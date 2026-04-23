@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cachink!</title>
+    <!--
+      Tamagui 2.x (@tamagui/constants, @tamagui/web) reads and writes
+      `process.env.*` at module-eval time. Tauri's WebKit webview has no
+      Node globals — this tiny polyfill makes those references safe so the
+      Tamagui runtime initialises without a ReferenceError. Vite's `define`
+      in vite.config.ts also statically substitutes the known keys — this
+      shim catches any we missed and supports Tamagui's assignment of
+      `process.env.TAMAGUI_TARGET = 'web'` at line 51 of its constants.
+    -->
+    <script>
+      window.process = window.process || { env: { TAMAGUI_TARGET: 'web', NODE_ENV: 'development' } };
+      window.global = window.global || window;
+    </script>
+    <style>
+      html, body, #root { height: 100%; margin: 0; padding: 0; background: #F7F7F5; }
+      body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script type="module" src="/src/app/main.tsx"></script>
+  </body>
+</html>

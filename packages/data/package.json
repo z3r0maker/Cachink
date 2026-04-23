@@ -1,0 +1,36 @@
+{
+  "name": "@cachink/data",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Repository interfaces and Drizzle/SQLite implementations. Pure types; no UI.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./repositories": "./src/repositories/index.ts",
+    "./schema": "./src/schema/index.ts",
+    "./hardware": "./src/hardware/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@cachink/domain": "workspace:*",
+    "drizzle-orm": "^0.45.0"
+  },
+  "devDependencies": {
+    "@cachink/config": "workspace:*",
+    "@vitest/coverage-v8": "^3.0.0",
+    "drizzle-kit": "^0.30.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

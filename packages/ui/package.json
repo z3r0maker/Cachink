@@ -1,0 +1,47 @@
+{
+  "name": "@cachink/ui",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared cross-platform UI components and brand tokens. Tamagui-based.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./theme": "./src/theme.ts",
+    "./components": "./src/components/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@cachink/application": "workspace:*",
+    "@cachink/domain": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tamagui/core": "2.0.0-rc.41",
+    "@tamagui/web": "2.0.0-rc.41",
+    "react": "^19"
+  },
+  "devDependencies": {
+    "@cachink/config": "workspace:*",
+    "@tamagui/core": "2.0.0-rc.41",
+    "@testing-library/jest-dom": "^6",
+    "@testing-library/react": "^16",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitest/coverage-v8": "^3.0.0",
+    "jsdom": "^29",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

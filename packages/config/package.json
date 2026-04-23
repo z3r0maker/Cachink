@@ -1,0 +1,33 @@
+{
+  "name": "@cachink/config",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared ESLint, Prettier, TypeScript, and Vitest configs for the Cachink monorepo.",
+  "type": "module",
+  "exports": {
+    "./eslint": "./eslint.config.js",
+    "./prettier": "./prettier.config.js",
+    "./vitest": "./vitest.config.js",
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./tsconfig.lib.json": "./tsconfig.lib.json"
+  },
+  "files": [
+    "eslint.config.js",
+    "prettier.config.js",
+    "vitest.config.js",
+    "tsconfig.base.json",
+    "tsconfig.lib.json"
+  ],
+  "dependencies": {
+    "eslint-plugin-boundaries": "^6.0.0",
+    "eslint-plugin-sonarjs": "^4.0.0",
+    "eslint-plugin-unicorn": "^64.0.0",
+    "typescript-eslint": "^8.59.0"
+  },
+  "peerDependencies": {
+    "eslint": "^9.15.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0"
+  }
+}

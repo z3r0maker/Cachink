@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Cachink!",
+    "slug": "cachink",
+    "scheme": "cachink",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#FFD60A"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "mx.cachink.mobile"
+    },
+    "android": {
+      "package": "mx.cachink.mobile",
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#FFD60A"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite",
+      "expo-localization",
+      "expo-font"
+    ]
+  }
+}

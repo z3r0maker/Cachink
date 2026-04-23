@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "files": [],
+  "references": [
+    { "path": "./packages/domain" },
+    { "path": "./packages/application" },
+    { "path": "./packages/data" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/sync-lan" },
+    { "path": "./packages/sync-cloud" },
+    { "path": "./packages/testing" }
+  ]
+}

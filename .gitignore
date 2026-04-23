@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+
+# Test output
+coverage/
+*.log
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE / OS
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Expo / React Native
+.expo/
+.expo-shared/
+web-build/
+ios/
+android/
+!apps/*/ios/
+!apps/*/android/
+
+# Tauri
+target/
+src-tauri/target/
+
+# SQLite (dev)
+*.sqlite
+*.sqlite-journal
+*.db
+
+# Misc
+*.pem
+.rnstorybook/

@@ -1,0 +1,25 @@
+{
+  "name": "@cachink/sync-cloud",
+  "version": "0.0.0",
+  "private": true,
+  "description": "PowerSync + Postgres integration. Lazy-loaded only in Cloud mode. Phase 1E.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.ts' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@cachink/data": "workspace:*",
+    "@cachink/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@cachink/config": "workspace:*",
+    "typescript": "^5.7.0"
+  }
+}

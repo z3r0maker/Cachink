@@ -1,0 +1,22 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
+    "paths": {
+      "@cachink/ui": ["../../packages/ui/src/index.ts"],
+      "@cachink/ui/*": ["../../packages/ui/src/*"],
+      "@cachink/domain": ["../../packages/domain/src/index.ts"],
+      "@cachink/application": ["../../packages/application/src/index.ts"],
+      "@cachink/data": ["../../packages/data/src/index.ts"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "app.json"
+  ],
+  "exclude": ["node_modules", ".expo", ".turbo"]
+}
