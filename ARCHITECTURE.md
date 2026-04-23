@@ -55,6 +55,8 @@ Links to discussion, docs, prior art.
 | [014](#adr-014) | 2026-04-23 | Spanish (es-MX) is the only launch language | Accepted |
 | [015](#adr-015) | 2026-04-23 | Two documents (CLAUDE.md, ROADMAP.md) with distinct roles | Accepted |
 | [016](#adr-016) | 2026-04-23 | Brand asset management: single masters at repo root, derivatives per platform | Accepted |
+| [017](#adr-017) | 2026-04-23 | Storybook 10 over Ladle for component docs + visual regression | Accepted |
+| [018](#adr-018) | 2026-04-23 | Local Husky pre-push gate replaces GitHub Actions for Phase 0/1 | Accepted |
 
 ---
 
@@ -490,3 +492,102 @@ Splash + adaptive-icon backgrounds use the exact brand color `#FFD60A` (`colors.
 - `apps/desktop/SETUP.md` — Brand assets section
 - CLAUDE.md §2.3 (code lives in one place), §5.1 (components in `packages/ui`), §8.1 (colors)
 
+
+---
+
+## ADR-017
+### Storybook 10 over Ladle for component docs + visual regression
+**Date:** 2026-04-23
+**Status:** Accepted
+
+### Context
+CLAUDE.md §8.4 mandates that every primitive "pass a Storybook (or Ladle)
+visual regression test before use." Phase 1A-M1-T01 explicitly requests this
+decision as an ADR. Both tools are viable:
+
+- **Storybook 10** — industry standard, `@storybook/react-native-web-vite`
+  renders Tamagui primitives via react-native-web in a Vite-powered server,
+  mature Chromatic/Playwright integrations, huge addon ecosystem.
+- **Ladle 5** — ~10× faster cold start, ~1/20 install size, Storybook-
+  compatible story format (most Storybook stories "just work"), Vite-native.
+  Web-only.
+
+### Decision
+Use **Storybook 10.3.5+** with `@storybook/react-native-web-vite@10.3.5+` as
+the framework preset, wrapped in `TamaguiProvider` via `.storybook/preview.tsx`.
+Visual regression uses **Playwright 1.59+** screenshots checked into the repo
+(diffs via `toHaveScreenshot`). Chromatic is parked — evaluate if/when the
+team grows past one reviewer.
+
+### Alternatives Considered
+- **Ladle.** Rejected because its Vite-RN story path is unofficial and we'd
+  hand-maintain the react-native-web bridge Storybook already ships. For a
+  cross-platform (RN + Tauri) component library, Storybook's
+  `react-native-web-vite` preset is literally what it's designed for.
+- **Storybook 10 + Ladle dual.** Rejected as overkill — two doc tools
+  double the maintenance surface with no user-facing benefit.
+- **No component catalog; rely on the apps.** Rejected because §8.4
+  mandates visual regression, and tagging component states in Maestro/
+  Playwright against a running app is far more brittle than isolated
+  stories.
+
+### Consequences
+- **Easier:** every primitive has a single canonical "docs page";
+  designers/PMs review `pnpm --filter @cachink/ui storybook`; CI snapshots
+  any visual drift before a PR merges; Chromatic available as a drop-in
+  upgrade later.
+- **Harder:** Storybook adds ~300 MB to the dev install and a 3–5 s cold
+  start. Its RN-web preset version has to match Tamagui's react-native-web
+  peer range (pinned via the Renovate "Storybook" group so they bump
+  together).
+- **Committed to:** keeping Storybook 10's react-native-web preset as the
+  preview host. Native-device Storybook (`@storybook/react-native`) is a
+  separate decision deferred to Phase 1F if physical-device story preview
+  becomes required.
+
+### References
+- `packages/ui/.storybook/main.ts`, `packages/ui/.storybook/preview.tsx`
+- CLAUDE.md §8.4 (primitive list + visual-regression requirement)
+- ROADMAP Phase 1A-M1
+
+---
+
+## ADR-018
+### Local Husky pre-push gate replaces GitHub Actions for Phase 0/1
+**Date:** 2026-04-23
+**Status:** Accepted
+**Supersedes:** the CI/CD bullet previously in CLAUDE.md §3 (GitHub Actions lint → typecheck → test → coverage → visual-snapshot pipeline introduced by ROADMAP task P0-M7-T01).
+
+### Context
+The scaffold shipped with `.github/workflows/ci.yml` running lint → typecheck → test → coverage upload → Storybook visual snapshots on every push and PR. For Phase 0/1 the team is a single developer, there is no merge-to-main review requirement, and there are no external contributors. The Actions pipeline adds latency (wait for CI to turn green after every push) and recurring cost (Actions minutes, Playwright browser downloads on every run) without catching anything the local toolchain cannot. pnpm, Turborepo, Vitest, ESLint, and TypeScript are already wired and fast on the dev machine.
+
+### Decision
+Remove `.github/workflows/ci.yml` (and the now-empty `.github/` tree). Move the same fast gates into a new Husky `pre-push` hook that runs `pnpm lint && pnpm typecheck && pnpm test` before any push leaves the machine. Keep the existing `pre-commit` hook unchanged (lint-staged → prettier + eslint --fix on staged files). Coverage thresholds and Storybook visual snapshots are promoted to manual pre-milestone / pre-merge checks — the developer runs them deliberately, not on every push.
+
+Renovate (`renovate.json`) is a separate GitHub App, not Actions, and stays — but its `automerge` flag is flipped off on all rules. With no CI gate, `automerge: true` would let a broken dep upgrade land on `main` unopposed, violating CLAUDE.md §2 rule 9 ("no silent breaking changes"). The developer now pulls Renovate PRs locally, runs the Husky gate, and merges.
+
+### Alternatives Considered
+- **Keep GitHub Actions as-is.** Rejected: cost + latency without benefit for a solo-dev phase. Re-evaluate when a second contributor joins.
+- **Pre-commit hook runs the full gate.** Rejected: pre-commit must stay fast (lint-staged on changed files only) or developers will bypass it. The full gate belongs where a network round-trip used to be — at push time.
+- **Local Git pre-push hook (no Husky).** Rejected: Husky already ships in devDependencies and is auto-installed by `pnpm prepare`; a hand-rolled `.git/hooks/pre-push` is not tracked in the repo and would silently skip on fresh clones.
+- **CI in a different runner (Buildkite, CircleCI, self-hosted).** Rejected: same cost/latency trade-off, moved to a different dashboard.
+
+### Consequences
+- **Easier:** one-shot feedback loop — failures surface before the push leaves the machine, not 60 seconds later in a browser tab. No Actions minutes, no Playwright browser downloads on every push. Matches CLAUDE.md §2 principle 1 (fewer moving parts, simpler surface).
+- **Harder:** gates only run on machines that have executed `pnpm install` / `pnpm prepare` (which installs the hooks). If a contributor ever joins, their first push only runs the gate after Husky is bootstrapped. `git push --no-verify` bypasses the gate — team convention is to never use it except to escape a genuine hook bug.
+- **Committed to:**
+  - Coverage thresholds from CLAUDE.md §6 (domain ≥ 95%, application ≥ 90%, data ≥ 80%, ui ≥ 70%) become a manual pre-milestone check via `pnpm test:coverage`. They are no longer CI-enforced.
+  - Storybook visual-regression snapshots run manually via `pnpm --filter @cachink/ui test:visual` before any UI-primitive change is pushed. They are no longer CI-enforced.
+  - Renovate PRs require a human-in-the-loop merge through the local gate. No automerge.
+
+### Revisit when
+- A second contributor joins the repo, or
+- A bug slips past the local gate that a CI runner would have caught (e.g. a lint rule that only fires on Linux, or a test that depends on a specific CI env). At that point, restore `ci.yml` as a safety-net second runner rather than a blocking gate.
+
+### References
+- `.husky/pre-push` — the hook itself
+- `.husky/pre-commit` — the staged-file fast path, unchanged
+- CLAUDE.md §3 CI/CD — edited in the same change to reflect this ADR
+- CLAUDE.md §2 rule 9 (no silent breaking changes) — why Renovate automerge is now off
+- `renovate.json` — `automerge: false` on devDependency minor/patch
+- ROADMAP-archive.md — P0-M7-T01 is accurate history of the prior Actions pipeline, now superseded by this ADR

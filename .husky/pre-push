@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+# Local quality gate — replaces GitHub Actions (see ADR-018).
+# Bypass in emergencies with: git push --no-verify
+set -e
+
+echo "▶ pre-push: pnpm lint"
+pnpm lint
+
+echo "▶ pre-push: pnpm typecheck"
+pnpm typecheck
+
+echo "▶ pre-push: pnpm test"
+pnpm test
+
+echo "✓ pre-push: all gates passed"

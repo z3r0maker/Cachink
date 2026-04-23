@@ -1,0 +1,31 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:best-practices", ":prHourlyLimit2", ":prConcurrentLimit5"],
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "timezone": "America/Mexico_City",
+  "rangeStrategy": "bump",
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": false
+    },
+    {
+      "groupName": "Tamagui",
+      "matchPackagePrefixes": ["@tamagui/", "tamagui"]
+    },
+    {
+      "groupName": "Storybook",
+      "matchPackagePrefixes": ["@storybook/", "storybook"]
+    },
+    {
+      "groupName": "Expo",
+      "matchPackagePrefixes": ["expo", "@expo/", "react-native"]
+    },
+    {
+      "matchPackageNames": ["pnpm"],
+      "enabled": false
+    }
+  ]
+}

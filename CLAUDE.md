@@ -103,6 +103,8 @@ These principles override convenience, speed, or stylistic preference. If a deci
 - **Tamagui** ≥ 1.115 for cross-platform components (RN + web/Tauri) — **write once, render everywhere**
 - **Plus Jakarta Sans** (Google Fonts) — weights 400–900
 - All brand tokens defined in `packages/ui/src/theme.ts` (see §8).
+- **Storybook** ≥ 10.3 (`@storybook/react-native-web-vite` preset) for component docs + visual regression (see ADR-017).
+- **Playwright** ≥ 1.59 for Storybook-story visual snapshots (also used for Tauri desktop E2E in Phase 1C).
 
 ### Data & Persistence (always present, every mode)
 - **SQLite** on every device (via `expo-sqlite` on mobile, `@tauri-apps/plugin-sql` on desktop).
@@ -133,7 +135,7 @@ Sync is **only** loaded when the user opts into a mode that needs it. Local-only
 - **Vitest** ≥ 2.1 — unit tests for domain and use-case layers.
 - **Jest** + **React Native Testing Library** — component tests.
 - **Maestro** ≥ 1.40 — E2E on iOS/Android simulators and physical tablets.
-- **Playwright** ≥ 1.49 — E2E for the Tauri desktop app.
+- **Playwright** ≥ 1.59 — E2E for the Tauri desktop app and Storybook visual snapshots (see ADR-017).
 - **MSW** ≥ 2.7 — mocking the sync layer in integration tests.
 
 ### Lint & Format
@@ -146,8 +148,12 @@ Sync is **only** loaded when the user opts into a mode that needs it. Local-only
 - **Husky** + **lint-staged** — run lint + tests pre-commit
 
 ### CI/CD
-- **GitHub Actions**: lint → typecheck → unit tests → integration tests → build (mobile via EAS, desktop via Tauri Action).
-- **Renovate** bot: weekly dependency PRs. Tests gate the merge.
+- **Local quality gate via Husky** (see ADR-018):
+  - `pre-commit` — prettier + eslint --fix on staged files (via `lint-staged`).
+  - `pre-push` — `pnpm lint && pnpm typecheck && pnpm test`. Push is blocked on any failure.
+  - Bypass only in emergencies with `git push --no-verify`.
+- **Mobile / desktop builds** — triggered manually from the dev machine for Phase 0/1 (EAS Build for mobile, `pnpm --filter desktop tauri build` for desktop). Automated build pipelines are parked until a second contributor joins.
+- **Renovate** bot: weekly dependency PRs. With no CI gate, `automerge` is disabled in `renovate.json` — the developer pulls the PR locally and pushes through the Husky gate to merge.
 
 ---
 
