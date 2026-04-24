@@ -7,11 +7,23 @@ import { defineConfig } from 'vitest/config';
  * override these (e.g. domain requires ≥ 95% while ui only requires ≥ 70%) by
  * spreading this config and tightening the numbers in their local
  * vitest.config.ts.
+ *
+ * NODE_ENV: forced to `development` so React 19 resolves its dev bundle
+ * and exposes `React.act` (used by @testing-library/react 16+). Without
+ * this, the production-mode React CJS bundle loads and every render call
+ * crashes with `React.act is not a function`. We set it on both the host
+ * process (so bundlers observe it during config evaluation) and on the
+ * Vitest `test.env` (so the value reaches every worker thread).
  */
+if (!process.env.NODE_ENV || process.env.NODE_ENV === 'test') {
+  process.env.NODE_ENV = 'development';
+}
+
 export default defineConfig({
   test: {
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     environment: 'node',
+    env: { NODE_ENV: 'development' },
     globals: false,
     coverage: {
       provider: 'v8',

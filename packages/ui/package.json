@@ -10,7 +10,9 @@
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
     "./components": "./src/components/index.ts",
-    "./i18n": "./src/i18n/index.ts"
+    "./i18n": "./src/i18n/index.ts",
+    "./database": "./src/database/index.ts",
+    "./hooks": "./src/hooks/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
@@ -27,21 +29,30 @@
   },
   "dependencies": {
     "@cachink/application": "workspace:*",
-    "@cachink/domain": "workspace:*"
+    "@cachink/data": "workspace:*",
+    "@cachink/domain": "workspace:*",
+    "drizzle-orm": "^0.45.0"
   },
   "peerDependencies": {
     "@tamagui/core": "2.0.0-rc.41",
     "@tamagui/dialog": "2.0.0-rc.41",
     "@tamagui/input": "2.0.0-rc.41",
     "@tamagui/web": "2.0.0-rc.41",
+    "expo-sqlite": "~55",
     "i18next": "^26",
     "react": "^19",
     "react-i18next": "^17",
     "react-native": ">=0.83"
   },
+  "peerDependenciesMeta": {
+    "expo-sqlite": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@cachink/config": "workspace:*",
     "@playwright/test": "^1.59.1",
+    "expo-sqlite": "~55.0.15",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
     "@storybook/react-native-web-vite": "^10.3.5",
