@@ -8,3 +8,4 @@ export { NuevoProductoModal, type NuevoProductoModalProps } from './nuevo-produc
 export { MovimientoModal, type MovimientoModalProps } from './movimiento-modal';
 export { StockBajoBanner, type StockBajoBannerProps, countBajoStock } from './stock-bajo-banner';
 export { StockBajoSummary, type StockBajoSummaryProps } from './stock-bajo-summary';
+export { ProductoDetailPopover, type ProductoDetailPopoverProps } from './producto-detail-popover';
