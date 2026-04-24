@@ -9,7 +9,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppTamaguiProvider } from '../shell/tamagui-provider';
+import { bootstrapI18n } from '../shell/i18n';
 import { PlaceholderScreen } from './placeholder-screen';
+
+bootstrapI18n();
 
 const rootEl = document.getElementById('root');
 if (!rootEl) {

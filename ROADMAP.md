@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1A — Brand & Component Primitives 🚧
-**Current milestone:** P1A-M3 — Localization & formatting (P1A-M2 complete: all 11 primitives shipped)
-**Next unblocked task:** P1A-M3-T01 (Install i18next + expo-localization).
+**Current milestone:** P1A-M3 — Localization & formatting (i18n infrastructure shipped — 2 of 4 tasks complete)
+**Next unblocked task:** P1A-M3-T03 (Money + date formatters in `packages/domain/src/format`).
 **Last updated:** 2026-04-23
 
 ---
@@ -62,8 +62,8 @@ Carry-overs (environmental, not blockers):
 - [x] **P1A-M2-T11** `TopBar` — `packages/ui/src/components/TopBar/` with `top-bar.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (Default / WithSubtitle / OperativoScreen / DirectorHome / BackButton) + 5 Playwright baselines; 100% coverage; left/right slot pattern (44px tap-target floor); centered title block with optional subtitle; no new dependency
 
 ### Milestone P1A-M3 — Localization & formatting
-- [ ] **P1A-M3-T01** Install i18next + expo-localization
-- [ ] **P1A-M3-T02** Create `packages/ui/src/i18n` with es-MX as the only locale
+- [x] **P1A-M3-T01** Install i18next + expo-localization — `i18next@26.0.7` + `react-i18next@17.0.4` already present in apps; added as `peerDependencies` + `devDependencies` to `@cachink/ui` so the i18n module ships with strict types; `expo-localization@55.0.13` pre-warmed in mobile shell for future locale-detection swap
+- [x] **P1A-M3-T02** Create `packages/ui/src/i18n` with es-MX as the only locale — `packages/ui/src/i18n/{i18n.ts, index.ts, types.d.ts, locales/es-mx.ts}` + `apps/mobile/src/shell/i18n.ts` + `apps/desktop/src/shell/i18n.ts` wired into root layouts; 6 unit tests; 100% coverage; idempotent `initI18n()`; module augmentation gives `t('actions.save')` strict typing; `@cachink/ui/i18n` subpath export added
 - [ ] **P1A-M3-T03** Create money and date formatters (pure functions in `packages/domain/src/format`)
 - [ ] **P1A-M3-T04** Unit tests for formatters (edge cases: 0, negative, large numbers, BigInt centavos)
 

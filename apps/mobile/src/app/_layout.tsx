@@ -20,6 +20,11 @@ import {
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
 import { AppTamaguiProvider } from '../shell/tamagui-provider';
+import { bootstrapI18n } from '../shell/i18n';
+
+// Initialize i18n once at module load — initI18n is idempotent so Fast
+// Refresh re-evaluations are safe.
+bootstrapI18n();
 
 // Plus Jakarta Sans ships weights 200–800 on Google Fonts. CLAUDE.md §8.2
 // mentions 900 as the heading weight; when the CSS requests 900 the browser /
