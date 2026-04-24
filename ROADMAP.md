@@ -19,7 +19,7 @@
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
 **Current milestone:** P1B-M2 — Entity types & Zod schemas
-**Next unblocked task:** P1B-M2-T03 (Egreso — incl. `gasto_recurrente_id?`).
+**Next unblocked task:** P1B-M2-T04 (`Producto`, `MovimientoInventario`).
 **Last updated:** 2026-04-23
 
 ---
@@ -68,7 +68,7 @@ Completed 2026-04-23 — landed during the Phase 0 / Phase 1A scaffold; reconcil
 
 - [x] **P1B-M2-T01** Zod schemas + TS types for `Business`, `AppConfig` — `packages/domain/src/entities/{business,app-config}.ts` ship `BusinessSchema` / `NewBusinessSchema` / `AppConfigSchema` + inferred types. Shared helpers `_ulid-field.ts` (`ULID_REGEX`, `ulidField<T>()`) and `_audit.ts` (`auditSchema`, `isoTimestampField`) keep entity files thin. `zod@^4.3.6` added to `packages/domain/package.json`; subpath `./entities` exported. 16 new tests in `packages/domain/tests/entities/`; domain coverage stays at 100%.
 - [x] **P1B-M2-T02** `Venta` (incl. `cliente_id?`, `estado_pago`) — `packages/domain/src/entities/sale.ts` ships `SaleSchema` / `NewSaleSchema` + `PaymentMethodEnum` / `SaleCategoryEnum` / `PaymentStateEnum`. Cross-field `.refine` enforces "Crédito requires clienteId". Shared `_fields.ts` adds `isoDateField` + `moneyField`. `packages/data/src/repositories/sales-repository.ts` now re-exports the domain types (drops the inline declarations); `@cachink/testing` in-memory repo migrated to the branded `DeviceId`. 17 sale tests, domain coverage 100%.
-- [ ] **P1B-M2-T03** `Egreso` (incl. `gasto_recurrente_id?`)
+- [x] **P1B-M2-T03** `Egreso` (incl. `gasto_recurrente_id?`) — `packages/domain/src/entities/expense.ts` ships `ExpenseSchema` / `NewExpenseSchema` + `ExpenseCategoryEnum` (the ten EGRESO_CAT values). `proveedor` nullable in read schema, optional on input; `gastoRecurrenteId` wires the recurring-templates feature from CLAUDE.md §1. 11 tests covering happy path + ≥3 rejection cases.
 - [ ] **P1B-M2-T04** `Producto`, `MovimientoInventario`
 - [ ] **P1B-M2-T05** `Empleado`
 - [ ] **P1B-M2-T06** `Cliente`, `PagoCliente`

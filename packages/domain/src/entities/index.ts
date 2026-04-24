@@ -12,3 +12,4 @@ export * from './_ulid-field.js';
 export * from './business.js';
 export * from './app-config.js';
 export * from './sale.js';
+export * from './expense.js';
