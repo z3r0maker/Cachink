@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
-**Current milestone:** P1B-M2 — Entity types & Zod schemas
-**Next unblocked task:** P1B-M2-T08 (`GastoRecurrente`).
+**Current milestone:** P1B-M3 — Drizzle schema & migrations
+**Next unblocked task:** P1B-M3-T01 (Drizzle schema for all 11 entities).
 **Last updated:** 2026-04-23
 
 ---
@@ -66,6 +66,8 @@ Completed 2026-04-23 — landed during the Phase 0 / Phase 1A scaffold; reconcil
 
 ### Milestone P1B-M2 — Entity types & Zod schemas
 
+Completed 2026-04-23 — all 11 Phase 1 entity schemas live under `packages/domain/src/entities/` with shared `_audit.ts` + `_fields.ts` + `_ulid-field.ts` helpers. 111 entity tests (177 domain total), 100% coverage maintained.
+
 - [x] **P1B-M2-T01** Zod schemas + TS types for `Business`, `AppConfig` — `packages/domain/src/entities/{business,app-config}.ts` ship `BusinessSchema` / `NewBusinessSchema` / `AppConfigSchema` + inferred types. Shared helpers `_ulid-field.ts` (`ULID_REGEX`, `ulidField<T>()`) and `_audit.ts` (`auditSchema`, `isoTimestampField`) keep entity files thin. `zod@^4.3.6` added to `packages/domain/package.json`; subpath `./entities` exported. 16 new tests in `packages/domain/tests/entities/`; domain coverage stays at 100%.
 - [x] **P1B-M2-T02** `Venta` (incl. `cliente_id?`, `estado_pago`) — `packages/domain/src/entities/sale.ts` ships `SaleSchema` / `NewSaleSchema` + `PaymentMethodEnum` / `SaleCategoryEnum` / `PaymentStateEnum`. Cross-field `.refine` enforces "Crédito requires clienteId". Shared `_fields.ts` adds `isoDateField` + `moneyField`. `packages/data/src/repositories/sales-repository.ts` now re-exports the domain types (drops the inline declarations); `@cachink/testing` in-memory repo migrated to the branded `DeviceId`. 17 sale tests, domain coverage 100%.
 - [x] **P1B-M2-T03** `Egreso` (incl. `gasto_recurrente_id?`) — `packages/domain/src/entities/expense.ts` ships `ExpenseSchema` / `NewExpenseSchema` + `ExpenseCategoryEnum` (the ten EGRESO_CAT values). `proveedor` nullable in read schema, optional on input; `gastoRecurrenteId` wires the recurring-templates feature from CLAUDE.md §1. 11 tests covering happy path + ≥3 rejection cases.
@@ -73,7 +75,7 @@ Completed 2026-04-23 — landed during the Phase 0 / Phase 1A scaffold; reconcil
 - [x] **P1B-M2-T05** `Empleado` — `employee.ts` ships `EmployeeSchema` / `NewEmployeeSchema` + `PayrollFrequencyEnum` (semanal / quincenal / mensual). 7 tests.
 - [x] **P1B-M2-T06** `Cliente`, `PagoCliente` — `client.ts` ships `ClientSchema` / `NewClientSchema` with a deliberately loose phone regex (Mexican landlines / mobiles / international all pass). `client-payment.ts` ships `ClientPaymentSchema` / `NewClientPaymentSchema` and re-uses `PaymentMethodEnum` from `sale.ts`. 15 tests.
 - [x] **P1B-M2-T07** `CorteDeDia` — `day-close.ts` ships `DayCloseSchema` / `NewDayCloseSchema` + `DayCloseRoleEnum` (Operativo / Director). Cross-field refine enforces `diferenciaCentavos === efectivoContadoCentavos - efectivoEsperadoCentavos` (CLAUDE.md §10). 10 tests covering zero / negative / positive diferencias.
-- [ ] **P1B-M2-T08** `GastoRecurrente`
+- [x] **P1B-M2-T08** `GastoRecurrente` — `recurring-expense.ts` ships `RecurringExpenseSchema` / `NewRecurringExpenseSchema` + `RecurrenceFrequencyEnum` (semanal / quincenal / mensual). Cross-field refine binds the day-of-week / day-of-month fields to the selected frecuencia. 12 tests covering all three frequency branches.
 
 ### Milestone P1B-M3 — Drizzle schema & migrations
 
