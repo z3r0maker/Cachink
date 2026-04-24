@@ -52,6 +52,11 @@ const stories = [
   'phase-1a-primitives-kpi--egresos-hoy',
   'phase-1a-primitives-kpi--stock-total',
   'phase-1a-primitives-kpi--all-tones',
+  'phase-1a-primitives-gauge--margen-bruto',
+  'phase-1a-primitives-gauge--liquidez',
+  'phase-1a-primitives-gauge--rotacion-inventario',
+  'phase-1a-primitives-gauge--alerta',
+  'phase-1a-primitives-gauge--all-tones',
 ];
 
 for (const id of stories) {

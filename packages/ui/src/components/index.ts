@@ -14,3 +14,4 @@ export * from './EmptyState/index';
 export * from './SectionTitle/index';
 export * from './Card/index';
 export * from './Kpi/index';
+export * from './Gauge/index';
