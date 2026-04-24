@@ -110,8 +110,8 @@ Completed 2026-04-23 — 5 pure financial-calc functions in `@cachink/domain/fin
 - [x] **P1B-M6-T02** `RegistrarEgresoUseCase`
 - [x] **P1B-M6-T03** `RegistrarMovimientoInventarioUseCase` (entrada auto-creates an Egreso per CLAUDE.md mock behavior)
 - [x] **P1B-M6-T04** `RegistrarPagoClienteUseCase` (updates Venta.estado_pago to parcial/pagado)
-- [ ] **P1B-M6-T05** `CerrarCorteDeDiaUseCase`
-- [ ] **P1B-M6-T06** `ProcesarGastoRecurrenteUseCase` (creates the Egreso, advances proximo_disparo)
+- [x] **P1B-M6-T05** `CerrarCorteDeDiaUseCase`
+- [x] **P1B-M6-T06** `ProcesarGastoRecurrenteUseCase` (creates the Egreso, advances proximo_disparo)
 - [ ] **P1B-M6-T07** `GenerarInformeMensualUseCase` (returns structured data; PDF rendering comes later)
 - [ ] **P1B-M6-T08** `ExportarDatosUseCase` (returns a dataset that the UI serializes to Excel/PDF)
 
