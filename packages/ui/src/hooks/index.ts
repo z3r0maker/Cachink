@@ -23,3 +23,4 @@ export * from './use-productos';
 export * from './use-registrar-movimiento';
 export * from './use-crear-gasto-recurrente';
 export * from './use-pendientes-gastos-recurrentes';
+export * from './use-procesar-gasto-recurrente';
