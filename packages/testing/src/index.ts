@@ -14,5 +14,6 @@ export * from './in-memory-app-config-repository.js';
 export * from './in-memory-expenses-repository.js';
 export * from './in-memory-products-repository.js';
 export * from './in-memory-inventory-movements-repository.js';
+export * from './in-memory-employees-repository.js';
 export * from './fixtures/index.js';
 export * from './contract/index.js';
