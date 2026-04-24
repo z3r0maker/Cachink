@@ -4,11 +4,14 @@ import base from '@cachink/config/vitest';
 /**
  * Data-package Vitest config.
  *
- * Coverage excludes repository *interface* files (one level deep inside
- * `src/repositories/`) because they are pure TypeScript declarations with no
- * runtime — v8 reports 0/0 for them which drags the totals below threshold.
- * Concrete implementations land in `src/repositories/drizzle/*.ts` in
- * Phase 1B-M4 and are picked up by the default include glob.
+ * Coverage excludes two groups of declarative TypeScript:
+ *  1. Repository interface files (`src/repositories/*-repository.ts`) —
+ *     pure type declarations; v8 reports 0/0 which drags the totals below
+ *     threshold. Concrete implementations land in `src/repositories/drizzle/`
+ *     during P1B-M4 and are picked up by the default include glob.
+ *  2. Drizzle schema files (`src/schema/**`) — declarative table
+ *     definitions with no runtime branches; exercised end-to-end by the
+ *     in-memory SQLite integration test in `tests/schema.integration.test.ts`.
  */
 export default mergeConfig(
   base,
@@ -20,6 +23,7 @@ export default mergeConfig(
           'src/index.ts',
           'src/**/*.d.ts',
           'src/repositories/*-repository.ts',
+          'src/schema/**',
         ],
         thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
       },

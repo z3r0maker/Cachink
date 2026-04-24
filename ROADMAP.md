@@ -19,7 +19,7 @@
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
 **Current milestone:** P1B-M3 — Drizzle schema & migrations
-**Next unblocked task:** P1B-M3-T01 (Drizzle schema for all 11 entities).
+**Next unblocked task:** P1B-M3-T02 (Configure Drizzle Kit for migrations).
 **Last updated:** 2026-04-23
 
 ---
@@ -79,7 +79,7 @@ Completed 2026-04-23 — all 11 Phase 1 entity schemas live under `packages/doma
 
 ### Milestone P1B-M3 — Drizzle schema & migrations
 
-- [ ] **P1B-M3-T01** Write Drizzle schema for all entities in `packages/data/src/schema`
+- [x] **P1B-M3-T01** Write Drizzle schema for all entities in `packages/data/src/schema` — 11 sqliteTable definitions mirror the Zod entities 1:1 (`businesses`, `app_config`, `sales`, `expenses`, `products`, `inventory_movements`, `employees`, `clients`, `client_payments`, `day_closes`, `recurring_expenses`). Shared `_audit.ts` spreads the five audit columns; money uses `numeric('*_centavos', { mode: 'bigint' })` (Drizzle 0.45 exposes bigint via NUMERIC; app layer keeps JS bigint end-to-end). `packages/data/vitest.config.ts` now excludes `src/schema/**` from coverage — declarative tables are covered by the integration round-trip test (P1B-M3-T04).
 - [ ] **P1B-M3-T02** Configure Drizzle Kit for migrations
 - [ ] **P1B-M3-T03** Generate the initial migration
 - [ ] **P1B-M3-T04** Integration test: create in-memory SQLite, run migration, insert + read every entity
