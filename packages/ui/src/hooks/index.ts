@@ -22,3 +22,4 @@ export * from './use-crear-empleado';
 export * from './use-productos';
 export * from './use-registrar-movimiento';
 export * from './use-crear-gasto-recurrente';
+export * from './use-pendientes-gastos-recurrentes';
