@@ -95,8 +95,8 @@ Completed 2026-04-23 — 11 repository interfaces in `@cachink/data/repositories
 
 ### Milestone P1B-M5 — NIF financial calculations
 
-- [ ] **P1B-M5-T01** `calculateEstadoDeResultados(ventas, egresos, isrTasa) → EstadoResultados`
-- [ ] **P1B-M5-T02** `calculateBalanceGeneral(...)` including real Cuentas por Cobrar
+- [x] **P1B-M5-T01** `calculateEstadoDeResultados(ventas, egresos, isrTasa) → EstadoResultados`
+- [x] **P1B-M5-T02** `calculateBalanceGeneral(...)` including real Cuentas por Cobrar
 - [ ] **P1B-M5-T03** `calculateFlujoDeEfectivo(...)` distinguishing cash cobros from Crédito
 - [ ] **P1B-M5-T04** `calculateIndicadores(...)` including Días Promedio de Cobranza
 - [ ] **P1B-M5-T05** `calculateCorteDeDia(ventas, egresos, corteAnterior) → { esperado, diferencia }`
