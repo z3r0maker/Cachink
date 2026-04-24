@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
-**Current milestone:** P1B-M4 — Repository interfaces & implementations
-**Next unblocked task:** P1B-M4-T01 (Interface + Drizzle impl + InMemory impl for every repository).
+**Current milestone:** P1B-M5 — NIF financial calculations
+**Next unblocked task:** P1B-M5-T01 (calculateEstadoDeResultados).
 **Last updated:** 2026-04-23
 
 ---
@@ -88,8 +88,10 @@ Completed 2026-04-23 — 11 Drizzle tables mirror the Zod entities; initial migr
 
 ### Milestone P1B-M4 — Repository interfaces & implementations
 
-- [~] **P1B-M4-T01** Define interface + Drizzle impl + InMemory impl for every repository (one task per entity)
-- [~] **P1B-M4-T02** Contract tests: every repository runs the same test suite against both impls (behavior must match)
+Completed 2026-04-23 — 11 repository interfaces in `@cachink/data/repositories` with matching Drizzle + InMemory impls; shared contract factories in `@cachink/testing/contract` run identical assertions against both impls. Data coverage 100%, testing coverage ≥ 99%.
+
+- [x] **P1B-M4-T01** Define interface + Drizzle impl + InMemory impl for every repository (one task per entity)
+- [x] **P1B-M4-T02** Contract tests: every repository runs the same test suite against both impls (behavior must match)
 
 ### Milestone P1B-M5 — NIF financial calculations
 

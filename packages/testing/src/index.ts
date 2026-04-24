@@ -17,5 +17,7 @@ export * from './in-memory-inventory-movements-repository.js';
 export * from './in-memory-employees-repository.js';
 export * from './in-memory-clients-repository.js';
 export * from './in-memory-client-payments-repository.js';
+export * from './in-memory-day-closes-repository.js';
+export * from './in-memory-recurring-expenses-repository.js';
 export * from './fixtures/index.js';
 export * from './contract/index.js';
