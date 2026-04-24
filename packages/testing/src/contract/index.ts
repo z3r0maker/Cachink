@@ -9,3 +9,4 @@
 export * from './_shared.js';
 export * from './sales-repository.js';
 export * from './businesses-repository.js';
+export * from './app-config-repository.js';
