@@ -12,3 +12,4 @@ export * from './Wizard/index';
 export * from './BusinessForm/index';
 export * from './Ventas/index';
 export * from './Clientes/index';
+export * from './CuentasPorCobrar/index';

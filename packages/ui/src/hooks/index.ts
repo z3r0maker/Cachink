@@ -13,3 +13,4 @@ export * from './use-crear-cliente';
 export * from './use-clients-for-business';
 export * from './use-comprobante-html';
 export * from './use-eliminar-venta';
+export * from './use-cuentas-por-cobrar';
