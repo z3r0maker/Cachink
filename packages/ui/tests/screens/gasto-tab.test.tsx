@@ -37,4 +37,16 @@ describe('GastoTab', () => {
     const btn = screen.getAllByTestId('gasto-submit')[0]!;
     expect(getComputedStyle(btn).opacity).toBe('0.5');
   });
+
+  it('recurrente fields are hidden by default', () => {
+    renderWithProviders(<GastoTab businessId={businessId} fecha={fecha} onSubmit={vi.fn()} />);
+    expect(screen.queryByTestId('recurrente-frecuencia')).toBeNull();
+  });
+
+  it('reveals recurrente fields when the toggle is tapped', () => {
+    renderWithProviders(<GastoTab businessId={businessId} fecha={fecha} onSubmit={vi.fn()} />);
+    const toggle = screen.getAllByTestId('gasto-recurrente-toggle')[0]!;
+    fireEvent.click(toggle);
+    expect(screen.getByTestId('recurrente-frecuencia')).toBeInTheDocument();
+  });
 });
