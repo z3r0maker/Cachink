@@ -136,12 +136,12 @@ describe('AppShell — Director', () => {
 
 describe('Settings', () => {
   const business: Business = {
-    id: '01JPHK0000000000000000BIZ1' as BusinessId,
+    id: '01JPHK00000000000000000008' as BusinessId,
     nombre: 'Taquería Don Pedro',
     regimenFiscal: 'RIF',
     isrTasa: 0.3,
     logoUrl: null,
-    businessId: '01JPHK0000000000000000BIZ1' as BusinessId,
+    businessId: '01JPHK00000000000000000008' as BusinessId,
     deviceId: 'dev' as Business['deviceId'],
     createdAt: '2026-04-24T00:00:00Z' as Business['createdAt'],
     updatedAt: '2026-04-24T00:00:00Z' as Business['updatedAt'],

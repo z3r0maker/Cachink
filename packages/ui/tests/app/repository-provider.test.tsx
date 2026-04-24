@@ -158,7 +158,7 @@ describe('buildDrizzleRepositories', () => {
         schema,
       },
     ) as unknown as CachinkDatabase;
-    const deviceId = '01JPHK0000000000000000DEV9' as DeviceId;
+    const deviceId = '01JPHK00000000000000000007' as DeviceId;
     const repos = buildDrizzleRepositories(db, deviceId);
     const count = Object.keys(repos).length;
     expect(count).toBe(11);

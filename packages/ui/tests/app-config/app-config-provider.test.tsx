@@ -69,7 +69,7 @@ describe('AppConfigProvider — fresh install', () => {
   it('generates a deviceId, persists it, and hydrates children', async () => {
     resetStore();
     const repo = new InMemoryAppConfigRepository();
-    const fakeDeviceId = '01JPHK0000000000000000DEV1' as DeviceId;
+    const fakeDeviceId = '01JPHK00000000000000000002' as DeviceId;
 
     renderWithProviders(
       <AppConfigProvider appConfig={repo} generateDeviceId={() => fakeDeviceId}>
@@ -91,8 +91,8 @@ describe('AppConfigProvider — returning user', () => {
   it('reuses the persisted deviceId and does not regenerate it', async () => {
     resetStore();
     const repo = new InMemoryAppConfigRepository();
-    const storedDeviceId = '01JPHK0000000000000000DEV2' as DeviceId;
-    const storedBusinessId = '01JPHK0000000000000000BIZ1' as BusinessId;
+    const storedDeviceId = '01JPHK00000000000000000003' as DeviceId;
+    const storedBusinessId = '01JPHK00000000000000000004' as BusinessId;
     await repo.set(APP_CONFIG_KEYS.deviceId, storedDeviceId);
     await repo.set(APP_CONFIG_KEYS.mode, 'local-standalone');
     await repo.set(APP_CONFIG_KEYS.currentBusinessId, storedBusinessId);
@@ -114,7 +114,7 @@ describe('AppConfigProvider — returning user', () => {
   it('narrows a rogue mode value to null so the wizard re-runs', async () => {
     resetStore();
     const repo = new InMemoryAppConfigRepository();
-    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK0000000000000000DEV3');
+    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000005');
     await repo.set(APP_CONFIG_KEYS.mode, 'mainframe-over-fax');
 
     renderWithProviders(
@@ -132,7 +132,7 @@ describe('AppConfigProvider — rendering gate', () => {
   it('renders children only after hydration finishes', async () => {
     resetStore();
     const repo = new InMemoryAppConfigRepository();
-    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK0000000000000000DEV4');
+    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000006');
 
     renderWithProviders(
       <AppConfigProvider appConfig={repo}>

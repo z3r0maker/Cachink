@@ -18,6 +18,8 @@ import { useTranslation } from '../../i18n/index';
 import type { AppMode } from '../../app-config/index';
 import { colors, typography } from '../../theme';
 
+type T = ReturnType<typeof useTranslation>['t'];
+
 export interface SettingsProps {
   readonly mode: AppMode | null;
   readonly business: Business | null;
@@ -70,13 +72,7 @@ function SettingsRow({ label, value }: { label: string; value: string }): ReactE
   );
 }
 
-function BusinessCard({
-  business,
-  t,
-}: {
-  business: Business | null;
-  t: (k: string) => string;
-}): ReactElement {
+function BusinessCard({ business, t }: { business: Business | null; t: T }): ReactElement {
   const isrPct = business ? `${Math.round(business.isrTasa * 100)}%` : '—';
   return (
     <Card testID="settings-business-card" padding="md" fullWidth>
@@ -90,7 +86,7 @@ function BusinessCard({
   );
 }
 
-function LanguageCard({ t }: { t: (k: string) => string }): ReactElement {
+function LanguageCard({ t }: { t: T }): ReactElement {
   return (
     <Card testID="settings-language-card" padding="md" fullWidth>
       <View flexDirection="row" alignItems="center" justifyContent="space-between">

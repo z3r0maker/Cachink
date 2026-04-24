@@ -20,6 +20,8 @@ import { colors, typography } from '../../theme';
 import type { AppMode } from '../../app-config/index';
 import { WizardCard } from './wizard-card';
 
+type T = ReturnType<typeof useTranslation>['t'];
+
 export interface WizardProps {
   readonly onSelectMode: (mode: AppMode) => void;
   /** 'mobile' hides the "Ser el servidor local" card (desktop-only option). */
@@ -76,7 +78,7 @@ function DisabledCard(props: DisabledCardProps): ReactElement {
 }
 
 interface WizardCardsProps {
-  readonly t: (k: string) => string;
+  readonly t: T;
   readonly platform: 'mobile' | 'desktop';
   readonly onSelectMode: (mode: AppMode) => void;
 }

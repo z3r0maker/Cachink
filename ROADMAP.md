@@ -57,7 +57,6 @@ NIF financial calculators, and 8 application use-cases with Zod-validated
 boundaries. 570 tests total; domain + application 100% coverage, data
 100%, testing 99.28%. Full detail in `ROADMAP-archive.md`.
 
-
 ---
 
 ## Phase 1C — Local Standalone Mode (the first shippable slice)
@@ -75,11 +74,11 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M2 — Database setup & config wizard
 
-- [ ] **P1C-M2-T01** SQLite initialization on first launch (mobile + desktop)
-- [ ] **P1C-M2-T02** Run Drizzle migrations on first launch
-- [ ] **P1C-M2-T03** First-run wizard with 4 mode cards (CLAUDE.md §7.4) — only "Solo este dispositivo" is functional in Phase 1C
-- [ ] **P1C-M2-T04** Mode stored in `AppConfig`
-- [ ] **P1C-M2-T05** Business creation form (nombre, regimen_fiscal, isr_tasa with default 30%)
+- [x] **P1C-M2-T01** SQLite initialization on first launch (mobile + desktop)
+- [x] **P1C-M2-T02** Run Drizzle migrations on first launch
+- [x] **P1C-M2-T03** First-run wizard with 4 mode cards (CLAUDE.md §7.4) — only "Solo este dispositivo" is functional in Phase 1C
+- [x] **P1C-M2-T04** Mode stored in `AppConfig`
+- [x] **P1C-M2-T05** Business creation form (nombre, regimen_fiscal, isr_tasa with default 30%)
 
 ### Milestone P1C-M3 — Ventas module
 
