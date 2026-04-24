@@ -907,3 +907,74 @@ requires a hard crash, which also nukes any in-flight transaction.
 - CLAUDE.md §10 (dual-write rule)
 - `packages/application/src/registrar-movimiento-inventario/` (the use-case)
 - ROADMAP-archive P1B-M6-T03 notes (compensating delete follow-up)
+
+---
+
+## ADR-022
+
+Date: 2026-04-24
+Status: Accepted
+
+**Title:** Barcode scanning: expo-camera on mobile, `BarcodeDetector` API on desktop web
+
+### Context
+
+CLAUDE.md §1 requires barcode scanning inside the Inventario module
+(nuevo producto, entrada/salida) with a manual-entry fallback for
+devices without a camera. The platform choices:
+
+- **Mobile:** React Native ships nothing built-in for camera + barcode
+  detection. We have two credible options:
+  - `expo-camera` — bundled with Expo SDK, includes a
+    `CameraView` with `onBarcodeScanned`. One dependency, zero native
+    rebuild if the dev client already includes it.
+  - `react-native-vision-camera` — faster + more flexible (supports
+    frame processors), but requires a config plugin, adds a Reanimated
+    dependency, and needs a full native rebuild.
+
+- **Desktop (Tauri webview, Chromium-based):** Shape Detection API
+  exposes `BarcodeDetector` for barcode formats (QR, Code128, EAN, UPC).
+  Available in Chromium 86+ since mid-2020. macOS WebKit (used by Tauri
+  on macOS) does **not** implement it — the fallback there is a manual
+  input field.
+
+### Decision
+
+- Mobile: **expo-camera**. The scanner component renders a
+  `CameraView` + detection overlay; `onBarcodeScanned` fires the
+  shared `onScan(code)` prop.
+- Desktop: use `getUserMedia` + `BarcodeDetector` when available;
+  fall back to a manual text input otherwise. Manual entry is always
+  available as a secondary action (CLAUDE.md §11: manual barcode
+  fallback).
+
+### Alternatives Considered
+
+- **react-native-vision-camera on mobile.** Rejected for Phase 1C:
+  the config plugin adds friction to the dev loop and vision-camera's
+  frame processors don't yield value for the simple "scan-once-to-fill"
+  flows the Inventario module needs.
+- **ZXing.js (pure JS barcode decoder) on both platforms.** Rejected:
+  bundles ~200 kB of decoders into both apps even when platform APIs
+  are available; slower on low-end Android tablets.
+- **HID barcode scanner via keyboard wedge.** Already works for free —
+  keyboard emulation types the code into the focused field. No code
+  needed. CLAUDE.md §11 acknowledges this; we don't need a component.
+
+### Consequences
+
+- **Easier:** zero new native modules. Mobile dev-client rebuild is
+  only required on first `expo-camera` add (not per-feature).
+- **Harder:** macOS Tauri webview uses WebKit which lacks
+  BarcodeDetector — on macOS desktops the scanner is manual-entry only.
+  That's documented in `apps/desktop/SETUP.md` after this commit.
+- **Committed to:** expo-camera's scanning API + browser-standard
+  BarcodeDetector. If BarcodeDetector moves out of the Chrome stable
+  track, revisit.
+
+### References
+
+- `packages/ui/src/components/Scanner/` (implements)
+- CLAUDE.md §11 (hardware interfaces)
+- CLAUDE.md §5.3 (platform-extension pattern mandate)
+- https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API

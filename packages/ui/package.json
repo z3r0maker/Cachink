@@ -44,6 +44,7 @@
     "@tamagui/web": "2.0.0-rc.41",
     "@tanstack/react-query": "^5.62.0",
     "@tauri-apps/plugin-sql": "^2",
+    "expo-camera": "~55",
     "expo-sqlite": "~55",
     "i18next": "^26",
     "react": "^19",
@@ -54,6 +55,9 @@
   },
   "peerDependenciesMeta": {
     "@tauri-apps/plugin-sql": {
+      "optional": true
+    },
+    "expo-camera": {
       "optional": true
     },
     "expo-sqlite": {
@@ -67,6 +71,7 @@
     "@tanstack/react-query": "^5.100.1",
     "@tauri-apps/plugin-sql": "^2",
     "better-sqlite3": "^11.8.0",
+    "expo-camera": "~55.0.16",
     "expo-sqlite": "~55.0.15",
     "ulid": "^3.0.0",
     "zustand": "^5.0.12",

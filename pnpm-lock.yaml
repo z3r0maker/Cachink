@@ -450,6 +450,9 @@ importers:
       better-sqlite3:
         specifier: ^11.8.0
         version: 11.10.0
+      expo-camera:
+        specifier: ~55.0.16
+        version: 55.0.16(@types/emscripten@1.41.5)(expo@55.0.17)(react-native-web@0.21.2(react-dom@19.2.0(react@19.2.0))(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
       expo-sqlite:
         specifier: ~55.0.15
         version: 55.0.15(expo@55.0.17)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)
