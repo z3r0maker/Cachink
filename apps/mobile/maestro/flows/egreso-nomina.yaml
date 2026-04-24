@@ -1,0 +1,39 @@
+# Create a Nómina egreso with a freshly-created empleado.
+# Covers P1C-M4-T02 (Nómina tab + NuevoEmpleadoModal empty-state path).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-egresos"
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "egreso-tab-nomina"
+
+# No empleados yet — Crear empleado Btn appears.
+- assertVisible: "Crear empleado"
+- tapOn:
+    id: "nomina-crear-empleado"
+
+# Fill empleado form.
+- tapOn:
+    id: "empleado-nombre"
+- inputText: "Ana Pérez"
+- tapOn:
+    id: "empleado-puesto"
+- inputText: "Cocinera"
+- tapOn:
+    id: "empleado-salario"
+- inputText: "5000"
+- tapOn:
+    id: "empleado-submit"
+
+# Back on Nómina tab; empleado auto-selected + monto auto-filled.
+- assertVisible: "Nuevo egreso"
+- tapOn:
+    id: "nomina-submit"
+
+# Modal closes + egreso visible.
+- assertNotVisible: "Nuevo egreso"
+- assertVisible: "Nómina Ana Pérez"

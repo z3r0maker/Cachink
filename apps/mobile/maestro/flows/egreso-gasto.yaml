@@ -1,0 +1,30 @@
+# Create a cash gasto and verify Total de egresos updates.
+# Covers P1C-M4-T01 (list + date filter + total card) and
+# P1C-M4-T02 (NuevoEgreso modal, Gasto tab).
+#
+# Precondition: wizard complete, business set, Operativo role active.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Navigate to Egresos.
+- tapOn:
+    id: "tab-egresos"
+- tapOn:
+    id: "egresos-nuevo"
+
+# Gasto tab is the default — fill concepto + monto.
+- assertVisible: "Nuevo egreso"
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Renta del local"
+- tapOn:
+    id: "gasto-monto"
+- inputText: "8000"
+- tapOn:
+    id: "gasto-submit"
+
+# Modal closes + Total de egresos reflects the new amount.
+- assertNotVisible: "Nuevo egreso"
+- assertVisible: "−$8,000.00"
+- assertVisible: "Renta del local"

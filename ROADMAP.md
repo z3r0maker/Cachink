@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1C — Local Standalone Mode 🚧
-**Current milestone:** P1C-M4 — Egresos module
-**Next unblocked task:** P1C-M4-T01 (List view, reuse Ventas layout).
+**Current milestone:** P1C-M5 — Inventario module
+**Next unblocked task:** P1C-M5-T01 (Stock view with buscar, KPI strip, stock alerts).
 **Last updated:** 2026-04-24
 
 **Recent progress:** P1C-M1 + M2 + M3 all closed via the 17-commit
@@ -96,11 +96,11 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M4 — Egresos module
 
-- [ ] **P1C-M4-T01** List view (reuse Ventas layout)
-- [ ] **P1C-M4-T02** Modal with 3 sub-tabs: Gasto / Nómina / Inventario
-- [ ] **P1C-M4-T03** "Marcar como recurrente" toggle in Gasto tab → creates a GastoRecurrente
-- [ ] **P1C-M4-T04** Pendientes de registrar card (shows when a recurrente is due)
-- [ ] **P1C-M4-T05** Maestro E2E for each sub-tab
+- [x] **P1C-M4-T01** List view (reuse Ventas layout)
+- [x] **P1C-M4-T02** Modal with 3 sub-tabs: Gasto / Nómina / Inventario
+- [x] **P1C-M4-T03** "Marcar como recurrente" toggle in Gasto tab → creates a GastoRecurrente
+- [x] **P1C-M4-T04** Pendientes de registrar card (shows when a recurrente is due)
+- [x] **P1C-M4-T05** Maestro E2E for each sub-tab
 
 ### Milestone P1C-M5 — Inventario module
 

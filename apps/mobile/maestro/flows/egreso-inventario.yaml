@@ -1,0 +1,34 @@
+# Register an inventory purchase (entrada) via the Inventario tab.
+# Dual-writes: MovimientoInventario (stock up) + Egreso (money out)
+# per ADR-021.
+#
+# Precondition: at least one producto exists (created via the flow
+# from P1C-M5, or seeded in e2e-seed.json).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-egresos"
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "egreso-tab-inventario"
+
+# Inventario tab — fill producto + cantidad + costo_unit.
+- tapOn:
+    id: "inventario-producto"
+- tapOn:
+    index: 0
+- tapOn:
+    id: "inventario-cantidad"
+- inputText: "50"
+- tapOn:
+    id: "inventario-costo"
+- inputText: "12"
+- tapOn:
+    id: "inventario-submit"
+
+# Modal closes + egreso visible (50 × 12 = $600.00).
+- assertNotVisible: "Nuevo egreso"
+- assertVisible: "−$600.00"

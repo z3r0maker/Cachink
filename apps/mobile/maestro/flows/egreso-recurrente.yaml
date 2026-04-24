@@ -1,0 +1,34 @@
+# Create a recurrente gasto + confirm its pendiente on a later date.
+# Covers P1C-M4-T03 (Marcar como recurrente toggle) and
+# P1C-M4-T04 (PendientesCard with Confirmar action).
+#
+# The flow relies on the app clock being set to a date >= proximoDisparo
+# of the just-created template — run with MAESTRO_CLOCK_OFFSET if your
+# harness supports it, or simulate by manually advancing the system clock.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Create the recurrente.
+- tapOn:
+    id: "tab-egresos"
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Luz del local"
+- tapOn:
+    id: "gasto-monto"
+- inputText: "900"
+- tapOn:
+    id: "gasto-recurrente-toggle"
+- assertVisible: "Frecuencia"
+- tapOn:
+    id: "gasto-submit"
+- assertNotVisible: "Nuevo egreso"
+
+# The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
+- assertVisible: "Pendientes de registrar"
+- tapOn:
+    id: "pendiente-confirmar-01JPHK0000000000000000RE01"
+- assertVisible: "Luz del local"
