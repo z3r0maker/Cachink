@@ -10,6 +10,7 @@
     ".": "./src/index.ts",
     "./theme": "./src/theme.ts",
     "./components": "./src/components/index.ts",
+    "./screens": "./src/screens/index.ts",
     "./i18n": "./src/i18n/index.ts",
     "./database": "./src/database/index.ts",
     "./app-config": "./src/app-config/index.ts",

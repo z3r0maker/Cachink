@@ -29,6 +29,12 @@ export const esMX = {
     loading: 'Cargando…',
     error: 'Algo salió mal',
   },
+  rolePicker: {
+    title: 'Hola',
+    subtitle: '¿Con qué rol vas a trabajar hoy?',
+    operativoHint: 'Captura ventas, egresos e inventario',
+    directorHint: 'Resultados, indicadores y estados financieros',
+  },
 } as const;
 
 export type EsMX = typeof esMX;

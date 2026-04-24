@@ -11,6 +11,7 @@
  */
 export * from './theme';
 export * from './components/index';
+export * from './screens/index';
 export * from './database/index';
 export * from './app-config/index';
 export * from './app/index';
