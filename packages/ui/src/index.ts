@@ -13,6 +13,7 @@ export * from './theme';
 export * from './components/index';
 export * from './database/index';
 export * from './app-config/index';
+export * from './app/index';
 export * from './hooks/index';
 // The Tamagui config has to be mounted in each app's shell via
 // <TamaguiProvider config={tamaguiConfig}>. Re-exported here so app shells

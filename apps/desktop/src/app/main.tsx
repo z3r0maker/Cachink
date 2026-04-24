@@ -8,7 +8,7 @@
 
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { AppTamaguiProvider } from '../shell/tamagui-provider';
+import { AppProviders } from '@cachink/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { PlaceholderScreen } from './placeholder-screen';
 
@@ -21,8 +21,8 @@ if (!rootEl) {
 
 createRoot(rootEl).render(
   <StrictMode>
-    <AppTamaguiProvider>
+    <AppProviders>
       <PlaceholderScreen />
-    </AppTamaguiProvider>
+    </AppProviders>
   </StrictMode>,
 );

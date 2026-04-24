@@ -13,6 +13,7 @@
     "./i18n": "./src/i18n/index.ts",
     "./database": "./src/database/index.ts",
     "./app-config": "./src/app-config/index.ts",
+    "./app": "./src/app/index.ts",
     "./hooks": "./src/hooks/index.ts"
   },
   "scripts": {

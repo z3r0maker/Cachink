@@ -19,7 +19,7 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { AppTamaguiProvider } from '../shell/tamagui-provider';
+import { AppProviders } from '@cachink/ui';
 import { bootstrapI18n } from '../shell/i18n';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
@@ -43,8 +43,8 @@ export default function RootLayout(): ReactElement | null {
   }
 
   return (
-    <AppTamaguiProvider>
+    <AppProviders>
       <Stack screenOptions={{ headerShown: false }} />
-    </AppTamaguiProvider>
+    </AppProviders>
   );
 }
