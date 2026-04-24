@@ -6,10 +6,10 @@
  * `useCrearProducto`.
  */
 
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import type { InventoryCategory, InventoryUnit } from '@cachink/domain';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
-import { Btn, Input, Modal } from '../../components/index';
+import { Btn, Input, Modal, Scanner } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {
   INV_CATEGORIAS,
@@ -101,6 +101,29 @@ function ProductoFields({ form, t }: { form: ProductoFormApi; t: T }): ReactElem
   );
 }
 
+function ScanSkuBtn({
+  onScanned,
+  label,
+}: {
+  onScanned: (code: string) => void;
+  label: string;
+}): ReactElement {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Btn variant="ghost" onPress={() => setOpen(true)} fullWidth testID="producto-scan">
+        {`📷 ${label}`}
+      </Btn>
+      <Scanner
+        open={open}
+        onClose={() => setOpen(false)}
+        onScan={(code) => onScanned(code)}
+        mode="single"
+      />
+    </>
+  );
+}
+
 export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement {
   const { t } = useTranslation();
   const form = useProductoForm();
@@ -124,6 +147,7 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       testID="nuevo-producto-modal"
     >
       <ProductoFields form={form} t={t} />
+      <ScanSkuBtn onScanned={(code) => form.update({ sku: code })} label={t('scanner.title')} />
       <Btn
         variant="primary"
         onPress={handleSubmit}
