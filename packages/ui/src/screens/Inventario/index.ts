@@ -7,3 +7,4 @@ export { MovimientoCard, type MovimientoCardProps } from './movimiento-card';
 export { NuevoProductoModal, type NuevoProductoModalProps } from './nuevo-producto-modal';
 export { MovimientoModal, type MovimientoModalProps } from './movimiento-modal';
 export { StockBajoBanner, type StockBajoBannerProps, countBajoStock } from './stock-bajo-banner';
+export { StockBajoSummary, type StockBajoSummaryProps } from './stock-bajo-summary';
