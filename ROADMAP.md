@@ -88,8 +88,8 @@ Completed 2026-04-23 — 11 Drizzle tables mirror the Zod entities; initial migr
 
 ### Milestone P1B-M4 — Repository interfaces & implementations
 
-- [ ] **P1B-M4-T01** Define interface + Drizzle impl + InMemory impl for every repository (one task per entity)
-- [ ] **P1B-M4-T02** Contract tests: every repository runs the same test suite against both impls (behavior must match)
+- [~] **P1B-M4-T01** Define interface + Drizzle impl + InMemory impl for every repository (one task per entity)
+- [~] **P1B-M4-T02** Contract tests: every repository runs the same test suite against both impls (behavior must match)
 
 ### Milestone P1B-M5 — NIF financial calculations
 

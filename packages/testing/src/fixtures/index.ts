@@ -5,4 +5,4 @@
  * behaviour under test rather than re-deriving ULIDs + timestamps.
  */
 
-export {};
+export * from './sale.js';

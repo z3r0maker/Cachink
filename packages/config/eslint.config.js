@@ -127,6 +127,11 @@ export default tseslint.config(
       '**/*.spec.{ts,tsx}',
       '**/*.stories.{ts,tsx,mdx}',
       '**/.storybook/**/*.{ts,tsx}',
+      // Shared contract factories in @cachink/testing live in `src/contract/`
+      // but are test code by nature — they wrap `describe`/`it` calls from
+      // vitest and exist solely to be invoked from real test files.
+      '**/contract/**/*.ts',
+      '**/fixtures/**/*.ts',
     ],
     rules: {
       'max-lines': 'off',

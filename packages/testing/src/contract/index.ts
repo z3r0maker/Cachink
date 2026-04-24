@@ -7,3 +7,4 @@
  */
 
 export * from './_shared.js';
+export * from './sales-repository.js';
