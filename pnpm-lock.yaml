@@ -358,10 +358,16 @@ importers:
       '@cachink/domain':
         specifier: workspace:*
         version: link:../domain
+      vitest:
+        specifier: ^3.0.0
+        version: 3.2.4(@types/node@22.19.17)(jsdom@29.0.2)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
     devDependencies:
       '@cachink/config':
         specifier: workspace:*
         version: link:../config
+      '@vitest/coverage-v8':
+        specifier: ^3.0.0
+        version: 3.2.4(vitest@3.2.4(@types/node@22.19.17)(jsdom@29.0.2)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
       typescript:
         specifier: ^5.7.0
         version: 5.9.3

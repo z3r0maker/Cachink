@@ -1,6 +1,8 @@
 /**
- * Repository interfaces. Additional entity repositories (egresos, productos,
- * inventario, clientes, pagos, cortes, empleados, gastos recurrentes) will
- * follow the same pattern as SalesRepository during Phase 1B per ROADMAP.md.
+ * Repository interfaces. Concrete Drizzle implementations live under
+ * `./drizzle/`; test-only in-memory implementations live in
+ * `@cachink/testing`. Both satisfy the same TypeScript interface exported
+ * from each `*-repository.ts` file.
  */
 export * from './sales-repository.js';
+export * from './drizzle/index.js';
