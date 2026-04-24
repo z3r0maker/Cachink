@@ -8,7 +8,7 @@ import { calculateEstadoDeResultados } from '../../src/financials/index.js';
  */
 
 const AUDIT = {
-  businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BIZ',
+  businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
   createdAt: '2026-04-23T12:00:00.000Z',
   updatedAt: '2026-04-23T12:00:00.000Z',

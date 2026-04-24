@@ -221,9 +221,15 @@ importers:
 
   packages/application:
     dependencies:
+      '@cachink/data':
+        specifier: workspace:*
+        version: link:../data
       '@cachink/domain':
         specifier: workspace:*
         version: link:../domain
+      zod:
+        specifier: ^4.3.6
+        version: 4.3.6
     devDependencies:
       '@cachink/config':
         specifier: workspace:*

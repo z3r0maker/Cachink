@@ -14,7 +14,7 @@ import type {
 } from '@cachink/domain';
 import { newEntityId } from '@cachink/domain';
 
-const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BIZ' as BusinessId;
+const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
 const DEFAULT_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0C7PRD' as ProductId;

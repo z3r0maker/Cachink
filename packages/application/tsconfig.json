@@ -4,5 +4,5 @@
   "compilerOptions": { "outDir": "dist", "rootDir": "src" },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [{ "path": "../domain" }]
+  "references": [{ "path": "../domain" }, { "path": "../data" }]
 }

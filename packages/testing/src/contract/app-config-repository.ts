@@ -43,13 +43,13 @@ export function describeAppConfigRepositoryContract(
 
     it('list returns every (key, value) pair', async () => {
       await repo.set('mode', '"cloud"');
-      await repo.set('currentBusinessId', '"01HZ8XQN9GZJXV8AKQ5X0C7BIZ"');
+      await repo.set('currentBusinessId', '"01HZ8XQN9GZJXV8AKQ5X0C7BJZ"');
       const rows = await repo.list();
       expect(rows).toHaveLength(2);
       const asObject = Object.fromEntries(rows.map((r) => [r.key, r.value]));
       expect(asObject).toEqual({
         mode: '"cloud"',
-        currentBusinessId: '"01HZ8XQN9GZJXV8AKQ5X0C7BIZ"',
+        currentBusinessId: '"01HZ8XQN9GZJXV8AKQ5X0C7BJZ"',
       });
     });
 

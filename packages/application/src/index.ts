@@ -1,20 +1,15 @@
 /**
  * @cachink/application — Use-case layer.
  *
- * Use-cases orchestrate domain logic and repositories. They depend on
- * repository *interfaces* (from @cachink/data) and are injected with concrete
- * implementations at composition time.
+ * Use-cases orchestrate domain logic + repositories. They depend on
+ * repository **interfaces** (from @cachink/data) and receive concrete
+ * implementations via constructor injection at the composition root of
+ * each app. See CLAUDE.md §4.3.
  *
- * Contents will be populated during Phase 1B per ROADMAP.md:
- *   - RegistrarVentaUseCase
- *   - RegistrarEgresoUseCase
- *   - RegistrarMovimientoInventarioUseCase
- *   - RegistrarPagoClienteUseCase
- *   - CerrarCorteDeDiaUseCase
- *   - ProcesarGastoRecurrenteUseCase
- *   - GenerarInformeMensualUseCase
- *   - ExportarDatosUseCase
+ * Every use-case is a class implementing `UseCase<TInput, TOutput>`
+ * with a single `execute(input)` method. Input is re-validated with
+ * Zod at the boundary (defence-in-depth against UI mistakes).
  */
 
-// Placeholder export so the package compiles with zero source files.
-export const __version__ = '0.0.0';
+export * from './_use-case.js';
+export * from './registrar-venta/index.js';
