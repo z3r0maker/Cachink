@@ -27,3 +27,4 @@ export * from './use-procesar-gasto-recurrente';
 export * from './use-eliminar-egreso';
 export * from './use-productos-con-stock';
 export * from './use-inventario-kpis';
+export * from './use-movimientos-recientes';

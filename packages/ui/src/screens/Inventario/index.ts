@@ -2,3 +2,5 @@ export { StockScreen, type StockScreenProps, filterProductos } from './stock-scr
 export { ProductoCard, type ProductoCardProps } from './producto-card';
 export { EmptyProductos, type EmptyProductosProps } from './empty-productos';
 export { StockKpiStrip, type StockKpiStripProps } from './stock-kpi-strip';
+export { MovimientosScreen, type MovimientosScreenProps } from './movimientos-screen';
+export { MovimientoCard, type MovimientoCardProps } from './movimiento-card';
