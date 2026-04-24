@@ -1036,3 +1036,64 @@ internally.
 
 - CLAUDE.md §4.3 (repository pattern)
 - `packages/data/src/repositories/clients-repository.ts` (first implementation)
+
+---
+
+## ADR-024
+
+Date: 2026-04-24
+Status: Accepted
+
+**Title:** PagoCliente application always goes through RegistrarPagoClienteUseCase — UI never composes the payment + state-flip pair
+
+### Context
+
+Recording a client payment against a Crédito venta involves three
+coordinated writes:
+
+1. Create a PagoCliente row with the payment amount + method + date.
+2. Sum the existing pagos + this one, compare against venta.monto.
+3. Update venta.estadoPago:
+   - same as venta.monto → 'pagado'
+   - less → 'parcial'
+   - more (overpayment) → reject.
+
+If any step is skipped or happens out of order, the CxC view lies.
+CLAUDE.md §13 also rejects overpayments explicitly.
+
+### Decision
+
+The UI always calls `RegistrarPagoClienteUseCase.execute(...)` — never
+calls `ClientPaymentsRepository.create` followed by
+`SalesRepository.updatePaymentState` separately. The `useRegistrarPago`
+hook wraps the use-case; modal `onSubmit` bubbles the full payload into
+the hook and that's the only path.
+
+### Alternatives Considered
+
+- **Two hooks in the UI** (`useCrearPago` + `useUpdatePaymentState`).
+  Rejected: forgetting step 2 silently leaves the venta in `pendiente`
+  even after a full payment. Surface area too sharp.
+- **Client-side overpayment check + single `create`.** Rejected: the
+  use-case already does the check server-side (more trustworthy). UI
+  duplicating the logic is a consistency risk the next time domain
+  rules shift.
+- **Optimistic UI state-flip.** Rejected for Phase 1C. If the use-case
+  rejects (overpayment), we'd have to roll back the optimistic state.
+  Not worth the complexity for a single-device app where the write is
+  local + sub-millisecond.
+
+### Consequences
+
+- **Easier:** one invariant, one code path, one rollback unit.
+- **Harder:** a UI-layer "batch payments" feature would have to loop
+  the use-case one venta at a time (acceptable; fits the "less clicks"
+  principle too — no hidden multi-select).
+- **Committed to:** any new payment mutation that touches state-flip
+  lives inside the use-case layer, not the UI.
+
+### References
+
+- `packages/application/src/registrar-pago-cliente/`
+- `packages/ui/src/hooks/use-registrar-pago.ts` (implements)
+- CLAUDE.md §13 (overpayment rejection)

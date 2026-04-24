@@ -6,3 +6,4 @@ export {
   filterClientes,
 } from './clientes-screen';
 export { ClienteDetailScreen, type ClienteDetailScreenProps } from './cliente-detail-screen';
+export { RegistrarPagoModal, type RegistrarPagoModalProps } from './registrar-pago-modal';

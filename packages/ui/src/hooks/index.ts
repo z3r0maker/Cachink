@@ -32,3 +32,4 @@ export * from './use-crear-producto';
 export * from './use-eliminar-producto';
 export * from './use-editar-cliente';
 export * from './use-cliente-detail';
+export * from './use-registrar-pago';
