@@ -18,3 +18,4 @@ export * from './registrar-movimiento-inventario/index.js';
 export * from './registrar-pago-cliente/index.js';
 export * from './cerrar-corte-de-dia/index.js';
 export * from './procesar-gasto-recurrente/index.js';
+export * from './generar-informe-mensual/index.js';
