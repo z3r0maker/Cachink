@@ -5,7 +5,7 @@
  */
 
 import { numeric, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { auditColumns } from './_audit.js';
+import { auditColumns } from './_audit';
 
 export const dayCloses = sqliteTable('day_closes', {
   id: text('id').primaryKey(),

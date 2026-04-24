@@ -4,7 +4,7 @@
  */
 
 import { numeric, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { auditColumns } from './_audit.js';
+import { auditColumns } from './_audit';
 
 export const employees = sqliteTable('employees', {
   id: text('id').primaryKey(),

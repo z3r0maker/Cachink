@@ -6,7 +6,7 @@
  */
 
 import { integer, numeric, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { auditColumns } from './_audit.js';
+import { auditColumns } from './_audit';
 
 export const inventoryMovements = sqliteTable('inventory_movements', {
   id: text('id').primaryKey(),
