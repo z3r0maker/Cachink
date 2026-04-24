@@ -978,3 +978,61 @@ devices without a camera. The platform choices:
 - CLAUDE.md §11 (hardware interfaces)
 - CLAUDE.md §5.3 (platform-extension pattern mandate)
 - https://developer.mozilla.org/en-US/docs/Web/API/Barcode_Detection_API
+
+---
+
+## ADR-023
+
+Date: 2026-04-24
+Status: Accepted
+
+**Title:** Repository interfaces extend in place with `update(id, patch)` — no separate UpdateRepository
+
+### Context
+
+Phase 1C-M6 introduces edit flows (cliente, producto, empleado). The
+existing repositories expose `create`, `findById`, `findByX`, and
+`delete`; no mutation method for partial updates.
+
+Two shapes were on the table:
+
+- Extend each repository interface with an `update(id, patch)` method.
+- Introduce a separate `UpdateRepository<T>` per entity.
+
+### Decision
+
+Extend each interface in place. The Drizzle + in-memory implementations
+add matching `update()` methods.
+
+Shape: `update(id: EntityId, patch: Partial<Omit<Entity, 'id' | 'businessId' | 'deviceId' | 'createdAt'>>): Promise<Entity>`.
+Patch excludes immutable audit fields; the impl bumps `updatedAt`
+internally.
+
+### Alternatives Considered
+
+- **Separate UpdateRepository**. Rejected: doubles the repository
+  surface and breaks the "one interface per entity" mental model
+  already in §4.3 of CLAUDE.md.
+- **Return void from update** (like `delete`). Rejected: most callers
+  want the post-update row (TanStack Query optimistic-update
+  invalidation) and fetching via `findById` afterwards doubles
+  round-trips.
+- **Patch + full `put(Entity)` replace**. Rejected: PUT-style
+  replacement encourages the UI to re-send unchanged fields, which
+  trips on stale-read races. Partial-patch is explicit.
+
+### Consequences
+
+- **Easier:** edit flows land with one method per repo instead of a
+  parallel abstraction.
+- **Harder:** every existing repo needs the method added (6 repos to
+  be touched by the end of M6: clients, products, employees,
+  businesses; sales + expenses use replace-or-soft-delete patterns and
+  don't gain `update`).
+- **Committed to:** partial-patch updates only. Bulk updates
+  (`updateMany`) stay explicit — separate method if/when needed.
+
+### References
+
+- CLAUDE.md §4.3 (repository pattern)
+- `packages/data/src/repositories/clients-repository.ts` (first implementation)

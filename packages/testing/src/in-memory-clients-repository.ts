@@ -11,7 +11,7 @@ import type {
   NewClient,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { ClientsRepository } from '@cachink/data';
+import type { ClientPatch, ClientsRepository } from '@cachink/data';
 
 export class InMemoryClientsRepository implements ClientsRepository {
   private readonly rows = new Map<ClientId, Client>();
@@ -56,6 +56,22 @@ export class InMemoryClientsRepository implements ClientsRepository {
           r.nombre.toLowerCase().includes(needle),
       )
       .sort((a, b) => a.nombre.localeCompare(b.nombre));
+  }
+
+  async update(id: ClientId, patch: ClientPatch): Promise<Client | null> {
+    const existing = this.rows.get(id);
+    if (!existing || existing.deletedAt !== null) return null;
+    const ts: IsoTimestamp = now();
+    const next: Client = {
+      ...existing,
+      nombre: patch.nombre ?? existing.nombre,
+      telefono: patch.telefono ?? existing.telefono,
+      email: patch.email ?? existing.email,
+      nota: patch.nota ?? existing.nota,
+      updatedAt: ts,
+    };
+    this.rows.set(id, next);
+    return next;
   }
 
   async delete(id: ClientId): Promise<void> {

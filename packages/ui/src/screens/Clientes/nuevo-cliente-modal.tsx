@@ -14,6 +14,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
+import type { Client } from '@cachink/domain';
 import { Btn, Input, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { CrearClienteInput } from '../../hooks/use-crear-cliente';
@@ -25,6 +26,8 @@ export interface NuevoClienteModalProps {
   readonly onClose: () => void;
   readonly onSubmit: (input: CrearClienteInput) => void;
   readonly submitting?: boolean;
+  /** When provided, the modal opens in edit mode and pre-fills fields. */
+  readonly editing?: Client;
 }
 
 interface FormState {
@@ -39,8 +42,13 @@ interface FormErrors {
   email?: string;
 }
 
-function initialState(): FormState {
-  return { nombre: '', telefono: '', email: '', nota: '' };
+function initialState(editing?: Client): FormState {
+  return {
+    nombre: editing?.nombre ?? '',
+    telefono: editing?.telefono ?? '',
+    email: editing?.email ?? '',
+    nota: editing?.nota ?? '',
+  };
 }
 
 function validate(state: FormState, requiredLabel: string, emailInvalid: string): FormErrors {
@@ -117,18 +125,18 @@ function makeSubmit(
 
 export function NuevoClienteModal(props: NuevoClienteModalProps): ReactElement {
   const { t } = useTranslation();
-  const [state, setState] = useState<FormState>(initialState);
+  const [state, setState] = useState<FormState>(() => initialState(props.editing));
   const [errors, setErrors] = useState<FormErrors>({});
   const update = (partial: Partial<FormState>): void =>
     setState((prev) => ({ ...prev, ...partial }));
   const handleSubmit = makeSubmit(state, t, setErrors, props.onSubmit, () =>
-    setState(initialState()),
+    setState(initialState(props.editing)),
   );
   return (
     <Modal
       open={props.open}
       onClose={props.onClose}
-      title={t('clientes.nuevo')}
+      title={props.editing ? props.editing.nombre : t('clientes.nuevo')}
       testID="nuevo-cliente-modal"
     >
       <ClienteFields state={state} update={update} errors={errors} t={t} />

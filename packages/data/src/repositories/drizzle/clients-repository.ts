@@ -3,15 +3,9 @@
  */
 
 import { and, asc, eq, isNull, like } from 'drizzle-orm';
-import type {
-  BusinessId,
-  ClientId,
-  DeviceId,
-  IsoTimestamp,
-  NewClient,
-} from '@cachink/domain';
+import type { BusinessId, ClientId, DeviceId, IsoTimestamp, NewClient } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { Client, ClientsRepository } from '../clients-repository.js';
+import type { Client, ClientPatch, ClientsRepository } from '../clients-repository.js';
 import { clients } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -68,6 +62,19 @@ export class DrizzleClientsRepository implements ClientsRepository {
       .orderBy(asc(clients.nombre))
       .all();
     return rows.map((r) => this.#mapRow(r));
+  }
+
+  async update(id: ClientId, patch: ClientPatch): Promise<Client | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    const ts = now();
+    const updates: Record<string, string | null> = { updatedAt: ts };
+    if (patch.nombre !== undefined) updates.nombre = patch.nombre;
+    if (patch.telefono !== undefined) updates.telefono = patch.telefono;
+    if (patch.email !== undefined) updates.email = patch.email;
+    if (patch.nota !== undefined) updates.nota = patch.nota;
+    await this.#db.update(clients).set(updates).where(eq(clients.id, id)).run();
+    return this.findById(id);
   }
 
   async delete(id: ClientId): Promise<void> {
