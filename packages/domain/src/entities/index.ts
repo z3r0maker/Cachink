@@ -18,3 +18,4 @@ export * from './inventory-movement.js';
 export * from './employee.js';
 export * from './client.js';
 export * from './client-payment.js';
+export * from './day-close.js';
