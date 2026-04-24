@@ -107,8 +107,8 @@ Completed 2026-04-23 — 5 pure financial-calc functions in `@cachink/domain/fin
 ### Milestone P1B-M6 — Application layer (use-cases)
 
 - [x] **P1B-M6-T01** `RegistrarVentaUseCase`
-- [ ] **P1B-M6-T02** `RegistrarEgresoUseCase`
-- [ ] **P1B-M6-T03** `RegistrarMovimientoInventarioUseCase` (entrada auto-creates an Egreso per CLAUDE.md mock behavior)
+- [x] **P1B-M6-T02** `RegistrarEgresoUseCase`
+- [x] **P1B-M6-T03** `RegistrarMovimientoInventarioUseCase` (entrada auto-creates an Egreso per CLAUDE.md mock behavior)
 - [ ] **P1B-M6-T04** `RegistrarPagoClienteUseCase` (updates Venta.estado_pago to parcial/pagado)
 - [ ] **P1B-M6-T05** `CerrarCorteDeDiaUseCase`
 - [ ] **P1B-M6-T06** `ProcesarGastoRecurrenteUseCase` (creates the Egreso, advances proximo_disparo)

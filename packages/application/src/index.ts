@@ -13,3 +13,5 @@
 
 export * from './_use-case.js';
 export * from './registrar-venta/index.js';
+export * from './registrar-egreso/index.js';
+export * from './registrar-movimiento-inventario/index.js';
