@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
-**Current milestone:** P1B-M3 — Drizzle schema & migrations
-**Next unblocked task:** P1B-M3-T04 (Integration test — in-memory SQLite round-trip).
+**Current milestone:** P1B-M4 — Repository interfaces & implementations
+**Next unblocked task:** P1B-M4-T01 (Interface + Drizzle impl + InMemory impl for every repository).
 **Last updated:** 2026-04-23
 
 ---
@@ -79,10 +79,12 @@ Completed 2026-04-23 — all 11 Phase 1 entity schemas live under `packages/doma
 
 ### Milestone P1B-M3 — Drizzle schema & migrations
 
+Completed 2026-04-23 — 11 Drizzle tables mirror the Zod entities; initial migration `0000_lying_johnny_blaze.sql` committed; integration test round-trips every entity through in-memory SQLite with `better-sqlite3`. Data coverage 100% (schema files declaratively excluded; covered by integration test).
+
 - [x] **P1B-M3-T01** Write Drizzle schema for all entities in `packages/data/src/schema` — 11 sqliteTable definitions mirror the Zod entities 1:1 (`businesses`, `app_config`, `sales`, `expenses`, `products`, `inventory_movements`, `employees`, `clients`, `client_payments`, `day_closes`, `recurring_expenses`). Shared `_audit.ts` spreads the five audit columns; money uses `numeric('*_centavos', { mode: 'bigint' })` (Drizzle 0.45 exposes bigint via NUMERIC; app layer keeps JS bigint end-to-end). `packages/data/vitest.config.ts` now excludes `src/schema/**` from coverage — declarative tables are covered by the integration round-trip test (P1B-M3-T04).
 - [x] **P1B-M3-T02** Configure Drizzle Kit for migrations — `packages/data/drizzle.config.ts` (dialect `sqlite`, `casing: 'snake_case'`, out `./drizzle/migrations`). `pnpm --filter @cachink/data db:generate` / `db:check` scripts added. `packages/data/README.md` documents the workflow: never edit a committed migration; write a new one instead (CLAUDE.md §2 principle 9).
 - [x] **P1B-M3-T03** Generate the initial migration — `packages/data/drizzle/migrations/0000_lying_johnny_blaze.sql` (152 lines, 11 CREATE TABLE) + `meta/_journal.json` + `meta/0000_snapshot.json`. Drizzle-kit's CJS loader rejects `.js`-suffixed imports inside the schema barrel, so `packages/data/src/schema/*.ts` use extensionless relative imports (documented in the barrel header); moduleResolution `Bundler` accepts both forms, the rest of the repo keeps the `.js` convention. `drizzle-kit check` passes.
-- [ ] **P1B-M3-T04** Integration test: create in-memory SQLite, run migration, insert + read every entity
+- [x] **P1B-M3-T04** Integration test: create in-memory SQLite, run migration, insert + read every entity — `packages/data/tests/schema.integration.test.ts` uses `better-sqlite3` + `drizzle-orm/better-sqlite3/migrator` to apply the migration and round-trip one row through each of the 11 tables (12 tests). Proves bigint money survives the numeric-column round-trip, `activo` boolean maps 0/1 ↔ boolean, and enum-typed columns accept the expected literal values. `better-sqlite3@^11.8.0` + `@types/better-sqlite3` added as data devDependencies; `pnpm.onlyBuiltDependencies` approves the native compile in `package.json`.
 
 ### Milestone P1B-M4 — Repository interfaces & implementations
 
