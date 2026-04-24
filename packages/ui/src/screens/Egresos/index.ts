@@ -12,3 +12,4 @@ export { NominaTab, type NominaTabProps } from './tabs/nomina-tab';
 export { NuevoEmpleadoModal, type NuevoEmpleadoModalProps } from './tabs/nuevo-empleado-modal';
 export { InventarioTab, type InventarioTabProps } from './tabs/inventario-tab';
 export { PendientesCard, type PendientesCardProps } from './pendientes-card';
+export { EgresoDetailPopover, type EgresoDetailPopoverProps } from './egreso-detail-popover';
