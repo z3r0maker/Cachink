@@ -29,3 +29,4 @@ export * from './use-productos-con-stock';
 export * from './use-inventario-kpis';
 export * from './use-movimientos-recientes';
 export * from './use-crear-producto';
+export * from './use-eliminar-producto';
