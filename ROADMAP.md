@@ -97,9 +97,9 @@ Completed 2026-04-23 — 11 repository interfaces in `@cachink/data/repositories
 
 - [x] **P1B-M5-T01** `calculateEstadoDeResultados(ventas, egresos, isrTasa) → EstadoResultados`
 - [x] **P1B-M5-T02** `calculateBalanceGeneral(...)` including real Cuentas por Cobrar
-- [ ] **P1B-M5-T03** `calculateFlujoDeEfectivo(...)` distinguishing cash cobros from Crédito
+- [x] **P1B-M5-T03** `calculateFlujoDeEfectivo(...)` distinguishing cash cobros from Crédito
 - [ ] **P1B-M5-T04** `calculateIndicadores(...)` including Días Promedio de Cobranza
-- [ ] **P1B-M5-T05** `calculateCorteDeDia(ventas, egresos, corteAnterior) → { esperado, diferencia }`
+- [x] **P1B-M5-T05** `calculateCorteDeDia(ventas, egresos, corteAnterior) → { esperado, diferencia }`
 - [ ] **P1B-M5-T06** Unit tests with explicit fixture data for every formula — edge cases: no sales, all credit, all cash, mixed, refunds
 
 ### Milestone P1B-M6 — Application layer (use-cases)
