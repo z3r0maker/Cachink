@@ -13,3 +13,5 @@ export * from './business.js';
 export * from './app-config.js';
 export * from './sale.js';
 export * from './expense.js';
+export * from './product.js';
+export * from './inventory-movement.js';
