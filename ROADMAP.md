@@ -18,14 +18,16 @@
 ## Current Status
 
 **Current phase:** Phase 1C — Local Standalone Mode 🚧
-**Current milestone:** P1C-M6 — Clientes & Cuentas por Cobrar
-**Next unblocked task:** P1C-M6-T01 (Clientes list).
+**Current milestone:** P1C-M7 — Corte de Día
+**Next unblocked task:** P1C-M7-T01 (Card on Operativo home after 18:00).
 **Last updated:** 2026-04-24
 
-**Recent progress:** P1C-M1 + M2 + M3 all closed via the 17-commit
-first-user-visible slice (shell + wizard + Ventas). 15 of 62 P1C
-tasks ticked. 218 UI tests + 233 domain tests; typecheck 14/14,
-lint 9/9; 4 Maestro flows ready for local verification.
+**Recent progress:** Slice 2 closed M4 (Egresos), M5 (Inventario), M6
+(Clientes + CxC) via a 32-commit pass. 32 of 62 P1C tasks ticked
+(52%). 307 UI tests + 233 domain tests; typecheck 14/14, lint 9/9;
+14 Maestro flows ready for local verification. 5 new ADRs landed
+(020-024): Egresos sub-tab pattern, dual-write, barcode scanner,
+repo update() extension, PagoCliente use-case.
 
 ---
 
@@ -114,11 +116,11 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M6 — Clientes & Cuentas por Cobrar
 
-- [ ] **P1C-M6-T01** Clientes list (lightweight; reached from Venta form and Director Home)
-- [ ] **P1C-M6-T02** Crear/editar cliente (nombre, telefono, email, nota)
-- [ ] **P1C-M6-T03** Cuentas por Cobrar card on Director Home showing pending Crédito ventas grouped by cliente
-- [ ] **P1C-M6-T04** "Registrar pago" action from a pending venta → creates PagoCliente, updates estado_pago
-- [ ] **P1C-M6-T05** Maestro E2E: full credit → partial payment → full payment flow
+- [x] **P1C-M6-T01** Clientes list (lightweight; reached from Venta form and Director Home)
+- [x] **P1C-M6-T02** Crear/editar cliente (nombre, telefono, email, nota)
+- [x] **P1C-M6-T03** Cuentas por Cobrar card on Director Home showing pending Crédito ventas grouped by cliente
+- [x] **P1C-M6-T04** "Registrar pago" action from a pending venta → creates PagoCliente, updates estado_pago
+- [x] **P1C-M6-T05** Maestro E2E: full credit → partial payment → full payment flow
 
 ### Milestone P1C-M7 — Corte de Día
 

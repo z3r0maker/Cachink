@@ -1,0 +1,23 @@
+# Continue the parcial → record the remainder → verify estadoPago
+# flips to 'pagado' and the CxC saldo goes to zero.
+# Covers P1C-M6-T04 (full payment path) + M6-T05 (integration E2E).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-director-home"
+- tapOn: "Carla Márquez"
+
+# Venta is still visible because estado=parcial.
+- assertVisible: "parcial"
+- tapOn:
+    id: "registrar-pago-01JPHK0000000000000000S001"
+
+- tapOn:
+    id: "pago-submit"  # pre-fills with saldo; one-tap full payment
+
+- assertNotVisible: "Registrar"
+# Venta no longer visible (estado=pagado); saldo is zero.
+- assertNotVisible: "parcial"
+- assertVisible: "Sin saldos pendientes."

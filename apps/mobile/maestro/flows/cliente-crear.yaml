@@ -1,0 +1,22 @@
+# Create a cliente from the Clientes tab. Verify the row appears.
+# Covers P1C-M6-T01 (list) + M6-T02 (crear).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-clientes"
+- tapOn:
+    id: "clientes-nuevo"
+
+- tapOn:
+    id: "nuevo-cliente-nombre"
+- inputText: "Carla Márquez"
+- tapOn:
+    id: "nuevo-cliente-telefono"
+- inputText: "5512345678"
+- tapOn:
+    id: "nuevo-cliente-submit"
+
+- assertNotVisible: "Nuevo cliente"
+- assertVisible: "Carla Márquez"

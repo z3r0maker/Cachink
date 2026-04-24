@@ -1,0 +1,30 @@
+# Record a partial pago against a pending Crédito venta.
+# Covers P1C-M6-T04 (registrar pago).
+#
+# Precondition: a Crédito venta for cliente 'Carla Márquez' exists
+# (run venta-credito.yaml from Slice 1 first).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Open cliente detail via the CuentasPorCobrar strip.
+- tapOn:
+    id: "tab-director-home"
+- tapOn: "Carla Márquez"
+
+- assertVisible: "Cuentas por cobrar"
+# Tap the first pending venta's 'Registrar pago' Btn.
+- tapOn:
+    id: "registrar-pago-01JPHK0000000000000000S001"
+
+- assertVisible: "Registrar"
+- tapOn:
+    id: "pago-monto"
+- clearText
+- inputText: "500"
+- tapOn:
+    id: "pago-submit"
+
+- assertNotVisible: "Registrar"
+# Saldo card shows a smaller remaining amount.
+- assertVisible: "Cuentas por cobrar"
