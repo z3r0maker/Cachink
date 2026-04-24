@@ -14,3 +14,5 @@ export * from './expenses-repository.js';
 export * from './products-repository.js';
 export * from './inventory-movements-repository.js';
 export * from './employees-repository.js';
+export * from './clients-repository.js';
+export * from './client-payments-repository.js';
