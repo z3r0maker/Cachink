@@ -17,3 +17,5 @@ export * from './use-cuentas-por-cobrar';
 export * from './use-egresos-by-date';
 export * from './use-total-egresos-del-dia';
 export * from './use-registrar-egreso';
+export * from './use-empleados-for-business';
+export * from './use-crear-empleado';
