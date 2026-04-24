@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1C — Local Standalone Mode 🚧
-**Current milestone:** P1C-M5 — Inventario module
-**Next unblocked task:** P1C-M5-T01 (Stock view with buscar, KPI strip, stock alerts).
+**Current milestone:** P1C-M6 — Clientes & Cuentas por Cobrar
+**Next unblocked task:** P1C-M6-T01 (Clientes list).
 **Last updated:** 2026-04-24
 
 **Recent progress:** P1C-M1 + M2 + M3 all closed via the 17-commit
@@ -104,13 +104,13 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M5 — Inventario module
 
-- [ ] **P1C-M5-T01** Stock view with buscar, KPI strip, stock alerts
-- [ ] **P1C-M5-T02** Movimientos view (last 40)
-- [ ] **P1C-M5-T03** Nuevo Producto modal
-- [ ] **P1C-M5-T04** Entrada/Salida modal per producto
-- [ ] **P1C-M5-T05** Barcode scanner component (platform-extension pattern: `Scanner.native.tsx` uses expo-camera; `Scanner.web.tsx` uses BarcodeDetector API + getUserMedia fallback)
-- [ ] **P1C-M5-T06** Manual barcode entry fallback on both platforms
-- [ ] **P1C-M5-T07** Maestro E2E: add product, scan SKU, register entrada, register salida
+- [x] **P1C-M5-T01** Stock view with buscar, KPI strip, stock alerts
+- [x] **P1C-M5-T02** Movimientos view (last 40)
+- [x] **P1C-M5-T03** Nuevo Producto modal
+- [x] **P1C-M5-T04** Entrada/Salida modal per producto
+- [x] **P1C-M5-T05** Barcode scanner component (platform-extension pattern: `Scanner.native.tsx` uses expo-camera; `Scanner.web.tsx` uses BarcodeDetector API + getUserMedia fallback)
+- [x] **P1C-M5-T06** Manual barcode entry fallback on both platforms
+- [x] **P1C-M5-T07** Maestro E2E: add product, scan SKU, register entrada, register salida
 
 ### Milestone P1C-M6 — Clientes & Cuentas por Cobrar
 

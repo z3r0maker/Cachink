@@ -1,0 +1,31 @@
+# Create a producto using the manual barcode entry path.
+# Covers P1C-M5-T05/T06 (scanner + manual fallback) for mobile. On
+# simulators without a physical camera the ManualEntry field is the
+# only reliable code source.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-inventario"
+- tapOn:
+    id: "stock-nuevo-producto"
+
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Refresco 600ml"
+- tapOn:
+    id: "producto-scan"
+
+- assertVisible: "Escanear código"
+- tapOn:
+    id: "scanner-manual"
+- inputText: "7501055300005"
+- tapOn:
+    id: "scanner-manual-submit"
+
+# Scanner closes + SKU populated on the form.
+- assertNotVisible: "Escanear código"
+- tapOn:
+    id: "producto-submit"
+- assertVisible: "Refresco 600ml"

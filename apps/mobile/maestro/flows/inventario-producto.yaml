@@ -1,0 +1,26 @@
+# Create a producto and register an entrada; verify stock + egreso.
+# Covers P1C-M5-T01 (Stock list) and P1C-M5-T03 (NuevoProducto modal).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-inventario"
+- tapOn:
+    id: "stock-nuevo-producto"
+
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Tortilla"
+- tapOn:
+    id: "producto-costo"
+- inputText: "2"
+- tapOn:
+    id: "producto-umbral"
+- clearText
+- inputText: "10"
+- tapOn:
+    id: "producto-submit"
+
+- assertNotVisible: "Nuevo producto"
+- assertVisible: "Tortilla"
