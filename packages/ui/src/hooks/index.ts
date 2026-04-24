@@ -25,3 +25,4 @@ export * from './use-crear-gasto-recurrente';
 export * from './use-pendientes-gastos-recurrentes';
 export * from './use-procesar-gasto-recurrente';
 export * from './use-eliminar-egreso';
+export * from './use-productos-con-stock';

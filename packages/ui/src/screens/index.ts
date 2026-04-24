@@ -14,3 +14,4 @@ export * from './Ventas/index';
 export * from './Clientes/index';
 export * from './CuentasPorCobrar/index';
 export * from './Egresos/index';
+export * from './Inventario/index';
