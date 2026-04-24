@@ -19,7 +19,7 @@
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
 **Current milestone:** P1B-M2 — Entity types & Zod schemas
-**Next unblocked task:** P1B-M2-T06 (`Cliente`, `PagoCliente`).
+**Next unblocked task:** P1B-M2-T07 (`CorteDeDia`).
 **Last updated:** 2026-04-23
 
 ---
@@ -71,7 +71,7 @@ Completed 2026-04-23 — landed during the Phase 0 / Phase 1A scaffold; reconcil
 - [x] **P1B-M2-T03** `Egreso` (incl. `gasto_recurrente_id?`) — `packages/domain/src/entities/expense.ts` ships `ExpenseSchema` / `NewExpenseSchema` + `ExpenseCategoryEnum` (the ten EGRESO_CAT values). `proveedor` nullable in read schema, optional on input; `gastoRecurrenteId` wires the recurring-templates feature from CLAUDE.md §1. 11 tests covering happy path + ≥3 rejection cases.
 - [x] **P1B-M2-T04** `Producto`, `MovimientoInventario` — `product.ts` ships `ProductSchema` + `InventoryCategoryEnum` (6 values) + `InventoryUnitEnum` (9 values); `umbralStockBajo` defaults to 3. `inventory-movement.ts` ships `InventoryMovementSchema` + `MovementTypeEnum` / `EntryReasonEnum` / `ExitReasonEnum`, with a cross-field refine binding `motivo` to the allowed values for the movement `tipo`. 23 tests across the two files.
 - [x] **P1B-M2-T05** `Empleado` — `employee.ts` ships `EmployeeSchema` / `NewEmployeeSchema` + `PayrollFrequencyEnum` (semanal / quincenal / mensual). 7 tests.
-- [ ] **P1B-M2-T06** `Cliente`, `PagoCliente`
+- [x] **P1B-M2-T06** `Cliente`, `PagoCliente` — `client.ts` ships `ClientSchema` / `NewClientSchema` with a deliberately loose phone regex (Mexican landlines / mobiles / international all pass). `client-payment.ts` ships `ClientPaymentSchema` / `NewClientPaymentSchema` and re-uses `PaymentMethodEnum` from `sale.ts`. 15 tests.
 - [ ] **P1B-M2-T07** `CorteDeDia`
 - [ ] **P1B-M2-T08** `GastoRecurrente`
 
