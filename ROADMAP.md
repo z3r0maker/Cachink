@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1A — Brand & Component Primitives 🚧
-**Current milestone:** P1A-M2 — Core primitives (9 of 11 complete: `<Btn>`, `<Input>`, `<Tag>`, `<Modal>`, `<EmptyState>`, `<SectionTitle>`, `<Card>`, `<Kpi>`, `<Gauge>`)
-**Next unblocked task:** P1A-M2-T10 (`<BottomTabBar>`).
+**Current milestone:** P1A-M2 — Core primitives (10 of 11 complete: `<Btn>`, `<Input>`, `<Tag>`, `<Modal>`, `<EmptyState>`, `<SectionTitle>`, `<Card>`, `<Kpi>`, `<Gauge>`, `<BottomTabBar>`)
+**Next unblocked task:** P1A-M2-T11 (`<TopBar>`).
 **Last updated:** 2026-04-23
 
 ---
@@ -58,7 +58,7 @@ Carry-overs (environmental, not blockers):
 - [x] **P1A-M2-T07** `Card` (white, yellow, black variants) — `packages/ui/src/components/Card/` with `card.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (WhiteDefault / YellowHero / BlackDirector / Tappable / AllVariants) + 5 Playwright baselines; 100% coverage; 3 variants × 4 padding tokens; press transform when `onPress` is supplied; no new dependency
 - [x] **P1A-M2-T08** `Kpi` — `packages/ui/src/components/Kpi/` with `kpi.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (VentasHoy / UtilidadMes / EgresosHoy / StockTotal / AllTones) + 5 Playwright baselines; 100% coverage; 3 tones (neutral / positive / negative) × tabular numerals; agnostic of currency formatting (`value: string`); no new dependency
 - [x] **P1A-M2-T09** `Gauge` — `packages/ui/src/components/Gauge/` with `gauge.tsx` (single cross-platform impl, horizontal-bar variant chosen over circular-SVG to avoid `react-native-svg` dep) + 11 unit tests + 5 stories (MargenBruto / Liquidez / RotacionInventario / Alerta / AllTones) + 5 Playwright baselines; 100% coverage; 4 tones (neutral / positive / warning / negative); clamps value to [0, max]; safe when max=0; custom valueFormatter override; no new dependency
-- [ ] **P1A-M2-T10** `BottomTabBar`
+- [x] **P1A-M2-T10** `BottomTabBar` — `packages/ui/src/components/BottomTabBar/` with `bottom-tab-bar.tsx` + extracted `tab-item.tsx` + 13 unit tests + 5 stories (Operativo / Director / WithBadges / IconlessFallback / MidSelection) + 5 Playwright baselines; 100% coverage; 1..6 items supported with dev-mode warning + clamp guard outside that range; optional `icon: ReactNode` slot (icon-library decision deferred to Phase 1C); optional `badge: number` red-circle indicator; no new dependency
 - [ ] **P1A-M2-T11** `TopBar`
 
 ### Milestone P1A-M3 — Localization & formatting

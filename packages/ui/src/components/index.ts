@@ -15,3 +15,4 @@ export * from './SectionTitle/index';
 export * from './Card/index';
 export * from './Kpi/index';
 export * from './Gauge/index';
+export * from './BottomTabBar/index';

@@ -57,6 +57,11 @@ const stories = [
   'phase-1a-primitives-gauge--rotacion-inventario',
   'phase-1a-primitives-gauge--alerta',
   'phase-1a-primitives-gauge--all-tones',
+  'phase-1a-primitives-bottom-tab-bar--operativo',
+  'phase-1a-primitives-bottom-tab-bar--director',
+  'phase-1a-primitives-bottom-tab-bar--with-badges',
+  'phase-1a-primitives-bottom-tab-bar--iconless-fallback',
+  'phase-1a-primitives-bottom-tab-bar--mid-selection',
 ];
 
 for (const id of stories) {
