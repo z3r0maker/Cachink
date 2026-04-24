@@ -5,4 +5,5 @@
  * from each `*-repository.ts` file.
  */
 export * from './sales-repository.js';
+export * from './businesses-repository.js';
 export * from './drizzle/index.js';

@@ -9,3 +9,4 @@
 
 export type { CachinkDatabase, CachinkSchema } from './_db.js';
 export * from './sales-repository.js';
+export * from './businesses-repository.js';

@@ -23,6 +23,8 @@ export default mergeConfig(
           'src/index.ts',
           'src/**/*.d.ts',
           'src/repositories/*-repository.ts',
+          'src/repositories/drizzle/_db.ts',
+          'src/repositories/drizzle/index.ts',
           'src/schema/**',
         ],
         thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

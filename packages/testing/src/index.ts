@@ -9,5 +9,6 @@
  */
 
 export * from './in-memory-sales-repository.js';
+export * from './in-memory-businesses-repository.js';
 export * from './fixtures/index.js';
 export * from './contract/index.js';
