@@ -62,6 +62,11 @@ const stories = [
   'phase-1a-primitives-bottom-tab-bar--with-badges',
   'phase-1a-primitives-bottom-tab-bar--iconless-fallback',
   'phase-1a-primitives-bottom-tab-bar--mid-selection',
+  'phase-1a-primitives-top-bar--default',
+  'phase-1a-primitives-top-bar--with-subtitle',
+  'phase-1a-primitives-top-bar--operativo-screen',
+  'phase-1a-primitives-top-bar--director-home',
+  'phase-1a-primitives-top-bar--back-button',
 ];
 
 for (const id of stories) {

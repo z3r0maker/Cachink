@@ -16,3 +16,4 @@ export * from './Card/index';
 export * from './Kpi/index';
 export * from './Gauge/index';
 export * from './BottomTabBar/index';
+export * from './TopBar/index';

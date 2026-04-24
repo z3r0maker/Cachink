@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1A — Brand & Component Primitives 🚧
-**Current milestone:** P1A-M2 — Core primitives (10 of 11 complete: `<Btn>`, `<Input>`, `<Tag>`, `<Modal>`, `<EmptyState>`, `<SectionTitle>`, `<Card>`, `<Kpi>`, `<Gauge>`, `<BottomTabBar>`)
-**Next unblocked task:** P1A-M2-T11 (`<TopBar>`).
+**Current milestone:** P1A-M3 — Localization & formatting (P1A-M2 complete: all 11 primitives shipped)
+**Next unblocked task:** P1A-M3-T01 (Install i18next + expo-localization).
 **Last updated:** 2026-04-23
 
 ---
@@ -48,7 +48,7 @@ Carry-overs (environmental, not blockers):
 - [x] **P1A-M1-T02** Set up the chosen tool in `packages/ui` with native + web targets — `.storybook/{main,preview}.tsx` wrap stories in `TamaguiProvider`; `pnpm --filter @cachink/ui storybook` / `build-storybook` / `test:visual` all green
 - [x] **P1A-M1-T03** Add a CI job that runs visual regression tests on both targets — `.github/workflows/ci.yml` has a `storybook-visual` job after `verify` that installs Chromium, builds Storybook, runs Playwright, uploads the report on failure
 
-### Milestone P1A-M2 — Core primitives (CLAUDE.md §8.4)
+### Milestone P1A-M2 — Core primitives (CLAUDE.md §8.4) — Completed 2026-04-23
 - [x] **P1A-M2-T01** `Btn` with all 6 variants + press animation — `packages/ui/src/components/Btn/` with 100% test coverage, 6 variants × 3 sizes + pressed/disabled stories + 6 Playwright baselines
 - [x] **P1A-M2-T02** `Input` (text, number, date, select) with label, note, placeholder — `packages/ui/src/components/Input/` with 9 unit tests + 5 stories + 5 Playwright baselines; uses `@tamagui/input` for text/number/date; `<select>` is a native HTML element for now (Modal-backed picker lands as a follow-up once P1A-M2-T04 ships)
 - [x] **P1A-M2-T03** `Tag` — `packages/ui/src/components/Tag/` with 7 semantic variants (neutral / brand / soft / success / info / danger / warning) + 7 unit tests + 5 stories + 5 Playwright baselines; 100% coverage; no new dependency
@@ -59,7 +59,7 @@ Carry-overs (environmental, not blockers):
 - [x] **P1A-M2-T08** `Kpi` — `packages/ui/src/components/Kpi/` with `kpi.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (VentasHoy / UtilidadMes / EgresosHoy / StockTotal / AllTones) + 5 Playwright baselines; 100% coverage; 3 tones (neutral / positive / negative) × tabular numerals; agnostic of currency formatting (`value: string`); no new dependency
 - [x] **P1A-M2-T09** `Gauge` — `packages/ui/src/components/Gauge/` with `gauge.tsx` (single cross-platform impl, horizontal-bar variant chosen over circular-SVG to avoid `react-native-svg` dep) + 11 unit tests + 5 stories (MargenBruto / Liquidez / RotacionInventario / Alerta / AllTones) + 5 Playwright baselines; 100% coverage; 4 tones (neutral / positive / warning / negative); clamps value to [0, max]; safe when max=0; custom valueFormatter override; no new dependency
 - [x] **P1A-M2-T10** `BottomTabBar` — `packages/ui/src/components/BottomTabBar/` with `bottom-tab-bar.tsx` + extracted `tab-item.tsx` + 13 unit tests + 5 stories (Operativo / Director / WithBadges / IconlessFallback / MidSelection) + 5 Playwright baselines; 100% coverage; 1..6 items supported with dev-mode warning + clamp guard outside that range; optional `icon: ReactNode` slot (icon-library decision deferred to Phase 1C); optional `badge: number` red-circle indicator; no new dependency
-- [ ] **P1A-M2-T11** `TopBar`
+- [x] **P1A-M2-T11** `TopBar` — `packages/ui/src/components/TopBar/` with `top-bar.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (Default / WithSubtitle / OperativoScreen / DirectorHome / BackButton) + 5 Playwright baselines; 100% coverage; left/right slot pattern (44px tap-target floor); centered title block with optional subtitle; no new dependency
 
 ### Milestone P1A-M3 — Localization & formatting
 - [ ] **P1A-M3-T01** Install i18next + expo-localization
