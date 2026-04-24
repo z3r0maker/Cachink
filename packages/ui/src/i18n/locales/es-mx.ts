@@ -35,6 +35,38 @@ export const esMX = {
     operativoHint: 'Captura ventas, egresos e inventario',
     directorHint: 'Resultados, indicadores y estados financieros',
   },
+  tabs: {
+    ventas: 'Ventas',
+    egresos: 'Egresos',
+    inventario: 'Inventario',
+    home: 'Inicio',
+    estados: 'Estados',
+    ajustes: 'Ajustes',
+  },
+  topBar: {
+    cambiarRol: 'Cambiar',
+    ajustes: 'Ajustes',
+    syncLocal: 'Solo este dispositivo',
+    syncLan: 'Sincronizado',
+    syncCloud: 'En la nube',
+    syncOffline: 'Sin conexión',
+  },
+  settings: {
+    title: 'Ajustes',
+    modoLabel: 'Modo',
+    modoLocal: 'Solo este dispositivo',
+    modoTabletOnly: 'Solo tablet',
+    modoLan: 'Servidor local',
+    modoCloud: 'En la nube',
+    negocioLabel: 'Negocio',
+    negocioNoConfigurado: 'Sin configurar',
+    regimenLabel: 'Régimen fiscal',
+    isrLabel: 'ISR',
+    idiomaLabel: 'Idioma',
+    idiomaValue: 'Español (es-MX)',
+    reRunWizard: 'Re-ejecutar asistente',
+    reRunWizardHint: 'Volver al asistente de configuración',
+  },
 } as const;
 
 export type EsMX = typeof esMX;

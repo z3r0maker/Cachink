@@ -6,3 +6,5 @@
  * component + prop types. New screens add one `export *` line here.
  */
 export * from './RolePicker/index';
+export * from './AppShell/index';
+export * from './Settings/index';
