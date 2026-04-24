@@ -399,6 +399,9 @@ importers:
       '@cachink/config':
         specifier: workspace:*
         version: link:../config
+      '@cachink/testing':
+        specifier: workspace:*
+        version: link:../testing
       '@playwright/test':
         specifier: ^1.59.1
         version: 1.59.1
@@ -423,6 +426,9 @@ importers:
       '@tamagui/input':
         specifier: 2.0.0-rc.41
         version: 2.0.0-rc.41(react-dom@19.2.0(react@19.2.0))(react-native-safe-area-context@5.7.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(sf-symbols-typescript@2.2.0)
+      '@tanstack/react-query':
+        specifier: ^5.100.1
+        version: 5.100.1(react@19.2.0)
       '@tauri-apps/plugin-sql':
         specifier: ^2
         version: 2.4.0
@@ -474,12 +480,18 @@ importers:
       typescript:
         specifier: ^5.7.0
         version: 5.9.3
+      ulid:
+        specifier: ^3.0.0
+        version: 3.0.2
       vite:
         specifier: ^7.0.4
         version: 7.3.2(@types/node@22.19.17)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
       vitest:
         specifier: ^3.0.0
         version: 3.2.4(@types/node@22.19.17)(jsdom@29.0.2)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3)
+      zustand:
+        specifier: ^5.0.12
+        version: 5.0.12(@types/react@19.2.14)(react@19.2.0)(use-sync-external-store@1.6.0(react@19.2.0))
 
 packages:
 
