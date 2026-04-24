@@ -7,33 +7,22 @@
  * test suite (to be added in Phase 1B-M4).
  */
 
-import type {
-  BusinessId,
-  ClientId,
-  IsoTimestamp,
-  SaleId,
-} from '@cachink/domain';
+import type { BusinessId, ClientId, DeviceId, IsoTimestamp, SaleId } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type {
-  NewSale,
-  PaymentState,
-  Sale,
-  SalesRepository,
-} from '@cachink/data';
+import type { NewSale, PaymentState, Sale, SalesRepository } from '@cachink/data';
 
 export class InMemorySalesRepository implements SalesRepository {
   private readonly sales = new Map<SaleId, Sale>();
-  private readonly deviceId: string;
+  private readonly deviceId: DeviceId;
 
-  constructor(deviceId = 'test-device-0001') {
+  constructor(deviceId: DeviceId = newEntityId<DeviceId>()) {
     this.deviceId = deviceId;
   }
 
   async create(input: NewSale): Promise<Sale> {
     const id = newEntityId<SaleId>();
     const timestamp = now();
-    const estadoPago: PaymentState =
-      input.metodo === 'Crédito' ? 'pendiente' : 'pagado';
+    const estadoPago: PaymentState = input.metodo === 'Crédito' ? 'pendiente' : 'pagado';
     const sale: Sale = {
       id,
       fecha: input.fecha,
@@ -59,17 +48,9 @@ export class InMemorySalesRepository implements SalesRepository {
     return sale;
   }
 
-  async findByDate(
-    date: string,
-    businessId: BusinessId,
-  ): Promise<readonly Sale[]> {
+  async findByDate(date: string, businessId: BusinessId): Promise<readonly Sale[]> {
     return [...this.sales.values()]
-      .filter(
-        (s) =>
-          s.fecha === date &&
-          s.businessId === businessId &&
-          s.deletedAt === null,
-      )
+      .filter((s) => s.fecha === date && s.businessId === businessId && s.deletedAt === null)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
