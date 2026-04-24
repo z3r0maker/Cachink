@@ -9,3 +9,4 @@ export * from './sale.js';
 export * from './business.js';
 export * from './expense.js';
 export * from './product.js';
+export * from './inventory-movement.js';

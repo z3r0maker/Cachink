@@ -9,4 +9,5 @@ export * from './businesses-repository.js';
 export * from './app-config-repository.js';
 export * from './expenses-repository.js';
 export * from './products-repository.js';
+export * from './inventory-movements-repository.js';
 export * from './drizzle/index.js';
