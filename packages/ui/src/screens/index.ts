@@ -10,3 +10,4 @@ export * from './AppShell/index';
 export * from './Settings/index';
 export * from './Wizard/index';
 export * from './BusinessForm/index';
+export * from './Ventas/index';
