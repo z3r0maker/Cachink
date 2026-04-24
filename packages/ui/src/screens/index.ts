@@ -8,3 +8,4 @@
 export * from './RolePicker/index';
 export * from './AppShell/index';
 export * from './Settings/index';
+export * from './Wizard/index';

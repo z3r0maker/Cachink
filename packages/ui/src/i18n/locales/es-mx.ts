@@ -51,6 +51,38 @@ export const esMX = {
     syncCloud: 'En la nube',
     syncOffline: 'Sin conexión',
   },
+  wizard: {
+    title: 'Configura Cachink!',
+    subtitle: '¿Cómo vas a trabajar?',
+    comingSoon: 'Próximamente',
+    localStandalone: {
+      title: 'Solo este dispositivo',
+      hint: 'Cachink corre en esta tableta. No necesita internet.',
+    },
+    cloud: {
+      title: 'En la nube',
+      hint: 'Sincroniza con otros dispositivos por internet.',
+    },
+    lanClient: {
+      title: 'Conectar a un servidor local',
+      hint: 'Une esta tableta a un servidor en la misma Wi-Fi.',
+    },
+    lanHost: {
+      title: 'Ser el servidor local',
+      hint: 'Esta computadora hospeda hasta 3 tabletas por Wi-Fi.',
+    },
+    businessForm: {
+      title: 'Tu negocio',
+      subtitle: 'Solo los datos indispensables.',
+      nombreLabel: 'Nombre del negocio',
+      nombrePlaceholder: 'Taquería Don Pedro',
+      regimenLabel: 'Régimen fiscal',
+      isrLabel: 'Tasa de ISR',
+      isrHint: 'Puedes ajustar este valor con tu contador más adelante.',
+      saveLabel: 'Guardar y continuar',
+      required: 'Requerido',
+    },
+  },
   settings: {
     title: 'Ajustes',
     modoLabel: 'Modo',
