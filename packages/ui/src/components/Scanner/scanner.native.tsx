@@ -18,7 +18,7 @@ import { Text, View } from '@tamagui/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - expo-camera is a peer dep resolved by Metro at runtime
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Btn, Modal } from '../index';
+import { Btn, Input, Modal } from '../index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { ScannerProps } from './scanner';
@@ -103,9 +103,42 @@ export function Scanner(props: ScannerProps): ReactElement {
         disabled={scanned && mode === 'single'}
         t={t}
       />
+      <ManualEntry
+        onSubmit={(code) => {
+          props.onScan(code);
+          if (mode === 'single') props.onClose();
+        }}
+        t={t}
+      />
       <Btn variant="ghost" onPress={props.onClose} fullWidth testID="scanner-close">
         {t('scanner.close')}
       </Btn>
     </Modal>
+  );
+}
+
+function ManualEntry({ onSubmit, t }: { onSubmit: (code: string) => void; t: T }): ReactElement {
+  const [value, setValue] = useState('');
+  return (
+    <View gap={8} marginTop={8}>
+      <Input
+        label={t('scanner.manualLabel')}
+        value={value}
+        onChange={setValue}
+        testID="scanner-manual"
+      />
+      <Btn
+        variant="soft"
+        onPress={() => {
+          if (!value.trim()) return;
+          onSubmit(value.trim());
+          setValue('');
+        }}
+        fullWidth
+        testID="scanner-manual-submit"
+      >
+        {t('scanner.manualEntry')}
+      </Btn>
+    </View>
   );
 }
