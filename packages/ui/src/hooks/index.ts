@@ -31,3 +31,4 @@ export * from './use-movimientos-recientes';
 export * from './use-crear-producto';
 export * from './use-eliminar-producto';
 export * from './use-editar-cliente';
+export * from './use-cliente-detail';

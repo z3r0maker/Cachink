@@ -5,3 +5,4 @@ export {
   type ClienteWithSaldo,
   filterClientes,
 } from './clientes-screen';
+export { ClienteDetailScreen, type ClienteDetailScreenProps } from './cliente-detail-screen';
