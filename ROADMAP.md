@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Current phase:** Phase 1B — Domain & Data Layer 🚧
-**Current milestone:** P1B-M6 — Application layer (use-cases)
-**Next unblocked task:** P1B-M6-T01 (RegistrarVentaUseCase).
+**Current phase:** Phase 1C — Local Standalone Mode 🚧
+**Current milestone:** P1C-M1 — App shell & navigation
+**Next unblocked task:** P1C-M1-T01 (Role picker login screen).
 **Last updated:** 2026-04-23
 
 ---
@@ -49,71 +49,14 @@ domain tests, all green; lint 9/9, typecheck 13/13. Full detail in
 
 ---
 
-## Phase 1B — Domain & Data Layer
+## ✅ Phase 1B — Domain & Data Layer (Completed 2026-04-23)
 
-**Goal:** Every Phase 1 entity (CLAUDE.md §9) has a Drizzle schema, a repository interface, a `Drizzle` implementation, an `InMemory` implementation, and passing unit tests for all NIF financial calculations (§10). Zero UI code yet.
+11 entity schemas (Zod) + 11 Drizzle tables + 11 repositories (Drizzle +
+InMemory) wired behind a driver-agnostic `CachinkDatabase` alias, 5 pure
+NIF financial calculators, and 8 application use-cases with Zod-validated
+boundaries. 570 tests total; domain + application 100% coverage, data
+100%, testing 99.28%. Full detail in `ROADMAP-archive.md`.
 
-**Exit criteria:** `packages/domain` and `packages/data` have ≥ 95% and ≥ 80% coverage respectively. All financial formulas have unit tests with explicit inputs/outputs. A full ledger (ventas + egresos + pagos + cortes) can be constructed in-memory and produces correct Estado de Resultados, Balance General, Flujo de Efectivo.
-
-### Milestone P1B-M1 — Domain types & identity
-
-Completed 2026-04-23 — landed during the Phase 0 / Phase 1A scaffold; reconciled here so history is honest.
-
-- [x] **P1B-M1-T01** Install `ulid` package; create `packages/domain/src/ids` with branded ULID types per entity (`SaleId`, `ProductId`, etc.) — `ulid@^3` in `packages/domain/package.json`; `packages/domain/src/ids/index.ts` exports `Ulid`, `newUlid`, `newEntityId` + 11 branded IDs (`BusinessId`, `SaleId`, `ExpenseId`, `ProductId`, `InventoryMovementId`, `EmployeeId`, `ClientId`, `ClientPaymentId`, `DayCloseId`, `RecurringExpenseId`, `DeviceId`); 4 tests in `packages/domain/tests/ids.test.ts`.
-- [x] **P1B-M1-T02** Create ISO date type guards and factories in `packages/domain/src/dates` — `packages/domain/src/dates/index.ts` exports branded `IsoDate` / `IsoTimestamp` + `parseIsoDate`, `today`, `now`, `yearMonth`, `year`; 9 tests in `packages/domain/tests/dates.test.ts`.
-- [x] **P1B-M1-T03** Create Money type (bigint centavos) with arithmetic helpers — `packages/domain/src/money/index.ts` exports `Money`, `ZERO`, `fromCentavos`, `fromPesos`, `sum`, `subtract`, `multiplyByInteger`, `isNonNegative`, `toPesosString`; rationale in ADR-009.
-- [x] **P1B-M1-T04** Unit tests for Money (addition, subtraction, multiplication by integer, no float) — 31 tests in `packages/domain/tests/money.test.ts` covering centavos-only invariant, float-rejection, peso-string parsing, and arithmetic helpers.
-
-### Milestone P1B-M2 — Entity types & Zod schemas
-
-Completed 2026-04-23 — all 11 Phase 1 entity schemas live under `packages/domain/src/entities/` with shared `_audit.ts` + `_fields.ts` + `_ulid-field.ts` helpers. 111 entity tests (177 domain total), 100% coverage maintained.
-
-- [x] **P1B-M2-T01** Zod schemas + TS types for `Business`, `AppConfig` — `packages/domain/src/entities/{business,app-config}.ts` ship `BusinessSchema` / `NewBusinessSchema` / `AppConfigSchema` + inferred types. Shared helpers `_ulid-field.ts` (`ULID_REGEX`, `ulidField<T>()`) and `_audit.ts` (`auditSchema`, `isoTimestampField`) keep entity files thin. `zod@^4.3.6` added to `packages/domain/package.json`; subpath `./entities` exported. 16 new tests in `packages/domain/tests/entities/`; domain coverage stays at 100%.
-- [x] **P1B-M2-T02** `Venta` (incl. `cliente_id?`, `estado_pago`) — `packages/domain/src/entities/sale.ts` ships `SaleSchema` / `NewSaleSchema` + `PaymentMethodEnum` / `SaleCategoryEnum` / `PaymentStateEnum`. Cross-field `.refine` enforces "Crédito requires clienteId". Shared `_fields.ts` adds `isoDateField` + `moneyField`. `packages/data/src/repositories/sales-repository.ts` now re-exports the domain types (drops the inline declarations); `@cachink/testing` in-memory repo migrated to the branded `DeviceId`. 17 sale tests, domain coverage 100%.
-- [x] **P1B-M2-T03** `Egreso` (incl. `gasto_recurrente_id?`) — `packages/domain/src/entities/expense.ts` ships `ExpenseSchema` / `NewExpenseSchema` + `ExpenseCategoryEnum` (the ten EGRESO_CAT values). `proveedor` nullable in read schema, optional on input; `gastoRecurrenteId` wires the recurring-templates feature from CLAUDE.md §1. 11 tests covering happy path + ≥3 rejection cases.
-- [x] **P1B-M2-T04** `Producto`, `MovimientoInventario` — `product.ts` ships `ProductSchema` + `InventoryCategoryEnum` (6 values) + `InventoryUnitEnum` (9 values); `umbralStockBajo` defaults to 3. `inventory-movement.ts` ships `InventoryMovementSchema` + `MovementTypeEnum` / `EntryReasonEnum` / `ExitReasonEnum`, with a cross-field refine binding `motivo` to the allowed values for the movement `tipo`. 23 tests across the two files.
-- [x] **P1B-M2-T05** `Empleado` — `employee.ts` ships `EmployeeSchema` / `NewEmployeeSchema` + `PayrollFrequencyEnum` (semanal / quincenal / mensual). 7 tests.
-- [x] **P1B-M2-T06** `Cliente`, `PagoCliente` — `client.ts` ships `ClientSchema` / `NewClientSchema` with a deliberately loose phone regex (Mexican landlines / mobiles / international all pass). `client-payment.ts` ships `ClientPaymentSchema` / `NewClientPaymentSchema` and re-uses `PaymentMethodEnum` from `sale.ts`. 15 tests.
-- [x] **P1B-M2-T07** `CorteDeDia` — `day-close.ts` ships `DayCloseSchema` / `NewDayCloseSchema` + `DayCloseRoleEnum` (Operativo / Director). Cross-field refine enforces `diferenciaCentavos === efectivoContadoCentavos - efectivoEsperadoCentavos` (CLAUDE.md §10). 10 tests covering zero / negative / positive diferencias.
-- [x] **P1B-M2-T08** `GastoRecurrente` — `recurring-expense.ts` ships `RecurringExpenseSchema` / `NewRecurringExpenseSchema` + `RecurrenceFrequencyEnum` (semanal / quincenal / mensual). Cross-field refine binds the day-of-week / day-of-month fields to the selected frecuencia. 12 tests covering all three frequency branches.
-
-### Milestone P1B-M3 — Drizzle schema & migrations
-
-Completed 2026-04-23 — 11 Drizzle tables mirror the Zod entities; initial migration `0000_lying_johnny_blaze.sql` committed; integration test round-trips every entity through in-memory SQLite with `better-sqlite3`. Data coverage 100% (schema files declaratively excluded; covered by integration test).
-
-- [x] **P1B-M3-T01** Write Drizzle schema for all entities in `packages/data/src/schema` — 11 sqliteTable definitions mirror the Zod entities 1:1 (`businesses`, `app_config`, `sales`, `expenses`, `products`, `inventory_movements`, `employees`, `clients`, `client_payments`, `day_closes`, `recurring_expenses`). Shared `_audit.ts` spreads the five audit columns; money uses `numeric('*_centavos', { mode: 'bigint' })` (Drizzle 0.45 exposes bigint via NUMERIC; app layer keeps JS bigint end-to-end). `packages/data/vitest.config.ts` now excludes `src/schema/**` from coverage — declarative tables are covered by the integration round-trip test (P1B-M3-T04).
-- [x] **P1B-M3-T02** Configure Drizzle Kit for migrations — `packages/data/drizzle.config.ts` (dialect `sqlite`, `casing: 'snake_case'`, out `./drizzle/migrations`). `pnpm --filter @cachink/data db:generate` / `db:check` scripts added. `packages/data/README.md` documents the workflow: never edit a committed migration; write a new one instead (CLAUDE.md §2 principle 9).
-- [x] **P1B-M3-T03** Generate the initial migration — `packages/data/drizzle/migrations/0000_lying_johnny_blaze.sql` (152 lines, 11 CREATE TABLE) + `meta/_journal.json` + `meta/0000_snapshot.json`. Drizzle-kit's CJS loader rejects `.js`-suffixed imports inside the schema barrel, so `packages/data/src/schema/*.ts` use extensionless relative imports (documented in the barrel header); moduleResolution `Bundler` accepts both forms, the rest of the repo keeps the `.js` convention. `drizzle-kit check` passes.
-- [x] **P1B-M3-T04** Integration test: create in-memory SQLite, run migration, insert + read every entity — `packages/data/tests/schema.integration.test.ts` uses `better-sqlite3` + `drizzle-orm/better-sqlite3/migrator` to apply the migration and round-trip one row through each of the 11 tables (12 tests). Proves bigint money survives the numeric-column round-trip, `activo` boolean maps 0/1 ↔ boolean, and enum-typed columns accept the expected literal values. `better-sqlite3@^11.8.0` + `@types/better-sqlite3` added as data devDependencies; `pnpm.onlyBuiltDependencies` approves the native compile in `package.json`.
-
-### Milestone P1B-M4 — Repository interfaces & implementations
-
-Completed 2026-04-23 — 11 repository interfaces in `@cachink/data/repositories` with matching Drizzle + InMemory impls; shared contract factories in `@cachink/testing/contract` run identical assertions against both impls. Data coverage 100%, testing coverage ≥ 99%.
-
-- [x] **P1B-M4-T01** Define interface + Drizzle impl + InMemory impl for every repository (one task per entity)
-- [x] **P1B-M4-T02** Contract tests: every repository runs the same test suite against both impls (behavior must match)
-
-### Milestone P1B-M5 — NIF financial calculations
-
-Completed 2026-04-23 — 5 pure financial-calc functions in `@cachink/domain/financials` covering NIF B-3/B-6/B-2, Corte de Día math, and KPIs. 46 tests with explicit fixture data; domain coverage stays at 100%.
-
-- [x] **P1B-M5-T01** `calculateEstadoDeResultados(ventas, egresos, isrTasa) → EstadoResultados`
-- [x] **P1B-M5-T02** `calculateBalanceGeneral(...)` including real Cuentas por Cobrar
-- [x] **P1B-M5-T03** `calculateFlujoDeEfectivo(...)` distinguishing cash cobros from Crédito
-- [x] **P1B-M5-T04** `calculateIndicadores(...)` including Días Promedio de Cobranza
-- [x] **P1B-M5-T05** `calculateCorteDeDia(ventas, egresos, corteAnterior) → { esperado, diferencia }`
-- [x] **P1B-M5-T06** Unit tests with explicit fixture data for every formula — edge cases: no sales, all credit, all cash, mixed, refunds
-
-### Milestone P1B-M6 — Application layer (use-cases)
-
-- [x] **P1B-M6-T01** `RegistrarVentaUseCase`
-- [x] **P1B-M6-T02** `RegistrarEgresoUseCase`
-- [x] **P1B-M6-T03** `RegistrarMovimientoInventarioUseCase` (entrada auto-creates an Egreso per CLAUDE.md mock behavior)
-- [x] **P1B-M6-T04** `RegistrarPagoClienteUseCase` (updates Venta.estado_pago to parcial/pagado)
-- [x] **P1B-M6-T05** `CerrarCorteDeDiaUseCase`
-- [x] **P1B-M6-T06** `ProcesarGastoRecurrenteUseCase` (creates the Egreso, advances proximo_disparo)
-- [x] **P1B-M6-T07** `GenerarInformeMensualUseCase` (returns structured data; PDF rendering comes later)
-- [ ] **P1B-M6-T08** `ExportarDatosUseCase` (returns a dataset that the UI serializes to Excel/PDF)
 
 ---
 

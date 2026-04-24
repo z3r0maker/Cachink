@@ -19,3 +19,4 @@ export * from './registrar-pago-cliente/index.js';
 export * from './cerrar-corte-de-dia/index.js';
 export * from './procesar-gasto-recurrente/index.js';
 export * from './generar-informe-mensual/index.js';
+export * from './exportar-datos/index.js';
