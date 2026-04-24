@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1B — Domain & Data Layer 🚧
-**Current milestone:** P1B-M5 — NIF financial calculations
-**Next unblocked task:** P1B-M5-T01 (calculateEstadoDeResultados).
+**Current milestone:** P1B-M6 — Application layer (use-cases)
+**Next unblocked task:** P1B-M6-T01 (RegistrarVentaUseCase).
 **Last updated:** 2026-04-23
 
 ---
@@ -95,12 +95,14 @@ Completed 2026-04-23 — 11 repository interfaces in `@cachink/data/repositories
 
 ### Milestone P1B-M5 — NIF financial calculations
 
+Completed 2026-04-23 — 5 pure financial-calc functions in `@cachink/domain/financials` covering NIF B-3/B-6/B-2, Corte de Día math, and KPIs. 46 tests with explicit fixture data; domain coverage stays at 100%.
+
 - [x] **P1B-M5-T01** `calculateEstadoDeResultados(ventas, egresos, isrTasa) → EstadoResultados`
 - [x] **P1B-M5-T02** `calculateBalanceGeneral(...)` including real Cuentas por Cobrar
 - [x] **P1B-M5-T03** `calculateFlujoDeEfectivo(...)` distinguishing cash cobros from Crédito
-- [ ] **P1B-M5-T04** `calculateIndicadores(...)` including Días Promedio de Cobranza
+- [x] **P1B-M5-T04** `calculateIndicadores(...)` including Días Promedio de Cobranza
 - [x] **P1B-M5-T05** `calculateCorteDeDia(ventas, egresos, corteAnterior) → { esperado, diferencia }`
-- [ ] **P1B-M5-T06** Unit tests with explicit fixture data for every formula — edge cases: no sales, all credit, all cash, mixed, refunds
+- [x] **P1B-M5-T06** Unit tests with explicit fixture data for every formula — edge cases: no sales, all credit, all cash, mixed, refunds
 
 ### Milestone P1B-M6 — Application layer (use-cases)
 
