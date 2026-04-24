@@ -54,9 +54,10 @@ Links to discussion, docs, prior art.
 | [013](#adr-013) | 2026-04-23 | TDD mandatory for domain and use-case layers | Accepted |
 | [014](#adr-014) | 2026-04-23 | Spanish (es-MX) is the only launch language | Accepted |
 | [015](#adr-015) | 2026-04-23 | Two documents (CLAUDE.md, ROADMAP.md) with distinct roles | Accepted |
-| [016](#adr-016) | 2026-04-23 | Brand asset management: single masters at repo root, derivatives per platform | Accepted |
+| [016](#adr-016) | 2026-04-23 | Brand asset management: single masters at repo root, derivatives per platform | Accepted — amended by ADR-019 |
 | [017](#adr-017) | 2026-04-23 | Storybook 10 over Ladle for component docs + visual regression | Accepted |
 | [018](#adr-018) | 2026-04-23 | Local Husky pre-push gate replaces GitHub Actions for Phase 0/1 | Accepted |
+| [019](#adr-019) | 2026-04-23 | Per-platform splash masters (amends ADR-016) | Accepted |
 
 ---
 
@@ -456,7 +457,7 @@ The user asked whether the implementation plan should be a separate MD file that
 ## ADR-016
 ### Brand asset management: single masters at repo root, derivatives per platform
 **Date:** 2026-04-23
-**Status:** Accepted
+**Status:** Accepted — amended by ADR-019 (per-platform splash masters)
 
 ### Context
 Cachink ships three pieces of brand artwork: an **app icon**, an **in-app logo**, and a **splash / banner**. Each has a distinct consumer:
@@ -591,3 +592,55 @@ Renovate (`renovate.json`) is a separate GitHub App, not Actions, and stays — 
 - CLAUDE.md §2 rule 9 (no silent breaking changes) — why Renovate automerge is now off
 - `renovate.json` — `automerge: false` on devDependency minor/patch
 - ROADMAP-archive.md — P0-M7-T01 is accurate history of the prior Actions pipeline, now superseded by this ADR
+
+---
+
+## ADR-019
+### Per-platform splash masters (amends ADR-016)
+**Date:** 2026-04-23
+**Status:** Accepted
+
+### Context
+ADR-016 established a single canonical `assets/brand/splash.png` master that is
+copied verbatim into each platform's native splash location. That worked while
+the splash was a square-ish banner, but the Phase 1 splash artwork is
+genuinely platform-shaped: portrait (852×1846) on mobile so it fills a tablet
+or phone screen, landscape (1568×1003) on desktop so it fills the initial
+Tauri splash window (600×340 by default, scaling up on larger displays).
+Forcing both platforms to share one aspect ratio produced letterboxing on
+one target or the other.
+
+### Decision
+Split the single splash master into two platform-specific masters while
+keeping the rest of the hub-and-spoke strategy from ADR-016 intact:
+
+- `assets/brand/splash-mobile.png`  — portrait, consumed by `apps/mobile/assets/splash.png`.
+- `assets/brand/splash-desktop.png` — landscape, consumed by `apps/desktop/src/shell/splash/splash.png`.
+
+Everything else from ADR-016 still applies: `assets/brand/` remains the single
+source of truth, derivatives are copied (not symlinked), background colour is
+`#FFD60A` (CLAUDE.md §8.1), and brand updates start by replacing the master.
+
+### Alternatives Considered
+- **Keep one master, letterbox.** Rejected — designers end up hand-tuning
+  the letterbox padding per platform, producing the same two-asset workflow
+  without the benefit of each asset being purpose-built.
+- **Move the splash entirely into each app's directory, no master.**
+  Rejected — violates CLAUDE.md §2.3 (code lives in exactly one place);
+  drift between platforms becomes inevitable.
+- **Generate per-platform splashes from a single SVG master.** Rejected
+  for Phase 1 — adds tooling (SVG → PNG export) for minimal current value.
+  Revisit if the set of splash variants grows beyond two.
+
+### Consequences
+- **Easier:** each platform gets an optically correct splash.
+- **Harder:** brand updates now require replacing *two* masters instead of
+  one. Documented in `assets/brand/README.md` and both `SETUP.md` files.
+- **Committed to:** two splash masters only. Adding a third (e.g. web)
+  requires a new ADR.
+
+### References
+- ADR-016 (superseded portion: "one splash" rule; remaining hub-and-spoke
+  strategy still applies)
+- CLAUDE.md §2.3, §8.1
+- `assets/brand/README.md`

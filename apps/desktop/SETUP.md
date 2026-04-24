@@ -111,7 +111,7 @@ window alongside the main window:
 
 ```bash
 mkdir -p src/shell/splash
-cp ../../assets/brand/splash.png src/shell/splash/splash.png
+cp ../../assets/brand/splash-desktop.png src/shell/splash/splash.png
 ```
 
 In `src-tauri/tauri.conf.json` under `app.windows`:

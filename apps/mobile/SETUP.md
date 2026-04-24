@@ -57,7 +57,7 @@ Three PNGs are already staged here before the Expo init runs:
 |---|---|---|
 | `assets/icon.png` | `../../assets/brand/icon.png` | iOS + Android app icon |
 | `assets/adaptive-icon.png` | `../../assets/brand/icon.png` | Android adaptive-icon foreground layer |
-| `assets/splash.png` | `../../assets/brand/splash.png` | Launch splash image |
+| `assets/splash.png` | `../../assets/brand/splash-mobile.png` | Launch splash image |
 
 Canonical masters live in the repo-root `assets/brand/` directory — see
 ADR-016 in `ARCHITECTURE.md`. These local copies are derivatives. Never
