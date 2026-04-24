@@ -28,3 +28,4 @@ export {
 } from './mock-repository-provider';
 
 export { AppProviders, type AppProvidersProps } from './app-providers';
+export { GatedNavigation, type GatedNavigationProps } from './gated-navigation';

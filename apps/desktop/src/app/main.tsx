@@ -21,7 +21,7 @@ if (!rootEl) {
 
 createRoot(rootEl).render(
   <StrictMode>
-    <AppProviders>
+    <AppProviders platform="desktop">
       <PlaceholderScreen />
     </AppProviders>
   </StrictMode>,

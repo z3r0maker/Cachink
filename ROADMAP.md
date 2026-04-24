@@ -67,10 +67,10 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M1 — App shell & navigation
 
-- [ ] **P1C-M1-T01** Role picker login screen (from mock, reused across platforms)
-- [ ] **P1C-M1-T02** Bottom tab navigation for Operativo (3 tabs) and Director (6 tabs) per CLAUDE.md §1
-- [ ] **P1C-M1-T03** Top bar with role indicator, "Cambiar" button, and sync-state slot (empty in local mode)
-- [ ] **P1C-M1-T04** Settings screen (minimal: mode, business info, language placeholder)
+- [x] **P1C-M1-T01** Role picker login screen (from mock, reused across platforms)
+- [x] **P1C-M1-T02** Bottom tab navigation for Operativo (3 tabs) and Director (6 tabs) per CLAUDE.md §1
+- [x] **P1C-M1-T03** Top bar with role indicator, "Cambiar" button, and sync-state slot (empty in local mode)
+- [x] **P1C-M1-T04** Settings screen (minimal: mode, business info, language placeholder)
 
 ### Milestone P1C-M2 — Database setup & config wizard
 

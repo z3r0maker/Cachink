@@ -43,7 +43,7 @@ export default function RootLayout(): ReactElement | null {
   }
 
   return (
-    <AppProviders>
+    <AppProviders platform="mobile">
       <Stack screenOptions={{ headerShown: false }} />
     </AppProviders>
   );

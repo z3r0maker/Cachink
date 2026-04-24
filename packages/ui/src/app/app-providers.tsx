@@ -31,6 +31,7 @@ import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider, useDatabase } from '../database/index';
 import { AppConfigProvider, useDeviceId } from '../app-config/index';
 import { buildDrizzleRepositories, RepositoryProvider } from './repository-provider';
+import { GatedNavigation } from './gated-navigation';
 
 function DrizzleAppConfigBridge({ children }: { readonly children: ReactNode }): ReactElement {
   const db = useDatabase();
@@ -70,16 +71,32 @@ function buildQueryClient(): QueryClient {
 
 export interface AppProvidersProps {
   readonly children: ReactNode;
+  /**
+   * Host platform. Controls `GatedNavigation`'s wizard variant (mobile
+   * hides the "Ser el servidor local" option). Defaults to `'desktop'`.
+   */
+  readonly platform?: 'mobile' | 'desktop';
+  /**
+   * Set to false to skip the boot-time gate entirely. Tests use this to
+   * render app screens without walking the wizard.
+   */
+  readonly gated?: boolean;
 }
 
-export function AppProviders({ children }: AppProvidersProps): ReactElement {
+export function AppProviders(props: AppProvidersProps): ReactElement {
   const queryClient = useMemo(buildQueryClient, []);
+  const gated = props.gated ?? true;
+  const content = gated ? (
+    <GatedNavigation platform={props.platform}>{props.children}</GatedNavigation>
+  ) : (
+    props.children
+  );
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={queryClient}>
         <DatabaseProvider>
           <DrizzleAppConfigBridge>
-            <DrizzleRepositoryBridge>{children}</DrizzleRepositoryBridge>
+            <DrizzleRepositoryBridge>{content}</DrizzleRepositoryBridge>
           </DrizzleAppConfigBridge>
         </DatabaseProvider>
       </QueryClientProvider>
