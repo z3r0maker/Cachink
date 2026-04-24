@@ -34,3 +34,4 @@ export * from './use-editar-cliente';
 export * from './use-cliente-detail';
 export * from './use-registrar-pago';
 export * from './query-keys';
+export * from './use-eliminar-cliente';
