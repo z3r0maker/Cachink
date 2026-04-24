@@ -1,22 +1,17 @@
 /**
- * Minimal Tamagui config for `@cachink/ui`.
+ * Tamagui config for `@cachink/ui`.
  *
  * Tamagui 2.x requires `createTamagui` to be called once before any Tamagui
- * primitive renders. This file provides the minimum viable config so the
- * Phase-0 `<HelloBadge />` component renders in Vitest (jsdom), apps/desktop
- * (Vite), and apps/mobile (Metro + react-native-web) without each of those
- * three targets having to define their own.
+ * primitive renders. This file registers the full brand palette (all 18
+ * colors from `./theme`), the strict radii scale, and a minimal size/space
+ * ramp so Phase 1A primitives (Btn, Card, Tag, Modal, Kpi, Gauge, etc.) can
+ * reference `$yellow`, `$black`, `$green`, `$red`, etc. as design tokens.
  *
- * **Scope intentionally minimal.** The full design-token registration for
- * Phase 1A primitives (Btn, Card, Tag, Modal, Kpi, Gauge, etc.) lands in
- * Phase 1A-M1 alongside the Storybook/Ladle decision. At that point this
- * file grows to encode the brand palette (colors, radii, shadows, typography)
- * into Tamagui's token system so components can reference `$yellow`,
- * `$card`, etc. directly instead of importing from `./theme`.
- *
- * Until Phase 1A: we hand the theme tokens in via `./theme` directly in
- * each component's props, and this config exists solely to satisfy Tamagui's
- * "must-initialize" runtime check.
+ * Shadows and the press-transform are NOT expressed as Tamagui tokens —
+ * they come from `./theme`'s `shadows` / `pressTransform` constants because
+ * they're hard-drop-shadow strings, not color ramps Tamagui can interpolate.
+ * Components import the shadow constants directly; see `Btn/btn.tsx` for the
+ * canonical example.
  */
 
 import { createFont, createTamagui, createTokens } from '@tamagui/core';

@@ -25,6 +25,11 @@ export default mergeConfig(
         exclude: [
           'src/**/*.test.ts',
           'src/**/*.test.tsx',
+          // Storybook story files are catalog surfaces, not runtime code —
+          // covered instead by Playwright visual snapshots (see ADR-017).
+          'src/**/*.stories.ts',
+          'src/**/*.stories.tsx',
+          'src/**/*.stories.mdx',
           'src/index.ts',
           'src/components/index.ts',
           'src/components/**/index.ts',

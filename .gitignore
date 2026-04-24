@@ -45,3 +45,9 @@ src-tauri/target/
 # Misc
 *.pem
 .rnstorybook/
+
+# Storybook + Playwright build artifacts (baselines under __snapshots__/
+# ARE tracked — those are the visual-regression source of truth).
+packages/ui/storybook-static/
+packages/ui/playwright-report/
+packages/ui/test-results/

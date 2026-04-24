@@ -51,7 +51,17 @@ export default tseslint.config(
         { type: 'domain', pattern: 'packages/domain/src/**' },
         { type: 'application', pattern: 'packages/application/src/**' },
         { type: 'data', pattern: 'packages/data/src/**' },
-        { type: 'ui', pattern: 'packages/ui/src/**' },
+        {
+          type: 'ui',
+          pattern: [
+            'packages/ui/src/**',
+            // Storybook config + story files live next to the UI package but
+            // are not implementations of the boundary rules themselves.
+            // Counting them as UI-scope keeps lint clean without a new layer.
+            'packages/ui/.storybook/**',
+            'packages/ui/**/*.stories.{ts,tsx,mdx}',
+          ],
+        },
         { type: 'sync', pattern: 'packages/sync-*/src/**' },
         { type: 'testing', pattern: 'packages/testing/src/**' },
         { type: 'app', pattern: 'apps/**/src/**' },
@@ -85,10 +95,7 @@ export default tseslint.config(
       'sonarjs/no-collapsible-if': 'warn',
 
       // === File-size limits (CLAUDE.md §4.4) ===
-      'max-lines': [
-        'error',
-        { max: 200, skipBlankLines: true, skipComments: true },
-      ],
+      'max-lines': ['error', { max: 200, skipBlankLines: true, skipComments: true }],
       'max-lines-per-function': [
         'error',
         { max: 40, skipBlankLines: true, skipComments: true, IIFEs: true },
@@ -101,10 +108,7 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports' },
-      ],
+      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports' }],
 
       // === Unicorn selected rules (not all — keep overhead low) ===
       'unicorn/filename-case': ['error', { case: 'kebabCase' }],
@@ -115,14 +119,21 @@ export default tseslint.config(
     },
   },
 
-  // Relax rules for test files
+  // Relax rules for test files and Storybook stories
   {
-    files: ['**/tests/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
+    files: [
+      '**/tests/**/*.{ts,tsx}',
+      '**/*.test.{ts,tsx}',
+      '**/*.spec.{ts,tsx}',
+      '**/*.stories.{ts,tsx,mdx}',
+      '**/.storybook/**/*.{ts,tsx}',
+    ],
     rules: {
       'max-lines': 'off',
       'max-lines-per-function': 'off',
       'sonarjs/no-duplicate-string': 'off',
       'sonarjs/cognitive-complexity': 'off',
+      'unicorn/filename-case': 'off',
     },
   },
 
