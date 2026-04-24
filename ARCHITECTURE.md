@@ -838,3 +838,72 @@ the tabs.
 - CLAUDE.md §1 (Egresos sub-tabs)
 - CLAUDE.md §2 principle 1 (UX simplicity)
 - `packages/ui/src/screens/Egresos/nuevo-egreso-modal.tsx` (implements)
+
+---
+
+## ADR-021
+
+Date: 2026-04-24
+Status: Accepted
+
+**Title:** Egreso + MovimientoInventario dual-write via a single use-case (no transaction)
+
+### Context
+
+When a user logs an inventory purchase, two rows must land:
+
+- A `MovimientoInventario` with `tipo='entrada'` (stock goes up).
+- An `Expense` with `categoria='Inventario'` and `monto = cantidad × costoUnit`
+  (money goes out).
+
+If the user forgets either one, the books disagree with the warehouse.
+Our Drizzle + better-sqlite3 + Tauri-plugin-sql-proxy stack doesn't
+expose a cross-driver transaction primitive (each driver surfaces its
+own `db.transaction(fn)` with different semantics).
+
+The question: how does the UI guarantee both writes?
+
+### Decision
+
+The UI calls **`RegistrarMovimientoInventarioUseCase.execute(...)`
+exactly once**. The use-case internally creates the movement first,
+then the egreso, sequentially. Both writes go through the same
+repository instances — no UI-level composition.
+
+No transaction wrapping. If the second write fails, the caller sees
+an error and the movement row remains; a best-effort `compensating
+delete` is a follow-up (tracked in ROADMAP-archive under P1B-M6-T03
+notes). For Phase 1C local-standalone the driver is better-sqlite3 /
+expo-sqlite under the same process — failure between the two writes
+requires a hard crash, which also nukes any in-flight transaction.
+
+### Alternatives Considered
+
+- **Two separate UI hooks** — UI calls `useRegistrarMovimiento` then
+  `useRegistrarEgreso` with the computed monto. Rejected: the dual-write
+  invariant is a domain concern, not a UI one; moving it to the UI means
+  three layers (mobile, desktop, tests) each need to remember the rule.
+- **Add `db.transaction(fn)` to `CachinkDatabase`** — Rejected for
+  Phase 1C: better-sqlite3 is sync, expo-sqlite's transaction API is
+  async with a callback, Tauri-plugin-sql-proxy wraps via `BEGIN/COMMIT`
+  SQL strings. Unifying these is a multi-commit investment we'd rather
+  defer until a real double-write failure surfaces.
+- **Event sourcing** (write one "inventory purchase" event; projectors
+  derive movement + egreso). Over-engineered for Phase 1C.
+
+### Consequences
+
+- **Easier:** one call site in the UI; the invariant lives with the
+  domain code that owns it.
+- **Harder:** partial-failure windows exist in theory. For Phase 1C we
+  accept this (local single-process; crash = OS crash).
+- **Committed to:** no UI-layer composition of multi-entity writes. If
+  a future flow needs cross-entity atomicity (e.g. Phase 1D LAN sync),
+  we add `CachinkDatabase.transaction(fn)` then — that's the forcing
+  function.
+
+### References
+
+- CLAUDE.md §10 (dual-write rule)
+- `packages/application/src/registrar-movimiento-inventario/` (the use-case)
+- ROADMAP-archive P1B-M6-T03 notes (compensating delete follow-up)

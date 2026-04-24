@@ -5,3 +5,4 @@ export { NuevoEgresoModal, type NuevoEgresoModalProps, type EgresoTab } from './
 export { GastoTab, type GastoTabProps, GASTO_CATEGORIAS } from './tabs/gasto-tab';
 export { NominaTab, type NominaTabProps } from './tabs/nomina-tab';
 export { NuevoEmpleadoModal, type NuevoEmpleadoModalProps } from './tabs/nuevo-empleado-modal';
+export { InventarioTab, type InventarioTabProps } from './tabs/inventario-tab';
