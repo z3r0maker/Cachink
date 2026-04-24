@@ -18,8 +18,8 @@
 ## Current Status
 
 **Current phase:** Phase 1A — Brand & Component Primitives 🚧
-**Current milestone:** P1A-M2 — Core primitives (7 of 11 complete: `<Btn>`, `<Input>`, `<Tag>`, `<Modal>`, `<EmptyState>`, `<SectionTitle>`, `<Card>`)
-**Next unblocked task:** P1A-M2-T08 (`<Kpi>`).
+**Current milestone:** P1A-M2 — Core primitives (8 of 11 complete: `<Btn>`, `<Input>`, `<Tag>`, `<Modal>`, `<EmptyState>`, `<SectionTitle>`, `<Card>`, `<Kpi>`)
+**Next unblocked task:** P1A-M2-T09 (`<Gauge>`).
 **Last updated:** 2026-04-23
 
 ---
@@ -56,7 +56,7 @@ Carry-overs (environmental, not blockers):
 - [x] **P1A-M2-T05** `EmptyState` — `packages/ui/src/components/EmptyState/` with `empty-state.tsx` (single cross-platform impl — no platform split needed) + 8 unit tests + 5 stories (VentasVacio / EgresosVacio / InventarioVacio / SinResultados / TituloSolo) + 5 Playwright baselines; 100% coverage; no new dependency
 - [x] **P1A-M2-T06** `SectionTitle` — `packages/ui/src/components/SectionTitle/` with `section-title.tsx` (single cross-platform impl — no platform split needed) + 7 unit tests + 5 stories (VentasHoy / ActividadReciente / StockBajo / CuentasPorCobrar / Productos) + 5 Playwright baselines; 100% coverage; no new dependency
 - [x] **P1A-M2-T07** `Card` (white, yellow, black variants) — `packages/ui/src/components/Card/` with `card.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (WhiteDefault / YellowHero / BlackDirector / Tappable / AllVariants) + 5 Playwright baselines; 100% coverage; 3 variants × 4 padding tokens; press transform when `onPress` is supplied; no new dependency
-- [ ] **P1A-M2-T08** `Kpi`
+- [x] **P1A-M2-T08** `Kpi` — `packages/ui/src/components/Kpi/` with `kpi.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (VentasHoy / UtilidadMes / EgresosHoy / StockTotal / AllTones) + 5 Playwright baselines; 100% coverage; 3 tones (neutral / positive / negative) × tabular numerals; agnostic of currency formatting (`value: string`); no new dependency
 - [ ] **P1A-M2-T09** `Gauge`
 - [ ] **P1A-M2-T10** `BottomTabBar`
 - [ ] **P1A-M2-T11** `TopBar`

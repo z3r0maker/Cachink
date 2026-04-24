@@ -47,6 +47,11 @@ const stories = [
   'phase-1a-primitives-card--black-director',
   'phase-1a-primitives-card--tappable',
   'phase-1a-primitives-card--all-variants',
+  'phase-1a-primitives-kpi--ventas-hoy',
+  'phase-1a-primitives-kpi--utilidad-mes',
+  'phase-1a-primitives-kpi--egresos-hoy',
+  'phase-1a-primitives-kpi--stock-total',
+  'phase-1a-primitives-kpi--all-tones',
 ];
 
 for (const id of stories) {

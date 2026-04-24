@@ -13,3 +13,4 @@ export * from './Modal/index';
 export * from './EmptyState/index';
 export * from './SectionTitle/index';
 export * from './Card/index';
+export * from './Kpi/index';
