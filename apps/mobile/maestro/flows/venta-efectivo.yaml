@@ -1,0 +1,32 @@
+# Create a cash venta and verify "Total del día" updates.
+# Covers P1C-M3-T01 (list + date filter + total card) and
+# P1C-M3-T02 (NuevaVenta modal, Efectivo happy path).
+#
+# Precondition: the wizard + business + role are already set up. Run
+# `wizard-local-standalone.yaml` first, or launch with EXPO_PUBLIC_E2E_SEED
+# pointing to the fixture in e2e-seed.json.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Open the Ventas tab (Operativo role) + modal.
+- tapOn:
+    id: "tab-ventas"
+- tapOn:
+    id: "ventas-nueva"
+
+# Fill Efectivo venta: concepto + monto (kept minimal).
+- assertVisible: "Nueva venta"
+- tapOn:
+    id: "nueva-venta-concepto"
+- inputText: "Taco al pastor"
+- tapOn:
+    id: "nueva-venta-monto"
+- inputText: "150"
+- tapOn:
+    id: "nueva-venta-submit"
+
+# After success the modal closes and Total del día shows the new amount.
+- assertNotVisible: "Nueva venta"
+- assertVisible: "$150.00"
+- assertVisible: "Taco al pastor"

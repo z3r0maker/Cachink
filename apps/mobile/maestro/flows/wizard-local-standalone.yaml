@@ -1,0 +1,28 @@
+# Wizard → BusinessForm → RolePicker happy path.
+# Covers P1C-M1-T01 (role picker), P1C-M2-T03 (wizard), P1C-M2-T04
+# (mode stored in AppConfig), P1C-M2-T05 (business creation form).
+#
+# Precondition: fresh install (clearState wipes the SQLite file).
+appId: mx.cachink.mobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Configura Cachink!"
+- tapOn: "Solo este dispositivo"
+
+# BusinessForm.
+- assertVisible: "Tu negocio"
+- tapOn:
+    id: "business-nombre"
+- inputText: "Taquería Don Pedro"
+- tapOn:
+    id: "business-submit"
+
+# RolePicker.
+- assertVisible: "¿Con qué rol vas a trabajar hoy?"
+- tapOn:
+    id: "role-operativo-select"
+
+# Tabs mount — the Ventas list is the default Operativo tab.
+- assertVisible: "Ventas"
+- assertVisible: "Total del día"

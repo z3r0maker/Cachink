@@ -1,0 +1,12 @@
+# Smoke test: app launches and presents the first-run wizard.
+# Verifies nothing crashes in the expo-sqlite init + Drizzle migration
+# + AppConfigProvider hydration path (P1C C1-C4).
+#
+# Precondition: cachink.db does NOT exist (fresh install). If the
+# simulator has a previous install, uninstall the app first.
+appId: mx.cachink.mobile
+---
+- launchApp:
+    clearState: true
+- assertVisible: "Configura Cachink!"
+- assertVisible: "Solo este dispositivo"

@@ -1,0 +1,55 @@
+# Create a Crédito venta (with an inline cliente) and verify it
+# surfaces under Cuentas por Cobrar for the Director role.
+# Covers P1C-M3-T03 (Crédito requires cliente) and P1C-M3-T06
+# (Maestro verifies Cuentas por Cobrar membership).
+#
+# Precondition: wizard complete, business set, Operativo role active.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Open Nueva venta modal.
+- tapOn:
+    id: "tab-ventas"
+- tapOn:
+    id: "ventas-nueva"
+
+# Core fields.
+- tapOn:
+    id: "nueva-venta-concepto"
+- inputText: "Catering evento"
+- tapOn:
+    id: "nueva-venta-monto"
+- inputText: "1200"
+
+# Switch metodo to Crédito — this opens the Crear cliente Btn when
+# no clients exist yet.
+- tapOn:
+    id: "nueva-venta-metodo"
+- tapOn: "Crédito"
+
+# Crear cliente — empty-state button appears when no clients exist.
+- tapOn:
+    id: "nueva-venta-crear-cliente"
+- assertVisible: "Nuevo cliente"
+- tapOn:
+    id: "nuevo-cliente-nombre"
+- inputText: "Carla Márquez"
+- tapOn:
+    id: "nuevo-cliente-submit"
+
+# Back on the Venta form; submit.
+- assertVisible: "Nueva venta"
+- tapOn:
+    id: "nueva-venta-submit"
+- assertNotVisible: "Nueva venta"
+
+# Switch to Director role via the TopBar Cambiar Btn + navigate to
+# Cuentas por Cobrar.
+- tapOn:
+    id: "top-bar-change-role"
+- tapOn:
+    id: "role-director-select"
+- assertVisible: "Cuentas por cobrar"
+- assertVisible: "Carla Márquez"
+- assertVisible: "$1,200.00"

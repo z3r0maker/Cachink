@@ -1,0 +1,8 @@
+# Maestro workspace config for apps/mobile (P1C-M3-T05/T06).
+#
+# The defaultTags key is empty today — all flows run by default. Add
+# "slow" / "smoke" tags per-flow if the suite grows large and we want
+# to filter.
+appId: mx.cachink.mobile
+# iOS-first simulator target. Android testing uses MAESTRO_ANDROID=1 env.
+defaultTags: []

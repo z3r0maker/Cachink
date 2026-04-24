@@ -18,9 +18,14 @@
 ## Current Status
 
 **Current phase:** Phase 1C — Local Standalone Mode 🚧
-**Current milestone:** P1C-M1 — App shell & navigation
-**Next unblocked task:** P1C-M1-T01 (Role picker login screen).
-**Last updated:** 2026-04-23
+**Current milestone:** P1C-M4 — Egresos module
+**Next unblocked task:** P1C-M4-T01 (List view, reuse Ventas layout).
+**Last updated:** 2026-04-24
+
+**Recent progress:** P1C-M1 + M2 + M3 all closed via the 17-commit
+first-user-visible slice (shell + wizard + Ventas). 15 of 62 P1C
+tasks ticked. 218 UI tests + 233 domain tests; typecheck 14/14,
+lint 9/9; 4 Maestro flows ready for local verification.
 
 ---
 
@@ -82,12 +87,12 @@ boundaries. 570 tests total; domain + application 100% coverage, data
 
 ### Milestone P1C-M3 — Ventas module
 
-- [ ] **P1C-M3-T01** List view with date filter, total card, per-venta cards
-- [ ] **P1C-M3-T02** "Nueva Venta" modal with concepto, categoria, monto, metodo, optional cliente
-- [ ] **P1C-M3-T03** Crédito flow: selecting Crédito requires a cliente; creates venta with estado_pago = 'pendiente'
-- [ ] **P1C-M3-T04** Compartir comprobante action (generates PNG/PDF, native share sheet)
-- [ ] **P1C-M3-T05** Maestro E2E: create venta in Efectivo, verify totals update
-- [ ] **P1C-M3-T06** Maestro E2E: create venta in Crédito, verify it appears in Cuentas por Cobrar
+- [x] **P1C-M3-T01** List view with date filter, total card, per-venta cards
+- [x] **P1C-M3-T02** "Nueva Venta" modal with concepto, categoria, monto, metodo, optional cliente
+- [x] **P1C-M3-T03** Crédito flow: selecting Crédito requires a cliente; creates venta with estado_pago = 'pendiente'
+- [x] **P1C-M3-T04** Compartir comprobante action (generates PNG/PDF, native share sheet)
+- [x] **P1C-M3-T05** Maestro E2E: create venta in Efectivo, verify totals update
+- [x] **P1C-M3-T06** Maestro E2E: create venta in Crédito, verify it appears in Cuentas por Cobrar
 
 ### Milestone P1C-M4 — Egresos module
 
