@@ -5,6 +5,23 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "opener:default"
+    "opener:default",
+    "sql:default",
+    {
+      "identifier": "sql:allow-load",
+      "allow": [{ "name": "sqlite:cachink.db" }]
+    },
+    {
+      "identifier": "sql:allow-execute",
+      "allow": [{ "name": "sqlite:cachink.db" }]
+    },
+    {
+      "identifier": "sql:allow-select",
+      "allow": [{ "name": "sqlite:cachink.db" }]
+    },
+    {
+      "identifier": "sql:allow-close",
+      "allow": [{ "name": "sqlite:cachink.db" }]
+    }
   ]
 }

@@ -33,14 +33,31 @@ const CREATE_TRACKER_SQL = `CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
 
 const STATEMENT_BREAKPOINT = /^-->\s*statement-breakpoint\s*$/m;
 
-interface MigrationRow {
-  readonly tag: string;
+/**
+ * Row shape returned by `db.all(sql.raw(...))` — varies by driver.
+ * `better-sqlite3` gives named objects; `sqlite-proxy` gives column-value
+ * arrays. We normalize both in {@link loadAppliedTags}.
+ */
+type RawRow = Readonly<Record<string, unknown>> | readonly unknown[];
+
+function readTag(row: RawRow): string | null {
+  if (Array.isArray(row)) {
+    return typeof row[0] === 'string' ? row[0] : null;
+  }
+  const record = row as Readonly<Record<string, unknown>>;
+  const tag = record.tag;
+  return typeof tag === 'string' ? tag : null;
 }
 
 /** Read applied-migration tags. Returns an empty set on a fresh database. */
 async function loadAppliedTags(db: CachinkDatabase): Promise<ReadonlySet<string>> {
-  const rows = (await db.all(sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`))) as MigrationRow[];
-  return new Set(rows.map((r) => r.tag));
+  const rows = (await db.all(sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`))) as RawRow[];
+  const tags = new Set<string>();
+  for (const row of rows) {
+    const tag = readTag(row);
+    if (tag !== null) tags.add(tag);
+  }
+  return tags;
 }
 
 /** Split a migration's SQL at the Drizzle Kit statement-breakpoint marker. */

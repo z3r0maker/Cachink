@@ -423,6 +423,9 @@ importers:
       '@tamagui/input':
         specifier: 2.0.0-rc.41
         version: 2.0.0-rc.41(react-dom@19.2.0(react@19.2.0))(react-native-safe-area-context@5.7.0(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0))(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)(sf-symbols-typescript@2.2.0)
+      '@tauri-apps/plugin-sql':
+        specifier: ^2
+        version: 2.4.0
       '@testing-library/jest-dom':
         specifier: ^6
         version: 6.9.1
@@ -438,6 +441,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^3.0.0
         version: 3.2.4(vitest@3.2.4(@types/node@22.19.17)(jsdom@29.0.2)(lightningcss@1.32.0)(terser@5.46.2)(yaml@2.8.3))
+      better-sqlite3:
+        specifier: ^11.8.0
+        version: 11.10.0
       expo-sqlite:
         specifier: ~55.0.15
         version: 55.0.15(expo@55.0.17)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.0))(react@19.2.0)

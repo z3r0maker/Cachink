@@ -1,37 +1,79 @@
 /**
- * DatabaseProvider — Vite/Tauri variant (stub until Commit 2).
+ * DatabaseProvider — desktop (Tauri) variant.
  *
- * Commit 2 of the Phase 1C slice wires this to `@tauri-apps/plugin-sql`
- * via the Drizzle `sqlite-proxy` driver. For Commit 1 we only ship the
- * contract — consumers are expected to pass the `database` prop (tests)
- * or mount the platform-specific `.native.tsx` variant on mobile. If this
- * file is accidentally invoked without a `database` prop in production,
- * the factory throws so the bug surfaces immediately rather than the app
- * hanging on a never-resolving splash screen.
+ * Vite resolves this file for the Tauri webview (via the shared
+ * `database-provider.tsx`'s re-export). Metro picks `.native.tsx` on
+ * mobile and never loads this file.
+ *
+ * Wiring:
+ *   1. `@tauri-apps/plugin-sql`'s `Database.load('sqlite:cachink.db')`
+ *      opens the SQLite file under the app's sandboxed data directory
+ *      (resolved by Tauri from `BaseDirectory::App`).
+ *   2. Drizzle's `sqlite-proxy` driver adapts the plugin's
+ *      object-returning API onto the column-value-array shape Drizzle
+ *      internals expect. One ~40-line callback keeps the rest of the
+ *      Drizzle surface identical on both platforms.
+ *   3. `runMigrations` applies any pending migrations from
+ *      `@cachink/data/migrations` — same code path as the mobile variant.
+ *
+ * Important cross-driver quirk: Tauri's plugin returns `select` rows as
+ * objects (`Array<Record<string, unknown>>`), but the sqlite-proxy contract
+ * expects each row as an ordered array of column values. `Object.values`
+ * preserves insertion order for plain objects on every modern JS engine,
+ * and SQLite drivers emit columns in SELECT order, so the projection is
+ * deterministic. Drizzle's row-mapper then rebuilds the named shape using
+ * its own column metadata.
  */
 
-import type { ReactElement } from 'react';
+import { useCallback, type ReactElement } from 'react';
+import Database from '@tauri-apps/plugin-sql';
+import { drizzle, type AsyncRemoteCallback } from 'drizzle-orm/sqlite-proxy';
+import * as schema from '@cachink/data/schema';
+import type { CachinkDatabase } from '@cachink/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
   type AsyncDatabaseProviderProps,
 } from './_internal';
-import type { CachinkDatabase } from '@cachink/data';
+import { runMigrations } from './run-migrations';
 
-function createPlaceholderDatabase(): Promise<CachinkDatabase> {
-  return Promise.reject(
-    new Error(
-      'DatabaseProvider (.web) is a stub in Commit 1. Pass a `database` ' +
-        'prop for tests, or wait for Commit 2 which wires @tauri-apps/plugin-sql.',
-    ),
-  );
+/** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
+const DB_PATH = 'sqlite:cachink.db';
+
+/** Build the Drizzle sqlite-proxy callback that bridges to Tauri's plugin. */
+export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
+  return async (sqlText, params, method) => {
+    if (method === 'run') {
+      await tauriDb.execute(sqlText, params);
+      return { rows: [] };
+    }
+
+    const rows = await tauriDb.select<Array<Record<string, unknown>>>(sqlText, params);
+
+    if (method === 'get') {
+      const first = rows[0];
+      return { rows: first ? Object.values(first) : [] };
+    }
+
+    // method is 'all' or 'values' — return row-arrays.
+    return { rows: rows.map((row) => Object.values(row)) };
+  };
+}
+
+async function createDesktopDatabase(): Promise<CachinkDatabase> {
+  const tauriDb = await Database.load(DB_PATH);
+  const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
+  await runMigrations(db);
+  return db;
 }
 
 export function DatabaseProvider(props: DatabaseProviderProps): ReactElement | null {
+  // Memoize so AsyncDatabaseProvider's useEffect dep array stays stable.
+  const create = useCallback(createDesktopDatabase, []);
   const asyncProps: AsyncDatabaseProviderProps = {
     children: props.children,
     database: props.database,
-    create: createPlaceholderDatabase,
+    create,
   };
   return <AsyncDatabaseProvider {...asyncProps} />;
 }
