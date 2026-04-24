@@ -13,7 +13,8 @@
     "./dates": "./src/dates/index.ts",
     "./format": "./src/format/index.ts",
     "./entities": "./src/entities/index.ts",
-    "./financials": "./src/financials/index.ts"
+    "./financials": "./src/financials/index.ts",
+    "./comprobante": "./src/comprobante/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
