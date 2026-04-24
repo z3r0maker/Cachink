@@ -17,9 +17,9 @@
 
 ## Current Status
 
-**Current phase:** Phase 1A — Brand & Component Primitives 🚧
-**Current milestone:** P1A-M3 — Localization & formatting (i18n infrastructure shipped — 2 of 4 tasks complete)
-**Next unblocked task:** P1A-M3-T03 (Money + date formatters in `packages/domain/src/format`).
+**Current phase:** Phase 1B — Domain & Data Layer 🚧
+**Current milestone:** P1B-M1 — Domain types & identity (first task: P1B-M1-T01)
+**Next unblocked task:** P1B-M1-T01 (Install ulid; branded ULID types per entity).
 **Last updated:** 2026-04-23
 
 ---
@@ -37,35 +37,14 @@ Carry-overs (environmental, not blockers):
 
 ---
 
-## Phase 1A — Brand & Component Primitives 🚧
+## ✅ Phase 1A — Brand & Component Primitives (Completed 2026-04-23)
 
-**Goal:** All primitive UI components from CLAUDE.md §8.4 exist in `packages/ui`, pass visual regression tests on both platforms, and are documented in Storybook/Ladle.
-
-**Exit criteria:** A designer or PM can look at Storybook and see every Cachink primitive rendered correctly on mobile and desktop targets. Tests cover each.
-
-### Milestone P1A-M1 — Storybook/Ladle setup
-- [x] **P1A-M1-T01** Pick Storybook 8 vs Ladle (decision → ADR) — **ADR-017** accepts Storybook 10.3+ with `@storybook/react-native-web-vite` preset + Playwright 1.59 for visual snapshots
-- [x] **P1A-M1-T02** Set up the chosen tool in `packages/ui` with native + web targets — `.storybook/{main,preview}.tsx` wrap stories in `TamaguiProvider`; `pnpm --filter @cachink/ui storybook` / `build-storybook` / `test:visual` all green
-- [x] **P1A-M1-T03** Add a CI job that runs visual regression tests on both targets — `.github/workflows/ci.yml` has a `storybook-visual` job after `verify` that installs Chromium, builds Storybook, runs Playwright, uploads the report on failure
-
-### Milestone P1A-M2 — Core primitives (CLAUDE.md §8.4) — Completed 2026-04-23
-- [x] **P1A-M2-T01** `Btn` with all 6 variants + press animation — `packages/ui/src/components/Btn/` with 100% test coverage, 6 variants × 3 sizes + pressed/disabled stories + 6 Playwright baselines
-- [x] **P1A-M2-T02** `Input` (text, number, date, select) with label, note, placeholder — `packages/ui/src/components/Input/` with 9 unit tests + 5 stories + 5 Playwright baselines; uses `@tamagui/input` for text/number/date; `<select>` is a native HTML element for now (Modal-backed picker lands as a follow-up once P1A-M2-T04 ships)
-- [x] **P1A-M2-T03** `Tag` — `packages/ui/src/components/Tag/` with 7 semantic variants (neutral / brand / soft / success / info / danger / warning) + 7 unit tests + 5 stories + 5 Playwright baselines; 100% coverage; no new dependency
-- [x] **P1A-M2-T04** `Modal` (bottom-sheet on mobile, centered on desktop — platform-extension pattern) — `packages/ui/src/components/Modal/` with `modal.tsx` (shared types) + `modal.native.tsx` (bottom-sheet) + `modal.web.tsx` (centered dialog) + `modal-header.tsx` (shared header) + 19 unit tests (9 web + 10 native) + 5 stories + 5 Playwright baselines; 100% coverage; adds `@tamagui/dialog@2.0.0-rc.41` (subpackage under ADR-003)
-- [x] **P1A-M2-T05** `EmptyState` — `packages/ui/src/components/EmptyState/` with `empty-state.tsx` (single cross-platform impl — no platform split needed) + 8 unit tests + 5 stories (VentasVacio / EgresosVacio / InventarioVacio / SinResultados / TituloSolo) + 5 Playwright baselines; 100% coverage; no new dependency
-- [x] **P1A-M2-T06** `SectionTitle` — `packages/ui/src/components/SectionTitle/` with `section-title.tsx` (single cross-platform impl — no platform split needed) + 7 unit tests + 5 stories (VentasHoy / ActividadReciente / StockBajo / CuentasPorCobrar / Productos) + 5 Playwright baselines; 100% coverage; no new dependency
-- [x] **P1A-M2-T07** `Card` (white, yellow, black variants) — `packages/ui/src/components/Card/` with `card.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (WhiteDefault / YellowHero / BlackDirector / Tappable / AllVariants) + 5 Playwright baselines; 100% coverage; 3 variants × 4 padding tokens; press transform when `onPress` is supplied; no new dependency
-- [x] **P1A-M2-T08** `Kpi` — `packages/ui/src/components/Kpi/` with `kpi.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (VentasHoy / UtilidadMes / EgresosHoy / StockTotal / AllTones) + 5 Playwright baselines; 100% coverage; 3 tones (neutral / positive / negative) × tabular numerals; agnostic of currency formatting (`value: string`); no new dependency
-- [x] **P1A-M2-T09** `Gauge` — `packages/ui/src/components/Gauge/` with `gauge.tsx` (single cross-platform impl, horizontal-bar variant chosen over circular-SVG to avoid `react-native-svg` dep) + 11 unit tests + 5 stories (MargenBruto / Liquidez / RotacionInventario / Alerta / AllTones) + 5 Playwright baselines; 100% coverage; 4 tones (neutral / positive / warning / negative); clamps value to [0, max]; safe when max=0; custom valueFormatter override; no new dependency
-- [x] **P1A-M2-T10** `BottomTabBar` — `packages/ui/src/components/BottomTabBar/` with `bottom-tab-bar.tsx` + extracted `tab-item.tsx` + 13 unit tests + 5 stories (Operativo / Director / WithBadges / IconlessFallback / MidSelection) + 5 Playwright baselines; 100% coverage; 1..6 items supported with dev-mode warning + clamp guard outside that range; optional `icon: ReactNode` slot (icon-library decision deferred to Phase 1C); optional `badge: number` red-circle indicator; no new dependency
-- [x] **P1A-M2-T11** `TopBar` — `packages/ui/src/components/TopBar/` with `top-bar.tsx` (single cross-platform impl) + 10 unit tests + 5 stories (Default / WithSubtitle / OperativoScreen / DirectorHome / BackButton) + 5 Playwright baselines; 100% coverage; left/right slot pattern (44px tap-target floor); centered title block with optional subtitle; no new dependency
-
-### Milestone P1A-M3 — Localization & formatting
-- [x] **P1A-M3-T01** Install i18next + expo-localization — `i18next@26.0.7` + `react-i18next@17.0.4` already present in apps; added as `peerDependencies` + `devDependencies` to `@cachink/ui` so the i18n module ships with strict types; `expo-localization@55.0.13` pre-warmed in mobile shell for future locale-detection swap
-- [x] **P1A-M3-T02** Create `packages/ui/src/i18n` with es-MX as the only locale — `packages/ui/src/i18n/{i18n.ts, index.ts, types.d.ts, locales/es-mx.ts}` + `apps/mobile/src/shell/i18n.ts` + `apps/desktop/src/shell/i18n.ts` wired into root layouts; 6 unit tests; 100% coverage; idempotent `initI18n()`; module augmentation gives `t('actions.save')` strict typing; `@cachink/ui/i18n` subpath export added
-- [ ] **P1A-M3-T03** Create money and date formatters (pure functions in `packages/domain/src/format`)
-- [ ] **P1A-M3-T04** Unit tests for formatters (edge cases: 0, negative, large numbers, BigInt centavos)
+All 11 primitives from CLAUDE.md §8.4 ship in `@cachink/ui` with 100% unit
+coverage and 56 Playwright visual baselines on both targets. Strict-typed
+i18n infrastructure (es-MX) lives in `@cachink/ui/i18n`; pure-function
+money + date formatters live in `@cachink/domain/format`. 127 UI tests + 66
+domain tests, all green; lint 9/9, typecheck 13/13. Full detail in
+`ROADMAP-archive.md`.
 
 ---
 

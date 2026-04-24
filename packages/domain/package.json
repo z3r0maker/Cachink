@@ -10,7 +10,8 @@
     ".": "./src/index.ts",
     "./money": "./src/money/index.ts",
     "./ids": "./src/ids/index.ts",
-    "./dates": "./src/dates/index.ts"
+    "./dates": "./src/dates/index.ts",
+    "./format": "./src/format/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
