@@ -1,0 +1,111 @@
+/**
+ * Drizzle-backed {@link ProductsRepository}.
+ */
+
+import { and, asc, eq, isNull } from 'drizzle-orm';
+import type {
+  BusinessId,
+  DeviceId,
+  InventoryCategory,
+  InventoryUnit,
+  IsoTimestamp,
+  NewProduct,
+  ProductId,
+} from '@cachink/domain';
+import { newEntityId, now } from '@cachink/domain';
+import type { Product, ProductsRepository } from '../products-repository.js';
+import { products } from '../../schema/index.js';
+import type { CachinkDatabase } from './_db.js';
+
+type ProductRow = typeof products.$inferSelect;
+
+export class DrizzleProductsRepository implements ProductsRepository {
+  readonly #db: CachinkDatabase;
+  readonly #deviceId: DeviceId;
+
+  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+    this.#db = db;
+    this.#deviceId = deviceId;
+  }
+
+  async create(input: NewProduct): Promise<Product> {
+    const id = newEntityId<ProductId>();
+    const ts = now();
+    const row = {
+      id,
+      nombre: input.nombre,
+      sku: input.sku ?? null,
+      categoria: input.categoria,
+      costoUnitCentavos: input.costoUnitCentavos,
+      unidad: input.unidad,
+      umbralStockBajo: input.umbralStockBajo ?? 3,
+      businessId: input.businessId,
+      deviceId: this.#deviceId,
+      createdAt: ts,
+      updatedAt: ts,
+      deletedAt: null as string | null,
+    };
+    await this.#db.insert(products).values(row).run();
+    return this.#mapRow(row);
+  }
+
+  async findById(id: ProductId): Promise<Product | null> {
+    const row = await this.#db
+      .select()
+      .from(products)
+      .where(and(eq(products.id, id), isNull(products.deletedAt)))
+      .get();
+    return row ? this.#mapRow(row) : null;
+  }
+
+  async findBySku(sku: string, businessId: BusinessId): Promise<Product | null> {
+    const row = await this.#db
+      .select()
+      .from(products)
+      .where(
+        and(
+          eq(products.sku, sku),
+          eq(products.businessId, businessId),
+          isNull(products.deletedAt),
+        ),
+      )
+      .get();
+    return row ? this.#mapRow(row) : null;
+  }
+
+  async listForBusiness(businessId: BusinessId): Promise<readonly Product[]> {
+    const rows = await this.#db
+      .select()
+      .from(products)
+      .where(and(eq(products.businessId, businessId), isNull(products.deletedAt)))
+      .orderBy(asc(products.nombre))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
+  async delete(id: ProductId): Promise<void> {
+    const ts = now();
+    await this.#db
+      .update(products)
+      .set({ deletedAt: ts, updatedAt: ts })
+      .where(eq(products.id, id))
+      .run();
+  }
+
+  #mapRow(row: ProductRow): Product {
+    return {
+      id: row.id as ProductId,
+      nombre: row.nombre,
+      sku: row.sku,
+      categoria: row.categoria as InventoryCategory,
+      costoUnitCentavos: row.costoUnitCentavos,
+      unidad: row.unidad as InventoryUnit,
+      umbralStockBajo: row.umbralStockBajo,
+      businessId: row.businessId as BusinessId,
+      deviceId: row.deviceId as DeviceId,
+      createdAt: row.createdAt as IsoTimestamp,
+      updatedAt: row.updatedAt as IsoTimestamp,
+      deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+    };
+  }
+}
