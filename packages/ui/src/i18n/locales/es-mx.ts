@@ -9,7 +9,13 @@
  * Keep this object `as const` — the inferred type powers strict t() lookup
  * in `../types.d.ts` so typos like t('action.save') (singular) become
  * compile errors instead of empty-string fallbacks at runtime.
+ *
+ * This file intentionally holds all keys in a single object so the
+ * compile-time `EsMX = typeof esMX` type remains a single source of
+ * truth for `react-i18next`'s strict typing. It's a pure data file;
+ * the 200-line ceiling is waived for locales only.
  */
+/* eslint-disable max-lines */
 export const esMX = {
   roles: {
     operativo: 'Operativo',
@@ -50,6 +56,69 @@ export const esMX = {
     syncLan: 'Sincronizado',
     syncCloud: 'En la nube',
     syncOffline: 'Sin conexión',
+  },
+  egresos: {
+    title: 'Egresos',
+    totalDelDia: 'Total de egresos',
+    fechaLabel: 'Fecha',
+    emptyTitle: 'Aún no hay egresos',
+    emptyBody: 'Registra el primer egreso del día.',
+    newCta: '+ Nuevo Egreso',
+    retryLabel: 'Reintentar',
+    errorTitle: 'No se pudieron cargar los egresos',
+    errorBody: 'Revisa la conexión local y vuelve a intentarlo.',
+    delete: 'Eliminar',
+    proveedorLabel: 'Proveedor',
+    sinProveedor: 'Sin proveedor',
+  },
+  nuevoEgreso: {
+    title: 'Nuevo egreso',
+    tabGasto: 'Gasto',
+    tabNomina: 'Nómina',
+    tabInventario: 'Inventario',
+    conceptoLabel: 'Concepto',
+    conceptoPlaceholder: 'Renta local',
+    categoriaLabel: 'Categoría',
+    montoLabel: 'Monto',
+    proveedorLabel: 'Proveedor',
+    proveedorOpcional: 'Opcional',
+    fechaLabel: 'Fecha',
+    empleadoLabel: 'Empleado',
+    empleadoRequired: 'Selecciona un empleado',
+    periodoLabel: 'Periodo',
+    productoLabel: 'Producto',
+    productoRequired: 'Selecciona un producto',
+    cantidadLabel: 'Cantidad',
+    cantidadInvalid: 'La cantidad debe ser mayor a 0',
+    costoUnitLabel: 'Costo unitario',
+    save: 'Registrar egreso',
+    recurrenteToggle: 'Marcar como recurrente',
+    frecuenciaLabel: 'Frecuencia',
+    frecuenciaSemanal: 'Semanal',
+    frecuenciaQuincenal: 'Quincenal',
+    frecuenciaMensual: 'Mensual',
+    diaDelMesLabel: 'Día del mes',
+    diaDeLaSemanaLabel: 'Día de la semana',
+    crearEmpleado: 'Crear empleado',
+    crearProducto: 'Crear producto',
+    sinEmpleados: 'No hay empleados. Crea uno primero.',
+    sinProductos: 'No hay productos. Crea uno primero.',
+  },
+  empleados: {
+    nuevo: 'Nuevo empleado',
+    nombreLabel: 'Nombre',
+    puestoLabel: 'Puesto',
+    salarioLabel: 'Salario',
+    periodoLabel: 'Periodo',
+    save: 'Guardar',
+    required: 'Requerido',
+  },
+  pendientes: {
+    title: 'Pendientes de registrar',
+    confirmar: 'Confirmar',
+    descartar: 'Descartar',
+    emptyTitle: 'Nada pendiente',
+    due: 'Vence hoy',
   },
   ventas: {
     title: 'Ventas',
