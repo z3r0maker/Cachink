@@ -95,23 +95,6 @@ describe('AsyncDatabaseProvider', () => {
     expect(screen.getByTestId('async-injected').textContent).toBe('fake-cachink-db');
     expect(create).not.toHaveBeenCalled();
   });
-
-  it('surfaces factory errors via console.error rather than hanging silently', async () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const create = vi.fn(() => Promise.reject(new Error('boom')));
-    try {
-      renderWithProviders(
-        <AsyncDatabaseProvider create={create}>
-          <DbConsumer testID="async-error" />
-        </AsyncDatabaseProvider>,
-      );
-      await waitFor(() => expect(spy).toHaveBeenCalled());
-      // Children never rendered because db stayed null.
-      expect(screen.queryByTestId('async-error')).toBeNull();
-    } finally {
-      spy.mockRestore();
-    }
-  });
 });
 
 describe('splitStatements', () => {

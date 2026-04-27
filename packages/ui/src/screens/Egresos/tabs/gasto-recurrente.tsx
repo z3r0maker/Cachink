@@ -11,6 +11,7 @@
 import type { ReactElement } from 'react';
 import type { NewRecurringExpense, RecurrenceFrequency } from '@cachink/domain';
 import { Input } from '../../../components/index';
+import { IntegerField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 export const FRECUENCIAS: readonly RecurrenceFrequency[] = ['semanal', 'quincenal', 'mensual'];
@@ -71,20 +72,22 @@ export function GastoRecurrenteFields(props: GastoRecurrenteFieldsProps): ReactE
         testID="recurrente-frecuencia"
       />
       {state.frecuencia !== 'semanal' && (
-        <Input
-          type="number"
+        <IntegerField
           label={t('nuevoEgreso.diaDelMesLabel')}
           value={state.diaDelMes}
           onChange={(v) => update({ diaDelMes: v })}
+          min={1}
+          max={31}
           testID="recurrente-dia-mes"
         />
       )}
       {state.frecuencia !== 'mensual' && (
-        <Input
-          type="number"
+        <IntegerField
           label={t('nuevoEgreso.diaDeLaSemanaLabel')}
           value={state.diaDeLaSemana}
           onChange={(v) => update({ diaDeLaSemana: v })}
+          min={0}
+          max={6}
           testID="recurrente-dia-semana"
         />
       )}

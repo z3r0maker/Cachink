@@ -25,13 +25,13 @@ const MODAL_RADIUS = radii[7]; // 22
 /** Universal overlay color — not a brand token, same as every other app's backdrop. */
 const BACKDROP = 'rgba(0,0,0,0.5)';
 
+// Inline styles only carry purely-presentational values that don't fight
+// Tamagui's defaults. Positioning props are passed as Tamagui props below
+// so they're emitted as atomic CSS classes and override Dialog.Content's
+// default `position: 'relative'`.
 const CONTENT_STYLE = {
   boxShadow: shadows.hero,
   overflowY: 'auto',
-  position: 'fixed',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
 } as const;
 
 interface CenteredContentProps {
@@ -53,6 +53,21 @@ function CenteredContent(props: CenteredContentProps): ReactElement {
       width={480}
       maxWidth="92vw"
       maxHeight="86vh"
+      // Modern transform-free centering: a fixed-positioned element with
+      // inset:0 + margin:auto + an explicit width and content-based height
+      // sits in the visual centre of the viewport. Beats the default
+      // `position:'relative'` from Dialog.Content because every value here
+      // is a Tamagui prop — same specificity layer, last write wins.
+      position="fixed"
+      top={0}
+      right={0}
+      bottom={0}
+      left={0}
+      margin="auto"
+      // height auto + bottom:0 would stretch the box; pin it to its content.
+      // `height: 'fit-content'` is web-only — that's fine, this file only
+      // runs on Vite / Tauri / Storybook (Metro picks `modal.native.tsx`).
+      height="fit-content"
       style={CONTENT_STYLE}
     >
       {props.children}
@@ -86,7 +101,13 @@ export function Modal(props: ModalProps): ReactElement {
       <Dialog.Portal>
         <Backdrop onClose={props.onClose} />
         <CenteredContent testID={props.testID}>
-          <ModalHeader title={props.title} emoji={props.emoji} onClose={props.onClose} />
+          <ModalHeader
+            title={props.title}
+            subtitle={props.subtitle}
+            leftAvatar={props.leftAvatar}
+            emoji={props.emoji}
+            onClose={props.onClose}
+          />
           {props.children}
         </CenteredContent>
       </Dialog.Portal>

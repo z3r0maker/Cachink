@@ -14,9 +14,9 @@
 
 import { useState, type ReactElement, type ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
-import { Btn, Modal } from '../../components/index';
+import { Btn, Modal, SegmentedToggle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, typography } from '../../theme';
 
 export type EgresoTab = 'gasto' | 'nomina' | 'inventario';
 
@@ -30,67 +30,32 @@ export interface NuevoEgresoModalProps {
   readonly testID?: string;
 }
 
-interface TabButtonProps {
-  readonly id: EgresoTab;
-  readonly label: string;
-  readonly active: boolean;
-  readonly onPress: () => void;
-}
-
-function TabButton({ id, label, active, onPress }: TabButtonProps): ReactElement {
-  return (
-    <View
-      testID={`egreso-tab-${id}`}
-      onPress={onPress}
-      pressStyle={{ opacity: 0.7 }}
-      backgroundColor={active ? colors.yellow : colors.white}
-      borderColor={colors.black}
-      borderWidth={2}
-      borderRadius={radii[1]}
-      paddingHorizontal={14}
-      paddingVertical={8}
-      cursor="pointer"
-    >
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={12}
-        color={colors.black}
-        letterSpacing={typography.letterSpacing.wide}
-        style={{ textTransform: 'uppercase', userSelect: 'none' }}
-      >
-        {label}
-      </Text>
-    </View>
-  );
-}
-
 interface TabBarProps {
   readonly active: EgresoTab;
   readonly onChange: (tab: EgresoTab) => void;
   readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
+/**
+ * Audit M-1 PR 5.5 (audit 3.1) — migrated from inline `<TabButton>`
+ * (paddingY:8, opacity-only press style) to the brand
+ * `<SegmentedToggle>`. The new component carries the §8.3 press
+ * transform + 48-pt effective tap target. E2E selectors
+ * `egreso-tab-{gasto,nomina,inventario}` are preserved via
+ * `testIDPrefix`.
+ */
 function TabBar({ active, onChange, t }: TabBarProps): ReactElement {
   return (
-    <View flexDirection="row" gap={8} marginBottom={12}>
-      <TabButton
-        id="gasto"
-        label={t('nuevoEgreso.tabGasto')}
-        active={active === 'gasto'}
-        onPress={() => onChange('gasto')}
-      />
-      <TabButton
-        id="nomina"
-        label={t('nuevoEgreso.tabNomina')}
-        active={active === 'nomina'}
-        onPress={() => onChange('nomina')}
-      />
-      <TabButton
-        id="inventario"
-        label={t('nuevoEgreso.tabInventario')}
-        active={active === 'inventario'}
-        onPress={() => onChange('inventario')}
+    <View marginBottom={12}>
+      <SegmentedToggle<EgresoTab>
+        testIDPrefix="egreso-tab"
+        value={active}
+        onChange={onChange}
+        options={[
+          { key: 'gasto', label: t('nuevoEgreso.tabGasto') },
+          { key: 'nomina', label: t('nuevoEgreso.tabNomina') },
+          { key: 'inventario', label: t('nuevoEgreso.tabInventario') },
+        ]}
       />
     </View>
   );

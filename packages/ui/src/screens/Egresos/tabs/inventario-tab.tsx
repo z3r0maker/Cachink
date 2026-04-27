@@ -25,6 +25,7 @@ import {
   type ProductId,
 } from '@cachink/domain';
 import { Btn, Input } from '../../../components/index';
+import { IntegerField, MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 export interface InventarioTabProps {
@@ -83,6 +84,8 @@ interface InventarioFieldsProps {
   readonly update: (p: Partial<FormState>) => void;
   readonly errors: FormErrors;
   readonly productos: readonly Product[];
+  /** Audit 5.4 — Bluetooth-keyboard Enter-to-submit. */
+  readonly onSubmitEditing?: () => void;
   readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
@@ -99,21 +102,23 @@ function InventarioFields(props: InventarioFieldsProps): ReactElement {
         note={errors.producto}
         testID="inventario-producto"
       />
-      <Input
-        type="number"
+      <IntegerField
         label={t('nuevoEgreso.cantidadLabel')}
         value={state.cantidad}
         onChange={(v) => update({ cantidad: v })}
         note={errors.cantidad}
+        min={1}
         testID="inventario-cantidad"
+        returnKeyType="next"
       />
-      <Input
-        type="number"
+      <MoneyField
         label={t('nuevoEgreso.costoUnitLabel')}
         value={state.costoUnitPesos}
         onChange={(v) => update({ costoUnitPesos: v })}
         note={errors.costo}
         testID="inventario-costo"
+        returnKeyType="done"
+        onSubmitEditing={props.onSubmitEditing}
       />
     </>
   );
@@ -161,6 +166,7 @@ export function InventarioTab(props: InventarioTabProps): ReactElement {
         update={update}
         errors={errors}
         productos={props.productos}
+        onSubmitEditing={handleSubmit}
         t={t}
       />
       <Btn

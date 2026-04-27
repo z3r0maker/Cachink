@@ -1,0 +1,24 @@
+# Help modal pre-selection flow (ADR-039 WUX-M4-T04).
+#
+# Verifies that tapping "¿No estás seguro? Ayúdame a decidir" opens
+# the help modal with three scenarios, that picking "Solo cloud" closes
+# the modal and advances the wizard to Step 2A (where the cloud card
+# is visible), and that the same mechanism works for the other
+# scenarios.
+appId: mx.cachink.mobile
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "¡Bienvenido a Cachink!"
+- tapOn: { id: "wizard-step1-help-link" }
+
+# Modal mounts with all three scenarios.
+- assertVisible: { id: "wizard-help-modal" }
+- assertVisible: { id: "wizard-help-solo-local" }
+- assertVisible: { id: "wizard-help-multi-device" }
+- assertVisible: { id: "wizard-help-solo-cloud" }
+
+# Pick "Solo cloud" — modal closes and wizard lands on Step 2A.
+- tapOn: { id: "wizard-help-solo-cloud-cta" }
+- assertVisible: { id: "wizard-step2a-cloud" }

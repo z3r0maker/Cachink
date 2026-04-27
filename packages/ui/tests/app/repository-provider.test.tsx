@@ -24,7 +24,6 @@ import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import * as schema from '@cachink/data/schema';
 import { buildTauriCallback } from '../../src/database/database-provider.web';
 import {
-  MockRepositoryProvider,
   buildDrizzleRepositories,
   useAppConfigRepository,
   useBusinessesRepository,
@@ -39,6 +38,7 @@ import {
   useRepositories,
   useSalesRepository,
 } from '../../src/app/index';
+import { MockRepositoryProvider } from '@cachink/testing';
 import { renderWithProviders, screen } from '../test-utils';
 
 function RepoProbe(): ReactElement {

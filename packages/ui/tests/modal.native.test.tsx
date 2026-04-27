@@ -65,6 +65,19 @@ describe('Modal (native variant)', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('renders the close icon and applies the expanded hitSlop to the close button', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined} title="Detalle">
+        <span>body</span>
+      </Modal>,
+    );
+    expect(screen.getAllByTestId('icon-x').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('modal-close')[0]).toHaveAttribute(
+      'data-hit-slop',
+      '{"top":6,"bottom":6,"left":6,"right":6}',
+    );
+  });
+
   it('calls onClose when the backdrop is clicked', () => {
     const onClose = vi.fn();
     renderWithProviders(

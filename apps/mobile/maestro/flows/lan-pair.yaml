@@ -1,0 +1,59 @@
+# LAN pair flow (Slice 5 C21) — happy path for "Conectar a un servidor local".
+#
+# Precondition: the Tauri desktop app is running on the same LAN and has
+# already called `lan_server_start` — its pairing URL + token are
+# available as environment variables `LAN_SERVER_URL` + `LAN_PAIR_TOKEN`.
+# The developer runs the flow with:
+#
+#   MAESTRO_LAN_URL="http://192.168.1.5:43812" \
+#   MAESTRO_LAN_TOKEN="…" \
+#   maestro test apps/mobile/maestro/flows/lan-pair.yaml
+#
+# Parses the QR from the host via paste-URL fallback — Maestro doesn't
+# drive the camera, so the scan button is a separate manual verification.
+appId: mx.cachink.mobile
+env:
+  LAN_URL: ${MAESTRO_LAN_URL}
+  LAN_TOKEN: ${MAESTRO_LAN_TOKEN}
+---
+- launchApp
+
+# Re-run the wizard to reach the mode picker in a deterministic state.
+- tapOn:
+    id: "tab-ajustes"
+- tapOn:
+    id: "settings-re-run-wizard"
+
+- assertVisible:
+    id: "wizard"
+
+# Step 1 → "Ya tengo Cachink en otro dispositivo" link → Step 3 → LAN.
+# (Per ADR-039, joining a server is its own top-level entry point.)
+- tapOn:
+    id: "wizard-step1-join-existing-link"
+- tapOn:
+    id: "wizard-step3-lan-card"
+
+# Wait for the join screen to mount.
+- assertVisible:
+    id: "lan-join-screen"
+
+# Paste the `cachink-lan://…?token=…` URL built from env variables.
+- tapOn:
+    id: "lan-join-paste-input"
+- inputText: "cachink-lan://${LAN_URL.replace(\"http://\", \"\")}?token=${LAN_TOKEN}"
+
+- tapOn:
+    id: "lan-join-paste-submit"
+
+# On success, the GatedNavigation routes to RolePicker.
+- assertVisible:
+    id: "role-picker"
+- assertNotVisible:
+    id: "lan-join-error"
+
+# Sanity check: the TopBar sync badge shows "Sincronizado".
+- tapOn:
+    id: "role-director-select"
+- assertVisible:
+    id: "sync-status-badge"

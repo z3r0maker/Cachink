@@ -1,0 +1,36 @@
+# Close the day with contado == esperado → zero diferencia → corte saved.
+# Covers P1C-M7-T01..T05 (Slice 3 M7):
+#   - Card appears after 18:00 local time on the Operativo home.
+#   - Modal surfaces esperado, lets the user type contado, computes diferencia live.
+#   - A zero-diferencia corte requires no explicación and saves cleanly.
+#   - After save the card is hidden until the next day.
+#
+# Precondition: device clock is past 18:00 and today already has at least
+# one venta in Efectivo so esperado > 0. Run wizard-local-standalone.yaml +
+# venta-efectivo.yaml first (or seed via EXPO_PUBLIC_E2E_SEED).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# The CorteDeDia card surfaces on the Operativo home after 18:00.
+- tapOn:
+    id: "tab-ventas"
+- assertVisible:
+    id: "corte-de-dia-card"
+
+# Open the modal.
+- tapOn:
+    id: "corte-de-dia-cta"
+- assertVisible: "Corte de día"
+
+# Type contado equal to esperado — zero diferencia, no explicación required.
+- tapOn:
+    id: "corte-contado-input"
+- inputText: "150"
+- tapOn:
+    id: "corte-submit"
+
+# After success the modal closes and the card is no longer visible.
+- assertNotVisible: "Corte de día"
+- assertNotVisible:
+    id: "corte-de-dia-card"

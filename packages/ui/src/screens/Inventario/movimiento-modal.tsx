@@ -57,7 +57,13 @@ export function MovimientoModal(props: MovimientoModalProps): ReactElement {
   return (
     <Modal open={props.open} onClose={props.onClose} title={title} testID="movimiento-modal">
       <TipoToggle value={state.tipo} onChange={(tipo) => update({ tipo })} t={t} />
-      <MovimientoFields state={state} update={update} t={t} error={error} />
+      <MovimientoFields
+        state={state}
+        update={update}
+        t={t}
+        error={error}
+        onSubmitEditing={handleSubmit}
+      />
       <Btn
         variant="primary"
         onPress={handleSubmit}

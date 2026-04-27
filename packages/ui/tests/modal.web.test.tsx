@@ -51,6 +51,44 @@ describe('Modal (web variant)', () => {
     expect(screen.getByText('💰')).toBeDefined();
   });
 
+  it('renders the subtitle line beneath the title when provided', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined} title="Nueva venta" subtitle="24 abr · 10:48">
+        <span>body</span>
+      </Modal>,
+    );
+    expect(screen.getByText('24 abr · 10:48')).toBeDefined();
+    const subtitle = screen.getAllByTestId('modal-subtitle')[0]!;
+    expect(subtitle.textContent).toBe('24 abr · 10:48');
+  });
+
+  it('renders a leftAvatar slot when provided and skips the legacy emoji box', () => {
+    renderWithProviders(
+      <Modal
+        open
+        onClose={() => undefined}
+        title="Nueva venta"
+        leftAvatar={<span data-testid="custom-avatar">MR</span>}
+        emoji="💰"
+      >
+        <span>body</span>
+      </Modal>,
+    );
+    expect(screen.getAllByTestId('modal-left-avatar').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('custom-avatar').length).toBeGreaterThan(0);
+    // The deprecated emoji box must NOT render when leftAvatar wins.
+    expect(screen.queryAllByTestId('modal-emoji').length).toBe(0);
+  });
+
+  it('still renders the legacy emoji box when no leftAvatar is provided', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined} emoji="💰">
+        <span>body</span>
+      </Modal>,
+    );
+    expect(screen.getAllByTestId('modal-emoji').length).toBeGreaterThan(0);
+  });
+
   it('calls onClose when the X close button is clicked', () => {
     const onClose = vi.fn();
     renderWithProviders(
@@ -60,6 +98,19 @@ describe('Modal (web variant)', () => {
     );
     tap(screen.getAllByTestId('modal-close')[0]!);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the close icon and applies the expanded hitSlop to the close button', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined} title="Detalle">
+        <span>body</span>
+      </Modal>,
+    );
+    expect(screen.getAllByTestId('icon-x').length).toBeGreaterThan(0);
+    expect(screen.getAllByTestId('modal-close')[0]).toHaveAttribute(
+      'data-hit-slop',
+      '{"top":6,"bottom":6,"left":6,"right":6}',
+    );
   });
 
   it('calls onClose when the backdrop is clicked', () => {
@@ -108,5 +159,25 @@ describe('Modal (web variant)', () => {
     // which our adapter forwards to props.onClose.
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('positions content with fixed inset:0 + margin:auto (no transform-based centering)', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined}>
+        <span>centered body</span>
+      </Modal>,
+    );
+    const content = screen.getAllByTestId('modal')[0]!;
+    const style = (content as HTMLElement).style;
+    // Either set as inline CSS (browser) or via class attribute (jsdom + Tamagui
+    // compiled). The key invariants: no `transform: translate(...)` is being
+    // used to center, and `position` is fixed.
+    const inline = `${style.cssText} ${(content as HTMLElement).className}`;
+    expect(inline).not.toMatch(/translate\(-50%,\s*-50%\)/);
+    // Tamagui emits class-based styles in jsdom; we can also assert the
+    // computed style after the layout pass.
+    const computed = window.getComputedStyle(content);
+    expect(computed.position).toBe('fixed');
+    expect(computed.margin).toMatch(/auto/);
   });
 });

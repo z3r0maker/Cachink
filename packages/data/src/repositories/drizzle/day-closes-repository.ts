@@ -2,7 +2,7 @@
  * Drizzle-backed {@link DayClosesRepository}.
  */
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   DayCloseId,
@@ -82,6 +82,27 @@ export class DrizzleDayClosesRepository implements DayClosesRepository {
       .orderBy(desc(dayCloses.fecha), desc(dayCloses.createdAt))
       .get();
     return row ? this.#mapRow(row) : null;
+  }
+
+  async findByDateRange(
+    from: IsoDate,
+    to: IsoDate,
+    businessId: BusinessId,
+  ): Promise<readonly DayClose[]> {
+    const rows = await this.#db
+      .select()
+      .from(dayCloses)
+      .where(
+        and(
+          gte(dayCloses.fecha, from),
+          lte(dayCloses.fecha, to),
+          eq(dayCloses.businessId, businessId),
+          isNull(dayCloses.deletedAt),
+        ),
+      )
+      .orderBy(desc(dayCloses.fecha), desc(dayCloses.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
   }
 
   async delete(id: DayCloseId): Promise<void> {

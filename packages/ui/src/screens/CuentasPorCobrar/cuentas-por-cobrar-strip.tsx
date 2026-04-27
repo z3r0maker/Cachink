@@ -12,7 +12,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { Client, Money, Sale } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
-import { Card, EmptyState, SectionTitle, Tag } from '../../components/index';
+import { Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
@@ -76,11 +76,13 @@ export function CuentasPorCobrarStrip(props: CuentasPorCobrarStripProps): ReactE
       backgroundColor={colors.offwhite}
     >
       <SectionTitle title={t('cuentasPorCobrar.title')} />
-      {props.rows.length === 0 ? (
-        <EmptyState emoji="✅" title={t('cuentasPorCobrar.empty')} />
-      ) : (
-        props.rows.map((row) => <Row key={row.cliente.id} row={row} />)
-      )}
+      <List<CuentaPorCobrarRow>
+        data={props.rows}
+        keyExtractor={(row) => row.cliente.id}
+        renderItem={(row) => <Row row={row} />}
+        ListEmptyComponent={<EmptyState icon="check" title={t('cuentasPorCobrar.empty')} />}
+        testID="cuentas-por-cobrar-list"
+      />
     </View>
   );
 }

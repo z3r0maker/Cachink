@@ -22,5 +22,11 @@ export interface DayClosesRepository {
   findByDate(date: IsoDate, deviceId: DeviceId): Promise<DayClose | null>;
   /** Most recent corte (any device) for a business — used to seed saldoAnterior. */
   findLatest(businessId: BusinessId): Promise<DayClose | null>;
+  /**
+   * List all non-deleted cortes in `[from, to]` (inclusive) for a
+   * business. Powers the Balance General cash line + the corte
+   * historial strip (P1C-M7 / M8). Rows ordered newest first by fecha.
+   */
+  findByDateRange(from: IsoDate, to: IsoDate, businessId: BusinessId): Promise<readonly DayClose[]>;
   delete(id: DayCloseId): Promise<void>;
 }

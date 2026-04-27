@@ -68,6 +68,22 @@ export class InMemoryDayClosesRepository implements DayClosesRepository {
     return candidates[0] ?? null;
   }
 
+  async findByDateRange(
+    from: IsoDate,
+    to: IsoDate,
+    businessId: BusinessId,
+  ): Promise<readonly DayClose[]> {
+    return [...this.rows.values()]
+      .filter(
+        (r) =>
+          r.businessId === businessId && r.deletedAt === null && r.fecha >= from && r.fecha <= to,
+      )
+      .sort((a, b) => {
+        if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha);
+        return b.createdAt.localeCompare(a.createdAt);
+      });
+  }
+
   async delete(id: DayCloseId): Promise<void> {
     const existing = this.rows.get(id);
     if (!existing) return;

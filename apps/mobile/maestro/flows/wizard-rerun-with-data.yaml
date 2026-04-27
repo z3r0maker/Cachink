@@ -1,0 +1,32 @@
+# Re-run wizard with seeded data — verify the data-preserved callout
+# appears on every mode-change screen (ADR-039 WUX-M4-T05).
+#
+# Precondition: the app already has at least one venta + producto +
+# cliente in the local SQLite. Run `wizard-local-standalone.yaml`
+# first to seed, or launch with `EXPO_PUBLIC_E2E_SEED=1` to bake the
+# fixtures in at boot. The "data preserved" callout reads from the
+# repositories at render time, so any pre-existing data triggers it.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Reach Settings → Re-run asistente.
+- tapOn: { id: "tab-ajustes" }
+- tapOn: { id: "settings-re-run-wizard" }
+- assertVisible: { id: "wizard" }
+- assertVisible: "¡Bienvenido a Cachink!"
+
+# Step 1 → Solo → Step 2A. The data-preserved callout should be visible.
+- tapOn: { id: "wizard-step1-solo-card" }
+- assertVisible: { id: "wizard-data-preserved-callout" }
+- assertVisible: "Tus datos se conservan"
+
+# Back → step1 → Multi → Step 2B. Callout follows us.
+- tapOn: { id: "wizard-back" }
+- tapOn: { id: "wizard-step1-multi-card" }
+- assertVisible: { id: "wizard-data-preserved-callout" }
+
+# Back → step1 → Join existing → Step 3. Callout still visible.
+- tapOn: { id: "wizard-back" }
+- tapOn: { id: "wizard-step1-join-existing-link" }
+- assertVisible: { id: "wizard-data-preserved-callout" }

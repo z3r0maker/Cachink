@@ -1,14 +1,29 @@
-# Wizard → BusinessForm → RolePicker happy path.
+# Wizard → BusinessForm → RolePicker happy path (ADR-039 four-screen flow).
 # Covers P1C-M1-T01 (role picker), P1C-M2-T03 (wizard), P1C-M2-T04
-# (mode stored in AppConfig), P1C-M2-T05 (business creation form).
+# (mode stored in AppConfig), P1C-M2-T05 (business creation form),
+# WUX-M4 (post-rewrite step IDs).
 #
 # Precondition: fresh install (clearState wipes the SQLite file).
 appId: mx.cachink.mobile
 ---
 - launchApp:
     clearState: true
-- assertVisible: "Configura Cachink!"
-- tapOn: "Solo este dispositivo"
+
+# First-launch ConsentModal blocks the accessibility tree on a fresh
+# install. smoke-launch.yaml asserts the full consent flow; other
+# wizard flows just need to dismiss it so the wizard becomes
+# inspectable.
+- tapOn:
+    id: "consent-modal-later"
+
+- assertVisible: "¡Bienvenido a Cachink!"
+
+# Step 1 → Solo → Step 2A → Local (single fastest path on mobile).
+- tapOn:
+    id: "wizard-step1-solo-card"
+- assertVisible: { id: "wizard-step2a-local" }
+- tapOn:
+    id: "wizard-step2a-local-card"
 
 # BusinessForm.
 - assertVisible: "Tu negocio"

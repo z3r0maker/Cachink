@@ -6,6 +6,7 @@
 import type { ReactElement } from 'react';
 import type { Client, PaymentMethod, SaleCategory } from '@cachink/domain';
 import { Btn, Input } from '../../components/index';
+import { MoneyField, TextField } from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';
 import type { FormErrors, FormState } from './nueva-venta-form';
 import { CATEGORIAS, METODOS } from './nueva-venta-form';
@@ -18,6 +19,12 @@ export interface FieldsProps {
   readonly errors: FormErrors;
   readonly clientes: readonly Client[];
   readonly onCrearCliente?: () => void;
+  /**
+   * Audit 5.4 — Bluetooth-keyboard Enter-to-submit. Wired on the last
+   * keyboard-typed field (`MoneyField`) so cashiers using iPad keyboard
+   * cases can finish a Venta without reaching for the screen.
+   */
+  readonly onSubmitEditing?: () => void;
   readonly t: T;
 }
 
@@ -53,17 +60,31 @@ export function ClienteField(props: FieldsProps): ReactElement {
   );
 }
 
+function MetodoField({ state, update, t }: FieldsProps): ReactElement {
+  return (
+    <Input
+      type="select"
+      label={t('nuevaVenta.metodoLabel')}
+      value={state.metodo}
+      onChange={(value) => update({ metodo: value as PaymentMethod })}
+      options={METODOS}
+      testID="nueva-venta-metodo"
+    />
+  );
+}
+
 export function CoreFields(props: FieldsProps): ReactElement {
-  const { state, update, errors, t } = props;
+  const { state, update, errors, onSubmitEditing, t } = props;
   return (
     <>
-      <Input
+      <TextField
         label={t('nuevaVenta.conceptoLabel')}
         placeholder={t('nuevaVenta.conceptoPlaceholder')}
         value={state.concepto}
         onChange={(value) => update({ concepto: value })}
         note={errors.concepto}
         testID="nueva-venta-concepto"
+        returnKeyType="next"
       />
       <Input
         type="select"
@@ -73,22 +94,16 @@ export function CoreFields(props: FieldsProps): ReactElement {
         options={CATEGORIAS}
         testID="nueva-venta-categoria"
       />
-      <Input
-        type="number"
+      <MoneyField
         label={t('nuevaVenta.montoLabel')}
         value={state.montoPesos}
         onChange={(value) => update({ montoPesos: value })}
         note={errors.monto}
         testID="nueva-venta-monto"
+        returnKeyType="done"
+        onSubmitEditing={onSubmitEditing}
       />
-      <Input
-        type="select"
-        label={t('nuevaVenta.metodoLabel')}
-        value={state.metodo}
-        onChange={(value) => update({ metodo: value as PaymentMethod })}
-        options={METODOS}
-        testID="nueva-venta-metodo"
-      />
+      <MetodoField {...props} />
     </>
   );
 }

@@ -71,12 +71,7 @@ interface HeaderProps {
 function Header(props: HeaderProps): ReactElement | null {
   if (props.label === undefined && !props.showValue) return null;
   return (
-    <View
-      flexDirection="row"
-      justifyContent="space-between"
-      alignItems="center"
-      marginBottom={6}
-    >
+    <View flexDirection="row" justifyContent="space-between" alignItems="center" marginBottom={6}>
       {props.label !== undefined && (
         <Text
           testID="gauge-label"
@@ -103,6 +98,49 @@ function Header(props: HeaderProps): ReactElement | null {
   );
 }
 
+interface TrackProps {
+  readonly clamped: number;
+  readonly max: number;
+  readonly fillPercent: `${string}%`;
+  readonly tone: GaugeTone;
+  readonly formattedValue: string;
+  readonly ariaLabel: string;
+}
+
+/**
+ * Audit Round 2 G1: announce as `role="meter"` with the canonical
+ * ARIA value attributes. Screen readers read the gauge as
+ * "[label] meter, [valuetext]" instead of treating the bar as
+ * decorative chrome. Extracted from `<Gauge>` to keep the parent
+ * function under the 40-line cap.
+ */
+function Track(props: TrackProps): ReactElement {
+  return (
+    <View
+      testID="gauge-track"
+      role="meter"
+      aria-valuenow={props.clamped}
+      aria-valuemin={0}
+      aria-valuemax={props.max}
+      aria-valuetext={props.formattedValue}
+      aria-label={props.ariaLabel}
+      height={TRACK_HEIGHT}
+      backgroundColor={colors.gray100}
+      borderColor={colors.black}
+      borderWidth={2}
+      borderRadius={GAUGE_RADIUS}
+      overflow="hidden"
+    >
+      <View
+        testID="gauge-fill"
+        height="100%"
+        width={props.fillPercent}
+        backgroundColor={TONE_FILL[props.tone]}
+      />
+    </View>
+  );
+}
+
 /**
  * Renders a horizontal-bar gauge. See `gauge.stories.tsx` for the full
  * variant catalog.
@@ -115,30 +153,21 @@ export function Gauge(props: GaugeProps): ReactElement {
   const clamped = clampToRange(props.value, max);
   const fillRatio = max === 0 ? 0 : clamped / max;
   const fillPercent = `${(fillRatio * 100).toFixed(2)}%` as const;
+  const formattedValue = formatter(clamped, max);
+  const ariaLabel =
+    props.label !== undefined ? `${props.label}: ${formattedValue}` : formattedValue;
 
   return (
     <View testID={props.testID ?? 'gauge'} flexDirection="column">
-      <Header
-        label={props.label}
-        showValue={showValue}
-        displayValue={formatter(clamped, max)}
+      <Header label={props.label} showValue={showValue} displayValue={formattedValue} />
+      <Track
+        clamped={clamped}
+        max={max}
+        fillPercent={fillPercent}
+        tone={tone}
+        formattedValue={formattedValue}
+        ariaLabel={ariaLabel}
       />
-      <View
-        testID="gauge-track"
-        height={TRACK_HEIGHT}
-        backgroundColor={colors.gray100}
-        borderColor={colors.black}
-        borderWidth={2}
-        borderRadius={GAUGE_RADIUS}
-        overflow="hidden"
-      >
-        <View
-          testID="gauge-fill"
-          height="100%"
-          width={fillPercent}
-          backgroundColor={TONE_FILL[tone]}
-        />
-      </View>
     </View>
   );
 }

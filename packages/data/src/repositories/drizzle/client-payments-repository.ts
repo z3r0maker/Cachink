@@ -2,7 +2,7 @@
  * Drizzle-backed {@link ClientPaymentsRepository}.
  */
 
-import { and, desc, eq, isNull } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   ClientPaymentId,
@@ -15,10 +15,7 @@ import type {
   SaleId,
 } from '@cachink/domain';
 import { ZERO, newEntityId, now, sum } from '@cachink/domain';
-import type {
-  ClientPayment,
-  ClientPaymentsRepository,
-} from '../client-payments-repository.js';
+import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
 import { clientPayments } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -66,9 +63,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
     const rows = await this.#db
       .select()
       .from(clientPayments)
-      .where(
-        and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)),
-      )
+      .where(and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)))
       .orderBy(desc(clientPayments.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
@@ -77,6 +72,27 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
   async sumByVenta(ventaId: SaleId): Promise<Money> {
     const rows = await this.findByVenta(ventaId);
     return rows.length === 0 ? ZERO : sum(rows.map((r) => r.montoCentavos));
+  }
+
+  async findByDateRange(
+    from: IsoDate,
+    to: IsoDate,
+    businessId: BusinessId,
+  ): Promise<readonly ClientPayment[]> {
+    const rows = await this.#db
+      .select()
+      .from(clientPayments)
+      .where(
+        and(
+          gte(clientPayments.fecha, from),
+          lte(clientPayments.fecha, to),
+          eq(clientPayments.businessId, businessId),
+          isNull(clientPayments.deletedAt),
+        ),
+      )
+      .orderBy(desc(clientPayments.fecha), desc(clientPayments.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
   }
 
   async delete(id: ClientPaymentId): Promise<void> {

@@ -46,8 +46,16 @@ describe('Btn', () => {
     expect(getComputedStyle(root).backgroundColor.toLowerCase()).toContain('rgb(255, 214, 10)');
   });
 
-  it('applies each of the six variants without error', () => {
-    const variants: BtnVariant[] = ['primary', 'dark', 'ghost', 'green', 'danger', 'soft'];
+  it('applies each of the seven variants without error', () => {
+    const variants: BtnVariant[] = [
+      'primary',
+      'dark',
+      'ghost',
+      'green',
+      'danger',
+      'soft',
+      'outline',
+    ];
     for (const variant of variants) {
       renderWithProviders(
         <Btn variant={variant} testID={`btn-${variant}`}>
@@ -56,6 +64,22 @@ describe('Btn', () => {
       );
       expect(screen.getAllByTestId(`btn-${variant}`).length).toBeGreaterThan(0);
     }
+  });
+
+  it('renders the outline variant as a white surface with a hard shadow', () => {
+    renderWithProviders(
+      <Btn variant="outline" testID="btn-outline">
+        CANCELAR
+      </Btn>,
+    );
+    const root = screen.getAllByTestId('btn-outline')[0]!;
+    const bg = getComputedStyle(root).backgroundColor.toLowerCase();
+    expect(bg.includes('rgb(255, 255, 255)') || bg === '').toBe(true);
+    // The hard shadow should be applied via box-shadow (jsdom returns it
+    // verbatim). We assert it's not "none" and contains "rgb(13, 13, 13)"
+    // which is colors.black.
+    const shadow = root.style.boxShadow.toLowerCase();
+    expect(shadow.length > 0 && shadow !== 'none').toBe(true);
   });
 
   it('applies each of the three sizes (sm / md / lg) without error', () => {

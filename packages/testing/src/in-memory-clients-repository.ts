@@ -80,4 +80,12 @@ export class InMemoryClientsRepository implements ClientsRepository {
     const ts: IsoTimestamp = now();
     this.rows.set(id, { ...existing, deletedAt: ts, updatedAt: ts });
   }
+
+  async count(businessId: BusinessId): Promise<number> {
+    let n = 0;
+    for (const r of this.rows.values()) {
+      if (r.businessId === businessId && r.deletedAt === null) n++;
+    }
+    return n;
+  }
 }

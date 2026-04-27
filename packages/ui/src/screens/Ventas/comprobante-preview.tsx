@@ -4,18 +4,28 @@
  * {@link useComprobanteHtml} inside a Modal so the user can preview
  * before sharing.
  *
+ * Audit M-1 PR 3 fix (audit 2.16): the preview frame is now a
+ * platform extension. On web/Tauri it mounts a sandboxed
+ * `<iframe srcDoc={html}>` that renders the receipt 1:1 (the previous
+ * implementation displayed raw HTML source as monospace text). On RN
+ * a fallback frame with a clearer label ships until
+ * `react-native-webview` is added — the audit's WebView migration is
+ * one component swap once the dep lands.
+ *
  * The native share sheet integration lands in Commit 14 — this file
  * exposes `onShare` as a callback the caller wires. Closing the modal
  * calls `onClose`.
  */
 
 import type { ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
+import { Text } from '@tamagui/core';
+import { View } from '@tamagui/core';
 import type { Business, Sale } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useComprobanteHtml } from '../../hooks/use-comprobante-html';
-import { colors, radii } from '../../theme';
+import { colors } from '../../theme';
+import { PreviewFrame } from './comprobante-preview-frame';
 
 export interface ComprobantePreviewProps {
   readonly open: boolean;
@@ -24,31 +34,6 @@ export interface ComprobantePreviewProps {
   readonly business: Business | null;
   readonly onShare?: (html: string) => void;
   readonly sharing?: boolean;
-}
-
-function PreviewFrame({ html }: { html: string }): ReactElement {
-  return (
-    <View
-      testID="comprobante-preview-frame"
-      borderWidth={2}
-      borderColor={colors.black}
-      borderRadius={radii[2]}
-      padding={12}
-      backgroundColor={colors.offwhite}
-      style={{ overflow: 'auto', maxHeight: '50vh' }}
-    >
-      <Text
-        fontFamily="monospace"
-        fontSize={11}
-        color={colors.gray600}
-        // Display the raw HTML source so the user can verify what will
-        // be shared. The native/web share handlers rasterize the HTML
-        // into PNG/PDF in Commit 14.
-      >
-        {html}
-      </Text>
-    </View>
-  );
 }
 
 export function ComprobantePreview(props: ComprobantePreviewProps): ReactElement {

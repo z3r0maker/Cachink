@@ -1,8 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  BottomTabBar,
-  type BottomTabBarItem,
-} from '../src/components/BottomTabBar/index';
+import { BottomTabBar, type BottomTabBarItem } from '../src/components/BottomTabBar/index';
 import { fireEvent, renderWithProviders, screen } from './test-utils';
 
 const noop = (): void => {};
@@ -33,15 +30,13 @@ describe('BottomTabBar', () => {
   });
 
   it('renders 6 items (Director case)', () => {
-    renderWithProviders(
-      <BottomTabBar activeKey="tab0" items={makeItems(6)} />,
-    );
+    renderWithProviders(<BottomTabBar activeKey="tab0" items={makeItems(6)} />);
     for (let i = 0; i < 6; i++) {
       expect(screen.getByText(`Tab${i}`)).toBeDefined();
     }
   });
 
-  it('applies the yellow active background to the active tab cell', () => {
+  it('renders a yellow active strip pinned to the top of the active tab cell', () => {
     renderWithProviders(
       <BottomTabBar
         activeKey="ventas"
@@ -52,10 +47,28 @@ describe('BottomTabBar', () => {
       />,
     );
     const ventas = screen.getAllByTestId('tab-ventas')[0]!;
-    // yellow (#FFD60A) → rgb(255, 214, 10).
-    expect(getComputedStyle(ventas).backgroundColor.toLowerCase()).toContain(
-      'rgb(255, 214, 10)',
+    // The active cell itself stays transparent — the yellow surface
+    // moves to a 4-px strip that lives inside it (per ADR-040).
+    const cellBg = getComputedStyle(ventas).backgroundColor.toLowerCase();
+    expect(cellBg === 'transparent' || cellBg.includes('rgba(0, 0, 0, 0)') || cellBg === '').toBe(
+      true,
     );
+    const strip = screen.getAllByTestId('tab-item-active-strip')[0]!;
+    expect(getComputedStyle(strip).backgroundColor.toLowerCase()).toContain('rgb(255, 214, 10)');
+  });
+
+  it('does not render the active strip on inactive tabs', () => {
+    renderWithProviders(
+      <BottomTabBar
+        activeKey="ventas"
+        items={[
+          { key: 'ventas', label: 'Ventas', onPress: noop },
+          { key: 'egresos', label: 'Egresos', onPress: noop },
+        ]}
+      />,
+    );
+    // Exactly one strip on the active cell, none elsewhere.
+    expect(screen.getAllByTestId('tab-item-active-strip').length).toBe(1);
   });
 
   it('renders the inactive tab with a transparent background', () => {
@@ -71,9 +84,7 @@ describe('BottomTabBar', () => {
     const egresos = screen.getAllByTestId('tab-egresos')[0]!;
     const bg = getComputedStyle(egresos).backgroundColor.toLowerCase();
     // Tamagui resolves "transparent" to either "transparent" or "rgba(0, 0, 0, 0)".
-    expect(
-      bg === 'transparent' || bg.includes('rgba(0, 0, 0, 0)') || bg === '',
-    ).toBe(true);
+    expect(bg === 'transparent' || bg.includes('rgba(0, 0, 0, 0)') || bg === '').toBe(true);
   });
 
   it('fires onPress when an inactive tab is pressed', () => {
@@ -174,9 +185,7 @@ describe('BottomTabBar', () => {
     });
 
     it('warns and clamps to the first 6 when more than 6 items are passed', () => {
-      renderWithProviders(
-        <BottomTabBar activeKey="tab0" items={makeItems(8)} />,
-      );
+      renderWithProviders(<BottomTabBar activeKey="tab0" items={makeItems(8)} />);
       expect(warnSpy).toHaveBeenCalledOnce();
       // First 6 rendered, 7..8 dropped.
       expect(screen.getByText('Tab5')).toBeDefined();

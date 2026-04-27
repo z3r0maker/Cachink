@@ -57,11 +57,20 @@ describe('parseMode', () => {
     expect(parseMode(null)).toBeNull();
   });
 
-  it('accepts all four documented mode names', () => {
-    expect(parseMode('local-standalone')).toBe('local-standalone');
-    expect(parseMode('tablet-only')).toBe('tablet-only');
-    expect(parseMode('lan')).toBe('lan');
+  it('accepts all four documented mode names (ADR-039)', () => {
+    expect(parseMode('local')).toBe('local');
     expect(parseMode('cloud')).toBe('cloud');
+    expect(parseMode('lan-server')).toBe('lan-server');
+    expect(parseMode('lan-client')).toBe('lan-client');
+  });
+
+  it('migrates legacy local-standalone and tablet-only values to "local"', () => {
+    expect(parseMode('local-standalone')).toBe('local');
+    expect(parseMode('tablet-only')).toBe('local');
+  });
+
+  it('returns the legacy-lan sentinel for the pre-ADR-039 "lan" value', () => {
+    expect(parseMode('lan')).toBe('legacy-lan');
   });
 });
 
@@ -94,7 +103,7 @@ describe('AppConfigProvider — returning user', () => {
     const storedDeviceId = '01JPHK00000000000000000003' as DeviceId;
     const storedBusinessId = '01JPHK00000000000000000004' as BusinessId;
     await repo.set(APP_CONFIG_KEYS.deviceId, storedDeviceId);
-    await repo.set(APP_CONFIG_KEYS.mode, 'local-standalone');
+    await repo.set(APP_CONFIG_KEYS.mode, 'local');
     await repo.set(APP_CONFIG_KEYS.currentBusinessId, storedBusinessId);
     const generateDeviceId = vi.fn(() => 'should-not-be-called' as unknown as DeviceId);
 
@@ -106,9 +115,58 @@ describe('AppConfigProvider — returning user', () => {
 
     await waitFor(() => expect(screen.getByTestId('hydrated').textContent).toBe('yes'));
     expect(screen.getByTestId('deviceId').textContent).toBe(storedDeviceId);
-    expect(screen.getByTestId('mode').textContent).toBe('local-standalone');
+    expect(screen.getByTestId('mode').textContent).toBe('local');
     expect(screen.getByTestId('businessId').textContent).toBe(storedBusinessId);
     expect(generateDeviceId).not.toHaveBeenCalled();
+  });
+
+  it('migrates legacy "tablet-only" to "local" and rewrites the stored value (ADR-039)', async () => {
+    resetStore();
+    const repo = new InMemoryAppConfigRepository();
+    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000010');
+    await repo.set(APP_CONFIG_KEYS.mode, 'tablet-only');
+
+    renderWithProviders(
+      <AppConfigProvider appConfig={repo}>
+        <Probe />
+      </AppConfigProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('local'));
+    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('local');
+  });
+
+  it('migrates legacy "lan" via resolveLegacyLan callback (ADR-039)', async () => {
+    resetStore();
+    const repo = new InMemoryAppConfigRepository();
+    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000011');
+    await repo.set(APP_CONFIG_KEYS.mode, 'lan');
+    const resolver = vi.fn(async (): Promise<'lan-server' | 'lan-client'> => 'lan-server');
+
+    renderWithProviders(
+      <AppConfigProvider appConfig={repo} resolveLegacyLan={resolver}>
+        <Probe />
+      </AppConfigProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('lan-server'));
+    expect(resolver).toHaveBeenCalled();
+    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('lan-server');
+  });
+
+  it('defaults legacy "lan" to "lan-client" when no resolver is provided', async () => {
+    resetStore();
+    const repo = new InMemoryAppConfigRepository();
+    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000012');
+    await repo.set(APP_CONFIG_KEYS.mode, 'lan');
+
+    renderWithProviders(
+      <AppConfigProvider appConfig={repo}>
+        <Probe />
+      </AppConfigProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('lan-client'));
   });
 
   it('narrows a rogue mode value to null so the wizard re-runs', async () => {

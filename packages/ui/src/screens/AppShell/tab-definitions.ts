@@ -7,15 +7,21 @@
  *
  * Kept separate from the screen component so tab lists can be referenced
  * from deep-links, tests, or the Maestro flows without mounting React.
+ *
+ * Per ADR-040 the `icon` field is a curated `IconName` from the
+ * `<Icon>` primitive — emoji glyphs were retired in the April 2026
+ * design refresh.
  */
+
+import type { IconName } from '../../components/Icon/index';
 
 export interface TabDefinition {
   /** Stable identifier used as BottomTabBar `activeKey`. */
   readonly key: string;
   /** i18n key under `tabs.*` (e.g. `ventas` → `t('tabs.ventas')`). */
   readonly labelKey: string;
-  /** Emoji placeholder; icon-library swap happens in a later phase. */
-  readonly icon: string;
+  /** Vector glyph name from the curated `<Icon>` set (ADR-040). */
+  readonly icon: IconName;
   /**
    * Route path used by the app-shell router to navigate. Mobile uses
    * Expo Router segments; desktop will use wouter paths. Both agree on
@@ -26,9 +32,9 @@ export interface TabDefinition {
 
 /** Operativo — 3 tabs per CLAUDE.md §1. */
 export const OPERATIVO_TABS: readonly TabDefinition[] = [
-  { key: 'ventas', labelKey: 'tabs.ventas', icon: '💵', path: '/ventas' },
-  { key: 'egresos', labelKey: 'tabs.egresos', icon: '📝', path: '/egresos' },
-  { key: 'inventario', labelKey: 'tabs.inventario', icon: '📦', path: '/inventario' },
+  { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
+  { key: 'egresos', labelKey: 'tabs.egresos', icon: 'file-text', path: '/egresos' },
+  { key: 'inventario', labelKey: 'tabs.inventario', icon: 'package', path: '/inventario' },
 ] as const;
 
 /**
@@ -36,12 +42,12 @@ export const OPERATIVO_TABS: readonly TabDefinition[] = [
  * Home + the Venta form, not from a top-level tab.
  */
 export const DIRECTOR_TABS: readonly TabDefinition[] = [
-  { key: 'home', labelKey: 'tabs.home', icon: '🏠', path: '/' },
-  { key: 'ventas', labelKey: 'tabs.ventas', icon: '💵', path: '/ventas' },
-  { key: 'egresos', labelKey: 'tabs.egresos', icon: '📝', path: '/egresos' },
-  { key: 'inventario', labelKey: 'tabs.inventario', icon: '📦', path: '/inventario' },
-  { key: 'estados', labelKey: 'tabs.estados', icon: '📊', path: '/estados' },
-  { key: 'ajustes', labelKey: 'tabs.ajustes', icon: '⚙️', path: '/ajustes' },
+  { key: 'home', labelKey: 'tabs.home', icon: 'home', path: '/' },
+  { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
+  { key: 'egresos', labelKey: 'tabs.egresos', icon: 'file-text', path: '/egresos' },
+  { key: 'inventario', labelKey: 'tabs.inventario', icon: 'package', path: '/inventario' },
+  { key: 'estados', labelKey: 'tabs.estados', icon: 'chart-bar', path: '/estados' },
+  { key: 'ajustes', labelKey: 'tabs.ajustes', icon: 'settings', path: '/ajustes' },
 ] as const;
 
 /** Pick the right tab list for the current role. */

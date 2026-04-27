@@ -35,6 +35,7 @@ import {
   type DatabaseProviderProps,
   type AsyncDatabaseProviderProps,
 } from './_internal';
+import { webResetDatabase } from './database-reset.web';
 import { runMigrations } from './run-migrations';
 
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
@@ -62,9 +63,14 @@ export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
 
 async function createDesktopDatabase(): Promise<CachinkDatabase> {
   const tauriDb = await Database.load(DB_PATH);
-  const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
-  await runMigrations(db);
-  return db;
+  try {
+    const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
+    await runMigrations(db);
+    return db;
+  } catch (error) {
+    await tauriDb.close().catch(() => false);
+    throw error;
+  }
 }
 
 export function DatabaseProvider(props: DatabaseProviderProps): ReactElement | null {
@@ -74,6 +80,7 @@ export function DatabaseProvider(props: DatabaseProviderProps): ReactElement | n
     children: props.children,
     database: props.database,
     create,
+    reset: webResetDatabase,
   };
   return <AsyncDatabaseProvider {...asyncProps} />;
 }

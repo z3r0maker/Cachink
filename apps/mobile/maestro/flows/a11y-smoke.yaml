@@ -1,0 +1,18 @@
+# a11y smoke — navigates Director Home and confirms every accessibilityLabel
+# / testID is rendered (P1C-M12-T04, S4-C22).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "role-director-select"
+
+# The role chip, tab bar, hero, and strip all need visible anchors.
+- assertVisible:
+    id: "top-bar-role-chip"
+- assertVisible:
+    id: "bottom-tab-bar"
+- assertVisible:
+    id: "utilidad-hero"
+- assertVisible:
+    id: "hoy-kpi-strip"

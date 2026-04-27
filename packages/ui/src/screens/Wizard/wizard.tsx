@@ -1,130 +1,172 @@
 /**
- * Wizard — first-run database-mode picker (P1C-M2-T03).
+ * Wizard — first-run setup picker (ADR-039 four-screen state machine).
  *
- * Single-screen decision: 4 mode cards per CLAUDE.md §7.4.
- *   1. 📱 Solo este dispositivo — default highlight. Functional. Phase 1C.
- *   2. ☁️ En la nube — disabled ("Próximamente"). Phase 1E.
- *   3. 🏠 Conectar a un servidor local — disabled. Phase 1D.
- *   4. 🖥️ Ser el servidor local — disabled AND hidden on mobile (Tauri-only
- *      decision) — mobile consumers pass `platform="mobile"`.
- *
- * Tapping a functional card fires `onSelectMode('local-standalone')`; the
- * app-shell route then writes the mode to AppConfig and routes to the
- * business-creation step. Disabled cards are no-ops.
+ * Reads the active step from `useWizardStore` and renders the matching
+ * screen. The store resets on mount so re-runs from Settings start at
+ * Step 1. Cloud sub-flow integration is intentionally minimal — once
+ * the user picks a cloud branch the orchestrator fires
+ * `onSelectMode('cloud')` and the shell's CloudGate takes over with the
+ * sign-in/sign-up UI (see ARCHITECTURE.md §"ADR-039").
  */
 
-import type { ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
-import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { useEffect, useState, type ReactElement } from 'react';
+import { View } from '@tamagui/core';
+import { colors } from '../../theme';
 import type { AppMode } from '../../app-config/index';
-import { WizardCard } from './wizard-card';
+import {
+  useWizardBack,
+  useWizardGoTo,
+  useWizardPreselect,
+  useWizardPreselectedScenario,
+  useWizardReset,
+  useWizardStep,
+  type WizardScenario,
+} from './state';
+import { Step1WelcomeScreen } from './step1-welcome';
+import { Step2aSoloScreen } from './step2a-solo';
+import { Step2bMultiScreen } from './step2b-multi';
+import { Step3JoinExistingScreen } from './step3-join-existing';
+import { HelpModal } from './help-modal';
+import { MigrationDeferredScreen } from './migration-deferred-screen';
 
-type T = ReturnType<typeof useTranslation>['t'];
+type Platform = 'mobile' | 'desktop';
+
+/**
+ * @deprecated since ADR-039 — kept as an empty alias for one release to
+ * avoid breaking unrelated app-shell call-sites mid-migration.
+ */
+export interface WizardSelectOptions {
+  readonly lanRole?: 'host' | 'client';
+}
 
 export interface WizardProps {
   readonly onSelectMode: (mode: AppMode) => void;
-  /** 'mobile' hides the "Ser el servidor local" card (desktop-only option). */
-  readonly platform?: 'mobile' | 'desktop';
+  readonly platform?: Platform;
   readonly testID?: string;
+  readonly onHelpOpened?: () => void;
 }
 
-function WizardHeader({ title, subtitle }: { title: string; subtitle: string }): ReactElement {
+interface ScreenProps {
+  readonly platform: Platform;
+  readonly onSelectMode: (mode: AppMode) => void;
+  readonly onOpenHelp: () => void;
+}
+
+function Step1View({ platform, onOpenHelp }: ScreenProps): ReactElement {
+  const goTo = useWizardGoTo();
+  const preselected = useWizardPreselectedScenario();
   return (
-    <>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={36}
-        letterSpacing={typography.letterSpacing.tightest}
-        color={colors.black}
-        textAlign="center"
-      >
-        {title}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={16}
-        color={colors.gray600}
-        textAlign="center"
-        marginBottom={8}
-      >
-        {subtitle}
-      </Text>
-    </>
-  );
-}
-
-interface DisabledCardProps {
-  readonly testID: string;
-  readonly emoji: string;
-  readonly title: string;
-  readonly hint: string;
-  readonly comingSoonLabel: string;
-}
-
-function DisabledCard(props: DisabledCardProps): ReactElement {
-  return (
-    <WizardCard
-      testID={props.testID}
-      emoji={props.emoji}
-      title={props.title}
-      hint={props.hint}
-      disabled
-      comingSoonLabel={props.comingSoonLabel}
+    <Step1WelcomeScreen
+      platform={platform}
+      preselectedScenario={preselected}
+      onSelectSolo={() => goTo('step2a')}
+      onSelectMulti={() => goTo('step2b')}
+      onJoinExistingLink={() => goTo('step3')}
+      onHelpLink={onOpenHelp}
     />
   );
 }
 
-interface WizardCardsProps {
-  readonly t: T;
-  readonly platform: 'mobile' | 'desktop';
-  readonly onSelectMode: (mode: AppMode) => void;
-}
-
-function WizardCards({ t, platform, onSelectMode }: WizardCardsProps): ReactElement {
-  const comingSoon = t('wizard.comingSoon');
+function Step2aView({ onSelectMode }: ScreenProps): ReactElement {
+  const back = useWizardBack();
+  const goTo = useWizardGoTo();
   return (
-    <>
-      <WizardCard
-        testID="wizard-local-standalone"
-        emoji="📱"
-        title={t('wizard.localStandalone.title')}
-        hint={t('wizard.localStandalone.hint')}
-        highlighted
-        onPress={() => onSelectMode('local-standalone')}
-      />
-      <DisabledCard
-        testID="wizard-cloud"
-        emoji="☁️"
-        title={t('wizard.cloud.title')}
-        hint={t('wizard.cloud.hint')}
-        comingSoonLabel={comingSoon}
-      />
-      <DisabledCard
-        testID="wizard-lan-client"
-        emoji="🏠"
-        title={t('wizard.lanClient.title')}
-        hint={t('wizard.lanClient.hint')}
-        comingSoonLabel={comingSoon}
-      />
-      {platform === 'desktop' && (
-        <DisabledCard
-          testID="wizard-lan-host"
-          emoji="🖥️"
-          title={t('wizard.lanHost.title')}
-          hint={t('wizard.lanHost.hint')}
-          comingSoonLabel={comingSoon}
-        />
-      )}
-    </>
+    <Step2aSoloScreen
+      onSelectLocal={() => onSelectMode('local')}
+      onSelectCloud={() => goTo('cloudSignUp')}
+      onBack={back}
+    />
   );
 }
 
+function Step2bView({ platform, onSelectMode }: ScreenProps): ReactElement {
+  const back = useWizardBack();
+  const goTo = useWizardGoTo();
+  return (
+    <Step2bMultiScreen
+      platform={platform}
+      onSelectLanServer={() => onSelectMode('lan-server')}
+      onSelectCloud={() => goTo('cloudSignUp')}
+      onImportLink={() => goTo('migrationDeferred')}
+      onBack={back}
+    />
+  );
+}
+
+function Step3View({ onSelectMode }: ScreenProps): ReactElement {
+  const back = useWizardBack();
+  const goTo = useWizardGoTo();
+  return (
+    <Step3JoinExistingScreen
+      onSelectLanClient={() => onSelectMode('lan-client')}
+      onSelectCloudSignIn={() => goTo('cloudSignIn')}
+      onBack={back}
+    />
+  );
+}
+
+function CloudHandoff({ onSelectMode }: { onSelectMode: (mode: AppMode) => void }): ReactElement {
+  // The wizard hands over to `<CloudGate>` once mode='cloud' is written —
+  // CloudOnboardingScreen owns the sign-in/sign-up UI. Render null while
+  // the shell transitions.
+  useEffect(() => {
+    onSelectMode('cloud');
+  }, [onSelectMode]);
+  return <></>;
+}
+
+function ActiveStep(props: ScreenProps): ReactElement {
+  const step = useWizardStep();
+  switch (step) {
+    case 'step1':
+      return <Step1View {...props} />;
+    case 'step2a':
+      return <Step2aView {...props} />;
+    case 'step2b':
+      return <Step2bView {...props} />;
+    case 'step3':
+      return <Step3View {...props} />;
+    case 'cloudSignUp':
+    case 'cloudSignIn':
+      return <CloudHandoff onSelectMode={props.onSelectMode} />;
+    case 'migrationDeferred':
+      return <MigrationDeferredFromBack />;
+    default:
+      return <Step1View {...props} />;
+  }
+}
+
+function MigrationDeferredFromBack(): ReactElement {
+  const back = useWizardBack();
+  return <MigrationDeferredScreen onBack={back} />;
+}
+
+function useHelpModalController(onHelpOpened?: () => void): {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+  pickScenario: (s: WizardScenario) => void;
+} {
+  const preselect = useWizardPreselect();
+  const goTo = useWizardGoTo();
+  const [open, setOpenInternal] = useState(false);
+  const setOpen = (v: boolean): void => {
+    if (v && onHelpOpened) onHelpOpened();
+    setOpenInternal(v);
+  };
+  const pickScenario = (s: WizardScenario): void => {
+    preselect(s);
+    goTo(s === 'multi-device' ? 'step2b' : 'step2a');
+  };
+  return { open, setOpen, pickScenario };
+}
+
 export function Wizard(props: WizardProps): ReactElement {
-  const { t } = useTranslation();
   const platform = props.platform ?? 'desktop';
+  const reset = useWizardReset();
+  useEffect(() => {
+    reset();
+  }, [reset]);
+  const help = useHelpModalController(props.onHelpOpened);
   return (
     <View
       testID={props.testID ?? 'wizard'}
@@ -133,10 +175,14 @@ export function Wizard(props: WizardProps): ReactElement {
       alignItems="center"
       justifyContent="center"
       padding={24}
-      gap={16}
+      gap={14}
     >
-      <WizardHeader title={t('wizard.title')} subtitle={t('wizard.subtitle')} />
-      <WizardCards t={t} platform={platform} onSelectMode={props.onSelectMode} />
+      <ActiveStep
+        platform={platform}
+        onSelectMode={props.onSelectMode}
+        onOpenHelp={() => help.setOpen(true)}
+      />
+      <HelpModal open={help.open} onClose={() => help.setOpen(false)} onPick={help.pickScenario} />
     </View>
   );
 }

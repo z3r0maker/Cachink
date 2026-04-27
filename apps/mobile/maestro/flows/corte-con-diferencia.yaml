@@ -1,0 +1,35 @@
+# Close the day with a non-zero diferencia → explicación becomes required.
+# Covers the diferencia-≠-0 branch of P1C-M7-T03 (Slice 3 M7).
+#
+# Precondition: device clock is past 18:00 and today already has at least
+# one venta in Efectivo of 150 MXN. Run wizard-local-standalone.yaml +
+# venta-efectivo.yaml first.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-ventas"
+- tapOn:
+    id: "corte-de-dia-cta"
+- assertVisible: "Corte de día"
+
+# Contado 100 vs esperado 150 → diferencia -50 → explicación required.
+- tapOn:
+    id: "corte-contado-input"
+- inputText: "100"
+- tapOn:
+    id: "corte-submit"
+
+# Modal still open because explicación is missing.
+- assertVisible: "Corte de día"
+- tapOn:
+    id: "corte-explicacion-input"
+- inputText: "Propina dada por error"
+- tapOn:
+    id: "corte-submit"
+
+# Modal closes and the card hides now that the corte exists.
+- assertNotVisible: "Corte de día"
+- assertNotVisible:
+    id: "corte-de-dia-card"

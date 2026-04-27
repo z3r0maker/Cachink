@@ -9,7 +9,8 @@
 import { useState, type ReactElement } from 'react';
 import type { InventoryCategory, InventoryUnit } from '@cachink/domain';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
-import { Btn, Input, Modal, Scanner } from '../../components/index';
+import { Btn, Icon, Input, Modal, Scanner } from '../../components/index';
+import { IntegerField, MoneyField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import {
   INV_CATEGORIAS,
@@ -33,20 +34,22 @@ function PrimaryFields({ form, t }: { form: ProductoFormApi; t: T }): ReactEleme
   const { state, errors, update } = form;
   return (
     <>
-      <Input
+      <TextField
         label={t('nuevoProducto.nombreLabel')}
         placeholder={t('nuevoProducto.nombrePlaceholder')}
         value={state.nombre}
         onChange={(v) => update({ nombre: v })}
         note={errors.nombre}
         testID="producto-nombre"
+        returnKeyType="next"
       />
-      <Input
+      <TextField
         label={t('nuevoProducto.skuLabel')}
         placeholder={t('nuevoProducto.skuPlaceholder')}
         value={state.sku}
         onChange={(v) => update({ sku: v })}
         testID="producto-sku"
+        returnKeyType="next"
       />
       <Input
         type="select"
@@ -60,17 +63,23 @@ function PrimaryFields({ form, t }: { form: ProductoFormApi; t: T }): ReactEleme
   );
 }
 
-function SecondaryFields({ form, t }: { form: ProductoFormApi; t: T }): ReactElement {
+interface FieldsBlockProps {
+  form: ProductoFormApi;
+  t: T;
+  onSubmitEditing?: () => void;
+}
+
+function SecondaryFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
   const { state, errors, update } = form;
   return (
     <>
-      <Input
-        type="number"
+      <MoneyField
         label={t('nuevoProducto.costoUnitLabel')}
         value={state.costoPesos}
         onChange={(v) => update({ costoPesos: v })}
         note={errors.costo}
         testID="producto-costo"
+        returnKeyType="next"
       />
       <Input
         type="select"
@@ -80,23 +89,26 @@ function SecondaryFields({ form, t }: { form: ProductoFormApi; t: T }): ReactEle
         options={INV_UNIDADES}
         testID="producto-unidad"
       />
-      <Input
-        type="number"
+      <IntegerField
         label={t('nuevoProducto.umbralLabel')}
         value={state.umbral}
         onChange={(v) => update({ umbral: v })}
         note={errors.umbral}
+        min={0}
         testID="producto-umbral"
+        returnKeyType="done"
+        onSubmitEditing={onSubmitEditing}
       />
     </>
   );
 }
 
-function ProductoFields({ form, t }: { form: ProductoFormApi; t: T }): ReactElement {
+/** Audit 5.4 — Bluetooth-keyboard Enter-to-submit threads through {@link FieldsBlockProps}. */
+function ProductoFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
   return (
     <>
       <PrimaryFields form={form} t={t} />
-      <SecondaryFields form={form} t={t} />
+      <SecondaryFields form={form} t={t} onSubmitEditing={onSubmitEditing} />
     </>
   );
 }
@@ -111,8 +123,14 @@ function ScanSkuBtn({
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Btn variant="ghost" onPress={() => setOpen(true)} fullWidth testID="producto-scan">
-        {`📷 ${label}`}
+      <Btn
+        variant="ghost"
+        onPress={() => setOpen(true)}
+        fullWidth
+        icon={<Icon name="camera" size={16} />}
+        testID="producto-scan"
+      >
+        {label}
       </Btn>
       <Scanner
         open={open}
@@ -146,7 +164,7 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       title={t('nuevoProducto.title')}
       testID="nuevo-producto-modal"
     >
-      <ProductoFields form={form} t={t} />
+      <ProductoFields form={form} t={t} onSubmitEditing={handleSubmit} />
       <ScanSkuBtn onScanned={(code) => form.update({ sku: code })} label={t('scanner.title')} />
       <Btn
         variant="primary"

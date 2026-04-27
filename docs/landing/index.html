@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cachink! — Finanzas para emprendedores</title>
+    <meta
+      name="description"
+      content="La app más simple para llevar las finanzas de tu negocio en México. Ventas, egresos, inventario y estados financieros NIF. Funciona sin internet."
+    />
+    <link rel="icon" type="image/png" href="/assets/icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --yellow: #ffd60a;
+        --black: #0d0d0d;
+        --offwhite: #f7f7f5;
+        --gray: #5a5a56;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: var(--offwhite);
+        color: var(--black);
+        line-height: 1.5;
+      }
+      header.hero {
+        background: var(--yellow);
+        padding: 80px 20px;
+        text-align: center;
+        border-bottom: 3px solid var(--black);
+      }
+      header.hero h1 {
+        font-weight: 900;
+        font-size: clamp(36px, 6vw, 72px);
+        letter-spacing: -0.04em;
+        margin-bottom: 12px;
+      }
+      header.hero p.subtitle {
+        font-weight: 600;
+        font-size: clamp(16px, 2vw, 22px);
+        color: var(--black);
+        max-width: 640px;
+        margin: 0 auto 32px;
+      }
+      .cta-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+      .cta-btn {
+        display: inline-block;
+        padding: 14px 24px;
+        background: var(--black);
+        color: var(--offwhite);
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 16px;
+        border: 3px solid var(--black);
+        border-radius: 14px;
+        box-shadow: 4px 4px 0 var(--black);
+        transition: transform 0.05s, box-shadow 0.05s;
+      }
+      .cta-btn:hover { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
+      .cta-btn.ghost { background: var(--yellow); color: var(--black); }
+      section.features { padding: 80px 20px; max-width: 1200px; margin: 0 auto; }
+      section.features h2 {
+        font-weight: 900;
+        font-size: clamp(28px, 4vw, 44px);
+        letter-spacing: -0.03em;
+        text-align: center;
+        margin-bottom: 40px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: white;
+        border: 2.5px solid var(--black);
+        border-radius: 18px;
+        padding: 24px;
+        box-shadow: 4px 4px 0 var(--black);
+      }
+      .card h3 {
+        font-weight: 800;
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+      .card p {
+        color: var(--gray);
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .emoji { font-size: 36px; margin-bottom: 12px; }
+      footer {
+        background: var(--black);
+        color: var(--offwhite);
+        padding: 40px 20px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+      }
+      footer a { color: var(--yellow); text-decoration: none; margin: 0 12px; }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <h1>Cachink!</h1>
+      <p class="subtitle">Finanzas para emprendedores. Simple, en español, y sin enredos.</p>
+      <div class="cta-row">
+        <a class="cta-btn" href="https://apps.apple.com/mx/app/cachink/id0000000000">App Store</a>
+        <a class="cta-btn" href="https://play.google.com/store/apps/details?id=mx.cachink.mobile">Google Play</a>
+        <a class="cta-btn ghost" href="https://github.com/cachink/cachink/releases/latest">Mac / Windows</a>
+      </div>
+    </header>
+
+    <section class="features">
+      <h2>Lleva tu negocio en orden</h2>
+      <div class="grid">
+        <div class="card"><div class="emoji">📈</div><h3>Ventas</h3><p>Efectivo, transferencia, tarjeta, QR/CoDi o crédito. Comprobante por WhatsApp en un toque.</p></div>
+        <div class="card"><div class="emoji">📉</div><h3>Egresos</h3><p>Gasto, nómina e inventario en un mismo flujo. Gastos recurrentes con recordatorios automáticos.</p></div>
+        <div class="card"><div class="emoji">📦</div><h3>Inventario</h3><p>Productos, movimientos de stock, y alertas de bajo inventario al final del día.</p></div>
+        <div class="card"><div class="emoji">📊</div><h3>Estados NIF</h3><p>Resultados, balance y flujo de efectivo. Informe mensual en PDF para tu contador.</p></div>
+        <div class="card"><div class="emoji">🌙</div><h3>Sin internet</h3><p>Funciona fuera de línea por defecto. Sincroniza cuando quieras — por Wi-Fi o en la nube.</p></div>
+        <div class="card"><div class="emoji">🔒</div><h3>Tu privacidad</h3><p>Todo se queda en tu dispositivo. Exporta cuando quieras. Reportes de errores solo si tú aceptas.</p></div>
+      </div>
+    </section>
+
+    <footer>
+      <p>© 2026 Cachink! · Hecho con ❤️ en México</p>
+      <p style="margin-top: 8px;">
+        <a href="/privacidad">Privacidad</a> ·
+        <a href="/terminos">Términos</a> ·
+        <a href="mailto:contacto@cachink.mx">Contacto</a>
+      </p>
+    </footer>
+  </body>
+</html>

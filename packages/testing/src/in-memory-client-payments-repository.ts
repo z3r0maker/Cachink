@@ -3,9 +3,11 @@
  */
 
 import type {
+  BusinessId,
   ClientPayment,
   ClientPaymentId,
   DeviceId,
+  IsoDate,
   IsoTimestamp,
   Money,
   NewClientPayment,
@@ -57,6 +59,22 @@ export class InMemoryClientPaymentsRepository implements ClientPaymentsRepositor
   async sumByVenta(ventaId: SaleId): Promise<Money> {
     const rows = await this.findByVenta(ventaId);
     return rows.length === 0 ? ZERO : sum(rows.map((r) => r.montoCentavos));
+  }
+
+  async findByDateRange(
+    from: IsoDate,
+    to: IsoDate,
+    businessId: BusinessId,
+  ): Promise<readonly ClientPayment[]> {
+    return [...this.rows.values()]
+      .filter(
+        (r) =>
+          r.businessId === businessId && r.deletedAt === null && r.fecha >= from && r.fecha <= to,
+      )
+      .sort((a, b) => {
+        if (a.fecha !== b.fecha) return b.fecha.localeCompare(a.fecha);
+        return b.createdAt.localeCompare(a.createdAt);
+      });
   }
 
   async delete(id: ClientPaymentId): Promise<void> {

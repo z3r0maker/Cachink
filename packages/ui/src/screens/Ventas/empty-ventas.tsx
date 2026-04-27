@@ -16,7 +16,7 @@ export function EmptyVentas({ onNuevaVenta }: EmptyVentasProps): ReactElement {
   const { t } = useTranslation();
   return (
     <EmptyState
-      emoji="🧾"
+      icon="receipt"
       title={t('ventas.emptyTitle')}
       description={t('ventas.emptyBody')}
       action={

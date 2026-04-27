@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { Client, ClientPayment, Money, Sale } from '@cachink/domain';
 import { formatDate, formatMoney } from '@cachink/domain';
-import { Btn, Card, EmptyState, SectionTitle, Tag } from '../../components/index';
+import { Btn, Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
@@ -126,23 +126,29 @@ function PendingVentasList({
   props: ClienteDetailScreenProps;
   t: ReturnType<typeof useTranslation>['t'];
 }): ReactElement {
-  if (props.pendingSales.length === 0) {
-    return (
-      <EmptyState emoji="✅" title={t('cuentasPorCobrar.empty')} testID="cliente-detail-empty" />
-    );
-  }
   return (
-    <View gap={10}>
-      {props.pendingSales.map((venta) => (
-        <VentaPendienteRow
-          key={venta.id}
-          venta={venta}
-          pagos={props.pagosByVenta.get(venta.id) ?? []}
-          onRegistrarPago={() => props.onRegistrarPago(venta)}
-          t={t}
+    <List<Sale>
+      data={props.pendingSales}
+      keyExtractor={(venta) => venta.id}
+      renderItem={(venta) => (
+        <View marginBottom={10}>
+          <VentaPendienteRow
+            venta={venta}
+            pagos={props.pagosByVenta.get(venta.id) ?? []}
+            onRegistrarPago={() => props.onRegistrarPago(venta)}
+            t={t}
+          />
+        </View>
+      )}
+      ListEmptyComponent={
+        <EmptyState
+          icon="check"
+          title={t('cuentasPorCobrar.empty')}
+          testID="cliente-detail-empty"
         />
-      ))}
-    </View>
+      }
+      testID="cliente-detail-pending-list"
+    />
   );
 }
 

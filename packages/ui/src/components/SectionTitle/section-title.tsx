@@ -41,11 +41,26 @@ function Title({ text }: { text: string }): ReactElement {
   return (
     <Text
       testID="section-title-text"
+      // Audit Round 2 G1: section eyebrows are semantically headings
+      // — surface as `role="heading"` with `aria-level={2}` so screen
+      // readers can build the document outline. h1 is reserved for the
+      // screen title; section eyebrows are h2.
+      role="heading"
+      aria-level={2}
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
       fontSize={12}
       letterSpacing={typography.letterSpacing.wide}
+      // Audit 9.3 — long Spanish section labels ("ACTIVIDAD RECIENTE",
+      // "CUENTAS POR COBRAR") wrap awkwardly on phone widths when the
+      // right `action` slot is also rendered. Cap to one line + ellipsis.
+      numberOfLines={1}
+      ellipsizeMode="tail"
+      // Audit 9.4 — Dynamic Type / Android font scaling above 130 %
+      // would push the eyebrow's height past the 12-pt rhythm and
+      // misalign with the action slot. Cap at 1.3×.
+      maxFontSizeMultiplier={1.3}
       style={{ textTransform: 'uppercase' }}
     >
       {text}

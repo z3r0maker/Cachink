@@ -93,4 +93,27 @@ describe('ComprobantePreview', () => {
     fireEvent.click(btn);
     expect(onClose).toHaveBeenCalled();
   });
+
+  // Audit M-1 PR 3 fix (audit 2.16): the preview frame on web/Tauri now
+  // mounts a sandboxed `<iframe srcDoc>` that renders the receipt 1:1.
+  // The previous implementation displayed raw HTML source as
+  // monospace text — so this assertion would have failed against the
+  // pre-PR 3 frame (no iframe in the tree).
+  it('renders an iframe with the comprobante HTML on the web variant', () => {
+    renderWithProviders(
+      <ComprobantePreview
+        open
+        onClose={vi.fn()}
+        sale={sale}
+        business={business}
+        onShare={vi.fn()}
+      />,
+    );
+    const iframe = screen.getByTestId('comprobante-preview-iframe') as HTMLIFrameElement;
+    expect(iframe.tagName).toBe('IFRAME');
+    expect(iframe.getAttribute('sandbox')).toBe('allow-same-origin');
+    // srcDoc is set to the generated HTML string — assert the
+    // wrapper handed it through verbatim.
+    expect(iframe.srcdoc).toContain('<!doctype html>');
+  });
 });

@@ -1,0 +1,25 @@
+# Director Home shell E2E — launch, pick Director, assert every
+# Director Home card renders (P1C-M10-T01..T05, S4-C8).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Role picker → Director → lands on /
+- tapOn:
+    id: "role-director-select"
+
+# Core shell anchors.
+- assertVisible:
+    id: "director-home-route"
+- assertVisible:
+    id: "utilidad-hero"
+- assertVisible:
+    id: "hoy-kpi-strip"
+- assertVisible:
+    id: "hoy-kpi-ventas"
+- assertVisible:
+    id: "hoy-kpi-egresos"
+- assertVisible:
+    id: "cxc-card"
+- assertVisible:
+    id: "actividad-reciente"

@@ -1,6 +1,6 @@
 {
   "name": "cachink",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Finanzas para emprendedores — simple POS and financial control for Mexican small businesses",
   "packageManager": "pnpm@10.33.2+sha512.a90faf6feeab71ad6c6e57f94e0fe1a12f5dcc22cd754db40ae9593eb6a3e0b6b12e3540218bb37ae083404b1f2ce6db2a4121e979829b4aff94b99f49da1cf8",
@@ -19,7 +19,10 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\" --ignore-path .gitignore",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release:build": "./scripts/build-all.sh",
+    "release:dry-run": "./scripts/build-all.sh --dry-run",
+    "store:screenshots": "tsx scripts/take-store-screenshots.ts"
   },
   "devDependencies": {
     "@cachink/config": "workspace:*",

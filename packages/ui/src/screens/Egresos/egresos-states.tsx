@@ -1,13 +1,22 @@
 /**
- * Skeleton + error-banner + total-card sub-components extracted out of
- * EgresosScreen to respect the 200-line file budget (CLAUDE.md §4.4).
+ * Egresos-screen-scoped sub-components: TotalCard (red − amount),
+ * ErrorBanner (delegates to `<ErrorState>`), SkeletonRow (delegates
+ * to `<Skeleton.Row>`). Extracted out of EgresosScreen to respect the
+ * 200-line file budget (CLAUDE.md §4.4).
+ *
+ * Audit M-1 PR 5 (audit 6.4 + 6.5): the inline ErrorBanner and
+ * SkeletonRow shapes are now thin wrappers over the brand
+ * `<ErrorState>` and `<Skeleton.Row>` primitives. The screen-scoped
+ * testIDs (`egresos-skeleton-{index}`, `egresos-error`,
+ * `egresos-retry`) are preserved so existing E2E selectors keep
+ * working.
  */
 
 import type { ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
+import { Text } from '@tamagui/core';
 import type { Money } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
-import { Btn, Card } from '../../components/index';
+import { Card, ErrorState, Skeleton } from '../../components/index';
 import { colors, typography } from '../../theme';
 
 export function TotalCard({ label, total }: { label: string; total: Money }): ReactElement {
@@ -48,43 +57,17 @@ export function ErrorBanner({
   onRetry: () => void;
 }): ReactElement {
   return (
-    <Card testID="egresos-error" padding="md" fullWidth>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={18}
-        color={colors.red}
-      >
-        {title}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.gray600}
-        marginTop={6}
-        marginBottom={12}
-      >
-        {body}
-      </Text>
-      <Btn variant="danger" onPress={onRetry} testID="egresos-retry">
-        {retryLabel}
-      </Btn>
-    </Card>
+    <ErrorState
+      title={title}
+      body={body}
+      retryLabel={retryLabel}
+      onRetry={onRetry}
+      testID="egresos-error"
+      retryTestID="egresos-retry"
+    />
   );
 }
 
 export function SkeletonRow({ index }: { index: number }): ReactElement {
-  return (
-    <Card testID={`egresos-skeleton-${index}`} padding="md" fullWidth>
-      <View height={16} backgroundColor={colors.gray100} borderRadius={4} />
-      <View
-        height={16}
-        backgroundColor={colors.gray100}
-        borderRadius={4}
-        marginTop={8}
-        width="60%"
-      />
-    </Card>
-  );
+  return <Skeleton.Row index={index} testIDPrefix="egresos-skeleton" />;
 }

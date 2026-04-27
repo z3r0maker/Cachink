@@ -16,7 +16,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { useAppConfigRepository, useBusinessesRepository } from '../app/index';
+import { useAppConfigRepository, useBusinessesRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId, type Role } from '../app-config/index';
 import type { Business, BusinessId, DeviceId } from '@cachink/domain';
 import type { BusinessFormSubmitInput } from '../screens/BusinessForm/index';

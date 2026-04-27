@@ -49,9 +49,7 @@ export interface BottomTabBarProps {
 const MIN_ITEMS = 1;
 const MAX_ITEMS = 6;
 
-function clampItems(
-  items: readonly BottomTabBarItem[],
-): readonly BottomTabBarItem[] {
+function clampItems(items: readonly BottomTabBarItem[]): readonly BottomTabBarItem[] {
   if (items.length < MIN_ITEMS || items.length > MAX_ITEMS) {
     // Dev-mode warning — renders the first 6 to stay crash-free.
     console.warn(
@@ -65,6 +63,11 @@ function clampItems(
 /**
  * Renders the canonical Cachink bottom navigation strip. See
  * `bottom-tab-bar.stories.tsx` for the full variant catalog.
+ *
+ * Per ADR-040 the active state is a 4-px yellow strip pinned to the
+ * top of the active cell (matches the April 2026 design mocks 1/2/4),
+ * not a full-cell yellow background. Height bumped from 68 → 72 px so
+ * the icons can sit at 22-24 px while still leaving label clearance.
  */
 export function BottomTabBar(props: BottomTabBarProps): ReactElement {
   const items = clampItems(props.items);
@@ -72,7 +75,7 @@ export function BottomTabBar(props: BottomTabBarProps): ReactElement {
     <View
       testID={props.testID ?? 'bottom-tab-bar'}
       flexDirection="row"
-      height={68}
+      height={72}
       backgroundColor={colors.white}
       borderTopWidth={2.5}
       borderTopColor={colors.black}

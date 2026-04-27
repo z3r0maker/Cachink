@@ -16,7 +16,9 @@
     "./app-config": "./src/app-config/index.ts",
     "./app": "./src/app/index.ts",
     "./share": "./src/share/index.ts",
-    "./hooks": "./src/hooks/index.ts"
+    "./hooks": "./src/hooks/index.ts",
+    "./notifications": "./src/notifications/index.ts",
+    "./sync": "./src/sync/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
@@ -35,46 +37,88 @@
     "@cachink/application": "workspace:*",
     "@cachink/data": "workspace:*",
     "@cachink/domain": "workspace:*",
-    "drizzle-orm": "^0.45.0"
+    "@react-pdf/renderer": "^4.5.1",
+    "@sentry/browser": "^8.55.0",
+    "drizzle-orm": "^0.45.0",
+    "exceljs": "^4.4.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1"
   },
   "peerDependencies": {
+    "@cachink/sync-cloud": "workspace:*",
+    "@cachink/sync-lan": "workspace:*",
+    "@hookform/resolvers": "^5.2",
+    "@sentry/react-native": "^8",
     "@tamagui/core": "2.0.0-rc.41",
     "@tamagui/dialog": "2.0.0-rc.41",
     "@tamagui/input": "2.0.0-rc.41",
+    "@tamagui/popover": "2.0.0-rc.41",
+    "@tamagui/portal": "2.0.0-rc.41",
     "@tamagui/web": "2.0.0-rc.41",
     "@tanstack/react-query": "^5.62.0",
+    "@tauri-apps/plugin-fs": "^2",
+    "@tauri-apps/plugin-notification": "^2",
     "@tauri-apps/plugin-sql": "^2",
     "expo-camera": "~55",
+    "expo-file-system": "~19",
+    "expo-notifications": "~0.31",
     "expo-sqlite": "~55",
     "i18next": "^26",
+    "lucide-react": "^1.11.0",
+    "lucide-react-native": "^1.11.0",
     "react": "^19",
+    "react-hook-form": "^7.73",
     "react-i18next": "^17",
     "react-native": ">=0.83",
+    "react-native-svg": "^15.15.0",
     "ulid": "^3",
     "zustand": "^5"
   },
   "peerDependenciesMeta": {
+    "@cachink/sync-cloud": {
+      "optional": true
+    },
+    "@cachink/sync-lan": {
+      "optional": true
+    },
+    "@sentry/react-native": {
+      "optional": true
+    },
+    "@tauri-apps/plugin-fs": {
+      "optional": true
+    },
+    "@tauri-apps/plugin-notification": {
+      "optional": true
+    },
     "@tauri-apps/plugin-sql": {
       "optional": true
     },
     "expo-camera": {
       "optional": true
     },
+    "expo-file-system": {
+      "optional": true
+    },
+    "expo-notifications": {
+      "optional": true
+    },
     "expo-sqlite": {
+      "optional": true
+    },
+    "lucide-react-native": {
+      "optional": true
+    },
+    "react-native-svg": {
       "optional": true
     }
   },
   "devDependencies": {
     "@cachink/config": "workspace:*",
+    "@cachink/sync-cloud": "workspace:*",
+    "@cachink/sync-lan": "workspace:*",
     "@cachink/testing": "workspace:*",
+    "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.59.1",
-    "@tanstack/react-query": "^5.100.1",
-    "@tauri-apps/plugin-sql": "^2",
-    "better-sqlite3": "^11.8.0",
-    "expo-camera": "~55.0.16",
-    "expo-sqlite": "~55.0.15",
-    "ulid": "^3.0.0",
-    "zustand": "^5.0.12",
     "@storybook/addon-a11y": "^10.3.5",
     "@storybook/addon-docs": "^10.3.5",
     "@storybook/react-native-web-vite": "^10.3.5",
@@ -82,21 +126,36 @@
     "@tamagui/core": "2.0.0-rc.41",
     "@tamagui/dialog": "2.0.0-rc.41",
     "@tamagui/input": "2.0.0-rc.41",
+    "@tamagui/popover": "2.0.0-rc.41",
+    "@tamagui/portal": "2.0.0-rc.41",
+    "@tanstack/react-query": "^5.100.1",
+    "@tauri-apps/plugin-fs": "^2",
+    "@tauri-apps/plugin-notification": "^2",
+    "@tauri-apps/plugin-sql": "^2",
     "@testing-library/jest-dom": "^6",
     "@testing-library/react": "^16",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^3.0.0",
+    "better-sqlite3": "^11.8.0",
+    "expo-camera": "~55.0.16",
+    "expo-file-system": "~19.0.0",
+    "expo-notifications": "~0.31.4",
+    "expo-sqlite": "~55.0.15",
     "i18next": "^26",
     "jsdom": "^29",
+    "lucide-react": "^1.11.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "react-hook-form": "^7.73.1",
     "react-i18next": "^17",
     "react-native": "0.83.6",
     "react-native-web": "^0.21.0",
     "storybook": "^10.3.5",
     "typescript": "^5.7.0",
+    "ulid": "^3.0.0",
     "vite": "^7.0.4",
-    "vitest": "^3.0.0"
+    "vitest": "^3.0.0",
+    "zustand": "^5.0.12"
   }
 }

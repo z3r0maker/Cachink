@@ -20,3 +20,7 @@ export * from './cerrar-corte-de-dia/index.js';
 export * from './procesar-gasto-recurrente/index.js';
 export * from './generar-informe-mensual/index.js';
 export * from './exportar-datos/index.js';
+// Audit Round 2 J — partial-update use cases (powers swipe-to-edit).
+export * from './editar-venta/index.js';
+export * from './editar-egreso/index.js';
+export * from './editar-producto/index.js';

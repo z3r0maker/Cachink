@@ -1,0 +1,25 @@
+# Verify the Director can toggle stock-low notifications in Settings
+# (P1C-M11-T01..T03, S4-C13).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "role-director-select"
+
+# Open settings via the cog in the TopBar.
+- tapOn:
+    id: "top-bar-open-settings"
+
+- assertVisible:
+    id: "settings-notifications-toggle"
+
+# Toggle off.
+- tapOn:
+    id: "settings-notifications-btn"
+- assertVisible: "No"
+
+# Toggle on again.
+- tapOn:
+    id: "settings-notifications-btn"
+- assertVisible: "Sí"

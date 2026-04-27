@@ -12,7 +12,7 @@
  * leaking into the rest of the codebase.
  */
 
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   ClientId,
@@ -26,7 +26,7 @@ import type {
   SaleId,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { SalesRepository } from '../sales-repository.js';
+import type { SalePatch, SalesRepository } from '../sales-repository.js';
 import { sales } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -77,10 +77,29 @@ export class DrizzleSalesRepository implements SalesRepository {
     const rows = await this.#db
       .select()
       .from(sales)
-      .where(
-        and(eq(sales.fecha, date), eq(sales.businessId, businessId), isNull(sales.deletedAt)),
-      )
+      .where(and(eq(sales.fecha, date), eq(sales.businessId, businessId), isNull(sales.deletedAt)))
       .orderBy(desc(sales.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
+  async findByDateRange(
+    from: string,
+    to: string,
+    businessId: BusinessId,
+  ): Promise<readonly Sale[]> {
+    const rows = await this.#db
+      .select()
+      .from(sales)
+      .where(
+        and(
+          gte(sales.fecha, from),
+          lte(sales.fecha, to),
+          eq(sales.businessId, businessId),
+          isNull(sales.deletedAt),
+        ),
+      )
+      .orderBy(desc(sales.fecha), desc(sales.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
   }
@@ -108,6 +127,21 @@ export class DrizzleSalesRepository implements SalesRepository {
       .run();
   }
 
+  async update(id: SaleId, patch: SalePatch): Promise<Sale | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    const ts = now();
+    const updates: Record<string, unknown> = { updatedAt: ts };
+    if (patch.fecha !== undefined) updates.fecha = patch.fecha;
+    if (patch.concepto !== undefined) updates.concepto = patch.concepto;
+    if (patch.categoria !== undefined) updates.categoria = patch.categoria;
+    if (patch.monto !== undefined) updates.monto = patch.monto;
+    if (patch.metodo !== undefined) updates.metodo = patch.metodo;
+    if (patch.clienteId !== undefined) updates.clienteId = patch.clienteId;
+    await this.#db.update(sales).set(updates).where(eq(sales.id, id)).run();
+    return this.findById(id);
+  }
+
   async delete(id: SaleId): Promise<void> {
     const ts = now();
     await this.#db
@@ -115,6 +149,15 @@ export class DrizzleSalesRepository implements SalesRepository {
       .set({ deletedAt: ts, updatedAt: ts })
       .where(eq(sales.id, id))
       .run();
+  }
+
+  async count(businessId: BusinessId): Promise<number> {
+    const rows = await this.#db
+      .select({ id: sales.id })
+      .from(sales)
+      .where(and(eq(sales.businessId, businessId), isNull(sales.deletedAt)))
+      .all();
+    return rows.length;
   }
 
   #mapRow(row: SaleRow): Sale {

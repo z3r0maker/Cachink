@@ -15,7 +15,7 @@
  */
 
 import { createFont, createTamagui, createTokens } from '@tamagui/core';
-import { colors, radii } from './theme';
+import { breakpoints, colors, radii } from './theme';
 
 const plusJakartaSans = createFont({
   family: "'Plus Jakarta Sans', sans-serif",
@@ -45,6 +45,35 @@ const tokens = createTokens({
   zIndex: { 1: 0, 2: 10, 3: 100, 4: 1000 },
 });
 
+/**
+ * Media queries — consumed by `useMedia()` in component code.
+ *
+ * Keys map 1:1 onto the `breakpoints` scale in `./theme`. Each entry is a
+ * width-range query expressed in pixels:
+ *
+ *   - `sm`   → `maxWidth: gtSm - 1` (width <= 480)            → phone portrait
+ *   - `gtSm` → `minWidth: gtSm`     (width >= 481)            → phone landscape +
+ *   - `gtMd` → `minWidth: gtMd`     (width >= 769)            → tablet landscape +
+ *   - `gtLg` → `minWidth: gtLg`     (width >= 1281)           → wide desktop
+ *
+ * Usage example (see `packages/ui/src/responsive/README.md` for the full
+ * contract):
+ *
+ *   const media = useMedia();
+ *   if (media.gtMd) return <SplitPane left={...} right={...} />;
+ *   return <Stack>{...}</Stack>;
+ *
+ * The `gt*` ("greater-than") keys form a cumulative ladder — at 1500 px
+ * `gtSm`, `gtMd`, and `gtLg` are all `true`. Components decide on the
+ * highest-applicable key, not on exact ranges.
+ */
+const media = {
+  sm: { maxWidth: breakpoints.gtSm - 1 },
+  gtSm: { minWidth: breakpoints.gtSm },
+  gtMd: { minWidth: breakpoints.gtMd },
+  gtLg: { minWidth: breakpoints.gtLg },
+} as const;
+
 export const tamaguiConfig = createTamagui({
   fonts: { heading: plusJakartaSans, body: plusJakartaSans },
   tokens,
@@ -55,6 +84,7 @@ export const tamaguiConfig = createTamagui({
       borderColor: colors.black,
     },
   },
+  media,
   // Default font reference so `<Text>` without explicit font has something.
   defaultFont: 'body',
   settings: {

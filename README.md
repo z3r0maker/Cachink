@@ -8,7 +8,22 @@ A simple, mobile-first financial control and micro-POS app for Mexican emprended
 
 ## Status
 
-🚧 **Phase 0 — Foundation.** Not yet buildable; scaffolding in progress. See [`ROADMAP.md`](./ROADMAP.md) for the implementation plan.
+⚠️ **Phase 1 — Incomplete (post-audit reframe, 2026-04-24).** Phase 1's
+six sub-phases (0, 1A, 1B, 1C, 1D, 1E, 1F) all shipped their backend +
+screen work, but a Round 2 wiring audit found that several
+shipped-but-inert features broke at the route-adapter / shell-bridge
+boundary. Phase 1 is now closed via Slice 9 — Phases A, B1, 9.5, 9.6
+landed 2026-04-24 — and a Round 3 verification pass added the F1/F2
+correctness fixes plus matching boundary tests. Local + LAN + Cloud
+modes have working end-to-end UI for every shipped feature.
+v0.1.0 public-beta tag-ready once Round 3's F4 coverage tests land.
+~1,085+ unit tests, 5 ADRs (029 LAN protocol, 030 change-log triggers,
+035 hybrid cloud backend, 036 launch artifacts, 037 mobile
+@supabase/supabase-js direct dep). Store submission is a human-gated
+action — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
+Current phase + remaining work tracked in
+[`ROADMAP.md`](./ROADMAP.md); detailed phase history lives in
+[`ROADMAP-archive.md`](./ROADMAP-archive.md).
 
 ---
 
@@ -33,10 +48,12 @@ A bilingual-Spanish-first tablet app for tracking a small Mexican business's fin
 Emprendedores and small-business owners in Mexico. Not an ERP. Not facturación. Not a CRM.
 
 **What platforms?**
+
 - **Mobile (tablets):** iOS and Android via Expo + React Native
 - **Desktop:** Windows and macOS via Tauri 2
 
 **What deployment modes?**
+
 1. **Local standalone** — one device, no network, no account (default).
 2. **Tablet-only** — one tablet holds everything.
 3. **LAN distributed** — one PC + up to 3 tablets on the same Wi-Fi, syncing via a first-party SQLite-to-SQLite protocol bundled in the desktop app.
@@ -48,17 +65,36 @@ Emprendedores and small-business owners in Mexico. Not an ERP. Not facturación.
 
 ## Getting Started (Contributors)
 
-> Phase 0 scaffold is not yet committed. Once it lands, the standard flow will be:
-
 ```bash
 pnpm install
-pnpm test       # run all unit tests
-pnpm lint       # enforce layer boundaries and style
-pnpm --filter mobile start    # launch Expo dev client
-pnpm --filter desktop tauri dev   # launch Tauri desktop app
+pnpm test                              # full monorepo tests (>500 passing)
+pnpm lint                              # enforce layer boundaries + style
+pnpm typecheck                         # strict TS across all packages
+pnpm --filter @cachink/mobile start    # launch Expo dev client
+pnpm --filter @cachink/desktop tauri dev   # launch Tauri desktop app
 ```
 
+## Release workflow
+
+```bash
+./scripts/build-all.sh --dry-run   # validate configs + tests
+./scripts/build-all.sh             # signed iOS / Android / macOS / Windows builds
+                                    # + dist/CHECKSUMS.txt + dist/sbom.json
+pnpm store:screenshots              # regenerate 24 store screenshots
+```
+
+## Quickstart (Spanish, for end users)
+
+1. Descarga la app desde [cachink.mx](https://cachink.mx).
+2. Abre y elige **📱 Solo este dispositivo** — no necesitas cuenta.
+3. Captura una primera venta y un primer egreso desde el tab inferior.
+4. El **Director** puede ver los estados financieros en **Estados**.
+
+Si tienes un equipo, más tarde activas el **servidor local** o la
+sincronización **en la nube** desde Ajustes.
+
 Requirements:
+
 - Node.js ≥ 22 LTS
 - pnpm ≥ 9
 - Xcode (for iOS Simulator on Mac)
@@ -127,4 +163,4 @@ TBD.
 
 ---
 
-*Built with care for Mexican emprendedores.*
+_Built with care for Mexican emprendedores._

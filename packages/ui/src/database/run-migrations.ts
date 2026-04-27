@@ -23,6 +23,7 @@
 import { sql } from 'drizzle-orm';
 import type { CachinkDatabase } from '@cachink/data';
 import migrationsBundle, { migrationSqlByTag } from '@cachink/data/migrations';
+import type { BackupFn } from './database-backup';
 
 const MIGRATIONS_TABLE = '__cachink_migrations';
 
@@ -68,16 +69,41 @@ export function splitStatements(raw: string): readonly string[] {
     .filter((s) => s.length > 0);
 }
 
+export interface RunMigrationsOptions {
+  /**
+   * Optional backup hook called once per runMigrations() invocation
+   * when at least one pending migration exists (P1C-M12-T03). Called
+   * with the first pending migration tag; the returned path is
+   * retained for diagnostics. Not called when nothing is pending.
+   */
+  readonly backupBefore?: BackupFn;
+}
+
 /**
  * Apply any pending migrations in journal order. Safe to call on every app
  * launch — the bookkeeping table skips already-applied migrations.
  */
-export async function runMigrations(db: CachinkDatabase): Promise<void> {
+export async function runMigrations(
+  db: CachinkDatabase,
+  options: RunMigrationsOptions = {},
+): Promise<void> {
   await db.run(sql.raw(CREATE_TRACKER_SQL));
   const applied = await loadAppliedTags(db);
 
-  for (const entry of migrationsBundle.journal.entries) {
-    if (applied.has(entry.tag)) continue;
+  // Collect pending tags up-front so we can trigger a single backup
+  // only if at least one migration needs applying.
+  const pending = migrationsBundle.journal.entries.filter((e) => !applied.has(e.tag));
+  if (pending.length > 0 && options.backupBefore) {
+    try {
+      await options.backupBefore(pending[0]!.tag);
+    } catch {
+      // Backup failure must not block migration; the log happens at
+      // the caller (we don't have a logger here) and the migration
+      // proceeds.
+    }
+  }
+
+  for (const entry of pending) {
     const raw = migrationSqlByTag[entry.tag];
     if (!raw) {
       throw new Error(

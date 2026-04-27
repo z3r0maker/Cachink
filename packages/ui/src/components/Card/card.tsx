@@ -49,6 +49,12 @@ export interface CardProps {
   readonly children: ReactNode;
   /** Forwarded to the root View so E2E tests can anchor to it. */
   readonly testID?: string;
+  /**
+   * Screen-reader label — applied when the Card is tappable. Forwarded
+   * to Tamagui's `aria-label` per ADR-034 (Tamagui 2.x no longer
+   * translates RN-style a11y props; consumers pass web-standard ones).
+   */
+  readonly ariaLabel?: string;
 }
 
 interface VariantStyle {
@@ -101,6 +107,8 @@ export function Card(props: CardProps): ReactElement {
       padding={PADDINGS[padding]}
       width={props.fullWidth === true ? '100%' : undefined}
       cursor={tappable ? 'pointer' : 'default'}
+      role={tappable ? 'button' : undefined}
+      aria-label={tappable ? props.ariaLabel : undefined}
       style={{ boxShadow: v.shadow, userSelect: 'none' }}
     >
       {props.children}

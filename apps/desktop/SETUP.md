@@ -13,6 +13,22 @@ Tauri requires a working Rust toolchain and platform-specific system dependencie
 
 Verify: `rustc --version && cargo --version`.
 
+### Once Rust is on PATH, run the Tauri compile gate
+
+```bash
+pnpm --filter @cachink/desktop tauri:check
+```
+
+This runs `cargo check --locked` inside `src-tauri/` — it compiles the
+LAN sync server (the Rust axum module bundled with the desktop app per
+ADR-029) without producing a binary, so it's a fast feedback loop for
+"does the Rust side still type-check?". The agent toolchain in CI cannot
+install `rustup` system-wide; this verification is a one-time
+developer-laptop step that's part of the pre-push gate.
+
+`pnpm --filter @cachink/desktop tauri:test` runs the Rust unit tests
+under the same gate.
+
 ## One-time setup
 
 Run these commands from the repository root after `pnpm install` succeeds at the root level.
@@ -162,6 +178,70 @@ pnpm --filter @cachink/desktop tauri build
 ## LAN sync server
 
 The Phase 1D LAN sync server is a Rust module that lives inside `src-tauri/src/lan_sync/` and ships with the desktop app. Per ADR-007, this is a first-party component — no external sync vendor. Wiring starts in ROADMAP P1D-M2.
+
+### LAN mode hosting (Slice 5 / S9-B / S9.6)
+
+When a user picks **"Ser el servidor local"** in the first-launch
+wizard, the desktop shell takes the host path:
+
+1. `useDesktopLanBridges` wires the `lan_server_start` Tauri command
+   into `<LanHostScreen>` via the `startServer` prop.
+2. `<LanHostScreen>` invokes the command, gets back `{ url,
+pairingToken, qrPngBase64 }`, and renders the QR + URL + token
+   for tablets to scan.
+3. Once the user presses **Continuar**,
+   `useLanBridgeCallbacks.onServerStarted` stamps the explicit
+   `lanHostReady` sync-state scope (Slice 8 A2 revision — replaces
+   the prior `'cachink-host'` access-token sentinel).
+4. `<LanGate>` then falls through via
+   `(token || (lanRole === 'host' && hostReady))` and the host
+   proceeds to the role picker.
+
+The Tauri side of the pairing flow lives in
+`apps/desktop/src-tauri/src/lan_sync/`; the QR + token UI lives in
+`packages/ui/src/screens/LanPairing/`.
+
+## Cloud mode (Phase 1E carry-over)
+
+Cloud mode on desktop reads three Vite env vars (mirroring the EAS
+secrets on mobile) — set them in `apps/desktop/.env.local`:
+
+```
+VITE_CLOUD_API_URL=https://abc.supabase.co
+VITE_CLOUD_ANON_KEY=eyJhanon...
+VITE_POWERSYNC_URL=https://wss.powersync.example.com
+```
+
+Without these, the wizard's Cloud card renders the disabled-notice
+variant pointing at **Settings → Avanzado** for the BYO-backend
+flow. The handle factory `useDesktopCloudHandle` lazy-imports
+`@powersync/web` once the user signs in (Slice 8 M2-C10 added
+`@powersync/web` as a direct desktop dep so the import always
+resolves).
+
+## E2E specs (Playwright — manual setup)
+
+The four desktop integration specs under `apps/desktop/playwright/`
+exercise multi-window LAN + Cloud flows. They assume `tauri dev` is
+already running plus two Expo web tabs (one per simulated tablet).
+See the header comment in `apps/desktop/playwright.config.ts` for
+the full step-by-step. Quick reference:
+
+```sh
+# Terminal 1 — desktop app
+pnpm --filter @cachink/desktop dev
+
+# Terminals 2/3 — two mobile web tabs
+pnpm --filter @cachink/mobile web
+
+# Terminal 4 — drive the suite
+pnpm --filter @cachink/desktop test:lan    # LAN specs only
+pnpm --filter @cachink/desktop test:cloud  # cloud specs only
+pnpm --filter @cachink/desktop test:e2e    # everything
+```
+
+These specs are **not** in CI — they're integration scaffolds for
+human-driven manual QA before a release.
 
 ## ROADMAP tasks completed by this setup
 

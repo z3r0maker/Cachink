@@ -14,15 +14,11 @@
  * behaviour without mounting a real SQLite driver.
  */
 
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
 import type { CachinkDatabase } from '@cachink/data';
+import { DatabaseErrorState } from './database-error-state';
+import type { ResetDatabaseFn } from './database-reset';
+import { useDatabaseLifecycle } from './use-database-lifecycle';
 
 /**
  * React Context carrying the initialized database. `null` = provider not yet
@@ -64,6 +60,8 @@ export interface AsyncDatabaseProviderProps extends DatabaseProviderProps {
    * and runs pending migrations. Called exactly once per mount.
    */
   readonly create: () => Promise<CachinkDatabase>;
+  /** Optional platform reset hook that recreates the SQLite file from scratch. */
+  readonly reset?: ResetDatabaseFn;
 }
 
 /**
@@ -78,32 +76,30 @@ export interface AsyncDatabaseProviderProps extends DatabaseProviderProps {
  * via {@link useDatabase}.
  */
 export function AsyncDatabaseProvider(props: AsyncDatabaseProviderProps): ReactElement | null {
-  const [db, setDb] = useState<CachinkDatabase | null>(props.database ?? null);
-
-  useEffect(() => {
-    // If tests seeded a db, skip the async factory entirely.
-    if (props.database) {
-      setDb(props.database);
-      return;
-    }
-    let mounted = true;
-    void props
-      .create()
-      .then((resolved) => {
-        if (mounted) setDb(resolved);
-      })
-      .catch((err: unknown) => {
-        // Surface unhandled init errors rather than silently rendering null
-        // forever. CLAUDE.md §12 rule 9: never weaken — log and re-throw.
-        console.error('[DatabaseProvider] failed to initialize:', err);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, [props.create, props.database]);
-
-  if (!db) return null;
-  return <DatabaseContext.Provider value={db}>{props.children}</DatabaseContext.Provider>;
+  const lifecycle = useDatabaseLifecycle({
+    create: props.create,
+    reset: props.reset,
+    preInitialised: props.database,
+  });
+  if (lifecycle.error) {
+    return (
+      <DatabaseErrorState
+        error={lifecycle.error}
+        copied={lifecycle.copied}
+        resetOpen={lifecycle.resetOpen}
+        resetting={lifecycle.resetting}
+        canReset={props.reset != null}
+        onRetry={lifecycle.handleRetry}
+        onCopy={lifecycle.handleCopy}
+        onReset={() => {
+          void lifecycle.handleReset();
+        }}
+        onResetOpenChange={lifecycle.setResetOpen}
+      />
+    );
+  }
+  if (lifecycle.loading || !lifecycle.db) return null;
+  return <DatabaseContext.Provider value={lifecycle.db}>{props.children}</DatabaseContext.Provider>;
 }
 
 /**

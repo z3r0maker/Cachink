@@ -85,5 +85,55 @@ export function describeDayClosesRepositoryContract(
     it('delete on missing id is a no-op', async () => {
       await expect(repo.delete('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never)).resolves.toBeUndefined();
     });
+
+    it('findByDateRange returns an empty array when no cortes fall in the window', async () => {
+      await repo.create(makeNewDayClose({ businessId: BIZ_A, fecha: APR_22 }));
+      const rows = await repo.findByDateRange(
+        '2026-05-01' as IsoDate,
+        '2026-05-31' as IsoDate,
+        BIZ_A,
+      );
+      expect(rows).toEqual([]);
+    });
+
+    it('findByDateRange includes rows on both boundary dates', async () => {
+      const start = await repo.create(
+        makeNewDayClose({ businessId: BIZ_A, fecha: '2026-04-20' as IsoDate }),
+      );
+      const mid = await repo.create(makeNewDayClose({ businessId: BIZ_A, fecha: APR_22 }));
+      const end = await repo.create(
+        makeNewDayClose({ businessId: BIZ_A, fecha: '2026-04-24' as IsoDate }),
+      );
+      const outside = await repo.create(
+        makeNewDayClose({ businessId: BIZ_A, fecha: '2026-04-19' as IsoDate }),
+      );
+      const otherBiz = await repo.create(makeNewDayClose({ businessId: BIZ_B, fecha: APR_22 }));
+
+      const rows = await repo.findByDateRange(
+        '2026-04-20' as IsoDate,
+        '2026-04-24' as IsoDate,
+        BIZ_A,
+      );
+      const ids = rows.map((r) => r.id);
+      expect(ids).toEqual(expect.arrayContaining([start.id, mid.id, end.id]));
+      expect(ids).not.toContain(outside.id);
+      expect(ids).not.toContain(otherBiz.id);
+    });
+
+    it('findByDateRange returns rows sorted by fecha desc', async () => {
+      const oldest = await repo.create(
+        makeNewDayClose({ businessId: BIZ_A, fecha: '2026-04-20' as IsoDate }),
+      );
+      const newest = await repo.create(
+        makeNewDayClose({ businessId: BIZ_A, fecha: '2026-04-24' as IsoDate }),
+      );
+      const rows = await repo.findByDateRange(
+        '2026-04-20' as IsoDate,
+        '2026-04-24' as IsoDate,
+        BIZ_A,
+      );
+      expect(rows[0]!.id).toBe(newest.id);
+      expect(rows[rows.length - 1]!.id).toBe(oldest.id);
+    });
   });
 }

@@ -15,7 +15,7 @@
  * flow demands them.
  */
 
-import type { ShareResult, ShareTarget } from './share';
+import type { ShareResult, ShareTarget } from './share.shared';
 
 interface NavigatorShare {
   share?: (data: {

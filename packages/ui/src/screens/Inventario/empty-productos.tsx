@@ -15,7 +15,7 @@ export function EmptyProductos({ onNuevoProducto }: EmptyProductosProps): ReactE
   const { t } = useTranslation();
   return (
     <EmptyState
-      emoji="📦"
+      icon="package"
       title={t('inventario.emptyTitle')}
       description={t('inventario.emptyBody')}
       action={

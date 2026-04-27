@@ -1,0 +1,34 @@
+# Solo + Cloud-as-backup happy path (ADR-039 WUX-M4-T02).
+#
+# Verifies the new path the wizard exposes for users who run Cachink on
+# a single device but want cloud-backup safety. Step 1 → Solo →
+# Step 2A → Cloud → CloudOnboarding signup tab → BusinessForm.
+#
+# Requires the same env vars as cloud-signup-signin.yaml.
+appId: mx.cachink.mobile
+env:
+  EMAIL: ${MAESTRO_CLOUD_EMAIL_A}
+  PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "¡Bienvenido a Cachink!"
+- tapOn: { id: "wizard-step1-solo-card" }
+
+- assertVisible: { id: "wizard-step2a-cloud" }
+- tapOn: { id: "wizard-step2a-cloud-card" }
+
+# CloudOnboardingScreen mounts with sign-up tab pre-selected.
+- assertVisible: { id: "cloud-onboarding-screen" }
+- tapOn: { id: "cloud-tab-signup" }
+- tapOn: { id: "cloud-email-input" }
+- inputText: ${EMAIL}
+- tapOn: { id: "cloud-password-input" }
+- inputText: ${PASSWORD}
+- tapOn: { id: "cloud-business-input" }
+- inputText: "Solo Cloud Maestro"
+- tapOn: { id: "cloud-submit" }
+
+# Once authenticated, the GatedNavigation routes to RolePicker.
+- assertVisible: { id: "role-picker" }

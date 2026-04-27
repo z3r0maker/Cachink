@@ -2,6 +2,18 @@ import { describe, it, expect, vi } from 'vitest';
 import { Input } from '../src/components/Input/index';
 import { fireEvent, renderWithProviders, screen } from './test-utils';
 
+/**
+ * Tamagui's `<View>` wires `onPress` through React Native's Pressable
+ * system, which on web listens for the full pointerdown → pointerup →
+ * click sequence. `tap(el)` mirrors a real user tap so Pressable fires
+ * its handler. Same helper as combobox/modal tests.
+ */
+function tap(el: Element): void {
+  fireEvent.pointerDown(el);
+  fireEvent.pointerUp(el);
+  fireEvent.click(el);
+}
+
 describe('Input', () => {
   it('renders the label text above the field when provided', () => {
     renderWithProviders(<Input label="Concepto" value="" onChange={() => undefined} />);
@@ -44,7 +56,10 @@ describe('Input', () => {
     expect(onChange).toHaveBeenCalledWith('Hola');
   });
 
-  it('renders a select element when options are provided', () => {
+  it('renders a Combobox trigger (not a native HTML <select>) when options are provided', () => {
+    // Pre-2026-04 the select branch rendered a native HTML `<select>`.
+    // It now delegates to the shared `<Combobox>` so the picker styles
+    // match the brand and behaves identically on web + mobile.
     renderWithProviders(
       <Input
         value=""
@@ -53,24 +68,22 @@ describe('Input', () => {
         testID="input-select"
       />,
     );
-    const root = screen.getAllByTestId('input-select')[0]!;
-    expect(root.querySelector('select')).not.toBeNull();
+    const wrapper = screen.getAllByTestId('input-select')[0]!;
+    // Wrapper is unique — the Combobox trigger uses its own
+    // `combobox-trigger` testID and never collides with the wrapper.
+    expect(wrapper.querySelector('select')).toBeNull();
+    expect(screen.getAllByTestId('combobox-trigger').length).toBeGreaterThan(0);
   });
 
-  it('renders an empty select when type=select is passed without options', () => {
+  it('renders the Seleccionar... placeholder when type=select is passed without options', () => {
     renderWithProviders(
       <Input value="" onChange={() => undefined} type="select" testID="input-empty-select" />,
     );
-    const root = screen.getAllByTestId('input-empty-select')[0]!;
-    const select = root.querySelector('select');
-    expect(select).not.toBeNull();
-    // Only the "Seleccionar..." placeholder option should render.
-    const opts = Array.from(select!.querySelectorAll('option'));
-    expect(opts).toHaveLength(1);
-    expect(opts[0]!.textContent).toBe('Seleccionar...');
+    const trigger = screen.getAllByTestId('combobox-trigger')[0]!;
+    expect(trigger.textContent).toContain('Seleccionar...');
   });
 
-  it('renders every option inside the select, plus the empty "Seleccionar..." entry', () => {
+  it('opens the Combobox panel and renders every option as a row when tapped', () => {
     renderWithProviders(
       <Input
         value=""
@@ -79,19 +92,19 @@ describe('Input', () => {
         testID="input-options"
       />,
     );
-    const root = screen.getAllByTestId('input-options')[0]!;
-    const opts = Array.from(root.querySelectorAll('option')).map((o) => o.textContent ?? '');
-    expect(opts).toEqual(['Seleccionar...', 'Producto', 'Servicio', 'Anticipo']);
+    tap(screen.getAllByTestId('combobox-trigger')[0]!);
+    for (const opt of ['Producto', 'Servicio', 'Anticipo']) {
+      expect(screen.getAllByTestId(`combobox-option-${opt}`).length).toBeGreaterThan(0);
+    }
   });
 
-  it('calls onChange when the user selects a different option', () => {
+  it('calls onChange with the chosen option key when the user selects from the Combobox', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <Input value="" onChange={onChange} options={['Producto', 'Servicio']} testID="input-pick" />,
     );
-    const root = screen.getAllByTestId('input-pick')[0]!;
-    const select = root.querySelector('select') as HTMLSelectElement;
-    fireEvent.change(select, { target: { value: 'Servicio' } });
+    tap(screen.getAllByTestId('combobox-trigger')[0]!);
+    tap(screen.getAllByTestId('combobox-option-Servicio')[0]!);
     expect(onChange).toHaveBeenCalledWith('Servicio');
   });
 

@@ -12,11 +12,28 @@
  * and never load this file.
  *
  * The top-corners-only radius, 2.5-px black top/side borders (no bottom
- * border), and `alignSelf="center"` + `flex-end`-anchored overlay
+ * border), and bottom-anchored / `marginHorizontal:auto`-centered sheet
  * differ from the desktop variant — this is the platform delta the
  * extension pattern from CLAUDE.md §5.3 exists to express.
+ *
+ * ## Audit M-1 PR 3 fixes
+ *
+ * - `position: 'fixed'` was passed to Tamagui's Dialog.Content style
+ *   prop, which is invalid on React Native (RN only accepts
+ *   `'absolute'` or `'relative'`). On web the value resolved correctly
+ *   (every test target except RN-on-device); on iOS / Android it was
+ *   silently dropped, leaving the sheet to render in the document
+ *   flow. Replaced with `position: 'absolute'` — same screen-edge
+ *   anchoring inside the Dialog.Portal mount. Closes audit Blocker
+ *   1.10.
+ * - Children are now wrapped in `<KeyboardAvoidingView>` so the soft
+ *   keyboard doesn't cover the input the user is typing into. Closes
+ *   audit Blocker 1.9 across every modal call site (the wrap lives in
+ *   the primitive, so every Modal-based form benefits without code
+ *   changes).
  */
 import type { ReactElement, ReactNode } from 'react';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
 import { colors, radii } from '../../theme';
@@ -28,11 +45,8 @@ const SHEET_RADIUS = radii[7]; // 22
 /** Universal overlay color — not a brand token, same as every other app's backdrop. */
 const BACKDROP = 'rgba(0,0,0,0.5)';
 
+// As above, only non-positional presentational values stay in `style`.
 const SHEET_STYLE = {
-  position: 'fixed',
-  bottom: 0,
-  left: '50%',
-  transform: 'translateX(-50%)',
   overflowY: 'auto',
 } as const;
 
@@ -59,7 +73,11 @@ function Backdrop({ onClose }: { onClose: () => void }): ReactElement {
       backgroundColor={BACKDROP}
       // Anchor the content to the bottom edge — the bottom-sheet layout.
       justifyContent="flex-end"
-      style={{ position: 'fixed', inset: 0 }}
+      // `position: 'absolute'` (was `'fixed'` — RN doesn't accept that
+      // value and silently dropped it on iOS/Android). The Dialog.Portal
+      // mounts at the root so 'absolute' produces the same full-screen
+      // overlay on RN as 'fixed' does on web.
+      style={{ position: 'absolute', inset: 0 }}
     />
   );
 }
@@ -87,11 +105,38 @@ function SheetContent(props: SheetContentProps): ReactElement {
       width="100%"
       maxWidth={480}
       maxHeight="93vh"
-      alignSelf="center"
+      // Bottom-anchored sheet with auto horizontal margins.
+      // `position: 'absolute'` on RN — same effect as 'fixed' inside
+      // the Portal-mounted root view.
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      marginHorizontal="auto"
       style={SHEET_STYLE}
     >
       {props.children}
     </Dialog.Content>
+  );
+}
+
+/**
+ * `<KeyboardAvoidingView>` shifts the sheet content up when the soft
+ * keyboard mounts so the focused input stays visible. iOS and Android
+ * handle this differently — `behavior='padding'` is the right answer
+ * on iOS (the keyboard slides up under the view, padding pushes the
+ * content above it), `behavior='height'` on Android (the OS resizes
+ * the window). Both are off the default ('undefined') because the
+ * default does nothing.
+ */
+function KeyboardAware({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ width: '100%' }}
+    >
+      {children}
+    </KeyboardAvoidingView>
   );
 }
 
@@ -107,9 +152,17 @@ export function Modal(props: ModalProps): ReactElement {
       <Dialog.Portal>
         <Backdrop onClose={props.onClose} />
         <SheetContent testID={props.testID}>
-          <GrabHandle />
-          <ModalHeader title={props.title} emoji={props.emoji} onClose={props.onClose} />
-          {props.children}
+          <KeyboardAware>
+            <GrabHandle />
+            <ModalHeader
+              title={props.title}
+              subtitle={props.subtitle}
+              leftAvatar={props.leftAvatar}
+              emoji={props.emoji}
+              onClose={props.onClose}
+            />
+            {props.children}
+          </KeyboardAware>
         </SheetContent>
       </Dialog.Portal>
     </Dialog>

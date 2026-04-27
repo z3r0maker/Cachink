@@ -1,0 +1,55 @@
+# Cloud mode: signup on tablet A, sign in on tablet B — verify the
+# newly-recorded venta shows up within 5 s (P1E-M4 C15).
+#
+# Requires a live Cachink-hosted Supabase + PowerSync instance. See
+# supabase/README.md for provisioning. Expected env vars:
+#
+#   MAESTRO_CLOUD_EMAIL_A=alice+devA@cachink.mx
+#   MAESTRO_CLOUD_EMAIL_B=alice+devB@cachink.mx  # same user, two devices
+#   MAESTRO_CLOUD_PASSWORD=...
+#
+# Run from two separate device sessions — tablet A first (signup), then
+# tablet B (signin with the same account).
+appId: mx.cachink.mobile
+env:
+  EMAIL_A: ${MAESTRO_CLOUD_EMAIL_A}
+  EMAIL_B: ${MAESTRO_CLOUD_EMAIL_B}
+  PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
+---
+- launchApp
+
+# Reach the wizard, select Cloud mode (ADR-039 four-screen flow).
+- tapOn: { id: "tab-ajustes" }
+- tapOn: { id: "settings-re-run-wizard" }
+- assertVisible: { id: "wizard" }
+# Step 1 → "En varios dispositivos" → Step 2B → "La nube guarda los datos".
+- tapOn: { id: "wizard-step1-multi-card" }
+- tapOn: { id: "wizard-step2b-cloud-card" }
+- assertVisible: { id: "cloud-onboarding-screen" }
+
+# Tablet A: sign up.
+- tapOn: { id: "cloud-tab-signup" }
+- tapOn: { id: "cloud-email-input" }
+- inputText: ${EMAIL_A}
+- tapOn: { id: "cloud-password-input" }
+- inputText: ${PASSWORD}
+- tapOn: { id: "cloud-business-input" }
+- inputText: "Tortillería Maestro"
+- tapOn: { id: "cloud-submit" }
+
+# Once signed in, the GatedNavigation routes to RolePicker.
+- assertVisible: { id: "role-picker" }
+- tapOn: { id: "role-director-select" }
+
+# Record a venta for $450.
+- tapOn: { id: "tab-ventas" }
+- tapOn: { id: "ventas-new-cta" }
+- tapOn: { id: "nueva-venta-monto-input" }
+- inputText: "450"
+- tapOn: { id: "nueva-venta-concepto-input" }
+- inputText: "Taco al pastor"
+- tapOn: { id: "nueva-venta-submit" }
+
+- assertVisible:
+    text: "$ 450.00"
+    timeout: 5000

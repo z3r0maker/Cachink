@@ -14,7 +14,7 @@ import type {
   NewExpense,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { ExpensesRepository } from '@cachink/data';
+import type { ExpensePatch, ExpensesRepository } from '@cachink/data';
 
 export class InMemoryExpensesRepository implements ExpensesRepository {
   private readonly rows = new Map<ExpenseId, Expense>();
@@ -78,6 +78,23 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
           r.fecha <= to,
       )
       .sort((a, b) => b.fecha.localeCompare(a.fecha));
+  }
+
+  async update(id: ExpenseId, patch: ExpensePatch): Promise<Expense | null> {
+    const existing = this.rows.get(id);
+    if (!existing || existing.deletedAt !== null) return null;
+    const ts: IsoTimestamp = now();
+    const next: Expense = {
+      ...existing,
+      fecha: patch.fecha ?? existing.fecha,
+      concepto: patch.concepto ?? existing.concepto,
+      categoria: patch.categoria ?? existing.categoria,
+      monto: patch.monto ?? existing.monto,
+      proveedor: patch.proveedor ?? existing.proveedor,
+      updatedAt: ts,
+    };
+    this.rows.set(id, next);
+    return next;
   }
 
   async delete(id: ExpenseId): Promise<void> {

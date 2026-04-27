@@ -42,14 +42,10 @@ export function describeExpensesRepositoryContract(
     });
 
     it('findByDate scopes by businessId + date and excludes deleted rows', async () => {
-      const keep = await repo.create(
-        makeNewExpense({ businessId: BIZ_A, fecha: APR_23 }),
-      );
+      const keep = await repo.create(makeNewExpense({ businessId: BIZ_A, fecha: APR_23 }));
       await repo.create(makeNewExpense({ businessId: BIZ_A, fecha: APR_15 }));
       await repo.create(makeNewExpense({ businessId: BIZ_B, fecha: APR_23 }));
-      const drop = await repo.create(
-        makeNewExpense({ businessId: BIZ_A, fecha: APR_23 }),
-      );
+      const drop = await repo.create(makeNewExpense({ businessId: BIZ_A, fecha: APR_23 }));
       await repo.delete(drop.id);
       const rows = await repo.findByDate(APR_23, BIZ_A);
       expect(rows.map((r) => r.id)).toEqual([keep.id]);
@@ -66,24 +62,18 @@ export function describeExpensesRepositoryContract(
     });
 
     it('findByCategory filters by categoria + inclusive date range', async () => {
-      await repo.create(
-        makeNewExpense({ businessId: BIZ_A, categoria: 'Renta', fecha: APR_15 }),
-      );
+      await repo.create(makeNewExpense({ businessId: BIZ_A, categoria: 'Renta', fecha: APR_15 }));
       await repo.create(
         makeNewExpense({ businessId: BIZ_A, categoria: 'Servicios', fecha: APR_23 }),
       );
-      await repo.create(
-        makeNewExpense({ businessId: BIZ_A, categoria: 'Renta', fecha: MAY_01 }),
-      );
+      await repo.create(makeNewExpense({ businessId: BIZ_A, categoria: 'Renta', fecha: MAY_01 }));
       const rows = await repo.findByCategory('Renta', BIZ_A, APR_15, APR_23);
       expect(rows).toHaveLength(1);
       expect(rows[0]?.fecha).toBe(APR_15);
     });
 
     it('preserves monto as bigint end-to-end', async () => {
-      const row = await repo.create(
-        makeNewExpense({ businessId: BIZ_A, monto: 9_876_543n }),
-      );
+      const row = await repo.create(makeNewExpense({ businessId: BIZ_A, monto: 9_876_543n }));
       const loaded = await repo.findById(row.id);
       expect(loaded?.monto).toBe(9_876_543n);
       expect(typeof loaded?.monto).toBe('bigint');
@@ -91,6 +81,27 @@ export function describeExpensesRepositoryContract(
 
     it('delete on missing id is a no-op', async () => {
       await expect(repo.delete('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never)).resolves.toBeUndefined();
+    });
+
+    // Audit Round 2 J2: partial-update contract per ADR-023.
+    it('update applies the patch fields and bumps updatedAt', async () => {
+      const row = await repo.create(makeNewExpense({ businessId: BIZ_A, monto: 1500n }));
+      const originalUpdatedAt = row.updatedAt;
+      await new Promise((r) => setTimeout(r, 5));
+      const updated = await repo.update(row.id, {
+        monto: 4500n,
+        proveedor: 'Costco',
+      });
+      expect(updated?.monto).toBe(4500n);
+      expect(updated?.proveedor).toBe('Costco');
+      expect(updated && updated.updatedAt.localeCompare(originalUpdatedAt)).toBeGreaterThan(0);
+    });
+
+    it('update returns null for a missing or soft-deleted egreso', async () => {
+      expect(await repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { monto: 1n })).toBeNull();
+      const row = await repo.create(makeNewExpense({ businessId: BIZ_A }));
+      await repo.delete(row.id);
+      expect(await repo.update(row.id, { monto: 999n })).toBeNull();
     });
   });
 }

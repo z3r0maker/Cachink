@@ -18,6 +18,18 @@ import type {
 
 export type { Expense, NewExpense };
 
+/**
+ * Partial-patch shape for `update()` per ADR-023. Excludes immutable
+ * audit fields (id, businessId, deviceId, createdAt) and the
+ * `gastoRecurrenteId` provenance link (recurring-expense templates own
+ * that pointer; manual edits don't reassign it).
+ *
+ * Audit Round 2 J2: enables per-row swipe-to-edit (Phase K wiring).
+ */
+export type ExpensePatch = Partial<
+  Pick<Expense, 'fecha' | 'concepto' | 'categoria' | 'monto' | 'proveedor'>
+>;
+
 export interface ExpensesRepository {
   create(input: NewExpense): Promise<Expense>;
   findById(id: ExpenseId): Promise<Expense | null>;
@@ -30,5 +42,10 @@ export interface ExpensesRepository {
     from: IsoDate,
     to: IsoDate,
   ): Promise<readonly Expense[]>;
+  /**
+   * Partial update per ADR-023. Returns the post-update row or null
+   * when not found / soft-deleted. Audit Round 2 J2.
+   */
+  update(id: ExpenseId, patch: ExpensePatch): Promise<Expense | null>;
   delete(id: ExpenseId): Promise<void>;
 }

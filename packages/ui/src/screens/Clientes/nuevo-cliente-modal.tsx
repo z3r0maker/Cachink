@@ -1,7 +1,8 @@
 /**
  * NuevoClienteModal — the mid-sale "Crear cliente" flow for the
  * Crédito guardrail (P1C-M3-T03) and the Clientes list screen
- * (P1C-M6-T02, later commit).
+ * (P1C-M6-T02). Migrated to RHF + zodResolver as part of audit M-1
+ * PR 2.5 — the first of the 15 form migrations.
  *
  * Fields:
  *   - nombre (required, 1-120 chars)
@@ -11,15 +12,42 @@
  *
  * Pure UI: submit bubbles a CrearClienteInput payload. The caller wires
  * `useCrearCliente` + closes the modal on success.
+ *
+ * Each field uses the `<Rhf*Field>` wrappers from
+ * `@cachink/ui/components/fields/controlled` so a Zod-validated row is
+ * one line at the call site.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
+import type { Control } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import type { Client } from '@cachink/domain';
-import { Btn, Input, Modal } from '../../components/index';
+import { Btn, Modal } from '../../components/index';
+import { RhfEmailField, RhfPhoneField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import type { CrearClienteInput } from '../../hooks/use-crear-cliente';
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/**
+ * Form-only schema. Omits `businessId` (added by `useCrearCliente`)
+ * and uses optional-empty-string semantics so the optional fields
+ * round-trip through controlled `<Input>` state without forcing the
+ * user to leave them as `undefined`. Phone regex matches the
+ * entity-level `ClientSchema` from `@cachink/domain`.
+ */
+const NuevoClienteFormSchema = z.object({
+  nombre: z.string().min(1).max(120),
+  telefono: z
+    .string()
+    .regex(/^[\d\s+\-()]{7,20}$/)
+    .or(z.literal(''))
+    .optional(),
+  email: z.string().email().or(z.literal('')).optional(),
+  nota: z.string().max(500).or(z.literal('')).optional(),
+});
+
+type NuevoClienteFormValues = z.infer<typeof NuevoClienteFormSchema>;
 
 export interface NuevoClienteModalProps {
   readonly open: boolean;
@@ -30,19 +58,7 @@ export interface NuevoClienteModalProps {
   readonly editing?: Client;
 }
 
-interface FormState {
-  nombre: string;
-  telefono: string;
-  email: string;
-  nota: string;
-}
-
-interface FormErrors {
-  nombre?: string;
-  email?: string;
-}
-
-function initialState(editing?: Client): FormState {
+function defaults(editing?: Client): NuevoClienteFormValues {
   return {
     nombre: editing?.nombre ?? '',
     telefono: editing?.telefono ?? '',
@@ -51,87 +67,73 @@ function initialState(editing?: Client): FormState {
   };
 }
 
-function validate(state: FormState, requiredLabel: string, emailInvalid: string): FormErrors {
-  const errors: FormErrors = {};
-  if (!state.nombre.trim()) errors.nombre = requiredLabel;
-  if (state.email && !EMAIL_REGEX.test(state.email.trim())) errors.email = emailInvalid;
-  return errors;
+function toPayload(values: NuevoClienteFormValues): CrearClienteInput {
+  return {
+    nombre: values.nombre.trim(),
+    telefono: values.telefono?.trim() || undefined,
+    email: values.email?.trim() || undefined,
+    nota: values.nota?.trim() || undefined,
+  };
 }
 
 interface ClienteFieldsProps {
-  readonly state: FormState;
-  readonly update: (partial: Partial<FormState>) => void;
-  readonly errors: FormErrors;
+  readonly control: Control<NuevoClienteFormValues>;
   readonly t: ReturnType<typeof useTranslation>['t'];
+  readonly onSubmitEditing: () => void;
 }
 
-function ClienteFields(props: ClienteFieldsProps): ReactElement {
-  const { state, update, errors, t } = props;
+function ClienteFields({ control, t, onSubmitEditing }: ClienteFieldsProps): ReactElement {
   return (
     <>
-      <Input
+      <RhfTextField
+        control={control}
+        name="nombre"
         label={t('clientes.nombreLabel')}
-        value={state.nombre}
-        onChange={(v) => update({ nombre: v })}
-        note={errors.nombre}
+        errorMessage={t('clientes.required')}
         testID="nuevo-cliente-nombre"
+        returnKeyType="next"
       />
-      <Input
+      <RhfPhoneField
+        control={control}
+        name="telefono"
         label={t('clientes.telefonoLabel')}
-        value={state.telefono}
-        onChange={(v) => update({ telefono: v })}
         testID="nuevo-cliente-telefono"
+        returnKeyType="next"
       />
-      <Input
+      <RhfEmailField
+        control={control}
+        name="email"
         label={t('clientes.emailLabel')}
-        value={state.email}
-        onChange={(v) => update({ email: v })}
-        note={errors.email}
+        errorMessage={t('clientes.emailInvalid')}
         testID="nuevo-cliente-email"
+        returnKeyType="next"
       />
-      <Input
+      <RhfTextField
+        control={control}
+        name="nota"
         label={t('clientes.notaLabel')}
-        value={state.nota}
-        onChange={(v) => update({ nota: v })}
         testID="nuevo-cliente-nota"
+        returnKeyType="done"
+        onSubmitEditing={onSubmitEditing}
       />
     </>
   );
 }
 
-function makeSubmit(
-  state: FormState,
-  t: ReturnType<typeof useTranslation>['t'],
-  setErrors: (e: FormErrors) => void,
-  onSubmit: NuevoClienteModalProps['onSubmit'],
-  reset: () => void,
-): () => void {
-  return () => {
-    const validation = validate(state, t('clientes.required'), t('clientes.emailInvalid'));
-    if (Object.keys(validation).length > 0) {
-      setErrors(validation);
-      return;
-    }
-    setErrors({});
-    onSubmit({
-      nombre: state.nombre.trim(),
-      telefono: state.telefono.trim() || undefined,
-      email: state.email.trim() || undefined,
-      nota: state.nota.trim() || undefined,
-    });
-    reset();
-  };
-}
-
 export function NuevoClienteModal(props: NuevoClienteModalProps): ReactElement {
   const { t } = useTranslation();
-  const [state, setState] = useState<FormState>(() => initialState(props.editing));
-  const [errors, setErrors] = useState<FormErrors>({});
-  const update = (partial: Partial<FormState>): void =>
-    setState((prev) => ({ ...prev, ...partial }));
-  const handleSubmit = makeSubmit(state, t, setErrors, props.onSubmit, () =>
-    setState(initialState(props.editing)),
-  );
+  const form = useForm<NuevoClienteFormValues>({
+    resolver: zodResolver(NuevoClienteFormSchema),
+    defaultValues: defaults(props.editing),
+    mode: 'onSubmit',
+  });
+  useEffect(() => {
+    form.reset(defaults(props.editing));
+  }, [props.editing, form]);
+  const submit = form.handleSubmit((values) => {
+    props.onSubmit(toPayload(values));
+    form.reset(defaults(props.editing));
+  });
   return (
     <Modal
       open={props.open}
@@ -139,10 +141,10 @@ export function NuevoClienteModal(props: NuevoClienteModalProps): ReactElement {
       title={props.editing ? props.editing.nombre : t('clientes.nuevo')}
       testID="nuevo-cliente-modal"
     >
-      <ClienteFields state={state} update={update} errors={errors} t={t} />
+      <ClienteFields control={form.control} t={t} onSubmitEditing={submit} />
       <Btn
         variant="primary"
-        onPress={handleSubmit}
+        onPress={submit}
         disabled={props.submitting === true}
         fullWidth
         testID="nuevo-cliente-submit"

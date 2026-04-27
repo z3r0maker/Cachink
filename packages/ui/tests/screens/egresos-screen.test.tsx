@@ -143,4 +143,35 @@ describe('EgresosScreen', () => {
     );
     expect(screen.getByText('Inmobiliaria X')).toBeInTheDocument();
   });
+
+  // Audit Round 2 K2: per-row swipe wiring.
+  it('wraps each row in `<SwipeableRow>` when onEditEgreso / onEliminarEgreso are supplied', () => {
+    const e = egreso({ id: '01JPHK0000000000000000E099' as ExpenseId });
+    renderWithProviders(
+      <EgresosScreen
+        fecha="2026-04-24"
+        onChangeFecha={vi.fn()}
+        egresos={[e]}
+        total={5000n}
+        onNuevoEgreso={vi.fn()}
+        onEditEgreso={vi.fn()}
+        onEliminarEgreso={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByTestId(`egreso-swipe-${e.id}`).length).toBeGreaterThan(0);
+  });
+
+  it('does NOT wrap rows when swipe handlers are unset', () => {
+    const e = egreso({ id: '01JPHK0000000000000000E098' as ExpenseId });
+    renderWithProviders(
+      <EgresosScreen
+        fecha="2026-04-24"
+        onChangeFecha={vi.fn()}
+        egresos={[e]}
+        total={5000n}
+        onNuevoEgreso={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId(`egreso-swipe-${e.id}`)).toBeNull();
+  });
 });

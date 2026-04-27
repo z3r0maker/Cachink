@@ -44,7 +44,7 @@ describe('AppShell — Operativo', () => {
         onNavigate={overrides?.onNavigate ?? noop}
         onChangeRole={overrides?.onChangeRole ?? noop}
         onOpenSettings={overrides?.onOpenSettings ?? noop}
-        mode="local-standalone"
+        mode="local"
         title="Ventas"
         subtitle="jueves, 24 abril"
       >
@@ -70,11 +70,11 @@ describe('AppShell — Operativo', () => {
     expect(onNavigate).toHaveBeenCalledWith('/egresos');
   });
 
-  it('fires onChangeRole when the Cambiar button is tapped', () => {
+  it('fires onChangeRole when the role avatar is tapped (replaces Cambiar btn)', () => {
     const onChangeRole = vi.fn();
     mountOperativo({ onChangeRole });
-    const button = screen.getAllByTestId('top-bar-change-role')[0]!;
-    fireEvent.click(button);
+    const avatar = screen.getAllByTestId('top-bar-role-chip')[0]!;
+    fireEvent.click(avatar);
     expect(onChangeRole).toHaveBeenCalled();
   });
 
@@ -86,13 +86,35 @@ describe('AppShell — Operativo', () => {
     expect(onOpenSettings).toHaveBeenCalled();
   });
 
-  it('renders the role chip with the uppercase role label', () => {
+  it('renders the role avatar with the role-derived initials', () => {
     mountOperativo();
     const chip = screen.getByTestId('top-bar-role-chip');
-    expect(chip.textContent?.toUpperCase()).toContain('OPERATIVO');
+    // Default avatarValue falls back to the role label → 'Operativo' → 'OP'.
+    expect(chip.getAttribute('aria-label')).toBe('Cambiar');
+    const text = screen.getAllByTestId('initials-avatar-text')[0]!;
+    expect(text.textContent).toBe('OP');
   });
 
-  it('renders no sync badge in local-standalone mode', () => {
+  it('uses the explicit avatarValue when supplied', () => {
+    renderWithProviders(
+      <AppShell
+        role="operativo"
+        activeTabKey="ventas"
+        onNavigate={noop}
+        onChangeRole={noop}
+        onOpenSettings={noop}
+        mode="local"
+        avatarValue="Panadería La Esquina"
+      >
+        <span />
+      </AppShell>,
+    );
+    const text = screen.getAllByTestId('initials-avatar-text')[0]!;
+    // "Panadería La Esquina" → 3 tokens → first char of each = "PLE".
+    expect(text.textContent).toBe('PLE');
+  });
+
+  it('renders no sync badge in local mode', () => {
     mountOperativo();
     expect(screen.queryByTestId('sync-status-badge')).toBeNull();
   });
@@ -107,7 +129,7 @@ describe('AppShell — Director', () => {
         onNavigate={noop}
         onChangeRole={noop}
         onOpenSettings={noop}
-        mode="local-standalone"
+        mode="local"
       >
         <span />
       </AppShell>,
@@ -150,7 +172,7 @@ describe('Settings', () => {
 
   it('renders the business nombre, regimen fiscal and ISR percentage', () => {
     renderWithProviders(
-      <Settings mode="local-standalone" business={business} onReRunWizard={noop} />,
+      <Settings mode="local" business={business} onReRunWizard={noop} showExportAction={false} />,
     );
     expect(screen.getByText('Taquería Don Pedro')).toBeInTheDocument();
     expect(screen.getByText('RIF')).toBeInTheDocument();
@@ -158,24 +180,31 @@ describe('Settings', () => {
   });
 
   it('renders a placeholder when no business is configured', () => {
-    renderWithProviders(<Settings mode="local-standalone" business={null} onReRunWizard={noop} />);
+    renderWithProviders(
+      <Settings mode="local" business={null} onReRunWizard={noop} showExportAction={false} />,
+    );
     expect(screen.getByText('Sin configurar')).toBeInTheDocument();
   });
 
   it('fires onReRunWizard when the button is tapped', () => {
     const onReRunWizard = vi.fn();
     renderWithProviders(
-      <Settings mode="local-standalone" business={business} onReRunWizard={onReRunWizard} />,
+      <Settings
+        mode="local"
+        business={business}
+        onReRunWizard={onReRunWizard}
+        showExportAction={false}
+      />,
     );
     const button = screen.getAllByTestId('settings-re-run-wizard')[0]!;
     fireEvent.click(button);
     expect(onReRunWizard).toHaveBeenCalled();
   });
 
-  it('renders the localized mode label for local-standalone', () => {
+  it('renders the localized mode label for local mode', () => {
     renderWithProviders(
-      <Settings mode="local-standalone" business={business} onReRunWizard={noop} />,
+      <Settings mode="local" business={business} onReRunWizard={noop} showExportAction={false} />,
     );
-    expect(screen.getByText('Solo este dispositivo')).toBeInTheDocument();
+    expect(screen.getByText('Solo en este dispositivo')).toBeInTheDocument();
   });
 });

@@ -14,7 +14,7 @@
  */
 
 import { Share, type ShareContent, type ShareOptions } from 'react-native';
-import type { ShareResult, ShareTarget } from './share';
+import type { ShareResult, ShareTarget } from './share.shared';
 
 export async function shareComprobante(target: ShareTarget): Promise<ShareResult> {
   const content: ShareContent = {

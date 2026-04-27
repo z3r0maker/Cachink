@@ -1,0 +1,15 @@
+# Trigger a render-time throw via a dev-only test hook and assert the
+# error-boundary card renders with the "Volver al inicio" Btn
+# (P1C-M12-T01, S4-C22).
+appId: mx.cachink.mobile
+---
+- launchApp:
+    arguments:
+      CACHINK_FORCE_CRASH: "true"
+
+- assertVisible:
+    id: "app-error-boundary"
+- assertVisible:
+    id: "app-error-boundary-reset"
+- tapOn:
+    id: "app-error-boundary-reset"

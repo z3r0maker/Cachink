@@ -1,9 +1,18 @@
 /**
- * Expo Router entry for the first-run wizard (P1C-M2-T03).
+ * Expo Router entry for the first-run wizard (P1C-M2-T03; updated for
+ * ADR-039).
  *
  * Mobile wrapper around the shared `Wizard` screen. Writes the selected
  * mode to the AppConfigRepository + updates the Zustand store, then
  * routes to `/wizard/business` for the business-creation step.
+ *
+ * This route is normally pre-empted by `<GatedNavigation>` inside
+ * `<AppProviders>` (which renders its own WizardGate when `mode === null`).
+ * It still ships intact so that explicit `router.replace('/wizard')` calls
+ * — e.g. from Settings → "Re-run asistente" between renders — get the
+ * exact same UX. Per ADR-039 the wizard writes the final AppMode
+ * directly (`'local' | 'cloud' | 'lan-server' | 'lan-client'`); no
+ * separate `lanRole` payload to forward.
  */
 
 import type { ReactElement } from 'react';

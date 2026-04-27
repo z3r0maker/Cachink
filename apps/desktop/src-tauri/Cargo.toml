@@ -23,6 +23,38 @@ tauri-plugin-opener = "2"
 # SQLite plugin — mandated by CLAUDE.md §3 and ADR-011 for desktop Drizzle access.
 # Phase 1C-M2 uses this to open the local SQLite file.
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
+# Notification plugin — mandated by ADR-026 for Phase 1C-M11 (stock-low
+# notification at 19:00 daily on the Director role).
+tauri-plugin-notification = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
+# === Phase 1D: first-party LAN sync server (ADR-029, ADR-030) ===
+# Runs inside the Tauri backend process; exposes HTTP + WebSocket sync
+# endpoints on the local network. Bundled with the desktop app so
+# "Ser el servidor local" works air-gapped with zero external services.
+axum = { version = "0.8", features = ["ws"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+# Direct SQLite access for the LAN server — same cachink.db file the
+# SQL plugin manages, opened through an r2d2 pool per request.
+rusqlite = { version = "0.32", features = ["bundled"] }
+r2d2 = "0.8"
+r2d2_sqlite = "0.25"
+# QR code rendering for the pairing flow. Desktop shows a QR that mobile
+# scans; URL embeds the pairing token.
+qrcode = "0.14"
+image = { version = "0.25", default-features = false, features = ["png"] }
+# Cryptographically-random pairing / access tokens.
+rand = "0.8"
+base64 = "0.22"
+# Structured logging from inside the axum handlers.
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+# futures-util: used for SplitSink/SplitStream on WebSocket upgrade.
+futures-util = "0.3"
+
+# ADR-036 — desktop auto-update via the Tauri updater plugin, pointed at
+# GitHub Releases RSS. No dedicated update server.
+tauri-plugin-updater = "2"

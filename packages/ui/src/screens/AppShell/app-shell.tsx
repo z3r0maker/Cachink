@@ -19,13 +19,14 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { Text, View } from '@tamagui/core';
-import { BottomTabBar, Btn, TopBar } from '../../components/index';
+import { View } from '@tamagui/core';
+import { BottomTabBar, Btn, Icon, InitialsAvatar, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors } from '../../theme';
 import type { AppMode, Role } from '../../app-config/index';
 import { tabsForRole } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';
+import { useLanSync } from '../../hooks/use-lan-sync';
 
 export interface AppShellProps {
   readonly role: Role;
@@ -37,43 +38,37 @@ export interface AppShellProps {
   readonly subtitle?: string;
   readonly mode: AppMode | null;
   readonly children: ReactNode;
+  /**
+   * Optional source string for the TopBar's left avatar. Operativo
+   * passes the business name (`'Panadería La Esquina'` → `'PA'`),
+   * Director passes the role abbreviation (`'DIR'`). Falls back to
+   * the localised role label when omitted.
+   *
+   * Per ADR-040 the legacy `RoleChip` + "Cambiar" Btn collapsed into
+   * a single tappable `<InitialsAvatar>`; tapping the avatar fires
+   * `onChangeRole`.
+   */
+  readonly avatarValue?: string;
   readonly testID?: string;
 }
 
-interface RoleChipProps {
+interface RoleAvatarProps {
   readonly role: Role;
+  readonly value: string;
   readonly onChange: () => void;
-  readonly changeLabel: string;
+  readonly ariaLabel: string;
 }
 
-function RoleChip(props: RoleChipProps): ReactElement {
-  const { t } = useTranslation();
+function RoleAvatar(props: RoleAvatarProps): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" gap={8}>
-      <View
-        testID="top-bar-role-chip"
-        backgroundColor={props.role === 'director' ? colors.black : colors.yellow}
-        borderColor={colors.black}
-        borderWidth={2}
-        borderRadius={radii[0]}
-        paddingHorizontal={10}
-        paddingVertical={4}
-      >
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={11}
-          color={props.role === 'director' ? colors.yellow : colors.black}
-          letterSpacing={typography.letterSpacing.wide}
-          style={{ textTransform: 'uppercase' }}
-        >
-          {t(`roles.${props.role}` as const)}
-        </Text>
-      </View>
-      <Btn variant="ghost" size="sm" onPress={props.onChange} testID="top-bar-change-role">
-        {props.changeLabel}
-      </Btn>
-    </View>
+    <InitialsAvatar
+      testID="top-bar-role-chip"
+      value={props.value}
+      variant={props.role === 'director' ? 'dark' : 'brand'}
+      onPress={props.onChange}
+      ariaLabel={props.ariaLabel}
+      size="md"
+    />
   );
 }
 
@@ -83,12 +78,35 @@ interface RightSlotProps {
 }
 
 function RightSlot(props: RightSlotProps): ReactElement {
+  const { t } = useTranslation();
+  const lan = useLanSync();
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      <SyncStatusBadge mode={props.mode} />
-      <Btn variant="ghost" size="sm" onPress={props.onOpenSettings} testID="top-bar-open-settings">
-        ⚙️
-      </Btn>
+      <SyncStatusBadge
+        mode={props.mode}
+        lanStatus={lan.status}
+        connectedDevices={lan.connectedDevices}
+        onRetry={
+          props.mode === 'lan-server' || props.mode === 'lan-client'
+            ? () => void lan.retryNow()
+            : undefined
+        }
+      />
+      {/*
+       * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
+       * (children optional when icon is set, see PR 2.5). The ariaLabel
+       * was hardcoded "Ajustes" which violates CLAUDE.md §8.5
+       * (no hardcoded user-facing strings); pulled into the
+       * `topBar.openSettings` i18n key.
+       */}
+      <Btn
+        variant="ghost"
+        size="sm"
+        onPress={props.onOpenSettings}
+        testID="top-bar-open-settings"
+        ariaLabel={t('topBar.openSettings')}
+        icon={<Icon name="settings" size={20} color={colors.black} />}
+      />
     </View>
   );
 }
@@ -99,10 +117,20 @@ export function AppShell(props: AppShellProps): ReactElement {
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),
-    icon: tab.icon,
+    // Pass the IconName as a ReactNode — BottomTabBar's tab-item now
+    // recognises Icon elements and re-tints them for active state in
+    // UXD-M2-T02. Keeping the wrapping here means tab-item stays a
+    // pure presentational primitive.
+    icon: <Icon name={tab.icon} size={22} color={colors.black} />,
     onPress: () => props.onNavigate(tab.path),
     testID: `tab-${tab.key}`,
   }));
+
+  // Avatar source: caller-provided business / user name → fall back
+  // to the localised role label so the TopBar always renders 1–3
+  // initials.
+  const avatarValue = props.avatarValue ?? t(`roles.${props.role}` as const);
+  const changeLabel = t('topBar.cambiarRol');
 
   return (
     <View testID={props.testID ?? 'app-shell'} flex={1} backgroundColor={colors.offwhite}>
@@ -110,10 +138,11 @@ export function AppShell(props: AppShellProps): ReactElement {
         title={props.title}
         subtitle={props.subtitle}
         left={
-          <RoleChip
+          <RoleAvatar
             role={props.role}
+            value={avatarValue}
             onChange={props.onChangeRole}
-            changeLabel={t('topBar.cambiarRol')}
+            ariaLabel={changeLabel}
           />
         }
         right={<RightSlot mode={props.mode} onOpenSettings={props.onOpenSettings} />}

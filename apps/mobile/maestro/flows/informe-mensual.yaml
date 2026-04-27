@@ -1,0 +1,23 @@
+# Informe mensual → PDF for contador (P1C-M9-T02 + T03).
+#
+# Covers the Slice 3 C27 flow: Estados → Resultados tab → "Informe
+# mensual para contador" → share sheet surfaces the PDF.
+#
+# Precondition: wizard-local-standalone.yaml + the current month has
+# data (ventas + egresos).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- tapOn:
+    id: "tab-estados"
+- assertVisible:
+    id: "estados-shell"
+
+# The Resultados tab is the default sub-tab. The informe action card
+# sits above the Estado de Resultados rows.
+- assertVisible:
+    id: "informe-mensual-card"
+- tapOn:
+    id: "informe-mensual-btn"
+- assertVisible: "Generando"

@@ -23,6 +23,7 @@ import {
   type NewExpense,
 } from '@cachink/domain';
 import { Btn, Input } from '../../../components/index';
+import { MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 import { NuevoEmpleadoModal } from './nuevo-empleado-modal';
 
@@ -113,12 +114,13 @@ function NominaForm(props: NominaFormProps): ReactElement {
         note={error}
         testID="nomina-empleado"
       />
-      <Input
-        type="number"
+      <MoneyField
         label={t('nuevoEgreso.montoLabel')}
         value={state.montoPesos}
         onChange={state.setMontoPesos}
         testID="nomina-monto"
+        returnKeyType="done"
+        onSubmitEditing={onSubmit}
       />
       <Btn
         variant="primary"

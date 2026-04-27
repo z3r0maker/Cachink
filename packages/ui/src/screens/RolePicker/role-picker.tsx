@@ -36,16 +36,23 @@ interface RoleCardProps {
   readonly onPress: () => void;
 }
 
-function RoleCard(props: RoleCardProps): ReactElement {
-  const isDark = props.role === 'director';
+interface RoleCardBodyProps {
+  readonly label: string;
+  readonly hint: string;
+  readonly testID: string;
+  readonly onPress: () => void;
+  readonly isDark: boolean;
+}
+
+function RoleCardBody(props: RoleCardBodyProps): ReactElement {
   return (
-    <Card testID={props.testID} variant={isDark ? 'black' : 'white'} padding="lg" fullWidth>
+    <>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
         fontSize={28}
         letterSpacing={typography.letterSpacing.tighter}
-        color={isDark ? colors.yellow : colors.black}
+        color={props.isDark ? colors.yellow : colors.black}
         style={{ textTransform: 'uppercase' }}
       >
         {props.label}
@@ -54,14 +61,14 @@ function RoleCard(props: RoleCardProps): ReactElement {
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
         fontSize={14}
-        color={isDark ? colors.white : colors.gray600}
+        color={props.isDark ? colors.white : colors.gray600}
         marginTop={6}
       >
         {props.hint}
       </Text>
       <View marginTop={16}>
         <Btn
-          variant={isDark ? 'primary' : 'dark'}
+          variant={props.isDark ? 'primary' : 'dark'}
           onPress={props.onPress}
           fullWidth
           testID={`${props.testID}-select`}
@@ -69,6 +76,32 @@ function RoleCard(props: RoleCardProps): ReactElement {
           {props.label}
         </Btn>
       </View>
+    </>
+  );
+}
+
+function RoleCard(props: RoleCardProps): ReactElement {
+  const isDark = props.role === 'director';
+  // Audit 3.5 — the Card itself is now tappable. Previously only the
+  // inner Btn was — users who tapped the card body (a natural target,
+  // since the Card is the visual unit) hit nothing. The Btn stays for
+  // visual affordance and keyboard users; both Card.onPress and
+  // Btn.onPress fire `props.onPress` (idempotent at the parent).
+  return (
+    <Card
+      testID={props.testID}
+      variant={isDark ? 'black' : 'white'}
+      padding="lg"
+      fullWidth
+      onPress={props.onPress}
+    >
+      <RoleCardBody
+        label={props.label}
+        hint={props.hint}
+        testID={props.testID}
+        onPress={props.onPress}
+        isDark={isDark}
+      />
     </Card>
   );
 }

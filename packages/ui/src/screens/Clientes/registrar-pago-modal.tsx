@@ -1,14 +1,19 @@
 /**
  * RegistrarPagoModal — records a pago against a Crédito venta
- * (Slice 2 C28, M6-T04, ADR-024).
+ * (Slice 2 C28, M6-T04, ADR-024). Migrated to RHF + zodResolver as
+ * part of audit M-1 PR 2.5.
  *
- * Fields: monto (pre-fills with saldo pendiente), metodo (select:
- * Efectivo/Transferencia/Tarjeta/QR/CoDi), fecha (today), nota
- * (optional). Submit bubbles a NewClientPayment; parent wires
- * `useRegistrarPago` — the use-case owns the state-flip.
+ * Fields: monto (pre-fills with saldo pendiente, formats on blur via
+ * `<MoneyField>`), metodo (select: Efectivo / Transferencia / Tarjeta /
+ * QR/CoDi), nota (optional). Submit bubbles a NewClientPayment; parent
+ * wires `useRegistrarPago` — the use-case owns the state-flip.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
+import type { Control } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import {
   NewClientPaymentSchema,
   fromPesos,
@@ -21,15 +26,29 @@ import {
   type SaleId,
 } from '@cachink/domain';
 import { Btn, Input, Modal } from '../../components/index';
+import { RhfMoneyField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 
-const METODOS: readonly PaymentMethod[] = [
-  'Efectivo',
-  'Transferencia',
-  'Tarjeta',
-  'QR/CoDi',
-  'Crédito',
-];
+const METODOS: readonly PaymentMethod[] = ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'];
+
+/**
+ * Form schema. `montoPesos` is the visible string; `<MoneyField>`
+ * normalises it to canonical `1234.56` form before this resolver
+ * runs. The refine() gates submit on a positive amount without a
+ * `Number.isFinite` check scattered across the handler.
+ */
+const RegistrarPagoFormSchema = z.object({
+  montoPesos: z
+    .string()
+    .min(1)
+    .refine((s) => Number.parseFloat(s) > 0, {
+      message: 'monto must be positive',
+    }),
+  metodo: z.enum(['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi']),
+  nota: z.string().max(500).or(z.literal('')).optional(),
+});
+
+type RegistrarPagoFormValues = z.infer<typeof RegistrarPagoFormSchema>;
 
 export interface RegistrarPagoModalProps {
   readonly open: boolean;
@@ -42,13 +61,7 @@ export interface RegistrarPagoModalProps {
   readonly submitting?: boolean;
 }
 
-interface FormState {
-  montoPesos: string;
-  metodo: PaymentMethod;
-  nota: string;
-}
-
-function initialState(saldo: Money): FormState {
+function defaults(saldo: Money): RegistrarPagoFormValues {
   return {
     montoPesos: (Number(saldo) / 100).toString(),
     metodo: 'Efectivo',
@@ -56,47 +69,8 @@ function initialState(saldo: Money): FormState {
   };
 }
 
-function PagoFields({
-  state,
-  update,
-  error,
-  t,
-}: {
-  state: FormState;
-  update: (p: Partial<FormState>) => void;
-  error: string | undefined;
-  t: ReturnType<typeof useTranslation>['t'];
-}): ReactElement {
-  return (
-    <>
-      <Input
-        type="number"
-        label={t('nuevaVenta.montoLabel')}
-        value={state.montoPesos}
-        onChange={(v) => update({ montoPesos: v })}
-        note={error}
-        testID="pago-monto"
-      />
-      <Input
-        type="select"
-        label={t('nuevaVenta.metodoLabel')}
-        value={state.metodo}
-        onChange={(v) => update({ metodo: v as PaymentMethod })}
-        options={METODOS.filter((m) => m !== 'Crédito')}
-        testID="pago-metodo"
-      />
-      <Input
-        label={t('clientes.notaLabel')}
-        value={state.nota}
-        onChange={(v) => update({ nota: v })}
-        testID="pago-nota"
-      />
-    </>
-  );
-}
-
 function buildPayload(
-  state: FormState,
+  values: RegistrarPagoFormValues,
   venta: Sale,
   businessId: BusinessId,
   fecha: IsoDate,
@@ -104,30 +78,70 @@ function buildPayload(
   return NewClientPaymentSchema.parse({
     ventaId: venta.id as SaleId,
     fecha,
-    montoCentavos: fromPesos(state.montoPesos),
-    metodo: state.metodo,
-    nota: state.nota.trim() || undefined,
+    montoCentavos: fromPesos(values.montoPesos),
+    metodo: values.metodo,
+    nota: values.nota?.trim() || undefined,
     businessId,
   });
 }
 
+interface PagoFieldsProps {
+  readonly control: Control<RegistrarPagoFormValues>;
+  readonly t: ReturnType<typeof useTranslation>['t'];
+  readonly onSubmitEditing: () => void;
+}
+
+function PagoFields({ control, t, onSubmitEditing }: PagoFieldsProps): ReactElement {
+  return (
+    <>
+      <RhfMoneyField
+        control={control}
+        name="montoPesos"
+        label={t('nuevaVenta.montoLabel')}
+        errorMessage={t('clientes.required')}
+        testID="pago-monto"
+        returnKeyType="next"
+      />
+      <Controller
+        name="metodo"
+        control={control}
+        render={({ field }) => (
+          <Input
+            type="select"
+            label={t('nuevaVenta.metodoLabel')}
+            value={field.value}
+            onChange={(v) => field.onChange(v)}
+            options={METODOS}
+            testID="pago-metodo"
+          />
+        )}
+      />
+      <RhfTextField
+        control={control}
+        name="nota"
+        label={t('clientes.notaLabel')}
+        testID="pago-nota"
+        returnKeyType="done"
+        onSubmitEditing={onSubmitEditing}
+      />
+    </>
+  );
+}
+
 export function RegistrarPagoModal(props: RegistrarPagoModalProps): ReactElement {
   const { t } = useTranslation();
-  const [state, setState] = useState<FormState>(() => initialState(props.saldoPendiente));
-  const [error, setError] = useState<string | undefined>();
-  const update = (p: Partial<FormState>): void => setState((prev) => ({ ...prev, ...p }));
-
-  const handleSubmit = (): void => {
+  const form = useForm<RegistrarPagoFormValues>({
+    resolver: zodResolver(RegistrarPagoFormSchema),
+    defaultValues: defaults(props.saldoPendiente),
+    mode: 'onSubmit',
+  });
+  useEffect(() => {
+    form.reset(defaults(props.saldoPendiente));
+  }, [props.saldoPendiente, props.venta?.id, form]);
+  const submit = form.handleSubmit((values) => {
     if (!props.venta) return;
-    const monto = Number(state.montoPesos);
-    if (!Number.isFinite(monto) || monto <= 0) {
-      setError(t('clientes.required'));
-      return;
-    }
-    setError(undefined);
-    props.onSubmit(buildPayload(state, props.venta, props.businessId, props.fecha));
-  };
-
+    props.onSubmit(buildPayload(values, props.venta, props.businessId, props.fecha));
+  });
   return (
     <Modal
       open={props.open}
@@ -135,10 +149,10 @@ export function RegistrarPagoModal(props: RegistrarPagoModalProps): ReactElement
       title={t('nuevaVenta.save')}
       testID="registrar-pago-modal"
     >
-      <PagoFields state={state} update={update} error={error} t={t} />
+      <PagoFields control={form.control} t={t} onSubmitEditing={submit} />
       <Btn
         variant="green"
-        onPress={handleSubmit}
+        onPress={submit}
         disabled={props.submitting === true}
         fullWidth
         testID="pago-submit"

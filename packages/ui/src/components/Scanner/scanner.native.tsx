@@ -18,7 +18,9 @@ import { Text, View } from '@tamagui/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - expo-camera is a peer dep resolved by Metro at runtime
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { Btn, Input, Modal } from '../index';
+import { Btn } from '../Btn/index';
+import { Input } from '../Input/index';
+import { Modal } from '../Modal/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { ScannerProps } from './scanner';

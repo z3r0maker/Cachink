@@ -20,6 +20,8 @@ interface AppConfigStore extends AppConfigState {
   setMode: (mode: AppMode | null) => void;
   setCurrentBusinessId: (id: BusinessId | null) => void;
   setRole: (role: Role | null) => void;
+  setNotificationsEnabled: (next: boolean) => void;
+  setCrashReportingEnabled: (next: boolean | null) => void;
   /** Full reset — used by tests and by the "re-run wizard" settings action. */
   reset: () => void;
   /** Hydration complete marker — flips once the provider finishes loading. */
@@ -32,6 +34,8 @@ const INITIAL_STATE: AppConfigState = {
   currentBusinessId: null,
   role: null,
   hydrated: false,
+  notificationsEnabled: true,
+  crashReportingEnabled: null,
 };
 
 export const useAppConfigStore = create<AppConfigStore>((set) => ({
@@ -41,6 +45,8 @@ export const useAppConfigStore = create<AppConfigStore>((set) => ({
   setCurrentBusinessId: (currentBusinessId) => set({ currentBusinessId }),
   setRole: (role) => set({ role }),
   setHydrated: (hydrated) => set({ hydrated }),
+  setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
+  setCrashReportingEnabled: (crashReportingEnabled) => set({ crashReportingEnabled }),
   reset: () => set(INITIAL_STATE),
 }));
 
@@ -68,3 +74,15 @@ export const useSetCurrentBusinessId = (): ((id: BusinessId | null) => void) =>
   useAppConfigStore((s) => s.setCurrentBusinessId);
 
 export const useSetRole = (): ((role: Role | null) => void) => useAppConfigStore((s) => s.setRole);
+
+export const useNotificationsEnabled = (): boolean =>
+  useAppConfigStore((s) => s.notificationsEnabled);
+
+export const useSetNotificationsEnabled = (): ((next: boolean) => void) =>
+  useAppConfigStore((s) => s.setNotificationsEnabled);
+
+export const useCrashReportingEnabled = (): boolean | null =>
+  useAppConfigStore((s) => s.crashReportingEnabled);
+
+export const useSetCrashReportingEnabled = (): ((next: boolean | null) => void) =>
+  useAppConfigStore((s) => s.setCrashReportingEnabled);

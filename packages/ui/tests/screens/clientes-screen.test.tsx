@@ -91,4 +91,33 @@ describe('ClientesScreen', () => {
     fireEvent.click(btn);
     expect(onNuevoCliente).toHaveBeenCalled();
   });
+
+  // Audit Round 2 K4: per-row swipe wiring.
+  it('wraps each row in `<SwipeableRow>` when swipe handlers are supplied', () => {
+    const c = cliente({ id: '01JPHK0000000000000000C099' as ClientId });
+    renderWithProviders(
+      <ClientesScreen
+        query=""
+        onChangeQuery={vi.fn()}
+        items={[row(c, 0n)]}
+        onNuevoCliente={vi.fn()}
+        onEditCliente={vi.fn()}
+        onEliminarCliente={vi.fn()}
+      />,
+    );
+    expect(screen.getAllByTestId(`cliente-swipe-${c.id}`).length).toBeGreaterThan(0);
+  });
+
+  it('does NOT wrap rows when swipe handlers are unset', () => {
+    const c = cliente({ id: '01JPHK0000000000000000C098' as ClientId });
+    renderWithProviders(
+      <ClientesScreen
+        query=""
+        onChangeQuery={vi.fn()}
+        items={[row(c, 0n)]}
+        onNuevoCliente={vi.fn()}
+      />,
+    );
+    expect(screen.queryByTestId(`cliente-swipe-${c.id}`)).toBeNull();
+  });
 });

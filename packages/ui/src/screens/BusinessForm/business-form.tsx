@@ -16,73 +16,38 @@
  * code and zero new deps. Form error surfaces per-field via `Input.note`.
  */
 
-import { useState, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import {
-  NewBusinessSchema,
-  type NewBusiness,
-  type BusinessId,
-  type DeviceId,
-} from '@cachink/domain';
+import { type NewBusiness } from '@cachink/domain';
 import { Btn, Input, SectionTitle } from '../../components/index';
+import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import {
+  parseForm,
+  useBusinessFormState,
+  type BusinessFormSubmitInput,
+  type FormErrors,
+  type Regimen,
+  REGIMENES,
+} from './business-form-state';
 
 type T = ReturnType<typeof useTranslation>['t'];
-
-const REGIMENES = ['RIF', 'RESICO', 'Asalariados', 'Otro'] as const;
-type Regimen = (typeof REGIMENES)[number];
-
-export interface BusinessFormSubmitInput {
-  readonly nombre: string;
-  readonly regimenFiscal: Regimen;
-  readonly isrTasa: number;
-}
 
 export interface BusinessFormProps {
   readonly defaults?: Partial<BusinessFormSubmitInput>;
   readonly onSubmit: (input: BusinessFormSubmitInput) => void;
   readonly submitting?: boolean;
   readonly testID?: string;
-}
-
-interface FormErrors {
-  nombre?: string;
-  regimenFiscal?: string;
-  isrTasa?: string;
-}
-
-function parseForm(
-  nombre: string,
-  regimenFiscal: string,
-  isrTasaPct: string,
-  requiredLabel: string,
-): { ok: true; payload: BusinessFormSubmitInput } | { ok: false; errors: FormErrors } {
-  const errors: FormErrors = {};
-  if (!nombre.trim()) errors.nombre = requiredLabel;
-  if (!REGIMENES.includes(regimenFiscal as Regimen)) errors.regimenFiscal = requiredLabel;
-  const pct = Number(isrTasaPct);
-  if (!Number.isFinite(pct) || pct < 0 || pct > 100) {
-    errors.isrTasa = requiredLabel;
-  }
-  if (Object.keys(errors).length > 0) return { ok: false, errors };
-
-  const payload: BusinessFormSubmitInput = {
-    nombre: nombre.trim(),
-    regimenFiscal: regimenFiscal as Regimen,
-    isrTasa: pct / 100,
-  };
-  // Placeholder ids satisfying Crockford base-32 (no I, L, O, U) — 26 chars.
-  const check = NewBusinessSchema.safeParse({
-    ...payload,
-    logoUrl: null,
-    businessId: '01JPHK00000000000000000000' as BusinessId,
-    deviceId: '01JPHK00000000000000000001' as DeviceId,
-  });
-  if (!check.success) {
-    return { ok: false, errors: { nombre: requiredLabel } };
-  }
-  return { ok: true, payload };
+  /**
+   * Optional back-affordance handler. When supplied, a ghost "Atrás" button
+   * renders below the primary submit button. The `BusinessGate` in
+   * `gated-navigation.tsx` wires this to clear AppConfig `mode`, which
+   * flips GatedNavigation back to the wizard for the next paint — same
+   * mechanism as Settings → "Re-ejecutar asistente". Omit to render the
+   * form without a back affordance (e.g. in isolated stories or tests).
+   */
+  readonly onBack?: () => void;
 }
 
 interface FormFieldsProps {
@@ -94,19 +59,27 @@ interface FormFieldsProps {
   readonly setIsrTasaPct: (v: string) => void;
   readonly errors: FormErrors;
   readonly t: T;
+  /**
+   * Enter / Return-on-last-field handler — Audit M-1 PR3.5-T06 +
+   * Phase H1: when the user lands on the ISR-tasa field with a
+   * Bluetooth keyboard and hits Enter, submit the form. Mirrors the
+   * pattern in NuevaVenta / Gasto-Egreso / Nomina.
+   */
+  readonly onSubmitEditing?: () => void;
 }
 
 function FormFields(props: FormFieldsProps): ReactElement {
   const { t } = props;
   return (
     <>
-      <Input
+      <TextField
         label={t('wizard.businessForm.nombreLabel')}
         placeholder={t('wizard.businessForm.nombrePlaceholder')}
         value={props.nombre}
         onChange={props.setNombre}
         note={props.errors.nombre}
         testID="business-nombre"
+        returnKeyType="next"
       />
       <Input
         type="select"
@@ -124,6 +97,9 @@ function FormFields(props: FormFieldsProps): ReactElement {
         onChange={props.setIsrTasaPct}
         note={props.errors.isrTasa ?? t('wizard.businessForm.isrHint')}
         testID="business-isr"
+        returnKeyType="done"
+        onSubmitEditing={props.onSubmitEditing}
+        blurOnSubmit
       />
     </>
   );
@@ -143,16 +119,6 @@ function FormHeader({ t }: { t: T }): ReactElement {
       </Text>
     </>
   );
-}
-
-function useBusinessFormState(defaults: BusinessFormProps['defaults']) {
-  const [nombre, setNombre] = useState(defaults?.nombre ?? '');
-  const [regimen, setRegimen] = useState<Regimen>((defaults?.regimenFiscal as Regimen) ?? 'RIF');
-  const [isrTasaPct, setIsrTasaPct] = useState(
-    defaults?.isrTasa !== undefined ? String(Math.round(defaults.isrTasa * 100)) : '30',
-  );
-  const [errors, setErrors] = useState<FormErrors>({});
-  return { nombre, setNombre, regimen, setRegimen, isrTasaPct, setIsrTasaPct, errors, setErrors };
 }
 
 function SubmitRow({
@@ -179,6 +145,51 @@ function SubmitRow({
   );
 }
 
+function BackRow({
+  t,
+  onBack,
+  disabled,
+}: {
+  t: T;
+  onBack: () => void;
+  disabled: boolean;
+}): ReactElement {
+  return (
+    <Btn variant="ghost" onPress={onBack} disabled={disabled} fullWidth testID="business-back">
+      {t('wizard.businessForm.backLabel')}
+    </Btn>
+  );
+}
+
+interface FormColumnProps {
+  readonly s: ReturnType<typeof useBusinessFormState>;
+  readonly t: T;
+  readonly onSubmit: () => void;
+  readonly submitting: boolean;
+  readonly onBack?: () => void;
+}
+
+function FormColumn({ s, t, onSubmit, submitting, onBack }: FormColumnProps): ReactElement {
+  return (
+    <View testID="business-form-content" width="100%" maxWidth={480} gap={16}>
+      <FormHeader t={t} />
+      <FormFields
+        nombre={s.nombre}
+        setNombre={s.setNombre}
+        regimen={s.regimen}
+        setRegimen={s.setRegimen}
+        isrTasaPct={s.isrTasaPct}
+        setIsrTasaPct={s.setIsrTasaPct}
+        errors={s.errors}
+        t={t}
+        onSubmitEditing={onSubmit}
+      />
+      <SubmitRow t={t} onSubmit={onSubmit} submitting={submitting} />
+      {onBack && <BackRow t={t} onBack={onBack} disabled={submitting} />}
+    </View>
+  );
+}
+
 export function BusinessForm(props: BusinessFormProps): ReactElement {
   const { t } = useTranslation();
   const s = useBusinessFormState(props.defaults);
@@ -198,23 +209,24 @@ export function BusinessForm(props: BusinessFormProps): ReactElement {
       testID={props.testID ?? 'business-form'}
       flex={1}
       padding={24}
-      gap={16}
       backgroundColor={colors.offwhite}
+      // Center the form column horizontally + vertically on tablets and
+      // desktops, matching the sibling Wizard and RolePicker gate screens.
+      // On a phone the inner width:100% + maxWidth:480 collapses gracefully
+      // to the available width, so this also works at 320-px viewports.
+      alignItems="center"
+      justifyContent="center"
     >
-      <FormHeader t={t} />
-      <FormFields
-        nombre={s.nombre}
-        setNombre={s.setNombre}
-        regimen={s.regimen}
-        setRegimen={s.setRegimen}
-        isrTasaPct={s.isrTasaPct}
-        setIsrTasaPct={s.setIsrTasaPct}
-        errors={s.errors}
+      <FormColumn
+        s={s}
         t={t}
+        onSubmit={handleSubmit}
+        submitting={props.submitting === true}
+        onBack={props.onBack}
       />
-      <SubmitRow t={t} onSubmit={handleSubmit} submitting={props.submitting === true} />
     </View>
   );
 }
 
 export type { NewBusiness };
+export type { BusinessFormSubmitInput };

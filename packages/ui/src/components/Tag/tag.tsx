@@ -3,8 +3,21 @@
  *
  * A small classification chip used across the mock for `categoria`, `metodo`,
  * and other short status labels (see `VentaCard`, egresos list, inventario
- * categoria tag). Display-only — not interactive. A tappable categoria chip
- * would be a different primitive (`<Chip>`) added when a real usage demands.
+ * categoria tag).
+ *
+ * **Decorative-only contract (ADR-043).** `<Tag>` is **never** a tap target.
+ * It exposes no `onPress`, no `role="button"`, no focus ring. The audit's 3.10
+ * worry that "the visual implies tappability" was reconnoitred and zero
+ * tappable Tag instances exist in the codebase today. If a future surface
+ * needs a tappable chip:
+ *
+ *   - For radio-group / segmented choices (e.g. period filters, sub-tabs)
+ *     use `<SegmentedToggle>`. It already ships the 48-pt effective tap
+ *     target, the brand press-transform, and `aria-selected` semantics.
+ *   - For single-tappable chips that don't fit a segmented group, extend
+ *     `<Btn>` with a future `chip` size variant rather than overloading
+ *     `<Tag>`. A separate `<Chip>` primitive is **not** planned for Phase 1
+ *     (see ADR-043 for the deferral rationale).
  *
  * The seven variants map to brand + semantic tokens from CLAUDE.md §8.1 so the
  * prop surface stays disciplined (no raw color props). Every variant ships the
@@ -55,6 +68,15 @@ function TagText({ text, color }: { text: string; color: string }): ReactElement
       fontWeight={typography.weights.bold}
       fontSize={11}
       letterSpacing={typography.letterSpacing.wide}
+      // Audit 9.3 — Tags are short by contract, but sit in tight
+      // chip-row geometry (e.g. inside `<VentaCard>`). Cap to one
+      // line + ellipsis so a stray long string never wraps the row.
+      numberOfLines={1}
+      ellipsizeMode="tail"
+      // Audit 9.4 — the chip-row geometry is built around the 11-pt
+      // base size + 22-pt pill height. Cap at 1.2× so even at high
+      // Dynamic Type the pill stays inside the row's vertical rhythm.
+      maxFontSizeMultiplier={1.2}
     >
       {text}
     </Text>

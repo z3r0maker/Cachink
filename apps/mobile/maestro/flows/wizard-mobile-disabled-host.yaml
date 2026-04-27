@@ -1,0 +1,28 @@
+# Mobile cannot host LAN — verify the lan-server card is disabled with
+# the inline explanation visible (ADR-039 WUX-M4-T03).
+#
+# This flow proves the platform-aware copy: mobile users navigating to
+# Step 2B see the host card greyed out and the explanation text
+# "Esta opción solo funciona en computadoras (Windows o Mac)…" visible
+# below it. The card should refuse taps.
+appId: mx.cachink.mobile
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "¡Bienvenido a Cachink!"
+- tapOn: { id: "wizard-step1-multi-card" }
+
+# Step 2B — assert the disabled-note is visible (its presence is the
+# definition of "card is disabled").
+- assertVisible: { id: "wizard-step2b-server" }
+- assertVisible: { id: "wizard-step2b-server-note" }
+- assertVisible: "Esta opción solo funciona en computadoras"
+
+# Tapping the disabled card is a no-op — we're still on Step 2B.
+- tapOn: { id: "wizard-step2b-server-card" }
+- assertVisible: { id: "wizard-step2b-server" }
+
+# Cloud is the available alternative; tap to confirm the rest of the
+# screen is functional.
+- assertVisible: { id: "wizard-step2b-cloud" }

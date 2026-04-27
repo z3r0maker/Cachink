@@ -9,7 +9,7 @@ const meta: Meta<typeof Btn> = {
   argTypes: {
     variant: {
       control: 'select',
-      options: ['primary', 'dark', 'ghost', 'green', 'danger', 'soft'],
+      options: ['primary', 'dark', 'ghost', 'green', 'danger', 'soft', 'outline'],
     },
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
     disabled: { control: 'boolean' },
@@ -27,8 +27,9 @@ export const Ghost: Story = { args: { variant: 'ghost' } };
 export const Green: Story = { args: { variant: 'green' } };
 export const Danger: Story = { args: { variant: 'danger', children: 'CANCELAR' } };
 export const Soft: Story = { args: { variant: 'soft' } };
+export const Outline: Story = { args: { variant: 'outline', children: 'CANCELAR' } };
 
-/** All 6 variants in a vertical stack — designer visual-review surface. */
+/** All 7 variants in a vertical stack — designer visual-review surface. */
 export const AllVariants: Story = {
   render: () => (
     <View flexDirection="column" gap={12} padding={12}>
@@ -38,6 +39,21 @@ export const AllVariants: Story = {
       <Btn variant="green">GREEN</Btn>
       <Btn variant="danger">DANGER</Btn>
       <Btn variant="soft">SOFT</Btn>
+      <Btn variant="outline">OUTLINE</Btn>
+    </View>
+  ),
+};
+
+/** Side-by-side outline + primary — the canonical Cancelar / Guardar pair (mock 3). */
+export const CancelGuardar: Story = {
+  render: () => (
+    <View flexDirection="row" gap={12} padding={12}>
+      <Btn variant="outline" fullWidth>
+        CANCELAR
+      </Btn>
+      <Btn variant="primary" fullWidth>
+        GUARDAR
+      </Btn>
     </View>
   ),
 };

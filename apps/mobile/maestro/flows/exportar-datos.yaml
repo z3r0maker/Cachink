@@ -1,0 +1,25 @@
+# Exportar todos los datos → Excel workbook (P1C-M9-T01).
+#
+# Covers the Slice 3 C26 flow: Settings → "Exportar todos los datos" →
+# native share sheet surfaces the .xlsx file.
+#
+# Precondition: wizard-local-standalone.yaml + at least one venta/egreso
+# exist in the current business.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Settings is reachable via the TopBar cog on both roles; as a fallback
+# we use the direct route pushed by the app-shell.
+- tapOn:
+    id: "top-bar-open-settings"
+- assertVisible: "Ajustes"
+- assertVisible:
+    id: "export-datos-card"
+
+# Trigger the export. Pending status surfaces while the workbook builds;
+# the share sheet (native) or download anchor (Tauri WebView on desktop)
+# then fires.
+- tapOn:
+    id: "export-datos-btn"
+- assertVisible: "Generando"

@@ -20,7 +20,26 @@ export interface ModalProps {
   readonly onClose: () => void;
   /** Header title. Optional — some modals only show content. */
   readonly title?: string;
-  /** Emoji shown in a yellow-bordered box next to the title. */
+  /**
+   * Optional muted line beneath the title (e.g. `"24 abr · 10:48"`).
+   * Matches the design mocks' transactional-modal subtitle (mock 3,
+   * April 2026 review). Renders only when provided.
+   */
+  readonly subtitle?: string;
+  /**
+   * Optional ReactNode rendered in the same slot as `emoji`. Use this
+   * when a richer element (e.g. `<InitialsAvatar>`) replaces the emoji
+   * box — for instance the role-initials avatar in NuevaVenta.
+   * Mutually exclusive with `emoji`; if both are passed, `leftAvatar`
+   * wins.
+   */
+  readonly leftAvatar?: ReactNode;
+  /**
+   * @deprecated Pass `leftAvatar={<InitialsAvatar … />}` or omit the
+   * left slot entirely. Kept for back-compat with existing callers
+   * (NuevoEgreso, etc.) — will be removed in a follow-up after every
+   * call site migrates.
+   */
   readonly emoji?: string;
   /** Modal body. Forms, lists, anything. */
   readonly children: ReactNode;

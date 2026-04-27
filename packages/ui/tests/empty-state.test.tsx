@@ -18,7 +18,7 @@ describe('EmptyState', () => {
     expect(styles.fontWeight).toBe('900');
   });
 
-  it('renders the emoji when provided', () => {
+  it('renders the emoji when provided (legacy back-compat)', () => {
     renderWithProviders(<EmptyState title="Sin ventas todavía" emoji="📭" />);
     expect(screen.getByTestId('empty-state-emoji')).toBeDefined();
     expect(screen.getByText('📭')).toBeDefined();
@@ -27,6 +27,24 @@ describe('EmptyState', () => {
   it('does not render an emoji node when `emoji` is omitted', () => {
     renderWithProviders(<EmptyState title="Sin ventas todavía" />);
     expect(screen.queryByTestId('empty-state-emoji')).toBeNull();
+  });
+
+  it('renders the canonical Icon-in-yellow-square illustration when icon is provided', () => {
+    renderWithProviders(<EmptyState title="Sin ventas todavía" icon="receipt" />);
+    expect(screen.getByTestId('empty-state-icon-box')).toBeDefined();
+    // The Icon underneath uses the receipt glyph testID.
+    expect(screen.getAllByTestId('icon-receipt').length).toBeGreaterThan(0);
+  });
+
+  it('icon wins over emoji when both are passed (deprecation path)', () => {
+    renderWithProviders(<EmptyState title="Sin ventas todavía" icon="receipt" emoji="📭" />);
+    expect(screen.getByTestId('empty-state-icon-box')).toBeDefined();
+    expect(screen.queryByTestId('empty-state-emoji')).toBeNull();
+  });
+
+  it('does not render an icon-box when icon is omitted', () => {
+    renderWithProviders(<EmptyState title="Sin ventas todavía" />);
+    expect(screen.queryByTestId('empty-state-icon-box')).toBeNull();
   });
 
   it('renders the description in muted gray when provided', () => {

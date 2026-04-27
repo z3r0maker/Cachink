@@ -124,7 +124,9 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       .all('table') as Array<{ name: string }>;
     const names = new Set(tables.map((t) => t.name));
 
-    // Every Phase 1B table the 0000 migration creates must exist.
+    // Every Phase 1B table the 0000 migration creates must exist,
+    // plus the sync infrastructure tables added in the 0001 migration
+    // (ADR-030).
     for (const expected of [
       'businesses',
       'app_config',
@@ -138,6 +140,9 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       'day_closes',
       'recurring_expenses',
       '__cachink_migrations',
+      '__cachink_change_log',
+      '__cachink_sync_state',
+      '__cachink_conflicts',
     ]) {
       expect(names, `expected ${expected} to exist`).toContain(expected);
     }
@@ -156,6 +161,9 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const rows = sqlite.prepare('SELECT tag FROM __cachink_migrations').all() as Array<{
       tag: string;
     }>;
-    expect(rows).toEqual([{ tag: '0000_lying_johnny_blaze' }]);
+    expect(rows).toEqual([
+      { tag: '0000_lying_johnny_blaze' },
+      { tag: '0001_change_log_and_sync_state' },
+    ]);
   });
 });

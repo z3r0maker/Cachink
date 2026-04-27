@@ -10,7 +10,8 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { Expense, Money } from '@cachink/domain';
-import { Btn, Input, SectionTitle } from '../../components/index';
+import { Btn, FAB, Icon, List, SectionTitle, SwipeableRow } from '../../components/index';
+import { DateField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import { EgresoCard } from './egreso-card';
@@ -28,6 +29,17 @@ export interface EgresosScreenProps {
   readonly error?: Error | null;
   readonly onRetry?: () => void;
   readonly testID?: string;
+  /**
+   * Audit 4.6 — when `true` the screen mounts a `<FAB>` for the
+   * primary action so phone users can reach it one-handed. Mobile
+   * shells opt in; desktop continues to use the `<SectionTitle>`
+   * top-right Btn.
+   */
+  readonly showFab?: boolean;
+  /** Audit Round 2 K2 — swipe-to-edit handler. */
+  readonly onEditEgreso?: (egreso: Expense) => void;
+  /** Audit Round 2 K2 — swipe-to-delete handler (route opens ConfirmDialog). */
+  readonly onEliminarEgreso?: (egreso: Expense) => void;
 }
 
 function EgresosContent(props: EgresosScreenProps): ReactElement {
@@ -55,10 +67,34 @@ function EgresosContent(props: EgresosScreenProps): ReactElement {
     return <EmptyEgresos onNuevoEgreso={props.onNuevoEgreso} />;
   }
   return (
-    <View gap={10}>
-      {props.egresos.map((egreso) => (
-        <EgresoCard key={egreso.id} egreso={egreso} onPress={() => props.onEgresoPress?.(egreso)} />
-      ))}
+    <List<Expense>
+      data={props.egresos}
+      keyExtractor={(egreso) => egreso.id}
+      renderItem={(egreso) => <EgresoRowSlot egreso={egreso} {...props} />}
+      testID="egresos-list"
+    />
+  );
+}
+
+/** Audit Round 2 K2 — wrap row in SwipeableRow when handlers present. */
+function EgresoRowSlot({
+  egreso,
+  onEgresoPress,
+  onEditEgreso,
+  onEliminarEgreso,
+}: { egreso: Expense } & EgresosScreenProps): ReactElement {
+  const card = <EgresoCard egreso={egreso} onPress={() => onEgresoPress?.(egreso)} />;
+  const swipeEnabled = onEditEgreso !== undefined || onEliminarEgreso !== undefined;
+  if (!swipeEnabled) return <View marginBottom={10}>{card}</View>;
+  return (
+    <View marginBottom={10}>
+      <SwipeableRow
+        onSwipeLeft={onEditEgreso ? () => onEditEgreso(egreso) : undefined}
+        onSwipeRight={onEliminarEgreso ? () => onEliminarEgreso(egreso) : undefined}
+        testID={`egreso-swipe-${egreso.id}`}
+      >
+        {card}
+      </SwipeableRow>
     </View>
   );
 }
@@ -81,15 +117,24 @@ export function EgresosScreen(props: EgresosScreenProps): ReactElement {
           </Btn>
         }
       />
-      <Input
-        type="date"
+      {/* Audit 4.5 — TotalCard above the date filter so the
+       * day-total stays above the fold when the keyboard is open. */}
+      <TotalCard label={t('egresos.totalDelDia')} total={props.total} />
+      <DateField
         label={t('egresos.fechaLabel')}
         value={props.fecha}
         onChange={props.onChangeFecha}
         testID="egresos-fecha"
       />
-      <TotalCard label={t('egresos.totalDelDia')} total={props.total} />
       <EgresosContent {...props} />
+      {props.showFab === true && (
+        <FAB
+          icon={<Icon name="plus" size={28} color={colors.black} />}
+          ariaLabel={t('egresos.newCta')}
+          onPress={props.onNuevoEgreso}
+          testID="egresos-fab"
+        />
+      )}
     </View>
   );
 }

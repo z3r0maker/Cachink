@@ -4,7 +4,7 @@
     "slug": "cachink",
     "scheme": "cachink",
     "version": "0.1.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -30,11 +30,13 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-router",
-      "expo-sqlite",
-      "expo-localization",
-      "expo-font"
-    ]
+    "plugins": ["expo-router", "expo-sqlite", "expo-localization", "expo-font", "expo-updates"],
+    "updates": {
+      "url": "https://u.expo.dev/EAS_PROJECT_ID",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }

@@ -13,7 +13,7 @@ import type {
   ProductId,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { Product, ProductsRepository } from '../products-repository.js';
+import type { Product, ProductPatch, ProductsRepository } from '../products-repository.js';
 import { products } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -63,11 +63,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
       .select()
       .from(products)
       .where(
-        and(
-          eq(products.sku, sku),
-          eq(products.businessId, businessId),
-          isNull(products.deletedAt),
-        ),
+        and(eq(products.sku, sku), eq(products.businessId, businessId), isNull(products.deletedAt)),
       )
       .get();
     return row ? this.#mapRow(row) : null;
@@ -83,6 +79,20 @@ export class DrizzleProductsRepository implements ProductsRepository {
     return rows.map((r) => this.#mapRow(r));
   }
 
+  async update(id: ProductId, patch: ProductPatch): Promise<Product | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    const ts = now();
+    const updates: Record<string, unknown> = { updatedAt: ts };
+    if (patch.nombre !== undefined) updates.nombre = patch.nombre;
+    if (patch.sku !== undefined) updates.sku = patch.sku;
+    if (patch.categoria !== undefined) updates.categoria = patch.categoria;
+    if (patch.unidad !== undefined) updates.unidad = patch.unidad;
+    if (patch.umbralStockBajo !== undefined) updates.umbralStockBajo = patch.umbralStockBajo;
+    await this.#db.update(products).set(updates).where(eq(products.id, id)).run();
+    return this.findById(id);
+  }
+
   async delete(id: ProductId): Promise<void> {
     const ts = now();
     await this.#db
@@ -90,6 +100,15 @@ export class DrizzleProductsRepository implements ProductsRepository {
       .set({ deletedAt: ts, updatedAt: ts })
       .where(eq(products.id, id))
       .run();
+  }
+
+  async count(businessId: BusinessId): Promise<number> {
+    const rows = await this.#db
+      .select({ id: products.id })
+      .from(products)
+      .where(and(eq(products.businessId, businessId), isNull(products.deletedAt)))
+      .all();
+    return rows.length;
   }
 
   #mapRow(row: ProductRow): Product {

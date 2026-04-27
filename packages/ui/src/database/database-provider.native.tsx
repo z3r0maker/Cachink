@@ -27,16 +27,33 @@ import {
   type DatabaseProviderProps,
   type AsyncDatabaseProviderProps,
 } from './_internal';
+import { nativeResetDatabase } from './database-reset.native';
 import { runMigrations } from './run-migrations';
+
+// Mirror the surface of `./database-provider.tsx` so the barrel
+// `./index.ts` can re-export the same names regardless of which
+// platform variant Metro/Vite resolves. Without these re-exports,
+// `useDatabase` / `DatabaseContext` etc. silently become `undefined`
+// in the iOS bundle and consumers crash with
+// "useDatabase is not a function".
+export { DatabaseContext, useDatabase, TestDatabaseProvider } from './_internal';
+export { AsyncDatabaseProvider };
+export type { DatabaseProviderProps, AsyncDatabaseProviderProps };
+export { runMigrations, splitStatements } from './run-migrations';
 
 /** SQLite file name on device storage. Changing this breaks existing users. */
 const DB_FILE_NAME = 'cachink.db';
 
 async function createNativeDatabase(): Promise<CachinkDatabase> {
   const native = openDatabaseSync(DB_FILE_NAME);
-  const db = drizzle(native, { schema }) as unknown as CachinkDatabase;
-  await runMigrations(db);
-  return db;
+  try {
+    const db = drizzle(native, { schema }) as unknown as CachinkDatabase;
+    await runMigrations(db);
+    return db;
+  } catch (error) {
+    native.closeSync();
+    throw error;
+  }
 }
 
 export function DatabaseProvider(props: DatabaseProviderProps): ReactElement | null {
@@ -46,6 +63,7 @@ export function DatabaseProvider(props: DatabaseProviderProps): ReactElement | n
     children: props.children,
     database: props.database,
     create,
+    reset: nativeResetDatabase,
   };
   return <AsyncDatabaseProvider {...asyncProps} />;
 }

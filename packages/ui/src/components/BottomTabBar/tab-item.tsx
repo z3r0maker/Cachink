@@ -3,8 +3,11 @@
  * from the BottomTabBar barrel; consumers compose tabs via the
  * `BottomTabBarItem` items array on the parent.
  *
- * Extracted into its own file purely to keep `bottom-tab-bar.tsx` and the
- * tab-item rendering both well under the §4.4 file budgets.
+ * Per ADR-040 the active state is a 4-px yellow strip pinned to the
+ * top of the cell (mocks 1/2/4) instead of a full-cell yellow fill.
+ * Inactive icons + labels render at 0.55 opacity so the active cell
+ * pops without needing icon recoloring at the BottomTabBar level —
+ * consumers can pass any ReactNode and the visual hierarchy still reads.
  */
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
@@ -20,6 +23,24 @@ export interface TabItemProps {
 }
 
 const PRESS_STYLE = { opacity: 0.7 };
+
+const INACTIVE_OPACITY = 0.55;
+
+function ActiveStrip(): ReactElement {
+  return (
+    <View
+      testID="tab-item-active-strip"
+      position="absolute"
+      top={0}
+      left="20%"
+      right="20%"
+      height={4}
+      backgroundColor={colors.yellow}
+      borderBottomLeftRadius={4}
+      borderBottomRightRadius={4}
+    />
+  );
+}
 
 function Badge({ count }: { count: number }): ReactElement {
   return (
@@ -64,7 +85,9 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
 }
 
 /**
- * Renders one tab cell. Yellow surface when active, transparent otherwise.
+ * Renders one tab cell. Active = yellow top-strip + full-opacity icon
+ * + bold black label. Inactive = transparent + 0.55 opacity + gray
+ * label.
  */
 export function TabItem(props: TabItemProps): ReactElement {
   return (
@@ -76,13 +99,22 @@ export function TabItem(props: TabItemProps): ReactElement {
       flexDirection="column"
       alignItems="center"
       justifyContent="center"
-      backgroundColor={props.active ? colors.yellow : 'transparent'}
+      backgroundColor="transparent"
       cursor="pointer"
-      style={{ userSelect: 'none' }}
+      role="tab"
+      aria-label={props.label}
+      aria-selected={props.active}
+      style={{ userSelect: 'none', position: 'relative' }}
     >
+      {props.active && <ActiveStrip />}
       {props.icon !== undefined && (
-        <View testID="tab-item-icon" marginBottom={2}>
-          {props.icon}
+        <View testID="tab-item-icon" marginBottom={4} opacity={props.active ? 1 : INACTIVE_OPACITY}>
+          {/**
+           * Wrap string icons in `<Text>` — Tamagui's `<View>` rejects
+           * direct text-node children on both platforms. Consumers
+           * normally pass an `<Icon>` element which renders unwrapped.
+           */}
+          {typeof props.icon === 'string' ? <Text fontSize={22}>{props.icon}</Text> : props.icon}
         </View>
       )}
       <Label text={props.label} active={props.active} />

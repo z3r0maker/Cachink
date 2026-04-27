@@ -11,7 +11,9 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { Btn, Input, Modal } from '../index';
+import { Btn } from '../Btn/index';
+import { Input } from '../Input/index';
+import { Modal } from '../Modal/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, radii } from '../../theme';
 import type { ScannerProps } from './scanner';

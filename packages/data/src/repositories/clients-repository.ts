@@ -23,4 +23,6 @@ export interface ClientsRepository {
   /** Partial update per ADR-023. Returns the post-update row or null when not found. */
   update(id: ClientId, patch: ClientPatch): Promise<Client | null>;
   delete(id: ClientId): Promise<void>;
+  /** Count non-deleted clients for the wizard data-preserved callout (ADR-039). */
+  count(businessId: BusinessId): Promise<number>;
 }

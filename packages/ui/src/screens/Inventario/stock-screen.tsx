@@ -10,7 +10,15 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
-import { Btn, Input, SectionTitle } from '../../components/index';
+import {
+  Btn,
+  FAB,
+  Icon,
+  List,
+  SearchBar,
+  SectionTitle,
+  SwipeableRow,
+} from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import { ProductoCard } from './producto-card';
@@ -25,6 +33,12 @@ export interface StockScreenProps {
   readonly loading?: boolean;
   readonly error?: Error | null;
   readonly testID?: string;
+  /** Audit 4.6 — opt-in mobile FAB for the primary action. */
+  readonly showFab?: boolean;
+  /** Audit Round 2 K3 — swipe-to-edit handler. */
+  readonly onEditProducto?: (item: ProductoConStock) => void;
+  /** Audit Round 2 K3 — swipe-to-delete handler (route opens ConfirmDialog). */
+  readonly onEliminarProducto?: (item: ProductoConStock) => void;
 }
 
 export function filterProductos(
@@ -40,38 +54,73 @@ export function filterProductos(
   });
 }
 
-function StockList({
-  items,
+interface StockListProps {
+  readonly items: readonly ProductoConStock[];
+  readonly onProductoPress?: (item: ProductoConStock) => void;
+  readonly onEditProducto?: (item: ProductoConStock) => void;
+  readonly onEliminarProducto?: (item: ProductoConStock) => void;
+}
+
+function ProductoRow({
+  row,
   onProductoPress,
-}: {
-  items: readonly ProductoConStock[];
-  onProductoPress?: (item: ProductoConStock) => void;
-}): ReactElement {
+  onEditProducto,
+  onEliminarProducto,
+}: { row: ProductoConStock } & StockListProps): ReactElement {
+  const card = (
+    <ProductoCard
+      producto={row.producto}
+      stock={row.stock}
+      onPress={() => onProductoPress?.(row)}
+    />
+  );
+  const swipeEnabled = onEditProducto !== undefined || onEliminarProducto !== undefined;
+  if (!swipeEnabled) return <View marginBottom={10}>{card}</View>;
   return (
-    <View gap={10}>
-      {items.map((row) => (
-        <ProductoCard
-          key={row.producto.id}
-          producto={row.producto}
-          stock={row.stock}
-          onPress={() => onProductoPress?.(row)}
-        />
-      ))}
+    <View marginBottom={10}>
+      <SwipeableRow
+        onSwipeLeft={onEditProducto ? () => onEditProducto(row) : undefined}
+        onSwipeRight={onEliminarProducto ? () => onEliminarProducto(row) : undefined}
+        testID={`producto-swipe-${row.producto.id}`}
+      >
+        {card}
+      </SwipeableRow>
     </View>
+  );
+}
+
+function StockList(props: StockListProps): ReactElement {
+  return (
+    <List<ProductoConStock>
+      data={props.items}
+      keyExtractor={(row) => row.producto.id}
+      renderItem={(row) => <ProductoRow row={row} {...props} />}
+      testID="stock-list"
+    />
+  );
+}
+
+function StockBody(
+  props: StockScreenProps & { filtered: readonly ProductoConStock[] },
+): ReactElement {
+  if (props.error) return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
+  if (props.loading === true) return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
+  if (props.filtered.length === 0) {
+    return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
+  }
+  return (
+    <StockList
+      items={props.filtered}
+      onProductoPress={props.onProductoPress}
+      onEditProducto={props.onEditProducto}
+      onEliminarProducto={props.onEliminarProducto}
+    />
   );
 }
 
 export function StockScreen(props: StockScreenProps): ReactElement {
   const { t } = useTranslation();
   const filtered = filterProductos(props.items, props.query);
-
-  const body = ((): ReactElement => {
-    if (props.error) return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
-    if (props.loading === true) return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
-    if (filtered.length === 0) return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
-    return <StockList items={filtered} onProductoPress={props.onProductoPress} />;
-  })();
-
   return (
     <View
       testID={props.testID ?? 'stock-screen'}
@@ -88,14 +137,22 @@ export function StockScreen(props: StockScreenProps): ReactElement {
           </Btn>
         }
       />
-      <Input
+      <SearchBar
         label={t('inventario.buscar')}
         placeholder={t('inventario.buscarPlaceholder')}
         value={props.query}
         onChange={props.onChangeQuery}
         testID="stock-buscar"
       />
-      {body}
+      <StockBody {...props} filtered={filtered} />
+      {props.showFab === true && (
+        <FAB
+          icon={<Icon name="plus" size={28} color={colors.black} />}
+          ariaLabel={t('inventario.newCta')}
+          onPress={props.onNuevoProducto}
+          testID="stock-fab"
+        />
+      )}
     </View>
   );
 }

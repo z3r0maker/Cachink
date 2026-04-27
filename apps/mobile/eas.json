@@ -1,0 +1,63 @@
+{
+  "$schema": "https://raw.githubusercontent.com/expo/eas-cli/main/packages/eas-json/schema/eas.schema.json",
+  "cli": {
+    "version": ">= 13.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "channel": "development",
+      "env": {
+        "EXPO_PUBLIC_CLOUD_API_URL": "",
+        "EXPO_PUBLIC_CLOUD_ANON_KEY": "",
+        "EXPO_PUBLIC_POWERSYNC_URL": ""
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "channel": "preview",
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLOUD_API_URL": "$PREVIEW_CLOUD_API_URL",
+        "EXPO_PUBLIC_CLOUD_ANON_KEY": "$PREVIEW_CLOUD_ANON_KEY",
+        "EXPO_PUBLIC_POWERSYNC_URL": "$PREVIEW_POWERSYNC_URL"
+      }
+    },
+    "production": {
+      "channel": "production",
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_CLOUD_API_URL": "$PRODUCTION_CLOUD_API_URL",
+        "EXPO_PUBLIC_CLOUD_ANON_KEY": "$PRODUCTION_CLOUD_ANON_KEY",
+        "EXPO_PUBLIC_POWERSYNC_URL": "$PRODUCTION_POWERSYNC_URL"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascAppId": "${ASC_APP_ID}",
+        "appleId": "${APPLE_ID}",
+        "appleTeamId": "${APPLE_TEAM_ID}"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./fastlane/service-account.json",
+        "track": "internal"
+      }
+    }
+  }
+}

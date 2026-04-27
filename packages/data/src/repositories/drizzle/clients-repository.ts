@@ -86,6 +86,15 @@ export class DrizzleClientsRepository implements ClientsRepository {
       .run();
   }
 
+  async count(businessId: BusinessId): Promise<number> {
+    const rows = await this.#db
+      .select({ id: clients.id })
+      .from(clients)
+      .where(and(eq(clients.businessId, businessId), isNull(clients.deletedAt)))
+      .all();
+    return rows.length;
+  }
+
   #mapRow(row: ClientRow): Client {
     return {
       id: row.id as ClientId,

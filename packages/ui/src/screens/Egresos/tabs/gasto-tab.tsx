@@ -51,11 +51,12 @@ function makePayload(
   return recurrente ? { egreso, recurrente } : { egreso };
 }
 
-export function GastoTab(props: GastoTabProps): ReactElement {
-  const { t } = useTranslation();
-  const form = useGastoForm();
-
-  const handleSubmit = (): void => {
+function makeHandleSubmit(
+  form: GastoFormApi,
+  t: ReturnType<typeof useTranslation>['t'],
+  props: GastoTabProps,
+): () => void {
+  return () => {
     const v = validateGasto(form.state, t('empleados.required'));
     if (Object.keys(v).length > 0) {
       form.setErrors(v);
@@ -64,10 +65,22 @@ export function GastoTab(props: GastoTabProps): ReactElement {
     props.onSubmit(makePayload(form, props.businessId, props.fecha));
     form.reset();
   };
+}
+
+export function GastoTab(props: GastoTabProps): ReactElement {
+  const { t } = useTranslation();
+  const form = useGastoForm();
+  const handleSubmit = makeHandleSubmit(form, t, props);
 
   return (
     <>
-      <GastoFields state={form.state} update={form.update} errors={form.errors} t={t} />
+      <GastoFields
+        state={form.state}
+        update={form.update}
+        errors={form.errors}
+        onSubmitEditing={handleSubmit}
+        t={t}
+      />
       <RecurrenteToggle
         value={form.state.recurrente}
         onChange={(next) => form.update({ recurrente: next })}

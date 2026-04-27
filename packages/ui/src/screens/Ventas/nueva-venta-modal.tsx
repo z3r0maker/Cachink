@@ -48,6 +48,7 @@ function ModalBody(props: BodyProps): ReactElement {
         update={props.form.update}
         errors={props.form.errors}
         clientes={props.clientes}
+        onSubmitEditing={props.onSubmit}
         t={props.t}
       />
       <ClienteField

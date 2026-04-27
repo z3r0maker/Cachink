@@ -32,9 +32,7 @@ export function describeProductsRepositoryContract(
     });
 
     it('honours an explicit umbralStockBajo', async () => {
-      const row = await repo.create(
-        makeNewProduct({ businessId: BIZ_A, umbralStockBajo: 10 }),
-      );
+      const row = await repo.create(makeNewProduct({ businessId: BIZ_A, umbralStockBajo: 10 }));
       expect(row.umbralStockBajo).toBe(10);
     });
 
@@ -54,8 +52,12 @@ export function describeProductsRepositoryContract(
     });
 
     it('listForBusiness returns only that businessId, orders by nombre asc, excludes deleted', async () => {
-      await repo.create(makeNewProduct({ businessId: BIZ_A, nombre: 'Azúcar 1kg', sku: 'AZU-001' }));
-      await repo.create(makeNewProduct({ businessId: BIZ_A, nombre: 'Harina 1kg', sku: 'HAR-001' }));
+      await repo.create(
+        makeNewProduct({ businessId: BIZ_A, nombre: 'Azúcar 1kg', sku: 'AZU-001' }),
+      );
+      await repo.create(
+        makeNewProduct({ businessId: BIZ_A, nombre: 'Harina 1kg', sku: 'HAR-001' }),
+      );
       const otherBiz = await repo.create(
         makeNewProduct({ businessId: BIZ_B, nombre: 'Maíz', sku: 'MAI-001' }),
       );
@@ -80,6 +82,35 @@ export function describeProductsRepositoryContract(
 
     it('delete on missing id is a no-op', async () => {
       await expect(repo.delete('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never)).resolves.toBeUndefined();
+    });
+
+    // Audit Round 2 J3: partial-update contract per ADR-023.
+    it('update applies the patch fields and bumps updatedAt', async () => {
+      const row = await repo.create(makeNewProduct({ businessId: BIZ_A, umbralStockBajo: 3 }));
+      const originalUpdatedAt = row.updatedAt;
+      await new Promise((r) => setTimeout(r, 5));
+      const updated = await repo.update(row.id, {
+        nombre: 'Café tostado oscuro',
+        umbralStockBajo: 10,
+      });
+      expect(updated?.nombre).toBe('Café tostado oscuro');
+      expect(updated?.umbralStockBajo).toBe(10);
+      expect(updated && updated.updatedAt.localeCompare(originalUpdatedAt)).toBeGreaterThan(0);
+    });
+
+    it('update preserves costoUnitCentavos (excluded from the patch shape)', async () => {
+      const row = await repo.create(
+        makeNewProduct({ businessId: BIZ_A, costoUnitCentavos: 5000n }),
+      );
+      const updated = await repo.update(row.id, { nombre: 'Nuevo nombre' });
+      expect(updated?.costoUnitCentavos).toBe(5000n);
+    });
+
+    it('update returns null for a missing or soft-deleted producto', async () => {
+      expect(await repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { nombre: 'X' })).toBeNull();
+      const row = await repo.create(makeNewProduct({ businessId: BIZ_A }));
+      await repo.delete(row.id);
+      expect(await repo.update(row.id, { nombre: 'X' })).toBeNull();
     });
   });
 }

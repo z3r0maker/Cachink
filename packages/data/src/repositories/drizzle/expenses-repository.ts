@@ -15,7 +15,7 @@ import type {
   RecurringExpenseId,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { Expense, ExpensesRepository } from '../expenses-repository.js';
+import type { Expense, ExpensePatch, ExpensesRepository } from '../expenses-repository.js';
 import { expenses } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -113,6 +113,20 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       .orderBy(desc(expenses.fecha))
       .all();
     return rows.map((r) => this.#mapRow(r));
+  }
+
+  async update(id: ExpenseId, patch: ExpensePatch): Promise<Expense | null> {
+    const existing = await this.findById(id);
+    if (!existing) return null;
+    const ts = now();
+    const updates: Record<string, unknown> = { updatedAt: ts };
+    if (patch.fecha !== undefined) updates.fecha = patch.fecha;
+    if (patch.concepto !== undefined) updates.concepto = patch.concepto;
+    if (patch.categoria !== undefined) updates.categoria = patch.categoria;
+    if (patch.monto !== undefined) updates.monto = patch.monto;
+    if (patch.proveedor !== undefined) updates.proveedor = patch.proveedor;
+    await this.#db.update(expenses).set(updates).where(eq(expenses.id, id)).run();
+    return this.findById(id);
   }
 
   async delete(id: ExpenseId): Promise<void> {

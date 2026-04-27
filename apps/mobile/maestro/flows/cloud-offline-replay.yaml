@@ -1,0 +1,36 @@
+# Cloud mode airplane-mode replay (P1E-M4 C16). Toggles the OS airplane
+# mode via `runFlow: adb`, records 3 ventas locally, re-enables
+# connectivity, and asserts they sync to the Cloud within 5 s.
+appId: mx.cachink.mobile
+env:
+  EMAIL: ${MAESTRO_CLOUD_EMAIL_A}
+  PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
+---
+- launchApp
+
+- runFlow: cloud-signin-bootstrap
+
+# Enable airplane mode (Android). On iOS this is a manual pre-step
+# because Maestro can't toggle system control center.
+- runScript:
+    script: adb shell cmd connectivity airplane-mode enable
+
+# Record 3 ventas offline.
+- repeat:
+    times: 3
+    commands:
+      - tapOn: { id: "tab-ventas" }
+      - tapOn: { id: "ventas-new-cta" }
+      - tapOn: { id: "nueva-venta-monto-input" }
+      - inputText: "100"
+      - tapOn: { id: "nueva-venta-concepto-input" }
+      - inputText: "Offline venta"
+      - tapOn: { id: "nueva-venta-submit" }
+
+# Disable airplane mode — PowerSync queue drains.
+- runScript:
+    script: adb shell cmd connectivity airplane-mode disable
+
+- assertVisible:
+    text: "SINCRONIZADO"
+    timeout: 5000

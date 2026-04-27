@@ -16,7 +16,7 @@ export function EmptyEgresos({ onNuevoEgreso }: EmptyEgresosProps): ReactElement
   const { t } = useTranslation();
   return (
     <EmptyState
-      emoji="📝"
+      icon="file-text"
       title={t('egresos.emptyTitle')}
       description={t('egresos.emptyBody')}
       action={

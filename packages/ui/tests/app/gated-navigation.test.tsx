@@ -11,7 +11,8 @@ import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act } from 'react';
 import type { BusinessId } from '@cachink/domain';
-import { GatedNavigation, MockRepositoryProvider } from '../../src/app/index';
+import { GatedNavigation } from '../../src/app/index';
+import { MockRepositoryProvider } from '@cachink/testing';
 import { useAppConfigStore } from '../../src/app-config/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';
@@ -66,7 +67,7 @@ describe('GatedNavigation', () => {
   it('shows the business form when mode is set but no business exists', () => {
     setStore({
       hydrated: true,
-      mode: 'local-standalone',
+      mode: 'local',
       currentBusinessId: null,
       role: null,
       deviceId: null,
@@ -79,7 +80,7 @@ describe('GatedNavigation', () => {
   it('shows the role picker when mode + business exist but role is null', () => {
     setStore({
       hydrated: true,
-      mode: 'local-standalone',
+      mode: 'local',
       currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
       role: null,
       deviceId: null,
@@ -92,7 +93,7 @@ describe('GatedNavigation', () => {
   it('renders children when every gate is satisfied', () => {
     setStore({
       hydrated: true,
-      mode: 'local-standalone',
+      mode: 'local',
       currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
       role: 'operativo',
       deviceId: null,

@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { InventoryMovement, Product, ProductId } from '@cachink/domain';
-import { EmptyState, SectionTitle } from '../../components/index';
+import { EmptyState, List, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import { MovimientoCard } from './movimiento-card';
@@ -28,22 +28,27 @@ export function MovimientosScreen(props: MovimientosScreenProps): ReactElement {
       backgroundColor={colors.offwhite}
     >
       <SectionTitle title={t('inventario.movimientosTab')} />
-      {props.movimientos.length === 0 ? (
-        <EmptyState
-          emoji="📥"
-          title={t('inventario.movimientoEmptyTitle')}
-          description={t('inventario.movimientoEmptyBody')}
-          testID="empty-movimientos"
-        />
-      ) : (
-        props.movimientos.map((mov) => (
-          <MovimientoCard
-            key={mov.id}
-            movimiento={mov}
-            producto={props.productosById.get(mov.productoId) ?? null}
+      <List<InventoryMovement>
+        data={props.movimientos}
+        keyExtractor={(mov) => mov.id}
+        renderItem={(mov) => (
+          <View marginBottom={10}>
+            <MovimientoCard
+              movimiento={mov}
+              producto={props.productosById.get(mov.productoId) ?? null}
+            />
+          </View>
+        )}
+        ListEmptyComponent={
+          <EmptyState
+            icon="archive"
+            title={t('inventario.movimientoEmptyTitle')}
+            description={t('inventario.movimientoEmptyBody')}
+            testID="empty-movimientos"
           />
-        ))
-      )}
+        }
+        testID="movimientos-list"
+      />
     </View>
   );
 }

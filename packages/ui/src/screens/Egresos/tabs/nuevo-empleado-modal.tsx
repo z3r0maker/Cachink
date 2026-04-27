@@ -10,6 +10,7 @@ import { useState, type ReactElement } from 'react';
 import { fromPesos, type PayrollFrequency } from '@cachink/domain';
 import type { CrearEmpleadoInput } from '../../../hooks/use-crear-empleado';
 import { Btn, Input, Modal } from '../../../components/index';
+import { MoneyField, TextField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 const PERIODOS: readonly PayrollFrequency[] = ['semanal', 'quincenal', 'mensual'];
@@ -51,6 +52,8 @@ interface FieldsProps {
   readonly state: FormState;
   readonly update: (p: Partial<FormState>) => void;
   readonly errors: FormErrors;
+  /** Audit 5.4 — Bluetooth-keyboard Enter-to-submit. */
+  readonly onSubmitEditing?: () => void;
   readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
@@ -58,27 +61,30 @@ function EmpleadoFields(props: FieldsProps): ReactElement {
   const { state, update, errors, t } = props;
   return (
     <>
-      <Input
+      <TextField
         label={t('empleados.nombreLabel')}
         value={state.nombre}
         onChange={(v) => update({ nombre: v })}
         note={errors.nombre}
         testID="empleado-nombre"
+        returnKeyType="next"
       />
-      <Input
+      <TextField
         label={t('empleados.puestoLabel')}
         value={state.puesto}
         onChange={(v) => update({ puesto: v })}
         note={errors.puesto}
         testID="empleado-puesto"
+        returnKeyType="next"
       />
-      <Input
-        type="number"
+      <MoneyField
         label={t('empleados.salarioLabel')}
         value={state.salarioPesos}
         onChange={(v) => update({ salarioPesos: v })}
         note={errors.salario}
         testID="empleado-salario"
+        returnKeyType="done"
+        onSubmitEditing={props.onSubmitEditing}
       />
       <Input
         type="select"
@@ -92,27 +98,46 @@ function EmpleadoFields(props: FieldsProps): ReactElement {
   );
 }
 
-export function NuevoEmpleadoModal(props: NuevoEmpleadoModalProps): ReactElement {
-  const { t } = useTranslation();
-  const [state, setState] = useState<FormState>(initialState);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const update = (p: Partial<FormState>): void => setState((prev) => ({ ...prev, ...p }));
+function buildPayload(state: FormState): CrearEmpleadoInput {
+  return {
+    nombre: state.nombre.trim(),
+    puesto: state.puesto.trim(),
+    salario: fromPesos(state.salarioPesos),
+    periodo: state.periodo,
+  };
+}
 
-  const handleSubmit = (): void => {
-    const v = validate(state, t('empleados.required'));
+function makeSubmitHandler(
+  state: FormState,
+  setErrors: (e: FormErrors) => void,
+  setState: (s: FormState) => void,
+  required: string,
+  onSubmit: NuevoEmpleadoModalProps['onSubmit'],
+): () => void {
+  return () => {
+    const v = validate(state, required);
     if (Object.keys(v).length > 0) {
       setErrors(v);
       return;
     }
     setErrors({});
-    props.onSubmit({
-      nombre: state.nombre.trim(),
-      puesto: state.puesto.trim(),
-      salario: fromPesos(state.salarioPesos),
-      periodo: state.periodo,
-    });
+    onSubmit(buildPayload(state));
     setState(initialState());
   };
+}
+
+export function NuevoEmpleadoModal(props: NuevoEmpleadoModalProps): ReactElement {
+  const { t } = useTranslation();
+  const [state, setState] = useState<FormState>(initialState);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const update = (p: Partial<FormState>): void => setState((prev) => ({ ...prev, ...p }));
+  const handleSubmit = makeSubmitHandler(
+    state,
+    setErrors,
+    setState,
+    t('empleados.required'),
+    props.onSubmit,
+  );
 
   return (
     <Modal
@@ -121,7 +146,13 @@ export function NuevoEmpleadoModal(props: NuevoEmpleadoModalProps): ReactElement
       title={t('empleados.nuevo')}
       testID="nuevo-empleado-modal"
     >
-      <EmpleadoFields state={state} update={update} errors={errors} t={t} />
+      <EmpleadoFields
+        state={state}
+        update={update}
+        errors={errors}
+        onSubmitEditing={handleSubmit}
+        t={t}
+      />
       <Btn
         variant="primary"
         onPress={handleSubmit}
