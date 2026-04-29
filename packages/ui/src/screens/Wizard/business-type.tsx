@@ -84,16 +84,9 @@ const CARDS: readonly CardDef[] = [
   },
 ];
 
-export function BusinessType(props: BusinessTypeProps): ReactElement {
-  const { t } = useTranslation();
+function BusinessTypeHeader({ t }: { t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
   return (
-    <View
-      testID={props.testID ?? 'wizard-business-type'}
-      flex={1}
-      padding={24}
-      gap={16}
-      alignItems="center"
-    >
+    <>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
@@ -113,6 +106,15 @@ export function BusinessType(props: BusinessTypeProps): ReactElement {
       >
         {t('wizard.businessType.subtitle')}
       </Text>
+    </>
+  );
+}
+
+export function BusinessType(props: BusinessTypeProps): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View testID={props.testID ?? 'wizard-business-type'} flex={1} padding={24} gap={16} alignItems="center">
+      <BusinessTypeHeader t={t} />
       {CARDS.map((card) => (
         <WizardCard
           key={card.key}

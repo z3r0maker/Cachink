@@ -22,10 +22,16 @@
  * Single-purpose: takes one `icon` and one `ariaLabel`. The full label
  * lives on the screen header — the FAB is a reach-target shortcut, not
  * the only path. Desktops keep the top-right Btn.
+ *
+ * ## Same fix as Btn (F0-T04) — `<Pressable>` over `<View onPress>`
+ *
+ * Uses RN `<Pressable>` for the tappable root so Maestro / XCUI
+ * synthetic taps fire reliably on iOS.
  */
 import type { ReactElement, ReactNode } from 'react';
-import { View } from '@tamagui/core';
-import { colors, shadows } from '../../theme';
+import { Pressable, type ViewStyle } from 'react-native';
+import { shadows } from '../../theme';
+import { colors } from '../../theme';
 
 export interface FABProps {
   /** Brand icon shown inside the FAB. Pass `<Icon name="plus" size={28} />`. */
@@ -49,46 +55,56 @@ const DEFAULT_BOTTOM = 88;
 const DEFAULT_RIGHT = 24;
 
 /** Press transform mirrors §8.3 — translate(2,2) + shadow shrinks to 1×1. */
-const FAB_PRESSED = {
-  transform: [{ translateX: 2 }, { translateY: 2 }] as const,
-  style: { boxShadow: shadows.pressed },
+const PRESS_TRANSFORM: ViewStyle = {
+  transform: [{ translateX: 2 }, { translateY: 2 }],
+  boxShadow: shadows.pressed,
 };
+
+function buildBaseStyle(
+  bottom: number,
+  right: number,
+  disabled: boolean,
+): ViewStyle {
+  return {
+    position: 'absolute',
+    bottom,
+    right,
+    width: FAB_DIAMETER,
+    height: FAB_DIAMETER,
+    borderRadius: FAB_DIAMETER / 2,
+    backgroundColor: colors.yellow,
+    borderColor: colors.black,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+    boxShadow: shadows.card,
+    userSelect: 'none',
+  } as ViewStyle;
+}
 
 export function FAB(props: FABProps): ReactElement {
   const disabled = props.disabled ?? false;
+  const base = buildBaseStyle(
+    props.bottom ?? DEFAULT_BOTTOM,
+    props.right ?? DEFAULT_RIGHT,
+    disabled,
+  );
   return (
-    <View
+    <Pressable
       testID={props.testID ?? 'fab'}
       onPress={disabled ? undefined : props.onPress}
-      pressStyle={disabled ? {} : FAB_PRESSED}
-      position="absolute"
-      bottom={props.bottom ?? DEFAULT_BOTTOM}
-      right={props.right ?? DEFAULT_RIGHT}
-      width={FAB_DIAMETER}
-      height={FAB_DIAMETER}
-      borderRadius={FAB_DIAMETER / 2}
-      backgroundColor={colors.yellow}
-      borderColor={colors.black}
-      borderWidth={2}
-      alignItems="center"
-      justifyContent="center"
-      cursor={disabled ? 'not-allowed' : 'pointer'}
-      opacity={disabled ? 0.5 : 1}
+      disabled={disabled}
       role="button"
       aria-label={props.ariaLabel}
       aria-disabled={disabled}
-      // Hit-slop pushes the effective touch area to ~64 pt on every
-      // edge — well above the 44-pt iOS HIG minimum.
+      accessibilityRole="button"
+      accessibilityLabel={props.ariaLabel}
       hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
-      style={{
-        boxShadow: shadows.card,
-        userSelect: 'none',
-        // Override: brand circle visual via aspect-ratio fallback so
-        // RN renders true round; web rounds via borderRadius alone.
-        borderRadius: FAB_DIAMETER / 2,
-      }}
+      style={({ pressed }) => [base, pressed && !disabled ? PRESS_TRANSFORM : null]}
     >
       {props.icon}
-    </View>
+    </Pressable>
   );
 }

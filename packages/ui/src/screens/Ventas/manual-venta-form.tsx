@@ -25,54 +25,31 @@ export interface ManualVentaData {
   readonly metodo: PaymentMethod;
 }
 
-export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
-  const { t } = useTranslation();
+function useManualVentaState(onSubmit: ManualVentaFormProps['onSubmit']) {
   const [concepto, setConcepto] = useState('');
   const [montoPesos, setMontoPesos] = useState('');
-  const metodo: PaymentMethod = 'Efectivo';
-
   const valid = concepto.trim().length > 0 && Number(montoPesos) > 0;
-
-  function handleSubmit(): void {
+  const submit = (): void => {
     if (!valid) return;
-    props.onSubmit({ concepto: concepto.trim(), montoPesos, metodo });
+    onSubmit({ concepto: concepto.trim(), montoPesos, metodo: 'Efectivo' });
     setConcepto('');
     setMontoPesos('');
-  }
+  };
+  return { concepto, setConcepto, montoPesos, setMontoPesos, valid, submit };
+}
 
+export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
+  const { t } = useTranslation();
+  const f = useManualVentaState(props.onSubmit);
   return (
-    <View
-      testID={props.testID ?? 'manual-venta-form'}
-      flexDirection="row"
-      gap={8}
-      paddingHorizontal={16}
-      alignItems="flex-end"
-    >
+    <View testID={props.testID ?? 'manual-venta-form'} flexDirection="row" gap={8} paddingHorizontal={16} alignItems="flex-end">
       <View flex={2}>
-        <Input
-          label={t('ventas.conceptoLabel')}
-          value={concepto}
-          onChange={setConcepto}
-          placeholder={t('ventas.conceptoPlaceholder')}
-          testID="manual-venta-concepto"
-        />
+        <Input label={t('ventas.conceptoLabel')} value={f.concepto} onChange={f.setConcepto} placeholder={t('ventas.conceptoPlaceholder')} testID="manual-venta-concepto" />
       </View>
       <View flex={1}>
-        <Input
-          label={t('ventas.montoLabel')}
-          value={montoPesos}
-          onChange={setMontoPesos}
-          type="decimal"
-          placeholder="0.00"
-          testID="manual-venta-monto"
-        />
+        <Input label={t('ventas.montoLabel')} value={f.montoPesos} onChange={f.setMontoPesos} type="decimal" placeholder="0.00" testID="manual-venta-monto" />
       </View>
-      <Btn
-        variant="primary"
-        onPress={handleSubmit}
-        disabled={!valid || props.submitting}
-        testID="manual-venta-submit"
-      >
+      <Btn variant="primary" onPress={f.submit} disabled={!f.valid || props.submitting} testID="manual-venta-submit">
         +
       </Btn>
     </View>

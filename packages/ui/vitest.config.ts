@@ -26,11 +26,6 @@ import base from '@cachink/config/vitest';
 export default mergeConfig(
   base,
   defineConfig({
-    resolve: {
-      alias: {
-        'react-native': 'react-native-web',
-      },
-    },
     test: {
       environment: 'jsdom',
       include: [

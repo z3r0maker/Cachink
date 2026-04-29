@@ -96,55 +96,38 @@ export interface SalesContentProps {
   readonly onEliminarVenta?: (venta: Sale) => void;
 }
 
+function SalesEmpty({ t }: { t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
+  return (
+    <View padding={16} alignItems="center">
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.gray400}>
+        {t('ventas.emptyTitle')}
+      </Text>
+    </View>
+  );
+}
+
+function SalesLoading(): ReactElement {
+  return (
+    <View gap={10}>
+      <Skeleton.Row index={0} testIDPrefix="ventas-skeleton" />
+      <Skeleton.Row index={1} testIDPrefix="ventas-skeleton" />
+      <Skeleton.Row index={2} testIDPrefix="ventas-skeleton" />
+    </View>
+  );
+}
+
 export function SalesContent(props: SalesContentProps): ReactElement {
   const { t } = useTranslation();
   if (props.error) {
-    return (
-      <ErrorState
-        title={t('ventas.errorTitle')}
-        body={t('ventas.errorBody')}
-        retryLabel={t('ventas.retryLabel')}
-        onRetry={props.onRetry ?? (() => {})}
-        testID="ventas-error"
-        retryTestID="ventas-retry"
-      />
-    );
+    return <ErrorState title={t('ventas.errorTitle')} body={t('ventas.errorBody')} retryLabel={t('ventas.retryLabel')} onRetry={props.onRetry ?? (() => {})} testID="ventas-error" retryTestID="ventas-retry" />;
   }
-  if (props.loading === true) {
-    return (
-      <View gap={10}>
-        <Skeleton.Row index={0} testIDPrefix="ventas-skeleton" />
-        <Skeleton.Row index={1} testIDPrefix="ventas-skeleton" />
-        <Skeleton.Row index={2} testIDPrefix="ventas-skeleton" />
-      </View>
-    );
-  }
-  if (props.ventas.length === 0) {
-    return (
-      <View padding={16} alignItems="center">
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={14}
-          color={colors.gray400}
-        >
-          {t('ventas.emptyTitle')}
-        </Text>
-      </View>
-    );
-  }
+  if (props.loading === true) return <SalesLoading />;
+  if (props.ventas.length === 0) return <SalesEmpty t={t} />;
   return (
     <List<Sale>
       data={props.ventas}
       keyExtractor={(venta) => venta.id}
-      renderItem={(venta) => (
-        <VentaRowSlot
-          venta={venta}
-          onVentaPress={props.onVentaPress}
-          onEditVenta={props.onEditVenta}
-          onEliminarVenta={props.onEliminarVenta}
-        />
-      )}
+      renderItem={(venta) => <VentaRowSlot venta={venta} onVentaPress={props.onVentaPress} onEditVenta={props.onEditVenta} onEliminarVenta={props.onEliminarVenta} />}
       testID="ventas-list"
     />
   );

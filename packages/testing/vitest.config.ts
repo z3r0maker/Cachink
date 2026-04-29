@@ -19,6 +19,8 @@ export default mergeConfig(
   base,
   defineConfig({
     test: {
+      environment: 'jsdom',
+      setupFiles: ['../ui/tests/setup.ts'],
       coverage: {
         exclude: [
           'src/**/*.test.ts',

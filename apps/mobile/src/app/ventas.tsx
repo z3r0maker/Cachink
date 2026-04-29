@@ -23,7 +23,7 @@ import {
   useRole,
   useVentasByDate,
 } from '@cachink/ui';
-import type { ClientId, IsoDate, PaymentMethod, Product, ProductId, Sale } from '@cachink/domain';
+import type { Business, Client, ClientId, IsoDate, PaymentMethod, Product, ProductId, Sale } from '@cachink/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 import { useSwipeState } from '../shell/use-swipe-state';
 import { DetailSlot, SwipeSlots, useShareComprobante } from '../shell/ventas-slots';
@@ -36,13 +36,76 @@ function todayIso(): IsoDate {
   return `${y}-${m}-${d}` as IsoDate;
 }
 
-export default function VentasRoute(): ReactElement {
-  const router = useRouter();
+function useStockMap(stockQ: { data?: readonly { producto: { id: string }; stock: number }[] }) {
+  return useMemo(() => {
+    const map = new Map<string, number>();
+    for (const row of stockQ.data ?? []) map.set(row.producto.id, row.stock);
+    return map;
+  }, [stockQ.data]);
+}
+
+function makeQuickSellHandler(
+  productosQ: { data?: readonly Product[] },
+  business: Business | null,
+  fecha: IsoDate,
+  registrar: ReturnType<typeof useRegistrarVenta>,
+  setConfirmProduct: (p: Product | null) => void,
+) {
+  return (data: { productoId: ProductId; cantidad: number; metodo: PaymentMethod; clienteId?: ClientId }): void => {
+    const product = productosQ.data?.find((p) => p.id === data.productoId);
+    if (!product || !business) return;
+    const payload = buildQuickSellPayload({ producto: product, business, fecha, metodo: data.metodo });
+    registrar.mutate(
+      { ...payload, cantidad: data.cantidad, clienteId: data.clienteId },
+      { onSuccess: () => setConfirmProduct(null) },
+    );
+  };
+}
+
+function VentasOverlays(props: {
+  confirmProduct: Product | null;
+  setConfirmProduct: (p: Product | null) => void;
+  handleQuickSell: ReturnType<typeof makeQuickSellHandler>;
+  clientes: readonly Client[];
+  registrarPending: boolean;
+  selected: Sale | null;
+  setSelected: (s: Sale | null) => void;
+  handleShare: () => void;
+  eliminar: ReturnType<typeof useEliminarVenta>;
+  swipe: ReturnType<typeof useSwipeState<Sale>>;
+}): ReactElement {
+  return (
+    <>
+      <VentaConfirmSheet
+        open={props.confirmProduct !== null}
+        onClose={() => props.setConfirmProduct(null)}
+        product={props.confirmProduct}
+        onSubmit={props.handleQuickSell}
+        clientes={props.clientes}
+        submitting={props.registrarPending}
+      />
+      <DetailSlot
+        selected={props.selected}
+        setSelected={props.setSelected}
+        handleShare={props.handleShare}
+        eliminar={props.eliminar}
+      />
+      <SwipeSlots
+        editing={props.swipe.editing}
+        setEditing={props.swipe.setEditing}
+        confirmDelete={props.swipe.confirmDelete}
+        setConfirmDelete={props.swipe.setConfirmDelete}
+        eliminar={props.eliminar}
+      />
+    </>
+  );
+}
+
+function useVentasRouteData() {
   const [fecha, setFecha] = useState<IsoDate>(todayIso);
   const [search, setSearch] = useState('');
   const [confirmProduct, setConfirmProduct] = useState<Product | null>(null);
   const [selected, setSelected] = useState<Sale | null>(null);
-
   const ventasQ = useVentasByDate(fecha);
   const productosQ = useProductos();
   const stockQ = useProductosConStock();
@@ -53,77 +116,51 @@ export default function VentasRoute(): ReactElement {
   const swipe = useSwipeState<Sale>();
   const role = useRole();
   const handleShare = useShareComprobante(selected, business, () => setSelected(null));
+  const stockMap = useStockMap(stockQ);
+  const handleQuickSell = makeQuickSellHandler(productosQ, business, fecha, registrar, setConfirmProduct);
+  return {
+    fecha, setFecha, search, setSearch, confirmProduct, setConfirmProduct,
+    selected, setSelected, ventasQ, productosQ, clientesQ, business,
+    registrar, eliminar, swipe, role, handleShare, stockMap, handleQuickSell,
+  };
+}
 
-  // Build stock map from useProductosConStock
-  const stockMap = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of stockQ.data ?? []) {
-      map.set(row.producto.id, row.stock);
-    }
-    return map;
-  }, [stockQ.data]);
-
-  function handleQuickSell(data: {
-    productoId: ProductId;
-    cantidad: number;
-    metodo: PaymentMethod;
-    clienteId?: ClientId;
-  }): void {
-    const product = productosQ.data?.find((p) => p.id === data.productoId);
-    if (!product || !business) return;
-    const payload = buildQuickSellPayload({
-      producto: product,
-      business,
-      fecha,
-      metodo: data.metodo,
-    });
-    registrar.mutate(
-      { ...payload, cantidad: data.cantidad, clienteId: data.clienteId },
-      { onSuccess: () => setConfirmProduct(null) },
-    );
-  }
+export default function VentasRoute(): ReactElement {
+  const router = useRouter();
+  const d = useVentasRouteData();
 
   return (
     <AppShellWrapper activeTabKey="ventas">
-      {role === 'operativo' && <CorteHomeCard testID="corte-home-card-ventas" />}
+      {d.role === 'operativo' && <CorteHomeCard testID="corte-home-card-ventas" />}
       <VentasScreen
-        fecha={fecha}
-        onChangeFecha={(next) => setFecha(next as IsoDate)}
-        ventas={ventasQ.data ?? []}
-        total={totalDelDia(ventasQ.data ?? [])}
-        productos={productosQ.data ?? []}
-        stockMap={stockMap}
-        onProductoTap={setConfirmProduct}
-        productSearch={search}
-        onProductSearchChange={setSearch}
+        fecha={d.fecha}
+        onChangeFecha={(next) => d.setFecha(next as IsoDate)}
+        ventas={d.ventasQ.data ?? []}
+        total={totalDelDia(d.ventasQ.data ?? [])}
+        productos={d.productosQ.data ?? []}
+        stockMap={d.stockMap}
+        onProductoTap={d.setConfirmProduct}
+        productSearch={d.search}
+        onProductSearchChange={d.setSearch}
         onGoToProductos={() => router.push('/productos' as never)}
-        onVentaPress={setSelected}
-        onEditVenta={swipe.setEditing}
-        onEliminarVenta={swipe.setConfirmDelete}
-        loading={ventasQ.isLoading}
-        error={ventasQ.error as Error | null}
-        onRetry={() => void ventasQ.refetch()}
+        onVentaPress={d.setSelected}
+        onEditVenta={d.swipe.setEditing}
+        onEliminarVenta={d.swipe.setConfirmDelete}
+        loading={d.ventasQ.isLoading}
+        error={d.ventasQ.error as Error | null}
+        onRetry={() => void d.ventasQ.refetch()}
       />
-      <VentaConfirmSheet
-        open={confirmProduct !== null}
-        onClose={() => setConfirmProduct(null)}
-        product={confirmProduct}
-        onSubmit={handleQuickSell}
-        clientes={clientesQ.data ?? []}
-        submitting={registrar.isPending}
-      />
-      <DetailSlot
-        selected={selected}
-        setSelected={setSelected}
-        handleShare={handleShare}
-        eliminar={eliminar}
-      />
-      <SwipeSlots
-        editing={swipe.editing}
-        setEditing={swipe.setEditing}
-        confirmDelete={swipe.confirmDelete}
-        setConfirmDelete={swipe.setConfirmDelete}
-        eliminar={eliminar}
+      <VentasOverlays
+        confirmProduct={d.confirmProduct}
+        setConfirmProduct={d.setConfirmProduct}
+        handleQuickSell={d.handleQuickSell}
+        clientes={d.clientesQ.data ?? []}
+        registrarPending={d.registrar.isPending}
+        selected={d.selected}
+        setSelected={d.setSelected}
+        handleShare={d.handleShare}
+        eliminar={d.eliminar}
+        swipe={d.swipe}
       />
     </AppShellWrapper>
   );

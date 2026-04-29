@@ -38,105 +38,62 @@ export interface VentaConfirmSheetProps {
   readonly submitting?: boolean;
 }
 
-function SheetBody({
-  product,
-  onSubmit,
-  clientes,
-  submitting,
-}: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): ReactElement | null {
-  const { t } = useTranslation();
+function ProductHeader({ product }: { product: Product }): ReactElement {
+  return (
+    <View flexDirection="row" justifyContent="space-between" alignItems="center">
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={18} color={colors.black} flex={1} numberOfLines={1}>
+        {product.nombre}
+      </Text>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={20} color={colors.black}>
+        {formatMoney(product.precioVentaCentavos)}
+      </Text>
+    </View>
+  );
+}
+
+function useSheetForm(productId: string | undefined) {
   const [cantidad, setCantidad] = useState('1');
   const [metodo, setMetodo] = useState<PaymentMethod>('Efectivo');
   const [clienteId, setClienteId] = useState('');
+  useEffect(() => { setCantidad('1'); setMetodo('Efectivo'); setClienteId(''); }, [productId]);
+  return { cantidad, setCantidad, metodo, setMetodo, clienteId, setClienteId };
+}
 
-  // Reset form state when product changes
-  useEffect(() => {
-    setCantidad('1');
-    setMetodo('Efectivo');
-    setClienteId('');
-  }, [product?.id]);
+function SheetFields(props: {
+  form: ReturnType<typeof useSheetForm>;
+  clientes: VentaConfirmSheetProps['clientes'];
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  const { form, t } = props;
+  const isCredito = form.metodo === 'Crédito';
+  return (
+    <>
+      <IntegerField label={t('ventas.cantidad')} value={form.cantidad} onChange={form.setCantidad} min={1} max={9999} testID="venta-confirm-cantidad" />
+      <Input type="select" label={t('ventas.metodoLabel')} value={form.metodo} onChange={(v) => form.setMetodo(v as PaymentMethod)} options={METODOS as unknown as string[]} testID="venta-confirm-metodo" />
+      {isCredito && (
+        <Input type="select" label={t('nuevaVenta.clienteLabel')} value={form.clienteId} onChange={form.setClienteId} options={props.clientes.map((c) => c.id)} note={t('nuevaVenta.clienteRequired')} testID="venta-confirm-cliente" />
+      )}
+    </>
+  );
+}
 
+function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): ReactElement | null {
+  const { product, onSubmit, clientes, submitting } = props;
+  const { t } = useTranslation();
+  const form = useSheetForm(product?.id);
   const handleSubmit = useCallback((): void => {
     if (!product) return;
-    const qty = Number.parseInt(cantidad, 10);
+    const qty = Number.parseInt(form.cantidad, 10);
     if (Number.isNaN(qty) || qty < 1) return;
-    onSubmit({
-      productoId: product.id,
-      cantidad: qty,
-      metodo,
-      clienteId: metodo === 'Crédito' && clienteId ? (clienteId as ClientId) : undefined,
-    });
-  }, [product, cantidad, metodo, clienteId, onSubmit]);
+    onSubmit({ productoId: product.id, cantidad: qty, metodo: form.metodo, clienteId: form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined });
+  }, [product, form.cantidad, form.metodo, form.clienteId, onSubmit]);
 
   if (!product) return null;
-
-  const isCredito = metodo === 'Crédito';
-
   return (
     <View gap={16}>
-      {/* Product header */}
-      <View flexDirection="row" justifyContent="space-between" alignItems="center">
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={18}
-          color={colors.black}
-          flex={1}
-          numberOfLines={1}
-        >
-          {product.nombre}
-        </Text>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black}
-          fontSize={20}
-          color={colors.black}
-        >
-          {formatMoney(product.precioVentaCentavos)}
-        </Text>
-      </View>
-
-      {/* Quantity */}
-      <IntegerField
-        label={t('ventas.cantidad')}
-        value={cantidad}
-        onChange={setCantidad}
-        min={1}
-        max={9999}
-        testID="venta-confirm-cantidad"
-      />
-
-      {/* Payment method */}
-      <Input
-        type="select"
-        label={t('ventas.metodoLabel')}
-        value={metodo}
-        onChange={(v) => setMetodo(v as PaymentMethod)}
-        options={METODOS as unknown as string[]}
-        testID="venta-confirm-metodo"
-      />
-
-      {/* Client picker — only when Crédito */}
-      {isCredito && (
-        <Input
-          type="select"
-          label={t('nuevaVenta.clienteLabel')}
-          value={clienteId}
-          onChange={setClienteId}
-          options={clientes.map((c) => c.id)}
-          note={t('nuevaVenta.clienteRequired')}
-          testID="venta-confirm-cliente"
-        />
-      )}
-
-      {/* Submit */}
-      <Btn
-        variant="primary"
-        onPress={handleSubmit}
-        disabled={submitting || (isCredito && !clienteId)}
-        fullWidth
-        testID="venta-confirm-submit"
-      >
+      <ProductHeader product={product} />
+      <SheetFields form={form} clientes={clientes} t={t} />
+      <Btn variant="primary" onPress={handleSubmit} disabled={submitting || (form.metodo === 'Crédito' && !form.clienteId)} fullWidth testID="venta-confirm-submit">
         {t('ventas.registrarVenta')}
       </Btn>
     </View>

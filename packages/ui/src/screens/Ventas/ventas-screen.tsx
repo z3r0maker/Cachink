@@ -54,98 +54,58 @@ export interface VentasScreenProps {
   readonly onGoToProductos?: () => void;
 }
 
-export function VentasScreen(props: VentasScreenProps): ReactElement {
+function useFilteredProducts(productos: readonly Product[], search: string): readonly Product[] {
+  return useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return productos;
+    return productos.filter((p) => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
+  }, [productos, search]);
+}
+
+function ProductPane(props: VentasScreenProps & { filtered: readonly Product[] }): ReactElement {
   const { t } = useTranslation();
-  const media = useMedia();
-  const useSplit = Boolean(media.gtMd);
-
-  // Filter products by search query
-  const filteredProducts = useMemo(() => {
-    const q = props.productSearch.toLowerCase().trim();
-    if (!q) return props.productos;
-    return props.productos.filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(q) ||
-        (p.sku && p.sku.toLowerCase().includes(q)),
-    );
-  }, [props.productos, props.productSearch]);
-
-  const productPane = (
+  return (
     <View flex={1} gap={12}>
-      <SearchBar
-        value={props.productSearch}
-        onChange={props.onProductSearchChange}
-        placeholder={t('ventas.searchProducto')}
-        testID="ventas-product-search"
-      />
+      <SearchBar value={props.productSearch} onChange={props.onProductSearchChange} placeholder={t('ventas.searchProducto')} testID="ventas-product-search" />
       {props.productos.length === 0 ? (
         <VentasEmptyProductos onGoToProductos={props.onGoToProductos} />
       ) : (
-        <ProductoCardGrid
-          productos={filteredProducts}
-          stockMap={props.stockMap}
-          mode="sell"
-          onPress={props.onProductoTap}
-          testID="ventas-product-grid"
-        />
+        <ProductoCardGrid productos={props.filtered} stockMap={props.stockMap} mode="sell" onPress={props.onProductoTap} testID="ventas-product-grid" />
       )}
     </View>
   );
+}
 
-  const salesPane = (
+function SalesPane(props: VentasScreenProps): ReactElement {
+  const { t } = useTranslation();
+  return (
     <View flex={1} gap={12}>
       <TotalCard label={t('ventas.totalDelDia')} total={props.total} />
-      <DateField
-        label={t('ventas.fechaLabel')}
-        value={props.fecha}
-        onChange={props.onChangeFecha}
-        testID="ventas-fecha"
-      />
-      <SalesContent
-        ventas={props.ventas}
-        loading={props.loading}
-        error={props.error}
-        onRetry={props.onRetry}
-        onVentaPress={props.onVentaPress}
-        onEditVenta={props.onEditVenta}
-        onEliminarVenta={props.onEliminarVenta}
-      />
+      <DateField label={t('ventas.fechaLabel')} value={props.fecha} onChange={props.onChangeFecha} testID="ventas-fecha" />
+      <SalesContent ventas={props.ventas} loading={props.loading} error={props.error} onRetry={props.onRetry} onVentaPress={props.onVentaPress} onEditVenta={props.onEditVenta} onEliminarVenta={props.onEliminarVenta} />
     </View>
   );
+}
 
-  if (useSplit) {
+export function VentasScreen(props: VentasScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const media = useMedia();
+  const filtered = useFilteredProducts(props.productos, props.productSearch);
+
+  if (Boolean(media.gtMd)) {
     return (
-      <View
-        testID={props.testID ?? 'ventas-screen'}
-        flex={1}
-        padding={16}
-        backgroundColor={colors.offwhite}
-      >
+      <View testID={props.testID ?? 'ventas-screen'} flex={1} padding={16} backgroundColor={colors.offwhite}>
         <SectionTitle title={t('ventas.title')} />
-        <SplitPane
-          left={productPane}
-          right={salesPane}
-          leftFlex={0.45}
-          rightFlex={0.55}
-          testID="ventas-split"
-        />
+        <SplitPane left={<ProductPane {...props} filtered={filtered} />} right={<SalesPane {...props} />} leftFlex={0.45} rightFlex={0.55} testID="ventas-split" />
       </View>
     );
   }
-
-  // Stacked: products on top, sales below
   return (
-    <View
-      testID={props.testID ?? 'ventas-screen'}
-      flex={1}
-      padding={16}
-      gap={12}
-      backgroundColor={colors.offwhite}
-    >
+    <View testID={props.testID ?? 'ventas-screen'} flex={1} padding={16} gap={12} backgroundColor={colors.offwhite}>
       <SectionTitle title={t('ventas.title')} />
-      {productPane}
+      <ProductPane {...props} filtered={filtered} />
       <SectionTitle title={t('ventas.ventasDeHoy')} />
-      {salesPane}
+      <SalesPane {...props} />
     </View>
   );
 }

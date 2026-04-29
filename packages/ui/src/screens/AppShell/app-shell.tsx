@@ -112,43 +112,33 @@ function RightSlot(props: RightSlotProps): ReactElement {
   );
 }
 
+function useLeftSlot(props: AppShellProps, t: ReturnType<typeof useTranslation>['t']): ReactElement {
+  const avatarValue = props.avatarValue ?? t(`roles.${props.role}` as const);
+  const backLabel = props.backLabel ?? t('topBar.back');
+  if (props.onBack !== undefined) {
+    return <BackButton onPress={props.onBack} ariaLabel={backLabel} />;
+  }
+  return (
+    <RoleAvatar
+      role={props.role}
+      value={avatarValue}
+      onChange={props.onChangeRole}
+      ariaLabel={t('topBar.cambiarRol')}
+    />
+  );
+}
+
 export function AppShell(props: AppShellProps): ReactElement {
   const { t } = useTranslation();
   const tabs = tabsForRole(props.role);
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),
-    // Pass the IconName as a ReactNode — BottomTabBar's tab-item now
-    // recognises Icon elements and re-tints them for active state in
-    // UXD-M2-T02. Keeping the wrapping here means tab-item stays a
-    // pure presentational primitive.
     icon: <Icon name={tab.icon} size={22} color={colors.black} />,
     onPress: () => props.onNavigate(tab.path),
     testID: `tab-${tab.key}`,
   }));
-
-  // Avatar source: caller-provided business / user name → fall back
-  // to the localised role label so the TopBar always renders 1–3
-  // initials.
-  const avatarValue = props.avatarValue ?? t(`roles.${props.role}` as const);
-  const changeLabel = t('topBar.cambiarRol');
-  const backLabel = props.backLabel ?? t('topBar.back');
-
-  // UI-AUDIT-1 Issue 2 — when the route passes `onBack`, render the
-  // back button in the left slot **instead of** the role avatar. The
-  // role-change affordance still lives in the Settings screen body so
-  // discoverability survives.
-  const leftSlot =
-    props.onBack !== undefined ? (
-      <BackButton onPress={props.onBack} ariaLabel={backLabel} />
-    ) : (
-      <RoleAvatar
-        role={props.role}
-        value={avatarValue}
-        onChange={props.onChangeRole}
-        ariaLabel={changeLabel}
-      />
-    );
+  const leftSlot = useLeftSlot(props, t);
 
   return (
     <View testID={props.testID ?? 'app-shell'} flex={1} backgroundColor={colors.offwhite}>

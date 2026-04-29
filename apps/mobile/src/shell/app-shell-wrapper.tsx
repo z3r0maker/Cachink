@@ -7,7 +7,7 @@
  * CLAUDE.md §5.6 — belongs here, not in `packages/ui`.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import { AppShellRouteWrapper, type AppShellRouteWrapperProps } from '@cachink/ui';
 

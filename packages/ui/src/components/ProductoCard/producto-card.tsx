@@ -68,52 +68,31 @@ function AttrChips({ producto, defs }: { producto: Product; defs: readonly AttrD
   );
 }
 
+function CardHeader(props: { producto: ProductoCardProps['producto']; mode?: string; onLongPress?: (p: ProductoCardProps['producto']) => void }): ReactElement {
+  return (
+    <View flexDirection="row" justifyContent="space-between" alignItems="flex-start">
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.black} numberOfLines={2} flex={1}>
+        {props.producto.nombre}
+      </Text>
+      {props.mode === 'manage' && (
+        <Text fontFamily={typography.fontFamily} fontSize={16} color={colors.gray400} onPress={(e) => { e?.stopPropagation?.(); props.onLongPress?.(props.producto); }}>
+          ⋯
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export function ProductoCard(props: ProductoCardProps): ReactElement {
   const { producto, stock, atributoDefs = [], mode, disabled } = props;
   return (
-    <Card
-      testID={props.testID ?? `producto-tile-${producto.id}`}
-      padding="sm"
-      onPress={disabled ? undefined : () => props.onPress(producto)}
-      ariaLabel={producto.nombre}
-    >
+    <Card testID={props.testID ?? `producto-tile-${producto.id}`} padding="sm" onPress={disabled ? undefined : () => props.onPress(producto)} ariaLabel={producto.nombre}>
       <View gap={4}>
-        <View flexDirection="row" justifyContent="space-between" alignItems="flex-start">
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={14}
-            color={colors.black}
-            numberOfLines={2}
-            flex={1}
-          >
-            {producto.nombre}
-          </Text>
-          {mode === 'manage' && (
-            <Text
-              fontFamily={typography.fontFamily}
-              fontSize={16}
-              color={colors.gray400}
-              onPress={(e) => {
-                e?.stopPropagation?.();
-                props.onLongPress?.(producto);
-              }}
-            >
-              ⋯
-            </Text>
-          )}
-        </View>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black}
-          fontSize={16}
-          color={colors.black}
-        >
+        <CardHeader producto={producto} mode={mode} onLongPress={props.onLongPress} />
+        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={16} color={colors.black}>
           {formatMoney(producto.precioVentaCentavos)}
         </Text>
-        {stock !== undefined && (
-          <StockBadge stock={stock} umbral={producto.umbralStockBajo} />
-        )}
+        {stock !== undefined && <StockBadge stock={stock} umbral={producto.umbralStockBajo} />}
         <AttrChips producto={producto} defs={atributoDefs} />
       </View>
     </Card>
