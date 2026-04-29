@@ -10,7 +10,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { loadDesktopPowerSyncDb } from '../../src/shell/use-cloud-handle';
+import { loadDesktopPowerSyncDb } from '../../src/shell/load-cloud-db';
 
 describe('loadDesktopPowerSyncDb (Round 3 F10)', () => {
   it('rejects when @powersync/web is not installed', async () => {

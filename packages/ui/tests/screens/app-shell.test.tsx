@@ -57,7 +57,7 @@ describe('AppShell — Operativo', () => {
     mountOperativo();
     expect(screen.getByTestId('tab-ventas')).toBeInTheDocument();
     expect(screen.getByTestId('tab-egresos')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-inventario')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-productos')).toBeInTheDocument();
     expect(screen.queryByTestId('tab-home')).toBeNull();
     expect(screen.queryByTestId('tab-estados')).toBeNull();
     expect(screen.queryByTestId('tab-ajustes')).toBeNull();
@@ -118,6 +118,69 @@ describe('AppShell — Operativo', () => {
     mountOperativo();
     expect(screen.queryByTestId('sync-status-badge')).toBeNull();
   });
+
+  // UI-AUDIT-1 Issue 2 — when `onBack` is provided the TopBar's left
+  // slot renders a back button instead of the role avatar.
+  it('renders the back button (and hides the role avatar) when onBack is set', () => {
+    const onBack = vi.fn();
+    renderWithProviders(
+      <AppShell
+        role="operativo"
+        activeTabKey="ventas"
+        onNavigate={noop}
+        onChangeRole={noop}
+        onOpenSettings={noop}
+        onBack={onBack}
+        mode="local"
+        title="Ajustes"
+      >
+        <span />
+      </AppShell>,
+    );
+    expect(screen.getByTestId('top-bar-back')).toBeInTheDocument();
+    expect(screen.queryByTestId('top-bar-role-chip')).toBeNull();
+    fireEvent.click(screen.getByTestId('top-bar-back'));
+    expect(onBack).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the localised default back-label aria when backLabel is omitted', () => {
+    renderWithProviders(
+      <AppShell
+        role="operativo"
+        activeTabKey="ventas"
+        onNavigate={noop}
+        onChangeRole={noop}
+        onOpenSettings={noop}
+        onBack={noop}
+        mode="local"
+      >
+        <span />
+      </AppShell>,
+    );
+    const back = screen.getByTestId('top-bar-back');
+    // es-MX → topBar.back = 'Atrás'.
+    expect(back.getAttribute('aria-label')).toBe('Atrás');
+  });
+
+  it('honours an explicit backLabel override', () => {
+    renderWithProviders(
+      <AppShell
+        role="operativo"
+        activeTabKey="ventas"
+        onNavigate={noop}
+        onChangeRole={noop}
+        onOpenSettings={noop}
+        onBack={noop}
+        backLabel="Volver a Inicio"
+        mode="local"
+      >
+        <span />
+      </AppShell>,
+    );
+    expect(screen.getByTestId('top-bar-back').getAttribute('aria-label')).toBe(
+      'Volver a Inicio',
+    );
+  });
 });
 
 describe('AppShell — Director', () => {
@@ -134,7 +197,7 @@ describe('AppShell — Director', () => {
         <span />
       </AppShell>,
     );
-    for (const key of ['home', 'ventas', 'egresos', 'inventario', 'estados', 'ajustes']) {
+    for (const key of ['home', 'ventas', 'egresos', 'productos', 'estados', 'ajustes']) {
       expect(screen.getByTestId(`tab-${key}`)).toBeInTheDocument();
     }
   });

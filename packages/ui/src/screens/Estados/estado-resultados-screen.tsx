@@ -63,6 +63,11 @@ function UtilidadNetaHero(props: { value: Money; label: string }): ReactElement 
       value={formatMoney(props.value)}
       label={props.label}
       tone={tone}
+      // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): the totals Kpi sits
+      // visually below the body Card whose right column is right-
+      // aligned. Mirror that alignment here so the Utilidad Neta value
+      // lines up with the ISR / Utilidad Operativa column above it.
+      align="right"
       testID="estado-utilidad-neta-hero"
     />
   );

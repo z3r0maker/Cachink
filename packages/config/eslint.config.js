@@ -119,6 +119,25 @@ export default tseslint.config(
     },
   },
 
+  // Prevent components from importing their own barrel (causes require cycles)
+  {
+    files: ['packages/ui/src/components/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['../index', '../index.ts'],
+              message:
+                'Components must import siblings directly (e.g., "../Card/card"), not from the barrel ("../index"). Barrel self-imports create require cycles that crash Metro.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   // Relax rules for test files and Storybook stories
   {
     files: [

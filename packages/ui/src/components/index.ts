@@ -33,3 +33,7 @@ export * from './Skeleton/index';
 export * from './SplitPane/index';
 export * from './SwipeableRow/index';
 export * from './fields/index';
+export * from './ProductoCard/index';
+export * from './ProductoCardGrid/index';
+export * from './AtributosForm/index';
+export * from './AppShellRouteWrapper/index';

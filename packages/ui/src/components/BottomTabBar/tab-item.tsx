@@ -8,8 +8,16 @@
  * Inactive icons + labels render at 0.55 opacity so the active cell
  * pops without needing icon recoloring at the BottomTabBar level —
  * consumers can pass any ReactNode and the visual hierarchy still reads.
+ *
+ * ## Same fix as Btn (F0-T04) — `<Pressable>` over `<View onPress>`
+ *
+ * Tamagui `<View onPress>` does not fire on Maestro/iOS synthetic
+ * taps (no native gesture recognizer wired). The root is now RN
+ * `<Pressable>`, which registers a real gesture on iOS/Android and
+ * emits a `<div role="button">` via react-native-web on desktop.
  */
 import type { ReactElement, ReactNode } from 'react';
+import { Pressable, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { colors, typography } from '../../theme';
 
@@ -21,8 +29,6 @@ export interface TabItemProps {
   readonly badge?: number;
   readonly testID?: string;
 }
-
-const PRESS_STYLE = { opacity: 0.7 };
 
 const INACTIVE_OPACITY = 0.55;
 
@@ -84,6 +90,17 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
   );
 }
 
+const BASE_STYLE: ViewStyle = {
+  flex: 1,
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: 'transparent',
+  position: 'relative',
+};
+
+const PRESSED_STYLE: ViewStyle = { ...BASE_STYLE, opacity: 0.7 };
+
 /**
  * Renders one tab cell. Active = yellow top-strip + full-opacity icon
  * + bold black label. Inactive = transparent + 0.55 opacity + gray
@@ -91,20 +108,16 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
  */
 export function TabItem(props: TabItemProps): ReactElement {
   return (
-    <View
+    <Pressable
       testID={props.testID}
       onPress={props.onPress}
-      pressStyle={PRESS_STYLE}
-      flex={1}
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      backgroundColor="transparent"
-      cursor="pointer"
+      style={({ pressed }) => (pressed ? PRESSED_STYLE : BASE_STYLE)}
       role="tab"
       aria-label={props.label}
       aria-selected={props.active}
-      style={{ userSelect: 'none', position: 'relative' }}
+      accessibilityRole="tab"
+      accessibilityLabel={props.label}
+      accessibilityState={{ selected: props.active }}
     >
       {props.active && <ActiveStrip />}
       {props.icon !== undefined && (
@@ -119,6 +132,6 @@ export function TabItem(props: TabItemProps): ReactElement {
       )}
       <Label text={props.label} active={props.active} />
       {props.badge !== undefined && <Badge count={props.badge} />}
-    </View>
+    </Pressable>
   );
 }

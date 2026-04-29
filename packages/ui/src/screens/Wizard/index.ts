@@ -29,3 +29,4 @@ export { DataPreservedCallout } from './data-preserved-callout';
 export { OfflineBlocker } from './offline-blocker';
 export { UnsyncedBlocker } from './unsynced-blocker';
 export { ConfirmModeChangeModal } from './confirm-mode-change-modal';
+export { BusinessType, type BusinessTypeProps, type BusinessTypeChoice } from './business-type';

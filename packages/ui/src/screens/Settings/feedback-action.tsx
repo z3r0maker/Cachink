@@ -10,7 +10,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { Btn, Card } from '../../components/index';
+import { Btn } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 
 export interface FeedbackActionProps {
@@ -77,11 +77,20 @@ export function FeedbackAction(props: FeedbackActionProps): ReactElement {
     });
     open(url);
   }
+  // Audit M-1 follow-up (UI-AUDIT-1, Issue 3): the legacy `<Card>`
+  // wrapper around the single Btn was visual chrome with zero
+  // informational payload — and made FeedbackAction look heavier than
+  // its peer rows (`CheckForUpdatesRow`, re-run-wizard) which are bare
+  // Btns. Render the Btn directly so all four Settings tail actions
+  // sit in the same parent `gap` rhythm.
   return (
-    <Card padding="md" fullWidth testID={props.testID ?? 'settings-feedback-card'}>
-      <Btn variant="soft" onPress={handlePress} fullWidth testID="settings-feedback-button">
-        {t('settings.feedbackCta')}
-      </Btn>
-    </Card>
+    <Btn
+      variant="soft"
+      onPress={handlePress}
+      fullWidth
+      testID={props.testID ?? 'settings-feedback-button'}
+    >
+      {t('settings.feedbackCta')}
+    </Btn>
   );
 }

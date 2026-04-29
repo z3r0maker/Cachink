@@ -45,7 +45,7 @@ Each file has a distinct role:
 1. Login (role picker)
 2. Ventas — includes optional `cliente_id` and `estado_pago` per sale (supports Crédito tracking)
 3. Egresos (sub-tabs: Gasto / Nómina / Inventario-purchase) — with **recurring entry templates**
-4. Inventario (Stock / Movimientos, with barcode scanner)
+4. Productos (Catálogo / Stock / Movimientos, with barcode scanner) — renamed from Inventario per ADR-045
 5. Estados Financieros (NIF B-3 Resultados, B-6 Balance, B-2 Flujo de Efectivo)
 6. Indicadores (KPIs, margins, liquidity, rotation)
 7. Director Home — includes **stock-low push notification** at end of day for Directors
@@ -482,10 +482,12 @@ Extracted from the mock and extended with Phase 1 additions. All IDs are ULIDs. 
 
 ### Core transactional entities
 
-- **Venta**: `id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id?, estado_pago ('pagado' | 'pendiente' | 'parcial'), ...audit`
+- **Venta**: `id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id?, estado_pago ('pagado' | 'pendiente' | 'parcial'), producto_id, cantidad (default 1), ...audit`
   - `estado_pago` defaults to `'pagado'` for all metodos except `Crédito`, which defaults to `'pendiente'`.
+  - `producto_id` required FK to a catalogue producto (ADR-048). `concepto` and `monto_centavos` auto-derived from the product. `cantidad` supports multi-unit sales.
 - **Egreso**: `id, fecha, concepto, categoria, monto_centavos, proveedor?, gasto_recurrente_id?, ...audit`
-- **Producto** (inventario): `id, nombre, sku?, categoria, costo_unit_centavos, unidad, umbral_stock_bajo (default 3), ...audit`
+- **Producto** (catálogo): `id, nombre, sku?, categoria, costo_unit_centavos, precio_venta_centavos, unidad, umbral_stock_bajo (default 3), tipo ('producto' | 'servicio'), seguir_stock, atributos (JSON {}), ...audit`
+  - `tipo` discriminator: physical product vs service (ADR-046). `seguir_stock` forced false for servicios. `precio_venta_centavos` required for quick-sell. `atributos` sparse key/value map for custom attributes per business.
 - **MovimientoInventario**: `id, producto_id, fecha, tipo ('entrada'|'salida'), cantidad, costo_unit_centavos, motivo, nota?, ...audit`
 - **Empleado** (nómina): `id, nombre, puesto, salario_centavos, periodo, ...audit`
 
@@ -502,7 +504,8 @@ Extracted from the mock and extended with Phase 1 additions. All IDs are ULIDs. 
 
 ### Configuration
 
-- **Business**: `id, nombre, regimen_fiscal, isr_tasa (default 0.30), logo_url?, created_at, ...`
+- **Business**: `id, nombre, regimen_fiscal, isr_tasa (default 0.30), logo_url?, tipo_negocio ('producto-con-stock' | 'producto-sin-stock' | 'servicio' | 'mixto'), categoria_venta_predeterminada, atributos_producto (JSON []), created_at, ...`
+  - `tipo_negocio` drives UI adaptation for catalogue + stock sub-tabs (ADR-046). `atributos_producto` is an array of `AttrDef` objects (clave, label, tipo, opciones?, obligatorio).
 - **AppConfig**: `key, value` (singleton table for mode, current business, notification preferences, etc.)
 
 ### Enumerations (already defined in mock)
@@ -514,6 +517,8 @@ Extracted from the mock and extended with Phase 1 additions. All IDs are ULIDs. 
 - `INV_UNIDAD`: pza, kg, lt, m, caja, bolsa, rollo, par, otro
 - `MOV_MOTIVO_ENT`: Compra a proveedor, Devolución de cliente, Ajuste de inventario, Producción, Otro
 - `MOV_MOTIVO_SAL`: Venta, Uso en producción, Merma / daño, Muestra, Ajuste de inventario, Otro
+- `TIPO_NEGOCIO`: producto-con-stock, producto-sin-stock, servicio, mixto
+- `PRODUCTO_TIPO`: producto, servicio
 
 ---
 

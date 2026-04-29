@@ -19,14 +19,17 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
+import { Platform } from 'react-native';
 import { View } from '@tamagui/core';
-import { BottomTabBar, Btn, Icon, InitialsAvatar, TopBar } from '../../components/index';
+import { KeyboardAvoidingView } from 'react-native';
+import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { AppMode, Role } from '../../app-config/index';
 import { tabsForRole } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';
 import { useLanSync } from '../../hooks/use-lan-sync';
+import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
 export interface AppShellProps {
   readonly role: Role;
@@ -49,27 +52,25 @@ export interface AppShellProps {
    * `onChangeRole`.
    */
   readonly avatarValue?: string;
+  /**
+   * Audit M-1 follow-up (UI-AUDIT-1, Issue 2): when provided, the
+   * TopBar's left slot renders a ghost icon-only back button (chevron)
+   * **instead of** the role avatar. Used on routes reached from a
+   * parent screen — Settings, Cuentas por Cobrar, etc. — so the user
+   * has a clear way to return where they came from.
+   *
+   * The role avatar's "Cambiar" affordance is still reachable from the
+   * Settings screen body, so collapsing it from the TopBar on detail
+   * pages doesn't lose discoverability.
+   */
+  readonly onBack?: () => void;
+  /**
+   * Optional override for the back-button's accessible label. Defaults
+   * to `topBar.back` ("Atrás"). Pass when a route wants a more specific
+   * SR-friendly label (e.g. "Volver a Inicio").
+   */
+  readonly backLabel?: string;
   readonly testID?: string;
-}
-
-interface RoleAvatarProps {
-  readonly role: Role;
-  readonly value: string;
-  readonly onChange: () => void;
-  readonly ariaLabel: string;
-}
-
-function RoleAvatar(props: RoleAvatarProps): ReactElement {
-  return (
-    <InitialsAvatar
-      testID="top-bar-role-chip"
-      value={props.value}
-      variant={props.role === 'director' ? 'dark' : 'brand'}
-      onPress={props.onChange}
-      ariaLabel={props.ariaLabel}
-      size="md"
-    />
-  );
 }
 
 interface RightSlotProps {
@@ -131,23 +132,38 @@ export function AppShell(props: AppShellProps): ReactElement {
   // initials.
   const avatarValue = props.avatarValue ?? t(`roles.${props.role}` as const);
   const changeLabel = t('topBar.cambiarRol');
+  const backLabel = props.backLabel ?? t('topBar.back');
+
+  // UI-AUDIT-1 Issue 2 — when the route passes `onBack`, render the
+  // back button in the left slot **instead of** the role avatar. The
+  // role-change affordance still lives in the Settings screen body so
+  // discoverability survives.
+  const leftSlot =
+    props.onBack !== undefined ? (
+      <BackButton onPress={props.onBack} ariaLabel={backLabel} />
+    ) : (
+      <RoleAvatar
+        role={props.role}
+        value={avatarValue}
+        onChange={props.onChangeRole}
+        ariaLabel={changeLabel}
+      />
+    );
 
   return (
     <View testID={props.testID ?? 'app-shell'} flex={1} backgroundColor={colors.offwhite}>
       <TopBar
         title={props.title}
         subtitle={props.subtitle}
-        left={
-          <RoleAvatar
-            role={props.role}
-            value={avatarValue}
-            onChange={props.onChangeRole}
-            ariaLabel={changeLabel}
-          />
-        }
+        left={leftSlot}
         right={<RightSlot mode={props.mode} onOpenSettings={props.onOpenSettings} />}
       />
-      <View flex={1}>{props.children}</View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <View flex={1}>{props.children}</View>
+      </KeyboardAvoidingView>
       <BottomTabBar items={items} activeKey={props.activeTabKey} />
     </View>
   );

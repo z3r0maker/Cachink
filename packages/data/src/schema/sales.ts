@@ -3,9 +3,12 @@
  * bigint mode so the CLAUDE.md §2 principle 8 (no floats for money) holds
  * end-to-end. Enum columns match the Zod `PaymentMethodEnum`,
  * `SaleCategoryEnum`, and `PaymentStateEnum` literal tuples.
+ *
+ * `producto_id` is **required** — every sale references a catalogue producto
+ * (ADR-048: product-only sales). `cantidad` defaults to 1.
  */
 
-import { numeric, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, numeric, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { auditColumns } from './_audit';
 
 export const sales = sqliteTable('sales', {
@@ -23,5 +26,7 @@ export const sales = sqliteTable('sales', {
   estadoPago: text('estado_pago', {
     enum: ['pagado', 'pendiente', 'parcial'],
   }).notNull(),
+  productoId: text('producto_id').notNull(),
+  cantidad: integer('cantidad').notNull().default(1),
   ...auditColumns,
 });

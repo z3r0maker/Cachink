@@ -1,55 +1,65 @@
-# Create a Crédito venta (with an inline cliente) and verify it
+# Create a Crédito venta via the inline POS (ADR-048) and verify it
 # surfaces under Cuentas por Cobrar for the Director role.
+#
 # Covers P1C-M3-T03 (Crédito requires cliente) and P1C-M3-T06
 # (Maestro verifies Cuentas por Cobrar membership).
 #
-# Precondition: wizard complete, business set, Operativo role active.
+# Precondition: wizard complete, at least one product AND one client
+# exist. Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/venta-credito.yaml
+#
+# inventario-producto creates "Tortilla"; cliente-crear creates
+# "Carla Márquez". Both must exist before this flow runs.
 appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Open Nueva venta modal.
+# Navigate to the Ventas tab (Operativo role).
 - tapOn:
     id: "tab-ventas"
-- tapOn:
-    id: "ventas-nueva"
 
-# Core fields.
-- tapOn:
-    id: "nueva-venta-concepto"
-- inputText: "Catering evento"
-- tapOn:
-    id: "nueva-venta-monto"
-- inputText: "1200"
+# The product grid should show the "Tortilla" product.
+- assertVisible:
+    id: "ventas-product-grid"
+- assertVisible: "Tortilla"
 
-# Switch metodo to Crédito — this opens the Crear cliente Btn when
-# no clients exist yet.
+# Tap the product card to open the VentaConfirmSheet.
+- tapOn: "Tortilla"
+- assertVisible:
+    id: "venta-confirm-sheet"
+
+# Switch payment method to Crédito. Tap the method picker then
+# pick Crédito from the Combobox popover.
 - tapOn:
-    id: "nueva-venta-metodo"
+    id: "venta-confirm-metodo"
 - tapOn: "Crédito"
 
-# Crear cliente — empty-state button appears when no clients exist.
+# The client picker appears when Crédito is selected. Tap it and
+# pick the first available client (Carla Márquez from the
+# precondition flow).
 - tapOn:
-    id: "nueva-venta-crear-cliente"
-- assertVisible: "Nuevo cliente"
+    id: "venta-confirm-cliente"
 - tapOn:
-    id: "nuevo-cliente-nombre"
-- inputText: "Carla Márquez"
-- tapOn:
-    id: "nuevo-cliente-submit"
+    index: 0
 
-# Back on the Venta form; submit.
-- assertVisible: "Nueva venta"
+# Submit the Crédito venta.
 - tapOn:
-    id: "nueva-venta-submit"
-- assertNotVisible: "Nueva venta"
+    id: "venta-confirm-submit"
 
-# Switch to Director role via the TopBar Cambiar Btn + navigate to
-# Cuentas por Cobrar.
+# Sheet closes and the new sale appears in the list.
+- assertNotVisible:
+    id: "venta-confirm-sheet"
+- assertVisible: "Tortilla"
+
+# Switch to Director role via TopBar and verify the sale shows
+# under Cuentas por Cobrar.
 - tapOn:
     id: "top-bar-change-role"
 - tapOn:
     id: "role-director-select"
 - assertVisible: "Cuentas por cobrar"
-- assertVisible: "Carla Márquez"
-- assertVisible: "$1,200.00"

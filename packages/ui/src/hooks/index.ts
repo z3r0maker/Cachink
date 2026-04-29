@@ -57,3 +57,4 @@ export * from './use-cloud-session';
 export * from './use-check-for-updates';
 export * from './use-lan-sync';
 export * from './use-lan-auth';
+export * from './use-frequent-productos';

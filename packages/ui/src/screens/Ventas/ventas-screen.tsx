@@ -1,198 +1,139 @@
 /**
- * VentasScreen — list view with date filter + "Total del día" card +
- * per-venta rows (P1C-M3-T01).
+ * VentasScreen — inline POS surface (ADR-048).
+ *
+ * The screen IS the product picker. Product cards live directly on the
+ * surface; tapping a card fires `onProductoTap` which the route uses to
+ * open a small `<VentaConfirmSheet>`. No more free-text modal.
+ *
+ * Layout:
+ *   - Tablet landscape (`gtMd`): SplitPane — products left, today's sales right.
+ *   - Tablet portrait / phone: stacked — products top, sales below.
  *
  * Pure presentation. Data + loading / error states + handlers are all
  * props so every screen state is testable without async harness.
  */
 
-import type { ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
-import type { Sale } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import { useMemo, type ReactElement } from 'react';
+import { View, useMedia } from '@tamagui/core';
+import type { Product, Sale } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import {
-  Btn,
-  Card,
-  ErrorState,
-  FAB,
-  Icon,
-  List,
+  ProductoCardGrid,
+  SearchBar,
   SectionTitle,
-  Skeleton,
-  SwipeableRow,
+  SplitPane,
 } from '../../components/index';
 import { DateField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
-import { VentaCard } from './venta-card';
-import { EmptyVentas } from './empty-ventas';
+import { colors } from '../../theme';
+import { VentasEmptyProductos } from './empty-productos';
+import { SalesContent, TotalCard } from './ventas-sales-pane';
 
 export interface VentasScreenProps {
+  // --- Date + sales ---
   readonly fecha: string;
   readonly onChangeFecha: (fecha: string) => void;
   readonly ventas: readonly Sale[];
   readonly total: Money;
-  readonly onNuevaVenta: () => void;
   readonly onVentaPress?: (venta: Sale) => void;
   readonly loading?: boolean;
   readonly error?: Error | null;
   readonly onRetry?: () => void;
   readonly testID?: string;
-  /**
-   * Audit 4.6 — when `true` the screen mounts a `<FAB>` for the
-   * primary action so phone users can reach it one-handed. The
-   * top-right `<Btn>` in `<SectionTitle>` stays for desktop. Mobile
-   * shells pass `showFab` to opt in; desktop shells leave it
-   * unset / `false`.
-   */
-  readonly showFab?: boolean;
-  /**
-   * Audit Round 2 K1 — when supplied, each row is wrapped in a
-   * `<SwipeableRow>` whose left swipe fires `onEditVenta(venta)` and
-   * right swipe fires `onEliminarVenta(venta)`. The accessible
-   * tap-into-detail handler (`onVentaPress`) keeps the non-gesture
-   * fallback per ADR-022's rule: swipe is a magnifier, never the only
-   * entry point.
-   */
   readonly onEditVenta?: (venta: Sale) => void;
-  /**
-   * Audit Round 2 K1 — destructive companion to `onEditVenta`. Routes
-   * typically open a `<ConfirmDialog>` here and call `useEliminarVenta`
-   * on confirmation.
-   */
   readonly onEliminarVenta?: (venta: Sale) => void;
-}
 
-interface TotalCardProps {
-  readonly label: string;
-  readonly total: Money;
-}
+  // --- Inline product grid (ADR-048) ---
+  readonly productos: readonly Product[];
+  readonly stockMap?: ReadonlyMap<string, number>;
+  readonly onProductoTap: (p: Product) => void;
+  readonly productSearch: string;
+  readonly onProductSearchChange: (q: string) => void;
 
-function TotalCard({ label, total }: TotalCardProps): ReactElement {
-  return (
-    <Card testID="ventas-total-card" variant="yellow" padding="md" fullWidth>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={12}
-        letterSpacing={typography.letterSpacing.wide}
-        color={colors.black}
-        style={{ textTransform: 'uppercase' }}
-      >
-        {label}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={32}
-        color={colors.black}
-        letterSpacing={typography.letterSpacing.tighter}
-      >
-        {formatMoney(total)}
-      </Text>
-    </Card>
-  );
-}
-
-function ErrorBanner({
-  title,
-  body,
-  retryLabel,
-  onRetry,
-}: {
-  title: string;
-  body: string;
-  retryLabel: string;
-  onRetry: () => void;
-}): ReactElement {
-  // Audit M-1 PR 5 (audit 6.5) — delegates to the shared
-  // `<ErrorState>` primitive. Screen-scoped testIDs preserved so
-  // existing E2E selectors keep working.
-  return (
-    <ErrorState
-      title={title}
-      body={body}
-      retryLabel={retryLabel}
-      onRetry={onRetry}
-      testID="ventas-error"
-      retryTestID="ventas-retry"
-    />
-  );
-}
-
-function SkeletonRow({ index }: { index: number }): ReactElement {
-  // Audit M-1 PR 5 (audit 6.4) — delegates to the shared
-  // `<Skeleton.Row>` primitive. Screen-scoped testID preserved.
-  return <Skeleton.Row index={index} testIDPrefix="ventas-skeleton" />;
-}
-
-function VentasContent(props: VentasScreenProps): ReactElement {
-  const { t } = useTranslation();
-  if (props.error) {
-    return (
-      <ErrorBanner
-        title={t('ventas.errorTitle')}
-        body={t('ventas.errorBody')}
-        retryLabel={t('ventas.retryLabel')}
-        onRetry={props.onRetry ?? (() => {})}
-      />
-    );
-  }
-  if (props.loading === true) {
-    return (
-      <View gap={10}>
-        <SkeletonRow index={0} />
-        <SkeletonRow index={1} />
-        <SkeletonRow index={2} />
-      </View>
-    );
-  }
-  if (props.ventas.length === 0) {
-    return <EmptyVentas onNuevaVenta={props.onNuevaVenta} />;
-  }
-  return (
-    <List<Sale>
-      data={props.ventas}
-      keyExtractor={(venta) => venta.id}
-      renderItem={(venta) => <VentaRowSlot venta={venta} {...props} />}
-      testID="ventas-list"
-    />
-  );
-}
-
-/**
- * Audit Round 2 K1 — wraps a `VentaCard` in a `<SwipeableRow>` when
- * the parent route provides edit / delete handlers. Without them the
- * row renders unchanged so legacy mounts (web target, screens that
- * haven't opted in yet) keep working.
- */
-function VentaRowSlot({
-  venta,
-  onVentaPress,
-  onEditVenta,
-  onEliminarVenta,
-}: { venta: Sale } & VentasScreenProps): ReactElement {
-  const card = <VentaCard venta={venta} onPress={() => onVentaPress?.(venta)} />;
-  const swipeEnabled = onEditVenta !== undefined || onEliminarVenta !== undefined;
-  if (!swipeEnabled) {
-    return <View marginBottom={10}>{card}</View>;
-  }
-  return (
-    <View marginBottom={10}>
-      <SwipeableRow
-        onSwipeLeft={onEditVenta ? () => onEditVenta(venta) : undefined}
-        onSwipeRight={onEliminarVenta ? () => onEliminarVenta(venta) : undefined}
-        testID={`venta-swipe-${venta.id}`}
-      >
-        {card}
-      </SwipeableRow>
-    </View>
-  );
+  // --- Empty-state navigation ---
+  readonly onGoToProductos?: () => void;
 }
 
 export function VentasScreen(props: VentasScreenProps): ReactElement {
   const { t } = useTranslation();
+  const media = useMedia();
+  const useSplit = Boolean(media.gtMd);
+
+  // Filter products by search query
+  const filteredProducts = useMemo(() => {
+    const q = props.productSearch.toLowerCase().trim();
+    if (!q) return props.productos;
+    return props.productos.filter(
+      (p) =>
+        p.nombre.toLowerCase().includes(q) ||
+        (p.sku && p.sku.toLowerCase().includes(q)),
+    );
+  }, [props.productos, props.productSearch]);
+
+  const productPane = (
+    <View flex={1} gap={12}>
+      <SearchBar
+        value={props.productSearch}
+        onChange={props.onProductSearchChange}
+        placeholder={t('ventas.searchProducto')}
+        testID="ventas-product-search"
+      />
+      {props.productos.length === 0 ? (
+        <VentasEmptyProductos onGoToProductos={props.onGoToProductos} />
+      ) : (
+        <ProductoCardGrid
+          productos={filteredProducts}
+          stockMap={props.stockMap}
+          mode="sell"
+          onPress={props.onProductoTap}
+          testID="ventas-product-grid"
+        />
+      )}
+    </View>
+  );
+
+  const salesPane = (
+    <View flex={1} gap={12}>
+      <TotalCard label={t('ventas.totalDelDia')} total={props.total} />
+      <DateField
+        label={t('ventas.fechaLabel')}
+        value={props.fecha}
+        onChange={props.onChangeFecha}
+        testID="ventas-fecha"
+      />
+      <SalesContent
+        ventas={props.ventas}
+        loading={props.loading}
+        error={props.error}
+        onRetry={props.onRetry}
+        onVentaPress={props.onVentaPress}
+        onEditVenta={props.onEditVenta}
+        onEliminarVenta={props.onEliminarVenta}
+      />
+    </View>
+  );
+
+  if (useSplit) {
+    return (
+      <View
+        testID={props.testID ?? 'ventas-screen'}
+        flex={1}
+        padding={16}
+        backgroundColor={colors.offwhite}
+      >
+        <SectionTitle title={t('ventas.title')} />
+        <SplitPane
+          left={productPane}
+          right={salesPane}
+          leftFlex={0.45}
+          rightFlex={0.55}
+          testID="ventas-split"
+        />
+      </View>
+    );
+  }
+
+  // Stacked: products on top, sales below
   return (
     <View
       testID={props.testID ?? 'ventas-screen'}
@@ -201,37 +142,10 @@ export function VentasScreen(props: VentasScreenProps): ReactElement {
       gap={12}
       backgroundColor={colors.offwhite}
     >
-      <SectionTitle
-        title={t('ventas.title')}
-        action={
-          <Btn variant="primary" onPress={props.onNuevaVenta} testID="ventas-nueva">
-            {t('ventas.newCta')}
-          </Btn>
-        }
-      />
-      {/*
-       * Audit 4.5 — TotalCard moves above the date filter. With the
-       * keyboard popped on a phone, the previous `<SectionTitle> +
-       * date input + total` order pushed the day-total below the fold.
-       * The total is the most-checked KPI on this screen; it should
-       * be the first thing visible after the screen header.
-       */}
-      <TotalCard label={t('ventas.totalDelDia')} total={props.total} />
-      <DateField
-        label={t('ventas.fechaLabel')}
-        value={props.fecha}
-        onChange={props.onChangeFecha}
-        testID="ventas-fecha"
-      />
-      <VentasContent {...props} />
-      {props.showFab === true && (
-        <FAB
-          icon={<Icon name="plus" size={28} color={colors.black} />}
-          ariaLabel={t('ventas.newCta')}
-          onPress={props.onNuevaVenta}
-          testID="ventas-fab"
-        />
-      )}
+      <SectionTitle title={t('ventas.title')} />
+      {productPane}
+      <SectionTitle title={t('ventas.ventasDeHoy')} />
+      {salesPane}
     </View>
   );
 }

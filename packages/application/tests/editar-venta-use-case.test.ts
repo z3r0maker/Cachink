@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, SaleId } from '@cachink/domain';
+import type { BusinessId, ClientId, ProductId, SaleId } from '@cachink/domain';
 import {
   InMemoryClientsRepository,
+  InMemoryInventoryMovementsRepository,
+  InMemoryProductsRepository,
   InMemorySalesRepository,
   TEST_DEVICE_ID,
+  makeNewProduct,
   makeNewSale,
 } from '../../testing/src/index.js';
 import { EditarVentaUseCase, RegistrarVentaUseCase } from '../src/index.js';
@@ -13,18 +16,29 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 describe('EditarVentaUseCase', () => {
   let sales: InMemorySalesRepository;
   let clients: InMemoryClientsRepository;
+  let products: InMemoryProductsRepository;
+  let movements: InMemoryInventoryMovementsRepository;
   let registrar: RegistrarVentaUseCase;
   let editar: EditarVentaUseCase;
+  let defaultProductId: ProductId;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
-    registrar = new RegistrarVentaUseCase(sales, clients);
+    products = new InMemoryProductsRepository(TEST_DEVICE_ID);
+    movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
+    registrar = new RegistrarVentaUseCase(sales, clients, products, movements);
     editar = new EditarVentaUseCase(sales, clients);
+
+    // Seed a default product for use-case product validation
+    const defaultProduct = await products.create(
+      makeNewProduct({ businessId: BIZ }),
+    );
+    defaultProductId = defaultProduct.id;
   });
 
   it('applies a monto + concepto patch and returns the updated row', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, monto: 1000n }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, monto: 1000n, productoId: defaultProductId }));
     const updated = await editar.execute({
       id: sale.id,
       patch: { monto: 2500n, concepto: 'Café americano grande' },
@@ -35,7 +49,7 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('preserves untouched fields (fecha, metodo, categoria)', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
     const updated = await editar.execute({
       id: sale.id,
       patch: { monto: 9999n },
@@ -55,7 +69,7 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('rejects a Crédito patch without a clienteId on the merged row', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, metodo: 'Efectivo' }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, metodo: 'Efectivo', productoId: defaultProductId }));
     // Trying to flip metodo to Crédito while clienteId is null.
     await expect(editar.execute({ id: sale.id, patch: { metodo: 'Crédito' } })).rejects.toThrow(
       /clienteId/,
@@ -63,7 +77,7 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('rejects a Crédito patch when the clienteId points at a missing cliente', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
     await expect(
       editar.execute({
         id: sale.id,
@@ -81,7 +95,7 @@ describe('EditarVentaUseCase', () => {
       telefono: '5512345678',
       businessId: BIZ,
     });
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
     const updated = await editar.execute({
       id: sale.id,
       patch: { metodo: 'Crédito', clienteId: cliente.id },
@@ -91,7 +105,7 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('Zod rejects an empty concepto', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ }));
+    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
     await expect(editar.execute({ id: sale.id, patch: { concepto: '' } })).rejects.toThrow();
   });
 });

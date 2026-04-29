@@ -13,12 +13,18 @@
 #   - The wizard renders post-consent and exposes its primary CTAs
 #     to the accessibility tree.
 #
-# Precondition: cachink.db does NOT exist (fresh install). The
-# `clearState: true` flag handles this for us.
+# Precondition: cachink.db does NOT exist (fresh install). Run via
+# the wrapper script to get a clean slate without breaking Metro:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/smoke-launch.yaml
+#
+# DO NOT use `clearState: true` — on iOS 18+ / Expo SDK 55, it
+# wipes the dev-client's stored Metro URL and the app fails to
+# reconnect to the JS bundler. See Finding 1 in the Maestro audit.
 appId: mx.cachink.mobile
 ---
-- launchApp:
-    clearState: true
+- launchApp
 - assertVisible: "¿Enviar reportes de errores?"
 - tapOn: "Decidir después"
 - assertNotVisible: "¿Enviar reportes de errores?"

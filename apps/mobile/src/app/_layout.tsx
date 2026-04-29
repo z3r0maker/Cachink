@@ -33,7 +33,7 @@
 // `ULIDError: PRNG_DETECT` on Hermes.
 import 'react-native-get-random-values';
 
-import type { ReactElement } from 'react';
+import { StrictMode, type ReactElement } from 'react';
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -41,6 +41,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   PlusJakartaSans_400Regular,
   PlusJakartaSans_500Medium,
+  PlusJakartaSans_600SemiBold,
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
@@ -72,6 +73,7 @@ export default function RootLayout(): ReactElement | null {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
     PlusJakartaSans_500Medium,
+    PlusJakartaSans_600SemiBold,
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
@@ -82,21 +84,23 @@ export default function RootLayout(): ReactElement | null {
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AppProviders
-          platform="mobile"
-          hooks={mobileHooks}
-          overlays={
-            <>
-              <MobileScannerHost />
-              <CloudInnerScreenHost />
-            </>
-          }
-        >
-          <Stack screenOptions={{ headerShown: false }} />
-        </AppProviders>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <StrictMode>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AppProviders
+            platform="mobile"
+            hooks={mobileHooks}
+            overlays={
+              <>
+                <MobileScannerHost />
+                <CloudInnerScreenHost />
+              </>
+            }
+          >
+            <Stack screenOptions={{ headerShown: false }} />
+          </AppProviders>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </StrictMode>
   );
 }

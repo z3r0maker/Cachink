@@ -1,32 +1,48 @@
-# Create a cash venta and verify "Total del día" updates.
-# Covers P1C-M3-T01 (list + date filter + total card) and
-# P1C-M3-T02 (NuevaVenta modal, Efectivo happy path).
+# Create a cash venta via the inline POS and verify "Total del día"
+# updates.
 #
-# Precondition: the wizard + business + role are already set up. Run
-# `wizard-local-standalone.yaml` first, or launch with EXPO_PUBLIC_E2E_SEED
-# pointing to the fixture in e2e-seed.json.
+# Covers P1C-M3-T01 (list + date filter + total card) and
+# P1C-M3-T02 (inline POS happy path, Efectivo — ADR-048).
+#
+# Precondition: wizard + business + role already set up AND at least
+# one product exists in the catalogue. Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#
+# The inventario-producto flow creates "Tortilla" with cost $2.
+# That product must exist for the POS grid to render it. If no
+# products exist, VentasEmptyProductos shows instead of the grid.
 appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Open the Ventas tab (Operativo role) + modal.
+# Navigate to the Ventas tab (Operativo role).
 - tapOn:
     id: "tab-ventas"
-- tapOn:
-    id: "ventas-nueva"
 
-# Fill Efectivo venta: concepto + monto (kept minimal).
-- assertVisible: "Nueva venta"
-- tapOn:
-    id: "nueva-venta-concepto"
-- inputText: "Taco al pastor"
-- tapOn:
-    id: "nueva-venta-monto"
-- inputText: "150"
-- tapOn:
-    id: "nueva-venta-submit"
+# The product grid should show the "Tortilla" product created by
+# the inventario-producto.yaml precondition flow.
+- assertVisible:
+    id: "ventas-product-grid"
+- assertVisible: "Tortilla"
 
-# After success the modal closes and Total del día shows the new amount.
-- assertNotVisible: "Nueva venta"
-- assertVisible: "$150.00"
-- assertVisible: "Taco al pastor"
+# Tap the product card to open the VentaConfirmSheet.
+- tapOn: "Tortilla"
+
+# VentaConfirmSheet opens — verify the product name + price appear.
+- assertVisible:
+    id: "venta-confirm-sheet"
+- assertVisible: "Tortilla"
+
+# Quantity defaults to 1, payment method defaults to Efectivo.
+# Just submit without changing anything.
+- tapOn:
+    id: "venta-confirm-submit"
+
+# Sheet closes and the new sale appears in the sales list.
+- assertNotVisible:
+    id: "venta-confirm-sheet"
+- assertVisible: "Tortilla"

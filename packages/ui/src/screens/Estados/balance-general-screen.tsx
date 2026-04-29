@@ -84,6 +84,9 @@ function ActivoCard({
       <Kpi
         label={t('estados.balanceActivoTotal')}
         value={formatMoney(balance.activo.total)}
+        // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): mirror the right-
+        // aligned value column inside the Activo body rows above.
+        align="right"
         testID="balance-activo-total"
       />
     </Card>
@@ -123,6 +126,10 @@ function PasivoCapitalCard({
         label={t('estados.balanceCapitalTotal')}
         value={formatMoney(balance.capital.total)}
         tone={tone}
+        // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): mirror the right-
+        // aligned value column inside the Pasivo / Capital body rows
+        // above.
+        align="right"
         testID="balance-capital-total"
       />
     </Card>

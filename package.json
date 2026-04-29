@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "turbo run build",
+    "bundle:check": "turbo run bundle:check",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "test:coverage": "turbo run test:coverage",

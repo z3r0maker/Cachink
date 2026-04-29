@@ -1,31 +1,32 @@
 /**
- * Expo Router entry for /ventas (P1C-M3, S4-C1 route wire-up).
+ * Expo Router entry for /ventas — inline POS surface (ADR-048).
  *
- * Thin wrapper: wires `useVentasByDate` to `VentasScreen` inside the
- * shared AppShell. The Nueva Venta modal + VentaDetailPopover ship
- * already in @cachink/ui — route toggles visibility via local state.
- *
- * Audit Round 2 K1 added swipe-to-edit + swipe-to-delete plumbing;
- * the slot wrappers live in `../shell/ventas-slots.tsx` so this file
- * stays under the §4.4 200-line cap.
+ * The Ventas screen IS the product picker. Product cards live directly
+ * on the screen surface. Tapping a card opens VentaConfirmSheet (small
+ * bottom sheet: quantity + payment method). No more free-text modal.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import {
   CorteHomeCard,
+  VentaConfirmSheet,
   VentasScreen,
+  buildQuickSellPayload,
   totalDelDia,
+  useClientsForBusiness,
   useCurrentBusiness,
-  useCurrentBusinessId,
   useEliminarVenta,
+  useProductos,
+  useProductosConStock,
+  useRegistrarVenta,
   useRole,
   useVentasByDate,
 } from '@cachink/ui';
-import type { IsoDate, Sale } from '@cachink/domain';
+import type { ClientId, IsoDate, PaymentMethod, Product, ProductId, Sale } from '@cachink/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 import { useSwipeState } from '../shell/use-swipe-state';
-import { DetailSlot, NuevaSlot, SwipeSlots, useShareComprobante } from '../shell/ventas-slots';
+import { DetailSlot, SwipeSlots, useShareComprobante } from '../shell/ventas-slots';
 
 function todayIso(): IsoDate {
   const now = new Date();
@@ -35,96 +36,94 @@ function todayIso(): IsoDate {
   return `${y}-${m}-${d}` as IsoDate;
 }
 
-interface ScreenSlotProps {
-  fecha: IsoDate;
-  onChangeFecha: (next: IsoDate) => void;
-  onOpen: () => void;
-  onSelect: (sale: Sale) => void;
-  onEdit: (sale: Sale) => void;
-  onConfirmDelete: (sale: Sale) => void;
-}
-
-function ScreenSlot(props: ScreenSlotProps): ReactElement {
-  const ventasQ = useVentasByDate(props.fecha);
-  return (
-    <VentasScreen
-      fecha={props.fecha}
-      onChangeFecha={(next) => props.onChangeFecha(next as IsoDate)}
-      ventas={ventasQ.data ?? []}
-      total={totalDelDia(ventasQ.data ?? [])}
-      onNuevaVenta={props.onOpen}
-      onVentaPress={props.onSelect}
-      onEditVenta={props.onEdit}
-      onEliminarVenta={props.onConfirmDelete}
-      loading={ventasQ.isLoading}
-      error={ventasQ.error as Error | null}
-      onRetry={() => void ventasQ.refetch()}
-    />
-  );
-}
-
-function useVentasRouteState() {
+export default function VentasRoute(): ReactElement {
   const router = useRouter();
   const [fecha, setFecha] = useState<IsoDate>(todayIso);
-  const [modalOpen, setModalOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [confirmProduct, setConfirmProduct] = useState<Product | null>(null);
   const [selected, setSelected] = useState<Sale | null>(null);
-  const swipe = useSwipeState<Sale>();
-  const businessId = useCurrentBusinessId();
+
+  const ventasQ = useVentasByDate(fecha);
+  const productosQ = useProductos();
+  const stockQ = useProductosConStock();
+  const clientesQ = useClientsForBusiness();
   const business = useCurrentBusiness().data ?? null;
+  const registrar = useRegistrarVenta();
   const eliminar = useEliminarVenta();
+  const swipe = useSwipeState<Sale>();
   const role = useRole();
   const handleShare = useShareComprobante(selected, business, () => setSelected(null));
-  return {
-    router,
-    fecha,
-    setFecha,
-    modalOpen,
-    setModalOpen,
-    selected,
-    setSelected,
-    swipe,
-    businessId,
-    business,
-    eliminar,
-    role,
-    handleShare,
-  };
-}
 
-export default function VentasRoute(): ReactElement {
-  const s = useVentasRouteState();
+  // Build stock map from useProductosConStock
+  const stockMap = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const row of stockQ.data ?? []) {
+      map.set(row.producto.id, row.stock);
+    }
+    return map;
+  }, [stockQ.data]);
+
+  function handleQuickSell(data: {
+    productoId: ProductId;
+    cantidad: number;
+    metodo: PaymentMethod;
+    clienteId?: ClientId;
+  }): void {
+    const product = productosQ.data?.find((p) => p.id === data.productoId);
+    if (!product || !business) return;
+    const payload = buildQuickSellPayload({
+      producto: product,
+      business,
+      fecha,
+      metodo: data.metodo,
+    });
+    registrar.mutate(
+      { ...payload, cantidad: data.cantidad, clienteId: data.clienteId },
+      { onSuccess: () => setConfirmProduct(null) },
+    );
+  }
+
   return (
     <AppShellWrapper activeTabKey="ventas">
-      {s.role === 'operativo' && <CorteHomeCard testID="corte-home-card-ventas" />}
-      <ScreenSlot
-        fecha={s.fecha}
-        onChangeFecha={s.setFecha}
-        onOpen={() => s.setModalOpen(true)}
-        onSelect={s.setSelected}
-        onEdit={s.swipe.setEditing}
-        onConfirmDelete={s.swipe.setConfirmDelete}
+      {role === 'operativo' && <CorteHomeCard testID="corte-home-card-ventas" />}
+      <VentasScreen
+        fecha={fecha}
+        onChangeFecha={(next) => setFecha(next as IsoDate)}
+        ventas={ventasQ.data ?? []}
+        total={totalDelDia(ventasQ.data ?? [])}
+        productos={productosQ.data ?? []}
+        stockMap={stockMap}
+        onProductoTap={setConfirmProduct}
+        productSearch={search}
+        onProductSearchChange={setSearch}
+        onGoToProductos={() => router.push('/productos' as never)}
+        onVentaPress={setSelected}
+        onEditVenta={swipe.setEditing}
+        onEliminarVenta={swipe.setConfirmDelete}
+        loading={ventasQ.isLoading}
+        error={ventasQ.error as Error | null}
+        onRetry={() => void ventasQ.refetch()}
       />
-      {s.businessId && (
-        <NuevaSlot
-          open={s.modalOpen}
-          onClose={() => s.setModalOpen(false)}
-          fecha={s.fecha}
-          businessId={s.businessId}
-          router={s.router}
-        />
-      )}
+      <VentaConfirmSheet
+        open={confirmProduct !== null}
+        onClose={() => setConfirmProduct(null)}
+        product={confirmProduct}
+        onSubmit={handleQuickSell}
+        clientes={clientesQ.data ?? []}
+        submitting={registrar.isPending}
+      />
       <DetailSlot
-        selected={s.selected}
-        setSelected={s.setSelected}
-        handleShare={s.handleShare}
-        eliminar={s.eliminar}
+        selected={selected}
+        setSelected={setSelected}
+        handleShare={handleShare}
+        eliminar={eliminar}
       />
       <SwipeSlots
-        editing={s.swipe.editing}
-        setEditing={s.swipe.setEditing}
-        confirmDelete={s.swipe.confirmDelete}
-        setConfirmDelete={s.swipe.setConfirmDelete}
-        eliminar={s.eliminar}
+        editing={swipe.editing}
+        setEditing={swipe.setEditing}
+        confirmDelete={swipe.confirmDelete}
+        setConfirmDelete={swipe.setConfirmDelete}
+        eliminar={eliminar}
       />
     </AppShellWrapper>
   );

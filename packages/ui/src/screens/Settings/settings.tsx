@@ -13,6 +13,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { Business } from '@cachink/domain';
 import { Card, SectionTitle, Tag } from '../../components/index';
@@ -149,12 +150,10 @@ function LanguageCard({ t }: { t: T }): ReactElement {
 export function Settings(props: SettingsProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <View
+    <ScrollView
       testID={props.testID ?? 'settings-screen'}
-      flex={1}
-      padding={20}
-      gap={20}
-      backgroundColor={colors.offwhite}
+      style={{ flex: 1, backgroundColor: colors.offwhite }}
+      contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 24 }}
     >
       <SectionTitle title={t('settings.title')} />
       <Card testID="settings-mode-card" padding="md" fullWidth>
@@ -169,6 +168,6 @@ export function Settings(props: SettingsProps): ReactElement {
       )}
       <LanguageCard t={t} />
       <SettingsTail props={props} t={t} />
-    </View>
+    </ScrollView>
   );
 }

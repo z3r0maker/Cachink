@@ -17,6 +17,13 @@
  * stamp feel from §8.3. When omitted the Card is inert (no cursor, no
  * pressStyle).
  *
+ * ## Same fix as Btn (F0-T04) — `<Pressable>` over `<View onPress>`
+ *
+ * Tappable cards now render a RN `<Pressable>` root so Maestro / XCUI
+ * synthetic taps fire the handler. Inert cards (no `onPress`) still render
+ * a Tamagui `<View>` for styling convenience. See Btn's doc block for
+ * the full rationale on why Tamagui `<View onPress>` fails under E2E.
+ *
  * Foreground color is **not** inferred for the `black` variant: consumers
  * pass dark-on-light children for white/yellow and explicitly set their
  * children's text color when rendering inside a black Card. Keeps Card
@@ -26,6 +33,7 @@
  * invented radii, no soft shadows.
  */
 import type { ReactElement, ReactNode } from 'react';
+import { Pressable, type ViewStyle } from 'react-native';
 import { View } from '@tamagui/core';
 import { colors, radii, shadows } from '../../theme';
 
@@ -57,13 +65,13 @@ export interface CardProps {
   readonly ariaLabel?: string;
 }
 
-interface VariantStyle {
+interface VariantDef {
   readonly background: string;
   readonly borderWidth: number;
   readonly shadow: string;
 }
 
-const VARIANTS: Record<CardVariant, VariantStyle> = {
+const VARIANTS: Record<CardVariant, VariantDef> = {
   white: { background: colors.white, borderWidth: 2, shadow: shadows.card },
   yellow: { background: colors.yellow, borderWidth: 2, shadow: shadows.card },
   black: { background: colors.black, borderWidth: 2.5, shadow: shadows.hero },
@@ -80,10 +88,25 @@ const PADDINGS: Record<CardPadding, number> = {
 const CARD_RADIUS = radii[3];
 
 /** Per CLAUDE.md §8.3: on press, shift 2px and shrink shadow to 1×1. */
-const PRESSED_STYLE = {
-  transform: [{ translateX: 2 }, { translateY: 2 }] as const,
-  style: { boxShadow: shadows.pressed },
+const PRESS_TRANSFORM: ViewStyle = {
+  transform: [{ translateX: 2 }, { translateY: 2 }],
+  boxShadow: shadows.pressed,
 };
+
+/** Builds the RN ViewStyle for a tappable (Pressable) card root. */
+function buildTappableStyle(v: VariantDef, pad: number, fullWidth: boolean): ViewStyle {
+  return {
+    backgroundColor: v.background,
+    borderColor: colors.black,
+    borderWidth: v.borderWidth,
+    borderRadius: CARD_RADIUS,
+    padding: pad,
+    width: fullWidth ? '100%' : undefined,
+    cursor: 'pointer',
+    userSelect: 'none',
+    boxShadow: v.shadow,
+  } as ViewStyle;
+}
 
 /**
  * Renders the canonical Cachink card surface. See `card.stories.tsx` for the
@@ -93,22 +116,38 @@ export function Card(props: CardProps): ReactElement {
   const variant = props.variant ?? 'white';
   const padding = props.padding ?? 'md';
   const v = VARIANTS[variant];
+  const pad = PADDINGS[padding];
   const tappable = props.onPress !== undefined;
 
+  // Tappable cards use RN Pressable for reliable gesture recognition on
+  // Maestro / XCUI (same fix as Btn — F0-T04).
+  if (tappable) {
+    const base = buildTappableStyle(v, pad, props.fullWidth === true);
+    return (
+      <Pressable
+        testID={props.testID ?? 'card'}
+        onPress={props.onPress}
+        role="button"
+        aria-label={props.ariaLabel}
+        accessibilityRole="button"
+        accessibilityLabel={props.ariaLabel}
+        style={({ pressed }) => [base, pressed ? PRESS_TRANSFORM : null]}
+      >
+        {props.children}
+      </Pressable>
+    );
+  }
+
+  // Inert cards stay on Tamagui View — simpler styling, no gesture needed.
   return (
     <View
       testID={props.testID ?? 'card'}
-      onPress={props.onPress}
-      pressStyle={tappable ? PRESSED_STYLE : {}}
       backgroundColor={v.background}
       borderColor={colors.black}
       borderWidth={v.borderWidth}
       borderRadius={CARD_RADIUS}
-      padding={PADDINGS[padding]}
+      padding={pad}
       width={props.fullWidth === true ? '100%' : undefined}
-      cursor={tappable ? 'pointer' : 'default'}
-      role={tappable ? 'button' : undefined}
-      aria-label={tappable ? props.ariaLabel : undefined}
       style={{ boxShadow: v.shadow, userSelect: 'none' }}
     >
       {props.children}

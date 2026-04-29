@@ -82,6 +82,10 @@ Links to discussion, docs, prior art.
 | [042](#adr-042) | 2026-04-25 | Multi-step transactional flows are Stack pages, not single modals with internal tabs (supersedes ADR-020); KeyboardAvoidingView at the Modal primitive | Accepted                      |
 | [043](#adr-043) | 2026-04-26 | `<Tag>` is decorative-only; tappable-chip primitive deferred to Phase 2                                                                                | Accepted                      |
 | [044](#adr-044) | 2026-04-26 | Component tests run on Vitest + jsdom + react-native-web alias, not Jest + RNTL (clarifies CLAUDE.md §3)                                               | Accepted                      |
+| [045](#adr-045) | 2026-04-28 | Rename `Inventario` tab → `Productos` with sub-tabs Catálogo / Stock / Movimientos (UXD-R3)                                                            | Accepted                      |
+| [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto schema design (UXD-R3)                                                          | Accepted                      |
+| [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                                | Accepted                      |
+| [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS                                                                      | Accepted                      |
 
 ---
 
@@ -3047,3 +3051,159 @@ migration that deletes orphaned rows where `scope = 'lanRole'`. Kept
 in deferred-decisions rather than executed now to avoid coupling the
 wizard rewrite to a schema migration that isn't strictly required for
 correctness.
+
+---
+
+## ADR-045
+
+### Rename `Inventario` tab → `Productos` with sub-tabs
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+### Context
+
+The UXD-R3 audit identified that the `Inventario` tab name was confusing for service-only and mixed businesses — users selling services had no mental model for "inventario". The tab should surface the **catalogue** (products + services) as the primary concept, with stock tracking as an opt-in sub-feature.
+
+### Decision
+
+1. Rename the tab from `Inventario` to `Productos`.
+2. The tab has three sub-tabs: `Catálogo` (default), `Stock`, `Movimientos`.
+3. Sub-tab visibility adapts to `Business.tipoNegocio`:
+   - `producto-con-stock` / `mixto` → all three sub-tabs visible.
+   - `producto-sin-stock` / `servicio` → only `Catálogo` visible.
+4. CLAUDE.md §1 module 4 updated to reflect the rename.
+5. Expo Router path changes from `/inventario` to `/productos` with a one-release redirect alias.
+
+### Alternatives Considered
+
+- **Keep `Inventario` and add a separate `Servicios` tab.** Rejected: would add a fourth top-level tab for something that can be handled with a type discriminator on the existing catalogue.
+- **Rename to `Catálogo`.** Rejected: less intuitive for physical-product businesses that associate "productos" with their catalogue.
+
+### Consequences
+
+- All file paths under `packages/ui/src/screens/Inventario/` move to `packages/ui/src/screens/Productos/`.
+- Import paths across the monorepo must be updated (automated via search-and-replace).
+- The `tab-definitions.ts` file changes the key from `inventario` to `productos`.
+
+---
+
+## ADR-046
+
+### Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+### Context
+
+UXD-R3 introduces a "Smart Catalog" where productos can be physical goods (with or without stock tracking) or services. The UI adapts form fields and visibility based on the business type. Custom attributes allow businesses to add category-specific metadata (e.g., "talla", "color", "duración") to their products.
+
+### Decision
+
+**Product entity gains four fields:**
+- `tipo: 'producto' | 'servicio'` — discriminator.
+- `seguirStock: boolean` — opt-in stock tracking; forced `false` when `tipo='servicio'`.
+- `precioVentaCentavos: bigint` — selling price for quick-sell flow.
+- `atributos: Record<string, string>` — sparse key/value map for custom attributes.
+
+**Sale entity gains two fields:**
+- `productoId: ProductId | null` — optional FK to a catalogue producto.
+- `cantidad: number` — multi-unit sales (defaults to 1).
+
+**Business entity gains three fields:**
+- `tipoNegocio: 'producto-con-stock' | 'producto-sin-stock' | 'servicio' | 'mixto'` — archetype.
+- `categoriaVentaPredeterminada: SaleCategory` — default for quick-sell.
+- `atributosProducto: AttrDef[]` — custom attribute definitions for the catalogue.
+
+**Migration `0002_smart_catalog.sql`:** adds all columns with safe defaults. Backfills `precio_venta_centavos` from `costo_unit_centavos × 1.3` for existing products.
+
+### Alternatives Considered
+
+- **Separate `Servicio` entity.** Rejected: would duplicate 90% of the Product schema and complicate queries.
+- **Store `precioVenta` on the Sale rather than the Product.** Rejected: the selling price is a property of the catalogue item, not the transaction. The sale stores `monto` (which may differ from `precioVenta` after discounts in Phase 2).
+
+### Consequences
+
+- `NewProductSchema` now requires `precioVentaCentavos`.
+- `RegistrarVentaUseCase` auto-creates a salida `MovimientoInventario` when `producto.seguirStock=true`.
+- UI forms adapt field visibility based on `Business.tipoNegocio`.
+
+---
+
+## ADR-047
+
+### Persistent AppShell via Expo Router group layout
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+### Context
+
+The BottomTabBar was disappearing on certain routes (Inventario, Settings) because each authenticated route rendered its own `<AppShellWrapper>`, causing re-mount of the shell + tab bar on navigation. Additionally, screens without `<ScrollView>` could overflow into the tab bar's space, making it appear to vanish.
+
+### Decision
+
+1. **Shared parent layout:** Move all authenticated routes into an `(authenticated)/` group folder in Expo Router. The group's `_layout.tsx` renders `<AppShellWrapper>` once; child routes only swap the inner content.
+2. **`activeTabKey` resolution:** Centralize pathname → tab-key mapping in `useActiveTabKey()` so off-tab screens (Settings, Cuentas por Cobrar) light up the correct parent tab.
+3. **Scroll containment:** Every screen body that can overflow is wrapped in `<ScrollView>` to prevent content from bleeding into the BottomTabBar's space.
+4. **Keyboard avoidance:** `<KeyboardAvoidingView>` wraps the children area *above* the BottomTabBar inside AppShell, so the bar stays anchored when the keyboard opens.
+
+### Alternatives Considered
+
+- **Tab navigator with nested stacks.** Rejected: Expo Router's file-based routing makes this awkward and would require restructuring every route.
+- **Fixed positioning for the BottomTabBar.** Rejected: React Native doesn't support CSS `position: fixed`; the flex layout approach is more reliable.
+
+### Consequences
+
+- All authenticated routes move into `apps/mobile/src/app/(authenticated)/`.
+- Wizard and role-picker routes stay outside the group (no shell).
+- Desktop already uses a single-shell pattern; no changes needed beyond verification.
+
+---
+
+## ADR-048
+
+### Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS
+
+**Date:** 2026-04-28
+**Status:** Accepted
+
+### Context
+
+Cachink's Phase 1 Ventas screen originally used a free-text form modal (concepto + monto + method). This UX was designed before the smart catalogue (ADR-046) existed. Now that every business has products with `precioVentaCentavos`, requiring users to type a concept and amount is redundant for businesses that sell catalogued items — which is all of them.
+
+The free-text form also:
+1. Broke the link between sales and inventory (no automatic stock deduction).
+2. Made "Total del día" unreliable because users would type amounts inconsistently.
+3. Violated the "less clicks, most value" principle — a product-card tap should be all it takes.
+
+### Decision
+
+1. **`Venta.productoId` is required (non-nullable).** Every sale maps to exactly one catalogue product. The `?` is removed from the domain type. `producto_id` column in SQLite has a `NOT NULL` constraint.
+
+2. **`Venta.concepto` and `Venta.categoria` are auto-derived.** `concepto` defaults to the product name; `categoria` defaults to `Business.categoriaVentaPredeterminada`. Both are still stored on the row (denormalized for query performance + export).
+
+3. **`Venta.montoCentavos` is auto-calculated.** `cantidad × product.precioVentaCentavos`. The user can override this in Phase 2 (discounts), but for Phase 1 the monto is derived.
+
+4. **The Ventas screen is now an inline POS surface.** Product cards live directly on the screen; tapping a card opens a `<VentaConfirmSheet>` bottom-sheet modal with 2–3 fields (quantity, payment method, client when Crédito). The old `<NuevaVentaModal>` and `<ManualVentaForm>` are deleted.
+
+5. **Layout:** Tablet landscape uses `<SplitPane>` — product grid left, today's sales right. Tablet portrait / phone stacks them vertically.
+
+6. **Empty state:** When no products exist, `<VentasEmptyProductos>` renders a CTA directing the user to the Productos tab.
+
+7. **Migration strategy:** Since the app hasn't shipped publicly, the `productoId NOT NULL` constraint was folded directly into `migration-0000.ts` (no separate migration needed). The unregistered `migration-0002` columns were also folded in.
+
+### Alternatives Considered
+
+- **Keep free-text form as a fallback tab.** Rejected: two input modes means more code, more tests, and confuses the user with a choice that doesn't add value. Businesses that don't have products yet get the empty-state CTA to create one first.
+- **Make `productoId` nullable and allow both modes.** Rejected: introduces a "semi-structured sale" that makes financial calculations (cost of goods, margin) unreliable. A sale without a product is just a number — not useful for business intelligence.
+- **Auto-create a "Generic" product for free-text sales.** Rejected: pollutes the catalogue and confuses the user when they see a product they didn't create.
+
+### Consequences
+
+- Every venta requires a product. Users must create at least one product before they can record sales.
+- `RegistrarVentaUseCase` now validates `productoId` exists and auto-creates a `MovimientoInventario` (salida) when the product has `seguirStock=true`.
+- The old `<NuevaVentaModal>`, `<VentaForm>`, and `<ManualVentaForm>` components are deleted. Callers of the old modal API (route files, tests) were updated.
+- Maestro E2E flows (`venta-efectivo.yaml`, `venta-credito.yaml`) were rewritten for the inline POS interaction pattern.
+- The `EditarVentaModal` remains for editing existing sales (different from the create flow).

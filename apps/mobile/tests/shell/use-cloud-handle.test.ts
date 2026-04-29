@@ -22,7 +22,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { loadMobilePowerSyncDb } from '../../src/shell/use-cloud-handle';
+import { loadMobilePowerSyncDb } from '../../src/shell/load-cloud-db';
 
 describe('loadMobilePowerSyncDb (Round 3 F10)', () => {
   it('rejects when @powersync/react-native is not installed', async () => {

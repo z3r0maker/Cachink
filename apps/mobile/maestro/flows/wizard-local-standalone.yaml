@@ -3,11 +3,12 @@
 # (mode stored in AppConfig), P1C-M2-T05 (business creation form),
 # WUX-M4 (post-rewrite step IDs).
 #
-# Precondition: fresh install (clearState wipes the SQLite file).
+# Precondition: fresh install. Run via the wrapper script:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 appId: mx.cachink.mobile
 ---
-- launchApp:
-    clearState: true
+- launchApp
 
 # First-launch ConsentModal blocks the accessibility tree on a fresh
 # install. smoke-launch.yaml asserts the full consent flow; other

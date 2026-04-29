@@ -20,7 +20,7 @@ appId: mx.cachink.mobile
 - assertVisible: "Registrar"
 - tapOn:
     id: "pago-monto"
-- clearText
+- eraseText
 - inputText: "500"
 - tapOn:
     id: "pago-submit"

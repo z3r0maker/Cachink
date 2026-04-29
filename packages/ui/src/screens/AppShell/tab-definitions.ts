@@ -34,7 +34,7 @@ export interface TabDefinition {
 export const OPERATIVO_TABS: readonly TabDefinition[] = [
   { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
   { key: 'egresos', labelKey: 'tabs.egresos', icon: 'file-text', path: '/egresos' },
-  { key: 'inventario', labelKey: 'tabs.inventario', icon: 'package', path: '/inventario' },
+  { key: 'productos', labelKey: 'tabs.productos', icon: 'package', path: '/productos' },
 ] as const;
 
 /**
@@ -45,7 +45,7 @@ export const DIRECTOR_TABS: readonly TabDefinition[] = [
   { key: 'home', labelKey: 'tabs.home', icon: 'home', path: '/' },
   { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
   { key: 'egresos', labelKey: 'tabs.egresos', icon: 'file-text', path: '/egresos' },
-  { key: 'inventario', labelKey: 'tabs.inventario', icon: 'package', path: '/inventario' },
+  { key: 'productos', labelKey: 'tabs.productos', icon: 'package', path: '/productos' },
   { key: 'estados', labelKey: 'tabs.estados', icon: 'chart-bar', path: '/estados' },
   { key: 'ajustes', labelKey: 'tabs.ajustes', icon: 'settings', path: '/ajustes' },
 ] as const;

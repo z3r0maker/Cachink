@@ -23,6 +23,7 @@ import {
   useRole,
   useSetMode,
   useSetNotificationsEnabled,
+  useTranslation,
 } from '@cachink/ui';
 import { useLanDetails } from '@cachink/ui/sync';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
@@ -74,6 +75,22 @@ function useSettingsHandlers(): {
   };
 }
 
+/**
+ * UI-AUDIT-1 Issue 2 — Expo Router history-pop with a defensive
+ * `/` fallback when the user landed on Settings via a deep-link or
+ * cold-start (no history entry to pop).
+ */
+function useBackToParent(): () => void {
+  const router = useRouter();
+  return () => {
+    if (router.canGoBack()) {
+      router.back();
+      return;
+    }
+    router.replace('/' as never);
+  };
+}
+
 export default function SettingsRoute(): ReactElement {
   const mode = useMode();
   const business = useCurrentBusiness().data ?? null;
@@ -83,9 +100,11 @@ export default function SettingsRoute(): ReactElement {
   const lanDetails = useLanDetails();
   const cloudNav = useCloudNavigation();
   const handlers = useSettingsHandlers();
+  const handleBack = useBackToParent();
+  const { t } = useTranslation();
 
   return (
-    <AppShellWrapper activeTabKey="ajustes">
+    <AppShellWrapper activeTabKey="ajustes" title={t('settings.title')} onBack={handleBack}>
       <Settings
         mode={mode}
         business={business}

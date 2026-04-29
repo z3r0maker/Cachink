@@ -90,4 +90,22 @@ describe('Kpi', () => {
     );
     expect(screen.getAllByTestId('ventas-hoy-kpi').length).toBeGreaterThan(0);
   });
+
+  // UI-AUDIT-1 Issue 4 — Kpi gained an `align` prop so the totals
+  // Kpis on the NIF financial-statement screens can right-align their
+  // value with the right-aligned numeric column inside the body Card
+  // above them.
+  it('left-aligns its rows by default', () => {
+    renderWithProviders(<Kpi label="Ventas hoy" value="$8,450.00" testID="kpi-default" />);
+    const root = screen.getByTestId('kpi-default');
+    expect(getComputedStyle(root).alignItems).toBe('flex-start');
+  });
+
+  it('right-aligns its rows when align="right" is passed', () => {
+    renderWithProviders(
+      <Kpi label="Utilidad neta" value="$0.00" align="right" testID="kpi-right" />,
+    );
+    const root = screen.getByTestId('kpi-right');
+    expect(getComputedStyle(root).alignItems).toBe('flex-end');
+  });
 });

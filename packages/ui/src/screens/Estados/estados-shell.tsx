@@ -15,7 +15,7 @@ import type {
   FlujoDeEfectivo,
   Indicadores,
 } from '@cachink/domain';
-import { Btn, PeriodPicker } from '../../components/index';
+import { PeriodPicker, SegmentedToggle } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';
 import { BalanceGeneralScreen } from './balance-general-screen';
@@ -50,22 +50,31 @@ interface TabBarProps {
   readonly labels: Record<EstadosSubTab, string>;
 }
 
+/**
+ * Estados sub-tab bar.
+ *
+ * Audit M-1 follow-up (UI-AUDIT-1, Issue 1): the legacy hand-rolled row
+ * used `<Btn size="sm">` children inside a flex row without `flex={1}`,
+ * so each chip sized to its label (RESULTADOS / BALANCE / FLUJO /
+ * INDICADORES were four different widths). `SegmentedToggle` already
+ * implements equal-flex chip cells with proper radiogroup semantics —
+ * delegate to it. Existing E2E selectors (`estados-tabbar`,
+ * `estados-tab-{key}`) are preserved via `testID` + `testIDPrefix`.
+ */
 function TabBar(props: TabBarProps): ReactElement {
-  const tabs: readonly EstadosSubTab[] = ['resultados', 'balance', 'flujo', 'indicadores'];
   return (
-    <View flexDirection="row" gap={8} testID="estados-tabbar">
-      {tabs.map((tab) => (
-        <Btn
-          key={tab}
-          variant={props.active === tab ? 'dark' : 'ghost'}
-          size="sm"
-          onPress={() => props.onChange(tab)}
-          testID={`estados-tab-${tab}`}
-        >
-          {props.labels[tab]}
-        </Btn>
-      ))}
-    </View>
+    <SegmentedToggle<EstadosSubTab>
+      testID="estados-tabbar"
+      testIDPrefix="estados-tab"
+      value={props.active}
+      options={[
+        { key: 'resultados', label: props.labels.resultados },
+        { key: 'balance', label: props.labels.balance },
+        { key: 'flujo', label: props.labels.flujo },
+        { key: 'indicadores', label: props.labels.indicadores },
+      ]}
+      onChange={props.onChange}
+    />
   );
 }
 
@@ -92,8 +101,14 @@ export function EstadosShell(props: EstadosShellProps): ReactElement {
     flujo: t('estados.tabFlujo'),
     indicadores: t('estados.tabIndicadores'),
   };
+  // Audit M-1 follow-up (UI-AUDIT-1, Issue 5): the previous `gap={14}`
+  // was visually consumed by the §8.3 hard 4-px drop shadow on each
+  // child Card, leaving the date-label sibling visually flush against
+  // the InformeMensualAction card above it. Bumping to 18 restores
+  // ~14 px of post-shadow breathing room and resolves the same issue
+  // on every Estados sub-tab.
   return (
-    <View testID={props.testID ?? 'estados-shell'} gap={14} padding={16}>
+    <View testID={props.testID ?? 'estados-shell'} gap={18} padding={16}>
       <PeriodPicker
         value={props.periodoState}
         onChange={props.onPeriodoChange}

@@ -14,6 +14,7 @@ import type {
   IsoDate,
   IsoTimestamp,
   NewSale,
+  ProductId,
   Sale,
   SaleId,
 } from '@cachink/domain';
@@ -22,6 +23,8 @@ import { newEntityId } from '@cachink/domain';
 const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
+/** Default productoId used by fixtures — required since ADR-048. */
+const DEFAULT_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0CPROD' as ProductId;
 
 export function makeNewSale(overrides: Partial<NewSale> = {}): NewSale {
   return {
@@ -30,6 +33,8 @@ export function makeNewSale(overrides: Partial<NewSale> = {}): NewSale {
     categoria: 'Producto',
     monto: 450n,
     metodo: 'Efectivo',
+    cantidad: 1,
+    productoId: DEFAULT_PRODUCT,
     businessId: DEFAULT_BIZ,
     ...overrides,
   };
@@ -38,6 +43,7 @@ export function makeNewSale(overrides: Partial<NewSale> = {}): NewSale {
 export function makeSale(overrides: Partial<Sale> = {}): Sale {
   const id = (overrides.id ?? newEntityId<SaleId>()) as SaleId;
   const clienteId = (overrides.clienteId ?? null) as ClientId | null;
+  const productoId = (overrides.productoId ?? DEFAULT_PRODUCT) as ProductId;
   return {
     id,
     fecha: '2026-04-23' as IsoDate,
@@ -47,6 +53,8 @@ export function makeSale(overrides: Partial<Sale> = {}): Sale {
     metodo: 'Efectivo',
     clienteId,
     estadoPago: 'pagado',
+    productoId,
+    cantidad: 1,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdAt: DEFAULT_TS,

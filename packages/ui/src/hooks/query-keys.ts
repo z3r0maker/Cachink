@@ -71,6 +71,11 @@ export const estadosKeys = {
     ['indicadores', businessId, from, to] as const,
 } as const;
 
+export const frequentProductosKeys = {
+  byBusiness: (businessId: BusinessId | null, days: number): readonly unknown[] =>
+    ['frequentProductos', businessId, days] as const,
+} as const;
+
 export const syncKeys = {
   /** Recent LAN sync conflicts surfaced in DirectorHome (ADR-029). */
   conflicts: (limit: number): readonly unknown[] => ['sync-conflicts', limit] as const,

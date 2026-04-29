@@ -17,13 +17,14 @@
  * Coverage matrix — one assertion per form. Forms whose submit hook
  * lives outside this package (`<NuevoEgresoModal>` integration uses
  * the route-level submit) are covered via their tab fields directly.
+ *
+ * ADR-048: NuevaVentaModal test removed (component deleted — Ventas is
+ * now an inline POS with VentaConfirmSheet).
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId } from '@cachink/domain';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
-import { NuevaVentaModal } from '../../src/screens/Ventas/nueva-venta-modal';
 import { NuevoEmpleadoModal } from '../../src/screens/Egresos/tabs/nuevo-empleado-modal';
 import { NuevoProductoModal } from '../../src/screens/Inventario/nuevo-producto-modal';
 import { NuevoClienteModal } from '../../src/screens/Clientes/nuevo-cliente-modal';
@@ -42,31 +43,6 @@ function pressEnterOn(testID: string): void {
 }
 
 describe('Keyboard-submit on last form field (audit 5.4)', () => {
-  it('NuevaVentaModal: Enter on monto fires onSubmit when fields are valid', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(
-      <NuevaVentaModal
-        open
-        onClose={vi.fn()}
-        onSubmit={onSubmit}
-        fecha="2026-04-26"
-        businessId={'biz-1' as BusinessId}
-        clientes={[]}
-      />,
-    );
-    // Pressing Enter on monto fires the form's submit; an empty form
-    // hits the validate guard and stays put — that's also a sign the
-    // handler ran. We assert the submit-attempt itself by checking the
-    // submit Btn exists (handler is wired) AND that the Enter handler
-    // exists on the input (no exception).
-    pressEnterOn('nueva-venta-monto');
-    // Validation will short-circuit because the form is empty; what
-    // matters is that the keyDown didn't throw and the form is still
-    // mounted (no crash from a missing handler).
-    expect(screen.getByTestId('nueva-venta-monto')).toBeInTheDocument();
-    expect(onSubmit).not.toHaveBeenCalled(); // Empty form → validation block
-  });
-
   it('NuevoEmpleadoModal: Enter on salario fires submit (validation may reject)', () => {
     const onSubmit = vi.fn();
     renderWithProviders(<NuevoEmpleadoModal open onClose={vi.fn()} onSubmit={onSubmit} />);

@@ -24,3 +24,4 @@ export * from './exportar-datos/index.js';
 export * from './editar-venta/index.js';
 export * from './editar-egreso/index.js';
 export * from './editar-producto/index.js';
+export * from './find-frequent-productos/index.js';

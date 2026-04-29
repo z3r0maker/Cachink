@@ -7,7 +7,14 @@
  * test suite (to be added in Phase 1B-M4).
  */
 
-import type { BusinessId, ClientId, DeviceId, IsoTimestamp, SaleId } from '@cachink/domain';
+import type {
+  BusinessId,
+  ClientId,
+  DeviceId,
+  IsoTimestamp,
+  ProductId,
+  SaleId,
+} from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { NewSale, PaymentState, Sale, SalePatch, SalesRepository } from '@cachink/data';
 
@@ -32,6 +39,8 @@ export class InMemorySalesRepository implements SalesRepository {
       metodo: input.metodo,
       clienteId: input.clienteId ?? null,
       estadoPago,
+      productoId: input.productoId as ProductId,
+      cantidad: input.cantidad ?? 1,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdAt: timestamp,
@@ -116,6 +125,30 @@ export class InMemorySalesRepository implements SalesRepository {
       if (s.businessId === businessId && s.deletedAt === null) n++;
     }
     return n;
+  }
+
+  /** Test helper: find the most frequently sold productoId values. */
+  async findFrequentProductoIds(opts: {
+    businessId: BusinessId;
+    since: string;
+    limit: number;
+  }): Promise<readonly { productoId: ProductId; veces: number; ultimaVenta: string }[]> {
+    const counts = new Map<ProductId, { veces: number; ultimaVenta: string }>();
+    for (const s of this.sales.values()) {
+      if (s.businessId !== opts.businessId || s.deletedAt !== null) continue;
+      if (s.fecha < opts.since) continue;
+      const existing = counts.get(s.productoId);
+      if (existing) {
+        existing.veces += s.cantidad;
+        if (s.fecha > existing.ultimaVenta) existing.ultimaVenta = s.fecha;
+      } else {
+        counts.set(s.productoId, { veces: s.cantidad, ultimaVenta: s.fecha });
+      }
+    }
+    return [...counts.entries()]
+      .map(([productoId, data]) => ({ productoId, ...data }))
+      .sort((a, b) => b.veces - a.veces)
+      .slice(0, opts.limit);
   }
 
   /** Test helper: wipe all sales. Not part of the SalesRepository contract. */

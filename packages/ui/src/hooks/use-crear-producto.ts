@@ -3,10 +3,12 @@
  * ProductsRepository.create. Invalidates productos +
  * productos-con-stock queries so selects and the Stock screen pick up
  * the new row.
+ *
+ * UXD-R3: added tipo, seguirStock, precioVenta, atributos fields.
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, NewProduct, Product } from '@cachink/domain';
+import type { BusinessId, NewProduct, Product, ProductoTipo } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -18,6 +20,10 @@ export interface CrearProductoInput {
   readonly costoUnit: Money;
   readonly unidad: Product['unidad'];
   readonly umbralStockBajo?: number;
+  readonly tipo?: ProductoTipo;
+  readonly seguirStock?: boolean;
+  readonly precioVenta: Money;
+  readonly atributos?: Record<string, string>;
 }
 
 export type CrearProductoResult = UseMutationResult<Product, Error, CrearProductoInput, unknown>;
@@ -37,6 +43,10 @@ export function useCrearProducto(): CrearProductoResult {
         costoUnitCentavos: input.costoUnit,
         unidad: input.unidad,
         umbralStockBajo: input.umbralStockBajo,
+        tipo: input.tipo ?? 'producto',
+        seguirStock: input.seguirStock ?? true,
+        precioVentaCentavos: input.precioVenta,
+        atributos: input.atributos ?? {},
         businessId: businessId as BusinessId,
       };
       return products.create(payload);

@@ -5,10 +5,18 @@
 # the modal and advances the wizard to Step 2A (where the cloud card
 # is visible), and that the same mechanism works for the other
 # scenarios.
+#
+# Precondition: fresh install. Run via wrapper:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-help-modal.yaml
 appId: mx.cachink.mobile
 ---
-- launchApp:
-    clearState: true
+- launchApp
+
+# Dismiss first-launch ConsentModal (smoke-launch.yaml covers the
+# full consent flow; other wizard flows just need to get past it).
+- tapOn:
+    id: "consent-modal-later"
 
 - assertVisible: "¡Bienvenido a Cachink!"
 - tapOn: { id: "wizard-step1-help-link" }

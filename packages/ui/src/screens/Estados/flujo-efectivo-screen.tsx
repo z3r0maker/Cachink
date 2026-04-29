@@ -101,6 +101,10 @@ export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactEleme
             label={t('estados.flujoTotal')}
             value={formatMoney(props.flujo.total)}
             tone={props.flujo.total >= 0n ? 'positive' : 'negative'}
+            // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): mirror the
+            // right-aligned numeric column inside the SectionCard rows
+            // above so the totals value lines up with them.
+            align="right"
             testID="flujo-total"
           />
         </View>

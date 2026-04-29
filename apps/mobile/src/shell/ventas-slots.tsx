@@ -1,55 +1,21 @@
 /**
  * Ventas-route slot components — extracted from `app/ventas.tsx` so
- * the route file stays under the §4.4 200-line cap once Audit Round 2
- * K1 added swipe-to-edit + ConfirmDialog plumbing.
+ * the route file stays under the §4.4 200-line cap.
  *
- * Each Slot is a pure presentation wrapper around a `<NuevaVentaModal>`
- * / `<VentaDetailPopover>` / `<EditarVentaModal>` / `<ConfirmDialog>`
- * — the route file owns the state, this file owns the JSX.
+ * ADR-048: NuevaSlot removed — the free-text NuevaVentaModal has been
+ * replaced by the inline POS surface with VentaConfirmSheet.
  */
 import type { ReactElement } from 'react';
-import { type Router } from 'expo-router';
 import {
   ConfirmDialog,
   EditarVentaModal,
-  NuevaVentaModal,
   VentaDetailPopover,
   shareComprobante,
-  useClientsForBusiness,
   useComprobanteHtml,
-  useRegistrarVenta,
   useTranslation,
 } from '@cachink/ui';
 import type { useEliminarVenta } from '@cachink/ui';
-import type { Business, BusinessId, IsoDate, NewSale, Sale } from '@cachink/domain';
-
-export interface NuevaSlotProps {
-  open: boolean;
-  onClose: () => void;
-  fecha: IsoDate;
-  businessId: BusinessId;
-  router: Router;
-}
-
-export function NuevaSlot(props: NuevaSlotProps): ReactElement {
-  const clientesQ = useClientsForBusiness();
-  const registrar = useRegistrarVenta();
-  function handleSubmit(input: NewSale): void {
-    registrar.mutate(input, { onSuccess: () => props.onClose() });
-  }
-  return (
-    <NuevaVentaModal
-      open={props.open}
-      onClose={props.onClose}
-      onSubmit={handleSubmit}
-      fecha={props.fecha}
-      businessId={props.businessId}
-      clientes={clientesQ.data ?? []}
-      onCrearCliente={() => props.router.push('/clientes' as never)}
-      submitting={registrar.isPending}
-    />
-  );
-}
+import type { Business, Sale } from '@cachink/domain';
 
 export function useShareComprobante(
   selected: Sale | null,

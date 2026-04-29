@@ -13,8 +13,8 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { Btn } from '../Btn/index';
 import { Input } from '../Input/index';
+import { SegmentedToggle } from '../SegmentedToggle/index';
 import { DateField } from '../fields/index';
 
 export type PeriodoMode = 'mensual' | 'anual' | 'rango';
@@ -69,33 +69,34 @@ interface ModeTabsProps {
   readonly onSelect: (mode: PeriodoMode) => void;
 }
 
+/**
+ * Mode tab cluster — three equal-flex chips selecting `mensual` /
+ * `anual` / `rango`.
+ *
+ * Audit M-1 follow-up (UI-AUDIT-1, Issue 1): the legacy hand-rolled
+ * row used `<Btn size="sm">` children inside a `flex-direction: row`
+ * without `flex={1}`, so each chip sized to its label and the row's
+ * three chips ended up at three different widths. `SegmentedToggle`
+ * already implements the `flex={1} flexBasis={0}` chip cells with the
+ * proper `radiogroup`/`radio` ARIA semantics, so we delegate to it
+ * here. Existing E2E selectors (`period-picker-tabs`,
+ * `period-picker-tab-{mode}`) are preserved via `testID` +
+ * `testIDPrefix`.
+ */
 function ModeTabs(props: ModeTabsProps): ReactElement {
-  const pairs: readonly [PeriodoMode, string][] = [
-    ['mensual', props.labels.mensual],
-    ['anual', props.labels.anual],
-    ['rango', props.labels.rango],
-  ];
-  // Audit Round 2 G1: the mode-tab cluster is a single-select radio
-  // group — surface `role="radiogroup"` on the container and
-  // `role="radio"` + `aria-checked` per chip so screen readers
-  // announce them as a coherent selector instead of three disjoint
-  // buttons.
   return (
-    <View flexDirection="row" gap={8} testID="period-picker-tabs" role="radiogroup">
-      {pairs.map(([mode, label]) => (
-        <Btn
-          key={mode}
-          variant={props.mode === mode ? 'dark' : 'ghost'}
-          size="sm"
-          onPress={() => props.onSelect(mode)}
-          testID={`period-picker-tab-${mode}`}
-          role="radio"
-          ariaChecked={props.mode === mode}
-        >
-          {label}
-        </Btn>
-      ))}
-    </View>
+    <SegmentedToggle<PeriodoMode>
+      testID="period-picker-tabs"
+      testIDPrefix="period-picker-tab"
+      ariaLabel={props.labels.mensual}
+      value={props.mode}
+      options={[
+        { key: 'mensual', label: props.labels.mensual },
+        { key: 'anual', label: props.labels.anual },
+        { key: 'rango', label: props.labels.rango },
+      ]}
+      onChange={props.onSelect}
+    />
   );
 }
 

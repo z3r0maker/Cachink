@@ -21,6 +21,7 @@ import {
   useRole,
   useSetMode,
   useSetNotificationsEnabled,
+  useTranslation,
 } from '@cachink/ui';
 import { useLanDetails } from '@cachink/ui/sync';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
@@ -86,9 +87,21 @@ export function SettingsRoute(): ReactElement {
   const lanDetails = useLanDetails({ stopHostServer: () => stopLanServer() });
   const cloudNav = useCloudNavigation();
   const handlers = useSettingsHandlers();
+  const navigate = useDesktopNavigate();
+  const { t } = useTranslation();
+
+  // UI-AUDIT-1 Issue 2 — Settings is reached via the TopBar cog from
+  // any tabbed route. Desktop's state-router has no history stack, so
+  // we route to `/` (Director Home for Director, /ventas fallback for
+  // Operativo) — that's the parent surface the user came from.
+  const handleBack = (): void => navigate('/');
 
   return (
-    <DesktopAppShellWrapper activeTabKey="ajustes">
+    <DesktopAppShellWrapper
+      activeTabKey="ajustes"
+      title={t('settings.title')}
+      onBack={handleBack}
+    >
       <Settings
         mode={mode}
         business={business}

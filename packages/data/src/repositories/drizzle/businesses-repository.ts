@@ -4,7 +4,14 @@
  */
 
 import { and, eq, isNull } from 'drizzle-orm';
-import type { BusinessId, DeviceId, IsoTimestamp } from '@cachink/domain';
+import type {
+  AttrDef,
+  BusinessId,
+  DeviceId,
+  IsoTimestamp,
+  SaleCategory,
+  TipoNegocio,
+} from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type {
   Business,
@@ -34,6 +41,9 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       regimenFiscal: input.regimenFiscal,
       isrTasa: input.isrTasa,
       logoUrl: input.logoUrl ?? null,
+      tipoNegocio: input.tipoNegocio ?? 'mixto',
+      categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
+      atributosProducto: JSON.stringify(input.atributosProducto ?? []),
       businessId: id,
       deviceId: this.#deviceId,
       createdAt: ts,
@@ -41,7 +51,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       deletedAt: null as string | null,
     };
     await this.#db.insert(businesses).values(row).run();
-    return this.#mapRow(row);
+    return this.#mapRow(row as unknown as BusinessRow);
   }
 
   async findById(id: BusinessId): Promise<Business | null> {
@@ -73,11 +83,22 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       regimenFiscal: row.regimenFiscal,
       isrTasa: row.isrTasa,
       logoUrl: row.logoUrl,
+      tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
+      categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ?? 'Producto') as SaleCategory,
+      atributosProducto: this.#parseAttrDefs(row.atributosProducto),
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
     };
+  }
+
+  #parseAttrDefs(raw: string): AttrDef[] {
+    try {
+      return JSON.parse(raw) as AttrDef[];
+    } catch {
+      return [];
+    }
   }
 }

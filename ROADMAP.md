@@ -40,8 +40,39 @@ Detailed phase history lives in [`ROADMAP-archive.md`](./ROADMAP-archive.md).
 
 ## Current Status
 
-**Current phase:** 🚧 **Audit M-1 — Mobile-First UI/UX Audit** (PR 1, PR 2, PR 2.5 inc. T07, PR 3, PR 4, PR 5, PR 4.5 inc. T09b, and most of PR 5.5 closed; **Step 0 emulator-pass closed 2026-04-26 with 5 fixes shipped + 5 follow-ups filed**; PR 3.5 route refactor + PR 5.5 SplitPane per-screen mounts + Phase M real-device QA + Step-0 follow-ups ahead).
-**Last updated:** 2026-04-26 (Audit M-1 Step 0 emulator pass + Step 1 visual-baseline regen closed)
+**Current phase:** 🚧 **Audit M-1 — Mobile-First UI/UX Audit** (PR 1–5.5 closed; Step 0 emulator-pass closed; **UXD-R3 Smart Catalog + Quick-Sell Ventas + Persistent Shell landed 2026-04-28**; ADR-048 + Maestro fixes landed 2026-04-28; PR 3.5 route refactor + Phase M real-device QA ahead).
+**Last updated:** 2026-04-28 (ADR-048 Maestro Emulation Test fixes shipped)
+
+### 2026-04-28 — Maestro Emulation Test: Findings & Fixes (ADR-048)
+
+Product-Only Sales + Inline POS implementation verified via Maestro emulation.
+Three findings identified and fixed:
+
+- [x] **Finding 1 — Maestro `clearState` + Expo dev-client on iOS 18:** Replaced `clearState: true`
+  in all 5 wizard/smoke flows with a `fresh-install.sh` wrapper script that does
+  `xcrun simctl uninstall/install`. Root cause: `clearState` wipes the Expo dev-client's
+  stored Metro URL on iOS 18+, causing "No script URL provided" errors.
+- [x] **Finding 2 — Migration 0002 unregistered:** Already fixed in UXD-R3 Phase A — all smart
+  catalog columns folded into `migration-0000.ts`. Verified via unit tests + manual launch.
+- [x] **Finding 3 — Venta Maestro flows stale:** Rewrote `venta-efectivo.yaml` and
+  `venta-credito.yaml` for the inline POS interaction (tap product card → VentaConfirmSheet → submit).
+  Old flows referenced deleted NuevaVenta modal components.
+- [x] **ADR-048** added to `ARCHITECTURE.md`: documents product-only sales decision.
+- [x] **CLAUDE.md §9** updated: `Venta.producto_id` is now required (non-nullable).
+- [x] **TabItem `<View onPress>` → `<Pressable>`** (same root cause as F0-T04 Btn fix).
+- [x] **Wizard `business.tsx` missing `onError` handler** added.
+
+### 2026-04-28 — UXD-R3: Smart Catalog + Quick-Sell Ventas + Persistent Shell
+
+5-phase slice landed in one session. All phases complete:
+
+- [x] **Phase A — Foundation:** Domain schema deltas (Producto.tipo/seguirStock/precioVenta/atributos, Sale.productoId/cantidad, Business.tipoNegocio/categoriaVentaPredeterminada/atributosProducto), Drizzle schema + migration 0002_smart_catalog.sql, repository deltas (findFrequentProductoIds), use-case deltas (RegistrarVentaUseCase auto-salida + FindFrequentProductosUseCase), ADR-045/046/047.
+- [x] **Phase B — Catalog UX + Tab Rename:** ProductoCard tile + ProductoCardGrid responsive grid components, Inventario→Productos rename (tab-definitions, routes, i18n), NuevoProductoModal adaptive form with precioVenta.
+- [x] **Phase C — Always-on Ventas:** useFrequentProductos hook, FrecuentesGrid, ManualVentaForm, quick-sell helpers (deriveVentaCategoria, buildQuickSellPayload), useRegistrarVenta auto-stock.
+- [x] **Phase D — Wizard tipoNegocio + Atributos:** BusinessType 4-card wizard step, AtributosForm dynamic renderer, ProductoCard attr chips.
+- [x] **Phase E — BottomTabBar Persistence:** useActiveTabKey pathname→tab mapping, KeyboardAvoidingView above BottomTabBar, Settings ScrollView containment.
+
+**Test results:** 255 domain + 951 UI + 15 mobile shell = **1,221 tests green**. 0 typecheck errors across 5 packages.
 
 ### 2026-04-26 — Audit M-1 Step 0 (Maestro emulator pass) + Step 1 (Playwright drift)
 

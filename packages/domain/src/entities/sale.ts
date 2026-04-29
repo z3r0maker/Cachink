@@ -5,10 +5,13 @@
  * model. `estadoPago` defaults to `'pagado'` for cash/card/transfer sales and
  * `'pendiente'` for `Crédito` — the invariant is enforced by a cross-field
  * refine below (Crédito always requires a `clienteId`).
+ *
+ * `productoId` is **required** — every sale references a catalogue producto
+ * (ADR-048: product-only sales). `cantidad` supports multi-unit sales.
  */
 
 import { z } from 'zod';
-import type { BusinessId, ClientId, SaleId } from '../ids/index.js';
+import type { BusinessId, ClientId, ProductId, SaleId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { isoDateField, moneyField } from './_fields.js';
@@ -38,6 +41,8 @@ export const SaleSchema = z
     metodo: PaymentMethodEnum,
     clienteId: ulidField<ClientId>().nullable(),
     estadoPago: PaymentStateEnum,
+    productoId: ulidField<ProductId>(),
+    cantidad: z.number().int().positive().default(1),
   })
   .merge(auditSchema)
   .refine((v) => v.metodo !== 'Crédito' || v.clienteId !== null, {
@@ -54,6 +59,8 @@ export const NewSaleSchema = z.object({
   monto: moneyField,
   metodo: PaymentMethodEnum,
   clienteId: ulidField<ClientId>().optional(),
+  productoId: ulidField<ProductId>(),
+  cantidad: z.number().int().positive().default(1),
   businessId: ulidField<BusinessId>(),
 });
 

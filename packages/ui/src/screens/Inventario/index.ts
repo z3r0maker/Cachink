@@ -1,5 +1,7 @@
 export { StockScreen, type StockScreenProps, filterProductos } from './stock-screen';
-export { ProductoCard, type ProductoCardProps } from './producto-card';
+// Legacy re-export: ProductoCard renamed to ProductoListRow in UXD-R3.
+// The new vertical ProductoCard tile lives in components/ProductoCard/.
+export { ProductoCard as ProductoListRowLegacy, type ProductoCardProps as ProductoListRowLegacyProps } from './producto-card';
 export { EmptyProductos, type EmptyProductosProps } from './empty-productos';
 export { StockKpiStrip, type StockKpiStripProps } from './stock-kpi-strip';
 export { MovimientosScreen, type MovimientosScreenProps } from './movimientos-screen';

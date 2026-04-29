@@ -1,8 +1,17 @@
 /**
- * Product (Producto) — inventariable unit. Categories and units come from
- * INV_CAT and INV_UNIDAD in CLAUDE.md §9. Stock level is derived from the
- * MovimientoInventario ledger, not stored here; `umbralStockBajo` feeds the
- * Director's end-of-day stock-low notification.
+ * Product (Producto) — catalogue item. May represent a physical product
+ * (with or without stock tracking) or a service.
+ *
+ * Categories and units come from INV_CAT and INV_UNIDAD in CLAUDE.md §9.
+ * Stock level is derived from the MovimientoInventario ledger, not stored
+ * here; `umbralStockBajo` feeds the Director's end-of-day stock-low
+ * notification.
+ *
+ * UXD-R3 additions (ADR-043):
+ *   - `tipo` — discriminator: 'producto' | 'servicio'.
+ *   - `seguirStock` — opt-in stock tracking; forced false for servicios.
+ *   - `precioVentaCentavos` — required for quick-sell flow.
+ *   - `atributos` — sparse key/value map for custom attributes.
  */
 
 import { z } from 'zod';
@@ -34,6 +43,10 @@ export const InventoryUnitEnum = z.enum([
 ]);
 export type InventoryUnit = z.infer<typeof InventoryUnitEnum>;
 
+/** Discriminator: physical product vs service (ADR-043). */
+export const ProductoTipoEnum = z.enum(['producto', 'servicio']);
+export type ProductoTipo = z.infer<typeof ProductoTipoEnum>;
+
 export const ProductSchema = z
   .object({
     id: ulidField<ProductId>(),
@@ -43,8 +56,16 @@ export const ProductSchema = z
     costoUnitCentavos: moneyField,
     unidad: InventoryUnitEnum,
     umbralStockBajo: z.number().int().min(0).default(3),
+    tipo: ProductoTipoEnum,
+    seguirStock: z.boolean(),
+    precioVentaCentavos: moneyField,
+    atributos: z.record(z.string(), z.string()).default({}),
   })
-  .merge(auditSchema);
+  .merge(auditSchema)
+  .refine((v) => v.tipo === 'producto' || v.seguirStock === false, {
+    message: "tipo='servicio' implies seguirStock=false",
+    path: ['seguirStock'],
+  });
 
 export type Product = z.infer<typeof ProductSchema>;
 
@@ -55,6 +76,10 @@ export const NewProductSchema = z.object({
   costoUnitCentavos: moneyField,
   unidad: InventoryUnitEnum,
   umbralStockBajo: z.number().int().min(0).optional(),
+  tipo: ProductoTipoEnum.default('producto'),
+  seguirStock: z.boolean().default(true),
+  precioVentaCentavos: moneyField,
+  atributos: z.record(z.string(), z.string()).default({}),
   businessId: ulidField<BusinessId>(),
 });
 

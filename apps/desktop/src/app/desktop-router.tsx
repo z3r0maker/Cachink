@@ -14,7 +14,8 @@
  *                          /ventas (Operativo)
  *   /ventas              → VentasRoute
  *   /egresos             → EgresosRoute
- *   /inventario          → InventarioRoute
+ *   /productos           → ProductosRoute (renamed from /inventario, ADR-045)
+ *   /inventario          → ProductosRoute (legacy redirect)
  *   /clientes            → ClientesRoute
  *   /cuentas-por-cobrar  → CuentasPorCobrarRoute
  *   /estados             → EstadosRoute
@@ -37,7 +38,7 @@ import {
 import { DesktopRouterContext } from './desktop-router-context';
 import { VentasRoute } from './routes/ventas-route';
 import { EgresosRoute } from './routes/egresos-route';
-import { InventarioRoute } from './routes/inventario-route';
+import { ProductosRoute } from './routes/productos-route';
 import { ClientesRoute } from './routes/clientes-route';
 import { CuentasPorCobrarRoute } from './routes/cuentas-por-cobrar-route';
 import { EstadosRoute } from './routes/estados-route';
@@ -101,7 +102,8 @@ function renderRouteContent(path: string, role: Role, ctx: DirectorContext): Rea
   }
   if (path.startsWith('/ventas')) return <VentasRoute />;
   if (path.startsWith('/egresos')) return <EgresosRoute />;
-  if (path.startsWith('/inventario')) return <InventarioRoute />;
+  if (path.startsWith('/productos')) return <ProductosRoute />;
+  if (path.startsWith('/inventario')) return <ProductosRoute />; // Legacy redirect
   if (path.startsWith('/clientes')) return <ClientesRoute />;
   if (path.startsWith('/cuentas-por-cobrar')) return <CuentasPorCobrarRoute />;
   if (path.startsWith('/estados')) return <EstadosRoute />;

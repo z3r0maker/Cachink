@@ -15,6 +15,16 @@ export * from './Clientes/index';
 export * from './CuentasPorCobrar/index';
 export * from './Egresos/index';
 export * from './Inventario/index';
+// Productos/ re-exports come from Inventario/ which still has the full set.
+// ProductosTabBar + visibleSubTabs are new and only in Productos/.
+export {
+  ProductosTabBar,
+  type ProductosTabBarProps,
+  type ProductosSubTab,
+  visibleSubTabs,
+  ProductoListRow,
+  type ProductoListRowProps,
+} from './Productos/index';
 export * from './CorteDeDia/index';
 export * from './Estados/index';
 export * from './DirectorHome/index';

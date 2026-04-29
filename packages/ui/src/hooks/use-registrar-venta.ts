@@ -2,17 +2,24 @@
  * `useRegistrarVenta` — TanStack mutation wrapping the
  * `RegistrarVentaUseCase`.
  *
- * Wires the clients + sales repositories into the use-case, calls
- * `.execute(input)`, and invalidates the current day's `['ventas', …]`
- * query on success so the list refreshes immediately. Callers invoke
- * `.mutate({ fecha, concepto, categoria, monto, metodo, clienteId? })`.
+ * Wires the clients + sales + products + movements repositories into the
+ * use-case, calls `.execute(input)`, and invalidates ventas +
+ * productos-con-stock queries on success.
+ *
+ * UXD-R3: now passes products + movements repos to support auto-salida
+ * when selling a stock-tracked producto.
  */
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarVentaUseCase } from '@cachink/application';
 import type { NewSale, Sale } from '@cachink/domain';
-import { useClientsRepository, useSalesRepository } from '../app/index';
+import {
+  useClientsRepository,
+  useInventoryMovementsRepository,
+  useProductsRepository,
+  useSalesRepository,
+} from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 
 export type RegistrarVentaResult = UseMutationResult<Sale, Error, NewSale, unknown>;
@@ -20,16 +27,26 @@ export type RegistrarVentaResult = UseMutationResult<Sale, Error, NewSale, unkno
 export function useRegistrarVenta(): RegistrarVentaResult {
   const sales = useSalesRepository();
   const clients = useClientsRepository();
+  const products = useProductsRepository();
+  const movements = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
-  const useCase = useMemo(() => new RegistrarVentaUseCase(sales, clients), [sales, clients]);
+
+  const useCase = useMemo(
+    () => new RegistrarVentaUseCase(sales, clients, products, movements),
+    [sales, clients, products, movements],
+  );
 
   return useMutation<Sale, Error, NewSale>({
     async mutationFn(input) {
       return useCase.execute(input);
     },
     async onSuccess(sale) {
-      await queryClient.invalidateQueries({ queryKey: ['ventas', businessId, sale.fecha] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['ventas', businessId, sale.fecha] }),
+        queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['frequentProductos', businessId] }),
+      ]);
     },
   });
 }

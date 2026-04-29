@@ -1,18 +1,11 @@
 /**
  * Drizzle-backed implementation of {@link SalesRepository}.
  *
- * Shares one `db` + one `deviceId` per app instance (both wired at
- * composition time). All writes go through `this.#rowFor(...)` so the
- * business-id / device-id / timestamps / deletedAt audit contract from
- * CLAUDE.md §9 stays in one place.
- *
- * Reads run through `this.#mapRow(...)` to project plain-SQL text columns
- * back into their branded-type equivalents — the brand is zero-cost at
- * runtime, so this costs nothing at the call-site and stops `as any` from
- * leaking into the rest of the codebase.
+ * All writes stamp business-id / device-id / timestamps per CLAUDE.md §9.
+ * Reads project SQL rows back to branded domain types via `#mapRow`.
  */
 
-import { and, desc, eq, gte, inArray, isNull, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   ClientId,
@@ -21,6 +14,7 @@ import type {
   IsoTimestamp,
   NewSale,
   PaymentState,
+  ProductId,
   Sale,
   SaleCategory,
   SaleId,
@@ -54,6 +48,8 @@ export class DrizzleSalesRepository implements SalesRepository {
       metodo: input.metodo,
       clienteId: input.clienteId ?? null,
       estadoPago,
+      productoId: input.productoId,
+      cantidad: input.cantidad ?? 1,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdAt: ts,
@@ -83,22 +79,11 @@ export class DrizzleSalesRepository implements SalesRepository {
     return rows.map((r) => this.#mapRow(r));
   }
 
-  async findByDateRange(
-    from: string,
-    to: string,
-    businessId: BusinessId,
-  ): Promise<readonly Sale[]> {
+  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Sale[]> {
     const rows = await this.#db
       .select()
       .from(sales)
-      .where(
-        and(
-          gte(sales.fecha, from),
-          lte(sales.fecha, to),
-          eq(sales.businessId, businessId),
-          isNull(sales.deletedAt),
-        ),
-      )
+      .where(and(gte(sales.fecha, from), lte(sales.fecha, to), eq(sales.businessId, businessId), isNull(sales.deletedAt)))
       .orderBy(desc(sales.fecha), desc(sales.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
@@ -108,23 +93,13 @@ export class DrizzleSalesRepository implements SalesRepository {
     const rows = await this.#db
       .select()
       .from(sales)
-      .where(
-        and(
-          eq(sales.clienteId, clientId),
-          inArray(sales.estadoPago, ['pendiente', 'parcial']),
-          isNull(sales.deletedAt),
-        ),
-      )
+      .where(and(eq(sales.clienteId, clientId), inArray(sales.estadoPago, ['pendiente', 'parcial']), isNull(sales.deletedAt)))
       .all();
     return rows.map((r) => this.#mapRow(r));
   }
 
   async updatePaymentState(id: SaleId, state: PaymentState): Promise<void> {
-    await this.#db
-      .update(sales)
-      .set({ estadoPago: state, updatedAt: now() })
-      .where(eq(sales.id, id))
-      .run();
+    await this.#db.update(sales).set({ estadoPago: state, updatedAt: now() }).where(eq(sales.id, id)).run();
   }
 
   async update(id: SaleId, patch: SalePatch): Promise<Sale | null> {
@@ -144,11 +119,7 @@ export class DrizzleSalesRepository implements SalesRepository {
 
   async delete(id: SaleId): Promise<void> {
     const ts = now();
-    await this.#db
-      .update(sales)
-      .set({ deletedAt: ts, updatedAt: ts })
-      .where(eq(sales.id, id))
-      .run();
+    await this.#db.update(sales).set({ deletedAt: ts, updatedAt: ts }).where(eq(sales.id, id)).run();
   }
 
   async count(businessId: BusinessId): Promise<number> {
@@ -158,6 +129,34 @@ export class DrizzleSalesRepository implements SalesRepository {
       .where(and(eq(sales.businessId, businessId), isNull(sales.deletedAt)))
       .all();
     return rows.length;
+  }
+
+  async findFrequentProductoIds(opts: {
+    businessId: BusinessId;
+    since: string;
+    limit: number;
+  }): Promise<readonly { productoId: ProductId; veces: number; ultimaVenta: string }[]> {
+    const rows = await this.#db
+      .select({
+        productoId: sales.productoId,
+        veces: sql<number>`sum(${sales.cantidad})`.as('veces'),
+        ultimaVenta: sql<string>`max(${sales.fecha})`.as('ultima_venta'),
+      })
+      .from(sales)
+      .where(and(
+        eq(sales.businessId, opts.businessId),
+        isNull(sales.deletedAt),
+        gte(sales.fecha, opts.since),
+      ))
+      .groupBy(sales.productoId)
+      .orderBy(sql`veces DESC`)
+      .limit(opts.limit)
+      .all();
+    return rows.map((r) => ({
+      productoId: r.productoId as ProductId,
+      veces: Number(r.veces),
+      ultimaVenta: r.ultimaVenta,
+    }));
   }
 
   #mapRow(row: SaleRow): Sale {
@@ -170,6 +169,8 @@ export class DrizzleSalesRepository implements SalesRepository {
       metodo: row.metodo,
       clienteId: (row.clienteId ?? null) as ClientId | null,
       estadoPago: row.estadoPago,
+      productoId: row.productoId as ProductId,
+      cantidad: row.cantidad,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdAt: row.createdAt as IsoTimestamp,

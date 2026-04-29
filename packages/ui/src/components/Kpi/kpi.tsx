@@ -25,6 +25,20 @@ import { colors, typography } from '../../theme';
 
 export type KpiTone = 'neutral' | 'positive' | 'negative';
 
+/**
+ * Cross-axis alignment of the Kpi's three text lines.
+ *
+ * - `'left'` (default) — keeps the eyebrow / value / hint flush to the
+ *   start of the parent column. Used by Director Home strips and any
+ *   Kpi composed *inside* a parent Card with neighbour content.
+ * - `'right'` — flush to the end of the parent column. Used when the
+ *   Kpi acts as the *totals row* of a financial statement (Estado de
+ *   Resultados → Utilidad Neta, Flujo de Efectivo → Total, Balance →
+ *   Activo / Capital totals) so the value lines up with the right-
+ *   aligned numeric column inside the body Card directly above it.
+ */
+export type KpiAlign = 'left' | 'right';
+
 export interface KpiProps {
   /** Section label — proper-cased; visual uppercase is a CSS transform. */
   readonly label: string;
@@ -34,6 +48,13 @@ export interface KpiProps {
   readonly hint?: string;
   /** Tone token. Defaults to `neutral` (black value). */
   readonly tone?: KpiTone;
+  /**
+   * Cross-axis alignment. Defaults to `'left'`. Pass `'right'` when the
+   * Kpi acts as the totals row of a NIF financial statement so the value
+   * lines up with the right-aligned numeric column inside the body Card
+   * above it.
+   */
+  readonly align?: KpiAlign;
   /** Forwarded to the root View so E2E tests can anchor to it. */
   readonly testID?: string;
 }
@@ -130,12 +151,18 @@ function Hint({ text }: { text: string }): ReactElement {
  */
 export function Kpi(props: KpiProps): ReactElement {
   const tone = props.tone ?? 'neutral';
+  const align = props.align ?? 'left';
   const ariaLabel =
     props.hint !== undefined
       ? `${props.label}: ${props.value} (${props.hint})`
       : `${props.label}: ${props.value}`;
   return (
-    <View testID={props.testID ?? 'kpi'} flexDirection="column" aria-label={ariaLabel}>
+    <View
+      testID={props.testID ?? 'kpi'}
+      flexDirection="column"
+      alignItems={align === 'right' ? 'flex-end' : 'flex-start'}
+      aria-label={ariaLabel}
+    >
       <Label text={props.label} />
       <Value text={props.value} color={TONE_COLOR[tone]} />
       {props.hint !== undefined && <Hint text={props.hint} />}

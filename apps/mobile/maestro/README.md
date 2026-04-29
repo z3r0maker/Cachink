@@ -41,6 +41,36 @@ maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
 maestro test apps/mobile/maestro/flows/cliente-{crear,pago-completo,pago-parcial}.yaml
 ```
 
+### Fresh-install flows (wizard, smoke)
+
+Flows that need a clean database (no prior wizard completion) **must not**
+use Maestro's `clearState: true`. On iOS 18+ with Expo SDK 55 dev-clients,
+`clearState` wipes the stored Metro bundler URL and the app fails to
+reconnect ("No script URL provided").
+
+Instead, use the wrapper script which does an `xcrun simctl uninstall` +
+`xcrun simctl install` — this gives a fresh SQLite database while
+preserving Metro connectivity:
+
+```sh
+# Single fresh-install flow:
+./apps/mobile/maestro/scripts/fresh-install.sh \
+    apps/mobile/maestro/flows/smoke-launch.yaml
+
+# Chain: wizard sets up state, then venta flow runs on it:
+./apps/mobile/maestro/scripts/fresh-install.sh \
+    apps/mobile/maestro/flows/wizard-local-standalone.yaml
+maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+
+# Just reinstall (no test):
+./apps/mobile/maestro/scripts/fresh-install.sh --install-only
+```
+
+> **Affected flows:** `smoke-launch.yaml`, `wizard-local-standalone.yaml`,
+> `wizard-cloud-solo.yaml`, `wizard-mobile-disabled-host.yaml`,
+> `wizard-help-modal.yaml`. All other flows assume the wizard has already
+> completed and can be run with plain `maestro test`.
+
 The suite is **not** wired into CI yet (CLAUDE.md §3: CI deferred until a
 second contributor joins). Run it locally before landing anything that
 touches the wizard, tabs, Ventas, Cuentas por Cobrar, Inventario, or
@@ -63,10 +93,10 @@ Settings screens.
 
 ### Ventas + comprobantes
 
-| Flow                  | Closes         | What it proves                                  |
-| --------------------- | -------------- | ----------------------------------------------- |
-| `venta-efectivo.yaml` | M3-T01/T02/T05 | Cash venta create, "Total del día" KPI updates. |
-| `venta-credito.yaml`  | M3-T03/T06     | Crédito → inline cliente → Director → CxC.      |
+| Flow                  | Closes         | What it proves                                                          |
+| --------------------- | -------------- | ----------------------------------------------------------------------- |
+| `venta-efectivo.yaml` | M3-T01/T02/T05 | Inline POS: tap product → VentaConfirmSheet → Efectivo → sale appears.  |
+| `venta-credito.yaml`  | M3-T03/T06     | Inline POS: tap product → Crédito + client → Director → CxC.           |
 
 ### Egresos (Gasto / Nómina / Inventario / Recurrente)
 
@@ -130,7 +160,15 @@ Settings screens.
 
 ## Re-running between flows
 
-Some flows depend on state the previous one set up (e.g. a venta exists
-before `informe-mensual` can render its PDF). The cleanest way to
-rehearse is `maestro test apps/mobile/maestro/flows/smoke-launch.yaml`
-(which `clearState: true`) and then run the remaining flows in order.
+Some flows depend on state the previous one set up (e.g. a product exists
+before `venta-efectivo.yaml` can render the POS grid, or a venta exists
+before `informe-mensual` can render its PDF). The cleanest way to rehearse
+is to run the fresh-install wrapper + wizard flow first, then chain the
+remaining flows:
+
+```sh
+./apps/mobile/maestro/scripts/fresh-install.sh \
+    apps/mobile/maestro/flows/wizard-local-standalone.yaml
+maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+```

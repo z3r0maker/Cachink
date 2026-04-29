@@ -18,7 +18,7 @@
  */
 
 import type { Sale, NewSale, PaymentMethod, PaymentState, SaleCategory } from '@cachink/domain';
-import type { BusinessId, ClientId, SaleId } from '@cachink/domain';
+import type { BusinessId, ClientId, ProductId, SaleId } from '@cachink/domain';
 
 export type { Sale, NewSale, PaymentMethod, PaymentState, SaleCategory };
 
@@ -77,4 +77,15 @@ export interface SalesRepository {
    * before changing modes on a re-run.
    */
   count(businessId: BusinessId): Promise<number>;
+
+  /**
+   * Find the most frequently sold productoIds within a date window.
+   * Returns rows sorted by sale count descending, limited to `limit`.
+   * Powers the "frequent products" grid on the Ventas screen (UXD-R3).
+   */
+  findFrequentProductoIds(opts: {
+    businessId: BusinessId;
+    since: string;
+    limit: number;
+  }): Promise<readonly { productoId: ProductId; veces: number; ultimaVenta: string }[]>;
 }

@@ -72,6 +72,7 @@ export const esMX = {
     ventas: 'Ventas',
     egresos: 'Egresos',
     inventario: 'Inventario',
+    productos: 'Productos',
     home: 'Inicio',
     estados: 'Estados',
     ajustes: 'Ajustes',
@@ -81,6 +82,13 @@ export const esMX = {
     ajustes: 'Ajustes',
     /** Screen-reader label for the settings cog Btn — audit 3.12. */
     openSettings: 'Abrir ajustes',
+    /**
+     * Screen-reader label for the back-button Btn rendered in the
+     * TopBar.left slot when AppShell is given an `onBack` callback
+     * (UI-AUDIT-1, Issue 2). Defaults to this string but can be
+     * overridden per route via `backLabel`.
+     */
+    back: 'Atrás',
     syncLocal: 'Solo este dispositivo',
     syncLan: 'Sincronizado',
     syncLanWithCount: 'Sincronizado · {{count}} dispositivos',
@@ -90,6 +98,11 @@ export const esMX = {
     syncConnecting: 'Sincronizando…',
     syncError: 'Error de sincronización',
     retryNow: 'Reintentar ahora',
+  },
+  productos: {
+    catalogoTab: 'Catálogo',
+    stockTab: 'Stock',
+    movimientosTab: 'Movimientos',
   },
   inventario: {
     title: 'Inventario',
@@ -127,6 +140,7 @@ export const esMX = {
     skuPlaceholder: 'Opcional',
     categoriaLabel: 'Categoría',
     costoUnitLabel: 'Costo por unidad',
+    precioVentaLabel: 'Precio de venta',
     unidadLabel: 'Unidad',
     umbralLabel: 'Umbral de stock bajo',
     save: 'Guardar',
@@ -228,6 +242,22 @@ export const esMX = {
     retryLabel: 'Reintentar',
     errorTitle: 'No se pudieron cargar las ventas',
     errorBody: 'Revisa la conexión local y vuelve a intentarlo.',
+    frecuentes: 'Frecuentes',
+    conceptoLabel: 'Concepto',
+    conceptoPlaceholder: 'Taco al pastor',
+    montoLabel: 'Monto',
+    ventaAvanzada: 'Venta avanzada',
+    sinStockToast: 'Sin stock — venta registrada en negativo',
+    // ADR-048 — inline POS
+    searchProducto: 'Buscar producto...',
+    noProductos: 'Sin productos',
+    noProductosBody: 'Registra tu primer producto para empezar a vender',
+    goToProductos: 'Ir a Productos',
+    ventasDeHoy: 'Ventas de hoy',
+    confirmTitle: 'Registrar venta',
+    cantidad: 'Cantidad',
+    metodoLabel: 'Método de pago',
+    registrarVenta: 'Registrar venta',
   },
   nuevaVenta: {
     title: 'Nueva venta',
@@ -430,6 +460,18 @@ export const esMX = {
       fallbackTitle: '¿Sigues sin estar seguro?',
       fallbackBody:
         'Empieza con "Solo en este dispositivo → Guardar en este dispositivo" — es lo más fácil y siempre puedes cambiar después sin perder nada.',
+    },
+    businessType: {
+      title: '¿Qué tipo de negocio tienes?',
+      subtitle: 'Esto personaliza cómo Cachink muestra tu catálogo de productos.',
+      productoConStock: 'Productos físicos con inventario',
+      productoConStockHint: 'Vendes cosas que compras, produces o almacenas. Cachink lleva tu stock.',
+      productoSinStock: 'Productos sin inventario',
+      productoSinStockHint: 'Vendes café, comida u otro producto que no necesita conteo de piezas.',
+      servicio: 'Servicios',
+      servicioHint: 'Ofreces cortes, consultas, clases u otro servicio sin producto físico.',
+      mixto: 'Mezcla de productos y servicios',
+      mixtoHint: 'Vendes un poco de todo. Puedes configurar qué sigue stock y qué no.',
     },
     migrationDeferred: {
       title: 'Importar datos de otro dispositivo',

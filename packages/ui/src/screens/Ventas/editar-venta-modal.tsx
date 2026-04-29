@@ -24,7 +24,12 @@ import { Btn, Modal } from '../../components/index';
 import { Input } from '../../components/Input/index';
 import { MoneyField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { CATEGORIAS, METODOS } from './nueva-venta-form';
+const CATEGORIAS: readonly SaleCategory[] = [
+  'Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro',
+];
+const METODOS: readonly PaymentMethod[] = [
+  'Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito',
+];
 import { useEditarVenta } from '../../hooks/use-editar-venta';
 
 export interface EditarVentaModalProps {

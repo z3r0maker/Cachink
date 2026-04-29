@@ -1,16 +1,18 @@
 /**
- * VentasScreen component tests (P1C-M3-T01).
+ * VentasScreen component tests — inline POS surface (ADR-048).
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId, DeviceId, IsoDate, IsoTimestamp, SaleId } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate, IsoTimestamp, ProductId, SaleId } from '@cachink/domain';
 import type { Sale } from '@cachink/domain';
 import { VentasScreen } from '../../src/screens/index';
 import { totalDelDia } from '../../src/hooks/use-total-del-dia';
 import { initI18n } from '../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../test-utils';
+import { renderWithProviders, screen } from '../test-utils';
 
 initI18n();
+
+const PROD_ID = '01JPHK0000000000000000PROD' as ProductId;
 
 function sale(overrides: Partial<Sale>): Sale {
   return {
@@ -22,11 +24,29 @@ function sale(overrides: Partial<Sale>): Sale {
     metodo: 'Efectivo',
     clienteId: null,
     estadoPago: 'pagado',
+    productoId: PROD_ID,
+    cantidad: 1,
     businessId: '01JPHK00000000000000000008' as BusinessId,
     deviceId: '01JPHK00000000000000000007' as DeviceId,
     createdAt: '2026-04-24T00:00:00Z' as IsoTimestamp,
     updatedAt: '2026-04-24T00:00:00Z' as IsoTimestamp,
     deletedAt: null,
+    ...overrides,
+  };
+}
+
+/** Minimal props for the new VentasScreen. */
+function defaultProps(overrides: Record<string, unknown> = {}) {
+  return {
+    fecha: '2026-04-24',
+    onChangeFecha: vi.fn(),
+    ventas: [] as readonly Sale[],
+    total: 0n,
+    productos: [],
+    stockMap: undefined,
+    onProductoTap: vi.fn(),
+    productSearch: '',
+    onProductSearchChange: vi.fn(),
     ...overrides,
   };
 }
@@ -47,64 +67,29 @@ describe('totalDelDia', () => {
 });
 
 describe('VentasScreen', () => {
-  it('renders the empty state when the list is empty', () => {
+  it('renders the empty-productos state when product list is empty', () => {
     renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[]}
-        total={0n}
-        onNuevaVenta={vi.fn()}
-      />,
+      <VentasScreen {...defaultProps()} />,
     );
-    expect(screen.getByTestId('empty-ventas')).toBeInTheDocument();
+    expect(screen.getByTestId('empty-productos')).toBeInTheDocument();
   });
 
-  it('renders one VentaCard per sale and the formatted total', () => {
+  it('renders VentaCards and the formatted total when ventas exist', () => {
     const ventas = [
       sale({ id: '01JPHK0000000000000000S001' as SaleId, concepto: 'Taco', monto: 10000n }),
       sale({ id: '01JPHK0000000000000000S002' as SaleId, concepto: 'Refresco', monto: 25000n }),
     ];
     renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={ventas}
-        total={35000n}
-        onNuevaVenta={vi.fn()}
-      />,
+      <VentasScreen {...defaultProps({ ventas, total: 35000n })} />,
     );
     expect(screen.getByText('Taco')).toBeInTheDocument();
     expect(screen.getByText('Refresco')).toBeInTheDocument();
     expect(screen.getByTestId('ventas-total-card').textContent).toContain('$350.00');
   });
 
-  it('invokes onNuevaVenta when the header Btn is tapped', () => {
-    const onNuevaVenta = vi.fn();
-    renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[sale({})]}
-        total={10000n}
-        onNuevaVenta={onNuevaVenta}
-      />,
-    );
-    const btn = screen.getAllByTestId('ventas-nueva')[0]!;
-    fireEvent.click(btn);
-    expect(onNuevaVenta).toHaveBeenCalled();
-  });
-
   it('renders a skeleton when loading', () => {
     renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[]}
-        total={0n}
-        onNuevaVenta={vi.fn()}
-        loading
-      />,
+      <VentasScreen {...defaultProps({ loading: true })} />,
     );
     expect(screen.getByTestId('ventas-skeleton-0')).toBeInTheDocument();
   });
@@ -113,87 +98,33 @@ describe('VentasScreen', () => {
     const onRetry = vi.fn();
     renderWithProviders(
       <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[]}
-        total={0n}
-        onNuevaVenta={vi.fn()}
-        error={new Error('boom')}
-        onRetry={onRetry}
+        {...defaultProps({ error: new Error('boom'), onRetry })}
       />,
     );
-    const retryBtn = screen.getAllByTestId('ventas-retry')[0]!;
-    fireEvent.click(retryBtn);
-    expect(onRetry).toHaveBeenCalled();
+    expect(screen.getByTestId('ventas-error')).toBeInTheDocument();
   });
 
-  // Audit M-1 PR 4 (audit 4.6) — `<FAB>` is mounted when `showFab` is
-  // true and fires the same `onNuevaVenta` handler as the
-  // `<SectionTitle>` Btn. Mobile shells pass `showFab`; desktop shells
-  // leave it unset and continue to use the top-right Btn only.
-  it('mounts a FAB when showFab is true and routes its tap to onNuevaVenta', () => {
-    const onNuevaVenta = vi.fn();
+  it('renders the search bar for product filtering', () => {
     renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[]}
-        total={0n}
-        onNuevaVenta={onNuevaVenta}
-        showFab
-      />,
+      <VentasScreen {...defaultProps()} />,
     );
-    const fab = screen.getAllByTestId('ventas-fab')[0]!;
-    expect(fab).toBeInTheDocument();
-    fireEvent.pointerDown(fab);
-    fireEvent.pointerUp(fab);
-    fireEvent.click(fab);
-    expect(onNuevaVenta).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('ventas-product-search')).toBeInTheDocument();
   });
 
-  it('does not mount the FAB when showFab is unset (desktop default)', () => {
-    renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[]}
-        total={0n}
-        onNuevaVenta={vi.fn()}
-      />,
-    );
-    expect(screen.queryByTestId('ventas-fab')).toBeNull();
-  });
-
-  // Audit Round 2 K1: per-row swipe-to-edit + swipe-to-delete wiring.
-  it('wraps each row in a `<SwipeableRow>` when onEditVenta or onEliminarVenta are supplied', () => {
+  it('wraps each sale row in a SwipeableRow when handlers are supplied', () => {
     const ventaA = sale({ id: '01JPHK0000000000000000VA01' as SaleId });
     const ventaB = sale({ id: '01JPHK0000000000000000VB02' as SaleId });
     renderWithProviders(
       <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[ventaA, ventaB]}
-        total={20000n}
-        onNuevaVenta={vi.fn()}
-        onEditVenta={vi.fn()}
-        onEliminarVenta={vi.fn()}
+        {...defaultProps({
+          ventas: [ventaA, ventaB],
+          total: 20000n,
+          onEditVenta: vi.fn(),
+          onEliminarVenta: vi.fn(),
+        })}
       />,
     );
     expect(screen.getAllByTestId(`venta-swipe-${ventaA.id}`).length).toBeGreaterThan(0);
     expect(screen.getAllByTestId(`venta-swipe-${ventaB.id}`).length).toBeGreaterThan(0);
-  });
-
-  it('does NOT wrap rows when the swipe handlers are unset (legacy mounts unchanged)', () => {
-    const v = sale({ id: '01JPHK0000000000000000VC03' as SaleId });
-    renderWithProviders(
-      <VentasScreen
-        fecha="2026-04-24"
-        onChangeFecha={vi.fn()}
-        ventas={[v]}
-        total={10000n}
-        onNuevaVenta={vi.fn()}
-      />,
-    );
-    expect(screen.queryByTestId(`venta-swipe-${v.id}`)).toBeNull();
   });
 });

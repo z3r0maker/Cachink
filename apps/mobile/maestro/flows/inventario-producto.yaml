@@ -17,7 +17,7 @@ appId: mx.cachink.mobile
 - inputText: "2"
 - tapOn:
     id: "producto-umbral"
-- clearText
+- eraseText
 - inputText: "10"
 - tapOn:
     id: "producto-submit"

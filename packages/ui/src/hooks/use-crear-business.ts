@@ -46,6 +46,9 @@ export function useCrearBusiness(): CrearBusinessResult {
       const placeholder = {
         ...input,
         logoUrl: null,
+        tipoNegocio: 'mixto' as const,
+        categoriaVentaPredeterminada: 'Producto' as const,
+        atributosProducto: [],
         businessId: '01JPHK00000000000000000000' as BusinessId,
         deviceId: (deviceId ?? '01JPHK00000000000000000001') as DeviceId,
       };

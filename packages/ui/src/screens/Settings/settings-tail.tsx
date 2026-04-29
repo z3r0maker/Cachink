@@ -5,7 +5,6 @@
  */
 
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
 import { Btn } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { ExportarDatosAction } from './exportar-datos-action';
@@ -32,13 +31,16 @@ export function LanSection({
   );
 }
 
+// Audit M-1 follow-up (UI-AUDIT-1, Issue 3): the legacy `<View
+// marginTop={4|8}>` overrides on each tail row created an inconsistent
+// vertical rhythm — `Settings`'s parent `<View gap={20}>` already
+// drives row spacing. Drop the per-row marginTop overrides and let the
+// parent gap own the rhythm uniformly.
 export function AdvancedBackendRow({ onOpen, t }: { onOpen: () => void; t: T }): ReactElement {
   return (
-    <View marginTop={4}>
-      <Btn variant="ghost" onPress={onOpen} fullWidth testID="settings-open-advanced-backend">
-        {t('settings.openAdvancedBackend')}
-      </Btn>
-    </View>
+    <Btn variant="ghost" onPress={onOpen} fullWidth testID="settings-open-advanced-backend">
+      {t('settings.openAdvancedBackend')}
+    </Btn>
   );
 }
 
@@ -55,11 +57,9 @@ export function CheckForUpdatesRow({
     ? `${t('settings.checkForUpdatesCta')} — ${status}`
     : t('settings.checkForUpdatesCta');
   return (
-    <View marginTop={4}>
-      <Btn variant="ghost" onPress={onPress} fullWidth testID="settings-check-for-updates">
-        {label}
-      </Btn>
-    </View>
+    <Btn variant="ghost" onPress={onPress} fullWidth testID="settings-check-for-updates">
+      {label}
+    </Btn>
   );
 }
 
@@ -94,11 +94,14 @@ export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): Reac
         <ExportarDatosAction businessName={props.business?.nombre} />
       )}
       <SettingsCloudAndUpdatesRows props={props} t={t} />
-      <View marginTop={8}>
-        <Btn variant="soft" onPress={props.onReRunWizard} fullWidth testID="settings-re-run-wizard">
-          {t('settings.reRunWizard')}
-        </Btn>
-      </View>
+      {/*
+       * Audit M-1 follow-up (UI-AUDIT-1, Issue 3): drop the legacy
+       * `<View marginTop={8}>` wrapper — `Settings`'s parent
+       * `<View gap={20}>` drives row spacing uniformly.
+       */}
+      <Btn variant="soft" onPress={props.onReRunWizard} fullWidth testID="settings-re-run-wizard">
+        {t('settings.reRunWizard')}
+      </Btn>
     </>
   );
 }

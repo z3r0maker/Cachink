@@ -11,6 +11,7 @@ const BIZ_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEP';
 const CLI_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEQ';
 const SALE_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TER';
+const PROD_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEZ';
 
 const validEfectivoSale = {
   id: SALE_ID,
@@ -21,6 +22,8 @@ const validEfectivoSale = {
   metodo: 'Efectivo' as const,
   clienteId: null,
   estadoPago: 'pagado' as const,
+  productoId: PROD_ID,
+  cantidad: 1,
   businessId: BIZ_ID,
   deviceId: DEV_ID,
   createdAt: '2026-04-23T15:00:00.000Z',
@@ -93,10 +96,33 @@ describe('SaleSchema', () => {
   it('rejects an invalid fecha format', () => {
     expect(() => SaleSchema.parse({ ...validEfectivoSale, fecha: '23/04/2026' })).toThrow();
   });
+
+  // --- ADR-048: productoId required ---
+
+  it('rejects a sale without productoId', () => {
+    const { productoId: _p, ...rest } = validEfectivoSale;
+    expect(() => SaleSchema.parse(rest)).toThrow();
+  });
+
+  it('accepts a sale linked to a productoId', () => {
+    const parsed = SaleSchema.parse({
+      ...validEfectivoSale,
+      productoId: PROD_ID,
+      cantidad: 3,
+    });
+    expect(parsed.productoId).toBe(PROD_ID);
+    expect(parsed.cantidad).toBe(3);
+  });
+
+  it('defaults cantidad to 1 when omitted', () => {
+    const { cantidad: _c, ...rest } = validEfectivoSale;
+    const parsed = SaleSchema.parse(rest);
+    expect(parsed.cantidad).toBe(1);
+  });
 });
 
 describe('NewSaleSchema', () => {
-  it('accepts an input with all required fields and no clienteId', () => {
+  it('accepts an input with all required fields', () => {
     expect(() =>
       NewSaleSchema.parse({
         fecha: '2026-04-23',
@@ -104,6 +130,7 @@ describe('NewSaleSchema', () => {
         categoria: 'Producto',
         monto: 3500n,
         metodo: 'Efectivo',
+        productoId: PROD_ID,
         businessId: BIZ_ID,
       }),
     ).not.toThrow();
@@ -118,6 +145,7 @@ describe('NewSaleSchema', () => {
         monto: 3500n,
         metodo: 'Crédito',
         clienteId: CLI_ID,
+        productoId: PROD_ID,
         businessId: BIZ_ID,
       }),
     ).not.toThrow();
@@ -131,6 +159,20 @@ describe('NewSaleSchema', () => {
         categoria: 'Producto',
         monto: 3500n,
         metodo: 'Efectivo',
+        productoId: PROD_ID,
+      }),
+    ).toThrow();
+  });
+
+  it('rejects missing productoId', () => {
+    expect(() =>
+      NewSaleSchema.parse({
+        fecha: '2026-04-23',
+        concepto: 'X',
+        categoria: 'Producto',
+        monto: 3500n,
+        metodo: 'Efectivo',
+        businessId: BIZ_ID,
       }),
     ).toThrow();
   });

@@ -16,7 +16,10 @@ import { fireEvent, renderWithProviders, screen } from '../test-utils';
 initI18n();
 
 describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
-  it('renders the Card + Btn with the i18n cta label', () => {
+  it('renders the Btn with the i18n cta label and no surrounding Card-wrapper testID', () => {
+    // UI-AUDIT-1 Issue 3 — the redundant `<Card>` wrapper around the
+    // single Btn was removed (FeedbackAction now sits in the parent
+    // `gap` rhythm like every other Settings tail row).
     renderWithProviders(
       <FeedbackAction
         appVersion="1.0.0"
@@ -26,7 +29,7 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
         breadcrumbs={[]}
       />,
     );
-    expect(screen.getByTestId('settings-feedback-card')).toBeInTheDocument();
+    expect(screen.queryByTestId('settings-feedback-card')).toBeNull();
     expect(screen.getByTestId('settings-feedback-button')).toBeInTheDocument();
   });
 
@@ -80,12 +83,12 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
         crashReportingEnabled={true}
         breadcrumbs={breadcrumbs}
         openLink={openLink}
-        testID="settings-feedback-card-2"
+        testID="settings-feedback-button-2"
       />,
     );
-    // Both render, click the second one (the consented variant).
-    const cards = screen.getAllByTestId('settings-feedback-button');
-    fireEvent.click(cards[cards.length - 1]);
+    // Anchor on the explicit per-instance testID so the click can't be
+    // confused with the prior render's button.
+    fireEvent.click(screen.getByTestId('settings-feedback-button-2'));
     expect(decodeURIComponent(openLink.mock.calls[0][0] as string)).toContain(
       'opened sales screen',
     );

@@ -11,6 +11,7 @@ import type {
   IsoTimestamp,
   NewProduct,
   ProductId,
+  ProductoTipo,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { Product, ProductPatch, ProductsRepository } from '../products-repository.js';
@@ -39,6 +40,10 @@ export class DrizzleProductsRepository implements ProductsRepository {
       costoUnitCentavos: input.costoUnitCentavos,
       unidad: input.unidad,
       umbralStockBajo: input.umbralStockBajo ?? 3,
+      tipo: input.tipo ?? 'producto',
+      seguirStock: input.seguirStock ?? true,
+      precioVentaCentavos: input.precioVentaCentavos,
+      atributos: JSON.stringify(input.atributos ?? {}),
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdAt: ts,
@@ -46,7 +51,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
       deletedAt: null as string | null,
     };
     await this.#db.insert(products).values(row).run();
-    return this.#mapRow(row);
+    return this.#mapRow(row as unknown as ProductRow);
   }
 
   async findById(id: ProductId): Promise<Product | null> {
@@ -120,11 +125,23 @@ export class DrizzleProductsRepository implements ProductsRepository {
       costoUnitCentavos: row.costoUnitCentavos,
       unidad: row.unidad as InventoryUnit,
       umbralStockBajo: row.umbralStockBajo,
+      tipo: (row.tipo ?? 'producto') as ProductoTipo,
+      seguirStock: row.seguirStock ?? true,
+      precioVentaCentavos: row.precioVentaCentavos,
+      atributos: this.#parseAtributos(row.atributos),
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
     };
+  }
+
+  #parseAtributos(raw: string): Record<string, string> {
+    try {
+      return JSON.parse(raw) as Record<string, string>;
+    } catch {
+      return {};
+    }
   }
 }
