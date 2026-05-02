@@ -7,7 +7,7 @@ appId: mx.cachink.mobile
 - launchApp
 
 - tapOn:
-    id: "tab-inventario"
+    id: "tab-productos"
 - tapOn:
     id: "stock-nuevo-producto"
 

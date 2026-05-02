@@ -5,6 +5,9 @@
  * Composes `useActividadReciente(today, limit)`. Rows are tappable;
  * taps bubble up via onVentaPress / onEgresoPress. Empty state renders
  * a friendly EmptyState for days with no activity yet.
+ *
+ * Updated: colored circle icons (green $ for ventas, red − for egresos)
+ * and semantic Tag variants per the reference design (Image 4).
  */
 
 import { useMemo, type ReactElement } from 'react';
@@ -25,37 +28,65 @@ export interface ActividadRecienteProps {
   readonly now?: Date;
 }
 
-function RowBody({
-  titulo,
-  tag,
-  amountText,
-  amountColor,
-}: {
-  titulo: string;
-  tag: string;
-  amountText: string;
-  amountColor: string;
-}): ReactElement {
+type EntryKind = 'venta' | 'egreso';
+
+const CIRCLE_SYMBOLS: Record<EntryKind, string> = {
+  venta: '$',
+  egreso: '−', // minus sign
+};
+
+/** Colored circle icon — green for ventas, red/pink for egresos. */
+function EntryCircle({ kind }: { kind: EntryKind }): ReactElement {
+  const isVenta = kind === 'venta';
   return (
-    <View flexDirection="row" justifyContent="space-between" alignItems="center">
-      <View flex={1} paddingRight={12}>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={14}
-          color={colors.black}
-        >
-          {titulo}
-        </Text>
-        <Tag>{tag}</Tag>
-      </View>
+    <View
+      width={40}
+      height={40}
+      borderRadius={20}
+      backgroundColor={isVenta ? colors.greenSoft : colors.redSoft}
+      alignItems="center"
+      justifyContent="center"
+    >
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={16}
-        color={amountColor}
+        fontSize={18}
+        color={isVenta ? colors.green : colors.red}
       >
-        {amountText}
+        {CIRCLE_SYMBOLS[kind]}
+      </Text>
+    </View>
+  );
+}
+
+interface RowBodyProps {
+  readonly kind: EntryKind;
+  readonly titulo: string;
+  readonly tag: string;
+  readonly amountText: string;
+  readonly amountColor: string;
+}
+
+function RowCenter({ titulo, tag, kind }: Pick<RowBodyProps, 'titulo' | 'tag' | 'kind'>): ReactElement {
+  return (
+    <View flex={1}>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.black}>
+        {titulo}
+      </Text>
+      <View flexDirection="row" gap={6} marginTop={4}>
+        <Tag variant={kind === 'venta' ? 'success' : 'danger'}>{tag}</Tag>
+      </View>
+    </View>
+  );
+}
+
+function RowBody(props: RowBodyProps): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={12}>
+      <EntryCircle kind={props.kind} />
+      <RowCenter titulo={props.titulo} tag={props.tag} kind={props.kind} />
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={16} color={props.amountColor}>
+        {props.amountText}
       </Text>
     </View>
   );
@@ -72,6 +103,7 @@ function EntryRow({
   const testID = `${isVenta ? 'actividad-venta' : 'actividad-egreso'}-${entry.item.id}`;
   const body = isVenta ? (
     <RowBody
+      kind="venta"
       titulo={entry.item.concepto}
       tag={(entry.item as Sale).metodo}
       amountText={`+${formatMoney(entry.item.monto)}`}
@@ -79,6 +111,7 @@ function EntryRow({
     />
   ) : (
     <RowBody
+      kind="egreso"
       titulo={entry.item.concepto}
       tag={(entry.item as Expense).categoria}
       amountText={`−${formatMoney(entry.item.monto)}`}

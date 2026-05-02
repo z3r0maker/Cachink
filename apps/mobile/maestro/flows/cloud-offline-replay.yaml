@@ -15,17 +15,28 @@ env:
 - runScript:
     script: adb shell cmd connectivity airplane-mode enable
 
-# Record 3 ventas offline.
+# Ensure at least one product exists for the inline POS (ADR-048).
+# If cloud-signin-bootstrap already seeds a product, this is redundant
+# but safe — the duplicate-name scenario is handled by the create form.
+- tapOn: { id: "tab-productos" }
+- tapOn: { id: "stock-nuevo-producto" }
+- tapOn: { id: "producto-nombre" }
+- inputText: "Offline producto"
+- tapOn: { id: "producto-precio-venta" }
+- inputText: "100"
+- tapOn: { id: "producto-submit" }
+- assertVisible: "Offline producto"
+
+# Record 3 ventas offline via the inline POS (ADR-048).
 - repeat:
     times: 3
     commands:
       - tapOn: { id: "tab-ventas" }
-      - tapOn: { id: "ventas-new-cta" }
-      - tapOn: { id: "nueva-venta-monto-input" }
-      - inputText: "100"
-      - tapOn: { id: "nueva-venta-concepto-input" }
-      - inputText: "Offline venta"
-      - tapOn: { id: "nueva-venta-submit" }
+      - assertVisible: { id: "ventas-product-grid" }
+      - tapOn: "Offline producto"
+      - assertVisible: { id: "venta-confirm-sheet" }
+      - tapOn: { id: "venta-confirm-submit" }
+      - assertNotVisible: { id: "venta-confirm-sheet" }
 
 # Disable airplane mode — PowerSync queue drains.
 - runScript:

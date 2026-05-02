@@ -17,6 +17,7 @@ appId: mx.cachink.mobile
 # full consent flow; other wizard flows just need to get past it).
 - tapOn:
     id: "consent-modal-later"
+    optional: true
 
 - assertVisible: "¡Bienvenido a Cachink!"
 - tapOn: { id: "wizard-step1-multi-card" }

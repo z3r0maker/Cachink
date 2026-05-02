@@ -110,8 +110,8 @@ export function TabItem(props: TabItemProps): ReactElement {
   return (
     <Pressable
       testID={props.testID}
-      onPress={props.onPress}
-      style={({ pressed }) => (pressed ? PRESSED_STYLE : BASE_STYLE)}
+      onPress={props.active ? undefined : props.onPress}
+      style={({ pressed }) => (pressed && !props.active ? PRESSED_STYLE : BASE_STYLE)}
       role="tab"
       aria-label={props.label}
       aria-selected={props.active}

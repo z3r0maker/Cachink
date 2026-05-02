@@ -11,6 +11,7 @@
 
 import { useEffect, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
+import { SafeAreaSpacer } from '../../components/index';
 import { colors } from '../../theme';
 import type { AppMode } from '../../app-config/index';
 import {
@@ -177,6 +178,7 @@ export function Wizard(props: WizardProps): ReactElement {
       padding={24}
       gap={14}
     >
+      <SafeAreaSpacer />
       <ActiveStep
         platform={platform}
         onSelectMode={props.onSelectMode}

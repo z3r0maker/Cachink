@@ -9,7 +9,7 @@ appId: mx.cachink.mobile
 - launchApp
 
 - tapOn:
-    id: "tab-inventario"
+    id: "tab-productos"
 # Tap the producto card to open detail popover.
 - tapOn: "Tortilla"
 - tapOn:

@@ -5,7 +5,7 @@ appId: mx.cachink.mobile
 - launchApp
 
 - tapOn:
-    id: "tab-inventario"
+    id: "tab-productos"
 - tapOn:
     id: "stock-nuevo-producto"
 
@@ -15,6 +15,9 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "producto-costo"
 - inputText: "2"
+- tapOn:
+    id: "producto-precio-venta"
+- inputText: "15"
 - tapOn:
     id: "producto-umbral"
 - eraseText

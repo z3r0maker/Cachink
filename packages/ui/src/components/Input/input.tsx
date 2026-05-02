@@ -97,6 +97,8 @@ export interface InputProps {
   readonly inputRef?: RefObject<unknown>;
   /** Fires on focus loss — used by `<MoneyField>` to format on blur. */
   readonly onBlur?: () => void;
+  /** Override the default left padding. Used by SearchBar to clear the icon. */
+  readonly paddingLeft?: number;
 }
 
 interface SelectFieldProps extends FieldProps {
@@ -167,6 +169,7 @@ export function Input(props: InputProps): ReactElement {
         autoComplete={props.autoComplete}
         inputRef={props.inputRef}
         onBlur={props.onBlur}
+        paddingLeft={props.paddingLeft}
       />
       {props.note !== undefined && <InputNote text={props.note} />}
     </View>

@@ -8,19 +8,21 @@
  */
 
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
+import { Text, View } from '@tamagui/core';
 import type { Expense, Money } from '@cachink/domain';
+import { formatDate } from '@cachink/domain';
+import type { IsoDate } from '@cachink/domain';
 import { Btn, FAB, Icon, List, SectionTitle, SwipeableRow } from '../../components/index';
-import { DateField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, typography } from '../../theme';
 import { EgresoCard } from './egreso-card';
 import { EmptyEgresos } from './empty-egresos';
 import { ErrorBanner, SkeletonRow, TotalCard } from './egresos-states';
 
 export interface EgresosScreenProps {
   readonly fecha: string;
-  readonly onChangeFecha: (fecha: string) => void;
+  /** @deprecated Date is now read-only (device date). Kept for backwards compat. */
+  readonly onChangeFecha?: (fecha: string) => void;
   readonly egresos: readonly Expense[];
   readonly total: Money;
   readonly onNuevoEgreso: () => void;
@@ -99,6 +101,30 @@ function EgresoRowSlot({
   );
 }
 
+function ReadOnlyDate({ label, value }: { label: string; value: string }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={8} testID="egresos-fecha">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={12}
+        color={colors.gray600}
+        style={{ textTransform: 'uppercase' }}
+      >
+        {label}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={16}
+        color={colors.black}
+      >
+        {formatDate(value as IsoDate)}
+      </Text>
+    </View>
+  );
+}
+
 export function EgresosScreen(props: EgresosScreenProps): ReactElement {
   const { t } = useTranslation();
   return (
@@ -117,15 +143,8 @@ export function EgresosScreen(props: EgresosScreenProps): ReactElement {
           </Btn>
         }
       />
-      {/* Audit 4.5 — TotalCard above the date filter so the
-       * day-total stays above the fold when the keyboard is open. */}
       <TotalCard label={t('egresos.totalDelDia')} total={props.total} />
-      <DateField
-        label={t('egresos.fechaLabel')}
-        value={props.fecha}
-        onChange={props.onChangeFecha}
-        testID="egresos-fecha"
-      />
+      <ReadOnlyDate label={t('egresos.fechaLabel')} value={props.fecha} />
       <EgresosContent {...props} />
       {props.showFab === true && (
         <FAB

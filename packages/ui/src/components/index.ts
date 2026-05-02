@@ -32,8 +32,12 @@ export * from './SearchBar/index';
 export * from './Skeleton/index';
 export * from './SplitPane/index';
 export * from './SwipeableRow/index';
+export * from './SafeAreaSpacer/index';
 export * from './fields/index';
 export * from './ProductoCard/index';
 export * from './ProductoCardGrid/index';
 export * from './AtributosForm/index';
-export * from './AppShellRouteWrapper/index';
+// NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
+// components/ but imports from screens/AppShell, which imports from
+// components/ — creating a require cycle. It's re-exported from
+// screens/index.ts instead (both end up in the top-level barrel).

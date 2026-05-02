@@ -41,15 +41,22 @@ env:
 - assertVisible: { id: "role-picker" }
 - tapOn: { id: "role-director-select" }
 
-# Record a venta for $450.
-- tapOn: { id: "tab-ventas" }
-- tapOn: { id: "ventas-new-cta" }
-- tapOn: { id: "nueva-venta-monto-input" }
-- inputText: "450"
-- tapOn: { id: "nueva-venta-concepto-input" }
+# Create a product first — fresh cloud signup has an empty catalogue.
+- tapOn: { id: "tab-productos" }
+- tapOn: { id: "stock-nuevo-producto" }
+- tapOn: { id: "producto-nombre" }
 - inputText: "Taco al pastor"
-- tapOn: { id: "nueva-venta-submit" }
+- tapOn: { id: "producto-precio-venta" }
+- inputText: "450"
+- tapOn: { id: "producto-submit" }
+- assertVisible: "Taco al pastor"
 
-- assertVisible:
-    text: "$ 450.00"
-    timeout: 5000
+# Record a venta via the inline POS (ADR-048).
+- tapOn: { id: "tab-ventas" }
+- assertVisible: { id: "ventas-product-grid" }
+- tapOn: "Taco al pastor"
+- assertVisible: { id: "venta-confirm-sheet" }
+# Defaults: qty=1, Efectivo. Submit immediately.
+- tapOn: { id: "venta-confirm-submit" }
+- assertNotVisible: { id: "venta-confirm-sheet" }
+- assertVisible: "Taco al pastor"

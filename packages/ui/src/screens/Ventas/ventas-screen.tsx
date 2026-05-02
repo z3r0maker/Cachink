@@ -14,25 +14,27 @@
  */
 
 import { useMemo, type ReactElement } from 'react';
-import { View, useMedia } from '@tamagui/core';
+import { Text, View, useMedia } from '@tamagui/core';
 import type { Product, Sale } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
+import { formatDate } from '@cachink/domain';
+import type { IsoDate } from '@cachink/domain';
 import {
   ProductoCardGrid,
   SearchBar,
   SectionTitle,
   SplitPane,
 } from '../../components/index';
-import { DateField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, typography } from '../../theme';
 import { VentasEmptyProductos } from './empty-productos';
 import { SalesContent, TotalCard } from './ventas-sales-pane';
 
 export interface VentasScreenProps {
   // --- Date + sales ---
   readonly fecha: string;
-  readonly onChangeFecha: (fecha: string) => void;
+  /** @deprecated Date is now read-only (device date). Kept for backwards compat. */
+  readonly onChangeFecha?: (fecha: string) => void;
   readonly ventas: readonly Sale[];
   readonly total: Money;
   readonly onVentaPress?: (venta: Sale) => void;
@@ -76,12 +78,36 @@ function ProductPane(props: VentasScreenProps & { filtered: readonly Product[] }
   );
 }
 
+function ReadOnlyDate({ label, value }: { label: string; value: string }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={8} testID="ventas-fecha">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={12}
+        color={colors.gray600}
+        style={{ textTransform: 'uppercase' }}
+      >
+        {label}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={16}
+        color={colors.black}
+      >
+        {formatDate(value as IsoDate)}
+      </Text>
+    </View>
+  );
+}
+
 function SalesPane(props: VentasScreenProps): ReactElement {
   const { t } = useTranslation();
   return (
     <View flex={1} gap={12}>
       <TotalCard label={t('ventas.totalDelDia')} total={props.total} />
-      <DateField label={t('ventas.fechaLabel')} value={props.fecha} onChange={props.onChangeFecha} testID="ventas-fecha" />
+      <ReadOnlyDate label={t('ventas.fechaLabel')} value={props.fecha} />
       <SalesContent ventas={props.ventas} loading={props.loading} error={props.error} onRetry={props.onRetry} onVentaPress={props.onVentaPress} onEditVenta={props.onEditVenta} onEliminarVenta={props.onEliminarVenta} />
     </View>
   );

@@ -59,7 +59,7 @@ appId: mx.cachink.mobile
 # Switch to Director role via TopBar and verify the sale shows
 # under Cuentas por Cobrar.
 - tapOn:
-    id: "top-bar-change-role"
+    id: "top-bar-role-chip"
 - tapOn:
     id: "role-director-select"
 - assertVisible: "Cuentas por cobrar"

@@ -16,7 +16,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { Btn, Card } from '../../components/index';
+import { Btn, Card, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { Role } from '../../app-config/index';
 import { colors, typography } from '../../theme';
@@ -143,6 +143,7 @@ export function RolePicker(props: RolePickerProps): ReactElement {
       padding={24}
       gap={20}
     >
+      <SafeAreaSpacer />
       <Header title={t('rolePicker.title')} subtitle={t('rolePicker.subtitle')} />
       <View width="100%" maxWidth={480} gap={16}>
         <RoleCard

@@ -36,6 +36,7 @@ export interface ProductoFormState {
   precioVentaPesos: string;
   unidad: InventoryUnit;
   umbral: string;
+  stockInicial: string;
 }
 
 export interface ProductoFormErrors {
@@ -53,6 +54,7 @@ export function initialProductoState(): ProductoFormState {
     precioVentaPesos: '',
     unidad: 'pza',
     umbral: '3',
+    stockInicial: '',
   };
 }
 
@@ -70,6 +72,8 @@ export function validateProducto(
 }
 
 export function buildProductoPayload(state: ProductoFormState): CrearProductoInput {
+  const parsed = state.stockInicial.trim() !== '' ? Number(state.stockInicial) : undefined;
+  const stockInicial = parsed !== undefined && Number.isInteger(parsed) && parsed > 0 ? parsed : undefined;
   return {
     nombre: state.nombre.trim(),
     sku: state.sku.trim() || undefined,
@@ -78,6 +82,7 @@ export function buildProductoPayload(state: ProductoFormState): CrearProductoInp
     precioVenta: fromPesos(state.precioVentaPesos || '0'),
     unidad: state.unidad,
     umbralStockBajo: Number(state.umbral),
+    stockInicial,
   };
 }
 

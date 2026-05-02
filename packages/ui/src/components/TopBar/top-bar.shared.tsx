@@ -78,7 +78,7 @@ export function TopBarFrame(props: TopBarFrameProps): ReactElement {
       testID={props.testID ?? 'top-bar'}
       flexDirection="row"
       alignItems="center"
-      height={HEIGHT}
+      minHeight={HEIGHT}
       paddingTop={props.paddingTop}
       paddingHorizontal={16}
       backgroundColor={colors.white}

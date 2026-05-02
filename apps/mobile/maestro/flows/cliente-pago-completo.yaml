@@ -6,7 +6,7 @@ appId: mx.cachink.mobile
 - launchApp
 
 - tapOn:
-    id: "tab-director-home"
+    id: "tab-home"
 - tapOn: "Carla Márquez"
 
 # Venta is still visible because estado=parcial.

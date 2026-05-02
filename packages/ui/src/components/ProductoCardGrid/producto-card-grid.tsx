@@ -38,10 +38,12 @@ export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
       {productos.map((p) => (
         <View
           key={p.id}
-          width="47%"
-          $gtSm={{ width: '31%' }}
-          $gtMd={{ width: '23%' }}
-          $gtLg={{ width: '18%' }}
+          flexBasis="46%"
+          flexGrow={0}
+          flexShrink={0}
+          $gtSm={{ flexBasis: '31%' }}
+          $gtMd={{ flexBasis: '23%' }}
+          $gtLg={{ flexBasis: '18%' }}
         >
           <ProductoCard
             producto={p}

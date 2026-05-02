@@ -31,3 +31,11 @@ export * from './DirectorHome/index';
 export * from './ConsentModal/index';
 export * from './LanPairing/index';
 export * from './CloudOnboarding/index';
+// AppShellRouteWrapper lives in components/ but imports from
+// screens/AppShell — exporting it from the components barrel would
+// create a require cycle. Re-exported here to break the cycle while
+// keeping a single `@cachink/ui` import for consumers.
+export {
+  AppShellRouteWrapper,
+  type AppShellRouteWrapperProps,
+} from '../components/AppShellRouteWrapper/index';

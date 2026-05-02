@@ -153,10 +153,11 @@ Settings screens.
 
 ### Cloud mode
 
-| Flow                        | Closes     | What it proves                                           |
-| --------------------------- | ---------- | -------------------------------------------------------- |
-| `cloud-signup-signin.yaml`  | P1E-M3 C13 | Wizard → Cloud → sign-up → sign-out → sign-in.           |
-| `cloud-offline-replay.yaml` | P1E-M4 C16 | Two devices, offline writes on one, online sync replays. |
+| Flow                           | Closes     | What it proves                                           |
+| ------------------------------ | ---------- | -------------------------------------------------------- |
+| `cloud-signup-signin.yaml`     | P1E-M3 C13 | Wizard → Cloud → sign-up → sign-out → sign-in.           |
+| `cloud-signin-bootstrap.yaml`  | —          | Reusable sub-flow: wizard → cloud sign-in → role select. Called via `runFlow`. |
+| `cloud-offline-replay.yaml`    | P1E-M4 C16 | Two devices, offline writes on one, online sync replays. |
 
 ## Re-running between flows
 

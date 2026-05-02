@@ -39,6 +39,10 @@ export interface SearchBarProps {
 }
 
 const ICON_LEFT = 14;
+const ICON_SIZE = 16;
+const ICON_GAP = 8;
+/** Input text must start after the icon: left offset + icon width + gap. */
+const INPUT_PADDING_LEFT = ICON_LEFT + ICON_SIZE + ICON_GAP; // 38
 const ICON_TOP_WITH_LABEL = 28;
 const ICON_TOP_NO_LABEL = 13;
 
@@ -54,6 +58,7 @@ export function SearchBar(props: SearchBarProps): ReactElement {
         ariaLabel={props.ariaLabel ?? props.label}
         returnKeyType="search"
         onSubmitEditing={props.onSubmit}
+        paddingLeft={INPUT_PADDING_LEFT}
       />
       {/*
        * Anchored search icon. The 28-pt top offset lines the icon up

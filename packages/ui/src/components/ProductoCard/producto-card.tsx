@@ -43,7 +43,13 @@ function StockBadge({ stock, umbral }: { stock: number; umbral: number }): React
       paddingVertical={2}
       borderRadius={8}
       alignSelf="flex-start"
+      flexDirection="row"
+      gap={4}
+      alignItems="center"
     >
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={11} color={fg}>
+        Stock
+      </Text>
       <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={12} color={fg}>
         {stock}
       </Text>

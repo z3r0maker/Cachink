@@ -16,6 +16,7 @@ appId: mx.cachink.mobile
 # inspectable.
 - tapOn:
     id: "consent-modal-later"
+    optional: true
 
 - assertVisible: "¡Bienvenido a Cachink!"
 

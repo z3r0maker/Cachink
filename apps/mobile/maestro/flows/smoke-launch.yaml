@@ -29,4 +29,5 @@ appId: mx.cachink.mobile
 - tapOn: "Decidir después"
 - assertNotVisible: "¿Enviar reportes de errores?"
 - assertVisible: "¡Bienvenido a Cachink!"
-- assertVisible: "Solo en este dispositivo"
+- assertVisible:
+    id: "wizard-step1-solo"

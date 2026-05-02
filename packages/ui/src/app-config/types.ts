@@ -39,6 +39,9 @@ export const APP_CONFIG_KEYS = {
   currentBusinessId: 'currentBusinessId',
   notificationsEnabled: 'notificationsEnabled',
   crashReportingEnabled: 'crashReportingEnabled',
+  tipoNegocio: 'tipoNegocio',
+  categoriaVentaPredeterminada: 'categoriaVentaPredeterminada',
+  atributosProducto: 'atributosProducto',
 } as const;
 
 /** Shape of the Zustand store populated on launch. */

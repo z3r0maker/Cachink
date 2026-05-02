@@ -1,0 +1,39 @@
+# Reusable sub-flow: wizard → cloud sign-in → role selection.
+#
+# Called via `runFlow: cloud-signin-bootstrap` from flows that need
+# an authenticated cloud session (e.g. cloud-offline-replay.yaml).
+#
+# Expects the parent flow to have already called `launchApp` and to
+# supply these env vars:
+#   EMAIL    — cloud account email
+#   PASSWORD — cloud account password
+#
+# Extracted from cloud-signup-signin.yaml (lines 19–42) per the
+# Maestro Flow Audit plan. Uses the Step 3 "Join existing" path
+# (sign-in, not sign-up) since the account already exists.
+appId: mx.cachink.mobile
+---
+
+# Navigate to wizard via Settings.
+- tapOn: { id: "tab-ajustes" }
+- tapOn: { id: "settings-re-run-wizard" }
+- assertVisible: { id: "wizard" }
+
+# Step 1 → "Ya tengo Cachink en otro dispositivo" → Step 3.
+- tapOn: { id: "wizard-step1-join-existing-link" }
+
+# Step 3 → Cloud sign-in card (WizardCard testID + Card's -card suffix).
+- tapOn: { id: "wizard-step3-cloud-card" }
+
+# Shell takes over after mode='cloud' — CloudOnboardingScreen mounts.
+- assertVisible: { id: "cloud-onboarding-screen" }
+- tapOn: { id: "cloud-tab-signin" }
+- tapOn: { id: "cloud-email-input" }
+- inputText: ${EMAIL}
+- tapOn: { id: "cloud-password-input" }
+- inputText: ${PASSWORD}
+- tapOn: { id: "cloud-submit" }
+
+# GatedNavigation routes to RolePicker after successful auth.
+- assertVisible: { id: "role-picker" }
+- tapOn: { id: "role-operativo-select" }

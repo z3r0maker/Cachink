@@ -32,7 +32,7 @@ export default function WizardRoute(): ReactElement {
   async function handleSelect(mode: AppMode): Promise<void> {
     await appConfig.set(APP_CONFIG_KEYS.mode, mode);
     setMode(mode);
-    router.replace('/wizard/business');
+    router.replace('/wizard/business-type');
   }
   return (
     <Wizard

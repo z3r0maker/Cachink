@@ -103,16 +103,16 @@ function SheetContent(props: SheetContentProps): ReactElement {
       paddingHorizontal={20}
       paddingBottom={36}
       width="100%"
-      maxWidth={480}
-      maxHeight="93vh"
-      // Bottom-anchored sheet with auto horizontal margins.
-      // `position: 'absolute'` on RN — same effect as 'fixed' inside
-      // the Portal-mounted root view.
+      // Bottom-anchored full-width sheet on mobile. No maxWidth —
+      // phones should always use the full width. No marginHorizontal
+      // auto — RN doesn't centre absolute children with auto margins
+      // (they default to 0, causing left-alignment). maxHeight uses
+      // a percentage string instead of 'vh' which RN ignores.
+      maxHeight="90%"
       position="absolute"
       bottom={0}
       left={0}
       right={0}
-      marginHorizontal="auto"
       style={SHEET_STYLE}
     >
       {props.children}

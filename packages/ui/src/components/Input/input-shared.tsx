@@ -210,6 +210,11 @@ export interface FieldProps {
   readonly inputRef?: RefObject<unknown>;
   /** Fires on focus loss — used by `<MoneyField>` to format on blur. */
   readonly onBlur?: () => void;
+  /**
+   * Override the default left padding (14). Used by `<SearchBar>` to
+   * clear the leading search icon.
+   */
+  readonly paddingLeft?: number;
 }
 
 export function InputLabel({ text }: { text: string }): ReactElement {
@@ -295,6 +300,7 @@ export function TextField(props: FieldProps): ReactElement {
       data-input-type={props.type}
       placeholderTextColor="$gray400"
       {...FIELD_VISUAL}
+      {...(props.paddingLeft !== undefined ? { paddingLeft: props.paddingLeft } : {})}
     />
   );
 }

@@ -19,7 +19,7 @@
 import { type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { type NewBusiness } from '@cachink/domain';
-import { Btn, Input, SectionTitle } from '../../components/index';
+import { Btn, Input, SafeAreaSpacer, SectionTitle } from '../../components/index';
 import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
@@ -217,6 +217,7 @@ export function BusinessForm(props: BusinessFormProps): ReactElement {
       alignItems="center"
       justifyContent="center"
     >
+      <SafeAreaSpacer />
       <FormColumn
         s={s}
         t={t}

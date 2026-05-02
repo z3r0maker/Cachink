@@ -69,7 +69,7 @@ interface FieldsBlockProps {
   onSubmitEditing?: () => void;
 }
 
-function SecondaryFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
+function PricingFields({ form, t }: FieldsBlockProps): ReactElement {
   const { state, errors, update } = form;
   return (
     <>
@@ -96,6 +96,14 @@ function SecondaryFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactE
         options={INV_UNIDADES}
         testID="producto-unidad"
       />
+    </>
+  );
+}
+
+function StockFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
+  const { state, errors, update } = form;
+  return (
+    <>
       <IntegerField
         label={t('nuevoProducto.umbralLabel')}
         value={state.umbral}
@@ -103,6 +111,14 @@ function SecondaryFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactE
         note={errors.umbral}
         min={0}
         testID="producto-umbral"
+        returnKeyType="next"
+      />
+      <IntegerField
+        label={t('nuevoProducto.stockInicialLabel')}
+        value={state.stockInicial}
+        onChange={(v) => update({ stockInicial: v })}
+        min={0}
+        testID="producto-stock-inicial"
         returnKeyType="done"
         onSubmitEditing={onSubmitEditing}
       />
@@ -115,7 +131,8 @@ function ProductoFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactEl
   return (
     <>
       <PrimaryFields form={form} t={t} />
-      <SecondaryFields form={form} t={t} onSubmitEditing={onSubmitEditing} />
+      <PricingFields form={form} t={t} />
+      <StockFields form={form} t={t} onSubmitEditing={onSubmitEditing} />
     </>
   );
 }

@@ -9,7 +9,7 @@ appId: mx.cachink.mobile
 
 # Open cliente detail via the CuentasPorCobrar strip.
 - tapOn:
-    id: "tab-director-home"
+    id: "tab-home"
 - tapOn: "Carla Márquez"
 
 - assertVisible: "Cuentas por cobrar"

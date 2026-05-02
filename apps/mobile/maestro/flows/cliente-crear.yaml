@@ -1,11 +1,20 @@
-# Create a cliente from the Clientes tab. Verify the row appears.
+# Create a cliente via the /clientes route. Verify the row appears.
 # Covers P1C-M6-T01 (list) + M6-T02 (crear).
+#
+# There is no top-level "Clientes" tab — per CLAUDE.md §1, Clientes
+# is reached from Director Home + the Venta form. We deep-link to
+# the /clientes Expo Router page using the app's URL scheme.
+#
+# Precondition: wizard + business + role already set up.
 appId: mx.cachink.mobile
 ---
 - launchApp
 
-- tapOn:
-    id: "tab-clientes"
+# Navigate to the Clientes screen via Expo Router deep link.
+- openLink: "cachink:///clientes"
+
+- assertVisible:
+    id: "clientes-screen"
 - tapOn:
     id: "clientes-nuevo"
 
@@ -18,5 +27,6 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "nuevo-cliente-submit"
 
-- assertNotVisible: "Nuevo cliente"
+- assertNotVisible:
+    id: "nuevo-cliente-modal"
 - assertVisible: "Carla Márquez"
