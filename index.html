@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cachink · Finanzas para emprendedores</title>
+<meta name="description" content="Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.">
+<link rel="icon" type="image/png" href="assets/logo.png">
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  html, body { margin: 0; padding: 0; background: var(--white); font-family: var(--font-sans); color: var(--ink); }
+  * { box-sizing: border-box; }
+  ::selection { background: var(--yellow); color: var(--black); }
+  a { color: inherit; }
+  html { scroll-behavior: smooth; }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+
+  <!-- Production shim: provide no-op useTweaks + Tweak* components so the
+       prototype's components compile unchanged. The dev-only Tweaks panel
+       is intentionally not loaded in production. -->
+  <script type="text/babel">
+    function useTweaks(defaults) {
+      const [t] = React.useState(defaults);
+      return [t, () => {}];
+    }
+    const NoOp = () => null;
+    Object.assign(window, {
+      useTweaks,
+      TweaksPanel: NoOp,
+      TweakSection: NoOp,
+      TweakToggle: NoOp,
+      TweakRadio: NoOp,
+      TweakSlider: NoOp,
+      TweakSelect: NoOp,
+      TweakRow: NoOp,
+    });
+  </script>
+
+  <script type="text/babel" src="landing/Motion.jsx"></script>
+  <script type="text/babel" src="landing/PhoneScreens.jsx"></script>
+  <script type="text/babel" src="landing/AnimatedHero.jsx"></script>
+  <script type="text/babel" src="landing/Sections.jsx"></script>
+
+  <script type="text/babel">
+    // Defaults match the design's final landing-page state.
+    const TWEAK_DEFAULTS = {
+      tone: "educational",
+      yellowIntensity: "medium",
+      darkComoSection: false,
+      darkContactSection: false,
+      showPricing: true,
+      motion: true
+    };
+
+    function App() {
+      const [t] = useTweaks(TWEAK_DEFAULTS);
+
+      return (
+        <MotionProvider enabled={t.motion}>
+          <div>
+            <Nav onWaitlist={() => { const el = document.getElementById('top'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
+            <Hero tone={t.tone} yellowIntensity={t.yellowIntensity} />
+            <ParaQuienEs tone={t.tone} />
+            <ComoFunciona tone={t.tone} darkSection={t.darkComoSection} />
+            <Recorrido />
+            {t.showPricing && <Precios />}
+            <Contacto darkSection={t.darkContactSection} />
+            <Footer />
+          </div>
+        </MotionProvider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
