@@ -1,84 +1,56 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es-MX">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ── Font loading (preconnect + async, no render-blocking @import) ─ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
+
+<!-- ── Primary SEO ─────────────────────────────────────────────────── -->
 <title>Cachink · Finanzas para emprendedores</title>
 <meta name="description" content="Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.">
-<link rel="icon" type="image/png" href="assets/logo.png">
-<link rel="stylesheet" href="colors_and_type.css">
-<style>
-  html, body { margin: 0; padding: 0; background: var(--white); font-family: var(--font-sans); color: var(--ink); }
-  * { box-sizing: border-box; }
-  ::selection { background: var(--yellow); color: var(--black); }
-  a { color: inherit; }
-  html { scroll-behavior: smooth; }
-</style>
+<link rel="canonical" href="__SITE_URL__/">
+
+<!-- ── Open Graph ──────────────────────────────────────────────────── -->
+<meta property="og:type"         content="website">
+<meta property="og:locale"       content="es_MX">
+<meta property="og:site_name"    content="Cachink">
+<meta property="og:url"          content="__SITE_URL__/">
+<meta property="og:title"        content="Cachink · Finanzas para emprendedores">
+<meta property="og:description"  content="Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.">
+<meta property="og:image"        content="__SITE_URL__/og-image.png">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"    content="Cachink — Tu caja, clara. Cada día.">
+
+<!-- ── Twitter / X Card ───────────────────────────────────────────── -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:title"       content="Cachink · Finanzas para emprendedores">
+<meta name="twitter:description" content="Registra ventas y egresos en segundos. Ve lo que ganas hoy, sin hojas de Excel ni contadores.">
+<meta name="twitter:image"       content="__SITE_URL__/og-image.png">
+<meta name="twitter:image:alt"   content="Cachink — Tu caja, clara. Cada día.">
+
+<!-- ── Favicons ───────────────────────────────────────────────────── -->
+<link rel="icon"             type="image/png" sizes="32x32"   href="/assets/favicon-32.png">
+<link rel="apple-touch-icon"                  sizes="180x180" href="/assets/apple-touch-icon.png">
+
+<!-- ── Analytics (injected at build time from VITE_PLAUSIBLE_DOMAIN) ─ -->
+__PLAUSIBLE_SNIPPET__
+
 </head>
 <body>
-  <div id="root"></div>
+  <!-- Skip to main content — keyboard / screen reader navigation -->
+  <a href="#main-content"
+     style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;background:var(--yellow);color:var(--black);font-weight:800;padding:12px 20px;border:2.5px solid var(--black);border-radius:10px;z-index:9999;text-decoration:none;font-family:var(--font-sans);"
+     onfocus="this.style.cssText='position:fixed;left:16px;top:16px;width:auto;height:auto;z-index:9999;background:var(--yellow);color:var(--black);font-weight:800;padding:12px 20px;border:2.5px solid var(--black);border-radius:10px;text-decoration:none;font-family:var(--font-sans);'"
+     onblur="this.style.cssText='position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;'"
+  >Saltar al contenido principal</a>
 
-  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" crossorigin="anonymous"></script>
-  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
-
-  <!-- Production shim: provide no-op useTweaks + Tweak* components so the
-       prototype's components compile unchanged. The dev-only Tweaks panel
-       is intentionally not loaded in production. -->
-  <script type="text/babel">
-    function useTweaks(defaults) {
-      const [t] = React.useState(defaults);
-      return [t, () => {}];
-    }
-    const NoOp = () => null;
-    Object.assign(window, {
-      useTweaks,
-      TweaksPanel: NoOp,
-      TweakSection: NoOp,
-      TweakToggle: NoOp,
-      TweakRadio: NoOp,
-      TweakSlider: NoOp,
-      TweakSelect: NoOp,
-      TweakRow: NoOp,
-    });
-  </script>
-
-  <script type="text/babel" src="landing/Motion.jsx"></script>
-  <script type="text/babel" src="landing/PhoneScreens.jsx"></script>
-  <script type="text/babel" src="landing/AnimatedHero.jsx"></script>
-  <script type="text/babel" src="landing/Sections.jsx"></script>
-
-  <script type="text/babel">
-    // Defaults match the design's final landing-page state.
-    const TWEAK_DEFAULTS = {
-      tone: "educational",
-      yellowIntensity: "medium",
-      darkComoSection: false,
-      darkContactSection: false,
-      showPricing: true,
-      motion: true
-    };
-
-    function App() {
-      const [t] = useTweaks(TWEAK_DEFAULTS);
-
-      return (
-        <MotionProvider enabled={t.motion}>
-          <div>
-            <Nav onWaitlist={() => { const el = document.getElementById('top'); if (el) el.scrollIntoView({ behavior: 'smooth' }); }} />
-            <Hero tone={t.tone} yellowIntensity={t.yellowIntensity} />
-            <ParaQuienEs tone={t.tone} />
-            <ComoFunciona tone={t.tone} darkSection={t.darkComoSection} />
-            <Recorrido />
-            {t.showPricing && <Precios />}
-            <Contacto darkSection={t.darkContactSection} />
-            <Footer />
-          </div>
-        </MotionProvider>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+  <div id="root"><!--ssr-outlet--></div>
+  <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

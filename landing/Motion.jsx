@@ -1,4 +1,3 @@
-/* global React */
 /* Motion utilities for the landing page:
    - <Reveal>        : fades/slides in on scroll
    - <Parallax>      : shifts element on scroll
@@ -7,7 +6,7 @@
    - <Wiggle>        : wrapper that wiggles on hover
    All honor a `motion` boolean — when false, children render statically. */
 
-const { useState, useEffect, useRef, createContext, useContext } = React;
+import { useState, useEffect, useRef, createContext, useContext } from 'react'
 
 const MotionContext = createContext(true);
 
@@ -188,4 +187,4 @@ function SpinCoin({ size = 48, style = {} }) {
   );
 }
 
-Object.assign(window, { MotionProvider, useMotionOn, Reveal, Parallax, TiltCard, Wiggle, SpinCoin });
+export { MotionProvider, useMotionOn, Reveal, Parallax, TiltCard, Wiggle, SpinCoin }

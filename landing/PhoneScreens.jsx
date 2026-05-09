@@ -1,8 +1,8 @@
-/* global React */
 /* Static-render variants of the mobile screens for the landing page.
    These do NOT import from ui_kits — they re-implement the essential
    visual language so the landing page stays self-contained at the root.
    All values come from colors_and_type.css. */
+
 
 function LandingPhoneFrame({ children, scale = 1 }) {
   return (
@@ -274,4 +274,4 @@ function NuevaVentaStatic() {
   );
 }
 
-Object.assign(window, { LandingPhoneFrame, OperativoStatic, DirectorStatic, NuevaVentaStatic });
+export { LandingPhoneFrame, OperativoStatic, DirectorStatic, NuevaVentaStatic }

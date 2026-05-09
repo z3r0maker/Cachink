@@ -1,8 +1,8 @@
-/* global React, LandingPhoneFrame, OperativoStatic, DirectorStatic, NuevaVentaStatic,
-   AnimatedOperativo, Reveal, Parallax, TiltCard, Wiggle, SpinCoin, useMotionOn,
-   TweaksPanel, TweakSection, TweakSlider, TweakToggle, TweakRadio, TweakSelect, useTweaks */
-
-const { useState, useEffect, useRef } = React;
+import { useState, useEffect, useRef } from 'react'
+import { LandingPhoneFrame, OperativoStatic, DirectorStatic, NuevaVentaStatic } from './PhoneScreens.jsx'
+import { AnimatedOperativo } from './AnimatedHero.jsx'
+import { Reveal, Parallax, TiltCard, Wiggle, SpinCoin, useMotionOn } from './Motion.jsx'
+import { useViewport } from './Viewport.jsx'
 
 /* ─────────────── Copy decks for the 3 tones ─────────────── */
 const TONE_COPY = {
@@ -90,6 +90,8 @@ const HardBtn = ({ children, variant = 'primary', size = 'lg', onClick, href }) 
       onMouseDown={() => setP(true)}
       onMouseUp={() => setP(false)}
       onMouseLeave={() => setP(false)}
+      onTouchStart={() => setP(true)}
+      onTouchEnd={() => setP(false)}
       onClick={onClick}
       style={{
         display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
@@ -102,6 +104,7 @@ const HardBtn = ({ children, variant = 'primary', size = 'lg', onClick, href }) 
         transform: p ? 'translate(3px,3px)' : 'none',
         transition: 'transform 100ms var(--press-ease), box-shadow 100ms var(--press-ease)',
         textDecoration: 'none',
+        WebkitTapHighlightColor: 'transparent',
       }}>{children}</Tag>
   );
 };
@@ -119,30 +122,161 @@ const HardCard = ({ children, variant = 'white', padding = 24, style }) => {
   );
 };
 
+/* ─────────────── MOBILE MENU ─────────────── */
+function MobileMenu({ links, onClose, onWaitlist, triggerRef }) {
+  const drawerRef = useRef(null);
+
+  // Lock body scroll and manage focus lifecycle
+  useEffect(() => {
+    document.body.classList.add('menu-open');
+
+    // Focus the close button when menu opens
+    const closeBtn = drawerRef.current?.querySelector('button[data-close]');
+    if (closeBtn) closeBtn.focus();
+
+    // Return focus to hamburger trigger when menu unmounts
+    return () => {
+      document.body.classList.remove('menu-open');
+      if (triggerRef?.current) triggerRef.current.focus();
+    };
+  }, []);
+
+  // Focus trap + Escape key
+  useEffect(() => {
+    function onKeyDown(e) {
+      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key !== 'Tab') return;
+      const drawer = drawerRef.current;
+      if (!drawer) return;
+      const focusable = Array.from(drawer.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )).filter(el => !el.disabled);
+      const first = focusable[0];
+      const last  = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+      } else {
+        if (document.activeElement === last)  { e.preventDefault(); first.focus(); }
+      }
+    }
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Menú de navegación"
+      style={{
+        position: 'fixed', inset: 0, zIndex: 200,
+        background: 'rgba(13,13,13,0.55)',
+        display: 'flex', flexDirection: 'column',
+      }}
+      onClick={onClose}
+    >
+      <div
+        ref={drawerRef}
+        style={{
+          background: 'var(--white)',
+          borderBottom: '2.5px solid var(--black)',
+          padding: '20px 24px 28px',
+          display: 'flex', flexDirection: 'column',
+        }}
+        onClick={e => e.stopPropagation()}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gray-600)' }}>Menú</span>
+          <button
+            data-close
+            onClick={onClose}
+            aria-label="Cerrar menú"
+            style={{
+              background: 'transparent', border: '2px solid var(--black)', borderRadius: 8,
+              width: 36, height: 36, cursor: 'pointer', display: 'flex',
+              alignItems: 'center', justifyContent: 'center',
+              fontSize: 14, fontWeight: 900, fontFamily: 'var(--font-sans)',
+              boxShadow: '2px 2px 0 var(--black)', WebkitTapHighlightColor: 'transparent',
+            }}
+          >✕</button>
+        </div>
+        {links.map(([href, label]) => (
+          <a key={href} href={href} onClick={onClose} style={{
+            display: 'block', padding: '15px 0',
+            fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--black)',
+            textDecoration: 'none', borderBottom: '2px solid var(--gray-200)',
+            WebkitTapHighlightColor: 'transparent',
+          }}>{label}</a>
+        ))}
+        <div style={{ marginTop: 20 }}>
+          <HardBtn size="lg" onClick={() => { onClose(); onWaitlist && onWaitlist(); }}>Unirme a la lista →</HardBtn>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────── NAV ─────────────── */
 function Nav({ onWaitlist }) {
+  const { isMobile } = useViewport();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const hamburgerRef = useRef(null);
+  const links = [
+    ['#por-que', 'Por qué Cachink'],
+    ['#como', 'Cómo funciona'],
+    ['#recorrido', 'Recorrido'],
+    ['#precios', 'Precios'],
+    ['#contacto', 'Contacto'],
+  ];
   return (
     <nav style={{
       position: 'relative', zIndex: 40,
       background: 'var(--white)', borderBottom: '2.5px solid var(--black)',
     }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '18px 28px', display: 'flex', alignItems: 'center', gap: 18 }}>
+      <div style={{
+        maxWidth: 1280, margin: '0 auto',
+        padding: `14px clamp(20px, 5vw, 28px)`,
+        display: 'flex', alignItems: 'center', gap: 14,
+      }}>
         <a href="#top" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none', color: 'inherit' }}>
-          <img src="assets/logo.png" alt="Cachink" style={{ height: 180 }} />
+          <img src="/assets/apple-touch-icon.png" alt="Cachink" style={{ height: isMobile ? 40 : 52 }} />
         </a>
-        <div style={{ flex: 1, display: 'flex', gap: 28, justifyContent: 'center' }}>
-          {[
-            ['#por-que', 'Por qué Cachink'],
-            ['#como', 'Cómo funciona'],
-            ['#recorrido', 'Recorrido'],
-            ['#precios', 'Precios'],
-            ['#contacto', 'Contacto'],
-          ].map(([h, l]) => (
-            <a key={h} href={h} style={{ fontSize: 13, fontWeight: 700, color: 'var(--black)', textDecoration: 'none', letterSpacing: '-0.005em' }}>{l}</a>
-          ))}
+
+        {!isMobile && (
+          <div style={{ flex: 1, display: 'flex', gap: 28, justifyContent: 'center' }}>
+            {links.map(([h, l]) => (
+              <a key={h} href={h} style={{ fontSize: 13, fontWeight: 700, color: 'var(--black)', textDecoration: 'none', letterSpacing: '-0.005em' }}>{l}</a>
+            ))}
+          </div>
+        )}
+
+        <div style={{ flex: isMobile ? 1 : 0, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 10 }}>
+          <HardBtn size="sm" onClick={onWaitlist}>Lista de espera</HardBtn>
+          {isMobile && (
+            <button
+              ref={hamburgerRef}
+              onClick={() => setMenuOpen(true)}
+              aria-label="Abrir menú"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-menu-drawer"
+              style={{
+                background: 'var(--white)', border: '2px solid var(--black)', borderRadius: 10,
+                width: 44, height: 44, cursor: 'pointer', flexShrink: 0,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 5,
+                boxShadow: '3px 3px 0 var(--black)', WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              <span style={{ width: 18, height: 2, background: 'var(--black)', borderRadius: 1, display: 'block' }} />
+              <span style={{ width: 18, height: 2, background: 'var(--black)', borderRadius: 1, display: 'block' }} />
+              <span style={{ width: 12, height: 2, background: 'var(--black)', borderRadius: 1, display: 'block' }} />
+            </button>
+          )}
         </div>
-        <HardBtn size="sm" onClick={onWaitlist}>Lista de espera</HardBtn>
       </div>
+
+      {menuOpen && (
+        <MobileMenu links={links} onClose={() => setMenuOpen(false)} onWaitlist={onWaitlist} triggerRef={hamburgerRef} />
+      )}
     </nav>
   );
 }
@@ -152,22 +286,49 @@ function Hero({ tone, yellowIntensity, onSubmitEmail }) {
   const c = TONE_COPY[tone];
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [formError, setFormError] = useState(null);
+  const { isMobile, isTablet } = useViewport();
 
-  const heroBg = yellowIntensity === 'high' ? 'var(--yellow)'
-              : yellowIntensity === 'medium' ? 'var(--yellow)'
-              : 'var(--offwhite)';
-  const heroFg = yellowIntensity === 'low' ? 'var(--black)' : 'var(--black)';
+  async function handleWaitlist(e) {
+    e.preventDefault();
+    if (!email.includes('@')) return;
+    const endpoint = typeof import.meta !== 'undefined' && import.meta.env
+      ? import.meta.env.VITE_WAITLIST_ENDPOINT
+      : null;
+    if (!endpoint) {
+      // No endpoint configured — show success so UX is testable in dev
+      setSent(true);
+      return;
+    }
+    setLoading(true);
+    setFormError(null);
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setSent(true);
+    } catch (err) {
+      setFormError('Algo salió mal. Intenta de nuevo.');
+      console.error('[Cachink waitlist]', err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
-  // Sparkle marks on yellow background
+  const heroBg = yellowIntensity === 'low' ? 'var(--offwhite)' : 'var(--yellow)';
   const sparkles = yellowIntensity !== 'low';
 
   return (
     <section id="top" style={{
-      background: heroBg, color: heroFg,
+      background: heroBg, color: 'var(--black)',
       borderBottom: '2.5px solid var(--black)',
       position: 'relative', overflow: 'hidden',
     }}>
-      {sparkles && (
+      {sparkles && !isMobile && (
         <>
           <svg style={{ position: 'absolute', top: 60, left: '6%' }} width="28" height="28" viewBox="0 0 24 24" fill="var(--black)"><path d="M12 2l1.8 7.2L21 11l-7.2 1.8L12 20l-1.8-7.2L3 11l7.2-1.8L12 2z" /></svg>
           <svg style={{ position: 'absolute', top: 180, left: '2%' }} width="16" height="16" viewBox="0 0 24 24" fill="var(--black)"><path d="M12 2l1.8 7.2L21 11l-7.2 1.8L12 20l-1.8-7.2L3 11l7.2-1.8L12 2z" /></svg>
@@ -175,22 +336,26 @@ function Hero({ tone, yellowIntensity, onSubmitEmail }) {
         </>
       )}
       <div style={{
-        maxWidth: 1280, margin: '0 auto', padding: '64px 28px 72px',
-        display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 48, alignItems: 'center',
+        maxWidth: 1280, margin: '0 auto',
+        padding: `clamp(40px, 8vw, 64px) clamp(20px, 5vw, 28px) clamp(44px, 8vw, 72px)`,
+        display: 'grid',
+        gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr',
+        gap: isMobile ? 28 : 48,
+        alignItems: 'center',
       }}>
         <div>
           <Eyebrow>{c.eyebrow}</Eyebrow>
           <h1 style={{
             margin: '14px 0 16px', fontWeight: 900,
-            fontSize: tone === 'playful' ? 88 : 76,
+            fontSize: isMobile ? 'clamp(38px, 11vw, 52px)' : (tone === 'playful' ? 88 : 76),
             lineHeight: 0.95, letterSpacing: '-0.045em',
             color: 'var(--black)',
           }}>
             {c.h1a}<br />{c.h1b}
           </h1>
-          <p style={{ fontSize: 19, fontWeight: 500, color: 'var(--ink)', maxWidth: 540, lineHeight: 1.45, margin: '0 0 28px' }}>{c.sub}</p>
+          <p style={{ fontSize: isMobile ? 16 : 19, fontWeight: 500, color: 'var(--ink)', maxWidth: 540, lineHeight: 1.45, margin: '0 0 28px' }}>{c.sub}</p>
 
-          <HardCard variant="white" padding={18} style={{ maxWidth: 520 }}>
+          <HardCard variant="white" padding={18} style={{ maxWidth: isMobile ? 'none' : 520 }}>
             <Eyebrow>Próximamente · Únete a la lista</Eyebrow>
             {sent ? (
               <div style={{ marginTop: 10, padding: '14px 0', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -201,18 +366,30 @@ function Hero({ tone, yellowIntensity, onSubmitEmail }) {
                 </div>
               </div>
             ) : (
-              <form onSubmit={e => { e.preventDefault(); if (email.includes('@')) { setSent(true); onSubmitEmail && onSubmitEmail(email); } }}
-                style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                <input
-                  value={email} onChange={e => setEmail(e.target.value)}
-                  type="email" required placeholder="tu@correo.com"
-                  style={{
-                    flex: 1, border: '2px solid var(--black)', borderRadius: 12,
-                    padding: '12px 14px', fontSize: 15, fontFamily: 'var(--font-sans)',
-                    fontWeight: 500, color: 'var(--ink)', background: 'var(--white)', outline: 'none',
-                  }} />
-                <HardBtn size="sm" variant="dark">{c.cta1}</HardBtn>
-              </form>
+              <>
+                <form onSubmit={handleWaitlist}
+                  style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: 8, marginTop: 10 }}>
+                  <input
+                    value={email} onChange={e => { setEmail(e.target.value); setFormError(null); }}
+                    type="email" required placeholder="tu@correo.com"
+                    disabled={loading}
+                    aria-label="Tu correo electrónico"
+                    style={{
+                      flex: 1, border: `2px solid ${formError ? 'var(--red)' : 'var(--black)'}`, borderRadius: 12,
+                      padding: '12px 14px', fontSize: 15, fontFamily: 'var(--font-sans)',
+                      fontWeight: 500, color: 'var(--ink)', background: 'var(--white)', outline: 'none',
+                      opacity: loading ? 0.6 : 1,
+                    }} />
+                  <HardBtn size="sm" variant="dark" disabled={loading}>
+                    {loading ? 'Enviando…' : c.cta1}
+                  </HardBtn>
+                </form>
+                {formError && (
+                  <div role="alert" style={{ marginTop: 6, fontSize: 13, color: 'var(--red)', fontWeight: 600 }}>
+                    {formError}
+                  </div>
+                )}
+              </>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
               <StoreBadge platform="ios" />
@@ -222,15 +399,17 @@ function Hero({ tone, yellowIntensity, onSubmitEmail }) {
           </HardCard>
         </div>
 
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
-          <Parallax strength={0.25}>
-            <div style={{ transform: 'rotate(-3deg)' }}>
-              <LandingPhoneFrame>
-                <AnimatedOperativo />
-              </LandingPhoneFrame>
-            </div>
-          </Parallax>
-        </div>
+        {!isMobile && (
+          <div style={{ position: 'relative', display: 'flex', justifyContent: 'center' }}>
+            <Parallax strength={0.25}>
+              <div style={{ transform: 'rotate(-3deg)' }}>
+                <LandingPhoneFrame scale={isTablet ? 0.8 : 1}>
+                  <AnimatedOperativo />
+                </LandingPhoneFrame>
+              </div>
+            </Parallax>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -318,13 +497,14 @@ const IconToolbox = () => (
 
 function ParaQuienEs({ tone }) {
   const c = TONE_COPY[tone];
+  const { isMobile } = useViewport();
   return (
     <section id="por-que" style={{ background: 'var(--offwhite)', borderBottom: '2.5px solid var(--black)' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 28px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 40, alignItems: 'end', marginBottom: 44 }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: `clamp(48px, 8vw, 80px) clamp(20px, 5vw, 28px)` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: isMobile ? 16 : 40, alignItems: 'end', marginBottom: 44 }}>
           <div>
             <Eyebrow>Para quién es Cachink</Eyebrow>
-            <h2 style={{ margin: '10px 0 0', fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--black)', textWrap: 'pretty' }}>
+            <h2 style={{ margin: '10px 0 0', fontSize: isMobile ? 'clamp(28px, 8vw, 40px)' : 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--black)', textWrap: 'pretty' }}>
               Si llevas la caja en la cabeza o en una libreta — esto es para ti.
             </h2>
           </div>
@@ -333,7 +513,7 @@ function ParaQuienEs({ tone }) {
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20 }}>
           {[
             { Icon: IconBakery,  t: 'Panaderías y cafés', d: 'Decenas de ventas chicas al día. Cachink te lleva el corte del día sin hacer cuentas a mano.' },
             { Icon: IconShop,    t: 'Tiendas de barrio',  d: 'Efectivo, fiado, transferencia. Registras cómo te pagaron y ves qué te deben.' },
@@ -359,7 +539,7 @@ function ParaQuienEs({ tone }) {
           ))}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginTop: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20, marginTop: 24 }}>
           {c.why.map((x, i) => (
             <Reveal key={i} delay={i * 100} from="up">
               <TiltCard max={5} lift={5}>
@@ -380,19 +560,20 @@ function ParaQuienEs({ tone }) {
 function ComoFunciona({ tone, darkSection }) {
   const c = TONE_COPY[tone];
   const onDark = darkSection;
+  const { isMobile } = useViewport();
   return (
     <section id="como" style={{
       background: onDark ? 'var(--black)' : 'var(--yellow)',
       color: onDark ? 'var(--white)' : 'var(--black)',
       borderBottom: '2.5px solid var(--black)',
     }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 28px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: `clamp(48px, 8vw, 80px) clamp(20px, 5vw, 28px)` }}>
         <Eyebrow light={onDark}>{c.howTitle}</Eyebrow>
-        <h2 style={{ margin: '10px 0 44px', fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: onDark ? 'var(--white)' : 'var(--black)' }}>
+        <h2 style={{ margin: '10px 0 44px', fontSize: isMobile ? 'clamp(28px, 8vw, 40px)' : 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: onDark ? 'var(--white)' : 'var(--black)' }}>
           Tres pasos. Todos los días.
         </h2>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20 }}>
           {c.how.map((s, i) => (
             <Reveal key={i} delay={i * 140} from="up">
               <TiltCard max={7} lift={8}>
@@ -422,6 +603,7 @@ function ComoFunciona({ tone, darkSection }) {
 
 /* ─────────────── RECORRIDO (feature tour) ─────────────── */
 function Recorrido() {
+  const { isMobile, isTablet } = useViewport();
   const rows = [
     {
       Phone: OperativoStatic,
@@ -453,27 +635,27 @@ function Recorrido() {
   ];
   return (
     <section id="recorrido" style={{ borderBottom: '2.5px solid var(--black)' }}>
-      <div style={{ background: 'var(--white)', borderBottom: '2.5px solid var(--black)', padding: '72px 28px' }}>
+      <div style={{ background: 'var(--white)', borderBottom: '2.5px solid var(--black)', padding: `clamp(44px, 8vw, 72px) clamp(20px, 5vw, 28px)` }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <Eyebrow>Recorrido</Eyebrow>
-          <h2 style={{ margin: '10px 0 0', fontSize: 56, fontWeight: 900, letterSpacing: '-0.045em', lineHeight: 1, color: 'var(--black)', textWrap: 'pretty', maxWidth: 820 }}>
+          <h2 style={{ margin: '10px 0 0', fontSize: isMobile ? 'clamp(26px, 8vw, 40px)' : 56, fontWeight: 900, letterSpacing: '-0.045em', lineHeight: 1, color: 'var(--black)', textWrap: 'pretty', maxWidth: 820 }}>
             Un recorrido por las tres pantallas que usarás todos los días.
           </h2>
         </div>
       </div>
       {rows.map((r, i) => (
-        <div key={i} style={{ background: r.bg, borderBottom: '2.5px solid var(--black)', padding: '80px 28px' }}>
+        <div key={i} style={{ background: r.bg, borderBottom: '2.5px solid var(--black)', padding: `clamp(44px, 8vw, 80px) clamp(20px, 5vw, 28px)` }}>
           <div style={{
             maxWidth: 1280, margin: '0 auto',
             display: 'grid',
-            gridTemplateColumns: i % 2 === 0 ? '1fr 1.1fr' : '1.1fr 1fr',
-            gap: 60, alignItems: 'center',
+            gridTemplateColumns: isMobile ? '1fr' : (i % 2 === 0 ? '1fr 1.1fr' : '1.1fr 1fr'),
+            gap: isMobile ? 32 : 60, alignItems: 'center',
           }}>
-            <div style={{ order: i % 2 === 0 ? 1 : 2 }}>
+            <div style={{ order: isMobile ? 1 : (i % 2 === 0 ? 1 : 2) }}>
               <Reveal from={i % 2 === 0 ? 'right' : 'left'} distance={32}>
               <Eyebrow>{r.eyebrow}</Eyebrow>
-              <h3 style={{ margin: '10px 0 14px', fontSize: 44, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.02, color: 'var(--black)' }}>{r.title}</h3>
-              <p style={{ fontSize: 18, color: 'var(--ink)', fontWeight: 500, lineHeight: 1.5, margin: '0 0 22px', maxWidth: 520 }}>{r.desc}</p>
+              <h3 style={{ margin: '10px 0 14px', fontSize: isMobile ? 'clamp(22px, 7vw, 34px)' : 44, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.02, color: 'var(--black)' }}>{r.title}</h3>
+              <p style={{ fontSize: isMobile ? 15 : 18, color: 'var(--ink)', fontWeight: 500, lineHeight: 1.5, margin: '0 0 22px', maxWidth: 520 }}>{r.desc}</p>
               <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {r.bullets.map((b, j) => (
                   <li key={j} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', fontSize: 15, fontWeight: 600, color: 'var(--black)' }}>
@@ -484,19 +666,21 @@ function Recorrido() {
               </ul>
               </Reveal>
             </div>
-            <div style={{ order: i % 2 === 0 ? 2 : 1, display: 'flex', justifyContent: 'center' }}>
-              <Parallax strength={0.3}>
-                <Reveal from={i % 2 === 0 ? 'left' : 'right'} distance={40}>
-                  <TiltCard max={8} lift={10}>
-                    <div style={{ transform: `rotate(${r.rotate}deg)` }}>
-                      <LandingPhoneFrame>
-                        <r.Phone />
-                      </LandingPhoneFrame>
-                    </div>
-                  </TiltCard>
-                </Reveal>
-              </Parallax>
-            </div>
+            {!isMobile && (
+              <div style={{ order: i % 2 === 0 ? 2 : 1, display: 'flex', justifyContent: 'center' }}>
+                <Parallax strength={0.3}>
+                  <Reveal from={i % 2 === 0 ? 'left' : 'right'} distance={40}>
+                    <TiltCard max={8} lift={10}>
+                      <div style={{ transform: `rotate(${r.rotate}deg)` }}>
+                        <LandingPhoneFrame scale={isTablet ? 0.78 : 1}>
+                          <r.Phone />
+                        </LandingPhoneFrame>
+                      </div>
+                    </TiltCard>
+                  </Reveal>
+                </Parallax>
+              </div>
+            )}
           </div>
         </div>
       ))}
@@ -506,6 +690,7 @@ function Recorrido() {
 
 /* ─────────────── PRECIOS ─────────────── */
 function Precios() {
+  const { isMobile } = useViewport();
   const tiers = [
     { name: 'Gratis', price: '$0', cad: '/ para siempre', features: ['Ventas + egresos ilimitados', '1 dispositivo', 'Corte de día', 'Exportar a CSV'], variant: 'white', cta: 'Empezar gratis' },
     { name: 'Pro', price: '$149', cad: '/ mes MXN', features: ['Todo lo de Gratis', 'Multi-dispositivo sincronizado', 'Panel Director', 'Estados financieros NIF', 'Soporte por WhatsApp'], variant: 'yellow', cta: 'Probar Pro', featured: true },
@@ -513,15 +698,15 @@ function Precios() {
   ];
   return (
     <section id="precios" style={{ background: 'var(--offwhite)', borderBottom: '2.5px solid var(--black)' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 28px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: `clamp(48px, 8vw, 80px) clamp(20px, 5vw, 28px)` }}>
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <Eyebrow>Precios · honestos</Eyebrow>
-          <h2 style={{ margin: '10px 0 10px', fontSize: 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--black)' }}>Sin trucos. Sin letra chica.</h2>
+          <h2 style={{ margin: '10px 0 10px', fontSize: isMobile ? 'clamp(28px, 8vw, 40px)' : 52, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: 'var(--black)' }}>Sin trucos. Sin letra chica.</h2>
           <p style={{ fontSize: 16, color: 'var(--gray-600)', fontWeight: 500, margin: 0, maxWidth: 560, marginLeft: 'auto', marginRight: 'auto' }}>
             Precios preliminares para el lanzamiento. Los suscriptores de la lista de espera tendrán 3 meses gratis en cualquier plan.
           </p>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, alignItems: 'start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(3, 1fr)', gap: 20, alignItems: 'start' }}>
           {tiers.map((t, i) => (
             <Reveal key={i} delay={i * 120} from="up">
             <TiltCard max={5} lift={t.featured ? 12 : 6}>
@@ -530,7 +715,7 @@ function Precios() {
               border: '2.5px solid var(--black)', borderRadius: 20,
               boxShadow: t.featured ? '8px 8px 0 var(--black)' : '5px 5px 0 var(--black)',
               padding: 28, position: 'relative',
-              transform: t.featured ? 'translateY(-8px)' : 'none',
+              transform: (!isMobile && t.featured) ? 'translateY(-8px)' : 'none',
             }}>
               {t.featured && (
                 <div style={{ position: 'absolute', top: -14, right: 20, background: 'var(--black)', color: 'var(--yellow)', fontSize: 10, fontWeight: 800, padding: '5px 10px', borderRadius: 8, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Recomendado</div>
@@ -561,23 +746,24 @@ function Precios() {
 
 /* ─────────────── CONTACTO ─────────────── */
 function Contacto({ darkSection }) {
+  const { isMobile } = useViewport();
   return (
     <section id="contacto" style={{
       background: darkSection ? 'var(--black)' : 'var(--yellow)',
       borderBottom: '2.5px solid var(--black)',
     }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '80px 28px' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 1fr', gap: 48, alignItems: 'center' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: `clamp(48px, 8vw, 80px) clamp(20px, 5vw, 28px)` }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1.1fr 1fr', gap: isMobile ? 32 : 48, alignItems: 'center' }}>
           <div>
             <Eyebrow light={darkSection}>Contacto</Eyebrow>
-            <h2 style={{ margin: '10px 0 20px', fontSize: 56, fontWeight: 900, letterSpacing: '-0.045em', lineHeight: 0.98, color: darkSection ? 'var(--white)' : 'var(--black)' }}>¿Tienes preguntas? Escríbenos.</h2>
+            <h2 style={{ margin: '10px 0 20px', fontSize: isMobile ? 'clamp(28px, 8vw, 44px)' : 56, fontWeight: 900, letterSpacing: '-0.045em', lineHeight: 0.98, color: darkSection ? 'var(--white)' : 'var(--black)' }}>¿Tienes preguntas? Escríbenos.</h2>
             <p style={{ fontSize: 18, color: darkSection ? '#D6D6D2' : 'var(--ink)', fontWeight: 500, lineHeight: 1.5, margin: '0 0 24px', maxWidth: 520 }}>
               Respondemos el mismo día, en español, como humanos. Nada de chatbots.
             </p>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            <Reveal delay={80} from="right">
+            <Reveal delay={80} from={isMobile ? 'up' : 'right'}>
             <a href="mailto:hola@cachink.mx" style={{ textDecoration: 'none' }}>
               <TiltCard max={6} lift={6}>
               <HardCard padding={20}>
@@ -593,7 +779,7 @@ function Contacto({ darkSection }) {
               </TiltCard>
             </a>
             </Reveal>
-            <Reveal delay={220} from="right">
+            <Reveal delay={220} from={isMobile ? 'up' : 'right'}>
             <a href="https://wa.me/525555555555" target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
               <TiltCard max={6} lift={6}>
               <HardCard padding={20} variant="white" style={{ background: 'var(--green-soft)' }}>
@@ -671,14 +857,15 @@ function SocialButton({ Icon, label, href }) {
 }
 
 function Footer() {
+  const { isMobile } = useViewport();
   return (
     <footer style={{ background: 'var(--white)', color: 'var(--black)', borderTop: '2.5px solid var(--black)' }}>
-      <div style={{ maxWidth: 1280, margin: '0 auto', padding: '48px 28px 36px' }}>
+      <div style={{ maxWidth: 1280, margin: '0 auto', padding: `clamp(36px, 6vw, 48px) clamp(20px, 5vw, 28px) clamp(24px, 4vw, 36px)` }}>
         {/* Top band — logo + tagline + socials */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '1.2fr 1fr',
-          gap: 40, alignItems: 'center',
+          gridTemplateColumns: isMobile ? '1fr' : '1.2fr 1fr',
+          gap: isMobile ? 24 : 40, alignItems: 'center',
           paddingBottom: 28,
           borderBottom: '2px solid var(--black)',
         }}>
@@ -689,7 +876,7 @@ function Footer() {
               <span style={{ color: 'var(--gray-600)', fontWeight: 700 }}>Hecho en México, con cariño.</span>
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 14 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: isMobile ? 'flex-start' : 'flex-end', gap: 14 }}>
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'var(--gray-600)' }}>Síguenos</div>
             <div style={{ display: 'flex', gap: 12 }}>
               {SOCIALS.map(s => <SocialButton key={s.k} {...s} />)}
@@ -715,4 +902,4 @@ function Footer() {
   );
 }
 
-Object.assign(window, { Nav, Hero, ParaQuienEs, ComoFunciona, Recorrido, Precios, Contacto, Footer });
+export { Nav, Hero, ParaQuienEs, ComoFunciona, Recorrido, Precios, Contacto, Footer }

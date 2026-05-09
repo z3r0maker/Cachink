@@ -1,4 +1,3 @@
-/* global React, LandingPhoneFrame */
 /* AnimatedOperativo — hero phone loop:
    1. Show the Operativo home
    2. Open the "Nueva venta" sheet (slides up)
@@ -8,7 +7,8 @@
    6. pause 1.5s, loop
    Times in ms; each step handled by a tiny scheduler. */
 
-const { useState, useEffect, useRef } = React;
+import { useState, useEffect, useRef } from 'react'
+import { LandingPhoneFrame } from './PhoneScreens.jsx'
 
 const initialRows = [
   { t: 'Pan dulce × 6',     h: '07:42', tg: 'Producto', m: 'Efectivo',      a: 186.00, pos: true },
@@ -131,7 +131,7 @@ function AnimatedOperativo({ motion = true }) {
             <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--gray-600)' }}>Ventas hoy · 24 abr</div>
             <div style={{
               fontSize: 30, fontWeight: 900, letterSpacing: '-0.04em',
-              color: 'var(--black)', marginTop: 2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
+              marginTop: 2, fontVariantNumeric: 'tabular-nums', lineHeight: 1,
               transition: 'transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), color 200ms',
               transform: totalFlash ? 'scale(1.08)' : 'scale(1)',
               color: totalFlash ? 'var(--green)' : 'var(--black)',
@@ -349,4 +349,4 @@ function AnimatedOperativo({ motion = true }) {
   );
 }
 
-Object.assign(window, { AnimatedOperativo });
+export { AnimatedOperativo }

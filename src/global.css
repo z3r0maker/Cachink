@@ -1,0 +1,33 @@
+/* Global resets and layout utilities for the Cachink landing page */
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--white);
+  font-family: var(--font-sans);
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+::selection { background: var(--yellow); color: var(--black); }
+
+a { color: inherit; }
+
+html { scroll-behavior: smooth; }
+
+/* Phone carousel used in Recorrido on mobile */
+.c-phone-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  gap: 20px;
+  padding-bottom: 16px;
+  scrollbar-width: none;
+}
+.c-phone-carousel::-webkit-scrollbar { display: none; }
+.c-phone-carousel > * { scroll-snap-align: center; flex-shrink: 0; }
+
+/* Prevent body scroll when mobile menu is open */
+body.menu-open { overflow: hidden; }
