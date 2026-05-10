@@ -1,12 +1,14 @@
 # Cachink
 
+> Especificación completa del producto: /llms-full.txt
+
 > Cachink es la app mexicana para llevar la caja de tu negocio.
 
 Cachink es una aplicación móvil de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos, ver el estado del negocio en tiempo real y compartir estados financieros con un contador.
 
 ## Para quién es
 
-- Dueños de panaderías, cafeterías, tiendas de barria y pequeños negocios
+- Dueños de panaderías, cafeterías, tiendas de barrio y pequeños negocios
 - Emprendedores que manejan caja en efectivo, transferencias o pagos digitales
 - Negocios que quieren llevar el control financiero sin hojas de Excel ni software complejo
 

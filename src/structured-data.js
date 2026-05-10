@@ -1,15 +1,19 @@
 /**
  * JSON-LD structured data for Cachink landing page.
  *
- * Three @type blocks combined into a @graph:
- *   1. Organization  — the company
- *   2. SoftwareApplication — the product, with Offer nodes that mirror
- *      the Precios section (prices must match what's rendered on screen)
- *   3. FAQPage — key questions from the landing copy
+ * @graph blocks:
+ *   1. Organization       — the company
+ *   2. SoftwareApplication — the product + Offer nodes
+ *   3. Service            — cash management service for Mexican SMBs
+ *   4. FAQPage            — 14 questions imported from landing/copy.jsx
+ *                           (single source of truth shared with visible accordion)
  *
- * This is imported by App.jsx and rendered server-side via
- * dangerouslySetInnerHTML, so it ends up in the prerendered HTML.
+ * Rendered server-side via dangerouslySetInnerHTML in AppSSR.jsx,
+ * so all of this ends up in the prerendered HTML for crawlers.
  */
+
+// FAQ_ITEMS is the single source of truth — also consumed by FAQAccordion
+import { FAQ_ITEMS } from '../landing/copy.jsx'
 
 const SITE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL)
   || 'https://cachink.mx'
@@ -26,12 +30,13 @@ const organization = {
     height: 180,
   },
   description:
-    'Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.',
+    'Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador. Hecho en México para emprendedores mexicanos.',
   foundingLocation: {
     '@type': 'Place',
     addressCountry: 'MX',
     addressLocality: 'México',
   },
+  areaServed: { '@type': 'Country', name: 'México' },
   inLanguage: 'es-MX',
 }
 
@@ -43,7 +48,7 @@ const softwareApplication = {
   operatingSystem: 'iOS, Android',
   url: SITE_URL,
   description:
-    'App de finanzas para pequeños negocios mexicanos: panaderías, cafeterías, tiendas de barrio y talleres. Registra ventas y egresos, ve el estado de tu caja en tiempo real.',
+    'App de finanzas para pequeños negocios mexicanos: panaderías, cafeterías, tiendas de barrio y talleres. Registra ventas y egresos, ve el estado de tu caja en tiempo real, y exporta estados financieros en formato NIF para tu contador.',
   inLanguage: 'es-MX',
   offers: [
     {
@@ -51,8 +56,7 @@ const softwareApplication = {
       name: 'Plan Gratis',
       price: '0',
       priceCurrency: 'MXN',
-      description:
-        'Ventas + egresos ilimitados, 1 dispositivo, corte de día, exportar a CSV.',
+      description: 'Ventas + egresos ilimitados, 1 dispositivo, corte de día, exportar a CSV.',
       availability: 'https://schema.org/InStock',
     },
     {
@@ -60,8 +64,7 @@ const softwareApplication = {
       name: 'Plan Pro',
       price: '149',
       priceCurrency: 'MXN',
-      description:
-        'Todo lo de Gratis más multi-dispositivo sincronizado, Panel Director, estados financieros NIF y soporte por WhatsApp.',
+      description: 'Todo lo de Gratis más multi-dispositivo sincronizado, Panel Director, estados financieros NIF y soporte por WhatsApp.',
       availability: 'https://schema.org/InStock',
       billingIncrement: 'P1M',
     },
@@ -70,8 +73,7 @@ const softwareApplication = {
       name: 'Plan Contador',
       price: '299',
       priceCurrency: 'MXN',
-      description:
-        'Todo lo de Pro más hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
+      description: 'Todo lo de Pro más hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
       availability: 'https://schema.org/InStock',
       billingIncrement: 'P1M',
     },
@@ -79,54 +81,63 @@ const softwareApplication = {
   publisher: { '@id': `${SITE_URL}/#organization` },
 }
 
+// Service schema: positions Cachink as a cash-management service for Mexican SMBs.
+// This phrasing matches voice-search and LLM intent better than "BusinessApplication".
+const service = {
+  '@type': 'Service',
+  '@id': `${SITE_URL}/#service`,
+  name: 'Gestión de caja para pequeños negocios',
+  serviceType: 'Software de control de caja y finanzas para emprendedores',
+  description:
+    'Cachink es un servicio de gestión de caja para pequeños negocios mexicanos. Permite registrar ventas y egresos en segundos, llevar el control financiero diario y generar estados financieros para contadores, sin necesidad de hojas de Excel ni conocimientos contables.',
+  provider: { '@id': `${SITE_URL}/#organization` },
+  areaServed: { '@type': 'Country', name: 'México' },
+  availableChannel: {
+    '@type': 'ServiceChannel',
+    serviceUrl: SITE_URL,
+    availableLanguage: { '@type': 'Language', name: 'Spanish', alternateName: 'es-MX' },
+  },
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Planes Cachink',
+    itemListElement: [
+      { '@type': 'Offer', name: 'Plan Gratis', price: '0', priceCurrency: 'MXN' },
+      { '@type': 'Offer', name: 'Plan Pro', price: '149', priceCurrency: 'MXN' },
+      { '@type': 'Offer', name: 'Plan Contador', price: '299', priceCurrency: 'MXN' },
+    ],
+  },
+}
+
+// FAQPage — built from the single source of truth in landing/copy.jsx
 const faqPage = {
   '@type': 'FAQPage',
   '@id': `${SITE_URL}/#faq`,
-  mainEntity: [
-    {
-      '@type': 'Question',
-      name: '¿Para quién es Cachink?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Cachink es para dueños de pequeños negocios en México: panaderías, cafeterías, tiendas de barrio, talleres mecánicos y cualquier negocio que maneje caja diaria.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: '¿Cómo funciona Cachink?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Registras cada venta o egreso en menos de 3 segundos. La app muestra tus ventas de hoy, del mes y el efectivo en caja de forma instantánea. Puedes exportar estados financieros para tu contador.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: '¿Funciona sin internet?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Sí. Cachink funciona completamente offline. Tus ventas se sincronizan cuando vuelva la conexión.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: '¿Cuánto cuesta Cachink?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'El Plan Gratis es $0 para siempre e incluye ventas y egresos ilimitados. El Plan Pro cuesta $149 MXN al mes e incluye multi-dispositivo, Panel Director y estados financieros NIF. El Plan Contador cuesta $299 MXN al mes e incluye hasta 10 negocios y exportación fiscal.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: '¿En qué dispositivos está disponible?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Cachink está disponible en iOS (iPhone) y Android.',
-      },
-    },
-  ],
+  mainEntity: FAQ_ITEMS.map(({ q, a }) => ({
+    '@type': 'Question',
+    name: q,
+    acceptedAnswer: { '@type': 'Answer', text: a },
+  })),
 }
 
 export const structuredData = {
   '@context': 'https://schema.org',
-  '@graph': [organization, softwareApplication, faqPage],
+  '@graph': [organization, softwareApplication, service, faqPage],
+}
+
+// Per-article schema builder — used by /recursos article pages
+export function buildArticleSchema({ slug, title, description, datePublished }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    '@id': `${SITE_URL}/recursos/${slug}/#article`,
+    headline: title,
+    description,
+    datePublished,
+    dateModified: datePublished,
+    inLanguage: 'es-MX',
+    url: `${SITE_URL}/recursos/${slug}/`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/recursos/${slug}/` },
+    author: { '@id': `${SITE_URL}/#organization` },
+    publisher: { '@id': `${SITE_URL}/#organization` },
+  }
 }

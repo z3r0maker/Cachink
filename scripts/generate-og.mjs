@@ -15,7 +15,8 @@ import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
-const OUT = resolve(__dirname, '../public/og-image.png')
+const OUT     = resolve(__dirname, '../public/og-image.png')
+const OUT_WEBP = resolve(__dirname, '../public/og-image.webp')
 
 const W = 1200
 const H = 630
@@ -113,9 +114,18 @@ const svg = `
 
 const svgBuffer = Buffer.from(svg)
 
+// PNG (required by some OG parsers that don't accept WebP)
 await sharp(svgBuffer)
   .png({ compressionLevel: 9, palette: false })
   .toFile(OUT)
 
-const { size } = (await import('node:fs')).statSync(OUT)
-console.log(`✓  Generated public/og-image.png — ${(size / 1024).toFixed(1)} KB`)
+// WebP — ~60% smaller, used by modern crawlers and social platforms
+await sharp(svgBuffer)
+  .webp({ quality: 82 })
+  .toFile(OUT_WEBP)
+
+const fs = await import('node:fs')
+const pngKB  = (fs.statSync(OUT).size     / 1024).toFixed(1)
+const webpKB = (fs.statSync(OUT_WEBP).size / 1024).toFixed(1)
+console.log(`✓  Generated public/og-image.png  — ${pngKB} KB`)
+console.log(`✓  Generated public/og-image.webp — ${webpKB} KB`)

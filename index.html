@@ -4,9 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<!-- ── Font loading (preconnect + async, no render-blocking @import) ─ -->
+<!-- ── Font loading (preconnect + preload hero weight + async sheet) ── -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Preload the 800-weight woff2 used in the hero h1 — eliminates FOUT on LCP element.
+     URL is stable for Plus Jakarta Sans 800; re-verify if Google rotates the hash. -->
+<link rel="preload" as="font" type="font/woff2" crossorigin
+      href="https://fonts.gstatic.com/s/plusjakartasans/v8/LDIoaomQNQcsA88c7O9yZ4KMCoOg4Ko50yys9Ts.woff2">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"></noscript>
 
@@ -22,7 +26,15 @@
 <meta property="og:url"          content="__SITE_URL__/">
 <meta property="og:title"        content="Cachink · Finanzas para emprendedores">
 <meta property="og:description"  content="Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.">
+<!-- WebP variant first — modern crawlers and social platforms prefer it -->
+<meta property="og:image"        content="__SITE_URL__/og-image.webp">
+<meta property="og:image:type"   content="image/webp">
+<meta property="og:image:width"  content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt"    content="Cachink — Tu caja, clara. Cada día.">
+<!-- PNG fallback for parsers that don't accept WebP -->
 <meta property="og:image"        content="__SITE_URL__/og-image.png">
+<meta property="og:image:type"   content="image/png">
 <meta property="og:image:width"  content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt"    content="Cachink — Tu caja, clara. Cada día.">
@@ -37,6 +49,15 @@
 <!-- ── Favicons ───────────────────────────────────────────────────── -->
 <link rel="icon"             type="image/png" sizes="32x32"   href="/assets/favicon-32.png">
 <link rel="apple-touch-icon"                  sizes="180x180" href="/assets/apple-touch-icon.png">
+
+<!-- ── Mexico geo signals + PWA/browser chrome ───────────────────── -->
+<meta name="geo.region"                   content="MX">
+<meta name="geo.placename"                content="México">
+<meta name="theme-color"                  content="#FFD60A">
+<meta name="application-name"             content="Cachink">
+<meta name="apple-mobile-web-app-title"   content="Cachink">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 
 <!-- ── Analytics (injected at build time from VITE_PLAUSIBLE_DOMAIN) ─ -->
 __PLAUSIBLE_SNIPPET__

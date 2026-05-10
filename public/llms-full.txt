@@ -1,0 +1,144 @@
+# Cachink — Especificación completa del producto
+
+> Aplicación móvil de gestión de caja para pequeños negocios mexicanos.
+> Sitio web: https://cachink.mx · Lanzamiento: verano 2026
+> Idioma: Español (México) · Disponible en iOS y Android
+
+---
+
+## Descripción
+
+Cachink es una aplicación móvil de finanzas diseñada específicamente para dueños de pequeños negocios en México. Resuelve el problema del control de caja diario: saber exactamente cuánto se vendió, cuánto se gastó y cuánto queda en efectivo, sin necesidad de hojas de Excel, software contable complejo ni conocimientos financieros avanzados.
+
+El nombre "Cachink" es onomatopéyico — evoca el sonido de una caja registradora, símbolo de que el negocio va bien.
+
+---
+
+## Problema que resuelve
+
+La mayoría de los pequeños negocios en México (panaderías, cafeterías, tiendas de barrio, talleres, consultorios) llevan el control de su caja en una libreta o de memoria. Esto genera tres problemas críticos:
+
+1. **Falta de visibilidad**: el dueño no sabe con exactitud cuánto ganó hoy, esta semana o este mes.
+2. **Errores de cálculo**: las cuentas manuales tienen errores; el efectivo no cuadra al final del día.
+3. **Dificultad para crecer**: sin datos financieros ordenados, es imposible negociar créditos, presentar estados financieros a un banco o entender qué días o productos son más rentables.
+
+---
+
+## Usuarios objetivo
+
+Cachink está diseñado para tres perfiles principales:
+
+**Dueño operativo**: maneja personalmente la caja todos los días. Necesita registrar cada venta en segundos, ver el corte del día de un toque y exportar la información a su contador al fin de mes. Prioriza velocidad y simplicidad sobre funcionalidades avanzadas.
+
+**Dueño director**: tiene empleados que capturan ventas. Necesita un panel de supervisión (Panel Director) que le muestre KPIs financieros — utilidad del mes, liquidez, cuentas por cobrar — sin poder modificar registros. Accede desde su teléfono en cualquier momento.
+
+**Contador o administrador multi-negocio**: gestiona las finanzas de varios establecimientos. Necesita exportar estados financieros en formato NIF, ver comparativas entre negocios y gestionar permisos de acceso por usuario.
+
+---
+
+## Industrias de uso frecuente
+
+- Panaderías y pastelerías
+- Cafeterías y restaurantes pequeños
+- Tiendas de barrio (misceláneas, abarrotes)
+- Talleres mecánicos y eléctricos
+- Consultorios médicos y dentales
+- Salones de belleza y estéticas
+- Servicios de limpieza y jardinería
+- Pequeños comercios de ropa y calzado
+
+---
+
+## Funcionalidades principales
+
+### Registro de ventas e ingresos
+- Formulario de 3 campos: monto, concepto, método de pago
+- Registro en menos de 3 segundos
+- Métodos de pago: efectivo, tarjeta, transferencia (SPEI), CoDi, QR y métodos personalizados
+- Funcionamiento completamente offline — sin internet, sin interrupciones
+
+### Registro de egresos
+- Categorías personalizables (insumos, nómina, servicios, renta, etc.)
+- Asociación a proveedor opcional
+- Comprobante fotográfico adjuntable
+
+### Vista de caja (módulo Operativo)
+- Ventas del día y del mes en tiempo real
+- Efectivo disponible en caja
+- Movimientos del día con hora y método de pago
+- Corte de día con un toque — genera resumen imprimible o compartible
+
+### Panel Director
+- KPIs financieros: ventas, utilidad bruta, liquidez, meta de mes
+- Cuentas por cobrar con días de vencimiento
+- Comparativa semana a semana y mes a mes
+- Acceso de solo lectura — no puede modificar registros
+
+### Estados financieros
+- Estado de resultados mensual en formato NIF
+- Balance de caja
+- Exportación en PDF y CSV
+- Compatible con los formatos que solicitan los contadores en México
+
+### Multi-dispositivo y multi-usuario (Plan Pro y Contador)
+- Sincronización en tiempo real entre dispositivos
+- Roles: dueño, capturista, contador (solo lectura)
+- Hasta 10 negocios en una sola cuenta (Plan Contador)
+
+---
+
+## Precios
+
+| Plan      | Precio          | Dispositivos | Negocios | Características clave                              |
+|-----------|-----------------|--------------|----------|----------------------------------------------------|
+| Gratis    | $0 / siempre    | 1            | 1        | Ventas + egresos ilimitados, corte de día, CSV     |
+| Pro       | $149 MXN / mes  | ilimitados   | 1        | Multi-dispositivo, Panel Director, NIF, WhatsApp   |
+| Contador  | $299 MXN / mes  | ilimitados   | hasta 10 | Todo Pro + exportación fiscal, multi-usuario       |
+
+Los primeros suscriptores de la lista de espera reciben 3 meses gratis en cualquier plan de pago.
+
+---
+
+## Especificaciones técnicas
+
+- **Plataformas**: iOS (iPhone, iPad) y Android
+- **Modo offline**: almacenamiento local en el dispositivo; sincronización automática al recuperar conexión
+- **Seguridad**: cifrado en tránsito (TLS 1.3) y en reposo (AES-256)
+- **Idioma**: Español (México) — sin traducciones al inglés en la interfaz
+- **Privacidad**: los datos del negocio son del usuario; Cachink no los vende ni los comparte con terceros
+
+---
+
+## Preguntas frecuentes
+
+**¿Es una alternativa a Excel?**
+Sí. Cachink elimina la necesidad de hojas de cálculo para el control de caja diario. No requiere fórmulas, no se corrompe y genera reportes automáticamente.
+
+**¿Funciona sin internet?**
+Sí, completamente. Es offline-first: los datos viven en el dispositivo y se sincronizan cuando hay conexión disponible.
+
+**¿Maneja CFDI o facturación electrónica?**
+No directamente. Cachink se enfoca en el control de caja interno. Puede convivir con sistemas de facturación existentes — el ingreso o egreso se registra en Cachink independientemente de si se emite factura.
+
+**¿Reemplaza a un contador?**
+No. Cachink genera la información financiera que el contador necesita, facilitando y agilizando su trabajo, pero no sustituye el asesoramiento fiscal profesional.
+
+**¿Cuánto tiempo toma aprender a usarlo?**
+Menos de 5 minutos. El diseño está pensado para personas sin experiencia tecnológica o contable.
+
+**¿Mis datos están seguros?**
+Sí. Los datos son del usuario y solo del usuario. Sin publicidad, sin venta de datos, sin acceso de terceros.
+
+---
+
+## Información de contacto y presencia digital
+
+- **Sitio web**: https://cachink.mx
+- **Correo**: hola@cachink.mx
+- **País de operación**: México
+- **Idioma**: Español (México)
+- **Redes sociales**: Instagram, TikTok, X (Twitter), YouTube — @cachink
+
+---
+
+*Ver también: /llms.txt (resumen corto) · /recursos (artículos y guías para emprendedores)*
