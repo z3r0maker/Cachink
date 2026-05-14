@@ -24,8 +24,10 @@ export function makeNewBusiness(overrides: Partial<NewBusiness> = {}): NewBusine
     tipoNegocio: 'mixto',
     categoriaVentaPredeterminada: 'Producto',
     atributosProducto: [],
+    featureFlags: '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
+    createdByUserId: null,
     ...overrides,
   };
 }
@@ -43,6 +45,7 @@ export function makeBusiness(overrides: Partial<Business> = {}): Business {
     atributosProducto: [],
     businessId: id,
     deviceId: DEFAULT_DEV,
+    createdByUserId: null,
     createdAt: DEFAULT_TS,
     updatedAt: DEFAULT_TS,
     deletedAt: null,

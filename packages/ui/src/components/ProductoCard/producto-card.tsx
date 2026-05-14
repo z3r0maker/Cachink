@@ -18,6 +18,7 @@ import type { AttrDef, Product } from '@cachink/domain';
 import { Card } from '../Card/card';
 import { Tag } from '../Tag/tag';
 import { colors, typography } from '../../theme';
+import { PRODUCT_BG_COLORS } from '../../product-colors';
 
 export interface ProductoCardProps {
   readonly producto: Product;
@@ -44,29 +45,47 @@ function StockBadge({ stock, umbral }: { stock: number; umbral: number }): React
       borderRadius={8}
       alignSelf="flex-start"
       flexDirection="row"
+      flexWrap="nowrap"
+      flexShrink={0}
       gap={4}
       alignItems="center"
     >
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={11} color={fg}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={11}
+        color={fg}
+        flexShrink={0}
+      >
         Stock
       </Text>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={12} color={fg}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={12}
+        color={fg}
+        flexShrink={0}
+      >
         {stock}
       </Text>
     </View>
   );
 }
 
-function AttrChips({ producto, defs }: { producto: Product; defs: readonly AttrDef[] }): ReactElement | null {
+function AttrChips({
+  producto,
+  defs,
+}: {
+  producto: Product;
+  defs: readonly AttrDef[];
+}): ReactElement | null {
   if (defs.length === 0) return null;
-  const chips = defs
-    .filter((d) => producto.atributos[d.clave] !== undefined)
-    .slice(0, 3);
+  const chips = defs.filter((d) => producto.atributos[d.clave] !== undefined).slice(0, 3);
   if (chips.length === 0) return null;
   return (
     <View flexDirection="row" gap={4} flexWrap="wrap" marginTop={4}>
       {chips.map((d) => (
-        <Tag key={d.clave} variant="neutral">
+        <Tag key={d.clave} variant="soft">
           {producto.atributos[d.clave] ?? ''}
         </Tag>
       ))}
@@ -74,14 +93,33 @@ function AttrChips({ producto, defs }: { producto: Product; defs: readonly AttrD
   );
 }
 
-function CardHeader(props: { producto: ProductoCardProps['producto']; mode?: string; onLongPress?: (p: ProductoCardProps['producto']) => void }): ReactElement {
+function CardHeader(props: {
+  producto: ProductoCardProps['producto'];
+  mode?: string;
+  onLongPress?: (p: ProductoCardProps['producto']) => void;
+}): ReactElement {
   return (
     <View flexDirection="row" justifyContent="space-between" alignItems="flex-start">
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.black} numberOfLines={2} flex={1}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={14}
+        color={colors.black}
+        numberOfLines={2}
+        flex={1}
+      >
         {props.producto.nombre}
       </Text>
       {props.mode === 'manage' && (
-        <Text fontFamily={typography.fontFamily} fontSize={16} color={colors.gray400} onPress={(e) => { e?.stopPropagation?.(); props.onLongPress?.(props.producto); }}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={16}
+          color={colors.gray400}
+          onPress={(e) => {
+            e?.stopPropagation?.();
+            props.onLongPress?.(props.producto);
+          }}
+        >
           ⋯
         </Text>
       )}
@@ -91,11 +129,24 @@ function CardHeader(props: { producto: ProductoCardProps['producto']; mode?: str
 
 export function ProductoCard(props: ProductoCardProps): ReactElement {
   const { producto, stock, atributoDefs = [], mode, disabled } = props;
+  const bg = PRODUCT_BG_COLORS[producto.colorFondo ?? 'white'];
   return (
-    <Card testID={props.testID ?? `producto-tile-${producto.id}`} padding="sm" onPress={disabled ? undefined : () => props.onPress(producto)} ariaLabel={producto.nombre}>
+    <Card
+      testID={props.testID ?? `producto-tile-${producto.id}`}
+      padding="sm"
+      onPress={disabled ? undefined : () => props.onPress(producto)}
+      ariaLabel={producto.nombre}
+      backgroundColor={bg}
+    >
       <View gap={4}>
         <CardHeader producto={producto} mode={mode} onLongPress={props.onLongPress} />
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={16} color={colors.black}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black}
+          fontSize={16}
+          color={colors.black}
+          numberOfLines={1}
+        >
           {formatMoney(producto.precioVentaCentavos)}
         </Text>
         {stock !== undefined && <StockBadge stock={stock} umbral={producto.umbralStockBajo} />}

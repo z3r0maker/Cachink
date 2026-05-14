@@ -8,7 +8,7 @@ import type { ReactElement } from 'react';
 import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
 import { InMemoryClientsRepository, InMemorySalesRepository, makeNewSale } from '@cachink/testing';
 import { CxCCard } from '../../src/screens/DirectorHome/cxc-card';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';

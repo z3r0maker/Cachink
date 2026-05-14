@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { newEntityId, type BusinessId, type DeviceId } from '@cachink/domain';
+import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '@cachink/domain';
 import type { AppConfigRepository } from '@cachink/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
@@ -104,6 +104,12 @@ async function hydrateAppConfig(
   if (!existingDeviceId) {
     await repo.set(APP_CONFIG_KEYS.deviceId, deviceId);
   }
+  // Seed ISR defaults on first run so the DB owns the rates.
+  const existingIsrDefaults = await repo.get(APP_CONFIG_KEYS.isrDefaults);
+  if (!existingIsrDefaults) {
+    await repo.set(APP_CONFIG_KEYS.isrDefaults, JSON.stringify(ISR_DEFAULTS_SEED));
+  }
+
   const mode = await readAndMigrateMode(repo, resolveLegacyLan);
   const rawBusinessId = await repo.get(APP_CONFIG_KEYS.currentBusinessId);
   const notificationsEnabled = parseBool(

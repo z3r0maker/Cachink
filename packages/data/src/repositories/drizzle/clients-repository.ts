@@ -3,7 +3,8 @@
  */
 
 import { and, asc, eq, isNull, like } from 'drizzle-orm';
-import type { BusinessId, ClientId, DeviceId, IsoTimestamp, NewClient } from '@cachink/domain';
+import type { BusinessId, ClientId, DeviceId,
+  UserId, IsoTimestamp, NewClient } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { Client, ClientPatch, ClientsRepository } from '../clients-repository.js';
 import { clients } from '../../schema/index.js';
@@ -14,10 +15,12 @@ type ClientRow = typeof clients.$inferSelect;
 export class DrizzleClientsRepository implements ClientsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewClient): Promise<Client> {
@@ -31,6 +34,7 @@ export class DrizzleClientsRepository implements ClientsRepository {
       nota: input.nota ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -104,6 +108,7 @@ export class DrizzleClientsRepository implements ClientsRepository {
       nota: row.nota,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

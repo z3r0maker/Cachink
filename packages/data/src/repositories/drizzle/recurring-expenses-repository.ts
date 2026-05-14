@@ -6,6 +6,7 @@ import { and, asc, eq, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
+  UserId,
   IsoDate,
   IsoTimestamp,
   NewRecurringExpense,
@@ -25,10 +26,12 @@ type RecurringExpenseRow = typeof recurringExpenses.$inferSelect;
 export class DrizzleRecurringExpensesRepository implements RecurringExpensesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewRecurringExpense): Promise<RecurringExpense> {
@@ -47,6 +50,7 @@ export class DrizzleRecurringExpensesRepository implements RecurringExpensesRepo
       activo: input.activo ?? true,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -112,6 +116,7 @@ export class DrizzleRecurringExpensesRepository implements RecurringExpensesRepo
       activo: row.activo,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

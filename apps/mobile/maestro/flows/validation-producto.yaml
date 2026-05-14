@@ -1,0 +1,46 @@
+# Test form validation on the NuevoProducto modal — submit with
+# empty nombre and verify the error prevents submission.
+#
+# Covers validation edge case: empty nombre → error shown,
+# modal stays open.
+#
+# Precondition: wizard complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/validation-producto.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Open the NuevoProducto modal.
+- tapOn:
+    id: "stock-nuevo-producto"
+
+# The modal should be open.
+- assertVisible: "Nuevo producto"
+
+# Leave nombre empty and fill the required cost fields.
+- tapOn:
+    id: "producto-costo"
+- inputText: "5"
+- tapOn:
+    id: "producto-precio-venta"
+- inputText: "15"
+
+# Try to submit with empty nombre.
+- tapOn:
+    id: "producto-submit"
+
+# Modal should still be open — validation prevents submission
+# when nombre is empty.
+- assertVisible: "Nuevo producto"

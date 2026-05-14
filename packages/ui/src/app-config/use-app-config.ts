@@ -12,7 +12,7 @@
  */
 
 import { create } from 'zustand';
-import type { BusinessId, DeviceId } from '@cachink/domain';
+import type { BusinessId, DeviceId, UserId, UserRole } from '@cachink/domain';
 import type { AppConfigState, AppMode, Role } from './types';
 
 interface AppConfigStore extends AppConfigState {
@@ -22,6 +22,10 @@ interface AppConfigStore extends AppConfigState {
   setRole: (role: Role | null) => void;
   setNotificationsEnabled: (next: boolean) => void;
   setCrashReportingEnabled: (next: boolean | null) => void;
+  setUserId: (id: UserId | null) => void;
+  setUserRole: (role: UserRole | null) => void;
+  setMustChangePin: (must: boolean) => void;
+  setDiscoveryShown: (shown: boolean) => void;
   /** Full reset — used by tests and by the "re-run wizard" settings action. */
   reset: () => void;
   /** Hydration complete marker — flips once the provider finishes loading. */
@@ -36,6 +40,10 @@ const INITIAL_STATE: AppConfigState = {
   hydrated: false,
   notificationsEnabled: true,
   crashReportingEnabled: null,
+  userId: null,
+  userRole: null,
+  mustChangePin: false,
+  discoveryShown: false,
 };
 
 export const useAppConfigStore = create<AppConfigStore>((set) => ({
@@ -47,6 +55,10 @@ export const useAppConfigStore = create<AppConfigStore>((set) => ({
   setHydrated: (hydrated) => set({ hydrated }),
   setNotificationsEnabled: (notificationsEnabled) => set({ notificationsEnabled }),
   setCrashReportingEnabled: (crashReportingEnabled) => set({ crashReportingEnabled }),
+  setUserId: (userId) => set({ userId }),
+  setUserRole: (userRole) => set({ userRole }),
+  setMustChangePin: (mustChangePin) => set({ mustChangePin }),
+  setDiscoveryShown: (discoveryShown) => set({ discoveryShown }),
   reset: () => set(INITIAL_STATE),
 }));
 
@@ -86,3 +98,35 @@ export const useCrashReportingEnabled = (): boolean | null =>
 
 export const useSetCrashReportingEnabled = (): ((next: boolean | null) => void) =>
   useAppConfigStore((s) => s.setCrashReportingEnabled);
+
+// --- User auth selectors ---
+
+/** Selector: currently authenticated user ID (null = not logged in). */
+export const useUserId = (): UserId | null => useAppConfigStore((s) => s.userId);
+
+/** Setter: update the current user ID (login/logout). */
+export const useSetUserId = (): ((id: UserId | null) => void) =>
+  useAppConfigStore((s) => s.setUserId);
+
+/** Selector: role from the authenticated User record. */
+export const useUserRole = (): UserRole | null => useAppConfigStore((s) => s.userRole);
+
+/** Setter: update user role (set on login from User.role). */
+export const useSetUserRole = (): ((role: UserRole | null) => void) =>
+  useAppConfigStore((s) => s.setUserRole);
+
+/** Selector: whether the current user must change PIN. */
+export const useMustChangePin = (): boolean => useAppConfigStore((s) => s.mustChangePin);
+
+/** Setter: update mustChangePin flag. */
+export const useSetMustChangePin = (): ((must: boolean) => void) =>
+  useAppConfigStore((s) => s.setMustChangePin);
+
+// --- Feature discovery selectors ---
+
+/** Selector: whether the feature-discovery screen has been shown. */
+export const useDiscoveryShown = (): boolean => useAppConfigStore((s) => s.discoveryShown);
+
+/** Setter: mark feature-discovery as shown. */
+export const useSetDiscoveryShown = (): ((shown: boolean) => void) =>
+  useAppConfigStore((s) => s.setDiscoveryShown);

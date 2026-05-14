@@ -17,6 +17,10 @@ Brand-art files consumed by components inside `@cachink/ui`.
 | File | Consumed by | Phase |
 |---|---|---|
 | `logo.png` | `<BrandLogo />` — to be built in `packages/ui/src/components/BrandLogo/` | Phase 1A-M2 |
+| `role-director-dark.png` | `<RoleIllustration>` in `AppShell` (Director on yellow bg fallback) | Audit M-1 |
+| `role-director-light.png` | `<RoleIllustration>` in `AppShell` (Director on dark bg) | Audit M-1 |
+| `role-operativo-dark.png` | `<RoleIllustration>` in `AppShell` (Operativo on yellow bg) | Audit M-1 |
+| `role-operativo-light.png` | `<RoleIllustration>` in `AppShell` (Operativo on dark bg fallback) | Audit M-1 |
 
 ## Why this directory exists before the component
 

@@ -1,0 +1,66 @@
+# Registrar pago with method + nota fields (full form).
+#
+# Verifies:
+#   1. Open RegistrarPagoModal for a pending crédito venta
+#   2. registrar-pago-modal visible
+#   3. Change pago-metodo to "Transferencia"
+#   4. Fill pago-nota with reference text
+#   5. Submit → pago registered
+#
+# Precondition: wizard complete, a Crédito venta for "Carla Márquez"
+# exists (run venta-credito.yaml first). Some balance still pending.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/venta-credito.yaml
+#   maestro test apps/mobile/maestro/flows/registrar-pago-full-form.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Clientes screen to access the pending venta.
+- runFlow: shared/navigate-to-clientes.yaml
+
+# Tap the cliente with the pending crédito venta.
+- tapOn: "Carla Márquez"
+- assertVisible:
+    id: "cliente-detail-screen"
+
+# Tap the first pending venta's "Registrar pago" button.
+# Use a generic selector since the ID includes the venta UUID.
+- tapOn: "Registrar pago"
+
+# Verify the pago modal is visible.
+- assertVisible:
+    id: "registrar-pago-modal"
+
+# Change payment method to Transferencia.
+- tapOn:
+    id: "pago-metodo"
+- tapOn: "Transferencia"
+
+# Fill nota with a SPEI reference.
+- tapOn:
+    id: "pago-nota"
+- inputText: "Transferencia SPEI ref 12345"
+
+# Fill monto.
+- tapOn:
+    id: "pago-monto"
+- eraseText
+- inputText: "200"
+
+# Submit.
+- tapOn:
+    id: "pago-submit"
+
+# Modal closes — pago registered.
+- assertNotVisible:
+    id: "registrar-pago-modal"

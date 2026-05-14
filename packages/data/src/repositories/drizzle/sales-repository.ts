@@ -10,6 +10,7 @@ import type {
   BusinessId,
   ClientId,
   DeviceId,
+  UserId,
   IsoDate,
   IsoTimestamp,
   NewSale,
@@ -29,10 +30,12 @@ type SaleRow = typeof sales.$inferSelect;
 export class DrizzleSalesRepository implements SalesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewSale): Promise<Sale> {
@@ -42,6 +45,7 @@ export class DrizzleSalesRepository implements SalesRepository {
     const row = {
       id,
       fecha: input.fecha,
+      hora: input.hora ?? null,
       concepto: input.concepto,
       categoria: input.categoria,
       monto: input.monto,
@@ -52,6 +56,7 @@ export class DrizzleSalesRepository implements SalesRepository {
       cantidad: input.cantidad ?? 1,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -163,6 +168,7 @@ export class DrizzleSalesRepository implements SalesRepository {
     return {
       id: row.id as SaleId,
       fecha: row.fecha as IsoDate,
+      hora: row.hora ?? null,
       concepto: row.concepto,
       categoria: row.categoria as SaleCategory,
       monto: row.monto,
@@ -173,6 +179,7 @@ export class DrizzleSalesRepository implements SalesRepository {
       cantidad: row.cantidad,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

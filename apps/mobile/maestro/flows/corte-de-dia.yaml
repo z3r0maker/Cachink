@@ -12,9 +12,16 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 # The CorteDeDia card surfaces on the Operativo home after 18:00.
 - tapOn:
     id: "tab-ventas"
+# Gap I (Phase 17): assert the route-level wrapper testID.
+- assertVisible:
+    id: "corte-home-card-ventas"
 - assertVisible:
     id: "corte-de-dia-card"
 

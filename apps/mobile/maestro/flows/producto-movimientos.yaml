@@ -1,0 +1,38 @@
+# Navigate to the Productos → Movimientos tab and verify that
+# the movement history renders.
+#
+# Precondition: wizard + product + at least one movement exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
+#   maestro test apps/mobile/maestro/flows/producto-movimientos.yaml
+#
+# The producto-entrada-stock flow creates an entrada movement.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Switch to the Movimientos sub-tab.
+- tapOn:
+    id: "productos-tab-movimientos"
+
+# Verify the Movimientos screen renders with at least one entry.
+- assertVisible:
+    id: "movimientos-screen"
+- assertVisible:
+    id: "movimientos-list"
+
+# Verify the list is NOT empty (no empty-state shown).
+- assertNotVisible:
+    id: "empty-movimientos"

@@ -6,10 +6,13 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
+  UserId,
   InventoryCategory,
   InventoryUnit,
   IsoTimestamp,
   NewProduct,
+  ProductColor,
+  UsoProducto,
   ProductId,
   ProductoTipo,
 } from '@cachink/domain';
@@ -23,10 +26,12 @@ type ProductRow = typeof products.$inferSelect;
 export class DrizzleProductsRepository implements ProductsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewProduct): Promise<Product> {
@@ -44,8 +49,11 @@ export class DrizzleProductsRepository implements ProductsRepository {
       seguirStock: input.seguirStock ?? true,
       precioVentaCentavos: input.precioVentaCentavos,
       atributos: JSON.stringify(input.atributos ?? {}),
+      colorFondo: input.colorFondo ?? 'white',
+      usoProducto: input.usoProducto ?? 'venta',
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -94,6 +102,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
     if (patch.categoria !== undefined) updates.categoria = patch.categoria;
     if (patch.unidad !== undefined) updates.unidad = patch.unidad;
     if (patch.umbralStockBajo !== undefined) updates.umbralStockBajo = patch.umbralStockBajo;
+    if (patch.colorFondo !== undefined) updates.colorFondo = patch.colorFondo;
     await this.#db.update(products).set(updates).where(eq(products.id, id)).run();
     return this.findById(id);
   }
@@ -129,8 +138,11 @@ export class DrizzleProductsRepository implements ProductsRepository {
       seguirStock: row.seguirStock ?? true,
       precioVentaCentavos: row.precioVentaCentavos,
       atributos: this.#parseAtributos(row.atributos),
+      colorFondo: (row.colorFondo ?? 'white') as ProductColor,
+      usoProducto: (row.usoProducto ?? 'venta') as UsoProducto,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

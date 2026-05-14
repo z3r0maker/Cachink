@@ -21,6 +21,7 @@ import {
   useSalesRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useFeatureFlag } from './use-feature-flags';
 
 export type RegistrarVentaResult = UseMutationResult<Sale, Error, NewSale, unknown>;
 
@@ -31,10 +32,11 @@ export function useRegistrarVenta(): RegistrarVentaResult {
   const movements = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const stockEnabled = useFeatureFlag('stock');
 
   const useCase = useMemo(
-    () => new RegistrarVentaUseCase(sales, clients, products, movements),
-    [sales, clients, products, movements],
+    () => new RegistrarVentaUseCase(sales, clients, products, movements, { stockEnabled }),
+    [sales, clients, products, movements, stockEnabled],
   );
 
   return useMutation<Sale, Error, NewSale>({

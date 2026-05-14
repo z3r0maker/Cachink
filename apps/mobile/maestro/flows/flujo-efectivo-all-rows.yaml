@@ -1,0 +1,59 @@
+# Flujo de Efectivo — assert all rows including Inversión.
+#
+# Extends estados-flujo-efectivo.yaml which asserts flujo-operacion,
+# flujo-total, and flujo-diverging-bar. This flow scrolls to also
+# verify the flujo-inversion row.
+#
+# Verifies:
+#   1. Navigate to Estados → Flujo
+#   2. flujo-operacion visible (already covered)
+#   3. Scroll to flujo-inversion → visible
+#   4. flujo-total visible (already covered)
+#
+# Precondition: wizard complete, at least one venta + one egreso exist.
+# Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/flujo-efectivo-all-rows.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Switch to the Flujo sub-tab.
+- tapOn:
+    id: "estados-tab-flujo"
+- extendedWaitUntil:
+    visible:
+      id: "flujo-operacion"
+    timeout: 5000
+
+# --- Verify all sections render ---
+- assertVisible:
+    id: "flujo-operacion"
+
+# Scroll to the Inversión row (below Operación).
+- scrollUntilVisible:
+    element:
+      id: "flujo-inversion"
+    direction: DOWN
+    timeout: 5000
+
+# Verify the total row.
+- scrollUntilVisible:
+    element:
+      id: "flujo-total"
+    direction: DOWN
+    timeout: 5000

@@ -25,8 +25,14 @@ export * from './in-memory-clients-repository.js';
 export * from './in-memory-client-payments-repository.js';
 export * from './in-memory-day-closes-repository.js';
 export * from './in-memory-recurring-expenses-repository.js';
+export * from './in-memory-users-repository.js';
+export * from './in-memory-caja-turnos-repository.js';
+export * from './in-memory-conversion-recetas-repository.js';
+export * from './in-memory-conversions-repository.js';
+export * from './in-memory-auditorias-inventario-repository.js';
+export * from './in-memory-entregas-credito-repository.js';
+export * from './in-memory-director-alerts-repository.js';
 export * from './fixtures/index.js';
-export * from './mock-repository-provider.js';
 // `TEST_DEVICE_ID` is a shared runtime constant used by both the in-memory
 // tests inside this package and downstream contract tests. Re-exported
 // here so the main barrel stays the single import target for runtime

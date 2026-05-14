@@ -12,10 +12,7 @@ import { type IsoDate, type NewSale, type PaymentMethod, type SaleCategory } fro
 import type { Business, Product } from '@cachink/domain';
 
 /** Derive SaleCategory from a Product's tipo. */
-export function deriveVentaCategoria(
-  producto: Product,
-  _business: Business,
-): SaleCategory {
+export function deriveVentaCategoria(producto: Product, _business: Business): SaleCategory {
   return producto.tipo === 'servicio' ? 'Servicio' : 'Producto';
 }
 

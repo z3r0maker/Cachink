@@ -55,19 +55,44 @@ done
 
 set -- "${POSITIONAL_ARGS[@]+"${POSITIONAL_ARGS[@]}"}"
 
+# ──────────── Resolve target device (UDID or "booted") ──────────
+# Set MAESTRO_DEVICE_UDID to target a specific simulator (e.g. an
+# iPad) instead of whatever happens to be booted. run-ipad.sh sets
+# this automatically; callers can also set it manually.
+if [[ -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
+  SIM_TARGET="$MAESTRO_DEVICE_UDID"
+  # Resolve the display name for log output.
+  SIM_NAME=$(xcrun simctl list devices -j 2>/dev/null \
+    | python3 -c "
+import sys, json, os
+data = json.load(sys.stdin)
+udid = os.environ.get('MAESTRO_DEVICE_UDID', '')
+for _, devs in data.get('devices', {}).items():
+    for d in devs:
+        if d.get('udid') == udid:
+            print(d.get('name', udid))
+            sys.exit(0)
+print(udid)
+" 2>/dev/null || echo "$MAESTRO_DEVICE_UDID")
+  echo "🎯  Device: $SIM_NAME ($MAESTRO_DEVICE_UDID)"
+else
+  SIM_TARGET="booted"
+  echo "🎯  Device: booted simulator (set MAESTRO_DEVICE_UDID to pin a specific device)"
+fi
+
 # ─────────────────── Verify the app is installed ────────────────
-APP_DATA=$(xcrun simctl get_app_container booted "$APP_ID" data 2>/dev/null || true)
+APP_DATA=$(xcrun simctl get_app_container "$SIM_TARGET" "$APP_ID" data 2>/dev/null || true)
 
 if [[ -z "$APP_DATA" ]]; then
-  echo "❌  $APP_ID is not installed on the booted simulator."
+  echo "❌  $APP_ID is not installed on the target simulator."
   echo "    Run first:  cd apps/mobile && npx expo run:ios"
   exit 1
 fi
 
 # ────────────────── Optionally kill the app first ───────────────
 if [[ "$KILL_APP" == true ]]; then
-  echo "🔪  Terminating $APP_ID on the booted simulator..."
-  xcrun simctl terminate booted "$APP_ID" 2>/dev/null || true
+  echo "🔪  Terminating $APP_ID on $SIM_TARGET..."
+  xcrun simctl terminate "$SIM_TARGET" "$APP_ID" 2>/dev/null || true
   sleep 1
 fi
 
@@ -111,11 +136,17 @@ fi
 # We retry the Maestro test up to MAX_RETRIES times to handle
 # transient Metro-reconnection failures.
 
+# Build optional --device flag for maestro test
+MAESTRO_DEVICE_FLAG=()
+if [[ -n "${MAESTRO_DEVICE_UDID:-}" ]]; then
+  MAESTRO_DEVICE_FLAG=(--device "$MAESTRO_DEVICE_UDID")
+fi
+
 if [[ $# -gt 0 ]]; then
   ATTEMPT=1
   while [[ $ATTEMPT -le $MAX_RETRIES ]]; do
-    echo "🚀  Attempt $ATTEMPT/$MAX_RETRIES: maestro test $*"
-    if maestro test "$@"; then
+    echo "🚀  Attempt $ATTEMPT/$MAX_RETRIES: maestro test ${MAESTRO_DEVICE_FLAG[*]+"${MAESTRO_DEVICE_FLAG[*]}"} $*"
+    if maestro test "${MAESTRO_DEVICE_FLAG[@]+"${MAESTRO_DEVICE_FLAG[@]}"}" "$@"; then
       echo "✅  Flow passed on attempt $ATTEMPT."
       exit 0
     fi

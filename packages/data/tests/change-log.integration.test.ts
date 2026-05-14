@@ -82,6 +82,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
+        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7TE3',
         ...audit(),
       })
       .run();
@@ -238,6 +239,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
+        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(),
       })
       .run();
@@ -364,6 +366,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
+        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(DEV_B),
       })
       .run();

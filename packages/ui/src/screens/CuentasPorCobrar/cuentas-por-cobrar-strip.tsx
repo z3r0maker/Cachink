@@ -81,6 +81,7 @@ export function CuentasPorCobrarStrip(props: CuentasPorCobrarStripProps): ReactE
         keyExtractor={(row) => row.cliente.id}
         renderItem={(row) => <Row row={row} />}
         ListEmptyComponent={<EmptyState icon="check" title={t('cuentasPorCobrar.empty')} />}
+        scrollEnabled={false}
         testID="cuentas-por-cobrar-list"
       />
     </View>

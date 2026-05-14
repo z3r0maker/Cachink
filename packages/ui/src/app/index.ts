@@ -18,6 +18,13 @@ export {
   useClientPaymentsRepository,
   useDayClosesRepository,
   useRecurringExpensesRepository,
+  useUsersRepository,
+  useCajaTurnosRepository,
+  useConversionRecetasRepository,
+  useConversionsRepository,
+  useAuditoriasInventarioRepository,
+  useEntregasCreditoRepository,
+  useDirectorAlertsRepository,
   type Repositories,
   type RepositoryProviderProps,
 } from './repository-provider';

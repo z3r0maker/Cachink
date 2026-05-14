@@ -1,0 +1,20 @@
+# Reusable subflow: enable the caja feature flag as Director.
+#
+# Navigates to Otros → Funciones and ensures the caja flag is ON.
+# If the flag is already ON, the optional tap is a no-op.
+#
+# Precondition: user is authenticated as Director.
+#
+# Usage (from any caja-dependent flow):
+#   - runFlow: shared/enable-caja-flag.yaml
+appId: mx.cachink.mobile
+---
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+
+# Tap the caja switch — optional so it's safe if already ON.
+- tapOn:
+    id: "flag-caja-switch"
+    optional: true

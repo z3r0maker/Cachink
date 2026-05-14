@@ -55,7 +55,7 @@ function PrimaryMovFields({ state, update, t, error }: FieldProps): ReactElement
         label={t('movimiento.cantidadLabel')}
         value={state.cantidad}
         onChange={(v) => update({ cantidad: v })}
-        note={error}
+        error={error}
         min={1}
         testID="movimiento-cantidad"
         returnKeyType="next"

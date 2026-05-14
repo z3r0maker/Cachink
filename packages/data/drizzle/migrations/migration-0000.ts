@@ -5,11 +5,8 @@
  * (desktop) bundlers can `import` the SQL without a filesystem resolver.
  * See `./index.ts` for the rationale.
  *
- * This migration includes the full schema as of Phase 1 + UXD-R3 +
- * ADR-048 (smart catalog columns on products/sales/businesses, and
- * productoId NOT NULL on sales). Since the app hasn't shipped publicly,
- * we fold all schema changes into the initial migration rather than
- * maintaining a chain of ALTER TABLE migrations.
+ * This is the ORIGINAL schema. Later migrations (0002 smart catalog,
+ * 0003 productoId NOT NULL, 0004 hora, etc.) incrementally add columns.
  */
 
 export const migration0000Sql = `CREATE TABLE \`businesses\` (
@@ -18,9 +15,6 @@ export const migration0000Sql = `CREATE TABLE \`businesses\` (
 \t\`regimen_fiscal\` text NOT NULL,
 \t\`isr_tasa\` real NOT NULL,
 \t\`logo_url\` text,
-\t\`tipo_negocio\` text NOT NULL DEFAULT 'mixto',
-\t\`categoria_venta_predeterminada\` text NOT NULL DEFAULT 'Producto',
-\t\`atributos_producto\` text NOT NULL DEFAULT '[]',
 \t\`business_id\` text NOT NULL,
 \t\`device_id\` text NOT NULL,
 \t\`created_at\` text NOT NULL,
@@ -42,8 +36,6 @@ CREATE TABLE \`sales\` (
 \t\`metodo\` text NOT NULL,
 \t\`cliente_id\` text,
 \t\`estado_pago\` text NOT NULL,
-\t\`producto_id\` text NOT NULL,
-\t\`cantidad\` integer NOT NULL DEFAULT 1,
 \t\`business_id\` text NOT NULL,
 \t\`device_id\` text NOT NULL,
 \t\`created_at\` text NOT NULL,
@@ -74,10 +66,6 @@ CREATE TABLE \`products\` (
 \t\`costo_unit_centavos\` numeric NOT NULL,
 \t\`unidad\` text NOT NULL,
 \t\`umbral_stock_bajo\` integer DEFAULT 3 NOT NULL,
-\t\`tipo\` text NOT NULL DEFAULT 'producto',
-\t\`seguir_stock\` integer NOT NULL DEFAULT 1,
-\t\`precio_venta_centavos\` text NOT NULL DEFAULT '0',
-\t\`atributos\` text NOT NULL DEFAULT '{}',
 \t\`business_id\` text NOT NULL,
 \t\`device_id\` text NOT NULL,
 \t\`created_at\` text NOT NULL,

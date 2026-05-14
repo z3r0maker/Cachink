@@ -1,0 +1,45 @@
+# Wizard Step 1 → tap join-existing link → Step 3 renders → tap back → Step 1.
+# Covers Gap T (Phase 17): wizard-step1-join-existing-link testID.
+# Validates navigation without requiring cloud/LAN backend.
+#
+# testIDs exercised:
+#   wizard-step1-join-existing-link, wizard-step3-lan, wizard-step3-cloud,
+#   wizard-back
+#
+# Precondition: fresh install. Run via the wrapper script:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-join-existing-link.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+
+- assertVisible: "¡Bienvenido a Cachink!"
+
+# Verify the "join existing" secondary link is visible.
+- assertVisible:
+    id: "wizard-step1-join-existing-link"
+
+# Tap the join-existing link → Step 3 (join existing) renders.
+- tapOn:
+    id: "wizard-step1-join-existing-link"
+- extendedWaitUntil:
+    visible:
+      id: "wizard-step3-lan"
+    timeout: 5000
+
+# Verify both join cards render (LAN + Cloud).
+- assertVisible:
+    id: "wizard-step3-lan"
+- assertVisible:
+    id: "wizard-step3-cloud"
+
+# Tap back → returns to Step 1.
+- tapOn:
+    id: "wizard-back"
+- assertVisible:
+    id: "wizard-step1-solo-card"
+- assertVisible:
+    id: "wizard-step1-multi-card"

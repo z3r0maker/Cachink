@@ -37,7 +37,13 @@ function SettingsRow({
 export function IsrDisclaimer(props: IsrDisclaimerProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <Card testID={props.testID ?? 'isr-disclaimer'} variant="yellow" padding="md" fullWidth>
+    <Card
+      testID={props.testID ?? 'isr-disclaimer'}
+      variant="yellow"
+      elevation="raised"
+      padding="md"
+      fullWidth
+    >
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}

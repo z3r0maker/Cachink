@@ -1,26 +1,20 @@
 /**
  * Settings — the Director-reachable settings screen (P1C-M1-T04).
  *
- * Phase 1C ships a minimal read-only view: the selected mode, the
- * business identity, and an es-MX language chip (disabled). The
- * "Re-ejecutar asistente" button clears the mode on the AppConfig store
- * + routes to `/wizard` — wiring that lives in the app-shell route.
- *
- * Pure UI — receives business + mode via props so the component is
- * trivially testable without a repo fixture. Tail rows live in
- * `./settings-tail.tsx` to stay under the 200-line file budget
- * (CLAUDE.md §4.4).
+ * Receives business + mode via props. Tail rows in `./settings-tail.tsx`.
  */
 
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { Business } from '@cachink/domain';
-import { Card, SectionTitle, Tag } from '../../components/index';
+import { Btn, Card, Icon, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { AppMode } from '../../app-config/index';
 import { colors, typography } from '../../theme';
 import type { FeedbackActionProps } from './feedback-action';
+import { EditBusinessModal } from './edit-business-modal';
+import { IsrDefaultsCard } from './isr-defaults-card';
 import { LanSection, SettingsTail } from './settings-tail';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -65,6 +59,8 @@ export interface SettingsProps {
    */
   readonly onCheckForUpdates?: () => void;
   readonly checkForUpdatesStatus?: string;
+  /** Director only: navigates to Funciones del negocio screen. */
+  readonly onOpenFunciones?: () => void;
   readonly testID?: string;
 }
 
@@ -113,8 +109,17 @@ function SettingsRow({ label, value }: { label: string; value: string }): ReactE
   );
 }
 
-function BusinessCard({ business, t }: { business: Business | null; t: T }): ReactElement {
-  const isrPct = business ? `${Math.round(business.isrTasa * 100)}%` : '—';
+function BusinessCard({
+  business,
+  t,
+  onEdit,
+}: {
+  business: Business | null;
+  t: T;
+  onEdit?: () => void;
+}): ReactElement {
+  // Use 10_000/100 trick to preserve up to 2 decimal places (RESICO = 1.25%).
+  const isrPct = business ? `${Math.round(business.isrTasa * 10_000) / 100}%` : '—';
   return (
     <Card testID="settings-business-card" padding="md" fullWidth>
       <SettingsRow
@@ -123,6 +128,19 @@ function BusinessCard({ business, t }: { business: Business | null; t: T }): Rea
       />
       <SettingsRow label={t('settings.regimenLabel')} value={business?.regimenFiscal ?? '—'} />
       <SettingsRow label={t('settings.isrLabel')} value={isrPct} />
+      {business && onEdit && (
+        <View marginTop={8}>
+          <Btn
+            variant="ghost"
+            size="sm"
+            onPress={onEdit}
+            testID="settings-edit-business"
+            icon={<Icon name="pencil" size={16} color={colors.black} />}
+          >
+            {t('settings.editBusinessLabel')}
+          </Btn>
+        </View>
+      )}
     </Card>
   );
 }
@@ -147,27 +165,63 @@ function LanguageCard({ t }: { t: T }): ReactElement {
   );
 }
 
-export function Settings(props: SettingsProps): ReactElement {
-  const { t } = useTranslation();
+function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void }): ReactElement {
   return (
     <ScrollView
       testID={props.testID ?? 'settings-screen'}
       style={{ flex: 1, backgroundColor: colors.offwhite }}
       contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 24 }}
     >
-      <SectionTitle title={t('settings.title')} />
+      <SectionTitle title={props.t('settings.title')} />
       <Card testID="settings-mode-card" padding="md" fullWidth>
         <SettingsRow
-          label={t('settings.modoLabel')}
-          value={t(modeLabelKey(props.mode) as 'wizard.modeNames.local')}
+          label={props.t('settings.modoLabel')}
+          value={props.t(modeLabelKey(props.mode) as 'wizard.modeNames.local')}
         />
       </Card>
-      <BusinessCard business={props.business} t={t} />
+      <BusinessCard business={props.business} t={props.t} onEdit={props.onEdit} />
+      <IsrDefaultsCard />
+      {props.onOpenFunciones && (
+        <Card testID="settings-funciones" padding="md" fullWidth onPress={props.onOpenFunciones}>
+          <View flexDirection="row" alignItems="center" justifyContent="space-between">
+            <View flexDirection="row" alignItems="center" gap={8}>
+              <Icon name="sliders" size={18} color={colors.black} />
+              <Text
+                fontFamily={typography.fontFamily}
+                fontWeight={typography.weights.semibold}
+                fontSize={15}
+                color={colors.black}
+              >
+                {props.t('settings.funciones')}
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={16} color={colors.gray400} />
+          </View>
+        </Card>
+      )}
       {(props.mode === 'lan-server' || props.mode === 'lan-client') && props.lanDetails && (
         <LanSection lan={props.lanDetails} />
       )}
-      <LanguageCard t={t} />
-      <SettingsTail props={props} t={t} />
+      <LanguageCard t={props.t} />
+      <SettingsTail props={props} t={props.t} />
     </ScrollView>
+  );
+}
+
+export function Settings(props: SettingsProps): ReactElement {
+  const { t } = useTranslation();
+  const [editOpen, setEditOpen] = useState(false);
+
+  return (
+    <>
+      <SettingsScrollContent {...props} t={t} onEdit={() => setEditOpen(true)} />
+      {props.business && (
+        <EditBusinessModal
+          open={editOpen}
+          onClose={() => setEditOpen(false)}
+          business={props.business}
+        />
+      )}
+    </>
   );
 }

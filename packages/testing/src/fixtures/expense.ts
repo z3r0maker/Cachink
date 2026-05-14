@@ -40,6 +40,7 @@ export function makeExpense(overrides: Partial<Expense> = {}): Expense {
     gastoRecurrenteId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
+    createdByUserId: null,
     createdAt: DEFAULT_TS,
     updatedAt: DEFAULT_TS,
     deletedAt: null,

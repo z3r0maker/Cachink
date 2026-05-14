@@ -80,12 +80,36 @@ export interface RunMigrationsOptions {
 }
 
 /**
+ * Module-level mutex — prevents concurrent migration runs caused by
+ * React.StrictMode double-mounting effects in dev mode (see ADR for
+ * iPad crash). The second caller awaits the first run's promise.
+ */
+let migrationPromise: Promise<void> | null = null;
+
+/**
  * Apply any pending migrations in journal order. Safe to call on every app
  * launch — the bookkeeping table skips already-applied migrations.
+ *
+ * Guarded by a module-level mutex so that React StrictMode double-mount
+ * (two concurrent calls) serializes rather than races on the same DB file.
  */
 export async function runMigrations(
   db: CachinkDatabase,
   options: RunMigrationsOptions = {},
+): Promise<void> {
+  // Guard against concurrent calls (React StrictMode double-mount)
+  if (migrationPromise) return migrationPromise;
+  migrationPromise = runMigrationsInternal(db, options);
+  try {
+    await migrationPromise;
+  } finally {
+    migrationPromise = null;
+  }
+}
+
+async function runMigrationsInternal(
+  db: CachinkDatabase,
+  options: RunMigrationsOptions,
 ): Promise<void> {
   await db.run(sql.raw(CREATE_TRACKER_SQL));
   const applied = await loadAppliedTags(db);

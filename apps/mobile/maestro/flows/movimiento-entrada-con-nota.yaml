@@ -1,0 +1,58 @@
+# Stock entrada with costo + nota fields.
+#
+# Verifies:
+#   1. Navigate to product → tap "Entrada"
+#   2. Fill cantidad + costo
+#   3. Fill movimiento-nota (delivery note reference)
+#   4. Submit → stock increases
+#
+# Precondition: wizard complete, product "Tortilla" exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/movimiento-entrada-con-nota.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Tap the product card to open ProductoDetailPopover.
+- tapOn: "Tortilla"
+- assertVisible:
+    id: "producto-detail-popover"
+
+# Tap "Entrada" to open MovimientoModal.
+- tapOn:
+    id: "producto-detail-entrada"
+
+# MovimientoModal opens.
+- assertVisible:
+    id: "movimiento-modal"
+
+# Enter quantity.
+- tapOn:
+    id: "movimiento-cantidad"
+- eraseText
+- inputText: "25"
+
+# Fill the nota field (delivery reference).
+- tapOn:
+    id: "movimiento-nota"
+- inputText: "Recibo entrega #4521 Proveedor ABC"
+
+# Submit the movement.
+- tapOn:
+    id: "movimiento-submit"
+
+# Modal closes — stock increased.
+- assertNotVisible:
+    id: "movimiento-modal"

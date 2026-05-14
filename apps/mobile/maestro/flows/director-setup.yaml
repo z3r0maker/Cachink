@@ -1,0 +1,59 @@
+# DirectorSetup standalone E2E — first-user setup during wizard.
+#
+# Verifies that after wizard + BusinessForm, the DirectorSetup gate
+# appears and that filling all fields + submit auto-logs in as Director.
+#
+# Precondition: fresh install. Run via wrapper:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/director-setup.yaml
+#
+# This flow is essentially the same as wizard-local-standalone.yaml
+# but is kept separate for targeted regression of the setup gate.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+
+- assertVisible: "¡Bienvenido a Cachink!"
+
+# Step 1 → Solo → Step 2A → Local
+- tapOn:
+    id: "wizard-step1-solo-card"
+- extendedWaitUntil:
+    visible:
+      id: "wizard-step2a-local"
+    timeout: 5000
+- tapOn:
+    id: "wizard-step2a-local-card"
+
+# Consent step
+- extendedWaitUntil:
+    visible:
+      id: "consent-no"
+    timeout: 5000
+    optional: true
+- tapOn:
+    id: "consent-no"
+    optional: true
+
+# BusinessForm
+- extendedWaitUntil:
+    visible:
+      id: "business-nombre"
+    timeout: 10000
+- tapOn:
+    id: "business-nombre"
+- inputText: "Negocio Setup Test"
+- tapOn:
+    id: "business-submit"
+
+# DirectorSetup gate appears
+- runFlow: shared/director-setup.yaml
+
+# Verify Director Home renders — auto-logged in as Director.
+- assertVisible:
+    id: "tab-estados"
+- assertVisible:
+    id: "director-home-route"

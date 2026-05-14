@@ -7,8 +7,10 @@
  *      cliente must exist.
  *   3. Validate that the referenced producto exists (ADR-048).
  *   4. Delegate persistence to SalesRepository.create().
- *   5. When the producto has `seguirStock=true`, auto-create a salida
- *      MovimientoInventario with `cantidad` units.
+ *   5. When stock flag is ON AND the producto has `seguirStock=true`,
+ *      auto-create a salida MovimientoInventario with `cantidad` units.
+ *
+ * Phase 5: `stockEnabled` flag supersedes `tipoNegocio` for stock decisions.
  */
 
 import { NewSaleSchema, today, type NewSale, type Sale } from '@cachink/domain';
@@ -20,34 +22,40 @@ import type {
 } from '@cachink/data';
 import type { UseCase } from '../_use-case.js';
 
+export interface RegistrarVentaConfig {
+  /** Business-level stock feature flag. When false, no stock movements. */
+  readonly stockEnabled?: boolean;
+}
+
 export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
   readonly #sales: SalesRepository;
   readonly #clients: ClientsRepository;
   readonly #products: ProductsRepository;
   readonly #movements: InventoryMovementsRepository;
+  readonly #stockEnabled: boolean;
 
   constructor(
     sales: SalesRepository,
     clients: ClientsRepository,
     products: ProductsRepository,
     movements: InventoryMovementsRepository,
+    config?: RegistrarVentaConfig,
   ) {
     this.#sales = sales;
     this.#clients = clients;
     this.#products = products;
     this.#movements = movements;
+    this.#stockEnabled = config?.stockEnabled ?? true;
   }
 
   async execute(input: NewSale): Promise<Sale> {
     const parsed = NewSaleSchema.parse(input);
 
-    // Every sale must reference an existing product (ADR-048)
     const producto = await this.#products.findById(parsed.productoId);
     if (!producto) {
       throw new TypeError(`Producto ${parsed.productoId} no existe`);
     }
 
-    // Crédito invariant
     if (parsed.metodo === 'Crédito') {
       if (!parsed.clienteId) {
         throw new TypeError('Venta en Crédito requiere clienteId');
@@ -58,10 +66,14 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
       }
     }
 
-    const sale = await this.#sales.create(parsed);
+    const hora = parsed.hora ?? (() => {
+      const d = new Date();
+      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    })();
+    const sale = await this.#sales.create({ ...parsed, hora });
 
-    // Auto-stock salida — productoId always present, just check seguirStock
-    if (producto.seguirStock) {
+    // Business-level stock flag BEFORE product-level seguirStock
+    if (this.#stockEnabled && producto.seguirStock) {
       await this.#movements.create({
         productoId: parsed.productoId,
         fecha: parsed.fecha ?? today(),

@@ -7,9 +7,10 @@ vi.mock('react-native-safe-area-context', () => ({
 }));
 
 describe('TopBar (native variant)', () => {
-  it('applies the safe-area top inset on mobile', () => {
+  it('applies the safe-area top inset + buffer on mobile', () => {
     renderWithProviders(<TopBar title="Ventas" />);
 
-    expect(getComputedStyle(screen.getByTestId('top-bar')).paddingTop).toBe('24px');
+    // insets.top (24) + STATUS_BAR_BUFFER (8) = 32
+    expect(getComputedStyle(screen.getByTestId('top-bar')).paddingTop).toBe('32px');
   });
 });

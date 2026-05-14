@@ -11,6 +11,8 @@ import { formatMoney, type FlujoDeEfectivo, type Money } from '@cachink/domain';
 import { Card, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { DivergingBar } from '../../charts/DivergingBar/index';
+import { moneyToNumber } from '../../charts/chart-tokens';
 
 export interface FlujoEfectivoScreenProps {
   readonly flujo: FlujoDeEfectivo | null;
@@ -96,6 +98,13 @@ export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactEleme
             label={t('estados.flujoInversion')}
             value={props.flujo.inversion}
             testID="flujo-inversion"
+          />
+          <DivergingBar
+            items={[
+              { label: t('estados.flujoOperacion'), value: moneyToNumber(props.flujo.operacion) },
+              { label: t('estados.flujoInversion'), value: moneyToNumber(props.flujo.inversion) },
+            ]}
+            testID="flujo-diverging-bar"
           />
           <Kpi
             label={t('estados.flujoTotal')}

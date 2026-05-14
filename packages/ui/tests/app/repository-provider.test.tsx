@@ -38,7 +38,7 @@ import {
   useRepositories,
   useSalesRepository,
 } from '../../src/app/index';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { renderWithProviders, screen } from '../test-utils';
 
 function RepoProbe(): ReactElement {
@@ -64,7 +64,7 @@ describe('useRepositories', () => {
         <RepoProbe />
       </MockRepositoryProvider>,
     );
-    expect(screen.getByTestId('count').textContent).toBe('11');
+    expect(screen.getByTestId('count').textContent).toBe('18');
   });
 });
 
@@ -161,7 +161,7 @@ describe('buildDrizzleRepositories', () => {
     const deviceId = '01JPHK00000000000000000007' as DeviceId;
     const repos = buildDrizzleRepositories(db, deviceId);
     const count = Object.keys(repos).length;
-    expect(count).toBe(11);
+    expect(count).toBe(18);
     expect(Object.values(repos).every((r) => r !== null && typeof r === 'object')).toBe(true);
   });
 });

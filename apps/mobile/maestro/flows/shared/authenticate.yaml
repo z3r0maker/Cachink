@@ -1,0 +1,37 @@
+# Reusable subflow: authenticate via QuickSwitch if the login screen
+# is showing. Skips instantly if already past auth (tabs visible).
+#
+# Uses the test PIN established by director-setup.yaml: 123456
+#
+# Usage (from any post-wizard flow):
+#   - launchApp
+#   - runFlow: shared/dismiss-modals.yaml
+#   - runFlow: shared/authenticate.yaml
+appId: mx.cachink.mobile
+---
+# If QuickSwitchScreen is visible, tap the Director avatar to select
+# the role. accessibilityText is "D, Director" — fuzzy-match on
+# "Director" works for both Director and Director/Dueño label variants.
+# Falls through silently if already past auth (avatar not visible).
+- tapOn:
+    text: "Director"
+    optional: true
+
+# If a PIN prompt appeared after selecting the user, enter the test
+# PIN established by director-setup.yaml: 123456.
+- tapOn:
+    id: "pin-input"
+    optional: true
+- inputText: "123456"
+
+- tapOn:
+    id: "login-submit"
+    optional: true
+
+# Wait for tabs to mount (either we just logged in, or we were
+# already authenticated and this fires immediately).
+- extendedWaitUntil:
+    visible:
+      id: "tab-ventas"
+    timeout: 10000
+    optional: true

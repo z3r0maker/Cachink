@@ -18,8 +18,15 @@
 
 import { type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { type NewBusiness } from '@cachink/domain';
-import { Btn, Input, SafeAreaSpacer, SectionTitle } from '../../components/index';
+import { type IsrDefaults, type NewBusiness } from '@cachink/domain';
+import {
+  Btn,
+  FloatingCoinsBackground,
+  Input,
+  SafeAreaSpacer,
+  SectionTitle,
+} from '../../components/index';
+import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
@@ -29,7 +36,7 @@ import {
   type BusinessFormSubmitInput,
   type FormErrors,
   type Regimen,
-  REGIMENES,
+  REGIMEN_CARDS,
 } from './business-form-state';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -39,6 +46,12 @@ export interface BusinessFormProps {
   readonly onSubmit: (input: BusinessFormSubmitInput) => void;
   readonly submitting?: boolean;
   readonly testID?: string;
+  /**
+   * DB-stored ISR defaults keyed by regime. When provided, changing the
+   * regime picker auto-fills the ISR field with the matching default.
+   * Omit in tests that don't need the behaviour.
+   */
+  readonly isrDefaults?: IsrDefaults;
   /**
    * Optional back-affordance handler. When supplied, a ghost "Atrás" button
    * renders below the primary submit button. The `BusinessGate` in
@@ -81,13 +94,11 @@ function FormFields(props: FormFieldsProps): ReactElement {
         testID="business-nombre"
         returnKeyType="next"
       />
-      <Input
-        type="select"
+      <OptionCardGroup
         label={t('wizard.businessForm.regimenLabel')}
         value={props.regimen}
-        onChange={(value) => props.setRegimen(value as Regimen)}
-        options={REGIMENES}
-        note={props.errors.regimenFiscal}
+        onChange={(v) => props.setRegimen(v)}
+        options={REGIMEN_CARDS}
         testID="business-regimen"
       />
       <Input
@@ -192,7 +203,7 @@ function FormColumn({ s, t, onSubmit, submitting, onBack }: FormColumnProps): Re
 
 export function BusinessForm(props: BusinessFormProps): ReactElement {
   const { t } = useTranslation();
-  const s = useBusinessFormState(props.defaults);
+  const s = useBusinessFormState({ defaults: props.defaults, isrDefaults: props.isrDefaults });
 
   function handleSubmit(): void {
     const result = parseForm(s.nombre, s.regimen, s.isrTasaPct, t('wizard.businessForm.required'));
@@ -205,27 +216,18 @@ export function BusinessForm(props: BusinessFormProps): ReactElement {
   }
 
   return (
-    <View
-      testID={props.testID ?? 'business-form'}
-      flex={1}
-      padding={24}
-      backgroundColor={colors.offwhite}
-      // Center the form column horizontally + vertically on tablets and
-      // desktops, matching the sibling Wizard and RolePicker gate screens.
-      // On a phone the inner width:100% + maxWidth:480 collapses gracefully
-      // to the available width, so this also works at 320-px viewports.
-      alignItems="center"
-      justifyContent="center"
-    >
-      <SafeAreaSpacer />
-      <FormColumn
-        s={s}
-        t={t}
-        onSubmit={handleSubmit}
-        submitting={props.submitting === true}
-        onBack={props.onBack}
-      />
-    </View>
+    <FloatingCoinsBackground testID={props.testID ?? 'business-form'}>
+      <View flex={1} padding={24} alignItems="center" justifyContent="center">
+        <SafeAreaSpacer />
+        <FormColumn
+          s={s}
+          t={t}
+          onSubmit={handleSubmit}
+          submitting={props.submitting === true}
+          onBack={props.onBack}
+        />
+      </View>
+    </FloatingCoinsBackground>
   );
 }
 

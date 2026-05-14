@@ -20,10 +20,14 @@ import type { Indicadores } from '@cachink/domain';
 import { Card, Gauge, Kpi, SectionTitle } from '../../components/index';
 import type { GaugeTone } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
+import { Sparkline } from '../../charts/Sparkline/index';
+import { colors } from '../../theme';
+import type { MarginTrend } from '../../hooks/use-indicadores-trend';
 
 export interface IndicadoresScreenProps {
   readonly indicadores: Indicadores | null;
   readonly periodoLabel: string;
+  readonly trend?: MarginTrend | null;
   readonly testID?: string;
 }
 
@@ -42,10 +46,12 @@ function percentValue(value: number | null): number {
 function MarginGauge({
   label,
   value,
+  trend,
   testID,
 }: {
   label: string;
   value: number | null;
+  trend?: readonly number[];
   testID: string;
 }): ReactElement {
   return (
@@ -58,6 +64,16 @@ function MarginGauge({
         showValue
         valueFormatter={(v) => (value === null ? '—' : `${v}%`)}
       />
+      {trend !== undefined && trend.length >= 2 && (
+        <View marginTop={8}>
+          <Sparkline
+            points={trend.map((v) => v * 100)}
+            color={marginTone(value) === 'positive' ? colors.green : colors.red}
+            height={28}
+            testID={`${testID}-sparkline`}
+          />
+        </View>
+      )}
     </Card>
   );
 }
@@ -90,9 +106,11 @@ type T = ReturnType<typeof useTranslation>['t'];
 
 function MarginsSection({
   indicadores,
+  trend,
   t,
 }: {
   indicadores: Indicadores | null;
+  trend?: MarginTrend | null;
   t: T;
 }): ReactElement {
   return (
@@ -100,16 +118,19 @@ function MarginsSection({
       <MarginGauge
         label={t('estados.indicadoresMargenBruto')}
         value={indicadores?.margenBruto ?? null}
+        trend={trend?.margenBruto}
         testID="indicador-margen-bruto"
       />
       <MarginGauge
         label={t('estados.indicadoresMargenOperativo')}
         value={indicadores?.margenOperativo ?? null}
+        trend={trend?.margenOperativo}
         testID="indicador-margen-operativo"
       />
       <MarginGauge
         label={t('estados.indicadoresMargenNeto')}
         value={indicadores?.margenNeto ?? null}
+        trend={trend?.margenNeto}
         testID="indicador-margen-neto"
       />
     </>
@@ -158,7 +179,7 @@ export function IndicadoresScreen(props: IndicadoresScreenProps): ReactElement {
   return (
     <View testID={props.testID ?? 'indicadores-screen'} gap={12}>
       <SectionTitle title={props.periodoLabel} />
-      <MarginsSection indicadores={props.indicadores} t={t} />
+      <MarginsSection indicadores={props.indicadores} trend={props.trend} t={t} />
       <NumericSection indicadores={props.indicadores} t={t} nanLabel={nanLabel} />
     </View>
   );

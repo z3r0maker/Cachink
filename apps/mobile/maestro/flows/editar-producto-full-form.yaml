@@ -1,0 +1,73 @@
+# Edit an existing producto changing ALL optional fields (SKU, unidad, categoría, color).
+#
+# Extends editar-producto.yaml which only edits nombre + umbral.
+# This flow exercises the remaining uncovered fields:
+#   - editar-producto-categoria
+#   - editar-producto-sku
+#   - editar-producto-unidad
+#   - editar-producto-color-fondo
+#
+# Precondition: wizard + at least one producto exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/editar-producto-full-form.yaml
+#
+# The inventario-producto flow creates "Tortilla".
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Verify the existing product is visible in the stock list.
+- assertVisible: "Tortilla"
+
+# Swipe the product row left to reveal the edit action.
+- swipe:
+    id: "stock-list"
+    direction: LEFT
+    startX: 300
+    endX: 50
+
+# Wait for the EditarProductoModal to appear.
+- extendedWaitUntil:
+    visible:
+      id: "editar-producto-modal"
+    timeout: 5000
+
+# --- Set SKU ---
+- tapOn:
+    id: "editar-producto-sku"
+- inputText: "TORT-001"
+
+# --- Set unidad ---
+- tapOn:
+    id: "editar-producto-unidad"
+- tapOn: "kg"
+
+# --- Set categoría ---
+- tapOn:
+    id: "editar-producto-categoria"
+- tapOn: "Alimentos"
+
+# --- Set color de fondo ---
+- tapOn:
+    id: "editar-producto-color-fondo"
+
+# Submit the edit.
+- tapOn:
+    id: "editar-producto-submit"
+
+# Modal closes and the product name is still visible.
+- assertNotVisible:
+    id: "editar-producto-modal"
+- assertVisible: "Tortilla"

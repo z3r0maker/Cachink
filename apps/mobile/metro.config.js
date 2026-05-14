@@ -29,6 +29,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'packages/ui/node_modules'),
+  path.resolve(workspaceRoot, 'packages/application/node_modules'),
 ];
 config.resolver.disableHierarchicalLookup = true;
 

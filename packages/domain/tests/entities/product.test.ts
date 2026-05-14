@@ -5,6 +5,7 @@ import {
   InventoryCategoryEnum,
   InventoryUnitEnum,
   ProductoTipoEnum,
+  ProductColorEnum,
 } from '../../src/entities/index.js';
 
 const BIZ_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
@@ -106,6 +107,21 @@ describe('ProductSchema', () => {
       ProductSchema.parse({ ...validProduct, tipo: 'combo' }),
     ).toThrow();
   });
+
+  it('defaults colorFondo to white when omitted', () => {
+    const { colorFondo: _c, ...rest } = validProduct;
+    const parsed = ProductSchema.parse(rest);
+    expect(parsed.colorFondo).toBe('white');
+  });
+
+  it('accepts a valid colorFondo value', () => {
+    const parsed = ProductSchema.parse({ ...validProduct, colorFondo: 'purple' });
+    expect(parsed.colorFondo).toBe('purple');
+  });
+
+  it('rejects an unknown colorFondo value', () => {
+    expect(() => ProductSchema.parse({ ...validProduct, colorFondo: 'neon' })).toThrow();
+  });
 });
 
 describe('NewProductSchema', () => {
@@ -150,6 +166,18 @@ describe('NewProductSchema', () => {
     expect(parsed.tipo).toBe('servicio');
     expect(parsed.seguirStock).toBe(false);
   });
+
+  it('defaults colorFondo to white', () => {
+    const parsed = NewProductSchema.parse({
+      nombre: 'Playera algodón',
+      categoria: 'Producto Terminado',
+      costoUnitCentavos: 12_000n,
+      unidad: 'pza',
+      precioVentaCentavos: 15_000n,
+      businessId: BIZ_ID,
+    });
+    expect(parsed.colorFondo).toBe('white');
+  });
 });
 
 describe('Inventory enums', () => {
@@ -182,5 +210,13 @@ describe('Inventory enums', () => {
 describe('ProductoTipoEnum', () => {
   it('enumerates producto and servicio', () => {
     expect(ProductoTipoEnum.options).toEqual(['producto', 'servicio']);
+  });
+});
+
+describe('ProductColorEnum', () => {
+  it('enumerates the eight color options', () => {
+    expect(ProductColorEnum.options).toEqual([
+      'white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray',
+    ]);
   });
 });

@@ -28,5 +28,11 @@ export const products = sqliteTable('products', {
   seguirStock: integer('seguir_stock', { mode: 'boolean' }).notNull().default(true),
   precioVentaCentavos: numeric('precio_venta_centavos', { mode: 'bigint' }).notNull().default(0n),
   atributos: text('atributos').notNull().default('{}'),
+  colorFondo: text('color_fondo', {
+    enum: ['white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray'],
+  }).notNull().default('white'),
+  usoProducto: text('uso_producto', {
+    enum: ['venta', 'materia-prima', 'ambos'],
+  }).notNull().default('venta'),
   ...auditColumns,
 });

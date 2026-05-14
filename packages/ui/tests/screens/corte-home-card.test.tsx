@@ -19,8 +19,8 @@ import {
   InMemoryDayClosesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
-  MockRepositoryProvider,
 } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { CorteHomeCard } from '../../src/screens/CorteDeDia/corte-home-card';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

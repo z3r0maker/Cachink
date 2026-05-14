@@ -1,0 +1,38 @@
+# Director Home — assert structural grid container and render slots.
+#
+# Extends director-home.yaml which asserts individual cards but
+# never the structural containers:
+#   - director-home-grid
+#   - director-home-hero-slot (utilidad-hero renders inside it)
+#   - director-home-corte-slot (corte card render slot)
+#
+# Precondition: wizard complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/director-home-structure.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# After authenticate.yaml, Director is on Home.
+- assertVisible:
+    id: "director-home-route"
+
+# Assert the structural grid container.
+- assertVisible:
+    id: "director-home-grid"
+
+# Assert the hero slot (utilidad-hero renders inside it).
+- assertVisible:
+    id: "director-home-hero-slot"
+
+# Assert the corte slot (always present as a container, even if
+# the corte card only shows after 18:00).
+- assertVisible:
+    id: "director-home-corte-slot"

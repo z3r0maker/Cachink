@@ -6,6 +6,7 @@
 
 -- Step 1: Remove dev rows with NULL producto_id (pre-launch cleanup).
 DELETE FROM sales WHERE producto_id IS NULL;
+--> statement-breakpoint
 
 -- Step 2: Recreate the table with producto_id NOT NULL.
 CREATE TABLE sales_new (
@@ -25,6 +26,7 @@ CREATE TABLE sales_new (
   updated_at TEXT NOT NULL,
   deleted_at TEXT
 );
+--> statement-breakpoint
 
 -- Step 3: Copy all surviving rows.
 INSERT INTO sales_new
@@ -32,12 +34,15 @@ INSERT INTO sales_new
          cliente_id, estado_pago, producto_id, cantidad,
          business_id, device_id, created_at, updated_at, deleted_at
   FROM sales;
+--> statement-breakpoint
 
 -- Step 4: Drop old table (triggers go away with it).
 DROP TABLE sales;
+--> statement-breakpoint
 
 -- Step 5: Rename.
 ALTER TABLE sales_new RENAME TO sales;
+--> statement-breakpoint
 
 -- Step 6: Re-create the change-log triggers that were on the old table.
 CREATE TRIGGER trg_sales_ai AFTER INSERT ON sales
@@ -45,6 +50,7 @@ BEGIN
   INSERT INTO __cachink_change_log (table_name, row_id, row_updated_at, row_device_id, op)
   VALUES ('sales', NEW.id, NEW.updated_at, NEW.device_id, 'insert');
 END;
+--> statement-breakpoint
 
 CREATE TRIGGER trg_sales_au AFTER UPDATE ON sales
 BEGIN

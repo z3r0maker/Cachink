@@ -7,6 +7,7 @@ import { and, desc, eq, gte, isNull, like, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
+  UserId,
   ExpenseCategory,
   ExpenseId,
   IsoDate,
@@ -24,10 +25,12 @@ type ExpenseRow = typeof expenses.$inferSelect;
 export class DrizzleExpensesRepository implements ExpensesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewExpense): Promise<Expense> {
@@ -43,6 +46,7 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       gastoRecurrenteId: input.gastoRecurrenteId ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -72,6 +76,23 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
         ),
       )
       .orderBy(desc(expenses.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
+  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]> {
+    const rows = await this.#db
+      .select()
+      .from(expenses)
+      .where(
+        and(
+          gte(expenses.fecha, from),
+          lte(expenses.fecha, to),
+          eq(expenses.businessId, businessId),
+          isNull(expenses.deletedAt),
+        ),
+      )
+      .orderBy(desc(expenses.fecha), desc(expenses.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
   }
@@ -129,6 +150,24 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
     return this.findById(id);
   }
 
+  async findByGastoRecurrenteAndDate(
+    gastoRecurrenteId: string,
+    date: IsoDate,
+  ): Promise<Expense | null> {
+    const row = await this.#db
+      .select()
+      .from(expenses)
+      .where(
+        and(
+          eq(expenses.gastoRecurrenteId, gastoRecurrenteId),
+          eq(expenses.fecha, date),
+          isNull(expenses.deletedAt),
+        ),
+      )
+      .get();
+    return row ? this.#mapRow(row) : null;
+  }
+
   async delete(id: ExpenseId): Promise<void> {
     const ts = now();
     await this.#db
@@ -149,6 +188,7 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       gastoRecurrenteId: (row.gastoRecurrenteId ?? null) as RecurringExpenseId | null,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

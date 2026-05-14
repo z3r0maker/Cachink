@@ -106,6 +106,13 @@ export function describeProductsRepositoryContract(
       expect(updated?.costoUnitCentavos).toBe(5000n);
     });
 
+    it('update applies colorFondo patch', async () => {
+      const row = await repo.create(makeNewProduct({ businessId: BIZ_A }));
+      expect(row.colorFondo).toBe('white');
+      const updated = await repo.update(row.id, { colorFondo: 'blue' });
+      expect(updated?.colorFondo).toBe('blue');
+    });
+
     it('update returns null for a missing or soft-deleted producto', async () => {
       expect(await repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { nombre: 'X' })).toBeNull();
       const row = await repo.create(makeNewProduct({ businessId: BIZ_A }));

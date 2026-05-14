@@ -14,6 +14,8 @@ import { formatMoney, type BalanceGeneral, type Money } from '@cachink/domain';
 import { Card, Kpi, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { StackedBar } from '../../charts/StackedBar/index';
+import { moneyToNumber } from '../../charts/chart-tokens';
 
 export interface BalanceGeneralScreenProps {
   readonly balance: BalanceGeneral | null;
@@ -56,7 +58,7 @@ function Row(props: RowProps): ReactElement {
   );
 }
 
-function ActivoCard({
+function ActivoRows({
   balance,
   t,
 }: {
@@ -64,8 +66,7 @@ function ActivoCard({
   t: ReturnType<typeof useTranslation>['t'];
 }): ReactElement {
   return (
-    <Card testID="balance-activo-card" padding="md" fullWidth>
-      <SectionTitle title={t('estados.balanceActivo')} />
+    <>
       <Row
         label={t('estados.balanceActivoEfectivo')}
         value={balance.activo.efectivo}
@@ -81,11 +82,44 @@ function ActivoCard({
         value={balance.activo.cuentasPorCobrar}
         testID="balance-activo-cxc"
       />
+      <StackedBar
+        segments={[
+          {
+            label: t('estados.balanceActivoEfectivo'),
+            value: moneyToNumber(balance.activo.efectivo),
+            color: colors.green,
+          },
+          {
+            label: t('estados.balanceActivoInventarios'),
+            value: moneyToNumber(balance.activo.inventarios),
+            color: colors.blue,
+          },
+          {
+            label: t('estados.balanceActivoCxC'),
+            value: moneyToNumber(balance.activo.cuentasPorCobrar),
+            color: colors.warning,
+          },
+        ]}
+        testID="balance-activo-bar"
+      />
+    </>
+  );
+}
+
+function ActivoCard({
+  balance,
+  t,
+}: {
+  balance: BalanceGeneral;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <Card testID="balance-activo-card" padding="md" fullWidth>
+      <SectionTitle title={t('estados.balanceActivo')} />
+      <ActivoRows balance={balance} t={t} />
       <Kpi
         label={t('estados.balanceActivoTotal')}
         value={formatMoney(balance.activo.total)}
-        // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): mirror the right-
-        // aligned value column inside the Activo body rows above.
         align="right"
         testID="balance-activo-total"
       />

@@ -38,6 +38,10 @@ export const colors = {
   blueSoft: '#E5ECFF',
   warning: '#FFB800',
   warningSoft: '#FFF8E1',
+
+  // Product background (visual categorization)
+  purpleSoft: '#F0E5FF',
+  peachSoft: '#FFE8D6',
 } as const;
 
 export type ColorToken = keyof typeof colors;

@@ -63,10 +63,10 @@ function Title({ text }: { text: string }): ReactElement {
       fontWeight={typography.weights.black}
       fontSize={20}
       letterSpacing={typography.letterSpacing.tight}
-      // Audit 9.3 — modal titles like "Registrar pago de cliente"
+      // Audit 9.3 — modal titles like "¿Actualizar tasa de ISR?"
       // can exceed the modal-header width minus the close button +
-      // avatar slots. Cap to one line + ellipsis.
-      numberOfLines={1}
+      // avatar slots. Allow wrapping to two lines before ellipsis.
+      numberOfLines={2}
       ellipsizeMode="tail"
       // Audit 9.4 — modal headers compete with the close button for
       // the same row; cap at 1.3× to preserve the §8 row geometry.

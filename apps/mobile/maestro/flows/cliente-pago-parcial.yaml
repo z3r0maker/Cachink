@@ -7,6 +7,10 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 # Open cliente detail via the CuentasPorCobrar strip.
 - tapOn:
     id: "tab-home"

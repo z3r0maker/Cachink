@@ -1,0 +1,30 @@
+# Reusable subflow: switch to the Operativo role.
+#
+# After Phase 13, role is tied to the authenticated user. The Director
+# user logs in first (via authenticate.yaml) → sees Director Home →
+# this subflow navigates to the role picker via the top-bar chip and
+# taps Operativo.
+#
+# If the role picker is already showing (e.g., from a previous
+# navigation), just taps Operativo directly.
+#
+# Usage (from any Operativo flow):
+#   - launchApp
+#   - runFlow: shared/dismiss-modals.yaml
+#   - runFlow: shared/authenticate.yaml
+#   - runFlow: shared/select-operativo.yaml
+appId: mx.cachink.mobile
+---
+# If the role picker is showing (navigated via top-bar chip or
+# initial launch), select Operativo.
+- tapOn:
+    id: "role-operativo-select"
+    optional: true
+
+# If we're on Director Home and need to switch, tap the role chip first.
+- tapOn:
+    id: "top-bar-role-chip"
+    optional: true
+- tapOn:
+    id: "role-operativo-select"
+    optional: true

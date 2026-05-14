@@ -4,16 +4,23 @@
  * Fields: nombre (required), puesto (required), salario (pesos),
  * periodo (select: semanal/quincenal/mensual). Submit bubbles a
  * CrearEmpleadoInput payload; parent wires `useCrearEmpleado`.
+ *
+ * Form fields are imported from the shared `empleado-form-fields.tsx`
+ * component (CLAUDE.md §2 Principle #3 — code lives in one place).
  */
 
 import { useState, type ReactElement } from 'react';
-import { fromPesos, type PayrollFrequency } from '@cachink/domain';
+import { fromPesos } from '@cachink/domain';
 import type { CrearEmpleadoInput } from '../../../hooks/use-crear-empleado';
-import { Btn, Input, Modal } from '../../../components/index';
-import { MoneyField, TextField } from '../../../components/fields/index';
+import { Btn, Modal } from '../../../components/index';
 import { useTranslation } from '../../../i18n/index';
-
-const PERIODOS: readonly PayrollFrequency[] = ['semanal', 'quincenal', 'mensual'];
+import {
+  EmpleadoFields,
+  emptyEmpleadoForm,
+  validateEmpleadoForm,
+  type EmpleadoFormErrors,
+  type EmpleadoFormState,
+} from '../../Settings/empleado-form-fields';
 
 export interface NuevoEmpleadoModalProps {
   readonly open: boolean;
@@ -22,83 +29,7 @@ export interface NuevoEmpleadoModalProps {
   readonly submitting?: boolean;
 }
 
-interface FormState {
-  nombre: string;
-  puesto: string;
-  salarioPesos: string;
-  periodo: PayrollFrequency;
-}
-
-interface FormErrors {
-  nombre?: string;
-  puesto?: string;
-  salario?: string;
-}
-
-function initialState(): FormState {
-  return { nombre: '', puesto: '', salarioPesos: '', periodo: 'quincenal' };
-}
-
-function validate(state: FormState, requiredLabel: string): FormErrors {
-  const errors: FormErrors = {};
-  if (!state.nombre.trim()) errors.nombre = requiredLabel;
-  if (!state.puesto.trim()) errors.puesto = requiredLabel;
-  const s = Number(state.salarioPesos);
-  if (!Number.isFinite(s) || s <= 0) errors.salario = requiredLabel;
-  return errors;
-}
-
-interface FieldsProps {
-  readonly state: FormState;
-  readonly update: (p: Partial<FormState>) => void;
-  readonly errors: FormErrors;
-  /** Audit 5.4 — Bluetooth-keyboard Enter-to-submit. */
-  readonly onSubmitEditing?: () => void;
-  readonly t: ReturnType<typeof useTranslation>['t'];
-}
-
-function EmpleadoFields(props: FieldsProps): ReactElement {
-  const { state, update, errors, t } = props;
-  return (
-    <>
-      <TextField
-        label={t('empleados.nombreLabel')}
-        value={state.nombre}
-        onChange={(v) => update({ nombre: v })}
-        note={errors.nombre}
-        testID="empleado-nombre"
-        returnKeyType="next"
-      />
-      <TextField
-        label={t('empleados.puestoLabel')}
-        value={state.puesto}
-        onChange={(v) => update({ puesto: v })}
-        note={errors.puesto}
-        testID="empleado-puesto"
-        returnKeyType="next"
-      />
-      <MoneyField
-        label={t('empleados.salarioLabel')}
-        value={state.salarioPesos}
-        onChange={(v) => update({ salarioPesos: v })}
-        note={errors.salario}
-        testID="empleado-salario"
-        returnKeyType="done"
-        onSubmitEditing={props.onSubmitEditing}
-      />
-      <Input
-        type="select"
-        label={t('empleados.periodoLabel')}
-        value={state.periodo}
-        onChange={(v) => update({ periodo: v as PayrollFrequency })}
-        options={PERIODOS}
-        testID="empleado-periodo"
-      />
-    </>
-  );
-}
-
-function buildPayload(state: FormState): CrearEmpleadoInput {
+function buildPayload(state: EmpleadoFormState): CrearEmpleadoInput {
   return {
     nombre: state.nombre.trim(),
     puesto: state.puesto.trim(),
@@ -108,29 +39,29 @@ function buildPayload(state: FormState): CrearEmpleadoInput {
 }
 
 function makeSubmitHandler(
-  state: FormState,
-  setErrors: (e: FormErrors) => void,
-  setState: (s: FormState) => void,
+  state: EmpleadoFormState,
+  setErrors: (e: EmpleadoFormErrors) => void,
+  setState: (s: EmpleadoFormState) => void,
   required: string,
   onSubmit: NuevoEmpleadoModalProps['onSubmit'],
 ): () => void {
   return () => {
-    const v = validate(state, required);
+    const v = validateEmpleadoForm(state, required);
     if (Object.keys(v).length > 0) {
       setErrors(v);
       return;
     }
     setErrors({});
     onSubmit(buildPayload(state));
-    setState(initialState());
+    setState(emptyEmpleadoForm());
   };
 }
 
 export function NuevoEmpleadoModal(props: NuevoEmpleadoModalProps): ReactElement {
   const { t } = useTranslation();
-  const [state, setState] = useState<FormState>(initialState);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const update = (p: Partial<FormState>): void => setState((prev) => ({ ...prev, ...p }));
+  const [state, setState] = useState<EmpleadoFormState>(emptyEmpleadoForm);
+  const [errors, setErrors] = useState<EmpleadoFormErrors>({});
+  const update = (p: Partial<EmpleadoFormState>): void => setState((prev) => ({ ...prev, ...p }));
   const handleSubmit = makeSubmitHandler(
     state,
     setErrors,

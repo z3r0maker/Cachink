@@ -16,7 +16,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { Btn, Card, SafeAreaSpacer } from '../../components/index';
+import { Btn, Card, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { Role } from '../../app-config/index';
 import { colors, typography } from '../../theme';
@@ -91,6 +91,7 @@ function RoleCard(props: RoleCardProps): ReactElement {
     <Card
       testID={props.testID}
       variant={isDark ? 'black' : 'white'}
+      elevation="raised"
       padding="lg"
       fullWidth
       onPress={props.onPress}
@@ -134,33 +135,27 @@ function Header({ title, subtitle }: { title: string; subtitle: string }): React
 export function RolePicker(props: RolePickerProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <View
-      testID={props.testID ?? 'role-picker'}
-      flex={1}
-      backgroundColor={colors.offwhite}
-      alignItems="center"
-      justifyContent="center"
-      padding={24}
-      gap={20}
-    >
-      <SafeAreaSpacer />
-      <Header title={t('rolePicker.title')} subtitle={t('rolePicker.subtitle')} />
-      <View width="100%" maxWidth={480} gap={16}>
-        <RoleCard
-          role="operativo"
-          label={t('roles.operativo')}
-          hint={t('rolePicker.operativoHint')}
-          testID="role-operativo"
-          onPress={() => props.onSelect('operativo')}
-        />
-        <RoleCard
-          role="director"
-          label={t('roles.director')}
-          hint={t('rolePicker.directorHint')}
-          testID="role-director"
-          onPress={() => props.onSelect('director')}
-        />
+    <FloatingCoinsBackground testID={props.testID ?? 'role-picker'}>
+      <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={20}>
+        <SafeAreaSpacer />
+        <Header title={t('rolePicker.title')} subtitle={t('rolePicker.subtitle')} />
+        <View width="100%" maxWidth={480} gap={16}>
+          <RoleCard
+            role="operativo"
+            label={t('roles.operativo')}
+            hint={t('rolePicker.operativoHint')}
+            testID="role-operativo"
+            onPress={() => props.onSelect('operativo')}
+          />
+          <RoleCard
+            role="director"
+            label={t('roles.director')}
+            hint={t('rolePicker.directorHint')}
+            testID="role-director"
+            onPress={() => props.onSelect('director')}
+          />
+        </View>
       </View>
-    </View>
+    </FloatingCoinsBackground>
   );
 }

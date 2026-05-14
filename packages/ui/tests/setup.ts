@@ -12,7 +12,15 @@
  * internal testIDs (`modal-close`, `modal-backdrop`, …).
  */
 
-import '@testing-library/jest-dom/vitest';
+// Vitest 3.x isolates `expect` per worker, so the `jest-dom/vitest` entry
+// point (which imports its own `expect` and calls `.extend()`) extends the
+// wrong instance. Manually importing matchers and extending the worker's
+// `expect` fixes this.
+import * as jestDomMatchers from '@testing-library/jest-dom/matchers';
+import { expect } from 'vitest';
+
+expect.extend(jestDomMatchers);
+
 // Install width-aware `window.matchMedia` BEFORE `tamagui.config` is
 // imported. Tamagui captures the matchMedia function once at module-init
 // time (see `node_modules/@tamagui/web/.../matchMedia.mjs`); without this

@@ -24,7 +24,7 @@ import {
   type Product,
   type ProductId,
 } from '@cachink/domain';
-import { Btn, Input } from '../../../components/index';
+import { Btn, Combobox } from '../../../components/index';
 import { IntegerField, MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
@@ -93,12 +93,11 @@ function InventarioFields(props: InventarioFieldsProps): ReactElement {
   const { state, update, errors, productos, t } = props;
   return (
     <>
-      <Input
-        type="select"
+      <Combobox
         label={t('nuevoEgreso.productoLabel')}
         value={state.productoId}
         onChange={(v) => update({ productoId: v })}
-        options={productos.map((p) => p.id)}
+        options={productos.map((p) => ({ key: p.id, label: p.nombre }))}
         note={errors.producto}
         testID="inventario-producto"
       />

@@ -24,6 +24,8 @@ export {
   visibleSubTabs,
   ProductoListRow,
   type ProductoListRowProps,
+  NuevoProductoScreen,
+  type NuevoProductoScreenProps,
 } from './Productos/index';
 export * from './CorteDeDia/index';
 export * from './Estados/index';
@@ -39,3 +41,18 @@ export {
   AppShellRouteWrapper,
   type AppShellRouteWrapperProps,
 } from '../components/AppShellRouteWrapper/index';
+// Phase 1-12 new screens
+export * from './Login/index';
+export * from './DirectorSetup/index';
+export * from './FuncionesNegocio/index';
+export * from './Otros/index';
+export * from './Caja/index';
+export * from './Merma/index';
+export * from './UserManagement/index';
+// Phase 18 — Conversion
+export * from './Conversion/index';
+// Feature-flagged report screens
+export * from './MermaReportes/index';
+export * from './CajaReportes/index';
+export * from './VentasCredito/index';
+export * from './Auditoria/index';

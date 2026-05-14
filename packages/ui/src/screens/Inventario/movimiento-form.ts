@@ -45,7 +45,7 @@ export interface MovimientoFormState {
 export function initialMovimientoState(producto: Product, tipo: MovementType): MovimientoFormState {
   return {
     tipo,
-    cantidad: '',
+    cantidad: '1',
     costoPesos: (Number(producto.costoUnitCentavos) / 100).toString(),
     motivo: tipo === 'entrada' ? 'Compra a proveedor' : 'Venta',
     nota: '',

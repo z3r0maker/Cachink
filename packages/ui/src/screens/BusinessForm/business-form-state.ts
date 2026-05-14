@@ -7,16 +7,56 @@
  * (and is exercised end-to-end by the existing BusinessForm tests).
  */
 
-import { useState } from 'react';
-import { NewBusinessSchema, type BusinessId, type DeviceId } from '@cachink/domain';
+import { useCallback, useState } from 'react';
+import {
+  ISR_DEFAULTS_SEED,
+  NewBusinessSchema,
+  REGIMENES_FISCALES,
+  type BusinessId,
+  type DeviceId,
+  type IsrDefaults,
+  type RegimenFiscal,
+} from '@cachink/domain';
+import type { OptionCardItem } from '../../components/OptionCardGroup/index';
 
-export const REGIMENES = ['RIF', 'RESICO', 'Asalariados', 'Otro'] as const;
-export type Regimen = (typeof REGIMENES)[number];
+/** Backward-compat re-export — existing consumers import REGIMENES/Regimen. */
+export const REGIMENES = REGIMENES_FISCALES;
+export type Regimen = RegimenFiscal;
+
+/** Card-compatible data for OptionCardGroup selector (≤5 options → cards per CLAUDE.md §6). */
+export const REGIMEN_CARDS: readonly OptionCardItem<RegimenFiscal>[] = [
+  {
+    key: 'RIF',
+    icon: 'receipt',
+    label: 'RIF',
+    description: 'Régimen de Incorporación Fiscal.',
+  },
+  {
+    key: 'RESICO',
+    icon: 'banknote',
+    label: 'RESICO',
+    description: 'Régimen Simplificado de Confianza.',
+  },
+  {
+    key: 'Asalariados',
+    icon: 'user',
+    label: 'Asalariados',
+    description: 'Personas físicas con ingresos por salarios.',
+  },
+  {
+    key: 'Otro',
+    icon: 'file-text',
+    label: 'Otro',
+    description: 'Otro régimen o persona moral.',
+  },
+];
 
 export interface BusinessFormSubmitInput {
   readonly nombre: string;
   readonly regimenFiscal: Regimen;
   readonly isrTasa: number;
+  /** Feature flags seeded from wizard business type selection. */
+  readonly initialFeatureFlags?: Partial<Record<string, boolean>>;
 }
 
 export interface FormErrors {
@@ -62,12 +102,80 @@ export function parseForm(
   return { ok: true, payload };
 }
 
-export function useBusinessFormState(defaults: Partial<BusinessFormSubmitInput> | undefined) {
+/**
+ * Resolve the ISR default for a given regime from DB-stored defaults.
+ * Falls back to the domain-level seed values — never to a hardcoded number.
+ */
+function resolveIsrPct(regimen: Regimen, isrDefaults: IsrDefaults | undefined): string {
+  const defaults = isrDefaults ?? ISR_DEFAULTS_SEED;
+  const rate = defaults[regimen] ?? ISR_DEFAULTS_SEED[regimen] ?? 0;
+  return String(Math.round(rate * 10_000) / 100);
+}
+
+export interface BusinessFormStateOptions {
+  /** Pre-filled values (edit mode or from a previous session). */
+  readonly defaults?: Partial<BusinessFormSubmitInput>;
+  /** DB-stored ISR defaults keyed by regime. */
+  readonly isrDefaults?: IsrDefaults;
+}
+
+function parseOpts(
+  optsOrDefaults?: Partial<BusinessFormSubmitInput> | BusinessFormStateOptions,
+): BusinessFormStateOptions {
+  if (optsOrDefaults && 'isrDefaults' in optsOrDefaults)
+    return optsOrDefaults as BusinessFormStateOptions;
+  return { defaults: optsOrDefaults as Partial<BusinessFormSubmitInput> | undefined };
+}
+
+export function useBusinessFormState(
+  optsOrDefaults?: Partial<BusinessFormSubmitInput> | BusinessFormStateOptions,
+) {
+  const opts = parseOpts(optsOrDefaults);
+  const defaults = opts.defaults;
+  const isrDefaults = opts.isrDefaults;
+
+  const initialRegimen: Regimen = (defaults?.regimenFiscal as Regimen) ?? 'RIF';
+
   const [nombre, setNombre] = useState(defaults?.nombre ?? '');
-  const [regimen, setRegimen] = useState<Regimen>((defaults?.regimenFiscal as Regimen) ?? 'RIF');
+  const [regimen, setRegimen] = useState<Regimen>(initialRegimen);
   const [isrTasaPct, setIsrTasaPct] = useState(
-    defaults?.isrTasa !== undefined ? String(Math.round(defaults.isrTasa * 100)) : '30',
+    defaults?.isrTasa !== undefined
+      ? String(Math.round(defaults.isrTasa * 100))
+      : resolveIsrPct(initialRegimen, isrDefaults),
   );
+  const [isrManuallyEdited, setIsrManuallyEdited] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
-  return { nombre, setNombre, regimen, setRegimen, isrTasaPct, setIsrTasaPct, errors, setErrors };
+
+  /**
+   * When regime changes, update ISR if the user hasn't manually edited it.
+   * Always auto-fills — `resolveIsrPct` falls back to `ISR_DEFAULTS_SEED`
+   * when `isrDefaults` is `undefined` (e.g. query still loading or no prop
+   * provided), so the user always sees a regime-appropriate rate.
+   */
+  const handleRegimenChange = useCallback(
+    (newRegimen: Regimen) => {
+      setRegimen(newRegimen);
+      if (!isrManuallyEdited) {
+        setIsrTasaPct(resolveIsrPct(newRegimen, isrDefaults));
+      }
+    },
+    [isrManuallyEdited, isrDefaults],
+  );
+
+  /** Mark ISR as manually edited so regime changes don't override it. */
+  const handleIsrChange = useCallback((value: string) => {
+    setIsrManuallyEdited(true);
+    setIsrTasaPct(value);
+  }, []);
+
+  return {
+    nombre,
+    setNombre,
+    regimen,
+    setRegimen: handleRegimenChange,
+    isrTasaPct,
+    setIsrTasaPct: handleIsrChange,
+    errors,
+    setErrors,
+  };
 }

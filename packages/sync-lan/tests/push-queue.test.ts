@@ -26,6 +26,7 @@ function makeSaleRow(i: number) {
     metodo: 'Efectivo' as const,
     clienteId: null,
     estadoPago: 'pagado' as const,
+    productoId: `01HZ8XQN9GZJXV8AKQ5X0C7P${pad}`,
     businessId: BIZ,
     deviceId: DEV,
     createdAt: TS,

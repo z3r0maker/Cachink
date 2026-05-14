@@ -1,5 +1,5 @@
 /**
- * RepositoryProvider — composition root for the 11 Cachink repositories.
+ * RepositoryProvider — composition root for the 18 Cachink repositories.
  *
  * CLAUDE.md §4.3 mandates constructor-injected repository interfaces for
  * use-cases. The app-level composition happens here: each app's
@@ -20,7 +20,7 @@
  */
 
 import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
-import type { DeviceId } from '@cachink/domain';
+import type { DeviceId, UserId } from '@cachink/domain';
 import type {
   AppConfigRepository,
   BusinessesRepository,
@@ -34,6 +34,13 @@ import type {
   ProductsRepository,
   RecurringExpensesRepository,
   SalesRepository,
+  UsersRepository,
+  CajaTurnosRepository,
+  ConversionRecetasRepository,
+  ConversionsRepository,
+  AuditoriasInventarioRepository,
+  EntregasCreditoRepository,
+  DirectorAlertsRepository,
 } from '@cachink/data';
 import {
   DrizzleAppConfigRepository,
@@ -47,6 +54,13 @@ import {
   DrizzleProductsRepository,
   DrizzleRecurringExpensesRepository,
   DrizzleSalesRepository,
+  DrizzleUsersRepository,
+  DrizzleCajaTurnosRepository,
+  DrizzleConversionRecetasRepository,
+  DrizzleConversionsRepository,
+  DrizzleAuditoriasInventarioRepository,
+  DrizzleEntregasCreditoRepository,
+  DrizzleDirectorAlertsRepository,
 } from '@cachink/data';
 
 /**
@@ -66,24 +80,46 @@ export interface Repositories {
   readonly clientPayments: ClientPaymentsRepository;
   readonly dayCloses: DayClosesRepository;
   readonly recurringExpenses: RecurringExpensesRepository;
+  readonly users: UsersRepository;
+  readonly cajaTurnos: CajaTurnosRepository;
+  readonly conversionRecetas: ConversionRecetasRepository;
+  readonly conversions: ConversionsRepository;
+  readonly auditoriasInventario: AuditoriasInventarioRepository;
+  readonly entregasCredito: EntregasCreditoRepository;
+  readonly directorAlerts: DirectorAlertsRepository;
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
 
-/** Factory: wire every Drizzle repository onto a DB + deviceId in one call. */
-export function buildDrizzleRepositories(db: CachinkDatabase, deviceId: DeviceId): Repositories {
+/**
+ * Factory: wire every Drizzle repository onto a DB + deviceId + userId.
+ * `userId` is optional (null before login) — repos stamp it on created rows.
+ */
+export function buildDrizzleRepositories(
+  db: CachinkDatabase,
+  deviceId: DeviceId,
+  userId?: UserId | null,
+): Repositories {
+  const uid = userId ?? null;
   return {
     appConfig: new DrizzleAppConfigRepository(db),
-    businesses: new DrizzleBusinessesRepository(db, deviceId),
-    sales: new DrizzleSalesRepository(db, deviceId),
-    expenses: new DrizzleExpensesRepository(db, deviceId),
-    products: new DrizzleProductsRepository(db, deviceId),
-    inventoryMovements: new DrizzleInventoryMovementsRepository(db, deviceId),
-    employees: new DrizzleEmployeesRepository(db, deviceId),
-    clients: new DrizzleClientsRepository(db, deviceId),
-    clientPayments: new DrizzleClientPaymentsRepository(db, deviceId),
-    dayCloses: new DrizzleDayClosesRepository(db, deviceId),
-    recurringExpenses: new DrizzleRecurringExpensesRepository(db, deviceId),
+    businesses: new DrizzleBusinessesRepository(db, deviceId, uid),
+    sales: new DrizzleSalesRepository(db, deviceId, uid),
+    expenses: new DrizzleExpensesRepository(db, deviceId, uid),
+    products: new DrizzleProductsRepository(db, deviceId, uid),
+    inventoryMovements: new DrizzleInventoryMovementsRepository(db, deviceId, uid),
+    employees: new DrizzleEmployeesRepository(db, deviceId, uid),
+    clients: new DrizzleClientsRepository(db, deviceId, uid),
+    clientPayments: new DrizzleClientPaymentsRepository(db, deviceId, uid),
+    dayCloses: new DrizzleDayClosesRepository(db, deviceId, uid),
+    recurringExpenses: new DrizzleRecurringExpensesRepository(db, deviceId, uid),
+    users: new DrizzleUsersRepository(db, deviceId, uid),
+    cajaTurnos: new DrizzleCajaTurnosRepository(db, deviceId, uid),
+    conversionRecetas: new DrizzleConversionRecetasRepository(db, deviceId, uid),
+    conversions: new DrizzleConversionsRepository(db, deviceId, uid),
+    auditoriasInventario: new DrizzleAuditoriasInventarioRepository(db, deviceId, uid),
+    entregasCredito: new DrizzleEntregasCreditoRepository(db, deviceId, uid),
+    directorAlerts: new DrizzleDirectorAlertsRepository(db, deviceId, uid),
   };
 }
 
@@ -131,3 +167,14 @@ export const useClientPaymentsRepository = (): ClientPaymentsRepository =>
 export const useDayClosesRepository = (): DayClosesRepository => useRepositories().dayCloses;
 export const useRecurringExpensesRepository = (): RecurringExpensesRepository =>
   useRepositories().recurringExpenses;
+export const useUsersRepository = (): UsersRepository => useRepositories().users;
+export const useCajaTurnosRepository = (): CajaTurnosRepository => useRepositories().cajaTurnos;
+export const useConversionRecetasRepository = (): ConversionRecetasRepository =>
+  useRepositories().conversionRecetas;
+export const useConversionsRepository = (): ConversionsRepository => useRepositories().conversions;
+export const useAuditoriasInventarioRepository = (): AuditoriasInventarioRepository =>
+  useRepositories().auditoriasInventario;
+export const useEntregasCreditoRepository = (): EntregasCreditoRepository =>
+  useRepositories().entregasCredito;
+export const useDirectorAlertsRepository = (): DirectorAlertsRepository =>
+  useRepositories().directorAlerts;

@@ -88,7 +88,7 @@ describe('RegistrarVentaUseCase', () => {
   it('rejects a sale when the producto does not exist', async () => {
     const input = makeNewSale({
       businessId: BIZ,
-      productoId: '01HZ8XQN9GZJXV8AKQ5XGHOST' as ProductId,
+      productoId: '01HZ8XQN9GZJXV8AKQ5X0GH0ST' as ProductId,
     });
     await expect(useCase.execute(input)).rejects.toThrow(/Producto.*no existe/);
   });
@@ -184,5 +184,32 @@ describe('RegistrarVentaUseCase', () => {
 
     const stock = await movements.sumStock(producto.id);
     expect(stock).toBe(15); // 20 - 5
+  });
+
+  // --- Phase 5: Stock feature flag ---
+
+  it('does NOT create a movement when stockEnabled=false even if product seguirStock=true', async () => {
+    const stockOffUseCase = new RegistrarVentaUseCase(
+      sales, clients, products, movements, { stockEnabled: false },
+    );
+    const producto = await products.create(
+      makeNewProduct({ businessId: BIZ, seguirStock: true }),
+    );
+    await movements.create({
+      productoId: producto.id,
+      fecha: '2026-04-23',
+      tipo: 'entrada',
+      cantidad: 10,
+      costoUnitCentavos: 3_500n,
+      motivo: 'Compra a proveedor',
+      businessId: BIZ,
+    });
+
+    await stockOffUseCase.execute(
+      makeNewSale({ businessId: BIZ, productoId: producto.id, cantidad: 3 }),
+    );
+
+    const stock = await movements.sumStock(producto.id);
+    expect(stock).toBe(10); // no salida — stock unchanged
   });
 });

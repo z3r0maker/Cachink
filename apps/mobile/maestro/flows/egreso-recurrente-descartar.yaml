@@ -1,0 +1,53 @@
+# Create a recurrente gasto → PendientesCard appears → tap Descartar → row disappears.
+# Covers Gap B (Phase 17): the alternative dismiss path on PendientesCard.
+#
+# testIDs exercised:
+#   pendiente-descartar-* (dynamic ID)
+#
+# The flow relies on the app clock being set to a date >= proximoDisparo
+# of the just-created template — run with MAESTRO_CLOCK_OFFSET if your
+# harness supports it, or simulate by manually advancing the system clock.
+#
+# Precondition: wizard complete, operativo role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-recurrente-descartar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Create a recurrente gasto.
+- tapOn:
+    id: "tab-gastos"
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Internet del local"
+- tapOn:
+    id: "gasto-monto"
+- inputText: "500"
+- tapOn:
+    id: "gasto-recurrente-toggle"
+- assertVisible: "Frecuencia"
+- tapOn:
+    id: "gasto-submit"
+- assertNotVisible: "Nuevo egreso"
+
+# The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
+- assertVisible: "Pendientes de registrar"
+- assertVisible: "Internet del local"
+
+# Tap Descartar instead of Confirmar — row should disappear.
+# The dynamic testID uses the template's ULID. We use a text-based
+# tap to find the Descartar button near the pendiente row.
+- tapOn: "Descartar"
+
+# After descartar, the pendiente row is optimistically removed.
+- assertNotVisible: "Internet del local"

@@ -13,6 +13,7 @@ import type { Product } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { PRODUCT_BG_COLORS } from '../../product-colors';
 
 export interface ProductoCardProps {
   readonly producto: Product;
@@ -83,12 +84,14 @@ function ProductoAmount({
 export function ProductoCard(props: ProductoCardProps): ReactElement {
   const { t } = useTranslation();
   const isLow = props.stock <= props.producto.umbralStockBajo;
+  const bg = PRODUCT_BG_COLORS[props.producto.colorFondo ?? 'white'];
   return (
     <Card
       testID={props.testID ?? `producto-card-${props.producto.id}`}
       padding="md"
       onPress={props.onPress}
       fullWidth
+      backgroundColor={bg}
     >
       <View flexDirection="row" justifyContent="space-between" alignItems="center">
         <ProductoInfo

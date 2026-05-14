@@ -161,11 +161,11 @@ export function SwipeableRow(props: SwipeableRowProps): ReactElement {
       rightThreshold={ACTION_WIDTH * 0.6}
     >
       {/*
-        Audit M-1 Step 0: react-native-gesture-handler 2.31.x removed the
-        `accessibilityLabel` prop from `<Swipeable>`'s public types. We
-        forward `ariaLabel` to a wrapper `<View>` so VoiceOver / TalkBack
-        still announce the row label. Same DOM/native-tree depth before
-        and after the upgrade.
+        Forward `ariaLabel` to a wrapper `<View>` so VoiceOver / TalkBack
+        always announce the row label. This approach is forward-compatible
+        with RNGH ≥2.31 (which removed `accessibilityLabel` from
+        `<Swipeable>`'s types) and future v3 (which deprecates legacy
+        `Swipeable` entirely). Same native-tree depth either way.
       */}
       <View accessibilityLabel={props.ariaLabel}>{props.children}</View>
     </Swipeable>

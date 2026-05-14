@@ -1,0 +1,36 @@
+# Settings → Sistema — assert mode card and language card.
+#
+# Extends settings-hub-nav.yaml which navigates to sub-sections but
+# never asserts the display cards on the Sistema screen:
+#   - settings-mode-card
+#   - settings-language-card
+#
+# Precondition: wizard complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/settings-sistema-cards.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Open Settings via the top-bar cog icon.
+- tapOn:
+    id: "top-bar-open-settings"
+
+# Navigate to the Sistema sub-screen.
+- tapOn:
+    id: "settings-hub-sistema"
+
+# Assert the mode display card is visible.
+- assertVisible:
+    id: "settings-mode-card"
+
+# Assert the language card is visible.
+- assertVisible:
+    id: "settings-language-card"

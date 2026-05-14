@@ -15,6 +15,90 @@
       "when": 1777003200000,
       "tag": "0001_change_log_and_sync_state",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1777350000000,
+      "tag": "0002_smart_catalog",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1777500000000,
+      "tag": "0003_productoId_required",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1777700000000,
+      "tag": "0004_sale_hora",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1778323200000,
+      "tag": "0005_product_color_fondo",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1778400000000,
+      "tag": "0006_users",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1778486400000,
+      "tag": "0007_audit_trail",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1778572800000,
+      "tag": "0008_feature_flags",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1778659200000,
+      "tag": "0009_caja_turnos",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1778745600000,
+      "tag": "0010_conversion",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1778832000000,
+      "tag": "0011_auditoria_inventario",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1778918400000,
+      "tag": "0012_credito_alerts",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1779004800000,
+      "tag": "0013_rename_auth_columns",
+      "breakpoints": true
     }
   ]
 }

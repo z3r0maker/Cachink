@@ -1,0 +1,75 @@
+# Login as operativo → change-pin screen → enter wrong current PIN → error visible.
+# Then correct it → submit → success.
+# Covers Gap S (Phase 17): wrong current PIN error path during change-pin.
+#
+# Precondition: wizard + director-setup + usuario-crear complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-crear.yaml
+#   maestro test apps/mobile/maestro/flows/change-pin-wrong-current.yaml
+#
+# Note: usuario-crear.yaml creates "Operativo Test" with PIN "111111".
+# If mustChangePin is set during creation, this flow tests the error path.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+
+# QuickSwitch should show multiple user avatars now.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 10000
+
+# Select the operativo user (second avatar — index 1).
+- tapOn:
+    id: "user-avatar-1"
+    optional: true
+
+# Enter the operativo's initial PIN.
+- tapOn:
+    id: "pin-input"
+- inputText: "111111"
+- tapOn:
+    id: "login-submit"
+
+# Forced change PIN screen appears.
+- extendedWaitUntil:
+    visible:
+      id: "change-pin"
+    timeout: 10000
+
+# Enter WRONG current PIN → submit → error appears.
+- tapOn:
+    id: "new-pin"
+- inputText: "999999"
+- tapOn:
+    id: "confirm-pin"
+- inputText: "999999"
+- tapOn:
+    id: "change-pin-submit"
+
+# The error message should be visible ("PIN actual incorrecto" or similar).
+- assertVisible: "incorrecto"
+
+# Now enter correct PINs.
+- tapOn:
+    id: "new-pin"
+- eraseText
+- inputText: "222222"
+- tapOn:
+    id: "confirm-pin"
+- eraseText
+- inputText: "222222"
+- tapOn:
+    id: "change-pin-submit"
+
+# Tabs mount — operativo is now logged in.
+- extendedWaitUntil:
+    visible:
+      id: "tab-ventas"
+    timeout: 10000

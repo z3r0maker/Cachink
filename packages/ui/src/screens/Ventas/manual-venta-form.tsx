@@ -42,14 +42,38 @@ export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
   const { t } = useTranslation();
   const f = useManualVentaState(props.onSubmit);
   return (
-    <View testID={props.testID ?? 'manual-venta-form'} flexDirection="row" gap={8} paddingHorizontal={16} alignItems="flex-end">
+    <View
+      testID={props.testID ?? 'manual-venta-form'}
+      flexDirection="row"
+      gap={8}
+      paddingHorizontal={16}
+      alignItems="flex-end"
+    >
       <View flex={2}>
-        <Input label={t('ventas.conceptoLabel')} value={f.concepto} onChange={f.setConcepto} placeholder={t('ventas.conceptoPlaceholder')} testID="manual-venta-concepto" />
+        <Input
+          label={t('ventas.conceptoLabel')}
+          value={f.concepto}
+          onChange={f.setConcepto}
+          placeholder={t('ventas.conceptoPlaceholder')}
+          testID="manual-venta-concepto"
+        />
       </View>
       <View flex={1}>
-        <Input label={t('ventas.montoLabel')} value={f.montoPesos} onChange={f.setMontoPesos} type="decimal" placeholder="0.00" testID="manual-venta-monto" />
+        <Input
+          label={t('ventas.montoLabel')}
+          value={f.montoPesos}
+          onChange={f.setMontoPesos}
+          type="decimal"
+          placeholder="0.00"
+          testID="manual-venta-monto"
+        />
       </View>
-      <Btn variant="primary" onPress={f.submit} disabled={!f.valid || props.submitting} testID="manual-venta-submit">
+      <Btn
+        variant="primary"
+        onPress={f.submit}
+        disabled={!f.valid || props.submitting}
+        testID="manual-venta-submit"
+      >
         +
       </Btn>
     </View>

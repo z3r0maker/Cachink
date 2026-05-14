@@ -86,6 +86,7 @@ Links to discussion, docs, prior art.
 | [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto schema design (UXD-R3)                                                          | Accepted                      |
 | [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                                | Accepted                      |
 | [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS                                                                      | Accepted                      |
+| [049](#adr-049) | 2026-05-10 | PIN for login, Password for recovery                                                                                                                   | Accepted                      |
 
 ---
 
@@ -3207,3 +3208,43 @@ The free-text form also:
 - The old `<NuevaVentaModal>`, `<VentaForm>`, and `<ManualVentaForm>` components are deleted. Callers of the old modal API (route files, tests) were updated.
 - Maestro E2E flows (`venta-efectivo.yaml`, `venta-credito.yaml`) were rewritten for the inline POS interaction pattern.
 - The `EditarVentaModal` remains for editing existing sales (different from the create flow).
+
+---
+
+## ADR-049
+
+### PIN for login, Password for recovery
+
+Date: 2026-05-10
+Status: Accepted
+
+### Context
+
+The current auth model uses a free-text password (≥6 chars) for daily login and a 6-digit numeric PIN only for recovery. For a mobile-first POS app targeting Mexican emprendedores, a numeric PIN is faster to enter and more natural for quick user-switching — the target audience switches users multiple times daily on shared tablets. A 6-digit numeric PIN with a dedicated number pad is significantly fewer taps than a full keyboard password.
+
+### Decision
+
+Swap roles — PIN becomes the daily login credential, Password becomes the recovery credential. The database keeps both hashed fields but their semantic roles are inverted:
+
+- `password_hash` column → renamed to `pin_hash` (stores bcrypt hash of 6-digit login PIN)
+- `recovery_pin_hash` column → renamed to `recovery_password_hash` (stores bcrypt hash of alphanumeric recovery password)
+- `must_change_password` column → renamed to `must_change_pin` (flag for forced PIN change on first login)
+
+Domain, application, data, testing, UI, and E2E layers all updated to reflect the new semantics. Migration 0013 handles the column renames via `ALTER TABLE … RENAME COLUMN`.
+
+### Alternatives Considered
+
+- **Keep password for login, add a "quick PIN" as optional shortcut.** Rejected: two credentials for login is more confusing, not less. One primary credential per action is cleaner.
+- **Remove password entirely, PIN-only for everything.** Rejected: recovery needs a stronger credential since it resets the primary login method. A forgotten PIN should be recoverable with a memorized alphanumeric password.
+
+### Consequences
+
+- **Security trade-off:** 6-digit numeric PIN has 10⁶ combinations (vs alphanumeric password). Acceptable for a local-first app with a physical-access-only threat model — the device itself is the security boundary.
+- **Migration required:** `ALTER TABLE users RENAME COLUMN` for the three columns. SQLite ≥3.25 required (all supported platforms meet this).
+- **UX improvement:** QuickSwitch screen now shows a numeric keypad instead of full keyboard. Faster login aligns with CLAUDE.md §2.1 — fewer clicks, the most value.
+- **All auth screens, use cases, i18n, and E2E flows updated.** No code path references the old password-for-login or PIN-for-recovery semantics.
+
+### References
+
+- CLAUDE.md §2.1 — UX simplicity principle
+- CLAUDE.md §1 — two-role model, quick user switching

@@ -68,7 +68,7 @@ describe('MovimientoModal', () => {
     expect(screen.queryByTestId('movimiento-costo')).toBeNull();
   });
 
-  it('blocks submit when cantidad is empty', () => {
+  it('submits with default cantidad of 1 when no explicit value is set', () => {
     const onSubmit = vi.fn();
     renderWithProviders(
       <MovimientoModal
@@ -82,7 +82,8 @@ describe('MovimientoModal', () => {
     );
     const submit = screen.getAllByTestId('movimiento-submit')[0]!;
     fireEvent.click(submit);
-    expect(onSubmit).not.toHaveBeenCalled();
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit.mock.calls[0]![0]).toHaveProperty('cantidad', 1);
   });
 
   it('honours initialTipo=salida', () => {

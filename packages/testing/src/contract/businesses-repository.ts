@@ -61,5 +61,47 @@ export function describeBusinessesRepositoryContract(
       expect((await repo.findById(a.id))?.logoUrl).toBeNull();
       expect((await repo.findById(b.id))?.logoUrl).toBe('https://cachink.mx/logo.png');
     });
+
+    // --- update method ---
+
+    it('update patches nombre and sets updatedAt', async () => {
+      const row = await repo.create(makeNewBusiness({ nombre: 'Original' }));
+      const updated = await repo.update(row.id, { nombre: 'Nuevo Nombre' });
+      expect(updated.nombre).toBe('Nuevo Nombre');
+      expect(updated.regimenFiscal).toBe(row.regimenFiscal);
+      expect(updated.isrTasa).toBe(row.isrTasa);
+      expect(updated.updatedAt >= row.updatedAt).toBe(true);
+    });
+
+    it('update patches regimenFiscal only', async () => {
+      const row = await repo.create(makeNewBusiness());
+      const updated = await repo.update(row.id, { regimenFiscal: 'RESICO' });
+      expect(updated.regimenFiscal).toBe('RESICO');
+      expect(updated.nombre).toBe(row.nombre);
+    });
+
+    it('update patches isrTasa only', async () => {
+      const row = await repo.create(makeNewBusiness({ isrTasa: 0.3 }));
+      const updated = await repo.update(row.id, { isrTasa: 0.02 });
+      expect(updated.isrTasa).toBeCloseTo(0.02, 10);
+    });
+
+    it('update patches multiple fields at once', async () => {
+      const row = await repo.create(makeNewBusiness());
+      const updated = await repo.update(row.id, {
+        nombre: 'Patched',
+        regimenFiscal: 'Otro',
+        isrTasa: 0.15,
+      });
+      expect(updated.nombre).toBe('Patched');
+      expect(updated.regimenFiscal).toBe('Otro');
+      expect(updated.isrTasa).toBeCloseTo(0.15, 10);
+    });
+
+    it('update on missing id throws', async () => {
+      await expect(
+        repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { nombre: 'X' }),
+      ).rejects.toThrow();
+    });
   });
 }

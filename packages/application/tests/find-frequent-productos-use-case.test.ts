@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
+import type { BusinessId, IsoDate, ProductId } from '@cachink/domain';
 import {
   InMemoryProductsRepository,
   InMemorySalesRepository,
@@ -73,14 +73,21 @@ describe('FindFrequentProductosUseCase', () => {
     expect(result[0]!.id).toBe(p2.id);
   });
 
-  it('ignores sales without productoId', async () => {
-    await sales.create(makeNewSale({ businessId: BIZ, fecha: TODAY })); // no productoId
-    const p1 = await products.create(makeNewProduct({ businessId: BIZ }));
+  it('ignores sales referencing a non-existent product', async () => {
+    // Sale with a productoId that doesn't match any existing product
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: '01HZ8XQN9GZJXV8AKQ5X0GH0ST' as ProductId,
+        fecha: TODAY,
+      }),
+    );
+    await products.create(makeNewProduct({ businessId: BIZ }));
 
     const result = await useCase.execute({ businessId: BIZ });
-    // Should fall back to newest products since no productoId-linked sales
-    expect(result.length).toBe(1);
-    expect(result[0]!.id).toBe(p1.id);
+    // frequent sales were found but the referenced product doesn't exist,
+    // so resolveProducts returns empty — no fallback triggered
+    expect(result.length).toBe(0);
   });
 
   it('returns empty array when no products exist and no sales', async () => {

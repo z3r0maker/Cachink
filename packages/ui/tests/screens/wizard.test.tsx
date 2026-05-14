@@ -15,7 +15,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { Wizard, useWizardStore } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
@@ -79,11 +79,14 @@ describe('Wizard — Step 1 (welcome)', () => {
 });
 
 describe('Wizard — Step 2A (solo)', () => {
-  it('"Guardar todo en este dispositivo" fires onSelectMode("local")', () => {
+  it('"Guardar todo en este dispositivo" fires onSelectMode("local") after consent', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-solo');
     tapCard('wizard-step2a-local');
+    // Audit M-1 PR 6: consent step intercepts mode selection.
+    // Complete consent to trigger the real onSelectMode.
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('local');
   });
 
@@ -92,6 +95,8 @@ describe('Wizard — Step 2A (solo)', () => {
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-solo');
     tapCard('wizard-step2a-cloud');
+    // Cloud handoff goes directly to consent then mode.
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('cloud');
   });
 
@@ -105,19 +110,21 @@ describe('Wizard — Step 2A (solo)', () => {
 });
 
 describe('Wizard — Step 2B (multi)', () => {
-  it('desktop: server card fires onSelectMode("lan-server")', () => {
+  it('desktop: server card fires onSelectMode("lan-server") after consent', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-multi');
     tapCard('wizard-step2b-server');
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('lan-server');
   });
 
-  it('desktop: cloud card fires onSelectMode("cloud") via handoff', () => {
+  it('desktop: cloud card fires onSelectMode("cloud") via handoff after consent', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-multi');
     tapCard('wizard-step2b-cloud');
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('cloud');
   });
 
@@ -150,19 +157,21 @@ describe('Wizard — Step 2B (multi)', () => {
 });
 
 describe('Wizard — Step 3 (join existing)', () => {
-  it('LAN card fires onSelectMode("lan-client")', () => {
+  it('LAN card fires onSelectMode("lan-client") after consent', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     fireEvent.click(screen.getByTestId('wizard-step1-join-existing-link'));
     tapCard('wizard-step3-lan');
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('lan-client');
   });
 
-  it('Cloud sign-in card fires onSelectMode("cloud") via handoff', () => {
+  it('Cloud sign-in card fires onSelectMode("cloud") via handoff after consent', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     fireEvent.click(screen.getByTestId('wizard-step1-join-existing-link'));
     tapCard('wizard-step3-cloud');
+    fireEvent.click(screen.getByTestId('consent-yes'));
     expect(onSelectMode).toHaveBeenCalledWith('cloud');
   });
 

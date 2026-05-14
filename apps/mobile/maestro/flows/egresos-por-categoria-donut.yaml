@@ -1,0 +1,49 @@
+# Donut chart on Estado de Resultados for egresos by category.
+#
+# Verifies:
+#   1. Create egresos with different categories (assumes already exist)
+#   2. Navigate to Estados → Resultados
+#   3. egresos-por-categoria-card visible
+#   4. egresos-donut chart renders
+#
+# Precondition: wizard complete, at least one venta + egresos with
+# different categories exist. Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto-full-form.yaml
+#   maestro test apps/mobile/maestro/flows/egresos-por-categoria-donut.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Verify EstadosShell renders.
+- assertVisible:
+    id: "estados-shell"
+
+# Resultados is the default sub-tab.
+- assertVisible:
+    id: "estados-tab-resultados"
+
+# Scroll down to find the egresos-por-categoria card.
+- scrollUntilVisible:
+    element:
+      id: "egresos-por-categoria-card"
+    direction: DOWN
+    timeout: 5000
+
+# Verify the donut chart renders.
+- assertVisible:
+    id: "egresos-donut"

@@ -1,0 +1,69 @@
+# Open caja with additional money (fondo adicional).
+#
+# Verifies:
+#   1. Navigate to Caja → fill apertura with base monto AND adicional monto
+#   2. Submit → status card shows correct total
+#
+# Precondition: wizard + director-setup complete, caja feature flag ON.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
+#   maestro test apps/mobile/maestro/flows/caja-con-adicional.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Ensure caja feature flag is ON.
+- runFlow: shared/enable-caja-flag.yaml
+
+# Switch to Operativo to access Caja.
+- runFlow: shared/select-operativo.yaml
+
+# Navigate to Otros → Caja.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-caja"
+
+# The abrir-caja-modal should appear.
+- extendedWaitUntil:
+    visible:
+      id: "abrir-caja-modal"
+    timeout: 5000
+
+# Enter apertura base amount.
+- tapOn:
+    id: "caja-apertura-monto"
+- inputText: "500"
+
+# Enter additional money.
+- tapOn:
+    id: "caja-adicional-monto"
+- inputText: "200"
+
+# Submit the apertura.
+- tapOn:
+    id: "caja-abrir-submit"
+
+# Status card should be visible showing the turn is open.
+- assertVisible:
+    id: "caja-status-card"
+
+# Close the caja for cleanup.
+- tapOn:
+    id: "caja-cerrar-btn"
+- assertVisible:
+    id: "cerrar-caja-modal"
+- tapOn:
+    id: "caja-cierre-monto"
+- inputText: "700"
+- tapOn:
+    id: "caja-cerrar-submit"
+- assertNotVisible:
+    id: "cerrar-caja-modal"

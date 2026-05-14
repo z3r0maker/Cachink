@@ -63,6 +63,20 @@ describe('NominaTab', () => {
     expect(screen.getByTestId('nomina-monto')).toBeInTheDocument();
   });
 
+  it('shows employee name in the picker, not the raw ID', () => {
+    const emp = empleado();
+    renderWithProviders(
+      <NominaTab
+        businessId={businessId}
+        fecha={fecha}
+        empleados={[emp]}
+        onSubmit={vi.fn()}
+      />,
+    );
+    const picker = screen.getByTestId('nomina-empleado');
+    expect(picker.textContent).not.toContain(emp.id);
+  });
+
   it('blocks submit when no empleado is selected', () => {
     const onSubmit = vi.fn();
     renderWithProviders(

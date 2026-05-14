@@ -1,0 +1,118 @@
+# Create a conversion recipe and verify it appears in the list.
+#
+# Verifies:
+#   1. Create a materia-prima product + a venta product
+#   2. Navigate to /conversion → create recipe
+#   3. Recipe appears in the receta list
+#
+# Precondition: wizard complete, logged in as Director.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Enable conversion flag.
+- runFlow: shared/enable-conversion-flag.yaml
+
+# Create a materia-prima product first via /nuevo-producto.
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    text: "Nuevo"
+- extendedWaitUntil:
+    visible:
+      id: "nuevo-producto-screen"
+    timeout: 5000
+- inputText:
+    id: "producto-nombre"
+    text: "Café 1kg"
+- tapOn:
+    id: "producto-uso"
+- tapOn:
+    text: "Materia prima (para convertir)"
+- inputText:
+    id: "producto-costo"
+    text: "100"
+- tapOn:
+    id: "producto-submit"
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-screen"
+    timeout: 5000
+
+# Create a venta product.
+- tapOn:
+    text: "Nuevo"
+- extendedWaitUntil:
+    visible:
+      id: "nuevo-producto-screen"
+    timeout: 5000
+- inputText:
+    id: "producto-nombre"
+    text: "Taza de Café"
+- inputText:
+    id: "producto-costo"
+    text: "15"
+- inputText:
+    id: "producto-precio-venta"
+    text: "50"
+- tapOn:
+    id: "producto-submit"
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-screen"
+    timeout: 5000
+
+# Navigate to conversion screen.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-conversion"
+- extendedWaitUntil:
+    visible:
+      id: "conversion-screen"
+    timeout: 5000
+
+# Create a recipe.
+- tapOn:
+    id: "conversion-nueva-receta-btn"
+- extendedWaitUntil:
+    visible:
+      id: "nueva-receta-modal"
+    timeout: 3000
+
+# Select materia prima.
+- tapOn:
+    id: "receta-mp-picker"
+- tapOn:
+    text: "Café 1kg"
+
+# Select producto resultante.
+- tapOn:
+    id: "receta-prod-picker"
+- tapOn:
+    text: "Taza de Café"
+
+# Set quantities.
+- inputText:
+    id: "receta-cant-origen"
+    text: "1"
+- inputText:
+    id: "receta-cant-resultante"
+    text: "10"
+
+# Submit.
+- tapOn:
+    id: "receta-submit"
+
+# Verify recipe appears in list.
+- extendedWaitUntil:
+    visible:
+      id: "receta-list"
+    timeout: 5000
+- assertVisible:
+    text: "Café 1kg"
+- assertVisible:
+    text: "Taza de Café"

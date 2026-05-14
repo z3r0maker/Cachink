@@ -10,6 +10,7 @@
  *      apps render to verify the shared-component pipeline works.
  */
 export * from './theme';
+export * from './product-colors';
 export * from './components/index';
 export * from './screens/index';
 export * from './database/index';
@@ -17,6 +18,7 @@ export * from './app-config/index';
 export * from './app/index';
 export * from './share/index';
 export * from './hooks/index';
+export * from './charts/index';
 export * from './notifications/index';
 export * from './telemetry/index';
 // The Tamagui config has to be mounted in each app's shell via

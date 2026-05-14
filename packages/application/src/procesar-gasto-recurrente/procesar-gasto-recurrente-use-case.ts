@@ -60,6 +60,18 @@ export class ProcesarGastoRecurrenteUseCase
       return { processed: false, egreso: null, nextProximoDisparo: null };
     }
 
+    // Audit M-1 PR 4 — idempotency guard: if an egreso linked to this
+    // recurring template already exists for today, skip. Prevents double
+    // registration when the UI fires the confirm handler twice before
+    // the query cache refreshes.
+    const existing = await this.#expenses.findByGastoRecurrenteAndDate(
+      template.id,
+      today,
+    );
+    if (existing !== null) {
+      return { processed: true, egreso: existing, nextProximoDisparo: null };
+    }
+
     const egreso = await this.#expenses.create({
       fecha: today,
       concepto: template.concepto,
@@ -90,7 +102,7 @@ export class ProcesarGastoRecurrenteUseCase
  *   mensual   → +1 mes calendario, clampa al fin de mes para evitar
  *               que "31 de marzo" resbale a "31 de abril" (no existe).
  */
-function advanceProximoDisparo(
+export function advanceProximoDisparo(
   current: IsoDate,
   frecuencia: RecurringExpense['frecuencia'],
   diaDelMes: number | null,

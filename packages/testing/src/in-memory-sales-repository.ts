@@ -33,6 +33,7 @@ export class InMemorySalesRepository implements SalesRepository {
     const sale: Sale = {
       id,
       fecha: input.fecha,
+      hora: input.hora ?? null,
       concepto: input.concepto,
       categoria: input.categoria,
       monto: input.monto,
@@ -43,6 +44,7 @@ export class InMemorySalesRepository implements SalesRepository {
       cantidad: input.cantidad ?? 1,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: timestamp,
       updatedAt: timestamp,
       deletedAt: null,

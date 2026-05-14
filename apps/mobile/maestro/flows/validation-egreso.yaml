@@ -1,0 +1,72 @@
+# Egreso form validation — submit with invalid data prevented.
+#
+# Verifies:
+#   1. Open NuevoEgreso modal → leave concepto empty → tap submit → stays open
+#   2. Enter concepto with monto=0 → tap submit → stays open
+#   3. Enter valid concepto + valid monto → submit succeeds
+#
+# Mirrors validation-venta.yaml and validation-producto.yaml patterns.
+#
+# Precondition: wizard complete, Operativo role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/validation-egreso.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Egresos.
+- tapOn:
+    id: "tab-gastos"
+- tapOn:
+    id: "egresos-nuevo"
+
+# NuevoEgreso modal should be visible.
+- assertVisible: "Nuevo egreso"
+
+# --- Test 1: Empty concepto + valid monto ---
+- tapOn:
+    id: "gasto-monto"
+- inputText: "500"
+
+# Tap submit — should fail because concepto is empty.
+- tapOn:
+    id: "gasto-submit"
+
+# Modal still visible — validation prevented submission.
+- assertVisible: "Nuevo egreso"
+
+# --- Test 2: Valid concepto + $0 monto ---
+- tapOn:
+    id: "gasto-monto"
+- eraseText
+- inputText: "0"
+
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Test gasto"
+
+# Submit — should fail because monto is 0.
+- tapOn:
+    id: "gasto-submit"
+
+# Modal still visible.
+- assertVisible: "Nuevo egreso"
+
+# --- Test 3: Valid data → submit succeeds ---
+- tapOn:
+    id: "gasto-monto"
+- eraseText
+- inputText: "250"
+
+- tapOn:
+    id: "gasto-submit"
+
+# Modal closes on successful submission.
+- assertNotVisible: "Nuevo egreso"

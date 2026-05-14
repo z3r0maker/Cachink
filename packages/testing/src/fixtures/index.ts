@@ -14,3 +14,4 @@ export * from './employee.js';
 export * from './client.js';
 export * from './day-close.js';
 export * from './recurring-expense.js';
+export * from './user.js';

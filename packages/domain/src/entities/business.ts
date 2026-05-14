@@ -50,6 +50,10 @@ export const BusinessSchema = z
     tipoNegocio: TipoNegocioEnum.default('mixto'),
     categoriaVentaPredeterminada: SaleCategoryEnum.default('Producto'),
     atributosProducto: z.array(AttrDefSchema).default([]),
+    /** JSON string storing business feature flags. Parsed by callers. */
+    featureFlags: z.string().default(
+      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+    ),
   })
   .merge(auditSchema);
 

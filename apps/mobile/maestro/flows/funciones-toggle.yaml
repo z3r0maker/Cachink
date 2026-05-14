@@ -1,0 +1,99 @@
+# Feature flag toggling E2E — Director → Otros → Funciones.
+#
+# Verifies:
+#   1. Toggle stock OFF → Productos tab hides stock sub-tab
+#   2. Toggle caja ON → Caja item appears in Otros (Operativo grid)
+#   3. Toggle merma ON → Merma tab appears in Productos
+#   4. Toggle all OFF → clean state
+#
+# Precondition: wizard + director-setup complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros → Funciones.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+
+# --- Toggle stock OFF ---
+- assertVisible:
+    id: "funciones-negocio"
+- tapOn:
+    id: "flag-stock-switch"
+
+# Navigate to Productos via Otros and verify stock sub-tab is hidden.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
+- assertNotVisible:
+    id: "productos-tab-stock"
+
+# --- Toggle caja ON ---
+# Return to Funciones via Otros.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-caja-switch"
+
+# Switch to Operativo to verify Caja appears in their Otros tab.
+- runFlow: shared/select-operativo.yaml
+- tapOn:
+    id: "tab-otros"
+- assertVisible:
+    id: "otros-caja"
+
+# --- Toggle merma ON ---
+# Switch back to Director to access Funciones.
+- tapOn:
+    id: "top-bar-role-chip"
+- tapOn:
+    id: "role-director-select"
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-merma-switch"
+
+# Verify Merma appears as a bottom tab (replaces Productos for Operativo).
+# Switch to Operativo to verify the tab bar.
+- runFlow: shared/select-operativo.yaml
+- assertVisible:
+    id: "tab-merma"
+
+# --- Toggle all OFF → clean state ---
+# Switch back to Director to access Funciones.
+- tapOn:
+    id: "top-bar-role-chip"
+- tapOn:
+    id: "role-director-select"
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-caja-switch"
+- tapOn:
+    id: "flag-merma-switch"
+
+# Verify Otros no longer shows caja-reportes or merma-reportes.
+- tapOn:
+    id: "tab-otros"
+- assertNotVisible:
+    id: "otros-caja-reportes"
+- assertNotVisible:
+    id: "otros-merma-reportes"

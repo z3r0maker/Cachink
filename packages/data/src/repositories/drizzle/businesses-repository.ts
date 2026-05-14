@@ -8,6 +8,7 @@ import type {
   AttrDef,
   BusinessId,
   DeviceId,
+  UserId,
   IsoTimestamp,
   SaleCategory,
   TipoNegocio,
@@ -16,6 +17,7 @@ import { newEntityId, now } from '@cachink/domain';
 import type {
   Business,
   BusinessesRepository,
+  BusinessPatch,
   NewBusiness,
 } from '../businesses-repository.js';
 import { businesses } from '../../schema/index.js';
@@ -26,10 +28,12 @@ type BusinessRow = typeof businesses.$inferSelect;
 export class DrizzleBusinessesRepository implements BusinessesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewBusiness): Promise<Business> {
@@ -44,8 +48,10 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
       atributosProducto: JSON.stringify(input.atributosProducto ?? []),
+      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
       businessId: id,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -67,6 +73,23 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
     return this.findById(id);
   }
 
+  async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
+    const ts = now();
+    const set: Record<string, unknown> = { updatedAt: ts };
+    if (patch.nombre !== undefined) set['nombre'] = patch.nombre;
+    if (patch.regimenFiscal !== undefined) set['regimenFiscal'] = patch.regimenFiscal;
+    if (patch.isrTasa !== undefined) set['isrTasa'] = patch.isrTasa;
+    if (patch.featureFlags !== undefined) set['featureFlags'] = patch.featureFlags;
+    await this.#db.update(businesses).set(set).where(eq(businesses.id, id)).run();
+    const row = await this.#db
+      .select()
+      .from(businesses)
+      .where(eq(businesses.id, id))
+      .get();
+    if (!row) throw new Error(`Business ${id} not found after update`);
+    return this.#mapRow(row);
+  }
+
   async delete(id: BusinessId): Promise<void> {
     const ts = now();
     await this.#db
@@ -86,8 +109,10 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
       categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ?? 'Producto') as SaleCategory,
       atributosProducto: this.#parseAttrDefs(row.atributosProducto),
+      featureFlags: row.featureFlags,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

@@ -1,0 +1,56 @@
+# Create a gasto egreso with ALL optional fields (categoría + proveedor).
+#
+# Verifies:
+#   1. Open NuevoEgreso → fill concepto, categoría, monto, proveedor
+#   2. gasto-categoria selector works
+#   3. gasto-proveedor field accepts input
+#   4. Submit → egreso appears with category tag
+#
+# Precondition: wizard complete, Operativo or Director role active.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto-full-form.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Egresos.
+- tapOn:
+    id: "tab-gastos"
+- tapOn:
+    id: "egresos-nuevo"
+
+# Gasto tab is the default — fill concepto.
+- assertVisible: "Nuevo egreso"
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Material de limpieza"
+
+# Select a category from the categoria selector.
+- tapOn:
+    id: "gasto-categoria"
+- tapOn: "Servicios"
+
+# Fill proveedor.
+- tapOn:
+    id: "gasto-proveedor"
+- inputText: "Proveedor Industrial SA"
+
+# Fill monto.
+- tapOn:
+    id: "gasto-monto"
+- inputText: "2500"
+
+# Submit the egreso.
+- tapOn:
+    id: "gasto-submit"
+
+# Modal closes and the egreso appears in the list with context.
+- assertNotVisible: "Nuevo egreso"
+- assertVisible: "Material de limpieza"

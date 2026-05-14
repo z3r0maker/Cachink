@@ -1,0 +1,84 @@
+# Reusable subflow: complete DirectorSetup with test credentials.
+# Called by wizard-local-standalone.yaml after BusinessForm submit.
+#
+# Test credentials (hardcoded for E2E):
+#   Name:              Director Test
+#   Email:             test@cachink.test
+#   PIN (login):       123456
+#   Recovery Password: Test1234
+#
+# ADR-049: PIN first (login), recovery password second.
+appId: mx.cachink.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: "director-setup"
+    timeout: 10000
+
+- tapOn:
+    id: "director-nombre"
+- inputText: "Director Test"
+
+- tapOn:
+    id: "director-email"
+- inputText: "test@cachink.test"
+
+- tapOn:
+    id: "director-pin"
+- inputText: "123456"
+
+- tapOn:
+    id: "director-confirm-pin"
+- inputText: "123456"
+
+- tapOn:
+    id: "director-recovery-password"
+- inputText: "Test1234"
+# Dismiss iOS "Use Strong Password?" autofill sheet if it appeared.
+# The sheet blocks subsequent taps — dismiss before moving to next field.
+- tapOn:
+    text: "Close"
+    optional: true
+- tapOn:
+    text: "Don't Use"
+    optional: true
+# Dismiss the iPad software keyboard so the confirm field is reachable.
+- tapOn:
+    text: "Hide keyboard"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "director-confirm-recovery-password"
+- inputText: "Test1234"
+- tapOn:
+    text: "Close"
+    optional: true
+- tapOn:
+    text: "Don't Use"
+    optional: true
+# Dismiss keyboard again before submit button tap.
+- tapOn:
+    text: "Hide keyboard"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "director-setup-submit"
+
+# After submit, the user is auto-logged in as Director.
+# On first run, FeatureDiscovery carousel appears showing available flags.
+- extendedWaitUntil:
+    visible:
+      id: "feature-discovery"
+    timeout: 10000
+
+# Tap "Comenzar" to dismiss the feature discovery and enter the app.
+- tapOn:
+    id: "discovery-continue"
+
+# Wait for the app shell (tabs) to render.
+- extendedWaitUntil:
+    visible:
+      id: "tab-estados"
+    timeout: 10000

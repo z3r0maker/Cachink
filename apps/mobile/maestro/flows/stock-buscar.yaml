@@ -1,0 +1,53 @@
+# Search/filter stock list by product name using the search bar.
+#
+# Verifies:
+#   1. Navigate to Productos → Stock tab
+#   2. stock-buscar search bar visible
+#   3. Type product name → filtered list updates
+#   4. stock-instructions help text visible
+#
+# Precondition: wizard complete, at least one product exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/stock-buscar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Switch to Stock sub-tab.
+- tapOn:
+    id: "productos-tab-stock"
+
+# Verify the search bar is visible.
+- assertVisible:
+    id: "stock-buscar"
+
+# Verify instructions/help text is visible.
+- assertVisible:
+    id: "stock-instructions"
+
+# Type the product name to filter the list.
+- tapOn:
+    id: "stock-buscar"
+- inputText: "Tortilla"
+
+# Product should still be visible in filtered results.
+- assertVisible: "Tortilla"
+
+# Clear and type a non-existent name.
+- eraseText
+- inputText: "ZZZNOFOUND"
+
+# Product should disappear from filtered list.
+- assertNotVisible: "Tortilla"

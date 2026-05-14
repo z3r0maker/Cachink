@@ -10,11 +10,32 @@
 
 import type { ReactElement } from 'react';
 import type { NewRecurringExpense, RecurrenceFrequency } from '@cachink/domain';
-import { Input } from '../../../components/index';
+import { OptionCardGroup, type OptionCardItem } from '../../../components/OptionCardGroup/index';
 import { IntegerField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 export const FRECUENCIAS: readonly RecurrenceFrequency[] = ['semanal', 'quincenal', 'mensual'];
+
+export const FRECUENCIA_CARDS: readonly OptionCardItem<RecurrenceFrequency>[] = [
+  {
+    key: 'semanal',
+    icon: 'zap',
+    label: 'Semanal',
+    description: 'Se registra cada semana.',
+  },
+  {
+    key: 'quincenal',
+    icon: 'coins',
+    label: 'Quincenal',
+    description: 'Se registra cada 15 días.',
+  },
+  {
+    key: 'mensual',
+    icon: 'calendar',
+    label: 'Mensual',
+    description: 'Se registra una vez al mes.',
+  },
+];
 
 export interface RecurrenteState {
   frecuencia: RecurrenceFrequency;
@@ -63,12 +84,11 @@ export function GastoRecurrenteFields(props: GastoRecurrenteFieldsProps): ReactE
   const { state, update } = props;
   return (
     <>
-      <Input
-        type="select"
+      <OptionCardGroup
         label={t('nuevoEgreso.frecuenciaLabel')}
         value={state.frecuencia}
-        onChange={(v) => update({ frecuencia: v as RecurrenceFrequency })}
-        options={FRECUENCIAS}
+        onChange={(v) => update({ frecuencia: v })}
+        options={FRECUENCIA_CARDS}
         testID="recurrente-frecuencia"
       />
       {state.frecuencia !== 'semanal' && (

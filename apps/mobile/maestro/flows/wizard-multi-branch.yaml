@@ -1,0 +1,49 @@
+# Wizard Step 1 → tap Multi → verify Step 2B renders (multi-device branch).
+# Does NOT complete setup (requires cloud/LAN backend). Just validates navigation.
+#
+# Covers Gap A (Phase 17): wizard-step1-multi card + Step 2B screen +
+# wizard-back navigation.
+#
+# testIDs exercised:
+#   wizard-step1-multi-card, wizard-step2b-server, wizard-step2b-cloud,
+#   wizard-back
+#
+# Precondition: fresh install. Run via the wrapper script:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-multi-branch.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+
+- assertVisible: "¡Bienvenido a Cachink!"
+
+# Verify both Solo and Multi cards are visible on Step 1.
+- assertVisible:
+    id: "wizard-step1-solo-card"
+- assertVisible:
+    id: "wizard-step1-multi-card"
+
+# Tap Multi → Step 2B mounts.
+- tapOn:
+    id: "wizard-step1-multi-card"
+- extendedWaitUntil:
+    visible:
+      id: "wizard-step2b-server"
+    timeout: 5000
+
+# Verify both Step 2B cards render.
+- assertVisible:
+    id: "wizard-step2b-server"
+- assertVisible:
+    id: "wizard-step2b-cloud"
+
+# Tap back → returns to Step 1.
+- tapOn:
+    id: "wizard-back"
+- assertVisible:
+    id: "wizard-step1-solo-card"
+- assertVisible:
+    id: "wizard-step1-multi-card"

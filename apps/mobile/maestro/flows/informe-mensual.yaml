@@ -9,6 +9,10 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 - tapOn:
     id: "tab-estados"
 - assertVisible:
@@ -20,4 +24,7 @@ appId: mx.cachink.mobile
     id: "informe-mensual-card"
 - tapOn:
     id: "informe-mensual-btn"
+# Gap R (Phase 17): verify the status badge testID appears during generation.
+- assertVisible:
+    id: "informe-mensual-status"
 - assertVisible: "Generando"

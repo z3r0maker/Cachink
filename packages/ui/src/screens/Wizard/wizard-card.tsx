@@ -197,6 +197,7 @@ export function WizardCard(props: WizardCardProps): ReactElement {
         <Card
           testID={`${props.testID ?? 'wizard-card'}-card`}
           variant={props.highlighted === true ? 'yellow' : 'white'}
+          elevation="raised"
           padding="lg"
           onPress={isDisabled ? undefined : props.onPress}
           fullWidth

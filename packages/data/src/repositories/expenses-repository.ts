@@ -34,6 +34,8 @@ export interface ExpensesRepository {
   create(input: NewExpense): Promise<Expense>;
   findById(id: ExpenseId): Promise<Expense | null>;
   findByDate(date: IsoDate, businessId: BusinessId): Promise<readonly Expense[]>;
+  /** List expenses in an inclusive date range, newest first. */
+  findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]>;
   /** `yearMonth` is a `YYYY-MM` string, e.g. `"2026-04"`. */
   findByMonth(yearMonth: string, businessId: BusinessId): Promise<readonly Expense[]>;
   findByCategory(
@@ -48,4 +50,13 @@ export interface ExpensesRepository {
    */
   update(id: ExpenseId, patch: ExpensePatch): Promise<Expense | null>;
   delete(id: ExpenseId): Promise<void>;
+  /**
+   * Audit M-1 PR 4 — idempotency guard for recurring expense processing.
+   * Returns the first egreso linked to `gastoRecurrenteId` on `date`, or
+   * null if none exists.
+   */
+  findByGastoRecurrenteAndDate(
+    gastoRecurrenteId: string,
+    date: IsoDate,
+  ): Promise<Expense | null>;
 }

@@ -1,177 +1,51 @@
 /**
- * NuevoProductoModal — create a new producto in the catalog
- * (Slice 2 C14, M5-T03).
+ * NuevoProductoModal — create a new producto in the catalog.
  *
- * Pure UI. Submit bubbles a CrearProductoInput; parent wires
- * `useCrearProducto`.
+ * @deprecated Use NuevoProductoScreen for mobile (full page).
+ * This modal is kept for desktop backward-compat.
+ *
+ * Phase 18: now delegates to shared field components from
+ * producto-form-fields.tsx.
  */
 
 import { useState, type ReactElement } from 'react';
-import type { InventoryCategory, InventoryUnit } from '@cachink/domain';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
-import { Btn, Icon, Input, Modal, Scanner } from '../../components/index';
-import { IntegerField, MoneyField, TextField } from '../../components/fields/index';
+import { Btn, Modal, Scanner } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {
-  INV_CATEGORIAS,
-  INV_UNIDADES,
   buildProductoPayload,
   useProductoForm,
   validateProducto,
-  type ProductoFormApi,
 } from './nuevo-producto-form';
+import {
+  AppearanceField,
+  CategoryFields,
+  IdentityFields,
+  PricingFields,
+  StockFields,
+} from './producto-form-fields';
 
 export interface NuevoProductoModalProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onSubmit: (input: CrearProductoInput) => void;
   readonly submitting?: boolean;
-}
-
-type T = ReturnType<typeof useTranslation>['t'];
-
-function PrimaryFields({ form, t }: { form: ProductoFormApi; t: T }): ReactElement {
-  const { state, errors, update } = form;
-  return (
-    <>
-      <TextField
-        label={t('nuevoProducto.nombreLabel')}
-        placeholder={t('nuevoProducto.nombrePlaceholder')}
-        value={state.nombre}
-        onChange={(v) => update({ nombre: v })}
-        note={errors.nombre}
-        testID="producto-nombre"
-        returnKeyType="next"
-      />
-      <TextField
-        label={t('nuevoProducto.skuLabel')}
-        placeholder={t('nuevoProducto.skuPlaceholder')}
-        value={state.sku}
-        onChange={(v) => update({ sku: v })}
-        testID="producto-sku"
-        returnKeyType="next"
-      />
-      <Input
-        type="select"
-        label={t('nuevoProducto.categoriaLabel')}
-        value={state.categoria}
-        onChange={(v) => update({ categoria: v as InventoryCategory })}
-        options={INV_CATEGORIAS}
-        testID="producto-categoria"
-      />
-    </>
-  );
-}
-
-interface FieldsBlockProps {
-  form: ProductoFormApi;
-  t: T;
-  onSubmitEditing?: () => void;
-}
-
-function PricingFields({ form, t }: FieldsBlockProps): ReactElement {
-  const { state, errors, update } = form;
-  return (
-    <>
-      <MoneyField
-        label={t('nuevoProducto.costoUnitLabel')}
-        value={state.costoPesos}
-        onChange={(v) => update({ costoPesos: v })}
-        note={errors.costo}
-        testID="producto-costo"
-        returnKeyType="next"
-      />
-      <MoneyField
-        label={t('nuevoProducto.precioVentaLabel')}
-        value={state.precioVentaPesos}
-        onChange={(v) => update({ precioVentaPesos: v })}
-        testID="producto-precio-venta"
-        returnKeyType="next"
-      />
-      <Input
-        type="select"
-        label={t('nuevoProducto.unidadLabel')}
-        value={state.unidad}
-        onChange={(v) => update({ unidad: v as InventoryUnit })}
-        options={INV_UNIDADES}
-        testID="producto-unidad"
-      />
-    </>
-  );
-}
-
-function StockFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
-  const { state, errors, update } = form;
-  return (
-    <>
-      <IntegerField
-        label={t('nuevoProducto.umbralLabel')}
-        value={state.umbral}
-        onChange={(v) => update({ umbral: v })}
-        note={errors.umbral}
-        min={0}
-        testID="producto-umbral"
-        returnKeyType="next"
-      />
-      <IntegerField
-        label={t('nuevoProducto.stockInicialLabel')}
-        value={state.stockInicial}
-        onChange={(v) => update({ stockInicial: v })}
-        min={0}
-        testID="producto-stock-inicial"
-        returnKeyType="done"
-        onSubmitEditing={onSubmitEditing}
-      />
-    </>
-  );
-}
-
-/** Audit 5.4 — Bluetooth-keyboard Enter-to-submit threads through {@link FieldsBlockProps}. */
-function ProductoFields({ form, t, onSubmitEditing }: FieldsBlockProps): ReactElement {
-  return (
-    <>
-      <PrimaryFields form={form} t={t} />
-      <PricingFields form={form} t={t} />
-      <StockFields form={form} t={t} onSubmitEditing={onSubmitEditing} />
-    </>
-  );
-}
-
-function ScanSkuBtn({
-  onScanned,
-  label,
-}: {
-  onScanned: (code: string) => void;
-  label: string;
-}): ReactElement {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <Btn
-        variant="ghost"
-        onPress={() => setOpen(true)}
-        fullWidth
-        icon={<Icon name="camera" size={16} />}
-        testID="producto-scan"
-      >
-        {label}
-      </Btn>
-      <Scanner
-        open={open}
-        onClose={() => setOpen(false)}
-        onScan={(code) => onScanned(code)}
-        mode="single"
-      />
-    </>
-  );
+  readonly conversionEnabled?: boolean;
 }
 
 export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement {
   const { t } = useTranslation();
   const form = useProductoForm();
+  const [scanOpen, setScanOpen] = useState(false);
+  const showPrecio = form.state.usoProducto !== 'materia-prima';
 
   const handleSubmit = (): void => {
-    const v = validateProducto(form.state, t('nuevoProducto.required'));
+    const msgs = {
+      required: t('validation.required'),
+      greaterThanZero: t('validation.greaterThanZero'),
+      invalidNumber: t('validation.invalidNumber'),
+    };
+    const v = validateProducto(form.state, msgs);
     if (Object.keys(v).length > 0) {
       form.setErrors(v);
       return;
@@ -188,8 +62,15 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       title={t('nuevoProducto.title')}
       testID="nuevo-producto-modal"
     >
-      <ProductoFields form={form} t={t} onSubmitEditing={handleSubmit} />
-      <ScanSkuBtn onScanned={(code) => form.update({ sku: code })} label={t('scanner.title')} />
+      <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} />
+      <CategoryFields
+        form={form}
+        t={t}
+        conversionEnabled={props.conversionEnabled === true}
+      />
+      <PricingFields form={form} t={t} showPrecio={showPrecio} />
+      <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
+      <AppearanceField form={form} t={t} />
       <Btn
         variant="primary"
         onPress={handleSubmit}
@@ -199,6 +80,12 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       >
         {t('nuevoProducto.save')}
       </Btn>
+      <Scanner
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        onScan={(code) => form.update({ sku: code })}
+        mode="single"
+      />
     </Modal>
   );
 }

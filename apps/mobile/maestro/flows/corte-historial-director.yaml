@@ -1,0 +1,34 @@
+# After completing a corte, switch to Director → verify corte-historial visible.
+# Covers Gap H (Phase 17): corte-historial / corte-historial-empty testIDs.
+#
+# testIDs exercised:
+#   corte-historial OR corte-historial-empty, director-home-historial-slot
+#
+# The historial strip always renders on Director Home — if no cortes
+# exist yet, corte-historial-empty shows the empty-state card.
+#
+# Precondition: wizard complete, Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/corte-historial-director.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Director Home should be showing.
+- assertVisible:
+    id: "director-home-route"
+
+# Scroll to the historial strip. On a fresh install with no cortes,
+# the empty-state card should render.
+- scrollUntilVisible:
+    element:
+      id: "corte-historial-empty"
+    direction: DOWN
+    timeout: 5000

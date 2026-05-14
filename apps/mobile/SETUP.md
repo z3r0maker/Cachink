@@ -302,3 +302,22 @@ first — see the Audit M-1 ROADMAP entries.
 `MAESTRO_ANDROID=1 pnpm --filter @cachink/mobile test:e2e` runs the
 flows against an Android emulator. The dev laptop only has Xcode +
 iOS sims today; Android testing is a follow-up slice.
+
+### Known dev-only warnings
+
+#### `findNodeHandle is deprecated in StrictMode`
+
+A console error fires on first navigation to screens using
+`<SwipeableTabView>` (Productos, Estados Financieros):
+
+> findNodeHandle is deprecated in StrictMode. findNodeHandle was
+> passed an instance of Wrap which is inside StrictMode.
+
+**This is harmless.** It's triggered by `react-native-gesture-handler`
+v2.x's internal use of `findNodeHandle`, which React 19 StrictMode
+flags. It does not fire in production builds (StrictMode is dev-only).
+
+The warning will disappear when `react-native-gesture-handler` v3
+ships stable and Expo SDK officially supports it (expected SDK 56+).
+Do not remove `<StrictMode>` from `_layout.tsx` to suppress this —
+StrictMode catches real bugs elsewhere.

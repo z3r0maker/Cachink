@@ -103,6 +103,7 @@ export function ConflictosRecientesCard(props: ConflictosRecientesCardProps): Re
               <ConflictRow c={c} />
             </View>
           )}
+          scrollEnabled={false}
           testID="conflictos-recientes-list"
         />
       </View>

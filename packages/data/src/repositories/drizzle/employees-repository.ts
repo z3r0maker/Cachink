@@ -6,10 +6,12 @@ import { and, asc, eq, isNull } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
+  UserId,
   EmployeeId,
   IsoTimestamp,
   NewEmployee,
   PayrollFrequency,
+  UpdateEmployee,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { Employee, EmployeesRepository } from '../employees-repository.js';
@@ -21,10 +23,12 @@ type EmployeeRow = typeof employees.$inferSelect;
 export class DrizzleEmployeesRepository implements EmployeesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewEmployee): Promise<Employee> {
@@ -38,6 +42,7 @@ export class DrizzleEmployeesRepository implements EmployeesRepository {
       periodo: input.periodo,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -53,6 +58,19 @@ export class DrizzleEmployeesRepository implements EmployeesRepository {
       .where(and(eq(employees.id, id), isNull(employees.deletedAt)))
       .get();
     return row ? this.#mapRow(row) : null;
+  }
+
+  async update(id: EmployeeId, input: UpdateEmployee): Promise<Employee> {
+    const ts = now();
+    const updates: Record<string, unknown> = { updatedAt: ts };
+    if (input.nombre !== undefined) updates.nombre = input.nombre;
+    if (input.puesto !== undefined) updates.puesto = input.puesto;
+    if (input.salarioCentavos !== undefined) updates.salarioCentavos = input.salarioCentavos;
+    if (input.periodo !== undefined) updates.periodo = input.periodo;
+    await this.#db.update(employees).set(updates).where(eq(employees.id, id)).run();
+    const row = await this.findById(id);
+    if (!row) throw new Error(`Employee ${id} not found after update`);
+    return row;
   }
 
   async listActive(businessId: BusinessId): Promise<readonly Employee[]> {
@@ -83,6 +101,7 @@ export class DrizzleEmployeesRepository implements EmployeesRepository {
       periodo: row.periodo as PayrollFrequency,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

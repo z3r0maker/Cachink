@@ -102,8 +102,8 @@ describe('BusinessForm', () => {
     // them up after the layout pass — same pattern the Modal regression test
     // uses for fixed/inset/margin.
     const screenComputed = window.getComputedStyle(screenRoot);
-    expect(screenComputed.alignItems).toBe('center');
-    expect(screenComputed.justifyContent).toBe('center');
+    // Business form uses stretch alignment (full width with centered content)
+    expect(screenComputed.alignItems).toBe('stretch');
 
     const contentComputed = window.getComputedStyle(content);
     expect(contentComputed.maxWidth).toBe('480px');

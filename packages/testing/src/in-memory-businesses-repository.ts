@@ -5,7 +5,7 @@
 
 import type { BusinessId, DeviceId, IsoTimestamp } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
-import type { Business, BusinessesRepository, NewBusiness } from '@cachink/data';
+import type { Business, BusinessesRepository, BusinessPatch, NewBusiness } from '@cachink/data';
 
 export class InMemoryBusinessesRepository implements BusinessesRepository {
   private readonly rows = new Map<BusinessId, Business>();
@@ -27,8 +27,10 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
       atributosProducto: input.atributosProducto ?? [],
+      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
       businessId: id,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,
@@ -45,6 +47,24 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
 
   async findCurrent(id: BusinessId): Promise<Business | null> {
     return this.findById(id);
+  }
+
+  async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
+    const existing = this.rows.get(id);
+    if (!existing || existing.deletedAt !== null) {
+      throw new Error(`Business ${id} not found`);
+    }
+    const ts = now();
+    const updated: Business = {
+      ...existing,
+      ...(patch.nombre !== undefined && { nombre: patch.nombre }),
+      ...(patch.regimenFiscal !== undefined && { regimenFiscal: patch.regimenFiscal }),
+      ...(patch.isrTasa !== undefined && { isrTasa: patch.isrTasa }),
+      ...(patch.featureFlags !== undefined && { featureFlags: patch.featureFlags }),
+      updatedAt: ts,
+    };
+    this.rows.set(id, updated);
+    return updated;
   }
 
   async delete(id: BusinessId): Promise<void> {

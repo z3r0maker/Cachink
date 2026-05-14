@@ -1,0 +1,86 @@
+# Close caja with amount mismatch — requires reason + explanation.
+#
+# Verifies:
+#   1. Open caja with 500
+#   2. Close with 400 → discrepancy of -100
+#   3. caja-reason dropdown must be selected
+#   4. caja-explicacion text field must be filled
+#   5. Submit → caja closes
+#
+# Precondition: wizard + director-setup complete, caja feature flag ON.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
+#   maestro test apps/mobile/maestro/flows/caja-cierre-discrepancia.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Ensure caja feature flag is ON.
+- runFlow: shared/enable-caja-flag.yaml
+
+# Switch to Operativo to access Caja.
+- runFlow: shared/select-operativo.yaml
+
+# Navigate to Otros → Caja.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-caja"
+
+# Open caja with 500.
+- extendedWaitUntil:
+    visible:
+      id: "abrir-caja-modal"
+    timeout: 5000
+- tapOn:
+    id: "caja-apertura-monto"
+- inputText: "500"
+- tapOn:
+    id: "caja-abrir-submit"
+
+# Status card visible.
+- assertVisible:
+    id: "caja-status-card"
+
+# --- Close with discrepancy ---
+- tapOn:
+    id: "caja-cerrar-btn"
+- assertVisible:
+    id: "cerrar-caja-modal"
+
+# Enter cierre amount that doesn't match (400 vs 500 = -100 discrepancy).
+- tapOn:
+    id: "caja-cierre-monto"
+- inputText: "400"
+
+# Try to submit without reason — should fail/stay open.
+- tapOn:
+    id: "caja-cerrar-submit"
+- assertVisible:
+    id: "cerrar-caja-modal"
+
+# Select a reason from the dropdown.
+- tapOn:
+    id: "caja-reason"
+- tapOn:
+    index: 0
+
+# Enter explanation text.
+- tapOn:
+    id: "caja-explicacion"
+- inputText: "Error de cambio al cliente"
+
+# Now submit should succeed.
+- tapOn:
+    id: "caja-cerrar-submit"
+- assertNotVisible:
+    id: "cerrar-caja-modal"
+- assertVisible:
+    id: "caja-status-card"

@@ -14,20 +14,33 @@
  * decision; FlatList is sufficient for the row counts Cachink ships
  * and ships free with React Native.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { FlatList, View } from 'react-native';
 import type { ListProps } from './list.shared';
 
 export type { ListProps } from './list.shared';
 
+/** Wrap an optional ReactNode slot so FlatList receives a component function. */
+function wrapSlot(node: ReactNode | undefined): (() => ReactElement) | undefined {
+  return node ? () => <>{node}</> : undefined;
+}
+
 export function List<T>(props: ListProps<T>): ReactElement {
   // Audit Round 2 G1: RN's accessibility prop is `accessibilityRole`
   // (not the `role` HTML attribute). VoiceOver / TalkBack announce
   // the FlatList as a list and expose row navigation.
+
+  // When nested inside a parent ScrollView, disable FlatList's own
+  // scroll and render all items (virtualization is moot without scroll
+  // ownership). Phase-1 row counts are small enough that this is fine.
+  const nested = props.scrollEnabled === false;
+  const batchSize = nested ? props.data.length || 1 : undefined;
+
   return (
     <FlatList
       testID={props.testID ?? 'list'}
       accessibilityRole="list"
+      scrollEnabled={!nested}
       data={[...props.data] as T[]}
       // FlatList expects `(item, index) => ReactElement` — our shared
       // type returns ReactNode, which is broader. The runtime is
@@ -39,21 +52,17 @@ export function List<T>(props: ListProps<T>): ReactElement {
         </View>
       )}
       keyExtractor={(item, index) => props.keyExtractor(item, index)}
-      ListHeaderComponent={
-        props.ListHeaderComponent ? () => <>{props.ListHeaderComponent}</> : undefined
-      }
-      ListFooterComponent={
-        props.ListFooterComponent ? () => <>{props.ListFooterComponent}</> : undefined
-      }
-      ListEmptyComponent={
-        props.ListEmptyComponent ? () => <>{props.ListEmptyComponent}</> : undefined
-      }
+      ListHeaderComponent={wrapSlot(props.ListHeaderComponent)}
+      ListFooterComponent={wrapSlot(props.ListFooterComponent)}
+      ListEmptyComponent={wrapSlot(props.ListEmptyComponent)}
       getItemLayout={props.getItemLayout}
-      // FlatList defaults: keep scroll smooth without overspending CPU.
-      initialNumToRender={12}
-      maxToRenderPerBatch={8}
-      windowSize={5}
-      removeClippedSubviews={true}
+      // When nested, render everything up-front so the parent
+      // ScrollView governs scrolling. Otherwise keep the FlatList
+      // virtualization defaults for smooth scrolling.
+      initialNumToRender={batchSize ?? 12}
+      maxToRenderPerBatch={batchSize ?? 8}
+      windowSize={nested ? 21 : 5}
+      removeClippedSubviews={!nested}
     />
   );
 }

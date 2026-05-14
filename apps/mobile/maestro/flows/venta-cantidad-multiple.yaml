@@ -1,0 +1,51 @@
+# Sell multiple units via cantidad field on VentaConfirmSheet.
+#
+# Verifies:
+#   1. Tap product → VentaConfirmSheet opens
+#   2. Change cantidad to 3
+#   3. Submit → sale recorded with qty=3
+#
+# Precondition: wizard complete, at least one product exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-cantidad-multiple.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab (Operativo role).
+- tapOn:
+    id: "tab-ventas"
+
+# Verify the product grid is visible.
+- assertVisible:
+    id: "ventas-product-grid"
+
+# Tap the product card to open VentaConfirmSheet.
+- tapOn: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "venta-confirm-sheet"
+    timeout: 5000
+
+# Change the cantidad field from 1 to 3.
+- tapOn:
+    id: "venta-confirm-cantidad"
+- eraseText
+- inputText: "3"
+
+# Submit the venta.
+- tapOn:
+    id: "venta-confirm-submit"
+
+# Sheet closes and the sale appears in the list.
+- assertNotVisible:
+    id: "venta-confirm-sheet"
+- assertVisible: "Tortilla"

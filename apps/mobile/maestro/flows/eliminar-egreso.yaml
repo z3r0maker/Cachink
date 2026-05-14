@@ -1,0 +1,42 @@
+# Delete an egreso via the detail popover and verify it's removed.
+#
+# Covers CRUD Delete for Egresos.
+#
+# Precondition: wizard complete + at least one egreso exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/eliminar-egreso.yaml
+#
+# ⚠️  This flow DESTROYS state — run last in any chain that
+# expects the egreso to still exist afterwards.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Egresos tab.
+- tapOn:
+    id: "tab-gastos"
+
+# Verify the existing egreso is visible.
+- assertVisible: "Renta del local"
+
+# Tap the egreso to open EgresoDetailPopover.
+- tapOn: "Renta del local"
+- assertVisible:
+    id: "egreso-detail-popover"
+
+# Tap the delete button — fires eliminar directly (no confirm).
+- tapOn:
+    id: "egreso-detail-delete"
+
+# Popover closes and the egreso is removed from the list.
+- assertNotVisible:
+    id: "egreso-detail-popover"
+- assertNotVisible: "Renta del local"

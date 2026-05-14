@@ -14,19 +14,16 @@
  */
 
 import { useMemo, type ReactElement } from 'react';
+import { ScrollView } from 'react-native';
 import { Text, View, useMedia } from '@tamagui/core';
 import type { Product, Sale } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { formatDate } from '@cachink/domain';
 import type { IsoDate } from '@cachink/domain';
-import {
-  ProductoCardGrid,
-  SearchBar,
-  SectionTitle,
-  SplitPane,
-} from '../../components/index';
+import { ProductoCardGrid, SearchBar, SectionTitle, SplitPane } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { PRODUCT_BG_COLORS } from '../../product-colors';
 import { VentasEmptyProductos } from './empty-productos';
 import { SalesContent, TotalCard } from './ventas-sales-pane';
 
@@ -60,7 +57,9 @@ function useFilteredProducts(productos: readonly Product[], search: string): rea
   return useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return productos;
-    return productos.filter((p) => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)));
+    return productos.filter(
+      (p) => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)),
+    );
   }, [productos, search]);
 }
 
@@ -68,11 +67,22 @@ function ProductPane(props: VentasScreenProps & { filtered: readonly Product[] }
   const { t } = useTranslation();
   return (
     <View flex={1} gap={12}>
-      <SearchBar value={props.productSearch} onChange={props.onProductSearchChange} placeholder={t('ventas.searchProducto')} testID="ventas-product-search" />
+      <SearchBar
+        value={props.productSearch}
+        onChange={props.onProductSearchChange}
+        placeholder={t('ventas.searchProducto')}
+        testID="ventas-product-search"
+      />
       {props.productos.length === 0 ? (
         <VentasEmptyProductos onGoToProductos={props.onGoToProductos} />
       ) : (
-        <ProductoCardGrid productos={props.filtered} stockMap={props.stockMap} mode="sell" onPress={props.onProductoTap} testID="ventas-product-grid" />
+        <ProductoCardGrid
+          productos={props.filtered}
+          stockMap={props.stockMap}
+          mode="sell"
+          onPress={props.onProductoTap}
+          testID="ventas-product-grid"
+        />
       )}
     </View>
   );
@@ -102,13 +112,34 @@ function ReadOnlyDate({ label, value }: { label: string; value: string }): React
   );
 }
 
+function useProductColorMap(productos: readonly Product[]): ReadonlyMap<string, string> {
+  return useMemo(() => {
+    const map = new Map<string, string>();
+    for (const p of productos) {
+      const hex = PRODUCT_BG_COLORS[p.colorFondo ?? 'white'];
+      if (hex !== PRODUCT_BG_COLORS.white) map.set(p.id, hex);
+    }
+    return map;
+  }, [productos]);
+}
+
 function SalesPane(props: VentasScreenProps): ReactElement {
   const { t } = useTranslation();
+  const productColorMap = useProductColorMap(props.productos);
   return (
     <View flex={1} gap={12}>
       <TotalCard label={t('ventas.totalDelDia')} total={props.total} />
       <ReadOnlyDate label={t('ventas.fechaLabel')} value={props.fecha} />
-      <SalesContent ventas={props.ventas} loading={props.loading} error={props.error} onRetry={props.onRetry} onVentaPress={props.onVentaPress} onEditVenta={props.onEditVenta} onEliminarVenta={props.onEliminarVenta} />
+      <SalesContent
+        ventas={props.ventas}
+        productColorMap={productColorMap}
+        loading={props.loading}
+        error={props.error}
+        onRetry={props.onRetry}
+        onVentaPress={props.onVentaPress}
+        onEditVenta={props.onEditVenta}
+        onEliminarVenta={props.onEliminarVenta}
+      />
     </View>
   );
 }
@@ -120,18 +151,33 @@ export function VentasScreen(props: VentasScreenProps): ReactElement {
 
   if (Boolean(media.gtMd)) {
     return (
-      <View testID={props.testID ?? 'ventas-screen'} flex={1} padding={16} backgroundColor={colors.offwhite}>
+      <View
+        testID={props.testID ?? 'ventas-screen'}
+        flex={1}
+        padding={16}
+        backgroundColor={colors.offwhite}
+      >
         <SectionTitle title={t('ventas.title')} />
-        <SplitPane left={<ProductPane {...props} filtered={filtered} />} right={<SalesPane {...props} />} leftFlex={0.45} rightFlex={0.55} testID="ventas-split" />
+        <SplitPane
+          left={<ProductPane {...props} filtered={filtered} />}
+          right={<SalesPane {...props} />}
+          leftFlex={0.45}
+          rightFlex={0.55}
+          testID="ventas-split"
+        />
       </View>
     );
   }
   return (
-    <View testID={props.testID ?? 'ventas-screen'} flex={1} padding={16} gap={12} backgroundColor={colors.offwhite}>
+    <ScrollView
+      testID={props.testID ?? 'ventas-screen'}
+      style={{ flex: 1, backgroundColor: colors.offwhite }}
+      contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}
+    >
       <SectionTitle title={t('ventas.title')} />
       <ProductPane {...props} filtered={filtered} />
       <SectionTitle title={t('ventas.ventasDeHoy')} />
       <SalesPane {...props} />
-    </View>
+    </ScrollView>
   );
 }

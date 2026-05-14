@@ -1,0 +1,66 @@
+# Test form validation on the manual venta form — submit with
+# invalid data and verify errors prevent submission.
+#
+# Covers validation edge cases:
+#   1. Submit with empty concepto → form NOT submitted
+#   2. Submit with $0 monto → form NOT submitted
+#
+# Precondition: wizard complete + at least one product exists
+# (so the manual form is visible alongside the product grid).
+#
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/validation-venta.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab.
+- tapOn:
+    id: "tab-ventas"
+
+# --- Test 1: Empty concepto + valid monto ---
+# The manual venta form's submit button should be disabled when
+# concepto is empty.
+- assertVisible:
+    id: "manual-venta-form"
+
+# Enter a valid monto but leave concepto blank.
+- tapOn:
+    id: "manual-venta-monto"
+- inputText: "100"
+
+# The submit button should be disabled (validation: concepto is
+# required and monto > 0). Tap it — nothing should happen.
+- tapOn:
+    id: "manual-venta-submit"
+
+# The form should still be visible (not submitted).
+- assertVisible:
+    id: "manual-venta-form"
+
+# --- Test 2: Valid concepto + $0 monto ---
+# Clear the monto and enter a concepto.
+- tapOn:
+    id: "manual-venta-monto"
+- eraseText
+- inputText: "0"
+
+- tapOn:
+    id: "manual-venta-concepto"
+- inputText: "Test producto"
+
+# Submit button should still be disabled (monto = 0).
+- tapOn:
+    id: "manual-venta-submit"
+
+# Form still visible — validation prevented submission.
+- assertVisible:
+    id: "manual-venta-form"

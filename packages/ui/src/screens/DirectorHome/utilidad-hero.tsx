@@ -55,7 +55,13 @@ export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
   const utilidad = (query.data?.utilidadNeta ?? 0n) as bigint;
 
   return (
-    <Card testID={props.testID ?? 'utilidad-hero'} variant="yellow" padding="lg" fullWidth>
+    <Card
+      testID={props.testID ?? 'utilidad-hero'}
+      variant="yellow"
+      elevation="raised"
+      padding="lg"
+      fullWidth
+    >
       <Kpi
         label={t('directorHome.utilidadTitle')}
         value={formatMoney(utilidad as never)}

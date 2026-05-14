@@ -41,11 +41,27 @@ export type CardVariant = 'white' | 'yellow' | 'black';
 
 export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
 
+/**
+ * Shadow elevation. `raised` applies the §8.3 hard shadow (hero cards,
+ * yellow callouts, primary CTAs). `none` renders border-only (list-item
+ * cards, settings rows, detail rows). Defaults to `none`.
+ *
+ * Audit M-1 PR 3 — removes shadow triangle artifacts on list cards
+ * and improves visual density for card-heavy screens on phone.
+ */
+export type CardElevation = 'none' | 'raised';
+
 export interface CardProps {
   /** Surface variant from CLAUDE.md §8.4. Defaults to `white`. */
   readonly variant?: CardVariant;
   /** Inner padding scale. Defaults to `md` (16). */
   readonly padding?: CardPadding;
+  /**
+   * Shadow elevation. `raised` applies the §8.3 hard shadow (hero cards,
+   * yellow callouts). `none` renders border-only (list-item cards).
+   * Defaults to `none`.
+   */
+  readonly elevation?: CardElevation;
   /**
    * When provided the Card becomes tappable and applies the §8.3 press
    * transform. When omitted no press handler is wired and no cursor is set.
@@ -63,19 +79,26 @@ export interface CardProps {
    * translates RN-style a11y props; consumers pass web-standard ones).
    */
   readonly ariaLabel?: string;
+  /** Custom background override — takes precedence over variant bg. */
+  readonly backgroundColor?: string;
 }
 
 interface VariantDef {
   readonly background: string;
   readonly borderWidth: number;
-  readonly shadow: string;
+  /** Shadow applied when `elevation="raised"`. */
+  readonly raisedShadow: string;
 }
 
 const VARIANTS: Record<CardVariant, VariantDef> = {
-  white: { background: colors.white, borderWidth: 2, shadow: shadows.card },
-  yellow: { background: colors.yellow, borderWidth: 2, shadow: shadows.card },
-  black: { background: colors.black, borderWidth: 2.5, shadow: shadows.hero },
+  white: { background: colors.white, borderWidth: 2, raisedShadow: shadows.card },
+  yellow: { background: colors.yellow, borderWidth: 2, raisedShadow: shadows.card },
+  black: { background: colors.black, borderWidth: 2.5, raisedShadow: shadows.hero },
 };
+
+function resolveShadow(v: VariantDef, elevation: CardElevation): string {
+  return elevation === 'raised' ? v.raisedShadow : 'none';
+}
 
 const PADDINGS: Record<CardPadding, number> = {
   none: 0,
@@ -94,7 +117,12 @@ const PRESS_TRANSFORM: ViewStyle = {
 };
 
 /** Builds the RN ViewStyle for a tappable (Pressable) card root. */
-function buildTappableStyle(v: VariantDef, pad: number, fullWidth: boolean): ViewStyle {
+function buildTappableStyle(
+  v: VariantDef,
+  pad: number,
+  fullWidth: boolean,
+  shadow: string,
+): ViewStyle {
   return {
     backgroundColor: v.background,
     borderColor: colors.black,
@@ -104,7 +132,7 @@ function buildTappableStyle(v: VariantDef, pad: number, fullWidth: boolean): Vie
     width: fullWidth ? '100%' : undefined,
     cursor: 'pointer',
     userSelect: 'none',
-    boxShadow: v.shadow,
+    boxShadow: shadow,
   } as ViewStyle;
 }
 
@@ -115,14 +143,17 @@ function buildTappableStyle(v: VariantDef, pad: number, fullWidth: boolean): Vie
 export function Card(props: CardProps): ReactElement {
   const variant = props.variant ?? 'white';
   const padding = props.padding ?? 'md';
+  const elevation = props.elevation ?? 'none';
   const v = VARIANTS[variant];
   const pad = PADDINGS[padding];
+  const shadow = resolveShadow(v, elevation);
   const tappable = props.onPress !== undefined;
 
   // Tappable cards use RN Pressable for reliable gesture recognition on
   // Maestro / XCUI (same fix as Btn — F0-T04).
   if (tappable) {
-    const base = buildTappableStyle(v, pad, props.fullWidth === true);
+    const base = buildTappableStyle(v, pad, props.fullWidth === true, shadow);
+    if (props.backgroundColor) base.backgroundColor = props.backgroundColor;
     return (
       <Pressable
         testID={props.testID ?? 'card'}
@@ -142,13 +173,13 @@ export function Card(props: CardProps): ReactElement {
   return (
     <View
       testID={props.testID ?? 'card'}
-      backgroundColor={v.background}
+      backgroundColor={props.backgroundColor ?? v.background}
       borderColor={colors.black}
       borderWidth={v.borderWidth}
       borderRadius={CARD_RADIUS}
       padding={pad}
       width={props.fullWidth === true ? '100%' : undefined}
-      style={{ boxShadow: v.shadow, userSelect: 'none' }}
+      style={{ boxShadow: shadow, userSelect: 'none' }}
     >
       {props.children}
     </View>

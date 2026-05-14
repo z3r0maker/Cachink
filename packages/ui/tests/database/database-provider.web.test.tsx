@@ -139,6 +139,13 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       'client_payments',
       'day_closes',
       'recurring_expenses',
+      'users',
+      'caja_turnos',
+      'conversion_recetas',
+      'conversions',
+      'auditorias_inventario',
+      'entregas_credito',
+      'director_alerts',
       '__cachink_migrations',
       '__cachink_change_log',
       '__cachink_sync_state',
@@ -164,6 +171,18 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     expect(rows).toEqual([
       { tag: '0000_lying_johnny_blaze' },
       { tag: '0001_change_log_and_sync_state' },
+      { tag: '0002_smart_catalog' },
+      { tag: '0003_productoId_required' },
+      { tag: '0004_sale_hora' },
+      { tag: '0005_product_color_fondo' },
+      { tag: '0006_users' },
+      { tag: '0007_audit_trail' },
+      { tag: '0008_feature_flags' },
+      { tag: '0009_caja_turnos' },
+      { tag: '0010_conversion' },
+      { tag: '0011_auditoria_inventario' },
+      { tag: '0012_credito_alerts' },
+      { tag: '0013_rename_auth_columns' },
     ]);
   });
 });

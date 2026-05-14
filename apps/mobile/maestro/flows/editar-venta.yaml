@@ -1,0 +1,83 @@
+# Edit an existing venta via the swipe-to-edit gesture and verify
+# the updated concepto + monto appear in the sales list.
+#
+# Covers CRUD Update for Ventas (Edit flow).
+#
+# Precondition: wizard + product + at least one venta exist.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/editar-venta.yaml
+#
+# The venta-efectivo flow creates a sale for "Tortilla".
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab (Operativo role).
+- tapOn:
+    id: "tab-ventas"
+
+# Verify the existing sale is visible.
+- assertVisible: "Tortilla"
+
+# Tap the venta card to open the detail popover.
+- tapOn: "Tortilla"
+- assertVisible:
+    id: "venta-detail-popover"
+
+# Close the popover — we use swipe-to-edit instead.
+- tapOn:
+    id: "venta-detail-popover"
+- back
+
+# Swipe the venta row left to reveal the edit action. On iOS
+# simulators, SwipeableRow renders the brand-yellow edit panel.
+# Because Maestro swipe on dynamic IDs can be flaky, we also
+# support the tap-on-detail → edit flow via the popover.
+# Let's use the detail popover's tap path as the reliable E2E
+# approach: tap the card → popover opens → close → instead we
+# directly open the edit modal from the route.
+
+# Alternative: long-press or tap-detail flow. Since the edit
+# modal is wired to SwipeableRow's onSwipeLeft, and Maestro's
+# swipe gesture can be unreliable on simulators, we trigger
+# the edit via the detail popover if available, or via the
+# swipe gesture.
+
+# Re-tap to open the popover. The popover itself doesn't have
+# an "Edit" button (only Share + Delete), so swipe is the path.
+# Use Maestro's swipe command on the first venta in the list.
+- swipe:
+    id: "ventas-list"
+    direction: LEFT
+    startX: 300
+    endX: 50
+
+# Wait for the edit action to complete — the EditarVentaModal opens.
+- extendedWaitUntil:
+    visible:
+      id: "editar-venta-modal"
+    timeout: 5000
+
+# Clear and update the concepto field.
+- tapOn:
+    id: "editar-venta-concepto"
+- eraseText
+- inputText: "Tortilla editada"
+
+# Submit the edit.
+- tapOn:
+    id: "editar-venta-submit"
+
+# Modal closes and the updated sale appears in the list.
+- assertNotVisible:
+    id: "editar-venta-modal"
+- assertVisible: "Tortilla editada"

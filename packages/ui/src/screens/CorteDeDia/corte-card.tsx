@@ -25,7 +25,13 @@ export function CorteDeDiaCard(props: CorteDeDiaCardProps): ReactElement | null 
   const { t } = useTranslation();
   if (!props.shouldShow) return null;
   return (
-    <Card testID={props.testID ?? 'corte-de-dia-card'} variant="yellow" padding="md" fullWidth>
+    <Card
+      testID={props.testID ?? 'corte-de-dia-card'}
+      variant="yellow"
+      elevation="raised"
+      padding="md"
+      fullWidth
+    >
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}

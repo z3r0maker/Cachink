@@ -1,0 +1,74 @@
+# Caja open/close lifecycle E2E — Otros → Caja → apertura → cierre.
+#
+# Verifies:
+#   1. Navigate to Caja → fill apertura → submit → status card visible
+#   2. Tap "Cerrar caja" → fill cierre amount → submit → modal closes
+#
+# Precondition: wizard + director-setup complete, caja feature flag ON.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
+#   maestro test apps/mobile/maestro/flows/caja-abrir-cerrar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Ensure caja feature flag is ON via Otros → Funciones (Director).
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-caja-switch"
+    optional: true
+
+# Switch to Operativo to access the Caja open/close screen.
+- runFlow: shared/select-operativo.yaml
+
+# Navigate to Otros → Caja.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-caja"
+
+# --- Happy path: Open caja ---
+# The abrir-caja-modal should appear (no turn open yet).
+- extendedWaitUntil:
+    visible:
+      id: "abrir-caja-modal"
+    timeout: 5000
+
+- tapOn:
+    id: "caja-apertura-monto"
+- inputText: "500"
+- tapOn:
+    id: "caja-abrir-submit"
+
+# Status card should be visible showing the turn is open.
+- assertVisible:
+    id: "caja-status-card"
+
+# --- Happy path: Close caja ---
+- tapOn:
+    id: "caja-cerrar-btn"
+
+# Cierre modal appears.
+- assertVisible:
+    id: "cerrar-caja-modal"
+- tapOn:
+    id: "caja-cierre-monto"
+- inputText: "500"
+- tapOn:
+    id: "caja-cerrar-submit"
+
+# Modal closes, status card still visible (now showing closed state).
+- assertNotVisible:
+    id: "cerrar-caja-modal"
+- assertVisible:
+    id: "caja-status-card"

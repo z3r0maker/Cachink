@@ -75,6 +75,11 @@ export type IconName =
   | 'cloud'
   | 'plug'
   | 'monitor'
+  // Feature flags + system modules (Phase 4)
+  | 'inbox'
+  | 'refresh-cw'
+  | 'zap'
+  | 'sliders'
   // Chevrons (avatar/disclosure)
   | 'chevron-up'
   | 'chevron-down'

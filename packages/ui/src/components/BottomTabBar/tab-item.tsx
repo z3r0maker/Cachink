@@ -81,9 +81,11 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
       color={active ? colors.black : colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={11}
+      fontSize={10}
       letterSpacing={typography.letterSpacing.wide}
       style={{ textTransform: 'uppercase' }}
+      numberOfLines={1}
+      ellipsizeMode="tail"
     >
       {text}
     </Text>

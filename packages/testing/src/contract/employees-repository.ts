@@ -64,5 +64,40 @@ export function describeEmployeesRepositoryContract(
     it('delete on missing id is a no-op', async () => {
       await expect(repo.delete('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never)).resolves.toBeUndefined();
     });
+
+    /* ── update() ────────────────────────────────────────── */
+
+    it('update() changes nombre', async () => {
+      const row = await repo.create(makeNewEmployee({ businessId: BIZ_A, nombre: 'Ana' }));
+      const updated = await repo.update(row.id, { nombre: 'Ana María' });
+      expect(updated.nombre).toBe('Ana María');
+      expect(updated.puesto).toBe(row.puesto); // untouched
+    });
+
+    it('update() changes salarioCentavos', async () => {
+      const row = await repo.create(
+        makeNewEmployee({ businessId: BIZ_A, salarioCentavos: 5_000_00n }),
+      );
+      const updated = await repo.update(row.id, { salarioCentavos: 8_000_00n });
+      expect(updated.salarioCentavos).toBe(8_000_00n);
+    });
+
+    it('update() stamps updatedAt', async () => {
+      const row = await repo.create(makeNewEmployee({ businessId: BIZ_A }));
+      const updated = await repo.update(row.id, { puesto: 'Gerente' });
+      expect(updated.updatedAt >= row.updatedAt).toBe(true);
+    });
+
+    it('update() on deleted employee throws', async () => {
+      const row = await repo.create(makeNewEmployee({ businessId: BIZ_A }));
+      await repo.delete(row.id);
+      await expect(repo.update(row.id, { nombre: 'Nuevo' })).rejects.toThrow();
+    });
+
+    it('update() on missing employee throws', async () => {
+      await expect(
+        repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { nombre: 'Ghost' }),
+      ).rejects.toThrow();
+    });
   });
 }

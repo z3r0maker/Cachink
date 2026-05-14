@@ -1,0 +1,57 @@
+# Create User — cancel path (form dismissed without creating).
+#
+# Extends usuario-crear.yaml which fills and submits the form.
+# This flow exercises the cancel action:
+#   - create-user-cancel
+#
+# Precondition: wizard + director-setup complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-crear-cancel.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros → Usuarios.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-usuarios"
+
+# User list screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "user-list"
+    timeout: 5000
+
+# Tap create button.
+- tapOn:
+    id: "user-create-btn"
+
+# Create user modal appears.
+- extendedWaitUntil:
+    visible:
+      id: "create-user-modal"
+    timeout: 5000
+
+# Fill partial fields (to verify cancel discards them).
+- tapOn:
+    id: "new-user-nombre"
+- inputText: "Cancelado Test"
+
+# Tap cancel — modal should close without creating.
+- tapOn:
+    id: "create-user-cancel"
+
+# Modal is dismissed.
+- assertNotVisible:
+    id: "create-user-modal"
+
+# The user "Cancelado Test" should NOT appear in the list.
+- assertNotVisible: "Cancelado Test"

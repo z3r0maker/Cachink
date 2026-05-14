@@ -30,6 +30,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
+import { ScrollView } from 'react-native';
 import { Text, View, useMedia } from '@tamagui/core';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -55,6 +56,11 @@ export interface DirectorHomeScreenProps {
    * are zero conflicts so it's always safe to mount unconditionally.
    */
   readonly conflictos?: ReactNode;
+  /**
+   * Corte historial strip — last N cortes displayed below the grid.
+   * Phase 17 Gap H. Renders CorteHistorialStrip or the empty-state card.
+   */
+  readonly historial?: ReactNode;
   readonly testID?: string;
 }
 
@@ -122,12 +128,10 @@ export function DirectorHomeScreen(props: DirectorHomeScreenProps): ReactElement
   const greeting = props.greeting ?? t('directorHome.greeting');
   const columns = useGridColumns();
   return (
-    <View
+    <ScrollView
       testID={props.testID ?? 'director-home-screen'}
-      flex={1}
-      padding={20}
-      gap={16}
-      backgroundColor={colors.offwhite}
+      style={{ flex: 1, backgroundColor: colors.offwhite }}
+      contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
     >
       <GreetingHeader text={greeting} />
       {props.hero !== undefined && <View testID="director-home-hero-slot">{props.hero}</View>}
@@ -157,6 +161,9 @@ export function DirectorHomeScreen(props: DirectorHomeScreenProps): ReactElement
           <GridItem columns={columns}>{props.conflictos}</GridItem>
         )}
       </View>
-    </View>
+      {props.historial !== undefined && (
+        <View testID="director-home-historial-slot">{props.historial}</View>
+      )}
+    </ScrollView>
   );
 }

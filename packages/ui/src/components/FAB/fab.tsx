@@ -60,11 +60,7 @@ const PRESS_TRANSFORM: ViewStyle = {
   boxShadow: shadows.pressed,
 };
 
-function buildBaseStyle(
-  bottom: number,
-  right: number,
-  disabled: boolean,
-): ViewStyle {
+function buildBaseStyle(bottom: number, right: number, disabled: boolean): ViewStyle {
   return {
     position: 'absolute',
     bottom,

@@ -1,3 +1,4 @@
+import { resolve } from 'node:path';
 import { defineConfig, mergeConfig } from 'vitest/config';
 import base from '@cachink/config/vitest';
 
@@ -22,10 +23,28 @@ import base from '@cachink/config/vitest';
  * `Share`, etc.). The aliased modules behave like web shims under
  * jsdom, which is what the `.native.tsx` test files expect — they
  * exercise structure / wiring, not platform-native APIs.
+ *
+ * ## `react-native-svg` mock
+ *
+ * Same category of issue: the native package ships raw TS source in its
+ * `"react-native"` field and Fabric codegen imports in its compiled JS,
+ * neither of which Vite can resolve. Charts use it for `<Svg>`, `<Rect>`,
+ * etc. but unit tests don't need real SVG rendering — mock replaces
+ * every primitive with a `<div>`.
  */
 export default mergeConfig(
   base,
   defineConfig({
+    resolve: {
+      alias: {
+        'react-native': 'react-native-web',
+        'react-native-svg': resolve(__dirname, 'tests/__mocks__/react-native-svg.ts'),
+        'react-native-safe-area-context': resolve(
+          __dirname,
+          'tests/__mocks__/react-native-safe-area-context.ts',
+        ),
+      },
+    },
     test: {
       environment: 'jsdom',
       include: [

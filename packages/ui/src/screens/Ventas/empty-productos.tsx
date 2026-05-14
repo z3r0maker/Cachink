@@ -15,7 +15,10 @@ export interface VentasEmptyProductosProps {
   readonly testID?: string;
 }
 
-export function VentasEmptyProductos({ onGoToProductos, testID }: VentasEmptyProductosProps): ReactElement {
+export function VentasEmptyProductos({
+  onGoToProductos,
+  testID,
+}: VentasEmptyProductosProps): ReactElement {
   const { t } = useTranslation();
   return (
     <EmptyState

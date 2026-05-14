@@ -19,6 +19,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import { useAppConfigRepository, useBusinessesRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId, type Role } from '../app-config/index';
 import type { Business, BusinessId, DeviceId } from '@cachink/domain';
+import { DEFAULT_FEATURE_FLAGS } from '@cachink/domain';
 import type { BusinessFormSubmitInput } from '../screens/BusinessForm/index';
 import { useDeviceId } from '../app-config/use-app-config';
 
@@ -51,6 +52,11 @@ export function useCrearBusiness(): CrearBusinessResult {
         atributosProducto: [],
         businessId: '01JPHK00000000000000000000' as BusinessId,
         deviceId: (deviceId ?? '01JPHK00000000000000000001') as DeviceId,
+        createdByUserId: null,
+        featureFlags: JSON.stringify({
+          ...DEFAULT_FEATURE_FLAGS,
+          ...input.initialFeatureFlags,
+        }),
       };
       return businesses.create(placeholder);
     },

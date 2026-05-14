@@ -16,7 +16,7 @@
  * and `app-config-provider.tsx#hydrateAppConfig`.
  */
 
-import type { BusinessId, DeviceId } from '@cachink/domain';
+import type { BusinessId, DeviceId, UserId, UserRole } from '@cachink/domain';
 
 /** Deployment mode selected in the first-run wizard (CLAUDE.md §7.1, ADR-039). */
 export type AppMode = 'local' | 'cloud' | 'lan-server' | 'lan-client';
@@ -42,6 +42,9 @@ export const APP_CONFIG_KEYS = {
   tipoNegocio: 'tipoNegocio',
   categoriaVentaPredeterminada: 'categoriaVentaPredeterminada',
   atributosProducto: 'atributosProducto',
+  isrDefaults: 'isrDefaults',
+  autoLockTimeout: 'autoLockTimeout',
+  discoveryShown: 'discoveryShown',
 } as const;
 
 /** Shape of the Zustand store populated on launch. */
@@ -53,6 +56,14 @@ export interface AppConfigState {
   readonly hydrated: boolean;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
+  /** Currently authenticated user (null = not logged in). */
+  readonly userId: UserId | null;
+  /** Role derived from User.role at login. */
+  readonly userRole: UserRole | null;
+  /** Whether the user must change their PIN on first login. */
+  readonly mustChangePin: boolean;
+  /** Whether the feature-discovery screen was shown after first setup. */
+  readonly discoveryShown: boolean;
 }
 
 /** Allowed mode values — keep in sync with CLAUDE.md §7.1 and ADR-039. */

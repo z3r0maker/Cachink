@@ -9,6 +9,7 @@ import type {
   EmployeeId,
   IsoTimestamp,
   NewEmployee,
+  UpdateEmployee,
 } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { EmployeesRepository } from '@cachink/data';
@@ -32,6 +33,7 @@ export class InMemoryEmployeesRepository implements EmployeesRepository {
       periodo: input.periodo,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,
@@ -44,6 +46,24 @@ export class InMemoryEmployeesRepository implements EmployeesRepository {
     const row = this.rows.get(id);
     if (!row || row.deletedAt !== null) return null;
     return row;
+  }
+
+  async update(id: EmployeeId, input: UpdateEmployee): Promise<Employee> {
+    const existing = this.rows.get(id);
+    if (!existing || existing.deletedAt !== null) {
+      throw new Error(`Employee ${id} not found`);
+    }
+    const ts = now();
+    const updated: Employee = {
+      ...existing,
+      ...(input.nombre !== undefined && { nombre: input.nombre }),
+      ...(input.puesto !== undefined && { puesto: input.puesto }),
+      ...(input.salarioCentavos !== undefined && { salarioCentavos: input.salarioCentavos }),
+      ...(input.periodo !== undefined && { periodo: input.periodo }),
+      updatedAt: ts,
+    };
+    this.rows.set(id, updated);
+    return updated;
   }
 
   async listActive(businessId: BusinessId): Promise<readonly Employee[]> {

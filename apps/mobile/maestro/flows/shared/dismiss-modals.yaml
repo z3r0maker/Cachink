@@ -1,0 +1,28 @@
+# Reusable subflow: dismiss any blocking consent screens after launchApp.
+#
+# Two consent surfaces exist in the app:
+#   1. Wizard step consent (consent-no)      — inline wizard step on fresh install
+#   2. Standalone ConsentModal (consent-modal-no) — modal on non-wizard boot
+#
+# This subflow taps both dismiss targets. All taps are optional —
+# on non-fresh runs neither surface appears and this completes
+# instantly with zero timeout penalty.
+#
+# Usage (from any flow):
+#   - launchApp
+#   - runFlow: shared/dismiss-modals.yaml
+appId: mx.cachink.mobile
+---
+# Wizard-integrated consent step (wizard-step-consent).
+# On fresh install the wizard shows consent as an inline step
+# with testID "consent-no" (not "consent-modal-no").
+- tapOn:
+    id: "consent-no"
+    optional: true
+
+# Standalone ConsentModal (consent-modal).
+# On subsequent boots where consent was deferred, the modal
+# appears over whatever screen is active.
+- tapOn:
+    id: "consent-modal-no"
+    optional: true

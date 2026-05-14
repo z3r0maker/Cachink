@@ -1,0 +1,37 @@
+# Navigate to the Caja Reportes placeholder screen (Director).
+#
+# Verifies:
+#   1. Enable caja flag
+#   2. Navigate to Director Otros → tap otros-caja-reportes
+#   3. caja-reportes-placeholder screen renders
+#
+# Precondition: wizard complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/otros-caja-reportes-nav.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Enable the caja flag (Director only — navigates to Funciones).
+- runFlow: shared/enable-caja-flag.yaml
+
+# Navigate to Otros tab (still as Director).
+- tapOn:
+    id: "tab-otros"
+
+# Tap the Caja Reportes grid item (Director-only item).
+- tapOn:
+    id: "otros-caja-reportes"
+
+# Verify the placeholder screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "caja-reportes-placeholder"
+    timeout: 5000

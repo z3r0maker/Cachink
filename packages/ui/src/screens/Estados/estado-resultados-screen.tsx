@@ -16,10 +16,15 @@ import { ZERO, formatMoney, type EstadoDeResultados, type Money } from '@cachink
 import { Card, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { WaterfallChart } from '../../charts/WaterfallChart/index';
+import { DonutChart } from '../../charts/DonutChart/index';
+import { toWaterfallData, toDonutSlices } from './estado-resultados-mappers';
+import type { EgresoPorCategoria } from '../../hooks/use-egresos-por-categoria';
 
 export interface EstadoResultadosScreenProps {
   readonly estado: EstadoDeResultados | null;
   readonly periodoLabel: string;
+  readonly egresosPorCategoria?: readonly EgresoPorCategoria[];
   readonly loading?: boolean;
   readonly testID?: string;
 }
@@ -148,6 +153,20 @@ export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): Reac
       ) : (
         <>
           <Rows estado={props.estado} t={t} />
+          <WaterfallChart data={toWaterfallData(props.estado, t)} testID="waterfall-chart" />
+          {props.egresosPorCategoria && props.egresosPorCategoria.length > 0 && (
+            <Card padding="md" fullWidth testID="egresos-por-categoria-card">
+              <SectionTitle title={t('estados.egresosPorCategoria')} />
+              <DonutChart
+                slices={toDonutSlices(props.egresosPorCategoria)}
+                centerLabel={t('estados.egresosTotalLabel')}
+                centerValue={formatMoney(
+                  props.egresosPorCategoria.reduce((sum, e) => sum + e.total, 0n),
+                )}
+                testID="egresos-donut"
+              />
+            </Card>
+          )}
           <UtilidadNetaHero
             value={props.estado.utilidadNeta}
             label={t('estados.resultadosUtilidadNeta')}

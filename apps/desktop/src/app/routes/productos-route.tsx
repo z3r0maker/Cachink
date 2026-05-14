@@ -12,6 +12,7 @@ import {
   StockScreen,
   filterProductos,
   useCrearProducto,
+  useFeatureFlag,
   useProductosConStock,
   type InventarioSubTab,
   type ProductoConStock,
@@ -57,6 +58,7 @@ export function ProductosRoute(): ReactElement {
   const [selected, setSelected] = useState<ProductoConStock | null>(null);
   const itemsQ = useProductosConStock();
   const crear = useCrearProducto();
+  const conversionEnabled = useFeatureFlag('conversionMateriaPrima');
   const items = itemsQ.data ?? [];
   const filtered = useMemo(() => filterProductos(items, query), [items, query]);
 
@@ -80,6 +82,7 @@ export function ProductosRoute(): ReactElement {
         onClose={() => setModalOpen(false)}
         onSubmit={(input) => crear.mutate(input, { onSuccess: () => setModalOpen(false) })}
         submitting={crear.isPending}
+        conversionEnabled={conversionEnabled}
       />
       <ProductoDetailRoute row={selected} fecha={todayIso()} onClose={() => setSelected(null)} />
     </DesktopAppShellWrapper>

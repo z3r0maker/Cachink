@@ -1,0 +1,31 @@
+# Egresos → Nuevo → Inventario tab with no products → assert inventario-crear-producto visible.
+# Covers Gap M (Phase 17): inventario-crear-producto empty-state testID.
+#
+# testIDs exercised:
+#   inventario-crear-producto
+#
+# Precondition: wizard complete, NO products exist.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-inventario-empty-state.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Egresos → Nuevo → Inventario tab.
+- tapOn:
+    id: "tab-gastos"
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "egreso-tab-inventario"
+
+# No products exist — the "Crear producto" empty-state button should render.
+- assertVisible:
+    id: "inventario-crear-producto"

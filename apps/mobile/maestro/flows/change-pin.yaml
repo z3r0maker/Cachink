@@ -1,0 +1,63 @@
+# Forced PIN change E2E — operativo with mustChangePin.
+#
+# Verifies:
+#   1. Director creates operativo with mustChangePin flag
+#   2. Operativo logs in → forced change screen appears
+#   3. Enter new PIN → submit → tabs mount
+#
+# Precondition: wizard + director-setup complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-crear.yaml
+#   maestro test apps/mobile/maestro/flows/change-pin.yaml
+#
+# Note: usuario-crear.yaml creates "Operativo Test" with PIN "111111".
+# If mustChangePin is set during creation, this flow tests the gate.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+
+# QuickSwitch should show multiple user avatars now.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 10000
+
+# Select the operativo user (second avatar — index 1).
+- tapOn:
+    id: "user-avatar-1"
+    optional: true
+
+# Enter the operativo's initial PIN.
+- tapOn:
+    id: "pin-input"
+- inputText: "111111"
+- tapOn:
+    id: "login-submit"
+
+# Forced change PIN screen appears.
+- extendedWaitUntil:
+    visible:
+      id: "change-pin"
+    timeout: 10000
+
+# Fill new PIN.
+- tapOn:
+    id: "new-pin"
+- inputText: "222222"
+- tapOn:
+    id: "confirm-pin"
+- inputText: "222222"
+- tapOn:
+    id: "change-pin-submit"
+
+# Tabs mount — operativo is now logged in.
+- extendedWaitUntil:
+    visible:
+      id: "tab-ventas"
+    timeout: 10000

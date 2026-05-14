@@ -10,6 +10,7 @@ import { calculateEstadoDeResultados } from '../../src/financials/index.js';
 const AUDIT = {
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
+  createdByUserId: null,
   createdAt: '2026-04-23T12:00:00.000Z',
   updatedAt: '2026-04-23T12:00:00.000Z',
   deletedAt: null,
@@ -51,6 +52,7 @@ describe('calculateEstadoDeResultados', () => {
       ingresos: 0n,
       costoDeVentas: 0n,
       utilidadBruta: 0n,
+      merma: 0n,
       gastosOperativos: 0n,
       utilidadOperativa: 0n,
       isr: 0n,

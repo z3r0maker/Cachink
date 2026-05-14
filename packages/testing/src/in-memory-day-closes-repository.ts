@@ -36,6 +36,7 @@ export class InMemoryDayClosesRepository implements DayClosesRepository {
       cerradoPor: input.cerradoPor,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,

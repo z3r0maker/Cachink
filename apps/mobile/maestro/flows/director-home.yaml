@@ -4,11 +4,11 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Role picker → Director → lands on /
-- tapOn:
-    id: "role-director-select"
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
 
-# Core shell anchors.
+# After authenticate.yaml, Director is on Home. Verify core shell anchors.
 - assertVisible:
     id: "director-home-route"
 - assertVisible:

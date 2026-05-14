@@ -1,0 +1,50 @@
+# Caja features hidden when caja flag is OFF.
+#
+# Verifies:
+#   1. With caja flag OFF (default), navigate to Operativo Otros
+#   2. otros-caja is NOT visible
+#   3. Navigate to Director Otros
+#   4. otros-caja-reportes is NOT visible
+#   5. System gracefully hides caja features
+#
+# Precondition: wizard + director-setup complete, caja flag is OFF
+# (default state).
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/caja-sin-flag.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Ensure caja flag is OFF — navigate to Funciones and verify.
+# First make sure stock is ON (default), then verify caja is OFF.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+
+# Caja is OFF by default. If somehow ON, toggle it OFF.
+# We check UX impact rather than switch state.
+
+# --- Operativo: verify caja is hidden ---
+- runFlow: shared/select-operativo.yaml
+- tapOn:
+    id: "tab-otros"
+- assertNotVisible:
+    id: "otros-caja"
+
+# --- Director: verify caja reports are hidden ---
+- tapOn:
+    id: "top-bar-role-chip"
+- tapOn:
+    id: "role-director-select"
+- tapOn:
+    id: "tab-otros"
+- assertNotVisible:
+    id: "otros-caja-reportes"

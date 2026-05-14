@@ -33,7 +33,12 @@ export interface InventarioTabBarProps {
 export function InventarioTabBar(props: InventarioTabBarProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <View paddingHorizontal={16} paddingTop={12} backgroundColor={colors.offwhite}>
+    <View
+      paddingHorizontal={16}
+      paddingTop={12}
+      paddingBottom={8}
+      backgroundColor={colors.offwhite}
+    >
       <SegmentedToggle<InventarioSubTab>
         testID={props.testID ?? 'inventario-tab-bar'}
         testIDPrefix="inventario-tab"

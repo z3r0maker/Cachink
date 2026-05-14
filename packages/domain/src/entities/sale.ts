@@ -35,6 +35,8 @@ export const SaleSchema = z
   .object({
     id: ulidField<SaleId>(),
     fecha: isoDateField,
+    /** "HH:MM" device time at sale creation. Null for legacy records. */
+    hora: z.string().regex(/^\d{2}:\d{2}$/).nullable().default(null),
     concepto: z.string().min(1).max(200),
     categoria: SaleCategoryEnum,
     monto: moneyField,
@@ -54,6 +56,8 @@ export type Sale = z.infer<typeof SaleSchema>;
 
 export const NewSaleSchema = z.object({
   fecha: isoDateField,
+  /** Auto-captured device time "HH:MM". Optional — use case fills it. */
+  hora: z.string().regex(/^\d{2}:\d{2}$/).optional(),
   concepto: z.string().min(1).max(200),
   categoria: SaleCategoryEnum,
   monto: moneyField,

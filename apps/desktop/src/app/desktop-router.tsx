@@ -20,6 +20,16 @@
  *   /cuentas-por-cobrar  → CuentasPorCobrarRoute
  *   /estados             → EstadosRoute
  *   /settings            → SettingsRoute
+ *   /otros               → OtrosRoute
+ *   /merma               → MermaRoute
+ *   /funciones           → FuncionesRoute
+ *   /usuarios            → UsuariosRoute
+ *   /caja                → CajaRoute
+ *   /conversion          → Placeholder
+ *   /auditoria           → Placeholder
+ *   /ventas-credito      → Placeholder
+ *   /caja-reportes       → Placeholder
+ *   /merma-reportes      → Placeholder
  *   /role-picker         → RolePicker (role-gate fallback)
  *   /wizard[...]         → Wizard (handled by GatedNavigation upstream)
  */
@@ -27,9 +37,14 @@
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 import {
   AppShell,
+  AuditoriaScreen,
+  CajaReportesScreen,
   DirectorHomeRoute,
+  MermaReportesScreen,
   RolePicker,
+  VentasCreditoScreen,
   useCurrentBusiness,
+  useFeatureFlags,
   useMode,
   useRole,
   useSetRole,
@@ -43,6 +58,12 @@ import { ClientesRoute } from './routes/clientes-route';
 import { CuentasPorCobrarRoute } from './routes/cuentas-por-cobrar-route';
 import { EstadosRoute } from './routes/estados-route';
 import { SettingsRoute } from './routes/settings-route';
+import { OtrosRoute } from './routes/otros-route';
+import { MermaRoute } from './routes/merma-route';
+import { FuncionesRoute } from './routes/funciones-route';
+import { UsuariosRoute } from './routes/usuarios-route';
+import { CajaRoute } from './routes/caja-route';
+import { ConversionRoute } from './routes/conversion-route';
 
 function useDesktopNavigation(): {
   path: string;
@@ -69,6 +90,7 @@ interface DirectorContext {
   readonly setRole: (role: Role | null) => void;
   readonly title: string | undefined;
   readonly mode: ReturnType<typeof useMode>;
+  readonly flags: ReturnType<typeof useFeatureFlags>;
 }
 
 /**
@@ -83,6 +105,7 @@ function DirectorHomeDesktopRoute(ctx: DirectorContext): ReactElement {
       role="director"
       activeTabKey="home"
       mode={ctx.mode}
+      flags={ctx.flags}
       title={ctx.title}
       onNavigate={ctx.navigate}
       onChangeRole={() => {
@@ -96,29 +119,51 @@ function DirectorHomeDesktopRoute(ctx: DirectorContext): ReactElement {
   );
 }
 
+/**
+ * Ordered prefix→element table. Longer prefixes MUST appear before shorter
+ * ones (e.g. /ventas-credito before /ventas) to avoid accidental matches.
+ * Evaluated top-to-bottom by `resolveRouteByPrefix`.
+ */
+const PREFIX_ROUTES: ReadonlyArray<{ prefix: string; element: ReactElement }> = [
+  { prefix: '/ventas-credito', element: <VentasCreditoScreen /> },
+  { prefix: '/ventas',         element: <VentasRoute /> },
+  { prefix: '/egresos',        element: <EgresosRoute /> },
+  { prefix: '/productos',      element: <ProductosRoute /> },
+  { prefix: '/inventario',     element: <ProductosRoute /> },
+  { prefix: '/clientes',       element: <ClientesRoute /> },
+  { prefix: '/cuentas-por-cobrar', element: <CuentasPorCobrarRoute /> },
+  { prefix: '/estados',        element: <EstadosRoute /> },
+  { prefix: '/settings',       element: <SettingsRoute /> },
+  { prefix: '/otros',          element: <OtrosRoute /> },
+  { prefix: '/funciones',      element: <FuncionesRoute /> },
+  { prefix: '/usuarios',       element: <UsuariosRoute /> },
+  { prefix: '/merma-reportes', element: <MermaReportesScreen /> },
+  { prefix: '/merma',          element: <MermaRoute /> },
+  { prefix: '/caja-reportes',  element: <CajaReportesScreen /> },
+  { prefix: '/caja',           element: <CajaRoute /> },
+  { prefix: '/conversion',     element: <ConversionRoute /> },
+  { prefix: '/auditoria',      element: <AuditoriaScreen /> },
+] as const;
+
+function resolveRouteByPrefix(path: string): ReactElement | undefined {
+  return PREFIX_ROUTES.find((r) => path.startsWith(r.prefix))?.element;
+}
+
 function renderRouteContent(path: string, role: Role, ctx: DirectorContext): ReactElement {
   if (role === 'director' && path === '/') {
     return <DirectorHomeDesktopRoute {...ctx} />;
   }
-  if (path.startsWith('/ventas')) return <VentasRoute />;
-  if (path.startsWith('/egresos')) return <EgresosRoute />;
-  if (path.startsWith('/productos')) return <ProductosRoute />;
-  if (path.startsWith('/inventario')) return <ProductosRoute />; // Legacy redirect
-  if (path.startsWith('/clientes')) return <ClientesRoute />;
-  if (path.startsWith('/cuentas-por-cobrar')) return <CuentasPorCobrarRoute />;
-  if (path.startsWith('/estados')) return <EstadosRoute />;
-  if (path.startsWith('/settings')) return <SettingsRoute />;
-
-  // Fallback: Director Home for director, Ventas for Operativo. Matches
-  // mobile's redirect-to-/ventas behaviour for Operativo.
-  if (role === 'director') return <DirectorHomeDesktopRoute {...ctx} />;
-  return <VentasRoute />;
+  const match = resolveRouteByPrefix(path);
+  if (match !== undefined) return match;
+  // Fallback: Director Home for director, Ventas for Operativo.
+  return role === 'director' ? <DirectorHomeDesktopRoute {...ctx} /> : <VentasRoute />;
 }
 
 export function DesktopRouter(): ReactElement | null {
   const role = useRole();
   const setRole = useSetRole();
   const mode = useMode();
+  const flags = useFeatureFlags();
   const business = useCurrentBusiness().data ?? null;
   const { path, navigate } = useDesktopNavigation();
 
@@ -135,6 +180,7 @@ export function DesktopRouter(): ReactElement | null {
         setRole,
         title: business?.nombre ?? undefined,
         mode,
+        flags,
       })}
     </DesktopRouterContext.Provider>
   );

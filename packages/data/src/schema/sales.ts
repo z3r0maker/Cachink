@@ -14,6 +14,8 @@ import { auditColumns } from './_audit';
 export const sales = sqliteTable('sales', {
   id: text('id').primaryKey(),
   fecha: text('fecha').notNull(),
+  /** "HH:MM" device time at sale creation. Null for pre-PR-7 records. */
+  hora: text('hora'),
   concepto: text('concepto').notNull(),
   categoria: text('categoria', {
     enum: ['Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro'],

@@ -1,0 +1,69 @@
+# Wizard mode change confirmation modal — test cancel and confirm.
+#
+# Verifies:
+#   1. Re-run wizard with existing data
+#   2. Select a mode that triggers ConfirmModeChangeModal
+#   3. wizard-confirm-mode-change modal visible
+#   4. Tap wizard-confirm-mode-change-cancel → modal closes
+#   5. Re-trigger → tap wizard-confirm-mode-change-confirm → proceeds
+#
+# Precondition: wizard already complete with data in local DB.
+# The re-run triggers the mode change confirmation when switching
+# from solo to multi-device mode.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/wizard-confirm-mode-change.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Reach Settings → Sistema → Re-run asistente.
+- tapOn:
+    id: "top-bar-open-settings"
+- tapOn:
+    id: "settings-hub-sistema"
+- tapOn:
+    id: "settings-re-run-wizard"
+- assertVisible:
+    id: "wizard"
+
+# Step 1 → Multi-device to trigger mode change.
+- tapOn:
+    id: "wizard-step1-multi-card"
+
+# The ConfirmModeChange modal should appear (data exists).
+- extendedWaitUntil:
+    visible:
+      id: "wizard-confirm-mode-change"
+    timeout: 5000
+
+# --- Test 1: Cancel → modal closes ---
+- tapOn:
+    id: "wizard-confirm-mode-change-cancel"
+- assertNotVisible:
+    id: "wizard-confirm-mode-change"
+
+# We're back on step1.
+- assertVisible:
+    id: "wizard"
+
+# --- Test 2: Re-trigger → confirm → proceeds ---
+- tapOn:
+    id: "wizard-step1-multi-card"
+- extendedWaitUntil:
+    visible:
+      id: "wizard-confirm-mode-change"
+    timeout: 5000
+- tapOn:
+    id: "wizard-confirm-mode-change-confirm"
+
+# Modal closes and wizard proceeds to the next step.
+- assertNotVisible:
+    id: "wizard-confirm-mode-change"

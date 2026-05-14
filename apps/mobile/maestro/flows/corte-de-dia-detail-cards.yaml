@@ -1,0 +1,71 @@
+# Corte de Día — assert computed display elements (esperado + diferencia cards).
+#
+# Extends corte-de-dia.yaml / corte-con-diferencia.yaml by verifying
+# the computed display cards that were previously uncovered:
+#   - corte-de-dia-modal
+#   - corte-esperado-card + corte-esperado-row
+#   - corte-diferencia-card + corte-diferencia-row (after non-zero contado)
+#
+# Precondition: device clock is past 18:00 and today already has at least
+# one venta in Efectivo so esperado > 0. Run wizard-local-standalone.yaml +
+# venta-efectivo.yaml first.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/corte-de-dia-detail-cards.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# The CorteDeDia card surfaces on the Operativo home after 18:00.
+- tapOn:
+    id: "tab-ventas"
+- assertVisible:
+    id: "corte-de-dia-card"
+
+# Open the modal.
+- tapOn:
+    id: "corte-de-dia-cta"
+
+# Assert the modal itself renders.
+- extendedWaitUntil:
+    visible:
+      id: "corte-de-dia-modal"
+    timeout: 5000
+
+# Assert the esperado card and its row are visible.
+- assertVisible:
+    id: "corte-esperado-card"
+- assertVisible:
+    id: "corte-esperado-row"
+
+# Enter contado ≠ esperado to trigger diferencia display.
+- tapOn:
+    id: "corte-contado-input"
+- inputText: "100"
+
+# Assert diferencia card and row appear (non-zero difference).
+- assertVisible:
+    id: "corte-diferencia-card"
+- assertVisible:
+    id: "corte-diferencia-row"
+
+# Fill explicación (required for non-zero diferencia).
+- tapOn:
+    id: "corte-explicacion-input"
+- inputText: "Faltante por cambio"
+
+# Submit the corte.
+- tapOn:
+    id: "corte-submit"
+
+# Modal closes.
+- assertNotVisible:
+    id: "corte-de-dia-modal"

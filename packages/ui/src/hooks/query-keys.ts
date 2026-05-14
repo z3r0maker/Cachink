@@ -76,6 +76,22 @@ export const frequentProductosKeys = {
     ['frequentProductos', businessId, days] as const,
 } as const;
 
+export const userKeys = {
+  all: ['users'] as const,
+  byBusiness: (businessId: BusinessId | null): readonly unknown[] => ['users', businessId] as const,
+} as const;
+
+export const cajaKeys = {
+  byBusiness: (businessId: BusinessId | null): readonly unknown[] => ['caja', businessId] as const,
+  openByUser: (businessId: BusinessId | null): readonly unknown[] =>
+    ['caja-open', businessId] as const,
+} as const;
+
+export const flagKeys = {
+  /** Reuses the existing currentBusiness key. */
+  business: ['currentBusiness'] as const,
+} as const;
+
 export const syncKeys = {
   /** Recent LAN sync conflicts surfaced in DirectorHome (ADR-029). */
   conflicts: (limit: number): readonly unknown[] => ['sync-conflicts', limit] as const,
@@ -98,4 +114,30 @@ export const syncKeys = {
   pendingChanges: (): readonly unknown[] => ['sync-pending-changes'] as const,
   /** BYO backend config for Cloud mode (Slice 8 C4). */
   cloudByoBackend: (): readonly unknown[] => ['sync-cloud-byo'] as const,
+} as const;
+
+/* ── Feature-flagged report screens ────────────────────────────── */
+
+export const mermaKeys = {
+  all: ['merma-reportes'] as const,
+  byRange: (businessId: BusinessId | null, from: IsoDate, to: IsoDate): readonly unknown[] =>
+    ['merma-reportes', businessId, from, to] as const,
+} as const;
+
+export const cajaHistorialKeys = {
+  all: ['caja-historial'] as const,
+  byRange: (businessId: BusinessId | null, from: IsoDate, to: IsoDate): readonly unknown[] =>
+    ['caja-historial', businessId, from, to] as const,
+} as const;
+
+export const ventasCreditoKeys = {
+  all: ['ventas-credito'] as const,
+  byRange: (businessId: BusinessId | null, from: IsoDate, to: IsoDate): readonly unknown[] =>
+    ['ventas-credito', businessId, from, to] as const,
+} as const;
+
+export const auditoriaKeys = {
+  all: ['auditorias-inventario'] as const,
+  byRange: (businessId: BusinessId | null, from: IsoDate, to: IsoDate): readonly unknown[] =>
+    ['auditorias-inventario', businessId, from, to] as const,
 } as const;

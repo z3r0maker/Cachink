@@ -1,0 +1,40 @@
+# Create a cliente using the FAB (floating action button) instead of the header button.
+# Covers Gap E (Phase 17): clientes-fab testID alternative entry point.
+#
+# testIDs exercised:
+#   clientes-fab
+#
+# Precondition: wizard + business + role already set up.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear-via-fab.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Clientes screen via Expo Router deep link.
+- runFlow: shared/navigate-to-clientes.yaml
+
+# Use the FAB instead of the clientes-nuevo header button.
+- assertVisible:
+    id: "clientes-fab"
+- tapOn:
+    id: "clientes-fab"
+
+# Fill the client form.
+- tapOn:
+    id: "nuevo-cliente-nombre"
+- inputText: "Roberto Sánchez"
+- tapOn:
+    id: "nuevo-cliente-submit"
+
+# Modal closes + client row appears.
+- assertNotVisible:
+    id: "nuevo-cliente-modal"
+- assertVisible: "Roberto Sánchez"

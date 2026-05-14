@@ -11,7 +11,7 @@ import { useState, useCallback, useEffect, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { Client, ClientId, PaymentMethod, Product, ProductId } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
-import { Btn, Input, Modal } from '../../components/index';
+import { Btn, Combobox, Input, Modal } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
@@ -36,15 +36,33 @@ export interface VentaConfirmSheetProps {
   }) => void;
   readonly clientes: readonly Client[];
   readonly submitting?: boolean;
+  /** When true, the submit button is disabled (e.g. business not configured). */
+  readonly disabled?: boolean;
+  /** Shown below the submit button when `disabled` is true. */
+  readonly disabledReason?: string;
+  /** Mutation error — displayed inline below the submit button. */
+  readonly error?: Error | null;
 }
 
 function ProductHeader({ product }: { product: Product }): ReactElement {
   return (
     <View flexDirection="row" justifyContent="space-between" alignItems="center">
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={18} color={colors.black} flex={1} numberOfLines={1}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={18}
+        color={colors.black}
+        flex={1}
+        numberOfLines={1}
+      >
         {product.nombre}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={20} color={colors.black}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black}
+        fontSize={20}
+        color={colors.black}
+      >
         {formatMoney(product.precioVentaCentavos)}
       </Text>
     </View>
@@ -55,7 +73,11 @@ function useSheetForm(productId: string | undefined) {
   const [cantidad, setCantidad] = useState('1');
   const [metodo, setMetodo] = useState<PaymentMethod>('Efectivo');
   const [clienteId, setClienteId] = useState('');
-  useEffect(() => { setCantidad('1'); setMetodo('Efectivo'); setClienteId(''); }, [productId]);
+  useEffect(() => {
+    setCantidad('1');
+    setMetodo('Efectivo');
+    setClienteId('');
+  }, [productId]);
   return { cantidad, setCantidad, metodo, setMetodo, clienteId, setClienteId };
 }
 
@@ -68,24 +90,51 @@ function SheetFields(props: {
   const isCredito = form.metodo === 'Crédito';
   return (
     <>
-      <IntegerField label={t('ventas.cantidad')} value={form.cantidad} onChange={form.setCantidad} min={1} max={9999} testID="venta-confirm-cantidad" />
-      <Input type="select" label={t('ventas.metodoLabel')} value={form.metodo} onChange={(v) => form.setMetodo(v as PaymentMethod)} options={METODOS as unknown as string[]} testID="venta-confirm-metodo" />
+      <IntegerField
+        label={t('ventas.cantidad')}
+        value={form.cantidad}
+        onChange={form.setCantidad}
+        min={1}
+        max={9999}
+        testID="venta-confirm-cantidad"
+      />
+      <Input
+        type="select"
+        label={t('ventas.metodoLabel')}
+        value={form.metodo}
+        onChange={(v) => form.setMetodo(v as PaymentMethod)}
+        options={METODOS as unknown as string[]}
+        testID="venta-confirm-metodo"
+      />
       {isCredito && (
-        <Input type="select" label={t('nuevaVenta.clienteLabel')} value={form.clienteId} onChange={form.setClienteId} options={props.clientes.map((c) => c.id)} note={t('nuevaVenta.clienteRequired')} testID="venta-confirm-cliente" />
+        <Combobox
+          label={t('nuevaVenta.clienteLabel')}
+          value={form.clienteId}
+          onChange={form.setClienteId}
+          options={props.clientes.map((c) => ({ key: c.id, label: c.nombre }))}
+          note={t('nuevaVenta.clienteRequired')}
+          testID="venta-confirm-cliente"
+        />
       )}
     </>
   );
 }
 
 function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): ReactElement | null {
-  const { product, onSubmit, clientes, submitting } = props;
+  const { product, onSubmit, clientes, submitting, disabled, disabledReason, error } = props;
   const { t } = useTranslation();
   const form = useSheetForm(product?.id);
   const handleSubmit = useCallback((): void => {
     if (!product) return;
     const qty = Number.parseInt(form.cantidad, 10);
     if (Number.isNaN(qty) || qty < 1) return;
-    onSubmit({ productoId: product.id, cantidad: qty, metodo: form.metodo, clienteId: form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined });
+    onSubmit({
+      productoId: product.id,
+      cantidad: qty,
+      metodo: form.metodo,
+      clienteId:
+        form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined,
+    });
   }, [product, form.cantidad, form.metodo, form.clienteId, onSubmit]);
 
   if (!product) return null;
@@ -93,9 +142,39 @@ function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): Rea
     <View gap={16}>
       <ProductHeader product={product} />
       <SheetFields form={form} clientes={clientes} t={t} />
-      <Btn variant="primary" onPress={handleSubmit} disabled={submitting || (form.metodo === 'Crédito' && !form.clienteId)} fullWidth testID="venta-confirm-submit">
+      <Btn
+        variant="primary"
+        onPress={handleSubmit}
+        disabled={
+          disabled === true || submitting === true || (form.metodo === 'Crédito' && !form.clienteId)
+        }
+        fullWidth
+        testID="venta-confirm-submit"
+      >
         {t('ventas.registrarVenta')}
       </Btn>
+      {disabled === true && disabledReason !== undefined && (
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={12}
+          color={colors.gray600}
+          textAlign="center"
+          marginTop={4}
+        >
+          {disabledReason}
+        </Text>
+      )}
+      {error != null && (
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={12}
+          color={colors.red}
+          textAlign="center"
+          marginTop={4}
+        >
+          {error.message}
+        </Text>
+      )}
     </View>
   );
 }
@@ -114,6 +193,9 @@ export function VentaConfirmSheet(props: VentaConfirmSheetProps): ReactElement {
         onSubmit={props.onSubmit}
         clientes={props.clientes}
         submitting={props.submitting}
+        disabled={props.disabled}
+        disabledReason={props.disabledReason}
+        error={props.error}
       />
     </Modal>
   );

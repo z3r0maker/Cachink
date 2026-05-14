@@ -13,13 +13,14 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarCore, type BottomTabBarProps } from './bottom-tab-bar.shared';
+import { colors } from '../../theme';
 
 export { type BottomTabBarProps, type BottomTabBarItem } from './bottom-tab-bar.shared';
 
 export function BottomTabBar(props: BottomTabBarProps): ReactElement {
   const insets = useSafeAreaInsets();
   return (
-    <View paddingBottom={insets.bottom}>
+    <View backgroundColor={colors.white} paddingBottom={insets.bottom}>
       <BottomTabBarCore {...props} />
     </View>
   );

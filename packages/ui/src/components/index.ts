@@ -22,6 +22,7 @@ export * from './Scanner/index';
 export * from './PeriodPicker/index';
 export * from './Icon/index';
 export * from './InitialsAvatar/index';
+export * from './RoleIllustration/index';
 export * from './SegmentedToggle/index';
 export * from './Combobox/index';
 export * from './ConfirmDialog/index';
@@ -32,11 +33,17 @@ export * from './SearchBar/index';
 export * from './Skeleton/index';
 export * from './SplitPane/index';
 export * from './SwipeableRow/index';
+export * from './SwipeableTabView/index';
 export * from './SafeAreaSpacer/index';
 export * from './fields/index';
 export * from './ProductoCard/index';
 export * from './ProductoCardGrid/index';
 export * from './AtributosForm/index';
+export * from './FloatingCoinsBackground/index';
+export * from './ColorSwatchPicker/index';
+export * from './ActivityTracker/index';
+export * from './PinCodeInput/index';
+export * from './OptionCardGroup/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

@@ -4,6 +4,8 @@
  * SQLite stores timestamps as ISO 8601 strings; `deleted_at` is nullable
  * for soft deletes. Spread this object into each `sqliteTable` definition
  * so every row carries the same audit shape.
+ *
+ * Phase 2 addition: `created_by_user_id` — nullable for migration compat.
  */
 
 import { text } from 'drizzle-orm/sqlite-core';
@@ -11,6 +13,7 @@ import { text } from 'drizzle-orm/sqlite-core';
 export const auditColumns = {
   businessId: text('business_id').notNull(),
   deviceId: text('device_id').notNull(),
+  createdByUserId: text('created_by_user_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
   deletedAt: text('deleted_at'),

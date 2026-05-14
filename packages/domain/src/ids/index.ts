@@ -30,6 +30,13 @@ export type ClientPaymentId = Ulid & { readonly __entity: 'ClientPayment' };
 export type DayCloseId = Ulid & { readonly __entity: 'DayClose' };
 export type RecurringExpenseId = Ulid & { readonly __entity: 'RecurringExpense' };
 export type DeviceId = Ulid & { readonly __entity: 'Device' };
+export type UserId = Ulid & { readonly __entity: 'User' };
+export type CajaTurnoId = Ulid & { readonly __entity: 'CajaTurno' };
+export type ConversionRecetaId = Ulid & { readonly __entity: 'ConversionReceta' };
+export type ConversionId = Ulid & { readonly __entity: 'Conversion' };
+export type AuditoriaInventarioId = Ulid & { readonly __entity: 'AuditoriaInventario' };
+export type EntregaCreditoId = Ulid & { readonly __entity: 'EntregaCredito' };
+export type DirectorAlertId = Ulid & { readonly __entity: 'DirectorAlert' };
 
 /** Convenience factory for any branded entity id. */
 export function newEntityId<T extends Ulid>(): T {

@@ -2,36 +2,36 @@
  * Estado de Resultados (NIF B-3).
  *
  * Pure function. Callers pre-filter ventas + egresos by period. We treat
- * every Venta as ingreso regardless of `estadoPago` (accrual basis) —
- * Crédito ventas do count as ingresos here even though they don't move
- * cash. Flujo de Efectivo is the right place to reconcile cash.
+ * every Venta as ingreso regardless of `estadoPago` (accrual basis).
  *
- * Formula (CLAUDE.md §10):
- *   ingresos        = Σ ventas.monto
- *   costoDeVentas   = Σ egresos with categoria ∈ {Materia Prima, Inventario}
- *   utilidadBruta   = ingresos − costoDeVentas
+ * Formula:
+ *   ingresos         = Σ ventas.monto
+ *   costoDeVentas    = Σ egresos with categoria ∈ {Materia Prima, Inventario}
+ *   utilidadBruta    = ingresos − costoDeVentas
+ *   merma            = Σ(cantidad × costoUnitCentavos) for merma movements  (Phase 7)
  *   gastosOperativos = Σ egresos with other categorias
- *   utilidadOperativa = utilidadBruta − gastosOperativos
- *   isr             = max(0, utilidadOperativa × isrTasa)   ← clamped
- *   utilidadNeta    = utilidadOperativa − isr
- *
- * ISR-on-losses note: CLAUDE.md §10 is silent on negative income tax.
- * We clamp ISR ≥ 0 — a loss period doesn't generate a tax credit in the
- * P&L. If accountant review disagrees, supersede via ADR without changing
- * the public signature.
+ *   utilidadOperativa = utilidadBruta − merma − gastosOperativos
+ *   isr              = max(0, utilidadOperativa × isrTasa)
+ *   utilidadNeta     = utilidadOperativa − isr
  */
 
 import type { Expense } from '../entities/expense.js';
+import type { InventoryMovement } from '../entities/inventory-movement.js';
 import type { Sale } from '../entities/sale.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
 
-const COSTO_DE_VENTAS_CATS = new Set<Expense['categoria']>(['Materia Prima', 'Inventario']);
+const COSTO_DE_VENTAS_CATS = new Set<Expense['categoria']>([
+  'Materia Prima',
+  'Inventario',
+]);
 
 export interface EstadoDeResultados {
   ingresos: Money;
   costoDeVentas: Money;
   utilidadBruta: Money;
+  /** Phase 7: merma cost = Σ(cantidad × costoUnitCentavos). */
+  merma: Money;
   gastosOperativos: Money;
   utilidadOperativa: Money;
   isr: Money;
@@ -41,6 +41,8 @@ export interface EstadoDeResultados {
 export interface EstadoDeResultadosInput {
   ventas: readonly Sale[];
   egresos: readonly Expense[];
+  /** Inventory movements with motivo 'Merma / daño'. Phase 7. */
+  mermaMovements?: readonly InventoryMovement[];
   /** Effective ISR rate as a fraction, e.g. 0.30 for 30%. */
   isrTasa: number;
 }
@@ -50,20 +52,29 @@ export function calculateEstadoDeResultados(
 ): EstadoDeResultados {
   const { ventas, egresos, isrTasa } = input;
   if (!Number.isFinite(isrTasa) || isrTasa < 0 || isrTasa > 1) {
-    throw new TypeError(`isrTasa must be a finite number in [0, 1], got ${isrTasa}`);
+    throw new TypeError(
+      `isrTasa must be in [0, 1], got ${isrTasa}`,
+    );
   }
 
   const ingresos = sum(ventas.map((v) => v.monto));
 
   const costoDeVentas = sum(
-    egresos.filter((e) => COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
+    egresos
+      .filter((e) => COSTO_DE_VENTAS_CATS.has(e.categoria))
+      .map((e) => e.monto),
   );
   const gastosOperativos = sum(
-    egresos.filter((e) => !COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
+    egresos
+      .filter((e) => !COSTO_DE_VENTAS_CATS.has(e.categoria))
+      .map((e) => e.monto),
   );
 
+  const merma = calculateMermaTotal(input.mermaMovements ?? []);
+
   const utilidadBruta = ingresos - costoDeVentas;
-  const utilidadOperativa = utilidadBruta - gastosOperativos;
+  const utilidadOperativa =
+    utilidadBruta - merma - gastosOperativos;
 
   const isr = calculateIsr(utilidadOperativa, isrTasa);
   const utilidadNeta = utilidadOperativa - isr;
@@ -72,6 +83,7 @@ export function calculateEstadoDeResultados(
     ingresos,
     costoDeVentas,
     utilidadBruta,
+    merma,
     gastosOperativos,
     utilidadOperativa,
     isr,
@@ -79,12 +91,22 @@ export function calculateEstadoDeResultados(
   };
 }
 
-/**
- * ISR is computed on positive utilidad only. Multiplying a bigint by
- * `isrTasa × 10000` + integer-divide by 10000n keeps the arithmetic
- * in bigint land — no floats touch money.
- */
-function calculateIsr(utilidadOperativa: Money, isrTasa: number): Money {
+/** Merma cost = Σ(cantidad × costoUnitCentavos) for merma movements. */
+function calculateMermaTotal(
+  movements: readonly InventoryMovement[],
+): Money {
+  return sum(
+    movements.map(
+      (m) => BigInt(m.cantidad) * m.costoUnitCentavos,
+    ),
+  );
+}
+
+/** ISR computed on positive utilidad only (no tax credits). */
+function calculateIsr(
+  utilidadOperativa: Money,
+  isrTasa: number,
+): Money {
   if (utilidadOperativa <= ZERO) return ZERO;
   const basisPoints = BigInt(Math.round(isrTasa * 10_000));
   return (utilidadOperativa * basisPoints) / 10_000n;

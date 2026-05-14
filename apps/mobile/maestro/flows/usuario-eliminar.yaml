@@ -1,0 +1,51 @@
+# Delete a user (Director only) — verify removal from user list.
+#
+# Verifies:
+#   1. Navigate to Otros → Usuarios
+#   2. Tap delete icon on a non-Director user
+#   3. Confirm deletion
+#   4. User disappears from list
+#
+# Precondition: wizard + director-setup complete, at least one
+# non-Director user exists (created by usuario-crear.yaml).
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-crear.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-eliminar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros → Usuarios.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-usuarios"
+
+# Verify user list screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "user-list"
+    timeout: 5000
+
+# The user "Operativo Test" (created by usuario-crear.yaml) should be visible.
+- assertVisible: "Operativo Test"
+
+# Tap the delete icon for the Operativo Test user.
+# The testID pattern is user-del-{name} or a generic delete button on the row.
+- tapOn: "Eliminar"
+    # optional: true
+
+# Confirm deletion dialog.
+- tapOn: "Confirmar"
+
+# Verify the user is no longer in the list.
+- extendedWaitUntil:
+    notVisible: "Operativo Test"
+    timeout: 5000

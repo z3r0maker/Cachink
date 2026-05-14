@@ -22,10 +22,8 @@ export function FrecuentesGrid(props: FrecuentesGridProps): ReactElement | null 
   const { t } = useTranslation();
   if (props.productos.length === 0) return null;
   return (
-    <View testID={props.testID ?? 'frecuentes-grid'} gap={8}>
-      <View paddingHorizontal={16}>
-        <SectionTitle title={t('ventas.frecuentes')} />
-      </View>
+    <View testID={props.testID ?? 'frecuentes-grid'} gap={8} paddingHorizontal={16}>
+      <SectionTitle title={t('ventas.frecuentes')} />
       <ProductoCardGrid
         productos={props.productos}
         stockMap={props.stockMap}

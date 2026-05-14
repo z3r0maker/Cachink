@@ -47,6 +47,16 @@ export type InventoryUnit = z.infer<typeof InventoryUnitEnum>;
 export const ProductoTipoEnum = z.enum(['producto', 'servicio']);
 export type ProductoTipo = z.infer<typeof ProductoTipoEnum>;
 
+/** Phase 8: how the product is used in the business. */
+export const UsoProductoEnum = z.enum(['venta', 'materia-prima', 'ambos']);
+export type UsoProducto = z.infer<typeof UsoProductoEnum>;
+
+/** Soft background color for visual categorization (default: white). */
+export const ProductColorEnum = z.enum([
+  'white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray',
+]);
+export type ProductColor = z.infer<typeof ProductColorEnum>;
+
 export const ProductSchema = z
   .object({
     id: ulidField<ProductId>(),
@@ -60,6 +70,9 @@ export const ProductSchema = z
     seguirStock: z.boolean(),
     precioVentaCentavos: moneyField,
     atributos: z.record(z.string(), z.string()).default({}),
+    colorFondo: ProductColorEnum.default('white'),
+    /** Phase 8: venta, materia-prima, or ambos. */
+    usoProducto: UsoProductoEnum.default('venta'),
   })
   .merge(auditSchema)
   .refine((v) => v.tipo === 'producto' || v.seguirStock === false, {
@@ -80,6 +93,8 @@ export const NewProductSchema = z.object({
   seguirStock: z.boolean().default(true),
   precioVentaCentavos: moneyField,
   atributos: z.record(z.string(), z.string()).default({}),
+  colorFondo: ProductColorEnum.default('white'),
+  usoProducto: UsoProductoEnum.default('venta'),
   businessId: ulidField<BusinessId>(),
 });
 

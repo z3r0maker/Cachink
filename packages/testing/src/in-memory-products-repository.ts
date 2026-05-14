@@ -36,8 +36,11 @@ export class InMemoryProductsRepository implements ProductsRepository {
       seguirStock: input.seguirStock ?? true,
       precioVentaCentavos: input.precioVentaCentavos,
       atributos: input.atributos ?? {},
+      colorFondo: input.colorFondo ?? 'white',
+      usoProducto: input.usoProducto ?? 'venta',
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,
@@ -77,6 +80,7 @@ export class InMemoryProductsRepository implements ProductsRepository {
       categoria: patch.categoria ?? existing.categoria,
       unidad: patch.unidad ?? existing.unidad,
       umbralStockBajo: patch.umbralStockBajo ?? existing.umbralStockBajo,
+      colorFondo: patch.colorFondo ?? existing.colorFondo,
       updatedAt: ts,
     };
     this.rows.set(id, next);

@@ -10,8 +10,13 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Reach Settings → Re-run asistente.
-- tapOn: { id: "tab-ajustes" }
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Reach Settings → Sistema → Re-run asistente.
+- tapOn: { id: "top-bar-open-settings" }
+- tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }
 - assertVisible: "¡Bienvenido a Cachink!"

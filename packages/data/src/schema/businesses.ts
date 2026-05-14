@@ -28,5 +28,10 @@ export const businesses = sqliteTable('businesses', {
     .notNull()
     .default('Producto'),
   atributosProducto: text('atributos_producto').notNull().default('[]'),
+  featureFlags: text('feature_flags')
+    .notNull()
+    .default(
+      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+    ),
   ...auditColumns,
 });

@@ -33,14 +33,14 @@ export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
       flexDirection="row"
       flexWrap="wrap"
       gap={GAP}
-      paddingHorizontal={16}
     >
       {productos.map((p) => (
         <View
           key={p.id}
-          flexBasis="46%"
-          flexGrow={0}
+          flexBasis="47%"
+          flexGrow={1}
           flexShrink={0}
+          minWidth={140}
           $gtSm={{ flexBasis: '31%' }}
           $gtMd={{ flexBasis: '23%' }}
           $gtLg={{ flexBasis: '18%' }}

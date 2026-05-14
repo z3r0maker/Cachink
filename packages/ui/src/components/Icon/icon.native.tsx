@@ -69,6 +69,10 @@ import {
   Utensils,
   Wallet,
   X,
+  Inbox,
+  RefreshCw,
+  Zap,
+  Sliders,
 } from 'lucide-react-native';
 import type { IconName, IconProps } from './icon.shared';
 import { ICON_DEFAULT_SIZE, ICON_DEFAULT_STROKE } from './icon.shared';
@@ -126,6 +130,11 @@ const ICONS: Record<IconName, typeof Home> = {
   cloud: Cloud,
   plug: Plug,
   monitor: Monitor,
+  // Feature flags + system modules (Phase 4)
+  inbox: Inbox,
+  'refresh-cw': RefreshCw,
+  zap: Zap,
+  sliders: Sliders,
   'chevron-up': ChevronUp,
   'chevron-down': ChevronDown,
   'chevron-left': ChevronLeft,
