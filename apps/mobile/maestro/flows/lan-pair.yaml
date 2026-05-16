@@ -18,9 +18,15 @@ env:
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 # Re-run the wizard to reach the mode picker in a deterministic state.
 - tapOn:
-    id: "tab-ajustes"
+    id: "top-bar-open-settings"
+- tapOn:
+    id: "settings-hub-sistema"
 - tapOn:
     id: "settings-re-run-wizard"
 
@@ -46,14 +52,14 @@ env:
 - tapOn:
     id: "lan-join-paste-submit"
 
-# On success, the GatedNavigation routes to RolePicker.
-- assertVisible:
-    id: "role-picker"
+# On success, no error should appear.
 - assertNotVisible:
     id: "lan-join-error"
 
+# After LAN pairing with an existing host (which has users),
+# QuickSwitch fires. Authenticate via shared flow.
+- runFlow: shared/authenticate.yaml
+
 # Sanity check: the TopBar sync badge shows "Sincronizado".
-- tapOn:
-    id: "role-director-select"
 - assertVisible:
     id: "sync-status-badge"

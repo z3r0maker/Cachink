@@ -40,6 +40,7 @@ export function makeDayClose(overrides: Partial<DayClose> = {}): DayClose {
     cerradoPor: 'Operativo',
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
+    createdByUserId: null,
     createdAt: DEFAULT_TS,
     updatedAt: DEFAULT_TS,
     deletedAt: null,

@@ -22,8 +22,16 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { colors, radii, typography } from '../../theme';
+import { CenterTrack } from './center-track';
 
 export type GaugeTone = 'neutral' | 'positive' | 'warning' | 'negative';
+
+/** Colored zone rendered behind the fill bar on the track background. */
+export interface GaugeZone {
+  readonly from: number;
+  readonly to: number;
+  readonly color: string;
+}
 
 export interface GaugeProps {
   /** Numeric value — clamped to [0, max] before rendering. */
@@ -38,6 +46,13 @@ export interface GaugeProps {
   readonly showValue?: boolean;
   /** Optional formatter — overrides the default `${value}%` / `${v}/${max}`. */
   readonly valueFormatter?: (value: number, max: number) => string;
+  /**
+   * Fill origin: `'start'` (default) fills left-to-right [0, max].
+   * `'center'` fills bi-directionally from center for [-max, max] ranges.
+   */
+  readonly origin?: 'start' | 'center';
+  /** Optional colored zones on the track background (health thresholds). */
+  readonly zones?: readonly GaugeZone[];
   /** Forwarded to the root View so E2E tests can anchor to it. */
   readonly testID?: string;
 }
@@ -58,6 +73,13 @@ function defaultFormat(value: number, max: number): string {
 
 function clampToRange(value: number, max: number): number {
   if (value < 0) return 0;
+  if (value > max) return max;
+  return value;
+}
+
+/** Clamp to [-max, max] for center-origin mode. */
+function clampForCenter(value: number, max: number): number {
+  if (value < -max) return -max;
   if (value > max) return max;
   return value;
 }
@@ -105,6 +127,7 @@ interface TrackProps {
   readonly tone: GaugeTone;
   readonly formattedValue: string;
   readonly ariaLabel: string;
+  readonly zones?: readonly GaugeZone[];
 }
 
 /**
@@ -114,6 +137,30 @@ interface TrackProps {
  * decorative chrome. Extracted from `<Gauge>` to keep the parent
  * function under the 40-line cap.
  */
+/** Render colored zone segments behind the fill bar. */
+function ZoneSegments(p: { zones: readonly GaugeZone[]; max: number }): ReactElement {
+  return (
+    <>
+      {p.zones.map((z) => {
+        const left = p.max === 0 ? 0 : (z.from / p.max) * 100;
+        const width = p.max === 0 ? 0 : ((z.to - z.from) / p.max) * 100;
+        return (
+          <View
+            key={`${z.from}-${z.to}`}
+            testID="gauge-zone"
+            position="absolute"
+            top={0}
+            left={`${left.toFixed(2)}%`}
+            width={`${width.toFixed(2)}%`}
+            height="100%"
+            backgroundColor={z.color}
+          />
+        );
+      })}
+    </>
+  );
+}
+
 function Track(props: TrackProps): ReactElement {
   return (
     <View
@@ -130,9 +177,16 @@ function Track(props: TrackProps): ReactElement {
       borderWidth={2}
       borderRadius={GAUGE_RADIUS}
       overflow="hidden"
+      position="relative"
     >
+      {props.zones !== undefined && props.zones.length > 0 && (
+        <ZoneSegments zones={props.zones} max={props.max} />
+      )}
       <View
         testID="gauge-fill"
+        position="absolute"
+        top={0}
+        left={0}
         height="100%"
         width={props.fillPercent}
         backgroundColor={TONE_FILL[props.tone]}
@@ -149,10 +203,12 @@ export function Gauge(props: GaugeProps): ReactElement {
   const max = props.max ?? 100;
   const tone = props.tone ?? 'neutral';
   const showValue = props.showValue ?? true;
+  const origin = props.origin ?? 'start';
   const formatter = props.valueFormatter ?? defaultFormat;
-  const clamped = clampToRange(props.value, max);
-  const fillRatio = max === 0 ? 0 : clamped / max;
-  const fillPercent = `${(fillRatio * 100).toFixed(2)}%` as const;
+  const isCenter = origin === 'center';
+  const clamped = isCenter
+    ? clampForCenter(props.value, max)
+    : clampToRange(props.value, max);
   const formattedValue = formatter(clamped, max);
   const ariaLabel =
     props.label !== undefined ? `${props.label}: ${formattedValue}` : formattedValue;
@@ -160,14 +216,26 @@ export function Gauge(props: GaugeProps): ReactElement {
   return (
     <View testID={props.testID ?? 'gauge'} flexDirection="column">
       <Header label={props.label} showValue={showValue} displayValue={formattedValue} />
-      <Track
-        clamped={clamped}
-        max={max}
-        fillPercent={fillPercent}
-        tone={tone}
-        formattedValue={formattedValue}
-        ariaLabel={ariaLabel}
-      />
+      {isCenter ? (
+        <CenterTrack
+          clamped={clamped}
+          max={max}
+          tone={tone}
+          formattedValue={formattedValue}
+          ariaLabel={ariaLabel}
+          zones={props.zones}
+        />
+      ) : (
+        <Track
+          clamped={clamped}
+          max={max}
+          fillPercent={`${(max === 0 ? 0 : (clamped / max) * 100).toFixed(2)}%`}
+          tone={tone}
+          formattedValue={formattedValue}
+          ariaLabel={ariaLabel}
+          zones={props.zones}
+        />
+      )}
     </View>
   );
 }

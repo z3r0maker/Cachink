@@ -14,7 +14,7 @@ import {
   makeNewSale,
 } from '@cachink/testing';
 import { HoyKpiStrip } from '../../src/screens/DirectorHome/hoy-kpi-strip';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';
@@ -37,7 +37,7 @@ async function setup(): Promise<Harness> {
   const biz = await businesses.create({
     nombre: 'Test',
     regimenFiscal: 'RESICO',
-    isrTasa: 0.3,
+    isrTasa: 3000,
   });
   useAppConfigStore.getState().setCurrentBusinessId(biz.id);
   return {

@@ -32,6 +32,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { shadows } from '../../theme';
 import { colors } from '../../theme';
+import { impactMedium } from '../../haptics/index';
 
 export interface FABProps {
   /** Brand icon shown inside the FAB. Pass `<Icon name="plus" size={28} />`. */
@@ -60,11 +61,7 @@ const PRESS_TRANSFORM: ViewStyle = {
   boxShadow: shadows.pressed,
 };
 
-function buildBaseStyle(
-  bottom: number,
-  right: number,
-  disabled: boolean,
-): ViewStyle {
+function buildBaseStyle(bottom: number, right: number, disabled: boolean): ViewStyle {
   return {
     position: 'absolute',
     bottom,
@@ -94,7 +91,14 @@ export function FAB(props: FABProps): ReactElement {
   return (
     <Pressable
       testID={props.testID ?? 'fab'}
-      onPress={disabled ? undefined : props.onPress}
+      onPress={
+        disabled
+          ? undefined
+          : () => {
+              impactMedium();
+              props.onPress();
+            }
+      }
       disabled={disabled}
       role="button"
       aria-label={props.ariaLabel}

@@ -14,6 +14,8 @@ import { auditColumns } from './_audit';
 export const sales = sqliteTable('sales', {
   id: text('id').primaryKey(),
   fecha: text('fecha').notNull(),
+  /** "HH:MM" device time at sale creation. Null for pre-PR-7 records. */
+  hora: text('hora'),
   concepto: text('concepto').notNull(),
   categoria: text('categoria', {
     enum: ['Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro'],
@@ -28,5 +30,15 @@ export const sales = sqliteTable('sales', {
   }).notNull(),
   productoId: text('producto_id').notNull(),
   cantidad: integer('cantidad').notNull().default(1),
+  /** Cash received from customer (centavos). Only set for Efectivo sales. */
+  efectivoRecibidoCentavos: numeric('efectivo_recibido_centavos', { mode: 'bigint' }),
+  /** UserId who cancelled this sale. Null if not cancelled. */
+  cancelledByUserId: text('cancelled_by_user_id'),
+  /** Reason for cancellation. */
+  cancelMotivo: text('cancel_motivo'),
+  /** ISO timestamp when this sale was cancelled. */
+  cancelledAt: text('cancelled_at'),
+  /** CajaTurno ID active at time of sale. Null only for pre-migration legacy rows. */
+  cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,
 });

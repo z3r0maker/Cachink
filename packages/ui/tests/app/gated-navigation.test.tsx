@@ -10,9 +10,14 @@
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act } from 'react';
-import type { BusinessId } from '@cachink/domain';
+import type { BusinessId, UserId } from '@cachink/domain';
+import type { Repositories } from '../../src/app/repository-provider';
 import { GatedNavigation } from '../../src/app/index';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
+import {
+  InMemoryAppConfigRepository,
+  InMemoryUsersRepository,
+} from '@cachink/testing';
 import { useAppConfigStore } from '../../src/app-config/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';
@@ -26,12 +31,15 @@ function setStore(state: Partial<ReturnType<typeof useAppConfigStore.getState>>)
   });
 }
 
-function mountGate(children: ReactElement): ReturnType<typeof renderWithProviders> {
+function mountGate(
+  children: ReactElement,
+  overrides?: Partial<Repositories>,
+): ReturnType<typeof renderWithProviders> {
   // Local QueryClient so each test gets a fresh cache.
   const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
   return renderWithProviders(
     <QueryClientProvider client={qc}>
-      <MockRepositoryProvider>
+      <MockRepositoryProvider overrides={overrides}>
         <GatedNavigation platform="mobile">{children}</GatedNavigation>
       </MockRepositoryProvider>
     </QueryClientProvider>,
@@ -77,30 +85,54 @@ describe('GatedNavigation', () => {
     expect(screen.getByTestId('business-form')).toBeInTheDocument();
   });
 
-  it('shows the role picker when mode + business exist but role is null', () => {
+  it('shows the director setup when mode + business exist but no users', async () => {
     setStore({
       hydrated: true,
       mode: 'local',
       currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
+      userId: null,
       role: null,
       deviceId: null,
     });
     mountGate(<span data-testid="app-body">app</span>);
+    // With no users in the mock repo, the auth gate shows DirectorSetupGate
+    const setup = await screen.findByTestId('director-setup');
+    expect(setup).toBeInTheDocument();
     expect(screen.queryByTestId('app-body')).toBeNull();
-    expect(screen.getByTestId('role-picker')).toBeInTheDocument();
   });
 
-  it('renders children when every gate is satisfied', () => {
+  it('renders children when every gate is satisfied', async () => {
+    // Seed users repo so AuthInner sees hasUsers=true
+    const users = new InMemoryUsersRepository();
+    await users.create({
+      nombre: 'Test Director',
+      email: null,
+      pinHash: 'hash',
+      recoveryPasswordHash: 'pin',
+      role: 'director',
+      mustChangePin: false,
+      businessId: '01JPHK0000000000000000000B' as BusinessId,
+    });
+
+    // Seed appConfig with discoveryShown so FeatureDiscoveryGate passes through
+    const appConfig = new InMemoryAppConfigRepository();
+    await appConfig.set('discoveryShown', 'true');
+
     setStore({
       hydrated: true,
       mode: 'local',
       currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
+      userId: '01JPHK0000000000000000USR1' as UserId,
       role: 'operativo',
+      mustChangePin: false,
       deviceId: null,
     });
-    mountGate(<span data-testid="app-body">app</span>);
-    expect(screen.getByTestId('app-body')).toBeInTheDocument();
+    mountGate(<span data-testid="app-body">app</span>, { users, appConfig });
+    // AuthInner resolves users from the query — when userId is set +
+    // mustChangePin is false, children render.
+    const body = await screen.findByTestId('app-body');
+    expect(body).toBeInTheDocument();
     expect(screen.queryByTestId('wizard')).toBeNull();
-    expect(screen.queryByTestId('role-picker')).toBeNull();
+    expect(screen.queryByTestId('director-setup')).toBeNull();
   });
 });

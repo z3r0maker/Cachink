@@ -33,7 +33,12 @@
 // `ULIDError: PRNG_DETECT` on Hermes.
 import 'react-native-get-random-values';
 
+import { LogBox } from 'react-native';
 import { StrictMode, type ReactElement } from 'react';
+
+// Victory Native XL + react-native-reanimated use deprecated StrictMode
+// APIs internally — harmless but noisy. Suppress until upstream fixes land.
+LogBox.ignoreLogs(['findHostInstance_DEPRECATED', 'findNodeHandle is deprecated']);
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
@@ -69,6 +74,29 @@ const mobileHooks: AppProvidersHooks = {
 // §8.2 mentions 900 as the heading weight; when the CSS requests 900
 // the browser / RN runtime snaps to the closest available weight (800
 // ExtraBold).
+/** All Expo Router screens — extracted to keep RootLayout under 40 lines. */
+function MobileStack(): ReactElement {
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="(tabs)" />
+      <Stack.Screen name="wizard" />
+      <Stack.Screen name="role-picker" />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="clientes" />
+      <Stack.Screen name="cuentas-por-cobrar" />
+      <Stack.Screen name="inventario" />
+      <Stack.Screen name="funciones" />
+      <Stack.Screen name="usuarios" />
+      <Stack.Screen name="caja" />
+      <Stack.Screen name="conversion" />
+      <Stack.Screen name="auditoria" />
+      <Stack.Screen name="ventas-credito" />
+      <Stack.Screen name="caja-reportes" />
+      <Stack.Screen name="merma-reportes" />
+    </Stack>
+  );
+}
+
 export default function RootLayout(): ReactElement | null {
   const [fontsLoaded] = useFonts({
     PlusJakartaSans_400Regular,
@@ -77,12 +105,7 @@ export default function RootLayout(): ReactElement | null {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
-
-  if (!fontsLoaded) {
-    // Return null while fonts load so Expo Router shows the splash screen.
-    return null;
-  }
-
+  if (!fontsLoaded) return null;
   return (
     <StrictMode>
       <GestureHandlerRootView style={{ flex: 1 }}>
@@ -90,14 +113,9 @@ export default function RootLayout(): ReactElement | null {
           <AppProviders
             platform="mobile"
             hooks={mobileHooks}
-            overlays={
-              <>
-                <MobileScannerHost />
-                <CloudInnerScreenHost />
-              </>
-            }
+            overlays={<><MobileScannerHost /><CloudInnerScreenHost /></>}
           >
-            <Stack screenOptions={{ headerShown: false }} />
+            <MobileStack />
           </AppProviders>
         </SafeAreaProvider>
       </GestureHandlerRootView>

@@ -1,0 +1,49 @@
+# Switch between Director and Operativo roles via the TopBar role chip
+# and verify each role's home screen renders.
+#
+# After Phase 13, auth is required before tabs render. This flow:
+#   1. Authenticates as Director → verifies Director Home (tab-estados)
+#   2. Taps role chip → Operativo → verifies Ventas tab
+#   3. Taps role chip → Director → verifies Estados tab
+#
+# Precondition: wizard + director-setup complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/role-switch.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# After auth, we land on Director Home. Verify tab-estados is visible.
+- assertVisible:
+    id: "tab-estados"
+
+# Switch to Operativo via the role chip.
+- tapOn:
+    id: "top-bar-role-chip"
+- assertVisible:
+    id: "role-picker"
+- tapOn:
+    id: "role-operativo-select"
+
+# Verify Operativo home — Ventas tab visible.
+- assertVisible:
+    id: "tab-ventas"
+
+# Switch back to Director.
+- tapOn:
+    id: "top-bar-role-chip"
+- assertVisible:
+    id: "role-picker"
+- tapOn:
+    id: "role-director-select"
+
+# Verify Director Home loads — tab-estados visible.
+- assertVisible:
+    id: "tab-estados"

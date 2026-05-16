@@ -1,0 +1,17 @@
+# Reusable subflow: deep-link to the /clientes screen.
+#
+# There is no top-level "Clientes" tab — per CLAUDE.md §1, Clientes
+# is reached via deep link. This subflow navigates using the app's
+# URL scheme and waits for the screen to mount.
+#
+# Precondition: user is authenticated (run authenticate.yaml first).
+#
+# Usage (from any flow needing Clientes):
+#   - runFlow: shared/navigate-to-clientes.yaml
+appId: mx.cachink.mobile
+---
+- openLink: "cachink:///clientes"
+- extendedWaitUntil:
+    visible:
+      id: "clientes-screen"
+    timeout: 5000

@@ -1,0 +1,49 @@
+# Edit an existing cliente's information.
+#
+# Verifies:
+#   1. Navigate to cliente detail
+#   2. Tap cliente-editar button
+#   3. Modify name/phone → save
+#   4. Verify changes persist on the detail screen
+#
+# Precondition: wizard complete, cliente "Carla Márquez" exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-editar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Clientes screen via deep link.
+- runFlow: shared/navigate-to-clientes.yaml
+
+# Tap the existing cliente to open the detail screen.
+- tapOn: "Carla Márquez"
+- assertVisible:
+    id: "cliente-detail-screen"
+
+# Tap the edit button.
+- tapOn:
+    id: "cliente-editar"
+
+# Modify the phone number (clear and re-enter).
+- tapOn:
+    id: "nuevo-cliente-telefono"
+- eraseText
+- inputText: "5598765432"
+
+# Submit the edit.
+- tapOn:
+    id: "nuevo-cliente-submit"
+
+# Verify we're back on the detail screen with updated info.
+- assertVisible:
+    id: "cliente-detail-screen"
+- assertVisible: "5598765432"

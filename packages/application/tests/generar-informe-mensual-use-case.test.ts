@@ -27,7 +27,7 @@ describe('GenerarInformeMensualUseCase', () => {
       makeNewBusiness({
         nombre: 'Test Business',
         regimenFiscal: 'RIF',
-        isrTasa: 0.3,
+        isrTasa: 3000,
         logoUrl: null,
       }),
     );

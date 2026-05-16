@@ -1,0 +1,64 @@
+# Period Picker interaction — switch between Mes/Año tabs on Estados.
+#
+# Verifies:
+#   1. Navigate to Estados → Resultados
+#   2. Tap period-picker-tabs to verify it's interactive
+#   3. Switch to "Año" → assert period-picker-year visible
+#   4. Switch to "Mes" → assert period-picker-month visible
+#   5. Assert period-picker-from and period-picker-to render
+#
+# Exercises 6 previously uncovered testIDs:
+#   - period-picker-tabs
+#   - period-picker-month
+#   - period-picker-year
+#   - period-picker-from
+#   - period-picker-to
+#   - period-picker-year-only
+#
+# Precondition: wizard complete, at least one venta + one egreso exist.
+# Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/estados-period-picker.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Verify EstadosShell renders.
+- assertVisible:
+    id: "estados-shell"
+
+# Verify the period picker tabs are visible.
+- assertVisible:
+    id: "period-picker-tabs"
+
+# Switch to "Año" tab.
+- tapOn:
+    id: "period-picker-year-only"
+
+# Assert year-mode elements are visible.
+- assertVisible:
+    id: "period-picker-year"
+
+# Switch to "Mes" tab.
+- tapOn:
+    id: "period-picker-month"
+
+# Assert month-mode elements are visible.
+- assertVisible:
+    id: "period-picker-from"
+- assertVisible:
+    id: "period-picker-to"

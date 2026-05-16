@@ -33,7 +33,7 @@ function SaldoCard({
 }): ReactElement {
   const hasSaldo = (saldo as bigint) > 0n;
   return (
-    <Card variant={hasSaldo ? 'yellow' : 'white'} padding="md" fullWidth>
+    <Card variant={hasSaldo ? 'yellow' : 'white'} elevation="raised" padding="md" fullWidth>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}

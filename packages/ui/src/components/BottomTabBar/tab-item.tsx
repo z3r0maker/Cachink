@@ -20,6 +20,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { colors, typography } from '../../theme';
+import { impactLight } from '../../haptics/index';
 
 export interface TabItemProps {
   readonly label: string;
@@ -81,9 +82,11 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
       color={active ? colors.black : colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={11}
+      fontSize={10}
       letterSpacing={typography.letterSpacing.wide}
       style={{ textTransform: 'uppercase' }}
+      numberOfLines={1}
+      ellipsizeMode="tail"
     >
       {text}
     </Text>
@@ -110,7 +113,14 @@ export function TabItem(props: TabItemProps): ReactElement {
   return (
     <Pressable
       testID={props.testID}
-      onPress={props.active ? undefined : props.onPress}
+      onPress={
+        props.active
+          ? undefined
+          : () => {
+              impactLight();
+              props.onPress();
+            }
+      }
       style={({ pressed }) => (pressed && !props.active ? PRESSED_STYLE : BASE_STYLE)}
       role="tab"
       aria-label={props.label}

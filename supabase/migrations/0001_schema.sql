@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS public.businesses (
   id               TEXT PRIMARY KEY,
   nombre           TEXT NOT NULL,
   regimen_fiscal   TEXT NOT NULL,
-  isr_tasa         REAL NOT NULL,
+  isr_tasa         INTEGER NOT NULL,
   logo_url         TEXT,
   business_id      TEXT NOT NULL,
   device_id        TEXT NOT NULL,
@@ -298,7 +298,7 @@ BEGIN
     id, nombre, regimen_fiscal, isr_tasa, logo_url,
     business_id, device_id, created_at, updated_at, deleted_at
   ) VALUES (
-    new_business_id, business_name, 'RIF', 0.30, NULL,
+    new_business_id, business_name, 'RIF', 3000, NULL,
     new_business_id, 'pending', to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
     to_char(now(), 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'), NULL
   );

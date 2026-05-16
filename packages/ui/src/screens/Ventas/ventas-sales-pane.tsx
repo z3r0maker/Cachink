@@ -8,13 +8,7 @@ import { Text, View } from '@tamagui/core';
 import type { Sale } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
-import {
-  Card,
-  ErrorState,
-  List,
-  Skeleton,
-  SwipeableRow,
-} from '../../components/index';
+import { Card, ErrorState, List, Skeleton, SwipeableRow } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 import { VentaCard } from './venta-card';
@@ -25,7 +19,7 @@ import { VentaCard } from './venta-card';
 
 export function TotalCard({ label, total }: { label: string; total: Money }): ReactElement {
   return (
-    <Card testID="ventas-total-card" variant="yellow" padding="md" fullWidth>
+    <Card testID="ventas-total-card" variant="yellow" elevation="raised" padding="md" fullWidth>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
@@ -55,16 +49,21 @@ export function TotalCard({ label, total }: { label: string; total: Money }): Re
 
 export function VentaRowSlot({
   venta,
+  productColorMap,
   onVentaPress,
   onEditVenta,
   onEliminarVenta,
 }: {
   venta: Sale;
+  productColorMap?: ReadonlyMap<string, string>;
   onVentaPress?: (v: Sale) => void;
   onEditVenta?: (v: Sale) => void;
   onEliminarVenta?: (v: Sale) => void;
 }): ReactElement {
-  const card = <VentaCard venta={venta} onPress={() => onVentaPress?.(venta)} />;
+  const bg = productColorMap?.get(venta.productoId);
+  const card = (
+    <VentaCard venta={venta} backgroundColor={bg} onPress={() => onVentaPress?.(venta)} />
+  );
   const swipeEnabled = onEditVenta !== undefined || onEliminarVenta !== undefined;
   if (!swipeEnabled) {
     return <View marginBottom={10}>{card}</View>;
@@ -88,6 +87,8 @@ export function VentaRowSlot({
 
 export interface SalesContentProps {
   readonly ventas: readonly Sale[];
+  /** Maps productoId → hex background color for sale-row tinting. */
+  readonly productColorMap?: ReadonlyMap<string, string>;
   readonly loading?: boolean;
   readonly error?: Error | null;
   readonly onRetry?: () => void;
@@ -99,7 +100,12 @@ export interface SalesContentProps {
 function SalesEmpty({ t }: { t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
   return (
     <View padding={16} alignItems="center">
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.gray400}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={14}
+        color={colors.gray400}
+      >
         {t('ventas.emptyTitle')}
       </Text>
     </View>
@@ -119,7 +125,16 @@ function SalesLoading(): ReactElement {
 export function SalesContent(props: SalesContentProps): ReactElement {
   const { t } = useTranslation();
   if (props.error) {
-    return <ErrorState title={t('ventas.errorTitle')} body={t('ventas.errorBody')} retryLabel={t('ventas.retryLabel')} onRetry={props.onRetry ?? (() => {})} testID="ventas-error" retryTestID="ventas-retry" />;
+    return (
+      <ErrorState
+        title={t('ventas.errorTitle')}
+        body={t('ventas.errorBody')}
+        retryLabel={t('ventas.retryLabel')}
+        onRetry={props.onRetry ?? (() => {})}
+        testID="ventas-error"
+        retryTestID="ventas-retry"
+      />
+    );
   }
   if (props.loading === true) return <SalesLoading />;
   if (props.ventas.length === 0) return <SalesEmpty t={t} />;
@@ -127,7 +142,16 @@ export function SalesContent(props: SalesContentProps): ReactElement {
     <List<Sale>
       data={props.ventas}
       keyExtractor={(venta) => venta.id}
-      renderItem={(venta) => <VentaRowSlot venta={venta} onVentaPress={props.onVentaPress} onEditVenta={props.onEditVenta} onEliminarVenta={props.onEliminarVenta} />}
+      renderItem={(venta) => (
+        <VentaRowSlot
+          venta={venta}
+          productColorMap={props.productColorMap}
+          onVentaPress={props.onVentaPress}
+          onEditVenta={props.onEditVenta}
+          onEliminarVenta={props.onEliminarVenta}
+        />
+      )}
+      scrollEnabled={false}
       testID="ventas-list"
     />
   );

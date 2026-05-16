@@ -11,6 +11,7 @@ import { ExportarDatosAction } from './exportar-datos-action';
 import { FeedbackAction } from './feedback-action';
 import { LanDetailsCard } from './lan-details-card';
 import { NotificationsToggle } from './notifications-toggle';
+import { CachinkSoundToggle } from './cachink-sound-toggle';
 import type { SettingsProps } from './settings';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -26,7 +27,9 @@ export function LanSection({
       connectedDevices={lan.connectedDevices}
       isHost={lan.isHost}
       onUnpair={lan.onUnpair}
+      unpairSubmitting={lan.unpairSubmitting}
       onStopHostServer={lan.onStopHostServer}
+      stopHostSubmitting={lan.stopHostSubmitting}
     />
   );
 }
@@ -88,6 +91,12 @@ export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): Reac
         <NotificationsToggle
           enabled={props.notificationsEnabled ?? true}
           onChange={props.onNotificationsChange}
+        />
+      )}
+      {props.onCachinkSoundChange && (
+        <CachinkSoundToggle
+          enabled={props.cachinkSoundEnabled ?? true}
+          onChange={props.onCachinkSoundChange}
         />
       )}
       {(props.showExportAction ?? true) && (

@@ -19,7 +19,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { act } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import type { CachinkDatabase } from '@cachink/data';
 import { TestDatabaseProvider } from '../../src/database/_internal';
 import { useAppConfigStore } from '../../src/app-config/index';

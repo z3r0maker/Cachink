@@ -1,0 +1,69 @@
+# Stock-disabled UX E2E — toggle stock OFF → verify no stock impact.
+#
+# Verifies:
+#   1. Toggle stock OFF → create venta → no stock movement created
+#   2. Products list doesn't show stock column
+#
+# Precondition: wizard + director-setup complete, at least one product
+# exists. Stock flag toggled OFF.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-stock-disabled.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Toggle stock OFF via Otros → Funciones.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-stock-switch"
+
+# Navigate to Productos via Otros — stock sub-tab hidden.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
+- assertNotVisible:
+    id: "productos-tab-stock"
+
+# Verify no stock column in products list.
+- assertNotVisible:
+    id: "producto-stock-column"
+
+# Create a venta (to verify no stock movement is created).
+# Switch to Operativo for venta access.
+- tapOn:
+    id: "tab-ventas"
+
+# Tap the product to create a sale.
+- tapOn: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "venta-confirm-sheet"
+    timeout: 5000
+- tapOn:
+    id: "venta-confirm-submit"
+
+# Switch back to Director, check Productos → Movimientos tab absent.
+- tapOn:
+    id: "top-bar-role-chip"
+    optional: true
+- tapOn:
+    id: "role-director-select"
+    optional: true
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
+- assertNotVisible:
+    id: "productos-tab-movimientos"

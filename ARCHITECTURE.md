@@ -86,6 +86,7 @@ Links to discussion, docs, prior art.
 | [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto schema design (UXD-R3)                                                          | Accepted                      |
 | [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                                | Accepted                      |
 | [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS                                                                      | Accepted                      |
+| [049](#adr-049) | 2026-05-10 | PIN for login, Password for recovery                                                                                                                   | Accepted                      |
 
 ---
 
@@ -3207,3 +3208,97 @@ The free-text form also:
 - The old `<NuevaVentaModal>`, `<VentaForm>`, and `<ManualVentaForm>` components are deleted. Callers of the old modal API (route files, tests) were updated.
 - Maestro E2E flows (`venta-efectivo.yaml`, `venta-credito.yaml`) were rewritten for the inline POS interaction pattern.
 - The `EditarVentaModal` remains for editing existing sales (different from the create flow).
+
+---
+
+## ADR-049
+
+### PIN for login, Password for recovery
+
+Date: 2026-05-10
+Status: Accepted
+
+### Context
+
+The current auth model uses a free-text password (≥6 chars) for daily login and a 6-digit numeric PIN only for recovery. For a mobile-first POS app targeting Mexican emprendedores, a numeric PIN is faster to enter and more natural for quick user-switching — the target audience switches users multiple times daily on shared tablets. A 6-digit numeric PIN with a dedicated number pad is significantly fewer taps than a full keyboard password.
+
+### Decision
+
+Swap roles — PIN becomes the daily login credential, Password becomes the recovery credential. The database keeps both hashed fields but their semantic roles are inverted:
+
+- `password_hash` column → renamed to `pin_hash` (stores bcrypt hash of 6-digit login PIN)
+- `recovery_pin_hash` column → renamed to `recovery_password_hash` (stores bcrypt hash of alphanumeric recovery password)
+- `must_change_password` column → renamed to `must_change_pin` (flag for forced PIN change on first login)
+
+Domain, application, data, testing, UI, and E2E layers all updated to reflect the new semantics. Migration 0013 handles the column renames via `ALTER TABLE … RENAME COLUMN`.
+
+### Alternatives Considered
+
+- **Keep password for login, add a "quick PIN" as optional shortcut.** Rejected: two credentials for login is more confusing, not less. One primary credential per action is cleaner.
+- **Remove password entirely, PIN-only for everything.** Rejected: recovery needs a stronger credential since it resets the primary login method. A forgotten PIN should be recoverable with a memorized alphanumeric password.
+
+### Consequences
+
+- **Security trade-off:** 6-digit numeric PIN has 10⁶ combinations (vs alphanumeric password). Acceptable for a local-first app with a physical-access-only threat model — the device itself is the security boundary.
+- **Migration required:** `ALTER TABLE users RENAME COLUMN` for the three columns. SQLite ≥3.25 required (all supported platforms meet this).
+- **UX improvement:** QuickSwitch screen now shows a numeric keypad instead of full keyboard. Faster login aligns with CLAUDE.md §2.1 — fewer clicks, the most value.
+- **All auth screens, use cases, i18n, and E2E flows updated.** No code path references the old password-for-login or PIN-for-recovery semantics.
+
+### References
+
+- CLAUDE.md §2.1 — UX simplicity principle
+- CLAUDE.md §1 — two-role model, quick user switching
+
+---
+
+## ADR-050
+
+### Wheel picker for bounded quantity inputs
+
+Date: 2026-05-14
+Status: Accepted
+
+### Context
+
+Every quantity input in Cachink (sale units, stock movements, recipe
+multipliers, days of month) uses IntegerField — a plain text box that
+opens the system keyboard. On mobile this is a 3-tap interaction
+(tap field → wait for keyboard → type number → dismiss keyboard) for
+values that are almost always 1–99. UX audit flagged this as a friction
+point for operativos doing high-frequency POS entry.
+
+### Decision
+
+Add `react-native-wheely` (v0.6.0, MIT, zero dependencies, pure JS,
+478 GitHub stars) and wrap it in a `WheelQuantityPicker` component.
+Use this for all bounded integer quantities ≤999. Keep IntegerField for
+unbounded/large numbers. Keep StepperField for ±1 threshold tuning.
+
+### Alternatives Considered
+
+- **StepperField only** — We already have it, but scrolling through
+  20+ values with [−][+] taps is slow. Good for thresholds, not quantities.
+- **react-native-wheel-scrollview-picker** (v2.0.9, 148 stars) — More
+  recently updated but fewer users and less customizable styling API.
+- **@quidone/react-native-wheel-picker** (301 stars) — Pulls in
+  `date-fns` and `@rozhkov/react-useful-hooks` as transitive deps.
+  Overkill for a simple number drum.
+- **react-native-wheel-picker-expo** (v0.5.4) — Needs
+  `expo-linear-gradient` which we don't have installed.
+- **Build custom with FlatList + snapToInterval** — ~150 lines, no dep,
+  but reinvents momentum scrolling, deceleration tuning, and item
+  memoization that wheely already handles well.
+
+### Consequences
+
+- New dependency: `react-native-wheely` (0 transitive deps, ~8KB).
+- Form state for quantity fields changes from `string` to `number`.
+- All new bounded-integer fields must use WheelQuantityPicker per the
+  Component README decision tree.
+- If wheely ever becomes unmaintained, the wrapper isolates the swap
+  to one file.
+
+### References
+
+- https://github.com/erksch/react-native-wheely
+- packages/ui/src/components/README.md (Input selector decision tree)

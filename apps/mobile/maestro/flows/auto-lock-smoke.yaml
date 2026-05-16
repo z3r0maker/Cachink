@@ -1,0 +1,45 @@
+# Auto-lock smoke test — verifies QuickSwitch re-appears after timeout.
+#
+# NOTE: This test relies on the app's inactivity timer. In a real
+# scenario the timer is 5 minutes. For E2E purposes, this flow
+# validates the mechanism fires correctly. If the app exposes a
+# reduced timeout for testing (via EXPO_PUBLIC_E2E_LOCK_TIMEOUT),
+# this flow will complete faster.
+#
+# Verifies:
+#   1. Login → wait for inactivity timeout → QuickSwitch re-appears
+#
+# Precondition: wizard + director-setup complete, app relaunched.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/auto-lock-smoke.yaml
+#
+# Priority: LOW — may be deferred if timeout mocking is not available.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Verify we're logged in and tabs are visible.
+- assertVisible:
+    id: "tab-estados"
+
+# Wait for the inactivity timeout to fire.
+# Default is 5min (300s). If E2E reduces it to 10s, this works faster.
+# Using a conservative wait of 15 seconds (assumes reduced E2E timeout).
+- swipe:
+    direction: "DOWN"
+    duration: 100
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 320000
+
+# QuickSwitch re-appeared — auto-lock fired.
+- assertVisible:
+    id: "quick-switch"

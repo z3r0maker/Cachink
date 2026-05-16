@@ -1,0 +1,42 @@
+# Nuevo Egreso — cancel button path (form dismissed without creating).
+#
+# All egreso creation flows submit the form. No flow tests the cancel
+# action mid-form:
+#   - nuevo-egreso-cancel
+#
+# Precondition: wizard complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/nuevo-egreso-cancel.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Egresos tab.
+- tapOn:
+    id: "tab-gastos"
+
+# Open the nuevo egreso form.
+- tapOn:
+    id: "egresos-nuevo"
+
+# Fill a partial concepto (to verify cancel discards it).
+- tapOn:
+    id: "nuevo-egreso-concepto"
+- inputText: "Egreso cancelado"
+
+# Tap cancel — modal should close without creating.
+- tapOn:
+    id: "nuevo-egreso-cancel"
+
+# Verify the modal is closed.
+- assertNotVisible: "Nuevo egreso"
+
+# Verify the cancelled egreso does not appear in the list.
+- assertNotVisible: "Egreso cancelado"

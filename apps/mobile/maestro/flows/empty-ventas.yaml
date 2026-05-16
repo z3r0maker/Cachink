@@ -1,0 +1,36 @@
+# Verify the Ventas empty state renders correctly when no products
+# exist yet. The "No hay productos" message and CTA should appear.
+#
+# Covers the empty-state path: fresh wizard → Ventas tab →
+# VentasEmptyProductos component renders.
+#
+# Precondition: fresh install with wizard complete but NO products.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/empty-ventas.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab.
+- tapOn:
+    id: "tab-ventas"
+
+# No products registered yet, so VentasEmptyProductos renders
+# instead of the product grid.
+- assertVisible:
+    id: "empty-productos"
+
+# The CTA button to navigate to Productos tab should be visible.
+- assertVisible:
+    id: "ventas-go-to-productos"
+
+# Product grid should NOT be visible.
+- assertNotVisible:
+    id: "ventas-product-grid"

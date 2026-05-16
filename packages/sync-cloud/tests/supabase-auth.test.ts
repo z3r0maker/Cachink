@@ -277,6 +277,42 @@ describe('SupabaseAuthConnector (Slice 8 M3-C13)', () => {
     });
   });
 
+  describe('decodeClaims edge cases', () => {
+    it('rejects a JWT with no dots (no payload segment)', async () => {
+      MOCK_AUTH.signInWithPassword.mockResolvedValue({
+        data: { session: { access_token: 'no-dots-here' } },
+        error: null,
+      });
+      const connector = makeConnector();
+      await expect(connector.signIn({ email: 'a@b.com', password: 'x' })).rejects.toThrow(
+        'Sesión inválida',
+      );
+    });
+
+    it('rejects a JWT with a non-JSON base64 payload', async () => {
+      // "not json" in base64 = "bm90IGpzb24"
+      MOCK_AUTH.signInWithPassword.mockResolvedValue({
+        data: { session: { access_token: 'header.bm90IGpzb24.sig' } },
+        error: null,
+      });
+      const connector = makeConnector();
+      await expect(connector.signIn({ email: 'a@b.com', password: 'x' })).rejects.toThrow(
+        'Sesión inválida',
+      );
+    });
+
+    it('rejects a JWT with corrupted base64 in the payload', async () => {
+      MOCK_AUTH.signInWithPassword.mockResolvedValue({
+        data: { session: { access_token: 'header.!!!invalid-base64!!!.sig' } },
+        error: null,
+      });
+      const connector = makeConnector();
+      await expect(connector.signIn({ email: 'a@b.com', password: 'x' })).rejects.toThrow(
+        'Sesión inválida',
+      );
+    });
+  });
+
   describe('fetchCredentials', () => {
     it('proxies to getSession (PowerSync hook contract)', async () => {
       MOCK_AUTH.getSession.mockResolvedValue({

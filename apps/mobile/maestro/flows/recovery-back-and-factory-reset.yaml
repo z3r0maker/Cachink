@@ -1,0 +1,49 @@
+# Recovery screen — back button and factory reset link visibility.
+#
+# Extends recovery-pin.yaml which tests the password recovery flow
+# but never exercises:
+#   - recovery-back (returns to QuickSwitch)
+#   - recovery-factory-reset (visible link — NOT tapped in E2E)
+#
+# Precondition: wizard + director-setup complete, app relaunched.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/recovery-back-and-factory-reset.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+
+# QuickSwitchScreen should be showing.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 10000
+
+# Tap forgot PIN link.
+- tapOn:
+    id: "forgot-pin-link"
+
+# Recovery screen appears.
+- extendedWaitUntil:
+    visible:
+      id: "recovery-screen"
+    timeout: 5000
+
+# Assert the factory reset link is visible (do NOT tap in E2E).
+- assertVisible:
+    id: "recovery-factory-reset"
+
+# Tap the back button to return to QuickSwitch.
+- tapOn:
+    id: "recovery-back"
+
+# Verify we returned to the QuickSwitch screen.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 5000

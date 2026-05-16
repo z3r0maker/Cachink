@@ -1,0 +1,56 @@
+# Estados Financieros with no data — empty states render correctly.
+#
+# Verifies:
+#   1. Fresh install → navigate to Estados → Resultados
+#   2. estado-resultados-empty visible (empty state message)
+#   3. Navigate to Balance → balance-general-empty visible
+#   4. Navigate to Flujo → flujo-efectivo-empty visible
+#
+# Precondition: wizard complete, NO ventas or egresos exist yet.
+# Must run BEFORE any data-creating flows.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/empty-estados.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Verify EstadosShell renders.
+- assertVisible:
+    id: "estados-shell"
+
+# --- Resultados: empty state ---
+- assertVisible:
+    id: "estados-tab-resultados"
+- assertVisible:
+    id: "estado-resultados-empty"
+
+# --- Balance: empty state ---
+- tapOn:
+    id: "estados-tab-balance"
+- extendedWaitUntil:
+    visible:
+      id: "estados-tab-balance"
+    timeout: 3000
+- assertVisible:
+    id: "balance-general-empty"
+
+# --- Flujo: empty state ---
+- tapOn:
+    id: "estados-tab-flujo"
+- extendedWaitUntil:
+    visible:
+      id: "estados-tab-flujo"
+    timeout: 3000
+- assertVisible:
+    id: "flujo-efectivo-empty"

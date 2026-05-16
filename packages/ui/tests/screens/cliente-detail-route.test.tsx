@@ -16,8 +16,8 @@ import {
   InMemoryClientPaymentsRepository,
   InMemoryClientsRepository,
   InMemorySalesRepository,
-  MockRepositoryProvider,
 } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { ClienteDetailRoute } from '../../src/screens/Clientes/cliente-detail-route';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

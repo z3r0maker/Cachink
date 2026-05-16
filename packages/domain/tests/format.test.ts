@@ -5,7 +5,9 @@ import {
   formatPesos,
   formatDate,
   formatDateLong,
+  formatDateSlash,
   formatMonth,
+  formatPeriodoLabel,
 } from '../src/format/index.js';
 import { parseIsoDate } from '../src/dates/index.js';
 
@@ -150,5 +152,45 @@ describe('formatMonth', () => {
 
   it('throws TypeError on a malformed input like "2026-4"', () => {
     expect(() => formatMonth('2026-4')).toThrow(TypeError);
+  });
+});
+
+describe('formatDateSlash', () => {
+  it('formats "01/ABR/2026" from 2026-04-01', () => {
+    const out = formatDateSlash(parseIsoDate('2026-04-01'));
+    expect(out).toBe('01/ABR/2026');
+  });
+
+  it('formats "23/ABR/2026" from 2026-04-23', () => {
+    const out = formatDateSlash(parseIsoDate('2026-04-23'));
+    expect(out).toBe('23/ABR/2026');
+  });
+
+  it('formats January as ENE', () => {
+    const out = formatDateSlash(parseIsoDate('2026-01-15'));
+    expect(out).toBe('15/ENE/2026');
+  });
+
+  it('formats December as DIC', () => {
+    const out = formatDateSlash(parseIsoDate('2026-12-31'));
+    expect(out).toBe('31/DIC/2026');
+  });
+});
+
+describe('formatPeriodoLabel', () => {
+  it('formats a same-month range as "01/MAY/2026 - 31/MAY/2026"', () => {
+    const out = formatPeriodoLabel(
+      parseIsoDate('2026-05-01'),
+      parseIsoDate('2026-05-31'),
+    );
+    expect(out).toBe('01/MAY/2026 - 31/MAY/2026');
+  });
+
+  it('formats a cross-month range as "05/OCT/2025 - 05/NOV/2025"', () => {
+    const out = formatPeriodoLabel(
+      parseIsoDate('2025-10-05'),
+      parseIsoDate('2025-11-05'),
+    );
+    expect(out).toBe('05/OCT/2025 - 05/NOV/2025');
   });
 });

@@ -23,14 +23,7 @@
  * `<MockRepositoryProvider>` + `<TestDatabaseProvider>` directly.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ReactElement,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -39,19 +32,13 @@ import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider, useDatabase } from '../database/index';
 import {
   AppConfigProvider,
-  APP_CONFIG_KEYS,
   useAppConfigHydrated,
   useCrashReportingEnabled,
   useDeviceId,
-  useSetCrashReportingEnabled,
+  useUserId,
 } from '../app-config/index';
-import { ConsentModal } from '../screens/ConsentModal/index';
 import { captureException, initSentryIfConsented } from '../telemetry/index';
-import {
-  buildDrizzleRepositories,
-  RepositoryProvider,
-  useAppConfigRepository,
-} from './repository-provider';
+import { buildDrizzleRepositories, RepositoryProvider } from './repository-provider';
 import { GatedNavigation, type LanBridges, type CloudBridges } from './gated-navigation';
 import { AppErrorBoundary } from './error-boundary';
 import { LanSyncProvider } from '../sync/lan-sync-context';
@@ -82,6 +69,11 @@ function DrizzleAppConfigBridge({ children }: { readonly children: ReactNode }):
   );
 }
 
+/**
+ * DrizzleRepositoryBridge — builds the 13 Drizzle repositories from
+ * the db + hydrated deviceId + authenticated userId. Rebuilds when
+ * userId changes (login/logout) so repos stamp the correct user.
+ */
 function DrizzleRepositoryBridge({
   children,
 }: {
@@ -89,10 +81,11 @@ function DrizzleRepositoryBridge({
 }): ReactElement | null {
   const db = useDatabase();
   const deviceId = useDeviceId();
+  const userId = useUserId();
   const repositories = useMemo(() => {
     if (!deviceId) return null;
-    return buildDrizzleRepositories(db, deviceId);
-  }, [db, deviceId]);
+    return buildDrizzleRepositories(db, deviceId, userId);
+  }, [db, deviceId, userId]);
   if (!repositories) return null;
   return <RepositoryProvider repositories={repositories}>{children}</RepositoryProvider>;
 }
@@ -115,37 +108,21 @@ function DrizzleRepositoryBridge({
  * provider re-mounts and the flag resets, so the prompt re-appears
  * exactly as the original "Decidir después" intent specified).
  */
+/**
+ * TelemetryBridge — initialises Sentry when consent === true.
+ * Audit M-1 PR 6: ConsentModal moved into the Wizard as a final step.
+ * This bridge now only handles Sentry init based on the stored value.
+ */
 function TelemetryBridge({ children }: { readonly children: ReactNode }): ReactElement {
   const hydrated = useAppConfigHydrated();
   const consent = useCrashReportingEnabled();
-  const setConsent = useSetCrashReportingEnabled();
-  const appConfig = useAppConfigRepository();
-  const [dismissedThisSession, setDismissedThisSession] = useState(false);
 
   useEffect(() => {
     if (!hydrated) return;
     void initSentryIfConsented(consent);
   }, [hydrated, consent]);
 
-  function persist(next: boolean | null): void {
-    setConsent(next);
-    setDismissedThisSession(true);
-    if (next === null) {
-      void appConfig.delete(APP_CONFIG_KEYS.crashReportingEnabled);
-      return;
-    }
-    void appConfig.set(APP_CONFIG_KEYS.crashReportingEnabled, next ? 'true' : 'false');
-  }
-
-  return (
-    <>
-      {children}
-      <ConsentModal
-        open={hydrated && consent === null && !dismissedThisSession}
-        onChange={persist}
-      />
-    </>
-  );
+  return <>{children}</>;
 }
 
 function buildQueryClient(): QueryClient {

@@ -70,9 +70,31 @@ pnpm install
 pnpm test                              # full monorepo tests (>500 passing)
 pnpm lint                              # enforce layer boundaries + style
 pnpm typecheck                         # strict TS across all packages
-pnpm --filter @cachink/mobile start    # launch Expo dev client
+pnpm --filter @cachink/mobile ios      # dev build (needs Metro running)
+pnpm --filter @cachink/mobile ios:clean    # nuke Pods + full clean rebuild
+pnpm --filter @cachink/mobile ios:preview  # preview build (tap icon, no Metro)
 pnpm --filter @cachink/desktop tauri dev   # launch Tauri desktop app
 ```
+
+### iOS Build — encoding note
+
+The workspace path contains `!` which requires UTF-8 encoding for CocoaPods.
+If you see `Encoding::CompatibilityError` or `ASCII-8BIT` errors, ensure your
+shell has these exports (added to `~/.zshrc` during setup):
+
+```bash
+export LANG=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+```
+
+Clean rebuild after encoding or Pods issues:
+```bash
+pnpm --filter @cachink/mobile ios:clean
+```
+
+**Xcode 26+ note:** Build for an iOS 26.4 simulator (not 18.x). The
+`SwiftUICore` framework split in Xcode 26 causes linker errors when
+targeting older simulator runtimes.
 
 ## Release workflow
 

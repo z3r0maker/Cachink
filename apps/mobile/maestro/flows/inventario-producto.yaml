@@ -4,26 +4,58 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+# Select Operativo role if RolePicker is showing (cold start).
+
 - tapOn:
     id: "tab-productos"
 - tapOn:
     id: "stock-nuevo-producto"
 
+# Fill the product form. Use the "Next" toolbar button to advance
+# between fields, or press back to dismiss the keyboard before
+# tapping the next field.
 - tapOn:
     id: "producto-nombre"
 - inputText: "Tortilla"
+- pressKey: enter
+
 - tapOn:
     id: "producto-costo"
+- eraseText
 - inputText: "2"
+- pressKey: enter
+
 - tapOn:
     id: "producto-precio-venta"
+- eraseText
 - inputText: "15"
+- pressKey: enter
+
 - tapOn:
     id: "producto-umbral"
 - eraseText
 - inputText: "10"
+- pressKey: enter
+
+# Submit — the last pressKey:enter may have already submitted
+# the form via onSubmitEditing. Try tapping submit, but if the
+# modal already closed, that's fine too.
 - tapOn:
     id: "producto-submit"
+    optional: true
 
-- assertNotVisible: "Nuevo producto"
-- assertVisible: "Tortilla"
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 10000
+
+# Wait for the stock list to render the new product.
+- extendedWaitUntil:
+    visible:
+      id: "stock-list"
+    timeout: 5000
+- assertVisible:
+    text: ".*Tortilla.*"

@@ -36,7 +36,7 @@ export const SALIDA_MOTIVOS: readonly ExitReason[] = [
 
 export interface MovimientoFormState {
   tipo: MovementType;
-  cantidad: string;
+  cantidad: number;
   costoPesos: string;
   motivo: string;
   nota: string;
@@ -45,16 +45,15 @@ export interface MovimientoFormState {
 export function initialMovimientoState(producto: Product, tipo: MovementType): MovimientoFormState {
   return {
     tipo,
-    cantidad: '',
+    cantidad: 1,
     costoPesos: (Number(producto.costoUnitCentavos) / 100).toString(),
     motivo: tipo === 'entrada' ? 'Compra a proveedor' : 'Venta',
     nota: '',
   };
 }
 
-export function validateCantidad(value: string): boolean {
-  const n = Number(value);
-  return Number.isInteger(n) && n > 0;
+export function validateCantidad(value: number): boolean {
+  return Number.isInteger(value) && value > 0;
 }
 
 export function buildMovimientoPayload(
@@ -67,7 +66,7 @@ export function buildMovimientoPayload(
     productoId: producto.id as ProductId,
     fecha,
     tipo: state.tipo,
-    cantidad: Number(state.cantidad),
+    cantidad: state.cantidad,
     costoUnitCentavos:
       state.tipo === 'entrada' ? fromPesos(state.costoPesos || '0') : producto.costoUnitCentavos,
     motivo: state.motivo,

@@ -99,7 +99,7 @@ function FallbackCard(props: {
   onCopy: () => void;
 }): ReactElement {
   return (
-    <Card padding="lg" variant="yellow" fullWidth>
+    <Card padding="lg" variant="yellow" elevation="raised" fullWidth>
       <SectionTitle title={t('errorBoundary.title')} />
       <Text
         fontFamily={typography.fontFamily}

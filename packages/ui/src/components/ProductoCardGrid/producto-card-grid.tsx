@@ -10,6 +10,7 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { AttrDef, Product } from '@cachink/domain';
 import { ProductoCard, type ProductoCardProps } from '../ProductoCard/index';
+import type { BadgeVariant } from '../ProductoCard/quantity-badge';
 
 export interface ProductoCardGridProps {
   readonly productos: readonly Product[];
@@ -17,6 +18,10 @@ export interface ProductoCardGridProps {
   readonly stockMap?: ReadonlyMap<string, number>;
   /** Attribute definitions for chip rendering (Phase D). */
   readonly atributoDefs?: readonly AttrDef[];
+  /** Cart quantities map — productoId → quantity in cart (Enhancement A). */
+  readonly cartQuantities?: ReadonlyMap<string, number>;
+  /** Badge colour variant — yellow for ventas, red for merma (Enhancement G). */
+  readonly badgeVariant?: BadgeVariant;
   readonly mode: ProductoCardProps['mode'];
   readonly onPress: ProductoCardProps['onPress'];
   readonly onLongPress?: ProductoCardProps['onLongPress'];
@@ -26,21 +31,21 @@ export interface ProductoCardGridProps {
 const GAP = 12;
 
 export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
-  const { productos, stockMap, atributoDefs = [], mode, onPress, onLongPress } = props;
+  const { productos, stockMap, atributoDefs = [], cartQuantities, badgeVariant, mode, onPress, onLongPress } = props;
   return (
     <View
       testID={props.testID ?? 'producto-card-grid'}
       flexDirection="row"
       flexWrap="wrap"
       gap={GAP}
-      paddingHorizontal={16}
     >
       {productos.map((p) => (
         <View
           key={p.id}
-          flexBasis="46%"
-          flexGrow={0}
+          flexBasis="47%"
+          flexGrow={1}
           flexShrink={0}
+          minWidth={140}
           $gtSm={{ flexBasis: '31%' }}
           $gtMd={{ flexBasis: '23%' }}
           $gtLg={{ flexBasis: '18%' }}
@@ -52,6 +57,8 @@ export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
             mode={mode}
             onPress={onPress}
             onLongPress={onLongPress}
+            badgeCount={cartQuantities?.get(p.id) ?? 0}
+            badgeVariant={badgeVariant}
           />
         </View>
       ))}

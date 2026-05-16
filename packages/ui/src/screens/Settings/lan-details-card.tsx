@@ -20,7 +20,9 @@ export interface LanDetailsCardProps {
   readonly connectedDevices: number;
   readonly isHost: boolean;
   readonly onUnpair: () => void;
+  readonly unpairSubmitting?: boolean;
   readonly onStopHostServer?: () => void;
+  readonly stopHostSubmitting?: boolean;
   readonly testID?: string;
 }
 
@@ -72,13 +74,20 @@ export function LanDetailsCard(props: LanDetailsCardProps): ReactElement {
           <Btn
             variant="soft"
             onPress={props.onStopHostServer}
+            loading={props.stopHostSubmitting}
             fullWidth
             testID="settings-lan-stop-host"
           >
             {t('settings.lanStopHost')}
           </Btn>
         )}
-        <Btn variant="danger" onPress={props.onUnpair} fullWidth testID="settings-lan-unpair">
+        <Btn
+          variant="danger"
+          onPress={props.onUnpair}
+          loading={props.unpairSubmitting}
+          fullWidth
+          testID="settings-lan-unpair"
+        >
           {t('settings.lanUnpair')}
         </Btn>
       </View>

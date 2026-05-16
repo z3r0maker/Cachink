@@ -12,8 +12,8 @@ SELECT plan(6);
 INSERT INTO public.businesses
   (id, nombre, regimen_fiscal, isr_tasa, logo_url, business_id, device_id, created_at, updated_at, deleted_at)
 VALUES
-  ('BIZ_A', 'A', 'RIF', 0.30, NULL, 'BIZ_A', 'DEV_A', '2026-04-23T10:00:00.000Z', '2026-04-23T10:00:00.000Z', NULL),
-  ('BIZ_B', 'B', 'RIF', 0.30, NULL, 'BIZ_B', 'DEV_B', '2026-04-23T10:00:00.000Z', '2026-04-23T10:00:00.000Z', NULL);
+  ('BIZ_A', 'A', 'RIF', 3000, NULL, 'BIZ_A', 'DEV_A', '2026-04-23T10:00:00.000Z', '2026-04-23T10:00:00.000Z', NULL),
+  ('BIZ_B', 'B', 'RIF', 3000, NULL, 'BIZ_B', 'DEV_B', '2026-04-23T10:00:00.000Z', '2026-04-23T10:00:00.000Z', NULL);
 
 -- Seed one sale per business.
 INSERT INTO public.sales

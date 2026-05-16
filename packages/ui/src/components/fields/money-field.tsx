@@ -32,7 +32,7 @@
  * Pass `value=""` for an empty field. Empty + parse → `null`.
  */
 import type { ReactElement } from 'react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fromPesos, formatPesos, type Money } from '@cachink/domain';
 import { Input } from '../Input/input';
 
@@ -51,6 +51,10 @@ export interface MoneyFieldProps {
   readonly placeholder?: string;
   /** Small muted help text rendered below the field. */
   readonly note?: string;
+  /** Validation error — red text + red border. Takes precedence over `note`. */
+  readonly error?: string;
+  /** When true, appends a red asterisk to the label. */
+  readonly required?: boolean;
   /** Forwarded to the root View — anchor for E2E tests. */
   readonly testID?: string;
   /** Explicit screen-reader label. Defaults to `label`. */
@@ -105,50 +109,66 @@ function tryParse(cleaned: string): Money | null {
   }
 }
 
-export function MoneyField(props: MoneyFieldProps): ReactElement {
-  const { value, onChange, onValueChange } = props;
-  const [, setVersion] = useState(0);
+/**
+ * Format a canonical value string into a comma-grouped display string.
+ * Returns the raw value unchanged when it cannot be parsed (empty,
+ * intermediate states like `"."` or `"1."`).
+ */
+function formatForDisplay(canonical: string): string {
+  const parsed = tryParse(canonical);
+  if (parsed === null) return canonical;
+  return formatPesos(parsed);
+}
 
+function useMoneyField(props: MoneyFieldProps) {
+  const { value, onChange, onValueChange } = props;
+  const focusedRef = useRef(false);
+  // Display value — includes comma grouping when blurred, raw while typing.
+  const [displayValue, setDisplayValue] = useState(() => formatForDisplay(value));
+  // Sync display value when parent changes value externally (e.g. employee
+  // selection pre-fills salary). Skip while focused — the user is typing.
+  useEffect(() => {
+    if (!focusedRef.current) setDisplayValue(formatForDisplay(value));
+  }, [value]);
   const handleChange = useCallback(
     (raw: string) => {
       const cleaned = clean(raw);
+      setDisplayValue(cleaned);
       onChange(cleaned);
-      if (onValueChange !== undefined) {
-        onValueChange(tryParse(cleaned));
-      }
+      if (onValueChange !== undefined) onValueChange(tryParse(cleaned));
     },
     [onChange, onValueChange],
   );
-
+  const handleFocus = useCallback(() => {
+    focusedRef.current = true;
+    setDisplayValue(value);
+  }, [value]);
   const handleBlur = useCallback(() => {
+    focusedRef.current = false;
     const parsed = tryParse(value);
     if (parsed !== null) {
-      // formatPesos returns '1,234.56' (es-MX grouping). Pump it back
-      // through onChange so the visible string updates. Tests can
-      // observe the formatted result by reading the input's value
-      // post-blur.
       const formatted = formatPesos(parsed);
-      // Strip the grouping commas from the value we keep in state — we
-      // re-format on every blur, but the persisted string stays in the
-      // `1234.56` canonical form so onChange consumers don't have to
-      // parse `1,234.56`.
+      setDisplayValue(formatted);
       onChange(formatted.replace(/,/g, ''));
-      // Force a re-render so the formatted value is reflected even
-      // when the parent forwards the value verbatim.
-      setVersion((v) => v + 1);
     }
-    // Invalid → leave as-is; submit-time validation surfaces the error.
   }, [value, onChange]);
+  return { displayValue, handleChange, handleFocus, handleBlur };
+}
 
+export function MoneyField(props: MoneyFieldProps): ReactElement {
+  const { displayValue, handleChange, handleFocus, handleBlur } = useMoneyField(props);
   return (
     <Input
       type="decimal"
-      value={value}
+      value={displayValue}
       onChange={handleChange}
       onBlur={handleBlur}
+      onFocus={handleFocus}
       label={props.label}
       placeholder={props.placeholder ?? '0.00'}
       note={props.note}
+      error={props.error}
+      required={props.required}
       testID={props.testID}
       ariaLabel={props.ariaLabel ?? props.label}
       returnKeyType={props.returnKeyType}

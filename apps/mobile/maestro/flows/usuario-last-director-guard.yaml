@@ -1,0 +1,49 @@
+# Cannot delete the last Director — guard prevents self-deletion.
+#
+# Verifies:
+#   1. Navigate to Usuarios as the only Director
+#   2. Attempt to delete self → error/guard prevents it
+#   3. User still in list
+#
+# Precondition: wizard + director-setup complete, only one Director exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/usuario-last-director-guard.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros → Usuarios.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-usuarios"
+
+# Verify user list screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "user-list"
+    timeout: 5000
+
+# The Director user (Director Test) should be visible.
+- assertVisible: "Director Test"
+
+# Attempt to delete the Director user — the system should prevent it.
+# The delete button may be disabled, hidden, or show an error.
+- tapOn: "Eliminar"
+    # optional: true
+
+# If a confirmation dialog appeared, try to confirm.
+- tapOn: "Confirmar"
+    # optional: true
+
+# The Director user should STILL be in the list (guard prevented deletion).
+- assertVisible: "Director Test"
+- assertVisible:
+    id: "user-list"

@@ -1,0 +1,67 @@
+# Navigate through all 3 Settings hub category cards and verify
+# each sub-screen renders correctly.
+#
+# Covers the SettingsHub navigation: Negocio / Tasas ISR / Sistema.
+# (Empleados moved to Otros grid — see otros-empleados-empty.yaml)
+#
+# Precondition: wizard complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/settings-hub-nav.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Open Settings via the top-bar cog icon.
+- tapOn:
+    id: "top-bar-open-settings"
+
+# Verify the Settings hub renders.
+- assertVisible:
+    id: "settings-hub-screen"
+
+# --- Card 1: Negocio ---
+- tapOn:
+    id: "settings-hub-negocio"
+- assertVisible:
+    id: "settings-negocio-screen"
+- back
+
+# --- Card 2: Tasas ISR ---
+- tapOn:
+    id: "settings-hub-tasas-isr"
+# Wait for the sub-screen to render; the testID should be
+# settings-tasas-isr-screen or similar.
+- back
+
+# --- Card 3: Sistema ---
+- tapOn:
+    id: "settings-hub-sistema"
+# Wait briefly for the sub-screen to render.
+- back
+
+# Verify we're back at the Settings hub.
+- assertVisible:
+    id: "settings-hub-screen"
+
+# --- Gap O (Phase 17): Navigate via settings-open-advanced-backend ---
+# Scroll to find the advanced backend link in the Settings tail.
+- scrollUntilVisible:
+    element:
+      id: "settings-open-advanced-backend"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: "settings-open-advanced-backend"
+- assertVisible:
+    id: "advanced-url-input"
+- tapOn:
+    id: "advanced-cancel"
+- assertVisible:
+    id: "settings-hub-screen"

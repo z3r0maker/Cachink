@@ -48,6 +48,7 @@ export interface CloudOnboardingScreenProps {
 function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
   const { t } = useTranslation();
   const [state, setState] = useState<OnboardingFormState>(initialOnboardingForm);
+  const [magicLinkPending, setMagicLinkPending] = useState(false);
   const setField = (k: keyof OnboardingFormState, v: string) => setState((s) => ({ ...s, [k]: v }));
 
   async function submit(): Promise<void> {
@@ -70,6 +71,7 @@ function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
 
   async function magicLink(): Promise<void> {
     if (!props.onMagicLink || state.email.length === 0) return;
+    setMagicLinkPending(true);
     setState((s) => ({ ...s, status: 'submitting', errorMsg: null }));
     try {
       await props.onMagicLink(state.email);
@@ -80,9 +82,11 @@ function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
         status: 'error',
         errorMsg: err instanceof Error ? err.message : String(err),
       }));
+    } finally {
+      setMagicLinkPending(false);
     }
   }
-  return { t, state, setField, submit, magicLink };
+  return { t, state, setField, submit, magicLink, magicLinkPending };
 }
 
 function OnboardingCard({
@@ -96,7 +100,7 @@ function OnboardingCard({
   controller: ReturnType<typeof useCloudForm>;
   props: CloudOnboardingScreenProps;
 }): ReactElement {
-  const { state, setField, submit, magicLink } = controller;
+  const { state, setField, submit, magicLink, magicLinkPending } = controller;
   return (
     <Card padding="md" fullWidth>
       <OnboardingForm t={t} tab={tab} state={state} setField={setField} onSubmitEditing={submit} />
@@ -107,6 +111,7 @@ function OnboardingCard({
           onMagicLink={props.onMagicLink}
           onForgotPassword={props.onForgotPassword}
           magicLink={magicLink}
+          magicLinkPending={magicLinkPending}
         />
       )}
     </Card>

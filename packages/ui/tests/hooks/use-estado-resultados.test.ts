@@ -43,7 +43,7 @@ describe('monthsInRange', () => {
 });
 
 describe('collectExpensesInRange + composeEstadoResultados', () => {
-  async function setup(isrTasa = 0.3): Promise<{
+  async function setup(isrTasa = 3000): Promise<{
     sales: InMemorySalesRepository;
     expenses: InMemoryExpensesRepository;
     businesses: InMemoryBusinessesRepository;
@@ -71,7 +71,7 @@ describe('collectExpensesInRange + composeEstadoResultados', () => {
   });
 
   it('threads isrTasa from the business record into the calc', async () => {
-    const { sales, expenses, businesses, businessId } = await setup(0.1);
+    const { sales, expenses, businesses, businessId } = await setup(1000);
     await sales.create(
       makeNewSale({
         fecha: '2026-04-10' as IsoDate,
@@ -90,7 +90,7 @@ describe('collectExpensesInRange + composeEstadoResultados', () => {
   });
 
   it('clamps ISR to 0 on loss periods', async () => {
-    const { sales, expenses, businesses, businessId } = await setup(0.3);
+    const { sales, expenses, businesses, businessId } = await setup(3000);
     await expenses.create(
       makeNewExpense({
         fecha: '2026-04-10' as IsoDate,

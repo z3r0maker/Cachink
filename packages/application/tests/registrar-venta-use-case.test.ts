@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, NewSale, ProductId } from '@cachink/domain';
+import type { BusinessId, ClientId, NewSale, ProductId, UserId } from '@cachink/domain';
+import { CajaNoAbiertaError } from '@cachink/domain';
 import {
+  InMemoryCajaTurnosRepository,
   InMemoryClientsRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
@@ -13,12 +15,14 @@ import {
 import { RegistrarVentaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
+const USER_ID = '01HZ8XQN9GZJXV8AKQ5X0CUSR1' as UserId;
 
 describe('RegistrarVentaUseCase', () => {
   let sales: InMemorySalesRepository;
   let clients: InMemoryClientsRepository;
   let products: InMemoryProductsRepository;
   let movements: InMemoryInventoryMovementsRepository;
+  let cajaTurnos: InMemoryCajaTurnosRepository;
   let useCase: RegistrarVentaUseCase;
   /** A seeded default product — its ID is used in all `makeNewSale()` overrides. */
   let defaultProductId: ProductId;
@@ -28,7 +32,22 @@ describe('RegistrarVentaUseCase', () => {
     clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
     movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
-    useCase = new RegistrarVentaUseCase(sales, clients, products, movements);
+    cajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
+
+    // Seed an open turno so all existing happy-path tests pass
+    await cajaTurnos.create({
+      userId: USER_ID,
+      fecha: '2026-04-23',
+      aperturaAt: '2026-04-23T09:00:00.000Z',
+      montoAperturaCentavos: 500_00n,
+      efectivoAdicionalCentavos: 0n,
+      businessId: BIZ,
+    });
+
+    useCase = new RegistrarVentaUseCase(
+      sales, clients, products, movements, cajaTurnos,
+      { userId: USER_ID },
+    );
 
     // Seed a default product so makeNewSale() fixtures resolve
     const defaultProduct = await products.create(
@@ -88,7 +107,7 @@ describe('RegistrarVentaUseCase', () => {
   it('rejects a sale when the producto does not exist', async () => {
     const input = makeNewSale({
       businessId: BIZ,
-      productoId: '01HZ8XQN9GZJXV8AKQ5XGHOST' as ProductId,
+      productoId: '01HZ8XQN9GZJXV8AKQ5X0GH0ST' as ProductId,
     });
     await expect(useCase.execute(input)).rejects.toThrow(/Producto.*no existe/);
   });
@@ -184,5 +203,91 @@ describe('RegistrarVentaUseCase', () => {
 
     const stock = await movements.sumStock(producto.id);
     expect(stock).toBe(15); // 20 - 5
+  });
+
+  // --- Phase 5: Stock feature flag ---
+
+  it('does NOT create a movement when stockEnabled=false even if product seguirStock=true', async () => {
+    const stockOffUseCase = new RegistrarVentaUseCase(
+      sales, clients, products, movements, cajaTurnos,
+      { stockEnabled: false, userId: USER_ID },
+    );
+    const producto = await products.create(
+      makeNewProduct({ businessId: BIZ, seguirStock: true }),
+    );
+    await movements.create({
+      productoId: producto.id,
+      fecha: '2026-04-23',
+      tipo: 'entrada',
+      cantidad: 10,
+      costoUnitCentavos: 3_500n,
+      motivo: 'Compra a proveedor',
+      businessId: BIZ,
+    });
+
+    await stockOffUseCase.execute(
+      makeNewSale({ businessId: BIZ, productoId: producto.id, cantidad: 3 }),
+    );
+
+    const stock = await movements.sumStock(producto.id);
+    expect(stock).toBe(10); // no salida — stock unchanged
+  });
+
+  // --- Caja gate ---
+
+  describe('Caja gate', () => {
+    it('throws CajaNoAbiertaError when no turno is open', async () => {
+      const freshCajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
+      // No turno seeded
+      const gatedUseCase = new RegistrarVentaUseCase(
+        sales, clients, products, movements, freshCajaTurnos,
+        { userId: USER_ID },
+      );
+      await expect(
+        gatedUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),
+      ).rejects.toThrow(CajaNoAbiertaError);
+    });
+
+    it('stamps cajaTurnoId on the created sale', async () => {
+      const sale = await useCase.execute(
+        makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+      );
+      expect(sale.cajaTurnoId).not.toBeNull();
+      expect(typeof sale.cajaTurnoId).toBe('string');
+    });
+
+    it('throws CajaNoAbiertaError when userId is null', async () => {
+      const noUserUseCase = new RegistrarVentaUseCase(
+        sales, clients, products, movements, cajaTurnos,
+        { userId: null },
+      );
+      await expect(
+        noUserUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),
+      ).rejects.toThrow(CajaNoAbiertaError);
+    });
+
+    it('throws CajaNoAbiertaError when turno is closed', async () => {
+      const freshCajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
+      const turno = await freshCajaTurnos.create({
+        userId: USER_ID,
+        fecha: '2026-04-23',
+        aperturaAt: '2026-04-23T09:00:00.000Z',
+        montoAperturaCentavos: 500_00n,
+        efectivoAdicionalCentavos: 0n,
+        businessId: BIZ,
+      });
+      // Close the turno
+      await freshCajaTurnos.update(turno.id, {
+        cierreAt: '2026-04-23T18:00:00.000Z',
+        montoCierreCentavos: 500_00n,
+      });
+      const closedUseCase = new RegistrarVentaUseCase(
+        sales, clients, products, movements, freshCajaTurnos,
+        { userId: USER_ID },
+      );
+      await expect(
+        closedUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),
+      ).rejects.toThrow(CajaNoAbiertaError);
+    });
   });
 });

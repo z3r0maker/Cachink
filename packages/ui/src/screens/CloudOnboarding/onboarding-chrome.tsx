@@ -94,7 +94,7 @@ export function SubmitRow({
         onPress={submit}
         fullWidth
         testID="cloud-submit"
-        disabled={state.status === 'submitting'}
+        loading={state.status === 'submitting'}
       >
         {label}
       </Btn>
@@ -107,17 +107,26 @@ export function SignInExtras({
   onMagicLink,
   onForgotPassword,
   magicLink,
+  magicLinkPending,
 }: {
   t: T;
   onMagicLink?: (email: string) => Promise<void>;
   onForgotPassword?: () => void;
   magicLink: () => Promise<void>;
+  magicLinkPending?: boolean;
 }): ReactElement {
   return (
     <>
       {onMagicLink && (
         <View marginTop={8}>
-          <Btn variant="ghost" size="sm" onPress={magicLink} fullWidth testID="cloud-magic-link">
+          <Btn
+            variant="ghost"
+            size="sm"
+            onPress={magicLink}
+            loading={magicLinkPending}
+            fullWidth
+            testID="cloud-magic-link"
+          >
             {t('cloudOnboarding.magicLink')}
           </Btn>
         </View>

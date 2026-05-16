@@ -16,11 +16,9 @@ env:
 ---
 - launchApp
 
-# Dismiss first-launch ConsentModal (smoke-launch.yaml covers the
-# full consent flow; other wizard flows just need to get past it).
-- tapOn:
-    id: "consent-modal-later"
-    optional: true
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
 
 - assertVisible: "¡Bienvenido a Cachink!"
 - tapOn: { id: "wizard-step1-solo-card" }

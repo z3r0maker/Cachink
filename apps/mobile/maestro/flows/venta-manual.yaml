@@ -1,0 +1,48 @@
+# Create a venta using the free-text manual form (no product needed).
+#
+# Covers the ManualVentaForm path — type concepto + monto → submit.
+# This is the simplest venta creation path, useful when no products
+# are registered yet.
+#
+# Precondition: wizard complete with at least one product (so the
+# manual form appears alongside the product grid). If no products
+# exist, VentasEmptyProductos shows instead — use empty-ventas.yaml
+# for that path.
+#
+# Chain flows:
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-manual.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab.
+- tapOn:
+    id: "tab-ventas"
+
+# The manual venta form sits above the product grid.
+- assertVisible:
+    id: "manual-venta-form"
+
+# Fill in the concepto field.
+- tapOn:
+    id: "manual-venta-concepto"
+- inputText: "Servicio de limpieza"
+
+# Fill in the monto field (in pesos).
+- tapOn:
+    id: "manual-venta-monto"
+- inputText: "250"
+
+# Submit the manual venta.
+- tapOn:
+    id: "manual-venta-submit"
+
+# The new sale appears in the sales list below.
+- assertVisible: "Servicio de limpieza"

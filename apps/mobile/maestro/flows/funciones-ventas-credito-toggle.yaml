@@ -1,0 +1,85 @@
+# Feature flag: ventasCredito toggle affects UX (Crédito payment method).
+#
+# Verifies:
+#   1. Toggle ventasCredito ON → Crédito appears as a payment method on Ventas
+#   2. Toggle ventasCredito OFF → Crédito no longer available
+#
+# Precondition: wizard + director-setup complete, at least one product
+# and one client exist.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-ventas-credito-toggle.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# --- Step 1: Enable ventasCredito ---
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-ventasCredito-switch"
+
+# Verify Director Otros shows the CxC link.
+- tapOn:
+    id: "tab-otros"
+- assertVisible:
+    id: "otros-ventas-credito"
+
+# --- Step 2: Switch to Operativo → make a venta → Crédito available ---
+- tapOn:
+    id: "tab-ventas"
+
+# Tap the product to open VentaConfirmSheet.
+- tapOn: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "venta-confirm-sheet"
+    timeout: 5000
+
+# Open the payment method picker — Crédito should be present.
+- tapOn:
+    id: "venta-confirm-metodo"
+- assertVisible: "Crédito"
+
+# Close the sheet without submitting.
+- back
+
+# --- Step 3: Disable ventasCredito → Crédito should vanish ---
+- tapOn:
+    id: "top-bar-role-chip"
+- tapOn:
+    id: "role-director-select"
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-ventasCredito-switch"
+
+# Verify Director Otros no longer shows CxC link.
+- tapOn:
+    id: "tab-otros"
+- assertNotVisible:
+    id: "otros-ventas-credito"
+
+# Switch to Operativo → Ventas → confirm Crédito is gone.
+- tapOn:
+    id: "tab-ventas"
+- tapOn: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "venta-confirm-sheet"
+    timeout: 5000
+- tapOn:
+    id: "venta-confirm-metodo"
+- assertNotVisible: "Crédito"

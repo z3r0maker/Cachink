@@ -33,7 +33,6 @@
  */
 import type { CSSProperties, ReactElement, RefObject } from 'react';
 import { Text } from '@tamagui/core';
-import { Input as TamaguiInput } from '@tamagui/input';
 import { colors, radii, typography } from '../../theme';
 
 /**
@@ -210,14 +209,18 @@ export interface FieldProps {
   readonly inputRef?: RefObject<unknown>;
   /** Fires on focus loss — used by `<MoneyField>` to format on blur. */
   readonly onBlur?: () => void;
+  /** Fires on focus gain — used by `<MoneyField>` to switch to raw mode. */
+  readonly onFocus?: () => void;
   /**
    * Override the default left padding (14). Used by `<SearchBar>` to
    * clear the leading search icon.
    */
   readonly paddingLeft?: number;
+  /** Override the default border color (e.g. red for error state). */
+  readonly borderColor?: string;
 }
 
-export function InputLabel({ text }: { text: string }): ReactElement {
+export function InputLabel({ text, required }: { text: string; required?: boolean }): ReactElement {
   return (
     <Text
       color={colors.gray600}
@@ -229,6 +232,7 @@ export function InputLabel({ text }: { text: string }): ReactElement {
       style={{ textTransform: 'uppercase' }}
     >
       {text}
+      {required === true && <Text color={colors.red}> *</Text>}
     </Text>
   );
 }
@@ -247,60 +251,20 @@ export function InputNote({ text }: { text: string }): ReactElement {
   );
 }
 
-/**
- * Brand visual styling tokens for the underlying TamaguiInput. Frozen
- * `as const` so a new field variant can spread them verbatim instead
- * of duplicating the §8 brand values inline.
- */
-const FIELD_VISUAL = {
-  borderColor: colors.black,
-  borderWidth: 2,
-  focusStyle: { borderWidth: 2.5, borderColor: colors.black },
-  borderRadius: FIELD_RADIUS,
-  paddingHorizontal: 14,
-  paddingVertical: 11,
-  fontSize: 15,
-  fontWeight: typography.weights.medium,
-  color: colors.ink,
-  backgroundColor: colors.white,
-  fontFamily: typography.fontFamily,
-  style: { outlineWidth: 0, boxShadow: 'none', borderStyle: 'solid' as const },
-} as const;
-
-/**
- * Tamagui cross-platform `<Input>` for every text-style variant
- * (text / number / date / email / phone / password / decimal). The
- * `select` branch is handled separately at the wrapper layer because it
- * delegates to `<Combobox>` instead of an HTML/RN input.
- *
- * The `data-input-type` attribute exposes the resolved variant to the
- * DOM so tests can assert the right keyboard hint flowed through
- * without coupling to RN-only props that Tamagui may not serialize.
- */
-export function TextField(props: FieldProps): ReactElement {
-  const hints = keyboardHintsFor(props.type);
-  const resolvedAutoComplete = props.autoComplete ?? hints.autoComplete;
+/** Red validation error text rendered below a field. Takes precedence over `InputNote`. */
+export function InputError({ text }: { text: string }): ReactElement {
   return (
-    <TamaguiInput
-      value={props.value}
-      onChangeText={props.onChange}
-      placeholder={props.placeholder}
-      aria-label={props.ariaLabel}
-      type={hints.htmlType}
-      keyboardType={hints.keyboardType}
-      secureTextEntry={hints.secureTextEntry}
-      autoCapitalize={hints.autoCapitalize}
-      autoCorrect={hints.autoCorrect}
-      autoComplete={resolvedAutoComplete}
-      returnKeyType={props.returnKeyType}
-      onSubmitEditing={props.onSubmitEditing}
-      blurOnSubmit={props.blurOnSubmit}
-      onBlur={props.onBlur}
-      inputMode={hints.inputMode}
-      data-input-type={props.type}
-      placeholderTextColor="$gray400"
-      {...FIELD_VISUAL}
-      {...(props.paddingLeft !== undefined ? { paddingLeft: props.paddingLeft } : {})}
-    />
+    <Text
+      color={colors.red}
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.bold}
+      fontSize={11}
+      marginTop={NOTE_MARGIN_TOP}
+    >
+      {text}
+    </Text>
   );
 }
+
+/** Re-exported for backward-compat — implementation lives in shared-text-field.tsx. */
+export { TextField } from './shared-text-field';

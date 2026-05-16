@@ -67,10 +67,19 @@ interface RowBodyProps {
   readonly amountColor: string;
 }
 
-function RowCenter({ titulo, tag, kind }: Pick<RowBodyProps, 'titulo' | 'tag' | 'kind'>): ReactElement {
+function RowCenter({
+  titulo,
+  tag,
+  kind,
+}: Pick<RowBodyProps, 'titulo' | 'tag' | 'kind'>): ReactElement {
   return (
     <View flex={1}>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.black}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={14}
+        color={colors.black}
+      >
         {titulo}
       </Text>
       <View flexDirection="row" gap={6} marginTop={4}>
@@ -85,7 +94,12 @@ function RowBody(props: RowBodyProps): ReactElement {
     <View flexDirection="row" alignItems="center" gap={12}>
       <EntryCircle kind={props.kind} />
       <RowCenter titulo={props.titulo} tag={props.tag} kind={props.kind} />
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={16} color={props.amountColor}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black}
+        fontSize={16}
+        color={props.amountColor}
+      >
         {props.amountText}
       </Text>
     </View>
@@ -146,6 +160,7 @@ export function ActividadReciente(props: ActividadRecienteProps): ReactElement {
           />
         )}
         ListEmptyComponent={<EmptyState icon="info" title={t('directorHome.actividadEmpty')} />}
+        scrollEnabled={false}
         testID="actividad-reciente-list"
       />
     </View>

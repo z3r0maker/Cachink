@@ -1,0 +1,147 @@
+# iPad form-factor audit — walk every responsive surface and assert
+# that testIDs used by the iPhone flow library remain accessible on
+# the iPad $gtMd breakpoint.
+#
+# PURPOSE: Tamagui responsive breakpoints ($gtMd = min-width 768 px)
+# can reflow or hide controls when the app runs on iPad. This flow
+# acts as a tripwire: if any testID that drives an iPhone flow
+# becomes inaccessible on iPad (hidden behind a breakpoint, moved
+# to a different layout slot, or simply clipped), this flow fails
+# fast so we know before running the full 130-flow regression.
+#
+# What it audits (in dependency order):
+#   1. POS product grid (ventas) — 3-column on iPad vs 2-column iPhone
+#   2. VentaConfirmSheet — sheet vs centered modal on iPad
+#   3. NuevoEgreso modal — concepto + monto fields
+#   4. NuevoProducto modal — all creation fields
+#   5. Director Home KPI strip — assert no KPIs are scrolled off-screen
+#   6. CxC card visibility
+#   7. Settings hub nav items
+#
+# Precondition: wizard complete + inventario-producto run (creates
+# "Tortilla") + at least one venta exists.
+# Full setup chain:
+#
+#   ./apps/mobile/maestro/scripts/run-ipad.sh --install-only
+#   MAESTRO_DEVICE_UDID=<ipad-udid> maestro test \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   MAESTRO_DEVICE_UDID=<ipad-udid> maestro test \
+#       apps/mobile/maestro/flows/inventario-producto.yaml
+#   MAESTRO_DEVICE_UDID=<ipad-udid> maestro test \
+#       apps/mobile/maestro/flows/ipad-form-factor-audit.yaml
+#
+# iPhone counterparts: venta-efectivo.yaml, egreso-gasto.yaml,
+#   producto-full-form.yaml, director-home.yaml, settings-hub-nav.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# ── 1. POS product grid ──────────────────────────────────────────
+# On iPhone the grid renders 2 columns. On iPad ($gtMd) it renders
+# 3 columns. The testID on the container must still be present.
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 8000
+
+# Assert the "Tortilla" card from the precondition flow is visible.
+- assertVisible: "Tortilla"
+
+# ── 2. VentaConfirmSheet ─────────────────────────────────────────
+# On iPhone this renders as a bottom sheet. On iPad, React Native
+# renders it as a centered popover/modal. The testID must still be
+# in the accessibility tree regardless of position.
+- tapOn: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "venta-confirm-sheet"
+    timeout: 6000
+
+# Assert all interactive controls inside the sheet are reachable.
+- assertVisible:
+    id: "venta-confirm-submit"
+
+# Dismiss without saving.
+- back
+
+# ── 3. NuevoEgreso modal ─────────────────────────────────────────
+- tapOn:
+    id: "tab-gastos"
+- tapOn:
+    id: "egresos-nuevo"
+- extendedWaitUntil:
+    visible:
+      id: "gasto-concepto"
+    timeout: 6000
+- assertVisible:
+    id: "gasto-monto"
+- assertVisible:
+    id: "gasto-submit"
+
+# Dismiss without saving.
+- back
+
+# ── 4. NuevoProducto modal ───────────────────────────────────────
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    id: "stock-nuevo-producto"
+- extendedWaitUntil:
+    visible:
+      id: "producto-nombre"
+    timeout: 6000
+- assertVisible:
+    id: "producto-costo"
+- assertVisible:
+    id: "producto-precio-venta"
+- assertVisible:
+    id: "producto-umbral"
+- assertVisible:
+    id: "producto-submit"
+
+# Dismiss without saving.
+- back
+
+# ── 5. Director Home KPI strip ───────────────────────────────────
+# On iPhone the strip is horizontally scrollable and KPIs may be
+# off-screen. On iPad ($gtMd) all KPIs should be visible without
+# scrolling. Assert each KPI testID is directly visible.
+- tapOn:
+    id: "top-bar-role-chip"
+    optional: true
+- tapOn:
+    id: "role-director-select"
+    optional: true
+
+- assertVisible:
+    id: "director-home-route"
+- assertVisible:
+    id: "hoy-kpi-strip"
+- assertVisible:
+    id: "hoy-kpi-ventas"
+- assertVisible:
+    id: "hoy-kpi-egresos"
+- assertVisible:
+    id: "utilidad-hero"
+
+# ── 6. CxC card ──────────────────────────────────────────────────
+# CxC card is a Director-only card that must be in the layout tree
+# on iPad. Verify it isn't clipped by the $gtMd grid reflow.
+- assertVisible:
+    id: "cxc-card"
+
+# ── 7. Settings hub nav items ────────────────────────────────────
+# On iPad, settings may render inline or as a split-view. Assert
+# the hub container and its nav items are in the tree.
+- tapOn:
+    id: "tab-otros"
+- assertVisible:
+    id: "otros-screen"
+- tapOn:
+    id: "tab-otros"
+    optional: true

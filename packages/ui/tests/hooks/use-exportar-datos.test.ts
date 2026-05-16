@@ -49,7 +49,7 @@ async function setup(): Promise<{
   const biz = await businesses.create({
     nombre: 'Test',
     regimenFiscal: 'RESICO',
-    isrTasa: 0.3,
+    isrTasa: 3000,
   });
   const useCase = new ExportarDatosUseCase({
     businesses,

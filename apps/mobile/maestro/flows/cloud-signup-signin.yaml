@@ -18,8 +18,13 @@ env:
 ---
 - launchApp
 
-# Reach the wizard, select Cloud mode (ADR-039 four-screen flow).
-- tapOn: { id: "tab-ajustes" }
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Reach the wizard via Settings → Sistema → Re-run.
+- tapOn: { id: "top-bar-open-settings" }
+- tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }
 # Step 1 → "En varios dispositivos" → Step 2B → "La nube guarda los datos".
@@ -37,12 +42,13 @@ env:
 - inputText: "Tortillería Maestro"
 - tapOn: { id: "cloud-submit" }
 
-# Once signed in, the GatedNavigation routes to RolePicker.
-- assertVisible: { id: "role-picker" }
-- tapOn: { id: "role-director-select" }
+# Fresh cloud signup → no users → DirectorSetup gate fires.
+- runFlow: shared/director-setup.yaml
 
 # Create a product first — fresh cloud signup has an empty catalogue.
-- tapOn: { id: "tab-productos" }
+# Director accesses Productos via Otros grid.
+- tapOn: { id: "tab-otros" }
+- tapOn: { id: "otros-productos" }
 - tapOn: { id: "stock-nuevo-producto" }
 - tapOn: { id: "producto-nombre" }
 - inputText: "Taco al pastor"

@@ -1,0 +1,171 @@
+{
+  "meta": {
+    "round": 2,
+    "audit_date": "2026-05-16",
+    "scope": "Code-level behavioral analysis: query patterns, transaction safety, sync correctness, computation patterns",
+    "database_path": "~/Library/Application Support/mx.cachink.desktop/cachink.db",
+    "note": "Round 2 examines actual repository code, not just DDL schema. New findings only — Round 1 findings not repeated."
+  },
+  "new_findings": [
+    {
+      "id": "SYNC-FK-PRAGMA-NOOP",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "sync-correctness",
+      "title": "PRAGMA foreign_keys toggle inside transaction is a no-op (sync pull-loop bug)",
+      "description": "The LAN sync pull-loop (packages/sync-lan/src/client/pull-loop.ts:99-113) executes BEGIN IMMEDIATE, then PRAGMA foreign_keys = OFF, upserts, PRAGMA foreign_keys = ON, COMMIT. SQLite documentation states: 'It is not possible to enable or disable foreign keys in the middle of a multi-statement transaction.' Empirically confirmed: FK value remains unchanged inside the transaction. Currently masked because PRAGMA foreign_keys is 0 globally. When FK enforcement IS enabled (per Round 1 recommendation), the pull-loop will FAIL with FK violations because it CANNOT actually disable FK checks inside its transaction. The entire LAN sync ingest path is fundamentally broken for FK-aware databases.",
+      "affected_objects": [
+        "packages/sync-lan/src/client/pull-loop.ts:99-113 — applyDeltas()",
+        "BEGIN IMMEDIATE → PRAGMA foreign_keys = OFF → upserts → PRAGMA foreign_keys = ON → COMMIT"
+      ],
+      "recommendation": "Restructure the pull-loop: set PRAGMA foreign_keys = OFF BEFORE BEGIN, run the transaction, then set PRAGMA foreign_keys = ON AFTER COMMIT. Or use deferred FK constraints via PRAGMA defer_foreign_keys = ON (which CAN be toggled inside a transaction since SQLite 3.8.0).",
+      "interaction_with_round1": "Enabling PRAGMA foreign_keys (Round 1 fix #3) WITHOUT fixing this will break LAN sync. These two fixes MUST be done together."
+    },
+    {
+      "id": "SYNC-MONEY-COLUMNS-INCOMPLETE",
+      "severity": "high",
+      "confidence": "high",
+      "category": "sync-correctness",
+      "title": "MONEY_COLUMNS map missing newer centavos columns — sync will corrupt money values",
+      "description": "The LAN sync codec (packages/sync-lan/src/protocol/constants.ts:59-70) defines a MONEY_COLUMNS map used to coerce bigint↔string during encode/decode. The map only includes the original money columns from migration 0000. Columns added in later migrations are MISSING: sales.efectivo_recibido_centavos (migration 0007+), products.precio_venta_centavos (migration 0002+). When these columns are synced, the bigint values will be serialized/deserialized as plain numbers instead of being coerced through the bigint pathway, potentially losing precision or causing type mismatches.",
+      "affected_objects": [
+        "sales.efectivo_recibido_centavos — NOT in MONEY_COLUMNS.sales",
+        "products.precio_venta_centavos — NOT in MONEY_COLUMNS.products"
+      ],
+      "recommendation": "Add 'efectivo_recibido_centavos' to MONEY_COLUMNS.sales and 'precio_venta_centavos' to MONEY_COLUMNS.products. Audit all future money column additions to ensure MONEY_COLUMNS stays in sync."
+    },
+    {
+      "id": "NO-TRANSACTION-MULTI-TABLE-WRITE",
+      "severity": "high",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "Multi-table writes without transactions — inventory movement + expense can diverge",
+      "description": "RegistrarMovimientoInventarioUseCase (packages/application/src/registrar-movimiento-inventario/) creates an inventory_movement AND an expense in two separate await calls with no transaction wrapper. If the second write (expense.create) fails (disk full, WAL overflow, JS exception), the movement exists but the expense doesn't — inventory and financial data permanently diverge. The code explicitly acknowledges this: 'not inside a transaction (the InMemory and Drizzle backends have different tx surfaces)'. This is a known design debt, not an oversight.",
+      "affected_objects": [
+        "RegistrarMovimientoInventarioUseCase.execute() — movements.create() then expenses.create()",
+        "Any future use case that writes to 2+ tables in sequence"
+      ],
+      "recommendation": "Expose a transaction API on CachinkDatabase (e.g., db.transaction(fn)) that works on both InMemory and Drizzle backends. Wrap the two writes. The risk is proportional to transaction frequency — for a small business this is low but for a busy taquería it could happen once in thousands of writes."
+    },
+    {
+      "id": "COUNT-FETCHES-ALL-ROWS",
+      "severity": "high",
+      "confidence": "high",
+      "category": "performance",
+      "title": "count() methods fetch all rows into memory instead of using SQL COUNT(*)",
+      "description": "Four repositories implement count() by selecting all row IDs into a JavaScript array and returning .length: sales.count(), products.count(), clients.count(), users.count(). Each call transfers N ULID strings (26 bytes each) from SQLite to JS, creates N objects, then discards them. With 1000 sales this means ~26KB of wasted data transfer and object allocation. Should use SQL COUNT(*) which returns a single integer row.",
+      "affected_objects": [
+        "DrizzleSalesRepository.count() — SELECT id FROM sales WHERE ... .all() → rows.length",
+        "DrizzleProductsRepository.count() — same pattern",
+        "DrizzleClientsRepository.count() — same pattern",
+        "DrizzleUsersRepository.count() — same pattern"
+      ],
+      "recommendation": "Replace with: db.select({ count: sql<number>`count(*)` }).from(table).where(...).get(). Single row, no object array."
+    },
+    {
+      "id": "SUMSTOCK-FETCHES-ALL-MOVEMENTS",
+      "severity": "high",
+      "confidence": "high",
+      "category": "performance",
+      "title": "sumStock() fetches ALL movements into JS and sums in a loop — should be SQL aggregate",
+      "description": "DrizzleInventoryMovementsRepository.sumStock(productoId) calls findByProduct(productoId) which fetches every movement row for that product, maps them to domain objects, then loops over them in JavaScript to compute the stock sum. For a product with 500 movements, this transfers ~500 full rows just to compute one number. The SQL engine can do this in a single pass: SELECT SUM(CASE WHEN tipo='entrada' THEN cantidad ELSE -cantidad END) FROM inventory_movements WHERE producto_id = ? AND deleted_at IS NULL.",
+      "affected_objects": [
+        "DrizzleInventoryMovementsRepository.sumStock() — line 106-113"
+      ],
+      "recommendation": "Replace with a SQL aggregate query. This is called on every product detail screen and every stock-low notification check — it's a hot path."
+    },
+    {
+      "id": "SUMBYVENTA-FETCHES-ALL-PAYMENTS",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "performance",
+      "title": "sumByVenta() fetches all payment rows and sums in JavaScript",
+      "description": "DrizzleClientPaymentsRepository.sumByVenta(ventaId) calls findByVenta() to fetch all payment rows, then uses domain sum() on the array. Should be SELECT SUM(monto_centavos) FROM client_payments WHERE venta_id = ? AND deleted_at IS NULL.",
+      "affected_objects": [
+        "DrizzleClientPaymentsRepository.sumByVenta() — line 76-79"
+      ],
+      "recommendation": "Replace with SQL SUM aggregate. Lower priority than sumStock() since credit payments are less frequent."
+    },
+    {
+      "id": "LIKE-PATTERN-FOR-MONTH-QUERY",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "performance",
+      "title": "findByMonth() uses LIKE pattern on fecha instead of BETWEEN range",
+      "description": "DrizzleExpensesRepository.findByMonth('2026-05', businessId) generates WHERE fecha LIKE '2026-05-%'. While LIKE with a leading literal CAN use an index if the column has one, BETWEEN '2026-05-01' AND '2026-05-31' is more explicit and guaranteed to use a range scan. Currently moot since no index exists on fecha, but when indexes are added (Round 1 fix #1), the LIKE pattern will be suboptimal.",
+      "affected_objects": [
+        "DrizzleExpensesRepository.findByMonth() — line 100-113"
+      ],
+      "recommendation": "Replace LIKE with: gte(expenses.fecha, `${yearMonth}-01`), lte(expenses.fecha, `${yearMonth}-31`). Works for all months because ISO-8601 text sorts lexicographically."
+    },
+    {
+      "id": "UPDATE-THEN-REREAD",
+      "severity": "low",
+      "confidence": "high",
+      "category": "performance",
+      "title": "Update-then-re-SELECT pattern uses 2 round-trips where RETURNING could use 1",
+      "description": "Multiple repositories (sales, expenses, products, employees, businesses, caja-turnos) perform UPDATE ... SET ... WHERE id = ? then immediately SELECT ... WHERE id = ? as two separate queries. SQLite 3.35+ supports the RETURNING clause, and the live DB runs 3.51.0. Drizzle ORM supports .returning() on update statements. This is 2 DB round-trips where 1 suffices. Low severity because it's always on single-row PK lookups, so the overhead is microseconds per call.",
+      "affected_objects": [
+        "DrizzleSalesRepository.update() — update then findById",
+        "DrizzleExpensesRepository.update() — update then findById",
+        "DrizzleProductsRepository.update() — update then findById",
+        "DrizzleEmployeesRepository.update() — update then findById",
+        "DrizzleBusinessesRepository.update() — update then select",
+        "DrizzleCajaTurnosRepository.update() — update then select"
+      ],
+      "recommendation": "Use .returning() on update statements. Low priority — micro-optimization."
+    },
+    {
+      "id": "ISR-CALCULATION-RESILIENT",
+      "severity": "info",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "ISR calculation already converts REAL rate to integer basis points at compute time — mitigates Round 1 finding",
+      "description": "Round 1 flagged isr_tasa as REAL (0.3) with risk of precision errors. Round 2 code review reveals that calculateIsr() in estado-resultados.ts does: const basisPoints = BigInt(Math.round(isrTasa * 10_000)); return (utilidadOperativa * basisPoints) / 10_000n. The Math.round() call eliminates IEEE 754 rounding errors for typical rates (0.3 * 10000 = 3000.0000000000004 → 3000). The ISR calculation itself is safe. However, the Zod schema still defines isrTasa as z.number().min(0).max(1) and the DB stores it as REAL — the convention violation remains even if the computation is resilient."
+    }
+  ],
+  "round1_finding_updates": [
+    {
+      "id": "FK-DISABLED-GLOBALLY",
+      "round1_severity": "critical",
+      "updated_note": "IMPORTANT: Enabling FK (Round 1 recommendation) MUST be paired with fixing the sync pull-loop PRAGMA bug (new finding SYNC-FK-PRAGMA-NOOP). Otherwise LAN sync will break."
+    },
+    {
+      "id": "SYNC-TRIGGER-GAP",
+      "round1_severity": "high",
+      "round1_confidence": "medium",
+      "updated_confidence": "high",
+      "updated_note": "Confirmed: SYNCED_TABLES constant explicitly lists exactly 10 tables. The 9 newer tables (users, caja_turnos, caja_movimientos, conversions, conversion_recetas, auditorias_inventario, entregas_credito, director_alerts, cancelacion_logs) are excluded from both the sync table allowlist AND the trigger set. If any of these tables should sync across devices, BOTH the trigger AND the SYNCED_TABLES constant must be updated."
+    },
+    {
+      "id": "ISR-TASA-REAL",
+      "round1_severity": "high",
+      "updated_severity": "medium",
+      "updated_note": "Downgraded from high to medium. The calculateIsr() function uses Math.round(isrTasa * 10000) to convert to basis points, eliminating IEEE 754 rounding for typical rates. The convention violation remains (should be INTEGER in DB) but the computation path is safe. The fix is still worthwhile for consistency but is no longer an accuracy emergency."
+    },
+    {
+      "id": "NO-ENTITY-INDEXES",
+      "round1_severity": "critical",
+      "updated_note": "Code review confirms exact query patterns that need indexes. Priority index set based on actual WHERE/ORDER BY clauses: (1) sales(business_id, fecha) — used by findByDate, findByDateRange, findFrequentProductoIds, count. (2) sales(cliente_id) — used by findPendingByClient (Cuentas por Cobrar dashboard). (3) expenses(business_id, fecha) — used by findByDate, findByDateRange, findByMonth. (4) expenses(gasto_recurrente_id, fecha) — used by findByGastoRecurrenteAndDate. (5) inventory_movements(producto_id) — used by findByProduct and sumStock (hot path). (6) client_payments(venta_id) — used by findByVenta and sumByVenta."
+    }
+  ],
+  "summary": {
+    "new_findings": 9,
+    "by_severity": {
+      "critical": 1,
+      "high": 4,
+      "medium": 2,
+      "low": 1,
+      "info": 1
+    },
+    "round1_updates": 4,
+    "combined_total": 25,
+    "combined_by_severity": {
+      "critical": 4,
+      "high": 7,
+      "medium": 6,
+      "low": 4,
+      "info": 3
+    }
+  }
+}

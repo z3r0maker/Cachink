@@ -2,11 +2,12 @@
  * Drizzle-backed {@link ClientPaymentsRepository}.
  */
 
-import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   ClientPaymentId,
   DeviceId,
+  UserId,
   IsoDate,
   IsoTimestamp,
   Money,
@@ -14,7 +15,7 @@ import type {
   PaymentMethod,
   SaleId,
 } from '@cachink/domain';
-import { ZERO, newEntityId, now, sum } from '@cachink/domain';
+import { newEntityId, now } from '@cachink/domain';
 import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
 import { clientPayments } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
@@ -24,10 +25,12 @@ type PaymentRow = typeof clientPayments.$inferSelect;
 export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewClientPayment): Promise<ClientPayment> {
@@ -42,6 +45,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
       nota: input.nota ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -70,8 +74,12 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
   }
 
   async sumByVenta(ventaId: SaleId): Promise<Money> {
-    const rows = await this.findByVenta(ventaId);
-    return rows.length === 0 ? ZERO : sum(rows.map((r) => r.montoCentavos));
+    const result = await this.#db
+      .select({ total: sql<bigint>`coalesce(sum(${clientPayments.montoCentavos}), 0)` })
+      .from(clientPayments)
+      .where(and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)))
+      .get();
+    return BigInt(result?.total ?? 0) as Money;
   }
 
   async findByDateRange(
@@ -114,6 +122,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
       nota: row.nota,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

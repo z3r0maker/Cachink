@@ -57,3 +57,25 @@ export function formatMonth(yearMonth: string): string {
   }
   return MONTH.format(new Date(`${yearMonth}-01T12:00:00Z`));
 }
+
+const SLASH_PARTS = new Intl.DateTimeFormat(LOCALE, {
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+});
+
+/** "01/MAY/2026" — compact slash-separated form with uppercase 3-letter month. */
+export function formatDateSlash(date: IsoDate): string {
+  const parts = SLASH_PARTS.formatToParts(asNoonUtc(date));
+  const day = parts.find((p) => p.type === 'day')?.value ?? '??';
+  const month = (parts.find((p) => p.type === 'month')?.value ?? '???')
+    .replace('.', '')
+    .toUpperCase();
+  const year = parts.find((p) => p.type === 'year')?.value ?? '????';
+  return `${day}/${month}/${year}`;
+}
+
+/** "01/MAY/2026 - 31/MAY/2026" — human-readable periodo range label. */
+export function formatPeriodoLabel(from: IsoDate, to: IsoDate): string {
+  return `${formatDateSlash(from)} - ${formatDateSlash(to)}`;
+}

@@ -79,7 +79,8 @@ export function decodeDelta(raw: unknown): Delta & { decodedRow: Record<string, 
   return { ...parsed, decodedRow };
 }
 
-function encodeMoneyValue(key: string, value: unknown): string {
+function encodeMoneyValue(key: string, value: unknown): string | null {
+  if (value === null) return null;
   if (typeof value === 'bigint') return value.toString(10);
   if (typeof value === 'string' && /^-?\d+$/.test(value)) return value;
   if (typeof value === 'number' && Number.isSafeInteger(value)) return String(value);

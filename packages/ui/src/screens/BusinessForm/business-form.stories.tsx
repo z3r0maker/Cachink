@@ -31,14 +31,14 @@ export const Empty: Story = {};
 /** Pre-filled — what the screenshot showed: typical "Taquería Don Pedro" defaults. */
 export const Prefilled: Story = {
   args: {
-    defaults: { nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 0.3 },
+    defaults: { nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 3000 },
   },
 };
 
 /** Submitting state — disabled button, opacity 0.5. */
 export const Submitting: Story = {
   args: {
-    defaults: { nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 0.3 },
+    defaults: { nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 3000 },
     submitting: true,
   },
 };

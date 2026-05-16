@@ -9,6 +9,7 @@
 
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   DeviceId,
   IsoTimestamp,
@@ -33,6 +34,7 @@ export class InMemorySalesRepository implements SalesRepository {
     const sale: Sale = {
       id,
       fecha: input.fecha,
+      hora: input.hora ?? null,
       concepto: input.concepto,
       categoria: input.categoria,
       monto: input.monto,
@@ -41,8 +43,14 @@ export class InMemorySalesRepository implements SalesRepository {
       estadoPago,
       productoId: input.productoId as ProductId,
       cantidad: input.cantidad ?? 1,
+      efectivoRecibidoCentavos: input.efectivoRecibidoCentavos ?? null,
+      cancelledByUserId: null,
+      cancelMotivo: null,
+      cancelledAt: null,
+      cajaTurnoId: (input.cajaTurnoId ?? null) as CajaTurnoId | null,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: timestamp,
       updatedAt: timestamp,
       deletedAt: null,

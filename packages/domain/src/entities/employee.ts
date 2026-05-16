@@ -34,3 +34,16 @@ export const NewEmployeeSchema = z.object({
 });
 
 export type NewEmployee = z.infer<typeof NewEmployeeSchema>;
+
+/**
+ * UpdateEmployee — partial payload for editing an existing employee.
+ * All fields are optional; only the provided fields are updated.
+ */
+export const UpdateEmployeeSchema = z.object({
+  nombre: z.string().min(1).max(120).optional(),
+  puesto: z.string().min(1).max(80).optional(),
+  salarioCentavos: moneyField.optional(),
+  periodo: PayrollFrequencyEnum.optional(),
+});
+
+export type UpdateEmployee = z.infer<typeof UpdateEmployeeSchema>;

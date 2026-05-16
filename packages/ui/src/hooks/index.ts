@@ -20,10 +20,12 @@ export * from './use-registrar-egreso';
 export * from './use-empleados-for-business';
 export * from './use-crear-empleado';
 export * from './use-productos';
+export * from './use-productos-para-venta';
 export * from './use-registrar-movimiento';
 export * from './use-crear-gasto-recurrente';
 export * from './use-pendientes-gastos-recurrentes';
 export * from './use-procesar-gasto-recurrente';
+export * from './use-descartar-gasto-recurrente';
 export * from './use-eliminar-egreso';
 export * from './use-productos-con-stock';
 export * from './use-inventario-kpis';
@@ -43,6 +45,7 @@ export * from './use-corte-gate';
 export * from './use-efectivo-esperado';
 export * from './use-cerrar-corte-de-dia';
 export * from './use-corte-del-dia';
+export * from './use-corte-historial';
 export * from './use-periodo-range';
 export * from './use-estado-resultados';
 export * from './use-balance-general';
@@ -58,3 +61,50 @@ export * from './use-check-for-updates';
 export * from './use-lan-sync';
 export * from './use-lan-auth';
 export * from './use-frequent-productos';
+export * from './use-isr-defaults';
+export * from './use-editar-business';
+export * from './use-egresos-por-categoria';
+export * from './use-indicadores-trend';
+export * from './use-edit-empleado';
+export * from './use-eliminar-empleado';
+// Phase 1 — User Management + Auth
+export * from './use-auto-lock';
+// Phase 3 — Feature Flags
+export * from './use-feature-flags';
+export * from './use-toggle-feature-flag';
+// Phase 1 — User Management hooks
+export * from './use-crear-usuario';
+export * from './use-eliminar-usuario';
+// Phase 6 — Caja
+export * from './use-abrir-caja';
+export * from './use-cerrar-caja';
+export * from './use-open-caja-turno';
+// Phase 18 — Conversion
+export * from './use-conversion-recetas';
+export * from './use-crear-conversion-receta';
+export * from './use-eliminar-conversion-receta';
+export * from './use-conversiones';
+export * from './use-ejecutar-conversion';
+// Shared period labels hook
+export * from './use-period-labels';
+// Feature-flagged report screens
+export * from './use-merma-reportes';
+export * from './use-caja-historial';
+export * from './use-ventas-credito';
+export * from './use-auditorias-inventario';
+export * from './use-crear-auditoria';
+export * from './use-actualizar-auditoria';
+export * from './use-cachink-sound';
+export * from './use-enabled-payment-methods';
+// Tap-to-Cart POS redesign
+export * from './use-cart';
+// Caja Completa — Checkout flow
+export * from './use-checkout-store';
+// Caja Completa — Cancelaciones
+export * from './use-require-pin';
+// Shared derived-state hooks
+export * from './use-stock-map';
+// Product form state (zustand — persists across icon picker navigation)
+export * from './use-product-form-store';
+// Health thresholds (customizable from Settings)
+export * from './use-health-thresholds';

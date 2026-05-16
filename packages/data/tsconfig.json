@@ -1,8 +1,8 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "../config/tsconfig.lib.json",
-  "compilerOptions": { "outDir": "dist", "rootDir": "src" },
-  "include": ["src/**/*.ts"],
-  "exclude": ["node_modules", "dist", "tests"],
+  "compilerOptions": { "outDir": "dist", "rootDir": "." },
+  "include": ["src/**/*.ts", "drizzle/**/*.ts", "drizzle/**/meta/*.json"],
+  "exclude": ["node_modules", "dist", "tests", "scripts"],
   "references": [{ "path": "../domain" }]
 }

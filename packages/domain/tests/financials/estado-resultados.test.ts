@@ -10,6 +10,7 @@ import { calculateEstadoDeResultados } from '../../src/financials/index.js';
 const AUDIT = {
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
+  createdByUserId: null,
   createdAt: '2026-04-23T12:00:00.000Z',
   updatedAt: '2026-04-23T12:00:00.000Z',
   deletedAt: null,
@@ -46,11 +47,12 @@ function makeExpense(overrides: Partial<Expense> = {}): Expense {
 
 describe('calculateEstadoDeResultados', () => {
   it('returns all zeros on empty inputs', () => {
-    const result = calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 3000 });
     expect(result).toEqual({
       ingresos: 0n,
       costoDeVentas: 0n,
       utilidadBruta: 0n,
+      merma: 0n,
       gastosOperativos: 0n,
       utilidadOperativa: 0n,
       isr: 0n,
@@ -60,7 +62,7 @@ describe('calculateEstadoDeResultados', () => {
 
   it('sales only → utilidadBruta equals ingresos', () => {
     const ventas = [makeSale({ monto: 10_000n }), makeSale({ monto: 5_000n })];
-    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 3000 });
     expect(result.ingresos).toBe(15_000n);
     expect(result.utilidadBruta).toBe(15_000n);
     expect(result.costoDeVentas).toBe(0n);
@@ -80,7 +82,7 @@ describe('calculateEstadoDeResultados', () => {
 
   it('egresos only → utilidadOperativa is negative, ISR clamped to 0', () => {
     const egresos = [makeExpense({ monto: 5_000n })];
-    const result = calculateEstadoDeResultados({ ventas: [], egresos, isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas: [], egresos, isrTasa: 3000 });
     expect(result.utilidadOperativa).toBe(-5_000n);
     expect(result.isr).toBe(0n);
     expect(result.utilidadNeta).toBe(-5_000n);
@@ -89,9 +91,9 @@ describe('calculateEstadoDeResultados', () => {
   it('applies the ISR rate to positive utilidadOperativa only', () => {
     const ventas = [makeSale({ monto: 100_000n })];
     const egresos = [makeExpense({ categoria: 'Renta', monto: 30_000n })];
-    const result = calculateEstadoDeResultados({ ventas, egresos, isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas, egresos, isrTasa: 3000 });
     expect(result.utilidadOperativa).toBe(70_000n);
-    expect(result.isr).toBe(21_000n); // 70000 × 0.30
+    expect(result.isr).toBe(21_000n); // 70000 × 3000 / 10000
     expect(result.utilidadNeta).toBe(49_000n);
   });
 
@@ -102,9 +104,9 @@ describe('calculateEstadoDeResultados', () => {
     expect(result.utilidadNeta).toBe(10_000n);
   });
 
-  it('isrTasa=1 returns 0 utilidadNeta (100% tax)', () => {
+  it('isrTasa=10_000 returns 0 utilidadNeta (100% tax)', () => {
     const ventas = [makeSale({ monto: 10_000n })];
-    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 1 });
+    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 10_000 });
     expect(result.isr).toBe(10_000n);
     expect(result.utilidadNeta).toBe(0n);
   });
@@ -114,7 +116,7 @@ describe('calculateEstadoDeResultados', () => {
       makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n }),
       makeSale({ metodo: 'Efectivo', estadoPago: 'pagado', monto: 5_000n }),
     ];
-    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 3000 });
     expect(result.ingresos).toBe(15_000n);
   });
 
@@ -131,28 +133,28 @@ describe('calculateEstadoDeResultados', () => {
       makeExpense({ categoria: 'Nómina', monto: 35_000n }),
       makeExpense({ categoria: 'Servicios', monto: 5_000n }),
     ];
-    const result = calculateEstadoDeResultados({ ventas, egresos, isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas, egresos, isrTasa: 3000 });
     expect(result.ingresos).toBe(150_000n);
     expect(result.costoDeVentas).toBe(30_000n);
     expect(result.utilidadBruta).toBe(120_000n);
     expect(result.gastosOperativos).toBe(70_000n);
     expect(result.utilidadOperativa).toBe(50_000n);
-    expect(result.isr).toBe(15_000n); // 50000 × 0.30
+    expect(result.isr).toBe(15_000n); // 50000 × 3000 / 10000
     expect(result.utilidadNeta).toBe(35_000n);
   });
 
   it('treats refunds as negative-monto sales and reduces ingresos', () => {
     const ventas = [makeSale({ monto: 10_000n }), makeSale({ monto: -3_000n })];
-    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 0.3 });
+    const result = calculateEstadoDeResultados({ ventas, egresos: [], isrTasa: 3000 });
     expect(result.ingresos).toBe(7_000n);
   });
 
-  it('rejects isrTasa outside [0, 1]', () => {
+  it('rejects isrTasa outside [0, 10_000]', () => {
     expect(() =>
-      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 1.5 }),
+      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 15_000 }),
     ).toThrow(/isrTasa/);
     expect(() =>
-      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: -0.1 }),
+      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: -100 }),
     ).toThrow(/isrTasa/);
   });
 });

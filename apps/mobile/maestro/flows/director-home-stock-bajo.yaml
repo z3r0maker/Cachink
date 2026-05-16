@@ -1,0 +1,84 @@
+# Director Home → stock-bajo card visible when products below threshold.
+#
+# Verifies:
+#   1. Create a product with umbral=5, stock_inicial=2 (below threshold)
+#   2. Navigate to Director Home
+#   3. stock-bajo-card is visible
+#
+# Precondition: wizard complete, Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/director-home-stock-bajo.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Create a product with stock below the threshold.
+# Navigate to Productos via Otros (Director role).
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
+- tapOn:
+    id: "stock-nuevo-producto"
+
+# Fill product form with low stock.
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Producto Bajo Stock"
+- pressKey: enter
+
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "100"
+- pressKey: enter
+
+# Set umbral (threshold) = 5.
+- tapOn:
+    id: "producto-umbral"
+- eraseText
+- inputText: "5"
+- pressKey: enter
+
+# Set stock_inicial = 2 (below the threshold of 5).
+- tapOn:
+    id: "producto-stock-inicial"
+- eraseText
+- inputText: "2"
+- pressKey: enter
+
+# Submit.
+- tapOn:
+    id: "producto-submit"
+    optional: true
+
+# Wait for modal to close.
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 10000
+
+# Navigate to Director Home.
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "top-bar-role-chip"
+    optional: true
+- tapOn:
+    id: "role-director-select"
+    optional: true
+
+# Verify the stock-bajo card is visible on Director Home.
+- extendedWaitUntil:
+    visible:
+      id: "director-home-route"
+    timeout: 5000
+- assertVisible:
+    id: "stock-bajo-card"

@@ -8,6 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { Expense, Money } from '@cachink/domain';
 import { formatDate } from '@cachink/domain';
@@ -73,6 +74,7 @@ function EgresosContent(props: EgresosScreenProps): ReactElement {
       data={props.egresos}
       keyExtractor={(egreso) => egreso.id}
       renderItem={(egreso) => <EgresoRowSlot egreso={egreso} {...props} />}
+      scrollEnabled={false}
       testID="egresos-list"
     />
   );
@@ -128,24 +130,23 @@ function ReadOnlyDate({ label, value }: { label: string; value: string }): React
 export function EgresosScreen(props: EgresosScreenProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <View
-      testID={props.testID ?? 'egresos-screen'}
-      flex={1}
-      padding={16}
-      gap={12}
-      backgroundColor={colors.offwhite}
-    >
-      <SectionTitle
-        title={t('egresos.title')}
-        action={
-          <Btn variant="primary" onPress={props.onNuevoEgreso} testID="egresos-nuevo">
-            {t('egresos.newCta')}
-          </Btn>
-        }
-      />
-      <TotalCard label={t('egresos.totalDelDia')} total={props.total} />
-      <ReadOnlyDate label={t('egresos.fechaLabel')} value={props.fecha} />
-      <EgresosContent {...props} />
+    <View testID={props.testID ?? 'egresos-screen'} flex={1} backgroundColor={colors.offwhite}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 40 }}
+      >
+        <SectionTitle
+          title={t('egresos.title')}
+          action={
+            <Btn variant="primary" onPress={props.onNuevoEgreso} testID="egresos-nuevo">
+              {t('egresos.newCta')}
+            </Btn>
+          }
+        />
+        <TotalCard label={t('egresos.totalDelDia')} total={props.total} />
+        <ReadOnlyDate label={t('egresos.fechaLabel')} value={props.fecha} />
+        <EgresosContent {...props} />
+      </ScrollView>
       {props.showFab === true && (
         <FAB
           icon={<Icon name="plus" size={28} color={colors.black} />}

@@ -25,9 +25,7 @@ function decodeClaims(jwt: string): JwtClaims {
   const payload = jwt.split('.')[1];
   if (!payload) return {};
   try {
-    const json = globalThis.atob
-      ? globalThis.atob(payload.replace(/-/g, '+').replace(/_/g, '/'))
-      : Buffer.from(payload, 'base64').toString('utf-8');
+    const json = globalThis.atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     return JSON.parse(json) as JwtClaims;
   } catch {
     return {};

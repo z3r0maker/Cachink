@@ -30,3 +30,4 @@ export { OfflineBlocker } from './offline-blocker';
 export { UnsyncedBlocker } from './unsynced-blocker';
 export { ConfirmModeChangeModal } from './confirm-mode-change-modal';
 export { BusinessType, type BusinessTypeProps, type BusinessTypeChoice } from './business-type';
+export { FeatureDiscovery, type FeatureDiscoveryProps } from './feature-discovery';

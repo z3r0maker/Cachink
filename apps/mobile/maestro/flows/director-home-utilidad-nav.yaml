@@ -1,0 +1,38 @@
+# Director Home → Utilidad Hero → Estados Financieros.
+#
+# Verifies:
+#   1. From Director Home, utilidad-hero is visible
+#   2. Tap utilidad-hero-ver-estados
+#   3. Navigates to Estados tab (estados-shell visible)
+#
+# Precondition: wizard complete, Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/director-home-utilidad-nav.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Director Home should be showing.
+- assertVisible:
+    id: "director-home-route"
+
+# Verify the Utilidad Hero card is visible.
+- assertVisible:
+    id: "utilidad-hero"
+
+# Tap the "Ver estados" link on the hero card.
+- tapOn:
+    id: "utilidad-hero-ver-estados"
+
+# Should navigate to the Estados tab.
+- extendedWaitUntil:
+    visible:
+      id: "estados-shell"
+    timeout: 5000

@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import type { BusinessId } from '@cachink/domain';
 import { InformeMensualAction } from '../../src/screens/index';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { useBusinessesRepository } from '../../src/app/repository-provider';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
@@ -23,7 +23,7 @@ beforeEach(async () => {
   const biz = await seedBusinesses.create({
     nombre: 'Test',
     regimenFiscal: 'RESICO',
-    isrTasa: 0.3,
+    isrTasa: 3000,
   });
   TEST_BIZ = biz.id as BusinessId;
   useAppConfigStore.getState().setCurrentBusinessId(TEST_BIZ);

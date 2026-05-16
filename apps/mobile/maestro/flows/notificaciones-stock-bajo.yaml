@@ -4,9 +4,11 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-- tapOn:
-    id: "role-director-select"
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
 
+# Director is already on Home after authenticate.yaml.
 # Open settings via the cog in the TopBar.
 - tapOn:
     id: "top-bar-open-settings"

@@ -186,7 +186,7 @@ describe('MoneyField', () => {
     renderWithProviders(<Harness />);
     const input = inputOf('money-row');
     fireEvent.change(input, { target: { value: '$1,234.56' } });
-    expect(input.value).toBe('1234.56');
+    expect(input.value).toBe('1,234.56');
   });
 
   it('formats the visible value on blur (1234 → 1234.00)', () => {
@@ -198,7 +198,7 @@ describe('MoneyField', () => {
     const input = inputOf('money-fmt');
     fireEvent.change(input, { target: { value: '1234' } });
     fireEvent.blur(input);
-    expect(input.value).toBe('1234.00');
+    expect(input.value).toBe('1,234.00');
   });
 
   it('exposes the canonical Money bigint via onValueChange while the user types', () => {
@@ -305,7 +305,7 @@ describe('MoneyField', () => {
     renderWithProviders(<Harness />);
     const input = inputOf('money-locale');
     fireEvent.change(input, { target: { value: '1,234.56' } });
-    expect(input.value).toBe('1234.56');
+    expect(input.value).toBe('1,234.56');
   });
 
   it('preserves trailing zeros (`100.00`) on blur instead of auto-stripping them', () => {

@@ -42,7 +42,7 @@ function emptyDataset(): ExportDataset {
       id: BIZ,
       nombre: 'Taquería Test',
       regimenFiscal: 'RESICO',
-      isrTasa: 0.3,
+      isrTasa: 3000,
       logoUrl: null,
       businessId: BIZ,
       deviceId: DEV,

@@ -23,6 +23,10 @@ export interface TextFieldProps {
   readonly label?: string;
   readonly placeholder?: string;
   readonly note?: string;
+  /** Validation error — red text + red border. Takes precedence over `note`. */
+  readonly error?: string;
+  /** When true, appends a red asterisk to the label. */
+  readonly required?: boolean;
   readonly testID?: string;
   readonly ariaLabel?: string;
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
@@ -40,6 +44,8 @@ export function TextField(props: TextFieldProps): ReactElement {
       label={props.label}
       placeholder={props.placeholder}
       note={props.note}
+      error={props.error}
+      required={props.required}
       testID={props.testID ?? 'text-field'}
       ariaLabel={props.ariaLabel ?? props.label}
       returnKeyType={props.returnKeyType}

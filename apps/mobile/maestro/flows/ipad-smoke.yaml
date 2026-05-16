@@ -1,0 +1,144 @@
+# iPad smoke test — launch, authenticate, assert all major layout
+# regions are accessible on an iPad simulator.
+#
+# What this verifies:
+#   - App boots and Maestro can control it on an iPad target.
+#   - All bottom tabs render and are tappable (layout not obscured by
+#     iPad's larger safe-area margins or Tamagui $gtMd breakpoints).
+#   - Director Home structural slots (hero, grid, corte) are present.
+#   - Estados subtabs cycle correctly.
+#   - Otros tab grid renders on iPad form factor.
+#   - Tab bar testIDs are all reachable (no iOS 17+ "compact sidebar"
+#     regressions on iPad).
+#
+# Precondition: wizard + business + DirectorSetup complete, dev client
+# installed on iPad simulator. Run via the wrapper:
+#
+#   ./apps/mobile/maestro/scripts/run-ipad.sh \
+#       apps/mobile/maestro/flows/ipad-smoke.yaml
+#
+# Or, after a fresh install + wizard on iPad:
+#
+#   ./apps/mobile/maestro/scripts/run-ipad.sh --install-only
+#   MAESTRO_DEVICE_UDID=<ipad-udid> maestro test \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   MAESTRO_DEVICE_UDID=<ipad-udid> maestro test \
+#       apps/mobile/maestro/flows/ipad-smoke.yaml
+#
+# NOTE: iPad companion for smoke-launch.yaml (which tests the wizard).
+# iPhone counterpart: smoke-launch.yaml, director-home-structure.yaml,
+# estados-subtabs.yaml, otros-nav.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, consent wizard step).
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# ── 1. Director Home ─────────────────────────────────────────────
+# authenticate.yaml lands on Director Home. Assert the structural
+# layout containers that Tamagui may reflow at $gtMd.
+- assertVisible:
+    id: "director-home-route"
+- assertVisible:
+    id: "director-home-grid"
+- assertVisible:
+    id: "director-home-hero-slot"
+- assertVisible:
+    id: "utilidad-hero"
+- assertVisible:
+    id: "hoy-kpi-strip"
+
+# ── 2. All tab bar items reachable ───────────────────────────────
+# On iPad the tab bar remains at the bottom (Expo Router default).
+# Assert every tab target is in the accessibility tree.
+- assertVisible:
+    id: "tab-ventas"
+- assertVisible:
+    id: "tab-gastos"
+- assertVisible:
+    id: "tab-productos"
+- assertVisible:
+    id: "tab-estados"
+- assertVisible:
+    id: "tab-otros"
+
+# ── 3. Ventas tab (Operativo context) ────────────────────────────
+# Switch to Operativo to exercise the POS grid on iPad.
+- tapOn:
+    id: "tab-ventas"
+
+# The ventas screen renders — even on empty state the screen shell
+# is visible. We do not assert the product grid here (it requires
+# data); that is covered by ipad-form-factor-audit.yaml.
+- extendedWaitUntil:
+    visible:
+      id: "tab-ventas"
+    timeout: 5000
+
+# ── 4. Egresos tab ───────────────────────────────────────────────
+- tapOn:
+    id: "tab-gastos"
+- extendedWaitUntil:
+    visible:
+      id: "tab-gastos"
+    timeout: 5000
+
+# ── 5. Productos tab ─────────────────────────────────────────────
+- tapOn:
+    id: "tab-productos"
+- extendedWaitUntil:
+    visible:
+      id: "tab-productos"
+    timeout: 5000
+
+# ── 6. Switch back to Director for Estados + Otros ───────────────
+- tapOn:
+    id: "top-bar-role-chip"
+    optional: true
+- tapOn:
+    id: "role-director-select"
+    optional: true
+
+# ── 7. Estados Financieros subtabs ───────────────────────────────
+- tapOn:
+    id: "tab-estados"
+- assertVisible:
+    id: "estados-shell"
+
+# Cycle all four subtabs to confirm none are hidden at $gtMd.
+- assertVisible:
+    id: "estados-tab-resultados"
+- tapOn:
+    id: "estados-tab-balance"
+- extendedWaitUntil:
+    visible:
+      id: "estados-tab-balance"
+    timeout: 4000
+- tapOn:
+    id: "estados-tab-flujo"
+- extendedWaitUntil:
+    visible:
+      id: "estados-tab-flujo"
+    timeout: 4000
+- tapOn:
+    id: "estados-tab-indicadores"
+- extendedWaitUntil:
+    visible:
+      id: "estados-tab-indicadores"
+    timeout: 4000
+- tapOn:
+    id: "estados-tab-resultados"
+- assertVisible:
+    id: "estados-tab-resultados"
+
+# ── 8. Otros tab grid ────────────────────────────────────────────
+- tapOn:
+    id: "tab-otros"
+- assertVisible:
+    id: "otros-screen"
+- assertVisible:
+    id: "otros-usuarios"
+- assertVisible:
+    id: "otros-funciones"

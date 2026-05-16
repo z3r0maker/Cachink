@@ -1,0 +1,52 @@
+# Edit an existing empleado from Otros → Empleados.
+#
+# Covers CRUD Update for Empleados (Edit flow).
+#
+# Precondition: wizard complete + at least one empleado exists.
+# The egreso-nomina flow creates "Ana Pérez" (Cocinera, $5,000).
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-nomina.yaml
+#   maestro test apps/mobile/maestro/flows/empleado-editar.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros tab.
+- tapOn:
+    id: "tab-otros"
+
+# Tap the Empleados card in the Otros grid.
+- tapOn:
+    id: "otros-empleados"
+- assertVisible:
+    id: "settings-empleados-screen"
+
+# Tap on the first employee row to open the edit modal.
+- tapOn:
+    id: "empleado-edit-0"
+
+# EditEmpleadoModal opens.
+- assertVisible:
+    id: "edit-empleado-modal"
+
+# Update the puesto field.
+- tapOn:
+    id: "empleado-puesto"
+- eraseText
+- inputText: "Gerente"
+
+# Submit the edit.
+- tapOn:
+    id: "empleado-edit-submit"
+
+# Modal closes and the updated puesto appears on the card.
+- assertNotVisible:
+    id: "edit-empleado-modal"
+- assertVisible: "Gerente"

@@ -16,7 +16,7 @@ export interface TopBarProps {
 }
 
 const HEIGHT = 72;
-const SLOT_MIN_WIDTH = 44; // tap-target floor
+const SLOT_MIN_WIDTH = 48; // tap-target floor — matches role avatar frame
 
 function Title({ text }: { text: string }): ReactElement {
   return (
@@ -80,6 +80,7 @@ export function TopBarFrame(props: TopBarFrameProps): ReactElement {
       alignItems="center"
       minHeight={HEIGHT}
       paddingTop={props.paddingTop}
+      paddingBottom={8}
       paddingHorizontal={16}
       backgroundColor={colors.white}
       borderBottomWidth={2.5}

@@ -1,0 +1,55 @@
+# Add stock to an existing product via the "Entrada" action in the
+# ProductoDetailPopover → MovimientoModal.
+#
+# Complements the existing inventario-salida.yaml which tests
+# stock decrements. This flow tests stock INCREMENTS.
+#
+# Precondition: wizard + at least one product exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Verify the existing product is visible in the stock list.
+- assertVisible: "Tortilla"
+
+# Tap the product card to open ProductoDetailPopover.
+- tapOn: "Tortilla"
+- assertVisible:
+    id: "producto-detail-popover"
+
+# Tap the "Entrada" button to open the MovimientoModal.
+- tapOn:
+    id: "producto-detail-entrada"
+
+# MovimientoModal opens with tipo pre-set to "entrada".
+- assertVisible:
+    id: "movimiento-modal"
+
+# Enter quantity for the stock entrada.
+- tapOn:
+    id: "movimiento-cantidad"
+- eraseText
+- inputText: "50"
+
+# Submit the movement.
+- tapOn:
+    id: "movimiento-submit"
+
+# Modal closes and the popover also closes. The product's
+# stock should now reflect the entrada.
+- assertNotVisible:
+    id: "movimiento-modal"

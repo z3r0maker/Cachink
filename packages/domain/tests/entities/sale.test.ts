@@ -119,6 +119,60 @@ describe('SaleSchema', () => {
     const parsed = SaleSchema.parse(rest);
     expect(parsed.cantidad).toBe(1);
   });
+
+  // --- Caja Completa: efectivoRecibidoCentavos ---
+
+  it('defaults efectivoRecibidoCentavos to null when omitted', () => {
+    const parsed = SaleSchema.parse(validEfectivoSale);
+    expect(parsed.efectivoRecibidoCentavos).toBeNull();
+  });
+
+  it('accepts an Efectivo sale with efectivoRecibidoCentavos set', () => {
+    const parsed = SaleSchema.parse({
+      ...validEfectivoSale,
+      efectivoRecibidoCentavos: 10000n,
+    });
+    expect(parsed.efectivoRecibidoCentavos).toBe(10000n);
+  });
+
+  it('accepts efectivoRecibidoCentavos as null explicitly', () => {
+    const parsed = SaleSchema.parse({
+      ...validEfectivoSale,
+      efectivoRecibidoCentavos: null,
+    });
+    expect(parsed.efectivoRecibidoCentavos).toBeNull();
+  });
+
+  // --- Caja Completa: cancellation fields ---
+
+  it('defaults cancellation fields to null when omitted', () => {
+    const parsed = SaleSchema.parse(validEfectivoSale);
+    expect(parsed.cancelledByUserId).toBeNull();
+    expect(parsed.cancelMotivo).toBeNull();
+    expect(parsed.cancelledAt).toBeNull();
+  });
+
+  it('accepts a sale with cancellation metadata set', () => {
+    const userId = '01HZ8XQN9GZJXV8AKQ5X0C7TES';
+    const parsed = SaleSchema.parse({
+      ...validEfectivoSale,
+      cancelledByUserId: userId,
+      cancelMotivo: 'Cliente cambió de opinión',
+      cancelledAt: '2026-04-23T16:00:00.000Z',
+    });
+    expect(parsed.cancelledByUserId).toBe(userId);
+    expect(parsed.cancelMotivo).toBe('Cliente cambió de opinión');
+    expect(parsed.cancelledAt).toBe('2026-04-23T16:00:00.000Z');
+  });
+
+  it('rejects cancelMotivo longer than 500 chars', () => {
+    expect(() =>
+      SaleSchema.parse({
+        ...validEfectivoSale,
+        cancelMotivo: 'x'.repeat(501),
+      }),
+    ).toThrow();
+  });
 });
 
 describe('NewSaleSchema', () => {

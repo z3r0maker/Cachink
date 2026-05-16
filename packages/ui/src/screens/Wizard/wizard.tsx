@@ -11,8 +11,7 @@
 
 import { useEffect, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { SafeAreaSpacer } from '../../components/index';
-import { colors } from '../../theme';
+import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import type { AppMode } from '../../app-config/index';
 import {
   useWizardBack,
@@ -27,6 +26,7 @@ import { Step1WelcomeScreen } from './step1-welcome';
 import { Step2aSoloScreen } from './step2a-solo';
 import { Step2bMultiScreen } from './step2b-multi';
 import { Step3JoinExistingScreen } from './step3-join-existing';
+import { StepConsent } from './step-consent';
 import { HelpModal } from './help-modal';
 import { MigrationDeferredScreen } from './migration-deferred-screen';
 
@@ -45,15 +45,22 @@ export interface WizardProps {
   readonly platform?: Platform;
   readonly testID?: string;
   readonly onHelpOpened?: () => void;
+  /** Dev-only: one-tap demo mode. When undefined the link is hidden. */
+  readonly onDemoMode?: () => void;
+  /** Dev-only: true while demo seed is in progress → shows spinner. */
+  readonly demoLoading?: boolean;
 }
 
 interface ScreenProps {
   readonly platform: Platform;
   readonly onSelectMode: (mode: AppMode) => void;
   readonly onOpenHelp: () => void;
+  readonly onConsent?: (choice: boolean | null) => void;
+  readonly onDemoMode?: () => void;
+  readonly demoLoading?: boolean;
 }
 
-function Step1View({ platform, onOpenHelp }: ScreenProps): ReactElement {
+function Step1View({ platform, onOpenHelp, onDemoMode, demoLoading }: ScreenProps): ReactElement {
   const goTo = useWizardGoTo();
   const preselected = useWizardPreselectedScenario();
   return (
@@ -64,6 +71,8 @@ function Step1View({ platform, onOpenHelp }: ScreenProps): ReactElement {
       onSelectMulti={() => goTo('step2b')}
       onJoinExistingLink={() => goTo('step3')}
       onHelpLink={onOpenHelp}
+      onDemoMode={onDemoMode}
+      demoLoading={demoLoading}
     />
   );
 }
@@ -132,6 +141,8 @@ function ActiveStep(props: ScreenProps): ReactElement {
       return <CloudHandoff onSelectMode={props.onSelectMode} />;
     case 'migrationDeferred':
       return <MigrationDeferredFromBack />;
+    case 'consent':
+      return <StepConsent onComplete={props.onConsent ?? (() => {})} />;
     default:
       return <Step1View {...props} />;
   }
@@ -161,6 +172,35 @@ function useHelpModalController(onHelpOpened?: () => void): {
   return { open, setOpen, pickScenario };
 }
 
+/**
+ * Audit M-1 PR 6: consent flow is intercepted here — instead of calling
+ * `onSelectMode` directly, mode selection navigates to the consent step.
+ * After the user chooses, we call through to the real `onSelectMode`.
+ */
+function useConsentIntercept(onSelectMode: (mode: AppMode) => void): {
+  pendingMode: AppMode | null;
+  interceptedSelectMode: (mode: AppMode) => void;
+  handleConsent: (choice: boolean | null) => void;
+} {
+  const [pendingMode, setPendingMode] = useState<AppMode | null>(null);
+  const goTo = useWizardGoTo();
+
+  const interceptedSelectMode = (mode: AppMode): void => {
+    setPendingMode(mode);
+    goTo('consent');
+  };
+
+  const handleConsent = (_choice: boolean | null): void => {
+    // Persist consent (parent's TelemetryBridge handles this via
+    // the app-config store). For now we just pass through.
+    if (pendingMode) {
+      onSelectMode(pendingMode);
+    }
+  };
+
+  return { pendingMode, interceptedSelectMode, handleConsent };
+}
+
 export function Wizard(props: WizardProps): ReactElement {
   const platform = props.platform ?? 'desktop';
   const reset = useWizardReset();
@@ -168,23 +208,25 @@ export function Wizard(props: WizardProps): ReactElement {
     reset();
   }, [reset]);
   const help = useHelpModalController(props.onHelpOpened);
+  const consent = useConsentIntercept(props.onSelectMode);
   return (
-    <View
-      testID={props.testID ?? 'wizard'}
-      flex={1}
-      backgroundColor={colors.offwhite}
-      alignItems="center"
-      justifyContent="center"
-      padding={24}
-      gap={14}
-    >
-      <SafeAreaSpacer />
-      <ActiveStep
-        platform={platform}
-        onSelectMode={props.onSelectMode}
-        onOpenHelp={() => help.setOpen(true)}
-      />
-      <HelpModal open={help.open} onClose={() => help.setOpen(false)} onPick={help.pickScenario} />
-    </View>
+    <FloatingCoinsBackground testID={props.testID ?? 'wizard'}>
+      <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={14}>
+        <SafeAreaSpacer />
+        <ActiveStep
+          platform={platform}
+          onSelectMode={consent.interceptedSelectMode}
+          onOpenHelp={() => help.setOpen(true)}
+          onConsent={consent.handleConsent}
+          onDemoMode={props.onDemoMode}
+          demoLoading={props.demoLoading}
+        />
+        <HelpModal
+          open={help.open}
+          onClose={() => help.setOpen(false)}
+          onPick={help.pickScenario}
+        />
+      </View>
+    </FloatingCoinsBackground>
   );
 }

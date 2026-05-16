@@ -5,6 +5,9 @@ import {
   InventoryCategoryEnum,
   InventoryUnitEnum,
   ProductoTipoEnum,
+  ProductColorEnum,
+  ProductIconEnum,
+  resolveProductIcon,
 } from '../../src/entities/index.js';
 
 const BIZ_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
@@ -106,6 +109,21 @@ describe('ProductSchema', () => {
       ProductSchema.parse({ ...validProduct, tipo: 'combo' }),
     ).toThrow();
   });
+
+  it('defaults colorFondo to white when omitted', () => {
+    const { colorFondo: _c, ...rest } = validProduct;
+    const parsed = ProductSchema.parse(rest);
+    expect(parsed.colorFondo).toBe('white');
+  });
+
+  it('accepts a valid colorFondo value', () => {
+    const parsed = ProductSchema.parse({ ...validProduct, colorFondo: 'purple' });
+    expect(parsed.colorFondo).toBe('purple');
+  });
+
+  it('rejects an unknown colorFondo value', () => {
+    expect(() => ProductSchema.parse({ ...validProduct, colorFondo: 'neon' })).toThrow();
+  });
 });
 
 describe('NewProductSchema', () => {
@@ -150,6 +168,18 @@ describe('NewProductSchema', () => {
     expect(parsed.tipo).toBe('servicio');
     expect(parsed.seguirStock).toBe(false);
   });
+
+  it('defaults colorFondo to white', () => {
+    const parsed = NewProductSchema.parse({
+      nombre: 'Playera algodón',
+      categoria: 'Producto Terminado',
+      costoUnitCentavos: 12_000n,
+      unidad: 'pza',
+      precioVentaCentavos: 15_000n,
+      businessId: BIZ_ID,
+    });
+    expect(parsed.colorFondo).toBe('white');
+  });
 });
 
 describe('Inventory enums', () => {
@@ -182,5 +212,91 @@ describe('Inventory enums', () => {
 describe('ProductoTipoEnum', () => {
   it('enumerates producto and servicio', () => {
     expect(ProductoTipoEnum.options).toEqual(['producto', 'servicio']);
+  });
+});
+
+describe('ProductColorEnum', () => {
+  it('enumerates the eight color options', () => {
+    expect(ProductColorEnum.options).toEqual([
+      'white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray',
+    ]);
+  });
+});
+
+describe('ProductIconEnum', () => {
+  it('accepts valid icon names', () => {
+    expect(ProductIconEnum.safeParse('pizza').success).toBe(true);
+    expect(ProductIconEnum.safeParse('coffee').success).toBe(true);
+    expect(ProductIconEnum.safeParse('wrench').success).toBe(true);
+  });
+
+  it('rejects invalid icon names', () => {
+    expect(ProductIconEnum.safeParse('not-an-icon').success).toBe(false);
+    expect(ProductIconEnum.safeParse('').success).toBe(false);
+  });
+
+  it('has at least 60 icons', () => {
+    expect(ProductIconEnum.options.length).toBeGreaterThanOrEqual(60);
+  });
+});
+
+describe('icono field on ProductSchema', () => {
+  it('defaults icono to null when omitted', () => {
+    const parsed = ProductSchema.parse(validProduct);
+    expect(parsed.icono).toBeNull();
+  });
+
+  it('accepts a valid icon value', () => {
+    const parsed = ProductSchema.parse({ ...validProduct, icono: 'pizza' });
+    expect(parsed.icono).toBe('pizza');
+  });
+
+  it('accepts null as icono value', () => {
+    const parsed = ProductSchema.parse({ ...validProduct, icono: null });
+    expect(parsed.icono).toBeNull();
+  });
+
+  it('rejects an invalid icon value', () => {
+    expect(() => ProductSchema.parse({ ...validProduct, icono: 'invalid' })).toThrow();
+  });
+});
+
+describe('icono field on NewProductSchema', () => {
+  const minInput = {
+    nombre: 'Test',
+    categoria: 'Otro' as const,
+    costoUnitCentavos: 100n,
+    unidad: 'pza' as const,
+    precioVentaCentavos: 200n,
+    businessId: BIZ_ID,
+  };
+
+  it('defaults icono to undefined/null when not provided', () => {
+    const parsed = NewProductSchema.parse(minInput);
+    expect(parsed.icono === null || parsed.icono === undefined).toBe(true);
+  });
+
+  it('accepts a valid icon value', () => {
+    const parsed = NewProductSchema.parse({ ...minInput, icono: 'coffee' });
+    expect(parsed.icono).toBe('coffee');
+  });
+});
+
+describe('resolveProductIcon', () => {
+  it('returns the explicit icon when provided', () => {
+    expect(resolveProductIcon('pizza', 'Otro')).toBe('pizza');
+  });
+
+  it('returns category default when icono is null', () => {
+    expect(resolveProductIcon(null, 'Materia Prima')).toBe('box');
+    expect(resolveProductIcon(null, 'Producto Terminado')).toBe('package');
+    expect(resolveProductIcon(null, 'Empaque')).toBe('archive');
+    expect(resolveProductIcon(null, 'Herramienta')).toBe('wrench');
+    expect(resolveProductIcon(null, 'Insumo')).toBe('clipboard-list');
+    expect(resolveProductIcon(null, 'Otro')).toBe('tag');
+  });
+
+  it('explicit icon overrides category default', () => {
+    expect(resolveProductIcon('star', 'Materia Prima')).toBe('star');
   });
 });

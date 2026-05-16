@@ -8,16 +8,22 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { View } from '@tamagui/core';
-import type {
-  BalanceGeneral,
-  EstadoDeResultados,
-  FlujoDeEfectivo,
-  Indicadores,
+import { ScrollView } from 'react-native';
+import {
+  ZERO,
+  type BalanceGeneral,
+  type EstadoDeResultados,
+  type FlujoDeEfectivo,
+  type Indicadores,
 } from '@cachink/domain';
-import { PeriodPicker, SegmentedToggle } from '../../components/index';
+import type { EgresoPorCategoria } from '../../hooks/use-egresos-por-categoria';
+import type { IngresoPorCategoria } from '../../hooks/use-ingresos-por-categoria';
+import type { MarginTrend } from '../../hooks/use-indicadores-trend';
+import type { UtilidadNetaTrend } from '../../hooks/use-utilidad-neta-trend';
+import { PeriodPicker, SegmentedToggle, SwipeableTabView } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';
+import { usePeriodLabels } from '../../hooks/use-period-labels';
 import { BalanceGeneralScreen } from './balance-general-screen';
 import { EstadoResultadosScreen } from './estado-resultados-screen';
 import { FlujoEfectivoScreen } from './flujo-efectivo-screen';
@@ -36,7 +42,19 @@ export interface EstadosShellProps {
   readonly balance: BalanceGeneral | null;
   readonly flujo: FlujoDeEfectivo | null;
   readonly indicadores: Indicadores | null;
+  readonly egresosPorCategoria?: readonly EgresoPorCategoria[];
+  readonly ingresosPorCategoria?: readonly IngresoPorCategoria[];
+  readonly trend?: MarginTrend | null;
   readonly onOpenSettings?: () => void;
+  /** Prior-period data for delta comparisons. */
+  readonly priorEstado?: EstadoDeResultados | null;
+  readonly priorBalance?: BalanceGeneral | null;
+  readonly priorFlujo?: FlujoDeEfectivo | null;
+  readonly priorIndicadores?: Indicadores | null;
+  /** 6-month Utilidad Neta trend for the Resultados sparkline. */
+  readonly utilidadNetaTrend?: UtilidadNetaTrend | null;
+  /** ISR rate as a decimal (e.g. 0.30). Passed through to IsrDisclaimer. */
+  readonly isrRate?: number;
   /** YYYY-MM string for the Informe mensual action. Omit to hide. */
   readonly informeYearMonth?: string;
   readonly businessName?: string;
@@ -50,17 +68,6 @@ interface TabBarProps {
   readonly labels: Record<EstadosSubTab, string>;
 }
 
-/**
- * Estados sub-tab bar.
- *
- * Audit M-1 follow-up (UI-AUDIT-1, Issue 1): the legacy hand-rolled row
- * used `<Btn size="sm">` children inside a flex row without `flex={1}`,
- * so each chip sized to its label (RESULTADOS / BALANCE / FLUJO /
- * INDICADORES were four different widths). `SegmentedToggle` already
- * implements equal-flex chip cells with proper radiogroup semantics —
- * delegate to it. Existing E2E selectors (`estados-tabbar`,
- * `estados-tab-{key}`) are preserved via `testID` + `testIDPrefix`.
- */
 function TabBar(props: TabBarProps): ReactElement {
   return (
     <SegmentedToggle<EstadosSubTab>
@@ -82,59 +89,114 @@ function ActiveBody(props: { tab: EstadosSubTab; props: EstadosShellProps }): Re
   const p = props.props;
   switch (props.tab) {
     case 'resultados':
-      return <EstadoResultadosScreen estado={p.estado} periodoLabel={p.periodoLabel} />;
+      return (
+        <EstadoResultadosScreen
+          estado={p.estado}
+          periodoLabel={p.periodoLabel}
+          egresosPorCategoria={p.egresosPorCategoria}
+          ingresosPorCategoria={p.ingresosPorCategoria}
+          priorEstado={p.priorEstado}
+          utilidadNetaTrend={p.utilidadNetaTrend}
+        />
+      );
     case 'balance':
-      return <BalanceGeneralScreen balance={p.balance} periodoLabel={p.periodoLabel} />;
+      return (
+        <BalanceGeneralScreen
+          balance={p.balance}
+          periodoLabel={p.periodoLabel}
+          priorBalance={p.priorBalance}
+        />
+      );
     case 'flujo':
-      return <FlujoEfectivoScreen flujo={p.flujo} periodoLabel={p.periodoLabel} />;
+      return (
+        <FlujoEfectivoScreen
+          flujo={p.flujo}
+          periodoLabel={p.periodoLabel}
+          priorFlujo={p.priorFlujo}
+        />
+      );
     case 'indicadores':
-      return <IndicadoresScreen indicadores={p.indicadores} periodoLabel={p.periodoLabel} />;
+      return (
+        <IndicadoresScreen
+          indicadores={p.indicadores}
+          periodoLabel={p.periodoLabel}
+          periodoMode={p.periodoState.mode}
+          trend={p.trend}
+          priorIndicadores={p.priorIndicadores}
+          onOpenSettings={p.onOpenSettings}
+        />
+      );
   }
 }
 
-export function EstadosShell(props: EstadosShellProps): ReactElement {
+const TAB_ORDER: readonly EstadosSubTab[] = ['resultados', 'balance', 'flujo', 'indicadores'];
+
+function nextTab(current: EstadosSubTab): EstadosSubTab {
+  const idx = TAB_ORDER.indexOf(current);
+  return TAB_ORDER[Math.min(idx + 1, TAB_ORDER.length - 1)]!;
+}
+
+function prevTab(current: EstadosSubTab): EstadosSubTab {
+  const idx = TAB_ORDER.indexOf(current);
+  return TAB_ORDER[Math.max(idx - 1, 0)]!;
+}
+
+function useTabLabels(): Record<EstadosSubTab, string> {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<EstadosSubTab>(props.initialTab ?? 'resultados');
-  const labels: Record<EstadosSubTab, string> = {
+  return {
     resultados: t('estados.tabResultados'),
     balance: t('estados.tabBalance'),
     flujo: t('estados.tabFlujo'),
     indicadores: t('estados.tabIndicadores'),
   };
-  // Audit M-1 follow-up (UI-AUDIT-1, Issue 5): the previous `gap={14}`
-  // was visually consumed by the §8.3 hard 4-px drop shadow on each
-  // child Card, leaving the date-label sibling visually flush against
-  // the InformeMensualAction card above it. Bumping to 18 restores
-  // ~14 px of post-shadow breathing room and resolves the same issue
-  // on every Estados sub-tab.
+}
+
+/** gap:18 = §8.3 shadow breathing room (UI-AUDIT-1, Issue 5). */
+const SCROLL_CONTENT_STYLE = { gap: 18, padding: 16, paddingBottom: 40 } as const;
+
+export function EstadosShell(props: EstadosShellProps): ReactElement {
+  const [tab, setTab] = useState<EstadosSubTab>(props.initialTab ?? 'resultados');
+  const labels = useTabLabels();
+  const periodLabels = usePeriodLabels();
+  const showInforme =
+    tab === 'resultados' &&
+    (props.showInformeAction ?? true) &&
+    props.informeYearMonth !== undefined;
   return (
-    <View testID={props.testID ?? 'estados-shell'} gap={18} padding={16}>
+    <ScrollView
+      testID={props.testID ?? 'estados-shell'}
+      style={{ flex: 1 }}
+      contentContainerStyle={SCROLL_CONTENT_STYLE}
+    >
       <PeriodPicker
         value={props.periodoState}
         onChange={props.onPeriodoChange}
-        labels={{
-          mensual: t('estados.periodoMensual'),
-          anual: t('estados.periodoAnual'),
-          rango: t('estados.periodoRango'),
-          mes: t('estados.mesLabel'),
-          anio: t('estados.anioLabel'),
-          desde: t('estados.fechaDesde'),
-          hasta: t('estados.fechaHasta'),
-        }}
+        labels={periodLabels}
       />
       <TabBar active={tab} onChange={setTab} labels={labels} />
-      {tab === 'resultados' &&
-        (props.showInformeAction ?? true) &&
-        props.informeYearMonth !== undefined && (
-          <InformeMensualAction
-            yearMonth={props.informeYearMonth}
-            businessName={props.businessName}
+      {showInforme && (
+        <InformeMensualAction
+          yearMonth={props.informeYearMonth!}
+          businessName={props.businessName}
+        />
+      )}
+      <SwipeableTabView
+        onSwipeLeft={() => setTab(nextTab(tab))}
+        onSwipeRight={() => setTab(prevTab(tab))}
+      >
+        <ActiveBody tab={tab} props={props} />
+        {(tab === 'resultados' || tab === 'indicadores') && (
+          <IsrDisclaimer
+            onOpenSettings={props.onOpenSettings}
+            isrRate={props.isrRate}
+            isrIsZeroDueToLoss={
+              props.estado !== null &&
+              props.estado.isr === ZERO &&
+              props.estado.utilidadOperativa <= ZERO
+            }
           />
         )}
-      <ActiveBody tab={tab} props={props} />
-      {(tab === 'resultados' || tab === 'indicadores') && (
-        <IsrDisclaimer onOpenSettings={props.onOpenSettings} />
-      )}
-    </View>
+      </SwipeableTabView>
+    </ScrollView>
   );
 }

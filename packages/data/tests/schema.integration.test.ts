@@ -19,16 +19,22 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import Database from 'better-sqlite3';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { eq } from 'drizzle-orm';
 import * as schema from '../src/schema/index.js';
+import { migration0000Sql } from '../drizzle/migrations/0000_initial.js';
+import { splitStatements } from '../src/migrator/split-statements.js';
 
 type DB = BetterSQLite3Database<typeof schema>;
 
 function freshDb(): DB {
   const sqlite = new Database(':memory:');
+  // Disable FK enforcement — this test validates schema shape and
+  // round-trip, not referential integrity (see fk-enforcement.test.ts).
+  sqlite.pragma('foreign_keys = OFF');
+  for (const stmt of splitStatements(migration0000Sql)) {
+    sqlite.exec(stmt);
+  }
   const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder: './drizzle/migrations' });
   return db;
 }
 
@@ -79,14 +85,14 @@ describe('Drizzle schema — round-trip every entity', () => {
         id,
         nombre: 'Tortillería La Esperanza',
         regimenFiscal: 'RIF',
-        isrTasa: 0.3,
+        isrTasa: 3000,
         logoUrl: null,
         ...audit,
       })
       .run();
     const [row] = db.select().from(schema.businesses).where(eq(schema.businesses.id, id)).all();
     expect(row?.nombre).toBe('Tortillería La Esperanza');
-    expect(row?.isrTasa).toBeCloseTo(0.3, 10);
+    expect(row?.isrTasa).toBe(3000);
   });
 
   it('round-trips an AppConfig key/value pair', () => {
@@ -107,6 +113,7 @@ describe('Drizzle schema — round-trip every entity', () => {
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
+        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7TE3',
         ...audit,
       })
       .run();

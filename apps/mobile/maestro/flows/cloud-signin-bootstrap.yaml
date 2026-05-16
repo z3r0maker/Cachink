@@ -14,8 +14,9 @@
 appId: mx.cachink.mobile
 ---
 
-# Navigate to wizard via Settings.
-- tapOn: { id: "tab-ajustes" }
+# Navigate to wizard via Settings → Sistema → Re-run.
+- tapOn: { id: "top-bar-open-settings" }
+- tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }
 
@@ -34,6 +35,5 @@ appId: mx.cachink.mobile
 - inputText: ${PASSWORD}
 - tapOn: { id: "cloud-submit" }
 
-# GatedNavigation routes to RolePicker after successful auth.
-- assertVisible: { id: "role-picker" }
-- tapOn: { id: "role-operativo-select" }
+# After cloud sign-in with existing business+users, QuickSwitch fires.
+- runFlow: shared/authenticate.yaml

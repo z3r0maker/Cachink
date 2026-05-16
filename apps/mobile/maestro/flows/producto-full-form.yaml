@@ -1,0 +1,98 @@
+# Create product with ALL optional fields filled.
+#
+# Verifies:
+#   1. Open NuevoProducto modal → fill every field:
+#      nombre, SKU, categoría, costo, precio, unidad, umbral,
+#      stock inicial, color
+#   2. Submit → product persisted with all data
+#
+# Precondition: wizard complete.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/producto-full-form.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Productos.
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    id: "stock-nuevo-producto"
+
+# --- Fill ALL form fields ---
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Café Premium"
+- pressKey: enter
+
+# SKU (optional).
+- tapOn:
+    id: "producto-sku"
+- inputText: "CAF-001"
+- pressKey: enter
+
+# Categoría (optional).
+- tapOn:
+    id: "producto-categoria"
+- inputText: "Bebidas"
+- pressKey: enter
+
+# Costo (cost per unit).
+- tapOn:
+    id: "producto-costo"
+- eraseText
+- inputText: "3500"
+- pressKey: enter
+
+# Precio de venta.
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "7500"
+- pressKey: enter
+
+# Unidad de medida.
+- tapOn:
+    id: "producto-unidad"
+- inputText: "taza"
+- pressKey: enter
+
+# Umbral de stock bajo.
+- tapOn:
+    id: "producto-umbral"
+- eraseText
+- inputText: "5"
+- pressKey: enter
+
+# Stock inicial.
+- tapOn:
+    id: "producto-stock-inicial"
+- eraseText
+- inputText: "50"
+- pressKey: enter
+
+# Color de fondo (tap to cycle/pick a color).
+- tapOn:
+    id: "producto-color-fondo"
+    optional: true
+
+# Submit.
+- tapOn:
+    id: "producto-submit"
+    optional: true
+
+# Wait for modal to close.
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 10000
+
+# Verify the product appears in the stock list.
+- assertVisible: "Café Premium"

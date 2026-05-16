@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, ProductId, SaleId } from '@cachink/domain';
+import type { BusinessId, ClientId, ProductId, SaleId, UserId } from '@cachink/domain';
 import {
+  InMemoryCajaTurnosRepository,
   InMemoryClientsRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
@@ -12,12 +13,14 @@ import {
 import { EditarVentaUseCase, RegistrarVentaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
+const USER_ID = '01HZ8XQN9GZJXV8AKQ5X0CUSR1' as UserId;
 
 describe('EditarVentaUseCase', () => {
   let sales: InMemorySalesRepository;
   let clients: InMemoryClientsRepository;
   let products: InMemoryProductsRepository;
   let movements: InMemoryInventoryMovementsRepository;
+  let cajaTurnos: InMemoryCajaTurnosRepository;
   let registrar: RegistrarVentaUseCase;
   let editar: EditarVentaUseCase;
   let defaultProductId: ProductId;
@@ -27,7 +30,20 @@ describe('EditarVentaUseCase', () => {
     clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
     movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
-    registrar = new RegistrarVentaUseCase(sales, clients, products, movements);
+    cajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
+    // Seed an open turno for the registrar
+    await cajaTurnos.create({
+      userId: USER_ID,
+      fecha: '2026-04-23',
+      aperturaAt: '2026-04-23T09:00:00.000Z',
+      montoAperturaCentavos: 500_00n,
+      efectivoAdicionalCentavos: 0n,
+      businessId: BIZ,
+    });
+    registrar = new RegistrarVentaUseCase(
+      sales, clients, products, movements, cajaTurnos,
+      { userId: USER_ID },
+    );
     editar = new EditarVentaUseCase(sales, clients);
 
     // Seed a default product for use-case product validation

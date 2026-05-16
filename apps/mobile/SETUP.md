@@ -111,11 +111,32 @@ screen.
 
 ## Running
 
-- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile exec expo run:ios`
-- **Android emulator**: `pnpm --filter @cachink/mobile exec expo run:android`
-- **Physical device via Expo Go** (JS changes only): `pnpm --filter @cachink/mobile start` then scan the QR code.
+There are two ways to run the app, depending on what you need:
 
-Once a native module is added (SQLite, camera, etc.), Expo Go no longer works — build a custom dev client via `eas build --profile development`.
+### Dev build (for active coding — needs Metro running)
+
+- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios`
+- **Android emulator**: `pnpm --filter @cachink/mobile android`
+
+These build a Debug binary that downloads JS from Metro at runtime.
+Metro starts automatically. Hot reload works — save a file, see the
+change instantly. First build takes ~5 min; subsequent launches are
+fast. `expo-dev-client` provides a launcher UI if Metro isn't
+reachable.
+
+### Preview build (for testing / playing — NO Metro needed)
+
+- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios:preview`
+- **Android emulator**: `pnpm --filter @cachink/mobile android:preview`
+
+These build a Release binary with the JS bundle **embedded inside the
+app**. Tap the icon any time — it just works, no terminal needed.
+Build takes ~5–8 min (Hermes bytecode compilation). No hot reload.
+
+> **⚠️ Do NOT use `expo start` (Expo Go).** Cachink! requires native
+> modules (reanimated worklets, gesture-handler, expo-sqlite,
+> expo-camera) and New Architecture — none of which Expo Go bundles.
+> The app will crash on launch.
 
 ### Native-module rebuild after adding `react-native-gesture-handler`, `react-native-webview`, or `react-native-view-shot`
 
@@ -302,3 +323,22 @@ first — see the Audit M-1 ROADMAP entries.
 `MAESTRO_ANDROID=1 pnpm --filter @cachink/mobile test:e2e` runs the
 flows against an Android emulator. The dev laptop only has Xcode +
 iOS sims today; Android testing is a follow-up slice.
+
+### Known dev-only warnings
+
+#### `findNodeHandle is deprecated in StrictMode`
+
+A console error fires on first navigation to screens using
+`<SwipeableTabView>` (Productos, Estados Financieros):
+
+> findNodeHandle is deprecated in StrictMode. findNodeHandle was
+> passed an instance of Wrap which is inside StrictMode.
+
+**This is harmless.** It's triggered by `react-native-gesture-handler`
+v2.x's internal use of `findNodeHandle`, which React 19 StrictMode
+flags. It does not fire in production builds (StrictMode is dev-only).
+
+The warning will disappear when `react-native-gesture-handler` v3
+ships stable and Expo SDK officially supports it (expected SDK 56+).
+Do not remove `<StrictMode>` from `_layout.tsx` to suppress this —
+StrictMode catches real bugs elsewhere.

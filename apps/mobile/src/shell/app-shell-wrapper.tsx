@@ -13,7 +13,7 @@ import { AppShellRouteWrapper, type AppShellRouteWrapperProps } from '@cachink/u
 
 // Re-export the props type under the legacy name so existing route
 // files that import `AppShellWrapperProps` don't need updating.
-export type AppShellWrapperProps = Omit<AppShellRouteWrapperProps, 'navigate'>;
+export type AppShellWrapperProps = Omit<AppShellRouteWrapperProps, 'navigate' | 'replaceRoute'>;
 
 export function AppShellWrapper(props: AppShellWrapperProps): ReactElement | null {
   const router = useRouter();
@@ -21,6 +21,7 @@ export function AppShellWrapper(props: AppShellWrapperProps): ReactElement | nul
     <AppShellRouteWrapper
       {...props}
       navigate={(path) => router.push(path as never)}
+      replaceRoute={(path) => router.replace(path as never)}
     />
   );
 }

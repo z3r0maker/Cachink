@@ -11,6 +11,14 @@ const config = getDefaultConfig(projectRoot);
 // (`@cachink/ui`, `@cachink/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
+// Exclude the pnpm virtual store from Metro resolution. With
+// node-linker=hoisted all packages are real directories in
+// node_modules/ — the .pnpm store should never be traversed.
+config.resolver.blockList = [
+  ...(Array.isArray(config.resolver.blockList) ? config.resolver.blockList : []),
+  /node_modules\/\.pnpm\/.*/,
+];
+
 // Resolve node_modules from the app first, then the workspace root, then
 // each workspace package's own node_modules. Disabling hierarchical lookup
 // is required for pnpm so Metro doesn't climb past the workspace root and
@@ -29,8 +37,13 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'packages/ui/node_modules'),
+  path.resolve(workspaceRoot, 'packages/application/node_modules'),
 ];
-config.resolver.disableHierarchicalLookup = true;
+// With shamefully-hoist=true in the root .npmrc, all deps are flat in
+// the workspace root node_modules/. Hierarchical lookup is safe (no
+// duplicate React risk) and required so packages inside the pnpm
+// virtual store can find their siblings.
+config.resolver.unstable_enableSymlinks = true;
 
 // NodeNext `.js` suffix on TS source — Metro resolver hook.
 //

@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import type { MovementType } from '@cachink/domain';
 import { Input, SegmentedToggle } from '../../components/index';
-import { IntegerField, MoneyField, TextField } from '../../components/fields/index';
+import { MoneyField, TextField, WheelQuantityPicker } from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';
 import { ENTRADA_MOTIVOS, SALIDA_MOTIVOS, type MovimientoFormState } from './movimiento-form';
 
@@ -51,14 +51,14 @@ interface FieldProps {
 function PrimaryMovFields({ state, update, t, error }: FieldProps): ReactElement {
   return (
     <>
-      <IntegerField
+      <WheelQuantityPicker
         label={t('movimiento.cantidadLabel')}
         value={state.cantidad}
         onChange={(v) => update({ cantidad: v })}
-        note={error}
+        error={error}
         min={1}
+        max={999}
         testID="movimiento-cantidad"
-        returnKeyType="next"
       />
       {state.tipo === 'entrada' && (
         <MoneyField

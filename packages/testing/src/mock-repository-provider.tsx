@@ -34,6 +34,15 @@ import { InMemoryInventoryMovementsRepository } from './in-memory-inventory-move
 import { InMemoryProductsRepository } from './in-memory-products-repository.js';
 import { InMemoryRecurringExpensesRepository } from './in-memory-recurring-expenses-repository.js';
 import { InMemorySalesRepository } from './in-memory-sales-repository.js';
+import { InMemoryUsersRepository } from './in-memory-users-repository.js';
+import { InMemoryCajaTurnosRepository } from './in-memory-caja-turnos-repository.js';
+import { InMemoryConversionRecetasRepository } from './in-memory-conversion-recetas-repository.js';
+import { InMemoryConversionsRepository } from './in-memory-conversions-repository.js';
+import { InMemoryAuditoriasInventarioRepository } from './in-memory-auditorias-inventario-repository.js';
+import { InMemoryEntregasCreditoRepository } from './in-memory-entregas-credito-repository.js';
+import { InMemoryDirectorAlertsRepository } from './in-memory-director-alerts-repository.js';
+import { InMemoryCajaMovimientosRepository } from './in-memory-caja-movimientos-repository.js';
+import { InMemoryCancelacionLogsRepository } from './in-memory-cancelacion-logs-repository.js';
 
 export interface MockRepositoryProviderProps {
   readonly children: ReactNode;
@@ -59,6 +68,15 @@ function buildInMemoryRepositories(): Repositories {
     clientPayments: new InMemoryClientPaymentsRepository(),
     dayCloses: new InMemoryDayClosesRepository(),
     recurringExpenses: new InMemoryRecurringExpensesRepository(),
+    users: new InMemoryUsersRepository(),
+    cajaTurnos: new InMemoryCajaTurnosRepository(),
+    conversionRecetas: new InMemoryConversionRecetasRepository(),
+    conversions: new InMemoryConversionsRepository(),
+    auditoriasInventario: new InMemoryAuditoriasInventarioRepository(),
+    entregasCredito: new InMemoryEntregasCreditoRepository(),
+    directorAlerts: new InMemoryDirectorAlertsRepository(),
+    cajaMovimientos: new InMemoryCajaMovimientosRepository(),
+    cancelacionLogs: new InMemoryCancelacionLogsRepository(),
   };
 }
 

@@ -10,6 +10,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
+import { View } from '@tamagui/core';
 import type {
   BusinessId,
   IsoDate,
@@ -56,7 +57,9 @@ export function MovimientoModal(props: MovimientoModalProps): ReactElement {
     state.tipo === 'entrada' ? t('movimiento.titleEntrada') : t('movimiento.titleSalida');
   return (
     <Modal open={props.open} onClose={props.onClose} title={title} testID="movimiento-modal">
-      <TipoToggle value={state.tipo} onChange={(tipo) => update({ tipo })} t={t} />
+      <View marginBottom={14}>
+        <TipoToggle value={state.tipo} onChange={(tipo) => update({ tipo })} t={t} />
+      </View>
       <MovimientoFields
         state={state}
         update={update}
@@ -67,7 +70,7 @@ export function MovimientoModal(props: MovimientoModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="movimiento-submit"
       >

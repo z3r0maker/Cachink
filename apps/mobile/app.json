@@ -30,7 +30,7 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router", "expo-sqlite", "expo-localization", "expo-font", "expo-updates"],
+    "plugins": ["expo-dev-client", "expo-router", "expo-sqlite", "expo-localization", "expo-font", "expo-updates"],
     "updates": {
       "url": "https://u.expo.dev/EAS_PROJECT_ID",
       "fallbackToCacheTimeout": 0

@@ -1,0 +1,70 @@
+# Estado de Resultados — assert every NIF B-3 financial row.
+#
+# Extends estados-resultados-data.yaml by verifying individual
+# computed rows that map to the NIF B-3 standard.
+#
+# Verifies:
+#   1. Navigate to Estados → Resultados (with data)
+#   2. estado-row-costo-ventas visible
+#   3. estado-row-utilidad-bruta visible
+#   4. estado-row-utilidad-operativa visible
+#   5. estado-row-isr visible
+#
+# Precondition: wizard complete, ventas + egresos exist, Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/estados-resultados-all-rows.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Resultados is the default sub-tab.
+- assertVisible:
+    id: "estados-tab-resultados"
+
+# Verify data rows render (not empty state).
+- assertVisible:
+    id: "estado-resultados-rows"
+
+# --- Assert individual NIF B-3 rows ---
+
+# Costo de Ventas row.
+- scrollUntilVisible:
+    element:
+      id: "estado-row-costo-ventas"
+    direction: DOWN
+    timeout: 5000
+
+# Utilidad Bruta row.
+- scrollUntilVisible:
+    element:
+      id: "estado-row-utilidad-bruta"
+    direction: DOWN
+    timeout: 5000
+
+# Utilidad Operativa row.
+- scrollUntilVisible:
+    element:
+      id: "estado-row-utilidad-operativa"
+    direction: DOWN
+    timeout: 5000
+
+# ISR row.
+- scrollUntilVisible:
+    element:
+      id: "estado-row-isr"
+    direction: DOWN
+    timeout: 5000

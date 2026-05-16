@@ -12,7 +12,7 @@ import {
   useScheduleStockLowCheck,
   STOCK_LOW_NOTIFICATION_ID,
 } from '../../src/index';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, waitFor } from '../test-utils';

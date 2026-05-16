@@ -100,7 +100,7 @@ function PagoFields({ control, t, onSubmitEditing }: PagoFieldsProps): ReactElem
         label={t('nuevaVenta.montoLabel')}
         errorMessage={t('clientes.required')}
         testID="pago-monto"
-        returnKeyType="next"
+        returnKeyType="done"
       />
       <Controller
         name="metodo"
@@ -153,7 +153,7 @@ export function RegistrarPagoModal(props: RegistrarPagoModalProps): ReactElement
       <Btn
         variant="green"
         onPress={submit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="pago-submit"
       >

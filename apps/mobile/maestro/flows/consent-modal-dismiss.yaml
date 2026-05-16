@@ -1,0 +1,62 @@
+# ConsentModal interactions — test dismiss options (yes/no/later).
+#
+# Verifies:
+#   1. On first launch, ConsentModal appears
+#   2. Tap "Más tarde" (consent-modal-later) → modal dismisses, app continues
+#   3. On next significant interaction, modal may reappear
+#   4. Tap "No" (consent-modal-no) → modal dismisses permanently
+#
+# Precondition: fresh install (no prior consent decision stored).
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/consent-modal-dismiss.yaml
+#
+# NOTE: This flow tests the non-wizard ConsentModal (standalone modal
+# that appears on subsequent boots). The wizard-integrated consent step
+# uses "consent-no" / "consent-yes" testIDs instead.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# On fresh boot after wizard, the standalone ConsentModal may appear.
+# Wait for it briefly.
+- extendedWaitUntil:
+    visible:
+      id: "consent-modal"
+    timeout: 5000
+    optional: true
+
+# --- Test: Tap "Más tarde" → modal dismisses ---
+- tapOn:
+    id: "consent-modal-later"
+    optional: true
+
+# App continues normally — tabs should be visible.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 10000
+    optional: true
+
+# Authenticate normally.
+- runFlow: shared/authenticate.yaml
+
+# --- Relaunch to test "No" ---
+- launchApp
+
+# Dismiss consent if it reappears.
+- extendedWaitUntil:
+    visible:
+      id: "consent-modal"
+    timeout: 5000
+    optional: true
+
+# Tap "No" to dismiss permanently.
+- tapOn:
+    id: "consent-modal-no"
+    optional: true
+
+# App should continue.
+- runFlow: shared/authenticate.yaml

@@ -25,8 +25,8 @@ import type {
 import {
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
-  MockRepositoryProvider,
 } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { ProductoDetailRoute } from '../../src/screens/Inventario/producto-detail-route';
 import type { ProductoConStock } from '../../src/hooks/use-productos-con-stock';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -153,8 +153,9 @@ describe('ProductoDetailRoute', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
-      expect(screen.getByText('No se puede eliminar')).toBeInTheDocument();
-      expect(screen.getByText('Hay unidades en stock. Reduce primero a 0.')).toBeInTheDocument();
+      // Audit M-1 PR 4: stock-aware copy for products with stock.
+      expect(screen.getByText('Este producto tiene stock')).toBeInTheDocument();
+      expect(screen.getByText('Hay unidades en stock. ¿Eliminar de todas formas?')).toBeInTheDocument();
     });
 
     tap(screen.getAllByTestId('confirm-dialog-cancel')[0]!);

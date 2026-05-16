@@ -92,7 +92,7 @@ export function GastoTab(props: GastoTabProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="gasto-submit"
       >

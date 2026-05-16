@@ -38,7 +38,7 @@ import {
   useRepositories,
   useSalesRepository,
 } from '../../src/app/index';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { renderWithProviders, screen } from '../test-utils';
 
 function RepoProbe(): ReactElement {
@@ -58,13 +58,13 @@ describe('useRepositories', () => {
     }
   });
 
-  it('exposes all 11 repositories through the context record', () => {
+  it('exposes all 20 repositories through the context record', () => {
     renderWithProviders(
       <MockRepositoryProvider>
         <RepoProbe />
       </MockRepositoryProvider>,
     );
-    expect(screen.getByTestId('count').textContent).toBe('11');
+    expect(screen.getByTestId('count').textContent).toBe('20');
   });
 });
 
@@ -136,7 +136,7 @@ describe('MockRepositoryProvider overrides', () => {
 });
 
 describe('buildDrizzleRepositories', () => {
-  it('returns 11 non-null repository instances wired onto one db + deviceId', () => {
+  it('returns 20 non-null repository instances wired onto one db + deviceId', () => {
     const sqlite = new Sqlite(':memory:');
     const shim = {
       path: ':memory:',
@@ -161,7 +161,7 @@ describe('buildDrizzleRepositories', () => {
     const deviceId = '01JPHK00000000000000000007' as DeviceId;
     const repos = buildDrizzleRepositories(db, deviceId);
     const count = Object.keys(repos).length;
-    expect(count).toBe(11);
+    expect(count).toBe(20);
     expect(Object.values(repos).every((r) => r !== null && typeof r === 'object')).toBe(true);
   });
 });

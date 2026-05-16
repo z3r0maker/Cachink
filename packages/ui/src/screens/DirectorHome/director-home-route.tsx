@@ -18,7 +18,9 @@
 import type { ReactElement } from 'react';
 import { useNotificationsEnabled } from '../../app-config/index';
 import { useScheduleStockLowCheck } from '../../hooks/use-schedule-stock-low-check';
+import { useCorteHistorial } from '../../hooks/use-corte-historial';
 import { CorteHomeCard } from '../CorteDeDia/corte-home-card';
+import { CorteHistorialStrip } from '../CorteDeDia/corte-historial-strip';
 import { DirectorHomeScreen } from './director-home-screen';
 import { UtilidadHero } from './utilidad-hero';
 import { HoyKpiStrip } from './hoy-kpi-strip';
@@ -44,6 +46,7 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
   const nav = props.onNavigate;
   const notificationsEnabled = useNotificationsEnabled();
   useScheduleStockLowCheck({ enabled: notificationsEnabled });
+  const historialQ = useCorteHistorial();
   return (
     <DirectorHomeScreen
       testID={props.testID ?? 'director-home-route'}
@@ -57,6 +60,7 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
       stockBajo={<StockBajoCard onVerBajoStock={() => nav?.('/inventario?filter=bajoStock')} />}
       pendientes={<PendientesDirectorCard />}
       conflictos={<ConflictosRecientesCard />}
+      historial={<CorteHistorialStrip cortes={historialQ.data ?? []} />}
     />
   );
 }

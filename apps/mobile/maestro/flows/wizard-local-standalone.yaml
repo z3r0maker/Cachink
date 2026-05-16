@@ -1,7 +1,7 @@
-# Wizard → BusinessForm → RolePicker happy path (ADR-039 four-screen flow).
+# Wizard → BusinessForm → DirectorSetup happy path (Phase 13 auth gates).
 # Covers P1C-M1-T01 (role picker), P1C-M2-T03 (wizard), P1C-M2-T04
 # (mode stored in AppConfig), P1C-M2-T05 (business creation form),
-# WUX-M4 (post-rewrite step IDs).
+# WUX-M4 (post-rewrite step IDs), Phase 13 DirectorSetup gate.
 #
 # Precondition: fresh install. Run via the wrapper script:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
@@ -10,36 +10,46 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# First-launch ConsentModal blocks the accessibility tree on a fresh
-# install. smoke-launch.yaml asserts the full consent flow; other
-# wizard flows just need to dismiss it so the wizard becomes
-# inspectable.
-- tapOn:
-    id: "consent-modal-later"
-    optional: true
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
 
 - assertVisible: "¡Bienvenido a Cachink!"
 
 # Step 1 → Solo → Step 2A → Local (single fastest path on mobile).
 - tapOn:
     id: "wizard-step1-solo-card"
-- assertVisible: { id: "wizard-step2a-local" }
+- extendedWaitUntil:
+    visible:
+      id: "wizard-step2a-local"
+    timeout: 5000
 - tapOn:
     id: "wizard-step2a-local-card"
 
-# BusinessForm.
-- assertVisible: "Tu negocio"
+# Consent step
+- extendedWaitUntil:
+    visible:
+      id: "consent-no"
+    timeout: 5000
+    optional: true
+- tapOn:
+    id: "consent-no"
+    optional: true
+
+# BusinessForm — wait for the screen transition animation.
+- extendedWaitUntil:
+    visible:
+      id: "business-nombre"
+    timeout: 10000
 - tapOn:
     id: "business-nombre"
 - inputText: "Taquería Don Pedro"
 - tapOn:
     id: "business-submit"
 
-# RolePicker.
-- assertVisible: "¿Con qué rol vas a trabajar hoy?"
-- tapOn:
-    id: "role-operativo-select"
+# DirectorSetup (replaces old RolePicker step)
+- runFlow: shared/director-setup.yaml
 
-# Tabs mount — the Ventas list is the default Operativo tab.
-- assertVisible: "Ventas"
-- assertVisible: "Total del día"
+# After DirectorSetup, user is auto-logged in as Director.
+# Verify the Director Home renders (tab-estados visible).
+- assertVisible:
+    id: "tab-estados"

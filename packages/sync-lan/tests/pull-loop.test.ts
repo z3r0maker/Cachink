@@ -26,6 +26,8 @@ function remoteSaleRow(id: string, deviceId: string, updatedAt: string, monto: n
     metodo: 'Efectivo',
     cliente_id: null,
     estado_pago: 'pagado',
+    producto_id: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
+    cantidad: 1,
     business_id: BIZ,
     device_id: deviceId,
     created_at: updatedAt,
@@ -72,9 +74,9 @@ describe('pull loop — runPullCycle', () => {
     // Seed a local row with the older timestamp.
     await db.run(
       sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
-                             business_id, device_id, created_at, updated_at, deleted_at)
+                             producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
           VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S02', '2026-04-23', 'Old', 'Producto', '10000', 'Efectivo', NULL, 'pagado',
-                  ${BIZ}, ${DEV_A}, ${TS_OLD}, ${TS_OLD}, NULL)`,
+                  '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_A}, ${TS_OLD}, ${TS_OLD}, NULL)`,
     );
     const server = createFakeLanServer({
       initialRows: [
@@ -101,9 +103,9 @@ describe('pull loop — runPullCycle', () => {
     const db = makeFreshDb();
     await db.run(
       sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
-                             business_id, device_id, created_at, updated_at, deleted_at)
+                             producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
           VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S03', '2026-04-23', 'Newer', 'Producto', '30000', 'Efectivo', NULL, 'pagado',
-                  ${BIZ}, ${DEV_A}, ${TS_NEW}, ${TS_NEW}, NULL)`,
+                  '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_A}, ${TS_NEW}, ${TS_NEW}, NULL)`,
     );
     const server = createFakeLanServer({
       initialRows: [
@@ -134,9 +136,9 @@ describe('pull loop — runPullCycle', () => {
     // Local row: DEV_B (larger lex)
     await db.run(
       sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
-                             business_id, device_id, created_at, updated_at, deleted_at)
+                             producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
           VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S04', '2026-04-23', 'Local', 'Producto', '10000', 'Efectivo', NULL, 'pagado',
-                  ${BIZ}, ${DEV_B}, ${TS_OLD}, ${TS_OLD}, NULL)`,
+                  '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_B}, ${TS_OLD}, ${TS_OLD}, NULL)`,
     );
     // Remote row: same updated_at, DEV_A (smaller lex) — must win.
     const server = createFakeLanServer({

@@ -25,10 +25,18 @@ import { Input } from '../../components/Input/index';
 import { MoneyField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 const CATEGORIAS: readonly SaleCategory[] = [
-  'Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro',
+  'Producto',
+  'Servicio',
+  'Anticipo',
+  'Suscripción',
+  'Otro',
 ];
 const METODOS: readonly PaymentMethod[] = [
-  'Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito',
+  'Efectivo',
+  'Transferencia',
+  'Tarjeta',
+  'QR/CoDi',
+  'Crédito',
 ];
 import { useEditarVenta } from '../../hooks/use-editar-venta';
 
@@ -139,7 +147,7 @@ export function EditarVentaModal(props: EditarVentaModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={editar.isPending}
+        loading={editar.isPending}
         fullWidth
         testID="editar-venta-submit"
       >

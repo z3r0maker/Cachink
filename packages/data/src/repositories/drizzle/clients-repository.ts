@@ -2,8 +2,9 @@
  * Drizzle-backed {@link ClientsRepository}.
  */
 
-import { and, asc, eq, isNull, like } from 'drizzle-orm';
-import type { BusinessId, ClientId, DeviceId, IsoTimestamp, NewClient } from '@cachink/domain';
+import { and, asc, eq, isNull, like, sql } from 'drizzle-orm';
+import type { BusinessId, ClientId, DeviceId,
+  UserId, IsoTimestamp, NewClient } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
 import type { Client, ClientPatch, ClientsRepository } from '../clients-repository.js';
 import { clients } from '../../schema/index.js';
@@ -14,10 +15,12 @@ type ClientRow = typeof clients.$inferSelect;
 export class DrizzleClientsRepository implements ClientsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewClient): Promise<Client> {
@@ -31,6 +34,7 @@ export class DrizzleClientsRepository implements ClientsRepository {
       nota: input.nota ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -87,12 +91,12 @@ export class DrizzleClientsRepository implements ClientsRepository {
   }
 
   async count(businessId: BusinessId): Promise<number> {
-    const rows = await this.#db
-      .select({ id: clients.id })
+    const result = await this.#db
+      .select({ value: sql<number>`count(*)` })
       .from(clients)
       .where(and(eq(clients.businessId, businessId), isNull(clients.deletedAt)))
-      .all();
-    return rows.length;
+      .get();
+    return result?.value ?? 0;
   }
 
   #mapRow(row: ClientRow): Client {
@@ -104,6 +108,7 @@ export class DrizzleClientsRepository implements ClientsRepository {
       nota: row.nota,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

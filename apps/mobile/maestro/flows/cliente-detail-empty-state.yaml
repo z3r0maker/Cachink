@@ -1,0 +1,41 @@
+# Cliente Detail — empty state when no pending crédito ventas exist.
+#
+# When a cliente has no pending ventas, the `cliente-detail-empty` state
+# renders. No flow tests a cliente with zero pending crédito:
+#   - cliente-detail-empty
+#
+# Precondition: wizard + business + at least one cliente created (without
+# any crédito ventas). The flow uses Carla Márquez from cliente-crear.yaml
+# who has no pending sales.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-detail-empty-state.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Clientes screen via Expo Router deep link.
+- openLink: "cachink:///clientes"
+
+- assertVisible:
+    id: "clientes-screen"
+
+# Tap the existing cliente (created by cliente-crear.yaml).
+- tapOn: "Carla Márquez"
+
+# Wait for the detail screen to load.
+- extendedWaitUntil:
+    visible:
+      id: "cliente-detail-screen"
+    timeout: 5000
+
+# Assert the empty state is visible (no pending crédito ventas).
+- assertVisible:
+    id: "cliente-detail-empty"

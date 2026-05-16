@@ -24,7 +24,9 @@ export type WizardStep =
   | 'step3'
   | 'cloudSignUp'
   | 'cloudSignIn'
-  | 'migrationDeferred';
+  | 'migrationDeferred'
+  | 'featureDiscovery'
+  | 'consent';
 
 export type WizardScenario = 'solo-local' | 'multi-device' | 'solo-cloud';
 

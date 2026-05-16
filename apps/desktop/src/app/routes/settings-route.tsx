@@ -1,17 +1,23 @@
 /**
- * Desktop route adapter for /settings. Mirrors
- * `apps/mobile/src/app/settings.tsx`. The wizard-rerun flow uses the
- * state router's `navigate('/wizard')` (GatedNavigation's wizard gate
- * short-circuits once mode === null).
+ * Desktop route adapter for /settings. Renders the SettingsHub as the
+ * top-level screen, with sub-routes for negocio, tasas-isr, and
+ * sistema managed via local state.
+ *
+ * Empleados moved to a top-level /empleados route (see empleados-route.tsx).
  *
  * Slice 9.6 additions: FeedbackAction (T10) + useCheckForUpdates (T11)
- * wiring.
+ * wiring (preserved in the sistema sub-screen).
  */
 
 import { useState, type ReactElement } from 'react';
+import type { Business } from '@cachink/domain';
 import {
   APP_CONFIG_KEYS,
-  Settings,
+  SettingsHub,
+  SettingsIndicadores,
+  SettingsNegocio,
+  SettingsSistema,
+  SettingsTasasIsr,
   useAppConfigRepository,
   useCheckForUpdates,
   useCrashReportingEnabled,
@@ -22,6 +28,7 @@ import {
   useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
+  type SettingsSection,
 } from '@cachink/ui';
 import { useLanDetails } from '@cachink/ui/sync';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
@@ -45,13 +52,14 @@ function roleLabel(role: 'operativo' | 'director' | null): 'Operativo' | 'Direct
   return null;
 }
 
-function useSettingsHandlers(): {
+function useSettingsHandlers(
+  navigateGlobal: (p: string) => void,
+): {
   reRunWizard: () => void;
   notificationsChange: (next: boolean) => void;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
-  const navigate = useDesktopNavigate();
   const appConfig = useAppConfigRepository();
   const setMode = useSetMode();
   const setNotificationsEnabled = useSetNotificationsEnabled();
@@ -62,7 +70,7 @@ function useSettingsHandlers(): {
     reRunWizard: () => {
       void appConfig.delete(APP_CONFIG_KEYS.mode).then(() => {
         setMode(null);
-        navigate('/wizard');
+        navigateGlobal('/wizard');
       });
     },
     notificationsChange: (next: boolean) => {
@@ -78,6 +86,63 @@ function useSettingsHandlers(): {
   };
 }
 
+const SECTION_TITLE_KEYS: Record<SettingsSection, string> = {
+  negocio: 'settings.negocioCard',
+  'tasas-isr': 'settings.tasasIsrCard',
+  sistema: 'settings.sistemaCard',
+  'tipos-de-pago': 'settings.tiposDePagoCard',
+  indicadores: 'settings.indicadoresCard',
+};
+
+interface SettingsSubContentProps {
+  subRoute: SettingsSection | null;
+  mode: ReturnType<typeof useMode>;
+  business: Business | null;
+  role: ReturnType<typeof useRole>;
+  notificationsEnabled: boolean | null;
+  crashReportingEnabled: boolean | null;
+  handlers: ReturnType<typeof useSettingsHandlers>;
+  lanDetails: ReturnType<typeof useLanDetails>;
+  cloudNav: ReturnType<typeof useCloudNavigation>;
+  setSubRoute: (s: SettingsSection | null) => void;
+}
+
+function SettingsSistemaSubRoute(p: SettingsSubContentProps): ReactElement {
+  return (
+    <SettingsSistema settingsProps={{
+      mode: p.mode, business: p.business,
+      onReRunWizard: p.handlers.reRunWizard,
+      notificationsEnabled: p.notificationsEnabled ?? undefined,
+      onNotificationsChange: p.handlers.notificationsChange,
+      feedback: {
+        appVersion: APP_VERSION, platform: platformKey(),
+        role: roleLabel(p.role), crashReportingEnabled: p.crashReportingEnabled === true,
+        breadcrumbs: [],
+      },
+      onCheckForUpdates: p.handlers.checkUpdates,
+      checkForUpdatesStatus: p.handlers.statusLabel,
+      lanDetails: p.lanDetails ?? undefined,
+      onOpenAdvancedBackend: p.mode === 'cloud' ? p.cloudNav.openAdvancedBackend : undefined,
+    }} />
+  );
+}
+
+function SettingsSubContent(p: SettingsSubContentProps): ReactElement {
+  switch (p.subRoute) {
+    case 'negocio': return <SettingsNegocio mode={p.mode} business={p.business} />;
+    case 'tasas-isr': return <SettingsTasasIsr />;
+    case 'indicadores': return <SettingsIndicadores />;
+    case 'sistema': return <SettingsSistemaSubRoute {...p} />;
+    default:
+      return (
+        <SettingsHub
+          business={p.business}
+          onNavigate={p.setSubRoute}
+        />
+      );
+  }
+}
+
 export function SettingsRoute(): ReactElement {
   const mode = useMode();
   const business = useCurrentBusiness().data ?? null;
@@ -86,39 +151,24 @@ export function SettingsRoute(): ReactElement {
   const crashReportingEnabled = useCrashReportingEnabled();
   const lanDetails = useLanDetails({ stopHostServer: () => stopLanServer() });
   const cloudNav = useCloudNavigation();
-  const handlers = useSettingsHandlers();
   const navigate = useDesktopNavigate();
+  const handlers = useSettingsHandlers(navigate);
   const { t } = useTranslation();
-
-  // UI-AUDIT-1 Issue 2 — Settings is reached via the TopBar cog from
-  // any tabbed route. Desktop's state-router has no history stack, so
-  // we route to `/` (Director Home for Director, /ventas fallback for
-  // Operativo) — that's the parent surface the user came from.
-  const handleBack = (): void => navigate('/');
-
+  const [subRoute, setSubRoute] = useState<SettingsSection | null>(null);
+  const title = subRoute
+    ? t(SECTION_TITLE_KEYS[subRoute] as 'settings.negocioCard')
+    : t('settings.hubTitle');
+  const handleBack = (): void => {
+    if (subRoute !== null) { setSubRoute(null); return; }
+    navigate('/');
+  };
   return (
-    <DesktopAppShellWrapper
-      activeTabKey="ajustes"
-      title={t('settings.title')}
-      onBack={handleBack}
-    >
-      <Settings
-        mode={mode}
-        business={business}
-        onReRunWizard={handlers.reRunWizard}
+    <DesktopAppShellWrapper activeTabKey="ajustes" title={title} onBack={handleBack}>
+      <SettingsSubContent
+        subRoute={subRoute} mode={mode} business={business} role={role}
         notificationsEnabled={notificationsEnabled}
-        onNotificationsChange={handlers.notificationsChange}
-        feedback={{
-          appVersion: APP_VERSION,
-          platform: platformKey(),
-          role: roleLabel(role),
-          crashReportingEnabled: crashReportingEnabled === true,
-          breadcrumbs: [],
-        }}
-        onCheckForUpdates={handlers.checkUpdates}
-        checkForUpdatesStatus={handlers.statusLabel}
-        lanDetails={lanDetails ?? undefined}
-        onOpenAdvancedBackend={mode === 'cloud' ? cloudNav.openAdvancedBackend : undefined}
+        crashReportingEnabled={crashReportingEnabled} handlers={handlers}
+        lanDetails={lanDetails} cloudNav={cloudNav} setSubRoute={setSubRoute}
       />
     </DesktopAppShellWrapper>
   );

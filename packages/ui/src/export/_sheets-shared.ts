@@ -33,7 +33,7 @@ export function addCoverSheet(
   const biz = dataset.business;
   sheet.addRow({ campo: 'Negocio', valor: biz?.nombre ?? '—' });
   sheet.addRow({ campo: 'Régimen fiscal', valor: biz?.regimenFiscal ?? '—' });
-  sheet.addRow({ campo: 'Tasa de ISR', valor: biz?.isrTasa ?? '—' });
+  sheet.addRow({ campo: 'Tasa de ISR', valor: biz ? `${biz.isrTasa / 100}%` : '—' });
   sheet.addRow({ campo: 'Exportado', valor: exportedAt.toISOString() });
   sheet.addRow({ campo: 'Ventas', valor: dataset.sales.length });
   sheet.addRow({ campo: 'Egresos', valor: dataset.expenses.length });

@@ -8,7 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { View } from '@tamagui/core';
+import { Text, View } from '@tamagui/core';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
 import {
   Btn,
@@ -21,6 +21,7 @@ import {
 } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
+import { typography } from '../../theme';
 import { ProductoListRow } from './producto-list-row';
 import { EmptyProductos } from './empty-productos';
 
@@ -118,17 +119,11 @@ function StockBody(
   );
 }
 
-export function StockScreen(props: StockScreenProps): ReactElement {
-  const { t } = useTranslation();
-  const filtered = filterProductos(props.items, props.query);
+type T = ReturnType<typeof useTranslation>['t'];
+
+function StockHeader({ t, props }: { t: T; props: StockScreenProps }): ReactElement {
   return (
-    <View
-      testID={props.testID ?? 'stock-screen'}
-      flex={1}
-      padding={16}
-      gap={12}
-      backgroundColor={colors.offwhite}
-    >
+    <>
       <SectionTitle
         title={t('inventario.title')}
         action={
@@ -144,6 +139,31 @@ export function StockScreen(props: StockScreenProps): ReactElement {
         onChange={props.onChangeQuery}
         testID="stock-buscar"
       />
+      <Text
+        testID="stock-instructions"
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={13}
+        color={colors.gray600}
+      >
+        {t('inventario.stockInstructions')}
+      </Text>
+    </>
+  );
+}
+
+export function StockScreen(props: StockScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const filtered = filterProductos(props.items, props.query);
+  return (
+    <View
+      testID={props.testID ?? 'stock-screen'}
+      flex={1}
+      padding={16}
+      gap={12}
+      backgroundColor={colors.offwhite}
+    >
+      <StockHeader t={t} props={props} />
       <StockBody {...props} filtered={filtered} />
       {props.showFab === true && (
         <FAB

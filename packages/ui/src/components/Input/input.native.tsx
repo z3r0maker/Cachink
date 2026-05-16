@@ -19,7 +19,9 @@
 import type { ReactElement, RefObject } from 'react';
 import { View } from '@tamagui/core';
 import { Combobox, type ComboboxOption } from '../Combobox/index';
+import { colors } from '../../theme';
 import {
+  InputError,
   InputLabel,
   InputNote,
   ROW_MARGIN_BOTTOM,
@@ -50,6 +52,10 @@ export interface InputProps {
   readonly options?: readonly string[];
   /** Small muted help text rendered below the field. Optional. */
   readonly note?: string;
+  /** Validation error. When set, renders red text below the field and a red border. Takes precedence over `note`. */
+  readonly error?: string;
+  /** When true, appends a red asterisk to the label. */
+  readonly required?: boolean;
   /** Forwarded to the root View so E2E tests can anchor to it. */
   readonly testID?: string;
   /** Explicit screen-reader label. Defaults to `label` when both are present. */
@@ -66,6 +72,8 @@ export interface InputProps {
   readonly inputRef?: RefObject<unknown>;
   /** Fires on focus loss. */
   readonly onBlur?: () => void;
+  /** Fires on focus gain. */
+  readonly onFocus?: () => void;
   /** Override the default left padding. Used by SearchBar to clear the icon. */
   readonly paddingLeft?: number;
 }
@@ -112,10 +120,11 @@ function InputField(props: SelectFieldProps): ReactElement {
  */
 export function Input(props: InputProps): ReactElement {
   const type: InputType = props.type ?? 'text';
+  const hasError = props.error !== undefined;
 
   return (
     <View testID={props.testID ?? 'input'} marginBottom={ROW_MARGIN_BOTTOM}>
-      {props.label !== undefined && <InputLabel text={props.label} />}
+      {props.label !== undefined && <InputLabel text={props.label} required={props.required} />}
       <InputField
         type={type}
         value={props.value}
@@ -130,9 +139,12 @@ export function Input(props: InputProps): ReactElement {
         autoComplete={props.autoComplete}
         inputRef={props.inputRef}
         onBlur={props.onBlur}
+        onFocus={props.onFocus}
         paddingLeft={props.paddingLeft}
+        borderColor={hasError ? colors.red : undefined}
       />
-      {props.note !== undefined && <InputNote text={props.note} />}
+      {hasError && <InputError text={props.error} />}
+      {!hasError && props.note !== undefined && <InputNote text={props.note} />}
     </View>
   );
 }

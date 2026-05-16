@@ -38,6 +38,7 @@ export class InMemoryRecurringExpensesRepository implements RecurringExpensesRep
       activo: input.activo ?? true,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,

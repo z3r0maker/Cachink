@@ -1,0 +1,34 @@
+# Verify ventas total card and date display after creating ventas.
+#
+# Verifies:
+#   1. After creating ventas, navigate to Ventas tab
+#   2. ventas-total-card visible with formatted total
+#   3. ventas-fecha shows today's date
+#
+# Precondition: wizard complete, at least one venta exists.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/ventas-total-y-fecha.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Ventas tab.
+- tapOn:
+    id: "tab-ventas"
+
+# Verify the total card is visible with a formatted amount.
+- assertVisible:
+    id: "ventas-total-card"
+
+# Verify the date display shows today.
+- assertVisible:
+    id: "ventas-fecha"

@@ -106,7 +106,7 @@ export function DatabaseErrorState(props: DatabaseErrorStateProps): ReactElement
       alignItems="center"
       justifyContent="center"
     >
-      <Card padding="lg" variant="yellow" fullWidth>
+      <Card padding="lg" variant="yellow" elevation="raised" fullWidth>
         <SectionTitle title={t('database.errorState.title')} />
         <ErrorBody text={t('database.errorState.body')} />
         <ActionsRow copied={props.copied} onRetry={props.onRetry} onCopy={props.onCopy} />

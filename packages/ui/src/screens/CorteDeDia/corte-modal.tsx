@@ -75,7 +75,7 @@ function ModalBody(props: BodyProps): ReactElement {
       <Btn
         variant="primary"
         onPress={props.onSubmit}
-        disabled={props.submitting}
+        loading={props.submitting}
         fullWidth
         testID="corte-submit"
       >

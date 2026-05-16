@@ -1,0 +1,9 @@
+appId: mx.cachink.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-operativo.yaml
+- assertVisible:
+    id: "tab-gastos"
+- assertVisible:
+    id: "tab-ventas"

@@ -37,6 +37,7 @@ export class InMemoryInventoryMovementsRepository implements InventoryMovementsR
       nota: input.nota ?? null,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,

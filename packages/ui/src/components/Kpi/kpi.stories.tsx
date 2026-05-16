@@ -52,12 +52,7 @@ export const EgresosHoy: Story = {
   render: () => (
     <View padding={16} width={320}>
       <Card padding="lg">
-        <Kpi
-          label="Egresos hoy"
-          value="-$1,340.00"
-          hint="vs. ayer +8%"
-          tone="negative"
-        />
+        <Kpi label="Egresos hoy" value="-$1,340.00" hint="vs. ayer +8%" tone="negative" />
       </Card>
     </View>
   ),

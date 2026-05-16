@@ -2,201 +2,152 @@
  * EditarProductoModal — partial-edit form behind the Stock list
  * swipe-to-edit gesture (Audit Round 2 J3, Phase K wiring).
  *
- * Pre-populates from the supplied `editing` Product and submits the
- * diff via `useEditarProducto`. `costoUnitCentavos` is intentionally
- * omitted: changing the unit cost retroactively corrupts inventory
- * valuation on the Balance General. The note copy explains this to
- * the user (es-MX `editarProducto.costoNote`).
+ * Phase 18: added usoProducto field (conditionally shown when
+ * conversionEnabled is true).
  */
 
 import { useEffect, useState, type ReactElement } from 'react';
-import type { InventoryCategory, InventoryUnit, Product } from '@cachink/domain';
+import type {
+  InventoryCategory,
+  InventoryUnit,
+  Product,
+  ProductColor,
+  UsoProducto,
+} from '@cachink/domain';
 import type { ProductPatch } from '@cachink/data';
-import { Btn, Modal } from '../../components/index';
+import { Btn, ColorSwatchPicker, Combobox, Modal } from '../../components/index';
+import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { Input } from '../../components/Input/index';
 import { IntegerField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
+import { INV_UNIDADES_OPTIONS, USO_PRODUCTO_CARDS } from './nuevo-producto-form';
 import { useEditarProducto } from '../../hooks/use-editar-producto';
 
 export interface EditarProductoModalProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly editing: Product | null;
+  readonly conversionEnabled?: boolean;
   readonly testID?: string;
 }
 
 const CATEGORIAS: readonly InventoryCategory[] = [
-  'Materia Prima',
-  'Producto Terminado',
-  'Empaque',
-  'Herramienta',
-  'Insumo',
-  'Otro',
-];
-
-const UNIDADES: readonly InventoryUnit[] = [
-  'pza',
-  'kg',
-  'lt',
-  'm',
-  'caja',
-  'bolsa',
-  'rollo',
-  'par',
-  'otro',
+  'Materia Prima', 'Producto Terminado', 'Empaque',
+  'Herramienta', 'Insumo', 'Otro',
 ];
 
 interface FormState {
   nombre: string;
   sku: string;
   categoria: InventoryCategory;
+  usoProducto: UsoProducto;
   unidad: InventoryUnit;
   umbralStockBajo: string;
+  colorFondo: ProductColor;
 }
+
+interface EditFormErrors {
+  nombre?: string;
+  umbral?: string;
+}
+
+type T = ReturnType<typeof useTranslation>['t'];
 
 function fromProduct(p: Product | null): FormState {
   if (!p) {
     return {
-      nombre: '',
-      sku: '',
-      categoria: 'Otro',
-      unidad: 'pza',
-      umbralStockBajo: '3',
+      nombre: '', sku: '', categoria: 'Otro', usoProducto: 'venta',
+      unidad: 'pza', umbralStockBajo: '3', colorFondo: 'white',
     };
   }
   return {
-    nombre: p.nombre,
-    sku: p.sku ?? '',
-    categoria: p.categoria,
-    unidad: p.unidad,
-    umbralStockBajo: String(p.umbralStockBajo),
+    nombre: p.nombre, sku: p.sku ?? '', categoria: p.categoria,
+    usoProducto: p.usoProducto ?? 'venta', unidad: p.unidad,
+    umbralStockBajo: String(p.umbralStockBajo), colorFondo: p.colorFondo ?? 'white',
   };
-}
-
-type Patch = (next: Partial<FormState>) => void;
-type T = ReturnType<typeof useTranslation>['t'];
-
-function NameAndSku({ state, patch, t }: { state: FormState; patch: Patch; t: T }): ReactElement {
-  return (
-    <>
-      <TextField
-        label={t('editarProducto.nombreLabel')}
-        value={state.nombre}
-        onChange={(v) => patch({ nombre: v })}
-        testID="editar-producto-nombre"
-        returnKeyType="next"
-      />
-      <TextField
-        label={t('editarProducto.skuLabel')}
-        value={state.sku}
-        onChange={(v) => patch({ sku: v })}
-        testID="editar-producto-sku"
-        returnKeyType="next"
-      />
-    </>
-  );
-}
-
-function ClassificationFields({
-  state,
-  patch,
-  t,
-}: {
-  state: FormState;
-  patch: Patch;
-  t: T;
-}): ReactElement {
-  return (
-    <>
-      <Input
-        type="select"
-        label={t('nuevaVenta.categoriaLabel')}
-        value={state.categoria}
-        onChange={(v) => patch({ categoria: v as InventoryCategory })}
-        options={CATEGORIAS}
-        testID="editar-producto-categoria"
-      />
-      <Input
-        type="select"
-        label="Unidad"
-        value={state.unidad}
-        onChange={(v) => patch({ unidad: v as InventoryUnit })}
-        options={UNIDADES}
-        testID="editar-producto-unidad"
-      />
-    </>
-  );
-}
-
-function UmbralField({
-  state,
-  patch,
-  t,
-  onSubmit,
-}: {
-  state: FormState;
-  patch: Patch;
-  t: T;
-  onSubmit: () => void;
-}): ReactElement {
-  return (
-    <IntegerField
-      label={t('editarProducto.umbralLabel')}
-      value={state.umbralStockBajo}
-      onChange={(v) => patch({ umbralStockBajo: v })}
-      min={0}
-      max={9999}
-      note={t('editarProducto.costoNote')}
-      testID="editar-producto-umbral"
-      returnKeyType="done"
-      onSubmitEditing={onSubmit}
-      blurOnSubmit
-    />
-  );
 }
 
 function buildPatch(state: FormState): ProductPatch {
   return {
     nombre: state.nombre.trim(),
     sku: state.sku.trim() === '' ? null : state.sku.trim(),
-    categoria: state.categoria,
+    categoria: state.categoria, usoProducto: state.usoProducto,
     unidad: state.unidad,
     umbralStockBajo: Math.max(0, Number.parseInt(state.umbralStockBajo, 10) || 0),
+    colorFondo: state.colorFondo,
   };
+}
+
+function useEditarProductoForm(editing: Product | null, onClose: () => void) {
+  const { t } = useTranslation();
+  const editar = useEditarProducto();
+  const [state, setState] = useState<FormState>(fromProduct(editing));
+  const [errors, setErrors] = useState<EditFormErrors>({});
+  useEffect(() => { setState(fromProduct(editing)); setErrors({}); }, [editing]);
+  const patch = (next: Partial<FormState>): void => setState((prev) => ({ ...prev, ...next }));
+  const handleSubmit = (): void => {
+    if (!editing) return;
+    const v: EditFormErrors = {};
+    if (!state.nombre.trim()) v.nombre = t('validation.required');
+    const u = Number(state.umbralStockBajo);
+    if (!Number.isInteger(u) || u < 0) v.umbral = t('validation.invalidNumber');
+    if (Object.keys(v).length > 0) { setErrors(v); return; }
+    setErrors({});
+    editar.mutate({ id: editing.id, patch: buildPatch(state) }, { onSuccess: () => onClose() });
+  };
+  return { state, errors, patch, handleSubmit, saving: editar.isPending };
+}
+
+function EditFormFields(props: {
+  state: FormState;
+  errors: EditFormErrors;
+  patch: (n: Partial<FormState>) => void;
+  conversionEnabled: boolean;
+  t: T;
+  onSubmit: () => void;
+}): ReactElement {
+  const { state, errors, patch, t } = props;
+  return (
+    <>
+      <TextField label={t('editarProducto.nombreLabel')} value={state.nombre}
+        onChange={(v) => patch({ nombre: v })} error={errors.nombre} required
+        testID="editar-producto-nombre" returnKeyType="next" />
+      <TextField label={t('editarProducto.skuLabel')} value={state.sku}
+        onChange={(v) => patch({ sku: v })} testID="editar-producto-sku" returnKeyType="next" />
+      <Input type="select" label={t('nuevoProducto.categoriaLabel')} value={state.categoria}
+        onChange={(v) => patch({ categoria: v as InventoryCategory })} options={CATEGORIAS}
+        testID="editar-producto-categoria" />
+      {props.conversionEnabled && (
+        <OptionCardGroup label={t('nuevoProducto.usoLabel')} value={state.usoProducto}
+          onChange={(v) => patch({ usoProducto: v })} options={USO_PRODUCTO_CARDS}
+          testID="editar-producto-uso" />
+      )}
+      <Combobox label="Unidad" value={state.unidad}
+        onChange={(v) => patch({ unidad: v as InventoryUnit })} options={INV_UNIDADES_OPTIONS}
+        testID="editar-producto-unidad" />
+      <IntegerField label={t('editarProducto.umbralLabel')} value={state.umbralStockBajo}
+        onChange={(v) => patch({ umbralStockBajo: v })} min={0} max={9999}
+        note={t('editarProducto.costoNote')} error={errors.umbral}
+        testID="editar-producto-umbral" returnKeyType="done"
+        onSubmitEditing={props.onSubmit} blurOnSubmit />
+      <ColorSwatchPicker label={t('editarProducto.colorFondoLabel')} value={state.colorFondo}
+        onChange={(v) => patch({ colorFondo: v })} testID="editar-producto-color-fondo" />
+    </>
+  );
 }
 
 export function EditarProductoModal(props: EditarProductoModalProps): ReactElement {
   const { t } = useTranslation();
-  const editar = useEditarProducto();
-  const [state, setState] = useState<FormState>(fromProduct(props.editing));
-  useEffect(() => {
-    setState(fromProduct(props.editing));
-  }, [props.editing]);
-  const patch = (next: Partial<FormState>): void => setState((prev) => ({ ...prev, ...next }));
-  const handleSubmit = (): void => {
-    if (!props.editing) return;
-    editar.mutate(
-      { id: props.editing.id, patch: buildPatch(state) },
-      { onSuccess: () => props.onClose() },
-    );
-  };
+  const { state, errors, patch, handleSubmit, saving } = useEditarProductoForm(
+    props.editing, props.onClose,
+  );
   return (
-    <Modal
-      open={props.open}
-      onClose={props.onClose}
-      title={t('editarProducto.title')}
-      testID={props.testID ?? 'editar-producto-modal'}
-    >
-      <NameAndSku state={state} patch={patch} t={t} />
-      <ClassificationFields state={state} patch={patch} t={t} />
-      <UmbralField state={state} patch={patch} t={t} onSubmit={handleSubmit} />
-      <Btn
-        variant="primary"
-        onPress={handleSubmit}
-        disabled={editar.isPending}
-        fullWidth
-        testID="editar-producto-submit"
-      >
+    <Modal open={props.open} onClose={props.onClose}
+      title={t('editarProducto.title')} testID={props.testID ?? 'editar-producto-modal'}>
+      <EditFormFields state={state} errors={errors} patch={patch}
+        conversionEnabled={props.conversionEnabled === true} t={t} onSubmit={handleSubmit} />
+      <Btn variant="primary" onPress={handleSubmit} disabled={saving} fullWidth
+        testID="editar-producto-submit">
         {t('editarProducto.save')}
       </Btn>
     </Modal>

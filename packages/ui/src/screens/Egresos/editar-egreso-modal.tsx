@@ -150,7 +150,7 @@ export function EditarEgresoModal(props: EditarEgresoModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={editar.isPending}
+        loading={editar.isPending}
         fullWidth
         testID="editar-egreso-submit"
       >

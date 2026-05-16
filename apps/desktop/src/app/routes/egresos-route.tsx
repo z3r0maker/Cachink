@@ -14,6 +14,7 @@ import {
   useEliminarEgreso,
   usePendientesGastosRecurrentes,
   useProcesarGastoRecurrente,
+  useDescartarGastoRecurrente,
 } from '@cachink/ui';
 import type { Expense, IsoDate } from '@cachink/domain';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
@@ -26,10 +27,12 @@ function todayIso(): IsoDate {
 function PendientesSlot({ fecha }: { fecha: IsoDate }): ReactElement {
   const pendientesQ = usePendientesGastosRecurrentes(fecha);
   const procesar = useProcesarGastoRecurrente();
+  const descartar = useDescartarGastoRecurrente();
   return (
     <PendientesCard
       pendientes={pendientesQ.data ?? []}
       onConfirmar={(p) => procesar.mutate({ template: p, today: fecha })}
+      onDescartar={(p) => descartar.mutate({ template: p, today: fecha })}
       confirming={procesar.isPending}
     />
   );

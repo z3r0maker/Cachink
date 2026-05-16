@@ -26,7 +26,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
 import { NuevoEmpleadoModal } from '../../src/screens/Egresos/tabs/nuevo-empleado-modal';
-import { NuevoProductoModal } from '../../src/screens/Inventario/nuevo-producto-modal';
+import { NuevoProductoModal } from '../../src/screens/Productos/nuevo-producto-modal';
 import { NuevoClienteModal } from '../../src/screens/Clientes/nuevo-cliente-modal';
 
 initI18n();

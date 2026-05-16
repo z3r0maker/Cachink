@@ -34,6 +34,7 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
 import { colors, radii } from '../../theme';
@@ -85,6 +86,7 @@ function Backdrop({ onClose }: { onClose: () => void }): ReactElement {
 interface SheetContentProps {
   readonly testID?: string;
   readonly children: ReactNode;
+  readonly paddingBottom: number;
 }
 
 function SheetContent(props: SheetContentProps): ReactElement {
@@ -101,7 +103,7 @@ function SheetContent(props: SheetContentProps): ReactElement {
       borderTopRightRadius={SHEET_RADIUS}
       paddingTop={20}
       paddingHorizontal={20}
-      paddingBottom={36}
+      paddingBottom={props.paddingBottom}
       width="100%"
       // Bottom-anchored full-width sheet on mobile. No maxWidth —
       // phones should always use the full width. No marginHorizontal
@@ -141,6 +143,8 @@ function KeyboardAware({ children }: { children: ReactNode }): ReactElement {
 }
 
 export function Modal(props: ModalProps): ReactElement {
+  const insets = useSafeAreaInsets();
+  const bottomPad = Math.max(36, insets.bottom + 16);
   return (
     <Dialog
       modal
@@ -151,7 +155,7 @@ export function Modal(props: ModalProps): ReactElement {
     >
       <Dialog.Portal>
         <Backdrop onClose={props.onClose} />
-        <SheetContent testID={props.testID}>
+        <SheetContent testID={props.testID} paddingBottom={bottomPad}>
           <KeyboardAware>
             <GrabHandle />
             <ModalHeader

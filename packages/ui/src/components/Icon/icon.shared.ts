@@ -38,6 +38,7 @@ export type IconName =
   | 'package'
   | 'scan-barcode'
   | 'shopping-bag'
+  | 'shopping-cart'
   // Reporting
   | 'chart-bar'
   | 'trending-up'
@@ -53,6 +54,7 @@ export type IconName =
   // People + status
   | 'users'
   | 'user'
+  | 'user-check'
   | 'bell'
   | 'circle-alert'
   | 'info'
@@ -63,6 +65,8 @@ export type IconName =
   | 'camera'
   | 'calendar'
   | 'search'
+  // Help / educational affordances
+  | 'circle-help'
   // Wizard / help-modal scenarios (PR 2 — emoji→Icon sweep)
   | 'smartphone'
   | 'building-2'
@@ -75,11 +79,88 @@ export type IconName =
   | 'cloud'
   | 'plug'
   | 'monitor'
+  // Feature flags + system modules (Phase 4)
+  | 'inbox'
+  | 'refresh-cw'
+  | 'zap'
+  | 'sliders'
   // Chevrons (avatar/disclosure)
   | 'chevron-up'
   | 'chevron-down'
   | 'chevron-left'
-  | 'chevron-right';
+  | 'chevron-right'
+  // Caja Completa (Phase Caja)
+  | 'landmark'
+  | 'arrow-down-up'
+  | 'circle-x'
+  | 'lock'
+  | 'triangle-alert'
+  // Product icons — Alimentos
+  | 'beef'
+  | 'apple'
+  | 'candy'
+  | 'cookie'
+  | 'croissant'
+  | 'drumstick'
+  | 'egg'
+  | 'fish'
+  | 'ice-cream-cone'
+  | 'leaf'
+  | 'nut'
+  | 'pizza'
+  | 'popcorn'
+  | 'salad'
+  | 'sandwich'
+  | 'soup'
+  // Product icons — Bebidas
+  | 'beer'
+  | 'coffee'
+  | 'cup-soda'
+  | 'glass-water'
+  | 'grape'
+  | 'martini'
+  | 'milk'
+  | 'wine'
+  // Product icons — Comercio
+  | 'gift'
+  | 'gem'
+  | 'shirt'
+  | 'sport-shoe'
+  | 'store'
+  | 'tag'
+  | 'watch'
+  // Product icons — Servicios
+  | 'car'
+  | 'hammer'
+  | 'hard-hat'
+  | 'paintbrush'
+  | 'scissors'
+  | 'spray-can'
+  | 'stethoscope'
+  | 'wrench'
+  // Product icons — Belleza & Cuidado
+  | 'bath'
+  | 'sparkles'
+  | 'sun'
+  | 'droplets'
+  | 'heart'
+  // Product icons — Hogar & Oficina
+  | 'armchair'
+  | 'book'
+  | 'briefcase'
+  | 'lamp'
+  | 'pen-tool'
+  | 'printer'
+  // Product icons — General
+  | 'box'
+  | 'flower-2'
+  | 'music'
+  | 'palette'
+  | 'paw-print'
+  | 'pill'
+  | 'star'
+  | 'ticket'
+  | 'trophy';
 
 export interface IconProps {
   /** Curated icon name. See `IconName` for the full set. */

@@ -22,7 +22,7 @@ import {
   type IsoDate,
   type NewExpense,
 } from '@cachink/domain';
-import { Btn, Input } from '../../../components/index';
+import { Btn, Combobox } from '../../../components/index';
 import { MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 import { NuevoEmpleadoModal } from './nuevo-empleado-modal';
@@ -105,12 +105,14 @@ function NominaForm(props: NominaFormProps): ReactElement {
   const { state, empleados, t, error, submitting, onSubmit } = props;
   return (
     <>
-      <Input
-        type="select"
+      <Combobox
         label={t('nuevoEgreso.empleadoLabel')}
         value={state.empleadoId}
         onChange={state.setEmpleadoId}
-        options={empleados.map((e) => e.id)}
+        options={empleados.map((e) => ({
+          key: e.id,
+          label: `${e.nombre} — ${e.puesto}`,
+        }))}
         note={error}
         testID="nomina-empleado"
       />
@@ -125,7 +127,7 @@ function NominaForm(props: NominaFormProps): ReactElement {
       <Btn
         variant="primary"
         onPress={onSubmit}
-        disabled={submitting}
+        loading={submitting}
         fullWidth
         testID="nomina-submit"
       >

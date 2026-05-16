@@ -1,0 +1,50 @@
+# Verify the usoProducto selector appears when conversion flag is ON.
+#
+# Verifies:
+#   1. Enable conversionMateriaPrima flag
+#   2. Navigate to Productos → tap + Nuevo
+#   3. producto-uso field appears on the new product form
+#   4. Select materia-prima → precio de venta hides
+#
+# Precondition: wizard complete, logged in as Director.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Enable conversion flag.
+- runFlow: shared/enable-conversion-flag.yaml
+
+# Go to Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Tap Nuevo Producto button — navigates to /nuevo-producto.
+- tapOn:
+    text: "Nuevo"
+
+# Wait for the full-page form.
+- extendedWaitUntil:
+    visible:
+      id: "nuevo-producto-screen"
+    timeout: 5000
+
+# Verify uso del producto selector is visible.
+- assertVisible:
+    id: "producto-uso"
+
+# Verify precio de venta is visible by default (uso = venta).
+- assertVisible:
+    id: "producto-precio-venta"
+
+# Select materia-prima usage.
+- tapOn:
+    id: "producto-uso"
+- tapOn:
+    text: "Materia prima (para convertir)"
+
+# Verify precio de venta is hidden.
+- assertNotVisible:
+    id: "producto-precio-venta"

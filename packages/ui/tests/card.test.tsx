@@ -41,7 +41,7 @@ describe('Card', () => {
     );
   });
 
-  it('applies the black variant with 2.5px border and hero shadow', () => {
+  it('applies the black variant with 2.5px border and no shadow by default', () => {
     renderWithProviders(
       <Card variant="black" testID="card-black">
         <span>x</span>
@@ -52,7 +52,18 @@ describe('Card', () => {
     // black (#0D0D0D) → rgb(13, 13, 13).
     expect(styles.backgroundColor.toLowerCase()).toContain('rgb(13, 13, 13)');
     expect(styles.borderTopWidth).toBe('2.5px');
-    // hero shadow is the 5×5 hard drop shadow.
+    // Audit M-1 PR 3: default elevation is 'none' — no shadow.
+    expect(styles.boxShadow).toBe('none');
+  });
+
+  it('applies hero shadow when elevation="raised" on black variant', () => {
+    renderWithProviders(
+      <Card variant="black" elevation="raised" testID="card-black-raised">
+        <span>x</span>
+      </Card>,
+    );
+    const root = screen.getAllByTestId('card-black-raised')[0]!;
+    const styles = getComputedStyle(root);
     expect(styles.boxShadow).toContain('5px 5px 0');
   });
 

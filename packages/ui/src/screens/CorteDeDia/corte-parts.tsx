@@ -75,7 +75,7 @@ export function EsperadoCard({ esperado, t }: { esperado: Money; t: T }): ReactE
 
 export function DiferenciaCard({ diferencia, t }: { diferencia: Money; t: T }): ReactElement {
   return (
-    <Card variant="yellow" padding="md" fullWidth testID="corte-diferencia-card">
+    <Card variant="yellow" elevation="raised" padding="md" fullWidth testID="corte-diferencia-card">
       <LineItem
         label={t('corteDeDia.diferenciaLabel')}
         value={formatMoney(diferencia)}

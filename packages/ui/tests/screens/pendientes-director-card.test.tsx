@@ -12,7 +12,7 @@ import {
   makeNewRecurringExpense,
 } from '@cachink/testing';
 import { PendientesDirectorCard } from '../../src/screens/DirectorHome/pendientes-director-card';
-import { MockRepositoryProvider } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen, waitFor } from '../test-utils';

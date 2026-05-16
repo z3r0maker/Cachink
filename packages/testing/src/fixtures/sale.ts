@@ -24,7 +24,7 @@ const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
 /** Default productoId used by fixtures — required since ADR-048. */
-const DEFAULT_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0CPROD' as ProductId;
+const DEFAULT_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0CPR0D' as ProductId;
 
 export function makeNewSale(overrides: Partial<NewSale> = {}): NewSale {
   return {
@@ -55,8 +55,10 @@ export function makeSale(overrides: Partial<Sale> = {}): Sale {
     estadoPago: 'pagado',
     productoId,
     cantidad: 1,
+    cajaTurnoId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
+    createdByUserId: null,
     createdAt: DEFAULT_TS,
     updatedAt: DEFAULT_TS,
     deletedAt: null,

@@ -8,6 +8,10 @@ env:
 ---
 - launchApp
 
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 - runFlow: cloud-signin-bootstrap
 
 # Enable airplane mode (Android). On iOS this is a manual pre-step

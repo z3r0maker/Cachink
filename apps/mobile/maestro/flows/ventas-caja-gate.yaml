@@ -1,0 +1,15 @@
+appId: com.cachink.app
+tags:
+  - ventas
+  - caja
+  - gate
+---
+- launchApp
+- assertVisible:
+    id: "caja-gate-banner"
+- assertVisible:
+    text: "Abre tu caja para empezar a vender"
+- tapOn:
+    id: "caja-gate-go-to-caja"
+- assertVisible:
+    id: "caja-abrir-submit"

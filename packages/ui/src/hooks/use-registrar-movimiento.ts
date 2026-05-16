@@ -1,10 +1,10 @@
 /**
  * `useRegistrarMovimiento` — TanStack mutation wrapping
  * `RegistrarMovimientoInventarioUseCase`. Per ADR-021 the use-case
- * dual-writes an Expense when tipo='entrada', so we invalidate both
- * ['movimientos', businessId] and ['egresos', businessId, fecha] on
- * success. Also invalidates ['productos', businessId] so stock
- * derivations re-compute.
+ * dual-writes an Expense when tipo='entrada', so we invalidate
+ * ['movimientos', businessId], ['productos', businessId],
+ * ['productos-con-stock', businessId], and
+ * ['egresos', businessId, fecha] on success.
  */
 
 import { useMemo } from 'react';
@@ -39,6 +39,7 @@ export function useRegistrarMovimiento(): RegistrarMovimientoResult {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['movimientos', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['productos', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId, movement.fecha] }),
       ]);
     },

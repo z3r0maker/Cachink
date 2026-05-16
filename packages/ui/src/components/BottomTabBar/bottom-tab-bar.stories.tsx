@@ -73,7 +73,13 @@ export const WithBadges: Story = {
           { key: 'home', label: 'Home', icon: <Glyph char="🏠" />, onPress: noop },
           { key: 'ventas', label: 'Ventas', icon: <Glyph char="💰" />, onPress: noop },
           { key: 'egresos', label: 'Egresos', icon: <Glyph char="📤" />, onPress: noop, badge: 3 },
-          { key: 'inventario', label: 'Inventario', icon: <Glyph char="📦" />, onPress: noop, badge: 1 },
+          {
+            key: 'inventario',
+            label: 'Inventario',
+            icon: <Glyph char="📦" />,
+            onPress: noop,
+            badge: 1,
+          },
           { key: 'estados', label: 'Estados', icon: <Glyph char="📊" />, onPress: noop },
           { key: 'indicadores', label: 'Indicadores', icon: <Glyph char="📈" />, onPress: noop },
         ]}

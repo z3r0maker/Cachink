@@ -1,0 +1,56 @@
+# Create a product using the FAB on the stock/productos screen.
+# Covers Gap G (Phase 17): stock-fab testID alternative entry point.
+#
+# testIDs exercised:
+#   stock-fab
+#
+# Precondition: wizard complete, operativo role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/producto-via-fab.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+# Select Operativo role if RolePicker is showing (cold start).
+
+# Navigate to Productos tab.
+- tapOn:
+    id: "tab-productos"
+
+# Use the FAB instead of the stock-nuevo-producto header button.
+- assertVisible:
+    id: "stock-fab"
+- tapOn:
+    id: "stock-fab"
+
+# Fill the product form.
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Refresco"
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "25"
+- tapOn:
+    id: "producto-submit"
+    optional: true
+
+# Wait for the modal to close.
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 10000
+
+# Verify the product appears in the stock list.
+- extendedWaitUntil:
+    visible:
+      id: "stock-list"
+    timeout: 5000
+- assertVisible:
+    text: ".*Refresco.*"

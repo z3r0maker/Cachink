@@ -22,6 +22,11 @@ export { EmailField, type EmailFieldProps } from './email-field';
 export { PhoneField, type PhoneFieldProps } from './phone-field';
 export { PasswordField, type PasswordFieldProps } from './password-field';
 export { IntegerField, type IntegerFieldProps } from './integer-field';
+export { StepperField, type StepperFieldProps } from './stepper-field';
+export {
+  WheelQuantityPicker,
+  type WheelQuantityPickerProps,
+} from './wheel-quantity-picker';
 export { DateField, type DateFieldProps } from './date-field';
 export {
   RhfTextField,

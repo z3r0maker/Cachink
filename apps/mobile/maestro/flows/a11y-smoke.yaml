@@ -4,9 +4,11 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-- tapOn:
-    id: "role-director-select"
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
 
+# Director is already on Home after authenticate.yaml.
 # The role chip, tab bar, hero, and strip all need visible anchors.
 - assertVisible:
     id: "top-bar-role-chip"

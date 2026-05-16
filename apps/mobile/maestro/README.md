@@ -76,14 +76,69 @@ second contributor joins). Run it locally before landing anything that
 touches the wizard, tabs, Ventas, Cuentas por Cobrar, Inventario, or
 Settings screens.
 
+## Auth Gate Boot Flow (Phase 13)
+
+Phase 13 introduced authentication gates that changed the app's boot flow:
+
+1. **First run:** Wizard → BusinessForm → **DirectorSetupGate** (create user + password + PIN) → auto-login → Director Home
+2. **Subsequent launch:** **QuickSwitchGate** (avatar + password) → tabs
+3. **Auto-lock after 5min inactivity:** → QuickSwitch re-shown
+
+This means ALL flows that expect tabs now require authentication. The
+shared subflow `authenticate.yaml` handles this transparently.
+
+### Shared subflows
+
+| Subflow | Purpose |
+|---|---|
+| `shared/dismiss-modals.yaml` | Dismisses consent modals on cold boot |
+| `shared/authenticate.yaml` | Logs in via QuickSwitch (no-op if already past auth) |
+| `shared/director-setup.yaml` | Completes DirectorSetup during wizard with test credentials |
+| `shared/select-operativo.yaml` | Switches to Operativo role from Director Home |
+
+### Test credentials
+
+All E2E flows use these deterministic credentials created by
+`shared/director-setup.yaml`:
+
+| Field | Value |
+|---|---|
+| Name | Director Test |
+| Email | test@cachink.test |
+| Password | Test1234 |
+| PIN | 123456 |
+
+### Flow authoring pattern (post–Phase 13)
+
+Every flow MUST follow this pattern:
+
+```yaml
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+# ... flow-specific steps
+```
+
+The `authenticate.yaml` steps are all `optional: true` — they are a no-op
+when the app is already past auth (e.g., warm launch in the same session).
+
+---
+
 ## Flow inventory (grouped by feature area)
+
+### iPad form-factor
+
+| Flow | Closes | What it proves |
+|---|---|---|
+| `ipad-smoke.yaml` | — | Launch + auth + all tab targets + Director Home + Estados subtabs on iPad |
+| `ipad-form-factor-audit.yaml` | — | Tripwire: every testID used by iPhone flows is still accessible at `$gtMd` breakpoint |
 
 ### Smoke + onboarding
 
 | Flow                               | Closes         | What it proves                                                        |
 | ---------------------------------- | -------------- | --------------------------------------------------------------------- |
 | `smoke-launch.yaml`                | —              | App boots, wizard renders, no crash path.                             |
-| `wizard-local-standalone.yaml`     | M1-M2 / WUX-M4 | Wizard (Step 1 → Step 2A → Local) → BusinessForm → RolePicker → Tabs. |
+| `wizard-local-standalone.yaml`     | M1-M2 / WUX-M4 | Wizard (Step 1 → Step 2A → Local) → BusinessForm → DirectorSetup → Director Home. |
 | `wizard-cloud-solo.yaml`           | WUX-M4-T02     | Solo + Cloud-as-backup path (Step 1 → Step 2A → Cloud signup).        |
 | `wizard-mobile-disabled-host.yaml` | WUX-M4-T03     | Mobile users see lan-server card disabled with explanation visible.   |
 | `wizard-help-modal.yaml`           | WUX-M4-T04     | Help modal opens, scenario picks pre-select cards on Step 1.          |
@@ -151,6 +206,23 @@ Settings screens.
 | --------------- | ------------------- | -------------------------------------------------------------------------------------------- |
 | `lan-pair.yaml` | P1D-M4 C20 / WUX-M4 | Wizard → Step 3 (Join existing) → LAN client → scan QR → paired. Requires `MAESTRO_LAN_URL`. |
 
+### Auth + Feature Flags (Phase 13)
+
+| Flow                            | Closes    | What it proves                                                         |
+| ------------------------------- | --------- | ---------------------------------------------------------------------- |
+| `director-setup.yaml`           | P13-T01   | DirectorSetup gate during wizard: fill all fields → auto-login.        |
+| `quick-switch-login.yaml`       | P13-T02   | QuickSwitch: correct password → tabs; wrong password → error.          |
+| `change-password.yaml`          | P13-T03   | Forced password change for mustChangePassword users.                   |
+| `funciones-toggle.yaml`         | P13-T04   | Toggle stock/caja/merma flags → verify UI mutation.                    |
+| `funciones-stock-disabled.yaml` | P13-T05   | Stock OFF → no stock tab, no stock movements on venta.                 |
+| `caja-abrir-cerrar.yaml`        | P13-T06   | Cash drawer: apertura → status card → cierre → closed state.           |
+| `usuario-crear.yaml`            | P13-T07   | Director creates new user → appears in user list.                      |
+| `otros-nav.yaml`                | P13-T08   | Otros tab grid renders → each item navigates correctly.                |
+| `merma-registro.yaml`           | P13-T09   | Register shrinkage: select product → qty + reason → confirm.           |
+| `recovery-password.yaml`        | P13-T10   | Forgot password: wrong PIN → error; correct PIN → reset success.       |
+| `auto-lock-smoke.yaml`          | P13-T11   | Inactivity timer fires → QuickSwitch re-appears (low priority).        |
+| `role-switch.yaml`              | P13-T12   | Director → Operativo → Director via top-bar chip (rewritten).          |
+
 ### Cloud mode
 
 | Flow                           | Closes     | What it proves                                           |
@@ -158,6 +230,130 @@ Settings screens.
 | `cloud-signup-signin.yaml`     | P1E-M3 C13 | Wizard → Cloud → sign-up → sign-out → sign-in.           |
 | `cloud-signin-bootstrap.yaml`  | —          | Reusable sub-flow: wizard → cloud sign-in → role select. Called via `runFlow`. |
 | `cloud-offline-replay.yaml`    | P1E-M4 C16 | Two devices, offline writes on one, online sync replays. |
+
+## Running via MCP (Claude / Cursor)
+
+The repo root `.mcp.json` registers Maestro as an MCP server so any MCP
+host (Claude Code, Cursor, etc.) can call `maestro test`, inspect the view
+hierarchy, and read reports without leaving the chat.
+
+**Requirements:**
+
+- Maestro CLI ≥ 1.40 on your `PATH` (`maestro --version`).
+- `maestro mcp` starts the stdio server automatically via `.mcp.json`; no
+  manual startup needed.
+
+**What the MCP surface exposes (as of Maestro 1.40):**
+
+| Tool | What it does |
+|---|---|
+| `run_flow` | Execute a `.yaml` flow file against the booted (or specified) device |
+| `inspect_view_hierarchy` | Dump the accessibility tree of the current screen |
+| `list_devices` | List available iOS simulators / Android emulators |
+| `take_screenshot` | Capture the current screen |
+
+**MCP usage example (in Claude Code):**
+
+```
+Run the ipad-smoke flow against the iPad simulator.
+```
+
+Claude resolves this to `run_flow(path: "apps/mobile/maestro/flows/ipad-smoke.yaml")`.
+
+> **Note:** Flows that require a clean database (wizard flows) still need
+> `fresh-install.sh` or `run-ipad.sh` to be run first — those reset the DB
+> outside Maestro's protocol surface.
+
+---
+
+## Running on iPad
+
+`app.json` declares `ios.supportsTablet: true`, so the existing dev client
+runs as a native iPad app when launched on an iPad simulator.
+
+### Prerequisites
+
+1. **iPad simulator present:** Open Xcode → Devices and Simulators and
+   verify at least one iPad model is installed.  Default target:
+   `iPad (10th generation)`.  Override with the `MAESTRO_IPAD_DEVICE` env
+   var.
+2. **Dev client installed on the iPad simulator (one-time per device):**
+   ```sh
+   pnpm --filter @cachink/mobile ios -- --device "iPad (10th generation)"
+   ```
+   Once installed, the binary stays on the simulator — you do not need to
+   rebuild unless you upgrade the Expo SDK.
+3. **Metro bundler running** (same as for iPhone flows):
+   ```sh
+   cd apps/mobile && npx expo run:ios
+   ```
+
+### iPad runner script
+
+`scripts/run-ipad.sh` mirrors `fresh-install.sh` but targets a named iPad
+simulator, boots it automatically, and passes `--device <udid>` to every
+`maestro test` call so runs are deterministic even when both iPhone and iPad
+simulators are booted simultaneously.
+
+```sh
+# Boot iPad + reset DB + run a single flow:
+./apps/mobile/maestro/scripts/run-ipad.sh \
+    apps/mobile/maestro/flows/ipad-smoke.yaml
+
+# Boot + reset only (no test):
+./apps/mobile/maestro/scripts/run-ipad.sh --install-only
+
+# Override the default device model:
+MAESTRO_IPAD_DEVICE="iPad Pro 13-inch (M4)" \
+    ./apps/mobile/maestro/scripts/run-ipad.sh \
+    apps/mobile/maestro/flows/ipad-smoke.yaml
+```
+
+### Full regression on iPad
+
+```sh
+./apps/mobile/maestro/scripts/full-regression.sh --device-class ipad
+```
+
+This boots the target iPad, threads the UDID through to every `maestro test`
+call, and produces the same `reports/` output as the iPhone run.
+
+### iPad-specific env vars
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `MAESTRO_IPAD_DEVICE` | `iPad (10th generation)` | Display name of the iPad simulator to target |
+| `MAESTRO_DEVICE_UDID` | _(auto-resolved)_ | UDID override — set by scripts, or manually to pin an exact device |
+| `MAESTRO_EXCLUSIVE` | `0` | Set to `1` to shut down conflicting iPhone simulators before booting the iPad |
+
+### iPad form-factor notes
+
+Tamagui breakpoints activate at `$gtMd` (min-width 768 px) on iPad.
+Known layout differences versus iPhone:
+
+| Area | iPhone | iPad |
+|---|---|---|
+| Tab bar height | 49 pt | 49 pt (same — bottom tabs) |
+| Modal / sheet | bottom sheet, partial | centered modal, larger snap points |
+| POS grid | 2-column | 3-column at `$gtMd` |
+| KPI strip | horizontal scroll | all KPIs visible without scroll |
+| Side drawer | none | may render inline at `$gtLg` |
+
+**Flow tagging convention:**
+
+- Flows confirmed clean on iPad: no special tag.
+- Flows with a layout-divergent iPad companion: named `<flow-name>.ipad.yaml`.
+- Flows that rely on iPhone-only gestures/coordinates: tagged `iphone-only`
+  with a comment linking the tracking issue.
+
+### iPad-specific flows
+
+| Flow | Purpose |
+|---|---|
+| `ipad-smoke.yaml` | Launch + auth + assert all tabs + Director Home + Estados on iPad |
+| `ipad-form-factor-audit.yaml` | Walk every responsive surface; trips on hidden testIDs at `$gtMd` breakpoints |
+
+---
 
 ## Re-running between flows
 

@@ -7,7 +7,7 @@
  * parent wires confirm → ProcesarGastoRecurrenteUseCase.
  */
 
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { formatMoney } from '@cachink/domain';
 import type { RecurringExpense } from '@cachink/domain';
@@ -115,16 +115,31 @@ function PendienteRow(props: {
 
 export function PendientesCard(props: PendientesCardProps): ReactElement | null {
   const { t } = useTranslation();
-  if (props.pendientes.length === 0) return null;
+  // Audit M-1 PR 4: optimistic removal — track removed IDs locally
+  // so re-tapping before the query cache refreshes doesn't fire twice.
+  const [removedIds, setRemovedIds] = useState<ReadonlySet<string>>(new Set());
+
+  const handleConfirmar = (p: RecurringExpense): void => {
+    setRemovedIds((prev) => new Set([...prev, p.id]));
+    props.onConfirmar(p);
+  };
+
+  const handleDescartar = (p: RecurringExpense): void => {
+    setRemovedIds((prev) => new Set([...prev, p.id]));
+    props.onDescartar?.(p);
+  };
+
+  const visiblePendientes = props.pendientes.filter((p) => !removedIds.has(p.id));
+  if (visiblePendientes.length === 0) return null;
   return (
     <View testID={props.testID ?? 'pendientes-card'} gap={10}>
       <SectionTitle title={t('pendientes.title')} />
-      {props.pendientes.map((p) => (
+      {visiblePendientes.map((p) => (
         <PendienteRow
           key={p.id}
           pendiente={p}
-          onConfirmar={() => props.onConfirmar(p)}
-          onDescartar={props.onDescartar ? () => props.onDescartar?.(p) : undefined}
+          onConfirmar={() => handleConfirmar(p)}
+          onDescartar={props.onDescartar ? () => handleDescartar(p) : undefined}
           confirming={props.confirming === true}
           t={t}
         />

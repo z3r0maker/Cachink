@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { Product } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
-import { Btn, Modal, Tag } from '../../components/index';
+import { Btn, Icon, Modal, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
@@ -54,25 +54,34 @@ function DetailBody({ producto, stock }: { producto: Product; stock: number }): 
   );
 }
 
-function ActionStack({
-  onEntrada,
-  onSalida,
-  onDelete,
-  deleting,
-  t,
-}: {
-  onEntrada: () => void;
-  onSalida: () => void;
-  onDelete: () => void;
-  deleting: boolean;
-  t: ReturnType<typeof useTranslation>['t'];
-}): ReactElement {
+interface ActionStackProps {
+  readonly onEntrada: () => void;
+  readonly onSalida: () => void;
+  readonly onDelete: () => void;
+  readonly deleting: boolean;
+  readonly t: ReturnType<typeof useTranslation>['t'];
+}
+
+function ActionStack(props: ActionStackProps): ReactElement {
+  const { onEntrada, onSalida, onDelete, deleting, t } = props;
   return (
     <View marginTop={16} gap={8}>
-      <Btn variant="green" onPress={onEntrada} fullWidth testID="producto-detail-entrada">
+      <Btn
+        variant="green"
+        onPress={onEntrada}
+        fullWidth
+        testID="producto-detail-entrada"
+        icon={<Icon name="plus" size={18} color={colors.white} />}
+      >
         {t('inventario.entrada')}
       </Btn>
-      <Btn variant="primary" onPress={onSalida} fullWidth testID="producto-detail-salida">
+      <Btn
+        variant="primary"
+        onPress={onSalida}
+        fullWidth
+        testID="producto-detail-salida"
+        icon={<Icon name="minus" size={18} color={colors.black} />}
+      >
         {t('inventario.salida')}
       </Btn>
       <Btn
@@ -81,6 +90,7 @@ function ActionStack({
         disabled={deleting}
         fullWidth
         testID="producto-detail-delete"
+        icon={<Icon name="trash-2" size={18} color={colors.white} />}
       >
         {t('inventario.delete')}
       </Btn>

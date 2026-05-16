@@ -8,7 +8,14 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, IsoDate, NewProduct, Product, ProductoTipo } from '@cachink/domain';
+import type {
+  BusinessId,
+  IsoDate,
+  NewProduct,
+  Product,
+  ProductColor,
+  ProductoTipo,
+} from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -24,6 +31,8 @@ export interface CrearProductoInput {
   readonly seguirStock?: boolean;
   readonly precioVenta: Money;
   readonly atributos?: Record<string, string>;
+  readonly colorFondo?: ProductColor;
+  readonly usoProducto?: Product['usoProducto'];
   /** Optional initial stock quantity. Creates an 'entrada' MovimientoInventario. */
   readonly stockInicial?: number;
 }
@@ -50,6 +59,8 @@ function buildNewProduct(input: CrearProductoInput, biz: BusinessId): NewProduct
     seguirStock: input.seguirStock ?? true,
     precioVentaCentavos: input.precioVenta,
     atributos: input.atributos ?? {},
+    colorFondo: input.colorFondo ?? 'white',
+    usoProducto: input.usoProducto ?? 'venta',
     businessId: biz,
   };
 }

@@ -33,6 +33,7 @@
 | **`<PhoneField>`**    | Phone-pad keyboard + `autoComplete="tel"`.                                                                                                         | `Phase 1A / Fields / PhoneField`    |
 | **`<PasswordField>`** | Masked input with brand show/hide toggle. `current-password` / `new-password` autofill.                                                            | `Phase 1A / Fields / PasswordField` |
 | **`<IntegerField>`**  | Strips non-digits at the input layer; clamps to `min`/`max` on blur.                                                                               | `Phase 1A / Fields / IntegerField`  |
+| **`<WheelQuantityPicker>`** | iOS-style scroll drum for bounded integers (1–999). Wraps `react-native-wheely`.                                                              | `Phase 1C / Fields / WheelQuantityPicker` |
 | **`<DateField>`**     | Platform-extension date input — native HTML5 on web, brand Modal-Combobox on RN.                                                                   | `Phase 1A / Fields / DateField`     |
 
 ## Layout + chrome
@@ -72,6 +73,22 @@
 - **One component per folder.** Folder name PascalCase (`<FooBar>` lives in `FooBar/`); file name kebab-case (`foo-bar.tsx`). Index barrel re-exports.
 - **Platform extensions:** `foo-bar.tsx` (shared / web), `foo-bar.native.tsx` (RN), `foo-bar.shared.tsx` (when types live separately). See CLAUDE.md §5.3.
 - **a11y:** every focusable primitive declares its `role` + `aria-label`; layout primitives declare semantic roles (`status`, `alert`, `heading`, `meter`, `radiogroup`, `list`). See `tests/a11y-semantics.test.tsx`.
+- **Input selector decision tree:** When adding a new form field that
+  captures a number, follow this table:
+
+  | Scenario                                       | Component                |
+  | ---------------------------------------------- | ------------------------ |
+  | Bounded integer ≤999 (qty, units, day of month) | `WheelQuantityPicker`    |
+  | Small threshold, ±1 fine-tuning                 | `StepperField`           |
+  | Unbounded / large number / keyboard required    | `IntegerField`           |
+  | Money amount                                    | `MoneyField`             |
+  | ≤5 mutually-exclusive choices                   | `OptionCardGroup`        |
+  | 6+ options or open-ended lists                  | `Combobox`               |
+
+  **Never use a raw `<Input type="number">` for small quantities.** The
+  wheel picker avoids keyboard pop-up, prevents invalid input by
+  construction, and is faster for the small numbers typical in micro-POS
+  workflows.
 - **i18n:** Spanish (es-MX) only at launch — see CLAUDE.md §8.5. All user-facing strings flow through `useTranslation` from `@cachink/ui/i18n`.
 - **Tests:** Vitest + Testing Library, jsdom environment. Below-floor primitives carry ≥6 tests apiece (Audit Round 2 G4).
 

@@ -15,43 +15,68 @@ import { colors, typography } from '../../theme';
 
 export interface VentaCardProps {
   readonly venta: Sale;
+  /** When provided, shows the client name as a chip (for Crédito sales). */
+  readonly clienteName?: string;
+  /** Product background color hex — mirrors the ProductoCard tile color. */
+  readonly backgroundColor?: string;
   readonly onPress?: () => void;
   readonly testID?: string;
 }
 
 function MetodoTag({ metodo }: { metodo: Sale['metodo'] }): ReactElement {
-  const variant = metodo === 'Crédito' ? 'warning' : 'neutral';
+  const variant = metodo === 'Crédito' ? 'warning' : 'info';
   return <Tag variant={variant}>{metodo}</Tag>;
 }
 
+function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }): ReactElement {
+  return (
+    <View flex={1} paddingRight={12}>
+      <View flexDirection="row" alignItems="center" gap={6}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.bold}
+          fontSize={16}
+          color={colors.black}
+        >
+          {venta.concepto}
+        </Text>
+        {venta.hora !== undefined && venta.hora !== null && (
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.medium}
+            fontSize={12}
+            color={colors.gray600}
+          >
+            {venta.hora}
+          </Text>
+        )}
+      </View>
+      <View flexDirection="row" gap={6} marginTop={6}>
+        <Tag variant="soft">{venta.categoria}</Tag>
+        <MetodoTag metodo={venta.metodo} />
+        {clienteName !== undefined && <Tag variant="info">{clienteName}</Tag>}
+      </View>
+    </View>
+  );
+}
+
 export function VentaCard(props: VentaCardProps): ReactElement {
+  const montoColor = props.venta.estadoPago === 'pendiente' ? colors.warning : colors.black;
   return (
     <Card
       testID={props.testID ?? `venta-card-${props.venta.id}`}
       padding="md"
       onPress={props.onPress}
       fullWidth
+      backgroundColor={props.backgroundColor}
     >
       <View flexDirection="row" alignItems="center" justifyContent="space-between">
-        <View flex={1} paddingRight={12}>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={16}
-            color={colors.black}
-          >
-            {props.venta.concepto}
-          </Text>
-          <View flexDirection="row" gap={6} marginTop={6}>
-            <Tag>{props.venta.categoria}</Tag>
-            <MetodoTag metodo={props.venta.metodo} />
-          </View>
-        </View>
+        <VentaInfo venta={props.venta} clienteName={props.clienteName} />
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
           fontSize={20}
-          color={props.venta.estadoPago === 'pendiente' ? colors.warning : colors.black}
+          color={montoColor}
         >
           {formatMoney(props.venta.monto)}
         </Text>

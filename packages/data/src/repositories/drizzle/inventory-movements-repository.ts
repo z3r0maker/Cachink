@@ -2,10 +2,11 @@
  * Drizzle-backed {@link InventoryMovementsRepository}.
  */
 
-import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
+  UserId,
   InventoryMovementId,
   IsoDate,
   IsoTimestamp,
@@ -26,10 +27,12 @@ type MovementRow = typeof inventoryMovements.$inferSelect;
 export class DrizzleInventoryMovementsRepository implements InventoryMovementsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewInventoryMovement): Promise<InventoryMovement> {
@@ -46,6 +49,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
       nota: input.nota ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -100,12 +104,19 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
   }
 
   async sumStock(productoId: ProductId): Promise<number> {
-    const rows = await this.findByProduct(productoId);
-    let total = 0;
-    for (const row of rows) {
-      total += row.tipo === 'entrada' ? row.cantidad : -row.cantidad;
-    }
-    return total;
+    const result = await this.#db
+      .select({
+        total: sql<number>`sum(case when ${inventoryMovements.tipo} = 'entrada' then ${inventoryMovements.cantidad} else -${inventoryMovements.cantidad} end)`,
+      })
+      .from(inventoryMovements)
+      .where(
+        and(
+          eq(inventoryMovements.productoId, productoId),
+          isNull(inventoryMovements.deletedAt),
+        ),
+      )
+      .get();
+    return result?.total ?? 0;
   }
 
   async delete(id: InventoryMovementId): Promise<void> {
@@ -129,6 +140,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
       nota: row.nota,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

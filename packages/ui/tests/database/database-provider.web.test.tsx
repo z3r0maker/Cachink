@@ -124,9 +124,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       .all('table') as Array<{ name: string }>;
     const names = new Set(tables.map((t) => t.name));
 
-    // Every Phase 1B table the 0000 migration creates must exist,
-    // plus the sync infrastructure tables added in the 0001 migration
-    // (ADR-030).
+    // Every table from the consolidated 0000_initial migration must exist.
     for (const expected of [
       'businesses',
       'app_config',
@@ -139,6 +137,15 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       'client_payments',
       'day_closes',
       'recurring_expenses',
+      'users',
+      'caja_turnos',
+      'conversion_recetas',
+      'conversions',
+      'auditorias_inventario',
+      'entregas_credito',
+      'director_alerts',
+      'caja_movimientos',
+      'cancelacion_logs',
       '__cachink_migrations',
       '__cachink_change_log',
       '__cachink_sync_state',
@@ -162,8 +169,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       tag: string;
     }>;
     expect(rows).toEqual([
-      { tag: '0000_lying_johnny_blaze' },
-      { tag: '0001_change_log_and_sync_state' },
+      { tag: '0000_initial' },
     ]);
   });
 });

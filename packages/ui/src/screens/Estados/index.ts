@@ -4,6 +4,9 @@
  * consumed by the app shells.
  */
 export * from './estado-resultados-screen';
+export * from './resultados-resumen-card';
+export * from './resultados-rows';
+export * from './health-verdicts';
 export * from './balance-general-screen';
 export * from './flujo-efectivo-screen';
 export * from './indicadores-screen';

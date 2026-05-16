@@ -1,0 +1,50 @@
+# Delete an empleado from Otros → Empleados and verify removal.
+#
+# Covers CRUD Delete for Empleados.
+#
+# Precondition: wizard complete + at least one empleado exists.
+# The egreso-nomina flow creates "Ana Pérez".
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-nomina.yaml
+#   maestro test apps/mobile/maestro/flows/empleado-eliminar.yaml
+#
+# ⚠️  This flow DESTROYS state — run last in any chain that
+# expects the empleado to still exist afterwards.
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros tab.
+- tapOn:
+    id: "tab-otros"
+
+# Tap the Empleados card in the Otros grid.
+- tapOn:
+    id: "otros-empleados"
+- assertVisible:
+    id: "settings-empleados-screen"
+
+# Verify the employee exists.
+- assertVisible: "Ana Pérez"
+
+# Tap the trash-icon Btn on the first employee row.
+- tapOn:
+    id: "empleado-delete-0"
+
+# ConfirmDialog appears.
+- assertVisible:
+    id: "confirm-dialog"
+
+# Confirm the deletion.
+- tapOn:
+    id: "confirm-dialog-confirm"
+
+# Employee is removed from the list.
+- assertNotVisible: "Ana Pérez"

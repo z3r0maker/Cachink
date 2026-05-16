@@ -22,8 +22,8 @@ import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecurringExpensesRepository,
-  MockRepositoryProvider,
 } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { NuevoEgresoModalSmart } from '../../src/screens/index';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

@@ -1,0 +1,43 @@
+# Navigate to a cliente's detail screen and verify sections render.
+#
+# Verifies:
+#   1. Navigate to Clientes → tap a cliente row
+#   2. cliente-detail-screen visible
+#   3. cliente-detail-pending-list visible (pending ventas)
+#   4. Saldo card visible
+#
+# Precondition: wizard complete, at least one cliente exists with a
+# pending Crédito venta. Run cliente-crear.yaml + venta-credito.yaml.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
+#   maestro test apps/mobile/maestro/flows/venta-credito.yaml
+#   maestro test apps/mobile/maestro/flows/cliente-detail-screen.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Clientes screen via deep link.
+- runFlow: shared/navigate-to-clientes.yaml
+
+# Verify the clientes list renders.
+- assertVisible:
+    id: "clientes-list"
+
+# Tap the existing cliente (created by cliente-crear.yaml).
+- tapOn: "Carla Márquez"
+
+# Verify the detail screen renders with expected sections.
+- assertVisible:
+    id: "cliente-detail-screen"
+
+# Pending ventas list should be visible (crédito venta exists).
+- assertVisible:
+    id: "cliente-detail-pending-list"

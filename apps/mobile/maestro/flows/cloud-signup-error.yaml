@@ -1,0 +1,79 @@
+# Cloud signup with invalid credentials — error handling.
+#
+# Verifies:
+#   1. Reach Cloud Onboarding → enter invalid email format
+#   2. Tap submit → cloud-onboarding-error visible
+#   3. Enter valid email + weak password → error persists
+#   4. Modal doesn't close on error
+#
+# Precondition: wizard complete. This flow tests the error path
+# of cloud onboarding, not actual cloud connectivity.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/cloud-signup-error.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Reach Cloud Onboarding via Settings → Sistema → Re-run wizard.
+- tapOn:
+    id: "top-bar-open-settings"
+- tapOn:
+    id: "settings-hub-sistema"
+- tapOn:
+    id: "settings-re-run-wizard"
+- assertVisible:
+    id: "wizard"
+
+# Step 1 → multi-device → Step 2B → cloud.
+- tapOn:
+    id: "wizard-step1-multi-card"
+- tapOn:
+    id: "wizard-step2b-cloud-card"
+- assertVisible:
+    id: "cloud-onboarding-screen"
+
+# Select signup tab.
+- tapOn:
+    id: "cloud-tab-signup"
+
+# --- Test 1: Invalid email format ---
+- tapOn:
+    id: "cloud-email-input"
+- inputText: "not-an-email"
+- tapOn:
+    id: "cloud-password-input"
+- inputText: "ValidPass123"
+- tapOn:
+    id: "cloud-business-input"
+- inputText: "Test Business"
+- tapOn:
+    id: "cloud-submit"
+
+# Error should be visible — modal stays open.
+- assertVisible:
+    id: "cloud-onboarding-error"
+- assertVisible:
+    id: "cloud-onboarding-screen"
+
+# --- Test 2: Valid email + weak password ---
+- tapOn:
+    id: "cloud-email-input"
+- eraseText
+- inputText: "test@example.com"
+- tapOn:
+    id: "cloud-password-input"
+- eraseText
+- inputText: "123"
+- tapOn:
+    id: "cloud-submit"
+
+# Error persists — screen still visible.
+- assertVisible:
+    id: "cloud-onboarding-screen"

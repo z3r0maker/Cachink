@@ -102,7 +102,7 @@ describe('BottomTabBar', () => {
     expect(onEgresosPress).toHaveBeenCalledTimes(1);
   });
 
-  it('fires onPress even when the active tab is pressed (re-tap is supported)', () => {
+  it('does NOT fire onPress for the already-active tab (no re-tap)', () => {
     const onVentasPress = vi.fn();
     renderWithProviders(
       <BottomTabBar
@@ -114,7 +114,7 @@ describe('BottomTabBar', () => {
       />,
     );
     fireEvent.click(screen.getAllByTestId('tab-ventas')[0]!);
-    expect(onVentasPress).toHaveBeenCalledTimes(1);
+    expect(onVentasPress).toHaveBeenCalledTimes(0);
   });
 
   it('renders the badge when provided', () => {

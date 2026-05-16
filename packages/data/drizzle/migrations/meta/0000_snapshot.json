@@ -30,7 +30,7 @@
         },
         "isr_tasa": {
           "name": "isr_tasa",
-          "type": "real",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
@@ -197,6 +197,13 @@
         },
         "deleted_at": {
           "name": "deleted_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "caja_turno_id": {
+          "name": "caja_turno_id",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

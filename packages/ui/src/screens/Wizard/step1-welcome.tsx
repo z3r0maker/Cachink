@@ -15,6 +15,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { LoadingOverlay } from '../../components/index';
 import { WizardCard, type WizardCardChip } from './wizard-card';
 import type { WizardScenario } from './state';
 
@@ -27,6 +28,10 @@ interface Step1Props {
   readonly onSelectMulti: () => void;
   readonly onJoinExistingLink: () => void;
   readonly onHelpLink: () => void;
+  /** Dev-only: one-tap demo mode. When undefined the link is hidden. */
+  readonly onDemoMode?: () => void;
+  /** Dev-only: true while demo seed is in progress → shows spinner. */
+  readonly demoLoading?: boolean;
 }
 
 function recommendedChip(active: boolean): WizardCardChip | undefined {
@@ -96,31 +101,74 @@ function SecondaryLink({
   );
 }
 
-export function Step1WelcomeScreen(props: Step1Props): ReactElement {
+function DemoModeAction(props: {
+  readonly onDemoMode: () => void;
+  readonly loading?: boolean;
+}): ReactElement {
   const { t } = useTranslation();
-  const soloRecommended =
-    props.preselectedScenario === 'solo-local' || props.preselectedScenario === 'solo-cloud';
-  const multiRecommended = props.preselectedScenario === 'multi-device';
   return (
     <>
-      <WelcomeHeader t={t} />
+      <SecondaryLink
+        testID="wizard-step1-demo-mode"
+        label={t('wizard.step1.demoModeLink')}
+        onPress={props.onDemoMode}
+      />
+      <LoadingOverlay
+        visible={props.loading === true}
+        message="Cargando demo…"
+        testID="demo-mode-overlay"
+      />
+    </>
+  );
+}
+
+function isRecommended(scenario: WizardScenario | null, target: 'solo' | 'multi'): boolean {
+  if (target === 'solo') return scenario === 'solo-local' || scenario === 'solo-cloud';
+  return scenario === 'multi-device';
+}
+
+function ModeCards(props: {
+  readonly t: T;
+  readonly scenario: WizardScenario | null;
+  readonly onSelectSolo: () => void;
+  readonly onSelectMulti: () => void;
+}): ReactElement {
+  const solo = isRecommended(props.scenario, 'solo');
+  const multi = isRecommended(props.scenario, 'multi');
+  return (
+    <>
       <WizardCard
         testID="wizard-step1-solo"
         icon="smartphone"
-        title={t('wizard.step1.soloTitle')}
-        hint={t('wizard.step1.soloBody')}
-        highlighted={soloRecommended || props.preselectedScenario === null}
-        chip={recommendedChip(soloRecommended)}
+        title={props.t('wizard.step1.soloTitle')}
+        hint={props.t('wizard.step1.soloBody')}
+        highlighted={solo || props.scenario === null}
+        chip={recommendedChip(solo)}
         onPress={props.onSelectSolo}
       />
       <WizardCard
         testID="wizard-step1-multi"
         icon="building-2"
-        title={t('wizard.step1.multiTitle')}
-        hint={t('wizard.step1.multiBody')}
-        highlighted={multiRecommended}
-        chip={recommendedChip(multiRecommended)}
+        title={props.t('wizard.step1.multiTitle')}
+        hint={props.t('wizard.step1.multiBody')}
+        highlighted={multi}
+        chip={recommendedChip(multi)}
         onPress={props.onSelectMulti}
+      />
+    </>
+  );
+}
+
+export function Step1WelcomeScreen(props: Step1Props): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <>
+      <WelcomeHeader t={t} />
+      <ModeCards
+        t={t}
+        scenario={props.preselectedScenario}
+        onSelectSolo={props.onSelectSolo}
+        onSelectMulti={props.onSelectMulti}
       />
       <SecondaryLink
         testID="wizard-step1-join-existing-link"
@@ -132,6 +180,9 @@ export function Step1WelcomeScreen(props: Step1Props): ReactElement {
         label={t('wizard.step1.helpLink')}
         onPress={props.onHelpLink}
       />
+      {props.onDemoMode && (
+        <DemoModeAction onDemoMode={props.onDemoMode} loading={props.demoLoading} />
+      )}
     </>
   );
 }

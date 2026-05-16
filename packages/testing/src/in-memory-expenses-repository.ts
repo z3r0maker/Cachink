@@ -37,6 +37,7 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
       gastoRecurrenteId: input.gastoRecurrenteId ?? null,
       businessId: input.businessId,
       deviceId: this.deviceId,
+      createdByUserId: null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null,
@@ -55,6 +56,12 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
     return this.#live()
       .filter((r) => r.fecha === date && r.businessId === businessId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]> {
+    return this.#live()
+      .filter((r) => r.businessId === businessId && r.fecha >= from && r.fecha <= to)
+      .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.createdAt.localeCompare(a.createdAt));
   }
 
   async findByMonth(yearMonth: string, businessId: BusinessId): Promise<readonly Expense[]> {
@@ -95,6 +102,17 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
     };
     this.rows.set(id, next);
     return next;
+  }
+
+  async findByGastoRecurrenteAndDate(
+    gastoRecurrenteId: string,
+    date: IsoDate,
+  ): Promise<Expense | null> {
+    return (
+      this.#live().find(
+        (r) => r.gastoRecurrenteId === gastoRecurrenteId && r.fecha === date,
+      ) ?? null
+    );
   }
 
   async delete(id: ExpenseId): Promise<void> {

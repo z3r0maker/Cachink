@@ -22,6 +22,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { colors, radii, shadows, typography } from '../../theme';
+import { impactLight } from '../../haptics/index';
 
 export interface SegmentedToggleOption<T extends string> {
   /** Stable key compared against `value`. */
@@ -169,7 +170,10 @@ export function SegmentedToggle<T extends string>(props: SegmentedToggleProps<T>
             label={option.label}
             active={option.key === props.value}
             disabled={disabled}
-            onPress={() => props.onChange(option.key)}
+            onPress={() => {
+              impactLight();
+              props.onChange(option.key);
+            }}
             testID={`${chipPrefix}-${option.key}`}
           />
         ))}

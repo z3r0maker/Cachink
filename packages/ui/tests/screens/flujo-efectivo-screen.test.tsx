@@ -1,5 +1,5 @@
 /**
- * FlujoEfectivoScreen tests (Slice 3 C15).
+ * FlujoEfectivoScreen tests — updated for sub-components + ResumenCard.
  */
 
 import { describe, expect, it } from 'vitest';
@@ -15,6 +15,10 @@ function flujo(overrides: Partial<FlujoDeEfectivo> = {}): FlujoDeEfectivo {
     operacion: 50_000n,
     inversion: -10_000n,
     total: 40_000n,
+    cobroVentasContado: 40_000n,
+    cobroCreditoClientes: 15_000n,
+    egresoOperativo: 5_000n,
+    egresoInversion: 10_000n,
     ...overrides,
   } as FlujoDeEfectivo;
 }
@@ -40,5 +44,15 @@ describe('FlujoEfectivoScreen', () => {
       />,
     );
     expect(screen.getByTestId('flujo-total').textContent).toContain('-$50.00');
+  });
+
+  it('renders the ResumenCard', () => {
+    renderWithProviders(<FlujoEfectivoScreen flujo={flujo()} periodoLabel="Abril 2026" />);
+    expect(screen.getByTestId('flujo-resumen-card')).toBeInTheDocument();
+  });
+
+  it('renders the 4-bar DivergingBar chart', () => {
+    renderWithProviders(<FlujoEfectivoScreen flujo={flujo()} periodoLabel="Abril 2026" />);
+    expect(screen.getByTestId('flujo-diverging-bar')).toBeInTheDocument();
   });
 });

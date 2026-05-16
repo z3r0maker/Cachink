@@ -8,6 +8,7 @@ import type {
   DayCloseId,
   DayCloseRole,
   DeviceId,
+  UserId,
   IsoDate,
   IsoTimestamp,
   NewDayClose,
@@ -22,10 +23,12 @@ type DayCloseRow = typeof dayCloses.$inferSelect;
 export class DrizzleDayClosesRepository implements DayClosesRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
+  readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
+    this.#userId = userId;
   }
 
   async create(input: NewDayClose): Promise<DayClose> {
@@ -42,6 +45,7 @@ export class DrizzleDayClosesRepository implements DayClosesRepository {
       cerradoPor: input.cerradoPor,
       businessId: input.businessId,
       deviceId: this.#deviceId,
+      createdByUserId: (this.#userId ?? null) as string | null,
       createdAt: ts,
       updatedAt: ts,
       deletedAt: null as string | null,
@@ -125,6 +129,7 @@ export class DrizzleDayClosesRepository implements DayClosesRepository {
       cerradoPor: row.cerradoPor as DayCloseRole,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
+      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,

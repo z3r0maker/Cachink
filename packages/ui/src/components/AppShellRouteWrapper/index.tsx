@@ -15,6 +15,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { AppShell } from '../../screens/AppShell/index';
 import { useCurrentBusiness } from '../../hooks/use-current-business';
+import { useFeatureFlags } from '../../hooks/use-feature-flags';
 import { useMode, useRole, useSetRole } from '../../app-config/use-app-config';
 import type { Role } from '../../app-config/types';
 
@@ -36,14 +37,22 @@ export interface AppShellRouteWrapperProps {
    * `DesktopRouterContext`'s `navigate` function.
    */
   readonly navigate: (path: string) => void;
+  /**
+   * Platform-injected replace callback. On mobile this is
+   * `(path) => router.replace(path)`. Used for bottom-tab switches
+   * so tabs never stack — prevents the iOS back gesture from
+   * "changing the page" when the user swipes inside a tabbed screen.
+   * Falls back to `navigate` when omitted (desktop state-router has
+   * no push/replace distinction).
+   */
+  readonly replaceRoute?: (path: string) => void;
   readonly children: ReactNode;
 }
 
-export function AppShellRouteWrapper(
-  props: AppShellRouteWrapperProps,
-): ReactElement | null {
+export function AppShellRouteWrapper(props: AppShellRouteWrapperProps): ReactElement | null {
   const role = useRole();
   const mode = useMode();
+  const flags = useFeatureFlags();
   const business = useCurrentBusiness().data ?? null;
   const setRole = useSetRole();
 
@@ -52,18 +61,23 @@ export function AppShellRouteWrapper(
   const resolvedRole: Role | null = role ?? props.defaultRole ?? null;
   if (!resolvedRole) return null;
 
+  // Tab switches use replace so they never create a stack entry —
+  // prevents iOS swipe-back from "changing the page."
+  const tabNavigate = props.replaceRoute ?? props.navigate;
+
   return (
     <AppShell
       role={resolvedRole}
       activeTabKey={props.activeTabKey}
       mode={mode}
+      flags={flags}
       title={props.title ?? business?.nombre ?? undefined}
       onBack={props.onBack}
       backLabel={props.backLabel}
-      onNavigate={props.navigate}
+      onNavigate={tabNavigate}
       onChangeRole={() => {
         setRole(null);
-        props.navigate('/role-picker');
+        tabNavigate('/role-picker');
       }}
       onOpenSettings={() => props.navigate('/settings')}
     >

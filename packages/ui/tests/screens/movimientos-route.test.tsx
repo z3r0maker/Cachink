@@ -14,8 +14,8 @@ import type { DeviceId, BusinessId, IsoDate } from '@cachink/domain';
 import {
   InMemoryProductsRepository,
   InMemoryInventoryMovementsRepository,
-  MockRepositoryProvider,
 } from '@cachink/testing';
+import { MockRepositoryProvider } from '@cachink/testing/ui';
 import { MovimientosRoute } from '../../src/screens/Inventario/movimientos-route';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

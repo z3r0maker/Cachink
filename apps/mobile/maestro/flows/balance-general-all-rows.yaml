@@ -1,0 +1,90 @@
+# Balance General — assert all detail rows for assets and capital.
+#
+# Extends estados-balance-data.yaml by verifying individual
+# breakdown rows within Activo and Capital sections.
+#
+# Verifies:
+#   1. Navigate to Estados → Balance (with data)
+#   2. balance-activo-inventarios visible
+#   3. balance-activo-cxc visible
+#   4. balance-activo-total visible
+#   5. balance-activo-bar (stacked bar chart) visible
+#   6. balance-capital-utilidad visible
+#   7. balance-capital-total visible
+#
+# Precondition: wizard complete, ventas + egresos + inventory exist.
+# Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
+#   maestro test apps/mobile/maestro/flows/venta-credito.yaml
+#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
+#   maestro test apps/mobile/maestro/flows/balance-general-all-rows.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Navigate to the Estados tab (Director role).
+- tapOn:
+    id: "tab-estados"
+
+# Switch to the Balance sub-tab.
+- tapOn:
+    id: "estados-tab-balance"
+- extendedWaitUntil:
+    visible:
+      id: "balance-activo-card"
+    timeout: 5000
+
+# --- Activo section detail rows ---
+
+# Inventarios line item.
+- scrollUntilVisible:
+    element:
+      id: "balance-activo-inventarios"
+    direction: DOWN
+    timeout: 5000
+
+# Cuentas por Cobrar line item.
+- scrollUntilVisible:
+    element:
+      id: "balance-activo-cxc"
+    direction: DOWN
+    timeout: 5000
+
+# Activo total.
+- scrollUntilVisible:
+    element:
+      id: "balance-activo-total"
+    direction: DOWN
+    timeout: 5000
+
+# Stacked bar chart visualization.
+- scrollUntilVisible:
+    element:
+      id: "balance-activo-bar"
+    direction: DOWN
+    timeout: 5000
+
+# --- Capital section detail rows ---
+
+# Utilidad del periodo.
+- scrollUntilVisible:
+    element:
+      id: "balance-capital-utilidad"
+    direction: DOWN
+    timeout: 5000
+
+# Capital total.
+- scrollUntilVisible:
+    element:
+      id: "balance-capital-total"
+    direction: DOWN
+    timeout: 5000

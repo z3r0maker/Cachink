@@ -18,7 +18,7 @@ import type { BusinessId, IsoDate, MovementType, NewInventoryMovement } from '@c
 import { ConfirmDialog } from '../../components/index';
 import { useCurrentBusinessId } from '../../app-config/index';
 import { useRegistrarMovimiento } from '../../hooks/use-registrar-movimiento';
-import { useEliminarProducto, StockNotEmptyError } from '../../hooks/use-eliminar-producto';
+import { useEliminarProducto } from '../../hooks/use-eliminar-producto';
 import { useTranslation } from '../../i18n/index';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
 import { ProductoDetailPopover } from './producto-detail-popover';
@@ -51,20 +51,13 @@ function useMovimientoModalState(): {
 function useDeleteHandler(
   row: ProductoConStock | null,
   onClose: () => void,
-  onRequireForce: () => void,
-): { onDelete: () => void; onConfirmDelete: () => void; deleting: boolean } {
+  onRequireConfirm: () => void,
+): { onDelete: () => void; onConfirmDelete: () => void; deleting: boolean; hasStock: boolean } {
   const eliminar = useEliminarProducto();
+  // Audit M-1 PR 4: always require confirmation before deleting.
   const onDelete = (): void => {
     if (!row) return;
-    eliminar.mutate(
-      { id: row.producto.id, currentStock: row.stock },
-      {
-        onSuccess: () => onClose(),
-        onError: (err) => {
-          if (err instanceof StockNotEmptyError) onRequireForce();
-        },
-      },
-    );
+    onRequireConfirm();
   };
   const onConfirmDelete = (): void => {
     if (!row) return;
@@ -73,7 +66,12 @@ function useDeleteHandler(
       { onSuccess: () => onClose() },
     );
   };
-  return { onDelete, onConfirmDelete, deleting: eliminar.isPending };
+  return {
+    onDelete,
+    onConfirmDelete,
+    deleting: eliminar.isPending,
+    hasStock: (row?.stock ?? 0) > 0,
+  };
 }
 
 interface DetailModalsProps {
@@ -146,6 +144,12 @@ export function ProductoDetailRoute(props: ProductoDetailRouteProps): ReactEleme
       },
     });
   };
+  const deleteTitle = del.hasStock
+    ? t('inventario.deleteBlockedTitle')
+    : t('inventario.deleteConfirmTitle');
+  const deleteBody = del.hasStock
+    ? t('inventario.deleteBlockedBody')
+    : t('inventario.deleteConfirmBody');
   return (
     <DetailModals
       row={props.row}
@@ -156,8 +160,8 @@ export function ProductoDetailRoute(props: ProductoDetailRouteProps): ReactEleme
       del={del}
       deleteConfirmOpen={deleteConfirmOpen}
       onCloseDeleteConfirm={() => setDeleteConfirmOpen(false)}
-      deleteConfirmTitle={t('inventario.deleteBlockedTitle')}
-      deleteConfirmBody={t('inventario.deleteBlockedBody')}
+      deleteConfirmTitle={deleteTitle}
+      deleteConfirmBody={deleteBody}
       deleteConfirmLabel={t('actions.delete')}
       onClose={props.onClose}
       handleSubmit={handleSubmit}

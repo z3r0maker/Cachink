@@ -15,6 +15,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../Icon/index';
 import { colors, radii, typography } from '../../theme';
+import { impactLight } from '../../haptics/index';
 
 export interface ModalHeaderProps {
   readonly title?: string;
@@ -63,10 +64,10 @@ function Title({ text }: { text: string }): ReactElement {
       fontWeight={typography.weights.black}
       fontSize={20}
       letterSpacing={typography.letterSpacing.tight}
-      // Audit 9.3 — modal titles like "Registrar pago de cliente"
+      // Audit 9.3 — modal titles like "¿Actualizar tasa de ISR?"
       // can exceed the modal-header width minus the close button +
-      // avatar slots. Cap to one line + ellipsis.
-      numberOfLines={1}
+      // avatar slots. Allow wrapping to two lines before ellipsis.
+      numberOfLines={2}
       ellipsizeMode="tail"
       // Audit 9.4 — modal headers compete with the close button for
       // the same row; cap at 1.3× to preserve the §8 row geometry.
@@ -103,7 +104,10 @@ function CloseButton({ onClose }: { onClose: () => void }): ReactElement {
   return (
     <View
       testID="modal-close"
-      onPress={onClose}
+      onPress={() => {
+        impactLight();
+        onClose();
+      }}
       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       data-hit-slop='{"top":6,"bottom":6,"left":6,"right":6}'
       backgroundColor={colors.black}

@@ -23,6 +23,10 @@ export interface IntegerFieldProps {
   readonly label?: string;
   readonly placeholder?: string;
   readonly note?: string;
+  /** Validation error — red text + red border. Takes precedence over `note`. */
+  readonly error?: string;
+  /** When true, appends a red asterisk to the label. */
+  readonly required?: boolean;
   readonly testID?: string;
   readonly ariaLabel?: string;
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
@@ -67,6 +71,8 @@ export function IntegerField(props: IntegerFieldProps): ReactElement {
       label={props.label}
       placeholder={props.placeholder ?? '0'}
       note={props.note}
+      error={props.error}
+      required={props.required}
       testID={props.testID ?? 'integer-field'}
       ariaLabel={props.ariaLabel ?? props.label}
       returnKeyType={props.returnKeyType}

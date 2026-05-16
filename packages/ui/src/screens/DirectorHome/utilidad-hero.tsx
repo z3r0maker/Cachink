@@ -14,7 +14,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { IsoDate } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import { formatMoney, formatPeriodoLabel } from '@cachink/domain';
 import { Btn, Card, Kpi } from '../../components/index';
 import { useEstadoResultados } from '../../hooks/index';
 import { useTranslation } from '../../i18n/index';
@@ -55,7 +55,13 @@ export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
   const utilidad = (query.data?.utilidadNeta ?? 0n) as bigint;
 
   return (
-    <Card testID={props.testID ?? 'utilidad-hero'} variant="yellow" padding="lg" fullWidth>
+    <Card
+      testID={props.testID ?? 'utilidad-hero'}
+      variant="yellow"
+      elevation="raised"
+      padding="lg"
+      fullWidth
+    >
       <Kpi
         label={t('directorHome.utilidadTitle')}
         value={formatMoney(utilidad as never)}
@@ -68,7 +74,7 @@ export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
           fontSize={12}
           color={colors.gray600}
         >
-          {periodo.from} → {periodo.to}
+          {formatPeriodoLabel(periodo.from, periodo.to)}
         </Text>
         {props.onVerEstados && (
           <Btn

@@ -47,6 +47,41 @@ export type InventoryUnit = z.infer<typeof InventoryUnitEnum>;
 export const ProductoTipoEnum = z.enum(['producto', 'servicio']);
 export type ProductoTipo = z.infer<typeof ProductoTipoEnum>;
 
+/** Phase 8: how the product is used in the business. */
+export const UsoProductoEnum = z.enum(['venta', 'materia-prima', 'ambos']);
+export type UsoProducto = z.infer<typeof UsoProductoEnum>;
+
+/** Soft background color for visual categorization (default: white). */
+export const ProductColorEnum = z.enum([
+  'white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray',
+]);
+export type ProductColor = z.infer<typeof ProductColorEnum>;
+
+/** Product icon — curated Lucide icon names for visual identification. */
+export const ProductIconEnum = z.enum([
+  // Alimentos
+  'beef', 'apple', 'cake', 'candy', 'cookie', 'croissant', 'drumstick',
+  'egg', 'fish', 'ice-cream-cone', 'leaf', 'nut', 'pizza', 'popcorn',
+  'salad', 'sandwich', 'soup',
+  // Bebidas
+  'beer', 'coffee', 'cup-soda', 'glass-water', 'grape', 'martini',
+  'milk', 'wine',
+  // Comercio
+  'gift', 'gem', 'shirt', 'sport-shoe', 'shopping-bag', 'store', 'tag',
+  'watch',
+  // Servicios
+  'car', 'hammer', 'hard-hat', 'paintbrush', 'plug', 'scissors',
+  'spray-can', 'stethoscope', 'wrench',
+  // Belleza & Cuidado
+  'bath', 'sparkles', 'sun', 'droplets', 'heart',
+  // Hogar & Oficina
+  'armchair', 'book', 'briefcase', 'lamp', 'pen-tool', 'printer',
+  // General
+  'archive', 'box', 'clipboard-list', 'flower-2', 'music', 'package',
+  'palette', 'paw-print', 'pill', 'star', 'ticket', 'trophy', 'zap',
+]);
+export type ProductIcon = z.infer<typeof ProductIconEnum>;
+
 export const ProductSchema = z
   .object({
     id: ulidField<ProductId>(),
@@ -60,6 +95,11 @@ export const ProductSchema = z
     seguirStock: z.boolean(),
     precioVentaCentavos: moneyField,
     atributos: z.record(z.string(), z.string()).default({}),
+    colorFondo: ProductColorEnum.default('white'),
+    /** Phase 8: venta, materia-prima, or ambos. */
+    usoProducto: UsoProductoEnum.default('venta'),
+    /** Optional product icon for visual identification. */
+    icono: ProductIconEnum.nullable().default(null),
   })
   .merge(auditSchema)
   .refine((v) => v.tipo === 'producto' || v.seguirStock === false, {
@@ -80,6 +120,9 @@ export const NewProductSchema = z.object({
   seguirStock: z.boolean().default(true),
   precioVentaCentavos: moneyField,
   atributos: z.record(z.string(), z.string()).default({}),
+  colorFondo: ProductColorEnum.default('white'),
+  usoProducto: UsoProductoEnum.default('venta'),
+  icono: ProductIconEnum.nullable().optional(),
   businessId: ulidField<BusinessId>(),
 });
 

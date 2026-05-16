@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { newEntityId, type BusinessId, type DeviceId } from '@cachink/domain';
+import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '@cachink/domain';
 import type { AppConfigRepository } from '@cachink/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
@@ -51,6 +51,7 @@ interface HydratedConfig {
   readonly currentBusinessId: BusinessId | null;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
+  readonly cachinkSoundEnabled: boolean;
 }
 
 function parseBool(raw: string | null, fallback: boolean): boolean {
@@ -104,6 +105,12 @@ async function hydrateAppConfig(
   if (!existingDeviceId) {
     await repo.set(APP_CONFIG_KEYS.deviceId, deviceId);
   }
+  // Seed ISR defaults on first run so the DB owns the rates.
+  const existingIsrDefaults = await repo.get(APP_CONFIG_KEYS.isrDefaults);
+  if (!existingIsrDefaults) {
+    await repo.set(APP_CONFIG_KEYS.isrDefaults, JSON.stringify(ISR_DEFAULTS_SEED));
+  }
+
   const mode = await readAndMigrateMode(repo, resolveLegacyLan);
   const rawBusinessId = await repo.get(APP_CONFIG_KEYS.currentBusinessId);
   const notificationsEnabled = parseBool(
@@ -113,12 +120,17 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
+  const cachinkSoundEnabled = parseBool(
+    await repo.get(APP_CONFIG_KEYS.cachinkSoundEnabled),
+    true,
+  );
   return {
     deviceId,
     mode,
     currentBusinessId: rawBusinessId as BusinessId | null,
     notificationsEnabled,
     crashReportingEnabled,
+    cachinkSoundEnabled,
   };
 }
 
@@ -128,6 +140,7 @@ interface Setters {
   readonly setCurrentBusinessId: (v: BusinessId | null) => void;
   readonly setNotificationsEnabled: (v: boolean) => void;
   readonly setCrashReportingEnabled: (v: boolean | null) => void;
+  readonly setCachinkSoundEnabled: (v: boolean) => void;
   readonly setHydrated: (v: boolean) => void;
 }
 
@@ -137,6 +150,7 @@ function applyHydrated(c: HydratedConfig, s: Setters): void {
   s.setCurrentBusinessId(c.currentBusinessId);
   s.setNotificationsEnabled(c.notificationsEnabled);
   s.setCrashReportingEnabled(c.crashReportingEnabled);
+  s.setCachinkSoundEnabled(c.cachinkSoundEnabled);
   s.setHydrated(true);
 }
 
@@ -147,6 +161,7 @@ function useStoreSetters(): Setters {
     setCurrentBusinessId: useAppConfigStore((s) => s.setCurrentBusinessId),
     setNotificationsEnabled: useAppConfigStore((s) => s.setNotificationsEnabled),
     setCrashReportingEnabled: useAppConfigStore((s) => s.setCrashReportingEnabled),
+    setCachinkSoundEnabled: useAppConfigStore((s) => s.setCachinkSoundEnabled),
     setHydrated: useAppConfigStore((s) => s.setHydrated),
   };
 }

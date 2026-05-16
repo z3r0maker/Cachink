@@ -66,6 +66,15 @@ export interface ListProps<T> {
     data: ArrayLike<T> | null | undefined,
     index: number,
   ) => ListItemMetadata;
+  /**
+   * When `false` the native FlatList delegates scrolling to a parent
+   * ScrollView — use this whenever `<List>` is nested inside a
+   * `<ScrollView>` to avoid the "VirtualizedLists should never be
+   * nested" warning.  The web variant ignores this prop (scrolling
+   * is always handled by the document flow / parent overflow).
+   * @default true
+   */
+  readonly scrollEnabled?: boolean;
   /** Forwarded to the root container — anchor for E2E tests. */
   readonly testID?: string;
 }

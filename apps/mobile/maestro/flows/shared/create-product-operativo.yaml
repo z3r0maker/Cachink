@@ -1,0 +1,35 @@
+# Reusable subflow: quick product creation from Operativo role.
+#
+# Creates a product named "Tortilla" with precio $15.00 (1500 centavos).
+# Useful as a precondition setup step when the flow chain hasn't
+# run inventario-producto.yaml.
+#
+# Precondition: user is authenticated as Operativo (or Director
+# accessing Productos via Otros).
+#
+# Usage (from any flow that needs a product):
+#   - runFlow: shared/create-product-operativo.yaml
+appId: mx.cachink.mobile
+---
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    id: "stock-nuevo-producto"
+
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Tortilla"
+
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "1500"
+
+- tapOn:
+    id: "producto-submit"
+
+# Wait for the modal to close.
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 10000

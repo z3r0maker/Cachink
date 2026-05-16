@@ -25,6 +25,7 @@ import { KeyboardAvoidingView } from 'react-native';
 import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
+import type { FeatureFlags } from '@cachink/domain';
 import type { AppMode, Role } from '../../app-config/index';
 import { tabsForRole } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';
@@ -40,16 +41,14 @@ export interface AppShellProps {
   readonly title?: string;
   readonly subtitle?: string;
   readonly mode: AppMode | null;
+  /** Feature flags for tab visibility (Phase 4). */
+  readonly flags?: FeatureFlags;
   readonly children: ReactNode;
   /**
-   * Optional source string for the TopBar's left avatar. Operativo
-   * passes the business name (`'Panadería La Esquina'` → `'PA'`),
-   * Director passes the role abbreviation (`'DIR'`). Falls back to
-   * the localised role label when omitted.
-   *
-   * Per ADR-040 the legacy `RoleChip` + "Cambiar" Btn collapsed into
-   * a single tappable `<InitialsAvatar>`; tapping the avatar fires
-   * `onChangeRole`.
+   * @deprecated No longer used. The role avatar now renders an
+   * illustration (silhouette) instead of text initials. Kept
+   * temporarily so existing consumers don't break at compile time;
+   * will be removed in the next breaking-change sweep.
    */
   readonly avatarValue?: string;
   /**
@@ -102,7 +101,7 @@ function RightSlot(props: RightSlotProps): ReactElement {
        */}
       <Btn
         variant="ghost"
-        size="sm"
+        size="md"
         onPress={props.onOpenSettings}
         testID="top-bar-open-settings"
         ariaLabel={t('topBar.openSettings')}
@@ -112,8 +111,10 @@ function RightSlot(props: RightSlotProps): ReactElement {
   );
 }
 
-function useLeftSlot(props: AppShellProps, t: ReturnType<typeof useTranslation>['t']): ReactElement {
-  const avatarValue = props.avatarValue ?? t(`roles.${props.role}` as const);
+function useLeftSlot(
+  props: AppShellProps,
+  t: ReturnType<typeof useTranslation>['t'],
+): ReactElement {
   const backLabel = props.backLabel ?? t('topBar.back');
   if (props.onBack !== undefined) {
     return <BackButton onPress={props.onBack} ariaLabel={backLabel} />;
@@ -121,7 +122,6 @@ function useLeftSlot(props: AppShellProps, t: ReturnType<typeof useTranslation>[
   return (
     <RoleAvatar
       role={props.role}
-      value={avatarValue}
       onChange={props.onChangeRole}
       ariaLabel={t('topBar.cambiarRol')}
     />
@@ -130,7 +130,7 @@ function useLeftSlot(props: AppShellProps, t: ReturnType<typeof useTranslation>[
 
 export function AppShell(props: AppShellProps): ReactElement {
   const { t } = useTranslation();
-  const tabs = tabsForRole(props.role);
+  const tabs = tabsForRole(props.role, props.flags);
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),
