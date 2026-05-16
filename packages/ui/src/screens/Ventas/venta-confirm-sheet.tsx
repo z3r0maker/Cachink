@@ -146,8 +146,9 @@ function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): Rea
         variant="primary"
         onPress={handleSubmit}
         disabled={
-          disabled === true || submitting === true || (form.metodo === 'Crédito' && !form.clienteId)
+          disabled === true || (form.metodo === 'Crédito' && !form.clienteId)
         }
+        loading={submitting === true}
         fullWidth
         testID="venta-confirm-submit"
       >

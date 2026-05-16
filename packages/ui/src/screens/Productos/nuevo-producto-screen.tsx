@@ -75,7 +75,7 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="producto-submit"
       >

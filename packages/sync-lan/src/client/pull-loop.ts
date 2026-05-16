@@ -4,12 +4,10 @@
  * the WebSocket is alive (WS wake-ups trigger immediate one-shot pulls).
  *
  * Apply strategy:
- *   - Open a transaction per batch, `PRAGMA foreign_keys=OFF`, run the
- *     upserts, commit, then `PRAGMA foreign_keys=ON`. The cross-table
- *     order of deltas is not guaranteed (a sale may arrive before the
- *     client it references), so we disable FK checks for the duration of
- *     the batch and rely on the domain schema to catch referential bugs
- *     at the app layer.
+ *   - Open a transaction per batch with `PRAGMA defer_foreign_keys = ON`.
+ *     Deferred FKs are checked at COMMIT time (not per-statement), so
+ *     cross-table upsert order doesn't matter — a sale can arrive before
+ *     the client it references within the same batch.
  *   - Every row goes through the same LWW SQL the server uses: the
  *     local row wins if its `updated_at` is strictly greater, or equal
  *     and its `device_id` is lexicographically smaller.
@@ -98,7 +96,10 @@ async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promi
   let rejected = 0;
   await db.run(sql`BEGIN IMMEDIATE`);
   try {
-    await db.run(sql`PRAGMA foreign_keys = OFF`);
+    // defer_foreign_keys CAN be set inside a transaction (unlike foreign_keys).
+    // Deferred FKs are checked at COMMIT time, not per-statement, so
+    // cross-table upsert order doesn't matter.
+    await db.run(sql`PRAGMA defer_foreign_keys = ON`);
     for (const delta of decoded) {
       const stmt = buildUpsertLww(delta.table, delta.decodedRow);
       const raw = await db.run(stmt);
@@ -109,8 +110,8 @@ async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promi
         await recordInboundConflict(db, delta);
       }
     }
-    await db.run(sql`PRAGMA foreign_keys = ON`);
     await db.run(sql`COMMIT`);
+    // defer_foreign_keys resets to OFF automatically after COMMIT
   } catch (error) {
     await db.run(sql`ROLLBACK`);
     throw error;

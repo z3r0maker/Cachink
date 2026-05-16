@@ -45,6 +45,10 @@ export interface WizardProps {
   readonly platform?: Platform;
   readonly testID?: string;
   readonly onHelpOpened?: () => void;
+  /** Dev-only: one-tap demo mode. When undefined the link is hidden. */
+  readonly onDemoMode?: () => void;
+  /** Dev-only: true while demo seed is in progress → shows spinner. */
+  readonly demoLoading?: boolean;
 }
 
 interface ScreenProps {
@@ -52,9 +56,11 @@ interface ScreenProps {
   readonly onSelectMode: (mode: AppMode) => void;
   readonly onOpenHelp: () => void;
   readonly onConsent?: (choice: boolean | null) => void;
+  readonly onDemoMode?: () => void;
+  readonly demoLoading?: boolean;
 }
 
-function Step1View({ platform, onOpenHelp }: ScreenProps): ReactElement {
+function Step1View({ platform, onOpenHelp, onDemoMode, demoLoading }: ScreenProps): ReactElement {
   const goTo = useWizardGoTo();
   const preselected = useWizardPreselectedScenario();
   return (
@@ -65,6 +71,8 @@ function Step1View({ platform, onOpenHelp }: ScreenProps): ReactElement {
       onSelectMulti={() => goTo('step2b')}
       onJoinExistingLink={() => goTo('step3')}
       onHelpLink={onOpenHelp}
+      onDemoMode={onDemoMode}
+      demoLoading={demoLoading}
     />
   );
 }
@@ -210,6 +218,8 @@ export function Wizard(props: WizardProps): ReactElement {
           onSelectMode={consent.interceptedSelectMode}
           onOpenHelp={() => help.setOpen(true)}
           onConsent={consent.handleConsent}
+          onDemoMode={props.onDemoMode}
+          demoLoading={props.demoLoading}
         />
         <HelpModal
           open={help.open}

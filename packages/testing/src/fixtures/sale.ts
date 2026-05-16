@@ -55,6 +55,7 @@ export function makeSale(overrides: Partial<Sale> = {}): Sale {
     estadoPago: 'pagado',
     productoId,
     cantidad: 1,
+    cajaTurnoId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdByUserId: null,

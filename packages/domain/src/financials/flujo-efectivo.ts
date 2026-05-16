@@ -26,6 +26,14 @@ export interface FlujoDeEfectivo {
   operacion: Money;
   inversion: Money;
   total: Money;
+  /** Cash-in from cash-method sales (Efectivo, Transferencia, Tarjeta, QR/CoDi). */
+  cobroVentasContado: Money;
+  /** Cash-in from client payments against Crédito sales. */
+  cobroCreditoClientes: Money;
+  /** Cash-out from non-Inventario egresos. */
+  egresoOperativo: Money;
+  /** Cash-out from Inventario-category egresos. */
+  egresoInversion: Money;
 }
 
 export interface FlujoDeEfectivoInput {
@@ -51,5 +59,13 @@ export function calculateFlujoDeEfectivo(input: FlujoDeEfectivoInput): FlujoDeEf
   const inversion = ZERO - cashOutInversion;
   const total = operacion + inversion;
 
-  return { operacion, inversion, total };
+  return {
+    operacion,
+    inversion,
+    total,
+    cobroVentasContado: cashInFromSales,
+    cobroCreditoClientes: cashInFromPagos,
+    egresoOperativo: cashOutOperativo,
+    egresoInversion: cashOutInversion,
+  };
 }

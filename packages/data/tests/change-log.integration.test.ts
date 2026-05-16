@@ -223,7 +223,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
         id: '01HZ8XQN9GZJXV8AKQ5X0C7B01',
         nombre: 'Negocio',
         regimenFiscal: 'RIF',
-        isrTasa: 0.3,
+        isrTasa: 3000,
         logoUrl: null,
         ...audit(),
       })

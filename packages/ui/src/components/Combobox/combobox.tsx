@@ -31,6 +31,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 import { Popover } from '@tamagui/popover';
 import { colors, radii, shadows } from '../../theme';
+import { impactLight } from '../../haptics/index';
 import type { ComboboxOption, ComboboxProps } from './combobox-types';
 import { EmptyRow, OptionRow, SearchInput, TriggerView, readSearchEvent } from './combobox-views';
 
@@ -119,6 +120,7 @@ function useComboboxBindings<T extends string>(props: ComboboxProps<T>): Combobo
   const handleTriggerPress = useCallback(() => setOpen(true), [setOpen]);
   const handleSelect = useCallback(
     (key: T) => {
+      impactLight();
       onChange(key);
       setOpen(false);
     },

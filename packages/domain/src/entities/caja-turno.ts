@@ -43,6 +43,10 @@ export const CajaTurnoSchema = z
     totalQr: moneyField,
     totalCredito: moneyField,
     egresoAutoId: ulidField<ExpenseId>().nullable(),
+    /** Blind-count amount entered by operator (centavos). Locked on submit. */
+    conteoCentavos: moneyField.nullable().default(null),
+    /** ISO timestamp when the blind count was submitted. */
+    conteoAt: isoTimestampField.nullable().default(null),
   })
   .merge(auditSchema);
 

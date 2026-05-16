@@ -1,115 +1,138 @@
 /**
  * PinCodeInput — OTP-style 6-digit masked PIN entry.
  *
- * Uses the hidden-input pattern: one invisible TamaguiInput captures
- * keystrokes, six visual View boxes render masked dots (●).
- * Auto-fires onComplete when all 6 digits are entered.
- *
- * Neobrutalist styling: 2px solid black borders, 12px radius, hard
- * focus ring (2.5px). Red borders when `error` is set.
+ * Two modes: hidden-input (system keyboard) or inline numpad (`useNumpad`).
+ * Error feedback: shake animation + notificationError haptic.
  */
 
-import { useRef, useEffect, type ReactElement } from 'react';
-import { View, Text } from '@tamagui/core';
+import { useRef, useEffect, forwardRef, type ReactElement } from 'react';
+import { Animated } from 'react-native';
+import { View } from '@tamagui/core';
 import { Input as TamaguiInput } from '@tamagui/input';
-import { colors, radii, typography } from '../../theme';
+import { impactLight, notificationError } from '../../haptics/index';
+import { Numpad } from '../Numpad/index';
+import { DigitBox } from './digit-box';
+import { useShakeAnimation } from './use-shake-animation';
 
 export interface PinCodeInputProps {
   readonly value: string;
   readonly onChange: (value: string) => void;
-  /** Fires when all 6 digits are entered. */
   readonly onComplete?: (pin: string) => void;
-  /** Red border on all boxes when set. */
   readonly error?: boolean;
+  readonly disabled?: boolean;
+  /** Use inline numpad instead of system keyboard. Default false. */
+  readonly useNumpad?: boolean;
   readonly testID?: string;
 }
 
 const PIN_LENGTH = 6;
-const BOX_SIZE = 44;
-const BOX_HEIGHT = 48;
 const BOX_GAP = 8;
-const BORDER_WIDTH = 2;
-const BORDER_WIDTH_ACTIVE = 2.5;
-const DOT_FONT_SIZE = 24;
-const BOX_RADIUS = radii[2]; // 12
+const FOCUS_DELAY_MS = 100;
+const DISABLED_OPACITY = 0.6;
 
-/** Strip non-digits and clamp to PIN_LENGTH characters. */
 function sanitize(raw: string): string {
   return raw.replace(/\D/g, '').slice(0, PIN_LENGTH);
 }
 
-/** Determine which box is "active" (cursor position). */
-function activeIndex(valueLength: number): number {
-  return Math.min(valueLength, PIN_LENGTH - 1);
+function activeIndex(len: number): number {
+  return Math.min(len, PIN_LENGTH - 1);
 }
 
-function DigitBox(props: {
-  readonly filled: boolean;
-  readonly active: boolean;
-  readonly error: boolean;
-}): ReactElement {
-  const borderColor = props.error ? colors.red : colors.black;
-  const borderWidth = props.active && !props.error ? BORDER_WIDTH_ACTIVE : BORDER_WIDTH;
+/** Emit haptic + fire onChange/onComplete for a new digit value. */
+function commitValue(
+  next: string,
+  prev: string,
+  onChange: (v: string) => void,
+  onComplete?: (pin: string) => void,
+): void {
+  if (next.length > prev.length) impactLight();
+  onChange(next);
+  if (next.length === PIN_LENGTH) onComplete?.(next);
+}
 
-  return (
-    <View
-      width={BOX_SIZE}
-      height={BOX_HEIGHT}
-      borderColor={borderColor}
-      borderWidth={borderWidth}
-      borderRadius={BOX_RADIUS}
-      backgroundColor={colors.white}
-      alignItems="center"
-      justifyContent="center"
-      borderStyle="solid"
-    >
-      {props.filled && (
-        <Text
-          fontSize={DOT_FONT_SIZE}
-          color={colors.black}
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          lineHeight={DOT_FONT_SIZE}
-        >
-          ●
-        </Text>
-      )}
-    </View>
-  );
+function useErrorShake(hasError: boolean): Animated.Value {
+  const { translateX, triggerShake } = useShakeAnimation();
+  useEffect(() => {
+    if (hasError) { triggerShake(); notificationError(); }
+  }, [hasError, triggerShake]);
+  return translateX;
+}
+
+function useAutoFocus(
+  ref: React.RefObject<HTMLInputElement | null>,
+  disabled: boolean,
+  numpad: boolean,
+): void {
+  useEffect(() => {
+    if (disabled || numpad) return;
+    const t = setTimeout(() => ref.current?.focus(), FOCUS_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [ref, disabled, numpad]);
 }
 
 export function PinCodeInput(props: PinCodeInputProps): ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
-  const hasError = props.error === true;
-  const cursorIndex = activeIndex(props.value.length);
+  const off = props.disabled === true;
+  const numpad = props.useNumpad === true;
+  const shakeX = useErrorShake(props.error === true);
+
+  useAutoFocus(inputRef, off, numpad);
 
   const handleChange = (raw: string): void => {
-    const clean = sanitize(raw);
-    props.onChange(clean);
+    if (off) return;
+    commitValue(sanitize(raw), props.value, props.onChange, props.onComplete);
   };
 
-  useEffect(() => {
-    if (props.value.length === PIN_LENGTH) {
-      props.onComplete?.(props.value);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- fire only when value changes
-  }, [props.value]);
-
-  const focusInput = (): void => {
-    inputRef.current?.focus();
+  const handleNumpad = (key: string): void => {
+    if (off) return;
+    if (key === 'backspace') { props.onChange(props.value.slice(0, -1)); return; }
+    if (key !== '.') commitValue(sanitize(props.value + key), props.value, props.onChange, props.onComplete);
   };
 
   return (
-    <View testID={props.testID} onPress={focusInput}>
-      {/* Hidden input — captures all keystrokes */}
+    <View testID={props.testID} onPress={() => !off && !numpad && inputRef.current?.focus()} opacity={off ? DISABLED_OPACITY : 1} gap={16}>
+      {!numpad && <HiddenInput ref={inputRef} value={props.value} onChangeText={handleChange} disabled={off} testID={props.testID} />}
+      <Animated.View style={{ transform: [{ translateX: shakeX }] }}>
+        <DigitBoxRow value={props.value} disabled={off} error={props.error === true} />
+      </Animated.View>
+      {numpad && <NumpadSection disabled={off} onPress={handleNumpad} />}
+    </View>
+  );
+}
+
+// --- Small extracted sub-components ---
+
+function DigitBoxRow({ value, disabled, error }: { value: string; disabled: boolean; error: boolean }): ReactElement {
+  const cursor = activeIndex(value.length);
+  return (
+    <View flexDirection="row" gap={BOX_GAP} justifyContent="center">
+      {Array.from({ length: PIN_LENGTH }, (_, i) => (
+        <DigitBox key={i} filled={i < value.length} active={!disabled && i === cursor} error={error} />
+      ))}
+    </View>
+  );
+}
+
+function NumpadSection({ disabled, onPress }: { disabled: boolean; onPress: (k: string) => void }): ReactElement {
+  return (
+    <View opacity={disabled ? DISABLED_OPACITY : 1} pointerEvents={disabled ? 'none' : 'auto'}>
+      <Numpad onPress={onPress} allowDecimal={false} testID="pin-numpad" />
+    </View>
+  );
+}
+
+const HiddenInput = forwardRef<HTMLInputElement, { value: string; onChangeText: (r: string) => void; disabled: boolean; testID?: string }>(
+  function HiddenInput(props, ref) {
+    return (
       <TamaguiInput
-        ref={inputRef as never}
+        ref={ref as never}
         value={props.value}
-        onChangeText={handleChange}
+        onChangeText={props.onChangeText}
         keyboardType="number-pad"
         inputMode="numeric"
         maxLength={PIN_LENGTH}
-        autoFocus
+        autoFocus={!props.disabled}
+        pointerEvents={props.disabled ? 'none' : 'auto'}
         testID={props.testID ? `${props.testID}-field` : 'pin-input-field'}
         caretHidden
         position="absolute"
@@ -120,18 +143,6 @@ export function PinCodeInput(props: PinCodeInputProps): ReactElement {
         padding={0}
         aria-hidden
       />
-
-      {/* Visual boxes */}
-      <View flexDirection="row" gap={BOX_GAP} justifyContent="center">
-        {Array.from({ length: PIN_LENGTH }, (_, i) => (
-          <DigitBox
-            key={i}
-            filled={i < props.value.length}
-            active={i === cursorIndex}
-            error={hasError}
-          />
-        ))}
-      </View>
-    </View>
-  );
-}
+    );
+  },
+);

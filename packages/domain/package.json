@@ -27,13 +27,13 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "ulid": "^3.0.0",
-    "zod": "^4.3.6"
+    "ulid": "^3.0.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cachink/config": "workspace:*",
-    "@vitest/coverage-v8": "^3.0.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "@vitest/coverage-v8": "^4.1.6",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   }
 }

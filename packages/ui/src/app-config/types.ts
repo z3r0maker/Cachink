@@ -45,6 +45,8 @@ export const APP_CONFIG_KEYS = {
   isrDefaults: 'isrDefaults',
   autoLockTimeout: 'autoLockTimeout',
   discoveryShown: 'discoveryShown',
+  cachinkSoundEnabled: 'cachinkSoundEnabled',
+  healthThresholds: 'healthThresholds',
 } as const;
 
 /** Shape of the Zustand store populated on launch. */
@@ -64,6 +66,8 @@ export interface AppConfigState {
   readonly mustChangePin: boolean;
   /** Whether the feature-discovery screen was shown after first setup. */
   readonly discoveryShown: boolean;
+  /** Whether the "¡CACHINK!" sound plays on each sale. Defaults to true. */
+  readonly cachinkSoundEnabled: boolean;
 }
 
 /** Allowed mode values — keep in sync with CLAUDE.md §7.1 and ADR-039. */

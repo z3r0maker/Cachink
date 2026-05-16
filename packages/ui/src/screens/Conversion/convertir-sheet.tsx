@@ -7,7 +7,7 @@ import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { ConversionReceta, Product } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
-import { IntegerField } from '../../components/fields/index';
+import { WheelQuantityPicker } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 
 export interface ConvertirSheetProps {
@@ -23,8 +23,8 @@ export interface ConvertirSheetProps {
 
 export function ConvertirSheet(props: ConvertirSheetProps): ReactElement {
   const { t } = useTranslation();
-  const [mult, setMult] = useState('1');
-  const multN = Math.max(1, Number(mult) || 1);
+  const [mult, setMult] = useState(1);
+  const multN = Math.max(1, mult);
 
   const mp = props.receta ? props.products.get(props.receta.materiaPrimaId as string) : null;
   const prod = props.receta ? props.products.get(props.receta.productoResultanteId as string) : null;
@@ -42,11 +42,12 @@ export function ConvertirSheet(props: ConvertirSheetProps): ReactElement {
     >
       {props.receta && (
         <View gap={12}>
-          <IntegerField
+          <WheelQuantityPicker
             label={t('conversion.multiplicadorLabel')}
             value={mult}
             onChange={setMult}
             min={1}
+            max={50}
             testID="convertir-multiplicador"
           />
           <Text fontSize={14} color="$color">

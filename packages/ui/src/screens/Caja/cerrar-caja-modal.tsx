@@ -1,18 +1,27 @@
 /**
- * CerrarCajaModal — cash drawer closing form.
+ * CerrarCajaModal — 2-step tamper-proof blind-close orchestrator.
  *
- * Fields: counted cash, discrepancy reason (select), explanation.
- * Phase 6 of the Feature Flags plan: Caja.
+ * Step 1 (BlindCountStep): operator enters count without seeing expected.
+ *   → Immediately saves `conteoCentavos` + `conteoAt` to DB.
+ * Step 2 (CountResultStep): comparison + reason + close.
+ *
+ * If the app is killed after Step 1, CajaContent detects
+ * `conteoCentavos != null` and jumps directly to Step 2.
+ *
+ * Caja Overhaul — Phase C.
  */
 
 import { useState, type ReactElement } from 'react';
-import { Text, View } from '@tamagui/core';
-import type { DiscrepancyReason, Money } from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
-import { Btn, MoneyField, TextField } from '../../components/index';
-import { Input } from '../../components/index';
-import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { useQueryClient } from '@tanstack/react-query';
+import type { CajaTurno, DiscrepancyReason, Money } from '@cachink/domain';
+import { computeCajaBalance, now, ZERO } from '@cachink/domain';
+import type { BusinessId } from '@cachink/domain';
+import { useQuery } from '@tanstack/react-query';
+import { BlindCountStep } from './blind-count-step';
+import { CountResultStep } from './count-result-step';
+import { useCajaTurnosRepository, useSalesRepository, useExpensesRepository,
+  useCajaMovimientosRepository } from '../../app/repository-provider';
+import { useCurrentBusinessId } from '../../app-config/use-app-config';
 
 export interface CerrarCajaModalProps {
   readonly onSubmit: (
@@ -24,95 +33,114 @@ export interface CerrarCajaModalProps {
   readonly testID?: string;
 }
 
-type T = ReturnType<typeof useTranslation>['t'];
+function useExpectedCash(turno: CajaTurno | null): Money {
+  const businessId = useCurrentBusinessId() as BusinessId | null;
+  const salesRepo = useSalesRepository();
+  const expensesRepo = useExpensesRepository();
+  const movRepo = useCajaMovimientosRepository();
+  const fecha = turno?.fecha ?? '';
 
-const REASONS: readonly DiscrepancyReason[] = [
-  'gasto-no-registrado',
-  'error-en-cambio',
-  'retiro-autorizado',
-  'faltante-sin-explicacion',
-  'sobrante',
-  'otro',
-];
+  const salesQ = useQuery({
+    queryKey: ['cerrar-sales', turno?.id],
+    queryFn: () =>
+      businessId && turno ? salesRepo.findByDateRange(fecha, fecha, businessId) : [],
+    enabled: !!turno && !!businessId,
+  });
+  const expensesQ = useQuery({
+    queryKey: ['cerrar-expenses', turno?.id],
+    queryFn: () =>
+      businessId && turno ? expensesRepo.findByDateRange(fecha, fecha, businessId) : [],
+    enabled: !!turno && !!businessId,
+  });
+  const movQ = useQuery({
+    queryKey: ['cerrar-movimientos', turno?.id],
+    queryFn: () => turno ? movRepo.findByTurno(turno.id) : [],
+    enabled: !!turno,
+  });
 
-interface CerrarFieldsProps {
-  montoStr: string;
-  setMontoStr: (v: string) => void;
-  setMonto: (v: Money) => void;
-  reason: DiscrepancyReason | null;
-  setReason: (v: DiscrepancyReason | null) => void;
-  explicacion: string;
-  setExplicacion: (v: string) => void;
-  t: T;
-}
+  if (!turno) return ZERO;
+  const sales = salesQ.data ?? [];
+  const expenses = expensesQ.data ?? [];
+  const movimientos = movQ.data ?? [];
+  const cashSales = sales.filter((s) => s.metodo === 'Efectivo' && !s.cancelledAt);
 
-function CerrarCajaFormFields(p: CerrarFieldsProps): ReactElement {
-  return (
-    <>
-      <MoneyField
-        value={p.montoStr}
-        onChange={p.setMontoStr}
-        onValueChange={(v) => p.setMonto(v ?? ZERO)}
-        label={p.t('caja.montoCierre')}
-        testID="caja-cierre-monto"
-      />
-      <Input
-        label={p.t('caja.razon')}
-        type="select"
-        value={p.reason ?? ''}
-        onChange={(v) => p.setReason((v || null) as DiscrepancyReason | null)}
-        options={REASONS as unknown as readonly string[]}
-        testID="caja-reason"
-      />
-      <TextField
-        value={p.explicacion}
-        onChange={p.setExplicacion}
-        label={p.t('caja.explicacion')}
-        testID="caja-explicacion"
-        placeholder={p.t('caja.explicacionHint')}
-      />
-    </>
-  );
+  const balance = computeCajaBalance({
+    aperturaCentavos: turno.montoAperturaCentavos,
+    adicionalCentavos: turno.efectivoAdicionalCentavos,
+    ventasEfectivoCentavos: cashSales.map((s) => s.monto),
+    efectivoRecibidoPorVenta: cashSales
+      .filter((s) => s.efectivoRecibidoCentavos != null)
+      .map((s) => ({ monto: s.monto, efectivoRecibido: s.efectivoRecibidoCentavos! })),
+    egresosEfectivoCentavos: expenses.map((e) => e.monto),
+    depositosCentavos: movimientos.filter((m) => m.tipo === 'deposito').map((m) => m.montoCentavos),
+    retirosCentavos: movimientos.filter((m) => m.tipo === 'retiro').map((m) => m.montoCentavos),
+    cancelacionesEfectivoCentavos: sales
+      .filter((s) => s.metodo === 'Efectivo' && s.cancelledAt != null)
+      .map((s) => s.monto),
+  });
+
+  return balance.efectivoEnCaja;
 }
 
 export function CerrarCajaModal(props: CerrarCajaModalProps): ReactElement {
-  const { t } = useTranslation();
-  const [montoStr, setMontoStr] = useState('');
-  const [monto, setMonto] = useState<Money>(ZERO);
-  const [reason, setReason] = useState<DiscrepancyReason | null>(null);
-  const [explicacion, setExplicacion] = useState('');
-  const handleSubmit = (): void => {
-    props.onSubmit(monto, reason, explicacion.length > 0 ? explicacion : null);
-  };
-  return (
-    <View testID={props.testID ?? 'cerrar-caja-modal'} padding={16} gap={16}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={24}
-        color={colors.black}
-      >
-        {t('caja.cerrarTitle')}
-      </Text>
-      <CerrarCajaFormFields
-        montoStr={montoStr}
-        setMontoStr={setMontoStr}
-        setMonto={setMonto}
-        reason={reason}
-        setReason={setReason}
-        explicacion={explicacion}
-        setExplicacion={setExplicacion}
-        t={t}
+  const turnosRepo = useCajaTurnosRepository();
+  const queryClient = useQueryClient();
+  const businessId = useCurrentBusinessId();
+  const [savedConteo, setSavedConteo] = useState<Money | null>(null);
+  const [savingConteo, setSavingConteo] = useState(false);
+
+  // We need a reference to the open turno for expected-cash calculation
+  // The parent already knows it's open; query it here for the balance
+  const openQ = useQuery({
+    queryKey: ['cerrar-open-turno', businessId],
+    queryFn: async () => {
+      // findLatest returns the most recent turno
+      return businessId ? turnosRepo.findLatest(businessId as BusinessId) : null;
+    },
+    enabled: !!businessId,
+  });
+  const turno = openQ.data ?? null;
+  const esperado = useExpectedCash(turno);
+
+  // Check if turno already has a blind count (app-kill recovery)
+  const existingConteo =
+    turno && (turno as CajaTurno & { conteoCentavos?: Money | null }).conteoCentavos;
+  const conteo = savedConteo ?? (existingConteo ?? null);
+
+  if (conteo !== null) {
+    // Step 2: show comparison + close
+    return (
+      <CountResultStep
+        conteoCentavos={conteo}
+        esperadoCentavos={esperado}
+        onClose={(reason, explicacion) => {
+          props.onSubmit(conteo, reason, explicacion);
+        }}
+        submitting={props.submitting}
+        testID="cerrar-caja-step-2"
       />
-      <Btn
-        variant="dark"
-        onPress={handleSubmit}
-        fullWidth
-        disabled={props.submitting}
-        testID="caja-cerrar-submit"
-      >
-        {t('caja.cerrarSubmit')}
-      </Btn>
-    </View>
+    );
+  }
+
+  // Step 1: blind count
+  return (
+    <BlindCountStep
+      onSubmit={async (conteoCentavos) => {
+        if (!turno) return;
+        setSavingConteo(true);
+        try {
+          await turnosRepo.update(turno.id, {
+            conteoCentavos,
+            conteoAt: now(),
+          });
+          await queryClient.invalidateQueries({ queryKey: ['cerrar-open-turno'] });
+          setSavedConteo(conteoCentavos);
+        } finally {
+          setSavingConteo(false);
+        }
+      }}
+      submitting={savingConteo}
+      testID="cerrar-caja-step-1"
+    />
   );
 }

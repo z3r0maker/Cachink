@@ -51,6 +51,16 @@ export function previousNMonths(base: PeriodRange, n: number): PeriodRange[] {
   return ranges;
 }
 
+/**
+ * Strip leading null entries (months before the business had data).
+ * Trailing nulls within a run of data are kept as 0 to preserve time shape.
+ */
+export function stripLeadingNulls(values: readonly (number | null)[]): readonly number[] {
+  const firstNonNull = values.findIndex((v) => v !== null);
+  if (firstNonNull === -1) return [];
+  return values.slice(firstNonNull).map((v) => v ?? 0);
+}
+
 export async function composeIndicadoresTrend(
   deps: IndicadoresComposeDeps,
   businessId: BusinessId,
@@ -59,9 +69,9 @@ export async function composeIndicadoresTrend(
   const months = previousNMonths(currentPeriodo, 6);
   const results = await Promise.all(months.map((p) => composeIndicadores(deps, businessId, p)));
   return {
-    margenBruto: results.map((r) => r.margenBruto ?? 0),
-    margenOperativo: results.map((r) => r.margenOperativo ?? 0),
-    margenNeto: results.map((r) => r.margenNeto ?? 0),
+    margenBruto: stripLeadingNulls(results.map((r) => r.margenBruto)),
+    margenOperativo: stripLeadingNulls(results.map((r) => r.margenOperativo)),
+    margenNeto: stripLeadingNulls(results.map((r) => r.margenNeto)),
   };
 }
 

@@ -25,7 +25,7 @@ import {
   type ProductId,
 } from '@cachink/domain';
 import { Btn, Combobox } from '../../../components/index';
-import { IntegerField, MoneyField } from '../../../components/fields/index';
+import { MoneyField, WheelQuantityPicker } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 export interface InventarioTabProps {
@@ -39,7 +39,7 @@ export interface InventarioTabProps {
 
 interface FormState {
   productoId: string;
-  cantidad: string;
+  cantidad: number;
   costoUnitPesos: string;
 }
 
@@ -50,14 +50,13 @@ interface FormErrors {
 }
 
 function initialState(): FormState {
-  return { productoId: '', cantidad: '', costoUnitPesos: '' };
+  return { productoId: '', cantidad: 1, costoUnitPesos: '' };
 }
 
 function validate(state: FormState, requiredLabel: string, cantidadInvalid: string): FormErrors {
   const errors: FormErrors = {};
   if (!state.productoId) errors.producto = requiredLabel;
-  const cant = Number(state.cantidad);
-  if (!Number.isInteger(cant) || cant <= 0) errors.cantidad = cantidadInvalid;
+  if (!Number.isInteger(state.cantidad) || state.cantidad <= 0) errors.cantidad = cantidadInvalid;
   const costo = Number(state.costoUnitPesos);
   if (!Number.isFinite(costo) || costo <= 0) errors.costo = requiredLabel;
   return errors;
@@ -72,7 +71,7 @@ function buildPayload(
     productoId: state.productoId as ProductId,
     fecha,
     tipo: 'entrada',
-    cantidad: Number(state.cantidad),
+    cantidad: state.cantidad,
     costoUnitCentavos: fromPesos(state.costoUnitPesos),
     motivo: 'Compra a proveedor',
     businessId,
@@ -101,14 +100,14 @@ function InventarioFields(props: InventarioFieldsProps): ReactElement {
         note={errors.producto}
         testID="inventario-producto"
       />
-      <IntegerField
+      <WheelQuantityPicker
         label={t('nuevoEgreso.cantidadLabel')}
         value={state.cantidad}
         onChange={(v) => update({ cantidad: v })}
-        note={errors.cantidad}
+        error={errors.cantidad}
         min={1}
+        max={999}
         testID="inventario-cantidad"
-        returnKeyType="next"
       />
       <MoneyField
         label={t('nuevoEgreso.costoUnitLabel')}
@@ -171,7 +170,7 @@ export function InventarioTab(props: InventarioTabProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="inventario-submit"
       >

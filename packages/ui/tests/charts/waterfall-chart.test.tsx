@@ -1,36 +1,54 @@
 /**
  * WaterfallChart — unit tests.
+ *
+ * Tests the ECharts option builder function and the shared position math.
+ * The actual ECharts rendering is mocked (Canvas unavailable in jsdom).
  */
 
 import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
-vi.mock('react-native-svg', () => {
-  function make(tag: string) {
-    return function Mock(props: Record<string, unknown>) {
-      const { children, ...rest } = props;
-      return React.createElement(tag, rest, children as never);
-    };
-  }
+// Mock ECharts renderer to a simple div
+vi.mock('echarts-for-react/lib/core', () => ({
+  __esModule: true,
+  default: function MockECharts(props: Record<string, unknown>) {
+    return React.createElement('div', { 'data-testid': 'echarts-mock', 'data-option': JSON.stringify(props.option) });
+  },
+}));
+
+vi.mock('echarts/core', () => {
+  const graphic = {
+    LinearGradient: class {
+      constructor(public x: number, public y: number, public x2: number, public y2: number, public stops: unknown[]) {}
+    },
+  };
   return {
     __esModule: true,
-    default: make('svg'),
-    Svg: make('svg'),
-    G: make('g'),
-    Rect: make('rect'),
-    Circle: make('circle'),
-    Line: make('line'),
-    Text: make('text'),
-    Polyline: make('polyline'),
-    Polygon: make('polygon'),
-    Path: make('path'),
+    use: vi.fn(),
+    registerTheme: vi.fn(),
+    graphic,
+    default: { use: vi.fn(), registerTheme: vi.fn(), graphic },
   };
 });
+vi.mock('echarts/charts', () => ({ BarChart: {}, LineChart: {}, PieChart: {} }));
+vi.mock('echarts/components', () => ({
+  GridComponent: {},
+  TooltipComponent: {},
+  LegendComponent: {},
+  DatasetComponent: {},
+}));
+vi.mock('echarts/renderers', () => ({ CanvasRenderer: {} }));
 
 import { render } from '@testing-library/react';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
-import { WaterfallChart, computeBarPositions, type WaterfallItem } from '../../src/charts/WaterfallChart/index';
+import {
+  WaterfallChart,
+  computeBarPositions,
+  type WaterfallItem,
+} from '../../src/charts/WaterfallChart/index';
+import { computeRenderedBars } from '../../src/charts/WaterfallChart/waterfall-positions';
+import { buildWaterfallOption } from '../../src/charts/WaterfallChart/waterfall-chart';
 
 function renderChart(data: readonly WaterfallItem[]) {
   return render(
@@ -51,63 +69,62 @@ const sampleData: WaterfallItem[] = [
 ];
 
 describe('WaterfallChart', () => {
-  it('renders correct number of bars for 7-item data', () => {
-    const { container } = renderChart(sampleData);
-    const rects = container.querySelectorAll('rect');
-    expect(rects.length).toBe(7);
-  });
-
-  it('income bars use green fill', () => {
-    const { container } = renderChart(sampleData);
-    const rects = container.querySelectorAll('rect');
-    expect(rects[0]?.getAttribute('fill')).toBe('#00C896');
-  });
-
-  it('expense bars use red fill', () => {
-    const { container } = renderChart(sampleData);
-    const rects = container.querySelectorAll('rect');
-    expect(rects[1]?.getAttribute('fill')).toBe('#FF4757');
-  });
-
-  it('subtotal bars use blue fill', () => {
-    const { container } = renderChart(sampleData);
-    const rects = container.querySelectorAll('rect');
-    expect(rects[2]?.getAttribute('fill')).toBe('#3B6FFF');
-  });
-
-  it('renders labels below bars', () => {
-    const { container } = renderChart(sampleData);
-    const texts = container.querySelectorAll('text');
-    // Each bar has a value text + label text = 14 total
-    expect(texts.length).toBe(14);
-  });
-
-  it('renders values above bars', () => {
-    const { container } = renderChart(sampleData);
-    const texts = container.querySelectorAll('text');
-    // First text is the value of first bar
-    expect(texts[0]?.textContent).toBe('$50K');
-  });
-
   it('empty data renders nothing (no crash)', () => {
     const { container } = renderChart([]);
-    const svg = container.querySelector('svg');
-    expect(svg).toBeNull();
+    expect(container.querySelector('[data-testid="echarts-mock"]')).toBeNull();
   });
 
-  it('all-zero data renders flat bars at baseline', () => {
-    const zeroData: WaterfallItem[] = [
-      { label: 'A', value: 0, type: 'income' },
-      { label: 'B', value: 0, type: 'expense' },
-      { label: 'C', value: 0, type: 'subtotal' },
-    ];
-    const { container } = renderChart(zeroData);
-    const rects = container.querySelectorAll('rect');
-    expect(rects.length).toBe(3);
-    for (const rect of rects) {
-      const h = Number(rect.getAttribute('height'));
-      expect(h).toBeGreaterThanOrEqual(2);
-    }
+  it('renders the ECharts component for non-empty data', () => {
+    const { container } = renderChart(sampleData);
+    expect(container.querySelector('[data-testid="echarts-mock"]')).not.toBeNull();
+  });
+});
+
+describe('buildWaterfallOption', () => {
+  it('produces two series: transparent base + visible bars', () => {
+    const option = buildWaterfallOption(sampleData) as { series: Array<{ name: string }> };
+    expect(option.series.length).toBe(2);
+    expect(option.series[0]!.name).toBe('base');
+    expect(option.series[1]!.name).toBe('value');
+  });
+
+  it('base series has transparent color', () => {
+    const option = buildWaterfallOption(sampleData) as {
+      series: Array<{ itemStyle: { color: string } }>;
+    };
+    expect(option.series[0]!.itemStyle.color).toBe('transparent');
+  });
+
+  it('value series has correct number of data points', () => {
+    const option = buildWaterfallOption(sampleData) as {
+      series: Array<{ data: unknown[] }>;
+    };
+    expect(option.series[1]!.data.length).toBe(7);
+  });
+
+  it('x-axis labels match input data labels', () => {
+    const option = buildWaterfallOption(sampleData) as {
+      xAxis: { data: string[] };
+    };
+    expect(option.xAxis.data).toEqual([
+      'Ingresos', 'Costo', 'Ut. Bruta', 'Gastos Op.', 'Ut. Op.', 'ISR', 'Ut. Neta',
+    ]);
+  });
+
+  it('includes animation config', () => {
+    const option = buildWaterfallOption(sampleData) as {
+      animationDuration: number;
+      animationEasing: string;
+    };
+    expect(option.animationDuration).toBe(600);
+    expect(option.animationEasing).toBe('cubicOut');
+  });
+
+  it('includes tooltip config', () => {
+    const option = buildWaterfallOption(sampleData) as {
+      tooltip: { trigger: string };
+    };
+    expect(option.tooltip.trigger).toBe('axis');
   });
 });
 
@@ -163,7 +180,6 @@ describe('computeBarPositions', () => {
 
   it('exit levels form a monotonic cascade (income → expenses → net)', () => {
     const positions = computeBarPositions(sampleData);
-    // Income exits at 50000, then expense drops to 30000, etc.
     expect(positions[0]!.exitLevel).toBe(50000);
     expect(positions[1]!.exitLevel).toBe(30000);
     expect(positions[2]!.exitLevel).toBe(30000);
@@ -171,5 +187,18 @@ describe('computeBarPositions', () => {
     expect(positions[4]!.exitLevel).toBe(18000);
     expect(positions[5]!.exitLevel).toBe(12600);
     expect(positions[6]!.exitLevel).toBe(12600);
+  });
+
+  it('zero-value items produce non-zero bar heights (min 8px)', () => {
+    const data: WaterfallItem[] = [
+      { label: 'Income', value: 100, type: 'income' },
+      { label: 'Zero', value: 0, type: 'expense' },
+      { label: 'Total', value: 100, type: 'subtotal' },
+    ];
+    const positions = computeBarPositions(data);
+    const toY = (v: number): number => 200 - (v / 100) * 200;
+    const bars = computeRenderedBars(data, positions, 36, 240, toY, 16, 28, 20);
+    // Zero-value bar should get minimum height of 8
+    expect(bars[1]!.barH).toBeGreaterThanOrEqual(8);
   });
 });

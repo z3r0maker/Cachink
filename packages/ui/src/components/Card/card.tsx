@@ -36,8 +36,9 @@ import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { View } from '@tamagui/core';
 import { colors, radii, shadows } from '../../theme';
+import { impactLight } from '../../haptics/index';
 
-export type CardVariant = 'white' | 'yellow' | 'black';
+export type CardVariant = 'white' | 'yellow' | 'black' | 'red';
 
 export type CardPadding = 'none' | 'sm' | 'md' | 'lg';
 
@@ -81,6 +82,8 @@ export interface CardProps {
   readonly ariaLabel?: string;
   /** Custom background override — takes precedence over variant bg. */
   readonly backgroundColor?: string;
+  /** Extra styles merged onto the root element (e.g. `flex: 1`). */
+  readonly style?: ViewStyle;
 }
 
 interface VariantDef {
@@ -94,6 +97,7 @@ const VARIANTS: Record<CardVariant, VariantDef> = {
   white: { background: colors.white, borderWidth: 2, raisedShadow: shadows.card },
   yellow: { background: colors.yellow, borderWidth: 2, raisedShadow: shadows.card },
   black: { background: colors.black, borderWidth: 2.5, raisedShadow: shadows.hero },
+  red: { background: colors.redSoft, borderWidth: 2, raisedShadow: shadows.card },
 };
 
 function resolveShadow(v: VariantDef, elevation: CardElevation): string {
@@ -157,12 +161,15 @@ export function Card(props: CardProps): ReactElement {
     return (
       <Pressable
         testID={props.testID ?? 'card'}
-        onPress={props.onPress}
+        onPress={() => {
+          impactLight();
+          props.onPress?.();
+        }}
         role="button"
         aria-label={props.ariaLabel}
         accessibilityRole="button"
         accessibilityLabel={props.ariaLabel}
-        style={({ pressed }) => [base, pressed ? PRESS_TRANSFORM : null]}
+        style={({ pressed }) => [base, pressed ? PRESS_TRANSFORM : null, props.style]}
       >
         {props.children}
       </Pressable>
@@ -179,7 +186,7 @@ export function Card(props: CardProps): ReactElement {
       borderRadius={CARD_RADIUS}
       padding={pad}
       width={props.fullWidth === true ? '100%' : undefined}
-      style={{ boxShadow: shadow, userSelect: 'none' }}
+      style={[{ boxShadow: shadow, userSelect: 'none' }, props.style]}
     >
       {props.children}
     </View>

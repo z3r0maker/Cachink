@@ -58,9 +58,9 @@ export type SyncedTable = (typeof SYNCED_TABLES)[number];
 /** Money columns per synced table. Used by encode/decode to coerce bigint↔string. */
 export const MONEY_COLUMNS: Readonly<Record<SyncedTable, readonly string[]>> = Object.freeze({
   businesses: [],
-  sales: ['monto_centavos'],
+  sales: ['monto_centavos', 'efectivo_recibido_centavos'],
   expenses: ['monto_centavos'],
-  products: ['costo_unit_centavos'],
+  products: ['costo_unit_centavos', 'precio_venta_centavos'],
   inventory_movements: ['costo_unit_centavos'],
   employees: ['salario_centavos'],
   clients: [],

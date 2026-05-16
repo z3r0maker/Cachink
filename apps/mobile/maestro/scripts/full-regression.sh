@@ -221,7 +221,6 @@ if should_run "C"; then
   run_flow "$FLOWS_DIR/empty-estados.yaml"
   run_flow "$FLOWS_DIR/empty-egresos.yaml"                  # B2 — Phase 15
   run_flow "$FLOWS_DIR/empty-clientes.yaml"                 # A4 — Phase 15
-  run_flow "$FLOWS_DIR/caja-sin-flag.yaml"
 fi
 
 # ──────────────── Phase 2: Create baseline data ────────────────

@@ -22,6 +22,7 @@ export interface RecoveryScreenProps {
   readonly maskedEmail: string | null;
   readonly onRecoverWithPassword: (recoveryPassword: string, newPin: string) => void;
   readonly onFactoryReset: () => void;
+  readonly factoryResetSubmitting?: boolean;
   readonly onBack: () => void;
   readonly error: string | null;
   readonly submitting: boolean;
@@ -51,10 +52,12 @@ function useRecoveryForm() {
 function RecoveryActions({
   onBack,
   onFactoryReset,
+  factoryResetSubmitting,
   t,
 }: {
   onBack: () => void;
   onFactoryReset: () => void;
+  factoryResetSubmitting?: boolean;
   t: T;
 }): ReactElement {
   return (
@@ -62,7 +65,13 @@ function RecoveryActions({
       <Btn variant="ghost" onPress={onBack} fullWidth testID="recovery-back">
         {t('recovery.back')}
       </Btn>
-      <Btn variant="danger" onPress={onFactoryReset} fullWidth testID="recovery-factory-reset">
+      <Btn
+        variant="danger"
+        onPress={onFactoryReset}
+        loading={factoryResetSubmitting}
+        fullWidth
+        testID="recovery-factory-reset"
+      >
         {t('recovery.factoryReset')}
       </Btn>
     </View>
@@ -129,7 +138,8 @@ export function RecoveryScreen(props: RecoveryScreenProps): ReactElement {
             variant="dark"
             onPress={() => props.onRecoverWithPassword(form.recoveryPassword, form.newPin)}
             fullWidth
-            disabled={!form.valid || props.submitting}
+            disabled={!form.valid}
+            loading={props.submitting}
             testID="recovery-submit"
           >
             {t('recovery.submit')}
@@ -146,7 +156,12 @@ export function RecoveryScreen(props: RecoveryScreenProps): ReactElement {
               </Text>
             </View>
           )}
-          <RecoveryActions onBack={props.onBack} onFactoryReset={props.onFactoryReset} t={t} />
+          <RecoveryActions
+            onBack={props.onBack}
+            onFactoryReset={props.onFactoryReset}
+            factoryResetSubmitting={props.factoryResetSubmitting}
+            t={t}
+          />
         </View>
       </View>
     </FloatingCoinsBackground>

@@ -1,15 +1,15 @@
 /**
- * Tab definitions for the bottom tab bar — 4 tabs per role always.
+ * Tab definitions for the bottom tab bar.
  *
- * Phase 4 restructure: Operativo and Director each get exactly 4 tabs.
- * The 4th tab is always "Otros" — a grid of feature-flagged shortcuts.
+ * Operativo always has 5 tabs — Caja is permanently present (not gated).
+ * The 4th tab swaps between Merma/Productos based on feature flags.
  *
- * Operativo (merma ON):  Ventas | Gastos | Merma | Otros
- * Operativo (merma OFF): Ventas | Gastos | Productos | Otros
+ * Operativo (merma ON):  Ventas | Caja | Pagos | Merma    | Otros
+ * Operativo (merma OFF): Ventas | Caja | Pagos | Productos | Otros
  * Director (always):     Home | Ventas | Estados | Otros
  *
- * The "Egresos" label was renamed to "Gastos" in the UI per Phase 4.
- * Code identifiers stay `expense`/`egreso` — this is purely a label change.
+ * "Pagos" is the UI label for the Egresos tab (code identifiers stay
+ * `expense`/`egreso` — purely a label change).
  */
 
 import type { FeatureFlags } from '@cachink/domain';
@@ -26,11 +26,12 @@ export interface TabDefinition {
   readonly path: string;
 }
 
-/** Operativo tabs — dynamic based on merma flag. Always 4 tabs. */
+/** Operativo tabs — dynamic based on merma flag. Always 5 tabs. */
 export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
   const tabs: TabDefinition[] = [
     { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
-    { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
+    { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
+    { key: 'gastos', labelKey: 'tabs.pagos', icon: 'file-text', path: '/egresos' },
   ];
   if (flags.merma) {
     tabs.push({ key: 'merma', labelKey: 'tabs.merma', icon: 'trending-down', path: '/merma' });
@@ -71,7 +72,6 @@ export function tabsForRole(
       stock: true,
       conversionMateriaPrima: false,
       conversionAutomatica: false,
-      caja: false,
       auditoriaInventario: false,
       merma: false,
       ventasCredito: false,
@@ -83,7 +83,8 @@ export function tabsForRole(
 // Legacy exports preserved for backward compatibility
 export const OPERATIVO_TABS: readonly TabDefinition[] = [
   { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
-  { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
+  { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
+  { key: 'gastos', labelKey: 'tabs.pagos', icon: 'file-text', path: '/egresos' },
   { key: 'productos', labelKey: 'tabs.productos', icon: 'package', path: '/productos' },
   { key: 'otros', labelKey: 'tabs.otros', icon: 'layout-grid', path: '/otros' },
 ] as const;

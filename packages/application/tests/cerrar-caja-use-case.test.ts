@@ -164,6 +164,50 @@ describe('CerrarCajaUseCase', () => {
     expect(closed.efectivoEsperadoCentavos).toBe(8000n);
   });
 
+  it('closes a turn that already has a blind count saved', async () => {
+    const turnoId = await openTurn();
+    // Simulate Step 1: save blind count
+    await turnos.update(turnoId, {
+      conteoCentavos: 4800n,
+      conteoAt: '2026-05-09T18:30:00.000Z',
+    });
+    // Verify blind count was saved
+    const turnoWithCount = await turnos.findById(turnoId);
+    expect(turnoWithCount?.conteoCentavos).toBe(4800n);
+    expect(turnoWithCount?.conteoAt).toBe('2026-05-09T18:30:00.000Z');
+    // Step 2: close with the pre-saved count amount
+    const closed = await useCase.execute({
+      turnoId,
+      montoCierreCentavos: 4800n,
+      discrepancyReason: 'error-en-cambio',
+      explicacion: 'Probablemente di mal el cambio',
+      businessId: BIZ,
+    });
+    expect(closed.cierreAt).not.toBeNull();
+    expect(closed.montoCierreCentavos).toBe(4800n);
+    expect(closed.conteoCentavos).toBe(4800n);
+    expect(closed.diferenciaCentavos).toBe(-200n);
+  });
+
+  it('blind count is immutable once saved (update does not clear it)', async () => {
+    const turnoId = await openTurn();
+    // Save blind count
+    await turnos.update(turnoId, {
+      conteoCentavos: 4100n,
+      conteoAt: '2026-05-09T18:30:00.000Z',
+    });
+    // Close should not clear conteoCentavos
+    const closed = await useCase.execute({
+      turnoId,
+      montoCierreCentavos: 4100n,
+      discrepancyReason: 'faltante-sin-explicacion',
+      explicacion: null,
+      businessId: BIZ,
+    });
+    expect(closed.conteoCentavos).toBe(4100n);
+    expect(closed.conteoAt).toBe('2026-05-09T18:30:00.000Z');
+  });
+
   it('computes esperado from apertura + adicional + ventas - egresos', async () => {
     // Open with apertura=5000, adicional=2000
     const turno = await abrirCaja.execute({

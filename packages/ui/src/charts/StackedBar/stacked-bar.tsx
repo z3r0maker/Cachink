@@ -1,96 +1,122 @@
 /**
- * StackedBar — a single horizontal stacked bar showing proportional segments.
- * Used in the Balance General Activo card to visualize asset composition.
+ * StackedBar (desktop) — ECharts horizontal stacked bar chart.
  *
- * Neobrutalist: 2px black border, hard fills.
+ * A single horizontal stacked bar showing proportional segments.
+ * Used in the Balance General Activo card to visualize asset composition.
  */
-
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import Svg, { Rect } from 'react-native-svg';
+import { echarts, ReactEChartsCore } from '../echarts-wrapper';
 import { colors, typography } from '../../theme';
+import type { BarSegment, StackedBarProps } from './stacked-types';
 
-export interface BarSegment {
-  readonly label: string;
-  readonly value: number;
-  readonly color: string;
-}
-
-export interface StackedBarProps {
-  readonly segments: readonly BarSegment[];
-  readonly height?: number;
-  readonly testID?: string;
-}
+export type { BarSegment, StackedBarProps } from './stacked-types';
 
 const DEFAULT_HEIGHT = 28;
-const BAR_WIDTH = 280;
-const MIN_SEGMENT_PCT = 2;
 
-function StackedLegend({ segments }: { segments: readonly BarSegment[] }): ReactElement {
+function StackedLegend(props: {
+  segments: readonly BarSegment[];
+  total: number;
+  showValues: boolean;
+  formatValue?: (v: number) => string;
+}): ReactElement {
   return (
-    <View flexDirection="row" flexWrap="wrap" gap={8}>
-      {segments.map((seg, i) => (
-        <View key={i} flexDirection="row" alignItems="center" gap={4}>
-          <View width={8} height={8} borderRadius={4} backgroundColor={seg.color} />
-          <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
-            {seg.label}
-          </Text>
-        </View>
-      ))}
+    <View gap={4}>
+      {props.segments.map((seg, i) => {
+        const pct = props.total > 0 ? Math.round((seg.value / props.total) * 100) : 0;
+        const formatted = props.formatValue?.(seg.value) ?? `${seg.value.toFixed(0)}`;
+        return (
+          <View key={i} flexDirection="row" alignItems="center" gap={6}>
+            <View width={8} height={8} borderRadius={4} backgroundColor={seg.color} />
+            <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
+              {seg.label}
+            </Text>
+            {props.showValues && (
+              <>
+                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+                  —
+                </Text>
+                <Text fontFamily={typography.fontFamily} fontSize={11} fontWeight={typography.weights.bold} color={colors.ink}>
+                  {formatted}
+                </Text>
+                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+                  ({pct}%)
+                </Text>
+              </>
+            )}
+          </View>
+        );
+      })}
     </View>
   );
 }
 
-function BorderRect({ height }: { height: number }): ReactElement {
-  return (
-    <Rect
-      x={0}
-      y={0}
-      width={BAR_WIDTH}
-      height={height}
-      fill="none"
-      stroke={colors.black}
-      strokeWidth={2}
-      rx={8}
-    />
-  );
-}
-
-function buildStackedAriaLabel(segments: readonly BarSegment[], total: number): string {
+function buildAriaLabel(segments: readonly BarSegment[], total: number): string {
   const parts = segments.map((s) => `${s.label} ${Math.round((s.value / total) * 100)}%`);
   return `Composición: ${parts.join(', ')}`;
 }
 
+/** Build the ECharts option object. Exported for test assertions. */
+export function buildStackedOption(segments: readonly BarSegment[]): object {
+  return {
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+    },
+    grid: { left: 0, right: 0, top: 0, bottom: 0 },
+    xAxis: {
+      type: 'value',
+      show: false,
+      max: 'dataMax',
+    },
+    yAxis: {
+      type: 'category',
+      data: [''],
+      show: false,
+    },
+    animationDuration: 600,
+    animationEasing: 'cubicOut',
+    series: segments.map((seg) => ({
+      name: seg.label,
+      type: 'bar',
+      stack: 'total',
+      data: [seg.value],
+      barWidth: '100%',
+      itemStyle: {
+        color: seg.color,
+        borderColor: colors.black,
+        borderWidth: 2,
+      },
+      emphasis: { focus: 'series' },
+    })),
+  };
+}
+
 export function StackedBar(props: StackedBarProps): ReactElement | null {
-  const { segments, height = DEFAULT_HEIGHT, testID } = props;
+  const { segments, height = DEFAULT_HEIGHT, showValues = true, testID } = props;
   const total = segments.reduce((sum, s) => sum + s.value, 0);
   if (total <= 0 || segments.length === 0) return null;
-  const rawPcts = segments.map((s) => (s.value / total) * 100);
-  const adjustedPcts = rawPcts.map((p) => Math.max(p, MIN_SEGMENT_PCT));
-  const adjustedSum = adjustedPcts.reduce((a, b) => a + b, 0);
-  const normalizedPcts = adjustedPcts.map((p) => (p / adjustedSum) * 100);
-  let xOffset = 0;
-  const barRects = segments.map((seg, i) => {
-    const w = (normalizedPcts[i]! / 100) * BAR_WIDTH;
-    const x = xOffset;
-    xOffset += w;
-    return { seg, x, w, rx: i === 0 ? 8 : i === segments.length - 1 ? 8 : 0 };
-  });
-  const ariaLabel = buildStackedAriaLabel(segments, total);
+
+  const option = buildStackedOption(segments);
+  const ariaLabel = buildAriaLabel(segments, total);
+
   return (
     <View testID={testID ?? 'stacked-bar'} gap={8}>
-      <Svg
-        width={BAR_WIDTH}
-        height={height}
-        accessibilityRole="image"
-        accessibilityLabel={ariaLabel}
-      >
-        {barRects.map(({ seg, x, w, rx }, i) => (
-          <Rect key={i} x={x} y={0} width={w} height={height} fill={seg.color} rx={rx} />
-        ))}
-        <BorderRect height={height} />
-      </Svg>
-      <StackedLegend segments={segments} />
+      <View accessibilityLabel={ariaLabel}>
+        <ReactEChartsCore
+          echarts={echarts}
+          option={option}
+          theme="cachink"
+          style={{ height: height + 4, width: 280 }}
+          notMerge
+        />
+      </View>
+      <StackedLegend
+        segments={segments}
+        total={total}
+        showValues={showValues}
+        formatValue={props.formatValue}
+      />
     </View>
   );
 }

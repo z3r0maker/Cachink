@@ -1,8 +1,8 @@
-# Navigate through all 4 Settings hub category cards and verify
+# Navigate through all 3 Settings hub category cards and verify
 # each sub-screen renders correctly.
 #
-# Covers the SettingsHub navigation: Negocio / Tasas ISR /
-# Empleados / Sistema.
+# Covers the SettingsHub navigation: Negocio / Tasas ISR / Sistema.
+# (Empleados moved to Otros grid — see otros-empleados-empty.yaml)
 #
 # Precondition: wizard complete.
 # Chain flows:
@@ -40,14 +40,7 @@ appId: mx.cachink.mobile
 # settings-tasas-isr-screen or similar.
 - back
 
-# --- Card 3: Empleados ---
-- tapOn:
-    id: "settings-hub-empleados"
-- assertVisible:
-    id: "settings-empleados-screen"
-- back
-
-# --- Card 4: Sistema ---
+# --- Card 3: Sistema ---
 - tapOn:
     id: "settings-hub-sistema"
 # Wait briefly for the sub-screen to render.

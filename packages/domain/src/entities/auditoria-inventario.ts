@@ -14,7 +14,7 @@ import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { isoDateField } from './_fields.js';
 
-export const AuditoriaEstadoEnum = z.enum(['borrador', 'finalizada']);
+export const AuditoriaEstadoEnum = z.enum(['borrador', 'finalizada', 'cancelada']);
 export type AuditoriaEstado = z.infer<typeof AuditoriaEstadoEnum>;
 
 export const AuditoriaLineaSchema = z.object({

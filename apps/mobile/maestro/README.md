@@ -285,7 +285,7 @@ runs as a native iPad app when launched on an iPad simulator.
    rebuild unless you upgrade the Expo SDK.
 3. **Metro bundler running** (same as for iPhone flows):
    ```sh
-   cd apps/mobile && npx expo start
+   cd apps/mobile && npx expo run:ios
    ```
 
 ### iPad runner script

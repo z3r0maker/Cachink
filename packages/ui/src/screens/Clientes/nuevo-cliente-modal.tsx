@@ -145,7 +145,7 @@ export function NuevoClienteModal(props: NuevoClienteModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={submit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="nuevo-cliente-submit"
       >

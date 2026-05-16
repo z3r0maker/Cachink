@@ -45,9 +45,9 @@ export function describeBusinessesRepositoryContract(
     });
 
     it('preserves isrTasa as a plain number (not bigint)', async () => {
-      const row = await repo.create(makeNewBusiness({ isrTasa: 0.25 }));
+      const row = await repo.create(makeNewBusiness({ isrTasa: 2500 }));
       const loaded = await repo.findById(row.id);
-      expect(loaded?.isrTasa).toBeCloseTo(0.25, 10);
+      expect(loaded?.isrTasa).toBe(2500);
       expect(typeof loaded?.isrTasa).toBe('number');
     });
 
@@ -81,9 +81,9 @@ export function describeBusinessesRepositoryContract(
     });
 
     it('update patches isrTasa only', async () => {
-      const row = await repo.create(makeNewBusiness({ isrTasa: 0.3 }));
-      const updated = await repo.update(row.id, { isrTasa: 0.02 });
-      expect(updated.isrTasa).toBeCloseTo(0.02, 10);
+      const row = await repo.create(makeNewBusiness({ isrTasa: 3000 }));
+      const updated = await repo.update(row.id, { isrTasa: 200 });
+      expect(updated.isrTasa).toBe(200);
     });
 
     it('update patches multiple fields at once', async () => {
@@ -91,11 +91,11 @@ export function describeBusinessesRepositoryContract(
       const updated = await repo.update(row.id, {
         nombre: 'Patched',
         regimenFiscal: 'Otro',
-        isrTasa: 0.15,
+        isrTasa: 1500,
       });
       expect(updated.nombre).toBe('Patched');
       expect(updated.regimenFiscal).toBe('Otro');
-      expect(updated.isrTasa).toBeCloseTo(0.15, 10);
+      expect(updated.isrTasa).toBe(1500);
     });
 
     it('update on missing id throws', async () => {

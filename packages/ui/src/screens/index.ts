@@ -26,6 +26,12 @@ export {
   type ProductoListRowProps,
   NuevoProductoScreen,
   type NuevoProductoScreenProps,
+  IconPickerScreen,
+  type IconPickerScreenProps,
+  ProductoDetailScreen,
+  type ProductoDetailScreenProps,
+  ProductoDetailSmart,
+  type ProductoDetailSmartProps,
 } from './Productos/index';
 export * from './CorteDeDia/index';
 export * from './Estados/index';
@@ -56,3 +62,7 @@ export * from './MermaReportes/index';
 export * from './CajaReportes/index';
 export * from './VentasCredito/index';
 export * from './Auditoria/index';
+export * from './DemoSeeding/index';
+// Phase Caja Completa — Checkout + Cancelaciones
+export * from './Checkout/index';
+export * from './Cancelaciones/index';

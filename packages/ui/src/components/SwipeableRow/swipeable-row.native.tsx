@@ -39,6 +39,7 @@ import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../Icon/index';
 import { colors, typography } from '../../theme';
+import { impactMedium } from '../../haptics/index';
 import type { SwipeableRowProps } from './swipeable-row';
 
 const ACTION_WIDTH = 80;
@@ -148,6 +149,7 @@ export function SwipeableRow(props: SwipeableRowProps): ReactElement {
       renderLeftActions={hasLeftSwipe ? renderLeftActions(props.leftAction) : undefined}
       renderRightActions={hasRightSwipe ? renderRightActions(props.rightAction) : undefined}
       onSwipeableOpen={(direction: 'left' | 'right') => {
+        impactMedium();
         if (direction === 'left' && props.onSwipeLeft !== undefined) {
           props.onSwipeLeft();
         } else if (direction === 'right' && props.onSwipeRight !== undefined) {

@@ -16,12 +16,12 @@ export type RegimenFiscal = (typeof REGIMENES_FISCALES)[number];
 /**
  * Schema for the JSON blob stored in AppConfig under key `'isrDefaults'`.
  *
- * Each key is a {@link RegimenFiscal} and each value is a decimal rate
- * in [0, 1] (e.g. 0.30 = 30 %).
+ * Each key is a {@link RegimenFiscal} and each value is an ISR rate in
+ * basis points (e.g. 3000 = 30 %). Valid range: [0, 10_000].
  */
 export const IsrDefaultsSchema = z.record(
   z.enum(REGIMENES_FISCALES),
-  z.number().min(0).max(1),
+  z.number().int().min(0).max(10_000),
 );
 export type IsrDefaults = z.infer<typeof IsrDefaultsSchema>;
 
@@ -54,8 +54,8 @@ export type IsrDefaults = z.infer<typeof IsrDefaultsSchema>;
  *   rate is roughly 25 %–32 %. Seed at 30 %.
  */
 export const ISR_DEFAULTS_SEED: IsrDefaults = {
-  RIF: 0.02,
-  RESICO: 0.0125,
-  Asalariados: 0.25,
-  Otro: 0.30,
+  RIF: 200,       // 2%
+  RESICO: 125,    // 1.25%
+  Asalariados: 2500, // 25%
+  Otro: 3000,     // 30%
 };

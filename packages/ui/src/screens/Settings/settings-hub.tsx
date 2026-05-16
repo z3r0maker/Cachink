@@ -1,6 +1,9 @@
 /**
- * SettingsHub — the top-level Ajustes screen, showing 4 navigable
- * category cards: Negocio, Tasas ISR, Empleados, and Sistema.
+ * SettingsHub — the top-level Ajustes screen, showing 3 navigable
+ * category cards: Negocio, Tasas ISR, and Sistema.
+ *
+ * Empleados moved to the Otros grid (top-level route) — see plan
+ * "Move Empleados from Settings to Otros".
  *
  * Tapping a card calls `onNavigate(section)` so the shell can push
  * the appropriate sub-screen.
@@ -15,11 +18,10 @@ import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
-export type SettingsSection = 'negocio' | 'tasas-isr' | 'empleados' | 'sistema';
+export type SettingsSection = 'negocio' | 'tasas-isr' | 'sistema' | 'tipos-de-pago' | 'indicadores';
 
 export interface SettingsHubProps {
   readonly business: Business | null;
-  readonly empleadoCount: number;
   readonly onNavigate: (section: SettingsSection) => void;
   readonly testID?: string;
 }
@@ -79,12 +81,11 @@ function cat(section: SettingsSection, icon: IconName, title: string, subtitle: 
 export function SettingsHub(props: SettingsHubProps): ReactElement {
   const { t } = useTranslation();
   const businessName = props.business?.nombre ?? t('settings.negocioNoConfigurado');
-  const count = String(props.empleadoCount);
-  const empleadosSubtitle = t('settings.empleadosSubtitle').replace('{count}', count);
   const categories: HubCategory[] = [
     cat('negocio', 'building-2', t('settings.negocioCard'), businessName),
     cat('tasas-isr', 'banknote', t('settings.tasasIsrCard'), t('settings.tasasIsrSubtitle')),
-    cat('empleados', 'users', t('settings.empleadosCard'), empleadosSubtitle),
+    cat('tipos-de-pago', 'credit-card', t('settings.tiposDePagoCard'), t('settings.tiposDePagoSubtitle')),
+    cat('indicadores', 'chart-bar', t('settings.indicadoresCard'), t('settings.indicadoresSubtitle')),
     cat('sistema', 'settings', t('settings.sistemaCard'), t('settings.sistemaSubtitle')),
   ];
   return (

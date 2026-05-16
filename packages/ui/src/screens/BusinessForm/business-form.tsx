@@ -146,7 +146,7 @@ function SubmitRow({
       <Btn
         variant="primary"
         onPress={onSubmit}
-        disabled={submitting}
+        loading={submitting}
         fullWidth
         testID="business-submit"
       >

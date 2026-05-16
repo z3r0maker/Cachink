@@ -112,3 +112,118 @@ describe('Gauge', () => {
     );
   });
 });
+
+describe('Gauge center-origin mode', () => {
+  it('renders center divider when origin is center', () => {
+    renderWithProviders(
+      <Gauge value={-67} origin="center" testID="g-center" />,
+    );
+    expect(screen.queryByTestId('gauge-center-divider')).not.toBeNull();
+  });
+
+  it('does not render center divider in start mode', () => {
+    renderWithProviders(<Gauge value={50} testID="g-start" />);
+    expect(screen.queryByTestId('gauge-center-divider')).toBeNull();
+  });
+
+  it('negative value displays the actual number, not clamped to 0', () => {
+    renderWithProviders(
+      <Gauge value={-67} origin="center" testID="g-neg" />,
+    );
+    // Default formatter: -67%
+    expect(screen.getByText('-67%')).toBeDefined();
+  });
+
+  it('positive value in center mode displays the actual positive number', () => {
+    renderWithProviders(
+      <Gauge value={42} origin="center" testID="g-pos-center" />,
+    );
+    expect(screen.getByText('42%')).toBeDefined();
+  });
+
+  it('clamps center-origin value to [-max, max]', () => {
+    renderWithProviders(
+      <Gauge value={-200} max={100} origin="center" testID="g-clamp-neg" />,
+    );
+    expect(screen.getByText('-100%')).toBeDefined();
+  });
+
+  it('uses negative tone for the fill', () => {
+    renderWithProviders(
+      <Gauge value={-50} origin="center" tone="negative" testID="g-neg-tone" />,
+    );
+    const fill = screen
+      .getAllByTestId('g-neg-tone')[0]!
+      .querySelector('[data-testid="gauge-fill"]');
+    expect(fill).not.toBeNull();
+  });
+});
+
+describe('Gauge center-origin with zones', () => {
+  const zones = [
+    { from: 0, to: 10, color: '#FFE8EA' },
+    { from: 10, to: 20, color: '#FFF8E1' },
+    { from: 20, to: 100, color: '#D6FFF4' },
+  ] as const;
+
+  it('center-origin negative value fills left from center', () => {
+    renderWithProviders(
+      <Gauge value={-50} max={100} origin="center" testID="g-center-neg" />,
+    );
+    const fill = getFill('g-center-neg');
+    expect(fill).not.toBeNull();
+    // Fill width should be 25% (50/100 * 50%)
+    expect(fillPercent(fill)).toBe(25);
+  });
+
+  it('center-origin renders zones on positive half', () => {
+    renderWithProviders(
+      <Gauge value={50} max={100} origin="center" zones={zones} testID="g-center-zones" />,
+    );
+    const zoneEls = screen.getAllByTestId('gauge-zone');
+    expect(zoneEls.length).toBe(3);
+  });
+
+  it('center-origin zones do not render when zones is undefined', () => {
+    renderWithProviders(
+      <Gauge value={50} max={100} origin="center" testID="g-center-no-zones" />,
+    );
+    expect(screen.queryAllByTestId('gauge-zone').length).toBe(0);
+  });
+});
+
+describe('Gauge zones', () => {
+  const zones = [
+    { from: 0, to: 10, color: '#FFE8EA' },
+    { from: 10, to: 20, color: '#FFF8E1' },
+    { from: 20, to: 100, color: '#D6FFF4' },
+  ] as const;
+
+  it('renders zone segments when zones prop is provided', () => {
+    renderWithProviders(
+      <Gauge value={50} zones={zones} testID="g-zones" />,
+    );
+    const zoneEls = screen.getAllByTestId('gauge-zone');
+    expect(zoneEls.length).toBe(3);
+  });
+
+  it('does not render zone segments when zones is undefined', () => {
+    renderWithProviders(<Gauge value={50} testID="g-no-zones" />);
+    expect(screen.queryAllByTestId('gauge-zone').length).toBe(0);
+  });
+
+  it('does not render zone segments when zones array is empty', () => {
+    renderWithProviders(<Gauge value={50} zones={[]} testID="g-empty-zones" />);
+    expect(screen.queryAllByTestId('gauge-zone').length).toBe(0);
+  });
+
+  it('fill bar renders on top of zones (positioned absolute)', () => {
+    renderWithProviders(
+      <Gauge value={50} zones={zones} testID="g-zones-fill" />,
+    );
+    const fill = screen
+      .getAllByTestId('g-zones-fill')[0]!
+      .querySelector('[data-testid="gauge-fill"]');
+    expect(fill).not.toBeNull();
+  });
+});

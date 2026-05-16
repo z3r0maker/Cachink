@@ -1,8 +1,8 @@
 # Multiple wrong PIN attempts — error messages + recovery link.
 #
 # Verifies:
-#   1. On QuickSwitch, enter wrong PIN multiple times
-#   2. Error messages appear each time
+#   1. On QuickSwitch, enter wrong PIN multiple times via numpad
+#   2. Error messages appear each time (shake + haptic fire too)
 #   3. forgot-pin-link visible after failures
 #
 # Precondition: wizard + director-setup complete, app relaunched.
@@ -24,34 +24,53 @@ appId: mx.cachink.mobile
       id: "quick-switch"
     timeout: 10000
 
-# --- Attempt 1: Wrong PIN ---
+# --- Attempt 1: Wrong PIN (999991) via numpad ---
 - tapOn:
-    id: "pin-input"
-- inputText: "999991"
+    id: "numpad-9"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-1"
 
 # Error message should appear.
 - assertVisible: "PIN incorrecto"
 
-# --- Attempt 2: Wrong PIN ---
+# --- Attempt 2: Wrong PIN (999992) via numpad ---
 - tapOn:
-    id: "pin-input"
-- eraseText
-- inputText: "999992"
+    id: "numpad-9"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-2"
 
 # Error message still visible.
 - assertVisible: "PIN incorrecto"
 
-# --- Attempt 3: Wrong PIN ---
+# --- Attempt 3: Wrong PIN (999993) via numpad ---
 - tapOn:
-    id: "pin-input"
-- eraseText
-- inputText: "999993"
+    id: "numpad-9"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-3"
 
 # Error message still visible.
 - assertVisible: "PIN incorrecto"

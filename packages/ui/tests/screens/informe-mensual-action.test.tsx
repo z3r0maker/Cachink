@@ -23,7 +23,7 @@ beforeEach(async () => {
   const biz = await seedBusinesses.create({
     nombre: 'Test',
     regimenFiscal: 'RESICO',
-    isrTasa: 0.3,
+    isrTasa: 3000,
   });
   TEST_BIZ = biz.id as BusinessId;
   useAppConfigStore.getState().setCurrentBusinessId(TEST_BIZ);

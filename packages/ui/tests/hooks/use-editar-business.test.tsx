@@ -34,7 +34,7 @@ describe('useEditarBusiness', () => {
     const biz = await businesses.create({
       nombre: 'Original',
       regimenFiscal: 'RIF',
-      isrTasa: 0.3,
+      isrTasa: 3000,
       businessId: BIZ,
     });
     useAppConfigStore.setState({ currentBusinessId: biz.id, hydrated: true });

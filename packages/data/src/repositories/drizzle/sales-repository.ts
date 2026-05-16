@@ -8,11 +8,13 @@
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   DeviceId,
   UserId,
   IsoDate,
   IsoTimestamp,
+  Money,
   NewSale,
   PaymentState,
   ProductId,
@@ -54,6 +56,11 @@ export class DrizzleSalesRepository implements SalesRepository {
       estadoPago,
       productoId: input.productoId,
       cantidad: input.cantidad ?? 1,
+      efectivoRecibidoCentavos: input.efectivoRecibidoCentavos ?? null,
+      cancelledByUserId: null as string | null,
+      cancelMotivo: null as string | null,
+      cancelledAt: null as string | null,
+      cajaTurnoId: input.cajaTurnoId ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -128,12 +135,12 @@ export class DrizzleSalesRepository implements SalesRepository {
   }
 
   async count(businessId: BusinessId): Promise<number> {
-    const rows = await this.#db
-      .select({ id: sales.id })
+    const result = await this.#db
+      .select({ value: sql<number>`count(*)` })
       .from(sales)
       .where(and(eq(sales.businessId, businessId), isNull(sales.deletedAt)))
-      .all();
-    return rows.length;
+      .get();
+    return result?.value ?? 0;
   }
 
   async findFrequentProductoIds(opts: {
@@ -177,6 +184,11 @@ export class DrizzleSalesRepository implements SalesRepository {
       estadoPago: row.estadoPago,
       productoId: row.productoId as ProductId,
       cantidad: row.cantidad,
+      efectivoRecibidoCentavos: (row.efectivoRecibidoCentavos ?? null) as Money | null,
+      cancelledByUserId: (row.cancelledByUserId ?? null) as UserId | null,
+      cancelMotivo: row.cancelMotivo ?? null,
+      cancelledAt: (row.cancelledAt ?? null) as IsoTimestamp | null,
+      cajaTurnoId: (row.cajaTurnoId ?? null) as CajaTurnoId | null,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,

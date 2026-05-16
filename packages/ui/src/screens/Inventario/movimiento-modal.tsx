@@ -70,7 +70,7 @@ export function MovimientoModal(props: MovimientoModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="movimiento-submit"
       >

@@ -40,7 +40,7 @@ describe('CorteDeDiaCard', () => {
   it('renders the CTA label when shouldShow is true', () => {
     renderWithProviders(<CorteDeDiaCard shouldShow onOpen={vi.fn()} />);
     expect(screen.getByTestId('corte-de-dia-card')).toBeInTheDocument();
-    expect(screen.getByText('Cerrar corte del día')).toBeInTheDocument();
+    expect(screen.getByText('Cerrar corte')).toBeInTheDocument();
   });
 
   it('invokes onOpen when the CTA is tapped', () => {

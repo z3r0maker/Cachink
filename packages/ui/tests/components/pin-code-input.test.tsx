@@ -24,6 +24,7 @@ function Wrapper(props: Omit<PinCodeInputProps, 'value' | 'onChange'> & { initia
       onChange={setValue}
       onComplete={props.onComplete}
       error={props.error}
+      disabled={props.disabled}
       testID={props.testID}
     />
   );
@@ -121,5 +122,19 @@ describe('PinCodeInput', () => {
   it('derives hidden input testID from root testID', () => {
     renderWithProviders(<PinCodeInput value="" onChange={vi.fn()} testID="pin-input" />);
     expect(screen.getByTestId('pin-input-field')).toBeInTheDocument();
+  });
+
+  it('ignores input changes when disabled is true', () => {
+    const onChange = vi.fn();
+    renderWithProviders(<PinCodeInput value="" onChange={onChange} disabled testID="pin" />);
+    const input = screen.getByTestId('pin-field');
+    fireEvent.change(input, { target: { value: '123' } });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('does not show active cursor when disabled', () => {
+    renderWithProviders(<PinCodeInput value="" onChange={vi.fn()} disabled testID="pin" />);
+    // Blinking cursor renders "|" in active box — should not appear when disabled
+    expect(screen.queryByText('|')).not.toBeInTheDocument();
   });
 });

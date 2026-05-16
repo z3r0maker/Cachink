@@ -26,6 +26,7 @@ interface AppConfigStore extends AppConfigState {
   setUserRole: (role: UserRole | null) => void;
   setMustChangePin: (must: boolean) => void;
   setDiscoveryShown: (shown: boolean) => void;
+  setCachinkSoundEnabled: (next: boolean) => void;
   /** Full reset — used by tests and by the "re-run wizard" settings action. */
   reset: () => void;
   /** Hydration complete marker — flips once the provider finishes loading. */
@@ -44,6 +45,7 @@ const INITIAL_STATE: AppConfigState = {
   userRole: null,
   mustChangePin: false,
   discoveryShown: false,
+  cachinkSoundEnabled: true,
 };
 
 export const useAppConfigStore = create<AppConfigStore>((set) => ({
@@ -59,6 +61,7 @@ export const useAppConfigStore = create<AppConfigStore>((set) => ({
   setUserRole: (userRole) => set({ userRole }),
   setMustChangePin: (mustChangePin) => set({ mustChangePin }),
   setDiscoveryShown: (discoveryShown) => set({ discoveryShown }),
+  setCachinkSoundEnabled: (cachinkSoundEnabled) => set({ cachinkSoundEnabled }),
   reset: () => set(INITIAL_STATE),
 }));
 
@@ -130,3 +133,13 @@ export const useDiscoveryShown = (): boolean => useAppConfigStore((s) => s.disco
 /** Setter: mark feature-discovery as shown. */
 export const useSetDiscoveryShown = (): ((shown: boolean) => void) =>
   useAppConfigStore((s) => s.setDiscoveryShown);
+
+// --- Cachink sound selectors ---
+
+/** Selector: whether the "¡CACHINK!" sound plays on each sale. */
+export const useCachinkSoundEnabled = (): boolean =>
+  useAppConfigStore((s) => s.cachinkSoundEnabled);
+
+/** Setter: toggle the "¡CACHINK!" sale sound on/off. */
+export const useSetCachinkSoundEnabled = (): ((next: boolean) => void) =>
+  useAppConfigStore((s) => s.setCachinkSoundEnabled);

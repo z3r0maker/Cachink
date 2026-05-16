@@ -33,7 +33,7 @@ describe('BusinessForm', () => {
     renderWithProviders(
       <BusinessForm
         onSubmit={onSubmit}
-        defaults={{ nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 0.3 }}
+        defaults={{ nombre: 'Taquería Don Pedro', regimenFiscal: 'RIF', isrTasa: 3000 }}
       />,
     );
     fireEvent.click(getButton());
@@ -41,7 +41,7 @@ describe('BusinessForm', () => {
       expect.objectContaining({
         nombre: 'Taquería Don Pedro',
         regimenFiscal: 'RIF',
-        isrTasa: 0.3,
+        isrTasa: 3000,
       }),
     );
   });
@@ -51,7 +51,7 @@ describe('BusinessForm', () => {
     renderWithProviders(
       <BusinessForm
         onSubmit={onSubmit}
-        defaults={{ nombre: 'Test', regimenFiscal: 'RIF', isrTasa: 1.5 }}
+        defaults={{ nombre: 'Test', regimenFiscal: 'RIF', isrTasa: 15_000 }}
       />,
     );
     fireEvent.click(getButton());

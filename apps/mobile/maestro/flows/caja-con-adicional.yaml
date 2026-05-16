@@ -19,11 +19,8 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Ensure caja feature flag is ON.
-- runFlow: shared/enable-caja-flag.yaml
 
 # Switch to Operativo to access Caja.
-- runFlow: shared/select-operativo.yaml
 
 # Navigate to Otros → Caja.
 - tapOn:

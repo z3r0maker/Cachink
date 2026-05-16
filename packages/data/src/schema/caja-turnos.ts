@@ -25,5 +25,7 @@ export const cajaTurnos = sqliteTable('caja_turnos', {
   totalQr: numeric('total_qr', { mode: 'bigint' }).notNull().default(0n),
   totalCredito: numeric('total_credito', { mode: 'bigint' }).notNull().default(0n),
   egresoAutoId: text('egreso_auto_id'),
+  conteoCentavos: numeric('conteo_centavos', { mode: 'bigint' }),
+  conteoAt: text('conteo_at'),
   ...auditColumns,
 });

@@ -2,7 +2,7 @@
 #
 # Verifies:
 #   1. Director creates operativo with mustChangePin flag
-#   2. Operativo logs in → forced change screen appears
+#   2. Operativo logs in via numpad → forced change screen appears
 #   3. Enter new PIN → submit → tabs mount
 #
 # Precondition: wizard + director-setup complete.
@@ -33,12 +33,19 @@ appId: mx.cachink.mobile
     id: "user-avatar-1"
     optional: true
 
-# Enter the operativo's initial PIN.
+# Enter the operativo's initial PIN (111111) via inline numpad.
 - tapOn:
-    id: "pin-input"
-- inputText: "111111"
+    id: "numpad-1"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
 
 # Forced change PIN screen appears.
 - extendedWaitUntil:
@@ -46,7 +53,7 @@ appId: mx.cachink.mobile
       id: "change-pin"
     timeout: 10000
 
-# Fill new PIN.
+# Fill new PIN (change-pin screen uses system keyboard, not numpad).
 - tapOn:
     id: "new-pin"
 - inputText: "222222"

@@ -2,7 +2,7 @@
  * Drizzle-backed {@link ClientsRepository}.
  */
 
-import { and, asc, eq, isNull, like } from 'drizzle-orm';
+import { and, asc, eq, isNull, like, sql } from 'drizzle-orm';
 import type { BusinessId, ClientId, DeviceId,
   UserId, IsoTimestamp, NewClient } from '@cachink/domain';
 import { newEntityId, now } from '@cachink/domain';
@@ -91,12 +91,12 @@ export class DrizzleClientsRepository implements ClientsRepository {
   }
 
   async count(businessId: BusinessId): Promise<number> {
-    const rows = await this.#db
-      .select({ id: clients.id })
+    const result = await this.#db
+      .select({ value: sql<number>`count(*)` })
       .from(clients)
       .where(and(eq(clients.businessId, businessId), isNull(clients.deletedAt)))
-      .all();
-    return rows.length;
+      .get();
+    return result?.value ?? 0;
   }
 
   #mapRow(row: ClientRow): Client {

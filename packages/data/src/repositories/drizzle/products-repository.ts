@@ -2,7 +2,7 @@
  * Drizzle-backed {@link ProductsRepository}.
  */
 
-import { and, asc, eq, isNull } from 'drizzle-orm';
+import { and, asc, eq, isNull, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
@@ -12,6 +12,7 @@ import type {
   IsoTimestamp,
   NewProduct,
   ProductColor,
+  ProductIcon,
   UsoProducto,
   ProductId,
   ProductoTipo,
@@ -51,6 +52,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
       atributos: JSON.stringify(input.atributos ?? {}),
       colorFondo: input.colorFondo ?? 'white',
       usoProducto: input.usoProducto ?? 'venta',
+      icono: input.icono ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -103,6 +105,10 @@ export class DrizzleProductsRepository implements ProductsRepository {
     if (patch.unidad !== undefined) updates.unidad = patch.unidad;
     if (patch.umbralStockBajo !== undefined) updates.umbralStockBajo = patch.umbralStockBajo;
     if (patch.colorFondo !== undefined) updates.colorFondo = patch.colorFondo;
+    if (patch.usoProducto !== undefined) updates.usoProducto = patch.usoProducto;
+    if (patch.icono !== undefined) updates.icono = patch.icono;
+    if (patch.costoUnitCentavos !== undefined) updates.costoUnitCentavos = patch.costoUnitCentavos;
+    if (patch.precioVentaCentavos !== undefined) updates.precioVentaCentavos = patch.precioVentaCentavos;
     await this.#db.update(products).set(updates).where(eq(products.id, id)).run();
     return this.findById(id);
   }
@@ -117,12 +123,12 @@ export class DrizzleProductsRepository implements ProductsRepository {
   }
 
   async count(businessId: BusinessId): Promise<number> {
-    const rows = await this.#db
-      .select({ id: products.id })
+    const result = await this.#db
+      .select({ value: sql<number>`count(*)` })
       .from(products)
       .where(and(eq(products.businessId, businessId), isNull(products.deletedAt)))
-      .all();
-    return rows.length;
+      .get();
+    return result?.value ?? 0;
   }
 
   #mapRow(row: ProductRow): Product {
@@ -140,6 +146,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
       atributos: this.#parseAtributos(row.atributos),
       colorFondo: (row.colorFondo ?? 'white') as ProductColor,
       usoProducto: (row.usoProducto ?? 'venta') as UsoProducto,
+      icono: (row.icono ?? null) as ProductIcon | null,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,

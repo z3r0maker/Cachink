@@ -1,14 +1,24 @@
 /**
- * FlujoEfectivoScreen — NIF B-2 Flujo de Efectivo (P1C-M8-T04, Slice 3 C15).
+ * FlujoEfectivoScreen — NIF B-2 Flujo de Efectivo.
  *
- * Two sections (Operación, Inversión) with a running-total hero at the
- * bottom. Pure presentation.
+ * Restructured with punchline-first ResumenCard, collapsible
+ * sub-component detail rows, 4-bar DivergingBar, and HelpAccordions.
+ *
+ * Pure presentation.
  */
 
-import type { ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type FlujoDeEfectivo, type Money } from '@cachink/domain';
-import { Card, Kpi, SectionTitle } from '../../components/index';
+import { formatMoney, type FlujoDeEfectivo, type Money, ZERO } from '@cachink/domain';
+import {
+  Card,
+  DeltaIndicator,
+  HelpAccordion,
+  HealthIndicator,
+  Kpi,
+  SectionTitle,
+} from '../../components/index';
+import { Icon } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 import { DivergingBar } from '../../charts/DivergingBar/index';
@@ -17,41 +27,61 @@ import { moneyToNumber } from '../../charts/chart-tokens';
 export interface FlujoEfectivoScreenProps {
   readonly flujo: FlujoDeEfectivo | null;
   readonly periodoLabel: string;
+  readonly priorFlujo?: FlujoDeEfectivo | null;
   readonly testID?: string;
 }
 
-interface SectionCardProps {
-  readonly label: string;
-  readonly value: Money;
-  readonly testID: string;
+type T = ReturnType<typeof useTranslation>['t'];
+
+function SubRow(props: { label: string; value: Money; testID: string }): ReactElement {
+  return (
+    <View testID={props.testID} flexDirection="row" justifyContent="space-between" alignItems="center" paddingVertical={4} paddingLeft={16}>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={12} color={colors.gray600}>{props.label}</Text>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={13} color={colors.black}>{formatMoney(props.value)}</Text>
+    </View>
+  );
 }
 
-function SectionCard(props: SectionCardProps): ReactElement {
+function CollapsibleSection(props: {
+  label: string;
+  total: Money;
+  children: ReactElement;
+  testID: string;
+}): ReactElement {
+  const [open, setOpen] = useState(false);
   return (
     <Card padding="md" fullWidth testID={props.testID}>
-      <View
-        flexDirection="row"
-        justifyContent="space-between"
-        alignItems="center"
-        paddingVertical={8}
-      >
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={14}
-          color={colors.ink}
-        >
-          {props.label}
-        </Text>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black}
-          fontSize={18}
-          color={props.value >= 0n ? colors.black : colors.red}
-        >
-          {formatMoney(props.value)}
-        </Text>
+      <View flexDirection="row" justifyContent="space-between" alignItems="center" onPress={() => setOpen((p) => !p)} cursor="pointer">
+        <View flexDirection="row" alignItems="center" gap={6}>
+          <Icon name={open ? 'chevron-down' : 'chevron-right'} size={16} color={colors.gray600} />
+          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.ink}>{props.label}</Text>
+        </View>
+        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={18} color={props.total >= 0n ? colors.black : colors.red}>{formatMoney(props.total)}</Text>
       </View>
+      {open && <View marginTop={8}>{props.children}</View>}
+    </Card>
+  );
+}
+
+function ResumenCard({ flujo, prior, t }: { flujo: FlujoDeEfectivo; prior?: FlujoDeEfectivo | null; t: T }): ReactElement {
+  const tone = flujo.total >= ZERO ? 'healthy' : 'critical';
+  const verdict = flujo.total >= ZERO ? t('estados.flujoResumenPositive') : t('estados.flujoResumenNegative');
+  return (
+    <Card testID="flujo-resumen-card" padding="md" fullWidth>
+      <SectionTitle title={t('estados.resultadosResumenTitle')} />
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.ink} marginTop={4} marginBottom={8}>
+        {t('estados.flujoResumenSentence', { total: formatMoney(flujo.total) })}
+      </Text>
+      <HealthIndicator tone={tone} verdict={verdict} testID="flujo-resumen-health" />
+      {prior !== undefined && prior !== null && (
+        <DeltaIndicator
+          current={moneyToNumber(flujo.total)}
+          previous={moneyToNumber(prior.total)}
+          format="percent"
+          periodLabel={t('estados.deltaVsMesAnterior')}
+          testID="flujo-resumen-delta"
+        />
+      )}
     </Card>
   );
 }
@@ -59,23 +89,8 @@ function SectionCard(props: SectionCardProps): ReactElement {
 function EmptyCard(props: { title: string; body: string }): ReactElement {
   return (
     <Card testID="flujo-efectivo-empty" padding="md" fullWidth>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={14}
-        color={colors.ink}
-      >
-        {props.title}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={13}
-        color={colors.gray600}
-        marginTop={4}
-      >
-        {props.body}
-      </Text>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={14} color={colors.ink}>{props.title}</Text>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={13} color={colors.gray600} marginTop={4}>{props.body}</Text>
     </Card>
   );
 }
@@ -89,20 +104,27 @@ export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactEleme
         <EmptyCard title={t('estados.emptyPeriodTitle')} body={t('estados.emptyPeriodBody')} />
       ) : (
         <View gap={12}>
-          <SectionCard
-            label={t('estados.flujoOperacion')}
-            value={props.flujo.operacion}
-            testID="flujo-operacion"
-          />
-          <SectionCard
-            label={t('estados.flujoInversion')}
-            value={props.flujo.inversion}
-            testID="flujo-inversion"
-          />
+          <ResumenCard flujo={props.flujo} prior={props.priorFlujo} t={t} />
+          <CollapsibleSection label={t('estados.flujoOperacion')} total={props.flujo.operacion} testID="flujo-operacion">
+            <>
+              <HelpAccordion subtitle={t('estados.flujoOperacionSubtitle')} detail={t('estados.flujoOperacionDetail')} />
+              <SubRow label={t('estados.flujoCobrosContado')} value={props.flujo.cobroVentasContado} testID="flujo-cobros-contado" />
+              <SubRow label={t('estados.flujoCobrosCredito')} value={props.flujo.cobroCreditoClientes} testID="flujo-cobros-credito" />
+              <SubRow label={t('estados.flujoGastosOp')} value={ZERO - props.flujo.egresoOperativo} testID="flujo-gastos-op" />
+            </>
+          </CollapsibleSection>
+          <CollapsibleSection label={t('estados.flujoInversion')} total={props.flujo.inversion} testID="flujo-inversion">
+            <>
+              <HelpAccordion subtitle={t('estados.flujoInversionSubtitle')} detail={t('estados.flujoInversionDetail')} />
+              <SubRow label={t('estados.flujoComprasInv')} value={ZERO - props.flujo.egresoInversion} testID="flujo-compras-inv" />
+            </>
+          </CollapsibleSection>
           <DivergingBar
             items={[
-              { label: t('estados.flujoOperacion'), value: moneyToNumber(props.flujo.operacion) },
-              { label: t('estados.flujoInversion'), value: moneyToNumber(props.flujo.inversion) },
+              { label: t('estados.flujoCobrosContado'), value: moneyToNumber(props.flujo.cobroVentasContado) },
+              { label: t('estados.flujoCobrosCredito'), value: moneyToNumber(props.flujo.cobroCreditoClientes) },
+              { label: t('estados.flujoGastosOp'), value: -moneyToNumber(props.flujo.egresoOperativo) },
+              { label: t('estados.flujoComprasInv'), value: -moneyToNumber(props.flujo.egresoInversion) },
             ]}
             testID="flujo-diverging-bar"
           />
@@ -110,9 +132,6 @@ export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactEleme
             label={t('estados.flujoTotal')}
             value={formatMoney(props.flujo.total)}
             tone={props.flujo.total >= 0n ? 'positive' : 'negative'}
-            // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): mirror the
-            // right-aligned numeric column inside the SectionCard rows
-            // above so the totals value lines up with them.
             align="right"
             testID="flujo-total"
           />

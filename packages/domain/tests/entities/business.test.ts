@@ -10,7 +10,7 @@ const validBusiness = {
   id: '01HZ8XQN9GZJXV8AKQ5X0C7TEM',
   nombre: 'Tortillería La Esperanza',
   regimenFiscal: 'RIF',
-  isrTasa: 0.3,
+  isrTasa: 3000,
   logoUrl: null,
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7TEN',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7TEP',
@@ -41,12 +41,12 @@ describe('BusinessSchema', () => {
     expect(() => BusinessSchema.parse({ ...validBusiness, nombre: '' })).toThrow();
   });
 
-  it('rejects isrTasa above 1', () => {
-    expect(() => BusinessSchema.parse({ ...validBusiness, isrTasa: 1.5 })).toThrow();
+  it('rejects isrTasa above 10_000', () => {
+    expect(() => BusinessSchema.parse({ ...validBusiness, isrTasa: 15_000 })).toThrow();
   });
 
   it('rejects isrTasa below 0', () => {
-    expect(() => BusinessSchema.parse({ ...validBusiness, isrTasa: -0.1 })).toThrow();
+    expect(() => BusinessSchema.parse({ ...validBusiness, isrTasa: -100 })).toThrow();
   });
 
   it('rejects a malformed ULID for id', () => {
@@ -99,7 +99,7 @@ describe('NewBusinessSchema', () => {
     const parsed = NewBusinessSchema.parse({
       nombre: 'Taquería El Buen Sabor',
       regimenFiscal: 'PF actividad empresarial',
-      isrTasa: 0.3,
+      isrTasa: 3000,
       logoUrl: null,
       businessId: '01HZ8XQN9GZJXV8AKQ5X0C7TEN',
       deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7TEP',
@@ -111,7 +111,7 @@ describe('NewBusinessSchema', () => {
     expect(() =>
       NewBusinessSchema.parse({
         nombre: 'Taquería',
-        isrTasa: 0.3,
+        isrTasa: 3000,
         logoUrl: null,
         businessId: '01HZ8XQN9GZJXV8AKQ5X0C7TEN',
         deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7TEP',

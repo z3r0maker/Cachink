@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import {
   InventarioTabBar,
   MovimientosRoute,
-  ProductoDetailRoute,
   StockScreen,
   SwipeableTabView,
   filterProductos,
@@ -21,17 +20,6 @@ import {
   type InventarioSubTab,
   type ProductoConStock,
 } from '@cachink/ui';
-import type { IsoDate } from '@cachink/domain';
-import { useSwipeState } from '../../shell/use-swipe-state';
-import { ProductoSwipeSlots } from '../../shell/inventario-slots';
-
-function todayIso(): IsoDate {
-  const now = new Date();
-  const y = now.getUTCFullYear();
-  const m = String(now.getUTCMonth() + 1).padStart(2, '0');
-  const d = String(now.getUTCDate()).padStart(2, '0');
-  return `${y}-${m}-${d}` as IsoDate;
-}
 
 function toggleNext(tab: InventarioSubTab): InventarioSubTab {
   return tab === 'stock' ? 'movimientos' : 'stock';
@@ -54,37 +42,17 @@ function ProductosBody(props: {
   );
 }
 
-function ProductosOverlays(props: {
-  selected: ProductoConStock | null;
-  setSelected: (s: ProductoConStock | null) => void;
-  swipe: ReturnType<typeof useSwipeState<ProductoConStock>>;
-}): ReactElement {
-  return (
-    <>
-      <ProductoDetailRoute
-        row={props.selected}
-        fecha={todayIso()}
-        onClose={() => props.setSelected(null)}
-      />
-      <ProductoSwipeSlots
-        editing={props.swipe.editing}
-        setEditing={props.swipe.setEditing}
-        confirmDelete={props.swipe.confirmDelete}
-        setConfirmDelete={props.swipe.setConfirmDelete}
-      />
-    </>
-  );
-}
-
 export default function ProductosRoute(): ReactElement {
   const router = useRouter();
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<InventarioSubTab>('stock');
-  const [selected, setSelected] = useState<ProductoConStock | null>(null);
-  const swipe = useSwipeState<ProductoConStock>();
   const itemsQ = useProductosConStock();
   const items = itemsQ.data ?? [];
   const filtered = useMemo(() => filterProductos(items, query), [items, query]);
+
+  const handleProductoPress = (row: ProductoConStock): void => {
+    router.push(`/productos/${row.producto.id}` as never);
+  };
 
   const stockSlot = (
     <StockScreen
@@ -92,9 +60,7 @@ export default function ProductosRoute(): ReactElement {
       onChangeQuery={setQuery}
       items={filtered}
       onNuevoProducto={() => router.push('/nuevo-producto' as never)}
-      onProductoPress={setSelected}
-      onEditProducto={swipe.setEditing}
-      onEliminarProducto={swipe.setConfirmDelete}
+      onProductoPress={handleProductoPress}
       loading={itemsQ.isLoading}
       error={itemsQ.error as Error | null}
     />
@@ -109,7 +75,6 @@ export default function ProductosRoute(): ReactElement {
         onNext={() => setTab(toggleNext(tab))}
         onPrev={() => setTab(togglePrev(tab))}
       />
-      <ProductosOverlays selected={selected} setSelected={setSelected} swipe={swipe} />
     </>
   );
 }

@@ -9,7 +9,7 @@ import type { BusinessId, CajaTurnoId, UserId } from '@cachink/domain';
 
 export type { CajaTurno };
 
-/** Patchable fields for closing a turn. */
+/** Patchable fields for closing a turn (includes blind-close fields). */
 export type CajaTurnoPatch = Partial<
   Pick<
     CajaTurno,
@@ -24,6 +24,8 @@ export type CajaTurnoPatch = Partial<
     | 'totalQr'
     | 'totalCredito'
     | 'egresoAutoId'
+    | 'conteoCentavos'
+    | 'conteoAt'
   >
 >;
 

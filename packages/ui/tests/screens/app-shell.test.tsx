@@ -1,7 +1,7 @@
 /**
  * AppShell + Settings component tests.
  *
- * Updated for Phase 4: 4-tab bottom bar with Otros grid pattern.
+ * Updated for Phase 4: 5-tab bottom bar with Otros grid pattern.
  */
 
 import { describe, expect, it, vi } from 'vitest';
@@ -26,9 +26,9 @@ const noop = (): void => {};
 const defaultFlags = DEFAULT_FEATURE_FLAGS;
 
 describe('tabsForRole', () => {
-  it('returns 4-tab Operativo set (without flags)', () => {
+  it('returns 5-tab Operativo set (without flags)', () => {
     expect(tabsForRole('operativo')).toStrictEqual(OPERATIVO_TABS);
-    expect(tabsForRole('operativo')).toHaveLength(4);
+    expect(tabsForRole('operativo')).toHaveLength(5);
   });
 
   it('returns the 4-tab Director set', () => {
@@ -36,22 +36,22 @@ describe('tabsForRole', () => {
     expect(tabsForRole('director')).toHaveLength(4);
   });
 
-  it('Operativo with merma ON: 3rd tab is merma', () => {
+  it('Operativo with merma ON: 4th tab is merma', () => {
     const tabs = tabsForRole('operativo', {
       ...defaultFlags,
       merma: true,
     });
-    expect(tabs).toHaveLength(4);
-    expect(tabs[2]!.key).toBe('merma');
-    expect(tabs[3]!.key).toBe('otros');
+    expect(tabs).toHaveLength(5);
+    expect(tabs[3]!.key).toBe('merma');
+    expect(tabs[4]!.key).toBe('otros');
   });
 
-  it('Operativo with merma OFF: 3rd tab is productos', () => {
+  it('Operativo with merma OFF: 4th tab is productos', () => {
     const tabs = tabsForRole('operativo', {
       ...defaultFlags,
       merma: false,
     });
-    expect(tabs[2]!.key).toBe('productos');
+    expect(tabs[3]!.key).toBe('productos');
   });
 });
 
@@ -174,7 +174,7 @@ describe('Settings', () => {
     id: '01JPHK00000000000000000008' as BusinessId,
     nombre: 'Taquería Don Pedro',
     regimenFiscal: 'RIF',
-    isrTasa: 0.3,
+    isrTasa: 3000,
     logoUrl: null,
     featureFlags: JSON.stringify(defaultFlags),
     businessId: '01JPHK00000000000000000008' as BusinessId,

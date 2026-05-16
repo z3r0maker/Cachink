@@ -13,12 +13,14 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney } from '@cachink/domain';
-import type { AttrDef, Product } from '@cachink/domain';
+import { formatMoney, resolveProductIcon } from '@cachink/domain';
+import type { AttrDef, Product, ProductIcon } from '@cachink/domain';
 import { Card } from '../Card/card';
+import { Icon } from '../Icon/icon';
 import { Tag } from '../Tag/tag';
 import { colors, typography } from '../../theme';
 import { PRODUCT_BG_COLORS } from '../../product-colors';
+import { QuantityBadge, type BadgeVariant } from './quantity-badge';
 
 export interface ProductoCardProps {
   readonly producto: Product;
@@ -31,6 +33,12 @@ export interface ProductoCardProps {
   readonly disabled?: boolean;
   readonly onPress: (p: Product) => void;
   readonly onLongPress?: (p: Product) => void;
+  /** Enhancement A: quantity in the cart, renders a badge overlay. */
+  readonly badgeCount?: number;
+  /** Enhancement G: badge colour — `yellow` (ventas) or `red` (merma). */
+  readonly badgeVariant?: BadgeVariant;
+  /** Explicit override for the product icon. Defaults to producto.icono. */
+  readonly icono?: ProductIcon | null;
   readonly testID?: string;
 }
 
@@ -130,15 +138,27 @@ function CardHeader(props: {
 export function ProductoCard(props: ProductoCardProps): ReactElement {
   const { producto, stock, atributoDefs = [], mode, disabled } = props;
   const bg = PRODUCT_BG_COLORS[producto.colorFondo ?? 'white'];
+  const badge = (props.badgeCount ?? 0) > 0;
+  const resolvedIcon = resolveProductIcon(
+    props.icono !== undefined ? props.icono : producto.icono,
+    producto.categoria,
+  );
   return (
-    <Card
-      testID={props.testID ?? `producto-tile-${producto.id}`}
-      padding="sm"
-      onPress={disabled ? undefined : () => props.onPress(producto)}
-      ariaLabel={producto.nombre}
-      backgroundColor={bg}
-    >
-      <View gap={4}>
+    <View position="relative">
+      {badge && (
+        <QuantityBadge count={props.badgeCount!} variant={props.badgeVariant} />
+      )}
+      <Card
+        testID={props.testID ?? `producto-tile-${producto.id}`}
+        padding="sm"
+        onPress={disabled ? undefined : () => props.onPress(producto)}
+        ariaLabel={producto.nombre}
+        backgroundColor={bg}
+      >
+        <View gap={4} alignItems="center">
+          <Icon name={resolvedIcon} size={28} color={colors.black} />
+        </View>
+        <View gap={4}>
         <CardHeader producto={producto} mode={mode} onLongPress={props.onLongPress} />
         <Text
           fontFamily={typography.fontFamily}
@@ -151,7 +171,8 @@ export function ProductoCard(props: ProductoCardProps): ReactElement {
         </Text>
         {stock !== undefined && <StockBadge stock={stock} umbral={producto.umbralStockBajo} />}
         <AttrChips producto={producto} defs={atributoDefs} />
-      </View>
-    </Card>
+        </View>
+      </Card>
+    </View>
   );
 }

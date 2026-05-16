@@ -1,5 +1,5 @@
 /**
- * VentasScreen component tests — inline POS surface (ADR-048).
+ * VentasScreen component tests — tap-to-cart POS surface.
  */
 
 import { describe, expect, it, vi } from 'vitest';
@@ -35,18 +35,23 @@ function sale(overrides: Partial<Sale>): Sale {
   };
 }
 
-/** Minimal props for the new VentasScreen. */
+/** Minimal props for the VentasScreen (tap-to-cart model). */
 function defaultProps(overrides: Record<string, unknown> = {}) {
   return {
-    fecha: '2026-04-24',
-    onChangeFecha: vi.fn(),
-    ventas: [] as readonly Sale[],
     total: 0n,
+    ventaCount: 0,
     productos: [],
     stockMap: undefined,
-    onProductoTap: vi.fn(),
     productSearch: '',
     onProductSearchChange: vi.fn(),
+    // Cart props
+    cart: { items: [], totalCentavos: 0n, itemCount: 0 },
+    onAddToCart: vi.fn(),
+    onRemoveOne: vi.fn(),
+    onRemoveAll: vi.fn(),
+    onClearCart: vi.fn(),
+    cartQuantities: new Map<string, number>(),
+    onCheckout: vi.fn(),
     ...overrides,
   };
 }
@@ -74,34 +79,12 @@ describe('VentasScreen', () => {
     expect(screen.getByTestId('empty-productos')).toBeInTheDocument();
   });
 
-  it('renders VentaCards and the formatted total when ventas exist', () => {
-    const ventas = [
-      sale({ id: '01JPHK0000000000000000S001' as SaleId, concepto: 'Taco', monto: 10000n }),
-      sale({ id: '01JPHK0000000000000000S002' as SaleId, concepto: 'Refresco', monto: 25000n }),
-    ];
+  it('renders the total bar with the formatted total', () => {
     renderWithProviders(
-      <VentasScreen {...defaultProps({ ventas, total: 35000n })} />,
+      <VentasScreen {...defaultProps({ total: 35000n, ventaCount: 2 })} />,
     );
-    expect(screen.getByText('Taco')).toBeInTheDocument();
-    expect(screen.getByText('Refresco')).toBeInTheDocument();
-    expect(screen.getByTestId('ventas-total-card').textContent).toContain('$350.00');
-  });
-
-  it('renders a skeleton when loading', () => {
-    renderWithProviders(
-      <VentasScreen {...defaultProps({ loading: true })} />,
-    );
-    expect(screen.getByTestId('ventas-skeleton-0')).toBeInTheDocument();
-  });
-
-  it('renders an error banner with retry when error prop is set', () => {
-    const onRetry = vi.fn();
-    renderWithProviders(
-      <VentasScreen
-        {...defaultProps({ error: new Error('boom'), onRetry })}
-      />,
-    );
-    expect(screen.getByTestId('ventas-error')).toBeInTheDocument();
+    // TotalBar shows the total
+    expect(screen.getByTestId('total-bar').textContent).toContain('$350.00');
   });
 
   it('renders the search bar for product filtering', () => {
@@ -111,20 +94,48 @@ describe('VentasScreen', () => {
     expect(screen.getByTestId('ventas-product-search')).toBeInTheDocument();
   });
 
-  it('wraps each sale row in a SwipeableRow when handlers are supplied', () => {
-    const ventaA = sale({ id: '01JPHK0000000000000000VA01' as SaleId });
-    const ventaB = sale({ id: '01JPHK0000000000000000VB02' as SaleId });
+  it('renders the empty cart hint when cart is empty', () => {
+    renderWithProviders(
+      <VentasScreen {...defaultProps()} />,
+    );
+    expect(screen.getByTestId('empty-cart-hint')).toBeInTheDocument();
+  });
+
+  it('renders cart footer when cart has items', () => {
     renderWithProviders(
       <VentasScreen
         {...defaultProps({
-          ventas: [ventaA, ventaB],
-          total: 20000n,
-          onEditVenta: vi.fn(),
-          onEliminarVenta: vi.fn(),
+          cart: {
+            items: [
+              { productoId: PROD_ID, nombre: 'Taco', precioUnitCentavos: 2500n, cantidad: 2 },
+            ],
+            totalCentavos: 5000n,
+            itemCount: 2,
+          },
+          cartQuantities: new Map([[PROD_ID, 2]]),
         })}
       />,
     );
-    expect(screen.getAllByTestId(`venta-swipe-${ventaA.id}`).length).toBeGreaterThan(0);
-    expect(screen.getAllByTestId(`venta-swipe-${ventaB.id}`).length).toBeGreaterThan(0);
+    expect(screen.getByTestId('cart-footer')).toBeInTheDocument();
+    expect(screen.getByTestId('cart-footer').textContent).toContain('$50.00');
+  });
+
+  it('renders cart strip with items', () => {
+    renderWithProviders(
+      <VentasScreen
+        {...defaultProps({
+          cart: {
+            items: [
+              { productoId: PROD_ID, nombre: 'Taco al Pastor', precioUnitCentavos: 2500n, cantidad: 3 },
+            ],
+            totalCentavos: 7500n,
+            itemCount: 3,
+          },
+          cartQuantities: new Map([[PROD_ID, 3]]),
+        })}
+      />,
+    );
+    expect(screen.getByTestId('cart-strip')).toBeInTheDocument();
+    expect(screen.getByText('Taco al Pastor')).toBeInTheDocument();
   });
 });

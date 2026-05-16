@@ -56,7 +56,7 @@ describe('AuditoriaInventarioSchema', () => {
     const result = AuditoriaInventarioSchema.safeParse({
       id: VALID_ULID,
       fecha: '2026-05-09',
-      estado: 'cancelada',
+      estado: 'desconocido',
       lineas: '[]',
       totalDiscrepancias: 0,
       totalProductos: 10,
@@ -65,11 +65,26 @@ describe('AuditoriaInventarioSchema', () => {
     });
     expect(result.success).toBe(false);
   });
+
+  it('accepts cancelada as a valid estado', () => {
+    const result = AuditoriaInventarioSchema.safeParse({
+      id: VALID_ULID,
+      fecha: '2026-05-09',
+      estado: 'cancelada',
+      lineas: '[]',
+      totalDiscrepancias: 0,
+      totalProductos: 10,
+      productosContados: 0,
+      ...VALID_AUDIT,
+    });
+    expect(result.success).toBe(true);
+  });
 });
 
 describe('AuditoriaEstadoEnum', () => {
-  it('accepts borrador and finalizada', () => {
+  it('accepts borrador, finalizada, and cancelada', () => {
     expect(AuditoriaEstadoEnum.safeParse('borrador').success).toBe(true);
     expect(AuditoriaEstadoEnum.safeParse('finalizada').success).toBe(true);
+    expect(AuditoriaEstadoEnum.safeParse('cancelada').success).toBe(true);
   });
 });

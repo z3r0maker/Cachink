@@ -1,1 +1,0 @@
-ALTER TABLE businesses ADD COLUMN feature_flags TEXT NOT NULL DEFAULT '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}';

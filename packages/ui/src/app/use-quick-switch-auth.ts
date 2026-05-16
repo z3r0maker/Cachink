@@ -66,6 +66,7 @@ async function runAuth(
   try {
     const user = await usersRepo.findById(userId);
     if (!user) {
+      setters.setSubmitting(false);
       setters.setError('Usuario no encontrado');
       return;
     }
@@ -75,14 +76,17 @@ async function runAuth(
       businessId,
     });
     if (!result.success) {
+      setters.setSubmitting(false);
       setters.setError('PIN incorrecto');
       return;
     }
+    // On success: leave submitting=true — the QuickSwitchGate will
+    // unmount when userId propagates, taking the spinner with it.
     setters.setUserId(result.userId);
     setters.setUserRole(result.role);
     setters.setRole(result.role);
     setters.setMustChangePin(result.mustChangePin);
-  } finally {
+  } catch {
     setters.setSubmitting(false);
   }
 }

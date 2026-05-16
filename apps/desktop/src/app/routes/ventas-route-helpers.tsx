@@ -4,7 +4,7 @@
  * limits enforced by ESLint (CLAUDE.md §2 #6).
  */
 
-import { useMemo, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import {
   VentaConfirmSheet,
   VentaDetailPopover,
@@ -48,16 +48,6 @@ export function useShareComprobante(
       filenameStem: `comprobante-${selected.id}`,
     }).finally(onDone);
   };
-}
-
-export function useStockMap(
-  stockQ: { data?: readonly { producto: Product; stock: number }[] },
-): Map<string, number> {
-  return useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of stockQ.data ?? []) map.set(row.producto.id, row.stock);
-    return map;
-  }, [stockQ.data]);
 }
 
 export function makeQuickSellHandler(

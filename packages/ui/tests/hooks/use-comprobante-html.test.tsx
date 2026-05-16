@@ -18,7 +18,7 @@ const BUSINESS: Business = {
   id: '01HZ8XQN9GZJXV8AKQ5X0C7B01' as BusinessId,
   nombre: 'Taquería Don Pedro',
   regimenFiscal: 'RIF',
-  isrTasa: 0.3,
+  isrTasa: 3000,
   logoUrl: null,
   featureFlags: JSON.stringify(DEFAULT_FEATURE_FLAGS),
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7B01' as BusinessId,

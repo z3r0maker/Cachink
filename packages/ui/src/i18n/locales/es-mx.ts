@@ -70,6 +70,8 @@ export const esMX = {
   },
   tabs: {
     ventas: 'Ventas',
+    caja: 'Caja',
+    pagos: 'Pagos',
     egresos: 'Pagos',
     gastos: 'Gastos',
     inventario: 'Inventario',
@@ -223,6 +225,7 @@ export const esMX = {
     frecuenciaMensual: 'Mensual',
     diaDelMesLabel: 'Día del mes',
     diaDeLaSemanaLabel: 'Día de la semana',
+    diasSemanaCorto: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
     crearEmpleado: 'Crear empleado',
     crearProducto: 'Crear producto',
     sinEmpleados: 'No hay empleados. Crea uno primero.',
@@ -280,6 +283,37 @@ export const esMX = {
     cantidad: 'Cantidad',
     metodoLabel: 'Método de pago',
     registrarVenta: 'Registrar venta',
+    // Caja Gate
+    cajaGateTitle: 'Abre tu caja para empezar a vender',
+    cajaGateDescription: 'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
+    cajaGateCta: 'Ir a Caja',
+    // Tap-to-Cart redesign
+    carrito: 'Carrito',
+    vaciar: 'Vaciar',
+    vaciarConfirm: '¿Vaciar carrito?',
+    vaciarConfirmDesc: 'Se eliminarán todos los productos del carrito.',
+    cobrar: 'Cobrar',
+    emptyCartHint: 'Toca un producto para agregarlo',
+    checkoutTitle: 'Cobrar',
+    resumenPedido: 'Resumen del pedido',
+    registrarBatch: 'Registrar {{count}} ventas',
+    ventasCount: '{{count}} ventas',
+    ultimaVenta: 'Última: {{concepto}} ×{{cantidad}} {{monto}}',
+    verMas: 'Ver más',
+    ocultar: 'Ocultar',
+    stockImpact: 'Stock: {{current}} → {{after}}',
+    // Checkout Efectivo
+    checkoutTotalLabel: 'Total a cobrar',
+    checkoutEfectivoRecibido: 'Efectivo recibido',
+    checkoutCambio: 'Cambio',
+    checkoutRegistrar: 'Registrar',
+    checkoutCajaInsuficiente: 'Tu caja podría no tener suficiente cambio',
+    checkoutMigrationError: 'Cierra y vuelve a abrir la app para aplicar una actualización.',
+    // Checkout Confirm (emoji removal)
+    checkoutCobroConfirmado: 'Cobro confirmado',
+    checkoutTransferenciaRecibida: 'Transferencia recibida',
+    checkoutPagoRecibido: 'Pago recibido',
+    checkoutConfirmarPago: 'Confirmar pago',
   },
   nuevaVenta: {
     title: 'Nueva venta',
@@ -346,6 +380,7 @@ export const esMX = {
     cardTitle: 'Cierre del día',
     cardBody: 'Cuenta el efectivo y cierra el día.',
     cta: 'Cerrar corte del día',
+    ctaShort: 'Cerrar corte',
     modalTitle: 'Corte de día',
     esperadoLabel: 'Efectivo esperado',
     contadoLabel: 'Efectivo contado',
@@ -381,6 +416,14 @@ export const esMX = {
     resultadosUtilidadOperativa: 'Utilidad operativa',
     resultadosIsr: 'ISR',
     resultadosUtilidadNeta: 'Utilidad neta',
+    // Short chart labels for waterfall bars (Issue 1 — UX audit)
+    resultadosIngresosBrief: 'Ingresos',
+    resultadosCostoVentasBrief: 'Costo vtas',
+    resultadosUtilidadBrutaBrief: 'Ut. bruta',
+    resultadosGastosOperativosBrief: 'Gastos op.',
+    resultadosUtilidadOperativaBrief: 'Ut. operativa',
+    resultadosIsrBrief: 'ISR',
+    resultadosUtilidadNetaBrief: 'Ut. neta',
     balanceActivo: 'Activo',
     balanceActivoEfectivo: 'Efectivo',
     balanceActivoInventarios: 'Inventarios',
@@ -393,7 +436,9 @@ export const esMX = {
     balanceCapitalUtilidad: 'Utilidad del periodo',
     balanceCapitalTotal: 'Total capital',
     flujoOperacion: 'Flujo de operación',
+    flujoOperacionBrief: 'Operación',
     flujoInversion: 'Flujo de inversión',
+    flujoInversionBrief: 'Inversión',
     flujoTotal: 'Incremento neto en efectivo',
     indicadoresMargenBruto: 'Margen bruto',
     indicadoresMargenOperativo: 'Margen operativo',
@@ -403,7 +448,11 @@ export const esMX = {
     indicadoresDiasCobranza: 'Días promedio de cobranza',
     indicadorNaN: '—',
     isrDisclaimerTitle: 'ISR referencial',
+    isrDisclaimerTitleWithRate: 'ISR referencial ({{rate}}%)',
     isrDisclaimerBody: 'La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.',
+    isrDisclaimerZeroExplain:
+      'Tu tasa de ISR es del {{rate}}%, pero como la utilidad operativa es negativa, no se calcula ISR. Consulta a tu contador.',
+    isrDisclaimerSettingsLabel: 'Ajustar tasa ({{rate}}%)',
     informeMensualCta: 'Informe mensual para contador',
     informeMensualShare: 'Compartir informe',
     emptyPeriodTitle: 'Sin datos en el periodo',
@@ -414,6 +463,152 @@ export const esMX = {
     chartComposicionLabel: 'Composición',
     chartFlujoLabel: 'Flujos de efectivo',
     chartTendenciaLabel: 'Tendencia últimos 6 meses',
+    isrZeroHint: 'Sin utilidad operativa positiva, no aplica ISR.',
+
+    // ── Resumen card ──
+    resultadosResumenTitle: 'Resumen del periodo',
+    resultadosResumenSentence: 'Vendiste {{ingresos}}, gastaste {{egresos}}, y te quedaron {{neto}}.',
+
+    // ── Subtitles (always visible) ──
+    resultadosIngresosSubtitle: 'Todo el dinero que entró por ventas',
+    resultadosCostoVentasSubtitle: 'Lo que gastaste para producir lo que vendiste',
+    resultadosUtilidadBrutaSubtitle: 'Lo que te queda después del costo del producto',
+    resultadosMerma: 'Merma',
+    resultadosMermaBrief: 'Merma',
+    resultadosMermaSubtitle: 'Producto perdido por daño, caducidad o robo',
+    resultadosGastosOperativosSubtitle: 'Gastos para mantener el negocio andando',
+    resultadosUtilidadOperativaSubtitle: 'Lo que queda después de TODOS los gastos',
+    resultadosIsrSubtitle: 'Impuesto sobre la renta (estimado)',
+    resultadosUtilidadNetaSubtitle: 'Lo que realmente te queda al final',
+
+    // ── Details (expandable) ──
+    resultadosIngresosDetail:
+      'Es la suma de todas tus ventas en este periodo, sin importar el método de pago. Si vendiste 50 pasteles a $100, tus ingresos son $5,000.',
+    resultadosCostoVentasDetail:
+      'Incluye materia prima e inventario. Si compraste harina, azúcar y cajas para hacer los pasteles que vendiste, eso es tu costo de ventas.',
+    resultadosUtilidadBrutaDetail:
+      'Ingresos menos costo de ventas. Si vendiste $5,000 en pasteles y la materia prima costó $2,000, tu utilidad bruta es $3,000. Un número negativo significa que estás vendiendo por debajo de tu costo.',
+    resultadosMermaDetail:
+      'Cuando se echa a perder un producto o se daña, ese costo se resta de tu utilidad. Si se te echó a perder un pastel que costó $150 hacer, eso es merma.',
+    resultadosGastosOperativosDetail:
+      'Renta, nómina, luz, publicidad, servicios — todo lo que pagas aunque no vendas nada ese día.',
+    resultadosUtilidadOperativaDetail:
+      'Es la utilidad bruta menos la merma y los gastos operativos. Si es positiva, tu negocio genera dinero con su operación diaria.',
+    resultadosIsrDetail:
+      'Es un cálculo aproximado. Solo aplica cuando hay utilidad operativa positiva. Consulta a tu contador para la cifra real.',
+    resultadosUtilidadNetaDetail:
+      'La ganancia final después de todos los costos, gastos e impuestos. Si es positiva, tu negocio es rentable. Si es negativa, estás operando a pérdida.',
+
+    // ── Verdicts ──
+    verdictUtilidadNetaPositive: 'Tu negocio fue rentable este periodo.',
+    verdictUtilidadNetaZero: 'Quedaste en cero — no ganaste ni perdiste.',
+    verdictUtilidadNetaNegative: 'Tu negocio operó a pérdida este periodo.',
+    verdictUtilidadBrutaNegative: 'Estás vendiendo por debajo de lo que cuesta producir.',
+    verdictUtilidadOperativaPositive: 'Tu operación genera ganancia.',
+    verdictUtilidadOperativaNegative: 'Tu operación consume más de lo que genera.',
+
+    // ── Ingresos donut ──
+    ingresosPorCategoria: '¿De dónde vienen tus ingresos?',
+    ingresosPorCategoriaSubtitle: 'Tus ventas por tipo de ingreso',
+    ingresosPorCategoriaDetail:
+      'Muestra cuánto vendiste en cada categoría: productos, servicios, anticipos, etc.',
+    ingresosTotalLabel: 'Total ingresos',
+
+    // ── Delta labels ──
+    deltaVsMesAnterior: 'vs mes anterior',
+    deltaVsAnioAnterior: 'vs año anterior',
+    deltaSinCambio: 'sin cambio',
+
+    // ── Balance help ──
+    balanceActivoEfectivoSubtitle: 'Dinero en caja y banco',
+    balanceActivoEfectivoDetail:
+      'Todo el efectivo disponible: lo que hay en la caja, en el banco, y en medios electrónicos.',
+    balanceActivoInventariosSubtitle: 'Valor del producto que tienes para vender',
+    balanceActivoInventariosDetail:
+      'Lo que valen los productos en stock, al costo de compra. Si tienes 10 pasteles que costaron $150, tu inventario vale $1,500.',
+    balanceActivoCxCSubtitle: 'Lo que te deben los clientes',
+    balanceActivoCxCDetail: 'Ventas a crédito que aún no te han pagado.',
+    balancePasivoSubtitle: 'Lo que tu negocio le debe a otros',
+    balancePasivoDetail: 'Deudas, préstamos, pagos pendientes a proveedores.',
+    balanceCapitalSubtitle: 'Lo que vale tu negocio como tal',
+    balanceCapitalDetail:
+      'Lo que queda si vendieras todo y pagaras lo que debes. Incluye la utilidad o pérdida del periodo.',
+    balanceResumenSentence: 'Tienes {{activo}} en activos. Tu patrimonio neto es {{capital}}.',
+    balanceVerdictPositive: 'Tu patrimonio es positivo.',
+    balanceVerdictNegative: 'Tu patrimonio es negativo — debes más de lo que tienes.',
+
+    // ── Flujo help ──
+    flujoOperacionSubtitle: 'Dinero que entra y sale por el día a día',
+    flujoOperacionDetail:
+      'Lo que cobras por ventas menos lo que pagas en gastos como renta, nómina y servicios. Si es negativo, tu operación diaria consume más efectivo del que genera.',
+    flujoInversionSubtitle: 'Dinero gastado en comprar inventario',
+    flujoInversionDetail:
+      'Cuando compras mercancía o materia prima, ese dinero sale como inversión. Es normal que sea negativo.',
+    flujoCobrosContado: 'Cobros ventas contado',
+    flujoCobrosContadoSubtitle: 'Pagos recibidos al momento de la venta',
+    flujoCobrosContadoDetail:
+      'Efectivo, transferencia, tarjeta y QR/CoDi — todo lo que cobraste inmediatamente.',
+    flujoCobrosCredito: 'Cobros crédito clientes',
+    flujoCobrosCredCreditoSubtitle: 'Pagos de clientes que te debían',
+    flujoCobrosCredCreditoDetail:
+      'Cuando un cliente que compró a crédito te paga, ese dinero aparece aquí.',
+    flujoGastosOp: 'Gastos operativos',
+    flujoComprasInv: 'Compras inventario',
+    flujoResumenPositive: 'Este mes entró más dinero del que salió.',
+    flujoResumenNegative: 'Este mes salió más dinero del que entró.',
+    flujoResumenSentence: 'Flujo neto del periodo: {{total}}.',
+
+    // ── Indicadores help ──
+    indicadoresRentabilidadTitle: '¿Qué tan rentable es tu negocio?',
+    indicadoresRentabilidadSubtitle: 'Qué porcentaje de cada peso de venta se queda como ganancia.',
+    indicadoresSaludTitle: '¿Qué tan sano opera tu negocio?',
+    indicadoresSaludSubtitle: 'Eficiencia operativa — qué tan rápido cobras, vendes y cumples.',
+    indicadoresMargenBrutoSubtitle: 'De cada peso vendido, ¿cuánto te queda después del costo?',
+    indicadoresMargenBrutoDetail:
+      'Si tu margen es 40%, de cada $100, $40 son ganancia bruta. Arriba de 20% es saludable.',
+    indicadoresMargenOperativoSubtitle:
+      'De cada peso vendido, ¿cuánto queda después de TODOS los gastos?',
+    indicadoresMargenOperativoDetail:
+      'Descuenta el costo del producto y también renta, nómina, servicios. Si es 10%, de cada $100 te quedan $10.',
+    indicadoresMargenNetoSubtitle: 'Tu ganancia real por cada peso vendido',
+    indicadoresMargenNetoDetail:
+      'El porcentaje final que se queda como ganancia. Si vendes $100 y tu margen neto es 5%, te quedan $5 limpios.',
+    indicadoresLiquidezSubtitle: '¿Puedes pagar lo que debes con lo que tienes?',
+    indicadoresLiquidezDetail:
+      'Activos entre pasivos. Mayor a 1 = tienes más de lo que debes. Menor a 1 = podrías tener problemas.',
+    indicadoresRotacionSubtitle: '¿Cuántas veces renovaste tu inventario?',
+    indicadoresRotacionDetail:
+      'Si es 4, vendiste y repusiste todo tu inventario 4 veces. Más alto = tu producto se mueve rápido.',
+    indicadoresDiasCobranzaSubtitle: '¿Cuántos días tardan tus clientes en pagarte?',
+    indicadoresDiasCobranzaDetail:
+      'Si es 30, tardan un mes. Si es 365, te deben desde hace un año. Menos de 30 es saludable.',
+    indicadoresRotacionSufixMensual: 'veces/mes',
+    indicadoresRotacionSufixAnual: 'veces/año',
+    indicadoresRotacionSufixPeriodo: 'veces en el periodo',
+    indicadoresDiasCobranzaSufix: 'días',
+    indicadoresThresholdDisclosure:
+      'Estos indicadores usan rangos generales para pequeños negocios.',
+    indicadoresThresholdSettingsLink: 'Configurar rangos en Ajustes →',
+
+    // ── Indicadores health verdicts ──
+    indicadoresMargenBrutoHealthy: 'Saludable — buen control de costos.',
+    indicadoresMargenBrutoWarning: 'Bajo — tus costos consumen casi todo.',
+    indicadoresMargenBrutoCritical: 'Crítico — vendes casi al costo o por debajo.',
+    indicadoresMargenOperativoHealthy: 'Saludable — tu operación genera ganancia.',
+    indicadoresMargenOperativoWarning: 'Bajo — tus gastos operativos son altos.',
+    indicadoresMargenOperativoCritical: 'Crítico — la operación consume toda tu ganancia.',
+    indicadoresMargenNetoHealthy: 'Saludable — tu negocio es rentable.',
+    indicadoresMargenNetoWarning: 'Bajo — queda muy poco después de todo.',
+    indicadoresMargenNetoCritical: 'Crítico — no generas ganancia real.',
+    indicadoresLiquidezHealthy: 'Saludable — puedes cubrir tus obligaciones.',
+    indicadoresLiquidezWarning: 'Ajustada — cubres pero sin margen.',
+    indicadoresLiquidezCritical: 'Riesgo — podrías tener problemas para pagar.',
+    indicadoresRotacionHealthy: 'Buena — tu producto se mueve rápido.',
+    indicadoresRotacionWarning: 'Lenta — tu producto tarda en venderse.',
+    indicadoresRotacionCritical: 'Muy lenta — revisa si tienes producto estancado.',
+    indicadoresDiasCobranzaHealthy: 'Rápido — tus clientes pagan pronto.',
+    indicadoresDiasCobranzaWarning: 'Moderado — tardan en pagarte.',
+    indicadoresDiasCobranzaCritical: 'Lento — mucho dinero atrapado en cuentas por cobrar.',
   },
   export: {
     title: 'Exportar datos',
@@ -437,6 +632,7 @@ export const esMX = {
       multiBody: 'Tengo o voy a tener empleados, o uso varias tablets/computadoras a la vez.',
       joinExistingLink: '¿Ya tienes Cachink en otro dispositivo? Conecta este →',
       helpLink: '¿No estás seguro? Ayúdame a decidir →',
+      demoModeLink: '🧪 Modo Demo — Explorar con datos de prueba →',
     },
     step2a: {
       title: 'Solo en este dispositivo',
@@ -602,6 +798,18 @@ export const esMX = {
     confirmIsrChange: '¿Actualizar tasa de ISR a {{pct}}%?',
     confirmIsrYes: 'Sí, actualizar',
     confirmIsrNo: 'No, mantener actual',
+    cachinkSoundLabel: 'Sonido ¡CACHINK!',
+    cachinkSoundHint: 'Reproduce el sonido de caja registradora al registrar una venta',
+    tiposDePagoCard: 'Tipos de pago',
+    tiposDePagoSubtitle: 'Métodos de pago aceptados',
+    indicadoresCard: 'Indicadores Financieros',
+    indicadoresSubtitle: 'Umbrales de salud para tus métricas',
+  },
+  tiposDePago: {
+    title: 'Tipos de pago',
+    description: 'Selecciona los métodos de pago que acepta tu negocio.',
+    atLeastOne: 'Al menos un método debe estar activo.',
+    save: 'Guardar',
   },
   cloudOnboarding: {
     title: 'Sincronización en la nube',
@@ -696,9 +904,13 @@ export const esMX = {
   // Phase 1 — User Management + Auth
   login: {
     title: '¡Hola!',
+    greetingMorning: '¡Buenos días!',
+    greetingAfternoon: '¡Buenas tardes!',
+    greetingEvening: '¡Buenas noches!',
     selectUser: 'Selecciona tu usuario',
     pinPlaceholder: 'PIN',
     submit: 'Entrar',
+    verifying: 'Verificando…',
     error: 'PIN incorrecto',
     forgotPin: '¿Olvidaste tu PIN?',
   },
@@ -738,6 +950,26 @@ export const esMX = {
     usuarios: 'Usuarios',
     configuracion: 'Configuración',
     funciones: 'Funciones',
+    empleados: 'Empleados',
+    desc: {
+      productos: 'Registra y controla tu stock',
+      conversion: 'Transforma materia prima en producto',
+      auditoria: 'Audita el inventario físico',
+      ventasCredito: 'Ventas a crédito y cuentas por cobrar',
+      caja: 'Abre y cierra tu caja diaria',
+      gastos: 'Gastos, nómina y compras',
+      indicadores: 'KPIs y márgenes de tu negocio',
+      cajaReportes: 'Historial de cortes de caja',
+      mermaReportes: 'Reportes de pérdida y merma',
+      empleados: 'Gestiona tu equipo de trabajo',
+      usuarios: 'Usuarios y permisos de acceso',
+      configuracion: 'Ajustes de negocio y sistema',
+      funciones: 'Activa o desactiva módulos',
+      cajaMovimientos: 'Depósitos y retiros del turno',
+      cancelaciones: 'Cancela ventas y devuelve productos',
+    },
+    cajaMovimientos: 'Movimientos Caja',
+    cancelaciones: 'Cancelaciones',
   },
   recovery: {
     title: 'Recuperar acceso',
@@ -757,8 +989,6 @@ export const esMX = {
     stockDesc: 'Controla las cantidades de tus productos',
     conversion: 'Conversión de Materia Prima',
     conversionDesc: 'Convierte insumos en productos listos para vender',
-    caja: 'Caja',
-    cajaDesc: 'Administra el efectivo de cada turno',
     auditoria: 'Auditoría de Inventario',
     auditoriaDesc: 'Conteo físico para validar tus cantidades',
     merma: 'Merma',
@@ -778,21 +1008,61 @@ export const esMX = {
     notaHint: 'Descripción adicional...',
     cancelar: 'Cancelar',
     confirmar: 'Registrar',
+    emptyTitle: 'Sin productos para registrar merma',
+    emptyHint: 'Agrega productos en el catálogo primero.',
+    // Tap-to-Cart redesign
+    carrito: 'Carrito',
+    vaciar: 'Vaciar',
+    vaciarConfirm: '¿Vaciar carrito de merma?',
+    vaciarConfirmDesc: 'Se eliminarán todos los productos de la lista de merma.',
+    registrarBatch: 'Registrar merma',
+    checkoutTitle: 'Registrar merma',
+    resumenMerma: 'Resumen de merma',
+    razonBatch: 'Razón para todos',
+    cambiarRazon: 'Cambiar razón',
+    emptyCartHint: 'Toca un producto para registrar su merma',
   },
   caja: {
     title: 'Caja',
     abrirTitle: 'Abrir Caja',
+    abrirQuestion: '¿Con cuánto abres la caja?',
+    abrirHint: 'Cuenta el efectivo que hay en la caja antes de empezar.',
     montoApertura: 'Efectivo en caja',
     efectivoAdicional: 'Efectivo adicional',
+    efectivoEnCaja: 'Efectivo en caja',
+    movAgregar: 'Agregar',
+    movRetirar: 'Retirar',
     abrirSubmit: 'Abrir turno',
-    cerrarTitle: 'Cerrar Caja',
+    abrirSubmitWith: 'Abrir turno · {{monto}}',
+    cerrarTitle: 'Cerrar Turno',
     montoCierre: 'Efectivo contado',
     razon: 'Razón de diferencia',
-    explicacion: 'Explicación',
+    explicacion: 'Nota',
     explicacionHint: 'Describe la diferencia...',
     cerrarSubmit: 'Cerrar turno',
     turnoAbierto: 'Turno abierto',
     aperturaCon: 'Apertura: {{monto}}',
+    // --- Opening discrepancy ---
+    discrepancyTitle: 'Diferencia detectada',
+    discrepancyCierreAnterior: 'El cierre anterior fue {{monto}}',
+    discrepancyAbriendo: 'Estás abriendo con {{monto}}',
+    discrepancyDiff: 'Diferencia: {{monto}}',
+    discrepancyNotice: 'Si continúas, se notificará al Director de esta diferencia.',
+    discrepancyGoBack: 'Volver a contar',
+    discrepancyContinue: 'Continuar',
+    // --- Blind close step 1 ---
+    blindCountTitle: 'Cerrar Turno',
+    blindCountHeader: 'Cuenta el efectivo en la caja',
+    blindCountHint: 'Cuenta todo: billetes, monedas, y anota el total.',
+    blindCountWarning: 'El monto se guardará automáticamente y no podrá modificarse.',
+    blindCountContinue: 'Continuar',
+    // --- Blind close step 2 ---
+    countResultTitle: 'Resultado del conteo',
+    countResultContaste: 'Contaste',
+    countResultEsperado: 'Esperado',
+    countResultDiff: 'Diferencia',
+    countResultWhyLabel: '¿Por qué hay diferencia?',
+    // --- Discrepancy reasons ---
     'reason.gasto-no-registrado': 'Gasto no registrado',
     'reason.error-en-cambio': 'Error al dar cambio',
     'reason.retiro-autorizado': 'Retiro autorizado',
@@ -809,8 +1079,6 @@ export const esMX = {
     conversionDesc: 'Convierte materia prima en productos (ej: bolsa de café → tazas)',
     conversionAuto: 'Conversión Automática',
     conversionAutoDesc: 'Convierte automáticamente al vender cuando no hay stock suficiente',
-    caja: 'Caja (Apertura / Corte)',
-    cajaDesc: 'Administra el efectivo al inicio y cierre de cada turno',
     auditoria: 'Auditoría de Inventario',
     auditoriaDesc: 'Conteo físico periódico para validar cantidades',
     merma: 'Merma',
@@ -862,6 +1130,10 @@ export const esMX = {
     prodNombre: 'Producto',
     cantidadUsada: 'Cantidad usada',
     cantidadCreada: 'Cantidad creada',
+    noProductsTitle:
+      'Necesitas al menos una materia prima y un producto de venta',
+    noProductsHint:
+      'Crea productos y asígnales su uso (materia prima o venta) para crear recetas de conversión.',
     validacion: {
       mpRequired: 'Selecciona la materia prima',
       productoRequired: 'Selecciona el producto',
@@ -887,6 +1159,12 @@ export const esMX = {
     confirmarFinalizar: '¿Finalizar auditoría?',
     confirmarFinalizarDesc:
       'Se crearán ajustes de inventario para {{count}} discrepancias.',
+    noProducts: 'No hay productos para auditar',
+    noProductsHint:
+      'Agrega productos con seguimiento de stock para iniciar una auditoría.',
+    cancelar: 'Cancelar auditoría',
+    cancelarConfirm:
+      '¿Cancelar esta auditoría? Los conteos no guardados se perderán.',
   },
   ventasCredito: {
     title: 'Ventas a Crédito',
@@ -922,6 +1200,18 @@ export const esMX = {
   placeholder: {
     title: 'Próximamente',
     subtitle: 'Esta función estará disponible en una versión futura.',
+  },
+  dev: {
+    seedTitle: 'Datos de demostración',
+    seedBtn: 'Cargar datos demo',
+    seedHint: 'Inserta ~130 registros realistas para probar reportes, caja, productos, etc.',
+    seedConfirmTitle: '¿Cargar datos demo?',
+    seedConfirmBody:
+      'Se insertarán ventas, egresos, productos y más. Esta acción no se puede deshacer.',
+    seedConfirmBtn: 'Sí, cargar datos',
+    seedSuccess: '¡Listo! Se cargaron {count} registros.',
+    seedError: 'Error al cargar datos de demostración.',
+    seedAlreadyLoaded: 'Los datos demo ya fueron cargados.',
   },
 } as const;
 

@@ -41,6 +41,8 @@ import { InMemoryConversionsRepository } from './in-memory-conversions-repositor
 import { InMemoryAuditoriasInventarioRepository } from './in-memory-auditorias-inventario-repository.js';
 import { InMemoryEntregasCreditoRepository } from './in-memory-entregas-credito-repository.js';
 import { InMemoryDirectorAlertsRepository } from './in-memory-director-alerts-repository.js';
+import { InMemoryCajaMovimientosRepository } from './in-memory-caja-movimientos-repository.js';
+import { InMemoryCancelacionLogsRepository } from './in-memory-cancelacion-logs-repository.js';
 
 export interface MockRepositoryProviderProps {
   readonly children: ReactNode;
@@ -73,6 +75,8 @@ function buildInMemoryRepositories(): Repositories {
     auditoriasInventario: new InMemoryAuditoriasInventarioRepository(),
     entregasCredito: new InMemoryEntregasCreditoRepository(),
     directorAlerts: new InMemoryDirectorAlertsRepository(),
+    cajaMovimientos: new InMemoryCajaMovimientosRepository(),
+    cancelacionLogs: new InMemoryCancelacionLogsRepository(),
   };
 }
 

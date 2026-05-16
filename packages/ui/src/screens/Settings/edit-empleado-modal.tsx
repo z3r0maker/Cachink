@@ -80,7 +80,7 @@ export function EditEmpleadoModal(props: EditEmpleadoModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="empleado-edit-submit"
       >

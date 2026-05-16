@@ -2,7 +2,7 @@
  * Drizzle-backed {@link ClientPaymentsRepository}.
  */
 
-import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   ClientPaymentId,
@@ -15,7 +15,7 @@ import type {
   PaymentMethod,
   SaleId,
 } from '@cachink/domain';
-import { ZERO, newEntityId, now, sum } from '@cachink/domain';
+import { newEntityId, now } from '@cachink/domain';
 import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
 import { clientPayments } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
@@ -74,8 +74,12 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
   }
 
   async sumByVenta(ventaId: SaleId): Promise<Money> {
-    const rows = await this.findByVenta(ventaId);
-    return rows.length === 0 ? ZERO : sum(rows.map((r) => r.montoCentavos));
+    const result = await this.#db
+      .select({ total: sql<bigint>`coalesce(sum(${clientPayments.montoCentavos}), 0)` })
+      .from(clientPayments)
+      .where(and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)))
+      .get();
+    return BigInt(result?.total ?? 0) as Money;
   }
 
   async findByDateRange(

@@ -11,10 +11,15 @@
 import type { ReactElement } from 'react';
 import type { NewRecurringExpense, RecurrenceFrequency } from '@cachink/domain';
 import { OptionCardGroup, type OptionCardItem } from '../../../components/OptionCardGroup/index';
-import { IntegerField } from '../../../components/fields/index';
+import { WheelQuantityPicker } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
 
 export const FRECUENCIAS: readonly RecurrenceFrequency[] = ['semanal', 'quincenal', 'mensual'];
+
+/** Abbreviated day-of-week labels for the wheel picker (Mon–Sun, es-MX). */
+export const DIAS_SEMANA_CORTO: readonly string[] = [
+  'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom',
+];
 
 export const FRECUENCIA_CARDS: readonly OptionCardItem<RecurrenceFrequency>[] = [
   {
@@ -39,12 +44,12 @@ export const FRECUENCIA_CARDS: readonly OptionCardItem<RecurrenceFrequency>[] = 
 
 export interface RecurrenteState {
   frecuencia: RecurrenceFrequency;
-  diaDelMes: string;
-  diaDeLaSemana: string;
+  diaDelMes: number;
+  diaDeLaSemana: number;
 }
 
 export function initialRecurrenteState(): RecurrenteState {
-  return { frecuencia: 'mensual', diaDelMes: '1', diaDeLaSemana: '' };
+  return { frecuencia: 'mensual', diaDelMes: 1, diaDeLaSemana: 0 };
 }
 
 /**
@@ -60,10 +65,8 @@ export function buildRecurrenteDraft(
   >,
   proximoDisparo: NewRecurringExpense['proximoDisparo'],
 ): NewRecurringExpense | null {
-  const diaDelMes = state.frecuencia !== 'semanal' ? Number(state.diaDelMes) : undefined;
-  const diaDeLaSemana = state.frecuencia !== 'mensual' ? Number(state.diaDeLaSemana) : undefined;
-  if (state.frecuencia === 'semanal' && !Number.isInteger(diaDeLaSemana)) return null;
-  if (state.frecuencia === 'mensual' && !Number.isInteger(diaDelMes)) return null;
+  const diaDelMes = state.frecuencia !== 'semanal' ? state.diaDelMes : undefined;
+  const diaDeLaSemana = state.frecuencia !== 'mensual' ? state.diaDeLaSemana : undefined;
   return {
     ...base,
     frecuencia: state.frecuencia,
@@ -92,7 +95,7 @@ export function GastoRecurrenteFields(props: GastoRecurrenteFieldsProps): ReactE
         testID="recurrente-frecuencia"
       />
       {state.frecuencia !== 'semanal' && (
-        <IntegerField
+        <WheelQuantityPicker
           label={t('nuevoEgreso.diaDelMesLabel')}
           value={state.diaDelMes}
           onChange={(v) => update({ diaDelMes: v })}
@@ -102,12 +105,13 @@ export function GastoRecurrenteFields(props: GastoRecurrenteFieldsProps): ReactE
         />
       )}
       {state.frecuencia !== 'mensual' && (
-        <IntegerField
+        <WheelQuantityPicker
           label={t('nuevoEgreso.diaDeLaSemanaLabel')}
           value={state.diaDeLaSemana}
           onChange={(v) => update({ diaDeLaSemana: v })}
           min={0}
           max={6}
+          options={DIAS_SEMANA_CORTO}
           testID="recurrente-dia-semana"
         />
       )}

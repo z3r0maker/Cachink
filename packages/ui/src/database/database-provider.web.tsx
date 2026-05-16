@@ -37,6 +37,13 @@ import {
 } from './_internal';
 import { webResetDatabase } from './database-reset.web';
 import { runMigrations } from './run-migrations';
+import {
+  getSchemaVersion,
+  setSchemaVersion,
+  checkSchemaCompatibility,
+  SCHEMA_VERSION,
+  SchemaVersionError,
+} from '@cachink/data/migrator';
 
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
 const DB_PATH = 'sqlite:cachink.db';
@@ -64,9 +71,26 @@ export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
 async function createDesktopDatabase(): Promise<CachinkDatabase> {
   const tauriDb = await Database.load(DB_PATH);
   try {
+    // Enable FK enforcement before migrations run.
+    // Must happen outside any transaction — pragma is a no-op inside one.
+    await tauriDb.execute('PRAGMA foreign_keys = ON');
+    await tauriDb.execute('PRAGMA journal_mode = WAL');
     const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
-    await runMigrations(db);
-    return db;
+
+    // Version gate: prevent old code from running against a newer schema.
+    const dbVersion = await getSchemaVersion(db);
+    const compat = checkSchemaCompatibility(dbVersion, SCHEMA_VERSION);
+
+    switch (compat.status) {
+      case 'ok':
+        return db;
+      case 'needs_migration':
+        await runMigrations(db);
+        await setSchemaVersion(db, SCHEMA_VERSION);
+        return db;
+      case 'app_too_old':
+        throw new SchemaVersionError(compat.dbVersion, compat.appVersion);
+    }
   } catch (error) {
     await tauriDb.close().catch(() => false);
     throw error;

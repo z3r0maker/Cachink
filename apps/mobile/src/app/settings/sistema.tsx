@@ -12,12 +12,14 @@ import {
   APP_CONFIG_KEYS,
   SettingsSistema,
   useAppConfigRepository,
+  useCachinkSoundEnabled,
   useCheckForUpdates,
   useCrashReportingEnabled,
   useCurrentBusiness,
   useMode,
   useNotificationsEnabled,
   useRole,
+  useSetCachinkSoundEnabled,
   useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
@@ -42,6 +44,7 @@ function roleLabel(role: 'operativo' | 'director' | null): 'Operativo' | 'Direct
 function useSettingsHandlers(): {
   reRunWizard: () => void;
   notificationsChange: (next: boolean) => void;
+  cachinkSoundChange: (next: boolean) => void;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
@@ -49,6 +52,7 @@ function useSettingsHandlers(): {
   const appConfig = useAppConfigRepository();
   const setMode = useSetMode();
   const setNotificationsEnabled = useSetNotificationsEnabled();
+  const setCachinkSoundEnabled = useSetCachinkSoundEnabled();
   const updateAdapter = useMobileUpdateAdapter();
   const updates = useCheckForUpdates(updateAdapter);
   const [statusLabel, setStatusLabel] = useState<string | undefined>();
@@ -64,6 +68,11 @@ function useSettingsHandlers(): {
         .set(APP_CONFIG_KEYS.notificationsEnabled, next ? 'true' : 'false')
         .then(() => setNotificationsEnabled(next));
     },
+    cachinkSoundChange: (next: boolean) => {
+      void appConfig
+        .set(APP_CONFIG_KEYS.cachinkSoundEnabled, next ? 'true' : 'false')
+        .then(() => setCachinkSoundEnabled(next));
+    },
     checkUpdates: () => {
       setStatusLabel('Buscando…');
       void updates.check().then(() => setStatusLabel(updates.status));
@@ -78,6 +87,7 @@ export default function SistemaRoute(): ReactElement {
   const business = useCurrentBusiness().data ?? null;
   const role = useRole();
   const notificationsEnabled = useNotificationsEnabled();
+  const cachinkSoundEnabled = useCachinkSoundEnabled();
   const crashReportingEnabled = useCrashReportingEnabled();
   const lanDetails = useLanDetails();
   const cloudNav = useCloudNavigation();
@@ -97,6 +107,8 @@ export default function SistemaRoute(): ReactElement {
           onReRunWizard: handlers.reRunWizard,
           notificationsEnabled,
           onNotificationsChange: handlers.notificationsChange,
+          cachinkSoundEnabled,
+          onCachinkSoundChange: handlers.cachinkSoundChange,
           feedback: {
             appVersion: APP_VERSION,
             platform: platformKey(),

@@ -33,7 +33,7 @@ export function OtrosScreen(props: OtrosScreenProps): ReactElement {
 
   // Responsive: 3 columns on tablet (>600), 2 on phone
   const columns = width > 600 ? 3 : 2;
-  const gap = 12;
+  const gap = 14;
   const padding = 16;
   const cardWidth = (width - padding * 2 - gap * (columns - 1)) / columns;
 
@@ -49,7 +49,7 @@ export function OtrosScreen(props: OtrosScreenProps): ReactElement {
       >
         {t('tabs.otros')}
       </Text>
-      <View flexDirection="row" flexWrap="wrap" gap={gap}>
+      <View flexDirection="row" flexWrap="wrap" gap={gap} alignItems="stretch">
         {items.map((item) => (
           <View key={item.key} width={cardWidth}>
             <OtrosCard

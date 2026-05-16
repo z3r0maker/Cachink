@@ -31,7 +31,7 @@ type T = ReturnType<typeof useTranslation>['t'];
 
 function isrPctForRegimen(regimen: RegimenFiscal, defaults: IsrDefaults | undefined): number {
   if (!defaults) return 30;
-  return Math.round((defaults[regimen] ?? 0.3) * 10_000) / 100;
+  return (defaults[regimen] ?? 3000) / 100;
 }
 
 interface EditBusinessFormState {
@@ -56,7 +56,7 @@ function useSaveHandler(
     editar.mutate(
       {
         id: business.id,
-        patch: { nombre: nombre.trim(), regimenFiscal: regimen, isrTasa: pct / 100 },
+        patch: { nombre: nombre.trim(), regimenFiscal: regimen, isrTasa: Math.round(pct * 100) },
       },
       { onSuccess: () => onClose() },
     );
@@ -68,7 +68,7 @@ function useEditBusinessForm(business: Business, onClose: () => void) {
   const { data: isrDefaults } = useIsrDefaults();
   const [nombre, setNombre] = useState(business.nombre);
   const [regimen, setRegimen] = useState<RegimenFiscal>(business.regimenFiscal as RegimenFiscal);
-  const [isrPct, setIsrPct] = useState(String(Math.round(business.isrTasa * 10_000) / 100));
+  const [isrPct, setIsrPct] = useState(String(business.isrTasa / 100));
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [pendingRegimen, setPendingRegimen] = useState<RegimenFiscal | null>(null);
 

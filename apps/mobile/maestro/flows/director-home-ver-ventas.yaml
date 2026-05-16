@@ -18,7 +18,7 @@ appId: mx.cachink.mobile
 
 # Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/authenticate-director.yaml
 
 # After authenticate.yaml, Director is on Home.
 - assertVisible:

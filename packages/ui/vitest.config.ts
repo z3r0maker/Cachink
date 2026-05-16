@@ -43,6 +43,10 @@ export default mergeConfig(
           __dirname,
           'tests/__mocks__/react-native-safe-area-context.ts',
         ),
+        'react-native-wheely': resolve(
+          __dirname,
+          'tests/__mocks__/react-native-wheely.tsx',
+        ),
       },
     },
     test: {

@@ -54,7 +54,7 @@ export const TABLES: readonly TableSpec[] = [
     columns: [
       { name: 'nombre', type: 'text', notNull: true },
       { name: 'regimen_fiscal', type: 'text', notNull: true },
-      { name: 'isr_tasa', type: 'real', notNull: true },
+      { name: 'isr_tasa', type: 'integer', notNull: true },
       { name: 'logo_url', type: 'text' },
       ...AUDIT_COLS,
     ],

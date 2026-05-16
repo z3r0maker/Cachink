@@ -47,7 +47,7 @@ const rowFixtures: Record<(typeof SYNCED_TABLES)[number], Record<string, unknown
     id: '01HZ8XQN9GZJXV8AKQ5X0C7B01',
     nombre: 'Tortillería',
     regimen_fiscal: 'RIF',
-    isr_tasa: 0.3,
+    isr_tasa: 3000,
     logo_url: null,
     ...audit,
   },

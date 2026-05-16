@@ -6,7 +6,7 @@
  * ADR-049: PIN for login, Password for recovery.
  */
 
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
@@ -148,8 +148,8 @@ export class DrizzleUsersRepository implements UsersRepository {
   }
 
   async countDirectors(businessId: BusinessId): Promise<number> {
-    const rows = await this.#db
-      .select({ id: users.id })
+    const result = await this.#db
+      .select({ value: sql<number>`count(*)` })
       .from(users)
       .where(
         and(
@@ -158,8 +158,8 @@ export class DrizzleUsersRepository implements UsersRepository {
           isNull(users.deletedAt),
         ),
       )
-      .all();
-    return rows.length;
+      .get();
+    return result?.value ?? 0;
   }
 
   #mapRow(row: UserRow): User {

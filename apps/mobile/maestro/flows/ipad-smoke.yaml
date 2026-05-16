@@ -34,7 +34,7 @@ appId: mx.cachink.mobile
 
 # Dismiss any first-launch modals (ConsentModal, consent wizard step).
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/authenticate-director.yaml
 
 # ── 1. Director Home ─────────────────────────────────────────────
 # authenticate.yaml lands on Director Home. Assert the structural
@@ -66,7 +66,6 @@ appId: mx.cachink.mobile
 
 # ── 3. Ventas tab (Operativo context) ────────────────────────────
 # Switch to Operativo to exercise the POS grid on iPad.
-- runFlow: shared/select-operativo.yaml
 - tapOn:
     id: "tab-ventas"
 

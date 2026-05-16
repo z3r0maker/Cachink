@@ -17,6 +17,7 @@ import { APP_CONFIG_KEYS } from '../app-config/index';
 import { useAppConfigRepository } from './repository-provider';
 import { FeatureDiscovery } from '../screens/Wizard/index';
 import { useFeatureFlag } from '../hooks/use-feature-flags';
+import { AppLoadingSkeleton } from './app-loading-skeleton';
 
 const DISCOVERY_KEY = ['appConfig', 'discoveryShown'] as const;
 
@@ -50,8 +51,8 @@ export function FeatureDiscoveryGate(props: FeatureDiscoveryGateProps): ReactEle
     markShown.mutate();
   }, [markShown]);
 
-  // While loading, show nothing (splash stays).
-  if (isLoading) return null;
+  // While loading, show a spinner so there's no blank flash.
+  if (isLoading) return <AppLoadingSkeleton />;
 
   // Already shown → render children (the main app).
   if (shown) return <>{props.children}</>;

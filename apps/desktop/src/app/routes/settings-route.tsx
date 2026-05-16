@@ -1,17 +1,20 @@
 /**
  * Desktop route adapter for /settings. Renders the SettingsHub as the
- * top-level screen, with sub-routes for negocio, tasas-isr, empleados,
- * and sistema managed via local state.
+ * top-level screen, with sub-routes for negocio, tasas-isr, and
+ * sistema managed via local state.
+ *
+ * Empleados moved to a top-level /empleados route (see empleados-route.tsx).
  *
  * Slice 9.6 additions: FeedbackAction (T10) + useCheckForUpdates (T11)
  * wiring (preserved in the sistema sub-screen).
  */
 
 import { useState, type ReactElement } from 'react';
+import type { Business } from '@cachink/domain';
 import {
   APP_CONFIG_KEYS,
-  SettingsEmpleados,
   SettingsHub,
+  SettingsIndicadores,
   SettingsNegocio,
   SettingsSistema,
   SettingsTasasIsr,
@@ -19,7 +22,6 @@ import {
   useCheckForUpdates,
   useCrashReportingEnabled,
   useCurrentBusiness,
-  useEmpleadosForBusiness,
   useMode,
   useNotificationsEnabled,
   useRole,
@@ -87,16 +89,16 @@ function useSettingsHandlers(
 const SECTION_TITLE_KEYS: Record<SettingsSection, string> = {
   negocio: 'settings.negocioCard',
   'tasas-isr': 'settings.tasasIsrCard',
-  empleados: 'settings.empleadosCard',
   sistema: 'settings.sistemaCard',
+  'tipos-de-pago': 'settings.tiposDePagoCard',
+  indicadores: 'settings.indicadoresCard',
 };
 
 interface SettingsSubContentProps {
   subRoute: SettingsSection | null;
   mode: ReturnType<typeof useMode>;
-  business: ReturnType<typeof useCurrentBusiness>['data'] | null;
+  business: Business | null;
   role: ReturnType<typeof useRole>;
-  empleadoCount: number;
   notificationsEnabled: boolean | null;
   crashReportingEnabled: boolean | null;
   handlers: ReturnType<typeof useSettingsHandlers>;
@@ -110,7 +112,7 @@ function SettingsSistemaSubRoute(p: SettingsSubContentProps): ReactElement {
     <SettingsSistema settingsProps={{
       mode: p.mode, business: p.business,
       onReRunWizard: p.handlers.reRunWizard,
-      notificationsEnabled: p.notificationsEnabled,
+      notificationsEnabled: p.notificationsEnabled ?? undefined,
       onNotificationsChange: p.handlers.notificationsChange,
       feedback: {
         appVersion: APP_VERSION, platform: platformKey(),
@@ -129,13 +131,12 @@ function SettingsSubContent(p: SettingsSubContentProps): ReactElement {
   switch (p.subRoute) {
     case 'negocio': return <SettingsNegocio mode={p.mode} business={p.business} />;
     case 'tasas-isr': return <SettingsTasasIsr />;
-    case 'empleados': return <SettingsEmpleados />;
+    case 'indicadores': return <SettingsIndicadores />;
     case 'sistema': return <SettingsSistemaSubRoute {...p} />;
     default:
       return (
         <SettingsHub
           business={p.business}
-          empleadoCount={p.empleadoCount}
           onNavigate={p.setSubRoute}
         />
       );
@@ -146,7 +147,6 @@ export function SettingsRoute(): ReactElement {
   const mode = useMode();
   const business = useCurrentBusiness().data ?? null;
   const role = useRole();
-  const { data: employees = [] } = useEmpleadosForBusiness();
   const notificationsEnabled = useNotificationsEnabled();
   const crashReportingEnabled = useCrashReportingEnabled();
   const lanDetails = useLanDetails({ stopHostServer: () => stopLanServer() });
@@ -166,7 +166,7 @@ export function SettingsRoute(): ReactElement {
     <DesktopAppShellWrapper activeTabKey="ajustes" title={title} onBack={handleBack}>
       <SettingsSubContent
         subRoute={subRoute} mode={mode} business={business} role={role}
-        empleadoCount={employees.length} notificationsEnabled={notificationsEnabled}
+        notificationsEnabled={notificationsEnabled}
         crashReportingEnabled={crashReportingEnabled} handlers={handlers}
         lanDetails={lanDetails} cloudNav={cloudNav} setSubRoute={setSubRoute}
       />

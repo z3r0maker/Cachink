@@ -11,6 +11,7 @@
 import type { ReactElement } from 'react';
 import type { BusinessId } from '@cachink/domain';
 import { QuickSwitchScreen, RecoveryScreen } from '../screens/Login/index';
+import { useCurrentBusiness } from '../hooks/use-current-business';
 import { useQuickSwitchAuth } from './use-quick-switch-auth';
 
 export interface QuickSwitchGateProps {
@@ -19,6 +20,7 @@ export interface QuickSwitchGateProps {
 
 export function QuickSwitchGate(props: QuickSwitchGateProps): ReactElement {
   const auth = useQuickSwitchAuth(props.businessId);
+  const { data: business } = useCurrentBusiness();
 
   if (auth.recoveryUserId !== null) {
     return (
@@ -40,6 +42,7 @@ export function QuickSwitchGate(props: QuickSwitchGateProps): ReactElement {
   return (
     <QuickSwitchScreen
       users={auth.users}
+      businessName={business?.nombre}
       onAuthenticate={auth.handleAuth}
       onForgotPin={auth.startRecovery}
       error={auth.error}

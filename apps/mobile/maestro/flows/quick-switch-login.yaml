@@ -1,8 +1,8 @@
 # QuickSwitch authentication E2E — login via avatar + PIN.
 #
 # Verifies:
-#   1. Happy: tap avatar → enter PIN → tabs mount
-#   2. Edge: wrong PIN → error message visible
+#   1. Happy: tap avatar → enter PIN via numpad → tabs mount
+#   2. Edge: wrong PIN → error message visible + shake animation
 #
 # Precondition: wizard + director-setup complete, app relaunched.
 # Chain flows:
@@ -23,22 +23,36 @@ appId: mx.cachink.mobile
       id: "quick-switch"
     timeout: 10000
 
-# --- Edge case: wrong PIN ---
+# --- Edge case: wrong PIN (via inline numpad) ---
 - tapOn:
-    id: "pin-input"
-- inputText: "999999"
+    id: "numpad-9"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
+- tapOn:
+    id: "numpad-9"
 
-# Error message should appear.
+# Error message should appear (shake + haptic fire too, visual-only).
 - assertVisible: "PIN incorrecto"
 
-# --- Happy path: correct PIN ---
+# --- Happy path: correct PIN (via inline numpad) ---
 - tapOn:
-    id: "pin-input"
-- inputText: "123456"
+    id: "numpad-1"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-2"
+- tapOn:
+    id: "numpad-3"
+- tapOn:
+    id: "numpad-4"
+- tapOn:
+    id: "numpad-5"
+- tapOn:
+    id: "numpad-6"
 
 # Tabs mount — Director Home renders.
 - extendedWaitUntil:

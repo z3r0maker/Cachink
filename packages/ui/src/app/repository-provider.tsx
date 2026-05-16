@@ -25,6 +25,8 @@ import type {
   AppConfigRepository,
   BusinessesRepository,
   CachinkDatabase,
+  CajaMovimientosRepository,
+  CancelacionLogsRepository,
   ClientPaymentsRepository,
   ClientsRepository,
   DayClosesRepository,
@@ -61,6 +63,8 @@ import {
   DrizzleAuditoriasInventarioRepository,
   DrizzleEntregasCreditoRepository,
   DrizzleDirectorAlertsRepository,
+  DrizzleCajaMovimientosRepository,
+  DrizzleCancelacionLogsRepository,
 } from '@cachink/data';
 
 /**
@@ -87,6 +91,8 @@ export interface Repositories {
   readonly auditoriasInventario: AuditoriasInventarioRepository;
   readonly entregasCredito: EntregasCreditoRepository;
   readonly directorAlerts: DirectorAlertsRepository;
+  readonly cajaMovimientos: CajaMovimientosRepository;
+  readonly cancelacionLogs: CancelacionLogsRepository;
 }
 
 const RepositoryContext = createContext<Repositories | null>(null);
@@ -120,6 +126,8 @@ export function buildDrizzleRepositories(
     auditoriasInventario: new DrizzleAuditoriasInventarioRepository(db, deviceId, uid),
     entregasCredito: new DrizzleEntregasCreditoRepository(db, deviceId, uid),
     directorAlerts: new DrizzleDirectorAlertsRepository(db, deviceId, uid),
+    cajaMovimientos: new DrizzleCajaMovimientosRepository(db, deviceId, uid),
+    cancelacionLogs: new DrizzleCancelacionLogsRepository(db, deviceId, uid),
   };
 }
 
@@ -178,3 +186,7 @@ export const useEntregasCreditoRepository = (): EntregasCreditoRepository =>
   useRepositories().entregasCredito;
 export const useDirectorAlertsRepository = (): DirectorAlertsRepository =>
   useRepositories().directorAlerts;
+export const useCajaMovimientosRepository = (): CajaMovimientosRepository =>
+  useRepositories().cajaMovimientos;
+export const useCancelacionLogsRepository = (): CancelacionLogsRepository =>
+  useRepositories().cancelacionLogs;

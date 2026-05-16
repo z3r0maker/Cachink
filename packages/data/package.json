@@ -11,7 +11,8 @@
     "./repositories": "./src/repositories/index.ts",
     "./schema": "./src/schema/index.ts",
     "./hardware": "./src/hardware/index.ts",
-    "./migrations": "./drizzle/migrations/index.ts"
+    "./migrations": "./drizzle/migrations/index.ts",
+    "./migrator": "./src/migrator/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
@@ -21,21 +22,23 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' 'drizzle/**/*.ts' --config ../../eslint.config.js",
     "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' 'drizzle/**/*.ts' --config ../../eslint.config.js --fix",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "drizzle-kit generate && tsx scripts/gen-migration-barrel.ts",
+    "db:new": "tsx scripts/new-migration.ts",
+    "db:barrel": "tsx scripts/gen-migration-barrel.ts",
     "db:check": "drizzle-kit check",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
     "@cachink/domain": "workspace:*",
-    "drizzle-orm": "^0.45.0"
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "@cachink/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
-    "@vitest/coverage-v8": "^3.0.0",
-    "better-sqlite3": "^11.8.0",
-    "drizzle-kit": "^0.30.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "@vitest/coverage-v8": "^4.1.6",
+    "better-sqlite3": "^12.10.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   }
 }

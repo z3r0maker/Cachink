@@ -48,7 +48,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
       atributosProducto: JSON.stringify(input.atributosProducto ?? []),
-      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
       businessId: id,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -80,6 +80,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
     if (patch.regimenFiscal !== undefined) set['regimenFiscal'] = patch.regimenFiscal;
     if (patch.isrTasa !== undefined) set['isrTasa'] = patch.isrTasa;
     if (patch.featureFlags !== undefined) set['featureFlags'] = patch.featureFlags;
+    if (patch.enabledPaymentMethods !== undefined) set['enabledPaymentMethods'] = patch.enabledPaymentMethods;
     await this.#db.update(businesses).set(set).where(eq(businesses.id, id)).run();
     const row = await this.#db
       .select()
@@ -109,6 +110,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
       categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ?? 'Producto') as SaleCategory,
       atributosProducto: this.#parseAttrDefs(row.atributosProducto),
+      enabledPaymentMethods: row.enabledPaymentMethods ?? '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
       featureFlags: row.featureFlags,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,

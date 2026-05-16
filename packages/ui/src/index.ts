@@ -18,6 +18,7 @@ export * from './app-config/index';
 export * from './app/index';
 export * from './share/index';
 export * from './hooks/index';
+export * from './haptics/index';
 export * from './charts/index';
 export * from './notifications/index';
 export * from './telemetry/index';

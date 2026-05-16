@@ -1,26 +1,41 @@
 /**
- * Spin up a fresh in-memory SQLite with all Phase 1B tables + the Phase 1D
- * sync infrastructure migration applied. Mirrors `@cachink/data`'s own
- * test harness but lives inside `@cachink/sync-lan` so this package's
- * tests don't pull `packages/data/tests` into their scope.
+ * Spin up a fresh in-memory SQLite with the complete Cachink schema.
+ * Uses the same migration SQL as `@cachink/data`'s test harness and
+ * the production runner — single source of truth.
  */
 
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
 import * as schema from '@cachink/data/schema';
 import type { CachinkDatabase } from '@cachink/data';
-
-const MIGRATIONS_FOLDER = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  '../../../data/drizzle/migrations',
-);
+import { migration0000Sql } from '@cachink/data/migrations';
+import { splitStatements, SCHEMA_VERSION } from '@cachink/data/migrator';
 
 export function makeFreshDb(): CachinkDatabase {
   const sqlite = new Database(':memory:');
+
+  // Disable FK enforcement in sync tests — these tests validate sync
+  // logic (push/pull/LWW), not referential integrity. FK enforcement
+  // is tested in packages/data/tests/migrations/fk-enforcement.test.ts.
+  // better-sqlite3 compiles SQLite with SQLITE_DEFAULT_FOREIGN_KEYS=1.
+  sqlite.pragma('foreign_keys = OFF');
+
+  for (const stmt of splitStatements(migration0000Sql)) {
+    sqlite.exec(stmt);
+  }
+
+  sqlite.exec(
+    `CREATE TABLE IF NOT EXISTS __cachink_migrations (
+      tag TEXT PRIMARY KEY NOT NULL,
+      applied_at TEXT NOT NULL
+    )`,
+  );
+  sqlite.exec(
+    `INSERT INTO __cachink_migrations (tag, applied_at)
+     VALUES ('0000_initial', datetime('now'))`,
+  );
+  sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
+
   const db = drizzle(sqlite, { schema });
-  migrate(db, { migrationsFolder: MIGRATIONS_FOLDER });
   return db as unknown as CachinkDatabase;
 }

@@ -74,7 +74,7 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="producto-submit"
       >

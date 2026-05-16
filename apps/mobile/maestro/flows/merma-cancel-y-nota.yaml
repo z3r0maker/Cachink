@@ -34,7 +34,6 @@ appId: mx.cachink.mobile
     optional: true
 
 # Switch to Operativo — merma appears as a bottom tab.
-- runFlow: shared/select-operativo.yaml
 
 # Navigate to the Merma tab.
 - tapOn:

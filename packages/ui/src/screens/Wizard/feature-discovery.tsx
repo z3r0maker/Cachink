@@ -37,7 +37,6 @@ const CARDS: readonly FeatureCard[] = [
     descKey: 'discovery.conversionDesc',
     active: false,
   },
-  { icon: 'inbox', nameKey: 'discovery.caja', descKey: 'discovery.cajaDesc', active: false },
   {
     icon: 'clipboard-list',
     nameKey: 'discovery.auditoria',

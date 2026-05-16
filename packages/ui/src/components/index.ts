@@ -44,6 +44,12 @@ export * from './ColorSwatchPicker/index';
 export * from './ActivityTracker/index';
 export * from './PinCodeInput/index';
 export * from './OptionCardGroup/index';
+export * from './Spinner/index';
+export * from './LoadingOverlay/index';
+export * from './CachinkBurst/index';
+export * from './HelpAccordion/index';
+export * from './HealthIndicator/index';
+export * from './DeltaIndicator/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

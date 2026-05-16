@@ -21,8 +21,9 @@ describe('feature-flags', () => {
     });
 
     it('has everything else OFF by default', () => {
+      const onByDefault: readonly string[] = ['stock'];
       const others = FEATURE_FLAG_KEYS.filter(
-        (k) => k !== 'stock',
+        (k) => !onByDefault.includes(k),
       );
       for (const key of others) {
         expect(DEFAULT_FEATURE_FLAGS[key]).toBe(false);
@@ -36,7 +37,6 @@ describe('feature-flags', () => {
         stock: true,
         conversionMateriaPrima: true,
         conversionAutomatica: true,
-        caja: true,
         auditoriaInventario: true,
         merma: true,
         ventasCredito: true,
@@ -49,7 +49,6 @@ describe('feature-flags', () => {
       expect(result.auditoriaInventario).toBe(false);
       expect(result.merma).toBe(false);
       // Independent flags stay ON
-      expect(result.caja).toBe(true);
       expect(result.ventasCredito).toBe(true);
     });
 
@@ -71,17 +70,6 @@ describe('feature-flags', () => {
       expect(result.stock).toBe(true);
     });
 
-    it('disables caja → no cascading (independent flag)', () => {
-      const flags: FeatureFlags = {
-        ...DEFAULT_FEATURE_FLAGS,
-        caja: true,
-        stock: true,
-      };
-      const result = resolveDisableCascade(flags, 'caja');
-
-      expect(result.caja).toBe(false);
-      expect(result.stock).toBe(true);
-    });
   });
 
   describe('canEnableFlag', () => {
@@ -99,14 +87,6 @@ describe('feature-flags', () => {
         stock: false,
       };
       expect(canEnableFlag(flags, 'merma')).toBe(false);
-    });
-
-    it('allows enabling caja regardless of other flags', () => {
-      const flags: FeatureFlags = {
-        ...DEFAULT_FEATURE_FLAGS,
-        stock: false,
-      };
-      expect(canEnableFlag(flags, 'caja')).toBe(true);
     });
 
     it('blocks conversionAutomatica when conversionMateriaPrima OFF', () => {
@@ -136,12 +116,10 @@ describe('feature-flags', () => {
     it('parses valid JSON', () => {
       const json = JSON.stringify({
         stock: true,
-        caja: true,
         merma: false,
       });
       const result = parseFeatureFlags(json);
       expect(result.stock).toBe(true);
-      expect(result.caja).toBe(true);
       expect(result.merma).toBe(false);
       // Missing keys get defaults
       expect(result.ventasCredito).toBe(false);
@@ -158,10 +136,10 @@ describe('feature-flags', () => {
     });
 
     it('ignores non-boolean values in JSON', () => {
-      const json = JSON.stringify({ stock: 'yes', caja: 42 });
+      const json = JSON.stringify({ stock: 'yes', merma: 42 });
       const result = parseFeatureFlags(json);
       expect(result.stock).toBe(true); // default
-      expect(result.caja).toBe(false); // default
+      expect(result.merma).toBe(false); // default
     });
   });
 });

@@ -111,11 +111,32 @@ screen.
 
 ## Running
 
-- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile exec expo run:ios`
-- **Android emulator**: `pnpm --filter @cachink/mobile exec expo run:android`
-- **Physical device via Expo Go** (JS changes only): `pnpm --filter @cachink/mobile start` then scan the QR code.
+There are two ways to run the app, depending on what you need:
 
-Once a native module is added (SQLite, camera, etc.), Expo Go no longer works — build a custom dev client via `eas build --profile development`.
+### Dev build (for active coding — needs Metro running)
+
+- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios`
+- **Android emulator**: `pnpm --filter @cachink/mobile android`
+
+These build a Debug binary that downloads JS from Metro at runtime.
+Metro starts automatically. Hot reload works — save a file, see the
+change instantly. First build takes ~5 min; subsequent launches are
+fast. `expo-dev-client` provides a launcher UI if Metro isn't
+reachable.
+
+### Preview build (for testing / playing — NO Metro needed)
+
+- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios:preview`
+- **Android emulator**: `pnpm --filter @cachink/mobile android:preview`
+
+These build a Release binary with the JS bundle **embedded inside the
+app**. Tap the icon any time — it just works, no terminal needed.
+Build takes ~5–8 min (Hermes bytecode compilation). No hot reload.
+
+> **⚠️ Do NOT use `expo start` (Expo Go).** Cachink! requires native
+> modules (reanimated worklets, gesture-handler, expo-sqlite,
+> expo-camera) and New Architecture — none of which Expo Go bundles.
+> The app will crash on launch.
 
 ### Native-module rebuild after adding `react-native-gesture-handler`, `react-native-webview`, or `react-native-view-shot`
 

@@ -53,6 +53,7 @@ export function useCrearBusiness(): CrearBusinessResult {
         businessId: '01JPHK00000000000000000000' as BusinessId,
         deviceId: (deviceId ?? '01JPHK00000000000000000001') as DeviceId,
         createdByUserId: null,
+        enabledPaymentMethods: '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
         featureFlags: JSON.stringify({
           ...DEFAULT_FEATURE_FLAGS,
           ...input.initialFeatureFlags,

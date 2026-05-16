@@ -1,63 +1,86 @@
 /**
- * CajaContent — shared cash-drawer UI used by both mobile and
- * desktop route adapters.
+ * CajaContent — orchestrator for the cash-drawer screen.
  *
- * Handles open/closed turn logic, AbrirCajaModal, CajaStatusCard,
- * and CerrarCajaModal. Route files become thin wrappers.
- *
- * Extracted per CLAUDE.md §6 (40-line budget).
+ * State machine (Caja Overhaul):
+ *   turno == null                        → AbrirCaja (numpad)
+ *   turno.cierreAt == null &&
+ *     turno.conteoCentavos == null        → Active turn (balance, deposit/withdraw)
+ *   turno.cierreAt == null &&
+ *     turno.conteoCentavos != null        → Step 2 (comparison + close form)
+ *   turno.cierreAt != null               → Closed (new turn needed)
  */
 
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
-import { Text, View } from '@tamagui/core';
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, CajaTurno, UserId } from '@cachink/domain';
+import type {
+  BusinessId,
+  CajaMovimientoTipo,
+  CajaTurno,
+  Money,
+  UserId,
+} from '@cachink/domain';
+import { ZERO } from '@cachink/domain';
 import { AbrirCajaModal } from './abrir-caja-modal';
-import { CajaStatusCard } from './caja-status-card';
+import { OpeningDiscrepancyDialog } from './opening-discrepancy-dialog';
+import { CajaActiveTurnView } from './caja-active-turn';
+import { MovimientoSheetWired } from './movimiento-sheet-wired';
 import { CerrarCajaModal } from './cerrar-caja-modal';
 import { useAbrirCaja } from '../../hooks/use-abrir-caja';
 import { useCerrarCaja } from '../../hooks/use-cerrar-caja';
+import { useOpenCajaTurno } from '../../hooks/use-open-caja-turno';
 import { useCajaTurnosRepository } from '../../app/repository-provider';
-import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
-import { cajaKeys } from '../../hooks/query-keys';
-import { useTranslation } from '../../i18n/index';
-import { Btn } from '../../components/Btn/btn';
+import { useCurrentBusinessId } from '../../app-config/use-app-config';
 
 export interface CajaContentProps {
   readonly testID?: string;
 }
 
-function useOpenCajaTurno() {
+/** Tolerance for discrepancy check — $50 MXN = 5000 centavos. */
+const DISCREPANCY_TOLERANCE = 5000n;
+
+function usePreviousClose(): Money | null {
   const businessId = useCurrentBusinessId();
-  const userId = useUserId();
   const turnosRepo = useCajaTurnosRepository();
-  const openTurnoQ = useQuery({
-    queryKey: [...cajaKeys.openByUser(businessId as BusinessId | null), userId],
-    queryFn: () => (userId ? turnosRepo.findOpenByUser(userId) : null),
-    enabled: userId !== null,
+  const latestQ = useQuery({
+    queryKey: ['caja-previous-close', businessId],
+    queryFn: () =>
+      businessId ? turnosRepo.findLatest(businessId as BusinessId) : null,
+    enabled: businessId !== null,
   });
-  return { userId, openTurno: openTurnoQ.data ?? null };
+  return latestQ.data?.montoCierreCentavos ?? null;
 }
 
 export function CajaContent(_props: CajaContentProps): ReactElement {
-  const { t } = useTranslation();
   const { userId, openTurno } = useOpenCajaTurno();
   const abrir = useAbrirCaja();
   const cerrar = useCerrarCaja();
   const [showCerrar, setShowCerrar] = useState(false);
+  const [movSheet, setMovSheet] = useState<CajaMovimientoTipo | null>(null);
+
+  // Blind close recovery: if turno has conteoCentavos but no cierreAt,
+  // jump straight to the close flow (Step 2)
+  const hasBlindCount =
+    openTurno !== null &&
+    openTurno.cierreAt === null &&
+    (openTurno as CajaTurno & { conteoCentavos?: Money | null }).conteoCentavos != null;
+
+  const shouldShowCerrar = showCerrar || hasBlindCount;
+
   return (
     <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
-      <Text fontWeight="900" fontSize={28} color="$color">
-        {t('caja.title')}
-      </Text>
-      {openTurno === null && !showCerrar && (
+      {openTurno === null && !shouldShowCerrar && (
         <CajaOpenTurnView userId={userId as UserId | null} abrir={abrir} />
       )}
-      {openTurno !== null && !showCerrar && (
-        <CajaActiveTurnView turno={openTurno} onCerrar={() => setShowCerrar(true)} />
+      {openTurno !== null && !shouldShowCerrar && (
+        <CajaActiveTurnView
+          turno={openTurno}
+          onCerrar={() => setShowCerrar(true)}
+          onDeposit={() => setMovSheet('deposito')}
+          onWithdraw={() => setMovSheet('retiro')}
+        />
       )}
-      {showCerrar && openTurno !== null && (
+      {shouldShowCerrar && openTurno !== null && (
         <CerrarCajaModal
           onSubmit={(monto, reason, explicacion) => {
             cerrar.mutate(
@@ -73,11 +96,19 @@ export function CajaContent(_props: CajaContentProps): ReactElement {
           submitting={cerrar.isPending}
         />
       )}
+      {movSheet !== null && openTurno !== null && userId !== null && (
+        <MovimientoSheetWired
+          tipo={movSheet}
+          turnoId={openTurno.id}
+          userId={userId}
+          onClose={() => setMovSheet(null)}
+        />
+      )}
     </ScrollView>
   );
 }
 
-// --- Sub-components (keep each under 40 lines) ---
+// --- Opening sub-view with discrepancy check ---
 
 interface CajaOpenTurnViewProps {
   readonly userId: UserId | null;
@@ -85,36 +116,54 @@ interface CajaOpenTurnViewProps {
 }
 
 function CajaOpenTurnView(props: CajaOpenTurnViewProps): ReactElement {
+  const previousClose = usePreviousClose();
+  const [pendingAmount, setPendingAmount] = useState<Money | null>(null);
+
+  if (pendingAmount !== null && previousClose !== null) {
+    const diff = pendingAmount - previousClose;
+    const absDiff = diff < 0n ? -diff : diff;
+    if (absDiff > DISCREPANCY_TOLERANCE) {
+      return (
+        <OpeningDiscrepancyDialog
+          previousClose={previousClose}
+          newOpening={pendingAmount}
+          difference={diff}
+          onGoBack={() => setPendingAmount(null)}
+          onContinue={() => {
+            if (!props.userId) return;
+            props.abrir.mutate({
+              userId: props.userId,
+              montoAperturaCentavos: pendingAmount,
+              efectivoAdicionalCentavos: ZERO,
+            });
+          }}
+          submitting={props.abrir.isPending}
+        />
+      );
+    }
+  }
+
   return (
     <AbrirCajaModal
-      suggestedAmount={null}
-      onSubmit={(apertura, adicional) => {
+      suggestedAmount={previousClose}
+      previousCloseAmount={previousClose}
+      onSubmit={(apertura) => {
+        if (previousClose !== null) {
+          const diff = apertura - previousClose;
+          const absDiff = diff < 0n ? -diff : diff;
+          if (absDiff > DISCREPANCY_TOLERANCE) {
+            setPendingAmount(apertura);
+            return;
+          }
+        }
         if (!props.userId) return;
         props.abrir.mutate({
           userId: props.userId,
           montoAperturaCentavos: apertura,
-          efectivoAdicionalCentavos: adicional,
+          efectivoAdicionalCentavos: ZERO,
         });
       }}
       submitting={props.abrir.isPending}
     />
-  );
-}
-
-interface CajaActiveTurnViewProps {
-  readonly turno: CajaTurno;
-  readonly onCerrar: () => void;
-}
-
-function CajaActiveTurnView(props: CajaActiveTurnViewProps): ReactElement {
-  const { t } = useTranslation();
-
-  return (
-    <View gap={12}>
-      <CajaStatusCard turno={props.turno} onCerrar={props.onCerrar} />
-      <Btn variant="dark" onPress={props.onCerrar} fullWidth testID="caja-cerrar-btn">
-        {t('caja.cerrarTitle')}
-      </Btn>
-    </View>
   );
 }

@@ -4,7 +4,7 @@
  * Verifies:
  *   - Renders with sub-tab toggle (Recetas / Historial).
  *   - Shows empty states when no data.
- *   - Nueva receta button is visible on Recetas tab.
+ *   - Shows "no products" empty state when no MP or venta products exist.
  */
 
 import type { ReactNode } from 'react';
@@ -37,7 +37,15 @@ describe('ConversionScreen', () => {
     );
     expect(screen.getByTestId('conversion-screen')).toBeTruthy();
     expect(screen.getByTestId('conversion-tab-toggle')).toBeTruthy();
-    expect(screen.getByTestId('conversion-nueva-receta-btn')).toBeTruthy();
+  });
+
+  it('shows no-products empty state when no MP or venta products', () => {
+    renderWithProviders(
+      <Wrapper>
+        <ConversionScreen />
+      </Wrapper>,
+    );
+    expect(screen.getByTestId('conversion-no-products')).toBeTruthy();
   });
 
   it('renders empty recetas state when no data is loaded', () => {

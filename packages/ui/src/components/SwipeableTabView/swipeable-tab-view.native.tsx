@@ -44,7 +44,7 @@ export function SwipeableTabView(props: SwipeableTabViewProps): ReactElement {
 
   return (
     <GestureDetector gesture={gesture}>
-      <View style={{ flex: 1 }}>{props.children}</View>
+      <View style={{ flex: 1 }} collapsable={false}>{props.children}</View>
     </GestureDetector>
   );
 }

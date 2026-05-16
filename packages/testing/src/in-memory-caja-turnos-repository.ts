@@ -53,6 +53,8 @@ export class InMemoryCajaTurnosRepository
       totalQr: 0n,
       totalCredito: 0n,
       egresoAutoId: null,
+      conteoCentavos: null,
+      conteoAt: null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -154,6 +156,12 @@ export class InMemoryCajaTurnosRepository
       }),
       ...(patch.egresoAutoId !== undefined && {
         egresoAutoId: patch.egresoAutoId as ExpenseId | null,
+      }),
+      ...(patch.conteoCentavos !== undefined && {
+        conteoCentavos: patch.conteoCentavos,
+      }),
+      ...(patch.conteoAt !== undefined && {
+        conteoAt: patch.conteoAt as IsoTimestamp | null,
       }),
       updatedAt: ts,
     };

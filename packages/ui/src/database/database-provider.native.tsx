@@ -29,6 +29,13 @@ import {
 } from './_internal';
 import { nativeResetDatabase } from './database-reset.native';
 import { runMigrations } from './run-migrations';
+import {
+  getSchemaVersion,
+  setSchemaVersion,
+  checkSchemaCompatibility,
+  SCHEMA_VERSION,
+  SchemaVersionError,
+} from '@cachink/data/migrator';
 
 // Mirror the surface of `./database-provider.tsx` so the barrel
 // `./index.ts` can re-export the same names regardless of which
@@ -40,6 +47,7 @@ export { DatabaseContext, useDatabase, TestDatabaseProvider } from './_internal'
 export { AsyncDatabaseProvider };
 export type { DatabaseProviderProps, AsyncDatabaseProviderProps };
 export { runMigrations, splitStatements } from './run-migrations';
+export { SCHEMA_VERSION, SchemaVersionError } from '@cachink/data/migrator';
 
 /** SQLite file name on device storage. Changing this breaks existing users. */
 const DB_FILE_NAME = 'cachink.db';
@@ -47,9 +55,26 @@ const DB_FILE_NAME = 'cachink.db';
 async function createNativeDatabase(): Promise<CachinkDatabase> {
   const native = openDatabaseSync(DB_FILE_NAME);
   try {
+    // Enable FK enforcement before anything else (CLAUDE.md §conventions).
+    // Must happen outside any transaction — pragma is a no-op inside one.
+    native.execSync('PRAGMA foreign_keys = ON');
+    native.execSync('PRAGMA journal_mode = WAL');
     const db = drizzle(native, { schema }) as unknown as CachinkDatabase;
-    await runMigrations(db);
-    return db;
+
+    // Version gate: prevent old code from running against a newer schema.
+    const dbVersion = await getSchemaVersion(db);
+    const compat = checkSchemaCompatibility(dbVersion, SCHEMA_VERSION);
+
+    switch (compat.status) {
+      case 'ok':
+        return db;
+      case 'needs_migration':
+        await runMigrations(db);
+        await setSchemaVersion(db, SCHEMA_VERSION);
+        return db;
+      case 'app_too_old':
+        throw new SchemaVersionError(compat.dbVersion, compat.appVersion);
+    }
   } catch (error) {
     native.closeSync();
     throw error;

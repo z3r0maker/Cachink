@@ -109,7 +109,7 @@ export function ExportarDatosAction(props: ExportarDatosActionProps): ReactEleme
       <Btn
         variant="primary"
         onPress={onPress}
-        disabled={state === 'pending'}
+        loading={state === 'pending'}
         fullWidth
         testID="export-datos-btn"
       >

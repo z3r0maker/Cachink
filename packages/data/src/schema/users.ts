@@ -22,5 +22,7 @@ export const users = sqliteTable('users', {
     .notNull()
     .default(false),
   avatarColor: text('avatar_color').notNull().default('blue'),
+  /** JSON permissions object, parsed with UserPermissionsSchema. */
+  permissions: text('permissions').notNull().default('{}'),
   ...auditColumns,
 });

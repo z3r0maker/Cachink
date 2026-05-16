@@ -87,7 +87,7 @@ export function parseForm(
   const payload: BusinessFormSubmitInput = {
     nombre: nombre.trim(),
     regimenFiscal: regimenFiscal as Regimen,
-    isrTasa: pct / 100,
+    isrTasa: Math.round(pct * 100),
   };
   // Placeholder ids satisfying Crockford base-32 (no I, L, O, U) — 26 chars.
   const check = NewBusinessSchema.safeParse({
@@ -109,7 +109,7 @@ export function parseForm(
 function resolveIsrPct(regimen: Regimen, isrDefaults: IsrDefaults | undefined): string {
   const defaults = isrDefaults ?? ISR_DEFAULTS_SEED;
   const rate = defaults[regimen] ?? ISR_DEFAULTS_SEED[regimen] ?? 0;
-  return String(Math.round(rate * 10_000) / 100);
+  return String(rate / 100);
 }
 
 export interface BusinessFormStateOptions {
@@ -140,7 +140,7 @@ export function useBusinessFormState(
   const [regimen, setRegimen] = useState<Regimen>(initialRegimen);
   const [isrTasaPct, setIsrTasaPct] = useState(
     defaults?.isrTasa !== undefined
-      ? String(Math.round(defaults.isrTasa * 100))
+      ? String(defaults.isrTasa / 100)
       : resolveIsrPct(initialRegimen, isrDefaults),
   );
   const [isrManuallyEdited, setIsrManuallyEdited] = useState(false);

@@ -33,13 +33,18 @@ export interface SettingsProps {
   readonly showNotificationsToggle?: boolean;
   readonly notificationsEnabled?: boolean;
   readonly onNotificationsChange?: (next: boolean) => void;
+  /** Whether the "¡CACHINK!" sale sound is enabled. Defaults to `true`. */
+  readonly cachinkSoundEnabled?: boolean;
+  readonly onCachinkSoundChange?: (next: boolean) => void;
   /** LAN-only: metadata for the LanDetailsCard. Omit to hide. */
   readonly lanDetails?: {
     serverUrl: string | null;
     connectedDevices: number;
     isHost: boolean;
     onUnpair: () => void;
+    unpairSubmitting?: boolean;
     onStopHostServer?: () => void;
+    stopHostSubmitting?: boolean;
   };
   /**
    * Cloud-only: tapping "Avanzado" routes the user to AdvancedBackendRoute
@@ -119,7 +124,7 @@ function BusinessCard({
   onEdit?: () => void;
 }): ReactElement {
   // Use 10_000/100 trick to preserve up to 2 decimal places (RESICO = 1.25%).
-  const isrPct = business ? `${Math.round(business.isrTasa * 10_000) / 100}%` : '—';
+  const isrPct = business ? `${business.isrTasa / 100}%` : '—';
   return (
     <Card testID="settings-business-card" padding="md" fullWidth>
       <SettingsRow

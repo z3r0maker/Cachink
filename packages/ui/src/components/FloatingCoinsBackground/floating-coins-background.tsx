@@ -17,6 +17,7 @@ import { colors } from '../../theme';
 import { Icon } from '../Icon';
 import type { IconName } from '../Icon/icon.shared';
 
+const IS_E2E = process.env.EXPO_PUBLIC_E2E === '1';
 const PARTICLE_COUNT = 36;
 const SINE_SAMPLES = 20;
 
@@ -96,17 +97,29 @@ function makeSmoothLoop(anim: Animated.Value, duration: number): Animated.Compos
   );
 }
 
+/** Threshold: particles within 40% of center get faded. */
+const CENTER_FADE_THRESHOLD = 0.4;
+const CENTER_OPACITY = 0.12;
+const EDGE_OPACITY = 0.3;
+
 function generateParticles(): readonly ParticleConfig[] {
   const particles: ParticleConfig[] = [];
   for (let i = 0; i < PARTICLE_COUNT; i++) {
     const base = i * 11;
+    const top = randRange(base + 2, 2, 92);
+    const left = randRange(base + 3, 5, 90);
+    // Distance from center (50%, 50%) normalized to [0, 1]
+    const dx = (top - 50) / 50;
+    const dy = (left - 50) / 50;
+    const distFromCenter = Math.sqrt(dx * dx + dy * dy);
+    const opacity = distFromCenter < CENTER_FADE_THRESHOLD ? CENTER_OPACITY : EDGE_OPACITY;
     particles.push({
       id: i,
       iconIndex: Math.floor(randRange(base + 1, 0, FLOATING_ICONS.length)),
-      top: randRange(base + 2, 2, 92),
-      left: randRange(base + 3, 5, 90),
+      top,
+      left,
       size: Math.round(randRange(base + 4, 24, 52)),
-      opacity: 0.3,
+      opacity,
       floatDur: Math.round(randRange(base + 6, 6000, 12000)),
       floatDist: Math.round(randRange(base + 7, 10, 22)),
       swayDur: Math.round(randRange(base + 8, 7500, 15000)),
@@ -210,11 +223,13 @@ export function FloatingCoinsBackground({
 }: FloatingCoinsBackgroundProps): ReactElement {
   return (
     <View testID={testID} style={[styles.root, { backgroundColor: colors.offwhite }]}>
-      <View testID="floating-coins-layer" style={styles.coinLayer}>
-        {PARTICLES.map((p) => (
-          <MoneyParticle key={p.id} config={p} />
-        ))}
-      </View>
+      {!IS_E2E && (
+        <View testID="floating-coins-layer" style={styles.coinLayer}>
+          {PARTICLES.map((p) => (
+            <MoneyParticle key={p.id} config={p} />
+          ))}
+        </View>
+      )}
       {children}
     </View>
   );

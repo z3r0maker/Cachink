@@ -1,81 +1,42 @@
 /**
- * EstadoResultadosScreen — NIF B-3 Estado de Resultados (P1C-M8-T02,
- * Slice 3 C11).
+ * EstadoResultadosScreen — NIF B-3 Estado de Resultados.
  *
- * Seven lines per CLAUDE.md §10:
- *   Ingresos − Costo de Ventas = Utilidad Bruta
- *   Utilidad Bruta − Gastos Operativos = Utilidad Operativa
- *   Utilidad Operativa − ISR = Utilidad Neta  (hero KPI, green/red by sign)
+ * Restructured with "punchline first":
+ *   1. ResumenCard (plain-language summary + Utilidad Neta hero)
+ *   2. Rows card (formal NIF B-3 breakdown + HelpAccordions)
+ *   3. Waterfall chart (8 bars including Merma)
+ *   4. Ingresos donut
+ *   5. Egresos donut
  *
- * Pure presentation. Parent wires `useEstadoResultados(periodo)`.
+ * Pure presentation. ResumenCard and Rows extracted to separate files
+ * to respect the 200-line-per-file cap.
  */
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { ZERO, formatMoney, type EstadoDeResultados, type Money } from '@cachink/domain';
-import { Card, Kpi, SectionTitle } from '../../components/index';
+import { ZERO, type EstadoDeResultados } from '@cachink/domain';
+import { Card, HelpAccordion, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { formatChartLabel, moneyToNumber } from '../../charts/chart-tokens';
 import { WaterfallChart } from '../../charts/WaterfallChart/index';
 import { DonutChart } from '../../charts/DonutChart/index';
-import { toWaterfallData, toDonutSlices } from './estado-resultados-mappers';
+import { toWaterfallData, toDonutSlices, toIngresoDonutSlices } from './estado-resultados-mappers';
+import { ResumenCard } from './resultados-resumen-card';
+import { ResultadosRows } from './resultados-rows';
 import type { EgresoPorCategoria } from '../../hooks/use-egresos-por-categoria';
+import type { IngresoPorCategoria } from '../../hooks/use-ingresos-por-categoria';
+import type { UtilidadNetaTrend } from '../../hooks/use-utilidad-neta-trend';
 
 export interface EstadoResultadosScreenProps {
   readonly estado: EstadoDeResultados | null;
   readonly periodoLabel: string;
   readonly egresosPorCategoria?: readonly EgresoPorCategoria[];
+  readonly ingresosPorCategoria?: readonly IngresoPorCategoria[];
+  readonly priorEstado?: EstadoDeResultados | null;
+  readonly utilidadNetaTrend?: UtilidadNetaTrend | null;
   readonly loading?: boolean;
   readonly testID?: string;
-}
-
-interface RowProps {
-  readonly label: string;
-  readonly value: Money;
-  readonly emphasis?: 'normal' | 'total';
-  readonly testID?: string;
-}
-
-function Row(props: RowProps): ReactElement {
-  const weight = props.emphasis === 'total' ? typography.weights.black : typography.weights.medium;
-  return (
-    <View
-      testID={props.testID}
-      flexDirection="row"
-      justifyContent="space-between"
-      alignItems="center"
-      paddingVertical={8}
-    >
-      <Text fontFamily={typography.fontFamily} fontWeight={weight} fontSize={14} color={colors.ink}>
-        {props.label}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={weight}
-        fontSize={16}
-        color={colors.black}
-      >
-        {formatMoney(props.value)}
-      </Text>
-    </View>
-  );
-}
-
-function UtilidadNetaHero(props: { value: Money; label: string }): ReactElement {
-  const tone = props.value >= ZERO ? 'positive' : 'negative';
-  return (
-    <Kpi
-      value={formatMoney(props.value)}
-      label={props.label}
-      tone={tone}
-      // Audit M-1 follow-up (UI-AUDIT-1, Issue 4): the totals Kpi sits
-      // visually below the body Card whose right column is right-
-      // aligned. Mirror that alignment here so the Utilidad Neta value
-      // lines up with the ISR / Utilidad Operativa column above it.
-      align="right"
-      testID="estado-utilidad-neta-hero"
-    />
-  );
 }
 
 function EmptyBody(props: { title: string; body: string }): ReactElement {
@@ -102,49 +63,9 @@ function EmptyBody(props: { title: string; body: string }): ReactElement {
   );
 }
 
-function Rows({
-  estado,
-  t,
-}: {
-  estado: EstadoDeResultados;
-  t: ReturnType<typeof useTranslation>['t'];
-}): ReactElement {
-  return (
-    <Card padding="md" fullWidth testID="estado-resultados-rows">
-      <Row
-        label={t('estados.resultadosIngresos')}
-        value={estado.ingresos}
-        testID="estado-row-ingresos"
-      />
-      <Row
-        label={t('estados.resultadosCostoVentas')}
-        value={estado.costoDeVentas}
-        testID="estado-row-costo-ventas"
-      />
-      <Row
-        label={t('estados.resultadosUtilidadBruta')}
-        value={estado.utilidadBruta}
-        emphasis="total"
-        testID="estado-row-utilidad-bruta"
-      />
-      <Row
-        label={t('estados.resultadosGastosOperativos')}
-        value={estado.gastosOperativos}
-        testID="estado-row-gastos-operativos"
-      />
-      <Row
-        label={t('estados.resultadosUtilidadOperativa')}
-        value={estado.utilidadOperativa}
-        emphasis="total"
-        testID="estado-row-utilidad-operativa"
-      />
-      <Row label={t('estados.resultadosIsr')} value={estado.isr} testID="estado-row-isr" />
-    </Card>
-  );
-}
-
 export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): ReactElement {
   const { t } = useTranslation();
+  const totalIngresos = props.estado?.ingresos ?? ZERO;
   return (
     <View testID={props.testID ?? 'estado-resultados-screen'} gap={14}>
       <SectionTitle title={props.periodoLabel} />
@@ -152,25 +73,47 @@ export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): Reac
         <EmptyBody title={t('estados.emptyPeriodTitle')} body={t('estados.emptyPeriodBody')} />
       ) : (
         <>
-          <Rows estado={props.estado} t={t} />
-          <WaterfallChart data={toWaterfallData(props.estado, t)} testID="waterfall-chart" />
+          <ResumenCard
+            estado={props.estado}
+            priorEstado={props.priorEstado}
+            trend={props.utilidadNetaTrend}
+            t={t}
+          />
+          <ResultadosRows estado={props.estado} t={t} />
+          <Card padding="md" fullWidth testID="waterfall-card">
+            <SectionTitle title={t('estados.chartCascadaLabel')} />
+            <WaterfallChart data={toWaterfallData(props.estado, t)} testID="waterfall-chart" />
+          </Card>
+          {props.ingresosPorCategoria && props.ingresosPorCategoria.length > 0 && (
+            <Card padding="md" fullWidth testID="ingresos-por-categoria-card">
+              <SectionTitle title={t('estados.ingresosPorCategoria')} />
+              <HelpAccordion
+                subtitle={t('estados.ingresosPorCategoriaSubtitle')}
+                detail={t('estados.ingresosPorCategoriaDetail')}
+              />
+              <DonutChart
+                slices={toIngresoDonutSlices(props.ingresosPorCategoria)}
+                centerLabel={t('estados.ingresosTotalLabel')}
+                centerValue={formatChartLabel(moneyToNumber(totalIngresos))}
+                formatValue={formatChartLabel}
+                testID="ingresos-donut"
+              />
+            </Card>
+          )}
           {props.egresosPorCategoria && props.egresosPorCategoria.length > 0 && (
             <Card padding="md" fullWidth testID="egresos-por-categoria-card">
               <SectionTitle title={t('estados.egresosPorCategoria')} />
               <DonutChart
                 slices={toDonutSlices(props.egresosPorCategoria)}
                 centerLabel={t('estados.egresosTotalLabel')}
-                centerValue={formatMoney(
-                  props.egresosPorCategoria.reduce((sum, e) => sum + e.total, 0n),
+                centerValue={formatChartLabel(
+                  moneyToNumber(props.egresosPorCategoria.reduce((sum, e) => sum + e.total, 0n)),
                 )}
+                formatValue={formatChartLabel}
                 testID="egresos-donut"
               />
             </Card>
           )}
-          <UtilidadNetaHero
-            value={props.estado.utilidadNeta}
-            label={t('estados.resultadosUtilidadNeta')}
-          />
         </>
       )}
     </View>

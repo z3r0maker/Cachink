@@ -19,8 +19,6 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Enable the caja flag (Director only — navigates to Funciones).
-- runFlow: shared/enable-caja-flag.yaml
 
 # Navigate to Otros tab (still as Director).
 - tapOn:

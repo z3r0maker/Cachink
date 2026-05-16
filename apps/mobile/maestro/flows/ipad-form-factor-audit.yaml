@@ -37,8 +37,7 @@ appId: mx.cachink.mobile
 - launchApp
 
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
-- runFlow: shared/select-operativo.yaml
+- runFlow: shared/authenticate-director.yaml
 
 # ── 1. POS product grid ──────────────────────────────────────────
 # On iPhone the grid renders 2 columns. On iPad ($gtMd) it renders

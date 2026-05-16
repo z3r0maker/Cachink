@@ -89,7 +89,8 @@ function MermaActions({
           variant="dark"
           onPress={onConfirm}
           fullWidth
-          disabled={submitting || disabled}
+          disabled={disabled}
+          loading={submitting}
           testID="merma-submit"
         >
           {t('merma.confirmar')}

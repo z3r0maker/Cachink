@@ -78,6 +78,7 @@ export * from './use-eliminar-usuario';
 // Phase 6 — Caja
 export * from './use-abrir-caja';
 export * from './use-cerrar-caja';
+export * from './use-open-caja-turno';
 // Phase 18 — Conversion
 export * from './use-conversion-recetas';
 export * from './use-crear-conversion-receta';
@@ -93,3 +94,17 @@ export * from './use-ventas-credito';
 export * from './use-auditorias-inventario';
 export * from './use-crear-auditoria';
 export * from './use-actualizar-auditoria';
+export * from './use-cachink-sound';
+export * from './use-enabled-payment-methods';
+// Tap-to-Cart POS redesign
+export * from './use-cart';
+// Caja Completa — Checkout flow
+export * from './use-checkout-store';
+// Caja Completa — Cancelaciones
+export * from './use-require-pin';
+// Shared derived-state hooks
+export * from './use-stock-map';
+// Product form state (zustand — persists across icon picker navigation)
+export * from './use-product-form-store';
+// Health thresholds (customizable from Settings)
+export * from './use-health-thresholds';

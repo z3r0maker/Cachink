@@ -15,6 +15,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../Icon/index';
 import { colors, radii, typography } from '../../theme';
+import { impactLight } from '../../haptics/index';
 
 export interface ModalHeaderProps {
   readonly title?: string;
@@ -103,7 +104,10 @@ function CloseButton({ onClose }: { onClose: () => void }): ReactElement {
   return (
     <View
       testID="modal-close"
-      onPress={onClose}
+      onPress={() => {
+        impactLight();
+        onClose();
+      }}
       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       data-hit-slop='{"top":6,"bottom":6,"left":6,"right":6}'
       backgroundColor={colors.black}

@@ -37,3 +37,5 @@ export * from './conversions';
 export * from './auditorias-inventario';
 export * from './entregas-credito';
 export * from './director-alerts';
+export * from './caja-movimientos';
+export * from './cancelacion-logs';

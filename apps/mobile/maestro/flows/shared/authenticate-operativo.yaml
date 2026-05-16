@@ -1,0 +1,44 @@
+# Reusable subflow: authenticate as Operativo (Ana Operativa).
+#
+# Uses the test PIN: 000000
+# Enters PIN via inline numpad (no system keyboard).
+# PIN auto-submits after 6 digits.
+#
+# Usage (from any Operativo flow):
+#   - launchApp
+#   - runFlow: shared/dismiss-modals.yaml
+#   - runFlow: shared/authenticate-operativo.yaml
+appId: mx.cachink.mobile
+---
+# Tap the Operativo avatar on QuickSwitch screen.
+- tapOn:
+    text: "A, Ana Operativa, Operativo"
+    optional: true
+
+# Wait for numpad and let animation settle.
+- extendedWaitUntil:
+    visible:
+      id: "pin-numpad"
+    timeout: 5000
+    optional: true
+- waitForAnimationToEnd
+
+# Enter PIN: 000000
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+
+# Wait for Operativo tabs to mount.
+- extendedWaitUntil:
+    visible:
+      id: "tab-ventas"
+    timeout: 10000

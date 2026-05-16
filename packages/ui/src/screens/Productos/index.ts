@@ -18,7 +18,12 @@ export {
   visibleSubTabs,
 } from './productos-tab-bar';
 export { MovimientosRoute } from './movimientos-route';
+/** @deprecated Use ProductoDetailScreen instead. */
 export { EditarProductoModal, type EditarProductoModalProps } from './editar-producto-modal';
+export { IconPickerScreen, type IconPickerScreenProps } from './icon-picker-screen';
+export { ICON_CATEGORIES, type IconCategory } from './icon-picker-data';
+export { ProductoDetailScreen, type ProductoDetailScreenProps } from './producto-detail-screen';
+export { ProductoDetailSmart, type ProductoDetailSmartProps } from './producto-detail-smart';
 // Legacy re-exports — will be removed after Phase B transition.
 export {
   InventarioTabBar,

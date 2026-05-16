@@ -10,6 +10,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
+import { formatPeriodoLabel } from '@cachink/domain';
 import {
   EstadosShell,
   defaultPeriodoState,
@@ -27,7 +28,7 @@ export default function EstadosRoute(): ReactElement {
   const router = useRouter();
   const [periodoState, setPeriodoState] = useState<PeriodoState>(() => defaultPeriodoState());
   const periodo = usePeriodoRange(periodoState);
-  const periodoLabel = `${periodo.from} → ${periodo.to}`;
+  const periodoLabel = formatPeriodoLabel(periodo.from, periodo.to);
 
   const estado = useEstadoResultados({ periodo });
   const balance = useBalanceGeneral({ periodo });

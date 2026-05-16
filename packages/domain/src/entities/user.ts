@@ -18,6 +18,29 @@ import { auditSchema } from './_audit.js';
 export const UserRoleEnum = z.enum(['operativo', 'director']);
 export type UserRole = z.infer<typeof UserRoleEnum>;
 
+/** Per-user permissions. Director always has all permissions implicitly. */
+export const UserPermissionsSchema = z.object({
+  canCancelSales: z.boolean().default(false),
+});
+export type UserPermissions = z.infer<typeof UserPermissionsSchema>;
+
+/** Parse a permissions JSON string safely, defaulting all to false. */
+export function parseUserPermissions(raw: string): UserPermissions {
+  try {
+    return UserPermissionsSchema.parse(JSON.parse(raw));
+  } catch {
+    return { canCancelSales: false };
+  }
+}
+
+/** Check if a user (by role + permissions) can cancel sales. */
+export function canUserCancelSales(
+  role: UserRole,
+  permissions: UserPermissions,
+): boolean {
+  return role === 'director' || permissions.canCancelSales;
+}
+
 /** Persisted user record. */
 export const UserSchema = z
   .object({

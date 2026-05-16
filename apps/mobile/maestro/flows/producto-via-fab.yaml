@@ -18,7 +18,6 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 # Select Operativo role if RolePicker is showing (cold start).
-- runFlow: shared/select-operativo.yaml
 
 # Navigate to Productos tab.
 - tapOn:

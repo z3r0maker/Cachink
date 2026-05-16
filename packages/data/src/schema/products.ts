@@ -34,5 +34,6 @@ export const products = sqliteTable('products', {
   usoProducto: text('uso_producto', {
     enum: ['venta', 'materia-prima', 'ambos'],
   }).notNull().default('venta'),
+  icono: text('icono'),
   ...auditColumns,
 });

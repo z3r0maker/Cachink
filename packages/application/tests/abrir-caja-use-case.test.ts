@@ -52,4 +52,15 @@ describe('AbrirCajaUseCase', () => {
     });
     expect(turno.efectivoAdicionalCentavos).toBe(2000n);
   });
+
+  it('initializes conteoCentavos and conteoAt as null (blind close fields)', async () => {
+    const turno = await useCase.execute({
+      userId: USER,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
+    });
+    expect(turno.conteoCentavos).toBeNull();
+    expect(turno.conteoAt).toBeNull();
+  });
 });

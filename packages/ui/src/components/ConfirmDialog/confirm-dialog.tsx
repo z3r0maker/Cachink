@@ -32,6 +32,7 @@ import { Btn } from '../Btn';
 import { Modal } from '../Modal';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { notificationSuccess } from '../../haptics/index';
 
 export interface ConfirmDialogProps {
   readonly open: boolean;
@@ -65,6 +66,7 @@ function usePendingConfirm(onConfirm: ConfirmDialogProps['onConfirm']): {
   const [pending, setPending] = useState(false);
 
   const handleConfirm = async (): Promise<void> => {
+    notificationSuccess();
     setPending(true);
     try {
       await onConfirm();

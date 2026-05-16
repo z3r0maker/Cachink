@@ -33,7 +33,12 @@
 // `ULIDError: PRNG_DETECT` on Hermes.
 import 'react-native-get-random-values';
 
+import { LogBox } from 'react-native';
 import { StrictMode, type ReactElement } from 'react';
+
+// Victory Native XL + react-native-reanimated use deprecated StrictMode
+// APIs internally — harmless but noisy. Suppress until upstream fixes land.
+LogBox.ignoreLogs(['findHostInstance_DEPRECATED', 'findNodeHandle is deprecated']);
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

@@ -112,7 +112,8 @@ function CreateUserActions(props: CreateUserActionsProps): ReactElement {
           variant="dark"
           onPress={props.onSubmit}
           fullWidth
-          disabled={!props.valid || props.submitting}
+          disabled={!props.valid}
+          loading={props.submitting}
           testID="create-user-submit"
         >
           {t('directorSetup.submit')}

@@ -107,7 +107,7 @@ export default defineConfig(async ({ mode }) => ({
   // `index.js` during the production build (extends ADR-032 to the
   // build path).
   build: {
-    rollupOptions: {
+    rolldownOptions: {
       external: ['react-native'],
       output: {
         manualChunks(id: string) {

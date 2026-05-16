@@ -27,7 +27,8 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
       atributosProducto: input.atributosProducto ?? [],
-      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+      enabledPaymentMethods: input.enabledPaymentMethods ?? '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
+      featureFlags: input.featureFlags ?? '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
       businessId: id,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -61,6 +62,7 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       ...(patch.regimenFiscal !== undefined && { regimenFiscal: patch.regimenFiscal }),
       ...(patch.isrTasa !== undefined && { isrTasa: patch.isrTasa }),
       ...(patch.featureFlags !== undefined && { featureFlags: patch.featureFlags }),
+      ...(patch.enabledPaymentMethods !== undefined && { enabledPaymentMethods: patch.enabledPaymentMethods }),
       updatedAt: ts,
     };
     this.rows.set(id, updated);

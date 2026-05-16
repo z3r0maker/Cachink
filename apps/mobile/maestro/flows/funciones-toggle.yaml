@@ -2,9 +2,8 @@
 #
 # Verifies:
 #   1. Toggle stock OFF → Productos tab hides stock sub-tab
-#   2. Toggle caja ON → Caja item appears in Otros (Operativo grid)
-#   3. Toggle merma ON → Merma tab appears in Productos
-#   4. Toggle all OFF → clean state
+#   2. Toggle merma ON → Merma tab appears in Productos
+#   3. Toggle all OFF → clean state
 #
 # Precondition: wizard + director-setup complete, logged in as Director.
 # Chain flows:
@@ -40,28 +39,8 @@ appId: mx.cachink.mobile
 - assertNotVisible:
     id: "productos-tab-stock"
 
-# --- Toggle caja ON ---
-# Return to Funciones via Otros.
-- tapOn:
-    id: "tab-otros"
-- tapOn:
-    id: "otros-funciones"
-- tapOn:
-    id: "flag-caja-switch"
-
-# Switch to Operativo to verify Caja appears in their Otros tab.
-- runFlow: shared/select-operativo.yaml
-- tapOn:
-    id: "tab-otros"
-- assertVisible:
-    id: "otros-caja"
-
 # --- Toggle merma ON ---
-# Switch back to Director to access Funciones.
-- tapOn:
-    id: "top-bar-role-chip"
-- tapOn:
-    id: "role-director-select"
+# Return to Funciones via Otros.
 - tapOn:
     id: "tab-otros"
 - tapOn:
@@ -70,8 +49,6 @@ appId: mx.cachink.mobile
     id: "flag-merma-switch"
 
 # Verify Merma appears as a bottom tab (replaces Productos for Operativo).
-# Switch to Operativo to verify the tab bar.
-- runFlow: shared/select-operativo.yaml
 - assertVisible:
     id: "tab-merma"
 
@@ -86,14 +63,10 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "otros-funciones"
 - tapOn:
-    id: "flag-caja-switch"
-- tapOn:
     id: "flag-merma-switch"
 
-# Verify Otros no longer shows caja-reportes or merma-reportes.
+# Verify Otros no longer shows merma-reportes (caja-reportes always visible).
 - tapOn:
     id: "tab-otros"
-- assertNotVisible:
-    id: "otros-caja-reportes"
 - assertNotVisible:
     id: "otros-merma-reportes"

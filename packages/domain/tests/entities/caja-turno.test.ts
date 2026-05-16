@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DiscrepancyReasonEnum, NewCajaTurnoSchema, CerrarCajaSchema } from '../../src/entities/caja-turno.js';
+import { CajaTurnoSchema, DiscrepancyReasonEnum, NewCajaTurnoSchema, CerrarCajaSchema } from '../../src/entities/caja-turno.js';
 
 const ULID = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 
@@ -48,5 +48,61 @@ describe('CerrarCajaSchema', () => {
       discrepancyReason: null, explicacion: null,
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe('CajaTurnoSchema — blind close fields', () => {
+  const BASE_TURNO = {
+    id: ULID,
+    userId: ULID,
+    fecha: '2026-05-09',
+    aperturaAt: '2026-05-09T08:00:00.000Z',
+    cierreAt: null,
+    montoAperturaCentavos: 5000n,
+    efectivoAdicionalCentavos: 0n,
+    montoCierreCentavos: null,
+    efectivoEsperadoCentavos: null,
+    diferenciaCentavos: null,
+    discrepancyReason: null,
+    explicacion: null,
+    totalTransferencias: 0n,
+    totalTarjeta: 0n,
+    totalQr: 0n,
+    totalCredito: 0n,
+    egresoAutoId: null,
+    businessId: ULID,
+    deviceId: ULID,
+    createdByUserId: null,
+    createdAt: '2026-05-09T08:00:00.000Z',
+    updatedAt: '2026-05-09T08:00:00.000Z',
+    deletedAt: null,
+  };
+
+  it('defaults conteoCentavos to null', () => {
+    const result = CajaTurnoSchema.parse(BASE_TURNO);
+    expect(result.conteoCentavos).toBeNull();
+  });
+
+  it('defaults conteoAt to null', () => {
+    const result = CajaTurnoSchema.parse(BASE_TURNO);
+    expect(result.conteoAt).toBeNull();
+  });
+
+  it('accepts conteoCentavos as a bigint value', () => {
+    const result = CajaTurnoSchema.parse({
+      ...BASE_TURNO,
+      conteoCentavos: 4100n,
+      conteoAt: '2026-05-09T18:30:00.000Z',
+    });
+    expect(result.conteoCentavos).toBe(4100n);
+    expect(result.conteoAt).toBe('2026-05-09T18:30:00.000Z');
+  });
+
+  it('rejects conteoCentavos with a non-numeric value', () => {
+    const result = CajaTurnoSchema.safeParse({
+      ...BASE_TURNO,
+      conteoCentavos: 'abc',
+    });
+    expect(result.success).toBe(false);
   });
 });

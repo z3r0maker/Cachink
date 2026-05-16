@@ -15,12 +15,13 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import { RegistrarVentaUseCase } from '@cachink/application';
 import type { NewSale, Sale } from '@cachink/domain';
 import {
+  useCajaTurnosRepository,
   useClientsRepository,
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
 } from '../app/index';
-import { useCurrentBusinessId } from '../app-config/index';
+import { useCurrentBusinessId, useUserId } from '../app-config/index';
 import { useFeatureFlag } from './use-feature-flags';
 
 export type RegistrarVentaResult = UseMutationResult<Sale, Error, NewSale, unknown>;
@@ -30,13 +31,18 @@ export function useRegistrarVenta(): RegistrarVentaResult {
   const clients = useClientsRepository();
   const products = useProductsRepository();
   const movements = useInventoryMovementsRepository();
+  const cajaTurnos = useCajaTurnosRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const userId = useUserId();
   const stockEnabled = useFeatureFlag('stock');
 
   const useCase = useMemo(
-    () => new RegistrarVentaUseCase(sales, clients, products, movements, { stockEnabled }),
-    [sales, clients, products, movements, stockEnabled],
+    () => new RegistrarVentaUseCase(
+      sales, clients, products, movements, cajaTurnos,
+      { stockEnabled, userId },
+    ),
+    [sales, clients, products, movements, cajaTurnos, stockEnabled, userId],
   );
 
   return useMutation<Sale, Error, NewSale>({

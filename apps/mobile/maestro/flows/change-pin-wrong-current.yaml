@@ -30,12 +30,19 @@ appId: mx.cachink.mobile
     id: "user-avatar-1"
     optional: true
 
-# Enter the operativo's initial PIN.
+# Enter the operativo's initial PIN (111111) via inline numpad.
 - tapOn:
-    id: "pin-input"
-- inputText: "111111"
+    id: "numpad-1"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
 
 # Forced change PIN screen appears.
 - extendedWaitUntil:
@@ -44,6 +51,7 @@ appId: mx.cachink.mobile
     timeout: 10000
 
 # Enter WRONG current PIN → submit → error appears.
+# (change-pin screen uses system keyboard, not numpad)
 - tapOn:
     id: "new-pin"
 - inputText: "999999"

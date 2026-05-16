@@ -127,7 +127,7 @@ function NominaForm(props: NominaFormProps): ReactElement {
       <Btn
         variant="primary"
         onPress={onSubmit}
-        disabled={submitting}
+        loading={submitting}
         fullWidth
         testID="nomina-submit"
       >

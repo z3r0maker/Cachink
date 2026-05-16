@@ -71,7 +71,8 @@ export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
       <Btn
         variant="primary"
         onPress={f.submit}
-        disabled={!f.valid || props.submitting}
+        disabled={!f.valid}
+        loading={props.submitting === true}
         testID="manual-venta-submit"
       >
         +

@@ -9,6 +9,7 @@
 import type { ReactElement } from 'react';
 import { Tabs, usePathname, useRouter } from 'expo-router';
 import {
+  AppLoadingSkeleton,
   AppShell,
   useCurrentBusiness,
   useMode,
@@ -29,7 +30,10 @@ function deriveActiveTab(pathname: string, role: string | null): string {
     case 'estados':
     case 'merma':
     case 'otros':
+    case 'caja':
       return segment;
+    case 'egresos':
+      return 'gastos';
     default:
       return role === 'director' ? 'home' : 'ventas';
   }
@@ -44,7 +48,7 @@ export default function TabsLayout(): ReactElement | null {
   const setUserId = useSetUserId();
   const flags = useFeatureFlags();
 
-  if (!role) return null;
+  if (!role) return <AppLoadingSkeleton />;
 
   const activeTabKey = deriveActiveTab(pathname, role);
 

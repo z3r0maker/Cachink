@@ -42,7 +42,6 @@ appId: mx.cachink.mobile
 
 # Create a venta (to verify no stock movement is created).
 # Switch to Operativo for venta access.
-- runFlow: shared/select-operativo.yaml
 - tapOn:
     id: "tab-ventas"
 

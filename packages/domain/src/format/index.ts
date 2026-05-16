@@ -6,4 +6,4 @@
  * imports from here (these are leaf formatters).
  */
 export { formatMoney, formatMoneyCompact, formatPesos } from './money.js';
-export { formatDate, formatDateLong, formatMonth } from './date.js';
+export { formatDate, formatDateLong, formatDateSlash, formatMonth, formatPeriodoLabel } from './date.js';

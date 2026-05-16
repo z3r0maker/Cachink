@@ -43,7 +43,7 @@ export interface EstadoDeResultadosInput {
   egresos: readonly Expense[];
   /** Inventory movements with motivo 'Merma / daño'. Phase 7. */
   mermaMovements?: readonly InventoryMovement[];
-  /** Effective ISR rate as a fraction, e.g. 0.30 for 30%. */
+  /** ISR rate in basis points (3000 = 30%). */
   isrTasa: number;
 }
 
@@ -51,9 +51,9 @@ export function calculateEstadoDeResultados(
   input: EstadoDeResultadosInput,
 ): EstadoDeResultados {
   const { ventas, egresos, isrTasa } = input;
-  if (!Number.isFinite(isrTasa) || isrTasa < 0 || isrTasa > 1) {
+  if (!Number.isInteger(isrTasa) || isrTasa < 0 || isrTasa > 10_000) {
     throw new TypeError(
-      `isrTasa must be in [0, 1], got ${isrTasa}`,
+      `isrTasa must be an integer in [0, 10_000], got ${isrTasa}`,
     );
   }
 
@@ -108,6 +108,5 @@ function calculateIsr(
   isrTasa: number,
 ): Money {
   if (utilidadOperativa <= ZERO) return ZERO;
-  const basisPoints = BigInt(Math.round(isrTasa * 10_000));
-  return (utilidadOperativa * basisPoints) / 10_000n;
+  return (utilidadOperativa * BigInt(isrTasa)) / 10_000n;
 }

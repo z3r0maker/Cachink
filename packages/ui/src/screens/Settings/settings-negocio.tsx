@@ -77,7 +77,7 @@ function BusinessInfoCard({
   onEdit: () => void;
   t: T;
 }): ReactElement {
-  const isrPct = business ? `${Math.round(business.isrTasa * 10_000) / 100}%` : '—';
+  const isrPct = business ? `${business.isrTasa / 100}%` : '—';
   return (
     <Card testID="settings-business-card" padding="md" fullWidth>
       <InfoRow

@@ -2,7 +2,7 @@
  * Drizzle-backed {@link InventoryMovementsRepository}.
  */
 
-import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
@@ -104,12 +104,19 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
   }
 
   async sumStock(productoId: ProductId): Promise<number> {
-    const rows = await this.findByProduct(productoId);
-    let total = 0;
-    for (const row of rows) {
-      total += row.tipo === 'entrada' ? row.cantidad : -row.cantidad;
-    }
-    return total;
+    const result = await this.#db
+      .select({
+        total: sql<number>`sum(case when ${inventoryMovements.tipo} = 'entrada' then ${inventoryMovements.cantidad} else -${inventoryMovements.cantidad} end)`,
+      })
+      .from(inventoryMovements)
+      .where(
+        and(
+          eq(inventoryMovements.productoId, productoId),
+          isNull(inventoryMovements.deletedAt),
+        ),
+      )
+      .get();
+    return result?.total ?? 0;
   }
 
   async delete(id: InventoryMovementId): Promise<void> {

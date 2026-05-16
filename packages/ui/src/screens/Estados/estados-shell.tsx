@@ -9,14 +9,17 @@
 
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
-import type {
-  BalanceGeneral,
-  EstadoDeResultados,
-  FlujoDeEfectivo,
-  Indicadores,
+import {
+  ZERO,
+  type BalanceGeneral,
+  type EstadoDeResultados,
+  type FlujoDeEfectivo,
+  type Indicadores,
 } from '@cachink/domain';
 import type { EgresoPorCategoria } from '../../hooks/use-egresos-por-categoria';
+import type { IngresoPorCategoria } from '../../hooks/use-ingresos-por-categoria';
 import type { MarginTrend } from '../../hooks/use-indicadores-trend';
+import type { UtilidadNetaTrend } from '../../hooks/use-utilidad-neta-trend';
 import { PeriodPicker, SegmentedToggle, SwipeableTabView } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';
@@ -40,8 +43,18 @@ export interface EstadosShellProps {
   readonly flujo: FlujoDeEfectivo | null;
   readonly indicadores: Indicadores | null;
   readonly egresosPorCategoria?: readonly EgresoPorCategoria[];
+  readonly ingresosPorCategoria?: readonly IngresoPorCategoria[];
   readonly trend?: MarginTrend | null;
   readonly onOpenSettings?: () => void;
+  /** Prior-period data for delta comparisons. */
+  readonly priorEstado?: EstadoDeResultados | null;
+  readonly priorBalance?: BalanceGeneral | null;
+  readonly priorFlujo?: FlujoDeEfectivo | null;
+  readonly priorIndicadores?: Indicadores | null;
+  /** 6-month Utilidad Neta trend for the Resultados sparkline. */
+  readonly utilidadNetaTrend?: UtilidadNetaTrend | null;
+  /** ISR rate as a decimal (e.g. 0.30). Passed through to IsrDisclaimer. */
+  readonly isrRate?: number;
   /** YYYY-MM string for the Informe mensual action. Omit to hide. */
   readonly informeYearMonth?: string;
   readonly businessName?: string;
@@ -55,17 +68,6 @@ interface TabBarProps {
   readonly labels: Record<EstadosSubTab, string>;
 }
 
-/**
- * Estados sub-tab bar.
- *
- * Audit M-1 follow-up (UI-AUDIT-1, Issue 1): the legacy hand-rolled row
- * used `<Btn size="sm">` children inside a flex row without `flex={1}`,
- * so each chip sized to its label (RESULTADOS / BALANCE / FLUJO /
- * INDICADORES were four different widths). `SegmentedToggle` already
- * implements equal-flex chip cells with proper radiogroup semantics —
- * delegate to it. Existing E2E selectors (`estados-tabbar`,
- * `estados-tab-{key}`) are preserved via `testID` + `testIDPrefix`.
- */
 function TabBar(props: TabBarProps): ReactElement {
   return (
     <SegmentedToggle<EstadosSubTab>
@@ -92,18 +94,36 @@ function ActiveBody(props: { tab: EstadosSubTab; props: EstadosShellProps }): Re
           estado={p.estado}
           periodoLabel={p.periodoLabel}
           egresosPorCategoria={p.egresosPorCategoria}
+          ingresosPorCategoria={p.ingresosPorCategoria}
+          priorEstado={p.priorEstado}
+          utilidadNetaTrend={p.utilidadNetaTrend}
         />
       );
     case 'balance':
-      return <BalanceGeneralScreen balance={p.balance} periodoLabel={p.periodoLabel} />;
+      return (
+        <BalanceGeneralScreen
+          balance={p.balance}
+          periodoLabel={p.periodoLabel}
+          priorBalance={p.priorBalance}
+        />
+      );
     case 'flujo':
-      return <FlujoEfectivoScreen flujo={p.flujo} periodoLabel={p.periodoLabel} />;
+      return (
+        <FlujoEfectivoScreen
+          flujo={p.flujo}
+          periodoLabel={p.periodoLabel}
+          priorFlujo={p.priorFlujo}
+        />
+      );
     case 'indicadores':
       return (
         <IndicadoresScreen
           indicadores={p.indicadores}
           periodoLabel={p.periodoLabel}
+          periodoMode={p.periodoState.mode}
           trend={p.trend}
+          priorIndicadores={p.priorIndicadores}
+          onOpenSettings={p.onOpenSettings}
         />
       );
   }
@@ -166,7 +186,15 @@ export function EstadosShell(props: EstadosShellProps): ReactElement {
       >
         <ActiveBody tab={tab} props={props} />
         {(tab === 'resultados' || tab === 'indicadores') && (
-          <IsrDisclaimer onOpenSettings={props.onOpenSettings} />
+          <IsrDisclaimer
+            onOpenSettings={props.onOpenSettings}
+            isrRate={props.isrRate}
+            isrIsZeroDueToLoss={
+              props.estado !== null &&
+              props.estado.isr === ZERO &&
+              props.estado.utilidadOperativa <= ZERO
+            }
+          />
         )}
       </SwipeableTabView>
     </ScrollView>

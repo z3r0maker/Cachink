@@ -3248,3 +3248,57 @@ Domain, application, data, testing, UI, and E2E layers all updated to reflect th
 
 - CLAUDE.md §2.1 — UX simplicity principle
 - CLAUDE.md §1 — two-role model, quick user switching
+
+---
+
+## ADR-050
+
+### Wheel picker for bounded quantity inputs
+
+Date: 2026-05-14
+Status: Accepted
+
+### Context
+
+Every quantity input in Cachink (sale units, stock movements, recipe
+multipliers, days of month) uses IntegerField — a plain text box that
+opens the system keyboard. On mobile this is a 3-tap interaction
+(tap field → wait for keyboard → type number → dismiss keyboard) for
+values that are almost always 1–99. UX audit flagged this as a friction
+point for operativos doing high-frequency POS entry.
+
+### Decision
+
+Add `react-native-wheely` (v0.6.0, MIT, zero dependencies, pure JS,
+478 GitHub stars) and wrap it in a `WheelQuantityPicker` component.
+Use this for all bounded integer quantities ≤999. Keep IntegerField for
+unbounded/large numbers. Keep StepperField for ±1 threshold tuning.
+
+### Alternatives Considered
+
+- **StepperField only** — We already have it, but scrolling through
+  20+ values with [−][+] taps is slow. Good for thresholds, not quantities.
+- **react-native-wheel-scrollview-picker** (v2.0.9, 148 stars) — More
+  recently updated but fewer users and less customizable styling API.
+- **@quidone/react-native-wheel-picker** (301 stars) — Pulls in
+  `date-fns` and `@rozhkov/react-useful-hooks` as transitive deps.
+  Overkill for a simple number drum.
+- **react-native-wheel-picker-expo** (v0.5.4) — Needs
+  `expo-linear-gradient` which we don't have installed.
+- **Build custom with FlatList + snapToInterval** — ~150 lines, no dep,
+  but reinvents momentum scrolling, deceleration tuning, and item
+  memoization that wheely already handles well.
+
+### Consequences
+
+- New dependency: `react-native-wheely` (0 transitive deps, ~8KB).
+- Form state for quantity fields changes from `string` to `number`.
+- All new bounded-integer fields must use WheelQuantityPicker per the
+  Component README decision tree.
+- If wheely ever becomes unmaintained, the wrapper isolates the swap
+  to one file.
+
+### References
+
+- https://github.com/erksch/react-native-wheely
+- packages/ui/src/components/README.md (Input selector decision tree)

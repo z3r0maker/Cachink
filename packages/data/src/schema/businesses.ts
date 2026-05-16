@@ -8,14 +8,14 @@
  *   - `atributos_producto` — JSON string of AttrDef[] for custom product attributes.
  */
 
-import { real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { auditColumns } from './_audit';
 
 export const businesses = sqliteTable('businesses', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
   regimenFiscal: text('regimen_fiscal').notNull(),
-  isrTasa: real('isr_tasa').notNull(),
+  isrTasa: integer('isr_tasa').notNull(),
   logoUrl: text('logo_url'),
   tipoNegocio: text('tipo_negocio', {
     enum: ['producto-con-stock', 'producto-sin-stock', 'servicio', 'mixto'],
@@ -28,10 +28,13 @@ export const businesses = sqliteTable('businesses', {
     .notNull()
     .default('Producto'),
   atributosProducto: text('atributos_producto').notNull().default('[]'),
+  enabledPaymentMethods: text('enabled_payment_methods')
+    .notNull()
+    .default('["Efectivo","Transferencia","Tarjeta","QR/CoDi"]'),
   featureFlags: text('feature_flags')
     .notNull()
     .default(
-      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
     ),
   ...auditColumns,
 });

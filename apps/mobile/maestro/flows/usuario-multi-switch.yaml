@@ -3,7 +3,7 @@
 # Verifies:
 #   1. After creating a second user (Operativo), relaunch app
 #   2. QuickSwitch shows multiple user avatars
-#   3. Tap second avatar → enter PIN → lands on Operativo tabs
+#   3. Tap second avatar → enter PIN via numpad → lands on Operativo tabs
 #   4. tab-ventas visible (Operativo landing)
 #
 # Precondition: wizard + director-setup complete, a second Operativo
@@ -31,13 +31,19 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "user-avatar-1"
 
-# Enter the Operativo PIN.
+# Enter the Operativo PIN (111111) via inline numpad.
 - tapOn:
-    id: "pin-input"
-- inputText: "111111"
-
+    id: "numpad-1"
 - tapOn:
-    id: "login-submit"
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-1"
 
 # Should land on Operativo tabs — verify Ventas tab is visible.
 - extendedWaitUntil:

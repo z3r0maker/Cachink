@@ -9,7 +9,7 @@ import { ScrollView } from 'react-native';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { User } from '@cachink/domain';
-import { Btn, Card, Icon, SafeAreaSpacer } from '../../components/index';
+import { Btn, Card, Icon, InitialsAvatar, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
@@ -26,22 +26,10 @@ function UserRow(props: {
   readonly onEdit: () => void;
   readonly onDelete: () => void;
 }): ReactElement {
-  const initial = props.user.nombre.charAt(0).toUpperCase();
   return (
     <Card variant="white" padding="md" fullWidth>
       <View flexDirection="row" alignItems="center" gap={12}>
-        <View
-          width={40}
-          height={40}
-          borderRadius={20}
-          backgroundColor={props.user.avatarColor}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Text color={colors.white} fontWeight="bold" fontSize={18}>
-            {initial}
-          </Text>
-        </View>
+        <InitialsAvatar value={props.user.nombre} size="sm" />
         <View flex={1}>
           <Text
             fontFamily={typography.fontFamily}

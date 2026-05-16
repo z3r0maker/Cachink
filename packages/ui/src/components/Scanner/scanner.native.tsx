@@ -23,6 +23,7 @@ import { Input } from '../Input/index';
 import { Modal } from '../Modal/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
+import { notificationSuccess } from '../../haptics/index';
 import type { ScannerProps } from './scanner';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -85,6 +86,7 @@ export function Scanner(props: ScannerProps): ReactElement {
 
   const handleBarcode = ({ data }: { data: string }): void => {
     if (mode === 'single' && scanned) return;
+    notificationSuccess();
     setScanned(true);
     props.onScan(data);
     if (mode === 'single') props.onClose();

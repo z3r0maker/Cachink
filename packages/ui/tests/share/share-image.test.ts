@@ -39,10 +39,12 @@ vi.mock('html2canvas', () => {
 
 vi.mock('jspdf', () => {
   return {
-    jsPDF: vi.fn().mockImplementation(() => ({
-      addImage: vi.fn(),
-      output: vi.fn().mockReturnValue(new Blob(['fake-pdf-bytes'], { type: 'application/pdf' })),
-    })),
+    jsPDF: class MockJsPDF {
+      addImage = vi.fn();
+      output = vi.fn().mockReturnValue(
+        new Blob(['fake-pdf-bytes'], { type: 'application/pdf' }),
+      );
+    },
   };
 });
 

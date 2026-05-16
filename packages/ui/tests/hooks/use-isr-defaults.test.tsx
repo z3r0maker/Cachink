@@ -41,14 +41,14 @@ describe('useIsrDefaults', () => {
   });
 
   it('reads persisted ISR defaults from app config', async () => {
-    const custom = { ...ISR_DEFAULTS_SEED, RIF: 0.02, 'Persona Física': 0.25 };
+    const custom = { ...ISR_DEFAULTS_SEED, RIF: 200, 'Persona Física': 2500 };
     await appConfig.set('isrDefaults', JSON.stringify(custom));
 
     const { result } = renderHook(() => useIsrDefaults(), {
       wrapper: wrapper({ appConfig }),
     });
 
-    await waitFor(() => expect(result.current.data?.RIF).toBe(0.02));
+    await waitFor(() => expect(result.current.data?.RIF).toBe(200));
   });
 });
 
@@ -65,7 +65,7 @@ describe('useUpdateIsrDefaults', () => {
       wrapper: wrapper({ appConfig }),
     });
 
-    const next = { ...ISR_DEFAULTS_SEED, RIF: 0.05 };
+    const next = { ...ISR_DEFAULTS_SEED, RIF: 500 };
     await act(async () => {
       result.current.mutate(next);
     });

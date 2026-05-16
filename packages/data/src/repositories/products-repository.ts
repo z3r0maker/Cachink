@@ -9,16 +9,18 @@ export type { Product, NewProduct };
 /**
  * Partial-patch shape for `update()` per ADR-023.
  *
- * Excludes `costoUnitCentavos` deliberately: changing the unit cost
- * would retroactively corrupt the inventory-valuation column on the
- * Balance General (NIF B-6). Re-pricing flows belong in Phase 2 with
- * a movimiento-adjustment story; for Phase 1 the cost is locked once
- * the producto is created.
+ * Now includes `icono` (product icon), `costoUnitCentavos`, and
+ * `precioVentaCentavos` so the inline-editable product detail page
+ * can update all visible fields in a single save.
  *
  * Audit Round 2 J3: enables per-row swipe-to-edit (Phase K wiring).
  */
 export type ProductPatch = Partial<
-  Pick<Product, 'nombre' | 'sku' | 'categoria' | 'unidad' | 'umbralStockBajo' | 'colorFondo' | 'usoProducto'>
+  Pick<Product,
+    | 'nombre' | 'sku' | 'categoria' | 'unidad' | 'umbralStockBajo'
+    | 'colorFondo' | 'usoProducto' | 'icono'
+    | 'costoUnitCentavos' | 'precioVentaCentavos'
+  >
 >;
 
 export interface ProductsRepository {

@@ -1,4 +1,4 @@
-# Delete an empleado from Settings → Empleados and verify removal.
+# Delete an empleado from Otros → Empleados and verify removal.
 #
 # Covers CRUD Delete for Empleados.
 #
@@ -21,13 +21,13 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Open Settings via the top-bar cog icon.
+# Navigate to Otros tab.
 - tapOn:
-    id: "top-bar-open-settings"
+    id: "tab-otros"
 
-# Navigate to the Empleados sub-screen.
+# Tap the Empleados card in the Otros grid.
 - tapOn:
-    id: "settings-hub-empleados"
+    id: "otros-empleados"
 - assertVisible:
     id: "settings-empleados-screen"
 

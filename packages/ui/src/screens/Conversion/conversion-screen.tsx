@@ -6,7 +6,7 @@
 import { useMemo, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import type { ConversionReceta, Product } from '@cachink/domain';
-import { Btn, SegmentedToggle } from '../../components/index';
+import { Btn, EmptyState, SegmentedToggle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {
   useConversionRecetas,
@@ -16,6 +16,7 @@ import {
   useCrearConversionReceta,
   useEliminarConversionReceta,
   useEjecutarConversion,
+  useStockMap,
 } from '../../hooks/index';
 import { RecetaList } from './receta-list';
 import { NuevaRecetaModal } from './nueva-receta-modal';
@@ -34,14 +35,6 @@ function useProductMap(productos: readonly Product[]): ReadonlyMap<string, Produ
     for (const p of productos) map.set(p.id as string, p);
     return map;
   }, [productos]);
-}
-
-function useStockMap(stockQ: ReturnType<typeof useProductosConStock>): ReadonlyMap<string, number> {
-  return useMemo(() => {
-    const map = new Map<string, number>();
-    for (const row of stockQ.data ?? []) map.set(row.producto.id as string, row.stock);
-    return map;
-  }, [stockQ.data]);
 }
 
 function filterMPs(productos: readonly Product[]): readonly Product[] {
@@ -71,6 +64,7 @@ export function ConversionScreen(props: ConversionScreenProps): ReactElement {
   const stockMap = useStockMap(stockQ);
   const mps = useMemo(() => filterMPs(productos), [productos]);
   const ventas = useMemo(() => filterVenta(productos), [productos]);
+  const canCreateReceta = mps.length > 0 && ventas.length > 0;
 
   const tabOptions = [
     { key: 'recetas', label: t('conversion.tabRecetas') },
@@ -90,10 +84,19 @@ export function ConversionScreen(props: ConversionScreenProps): ReactElement {
       {tab === 'recetas' && (
         <>
           <View paddingHorizontal={16} paddingVertical={8}>
-            <Btn variant="primary" onPress={() => setRecetaModalOpen(true)}
-              fullWidth testID="conversion-nueva-receta-btn">
-              {t('conversion.nuevaReceta')}
-            </Btn>
+            {canCreateReceta ? (
+              <Btn variant="primary" onPress={() => setRecetaModalOpen(true)}
+                fullWidth testID="conversion-nueva-receta-btn">
+                {t('conversion.nuevaReceta')}
+              </Btn>
+            ) : (
+              <EmptyState
+                icon="package"
+                title={t('conversion.noProductsTitle')}
+                description={t('conversion.noProductsHint')}
+                testID="conversion-no-products"
+              />
+            )}
           </View>
           <RecetaList
             recetas={recetasQ.data ?? []}

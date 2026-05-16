@@ -1,36 +1,43 @@
 /**
  * DivergingBar — unit tests.
+ *
+ * Tests the ECharts option builder function.
  */
 
 import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
-vi.mock('react-native-svg', () => {
-  function make(tag: string) {
-    return function Mock(props: Record<string, unknown>) {
-      const { children, ...rest } = props;
-      return React.createElement(tag, rest, children as never);
-    };
-  }
-  return {
-    __esModule: true,
-    default: make('svg'),
-    Svg: make('svg'),
-    G: make('g'),
-    Rect: make('rect'),
-    Circle: make('circle'),
-    Line: make('line'),
-    Text: make('text'),
-    Polyline: make('polyline'),
-    Polygon: make('polygon'),
-    Path: make('path'),
-  };
-});
+vi.mock('echarts-for-react/lib/core', () => ({
+  __esModule: true,
+  default: function MockECharts(props: Record<string, unknown>) {
+    return React.createElement('div', { 'data-testid': 'echarts-mock' });
+  },
+}));
+vi.mock('echarts/core', () => ({
+  __esModule: true,
+  use: vi.fn(),
+  registerTheme: vi.fn(),
+  graphic: {
+    LinearGradient: class {
+      constructor(public x: number, public y: number, public x2: number, public y2: number, public stops: unknown[]) {}
+    },
+  },
+  default: { use: vi.fn(), registerTheme: vi.fn(), graphic: {} },
+}));
+vi.mock('echarts/charts', () => ({ BarChart: {}, LineChart: {}, PieChart: {} }));
+vi.mock('echarts/components', () => ({
+  GridComponent: {},
+  TooltipComponent: {},
+  LegendComponent: {},
+  DatasetComponent: {},
+}));
+vi.mock('echarts/renderers', () => ({ CanvasRenderer: {} }));
 
 import { render } from '@testing-library/react';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 import { DivergingBar, type DivergingItem } from '../../src/charts/DivergingBar/index';
+import { buildDivergingOption } from '../../src/charts/DivergingBar/diverging-bar';
 
 function renderChart(items: readonly DivergingItem[]) {
   return render(
@@ -40,62 +47,58 @@ function renderChart(items: readonly DivergingItem[]) {
   );
 }
 
-describe('DivergingBar', () => {
-  it('positive values render right of center (green fill)', () => {
-    const { container } = renderChart([{ label: 'Op', value: 1000 }]);
-    const rects = container.querySelectorAll('rect');
-    expect(rects[0]?.getAttribute('fill')).toBe('#00C896');
+describe('buildDivergingOption', () => {
+  it('produces a single bar series', () => {
+    const option = buildDivergingOption([
+      { label: 'Op', value: 1000 },
+    ]) as { series: Array<{ type: string }> };
+    expect(option.series.length).toBe(1);
+    expect(option.series[0]!.type).toBe('bar');
   });
 
-  it('negative values render left of center (red fill)', () => {
-    const { container } = renderChart([{ label: 'Inv', value: -500 }]);
-    const rects = container.querySelectorAll('rect');
-    expect(rects[0]?.getAttribute('fill')).toBe('#FF4757');
+  it('y-axis labels match input labels', () => {
+    const option = buildDivergingOption([
+      { label: 'Operación', value: 2000 },
+      { label: 'Inversión', value: -1000 },
+    ]) as { yAxis: { data: string[] } };
+    expect(option.yAxis.data).toEqual(['Operación', 'Inversión']);
   });
 
-  it('mixed positive+negative renders correctly', () => {
-    const { container } = renderChart([
+  it('data values match input values', () => {
+    const items = [
       { label: 'Op', value: 2000 },
       { label: 'Inv', value: -1000 },
-    ]);
-    const rects = container.querySelectorAll('rect');
-    expect(rects.length).toBe(2);
-    expect(rects[0]?.getAttribute('fill')).toBe('#00C896');
-    expect(rects[1]?.getAttribute('fill')).toBe('#FF4757');
+    ];
+    const option = buildDivergingOption(items) as {
+      series: Array<{ data: Array<{ value: number }> }>;
+    };
+    expect(option.series[0]!.data[0]!.value).toBe(2000);
+    expect(option.series[0]!.data[1]!.value).toBe(-1000);
   });
 
-  it('single item renders one bar', () => {
-    const { container } = renderChart([{ label: 'Only', value: 500 }]);
-    const rects = container.querySelectorAll('rect');
-    expect(rects.length).toBe(1);
+  it('includes animation config', () => {
+    const option = buildDivergingOption([
+      { label: 'A', value: 100 },
+    ]) as { animationDuration: number };
+    expect(option.animationDuration).toBe(600);
   });
 
-  it('all zeros renders flat bars at center', () => {
-    const { container } = renderChart([
-      { label: 'A', value: 0 },
-      { label: 'B', value: 0 },
-    ]);
-    const rects = container.querySelectorAll('rect');
-    expect(rects.length).toBe(2);
-    // Zero-value bars should have minimum width of 2
-    for (const rect of rects) {
-      expect(Number(rect.getAttribute('width'))).toBeGreaterThanOrEqual(2);
-    }
+  it('includes tooltip', () => {
+    const option = buildDivergingOption([
+      { label: 'A', value: 100 },
+    ]) as { tooltip: { trigger: string } };
+    expect(option.tooltip.trigger).toBe('axis');
   });
+});
 
-  it('labels render for each item', () => {
-    const { container } = renderChart([
-      { label: 'Operación', value: 1000 },
-      { label: 'Inversión', value: -500 },
-    ]);
-    const texts = container.querySelectorAll('text');
-    // 2 labels + 2 values = 4 text elements
-    expect(texts.length).toBe(4);
+describe('DivergingBar', () => {
+  it('renders the ECharts component', () => {
+    const { container } = renderChart([{ label: 'Op', value: 1000 }]);
+    expect(container.querySelector('[data-testid="echarts-mock"]')).not.toBeNull();
   });
 
   it('empty items renders nothing', () => {
     const { container } = renderChart([]);
-    const svg = container.querySelector('svg');
-    expect(svg).toBeNull();
+    expect(container.querySelector('[data-testid="echarts-mock"]')).toBeNull();
   });
 });

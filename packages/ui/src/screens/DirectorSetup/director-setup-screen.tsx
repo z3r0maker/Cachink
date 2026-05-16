@@ -170,7 +170,8 @@ function DirectorSetupFields({
         variant="dark"
         onPress={handleSubmit}
         fullWidth
-        disabled={!validation.valid || submitting}
+        disabled={!validation.valid}
+        loading={submitting}
         testID="director-setup-submit"
       >
         {t('directorSetup.submit')}

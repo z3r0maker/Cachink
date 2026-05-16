@@ -1,9 +1,10 @@
 /**
  * Expo Router entry for /settings (hub).
  *
- * Shows the 4-card SettingsHub. Each card navigates to a sub-route
- * under /settings/negocio, /settings/tasas-isr, /settings/empleados,
- * or /settings/sistema.
+ * Shows the 3-card SettingsHub. Each card navigates to a sub-route
+ * under /settings/negocio, /settings/tasas-isr, or /settings/sistema.
+ *
+ * Empleados moved to top-level /empleados route (Otros grid).
  */
 
 import type { ReactElement } from 'react';
@@ -11,7 +12,6 @@ import { useRouter } from 'expo-router';
 import {
   SettingsHub,
   useCurrentBusiness,
-  useEmpleadosForBusiness,
   useTranslation,
   type SettingsSection,
 } from '@cachink/ui';
@@ -31,7 +31,6 @@ function useBackToParent(): () => void {
 export default function SettingsHubRoute(): ReactElement {
   const router = useRouter();
   const business = useCurrentBusiness().data ?? null;
-  const { data: employees = [] } = useEmpleadosForBusiness();
   const handleBack = useBackToParent();
   const { t } = useTranslation();
 
@@ -43,7 +42,6 @@ export default function SettingsHubRoute(): ReactElement {
     <AppShellWrapper activeTabKey="ajustes" title={t('settings.hubTitle')} onBack={handleBack}>
       <SettingsHub
         business={business}
-        empleadoCount={employees.length}
         onNavigate={handleNavigate}
       />
     </AppShellWrapper>

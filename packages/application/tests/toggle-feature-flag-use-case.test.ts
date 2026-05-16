@@ -23,9 +23,9 @@ describe('ToggleFeatureFlagUseCase', () => {
 
   it('enables a flag that has no dependencies', async () => {
     const result = await useCase.execute({
-      businessId, flagKey: 'caja', newValue: true,
+      businessId, flagKey: 'ventasCredito', newValue: true,
     });
-    expect(result.caja).toBe(true);
+    expect(result.ventasCredito).toBe(true);
   });
 
   it('enables merma when stock is ON', async () => {
@@ -55,21 +55,21 @@ describe('ToggleFeatureFlagUseCase', () => {
     expect(result.merma).toBe(false);
     expect(result.auditoriaInventario).toBe(false);
     // Independent flags unaffected
-    expect(result.caja).toBe(false);
+    expect(result.ventasCredito).toBe(false);
   });
 
   it('persists the updated flags to the business', async () => {
-    await useCase.execute({ businessId, flagKey: 'caja', newValue: true });
+    await useCase.execute({ businessId, flagKey: 'ventasCredito', newValue: true });
     const biz = await businesses.findById(businessId);
     const flags = JSON.parse(biz!.featureFlags);
-    expect(flags.caja).toBe(true);
+    expect(flags.ventasCredito).toBe(true);
   });
 
   it('rejects non-existent business', async () => {
     await expect(
       useCase.execute({
         businessId: '01HZ8XQN9GZJXV8AKQ5XGHOST' as BusinessId,
-        flagKey: 'caja',
+        flagKey: 'ventasCredito',
         newValue: true,
       }),
     ).rejects.toThrow(/no encontrado/);

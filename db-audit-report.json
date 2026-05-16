@@ -1,0 +1,310 @@
+{
+  "meta": {
+    "audit_date": "2026-05-16",
+    "database_path": "~/Library/Application Support/mx.cachink.desktop/cachink.db",
+    "sqlite_version": "3.51.0",
+    "journal_mode": "wal",
+    "page_size": 4096,
+    "page_count": 36,
+    "integrity_check": "ok",
+    "foreign_keys_enabled": false,
+    "tables_in_db": 15,
+    "entity_tables_in_db": 11,
+    "system_tables_in_db": 4,
+    "entity_tables_in_code": 20,
+    "missing_entity_tables": 9,
+    "explicit_indexes": 2,
+    "auto_indexes": 13,
+    "triggers": 20,
+    "migrations_defined": 18,
+    "migrations_applied": 2,
+    "migrations_pending": 16,
+    "conventions_file": "./db-audit-conventions.md",
+    "skill_used": "sqlite-patterns (baseline) + CLAUDE.md §2 conventions",
+    "note": "No sqlite-antipattern-audit skill or validator exists on this system. Rule IDs are descriptive, not from an external catalog."
+  },
+  "findings": [
+    {
+      "id": "MONEY-NUMERIC-AFFINITY",
+      "severity": "critical",
+      "confidence": "medium",
+      "category": "data-integrity",
+      "title": "Money columns use NUMERIC affinity instead of INTEGER",
+      "description": "All 10 *_centavos columns in the live DB are declared as `numeric` (NUMERIC type affinity). The code schema defines 26 such columns across 13 tables. CLAUDE.md §2.8 mandates INTEGER centavos. NUMERIC affinity applies type coercion that CAN store values as REAL if they arrive as floating-point strings. Empirical test confirms: INSERT INTO numeric_col VALUES ('300.5') stores as REAL. However, Drizzle ORM's { mode: 'bigint' } always sends integer values via prepared statements, making the risk theoretical unless raw SQL is used.",
+      "affected_objects": [
+        "sales.monto_centavos",
+        "expenses.monto_centavos",
+        "products.costo_unit_centavos",
+        "inventory_movements.costo_unit_centavos",
+        "employees.salario_centavos",
+        "client_payments.monto_centavos",
+        "day_closes.efectivo_esperado_centavos",
+        "day_closes.efectivo_contado_centavos",
+        "day_closes.diferencia_centavos",
+        "recurring_expenses.monto_centavos",
+        "products.precio_venta_centavos (code only, migration 0002+)",
+        "sales.efectivo_recibido_centavos (code only, migration 0002+)",
+        "caja_turnos.monto_apertura_centavos (code only)",
+        "caja_turnos.efectivo_adicional_centavos (code only)",
+        "caja_turnos.monto_cierre_centavos (code only)",
+        "caja_turnos.efectivo_esperado_centavos (code only)",
+        "caja_turnos.diferencia_centavos (code only)",
+        "caja_turnos.total_transferencias (code only)",
+        "caja_turnos.total_tarjeta (code only)",
+        "caja_turnos.total_qr (code only)",
+        "caja_turnos.total_credito (code only)",
+        "caja_turnos.conteo_centavos (code only)",
+        "cancelacion_logs.monto_original_centavos (code only)",
+        "cancelacion_logs.cash_returned_centavos (code only)",
+        "caja_movimientos.monto_centavos (code only)",
+        "entregas_credito.total_centavos (code only)"
+      ],
+      "convention_violated": "CLAUDE.md §2.8: 'Money is never a float. All monetary values are stored and computed as integer centavos.'",
+      "recommendation": "Change Drizzle schema from numeric(..., { mode: 'bigint' }) to integer(...) for all *_centavos columns. This requires table recreation in SQLite (ALTER TABLE cannot change column type). Write a migration that creates new tables with INTEGER columns, copies data, and swaps."
+    },
+    {
+      "id": "FK-DISABLED-GLOBALLY",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "referential-integrity",
+      "title": "PRAGMA foreign_keys = 0 — FK enforcement is off globally",
+      "description": "The live database reports PRAGMA foreign_keys = 0. No foreign key constraints are declared anywhere in any migration. The Expo (mobile) database init does not set PRAGMA foreign_keys = ON. The Tauri LAN-sync connection sets it, but the main desktop DB connection does not. The sync pull-loop explicitly toggles FK off/on during batch upserts. Without FK enforcement, orphaned producto_id, cliente_id, venta_id, turno_id, gasto_recurrente_id references are silently accepted.",
+      "affected_objects": [
+        "sales.cliente_id → clients.id (no FK)",
+        "sales.producto_id → products.id (no FK)",
+        "expenses.gasto_recurrente_id → recurring_expenses.id (no FK)",
+        "client_payments.venta_id → sales.id (no FK)",
+        "inventory_movements.producto_id → products.id (no FK)",
+        "PRAGMA foreign_keys = 0 at connection init"
+      ],
+      "convention_violated": "db-audit-conventions.md: 'PRAGMA foreign_keys = ON must be set at connection time for both Expo and Tauri.'",
+      "recommendation": "Add PRAGMA foreign_keys = ON to both Expo and Tauri database connection initialization. Then add FK constraints via migration. Note: FK constraints cannot be added via ALTER TABLE in SQLite — requires table recreation."
+    },
+    {
+      "id": "NO-ENTITY-INDEXES",
+      "severity": "critical",
+      "confidence": "high",
+      "category": "performance",
+      "title": "Zero indexes on any entity table",
+      "description": "Only auto-indexes on TEXT PKs exist (SQLite creates these automatically for PRIMARY KEY columns). The 2 explicit indexes are both on system tables (__cachink_change_log.id which is redundant, and __cachink_conflicts.detected_at). Every query filtering by business_id (all 11 entity tables), fecha (sales, expenses, inventory_movements, day_closes), producto_id (inventory_movements, sales), or cliente_id (sales, client_payments) performs a full table scan.",
+      "affected_objects": [
+        "All 11 entity tables — no index on business_id",
+        "sales — no index on fecha, producto_id, cliente_id",
+        "expenses — no index on fecha, categoria",
+        "inventory_movements — no index on producto_id, fecha",
+        "client_payments — no index on venta_id",
+        "day_closes — no index on fecha",
+        "products — no index on business_id",
+        "employees — no index on business_id",
+        "clients — no index on business_id",
+        "recurring_expenses — no index on business_id"
+      ],
+      "recommendation": "Add a migration (0018) creating indexes: sales(business_id, fecha), sales(producto_id), sales(cliente_id), expenses(business_id, fecha), inventory_movements(producto_id, fecha), client_payments(venta_id), day_closes(business_id, fecha). Add partial indexes WHERE deleted_at IS NULL on high-traffic tables."
+    },
+    {
+      "id": "ISR-TASA-REAL",
+      "severity": "high",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "Tax rate stored as REAL (businesses.isr_tasa)",
+      "description": "The businesses.isr_tasa column is declared as REAL and stores 0.3 (30%). This value is used in ISR monetary calculations against centavo amounts. IEEE 754 floating-point arithmetic produces precision errors (e.g., 0.3 * 10000 = 2999.9999... in some contexts). The column should use INTEGER basis points (3000 = 30%) to keep all financial arithmetic in integer space.",
+      "affected_objects": [
+        "businesses.isr_tasa (current value: 0.3, typeof: real)"
+      ],
+      "convention_violated": "CLAUDE.md §2.8: 'Money is never a float.' Tax rates participate in monetary calculations and should follow the same principle.",
+      "recommendation": "Change isr_tasa from REAL to INTEGER storing basis points (30% = 3000). Update all ISR calculations to divide by 10000 instead of multiplying by the rate directly."
+    },
+    {
+      "id": "JSON-IN-TEXT-COLUMNS",
+      "severity": "high",
+      "confidence": "high",
+      "category": "schema-design",
+      "title": "JSON-encoded structured data in TEXT columns (8 occurrences across code schema)",
+      "description": "Eight columns across the code schema store JSON-encoded structured data as TEXT. These cannot be indexed, constrained, or queried without full deserialization. In the live desktop DB, none of these columns exist yet (all are in unapplied migrations 0002+). On mobile (where all migrations apply), all 8 exist.",
+      "affected_objects": [
+        "businesses.feature_flags (JSON object — migration 0008)",
+        "businesses.enabled_payment_methods (JSON string[] — migration 0014)",
+        "businesses.atributos_producto (JSON AttrDef[] — migration 0002)",
+        "products.atributos (JSON {clave: valor} — migration 0002)",
+        "users.permissions (JSON object — migration 0006)",
+        "auditorias_inventario.lineas (JSON — migration 0011)",
+        "entregas_credito.sale_ids (JSON string[] — migration 0012)",
+        "director_alerts.metadata (JSON {} — migration 0012)"
+      ],
+      "recommendation": "Acceptable for configuration/metadata columns. Revisit when any JSON field needs filtering/sorting in queries, or when adopting SQLite's JSON1 extension. For sale_ids (entregas_credito), consider a junction table if credit delivery queries become frequent."
+    },
+    {
+      "id": "DESKTOP-MIGRATIONS-BEHIND",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "deployment",
+      "title": "Desktop database is 16 migrations behind (only 0000-0001 applied of 0000-0017)",
+      "description": "The live desktop DB has only migrations 0000 (initial schema) and 0001 (change log + sync state) applied. The code defines 18 migrations (0000-0017). Tables users, caja_turnos, caja_movimientos, conversions, conversion_recetas, auditorias_inventario, entregas_credito, director_alerts, cancelacion_logs do not exist. Additionally, columns added by migrations 0002-0008 (tipo_negocio, seguir_stock, precio_venta_centavos, atributos, hora, color_fondo, productoId NOT NULL, smart catalog, feature_flags, etc.) are missing. The migration runner code (run-migrations.ts) appears correct — it may be that the desktop app simply hasn't been relaunched since these migrations were added.",
+      "affected_objects": [
+        "Missing tables: users, caja_turnos, caja_movimientos, conversions, conversion_recetas, auditorias_inventario, entregas_credito, director_alerts, cancelacion_logs",
+        "Missing columns on businesses: tipo_negocio, categoria_venta_predeterminada, atributos_producto, enabled_payment_methods, feature_flags",
+        "Missing columns on products: tipo, seguir_stock, precio_venta_centavos, atributos, color_fondo, uso_producto, icono",
+        "Missing columns on sales: hora, producto_id (NOT NULL constraint), cantidad, efectivo_recibido_centavos, cancelled_by_user_id, cancel_motivo, cancelled_at"
+      ],
+      "recommendation": "Launch the Tauri desktop app and check console logs for migration errors. Verify __cachink_migrations table after launch. If the runner works, this finding resolves itself. If not, debug the Tauri DB init path."
+    },
+    {
+      "id": "NO-CHECK-ENUM-COLUMNS",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "No CHECK constraints on 13 enum columns in live DB",
+      "description": "13 text columns in the live DB have enum semantics but no SQL-level CHECK constraint. Only the 2 system tables use CHECK (op IN ('insert','update') and direction IN ('inbound','outbound')). App-layer Zod schemas enforce valid values, but raw SQL inserts or sync imports can inject invalid enum values.",
+      "affected_objects": [
+        "sales.categoria",
+        "sales.metodo",
+        "sales.estado_pago",
+        "expenses.categoria",
+        "products.categoria",
+        "products.unidad",
+        "inventory_movements.tipo",
+        "inventory_movements.motivo",
+        "employees.periodo",
+        "recurring_expenses.categoria",
+        "recurring_expenses.frecuencia",
+        "day_closes.cerrado_por",
+        "businesses.regimen_fiscal"
+      ],
+      "recommendation": "Add CHECK constraints via migration before LAN sync goes live. Incoming sync data bypasses the local app's Zod validation layer."
+    },
+    {
+      "id": "REDUNDANT-CHANGELOG-ID-INDEX",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "performance",
+      "title": "Redundant explicit index idx_cachink_change_log_id on INTEGER PRIMARY KEY AUTOINCREMENT column",
+      "description": "The index idx_cachink_change_log_id indexes the `id` column of __cachink_change_log, which is declared as INTEGER PRIMARY KEY AUTOINCREMENT. In SQLite, INTEGER PRIMARY KEY is automatically the rowid alias — it is already the fastest possible lookup path. The explicit index duplicates the B-tree, wastes space, and slows writes with no query benefit.",
+      "affected_objects": [
+        "__cachink_change_log.id — idx_cachink_change_log_id"
+      ],
+      "recommendation": "Drop the index: DROP INDEX idx_cachink_change_log_id;"
+    },
+    {
+      "id": "NO-COMPOSITE-INDEX-CHANGELOG",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "performance",
+      "title": "No composite index on __cachink_change_log(table_name, row_id)",
+      "description": "Sync pull queries need to find changes by table+row combination. The only explicit index is on `id` (redundant, see above). Queries like 'SELECT * FROM __cachink_change_log WHERE table_name = ? AND row_id = ?' require a full table scan of the change log.",
+      "affected_objects": [
+        "__cachink_change_log — no index on (table_name, row_id)"
+      ],
+      "recommendation": "Add a composite index: CREATE INDEX idx_changelog_table_row ON __cachink_change_log(table_name, row_id);"
+    },
+    {
+      "id": "NO-SOFT-DELETE-PARTIAL-INDEX",
+      "severity": "medium",
+      "confidence": "high",
+      "category": "performance",
+      "title": "Soft-delete pattern with no partial index on deleted_at",
+      "description": "Every entity table uses soft deletes (deleted_at IS NULL for active rows). Every read query must filter WHERE deleted_at IS NULL, but no partial index exists to accelerate this. As tables grow and soft-deleted rows accumulate, every query pays the cost of scanning deleted rows.",
+      "affected_objects": [
+        "All 11 entity tables — deleted_at column with no partial index"
+      ],
+      "recommendation": "Add partial indexes: CREATE INDEX idx_<table>_active ON <table>(business_id) WHERE deleted_at IS NULL; on high-traffic tables (sales, expenses, products, inventory_movements)."
+    },
+    {
+      "id": "EAV-APP-CONFIG",
+      "severity": "low",
+      "confidence": "high",
+      "category": "schema-design",
+      "title": "app_config uses EAV (key-value) pattern with no schema validation",
+      "description": "The app_config table stores 4 key-value pairs (deviceId, crashReportingEnabled, mode, currentBusinessId). EAV is acceptable for application settings but provides no SQL-level type safety or constraint validation. Values are all TEXT regardless of semantic type (boolean, ULID, enum).",
+      "affected_objects": [
+        "app_config — 4 rows: deviceId, crashReportingEnabled, mode, currentBusinessId"
+      ],
+      "recommendation": "Acceptable tradeoff for a small settings table. No action needed unless the number of settings grows significantly."
+    },
+    {
+      "id": "NO-UNIQUE-DAY-CLOSES",
+      "severity": "low",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "No UNIQUE constraint on day_closes(fecha, device_id)",
+      "description": "The business rule 'one corte de día per day per device' is enforced only at the application layer. Without a UNIQUE(fecha, device_id) constraint, duplicate day-close records are possible via raw SQL or sync race conditions.",
+      "affected_objects": [
+        "day_closes — no UNIQUE(fecha, device_id)"
+      ],
+      "recommendation": "Add UNIQUE constraint before multi-device sync goes live."
+    },
+    {
+      "id": "NO-UNIQUE-CONVERSION-RECETAS",
+      "severity": "low",
+      "confidence": "high",
+      "category": "data-integrity",
+      "title": "No UNIQUE constraint on conversion_recetas(materia_prima_id, producto_resultante_id)",
+      "description": "Duplicate recipes (same raw material → same finished product) are possible without a UNIQUE constraint. This table does not yet exist in the live DB (migration 0010+).",
+      "affected_objects": [
+        "conversion_recetas — no UNIQUE(materia_prima_id, producto_resultante_id) (code only)"
+      ],
+      "recommendation": "Add UNIQUE constraint when this table is first created in the DB."
+    },
+    {
+      "id": "TEXT-PK-ULID",
+      "severity": "info",
+      "confidence": "high",
+      "category": "schema-design",
+      "title": "TEXT primary keys (ULIDs) — accepted tradeoff",
+      "description": "All entity tables use TEXT primary keys storing ULIDs (26-char Crockford Base32). This is larger than INTEGER rowids (8 bytes vs 26 bytes) and creates larger auto-indexes. However, ULIDs are required for distributed ID generation in multi-device sync scenarios without a central server.",
+      "affected_objects": [
+        "All 11 entity tables in live DB + 9 in code schema"
+      ],
+      "recommendation": "No change needed. This is a correct architectural decision for multi-device sync."
+    },
+    {
+      "id": "ISO-TEXT-TIMESTAMPS",
+      "severity": "info",
+      "confidence": "high",
+      "category": "schema-design",
+      "title": "All timestamps are ISO-8601 TEXT — correct per convention",
+      "description": "All date/timestamp columns use TEXT storing ISO-8601 strings. No CHECK constraint validates the format, but Zod schemas at the application layer ensure correct formatting. ISO-8601 TEXT sorts lexicographically, so range queries (fecha BETWEEN '2026-01-01' AND '2026-01-31') work correctly.",
+      "affected_objects": [
+        "All fecha, created_at, updated_at, deleted_at, apertura_at, cierre_at columns"
+      ],
+      "recommendation": "No change needed. Correct per project conventions."
+    },
+    {
+      "id": "SYNC-TRIGGER-GAP",
+      "severity": "high",
+      "confidence": "medium",
+      "category": "sync-integrity",
+      "title": "Tables added in migrations 0006-0017 have no sync change-log triggers",
+      "description": "The change-log triggers only cover the original 10 entity tables (businesses, sales, expenses, products, inventory_movements, employees, clients, client_payments, day_closes, recurring_expenses). Tables added in later migrations (users, caja_turnos, caja_movimientos, conversions, conversion_recetas, auditorias_inventario, entregas_credito, director_alerts, cancelacion_logs) have NO sync triggers. Changes to those tables are invisible to the LAN sync system. This may be intentional (local-only tables during phased rollout) or a gap.",
+      "affected_objects": [
+        "users — no sync triggers",
+        "caja_turnos — no sync triggers",
+        "caja_movimientos — no sync triggers",
+        "conversions — no sync triggers",
+        "conversion_recetas — no sync triggers",
+        "auditorias_inventario — no sync triggers",
+        "entregas_credito — no sync triggers",
+        "director_alerts — no sync triggers",
+        "cancelacion_logs — no sync triggers"
+      ],
+      "recommendation": "Determine which newer tables should participate in sync. For those that should: add AFTER INSERT and AFTER UPDATE triggers mirroring the pattern used by the original 10 tables. For intentionally-local tables: document as such."
+    }
+  ],
+  "summary": {
+    "total_findings": 16,
+    "by_severity": {
+      "critical": 3,
+      "high": 4,
+      "medium": 4,
+      "low": 3,
+      "info": 2
+    },
+    "by_category": {
+      "data-integrity": 5,
+      "performance": 4,
+      "schema-design": 3,
+      "referential-integrity": 1,
+      "deployment": 1,
+      "sync-integrity": 1
+    }
+  }
+}

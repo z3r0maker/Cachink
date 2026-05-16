@@ -153,7 +153,7 @@ export function RegistrarPagoModal(props: RegistrarPagoModalProps): ReactElement
       <Btn
         variant="green"
         onPress={submit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="pago-submit"
       >

@@ -1,0 +1,5 @@
+source "https://rubygems.org"
+
+# Pin CocoaPods to the exact version used in dev / CI.
+# Update when upgrading Xcode or React Native.
+gem "cocoapods", "~> 1.16.2"

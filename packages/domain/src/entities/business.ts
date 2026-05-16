@@ -45,14 +45,19 @@ export const BusinessSchema = z
     id: ulidField<BusinessId>(),
     nombre: z.string().min(1).max(120),
     regimenFiscal: z.string().min(1).max(80),
-    isrTasa: z.number().min(0).max(1),
+    /** ISR rate in basis points (3000 = 30%). */
+    isrTasa: z.number().int().min(0).max(10_000),
     logoUrl: z.string().url().nullable(),
     tipoNegocio: TipoNegocioEnum.default('mixto'),
     categoriaVentaPredeterminada: SaleCategoryEnum.default('Producto'),
     atributosProducto: z.array(AttrDefSchema).default([]),
+    /** JSON array of enabled payment method keys. Defaults to all 4. */
+    enabledPaymentMethods: z.string().default(
+      '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
+    ),
     /** JSON string storing business feature flags. Parsed by callers. */
     featureFlags: z.string().default(
-      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"caja":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
     ),
   })
   .merge(auditSchema);

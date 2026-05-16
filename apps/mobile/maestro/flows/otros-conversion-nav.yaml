@@ -23,7 +23,6 @@ appId: mx.cachink.mobile
 - runFlow: shared/enable-conversion-flag.yaml
 
 # Switch to Operativo to verify the grid item appears.
-- runFlow: shared/select-operativo.yaml
 
 # Navigate to Otros tab.
 - tapOn:

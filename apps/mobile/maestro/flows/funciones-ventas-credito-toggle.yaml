@@ -36,7 +36,6 @@ appId: mx.cachink.mobile
     id: "otros-ventas-credito"
 
 # --- Step 2: Switch to Operativo → make a venta → Crédito available ---
-- runFlow: shared/select-operativo.yaml
 - tapOn:
     id: "tab-ventas"
 
@@ -74,7 +73,6 @@ appId: mx.cachink.mobile
     id: "otros-ventas-credito"
 
 # Switch to Operativo → Ventas → confirm Crédito is gone.
-- runFlow: shared/select-operativo.yaml
 - tapOn:
     id: "tab-ventas"
 - tapOn: "Tortilla"

@@ -36,12 +36,6 @@ export const FLAG_DISPLAY_INFO: readonly FlagDisplayInfo[] = [
     parentKey: 'conversionMateriaPrima',
   },
   {
-    key: 'caja',
-    icon: 'inbox',
-    labelKey: 'funciones.caja',
-    descriptionKey: 'funciones.cajaDesc',
-  },
-  {
     key: 'auditoriaInventario',
     icon: 'clipboard-list',
     labelKey: 'funciones.auditoria',

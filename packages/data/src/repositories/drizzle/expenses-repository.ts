@@ -3,7 +3,7 @@
  * patterns: one `#rowFor` write helper, one `#mapRow` read helper.
  */
 
-import { and, desc, eq, gte, isNull, like, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
   DeviceId,
@@ -103,7 +103,8 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       .from(expenses)
       .where(
         and(
-          like(expenses.fecha, `${yearMonth}-%`),
+          gte(expenses.fecha, `${yearMonth}-01`),
+          lte(expenses.fecha, `${yearMonth}-31`),
           eq(expenses.businessId, businessId),
           isNull(expenses.deletedAt),
         ),

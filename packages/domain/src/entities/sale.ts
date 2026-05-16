@@ -11,9 +11,9 @@
  */
 
 import { z } from 'zod';
-import type { BusinessId, ClientId, ProductId, SaleId } from '../ids/index.js';
+import type { BusinessId, CajaTurnoId, ClientId, ProductId, SaleId, UserId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
-import { auditSchema } from './_audit.js';
+import { auditSchema, isoTimestampField } from './_audit.js';
 import { isoDateField, moneyField } from './_fields.js';
 
 export const PaymentMethodEnum = z.enum([
@@ -45,6 +45,16 @@ export const SaleSchema = z
     estadoPago: PaymentStateEnum,
     productoId: ulidField<ProductId>(),
     cantidad: z.number().int().positive().default(1),
+    /** Cash received from the customer (centavos). Only set when metodo='Efectivo'. Change = efectivoRecibidoCentavos − monto. */
+    efectivoRecibidoCentavos: moneyField.nullable().default(null),
+    /** UserId who cancelled this sale. Null if not cancelled. */
+    cancelledByUserId: ulidField<UserId>().nullable().default(null),
+    /** Reason for cancellation. Null if not cancelled. */
+    cancelMotivo: z.string().max(500).nullable().default(null),
+    /** Timestamp when this sale was cancelled. Null if not cancelled. */
+    cancelledAt: isoTimestampField.nullable().default(null),
+    /** CajaTurno ID that was active when this sale was recorded. Null only for legacy pre-migration sales. */
+    cajaTurnoId: ulidField<CajaTurnoId>().nullable().default(null),
   })
   .merge(auditSchema)
   .refine((v) => v.metodo !== 'Crédito' || v.clienteId !== null, {
@@ -65,7 +75,11 @@ export const NewSaleSchema = z.object({
   clienteId: ulidField<ClientId>().optional(),
   productoId: ulidField<ProductId>(),
   cantidad: z.number().int().positive().default(1),
+  /** Cash received from customer (centavos). Only relevant for Efectivo. */
+  efectivoRecibidoCentavos: moneyField.optional(),
   businessId: ulidField<BusinessId>(),
+  /** Active CajaTurno ID. Always set by use-case. */
+  cajaTurnoId: ulidField<CajaTurnoId>().optional(),
 });
 
 export type NewSale = z.infer<typeof NewSaleSchema>;

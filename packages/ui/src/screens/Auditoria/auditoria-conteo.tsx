@@ -8,15 +8,16 @@ import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { AuditoriaInventario, AuditoriaLinea } from '@cachink/domain';
-import { Btn, Card, ConfirmDialog } from '../../components/index';
-import { IntegerField } from '../../components/fields/index';
+import { Btn, ConfirmDialog } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useActualizarAuditoria } from '../../hooks/use-actualizar-auditoria';
 import { colors, typography } from '../../theme';
+import { ConteoLineaCard } from './conteo-linea-card';
 
 export interface AuditoriaConteoProps {
   readonly auditoria: AuditoriaInventario;
   readonly onFinalized: () => void;
+  readonly onCancelled: () => void;
   readonly testID?: string;
 }
 
@@ -28,6 +29,7 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
     () => JSON.parse(props.auditoria.lineas) as AuditoriaLinea[],
   );
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
 
   const contados = lineas.filter((l) => l.stockReal !== null).length;
   const total = lineas.length;
@@ -70,6 +72,16 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
     props.onFinalized();
   };
 
+  const handleCancel = async (): Promise<void> => {
+    await mutateAsync({
+      id: props.auditoria.id,
+      lineas,
+      estado: 'cancelada',
+    });
+    setShowCancel(false);
+    props.onCancelled();
+  };
+
   return (
     <View gap={12} testID={props.testID ?? 'auditoria-conteo'}>
       <Text
@@ -88,49 +100,27 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
       <ScrollView>
         <View gap={8}>
           {lineas.map((linea, idx) => (
-            <Card
+            <ConteoLineaCard
               key={linea.productoId as string}
-              padding="sm"
-              fullWidth
-              testID={`conteo-linea-${linea.productoId}`}
-            >
-              <View gap={4}>
-                <Text
-                  fontFamily={typography.fontFamily}
-                  fontWeight={typography.weights.bold}
-                  fontSize={14}
-                  color={colors.black}
-                  numberOfLines={1}
-                >
-                  {linea.productoNombre}
-                </Text>
-                <View flexDirection="row" gap={12} alignItems="center">
-                  <Text
-                    fontFamily={typography.fontFamily}
-                    fontSize={12}
-                    color={colors.gray600}
-                  >
-                    {t('auditoria.stockSistema')}: {linea.stockSistema}
-                  </Text>
-                  <View flex={1}>
-                    <IntegerField
-                      label={t('auditoria.stockReal')}
-                      value={
-                        linea.stockReal !== null ? String(linea.stockReal) : ''
-                      }
-                      onChange={(v) => handleStockChange(idx, v)}
-                      min={0}
-                      testID={`conteo-real-${linea.productoId}`}
-                    />
-                  </View>
-                </View>
-              </View>
-            </Card>
+              linea={linea}
+              onChange={(v) => handleStockChange(idx, v)}
+            />
           ))}
         </View>
       </ScrollView>
 
       <View flexDirection="row" gap={8}>
+        <View flex={1}>
+          <Btn
+            variant="ghost"
+            onPress={() => setShowCancel(true)}
+            disabled={isPending}
+            fullWidth
+            testID="conteo-cancelar"
+          >
+            {t('auditoria.cancelar')}
+          </Btn>
+        </View>
         <View flex={1}>
           <Btn
             variant="ghost"
@@ -164,6 +154,15 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
         onConfirm={handleFinalize}
         confirmLabel={t('auditoria.finalizar')}
         tone="default"
+      />
+      <ConfirmDialog
+        open={showCancel}
+        onClose={() => setShowCancel(false)}
+        title={t('auditoria.cancelar')}
+        description={t('auditoria.cancelarConfirm')}
+        onConfirm={handleCancel}
+        confirmLabel={t('auditoria.cancelar')}
+        tone="danger"
       />
     </View>
   );

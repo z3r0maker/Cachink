@@ -87,7 +87,7 @@ export function NuevoEmpleadoModal(props: NuevoEmpleadoModalProps): ReactElement
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={props.submitting === true}
+        loading={props.submitting === true}
         fullWidth
         testID="empleado-submit"
       >

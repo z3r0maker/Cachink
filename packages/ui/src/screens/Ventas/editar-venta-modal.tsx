@@ -147,7 +147,7 @@ export function EditarVentaModal(props: EditarVentaModalProps): ReactElement {
       <Btn
         variant="primary"
         onPress={handleSubmit}
-        disabled={editar.isPending}
+        loading={editar.isPending}
         fullWidth
         testID="editar-venta-submit"
       >

@@ -12,6 +12,7 @@ import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
 import {
   Btn,
+  EmptyState,
   ErrorState,
   PeriodPicker,
   SectionTitle,
@@ -22,6 +23,7 @@ import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';
 import { useAuditoriasInventario } from '../../hooks/use-auditorias-inventario';
 import { useCrearAuditoria } from '../../hooks/use-crear-auditoria';
+import { useProductos } from '../../hooks/use-productos';
 import { usePeriodLabels } from '../../hooks/use-period-labels';
 import { defaultPeriodoState, usePeriodoRange } from '../../hooks/use-periodo-range';
 import { EmptyAuditoria } from './empty-auditoria';
@@ -43,6 +45,9 @@ export function AuditoriaScreen(props: AuditoriaScreenProps): ReactElement {
 
   const { data: auditorias, isLoading, error } = useAuditoriasInventario(range.from, range.to);
   const crear = useCrearAuditoria();
+  const productosQ = useProductos();
+  const hasStockProducts =
+    (productosQ.data ?? []).filter((p) => p.seguirStock !== false).length > 0;
 
   const activeAudit = auditorias?.find((a) => a.estado === 'borrador') ?? null;
 
@@ -86,6 +91,16 @@ export function AuditoriaScreen(props: AuditoriaScreenProps): ReactElement {
               <AuditoriaConteo
                 auditoria={activeAudit}
                 onFinalized={() => setTab('historial')}
+                onCancelled={() => {
+                  /* Re-render triggers re-query; activeAudit becomes null */
+                }}
+              />
+            ) : !hasStockProducts ? (
+              <EmptyState
+                icon="clipboard-list"
+                title={t('auditoria.noProducts')}
+                description={t('auditoria.noProductsHint')}
+                testID="auditoria-no-products"
               />
             ) : (
               <View gap={16}>

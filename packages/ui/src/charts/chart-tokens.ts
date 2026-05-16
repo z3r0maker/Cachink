@@ -17,7 +17,7 @@ export const CHART_PALETTE = [
   colors.warning, // Renta
   '#8B5CF6', // Publicidad (purple)
   '#0EA5E9', // Mantenimiento (sky)
-  colors.gray400, // Servicios
+  '#6366F1', // Servicios (indigo)
   '#EC4899', // Logística (pink)
   colors.gray600, // Impuestos
   colors.black, // Otro

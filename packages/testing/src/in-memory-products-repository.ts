@@ -38,6 +38,7 @@ export class InMemoryProductsRepository implements ProductsRepository {
       atributos: input.atributos ?? {},
       colorFondo: input.colorFondo ?? 'white',
       usoProducto: input.usoProducto ?? 'venta',
+      icono: input.icono ?? null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -81,6 +82,10 @@ export class InMemoryProductsRepository implements ProductsRepository {
       unidad: patch.unidad ?? existing.unidad,
       umbralStockBajo: patch.umbralStockBajo ?? existing.umbralStockBajo,
       colorFondo: patch.colorFondo ?? existing.colorFondo,
+      usoProducto: patch.usoProducto ?? existing.usoProducto,
+      icono: patch.icono !== undefined ? patch.icono : existing.icono,
+      costoUnitCentavos: patch.costoUnitCentavos ?? existing.costoUnitCentavos,
+      precioVentaCentavos: patch.precioVentaCentavos ?? existing.precioVentaCentavos,
       updatedAt: ts,
     };
     this.rows.set(id, next);

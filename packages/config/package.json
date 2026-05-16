@@ -19,15 +19,15 @@
     "tsconfig.lib.json"
   ],
   "dependencies": {
-    "eslint-plugin-boundaries": "^6.0.0",
-    "eslint-plugin-sonarjs": "^4.0.0",
+    "eslint-plugin-boundaries": "^6.0.2",
+    "eslint-plugin-sonarjs": "^4.0.3",
     "eslint-plugin-unicorn": "^64.0.0",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.59.3"
   },
   "peerDependencies": {
-    "eslint": "^9.15.0",
+    "eslint": "^9.15.0 || ^10.0.0",
     "prettier": "^3.3.0",
-    "typescript": "^5.7.0",
-    "vitest": "^3.0.0"
+    "typescript": "^5.7.0 || ^6.0.0",
+    "vitest": "^3.0.0 || ^4.0.0"
   }
 }

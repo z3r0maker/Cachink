@@ -74,7 +74,7 @@ describe('composeIndicadores', () => {
     const biz = await deps.businesses.create({
       nombre: 'Test',
       regimenFiscal: 'RESICO',
-      isrTasa: 0.3,
+      isrTasa: 3000,
     });
     const ind = await composeIndicadores(deps, biz.id as BusinessId, {
       from: '2026-04-01' as IsoDate,

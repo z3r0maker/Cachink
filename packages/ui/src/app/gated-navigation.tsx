@@ -36,6 +36,9 @@ import { LanGate, type LanBridges } from './lan-gate';
 import { CloudGate, type CloudBridges } from './cloud-gate';
 import { useAuthGateState, DirectorSetupGate, QuickSwitchGate, ChangePinGate } from './auth-gates';
 import { FeatureDiscoveryGate } from './feature-discovery-gate';
+import { useDemoMode, type DemoModeState } from '../dev/index';
+import { DemoSeedingScreen } from '../screens/DemoSeeding/index';
+import { AppLoadingSkeleton } from './app-loading-skeleton';
 
 export { type LanBridges } from './lan-gate';
 export { type CloudBridges } from './cloud-gate';
@@ -47,14 +50,24 @@ export interface GatedNavigationProps {
   readonly cloud?: CloudBridges | null;
 }
 
-function WizardGate({ platform }: { platform: 'mobile' | 'desktop' }): ReactElement {
+function WizardGate(props: {
+  platform: 'mobile' | 'desktop';
+  demoMode: DemoModeState | undefined;
+}): ReactElement {
   const appConfig = useAppConfigRepository();
   const setMode = useSetMode();
   async function handleSelect(mode: AppMode): Promise<void> {
     await appConfig.set(APP_CONFIG_KEYS.mode, mode);
     setMode(mode);
   }
-  return <Wizard platform={platform} onSelectMode={(m) => void handleSelect(m)} />;
+  return (
+    <Wizard
+      platform={props.platform}
+      onSelectMode={(m) => void handleSelect(m)}
+      onDemoMode={props.demoMode?.trigger}
+      demoLoading={props.demoMode?.loading}
+    />
+  );
 }
 
 function BusinessGate(): ReactElement {
@@ -117,7 +130,7 @@ function AuthInner(props: {
   // `resetActivity` is called on every touch via ActivityTracker.
   const { resetActivity } = useAutoLock(DEFAULT_AUTO_LOCK_TIMEOUT);
 
-  if (isLoading || hasUsers === undefined) return null;
+  if (isLoading || hasUsers === undefined) return <AppLoadingSkeleton />;
 
   if (!hasUsers) {
     return <DirectorSetupGate businessId={businessId} />;
@@ -140,10 +153,18 @@ export function GatedNavigation(props: GatedNavigationProps): ReactElement | nul
   const mode = useMode();
   const currentBusinessId = useCurrentBusinessId();
   const platform = props.platform ?? 'desktop';
+  const demoMode = useDemoMode();
 
   if (!hydrated) return null;
+
+  // Demo seeding overlay — renders ABOVE the wizard/auth gates
+  // so it persists across the mode=null → mode='local' transition.
+  if (demoMode?.loading) {
+    return <DemoSeedingScreen />;
+  }
+
   if (mode === null) {
-    return <WizardGate platform={platform} />;
+    return <WizardGate platform={platform} demoMode={demoMode} />;
   }
 
   const inner =

@@ -13,8 +13,10 @@
  * Phase 5: `stockEnabled` flag supersedes `tipoNegocio` for stock decisions.
  */
 
-import { NewSaleSchema, today, type NewSale, type Sale } from '@cachink/domain';
+import { NewSaleSchema, today, type CajaTurnoId, type NewSale, type Sale, type UserId } from '@cachink/domain';
+import { CajaNoAbiertaError } from '@cachink/domain';
 import type {
+  CajaTurnosRepository,
   ClientsRepository,
   InventoryMovementsRepository,
   ProductsRepository,
@@ -25,6 +27,8 @@ import type { UseCase } from '../_use-case.js';
 export interface RegistrarVentaConfig {
   /** Business-level stock feature flag. When false, no stock movements. */
   readonly stockEnabled?: boolean;
+  /** Current user — needed to look up their open turno. */
+  readonly userId: UserId | null;
 }
 
 export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
@@ -32,24 +36,37 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
   readonly #clients: ClientsRepository;
   readonly #products: ProductsRepository;
   readonly #movements: InventoryMovementsRepository;
+  readonly #cajaTurnos: CajaTurnosRepository;
   readonly #stockEnabled: boolean;
+  readonly #userId: UserId | null;
 
   constructor(
     sales: SalesRepository,
     clients: ClientsRepository,
     products: ProductsRepository,
     movements: InventoryMovementsRepository,
-    config?: RegistrarVentaConfig,
+    cajaTurnos: CajaTurnosRepository,
+    config: RegistrarVentaConfig,
   ) {
     this.#sales = sales;
     this.#clients = clients;
     this.#products = products;
     this.#movements = movements;
-    this.#stockEnabled = config?.stockEnabled ?? true;
+    this.#cajaTurnos = cajaTurnos;
+    this.#stockEnabled = config.stockEnabled ?? true;
+    this.#userId = config.userId;
   }
 
   async execute(input: NewSale): Promise<Sale> {
     const parsed = NewSaleSchema.parse(input);
+
+    // ── Caja gate (always active) ──
+    if (!this.#userId) {
+      throw new CajaNoAbiertaError();
+    }
+    const turno = await this.#cajaTurnos.findOpenByUser(this.#userId);
+    if (!turno) throw new CajaNoAbiertaError();
+    const cajaTurnoId: CajaTurnoId = turno.id;
 
     const producto = await this.#products.findById(parsed.productoId);
     if (!producto) {
@@ -70,7 +87,12 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
       const d = new Date();
       return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
     })();
-    const sale = await this.#sales.create({ ...parsed, hora });
+    const sale = await this.#sales.create({
+      ...parsed,
+      hora,
+      cajaTurnoId,
+      efectivoRecibidoCentavos: parsed.efectivoRecibidoCentavos,
+    });
 
     // Business-level stock flag BEFORE product-level seguirStock
     if (this.#stockEnabled && producto.seguirStock) {

@@ -1,0 +1,43 @@
+# Demo Mode setup: fresh install → seed DB with demo data.
+#
+# Precondition: app already launched and connected to Metro
+# (via deep link or manual server selection). Handles Expo
+# dev-client modals, then taps "Modo Demo" on the wizard.
+#
+# After: app on QuickSwitch login with demo data (PIN 000000).
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss Expo dev-client welcome modal if present.
+- tapOn:
+    text: "Continue"
+    optional: true
+
+# Dismiss Expo dev menu if it appeared after Continue.
+- tapOn:
+    text: "close"
+    optional: true
+
+# Dismiss app consent modals.
+- runFlow: shared/dismiss-modals.yaml
+
+# Wait for wizard to be ready.
+- extendedWaitUntil:
+    visible: "¡Bienvenido a Cachink!"
+    timeout: 30000
+
+# Scroll to Modo Demo and tap.
+- scrollUntilVisible:
+    element:
+      id: "wizard-step1-demo-mode"
+    direction: DOWN
+    timeout: 5000
+- tapOn:
+    id: "wizard-step1-demo-mode"
+
+# Wait for demo seeding to complete and land on login screen.
+# Seeding takes ~2-3 min due to bcrypt on Hermes.
+- extendedWaitUntil:
+    visible: "Selecciona tu usuario"
+    timeout: 180000

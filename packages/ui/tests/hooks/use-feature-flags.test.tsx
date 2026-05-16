@@ -55,11 +55,11 @@ describe('useFeatureFlags', () => {
 
   it('parses flags from the business record', async () => {
     const businesses = new InMemoryBusinessesRepository(TEST_DEVICE_ID);
-    const flags = { ...DEFAULT_FEATURE_FLAGS, caja: true, merma: true };
+    const flags = { ...DEFAULT_FEATURE_FLAGS, merma: true };
     const biz = await businesses.create({
       nombre: 'Test',
       regimenFiscal: 'RIF',
-      isrTasa: 0.3,
+      isrTasa: 3000,
       businessId: BIZ,
       featureFlags: JSON.stringify(flags),
     });
@@ -70,7 +70,6 @@ describe('useFeatureFlags', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.caja).toBe(true);
       expect(result.current.merma).toBe(true);
     });
   });
@@ -88,8 +87,8 @@ describe('useFeatureFlag', () => {
     expect(result.current).toBe(true);
   });
 
-  it('returns caja as false by default', () => {
-    const { result } = renderHook(() => useFeatureFlag('caja'), {
+  it('returns merma as false by default', () => {
+    const { result } = renderHook(() => useFeatureFlag('merma'), {
       wrapper: wrapper(),
     });
     expect(result.current).toBe(false);

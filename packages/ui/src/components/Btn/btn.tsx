@@ -35,6 +35,8 @@ import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text } from '@tamagui/core';
 import { colors, radii, shadows, typography } from '../../theme';
+import { impactLight } from '../../haptics/index';
+import { Spinner } from '../Spinner/index';
 
 export type BtnVariant = 'primary' | 'dark' | 'ghost' | 'green' | 'danger' | 'soft' | 'outline';
 
@@ -71,6 +73,8 @@ export interface BtnProps {
    * in via a platform-variant when Phase 1B wires the mobile shell.
    */
   readonly ariaLabel?: string;
+  /** When true, replaces the label with a Spinner and disables interaction. */
+  readonly loading?: boolean;
   /**
    * Override the default `role="button"` — pass `'radio'` (or other
    * ARIA role) when the Btn is acting as a member of a `<radiogroup>`
@@ -167,18 +171,26 @@ interface ResolvedBtn {
   readonly v: VariantStyle;
   readonly s: { height: number; paddingX: number; fontSize: number };
   readonly disabled: boolean;
+  readonly loading: boolean;
   readonly handlePress: (() => void) | undefined;
 }
 
 function resolve(props: BtnProps): ResolvedBtn {
   const variant = props.variant ?? 'primary';
   const size = props.size ?? 'md';
-  const disabled = props.disabled ?? false;
+  const loading = props.loading ?? false;
+  const disabled = (props.disabled ?? false) || loading;
   return {
     v: VARIANTS[variant],
     s: SIZES[size],
     disabled,
-    handlePress: disabled ? undefined : props.onPress,
+    loading,
+    handlePress: disabled
+      ? undefined
+      : () => {
+          impactLight();
+          props.onPress?.();
+        },
   };
 }
 
@@ -222,7 +234,7 @@ function buildBaseStyle(
  * full variant matrix and press-state preview.
  */
 export function Btn(props: BtnProps): ReactElement {
-  const { v, s, disabled, handlePress } = resolve(props);
+  const { v, s, disabled, loading, handlePress } = resolve(props);
   const baseStyle = buildBaseStyle(v, s, disabled, props.fullWidth === true);
   // We forward the modern ARIA props (`aria-disabled`,
   // `aria-checked`, `role`) directly. react-native-web's Pressable
@@ -244,9 +256,15 @@ export function Btn(props: BtnProps): ReactElement {
       aria-checked={props.role === 'radio' ? props.ariaChecked === true : undefined}
       style={({ pressed }) => [baseStyle, pressed && !disabled ? PRESSED_STYLE : null]}
     >
-      {props.icon}
-      {props.children !== undefined && (
-        <BtnLabel text={props.children} color={v.color} fontSize={s.fontSize} />
+      {loading ? (
+        <Spinner size="sm" />
+      ) : (
+        <>
+          {props.icon}
+          {props.children !== undefined && (
+            <BtnLabel text={props.children} color={v.color} fontSize={s.fontSize} />
+          )}
+        </>
       )}
     </Pressable>
   );

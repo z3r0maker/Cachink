@@ -8,10 +8,10 @@ import { useBusinessFormState, parseForm } from '../../src/screens/BusinessForm/
 import type { IsrDefaults } from '@cachink/domain';
 
 const mockIsrDefaults: IsrDefaults = {
-  RIF: 0.02,
-  RESICO: 0.0125,
-  Asalariados: 0.25,
-  Otro: 0.30,
+  RIF: 200,
+  RESICO: 125,
+  Asalariados: 2500,
+  Otro: 3000,
 };
 
 describe('useBusinessFormState with ISR defaults', () => {
@@ -26,7 +26,7 @@ describe('useBusinessFormState with ISR defaults', () => {
   it('uses explicit defaults.isrTasa over ISR defaults', () => {
     const { result } = renderHook(() =>
       useBusinessFormState({
-        defaults: { isrTasa: 0.15, regimenFiscal: 'RIF' },
+        defaults: { isrTasa: 1500, regimenFiscal: 'RIF' },
         isrDefaults: mockIsrDefaults,
       }),
     );
@@ -101,7 +101,7 @@ describe('parseForm', () => {
     const result = parseForm('Test Biz', 'RIF', '2', 'Required');
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.payload.isrTasa).toBeCloseTo(0.02, 10);
+      expect(result.payload.isrTasa).toBe(200);
     }
   });
 

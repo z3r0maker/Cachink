@@ -61,6 +61,8 @@ export class DrizzleCajaTurnosRepository
       totalQr: 0n,
       totalCredito: 0n,
       egresoAutoId: null as string | null,
+      conteoCentavos: null as bigint | null,
+      conteoAt: null as string | null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -140,6 +142,7 @@ export class DrizzleCajaTurnosRepository
       'cierreAt', 'montoCierreCentavos', 'efectivoEsperadoCentavos',
       'diferenciaCentavos', 'discrepancyReason', 'explicacion',
       'totalTransferencias', 'totalTarjeta', 'totalQr', 'totalCredito', 'egresoAutoId',
+      'conteoCentavos', 'conteoAt',
     ];
     for (const k of keys) {
       if (patch[k] !== undefined) set[k] = patch[k];
@@ -169,6 +172,8 @@ export class DrizzleCajaTurnosRepository
       totalQr: row.totalQr,
       totalCredito: row.totalCredito,
       egresoAutoId: (row.egresoAutoId ?? null) as ExpenseId | null,
+      conteoCentavos: row.conteoCentavos ?? null,
+      conteoAt: (row.conteoAt ?? null) as IsoTimestamp | null,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,

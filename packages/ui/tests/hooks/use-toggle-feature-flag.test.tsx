@@ -45,7 +45,7 @@ describe('useToggleFeatureFlag', () => {
     const biz = await businesses.create({
       nombre: 'Test',
       regimenFiscal: 'RIF',
-      isrTasa: 0.3,
+      isrTasa: 3000,
       businessId: BIZ,
       featureFlags: JSON.stringify(DEFAULT_FEATURE_FLAGS),
     });
@@ -58,11 +58,11 @@ describe('useToggleFeatureFlag', () => {
     });
 
     await act(async () => {
-      result.current.mutate({ key: 'caja', newValue: true });
+      result.current.mutate({ key: 'ventasCredito', newValue: true });
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.caja).toBe(true);
+    expect(result.current.data?.ventasCredito).toBe(true);
     // Other flags should remain at defaults
     expect(result.current.data?.stock).toBe(true);
   });

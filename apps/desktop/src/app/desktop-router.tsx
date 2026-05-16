@@ -62,6 +62,7 @@ import { OtrosRoute } from './routes/otros-route';
 import { MermaRoute } from './routes/merma-route';
 import { FuncionesRoute } from './routes/funciones-route';
 import { UsuariosRoute } from './routes/usuarios-route';
+import { EmpleadosRoute } from './routes/empleados-route';
 import { CajaRoute } from './routes/caja-route';
 import { ConversionRoute } from './routes/conversion-route';
 
@@ -133,6 +134,7 @@ const PREFIX_ROUTES: ReadonlyArray<{ prefix: string; element: ReactElement }> = 
   { prefix: '/clientes',       element: <ClientesRoute /> },
   { prefix: '/cuentas-por-cobrar', element: <CuentasPorCobrarRoute /> },
   { prefix: '/estados',        element: <EstadosRoute /> },
+  { prefix: '/empleados',      element: <EmpleadosRoute /> },
   { prefix: '/settings',       element: <SettingsRoute /> },
   { prefix: '/otros',          element: <OtrosRoute /> },
   { prefix: '/funciones',      element: <FuncionesRoute /> },

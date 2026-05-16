@@ -26,3 +26,13 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "consent-modal-no"
     optional: true
+
+# Expo dev-client modals (dev builds only).
+# The welcome modal ("Continue") and dev menu ("close") can
+# appear on any launchApp in development builds.
+- tapOn:
+    text: "Continue"
+    optional: true
+- tapOn:
+    text: "close"
+    optional: true

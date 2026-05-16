@@ -28,32 +28,33 @@ export function CorteDeDiaCard(props: CorteDeDiaCardProps): ReactElement | null 
     <Card
       testID={props.testID ?? 'corte-de-dia-card'}
       variant="yellow"
-      elevation="raised"
-      padding="md"
+      elevation="none"
+      padding="sm"
       fullWidth
     >
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={20}
-        color={colors.black}
-        letterSpacing={typography.letterSpacing.tighter}
-      >
-        {t('corteDeDia.cardTitle')}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.ink}
-        marginTop={6}
-        marginBottom={12}
-      >
-        {t('corteDeDia.cardBody')}
-      </Text>
-      <View flexDirection="row" justifyContent="flex-end">
-        <Btn variant="dark" onPress={props.onOpen} testID="corte-de-dia-cta">
-          {t('corteDeDia.cta')}
+      <View flexDirection="row" justifyContent="space-between" alignItems="center" gap={12}>
+        <View flex={1}>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.black}
+            fontSize={16}
+            color={colors.black}
+            letterSpacing={typography.letterSpacing.tighter}
+          >
+            {t('corteDeDia.cardTitle')}
+          </Text>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.medium}
+            fontSize={12}
+            color={colors.ink}
+            marginTop={2}
+          >
+            {t('corteDeDia.cardBody')}
+          </Text>
+        </View>
+        <Btn variant="dark" size="sm" onPress={props.onOpen} testID="corte-de-dia-cta">
+          {t('corteDeDia.ctaShort')}
         </Btn>
       </View>
     </Card>
