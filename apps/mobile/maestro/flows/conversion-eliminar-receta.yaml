@@ -8,6 +8,7 @@
 #   3. Recipe is removed from the list
 #
 # Precondition: conversion-crear-receta.yaml has been run.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

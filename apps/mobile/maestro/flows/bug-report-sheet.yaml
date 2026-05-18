@@ -5,6 +5,7 @@
 # The BugReportSheet is a bottom sheet triggered from the feedback
 # action in Settings Sistema. It auto-attaches audit events + errors
 # and exports as JSON for user-to-developer bug reporting.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
   - settings

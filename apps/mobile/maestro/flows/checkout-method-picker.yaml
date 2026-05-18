@@ -1,5 +1,6 @@
 # Verify the multi-step checkout flow renders the method picker.
 # Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 tags:
   - ventas

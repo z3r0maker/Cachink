@@ -13,6 +13,7 @@
 #   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
 #   maestro test apps/mobile/maestro/flows/venta-credito.yaml
 #   maestro test apps/mobile/maestro/flows/director-home-cxc-strip.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

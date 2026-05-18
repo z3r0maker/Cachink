@@ -13,6 +13,7 @@
 #
 # ⚠️  This flow DESTROYS state — run last in any chain that
 # expects the venta to still exist afterwards.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

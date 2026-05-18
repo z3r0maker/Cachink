@@ -6,6 +6,7 @@
 #   3. Tap product → cart → checkout → confirm sheet → submit
 #
 # Precondition: demo mode seeded (products + merma flag ON).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

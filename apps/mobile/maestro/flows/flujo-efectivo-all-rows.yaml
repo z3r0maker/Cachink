@@ -20,6 +20,7 @@
 #   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
 #   maestro test apps/mobile/maestro/flows/flujo-efectivo-all-rows.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

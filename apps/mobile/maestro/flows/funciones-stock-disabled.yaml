@@ -8,6 +8,7 @@
 #   2. Products list doesn't show stock column
 #
 # Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

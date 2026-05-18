@@ -4,6 +4,7 @@
 #
 # Precondition: at least one producto exists (created via the flow
 # from P1C-M5, or seeded in e2e-seed.json).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -1,5 +1,6 @@
 # Director Home → "Ver ventas" hoy card → lands on Ventas tab
 # (P1C-M10-T02, S4-C8).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

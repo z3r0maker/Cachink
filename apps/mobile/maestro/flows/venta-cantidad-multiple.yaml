@@ -5,6 +5,7 @@
 #   2. Checkout → sale recorded with qty=3
 #
 # Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -52,4 +53,4 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
-    timeout: 10000
+    timeout: 5000

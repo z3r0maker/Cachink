@@ -11,6 +11,7 @@
 #
 # Parses the QR from the host via paste-URL fallback — Maestro doesn't
 # drive the camera, so the scan button is a separate manual verification.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 env:
   LAN_URL: ${MAESTRO_LAN_URL}

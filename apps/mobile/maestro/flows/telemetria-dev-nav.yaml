@@ -4,6 +4,7 @@
 #
 # NOTE: This flow only works in development builds (__DEV__ === true).
 # The telemetria card is hidden in production builds.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
   - otros

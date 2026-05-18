@@ -19,6 +19,7 @@
 #   7. Settings hub nav items
 #
 # Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -1,5 +1,6 @@
 # a11y smoke — navigates Director Home and confirms every accessibilityLabel
 # / testID is rendered (P1C-M12-T04, S4-C22).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

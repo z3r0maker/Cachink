@@ -5,6 +5,7 @@
 #
 # Precondition: wizard-local-standalone.yaml + at least one venta/egreso
 # exist in the current business.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -1,4 +1,5 @@
 # Debug flow: full auth + verify home screen
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -25,4 +26,4 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "tab-ventas"
-    timeout: 10000
+    timeout: 5000

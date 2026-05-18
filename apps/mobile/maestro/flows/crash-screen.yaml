@@ -1,6 +1,7 @@
 # Trigger a render-time throw via a dev-only test hook and assert the
 # error-boundary card renders with the "Volver al inicio" Btn
 # (P1C-M12-T01, S4-C22).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp:

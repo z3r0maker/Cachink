@@ -11,6 +11,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

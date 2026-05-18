@@ -14,6 +14,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/usuario-crear.yaml
 #   maestro test apps/mobile/maestro/flows/usuario-eliminar.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

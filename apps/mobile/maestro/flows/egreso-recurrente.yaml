@@ -5,6 +5,7 @@
 # The flow relies on the app clock being set to a date >= proximoDisparo
 # of the just-created template — run with MAESTRO_CLOCK_OFFSET if your
 # harness supports it, or simulate by manually advancing the system clock.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -8,6 +8,7 @@
 #   2. Toggle ventasCredito OFF → Crédito no longer available
 #
 # Precondition: demo mode seeded (products + users + clients exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

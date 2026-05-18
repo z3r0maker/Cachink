@@ -17,6 +17,7 @@
 #   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-gasto-full-form.yaml
 #   maestro test apps/mobile/maestro/flows/egresos-por-categoria-donut.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

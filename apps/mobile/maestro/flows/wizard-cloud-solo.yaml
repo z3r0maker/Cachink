@@ -9,6 +9,7 @@
 #       apps/mobile/maestro/flows/wizard-cloud-solo.yaml
 #
 # Requires the same env vars as cloud-signup-signin.yaml.
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 env:
   EMAIL: ${MAESTRO_CLOUD_EMAIL_A}

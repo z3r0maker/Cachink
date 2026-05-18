@@ -1,5 +1,6 @@
 # Create a Nómina egreso with a freshly-created empleado.
 # Covers P1C-M4-T02 (Nómina tab + NuevoEmpleadoModal empty-state path).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

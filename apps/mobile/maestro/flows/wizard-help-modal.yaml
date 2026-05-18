@@ -9,6 +9,7 @@
 # Precondition: fresh install. Run via wrapper:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-help-modal.yaml
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp

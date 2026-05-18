@@ -17,6 +17,7 @@
 #
 # ⚠️  This flow DESTROYS state — run last in any chain that
 # expects the product to still exist afterwards.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

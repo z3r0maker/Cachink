@@ -9,6 +9,7 @@
 # Precondition: fresh install. Run via the wrapper script:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-business-full-form.yaml
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -42,7 +43,7 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "business-nombre"
-    timeout: 10000
+    timeout: 5000
 
 # Verify the full form content is rendered.
 - assertVisible:

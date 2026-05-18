@@ -9,6 +9,7 @@
 #
 # This flow is essentially the same as wizard-local-standalone.yaml
 # but is kept separate for targeted regression of the setup gate.
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -42,7 +43,7 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "business-nombre"
-    timeout: 10000
+    timeout: 5000
 - tapOn:
     id: "business-nombre"
 - inputText: "Negocio Setup Test"

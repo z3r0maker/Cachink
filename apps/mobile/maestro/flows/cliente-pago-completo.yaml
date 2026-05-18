@@ -1,6 +1,7 @@
 # Continue the parcial → record the remainder → verify estadoPago
 # flips to 'pagado' and the CxC saldo goes to zero.
 # Covers P1C-M6-T04 (full payment path) + M6-T05 (integration E2E).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp
