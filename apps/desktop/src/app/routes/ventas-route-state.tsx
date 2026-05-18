@@ -74,46 +74,77 @@ function useCheckoutSubmit(
   );
 }
 
-export function useVentasRouteState(): VentasRouteState {
-  const [fecha] = useState<IsoDate>(todayIso);
-  const [search, setSearch] = useState('');
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [selected, setSelected] = useState<Sale | null>(null);
-
-  const ventasQ = useVentasByDate(fecha);
-  const productosQ = useProductosParaVenta();
-  const stockQ = useProductosConStock();
-  const business = useCurrentBusiness().data ?? null;
-  const registrar = useRegistrarVenta();
-  const eliminar = useEliminarVenta();
-  const handleShare = useShareComprobante(selected, business, () => setSelected(null));
-  const stockMap = useStockMap(stockQ);
-  const { state: cart, dispatch } = useCart();
-
-  const cartQuantities = useMemo(() => {
+function useCartQuantities(items: ReturnType<typeof useCart>['state']['items']) {
+  return useMemo(() => {
     const m = new Map<string, number>();
-    for (const item of cart.items) m.set(item.productoId, item.cantidad);
+    for (const item of items) m.set(item.productoId, item.cantidad);
     return m;
-  }, [cart.items]);
+  }, [items]);
+}
 
-  const handleAddToCart = useCallback(
+function useAddToCart(
+  dispatch: ReturnType<typeof useCart>['dispatch'],
+  stockMap: ReturnType<typeof useStockMap>,
+) {
+  return useCallback(
     (p: Product) => {
       impactLight();
       dispatch({ type: 'add', product: p, stock: stockMap.get(p.id) });
     },
     [dispatch, stockMap],
   );
+}
 
+function useVentasQueries(fecha: IsoDate) {
+  const ventasQ = useVentasByDate(fecha);
+  const productosQ = useProductosParaVenta();
+  const stockQ = useProductosConStock();
+  const business = useCurrentBusiness().data ?? null;
+  const registrar = useRegistrarVenta();
+  const eliminar = useEliminarVenta();
+  const stockMap = useStockMap(stockQ);
+  return { ventasQ, productosQ, stockMap, business, registrar, eliminar };
+}
+
+export function useVentasRouteState(): VentasRouteState {
+  const [fecha] = useState<IsoDate>(todayIso);
+  const [search, setSearch] = useState('');
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [selected, setSelected] = useState<Sale | null>(null);
+  const q = useVentasQueries(fecha);
+  const handleShare = useShareComprobante(selected, q.business, () => setSelected(null));
+  const { state: cart, dispatch } = useCart();
+  const cartQuantities = useCartQuantities(cart.items);
+  const handleAddToCart = useAddToCart(dispatch, q.stockMap);
   const handleCheckoutSubmit = useCheckoutSubmit(
-    business, productosQ, cart, fecha, registrar, dispatch, setCheckoutOpen,
+    q.business,
+    q.productosQ,
+    cart,
+    fecha,
+    q.registrar,
+    dispatch,
+    setCheckoutOpen,
   );
 
   return {
-    productosQ, stockMap, cart, dispatch,
-    search, setSearch, checkoutOpen, setCheckoutOpen,
-    selected, setSelected, cartQuantities, handleAddToCart,
-    handleCheckoutSubmit, ventas: ventasQ.data ?? [],
-    registrar, eliminar, business, handleShare,
+    productosQ: q.productosQ,
+    stockMap: q.stockMap,
+    cart,
+    dispatch,
+    search,
+    setSearch,
+    checkoutOpen,
+    setCheckoutOpen,
+    selected,
+    setSelected,
+    cartQuantities,
+    handleAddToCart,
+    handleCheckoutSubmit,
+    ventas: q.ventasQ.data ?? [],
+    registrar: q.registrar,
+    eliminar: q.eliminar,
+    business: q.business,
+    handleShare,
   };
 }
 

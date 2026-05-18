@@ -1,21 +1,16 @@
-/**
- * RecoveryScreen — 3-layer PIN recovery.
- *
- * 1. Recovery password → resets PIN
- * 2. Email info display (future: email reset flow)
- * 3. Factory reset → wipe app data
- *
- * ADR-049: Password for recovery, PIN as the new credential.
- */
+/** RecoveryScreen — 3-layer PIN recovery (ADR-049). */
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { UserId } from '@cachink/domain';
-import { Btn, PasswordField } from '../../components/index';
-import { Input } from '../../components/Input/input';
-import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
+import { Btn, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import {
+  RecoveryPasswordSection,
+  RecoveryPinFields,
+  type RecoveryFormState,
+} from './recovery-form-fields';
 
 export interface RecoveryScreenProps {
   readonly userId: UserId;
@@ -31,7 +26,7 @@ export interface RecoveryScreenProps {
 
 type T = ReturnType<typeof useTranslation>['t'];
 
-function useRecoveryForm() {
+function useRecoveryForm(): RecoveryFormState {
   const [recoveryPassword, setRecoveryPassword] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
@@ -49,12 +44,7 @@ function useRecoveryForm() {
   };
 }
 
-function RecoveryActions({
-  onBack,
-  onFactoryReset,
-  factoryResetSubmitting,
-  t,
-}: {
+function RecoveryActions(props: {
   onBack: () => void;
   onFactoryReset: () => void;
   factoryResetSubmitting?: boolean;
@@ -62,69 +52,86 @@ function RecoveryActions({
 }): ReactElement {
   return (
     <View marginTop={24} gap={8}>
-      <Btn variant="ghost" onPress={onBack} fullWidth testID="recovery-back">
-        {t('recovery.back')}
+      <Btn variant="ghost" onPress={props.onBack} fullWidth testID="recovery-back">
+        {props.t('recovery.back')}
       </Btn>
       <Btn
         variant="danger"
-        onPress={onFactoryReset}
-        loading={factoryResetSubmitting}
+        onPress={props.onFactoryReset}
+        loading={props.factoryResetSubmitting}
         fullWidth
         testID="recovery-factory-reset"
       >
-        {t('recovery.factoryReset')}
+        {props.t('recovery.factoryReset')}
       </Btn>
     </View>
   );
 }
 
-function RecoveryPasswordSection({ form, t }: { form: ReturnType<typeof useRecoveryForm>; t: T }): ReactElement {
+function EmailHint({ email, t }: { email: string; t: T }): ReactElement {
   return (
-    <>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={16} color={colors.black}>
-        {t('recovery.passwordTitle')}
+    <View marginTop={16}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={13}
+        color={colors.gray600}
+        textAlign="center"
+      >
+        {t('recovery.emailHint', { email })}
       </Text>
-      <PasswordField
-        value={form.recoveryPassword} onChange={form.setRecoveryPassword}
-        label={t('recovery.password')} testID="recovery-password"
-      />
-    </>
+    </View>
   );
 }
 
-function RecoveryPinFields({ form, t }: { form: ReturnType<typeof useRecoveryForm>; t: T }): ReactElement {
-  return (
-    <>
-      <Input type="number" value={form.newPin} onChange={(v) => form.setNewPin(v.slice(0, 6))}
-        label={t('recovery.newPin')} testID="recovery-new-pin" placeholder="000000" />
-      <Input type="number" value={form.confirmPin} onChange={(v) => form.setConfirmPin(v.slice(0, 6))}
-        label={t('recovery.confirmPin')} testID="recovery-confirm-pin" placeholder="000000" />
-      {form.mismatch && <Text fontSize={12} color={colors.red}>{t('changePin.mismatch')}</Text>}
-    </>
-  );
-}
-
-function RecoveryFormCard({ props, form, t }: {
-  props: RecoveryScreenProps; form: ReturnType<typeof useRecoveryForm>; t: T;
+function SubmitButton(props: {
+  onPress: () => void;
+  valid: boolean;
+  submitting: boolean;
+  t: T;
 }): ReactElement {
+  return (
+    <Btn
+      variant="dark"
+      onPress={props.onPress}
+      fullWidth
+      disabled={!props.valid}
+      loading={props.submitting}
+      testID="recovery-submit"
+    >
+      {props.t('recovery.submit')}
+    </Btn>
+  );
+}
+
+function RecoveryFormCard(props: {
+  screenProps: RecoveryScreenProps;
+  form: RecoveryFormState;
+  t: T;
+}): ReactElement {
+  const { screenProps, form, t } = props;
+  const handleSubmit = () => screenProps.onRecoverWithPassword(form.recoveryPassword, form.newPin);
   return (
     <View width="100%" maxWidth={320} gap={12}>
       <RecoveryPasswordSection form={form} t={t} />
       <RecoveryPinFields form={form} t={t} />
-      {props.error && <Text fontSize={12} color={colors.red}>{props.error}</Text>}
-      <Btn variant="dark" onPress={() => props.onRecoverWithPassword(form.recoveryPassword, form.newPin)}
-        fullWidth disabled={!form.valid} loading={props.submitting} testID="recovery-submit">
-        {t('recovery.submit')}
-      </Btn>
-      {props.maskedEmail && (
-        <View marginTop={16}>
-          <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600} textAlign="center">
-            {t('recovery.emailHint', { email: props.maskedEmail })}
-          </Text>
-        </View>
+      {screenProps.error && (
+        <Text fontSize={12} color={colors.red}>
+          {screenProps.error}
+        </Text>
       )}
-      <RecoveryActions onBack={props.onBack} onFactoryReset={props.onFactoryReset}
-        factoryResetSubmitting={props.factoryResetSubmitting} t={t} />
+      <SubmitButton
+        onPress={handleSubmit}
+        valid={form.valid}
+        submitting={screenProps.submitting}
+        t={t}
+      />
+      {screenProps.maskedEmail && <EmailHint email={screenProps.maskedEmail} t={t} />}
+      <RecoveryActions
+        onBack={screenProps.onBack}
+        onFactoryReset={screenProps.onFactoryReset}
+        factoryResetSubmitting={screenProps.factoryResetSubmitting}
+        t={t}
+      />
     </View>
   );
 }
@@ -136,10 +143,15 @@ export function RecoveryScreen(props: RecoveryScreenProps): ReactElement {
     <FloatingCoinsBackground testID={props.testID ?? 'recovery-screen'}>
       <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={16}>
         <SafeAreaSpacer />
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={28} color={colors.black}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black}
+          fontSize={28}
+          color={colors.black}
+        >
           {t('recovery.title')}
         </Text>
-        <RecoveryFormCard props={props} form={form} t={t} />
+        <RecoveryFormCard screenProps={props} form={form} t={t} />
       </View>
     </FloatingCoinsBackground>
   );

@@ -30,11 +30,7 @@ const DEFAULT_MAX = 99;
 const ITEM_HEIGHT = 40;
 const VISIBLE_REST = 2;
 
-function buildOptions(
-  min: number,
-  max: number,
-  labels: readonly string[] | undefined,
-): string[] {
+function buildOptions(min: number, max: number, labels: readonly string[] | undefined): string[] {
   if (labels) return [...labels];
   const result: string[] = [];
   for (let i = min; i <= max; i++) result.push(String(i));
@@ -69,8 +65,35 @@ function FieldLabel({ label }: { label: string }): ReactElement {
   );
 }
 
-function WheelContainer({ selectedIndex, options, onChange }: {
-  selectedIndex: number; options: string[]; onChange: (i: number) => void;
+const INDICATOR_STYLE = {
+  borderTopWidth: 2,
+  borderBottomWidth: 2,
+  borderColor: colors.black,
+  backgroundColor: colors.offwhite,
+};
+
+const ITEM_TEXT_STYLE = {
+  fontFamily: typography.fontFamily,
+  fontWeight: String(typography.weights.black) as unknown as TextStyleWeight,
+  fontSize: 20,
+  color: colors.black,
+};
+
+function opacityFn(x: number): number {
+  return 1 / (1 + Math.abs(x) * 0.6);
+}
+function scaleFn(x: number): number {
+  return 1 - Math.min(0.3, Math.abs(x) * 0.12);
+}
+
+function WheelContainer({
+  selectedIndex,
+  options,
+  onChange,
+}: {
+  selectedIndex: number;
+  options: string[];
+  onChange: (i: number) => void;
 }): ReactElement {
   return (
     <View
@@ -88,20 +111,10 @@ function WheelContainer({ selectedIndex, options, onChange }: {
         itemHeight={ITEM_HEIGHT}
         visibleRest={VISIBLE_REST}
         containerStyle={{ backgroundColor: colors.white }}
-        selectedIndicatorStyle={{
-          borderTopWidth: 2,
-          borderBottomWidth: 2,
-          borderColor: colors.black,
-          backgroundColor: colors.offwhite,
-        }}
-        itemTextStyle={{
-          fontFamily: typography.fontFamily,
-          fontWeight: String(typography.weights.black) as unknown as TextStyleWeight,
-          fontSize: 20,
-          color: colors.black,
-        }}
-        opacityFunction={(x: number) => 1 / (1 + Math.abs(x) * 0.6)}
-        scaleFunction={(x: number) => 1 - Math.min(0.3, Math.abs(x) * 0.12)}
+        selectedIndicatorStyle={INDICATOR_STYLE}
+        itemTextStyle={ITEM_TEXT_STYLE}
+        opacityFunction={opacityFn}
+        scaleFunction={scaleFn}
       />
     </View>
   );
@@ -137,4 +150,15 @@ export function WheelQuantityPicker(props: WheelQuantityPickerProps): ReactEleme
  * which is `string | number`. The inline cast avoids a TS error when
  * passing the numeric weight from our tokens as a string.
  */
-type TextStyleWeight = 'normal' | 'bold' | '100' | '200' | '300' | '400' | '500' | '600' | '700' | '800' | '900';
+type TextStyleWeight =
+  | 'normal'
+  | 'bold'
+  | '100'
+  | '200'
+  | '300'
+  | '400'
+  | '500'
+  | '600'
+  | '700'
+  | '800'
+  | '900';

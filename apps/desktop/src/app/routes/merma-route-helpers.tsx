@@ -58,6 +58,24 @@ function useMermaCheckout(
   );
 }
 
+function useCartQuantities(items: ReturnType<typeof useCart>['state']['items']) {
+  return useMemo(() => {
+    const m = new Map<string, number>();
+    for (const item of items) m.set(item.productoId, item.cantidad);
+    return m;
+  }, [items]);
+}
+
+function useAddToCart(dispatch: ReturnType<typeof useCart>['dispatch']) {
+  return useCallback(
+    (p: Product) => {
+      impactLight();
+      dispatch({ type: 'add', product: p });
+    },
+    [dispatch],
+  );
+}
+
 export function useMermaState() {
   const productosQ = useProductos();
   const stockQ = useProductosConStock();
@@ -67,29 +85,29 @@ export function useMermaState() {
   const { state: cart, dispatch } = useCart();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [search, setSearch] = useState('');
-
-  const cartQuantities = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const item of cart.items) m.set(item.productoId, item.cantidad);
-    return m;
-  }, [cart.items]);
-
-  const handleAddToCart = useCallback(
-    (p: Product) => {
-      impactLight();
-      dispatch({ type: 'add', product: p });
-    },
-    [dispatch],
-  );
-
+  const cartQuantities = useCartQuantities(cart.items);
+  const handleAddToCart = useAddToCart(dispatch);
   const handleCheckoutSubmit = useMermaCheckout(
-    businessId, cart, registrar, dispatch, setCheckoutOpen,
+    businessId,
+    cart,
+    registrar,
+    dispatch,
+    setCheckoutOpen,
   );
 
   return {
-    productosQ, stockMap, cart, dispatch,
-    checkoutOpen, setCheckoutOpen, search, setSearch,
-    cartQuantities, handleAddToCart, handleCheckoutSubmit, registrar,
+    productosQ,
+    stockMap,
+    cart,
+    dispatch,
+    checkoutOpen,
+    setCheckoutOpen,
+    search,
+    setSearch,
+    cartQuantities,
+    handleAddToCart,
+    handleCheckoutSubmit,
+    registrar,
   };
 }
 

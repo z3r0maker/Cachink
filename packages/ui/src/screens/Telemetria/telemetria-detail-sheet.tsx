@@ -27,8 +27,12 @@ function formatJson(data: unknown): string {
 function DetailRow({ label, value }: { label: string; value: string }): ReactElement {
   return (
     <View flexDirection="row" paddingVertical="$1">
-      <Text fontSize="$2" color="$colorSubtle" width={110}>{label}:</Text>
-      <Text fontSize="$2" flex={1} fontFamily="$mono">{value}</Text>
+      <Text fontSize="$2" color="$colorSubtle" width={110}>
+        {label}:
+      </Text>
+      <Text fontSize="$2" flex={1} fontFamily="$mono">
+        {value}
+      </Text>
     </View>
   );
 }
@@ -36,9 +40,13 @@ function DetailRow({ label, value }: { label: string; value: string }): ReactEle
 function CodeBlock({ title, content }: { title: string; content: string }): ReactElement {
   return (
     <View marginTop="$2">
-      <Text fontSize="$2" fontWeight="600" marginBottom="$1">{title}:</Text>
+      <Text fontSize="$2" fontWeight="600" marginBottom="$1">
+        {title}:
+      </Text>
       <View backgroundColor="$backgroundStrong" borderRadius="$2" padding="$2">
-        <Text fontSize="$1" fontFamily="$mono" numberOfLines={20}>{content}</Text>
+        <Text fontSize="$1" fontFamily="$mono" numberOfLines={20}>
+          {content}
+        </Text>
       </View>
     </View>
   );
@@ -70,7 +78,9 @@ function AuditExtras({ entry }: { entry: TimelineEntry & { type: 'audit' } }): R
       {entry.metadata && <CodeBlock title="Metadata" content={formatJson(entry.metadata)} />}
       {entry.status === 'error' && entry.errorMessage && (
         <View marginTop="$2">
-          <Text fontSize="$2" color="$red10">{entry.errorCode}: {entry.errorMessage}</Text>
+          <Text fontSize="$2" color="$red10">
+            {entry.errorCode}: {entry.errorMessage}
+          </Text>
         </View>
       )}
     </>
@@ -102,21 +112,68 @@ function DetailContent({ entry }: { entry: TimelineEntry }): ReactElement {
   );
 }
 
-export function TelemetriaDetailSheet({ entry, onClose, onCopy }: TelemetriaDetailSheetProps): ReactElement | null {
+function SheetHeader({ onClose }: { onClose: () => void }): ReactElement {
+  return (
+    <View
+      flexDirection="row"
+      justifyContent="space-between"
+      padding="$3"
+      borderBottomWidth={1}
+      borderBottomColor="$borderColor"
+    >
+      <Text fontSize="$4" fontWeight="700">
+        Detalle de Evento
+      </Text>
+      <Btn size="$2" variant="ghost" onPress={onClose}>
+        X
+      </Btn>
+    </View>
+  );
+}
+
+function SheetFooter(props: { onCopy: () => void; onClose: () => void }): ReactElement {
+  return (
+    <View
+      flexDirection="row"
+      padding="$3"
+      gap="$2"
+      borderTopWidth={1}
+      borderTopColor="$borderColor"
+    >
+      <Btn flex={1} variant="outlined" onPress={props.onCopy}>
+        Copiar JSON
+      </Btn>
+      <Btn flex={1} variant="outlined" onPress={props.onClose}>
+        Cerrar
+      </Btn>
+    </View>
+  );
+}
+
+export function TelemetriaDetailSheet({
+  entry,
+  onClose,
+  onCopy,
+}: TelemetriaDetailSheetProps): ReactElement | null {
   if (!entry) return null;
   return (
-    <View position="absolute" bottom={0} left={0} right={0} backgroundColor="$background"
-      borderTopLeftRadius="$4" borderTopRightRadius="$4" maxHeight="70%"
-      shadowColor="black" shadowOpacity={0.2} shadowRadius={10} elevation={10}>
-      <View flexDirection="row" justifyContent="space-between" padding="$3" borderBottomWidth={1} borderBottomColor="$borderColor">
-        <Text fontSize="$4" fontWeight="700">Detalle de Evento</Text>
-        <Btn size="$2" variant="ghost" onPress={onClose}>X</Btn>
-      </View>
+    <View
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      backgroundColor="$background"
+      borderTopLeftRadius="$4"
+      borderTopRightRadius="$4"
+      maxHeight="70%"
+      shadowColor="black"
+      shadowOpacity={0.2}
+      shadowRadius={10}
+      elevation={10}
+    >
+      <SheetHeader onClose={onClose} />
       <DetailContent entry={entry} />
-      <View flexDirection="row" padding="$3" gap="$2" borderTopWidth={1} borderTopColor="$borderColor">
-        <Btn flex={1} variant="outlined" onPress={() => onCopy(formatJson(entry))}>Copiar JSON</Btn>
-        <Btn flex={1} variant="outlined" onPress={onClose}>Cerrar</Btn>
-      </View>
+      <SheetFooter onCopy={() => onCopy(formatJson(entry))} onClose={onClose} />
     </View>
   );
 }

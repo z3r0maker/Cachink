@@ -19,9 +19,8 @@ import {
   useStockMap,
 } from '../../hooks/index';
 import { RecetaList } from './receta-list';
-import { NuevaRecetaModal } from './nueva-receta-modal';
-import { ConvertirSheet } from './convertir-sheet';
 import { ConversionHistorial } from './conversion-historial';
+import { ConversionOverlays } from './conversion-overlays';
 
 export type ConversionSubTab = 'recetas' | 'historial';
 
@@ -58,31 +57,46 @@ function useConversionData() {
   const stockMap = useStockMap(stockQ);
   const mps = useMemo(() => filterMPs(productos), [productos]);
   const ventas = useMemo(() => filterVenta(productos), [productos]);
-  return { recetasQ, conversionesQ, crearReceta, eliminarReceta, ejecutar, productMap, stockMap, mps, ventas };
+  return {
+    recetasQ,
+    conversionesQ,
+    crearReceta,
+    eliminarReceta,
+    ejecutar,
+    productMap,
+    stockMap,
+    mps,
+    ventas,
+  };
 }
 
-function RecetasTab({ data, onOpenModal, onConvertir }: {
+function RecetasTab({
+  data,
+  onOpenModal,
+  onConvertir,
+}: {
   data: ReturnType<typeof useConversionData>;
   onOpenModal: () => void;
   onConvertir: (r: ConversionReceta) => void;
 }): ReactElement {
   const { t } = useTranslation();
   const canCreate = data.mps.length > 0 && data.ventas.length > 0;
+  const actionContent = canCreate ? (
+    <Btn variant="primary" onPress={onOpenModal} fullWidth testID="conversion-nueva-receta-btn">
+      {t('conversion.nuevaReceta')}
+    </Btn>
+  ) : (
+    <EmptyState
+      icon="package"
+      title={t('conversion.noProductsTitle')}
+      description={t('conversion.noProductsHint')}
+      testID="conversion-no-products"
+    />
+  );
   return (
     <>
       <View paddingHorizontal={16} paddingVertical={8}>
-        {canCreate ? (
-          <Btn variant="primary" onPress={onOpenModal} fullWidth testID="conversion-nueva-receta-btn">
-            {t('conversion.nuevaReceta')}
-          </Btn>
-        ) : (
-          <EmptyState
-            icon="package"
-            title={t('conversion.noProductsTitle')}
-            description={t('conversion.noProductsHint')}
-            testID="conversion-no-products"
-          />
-        )}
+        {actionContent}
       </View>
       <RecetaList
         recetas={data.recetasQ.data ?? []}
@@ -94,36 +108,48 @@ function RecetasTab({ data, onOpenModal, onConvertir }: {
   );
 }
 
-function ConversionOverlays({ data, recetaModalOpen, setRecetaModalOpen, convertir, setConvertir }: {
+function TabContent({
+  tab,
+  data,
+  onOpenModal,
+  onConvertir,
+}: {
+  tab: ConversionSubTab;
   data: ReturnType<typeof useConversionData>;
-  recetaModalOpen: boolean; setRecetaModalOpen: (v: boolean) => void;
-  convertir: ConversionReceta | null; setConvertir: (v: ConversionReceta | null) => void;
+  onOpenModal: () => void;
+  onConvertir: (r: ConversionReceta) => void;
 }): ReactElement {
+  if (tab === 'recetas')
+    return <RecetasTab data={data} onOpenModal={onOpenModal} onConvertir={onConvertir} />;
   return (
-    <>
-      <NuevaRecetaModal
-        open={recetaModalOpen}
-        onClose={() => setRecetaModalOpen(false)}
-        onSubmit={(input) => data.crearReceta.mutate(input, { onSuccess: () => setRecetaModalOpen(false) })}
-        submitting={data.crearReceta.isPending}
-        materiasPrimas={data.mps}
-        productosVenta={data.ventas}
+    <ConversionHistorial conversiones={data.conversionesQ.data ?? []} products={data.productMap} />
+  );
+}
+
+function ConversionTabBar({
+  tab,
+  setTab,
+}: {
+  tab: ConversionSubTab;
+  setTab: (v: ConversionSubTab) => void;
+}): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View paddingHorizontal={16} paddingTop={8} paddingBottom={4}>
+      <SegmentedToggle
+        options={[
+          { key: 'recetas', label: t('conversion.tabRecetas') },
+          { key: 'historial', label: t('conversion.tabHistorial') },
+        ]}
+        value={tab}
+        onChange={(k) => setTab(k as ConversionSubTab)}
+        testID="conversion-tab-toggle"
       />
-      <ConvertirSheet
-        open={convertir !== null} onClose={() => setConvertir(null)} receta={convertir}
-        products={data.productMap} stockMap={data.stockMap}
-        onConfirm={(mult) => {
-          if (!convertir) return;
-          data.ejecutar.mutate({ recetaId: convertir.id, multiplicador: mult }, { onSuccess: () => setConvertir(null) });
-        }}
-        submitting={data.ejecutar.isPending}
-      />
-    </>
+    </View>
   );
 }
 
 export function ConversionScreen(props: ConversionScreenProps): ReactElement {
-  const { t } = useTranslation();
   const [tab, setTab] = useState<ConversionSubTab>('recetas');
   const [recetaModalOpen, setRecetaModalOpen] = useState(false);
   const [convertir, setConvertir] = useState<ConversionReceta | null>(null);
@@ -131,14 +157,25 @@ export function ConversionScreen(props: ConversionScreenProps): ReactElement {
 
   return (
     <View flex={1} testID={props.testID ?? 'conversion-screen'}>
-      <View paddingHorizontal={16} paddingTop={8} paddingBottom={4}>
-        <SegmentedToggle
-          options={[{ key: 'recetas', label: t('conversion.tabRecetas') }, { key: 'historial', label: t('conversion.tabHistorial') }]}
-          value={tab} onChange={(k) => setTab(k as ConversionSubTab)} testID="conversion-tab-toggle" />
-      </View>
-      {tab === 'recetas' && <RecetasTab data={data} onOpenModal={() => setRecetaModalOpen(true)} onConvertir={setConvertir} />}
-      {tab === 'historial' && <ConversionHistorial conversiones={data.conversionesQ.data ?? []} products={data.productMap} />}
-      <ConversionOverlays data={data} recetaModalOpen={recetaModalOpen} setRecetaModalOpen={setRecetaModalOpen} convertir={convertir} setConvertir={setConvertir} />
+      <ConversionTabBar tab={tab} setTab={setTab} />
+      <TabContent
+        tab={tab}
+        data={data}
+        onOpenModal={() => setRecetaModalOpen(true)}
+        onConvertir={setConvertir}
+      />
+      <ConversionOverlays
+        mps={data.mps}
+        ventas={data.ventas}
+        productMap={data.productMap}
+        stockMap={data.stockMap}
+        crearReceta={data.crearReceta}
+        ejecutar={data.ejecutar}
+        recetaModalOpen={recetaModalOpen}
+        setRecetaModalOpen={setRecetaModalOpen}
+        convertir={convertir}
+        setConvertir={setConvertir}
+      />
     </View>
   );
 }

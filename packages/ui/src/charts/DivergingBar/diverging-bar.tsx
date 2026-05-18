@@ -34,36 +34,80 @@ function buildBarGradient(value: number) {
 function buildBarData(items: readonly DivergingItem[]) {
   return items.map((item) => ({
     value: item.value,
-    itemStyle: { color: buildBarGradient(item.value), borderColor: colors.black, borderWidth: 2, borderRadius: 4 },
+    itemStyle: {
+      color: buildBarGradient(item.value),
+      borderColor: colors.black,
+      borderWidth: 2,
+      borderRadius: 4,
+    },
   }));
+}
+
+function buildDivergingTooltip() {
+  return {
+    trigger: 'axis',
+    axisPointer: { type: 'shadow' },
+    formatter: (params: Array<{ name: string; value: number }>) => {
+      const p = params[0];
+      return p ? `${p.name}: ${formatChartLabel(p.value)}` : '';
+    },
+  };
+}
+
+function buildDivergingAxes(labels: string[]) {
+  const hidden = { show: false };
+  return {
+    xAxis: {
+      type: 'value',
+      axisLine: hidden,
+      axisTick: hidden,
+      axisLabel: hidden,
+      splitLine: hidden,
+    },
+    yAxis: {
+      type: 'category',
+      data: labels,
+      axisLine: hidden,
+      axisTick: hidden,
+      axisLabel: {
+        color: colors.gray600,
+        fontSize: 11,
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        fontWeight: 500,
+      },
+    },
+  };
+}
+
+function buildDivergingSeries(items: readonly DivergingItem[]) {
+  return [
+    {
+      type: 'bar',
+      data: buildBarData(items),
+      barWidth: 28,
+      label: {
+        show: true,
+        position: 'right',
+        formatter: (p: { value: number }) => formatChartLabel(p.value),
+        fontWeight: 700,
+        fontSize: 11,
+        fontFamily: "'Plus Jakarta Sans', sans-serif",
+        color: colors.ink,
+      },
+    },
+  ];
 }
 
 /** Build the ECharts option object. Exported for test assertions. */
 export function buildDivergingOption(items: readonly DivergingItem[]): object {
   const labels = items.map((i) => i.label);
   return {
-    tooltip: {
-      trigger: 'axis', axisPointer: { type: 'shadow' },
-      formatter: (params: Array<{ name: string; value: number }>) => {
-        const p = params[0];
-        return p ? `${p.name}: ${formatChartLabel(p.value)}` : '';
-      },
-    },
+    tooltip: buildDivergingTooltip(),
     grid: { left: 100, right: 60, top: 10, bottom: 10, containLabel: false },
-    xAxis: { type: 'value', axisLine: { show: false }, axisTick: { show: false }, axisLabel: { show: false }, splitLine: { show: false } },
-    yAxis: {
-      type: 'category', data: labels, axisLine: { show: false }, axisTick: { show: false },
-      axisLabel: { color: colors.gray600, fontSize: 11, fontFamily: "'Plus Jakarta Sans', sans-serif", fontWeight: 500 },
-    },
-    animationDuration: 600, animationEasing: 'cubicOut',
-    series: [{
-      type: 'bar', data: buildBarData(items), barWidth: 28,
-      label: {
-        show: true, position: 'right',
-        formatter: (p: { value: number }) => formatChartLabel(p.value),
-        fontWeight: 700, fontSize: 11, fontFamily: "'Plus Jakarta Sans', sans-serif", color: colors.ink,
-      },
-    }],
+    ...buildDivergingAxes(labels),
+    animationDuration: 600,
+    animationEasing: 'cubicOut',
+    series: buildDivergingSeries(items),
   };
 }
 

@@ -40,20 +40,32 @@ export interface NuevoProductoScreenProps {
   readonly testID?: string;
 }
 
+function useScreenSubmit(
+  form: ReturnType<typeof useProductoForm>,
+  onSubmit: (input: CrearProductoInput) => void,
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  return (): void => {
+    const v = validateProducto(form.state, validationMessages(t));
+    if (Object.keys(v).length > 0) {
+      form.setErrors(v);
+      return;
+    }
+    form.setErrors({});
+    onSubmit(buildProductoPayload(form.state));
+    form.reset();
+  };
+}
+
 export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactElement {
   const { t } = useTranslation();
   const form = useProductoForm();
   const [scanOpen, setScanOpen] = useState(false);
+  const handleSubmit = useScreenSubmit(form, props.onSubmit, t);
 
-  useEffect(() => { props.onFormChange?.(form.state); }, [form.state]);
-
-  const handleSubmit = (): void => {
-    const v = validateProducto(form.state, validationMessages(t));
-    if (Object.keys(v).length > 0) { form.setErrors(v); return; }
-    form.setErrors({});
-    props.onSubmit(buildProductoPayload(form.state));
-    form.reset();
-  };
+  useEffect(() => {
+    props.onFormChange?.(form.state);
+  }, [form.state]);
 
   return (
     <ScrollView
@@ -67,10 +79,21 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
       <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
-      <Btn variant="primary" onPress={handleSubmit} loading={props.submitting === true} fullWidth testID="producto-submit">
+      <Btn
+        variant="primary"
+        onPress={handleSubmit}
+        loading={props.submitting === true}
+        fullWidth
+        testID="producto-submit"
+      >
         {t('nuevoProducto.save')}
       </Btn>
-      <Scanner open={scanOpen} onClose={() => setScanOpen(false)} onScan={(code) => form.update({ sku: code })} mode="single" />
+      <Scanner
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        onScan={(code) => form.update({ sku: code })}
+        mode="single"
+      />
     </ScrollView>
   );
 }

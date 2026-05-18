@@ -1,28 +1,19 @@
 /**
  * ProductoDetailScreen — inline-editable full-page product form.
  *
- * Replaces the popover + EditarProductoModal flow with a single
- * dedicated route page. All product fields are editable in place.
+ * DetailFormBody lives in producto-detail-form-body.tsx.
  */
 
 import { useEffect, useState, type ReactElement } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { Product, ProductIcon } from '@cachink/domain';
 import { fromPesos, toPesosString } from '@cachink/domain';
 import type { ProductPatch } from '@cachink/data';
 import { Btn, Icon } from '../../components/index';
 import { colors, typography } from '../../theme';
-import {
-  IconArea,
-  StockActionCard,
-  IdentitySection,
-  PricingSection,
-  InventorySection,
-  AppearanceSection,
-  type DetailFormState,
-  type DetailFormErrors,
-} from './producto-detail-fields';
+import { type DetailFormState, type DetailFormErrors } from './producto-detail-fields';
+import { DetailFormBody } from './producto-detail-form-body';
 
 export interface ProductoDetailScreenProps {
   readonly producto: Product;
@@ -36,7 +27,6 @@ export interface ProductoDetailScreenProps {
   readonly deleting: boolean;
   readonly onSelectIcon: () => void;
   readonly onBack: () => void;
-  /** Override icon from zustand store when returning from picker. */
   readonly iconOverride?: ProductIcon | null;
   readonly testID?: string;
 }
@@ -91,14 +81,33 @@ function DetailTopBar(props: {
   onSave: () => void;
 }): ReactElement {
   return (
-    <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingHorizontal={16} paddingVertical={12}>
+    <View
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+      paddingHorizontal={16}
+      paddingVertical={12}
+    >
       <Pressable onPress={props.onBack} testID="detail-back">
         <Icon name="chevron-left" size={24} color={colors.black} />
       </Pressable>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={18} color={colors.black} numberOfLines={1} flex={1} textAlign="center">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={18}
+        color={colors.black}
+        numberOfLines={1}
+        flex={1}
+        textAlign="center"
+      >
         {props.nombre}
       </Text>
-      <Btn variant={props.dirty ? 'primary' : 'ghost'} onPress={props.onSave} disabled={!props.dirty || props.saving} testID="detail-save">
+      <Btn
+        variant={props.dirty ? 'primary' : 'ghost'}
+        onPress={props.onSave}
+        disabled={!props.dirty || props.saving}
+        testID="detail-save"
+      >
         Guardar
       </Btn>
     </View>
@@ -117,37 +126,52 @@ function useDetailForm(producto: Product, iconOverride?: ProductIcon | null) {
     }
   }, [iconOverride]);
 
-  const update = (p: Partial<DetailFormState>): void => { setState((s) => ({ ...s, ...p })); setDirty(true); };
+  const update = (p: Partial<DetailFormState>): void => {
+    setState((s) => ({ ...s, ...p }));
+    setDirty(true);
+  };
   return { state, errors, setErrors, dirty, update };
 }
 
-export function ProductoDetailScreen(props: ProductoDetailScreenProps): ReactElement {
-  const { state, errors, setErrors, dirty, update } = useDetailForm(props.producto, props.iconOverride);
-
-  const handleSave = (): void => {
+function useDetailSave(
+  state: DetailFormState,
+  setErrors: (e: DetailFormErrors) => void,
+  onSave: (patch: ProductPatch) => void,
+) {
+  return (): void => {
     const v = validate(state);
-    if (Object.keys(v).length > 0) { setErrors(v); return; }
+    if (Object.keys(v).length > 0) {
+      setErrors(v);
+      return;
+    }
     setErrors({});
-    props.onSave(buildPatch(state));
+    onSave(buildPatch(state));
   };
+}
 
-  const id = (k: string) => k;
+export function ProductoDetailScreen(props: ProductoDetailScreenProps): ReactElement {
+  const form = useDetailForm(props.producto, props.iconOverride);
+  const handleSave = useDetailSave(form.state, form.setErrors, props.onSave);
+
   return (
-    <View testID={props.testID ?? 'producto-detail-screen'} flex={1} backgroundColor={colors.offwhite}>
-      <DetailTopBar nombre={props.producto.nombre} dirty={dirty} saving={props.saving} onBack={props.onBack} onSave={handleSave} />
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 80 }}>
-        <IconArea icono={state.icono} categoria={state.categoria} onSelectIcon={props.onSelectIcon} t={id} />
-        <StockActionCard stock={props.stock} umbral={Number(state.umbral) || 0} onEntrada={props.onEntrada} onSalida={props.onSalida} t={id} />
-        <IdentitySection state={state} errors={errors} onChange={update} t={id} />
-        <PricingSection state={state} errors={errors} showPrecio={state.usoProducto !== 'materia-prima'} onChange={update} conversionEnabled={props.conversionEnabled} t={id} />
-        <InventorySection state={state} errors={errors} onChange={update} />
-        <AppearanceSection state={state} onChange={update} />
-        <View marginTop={24}>
-          <Btn variant="danger" onPress={props.onDelete} disabled={props.deleting} fullWidth testID="detail-delete" icon={<Icon name="trash-2" size={18} color={colors.white} />}>
-            Eliminar producto
-          </Btn>
-        </View>
-      </ScrollView>
+    <View
+      testID={props.testID ?? 'producto-detail-screen'}
+      flex={1}
+      backgroundColor={colors.offwhite}
+    >
+      <DetailTopBar
+        nombre={props.producto.nombre}
+        dirty={form.dirty}
+        saving={props.saving}
+        onBack={props.onBack}
+        onSave={handleSave}
+      />
+      <DetailFormBody
+        state={form.state}
+        errors={form.errors}
+        update={form.update}
+        screenProps={props}
+      />
     </View>
   );
 }

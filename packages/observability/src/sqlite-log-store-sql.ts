@@ -54,6 +54,47 @@ export interface LogQueryOptions {
   readonly limit?: number;
 }
 
+export async function countByType(
+  db: SqliteDatabase,
+  type: string,
+  since: string,
+): Promise<number> {
+  const r = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) as cnt FROM ${TABLE} WHERE type = '${type}' AND timestamp >= ?`,
+    [since],
+  );
+  return r?.cnt ?? 0;
+}
+
+export async function lastErrorTimestamp(
+  db: SqliteDatabase,
+  since: string,
+): Promise<string | null> {
+  const r = await db.getFirstAsync<{ timestamp: string }>(
+    `SELECT timestamp FROM ${TABLE} WHERE type = 'error' AND timestamp >= ? ORDER BY timestamp DESC LIMIT 1`,
+    [since],
+  );
+  return r?.timestamp ?? null;
+}
+
+export async function groupBy(
+  db: SqliteDatabase,
+  col: string,
+  type: string,
+  since: string,
+): Promise<Record<string, number>> {
+  const rows = await db.getAllAsync<Record<string, unknown>>(
+    `SELECT ${col}, COUNT(*) as cnt FROM ${TABLE} WHERE type = '${type}' AND timestamp >= ? GROUP BY ${col}`,
+    [since],
+  );
+  const result: Record<string, number> = {};
+  for (const row of rows) {
+    const key = row[col] as string | null;
+    if (key) result[key] = row.cnt as number;
+  }
+  return result;
+}
+
 export function buildQuery(
   type: 'audit' | 'error' | null,
   opts: LogQueryOptions,

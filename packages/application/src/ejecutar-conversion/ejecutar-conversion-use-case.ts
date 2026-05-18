@@ -41,9 +41,10 @@ export interface EjecutarConversionResult {
   readonly movimientoEntradaId: string;
 }
 
-export class EjecutarConversionUseCase
-  implements UseCase<EjecutarConversionInput, EjecutarConversionResult>
-{
+export class EjecutarConversionUseCase implements UseCase<
+  EjecutarConversionInput,
+  EjecutarConversionResult
+> {
   readonly #recetas: ConversionRecetasRepository;
   readonly #conversions: ConversionsRepository;
   readonly #movements: InventoryMovementsRepository;
@@ -65,11 +66,8 @@ export class EjecutarConversionUseCase
     if (!Number.isInteger(input.multiplicador) || input.multiplicador < 1) {
       throw new TypeError('Multiplicador debe ser un entero ≥ 1');
     }
-
     const receta = await this.#recetas.findById(input.recetaId);
-    if (!receta) {
-      throw new TypeError(`Receta ${input.recetaId} no encontrada`);
-    }
+    if (!receta) throw new TypeError(`Receta ${input.recetaId} no encontrada`);
 
     const mp = await this.#validateStock(receta, input.multiplicador);
     const fecha = input.today ?? today();
@@ -77,34 +75,50 @@ export class EjecutarConversionUseCase
     const cantidadEntrada = receta.cantidadResultante * input.multiplicador;
 
     const movSalida = await this.#createSalida(
-      receta.materiaPrimaId, fecha, cantidadSalida, mp.costoUnitCentavos, input.businessId,
+      receta.materiaPrimaId,
+      fecha,
+      cantidadSalida,
+      mp.costoUnitCentavos,
+      input.businessId,
     );
     const movEntrada = await this.#createEntrada(
-      receta.productoResultanteId, fecha, cantidadEntrada, input.businessId,
+      receta.productoResultanteId,
+      fecha,
+      cantidadEntrada,
+      input.businessId,
     );
+    return this.#buildResult(
+      receta,
+      cantidadSalida,
+      cantidadEntrada,
+      movSalida,
+      movEntrada,
+      input.businessId,
+    );
+  }
 
+  async #buildResult(
+    receta: ConversionReceta,
+    cantidadSalida: number,
+    cantidadEntrada: number,
+    movSalida: { id: string },
+    movEntrada: { id: string },
+    businessId: BusinessId,
+  ): Promise<EjecutarConversionResult> {
     const conversion = await this.#conversions.create({
       recetaId: receta.id,
       materiaPrimaId: receta.materiaPrimaId as string,
       productoResultanteId: receta.productoResultanteId as string,
       cantidadOrigenUsada: cantidadSalida,
       cantidadResultanteCreada: cantidadEntrada,
-      movimientoSalidaId: movSalida.id as string,
-      movimientoEntradaId: movEntrada.id as string,
-      businessId: input.businessId,
-    });
-
-    return {
-      conversion,
       movimientoSalidaId: movSalida.id,
       movimientoEntradaId: movEntrada.id,
-    };
+      businessId,
+    });
+    return { conversion, movimientoSalidaId: movSalida.id, movimientoEntradaId: movEntrada.id };
   }
 
-  async #validateStock(
-    receta: ConversionReceta,
-    multiplicador: number,
-  ): Promise<Product> {
+  async #validateStock(receta: ConversionReceta, multiplicador: number): Promise<Product> {
     const mp = await this.#products.findById(receta.materiaPrimaId);
     if (!mp) throw new TypeError('Materia prima no encontrada');
 
@@ -119,23 +133,40 @@ export class EjecutarConversionUseCase
   }
 
   async #createSalida(
-    productoId: ProductId, fecha: IsoDate, cantidad: number,
-    costoUnitCentavos: bigint, businessId: BusinessId,
+    productoId: ProductId,
+    fecha: IsoDate,
+    cantidad: number,
+    costoUnitCentavos: bigint,
+    businessId: BusinessId,
   ) {
     return this.#movements.create({
-      productoId, fecha, tipo: 'salida', cantidad,
-      costoUnitCentavos, motivo: 'Conversión', nota: undefined, businessId,
+      productoId,
+      fecha,
+      tipo: 'salida',
+      cantidad,
+      costoUnitCentavos,
+      motivo: 'Conversión',
+      nota: undefined,
+      businessId,
     });
   }
 
   async #createEntrada(
-    productoId: ProductId, fecha: IsoDate, cantidad: number, businessId: BusinessId,
+    productoId: ProductId,
+    fecha: IsoDate,
+    cantidad: number,
+    businessId: BusinessId,
   ) {
     const producto = await this.#products.findById(productoId);
     return this.#movements.create({
-      productoId, fecha, tipo: 'entrada', cantidad,
+      productoId,
+      fecha,
+      tipo: 'entrada',
+      cantidad,
       costoUnitCentavos: producto?.costoUnitCentavos ?? 0n,
-      motivo: 'Conversión', nota: undefined, businessId,
+      motivo: 'Conversión',
+      nota: undefined,
+      businessId,
     });
   }
 }

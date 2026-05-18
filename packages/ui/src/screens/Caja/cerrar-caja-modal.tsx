@@ -38,23 +38,27 @@ function extractExistingConteo(turno: CajaTurno | null): Money | null {
   return (turno as CajaTurno & { conteoCentavos?: Money | null }).conteoCentavos ?? null;
 }
 
-export function CerrarCajaModal(props: CerrarCajaModalProps): ReactElement {
+function useCerrarCajaState() {
   const turnosRepo = useCajaTurnosRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
   const [savedConteo, setSavedConteo] = useState<Money | null>(null);
   const [savingConteo, setSavingConteo] = useState(false);
-
   const openQ = useQuery({
     queryKey: ['cerrar-open-turno', businessId],
-    queryFn: async () =>
-      businessId ? turnosRepo.findLatest(businessId as BusinessId) : null,
+    queryFn: async () => (businessId ? turnosRepo.findLatest(businessId as BusinessId) : null),
     enabled: !!businessId,
   });
   const turno = openQ.data ?? null;
   const esperado = useExpectedCash(turno);
   const conteo = savedConteo ?? extractExistingConteo(turno);
+  const handleBlindSubmit = async (c: Money) =>
+    saveBlindCount(turno, c, turnosRepo, queryClient, setSavingConteo, setSavedConteo);
+  return { conteo, esperado, turno, savingConteo, handleBlindSubmit };
+}
 
+export function CerrarCajaModal(props: CerrarCajaModalProps): ReactElement {
+  const { conteo, esperado, savingConteo, handleBlindSubmit } = useCerrarCajaState();
   if (conteo !== null) {
     return (
       <CountResultStep
@@ -66,12 +70,9 @@ export function CerrarCajaModal(props: CerrarCajaModalProps): ReactElement {
       />
     );
   }
-
   return (
     <BlindCountStep
-      onSubmit={async (conteoCentavos) => {
-        await saveBlindCount(turno, conteoCentavos, turnosRepo, queryClient, setSavingConteo, setSavedConteo);
-      }}
+      onSubmit={handleBlindSubmit}
       submitting={savingConteo}
       testID="cerrar-caja-step-1"
     />

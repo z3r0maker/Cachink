@@ -8,11 +8,12 @@ import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { AuditoriaInventario, AuditoriaLinea } from '@cachink/domain';
-import { Btn, ConfirmDialog } from '../../components/index';
+import { ConfirmDialog } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useActualizarAuditoria } from '../../hooks/use-actualizar-auditoria';
 import { colors, typography } from '../../theme';
 import { ConteoLineaCard } from './conteo-linea-card';
+import { ConteoActionBar } from './conteo-action-bar';
 
 export interface AuditoriaConteoProps {
   readonly auditoria: AuditoriaInventario;
@@ -26,61 +27,73 @@ function parseStockValue(value: string): number | null {
   return parsed !== null && Number.isInteger(parsed) ? parsed : null;
 }
 
-function useConteoState(auditoria: AuditoriaInventario, onFinalized: () => void, onCancelled: () => void) {
+function computeDiferencia(stockReal: number | null, stockSistema: number): number | null {
+  return stockReal !== null ? stockReal - stockSistema : null;
+}
+
+function updateLinea(prev: AuditoriaLinea[], idx: number, value: string): AuditoriaLinea[] {
+  const next = [...prev];
+  const linea = next[idx];
+  if (!linea) return prev;
+  const stockReal = parseStockValue(value);
+  next[idx] = { ...linea, stockReal, diferencia: computeDiferencia(stockReal, linea.stockSistema) };
+  return next;
+}
+
+function useConteoDialogs() {
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showCancel, setShowCancel] = useState(false);
+  return { showConfirm, setShowConfirm, showCancel, setShowCancel };
+}
+
+function useConteoState(
+  auditoria: AuditoriaInventario,
+  onFinalized: () => void,
+  onCancelled: () => void,
+) {
   const { mutateAsync, isPending } = useActualizarAuditoria();
   const [lineas, setLineas] = useState<AuditoriaLinea[]>(
     () => JSON.parse(auditoria.lineas) as AuditoriaLinea[],
   );
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showCancel, setShowCancel] = useState(false);
-
+  const dialogs = useConteoDialogs();
   const contados = lineas.filter((l) => l.stockReal !== null).length;
-  const allCounted = contados === lineas.length;
   const discrepancias = lineas.filter((l) => l.diferencia !== null && l.diferencia !== 0).length;
-
-  const handleStockChange = (idx: number, value: string): void => {
-    const stockReal = parseStockValue(value);
-    setLineas((prev) => {
-      const next = [...prev];
-      const linea = next[idx];
-      if (!linea) return prev;
-      next[idx] = { ...linea, stockReal, diferencia: stockReal !== null ? stockReal - linea.stockSistema : null };
-      return next;
-    });
-  };
+  const handleStockChange = (idx: number, value: string): void =>
+    setLineas((prev) => updateLinea(prev, idx, value));
 
   const save = async () => mutateAsync({ id: auditoria.id, lineas, estado: 'borrador' });
-  const finalize = async () => { await mutateAsync({ id: auditoria.id, lineas, estado: 'finalizada' }); setShowConfirm(false); onFinalized(); };
-  const cancel = async () => { await mutateAsync({ id: auditoria.id, lineas, estado: 'cancelada' }); setShowCancel(false); onCancelled(); };
+  const finalize = async () => {
+    await mutateAsync({ id: auditoria.id, lineas, estado: 'finalizada' });
+    dialogs.setShowConfirm(false);
+    onFinalized();
+  };
+  const cancel = async () => {
+    await mutateAsync({ id: auditoria.id, lineas, estado: 'cancelada' });
+    dialogs.setShowCancel(false);
+    onCancelled();
+  };
 
-  return { lineas, isPending, contados, allCounted, discrepancias, showConfirm, setShowConfirm, showCancel, setShowCancel, handleStockChange, save, finalize, cancel };
+  return {
+    lineas,
+    isPending,
+    contados,
+    allCounted: contados === lineas.length,
+    discrepancias,
+    ...dialogs,
+    handleStockChange,
+    save,
+    finalize,
+    cancel,
+  };
 }
 
-type T = ReturnType<typeof useTranslation>['t'];
-
-function ConteoActionBar({ ctx, t }: { ctx: ReturnType<typeof useConteoState>; t: T }): ReactElement {
-  return (
-    <View flexDirection="row" gap={8}>
-      <View flex={1}>
-        <Btn variant="ghost" onPress={() => ctx.setShowCancel(true)} disabled={ctx.isPending} fullWidth testID="conteo-cancelar">
-          {t('auditoria.cancelar' as never)}
-        </Btn>
-      </View>
-      <View flex={1}>
-        <Btn variant="ghost" onPress={ctx.save} disabled={ctx.isPending} fullWidth testID="conteo-save">
-          {t('actions.save' as never)}
-        </Btn>
-      </View>
-      <View flex={1}>
-        <Btn onPress={() => ctx.setShowConfirm(true)} disabled={!ctx.allCounted || ctx.isPending} fullWidth testID="conteo-finalizar">
-          {t('auditoria.finalizar' as never)}
-        </Btn>
-      </View>
-    </View>
-  );
-}
-
-function ConteoDialogs({ ctx, t }: { ctx: ReturnType<typeof useConteoState>; t: T }): ReactElement {
+function ConteoDialogs({
+  ctx,
+  t,
+}: {
+  ctx: ReturnType<typeof useConteoState>;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
   return (
     <>
       <ConfirmDialog
@@ -112,19 +125,36 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
   return (
     <View gap={12} testID={props.testID ?? 'auditoria-conteo'}>
       <Text
-        fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold}
-        fontSize={14} color={colors.gray600} testID="conteo-counter"
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={14}
+        color={colors.gray600}
+        testID="conteo-counter"
       >
-        {t('auditoria.contados', { contados: String(ctx.contados), total: String(ctx.lineas.length) })}
+        {t('auditoria.contados', {
+          contados: String(ctx.contados),
+          total: String(ctx.lineas.length),
+        })}
       </Text>
       <ScrollView>
         <View gap={8}>
           {ctx.lineas.map((linea, idx) => (
-            <ConteoLineaCard key={linea.productoId as string} linea={linea} onChange={(v) => ctx.handleStockChange(idx, v)} />
+            <ConteoLineaCard
+              key={linea.productoId as string}
+              linea={linea}
+              onChange={(v) => ctx.handleStockChange(idx, v)}
+            />
           ))}
         </View>
       </ScrollView>
-      <ConteoActionBar ctx={ctx} t={t} />
+      <ConteoActionBar
+        isPending={ctx.isPending}
+        allCounted={ctx.allCounted}
+        onCancel={() => ctx.setShowCancel(true)}
+        onSave={ctx.save}
+        onFinalize={() => ctx.setShowConfirm(true)}
+        t={t}
+      />
       <ConteoDialogs ctx={ctx} t={t} />
     </View>
   );

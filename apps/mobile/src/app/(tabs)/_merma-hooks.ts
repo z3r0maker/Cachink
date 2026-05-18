@@ -81,38 +81,70 @@ export interface MermaState {
   readonly handleCheckoutSubmit: (reason: string, nota: string | null) => Promise<void>;
 }
 
-export function useMermaState(): MermaState {
-  const { productos, stockMap, registrar, businessId } = useMermaQueries();
-  const { state: cart, dispatch } = useCart();
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const cartQuantities = useMemo(() => {
+function useCartQuantities(items: ReturnType<typeof useCart>['state']['items']) {
+  return useMemo(() => {
     const m = new Map<string, number>();
-    for (const item of cart.items) m.set(item.productoId, item.cantidad);
+    for (const item of items) m.set(item.productoId, item.cantidad);
     return m;
-  }, [cart.items]);
+  }, [items]);
+}
 
-  const handleAddToCart = useCallback(
-    (p: Product) => { impactLight(); dispatch({ type: 'add', product: p }); },
-    [dispatch],
-  );
-
-  const handleCheckoutSubmit = useCallback(
+function useMermaCheckout(
+  businessId: string | null,
+  cart: ReturnType<typeof useCart>['state'],
+  registrar: ReturnType<typeof useRegistrarMovimiento>,
+  dispatch: ReturnType<typeof useCart>['dispatch'],
+  setCheckoutOpen: (v: boolean) => void,
+) {
+  return useCallback(
     async (reason: string, nota: string | null) => {
       if (!businessId) {
         Alert.alert('Negocio no configurado', 'Configura tu negocio en Ajustes.');
         return;
       }
       const ok = await submitMermaItems(cart.items, businessId, registrar, reason, nota);
-      if (ok) { dispatch({ type: 'clear' }); setCheckoutOpen(false); }
+      if (ok) {
+        dispatch({ type: 'clear' });
+        setCheckoutOpen(false);
+      }
     },
-    [businessId, cart.items, registrar, dispatch],
+    [businessId, cart.items, registrar, dispatch, setCheckoutOpen],
+  );
+}
+
+export function useMermaState(): MermaState {
+  const { productos, stockMap, registrar, businessId } = useMermaQueries();
+  const { state: cart, dispatch } = useCart();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const cartQuantities = useCartQuantities(cart.items);
+  const handleAddToCart = useCallback(
+    (p: Product) => {
+      impactLight();
+      dispatch({ type: 'add', product: p });
+    },
+    [dispatch],
+  );
+  const handleCheckoutSubmit = useMermaCheckout(
+    businessId,
+    cart,
+    registrar,
+    dispatch,
+    setCheckoutOpen,
   );
 
   return {
-    productos, stockMap, cart, dispatch, registrar,
-    checkoutOpen, setCheckoutOpen, search, setSearch,
-    cartQuantities, handleAddToCart, handleCheckoutSubmit,
+    productos,
+    stockMap,
+    cart,
+    dispatch,
+    registrar,
+    checkoutOpen,
+    setCheckoutOpen,
+    search,
+    setSearch,
+    cartQuantities,
+    handleAddToCart,
+    handleCheckoutSubmit,
   };
 }

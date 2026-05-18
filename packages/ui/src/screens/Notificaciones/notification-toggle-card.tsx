@@ -18,10 +18,14 @@ import type { NotificationSourceInfo } from './notification-source-info';
 
 function severityDotColor(severity: AlertSeverity): string {
   switch (severity) {
-    case 'critical': return colors.red;
-    case 'warning': return colors.warning;
-    case 'info': return colors.blue;
-    default: return colors.blue;
+    case 'critical':
+      return colors.red;
+    case 'warning':
+      return colors.warning;
+    case 'info':
+      return colors.blue;
+    default:
+      return colors.blue;
   }
 }
 
@@ -34,30 +38,55 @@ export interface NotificationToggleCardProps {
   readonly testID?: string;
 }
 
-function ToggleLabelColumn({ info, locked, lockedHint }: {
+function ToggleLabelRow({
+  info,
+  locked,
+}: {
+  info: NotificationSourceInfo;
+  locked: boolean;
+}): ReactElement {
+  const { t } = useTranslation();
+  const labelColor = locked ? colors.gray400 : colors.black;
+  const dotColor = locked ? colors.gray200 : severityDotColor(info.defaultSeverity);
+  return (
+    <View flexDirection="row" alignItems="center" gap={8}>
+      <View width={8} height={8} borderRadius={4} backgroundColor={dotColor} />
+      <Icon name={info.icon} size={18} color={labelColor} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={15}
+        color={labelColor}
+      >
+        {t(info.labelKey as never)}
+      </Text>
+    </View>
+  );
+}
+
+function ToggleLabelColumn({
+  info,
+  locked,
+  lockedHint,
+}: {
   info: NotificationSourceInfo;
   locked: boolean;
   lockedHint?: string | null;
 }): ReactElement {
   const { t } = useTranslation();
-  const labelColor = locked ? colors.gray400 : colors.black;
   return (
     <View flex={1} marginRight={12} gap={4}>
-      <View flexDirection="row" alignItems="center" gap={8}>
-        <View
-          width={8} height={8} borderRadius={4}
-          backgroundColor={locked ? colors.gray200 : severityDotColor(info.defaultSeverity)}
-        />
-        <Icon name={info.icon} size={18} color={labelColor} />
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={15} color={labelColor}>
-          {t(info.labelKey as never)}
-        </Text>
-      </View>
+      <ToggleLabelRow info={info} locked={locked} />
       <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600}>
         {t(info.descriptionKey as never)}
       </Text>
       {locked && lockedHint && (
-        <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray400} fontStyle="italic">
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={12}
+          color={colors.gray400}
+          fontStyle="italic"
+        >
           {lockedHint}
         </Text>
       )}

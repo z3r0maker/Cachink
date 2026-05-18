@@ -4,8 +4,6 @@ import { evaluateHealth, type HealthThresholds, type Indicadores } from '@cachin
 import { Card, SectionTitle } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
-import type { MarginTrend } from '../../hooks/use-indicadores-trend';
-import { MarginCard } from './indicadores-cards';
 import { NumericCard } from './indicadores-cards';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -19,7 +17,10 @@ export interface HealthTones {
   readonly dc: 'healthy' | 'warning' | 'critical' | null;
 }
 
-function computeMarginTones(i: Indicadores | null, th: HealthThresholds): Pick<HealthTones, 'mb' | 'mo' | 'mn'> {
+function computeMarginTones(
+  i: Indicadores | null,
+  th: HealthThresholds,
+): Pick<HealthTones, 'mb' | 'mo' | 'mn'> {
   return {
     mb: evaluateHealth(i?.margenBruto ?? null, th.margenBruto),
     mo: evaluateHealth(i?.margenOperativo ?? null, th.margenOperativo),
@@ -27,7 +28,10 @@ function computeMarginTones(i: Indicadores | null, th: HealthThresholds): Pick<H
   };
 }
 
-function computeSaludTones(i: Indicadores | null, th: HealthThresholds): Pick<HealthTones, 'liq' | 'rot' | 'dc'> {
+function computeSaludTones(
+  i: Indicadores | null,
+  th: HealthThresholds,
+): Pick<HealthTones, 'liq' | 'rot' | 'dc'> {
   return {
     liq: evaluateHealth(i?.razonDeLiquidez ?? null, th.razonDeLiquidez),
     rot: evaluateHealth(i?.rotacionInventario ?? null, th.rotacionInventario),
@@ -39,9 +43,14 @@ export function computeHealthTones(i: Indicadores | null, th: HealthThresholds):
   return { ...computeMarginTones(i, th), ...computeSaludTones(i, th) };
 }
 
-export function healthVerdict(tone: 'healthy' | 'warning' | 'critical' | null, metric: string, t: T): string | null {
+export function healthVerdict(
+  tone: 'healthy' | 'warning' | 'critical' | null,
+  metric: string,
+  t: T,
+): string | null {
   if (tone === null) return null;
-  const key = `estados.indicadores${metric}${tone.charAt(0).toUpperCase() + tone.slice(1)}` as Parameters<T>[0];
+  const key =
+    `estados.indicadores${metric}${tone.charAt(0).toUpperCase() + tone.slice(1)}` as Parameters<T>[0];
   return t(key) as string;
 }
 
@@ -63,68 +72,79 @@ export const MARGIN_ZONES = {
   ],
 } as const;
 
-function nullableMargin(i: Indicadores | null, key: keyof Indicadores): number | null {
-  return i?.[key] ?? null;
-}
-
-export interface RentabilidadProps {
+export interface SaludSectionProps {
   readonly i: Indicadores | null;
   readonly pi?: Indicadores | null;
-  readonly trend?: MarginTrend | null;
   readonly tones: HealthTones;
+  readonly rotSuffix: string;
+  readonly nanLabel: string;
   readonly t: T;
 }
 
-function MargenBrutoCard(props: RentabilidadProps): ReactElement {
-  const { i, pi, tones, t } = props;
+function LiquidezCard(p: SaludSectionProps): ReactElement {
   return (
-    <MarginCard label={t('estados.indicadoresMargenBruto')} subtitle={t('estados.indicadoresMargenBrutoSubtitle')} detail={t('estados.indicadoresMargenBrutoDetail')} value={nullableMargin(i, 'margenBruto')} trend={props.trend?.margenBruto} zones={MARGIN_ZONES.bruto} healthVerdict={healthVerdict(tones.mb, 'MargenBruto', t)} healthTone={tones.mb} priorValue={pi?.margenBruto} testID="indicador-margen-bruto" t={t} />
+    <NumericCard
+      label={p.t('estados.indicadoresLiquidez')}
+      subtitle={p.t('estados.indicadoresLiquidezSubtitle')}
+      detail={p.t('estados.indicadoresLiquidezDetail')}
+      value={p.i?.razonDeLiquidez ?? null}
+      formatter={(v) => `${v.toFixed(2)}×`}
+      healthVerdict={healthVerdict(p.tones.liq, 'Liquidez', p.t)}
+      healthTone={p.tones.liq}
+      priorValue={p.pi?.razonDeLiquidez}
+      nanLabel={p.nanLabel}
+      testID="indicador-liquidez"
+      t={p.t}
+    />
   );
 }
 
-function MargenOperativoCard(props: RentabilidadProps): ReactElement {
-  const { i, pi, tones, t } = props;
+function RotacionCard(p: SaludSectionProps): ReactElement {
   return (
-    <MarginCard label={t('estados.indicadoresMargenOperativo')} subtitle={t('estados.indicadoresMargenOperativoSubtitle')} detail={t('estados.indicadoresMargenOperativoDetail')} value={nullableMargin(i, 'margenOperativo')} trend={props.trend?.margenOperativo} zones={MARGIN_ZONES.operativo} healthVerdict={healthVerdict(tones.mo, 'MargenOperativo', t)} healthTone={tones.mo} priorValue={pi?.margenOperativo} testID="indicador-margen-operativo" t={t} />
+    <NumericCard
+      label={p.t('estados.indicadoresRotacion')}
+      subtitle={p.t('estados.indicadoresRotacionSubtitle')}
+      detail={p.t('estados.indicadoresRotacionDetail')}
+      value={p.i?.rotacionInventario ?? null}
+      formatter={(v) => `${v.toFixed(2)} ${p.rotSuffix}`}
+      healthVerdict={healthVerdict(p.tones.rot, 'Rotacion', p.t)}
+      healthTone={p.tones.rot}
+      priorValue={p.pi?.rotacionInventario}
+      nanLabel={p.nanLabel}
+      testID="indicador-rotacion"
+      t={p.t}
+    />
   );
 }
 
-function MargenNetoCard(props: RentabilidadProps): ReactElement {
-  const { i, pi, tones, t } = props;
+function DiasCobranzaCard(p: SaludSectionProps): ReactElement {
   return (
-    <MarginCard label={t('estados.indicadoresMargenNeto')} subtitle={t('estados.indicadoresMargenNetoSubtitle')} detail={t('estados.indicadoresMargenNetoDetail')} value={nullableMargin(i, 'margenNeto')} trend={props.trend?.margenNeto} zones={MARGIN_ZONES.neto} healthVerdict={healthVerdict(tones.mn, 'MargenNeto', t)} healthTone={tones.mn} priorValue={pi?.margenNeto} testID="indicador-margen-neto" t={t} />
+    <NumericCard
+      label={p.t('estados.indicadoresDiasCobranza')}
+      subtitle={p.t('estados.indicadoresDiasCobranzaSubtitle')}
+      detail={p.t('estados.indicadoresDiasCobranzaDetail')}
+      value={p.i?.diasPromedioCobranza ?? null}
+      formatter={(v) => `${Math.round(v)} ${p.t('estados.indicadoresDiasCobranzaSufix')}`}
+      healthVerdict={healthVerdict(p.tones.dc, 'DiasCobranza', p.t)}
+      healthTone={p.tones.dc}
+      priorValue={p.pi?.diasPromedioCobranza}
+      nanLabel={p.nanLabel}
+      testID="indicador-dias-cobranza"
+      t={p.t}
+    />
   );
 }
 
-export function RentabilidadSection(props: RentabilidadProps): ReactElement {
-  const { t } = props;
+export function SaludSection(props: SaludSectionProps): ReactElement {
   return (
     <>
-      <SectionTitle title={t('estados.indicadoresRentabilidadTitle')} />
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>{t('estados.indicadoresRentabilidadSubtitle')}</Text>
-      <MargenBrutoCard {...props} />
-      <MargenOperativoCard {...props} />
-      <MargenNetoCard {...props} />
-    </>
-  );
-}
-
-export function SaludSection(props: {
-  i: Indicadores | null;
-  pi?: Indicadores | null;
-  tones: HealthTones;
-  rotSuffix: string;
-  nanLabel: string;
-  t: T;
-}): ReactElement {
-  const { i, pi, tones, t } = props;
-  return (
-    <>
-      <SectionTitle title={t('estados.indicadoresSaludTitle')} />
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>{t('estados.indicadoresSaludSubtitle')}</Text>
-      <NumericCard label={t('estados.indicadoresLiquidez')} subtitle={t('estados.indicadoresLiquidezSubtitle')} detail={t('estados.indicadoresLiquidezDetail')} value={i?.razonDeLiquidez ?? null} formatter={(v) => `${v.toFixed(2)}×`} healthVerdict={healthVerdict(tones.liq, 'Liquidez', t)} healthTone={tones.liq} priorValue={pi?.razonDeLiquidez} nanLabel={props.nanLabel} testID="indicador-liquidez" t={t} />
-      <NumericCard label={t('estados.indicadoresRotacion')} subtitle={t('estados.indicadoresRotacionSubtitle')} detail={t('estados.indicadoresRotacionDetail')} value={i?.rotacionInventario ?? null} formatter={(v) => `${v.toFixed(2)} ${props.rotSuffix}`} healthVerdict={healthVerdict(tones.rot, 'Rotacion', t)} healthTone={tones.rot} priorValue={pi?.rotacionInventario} nanLabel={props.nanLabel} testID="indicador-rotacion" t={t} />
-      <NumericCard label={t('estados.indicadoresDiasCobranza')} subtitle={t('estados.indicadoresDiasCobranzaSubtitle')} detail={t('estados.indicadoresDiasCobranzaDetail')} value={i?.diasPromedioCobranza ?? null} formatter={(v) => `${Math.round(v)} ${t('estados.indicadoresDiasCobranzaSufix')}`} healthVerdict={healthVerdict(tones.dc, 'DiasCobranza', t)} healthTone={tones.dc} priorValue={pi?.diasPromedioCobranza} nanLabel={props.nanLabel} testID="indicador-dias-cobranza" t={t} />
+      <SectionTitle title={props.t('estados.indicadoresSaludTitle')} />
+      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>
+        {props.t('estados.indicadoresSaludSubtitle')}
+      </Text>
+      <LiquidezCard {...props} />
+      <RotacionCard {...props} />
+      <DiasCobranzaCard {...props} />
     </>
   );
 }
@@ -132,9 +152,22 @@ export function SaludSection(props: {
 export function ThresholdDisclosure(props: { onOpenSettings?: () => void; t: T }): ReactElement {
   return (
     <Card testID="indicadores-threshold-disclosure" padding="md" fullWidth>
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>{props.t('estados.indicadoresThresholdDisclosure')}</Text>
+      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>
+        {props.t('estados.indicadoresThresholdDisclosure')}
+      </Text>
       {props.onOpenSettings !== undefined && (
-        <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontWeight={500} fontSize={12} color={colors.blue} onPress={props.onOpenSettings} cursor="pointer" marginTop={4} testID="indicadores-settings-link">{props.t('estados.indicadoresThresholdSettingsLink')}</Text>
+        <Text
+          fontFamily="'Plus Jakarta Sans', sans-serif"
+          fontWeight={500}
+          fontSize={12}
+          color={colors.blue}
+          onPress={props.onOpenSettings}
+          cursor="pointer"
+          marginTop={4}
+          testID="indicadores-settings-link"
+        >
+          {props.t('estados.indicadoresThresholdSettingsLink')}
+        </Text>
       )}
     </Card>
   );

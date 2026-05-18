@@ -47,25 +47,73 @@ function useNotificacionesState(onNavigate?: (path: string) => void) {
   };
 
   return {
-    t, topTab, setTopTab, filter, setFilter,
-    alerts: alertsQ.data ?? [], markRead, markAllRead,
-    prefs: prefsQ.data, flags, handleToggleSource, onNavigate,
+    t,
+    topTab,
+    setTopTab,
+    filter,
+    setFilter,
+    alerts: alertsQ.data ?? [],
+    markRead,
+    markAllRead,
+    prefs: prefsQ.data,
+    flags,
+    handleToggleSource,
+    onNavigate,
   };
 }
 
-function BandejaTab({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> }): ReactElement {
+function BandejaFilterBar({
+  ctx,
+}: {
+  ctx: ReturnType<typeof useNotificacionesState>;
+}): ReactElement {
   const filterOptions = [
     { key: 'all' as const, label: ctx.t('notificaciones.filterAll') },
     { key: 'unread' as const, label: ctx.t('notificaciones.filterUnread') },
   ] as const;
   return (
+    <View flexDirection="row" alignItems="center" justifyContent="space-between" gap={12}>
+      <SegmentedToggle
+        options={filterOptions}
+        value={ctx.filter}
+        onChange={(key) => ctx.setFilter(key)}
+      />
+      <Btn
+        size="sm"
+        variant="ghost"
+        onPress={() => ctx.markAllRead.mutate()}
+        testID="mark-all-read-btn"
+      >
+        {ctx.t('notificaciones.markAllRead')}
+      </Btn>
+    </View>
+  );
+}
+
+function AlertList({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> }): ReactElement {
+  return (
+    <View gap={10}>
+      {ctx.alerts.map((alert) => (
+        <AlertCard
+          key={alert.id}
+          alert={alert}
+          onPress={() => {
+            if (!alert.read) ctx.markRead.mutate(alert.id);
+          }}
+          onAction={() => {
+            if (!alert.read) ctx.markRead.mutate(alert.id);
+            if (alert.actionRoute) ctx.onNavigate?.(alert.actionRoute);
+          }}
+        />
+      ))}
+    </View>
+  );
+}
+
+function BandejaTab({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> }): ReactElement {
+  return (
     <>
-      <View flexDirection="row" alignItems="center" justifyContent="space-between" gap={12}>
-        <SegmentedToggle options={filterOptions} value={ctx.filter} onChange={(key) => ctx.setFilter(key)} />
-        <Btn size="sm" variant="ghost" onPress={() => ctx.markAllRead.mutate()} testID="mark-all-read-btn">
-          {ctx.t('notificaciones.markAllRead')}
-        </Btn>
-      </View>
+      <BandejaFilterBar ctx={ctx} />
       {ctx.alerts.length === 0 && (
         <EmptyState
           icon="bell"
@@ -74,19 +122,7 @@ function BandejaTab({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> })
           testID="notificaciones-empty"
         />
       )}
-      <View gap={10}>
-        {ctx.alerts.map((alert) => (
-          <AlertCard
-            key={alert.id}
-            alert={alert}
-            onPress={() => { if (!alert.read) ctx.markRead.mutate(alert.id); }}
-            onAction={() => {
-              if (!alert.read) ctx.markRead.mutate(alert.id);
-              if (alert.actionRoute) ctx.onNavigate?.(alert.actionRoute);
-            }}
-          />
-        ))}
-      </View>
+      <AlertList ctx={ctx} />
     </>
   );
 }
@@ -113,10 +149,18 @@ export function NotificacionesScreen(props: NotificacionesScreenProps): ReactEle
       >
         {ctx.t('notificaciones.title')}
       </Text>
-      <SegmentedToggle options={topTabOptions} value={ctx.topTab} onChange={(key) => ctx.setTopTab(key)} />
+      <SegmentedToggle
+        options={topTabOptions}
+        value={ctx.topTab}
+        onChange={(key) => ctx.setTopTab(key)}
+      />
       {ctx.topTab === 'bandeja' && <BandejaTab ctx={ctx} />}
       {ctx.topTab === 'configurar' && (
-        <NotificacionesConfigTab prefs={ctx.prefs} flags={ctx.flags} onToggle={ctx.handleToggleSource} />
+        <NotificacionesConfigTab
+          prefs={ctx.prefs}
+          flags={ctx.flags}
+          onToggle={ctx.handleToggleSource}
+        />
       )}
     </ScrollView>
   );

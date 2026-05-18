@@ -27,37 +27,71 @@ export function ResetDemoAction(props: ResetDemoActionProps): ReactElement | nul
   return <ResetDemoActionInner {...props} />;
 }
 
-function useResetHandlers(props: ResetDemoActionProps, userId: UserId | null, repos: ReturnType<typeof useRepositories>) {
+function usePinSubmit(
+  userId: UserId | null,
+  repos: ReturnType<typeof useRepositories>,
+  setPinError: (e: string | null) => void,
+  setPinAttempt: (fn: (n: number) => number) => void,
+  setStep: (s: ResetStep) => void,
+) {
   const { t } = useTranslation();
-  const [step, setStep] = useState<ResetStep>('idle');
-  const [pinError, setPinError] = useState<string | null>(null);
-  const [pinAttempt, setPinAttempt] = useState(0);
-
-  const handlePinSubmit = useCallback(
+  return useCallback(
     async (pin: string) => {
       if (!userId) return;
       const user = await repos.users.findById(userId);
-      if (!user) { setPinError('Usuario no encontrado'); return; }
+      if (!user) {
+        setPinError('Usuario no encontrado');
+        return;
+      }
       const valid = await compare(pin, user.pinHash);
-      if (!valid) { setPinError(t('dev.resetPinError')); setPinAttempt((n) => n + 1); return; }
+      if (!valid) {
+        setPinError(t('dev.resetPinError'));
+        setPinAttempt((n) => n + 1);
+        return;
+      }
       setPinError(null);
       setStep('confirm');
     },
-    [userId, repos.users, t],
+    [userId, repos.users, t, setPinError, setPinAttempt, setStep],
   );
+}
+
+function useResetHandlers(
+  props: ResetDemoActionProps,
+  userId: UserId | null,
+  repos: ReturnType<typeof useRepositories>,
+) {
+  const [step, setStep] = useState<ResetStep>('idle');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinAttempt, setPinAttempt] = useState(0);
+  const handlePinSubmit = usePinSubmit(userId, repos, setPinError, setPinAttempt, setStep);
 
   const handleReset = useCallback(async () => {
     setStep('pending');
-    try { await props.resetDatabase(); props.onReload(); } catch { setStep('error'); }
+    try {
+      await props.resetDatabase();
+      props.onReload();
+    } catch {
+      setStep('error');
+    }
   }, [props]);
 
-  const handleDismissPin = useCallback(() => { setStep('idle'); setPinError(null); }, []);
+  const handleDismissPin = useCallback(() => {
+    setStep('idle');
+    setPinError(null);
+  }, []);
 
   return { step, setStep, pinError, pinAttempt, handlePinSubmit, handleReset, handleDismissPin };
 }
 
-function ResetDemoCard({ step, setStep, t }: {
-  step: ResetStep; setStep: (s: ResetStep) => void; t: (k: string) => string;
+function ResetDemoCard({
+  step,
+  setStep,
+  t,
+}: {
+  step: ResetStep;
+  setStep: (s: ResetStep) => void;
+  t: (k: string) => string;
 }): ReactElement {
   return (
     <Card testID="reset-demo-card" padding="md" fullWidth>
@@ -93,7 +127,12 @@ function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
   return (
     <>
       <ResetDemoCard step={h.step} setStep={h.setStep} t={t} />
-      <Modal open={h.step === 'pin'} onClose={h.handleDismissPin} title={t('dev.resetPinTitle')} testID="reset-pin-modal">
+      <Modal
+        open={h.step === 'pin'}
+        onClose={h.handleDismissPin}
+        title={t('dev.resetPinTitle')}
+        testID="reset-pin-modal"
+      >
         <PinGateContent key={h.pinAttempt} onSubmit={h.handlePinSubmit} error={h.pinError} />
       </Modal>
       <ConfirmDialog

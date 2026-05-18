@@ -63,10 +63,46 @@ function useEfectivoDeps(): {
   const cachinkPlayer = useCachinkPlayer();
   const { play: playCachink } = useCachinkSound(cachinkPlayer);
   return {
-    router, cart, clearCheckout, registrar, business,
-    productos, fecha, efectivoEnCaja: efectivoQ.data?.esperado ?? null,
+    router,
+    cart,
+    clearCheckout,
+    registrar,
+    business,
+    productos,
+    fecha,
+    efectivoEnCaja: efectivoQ.data?.esperado ?? null,
     playCachink,
   };
+}
+
+async function submitEfectivoItems(
+  d: ReturnType<typeof useEfectivoDeps>,
+  efectivoRecibido: Money,
+): Promise<boolean> {
+  if (!d.business || !d.cart) {
+    Alert.alert('Error', 'Negocio no configurado');
+    return false;
+  }
+  for (const item of d.cart.items) {
+    const producto = (d.productos ?? []).find((p: Product) => p.id === item.productoId);
+    if (!producto) continue;
+    try {
+      await d.registrar.mutateAsync({
+        ...buildQuickSellPayload({
+          producto,
+          business: d.business,
+          fecha: d.fecha,
+          metodo: 'Efectivo' as PaymentMethod,
+        }),
+        cantidad: item.cantidad,
+        efectivoRecibidoCentavos: efectivoRecibido,
+      });
+    } catch (err) {
+      handleMutationError(err);
+      return false;
+    }
+  }
+  return true;
 }
 
 export function useEfectivoState(): EfectivoState {
@@ -75,24 +111,8 @@ export function useEfectivoState(): EfectivoState {
 
   const handleConfirm = useCallback(
     async (efectivoRecibido: Money) => {
-      if (!d.business || !d.cart) {
-        Alert.alert('Error', 'Negocio no configurado');
-        return;
-      }
-      for (const item of d.cart.items) {
-        const producto = (d.productos ?? []).find((p: Product) => p.id === item.productoId);
-        if (!producto) continue;
-        try {
-          await d.registrar.mutateAsync({
-            ...buildQuickSellPayload({ producto, business: d.business, fecha: d.fecha, metodo: 'Efectivo' as PaymentMethod }),
-            cantidad: item.cantidad,
-            efectivoRecibidoCentavos: efectivoRecibido,
-          });
-        } catch (err) {
-          handleMutationError(err);
-          return;
-        }
-      }
+      const ok = await submitEfectivoItems(d, efectivoRecibido);
+      if (!ok) return;
       d.clearCheckout();
       setShowCachink(true);
       d.playCachink();
@@ -105,6 +125,8 @@ export function useEfectivoState(): EfectivoState {
     totalCentavos: d.cart?.totalCentavos ?? 0n,
     submitting: d.registrar.isPending,
     efectivoEnCaja: d.efectivoEnCaja,
-    showCachink, setShowCachink, handleConfirm,
+    showCachink,
+    setShowCachink,
+    handleConfirm,
   };
 }

@@ -43,17 +43,12 @@ export interface MermaScreenProps {
   readonly testID?: string;
 }
 
-function useFilteredProducts(
-  productos: readonly Product[],
-  search: string,
-): readonly Product[] {
+function useFilteredProducts(productos: readonly Product[], search: string): readonly Product[] {
   return useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return productos;
     return productos.filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(q) ||
-        (p.sku && p.sku.toLowerCase().includes(q)),
+      (p) => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)),
     );
   }, [productos, search]);
 }
@@ -116,7 +111,11 @@ function ProductGrid(props: {
   );
 }
 
-function MermaCartFooter(props: { cart: CartState; onCheckout: () => void; submitting: boolean }): ReactElement {
+function MermaCartFooter(props: {
+  cart: CartState;
+  onCheckout: () => void;
+  submitting: boolean;
+}): ReactElement {
   return (
     <CartFooter
       itemCount={props.cart.itemCount}
@@ -141,44 +140,78 @@ function buildGridProps(props: MermaScreenProps, filtered: readonly Product[]) {
   };
 }
 
+function TabletLayout(props: {
+  testID: string;
+  title: string;
+  gridProps: Parameters<typeof ProductGrid>[0];
+  screenProps: MermaScreenProps;
+}): ReactElement {
+  return (
+    <View testID={props.testID} flex={1} backgroundColor={colors.offwhite}>
+      <View flex={1} padding={16}>
+        <SectionTitle title={props.title} />
+        <SplitPane
+          left={<ProductGrid {...props.gridProps} />}
+          right={
+            <View flex={1} gap={12}>
+              <MermaCartFooter
+                cart={props.screenProps.cart}
+                onCheckout={props.screenProps.onCheckout}
+                submitting={props.screenProps.submitting}
+              />
+              <ScrollView style={{ flex: 1 }}>
+                <CartSection {...props.screenProps} />
+              </ScrollView>
+            </View>
+          }
+          leftFlex={0.45}
+          rightFlex={0.55}
+          testID="merma-split"
+        />
+      </View>
+    </View>
+  );
+}
+
+function PhoneLayout(props: {
+  testID: string;
+  title: string;
+  gridProps: Parameters<typeof ProductGrid>[0];
+  screenProps: MermaScreenProps;
+}): ReactElement {
+  return (
+    <View testID={props.testID} flex={1} backgroundColor={colors.offwhite}>
+      <ScrollView
+        contentContainerStyle={{
+          padding: 16,
+          gap: 16,
+          paddingBottom: 120,
+        }}
+      >
+        <SafeAreaSpacer />
+        <SectionTitle title={props.title} />
+        <ProductGrid {...props.gridProps} />
+        <CartSection {...props.screenProps} />
+      </ScrollView>
+      <MermaCartFooter
+        cart={props.screenProps.cart}
+        onCheckout={props.screenProps.onCheckout}
+        submitting={props.screenProps.submitting}
+      />
+    </View>
+  );
+}
+
 export function MermaScreen(props: MermaScreenProps): ReactElement {
   const { t } = useTranslation();
   const media = useMedia();
   const filtered = useFilteredProducts(props.productos, props.productSearch);
   const gridProps = buildGridProps(props, filtered);
   const testID = props.testID ?? 'merma-screen';
+  const title = t('merma.title');
 
   if (Boolean(media.gtMd)) {
-    return (
-      <View testID={testID} flex={1} backgroundColor={colors.offwhite}>
-        <View flex={1} padding={16}>
-          <SectionTitle title={t('merma.title')} />
-          <SplitPane
-            left={<ProductGrid {...gridProps} />}
-            right={
-              <View flex={1} gap={12}>
-                <MermaCartFooter cart={props.cart} onCheckout={props.onCheckout} submitting={props.submitting} />
-                <ScrollView style={{ flex: 1 }}><CartSection {...props} /></ScrollView>
-              </View>
-            }
-            leftFlex={0.45}
-            rightFlex={0.55}
-            testID="merma-split"
-          />
-        </View>
-      </View>
-    );
+    return <TabletLayout testID={testID} title={title} gridProps={gridProps} screenProps={props} />;
   }
-
-  return (
-    <View testID={testID} flex={1} backgroundColor={colors.offwhite}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 120 }}>
-        <SafeAreaSpacer />
-        <SectionTitle title={t('merma.title')} />
-        <ProductGrid {...gridProps} />
-        <CartSection {...props} />
-      </ScrollView>
-      <MermaCartFooter cart={props.cart} onCheckout={props.onCheckout} submitting={props.submitting} />
-    </View>
-  );
+  return <PhoneLayout testID={testID} title={title} gridProps={gridProps} screenProps={props} />;
 }

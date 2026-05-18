@@ -15,6 +15,46 @@ export type { BarSegment, StackedBarProps } from './stacked-types';
 const DEFAULT_HEIGHT = 28;
 const INLINE_LABEL_THRESHOLD = 15;
 
+function LegendValues({ formatted, pct }: { formatted: string; pct: number }): ReactElement {
+  return (
+    <>
+      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+        —
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={11}
+        fontWeight={typography.weights.bold}
+        color={colors.ink}
+      >
+        {formatted}
+      </Text>
+      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+        ({pct}%)
+      </Text>
+    </>
+  );
+}
+
+function LegendRow(props: {
+  seg: BarSegment;
+  total: number;
+  showValues: boolean;
+  formatValue?: (v: number) => string;
+}): ReactElement {
+  const pct = props.total > 0 ? Math.round((props.seg.value / props.total) * 100) : 0;
+  const formatted = props.formatValue?.(props.seg.value) ?? `$${props.seg.value.toFixed(0)}`;
+  return (
+    <View flexDirection="row" alignItems="center" gap={6}>
+      <View width={8} height={8} borderRadius={4} backgroundColor={props.seg.color} />
+      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
+        {props.seg.label}
+      </Text>
+      {props.showValues && <LegendValues formatted={formatted} pct={pct} />}
+    </View>
+  );
+}
+
 function StackedLegend(props: {
   segments: readonly BarSegment[];
   total: number;
@@ -23,31 +63,15 @@ function StackedLegend(props: {
 }): ReactElement {
   return (
     <View gap={4}>
-      {props.segments.map((seg, i) => {
-        const pct = props.total > 0 ? Math.round((seg.value / props.total) * 100) : 0;
-        const formatted = props.formatValue?.(seg.value) ?? `$${seg.value.toFixed(0)}`;
-        return (
-          <View key={i} flexDirection="row" alignItems="center" gap={6}>
-            <View width={8} height={8} borderRadius={4} backgroundColor={seg.color} />
-            <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
-              {seg.label}
-            </Text>
-            {props.showValues && (
-              <>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  —
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} fontWeight={typography.weights.bold} color={colors.ink}>
-                  {formatted}
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  ({pct}%)
-                </Text>
-              </>
-            )}
-          </View>
-        );
-      })}
+      {props.segments.map((seg, i) => (
+        <LegendRow
+          key={i}
+          seg={seg}
+          total={props.total}
+          showValues={props.showValues}
+          formatValue={props.formatValue}
+        />
+      ))}
     </View>
   );
 }
@@ -55,9 +79,22 @@ function StackedLegend(props: {
 function BarSegmentView({ seg, pct }: { seg: BarSegment; pct: number }): ReactElement | null {
   if (pct <= 0) return null;
   return (
-    <View testID="stacked-bar-segment" width={`${pct.toFixed(1)}%`} backgroundColor={seg.color} height="100%" justifyContent="center" alignItems="center">
+    <View
+      testID="stacked-bar-segment"
+      width={`${pct.toFixed(1)}%`}
+      backgroundColor={seg.color}
+      height="100%"
+      justifyContent="center"
+      alignItems="center"
+    >
       {pct >= INLINE_LABEL_THRESHOLD && (
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={10} color={colors.white} textAlign="center">
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.bold}
+          fontSize={10}
+          color={colors.white}
+          textAlign="center"
+        >
           {Math.round(pct)}%
         </Text>
       )}
@@ -65,9 +102,21 @@ function BarSegmentView({ seg, pct }: { seg: BarSegment; pct: number }): ReactEl
   );
 }
 
-function BarTrack(props: { segments: readonly BarSegment[]; total: number; height: number }): ReactElement {
+function BarTrack(props: {
+  segments: readonly BarSegment[];
+  total: number;
+  height: number;
+}): ReactElement {
   return (
-    <View testID="stacked-bar-track" flexDirection="row" height={props.height} borderRadius={4} overflow="hidden" borderColor={colors.black} borderWidth={2}>
+    <View
+      testID="stacked-bar-track"
+      flexDirection="row"
+      height={props.height}
+      borderRadius={4}
+      overflow="hidden"
+      borderColor={colors.black}
+      borderWidth={2}
+    >
       {props.segments.map((seg, i) => {
         const pct = props.total > 0 ? (seg.value / props.total) * 100 : 0;
         return <BarSegmentView key={i} seg={seg} pct={pct} />;
