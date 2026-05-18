@@ -1,0 +1,33 @@
+{
+  "name": "@cachink/observability",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Audit logging, error telemetry, and observability infrastructure. No UI.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@cachink/domain": "workspace:*",
+    "ulid": "^3.0.2"
+  },
+  "devDependencies": {
+    "@cachink/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.1.6",
+    "better-sqlite3": "^12.10.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}

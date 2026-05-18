@@ -93,6 +93,13 @@ const OPERATIVO_FLAG_ITEMS: readonly FlagItem[] = [
 
 const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
   {
+    key: 'notificaciones',
+    icon: 'bell',
+    labelKey: 'otros.notificaciones',
+    descriptionKey: 'otros.desc.notificaciones',
+    path: '/notificaciones',
+  },
+  {
     key: 'gastos',
     icon: 'file-text',
     labelKey: 'otros.gastos',
@@ -161,8 +168,22 @@ const DIRECTOR_FLAG_ITEMS: readonly FlagItem[] = [
 /** Director caja items always visible (caja is always-on). */
 const DIRECTOR_CAJA_ITEMS: readonly OtrosItem[] = [
   {
-    key: 'caja-reportes',
+    key: 'caja',
     icon: 'inbox',
+    labelKey: 'otros.caja',
+    descriptionKey: 'otros.desc.caja',
+    path: '/caja',
+  },
+  {
+    key: 'caja-movimientos',
+    icon: 'arrow-down-up',
+    labelKey: 'otros.cajaMovimientos',
+    descriptionKey: 'otros.desc.cajaMovimientos',
+    path: '/caja-movimientos',
+  },
+  {
+    key: 'caja-reportes',
+    icon: 'chart-bar',
     labelKey: 'otros.cajaReportes',
     descriptionKey: 'otros.desc.cajaReportes',
     path: '/caja-reportes',
@@ -216,5 +237,18 @@ export function operativoOtrosItems(flags: FeatureFlags): OtrosItem[] {
 /** Director Otros grid items (always-on + feature-flag dependent). */
 export function directorOtrosItems(flags: FeatureFlags): OtrosItem[] {
   const flagItems = DIRECTOR_FLAG_ITEMS.filter((e) => e.flagCheck(flags)).map((e) => e.item);
-  return [...DIRECTOR_ALWAYS_ITEMS, ...flagItems, ...DIRECTOR_CAJA_ITEMS, ...DIRECTOR_TAIL_ITEMS];
+  const items = [...DIRECTOR_ALWAYS_ITEMS, ...flagItems, ...DIRECTOR_CAJA_ITEMS, ...DIRECTOR_TAIL_ITEMS];
+
+  // Dev-only telemetry card — visible only in development builds
+  if (typeof __DEV__ !== 'undefined' && __DEV__) {
+    items.push({
+      key: 'telemetria',
+      icon: 'zap',
+      labelKey: 'otros.telemetria',
+      descriptionKey: 'otros.desc.telemetria',
+      path: '/telemetria',
+    });
+  }
+
+  return items;
 }

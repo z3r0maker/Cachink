@@ -8,10 +8,12 @@
  * on success.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { ClientId } from '@cachink/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ELIMINAR_CLIENTE } from '../observability/audit-configs';
 
 export class ClientPendingSalesError extends Error {
   constructor(public readonly pendingCount: number) {
@@ -33,7 +35,7 @@ export function useEliminarCliente(): EliminarClienteResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<void, Error, EliminarClienteInput>({
+  return useAuditedMutation(MUTATION_ELIMINAR_CLIENTE, {
     async mutationFn(input) {
       if (input.force !== true) {
         const pending = await sales.findPendingByClient(input.id);

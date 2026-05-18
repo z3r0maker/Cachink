@@ -44,6 +44,8 @@ export interface CajaTurnosRepository {
   findById(id: CajaTurnoId): Promise<CajaTurno | null>;
   /** Find the currently open turn for a user (cierreAt IS NULL). */
   findOpenByUser(userId: UserId): Promise<CajaTurno | null>;
+  /** Find any open turn for the business (regardless of user). */
+  findOpenByBusiness(businessId: BusinessId): Promise<CajaTurno | null>;
   /** Find the most recent turn for a business. */
   findLatest(businessId: BusinessId): Promise<CajaTurno | null>;
   /** List turns in a date range, newest first. */

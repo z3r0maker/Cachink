@@ -19,7 +19,7 @@ env:
 - runScript:
     script: adb shell cmd connectivity airplane-mode enable
 
-# Ensure at least one product exists for the inline POS (ADR-048).
+# Ensure at least one product exists for the cart checkout flow.
 # If cloud-signin-bootstrap already seeds a product, this is redundant
 # but safe — the duplicate-name scenario is handled by the create form.
 - tapOn: { id: "tab-productos" }
@@ -31,16 +31,29 @@ env:
 - tapOn: { id: "producto-submit" }
 - assertVisible: "Offline producto"
 
-# Record 3 ventas offline via the inline POS (ADR-048).
+# Record 3 ventas offline via the cart checkout flow.
 - repeat:
     times: 3
     commands:
       - tapOn: { id: "tab-ventas" }
-      - assertVisible: { id: "ventas-product-grid" }
+      - extendedWaitUntil:
+          visible: { id: "ventas-product-grid" }
+          timeout: 5000
       - tapOn: "Offline producto"
-      - assertVisible: { id: "venta-confirm-sheet" }
-      - tapOn: { id: "venta-confirm-submit" }
-      - assertNotVisible: { id: "venta-confirm-sheet" }
+      - assertVisible: { id: "cart-strip" }
+      - tapOn: { id: "cart-checkout-btn" }
+      - extendedWaitUntil:
+          visible: { id: "checkout-method-picker" }
+          timeout: 5000
+      - tapOn: { id: "checkout-method-continue" }
+      - extendedWaitUntil:
+          visible: { id: "checkout-efectivo" }
+          timeout: 5000
+      - tapOn: "\\$50"
+      - tapOn: { id: "checkout-efectivo-submit" }
+      - extendedWaitUntil:
+          visible: { id: "ventas-product-grid" }
+          timeout: 10000
 
 # Disable airplane mode — PowerSync queue drains.
 - runScript:

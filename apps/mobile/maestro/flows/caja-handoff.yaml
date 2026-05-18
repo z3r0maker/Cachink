@@ -1,0 +1,94 @@
+# Caja handoff E2E — verifies banner appears when another user opened caja.
+#
+# Verifies:
+#   1. Director opens caja with $1000
+#   2. Switch to Operativo
+#   3. Navigate to Caja → handoff banner visible
+#   4. "Confirmar monto" button works → turno opens for Operativo
+#
+# Precondition: wizard + director-setup complete, both users exist.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
+#   maestro test apps/mobile/maestro/flows/caja-handoff.yaml
+appId: mx.cachink.mobile
+tags:
+  - caja
+  - regression
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+
+# --- Step 1: Login as Director and open caja with $1000 ---
+- runFlow: shared/authenticate-director.yaml
+
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-caja"
+
+# Abrir caja modal should appear.
+- extendedWaitUntil:
+    visible:
+      id: "abrir-caja-modal"
+    timeout: 5000
+
+# Enter 1000 via numpad (Caja Overhaul — replaces text input).
+- tapOn: { id: "numpad-1" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn:
+    id: "caja-abrir-submit"
+
+# Status card shows open turn.
+- assertVisible:
+    id: "caja-status-card"
+
+# --- Step 2: Switch to Operativo ---
+# Go back to home and switch user
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-cerrar-sesion"
+    optional: true
+
+# Wait for QuickSwitch to appear.
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 5000
+    optional: true
+
+- runFlow: shared/authenticate.yaml
+
+# --- Step 3: Navigate to Caja and verify handoff banner ---
+- tapOn:
+    id: "tab-otros"
+- tapOn:
+    id: "otros-caja"
+
+# Handoff banner should be visible.
+- extendedWaitUntil:
+    visible:
+      id: "caja-handoff-banner"
+    timeout: 5000
+
+- assertVisible:
+    id: "caja-handoff-confirm"
+- assertVisible:
+    id: "caja-handoff-different"
+
+# --- Step 4: Confirm monto (same amount) ---
+- tapOn:
+    id: "caja-handoff-confirm"
+
+# After confirmation, the status card should appear for Operativo.
+- extendedWaitUntil:
+    visible:
+      id: "caja-status-card"
+    timeout: 5000

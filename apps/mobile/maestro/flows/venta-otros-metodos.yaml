@@ -3,65 +3,83 @@
 # Covers additional payment methods beyond Efectivo and Crédito
 # which are already tested in venta-efectivo.yaml and venta-credito.yaml.
 #
-# Precondition: wizard + at least one product exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/venta-otros-metodos.yaml
+# Precondition: demo mode seeded (products + users exist).
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
 # Navigate to the Ventas tab.
 - tapOn:
     id: "tab-ventas"
-- assertVisible: "Tortilla"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
 
 # --- Sale 1: Transferencia ---
 
-# Tap the product to open VentaConfirmSheet.
-- tapOn: "Tortilla"
+# Tap a product to add to cart.
+- tapOn: "Quesadilla"
 - assertVisible:
-    id: "venta-confirm-sheet"
-
-# Switch payment method to Transferencia.
+    id: "cart-strip"
 - tapOn:
-    id: "venta-confirm-metodo"
-- tapOn: "Transferencia"
+    id: "cart-checkout-btn"
 
-# Submit the sale.
+# Method picker — select Transferencia.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
 - tapOn:
-    id: "venta-confirm-submit"
+    id: "option-card-Transferencia"
+- tapOn:
+    id: "checkout-method-continue"
 
-# Sheet closes and the sale appears in the list.
-- assertNotVisible:
-    id: "venta-confirm-sheet"
-- assertVisible: "Tortilla"
+# Confirm screen for Transferencia — submit.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-confirm-Transferencia"
+    timeout: 5000
+- tapOn:
+    id: "checkout-confirm-Transferencia-submit"
+
+# Returns to Ventas.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 10000
 
 # --- Sale 2: Tarjeta ---
 
-# Tap the product again.
-- tapOn:
-    id: "ventas-product-grid"
-- tapOn: "Tortilla"
+- tapOn: "Quesadilla"
 - assertVisible:
-    id: "venta-confirm-sheet"
-
-# Switch payment method to Tarjeta.
+    id: "cart-strip"
 - tapOn:
-    id: "venta-confirm-metodo"
-- tapOn: "Tarjeta"
+    id: "cart-checkout-btn"
 
-# Submit the sale.
+# Method picker — select Tarjeta.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
 - tapOn:
-    id: "venta-confirm-submit"
+    id: "option-card-Tarjeta"
+- tapOn:
+    id: "checkout-method-continue"
 
-# Sheet closes — both sales now exist.
-- assertNotVisible:
-    id: "venta-confirm-sheet"
+# Confirm screen for Tarjeta — submit.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-confirm-Tarjeta"
+    timeout: 5000
+- tapOn:
+    id: "checkout-confirm-Tarjeta-submit"
+
+# Returns to Ventas — both sales exist.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 10000

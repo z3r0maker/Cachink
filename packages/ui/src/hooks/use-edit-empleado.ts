@@ -4,11 +4,13 @@
  * on success so employee lists refresh immediately.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Employee, EmployeeId, Money, PayrollFrequency } from '@cachink/domain';
 import type { UpdateEmployee } from '@cachink/data';
 import { useEmployeesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_EDITAR_EMPLEADO } from '../observability/audit-configs';
 
 export interface EditEmpleadoInput {
   readonly id: EmployeeId;
@@ -25,7 +27,7 @@ export function useEditEmpleado(): EditEmpleadoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<Employee, Error, EditEmpleadoInput>({
+  return useAuditedMutation(MUTATION_EDITAR_EMPLEADO, {
     async mutationFn(input) {
       const payload: UpdateEmployee = {};
       if (input.nombre !== undefined) payload.nombre = input.nombre;

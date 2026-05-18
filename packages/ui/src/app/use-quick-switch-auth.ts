@@ -63,6 +63,8 @@ async function runAuth(
 ): Promise<void> {
   setters.setSubmitting(true);
   setters.setError(null);
+  // Yield one frame so React paints the loading spinner before bcrypt blocks
+  await new Promise<void>((r) => requestAnimationFrame(() => r()));
   try {
     const user = await usersRepo.findById(userId);
     if (!user) {
@@ -101,6 +103,8 @@ async function runRecover(
 ): Promise<void> {
   setters.setSubmitting(true);
   setters.setError(null);
+  // Yield one frame so React paints the loading spinner before bcrypt blocks
+  await new Promise<void>((r) => requestAnimationFrame(() => r()));
   try {
     await new RecuperarPinUseCase(usersRepo).execute({
       userId: recoveryUserId,

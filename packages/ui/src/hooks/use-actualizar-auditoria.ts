@@ -8,7 +8,7 @@
  * Powers the Auditoría "Conteo" tab (Part C4).
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   today,
   type AuditoriaEstado,
@@ -22,6 +22,9 @@ import {
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { auditoriaKeys } from './query-keys';
+import { useEmitDirectorAlert } from './use-emit-director-alert';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ACTUALIZAR_AUDITORIA } from '../observability/audit-configs';
 
 export interface ActualizarAuditoriaInput {
   readonly id: AuditoriaInventarioId;
@@ -41,8 +44,9 @@ export function useActualizarAuditoria(): ActualizarAuditoriaResult {
   const movementsRepo = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const emitAlert = useEmitDirectorAlert();
 
-  return useMutation<AuditoriaInventario, Error, ActualizarAuditoriaInput>({
+  return useAuditedMutation(MUTATION_ACTUALIZAR_AUDITORIA, {
     async mutationFn(input) {
       if (!businessId) {
         throw new Error('useActualizarAuditoria: no current business set');
@@ -79,7 +83,7 @@ export function useActualizarAuditoria(): ActualizarAuditoriaResult {
 
       return updated;
     },
-    async onSuccess() {
+    async onSuccess(auditoria, input) {
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: auditoriaKeys.all,
@@ -91,6 +95,23 @@ export function useActualizarAuditoria(): ActualizarAuditoriaResult {
           queryKey: ['productos-con-stock', businessId],
         }),
       ]);
+
+      // Alert: auditoria-discrepancia — when finalized audit has discrepancies
+      if (input.estado === 'finalizada') {
+        const discrepancyCount = input.lineas.filter(
+          (l) => l.diferencia !== null && l.diferencia !== 0,
+        ).length;
+        if (discrepancyCount > 0) {
+          emitAlert.mutate({
+            source: 'auditoria-discrepancia',
+            severity: 'warning',
+            titleKey: 'notificaciones.auditoriaDiscrepancia',
+            message: `La auditoría finalizó con ${discrepancyCount} discrepancias.`,
+            actionRoute: '/auditoria',
+            metadata: JSON.stringify({ auditoriaId: auditoria.id, discrepancyCount }),
+          });
+        }
+      }
     },
   });
 }

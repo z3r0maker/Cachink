@@ -141,3 +141,12 @@ export const auditoriaKeys = {
   byRange: (businessId: BusinessId | null, from: IsoDate, to: IsoDate): readonly unknown[] =>
     ['auditorias-inventario', businessId, from, to] as const,
 } as const;
+
+export const directorAlertKeys = {
+  all: (businessId: BusinessId | null): readonly unknown[] =>
+    ['director-alerts', businessId] as const,
+  unreadCount: (businessId: BusinessId | null): readonly unknown[] =>
+    ['director-alerts', 'unread-count', businessId] as const,
+  list: (businessId: BusinessId | null, filter: string): readonly unknown[] =>
+    ['director-alerts', 'list', businessId, filter] as const,
+} as const;

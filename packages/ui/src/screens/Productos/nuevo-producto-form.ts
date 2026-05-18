@@ -11,6 +11,7 @@ import {
   type InventoryCategory,
   type InventoryUnit,
   type ProductColor,
+  type ProductIcon,
   type UsoProducto,
 } from '@cachink/domain';
 import type { OptionCardItem } from '../../components/OptionCardGroup/index';
@@ -85,6 +86,7 @@ export interface ProductoFormState {
   umbral: string;
   stockInicial: string;
   colorFondo: ProductColor;
+  icono: ProductIcon | null;
 }
 
 export interface ProductoFormErrors {
@@ -106,6 +108,7 @@ export function initialProductoState(): ProductoFormState {
     umbral: '3',
     stockInicial: '',
     colorFondo: 'white',
+    icono: null,
   };
 }
 
@@ -151,6 +154,7 @@ export function buildProductoPayload(state: ProductoFormState): CrearProductoInp
     unidad: state.unidad,
     umbralStockBajo: Number(state.umbral),
     colorFondo: state.colorFondo,
+    icono: state.icono,
     stockInicial,
   };
 }

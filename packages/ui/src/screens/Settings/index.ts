@@ -12,3 +12,4 @@ export { EditBusinessModal, type EditBusinessModalProps } from './edit-business-
 export { EditEmpleadoModal, type EditEmpleadoModalProps } from './edit-empleado-modal';
 export { TiposDePagoScreen, type TiposDePagoScreenProps } from './tipos-de-pago-screen';
 export { SettingsIndicadores, type SettingsIndicadoresProps } from './settings-indicadores';
+export { BugReportSheet, type BugReportSheetProps } from './bug-report-sheet';

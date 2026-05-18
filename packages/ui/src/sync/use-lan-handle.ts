@@ -78,8 +78,8 @@ function useStartLanSync(ready: boolean, args: InitArgs | null): LanSyncHandle |
         local = h;
         setHandle(h);
       })
-      .catch((err: unknown) => {
-        console.error('[useLanHandle] initLanSync failed', err);
+      .catch((_err: unknown) => {
+        console.error('[useLanHandle] initLanSync failed', _err);
       });
     return () => {
       disposed = true;

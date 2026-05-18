@@ -29,6 +29,7 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "ventas-total-card"
 
-# Verify the date display shows today.
+# Verify the sales list is visible (ventas-fecha testID was removed;
+# the date is shown inline in the total card).
 - assertVisible:
-    id: "ventas-fecha"
+    id: "ventas-list"

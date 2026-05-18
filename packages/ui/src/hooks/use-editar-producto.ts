@@ -9,12 +9,14 @@
  */
 
 import { useMemo } from 'react';
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Product, ProductId } from '@cachink/domain';
 import type { ProductPatch } from '@cachink/data';
 import { EditarProductoUseCase } from '@cachink/application';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_EDITAR_PRODUCTO } from '../observability/audit-configs';
 
 export interface EditarProductoInput {
   readonly id: ProductId;
@@ -30,7 +32,7 @@ export function useEditarProducto(): EditarProductoResult {
 
   const useCase = useMemo(() => new EditarProductoUseCase(products), [products]);
 
-  return useMutation<Product, Error, EditarProductoInput>({
+  return useAuditedMutation(MUTATION_EDITAR_PRODUCTO, {
     async mutationFn(input) {
       return useCase.execute(input);
     },

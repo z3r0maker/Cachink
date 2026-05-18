@@ -9,9 +9,15 @@ import {
   OtrosScreen,
   useFeatureFlags,
   useRole,
+  ResetDemoAction,
 } from '@cachink/ui';
+import { webResetDatabase } from '@cachink/ui/database/reset-web';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
 import { useDesktopNavigate } from '../desktop-router-context';
+
+function reloadApp(): void {
+  window.location.reload();
+}
 
 export function OtrosRoute(): ReactElement {
   const navigate = useDesktopNavigate();
@@ -26,6 +32,14 @@ export function OtrosRoute(): ReactElement {
         onNavigate={navigate}
         testID="otros-desktop-route"
       />
+      {typeof __DEV__ !== 'undefined' && __DEV__ && (
+        <div style={{ padding: 16 }}>
+          <ResetDemoAction
+            resetDatabase={webResetDatabase}
+            onReload={reloadApp}
+          />
+        </div>
+      )}
     </DesktopAppShellWrapper>
   );
 }

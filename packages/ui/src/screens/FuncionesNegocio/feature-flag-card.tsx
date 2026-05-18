@@ -3,7 +3,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { Switch } from 'react-native';
+import { Switch, Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -68,6 +68,9 @@ export function FeatureFlagCard(props: FeatureFlagCardProps): ReactElement {
           value={props.enabled}
           onValueChange={props.onToggle}
           disabled={!props.canToggle}
+          trackColor={{ false: colors.gray200, true: colors.yellow }}
+          thumbColor={Platform.OS === 'android' ? colors.white : undefined}
+          ios_backgroundColor={colors.gray200}
           testID={`${props.testID}-switch`}
         />
       </View>

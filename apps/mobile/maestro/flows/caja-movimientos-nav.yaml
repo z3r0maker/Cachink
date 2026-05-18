@@ -1,0 +1,29 @@
+# Navigate to Caja Movimientos screen and verify empty state.
+# Route: /caja-movimientos (via Otros → caja-movimientos card)
+# Verifies: screen renders, empty-state message visible.
+appId: mx.cachink.mobile
+tags:
+  - otros
+  - caja
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+- tapOn:
+    id: "tab-otros"
+- extendedWaitUntil:
+    visible:
+      id: "otros-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "otros-caja-movimientos"
+- extendedWaitUntil:
+    visible:
+      text: "Movimientos de Caja"
+    timeout: 5000
+
+# Verify empty state renders (no movements today)
+- assertVisible: "Sin movimientos registrados hoy"

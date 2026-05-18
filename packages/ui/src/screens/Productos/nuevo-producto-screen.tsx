@@ -7,7 +7,7 @@
  * Phase 18: new product form as a full page.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
 import { Btn, Scanner } from '../../components/index';
@@ -16,6 +16,7 @@ import {
   buildProductoPayload,
   useProductoForm,
   validateProducto,
+  type ProductoFormState,
 } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
 import {
@@ -31,6 +32,10 @@ export interface NuevoProductoScreenProps {
   readonly onBack: () => void;
   readonly submitting?: boolean;
   readonly conversionEnabled?: boolean;
+  /** Navigate to icon picker screen. */
+  readonly onPickIcon?: () => void;
+  /** Fires on every form update — used to persist state before navigation. */
+  readonly onFormChange?: (state: ProductoFormState) => void;
   readonly testID?: string;
 }
 
@@ -39,6 +44,10 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
   const form = useProductoForm();
   const [scanOpen, setScanOpen] = useState(false);
   const showPrecio = form.state.usoProducto !== 'materia-prima';
+
+  useEffect(() => {
+    props.onFormChange?.(form.state);
+  }, [form.state]);
 
   const handleSubmit = (): void => {
     const msgs = {
@@ -71,7 +80,7 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       />
       <PricingFields form={form} t={t} showPrecio={showPrecio} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
-      <AppearanceField form={form} t={t} />
+      <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
       <Btn
         variant="primary"
         onPress={handleSubmit}

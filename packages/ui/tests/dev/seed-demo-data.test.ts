@@ -110,7 +110,7 @@ describe('seedDemoData', () => {
     const sales = await repos.sales.findByDateRange(
       from.toISOString().slice(0, 10), new Date().toISOString().slice(0, 10), bizId,
     );
-    expect(sales.length).toBeGreaterThanOrEqual(60);
+    expect(sales.length).toBeGreaterThanOrEqual(290);
   });
 
   it('creates 15 expenses', async () => {

@@ -22,6 +22,8 @@ function useChangePinSubmit() {
     if (!userId) return;
     setSubmitting(true);
     setError(null);
+    // Yield one frame so React paints the loading spinner before bcrypt blocks
+    await new Promise<void>((r) => requestAnimationFrame(() => r()));
     try {
       await new CambiarPinUseCase(users).execute({ userId, currentPin, newPin });
       setMustChangePin(false);

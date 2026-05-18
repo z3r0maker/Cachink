@@ -19,6 +19,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle } from '../components/index';
 import { i18n } from '../i18n/index';
 import { colors, typography } from '../theme';
+import { getLogStoreRef } from '../observability/log-store-ref';
 
 export interface AppErrorBoundaryProps {
   readonly children: ReactNode;
@@ -53,6 +54,23 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
 
   override componentDidCatch(error: Error, info: ErrorInfo): void {
     this.props.onError?.(error, info);
+
+    // Phase 7: Write render crash to local LogStore
+    const logStore = getLogStoreRef();
+    if (logStore) {
+      void logStore.writeError({
+        id: '',
+        timestamp: new Date().toISOString(),
+        source: 'ui',
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        userId: null,
+        deviceId: '',
+        businessId: null,
+        context: { componentStack: info.componentStack ?? undefined },
+      }).catch(() => {});
+    }
   }
 
   readonly #handleReset = (): void => {

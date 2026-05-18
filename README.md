@@ -1,8 +1,18 @@
-# Cachink! 💰
+<p align="center">
+  <img src="assets/brand/icon-padded.png" alt="Cachink!" width="120" height="120" />
+</p>
 
-> Finanzas para emprendedores.
+<h1 align="center">Cachink! 💰</h1>
 
-A simple, mobile-first financial control and micro-POS app for Mexican emprendedores and small businesses. Captures sales, expenses, and inventory; produces NIF-compliant financial statements; works fully offline on a single device or syncs across a LAN or the cloud.
+<p align="center">
+  <em>Finanzas para emprendedores.</em>
+</p>
+
+<p align="center">
+  A simple, mobile-first financial control and micro-POS app for Mexican emprendedores and small businesses.<br/>
+  Captures sales, expenses, and inventory; produces NIF-compliant financial statements;<br/>
+  works fully offline on a single device or syncs across a LAN or the cloud.
+</p>
 
 ---
 
@@ -17,9 +27,9 @@ landed 2026-04-24 — and a Round 3 verification pass added the F1/F2
 correctness fixes plus matching boundary tests. Local + LAN + Cloud
 modes have working end-to-end UI for every shipped feature.
 v0.1.0 public-beta tag-ready once Round 3's F4 coverage tests land.
-~1,085+ unit tests, 5 ADRs (029 LAN protocol, 030 change-log triggers,
-035 hybrid cloud backend, 036 launch artifacts, 037 mobile
-@supabase/supabase-js direct dep). Store submission is a human-gated
+369 test files, 179 Maestro E2E flows, 50 ADRs. Full observability/audit
+trail system via `@cachink/observability` for local audit logging, error
+telemetry, and health checks. Store submission is a human-gated
 action — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
 Current phase + remaining work tracked in
 [`ROADMAP.md`](./ROADMAP.md); detailed phase history lives in
@@ -67,7 +77,7 @@ Emprendedores and small-business owners in Mexico. Not an ERP. Not facturación.
 
 ```bash
 pnpm install
-pnpm test                              # full monorepo tests (>500 passing)
+pnpm test                              # full monorepo tests (369 test files)
 pnpm lint                              # enforce layer boundaries + style
 pnpm typecheck                         # strict TS across all packages
 pnpm --filter @cachink/mobile ios      # dev build (needs Metro running)
@@ -134,6 +144,7 @@ Requirements:
 - **PowerSync** (Cloud mode), first-party LAN sync (LAN mode)
 - **Zustand** + **TanStack Query** for state
 - **Vitest** + **React Native Testing Library** + **Maestro** + **Playwright** for testing
+- **@cachink/observability** for local audit logging + error telemetry
 - **Turborepo** + **pnpm workspaces** monorepo
 
 See CLAUDE.md §3 for pinned version floors and full list.
@@ -167,6 +178,7 @@ cachink/
 │   ├── ui/               Shared Tamagui components
 │   ├── sync-lan/         First-party LAN sync (LAN mode only)
 │   ├── sync-cloud/       PowerSync integration (Cloud mode only)
+│   ├── observability/    Audit logging, error telemetry, health checks
 │   ├── config/           Shared ESLint, TS, Prettier configs
 │   └── testing/          Shared test utilities, in-memory repos
 ├── CLAUDE.md

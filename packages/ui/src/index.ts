@@ -32,3 +32,4 @@ export type { AppTamaguiConfig } from './tamagui.config';
 // the EsMX type, etc.) stays internal and is consumed by the
 // per-app shell bootstrap files.
 export { useTranslation } from './i18n/index';
+export * from './dev/index';

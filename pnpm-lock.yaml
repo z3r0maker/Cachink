@@ -432,6 +432,31 @@ importers:
         specifier: ^4.1.6
         version: 4.1.6(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0))
 
+  packages/observability:
+    dependencies:
+      '@cachink/domain':
+        specifier: workspace:*
+        version: link:../domain
+      ulid:
+        specifier: ^3.0.2
+        version: 3.0.2
+    devDependencies:
+      '@cachink/config':
+        specifier: workspace:*
+        version: link:../config
+      '@vitest/coverage-v8':
+        specifier: ^4.1.6
+        version: 4.1.6(vitest@4.1.6)
+      better-sqlite3:
+        specifier: ^12.10.0
+        version: 12.10.0
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.22.0)(yaml@2.9.0))
+
   packages/sync-cloud:
     dependencies:
       '@cachink/data':
@@ -548,6 +573,9 @@ importers:
       '@cachink/domain':
         specifier: workspace:*
         version: link:../domain
+      '@cachink/observability':
+        specifier: workspace:*
+        version: link:../observability
       '@react-pdf/renderer':
         specifier: ^4.5.1
         version: 4.5.1(react@19.2.6)
@@ -557,6 +585,9 @@ importers:
       '@tamagui/web':
         specifier: 2.0.0-rc.42
         version: 2.0.0-rc.42(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      bcryptjs:
+        specifier: 3.0.3
+        version: 3.0.3
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@types/better-sqlite3@7.6.13)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(gel@2.2.0)

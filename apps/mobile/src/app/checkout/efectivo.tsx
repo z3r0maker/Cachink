@@ -8,7 +8,7 @@
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { useAudioPlayer } from 'expo-audio';
+import { useCachinkPlayer } from '../../shell/use-cachink-player';
 import { Alert } from 'react-native';
 import type { Money, PaymentMethod, Product, IsoDate } from '@cachink/domain';
 import { today } from '@cachink/domain';
@@ -37,8 +37,7 @@ export default function CheckoutEfectivoRoute(): ReactElement {
   const efectivoQ = useEfectivoEsperado({ fecha });
   const efectivoEnCaja = efectivoQ.data?.esperado ?? null;
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const cachinkPlayer = useAudioPlayer(require('../../../assets/sounds/cachink.mp3'));
+  const cachinkPlayer = useCachinkPlayer();
   const { play: playCachink } = useCachinkSound(cachinkPlayer);
 
   const handleConfirm = useCallback(

@@ -33,3 +33,4 @@ export * from './entrega-credito.js';
 export * from './director-alert.js';
 export * from './caja-movimiento.js';
 export * from './cancelacion-log.js';
+export * from './notification-preferences.js';

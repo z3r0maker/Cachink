@@ -10,7 +10,7 @@
  */
 
 import { useMemo } from 'react';
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   ProcesarGastoRecurrenteUseCase,
   type ProcesarGastoRecurrenteInput,
@@ -18,6 +18,9 @@ import {
 } from '@cachink/application';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useEmitDirectorAlert } from './use-emit-director-alert';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_PROCESAR_RECURRENTE } from '../observability/audit-configs';
 
 export type ProcesarGastoRecurrenteHookResult = UseMutationResult<
   ProcesarGastoRecurrenteResult,
@@ -36,7 +39,9 @@ export function useProcesarGastoRecurrente(): ProcesarGastoRecurrenteHookResult 
     [expenses, recurring],
   );
 
-  return useMutation<ProcesarGastoRecurrenteResult, Error, ProcesarGastoRecurrenteInput>({
+  const emitAlert = useEmitDirectorAlert();
+
+  return useAuditedMutation(MUTATION_PROCESAR_RECURRENTE, {
     async mutationFn(input) {
       return useCase.execute(input);
     },
@@ -47,6 +52,18 @@ export function useProcesarGastoRecurrente(): ProcesarGastoRecurrenteHookResult 
           queryKey: ['egresos', businessId, result.egreso?.fecha],
         }),
       ]);
+
+      // Alert: gasto-recurrente-pendiente
+      if (result.egreso) {
+        emitAlert.mutate({
+          source: 'gasto-recurrente-pendiente',
+          severity: 'info',
+          titleKey: 'notificaciones.gastoRecurrentePendiente',
+          message: `Se confirmó el gasto recurrente: ${result.egreso.concepto}.`,
+          actionRoute: '/egresos',
+          metadata: JSON.stringify({ egresoId: result.egreso.id }),
+        });
+      }
     },
   });
 }

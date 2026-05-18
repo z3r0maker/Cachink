@@ -15,6 +15,8 @@ import type { SalePatch } from '@cachink/data';
 import { EditarVentaUseCase } from '@cachink/application';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_EDITAR_VENTA } from '../observability/audit-configs';
 
 export interface EditarVentaInput {
   readonly id: SaleId;
@@ -31,7 +33,8 @@ export function useEditarVenta(): EditarVentaResult {
 
   // Construct the use-case once per repository swap; identity is
   // stable across renders so consumers can tap the mutation safely.
-  const useCase = useMemo(() => new EditarVentaUseCase(sales, clients), [sales, clients]);
+  const rawUseCase = useMemo(() => new EditarVentaUseCase(sales, clients), [sales, clients]);
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_EDITAR_VENTA);
 
   return useMutation<Sale, Error, EditarVentaInput>({
     async mutationFn(input) {

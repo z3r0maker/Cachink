@@ -7,9 +7,9 @@
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useAudioPlayer } from 'expo-audio';
+import { useCachinkPlayer } from '../../shell/use-cachink-player';
 import { Alert } from 'react-native';
-import type { IsoDate, Money, PaymentMethod, Product } from '@cachink/domain';
+import type { IsoDate, PaymentMethod, Product } from '@cachink/domain';
 import { today } from '@cachink/domain';
 import {
   CachinkBurst,
@@ -34,8 +34,7 @@ export default function CheckoutConfirmRoute(): ReactElement {
   const [showCachink, setShowCachink] = useState(false);
   const fecha = today() as IsoDate;
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const cachinkPlayer = useAudioPlayer(require('../../../assets/sounds/cachink.mp3'));
+  const cachinkPlayer = useCachinkPlayer();
   const { play: playCachink } = useCachinkSound(cachinkPlayer);
 
   const resolvedMetodo = (metodo ?? 'Tarjeta') as PaymentMethod;

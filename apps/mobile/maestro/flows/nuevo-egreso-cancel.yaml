@@ -28,7 +28,7 @@ appId: mx.cachink.mobile
 
 # Fill a partial concepto (to verify cancel discards it).
 - tapOn:
-    id: "nuevo-egreso-concepto"
+    id: "gasto-concepto"
 - inputText: "Egreso cancelado"
 
 # Tap cancel — modal should close without creating.

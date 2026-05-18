@@ -1,0 +1,35 @@
+# Navigate to Telemetría dev dashboard (Director, __DEV__ only).
+# Route: /telemetria (via Otros grid → telemetria card, dev builds only)
+# Verifies: telemetria screen renders, timeline + filter bar visible.
+#
+# NOTE: This flow only works in development builds (__DEV__ === true).
+# The telemetria card is hidden in production builds.
+appId: mx.cachink.mobile
+tags:
+  - otros
+  - telemetria
+  - debug
+  - observability
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Director Otros tab should show telemetria card in dev
+- tapOn:
+    id: "tab-otros"
+- extendedWaitUntil:
+    visible:
+      id: "otros-screen"
+    timeout: 5000
+
+# Tap telemetria card (only visible in __DEV__)
+- tapOn:
+    id: "otros-telemetria"
+- extendedWaitUntil:
+    visible:
+      text: "Telemetría"
+    timeout: 5000
+
+# Verify key sub-components render
+- assertVisible: "eventos"

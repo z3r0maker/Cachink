@@ -97,6 +97,7 @@ export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
             <QuickAmounts
               onSelect={(c) => numpad.setFromCentavos(c)}
               onExacto={() => {}}
+              showExacto={false}
               extraAmounts={OPENING_AMOUNTS.filter(
                 (a) =>
                   !([50000n, 100000n] as readonly bigint[]).includes(

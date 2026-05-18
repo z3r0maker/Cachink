@@ -9,6 +9,7 @@
     { "path": "./packages/ui" },
     { "path": "./packages/sync-lan" },
     { "path": "./packages/sync-cloud" },
-    { "path": "./packages/testing" }
+    { "path": "./packages/testing" },
+    { "path": "./packages/observability" }
   ]
 }

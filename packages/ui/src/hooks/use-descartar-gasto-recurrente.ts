@@ -9,7 +9,7 @@
  */
 
 import { useMemo } from 'react';
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import {
   DescartarGastoRecurrenteUseCase,
   type DescartarGastoRecurrenteInput,
@@ -17,6 +17,8 @@ import {
 } from '@cachink/application';
 import { useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_DESCARTAR_RECURRENTE } from '../observability/audit-configs';
 
 export type DescartarGastoRecurrenteHookResult = UseMutationResult<
   DescartarGastoRecurrenteResult,
@@ -31,7 +33,7 @@ export function useDescartarGastoRecurrente(): DescartarGastoRecurrenteHookResul
   const businessId = useCurrentBusinessId();
   const useCase = useMemo(() => new DescartarGastoRecurrenteUseCase(recurring), [recurring]);
 
-  return useMutation<DescartarGastoRecurrenteResult, Error, DescartarGastoRecurrenteInput>({
+  return useAuditedMutation(MUTATION_DESCARTAR_RECURRENTE, {
     async mutationFn(input) {
       return useCase.execute(input);
     },

@@ -1,62 +1,46 @@
-# Caja open/close lifecycle E2E — Otros → Caja → apertura → cierre.
+# Caja open/close lifecycle E2E.
 #
 # Verifies:
-#   1. Navigate to Caja → fill apertura → submit → status card visible
-#   2. Tap "Cerrar caja" → fill cierre amount → submit → modal closes
+#   1. Caja opens (or confirms Director's opening) → status card visible
+#   2. Tap "Cerrar turno" → blind count step 1 → step 2 → close
 #
-# Precondition: wizard + director-setup complete.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
-#   maestro test apps/mobile/maestro/flows/caja-abrir-cerrar.yaml
+# Precondition: demo mode seeded.
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Otros → Caja (caja is always-on).
-- tapOn:
-    id: "tab-otros"
-- tapOn:
-    id: "otros-caja"
-
-# --- Happy path: Open caja ---
-# The abrir-caja-modal should appear (no turn open yet).
-- extendedWaitUntil:
-    visible:
-      id: "abrir-caja-modal"
-    timeout: 5000
-
-- tapOn:
-    id: "caja-apertura-monto"
-- inputText: "500"
-- tapOn:
-    id: "caja-abrir-submit"
+# Ensure caja is open (handles demo state where Director opened it).
+- runFlow: shared/ensure-caja-open.yaml
 
 # Status card should be visible showing the turn is open.
 - assertVisible:
     id: "caja-status-card"
+- assertVisible:
+    id: "caja-balance-card"
 
 # --- Happy path: Close caja ---
 - tapOn:
     id: "caja-cerrar-btn"
 
-# Cierre modal appears.
-- assertVisible:
-    id: "cerrar-caja-modal"
-- tapOn:
-    id: "caja-cierre-monto"
-- inputText: "500"
-- tapOn:
-    id: "caja-cerrar-submit"
+# Step 1: BlindCountStep — enter count without seeing expected.
+- extendedWaitUntil:
+    visible:
+      id: "cerrar-caja-step-1"
+    timeout: 5000
 
-# Modal closes, status card still visible (now showing closed state).
-- assertNotVisible:
-    id: "cerrar-caja-modal"
-- assertVisible:
-    id: "caja-status-card"
+# Enter 500 via numpad (matching amount).
+- tapOn: { id: "numpad-5" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn:
+    id: "blind-count-continue"
+
+# Step 2: CountResultStep — comparison + close.
+- extendedWaitUntil:
+    visible:
+      id: "cerrar-caja-step-2"
+    timeout: 5000
+- tapOn:
+    id: "count-result-close"

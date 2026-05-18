@@ -23,11 +23,12 @@
  * `<MockRepositoryProvider>` + `<TestDatabaseProvider>` directly.
  */
 
-import { useCallback, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement, type ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DrizzleAppConfigRepository, readSyncState } from '@cachink/data';
+import { createLogStore, type LogStore } from '@cachink/observability';
 import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider, useDatabase } from '../database/index';
 import {
@@ -38,6 +39,11 @@ import {
   useUserId,
 } from '../app-config/index';
 import { captureException, initSentryIfConsented } from '../telemetry/index';
+import { ObservabilityProvider, useLogStore } from '../observability/observability-provider';
+import { useErrorToastStore } from '../observability/error-toast-store';
+import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
+import { useLifecycleObserver } from '../observability/use-lifecycle-observer';
+import { setLogStoreRef } from '../observability/log-store-ref';
 import { buildDrizzleRepositories, RepositoryProvider } from './repository-provider';
 import { GatedNavigation, type LanBridges, type CloudBridges } from './gated-navigation';
 import { AppErrorBoundary } from './error-boundary';
@@ -125,7 +131,60 @@ function TelemetryBridge({ children }: { readonly children: ReactNode }): ReactE
   return <>{children}</>;
 }
 
-function buildQueryClient(): QueryClient {
+/**
+ * ObservabilityBridge — initializes the LogStore from the DB + deviceId.
+ * Wraps children in `<ObservabilityProvider>` so all descendant hooks can
+ * write audit events and errors.
+ */
+function ObservabilityBridge({
+  children,
+  logStoreRef,
+}: {
+  readonly children: ReactNode;
+  readonly logStoreRef: { current: LogStore | null };
+}): ReactElement {
+  const db = useDatabase();
+  const deviceId = useDeviceId();
+  const [logStore, setLogStore] = useState<LogStore | null>(null);
+
+  useEffect(() => {
+    if (!deviceId) return;
+    let cancelled = false;
+    void createLogStore({
+      db: (db as unknown as { $client: unknown }).$client as never,
+      deviceId,
+      isDev: typeof __DEV__ !== 'undefined' && __DEV__,
+    }).then((store) => {
+      if (!cancelled) {
+        setLogStore(store);
+        logStoreRef.current = store;
+      }
+    });
+    return () => { cancelled = true; };
+  }, [db, deviceId, logStoreRef]);
+
+  return (
+    <ObservabilityProvider logStore={logStore}>
+      <LifecycleObserverBridge>{children}</LifecycleObserverBridge>
+    </ObservabilityProvider>
+  );
+}
+
+/** Runs lifecycle + error-boundary hooks inside the ObservabilityProvider context. */
+function LifecycleObserverBridge({ children }: { readonly children: ReactNode }): ReactElement {
+  useLifecycleObserver();
+
+  // Phase 7: Set the module-level LogStore ref so ErrorBoundary can access it
+  const logStore = useLogStore();
+  useEffect(() => {
+    setLogStoreRef(logStore);
+    return () => setLogStoreRef(null);
+  }, [logStore]);
+
+  return <>{children}</>;
+}
+
+function buildQueryClient(logStoreRef: { current: LogStore | null }): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -135,6 +194,36 @@ function buildQueryClient(): QueryClient {
         // Stale data in a local-first app only happens after the same
         // process mutates — mark writes invalidate the key explicitly.
         staleTime: Infinity,
+      },
+      mutations: {
+        onError(error) {
+          // Global mutation error handler (Phase B1): persist every
+          // mutation failure to the local observability log + Sentry.
+          const store = logStoreRef.current;
+          if (store) {
+            void store.writeError({
+              id: '',
+              timestamp: new Date().toISOString(),
+              source: 'ui',
+              errorName: error instanceof Error ? error.name : 'UnknownError',
+              errorMessage: error instanceof Error ? error.message : String(error),
+              errorStack: error instanceof Error ? error.stack : undefined,
+              userId: null,
+              deviceId: '',
+              businessId: null,
+            }).catch(() => {});
+          }
+
+          // Phase 2: Push error toast so the user sees feedback
+          useErrorToastStore.getState().push({
+            message: error instanceof Error ? error.message : 'Algo salió mal',
+            severity: 'error',
+          });
+
+          if (error instanceof Error) {
+            captureException(error);
+          }
+        },
       },
     },
   });
@@ -242,7 +331,8 @@ function resolveHooks(input?: AppProvidersHooks): Required<AppProvidersHooks> {
 }
 
 export function AppProviders(props: AppProvidersProps): ReactElement {
-  const queryClient = useMemo(buildQueryClient, []);
+  const logStoreRef = useRef<LogStore | null>(null);
+  const queryClient = useMemo(() => buildQueryClient(logStoreRef), []);
   const gated = props.gated ?? true;
   const hooks = useMemo(() => resolveHooks(props.hooks), [props.hooks]);
 
@@ -269,7 +359,12 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
             <DatabaseProvider>
               <DrizzleAppConfigBridge>
                 <DrizzleRepositoryBridge>
-                  <TelemetryBridge>{content}</TelemetryBridge>
+                  <ObservabilityBridge logStoreRef={logStoreRef}>
+                    <TelemetryBridge>
+                      {content}
+                      <GlobalErrorToast />
+                    </TelemetryBridge>
+                  </ObservabilityBridge>
                 </DrizzleRepositoryBridge>
               </DrizzleAppConfigBridge>
             </DatabaseProvider>

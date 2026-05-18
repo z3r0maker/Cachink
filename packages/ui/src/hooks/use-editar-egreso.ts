@@ -14,6 +14,8 @@ import type { ExpensePatch } from '@cachink/data';
 import { EditarEgresoUseCase } from '@cachink/application';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_EDITAR_EGRESO } from '../observability/audit-configs';
 
 export interface EditarEgresoInput {
   readonly id: ExpenseId;
@@ -27,7 +29,8 @@ export function useEditarEgreso(): EditarEgresoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  const useCase = useMemo(() => new EditarEgresoUseCase(expenses), [expenses]);
+  const rawUseCase = useMemo(() => new EditarEgresoUseCase(expenses), [expenses]);
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_EDITAR_EGRESO);
 
   return useMutation<Expense, Error, EditarEgresoInput>({
     async mutationFn(input) {

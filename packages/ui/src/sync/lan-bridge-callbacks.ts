@@ -29,6 +29,9 @@ import { useAppConfigRepository } from '../app/repository-provider';
 import { syncKeys } from '../hooks/query-keys';
 import type { LanPairSuccess } from '../screens/LanPairing/index';
 import type { LanHostStartResult } from '../screens/LanPairing/index';
+import { logSyncEvent } from '../observability/sync-observer';
+import { useLogStore } from '../observability/observability-provider';
+import { useDeviceId } from '../app-config/index';
 
 interface PersistPairingArgs {
   readonly db: CachinkDatabase;
@@ -114,6 +117,8 @@ export function useLanBridgeCallbacks(): UseLanBridgeCallbacksResult {
   const setBusiness = useSetBusiness();
   const invalidateAuth = useInvalidateLanAuth();
   const invalidateHostReady = useInvalidateLanHostReady();
+  const logStore = useLogStore();
+  const currentDeviceId = useDeviceId();
 
   const onPaired = useCallback(
     async (payload: LanPairSuccess): Promise<void> => {
@@ -125,16 +130,28 @@ export function useLanBridgeCallbacks(): UseLanBridgeCallbacksResult {
       });
       await setBusiness(payload.businessId as BusinessId);
       invalidateAuth();
+
+      // Log successful LAN pair event
+      logSyncEvent(logStore, 'sync.lan.pair', currentDeviceId ?? '', {
+        serverUrl: payload.serverUrl,
+        businessId: payload.businessId,
+      });
     },
-    [db, setBusiness, invalidateAuth],
+    [db, setBusiness, invalidateAuth, logStore, currentDeviceId],
   );
 
   const onServerStarted = useCallback(
     async (result: LanHostStartResult): Promise<void> => {
       await persistHostReady({ db, serverUrl: result.url });
       invalidateHostReady();
+
+      // Log LAN host ready event
+      logSyncEvent(logStore, 'sync.lan.pair', currentDeviceId ?? '', {
+        role: 'host',
+        serverUrl: result.url,
+      });
     },
-    [db, invalidateHostReady],
+    [db, invalidateHostReady, logStore, currentDeviceId],
   );
 
   return { onPaired, onServerStarted };

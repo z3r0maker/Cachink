@@ -1,8 +1,31 @@
-# Maestro workspace config for apps/mobile (P1C-M3-T05/T06).
+# Maestro workspace config for apps/mobile.
 #
-# The defaultTags key is empty today — all flows run by default. Add
-# "slow" / "smoke" tags per-flow if the suite grows large and we want
-# to filter.
+# Tag infrastructure for filtered regression runs:
+#
+#   maestro test --includeTags smoke apps/mobile/maestro/flows/
+#   maestro test --excludeTags wizard,cloud apps/mobile/maestro/flows/
+#
+# Available tags:
+#
+# | Tag         | Purpose                              | Flow count (est.) |
+# |-------------|--------------------------------------|-------------------|
+# | smoke       | Quick sanity check (< 2 min total)   | ~10               |
+# | regression  | Full regression set                  | ~140              |
+# | wizard      | Needs fresh install (clearState)     | ~12               |
+# | cloud       | Needs Supabase credentials           | ~3                |
+# | lan         | Needs LAN server running             | ~1                |
+# | ipad        | iPad-specific form factor            | ~2                |
+# | debug       | Developer-only (not for prod builds) | ~3                |
+# | observability | Telemetry, audit, bug-report flows | ~5                |
+# | ventas      | Sales-related flows                  | ~15               |
+# | egresos     | Expense-related flows                | ~12               |
+# | settings    | Settings/configuration flows         | ~10               |
+# | otros       | Otros tab navigation flows           | ~10               |
+# | caja        | Cash drawer flows                    | ~6                |
+# | auth        | Authentication/PIN flows             | ~8                |
+#
+# The defaultTags key is empty — all flows run by default.
+# Use full-regression.sh for phased, ordered execution.
 appId: mx.cachink.mobile
 # iOS-first simulator target. Android testing uses MAESTRO_ANDROID=1 env.
 defaultTags: []

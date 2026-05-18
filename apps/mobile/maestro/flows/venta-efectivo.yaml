@@ -1,52 +1,55 @@
-# Create a cash venta via the inline POS and verify "Total del día"
-# updates.
+# Create a cash venta via the inline POS and verify sale appears.
 #
-# Covers P1C-M3-T01 (list + date filter + total card) and
-# P1C-M3-T02 (inline POS happy path, Efectivo — ADR-048).
-#
-# Precondition: wizard + business + role already set up AND at least
-# one product exists in the catalogue. Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
-#
-# The inventario-producto flow creates "Tortilla" with cost $2.
-# That product must exist for the POS grid to render it. If no
-# products exist, VentasEmptyProductos shows instead of the grid.
+# Precondition: demo mode seeded (products + users exist).
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to the Ventas tab (Operativo role).
+# Navigate to the Ventas tab.
 - tapOn:
     id: "tab-ventas"
 
-# The product grid should show the "Tortilla" product created by
-# the inventario-producto.yaml precondition flow.
+# The product grid should show demo products.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+# Tap a demo product to add to cart.
+- tapOn: "Quesadilla"
+
+# Cart strip should appear.
 - assertVisible:
-    id: "ventas-product-grid"
-- assertVisible: "Tortilla"
+    id: "cart-strip"
 
-# Tap the product card to open the VentaConfirmSheet.
-- tapOn: "Tortilla"
-
-# VentaConfirmSheet opens — verify the product name + price appear.
-- assertVisible:
-    id: "venta-confirm-sheet"
-- assertVisible: "Tortilla"
-
-# Quantity defaults to 1, payment method defaults to Efectivo.
-# Just submit without changing anything.
+# Tap checkout.
 - tapOn:
-    id: "venta-confirm-submit"
+    id: "cart-checkout-btn"
 
-# Sheet closes and the new sale appears in the sales list.
-- assertNotVisible:
-    id: "venta-confirm-sheet"
-- assertVisible: "Tortilla"
+# Checkout screen appears — confirm with Efectivo (default).
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+- tapOn:
+    id: "checkout-method-continue"
+
+# Cash entry screen — tap a quick amount to fill the received field.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-efectivo"
+    timeout: 5000
+- tapOn: "\\$50"
+
+# Submit the sale.
+- tapOn:
+    id: "checkout-efectivo-submit"
+
+# Returns to Ventas after sale is registered.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 10000

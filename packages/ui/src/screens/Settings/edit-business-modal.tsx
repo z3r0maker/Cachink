@@ -124,7 +124,7 @@ function EditBusinessForm(props: EditBusinessFormProps): ReactElement {
       />
       <Input
         type="number"
-        label={t('settings.isrLabel')}
+        label={t('settings.isrEditLabel')}
         value={state.isrPct}
         onChange={setIsrPct}
         testID="edit-business-isr"

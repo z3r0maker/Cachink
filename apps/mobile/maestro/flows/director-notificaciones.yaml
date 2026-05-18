@@ -1,0 +1,76 @@
+# Director Notification Inbox — happy path E2E.
+#
+# Verifies:
+#   1. Director logs in and sees notification badge on Home
+#   2. Taps badge → lands on Notificaciones Bandeja tab
+#   3. Switches to Configurar tab
+#   4. Sees toggle cards for alert sources
+#   5. Switches back to Bandeja tab
+#
+# Precondition: wizard complete, Director user set up.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/director-notificaciones.yaml
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate-director.yaml
+
+# Wait for Director Home to mount.
+- extendedWaitUntil:
+    visible:
+      id: "director-home-route"
+    timeout: 5000
+
+# Verify the notification badge is visible on Director Home.
+- assertVisible:
+    id: "notification-badge"
+
+# Tap the badge to navigate to Notificaciones.
+- tapOn:
+    id: "notification-badge"
+
+# Wait for the Notificaciones screen to mount.
+- extendedWaitUntil:
+    visible:
+      id: "notificaciones-screen"
+    timeout: 5000
+
+# Should land on Bandeja tab — verify filter and mark-all buttons exist.
+- assertVisible:
+    id: "mark-all-read-btn"
+
+# Switch to Configurar tab.
+- tapOn:
+    text: "Configurar"
+
+# Verify the config tab renders with source toggles.
+- extendedWaitUntil:
+    visible:
+      id: "notificaciones-config-tab"
+    timeout: 3000
+
+# Check a few representative source toggles are visible.
+- assertVisible:
+    id: "notif-toggle-stock-bajo"
+- assertVisible:
+    id: "notif-toggle-caja-discrepancia"
+- assertVisible:
+    id: "notif-toggle-credito-vencido"
+
+# Toggle one source switch.
+- tapOn:
+    id: "notif-toggle-stock-bajo-switch"
+
+# Switch back to Bandeja tab.
+- tapOn:
+    text: "Bandeja"
+
+# Verify we're back on the inbox view.
+- assertVisible:
+    id: "mark-all-read-btn"

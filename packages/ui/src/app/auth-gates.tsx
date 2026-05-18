@@ -53,6 +53,8 @@ export function DirectorSetupGate(props: AuthGatesProps): ReactElement {
 
   const mutation = useMutation({
     mutationFn: async (input: DirectorSetupSubmitInput) => {
+      // Yield one frame so React paints the loading spinner before bcrypt blocks
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
       const crear = new CrearUsuarioUseCase(users);
       return crear.execute({
         nombre: input.nombre,

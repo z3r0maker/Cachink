@@ -9,10 +9,12 @@
  * cached select refreshes.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { ProductId } from '@cachink/domain';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ELIMINAR_PRODUCTO } from '../observability/audit-configs';
 
 export class StockNotEmptyError extends Error {
   constructor(public readonly currentStock: number) {
@@ -34,7 +36,7 @@ export function useEliminarProducto(): EliminarProductoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<void, Error, EliminarProductoInput>({
+  return useAuditedMutation(MUTATION_ELIMINAR_PRODUCTO, {
     async mutationFn(input) {
       if (input.currentStock > 0 && input.force !== true) {
         throw new StockNotEmptyError(input.currentStock);

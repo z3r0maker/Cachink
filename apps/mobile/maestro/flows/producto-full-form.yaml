@@ -20,9 +20,12 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Productos.
+# Navigate to Productos via Otros (when merma flag is on,
+# Productos tab is replaced by Merma — access via Otros grid).
 - tapOn:
-    id: "tab-productos"
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
 - tapOn:
     id: "stock-nuevo-producto"
 

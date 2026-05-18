@@ -9,8 +9,11 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 # Select Operativo role if RolePicker is showing (cold start).
 
+# Navigate to Productos via Otros (merma flag ON replaces tab).
 - tapOn:
-    id: "tab-productos"
+    id: "tab-otros"
+- tapOn:
+    id: "otros-productos"
 - tapOn:
     id: "stock-nuevo-producto"
 
