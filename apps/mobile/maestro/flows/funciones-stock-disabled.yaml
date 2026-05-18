@@ -1,5 +1,8 @@
 # Stock-disabled UX E2E — toggle stock OFF → verify no stock impact.
 #
+# NOTE: Requires a RELEASE build. In the Expo dev-client, the gear icon
+# triggers the Expo developer menu instead of the app Settings screen.
+#
 # Verifies:
 #   1. Toggle stock OFF → create venta → no stock movement created
 #   2. Products list doesn't show stock column
@@ -9,15 +12,24 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/authenticate-director.yaml
 
-# Toggle stock OFF via Otros → Funciones.
+# Toggle stock OFF via Settings → Funciones.
+# Navigate to Otros first (gear on Home opens Expo dev menu).
 - tapOn:
     id: "tab-otros"
 - tapOn:
-    id: "otros-funciones"
+    id: "top-bar-open-settings"
+- extendedWaitUntil:
+    visible:
+      id: "settings-funciones"
+    timeout: 5000
+- tapOn:
+    id: "settings-funciones"
 - tapOn:
     id: "flag-stock-switch"
+- back
+- back
 
 # Navigate to Productos via Otros — stock sub-tab hidden.
 - tapOn:

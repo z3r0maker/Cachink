@@ -1,5 +1,8 @@
 # Feature flag: ventasCredito toggle affects UX (Crédito payment method).
 #
+# NOTE: Requires a RELEASE build. In the Expo dev-client, the gear icon
+# triggers the Expo developer menu instead of the app Settings screen.
+#
 # Verifies:
 #   1. Toggle ventasCredito ON → Crédito appears as a payment method
 #   2. Toggle ventasCredito OFF → Crédito no longer available
@@ -9,15 +12,23 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/authenticate-director.yaml
 
-# --- Step 1: Enable ventasCredito ---
+# --- Step 1: Enable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
 - tapOn:
-    id: "otros-funciones"
+    id: "top-bar-open-settings"
+- extendedWaitUntil:
+    visible:
+      id: "settings-funciones"
+    timeout: 5000
+- tapOn:
+    id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
+- back
+- back
 
 # Verify Director Otros shows the CxC link.
 - tapOn:
@@ -53,17 +64,21 @@ appId: mx.cachink.mobile
     id: "cart-strip-clear"
     optional: true
 
-# --- Step 3: Disable ventasCredito → Crédito should vanish ---
-- tapOn:
-    id: "top-bar-role-chip"
-- tapOn:
-    id: "role-director-select"
+# --- Step 3: Disable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
 - tapOn:
-    id: "otros-funciones"
+    id: "top-bar-open-settings"
+- extendedWaitUntil:
+    visible:
+      id: "settings-funciones"
+    timeout: 5000
+- tapOn:
+    id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
+- back
+- back
 
 # Verify Director Otros no longer shows CxC link.
 - tapOn:
