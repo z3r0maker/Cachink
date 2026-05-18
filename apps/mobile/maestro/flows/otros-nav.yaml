@@ -29,13 +29,19 @@ appId: mx.cachink.mobile
     id: "otros-route"
 
 # --- Usuarios ---
+- scrollUntilVisible:
+    element:
+      id: "otros-usuarios"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-usuarios"
 - extendedWaitUntil:
     visible:
-      id: "user-list"
+      id: "usuarios-route"
     timeout: 5000
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # --- Funciones ---
 - scrollUntilVisible:
@@ -49,7 +55,8 @@ appId: mx.cachink.mobile
     visible:
       id: "funciones-route"
     timeout: 5000
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # Back on Otros grid.
 - assertVisible:

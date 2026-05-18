@@ -23,7 +23,7 @@ tags:
     id: "otros-cancelaciones"
 - extendedWaitUntil:
     visible:
-      id: "cancelaciones-screen"
+      id: "mobile-cancelaciones"
     timeout: 5000
 
 # Verify the screen title renders
