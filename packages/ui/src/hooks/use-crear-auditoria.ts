@@ -10,7 +10,12 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { today, type AuditoriaInventario, type AuditoriaLinea } from '@cachink/domain';
+import {
+  today,
+  type AuditoriaInventario,
+  type AuditoriaLinea,
+  type BusinessId,
+} from '@cachink/domain';
 import {
   useAuditoriasInventarioRepository,
   useInventoryMovementsRepository,
@@ -22,17 +27,12 @@ import { useEmitDirectorAlert } from './use-emit-director-alert';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_CREAR_AUDITORIA } from '../observability/audit-configs';
 
-export type CrearAuditoriaResult = UseMutationResult<
-  AuditoriaInventario,
-  Error,
-  void,
-  unknown
->;
+export type CrearAuditoriaResult = UseMutationResult<AuditoriaInventario, Error, void, unknown>;
 
 async function buildLineas(
   productsRepo: ReturnType<typeof useProductsRepository>,
   movementsRepo: ReturnType<typeof useInventoryMovementsRepository>,
-  businessId: string,
+  businessId: BusinessId,
 ): Promise<AuditoriaLinea[]> {
   const allProducts = await productsRepo.listForBusiness(businessId);
   const products = allProducts.filter((p) => p.seguirStock !== false);

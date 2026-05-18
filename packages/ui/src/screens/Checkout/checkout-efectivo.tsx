@@ -26,6 +26,7 @@ import {
   NumpadDisplay,
   QuickAmounts,
   useNumpadInput,
+  type NumpadKey,
 } from '../../components/Numpad/index';
 import { colors, radii, typography } from '../../theme';
 import { CambioCard } from './cambio-card';
@@ -47,7 +48,7 @@ export interface CheckoutEfectivoProps {
 
 function PaymentEntryCard(props: {
   display: string;
-  onKey: (k: string) => void;
+  onKey: (k: NumpadKey) => void;
   setFromCentavos: (c: Money) => void;
   onExacto: () => void;
 }): ReactElement {
@@ -65,10 +66,7 @@ function PaymentEntryCard(props: {
           Efectivo recibido
         </Text>
         <NumpadDisplay value={props.display} />
-        <QuickAmounts
-          onSelect={props.setFromCentavos}
-          onExacto={props.onExacto}
-        />
+        <QuickAmounts onSelect={props.setFromCentavos} onExacto={props.onExacto} />
         <Numpad onPress={props.onKey} />
       </View>
     </Card>
@@ -78,10 +76,7 @@ function PaymentEntryCard(props: {
 function useEfectivoState(totalCentavos: Money, efectivoEnCaja?: Money | null) {
   const input = useNumpadInput();
 
-  const cambio =
-    input.centavos >= totalCentavos
-      ? input.centavos - totalCentavos
-      : ZERO;
+  const cambio = input.centavos >= totalCentavos ? input.centavos - totalCentavos : ZERO;
 
   const canSubmit = input.centavos >= totalCentavos && input.centavos > ZERO;
   const handleExacto = useCallback(() => {
@@ -89,10 +84,7 @@ function useEfectivoState(totalCentavos: Money, efectivoEnCaja?: Money | null) {
   }, [input, totalCentavos]);
 
   const showCambio = input.centavos > ZERO;
-  const showCashWarning =
-    cambio > ZERO &&
-    efectivoEnCaja != null &&
-    cambio > efectivoEnCaja;
+  const showCashWarning = cambio > ZERO && efectivoEnCaja != null && cambio > efectivoEnCaja;
 
   return { input, cambio, canSubmit, handleExacto, showCambio, showCashWarning };
 }
@@ -104,9 +96,7 @@ const scrollStyle = {
   alignItems: 'center' as const,
 };
 
-export function CheckoutEfectivo(
-  props: CheckoutEfectivoProps,
-): ReactElement {
+export function CheckoutEfectivo(props: CheckoutEfectivoProps): ReactElement {
   const s = useEfectivoState(props.totalCentavos, props.efectivoEnCaja);
 
   return (

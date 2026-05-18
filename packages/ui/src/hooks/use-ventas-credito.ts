@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { ClientId, IsoDate, Sale } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate, Sale } from '@cachink/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { ventasCreditoKeys } from './query-keys';
@@ -69,7 +69,7 @@ interface CreditQueryResult {
 async function fetchCreditSales(
   from: IsoDate,
   to: IsoDate,
-  businessId: string,
+  businessId: BusinessId,
   salesRepo: ReturnType<typeof useSalesRepository>,
   clientsRepo: ReturnType<typeof useClientsRepository>,
 ): Promise<CreditQueryResult> {
@@ -77,12 +77,8 @@ async function fetchCreditSales(
     salesRepo.findByDateRange(from, to, businessId),
     clientsRepo.findByName('', businessId),
   ]);
-  const nameMap = new Map<string, string>(
-    clients.map((c) => [c.id as string, c.nombre]),
-  );
-  const sales = all.filter(
-    (s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado',
-  );
+  const nameMap = new Map<string, string>(clients.map((c) => [c.id as string, c.nombre]));
+  const sales = all.filter((s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado');
   return { sales, nameMap };
 }
 
@@ -110,10 +106,7 @@ export function useVentasCredito(
   });
 
   const grouped = useMemo(
-    () =>
-      query.data
-        ? groupByCliente(query.data.sales, query.data.nameMap)
-        : undefined,
+    () => (query.data ? groupByCliente(query.data.sales, query.data.nameMap) : undefined),
     [query.data],
   );
 

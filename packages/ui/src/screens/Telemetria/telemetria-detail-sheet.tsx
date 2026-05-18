@@ -124,7 +124,7 @@ function SheetHeader({ onClose }: { onClose: () => void }): ReactElement {
       <Text fontSize="$4" fontWeight="700">
         Detalle de Evento
       </Text>
-      <Btn size="$2" variant="ghost" onPress={onClose}>
+      <Btn size="sm" variant="ghost" onPress={onClose}>
         X
       </Btn>
     </View>
@@ -140,12 +140,16 @@ function SheetFooter(props: { onCopy: () => void; onClose: () => void }): ReactE
       borderTopWidth={1}
       borderTopColor="$borderColor"
     >
-      <Btn flex={1} variant="outlined" onPress={props.onCopy}>
-        Copiar JSON
-      </Btn>
-      <Btn flex={1} variant="outlined" onPress={props.onClose}>
-        Cerrar
-      </Btn>
+      <View flex={1}>
+        <Btn variant="outline" fullWidth onPress={props.onCopy}>
+          Copiar JSON
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn variant="outline" fullWidth onPress={props.onClose}>
+          Cerrar
+        </Btn>
+      </View>
     </View>
   );
 }
@@ -169,7 +173,6 @@ export function TelemetriaDetailSheet({
       shadowColor="black"
       shadowOpacity={0.2}
       shadowRadius={10}
-      elevation={10}
     >
       <SheetHeader onClose={onClose} />
       <DetailContent entry={entry} />

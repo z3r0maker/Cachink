@@ -15,11 +15,9 @@ import {
   type AuditoriaInventario,
   type AuditoriaInventarioId,
   type AuditoriaLinea,
+  type BusinessId,
 } from '@cachink/domain';
-import {
-  useAuditoriasInventarioRepository,
-  useInventoryMovementsRepository,
-} from '../app/index';
+import { useAuditoriasInventarioRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { auditoriaKeys } from './query-keys';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
@@ -41,7 +39,7 @@ export type ActualizarAuditoriaResult = UseMutationResult<
 
 async function persistAuditoria(
   input: ActualizarAuditoriaInput,
-  businessId: string,
+  businessId: BusinessId,
   auditoriasRepo: ReturnType<typeof useAuditoriasInventarioRepository>,
   movementsRepo: ReturnType<typeof useInventoryMovementsRepository>,
 ): Promise<AuditoriaInventario> {
@@ -66,7 +64,7 @@ async function persistAuditoria(
 
 async function createAdjustmentMovements(
   lineas: readonly AuditoriaLinea[],
-  businessId: string,
+  businessId: BusinessId,
   movementsRepo: ReturnType<typeof useInventoryMovementsRepository>,
 ): Promise<void> {
   const fecha = today();

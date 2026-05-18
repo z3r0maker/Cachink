@@ -48,15 +48,29 @@ function utilidadTone(utilidad: bigint): 'positive' | 'negative' | 'neutral' {
   return 'neutral';
 }
 
-function HeroFooter(props: { from: string; to: string; onVerEstados?: () => void }): ReactElement {
+function HeroFooter(props: {
+  from: IsoDate;
+  to: IsoDate;
+  onVerEstados?: () => void;
+}): ReactElement {
   const { t } = useTranslation();
   return (
     <View marginTop={12} flexDirection="row" justifyContent="space-between" alignItems="center">
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={12} color={colors.gray600}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={12}
+        color={colors.gray600}
+      >
         {formatPeriodoLabel(props.from, props.to)}
       </Text>
       {props.onVerEstados && (
-        <Btn variant="dark" size="sm" onPress={props.onVerEstados} testID="utilidad-hero-ver-estados">
+        <Btn
+          variant="dark"
+          size="sm"
+          onPress={props.onVerEstados}
+          testID="utilidad-hero-ver-estados"
+        >
           {t('directorHome.utilidadVerEstados')}
         </Btn>
       )}
@@ -70,8 +84,18 @@ export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
   const query = useEstadoResultados({ periodo });
   const utilidad = (query.data?.utilidadNeta ?? 0n) as bigint;
   return (
-    <Card testID={props.testID ?? 'utilidad-hero'} variant="yellow" elevation="raised" padding="lg" fullWidth>
-      <Kpi label={t('directorHome.utilidadTitle')} value={formatMoney(utilidad as never)} tone={utilidadTone(utilidad)} />
+    <Card
+      testID={props.testID ?? 'utilidad-hero'}
+      variant="yellow"
+      elevation="raised"
+      padding="lg"
+      fullWidth
+    >
+      <Kpi
+        label={t('directorHome.utilidadTitle')}
+        value={formatMoney(utilidad as never)}
+        tone={utilidadTone(utilidad)}
+      />
       <HeroFooter from={periodo.from} to={periodo.to} onVerEstados={props.onVerEstados} />
     </Card>
   );

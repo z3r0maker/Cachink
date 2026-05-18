@@ -4,6 +4,7 @@
  */
 
 import type { BusinessId, Sale, UserId } from '@cachink/domain';
+import type { LogStore } from '@cachink/observability';
 import { addAuditBreadcrumb } from '../../observability/sentry-breadcrumbs';
 
 interface AuditContext {
@@ -15,15 +16,7 @@ interface AuditContext {
   readonly isCashSale: boolean;
 }
 
-interface LogStore {
-  writeAudit: (e: Record<string, unknown>) => Promise<void>;
-  writeError: (e: Record<string, unknown>) => Promise<void>;
-}
-
-export function logSuccessAudit(
-  ctx: AuditContext,
-  logStore: LogStore | null,
-): void {
+export function logSuccessAudit(ctx: AuditContext, logStore: LogStore | null): void {
   const event = {
     id: '',
     timestamp: new Date().toISOString(),
@@ -45,11 +38,7 @@ export function logSuccessAudit(
   void logStore?.writeAudit(event).catch(() => {});
 }
 
-export function logErrorAudit(
-  ctx: AuditContext,
-  error: Error,
-  logStore: LogStore | null,
-): void {
+export function logErrorAudit(ctx: AuditContext, error: Error, logStore: LogStore | null): void {
   const errorEvent = {
     id: '',
     timestamp: new Date().toISOString(),
@@ -66,16 +55,18 @@ export function logErrorAudit(
   };
   addAuditBreadcrumb(errorEvent);
   void logStore?.writeAudit(errorEvent).catch(() => {});
-  void logStore?.writeError({
-    id: '',
-    timestamp: new Date().toISOString(),
-    source: 'ui',
-    operation: 'venta.cancelar',
-    errorName: error.name,
-    errorMessage: error.message,
-    errorStack: error.stack,
-    userId: ctx.userId ?? null,
-    deviceId: ctx.deviceId ?? '',
-    businessId: ctx.businessId ?? null,
-  }).catch(() => {});
+  void logStore
+    ?.writeError({
+      id: '',
+      timestamp: new Date().toISOString(),
+      source: 'ui',
+      operation: 'venta.cancelar',
+      errorName: error.name,
+      errorMessage: error.message,
+      errorStack: error.stack,
+      userId: ctx.userId ?? null,
+      deviceId: ctx.deviceId ?? '',
+      businessId: ctx.businessId ?? null,
+    })
+    .catch(() => {});
 }

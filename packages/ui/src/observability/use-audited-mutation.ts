@@ -129,20 +129,20 @@ export function useAuditedMutation<TInput, TOutput>(
 
   return useMutation<TOutput, Error, TInput>({
     ...mutationOptions,
-    async mutationFn(input: TInput) {
+    async mutationFn(input: TInput, fnContext) {
       if (!mutationOptions.mutationFn)
         throw new Error('useAuditedMutation: mutationFn is required');
-      return mutationOptions.mutationFn(input);
+      return mutationOptions.mutationFn(input, fnContext);
     },
-    onSuccess(result, input, context) {
+    onSuccess(result, input, onMutateResult, fnContext) {
       const event = buildSuccessEvent(config, result, input, uid, did, bid);
       addAuditBreadcrumb(event);
       void logStore?.writeAudit(event).catch(() => {});
-      mutationOptions.onSuccess?.(result, input, context);
+      mutationOptions.onSuccess?.(result, input, onMutateResult, fnContext);
     },
-    onError(error, input, context) {
+    onError(error, input, onMutateResult, fnContext) {
       logError(config, error, input, logStore, uid, did, bid);
-      mutationOptions.onError?.(error, input, context);
+      mutationOptions.onError?.(error, input, onMutateResult, fnContext);
     },
   });
 }

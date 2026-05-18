@@ -36,13 +36,13 @@ export function TelemetriaFilterBar({
     <View paddingHorizontal="$3" gap="$2">
       <SegmentedToggle
         options={FILTER_OPTIONS}
-        selected={filter}
-        onSelect={(key) => onFilterChange(key as TelemetriaFilter)}
+        value={filter}
+        onChange={(key: TelemetriaFilter) => onFilterChange(key)}
       />
       <SegmentedToggle
         options={PERIOD_OPTIONS}
-        selected={period}
-        onSelect={(key) => onPeriodChange(key as TelemetriaPeriod)}
+        value={period}
+        onChange={(key: TelemetriaPeriod) => onPeriodChange(key)}
       />
     </View>
   );
