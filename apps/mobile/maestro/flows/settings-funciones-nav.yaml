@@ -1,16 +1,11 @@
-# Settings → tap settings-funciones → funciones-negocio screen renders.
-# Covers Gap P (Phase 17): settings-funciones testID as alternative entry
-# to the funciones screen (vs the Otros tab path).
+# Otros → Funciones — verify Funciones screen renders from Otros grid.
+#
+# Covers navigation to the funciones screen via the Otros tab card.
 #
 # testIDs exercised:
-#   settings-funciones, funciones-negocio
+#   otros-funciones, funciones-route
 #
 # Precondition: wizard complete, Director role.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/settings-funciones-nav.yaml
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -20,18 +15,24 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Open Settings via the top-bar cog icon.
-- runFlow: shared/navigate-to-settings.yaml
-
-# Scroll down to find the Funciones link.
-- scrollUntilVisible:
-    element:
-      id: "settings-funciones"
-    direction: DOWN
+# Navigate to Otros tab.
+- tapOn:
+    id: "tab-otros"
+- extendedWaitUntil:
+    visible: "Otros"
     timeout: 5000
 
-# Tap the Funciones link → funciones screen renders.
+# Scroll to Funciones card and tap it.
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
-    id: "settings-funciones"
-- assertVisible:
-    id: "funciones-route"
+    id: "otros-funciones"
+
+# Funciones screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "funciones-route"
+    timeout: 5000

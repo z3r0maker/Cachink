@@ -180,6 +180,7 @@ function InertCard(
 ): ReactElement {
   return (
     <View
+      testID={props.testID ?? 'card'}
       backgroundColor={props.backgroundColor ?? props.v.background}
       borderColor={colors.black}
       borderWidth={props.v.borderWidth}
