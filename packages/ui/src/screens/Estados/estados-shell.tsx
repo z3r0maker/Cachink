@@ -85,45 +85,33 @@ function TabBar(props: TabBarProps): ReactElement {
   );
 }
 
+function ResultadosBody(p: EstadosShellProps): ReactElement {
+  return (
+    <EstadoResultadosScreen
+      estado={p.estado}
+      periodoLabel={p.periodoLabel}
+      egresosPorCategoria={p.egresosPorCategoria}
+      ingresosPorCategoria={p.ingresosPorCategoria}
+      priorEstado={p.priorEstado}
+      utilidadNetaTrend={p.utilidadNetaTrend}
+    />
+  );
+}
+
 function ActiveBody(props: { tab: EstadosSubTab; props: EstadosShellProps }): ReactElement {
   const p = props.props;
   switch (props.tab) {
     case 'resultados':
-      return (
-        <EstadoResultadosScreen
-          estado={p.estado}
-          periodoLabel={p.periodoLabel}
-          egresosPorCategoria={p.egresosPorCategoria}
-          ingresosPorCategoria={p.ingresosPorCategoria}
-          priorEstado={p.priorEstado}
-          utilidadNetaTrend={p.utilidadNetaTrend}
-        />
-      );
+      return <ResultadosBody {...p} />;
     case 'balance':
-      return (
-        <BalanceGeneralScreen
-          balance={p.balance}
-          periodoLabel={p.periodoLabel}
-          priorBalance={p.priorBalance}
-        />
-      );
+      return <BalanceGeneralScreen balance={p.balance} periodoLabel={p.periodoLabel} priorBalance={p.priorBalance} />;
     case 'flujo':
-      return (
-        <FlujoEfectivoScreen
-          flujo={p.flujo}
-          periodoLabel={p.periodoLabel}
-          priorFlujo={p.priorFlujo}
-        />
-      );
+      return <FlujoEfectivoScreen flujo={p.flujo} periodoLabel={p.periodoLabel} priorFlujo={p.priorFlujo} />;
     case 'indicadores':
       return (
         <IndicadoresScreen
-          indicadores={p.indicadores}
-          periodoLabel={p.periodoLabel}
-          periodoMode={p.periodoState.mode}
-          trend={p.trend}
-          priorIndicadores={p.priorIndicadores}
-          onOpenSettings={p.onOpenSettings}
+          indicadores={p.indicadores} periodoLabel={p.periodoLabel} periodoMode={p.periodoState.mode}
+          trend={p.trend} priorIndicadores={p.priorIndicadores} onOpenSettings={p.onOpenSettings}
         />
       );
   }
@@ -154,47 +142,28 @@ function useTabLabels(): Record<EstadosSubTab, string> {
 /** gap:18 = §8.3 shadow breathing room (UI-AUDIT-1, Issue 5). */
 const SCROLL_CONTENT_STYLE = { gap: 18, padding: 16, paddingBottom: 40 } as const;
 
+function showIsrDisclaimer(tab: EstadosSubTab): boolean {
+  return tab === 'resultados' || tab === 'indicadores';
+}
+
+function isrIsZeroDueToLoss(props: EstadosShellProps): boolean {
+  return props.estado !== null && props.estado.isr === ZERO && props.estado.utilidadOperativa <= ZERO;
+}
+
 export function EstadosShell(props: EstadosShellProps): ReactElement {
   const [tab, setTab] = useState<EstadosSubTab>(props.initialTab ?? 'resultados');
   const labels = useTabLabels();
   const periodLabels = usePeriodLabels();
-  const showInforme =
-    tab === 'resultados' &&
-    (props.showInformeAction ?? true) &&
-    props.informeYearMonth !== undefined;
+  const showInforme = tab === 'resultados' && (props.showInformeAction ?? true) && props.informeYearMonth !== undefined;
   return (
-    <ScrollView
-      testID={props.testID ?? 'estados-shell'}
-      style={{ flex: 1 }}
-      contentContainerStyle={SCROLL_CONTENT_STYLE}
-    >
-      <PeriodPicker
-        value={props.periodoState}
-        onChange={props.onPeriodoChange}
-        labels={periodLabels}
-      />
+    <ScrollView testID={props.testID ?? 'estados-shell'} style={{ flex: 1 }} contentContainerStyle={SCROLL_CONTENT_STYLE}>
+      <PeriodPicker value={props.periodoState} onChange={props.onPeriodoChange} labels={periodLabels} />
       <TabBar active={tab} onChange={setTab} labels={labels} />
-      {showInforme && (
-        <InformeMensualAction
-          yearMonth={props.informeYearMonth!}
-          businessName={props.businessName}
-        />
-      )}
-      <SwipeableTabView
-        onSwipeLeft={() => setTab(nextTab(tab))}
-        onSwipeRight={() => setTab(prevTab(tab))}
-      >
+      {showInforme && <InformeMensualAction yearMonth={props.informeYearMonth!} businessName={props.businessName} />}
+      <SwipeableTabView onSwipeLeft={() => setTab(nextTab(tab))} onSwipeRight={() => setTab(prevTab(tab))}>
         <ActiveBody tab={tab} props={props} />
-        {(tab === 'resultados' || tab === 'indicadores') && (
-          <IsrDisclaimer
-            onOpenSettings={props.onOpenSettings}
-            isrRate={props.isrRate}
-            isrIsZeroDueToLoss={
-              props.estado !== null &&
-              props.estado.isr === ZERO &&
-              props.estado.utilidadOperativa <= ZERO
-            }
-          />
+        {showIsrDisclaimer(tab) && (
+          <IsrDisclaimer onOpenSettings={props.onOpenSettings} isrRate={props.isrRate} isrIsZeroDueToLoss={isrIsZeroDueToLoss(props)} />
         )}
       </SwipeableTabView>
     </ScrollView>

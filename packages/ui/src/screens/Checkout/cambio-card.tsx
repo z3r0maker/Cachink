@@ -17,6 +17,36 @@ export interface CambioCardProps {
   readonly showCashWarning: boolean;
 }
 
+function CambioRow(props: { cambio: Money }): ReactElement {
+  return (
+    <View
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+    >
+      <View flexDirection="row" alignItems="center" gap={8}>
+        <Icon name="hand-coins" size={22} color={colors.green} />
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.semibold.toString()}
+          fontSize={16}
+          color={colors.green}
+        >
+          Cambio
+        </Text>
+      </View>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black.toString()}
+        fontSize={22}
+        color={colors.green}
+      >
+        {formatMoney(props.cambio)}
+      </Text>
+    </View>
+  );
+}
+
 export function CambioCard(props: CambioCardProps): ReactElement {
   if (!props.visible) return <View height={48} />;
 
@@ -31,34 +61,7 @@ export function CambioCard(props: CambioCardProps): ReactElement {
       width="100%"
       gap={10}
     >
-      {/* Label left — amount right */}
-      <View
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-      >
-        <View flexDirection="row" alignItems="center" gap={8}>
-          <Icon name="hand-coins" size={22} color={colors.green} />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.semibold.toString()}
-            fontSize={16}
-            color={colors.green}
-          >
-            Cambio
-          </Text>
-        </View>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black.toString()}
-          fontSize={22}
-          color={colors.green}
-        >
-          {formatMoney(props.cambio)}
-        </Text>
-      </View>
-
-      {/* Cash insufficient warning */}
+      <CambioRow cambio={props.cambio} />
       {props.showCashWarning && <CashWarning />}
     </View>
   );

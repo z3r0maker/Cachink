@@ -35,6 +35,27 @@ export interface TiposDePagoScreenProps {
   readonly testID?: string;
 }
 
+function ToggleThumb({ enabled }: { enabled: boolean }): ReactElement {
+  return (
+    <View
+      width={44}
+      height={26}
+      borderRadius={13}
+      backgroundColor={enabled ? colors.yellow : colors.gray200}
+      justifyContent="center"
+      paddingHorizontal={2}
+    >
+      <View
+        width={22}
+        height={22}
+        borderRadius={11}
+        backgroundColor={colors.white}
+        alignSelf={enabled ? 'flex-end' : 'flex-start'}
+      />
+    </View>
+  );
+}
+
 function ToggleRow(props: {
   readonly method: MethodRow;
   readonly enabled: boolean;
@@ -66,37 +87,16 @@ function ToggleRow(props: {
         >
           {props.method.label}
         </Text>
-        <View
-          width={44}
-          height={26}
-          borderRadius={13}
-          backgroundColor={props.enabled ? colors.yellow : colors.gray200}
-          justifyContent="center"
-          paddingHorizontal={2}
-        >
-          <View
-            width={22}
-            height={22}
-            borderRadius={11}
-            backgroundColor={colors.white}
-            alignSelf={props.enabled ? 'flex-end' : 'flex-start'}
-          />
-        </View>
+        <ToggleThumb enabled={props.enabled} />
       </View>
     </Pressable>
   );
 }
 
-export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
-  const { t } = useTranslation();
-  const businessId = useCurrentBusinessId();
-  const currentMethods = useEnabledPaymentMethods();
-  const editar = useEditarBusiness();
-
+function usePaymentToggle(currentMethods: readonly PaymentMethod[]) {
   const [selected, setSelected] = useState<Set<PaymentMethod>>(
     () => new Set(currentMethods),
   );
-
   const toggle = useCallback((key: PaymentMethod) => {
     impactLight();
     setSelected((prev) => {
@@ -106,6 +106,33 @@ export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
       return next;
     });
   }, []);
+  return { selected, toggle };
+}
+
+function MethodList(props: {
+  readonly selected: Set<PaymentMethod>;
+  readonly toggle: (key: PaymentMethod) => void;
+}): ReactElement {
+  return (
+    <Card padding="none" fullWidth>
+      {METHODS.map((m, i) => (
+        <View key={m.key}>
+          {i > 0 && <View height={1} backgroundColor={colors.gray100} />}
+          <ToggleRow
+            method={m}
+            enabled={props.selected.has(m.key)}
+            disabled={props.selected.size <= 1 && props.selected.has(m.key)}
+            onToggle={() => props.toggle(m.key)}
+          />
+        </View>
+      ))}
+    </Card>
+  );
+}
+
+function useSavePaymentMethods(selected: Set<PaymentMethod>) {
+  const businessId = useCurrentBusinessId();
+  const editar = useEditarBusiness();
 
   const handleSave = useCallback(() => {
     if (!businessId) return;
@@ -115,6 +142,43 @@ export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
       patch: { enabledPaymentMethods: JSON.stringify(arr) },
     });
   }, [businessId, selected, editar]);
+
+  return { handleSave, isPending: editar.isPending };
+}
+
+function PaymentFooter(props: {
+  readonly t: ReturnType<typeof useTranslation>['t'];
+  readonly onSave: () => void;
+  readonly isPending: boolean;
+}): ReactElement {
+  return (
+    <>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.regular}
+        fontSize={12}
+        color={colors.gray400}
+      >
+        {props.t('tiposDePago.atLeastOne')}
+      </Text>
+      <Btn
+        variant="primary"
+        fullWidth
+        size="lg"
+        onPress={props.onSave}
+        loading={props.isPending}
+        testID="tipos-de-pago-save"
+      >
+        {props.t('tiposDePago.save')}
+      </Btn>
+    </>
+  );
+}
+
+export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const { selected, toggle } = usePaymentToggle(useEnabledPaymentMethods());
+  const { handleSave, isPending } = useSavePaymentMethods(selected);
 
   return (
     <ScrollView
@@ -131,37 +195,8 @@ export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
       >
         {t('tiposDePago.description')}
       </Text>
-      <Card padding="none" fullWidth>
-        {METHODS.map((m, i) => (
-          <View key={m.key}>
-            {i > 0 && <View height={1} backgroundColor={colors.gray100} />}
-            <ToggleRow
-              method={m}
-              enabled={selected.has(m.key)}
-              disabled={selected.size <= 1 && selected.has(m.key)}
-              onToggle={() => toggle(m.key)}
-            />
-          </View>
-        ))}
-      </Card>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.regular}
-        fontSize={12}
-        color={colors.gray400}
-      >
-        ⓘ {t('tiposDePago.atLeastOne')}
-      </Text>
-      <Btn
-        variant="primary"
-        fullWidth
-        size="lg"
-        onPress={handleSave}
-        loading={editar.isPending}
-        testID="tipos-de-pago-save"
-      >
-        {t('tiposDePago.save')}
-      </Btn>
+      <MethodList selected={selected} toggle={toggle} />
+      <PaymentFooter t={t} onSave={handleSave} isPending={isPending} />
     </ScrollView>
   );
 }

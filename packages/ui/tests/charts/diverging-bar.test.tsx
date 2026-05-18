@@ -9,7 +9,7 @@ import React from 'react';
 
 vi.mock('echarts-for-react/lib/core', () => ({
   __esModule: true,
-  default: function MockECharts(props: Record<string, unknown>) {
+  default: function MockECharts(_props: Record<string, unknown>) {
     return React.createElement('div', { 'data-testid': 'echarts-mock' });
   },
 }));

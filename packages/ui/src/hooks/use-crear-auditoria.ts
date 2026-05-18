@@ -29,6 +29,28 @@ export type CrearAuditoriaResult = UseMutationResult<
   unknown
 >;
 
+async function buildLineas(
+  productsRepo: ReturnType<typeof useProductsRepository>,
+  movementsRepo: ReturnType<typeof useInventoryMovementsRepository>,
+  businessId: string,
+): Promise<AuditoriaLinea[]> {
+  const allProducts = await productsRepo.listForBusiness(businessId);
+  const products = allProducts.filter((p) => p.seguirStock !== false);
+
+  return Promise.all(
+    products.map(async (p) => {
+      const stockSistema = await movementsRepo.sumStock(p.id);
+      return {
+        productoId: p.id,
+        productoNombre: p.nombre,
+        stockSistema,
+        stockReal: null,
+        diferencia: null,
+      };
+    }),
+  );
+}
+
 export function useCrearAuditoria(): CrearAuditoriaResult {
   const auditoriasRepo = useAuditoriasInventarioRepository();
   const productsRepo = useProductsRepository();
@@ -42,23 +64,7 @@ export function useCrearAuditoria(): CrearAuditoriaResult {
       if (!businessId) {
         throw new Error('useCrearAuditoria: no current business set');
       }
-
-      const allProducts = await productsRepo.listForBusiness(businessId);
-      const products = allProducts.filter((p) => p.seguirStock !== false);
-
-      const lineas: AuditoriaLinea[] = await Promise.all(
-        products.map(async (p) => {
-          const stockSistema = await movementsRepo.sumStock(p.id);
-          return {
-            productoId: p.id,
-            productoNombre: p.nombre,
-            stockSistema,
-            stockReal: null,
-            diferencia: null,
-          };
-        }),
-      );
-
+      const lineas = await buildLineas(productsRepo, movementsRepo, businessId);
       return auditoriasRepo.create({
         fecha: today(),
         lineas: JSON.stringify(lineas),
@@ -67,11 +73,7 @@ export function useCrearAuditoria(): CrearAuditoriaResult {
       });
     },
     async onSuccess(auditoria) {
-      await queryClient.invalidateQueries({
-        queryKey: auditoriaKeys.all,
-      });
-
-      // Alert: auditoria-pendiente
+      await queryClient.invalidateQueries({ queryKey: auditoriaKeys.all });
       emitAlert.mutate({
         source: 'auditoria-pendiente',
         severity: 'info',

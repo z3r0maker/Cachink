@@ -120,11 +120,8 @@ function SheetFields(props: {
   );
 }
 
-function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): ReactElement | null {
-  const { product, onSubmit, clientes, submitting, disabled, disabledReason, error } = props;
-  const { t } = useTranslation();
-  const form = useSheetForm(product?.id);
-  const handleSubmit = useCallback((): void => {
+function useSheetSubmit(product: VentaConfirmSheetProps['product'], form: ReturnType<typeof useSheetForm>, onSubmit: VentaConfirmSheetProps['onSubmit']) {
+  return useCallback((): void => {
     if (!product) return;
     const qty = Number.parseInt(form.cantidad, 10);
     if (Number.isNaN(qty) || qty < 1) return;
@@ -132,50 +129,35 @@ function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): Rea
       productoId: product.id,
       cantidad: qty,
       metodo: form.metodo,
-      clienteId:
-        form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined,
+      clienteId: form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined,
     });
   }, [product, form.cantidad, form.metodo, form.clienteId, onSubmit]);
+}
 
+function SheetFooter(props: { disabled?: boolean; disabledReason?: string; error?: Error | null }): ReactElement | null {
+  if (props.disabled === true && props.disabledReason !== undefined) {
+    return <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600} textAlign="center" marginTop={4}>{props.disabledReason}</Text>;
+  }
+  if (props.error != null) {
+    return <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red} textAlign="center" marginTop={4}>{props.error.message}</Text>;
+  }
+  return null;
+}
+
+function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): ReactElement | null {
+  const { product, onSubmit, clientes, submitting, disabled, disabledReason, error } = props;
+  const { t } = useTranslation();
+  const form = useSheetForm(product?.id);
+  const handleSubmit = useSheetSubmit(product, form, onSubmit);
   if (!product) return null;
   return (
     <View gap={16}>
       <ProductHeader product={product} />
       <SheetFields form={form} clientes={clientes} t={t} />
-      <Btn
-        variant="primary"
-        onPress={handleSubmit}
-        disabled={
-          disabled === true || (form.metodo === 'Crédito' && !form.clienteId)
-        }
-        loading={submitting === true}
-        fullWidth
-        testID="venta-confirm-submit"
-      >
+      <Btn variant="primary" onPress={handleSubmit} disabled={disabled === true || (form.metodo === 'Crédito' && !form.clienteId)} loading={submitting === true} fullWidth testID="venta-confirm-submit">
         {t('ventas.registrarVenta')}
       </Btn>
-      {disabled === true && disabledReason !== undefined && (
-        <Text
-          fontFamily={typography.fontFamily}
-          fontSize={12}
-          color={colors.gray600}
-          textAlign="center"
-          marginTop={4}
-        >
-          {disabledReason}
-        </Text>
-      )}
-      {error != null && (
-        <Text
-          fontFamily={typography.fontFamily}
-          fontSize={12}
-          color={colors.red}
-          textAlign="center"
-          marginTop={4}
-        >
-          {error.message}
-        </Text>
-      )}
+      <SheetFooter disabled={disabled} disabledReason={disabledReason} error={error} />
     </View>
   );
 }

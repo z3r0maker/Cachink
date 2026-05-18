@@ -29,49 +29,27 @@ function buildAriaLabel(items: readonly DivergingItem[]): string {
   return `Flujos: ${parts.join(', ')}`;
 }
 
-/** Single row: [category] [bar] [value]. */
-function BarRow(props: {
-  item: DivergingItem;
-  maxAbsValue: number;
-}): ReactElement {
+function BarFill(p: { item: DivergingItem; maxAbsValue: number }): ReactElement {
+  const barPercent = p.maxAbsValue === 0 ? 0 : (Math.abs(p.item.value) / p.maxAbsValue) * 100;
+  const barWidth = `${Math.max(barPercent, 2).toFixed(1)}%`;
+  const barColor = p.item.value >= 0 ? colors.green : colors.red;
+  return (
+    <View flex={1} height={BAR_HEIGHT} justifyContent="center">
+      <View height={BAR_HEIGHT} width={barWidth} backgroundColor={barColor} borderRadius={4} />
+    </View>
+  );
+}
+
+function BarRow(props: { item: DivergingItem; maxAbsValue: number }): ReactElement {
   const { item, maxAbsValue } = props;
   const isPositive = item.value >= 0;
-  const barPercent = maxAbsValue === 0 ? 0 : (Math.abs(item.value) / maxAbsValue) * 100;
-  const barWidth = `${Math.max(barPercent, 2).toFixed(1)}%`;
   return (
-    <View
-      flexDirection="row"
-      alignItems="center"
-      gap={ROW_GAP}
-      paddingVertical={4}
-    >
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={11}
-        color={colors.gray600}
-        width={LABEL_WIDTH}
-        numberOfLines={1}
-      >
+    <View flexDirection="row" alignItems="center" gap={ROW_GAP} paddingVertical={4}>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={11} color={colors.gray600} width={LABEL_WIDTH} numberOfLines={1}>
         {item.label}
       </Text>
-      <View flex={1} height={BAR_HEIGHT} justifyContent="center">
-        <View
-          height={BAR_HEIGHT}
-          width={barWidth}
-          backgroundColor={isPositive ? colors.green : colors.red}
-          borderRadius={4}
-        />
-      </View>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={11}
-        color={isPositive ? colors.green : colors.red}
-        width={VALUE_WIDTH}
-        textAlign="right"
-        numberOfLines={1}
-      >
+      <BarFill item={item} maxAbsValue={maxAbsValue} />
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={11} color={isPositive ? colors.green : colors.red} width={VALUE_WIDTH} textAlign="right" numberOfLines={1}>
         {formatChartLabel(item.value)}
       </Text>
     </View>

@@ -1,28 +1,16 @@
 /**
- * CancellationFlow — multi-step cancellation: PIN → reason → cash confirm.
- *
- * Orchestrates the PIN gate, reason input, and cash return confirmation
- * for a single sale cancellation.
+ * CancellationFlow — multi-step cancellation: PIN -> reason -> cash confirm.
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
 import { Alert } from 'react-native';
-import { Text, View } from '@tamagui/core';
-import {
-  formatMoney,
-  type BusinessId,
-  type Sale,
-  type UserId,
-} from '@cachink/domain';
+import type { BusinessId, Sale, UserId } from '@cachink/domain';
 import { Modal } from '../../components/index';
-import { Btn } from '../../components/Btn/btn';
-import { Input } from '../../components/Input/index';
-import { PinCodeInput } from '../../components/index';
 import { useSalesRepository, useCancelacionLogsRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId, useDeviceId } from '../../app-config/use-app-config';
 import { useLogStore } from '../../observability/observability-provider';
-import { addAuditBreadcrumb } from '../../observability/sentry-breadcrumbs';
-import { colors, typography } from '../../theme';
+import { logSuccessAudit, logErrorAudit } from './cancellation-audit';
+import { PinStep, ReasonStep, CashConfirmStep } from './cancellation-steps';
 
 type Step = 'pin' | 'reason' | 'cash-confirm' | 'done';
 
@@ -32,243 +20,93 @@ export interface CancellationFlowProps {
   readonly onSuccess: () => void;
 }
 
-export function CancellationFlow(
-  props: CancellationFlowProps,
-): ReactElement {
-  const [step, setStep] = useState<Step>('pin');
-  const [_pin, setPin] = useState('');
-  const [motivo, setMotivo] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+function useAuditContext(sale: Sale) {
   const userId = useUserId() as UserId;
   const businessId = useCurrentBusinessId() as BusinessId;
   const deviceId = useDeviceId();
   const logStore = useLogStore();
+  const isCashSale = sale.metodo === 'Efectivo';
+
+  return { userId, businessId, deviceId, logStore, isCashSale };
+}
+
+function buildLogPayload(sale: Sale, motivo: string, ctx: ReturnType<typeof useAuditContext>) {
+  return {
+    saleId: sale.id,
+    cancelledByUserId: ctx.userId,
+    motivo: motivo.trim(),
+    montoOriginalCentavos: sale.monto,
+    metodoOriginal: sale.metodo,
+    cashReturnedCentavos: ctx.isCashSale ? sale.monto : null,
+    stockReversed: false,
+    cantidadDevuelta: null,
+    productoId: null,
+    businessId: ctx.businessId,
+  };
+}
+
+function buildAuditCtx(sale: Sale, motivo: string, ctx: ReturnType<typeof useAuditContext>) {
+  return {
+    sale,
+    userId: ctx.userId,
+    deviceId: ctx.deviceId ?? '',
+    businessId: ctx.businessId ?? '',
+    motivo: motivo.trim(),
+    isCashSale: ctx.isCashSale,
+  };
+}
+
+function useExecuteCancellation(
+  props: CancellationFlowProps,
+  motivo: string,
+  ctx: ReturnType<typeof useAuditContext>,
+) {
   const salesRepo = useSalesRepository();
   const logsRepo = useCancelacionLogsRepository();
+  const [submitting, setSubmitting] = useState(false);
 
-  const isCashSale = props.sale.metodo === 'Efectivo';
-
-  const handlePinSubmit = useCallback((enteredPin: string) => {
-    setPin(enteredPin);
-    setStep('reason');
-  }, []);
-
-  const handleReasonSubmit = useCallback(() => {
-    if (motivo.trim().length === 0) return;
-    if (isCashSale) {
-      setStep('cash-confirm');
-    } else {
-      executeCancellation();
-    }
-  }, [motivo, isCashSale]);
-
-  const executeCancellation = useCallback(async () => {
+  const execute = useCallback(async () => {
     setSubmitting(true);
     try {
-      // Soft-delete the sale
       await salesRepo.delete(props.sale.id);
-
-      // Create audit log
-      await logsRepo.create({
-        saleId: props.sale.id,
-        cancelledByUserId: userId,
-        motivo: motivo.trim(),
-        montoOriginalCentavos: props.sale.monto,
-        metodoOriginal: props.sale.metodo,
-        cashReturnedCentavos: isCashSale ? props.sale.monto : null,
-        stockReversed: false, // Stock reversal handled by use case
-        cantidadDevuelta: null,
-        productoId: null,
-        businessId,
-      });
-
-      // Audit log: successful cancellation
-      const auditEvent = {
-        id: '',
-        timestamp: new Date().toISOString(),
-        operation: 'venta.cancelar' as const,
-        entityType: 'sale',
-        entityId: props.sale.id,
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: {
-          motivo: motivo.trim(),
-          montoOriginalCentavos: String(props.sale.monto),
-          metodoOriginal: props.sale.metodo,
-          isCashSale,
-        },
-        status: 'success' as const,
-      };
-      addAuditBreadcrumb(auditEvent);
-      void logStore?.writeAudit(auditEvent).catch(() => {});
-
+      await logsRepo.create(buildLogPayload(props.sale, motivo, ctx));
+      logSuccessAudit(buildAuditCtx(props.sale, motivo, ctx), ctx.logStore);
       props.onSuccess();
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-
-      // Audit log: failed cancellation
-      const errorEvent = {
-        id: '',
-        timestamp: new Date().toISOString(),
-        operation: 'venta.cancelar' as const,
-        entityType: 'sale',
-        entityId: props.sale.id,
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: { motivo: motivo.trim() },
-        status: 'error' as const,
-        errorCode: error.name,
-        errorMessage: error.message,
-      };
-      addAuditBreadcrumb(errorEvent);
-      void logStore?.writeAudit(errorEvent).catch(() => {});
-      void logStore?.writeError({
-        id: '',
-        timestamp: new Date().toISOString(),
-        source: 'ui',
-        operation: 'venta.cancelar',
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? null,
-      }).catch(() => {});
-
+      logErrorAudit(buildAuditCtx(props.sale, motivo, ctx), error, ctx.logStore);
       Alert.alert('Error', error.message);
     } finally {
       setSubmitting(false);
     }
-  }, [salesRepo, logsRepo, props, userId, businessId, motivo, isCashSale]);
+  }, [salesRepo, logsRepo, props, ctx, motivo]);
+
+  return { execute, submitting };
+}
+
+export function CancellationFlow(
+  props: CancellationFlowProps,
+): ReactElement {
+  const [step, setStep] = useState<Step>('pin');
+  const [motivo, setMotivo] = useState('');
+  const ctx = useAuditContext(props.sale);
+  const { execute, submitting } = useExecuteCancellation(props, motivo, ctx);
+
+  const handlePin = useCallback((_p: string) => { setStep('reason'); }, []);
+  const handleReason = useCallback(() => {
+    if (motivo.trim().length === 0) return;
+    if (ctx.isCashSale) { setStep('cash-confirm'); } else { execute(); }
+  }, [motivo, ctx.isCashSale, execute]);
 
   return (
-    <Modal
-      open
-      onClose={props.onClose}
-      title="Cancelar venta"
-      testID="cancellation-flow"
-    >
-      {step === 'pin' && (
-        <PinStep onSubmit={handlePinSubmit} onCancel={props.onClose} />
-      )}
+    <Modal open onClose={props.onClose} title="Cancelar venta" testID="cancellation-flow">
+      {step === 'pin' && <PinStep onSubmit={handlePin} />}
       {step === 'reason' && (
-        <ReasonStep
-          motivo={motivo}
-          onChangeMotivo={setMotivo}
-          onSubmit={handleReasonSubmit}
-        />
+        <ReasonStep motivo={motivo} onChangeMotivo={setMotivo} onSubmit={handleReason} />
       )}
       {step === 'cash-confirm' && (
-        <CashConfirmStep
-          amount={props.sale.monto}
-          onConfirm={executeCancellation}
-          submitting={submitting}
-        />
+        <CashConfirmStep amount={props.sale.monto} onConfirm={execute} submitting={submitting} />
       )}
     </Modal>
-  );
-}
-
-// --- Sub-components ---
-
-function PinStep(props: {
-  onSubmit: (pin: string) => void;
-  onCancel: () => void;
-}): ReactElement {
-  const [pinValue, setPinValue] = useState('');
-  return (
-    <View gap={16} alignItems="center" padding={8}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold.toString()}
-        fontSize={16}
-        color={colors.gray600}
-        textAlign="center"
-      >
-        Ingresa tu PIN para autorizar la cancelación
-      </Text>
-      <PinCodeInput
-        value={pinValue}
-        onChange={setPinValue}
-        onComplete={props.onSubmit}
-        testID="cancel-pin-input"
-      />
-    </View>
-  );
-}
-
-function ReasonStep(props: {
-  motivo: string;
-  onChangeMotivo: (v: string) => void;
-  onSubmit: () => void;
-}): ReactElement {
-  return (
-    <View gap={16} padding={8}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold.toString()}
-        fontSize={16}
-        color={colors.gray600}
-      >
-        ¿Por qué cancelas esta venta?
-      </Text>
-      <Input
-        label="Motivo"
-        value={props.motivo}
-        onChange={props.onChangeMotivo}
-        placeholder="Cliente cambió de opinión"
-        testID="cancel-reason-input"
-      />
-      <Btn
-        variant="danger"
-        fullWidth
-        onPress={props.onSubmit}
-        disabled={props.motivo.trim().length === 0}
-        testID="cancel-reason-submit"
-      >
-        Continuar
-      </Btn>
-    </View>
-  );
-}
-
-function CashConfirmStep(props: {
-  amount: bigint;
-  onConfirm: () => void;
-  submitting: boolean;
-}): ReactElement {
-  return (
-    <View gap={16} padding={8} alignItems="center">
-      <Text fontSize={40}>💵</Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black.toString()}
-        fontSize={24}
-        color={colors.black}
-        textAlign="center"
-      >
-        {`Devuelve ${formatMoney(props.amount)} al cliente`}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontSize={14}
-        color={colors.gray600}
-        textAlign="center"
-      >
-        El efectivo será descontado del saldo de la caja.
-      </Text>
-      <Btn
-        variant="danger"
-        fullWidth
-        size="lg"
-        onPress={props.onConfirm}
-        loading={props.submitting}
-        testID="cancel-cash-confirm"
-      >
-        ✅ Confirmar devolución
-      </Btn>
-    </View>
   );
 }

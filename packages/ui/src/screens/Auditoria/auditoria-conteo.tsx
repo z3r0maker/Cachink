@@ -21,149 +21,111 @@ export interface AuditoriaConteoProps {
   readonly testID?: string;
 }
 
-export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
-  const { t } = useTranslation();
-  const { mutateAsync, isPending } = useActualizarAuditoria();
+function parseStockValue(value: string): number | null {
+  const parsed = value.trim() === '' ? null : Number(value);
+  return parsed !== null && Number.isInteger(parsed) ? parsed : null;
+}
 
+function useConteoState(auditoria: AuditoriaInventario, onFinalized: () => void, onCancelled: () => void) {
+  const { mutateAsync, isPending } = useActualizarAuditoria();
   const [lineas, setLineas] = useState<AuditoriaLinea[]>(
-    () => JSON.parse(props.auditoria.lineas) as AuditoriaLinea[],
+    () => JSON.parse(auditoria.lineas) as AuditoriaLinea[],
   );
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
 
   const contados = lineas.filter((l) => l.stockReal !== null).length;
-  const total = lineas.length;
-  const allCounted = contados === total;
-
-  const discrepancias = lineas.filter(
-    (l) => l.diferencia !== null && l.diferencia !== 0,
-  ).length;
+  const allCounted = contados === lineas.length;
+  const discrepancias = lineas.filter((l) => l.diferencia !== null && l.diferencia !== 0).length;
 
   const handleStockChange = (idx: number, value: string): void => {
-    const parsed = value.trim() === '' ? null : Number(value);
-    const stockReal =
-      parsed !== null && Number.isInteger(parsed) ? parsed : null;
+    const stockReal = parseStockValue(value);
     setLineas((prev) => {
       const next = [...prev];
       const linea = next[idx];
       if (!linea) return prev;
-      const diferencia =
-        stockReal !== null ? stockReal - linea.stockSistema : null;
-      next[idx] = { ...linea, stockReal, diferencia };
+      next[idx] = { ...linea, stockReal, diferencia: stockReal !== null ? stockReal - linea.stockSistema : null };
       return next;
     });
   };
 
-  const handleSave = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'borrador',
-    });
-  };
+  const save = async () => mutateAsync({ id: auditoria.id, lineas, estado: 'borrador' });
+  const finalize = async () => { await mutateAsync({ id: auditoria.id, lineas, estado: 'finalizada' }); setShowConfirm(false); onFinalized(); };
+  const cancel = async () => { await mutateAsync({ id: auditoria.id, lineas, estado: 'cancelada' }); setShowCancel(false); onCancelled(); };
 
-  const handleFinalize = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'finalizada',
-    });
-    setShowConfirm(false);
-    props.onFinalized();
-  };
+  return { lineas, isPending, contados, allCounted, discrepancias, showConfirm, setShowConfirm, showCancel, setShowCancel, handleStockChange, save, finalize, cancel };
+}
 
-  const handleCancel = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'cancelada',
-    });
-    setShowCancel(false);
-    props.onCancelled();
-  };
+type T = ReturnType<typeof useTranslation>['t'];
+
+function ConteoActionBar({ ctx, t }: { ctx: ReturnType<typeof useConteoState>; t: T }): ReactElement {
+  return (
+    <View flexDirection="row" gap={8}>
+      <View flex={1}>
+        <Btn variant="ghost" onPress={() => ctx.setShowCancel(true)} disabled={ctx.isPending} fullWidth testID="conteo-cancelar">
+          {t('auditoria.cancelar' as never)}
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn variant="ghost" onPress={ctx.save} disabled={ctx.isPending} fullWidth testID="conteo-save">
+          {t('actions.save' as never)}
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn onPress={() => ctx.setShowConfirm(true)} disabled={!ctx.allCounted || ctx.isPending} fullWidth testID="conteo-finalizar">
+          {t('auditoria.finalizar' as never)}
+        </Btn>
+      </View>
+    </View>
+  );
+}
+
+function ConteoDialogs({ ctx, t }: { ctx: ReturnType<typeof useConteoState>; t: T }): ReactElement {
+  return (
+    <>
+      <ConfirmDialog
+        open={ctx.showConfirm}
+        onClose={() => ctx.setShowConfirm(false)}
+        title={t('auditoria.confirmarFinalizar' as never)}
+        description={t('auditoria.confirmarFinalizarDesc' as never, { count: ctx.discrepancias })}
+        onConfirm={ctx.finalize}
+        confirmLabel={t('auditoria.finalizar' as never)}
+        tone="default"
+      />
+      <ConfirmDialog
+        open={ctx.showCancel}
+        onClose={() => ctx.setShowCancel(false)}
+        title={t('auditoria.cancelar' as never)}
+        description={t('auditoria.cancelarConfirm' as never)}
+        onConfirm={ctx.cancel}
+        confirmLabel={t('auditoria.cancelar' as never)}
+        tone="danger"
+      />
+    </>
+  );
+}
+
+export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
+  const { t } = useTranslation();
+  const ctx = useConteoState(props.auditoria, props.onFinalized, props.onCancelled);
 
   return (
     <View gap={12} testID={props.testID ?? 'auditoria-conteo'}>
       <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={14}
-        color={colors.gray600}
-        testID="conteo-counter"
+        fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold}
+        fontSize={14} color={colors.gray600} testID="conteo-counter"
       >
-        {t('auditoria.contados', {
-          contados: String(contados),
-          total: String(total),
-        })}
+        {t('auditoria.contados', { contados: String(ctx.contados), total: String(ctx.lineas.length) })}
       </Text>
-
       <ScrollView>
         <View gap={8}>
-          {lineas.map((linea, idx) => (
-            <ConteoLineaCard
-              key={linea.productoId as string}
-              linea={linea}
-              onChange={(v) => handleStockChange(idx, v)}
-            />
+          {ctx.lineas.map((linea, idx) => (
+            <ConteoLineaCard key={linea.productoId as string} linea={linea} onChange={(v) => ctx.handleStockChange(idx, v)} />
           ))}
         </View>
       </ScrollView>
-
-      <View flexDirection="row" gap={8}>
-        <View flex={1}>
-          <Btn
-            variant="ghost"
-            onPress={() => setShowCancel(true)}
-            disabled={isPending}
-            fullWidth
-            testID="conteo-cancelar"
-          >
-            {t('auditoria.cancelar')}
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn
-            variant="ghost"
-            onPress={handleSave}
-            disabled={isPending}
-            fullWidth
-            testID="conteo-save"
-          >
-            {t('actions.save')}
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn
-            onPress={() => setShowConfirm(true)}
-            disabled={!allCounted || isPending}
-            fullWidth
-            testID="conteo-finalizar"
-          >
-            {t('auditoria.finalizar')}
-          </Btn>
-        </View>
-      </View>
-
-      <ConfirmDialog
-        open={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        title={t('auditoria.confirmarFinalizar')}
-        description={t('auditoria.confirmarFinalizarDesc', {
-          count: discrepancias,
-        })}
-        onConfirm={handleFinalize}
-        confirmLabel={t('auditoria.finalizar')}
-        tone="default"
-      />
-      <ConfirmDialog
-        open={showCancel}
-        onClose={() => setShowCancel(false)}
-        title={t('auditoria.cancelar')}
-        description={t('auditoria.cancelarConfirm')}
-        onConfirm={handleCancel}
-        confirmLabel={t('auditoria.cancelar')}
-        tone="danger"
-      />
+      <ConteoActionBar ctx={ctx} t={t} />
+      <ConteoDialogs ctx={ctx} t={t} />
     </View>
   );
 }

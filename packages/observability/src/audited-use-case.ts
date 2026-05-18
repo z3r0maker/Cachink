@@ -67,61 +67,63 @@ export class AuditedUseCase<TInput, TOutput> implements Executable<TInput, TOutp
     try {
       const result = await this.#inner.execute(input);
       const durationMs = Date.now() - startMs;
-
-      const event: AuditEvent = {
-        id,
-        timestamp,
-        operation: this.#config.operation,
-        entityType: this.#config.entityType,
-        entityId: this.#config.extractEntityId(result, input),
-        userId: this.#context.userId,
-        deviceId: this.#context.deviceId,
-        businessId: this.#context.businessId,
-        metadata: this.#config.extractMetadata?.(input, result),
-        status: 'success',
-        durationMs,
-      };
-
-      // Fire-and-forget — don't block the use case on logging
-      void this.#logStore.writeAudit(event).catch(() => {});
+      this.#logSuccess(id, timestamp, durationMs, input, result);
       return result;
     } catch (err: unknown) {
-      const error = err instanceof Error ? err : new Error(String(err));
-
       const durationMs = Date.now() - startMs;
-
-      const event: AuditEvent = {
-        id,
-        timestamp,
-        operation: this.#config.operation,
-        entityType: this.#config.entityType,
-        entityId: '',
-        userId: this.#context.userId,
-        deviceId: this.#context.deviceId,
-        businessId: this.#context.businessId,
-        metadata: this.#config.extractMetadata?.(input),
-        status: 'error',
-        errorCode: error.name,
-        errorMessage: error.message,
-        durationMs,
-      };
-
-      void this.#logStore.writeAudit(event).catch(() => {});
-      void this.#logStore.writeError({
-        id: ulid(),
-        timestamp,
-        source: 'use-case',
-        operation: this.#config.operation,
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        userId: this.#context.userId,
-        deviceId: this.#context.deviceId,
-        businessId: this.#context.businessId,
-        context: this.#config.extractMetadata?.(input),
-      }).catch(() => {});
-
+      this.#logFailure(id, timestamp, durationMs, input, err);
       throw err;
     }
+  }
+
+  #logSuccess(
+    id: string, timestamp: string, durationMs: number,
+    input: TInput, result: TOutput,
+  ): void {
+    const event: AuditEvent = {
+      id, timestamp, durationMs,
+      operation: this.#config.operation,
+      entityType: this.#config.entityType,
+      entityId: this.#config.extractEntityId(result, input),
+      userId: this.#context.userId,
+      deviceId: this.#context.deviceId,
+      businessId: this.#context.businessId,
+      metadata: this.#config.extractMetadata?.(input, result),
+      status: 'success',
+    };
+    void this.#logStore.writeAudit(event).catch(() => {});
+  }
+
+  #logFailure(
+    id: string, timestamp: string, durationMs: number,
+    input: TInput, err: unknown,
+  ): void {
+    const error = err instanceof Error ? err : new Error(String(err));
+    const event: AuditEvent = {
+      id, timestamp, durationMs,
+      operation: this.#config.operation,
+      entityType: this.#config.entityType,
+      entityId: '',
+      userId: this.#context.userId,
+      deviceId: this.#context.deviceId,
+      businessId: this.#context.businessId,
+      metadata: this.#config.extractMetadata?.(input),
+      status: 'error',
+      errorCode: error.name,
+      errorMessage: error.message,
+    };
+    void this.#logStore.writeAudit(event).catch(() => {});
+    void this.#logStore.writeError({
+      id: ulid(), timestamp,
+      source: 'use-case',
+      operation: this.#config.operation,
+      errorName: error.name,
+      errorMessage: error.message,
+      errorStack: error.stack,
+      userId: this.#context.userId,
+      deviceId: this.#context.deviceId,
+      businessId: this.#context.businessId,
+      context: this.#config.extractMetadata?.(input),
+    }).catch(() => {});
   }
 }

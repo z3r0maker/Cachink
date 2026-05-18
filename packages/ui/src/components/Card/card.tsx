@@ -144,51 +144,51 @@ function buildTappableStyle(
  * Renders the canonical Cachink card surface. See `card.stories.tsx` for the
  * full variant catalog.
  */
-export function Card(props: CardProps): ReactElement {
-  const variant = props.variant ?? 'white';
-  const padding = props.padding ?? 'md';
-  const elevation = props.elevation ?? 'none';
-  const v = VARIANTS[variant];
-  const pad = PADDINGS[padding];
-  const shadow = resolveShadow(v, elevation);
-  const tappable = props.onPress !== undefined;
+function TappableCard(props: CardProps & {
+  v: VariantDef; pad: number; shadow: string;
+}): ReactElement {
+  const base = buildTappableStyle(props.v, props.pad, props.fullWidth === true, props.shadow);
+  if (props.backgroundColor) base.backgroundColor = props.backgroundColor;
+  return (
+    <Pressable
+      testID={props.testID ?? 'card'}
+      onPress={() => { impactLight(); props.onPress?.(); }}
+      role="button"
+      aria-label={props.ariaLabel}
+      accessibilityRole="button"
+      accessibilityLabel={props.ariaLabel}
+      style={({ pressed }) => [base, pressed ? PRESS_TRANSFORM : null, props.style]}
+    >
+      {props.children}
+    </Pressable>
+  );
+}
 
-  // Tappable cards use RN Pressable for reliable gesture recognition on
-  // Maestro / XCUI (same fix as Btn — F0-T04).
-  if (tappable) {
-    const base = buildTappableStyle(v, pad, props.fullWidth === true, shadow);
-    if (props.backgroundColor) base.backgroundColor = props.backgroundColor;
-    return (
-      <Pressable
-        testID={props.testID ?? 'card'}
-        onPress={() => {
-          impactLight();
-          props.onPress?.();
-        }}
-        role="button"
-        aria-label={props.ariaLabel}
-        accessibilityRole="button"
-        accessibilityLabel={props.ariaLabel}
-        style={({ pressed }) => [base, pressed ? PRESS_TRANSFORM : null, props.style]}
-      >
-        {props.children}
-      </Pressable>
-    );
-  }
-
-  // Inert cards stay on Tamagui View — simpler styling, no gesture needed.
+function InertCard(props: CardProps & {
+  v: VariantDef; pad: number; shadow: string;
+}): ReactElement {
   return (
     <View
       testID={props.testID ?? 'card'}
-      backgroundColor={props.backgroundColor ?? v.background}
+      backgroundColor={props.backgroundColor ?? props.v.background}
       borderColor={colors.black}
-      borderWidth={v.borderWidth}
+      borderWidth={props.v.borderWidth}
       borderRadius={CARD_RADIUS}
-      padding={pad}
+      padding={props.pad}
       width={props.fullWidth === true ? '100%' : undefined}
-      style={[{ boxShadow: shadow, userSelect: 'none' }, props.style]}
+      style={[{ boxShadow: props.shadow, userSelect: 'none' }, props.style]}
     >
       {props.children}
     </View>
   );
+}
+
+export function Card(props: CardProps): ReactElement {
+  const v = VARIANTS[props.variant ?? 'white'];
+  const pad = PADDINGS[props.padding ?? 'md'];
+  const shadow = resolveShadow(v, props.elevation ?? 'none');
+  const shared = { ...props, v, pad, shadow };
+
+  if (props.onPress !== undefined) return <TappableCard {...shared} />;
+  return <InertCard {...shared} />;
 }

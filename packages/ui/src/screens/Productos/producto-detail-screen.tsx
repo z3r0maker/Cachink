@@ -83,27 +83,46 @@ function validate(state: DetailFormState): DetailFormErrors {
   return e;
 }
 
-export function ProductoDetailScreen(
-  props: ProductoDetailScreenProps,
-): ReactElement {
-  const [state, setState] = useState<DetailFormState>(
-    fromProduct(props.producto),
+function DetailTopBar(props: {
+  nombre: string;
+  dirty: boolean;
+  saving: boolean;
+  onBack: () => void;
+  onSave: () => void;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingHorizontal={16} paddingVertical={12}>
+      <Pressable onPress={props.onBack} testID="detail-back">
+        <Icon name="chevron-left" size={24} color={colors.black} />
+      </Pressable>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={18} color={colors.black} numberOfLines={1} flex={1} textAlign="center">
+        {props.nombre}
+      </Text>
+      <Btn variant={props.dirty ? 'primary' : 'ghost'} onPress={props.onSave} disabled={!props.dirty || props.saving} testID="detail-save">
+        Guardar
+      </Btn>
+    </View>
   );
+}
+
+function useDetailForm(producto: Product, iconOverride?: ProductIcon | null) {
+  const [state, setState] = useState<DetailFormState>(fromProduct(producto));
   const [errors, setErrors] = useState<DetailFormErrors>({});
   const [dirty, setDirty] = useState(false);
 
-  // Sync icon override from zustand store (icon picker return)
   useEffect(() => {
-    if (props.iconOverride !== undefined) {
-      setState((s) => ({ ...s, icono: props.iconOverride ?? null }));
+    if (iconOverride !== undefined) {
+      setState((s) => ({ ...s, icono: iconOverride ?? null }));
       setDirty(true);
     }
-  }, [props.iconOverride]);
+  }, [iconOverride]);
 
-  const update = (p: Partial<DetailFormState>): void => {
-    setState((s) => ({ ...s, ...p }));
-    setDirty(true);
-  };
+  const update = (p: Partial<DetailFormState>): void => { setState((s) => ({ ...s, ...p })); setDirty(true); };
+  return { state, errors, setErrors, dirty, update };
+}
+
+export function ProductoDetailScreen(props: ProductoDetailScreenProps): ReactElement {
+  const { state, errors, setErrors, dirty, update } = useDetailForm(props.producto, props.iconOverride);
 
   const handleSave = (): void => {
     const v = validate(state);
@@ -112,32 +131,17 @@ export function ProductoDetailScreen(
     props.onSave(buildPatch(state));
   };
 
-  const showPrecio = state.usoProducto !== 'materia-prima';
-
+  const id = (k: string) => k;
   return (
     <View testID={props.testID ?? 'producto-detail-screen'} flex={1} backgroundColor={colors.offwhite}>
-      {/* Top bar */}
-      <View flexDirection="row" alignItems="center" justifyContent="space-between" paddingHorizontal={16} paddingVertical={12}>
-        <Pressable onPress={props.onBack} testID="detail-back">
-          <Icon name="chevron-left" size={24} color={colors.black} />
-        </Pressable>
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={18} color={colors.black} numberOfLines={1} flex={1} textAlign="center">
-          {props.producto.nombre}
-        </Text>
-        <Btn variant={dirty ? 'primary' : 'ghost'} onPress={handleSave} disabled={!dirty || props.saving} testID="detail-save">
-          Guardar
-        </Btn>
-      </View>
-
+      <DetailTopBar nombre={props.producto.nombre} dirty={dirty} saving={props.saving} onBack={props.onBack} onSave={handleSave} />
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 80 }}>
-        <IconArea icono={state.icono} categoria={state.categoria} onSelectIcon={props.onSelectIcon} t={(k) => k} />
-        <StockActionCard stock={props.stock} umbral={Number(state.umbral) || 0} onEntrada={props.onEntrada} onSalida={props.onSalida} t={(k) => k} />
-        <IdentitySection state={state} errors={errors} onChange={update} t={(k) => k} />
-        <PricingSection state={state} errors={errors} showPrecio={showPrecio} onChange={update} conversionEnabled={props.conversionEnabled} t={(k) => k} />
+        <IconArea icono={state.icono} categoria={state.categoria} onSelectIcon={props.onSelectIcon} t={id} />
+        <StockActionCard stock={props.stock} umbral={Number(state.umbral) || 0} onEntrada={props.onEntrada} onSalida={props.onSalida} t={id} />
+        <IdentitySection state={state} errors={errors} onChange={update} t={id} />
+        <PricingSection state={state} errors={errors} showPrecio={state.usoProducto !== 'materia-prima'} onChange={update} conversionEnabled={props.conversionEnabled} t={id} />
         <InventorySection state={state} errors={errors} onChange={update} />
         <AppearanceSection state={state} onChange={update} />
-
-        {/* Delete button */}
         <View marginTop={24}>
           <Btn variant="danger" onPress={props.onDelete} disabled={props.deleting} fullWidth testID="detail-delete" icon={<Icon name="trash-2" size={18} color={colors.white} />}>
             Eliminar producto

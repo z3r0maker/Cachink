@@ -135,31 +135,18 @@ function CardHeader(props: {
   );
 }
 
-export function ProductoCard(props: ProductoCardProps): ReactElement {
-  const { producto, stock, atributoDefs = [], mode, disabled } = props;
-  const bg = PRODUCT_BG_COLORS[producto.colorFondo ?? 'white'];
-  const badge = (props.badgeCount ?? 0) > 0;
-  const resolvedIcon = resolveProductIcon(
-    props.icono !== undefined ? props.icono : producto.icono,
-    producto.categoria,
-  );
+function CardBody({ producto, stock, atributoDefs, mode, onLongPress, resolvedIcon }: {
+  producto: Product; stock?: number; atributoDefs: readonly AttrDef[];
+  mode: 'sell' | 'manage'; onLongPress?: (p: Product) => void;
+  resolvedIcon: string;
+}): ReactElement {
   return (
-    <View position="relative">
-      {badge && (
-        <QuantityBadge count={props.badgeCount!} variant={props.badgeVariant} />
-      )}
-      <Card
-        testID={props.testID ?? `producto-tile-${producto.id}`}
-        padding="sm"
-        onPress={disabled ? undefined : () => props.onPress(producto)}
-        ariaLabel={producto.nombre}
-        backgroundColor={bg}
-      >
-        <View gap={4} alignItems="center">
-          <Icon name={resolvedIcon} size={28} color={colors.black} />
-        </View>
-        <View gap={4}>
-        <CardHeader producto={producto} mode={mode} onLongPress={props.onLongPress} />
+    <>
+      <View gap={4} alignItems="center">
+        <Icon name={resolvedIcon as Parameters<typeof Icon>[0]['name']} size={28} color={colors.black} />
+      </View>
+      <View gap={4}>
+        <CardHeader producto={producto} mode={mode} onLongPress={onLongPress} />
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
@@ -171,7 +158,33 @@ export function ProductoCard(props: ProductoCardProps): ReactElement {
         </Text>
         {stock !== undefined && <StockBadge stock={stock} umbral={producto.umbralStockBajo} />}
         <AttrChips producto={producto} defs={atributoDefs} />
-        </View>
+      </View>
+    </>
+  );
+}
+
+export function ProductoCard(props: ProductoCardProps): ReactElement {
+  const { producto, stock, atributoDefs = [], mode, disabled } = props;
+  const bg = PRODUCT_BG_COLORS[producto.colorFondo ?? 'white'];
+  const badge = (props.badgeCount ?? 0) > 0;
+  const resolvedIcon = resolveProductIcon(
+    props.icono !== undefined ? props.icono : producto.icono,
+    producto.categoria,
+  );
+  return (
+    <View position="relative">
+      {badge && <QuantityBadge count={props.badgeCount!} variant={props.badgeVariant} />}
+      <Card
+        testID={props.testID ?? `producto-tile-${producto.id}`}
+        padding="sm"
+        onPress={disabled ? undefined : () => props.onPress(producto)}
+        ariaLabel={producto.nombre}
+        backgroundColor={bg}
+      >
+        <CardBody
+          producto={producto} stock={stock} atributoDefs={atributoDefs}
+          mode={mode} onLongPress={props.onLongPress} resolvedIcon={resolvedIcon}
+        />
       </Card>
     </View>
   );

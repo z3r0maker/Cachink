@@ -59,11 +59,41 @@ function CenterZones(p: { zones: readonly GaugeZone[]; max: number }): ReactElem
   );
 }
 
+function FillBar({ fillPct, tone, isNegative }: {
+  fillPct: string; tone: GaugeTone; isNegative: boolean;
+}): ReactElement {
+  return (
+    <View
+      testID="gauge-fill"
+      position="absolute"
+      top={0}
+      height="100%"
+      width={`${fillPct}%`}
+      backgroundColor={TONE_FILL[tone]}
+      {...(isNegative ? { right: '50%' } : { left: '50%' })}
+    />
+  );
+}
+
+function CenterDivider(): ReactElement {
+  return (
+    <View
+      testID="gauge-center-divider"
+      position="absolute"
+      top={0}
+      left="50%"
+      marginLeft={-DIVIDER_WIDTH / 2}
+      width={DIVIDER_WIDTH}
+      height="100%"
+      backgroundColor={colors.gray400}
+    />
+  );
+}
+
 export function CenterTrack(props: CenterTrackProps): ReactElement {
   const { clamped, max, tone, formattedValue, ariaLabel, zones } = props;
-  const isNegative = clamped < 0;
   const ratio = max === 0 ? 0 : Math.abs(clamped) / max;
-  const fillWidthPct = (ratio * 50).toFixed(2);
+  const fillPct = (ratio * 50).toFixed(2);
 
   return (
     <View
@@ -82,33 +112,11 @@ export function CenterTrack(props: CenterTrackProps): ReactElement {
       overflow="hidden"
       position="relative"
     >
-      {/* Zone overlays on positive half */}
       {zones !== undefined && zones.length > 0 && (
         <CenterZones zones={zones} max={max} />
       )}
-      {/* Fill bar — extends from center in the appropriate direction */}
-      <View
-        testID="gauge-fill"
-        position="absolute"
-        top={0}
-        height="100%"
-        width={`${fillWidthPct}%`}
-        backgroundColor={TONE_FILL[tone]}
-        {...(isNegative
-          ? { right: '50%' }
-          : { left: '50%' })}
-      />
-      {/* Center divider — always visible at the 50% mark */}
-      <View
-        testID="gauge-center-divider"
-        position="absolute"
-        top={0}
-        left="50%"
-        marginLeft={-DIVIDER_WIDTH / 2}
-        width={DIVIDER_WIDTH}
-        height="100%"
-        backgroundColor={colors.gray400}
-      />
+      <FillBar fillPct={fillPct} tone={tone} isNegative={clamped < 0} />
+      <CenterDivider />
     </View>
   );
 }

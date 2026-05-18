@@ -52,11 +52,58 @@ const PILL: ViewStyle = {
   backgroundColor: colors.yellowSoft,
 };
 
+function PillLabel({ icon, label }: { icon: 'banknote' | 'check'; label: string }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={6}>
+      <Icon name={icon} size={14} color={colors.black} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold.toString()}
+        fontSize={16}
+        color={colors.black}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
+function AmountPill({ amt, onSelect }: {
+  amt: QuickAmountOption; onSelect: (c: bigint) => void;
+}): ReactElement {
+  return (
+    <Pressable
+      key={amt.label}
+      style={({ pressed }) => [PILL, pressed && { backgroundColor: colors.yellow }]}
+      onPress={() => { impactLight(); onSelect(amt.centavos); }}
+      testID={`quick-amount-${amt.label}`}
+      accessibilityRole="button"
+      accessibilityLabel={amt.label}
+    >
+      <PillLabel icon="banknote" label={amt.label} />
+    </Pressable>
+  );
+}
+
+function ExactoPill({ onExacto }: { onExacto: () => void }): ReactElement {
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        PILL,
+        { backgroundColor: pressed ? colors.green : colors.greenSoft },
+      ]}
+      onPress={() => { impactLight(); onExacto(); }}
+      testID="quick-amount-exacto"
+      accessibilityRole="button"
+      accessibilityLabel="Exacto"
+    >
+      <PillLabel icon="check" label="Exacto" />
+    </Pressable>
+  );
+}
+
 export function QuickAmounts(props: QuickAmountsProps): ReactElement {
-  const amounts = [
-    ...MXN_BILL_AMOUNTS,
-    ...(props.extraAmounts ?? []),
-  ];
+  const amounts = [...MXN_BILL_AMOUNTS, ...(props.extraAmounts ?? [])];
 
   return (
     <ScrollView
@@ -66,60 +113,9 @@ export function QuickAmounts(props: QuickAmountsProps): ReactElement {
       testID={props.testID ?? 'quick-amounts'}
     >
       {amounts.map((amt) => (
-        <Pressable
-          key={amt.label}
-          style={({ pressed }) => [
-            PILL,
-            pressed && { backgroundColor: colors.yellow },
-          ]}
-          onPress={() => {
-            impactLight();
-            props.onSelect(amt.centavos);
-          }}
-          testID={`quick-amount-${amt.label}`}
-          accessibilityRole="button"
-          accessibilityLabel={amt.label}
-        >
-          <View flexDirection="row" alignItems="center" gap={6}>
-            <Icon name="banknote" size={14} color={colors.black} />
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.bold.toString()}
-              fontSize={16}
-              color={colors.black}
-            >
-              {amt.label}
-            </Text>
-          </View>
-        </Pressable>
+        <AmountPill key={amt.label} amt={amt} onSelect={props.onSelect} />
       ))}
-      {(props.showExacto ?? true) && (
-        <Pressable
-          style={({ pressed }) => [
-            PILL,
-            { backgroundColor: pressed ? colors.green : colors.greenSoft },
-          ]}
-          onPress={() => {
-            impactLight();
-            props.onExacto();
-          }}
-          testID="quick-amount-exacto"
-          accessibilityRole="button"
-          accessibilityLabel="Exacto"
-        >
-          <View flexDirection="row" alignItems="center" gap={6}>
-            <Icon name="check" size={14} color={colors.black} />
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.bold.toString()}
-              fontSize={16}
-              color={colors.black}
-            >
-              Exacto
-            </Text>
-          </View>
-        </Pressable>
-      )}
+      {(props.showExacto ?? true) && <ExactoPill onExacto={props.onExacto} />}
     </ScrollView>
   );
 }

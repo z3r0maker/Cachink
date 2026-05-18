@@ -8,9 +8,9 @@
  */
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import type { ProductId, Money } from '@cachink/domain';
+import type { ProductId } from '@cachink/domain';
 import type { Product } from '@cachink/domain';
-import { useCart, type CartItem } from '../../src/hooks/use-cart';
+import { useCart } from '../../src/hooks/use-cart';
 
 // ---------------------------------------------------------------------------
 // Helpers

@@ -81,8 +81,10 @@ function useSettingsHandlers(): {
   };
 }
 
-export default function SistemaRoute(): ReactElement {
-  const router = useRouter();
+function useSistemaProps(): {
+  settingsProps: React.ComponentProps<typeof SettingsSistema>['settingsProps'];
+  title: string;
+} {
   const mode = useMode();
   const business = useCurrentBusiness().data ?? null;
   const role = useRole();
@@ -94,34 +96,37 @@ export default function SistemaRoute(): ReactElement {
   const handlers = useSettingsHandlers();
   const { t } = useTranslation();
 
+  return {
+    title: t('settings.sistemaCard'),
+    settingsProps: {
+      mode, business,
+      onReRunWizard: handlers.reRunWizard,
+      notificationsEnabled,
+      onNotificationsChange: handlers.notificationsChange,
+      cachinkSoundEnabled,
+      onCachinkSoundChange: handlers.cachinkSoundChange,
+      feedback: {
+        appVersion: APP_VERSION,
+        platform: platformKey(),
+        role: roleLabel(role),
+        crashReportingEnabled: crashReportingEnabled === true,
+        breadcrumbs: [],
+      },
+      onCheckForUpdates: handlers.checkUpdates,
+      checkForUpdatesStatus: handlers.statusLabel,
+      lanDetails: lanDetails ?? undefined,
+      onOpenAdvancedBackend: mode === 'cloud' ? cloudNav.openAdvancedBackend : undefined,
+    },
+  };
+}
+
+export default function SistemaRoute(): ReactElement {
+  const router = useRouter();
+  const { title, settingsProps } = useSistemaProps();
+
   return (
-    <AppShellWrapper
-      activeTabKey="ajustes"
-      title={t('settings.sistemaCard')}
-      onBack={() => router.back()}
-    >
-      <SettingsSistema
-        settingsProps={{
-          mode,
-          business,
-          onReRunWizard: handlers.reRunWizard,
-          notificationsEnabled,
-          onNotificationsChange: handlers.notificationsChange,
-          cachinkSoundEnabled,
-          onCachinkSoundChange: handlers.cachinkSoundChange,
-          feedback: {
-            appVersion: APP_VERSION,
-            platform: platformKey(),
-            role: roleLabel(role),
-            crashReportingEnabled: crashReportingEnabled === true,
-            breadcrumbs: [],
-          },
-          onCheckForUpdates: handlers.checkUpdates,
-          checkForUpdatesStatus: handlers.statusLabel,
-          lanDetails: lanDetails ?? undefined,
-          onOpenAdvancedBackend: mode === 'cloud' ? cloudNav.openAdvancedBackend : undefined,
-        }}
-      />
+    <AppShellWrapper activeTabKey="ajustes" title={title} onBack={() => router.back()}>
+      <SettingsSistema settingsProps={settingsProps} />
     </AppShellWrapper>
   );
 }

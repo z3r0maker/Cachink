@@ -45,12 +45,7 @@ function filterVenta(productos: readonly Product[]): readonly Product[] {
   return productos.filter((p) => p.usoProducto === 'venta' || p.usoProducto === 'ambos');
 }
 
-export function ConversionScreen(props: ConversionScreenProps): ReactElement {
-  const { t } = useTranslation();
-  const [tab, setTab] = useState<ConversionSubTab>('recetas');
-  const [recetaModalOpen, setRecetaModalOpen] = useState(false);
-  const [convertir, setConvertir] = useState<ConversionReceta | null>(null);
-
+function useConversionData() {
   const recetasQ = useConversionRecetas();
   const conversionesQ = useConversiones();
   const productosQ = useProductos();
@@ -58,85 +53,92 @@ export function ConversionScreen(props: ConversionScreenProps): ReactElement {
   const crearReceta = useCrearConversionReceta();
   const eliminarReceta = useEliminarConversionReceta();
   const ejecutar = useEjecutarConversion();
-
   const productos = productosQ.data ?? [];
   const productMap = useProductMap(productos);
   const stockMap = useStockMap(stockQ);
   const mps = useMemo(() => filterMPs(productos), [productos]);
   const ventas = useMemo(() => filterVenta(productos), [productos]);
-  const canCreateReceta = mps.length > 0 && ventas.length > 0;
+  return { recetasQ, conversionesQ, crearReceta, eliminarReceta, ejecutar, productMap, stockMap, mps, ventas };
+}
 
-  const tabOptions = [
-    { key: 'recetas', label: t('conversion.tabRecetas') },
-    { key: 'historial', label: t('conversion.tabHistorial') },
-  ];
+function RecetasTab({ data, onOpenModal, onConvertir }: {
+  data: ReturnType<typeof useConversionData>;
+  onOpenModal: () => void;
+  onConvertir: (r: ConversionReceta) => void;
+}): ReactElement {
+  const { t } = useTranslation();
+  const canCreate = data.mps.length > 0 && data.ventas.length > 0;
+  return (
+    <>
+      <View paddingHorizontal={16} paddingVertical={8}>
+        {canCreate ? (
+          <Btn variant="primary" onPress={onOpenModal} fullWidth testID="conversion-nueva-receta-btn">
+            {t('conversion.nuevaReceta')}
+          </Btn>
+        ) : (
+          <EmptyState
+            icon="package"
+            title={t('conversion.noProductsTitle')}
+            description={t('conversion.noProductsHint')}
+            testID="conversion-no-products"
+          />
+        )}
+      </View>
+      <RecetaList
+        recetas={data.recetasQ.data ?? []}
+        products={data.productMap}
+        onConvertir={onConvertir}
+        onEliminar={(r) => data.eliminarReceta.mutate(r.id)}
+      />
+    </>
+  );
+}
+
+function ConversionOverlays({ data, recetaModalOpen, setRecetaModalOpen, convertir, setConvertir }: {
+  data: ReturnType<typeof useConversionData>;
+  recetaModalOpen: boolean; setRecetaModalOpen: (v: boolean) => void;
+  convertir: ConversionReceta | null; setConvertir: (v: ConversionReceta | null) => void;
+}): ReactElement {
+  return (
+    <>
+      <NuevaRecetaModal
+        open={recetaModalOpen}
+        onClose={() => setRecetaModalOpen(false)}
+        onSubmit={(input) => data.crearReceta.mutate(input, { onSuccess: () => setRecetaModalOpen(false) })}
+        submitting={data.crearReceta.isPending}
+        materiasPrimas={data.mps}
+        productosVenta={data.ventas}
+      />
+      <ConvertirSheet
+        open={convertir !== null} onClose={() => setConvertir(null)} receta={convertir}
+        products={data.productMap} stockMap={data.stockMap}
+        onConfirm={(mult) => {
+          if (!convertir) return;
+          data.ejecutar.mutate({ recetaId: convertir.id, multiplicador: mult }, { onSuccess: () => setConvertir(null) });
+        }}
+        submitting={data.ejecutar.isPending}
+      />
+    </>
+  );
+}
+
+export function ConversionScreen(props: ConversionScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const [tab, setTab] = useState<ConversionSubTab>('recetas');
+  const [recetaModalOpen, setRecetaModalOpen] = useState(false);
+  const [convertir, setConvertir] = useState<ConversionReceta | null>(null);
+  const data = useConversionData();
 
   return (
     <View flex={1} testID={props.testID ?? 'conversion-screen'}>
       <View paddingHorizontal={16} paddingTop={8} paddingBottom={4}>
         <SegmentedToggle
-          options={tabOptions}
-          value={tab}
-          onChange={(k) => setTab(k as ConversionSubTab)}
-          testID="conversion-tab-toggle"
-        />
+          options={[{ key: 'recetas', label: t('conversion.tabRecetas') }, { key: 'historial', label: t('conversion.tabHistorial') }]}
+          value={tab} onChange={(k) => setTab(k as ConversionSubTab)} testID="conversion-tab-toggle" />
       </View>
-      {tab === 'recetas' && (
-        <>
-          <View paddingHorizontal={16} paddingVertical={8}>
-            {canCreateReceta ? (
-              <Btn variant="primary" onPress={() => setRecetaModalOpen(true)}
-                fullWidth testID="conversion-nueva-receta-btn">
-                {t('conversion.nuevaReceta')}
-              </Btn>
-            ) : (
-              <EmptyState
-                icon="package"
-                title={t('conversion.noProductsTitle')}
-                description={t('conversion.noProductsHint')}
-                testID="conversion-no-products"
-              />
-            )}
-          </View>
-          <RecetaList
-            recetas={recetasQ.data ?? []}
-            products={productMap}
-            onConvertir={setConvertir}
-            onEliminar={(r) => eliminarReceta.mutate(r.id)}
-          />
-        </>
-      )}
-      {tab === 'historial' && (
-        <ConversionHistorial
-          conversiones={conversionesQ.data ?? []}
-          products={productMap}
-        />
-      )}
-      <NuevaRecetaModal
-        open={recetaModalOpen}
-        onClose={() => setRecetaModalOpen(false)}
-        onSubmit={(input) =>
-          crearReceta.mutate(input, { onSuccess: () => setRecetaModalOpen(false) })
-        }
-        submitting={crearReceta.isPending}
-        materiasPrimas={mps}
-        productosVenta={ventas}
-      />
-      <ConvertirSheet
-        open={convertir !== null}
-        onClose={() => setConvertir(null)}
-        receta={convertir}
-        products={productMap}
-        stockMap={stockMap}
-        onConfirm={(mult) => {
-          if (!convertir) return;
-          ejecutar.mutate(
-            { recetaId: convertir.id, multiplicador: mult },
-            { onSuccess: () => setConvertir(null) },
-          );
-        }}
-        submitting={ejecutar.isPending}
-      />
+      {tab === 'recetas' && <RecetasTab data={data} onOpenModal={() => setRecetaModalOpen(true)} onConvertir={setConvertir} />}
+      {tab === 'historial' && <ConversionHistorial conversiones={data.conversionesQ.data ?? []} products={data.productMap} />}
+      <ConversionOverlays data={data} recetaModalOpen={recetaModalOpen} setRecetaModalOpen={setRecetaModalOpen} convertir={convertir} setConvertir={setConvertir} />
     </View>
   );
 }

@@ -26,6 +26,26 @@ export interface CartFooterProps {
   readonly testID?: string;
 }
 
+function CartSummaryRow(props: {
+  itemCount: number;
+  totalCentavos: Money;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={8} marginBottom={8}>
+      <Icon name="shopping-cart" size={18} color={colors.black} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={14}
+        color={colors.black}
+      >
+        {props.itemCount} producto{props.itemCount !== 1 ? 's' : ''} ·{' '}
+        {formatMoney(props.totalCentavos)}
+      </Text>
+    </View>
+  );
+}
+
 export function CartFooter(props: CartFooterProps): ReactElement | null {
   if (props.itemCount <= 0) return null;
 
@@ -44,23 +64,10 @@ export function CartFooter(props: CartFooterProps): ReactElement | null {
       paddingHorizontal={16}
       paddingVertical={12}
     >
-      <View
-        flexDirection="row"
-        alignItems="center"
-        gap={8}
-        marginBottom={8}
-      >
-        <Icon name="shopping-cart" size={18} color={colors.black} />
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={14}
-          color={colors.black}
-        >
-          {props.itemCount} producto{props.itemCount !== 1 ? 's' : ''} ·{' '}
-          {formatMoney(props.totalCentavos)}
-        </Text>
-      </View>
+      <CartSummaryRow
+        itemCount={props.itemCount}
+        totalCentavos={props.totalCentavos}
+      />
       <Btn
         variant={btnVariant}
         fullWidth

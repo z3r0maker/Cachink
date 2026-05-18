@@ -52,47 +52,25 @@ function StackedLegend(props: {
   );
 }
 
-function BarTrack(props: {
-  segments: readonly BarSegment[];
-  total: number;
-  height: number;
-}): ReactElement {
+function BarSegmentView({ seg, pct }: { seg: BarSegment; pct: number }): ReactElement | null {
+  if (pct <= 0) return null;
   return (
-    <View
-      testID="stacked-bar-track"
-      flexDirection="row"
-      height={props.height}
-      borderRadius={4}
-      overflow="hidden"
-      borderColor={colors.black}
-      borderWidth={2}
-    >
+    <View testID="stacked-bar-segment" width={`${pct.toFixed(1)}%`} backgroundColor={seg.color} height="100%" justifyContent="center" alignItems="center">
+      {pct >= INLINE_LABEL_THRESHOLD && (
+        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={10} color={colors.white} textAlign="center">
+          {Math.round(pct)}%
+        </Text>
+      )}
+    </View>
+  );
+}
+
+function BarTrack(props: { segments: readonly BarSegment[]; total: number; height: number }): ReactElement {
+  return (
+    <View testID="stacked-bar-track" flexDirection="row" height={props.height} borderRadius={4} overflow="hidden" borderColor={colors.black} borderWidth={2}>
       {props.segments.map((seg, i) => {
         const pct = props.total > 0 ? (seg.value / props.total) * 100 : 0;
-        if (pct <= 0) return null;
-        return (
-          <View
-            key={i}
-            testID="stacked-bar-segment"
-            width={`${pct.toFixed(1)}%`}
-            backgroundColor={seg.color}
-            height="100%"
-            justifyContent="center"
-            alignItems="center"
-          >
-            {pct >= INLINE_LABEL_THRESHOLD && (
-              <Text
-                fontFamily={typography.fontFamily}
-                fontWeight={typography.weights.bold}
-                fontSize={10}
-                color={colors.white}
-                textAlign="center"
-              >
-                {Math.round(pct)}%
-              </Text>
-            )}
-          </View>
-        );
+        return <BarSegmentView key={i} seg={seg} pct={pct} />;
       })}
     </View>
   );

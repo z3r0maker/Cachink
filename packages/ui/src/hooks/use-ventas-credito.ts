@@ -66,6 +66,26 @@ interface CreditQueryResult {
   readonly nameMap: ReadonlyMap<string, string>;
 }
 
+async function fetchCreditSales(
+  from: IsoDate,
+  to: IsoDate,
+  businessId: string,
+  salesRepo: ReturnType<typeof useSalesRepository>,
+  clientsRepo: ReturnType<typeof useClientsRepository>,
+): Promise<CreditQueryResult> {
+  const [all, clients] = await Promise.all([
+    salesRepo.findByDateRange(from, to, businessId),
+    clientsRepo.findByName('', businessId),
+  ]);
+  const nameMap = new Map<string, string>(
+    clients.map((c) => [c.id as string, c.nombre]),
+  );
+  const sales = all.filter(
+    (s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado',
+  );
+  return { sales, nameMap };
+}
+
 export function useVentasCredito(
   from: IsoDate,
   to: IsoDate,
@@ -85,17 +105,7 @@ export function useVentasCredito(
       if (!businessId) {
         return { sales: [] as readonly Sale[], nameMap: new Map<string, string>() };
       }
-      const [all, clients] = await Promise.all([
-        salesRepo.findByDateRange(from, to, businessId),
-        clientsRepo.findByName('', businessId),
-      ]);
-      const nameMap = new Map<string, string>(
-        clients.map((c) => [c.id as string, c.nombre]),
-      );
-      const sales = all.filter(
-        (s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado',
-      );
-      return { sales, nameMap };
+      return fetchCreditSales(from, to, businessId, salesRepo, clientsRepo);
     },
   });
 
@@ -107,9 +117,5 @@ export function useVentasCredito(
     [query.data],
   );
 
-  return {
-    data: grouped,
-    isLoading: query.isLoading,
-    error: query.error,
-  };
+  return { data: grouped, isLoading: query.isLoading, error: query.error };
 }

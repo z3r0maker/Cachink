@@ -54,66 +54,48 @@ function Row(props: RowProps): ReactElement {
   );
 }
 
-export function ResultadosRows({
-  estado,
-  t,
-}: {
-  estado: EstadoDeResultados;
-  t: T;
-}): ReactElement {
+function TopRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
   return (
-    <Card padding="md" fullWidth testID="estado-resultados-rows">
+    <>
       <Row label={t('estados.resultadosIngresos')} value={estado.ingresos} testID="estado-row-ingresos" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosIngresosSubtitle')}
-        detail={t('estados.resultadosIngresosDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosIngresosSubtitle')} detail={t('estados.resultadosIngresosDetail')} />
       <Row label={t('estados.resultadosCostoVentas')} value={estado.costoDeVentas} testID="estado-row-costo-ventas" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosCostoVentasSubtitle')}
-        detail={t('estados.resultadosCostoVentasDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosCostoVentasSubtitle')} detail={t('estados.resultadosCostoVentasDetail')} />
       <Row label={t('estados.resultadosUtilidadBruta')} value={estado.utilidadBruta} emphasis="total" testID="estado-row-utilidad-bruta" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosUtilidadBrutaSubtitle')}
-        detail={t('estados.resultadosUtilidadBrutaDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosUtilidadBrutaSubtitle')} detail={t('estados.resultadosUtilidadBrutaDetail')} />
       {estado.merma > ZERO && (
         <View>
           <Row label={t('estados.resultadosMerma')} value={estado.merma} testID="estado-row-merma" />
-          <HelpAccordion
-            subtitle={t('estados.resultadosMermaSubtitle')}
-            detail={t('estados.resultadosMermaDetail')}
-          />
+          <HelpAccordion subtitle={t('estados.resultadosMermaSubtitle')} detail={t('estados.resultadosMermaDetail')} />
         </View>
       )}
+    </>
+  );
+}
+
+function BottomRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
+  return (
+    <>
       <Row label={t('estados.resultadosGastosOperativos')} value={estado.gastosOperativos} testID="estado-row-gastos-operativos" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosGastosOperativosSubtitle')}
-        detail={t('estados.resultadosGastosOperativosDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosGastosOperativosSubtitle')} detail={t('estados.resultadosGastosOperativosDetail')} />
       <Row label={t('estados.resultadosUtilidadOperativa')} value={estado.utilidadOperativa} emphasis="total" testID="estado-row-utilidad-operativa" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosUtilidadOperativaSubtitle')}
-        detail={t('estados.resultadosUtilidadOperativaDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosUtilidadOperativaSubtitle')} detail={t('estados.resultadosUtilidadOperativaDetail')} />
       <Row label={t('estados.resultadosIsr')} value={estado.isr} testID="estado-row-isr" />
-      <HelpAccordion
-        subtitle={t('estados.resultadosIsrSubtitle')}
-        detail={t('estados.resultadosIsrDetail')}
-      />
+      <HelpAccordion subtitle={t('estados.resultadosIsrSubtitle')} detail={t('estados.resultadosIsrDetail')} />
       {estado.isr === ZERO && estado.utilidadOperativa < ZERO && (
-        <Text
-          testID="estado-isr-zero-hint"
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={11}
-          color={colors.gray400}
-          paddingVertical={2}
-        >
+        <Text testID="estado-isr-zero-hint" fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={11} color={colors.gray400} paddingVertical={2}>
           {t('estados.isrZeroHint')}
         </Text>
       )}
+    </>
+  );
+}
+
+export function ResultadosRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
+  return (
+    <Card padding="md" fullWidth testID="estado-resultados-rows">
+      <TopRows estado={estado} t={t} />
+      <BottomRows estado={estado} t={t} />
     </Card>
   );
 }

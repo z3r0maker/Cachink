@@ -44,10 +44,8 @@ function isOnlineFromState(state: NetInfoState | null): boolean {
   return true;
 }
 
-export function useIsOnline(): boolean {
+function useNetInfoSubscription(): NetInfoState | null {
   const [state, setState] = useState<NetInfoState | null>(null);
-  const logStore = useLogStore();
-  const deviceId = useDeviceId();
 
   useEffect(() => {
     let cancelled = false;
@@ -67,13 +65,17 @@ export function useIsOnline(): boolean {
     };
   }, []);
 
-  const online = isOnlineFromState(state);
+  return state;
+}
 
-  // Phase 9: Log connectivity transitions
+function useLogConnectivityTransition(
+  online: boolean,
+  logStore: ReturnType<typeof useLogStore>,
+  deviceId: string | null,
+): void {
   const prevOnline = useRef<boolean | null>(null);
   useEffect(() => {
     if (prevOnline.current === null) {
-      // Skip the initial state — only log transitions
       prevOnline.current = online;
       return;
     }
@@ -95,6 +97,13 @@ export function useIsOnline(): boolean {
     };
     void logStore.writeAudit(event).catch(() => {});
   }, [online, logStore, deviceId]);
+}
 
+export function useIsOnline(): boolean {
+  const state = useNetInfoSubscription();
+  const logStore = useLogStore();
+  const deviceId = useDeviceId();
+  const online = isOnlineFromState(state);
+  useLogConnectivityTransition(online, logStore, deviceId);
   return online;
 }

@@ -39,81 +39,45 @@ export interface SeedResult {
   readonly alreadySeeded: boolean;
 }
 
-export async function seedDemoData(deps: SeedDeps): Promise<SeedResult> {
-  const { repositories: r, businessId: biz } = deps;
-
-  // ── Idempotency guard ──────────────────────────────────────────────
-  const existing = await r.appConfig.get(DEMO_KEY);
-  if (existing === 'true') {
-    return { totalRecords: 0, alreadySeeded: true };
-  }
-
-  let count = 0;
-
-  // ── 1. Users (Director + Operativo, PIN 000000) ────────────────────
+async function seedUsers(r: Repositories, biz: BusinessId) {
   const [pinHash, recoveryHash] = await Promise.all([
     hash(DEFAULT_PIN, BCRYPT_ROUNDS),
     hash(DEFAULT_RECOVERY, BCRYPT_ROUNDS),
   ]);
+  const base = { email: null, pinHash, recoveryPasswordHash: recoveryHash, mustChangePin: false, businessId: biz };
+  const director = await r.users.create({ ...base, nombre: 'Juan Director', role: 'director', avatarColor: 'blue' });
+  const operativo = await r.users.create({ ...base, nombre: 'Ana Operativa', role: 'operativo', avatarColor: 'green' });
+  return { director, operativo, count: 2 };
+}
 
-  const director = await r.users.create({
-    nombre: 'Juan Director',
-    email: null,
-    pinHash,
-    recoveryPasswordHash: recoveryHash,
-    role: 'director',
-    mustChangePin: false,
-    avatarColor: 'blue',
-    businessId: biz,
-  });
-  count += 1;
-
-  const operativo = await r.users.create({
-    nombre: 'Ana Operativa',
-    email: null,
-    pinHash,
-    recoveryPasswordHash: recoveryHash,
-    role: 'operativo',
-    mustChangePin: false,
-    avatarColor: 'green',
-    businessId: biz,
-  });
-  count += 1;
-
-  // ── 2. Products ────────────────────────────────────────────────────
+async function seedCatalog(r: Repositories, biz: BusinessId) {
+  let count = 0;
   const products: Product[] = [];
-  for (const np of demoProducts(biz)) {
-    products.push(await r.products.create(np));
-    count += 1;
-  }
-
-  // ── 3. Inventory, Clients, Employees ──────────────────────────────
+  for (const np of demoProducts(biz)) { products.push(await r.products.create(np)); count += 1; }
   count += await seedInventory(r, biz, products);
-
   const clients = [];
-  for (const nc of demoClients(biz)) {
-    clients.push(await r.clients.create(nc));
-    count += 1;
-  }
+  for (const nc of demoClients(biz)) { clients.push(await r.clients.create(nc)); count += 1; }
+  for (const ne of demoEmployees(biz)) { await r.employees.create(ne); count += 1; }
+  return { products, clients, count };
+}
 
-  for (const ne of demoEmployees(biz)) {
-    await r.employees.create(ne);
-    count += 1;
-  }
+export async function seedDemoData(deps: SeedDeps): Promise<SeedResult> {
+  const { repositories: r, businessId: biz } = deps;
 
-  // ── 4. Sales, Expenses, Recurring ──────────────────────────────────
-  count += await seedSales(r, biz, products, clients);
+  const existing = await r.appConfig.get(DEMO_KEY);
+  if (existing === 'true') return { totalRecords: 0, alreadySeeded: true };
+
+  const users = await seedUsers(r, biz);
+  const catalog = await seedCatalog(r, biz);
+  let count = users.count + catalog.count;
+
+  count += await seedSales(r, biz, catalog.products, catalog.clients);
   count += await seedExpenses(r, biz);
   count += await seedRecurringExpenses(r, biz);
-
-  // ── 5. Day closes + Caja turnos ────────────────────────────────────
   count += await seedDayCloses(r, biz);
-  count += await seedCajaTurnos(r, biz, director.id, operativo.id);
+  count += await seedCajaTurnos(r, biz, users.director.id, users.operativo.id);
 
-  // ── 6. Enable all feature flags ────────────────────────────────────
   await r.businesses.update(biz, { featureFlags: ALL_FEATURES_ON });
-
-  // ── Mark as seeded ─────────────────────────────────────────────────
   await r.appConfig.set(DEMO_KEY, 'true');
 
   return { totalRecords: count, alreadySeeded: false };

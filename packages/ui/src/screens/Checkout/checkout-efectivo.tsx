@@ -45,90 +45,88 @@ export interface CheckoutEfectivoProps {
   readonly testID?: string;
 }
 
-export function CheckoutEfectivo(
-  props: CheckoutEfectivoProps,
-): ReactElement {
+function PaymentEntryCard(props: {
+  display: string;
+  onKey: (k: string) => void;
+  setFromCentavos: (c: Money) => void;
+  onExacto: () => void;
+}): ReactElement {
+  return (
+    <Card variant="white" fullWidth padding="md" elevation="raised">
+      <View gap={16} alignItems="center">
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.semibold.toString()}
+          fontSize={14}
+          color={colors.gray600}
+          letterSpacing={typography.letterSpacing.wide}
+          style={{ textTransform: 'uppercase' }}
+        >
+          Efectivo recibido
+        </Text>
+        <NumpadDisplay value={props.display} />
+        <QuickAmounts
+          onSelect={props.setFromCentavos}
+          onExacto={props.onExacto}
+        />
+        <Numpad onPress={props.onKey} />
+      </View>
+    </Card>
+  );
+}
+
+function useEfectivoState(totalCentavos: Money, efectivoEnCaja?: Money | null) {
   const input = useNumpadInput();
 
   const cambio =
-    input.centavos >= props.totalCentavos
-      ? input.centavos - props.totalCentavos
+    input.centavos >= totalCentavos
+      ? input.centavos - totalCentavos
       : ZERO;
 
-  const canSubmit =
-    input.centavos >= props.totalCentavos && input.centavos > ZERO;
-
+  const canSubmit = input.centavos >= totalCentavos && input.centavos > ZERO;
   const handleExacto = useCallback(() => {
-    input.setFromCentavos(props.totalCentavos);
-  }, [input, props.totalCentavos]);
+    input.setFromCentavos(totalCentavos);
+  }, [input, totalCentavos]);
 
   const showCambio = input.centavos > ZERO;
   const showCashWarning =
     cambio > ZERO &&
-    props.efectivoEnCaja != null &&
-    cambio > props.efectivoEnCaja;
+    efectivoEnCaja != null &&
+    cambio > efectivoEnCaja;
+
+  return { input, cambio, canSubmit, handleExacto, showCambio, showCashWarning };
+}
+
+const scrollStyle = {
+  paddingHorizontal: 20,
+  paddingBottom: 100,
+  gap: 16,
+  alignItems: 'center' as const,
+};
+
+export function CheckoutEfectivo(
+  props: CheckoutEfectivoProps,
+): ReactElement {
+  const s = useEfectivoState(props.totalCentavos, props.efectivoEnCaja);
 
   return (
     <View flex={1} testID={props.testID ?? 'checkout-efectivo'}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 100,
-          gap: 16,
-          alignItems: 'center',
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Yellow accent strip */}
-        <View
-          width="100%"
-          height={6}
-          backgroundColor={colors.yellow}
-          borderRadius={radii[0]}
-        />
-
-        {/* Total context header */}
+      <ScrollView contentContainerStyle={scrollStyle} showsVerticalScrollIndicator={false}>
+        <View width="100%" height={6} backgroundColor={colors.yellow} borderRadius={radii[0]} />
         <TotalHeader totalCentavos={props.totalCentavos} />
-
-        {/* Payment Entry Card */}
-        <Card variant="white" fullWidth padding="md" elevation="raised">
-          <View gap={16} alignItems="center">
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.semibold.toString()}
-              fontSize={14}
-              color={colors.gray600}
-              letterSpacing={typography.letterSpacing.wide}
-              style={{ textTransform: 'uppercase' }}
-            >
-              Efectivo recibido
-            </Text>
-
-            <NumpadDisplay value={input.display} />
-
-            <QuickAmounts
-              onSelect={input.setFromCentavos}
-              onExacto={handleExacto}
-            />
-
-            <Numpad onPress={input.onKey} />
-          </View>
-        </Card>
-
-        {/* Cambio Card */}
-        <CambioCard
-          cambio={cambio}
-          visible={showCambio}
-          showCashWarning={showCashWarning}
+        <PaymentEntryCard
+          display={s.input.display}
+          onKey={s.input.onKey}
+          setFromCentavos={s.input.setFromCentavos}
+          onExacto={s.handleExacto}
         />
+        <CambioCard cambio={s.cambio} visible={s.showCambio} showCashWarning={s.showCashWarning} />
       </ScrollView>
-
-      {/* Sticky footer CTA */}
       <CheckoutFooter
         totalCentavos={props.totalCentavos}
-        canSubmit={canSubmit}
+        canSubmit={s.canSubmit}
         submitting={props.submitting === true}
-        onConfirm={() => props.onConfirm(input.centavos)}
+        onConfirm={() => props.onConfirm(s.input.centavos)}
       />
     </View>
   );

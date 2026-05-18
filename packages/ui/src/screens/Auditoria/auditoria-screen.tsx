@@ -10,6 +10,7 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
+import type { AuditoriaInventario } from '@cachink/domain';
 import {
   Btn,
   EmptyState,
@@ -36,99 +37,98 @@ export interface AuditoriaScreenProps {
 
 type AuditoriaTab = 'conteo' | 'historial';
 
+function ConteoTabContent({ activeAudit, hasStockProducts, crear, setTab, t }: {
+  activeAudit: AuditoriaInventario | null;
+  hasStockProducts: boolean;
+  crear: ReturnType<typeof useCrearAuditoria>;
+  setTab: (t: AuditoriaTab) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  if (activeAudit !== null) {
+    return <AuditoriaConteo auditoria={activeAudit} onFinalized={() => setTab('historial')} onCancelled={() => {}} />;
+  }
+  if (!hasStockProducts) {
+    return (
+      <EmptyState icon="clipboard-list" title={t('auditoria.noProducts')}
+        description={t('auditoria.noProductsHint')} testID="auditoria-no-products" />
+    );
+  }
+  return (
+    <View gap={16}>
+      <EmptyAuditoria />
+      <Btn onPress={() => crear.mutateAsync()} disabled={crear.isPending} fullWidth testID="nueva-auditoria-btn">
+        {t('auditoria.nuevaAuditoria')}
+      </Btn>
+    </View>
+  );
+}
+
+function HistorialTabContent({ auditorias, periodo, setPeriodo, periodLabels }: {
+  auditorias: readonly AuditoriaInventario[] | undefined;
+  periodo: PeriodoState;
+  setPeriodo: (p: PeriodoState) => void;
+  periodLabels: ReturnType<typeof usePeriodLabels>;
+}): ReactElement {
+  return (
+    <View gap={12}>
+      <PeriodPicker value={periodo} onChange={setPeriodo} labels={periodLabels} />
+      {auditorias !== undefined && auditorias.length === 0 && <EmptyAuditoria />}
+      {auditorias !== undefined && auditorias.length > 0 && <AuditoriaHistorial auditorias={auditorias} />}
+    </View>
+  );
+}
+
+function AuditoriaBody({ tab, setTab, isLoading, error, auditorias, activeAudit, hasStockProducts, crear, periodo, setPeriodo, periodLabels, t }: {
+  tab: AuditoriaTab; setTab: (t: AuditoriaTab) => void;
+  isLoading: boolean; error: Error | null;
+  auditorias: readonly AuditoriaInventario[] | undefined;
+  activeAudit: AuditoriaInventario | null;
+  hasStockProducts: boolean; crear: ReturnType<typeof useCrearAuditoria>;
+  periodo: PeriodoState; setPeriodo: (p: PeriodoState) => void;
+  periodLabels: ReturnType<typeof usePeriodLabels>;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  if (isLoading) {
+    return (
+      <View gap={8}>
+        <Skeleton.Row index={0} testIDPrefix="auditoria-skeleton" />
+        <Skeleton.Row index={1} testIDPrefix="auditoria-skeleton" />
+      </View>
+    );
+  }
+  if (error !== null) return <ErrorState title={t('common.error')} body={error.message} testID="auditoria-error" />;
+  if (tab === 'conteo') {
+    return (
+      <View gap={12}>
+        <ConteoTabContent activeAudit={activeAudit} hasStockProducts={hasStockProducts} crear={crear} setTab={setTab} t={t} />
+      </View>
+    );
+  }
+  return <HistorialTabContent auditorias={auditorias} periodo={periodo} setPeriodo={setPeriodo} periodLabels={periodLabels} />;
+}
+
 export function AuditoriaScreen(props: AuditoriaScreenProps): ReactElement {
   const { t } = useTranslation();
   const periodLabels = usePeriodLabels();
   const [tab, setTab] = useState<AuditoriaTab>('conteo');
   const [periodo, setPeriodo] = useState<PeriodoState>(defaultPeriodoState);
   const range = usePeriodoRange(periodo);
-
   const { data: auditorias, isLoading, error } = useAuditoriasInventario(range.from, range.to);
   const crear = useCrearAuditoria();
   const productosQ = useProductos();
-  const hasStockProducts =
-    (productosQ.data ?? []).filter((p) => p.seguirStock !== false).length > 0;
-
+  const hasStockProducts = (productosQ.data ?? []).filter((p) => p.seguirStock !== false).length > 0;
   const activeAudit = auditorias?.find((a) => a.estado === 'borrador') ?? null;
-
-  const handleNew = async (): Promise<void> => {
-    await crear.mutateAsync();
-  };
 
   return (
     <ScrollView testID={props.testID ?? 'auditoria-screen'}>
       <View padding={16} gap={16}>
         <SectionTitle title={t('auditoria.title')} />
-
-        <SegmentedToggle
-          value={tab}
-          onChange={(v) => setTab(v as AuditoriaTab)}
-          options={[
-            { key: 'conteo', label: t('auditoria.tabConteo') },
-            { key: 'historial', label: t('auditoria.tabHistorial') },
-          ]}
-          testID="auditoria-tabs"
-        />
-
-        {isLoading && (
-          <View gap={8}>
-            <Skeleton.Row index={0} testIDPrefix="auditoria-skeleton" />
-            <Skeleton.Row index={1} testIDPrefix="auditoria-skeleton" />
-          </View>
-        )}
-
-        {error !== null && !isLoading && (
-          <ErrorState
-            title={t('common.error')}
-            body={error.message}
-            testID="auditoria-error"
-          />
-        )}
-
-        {tab === 'conteo' && !isLoading && error === null && (
-          <View gap={12}>
-            {activeAudit !== null ? (
-              <AuditoriaConteo
-                auditoria={activeAudit}
-                onFinalized={() => setTab('historial')}
-                onCancelled={() => {
-                  /* Re-render triggers re-query; activeAudit becomes null */
-                }}
-              />
-            ) : !hasStockProducts ? (
-              <EmptyState
-                icon="clipboard-list"
-                title={t('auditoria.noProducts')}
-                description={t('auditoria.noProductsHint')}
-                testID="auditoria-no-products"
-              />
-            ) : (
-              <View gap={16}>
-                <EmptyAuditoria />
-                <Btn
-                  onPress={handleNew}
-                  disabled={crear.isPending}
-                  fullWidth
-                  testID="nueva-auditoria-btn"
-                >
-                  {t('auditoria.nuevaAuditoria')}
-                </Btn>
-              </View>
-            )}
-          </View>
-        )}
-
-        {tab === 'historial' && !isLoading && error === null && (
-          <View gap={12}>
-            <PeriodPicker value={periodo} onChange={setPeriodo} labels={periodLabels} />
-            {auditorias !== undefined && auditorias.length === 0 && (
-              <EmptyAuditoria />
-            )}
-            {auditorias !== undefined && auditorias.length > 0 && (
-              <AuditoriaHistorial auditorias={auditorias} />
-            )}
-          </View>
-        )}
+        <SegmentedToggle value={tab} onChange={(v) => setTab(v as AuditoriaTab)}
+          options={[{ key: 'conteo', label: t('auditoria.tabConteo') }, { key: 'historial', label: t('auditoria.tabHistorial') }]}
+          testID="auditoria-tabs" />
+        <AuditoriaBody tab={tab} setTab={setTab} isLoading={isLoading} error={error} auditorias={auditorias}
+          activeAudit={activeAudit} hasStockProducts={hasStockProducts} crear={crear}
+          periodo={periodo} setPeriodo={setPeriodo} periodLabels={periodLabels} t={t} />
       </View>
     </ScrollView>
   );

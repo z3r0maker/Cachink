@@ -10,6 +10,35 @@ import { SqliteLogStore, type SqliteDatabase } from '../src/sqlite-log-store.js'
 import type { AuditEvent } from '../src/audit-event.js';
 import type { ErrorLogEntry } from '../src/error-log.js';
 
+// ─── In-memory SQLite mock helpers ─────────────────────────────────
+
+type Row = Record<string, unknown>;
+
+function applyTypeFilter(rows: Row[], sql: string, params?: unknown[]): Row[] {
+  if (!sql.includes("type = ?")) return rows;
+  const typeParam = params?.find((p) => p === 'audit' || p === 'error');
+  return typeParam ? rows.filter((r) => r.type === typeParam) : rows;
+}
+
+function applyTimestampFilter(rows: Row[], sql: string, params?: unknown[]): Row[] {
+  if (!sql.includes('timestamp >= ?') || !params) return rows;
+  const tsParam = params.find((p) => typeof p === 'string' && p.includes('T') && p.includes(':'));
+  return tsParam ? rows.filter((r) => (r.timestamp as string) >= (tsParam as string)) : rows;
+}
+
+function applyOperationFilter(rows: Row[], sql: string, params?: unknown[]): Row[] {
+  if (!sql.includes('operation = ?') || !params) return rows;
+  const opParam = params.find((p) => typeof p === 'string' && p.includes('.') && !p.includes('T'));
+  return opParam ? rows.filter((r) => r.operation === opParam) : rows;
+}
+
+function applyLimit(rows: Row[], params?: unknown[]): Row[] {
+  if (!params) return rows;
+  const numParams = params.filter((p) => typeof p === 'number');
+  const limit = numParams[numParams.length - 1] as number | undefined;
+  return (limit && limit > 0) ? rows.slice(0, limit) : rows;
+}
+
 // ─── In-memory SQLite mock ──────────────────────────────────────────
 
 class InMemorySqliteDatabase implements SqliteDatabase {
@@ -39,41 +68,11 @@ class InMemorySqliteDatabase implements SqliteDatabase {
 
   async getAllAsync<T>(sql: string, params?: unknown[]): Promise<T[]> {
     let filtered = [...this.rows];
-
-    // Apply type filter from SQL
-    if (sql.includes("type = ?")) {
-      const typeParam = params?.find((p) => p === 'audit' || p === 'error');
-      if (typeParam) {
-        filtered = filtered.filter((r) => r.type === typeParam);
-      }
-    }
-
-    // Apply timestamp filter
-    if (sql.includes('timestamp >= ?') && params) {
-      const tsParam = params.find((p) => typeof p === 'string' && p.includes('T') && p.includes(':'));
-      if (tsParam) {
-        filtered = filtered.filter((r) => (r.timestamp as string) >= (tsParam as string));
-      }
-    }
-
-    // Apply operation filter
-    if (sql.includes('operation = ?') && params) {
-      const opParam = params.find((p) => typeof p === 'string' && p.includes('.') && !p.includes('T'));
-      if (opParam) {
-        filtered = filtered.filter((r) => r.operation === opParam);
-      }
-    }
-
-    // Sort by timestamp desc
+    filtered = applyTypeFilter(filtered, sql, params);
+    filtered = applyTimestampFilter(filtered, sql, params);
+    filtered = applyOperationFilter(filtered, sql, params);
     filtered.sort((a, b) => (b.timestamp as string).localeCompare(a.timestamp as string));
-
-    // Apply LIMIT (last numeric param)
-    if (params) {
-      const numParams = params.filter((p) => typeof p === 'number');
-      const limit = numParams[numParams.length - 1] as number | undefined;
-      if (limit && limit > 0) filtered = filtered.slice(0, limit);
-    }
-
+    filtered = applyLimit(filtered, params);
     return filtered as T[];
   }
 

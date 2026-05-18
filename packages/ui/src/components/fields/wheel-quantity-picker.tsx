@@ -54,21 +54,69 @@ function tryHaptic(): void {
   }
 }
 
-export function WheelQuantityPicker(
-  props: WheelQuantityPickerProps,
-): ReactElement {
+function FieldLabel({ label }: { label: string }): ReactElement {
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.bold}
+      fontSize={12}
+      letterSpacing={typography.letterSpacing.wide}
+      color={colors.gray600}
+      style={{ textTransform: 'uppercase' }}
+    >
+      {label}
+    </Text>
+  );
+}
+
+function WheelContainer({ selectedIndex, options, onChange }: {
+  selectedIndex: number; options: string[]; onChange: (i: number) => void;
+}): ReactElement {
+  return (
+    <View
+      height={ITEM_HEIGHT * (VISIBLE_REST * 2 + 1)}
+      borderWidth={2}
+      borderColor={colors.black}
+      borderRadius={radii[2]}
+      backgroundColor={colors.white}
+      overflow="hidden"
+    >
+      <WheelPicker
+        selectedIndex={selectedIndex}
+        options={options}
+        onChange={onChange}
+        itemHeight={ITEM_HEIGHT}
+        visibleRest={VISIBLE_REST}
+        containerStyle={{ backgroundColor: colors.white }}
+        selectedIndicatorStyle={{
+          borderTopWidth: 2,
+          borderBottomWidth: 2,
+          borderColor: colors.black,
+          backgroundColor: colors.offwhite,
+        }}
+        itemTextStyle={{
+          fontFamily: typography.fontFamily,
+          fontWeight: String(typography.weights.black) as unknown as TextStyleWeight,
+          fontSize: 20,
+          color: colors.black,
+        }}
+        opacityFunction={(x: number) => 1 / (1 + Math.abs(x) * 0.6)}
+        scaleFunction={(x: number) => 1 - Math.min(0.3, Math.abs(x) * 0.12)}
+      />
+    </View>
+  );
+}
+
+export function WheelQuantityPicker(props: WheelQuantityPickerProps): ReactElement {
   const min = props.min ?? DEFAULT_MIN;
   const max = props.max ?? DEFAULT_MAX;
-  const testID = props.testID ?? 'wheel-quantity-picker';
 
   const optionsList = useMemo(
     () => buildOptions(min, max, props.options),
     [min, max, props.options],
   );
 
-  const selectedIndex = props.options
-    ? Math.max(0, Math.min(props.value - min, optionsList.length - 1))
-    : Math.max(0, Math.min(props.value - min, optionsList.length - 1));
+  const selectedIndex = Math.max(0, Math.min(props.value - min, optionsList.length - 1));
 
   const handleChange = (index: number): void => {
     tryHaptic();
@@ -76,52 +124,9 @@ export function WheelQuantityPicker(
   };
 
   return (
-    <View testID={testID} gap={6}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={12}
-        letterSpacing={typography.letterSpacing.wide}
-        color={colors.gray600}
-        style={{ textTransform: 'uppercase' }}
-      >
-        {props.label}
-      </Text>
-      <View
-        height={ITEM_HEIGHT * (VISIBLE_REST * 2 + 1)}
-        borderWidth={2}
-        borderColor={colors.black}
-        borderRadius={radii[2]}
-        backgroundColor={colors.white}
-        overflow="hidden"
-      >
-        <WheelPicker
-          selectedIndex={selectedIndex}
-          options={optionsList}
-          onChange={handleChange}
-          itemHeight={ITEM_HEIGHT}
-          visibleRest={VISIBLE_REST}
-          containerStyle={{ backgroundColor: colors.white }}
-          selectedIndicatorStyle={{
-            borderTopWidth: 2,
-            borderBottomWidth: 2,
-            borderColor: colors.black,
-            backgroundColor: colors.offwhite,
-          }}
-          itemTextStyle={{
-            fontFamily: typography.fontFamily,
-            fontWeight: String(
-              typography.weights.black,
-            ) as unknown as TextStyleWeight,
-            fontSize: 20,
-            color: colors.black,
-          }}
-          opacityFunction={(x: number) => 1 / (1 + Math.abs(x) * 0.6)}
-          scaleFunction={(x: number) =>
-            1 - Math.min(0.3, Math.abs(x) * 0.12)
-          }
-        />
-      </View>
+    <View testID={props.testID ?? 'wheel-quantity-picker'} gap={6}>
+      <FieldLabel label={props.label} />
+      <WheelContainer selectedIndex={selectedIndex} options={optionsList} onChange={handleChange} />
       {props.error !== undefined && <InputError text={props.error} />}
     </View>
   );

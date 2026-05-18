@@ -27,16 +27,19 @@ export interface CheckoutMethodPickerProps {
   readonly testID?: string;
 }
 
+function useVisibleMethods() {
+  const enabledMethods = useEnabledPaymentMethods();
+  return useMemo(
+    () => PAYMENT_OPTIONS.filter((o) => enabledMethods.includes(o.key)),
+    [enabledMethods],
+  );
+}
+
 export function CheckoutMethodPicker(
   props: CheckoutMethodPickerProps,
 ): ReactElement {
   const [metodo, setMetodo] = useState<PaymentMethod>('Efectivo');
-  const enabledMethods = useEnabledPaymentMethods();
-
-  const visibleOptions = useMemo(
-    () => PAYMENT_OPTIONS.filter((o) => enabledMethods.includes(o.key)),
-    [enabledMethods],
-  );
+  const visibleOptions = useVisibleMethods();
 
   return (
     <ScrollView
@@ -51,9 +54,7 @@ export function CheckoutMethodPicker(
       >
         {`Cobrar ${formatMoney(props.totalCentavos)}`}
       </Text>
-
       <CheckoutSummary items={props.items} />
-
       <OptionCardGroup<PaymentMethod>
         label="Método de pago"
         value={metodo}
@@ -62,7 +63,6 @@ export function CheckoutMethodPicker(
         layout="grid"
         testID="checkout-payment-method"
       />
-
       <Btn
         variant="primary"
         fullWidth

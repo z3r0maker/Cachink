@@ -38,6 +38,38 @@ function useManualVentaState(onSubmit: ManualVentaFormProps['onSubmit']) {
   return { concepto, setConcepto, montoPesos, setMontoPesos, valid, submit };
 }
 
+function FormFields(props: {
+  concepto: string;
+  montoPesos: string;
+  setConcepto: (v: string) => void;
+  setMontoPesos: (v: string) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <>
+      <View flex={2}>
+        <Input
+          label={props.t('ventas.conceptoLabel')}
+          value={props.concepto}
+          onChange={props.setConcepto}
+          placeholder={props.t('ventas.conceptoPlaceholder')}
+          testID="manual-venta-concepto"
+        />
+      </View>
+      <View flex={1}>
+        <Input
+          label={props.t('ventas.montoLabel')}
+          value={props.montoPesos}
+          onChange={props.setMontoPesos}
+          type="decimal"
+          placeholder="0.00"
+          testID="manual-venta-monto"
+        />
+      </View>
+    </>
+  );
+}
+
 export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
   const { t } = useTranslation();
   const f = useManualVentaState(props.onSubmit);
@@ -49,25 +81,13 @@ export function ManualVentaForm(props: ManualVentaFormProps): ReactElement {
       paddingHorizontal={16}
       alignItems="flex-end"
     >
-      <View flex={2}>
-        <Input
-          label={t('ventas.conceptoLabel')}
-          value={f.concepto}
-          onChange={f.setConcepto}
-          placeholder={t('ventas.conceptoPlaceholder')}
-          testID="manual-venta-concepto"
-        />
-      </View>
-      <View flex={1}>
-        <Input
-          label={t('ventas.montoLabel')}
-          value={f.montoPesos}
-          onChange={f.setMontoPesos}
-          type="decimal"
-          placeholder="0.00"
-          testID="manual-venta-monto"
-        />
-      </View>
+      <FormFields
+        concepto={f.concepto}
+        montoPesos={f.montoPesos}
+        setConcepto={f.setConcepto}
+        setMontoPesos={f.setMontoPesos}
+        t={t}
+      />
       <Btn
         variant="primary"
         onPress={f.submit}

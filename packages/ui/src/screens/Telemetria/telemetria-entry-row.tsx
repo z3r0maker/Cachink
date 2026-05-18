@@ -47,49 +47,37 @@ function getDurationBadge(entry: TimelineEntry): { text: string; color: string }
   return { text: `${ms}ms`, color: '$red9' };
 }
 
+function DurationBadge({ entry }: { entry: TimelineEntry }): ReactElement | null {
+  const badge = getDurationBadge(entry);
+  if (!badge) return null;
+  return <Text fontSize="$1" fontFamily="$mono" color={badge.color} marginLeft="$1">{badge.text}</Text>;
+}
+
+function EntryInfo({ entry }: { entry: TimelineEntry }): ReactElement {
+  const isError = entry.type === 'error' || (entry.type === 'audit' && entry.status === 'error');
+  const indicator = isError ? '!' : 'ok';
+  return (
+    <View flex={1}>
+      <View flexDirection="row" alignItems="center" gap="$1">
+        <Text fontSize="$1">{indicator}</Text>
+        <Text fontSize="$2" fontFamily="$mono" color="$colorSubtle">{formatTime(entry.timestamp)}</Text>
+        <Text fontSize="$2" fontWeight="600" marginLeft="$1">{getOperation(entry)}</Text>
+        <DurationBadge entry={entry} />
+      </View>
+      <Text fontSize="$1" color="$colorSubtle" marginTop="$0.5" numberOfLines={1}>{getDescription(entry)}</Text>
+      <Text fontSize="$1" color="$colorSubtle" numberOfLines={1}>{entry.userId?.slice(0, 8) ?? '\u2014'} \u00b7 {entry.deviceId.slice(0, 8)}</Text>
+    </View>
+  );
+}
+
 export function TelemetriaEntryRow({ entry, onPress }: TelemetriaEntryRowProps): ReactElement {
   const isError = entry.type === 'error' || (entry.type === 'audit' && entry.status === 'error');
   const accentColor = isError ? '$red8' : '$green8';
-  const indicator = isError ? '🔴' : '🟢';
-
   return (
-    <View
-      onPress={() => onPress(entry)}
-      flexDirection="row"
-      paddingVertical="$2"
-      paddingHorizontal="$3"
-      borderBottomWidth={1}
-      borderBottomColor="$borderColor"
-      pressStyle={{ opacity: 0.7 }}
-      cursor="pointer"
-    >
+    <View onPress={() => onPress(entry)} flexDirection="row" paddingVertical="$2" paddingHorizontal="$3"
+      borderBottomWidth={1} borderBottomColor="$borderColor" pressStyle={{ opacity: 0.7 }} cursor="pointer">
       <View width={4} borderRadius="$1" backgroundColor={accentColor} marginRight="$2" />
-      <View flex={1}>
-        <View flexDirection="row" alignItems="center" gap="$1">
-          <Text fontSize="$1">{indicator}</Text>
-          <Text fontSize="$2" fontFamily="$mono" color="$colorSubtle">
-            {formatTime(entry.timestamp)}
-          </Text>
-          <Text fontSize="$2" fontWeight="600" marginLeft="$1">
-            {getOperation(entry)}
-          </Text>
-          {(() => {
-            const badge = getDurationBadge(entry);
-            if (!badge) return null;
-            return (
-              <Text fontSize="$1" fontFamily="$mono" color={badge.color} marginLeft="$1">
-                {badge.text}
-              </Text>
-            );
-          })()}
-        </View>
-        <Text fontSize="$1" color="$colorSubtle" marginTop="$0.5" numberOfLines={1}>
-          {getDescription(entry)}
-        </Text>
-        <Text fontSize="$1" color="$colorSubtle" numberOfLines={1}>
-          {entry.userId?.slice(0, 8) ?? '—'} · {entry.deviceId.slice(0, 8)}
-        </Text>
-      </View>
+      <EntryInfo entry={entry} />
     </View>
   );
 }

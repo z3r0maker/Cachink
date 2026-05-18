@@ -63,6 +63,49 @@ function EmptyBody(props: { title: string; body: string }): ReactElement {
   );
 }
 
+function IngresosDonutCard(props: {
+  data: readonly IngresoPorCategoria[];
+  totalIngresos: bigint;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <Card padding="md" fullWidth testID="ingresos-por-categoria-card">
+      <SectionTitle title={props.t('estados.ingresosPorCategoria')} />
+      <HelpAccordion
+        subtitle={props.t('estados.ingresosPorCategoriaSubtitle')}
+        detail={props.t('estados.ingresosPorCategoriaDetail')}
+      />
+      <DonutChart
+        slices={toIngresoDonutSlices(props.data)}
+        centerLabel={props.t('estados.ingresosTotalLabel')}
+        centerValue={formatChartLabel(moneyToNumber(props.totalIngresos))}
+        formatValue={formatChartLabel}
+        testID="ingresos-donut"
+      />
+    </Card>
+  );
+}
+
+function EgresosDonutCard(props: {
+  data: readonly EgresoPorCategoria[];
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <Card padding="md" fullWidth testID="egresos-por-categoria-card">
+      <SectionTitle title={props.t('estados.egresosPorCategoria')} />
+      <DonutChart
+        slices={toDonutSlices(props.data)}
+        centerLabel={props.t('estados.egresosTotalLabel')}
+        centerValue={formatChartLabel(
+          moneyToNumber(props.data.reduce((sum, e) => sum + e.total, 0n)),
+        )}
+        formatValue={formatChartLabel}
+        testID="egresos-donut"
+      />
+    </Card>
+  );
+}
+
 export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): ReactElement {
   const { t } = useTranslation();
   const totalIngresos = props.estado?.ingresos ?? ZERO;
@@ -73,46 +116,17 @@ export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): Reac
         <EmptyBody title={t('estados.emptyPeriodTitle')} body={t('estados.emptyPeriodBody')} />
       ) : (
         <>
-          <ResumenCard
-            estado={props.estado}
-            priorEstado={props.priorEstado}
-            trend={props.utilidadNetaTrend}
-            t={t}
-          />
+          <ResumenCard estado={props.estado} priorEstado={props.priorEstado} trend={props.utilidadNetaTrend} t={t} />
           <ResultadosRows estado={props.estado} t={t} />
           <Card padding="md" fullWidth testID="waterfall-card">
             <SectionTitle title={t('estados.chartCascadaLabel')} />
             <WaterfallChart data={toWaterfallData(props.estado, t)} testID="waterfall-chart" />
           </Card>
           {props.ingresosPorCategoria && props.ingresosPorCategoria.length > 0 && (
-            <Card padding="md" fullWidth testID="ingresos-por-categoria-card">
-              <SectionTitle title={t('estados.ingresosPorCategoria')} />
-              <HelpAccordion
-                subtitle={t('estados.ingresosPorCategoriaSubtitle')}
-                detail={t('estados.ingresosPorCategoriaDetail')}
-              />
-              <DonutChart
-                slices={toIngresoDonutSlices(props.ingresosPorCategoria)}
-                centerLabel={t('estados.ingresosTotalLabel')}
-                centerValue={formatChartLabel(moneyToNumber(totalIngresos))}
-                formatValue={formatChartLabel}
-                testID="ingresos-donut"
-              />
-            </Card>
+            <IngresosDonutCard data={props.ingresosPorCategoria} totalIngresos={totalIngresos} t={t} />
           )}
           {props.egresosPorCategoria && props.egresosPorCategoria.length > 0 && (
-            <Card padding="md" fullWidth testID="egresos-por-categoria-card">
-              <SectionTitle title={t('estados.egresosPorCategoria')} />
-              <DonutChart
-                slices={toDonutSlices(props.egresosPorCategoria)}
-                centerLabel={t('estados.egresosTotalLabel')}
-                centerValue={formatChartLabel(
-                  moneyToNumber(props.egresosPorCategoria.reduce((sum, e) => sum + e.total, 0n)),
-                )}
-                formatValue={formatChartLabel}
-                testID="egresos-donut"
-              />
-            </Card>
+            <EgresosDonutCard data={props.egresosPorCategoria} t={t} />
           )}
         </>
       )}

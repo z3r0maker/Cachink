@@ -19,13 +19,9 @@ import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
 
 export interface CajaHandoffBannerProps {
-  /** Name of the user who opened the existing turn. */
   readonly otherUserName: string;
-  /** The opening amount of the existing turn. */
   readonly openingAmount: Money;
-  /** Confirm the same amount — creates the current user's turn instantly. */
   readonly onConfirm: () => void;
-  /** Show the numpad so user can enter a different amount. */
   readonly onDifferent: () => void;
   readonly submitting?: boolean;
   readonly testID?: string;
@@ -36,43 +32,65 @@ export function CajaHandoffBanner(props: CajaHandoffBannerProps): ReactElement {
   return (
     <Card variant="white" padding="lg" fullWidth testID={props.testID ?? 'caja-handoff-banner'}>
       <View gap={12}>
-        <View flexDirection="row" alignItems="center" gap={10}>
-          <Icon name="users" size={24} color={colors.green} />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={'700'}
-            fontSize={16}
-            color={colors.black}
-            flex={1}
-          >
-            {t('caja.handoffTitle', { name: props.otherUserName })}
-          </Text>
-        </View>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontSize={14}
-          color={colors.gray600}
-        >
+        <HandoffHeader name={props.otherUserName} t={t} />
+        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
           {t('caja.handoffDescription', { monto: formatMoney(props.openingAmount) })}
         </Text>
-        <Btn
-          variant="primary"
-          onPress={props.onConfirm}
-          fullWidth
-          loading={props.submitting}
-          testID="caja-handoff-confirm"
-        >
-          {t('caja.handoffConfirm')}
-        </Btn>
-        <Btn
-          variant="ghost"
-          onPress={props.onDifferent}
-          fullWidth
-          testID="caja-handoff-different"
-        >
-          {t('caja.handoffDifferent')}
-        </Btn>
+        <HandoffActions
+          onConfirm={props.onConfirm}
+          onDifferent={props.onDifferent}
+          submitting={props.submitting}
+          t={t}
+        />
       </View>
     </Card>
+  );
+}
+
+type T = ReturnType<typeof useTranslation>['t'];
+
+function HandoffHeader(props: { name: string; t: T }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={10}>
+      <Icon name="users" size={24} color={colors.green} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={'700'}
+        fontSize={16}
+        color={colors.black}
+        flex={1}
+      >
+        {props.t('caja.handoffTitle', { name: props.name })}
+      </Text>
+    </View>
+  );
+}
+
+function HandoffActions(props: {
+  onConfirm: () => void;
+  onDifferent: () => void;
+  submitting?: boolean;
+  t: T;
+}): ReactElement {
+  return (
+    <View gap={12}>
+      <Btn
+        variant="primary"
+        onPress={props.onConfirm}
+        fullWidth
+        loading={props.submitting}
+        testID="caja-handoff-confirm"
+      >
+        {props.t('caja.handoffConfirm')}
+      </Btn>
+      <Btn
+        variant="ghost"
+        onPress={props.onDifferent}
+        fullWidth
+        testID="caja-handoff-different"
+      >
+        {props.t('caja.handoffDifferent')}
+      </Btn>
+    </View>
   );
 }

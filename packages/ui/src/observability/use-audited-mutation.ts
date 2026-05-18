@@ -40,6 +40,34 @@ export interface AuditedMutationConfig<TInput, TOutput> {
  *   3. On error: writes an `AuditEvent` with `status: 'error'` + an `ErrorLogEntry`.
  *   4. Calls any original `onSuccess` / `onError` callbacks unchanged.
  */
+function buildSuccessEvent<TInput, TOutput>(
+  config: AuditedMutationConfig<TInput, TOutput>,
+  result: TOutput, input: TInput,
+  userId: string | null, deviceId: string, businessId: string,
+): AuditEvent {
+  return {
+    id: ulid(), timestamp: new Date().toISOString(),
+    operation: config.operation, entityType: config.entityType,
+    entityId: config.extractEntityId(result, input),
+    userId, deviceId, businessId,
+    metadata: config.extractMetadata?.(input, result), status: 'success',
+  };
+}
+
+function buildErrorEvent<TInput, TOutput>(
+  config: AuditedMutationConfig<TInput, TOutput>,
+  error: Error, input: TInput,
+  userId: string | null, deviceId: string, businessId: string,
+): AuditEvent {
+  return {
+    id: ulid(), timestamp: new Date().toISOString(),
+    operation: config.operation, entityType: config.entityType, entityId: '',
+    userId, deviceId, businessId,
+    metadata: config.extractMetadata?.(input),
+    status: 'error', errorCode: error.name, errorMessage: error.message,
+  };
+}
+
 export function useAuditedMutation<TInput, TOutput>(
   config: AuditedMutationConfig<NoInfer<TInput>, NoInfer<TOutput>>,
   mutationOptions: UseMutationOptions<TOutput, Error, TInput>,
@@ -53,65 +81,27 @@ export function useAuditedMutation<TInput, TOutput>(
     ...mutationOptions,
 
     async mutationFn(input: TInput) {
-      if (!mutationOptions.mutationFn) {
-        throw new Error('useAuditedMutation: mutationFn is required');
-      }
+      if (!mutationOptions.mutationFn) throw new Error('useAuditedMutation: mutationFn is required');
       return mutationOptions.mutationFn(input);
     },
 
     onSuccess(result, input, context) {
-      const event: AuditEvent = {
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        operation: config.operation,
-        entityType: config.entityType,
-        entityId: config.extractEntityId(result, input),
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: config.extractMetadata?.(input, result),
-        status: 'success',
-      };
-
+      const event = buildSuccessEvent(config, result, input, userId ?? null, deviceId ?? '', businessId ?? '');
       addAuditBreadcrumb(event);
       void logStore?.writeAudit(event).catch(() => {});
-
       mutationOptions.onSuccess?.(result, input, context);
     },
 
     onError(error, input, context) {
-      const event: AuditEvent = {
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        operation: config.operation,
-        entityType: config.entityType,
-        entityId: '',
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: config.extractMetadata?.(input),
-        status: 'error',
-        errorCode: error.name,
-        errorMessage: error.message,
-      };
-
+      const event = buildErrorEvent(config, error, input, userId ?? null, deviceId ?? '', businessId ?? '');
       addAuditBreadcrumb(event);
       void logStore?.writeAudit(event).catch(() => {});
-
       void logStore?.writeError({
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        source: 'ui',
-        operation: config.operation,
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? null,
-        context: config.extractMetadata?.(input),
+        id: ulid(), timestamp: new Date().toISOString(), source: 'ui',
+        operation: config.operation, errorName: error.name, errorMessage: error.message,
+        errorStack: error.stack, userId: userId ?? null, deviceId: deviceId ?? '',
+        businessId: businessId ?? null, context: config.extractMetadata?.(input),
       }).catch(() => {});
-
       mutationOptions.onError?.(error, input, context);
     },
   });

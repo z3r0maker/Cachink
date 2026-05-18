@@ -9,8 +9,6 @@ import type {
   CajaTurno,
   CajaTurnoId,
   DeviceId,
-  DiscrepancyReason,
-  ExpenseId,
   IsoDate,
   IsoTimestamp,
   UserId,
@@ -21,6 +19,18 @@ import type {
   CajaTurnosRepository,
   CreateCajaTurnoInput,
 } from '@cachink/data';
+
+function pickDefinedFields(
+  patch: CajaTurnoPatch,
+): Partial<CajaTurno> {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(patch) as (keyof CajaTurnoPatch)[]) {
+    if (patch[key] !== undefined) {
+      result[key] = patch[key];
+    }
+  }
+  return result as Partial<CajaTurno>;
+}
 
 export class InMemoryCajaTurnosRepository
   implements CajaTurnosRepository
@@ -136,49 +146,11 @@ export class InMemoryCajaTurnosRepository
     if (!existing || existing.deletedAt !== null) {
       throw new Error(`CajaTurno ${id} not found`);
     }
-    const ts = now();
+    const defined = pickDefinedFields(patch);
     const updated: CajaTurno = {
       ...existing,
-      ...(patch.cierreAt !== undefined && {
-        cierreAt: patch.cierreAt as IsoTimestamp | null,
-      }),
-      ...(patch.montoCierreCentavos !== undefined && {
-        montoCierreCentavos: patch.montoCierreCentavos,
-      }),
-      ...(patch.efectivoEsperadoCentavos !== undefined && {
-        efectivoEsperadoCentavos: patch.efectivoEsperadoCentavos,
-      }),
-      ...(patch.diferenciaCentavos !== undefined && {
-        diferenciaCentavos: patch.diferenciaCentavos,
-      }),
-      ...(patch.discrepancyReason !== undefined && {
-        discrepancyReason: patch.discrepancyReason as DiscrepancyReason | null,
-      }),
-      ...(patch.explicacion !== undefined && {
-        explicacion: patch.explicacion,
-      }),
-      ...(patch.totalTransferencias !== undefined && {
-        totalTransferencias: patch.totalTransferencias,
-      }),
-      ...(patch.totalTarjeta !== undefined && {
-        totalTarjeta: patch.totalTarjeta,
-      }),
-      ...(patch.totalQr !== undefined && {
-        totalQr: patch.totalQr,
-      }),
-      ...(patch.totalCredito !== undefined && {
-        totalCredito: patch.totalCredito,
-      }),
-      ...(patch.egresoAutoId !== undefined && {
-        egresoAutoId: patch.egresoAutoId as ExpenseId | null,
-      }),
-      ...(patch.conteoCentavos !== undefined && {
-        conteoCentavos: patch.conteoCentavos,
-      }),
-      ...(patch.conteoAt !== undefined && {
-        conteoAt: patch.conteoAt as IsoTimestamp | null,
-      }),
-      updatedAt: ts,
+      ...defined,
+      updatedAt: now(),
     };
     this.rows.set(id, updated);
     return updated;

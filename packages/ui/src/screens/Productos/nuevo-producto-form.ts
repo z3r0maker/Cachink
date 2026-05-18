@@ -137,6 +137,14 @@ export function validateProducto(
   return errors;
 }
 
+export function validationMessages(t: (k: string) => string): ValidationMessages {
+  return {
+    required: t('validation.required'),
+    greaterThanZero: t('validation.greaterThanZero'),
+    invalidNumber: t('validation.invalidNumber'),
+  };
+}
+
 export function buildProductoPayload(state: ProductoFormState): CrearProductoInput {
   const parsed = state.stockInicial.trim() !== '' ? Number(state.stockInicial) : undefined;
   const stockInicial =

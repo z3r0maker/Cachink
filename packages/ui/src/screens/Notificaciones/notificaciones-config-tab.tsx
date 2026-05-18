@@ -34,49 +34,51 @@ function featureLabelForFlag(flagKey: string, t: (k: never) => string): string {
   return info ? t(info.labelKey as never) : flagKey;
 }
 
+function CategoryGroup({ cat, prefs, flags, onToggle }: {
+  cat: (typeof NOTIFICATION_CATEGORIES)[number];
+  prefs: NotificationPreferences;
+  flags: FeatureFlags;
+  onToggle: (source: string, newValue: boolean) => void;
+}): ReactElement | null {
+  const { t } = useTranslation();
+  const items = NOTIFICATION_SOURCE_INFO.filter((s) => s.category === cat.key);
+  if (items.length === 0) return null;
+  return (
+    <View key={cat.key} gap={10}>
+      <SectionTitle title={t(cat.labelKey as never)} />
+      {items.map((info) => {
+        const locked = isSourceLocked(info.source, flags);
+        const lockedHint = locked && info.featureFlag
+          ? t('notificaciones.requiereHint' as never, {
+              feature: featureLabelForFlag(info.featureFlag, t),
+            })
+          : null;
+        return (
+          <NotificationToggleCard
+            key={info.source}
+            info={info}
+            enabled={locked ? false : (prefs[info.source] ?? true)}
+            locked={locked}
+            lockedHint={lockedHint}
+            onToggle={(v) => onToggle(info.source, v)}
+          />
+        );
+      })}
+    </View>
+  );
+}
+
 export function NotificacionesConfigTab(props: NotificacionesConfigTabProps): ReactElement {
   const { prefs, flags, onToggle, testID } = props;
   const { t } = useTranslation();
-
   return (
     <View testID={testID ?? 'notificaciones-config-tab'} gap={16}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontSize={14}
-        color={colors.gray600}
-      >
+      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
         {t('notificaciones.configSubtitle')}
       </Text>
-
-      {NOTIFICATION_CATEGORIES.map((cat) => {
-        const items = NOTIFICATION_SOURCE_INFO.filter((s) => s.category === cat.key);
-        if (items.length === 0) return null;
-
-        return (
-          <View key={cat.key} gap={10}>
-            <SectionTitle title={t(cat.labelKey as never)} />
-            {items.map((info) => {
-              const locked = isSourceLocked(info.source, flags);
-              const lockedHint = locked && info.featureFlag
-                ? t('notificaciones.requiereHint' as never, {
-                    feature: featureLabelForFlag(info.featureFlag, t),
-                  })
-                : null;
-
-              return (
-                <NotificationToggleCard
-                  key={info.source}
-                  info={info}
-                  enabled={locked ? false : (prefs[info.source] ?? true)}
-                  locked={locked}
-                  lockedHint={lockedHint}
-                  onToggle={(v) => onToggle(info.source, v)}
-                />
-              );
-            })}
-          </View>
-        );
-      })}
+      {NOTIFICATION_CATEGORIES.map((cat) => (
+        <CategoryGroup key={cat.key} cat={cat} prefs={prefs} flags={flags} onToggle={onToggle} />
+      ))}
     </View>
   );
 }

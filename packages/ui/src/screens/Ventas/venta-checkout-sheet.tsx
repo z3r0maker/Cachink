@@ -52,6 +52,59 @@ export interface VentaCheckoutSheetProps {
 // Component
 // ---------------------------------------------------------------------------
 
+function ErrorText(props: { error?: Error | null }): ReactElement | null {
+  if (props.error == null) return null;
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontSize={12}
+      color={colors.red}
+      textAlign="center"
+    >
+      {props.error.message}
+    </Text>
+  );
+}
+
+interface SheetBodyProps {
+  readonly items: readonly CartItem[];
+  readonly metodo: PaymentMethod;
+  readonly onMetodoChange: (m: PaymentMethod) => void;
+  readonly visibleOptions: readonly OptionCardItem<PaymentMethod>[];
+  readonly error?: Error | null;
+  readonly totalCentavos: Money;
+  readonly onSubmit: (metodo: PaymentMethod) => void;
+  readonly submitting?: boolean;
+}
+
+function SheetSubmitBtn(props: Pick<SheetBodyProps, 'totalCentavos' | 'metodo' | 'onSubmit' | 'submitting'> & { disabled: boolean }): ReactElement {
+  return (
+    <Btn variant="primary" fullWidth size="lg" onPress={() => props.onSubmit(props.metodo)} disabled={props.disabled} loading={props.submitting === true} testID="checkout-submit">
+      {`Registrar ${formatMoney(props.totalCentavos)}`}
+    </Btn>
+  );
+}
+
+function SheetBody(props: SheetBodyProps): ReactElement {
+  return (
+    <ScrollView style={{ maxHeight: 480 }}>
+      <View gap={16}>
+        <CheckoutSummary items={props.items} />
+        <OptionCardGroup<PaymentMethod>
+          label="Método de pago"
+          value={props.metodo}
+          onChange={props.onMetodoChange}
+          options={props.visibleOptions}
+          layout="grid"
+          testID="checkout-payment-method"
+        />
+        <ErrorText error={props.error} />
+        <SheetSubmitBtn totalCentavos={props.totalCentavos} metodo={props.metodo} onSubmit={props.onSubmit} submitting={props.submitting} disabled={props.items.length === 0} />
+      </View>
+    </ScrollView>
+  );
+}
+
 export function VentaCheckoutSheet(props: VentaCheckoutSheetProps): ReactElement {
   const [metodo, setMetodo] = useState<PaymentMethod>('Efectivo');
   const enabledMethods = useEnabledPaymentMethods();
@@ -68,40 +121,16 @@ export function VentaCheckoutSheet(props: VentaCheckoutSheetProps): ReactElement
       title={`Cobrar ${formatMoney(props.totalCentavos)}`}
       testID={props.testID ?? 'venta-checkout-sheet'}
     >
-      <ScrollView style={{ maxHeight: 480 }}>
-        <View gap={16}>
-          <CheckoutSummary items={props.items} />
-          <OptionCardGroup<PaymentMethod>
-            label="Método de pago"
-            value={metodo}
-            onChange={setMetodo}
-            options={visibleOptions}
-            layout="grid"
-            testID="checkout-payment-method"
-          />
-          {props.error != null && (
-            <Text
-              fontFamily={typography.fontFamily}
-              fontSize={12}
-              color={colors.red}
-              textAlign="center"
-            >
-              {props.error.message}
-            </Text>
-          )}
-          <Btn
-            variant="primary"
-            fullWidth
-            size="lg"
-            onPress={() => props.onSubmit(metodo)}
-            disabled={props.items.length === 0}
-            loading={props.submitting === true}
-            testID="checkout-submit"
-          >
-            {`Registrar ${formatMoney(props.totalCentavos)}`}
-          </Btn>
-        </View>
-      </ScrollView>
+      <SheetBody
+        items={props.items}
+        metodo={metodo}
+        onMetodoChange={setMetodo}
+        visibleOptions={visibleOptions}
+        error={props.error}
+        totalCentavos={props.totalCentavos}
+        onSubmit={props.onSubmit}
+        submitting={props.submitting}
+      />
     </Modal>
   );
 }

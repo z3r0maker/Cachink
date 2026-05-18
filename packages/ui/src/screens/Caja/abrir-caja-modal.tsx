@@ -13,11 +13,10 @@
 
 import { type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
-import { Text, View, useMedia } from '@tamagui/core';
+import { View, useMedia } from '@tamagui/core';
 import type { Money } from '@cachink/domain';
 import { ZERO, formatMoney } from '@cachink/domain';
 import { Card } from '../../components/Card/card';
-import { Icon } from '../../components/Icon/index';
 import {
   Numpad,
   NumpadDisplay,
@@ -26,8 +25,9 @@ import {
 } from '../../components/Numpad/index';
 import type { QuickAmountOption } from '../../components/Numpad/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, radii } from '../../theme';
 import { AbrirCajaFooter } from './abrir-caja-footer';
+import { AbrirCajaHeader } from './abrir-caja-header';
 
 export interface AbrirCajaModalProps {
   /** Pre-filled from previous turn's cierre amount (handoff). */
@@ -48,12 +48,19 @@ const OPENING_AMOUNTS: readonly QuickAmountOption[] = [
   { label: '$5000', centavos: 500000n },
 ] as const;
 
+const BUILT_IN_AMOUNTS: readonly bigint[] = [50000n, 100000n];
+
+function filterExtraAmounts(): readonly QuickAmountOption[] {
+  return OPENING_AMOUNTS.filter(
+    (a) => !BUILT_IN_AMOUNTS.includes(a.centavos),
+  );
+}
+
 export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
   const { t } = useTranslation();
   const media = useMedia();
   const numpad = useNumpadInput();
   const isPhone = media.sm === true;
-  const numpadSize = isPhone ? 56 : 72;
 
   const handleSubmit = (): void => {
     props.onSubmit(numpad.centavos, ZERO);
@@ -66,56 +73,10 @@ export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
 
   return (
     <View flex={1} testID={props.testID ?? 'abrir-caja-modal'}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 100,
-          gap: isPhone ? 12 : 16,
-          alignItems: 'center',
-        }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Yellow accent strip */}
-        <View
-          width="100%"
-          height={6}
-          backgroundColor={colors.yellow}
-          borderRadius={radii[0]}
-        />
-
-        {/* Header Card */}
-        <AbrirCajaHeader t={t} />
-
-        {/* Entry Card — numpad + display + quick amounts */}
-        <Card variant="white" fullWidth padding="md" elevation="raised">
-          <View gap={isPhone ? 12 : 16} alignItems="center">
-            <NumpadDisplay
-              value={numpad.display}
-              testID="abrir-numpad-display"
-            />
-            <QuickAmounts
-              onSelect={(c) => numpad.setFromCentavos(c)}
-              onExacto={() => {}}
-              showExacto={false}
-              extraAmounts={OPENING_AMOUNTS.filter(
-                (a) =>
-                  !([50000n, 100000n] as readonly bigint[]).includes(
-                    a.centavos,
-                  ),
-              )}
-              testID="abrir-quick-amounts"
-            />
-            <Numpad
-              onPress={numpad.onKey}
-              buttonSize={numpadSize}
-              testID="abrir-numpad"
-            />
-          </View>
-        </Card>
-      </ScrollView>
-
-      {/* Sticky footer CTA */}
+      <AbrirCajaScrollBody
+        isPhone={isPhone}
+        numpad={numpad}
+      />
       <AbrirCajaFooter
         buttonLabel={buttonLabel}
         canSubmit={numpad.centavos > ZERO}
@@ -128,30 +89,65 @@ export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
 
 // --- Sub-components ---
 
-function AbrirCajaHeader({
-  t,
-}: {
-  t: ReturnType<typeof useTranslation>['t'];
+function AbrirCajaScrollBody(props: {
+  isPhone: boolean;
+  numpad: ReturnType<typeof useNumpadInput>;
 }): ReactElement {
+  const gap = props.isPhone ? 12 : 16;
+  const { t } = useTranslation();
+
   return (
-    <Card variant="white" padding="md" fullWidth testID="abrir-caja-header">
-      <View flexDirection="row" alignItems="center" gap={10}>
-        <Icon name="landmark" size={28} color={colors.green} />
-        <View flex={1} gap={2}>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={'900'}
-            fontSize={18}
-            color={colors.black}
-            children={t('caja.abrirQuestion') as string}
-          />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={14}
-            color={colors.gray600}
-            children={t('caja.abrirHint') as string}
-          />
-        </View>
+    <ScrollView
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 100,
+        gap,
+        alignItems: 'center',
+      }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View
+        width="100%"
+        height={6}
+        backgroundColor={colors.yellow}
+        borderRadius={radii[0]}
+      />
+      <AbrirCajaHeader t={t} />
+      <AbrirCajaEntryCard
+        isPhone={props.isPhone}
+        numpad={props.numpad}
+      />
+    </ScrollView>
+  );
+}
+
+function AbrirCajaEntryCard(props: {
+  isPhone: boolean;
+  numpad: ReturnType<typeof useNumpadInput>;
+}): ReactElement {
+  const numpadSize = props.isPhone ? 56 : 72;
+  const gap = props.isPhone ? 12 : 16;
+
+  return (
+    <Card variant="white" fullWidth padding="md" elevation="raised">
+      <View gap={gap} alignItems="center">
+        <NumpadDisplay
+          value={props.numpad.display}
+          testID="abrir-numpad-display"
+        />
+        <QuickAmounts
+          onSelect={(c) => props.numpad.setFromCentavos(c)}
+          onExacto={() => {}}
+          showExacto={false}
+          extraAmounts={filterExtraAmounts()}
+          testID="abrir-quick-amounts"
+        />
+        <Numpad
+          onPress={props.numpad.onKey}
+          buttonSize={numpadSize}
+          testID="abrir-numpad"
+        />
       </View>
     </Card>
   );

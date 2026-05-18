@@ -16,6 +16,42 @@ import type { ProductoFormApi } from './nuevo-producto-form';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
+function IconPickerButton(props: {
+  icono: string | null;
+  label: string;
+  onPress: () => void;
+}): ReactElement {
+  return (
+    <Pressable onPress={props.onPress} testID="producto-icon-picker-btn">
+      <View
+        flexDirection="row"
+        alignItems="center"
+        gap={12}
+        padding={12}
+        borderWidth={2}
+        borderColor={colors.black}
+        borderRadius={12}
+      >
+        {props.icono ? (
+          <Icon name={props.icono as IconName} size={32} color={colors.black} />
+        ) : (
+          <Icon name="box" size={32} color={colors.gray400} />
+        )}
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.medium.toString()}
+          fontSize={14}
+          color={colors.black}
+          flex={1}
+        >
+          {props.label}
+        </Text>
+        <Icon name="chevron-right" size={20} color={colors.gray400} />
+      </View>
+    </Pressable>
+  );
+}
+
 export function AppearanceField({
   form,
   t,
@@ -25,38 +61,13 @@ export function AppearanceField({
   t: T;
   onPickIcon?: () => void;
 }): ReactElement {
+  const label = form.state.icono
+    ? t('nuevoProducto.changeIcon')
+    : t('nuevoProducto.selectIcon');
   return (
     <>
       {onPickIcon && (
-        <Pressable onPress={onPickIcon} testID="producto-icon-picker-btn">
-          <View
-            flexDirection="row"
-            alignItems="center"
-            gap={12}
-            padding={12}
-            borderWidth={2}
-            borderColor={colors.black}
-            borderRadius={12}
-          >
-            {form.state.icono ? (
-              <Icon name={form.state.icono as IconName} size={32} color={colors.black} />
-            ) : (
-              <Icon name="box" size={32} color={colors.gray400} />
-            )}
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.medium.toString()}
-              fontSize={14}
-              color={colors.black}
-              flex={1}
-            >
-              {form.state.icono
-                ? t('nuevoProducto.changeIcon')
-                : t('nuevoProducto.selectIcon')}
-            </Text>
-            <Icon name="chevron-right" size={20} color={colors.gray400} />
-          </View>
-        </Pressable>
+        <IconPickerButton icono={form.state.icono} label={label} onPress={onPickIcon} />
       )}
       <ColorSwatchPicker
         label={t('nuevoProducto.colorFondoLabel')}

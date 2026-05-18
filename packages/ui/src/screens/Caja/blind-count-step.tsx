@@ -31,7 +31,6 @@ import { useTranslation } from '../../i18n/index';
 import { colors, radii, typography } from '../../theme';
 
 export interface BlindCountStepProps {
-  /** Called with the counted amount. Parent must save to DB immediately. */
   readonly onSubmit: (conteoCentavos: Money) => void;
   readonly submitting: boolean;
   readonly testID?: string;
@@ -42,101 +41,67 @@ export function BlindCountStep(props: BlindCountStepProps): ReactElement {
   const media = useMedia();
   const numpad = useNumpadInput();
   const isPhone = media.sm === true;
-  const numpadSize = isPhone ? 56 : 72;
 
   return (
     <View flex={1} testID={props.testID ?? 'blind-count-step'}>
-      <ScrollView
-        contentContainerStyle={{
-          paddingHorizontal: 20,
-          paddingBottom: 100,
-          gap: isPhone ? 12 : 16,
-          alignItems: 'center',
-        }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        {/* Yellow accent strip */}
-        <View
-          width="100%"
-          height={6}
-          backgroundColor={colors.yellow}
-          borderRadius={radii[0]}
-        />
-
-        {/* Header Card */}
-        <BlindCountHeader t={t} />
-
-        {/* Entry Card — numpad + display */}
-        <Card variant="white" fullWidth padding="md" elevation="raised">
-          <View gap={isPhone ? 12 : 16} alignItems="center">
-            <NumpadDisplay
-              value={numpad.display}
-              testID="blind-count-display"
-            />
-            <Numpad
-              onPress={numpad.onKey}
-              buttonSize={numpadSize}
-              testID="blind-count-numpad"
-            />
-          </View>
-        </Card>
-
-        {/* Warning notice */}
-        <View
-          flexDirection="row"
-          alignItems="center"
-          gap={8}
-          paddingHorizontal={4}
-        >
-          <Icon name="triangle-alert" size={16} color={colors.yellow} />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={12}
-            color={colors.gray600}
-            flex={1}
-          >
-            {t('caja.blindCountWarning')}
-          </Text>
-        </View>
-      </ScrollView>
-
-      {/* Sticky footer CTA */}
-      <View
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        backgroundColor={colors.offwhite}
-        paddingHorizontal={20}
-        paddingVertical={16}
-        borderTopWidth={2}
-        borderTopColor={colors.gray200}
-      >
-        <Btn
-          variant="dark"
-          fullWidth
-          size="lg"
-          icon={<Icon name="check" size={18} color={colors.white} />}
-          onPress={() => props.onSubmit(numpad.centavos)}
-          loading={props.submitting}
-          disabled={numpad.centavos <= ZERO}
-          testID="blind-count-continue"
-        >
-          {t('caja.blindCountContinue')}
-        </Btn>
-      </View>
+      <BlindCountScrollBody isPhone={isPhone} numpad={numpad} t={t} />
+      <BlindCountFooter
+        onSubmit={() => props.onSubmit(numpad.centavos)}
+        submitting={props.submitting}
+        disabled={numpad.centavos <= ZERO}
+        t={t}
+      />
     </View>
   );
 }
 
-// --- Sub-component ---
+// --- Sub-components ---
 
-function BlindCountHeader({
-  t,
-}: {
-  t: ReturnType<typeof useTranslation>['t'];
+type T = ReturnType<typeof useTranslation>['t'];
+
+function BlindCountScrollBody(props: {
+  isPhone: boolean;
+  numpad: ReturnType<typeof useNumpadInput>;
+  t: T;
 }): ReactElement {
+  const gap = props.isPhone ? 12 : 16;
+
+  return (
+    <ScrollView
+      contentContainerStyle={{
+        paddingHorizontal: 20,
+        paddingBottom: 100,
+        gap,
+        alignItems: 'center',
+      }}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+    >
+      <View width="100%" height={6} backgroundColor={colors.yellow} borderRadius={radii[0]} />
+      <BlindCountHeader t={props.t} />
+      <BlindCountNumpadCard isPhone={props.isPhone} numpad={props.numpad} />
+      <BlindCountWarning t={props.t} />
+    </ScrollView>
+  );
+}
+
+function BlindCountNumpadCard(props: {
+  isPhone: boolean;
+  numpad: ReturnType<typeof useNumpadInput>;
+}): ReactElement {
+  const gap = props.isPhone ? 12 : 16;
+  const numpadSize = props.isPhone ? 56 : 72;
+  return (
+    <Card variant="white" fullWidth padding="md" elevation="raised">
+      <View gap={gap} alignItems="center">
+        <NumpadDisplay value={props.numpad.display} testID="blind-count-display" />
+        <Numpad onPress={props.numpad.onKey} buttonSize={numpadSize} testID="blind-count-numpad" />
+      </View>
+    </Card>
+  );
+}
+
+function BlindCountHeader({ t }: { t: T }): ReactElement {
   return (
     <Card variant="white" padding="md" fullWidth testID="blind-count-header">
       <View flexDirection="row" alignItems="center" gap={10}>
@@ -160,5 +125,60 @@ function BlindCountHeader({
         </View>
       </View>
     </Card>
+  );
+}
+
+function BlindCountWarning({ t }: { t: T }): ReactElement {
+  return (
+    <View
+      flexDirection="row"
+      alignItems="center"
+      gap={8}
+      paddingHorizontal={4}
+    >
+      <Icon name="triangle-alert" size={16} color={colors.yellow} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={12}
+        color={colors.gray600}
+        flex={1}
+      >
+        {t('caja.blindCountWarning')}
+      </Text>
+    </View>
+  );
+}
+
+function BlindCountFooter(props: {
+  onSubmit: () => void;
+  submitting: boolean;
+  disabled: boolean;
+  t: T;
+}): ReactElement {
+  return (
+    <View
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      backgroundColor={colors.offwhite}
+      paddingHorizontal={20}
+      paddingVertical={16}
+      borderTopWidth={2}
+      borderTopColor={colors.gray200}
+    >
+      <Btn
+        variant="dark"
+        fullWidth
+        size="lg"
+        icon={<Icon name="check" size={18} color={colors.white} />}
+        onPress={props.onSubmit}
+        loading={props.submitting}
+        disabled={props.disabled}
+        testID="blind-count-continue"
+      >
+        {props.t('caja.blindCountContinue')}
+      </Btn>
+    </View>
   );
 }

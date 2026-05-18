@@ -76,6 +76,30 @@ export function IconArea(props: {
   );
 }
 
+function stockStatus(stock: number, umbral: number) {
+  const isLow = stock <= umbral;
+  if (stock <= 0) return { bg: colors.redSoft, fg: colors.red, label: 'Sin stock' };
+  if (isLow) return { bg: colors.warningSoft, fg: colors.warning, label: 'Bajo' };
+  return { bg: colors.greenSoft, fg: colors.green, label: 'Saludable' };
+}
+
+function StockActions(props: { onEntrada: () => void; onSalida: () => void }): ReactElement {
+  return (
+    <View flexDirection="row" gap={8}>
+      <View flex={1}>
+        <Btn variant="green" onPress={props.onEntrada} fullWidth testID="detail-entrada" icon={<Icon name="plus" size={16} color={colors.white} />}>
+          Entrada
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn variant="primary" onPress={props.onSalida} fullWidth testID="detail-salida" icon={<Icon name="minus" size={16} color={colors.black} />}>
+          Salida
+        </Btn>
+      </View>
+    </View>
+  );
+}
+
 /** Stock + Entrada / Salida card. */
 export function StockActionCard(props: {
   stock: number;
@@ -84,41 +108,18 @@ export function StockActionCard(props: {
   onSalida: () => void;
   t: T;
 }): ReactElement {
-  const isLow = props.stock <= props.umbral;
-  const bg = props.stock <= 0 ? colors.redSoft : isLow ? colors.warningSoft : colors.greenSoft;
-  const fg = props.stock <= 0 ? colors.red : isLow ? colors.warning : colors.green;
-  const label = props.stock <= 0 ? 'Sin stock' : isLow ? 'Bajo' : 'Saludable';
+  const s = stockStatus(props.stock, props.umbral);
   return (
-    <View
-      backgroundColor={colors.white}
-      borderWidth={2}
-      borderColor={colors.black}
-      borderRadius={14}
-      padding={16}
-      gap={12}
-    >
+    <View backgroundColor={colors.white} borderWidth={2} borderColor={colors.black} borderRadius={14} padding={16} gap={12}>
       <View flexDirection="row" alignItems="center" gap={12}>
         <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={28} color={colors.black}>
           {props.stock}
         </Text>
-        <View backgroundColor={bg} paddingHorizontal={10} paddingVertical={4} borderRadius={8}>
-          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={12} color={fg}>
-            {label}
-          </Text>
+        <View backgroundColor={s.bg} paddingHorizontal={10} paddingVertical={4} borderRadius={8}>
+          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={12} color={s.fg}>{s.label}</Text>
         </View>
       </View>
-      <View flexDirection="row" gap={8}>
-        <View flex={1}>
-          <Btn variant="green" onPress={props.onEntrada} fullWidth testID="detail-entrada" icon={<Icon name="plus" size={16} color={colors.white} />}>
-            Entrada
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn variant="primary" onPress={props.onSalida} fullWidth testID="detail-salida" icon={<Icon name="minus" size={16} color={colors.black} />}>
-            Salida
-          </Btn>
-        </View>
-      </View>
+      <StockActions onEntrada={props.onEntrada} onSalida={props.onSalida} />
     </View>
   );
 }

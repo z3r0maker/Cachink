@@ -19,57 +19,26 @@ type T = ReturnType<typeof useTranslation>['t'];
  *
  * Includes Merma bar after Utilidad Bruta when merma > 0 (8 bars).
  */
-export function toWaterfallData(estado: EstadoDeResultados, t: T): WaterfallItem[] {
-  const items: WaterfallItem[] = [
-    {
-      label: t('estados.resultadosIngresosBrief'),
-      value: moneyToNumber(estado.ingresos),
-      type: 'income',
-    },
-    {
-      label: t('estados.resultadosCostoVentasBrief'),
-      value: moneyToNumber(estado.costoDeVentas),
-      type: 'expense',
-    },
-    {
-      label: t('estados.resultadosUtilidadBrutaBrief'),
-      value: moneyToNumber(estado.utilidadBruta),
-      type: 'subtotal',
-    },
+function topItems(estado: EstadoDeResultados, t: T): WaterfallItem[] {
+  return [
+    { label: t('estados.resultadosIngresosBrief'), value: moneyToNumber(estado.ingresos), type: 'income' },
+    { label: t('estados.resultadosCostoVentasBrief'), value: moneyToNumber(estado.costoDeVentas), type: 'expense' },
+    { label: t('estados.resultadosUtilidadBrutaBrief'), value: moneyToNumber(estado.utilidadBruta), type: 'subtotal' },
+    { label: t('estados.resultadosMermaBrief'), value: moneyToNumber(estado.merma), type: 'expense' },
   ];
+}
 
-  // Merma bar — always present so waterfall sums stay consistent,
-  // but renders as zero-height when merma is 0.
-  items.push({
-    label: t('estados.resultadosMermaBrief'),
-    value: moneyToNumber(estado.merma),
-    type: 'expense',
-  });
+function bottomItems(estado: EstadoDeResultados, t: T): WaterfallItem[] {
+  return [
+    { label: t('estados.resultadosGastosOperativosBrief'), value: moneyToNumber(estado.gastosOperativos), type: 'expense' },
+    { label: t('estados.resultadosUtilidadOperativaBrief'), value: moneyToNumber(estado.utilidadOperativa), type: 'subtotal' },
+    { label: t('estados.resultadosIsrBrief'), value: moneyToNumber(estado.isr), type: 'expense' },
+    { label: t('estados.resultadosUtilidadNetaBrief'), value: moneyToNumber(estado.utilidadNeta), type: 'subtotal' },
+  ];
+}
 
-  items.push(
-    {
-      label: t('estados.resultadosGastosOperativosBrief'),
-      value: moneyToNumber(estado.gastosOperativos),
-      type: 'expense',
-    },
-    {
-      label: t('estados.resultadosUtilidadOperativaBrief'),
-      value: moneyToNumber(estado.utilidadOperativa),
-      type: 'subtotal',
-    },
-    {
-      label: t('estados.resultadosIsrBrief'),
-      value: moneyToNumber(estado.isr),
-      type: 'expense',
-    },
-    {
-      label: t('estados.resultadosUtilidadNetaBrief'),
-      value: moneyToNumber(estado.utilidadNeta),
-      type: 'subtotal',
-    },
-  );
-
-  return items;
+export function toWaterfallData(estado: EstadoDeResultados, t: T): WaterfallItem[] {
+  return [...topItems(estado, t), ...bottomItems(estado, t)];
 }
 
 /** Maps expense category names to their CHART_PALETTE index. */

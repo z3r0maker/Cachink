@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { BusinessId, DeviceId } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
 import {
   InMemoryAppConfigRepository,
   InMemoryBusinessesRepository,
@@ -138,8 +138,8 @@ describe('seedDemoData', () => {
     const from = new Date(today);
     from.setDate(from.getDate() - 6);
     const closes = await repos.dayCloses.findByDateRange(
-      from.toISOString().slice(0, 10) as import('@cachink/domain').IsoDate,
-      today.toISOString().slice(0, 10) as import('@cachink/domain').IsoDate,
+      from.toISOString().slice(0, 10) as IsoDate,
+      today.toISOString().slice(0, 10) as IsoDate,
       bizId,
     );
     expect(closes).toHaveLength(5);

@@ -23,72 +23,50 @@ export interface ResumenCardProps {
   readonly t: T;
 }
 
-export function ResumenCard(props: ResumenCardProps): ReactElement {
+function UtilidadHero(props: {
+  estado: EstadoDeResultados;
+  priorEstado?: EstadoDeResultados | null;
+  trend?: UtilidadNetaTrend | null;
+  t: T;
+}): ReactElement {
   const { estado, t } = props;
   const verdict = utilidadNetaVerdict(estado.utilidadNeta, t);
   const tone: 'positive' | 'negative' = estado.utilidadNeta >= ZERO ? 'positive' : 'negative';
   const accentColor = tone === 'negative' ? colors.red : colors.green;
+  return (
+    <View
+      testID="estado-utilidad-neta-card" borderLeftWidth={4} borderLeftColor={accentColor}
+      borderRadius={12} overflow="hidden" padding={12}
+      backgroundColor={tone === 'negative' ? colors.redSoft : colors.greenSoft}
+    >
+      <Kpi value={formatMoney(estado.utilidadNeta)} label={t('estados.resultadosUtilidadNeta')} tone={tone} align="right" testID="estado-utilidad-neta-hero" />
+      <HealthIndicator tone={verdict.tone} verdict={verdict.verdict} testID="estado-resumen-health" />
+      {props.priorEstado != null && (
+        <DeltaIndicator current={moneyToNumber(estado.utilidadNeta)} previous={moneyToNumber(props.priorEstado.utilidadNeta)} format="percent" periodLabel={t('estados.deltaVsMesAnterior')} testID="estado-resumen-delta" />
+      )}
+      {props.trend != null && props.trend.points.length >= 2 && (
+        <View marginTop={8}>
+          <Sparkline points={props.trend.points} color={accentColor} height={28} testID="estado-resumen-sparkline" />
+        </View>
+      )}
+    </View>
+  );
+}
 
+export function ResumenCard(props: ResumenCardProps): ReactElement {
+  const { estado, t } = props;
   const sentence = t('estados.resultadosResumenSentence', {
     ingresos: formatMoney(estado.ingresos),
     egresos: formatMoney(estado.costoDeVentas + estado.gastosOperativos + estado.merma),
     neto: formatMoney(estado.utilidadNeta),
   });
-
   return (
     <Card testID="estado-resumen-card" padding="md" fullWidth>
       <SectionTitle title={t('estados.resultadosResumenTitle')} />
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.ink}
-        marginTop={4}
-        marginBottom={12}
-      >
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.ink} marginTop={4} marginBottom={12}>
         {sentence}
       </Text>
-      <View
-        testID="estado-utilidad-neta-card"
-        borderLeftWidth={4}
-        borderLeftColor={accentColor}
-        borderRadius={12}
-        overflow="hidden"
-        padding={12}
-        backgroundColor={tone === 'negative' ? colors.redSoft : colors.greenSoft}
-      >
-        <Kpi
-          value={formatMoney(estado.utilidadNeta)}
-          label={t('estados.resultadosUtilidadNeta')}
-          tone={tone}
-          align="right"
-          testID="estado-utilidad-neta-hero"
-        />
-        <HealthIndicator
-          tone={verdict.tone}
-          verdict={verdict.verdict}
-          testID="estado-resumen-health"
-        />
-        {props.priorEstado !== undefined && props.priorEstado !== null && (
-          <DeltaIndicator
-            current={moneyToNumber(estado.utilidadNeta)}
-            previous={moneyToNumber(props.priorEstado.utilidadNeta)}
-            format="percent"
-            periodLabel={t('estados.deltaVsMesAnterior')}
-            testID="estado-resumen-delta"
-          />
-        )}
-        {props.trend !== undefined && props.trend !== null && props.trend.points.length >= 2 && (
-          <View marginTop={8}>
-            <Sparkline
-              points={props.trend.points}
-              color={accentColor}
-              height={28}
-              testID="estado-resumen-sparkline"
-            />
-          </View>
-        )}
-      </View>
+      <UtilidadHero estado={estado} priorEstado={props.priorEstado} trend={props.trend} t={t} />
     </Card>
   );
 }

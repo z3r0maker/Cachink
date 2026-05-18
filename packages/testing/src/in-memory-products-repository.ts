@@ -13,6 +13,18 @@ import type {
 import { newEntityId, now } from '@cachink/domain';
 import type { ProductPatch, ProductsRepository } from '@cachink/data';
 
+function pickDefinedProductFields(
+  patch: ProductPatch,
+): Partial<Product> {
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(patch) as (keyof ProductPatch)[]) {
+    if (patch[key] !== undefined) {
+      result[key] = patch[key];
+    }
+  }
+  return result as Partial<Product>;
+}
+
 export class InMemoryProductsRepository implements ProductsRepository {
   private readonly rows = new Map<ProductId, Product>();
   private readonly deviceId: DeviceId;
@@ -73,20 +85,11 @@ export class InMemoryProductsRepository implements ProductsRepository {
   async update(id: ProductId, patch: ProductPatch): Promise<Product | null> {
     const existing = this.rows.get(id);
     if (!existing || existing.deletedAt !== null) return null;
-    const ts: IsoTimestamp = now();
+    const defined = pickDefinedProductFields(patch);
     const next: Product = {
       ...existing,
-      nombre: patch.nombre ?? existing.nombre,
-      sku: patch.sku ?? existing.sku,
-      categoria: patch.categoria ?? existing.categoria,
-      unidad: patch.unidad ?? existing.unidad,
-      umbralStockBajo: patch.umbralStockBajo ?? existing.umbralStockBajo,
-      colorFondo: patch.colorFondo ?? existing.colorFondo,
-      usoProducto: patch.usoProducto ?? existing.usoProducto,
-      icono: patch.icono !== undefined ? patch.icono : existing.icono,
-      costoUnitCentavos: patch.costoUnitCentavos ?? existing.costoUnitCentavos,
-      precioVentaCentavos: patch.precioVentaCentavos ?? existing.precioVentaCentavos,
-      updatedAt: ts,
+      ...defined,
+      updatedAt: now(),
     };
     this.rows.set(id, next);
     return next;

@@ -90,13 +90,58 @@ function CartSection(props: VentasScreenProps): ReactElement {
   );
 }
 
-export function VentasScreen(props: VentasScreenProps): ReactElement {
+interface ProductPaneConfig {
+  readonly filtered: readonly Product[];
+  readonly stockMap?: ReadonlyMap<string, number>;
+  readonly cartQuantities: ReadonlyMap<string, number>;
+  readonly onPress: (p: Product) => void;
+  readonly productSearch: string;
+  readonly onProductSearchChange: (q: string) => void;
+  readonly hasProductos: boolean;
+  readonly onGoToProductos?: () => void;
+}
+
+function TabletLayout(props: {
+  testID: string;
+  title: string;
+  paneProps: ProductPaneConfig;
+  totalBar: ReactElement;
+  screenProps: VentasScreenProps;
+}): ReactElement {
+  return (
+    <View testID={props.testID} flex={1} backgroundColor={colors.offwhite}>
+      <View flex={1} padding={16}>
+        <SectionTitle title={props.title} />
+        <SplitPane
+          left={<ProductPane {...props.paneProps} />}
+          right={
+            <View flex={1} gap={12}>
+              {props.totalBar}
+              <CartFooter
+                itemCount={props.screenProps.cart.itemCount}
+                totalCentavos={props.screenProps.cart.totalCentavos}
+                onCheckout={props.screenProps.onCheckout}
+              />
+              <ScrollView style={{ flex: 1 }}>
+                <CartSection {...props.screenProps} />
+              </ScrollView>
+            </View>
+          }
+          leftFlex={0.45}
+          rightFlex={0.55}
+          testID="ventas-split"
+        />
+      </View>
+    </View>
+  );
+}
+
+function useVentasSetup(props: VentasScreenProps) {
   const { t } = useTranslation();
-  const media = useMedia();
   const filtered = useFilteredProducts(props.productos, props.productSearch);
   useProductColorMap(props.productos);
 
-  const productPaneProps = {
+  const paneProps: ProductPaneConfig = {
     filtered,
     stockMap: props.stockMap,
     cartQuantities: props.cartQuantities,
@@ -116,51 +161,51 @@ export function VentasScreen(props: VentasScreenProps): ReactElement {
     />
   );
 
-  if (Boolean(media.gtMd)) {
-    return (
-      <View testID={props.testID ?? 'ventas-screen'} flex={1} backgroundColor={colors.offwhite}>
-        <View flex={1} padding={16}>
-          <SectionTitle title={t('ventas.title')} />
-          <SplitPane
-            left={<ProductPane {...productPaneProps} />}
-            right={
-              <View flex={1} gap={12}>
-                {totalBar}
-                <CartFooter
-                  itemCount={props.cart.itemCount}
-                  totalCentavos={props.cart.totalCentavos}
-                  onCheckout={props.onCheckout}
-                />
-                <ScrollView style={{ flex: 1 }}>
-                  <CartSection {...props} />
-                </ScrollView>
-              </View>
-            }
-            leftFlex={0.45}
-            rightFlex={0.55}
-            testID="ventas-split"
-          />
-        </View>
-      </View>
-    );
-  }
+  return { t, paneProps, totalBar, testID: props.testID ?? 'ventas-screen' };
+}
 
+function PhoneLayout(props: {
+  testID: string;
+  title: string;
+  paneProps: ProductPaneConfig;
+  totalBar: ReactElement;
+  screenProps: VentasScreenProps;
+}): ReactElement {
   return (
-    <View testID={props.testID ?? 'ventas-screen'} flex={1} backgroundColor={colors.offwhite}>
+    <View testID={props.testID} flex={1} backgroundColor={colors.offwhite}>
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 120 }}
       >
-        <SectionTitle title={t('ventas.title')} />
-        {totalBar}
-        <ProductPane {...productPaneProps} />
-        <CartSection {...props} />
+        <SectionTitle title={props.title} />
+        {props.totalBar}
+        <ProductPane {...props.paneProps} />
+        <CartSection {...props.screenProps} />
       </ScrollView>
       <CartFooter
-        itemCount={props.cart.itemCount}
-        totalCentavos={props.cart.totalCentavos}
-        onCheckout={props.onCheckout}
+        itemCount={props.screenProps.cart.itemCount}
+        totalCentavos={props.screenProps.cart.totalCentavos}
+        onCheckout={props.screenProps.onCheckout}
       />
     </View>
   );
+}
+
+export function VentasScreen(props: VentasScreenProps): ReactElement {
+  const media = useMedia();
+  const { t, paneProps, totalBar, testID } = useVentasSetup(props);
+
+  const layoutProps = {
+    testID,
+    title: t('ventas.title'),
+    paneProps,
+    totalBar,
+    screenProps: props,
+  };
+
+  if (Boolean(media.gtMd)) {
+    return <TabletLayout {...layoutProps} />;
+  }
+
+  return <PhoneLayout {...layoutProps} />;
 }

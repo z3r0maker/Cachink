@@ -28,41 +28,81 @@ export interface ProductoDetailSmartProps {
   readonly testID?: string;
 }
 
-export function ProductoDetailSmart(
-  props: ProductoDetailSmartProps,
-): ReactElement {
-  const { t } = useTranslation();
-  const businessId = useCurrentBusinessId() as BusinessId | null;
+function useDetailMutations(row: ProductoConStock, onBack: () => void) {
   const editar = useEditarProducto();
   const registrar = useRegistrarMovimiento();
   const eliminar = useEliminarProducto();
-  const conversionEnabled = useFeatureFlag('conversionMateriaPrima');
-  const iconOverride = useProductFormStore((s) => s.draft?.icono);
-
   const [movTipo, setMovTipo] = useState<MovementType | null>(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const handleSave = (patch: Parameters<typeof editar.mutate>[0]['patch']): void => {
-    editar.mutate(
-      { id: props.row.producto.id, patch },
-      { onSuccess: () => props.onBack() },
-    );
+    editar.mutate({ id: row.producto.id, patch }, { onSuccess: onBack });
   };
-
   const handleMovSubmit = (input: NewInventoryMovement): void => {
     registrar.mutate(input, { onSuccess: () => setMovTipo(null) });
   };
-
   const handleConfirmDelete = (): void => {
     eliminar.mutate(
-      { id: props.row.producto.id, currentStock: props.row.stock, force: true },
-      { onSuccess: () => props.onBack() },
+      { id: row.producto.id, currentStock: row.stock, force: true },
+      { onSuccess: onBack },
     );
   };
 
-  const hasStock = props.row.stock > 0;
-  const deleteTitle = hasStock ? t('inventario.deleteBlockedTitle') : t('inventario.deleteConfirmTitle');
-  const deleteBody = hasStock ? t('inventario.deleteBlockedBody') : t('inventario.deleteConfirmBody');
+  return {
+    editar,
+    registrar,
+    eliminar,
+    movTipo,
+    setMovTipo,
+    confirmDeleteOpen,
+    setConfirmDeleteOpen,
+    handleSave,
+    handleMovSubmit,
+    handleConfirmDelete,
+  };
+}
+
+function DetailDialogs(props: {
+  row: ProductoConStock;
+  fecha: IsoDate;
+  businessId: BusinessId | null;
+  m: ReturnType<typeof useDetailMutations>;
+}): ReactElement {
+  const { t } = useTranslation();
+  const { m, row } = props;
+  const hasStock = row.stock > 0;
+  return (
+    <>
+      <ConfirmDialog
+        open={m.confirmDeleteOpen}
+        onClose={() => m.setConfirmDeleteOpen(false)}
+        onConfirm={m.handleConfirmDelete}
+        title={hasStock ? t('inventario.deleteBlockedTitle') : t('inventario.deleteConfirmTitle')}
+        description={hasStock ? t('inventario.deleteBlockedBody') : t('inventario.deleteConfirmBody')}
+        confirmLabel={t('actions.delete')}
+        tone="danger"
+      />
+      {props.businessId && m.movTipo && (
+        <MovimientoModal
+          open
+          onClose={() => m.setMovTipo(null)}
+          onSubmit={m.handleMovSubmit}
+          producto={row.producto}
+          businessId={props.businessId}
+          fecha={props.fecha}
+          initialTipo={m.movTipo}
+          submitting={m.registrar.isPending}
+        />
+      )}
+    </>
+  );
+}
+
+export function ProductoDetailSmart(props: ProductoDetailSmartProps): ReactElement {
+  const businessId = useCurrentBusinessId() as BusinessId | null;
+  const conversionEnabled = useFeatureFlag('conversionMateriaPrima');
+  const iconOverride = useProductFormStore((s) => s.draft?.icono);
+  const m = useDetailMutations(props.row, props.onBack);
 
   return (
     <>
@@ -70,40 +110,23 @@ export function ProductoDetailSmart(
         producto={props.row.producto}
         stock={props.row.stock}
         conversionEnabled={conversionEnabled}
-        onSave={handleSave}
-        saving={editar.isPending}
-        onEntrada={() => setMovTipo('entrada')}
-        onSalida={() => setMovTipo('salida')}
-        onDelete={() => setConfirmDeleteOpen(true)}
-        deleting={eliminar.isPending}
+        onSave={m.handleSave}
+        saving={m.editar.isPending}
+        onEntrada={() => m.setMovTipo('entrada')}
+        onSalida={() => m.setMovTipo('salida')}
+        onDelete={() => m.setConfirmDeleteOpen(true)}
+        deleting={m.eliminar.isPending}
         onSelectIcon={props.onSelectIcon}
         onBack={props.onBack}
         iconOverride={iconOverride}
         testID={props.testID}
       />
-
-      <ConfirmDialog
-        open={confirmDeleteOpen}
-        onClose={() => setConfirmDeleteOpen(false)}
-        onConfirm={handleConfirmDelete}
-        title={deleteTitle}
-        description={deleteBody}
-        confirmLabel={t('actions.delete')}
-        tone="danger"
+      <DetailDialogs
+        row={props.row}
+        fecha={props.fecha}
+        businessId={businessId}
+        m={m}
       />
-
-      {businessId && movTipo && (
-        <MovimientoModal
-          open
-          onClose={() => setMovTipo(null)}
-          onSubmit={handleMovSubmit}
-          producto={props.row.producto}
-          businessId={businessId}
-          fecha={props.fecha}
-          initialTipo={movTipo}
-          submitting={registrar.isPending}
-        />
-      )}
     </>
   );
 }

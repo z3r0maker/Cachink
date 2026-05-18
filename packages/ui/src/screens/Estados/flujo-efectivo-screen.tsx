@@ -95,6 +95,46 @@ function EmptyCard(props: { title: string; body: string }): ReactElement {
   );
 }
 
+function FlujoBody(props: { flujo: FlujoDeEfectivo; priorFlujo?: FlujoDeEfectivo | null; t: T }): ReactElement {
+  const { flujo, t } = props;
+  return (
+    <View gap={12}>
+      <ResumenCard flujo={flujo} prior={props.priorFlujo} t={t} />
+      <CollapsibleSection label={t('estados.flujoOperacion')} total={flujo.operacion} testID="flujo-operacion">
+        <>
+          <HelpAccordion subtitle={t('estados.flujoOperacionSubtitle')} detail={t('estados.flujoOperacionDetail')} />
+          <SubRow label={t('estados.flujoCobrosContado')} value={flujo.cobroVentasContado} testID="flujo-cobros-contado" />
+          <SubRow label={t('estados.flujoCobrosCredito')} value={flujo.cobroCreditoClientes} testID="flujo-cobros-credito" />
+          <SubRow label={t('estados.flujoGastosOp')} value={ZERO - flujo.egresoOperativo} testID="flujo-gastos-op" />
+        </>
+      </CollapsibleSection>
+      <CollapsibleSection label={t('estados.flujoInversion')} total={flujo.inversion} testID="flujo-inversion">
+        <>
+          <HelpAccordion subtitle={t('estados.flujoInversionSubtitle')} detail={t('estados.flujoInversionDetail')} />
+          <SubRow label={t('estados.flujoComprasInv')} value={ZERO - flujo.egresoInversion} testID="flujo-compras-inv" />
+        </>
+      </CollapsibleSection>
+      <FlujoDivergingBar flujo={flujo} t={t} />
+      <Kpi label={t('estados.flujoTotal')} value={formatMoney(flujo.total)} tone={flujo.total >= 0n ? 'positive' : 'negative'} align="right" testID="flujo-total" />
+    </View>
+  );
+}
+
+function FlujoDivergingBar(props: { flujo: FlujoDeEfectivo; t: T }): ReactElement {
+  const { flujo, t } = props;
+  return (
+    <DivergingBar
+      items={[
+        { label: t('estados.flujoCobrosContado'), value: moneyToNumber(flujo.cobroVentasContado) },
+        { label: t('estados.flujoCobrosCredito'), value: moneyToNumber(flujo.cobroCreditoClientes) },
+        { label: t('estados.flujoGastosOp'), value: -moneyToNumber(flujo.egresoOperativo) },
+        { label: t('estados.flujoComprasInv'), value: -moneyToNumber(flujo.egresoInversion) },
+      ]}
+      testID="flujo-diverging-bar"
+    />
+  );
+}
+
 export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactElement {
   const { t } = useTranslation();
   return (
@@ -103,39 +143,7 @@ export function FlujoEfectivoScreen(props: FlujoEfectivoScreenProps): ReactEleme
       {props.flujo === null ? (
         <EmptyCard title={t('estados.emptyPeriodTitle')} body={t('estados.emptyPeriodBody')} />
       ) : (
-        <View gap={12}>
-          <ResumenCard flujo={props.flujo} prior={props.priorFlujo} t={t} />
-          <CollapsibleSection label={t('estados.flujoOperacion')} total={props.flujo.operacion} testID="flujo-operacion">
-            <>
-              <HelpAccordion subtitle={t('estados.flujoOperacionSubtitle')} detail={t('estados.flujoOperacionDetail')} />
-              <SubRow label={t('estados.flujoCobrosContado')} value={props.flujo.cobroVentasContado} testID="flujo-cobros-contado" />
-              <SubRow label={t('estados.flujoCobrosCredito')} value={props.flujo.cobroCreditoClientes} testID="flujo-cobros-credito" />
-              <SubRow label={t('estados.flujoGastosOp')} value={ZERO - props.flujo.egresoOperativo} testID="flujo-gastos-op" />
-            </>
-          </CollapsibleSection>
-          <CollapsibleSection label={t('estados.flujoInversion')} total={props.flujo.inversion} testID="flujo-inversion">
-            <>
-              <HelpAccordion subtitle={t('estados.flujoInversionSubtitle')} detail={t('estados.flujoInversionDetail')} />
-              <SubRow label={t('estados.flujoComprasInv')} value={ZERO - props.flujo.egresoInversion} testID="flujo-compras-inv" />
-            </>
-          </CollapsibleSection>
-          <DivergingBar
-            items={[
-              { label: t('estados.flujoCobrosContado'), value: moneyToNumber(props.flujo.cobroVentasContado) },
-              { label: t('estados.flujoCobrosCredito'), value: moneyToNumber(props.flujo.cobroCreditoClientes) },
-              { label: t('estados.flujoGastosOp'), value: -moneyToNumber(props.flujo.egresoOperativo) },
-              { label: t('estados.flujoComprasInv'), value: -moneyToNumber(props.flujo.egresoInversion) },
-            ]}
-            testID="flujo-diverging-bar"
-          />
-          <Kpi
-            label={t('estados.flujoTotal')}
-            value={formatMoney(props.flujo.total)}
-            tone={props.flujo.total >= 0n ? 'positive' : 'negative'}
-            align="right"
-            testID="flujo-total"
-          />
-        </View>
+        <FlujoBody flujo={props.flujo} priorFlujo={props.priorFlujo} t={t} />
       )}
     </View>
   );

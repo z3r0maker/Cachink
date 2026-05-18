@@ -21,61 +21,59 @@ export interface ConvertirSheetProps {
   readonly testID?: string;
 }
 
+interface ConvertirCalc {
+  mp: Product | undefined;
+  prod: Product | undefined;
+  mpStock: number;
+  needed: number;
+  insufficient: boolean;
+  cantResultante: number;
+}
+
+function computeConvertir(
+  receta: ConversionReceta | null,
+  products: ReadonlyMap<string, Product>,
+  stockMap: ReadonlyMap<string, number>,
+  multN: number,
+): ConvertirCalc {
+  const mp = receta ? products.get(receta.materiaPrimaId as string) : undefined;
+  const prod = receta ? products.get(receta.productoResultanteId as string) : undefined;
+  const mpStock = mp ? (stockMap.get(mp.id as string) ?? 0) : 0;
+  const needed = receta ? receta.cantidadOrigen * multN : 0;
+  return { mp, prod, mpStock, needed, insufficient: needed > mpStock, cantResultante: receta ? receta.cantidadResultante * multN : 0 };
+}
+
+function ConvertirPreview({ calc, t }: { calc: ConvertirCalc; t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
+  return (
+    <>
+      <Text fontSize={14} color="$color">
+        {t('conversion.previewSalida', { cantidad: String(calc.needed), unidad: calc.mp?.unidad ?? '', nombre: calc.mp?.nombre ?? '—' })}
+      </Text>
+      <Text fontSize={14} color="$color">
+        {t('conversion.previewEntrada', { cantidad: String(calc.cantResultante), unidad: calc.prod?.unidad ?? '', nombre: calc.prod?.nombre ?? '—' })}
+      </Text>
+      {calc.insufficient && (
+        <Text fontSize={13} color="$colorDanger" testID="convertir-error-stock">
+          {t('conversion.stockInsuficiente', { stock: String(calc.mpStock) })}
+        </Text>
+      )}
+    </>
+  );
+}
+
 export function ConvertirSheet(props: ConvertirSheetProps): ReactElement {
   const { t } = useTranslation();
   const [mult, setMult] = useState(1);
   const multN = Math.max(1, mult);
-
-  const mp = props.receta ? props.products.get(props.receta.materiaPrimaId as string) : null;
-  const prod = props.receta ? props.products.get(props.receta.productoResultanteId as string) : null;
-  const mpStock = mp ? (props.stockMap.get(mp.id as string) ?? 0) : 0;
-  const needed = props.receta ? props.receta.cantidadOrigen * multN : 0;
-  const insufficient = needed > mpStock;
-  const cantResultante = props.receta ? props.receta.cantidadResultante * multN : 0;
+  const calc = computeConvertir(props.receta, props.products, props.stockMap, multN);
 
   return (
-    <Modal
-      open={props.open}
-      onClose={props.onClose}
-      title={t('conversion.convertirTitle')}
-      testID={props.testID ?? 'convertir-sheet'}
-    >
+    <Modal open={props.open} onClose={props.onClose} title={t('conversion.convertirTitle')} testID={props.testID ?? 'convertir-sheet'}>
       {props.receta && (
         <View gap={12}>
-          <WheelQuantityPicker
-            label={t('conversion.multiplicadorLabel')}
-            value={mult}
-            onChange={setMult}
-            min={1}
-            max={50}
-            testID="convertir-multiplicador"
-          />
-          <Text fontSize={14} color="$color">
-            {t('conversion.previewSalida', {
-              cantidad: String(needed),
-              unidad: mp?.unidad ?? '',
-              nombre: mp?.nombre ?? '—',
-            })}
-          </Text>
-          <Text fontSize={14} color="$color">
-            {t('conversion.previewEntrada', {
-              cantidad: String(cantResultante),
-              unidad: prod?.unidad ?? '',
-              nombre: prod?.nombre ?? '—',
-            })}
-          </Text>
-          {insufficient && (
-            <Text fontSize={13} color="$colorDanger" testID="convertir-error-stock">
-              {t('conversion.stockInsuficiente', { stock: String(mpStock) })}
-            </Text>
-          )}
-          <Btn
-            variant="primary"
-            onPress={() => props.onConfirm(multN)}
-            disabled={insufficient || props.submitting === true}
-            fullWidth
-            testID="convertir-confirm"
-          >
+          <WheelQuantityPicker label={t('conversion.multiplicadorLabel')} value={mult} onChange={setMult} min={1} max={50} testID="convertir-multiplicador" />
+          <ConvertirPreview calc={calc} t={t} />
+          <Btn variant="primary" onPress={() => props.onConfirm(multN)} disabled={calc.insufficient || props.submitting === true} fullWidth testID="convertir-confirm">
             {t('conversion.confirmar')}
           </Btn>
         </View>

@@ -10,7 +10,16 @@
  * Phase 18: Conversion feature.
  */
 
-import { today, type BusinessId, type IsoDate } from '@cachink/domain';
+import {
+  today,
+  type BusinessId,
+  type IsoDate,
+  type ProductId,
+  type Conversion,
+  type ConversionReceta,
+  type ConversionRecetaId,
+  type Product,
+} from '@cachink/domain';
 import type {
   ConversionRecetasRepository,
   ConversionsRepository,
@@ -18,7 +27,6 @@ import type {
   ProductsRepository,
 } from '@cachink/data';
 import type { UseCase } from '../_use-case.js';
-import type { Conversion, ConversionRecetaId } from '@cachink/domain';
 
 export interface EjecutarConversionInput {
   readonly recetaId: ConversionRecetaId;
@@ -63,46 +71,17 @@ export class EjecutarConversionUseCase
       throw new TypeError(`Receta ${input.recetaId} no encontrada`);
     }
 
-    const mp = await this.#products.findById(receta.materiaPrimaId);
-    if (!mp) {
-      throw new TypeError('Materia prima no encontrada');
-    }
-
-    const cantidadSalida = receta.cantidadOrigen * input.multiplicador;
-    const currentStock = await this.#movements.sumStock(receta.materiaPrimaId);
-
-    if (currentStock < cantidadSalida) {
-      throw new TypeError(
-        `Stock insuficiente: necesitas ${cantidadSalida} ${mp.unidad} de ${mp.nombre}, disponible ${currentStock}`,
-      );
-    }
-
+    const mp = await this.#validateStock(receta, input.multiplicador);
     const fecha = input.today ?? today();
-
-    const movSalida = await this.#movements.create({
-      productoId: receta.materiaPrimaId,
-      fecha,
-      tipo: 'salida',
-      cantidad: cantidadSalida,
-      costoUnitCentavos: mp.costoUnitCentavos,
-      motivo: 'Conversión',
-      nota: undefined,
-      businessId: input.businessId,
-    });
-
-    const producto = await this.#products.findById(receta.productoResultanteId);
+    const cantidadSalida = receta.cantidadOrigen * input.multiplicador;
     const cantidadEntrada = receta.cantidadResultante * input.multiplicador;
 
-    const movEntrada = await this.#movements.create({
-      productoId: receta.productoResultanteId,
-      fecha,
-      tipo: 'entrada',
-      cantidad: cantidadEntrada,
-      costoUnitCentavos: producto?.costoUnitCentavos ?? 0n,
-      motivo: 'Conversión',
-      nota: undefined,
-      businessId: input.businessId,
-    });
+    const movSalida = await this.#createSalida(
+      receta.materiaPrimaId, fecha, cantidadSalida, mp.costoUnitCentavos, input.businessId,
+    );
+    const movEntrada = await this.#createEntrada(
+      receta.productoResultanteId, fecha, cantidadEntrada, input.businessId,
+    );
 
     const conversion = await this.#conversions.create({
       recetaId: receta.id,
@@ -120,5 +99,43 @@ export class EjecutarConversionUseCase
       movimientoSalidaId: movSalida.id,
       movimientoEntradaId: movEntrada.id,
     };
+  }
+
+  async #validateStock(
+    receta: ConversionReceta,
+    multiplicador: number,
+  ): Promise<Product> {
+    const mp = await this.#products.findById(receta.materiaPrimaId);
+    if (!mp) throw new TypeError('Materia prima no encontrada');
+
+    const cantidadSalida = receta.cantidadOrigen * multiplicador;
+    const currentStock = await this.#movements.sumStock(receta.materiaPrimaId);
+    if (currentStock < cantidadSalida) {
+      throw new TypeError(
+        `Stock insuficiente: necesitas ${cantidadSalida} ${mp.unidad} de ${mp.nombre}, disponible ${currentStock}`,
+      );
+    }
+    return mp;
+  }
+
+  async #createSalida(
+    productoId: ProductId, fecha: IsoDate, cantidad: number,
+    costoUnitCentavos: bigint, businessId: BusinessId,
+  ) {
+    return this.#movements.create({
+      productoId, fecha, tipo: 'salida', cantidad,
+      costoUnitCentavos, motivo: 'Conversión', nota: undefined, businessId,
+    });
+  }
+
+  async #createEntrada(
+    productoId: ProductId, fecha: IsoDate, cantidad: number, businessId: BusinessId,
+  ) {
+    const producto = await this.#products.findById(productoId);
+    return this.#movements.create({
+      productoId, fecha, tipo: 'entrada', cantidad,
+      costoUnitCentavos: producto?.costoUnitCentavos ?? 0n,
+      motivo: 'Conversión', nota: undefined, businessId,
+    });
   }
 }

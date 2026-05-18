@@ -26,6 +26,49 @@ export interface CerrarCajaHookInput {
 
 export type CerrarCajaResult = UseMutationResult<CajaTurno, Error, CerrarCajaHookInput, unknown>;
 
+function buildFullInput(
+  input: CerrarCajaHookInput,
+  businessId: BusinessId,
+): CerrarCajaFullInput {
+  return {
+    turnoId: input.turnoId,
+    montoCierreCentavos: input.montoCierreCentavos,
+    discrepancyReason: input.discrepancyReason,
+    explicacion: input.explicacion,
+    businessId,
+  };
+}
+
+function emitCajaAlerts(
+  turno: CajaTurno,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): void {
+  const diff = turno.diferenciaCentavos ?? 0n;
+  if (diff !== 0n) {
+    const absDiff = diff < 0n ? -diff : diff;
+    const severity = absDiff >= 500_00n ? 'critical' : 'warning';
+    emitAlert.mutate({
+      source: 'caja-discrepancia',
+      severity,
+      titleKey: 'notificaciones.cajaDiscrepancia',
+      message: `Diferencia de ${formatMoney(diff)} al cerrar turno.`,
+      actionRoute: '/caja-reportes',
+      metadata: JSON.stringify({ turnoId: turno.id, diff: String(diff) }),
+    });
+  }
+
+  if (turno.egresoAutoId) {
+    emitAlert.mutate({
+      source: 'caja-egreso-auto',
+      severity: 'info',
+      titleKey: 'notificaciones.cajaEgresoAuto',
+      message: 'Se creó un egreso automático para registrar la diferencia de caja.',
+      actionRoute: '/egresos',
+      metadata: JSON.stringify({ egresoId: turno.egresoAutoId }),
+    });
+  }
+}
+
 export function useCerrarCaja(): CerrarCajaResult {
   const turnos = useCajaTurnosRepository();
   const sales = useSalesRepository();
@@ -38,7 +81,6 @@ export function useCerrarCaja(): CerrarCajaResult {
     [turnos, sales, expenses],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_CERRAR_CAJA);
-
   const emitAlert = useEmitDirectorAlert();
 
   return useMutation<CajaTurno, Error, CerrarCajaHookInput>({
@@ -46,55 +88,16 @@ export function useCerrarCaja(): CerrarCajaResult {
       if (!businessId) {
         throw new Error('useCerrarCaja: no current business set');
       }
-      const fullInput: CerrarCajaFullInput = {
-        turnoId: input.turnoId,
-        montoCierreCentavos: input.montoCierreCentavos,
-        discrepancyReason: input.discrepancyReason,
-        explicacion: input.explicacion,
-        businessId: businessId as BusinessId,
-      };
-      return useCase.execute(fullInput);
+      return useCase.execute(buildFullInput(input, businessId as BusinessId));
     },
     async onSuccess(turno) {
       await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: cajaKeys.byBusiness(businessId as BusinessId),
-        }),
+        queryClient.invalidateQueries({ queryKey: cajaKeys.byBusiness(businessId as BusinessId) }),
         queryClient.invalidateQueries({ queryKey: ['caja-open'] }),
-        queryClient.invalidateQueries({
-          queryKey: ['egresos', businessId],
-        }),
-        queryClient.invalidateQueries({
-          queryKey: ['efectivo-esperado', businessId],
-        }),
+        queryClient.invalidateQueries({ queryKey: ['egresos', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['efectivo-esperado', businessId] }),
       ]);
-
-      // Alert: caja-discrepancia — when there's a money difference
-      const diff = turno.diferenciaCentavos ?? 0n;
-      if (diff !== 0n) {
-        const absDiff = diff < 0n ? -diff : diff;
-        const severity = absDiff >= 500_00n ? 'critical' : 'warning';
-        emitAlert.mutate({
-          source: 'caja-discrepancia',
-          severity,
-          titleKey: 'notificaciones.cajaDiscrepancia',
-          message: `Diferencia de ${formatMoney(diff)} al cerrar turno.`,
-          actionRoute: '/caja-reportes',
-          metadata: JSON.stringify({ turnoId: turno.id, diff: String(diff) }),
-        });
-      }
-
-      // Alert: caja-egreso-auto — when an auto-egreso was created
-      if (turno.egresoAutoId) {
-        emitAlert.mutate({
-          source: 'caja-egreso-auto',
-          severity: 'info',
-          titleKey: 'notificaciones.cajaEgresoAuto',
-          message: 'Se creó un egreso automático para registrar la diferencia de caja.',
-          actionRoute: '/egresos',
-          metadata: JSON.stringify({ egresoId: turno.egresoAutoId }),
-        });
-      }
+      emitCajaAlerts(turno, emitAlert);
     },
   });
 }

@@ -31,42 +31,76 @@ export interface NotificacionesScreenProps {
 
 type TopTab = 'bandeja' | 'configurar';
 
-export function NotificacionesScreen(props: NotificacionesScreenProps): ReactElement {
-  const { onNavigate, testID } = props;
+function useNotificacionesState(onNavigate?: (path: string) => void) {
   const { t } = useTranslation();
   const [topTab, setTopTab] = useState<TopTab>('bandeja');
   const [filter, setFilter] = useState<AlertFilter>('all');
-
-  // Inbox hooks
   const alertsQ = useDirectorAlerts(filter);
   const markRead = useMarkAlertRead();
   const markAllRead = useMarkAllAlertsRead();
-  const alerts = alertsQ.data ?? [];
-
-  // Config hooks
   const prefsQ = useNotificationPrefs();
   const updatePrefs = useUpdateNotificationPrefs();
   const flags = useFeatureFlags();
-  const prefs = prefsQ.data;
 
-  const topTabOptions = [
-    { key: 'bandeja' as const, label: t('notificaciones.tabInbox') },
-    { key: 'configurar' as const, label: t('notificaciones.tabConfig') },
-  ] as const;
+  const handleToggleSource = (source: string, newValue: boolean): void => {
+    updatePrefs.mutate({ ...prefsQ.data, [source]: newValue });
+  };
 
+  return {
+    t, topTab, setTopTab, filter, setFilter,
+    alerts: alertsQ.data ?? [], markRead, markAllRead,
+    prefs: prefsQ.data, flags, handleToggleSource, onNavigate,
+  };
+}
+
+function BandejaTab({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> }): ReactElement {
   const filterOptions = [
-    { key: 'all' as const, label: t('notificaciones.filterAll') },
-    { key: 'unread' as const, label: t('notificaciones.filterUnread') },
+    { key: 'all' as const, label: ctx.t('notificaciones.filterAll') },
+    { key: 'unread' as const, label: ctx.t('notificaciones.filterUnread') },
   ] as const;
+  return (
+    <>
+      <View flexDirection="row" alignItems="center" justifyContent="space-between" gap={12}>
+        <SegmentedToggle options={filterOptions} value={ctx.filter} onChange={(key) => ctx.setFilter(key)} />
+        <Btn size="sm" variant="ghost" onPress={() => ctx.markAllRead.mutate()} testID="mark-all-read-btn">
+          {ctx.t('notificaciones.markAllRead')}
+        </Btn>
+      </View>
+      {ctx.alerts.length === 0 && (
+        <EmptyState
+          icon="bell"
+          title={ctx.t('notificaciones.emptyTitle')}
+          description={ctx.t('notificaciones.emptyHint')}
+          testID="notificaciones-empty"
+        />
+      )}
+      <View gap={10}>
+        {ctx.alerts.map((alert) => (
+          <AlertCard
+            key={alert.id}
+            alert={alert}
+            onPress={() => { if (!alert.read) ctx.markRead.mutate(alert.id); }}
+            onAction={() => {
+              if (!alert.read) ctx.markRead.mutate(alert.id);
+              if (alert.actionRoute) ctx.onNavigate?.(alert.actionRoute);
+            }}
+          />
+        ))}
+      </View>
+    </>
+  );
+}
 
-  function handleToggleSource(source: string, newValue: boolean): void {
-    const next = { ...prefs, [source]: newValue };
-    updatePrefs.mutate(next);
-  }
+export function NotificacionesScreen(props: NotificacionesScreenProps): ReactElement {
+  const ctx = useNotificacionesState(props.onNavigate);
+  const topTabOptions = [
+    { key: 'bandeja' as const, label: ctx.t('notificaciones.tabInbox') },
+    { key: 'configurar' as const, label: ctx.t('notificaciones.tabConfig') },
+  ] as const;
 
   return (
     <ScrollView
-      testID={testID ?? 'notificaciones-screen'}
+      testID={props.testID ?? 'notificaciones-screen'}
       style={{ flex: 1, backgroundColor: colors.offwhite }}
       contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
     >
@@ -77,69 +111,12 @@ export function NotificacionesScreen(props: NotificacionesScreenProps): ReactEle
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >
-        {t('notificaciones.title')}
+        {ctx.t('notificaciones.title')}
       </Text>
-
-      {/* Top-level tab switcher */}
-      <SegmentedToggle
-        options={topTabOptions}
-        value={topTab}
-        onChange={(key) => setTopTab(key)}
-      />
-
-      {/* ── Bandeja tab ── */}
-      {topTab === 'bandeja' && (
-        <>
-          <View flexDirection="row" alignItems="center" justifyContent="space-between" gap={12}>
-            <SegmentedToggle
-              options={filterOptions}
-              value={filter}
-              onChange={(key) => setFilter(key)}
-            />
-            <Btn
-              size="sm"
-              variant="ghost"
-              onPress={() => markAllRead.mutate()}
-              testID="mark-all-read-btn"
-            >
-              {t('notificaciones.markAllRead')}
-            </Btn>
-          </View>
-
-          {alerts.length === 0 && (
-            <EmptyState
-              icon="bell"
-              title={t('notificaciones.emptyTitle')}
-              description={t('notificaciones.emptyHint')}
-              testID="notificaciones-empty"
-            />
-          )}
-
-          <View gap={10}>
-            {alerts.map((alert) => (
-              <AlertCard
-                key={alert.id}
-                alert={alert}
-                onPress={() => {
-                  if (!alert.read) markRead.mutate(alert.id);
-                }}
-                onAction={() => {
-                  if (!alert.read) markRead.mutate(alert.id);
-                  if (alert.actionRoute) onNavigate?.(alert.actionRoute);
-                }}
-              />
-            ))}
-          </View>
-        </>
-      )}
-
-      {/* ── Configurar tab ── */}
-      {topTab === 'configurar' && (
-        <NotificacionesConfigTab
-          prefs={prefs}
-          flags={flags}
-          onToggle={handleToggleSource}
-        />
+      <SegmentedToggle options={topTabOptions} value={ctx.topTab} onChange={(key) => ctx.setTopTab(key)} />
+      {ctx.topTab === 'bandeja' && <BandejaTab ctx={ctx} />}
+      {ctx.topTab === 'configurar' && (
+        <NotificacionesConfigTab prefs={ctx.prefs} flags={ctx.flags} onToggle={ctx.handleToggleSource} />
       )}
     </ScrollView>
   );

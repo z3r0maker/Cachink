@@ -116,12 +116,21 @@ function ProductGrid(props: {
   );
 }
 
-export function MermaScreen(props: MermaScreenProps): ReactElement {
-  const { t } = useTranslation();
-  const media = useMedia();
-  const filtered = useFilteredProducts(props.productos, props.productSearch);
+function MermaCartFooter(props: { cart: CartState; onCheckout: () => void; submitting: boolean }): ReactElement {
+  return (
+    <CartFooter
+      itemCount={props.cart.itemCount}
+      totalCentavos={props.cart.totalCentavos}
+      onCheckout={props.onCheckout}
+      variant="red"
+      checkoutLabel="Registrar merma"
+      disabled={props.submitting}
+    />
+  );
+}
 
-  const gridProps = {
+function buildGridProps(props: MermaScreenProps, filtered: readonly Product[]) {
+  return {
     productos: props.productos,
     filtered,
     cartQuantities: props.cartQuantities,
@@ -130,27 +139,26 @@ export function MermaScreen(props: MermaScreenProps): ReactElement {
     productSearch: props.productSearch,
     onProductSearchChange: props.onProductSearchChange,
   };
+}
+
+export function MermaScreen(props: MermaScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const media = useMedia();
+  const filtered = useFilteredProducts(props.productos, props.productSearch);
+  const gridProps = buildGridProps(props, filtered);
+  const testID = props.testID ?? 'merma-screen';
 
   if (Boolean(media.gtMd)) {
     return (
-      <View testID={props.testID ?? 'merma-screen'} flex={1} backgroundColor={colors.offwhite}>
+      <View testID={testID} flex={1} backgroundColor={colors.offwhite}>
         <View flex={1} padding={16}>
           <SectionTitle title={t('merma.title')} />
           <SplitPane
             left={<ProductGrid {...gridProps} />}
             right={
               <View flex={1} gap={12}>
-                <CartFooter
-                  itemCount={props.cart.itemCount}
-                  totalCentavos={props.cart.totalCentavos}
-                  onCheckout={props.onCheckout}
-                  variant="red"
-                  checkoutLabel="Registrar merma"
-                  disabled={props.submitting}
-                />
-                <ScrollView style={{ flex: 1 }}>
-                  <CartSection {...props} />
-                </ScrollView>
+                <MermaCartFooter cart={props.cart} onCheckout={props.onCheckout} submitting={props.submitting} />
+                <ScrollView style={{ flex: 1 }}><CartSection {...props} /></ScrollView>
               </View>
             }
             leftFlex={0.45}
@@ -163,23 +171,14 @@ export function MermaScreen(props: MermaScreenProps): ReactElement {
   }
 
   return (
-    <View testID={props.testID ?? 'merma-screen'} flex={1} backgroundColor={colors.offwhite}>
-      <ScrollView
-        contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 120 }}
-      >
+    <View testID={testID} flex={1} backgroundColor={colors.offwhite}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 120 }}>
         <SafeAreaSpacer />
         <SectionTitle title={t('merma.title')} />
         <ProductGrid {...gridProps} />
         <CartSection {...props} />
       </ScrollView>
-      <CartFooter
-        itemCount={props.cart.itemCount}
-        totalCentavos={props.cart.totalCentavos}
-        onCheckout={props.onCheckout}
-        variant="red"
-        checkoutLabel="Registrar merma"
-        disabled={props.submitting}
-      />
+      <MermaCartFooter cart={props.cart} onCheckout={props.onCheckout} submitting={props.submitting} />
     </View>
   );
 }

@@ -46,49 +46,21 @@ function periodoLabel(periodo: string): string {
   }
 }
 
-function EmpleadoPayInfo({
-  salarioCentavos,
-  periodo,
-}: {
-  salarioCentavos: bigint;
-  periodo: string;
-}): ReactElement {
-  return (
-    <View flexDirection="row" alignItems="center" gap={8} marginTop={4}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={14}
-        color={colors.black}
-      >
-        {formatMoney(salarioCentavos)}
-      </Text>
-      <Tag>{periodoLabel(periodo)}</Tag>
-    </View>
-  );
-}
-
 function EmpleadoInfo({ employee }: { employee: Employee }): ReactElement {
   return (
     <View flex={1}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={16}
-        color={colors.black}
-      >
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={16} color={colors.black}>
         {employee.nombre}
       </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={13}
-        color={colors.gray600}
-        marginTop={2}
-      >
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={13} color={colors.gray600} marginTop={2}>
         {employee.puesto}
       </Text>
-      <EmpleadoPayInfo salarioCentavos={employee.salarioCentavos} periodo={employee.periodo} />
+      <View flexDirection="row" alignItems="center" gap={8} marginTop={4}>
+        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={14} color={colors.black}>
+          {formatMoney(employee.salarioCentavos)}
+        </Text>
+        <Tag>{periodoLabel(employee.periodo)}</Tag>
+      </View>
     </View>
   );
 }
@@ -126,13 +98,7 @@ function EmpleadosHeader({ t, onAdd }: { t: T; onAdd: () => void }): ReactElemen
   return (
     <View flexDirection="row" alignItems="center" justifyContent="space-between">
       <SectionTitle title={t('settings.empleadosCard')} />
-      <Btn
-        variant="primary"
-        size="sm"
-        onPress={onAdd}
-        testID="empleados-add-btn"
-        icon={<Icon name="plus" size={16} color={colors.white} />}
-      >
+      <Btn variant="primary" size="sm" onPress={onAdd} testID="empleados-add-btn" icon={<Icon name="plus" size={16} color={colors.white} />}>
         {t('empleados.addCta')}
       </Btn>
     </View>
