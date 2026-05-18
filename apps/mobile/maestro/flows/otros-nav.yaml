@@ -26,7 +26,7 @@ appId: mx.cachink.mobile
 
 # Grid renders.
 - assertVisible:
-    id: "otros-screen"
+    id: "otros-route"
 
 # --- Usuarios ---
 - tapOn:
@@ -47,10 +47,10 @@ appId: mx.cachink.mobile
     id: "otros-funciones"
 - extendedWaitUntil:
     visible:
-      id: "funciones-negocio"
+      id: "funciones-route"
     timeout: 5000
 - back
 
 # Back on Otros grid.
 - assertVisible:
-    id: "otros-screen"
+    id: "otros-route"

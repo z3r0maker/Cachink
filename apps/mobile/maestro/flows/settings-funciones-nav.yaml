@@ -34,4 +34,4 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "settings-funciones"
 - assertVisible:
-    id: "funciones-negocio"
+    id: "funciones-route"

@@ -33,7 +33,7 @@ appId: mx.cachink.mobile
 
 # --- Toggle stock OFF ---
 - assertVisible:
-    id: "funciones-negocio"
+    id: "funciones-route"
 - tapOn:
     id: "flag-stock-switch"
 

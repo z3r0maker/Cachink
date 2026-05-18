@@ -34,7 +34,7 @@ appId: mx.cachink.mobile
 
 # Verify Funciones screen renders.
 - assertVisible:
-    id: "funciones-negocio"
+    id: "funciones-route"
 
 # --- Step 1: Enable the full 3-level chain ---
 # Stock is ON by default. Enable conversionMateriaPrima.

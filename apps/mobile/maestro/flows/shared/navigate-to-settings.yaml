@@ -1,8 +1,8 @@
 # Reusable subflow: navigate to the Settings Hub screen.
 #
-# Uses Otros tab → scroll to reveal Configuración → tap it.
-# In dev builds, the ResetDemoAction section at bottom can cover
-# lower grid cards, requiring careful scroll positioning.
+# Uses Otros tab → scroll to Configuración card → tap it.
+# Expo Dev Client floating gear icon blocks top-bar-open-settings,
+# so we navigate via the Otros grid instead.
 #
 # Precondition: user is authenticated and on any tab.
 appId: mx.cachink.mobile
@@ -17,12 +17,8 @@ appId: mx.cachink.mobile
       id: "otros-configuracion"
     direction: DOWN
     timeout: 5000
-# Extra scroll to move Configuración away from the BORRAR overlay.
-- swipe:
-    start: "50%,60%"
-    end: "50%,40%"
 - tapOn:
     id: "otros-configuracion"
 - extendedWaitUntil:
     visible: "Ajustes"
-    timeout: 8000
+    timeout: 5000

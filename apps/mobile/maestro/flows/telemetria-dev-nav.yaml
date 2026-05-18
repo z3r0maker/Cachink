@@ -21,7 +21,7 @@ tags:
     id: "tab-otros"
 - extendedWaitUntil:
     visible:
-      id: "otros-screen"
+      id: "otros-route"
     timeout: 5000
 
 # Tap telemetria card (only visible in __DEV__)

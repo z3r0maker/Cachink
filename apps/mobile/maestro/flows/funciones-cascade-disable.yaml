@@ -36,7 +36,7 @@ appId: mx.cachink.mobile
 
 # Verify Funciones screen renders.
 - assertVisible:
-    id: "funciones-negocio"
+    id: "funciones-route"
 
 # --- Enable children that depend on stock ---
 

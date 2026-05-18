@@ -9,12 +9,7 @@
 import type { ReactElement } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import {
-  OtrosScreen,
-  useFeatureFlags,
-  useRole,
-  ResetDemoAction,
-} from '@cachink/ui';
+import { OtrosScreen, useFeatureFlags, useRole, ResetDemoAction } from '@cachink/ui';
 import { nativeResetDatabase } from '@cachink/ui/database/reset-native';
 
 function reloadApp(): void {
@@ -29,22 +24,20 @@ export default function OtrosRoute(): ReactElement {
   const role = useRole();
   const flags = useFeatureFlags();
 
+  const devFooter =
+    typeof __DEV__ !== 'undefined' && __DEV__ ? (
+      <View style={{ padding: 16 }}>
+        <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={reloadApp} />
+      </View>
+    ) : null;
+
   return (
-    <View style={{ flex: 1 }}>
-      <OtrosScreen
-        role={role === 'director' ? 'director' : 'operativo'}
-        flags={flags}
-        onNavigate={(path) => router.push(path as never)}
-        testID="otros-route"
-      />
-      {typeof __DEV__ !== 'undefined' && __DEV__ && (
-        <View style={{ padding: 16 }}>
-          <ResetDemoAction
-            resetDatabase={nativeResetDatabase}
-            onReload={reloadApp}
-          />
-        </View>
-      )}
-    </View>
+    <OtrosScreen
+      role={role === 'director' ? 'director' : 'operativo'}
+      flags={flags}
+      onNavigate={(path) => router.push(path as never)}
+      testID="otros-route"
+      footer={devFooter}
+    />
   );
 }

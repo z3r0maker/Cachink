@@ -23,6 +23,8 @@ export interface OtrosScreenProps {
   readonly flags: FeatureFlags;
   readonly onNavigate: (path: string) => void;
   readonly testID?: string;
+  /** Rendered at the bottom of the scroll area (e.g. dev-only reset action). */
+  readonly footer?: ReactElement | null;
 }
 
 export function OtrosScreen(props: OtrosScreenProps): ReactElement {
@@ -61,6 +63,7 @@ export function OtrosScreen(props: OtrosScreenProps): ReactElement {
             </View>
           ))}
         </View>
+        {props.footer}
       </ScrollView>
     </RNView>
   );
