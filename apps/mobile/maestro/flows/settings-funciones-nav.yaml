@@ -21,12 +21,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
-
-# Verify the Settings hub renders.
-- assertVisible:
-    id: "settings-hub-screen"
+- runFlow: shared/navigate-to-settings.yaml
 
 # Scroll down to find the Funciones link.
 - scrollUntilVisible:

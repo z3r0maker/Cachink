@@ -23,8 +23,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Reach Cloud Onboarding via Settings → Sistema → Re-run wizard.
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - tapOn:
     id: "settings-hub-sistema"
 - tapOn:

@@ -21,8 +21,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 
 # Navigate to the Sistema sub-screen.
 - tapOn:

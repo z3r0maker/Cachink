@@ -38,6 +38,11 @@ appId: mx.cachink.mobile
 - back
 
 # --- Funciones ---
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 - extendedWaitUntil:

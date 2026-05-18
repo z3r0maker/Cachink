@@ -9,7 +9,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { ScrollView, useWindowDimensions } from 'react-native';
+import { ScrollView, useWindowDimensions, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { FeatureFlags } from '@cachink/domain';
 import { SafeAreaSpacer } from '../../components/index';
@@ -38,28 +38,30 @@ export function OtrosScreen(props: OtrosScreenProps): ReactElement {
   const cardWidth = (width - padding * 2 - gap * (columns - 1)) / columns;
 
   return (
-    <ScrollView testID={props.testID ?? 'otros-screen'} contentContainerStyle={{ padding, gap }}>
-      <SafeAreaSpacer />
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={28}
-        color={colors.black}
-        marginBottom={8}
-      >
-        {t('tabs.otros')}
-      </Text>
-      <View flexDirection="row" flexWrap="wrap" gap={gap} alignItems="stretch">
-        {items.map((item) => (
-          <View key={item.key} width={cardWidth}>
-            <OtrosCard
-              item={item}
-              onPress={() => props.onNavigate(item.path)}
-              testID={`otros-${item.key}`}
-            />
-          </View>
-        ))}
-      </View>
-    </ScrollView>
+    <RNView testID={props.testID ?? 'otros-screen'} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding, gap }}>
+        <SafeAreaSpacer />
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black}
+          fontSize={28}
+          color={colors.black}
+          marginBottom={8}
+        >
+          {t('tabs.otros')}
+        </Text>
+        <View flexDirection="row" flexWrap="wrap" gap={gap} alignItems="stretch">
+          {items.map((item) => (
+            <View key={item.key} width={cardWidth}>
+              <OtrosCard
+                item={item}
+                onPress={() => props.onNavigate(item.path)}
+                testID={`otros-${item.key}`}
+              />
+            </View>
+          ))}
+        </View>
+      </ScrollView>
+    </RNView>
   );
 }

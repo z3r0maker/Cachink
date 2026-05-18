@@ -1,11 +1,13 @@
-# Reusable subflow: authenticate as Operativo (Ana Operativa).
+# Reusable subflow: authenticate as the primary Operativo user.
 #
-# This is the DEFAULT auth flow — most flows (70-80%) test Operativo.
-# For Director flows, use shared/authenticate-director.yaml instead.
+# Supports BOTH entry points:
+#   - Demo mode → Ana Operativa (PIN 000000)
+#   - Wizard mode → Director Test (PIN 123456)
 #
-# Uses the test PIN: 000000
-# Enters PIN via inline numpad (no system keyboard).
-# PIN auto-submits after 6 digits.
+# Tries Ana Operativa first (demo user). If she doesn't exist
+# (wizard-only state), falls back to Director Test.
+#
+# PIN auto-submits after 6 digits via inline numpad.
 #
 # Usage (from any flow):
 #   - launchApp
@@ -13,20 +15,12 @@
 #   - runFlow: shared/authenticate.yaml
 appId: mx.cachink.mobile
 ---
-# Tap the Operativo avatar on QuickSwitch screen.
+# --- Attempt 1: Demo mode — Ana Operativa (PIN 000000) ---
 - tapOn:
     text: "A, Ana Operativa, Operativo"
     optional: true
 
-# Wait for numpad and let animation settle.
-- extendedWaitUntil:
-    visible:
-      id: "pin-numpad"
-    timeout: 5000
-    optional: true
-- waitForAnimationToEnd
-
-# Enter PIN: 000000
+# If Ana exists, numpad shows. Enter PIN 000000.
 - tapOn:
     id: "numpad-0"
     optional: true
@@ -46,9 +40,35 @@ appId: mx.cachink.mobile
     id: "numpad-0"
     optional: true
 
-# Wait for Operativo tabs to mount.
+# --- Attempt 2: Wizard mode — Director Test (PIN 123456) ---
+# If Ana didn't exist, we're still on QuickSwitch. Tap Director Test.
+- tapOn:
+    text: "D, Director Test, Director"
+    optional: true
+
+# If Director Test exists, numpad shows. Enter PIN 123456.
+- tapOn:
+    id: "numpad-1"
+    optional: true
+- tapOn:
+    id: "numpad-2"
+    optional: true
+- tapOn:
+    id: "numpad-3"
+    optional: true
+- tapOn:
+    id: "numpad-4"
+    optional: true
+- tapOn:
+    id: "numpad-5"
+    optional: true
+- tapOn:
+    id: "numpad-6"
+    optional: true
+
+# Wait for any tab to mount (Operativo sees tab-ventas, Director sees tab-estados).
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: "bottom-tab-bar"
     timeout: 10000
     optional: true

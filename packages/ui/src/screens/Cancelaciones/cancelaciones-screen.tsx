@@ -6,8 +6,8 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { ScrollView } from 'react-native';
-import { Text, View } from '@tamagui/core';
+import { ScrollView, View as RNView } from 'react-native';
+import { Text } from '@tamagui/core';
 import { useQuery } from '@tanstack/react-query';
 import type { BusinessId, Sale } from '@cachink/domain';
 import { today } from '@cachink/domain';
@@ -35,12 +35,27 @@ function useCancelacionesData() {
 
 function SalesList(props: { sales: readonly Sale[]; onCancel: (s: Sale) => void }): ReactElement {
   if (props.sales.length === 0) {
-    return <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray400} textAlign="center" paddingVertical={40}>No hay ventas registradas hoy</Text>;
+    return (
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={14}
+        color={colors.gray400}
+        textAlign="center"
+        paddingVertical={40}
+      >
+        No hay ventas registradas hoy
+      </Text>
+    );
   }
   return (
     <>
       {props.sales.map((sale) => (
-        <SaleCancelCard key={sale.id} sale={sale} onCancel={sale.cancelledAt || sale.deletedAt ? undefined : () => props.onCancel(sale)} testID={`sale-card-${sale.id}`} />
+        <SaleCancelCard
+          key={sale.id}
+          sale={sale}
+          onCancel={sale.cancelledAt || sale.deletedAt ? undefined : () => props.onCancel(sale)}
+          testID={`sale-card-${sale.id}`}
+        />
       ))}
     </>
   );
@@ -50,15 +65,36 @@ export function CancelacionesScreen(_props: CancelacionesScreenProps): ReactElem
   const { sales, refetch } = useCancelacionesData();
   const [cancelTarget, setCancelTarget] = useState<Sale | null>(null);
   return (
-    <View flex={1} backgroundColor={colors.offwhite}>
-      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }} testID={_props.testID ?? 'cancelaciones-screen'}>
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black.toString()} fontSize={28} color={colors.black}>Cancelaciones</Text>
-        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>{`Hoy · ${sales.length} ventas`}</Text>
+    <RNView
+      testID={_props.testID ?? 'cancelaciones-screen'}
+      style={{ flex: 1, backgroundColor: colors.offwhite }}
+    >
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black.toString()}
+          fontSize={28}
+          color={colors.black}
+        >
+          Cancelaciones
+        </Text>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={14}
+          color={colors.gray600}
+        >{`Hoy · ${sales.length} ventas`}</Text>
         <SalesList sales={sales} onCancel={setCancelTarget} />
       </ScrollView>
       {cancelTarget !== null && (
-        <CancellationFlow sale={cancelTarget} onClose={() => setCancelTarget(null)} onSuccess={() => { setCancelTarget(null); refetch(); }} />
+        <CancellationFlow
+          sale={cancelTarget}
+          onClose={() => setCancelTarget(null)}
+          onSuccess={() => {
+            setCancelTarget(null);
+            refetch();
+          }}
+        />
       )}
-    </View>
+    </RNView>
   );
 }

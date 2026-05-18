@@ -18,8 +18,7 @@ appId: mx.cachink.mobile
 # --- Step 1: Enable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"
@@ -68,8 +67,7 @@ appId: mx.cachink.mobile
 # --- Step 3: Disable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"

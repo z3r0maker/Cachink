@@ -1,11 +1,13 @@
-# Reusable subflow: authenticate as Director (Juan Director).
+# Reusable subflow: authenticate as Director.
 #
-# Use this for Director-specific flows (home dashboard, estados
-# financieros, indicadores, etc.). Most flows should use the
-# default shared/authenticate.yaml (Operativo) instead.
+# Supports BOTH entry points:
+#   - Demo mode → Juan Director (PIN 000000)
+#   - Wizard mode → Director Test (PIN 123456)
 #
-# Uses the test PIN: 000000
-# PIN auto-submits after 6 digits.
+# Tries Juan Director first (demo user). If he doesn't exist
+# (wizard-only state), falls back to Director Test.
+#
+# PIN auto-submits after 6 digits via inline numpad.
 #
 # Usage (from Director flows):
 #   - launchApp
@@ -13,42 +15,60 @@
 #   - runFlow: shared/authenticate-director.yaml
 appId: mx.cachink.mobile
 ---
-# Tap the Director avatar on QuickSwitch screen.
+# --- Attempt 1: Demo mode — Juan Director (PIN 000000) ---
 - tapOn:
     text: "J, Juan Director, Director"
     optional: true
 
-# Wait for numpad and let animation settle.
-- extendedWaitUntil:
-    visible:
-      id: "pin-numpad"
-    timeout: 5000
+# If Juan exists, numpad shows. Enter PIN 000000.
+- tapOn:
+    id: "numpad-0"
     optional: true
-- waitForAnimationToEnd
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
 
-# Enter PIN: 000000
+# --- Attempt 2: Wizard mode — Director Test (PIN 123456) ---
+# If Juan didn't exist, we're still on QuickSwitch. Tap Director Test.
 - tapOn:
-    id: "numpad-0"
+    text: "D, Director Test, Director"
+    optional: true
+
+# If Director Test exists, numpad shows. Enter PIN 123456.
+- tapOn:
+    id: "numpad-1"
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: "numpad-2"
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: "numpad-3"
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: "numpad-4"
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: "numpad-5"
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: "numpad-6"
     optional: true
 
 # Wait for Director tabs to mount.
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: "tab-estados"
     timeout: 10000
     optional: true

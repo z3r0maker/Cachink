@@ -144,15 +144,22 @@ function buildTappableStyle(
  * Renders the canonical Cachink card surface. See `card.stories.tsx` for the
  * full variant catalog.
  */
-function TappableCard(props: CardProps & {
-  v: VariantDef; pad: number; shadow: string;
-}): ReactElement {
+function TappableCard(
+  props: CardProps & {
+    v: VariantDef;
+    pad: number;
+    shadow: string;
+  },
+): ReactElement {
   const base = buildTappableStyle(props.v, props.pad, props.fullWidth === true, props.shadow);
   if (props.backgroundColor) base.backgroundColor = props.backgroundColor;
   return (
     <Pressable
       testID={props.testID ?? 'card'}
-      onPress={() => { impactLight(); props.onPress?.(); }}
+      onPress={() => {
+        impactLight();
+        props.onPress?.();
+      }}
       role="button"
       aria-label={props.ariaLabel}
       accessibilityRole="button"
@@ -164,18 +171,22 @@ function TappableCard(props: CardProps & {
   );
 }
 
-function InertCard(props: CardProps & {
-  v: VariantDef; pad: number; shadow: string;
-}): ReactElement {
+function InertCard(
+  props: CardProps & {
+    v: VariantDef;
+    pad: number;
+    shadow: string;
+  },
+): ReactElement {
   return (
     <View
-      testID={props.testID ?? 'card'}
       backgroundColor={props.backgroundColor ?? props.v.background}
       borderColor={colors.black}
       borderWidth={props.v.borderWidth}
       borderRadius={CARD_RADIUS}
       padding={props.pad}
       width={props.fullWidth === true ? '100%' : undefined}
+      pointerEvents="box-none"
       style={[{ boxShadow: props.shadow, userSelect: 'none' }, props.style]}
     >
       {props.children}

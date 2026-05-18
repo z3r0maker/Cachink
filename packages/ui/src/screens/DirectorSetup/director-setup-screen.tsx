@@ -136,14 +136,14 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
         onChange={form.setRecoveryPassword}
         label={form.t('directorSetup.recoveryPassword')}
         testID="director-recovery-password"
-        autoComplete="off"
+        autoComplete="new-password"
       />
       <PasswordField
         value={form.confirmRecoveryPassword}
         onChange={form.setConfirmRecoveryPassword}
         label={form.t('directorSetup.confirmRecoveryPassword')}
         testID="director-confirm-recovery-password"
-        autoComplete="off"
+        autoComplete="new-password"
       />
       <ErrorHint text={form.validation.errors.confirmRecoveryPassword} />
     </>

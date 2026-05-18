@@ -19,8 +19,7 @@ appId: mx.cachink.mobile
 # Navigate to Otros first (gear on Home opens Expo dev menu).
 - tapOn:
     id: "tab-otros"
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"

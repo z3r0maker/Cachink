@@ -16,7 +16,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Reach Settings → Sistema → Re-run asistente.
-- tapOn: { id: "top-bar-open-settings" }
+- runFlow: shared/navigate-to-settings.yaml
 - tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }

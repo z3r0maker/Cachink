@@ -19,6 +19,11 @@ tags:
       id: "otros-screen"
     timeout: 5000
 
+- scrollUntilVisible:
+    element:
+      id: "otros-configuracion"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-configuracion"
 - extendedWaitUntil:

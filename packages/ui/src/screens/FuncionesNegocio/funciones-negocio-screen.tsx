@@ -8,7 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import {
   canEnableFlag,
@@ -70,28 +70,27 @@ export function FuncionesNegocioScreen(props: FuncionesNegocioScreenProps): Reac
     );
   };
   return (
-    <ScrollView
-      testID={props.testID ?? 'funciones-negocio'}
-      contentContainerStyle={{ padding: 16, gap: 12 }}
-    >
-      <FuncionesHeader t={t} />
-      <View gap={10}>
-        {FLAG_DISPLAY_INFO.map((info) => {
-          const enabled = props.flags[info.key];
-          const allowed = canEnableFlag(props.flags, info.key);
-          return (
-            <FeatureFlagCard
-              key={info.key}
-              info={info}
-              enabled={enabled}
-              canToggle={enabled || allowed}
-              dependencyHint={buildFlagHint(props.flags, info, t)}
-              onToggle={(v) => handleToggle(info.key, v)}
-              testID={`flag-${info.key}`}
-            />
-          );
-        })}
-      </View>
-    </ScrollView>
+    <RNView testID={props.testID ?? 'funciones-negocio'} style={{ flex: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 12 }}>
+        <FuncionesHeader t={t} />
+        <View gap={10}>
+          {FLAG_DISPLAY_INFO.map((info) => {
+            const enabled = props.flags[info.key];
+            const allowed = canEnableFlag(props.flags, info.key);
+            return (
+              <FeatureFlagCard
+                key={info.key}
+                info={info}
+                enabled={enabled}
+                canToggle={enabled || allowed}
+                dependencyHint={buildFlagHint(props.flags, info, t)}
+                onToggle={(v) => handleToggle(info.key, v)}
+                testID={`flag-${info.key}`}
+              />
+            );
+          })}
+        </View>
+      </ScrollView>
+    </RNView>
   );
 }

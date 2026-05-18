@@ -16,9 +16,7 @@ appId: mx.cachink.mobile
 
 # Settings is reachable via the TopBar cog on both roles; as a fallback
 # we use the direct route pushed by the app-shell.
-- tapOn:
-    id: "top-bar-open-settings"
-- assertVisible: "Ajustes"
+- runFlow: shared/navigate-to-settings.yaml
 - assertVisible:
     id: "export-datos-card"
 
