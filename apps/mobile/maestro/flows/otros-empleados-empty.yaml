@@ -47,4 +47,5 @@ appId: mx.cachink.mobile
     timeout: 5000
 
 # Close the modal without creating.
-- back
+- tapOn:
+    id: "top-bar-back"

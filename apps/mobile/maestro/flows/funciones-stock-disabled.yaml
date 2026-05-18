@@ -28,7 +28,8 @@ appId: mx.cachink.mobile
     id: "settings-funciones"
 - tapOn:
     id: "flag-stock-switch"
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
 
 # Navigate to Productos via Otros — stock sub-tab hidden.

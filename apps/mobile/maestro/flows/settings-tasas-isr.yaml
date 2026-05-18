@@ -43,6 +43,7 @@ appId: mx.cachink.mobile
     optional: true
 
 # Navigate back to verify the settings hub is intact.
-- back
+- tapOn:
+    id: "top-bar-back"
 - assertVisible:
     id: "settings-hub-screen"

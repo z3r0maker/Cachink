@@ -41,7 +41,8 @@ appId: mx.cachink.mobile
     id: "venta-detail-delete"
 
 # Close the popover without taking action (tap the backdrop or back).
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # Popover closes, venta is still in the list.
 - assertNotVisible:

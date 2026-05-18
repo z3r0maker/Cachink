@@ -27,7 +27,8 @@ appId: mx.cachink.mobile
     id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
 
 # Verify Director Otros shows the CxC link.
@@ -55,7 +56,8 @@ appId: mx.cachink.mobile
 - assertVisible: "Crédito"
 
 # Go back without submitting.
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
     optional: true
 
@@ -76,7 +78,8 @@ appId: mx.cachink.mobile
     id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
 
 # Verify Director Otros no longer shows CxC link.
