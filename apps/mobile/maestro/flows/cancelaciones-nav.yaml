@@ -1,0 +1,31 @@
+# Navigate to Cancelaciones screen and verify empty state renders.
+# Route: /cancelaciones (via Otros → cancelaciones card)
+# Verifies: cancelaciones-screen testID, empty-state text.
+appId: mx.cachink.mobile
+tags:
+  - otros
+  - cancelaciones
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+- tapOn:
+    id: "tab-otros"
+- extendedWaitUntil:
+    visible:
+      id: "otros-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "otros-cancelaciones"
+- extendedWaitUntil:
+    visible:
+      id: "cancelaciones-screen"
+    timeout: 5000
+
+# Verify the screen title renders
+- assertVisible: "Cancelaciones"
+# Empty state (no sales today expected at test start)
+- assertVisible: "No hay ventas registradas hoy"

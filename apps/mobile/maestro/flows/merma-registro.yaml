@@ -1,38 +1,18 @@
-# Merma (shrinkage) registration E2E — Productos → Merma tab → grid.
+# Merma (shrinkage) registration E2E — Merma tab → grid → confirm.
 #
 # Verifies:
-#   1. Merma tab visible when feature flag is ON
-#   2. Tap product in grid → confirm sheet appears → fill cantidad + reason → submit
-#   3. Confirm sheet closes on success
+#   1. Merma tab visible (flag ON in demo mode)
+#   2. Product grid renders with demo products
+#   3. Tap product → cart → checkout → confirm sheet → submit
 #
-# Precondition: wizard + director-setup complete, merma flag ON,
-# at least one product exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/merma-registro.yaml
+# Precondition: demo mode seeded (products + merma flag ON).
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Ensure merma feature flag is ON via Otros → Funciones.
-- tapOn:
-    id: "tab-otros"
-- tapOn:
-    id: "otros-funciones"
-- tapOn:
-    id: "flag-merma-switch"
-    optional: true
-
-# Switch to Operativo — merma appears as a bottom tab for Operativo.
-
-# Navigate to the Merma tab.
+# Navigate to the Merma tab (direct tab in Operativo layout).
 - tapOn:
     id: "tab-merma"
 
@@ -44,28 +24,27 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "merma-grid"
 
-# Tap a product directly in the grid (product created by inventario-producto.yaml).
-- tapOn: "Tortilla"
+# Tap a demo product to add to cart.
+- tapOn: "Quesadilla"
 
-# Confirm sheet appears.
+# Cart strip should appear with the item.
+- assertVisible:
+    id: "cart-strip"
+
+# Tap checkout to open the confirm sheet.
+- tapOn:
+    id: "cart-checkout-btn"
+
+# Merma checkout sheet appears.
 - extendedWaitUntil:
     visible:
-      id: "merma-confirm-sheet"
+      id: "merma-checkout-sheet"
     timeout: 5000
 
-# Enter quantity and reason.
+# Submit the merma registration.
 - tapOn:
-    id: "merma-cantidad"
-- inputText: "3"
+    id: "merma-checkout-submit"
 
-- tapOn:
-    id: "merma-reason"
-- inputText: "Producto caducado"
-
-# Submit.
-- tapOn:
-    id: "merma-submit"
-
-# Confirm sheet closes on success.
+# Sheet closes on success.
 - assertNotVisible:
-    id: "merma-confirm-sheet"
+    id: "merma-checkout-sheet"

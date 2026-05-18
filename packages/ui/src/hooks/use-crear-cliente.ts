@@ -4,10 +4,12 @@
  * selects pick up the new row immediately.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { BusinessId, Client, NewClient } from '@cachink/domain';
 import { useClientsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_CLIENTE } from '../observability/audit-configs';
 
 export interface CrearClienteInput {
   readonly nombre: string;
@@ -23,7 +25,7 @@ export function useCrearCliente(): CrearClienteResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<Client, Error, CrearClienteInput>({
+  return useAuditedMutation(MUTATION_CREAR_CLIENTE, {
     async mutationFn(input) {
       if (!businessId) {
         throw new Error('useCrearCliente: no current business set');

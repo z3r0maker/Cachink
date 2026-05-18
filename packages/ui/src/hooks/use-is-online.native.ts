@@ -10,7 +10,11 @@
  * builds. On mobile, Expo's autolinking already includes the package.
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { ulid } from 'ulid';
+import type { AuditEvent, AuditOperation } from '@cachink/observability';
+import { useLogStore } from '../observability/observability-provider';
+import { useDeviceId } from '../app-config/index';
 
 interface NetInfoState {
   readonly isConnected: boolean | null;
@@ -42,6 +46,9 @@ function isOnlineFromState(state: NetInfoState | null): boolean {
 
 export function useIsOnline(): boolean {
   const [state, setState] = useState<NetInfoState | null>(null);
+  const logStore = useLogStore();
+  const deviceId = useDeviceId();
+
   useEffect(() => {
     let cancelled = false;
     let unsubscribe: (() => void) | undefined;
@@ -59,5 +66,35 @@ export function useIsOnline(): boolean {
       unsubscribe?.();
     };
   }, []);
-  return isOnlineFromState(state);
+
+  const online = isOnlineFromState(state);
+
+  // Phase 9: Log connectivity transitions
+  const prevOnline = useRef<boolean | null>(null);
+  useEffect(() => {
+    if (prevOnline.current === null) {
+      // Skip the initial state — only log transitions
+      prevOnline.current = online;
+      return;
+    }
+    if (prevOnline.current === online) return;
+    prevOnline.current = online;
+
+    if (!logStore || !deviceId) return;
+    const op: AuditOperation = online ? 'network.online' : 'network.offline';
+    const event: AuditEvent = {
+      id: ulid(),
+      timestamp: new Date().toISOString(),
+      operation: op,
+      entityType: 'connectivity',
+      entityId: '',
+      userId: null,
+      deviceId,
+      businessId: '',
+      status: 'success',
+    };
+    void logStore.writeAudit(event).catch(() => {});
+  }, [online, logStore, deviceId]);
+
+  return online;
 }

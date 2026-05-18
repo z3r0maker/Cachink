@@ -38,6 +38,8 @@ import { colors, typography } from '../../theme';
 
 export interface DirectorHomeScreenProps {
   readonly greeting?: string;
+  /** Badge slot rendered to the right of the greeting text. */
+  readonly notificationBadge?: ReactNode;
   readonly hero?: ReactNode;
   /**
    * Corte de Día card — rendered above the grid, below the hero.
@@ -64,18 +66,20 @@ export interface DirectorHomeScreenProps {
   readonly testID?: string;
 }
 
-function GreetingHeader({ text }: { text: string }): ReactElement {
+function GreetingHeader({ text, badge }: { text: string; badge?: ReactNode }): ReactElement {
   return (
-    <View gap={4}>
+    <View flexDirection="row" alignItems="center" justifyContent="space-between">
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
         fontSize={28}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
+        flexShrink={1}
       >
         {text}
       </Text>
+      {badge !== undefined && <View testID="director-home-badge-slot">{badge}</View>}
     </View>
   );
 }
@@ -133,7 +137,7 @@ export function DirectorHomeScreen(props: DirectorHomeScreenProps): ReactElement
       style={{ flex: 1, backgroundColor: colors.offwhite }}
       contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 40 }}
     >
-      <GreetingHeader text={greeting} />
+      <GreetingHeader text={greeting} badge={props.notificationBadge} />
       {props.hero !== undefined && <View testID="director-home-hero-slot">{props.hero}</View>}
       {props.corte !== undefined && <View testID="director-home-corte-slot">{props.corte}</View>}
       <SectionTitle title={t('directorHome.resumenHoy')} />

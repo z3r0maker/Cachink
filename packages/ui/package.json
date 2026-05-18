@@ -18,7 +18,9 @@
     "./share": "./src/share/index.ts",
     "./hooks": "./src/hooks/index.ts",
     "./notifications": "./src/notifications/index.ts",
-    "./sync": "./src/sync/index.ts"
+    "./sync": "./src/sync/index.ts",
+    "./database/reset-native": "./src/database/database-reset.native.ts",
+    "./database/reset-web": "./src/database/database-reset.web.ts"
   },
   "scripts": {
     "build": "tsc --build",
@@ -37,6 +39,8 @@
     "@cachink/application": "workspace:*",
     "@cachink/data": "workspace:*",
     "@cachink/domain": "workspace:*",
+    "@cachink/observability": "workspace:*",
+    "bcryptjs": "3.0.3",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/browser": "^10.53.1",
     "drizzle-orm": "^0.45.2",

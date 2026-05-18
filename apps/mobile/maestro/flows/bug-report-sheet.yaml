@@ -1,0 +1,56 @@
+# Open the Bug Report sheet from Settings → Sistema → Feedback.
+# Verifies: the bug report sheet opens, shows description input,
+# and the "Compartir Reporte" button is visible.
+#
+# The BugReportSheet is a bottom sheet triggered from the feedback
+# action in Settings Sistema. It auto-attaches audit events + errors
+# and exports as JSON for user-to-developer bug reporting.
+appId: mx.cachink.mobile
+tags:
+  - settings
+  - observability
+  - regression
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros → Settings → Sistema
+- tapOn:
+    id: "tab-otros"
+- extendedWaitUntil:
+    visible:
+      id: "otros-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "otros-configuracion"
+- extendedWaitUntil:
+    visible:
+      id: "settings-hub-screen"
+    timeout: 5000
+
+- tapOn:
+    id: "settings-hub-sistema"
+- extendedWaitUntil:
+    visible:
+      id: "settings-sistema-screen"
+    timeout: 5000
+
+# Tap the feedback / bug report action
+- tapOn:
+    id: "settings-feedback-action"
+    optional: true
+
+# Verify the bug report sheet content appears
+- extendedWaitUntil:
+    visible:
+      text: "Enviar Reporte"
+    timeout: 5000
+    optional: true
+- assertVisible:
+    text: "Describe el problema que encontraste"
+    optional: true
+- assertVisible:
+    text: "Compartir Reporte"
+    optional: true

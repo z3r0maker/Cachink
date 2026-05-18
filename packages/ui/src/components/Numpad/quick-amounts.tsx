@@ -38,6 +38,8 @@ export interface QuickAmountsProps {
   readonly onExacto: () => void;
   /** Additional amounts beyond the default MXN bills. */
   readonly extraAmounts?: readonly QuickAmountOption[];
+  /** Whether to show the "Exacto" button. Default true. */
+  readonly showExacto?: boolean;
   readonly testID?: string;
 }
 
@@ -59,7 +61,7 @@ export function QuickAmounts(props: QuickAmountsProps): ReactElement {
   return (
     <ScrollView
       horizontal
-      showsHorizontalScrollIndicator={false}
+      showsHorizontalScrollIndicator
       contentContainerStyle={{ gap: 8, paddingHorizontal: 4 }}
       testID={props.testID ?? 'quick-amounts'}
     >
@@ -91,31 +93,33 @@ export function QuickAmounts(props: QuickAmountsProps): ReactElement {
           </View>
         </Pressable>
       ))}
-      <Pressable
-        style={({ pressed }) => [
-          PILL,
-          { backgroundColor: pressed ? colors.green : colors.greenSoft },
-        ]}
-        onPress={() => {
-          impactLight();
-          props.onExacto();
-        }}
-        testID="quick-amount-exacto"
-        accessibilityRole="button"
-        accessibilityLabel="Exacto"
-      >
-        <View flexDirection="row" alignItems="center" gap={6}>
-          <Icon name="check" size={14} color={colors.black} />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold.toString()}
-            fontSize={16}
-            color={colors.black}
-          >
-            Exacto
-          </Text>
-        </View>
-      </Pressable>
+      {(props.showExacto ?? true) && (
+        <Pressable
+          style={({ pressed }) => [
+            PILL,
+            { backgroundColor: pressed ? colors.green : colors.greenSoft },
+          ]}
+          onPress={() => {
+            impactLight();
+            props.onExacto();
+          }}
+          testID="quick-amount-exacto"
+          accessibilityRole="button"
+          accessibilityLabel="Exacto"
+        >
+          <View flexDirection="row" alignItems="center" gap={6}>
+            <Icon name="check" size={14} color={colors.black} />
+            <Text
+              fontFamily={typography.fontFamily}
+              fontWeight={typography.weights.bold.toString()}
+              fontSize={16}
+              color={colors.black}
+            >
+              Exacto
+            </Text>
+          </View>
+        </Pressable>
+      )}
     </ScrollView>
   );
 }

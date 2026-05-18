@@ -1,10 +1,15 @@
-appId: com.cachink.app
+# Verify the Caja gate blocks venta when caja is not open.
+# Navigate to Ventas, see gate banner, tap "go to caja" to open caja screen.
+appId: mx.cachink.mobile
 tags:
   - ventas
   - caja
   - gate
 ---
 - launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
 - assertVisible:
     id: "caja-gate-banner"
 - assertVisible:

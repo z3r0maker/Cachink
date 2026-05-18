@@ -4,10 +4,12 @@
  * ['egresos', businessId, fecha] query.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { ExpenseId, IsoDate } from '@cachink/domain';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ELIMINAR_EGRESO } from '../observability/audit-configs';
 
 export interface EliminarEgresoInput {
   readonly id: ExpenseId;
@@ -21,7 +23,7 @@ export function useEliminarEgreso(): EliminarEgresoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<void, Error, EliminarEgresoInput>({
+  return useAuditedMutation(MUTATION_ELIMINAR_EGRESO, {
     async mutationFn(input) {
       await expenses.delete(input.id);
     },

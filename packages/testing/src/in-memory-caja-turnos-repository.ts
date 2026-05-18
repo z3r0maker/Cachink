@@ -85,6 +85,21 @@ export class InMemoryCajaTurnosRepository
     return null;
   }
 
+  async findOpenByBusiness(
+    businessId: BusinessId,
+  ): Promise<CajaTurno | null> {
+    for (const row of this.rows.values()) {
+      if (
+        row.businessId === businessId &&
+        row.cierreAt === null &&
+        row.deletedAt === null
+      ) {
+        return row;
+      }
+    }
+    return null;
+  }
+
   async findLatest(
     businessId: BusinessId,
   ): Promise<CajaTurno | null> {

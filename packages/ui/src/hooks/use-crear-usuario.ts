@@ -7,12 +7,15 @@
  * ADR-049: PIN for login, Password for recovery.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { CrearUsuarioUseCase } from '@cachink/application';
 import type { BusinessId, User, UserRole } from '@cachink/domain';
 import { useUsersRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { userKeys } from './query-keys';
+import { useEmitDirectorAlert } from './use-emit-director-alert';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_USUARIO } from '../observability/audit-configs';
 
 export interface CrearUsuarioHookInput {
   readonly nombre: string;
@@ -31,11 +34,15 @@ export function useCrearUsuario(): CrearUsuarioResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<User, Error, CrearUsuarioHookInput>({
+  const emitAlert = useEmitDirectorAlert();
+
+  return useAuditedMutation(MUTATION_CREAR_USUARIO, {
     async mutationFn(input) {
       if (!businessId) {
         throw new Error('useCrearUsuario: no current business set');
       }
+      // Yield one frame so React paints the loading spinner before bcrypt blocks
+      await new Promise<void>((r) => requestAnimationFrame(() => r()));
       const useCase = new CrearUsuarioUseCase(users);
       return useCase.execute({
         nombre: input.nombre,
@@ -47,9 +54,19 @@ export function useCrearUsuario(): CrearUsuarioResult {
         businessId: businessId as BusinessId,
       });
     },
-    async onSuccess() {
+    async onSuccess(user) {
       await queryClient.invalidateQueries({
         queryKey: userKeys.byBusiness(businessId as BusinessId),
+      });
+
+      // Alert: usuario-cambio
+      emitAlert.mutate({
+        source: 'usuario-cambio',
+        severity: 'info',
+        titleKey: 'notificaciones.usuarioCambio',
+        message: `Se creó el usuario "${user.nombre}" con rol ${user.role}.`,
+        actionRoute: '/usuarios',
+        metadata: JSON.stringify({ userId: user.id, action: 'created' }),
       });
     },
   });

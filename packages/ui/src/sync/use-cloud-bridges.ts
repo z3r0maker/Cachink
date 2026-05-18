@@ -41,6 +41,9 @@ import { useDatabase } from '../database/_internal';
 import { APP_CONFIG_KEYS, useMode, useSetCurrentBusinessId } from '../app-config/index';
 import type { AppMode } from '../app-config/index';
 import { useAppConfigRepository } from '../app/repository-provider';
+import { logSyncEvent } from '../observability/sync-observer';
+import { useLogStore } from '../observability/observability-provider';
+import { useDeviceId } from '../app-config/index';
 
 export interface UseCloudBridgesArgs {
   readonly defaults: CloudBackendConfig | null;
@@ -127,6 +130,19 @@ export function useCloudBridges(args: UseCloudBridgesArgs): CloudBridges | null 
   const { config: byo, loading: byoLoading } = useByoBackend();
   const handle = useLazyCloudAuthHandle(mode, byo, args.defaults, byoLoading);
   const persist = usePersistCloudSession();
+  const logStore = useLogStore();
+  const currentDeviceId = useDeviceId();
+
+  // Log cloud connection/disconnection events
+  useEffect(() => {
+    if (!handle) return;
+    logSyncEvent(logStore, 'sync.cloud.connect', currentDeviceId ?? '', {
+      hasBackend: !!byo || !!args.defaults,
+    });
+    return () => {
+      logSyncEvent(logStore, 'sync.cloud.disconnect', currentDeviceId ?? '');
+    };
+  }, [handle, logStore, currentDeviceId, byo, args.defaults]);
 
   return useMemo<CloudBridges | null>(() => {
     const backendConfigured = byo !== null || args.defaults !== null;

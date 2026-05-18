@@ -3,10 +3,12 @@
  * Phase 18.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { BusinessId, ConversionReceta, ProductId } from '@cachink/domain';
 import { useConversionRecetasRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_RECETA } from '../observability/audit-configs';
 
 export interface CrearRecetaInput {
   readonly materiaPrimaId: ProductId;
@@ -20,7 +22,7 @@ export function useCrearConversionReceta(): UseMutationResult<ConversionReceta, 
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<ConversionReceta, Error, CrearRecetaInput>({
+  return useAuditedMutation(MUTATION_CREAR_RECETA, {
     async mutationFn(input) {
       if (!businessId) throw new Error('No current business');
       return repo.create({ ...input, businessId: businessId as BusinessId });

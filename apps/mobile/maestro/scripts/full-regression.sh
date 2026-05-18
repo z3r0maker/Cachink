@@ -15,10 +15,11 @@
 #
 # Options:
 #   --skip-fresh     Skip the database reset + wizard (assumes already done)
-#   --phase A|B|C    Run only a specific phase
+#   --phase A|B|C|D|E|W  Run only a specific phase (W = wizard with fresh-install)
 #   --stop-on-fail   Stop immediately on first failure
 #   --dry-run        Print the flow list without running
 #   --open-reports   Open the reports directory in Finder after run
+#   --device-class   Target a specific device class ("iphone" | "ipad")
 # -------------------------------------------------------------------
 set -euo pipefail
 
@@ -250,6 +251,9 @@ fi
 
 if should_run "C"; then
   run_flow "$FLOWS_DIR/producto-full-form.yaml"
+  run_flow "$FLOWS_DIR/nuevo-producto-icon-picker.yaml"  # Audit — previously excluded
+  run_flow "$FLOWS_DIR/producto-via-fab.yaml"             # Audit — previously excluded
+  run_flow "$FLOWS_DIR/producto-uso-selector.yaml"        # Audit — previously excluded
 fi
 
 # ──────────────── Phase 4: Sales ───────────────────────────────
@@ -271,6 +275,8 @@ fi
 if should_run "C"; then
   run_flow "$FLOWS_DIR/venta-cantidad-multiple.yaml"
   run_flow "$FLOWS_DIR/venta-search-product.yaml"
+  run_flow "$FLOWS_DIR/venta-detail-popover-inspect.yaml" # Audit — previously excluded
+  run_flow "$FLOWS_DIR/checkout-method-picker.yaml"        # NEW — uncovered screen
 fi
 
 if should_run "A"; then
@@ -294,6 +300,10 @@ run_flow "$FLOWS_DIR/egreso-recurrente-mensual.yaml"        # G1 — Phase 15
 if should_run "C"; then
   run_flow "$FLOWS_DIR/validation-egreso.yaml"
   run_flow "$FLOWS_DIR/egreso-recurrente-semanal.yaml"
+  run_flow "$FLOWS_DIR/egreso-gasto-via-fab.yaml"         # Audit — previously excluded
+  run_flow "$FLOWS_DIR/egreso-inventario-empty-state.yaml" # Audit — previously excluded
+  run_flow "$FLOWS_DIR/egreso-nomina-periodo.yaml"        # Audit — previously excluded
+  run_flow "$FLOWS_DIR/egreso-recurrente-descartar.yaml"  # Audit — previously excluded
 fi
 
 if should_run "A"; then
@@ -320,12 +330,15 @@ run_flow "$FLOWS_DIR/registrar-pago-full-form.yaml"         # H3 — Phase 15
 run_flow "$FLOWS_DIR/cliente-pago-parcial.yaml"
 run_flow "$FLOWS_DIR/cliente-pago-completo.yaml"
 run_flow "$FLOWS_DIR/cliente-detail-empty-state.yaml"       # Gap 22 — Phase 16
+run_flow "$FLOWS_DIR/cliente-crear-via-fab.yaml"            # Audit — previously excluded
 
 # ──────────────── Phase 8: Corte de día ────────────────────────
 echo ""
 echo "📂  Phase 8: Corte de día"
 run_flow "$FLOWS_DIR/corte-de-dia.yaml"
 run_flow "$FLOWS_DIR/corte-de-dia-detail-cards.yaml"        # Gap 5 — Phase 16
+run_flow "$FLOWS_DIR/corte-con-diferencia.yaml"             # Audit — previously excluded
+run_flow "$FLOWS_DIR/corte-historial-director.yaml"         # Audit — previously excluded
 
 # ──────────────── Phase 9: Director features ───────────────────
 echo ""
@@ -344,6 +357,8 @@ if should_run "D"; then
   run_flow "$FLOWS_DIR/director-home-utilidad-nav.yaml"
   run_flow "$FLOWS_DIR/director-home-stock-bajo.yaml"
   run_flow "$FLOWS_DIR/director-home-actividad.yaml"
+  run_flow "$FLOWS_DIR/director-home-cxc-strip.yaml"        # Audit — previously excluded
+  run_flow "$FLOWS_DIR/director-to-ventas.yaml"             # Audit — previously excluded
 fi
 
 if should_run "B"; then
@@ -379,7 +394,9 @@ if should_run "C"; then
   run_flow "$FLOWS_DIR/recovery-password.yaml"
   run_flow "$FLOWS_DIR/recovery-back-and-factory-reset.yaml" # Gap 20 — Phase 16
   run_flow "$FLOWS_DIR/funciones-stock-disabled.yaml"
-  run_flow "$FLOWS_DIR/change-password.yaml"
+  # change-password.yaml DELETED — ChangePassword screen removed by ADR-049.
+  run_flow "$FLOWS_DIR/change-pin.yaml"                     # Audit — previously excluded
+  run_flow "$FLOWS_DIR/change-pin-wrong-current.yaml"       # Audit — previously excluded
 fi
 
 # ──────────────── Phase 13: Coverage gap — flag cascades ──────
@@ -418,6 +435,7 @@ if should_run "C"; then
   echo "📂  Phase 13.6: Caja edge cases"
   run_flow "$FLOWS_DIR/caja-con-adicional.yaml"
   run_flow "$FLOWS_DIR/caja-cierre-discrepancia.yaml"
+  run_flow "$FLOWS_DIR/caja-handoff.yaml"                   # Audit — previously excluded
 fi
 
 # ──────────────── Phase 13.7: Error paths ─────────────────────
@@ -428,6 +446,15 @@ if should_run "D"; then
   run_flow "$FLOWS_DIR/consent-modal-dismiss.yaml"
 fi
 
+# ──────────────── Phase 9.7: Notifications + Otros deep nav ────
+if should_run "D"; then
+  echo ""
+  echo "📂  Phase 9.7: Notifications + Otros deep nav"
+  run_flow "$FLOWS_DIR/director-notificaciones.yaml"        # Audit — previously excluded
+  run_flow "$FLOWS_DIR/cancelaciones-nav.yaml"              # NEW — uncovered screen
+  run_flow "$FLOWS_DIR/caja-movimientos-nav.yaml"           # NEW — uncovered screen
+fi
+
 # ──────────────── Phase 10: Settings ───────────────────────────
 if should_run "B"; then
   echo ""
@@ -436,7 +463,9 @@ if should_run "B"; then
   run_flow "$FLOWS_DIR/settings-negocio-editar.yaml"
   run_flow "$FLOWS_DIR/settings-edit-business-isr.yaml"     # Gap 17 — Phase 16
   run_flow "$FLOWS_DIR/settings-sistema-cards.yaml"         # Gap 12 — Phase 16
-  run_flow "$FLOWS_DIR/settings-empleados-empty.yaml"       # Gap 18 — Phase 16
+  run_flow "$FLOWS_DIR/otros-empleados-empty.yaml"         # Gap 18 — Phase 16
+  run_flow "$FLOWS_DIR/settings-funciones-nav.yaml"         # Audit — previously excluded
+  run_flow "$FLOWS_DIR/settings-tipos-de-pago.yaml"         # NEW — uncovered screen
 fi
 
 if should_run "E"; then
@@ -446,6 +475,8 @@ if should_run "E"; then
   run_flow "$FLOWS_DIR/settings-export-datos.yaml"
   run_flow "$FLOWS_DIR/advanced-backend-screen.yaml"        # H1 — Phase 15
   run_flow "$FLOWS_DIR/wizard-confirm-mode-change.yaml"     # H2 — Phase 15
+  run_flow "$FLOWS_DIR/settings-check-updates.yaml"         # Audit — previously excluded
+  run_flow "$FLOWS_DIR/bug-report-sheet.yaml"               # NEW — uncovered screen
 fi
 
 # ──────────────── Phase 11: Validation ─────────────────────────
@@ -466,13 +497,32 @@ if should_run "E"; then
   run_flow "$FLOWS_DIR/wizard-business-back.yaml"           # Gap 16 — Phase 16
 fi
 
-# ──────────────── Phase 12: Deletions (LAST!) ──────────────────
+# ──────────────── Phase 12: Deletions (state-destroying — run last)
 if should_run "A"; then
   echo ""
   echo "📂  Phase 12: Deletions (state-destroying — run last)"
   run_flow "$FLOWS_DIR/eliminar-venta.yaml"
   run_flow "$FLOWS_DIR/eliminar-egreso.yaml"
+  run_flow "$FLOWS_DIR/eliminar-egreso-via-popover.yaml"    # Audit — previously excluded
   run_flow "$FLOWS_DIR/eliminar-producto.yaml"
+fi
+
+# ──────────────── Phase W: Wizard edge cases (fresh install) ──
+if should_run "W"; then
+  echo ""
+  echo "📂  Phase W: Wizard edge cases (requires fresh install per flow)"
+  for wiz in wizard-cloud-solo wizard-help-modal wizard-multi-branch \
+             wizard-mobile-disabled-host wizard-rerun-with-data \
+             wizard-join-existing-link wizard-business-full-form; do
+    "$FRESH_SCRIPT" --install-only
+    run_flow "$FLOWS_DIR/$wiz.yaml"
+  done
+  # Standalone flows that benefit from fresh state
+  "$FRESH_SCRIPT" --install-only
+  run_flow "$FLOWS_DIR/smoke-launch.yaml"
+  "$FRESH_SCRIPT" --install-only
+  run_flow "$FLOWS_DIR/crash-screen.yaml"
+  run_flow "$FLOWS_DIR/a11y-smoke.yaml"
 fi
 
 # ──────────────── Summary ──────────────────────────────────────

@@ -33,6 +33,10 @@
 // `ULIDError: PRNG_DETECT` on Hermes.
 import 'react-native-get-random-values';
 
+// Polyfill: map unsupported TextDecoder encodings (e.g. 'ascii') to
+// 'utf-8'. Must precede @react-pdf/renderer which requests 'ascii'.
+import '../shell/text-decoder-polyfill';
+
 import { LogBox } from 'react-native';
 import { StrictMode, type ReactElement } from 'react';
 

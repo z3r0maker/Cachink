@@ -18,7 +18,8 @@ appId: mx.cachink.mobile
     id: "egresos-nuevo"
 
 # Gasto tab is the default — fill concepto + monto.
-- assertVisible: "Nuevo egreso"
+- assertVisible:
+    id: "nuevo-egreso-modal"
 - tapOn:
     id: "gasto-concepto"
 - inputText: "Renta del local"
@@ -29,6 +30,7 @@ appId: mx.cachink.mobile
     id: "gasto-submit"
 
 # Modal closes + Total de egresos reflects the new amount.
-- assertNotVisible: "Nuevo egreso"
+- assertNotVisible:
+    id: "nuevo-egreso-modal"
 - assertVisible: "−$8,000.00"
 - assertVisible: "Renta del local"

@@ -9,7 +9,6 @@ import type { ReactElement } from 'react';
 import type { InventoryCategory, InventoryUnit, UsoProducto } from '@cachink/domain';
 import {
   Btn,
-  ColorSwatchPicker,
   Combobox,
   Icon,
   Input,
@@ -175,19 +174,5 @@ export function StockFields({
   );
 }
 
-export function AppearanceField({
-  form,
-  t,
-}: {
-  form: ProductoFormApi;
-  t: T;
-}): ReactElement {
-  return (
-    <ColorSwatchPicker
-      label={t('nuevoProducto.colorFondoLabel')}
-      value={form.state.colorFondo}
-      onChange={(v) => form.update({ colorFondo: v })}
-      testID="producto-color-fondo"
-    />
-  );
-}
+// Re-export AppearanceField from its own file for backwards-compat
+export { AppearanceField } from './appearance-field';

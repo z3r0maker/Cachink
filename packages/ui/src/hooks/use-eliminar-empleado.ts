@@ -4,10 +4,12 @@
  * ['empleados', businessId] on success.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { EmployeeId } from '@cachink/domain';
 import { useEmployeesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ELIMINAR_EMPLEADO } from '../observability/audit-configs';
 
 export type EliminarEmpleadoResult = UseMutationResult<void, Error, EmployeeId, unknown>;
 
@@ -16,7 +18,7 @@ export function useEliminarEmpleado(): EliminarEmpleadoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<void, Error, EmployeeId>({
+  return useAuditedMutation(MUTATION_ELIMINAR_EMPLEADO, {
     async mutationFn(id) {
       await employees.delete(id);
     },

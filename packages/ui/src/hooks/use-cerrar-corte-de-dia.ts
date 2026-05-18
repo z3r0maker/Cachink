@@ -14,6 +14,8 @@ import { CerrarCorteDeDiaUseCase, type CerrarCorteDeDiaInput } from '@cachink/ap
 import type { DayClose } from '@cachink/domain';
 import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_CERRAR_CORTE } from '../observability/audit-configs';
 
 export type CerrarCorteDeDiaResult = UseMutationResult<
   DayClose,
@@ -28,10 +30,11 @@ export function useCerrarCorteDeDia(): CerrarCorteDeDiaResult {
   const closes = useDayClosesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
-  const useCase = useMemo(
+  const rawUseCase = useMemo(
     () => new CerrarCorteDeDiaUseCase(sales, expenses, closes),
     [sales, expenses, closes],
   );
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_CERRAR_CORTE);
 
   return useMutation<DayClose, Error, CerrarCorteDeDiaInput>({
     async mutationFn(input) {

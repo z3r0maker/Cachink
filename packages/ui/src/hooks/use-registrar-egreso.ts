@@ -10,6 +10,8 @@ import { RegistrarEgresoUseCase } from '@cachink/application';
 import type { Expense, NewExpense } from '@cachink/domain';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_REGISTRAR_EGRESO } from '../observability/audit-configs';
 
 export type RegistrarEgresoResult = UseMutationResult<Expense, Error, NewExpense, unknown>;
 
@@ -18,10 +20,11 @@ export function useRegistrarEgreso(): RegistrarEgresoResult {
   const recurring = useRecurringExpensesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
-  const useCase = useMemo(
+  const rawUseCase = useMemo(
     () => new RegistrarEgresoUseCase(expenses, recurring),
     [expenses, recurring],
   );
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_EGRESO);
 
   return useMutation<Expense, Error, NewExpense>({
     async mutationFn(input) {

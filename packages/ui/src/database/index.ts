@@ -21,3 +21,4 @@ export {
 export { formatBackupFilename, noopBackup, type BackupFn } from './database-backup';
 export type { RunMigrationsOptions } from './run-migrations';
 export { CloudDatabaseProvider, type CloudDatabaseProviderProps } from './cloud-database-provider';
+export type { ResetDatabaseFn } from './database-reset';

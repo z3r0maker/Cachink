@@ -141,6 +141,7 @@ export function ChangePinScreen(props: ChangePinScreenProps): ReactElement {
             onPress={() => props.onSubmit(current, newPin)}
             fullWidth
             disabled={!canSubmit}
+            loading={props.submitting}
             testID="change-pin-submit"
           >
             {t('changePin.submit')}

@@ -9,7 +9,7 @@
  * Powers the Auditoría "Conteo" tab (Part C4).
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { today, type AuditoriaInventario, type AuditoriaLinea } from '@cachink/domain';
 import {
   useAuditoriasInventarioRepository,
@@ -18,6 +18,9 @@ import {
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { auditoriaKeys } from './query-keys';
+import { useEmitDirectorAlert } from './use-emit-director-alert';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_AUDITORIA } from '../observability/audit-configs';
 
 export type CrearAuditoriaResult = UseMutationResult<
   AuditoriaInventario,
@@ -32,8 +35,9 @@ export function useCrearAuditoria(): CrearAuditoriaResult {
   const movementsRepo = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const emitAlert = useEmitDirectorAlert();
 
-  return useMutation<AuditoriaInventario, Error, void>({
+  return useAuditedMutation(MUTATION_CREAR_AUDITORIA, {
     async mutationFn() {
       if (!businessId) {
         throw new Error('useCrearAuditoria: no current business set');
@@ -62,9 +66,19 @@ export function useCrearAuditoria(): CrearAuditoriaResult {
         businessId,
       });
     },
-    async onSuccess() {
+    async onSuccess(auditoria) {
       await queryClient.invalidateQueries({
         queryKey: auditoriaKeys.all,
+      });
+
+      // Alert: auditoria-pendiente
+      emitAlert.mutate({
+        source: 'auditoria-pendiente',
+        severity: 'info',
+        titleKey: 'notificaciones.auditoriaPendiente',
+        message: `Se creó una nueva auditoría de inventario con ${auditoria.totalProductos} productos.`,
+        actionRoute: '/auditoria',
+        metadata: JSON.stringify({ auditoriaId: auditoria.id }),
       });
     },
   });

@@ -24,6 +24,7 @@ import { ZERO } from '@cachink/domain';
 import { AbrirCajaModal } from './abrir-caja-modal';
 import { OpeningDiscrepancyDialog } from './opening-discrepancy-dialog';
 import { CajaActiveTurnView } from './caja-active-turn';
+import { CajaHandoffBanner } from './caja-handoff-banner';
 import { MovimientoSheetWired } from './movimiento-sheet-wired';
 import { CerrarCajaModal } from './cerrar-caja-modal';
 import { useAbrirCaja } from '../../hooks/use-abrir-caja';
@@ -31,6 +32,7 @@ import { useCerrarCaja } from '../../hooks/use-cerrar-caja';
 import { useOpenCajaTurno } from '../../hooks/use-open-caja-turno';
 import { useCajaTurnosRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId } from '../../app-config/use-app-config';
+import { useOtherOpenTurno } from './use-other-open-turno';
 
 export interface CajaContentProps {
   readonly testID?: string;
@@ -108,7 +110,7 @@ export function CajaContent(_props: CajaContentProps): ReactElement {
   );
 }
 
-// --- Opening sub-view with discrepancy check ---
+// --- Opening sub-view with discrepancy check + handoff ---
 
 interface CajaOpenTurnViewProps {
   readonly userId: UserId | null;
@@ -117,7 +119,29 @@ interface CajaOpenTurnViewProps {
 
 function CajaOpenTurnView(props: CajaOpenTurnViewProps): ReactElement {
   const previousClose = usePreviousClose();
+  const { otherTurno, otherUserName } = useOtherOpenTurno(props.userId);
   const [pendingAmount, setPendingAmount] = useState<Money | null>(null);
+  const [skipHandoff, setSkipHandoff] = useState(false);
+
+  // Show handoff banner if another user has an open turn
+  if (otherTurno && otherUserName && !skipHandoff) {
+    return (
+      <CajaHandoffBanner
+        otherUserName={otherUserName}
+        openingAmount={otherTurno.montoAperturaCentavos}
+        onConfirm={() => {
+          if (!props.userId) return;
+          props.abrir.mutate({
+            userId: props.userId,
+            montoAperturaCentavos: otherTurno.montoAperturaCentavos,
+            efectivoAdicionalCentavos: ZERO,
+          });
+        }}
+        onDifferent={() => setSkipHandoff(true)}
+        submitting={props.abrir.isPending}
+      />
+    );
+  }
 
   if (pendingAmount !== null && previousClose !== null) {
     const diff = pendingAmount - previousClose;

@@ -4,11 +4,13 @@
  * on success.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { Client, ClientId } from '@cachink/domain';
 import type { ClientPatch } from '@cachink/data';
 import { useClientsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_EDITAR_CLIENTE } from '../observability/audit-configs';
 
 export interface EditarClienteInput {
   readonly id: ClientId;
@@ -27,7 +29,7 @@ export function useEditarCliente(): EditarClienteResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<Client | null, Error, EditarClienteInput>({
+  return useAuditedMutation(MUTATION_EDITAR_CLIENTE, {
     async mutationFn(input) {
       return clients.update(input.id, input.patch);
     },

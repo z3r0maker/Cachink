@@ -31,6 +31,8 @@ export interface NuevoProductoModalProps {
   readonly onSubmit: (input: CrearProductoInput) => void;
   readonly submitting?: boolean;
   readonly conversionEnabled?: boolean;
+  /** Navigate to icon picker (desktop wiring). */
+  readonly onPickIcon?: () => void;
 }
 
 export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement {
@@ -70,7 +72,7 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       />
       <PricingFields form={form} t={t} showPrecio={showPrecio} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
-      <AppearanceField form={form} t={t} />
+      <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
       <Btn
         variant="primary"
         onPress={handleSubmit}

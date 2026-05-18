@@ -26,6 +26,8 @@ export {
   type ProductoListRowProps,
   NuevoProductoScreen,
   type NuevoProductoScreenProps,
+  initialProductoState,
+  type ProductoFormState,
   IconPickerScreen,
   type IconPickerScreenProps,
   ProductoDetailScreen,
@@ -66,3 +68,7 @@ export * from './DemoSeeding/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';
 export * from './Cancelaciones/index';
+// Observability — dev-only Telemetría dashboard
+export * from './Telemetria/index';
+// Phase 11 — Director Notification Inbox
+export * from './Notificaciones/index';

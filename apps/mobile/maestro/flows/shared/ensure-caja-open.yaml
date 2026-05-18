@@ -1,0 +1,39 @@
+# Reusable subflow: ensure caja is open for the current Operativo.
+#
+# Handles 3 possible states:
+#   1. No turno → abrir-caja-modal visible → enter amount → submit
+#   2. Director already opened → "CONFIRMAR MONTO" prompt → tap confirm
+#   3. Already open → caja-status-card visible → nothing to do
+#
+# Usage (from any flow that needs caja open):
+#   - runFlow: shared/authenticate.yaml
+#   - runFlow: shared/ensure-caja-open.yaml
+appId: mx.cachink.mobile
+---
+- tapOn:
+    id: "tab-caja"
+
+# State 2: Director already opened — confirm prompt visible.
+- tapOn:
+    text: "CONFIRMAR MONTO"
+    optional: true
+
+# State 1: No turno — abrir-caja-modal. Enter 500 and submit.
+- tapOn:
+    id: "numpad-5"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "caja-abrir-submit"
+    optional: true
+
+# All states should now show the active turn.
+- extendedWaitUntil:
+    visible:
+      id: "caja-status-card"
+    timeout: 10000

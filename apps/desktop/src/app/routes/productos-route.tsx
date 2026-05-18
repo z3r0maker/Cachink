@@ -12,6 +12,7 @@ import {
   filterProductos,
   useCrearProducto,
   useFeatureFlag,
+  useProductFormStore,
   useProductosConStock,
   type InventarioSubTab,
   type ProductoConStock,
@@ -27,6 +28,7 @@ export function ProductosRoute(): ReactElement {
   const itemsQ = useProductosConStock();
   const crear = useCrearProducto();
   const conversionEnabled = useFeatureFlag('conversionMateriaPrima');
+  const storeIcon = useProductFormStore((s) => s.draft?.icono ?? null);
   const items = itemsQ.data ?? [];
   const filtered = useMemo(() => filterProductos(items, query), [items, query]);
 
@@ -53,9 +55,33 @@ export function ProductosRoute(): ReactElement {
       <NuevoProductoModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSubmit={(input) => crear.mutate(input, { onSuccess: () => setModalOpen(false) })}
+        onSubmit={(input) => {
+          const payload = storeIcon ? { ...input, icono: storeIcon } : input;
+          crear.mutate(payload, {
+            onSuccess: () => {
+              useProductFormStore.getState().clear();
+              setModalOpen(false);
+            },
+          });
+        }}
         submitting={crear.isPending}
         conversionEnabled={conversionEnabled}
+        onPickIcon={() => {
+          useProductFormStore.getState().setDraft({
+            nombre: '',
+            sku: '',
+            categoria: 'Producto Terminado',
+            usoProducto: 'venta',
+            costoPesos: '',
+            precioVentaPesos: '',
+            unidad: 'pza',
+            umbral: '3',
+            colorFondo: 'white',
+            icono: storeIcon,
+            editingProductId: null,
+          });
+          navigate('/productos/icon-picker');
+        }}
       />
     </DesktopAppShellWrapper>
   );

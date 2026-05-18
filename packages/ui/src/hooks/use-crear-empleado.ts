@@ -4,11 +4,13 @@
  * on success so the Nómina select picks up the new row immediately.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { BusinessId, Employee, NewEmployee, PayrollFrequency } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { useEmployeesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_EMPLEADO } from '../observability/audit-configs';
 
 export interface CrearEmpleadoInput {
   readonly nombre: string;
@@ -24,7 +26,7 @@ export function useCrearEmpleado(): CrearEmpleadoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<Employee, Error, CrearEmpleadoInput>({
+  return useAuditedMutation(MUTATION_CREAR_EMPLEADO, {
     async mutationFn(input) {
       if (!businessId) throw new Error('useCrearEmpleado: no current business');
       const payload: NewEmployee = {

@@ -13,6 +13,8 @@ import type { BusinessId, CajaTurno, Money, UserId } from '@cachink/domain';
 import { useCajaTurnosRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { cajaKeys } from './query-keys';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_ABRIR_CAJA } from '../observability/audit-configs';
 
 export interface AbrirCajaInput {
   readonly userId: UserId;
@@ -27,7 +29,8 @@ export function useAbrirCaja(): AbrirCajaResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  const useCase = useMemo(() => new AbrirCajaUseCase(turnos), [turnos]);
+  const rawUseCase = useMemo(() => new AbrirCajaUseCase(turnos), [turnos]);
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_ABRIR_CAJA);
 
   return useMutation<CajaTurno, Error, AbrirCajaInput>({
     async mutationFn(input) {

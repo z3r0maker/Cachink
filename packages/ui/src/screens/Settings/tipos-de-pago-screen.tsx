@@ -70,7 +70,7 @@ function ToggleRow(props: {
           width={44}
           height={26}
           borderRadius={13}
-          backgroundColor={props.enabled ? colors.black : colors.gray200}
+          backgroundColor={props.enabled ? colors.yellow : colors.gray200}
           justifyContent="center"
           paddingHorizontal={2}
         >

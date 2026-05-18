@@ -47,6 +47,7 @@ export const APP_CONFIG_KEYS = {
   discoveryShown: 'discoveryShown',
   cachinkSoundEnabled: 'cachinkSoundEnabled',
   healthThresholds: 'healthThresholds',
+  notificationPrefs: 'notificationPrefs',
 } as const;
 
 /** Shape of the Zustand store populated on launch. */

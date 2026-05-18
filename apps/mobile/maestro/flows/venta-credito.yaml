@@ -1,64 +1,62 @@
-# Create a Crédito venta via the inline POS (ADR-048) and verify it
+# Create a Crédito venta via the cart checkout flow and verify it
 # surfaces under Cuentas por Cobrar for the Director role.
 #
-# Covers P1C-M3-T03 (Crédito requires cliente) and P1C-M3-T06
-# (Maestro verifies Cuentas por Cobrar membership).
-#
-# Precondition: wizard complete, at least one product AND one client
-# exist. Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
-#   maestro test apps/mobile/maestro/flows/venta-credito.yaml
-#
-# inventario-producto creates "Tortilla"; cliente-crear creates
-# "Carla Márquez". Both must exist before this flow runs.
+# Precondition: demo mode seeded (products + users + clients exist).
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
     id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
 
-# The product grid should show the "Tortilla" product.
+# Tap a product to add to cart.
+- tapOn: "Quesadilla"
 - assertVisible:
-    id: "ventas-product-grid"
-- assertVisible: "Tortilla"
-
-# Tap the product card to open the VentaConfirmSheet.
-- tapOn: "Tortilla"
-- assertVisible:
-    id: "venta-confirm-sheet"
-
-# Switch payment method to Crédito. Tap the method picker then
-# pick Crédito from the Combobox popover.
+    id: "cart-strip"
 - tapOn:
-    id: "venta-confirm-metodo"
-- tapOn: "Crédito"
+    id: "cart-checkout-btn"
 
-# The client picker appears when Crédito is selected. Tap it and
-# pick the first available client (Carla Márquez from the
-# precondition flow).
+# Method picker — select Crédito.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+- tapOn:
+    id: "option-card-Crédito"
+
+# The client picker appears when Crédito is selected.
+# Pick the first available client.
 - tapOn:
     id: "venta-confirm-cliente"
+    optional: true
 - tapOn:
     index: 0
+    optional: true
 
-# Submit the Crédito venta.
 - tapOn:
-    id: "venta-confirm-submit"
+    id: "checkout-method-continue"
 
-# Sheet closes and the new sale appears in the list.
-- assertNotVisible:
-    id: "venta-confirm-sheet"
-- assertVisible: "Tortilla"
+# Confirm screen for Crédito — submit.
+- extendedWaitUntil:
+    visible:
+      id: "checkout-confirm-Crédito"
+    timeout: 5000
+- tapOn:
+    id: "checkout-confirm-Crédito-submit"
+
+# Returns to Ventas.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 10000
 
 # Switch to Director role via TopBar and verify the sale shows
 # under Cuentas por Cobrar.

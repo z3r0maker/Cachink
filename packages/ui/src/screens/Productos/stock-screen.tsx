@@ -122,14 +122,18 @@ function StockBody(
 type T = ReturnType<typeof useTranslation>['t'];
 
 function StockHeader({ t, props }: { t: T; props: StockScreenProps }): ReactElement {
+  const hasProducts =
+    !props.loading && !props.error && (props.items?.length ?? 0) > 0;
   return (
     <>
       <SectionTitle
         title={t('inventario.title')}
         action={
-          <Btn variant="primary" onPress={props.onNuevoProducto} testID="stock-nuevo-producto">
-            {t('inventario.newCta')}
-          </Btn>
+          hasProducts ? (
+            <Btn variant="primary" onPress={props.onNuevoProducto} testID="stock-nuevo-producto">
+              {t('inventario.newCta')}
+            </Btn>
+          ) : undefined
         }
       />
       <SearchBar

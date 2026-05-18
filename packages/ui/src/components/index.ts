@@ -50,6 +50,7 @@ export * from './CachinkBurst/index';
 export * from './HelpAccordion/index';
 export * from './HealthIndicator/index';
 export * from './DeltaIndicator/index';
+export * from './NotificationBadge/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

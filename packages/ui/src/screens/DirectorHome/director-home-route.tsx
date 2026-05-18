@@ -19,6 +19,9 @@ import type { ReactElement } from 'react';
 import { useNotificationsEnabled } from '../../app-config/index';
 import { useScheduleStockLowCheck } from '../../hooks/use-schedule-stock-low-check';
 import { useCorteHistorial } from '../../hooks/use-corte-historial';
+import { useUnreadAlertCount } from '../../hooks/use-unread-alert-count';
+import { useCheckCreditosVencidos } from '../../hooks/use-check-creditos-vencidos';
+import { NotificationBadge } from '../../components/NotificationBadge/index';
 import { CorteHomeCard } from '../CorteDeDia/corte-home-card';
 import { CorteHistorialStrip } from '../CorteDeDia/corte-historial-strip';
 import { DirectorHomeScreen } from './director-home-screen';
@@ -46,10 +49,18 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
   const nav = props.onNavigate;
   const notificationsEnabled = useNotificationsEnabled();
   useScheduleStockLowCheck({ enabled: notificationsEnabled });
+  useCheckCreditosVencidos();
   const historialQ = useCorteHistorial();
+  const unreadCount = useUnreadAlertCount();
   return (
     <DirectorHomeScreen
       testID={props.testID ?? 'director-home-route'}
+      notificationBadge={
+        <NotificationBadge
+          count={unreadCount.data ?? 0}
+          onPress={() => nav?.('/notificaciones')}
+        />
+      }
       hero={<UtilidadHero onVerEstados={() => nav?.('/estados')} />}
       corte={<CorteHomeCard />}
       hoy={

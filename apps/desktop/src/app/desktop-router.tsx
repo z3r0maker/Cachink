@@ -65,6 +65,7 @@ import { UsuariosRoute } from './routes/usuarios-route';
 import { EmpleadosRoute } from './routes/empleados-route';
 import { CajaRoute } from './routes/caja-route';
 import { ConversionRoute } from './routes/conversion-route';
+import { NotificacionesRoute } from './routes/notificaciones-route';
 
 function useDesktopNavigation(): {
   path: string;
@@ -144,6 +145,7 @@ const PREFIX_ROUTES: ReadonlyArray<{ prefix: string; element: ReactElement }> = 
   { prefix: '/caja-reportes',  element: <CajaReportesScreen /> },
   { prefix: '/caja',           element: <CajaRoute /> },
   { prefix: '/conversion',     element: <ConversionRoute /> },
+  { prefix: '/notificaciones', element: <NotificacionesRoute /> },
   { prefix: '/auditoria',      element: <AuditoriaScreen /> },
 ] as const;
 

@@ -1,23 +1,13 @@
 # Feature flag: ventasCredito toggle affects UX (Crédito payment method).
 #
 # Verifies:
-#   1. Toggle ventasCredito ON → Crédito appears as a payment method on Ventas
+#   1. Toggle ventasCredito ON → Crédito appears as a payment method
 #   2. Toggle ventasCredito OFF → Crédito no longer available
 #
-# Precondition: wizard + director-setup complete, at least one product
-# and one client exist.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
-#   maestro test apps/mobile/maestro/flows/funciones-ventas-credito-toggle.yaml
+# Precondition: demo mode seeded (products + users + clients exist).
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
@@ -35,24 +25,33 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "otros-ventas-credito"
 
-# --- Step 2: Switch to Operativo → make a venta → Crédito available ---
+# --- Step 2: Switch to Operativo → checkout → Crédito available ---
 - tapOn:
     id: "tab-ventas"
 
-# Tap the product to open VentaConfirmSheet.
-- tapOn: "Tortilla"
+# Add product to cart and go to checkout.
+- tapOn: "Quesadilla"
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
+
+# On checkout method picker — Crédito should be present.
 - extendedWaitUntil:
     visible:
-      id: "venta-confirm-sheet"
+      id: "checkout-method-picker"
     timeout: 5000
-
-# Open the payment method picker — Crédito should be present.
-- tapOn:
-    id: "venta-confirm-metodo"
 - assertVisible: "Crédito"
 
-# Close the sheet without submitting.
+# Go back without submitting.
 - back
+- back
+    optional: true
+
+# Clear the cart if still visible.
+- tapOn:
+    id: "cart-strip-clear"
+    optional: true
 
 # --- Step 3: Disable ventasCredito → Crédito should vanish ---
 - tapOn:
@@ -75,11 +74,13 @@ appId: mx.cachink.mobile
 # Switch to Operativo → Ventas → confirm Crédito is gone.
 - tapOn:
     id: "tab-ventas"
-- tapOn: "Tortilla"
+- tapOn: "Quesadilla"
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
 - extendedWaitUntil:
     visible:
-      id: "venta-confirm-sheet"
+      id: "checkout-method-picker"
     timeout: 5000
-- tapOn:
-    id: "venta-confirm-metodo"
 - assertNotVisible: "Crédito"

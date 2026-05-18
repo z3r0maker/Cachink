@@ -7,18 +7,21 @@
  * UXD-R3: added tipo, seguirStock, precioVenta, atributos fields.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type {
   BusinessId,
   IsoDate,
   NewProduct,
   Product,
   ProductColor,
+  ProductIcon,
   ProductoTipo,
 } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_CREAR_PRODUCTO } from '../observability/audit-configs';
 
 export interface CrearProductoInput {
   readonly nombre: string;
@@ -33,6 +36,8 @@ export interface CrearProductoInput {
   readonly atributos?: Record<string, string>;
   readonly colorFondo?: ProductColor;
   readonly usoProducto?: Product['usoProducto'];
+  /** Optional product icon for visual identification. */
+  readonly icono?: ProductIcon | null;
   /** Optional initial stock quantity. Creates an 'entrada' MovimientoInventario. */
   readonly stockInicial?: number;
 }
@@ -61,6 +66,7 @@ function buildNewProduct(input: CrearProductoInput, biz: BusinessId): NewProduct
     atributos: input.atributos ?? {},
     colorFondo: input.colorFondo ?? 'white',
     usoProducto: input.usoProducto ?? 'venta',
+    icono: input.icono ?? null,
     businessId: biz,
   };
 }
@@ -71,7 +77,7 @@ export function useCrearProducto(): CrearProductoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<Product, Error, CrearProductoInput>({
+  return useAuditedMutation(MUTATION_CREAR_PRODUCTO, {
     async mutationFn(input) {
       if (!businessId) throw new Error('useCrearProducto: no current business');
       const product = await products.create(buildNewProduct(input, businessId as BusinessId));

@@ -98,6 +98,23 @@ export class DrizzleCajaTurnosRepository
     return row ? this.#mapRow(row) : null;
   }
 
+  async findOpenByBusiness(businessId: BusinessId): Promise<CajaTurno | null> {
+    const row = await this.#db
+      .select()
+      .from(cajaTurnos)
+      .where(
+        and(
+          eq(cajaTurnos.businessId, businessId),
+          isNull(cajaTurnos.cierreAt),
+          isNull(cajaTurnos.deletedAt),
+        ),
+      )
+      .orderBy(desc(cajaTurnos.createdAt))
+      .limit(1)
+      .get();
+    return row ? this.#mapRow(row) : null;
+  }
+
   async findLatest(businessId: BusinessId): Promise<CajaTurno | null> {
     const row = await this.#db
       .select()

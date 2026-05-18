@@ -27,7 +27,7 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "settings-hub-sistema"
 - tapOn:
-    id: "settings-advanced"
+    id: "settings-open-advanced-backend"
 
 # Verify the advanced backend inputs render.
 - assertVisible:

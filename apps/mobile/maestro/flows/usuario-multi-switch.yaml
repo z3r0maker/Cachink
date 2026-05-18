@@ -27,9 +27,9 @@ appId: mx.cachink.mobile
       id: "quick-switch"
     timeout: 10000
 
-# Tap the second avatar (Operativo Test user).
-- tapOn:
-    id: "user-avatar-1"
+# Tap the Operativo avatar by name (user-avatar-${userId} uses a ULID,
+# not a numeric index, so we match by displayed text instead).
+- tapOn: "Operativo Test"
 
 # Enter the Operativo PIN (111111) via inline numpad.
 - tapOn:

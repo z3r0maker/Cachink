@@ -11,6 +11,8 @@ import { RegistrarPagoClienteUseCase } from '@cachink/application';
 import type { ClientPayment, NewClientPayment } from '@cachink/domain';
 import { useClientPaymentsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedUseCase } from '../observability/index';
+import { AUDIT_REGISTRAR_PAGO } from '../observability/audit-configs';
 
 export type RegistrarPagoResult = UseMutationResult<
   ClientPayment,
@@ -24,10 +26,11 @@ export function useRegistrarPago(): RegistrarPagoResult {
   const sales = useSalesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
-  const useCase = useMemo(
+  const rawUseCase = useMemo(
     () => new RegistrarPagoClienteUseCase(payments, sales),
     [payments, sales],
   );
+  const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_PAGO);
 
   return useMutation<ClientPayment, Error, NewClientPayment>({
     async mutationFn(input) {

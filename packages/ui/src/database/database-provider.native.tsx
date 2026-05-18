@@ -36,6 +36,7 @@ import {
   SCHEMA_VERSION,
   SchemaVersionError,
 } from '@cachink/data/migrator';
+import { logMigrationEvent } from '@cachink/observability';
 
 // Mirror the surface of `./database-provider.tsx` so the barrel
 // `./index.ts` can re-export the same names regardless of which
@@ -68,10 +69,25 @@ async function createNativeDatabase(): Promise<CachinkDatabase> {
     switch (compat.status) {
       case 'ok':
         return db;
-      case 'needs_migration':
-        await runMigrations(db);
-        await setSchemaVersion(db, SCHEMA_VERSION);
+      case 'needs_migration': {
+        const fromVersion = dbVersion;
+        try {
+          await runMigrations(db);
+          await setSchemaVersion(db, SCHEMA_VERSION);
+          await logMigrationEvent(native as never, 'success', '', {
+            fromVersion,
+            toVersion: SCHEMA_VERSION,
+          });
+        } catch (migrationError) {
+          await logMigrationEvent(native as never, 'error', '', {
+            fromVersion,
+            toVersion: SCHEMA_VERSION,
+            error: migrationError instanceof Error ? migrationError.message : String(migrationError),
+          });
+          throw migrationError;
+        }
         return db;
+      }
       case 'app_too_old':
         throw new SchemaVersionError(compat.dbVersion, compat.appVersion);
     }

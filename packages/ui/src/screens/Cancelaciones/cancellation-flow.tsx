@@ -19,7 +19,9 @@ import { Btn } from '../../components/Btn/btn';
 import { Input } from '../../components/Input/index';
 import { PinCodeInput } from '../../components/index';
 import { useSalesRepository, useCancelacionLogsRepository } from '../../app/repository-provider';
-import { useCurrentBusinessId, useUserId } from '../../app-config/use-app-config';
+import { useCurrentBusinessId, useUserId, useDeviceId } from '../../app-config/use-app-config';
+import { useLogStore } from '../../observability/observability-provider';
+import { addAuditBreadcrumb } from '../../observability/sentry-breadcrumbs';
 import { colors, typography } from '../../theme';
 
 type Step = 'pin' | 'reason' | 'cash-confirm' | 'done';
@@ -39,6 +41,8 @@ export function CancellationFlow(
   const [submitting, setSubmitting] = useState(false);
   const userId = useUserId() as UserId;
   const businessId = useCurrentBusinessId() as BusinessId;
+  const deviceId = useDeviceId();
+  const logStore = useLogStore();
   const salesRepo = useSalesRepository();
   const logsRepo = useCancelacionLogsRepository();
 
@@ -78,9 +82,62 @@ export function CancellationFlow(
         businessId,
       });
 
+      // Audit log: successful cancellation
+      const auditEvent = {
+        id: '',
+        timestamp: new Date().toISOString(),
+        operation: 'venta.cancelar' as const,
+        entityType: 'sale',
+        entityId: props.sale.id,
+        userId: userId ?? null,
+        deviceId: deviceId ?? '',
+        businessId: businessId ?? '',
+        metadata: {
+          motivo: motivo.trim(),
+          montoOriginalCentavos: String(props.sale.monto),
+          metodoOriginal: props.sale.metodo,
+          isCashSale,
+        },
+        status: 'success' as const,
+      };
+      addAuditBreadcrumb(auditEvent);
+      void logStore?.writeAudit(auditEvent).catch(() => {});
+
       props.onSuccess();
     } catch (err) {
-      Alert.alert('Error', (err as Error).message);
+      const error = err instanceof Error ? err : new Error(String(err));
+
+      // Audit log: failed cancellation
+      const errorEvent = {
+        id: '',
+        timestamp: new Date().toISOString(),
+        operation: 'venta.cancelar' as const,
+        entityType: 'sale',
+        entityId: props.sale.id,
+        userId: userId ?? null,
+        deviceId: deviceId ?? '',
+        businessId: businessId ?? '',
+        metadata: { motivo: motivo.trim() },
+        status: 'error' as const,
+        errorCode: error.name,
+        errorMessage: error.message,
+      };
+      addAuditBreadcrumb(errorEvent);
+      void logStore?.writeAudit(errorEvent).catch(() => {});
+      void logStore?.writeError({
+        id: '',
+        timestamp: new Date().toISOString(),
+        source: 'ui',
+        operation: 'venta.cancelar',
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        userId: userId ?? null,
+        deviceId: deviceId ?? '',
+        businessId: businessId ?? null,
+      }).catch(() => {});
+
+      Alert.alert('Error', error.message);
     } finally {
       setSubmitting(false);
     }

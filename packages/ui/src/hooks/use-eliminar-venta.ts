@@ -5,10 +5,12 @@
  * refreshes immediately.
  */
 
-import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { IsoDate, SaleId } from '@cachink/domain';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useAuditedMutation } from '../observability/use-audited-mutation';
+import { MUTATION_ELIMINAR_VENTA } from '../observability/audit-configs';
 
 export interface EliminarVentaInput {
   readonly id: SaleId;
@@ -22,7 +24,7 @@ export function useEliminarVenta(): EliminarVentaResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
-  return useMutation<void, Error, EliminarVentaInput>({
+  return useAuditedMutation(MUTATION_ELIMINAR_VENTA, {
     async mutationFn(input) {
       await sales.delete(input.id);
     },

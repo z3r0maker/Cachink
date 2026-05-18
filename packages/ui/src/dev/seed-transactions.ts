@@ -29,14 +29,17 @@ export async function seedSales(
   const templates = DEMO_SALE_TEMPLATES;
 
   for (let day = 29; day >= 0; day--) {
-    const salesPerDay = 2 + (day % 3); // 2-4 sales per day
+    // Bad week: days 7-13 ago have reduced sales (simulates a slow week)
+    const isBadWeek = day >= 7 && day <= 13;
+    const salesPerDay = isBadWeek ? 3 + (day % 3) : 10 + (day % 5);
+
     for (let s = 0; s < salesPerDay; s++) {
       const tpl = templates[count % templates.length]!;
       const product = products[tpl.productIndex]!;
       const saleDate = daysAgo(day);
 
-      // 2 Crédito sales linked to clients for cuentas por cobrar testing
-      const isCredito = count === 5 || count === 12;
+      // Sprinkle Crédito sales for cuentas por cobrar testing
+      const isCredito = count === 8 || count === 25 || count === 60;
       const client = clients[count % clients.length]!;
 
       await r.sales.create({
@@ -93,9 +96,9 @@ export async function seedRecurringExpenses(
     monto: bigint;
     dia: number;
   }> = [
-    { concepto: 'Renta del local', cat: 'Renta', monto: 1_200_000n, dia: 1 },
-    { concepto: 'Luz CFE', cat: 'Servicios', monto: 280_000n, dia: 15 },
-    { concepto: 'Internet Telmex', cat: 'Servicios', monto: 59_900n, dia: 20 },
+    { concepto: 'Renta del local', cat: 'Renta', monto: 550_000n, dia: 1 },
+    { concepto: 'Luz CFE', cat: 'Servicios', monto: 130_000n, dia: 15 },
+    { concepto: 'Internet Telmex', cat: 'Servicios', monto: 49_900n, dia: 20 },
   ];
 
   for (const e of entries) {

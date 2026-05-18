@@ -1,8 +1,14 @@
-# Open caja with additional money (fondo adicional).
+# Open caja with larger amount (replaces old "adicional" field).
+#
+# Caja Overhaul: The separate `caja-adicional-monto` field no longer
+# exists. The AbrirCajaModal now takes a single amount via numpad.
+# This flow enters a larger total (700) that previously would have
+# been 500 base + 200 adicional.
 #
 # Verifies:
-#   1. Navigate to Caja → fill apertura with base monto AND adicional monto
-#   2. Submit → status card shows correct total
+#   1. Navigate to Caja → enter 700 via numpad → submit
+#   2. Status card shows correct open turn
+#   3. Close caja with matching count (cleanup)
 #
 # Precondition: wizard + director-setup complete, caja feature flag ON.
 # Chain flows:
@@ -19,9 +25,6 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-
-# Switch to Operativo to access Caja.
-
 # Navigate to Otros → Caja.
 - tapOn:
     id: "tab-otros"
@@ -34,15 +37,11 @@ appId: mx.cachink.mobile
       id: "abrir-caja-modal"
     timeout: 5000
 
-# Enter apertura base amount.
-- tapOn:
-    id: "caja-apertura-monto"
-- inputText: "500"
-
-# Enter additional money.
-- tapOn:
-    id: "caja-adicional-monto"
-- inputText: "200"
+# Enter total opening amount (700) via numpad.
+# Previously this was 500 base + 200 adicional; now it's a single entry.
+- tapOn: { id: "numpad-7" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
 
 # Submit the apertura.
 - tapOn:
@@ -52,15 +51,21 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "caja-status-card"
 
-# Close the caja for cleanup.
+# Close the caja for cleanup (2-step blind count).
 - tapOn:
     id: "caja-cerrar-btn"
+
+# Step 1: BlindCountStep — enter matching count of 700.
 - assertVisible:
-    id: "cerrar-caja-modal"
+    id: "cerrar-caja-step-1"
+- tapOn: { id: "numpad-7" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
 - tapOn:
-    id: "caja-cierre-monto"
-- inputText: "700"
+    id: "blind-count-continue"
+
+# Step 2: CountResultStep — no discrepancy, close immediately.
+- assertVisible:
+    id: "cerrar-caja-step-2"
 - tapOn:
-    id: "caja-cerrar-submit"
-- assertNotVisible:
-    id: "cerrar-caja-modal"
+    id: "count-result-close"

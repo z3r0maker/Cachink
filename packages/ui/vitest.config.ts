@@ -47,6 +47,10 @@ export default mergeConfig(
           __dirname,
           'tests/__mocks__/react-native-wheely.tsx',
         ),
+        '@cachink/observability': resolve(
+          __dirname,
+          'tests/__mocks__/cachink-observability.ts',
+        ),
       },
     },
     test: {

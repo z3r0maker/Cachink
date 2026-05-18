@@ -108,3 +108,10 @@ export * from './use-stock-map';
 export * from './use-product-form-store';
 // Health thresholds (customizable from Settings)
 export * from './use-health-thresholds';
+// Phase 11 — Director Notification Inbox
+export * from './use-emit-director-alert';
+export * from './use-unread-alert-count';
+export * from './use-director-alerts';
+export * from './use-mark-alert-read';
+export * from './use-check-creditos-vencidos';
+export * from './use-notification-prefs';

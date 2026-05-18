@@ -9,3 +9,4 @@
 export { SeedDemoAction } from './seed-demo-action';
 export { seedDemoData, type SeedDeps, type SeedResult } from './seed-demo-data';
 export { useDemoMode, type DemoModeState } from './use-demo-mode';
+export { ResetDemoAction, type ResetDemoActionProps } from './reset-demo-action';

@@ -9,7 +9,7 @@
  */
 import { useState, useMemo, useCallback, useEffect, useRef, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { useAudioPlayer } from 'expo-audio';
+import { useCachinkPlayer } from '../../shell/use-cachink-player';
 import { Alert } from 'react-native';
 import {
   CachinkBurst,
@@ -92,8 +92,7 @@ export default function VentasRoute(): ReactElement {
   );
 
   // Cachink sound
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const cachinkPlayer = useAudioPlayer(require('../../../assets/sounds/cachink.mp3'));
+  const cachinkPlayer = useCachinkPlayer();
   const { play: playCachink } = useCachinkSound(cachinkPlayer);
   const triggerCachink = useCallback(() => {
     setShowCachink(true);
