@@ -44,6 +44,11 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "business-nombre"
 - inputText: "Taquería Don Pedro"
+- pressKey: Enter
+- pressKey: Enter
+- swipe:
+    direction: UP
+    duration: 400
 - tapOn:
     id: "business-submit"
 
