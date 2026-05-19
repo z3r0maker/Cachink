@@ -60,17 +60,17 @@ appId: mx.cachink.mobile
     direction: DOWN
     timeout: 5000
 
+# Stacked bar chart visualization (appears before total in the DOM).
+- scrollUntilVisible:
+    element:
+      id: "balance-activo-bar"
+    direction: DOWN
+    timeout: 5000
+
 # Activo total.
 - scrollUntilVisible:
     element:
       id: "balance-activo-total"
-    direction: DOWN
-    timeout: 5000
-
-# Stacked bar chart visualization.
-- scrollUntilVisible:
-    element:
-      id: "balance-activo-bar"
     direction: DOWN
     timeout: 5000
 

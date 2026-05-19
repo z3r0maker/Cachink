@@ -39,7 +39,7 @@ appId: mx.cachink.mobile
 # Wait for the Notificaciones screen to mount.
 - extendedWaitUntil:
     visible:
-      id: "notificaciones-screen"
+      id: "mobile-notificaciones"
     timeout: 5000
 
 # Should land on Bandeja tab — verify filter and mark-all buttons exist.

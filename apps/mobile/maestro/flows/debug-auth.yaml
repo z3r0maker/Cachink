@@ -1,5 +1,5 @@
 # Debug flow: full auth + verify home screen
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
