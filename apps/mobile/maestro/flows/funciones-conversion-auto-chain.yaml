@@ -29,6 +29,7 @@ appId: mx.cachink.mobile
       id: "otros-funciones"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-funciones"
 
@@ -58,6 +59,7 @@ appId: mx.cachink.mobile
       id: "otros-funciones"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-funciones"
 
@@ -84,6 +86,7 @@ appId: mx.cachink.mobile
       id: "otros-productos"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-productos"
 - assertNotVisible:
@@ -97,6 +100,7 @@ appId: mx.cachink.mobile
       id: "otros-funciones"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-funciones"
 - tapOn:

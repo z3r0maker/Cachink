@@ -31,6 +31,7 @@ appId: mx.cachink.mobile
       id: "otros-caja-reportes"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-caja-reportes"
 

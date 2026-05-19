@@ -35,6 +35,7 @@ appId: mx.cachink.mobile
       id: "otros-auditoria"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-auditoria"
 

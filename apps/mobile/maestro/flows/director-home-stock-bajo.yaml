@@ -29,6 +29,7 @@ appId: mx.cachink.mobile
       id: "otros-productos"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-productos"
 - tapOn:

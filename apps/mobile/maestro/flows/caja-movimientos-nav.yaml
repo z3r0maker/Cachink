@@ -24,6 +24,7 @@ tags:
       id: "otros-caja-movimientos"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-caja-movimientos"
 - extendedWaitUntil:
