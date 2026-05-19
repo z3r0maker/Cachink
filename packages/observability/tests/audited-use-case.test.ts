@@ -7,7 +7,7 @@
  *   - LogStore failures don't crash the use case
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { AuditedUseCase, type AuditContext, type AuditedUseCaseConfig } from '../src/audited-use-case.js';
 import type { LogStore } from '../src/log-store.js';
 import type { AuditEvent } from '../src/audit-event.js';

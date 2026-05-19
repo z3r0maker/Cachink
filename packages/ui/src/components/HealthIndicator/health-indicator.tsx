@@ -29,57 +29,68 @@ const TONE_COLOR: Record<HealthTone, string> = {
   critical: colors.red,
 };
 
+function VerdictRow({ tone, verdict }: {
+  tone: HealthTone; verdict: string;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={6}>
+      <View
+        testID="health-indicator-dot"
+        width={8}
+        height={8}
+        borderRadius={4}
+        backgroundColor={TONE_COLOR[tone]}
+      />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={13}
+        color={colors.ink}
+        flex={1}
+      >
+        {verdict}
+      </Text>
+    </View>
+  );
+}
+
+function ThresholdRow({ label, onOpenSettings }: {
+  label: string; onOpenSettings?: () => void;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={4} paddingLeft={14}>
+      <Text
+        testID="health-indicator-threshold"
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.regular}
+        fontSize={11}
+        color={colors.gray400}
+      >
+        {label}
+      </Text>
+      {onOpenSettings !== undefined && (
+        <Text
+          testID="health-indicator-settings-link"
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.medium}
+          fontSize={11}
+          color={colors.blue}
+          onPress={onOpenSettings}
+          cursor="pointer"
+        >
+          Configurar en Ajustes →
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export function HealthIndicator(props: HealthIndicatorProps): ReactElement {
   return (
     <View testID={props.testID ?? 'health-indicator'} gap={2}>
-      <View flexDirection="row" alignItems="center" gap={6}>
-        <View
-          testID="health-indicator-dot"
-          width={8}
-          height={8}
-          borderRadius={4}
-          backgroundColor={TONE_COLOR[props.tone]}
-        />
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={13}
-          color={colors.ink}
-          flex={1}
-        >
-          {props.verdict}
-        </Text>
-      </View>
+      <VerdictRow tone={props.tone} verdict={props.verdict} />
       {props.thresholdLabel !== undefined && (
-        <View
-          flexDirection="row"
-          alignItems="center"
-          gap={4}
-          paddingLeft={14}
-        >
-          <Text
-            testID="health-indicator-threshold"
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.regular}
-            fontSize={11}
-            color={colors.gray400}
-          >
-            {props.thresholdLabel}
-          </Text>
-          {props.onOpenSettings !== undefined && (
-            <Text
-              testID="health-indicator-settings-link"
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.medium}
-              fontSize={11}
-              color={colors.blue}
-              onPress={props.onOpenSettings}
-              cursor="pointer"
-            >
-              Configurar en Ajustes →
-            </Text>
-          )}
-        </View>
+        <ThresholdRow label={props.thresholdLabel} onOpenSettings={props.onOpenSettings} />
       )}
     </View>
   );

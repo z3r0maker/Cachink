@@ -4,6 +4,7 @@
 # Precondition: device clock is past 18:00 and today already has at least
 # one venta in Efectivo of 150 MXN. Run wizard-local-standalone.yaml +
 # venta-efectivo.yaml first.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

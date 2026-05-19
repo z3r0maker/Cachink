@@ -5,6 +5,7 @@
 #
 # Precondition: wizard-local-standalone.yaml + the current month has
 # data (ventas + egresos).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

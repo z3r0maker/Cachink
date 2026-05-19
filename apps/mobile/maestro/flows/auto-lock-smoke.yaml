@@ -17,6 +17,7 @@
 #   maestro test apps/mobile/maestro/flows/auto-lock-smoke.yaml
 #
 # Priority: LOW — may be deferred if timeout mocking is not available.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

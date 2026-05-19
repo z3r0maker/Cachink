@@ -9,7 +9,7 @@
  * via useProductFormStore for state persistence.
  */
 
-import { useRef, type ReactElement } from 'react';
+import { useCallback, useRef, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import {
   NuevoProductoScreen,
@@ -17,11 +17,18 @@ import {
   useCrearProducto,
   useFeatureFlag,
   useProductFormStore,
+  type CrearProductoInput,
   type ProductoFormState,
 } from '@cachink/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
-export default function NuevoProductoRoute(): ReactElement {
+function useNuevoProductoHandlers(): {
+  handlePickIcon: () => void;
+  handleSubmit: (input: CrearProductoInput) => void;
+  formRef: React.RefObject<ProductoFormState>;
+  crear: ReturnType<typeof useCrearProducto>;
+  conversionEnabled: boolean;
+} {
   const router = useRouter();
   const crear = useCrearProducto();
   const conversionEnabled = useFeatureFlag('conversionMateriaPrima');
@@ -30,33 +37,39 @@ export default function NuevoProductoRoute(): ReactElement {
   const formRef = useRef<ProductoFormState>(initialProductoState());
 
   const handlePickIcon = (): void => {
-    // Persist the full form state so it survives memory-pressure unmounts
-    setDraft({
-      ...formRef.current,
-      icono: storeIcon,
-      editingProductId: null,
-    });
+    setDraft({ ...formRef.current, icono: storeIcon, editingProductId: null });
     router.push('/productos/icon-picker' as never);
   };
+
+  const handleSubmit = useCallback(
+    (input: CrearProductoInput) => {
+      const payload = storeIcon ? { ...input, icono: storeIcon } : input;
+      crear.mutate(payload, {
+        onSuccess: () => {
+          useProductFormStore.getState().clear();
+          router.back();
+        },
+      });
+    },
+    [storeIcon, crear, router],
+  );
+
+  return { handlePickIcon, handleSubmit, formRef, crear, conversionEnabled };
+}
+
+export default function NuevoProductoRoute(): ReactElement {
+  const router = useRouter();
+  const h = useNuevoProductoHandlers();
 
   return (
     <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
       <NuevoProductoScreen
-        onSubmit={(input) => {
-          // Merge the icon from the store into the submission
-          const payload = storeIcon ? { ...input, icono: storeIcon } : input;
-          crear.mutate(payload, {
-            onSuccess: () => {
-              useProductFormStore.getState().clear();
-              router.back();
-            },
-          });
-        }}
+        onSubmit={h.handleSubmit}
         onBack={() => router.back()}
-        submitting={crear.isPending}
-        conversionEnabled={conversionEnabled}
-        onPickIcon={handlePickIcon}
-        onFormChange={(s) => { formRef.current = s; }}
+        submitting={h.crear.isPending}
+        conversionEnabled={h.conversionEnabled}
+        onPickIcon={h.handlePickIcon}
+        onFormChange={(s) => { h.formRef.current = s; }}
       />
     </AppShellWrapper>
   );

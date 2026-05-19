@@ -5,6 +5,7 @@
 #   2. Tap "Cerrar turno" → blind count step 1 → step 2 → close
 #
 # Precondition: demo mode seeded.
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

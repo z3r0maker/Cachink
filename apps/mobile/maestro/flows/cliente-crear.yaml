@@ -6,6 +6,7 @@
 # the /clientes Expo Router page using the app's URL scheme.
 #
 # Precondition: wizard + business + role already set up.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

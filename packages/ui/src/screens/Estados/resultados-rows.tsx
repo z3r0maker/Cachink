@@ -54,66 +54,109 @@ function Row(props: RowProps): ReactElement {
   );
 }
 
-export function ResultadosRows({
-  estado,
-  t,
-}: {
-  estado: EstadoDeResultados;
-  t: T;
-}): ReactElement {
+function RowWithHelp(p: RowProps & { subtitle: string; detail: string }): ReactElement {
   return (
-    <Card padding="md" fullWidth testID="estado-resultados-rows">
-      <Row label={t('estados.resultadosIngresos')} value={estado.ingresos} testID="estado-row-ingresos" />
+    <>
+      <Row label={p.label} value={p.value} emphasis={p.emphasis} testID={p.testID} />
+      <HelpAccordion subtitle={p.subtitle} detail={p.detail} />
+    </>
+  );
+}
+
+function MermaRow({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement | null {
+  if (estado.merma <= ZERO) return null;
+  return (
+    <View>
+      <Row label={t('estados.resultadosMerma')} value={estado.merma} testID="estado-row-merma" />
       <HelpAccordion
+        subtitle={t('estados.resultadosMermaSubtitle')}
+        detail={t('estados.resultadosMermaDetail')}
+      />
+    </View>
+  );
+}
+
+function TopRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
+  return (
+    <>
+      <RowWithHelp
+        label={t('estados.resultadosIngresos')}
+        value={estado.ingresos}
+        testID="estado-row-ingresos"
         subtitle={t('estados.resultadosIngresosSubtitle')}
         detail={t('estados.resultadosIngresosDetail')}
       />
-      <Row label={t('estados.resultadosCostoVentas')} value={estado.costoDeVentas} testID="estado-row-costo-ventas" />
-      <HelpAccordion
+      <RowWithHelp
+        label={t('estados.resultadosCostoVentas')}
+        value={estado.costoDeVentas}
+        testID="estado-row-costo-ventas"
         subtitle={t('estados.resultadosCostoVentasSubtitle')}
         detail={t('estados.resultadosCostoVentasDetail')}
       />
-      <Row label={t('estados.resultadosUtilidadBruta')} value={estado.utilidadBruta} emphasis="total" testID="estado-row-utilidad-bruta" />
-      <HelpAccordion
+      <RowWithHelp
+        label={t('estados.resultadosUtilidadBruta')}
+        value={estado.utilidadBruta}
+        emphasis="total"
+        testID="estado-row-utilidad-bruta"
         subtitle={t('estados.resultadosUtilidadBrutaSubtitle')}
         detail={t('estados.resultadosUtilidadBrutaDetail')}
       />
-      {estado.merma > ZERO && (
-        <View>
-          <Row label={t('estados.resultadosMerma')} value={estado.merma} testID="estado-row-merma" />
-          <HelpAccordion
-            subtitle={t('estados.resultadosMermaSubtitle')}
-            detail={t('estados.resultadosMermaDetail')}
-          />
-        </View>
-      )}
-      <Row label={t('estados.resultadosGastosOperativos')} value={estado.gastosOperativos} testID="estado-row-gastos-operativos" />
-      <HelpAccordion
+      <MermaRow estado={estado} t={t} />
+    </>
+  );
+}
+
+function IsrZeroHint({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement | null {
+  if (estado.isr !== ZERO || estado.utilidadOperativa >= ZERO) return null;
+  return (
+    <Text
+      testID="estado-isr-zero-hint"
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.medium}
+      fontSize={11}
+      color={colors.gray400}
+      paddingVertical={2}
+    >
+      {t('estados.isrZeroHint')}
+    </Text>
+  );
+}
+
+function BottomRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
+  return (
+    <>
+      <RowWithHelp
+        label={t('estados.resultadosGastosOperativos')}
+        value={estado.gastosOperativos}
+        testID="estado-row-gastos-operativos"
         subtitle={t('estados.resultadosGastosOperativosSubtitle')}
         detail={t('estados.resultadosGastosOperativosDetail')}
       />
-      <Row label={t('estados.resultadosUtilidadOperativa')} value={estado.utilidadOperativa} emphasis="total" testID="estado-row-utilidad-operativa" />
-      <HelpAccordion
+      <RowWithHelp
+        label={t('estados.resultadosUtilidadOperativa')}
+        value={estado.utilidadOperativa}
+        emphasis="total"
+        testID="estado-row-utilidad-operativa"
         subtitle={t('estados.resultadosUtilidadOperativaSubtitle')}
         detail={t('estados.resultadosUtilidadOperativaDetail')}
       />
-      <Row label={t('estados.resultadosIsr')} value={estado.isr} testID="estado-row-isr" />
-      <HelpAccordion
+      <RowWithHelp
+        label={t('estados.resultadosIsr')}
+        value={estado.isr}
+        testID="estado-row-isr"
         subtitle={t('estados.resultadosIsrSubtitle')}
         detail={t('estados.resultadosIsrDetail')}
       />
-      {estado.isr === ZERO && estado.utilidadOperativa < ZERO && (
-        <Text
-          testID="estado-isr-zero-hint"
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={11}
-          color={colors.gray400}
-          paddingVertical={2}
-        >
-          {t('estados.isrZeroHint')}
-        </Text>
-      )}
+      <IsrZeroHint estado={estado} t={t} />
+    </>
+  );
+}
+
+export function ResultadosRows({ estado, t }: { estado: EstadoDeResultados; t: T }): ReactElement {
+  return (
+    <Card padding="md" fullWidth testID="estado-resultados-rows">
+      <TopRows estado={estado} t={t} />
+      <BottomRows estado={estado} t={t} />
     </Card>
   );
 }

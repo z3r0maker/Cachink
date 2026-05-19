@@ -13,6 +13,7 @@
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
 #   maestro test apps/mobile/maestro/flows/ventas-total-y-fecha.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

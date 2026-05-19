@@ -29,6 +29,46 @@ import { AUDIT_REGISTRAR_VENTA } from '../observability/audit-configs';
 
 export type RegistrarVentaResult = UseMutationResult<Sale, Error, NewSale, unknown>;
 
+async function checkStockBajo(
+  sale: Sale,
+  businessId: string | null,
+  products: ReturnType<typeof useProductsRepository>,
+  movements: ReturnType<typeof useInventoryMovementsRepository>,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): Promise<void> {
+  if (!businessId) return;
+  const product = await products.findById(sale.productoId);
+  if (!product || !product.seguirStock) return;
+  const stock = await movements.sumStock(sale.productoId);
+  const umbral = product.umbralStockBajo ?? 3;
+  if (stock <= umbral) {
+    emitAlert.mutate({
+      source: 'stock-bajo',
+      severity: 'warning',
+      titleKey: 'notificaciones.stockBajo',
+      message: `${product.nombre}: quedan ${stock} unidades (umbral: ${umbral}).`,
+      actionRoute: '/productos',
+      metadata: JSON.stringify({ productoId: sale.productoId, stock, umbral }),
+      dedupeKey: sale.productoId as string,
+    });
+  }
+}
+
+function emitCreditoAlert(
+  sale: Sale,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): void {
+  if (sale.metodo !== 'Crédito') return;
+  emitAlert.mutate({
+    source: 'credito-entrega',
+    severity: 'info',
+    titleKey: 'notificaciones.creditoEntrega',
+    message: `Se registró una venta a crédito: ${sale.concepto}.`,
+    actionRoute: '/ventas-credito',
+    metadata: JSON.stringify({ saleId: sale.id }),
+  });
+}
+
 export function useRegistrarVenta(): RegistrarVentaResult {
   const sales = useSalesRepository();
   const clients = useClientsRepository();
@@ -48,7 +88,6 @@ export function useRegistrarVenta(): RegistrarVentaResult {
     [sales, clients, products, movements, cajaTurnos, stockEnabled, userId],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_VENTA);
-
   const emitAlert = useEmitDirectorAlert();
 
   return useMutation<Sale, Error, NewSale>({
@@ -61,42 +100,10 @@ export function useRegistrarVenta(): RegistrarVentaResult {
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['frequentProductos', businessId] }),
       ]);
-
-      // Alert: credito-entrega — when a Crédito sale is recorded
-      if (sale.metodo === 'Crédito') {
-        emitAlert.mutate({
-          source: 'credito-entrega',
-          severity: 'info',
-          titleKey: 'notificaciones.creditoEntrega',
-          message: `Se registró una venta a crédito: ${sale.concepto}.`,
-          actionRoute: '/ventas-credito',
-          metadata: JSON.stringify({ saleId: sale.id }),
-        });
-      }
-
-      // Alert: stock-bajo — check if the sold product is at/below threshold
+      emitCreditoAlert(sale, emitAlert);
       if (stockEnabled && sale.productoId) {
-        void checkStockBajo(sale);
+        void checkStockBajo(sale, businessId, products, movements, emitAlert);
       }
     },
   });
-
-  async function checkStockBajo(sale: Sale): Promise<void> {
-    if (!businessId) return;
-    const product = await products.findById(sale.productoId);
-    if (!product || !product.seguirStock) return;
-    const stock = await movements.sumStock(sale.productoId);
-    const umbral = product.umbralStockBajo ?? 3;
-    if (stock <= umbral) {
-      emitAlert.mutate({
-        source: 'stock-bajo',
-        severity: 'warning',
-        titleKey: 'notificaciones.stockBajo',
-        message: `${product.nombre}: quedan ${stock} unidades (umbral: ${umbral}).`,
-        actionRoute: '/productos',
-        metadata: JSON.stringify({ productoId: sale.productoId, stock, umbral }),
-        dedupeKey: sale.productoId as string,
-      });
-    }
-  }
 }

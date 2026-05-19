@@ -29,3 +29,9 @@
 appId: mx.cachink.mobile
 # iOS-first simulator target. Android testing uses MAESTRO_ANDROID=1 env.
 defaultTags: []
+# Disable iOS simulator animations to speed up tap commands.
+# Maestro waits for animations to settle after each tap (2x 3s timeout).
+# The wizard screen's continuous background animations cause ~14s overhead per tap.
+platform:
+  ios:
+    disableAnimations: true

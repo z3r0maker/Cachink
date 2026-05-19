@@ -13,6 +13,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
 #   maestro test apps/mobile/maestro/flows/cliente-editar.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

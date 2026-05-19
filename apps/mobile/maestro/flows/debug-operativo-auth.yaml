@@ -1,3 +1,4 @@
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

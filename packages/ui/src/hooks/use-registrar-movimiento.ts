@@ -26,6 +26,27 @@ export type RegistrarMovimientoResult = UseMutationResult<
 
 const MERMA_MOTIVOS = ['Caducidad', 'Daño', 'Preparación incorrecta', 'Otro'];
 
+function emitMermaAlert(
+  movement: InventoryMovement,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): void {
+  if (movement.tipo !== 'salida') return;
+  if (!movement.motivo || !MERMA_MOTIVOS.includes(movement.motivo)) return;
+  emitAlert.mutate({
+    source: 'merma-threshold',
+    severity: 'warning',
+    titleKey: 'notificaciones.mermaThreshold',
+    message: `Se registró merma: ${movement.cantidad} unidades (${movement.motivo}).`,
+    actionRoute: '/merma-reportes',
+    metadata: JSON.stringify({
+      productoId: movement.productoId,
+      cantidad: movement.cantidad,
+      motivo: movement.motivo,
+    }),
+    dedupeKey: `merma-${movement.productoId}-${movement.fecha}`,
+  });
+}
+
 export function useRegistrarMovimiento(): RegistrarMovimientoResult {
   const movements = useInventoryMovementsRepository();
   const expenses = useExpensesRepository();
@@ -49,27 +70,7 @@ export function useRegistrarMovimiento(): RegistrarMovimientoResult {
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId, movement.fecha] }),
       ]);
-
-      // Alert: merma-threshold — if this is a merma exit
-      if (
-        movement.tipo === 'salida' &&
-        movement.motivo &&
-        MERMA_MOTIVOS.includes(movement.motivo)
-      ) {
-        emitAlert.mutate({
-          source: 'merma-threshold',
-          severity: 'warning',
-          titleKey: 'notificaciones.mermaThreshold',
-          message: `Se registró merma: ${movement.cantidad} unidades (${movement.motivo}).`,
-          actionRoute: '/merma-reportes',
-          metadata: JSON.stringify({
-            productoId: movement.productoId,
-            cantidad: movement.cantidad,
-            motivo: movement.motivo,
-          }),
-          dedupeKey: `merma-${movement.productoId}-${movement.fecha}`,
-        });
-      }
+      emitMermaAlert(movement, emitAlert);
     },
   });
 }

@@ -3,6 +3,7 @@
 #
 # Precondition: a Crédito venta for cliente 'Carla Márquez' exists
 # (run venta-credito.yaml from Slice 1 first).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

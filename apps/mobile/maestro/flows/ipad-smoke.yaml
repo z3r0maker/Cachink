@@ -28,6 +28,7 @@
 # NOTE: iPad companion for smoke-launch.yaml (which tests the wizard).
 # iPhone counterpart: smoke-launch.yaml, director-home-structure.yaml,
 # estados-subtabs.yaml, otros-nav.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

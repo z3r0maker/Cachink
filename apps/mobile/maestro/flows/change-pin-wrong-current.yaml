@@ -12,6 +12,7 @@
 #
 # Note: usuario-crear.yaml creates "Operativo Test" with PIN "111111".
 # If mustChangePin is set during creation, this flow tests the error path.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

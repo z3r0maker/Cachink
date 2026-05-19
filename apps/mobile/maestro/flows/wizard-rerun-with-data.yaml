@@ -6,6 +6,7 @@
 # first to seed, or launch with `EXPO_PUBLIC_E2E_SEED=1` to bake the
 # fixtures in at boot. The "data preserved" callout reads from the
 # repositories at render time, so any pre-existing data triggers it.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

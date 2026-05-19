@@ -22,6 +22,42 @@ export interface MermaReportesScreenProps {
   readonly testID?: string;
 }
 
+type MermaRow = NonNullable<ReturnType<typeof useMermaReportes>['data']>[number];
+
+function MermaKpiStrip(props: { rows: readonly MermaRow[] | undefined; t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
+  const total = props.rows?.reduce((acc, r) => acc + r.totalUnidades, 0) ?? 0;
+  const affected = props.rows?.length ?? 0;
+  const top = props.rows?.[0]?.productoNombre ?? '—';
+  return (
+    <>
+      <View flexDirection="row" gap={8}>
+        <View flex={1}><Kpi label={props.t('mermaReportes.totalUnidades')} value={String(total)} tone="negative" /></View>
+        <View flex={1}><Kpi label={props.t('mermaReportes.productosAfectados')} value={String(affected)} /></View>
+      </View>
+      <Kpi label={props.t('mermaReportes.productoMasMerma')} value={top} />
+    </>
+  );
+}
+
+function MermaDataState(props: {
+  rows: readonly MermaRow[] | undefined;
+  isLoading: boolean;
+  error: Error | null;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement | null {
+  if (props.isLoading) {
+    return (
+      <View gap={8}>
+        <Skeleton.Row index={0} testIDPrefix="merma-skeleton" />
+        <Skeleton.Row index={1} testIDPrefix="merma-skeleton" />
+      </View>
+    );
+  }
+  if (props.error !== null) return <ErrorState title={props.t('common.error')} body={props.error.message} testID="merma-error" />;
+  if (props.rows !== undefined && props.rows.length === 0) return <EmptyMermaReportes />;
+  return null;
+}
+
 export function MermaReportesScreen(props: MermaReportesScreenProps): ReactElement {
   const { t } = useTranslation();
   const periodLabels = usePeriodLabels();
@@ -29,50 +65,15 @@ export function MermaReportesScreen(props: MermaReportesScreenProps): ReactEleme
   const range = usePeriodoRange(periodo);
   const { data: rows, isLoading, error } = useMermaReportes(range.from, range.to);
 
-  const totalUnidades = rows?.reduce((acc, r) => acc + r.totalUnidades, 0) ?? 0;
-  const productosAfectados = rows?.length ?? 0;
-  const topProducto = rows?.[0]?.productoNombre ?? '—';
-
   return (
     <ScrollView testID={props.testID ?? 'merma-reportes-screen'}>
       <View padding={16} gap={16}>
         <SectionTitle title={t('mermaReportes.title')} />
         <PeriodPicker value={periodo} onChange={setPeriodo} labels={periodLabels} />
-
-        <View flexDirection="row" gap={8}>
-          <View flex={1}>
-            <Kpi label={t('mermaReportes.totalUnidades')} value={String(totalUnidades)} tone="negative" />
-          </View>
-          <View flex={1}>
-            <Kpi label={t('mermaReportes.productosAfectados')} value={String(productosAfectados)} />
-          </View>
-        </View>
-        <Kpi label={t('mermaReportes.productoMasMerma')} value={topProducto} />
-
-        {isLoading && (
-          <View gap={8}>
-            <Skeleton.Row index={0} testIDPrefix="merma-skeleton" />
-            <Skeleton.Row index={1} testIDPrefix="merma-skeleton" />
-          </View>
-        )}
-
-        {error !== null && !isLoading && (
-          <ErrorState
-            title={t('common.error')}
-            body={error.message}
-            testID="merma-error"
-          />
-        )}
-
-        {rows !== undefined && rows.length === 0 && <EmptyMermaReportes />}
-
+        <MermaKpiStrip rows={rows} t={t} />
+        <MermaDataState rows={rows} isLoading={isLoading} error={error} t={t} />
         {rows?.map((row) => (
-          <MermaProductoCard
-            key={row.productoId as string}
-            productoNombre={row.productoNombre}
-            totalUnidades={row.totalUnidades}
-            movimientos={row.movimientos}
-          />
+          <MermaProductoCard key={row.productoId as string} productoNombre={row.productoNombre} totalUnidades={row.totalUnidades} movimientos={row.movimientos} />
         ))}
       </View>
     </ScrollView>

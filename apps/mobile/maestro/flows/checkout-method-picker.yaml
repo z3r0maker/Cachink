@@ -1,7 +1,6 @@
 # Verify the multi-step checkout flow renders the method picker.
-# Route: /checkout (triggered after adding item to cart)
-# Prerequisite: at least one product must exist (created by Phase 2).
-# Verifies: checkout-method-picker testID, payment options, continue CTA.
+# Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 tags:
   - ventas
@@ -11,28 +10,33 @@ tags:
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to Ventas tab and tap a product to add to cart
+# Navigate to Ventas tab and tap a product to add to cart.
 - tapOn:
     id: "tab-ventas"
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
     timeout: 5000
+- tapOn: "Quesadilla"
 
-# Tap a product in the grid ("Tortilla" from precondition flow).
-- tapOn: "Tortilla"
+# Cart strip appears — tap checkout.
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
 
-# The checkout sheet / method picker should appear
+# The checkout method picker screen should appear.
 - extendedWaitUntil:
     visible:
       id: "checkout-method-picker"
     timeout: 5000
 
-# Verify payment method options are visible
+# Verify payment method options are visible.
 - assertVisible:
     id: "checkout-payment-method"
 
-# Verify the continue button exists
+# Verify the continue button exists.
 - assertVisible:
     id: "checkout-method-continue"

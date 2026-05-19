@@ -45,6 +45,7 @@ const setCurrentBusinessIdMock = vi.fn();
 vi.mock('../../src/app-config/index', () => ({
   APP_CONFIG_KEYS: { currentBusinessId: 'currentBusinessId' },
   useSetCurrentBusinessId: () => setCurrentBusinessIdMock,
+  useDeviceId: () => 'test-device-id',
 }));
 
 // Import after mocks register.

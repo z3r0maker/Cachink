@@ -1,6 +1,7 @@
 # Navigate to Settings → Tipos de Pago and verify toggle cards render.
 # Route: /settings/tipos-de-pago (via Settings hub → tipos-de-pago card)
 # Verifies: tipos-de-pago-screen testID, all 4 payment method toggles.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
   - settings

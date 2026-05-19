@@ -44,6 +44,66 @@ function LastSalePreview(props: { sale: Sale }): ReactElement {
   );
 }
 
+function CollapsedHeader(props: { total: Money }): ReactElement {
+  return (
+    <View flexDirection="row" justifyContent="space-between" alignItems="center">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={11}
+        color={colors.black}
+        letterSpacing={typography.letterSpacing.wide}
+        style={{ textTransform: 'uppercase' }}
+      >
+        Total del día
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black}
+        fontSize={20}
+        color={colors.black}
+        letterSpacing={typography.letterSpacing.tight}
+      >
+        {formatMoney(props.total)}
+      </Text>
+    </View>
+  );
+}
+
+function CollapsedFooter(props: {
+  ventaCount: number;
+  lastVenta?: Sale;
+}): ReactElement {
+  return (
+    <View flexDirection="row" justifyContent="space-between" alignItems="center">
+      <View flexDirection="row" gap={4} flex={1}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.medium}
+          fontSize={12}
+          color={colors.gray600}
+        >
+          {props.ventaCount} venta{props.ventaCount !== 1 ? 's' : ''}
+        </Text>
+        {props.lastVenta && (
+          <>
+            <Text fontSize={12} color={colors.gray400}>·</Text>
+            <LastSalePreview sale={props.lastVenta} />
+          </>
+        )}
+      </View>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={12}
+        color={colors.black}
+      >
+        Ver más ▼
+      </Text>
+    </View>
+  );
+}
+
 function CollapsedCard(props: {
   total: Money;
   ventaCount: number;
@@ -55,61 +115,51 @@ function CollapsedCard(props: {
       variant="yellow"
       padding="md"
       fullWidth
-      onPress={() => {
-        impactLight();
-        props.onExpand();
-      }}
+      onPress={() => { impactLight(); props.onExpand(); }}
       testID="session-strip-collapsed"
       ariaLabel="Ver ventas del día"
     >
       <View gap={4}>
-        <View flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={11}
-            color={colors.black}
-            letterSpacing={typography.letterSpacing.wide}
-            style={{ textTransform: 'uppercase' }}
-          >
-            Total del día
-          </Text>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.black}
-            fontSize={20}
-            color={colors.black}
-            letterSpacing={typography.letterSpacing.tight}
-          >
-            {formatMoney(props.total)}
-          </Text>
-        </View>
-        <View flexDirection="row" justifyContent="space-between" alignItems="center">
-          <View flexDirection="row" gap={4} flex={1}>
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.medium}
-              fontSize={12}
-              color={colors.gray600}
-            >
-              {props.ventaCount} venta{props.ventaCount !== 1 ? 's' : ''}
-            </Text>
-            {props.lastVenta && (
-              <>
-                <Text fontSize={12} color={colors.gray400}>·</Text>
-                <LastSalePreview sale={props.lastVenta} />
-              </>
-            )}
-          </View>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.semibold}
-            fontSize={12}
-            color={colors.black}
-          >
-            Ver más ▼
-          </Text>
-        </View>
+        <CollapsedHeader total={props.total} />
+        <CollapsedFooter
+          ventaCount={props.ventaCount}
+          lastVenta={props.lastVenta}
+        />
+      </View>
+    </Card>
+  );
+}
+
+function ExpandedHeader(props: {
+  total: Money;
+  onCollapse: () => void;
+}): ReactElement {
+  return (
+    <Card
+      variant="yellow"
+      padding="md"
+      fullWidth
+      onPress={() => { impactLight(); props.onCollapse(); }}
+      testID="session-strip-expanded-header"
+      ariaLabel="Ocultar ventas del día"
+    >
+      <View flexDirection="row" justifyContent="space-between" alignItems="center">
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black}
+          fontSize={20}
+          color={colors.black}
+        >
+          {formatMoney(props.total)}
+        </Text>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.semibold}
+          fontSize={12}
+          color={colors.black}
+        >
+          Ocultar ▲
+        </Text>
       </View>
     </Card>
   );
@@ -117,10 +167,11 @@ function CollapsedCard(props: {
 
 export function SessionStrip(props: SessionStripProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
+  const testID = props.testID ?? 'session-strip';
 
   if (!expanded) {
     return (
-      <View testID={props.testID ?? 'session-strip'}>
+      <View testID={testID}>
         <CollapsedCard
           total={props.total}
           ventaCount={props.ventaCount}
@@ -132,37 +183,8 @@ export function SessionStrip(props: SessionStripProps): ReactElement {
   }
 
   return (
-    <View testID={props.testID ?? 'session-strip'} gap={8}>
-      <Card
-        variant="yellow"
-        padding="md"
-        fullWidth
-        onPress={() => {
-          impactLight();
-          setExpanded(false);
-        }}
-        testID="session-strip-expanded-header"
-        ariaLabel="Ocultar ventas del día"
-      >
-        <View flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.black}
-            fontSize={20}
-            color={colors.black}
-          >
-            {formatMoney(props.total)}
-          </Text>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.semibold}
-            fontSize={12}
-            color={colors.black}
-          >
-            Ocultar ▲
-          </Text>
-        </View>
-      </Card>
+    <View testID={testID} gap={8}>
+      <ExpandedHeader total={props.total} onCollapse={() => setExpanded(false)} />
       <SalesContent
         ventas={props.ventas}
         productColorMap={props.productColorMap}

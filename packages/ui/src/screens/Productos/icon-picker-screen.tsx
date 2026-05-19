@@ -44,44 +44,46 @@ function CategoryHeader({ label }: { label: string }): ReactElement {
   );
 }
 
+function TileContent(props: { icon: ProductIcon; selected: boolean }): ReactElement {
+  const bg = props.selected ? colors.yellow : colors.white;
+  const borderW = props.selected ? 2.5 : 2;
+  return (
+    <View
+      backgroundColor={bg}
+      borderWidth={borderW}
+      borderColor={colors.black}
+      borderRadius={12}
+      padding={10}
+      alignItems="center"
+      justifyContent="center"
+      gap={4}
+      minWidth={64}
+      minHeight={64}
+      {...(props.selected && { scale: 1.05 })}
+    >
+      <Icon name={props.icon as IconName} size={32} color={colors.black} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={9}
+        color={colors.gray600}
+        numberOfLines={1}
+        textAlign="center"
+      >
+        {props.icon}
+      </Text>
+    </View>
+  );
+}
+
 function IconTile(props: {
   icon: ProductIcon;
   selected: boolean;
   onPress: () => void;
 }): ReactElement {
-  const bg = props.selected ? colors.yellow : colors.white;
-  const borderW = props.selected ? 2.5 : 2;
   return (
     <Pressable onPress={props.onPress} testID={`icon-tile-${props.icon}`}>
-      <View
-        backgroundColor={bg}
-        borderWidth={borderW}
-        borderColor={colors.black}
-        borderRadius={12}
-        padding={10}
-        alignItems="center"
-        justifyContent="center"
-        gap={4}
-        minWidth={64}
-        minHeight={64}
-        {...(props.selected && { scale: 1.05 })}
-      >
-        <Icon
-          name={props.icon as IconName}
-          size={32}
-          color={colors.black}
-        />
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={9}
-          color={colors.gray600}
-          numberOfLines={1}
-          textAlign="center"
-        >
-          {props.icon}
-        </Text>
-      </View>
+      <TileContent icon={props.icon} selected={props.selected} />
     </Pressable>
   );
 }
@@ -108,54 +110,70 @@ function CategorySection(props: {
   );
 }
 
-export function IconPickerScreen(
-  props: IconPickerScreenProps,
-): ReactElement {
-  const [selected, setSelected] = useState<ProductIcon | null>(
-    props.selectedIcon,
-  );
-
+function PickerTopBar(props: { onCancel: () => void }): ReactElement {
   return (
     <View
-      testID={props.testID ?? 'icon-picker-screen'}
-      flex={1}
-      backgroundColor={colors.offwhite}
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+      paddingHorizontal={16}
+      paddingVertical={12}
     >
-      {/* Yellow accent strip */}
-      <View backgroundColor={colors.yellow} height={6} />
-
-      {/* Top bar */}
-      <View
-        flexDirection="row"
-        alignItems="center"
-        justifyContent="space-between"
-        paddingHorizontal={16}
-        paddingVertical={12}
+      <Pressable onPress={props.onCancel} testID="icon-picker-cancel">
+        <Icon name="chevron-left" size={24} color={colors.black} />
+      </Pressable>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={18}
+        color={colors.black}
       >
-        <Pressable
-          onPress={props.onCancel}
-          testID="icon-picker-cancel"
-        >
-          <Icon name="chevron-left" size={24} color={colors.black} />
-        </Pressable>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={18}
-          color={colors.black}
-        >
-          Seleccionar ícono
-        </Text>
-        <View width={24} />
-      </View>
+        Seleccionar ícono
+      </Text>
+      <View width={24} />
+    </View>
+  );
+}
 
-      {/* Scrollable icon grid */}
+function PickerFooter(props: {
+  selected: ProductIcon | null;
+  onAccept: (icon: ProductIcon) => void;
+}): ReactElement {
+  return (
+    <View
+      position="absolute"
+      bottom={0}
+      left={0}
+      right={0}
+      padding={16}
+      paddingBottom={32}
+      backgroundColor={colors.offwhite}
+      borderTopWidth={2}
+      borderTopColor={colors.gray200}
+    >
+      <Btn
+        variant="primary"
+        onPress={() => { if (props.selected) props.onAccept(props.selected); }}
+        disabled={props.selected === null}
+        fullWidth
+        testID="icon-picker-accept"
+      >
+        Aceptar
+      </Btn>
+    </View>
+  );
+}
+
+export function IconPickerScreen(props: IconPickerScreenProps): ReactElement {
+  const [selected, setSelected] = useState<ProductIcon | null>(props.selectedIcon);
+
+  return (
+    <View testID={props.testID ?? 'icon-picker-screen'} flex={1} backgroundColor={colors.offwhite}>
+      <View backgroundColor={colors.yellow} height={6} />
+      <PickerTopBar onCancel={props.onCancel} />
       <ScrollView
         style={{ flex: 1 }}
-        contentContainerStyle={{
-          padding: 16,
-          paddingBottom: 100,
-        }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
       >
         {ICON_CATEGORIES.map((cat) => (
           <CategorySection
@@ -166,31 +184,7 @@ export function IconPickerScreen(
           />
         ))}
       </ScrollView>
-
-      {/* Sticky footer */}
-      <View
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        padding={16}
-        paddingBottom={32}
-        backgroundColor={colors.offwhite}
-        borderTopWidth={2}
-        borderTopColor={colors.gray200}
-      >
-        <Btn
-          variant="primary"
-          onPress={() => {
-            if (selected) props.onAccept(selected);
-          }}
-          disabled={selected === null}
-          fullWidth
-          testID="icon-picker-accept"
-        >
-          Aceptar
-        </Btn>
-      </View>
+      <PickerFooter selected={selected} onAccept={props.onAccept} />
     </View>
   );
 }

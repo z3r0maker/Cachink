@@ -8,11 +8,12 @@ import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { AuditoriaInventario, AuditoriaLinea } from '@cachink/domain';
-import { Btn, ConfirmDialog } from '../../components/index';
+import { ConfirmDialog } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useActualizarAuditoria } from '../../hooks/use-actualizar-auditoria';
 import { colors, typography } from '../../theme';
 import { ConteoLineaCard } from './conteo-linea-card';
+import { ConteoActionBar } from './conteo-action-bar';
 
 export interface AuditoriaConteoProps {
   readonly auditoria: AuditoriaInventario;
@@ -21,66 +22,105 @@ export interface AuditoriaConteoProps {
   readonly testID?: string;
 }
 
-export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
-  const { t } = useTranslation();
-  const { mutateAsync, isPending } = useActualizarAuditoria();
+function parseStockValue(value: string): number | null {
+  const parsed = value.trim() === '' ? null : Number(value);
+  return parsed !== null && Number.isInteger(parsed) ? parsed : null;
+}
 
-  const [lineas, setLineas] = useState<AuditoriaLinea[]>(
-    () => JSON.parse(props.auditoria.lineas) as AuditoriaLinea[],
-  );
+function computeDiferencia(stockReal: number | null, stockSistema: number): number | null {
+  return stockReal !== null ? stockReal - stockSistema : null;
+}
+
+function updateLinea(prev: AuditoriaLinea[], idx: number, value: string): AuditoriaLinea[] {
+  const next = [...prev];
+  const linea = next[idx];
+  if (!linea) return prev;
+  const stockReal = parseStockValue(value);
+  next[idx] = { ...linea, stockReal, diferencia: computeDiferencia(stockReal, linea.stockSistema) };
+  return next;
+}
+
+function useConteoDialogs() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
+  return { showConfirm, setShowConfirm, showCancel, setShowCancel };
+}
 
+function useConteoState(
+  auditoria: AuditoriaInventario,
+  onFinalized: () => void,
+  onCancelled: () => void,
+) {
+  const { mutateAsync, isPending } = useActualizarAuditoria();
+  const [lineas, setLineas] = useState<AuditoriaLinea[]>(
+    () => JSON.parse(auditoria.lineas) as AuditoriaLinea[],
+  );
+  const dialogs = useConteoDialogs();
   const contados = lineas.filter((l) => l.stockReal !== null).length;
-  const total = lineas.length;
-  const allCounted = contados === total;
+  const discrepancias = lineas.filter((l) => l.diferencia !== null && l.diferencia !== 0).length;
+  const handleStockChange = (idx: number, value: string): void =>
+    setLineas((prev) => updateLinea(prev, idx, value));
 
-  const discrepancias = lineas.filter(
-    (l) => l.diferencia !== null && l.diferencia !== 0,
-  ).length;
-
-  const handleStockChange = (idx: number, value: string): void => {
-    const parsed = value.trim() === '' ? null : Number(value);
-    const stockReal =
-      parsed !== null && Number.isInteger(parsed) ? parsed : null;
-    setLineas((prev) => {
-      const next = [...prev];
-      const linea = next[idx];
-      if (!linea) return prev;
-      const diferencia =
-        stockReal !== null ? stockReal - linea.stockSistema : null;
-      next[idx] = { ...linea, stockReal, diferencia };
-      return next;
-    });
+  const save = async () => mutateAsync({ id: auditoria.id, lineas, estado: 'borrador' });
+  const finalize = async () => {
+    await mutateAsync({ id: auditoria.id, lineas, estado: 'finalizada' });
+    dialogs.setShowConfirm(false);
+    onFinalized();
+  };
+  const cancel = async () => {
+    await mutateAsync({ id: auditoria.id, lineas, estado: 'cancelada' });
+    dialogs.setShowCancel(false);
+    onCancelled();
   };
 
-  const handleSave = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'borrador',
-    });
+  return {
+    lineas,
+    isPending,
+    contados,
+    allCounted: contados === lineas.length,
+    discrepancias,
+    ...dialogs,
+    handleStockChange,
+    save,
+    finalize,
+    cancel,
   };
+}
 
-  const handleFinalize = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'finalizada',
-    });
-    setShowConfirm(false);
-    props.onFinalized();
-  };
+function ConteoDialogs({
+  ctx,
+  t,
+}: {
+  ctx: ReturnType<typeof useConteoState>;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <>
+      <ConfirmDialog
+        open={ctx.showConfirm}
+        onClose={() => ctx.setShowConfirm(false)}
+        title={t('auditoria.confirmarFinalizar' as never)}
+        description={t('auditoria.confirmarFinalizarDesc' as never, { count: ctx.discrepancias })}
+        onConfirm={ctx.finalize}
+        confirmLabel={t('auditoria.finalizar' as never)}
+        tone="default"
+      />
+      <ConfirmDialog
+        open={ctx.showCancel}
+        onClose={() => ctx.setShowCancel(false)}
+        title={t('auditoria.cancelar' as never)}
+        description={t('auditoria.cancelarConfirm' as never)}
+        onConfirm={ctx.cancel}
+        confirmLabel={t('auditoria.cancelar' as never)}
+        tone="danger"
+      />
+    </>
+  );
+}
 
-  const handleCancel = async (): Promise<void> => {
-    await mutateAsync({
-      id: props.auditoria.id,
-      lineas,
-      estado: 'cancelada',
-    });
-    setShowCancel(false);
-    props.onCancelled();
-  };
+export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
+  const { t } = useTranslation();
+  const ctx = useConteoState(props.auditoria, props.onFinalized, props.onCancelled);
 
   return (
     <View gap={12} testID={props.testID ?? 'auditoria-conteo'}>
@@ -92,78 +132,30 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
         testID="conteo-counter"
       >
         {t('auditoria.contados', {
-          contados: String(contados),
-          total: String(total),
+          contados: String(ctx.contados),
+          total: String(ctx.lineas.length),
         })}
       </Text>
-
       <ScrollView>
         <View gap={8}>
-          {lineas.map((linea, idx) => (
+          {ctx.lineas.map((linea, idx) => (
             <ConteoLineaCard
               key={linea.productoId as string}
               linea={linea}
-              onChange={(v) => handleStockChange(idx, v)}
+              onChange={(v) => ctx.handleStockChange(idx, v)}
             />
           ))}
         </View>
       </ScrollView>
-
-      <View flexDirection="row" gap={8}>
-        <View flex={1}>
-          <Btn
-            variant="ghost"
-            onPress={() => setShowCancel(true)}
-            disabled={isPending}
-            fullWidth
-            testID="conteo-cancelar"
-          >
-            {t('auditoria.cancelar')}
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn
-            variant="ghost"
-            onPress={handleSave}
-            disabled={isPending}
-            fullWidth
-            testID="conteo-save"
-          >
-            {t('actions.save')}
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn
-            onPress={() => setShowConfirm(true)}
-            disabled={!allCounted || isPending}
-            fullWidth
-            testID="conteo-finalizar"
-          >
-            {t('auditoria.finalizar')}
-          </Btn>
-        </View>
-      </View>
-
-      <ConfirmDialog
-        open={showConfirm}
-        onClose={() => setShowConfirm(false)}
-        title={t('auditoria.confirmarFinalizar')}
-        description={t('auditoria.confirmarFinalizarDesc', {
-          count: discrepancias,
-        })}
-        onConfirm={handleFinalize}
-        confirmLabel={t('auditoria.finalizar')}
-        tone="default"
+      <ConteoActionBar
+        isPending={ctx.isPending}
+        allCounted={ctx.allCounted}
+        onCancel={() => ctx.setShowCancel(true)}
+        onSave={ctx.save}
+        onFinalize={() => ctx.setShowConfirm(true)}
+        t={t}
       />
-      <ConfirmDialog
-        open={showCancel}
-        onClose={() => setShowCancel(false)}
-        title={t('auditoria.cancelar')}
-        description={t('auditoria.cancelarConfirm')}
-        onConfirm={handleCancel}
-        confirmLabel={t('auditoria.cancelar')}
-        tone="danger"
-      />
+      <ConteoDialogs ctx={ctx} t={t} />
     </View>
   );
 }

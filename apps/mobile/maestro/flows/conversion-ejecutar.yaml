@@ -7,6 +7,7 @@
 #   2. Confirm conversion → success
 #
 # Precondition: conversion-crear-receta.yaml has been run.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

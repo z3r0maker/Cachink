@@ -23,6 +23,10 @@
 # -------------------------------------------------------------------
 set -euo pipefail
 
+# Disable FloatingCoinsBackground animations — Maestro waits for
+# animations to settle after each tap (~14s overhead without this).
+export EXPO_PUBLIC_E2E=1
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FLOWS_DIR="$(cd "$SCRIPT_DIR/../flows" && pwd)"
 FRESH_SCRIPT="$SCRIPT_DIR/fresh-install.sh"

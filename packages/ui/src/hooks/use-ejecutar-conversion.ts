@@ -27,6 +27,42 @@ export interface EjecutarConversionMutationInput {
   readonly today?: IsoDate;
 }
 
+function emitConversionSuccess(
+  result: EjecutarConversionResult,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): void {
+  emitAlert.mutate({
+    source: 'conversion-automatica',
+    severity: 'info',
+    titleKey: 'notificaciones.conversionAutomatica',
+    message: `Conversión completada exitosamente.`,
+    actionRoute: '/conversion',
+    metadata: JSON.stringify({ conversionId: result.conversion.id }),
+  });
+}
+
+async function checkConversionCosto(
+  result: EjecutarConversionResult,
+  recetas: ReturnType<typeof useConversionRecetasRepository>,
+  products: ReturnType<typeof useProductsRepository>,
+  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
+): Promise<void> {
+  const receta = await recetas.findById(result.conversion.recetaId);
+  if (!receta) return;
+  const prod = await products.findById(receta.productoResultanteId);
+  const mp = await products.findById(receta.materiaPrimaId);
+  if (prod && mp && mp.costoUnitCentavos > prod.precioVentaCentavos) {
+    emitAlert.mutate({
+      source: 'conversion-costo',
+      severity: 'warning',
+      titleKey: 'notificaciones.conversionCosto',
+      message: 'El costo de materia prima supera el precio de venta del producto.',
+      actionRoute: '/conversion',
+      metadata: JSON.stringify({ conversionId: result.conversion.id }),
+    });
+  }
+}
+
 export function useEjecutarConversion(): UseMutationResult<
   EjecutarConversionResult,
   Error,
@@ -38,7 +74,6 @@ export function useEjecutarConversion(): UseMutationResult<
   const products = useProductsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
-
   const emitAlert = useEmitDirectorAlert();
 
   const rawUseCase = useMemo(
@@ -50,10 +85,7 @@ export function useEjecutarConversion(): UseMutationResult<
   return useMutation<EjecutarConversionResult, Error, EjecutarConversionMutationInput>({
     async mutationFn(input) {
       if (!businessId) throw new Error('No current business');
-      return useCase.execute({
-        ...input,
-        businessId: businessId as BusinessId,
-      });
+      return useCase.execute({ ...input, businessId: businessId as BusinessId });
     },
     async onSuccess(result) {
       await Promise.all([
@@ -61,34 +93,9 @@ export function useEjecutarConversion(): UseMutationResult<
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['movimientos', businessId] }),
       ]);
-
-      // Alert: conversion-automatica
-      emitAlert.mutate({
-        source: 'conversion-automatica',
-        severity: 'info',
-        titleKey: 'notificaciones.conversionAutomatica',
-        message: `Conversión completada exitosamente.`,
-        actionRoute: '/conversion',
-        metadata: JSON.stringify({ conversionId: result.conversion.id }),
-      });
-
-      // Alert: conversion-costo — check if conversion cost exceeds product price
+      emitConversionSuccess(result, emitAlert);
       if (businessId) {
-        const receta = await recetas.findById(result.conversion.recetaId);
-        if (receta) {
-          const prod = await products.findById(receta.productoResultanteId);
-          const mp = await products.findById(receta.materiaPrimaId);
-          if (prod && mp && mp.costoUnitCentavos > prod.precioVentaCentavos) {
-            emitAlert.mutate({
-              source: 'conversion-costo',
-              severity: 'warning',
-              titleKey: 'notificaciones.conversionCosto',
-              message: 'El costo de materia prima supera el precio de venta del producto.',
-              actionRoute: '/conversion',
-              metadata: JSON.stringify({ conversionId: result.conversion.id }),
-            });
-          }
-        }
+        void checkConversionCosto(result, recetas, products, emitAlert);
       }
     },
   });

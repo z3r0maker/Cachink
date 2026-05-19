@@ -51,8 +51,6 @@ describe('EstadoResultadosScreen', () => {
     renderWithProviders(<EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />);
     expect(screen.getByTestId('estado-resumen-card')).toBeInTheDocument();
     // ResumenCard is the first card in the render tree
-    const allCards = screen.getByTestId('estado-resultados-screen').children;
-    // First child after SectionTitle should be the resumen card
     expect(screen.getByTestId('estado-resumen-card')).toBeInTheDocument();
   });
 

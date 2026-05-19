@@ -45,6 +45,10 @@ export interface CloudOnboardingScreenProps {
   readonly testID?: string;
 }
 
+function toErrorMsg(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
 function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
   const { t } = useTranslation();
   const [state, setState] = useState<OnboardingFormState>(initialOnboardingForm);
@@ -54,18 +58,13 @@ function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
   async function submit(): Promise<void> {
     setState((s) => ({ ...s, status: 'submitting', errorMsg: null }));
     try {
-      const creds =
-        tab === 'signin'
-          ? await props.onSignIn(state.email, state.password)
-          : await props.onSignUp(state.email, state.password, state.businessName);
+      const creds = tab === 'signin'
+        ? await props.onSignIn(state.email, state.password)
+        : await props.onSignUp(state.email, state.password, state.businessName);
       props.onSuccess(creds);
       setState(initialOnboardingForm());
     } catch (err) {
-      setState((s) => ({
-        ...s,
-        status: 'error',
-        errorMsg: err instanceof Error ? err.message : String(err),
-      }));
+      setState((s) => ({ ...s, status: 'error', errorMsg: toErrorMsg(err) }));
     }
   }
 
@@ -77,11 +76,7 @@ function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
       await props.onMagicLink(state.email);
       setState((s) => ({ ...s, status: 'idle' }));
     } catch (err) {
-      setState((s) => ({
-        ...s,
-        status: 'error',
-        errorMsg: err instanceof Error ? err.message : String(err),
-      }));
+      setState((s) => ({ ...s, status: 'error', errorMsg: toErrorMsg(err) }));
     } finally {
       setMagicLinkPending(false);
     }

@@ -40,6 +40,81 @@ export interface AuditedMutationConfig<TInput, TOutput> {
  *   3. On error: writes an `AuditEvent` with `status: 'error'` + an `ErrorLogEntry`.
  *   4. Calls any original `onSuccess` / `onError` callbacks unchanged.
  */
+function buildSuccessEvent<TInput, TOutput>(
+  config: AuditedMutationConfig<TInput, TOutput>,
+  result: TOutput,
+  input: TInput,
+  userId: string | null,
+  deviceId: string,
+  businessId: string,
+): AuditEvent {
+  return {
+    id: ulid(),
+    timestamp: new Date().toISOString(),
+    operation: config.operation,
+    entityType: config.entityType,
+    entityId: config.extractEntityId(result, input),
+    userId,
+    deviceId,
+    businessId,
+    metadata: config.extractMetadata?.(input, result),
+    status: 'success',
+  };
+}
+
+function buildErrorEvent<TInput, TOutput>(
+  config: AuditedMutationConfig<TInput, TOutput>,
+  error: Error,
+  input: TInput,
+  userId: string | null,
+  deviceId: string,
+  businessId: string,
+): AuditEvent {
+  return {
+    id: ulid(),
+    timestamp: new Date().toISOString(),
+    operation: config.operation,
+    entityType: config.entityType,
+    entityId: '',
+    userId,
+    deviceId,
+    businessId,
+    metadata: config.extractMetadata?.(input),
+    status: 'error',
+    errorCode: error.name,
+    errorMessage: error.message,
+  };
+}
+
+function logError<TInput, TOutput>(
+  config: AuditedMutationConfig<TInput, TOutput>,
+  error: Error,
+  input: TInput,
+  logStore: ReturnType<typeof useLogStore>,
+  userId: string | null,
+  deviceId: string,
+  businessId: string,
+): void {
+  const event = buildErrorEvent(config, error, input, userId, deviceId, businessId);
+  addAuditBreadcrumb(event);
+  void logStore?.writeAudit(event).catch(() => {});
+  void logStore
+    ?.writeError({
+      id: ulid(),
+      timestamp: new Date().toISOString(),
+      source: 'ui',
+      operation: config.operation,
+      errorName: error.name,
+      errorMessage: error.message,
+      errorStack: error.stack,
+      userId,
+      deviceId,
+      businessId: businessId || null,
+      context: config.extractMetadata?.(input),
+    })
+    .catch(() => {});
+}
+
 export function useAuditedMutation<TInput, TOutput>(
   config: AuditedMutationConfig<NoInfer<TInput>, NoInfer<TOutput>>,
   mutationOptions: UseMutationOptions<TOutput, Error, TInput>,
@@ -48,71 +123,26 @@ export function useAuditedMutation<TInput, TOutput>(
   const deviceId = useDeviceId();
   const userId = useUserId();
   const businessId = useCurrentBusinessId();
+  const uid = userId ?? null;
+  const did = deviceId ?? '';
+  const bid = businessId ?? '';
 
   return useMutation<TOutput, Error, TInput>({
     ...mutationOptions,
-
-    async mutationFn(input: TInput) {
-      if (!mutationOptions.mutationFn) {
+    async mutationFn(input: TInput, fnContext) {
+      if (!mutationOptions.mutationFn)
         throw new Error('useAuditedMutation: mutationFn is required');
-      }
-      return mutationOptions.mutationFn(input);
+      return mutationOptions.mutationFn(input, fnContext);
     },
-
-    onSuccess(result, input, context) {
-      const event: AuditEvent = {
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        operation: config.operation,
-        entityType: config.entityType,
-        entityId: config.extractEntityId(result, input),
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: config.extractMetadata?.(input, result),
-        status: 'success',
-      };
-
+    onSuccess(result, input, onMutateResult, fnContext) {
+      const event = buildSuccessEvent(config, result, input, uid, did, bid);
       addAuditBreadcrumb(event);
       void logStore?.writeAudit(event).catch(() => {});
-
-      mutationOptions.onSuccess?.(result, input, context);
+      mutationOptions.onSuccess?.(result, input, onMutateResult, fnContext);
     },
-
-    onError(error, input, context) {
-      const event: AuditEvent = {
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        operation: config.operation,
-        entityType: config.entityType,
-        entityId: '',
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? '',
-        metadata: config.extractMetadata?.(input),
-        status: 'error',
-        errorCode: error.name,
-        errorMessage: error.message,
-      };
-
-      addAuditBreadcrumb(event);
-      void logStore?.writeAudit(event).catch(() => {});
-
-      void logStore?.writeError({
-        id: ulid(),
-        timestamp: new Date().toISOString(),
-        source: 'ui',
-        operation: config.operation,
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        userId: userId ?? null,
-        deviceId: deviceId ?? '',
-        businessId: businessId ?? null,
-        context: config.extractMetadata?.(input),
-      }).catch(() => {});
-
-      mutationOptions.onError?.(error, input, context);
+    onError(error, input, onMutateResult, fnContext) {
+      logError(config, error, input, logStore, uid, did, bid);
+      mutationOptions.onError?.(error, input, onMutateResult, fnContext);
     },
   });
 }

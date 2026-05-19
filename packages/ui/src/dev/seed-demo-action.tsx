@@ -25,12 +25,7 @@ export function SeedDemoAction(): ReactElement | null {
   return <SeedDemoActionInner />;
 }
 
-function SeedDemoActionInner(): ReactElement {
-  const { t } = useTranslation();
-  const repos = useRepositories();
-  const businessId = useCurrentBusinessId() as BusinessId | null;
-  const deviceId = useDeviceId() as DeviceId | null;
-
+function useSeedHandler(repos: ReturnType<typeof useRepositories>, businessId: BusinessId | null, deviceId: DeviceId | null) {
   const [state, setState] = useState<ActionState>('idle');
   const [count, setCount] = useState(0);
 
@@ -38,36 +33,29 @@ function SeedDemoActionInner(): ReactElement {
     if (!businessId || !deviceId) return;
     setState('pending');
     try {
-      const result = await seedDemoData({
-        repositories: repos,
-        businessId,
-        deviceId,
-      });
-      if (result.alreadySeeded) {
-        setState('already');
-      } else {
-        setCount(result.totalRecords);
-        setState('done');
-      }
-    } catch {
-      setState('error');
-    }
+      const result = await seedDemoData({ repositories: repos, businessId, deviceId });
+      if (result.alreadySeeded) { setState('already'); }
+      else { setCount(result.totalRecords); setState('done'); }
+    } catch { setState('error'); }
   }, [repos, businessId, deviceId]);
 
+  return { state, setState, count, handleSeed };
+}
+
+function SeedDemoActionInner(): ReactElement {
+  const { t } = useTranslation();
+  const repos = useRepositories();
+  const businessId = useCurrentBusinessId() as BusinessId | null;
+  const deviceId = useDeviceId() as DeviceId | null;
+  const { state, setState, count, handleSeed } = useSeedHandler(repos, businessId, deviceId);
   const disabled = !businessId || state === 'pending' || state === 'done';
+
   return (
     <>
       <Card testID="seed-demo-card" padding="md" fullWidth>
         <SectionTitle title={t('dev.seedTitle')} />
         <SeedStatus state={state} count={count} />
-
-        <Btn
-          variant="primary"
-          onPress={() => setState('confirm')}
-          disabled={disabled}
-          fullWidth
-          testID="seed-demo-btn"
-        >
+        <Btn variant="primary" onPress={() => setState('confirm')} disabled={disabled} fullWidth testID="seed-demo-btn">
           {t('dev.seedBtn')}
         </Btn>
       </Card>

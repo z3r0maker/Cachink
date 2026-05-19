@@ -4,6 +4,7 @@
 # which are already tested in venta-efectivo.yaml and venta-credito.yaml.
 #
 # Precondition: demo mode seeded (products + users exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -50,7 +51,7 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
-    timeout: 10000
+    timeout: 5000
 
 # --- Sale 2: Tarjeta ---
 
@@ -82,4 +83,4 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
-    timeout: 10000
+    timeout: 5000

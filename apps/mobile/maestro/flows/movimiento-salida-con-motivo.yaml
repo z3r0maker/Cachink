@@ -15,6 +15,7 @@
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
 #   maestro test apps/mobile/maestro/flows/movimiento-salida-con-motivo.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

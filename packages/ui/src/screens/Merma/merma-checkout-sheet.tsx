@@ -42,59 +42,52 @@ export interface MermaCheckoutSheetProps {
 // Component
 // ---------------------------------------------------------------------------
 
+function MermaFormBody(props: {
+  items: readonly CartItem[];
+  reason: string;
+  onReasonChange: (v: string) => void;
+  nota: string;
+  onNotaChange: (v: string) => void;
+  error?: Error | null;
+}): ReactElement {
+  return (
+    <View gap={16}>
+      <CheckoutSummary items={props.items} />
+      <OptionCardGroup
+        label="Razón para todos"
+        value={props.reason}
+        onChange={props.onReasonChange}
+        options={MERMA_REASONS}
+        layout="grid"
+        testID="merma-reason-group"
+      />
+      <TextField
+        value={props.nota}
+        onChange={props.onNotaChange}
+        label="Nota (opcional)"
+        placeholder="Detalle adicional..."
+        testID="merma-nota"
+      />
+      {props.error != null && (
+        <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red} textAlign="center">
+          {props.error.message}
+        </Text>
+      )}
+    </View>
+  );
+}
+
 export function MermaCheckoutSheet(props: MermaCheckoutSheetProps): ReactElement {
   const [reason, setReason] = useState('Preparación incorrecta');
   const [nota, setNota] = useState('');
 
   return (
-    <Modal
-      open={props.open}
-      onClose={props.onClose}
-      title="Registrar merma"
-      testID={props.testID ?? 'merma-checkout-sheet'}
-    >
+    <Modal open={props.open} onClose={props.onClose} title="Registrar merma" testID={props.testID ?? 'merma-checkout-sheet'}>
       <ScrollView style={{ maxHeight: 480 }}>
-        <View gap={16}>
-          <CheckoutSummary items={props.items} />
-          <OptionCardGroup
-            label="Razón para todos"
-            value={reason}
-            onChange={setReason}
-            options={MERMA_REASONS}
-            layout="grid"
-            testID="merma-reason-group"
-          />
-          <TextField
-            value={nota}
-            onChange={setNota}
-            label="Nota (opcional)"
-            placeholder="Detalle adicional..."
-            testID="merma-nota"
-          />
-          {props.error != null && (
-            <Text
-              fontFamily={typography.fontFamily}
-              fontSize={12}
-              color={colors.red}
-              textAlign="center"
-            >
-              {props.error.message}
-            </Text>
-          )}
-          <Btn
-            variant="danger"
-            fullWidth
-            size="lg"
-            onPress={() =>
-              props.onSubmit(reason, nota.trim() || null)
-            }
-            disabled={props.items.length === 0}
-            loading={props.submitting === true}
-            testID="merma-checkout-submit"
-          >
-            Registrar merma
-          </Btn>
-        </View>
+        <MermaFormBody items={props.items} reason={reason} onReasonChange={setReason} nota={nota} onNotaChange={setNota} error={props.error} />
+        <Btn variant="danger" fullWidth size="lg" onPress={() => props.onSubmit(reason, nota.trim() || null)} disabled={props.items.length === 0} loading={props.submitting === true} testID="merma-checkout-submit">
+          Registrar merma
+        </Btn>
       </ScrollView>
     </Modal>
   );

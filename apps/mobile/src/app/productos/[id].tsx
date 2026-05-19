@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Text, View } from '@tamagui/core';
-import type { IsoDate, ProductId } from '@cachink/domain';
+import type { IsoDate } from '@cachink/domain';
 import {
   ProductoDetailSmart,
   useProductosConStock,

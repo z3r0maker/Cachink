@@ -39,14 +39,23 @@ export function useTelemetriaData(opts: TelemetriaQueryOpts) {
     queryKey: ['telemetria', opts.filter, opts.period, opts.operation],
     async queryFn() {
       const since = periodToSince(opts.period);
-      const queryOpts: LogQueryOptions = { since, limit: 200 };
-      if (opts.operation) queryOpts.operation = opts.operation;
+      const queryOpts: LogQueryOptions = {
+        since,
+        limit: 200,
+        ...(opts.operation ? { operation: opts.operation } : undefined),
+      };
 
       switch (opts.filter) {
         case 'audit':
-          return (await logStore.queryAudit(queryOpts)).map((e) => ({ type: 'audit' as const, ...e }));
+          return (await logStore.queryAudit(queryOpts)).map((e) => ({
+            type: 'audit' as const,
+            ...e,
+          }));
         case 'error':
-          return (await logStore.queryErrors(queryOpts)).map((e) => ({ type: 'error' as const, ...e }));
+          return (await logStore.queryErrors(queryOpts)).map((e) => ({
+            type: 'error' as const,
+            ...e,
+          }));
         default:
           return logStore.queryTimeline(queryOpts);
       }

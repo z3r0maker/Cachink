@@ -21,12 +21,12 @@ import { migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { runMigrations } from '../../src/migrator/run-migrations.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
-function freshAsyncDb(): CachinkDatabase {
+function _freshAsyncDb(): CachinkDatabase {
   const sqlite = new Database(':memory:');
   return drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
 }
 
-function getSqliteHandle(db: CachinkDatabase): Database.Database {
+function _getSqliteHandle(_db: CachinkDatabase): Database.Database {
   // drizzle-orm/better-sqlite3 stores the raw db internally;
   // we can create a fresh one for direct queries.
   const sqlite = new Database(':memory:');

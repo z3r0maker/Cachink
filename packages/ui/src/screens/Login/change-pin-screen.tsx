@@ -110,37 +110,30 @@ function ChangePinFormFields(props: ChangePinFieldsProps): ReactElement {
   );
 }
 
-export function ChangePinScreen(props: ChangePinScreenProps): ReactElement {
-  const { t } = useTranslation();
+function useChangePinForm(submitting: boolean) {
   const [current, setCurrent] = useState('');
   const [newPin, setNewPin] = useState('');
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm.length > 0 && newPin !== confirm;
   const tooShort = newPin.length > 0 && !/^\d{6}$/.test(newPin);
-  const canSubmit =
-    /^\d{6}$/.test(current) && /^\d{6}$/.test(newPin) && newPin === confirm && !props.submitting;
+  const canSubmit = /^\d{6}$/.test(current) && /^\d{6}$/.test(newPin) && newPin === confirm && !submitting;
+  return { current, setCurrent, newPin, setNewPin, confirm, setConfirm, mismatch, tooShort, canSubmit };
+}
+
+export function ChangePinScreen(props: ChangePinScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const form = useChangePinForm(props.submitting);
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'change-pin'}>
       <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={16}>
         <ChangePinHeader t={t} userName={props.userName} />
         <View width="100%" maxWidth={320} gap={12}>
-          <ChangePinFormFields
-            current={current}
-            setCurrent={setCurrent}
-            newPin={newPin}
-            setNewPin={setNewPin}
-            confirm={confirm}
-            setConfirm={setConfirm}
-            mismatch={mismatch}
-            tooShort={tooShort}
-            error={props.error}
-            t={t}
-          />
+          <ChangePinFormFields {...form} error={props.error} t={t} />
           <Btn
             variant="dark"
-            onPress={() => props.onSubmit(current, newPin)}
+            onPress={() => props.onSubmit(form.current, form.newPin)}
             fullWidth
-            disabled={!canSubmit}
+            disabled={!form.canSubmit}
             loading={props.submitting}
             testID="change-pin-submit"
           >

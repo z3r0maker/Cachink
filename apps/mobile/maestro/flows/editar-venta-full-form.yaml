@@ -16,6 +16,7 @@
 #   maestro test apps/mobile/maestro/flows/editar-venta-full-form.yaml
 #
 # The venta-efectivo flow creates a sale for "Tortilla".
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

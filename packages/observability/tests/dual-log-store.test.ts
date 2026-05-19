@@ -8,7 +8,7 @@
  *   - Queries delegate to local store
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { DualLogStore } from '../src/dual-log-store.js';
 import type { LogStore } from '../src/log-store.js';
 import type { RemoteLogStore } from '../src/remote-log-store.js';

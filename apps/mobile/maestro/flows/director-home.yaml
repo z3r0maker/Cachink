@@ -1,5 +1,6 @@
 # Director Home shell E2E — launch, pick Director, assert every
 # Director Home card renders (P1C-M10-T01..T05, S4-C8).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

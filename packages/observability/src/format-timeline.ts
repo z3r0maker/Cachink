@@ -27,29 +27,39 @@ export function formatTimelineAsText(
   ];
 
   for (const entry of entries) {
-    const time = formatTime(entry.timestamp, locale);
-
-    if (entry.type === 'audit') {
-      const status = entry.status === 'success' ? '✅' : '❌';
-      const entityShort = entry.entityId ? entry.entityId.slice(0, 8) : '—';
-      lines.push(`${time} ${status} ${entry.operation} → ${entry.entityType} ${entityShort}`);
-
-      if (entry.durationMs != null) {
-        lines.push(`         (${entry.durationMs}ms)`);
-      }
-      if (entry.status === 'error' && entry.errorMessage) {
-        lines.push(`         Error: ${entry.errorMessage}`);
-      }
-    } else {
-      lines.push(
-        `${time} 🔴 ERROR [${entry.source}] ${entry.errorName}: ${entry.errorMessage}`,
-      );
-    }
+    formatEntry(entry, locale, lines);
   }
 
   lines.push('');
   lines.push('=== End of Report ===');
   return lines.join('\n');
+}
+
+function formatEntry(
+  entry: TimelineEntry, locale: string, lines: string[],
+): void {
+  const time = formatTime(entry.timestamp, locale);
+  if (entry.type === 'audit') {
+    formatAuditEntry(entry, time, lines);
+  } else {
+    lines.push(
+      `${time} 🔴 ERROR [${entry.source}] ${entry.errorName}: ${entry.errorMessage}`,
+    );
+  }
+}
+
+function formatAuditEntry(
+  entry: TimelineEntry & { type: 'audit' }, time: string, lines: string[],
+): void {
+  const status = entry.status === 'success' ? '✅' : '❌';
+  const entityShort = entry.entityId ? entry.entityId.slice(0, 8) : '—';
+  lines.push(`${time} ${status} ${entry.operation} → ${entry.entityType} ${entityShort}`);
+  if (entry.durationMs != null) {
+    lines.push(`         (${entry.durationMs}ms)`);
+  }
+  if (entry.status === 'error' && entry.errorMessage) {
+    lines.push(`         Error: ${entry.errorMessage}`);
+  }
 }
 
 function formatTime(iso: string, locale: string): string {

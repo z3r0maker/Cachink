@@ -9,7 +9,7 @@ import React from 'react';
 
 vi.mock('echarts-for-react/lib/core', () => ({
   __esModule: true,
-  default: function MockECharts(props: Record<string, unknown>) {
+  default: function MockECharts(_props: Record<string, unknown>) {
     return React.createElement('div', { 'data-testid': 'echarts-mock' });
   },
 }));
@@ -18,7 +18,7 @@ vi.mock('echarts/core', () => ({
   use: vi.fn(),
   registerTheme: vi.fn(),
   graphic: {
-    LinearGradient: class { constructor(...args: unknown[]) {} },
+    LinearGradient: class { constructor(..._args: unknown[]) {} },
   },
   default: { use: vi.fn(), registerTheme: vi.fn(), graphic: {} },
 }));

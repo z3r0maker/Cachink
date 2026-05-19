@@ -6,121 +6,25 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { Pressable, ScrollView } from 'react-native';
-import { Text, View } from '@tamagui/core';
-import { formatMoney, type Employee } from '@cachink/domain';
-import {
-  Btn,
-  Card,
-  ConfirmDialog,
-  EmptyState,
-  Icon,
-  SectionTitle,
-  Tag,
-} from '../../components/index';
+import { ScrollView } from 'react-native';
+import { View } from '@tamagui/core';
+import type { Employee } from '@cachink/domain';
+import { Btn, ConfirmDialog, EmptyState, Icon, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors } from '../../theme';
 import { useEmpleadosForBusiness } from '../../hooks/use-empleados-for-business';
 import { useCrearEmpleado } from '../../hooks/use-crear-empleado';
 import { useEditEmpleado } from '../../hooks/use-edit-empleado';
 import { useEliminarEmpleado } from '../../hooks/use-eliminar-empleado';
 import { NuevoEmpleadoModal } from '../Egresos/tabs/nuevo-empleado-modal';
 import { EditEmpleadoModal } from './edit-empleado-modal';
+import { EmpleadoListItem } from './empleado-list-item';
 
 export interface SettingsEmpleadosProps {
   readonly testID?: string;
 }
 
 type T = ReturnType<typeof useTranslation>['t'];
-
-function periodoLabel(periodo: string): string {
-  switch (periodo) {
-    case 'semanal':
-      return 'Semanal';
-    case 'quincenal':
-      return 'Quincenal';
-    case 'mensual':
-      return 'Mensual';
-    default:
-      return periodo;
-  }
-}
-
-function EmpleadoPayInfo({
-  salarioCentavos,
-  periodo,
-}: {
-  salarioCentavos: bigint;
-  periodo: string;
-}): ReactElement {
-  return (
-    <View flexDirection="row" alignItems="center" gap={8} marginTop={4}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={14}
-        color={colors.black}
-      >
-        {formatMoney(salarioCentavos)}
-      </Text>
-      <Tag>{periodoLabel(periodo)}</Tag>
-    </View>
-  );
-}
-
-function EmpleadoInfo({ employee }: { employee: Employee }): ReactElement {
-  return (
-    <View flex={1}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold}
-        fontSize={16}
-        color={colors.black}
-      >
-        {employee.nombre}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={13}
-        color={colors.gray600}
-        marginTop={2}
-      >
-        {employee.puesto}
-      </Text>
-      <EmpleadoPayInfo salarioCentavos={employee.salarioCentavos} periodo={employee.periodo} />
-    </View>
-  );
-}
-
-function EmpleadoListItem({
-  employee,
-  index,
-  onEdit,
-  onDelete,
-}: {
-  employee: Employee;
-  index: number;
-  onEdit: () => void;
-  onDelete: () => void;
-}): ReactElement {
-  return (
-    <Card padding="md" fullWidth testID={`empleado-row-${index}`}>
-      <Pressable onPress={onEdit} testID={`empleado-edit-${index}`}>
-        <View flexDirection="row" alignItems="center" gap={12}>
-          <EmpleadoInfo employee={employee} />
-          <Btn
-            variant="ghost"
-            size="sm"
-            onPress={onDelete}
-            testID={`empleado-delete-${index}`}
-            icon={<Icon name="trash-2" size={16} color={colors.red} />}
-          />
-        </View>
-      </Pressable>
-    </Card>
-  );
-}
 
 function EmpleadosHeader({ t, onAdd }: { t: T; onAdd: () => void }): ReactElement {
   return (
@@ -158,20 +62,41 @@ interface EmpleadoModalsProps {
   readonly t: T;
 }
 
-function EmpleadoModals({ state, t }: EmpleadoModalsProps): ReactElement {
+function DeleteEmpleadoDialog({ state, t }: EmpleadoModalsProps): ReactElement {
   const deleteDesc = state.deleteTarget
     ? t('empleados.deleteConfirmMessage').replace('{nombre}', state.deleteTarget.nombre)
     : '';
-  const onConfirmDelete = () => {
+  const onConfirm = () => {
     if (!state.deleteTarget) return;
-    state.eliminar.mutate(state.deleteTarget.id, { onSuccess: () => state.setDeleteTarget(null) });
+    state.eliminar.mutate(state.deleteTarget.id, {
+      onSuccess: () => state.setDeleteTarget(null),
+    });
   };
+  return (
+    <ConfirmDialog
+      open={state.deleteTarget !== null}
+      onClose={() => state.setDeleteTarget(null)}
+      onConfirm={onConfirm}
+      title={t('empleados.deleteConfirmTitle')}
+      description={deleteDesc}
+      confirmLabel={t('empleados.deleteConfirm')}
+      cancelLabel={t('empleados.deleteCancel')}
+      tone="danger"
+    />
+  );
+}
+
+function EmpleadoModals({ state, t }: EmpleadoModalsProps): ReactElement {
   return (
     <>
       <NuevoEmpleadoModal
         open={state.addOpen}
         onClose={() => state.setAddOpen(false)}
-        onSubmit={(input) => state.crear.mutate(input, { onSuccess: () => state.setAddOpen(false) })}
+        onSubmit={(input) =>
+          state.crear.mutate(input, {
+            onSuccess: () => state.setAddOpen(false),
+          })
+        }
         submitting={state.crear.isPending}
       />
       {state.editTarget && (
@@ -180,21 +105,14 @@ function EmpleadoModals({ state, t }: EmpleadoModalsProps): ReactElement {
           onClose={() => state.setEditTarget(null)}
           employee={state.editTarget}
           onSubmit={(input) =>
-            state.editar.mutate(input, { onSuccess: () => state.setEditTarget(null) })
+            state.editar.mutate(input, {
+              onSuccess: () => state.setEditTarget(null),
+            })
           }
           submitting={state.editar.isPending}
         />
       )}
-      <ConfirmDialog
-        open={state.deleteTarget !== null}
-        onClose={() => state.setDeleteTarget(null)}
-        onConfirm={onConfirmDelete}
-        title={t('empleados.deleteConfirmTitle')}
-        description={deleteDesc}
-        confirmLabel={t('empleados.deleteConfirm')}
-        cancelLabel={t('empleados.deleteCancel')}
-        tone="danger"
-      />
+      <DeleteEmpleadoDialog state={state} t={t} />
     </>
   );
 }

@@ -1,6 +1,7 @@
 # Navigate to Cancelaciones screen and verify empty state renders.
 # Route: /cancelaciones (via Otros → cancelaciones card)
 # Verifies: cancelaciones-screen testID, empty-state text.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
   - otros

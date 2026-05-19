@@ -2,30 +2,28 @@
  * ProductoDetailFields — sub-field groups for the inline-editable
  * product detail page. Extracted to keep the main screen under 200
  * lines.
+ *
+ * StockActionCard lives in producto-stock-card.tsx.
+ * PricingSection lives in producto-pricing-section.tsx.
  */
 
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { InventoryCategory, InventoryUnit, ProductIcon, UsoProducto } from '@cachink/domain';
+import type { InventoryCategory, ProductIcon } from '@cachink/domain';
 import { resolveProductIcon } from '@cachink/domain';
-import {
-  Btn,
-  ColorSwatchPicker,
-  Combobox,
-  Icon,
-  Input,
-  OptionCardGroup,
-} from '../../components/index';
+import { ColorSwatchPicker, Icon, Input } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
-import { MoneyField, StepperField, TextField } from '../../components/fields/index';
+import { StepperField, TextField } from '../../components/fields/index';
 import { colors, typography } from '../../theme';
-import {
-  INV_CATEGORIAS,
-  INV_UNIDADES_OPTIONS,
-  USO_PRODUCTO_CARDS,
-} from './nuevo-producto-form';
+import { INV_CATEGORIAS } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
+
+// Re-export extracted modules so existing imports keep working.
+export { StockActionCard } from './producto-stock-card';
+export { PricingSection } from './producto-pricing-section';
+
+import type { InventoryUnit, UsoProducto } from '@cachink/domain';
 
 type T = (key: string) => string;
 
@@ -76,53 +74,6 @@ export function IconArea(props: {
   );
 }
 
-/** Stock + Entrada / Salida card. */
-export function StockActionCard(props: {
-  stock: number;
-  umbral: number;
-  onEntrada: () => void;
-  onSalida: () => void;
-  t: T;
-}): ReactElement {
-  const isLow = props.stock <= props.umbral;
-  const bg = props.stock <= 0 ? colors.redSoft : isLow ? colors.warningSoft : colors.greenSoft;
-  const fg = props.stock <= 0 ? colors.red : isLow ? colors.warning : colors.green;
-  const label = props.stock <= 0 ? 'Sin stock' : isLow ? 'Bajo' : 'Saludable';
-  return (
-    <View
-      backgroundColor={colors.white}
-      borderWidth={2}
-      borderColor={colors.black}
-      borderRadius={14}
-      padding={16}
-      gap={12}
-    >
-      <View flexDirection="row" alignItems="center" gap={12}>
-        <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={28} color={colors.black}>
-          {props.stock}
-        </Text>
-        <View backgroundColor={bg} paddingHorizontal={10} paddingVertical={4} borderRadius={8}>
-          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={12} color={fg}>
-            {label}
-          </Text>
-        </View>
-      </View>
-      <View flexDirection="row" gap={8}>
-        <View flex={1}>
-          <Btn variant="green" onPress={props.onEntrada} fullWidth testID="detail-entrada" icon={<Icon name="plus" size={16} color={colors.white} />}>
-            Entrada
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn variant="primary" onPress={props.onSalida} fullWidth testID="detail-salida" icon={<Icon name="minus" size={16} color={colors.black} />}>
-            Salida
-          </Btn>
-        </View>
-      </View>
-    </View>
-  );
-}
-
 /** Identity section: nombre + SKU. */
 export function IdentitySection(props: {
   state: DetailFormState;
@@ -133,33 +84,28 @@ export function IdentitySection(props: {
   return (
     <>
       <SectionHeader label="Información" />
-      <TextField label="Nombre" value={props.state.nombre} onChange={(v) => props.onChange({ nombre: v })} error={props.errors.nombre} required testID="detail-nombre" />
-      <TextField label="SKU" value={props.state.sku} onChange={(v) => props.onChange({ sku: v })} testID="detail-sku" />
-      <Input type="select" label="Categoría" value={props.state.categoria} onChange={(v) => props.onChange({ categoria: v as InventoryCategory })} options={INV_CATEGORIAS} testID="detail-categoria" />
-    </>
-  );
-}
-
-/** Pricing section: costo + precio + unidad. */
-export function PricingSection(props: {
-  state: DetailFormState;
-  errors: DetailFormErrors;
-  showPrecio: boolean;
-  onChange: (p: Partial<DetailFormState>) => void;
-  conversionEnabled: boolean;
-  t: T;
-}): ReactElement {
-  return (
-    <>
-      <SectionHeader label="Precios" />
-      <MoneyField label="Costo unitario" value={props.state.costoPesos} onChange={(v) => props.onChange({ costoPesos: v })} error={props.errors.costo} required testID="detail-costo" />
-      {props.showPrecio && (
-        <MoneyField label="Precio venta" value={props.state.precioVentaPesos} onChange={(v) => props.onChange({ precioVentaPesos: v })} error={props.errors.precioVenta} required testID="detail-precio" />
-      )}
-      <Combobox label="Unidad" value={props.state.unidad} onChange={(v) => props.onChange({ unidad: v as InventoryUnit })} options={INV_UNIDADES_OPTIONS} testID="detail-unidad" />
-      {props.conversionEnabled && (
-        <OptionCardGroup label="Uso del producto" value={props.state.usoProducto} onChange={(v) => props.onChange({ usoProducto: v as UsoProducto })} options={USO_PRODUCTO_CARDS} testID="detail-uso" />
-      )}
+      <TextField
+        label="Nombre"
+        value={props.state.nombre}
+        onChange={(v) => props.onChange({ nombre: v })}
+        error={props.errors.nombre}
+        required
+        testID="detail-nombre"
+      />
+      <TextField
+        label="SKU"
+        value={props.state.sku}
+        onChange={(v) => props.onChange({ sku: v })}
+        testID="detail-sku"
+      />
+      <Input
+        type="select"
+        label="Categoría"
+        value={props.state.categoria}
+        onChange={(v) => props.onChange({ categoria: v as InventoryCategory })}
+        options={INV_CATEGORIAS}
+        testID="detail-categoria"
+      />
     </>
   );
 }
@@ -173,7 +119,15 @@ export function InventorySection(props: {
   return (
     <>
       <SectionHeader label="Inventario" />
-      <StepperField label="Umbral stock bajo" value={Number(props.state.umbral) || 0} onChange={(v) => props.onChange({ umbral: String(v) })} min={0} max={100} error={props.errors.umbral} testID="detail-umbral" />
+      <StepperField
+        label="Umbral stock bajo"
+        value={Number(props.state.umbral) || 0}
+        onChange={(v) => props.onChange({ umbral: String(v) })}
+        min={0}
+        max={100}
+        error={props.errors.umbral}
+        testID="detail-umbral"
+      />
     </>
   );
 }
@@ -186,7 +140,12 @@ export function AppearanceSection(props: {
   return (
     <>
       <SectionHeader label="Apariencia" />
-      <ColorSwatchPicker label="Color de fondo" value={props.state.colorFondo as never} onChange={(v) => props.onChange({ colorFondo: v })} testID="detail-color-fondo" />
+      <ColorSwatchPicker
+        label="Color de fondo"
+        value={props.state.colorFondo as never}
+        onChange={(v) => props.onChange({ colorFondo: v })}
+        testID="detail-color-fondo"
+      />
     </>
   );
 }

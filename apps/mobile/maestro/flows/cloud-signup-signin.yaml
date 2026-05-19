@@ -10,6 +10,7 @@
 #
 # Run from two separate device sessions — tablet A first (signup), then
 # tablet B (signin with the same account).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 env:
   EMAIL_A: ${MAESTRO_CLOUD_EMAIL_A}

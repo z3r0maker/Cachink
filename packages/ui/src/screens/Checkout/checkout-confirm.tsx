@@ -60,6 +60,59 @@ function getMethodConfig(metodo: PaymentMethod): MethodConfig {
   }
 }
 
+function MethodBadge(props: { icon: IconName }): ReactElement {
+  return (
+    <View
+      backgroundColor={colors.yellowSoft}
+      borderRadius={radii[5]}
+      borderWidth={2}
+      borderColor={colors.black}
+      padding={20}
+    >
+      <Icon name={props.icon} size={48} color={colors.black} />
+    </View>
+  );
+}
+
+function ConfirmHeader(props: {
+  icon: IconName;
+  totalCentavos: Money;
+  title: string;
+  message: string;
+}): ReactElement {
+  return (
+    <>
+      <MethodBadge icon={props.icon} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black.toString()}
+        fontSize={32}
+        color={colors.black}
+        textAlign="center"
+      >
+        {formatMoney(props.totalCentavos)}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold.toString()}
+        fontSize={18}
+        color={colors.gray600}
+        textAlign="center"
+      >
+        {props.title}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={16}
+        color={colors.gray400}
+        textAlign="center"
+      >
+        {props.message}
+      </Text>
+    </>
+  );
+}
+
 export function CheckoutConfirm(
   props: CheckoutConfirmProps,
 ): ReactElement {
@@ -74,45 +127,12 @@ export function CheckoutConfirm(
       justifyContent="center"
       testID={props.testID ?? `checkout-confirm-${props.metodo}`}
     >
-      <View
-        backgroundColor={colors.yellowSoft}
-        borderRadius={radii[5]}
-        borderWidth={2}
-        borderColor={colors.black}
-        padding={20}
-      >
-        <Icon name={config.icon} size={48} color={colors.black} />
-      </View>
-
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black.toString()}
-        fontSize={32}
-        color={colors.black}
-        textAlign="center"
-      >
-        {formatMoney(props.totalCentavos)}
-      </Text>
-
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.semibold.toString()}
-        fontSize={18}
-        color={colors.gray600}
-        textAlign="center"
-      >
-        {config.title}
-      </Text>
-
-      <Text
-        fontFamily={typography.fontFamily}
-        fontSize={16}
-        color={colors.gray400}
-        textAlign="center"
-      >
-        {config.message}
-      </Text>
-
+      <ConfirmHeader
+        icon={config.icon}
+        totalCentavos={props.totalCentavos}
+        title={config.title}
+        message={config.message}
+      />
       <View width="100%" paddingTop={12}>
         <Btn
           variant="green"

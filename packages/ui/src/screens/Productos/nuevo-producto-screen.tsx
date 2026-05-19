@@ -16,6 +16,7 @@ import {
   buildProductoPayload,
   useProductoForm,
   validateProducto,
+  validationMessages,
   type ProductoFormState,
 } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
@@ -39,31 +40,32 @@ export interface NuevoProductoScreenProps {
   readonly testID?: string;
 }
 
-export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactElement {
-  const { t } = useTranslation();
-  const form = useProductoForm();
-  const [scanOpen, setScanOpen] = useState(false);
-  const showPrecio = form.state.usoProducto !== 'materia-prima';
-
-  useEffect(() => {
-    props.onFormChange?.(form.state);
-  }, [form.state]);
-
-  const handleSubmit = (): void => {
-    const msgs = {
-      required: t('validation.required'),
-      greaterThanZero: t('validation.greaterThanZero'),
-      invalidNumber: t('validation.invalidNumber'),
-    };
-    const v = validateProducto(form.state, msgs);
+function useScreenSubmit(
+  form: ReturnType<typeof useProductoForm>,
+  onSubmit: (input: CrearProductoInput) => void,
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  return (): void => {
+    const v = validateProducto(form.state, validationMessages(t));
     if (Object.keys(v).length > 0) {
       form.setErrors(v);
       return;
     }
     form.setErrors({});
-    props.onSubmit(buildProductoPayload(form.state));
+    onSubmit(buildProductoPayload(form.state));
     form.reset();
   };
+}
+
+export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactElement {
+  const { t } = useTranslation();
+  const form = useProductoForm();
+  const [scanOpen, setScanOpen] = useState(false);
+  const handleSubmit = useScreenSubmit(form, props.onSubmit, t);
+
+  useEffect(() => {
+    props.onFormChange?.(form.state);
+  }, [form.state]);
 
   return (
     <ScrollView
@@ -73,12 +75,8 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
     >
       <SectionHeader label={t('nuevoProducto.title')} />
       <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} />
-      <CategoryFields
-        form={form}
-        t={t}
-        conversionEnabled={props.conversionEnabled === true}
-      />
-      <PricingFields form={form} t={t} showPrecio={showPrecio} />
+      <CategoryFields form={form} t={t} conversionEnabled={props.conversionEnabled === true} />
+      <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
       <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
       <Btn

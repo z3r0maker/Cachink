@@ -29,65 +29,114 @@ export interface CajaMovimientoSheetProps {
   readonly testID?: string;
 }
 
-export function CajaMovimientoSheet(
-  props: CajaMovimientoSheetProps,
-): ReactElement {
+function movLabels(isDeposito: boolean): { title: string; question: string; btn: string } {
+  return {
+    title: isDeposito ? 'Agregar efectivo' : 'Retirar efectivo',
+    question: isDeposito ? '¿Cuánto agregas?' : '¿Cuánto retiras?',
+    btn: isDeposito ? 'Agregar' : 'Retirar',
+  };
+}
+
+export function CajaMovimientoSheet(props: CajaMovimientoSheetProps): ReactElement {
   const input = useNumpadInput();
   const [motivo, setMotivo] = useState('');
   const isDeposito = props.tipo === 'deposito';
-  const title = isDeposito ? 'Agregar efectivo' : 'Retirar efectivo';
-  const question = isDeposito ? '¿Cuánto agregas?' : '¿Cuánto retiras?';
-  const btnLabel = isDeposito ? 'Agregar' : 'Retirar';
+  const labels = movLabels(isDeposito);
   const canSubmit = input.centavos > ZERO && motivo.trim().length > 0;
 
   return (
     <Modal
       open={props.open}
       onClose={props.onClose}
-      title={title}
+      title={labels.title}
       testID={props.testID ?? `caja-movimiento-sheet-${props.tipo}`}
     >
-      <ScrollView style={{ maxHeight: 560 }}>
-        <View gap={16} paddingHorizontal={4}>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.semibold.toString()}
-            fontSize={16}
-            color={colors.gray600}
-            textAlign="center"
-          >
-            {question}
-          </Text>
-
-          <NumpadDisplay value={input.display} />
-          <Numpad onPress={input.onKey} />
-
-          <Input
-            label="Motivo"
-            value={motivo}
-            onChange={setMotivo}
-            placeholder={isDeposito ? 'Cambio en monedas' : 'Retiro para banco'}
-            testID="caja-movimiento-motivo"
-          />
-
-          <Btn
-            variant={isDeposito ? 'green' : 'danger'}
-            fullWidth
-            size="lg"
-            icon={<Icon name="check" size={18} color={colors.white} />}
-            onPress={() => {
-              props.onSubmit(input.centavos, motivo.trim());
-              input.reset();
-              setMotivo('');
-            }}
-            disabled={!canSubmit}
-            loading={props.submitting === true}
-            testID="caja-movimiento-submit"
-          >
-            {btnLabel}
-          </Btn>
-        </View>
-      </ScrollView>
+      <MovimientoSheetBody
+        input={input}
+        motivo={motivo}
+        setMotivo={setMotivo}
+        isDeposito={isDeposito}
+        labels={labels}
+        canSubmit={canSubmit}
+        submitting={props.submitting === true}
+        onSubmit={props.onSubmit}
+      />
     </Modal>
+  );
+}
+
+function MovimientoSheetBody(props: {
+  input: ReturnType<typeof useNumpadInput>;
+  motivo: string;
+  setMotivo: (v: string) => void;
+  isDeposito: boolean;
+  labels: { question: string; btn: string };
+  canSubmit: boolean;
+  submitting: boolean;
+  onSubmit: (montoCentavos: Money, motivo: string) => void;
+}): ReactElement {
+  return (
+    <ScrollView style={{ maxHeight: 560 }}>
+      <View gap={16} paddingHorizontal={4}>
+        <MovimientoQuestion label={props.labels.question} />
+        <NumpadDisplay value={props.input.display} />
+        <Numpad onPress={props.input.onKey} />
+        <Input
+          label="Motivo"
+          value={props.motivo}
+          onChange={props.setMotivo}
+          placeholder={props.isDeposito ? 'Cambio en monedas' : 'Retiro para banco'}
+          testID="caja-movimiento-motivo"
+        />
+        <MovimientoSubmitBtn
+          isDeposito={props.isDeposito}
+          label={props.labels.btn}
+          canSubmit={props.canSubmit}
+          submitting={props.submitting}
+          onPress={() => {
+            props.onSubmit(props.input.centavos, props.motivo.trim());
+            props.input.reset();
+            props.setMotivo('');
+          }}
+        />
+      </View>
+    </ScrollView>
+  );
+}
+
+function MovimientoQuestion(props: { label: string }): ReactElement {
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.semibold.toString()}
+      fontSize={16}
+      color={colors.gray600}
+      textAlign="center"
+    >
+      {props.label}
+    </Text>
+  );
+}
+
+function MovimientoSubmitBtn(props: {
+  isDeposito: boolean;
+  label: string;
+  canSubmit: boolean;
+  submitting: boolean;
+  onPress: () => void;
+}): ReactElement {
+  return (
+    <Btn
+      variant={props.isDeposito ? 'green' : 'danger'}
+      fullWidth
+      size="lg"
+      icon={<Icon name="check" size={18} color={colors.white} />}
+      onPress={props.onPress}
+      disabled={!props.canSubmit}
+      loading={props.submitting}
+      testID="caja-movimiento-submit"
+    >
+      {props.label}
+    </Btn>
   );
 }

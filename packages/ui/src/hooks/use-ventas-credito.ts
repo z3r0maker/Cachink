@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { ClientId, IsoDate, Sale } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate, Sale } from '@cachink/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { ventasCreditoKeys } from './query-keys';
@@ -66,6 +66,22 @@ interface CreditQueryResult {
   readonly nameMap: ReadonlyMap<string, string>;
 }
 
+async function fetchCreditSales(
+  from: IsoDate,
+  to: IsoDate,
+  businessId: BusinessId,
+  salesRepo: ReturnType<typeof useSalesRepository>,
+  clientsRepo: ReturnType<typeof useClientsRepository>,
+): Promise<CreditQueryResult> {
+  const [all, clients] = await Promise.all([
+    salesRepo.findByDateRange(from, to, businessId),
+    clientsRepo.findByName('', businessId),
+  ]);
+  const nameMap = new Map<string, string>(clients.map((c) => [c.id as string, c.nombre]));
+  const sales = all.filter((s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado');
+  return { sales, nameMap };
+}
+
 export function useVentasCredito(
   from: IsoDate,
   to: IsoDate,
@@ -85,31 +101,14 @@ export function useVentasCredito(
       if (!businessId) {
         return { sales: [] as readonly Sale[], nameMap: new Map<string, string>() };
       }
-      const [all, clients] = await Promise.all([
-        salesRepo.findByDateRange(from, to, businessId),
-        clientsRepo.findByName('', businessId),
-      ]);
-      const nameMap = new Map<string, string>(
-        clients.map((c) => [c.id as string, c.nombre]),
-      );
-      const sales = all.filter(
-        (s) => s.metodo === 'Crédito' && s.estadoPago !== 'pagado',
-      );
-      return { sales, nameMap };
+      return fetchCreditSales(from, to, businessId, salesRepo, clientsRepo);
     },
   });
 
   const grouped = useMemo(
-    () =>
-      query.data
-        ? groupByCliente(query.data.sales, query.data.nameMap)
-        : undefined,
+    () => (query.data ? groupByCliente(query.data.sales, query.data.nameMap) : undefined),
     [query.data],
   );
 
-  return {
-    data: grouped,
-    isLoading: query.isLoading,
-    error: query.error,
-  };
+  return { data: grouped, isLoading: query.isLoading, error: query.error };
 }

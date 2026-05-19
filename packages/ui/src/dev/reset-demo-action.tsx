@@ -27,16 +27,15 @@ export function ResetDemoAction(props: ResetDemoActionProps): ReactElement | nul
   return <ResetDemoActionInner {...props} />;
 }
 
-function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
+function usePinSubmit(
+  userId: UserId | null,
+  repos: ReturnType<typeof useRepositories>,
+  setPinError: (e: string | null) => void,
+  setPinAttempt: (fn: (n: number) => number) => void,
+  setStep: (s: ResetStep) => void,
+) {
   const { t } = useTranslation();
-  const repos = useRepositories();
-  const userId = useUserId() as UserId | null;
-
-  const [step, setStep] = useState<ResetStep>('idle');
-  const [pinError, setPinError] = useState<string | null>(null);
-  const [pinAttempt, setPinAttempt] = useState(0);
-
-  const handlePinSubmit = useCallback(
+  return useCallback(
     async (pin: string) => {
       if (!userId) return;
       const user = await repos.users.findById(userId);
@@ -44,7 +43,6 @@ function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
         setPinError('Usuario no encontrado');
         return;
       }
-
       const valid = await compare(pin, user.pinHash);
       if (!valid) {
         setPinError(t('dev.resetPinError'));
@@ -54,8 +52,19 @@ function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
       setPinError(null);
       setStep('confirm');
     },
-    [userId, repos.users, t],
+    [userId, repos.users, t, setPinError, setPinAttempt, setStep],
   );
+}
+
+function useResetHandlers(
+  props: ResetDemoActionProps,
+  userId: UserId | null,
+  repos: ReturnType<typeof useRepositories>,
+) {
+  const [step, setStep] = useState<ResetStep>('idle');
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinAttempt, setPinAttempt] = useState(0);
+  const handlePinSubmit = usePinSubmit(userId, repos, setPinError, setPinAttempt, setStep);
 
   const handleReset = useCallback(async () => {
     setStep('pending');
@@ -72,45 +81,64 @@ function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
     setPinError(null);
   }, []);
 
+  return { step, setStep, pinError, pinAttempt, handlePinSubmit, handleReset, handleDismissPin };
+}
+
+function ResetDemoCard({
+  step,
+  setStep,
+  t,
+}: {
+  step: ResetStep;
+  setStep: (s: ResetStep) => void;
+  t: (k: string) => string;
+}): ReactElement {
+  return (
+    <Card testID="reset-demo-card" padding="md" fullWidth>
+      <SectionTitle title={t('dev.resetTitle')} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={13}
+        color={step === 'error' ? colors.red : colors.gray600}
+        marginBottom={10}
+      >
+        {step === 'error' ? t('dev.resetError') : t('dev.resetHint')}
+      </Text>
+      <Btn
+        variant="danger"
+        onPress={() => setStep('pin')}
+        disabled={step === 'pending'}
+        fullWidth
+        testID="reset-demo-btn"
+      >
+        {step === 'pending' ? '⏳ Borrando…' : t('dev.resetBtn')}
+      </Btn>
+    </Card>
+  );
+}
+
+function ResetDemoActionInner(props: ResetDemoActionProps): ReactElement {
+  const { t } = useTranslation();
+  const repos = useRepositories();
+  const userId = useUserId() as UserId | null;
+  const h = useResetHandlers(props, userId, repos);
+
   return (
     <>
-      <Card testID="reset-demo-card" padding="md" fullWidth>
-        <SectionTitle title={t('dev.resetTitle')} />
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={13}
-          color={step === 'error' ? colors.red : colors.gray600}
-          marginBottom={10}
-        >
-          {step === 'error' ? t('dev.resetError') : t('dev.resetHint')}
-        </Text>
-        <Btn
-          variant="danger"
-          onPress={() => setStep('pin')}
-          disabled={step === 'pending'}
-          fullWidth
-          testID="reset-demo-btn"
-        >
-          {step === 'pending' ? '⏳ Borrando…' : t('dev.resetBtn')}
-        </Btn>
-      </Card>
-
-      {/* PIN verification modal */}
+      <ResetDemoCard step={h.step} setStep={h.setStep} t={t} />
       <Modal
-        open={step === 'pin'}
-        onClose={handleDismissPin}
+        open={h.step === 'pin'}
+        onClose={h.handleDismissPin}
         title={t('dev.resetPinTitle')}
         testID="reset-pin-modal"
       >
-        <PinGateContent key={pinAttempt} onSubmit={handlePinSubmit} error={pinError} />
+        <PinGateContent key={h.pinAttempt} onSubmit={h.handlePinSubmit} error={h.pinError} />
       </Modal>
-
-      {/* Final confirmation dialog */}
       <ConfirmDialog
-        open={step === 'confirm'}
-        onClose={() => setStep('idle')}
-        onConfirm={handleReset}
+        open={h.step === 'confirm'}
+        onClose={() => h.setStep('idle')}
+        onConfirm={h.handleReset}
         title={t('dev.resetConfirmTitle')}
         description={t('dev.resetConfirmBody')}
         confirmLabel={t('dev.resetConfirmBtn')}

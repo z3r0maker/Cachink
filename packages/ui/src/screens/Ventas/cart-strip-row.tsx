@@ -31,6 +31,47 @@ function StockImpact(props: {
   );
 }
 
+function CartItemInfo(props: { item: CartItem }): ReactElement {
+  return (
+    <View flex={1} gap={2}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={13}
+        color={colors.black}
+        numberOfLines={1}
+      >
+        {props.item.nombre}
+      </Text>
+      <StockImpact stock={props.item.stock} qty={props.item.cantidad} />
+    </View>
+  );
+}
+
+function RemoveButton(props: {
+  productoId: string;
+  onRemoveOne: () => void;
+  onRemoveAll: () => void;
+}): ReactElement {
+  return (
+    <Pressable
+      testID={`cart-remove-${props.productoId}`}
+      onPress={() => { impactLight(); props.onRemoveOne(); }}
+      onLongPress={() => { impactMedium(); props.onRemoveAll(); }}
+      hitSlop={6}
+    >
+      <View
+        width={28} height={28} borderRadius={14}
+        borderWidth={2} borderColor={colors.black}
+        alignItems="center" justifyContent="center"
+        backgroundColor={colors.gray100}
+      >
+        <Icon name="minus" size={14} color={colors.black} />
+      </View>
+    </Pressable>
+  );
+}
+
 export function CartRow(props: {
   item: CartItem;
   onRemoveOne: () => void;
@@ -44,18 +85,7 @@ export function CartRow(props: {
       paddingVertical={6}
       gap={8}
     >
-      <View flex={1} gap={2}>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.semibold}
-          fontSize={13}
-          color={colors.black}
-          numberOfLines={1}
-        >
-          {props.item.nombre}
-        </Text>
-        <StockImpact stock={props.item.stock} qty={props.item.cantidad} />
-      </View>
+      <CartItemInfo item={props.item} />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
@@ -74,31 +104,11 @@ export function CartRow(props: {
       >
         {formatMoney(props.item.precioUnitCentavos * BigInt(props.item.cantidad))}
       </Text>
-      <Pressable
-        testID={`cart-remove-${props.item.productoId}`}
-        onPress={() => {
-          impactLight();
-          props.onRemoveOne();
-        }}
-        onLongPress={() => {
-          impactMedium();
-          props.onRemoveAll();
-        }}
-        hitSlop={6}
-      >
-        <View
-          width={28}
-          height={28}
-          borderRadius={14}
-          borderWidth={2}
-          borderColor={colors.black}
-          alignItems="center"
-          justifyContent="center"
-          backgroundColor={colors.gray100}
-        >
-          <Icon name="minus" size={14} color={colors.black} />
-        </View>
-      </Pressable>
+      <RemoveButton
+        productoId={props.item.productoId}
+        onRemoveOne={props.onRemoveOne}
+        onRemoveAll={props.onRemoveAll}
+      />
     </View>
   );
 }

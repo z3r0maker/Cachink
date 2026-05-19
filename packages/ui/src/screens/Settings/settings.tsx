@@ -170,7 +170,24 @@ function LanguageCard({ t }: { t: T }): ReactElement {
   );
 }
 
+function FuncionesCard(props: { label: string; onPress: () => void }): ReactElement {
+  return (
+    <Card testID="settings-funciones" padding="md" fullWidth onPress={props.onPress}>
+      <View flexDirection="row" alignItems="center" justifyContent="space-between">
+        <View flexDirection="row" alignItems="center" gap={8}>
+          <Icon name="sliders" size={18} color={colors.black} />
+          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={15} color={colors.black}>
+            {props.label}
+          </Text>
+        </View>
+        <Icon name="chevron-right" size={16} color={colors.gray400} />
+      </View>
+    </Card>
+  );
+}
+
 function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void }): ReactElement {
+  const isLan = props.mode === 'lan-server' || props.mode === 'lan-client';
   return (
     <ScrollView
       testID={props.testID ?? 'settings-screen'}
@@ -179,34 +196,12 @@ function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void
     >
       <SectionTitle title={props.t('settings.title')} />
       <Card testID="settings-mode-card" padding="md" fullWidth>
-        <SettingsRow
-          label={props.t('settings.modoLabel')}
-          value={props.t(modeLabelKey(props.mode) as 'wizard.modeNames.local')}
-        />
+        <SettingsRow label={props.t('settings.modoLabel')} value={props.t(modeLabelKey(props.mode) as 'wizard.modeNames.local')} />
       </Card>
       <BusinessCard business={props.business} t={props.t} onEdit={props.onEdit} />
       <IsrDefaultsCard />
-      {props.onOpenFunciones && (
-        <Card testID="settings-funciones" padding="md" fullWidth onPress={props.onOpenFunciones}>
-          <View flexDirection="row" alignItems="center" justifyContent="space-between">
-            <View flexDirection="row" alignItems="center" gap={8}>
-              <Icon name="sliders" size={18} color={colors.black} />
-              <Text
-                fontFamily={typography.fontFamily}
-                fontWeight={typography.weights.semibold}
-                fontSize={15}
-                color={colors.black}
-              >
-                {props.t('settings.funciones')}
-              </Text>
-            </View>
-            <Icon name="chevron-right" size={16} color={colors.gray400} />
-          </View>
-        </Card>
-      )}
-      {(props.mode === 'lan-server' || props.mode === 'lan-client') && props.lanDetails && (
-        <LanSection lan={props.lanDetails} />
-      )}
+      {props.onOpenFunciones && <FuncionesCard label={props.t('settings.funciones')} onPress={props.onOpenFunciones} />}
+      {isLan && props.lanDetails && <LanSection lan={props.lanDetails} />}
       <LanguageCard t={props.t} />
       <SettingsTail props={props} t={props.t} />
     </ScrollView>

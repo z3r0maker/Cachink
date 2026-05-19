@@ -36,7 +36,7 @@ function insertProduct(sqlite: Database.Database, id: string): void {
   `);
 }
 
-function insertClient(sqlite: Database.Database, id: string): void {
+function _insertClient(sqlite: Database.Database, id: string): void {
   sqlite.exec(`
     INSERT INTO clients (id, nombre, business_id, device_id, created_at, updated_at)
     VALUES ('${id}', 'Test Client', '${BIZ}', '${DEV}', '${NOW}', '${NOW}')
@@ -50,7 +50,7 @@ function insertUser(sqlite: Database.Database, id: string): void {
   `);
 }
 
-function insertSale(sqlite: Database.Database, id: string, productoId: string): void {
+function _insertSale(sqlite: Database.Database, id: string, productoId: string): void {
   sqlite.exec(`
     INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago, producto_id, business_id, device_id, created_at, updated_at)
     VALUES ('${id}', '2026-05-16', 'Test', 'Producto', 5000, 'Efectivo', 'pagado', '${productoId}', '${BIZ}', '${DEV}', '${NOW}', '${NOW}')

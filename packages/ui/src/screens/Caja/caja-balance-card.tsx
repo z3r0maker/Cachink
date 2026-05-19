@@ -24,20 +24,17 @@ function Row(props: {
   prefix: '+' | '−';
 }): ReactElement {
   const isZero = props.amount === 0n;
+  const color = isZero ? colors.gray400 : colors.ink;
   return (
     <View flexDirection="row" justifyContent="space-between" paddingVertical={2}>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontSize={14}
-        color={isZero ? colors.gray400 : colors.ink}
-      >
+      <Text fontFamily={typography.fontFamily} fontSize={14} color={color}>
         {props.label}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold.toString()}
         fontSize={14}
-        color={isZero ? colors.gray400 : colors.ink}
+        color={color}
       >
         {`${props.prefix} ${formatMoney(props.amount)}`}
       </Text>
@@ -58,43 +55,48 @@ export function CajaBalanceCard(props: CajaBalanceCardProps): ReactElement {
       gap={8}
       testID={props.testID ?? 'caja-balance-card'}
     >
-      <View flexDirection="row" alignItems="center" gap={8}>
-        <Icon name="banknote" size={24} color={colors.green} />
-        <View>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={12}
-            color={colors.gray600}
-          >
-            Efectivo en caja
-          </Text>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.black.toString()}
-            fontSize={28}
-            color={colors.black}
-          >
-            {formatMoney(efectivoEnCaja)}
-          </Text>
-        </View>
+      <BalanceTotalRow efectivoEnCaja={efectivoEnCaja} />
+      <View height={1} backgroundColor={colors.gray200} marginVertical={4} />
+      <BalanceBreakdown desglose={desglose} />
+    </View>
+  );
+}
+
+function BalanceTotalRow(props: { efectivoEnCaja: Money }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={8}>
+      <Icon name="banknote" size={24} color={colors.green} />
+      <View>
+        <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600}>
+          Efectivo en caja
+        </Text>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.black.toString()}
+          fontSize={28}
+          color={colors.black}
+        >
+          {formatMoney(props.efectivoEnCaja)}
+        </Text>
       </View>
+    </View>
+  );
+}
 
-      <View
-        height={1}
-        backgroundColor={colors.gray200}
-        marginVertical={4}
-      />
-
-      <Row label="Apertura:" amount={desglose.apertura} prefix="+" />
-      {desglose.adicional > 0n && (
-        <Row label="Adicional:" amount={desglose.adicional} prefix="+" />
-      )}
-      <Row label="Ventas efectivo:" amount={desglose.ventasEfectivo} prefix="+" />
-      <Row label="Cambios dados:" amount={desglose.cambiosDados} prefix="−" />
-      <Row label="Depósitos:" amount={desglose.depositos} prefix="+" />
-      <Row label="Retiros:" amount={desglose.retiros} prefix="−" />
-      <Row label="Egresos:" amount={desglose.egresosEfectivo} prefix="−" />
-      <Row label="Cancelaciones:" amount={desglose.cancelacionesEfectivo} prefix="−" />
+function BalanceBreakdown(props: {
+  desglose: CajaBalanceResult['desglose'];
+}): ReactElement {
+  const d = props.desglose;
+  return (
+    <View>
+      <Row label="Apertura:" amount={d.apertura} prefix="+" />
+      {d.adicional > 0n && <Row label="Adicional:" amount={d.adicional} prefix="+" />}
+      <Row label="Ventas efectivo:" amount={d.ventasEfectivo} prefix="+" />
+      <Row label="Cambios dados:" amount={d.cambiosDados} prefix="−" />
+      <Row label="Depósitos:" amount={d.depositos} prefix="+" />
+      <Row label="Retiros:" amount={d.retiros} prefix="−" />
+      <Row label="Egresos:" amount={d.egresosEfectivo} prefix="−" />
+      <Row label="Cancelaciones:" amount={d.cancelacionesEfectivo} prefix="−" />
     </View>
   );
 }

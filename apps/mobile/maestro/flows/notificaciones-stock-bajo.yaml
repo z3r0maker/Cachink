@@ -1,5 +1,6 @@
 # Verify the Director can toggle stock-low notifications in Settings
 # (P1C-M11-T01..T03, S4-C13).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

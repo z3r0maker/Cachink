@@ -1,5 +1,6 @@
 # Create a producto and register an entrada; verify stock + egreso.
 # Covers P1C-M5-T01 (Stock list) and P1C-M5-T03 (NuevoProducto modal).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -53,7 +54,7 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     notVisible:
       id: "nuevo-producto-modal"
-    timeout: 10000
+    timeout: 5000
 
 # Wait for the stock list to render the new product.
 - extendedWaitUntil:

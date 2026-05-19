@@ -25,15 +25,12 @@ import {
 
 type T = ReturnType<typeof useTranslation>['t'];
 
-export function IdentityFields({
-  form,
-  t,
-  onScan,
-}: {
+export function IdentityFields(props: {
   form: ProductoFormApi;
   t: T;
   onScan: () => void;
 }): ReactElement {
+  const { form, t } = props;
   return (
     <>
       <TextField
@@ -54,13 +51,7 @@ export function IdentityFields({
         testID="producto-sku"
         returnKeyType="next"
       />
-      <Btn
-        variant="ghost"
-        onPress={onScan}
-        fullWidth
-        icon={<Icon name="camera" size={16} />}
-        testID="producto-scan"
-      >
+      <Btn variant="ghost" onPress={props.onScan} fullWidth icon={<Icon name="camera" size={16} />} testID="producto-scan">
         {t('scanner.title')}
       </Btn>
     </>
@@ -99,15 +90,12 @@ export function CategoryFields({
   );
 }
 
-export function PricingFields({
-  form,
-  t,
-  showPrecio,
-}: {
+export function PricingFields(props: {
   form: ProductoFormApi;
   t: T;
   showPrecio: boolean;
 }): ReactElement {
+  const { form, t } = props;
   return (
     <>
       <MoneyField
@@ -119,7 +107,7 @@ export function PricingFields({
         testID="producto-costo"
         returnKeyType="next"
       />
-      {showPrecio && (
+      {props.showPrecio && (
         <MoneyField
           label={t('nuevoProducto.precioVentaLabel')}
           value={form.state.precioVentaPesos}
@@ -130,13 +118,7 @@ export function PricingFields({
           returnKeyType="next"
         />
       )}
-      <Combobox
-        label={t('nuevoProducto.unidadLabel')}
-        value={form.state.unidad}
-        onChange={(v) => form.update({ unidad: v as InventoryUnit })}
-        options={INV_UNIDADES_OPTIONS}
-        testID="producto-unidad"
-      />
+      <Combobox label={t('nuevoProducto.unidadLabel')} value={form.state.unidad} onChange={(v) => form.update({ unidad: v as InventoryUnit })} options={INV_UNIDADES_OPTIONS} testID="producto-unidad" />
     </>
   );
 }

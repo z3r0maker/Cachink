@@ -26,28 +26,21 @@ function barColor(type: WaterfallItem['type'], value: number): string {
   return SEMANTIC[type];
 }
 
-function barGradient(
-  type: WaterfallItem['type'],
-  value: number,
-) {
+function barGradient(type: WaterfallItem['type'], value: number) {
   const startColor = barColor(type, value);
-  const endColor = type === 'income' || (type === 'subtotal' && value >= 0)
-    ? colors.greenSoft
-    : colors.redSoft;
+  const endColor =
+    type === 'income' || (type === 'subtotal' && value >= 0) ? colors.greenSoft : colors.redSoft;
   return new echarts.graphic.LinearGradient(0, 0, 0, 1, [
     { offset: 0, color: startColor },
     { offset: 1, color: endColor },
   ]);
 }
 
-/** Build the ECharts option object from WaterfallItem[] data. */
-export function buildWaterfallOption(data: readonly WaterfallItem[]): object {
-  const positions = computeBarPositions(data);
-  const labels = data.map((d) => d.label);
-
-  // Three series: invisible base, visible bars, value labels
-  const baseData = positions.map((p) => Math.min(p.base, p.top));
-  const barData = data.map((item, i) => {
+function buildBarDataItems(
+  data: readonly WaterfallItem[],
+  positions: ReturnType<typeof computeBarPositions>,
+) {
+  return data.map((item, i) => {
     const pos = positions[i]!;
     return {
       value: Math.abs(pos.top - pos.base),
@@ -59,57 +52,78 @@ export function buildWaterfallOption(data: readonly WaterfallItem[]): object {
       },
     };
   });
+}
 
+function buildValueLabel(data: readonly WaterfallItem[]) {
   return {
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: (params: Array<{ name: string; seriesIndex: number; value: number }>) => {
-        const item = params.find((p) => p.seriesIndex === 1);
-        if (!item) return '';
-        const idx = labels.indexOf(item.name);
-        const original = idx >= 0 ? data[idx]! : null;
-        return original
-          ? `${item.name}: ${formatChartLabel(original.value)}`
-          : `${item.name}: ${formatChartLabel(item.value)}`;
-      },
+    show: true,
+    position: 'top',
+    formatter: (p: { dataIndex: number }) => formatChartLabel(data[p.dataIndex]?.value ?? 0),
+    color: (p: { dataIndex: number }) => {
+      const v = data[p.dataIndex]?.value ?? 0;
+      if (v < 0) return colors.red;
+      if (v > 0) return colors.green;
+      return colors.ink;
     },
+    fontWeight: 700,
+    fontSize: 11,
+    fontFamily: "'Plus Jakarta Sans', sans-serif",
+  };
+}
+
+function buildWaterfallSeries(
+  data: readonly WaterfallItem[],
+  positions: ReturnType<typeof computeBarPositions>,
+) {
+  const baseData = positions.map((p) => Math.min(p.base, p.top));
+  const transparentStyle = { color: 'transparent', borderWidth: 0 };
+  return [
+    {
+      name: 'base',
+      type: 'bar',
+      stack: 'waterfall',
+      data: baseData,
+      itemStyle: transparentStyle,
+      emphasis: { itemStyle: transparentStyle },
+    },
+    {
+      name: 'value',
+      type: 'bar',
+      stack: 'waterfall',
+      data: buildBarDataItems(data, positions),
+      label: buildValueLabel(data),
+    },
+  ];
+}
+
+function buildWaterfallTooltip(data: readonly WaterfallItem[], labels: string[]) {
+  return {
+    trigger: 'axis',
+    axisPointer: { type: 'shadow' },
+    formatter: (params: Array<{ name: string; seriesIndex: number; value: number }>) => {
+      const item = params.find((p) => p.seriesIndex === 1);
+      if (!item) return '';
+      const idx = labels.indexOf(item.name);
+      const original = idx >= 0 ? data[idx]! : null;
+      return original
+        ? `${item.name}: ${formatChartLabel(original.value)}`
+        : `${item.name}: ${formatChartLabel(item.value)}`;
+    },
+  };
+}
+
+/** Build the ECharts option object from WaterfallItem[] data. */
+export function buildWaterfallOption(data: readonly WaterfallItem[]): object {
+  const positions = computeBarPositions(data);
+  const labels = data.map((d) => d.label);
+  return {
+    tooltip: buildWaterfallTooltip(data, labels),
     grid: { left: 10, right: 10, top: 30, bottom: 30, containLabel: true },
     xAxis: { type: 'category', data: labels },
     yAxis: { type: 'value', show: false },
     animationDuration: 600,
     animationEasing: 'cubicOut',
-    series: [
-      {
-        name: 'base',
-        type: 'bar',
-        stack: 'waterfall',
-        data: baseData,
-        itemStyle: { color: 'transparent', borderWidth: 0 },
-        emphasis: { itemStyle: { color: 'transparent' } },
-      },
-      {
-        name: 'value',
-        type: 'bar',
-        stack: 'waterfall',
-        data: barData,
-        label: {
-          show: true,
-          position: 'top',
-          formatter: (p: { dataIndex: number }) =>
-            formatChartLabel(data[p.dataIndex]?.value ?? 0),
-          color: (p: { dataIndex: number }) => {
-            const v = data[p.dataIndex]?.value ?? 0;
-            if (v < 0) return colors.red;
-            if (v > 0) return colors.green;
-            return colors.ink;
-          },
-          fontWeight: 700,
-          fontSize: 11,
-          fontFamily: "'Plus Jakarta Sans', sans-serif",
-        },
-      },
-    ],
+    series: buildWaterfallSeries(data, positions),
   };
 }
 

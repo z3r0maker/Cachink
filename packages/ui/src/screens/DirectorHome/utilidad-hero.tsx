@@ -48,12 +48,41 @@ function utilidadTone(utilidad: bigint): 'positive' | 'negative' | 'neutral' {
   return 'neutral';
 }
 
+function HeroFooter(props: {
+  from: IsoDate;
+  to: IsoDate;
+  onVerEstados?: () => void;
+}): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View marginTop={12} flexDirection="row" justifyContent="space-between" alignItems="center">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={12}
+        color={colors.gray600}
+      >
+        {formatPeriodoLabel(props.from, props.to)}
+      </Text>
+      {props.onVerEstados && (
+        <Btn
+          variant="dark"
+          size="sm"
+          onPress={props.onVerEstados}
+          testID="utilidad-hero-ver-estados"
+        >
+          {t('directorHome.utilidadVerEstados')}
+        </Btn>
+      )}
+    </View>
+  );
+}
+
 export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
   const { t } = useTranslation();
   const periodo = useMemo(() => currentMonthRange(props.now), [props.now]);
   const query = useEstadoResultados({ periodo });
   const utilidad = (query.data?.utilidadNeta ?? 0n) as bigint;
-
   return (
     <Card
       testID={props.testID ?? 'utilidad-hero'}
@@ -67,26 +96,7 @@ export function UtilidadHero(props: UtilidadHeroProps): ReactElement {
         value={formatMoney(utilidad as never)}
         tone={utilidadTone(utilidad)}
       />
-      <View marginTop={12} flexDirection="row" justifyContent="space-between" alignItems="center">
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.medium}
-          fontSize={12}
-          color={colors.gray600}
-        >
-          {formatPeriodoLabel(periodo.from, periodo.to)}
-        </Text>
-        {props.onVerEstados && (
-          <Btn
-            variant="dark"
-            size="sm"
-            onPress={props.onVerEstados}
-            testID="utilidad-hero-ver-estados"
-          >
-            {t('directorHome.utilidadVerEstados')}
-          </Btn>
-        )}
-      </View>
+      <HeroFooter from={periodo.from} to={periodo.to} onVerEstados={props.onVerEstados} />
     </Card>
   );
 }

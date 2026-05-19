@@ -24,6 +24,13 @@ import type {
 } from '@cachink/data';
 import type { UseCase } from '../_use-case.js';
 
+function currentHHMM(): string {
+  const d = new Date();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
 export interface RegistrarVentaConfig {
   /** Business-level stock feature flag. When false, no stock movements. */
   readonly stockEnabled?: boolean;
@@ -59,34 +66,16 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
 
   async execute(input: NewSale): Promise<Sale> {
     const parsed = NewSaleSchema.parse(input);
-
-    // ── Caja gate (always active) ──
-    if (!this.#userId) {
-      throw new CajaNoAbiertaError();
-    }
-    const turno = await this.#cajaTurnos.findOpenByUser(this.#userId);
-    if (!turno) throw new CajaNoAbiertaError();
-    const cajaTurnoId: CajaTurnoId = turno.id;
+    const cajaTurnoId = await this.#requireOpenTurno();
 
     const producto = await this.#products.findById(parsed.productoId);
     if (!producto) {
       throw new TypeError(`Producto ${parsed.productoId} no existe`);
     }
 
-    if (parsed.metodo === 'Crédito') {
-      if (!parsed.clienteId) {
-        throw new TypeError('Venta en Crédito requiere clienteId');
-      }
-      const cliente = await this.#clients.findById(parsed.clienteId);
-      if (!cliente) {
-        throw new TypeError(`Cliente ${parsed.clienteId} no existe`);
-      }
-    }
+    await this.#validateCredito(parsed);
 
-    const hora = parsed.hora ?? (() => {
-      const d = new Date();
-      return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-    })();
+    const hora = parsed.hora ?? currentHHMM();
     const sale = await this.#sales.create({
       ...parsed,
       hora,
@@ -94,20 +83,44 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
       efectivoRecibidoCentavos: parsed.efectivoRecibidoCentavos,
     });
 
-    // Business-level stock flag BEFORE product-level seguirStock
     if (this.#stockEnabled && producto.seguirStock) {
-      await this.#movements.create({
-        productoId: parsed.productoId,
-        fecha: parsed.fecha ?? today(),
-        tipo: 'salida',
-        cantidad: parsed.cantidad ?? 1,
-        costoUnitCentavos: producto.costoUnitCentavos,
-        motivo: 'Venta',
-        nota: undefined,
-        businessId: parsed.businessId,
-      });
+      await this.#createStockMovement(parsed, producto);
     }
 
     return sale;
+  }
+
+  async #requireOpenTurno(): Promise<CajaTurnoId> {
+    if (!this.#userId) throw new CajaNoAbiertaError();
+    const turno = await this.#cajaTurnos.findOpenByUser(this.#userId);
+    if (!turno) throw new CajaNoAbiertaError();
+    return turno.id;
+  }
+
+  async #validateCredito(parsed: NewSale): Promise<void> {
+    if (parsed.metodo !== 'Crédito') return;
+    if (!parsed.clienteId) {
+      throw new TypeError('Venta en Crédito requiere clienteId');
+    }
+    const cliente = await this.#clients.findById(parsed.clienteId);
+    if (!cliente) {
+      throw new TypeError(`Cliente ${parsed.clienteId} no existe`);
+    }
+  }
+
+  async #createStockMovement(
+    parsed: NewSale,
+    producto: { costoUnitCentavos: bigint },
+  ): Promise<void> {
+    await this.#movements.create({
+      productoId: parsed.productoId,
+      fecha: parsed.fecha ?? today(),
+      tipo: 'salida',
+      cantidad: parsed.cantidad ?? 1,
+      costoUnitCentavos: producto.costoUnitCentavos,
+      motivo: 'Venta',
+      nota: undefined,
+      businessId: parsed.businessId,
+    });
   }
 }

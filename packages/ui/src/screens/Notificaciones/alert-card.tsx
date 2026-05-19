@@ -53,9 +53,49 @@ function formatRelativeTime(date: string): string {
   return `${diffDays}d`;
 }
 
+function AlertHeader({ alert, accent }: { alert: DirectorAlert; accent: string }): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View flexDirection="row" alignItems="center" gap={8}>
+      <Icon name={severityIcon(alert.severity)} size={18} color={accent} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={15}
+        color={colors.black}
+        flexShrink={1}
+      >
+        {t(alert.titleKey)}
+      </Text>
+    </View>
+  );
+}
+
+function AlertFooter({ alert, onAction }: { alert: DirectorAlert; onAction?: () => void }): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <View flexDirection="row" alignItems="center" justifyContent="space-between">
+      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray400}>
+        {formatRelativeTime(alert.createdAt)}
+      </Text>
+      {alert.actionRoute && (
+        <Pressable onPress={onAction}>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.semibold}
+            fontSize={13}
+            color={colors.blue}
+          >
+            {t('notificaciones.ver')} →
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
 export function AlertCard(props: AlertCardProps): ReactElement {
   const { alert, onPress, onAction, testID } = props;
-  const { t } = useTranslation();
   const isUnread = !alert.read;
   const accent = severityColor(alert.severity);
 
@@ -72,19 +112,7 @@ export function AlertCard(props: AlertCardProps): ReactElement {
         gap={6}
         opacity={isUnread ? 1 : 0.7}
       >
-        <View flexDirection="row" alignItems="center" gap={8}>
-          <Icon name={severityIcon(alert.severity)} size={18} color={accent} />
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={15}
-            color={colors.black}
-            flexShrink={1}
-          >
-            {t(alert.titleKey)}
-          </Text>
-        </View>
-
+        <AlertHeader alert={alert} accent={accent} />
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.regular}
@@ -94,28 +122,7 @@ export function AlertCard(props: AlertCardProps): ReactElement {
         >
           {alert.message}
         </Text>
-
-        <View flexDirection="row" alignItems="center" justifyContent="space-between">
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={12}
-            color={colors.gray400}
-          >
-            {formatRelativeTime(alert.createdAt)}
-          </Text>
-          {alert.actionRoute && (
-            <Pressable onPress={onAction}>
-              <Text
-                fontFamily={typography.fontFamily}
-                fontWeight={typography.weights.semibold}
-                fontSize={13}
-                color={colors.blue}
-              >
-                {t('notificaciones.ver')} →
-              </Text>
-            </Pressable>
-          )}
-        </View>
+        <AlertFooter alert={alert} onAction={onAction} />
       </View>
     </Pressable>
   );

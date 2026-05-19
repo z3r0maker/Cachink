@@ -117,6 +117,65 @@ export async function runMigrations(
   }
 }
 
+/** Resolve the SQL for a migration tag, or throw if missing. */
+function resolveMigrationSql(tag: string): string {
+  const raw = migrationSqlByTag[tag];
+  if (!raw) {
+    throw new MigrationError(
+      tag,
+      new Error(
+        `Migration '${tag}' is listed in the journal but missing ` +
+          `from migrationSqlByTag. Did you forget to register its SQL ` +
+          `in @cachink/data/drizzle/migrations/index.ts?`,
+      ),
+    );
+  }
+  return raw;
+}
+
+/** Apply a single migration inside a transaction. */
+async function applySingleMigration(
+  db: CachinkDatabase,
+  tag: string,
+  migrationSql: string,
+): Promise<void> {
+  await db.run(sql.raw('BEGIN IMMEDIATE'));
+  try {
+    for (const statement of splitStatements(migrationSql)) {
+      await db.run(sql.raw(statement));
+    }
+
+    const appliedAt = new Date().toISOString();
+    await db.run(
+      sql.raw(
+        `INSERT INTO ${MIGRATIONS_TABLE} (tag, applied_at) VALUES ('${tag}', '${appliedAt}')`,
+      ),
+    );
+
+    await db.run(sql.raw('COMMIT'));
+  } catch (error) {
+    try {
+      await db.run(sql.raw('ROLLBACK'));
+    } catch {
+      // ROLLBACK itself may fail if the DB is in a weird state.
+    }
+    throw new MigrationError(tag, error);
+  }
+}
+
+/** Run optional backup before applying pending migrations. */
+async function runBackupIfNeeded(
+  options: RunMigrationsOptions,
+  firstTag: string,
+): Promise<void> {
+  if (!options.backupBefore) return;
+  try {
+    await options.backupBefore(firstTag);
+  } catch {
+    // Backup failure must not block migration.
+  }
+}
+
 async function runMigrationsInternal(
   db: CachinkDatabase,
   options: RunMigrationsOptions,
@@ -129,55 +188,15 @@ async function runMigrationsInternal(
   );
 
   if (pending.length === 0) {
-    // Still set user_version in case this is an "adoption" run
-    // (existing DB that predates the version gate).
     await setSchemaVersion(db, SCHEMA_VERSION);
     return;
   }
 
-  if (options.backupBefore) {
-    try {
-      await options.backupBefore(pending[0]!.tag);
-    } catch {
-      // Backup failure must not block migration.
-    }
-  }
+  await runBackupIfNeeded(options, pending[0]!.tag);
 
   for (const entry of pending) {
-    const raw = migrationSqlByTag[entry.tag];
-    if (!raw) {
-      throw new MigrationError(
-        entry.tag,
-        new Error(
-          `Migration '${entry.tag}' is listed in the journal but missing ` +
-            `from migrationSqlByTag. Did you forget to register its SQL ` +
-            `in @cachink/data/drizzle/migrations/index.ts?`,
-        ),
-      );
-    }
-
-    await db.run(sql.raw('BEGIN IMMEDIATE'));
-    try {
-      for (const statement of splitStatements(raw)) {
-        await db.run(sql.raw(statement));
-      }
-
-      const appliedAt = new Date().toISOString();
-      await db.run(
-        sql.raw(
-          `INSERT INTO ${MIGRATIONS_TABLE} (tag, applied_at) VALUES ('${entry.tag}', '${appliedAt}')`,
-        ),
-      );
-
-      await db.run(sql.raw('COMMIT'));
-    } catch (error) {
-      try {
-        await db.run(sql.raw('ROLLBACK'));
-      } catch {
-        // ROLLBACK itself may fail if the DB is in a weird state.
-      }
-      throw new MigrationError(entry.tag, error);
-    }
+    const migrationSql = resolveMigrationSql(entry.tag);
+    await applySingleMigration(db, entry.tag, migrationSql);
   }
 
   await setSchemaVersion(db, SCHEMA_VERSION);

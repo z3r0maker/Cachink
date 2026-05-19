@@ -5,6 +5,7 @@
 # dev-client modals, then taps "Modo Demo" on the wizard.
 #
 # After: app on QuickSwitch login with demo data (PIN 000000).
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp

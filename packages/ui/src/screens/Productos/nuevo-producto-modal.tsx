@@ -16,6 +16,7 @@ import {
   buildProductoPayload,
   useProductoForm,
   validateProducto,
+  validationMessages,
 } from './nuevo-producto-form';
 import {
   AppearanceField,
@@ -35,27 +36,28 @@ export interface NuevoProductoModalProps {
   readonly onPickIcon?: () => void;
 }
 
-export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement {
-  const { t } = useTranslation();
-  const form = useProductoForm();
-  const [scanOpen, setScanOpen] = useState(false);
-  const showPrecio = form.state.usoProducto !== 'materia-prima';
-
-  const handleSubmit = (): void => {
-    const msgs = {
-      required: t('validation.required'),
-      greaterThanZero: t('validation.greaterThanZero'),
-      invalidNumber: t('validation.invalidNumber'),
-    };
-    const v = validateProducto(form.state, msgs);
+function useModalSubmit(
+  form: ReturnType<typeof useProductoForm>,
+  onSubmit: (input: CrearProductoInput) => void,
+  t: ReturnType<typeof useTranslation>['t'],
+) {
+  return (): void => {
+    const v = validateProducto(form.state, validationMessages(t));
     if (Object.keys(v).length > 0) {
       form.setErrors(v);
       return;
     }
     form.setErrors({});
-    props.onSubmit(buildProductoPayload(form.state));
+    onSubmit(buildProductoPayload(form.state));
     form.reset();
   };
+}
+
+export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement {
+  const { t } = useTranslation();
+  const form = useProductoForm();
+  const [scanOpen, setScanOpen] = useState(false);
+  const handleSubmit = useModalSubmit(form, props.onSubmit, t);
 
   return (
     <Modal
@@ -65,12 +67,8 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       testID="nuevo-producto-modal"
     >
       <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} />
-      <CategoryFields
-        form={form}
-        t={t}
-        conversionEnabled={props.conversionEnabled === true}
-      />
-      <PricingFields form={form} t={t} showPrecio={showPrecio} />
+      <CategoryFields form={form} t={t} conversionEnabled={props.conversionEnabled === true} />
+      <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
       <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
       <Btn

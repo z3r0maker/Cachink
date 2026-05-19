@@ -1,5 +1,6 @@
 # Verify the Caja gate blocks venta when caja is not open.
 # Navigate to Ventas, see gate banner, tap "go to caja" to open caja screen.
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
   - ventas

@@ -6,7 +6,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { BusinessId, CajaMovimientoTipo, Money } from '@cachink/domain';
+import type { BusinessId, CajaMovimientoTipo, CajaTurnoId, Money, UserId } from '@cachink/domain';
 import { CajaMovimientoSheet } from './caja-movimiento-sheet';
 import { useCajaMovimientosRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId } from '../../app-config/use-app-config';
@@ -35,11 +35,11 @@ export function MovimientoSheetWired(props: MovimientoSheetWiredProps): ReactEle
         setSubmitting(true);
         try {
           await movRepo.create({
-            turnoId: props.turnoId as any,
+            turnoId: props.turnoId as CajaTurnoId,
             tipo: props.tipo,
             montoCentavos,
             motivo,
-            userId: props.userId as any,
+            userId: props.userId as UserId,
             businessId,
           });
           // Refresh the active turn balance display (fire-and-forget for snappy UX)

@@ -8,6 +8,7 @@
 # Precondition: device clock is past 18:00 and today already has at least
 # one venta in Efectivo so esperado > 0. Run wizard-local-standalone.yaml +
 # venta-efectivo.yaml first (or seed via EXPO_PUBLIC_E2E_SEED).
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -29,6 +29,50 @@ export interface OpeningDiscrepancyDialogProps {
   readonly testID?: string;
 }
 
+type T = ReturnType<typeof useTranslation>['t'];
+
+export function OpeningDiscrepancyDialog(
+  props: OpeningDiscrepancyDialogProps,
+): ReactElement {
+  const { t } = useTranslation();
+
+  return (
+    <View padding={16} gap={16} testID={props.testID ?? 'opening-discrepancy-dialog'}>
+      <DiscrepancyHeader t={t} />
+      <DiffCard
+        previousClose={props.previousClose}
+        newOpening={props.newOpening}
+        difference={props.difference}
+      />
+      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+        {t('caja.discrepancyNotice')}
+      </Text>
+      <DiscrepancyActions
+        onGoBack={props.onGoBack}
+        onContinue={props.onContinue}
+        submitting={props.submitting}
+        t={t}
+      />
+    </View>
+  );
+}
+
+function DiscrepancyHeader({ t }: { t: T }): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={8}>
+      <Icon name="triangle-alert" size={24} color={colors.yellow} />
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black}
+        fontSize={20}
+        color={colors.black}
+      >
+        {t('caja.discrepancyTitle')}
+      </Text>
+    </View>
+  );
+}
+
 function DiffCard(props: {
   previousClose: Money;
   newOpening: Money;
@@ -41,103 +85,81 @@ function DiffCard(props: {
   return (
     <Card variant="white" padding="md" fullWidth testID="discrepancy-card">
       <View gap={8}>
-        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
-          {t('caja.discrepancyCierreAnterior', {
-            monto: formatMoney(props.previousClose),
-          })}
-        </Text>
-        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
-          {t('caja.discrepancyAbriendo', {
-            monto: formatMoney(props.newOpening),
-          })}
-        </Text>
-        <View
-          flexDirection="row"
-          alignItems="center"
-          justifyContent="space-between"
-          backgroundColor={isNegative ? colors.redSoft : colors.greenSoft}
-          borderRadius={8}
-          padding={12}
-          marginTop={4}
-        >
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={16}
-            color={diffColor}
-          >
-            {t('caja.discrepancyDiff', { monto: formatMoney(props.difference) })}
-          </Text>
-          <Icon
-            name="triangle-alert"
-            size={20}
-            color={diffColor}
-          />
-        </View>
+        <DiffRow
+          label={t('caja.discrepancyCierreAnterior', { monto: formatMoney(props.previousClose) })}
+        />
+        <DiffRow
+          label={t('caja.discrepancyAbriendo', { monto: formatMoney(props.newOpening) })}
+        />
+        <DiffHighlight
+          label={t('caja.discrepancyDiff', { monto: formatMoney(props.difference) })}
+          isNegative={isNegative}
+          diffColor={diffColor}
+        />
       </View>
     </Card>
   );
 }
 
-export function OpeningDiscrepancyDialog(
-  props: OpeningDiscrepancyDialogProps,
-): ReactElement {
-  const { t } = useTranslation();
+function DiffRow(props: { label: string }): ReactElement {
+  return (
+    <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+      {props.label}
+    </Text>
+  );
+}
 
+function DiffHighlight(props: {
+  label: string;
+  isNegative: boolean;
+  diffColor: string;
+}): ReactElement {
   return (
     <View
-      padding={16}
-      gap={16}
-      testID={props.testID ?? 'opening-discrepancy-dialog'}
+      flexDirection="row"
+      alignItems="center"
+      justifyContent="space-between"
+      backgroundColor={props.isNegative ? colors.redSoft : colors.greenSoft}
+      borderRadius={8}
+      padding={12}
+      marginTop={4}
     >
-      <View flexDirection="row" alignItems="center" gap={8}>
-        <Icon name="triangle-alert" size={24} color={colors.yellow} />
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black}
-          fontSize={20}
-          color={colors.black}
-        >
-          {t('caja.discrepancyTitle')}
-        </Text>
-      </View>
-
-      <DiffCard
-        previousClose={props.previousClose}
-        newOpening={props.newOpening}
-        difference={props.difference}
-      />
-
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
-        color={colors.gray600}
+        fontWeight={typography.weights.bold}
+        fontSize={16}
+        color={props.diffColor}
       >
-        {t('caja.discrepancyNotice')}
+        {props.label}
       </Text>
+      <Icon name="triangle-alert" size={20} color={props.diffColor} />
+    </View>
+  );
+}
 
-      <View flexDirection="row" gap={12}>
-        <View flex={1}>
-          <Btn
-            variant="ghost"
-            onPress={props.onGoBack}
-            fullWidth
-            testID="discrepancy-go-back"
-          >
-            {t('caja.discrepancyGoBack')}
-          </Btn>
-        </View>
-        <View flex={1}>
-          <Btn
-            variant="dark"
-            onPress={props.onContinue}
-            fullWidth
-            loading={props.submitting}
-            testID="discrepancy-continue"
-          >
-            {t('caja.discrepancyContinue')}
-          </Btn>
-        </View>
+function DiscrepancyActions(props: {
+  onGoBack: () => void;
+  onContinue: () => void;
+  submitting: boolean;
+  t: T;
+}): ReactElement {
+  return (
+    <View flexDirection="row" gap={12}>
+      <View flex={1}>
+        <Btn variant="ghost" onPress={props.onGoBack} fullWidth testID="discrepancy-go-back">
+          {props.t('caja.discrepancyGoBack')}
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn
+          variant="dark"
+          onPress={props.onContinue}
+          fullWidth
+          loading={props.submitting}
+          testID="discrepancy-continue"
+        >
+          {props.t('caja.discrepancyContinue')}
+        </Btn>
       </View>
     </View>
   );

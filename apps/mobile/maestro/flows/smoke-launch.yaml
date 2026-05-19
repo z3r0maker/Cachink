@@ -22,6 +22,7 @@
 # DO NOT use `clearState: true` — on iOS 18+ / Expo SDK 55, it
 # wipes the dev-client's stored Metro URL and the app fails to
 # reconnect to the JS bundler. See Finding 1 in the Maestro audit.
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp

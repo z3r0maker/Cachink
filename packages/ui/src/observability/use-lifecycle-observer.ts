@@ -42,62 +42,49 @@ function buildEvent(
   };
 }
 
+function useColdStartLog(logStore: ReturnType<typeof useLogStore>, deviceId: string | null, userId: string | null, businessId: string | null): void {
+  const hasMounted = useRef(false);
+  useEffect(() => {
+    if (!logStore || !deviceId || hasMounted.current) return;
+    hasMounted.current = true;
+    void logStore.writeAudit(
+      buildEvent('system.cold-start', 'app', '', deviceId, userId ?? null, businessId ?? '', { platform: Platform.OS }),
+    ).catch(() => {});
+  }, [logStore, deviceId, userId, businessId]);
+}
+
+function useAppStateLog(logStore: ReturnType<typeof useLogStore>, deviceId: string | null, userId: string | null, businessId: string | null): void {
+  useEffect(() => {
+    if (!logStore || !deviceId) return;
+    const handler = (state: AppStateStatus): void => {
+      if (state === 'active') {
+        void logStore.writeAudit(buildEvent('system.foreground', 'app', '', deviceId, userId ?? null, businessId ?? '')).catch(() => {});
+      } else if (state === 'background') {
+        void logStore.writeAudit(buildEvent('system.background', 'app', '', deviceId, userId ?? null, businessId ?? '')).catch(() => {});
+      }
+    };
+    const sub = AppState.addEventListener('change', handler);
+    return () => sub.remove();
+  }, [logStore, deviceId, userId, businessId]);
+}
+
+function useUserChangeLog(logStore: ReturnType<typeof useLogStore>, deviceId: string | null, userId: string | null, businessId: string | null): void {
+  const prevUserId = useRef(userId);
+  useEffect(() => {
+    if (!logStore || !deviceId) return;
+    if (prevUserId.current === userId) return;
+    const op: AuditOperation = userId ? 'auth.login' : 'auth.logout';
+    void logStore.writeAudit(buildEvent(op, 'user', userId ?? '', deviceId, userId ?? null, businessId ?? '')).catch(() => {});
+    prevUserId.current = userId;
+  }, [userId, logStore, deviceId, businessId]);
+}
+
 export function useLifecycleObserver(): void {
   const logStore = useLogStore();
   const deviceId = useDeviceId();
   const userId = useUserId();
   const businessId = useCurrentBusinessId();
-
-  // 1. Log cold start (on first mount)
-  const hasMounted = useRef(false);
-  useEffect(() => {
-    if (!logStore || !deviceId || hasMounted.current) return;
-    hasMounted.current = true;
-
-    void logStore.writeAudit(
-      buildEvent(
-        'system.cold-start',
-        'app',
-        '',
-        deviceId,
-        userId ?? null,
-        businessId ?? '',
-        { platform: Platform.OS },
-      ),
-    ).catch(() => {});
-  }, [logStore, deviceId, userId, businessId]);
-
-  // 2. Log foreground/background transitions
-  useEffect(() => {
-    if (!logStore || !deviceId) return;
-
-    const handler = (state: AppStateStatus): void => {
-      if (state === 'active') {
-        void logStore.writeAudit(
-          buildEvent('system.foreground', 'app', '', deviceId, userId ?? null, businessId ?? ''),
-        ).catch(() => {});
-      } else if (state === 'background') {
-        void logStore.writeAudit(
-          buildEvent('system.background', 'app', '', deviceId, userId ?? null, businessId ?? ''),
-        ).catch(() => {});
-      }
-    };
-
-    const sub = AppState.addEventListener('change', handler);
-    return () => sub.remove();
-  }, [logStore, deviceId, userId, businessId]);
-
-  // 3. Log user changes (login/logout/switch)
-  const prevUserId = useRef(userId);
-  useEffect(() => {
-    if (!logStore || !deviceId) return;
-    if (prevUserId.current === userId) return;
-
-    const op: AuditOperation = userId ? 'auth.login' : 'auth.logout';
-    void logStore.writeAudit(
-      buildEvent(op, 'user', userId ?? '', deviceId, userId ?? null, businessId ?? ''),
-    ).catch(() => {});
-
-    prevUserId.current = userId;
-  }, [userId, logStore, deviceId, businessId]);
+  useColdStartLog(logStore, deviceId, userId, businessId);
+  useAppStateLog(logStore, deviceId, userId, businessId);
+  useUserChangeLog(logStore, deviceId, userId, businessId);
 }

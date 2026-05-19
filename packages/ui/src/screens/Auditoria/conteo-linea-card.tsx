@@ -16,43 +16,38 @@ export interface ConteoLineaCardProps {
   readonly onChange: (value: string) => void;
 }
 
-export function ConteoLineaCard(props: ConteoLineaCardProps): ReactElement {
+function StockRow({ linea, onChange }: ConteoLineaCardProps): ReactElement {
   const { t } = useTranslation();
+  return (
+    <View flexDirection="row" gap={12} alignItems="center">
+      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600}>
+        {t('auditoria.stockSistema')}: {linea.stockSistema}
+      </Text>
+      <View flex={1}>
+        <IntegerField
+          label={t('auditoria.stockReal')}
+          value={linea.stockReal !== null ? String(linea.stockReal) : ''}
+          onChange={onChange}
+          min={0}
+          testID={`conteo-real-${linea.productoId}`}
+        />
+      </View>
+    </View>
+  );
+}
+
+export function ConteoLineaCard(props: ConteoLineaCardProps): ReactElement {
   const { linea } = props;
   return (
-    <Card
-      padding="sm"
-      fullWidth
-      testID={`conteo-linea-${linea.productoId}`}
-    >
+    <Card padding="sm" fullWidth testID={`conteo-linea-${linea.productoId}`}>
       <View gap={4}>
         <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.bold}
-          fontSize={14}
-          color={colors.black}
-          numberOfLines={1}
+          fontFamily={typography.fontFamily} fontWeight={typography.weights.bold}
+          fontSize={14} color={colors.black} numberOfLines={1}
         >
           {linea.productoNombre}
         </Text>
-        <View flexDirection="row" gap={12} alignItems="center">
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={12}
-            color={colors.gray600}
-          >
-            {t('auditoria.stockSistema')}: {linea.stockSistema}
-          </Text>
-          <View flex={1}>
-            <IntegerField
-              label={t('auditoria.stockReal')}
-              value={linea.stockReal !== null ? String(linea.stockReal) : ''}
-              onChange={props.onChange}
-              min={0}
-              testID={`conteo-real-${linea.productoId}`}
-            />
-          </View>
-        </View>
+        <StockRow {...props} />
       </View>
     </Card>
   );

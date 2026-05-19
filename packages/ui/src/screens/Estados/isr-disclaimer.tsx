@@ -41,44 +41,31 @@ function SettingsRow({
   );
 }
 
+type TFn = ReturnType<typeof useTranslation>['t'];
+
+function resolveLabels(props: IsrDisclaimerProps, t: TFn): { title: string; body: string; settingsLabel: string } {
+  const ratePercent = props.isrRate !== undefined ? Math.round(props.isrRate * 100) : undefined;
+  const title = ratePercent !== undefined
+    ? t('estados.isrDisclaimerTitleWithRate', { rate: String(ratePercent) })
+    : t('estados.isrDisclaimerTitle');
+  const body = props.isrIsZeroDueToLoss === true && ratePercent !== undefined
+    ? t('estados.isrDisclaimerZeroExplain', { rate: String(ratePercent) })
+    : t('estados.isrDisclaimerBody');
+  const settingsLabel = ratePercent !== undefined
+    ? t('estados.isrDisclaimerSettingsLabel', { rate: String(ratePercent) })
+    : t('tabs.ajustes');
+  return { title, body, settingsLabel };
+}
+
 export function IsrDisclaimer(props: IsrDisclaimerProps): ReactElement {
   const { t } = useTranslation();
-  const ratePercent = props.isrRate !== undefined ? Math.round(props.isrRate * 100) : undefined;
-  const title =
-    ratePercent !== undefined
-      ? t('estados.isrDisclaimerTitleWithRate', { rate: String(ratePercent) })
-      : t('estados.isrDisclaimerTitle');
-  const body =
-    props.isrIsZeroDueToLoss === true && ratePercent !== undefined
-      ? t('estados.isrDisclaimerZeroExplain', { rate: String(ratePercent) })
-      : t('estados.isrDisclaimerBody');
-  const settingsLabel =
-    ratePercent !== undefined
-      ? t('estados.isrDisclaimerSettingsLabel', { rate: String(ratePercent) })
-      : t('tabs.ajustes');
+  const { title, body, settingsLabel } = resolveLabels(props, t);
   return (
-    <Card
-      testID={props.testID ?? 'isr-disclaimer'}
-      variant="yellow"
-      elevation="raised"
-      padding="md"
-      fullWidth
-    >
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.black}
-        fontSize={14}
-        color={colors.black}
-      >
+    <Card testID={props.testID ?? 'isr-disclaimer'} variant="yellow" elevation="raised" padding="md" fullWidth>
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black} fontSize={14} color={colors.black}>
         {title}
       </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.medium}
-        fontSize={13}
-        color={colors.ink}
-        marginTop={4}
-      >
+      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={13} color={colors.ink} marginTop={4}>
         {body}
       </Text>
       {props.onOpenSettings !== undefined && (

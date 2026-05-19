@@ -2,6 +2,7 @@
 # surfaces under Cuentas por Cobrar for the Director role.
 #
 # Precondition: demo mode seeded (products + users + clients exist).
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -56,7 +57,7 @@ appId: mx.cachink.mobile
 - extendedWaitUntil:
     visible:
       id: "ventas-product-grid"
-    timeout: 10000
+    timeout: 5000
 
 # Switch to Director role via TopBar and verify the sale shows
 # under Cuentas por Cobrar.

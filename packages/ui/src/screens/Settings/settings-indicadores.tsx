@@ -53,35 +53,68 @@ function isPercent(m: MetricConfig): boolean {
 
 function MetricLabel({ label }: { label: string }): ReactElement {
   return (
-    <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={15} color={colors.black}>
+    <Text
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.bold}
+      fontSize={15}
+      color={colors.black}
+    >
       {label}
     </Text>
   );
 }
 
-export function SettingsIndicadores(
-  props: SettingsIndicadoresProps,
-): ReactElement {
-  const thresholdsQ = useHealthThresholds();
-  const update = useUpdateHealthThresholds();
-  const initial = thresholdsQ.data ?? DEFAULT_HEALTH_THRESHOLDS;
+function MetricCard(props: {
+  m: MetricConfig;
+  th: { healthy: number; warning: number };
+  onPatch: (field: 'healthy' | 'warning', raw: string) => void;
+}): ReactElement {
+  const { m, th } = props;
+  const pct = isPercent(m);
+  const op = m.inverted ? '≤' : '≥';
+  return (
+    <Card key={m.key} padding="md" fullWidth testID={`threshold-${m.key}`}>
+      <MetricLabel label={m.label} />
+      <ThresholdRow
+        label={`Saludable ${op}`}
+        value={toDisplay(th.healthy, pct)}
+        suffix={m.suffix}
+        onChange={(v) => props.onPatch('healthy', v)}
+        testID={`${m.key}-healthy`}
+      />
+      <ThresholdRow
+        label={`Alerta ${op}`}
+        value={toDisplay(th.warning, pct)}
+        suffix={m.suffix}
+        onChange={(v) => props.onPatch('warning', v)}
+        testID={`${m.key}-warning`}
+      />
+    </Card>
+  );
+}
 
+function useThresholdDraft() {
+  const thresholdsQ = useHealthThresholds();
+  const updateMutation = useUpdateHealthThresholds();
+  const initial = thresholdsQ.data ?? DEFAULT_HEALTH_THRESHOLDS;
   const [draft, setDraft] = useState<HealthThresholds>(initial);
   const [dirty, setDirty] = useState(false);
 
   const patchMetric = (key: MetricKey, field: 'healthy' | 'warning', raw: string): void => {
     const cfg = METRICS.find((m) => m.key === key)!;
     const val = fromDisplay(raw, isPercent(cfg));
-    setDraft((prev) => ({
-      ...prev,
-      [key]: { ...prev[key], [field]: val },
-    }));
+    setDraft((prev) => ({ ...prev, [key]: { ...prev[key], [field]: val } }));
     setDirty(true);
   };
 
   const handleSave = (): void => {
-    update.mutate(draft, { onSuccess: () => setDirty(false) });
+    updateMutation.mutate(draft, { onSuccess: () => setDirty(false) });
   };
+  return { draft, dirty, patchMetric, handleSave, isPending: updateMutation.isPending };
+}
+
+export function SettingsIndicadores(props: SettingsIndicadoresProps): ReactElement {
+  const { draft, dirty, patchMetric, handleSave, isPending } = useThresholdDraft();
 
   return (
     <ScrollView
@@ -90,28 +123,57 @@ export function SettingsIndicadores(
       contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}
     >
       <SectionTitle title="Umbrales de salud" />
-
-      {METRICS.map((m) => {
-        const th = draft[m.key];
-        const pct = isPercent(m);
-        const op = m.inverted ? '≤' : '≥';
-        return (
-          <Card key={m.key} padding="md" fullWidth testID={`threshold-${m.key}`}>
-            <MetricLabel label={m.label} />
-            <ThresholdRow label={`Saludable ${op}`} value={toDisplay(th.healthy, pct)} suffix={m.suffix} onChange={(v) => patchMetric(m.key, 'healthy', v)} testID={`${m.key}-healthy`} />
-            <ThresholdRow label={`Alerta ${op}`} value={toDisplay(th.warning, pct)} suffix={m.suffix} onChange={(v) => patchMetric(m.key, 'warning', v)} testID={`${m.key}-warning`} />
-          </Card>
-        );
-      })}
-
-      <Btn variant="primary" onPress={handleSave} disabled={!dirty || update.isPending} fullWidth testID="indicadores-save">
+      {METRICS.map((m) => (
+        <MetricCard
+          key={m.key}
+          m={m}
+          th={draft[m.key]}
+          onPatch={(f, v) => patchMetric(m.key, f, v)}
+        />
+      ))}
+      <Btn
+        variant="primary"
+        onPress={handleSave}
+        disabled={!dirty || isPending}
+        fullWidth
+        testID="indicadores-save"
+      >
         Guardar
       </Btn>
-
-      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600} textAlign="center">
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={12}
+        color={colors.gray600}
+        textAlign="center"
+      >
         Estos umbrales definen cuándo un indicador se marca como saludable, en alerta, o crítico.
       </Text>
     </ScrollView>
+  );
+}
+
+function ThresholdValueBox(props: { value: string; testID: string }): ReactElement {
+  return (
+    <View
+      backgroundColor={colors.white}
+      borderWidth={2}
+      borderColor={colors.black}
+      borderRadius={8}
+      paddingHorizontal={12}
+      paddingVertical={6}
+      width={72}
+    >
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={16}
+        color={colors.black}
+        textAlign="center"
+        testID={props.testID}
+      >
+        {props.value}
+      </Text>
+    </View>
   );
 }
 
@@ -124,30 +186,17 @@ function ThresholdRow(props: {
 }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={8} marginTop={8}>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.gray600} flex={1}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={14}
+        color={colors.gray600}
+        flex={1}
+      >
         {props.label}
       </Text>
       <View flexDirection="row" alignItems="center" gap={4}>
-        <View
-          backgroundColor={colors.white}
-          borderWidth={2}
-          borderColor={colors.black}
-          borderRadius={8}
-          paddingHorizontal={12}
-          paddingVertical={6}
-          width={72}
-        >
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.bold}
-            fontSize={16}
-            color={colors.black}
-            textAlign="center"
-            testID={props.testID}
-          >
-            {props.value}
-          </Text>
-        </View>
+        <ThresholdValueBox value={props.value} testID={props.testID} />
         <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600}>
           {props.suffix}
         </Text>

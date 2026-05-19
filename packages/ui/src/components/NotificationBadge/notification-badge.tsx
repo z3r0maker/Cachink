@@ -25,6 +25,34 @@ function formatBadgeCount(count: number): string {
   return String(count);
 }
 
+function CountDot({ label }: { label: string }): ReactElement {
+  return (
+    <View
+      position="absolute"
+      top={2}
+      right={2}
+      minWidth={18}
+      height={18}
+      borderRadius={9}
+      backgroundColor={colors.red}
+      alignItems="center"
+      justifyContent="center"
+      paddingHorizontal={4}
+      testID="notification-badge-count"
+    >
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={10}
+        color="#FFFFFF"
+        lineHeight={12}
+      >
+        {label}
+      </Text>
+    </View>
+  );
+}
+
 export function NotificationBadge(props: NotificationBadgeProps): ReactElement {
   const { count, onPress, testID } = props;
   const label = formatBadgeCount(count);
@@ -38,31 +66,7 @@ export function NotificationBadge(props: NotificationBadgeProps): ReactElement {
     >
       <View position="relative" width={36} height={36} alignItems="center" justifyContent="center">
         <Icon name="bell" size={22} color={colors.gray600} />
-        {count > 0 && (
-          <View
-            position="absolute"
-            top={2}
-            right={2}
-            minWidth={18}
-            height={18}
-            borderRadius={9}
-            backgroundColor={colors.red}
-            alignItems="center"
-            justifyContent="center"
-            paddingHorizontal={4}
-            testID="notification-badge-count"
-          >
-            <Text
-              fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.bold}
-              fontSize={10}
-              color="#FFFFFF"
-              lineHeight={12}
-            >
-              {label}
-            </Text>
-          </View>
-        )}
+        {count > 0 && <CountDot label={label} />}
       </View>
     </Pressable>
   );

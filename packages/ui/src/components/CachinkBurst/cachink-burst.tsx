@@ -90,13 +90,12 @@ function BurstRay({ index, anim }: {
   );
 }
 
-export function CachinkBurst({ visible, onComplete, testID }: CachinkBurstProps): ReactElement | null {
+function useBurstAnimation(visible: boolean, onComplete: () => void) {
   const anim = useAnimationValues();
 
   useEffect(() => {
     if (!visible) return;
 
-    // Reset all values
     anim.badgeScale.setValue(0.3);
     anim.badgeOpacity.setValue(0);
     for (const ray of anim.rays) {
@@ -104,7 +103,6 @@ export function CachinkBurst({ visible, onComplete, testID }: CachinkBurstProps)
       ray.translateY.setValue(-10);
     }
 
-    // Build ray animations with stagger
     const rayAnims = anim.rays.map((ray, i) =>
       Animated.sequence([
         Animated.delay(i * RAY_STAGGER_MS),
@@ -118,43 +116,54 @@ export function CachinkBurst({ visible, onComplete, testID }: CachinkBurstProps)
     ]);
 
     masterAnimation.start(() => onComplete());
-
     return () => masterAnimation.stop();
   }, [visible, anim, onComplete]);
+
+  return anim;
+}
+
+function BadgeLabel(): ReactElement {
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.black}
+      fontSize={32}
+      color={colors.black}
+      letterSpacing={typography.letterSpacing.tightest}
+      userSelect="none"
+    >
+      ¡CACHINK!
+    </Text>
+  );
+}
+
+function AnimatedBadge({ scale, opacity }: {
+  scale: Animated.Value;
+  opacity: Animated.Value;
+}): ReactElement {
+  return (
+    <Animated.View
+      style={[
+        styles.badge,
+        { opacity, transform: [{ scale }, { rotate: '-6deg' }] },
+      ]}
+    >
+      <BadgeLabel />
+    </Animated.View>
+  );
+}
+
+export function CachinkBurst({ visible, onComplete, testID }: CachinkBurstProps): ReactElement | null {
+  const anim = useBurstAnimation(visible, onComplete);
 
   if (!visible) return null;
 
   return (
     <View testID={testID ?? 'cachink-burst'} style={styles.overlay} pointerEvents="none">
-      {/* Burst rays */}
       {anim.rays.map((ray, i) => (
         <BurstRay key={i} index={i} anim={ray} />
       ))}
-
-      {/* Yellow badge */}
-      <Animated.View
-        style={[
-          styles.badge,
-          {
-            opacity: anim.badgeOpacity,
-            transform: [
-              { scale: anim.badgeScale },
-              { rotate: '-6deg' },
-            ],
-          },
-        ]}
-      >
-        <Text
-          fontFamily={typography.fontFamily}
-          fontWeight={typography.weights.black}
-          fontSize={32}
-          color={colors.black}
-          letterSpacing={typography.letterSpacing.tightest}
-          userSelect="none"
-        >
-          ¡CACHINK!
-        </Text>
-      </Animated.View>
+      <AnimatedBadge scale={anim.badgeScale} opacity={anim.badgeOpacity} />
     </View>
   );
 }

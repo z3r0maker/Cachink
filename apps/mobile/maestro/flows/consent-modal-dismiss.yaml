@@ -16,6 +16,7 @@
 # NOTE: This flow tests the non-wizard ConsentModal (standalone modal
 # that appears on subsequent boots). The wizard-integrated consent step
 # uses "consent-no" / "consent-yes" testIDs instead.
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp

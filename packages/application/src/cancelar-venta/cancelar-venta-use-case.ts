@@ -75,60 +75,73 @@ export class CancelarVentaUseCase
   }
 
   async execute(input: CancelarVentaInput): Promise<CancelarVentaResult> {
-    // 1. Verify user + PIN
-    const user = await this.#users.findById(input.userId);
+    await this.#verifyUserAndPin(input.userId, input.pin);
+    const sale = await this.#loadAndValidateSale(input.saleId);
+    await this.#sales.delete(input.saleId);
+
+    const { stockReversed, cantidadDevuelta } =
+      await this.#reverseStock(sale, input);
+    const cashToReturn =
+      sale.metodo === 'Efectivo' ? sale.monto : null;
+
+    await this.#createAuditLog(input, sale, cashToReturn, stockReversed, cantidadDevuelta);
+    return { sale, cashToReturn, stockReversed, cantidadDevuelta };
+  }
+
+  async #verifyUserAndPin(userId: UserId, pin: string): Promise<void> {
+    const user = await this.#users.findById(userId);
     if (!user) throw new TypeError('Usuario no encontrado');
-    const pinOk = await compare(input.pin, user.pinHash);
+    const pinOk = await compare(pin, user.pinHash);
     if (!pinOk) throw new TypeError('PIN incorrecto');
 
-    // 2. Check permission
+    const raw = (user as Record<string, unknown>).permissions;
     const perms = parseUserPermissions(
-      (user as any).permissions ?? '{}',
+      typeof raw === 'string' ? raw : '{}',
     );
     if (!canUserCancelSales(user.role, perms)) {
       throw new TypeError('No tienes permiso para cancelar ventas');
     }
+  }
 
-    // 3. Load sale
-    const sale = await this.#sales.findById(input.saleId);
+  async #loadAndValidateSale(saleId: SaleId): Promise<Sale> {
+    const sale = await this.#sales.findById(saleId);
     if (!sale) throw new TypeError('Venta no encontrada');
     if (sale.cancelledAt) {
       throw new TypeError('Esta venta ya fue cancelada');
     }
+    return sale;
+  }
 
-    // 4. Cancel the sale
-    await this.#sales.update(input.saleId, {} as any);
-    // We need to use a direct approach since SalePatch doesn't include cancel fields
-    // The sale's cancellation is recorded via the audit log; the sale gets soft-deleted
-    await this.#sales.delete(input.saleId);
-
-    // 5. Stock reversal
-    let stockReversed = false;
-    let cantidadDevuelta: number | null = null;
+  async #reverseStock(
+    sale: Sale,
+    input: CancelarVentaInput,
+  ): Promise<{ stockReversed: boolean; cantidadDevuelta: number | null }> {
     const stockEnabled = input.stockEnabled ?? true;
-    if (stockEnabled) {
-      const producto = await this.#products.findById(sale.productoId);
-      if (producto?.seguirStock) {
-        await this.#movements.create({
-          productoId: sale.productoId,
-          fecha: today(),
-          tipo: 'entrada',
-          cantidad: sale.cantidad,
-          costoUnitCentavos: producto.costoUnitCentavos,
-          motivo: 'Devolución de cliente',
-          nota: `Cancelación de venta: ${input.motivo}`,
-          businessId: input.businessId,
-        });
-        stockReversed = true;
-        cantidadDevuelta = sale.cantidad;
-      }
-    }
+    if (!stockEnabled) return { stockReversed: false, cantidadDevuelta: null };
 
-    // 6. Cash return tracking
-    const cashToReturn =
-      sale.metodo === 'Efectivo' ? sale.monto : null;
+    const producto = await this.#products.findById(sale.productoId);
+    if (!producto?.seguirStock) return { stockReversed: false, cantidadDevuelta: null };
 
-    // 7. Audit log
+    await this.#movements.create({
+      productoId: sale.productoId,
+      fecha: today(),
+      tipo: 'entrada',
+      cantidad: sale.cantidad,
+      costoUnitCentavos: producto.costoUnitCentavos,
+      motivo: 'Devolución de cliente',
+      nota: `Cancelación de venta: ${input.motivo}`,
+      businessId: input.businessId,
+    });
+    return { stockReversed: true, cantidadDevuelta: sale.cantidad };
+  }
+
+  async #createAuditLog(
+    input: CancelarVentaInput,
+    sale: Sale,
+    cashToReturn: bigint | null,
+    stockReversed: boolean,
+    cantidadDevuelta: number | null,
+  ): Promise<void> {
     await this.#logs.create({
       saleId: input.saleId,
       cancelledByUserId: input.userId,
@@ -141,7 +154,5 @@ export class CancelarVentaUseCase
       productoId: stockReversed ? sale.productoId : null,
       businessId: input.businessId,
     });
-
-    return { sale, cashToReturn, stockReversed, cantidadDevuelta };
   }
 }

@@ -18,6 +18,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
 #   maestro test apps/mobile/maestro/flows/caja-cierre-discrepancia.yaml
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp
