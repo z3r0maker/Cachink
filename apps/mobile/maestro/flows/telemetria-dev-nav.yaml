@@ -24,7 +24,12 @@ tags:
       id: "otros-route"
     timeout: 5000
 
-# Tap telemetria card (only visible in __DEV__)
+# Scroll to telemetria card (last card in grid, below fold)
+- scrollUntilVisible:
+    element:
+      id: "otros-telemetria"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-telemetria"
 - extendedWaitUntil:

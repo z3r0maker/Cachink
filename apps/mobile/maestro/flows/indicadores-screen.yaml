@@ -1,24 +1,12 @@
-# Indicadores KPI cards render — verify all 6 core KPI cards.
+# Indicadores KPI cards render — verify core KPI cards.
 #
 # Verifies:
 #   1. Navigate to Estados → Indicadores tab
-#   2. indicador-margen-bruto visible
-#   3. indicador-margen-operativo visible
-#   4. indicador-margen-neto visible
-#   5. indicador-liquidez visible
-#   6. indicador-rotacion visible
-#   7. indicador-dias-cobranza visible
+#   2. Core margin KPI cards visible
+#   3. Scroll to reveal lower KPI cards
 #
-# Precondition: wizard complete, at least one venta + one egreso exist.
-# Director role.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
-#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
-#   maestro test apps/mobile/maestro/flows/indicadores-screen.yaml
+# Precondition: wizard complete, Director role.
+# Some cards may show "Sin datos" if no transactions exist.
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -33,27 +21,48 @@ appId: mx.cachink.mobile
     id: "tab-estados"
 
 # Verify EstadosShell renders.
-- assertVisible:
-    id: "estados-shell"
+- extendedWaitUntil:
+    visible:
+      id: "estados-shell"
+    timeout: 5000
 
 # Switch to the Indicadores sub-tab.
 - tapOn:
     id: "estados-tab-indicadores"
 - extendedWaitUntil:
     visible:
-      id: "estados-tab-indicadores"
-    timeout: 3000
+      id: "indicadores-screen"
+    timeout: 5000
 
-# --- Verify all 6 KPI cards render ---
+# Verify top KPI cards render.
 - assertVisible:
     id: "indicador-margen-bruto"
 - assertVisible:
     id: "indicador-margen-operativo"
 - assertVisible:
     id: "indicador-margen-neto"
+
+# Scroll to reveal lower KPI cards.
+- scrollUntilVisible:
+    element:
+      id: "indicador-liquidez"
+    direction: DOWN
+    timeout: 5000
 - assertVisible:
     id: "indicador-liquidez"
+
+- scrollUntilVisible:
+    element:
+      id: "indicador-rotacion"
+    direction: DOWN
+    timeout: 5000
 - assertVisible:
     id: "indicador-rotacion"
+
+- scrollUntilVisible:
+    element:
+      id: "indicador-dias-cobranza"
+    direction: DOWN
+    timeout: 5000
 - assertVisible:
     id: "indicador-dias-cobranza"
