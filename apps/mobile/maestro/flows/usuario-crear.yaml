@@ -42,10 +42,10 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "user-create-btn"
 
-# Create user modal appears.
+# Create user form appears.
 - extendedWaitUntil:
     visible:
-      id: "create-user-modal"
+      id: "usuarios-route-create-modal"
     timeout: 5000
 
 # Fill user creation form.
@@ -53,9 +53,7 @@ appId: mx.cachink.mobile
     id: "new-user-nombre"
 - inputText: "Operativo Test"
 
-- tapOn:
-    id: "new-user-role"
-- tapOn: "operativo"
+# Role defaults to Operativo — no need to change it.
 
 - tapOn:
     id: "new-user-pin"

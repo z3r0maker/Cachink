@@ -39,8 +39,9 @@ appId: mx.cachink.mobile
     id: "flag-stock-switch"
 
 # Navigate to Productos via Otros and verify stock sub-tab is hidden.
+# Use back button to return to Otros grid (tab tap doesn't pop pushed routes).
 - tapOn:
-    id: "tab-otros"
+    id: "top-bar-back"
 - scrollUntilVisible:
     element:
       id: "otros-productos"
@@ -49,13 +50,17 @@ appId: mx.cachink.mobile
     centerElement: true
 - tapOn:
     id: "otros-productos"
+# Wait for the Productos screen to mount before asserting.
+- extendedWaitUntil:
+    visible: "Catálogo"
+    timeout: 5000
 - assertNotVisible:
     id: "productos-tab-stock"
 
 # --- Toggle merma ON ---
-# Return to Funciones via Otros.
+# Return to Otros, then navigate to Funciones again.
 - tapOn:
-    id: "tab-otros"
+    id: "top-bar-back"
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -72,13 +77,9 @@ appId: mx.cachink.mobile
     id: "tab-merma"
 
 # --- Toggle all OFF → clean state ---
-# Switch back to Director to access Funciones.
+# Return to Otros from Funciones, then back to Funciones to toggle merma off.
 - tapOn:
-    id: "top-bar-role-chip"
-- tapOn:
-    id: "role-director-select"
-- tapOn:
-    id: "tab-otros"
+    id: "top-bar-back"
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -90,8 +91,8 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "flag-merma-switch"
 
-# Verify Otros no longer shows merma-reportes (caja-reportes always visible).
+# Verify Otros no longer shows merma-reportes.
 - tapOn:
-    id: "tab-otros"
+    id: "top-bar-back"
 - assertNotVisible:
     id: "otros-merma-reportes"

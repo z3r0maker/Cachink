@@ -44,7 +44,7 @@ appId: mx.cachink.mobile
 # Create user modal appears.
 - extendedWaitUntil:
     visible:
-      id: "create-user-modal"
+      id: "usuarios-route-create-modal"
     timeout: 5000
 
 # Fill partial fields (to verify cancel discards them).
@@ -58,7 +58,7 @@ appId: mx.cachink.mobile
 
 # Modal is dismissed.
 - assertNotVisible:
-    id: "create-user-modal"
+    id: "usuarios-route-create-modal"
 
 # The user "Cancelado Test" should NOT appear in the list.
 - assertNotVisible: "Cancelado Test"

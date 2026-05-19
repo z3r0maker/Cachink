@@ -54,4 +54,4 @@ appId: mx.cachink.mobile
 
 # Close the modal without creating.
 - tapOn:
-    id: "top-bar-back"
+    id: "modal-close"
