@@ -32,10 +32,9 @@ tags:
     timeout: 5000
 - tapOn:
     id: "otros-telemetria"
+# Verify key sub-components render (the telemetria screen shows
+# operation stats and filter buttons).
 - extendedWaitUntil:
-    visible:
-      text: "Telemetría"
+    visible: "Operaciones"
     timeout: 5000
-
-# Verify key sub-components render
-- assertVisible: "eventos"
+- assertVisible: "Errores"

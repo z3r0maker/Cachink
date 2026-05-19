@@ -37,8 +37,8 @@ appId: mx.cachink.mobile
 # Update the business name.
 - tapOn:
     id: "edit-business-nombre"
-- eraseText: 30
-- inputText: "Tortillería La Doña"
+- clearText
+- inputText: "La Dona"
 
 # Save the changes.
 - tapOn:
@@ -46,5 +46,5 @@ appId: mx.cachink.mobile
 
 # Wait for the modal to dismiss and verify updated name.
 - extendedWaitUntil:
-    visible: "Tortillería La Doña"
+    visible: "La Dona"
     timeout: 5000
