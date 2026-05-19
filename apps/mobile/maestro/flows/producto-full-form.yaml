@@ -25,6 +25,11 @@ appId: mx.cachink.mobile
 # Productos tab is replaced by Merma — access via Otros grid).
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-productos"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-productos"
 - tapOn:

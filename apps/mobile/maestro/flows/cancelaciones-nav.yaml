@@ -24,10 +24,6 @@ tags:
       id: "otros-cancelaciones"
     direction: DOWN
     timeout: 5000
-# Extra swipe to position card in clear area (away from tab bar overlap).
-- swipe:
-    start: "50%,60%"
-    end: "50%,40%"
 - tapOn:
     id: "otros-cancelaciones"
 - extendedWaitUntil:

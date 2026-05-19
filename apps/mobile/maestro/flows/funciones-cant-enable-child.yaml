@@ -50,6 +50,11 @@ appId: mx.cachink.mobile
 # Verify the products screen doesn't show stock-dependent features.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-productos"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-productos"
 - assertNotVisible:

@@ -36,6 +36,11 @@ appId: mx.cachink.mobile
 # Navigate to Otros → tap the Merma Reportes grid item.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-merma-reportes"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-merma-reportes"
 

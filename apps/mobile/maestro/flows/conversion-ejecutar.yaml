@@ -18,6 +18,11 @@ appId: mx.cachink.mobile
 # Navigate to conversion screen.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-conversion"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-conversion"
 - extendedWaitUntil:
