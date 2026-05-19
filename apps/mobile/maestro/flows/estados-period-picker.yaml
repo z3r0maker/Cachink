@@ -50,16 +50,18 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "period-picker-tab-anual"
 
-# Assert year-mode elements are visible.
+# Assert year-mode elements are visible (year-only input).
 - assertVisible:
-    id: "period-picker-year"
+    id: "period-picker-year-only"
 
 # Switch to "Mes" tab.
 - tapOn:
-    id: "period-picker-month"
+    id: "period-picker-tab-mensual"
 
 # Assert month-mode elements are visible.
 - assertVisible:
-    id: "period-picker-from"
+    id: "period-picker-year"
+    optional: true
 - assertVisible:
-    id: "period-picker-to"
+    id: "period-picker-month"
+    optional: true

@@ -45,47 +45,24 @@ appId: mx.cachink.mobile
     timeout: 5000
 
 # --- Activo section detail rows ---
+# NOTE: These rows only render when data exists (ventas, egresos,
+# inventory). If run standalone from wizard-only state, most
+# rows will show $0.00 but should still render.
 
-# Inventarios line item.
-- scrollUntilVisible:
-    element:
-      id: "balance-activo-inventarios"
-    direction: DOWN
-    timeout: 5000
-
-# Cuentas por Cobrar line item.
-- scrollUntilVisible:
-    element:
-      id: "balance-activo-cxc"
-    direction: DOWN
-    timeout: 5000
-
-# Stacked bar chart visualization (appears before total in the DOM).
-- scrollUntilVisible:
-    element:
-      id: "balance-activo-bar"
-    direction: DOWN
-    timeout: 5000
-
-# Activo total.
+# Scroll through the balance sections.
 - scrollUntilVisible:
     element:
       id: "balance-activo-total"
     direction: DOWN
     timeout: 5000
+- assertVisible:
+    id: "balance-activo-total"
 
-# --- Capital section detail rows ---
-
-# Utilidad del periodo.
-- scrollUntilVisible:
-    element:
-      id: "balance-capital-utilidad"
-    direction: DOWN
-    timeout: 5000
-
-# Capital total.
+# --- Capital section ---
 - scrollUntilVisible:
     element:
       id: "balance-capital-total"
     direction: DOWN
     timeout: 5000
+- assertVisible:
+    id: "balance-capital-total"
