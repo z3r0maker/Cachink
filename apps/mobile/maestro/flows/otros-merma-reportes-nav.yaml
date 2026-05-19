@@ -49,5 +49,5 @@ appId: mx.cachink.mobile
 # Verify the placeholder screen renders.
 - extendedWaitUntil:
     visible:
-      id: "merma-reportes-placeholder"
+      id: "merma-reportes-screen"
     timeout: 5000

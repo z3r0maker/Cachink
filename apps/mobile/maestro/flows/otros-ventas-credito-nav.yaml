@@ -50,5 +50,5 @@ appId: mx.cachink.mobile
 # Verify the placeholder screen renders.
 - extendedWaitUntil:
     visible:
-      id: "ventas-credito-placeholder"
+      id: "ventas-credito-screen"
     timeout: 5000

@@ -38,5 +38,5 @@ appId: mx.cachink.mobile
 # Verify the placeholder screen renders.
 - extendedWaitUntil:
     visible:
-      id: "caja-reportes-placeholder"
+      id: "caja-reportes-screen"
     timeout: 5000

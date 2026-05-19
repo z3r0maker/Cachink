@@ -42,5 +42,5 @@ appId: mx.cachink.mobile
 # Verify the placeholder screen renders.
 - extendedWaitUntil:
     visible:
-      id: "auditoria-placeholder"
+      id: "auditoria-screen"
     timeout: 5000
