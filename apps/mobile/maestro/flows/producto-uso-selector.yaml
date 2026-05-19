@@ -7,7 +7,7 @@
 #   4. Select materia-prima → precio de venta hides
 #
 # Precondition: wizard complete, logged in as Director.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

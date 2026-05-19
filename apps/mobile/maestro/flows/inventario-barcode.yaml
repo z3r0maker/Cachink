@@ -2,7 +2,7 @@
 # Covers P1C-M5-T05/T06 (scanner + manual fallback) for mobile. On
 # simulators without a physical camera the ManualEntry field is the
 # only reliable code source.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

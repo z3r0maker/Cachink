@@ -12,7 +12,7 @@
 #   maestro test apps/mobile/maestro/flows/editar-egreso.yaml
 #
 # The egreso-gasto flow creates "Renta del local" at $8,000.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

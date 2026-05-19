@@ -1,7 +1,7 @@
 # Cloud mode airplane-mode replay (P1E-M4 C16). Toggles the OS airplane
 # mode via `runFlow: adb`, records 3 ventas locally, re-enables
 # connectivity, and asserts they sync to the Cloud within 5 s.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 env:
   EMAIL: ${MAESTRO_CLOUD_EMAIL_A}

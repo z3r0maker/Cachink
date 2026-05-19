@@ -4,7 +4,7 @@
 #
 # Precondition: producto 'Tortilla' with stock >= 5 exists (create via
 # inventario-producto.yaml and an entrada flow, or seed e2e-seed.json).
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -6,7 +6,7 @@
 #   3. Recipe appears in the receta list
 #
 # Precondition: wizard complete, logged in as Director.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

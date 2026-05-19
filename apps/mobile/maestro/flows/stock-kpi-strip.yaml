@@ -14,7 +14,7 @@
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
 #   maestro test apps/mobile/maestro/flows/stock-kpi-strip.yaml
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
