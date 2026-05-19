@@ -37,7 +37,8 @@ appId: mx.cachink.mobile
 # Close the popover — we use swipe-to-edit instead.
 - tapOn:
     id: "venta-detail-popover"
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # Swipe the venta row left to reveal the edit action. On iOS
 # simulators, SwipeableRow renders the brand-yellow edit panel.

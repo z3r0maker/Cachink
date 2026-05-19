@@ -30,39 +30,41 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "director-confirm-pin"
 - inputText: "123456"
-
+# The numeric keyboard covers recovery-password fields.
+# Scroll within the ScrollView to bring them into view.
+- scrollUntilVisible:
+    element:
+      id: "director-recovery-password"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "director-recovery-password"
 - inputText: "Test1234"
-# Dismiss iOS "Use Strong Password?" autofill sheet if it appeared.
-# The sheet blocks subsequent taps — dismiss before moving to next field.
+# Use pressKey Enter to submit the current field and move focus,
+# then dismiss keyboard by tapping the title area.
+- pressKey: Enter
 - tapOn:
-    text: "Close"
-    optional: true
-- tapOn:
-    text: "Don't Use"
-    optional: true
-# Dismiss the iPad software keyboard so the confirm field is reachable.
-- tapOn:
-    text: "Hide keyboard"
-    optional: true
-- waitForAnimationToEnd
-
+    point: "196,80"
+# Now scroll to reveal confirm password and submit.
+- swipe:
+    start: "50%,60%"
+    end: "50%,20%"
 - tapOn:
     id: "director-confirm-recovery-password"
 - inputText: "Test1234"
+- pressKey: Enter
 - tapOn:
-    text: "Close"
-    optional: true
-- tapOn:
-    text: "Don't Use"
-    optional: true
-# Dismiss keyboard again before submit button tap.
-- tapOn:
-    text: "Hide keyboard"
-    optional: true
-- waitForAnimationToEnd
+    point: "196,80"
+- swipe:
+    start: "50%,60%"
+    end: "50%,20%"
 
+# Scroll to submit button.
+- scrollUntilVisible:
+    element:
+      id: "director-setup-submit"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "director-setup-submit"
 

@@ -10,7 +10,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Pressable, ScrollView, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { Business } from '@cachink/domain';
 import { Card, Icon, SectionTitle } from '../../components/index';
@@ -74,37 +74,59 @@ interface HubCategory {
   readonly testID: string;
 }
 
-function cat(section: SettingsSection, icon: IconName, title: string, subtitle: string): HubCategory {
+function cat(
+  section: SettingsSection,
+  icon: IconName,
+  title: string,
+  subtitle: string,
+): HubCategory {
   return { section, icon, title, subtitle, testID: `settings-hub-${section}` };
+}
+
+type T = ReturnType<typeof useTranslation>['t'];
+
+function buildCategories(t: T, businessName: string): HubCategory[] {
+  return [
+    cat('negocio', 'building-2', t('settings.negocioCard'), businessName),
+    cat('tasas-isr', 'banknote', t('settings.tasasIsrCard'), t('settings.tasasIsrSubtitle')),
+    cat(
+      'tipos-de-pago',
+      'credit-card',
+      t('settings.tiposDePagoCard'),
+      t('settings.tiposDePagoSubtitle'),
+    ),
+    cat(
+      'indicadores',
+      'chart-bar',
+      t('settings.indicadoresCard'),
+      t('settings.indicadoresSubtitle'),
+    ),
+    cat('sistema', 'settings', t('settings.sistemaCard'), t('settings.sistemaSubtitle')),
+  ];
 }
 
 export function SettingsHub(props: SettingsHubProps): ReactElement {
   const { t } = useTranslation();
   const businessName = props.business?.nombre ?? t('settings.negocioNoConfigurado');
-  const categories: HubCategory[] = [
-    cat('negocio', 'building-2', t('settings.negocioCard'), businessName),
-    cat('tasas-isr', 'banknote', t('settings.tasasIsrCard'), t('settings.tasasIsrSubtitle')),
-    cat('tipos-de-pago', 'credit-card', t('settings.tiposDePagoCard'), t('settings.tiposDePagoSubtitle')),
-    cat('indicadores', 'chart-bar', t('settings.indicadoresCard'), t('settings.indicadoresSubtitle')),
-    cat('sistema', 'settings', t('settings.sistemaCard'), t('settings.sistemaSubtitle')),
-  ];
+  const categories = buildCategories(t, businessName);
   return (
-    <ScrollView
-      testID={props.testID ?? 'settings-hub-screen'}
-      style={{ flex: 1, backgroundColor: colors.offwhite }}
-      contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}
-    >
-      <SectionTitle title={t('settings.hubTitle')} />
-      {categories.map((c) => (
-        <CategoryCard
-          key={c.section}
-          icon={c.icon}
-          title={c.title}
-          subtitle={c.subtitle}
-          onPress={() => props.onNavigate(c.section)}
-          testID={c.testID}
-        />
-      ))}
-    </ScrollView>
+    <RNView testID={props.testID ?? 'settings-hub-screen'} style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.offwhite }}
+        contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}
+      >
+        <SectionTitle title={t('settings.hubTitle')} />
+        {categories.map((c) => (
+          <CategoryCard
+            key={c.section}
+            icon={c.icon}
+            title={c.title}
+            subtitle={c.subtitle}
+            onPress={() => props.onNavigate(c.section)}
+            testID={c.testID}
+          />
+        ))}
+      </ScrollView>
+    </RNView>
   );
 }

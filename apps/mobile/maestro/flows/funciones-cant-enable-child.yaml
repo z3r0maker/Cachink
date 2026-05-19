@@ -24,6 +24,11 @@ appId: mx.cachink.mobile
 # Navigate to Otros → Funciones.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 
@@ -53,6 +58,11 @@ appId: mx.cachink.mobile
 # Re-enable stock for subsequent flows.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 - tapOn:

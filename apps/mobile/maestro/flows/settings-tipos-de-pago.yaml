@@ -16,9 +16,14 @@ tags:
     id: "tab-otros"
 - extendedWaitUntil:
     visible:
-      id: "otros-screen"
+      id: "otros-route"
     timeout: 5000
 
+- scrollUntilVisible:
+    element:
+      id: "otros-configuracion"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-configuracion"
 - extendedWaitUntil:

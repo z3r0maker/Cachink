@@ -1,5 +1,5 @@
 # Speed test: measure tap latency
-# x-entrypoint: wizard
+# x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp

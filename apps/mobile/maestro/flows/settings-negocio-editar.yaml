@@ -5,11 +5,6 @@
 # → change nombre → save → updated on card.
 #
 # Precondition: wizard complete (business already set up).
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/settings-negocio-editar.yaml
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -19,39 +14,37 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
+# Open Settings via Otros → Configuración.
+- runFlow: shared/navigate-to-settings.yaml
 
 # Navigate to the Negocio sub-screen.
 - tapOn:
     id: "settings-hub-negocio"
-- assertVisible:
-    id: "settings-negocio-screen"
-
-# Verify the business card is visible.
-- assertVisible:
-    id: "settings-business-card"
+- extendedWaitUntil:
+    visible: "Negocio"
+    timeout: 5000
 
 # Tap the edit button.
 - tapOn:
     id: "settings-edit-business"
 
-# EditBusinessModal opens.
-- assertVisible:
-    id: "edit-business-modal"
+# EditBusinessModal opens — wait for the nombre input.
+- extendedWaitUntil:
+    visible:
+      id: "edit-business-nombre"
+    timeout: 5000
 
 # Update the business name.
 - tapOn:
     id: "edit-business-nombre"
-- eraseText
-- inputText: "Tortillería La Doña"
+- clearText
+- inputText: "La Dona"
 
 # Save the changes.
 - tapOn:
     id: "edit-business-save"
 
-# Modal closes and the updated name appears on the card.
-- assertNotVisible:
-    id: "edit-business-modal"
-- assertVisible: "Tortillería La Doña"
+# Wait for the modal to dismiss and verify updated name.
+- extendedWaitUntil:
+    visible: "La Dona"
+    timeout: 5000

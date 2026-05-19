@@ -8,6 +8,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Btn, PasswordField, TextField } from '../../components/index';
 import { Input } from '../../components/Input/input';
@@ -105,6 +106,12 @@ function DirectorSetupHeader({ t }: { t: T }): ReactElement {
   );
 }
 
+function handleConfirmPin(form: Form, v: string): void {
+  const trimmed = v.slice(0, 6);
+  form.setConfirmPin(trimmed);
+  if (trimmed.length === 6) Keyboard.dismiss();
+}
+
 function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
   return (
     <>
@@ -119,7 +126,7 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
       <Input
         type="number"
         value={form.confirmPin}
-        onChange={(v) => form.setConfirmPin(v.slice(0, 6))}
+        onChange={(v) => handleConfirmPin(form, v)}
         label={form.t('directorSetup.confirmPin')}
         testID="director-confirm-pin"
         error={form.validation.errors.confirmPin}
@@ -129,12 +136,14 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
         onChange={form.setRecoveryPassword}
         label={form.t('directorSetup.recoveryPassword')}
         testID="director-recovery-password"
+        autoComplete="new-password"
       />
       <PasswordField
         value={form.confirmRecoveryPassword}
         onChange={form.setConfirmRecoveryPassword}
         label={form.t('directorSetup.confirmRecoveryPassword')}
         testID="director-confirm-recovery-password"
+        autoComplete="new-password"
       />
       <ErrorHint text={form.validation.errors.confirmRecoveryPassword} />
     </>
@@ -184,10 +193,25 @@ export function DirectorSetupScreen(props: DirectorSetupScreenProps): ReactEleme
   const form = useDirectorSetupForm(props);
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'director-setup'}>
-      <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={16}>
-        <DirectorSetupHeader t={form.t} />
-        <DirectorSetupFields form={form} submitting={props.submitting} />
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 24,
+            gap: 16,
+          }}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+        >
+          <DirectorSetupHeader t={form.t} />
+          <DirectorSetupFields form={form} submitting={props.submitting} />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </FloatingCoinsBackground>
   );
 }

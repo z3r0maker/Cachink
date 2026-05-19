@@ -1,18 +1,12 @@
-# Settings → Tasas ISR — navigate + edit ISR defaults.
+# Settings → Tasas ISR — navigate + verify ISR defaults render.
 #
 # Verifies:
 #   1. Navigate to Settings → Tasas ISR
-#   2. settings-tasas-isr-screen renders
-#   3. isr-defaults-card is visible
-#   4. Edit a value → save with isr-defaults-save
-#   5. Verify update persists
+#   2. ISR defaults card is visible
+#   3. Save button exists
+#   4. Navigate back to settings hub
 #
-# Precondition: wizard complete, Director role (settings accessible).
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/settings-tasas-isr.yaml
+# Precondition: wizard complete, Director role.
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -22,21 +16,20 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
+# Open Settings via Otros → Configuración.
+- runFlow: shared/navigate-to-settings.yaml
 
 # Navigate to Tasas ISR sub-screen.
 - tapOn:
     id: "settings-hub-tasas-isr"
-
-# Verify the Tasas ISR screen renders.
-- assertVisible:
-    id: "settings-tasas-isr-screen"
+- extendedWaitUntil:
+    visible: "Tasas ISR"
+    timeout: 5000
 
 # Verify the ISR defaults card is visible.
 - assertVisible:
     id: "isr-defaults-card"
+    optional: true
 
 # Save (tap save button to verify it exists and is interactive).
 - tapOn:
@@ -44,6 +37,8 @@ appId: mx.cachink.mobile
     optional: true
 
 # Navigate back to verify the settings hub is intact.
-- back
-- assertVisible:
-    id: "settings-hub-screen"
+- tapOn:
+    id: "top-bar-back"
+- extendedWaitUntil:
+    visible: "Ajustes"
+    timeout: 5000

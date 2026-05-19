@@ -18,8 +18,7 @@ appId: mx.cachink.mobile
 # --- Step 1: Enable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"
@@ -28,7 +27,8 @@ appId: mx.cachink.mobile
     id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
 
 # Verify Director Otros shows the CxC link.
@@ -56,7 +56,8 @@ appId: mx.cachink.mobile
 - assertVisible: "Crédito"
 
 # Go back without submitting.
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
     optional: true
 
@@ -68,8 +69,7 @@ appId: mx.cachink.mobile
 # --- Step 3: Disable ventasCredito via Settings → Funciones ---
 - tapOn:
     id: "tab-otros"
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"
@@ -78,7 +78,8 @@ appId: mx.cachink.mobile
     id: "settings-funciones"
 - tapOn:
     id: "flag-ventasCredito-switch"
-- back
+- tapOn:
+    id: "top-bar-back"
 - back
 
 # Verify Director Otros no longer shows CxC link.

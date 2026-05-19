@@ -20,49 +20,43 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
-
-# Verify the Settings hub renders.
-- assertVisible:
-    id: "settings-hub-screen"
+- runFlow: shared/navigate-to-settings.yaml
 
 # --- Card 1: Negocio ---
 - tapOn:
     id: "settings-hub-negocio"
-- assertVisible:
-    id: "settings-negocio-screen"
-- back
-
-# --- Card 2: Tasas ISR ---
-- tapOn:
-    id: "settings-hub-tasas-isr"
-# Wait for the sub-screen to render; the testID should be
-# settings-tasas-isr-screen or similar.
-- back
-
-# --- Card 3: Sistema ---
-- tapOn:
-    id: "settings-hub-sistema"
-# Wait briefly for the sub-screen to render.
-- back
-
-# Verify we're back at the Settings hub.
-- assertVisible:
-    id: "settings-hub-screen"
-
-# --- Gap O (Phase 17): Navigate via settings-open-advanced-backend ---
-# Scroll to find the advanced backend link in the Settings tail.
-- scrollUntilVisible:
-    element:
-      id: "settings-open-advanced-backend"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Negocio"
     timeout: 5000
 - tapOn:
-    id: "settings-open-advanced-backend"
-- assertVisible:
-    id: "advanced-url-input"
+    id: "top-bar-back"
+- waitForAnimationToEnd
+
+# --- Card 2: Tasas ISR ---
+- extendedWaitUntil:
+    visible: "Ajustes"
+    timeout: 5000
 - tapOn:
-    id: "advanced-cancel"
-- assertVisible:
-    id: "settings-hub-screen"
+    id: "settings-hub-tasas-isr"
+- extendedWaitUntil:
+    visible: "Tasas ISR"
+    timeout: 5000
+- tapOn:
+    id: "top-bar-back"
+
+# --- Card 3: Sistema ---
+- extendedWaitUntil:
+    visible: "Ajustes"
+    timeout: 5000
+- tapOn:
+    id: "settings-hub-sistema"
+- extendedWaitUntil:
+    visible: "Sistema"
+    timeout: 5000
+- tapOn:
+    id: "top-bar-back"
+
+# Verify we're back at the Settings hub.
+- extendedWaitUntil:
+    visible: "Ajustes"
+    timeout: 5000

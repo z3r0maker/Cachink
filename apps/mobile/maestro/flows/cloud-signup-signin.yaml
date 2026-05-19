@@ -24,7 +24,7 @@ env:
 - runFlow: shared/authenticate.yaml
 
 # Reach the wizard via Settings → Sistema → Re-run.
-- tapOn: { id: "top-bar-open-settings" }
+- runFlow: shared/navigate-to-settings.yaml
 - tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }

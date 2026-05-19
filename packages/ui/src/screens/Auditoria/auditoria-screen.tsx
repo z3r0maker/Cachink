@@ -8,7 +8,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View as RNView } from 'react-native';
 import { View } from '@tamagui/core';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { SectionTitle, SegmentedToggle } from '../../components/index';
@@ -57,30 +57,32 @@ export function AuditoriaScreen(props: AuditoriaScreenProps): ReactElement {
   ];
 
   return (
-    <ScrollView testID={props.testID ?? 'auditoria-screen'}>
-      <View padding={16} gap={16}>
-        <SectionTitle title={t('auditoria.title')} />
-        <SegmentedToggle
-          value={s.tab}
-          onChange={(v) => s.setTab(v as AuditoriaTab)}
-          options={tabOptions}
-          testID="auditoria-tabs"
-        />
-        <AuditoriaBody
-          tab={s.tab}
-          setTab={s.setTab}
-          isLoading={s.isLoading}
-          error={s.error}
-          auditorias={s.auditorias}
-          activeAudit={s.activeAudit}
-          hasStockProducts={s.hasStockProducts}
-          crear={s.crear}
-          periodo={s.periodo}
-          setPeriodo={s.setPeriodo}
-          periodLabels={periodLabels}
-          t={t}
-        />
-      </View>
-    </ScrollView>
+    <RNView testID={props.testID ?? 'auditoria-screen'} style={{ flex: 1 }}>
+      <ScrollView>
+        <View padding={16} gap={16}>
+          <SectionTitle title={t('auditoria.title')} />
+          <SegmentedToggle
+            value={s.tab}
+            onChange={(v) => s.setTab(v as AuditoriaTab)}
+            options={tabOptions}
+            testID="auditoria-tabs"
+          />
+          <AuditoriaBody
+            tab={s.tab}
+            setTab={s.setTab}
+            isLoading={s.isLoading}
+            error={s.error}
+            auditorias={s.auditorias}
+            activeAudit={s.activeAudit}
+            hasStockProducts={s.hasStockProducts}
+            crear={s.crear}
+            periodo={s.periodo}
+            setPeriodo={s.setPeriodo}
+            periodLabels={periodLabels}
+            t={t}
+          />
+        </View>
+      </ScrollView>
+    </RNView>
   );
 }

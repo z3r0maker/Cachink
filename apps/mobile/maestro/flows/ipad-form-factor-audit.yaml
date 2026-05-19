@@ -59,7 +59,8 @@ appId: mx.cachink.mobile
     id: "checkout-method-continue"
 
 # Go back without completing.
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # ── 3. NuevoEgreso modal ─────────────────────────────────────────
 - tapOn:
@@ -76,7 +77,8 @@ appId: mx.cachink.mobile
     id: "gasto-submit"
 
 # Dismiss without saving.
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # ── 4. NuevoProducto modal ───────────────────────────────────────
 - tapOn:
@@ -97,7 +99,8 @@ appId: mx.cachink.mobile
     id: "producto-submit"
 
 # Dismiss without saving.
-- back
+- tapOn:
+    id: "top-bar-back"
 
 # ── 5. Director Home KPI strip ───────────────────────────────────
 # On iPhone the strip is horizontally scrollable and KPIs may be
@@ -133,7 +136,7 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "tab-otros"
 - assertVisible:
-    id: "otros-screen"
+    id: "otros-route"
 - tapOn:
     id: "tab-otros"
     optional: true

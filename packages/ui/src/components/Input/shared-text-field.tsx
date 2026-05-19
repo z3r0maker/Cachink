@@ -28,6 +28,13 @@ const FIELD_VISUAL = {
   style: { outlineWidth: 0, boxShadow: 'none', borderStyle: 'solid' as const },
 } as const;
 
+/** Prevent iOS Strong Password autofill when autoComplete="off". */
+function autofillOverride(autoComplete: string | undefined) {
+  return autoComplete === 'off'
+    ? { textContentType: 'oneTimeCode' as const, autoComplete: 'one-time-code' as const }
+    : {};
+}
+
 export function TextField(props: FieldProps): ReactElement {
   const hints = keyboardHintsFor(props.type);
   const resolvedAutoComplete = props.autoComplete ?? hints.autoComplete;
@@ -61,6 +68,7 @@ export function TextField(props: FieldProps): ReactElement {
       placeholderTextColor="$gray400"
       ref={props.inputRef as never}
       {...FIELD_VISUAL}
+      {...autofillOverride(resolvedAutoComplete)}
       {...paddingOverride}
       {...borderOverride}
     />

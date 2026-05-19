@@ -1,10 +1,9 @@
 # Exportar todos los datos → Excel workbook (P1C-M9-T01).
 #
-# Covers the Slice 3 C26 flow: Settings → "Exportar todos los datos" →
-# native share sheet surfaces the .xlsx file.
+# Covers the Slice 3 C26 flow: Settings → Sistema → "Exportar todos
+# los datos" → native share sheet surfaces the .xlsx file.
 #
-# Precondition: wizard-local-standalone.yaml + at least one venta/egreso
-# exist in the current business.
+# Precondition: wizard-local-standalone.yaml complete.
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -14,17 +13,24 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Settings is reachable via the TopBar cog on both roles; as a fallback
-# we use the direct route pushed by the app-shell.
+# Navigate to Settings → Sistema where export lives.
+- runFlow: shared/navigate-to-settings.yaml
 - tapOn:
-    id: "top-bar-open-settings"
-- assertVisible: "Ajustes"
+    id: "settings-hub-sistema"
+- extendedWaitUntil:
+    visible: "Sistema"
+    timeout: 5000
+
+# Scroll to the export datos card.
+- scrollUntilVisible:
+    element:
+      id: "export-datos-card"
+    direction: DOWN
+    timeout: 5000
 - assertVisible:
     id: "export-datos-card"
 
-# Trigger the export. Pending status surfaces while the workbook builds;
-# the share sheet (native) or download anchor (Tauri WebView on desktop)
-# then fires.
+# Trigger the export. The "Generando" status may flash too quickly
+# to assert, so we just verify the button is tappable.
 - tapOn:
     id: "export-datos-btn"
-- assertVisible: "Generando"

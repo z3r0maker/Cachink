@@ -93,9 +93,13 @@ function ShowHideToggle(props: ToggleProps): ReactElement {
   );
 }
 
+const IS_E2E = process.env.EXPO_PUBLIC_E2E === '1';
+
 export function PasswordField(props: PasswordFieldProps): ReactElement {
   const [revealed, setRevealed] = useState(false);
-  const inputType: InputType = revealed ? 'text' : 'password';
+  // In E2E mode, use 'text' type to avoid iOS Strong Password autofill
+  // which blocks Maestro from typing into secureTextEntry fields.
+  const inputType: InputType = IS_E2E ? 'text' : revealed ? 'text' : 'password';
   const testID = props.testID ?? 'password-field';
 
   return (
@@ -109,7 +113,7 @@ export function PasswordField(props: PasswordFieldProps): ReactElement {
         note={props.note}
         testID={testID}
         ariaLabel={props.ariaLabel ?? props.label}
-        autoComplete={props.autoComplete ?? 'current-password'}
+        autoComplete={IS_E2E ? 'off' : (props.autoComplete ?? 'current-password')}
         returnKeyType={props.returnKeyType}
         onSubmitEditing={props.onSubmitEditing}
         blurOnSubmit={props.blurOnSubmit}

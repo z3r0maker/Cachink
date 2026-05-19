@@ -29,7 +29,7 @@ appId: mx.cachink.mobile
 # User list screen renders.
 - extendedWaitUntil:
     visible:
-      id: "user-list"
+      id: "usuarios-route"
     timeout: 5000
 
 # Tap create button.

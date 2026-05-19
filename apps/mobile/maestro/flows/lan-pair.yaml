@@ -24,8 +24,7 @@ env:
 - runFlow: shared/authenticate.yaml
 
 # Re-run the wizard to reach the mode picker in a deterministic state.
-- tapOn:
-    id: "top-bar-open-settings"
+- runFlow: shared/navigate-to-settings.yaml
 - tapOn:
     id: "settings-hub-sistema"
 - tapOn:

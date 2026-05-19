@@ -1,16 +1,12 @@
-# Settings → Sistema — assert mode card and language card.
+# Settings → Sistema — assert key cards on the Sistema sub-screen.
 #
-# Extends settings-hub-nav.yaml which navigates to sub-sections but
-# never asserts the display cards on the Sistema screen:
-#   - settings-mode-card
-#   - settings-language-card
+# Verifies:
+#   - settings-language-card (language selector)
+#   - settings-notifications-toggle
+#   - export-datos-card (exportar datos action)
+#   - settings-check-for-updates (buscar actualizaciones)
 #
 # Precondition: wizard complete.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/settings-sistema-cards.yaml
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
@@ -20,18 +16,38 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Open Settings via the top-bar cog icon.
-- tapOn:
-    id: "top-bar-open-settings"
+# Open Settings via Otros → Configuración.
+- runFlow: shared/navigate-to-settings.yaml
 
 # Navigate to the Sistema sub-screen.
 - tapOn:
     id: "settings-hub-sistema"
-
-# Assert the mode display card is visible.
-- assertVisible:
-    id: "settings-mode-card"
+- extendedWaitUntil:
+    visible: "Sistema"
+    timeout: 5000
 
 # Assert the language card is visible.
 - assertVisible:
     id: "settings-language-card"
+
+# Assert the notifications toggle is visible.
+- assertVisible:
+    id: "settings-notifications-toggle"
+
+# Scroll to and assert export datos card.
+- scrollUntilVisible:
+    element:
+      id: "export-datos-card"
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: "export-datos-card"
+
+# Scroll to and assert check for updates button.
+- scrollUntilVisible:
+    element:
+      id: "settings-check-for-updates"
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: "settings-check-for-updates"

@@ -4,14 +4,13 @@
 # What this verifies:
 #   - expo-sqlite init + Drizzle migration runs without crashing
 #     (P1C C1-C4).
-#   - The ConsentModal auto-mounts on first boot (consent === null)
-#     and dismisses correctly when the user picks any option (Audit
-#     M-1 STEP0-T05 fix in `app-providers.tsx`).
 #   - Btn taps fire `onPress` end-to-end (Audit M-1 STEP0-T01 swap
 #     to `<Pressable>` in `btn.tsx` — the prior Tamagui
 #     `<View onPress>` silently no-op'd on Maestro/iOS taps).
-#   - The wizard renders post-consent and exposes its primary CTAs
+#   - The wizard renders on fresh launch and exposes its primary CTAs
 #     to the accessibility tree.
+#   - Consent step appears inline within the wizard after mode
+#     selection (Audit M-1 PR 6 moved consent into the wizard).
 #
 # Precondition: cachink.db does NOT exist (fresh install). Run via
 # the wrapper script to get a clean slate without breaking Metro:
@@ -26,9 +25,11 @@
 appId: mx.cachink.mobile
 ---
 - launchApp
-- assertVisible: "¿Enviar reportes de errores?"
-- tapOn: "Decidir después"
-- assertNotVisible: "¿Enviar reportes de errores?"
+
+# Dismiss any first-launch modals (ConsentModal legacy, etc.)
+- runFlow: shared/dismiss-modals.yaml
+
+# Wizard renders directly on fresh launch.
 - assertVisible: "¡Bienvenido a Cachink!"
 - assertVisible:
     id: "wizard-step1-solo"

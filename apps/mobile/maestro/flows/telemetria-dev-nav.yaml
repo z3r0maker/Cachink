@@ -21,16 +21,20 @@ tags:
     id: "tab-otros"
 - extendedWaitUntil:
     visible:
-      id: "otros-screen"
+      id: "otros-route"
     timeout: 5000
 
-# Tap telemetria card (only visible in __DEV__)
+# Scroll to telemetria card (last card in grid, below fold)
+- scrollUntilVisible:
+    element:
+      id: "otros-telemetria"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-telemetria"
+# Verify key sub-components render (the telemetria screen shows
+# operation stats and filter buttons).
 - extendedWaitUntil:
-    visible:
-      text: "Telemetría"
+    visible: "Operaciones"
     timeout: 5000
-
-# Verify key sub-components render
-- assertVisible: "eventos"
+- assertVisible: "Errores"

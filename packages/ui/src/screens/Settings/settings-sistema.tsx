@@ -8,7 +8,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -48,17 +48,18 @@ export function SettingsSistema(props: SettingsSistemaProps): ReactElement {
   const sp = props.settingsProps;
 
   return (
-    <ScrollView
-      testID={props.testID ?? 'settings-sistema-screen'}
-      style={{ flex: 1, backgroundColor: colors.offwhite }}
-      contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 24 }}
-    >
-      <SectionTitle title={t('settings.sistemaCard')} />
-      <LanguageCard />
-      {(sp.mode === 'lan-server' || sp.mode === 'lan-client') && sp.lanDetails && (
-        <LanSection lan={sp.lanDetails} />
-      )}
-      <SettingsTail props={sp} t={t} />
-    </ScrollView>
+    <RNView testID={props.testID ?? 'settings-sistema-screen'} style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1, backgroundColor: colors.offwhite }}
+        contentContainerStyle={{ padding: 20, gap: 20, paddingBottom: 24 }}
+      >
+        <SectionTitle title={t('settings.sistemaCard')} />
+        <LanguageCard />
+        {(sp.mode === 'lan-server' || sp.mode === 'lan-client') && sp.lanDetails && (
+          <LanSection lan={sp.lanDetails} />
+        )}
+        <SettingsTail props={sp} t={t} />
+      </ScrollView>
+    </RNView>
   );
 }

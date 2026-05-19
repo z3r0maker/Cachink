@@ -23,12 +23,17 @@ appId: mx.cachink.mobile
 # Navigate to Otros → Funciones.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 
 # --- Toggle stock OFF ---
 - assertVisible:
-    id: "funciones-negocio"
+    id: "funciones-route"
 - tapOn:
     id: "flag-stock-switch"
 
@@ -44,6 +49,11 @@ appId: mx.cachink.mobile
 # Return to Funciones via Otros.
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 - tapOn:
@@ -61,6 +71,11 @@ appId: mx.cachink.mobile
     id: "role-director-select"
 - tapOn:
     id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-funciones"
 - tapOn:

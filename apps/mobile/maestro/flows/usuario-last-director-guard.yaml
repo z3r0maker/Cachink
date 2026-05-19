@@ -29,7 +29,7 @@ appId: mx.cachink.mobile
 # Verify user list screen renders.
 - extendedWaitUntil:
     visible:
-      id: "user-list"
+      id: "usuarios-route"
     timeout: 5000
 
 # The Director user (Director Test) should be visible.
@@ -47,4 +47,4 @@ appId: mx.cachink.mobile
 # The Director user should STILL be in the list (guard prevented deletion).
 - assertVisible: "Director Test"
 - assertVisible:
-    id: "user-list"
+    id: "usuarios-route"

@@ -7,7 +7,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View as RNView } from 'react-native';
 import { View } from '@tamagui/core';
 import { formatMoney } from '@cachink/domain';
 import type { CajaTurno } from '@cachink/domain';
@@ -34,15 +34,19 @@ export function CajaReportesScreen(props: CajaReportesScreenProps): ReactElement
   const kpis = computeReportKpis(turnos ?? []);
 
   return (
-    <ScrollView testID={props.testID ?? 'caja-reportes-screen'}>
-      <View padding={16} gap={16}>
-        <SectionTitle title={t('cajaReportes.title')} />
-        <PeriodPicker value={periodo} onChange={setPeriodo} labels={periodLabels} />
-        <ReportKpis kpis={kpis} t={t} />
-        <ReportStateView turnos={turnos} isLoading={isLoading} error={error} t={t} />
-        {turnos?.map((turno) => <CajaTurnoCard key={turno.id} turno={turno} />)}
-      </View>
-    </ScrollView>
+    <RNView testID={props.testID ?? 'caja-reportes-screen'} style={{ flex: 1 }}>
+      <ScrollView>
+        <View padding={16} gap={16}>
+          <SectionTitle title={t('cajaReportes.title')} />
+          <PeriodPicker value={periodo} onChange={setPeriodo} labels={periodLabels} />
+          <ReportKpis kpis={kpis} t={t} />
+          <ReportStateView turnos={turnos} isLoading={isLoading} error={error} t={t} />
+          {turnos?.map((turno) => (
+            <CajaTurnoCard key={turno.id} turno={turno} />
+          ))}
+        </View>
+      </ScrollView>
+    </RNView>
   );
 }
 
@@ -93,7 +97,9 @@ function ReportStateView(props: {
     );
   }
   if (props.error !== null) {
-    return <ErrorState title={props.t('common.error')} body={props.error.message} testID="caja-error" />;
+    return (
+      <ErrorState title={props.t('common.error')} body={props.error.message} testID="caja-error" />
+    );
   }
   if (props.turnos !== undefined && props.turnos.length === 0) {
     return <EmptyCajaReportes />;

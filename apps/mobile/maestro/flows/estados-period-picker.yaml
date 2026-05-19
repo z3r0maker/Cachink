@@ -46,9 +46,9 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "period-picker-tabs"
 
-# Switch to "Año" tab.
+# Switch to "Año" tab (taps the SegmentedToggle chip for anual mode).
 - tapOn:
-    id: "period-picker-year-only"
+    id: "period-picker-tab-anual"
 
 # Assert year-mode elements are visible.
 - assertVisible:

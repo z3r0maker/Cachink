@@ -138,7 +138,7 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "tab-otros"
 - assertVisible:
-    id: "otros-screen"
+    id: "otros-route"
 - assertVisible:
     id: "otros-usuarios"
 - assertVisible:

@@ -6,7 +6,6 @@
  */
 
 import type { ReactElement } from 'react';
-import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Card, Icon } from '../../components/index';
 import type { IconName } from '../../components/Icon/index';
@@ -39,34 +38,39 @@ function IconBadge({ icon }: { readonly icon: IconName }): ReactElement {
 export function OtrosCard(props: OtrosCardProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <Pressable onPress={props.onPress} testID={props.testID} style={{ flex: 1 }}>
-      <Card variant="white" padding="md" elevation="raised" style={{ flex: 1 }}>
-        <View gap={10}>
-          <IconBadge icon={props.item.icon} />
-          <View gap={2}>
+    <Card
+      variant="white"
+      padding="md"
+      elevation="raised"
+      onPress={props.onPress}
+      testID={props.testID}
+      style={{ flex: 1 }}
+    >
+      <View gap={10}>
+        <IconBadge icon={props.item.icon} />
+        <View gap={2}>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.bold}
+            fontSize={14}
+            color={colors.black}
+            numberOfLines={1}
+          >
+            {t(props.item.labelKey as never)}
+          </Text>
+          {props.item.descriptionKey != null && (
             <Text
               fontFamily={typography.fontFamily}
-              fontWeight={typography.weights.bold}
-              fontSize={14}
-              color={colors.black}
-              numberOfLines={1}
+              fontWeight={typography.weights.medium}
+              fontSize={12}
+              color={colors.gray600}
+              numberOfLines={2}
             >
-              {t(props.item.labelKey as never)}
+              {t(props.item.descriptionKey as never)}
             </Text>
-            {props.item.descriptionKey != null && (
-              <Text
-                fontFamily={typography.fontFamily}
-                fontWeight={typography.weights.medium}
-                fontSize={12}
-                color={colors.gray600}
-                numberOfLines={2}
-              >
-                {t(props.item.descriptionKey as never)}
-              </Text>
-            )}
-          </View>
+          )}
         </View>
-      </Card>
-    </Pressable>
+      </View>
+    </Card>
   );
 }

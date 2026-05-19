@@ -16,14 +16,19 @@ tags:
     id: "tab-otros"
 - extendedWaitUntil:
     visible:
-      id: "otros-screen"
+      id: "otros-route"
     timeout: 5000
 
+- scrollUntilVisible:
+    element:
+      id: "otros-cancelaciones"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
     id: "otros-cancelaciones"
 - extendedWaitUntil:
     visible:
-      id: "cancelaciones-screen"
+      id: "mobile-cancelaciones"
     timeout: 5000
 
 # Verify the screen title renders
