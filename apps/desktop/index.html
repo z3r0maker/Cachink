@@ -16,9 +16,20 @@
     <script>
       window.process = window.process || { env: { TAMAGUI_TARGET: 'web', NODE_ENV: 'development' } };
       window.global = window.global || window;
+      // @vitejs/plugin-react v6 uses OXC to inject $RefreshReg$ /
+      // $RefreshSig$ calls into every component file during `vite dev`,
+      // but does NOT inject the "preamble" <script> that defines those
+      // globals (the transformIndexHtml hook evaluates `skipFastRefresh`
+      // as true in this environment). Without these no-ops, every
+      // component module throws a silent ReferenceError — ES module
+      // execution errors do NOT fire `window.error`, so the app shows
+      // a blank screen with no visible error.
+      window.$RefreshReg$ = window.$RefreshReg$ || function() {};
+      window.$RefreshSig$ = window.$RefreshSig$ || function() { return function(type) { return type; }; };
     </script>
     <style>
       html, body, #root { height: 100%; margin: 0; padding: 0; background: #F7F7F5; /* colors.offwhite — @cachink/ui/src/theme.ts */ }
+      #root { display: flex; flex-direction: column; }
       body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; }
     </style>
   </head>

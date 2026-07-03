@@ -114,15 +114,16 @@ function BandejaTab({ ctx }: { ctx: ReturnType<typeof useNotificacionesState> })
   return (
     <>
       <BandejaFilterBar ctx={ctx} />
-      {ctx.alerts.length === 0 && (
+      {ctx.alerts.length === 0 ? (
         <EmptyState
           icon="bell"
           title={ctx.t('notificaciones.emptyTitle')}
           description={ctx.t('notificaciones.emptyHint')}
           testID="notificaciones-empty"
         />
+      ) : (
+        <AlertList ctx={ctx} />
       )}
-      <AlertList ctx={ctx} />
     </>
   );
 }

@@ -58,7 +58,6 @@ export function DirectorSetupGate(props: AuthGatesProps): ReactElement {
       const crear = new CrearUsuarioUseCase(users);
       return crear.execute({
         nombre: input.nombre,
-        email: input.email,
         pin: input.pin,
         recoveryPassword: input.recoveryPassword,
         role: 'director',

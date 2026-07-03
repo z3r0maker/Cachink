@@ -30,13 +30,27 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-dev-client", "expo-router", "expo-sqlite", "expo-localization", "expo-font", "expo-updates"],
+    "plugins": [
+      "expo-dev-client",
+      "expo-router",
+      "expo-sqlite",
+      "expo-localization",
+      "expo-font",
+      "expo-updates"
+    ],
     "updates": {
       "url": "https://u.expo.dev/EAS_PROJECT_ID",
       "fallbackToCacheTimeout": 0
     },
     "runtimeVersion": {
       "policy": "appVersion"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dece170a-8337-4258-bfc7-07e88b0699b8"
+      }
+    },
+    "owner": "z3r0makers-organization"
   }
 }

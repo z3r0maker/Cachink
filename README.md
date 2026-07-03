@@ -18,22 +18,58 @@
 
 ## Status
 
-⚠️ **Phase 1 — Incomplete (post-audit reframe, 2026-04-24).** Phase 1's
-six sub-phases (0, 1A, 1B, 1C, 1D, 1E, 1F) all shipped their backend +
-screen work, but a Round 2 wiring audit found that several
-shipped-but-inert features broke at the route-adapter / shell-bridge
-boundary. Phase 1 is now closed via Slice 9 — Phases A, B1, 9.5, 9.6
-landed 2026-04-24 — and a Round 3 verification pass added the F1/F2
-correctness fixes plus matching boundary tests. Local + LAN + Cloud
-modes have working end-to-end UI for every shipped feature.
-v0.1.0 public-beta tag-ready once Round 3's F4 coverage tests land.
-369 test files, 179 Maestro E2E flows, 50 ADRs. Full observability/audit
-trail system via `@cachink/observability` for local audit logging, error
-telemetry, and health checks. Store submission is a human-gated
-action — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
-Current phase + remaining work tracked in
-[`ROADMAP.md`](./ROADMAP.md); detailed phase history lives in
-[`ROADMAP-archive.md`](./ROADMAP-archive.md).
+🟡 **Pre-release — core features built, UI polish in progress.**
+
+### ✅ Done
+
+- **Point-of-sale (Ventas)** — product catalog, inline quick-sell, barcode scanner, payment methods (Efectivo, Transferencia, Tarjeta, QR/CoDi, Crédito), sale editing/cancellation
+- **Expenses (Egresos)** — Gasto / Nómina / Inventario-purchase sub-tabs, recurring expense templates with auto-reminders
+- **Inventory (Productos)** — stock tracking, movements log, low-stock alerts, merma (shrinkage), materia prima conversions, inventory audits
+- **Clients + Accounts Receivable** — lightweight client directory, crédito tracking, payment registration, overdue alerts
+- **NIF Financial Statements** — Estado de Resultados (B-3), Balance General (B-6), Flujo de Efectivo (B-2)
+- **KPI Dashboard (Indicadores)** — margins, liquidity, rotation, financial health gauges
+- **Director Home** — daily summary, recent activity, stock alerts, CxC, notification inbox
+- **Cash register (Caja)** — open/close shifts, discrepancy tracking, auto-egreso on difference, daily cash reconciliation (Corte de Día)
+- **User management** — Director + Operativo roles with PIN auth, quick-switch, employee management
+- **Export** — Excel workbook + PDF summary of all data; monthly accountant report (Informe para el Contador)
+- **Simple receipts (Comprobantes)** — shareable PNG/PDF per sale (not CFDI)
+- **Director Notification Inbox** — 13 alert sources, per-source preferences, severity indicators, deduplication
+- **Feature flags** — per-business toggles for stock, crédito, merma, auditoría, conversión
+- **Setup wizard** — intent-first onboarding with Local / LAN / Cloud mode selection
+- **Local standalone mode** — fully offline, no account required
+- **LAN sync** — SQLite-to-SQLite sync over local Wi-Fi (desktop server + up to 3 tablets)
+- **Cloud sync** — PowerSync + Supabase backend for multi-location
+- **Observability** — local audit logging, error telemetry, and health checks (`@cachink/observability`)
+- **Cross-platform UI** — shared Tamagui component library rendering on iOS, Android, macOS, and Windows
+
+### 🟡 In Progress
+
+- **Mobile UI/UX audit** — refining tap targets, keyboard flows, list virtualization, tablet landscape layouts, and visual density to match design mocks
+- **Route-stack refactor** — converting modal-based flows to proper page navigation (5 screens remaining)
+- **Split-pane layouts** — list/detail side-by-side on tablet landscape and desktop (6 screens remaining)
+
+### 📋 Not Started (Phase 2 candidates)
+
+- Operativo "Más…" tab (additional bottom-tab affordances)
+- CoDi QR payment flow
+- Clip / Mercado Pago Point integration
+- WhatsApp as a first-class share target
+- Payment reminders for Crédito ventas
+- ESC/POS receipt printer support
+- Cash drawer integration
+- Multi-business support
+
+### Numbers
+
+| Metric                        | Count                                |
+| ----------------------------- | ------------------------------------ |
+| Unit + integration tests      | ~2,100 across 365 test files         |
+| Maestro E2E flows             | 187 (174 flows + 13 shared subflows) |
+| Architecture Decision Records | 50                                   |
+| Monorepo packages             | 9                                    |
+
+Store submission is a human-gated action — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
+Current task tracking in [`ROADMAP.md`](./ROADMAP.md); phase history in [`ROADMAP-archive.md`](./ROADMAP-archive.md).
 
 ---
 
@@ -77,7 +113,7 @@ Emprendedores and small-business owners in Mexico. Not an ERP. Not facturación.
 
 ```bash
 pnpm install
-pnpm test                              # full monorepo tests (369 test files)
+pnpm test                              # full monorepo tests (~2,100 tests)
 pnpm lint                              # enforce layer boundaries + style
 pnpm typecheck                         # strict TS across all packages
 pnpm --filter @cachink/mobile ios      # dev build (needs Metro running)
@@ -98,6 +134,7 @@ export LC_ALL=en_US.UTF-8
 ```
 
 Clean rebuild after encoding or Pods issues:
+
 ```bash
 pnpm --filter @cachink/mobile ios:clean
 ```

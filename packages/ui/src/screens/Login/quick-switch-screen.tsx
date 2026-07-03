@@ -30,9 +30,8 @@ export interface QuickSwitchScreenProps {
 function AnimatedPinPrompt(props: {
   readonly visible: boolean;
   readonly children: ReactElement;
-}): ReactElement | null {
+}): ReactElement {
   const anim = usePinSlideIn(props.visible);
-  if (!props.visible) return null;
   return (
     <Animated.View
       style={{
@@ -40,7 +39,12 @@ function AnimatedPinPrompt(props: {
         opacity: anim.opacity,
         width: '100%',
         alignItems: 'center',
+        // Keep in the layout tree so react-native-web's Animated
+        // subscriptions stay active. When hidden, collapse to zero
+        // height so it doesn't push the avatar grid off-center.
+        ...(props.visible ? {} : { height: 0, overflow: 'hidden' }),
       }}
+      pointerEvents={props.visible ? 'auto' : 'none'}
     >
       {props.children}
     </Animated.View>
@@ -56,7 +60,11 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
     <FloatingCoinsBackground testID={props.testID ?? 'quick-switch'}>
       <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={24}>
         <QuickSwitchHeader businessName={props.businessName} />
-        <UserAvatarGrid users={props.users} selectedUserId={selectedUserId} onSelect={setSelectedUserId} />
+        <UserAvatarGrid
+          users={props.users}
+          selectedUserId={selectedUserId}
+          onSelect={setSelectedUserId}
+        />
         <AnimatedPinPrompt visible={selectedUserId !== null}>
           <PinPrompt
             userId={selectedUserId!}

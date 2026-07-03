@@ -55,7 +55,7 @@ const OPERATIVO_FLAG_ITEMS: readonly FlagItem[] = [
       icon: 'package',
       labelKey: 'otros.productos',
       descriptionKey: 'otros.desc.productos',
-      path: '/productos',
+      path: '/productos-otros',
     },
     flagCheck: (f) => f.stock && f.merma,
   },

@@ -20,7 +20,7 @@ const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
     icon: 'file-text',
     labelKey: 'otros.gastos',
     descriptionKey: 'otros.desc.gastos',
-    path: '/egresos',
+    path: '/gastos',
   },
   {
     key: 'indicadores',
@@ -34,7 +34,7 @@ const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
     icon: 'package',
     labelKey: 'otros.productos',
     descriptionKey: 'otros.desc.productos',
-    path: '/productos',
+    path: '/productos-otros',
   },
 ] as const;
 
@@ -145,7 +145,12 @@ const DIRECTOR_TAIL_ITEMS: readonly OtrosItem[] = [
 
 export function directorOtrosItems(flags: FeatureFlags): OtrosItem[] {
   const flagItems = DIRECTOR_FLAG_ITEMS.filter((e) => e.flagCheck(flags)).map((e) => e.item);
-  const items = [...DIRECTOR_ALWAYS_ITEMS, ...flagItems, ...DIRECTOR_CAJA_ITEMS, ...DIRECTOR_TAIL_ITEMS];
+  const items = [
+    ...DIRECTOR_ALWAYS_ITEMS,
+    ...flagItems,
+    ...DIRECTOR_CAJA_ITEMS,
+    ...DIRECTOR_TAIL_ITEMS,
+  ];
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     items.push({

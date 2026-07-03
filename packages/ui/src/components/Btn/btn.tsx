@@ -257,7 +257,7 @@ export function Btn(props: BtnProps): ReactElement {
       style={({ pressed }) => [baseStyle, pressed && !disabled ? PRESSED_STYLE : null]}
     >
       {loading ? (
-        <Spinner size="sm" />
+        <Spinner size={props.fullWidth ? 'md' : 'sm'} />
       ) : (
         <>
           {props.icon}

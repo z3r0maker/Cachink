@@ -10,9 +10,9 @@
       "distribution": "internal",
       "channel": "development",
       "env": {
-        "EXPO_PUBLIC_CLOUD_API_URL": "",
-        "EXPO_PUBLIC_CLOUD_ANON_KEY": "",
-        "EXPO_PUBLIC_POWERSYNC_URL": ""
+        "EXPO_PUBLIC_CLOUD_API_URL": "http://localhost:54321",
+        "EXPO_PUBLIC_CLOUD_ANON_KEY": "dev-placeholder",
+        "EXPO_PUBLIC_POWERSYNC_URL": "http://localhost:6060"
       }
     },
     "preview": {
