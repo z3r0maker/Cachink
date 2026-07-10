@@ -17,6 +17,11 @@
 #   maestro test apps/mobile/maestro/flows/movimiento-salida-con-motivo.yaml
 # x-entrypoint: demo
 appId: mx.cachink.mobile
+# TODO(e2e): selectors here are correct (find-producto-stock, text-regex detail
+# buttons, MOTIVO dropdown select, REGISTRAR), but the final salida submit does
+# NOT close the modal — validateCantidad appears not to see the WheelQuantityPicker
+# value on the salida path (entrada with the identical field submits fine). Needs
+# an app-behavior look at MovimientoModal submit for tipo=salida. Not yet green.
 ---
 - launchApp
 
@@ -39,7 +44,8 @@ appId: mx.cachink.mobile
 - assertVisible:
     text: "CANTIDAD.*"
 
-# Enter quantity (the input exposes its testID).
+# CANTIDAD is a WheelQuantityPicker (scroll drum). Interacting with it commits the
+# selected value into form state (needed for validateCantidad on submit).
 - tapOn:
     id: "movimiento-cantidad"
 - eraseText
