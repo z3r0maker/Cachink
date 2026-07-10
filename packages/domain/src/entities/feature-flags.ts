@@ -30,6 +30,19 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   ventasCredito: false,
 } as const;
 
+/**
+ * MVP-hidden flags — advanced features suppressed for the initial release.
+ * Removing a key from this array re-enables the feature across the entire UI.
+ * The underlying entities, use cases, repositories, and migrations are preserved.
+ */
+export const MVP_HIDDEN_FLAGS: readonly FeatureFlagKey[] = [
+  'merma',
+  'conversionMateriaPrima',
+  'conversionAutomatica',
+  'auditoriaInventario',
+  'ventasCredito',
+] as const;
+
 /** Parent flag that must be ON for the child to be enabled. */
 export const FEATURE_FLAG_DEPENDENCIES: Partial<
   Record<FeatureFlagKey, FeatureFlagKey>
@@ -79,7 +92,10 @@ export function canEnableFlag(
   return parent === undefined || flags[parent];
 }
 
-/** Parse a JSON string into FeatureFlags, falling back to defaults. */
+/** Parse a JSON string into FeatureFlags, falling back to defaults.
+ *  MVP clamp: flags listed in MVP_HIDDEN_FLAGS are forced OFF regardless
+ *  of the stored value, ensuring hidden features stay disabled even for
+ *  pre-existing businesses that had them enabled. */
 export function parseFeatureFlags(raw: string): FeatureFlags {
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
@@ -88,6 +104,10 @@ export function parseFeatureFlags(raw: string): FeatureFlags {
       if (typeof parsed[key] === 'boolean') {
         result[key] = parsed[key];
       }
+    }
+    // MVP clamp — force hidden flags OFF
+    for (const hidden of MVP_HIDDEN_FLAGS) {
+      result[hidden] = false;
     }
     return result;
   } catch {

@@ -107,4 +107,47 @@ describe('useDirectorAlerts', () => {
 
     await waitFor(() => expect(result.current.data).toEqual([]));
   });
+
+  it('excludes alerts for disabled feature flags (MVP hidden flags)', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    // stock-bajo passes (stock ON by default)
+    await repo.create({
+      source: 'stock-bajo',
+      severity: 'warning',
+      titleKey: 'Stock bajo',
+      message: 'Stock alert',
+      actionRoute: null,
+      businessId: BIZ,
+    });
+    // merma-threshold blocked (merma OFF by default / MVP-hidden)
+    await repo.create({
+      source: 'merma-threshold',
+      severity: 'warning',
+      titleKey: 'Merma',
+      message: 'Merma alert',
+      actionRoute: null,
+      businessId: BIZ,
+    });
+    // caja-discrepancia passes (always-on)
+    await repo.create({
+      source: 'caja-discrepancia',
+      severity: 'warning',
+      titleKey: 'Caja',
+      message: 'Caja alert',
+      actionRoute: null,
+      businessId: BIZ,
+    });
+
+    const { result } = renderHook(() => useDirectorAlerts('all'), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toHaveLength(2);
+      const sources = result.current.data!.map((a) => a.source);
+      expect(sources).toContain('stock-bajo');
+      expect(sources).toContain('caja-discrepancia');
+      expect(sources).not.toContain('merma-threshold');
+    });
+  });
 });

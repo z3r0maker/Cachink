@@ -18,14 +18,15 @@
  * one line at the call site.
  */
 
-import { useEffect, type ReactElement } from 'react';
+import { useEffect, useRef, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import type { Control } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Client } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
-import { RhfEmailField, RhfPhoneField, RhfTextField } from '../../components/fields/index';
+import { focusRef, RhfEmailField, RhfPhoneField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import type { CrearClienteInput } from '../../hooks/use-crear-cliente';
 
@@ -76,13 +77,45 @@ function toPayload(values: NuevoClienteFormValues): CrearClienteInput {
   };
 }
 
-interface ClienteFieldsProps {
-  readonly control: Control<NuevoClienteFormValues>;
-  readonly t: ReturnType<typeof useTranslation>['t'];
-  readonly onSubmitEditing: () => void;
+function ContactInfoFields({ control, t, telefonoRef, emailRef, notaRef }: {
+  control: Control<NuevoClienteFormValues>; t: ReturnType<typeof useTranslation>['t'];
+  telefonoRef: React.RefObject<unknown>; emailRef: React.RefObject<unknown>; notaRef: React.RefObject<unknown>;
+}): ReactElement {
+  return (
+    <>
+      <RhfPhoneField
+        control={control}
+        name="telefono"
+        label={t('clientes.telefonoLabel')}
+        testID="nuevo-cliente-telefono"
+        returnKeyType="next"
+        inputRef={telefonoRef}
+        onSubmitEditing={() => focusRef(emailRef)}
+        blurOnSubmit={false}
+      />
+      <RhfEmailField
+        control={control}
+        name="email"
+        label={t('clientes.emailLabel')}
+        errorMessage={t('clientes.emailInvalid')}
+        testID="nuevo-cliente-email"
+        returnKeyType="next"
+        inputRef={emailRef}
+        onSubmitEditing={() => focusRef(notaRef)}
+        blurOnSubmit={false}
+      />
+    </>
+  );
 }
 
-function ClienteFields({ control, t, onSubmitEditing }: ClienteFieldsProps): ReactElement {
+function ClienteFields({ control, t, onSubmitEditing }: {
+  control: Control<NuevoClienteFormValues>;
+  t: ReturnType<typeof useTranslation>['t'];
+  onSubmitEditing: () => void;
+}): ReactElement {
+  const telefonoRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
+  const notaRef = useRef<TextInput>(null);
   return (
     <>
       <RhfTextField
@@ -92,22 +125,10 @@ function ClienteFields({ control, t, onSubmitEditing }: ClienteFieldsProps): Rea
         errorMessage={t('clientes.required')}
         testID="nuevo-cliente-nombre"
         returnKeyType="next"
+        onSubmitEditing={() => focusRef(telefonoRef)}
+        blurOnSubmit={false}
       />
-      <RhfPhoneField
-        control={control}
-        name="telefono"
-        label={t('clientes.telefonoLabel')}
-        testID="nuevo-cliente-telefono"
-        returnKeyType="next"
-      />
-      <RhfEmailField
-        control={control}
-        name="email"
-        label={t('clientes.emailLabel')}
-        errorMessage={t('clientes.emailInvalid')}
-        testID="nuevo-cliente-email"
-        returnKeyType="next"
-      />
+      <ContactInfoFields control={control} t={t} telefonoRef={telefonoRef} emailRef={emailRef} notaRef={notaRef} />
       <RhfTextField
         control={control}
         name="nota"
@@ -115,6 +136,7 @@ function ClienteFields({ control, t, onSubmitEditing }: ClienteFieldsProps): Rea
         testID="nuevo-cliente-nota"
         returnKeyType="done"
         onSubmitEditing={onSubmitEditing}
+        inputRef={notaRef}
       />
     </>
   );
@@ -127,9 +149,7 @@ export function NuevoClienteModal(props: NuevoClienteModalProps): ReactElement {
     defaultValues: defaults(props.editing),
     mode: 'onSubmit',
   });
-  useEffect(() => {
-    form.reset(defaults(props.editing));
-  }, [props.editing, form]);
+  useEffect(() => form.reset(defaults(props.editing)), [props.editing, form]);
   const submit = form.handleSubmit((values) => {
     props.onSubmit(toPayload(values));
     form.reset(defaults(props.editing));

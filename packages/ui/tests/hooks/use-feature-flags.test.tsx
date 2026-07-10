@@ -53,9 +53,10 @@ describe('useFeatureFlags', () => {
     expect(result.current).toEqual(DEFAULT_FEATURE_FLAGS);
   });
 
-  it('parses flags from the business record', async () => {
+  it('parses flags from the business record (non-hidden flags preserved)', async () => {
     const businesses = new InMemoryBusinessesRepository(TEST_DEVICE_ID);
-    const flags = { ...DEFAULT_FEATURE_FLAGS, merma: true };
+    // stock is a non-hidden flag — stored value should be preserved
+    const flags = { ...DEFAULT_FEATURE_FLAGS, stock: false };
     const biz = await businesses.create({
       nombre: 'Test',
       regimenFiscal: 'RIF',
@@ -70,7 +71,30 @@ describe('useFeatureFlags', () => {
     });
 
     await waitFor(() => {
-      expect(result.current.merma).toBe(true);
+      expect(result.current.stock).toBe(false);
+    });
+  });
+
+  it('clamps MVP-hidden flags to false even when stored as true', async () => {
+    const businesses = new InMemoryBusinessesRepository(TEST_DEVICE_ID);
+    const flags = { ...DEFAULT_FEATURE_FLAGS, merma: true, auditoriaInventario: true, ventasCredito: true };
+    const biz = await businesses.create({
+      nombre: 'Test',
+      regimenFiscal: 'RIF',
+      isrTasa: 3000,
+      businessId: BIZ,
+      featureFlags: JSON.stringify(flags),
+    });
+    useAppConfigStore.setState({ currentBusinessId: biz.id });
+
+    const { result } = renderHook(() => useFeatureFlags(), {
+      wrapper: wrapper({ businesses }),
+    });
+
+    await waitFor(() => {
+      expect(result.current.merma).toBe(false);
+      expect(result.current.auditoriaInventario).toBe(false);
+      expect(result.current.ventasCredito).toBe(false);
     });
   });
 });

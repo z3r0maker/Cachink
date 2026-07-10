@@ -43,6 +43,10 @@ export const ADD_DURATION_MS_SQL = `
 ALTER TABLE ${TABLE} ADD COLUMN duration_ms INTEGER;
 `;
 
+export const ADD_SHIPPED_AT_SQL = `
+ALTER TABLE ${TABLE} ADD COLUMN shipped_at TEXT;
+`;
+
 export const CREATE_INDEXES_SQL = `
 CREATE INDEX IF NOT EXISTS idx_obs_log_type_ts ON ${TABLE}(type, timestamp);
 CREATE INDEX IF NOT EXISTS idx_obs_log_operation ON ${TABLE}(operation);`;

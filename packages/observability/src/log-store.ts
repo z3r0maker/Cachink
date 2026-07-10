@@ -61,4 +61,10 @@ export interface LogStore {
     readonly auditLimit?: number;
     readonly errorLimit?: number;
   }): Promise<LogSnapshot>;
+
+  /** Query unshipped error entries for the outbox flusher. */
+  queryUnshippedErrors?(limit?: number): Promise<readonly ErrorLogEntry[]>;
+
+  /** Mark error entries as shipped (by IDs). */
+  markShipped?(ids: readonly string[]): Promise<void>;
 }

@@ -8,12 +8,14 @@
 #
 # Usage:
 #   # After a failed `maestro test`:
-#   ./apps/mobile/maestro/scripts/maestro-diagnose.sh <flow.yaml> [debug-output-dir]
+#   ./apps/mobile/maestro/scripts/maestro-diagnose.sh <flow.yaml> [debug-output-dir] [target-dir]
 #
 #   # Called automatically by full-regression.sh on failure.
+#   # When target-dir is provided, artifacts are written there
+#   # (e2e-reports/runs/<run>/tests/<flow>/) for the HTML report.
 #
 # Output:
-#   apps/mobile/maestro/reports/<flow-name>/
+#   <target-dir>/ (or apps/mobile/maestro/reports/<flow-name>/):
 #     ├── report.md         — the diagnostic report (printed to stdout too)
 #     ├── screenshot.png    — failure screenshot
 #     ├── commands.json     — step trace
@@ -24,10 +26,17 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 ANALYZER="$SCRIPT_DIR/analyze-failure.py"
 
-FLOW="${1:?Usage: maestro-diagnose.sh <flow.yaml> [debug-output-dir]}"
+FLOW="${1:?Usage: maestro-diagnose.sh <flow.yaml> [debug-output-dir] [target-dir]}"
 DEBUG_DIR="${2:-}"
+TARGET_DIR="${3:-}"
 FLOW_NAME="$(basename "$FLOW" .yaml)"
-REPORT_DIR="apps/mobile/maestro/reports/$FLOW_NAME"
+
+# Use target-dir if provided (e2e-report run dir), otherwise fall back to legacy path
+if [[ -n "$TARGET_DIR" ]]; then
+  REPORT_DIR="$TARGET_DIR"
+else
+  REPORT_DIR="apps/mobile/maestro/reports/$FLOW_NAME"
+fi
 
 mkdir -p "$REPORT_DIR"
 

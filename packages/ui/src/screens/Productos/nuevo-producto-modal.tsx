@@ -8,7 +8,8 @@
  * producto-form-fields.tsx.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
 import { Btn, Modal, Scanner } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -58,6 +59,9 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
   const form = useProductoForm();
   const [scanOpen, setScanOpen] = useState(false);
   const handleSubmit = useModalSubmit(form, props.onSubmit, t);
+  const skuRef = useRef<TextInput>(null);
+  const costoRef = useRef<TextInput>(null);
+  const precioRef = useRef<TextInput>(null);
 
   return (
     <Modal
@@ -66,9 +70,9 @@ export function NuevoProductoModal(props: NuevoProductoModalProps): ReactElement
       title={t('nuevoProducto.title')}
       testID="nuevo-producto-modal"
     >
-      <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} />
+      <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} skuRef={skuRef} />
       <CategoryFields form={form} t={t} conversionEnabled={props.conversionEnabled === true} />
-      <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} />
+      <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} costoRef={costoRef} precioRef={precioRef} />
       <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
       <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
       <Btn

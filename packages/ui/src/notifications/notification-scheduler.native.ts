@@ -8,6 +8,7 @@ import type {
   NotificationPermission,
   NotificationScheduler,
   NotificationSchedulerOptions,
+  PresentNowOptions,
 } from './notification-scheduler.shared';
 
 function mapStatus(status: string): NotificationPermission {
@@ -36,6 +37,18 @@ export class ExpoNotificationScheduler implements NotificationScheduler {
         hour: options.hour,
         minute: options.minute,
       } as never,
+    });
+  }
+
+  async presentNow(options: PresentNowOptions): Promise<void> {
+    await Notifications.scheduleNotificationAsync({
+      identifier: options.id,
+      content: {
+        title: options.title,
+        body: options.body,
+        data: options.payload ?? {},
+      },
+      trigger: null,
     });
   }
 

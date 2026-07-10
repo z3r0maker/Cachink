@@ -8,10 +8,9 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { Animated } from 'react-native';
-import { View } from '@tamagui/core';
+import { Animated, ScrollView } from 'react-native';
 import type { User, UserId } from '@cachink/domain';
-import { FloatingCoinsBackground } from '../../components/index';
+import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { usePinSlideIn } from './login-animations';
 import { PinPrompt } from './pin-prompt';
 import { QuickSwitchHeader } from './quick-switch-header';
@@ -58,7 +57,18 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
 
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'quick-switch'}>
-      <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={24}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: 24,
+          gap: 24,
+        }}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
+        <SafeAreaSpacer />
         <QuickSwitchHeader businessName={props.businessName} />
         <UserAvatarGrid
           users={props.users}
@@ -75,7 +85,7 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
             submitting={props.submitting}
           />
         </AnimatedPinPrompt>
-      </View>
+      </ScrollView>
     </FloatingCoinsBackground>
   );
 }

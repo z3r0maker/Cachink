@@ -1,0 +1,273 @@
+# Full sales lifecycle: multi-item → sales → cancel → KPI verification.
+#
+# The flagship gap-filler flow that covers the complete sales cycle:
+#   1. Create a 2nd product (Taco, $20)
+#   2. Generate 2 cash sales (Tortilla $15, Taco $20)
+#   3. Assert aggregate KPI (ventas-total-card = $35.00)
+#   4. Cancel the Taco sale via Cancelaciones flow (PIN → reason → cash)
+#   5. Verify KPI adjusts (total = $15.00) and cancelled badge appears
+#
+# Precondition: wizard + director-setup complete, Tortilla ($15) exists
+# (created by inventario-producto.yaml in Phase 2). No prior sales today.
+# Must run FIRST in Phase 4 for deterministic totals.
+#
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
+#   maestro test apps/mobile/maestro/flows/venta-ciclo-completo.yaml
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# ══════════════════════════════════════════════════════════════════
+# Step 0: Open caja via Otros (Director has no tab-caja)
+# ══════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-caja"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-caja"
+
+# Handle caja opening — may need numpad entry or confirm.
+- tapOn:
+    text: "CONFIRMAR MONTO"
+    optional: true
+- tapOn:
+    id: "numpad-5"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "caja-abrir-submit"
+    optional: true
+
+- extendedWaitUntil:
+    visible:
+      id: "caja-status-card"
+    timeout: 10000
+
+# ══════════════════════════════════════════════════════════════════
+# Step 1: Create 2nd product — Taco ($20)
+# ══════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "top-bar-back"
+
+# Now on Otros grid — navigate to Productos.
+- scrollUntilVisible:
+    element:
+      id: "otros-productos"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-productos"
+
+- tapOn:
+    id: "stock-nuevo-producto"
+
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Taco"
+- pressKey: enter
+
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "20"
+- pressKey: enter
+
+- tapOn:
+    id: "producto-submit"
+    optional: true
+
+- extendedWaitUntil:
+    notVisible:
+      id: "nuevo-producto-modal"
+    timeout: 5000
+
+# Verify Taco appears in the stock list.
+- extendedWaitUntil:
+    visible:
+      id: "stock-list"
+    timeout: 5000
+- assertVisible:
+    text: ".*Taco.*"
+
+# ══════════════════════════════════════════════════════════════════
+# Step 2: Sell Tortilla ($15, Efectivo)
+# ══════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+- tapOn: "Tortilla"
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+- tapOn:
+    id: "checkout-method-continue"
+
+- extendedWaitUntil:
+    visible:
+      id: "checkout-efectivo"
+    timeout: 5000
+- tapOn: "\\$50"
+- tapOn:
+    id: "checkout-efectivo-submit"
+
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+# ══════════════════════════════════════════════════════════════════
+# Step 3: Sell Taco ($20, Efectivo)
+# ══════════════════════════════════════════════════════════════════
+- tapOn: "Taco"
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
+
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+- tapOn:
+    id: "checkout-method-continue"
+
+- extendedWaitUntil:
+    visible:
+      id: "checkout-efectivo"
+    timeout: 5000
+- tapOn: "\\$50"
+- tapOn:
+    id: "checkout-efectivo-submit"
+
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+# ══════════════════════════════════════════════════════════════════
+# Step 4: Assert aggregate KPI — $35.00 (both sales)
+# ══════════════════════════════════════════════════════════════════
+- assertVisible:
+    id: "ventas-total-card"
+- assertVisible:
+    text: ".*\\$35\\.00.*"
+
+- assertVisible:
+    id: "ventas-list"
+
+# ══════════════════════════════════════════════════════════════════
+# Step 5: Cancel one sale — navigate to Cancelaciones via Otros
+# ══════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-cancelaciones"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-cancelaciones"
+
+- extendedWaitUntil:
+    visible:
+      id: "cancelaciones-screen"
+    timeout: 5000
+
+# Tap the first "Cancelar" button (newest sale = Taco, $20).
+- tapOn: "Cancelar"
+
+# ── PIN step ──
+- extendedWaitUntil:
+    visible:
+      id: "cancellation-flow"
+    timeout: 5000
+- assertVisible:
+    id: "cancel-pin-input"
+# Enter PIN 123456 (Director Test PIN).
+- tapOn:
+    id: "numpad-1"
+- tapOn:
+    id: "numpad-2"
+- tapOn:
+    id: "numpad-3"
+- tapOn:
+    id: "numpad-4"
+- tapOn:
+    id: "numpad-5"
+- tapOn:
+    id: "numpad-6"
+
+# ── Reason step ──
+- extendedWaitUntil:
+    visible:
+      id: "cancel-reason-input"
+    timeout: 5000
+- tapOn:
+    id: "cancel-reason-input"
+- inputText: "Prueba E2E"
+- tapOn:
+    id: "cancel-reason-submit"
+
+# ── Cash confirm step (Taco was cash/Efectivo) ──
+- extendedWaitUntil:
+    visible:
+      id: "cancel-cash-confirm"
+    timeout: 5000
+- tapOn:
+    id: "cancel-cash-confirm"
+
+# ══════════════════════════════════════════════════════════════════
+# Step 6: Verify cancellation — badge visible on cancelled sale
+# ══════════════════════════════════════════════════════════════════
+- extendedWaitUntil:
+    notVisible:
+      id: "cancellation-flow"
+    timeout: 5000
+
+# The cancelled sale should show the badge text.
+- assertVisible:
+    text: ".*Cancelada.*Prueba E2E.*"
+
+# ══════════════════════════════════════════════════════════════════
+# Step 7: Verify KPI adjusts — back to Ventas, total = $15.00
+# ══════════════════════════════════════════════════════════════════
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+- assertVisible:
+    id: "ventas-total-card"
+- assertVisible:
+    text: ".*\\$15\\.00.*"

@@ -17,6 +17,7 @@
 
 import type { ReactElement } from 'react';
 import { useNotificationsEnabled } from '../../app-config/index';
+import { useFeatureFlag } from '../../hooks/use-feature-flags';
 import { useScheduleStockLowCheck } from '../../hooks/use-schedule-stock-low-check';
 import { useCorteHistorial } from '../../hooks/use-corte-historial';
 import { useUnreadAlertCount } from '../../hooks/use-unread-alert-count';
@@ -48,6 +49,7 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
   // below with its smart component.
   const nav = props.onNavigate;
   const notificationsEnabled = useNotificationsEnabled();
+  const ventasCredito = useFeatureFlag('ventasCredito');
   useScheduleStockLowCheck({ enabled: notificationsEnabled });
   useCheckCreditosVencidos();
   const historialQ = useCorteHistorial();
@@ -66,7 +68,7 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
       hoy={
         <HoyKpiStrip onVerVentas={() => nav?.('/ventas')} onVerEgresos={() => nav?.('/egresos')} />
       }
-      cxc={<CxCCard onVerTodo={() => nav?.('/cuentas-por-cobrar')} />}
+      cxc={ventasCredito ? <CxCCard onVerTodo={() => nav?.('/cuentas-por-cobrar')} /> : undefined}
       actividad={<ActividadReciente limit={6} />}
       stockBajo={<StockBajoCard onVerBajoStock={() => nav?.('/inventario?filter=bajoStock')} />}
       pendientes={<PendientesDirectorCard />}

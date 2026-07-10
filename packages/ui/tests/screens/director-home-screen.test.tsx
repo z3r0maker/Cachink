@@ -61,6 +61,23 @@ describe('DirectorHomeScreen', () => {
     expect(screen.getByTestId('dh-root')).toBeInTheDocument();
   });
 
+  it('omits CxC card when cxc prop is undefined (MVP: ventasCredito OFF)', () => {
+    renderWithProviders(
+      <DirectorHomeScreen
+        hoy={<div data-testid="hoy">Hoy</div>}
+        actividad={<div data-testid="actividad">Actividad</div>}
+        stockBajo={<div data-testid="stock">Stock</div>}
+      />,
+    );
+    // With ventasCredito MVP-clamped to false, the route passes cxc=undefined.
+    // The screen must not render a CxC slot.
+    expect(screen.queryByTestId('cxc')).toBeNull();
+    expect(screen.queryByTestId('cxc-card')).toBeNull();
+    // Other slots still render.
+    expect(screen.getByTestId('hoy')).toBeInTheDocument();
+    expect(screen.getByTestId('actividad')).toBeInTheDocument();
+  });
+
   describe('grid column count (PR 5.5-T03 useMedia ladder)', () => {
     afterEach(() => {
       resetMockViewport();

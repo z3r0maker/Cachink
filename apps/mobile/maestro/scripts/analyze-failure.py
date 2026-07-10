@@ -337,6 +337,42 @@ def generate_report(
     return "\n".join(lines)
 
 
+def diagnose_failure(
+    commands_path: str,
+    hierarchy_path: str,
+    flow_path: str = "",
+    screenshot_path: str = "",
+) -> Dict:
+    """High-level entry point for programmatic callers (e.g. report-collect.py).
+
+    Returns a dict with:
+      - steps: list of step dicts
+      - failed_index: int (-1 if none)
+      - failed_step: dict or None
+      - warned_steps: list of (index, step) tuples
+      - probable_cause: str
+      - hierarchy_summary: str
+      - hierarchy_ids: set of str
+      - hierarchy_texts: set of str
+    """
+    steps = parse_commands(commands_path)
+    hierarchy = parse_hierarchy(hierarchy_path)
+    failed_idx, failed_step = find_failed_step(steps)
+    warned = find_warned_steps(steps)
+    cause = diagnose(failed_step, warned, hierarchy)
+
+    return {
+        "steps": steps,
+        "failed_index": failed_idx,
+        "failed_step": failed_step,
+        "warned_steps": warned,
+        "probable_cause": cause,
+        "hierarchy_summary": hierarchy["tree_summary"],
+        "hierarchy_ids": hierarchy["ids"],
+        "hierarchy_texts": hierarchy["texts"],
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Maestro failure diagnostic")
     parser.add_argument("--flow", required=True, help="Path to the flow YAML")

@@ -31,7 +31,7 @@
  *
  * Pass `value=""` for an empty field. Empty + parse → `null`.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { fromPesos, formatPesos, type Money } from '@cachink/domain';
 import { Input } from '../Input/input';
@@ -62,6 +62,8 @@ export interface MoneyFieldProps {
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
   readonly onSubmitEditing?: () => void;
   readonly blurOnSubmit?: boolean;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 /**
@@ -174,6 +176,7 @@ export function MoneyField(props: MoneyFieldProps): ReactElement {
       returnKeyType={props.returnKeyType}
       onSubmitEditing={props.onSubmitEditing}
       blurOnSubmit={props.blurOnSubmit}
+      inputRef={props.inputRef}
     />
   );
 }

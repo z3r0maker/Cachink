@@ -17,7 +17,7 @@
  * the form layer; the wrapper picks it up off `formState.errors`
  * automatically — call sites don't have to reach into formState.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { Controller, type Control, type FieldPath, type FieldValues } from 'react-hook-form';
 import { EmailField, type EmailFieldProps } from './email-field';
 import { IntegerField, type IntegerFieldProps } from './integer-field';
@@ -32,13 +32,15 @@ interface RhfBase<TForm extends FieldValues> {
   readonly name: FieldPath<TForm>;
   /** When set, rendered as `<X note={errorMessage}>` whenever the field is invalid. */
   readonly errorMessage?: string;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 /** RHF-bound `<TextField>`. */
 export function RhfTextField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<TextFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -49,6 +51,7 @@ export function RhfTextField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />
@@ -59,7 +62,7 @@ export function RhfTextField<TForm extends FieldValues>(
 export function RhfEmailField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<EmailFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -70,6 +73,7 @@ export function RhfEmailField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />
@@ -80,7 +84,7 @@ export function RhfEmailField<TForm extends FieldValues>(
 export function RhfPhoneField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<PhoneFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -91,6 +95,7 @@ export function RhfPhoneField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />
@@ -101,7 +106,7 @@ export function RhfPhoneField<TForm extends FieldValues>(
 export function RhfPasswordField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<PasswordFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -112,6 +117,7 @@ export function RhfPasswordField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />
@@ -122,7 +128,7 @@ export function RhfPasswordField<TForm extends FieldValues>(
 export function RhfMoneyField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<MoneyFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -133,6 +139,7 @@ export function RhfMoneyField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />
@@ -143,7 +150,7 @@ export function RhfMoneyField<TForm extends FieldValues>(
 export function RhfIntegerField<TForm extends FieldValues>(
   props: RhfBase<TForm> & Omit<IntegerFieldProps, 'value' | 'onChange'>,
 ): ReactElement {
-  const { control, name, errorMessage, ...rest } = props;
+  const { control, name, errorMessage, inputRef, ...rest } = props;
   return (
     <Controller
       control={control}
@@ -154,6 +161,7 @@ export function RhfIntegerField<TForm extends FieldValues>(
           value={(field.value as string | undefined) ?? ''}
           onChange={field.onChange}
           note={fieldState.invalid && errorMessage ? errorMessage : rest.note}
+          inputRef={inputRef}
         />
       )}
     />

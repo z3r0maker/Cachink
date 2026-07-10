@@ -13,6 +13,7 @@ import {
   TABLE,
   CREATE_TABLE_SQL,
   ADD_DURATION_MS_SQL,
+  ADD_SHIPPED_AT_SQL,
   CREATE_INDEXES_SQL,
   buildQuery,
   countByType,
@@ -67,6 +68,34 @@ export class SqliteLogStore implements LogStore {
     } catch {
       /* column exists */
     }
+    try {
+      await this.#db.execAsync(ADD_SHIPPED_AT_SQL);
+    } catch {
+      /* column exists */
+    }
+  }
+
+  /**
+   * Query unshipped error entries for the outbox flusher.
+   * Returns errors that haven't been shipped to the remote backend yet.
+   */
+  async queryUnshippedErrors(limit: number = 50): Promise<readonly ErrorLogEntry[]> {
+    const sql = `SELECT * FROM ${TABLE} WHERE type = 'error' AND shipped_at IS NULL ORDER BY timestamp ASC LIMIT ?`;
+    const rows = await this.#db.getAllAsync<RawRow>(sql, [limit]);
+    return rows.map(rowToErrorEntry);
+  }
+
+  /**
+   * Mark error entries as shipped (by IDs).
+   */
+  async markShipped(ids: readonly string[]): Promise<void> {
+    if (ids.length === 0) return;
+    const now = new Date().toISOString();
+    const placeholders = ids.map(() => '?').join(',');
+    await this.#db.runAsync(
+      `UPDATE ${TABLE} SET shipped_at = ? WHERE id IN (${placeholders})`,
+      [now, ...ids],
+    );
   }
 
   async writeAudit(event: AuditEvent): Promise<void> {

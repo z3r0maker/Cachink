@@ -16,5 +16,7 @@ export { TotalBar, type TotalBarProps } from './total-bar';
 export { CheckoutSummary, type CheckoutSummaryProps } from './checkout-summary';
 // Caja Gate
 export { CajaGateBanner, type CajaGateBannerProps } from './caja-gate-banner';
+// Products Gate
+export { ProductosGateBanner, type ProductosGateBannerProps } from './productos-gate-banner';
 // Legacy — kept for backwards compatibility until all consumers migrate
 export { VentaConfirmSheet, type VentaConfirmSheetProps } from './venta-confirm-sheet';

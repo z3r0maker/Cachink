@@ -30,3 +30,7 @@ appId: mx.cachink.mobile
 # Pick "Solo cloud" — modal closes and wizard lands on Step 2A.
 - tapOn: { id: "wizard-help-solo-cloud-cta" }
 - assertVisible: { id: "wizard-step2a-cloud" }
+
+# MVP: the recommended cloud option is disabled — note explains why.
+- assertVisible: { id: "wizard-step2a-cloud-note" }
+- assertVisible: { id: "wizard-step2a-local" }

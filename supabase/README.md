@@ -1,5 +1,13 @@
 # Cachink Supabase — provisioning guide
 
+> **MVP scope:** For the iOS-only MVP, only `0002_bug_database.sql`
+> (error_events + bug_reports) and the `bug-report` Edge Function are
+> needed. Skip PowerSync setup and the synced-table RLS policies until
+> cloud sync is re-enabled post-MVP. **However**, `0001_schema.sql` must
+> still be pushed first — it defines `cachink_generate_ulid()` which
+> `0002` depends on. Run `supabase db push` (which applies both in order)
+> rather than cherry-picking individual migrations.
+
 This directory holds the **developer-laptop-only** assets needed to
 stand up the Cachink-hosted Supabase backend (ADR-035). None of these
 files are imported by the mobile or desktop app; they only run via
@@ -33,9 +41,10 @@ the Supabase CLI on a developer machine.
    ```sh
    supabase db push
    ```
-   This runs `migrations/0001_schema.sql` which creates the 10 synced
-   tables, RLS policies, the `powersync` publication, and the
-   `seed_business_on_signup` trigger.
+   This runs `migrations/0001_schema.sql` (10 synced tables, RLS,
+   PowerSync publication, sign-up trigger) and
+   `migrations/0002_bug_database.sql` (error_events + bug_reports
+   tables with deny-by-default RLS, pg_cron nightly prune).
 6. **Grab the project URL + anon key** from the dashboard
    (`Project Settings → API`). Put them in your local `.env.local`:
    ```env
@@ -47,6 +56,23 @@ the Supabase CLI on a developer machine.
    Create Instance → Configure Postgres → point at the Supabase instance
    via the `postgres` connection string). Grab the PowerSync URL.
 
+## Deploying the Edge Function
+
+```sh
+supabase functions deploy bug-report --project-ref <project-ref>
+```
+
+The `bug-report` function handles `POST .../errors` (batch error events)
+and `POST .../bug-reports` (single user-initiated reports). It uses the
+service-role key (env secret) to insert — the anon key is only used by
+the client for auth header compatibility.
+
+Grab the function URL from the dashboard and set it in your `.env.local`:
+
+```env
+EXPO_PUBLIC_BUG_INGEST_URL=https://<project-ref>.supabase.co/functions/v1/bug-report
+```
+
 ## Running RLS tests
 
 ```sh
@@ -54,9 +80,10 @@ supabase test db supabase/tests/rls.spec.sql
 supabase test db supabase/tests/ulid.spec.sql
 ```
 
-The RLS tests assert cross-business isolation: a user authenticated with
-`business_id=BIZ_A`'s JWT cannot read or write rows flagged as
-`business_id=BIZ_B`.
+The RLS tests assert cross-business isolation (synced tables) **and**
+deny-by-default access on `error_events` / `bug_reports` — neither anon
+nor authenticated roles can SELECT or INSERT into the bug database
+tables.
 
 The ULID tests verify the `cachink_generate_ulid()` PL/pgSQL function
 returns a 26-char Crockford-base32 string that the domain layer's regex

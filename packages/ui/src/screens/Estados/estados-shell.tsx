@@ -9,6 +9,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
+import { View } from '@tamagui/core';
 import {
   ZERO,
   type BalanceGeneral,
@@ -125,11 +126,13 @@ function ShellContent({
     >
       <ActiveBody tab={tab} shellProps={props} />
       {showIsrDisclaimer(tab) && (
-        <IsrDisclaimer
-          onOpenSettings={props.onOpenSettings}
-          isrRate={props.isrRate}
-          isrIsZeroDueToLoss={isrIsZeroDueToLoss(props)}
-        />
+        <View marginTop={18}>
+          <IsrDisclaimer
+            onOpenSettings={props.onOpenSettings}
+            isrRate={props.isrRate}
+            isrIsZeroDueToLoss={isrIsZeroDueToLoss(props)}
+          />
+        </View>
       )}
     </SwipeableTabView>
   );

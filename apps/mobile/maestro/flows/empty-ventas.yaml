@@ -1,8 +1,6 @@
-# Verify the Ventas empty state renders correctly when no products
-# exist yet. The "No hay productos" message and CTA should appear.
-#
-# Covers the empty-state path: fresh wizard → Ventas tab →
-# VentasEmptyProductos component renders.
+# Verify the productos gate blocks Ventas when no products exist.
+# With the productos gate, fresh state renders ProductosGateBanner
+# ("Registra tus productos") instead of the old empty-state component.
 #
 # Precondition: fresh install with wizard complete but NO products.
 # Chain flows:
@@ -23,14 +21,13 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "tab-ventas"
 
-# No products registered yet, so VentasEmptyProductos renders
-# instead of the product grid.
+# No products registered yet — the productos gate renders.
 - assertVisible:
-    id: "empty-productos"
+    id: "productos-gate-banner"
 
-# The CTA button to navigate to Productos tab should be visible.
+# The CTA button to navigate to Productos should be visible.
 - assertVisible:
-    id: "ventas-go-to-productos"
+    id: "productos-gate-go-to-productos"
 
 # Product grid should NOT be visible.
 - assertNotVisible:

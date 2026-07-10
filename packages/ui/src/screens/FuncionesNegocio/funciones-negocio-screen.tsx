@@ -81,10 +81,10 @@ export function FuncionesNegocioScreen(props: FuncionesNegocioScreenProps): Reac
               <FeatureFlagCard
                 key={info.key}
                 info={info}
-                enabled={enabled}
-                canToggle={enabled || allowed}
-                dependencyHint={buildFlagHint(props.flags, info, t)}
-                onToggle={(v) => handleToggle(info.key, v)}
+                enabled={info.comingSoon ? false : enabled}
+                canToggle={info.comingSoon ? false : enabled || allowed}
+                dependencyHint={info.comingSoon ? null : buildFlagHint(props.flags, info, t)}
+                onToggle={info.comingSoon ? () => {} : (v) => handleToggle(info.key, v)}
                 testID={`flag-${info.key}`}
               />
             );

@@ -37,5 +37,9 @@ export * from './toggle-feature-flag/index.js';
 // Phase 6 — Caja
 export * from './abrir-caja/index.js';
 export * from './cerrar-caja/index.js';
+export * from './depositar-caja/index.js';
+export * from './retirar-caja/index.js';
+// Phase 9 — Cancelaciones
+export * from './cancelar-venta/index.js';
 // Phase 18 — Conversion
 export * from './ejecutar-conversion/index.js';

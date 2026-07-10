@@ -66,6 +66,12 @@ export interface SettingsProps {
   readonly checkForUpdatesStatus?: string;
   /** Director only: navigates to Funciones del negocio screen. */
   readonly onOpenFunciones?: () => void;
+  /** Current crash-reporting consent state. */
+  readonly crashReportingEnabled?: boolean;
+  /** Toggle crash reporting on/off from Settings. */
+  readonly onCrashReportingChange?: (next: boolean) => void;
+  /** Open the bug report sheet. */
+  readonly onOpenBugReport?: () => void;
   readonly testID?: string;
 }
 

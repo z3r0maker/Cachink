@@ -31,6 +31,20 @@ appId: mx.cachink.mobile
 
 # Scanner closes + SKU populated on the form.
 - assertNotVisible: "Escanear código"
+
+# Enter pricing to verify Margen de ganancia row appears.
+- tapOn:
+    id: "producto-costo"
+- eraseText
+- inputText: "50"
+- pressKey: enter
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "100"
+- hideKeyboard
+- assertVisible: "Margen de ganancia"
+
 - tapOn:
     id: "producto-submit"
 - assertVisible: "Refresco 600ml"

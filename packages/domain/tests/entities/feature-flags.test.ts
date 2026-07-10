@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAG_KEYS,
+  MVP_HIDDEN_FLAGS,
   canEnableFlag,
   parseFeatureFlags,
   resolveDisableCascade,
@@ -140,6 +141,33 @@ describe('feature-flags', () => {
       const result = parseFeatureFlags(json);
       expect(result.stock).toBe(true); // default
       expect(result.merma).toBe(false); // default
+    });
+
+    it('clamps MVP-hidden flags to false even when stored as true', () => {
+      const json = JSON.stringify({
+        stock: true,
+        merma: true,
+        conversionMateriaPrima: true,
+        conversionAutomatica: true,
+        auditoriaInventario: true,
+        ventasCredito: true,
+      });
+      const result = parseFeatureFlags(json);
+      // Hidden flags forced OFF
+      expect(result.merma).toBe(false);
+      expect(result.conversionMateriaPrima).toBe(false);
+      expect(result.conversionAutomatica).toBe(false);
+      expect(result.auditoriaInventario).toBe(false);
+      // Non-hidden flags preserved
+      expect(result.stock).toBe(true);
+      expect(result.ventasCredito).toBe(true);
+    });
+
+    it('clamps hidden flags even in default fallback path', () => {
+      const result = parseFeatureFlags('{}');
+      for (const key of MVP_HIDDEN_FLAGS) {
+        expect(result[key]).toBe(false);
+      }
     });
   });
 });

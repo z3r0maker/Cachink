@@ -16,6 +16,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { CLOUD_MODE_ENABLED } from '../../app-config/index';
 import { WizardCard } from './wizard-card';
 import { DataPreservedCallout } from './data-preserved-callout';
 
@@ -123,6 +124,9 @@ export function Step2bMultiScreen(props: Step2bProps): ReactElement {
         icon="cloud"
         title={t('wizard.step2b.cloudTitle')}
         hint={t('wizard.step2b.cloudBody')}
+        disabled={!CLOUD_MODE_ENABLED}
+        chip={CLOUD_MODE_ENABLED ? undefined : { label: t('wizard.comingSoonChip') }}
+        disabledNote={CLOUD_MODE_ENABLED ? undefined : t('wizard.cloudComingSoonNote')}
         onPress={props.onSelectCloud}
       />
       {!isMobile && (

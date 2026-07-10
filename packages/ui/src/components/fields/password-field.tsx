@@ -20,7 +20,7 @@
  * "Ocultar contraseña" via `aria-label` so VoiceOver / TalkBack callers
  * understand the affordance.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { useState } from 'react';
 import { View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
@@ -44,6 +44,8 @@ export interface PasswordFieldProps {
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
   readonly onSubmitEditing?: () => void;
   readonly blurOnSubmit?: boolean;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 /**
@@ -117,6 +119,7 @@ export function PasswordField(props: PasswordFieldProps): ReactElement {
         returnKeyType={props.returnKeyType}
         onSubmitEditing={props.onSubmitEditing}
         blurOnSubmit={props.blurOnSubmit}
+        inputRef={props.inputRef}
       />
       <ShowHideToggle
         revealed={revealed}

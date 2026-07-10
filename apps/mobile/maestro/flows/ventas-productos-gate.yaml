@@ -1,0 +1,23 @@
+# Verify the Products gate blocks Ventas when no products exist.
+# On a fresh install, Ventas should show "Registra tus productos" instead of
+# the Caja gate, since there's nothing to sell yet.
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+tags:
+  - ventas
+  - productos
+  - gate
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Ventas tab — should show products gate (no products exist).
+- tapOn:
+    id: "tab-ventas"
+- assertVisible:
+    id: "productos-gate-banner"
+- assertVisible:
+    text: "Registra tus productos para empezar a vender"
+- tapOn:
+    id: "productos-gate-go-to-productos"

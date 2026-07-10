@@ -20,6 +20,10 @@
 
 🟡 **Pre-release — core features built, UI polish in progress.**
 
+> **MVP release targets iOS (iPhone + iPad) only.** Android + desktop
+> (macOS/Windows) distributions are deferred post-MVP — the codebase
+> remains fully cross-platform.
+
 ### ✅ Done
 
 - **Point-of-sale (Ventas)** — product catalog, inline quick-sell, barcode scanner, payment methods (Efectivo, Transferencia, Tarjeta, QR/CoDi, Crédito), sale editing/cancellation

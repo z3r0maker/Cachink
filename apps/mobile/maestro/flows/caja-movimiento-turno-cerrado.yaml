@@ -1,0 +1,62 @@
+# Caja movement on closed turno — verify rejection.
+#
+# After closing a caja turn, attempt to make a retiro or depósito.
+# The UI should not allow the action (button disabled or error shown).
+#
+# Precondition: wizard mode (fresh state, open + close caja first).
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+tags:
+  - caja
+  - edge-case
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Open caja.
+- tapOn:
+    id: "tab-caja"
+- tapOn:
+    id: "numpad-5"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "numpad-0"
+    optional: true
+- tapOn:
+    id: "caja-abrir-submit"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "caja-status-card"
+    timeout: 10000
+
+# Close the turno immediately.
+- tapOn:
+    id: "caja-cerrar-btn"
+- extendedWaitUntil:
+    visible:
+      id: "caja-cerrar-sheet"
+    timeout: 5000
+# Enter counted amount.
+- tapOn:
+    id: "numpad-5"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "numpad-0"
+- tapOn:
+    id: "caja-cerrar-submit"
+- extendedWaitUntil:
+    visible:
+      id: "caja-cerrado-banner"
+    timeout: 5000
+
+# Now verify retiro/depósito buttons are disabled or not visible.
+- assertNotVisible:
+    id: "caja-retiro-btn"
+- assertNotVisible:
+    id: "caja-deposito-btn"

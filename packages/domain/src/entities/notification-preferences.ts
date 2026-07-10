@@ -11,6 +11,7 @@
 
 import { z } from 'zod';
 import { AlertSourceEnum, type AlertSource } from './director-alert.js';
+import type { DirectorAlert } from './director-alert.js';
 import type { FeatureFlagKey, FeatureFlags } from './feature-flags.js';
 
 /** Record<AlertSource, boolean> — true = receive, false = suppress. */
@@ -77,4 +78,21 @@ export function resolveEffectivePrefs(
 export function isSourceLocked(source: AlertSource, flags: FeatureFlags): boolean {
   const flagKey = ALERT_SOURCE_FLAG_MAP[source];
   return flagKey !== null && !flags[flagKey];
+}
+
+/**
+ * Filter alerts by active feature flags. Alerts whose source maps to a
+ * disabled flag are excluded. Sources with no flag mapping (null in
+ * ALERT_SOURCE_FLAG_MAP) always pass — they belong to always-on features.
+ */
+export function filterAlertsByFlags(
+  alerts: readonly DirectorAlert[],
+  flags: FeatureFlags,
+): DirectorAlert[] {
+  return alerts.filter((alert) => {
+    const flagKey = ALERT_SOURCE_FLAG_MAP[alert.source];
+    // null = always-on source, no flag dependency
+    if (flagKey === null || flagKey === undefined) return true;
+    return flags[flagKey];
+  });
 }

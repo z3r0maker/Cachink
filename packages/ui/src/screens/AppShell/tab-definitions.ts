@@ -26,7 +26,11 @@ export interface TabDefinition {
   readonly path: string;
 }
 
-/** Operativo tabs — dynamic based on merma flag. Always 5 tabs. */
+/** Operativo tabs — dynamic based on merma flag. Always 5 tabs.
+ *  MVP note: merma is clamped OFF by MVP_HIDDEN_FLAGS, so the merma
+ *  branch below is effectively dead and tabs always render as:
+ *  Ventas | Caja | Pagos | Productos | Otros.
+ *  No code change needed — the clamp in parseFeatureFlags handles it. */
 export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
   const tabs: TabDefinition[] = [
     { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },

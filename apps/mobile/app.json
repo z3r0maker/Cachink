@@ -15,7 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "mx.cachink.mobile"
+      "bundleIdentifier": "mx.cachink.mobile",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "mx.cachink.mobile",
@@ -39,7 +42,7 @@
       "expo-updates"
     ],
     "updates": {
-      "url": "https://u.expo.dev/EAS_PROJECT_ID",
+      "url": "https://u.expo.dev/dece170a-8337-4258-bfc7-07e88b0699b8",
       "fallbackToCacheTimeout": 0
     },
     "runtimeVersion": {

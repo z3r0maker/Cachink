@@ -8,8 +8,11 @@
 import { useState, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import { Platform } from 'react-native';
+import * as Application from 'expo-application';
+import { Share } from 'react-native';
 import {
   APP_CONFIG_KEYS,
+  BugReportSheet,
   SettingsSistema,
   useAppConfigRepository,
   useCachinkSoundEnabled,
@@ -20,6 +23,7 @@ import {
   useNotificationsEnabled,
   useRole,
   useSetCachinkSoundEnabled,
+  useSetCrashReportingEnabled,
   useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
@@ -29,7 +33,7 @@ import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useCloudNavigation } from '../../shell/cloud-navigation';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
-const APP_VERSION = '0.1.0';
+const APP_VERSION = Application.nativeApplicationVersion ?? '0.0.0';
 
 function platformKey(): 'ios' | 'android' | 'desktop-mac' | 'desktop-windows' {
   return Platform.OS === 'ios' ? 'ios' : 'android';
@@ -45,6 +49,7 @@ function useSettingsHandlers(): {
   reRunWizard: () => void;
   notificationsChange: (next: boolean) => void;
   cachinkSoundChange: (next: boolean) => void;
+  crashReportingChange: (next: boolean) => void;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
@@ -53,6 +58,7 @@ function useSettingsHandlers(): {
   const setMode = useSetMode();
   const setNotificationsEnabled = useSetNotificationsEnabled();
   const setCachinkSoundEnabled = useSetCachinkSoundEnabled();
+  const setCrashReportingEnabled = useSetCrashReportingEnabled();
   const updateAdapter = useMobileUpdateAdapter();
   const updates = useCheckForUpdates(updateAdapter);
   const [statusLabel, setStatusLabel] = useState<string | undefined>();
@@ -72,6 +78,11 @@ function useSettingsHandlers(): {
       void appConfig
         .set(APP_CONFIG_KEYS.cachinkSoundEnabled, next ? 'true' : 'false')
         .then(() => setCachinkSoundEnabled(next));
+    },
+    crashReportingChange: (next: boolean) => {
+      void appConfig
+        .set(APP_CONFIG_KEYS.crashReportingEnabled, next ? 'true' : 'false')
+        .then(() => setCrashReportingEnabled(next));
     },
     checkUpdates: () => {
       setStatusLabel('Buscando…');
@@ -105,6 +116,8 @@ function useSistemaProps(): {
       onNotificationsChange: handlers.notificationsChange,
       cachinkSoundEnabled,
       onCachinkSoundChange: handlers.cachinkSoundChange,
+      crashReportingEnabled: crashReportingEnabled === true,
+      onCrashReportingChange: handlers.crashReportingChange,
       feedback: {
         appVersion: APP_VERSION,
         platform: platformKey(),
@@ -123,10 +136,25 @@ function useSistemaProps(): {
 export default function SistemaRoute(): ReactElement {
   const router = useRouter();
   const { title, settingsProps } = useSistemaProps();
+  const [bugReportVisible, setBugReportVisible] = useState(false);
+  const crashReportingEnabled = useCrashReportingEnabled();
+
+  const propsWithBugReport = {
+    ...settingsProps,
+    onOpenBugReport: () => setBugReportVisible(true),
+  };
 
   return (
     <AppShellWrapper activeTabKey="ajustes" title={title} onBack={() => router.back()}>
-      <SettingsSistema settingsProps={settingsProps} />
+      <SettingsSistema settingsProps={propsWithBugReport} />
+      <BugReportSheet
+        visible={bugReportVisible}
+        onClose={() => setBugReportVisible(false)}
+        onShare={(json, filename) => {
+          void Share.share({ message: json, title: filename });
+        }}
+        consentEnabled={crashReportingEnabled === true}
+      />
     </AppShellWrapper>
   );
 }

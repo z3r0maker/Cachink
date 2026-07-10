@@ -24,5 +24,6 @@ export type {
   NotificationPermission,
   NotificationScheduler,
   NotificationSchedulerOptions,
+  PresentNowOptions,
 } from './notification-scheduler.shared';
 export { InMemoryNotificationScheduler } from './notification-scheduler.shared';

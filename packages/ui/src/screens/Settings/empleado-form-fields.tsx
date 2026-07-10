@@ -6,9 +6,10 @@
  * NuevoEmpleadoModal and the Settings EditEmpleadoModal import these.
  */
 
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import type { PayrollFrequency } from '@cachink/domain';
-import { MoneyField, TextField } from '../../components/fields/index';
+import { focusRef, MoneyField, TextField } from '../../components/fields/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
 import type { useTranslation } from '../../i18n/index';
 
@@ -71,8 +72,24 @@ export interface EmpleadoFieldsProps {
   readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
-export function EmpleadoFields(props: EmpleadoFieldsProps): ReactElement {
-  const { state, update, errors, t } = props;
+function PeriodoSelector({ state, update, t }: {
+  state: EmpleadoFormState; update: (p: Partial<EmpleadoFormState>) => void;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
+  return (
+    <OptionCardGroup
+      label={t('empleados.periodoLabel')}
+      value={state.periodo}
+      onChange={(v) => update({ periodo: v })}
+      options={PERIODO_CARDS}
+      testID="empleado-periodo"
+    />
+  );
+}
+
+export function EmpleadoFields({ state, update, errors, t, onSubmitEditing }: EmpleadoFieldsProps): ReactElement {
+  const puestoRef = useRef<TextInput>(null);
+  const salarioRef = useRef<TextInput>(null);
   return (
     <>
       <TextField
@@ -82,6 +99,8 @@ export function EmpleadoFields(props: EmpleadoFieldsProps): ReactElement {
         note={errors.nombre}
         testID="empleado-nombre"
         returnKeyType="next"
+        onSubmitEditing={() => focusRef(puestoRef)}
+        blurOnSubmit={false}
       />
       <TextField
         label={t('empleados.puestoLabel')}
@@ -90,6 +109,9 @@ export function EmpleadoFields(props: EmpleadoFieldsProps): ReactElement {
         note={errors.puesto}
         testID="empleado-puesto"
         returnKeyType="next"
+        inputRef={puestoRef}
+        onSubmitEditing={() => focusRef(salarioRef)}
+        blurOnSubmit={false}
       />
       <MoneyField
         label={t('empleados.salarioLabel')}
@@ -98,15 +120,10 @@ export function EmpleadoFields(props: EmpleadoFieldsProps): ReactElement {
         note={errors.salario}
         testID="empleado-salario"
         returnKeyType="done"
-        onSubmitEditing={props.onSubmitEditing}
+        onSubmitEditing={onSubmitEditing}
+        inputRef={salarioRef}
       />
-      <OptionCardGroup
-        label={t('empleados.periodoLabel')}
-        value={state.periodo}
-        onChange={(v) => update({ periodo: v })}
-        options={PERIODO_CARDS}
-        testID="empleado-periodo"
-      />
+      <PeriodoSelector state={state} update={update} t={t} />
     </>
   );
 }

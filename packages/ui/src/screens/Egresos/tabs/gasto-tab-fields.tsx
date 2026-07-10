@@ -3,7 +3,8 @@
  * respect the 200-line budget (CLAUDE.md §4.4).
  */
 
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { ExpenseCategory } from '@cachink/domain';
 import { Input } from '../../../components/index';
@@ -27,7 +28,7 @@ export interface GastoFieldsProps {
   readonly t: T;
 }
 
-function ProveedorField(props: GastoFieldsProps): ReactElement {
+function ProveedorField(props: GastoFieldsProps & { proveedorRef?: React.RefObject<unknown> }): ReactElement {
   const { state, update, onSubmitEditing, t } = props;
   return (
     <TextField
@@ -38,12 +39,15 @@ function ProveedorField(props: GastoFieldsProps): ReactElement {
       testID="gasto-proveedor"
       returnKeyType="done"
       onSubmitEditing={onSubmitEditing}
+      inputRef={props.proveedorRef}
     />
   );
 }
 
 export function GastoFields(props: GastoFieldsProps): ReactElement {
   const { state, update, errors, t } = props;
+  const montoRef = useRef<TextInput>(null);
+  const proveedorRef = useRef<TextInput>(null);
   return (
     <>
       <TextField
@@ -54,6 +58,8 @@ export function GastoFields(props: GastoFieldsProps): ReactElement {
         note={errors.concepto}
         testID="gasto-concepto"
         returnKeyType="next"
+        onSubmitEditing={() => (montoRef.current as TextInput | null)?.focus()}
+        blurOnSubmit={false}
       />
       <Input
         type="select"
@@ -70,8 +76,11 @@ export function GastoFields(props: GastoFieldsProps): ReactElement {
         note={errors.monto}
         testID="gasto-monto"
         returnKeyType="next"
+        inputRef={montoRef}
+        onSubmitEditing={() => (proveedorRef.current as TextInput | null)?.focus()}
+        blurOnSubmit={false}
       />
-      <ProveedorField {...props} />
+      <ProveedorField {...props} proveedorRef={proveedorRef} />
     </>
   );
 }

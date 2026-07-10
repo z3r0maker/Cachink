@@ -4,7 +4,7 @@
  * Mirrors the mobile route with `navigate` in place of `useRouter`.
  */
 import { type ReactElement } from 'react';
-import { CajaGateBanner, CorteHomeCard, useOpenCajaTurno, useRole } from '@cachink/ui';
+import { CajaGateBanner, CorteHomeCard, ProductosGateBanner, useOpenCajaTurno, useRole } from '@cachink/ui';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
 import { useDesktopNavigate } from '../desktop-router-context';
 import { useVentasRouteState, VentasMainContent, VentasSheets } from './ventas-route-state';
@@ -16,9 +16,15 @@ export function VentasRoute(): ReactElement {
   const s = useVentasRouteState();
 
   if (!turnoLoading && openTurno === null) {
+    // Products gate takes priority: no products → nothing to sell
+    const hasNoProducts = s.productosQ.data !== undefined && s.productosQ.data.length === 0;
     return (
       <DesktopAppShellWrapper activeTabKey="ventas">
-        <CajaGateBanner onGoToCaja={() => navigate('/caja')} />
+        {hasNoProducts ? (
+          <ProductosGateBanner onGoToProductos={() => navigate('/productos')} />
+        ) : (
+          <CajaGateBanner onGoToCaja={() => navigate('/caja')} />
+        )}
       </DesktopAppShellWrapper>
     );
   }

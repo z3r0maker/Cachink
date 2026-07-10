@@ -47,9 +47,17 @@ reportes de errores anónimos. Si aceptas:
 
 - Usamos **Sentry** para recibir información técnica del fallo
   (versión de la app, sistema operativo, stack trace).
+- Usamos una **base de datos propia alojada en Supabase** para
+  almacenar eventos de error estructurados y reportes de problemas
+  que tú envíes manualmente. Los datos almacenados incluyen:
+  modelo del dispositivo, versión del sistema operativo, versión de
+  la app, plataforma, estado de funciones activas, y un resumen
+  anonimizado de los últimos eventos. Los eventos de error se
+  eliminan automáticamente después de 90 días.
 - **Nunca enviamos** contenido que tú escribas: conceptos, notas,
   nombres de clientes, teléfonos, ni montos.
-- Puedes desactivarlo cuando quieras desde Ajustes.
+- Puedes desactivarlo cuando quieras desde **Ajustes → Sistema →
+  Reportes de errores**.
 
 Si rechazas, no se envía nada en absoluto.
 

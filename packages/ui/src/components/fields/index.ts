@@ -28,6 +28,7 @@ export {
   type WheelQuantityPickerProps,
 } from './wheel-quantity-picker';
 export { DateField, type DateFieldProps } from './date-field';
+export { focusRef } from './focus-ref';
 export {
   RhfTextField,
   RhfEmailField,

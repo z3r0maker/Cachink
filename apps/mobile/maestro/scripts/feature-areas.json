@@ -1,0 +1,17 @@
+[
+  { "pattern": "venta|checkout|cancelacion|comprobante",       "area": "Ventas" },
+  { "pattern": "egreso|nomina",                                "area": "Egresos" },
+  { "pattern": "producto|stock|inventario|movimiento|barcode", "area": "Productos" },
+  { "pattern": "cliente|cxc|credito|pago",                     "area": "Clientes & CxC" },
+  { "pattern": "corte",                                        "area": "Corte de Día" },
+  { "pattern": "caja",                                         "area": "Caja" },
+  { "pattern": "director|estados|balance|flujo|indicadores|informe", "area": "Director & Reportes" },
+  { "pattern": "usuario|pin|recovery|quick-switch|auto-lock|role-switch|change-pin", "area": "Auth & Usuarios" },
+  { "pattern": "funciones|flag",                               "area": "Feature Flags" },
+  { "pattern": "settings|exportar|tasas|tipos-de-pago",        "area": "Settings" },
+  { "pattern": "wizard|demo-mode",                             "area": "Wizard & Onboarding" },
+  { "pattern": "smoke|a11y|ipad",                              "area": "Smoke & Plataforma" },
+  { "pattern": "empty|validation",                             "area": "Estados Vacíos & Validación" },
+  { "pattern": "telemetria|bug-report|crash|consent|notificaciones|advanced|debug|lan", "area": "Sistema & Observabilidad" },
+  { "pattern": "otros",                                        "area": "Otros Tab" }
+]

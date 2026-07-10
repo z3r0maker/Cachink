@@ -15,6 +15,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { CLOUD_MODE_ENABLED } from '../../app-config/index';
 import { WizardCard } from './wizard-card';
 import { DataPreservedCallout } from './data-preserved-callout';
 
@@ -94,6 +95,9 @@ export function Step3JoinExistingScreen(props: Step3Props): ReactElement {
         icon="cloud"
         title={t('wizard.step3.cloudTitle')}
         hint={t('wizard.step3.cloudBody')}
+        disabled={!CLOUD_MODE_ENABLED}
+        chip={CLOUD_MODE_ENABLED ? undefined : { label: t('wizard.comingSoonChip') }}
+        disabledNote={CLOUD_MODE_ENABLED ? undefined : t('wizard.cloudComingSoonNote')}
         onPress={props.onSelectCloudSignIn}
       />
       <BackLink label={t('wizard.back')} onPress={props.onBack} />

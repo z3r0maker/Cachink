@@ -1,10 +1,11 @@
-# Open the Bug Report sheet from Settings → Sistema → Feedback.
+# Open the Bug Report sheet from Settings → Sistema → "Reportar un problema".
 # Verifies: the bug report sheet opens, shows description input,
-# and the "Compartir Reporte" button is visible.
+# the share/submit button is visible, and the sheet can be closed.
 #
-# The BugReportSheet is a bottom sheet triggered from the feedback
-# action in Settings Sistema. It auto-attaches audit events + errors
-# and exports as JSON for user-to-developer bug reporting.
+# The BugReportSheet is a bottom sheet triggered from the "Reportar un
+# problema" button in Settings Sistema. It auto-attaches audit events +
+# errors and supports server-first submit (when consent on) or
+# file-share fallback.
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
@@ -42,20 +43,33 @@ tags:
       id: "settings-sistema-screen"
     timeout: 5000
 
-# Tap the feedback / bug report action
+# Scroll to and tap the "Reportar un problema" button.
+- scrollUntilVisible:
+    element:
+      id: "settings-open-bug-report"
+    direction: DOWN
+    timeout: 5000
 - tapOn:
-    id: "settings-feedback-action"
-    optional: true
+    id: "settings-open-bug-report"
 
-# Verify the bug report sheet content appears
+# Verify the bug report sheet content appears.
 - extendedWaitUntil:
     visible:
-      text: "Enviar Reporte"
+      id: "bug-report-sheet"
     timeout: 5000
-    optional: true
+
+# Assert description input is visible.
 - assertVisible:
-    text: "Describe el problema que encontraste"
-    optional: true
+    id: "bug-report-description-input"
+
+# Type a description.
+- tapOn:
+    id: "bug-report-description-input"
+- inputText: "La app se cerró al editar un producto"
+
+# Assert share button is visible (fallback path when consent is off).
 - assertVisible:
-    text: "Compartir Reporte"
-    optional: true
+    id: "bug-report-share-btn"
+
+# Close the sheet.
+- tapOn: "Cancelar"

@@ -27,6 +27,16 @@ function readDsn(): string | undefined {
 }
 
 export async function initSentryIfConsented(consent: boolean | null): Promise<void> {
+  // Toggle-off: close Sentry if it was previously initialized
+  if (consent !== true && _initialised && _sentry) {
+    try {
+      await _sentry.close();
+    } catch { /* closing failed — non-critical */ }
+    _initialised = false;
+    _sentry = null;
+    return;
+  }
+
   if (consent !== true) return;
   if (_initialised) return;
   const dsn = readDsn();

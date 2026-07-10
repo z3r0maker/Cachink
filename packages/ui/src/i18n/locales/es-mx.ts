@@ -164,6 +164,7 @@ export const esMX = {
     save: 'Guardar',
     required: 'Requerido',
     back: 'Volver',
+    margenLabel: 'Margen de ganancia',
   },
   movimiento: {
     titleEntrada: 'Registrar entrada',
@@ -289,6 +290,10 @@ export const esMX = {
     cajaGateTitle: 'Abre tu caja para empezar a vender',
     cajaGateDescription: 'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
     cajaGateCta: 'Ir a Caja',
+    // Products Gate
+    productosGateTitle: 'Registra tus productos para empezar a vender',
+    productosGateDescription: 'Aún no tienes productos. Agrega al menos uno para poder registrar ventas.',
+    productosGateCta: 'Ir a Productos',
     // Tap-to-Cart redesign
     carrito: 'Carrito',
     vaciar: 'Vaciar',
@@ -623,6 +628,9 @@ export const esMX = {
   wizard: {
     title: 'Configura Cachink!',
     back: '← Atrás',
+    comingSoonChip: 'Próximamente',
+    cloudComingSoonNote:
+      'Guardar en la nube llegará muy pronto en una próxima versión. Por ahora tus datos se guardan de forma segura en este dispositivo.',
     cancel: 'Cancelar',
     step1: {
       welcomeTitle: '¡Bienvenido a Cachink!',
@@ -682,7 +690,7 @@ export const esMX = {
       soloCloudEmoji: '🚐',
       soloCloudTitle: 'Soy vendedor ambulante o trabajo en varios lugares.',
       soloCloudRecommendation:
-        'Te recomendamos: Solo en este dispositivo → Guardar en la nube. Tus datos están seguros en internet y puedes acceder desde donde sea.',
+        'Te recomendamos: Solo en este dispositivo. La opción de guardar en la nube llega muy pronto — mientras tanto tus datos quedan seguros en tu dispositivo.',
       startCta: 'Empezar así →',
       fallbackTitle: '¿Sigues sin estar seguro?',
       fallbackBody:
@@ -777,10 +785,16 @@ export const esMX = {
     notificacionesHint: 'Recibir avisos de stock bajo al final del día',
     crashReportingTitle: '¿Enviar reportes de errores?',
     crashReportingBody:
-      'Nos ayuda a detectar fallos más rápido. Nunca enviamos conceptos, nombres o notas.',
+      'Envía datos de diagnóstico a Sentry y a la base de datos de errores de Cachink para detectar fallos más rápido. Nunca enviamos conceptos, nombres o notas.',
     crashReportingYes: 'Sí, enviar',
     crashReportingNo: 'No, gracias',
     crashReportingLater: 'Decidir después',
+    crashReportingToggleLabel: 'Reportes de errores',
+    crashReportingToggleHint:
+      'Envía datos de diagnóstico y errores para mejorar la app. Nunca se envían conceptos, nombres ni notas.',
+    reportBugCta: 'Reportar un problema',
+    bugReportSent: 'Reporte enviado',
+    bugReportFailed: 'No se pudo enviar. Se intentará después.',
     lanMode: 'Servidor local',
     lanHostRole: 'Tú eres el servidor',
     lanServerUrl: 'URL del servidor',
@@ -1053,6 +1067,7 @@ export const esMX = {
     ventasCredito: 'Ventas a Crédito',
     ventasCreditoDesc: 'Entrega productos con pago posterior',
     active: 'Ya activado',
+    comingSoon: 'Próximamente',
     continue: 'Comenzar',
     hint: 'Actívalas en Configuración → Funciones del negocio',
   },
@@ -1149,6 +1164,7 @@ export const esMX = {
     ventasCreditoDesc: 'Entrega productos a clientes con pago posterior',
     requiresHint: 'Requiere {{parent}} activado',
     disableWarning: 'Los datos se conservarán pero no serán visibles. ¿Continuar?',
+    comingSoon: 'Próximamente',
   },
   userManagement: {
     title: 'Usuarios',

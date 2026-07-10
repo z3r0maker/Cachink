@@ -12,8 +12,8 @@
  * recovery launches, re-add those fields here.
  */
 
-import { useState, type ReactElement } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRef, useState, type ReactElement } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Btn, TextField } from '../../components/index';
 import { Input } from '../../components/Input/input';
@@ -41,6 +41,8 @@ function useDirectorSetupForm(props: DirectorSetupScreenProps) {
   const [nombre, setNombre] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
+  const pinRef = useRef<TextInput>(null);
+  const confirmPinRef = useRef<TextInput>(null);
   const validation = DirectorSetupValidation.validate({
     nombre,
     pin,
@@ -60,6 +62,8 @@ function useDirectorSetupForm(props: DirectorSetupScreenProps) {
     setConfirmPin,
     validation,
     handleSubmit,
+    pinRef,
+    confirmPinRef,
   };
 }
 
@@ -90,6 +94,13 @@ function DirectorSetupHeader({ t }: { t: T }): ReactElement {
   );
 }
 
+function handlePin(form: Form, v: string): void {
+  const trimmed = v.slice(0, 6);
+  form.setPin(trimmed);
+  // iOS number-pad has no return key — auto-advance to confirmPin on 6 digits
+  if (trimmed.length === 6) (form.confirmPinRef.current as TextInput | null)?.focus();
+}
+
 function handleConfirmPin(form: Form, v: string): void {
   const trimmed = v.slice(0, 6);
   form.setConfirmPin(trimmed);
@@ -102,10 +113,11 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
       <Input
         type="number"
         value={form.pin}
-        onChange={(v) => form.setPin(v.slice(0, 6))}
+        onChange={(v) => handlePin(form, v)}
         label={form.t('directorSetup.pin')}
         testID="director-pin"
         placeholder="000000"
+        inputRef={form.pinRef}
       />
       <Input
         type="number"
@@ -114,6 +126,7 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
         label={form.t('directorSetup.confirmPin')}
         testID="director-confirm-pin"
         error={form.validation.errors.confirmPin}
+        inputRef={form.confirmPinRef}
       />
     </>
   );
@@ -135,6 +148,9 @@ function DirectorSetupFields({
         label={t('directorSetup.nombre')}
         testID="director-nombre"
         required
+        returnKeyType="next"
+        onSubmitEditing={() => (form.pinRef.current as TextInput | null)?.focus()}
+        blurOnSubmit={false}
       />
       <DirectorCredentialFields form={form} />
       <Btn

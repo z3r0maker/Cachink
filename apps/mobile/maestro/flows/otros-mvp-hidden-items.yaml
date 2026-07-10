@@ -1,0 +1,110 @@
+# Otros grid — verify MVP-visible items and assert hidden entry points.
+#
+# Verifies:
+#   1. Director Otros grid shows the expected MVP items
+#   2. MVP-hidden entry points are NOT visible (ventas-credito,
+#      clientes, conversion, auditoria, merma-reportes, empleados)
+#   3. tab-merma is NOT in the tab bar (MVP-clamped)
+#
+# Precondition: wizard + director-setup complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/otros-mvp-hidden-items.yaml
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Otros tab.
+- tapOn:
+    id: "tab-otros"
+
+# Grid renders.
+- assertVisible:
+    id: "otros-route"
+
+# ── Director MVP-visible items ──
+- assertVisible:
+    id: "otros-notificaciones"
+- assertVisible:
+    id: "otros-gastos"
+- assertVisible:
+    id: "otros-indicadores"
+- assertVisible:
+    id: "otros-productos"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-caja"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-caja"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-caja-movimientos"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-caja-movimientos"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-caja-reportes"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-caja-reportes"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-cancelaciones"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-cancelaciones"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-usuarios"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-usuarios"
+
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "otros-funciones"
+
+# ── MVP-hidden entry points (must NOT be visible) ──
+- assertNotVisible:
+    id: "otros-ventas-credito"
+- assertNotVisible:
+    id: "otros-clientes"
+- assertNotVisible:
+    id: "otros-conversion"
+- assertNotVisible:
+    id: "otros-auditoria"
+- assertNotVisible:
+    id: "otros-merma-reportes"
+- assertNotVisible:
+    id: "otros-empleados"
+
+# ── Tab bar: merma tab must NOT be visible (MVP-clamped OFF) ──
+- assertNotVisible:
+    id: "tab-merma"

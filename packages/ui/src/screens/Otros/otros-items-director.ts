@@ -38,47 +38,22 @@ const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
   },
 ] as const;
 
+/**
+ * MVP: removed conversion, auditoria, merma-reportes, and ventas-credito.
+ * Restore hidden entries here when re-enabling post-MVP.
+ */
 const DIRECTOR_FLAG_ITEMS: readonly FlagItem[] = [
-  {
-    item: {
-      key: 'conversion',
-      icon: 'refresh-cw',
-      labelKey: 'otros.conversion',
-      descriptionKey: 'otros.desc.conversion',
-      path: '/conversion',
-    },
-    flagCheck: (f) => f.conversionMateriaPrima,
-  },
-  {
-    item: {
-      key: 'auditoria',
-      icon: 'clipboard-list',
-      labelKey: 'otros.auditoria',
-      descriptionKey: 'otros.desc.auditoria',
-      path: '/auditoria',
-    },
-    flagCheck: (f) => f.auditoriaInventario,
-  },
-  {
-    item: {
-      key: 'ventas-credito',
-      icon: 'credit-card',
-      labelKey: 'otros.ventasCredito',
-      descriptionKey: 'otros.desc.ventasCredito',
-      path: '/ventas-credito',
-    },
-    flagCheck: (f) => f.ventasCredito,
-  },
-  {
-    item: {
-      key: 'merma-reportes',
-      icon: 'trending-down',
-      labelKey: 'otros.mermaReportes',
-      descriptionKey: 'otros.desc.mermaReportes',
-      path: '/merma-reportes',
-    },
-    flagCheck: (f) => f.merma,
-  },
+  // ---- Restore post-MVP ----
+  // {
+  //   item: {
+  //     key: 'ventas-credito',
+  //     icon: 'credit-card',
+  //     labelKey: 'otros.ventasCredito',
+  //     descriptionKey: 'otros.desc.ventasCredito',
+  //     path: '/ventas-credito',
+  //   },
+  //   flagCheck: (f) => f.ventasCredito,
+  // },
 ] as const;
 
 const DIRECTOR_CAJA_ITEMS: readonly OtrosItem[] = [
@@ -113,13 +88,14 @@ const DIRECTOR_CAJA_ITEMS: readonly OtrosItem[] = [
 ] as const;
 
 const DIRECTOR_TAIL_ITEMS: readonly OtrosItem[] = [
-  {
-    key: 'empleados',
-    icon: 'users',
-    labelKey: 'otros.empleados',
-    descriptionKey: 'otros.desc.empleados',
-    path: '/empleados',
-  },
+  // ---- Restore post-MVP ----
+  // {
+  //   key: 'empleados',
+  //   icon: 'users',
+  //   labelKey: 'otros.empleados',
+  //   descriptionKey: 'otros.desc.empleados',
+  //   path: '/empleados',
+  // },
   {
     key: 'usuarios',
     icon: 'user-check',

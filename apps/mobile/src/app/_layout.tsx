@@ -62,6 +62,8 @@ import { useMobileCloudBridges } from '../shell/use-cloud-bridges';
 import { useMobileCloudHandle } from '../shell/use-cloud-handle';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { CloudInnerScreenHost } from '../shell/cloud-navigation';
+import { NotificationTapHost } from '../shell/notification-tap-host';
+import { useMobileDeviceContext } from '../shell/use-device-context';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
 // Refresh re-evaluations are safe.
@@ -109,6 +111,7 @@ export default function RootLayout(): ReactElement | null {
     PlusJakartaSans_700Bold,
     PlusJakartaSans_800ExtraBold,
   });
+  const deviceContext = useMobileDeviceContext();
   if (!fontsLoaded) return null;
   return (
     <StrictMode>
@@ -117,7 +120,8 @@ export default function RootLayout(): ReactElement | null {
           <AppProviders
             platform="mobile"
             hooks={mobileHooks}
-            overlays={<><MobileScannerHost /><CloudInnerScreenHost /></>}
+            deviceContext={deviceContext}
+            overlays={<><MobileScannerHost /><CloudInnerScreenHost /><NotificationTapHost /></>}
           >
             <MobileStack />
           </AppProviders>

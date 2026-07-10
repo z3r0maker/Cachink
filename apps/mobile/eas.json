@@ -28,7 +28,9 @@
       "env": {
         "EXPO_PUBLIC_CLOUD_API_URL": "$PREVIEW_CLOUD_API_URL",
         "EXPO_PUBLIC_CLOUD_ANON_KEY": "$PREVIEW_CLOUD_ANON_KEY",
-        "EXPO_PUBLIC_POWERSYNC_URL": "$PREVIEW_POWERSYNC_URL"
+        "EXPO_PUBLIC_POWERSYNC_URL": "$PREVIEW_POWERSYNC_URL",
+        "EXPO_PUBLIC_BUG_INGEST_URL": "$PREVIEW_BUG_INGEST_URL",
+        "EXPO_PUBLIC_SENTRY_DSN": "$PREVIEW_SENTRY_DSN"
       }
     },
     "production": {
@@ -43,7 +45,9 @@
       "env": {
         "EXPO_PUBLIC_CLOUD_API_URL": "$PRODUCTION_CLOUD_API_URL",
         "EXPO_PUBLIC_CLOUD_ANON_KEY": "$PRODUCTION_CLOUD_ANON_KEY",
-        "EXPO_PUBLIC_POWERSYNC_URL": "$PRODUCTION_POWERSYNC_URL"
+        "EXPO_PUBLIC_POWERSYNC_URL": "$PRODUCTION_POWERSYNC_URL",
+        "EXPO_PUBLIC_BUG_INGEST_URL": "$PRODUCTION_BUG_INGEST_URL",
+        "EXPO_PUBLIC_SENTRY_DSN": "$PRODUCTION_SENTRY_DSN"
       }
     }
   },
@@ -53,10 +57,6 @@
         "ascAppId": "${ASC_APP_ID}",
         "appleId": "${APPLE_ID}",
         "appleTeamId": "${APPLE_TEAM_ID}"
-      },
-      "android": {
-        "serviceAccountKeyPath": "./fastlane/service-account.json",
-        "track": "internal"
       }
     }
   }

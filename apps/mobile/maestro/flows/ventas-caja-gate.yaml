@@ -1,5 +1,7 @@
 # Verify the Caja gate blocks venta when caja is not open.
-# Navigate to Ventas, see gate banner, tap "go to caja" to open caja screen.
+# Precondition: at least one product must exist so the products gate
+# doesn't take priority. Product is created by inventario-producto.yaml
+# earlier in the regression chain.
 # x-entrypoint: wizard
 appId: mx.cachink.mobile
 tags:
@@ -11,6 +13,9 @@ tags:
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
+# Navigate to Ventas tab — should show caja gate (product exists, no turno).
+- tapOn:
+    id: "tab-ventas"
 - assertVisible:
     id: "caja-gate-banner"
 - assertVisible:

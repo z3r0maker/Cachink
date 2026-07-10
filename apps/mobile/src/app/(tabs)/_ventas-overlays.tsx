@@ -10,6 +10,7 @@ import {
   CachinkBurst,
   CajaGateBanner,
   CorteHomeCard,
+  ProductosGateBanner,
   VentaCheckoutSheet,
   VentasScreen,
   type CartState,
@@ -17,6 +18,11 @@ import {
 } from '@cachink/ui';
 import type { CartAction } from './_ventas-hooks';
 import { DetailSlot, SwipeSlots } from '../../shell/ventas-slots';
+
+export function VentasProductosGate(): ReactElement {
+  const router = useRouter();
+  return <ProductosGateBanner onGoToProductos={() => router.replace('/productos' as never)} />;
+}
 
 export function VentasCajaGate(props: {
   role: string | null;

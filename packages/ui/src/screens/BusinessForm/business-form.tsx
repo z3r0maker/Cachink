@@ -16,7 +16,8 @@
  * code and zero new deps. Form error surfaces per-field via `Input.note`.
  */
 
-import { type ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { type IsrDefaults, type NewBusiness } from '@cachink/domain';
 import {
@@ -79,6 +80,8 @@ interface FormFieldsProps {
    * pattern in NuevaVenta / Gasto-Egreso / Nomina.
    */
   readonly onSubmitEditing?: () => void;
+  /** Ref to the ISR input for focus-chain. */
+  readonly isrRef?: React.RefObject<unknown>;
 }
 
 function FormFields(props: FormFieldsProps): ReactElement {
@@ -93,6 +96,8 @@ function FormFields(props: FormFieldsProps): ReactElement {
         note={props.errors.nombre}
         testID="business-nombre"
         returnKeyType="next"
+        onSubmitEditing={() => (props.isrRef?.current as TextInput | null)?.focus()}
+        blurOnSubmit={false}
       />
       <OptionCardGroup
         label={t('wizard.businessForm.regimenLabel')}
@@ -111,6 +116,7 @@ function FormFields(props: FormFieldsProps): ReactElement {
         returnKeyType="done"
         onSubmitEditing={props.onSubmitEditing}
         blurOnSubmit
+        inputRef={props.isrRef}
       />
     </>
   );
@@ -181,6 +187,7 @@ interface FormColumnProps {
 }
 
 function FormColumn({ s, t, onSubmit, submitting, onBack }: FormColumnProps): ReactElement {
+  const isrRef = useRef<TextInput>(null);
   return (
     <View testID="business-form-content" width="100%" maxWidth={480} gap={16}>
       <FormHeader t={t} />
@@ -194,6 +201,7 @@ function FormColumn({ s, t, onSubmit, submitting, onBack }: FormColumnProps): Re
         errors={s.errors}
         t={t}
         onSubmitEditing={onSubmit}
+        isrRef={isrRef}
       />
       <SubmitRow t={t} onSubmit={onSubmit} submitting={submitting} />
       {onBack && <BackRow t={t} onBack={onBack} disabled={submitting} />}

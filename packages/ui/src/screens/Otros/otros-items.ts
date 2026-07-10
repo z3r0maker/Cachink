@@ -48,47 +48,22 @@ const OPERATIVO_ALWAYS_ITEMS: readonly OtrosItem[] = [
   },
 ] as const;
 
+/**
+ * MVP: removed productos, conversion, auditoria, and ventas-credito.
+ * Restore hidden entries here when re-enabling post-MVP.
+ */
 const OPERATIVO_FLAG_ITEMS: readonly FlagItem[] = [
-  {
-    item: {
-      key: 'productos',
-      icon: 'package',
-      labelKey: 'otros.productos',
-      descriptionKey: 'otros.desc.productos',
-      path: '/productos-otros',
-    },
-    flagCheck: (f) => f.stock && f.merma,
-  },
-  {
-    item: {
-      key: 'conversion',
-      icon: 'refresh-cw',
-      labelKey: 'otros.conversion',
-      descriptionKey: 'otros.desc.conversion',
-      path: '/conversion',
-    },
-    flagCheck: (f) => f.conversionMateriaPrima,
-  },
-  {
-    item: {
-      key: 'auditoria',
-      icon: 'clipboard-list',
-      labelKey: 'otros.auditoria',
-      descriptionKey: 'otros.desc.auditoria',
-      path: '/auditoria',
-    },
-    flagCheck: (f) => f.auditoriaInventario,
-  },
-  {
-    item: {
-      key: 'ventas-credito',
-      icon: 'credit-card',
-      labelKey: 'otros.ventasCredito',
-      descriptionKey: 'otros.desc.ventasCredito',
-      path: '/ventas-credito',
-    },
-    flagCheck: (f) => f.ventasCredito,
-  },
+  // ---- Restore post-MVP ----
+  // {
+  //   item: {
+  //     key: 'ventas-credito',
+  //     icon: 'credit-card',
+  //     labelKey: 'otros.ventasCredito',
+  //     descriptionKey: 'otros.desc.ventasCredito',
+  //     path: '/ventas-credito',
+  //   },
+  //   flagCheck: (f) => f.ventasCredito,
+  // },
 ] as const;
 
 /** Operativo Otros grid items (always-on + feature-flag dependent). */

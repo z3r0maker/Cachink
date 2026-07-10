@@ -9,7 +9,7 @@ import { useMemo, useRef, type ReactElement, type ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { LogStore } from '@cachink/observability';
+import type { DeviceContext, LogStore } from '@cachink/observability';
 import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
@@ -41,6 +41,10 @@ export interface AppProvidersProps {
   readonly gated?: boolean;
   readonly hooks?: AppProvidersHooks;
   readonly overlays?: ReactNode;
+  /** Device context for outbox enrichment (supplied by mobile/desktop shell). */
+  readonly deviceContext?: DeviceContext | null;
+  /** Live accessor for current feature-flag state. */
+  readonly getFeatureFlags?: () => Record<string, boolean> | null;
 }
 
 const NULL_LAN_HOOK: () => LanBridges | null = () => null;
@@ -101,7 +105,11 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
             <DatabaseProvider>
               <DrizzleAppConfigBridge>
                 <DrizzleRepositoryBridge>
-                  <ObservabilityBridge logStoreRef={logStoreRef}>
+                  <ObservabilityBridge
+                    logStoreRef={logStoreRef}
+                    deviceContext={props.deviceContext}
+                    getFeatureFlags={props.getFeatureFlags}
+                  >
                     <TelemetryBridge>
                       {content}
                       <GlobalErrorToast />
