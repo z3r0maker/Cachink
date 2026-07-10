@@ -1,0 +1,26 @@
+# Reusable subflow: open Productos and filter the Stock list to the standard test
+# product "Tortilla" (demo seeds "Tortilla maíz kg"; the wizard inventario-producto
+# flow creates "Tortilla" — "Tortilla" matches both) via the search box, so exactly
+# one on-screen row remains regardless of device or list length.
+#
+# Leaves the filtered list showing. The caller opens the detail with:
+#   - tapOn: { id: "producto-card-.*" }
+#
+# Why search + `producto-card` id: on iOS/Fabric the row is a Tamagui onPress-card
+# whose merged accessibilityText is matchable by `text: "<name>.*"` but whose
+# child text/name is not exactly matchable; the row's `producto-card-<id>` testID
+# IS matchable by the `producto-card-.*` regex once the list is filtered to one row.
+appId: mx.cachink.mobile
+---
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    id: "stock-buscar"
+- inputText: "Tortilla"
+- assertVisible:
+    id: "producto-card-.*"
+# Dismiss the keyboard so the caller's tap opens the row detail (the stock list is
+# keyboardShouldPersistTaps="never", so with the keyboard up the first tap would
+# only dismiss it). Assert the row first — it's visible above the keyboard — then
+# dismiss, so a flaky hideKeyboard can't hide a genuine "no product" failure.
+- hideKeyboard

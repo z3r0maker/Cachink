@@ -1,13 +1,12 @@
-# Reusable subflow: authenticate as the primary Operativo user.
+# Reusable subflow: authenticate as the primary user (deterministic, both entry points).
 #
-# Supports BOTH entry points:
-#   - Demo mode → Ana Operativa (PIN 000000)
-#   - Wizard mode → Director Test (PIN 123456)
+#   - Demo mode  → Ana Operativa   (PIN 000000)  — an Operativo avatar is present
+#   - Wizard mode → Director Test    (PIN 123456)  — no Operativo avatar
 #
-# Tries Ana Operativa first (demo user). If she doesn't exist
-# (wizard-only state), falls back to Director Test.
-#
-# PIN auto-submits after 6 digits via inline numpad.
+# Selects by the stable role testIDs (`user-avatar-role-operativo` /
+# `user-avatar-role-director`) and branches on whether the Operativo avatar
+# exists to pick user + PIN. Every step inside the taken branch is REQUIRED, so a
+# failed login fails at auth (loudly) instead of silently proceeding.
 #
 # Usage (from any flow):
 #   - launchApp
@@ -15,60 +14,52 @@
 #   - runFlow: shared/authenticate.yaml
 appId: mx.cachink.mobile
 ---
-# --- Attempt 1: Demo mode — Ana Operativa (PIN 000000) ---
-- tapOn:
-    text: "A, Ana Operativa, Operativo"
-    optional: true
+- assertVisible:
+    id: "quick-switch"
 
-# If Ana exists, numpad shows. Enter PIN 000000.
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
+# Demo mode: Operativo avatar present → Ana Operativa, PIN 000000.
+- runFlow:
+    when:
+      visible:
+        id: "user-avatar-role-operativo"
+    commands:
+      - tapOn:
+          id: "user-avatar-role-operativo"
+      - assertVisible:
+          id: "pin-numpad"
+      - waitForAnimationToEnd
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
 
-# --- Attempt 2: Wizard mode — Director Test (PIN 123456) ---
-# If Ana didn't exist, we're still on QuickSwitch. Tap Director Test.
-- tapOn:
-    text: "D, Director Test, Director"
-    optional: true
+# Wizard mode: no Operativo avatar → Director Test, PIN 123456.
+# Guard on `quick-switch` still being visible so this branch does NOT fire after
+# the demo branch above already logged in (which removes the operativo avatar and
+# would otherwise make `notVisible operativo` true here).
+- runFlow:
+    when:
+      visible:
+        id: "quick-switch"
+      notVisible:
+        id: "user-avatar-role-operativo"
+    commands:
+      - tapOn:
+          id: "user-avatar-role-director"
+      - assertVisible:
+          id: "pin-numpad"
+      - waitForAnimationToEnd
+      - tapOn: { id: "numpad-1" }
+      - tapOn: { id: "numpad-2" }
+      - tapOn: { id: "numpad-3" }
+      - tapOn: { id: "numpad-4" }
+      - tapOn: { id: "numpad-5" }
+      - tapOn: { id: "numpad-6" }
 
-# If Director Test exists, numpad shows. Enter PIN 123456.
-- tapOn:
-    id: "numpad-1"
-    optional: true
-- tapOn:
-    id: "numpad-2"
-    optional: true
-- tapOn:
-    id: "numpad-3"
-    optional: true
-- tapOn:
-    id: "numpad-4"
-    optional: true
-- tapOn:
-    id: "numpad-5"
-    optional: true
-- tapOn:
-    id: "numpad-6"
-    optional: true
-
-# Wait for any tab to mount (Operativo sees tab-ventas, Director sees tab-estados).
+# Either role lands with the bottom tab bar mounted.
 - extendedWaitUntil:
     visible:
       id: "bottom-tab-bar"
     timeout: 10000
-    optional: true

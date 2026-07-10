@@ -1,11 +1,12 @@
-# Reusable subflow: authenticate as Director Test (wizard-created user).
+# Reusable subflow: authenticate as Director Test (wizard-created user, PIN 123456).
 #
 # Use this in regression-path flows that start from the wizard setup
 # (director-setup.yaml creates "Director Test" with PIN 123456).
 # For demo-mode flows, use shared/authenticate.yaml instead.
 #
-# Uses the test PIN: 123456
-# PIN auto-submits after 6 digits.
+# Deterministic: selects by the stable role testID `user-avatar-role-director`
+# and every step is REQUIRED, so a failed login fails here (loudly) rather than
+# silently proceeding and failing later at the first real step.
 #
 # Usage (from regression-path flows):
 #   - launchApp
@@ -13,42 +14,24 @@
 #   - runFlow: shared/authenticate-wizard.yaml
 appId: mx.cachink.mobile
 ---
-# Tap the Director Test avatar on QuickSwitch screen.
+- assertVisible:
+    id: "quick-switch"
 - tapOn:
-    text: "D, Director Test, Director"
-    optional: true
-
-# Wait for numpad and let animation settle.
-- extendedWaitUntil:
-    visible:
-      id: "pin-numpad"
-    timeout: 5000
-    optional: true
+    id: "user-avatar-role-director"
+- assertVisible:
+    id: "pin-numpad"
 - waitForAnimationToEnd
 
-# Enter PIN: 123456
-- tapOn:
-    id: "numpad-1"
-    optional: true
-- tapOn:
-    id: "numpad-2"
-    optional: true
-- tapOn:
-    id: "numpad-3"
-    optional: true
-- tapOn:
-    id: "numpad-4"
-    optional: true
-- tapOn:
-    id: "numpad-5"
-    optional: true
-- tapOn:
-    id: "numpad-6"
-    optional: true
+# Enter PIN 123456 (auto-submits after 6 digits).
+- tapOn: { id: "numpad-1" }
+- tapOn: { id: "numpad-2" }
+- tapOn: { id: "numpad-3" }
+- tapOn: { id: "numpad-4" }
+- tapOn: { id: "numpad-5" }
+- tapOn: { id: "numpad-6" }
 
-# Wait for Director tabs to mount.
+# Director lands on the estados tab.
 - extendedWaitUntil:
     visible:
       id: "tab-estados"
     timeout: 10000
-    optional: true

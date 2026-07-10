@@ -40,6 +40,12 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 REPORT_ROOT="$REPO_ROOT/e2e-reports"
 REPORT_BASE="apps/mobile/maestro/reports"
 
+# Shared entry-point detection + state setup (detect_entry / run_setup), so this
+# runner seeds the correct state (fresh / demo / wizard) per flow — the same
+# implementation run-flow.sh uses. Without this, the 58 demo flows never get
+# demo seeding and always fail. See lib/entry-setup.sh.
+source "$SCRIPT_DIR/lib/entry-setup.sh"
+
 # ───────────────────────── Parse flags ──────────────────────────
 SKIP_FRESH=false
 PHASE=""
@@ -160,7 +166,7 @@ run_flow() {
   local test_dir="$RUN_DIR/tests/$name"
 
   if [[ "$DRY_RUN" == true ]]; then
-    echo "  📋  $name"
+    echo "  📋  $name  [entry: $(detect_entry "$flow")]"
     return 0
   fi
 
@@ -168,6 +174,11 @@ run_flow() {
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "🧪  $name"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+  # Put the app into this flow's entry-point state (state-cached: only re-seeds on
+  # a transition). This is what lets demo/fresh flows run — previously every flow
+  # ran against the single Phase-0 wizard state.
+  run_setup "$(detect_entry "$flow")"
 
   mkdir -p "$debug_dir" "$test_dir"
 
@@ -251,6 +262,44 @@ should_run() {
   [[ -z "$PHASE" ]] || [[ "$PHASE" == "$phase" ]]
 }
 
+# ── Default run: entry-point-aware, grouped so each state seeds once ─────────
+# Collects THIS script's own active (uncommented) run_flow list — the curated,
+# dependency-ordered set — then buckets by entry-point (demo → wizard/other →
+# fresh) preserving relative order within each bucket, so run_setup re-seeds ~3×
+# instead of ~60× (the interleaved order would otherwise reseed demo on every
+# transition). Used when no --phase is given; --phase keeps the legacy linear path.
+run_grouped_suite() {
+  echo "🧭  Entry-point-aware grouped MVP run (demo → wizard → fresh)"
+  rm -f "$STATE_FILE"   # force a clean first setup regardless of prior runs
+
+  local flows=()
+  while IFS= read -r name; do
+    [[ -f "$FLOWS_DIR/$name" ]] && flows+=("$FLOWS_DIR/$name")
+  done < <(grep -E '^[[:space:]]*run_flow[[:space:]]+"\$FLOWS_DIR/' "$0" \
+            | sed -E 's#.*\$FLOWS_DIR/([A-Za-z0-9_.-]+\.yaml).*#\1#')
+
+  local demo=() wizard=() fresh=() f e
+  for f in "${flows[@]+"${flows[@]}"}"; do
+    e="$(detect_entry "$f")"
+    case "$e" in
+      demo)  demo+=("$f") ;;
+      fresh) fresh+=("$f") ;;
+      *)     wizard+=("$f") ;;   # wizard + anything unrecognized
+    esac
+  done
+
+  local ordered=()
+  ordered+=("${demo[@]+"${demo[@]}"}")
+  ordered+=("${wizard[@]+"${wizard[@]}"}")
+  ordered+=("${fresh[@]+"${fresh[@]}"}")
+
+  echo "   demo=${#demo[@]}  wizard=${#wizard[@]}  fresh=${#fresh[@]}  total=${#ordered[@]}"
+  CURRENT_PHASE="Grouped MVP run"
+  for f in "${ordered[@]+"${ordered[@]}"}"; do
+    run_flow "$f"
+  done
+}
+
 # ── Trap handler: finalize partial report on interrupt ──────────
 finalize_on_exit() {
   if [[ "$DRY_RUN" == true ]] || [[ -z "${RUN_DIR:-}" ]]; then
@@ -262,7 +311,19 @@ finalize_on_exit() {
 }
 trap finalize_on_exit INT TERM
 
-# ──────────────── Phase 0: Fresh install + wizard ──────────────
+# ── Default: entry-point-aware grouped run (per-flow run_setup handles state) ──
+# --phase falls through to the legacy linear path below for targeted debugging.
+if [[ -z "$PHASE" ]]; then
+  run_grouped_suite
+  if [[ "$DRY_RUN" == false ]]; then
+    python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" || true
+  fi
+  print_summary
+  [[ "$DRY_RUN" == false && $FAILED -gt 0 ]] && exit 1
+  exit 0
+fi
+
+# ──────────────── Phase 0: Fresh install + wizard (legacy --phase path) ──────
 if [[ "$SKIP_FRESH" == false ]]; then
   echo "🔄  Phase 0: Fresh install + wizard"
   if [[ "$DRY_RUN" == true ]]; then

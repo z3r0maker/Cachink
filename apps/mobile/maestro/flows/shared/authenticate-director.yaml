@@ -1,13 +1,11 @@
-# Reusable subflow: authenticate as Director.
+# Reusable subflow: authenticate as Director (deterministic, both entry points).
 #
-# Supports BOTH entry points:
-#   - Demo mode → Juan Director (PIN 000000)
-#   - Wizard mode → Director Test (PIN 123456)
+#   - Demo mode  → Juan Director   (PIN 000000)  — an Operativo avatar is present
+#   - Wizard mode → Director Test   (PIN 123456)  — no Operativo avatar
 #
-# Tries Juan Director first (demo user). If he doesn't exist
-# (wizard-only state), falls back to Director Test.
-#
-# PIN auto-submits after 6 digits via inline numpad.
+# Selects by the stable role testID `user-avatar-role-director` and branches on
+# whether the Operativo avatar exists to pick the right PIN. Every step inside the
+# taken branch is REQUIRED, so a failed login fails at auth (loudly).
 #
 # Usage (from Director flows):
 #   - launchApp
@@ -15,60 +13,52 @@
 #   - runFlow: shared/authenticate-director.yaml
 appId: mx.cachink.mobile
 ---
-# --- Attempt 1: Demo mode — Juan Director (PIN 000000) ---
-- tapOn:
-    text: "J, Juan Director, Director"
-    optional: true
+- assertVisible:
+    id: "quick-switch"
 
-# If Juan exists, numpad shows. Enter PIN 000000.
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
-- tapOn:
-    id: "numpad-0"
-    optional: true
+# Demo mode: an Operativo avatar is present → Juan Director, PIN 000000.
+- runFlow:
+    when:
+      visible:
+        id: "user-avatar-role-operativo"
+    commands:
+      - tapOn:
+          id: "user-avatar-role-director"
+      - assertVisible:
+          id: "pin-numpad"
+      - waitForAnimationToEnd
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: "numpad-0" }
 
-# --- Attempt 2: Wizard mode — Director Test (PIN 123456) ---
-# If Juan didn't exist, we're still on QuickSwitch. Tap Director Test.
-- tapOn:
-    text: "D, Director Test, Director"
-    optional: true
+# Wizard mode: no Operativo avatar → Director Test, PIN 123456.
+# Guard on `quick-switch` still being visible so this branch does NOT fire after
+# the demo branch above already logged in (which removes the operativo avatar and
+# would otherwise make `notVisible operativo` true here).
+- runFlow:
+    when:
+      visible:
+        id: "quick-switch"
+      notVisible:
+        id: "user-avatar-role-operativo"
+    commands:
+      - tapOn:
+          id: "user-avatar-role-director"
+      - assertVisible:
+          id: "pin-numpad"
+      - waitForAnimationToEnd
+      - tapOn: { id: "numpad-1" }
+      - tapOn: { id: "numpad-2" }
+      - tapOn: { id: "numpad-3" }
+      - tapOn: { id: "numpad-4" }
+      - tapOn: { id: "numpad-5" }
+      - tapOn: { id: "numpad-6" }
 
-# If Director Test exists, numpad shows. Enter PIN 123456.
-- tapOn:
-    id: "numpad-1"
-    optional: true
-- tapOn:
-    id: "numpad-2"
-    optional: true
-- tapOn:
-    id: "numpad-3"
-    optional: true
-- tapOn:
-    id: "numpad-4"
-    optional: true
-- tapOn:
-    id: "numpad-5"
-    optional: true
-- tapOn:
-    id: "numpad-6"
-    optional: true
-
-# Wait for Director tabs to mount.
+# Director lands on the estados tab (both paths).
 - extendedWaitUntil:
     visible:
       id: "tab-estados"
     timeout: 10000
-    optional: true

@@ -36,7 +36,15 @@ const SIZE_HERO = 88;
 const FONT_DEFAULT = 28;
 const FONT_HERO = 34;
 
-function AvatarCircle({ initial, bg, large }: { initial: string; bg: string; large?: boolean }): ReactElement {
+function AvatarCircle({
+  initial,
+  bg,
+  large,
+}: {
+  initial: string;
+  bg: string;
+  large?: boolean;
+}): ReactElement {
   const size = large ? SIZE_HERO : SIZE_DEFAULT;
   return (
     <View
@@ -59,7 +67,13 @@ function AvatarCircle({ initial, bg, large }: { initial: string; bg: string; lar
   );
 }
 
-function AvatarRing({ selected, children }: { selected: boolean; children: ReactElement }): ReactElement {
+function AvatarRing({
+  selected,
+  children,
+}: {
+  selected: boolean;
+  children: ReactElement;
+}): ReactElement {
   return (
     <View
       alignItems="center"
@@ -80,7 +94,12 @@ function AvatarContent(props: { user: User; selected: boolean }): ReactElement {
   const isDirector = props.user.role === 'director';
 
   return (
-    <View alignItems="center" gap={4}>
+    // Role-keyed testID for deterministic E2E selection. The Pressable's testID
+    // is `user-avatar-${id}` (dynamic ULID, unusable from flows), so we expose a
+    // stable `user-avatar-role-{director|operativo}` here. Test data has one user
+    // per role, so it is unambiguous; tapping this child's center still triggers
+    // the parent Pressable's onPress.
+    <View alignItems="center" gap={4} testID={`user-avatar-role-${props.user.role}`}>
       <AvatarRing selected={props.selected}>
         <AvatarCircle initial={initial} bg={props.user.avatarColor} large={props.selected} />
       </AvatarRing>

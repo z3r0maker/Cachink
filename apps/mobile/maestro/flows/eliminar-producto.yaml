@@ -26,29 +26,24 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Open the product's detail via search (Tamagui onPress-cards match by
+# `text: "<label>.*"`, containers/inputs by `id:`; see find-producto-stock.yaml).
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
+    id: "producto-card-.*"
 
-# Verify the existing product is visible.
-- assertVisible: "Tortilla"
-
-# Tap the product card to open ProductoDetailPopover.
-- tapOn: "Tortilla"
+# Tap the "Eliminar producto" action — this opens a ConfirmDialog.
 - assertVisible:
-    id: "producto-detail-popover"
-
-# Tap the delete button — this opens a ConfirmDialog.
+    text: "Eliminar producto.*"
 - tapOn:
-    id: "producto-detail-delete"
+    text: "Eliminar producto.*"
 
-# ConfirmDialog appears.
+# ConfirmDialog appears; confirm the deletion.
 - assertVisible:
     id: "confirm-dialog"
-
-# Confirm the deletion.
 - tapOn:
     id: "confirm-dialog-confirm"
 
-# The product is removed from the stock list.
-- assertNotVisible: "Tortilla"
+# Back on the (filtered) stock list, the product row is gone.
+- assertNotVisible:
+    id: "producto-card-.*"

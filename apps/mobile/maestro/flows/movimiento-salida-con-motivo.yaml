@@ -24,47 +24,39 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Open the product's detail via search (onPress-cards match by text-regex).
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
+    id: "producto-card-.*"
 
-# Tap the product card to open ProductoDetailPopover.
-- tapOn: "Tortilla"
+# Tap "Salida" to open the MovimientoModal (pre-set to tipo=salida).
 - assertVisible:
-    id: "producto-detail-popover"
-
-# Tap "Salida" to open MovimientoModal.
+    text: "Salida.*"
 - tapOn:
-    id: "producto-detail-salida"
+    text: "Salida.*"
 
-# MovimientoModal opens.
+# MovimientoModal open — CANTIDAD / MOTIVO / NOTA.
 - assertVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"
 
-# Verify the tipo toggle is visible.
-- assertVisible:
-    id: "movimiento-tipo-toggle"
-
-# Enter quantity.
+# Enter quantity (the input exposes its testID).
 - tapOn:
     id: "movimiento-cantidad"
 - eraseText
 - inputText: "2"
 
-# Fill the motivo (reason) field.
+# Fill the motivo (reason) — for Salida it's a DROPDOWN; open it and pick a reason.
 - tapOn:
     id: "movimiento-motivo"
-- inputText: "Producto dañado"
-
-# Fill the nota (optional note) field.
 - tapOn:
-    id: "movimiento-nota"
-- inputText: "Encontrado en revisión matutina"
+    text: "Merma.*"
 
-# Submit the movement.
+# (NOTA is optional and not always rendered for Salida — skipped.)
+
+# Submit the movement — the "REGISTRAR" button.
 - tapOn:
-    id: "movimiento-submit"
+    text: "REGISTRAR.*"
 
 # Modal closes — movement recorded.
 - assertNotVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"

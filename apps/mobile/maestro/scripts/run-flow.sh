@@ -108,87 +108,11 @@ for _, devs in data.get('devices', {}).items():
   echo "🎯  Device: $DEVICE_PATTERN ($RESOLVED_UDID)"
 fi
 
-# ──────────── Entry point detection ───────────────────────────────
-
-detect_entry() {
-  local flow="$1"
-
-  # Prefer structured x-entrypoint metadata
-  local xentry
-  xentry=$(head -15 "$flow" | sed -n 's/^# x-entrypoint: \([a-z]*\).*/\1/p' 2>/dev/null | head -1)
-  if [[ -n "$xentry" ]]; then
-    echo "$xentry"
-    return
-  fi
-
-  # Fall back to parsing # Precondition: comment
-  local precondition
-  precondition=$(head -15 "$flow" | grep -i '# Precondition:' 2>/dev/null | head -1 || true)
-
-  if [[ -z "$precondition" ]]; then
-    # No precondition found — default to wizard
-    echo "wizard"
-    return
-  fi
-
-  # Match patterns (order matters: most specific first)
-  if echo "$precondition" | grep -qi 'fresh install'; then
-    echo "fresh"
-  elif echo "$precondition" | grep -qi 'demo mode'; then
-    echo "demo"
-  else
-    echo "wizard"
-  fi
-}
-
-# ──────────── Setup runner ────────────────────────────────────────
-
-current_state() {
-  if [[ -f "$STATE_FILE" ]]; then
-    cat "$STATE_FILE"
-  else
-    echo "none"
-  fi
-}
-
-run_setup() {
-  local entry="$1"
-  local prev
-  prev=$(current_state)
-
-  if [[ "$SKIP_SETUP" == true ]]; then
-    echo "⏭️   Skipping setup (--skip-setup)"
-    return 0
-  fi
-
-  if [[ "$prev" == "$entry" ]]; then
-    echo "♻️   State already '$entry' — skipping setup"
-    return 0
-  fi
-
-  echo "🔧  Setting up entry point: $entry"
-
-  case "$entry" in
-    fresh)
-      "$FRESH_SCRIPT" --reset-only
-      ;;
-    demo)
-      "$FRESH_SCRIPT" --reset-only
-      echo "🌱  Seeding demo data (this takes 2-3 minutes)..."
-      maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$DEMO_FLOW"
-      ;;
-    wizard)
-      "$FRESH_SCRIPT" "$WIZARD_FLOW"
-      ;;
-    *)
-      echo "❌  Unknown entry point: $entry"
-      exit 1
-      ;;
-  esac
-
-  echo "$entry" > "$STATE_FILE"
-  echo "✅  Setup complete ($entry)"
-}
+# ──────── Entry-point detection + state setup (shared lib) ────────
+# detect_entry(), current_state(), run_setup() live in lib/entry-setup.sh so
+# full-regression.sh shares the exact same implementation. The vars above
+# (FLOWS_DIR, FRESH_SCRIPT, DEMO_FLOW, WIZARD_FLOW, STATE_FILE) are honored by it.
+source "$SCRIPT_DIR/lib/entry-setup.sh"
 
 # ──────────── Main: process each flow ─────────────────────────────
 
@@ -254,14 +178,16 @@ for flow in "$@"; do
 
   run_setup "$local_entry"
 
-  local debug_dir="$RUN_DIR/tests/$name/debug"
-  local test_dir="$RUN_DIR/tests/$name"
+  # NOTE: this block runs in the top-level for-loop, not a function, so `local`
+  # is invalid here (aborts under set -e). Use plain assignments.
+  debug_dir="$RUN_DIR/tests/$name/debug"
+  test_dir="$RUN_DIR/tests/$name"
   mkdir -p "$debug_dir" "$test_dir"
 
-  local start_seconds=$SECONDS
+  start_seconds=$SECONDS
 
   if maestro test --debug-output "$debug_dir" ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$flow"; then
-    local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+    elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
     echo "  ✅  $name PASSED (${elapsed_ms}ms)"
     PASSED=$((PASSED + 1))
 
@@ -270,7 +196,7 @@ for flow in "$@"; do
       --duration-ms "$elapsed_ms" --debug-dir "$debug_dir" || true
     rm -rf "$debug_dir"
   else
-    local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+    elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
     echo "  ❌  $name FAILED (${elapsed_ms}ms)"
     FAILED=$((FAILED + 1))
 

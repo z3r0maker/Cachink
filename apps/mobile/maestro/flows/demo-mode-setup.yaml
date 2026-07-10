@@ -38,7 +38,8 @@ appId: mx.cachink.mobile
     id: "wizard-step1-demo-mode"
 
 # Wait for demo seeding to complete and land on login screen.
-# Seeding takes ~2-3 min due to bcrypt on Hermes.
+# Seeding is bcrypt-bound on Hermes; on a debug dev-client build (esp. iPad)
+# it can exceed 3 min, so allow a generous 6 min before failing.
 - extendedWaitUntil:
     visible: "Selecciona tu usuario"
-    timeout: 180000
+    timeout: 360000
