@@ -234,3 +234,36 @@ one fixed, one still open:
 
 **Net:** iPad = 10/10 productos item flows green. iPhone ventas verification is one
 bounded login-layout fix away.
+
+---
+
+## Ventas item flows target a SUPERSEDED UI (2026-07-10) — decisive finding
+
+After unblocking iPhone auth (below) and running the ventas flow end-to-end on iPhone,
+the real blocker is that **the sales-history list + popover no longer exist in the app**:
+
+- `total-bar.tsx`: _"TotalBar — compact single-row yellow Card that **replaces
+  SessionStrip**."_ Both `PhoneLayout` and `TabletLayout` in `ventas-screen.tsx` render
+  `ProductPane` + `CartSection` + `TotalBar` — **neither renders `ventas-list`/
+  `VentaCard`/`venta-detail-popover`**. That pane lived in the old `SessionStrip`.
+- So `venta-detail-popover` (Compartir/Eliminar) and swipe-to-edit are unreachable from
+  the ventas tab on BOTH devices. `VentaDetailPopover` is still wired in
+  `ventas-slots.tsx`, and `onVentaPress` now only fires from **Director Home →
+  actividad-reciente** (`DirectorHome/actividad-reciente.tsx`).
+
+**Implication:** the 5 ventas item flows (`venta-detail-popover-inspect`,
+`venta-comprobante`, `eliminar-venta`, `editar-venta`, `editar-venta-full-form`) test a
+UI that was replaced. They should be **re-scoped to the current app** — either the
+Director-Home recent-activity → venta popover path, or dropped if the share/delete/edit
+affordances were intentionally removed. This is a product/UX question, not a selector
+fix. The `ensure-caja-open` + `create-venta` groundwork remains valid for any future
+venta-creation flow.
+
+### iPhone auth — FIXED (verified)
+
+The login numpad-0-below-fold blocker (above) is resolved for E2E: `authenticate.yaml`
+now swipes the login ScrollView up (over the avatar area, not the numpad) — guarded by
+`when: notVisible numpad-0`, so it fires only on short screens and is skipped on iPad
+(re-verified `producto-entrada-stock` + `eliminar-producto` still green on iPad).
+On iPhone, auth → ensure-caja-open → create-venta all run green; a sale registers
+("11 ventas $2,092"). Only the (superseded) sales-list assertion fails.

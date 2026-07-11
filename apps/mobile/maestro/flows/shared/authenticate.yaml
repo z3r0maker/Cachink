@@ -28,8 +28,19 @@ appId: mx.cachink.mobile
       - assertVisible:
           id: "pin-numpad"
       - waitForAnimationToEnd
-      # Wait for the numpad's bottom row (0) to settle into view (the PIN prompt
-      # slides in; on phones the login top-aligns so the whole numpad fits).
+      # On short screens (iPhone) the numpad's bottom row (0) sits below the fold.
+      # Scroll the login ScrollView up by swiping over the avatar/greeting area
+      # (NOT the numpad, which would capture the gesture) — only when numpad-0 is
+      # not already visible, so this is skipped on iPad.
+      - runFlow:
+          when:
+            notVisible:
+              id: "numpad-0"
+          commands:
+            - swipe:
+                start: "50%, 45%"
+                end: "50%, 12%"
+            - waitForAnimationToEnd
       - extendedWaitUntil:
           visible:
             id: "numpad-0"

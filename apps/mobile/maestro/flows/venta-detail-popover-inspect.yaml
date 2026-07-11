@@ -1,7 +1,11 @@
 # Inspect a venta's detail popover (Compartir / Eliminar) and close it.
 # x-entrypoint: demo
 #
-# TODO(e2e): iPhone-only. The sales-history pane (ventas-list + venta-detail-popover)
+# TODO(e2e): SUPERSEDED UI. The sales-history list + venta-detail-popover were
+# removed (SessionStrip -> compact TotalBar); the ventas tab renders ProductPane +
+# Cart + TotalBar on BOTH devices. This flow reaches checkout green (iPhone) but the
+# venta popover is no longer on the ventas tab. Re-scope to Director Home -> actividad
+# reciente, or drop. See docs/e2e-productos-row-accessibility-scope.md. (Formerly iPhone-only.) The sales-history pane (ventas-list + venta-detail-popover)
 # renders ONLY on the narrow layout. On iPad (gtMd) VentasScreen is a SplitPane
 # (products left, CART right) with NO sales list — so this flow reaches the checkout
 # but cannot open a venta popover on iPad. The steps below (demo -> ensure-caja-open
