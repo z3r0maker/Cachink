@@ -205,3 +205,32 @@ run `--device-class iphone` (needs the iPhone dev-client build — plan Phase 0)
 the sales pane to the iPad layout (Phase 4).** `venta-comprobante`, `editar-venta`,
 `editar-venta-full-form` follow the same pattern (comprobante via `venta-detail-share`;
 edit via swipe-left → `editar-venta-modal`) and are pending the same iPhone run.
+
+---
+
+## iPhone build + ventas verification — 2026-07-10 (Phase 0 progress)
+
+Built the iPhone dev-client (`expo run:ios --device "iPhone 17"`, ~75s, pods cached) and
+seeded demo on it (`demo-mode-setup.yaml`, ~5min). Two device-layout issues surfaced,
+one fixed, one still open:
+
+1. **Login numpad off-screen on iPhone 17 (blocks ALL iPhone auth).** The
+   QuickSwitchScreen ScrollView used `justifyContent: 'center'`; on a 874pt-tall screen
+   the greeting + avatars + PIN numpad total ~974pt, so `center` clipped the numpad's
+   bottom row (`numpad-0`, delete) below the fold AND out of the scrollable range
+   (`numpad-0` isn't even in the hierarchy — bounds ~902–974 vs screen 874).
+   - **Partial fix applied:** `quick-switch-screen.tsx` now top-aligns on phones
+     (`justifyContent: media.gtMd ? 'center' : 'flex-start'`) so the content is
+     scrollable rather than clipped (iPad unchanged — verified `producto-entrada-stock`
+     still green). `shared/authenticate.yaml` waits for `numpad-0` before the PIN taps.
+   - **STILL OPEN:** the content is ~100pt too tall for iPhone 17, so `numpad-0`
+     remains below the fold and Maestro's scroll can't reliably bring it into view
+     (the numpad captures the swipe). Needs phone-specific login layout tuning (smaller
+     header/avatars/numpad or a fixed numpad footer) OR a reliable scroll gesture.
+
+2. **Ventas sales pane is iPhone-only (confirmed earlier).** Once iPhone auth is
+   unblocked, the 5 ventas flows should run: `ensure-caja-open` + `create-venta` +
+   the popover pattern are all built and the narrow layout DOES render `ventas-list`.
+
+**Net:** iPad = 10/10 productos item flows green. iPhone ventas verification is one
+bounded login-layout fix away.

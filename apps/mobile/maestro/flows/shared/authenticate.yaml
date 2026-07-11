@@ -28,6 +28,12 @@ appId: mx.cachink.mobile
       - assertVisible:
           id: "pin-numpad"
       - waitForAnimationToEnd
+      # Wait for the numpad's bottom row (0) to settle into view (the PIN prompt
+      # slides in; on phones the login top-aligns so the whole numpad fits).
+      - extendedWaitUntil:
+          visible:
+            id: "numpad-0"
+          timeout: 8000
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
