@@ -112,3 +112,46 @@ risk. Verify on iPhone + iPad. (Dead-code cleanup: separate ~0.5 day.)
 **Remaining (~12 flows):** apply `find-producto-stock` + the selector rules above,
 handling each flow's modal quirks (picker/dropdown/keyboard). The ventas/egresos
 item flows follow the same principles but via their own panes.
+
+---
+
+## CONFIRMED APP-INTERACTION DEFECT (2026-07-10): `detail-save` (GUARDAR) Btn not tappable by Maestro
+
+While converting `editar-producto` to the modern detail-route edit path (tap product
+card → `ProductoDetailScreen` form → GUARDAR), the save step could not be driven.
+After a rigorous isolation (hot-reload verified working by changing the button label
+to "GUARDARX" and seeing it render), the cause is **not** a selector or validation
+issue — it is a genuine interaction defect:
+
+- **`detail-save` (a Tamagui `Btn` in `DetailTopBar`, top-right of the detail header)
+  does not fire its `onPress` under Maestro/XCUITest** — for BOTH `id: detail-save`
+  and `text` taps. Maestro reports "Tap … COMPLETED" but nothing happens.
+- **Proven it is the tap, not downstream logic:** temporarily wiring the button's
+  `onPress` directly to `router.back()` (no mutation, no validate) STILL did nothing.
+- **`router.back()` works and raw `<Pressable>` taps work:** the ADJACENT
+  `detail-back` chevron (a raw RN `<Pressable>` in the same header row, same
+  `router.back()`) fires correctly and returns to the stock list (verified green in a
+  throwaway `_detail-back-test` flow).
+- **`validate()` is not the cause:** bypassing it did not change the outcome.
+- **The same `Btn` primitive works elsewhere:** the MovimientoModal `REGISTRAR`
+  (entrada, green) is a `Btn` and fires fine. The discriminator is the **header
+  layout context** (`DetailTopBar`: raw-Pressable sibling on the left works, `Btn` on
+  the right does not), NOT the `Btn` component in general.
+
+**Why this matters (suite-wide risk):** any `Btn` placed in this kind of header row
+(a `flexDirection:"row"` with a `flex:1` centered title `<Text>` between a left action
+and a right `Btn`) may be untappable by Maestro. Other screens using the same header
+shape should be audited (e.g. any detail/edit screen with a top-right save action).
+
+**Proposed app fix (needs its own change + regression run, both form factors):**
+in `producto-detail-screen.tsx` `DetailTopBar`, stop the centered title `<Text flex={1}>`
+from participating in hit-testing over the button region — e.g. mark it
+non-interactive for a11y/touch (`pointerEvents="none"` / not accessible) and/or cap its
+width so its frame cannot overlap the right-hand `Btn`, and/or raise the `Btn`'s
+stacking so XCUITest resolves the tap to the button. Verify by re-running
+`editar-producto` (which is otherwise complete: find → detail form → edit NOMBRE →
+GUARDAR → re-search asserts the rename). **Do not force-pass the flow until the button
+is genuinely tappable.**
+
+Status: `editar-producto.yaml` is written to the correct modern path and carries a
+`TODO(e2e)` header pointing here; it is intentionally left NOT green pending the fix.

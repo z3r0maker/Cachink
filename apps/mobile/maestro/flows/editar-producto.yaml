@@ -1,18 +1,32 @@
-# Edit an existing producto via the swipe-to-edit gesture and verify
-# the updated nombre appears in the stock list.
+# Edit an existing producto via the detail route and verify the rename persists.
 #
 # Covers CRUD Update for Productos (Edit flow).
 #
-# Precondition: wizard + at least one producto exists.
+# The detail route (ProductoDetailScreen) is the modern edit path: tap a product
+# card → editable form (NOMBRE / SKU / CATEGORÍA / umbral) → GUARDAR (`detail-save`),
+# which on success navigates back to the stock list. (The old swipe-to-edit gesture
+# opened the deprecated EditarProductoModal — replaced here.)
+#
+# Precondition: demo seeded (product "Tortilla maíz kg" exists).
 # Chain flows:
 #
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/editar-producto.yaml
-#
-# The inventario-producto flow creates "Tortilla".
+#   ./apps/mobile/maestro/scripts/run-flow.sh \
+#       apps/mobile/maestro/flows/editar-producto.yaml
 # x-entrypoint: demo
+#
+# TODO(e2e): NOT YET GREEN — blocked on a confirmed interaction defect. The
+# `detail-save` (GUARDAR) button is a Tamagui `Btn` in the DetailTopBar header;
+# under Maestro/XCUITest its `onPress` does NOT fire for either `id: detail-save`
+# or `text` taps (Maestro reports the tap COMPLETED but nothing happens). Proven
+# with hot-reload confirmed: temporarily wiring the button's onPress straight to
+# router.back() still did nothing, while the ADJACENT raw <Pressable> `detail-back`
+# (same header, same router.back) fires correctly — so router.back works and the
+# Btn specifically is not receiving the synthetic tap here. validate() is not the
+# cause (bypassing it did not help). The same `Btn` primitive works for the
+# MovimientoModal REGISTRAR (entrada, green) — the difference is the header layout
+# context. See docs/e2e-productos-row-accessibility-scope.md ("detail-save Btn not
+# tappable"). Needs an app-side fix (DetailTopBar Btn hit-testing) before this flow
+# can go green; do not force-pass.
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -21,43 +35,37 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Find the product via search and open its detail route (onPress card).
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
+    id: "producto-card-.*"
 
-# Verify the existing product is visible in the stock list.
-- assertVisible: "Tortilla"
+# Detail form is open — the NOMBRE field is a plain TextField (id-selectable).
+- assertVisible:
+    id: "detail-nombre"
 
-# Swipe the product row left to reveal the edit action.
-- swipe:
-    id: "stock-list"
-    direction: LEFT
-    startX: 300
-    endX: 50
-
-# Wait for the EditarProductoModal to appear.
-- extendedWaitUntil:
-    visible:
-      id: "editar-producto-modal"
-    timeout: 5000
-
-# Update the nombre field.
+# Rename the product.
 - tapOn:
-    id: "editar-producto-nombre"
+    id: "detail-nombre"
 - eraseText
 - inputText: "Tortilla de maíz"
 
-# Update the stock threshold.
-- tapOn:
-    id: "editar-producto-umbral"
-- eraseText
-- inputText: "5"
+# The keyboard can cover the GUARDAR button; dismiss it before submitting.
+- hideKeyboard
 
-# Submit the edit.
+# Save — on success the detail route navigates back to the stock list.
 - tapOn:
-    id: "editar-producto-submit"
+    id: "detail-save"
 
-# Modal closes and the updated product appears in the list.
+# Save succeeded → detail form is gone (a validation failure would keep it open).
 - assertNotVisible:
-    id: "editar-producto-modal"
-- assertVisible: "Tortilla de maíz"
+    id: "detail-save"
+
+# Verify the rename persisted: re-search and assert the new name on the card.
+- tapOn:
+    id: "stock-buscar"
+- eraseText
+- inputText: "Tortilla"
+- assertVisible:
+    text: "Tortilla de maíz.*"
+- hideKeyboard
