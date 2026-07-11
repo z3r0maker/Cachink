@@ -14,19 +14,17 @@
 #       apps/mobile/maestro/flows/editar-producto.yaml
 # x-entrypoint: demo
 #
-# TODO(e2e): NOT YET GREEN — blocked on a confirmed interaction defect. The
-# `detail-save` (GUARDAR) button is a Tamagui `Btn` in the DetailTopBar header;
-# under Maestro/XCUITest its `onPress` does NOT fire for either `id: detail-save`
-# or `text` taps (Maestro reports the tap COMPLETED but nothing happens). Proven
-# with hot-reload confirmed: temporarily wiring the button's onPress straight to
-# router.back() still did nothing, while the ADJACENT raw <Pressable> `detail-back`
-# (same header, same router.back) fires correctly — so router.back works and the
-# Btn specifically is not receiving the synthetic tap here. validate() is not the
-# cause (bypassing it did not help). The same `Btn` primitive works for the
-# MovimientoModal REGISTRAR (entrada, green) — the difference is the header layout
-# context. See docs/e2e-productos-row-accessibility-scope.md ("detail-save Btn not
-# tappable"). Needs an app-side fix (DetailTopBar Btn hit-testing) before this flow
-# can go green; do not force-pass.
+# ✅ VERIFIED GREEN (2026-07-10) after an app fix: the `detail-save` (GUARDAR)
+# button in DetailTopBar was a Tamagui `Btn`, whose merged accessibility element
+# was not tappable by Maestro/XCUITest in this header context (its onPress never
+# fired). Fixed by rendering it as a raw <Pressable> (see producto-detail-screen.tsx
+# + docs/e2e-productos-row-accessibility-scope.md). Flow now runs end-to-end:
+# find → detail form → edit NOMBRE → GUARDAR → re-search asserts the rename.
+#
+# NOTE: this flow RENAMES the demo product to "Tortilla de maíz" (persists in the
+# DB). In a full suite run, order it late or reset demo data after — flows that
+# assert the exact original name "Tortilla maíz kg" would otherwise see the new one
+# (searches by the "Tortilla" prefix still match).
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -60,6 +58,12 @@ appId: mx.cachink.mobile
 # Save succeeded → detail form is gone (a validation failure would keep it open).
 - assertNotVisible:
     id: "detail-save"
+
+# Back on the stock list — wait for it to remount before re-searching.
+- extendedWaitUntil:
+    visible:
+      id: "stock-buscar"
+    timeout: 8000
 
 # Verify the rename persisted: re-search and assert the new name on the card.
 - tapOn:

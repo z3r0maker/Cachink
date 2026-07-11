@@ -143,15 +143,34 @@ issue — it is a genuine interaction defect:
 and a right `Btn`) may be untappable by Maestro. Other screens using the same header
 shape should be audited (e.g. any detail/edit screen with a top-right save action).
 
-**Proposed app fix (needs its own change + regression run, both form factors):**
-in `producto-detail-screen.tsx` `DetailTopBar`, stop the centered title `<Text flex={1}>`
-from participating in hit-testing over the button region — e.g. mark it
-non-interactive for a11y/touch (`pointerEvents="none"` / not accessible) and/or cap its
-width so its frame cannot overlap the right-hand `Btn`, and/or raise the `Btn`'s
-stacking so XCUITest resolves the tap to the button. Verify by re-running
-`editar-producto` (which is otherwise complete: find → detail form → edit NOMBRE →
-GUARDAR → re-search asserts the rename). **Do not force-pass the flow until the button
-is genuinely tappable.**
+### ✅ RESOLVED — the fix (2026-07-10)
 
-Status: `editar-producto.yaml` is written to the correct modern path and carries a
-`TODO(e2e)` header pointing here; it is intentionally left NOT green pending the fix.
+Rendered `detail-save` as a **raw `<Pressable>`** instead of the shared `<Btn>` in
+`DetailTopBar` (`producto-detail-screen.tsx`). `<Btn>` sets `accessibilityRole="button"`
+
+- `accessibilityLabel`, so RN collapses it into one **merged a11y element**; in this
+  header that merged element was not reliably tappable by Maestro/XCUITest (onPress never
+  fired). A raw `<Pressable>` takes the native coordinate touch directly and fires
+  reliably. **`editar-producto` now runs green end-to-end** (find → detail form → edit
+  NOMBRE → GUARDAR → re-search asserts the rename "Tortilla de maíz"; verified by
+  screenshot). Typecheck clean; the same `<Btn>` is unchanged everywhere else.
+
+Things that did NOT fix it (tried and reverted — the overlap theory was a red herring,
+since the adjacent raw-Pressable `detail-back` shares the exact same overlap yet works):
+`pointerEvents="none"` on the title, `zIndex`+bg on the header, `minHeight` on the
+header, `contentInsetAdjustmentBehavior="never"` / `automaticallyAdjustContentInsets`
+on the ScrollView.
+
+### ⚠️ Test-harness confound discovered: the Expo dev menu (cost hours)
+
+Mid-investigation, many runs gave **false results** because the Expo dev-client **Tools
+menu** (the floating "Tools button" bubble → Reload / Fast refresh / …) kept opening as
+a modal over the screen. It covered `detail-save`, so `assertNotVisible id: detail-save`
+passed for the WRONG reason (obscured, not navigated). **Disable "Tools button" AND
+"Fast refresh" in the dev menu before running** (or build a non-dev client for E2E).
+Verify ambiguous pass/fail with an actual screenshot (`xcrun simctl io <udid> screenshot`),
+not just the assertion. Fast Refresh can also reload mid-run and disrupt state.
+
+**Still a suite-wide note:** any `<Btn>` used as the sole action in a similar
+header/overlap context may be untappable by Maestro; prefer a raw `<Pressable>` (or audit
+per screen) for such buttons. The `<Btn>` works fine in modals and normal layouts.

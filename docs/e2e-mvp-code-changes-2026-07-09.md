@@ -472,3 +472,35 @@ entrypoint — fix in Phase 5.
 | `apps/mobile/maestro/scripts/full-regression.sh`           | entry-point-aware + grouped default run              |
 | `apps/mobile/maestro/flows/demo-mode-setup.yaml`           | seed timeout 180s→360s                               |
 | `apps/mobile/maestro/flows/wizard-local-standalone.yaml`   | keyboard-submit (earlier)                            |
+
+---
+
+## Addendum — 2026-07-10: `detail-save` (GUARDAR) button made tappable
+
+**File:** `packages/ui/src/screens/Productos/producto-detail-screen.tsx`
+
+**Change:** In `DetailTopBar`, the save action was rendered with the shared
+`<Btn>`. Replaced it with a raw `<Pressable>` (styled to match the primary Btn:
+yellow fill, black border, press-translate) wrapping a plain `<Text>Guardar</Text>`.
+
+**Problem:** In the product detail-route edit screen, tapping GUARDAR did nothing
+under Maestro/XCUITest — `onPress` never fired (verified across many runs, and by
+temporarily wiring `onPress` straight to `router.back()`, which also did nothing).
+The identical `<Btn>` fires fine elsewhere (e.g. MovimientoModal REGISTRAR), and the
+adjacent raw `<Pressable>` `detail-back` in the same header always fires. `validate()`
+was ruled out (bypassing it didn't help), as was the header/ScrollView overlap
+(`detail-back` shares that overlap yet works).
+
+**Why:** `<Btn>` sets `accessibilityRole="button"` + `accessibilityLabel`, so RN
+collapses it into a single **merged accessibility element**. In this header that
+merged element was not reliably receiving the synthetic tap; a raw `<Pressable>`
+(non-merged, native coordinate touch) fires reliably. This is a real interaction
+robustness improvement, not a test-only distortion — an edge/near-overlap real tap
+was affected too. Verified: `editar-producto` now green end-to-end (screenshot
+confirms the rename "Tortilla de maíz" persists). Typecheck clean.
+
+**Test-harness note:** a large chunk of debugging time was lost to the Expo
+dev-client **Tools menu** opening over the screen and producing false-positive
+assertions. Disable "Tools button" + "Fast refresh" in the dev menu before E2E runs,
+and confirm ambiguous results with an actual `xcrun simctl io <udid> screenshot`.
+Full detail: `docs/e2e-productos-row-accessibility-scope.md`.
