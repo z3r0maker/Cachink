@@ -176,3 +176,32 @@ not just the assertion. Fast Refresh can also reload mid-run and disrupt state.
 **Still a suite-wide note:** any `<Btn>` used as the sole action in a similar
 header/overlap context may be untappable by Maestro; prefer a raw `<Pressable>` (or audit
 per screen) for such buttons. The `<Btn>` works fine in modals and normal layouts.
+
+---
+
+## Ventas item flows — iPhone-only on the current app (2026-07-10)
+
+The ventas item flows (`venta-detail-popover-inspect`, `venta-comprobante`,
+`eliminar-venta`, `editar-venta`, `editar-venta-full-form`) interact with a sale via
+the **sales-history pane** (`ventas-list` → `venta-detail-popover` with Compartir /
+Eliminar, and swipe-left to edit). Two structural facts block them on the iPad sim:
+
+1. **Ventas is gated behind an open caja turn.** Demo seeds sales but no open turn, so
+   the tab shows "Abre tu caja para empezar a vender". Prepend
+   `shared/ensure-caja-open.yaml`.
+2. **Seeded sales are past-dated and the sales pane shows today's sales**, so you must
+   first create a sale via the POS. Added `shared/create-venta.yaml` (product → cart →
+   checkout → Efectivo $50 → submit).
+3. **The sales-history pane renders ONLY on the narrow (iPhone) layout.** On iPad
+   (`gtMd`) `VentasScreen` is a SplitPane: products on the left, **cart** on the right —
+   there is no `ventas-list`/popover. So even after creating a sale, the popover is
+   unreachable on iPad.
+
+**Status:** `venta-detail-popover-inspect` and `eliminar-venta` are rewired to the
+correct pattern (demo → ensure-caja-open → create-venta → tap the sale → popover) and
+carry an iPhone-only `TODO(e2e)`. They reach checkout green on iPad but stop at
+`ventas-list` (absent in the iPad layout). **To finish/verify the ventas item flows,
+run `--device-class iphone` (needs the iPhone dev-client build — plan Phase 0), or add
+the sales pane to the iPad layout (Phase 4).** `venta-comprobante`, `editar-venta`,
+`editar-venta-full-form` follow the same pattern (comprobante via `venta-detail-share`;
+edit via swipe-left → `editar-venta-modal`) and are pending the same iPhone run.
