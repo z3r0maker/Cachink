@@ -24,9 +24,9 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "tab-productos"
 
-# Switch to the Movimientos sub-tab.
+# Switch to the Movimientos sub-tab (SegmentedToggle chip `inventario-tab-<key>`).
 - tapOn:
-    id: "productos-tab-movimientos"
+    id: "inventario-tab-movimientos"
 
 # Verify the Movimientos screen renders with at least one entry.
 - assertVisible:
