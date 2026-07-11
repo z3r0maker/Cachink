@@ -80,9 +80,11 @@ risk. Verify on iPhone + iPad. (Dead-code cleanup: separate ~0.5 day.)
 - **`producto-entrada-stock.yaml`** — ✅ verified green end-to-end.
 - **`eliminar-producto.yaml`** — ✅ verified green (detail → `text: "Eliminar producto.*"`
   → `confirm-dialog` / `confirm-dialog-confirm` by id).
-- **`movimiento-salida-con-motivo.yaml`** — selectors updated (find + `text: "Salida.*"`
-  - motivo dropdown select + `text: "REGISTRAR.*"`); **not yet green** — blocked on
-    the CANTIDAD wheel-picker (below).
+- **`movimiento-salida-con-motivo.yaml`** — ✅ green. Pick the MOTIVO dropdown FIRST,
+  then commit CANTIDAD last: changing the motivo re-renders the form and drops an
+  uncommitted wheel value. (The earlier "wheel not committed" was this ordering plus
+  the Expo dev-menu confound, not an app bug.)
+- **`inventario-salida.yaml`** — ✅ green (salida, default cantidad, text-regex Salida/REGISTRAR).
 
 **Verified selector rules for this app (Maestro / iOS Fabric):**
 

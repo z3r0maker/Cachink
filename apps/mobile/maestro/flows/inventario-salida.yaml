@@ -13,23 +13,33 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
+# Open the product's detail via search (onPress cards match by text-regex).
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
-# Tap the producto card to open detail popover.
-- tapOn: "Tortilla"
-- tapOn:
-    id: "producto-detail-salida"
+    id: "producto-card-.*"
 
-# MovimientoModal opens with tipo=salida (cost hidden).
+# Detail screen — open the "Salida" movimiento.
+- assertVisible:
+    text: "Salida.*"
+- tapOn:
+    text: "Salida.*"
+
+# MovimientoModal (tipo=salida): CANTIDAD visible, COSTO hidden for salida.
+- assertVisible:
+    text: "CANTIDAD.*"
 - assertNotVisible:
     id: "movimiento-costo"
+
+# Enter the salida quantity (< stock).
 - tapOn:
     id: "movimiento-cantidad"
+- eraseText
 - inputText: "3"
-- tapOn:
-    id: "movimiento-submit"
 
-- assertNotVisible: "Registrar salida"
-# Stock decremented — cannot assert exact number without seeded state,
-# but the card renders the updated value.
-- assertVisible: "Tortilla"
+# Submit the movement — the "REGISTRAR" button.
+- tapOn:
+    text: "REGISTRAR"
+
+# Modal closes — CANTIDAD gone, stock decremented.
+- assertNotVisible:
+    text: "CANTIDAD.*"
