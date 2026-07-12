@@ -44,13 +44,16 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "business-nombre"
 - inputText: "Taquería Don Pedro"
+# Submit via the keyboard, NOT by tapping "business-submit". BusinessForm has
+# no KeyboardAvoidingView/ScrollView (unlike DirectorSetupScreen), so on the
+# iPad the on-screen keyboard covers the submit button and a coordinate tap
+# lands on the keyboard instead of the button. The designed keyboard-submit
+# path works: Return on the nombre field focuses the ISR field
+# (returnKeyType="next"), and Return on the ISR field submits the form
+# (returnKeyType="done" → onSubmitEditing → handleSubmit, the Audit M-1
+# Bluetooth-keyboard feature). See business-form.tsx:91-120.
 - pressKey: Enter
 - pressKey: Enter
-- swipe:
-    direction: UP
-    duration: 400
-- tapOn:
-    id: "business-submit"
 
 # DirectorSetup (replaces old RolePicker step)
 - runFlow: shared/director-setup.yaml

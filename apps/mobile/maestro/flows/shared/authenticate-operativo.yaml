@@ -1,8 +1,9 @@
-# Reusable subflow: authenticate as Operativo (Ana Operativa).
+# Reusable subflow: authenticate as Operativo (Ana Operativa, PIN 000000).
 #
-# Uses the test PIN: 000000
-# Enters PIN via inline numpad (no system keyboard).
-# PIN auto-submits after 6 digits.
+# Deterministic: selects by the stable role testID `user-avatar-role-operativo`
+# (added in user-avatar.tsx) instead of a brittle composite accessibility label,
+# and every step is REQUIRED — a failed login fails here, loudly, instead of
+# silently proceeding and failing 100s later at the first real step.
 #
 # Usage (from any Operativo flow):
 #   - launchApp
@@ -10,34 +11,23 @@
 #   - runFlow: shared/authenticate-operativo.yaml
 appId: mx.cachink.mobile
 ---
-# Tap the Operativo avatar on QuickSwitch screen.
+- assertVisible:
+    id: "quick-switch"
 - tapOn:
-    text: "A, Ana Operativa, Operativo"
-    optional: true
-
-# Wait for numpad and let animation settle.
-- extendedWaitUntil:
-    visible:
-      id: "pin-numpad"
-    timeout: 5000
-    optional: true
+    id: "user-avatar-role-operativo"
+- assertVisible:
+    id: "pin-numpad"
 - waitForAnimationToEnd
 
-# Enter PIN: 000000
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
+# Enter PIN 000000 (auto-submits after 6 digits).
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
+- tapOn: { id: "numpad-0" }
 
-# Wait for Operativo tabs to mount.
+# Operativo lands on the ventas tab.
 - extendedWaitUntil:
     visible:
       id: "tab-ventas"

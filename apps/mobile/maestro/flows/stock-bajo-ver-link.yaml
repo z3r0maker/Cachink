@@ -1,19 +1,9 @@
-# "Ver bajo stock" navigation from the Stock screen KPI strip.
+# "Ver bajo stock" link on the Director Home dashboard.
 #
-# Verifies:
-#   1. Create product with stock below threshold (≤3 units)
-#   2. Navigate to Stock screen
-#   3. stock-bajo-summary-ver or stock-bajo-ver button visible
-#   4. Tap → verify navigates to filtered bajo-stock view
-#
-# Precondition: wizard complete, at least one product with low/zero stock.
-# The product "Tortilla" starts at 0 stock or has stock ≤3 from prior flows.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/stock-bajo-ver-link.yaml
+# The low-stock summary/link lives on Director Home (StockBajoCard -> StockBajoSummary),
+# NOT the Operativo Productos stock tab. It shows because demo seeds low-stock products
+# (Aceite 20L, Carne pastor kg, ...). Tapping "ver" routes to the Inventario tab
+# filtered by bajoStock. Requires the DIRECTOR (Juan Director) in demo.
 # x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
@@ -21,25 +11,21 @@ appId: mx.cachink.mobile
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
-- tapOn:
-    id: "tab-productos"
+# Log in as the Director (Director Home has the stock-bajo card).
+- runFlow: shared/authenticate-director.yaml
 
-# Switch to Stock sub-tab.
-- tapOn:
-    id: "productos-tab-stock"
-
-# Verify the "Ver bajo stock" link/button is visible.
-# Two possible testIDs depending on the layout variant.
-- assertVisible:
-    id: "stock-kpi-bajo"
-
-# Tap the bajo stock KPI to navigate to the filtered view.
-- tapOn:
-    id: "stock-bajo-ver"
-    optional: true
+# Director Home — scroll to the low-stock card and follow its "ver" link.
+- scrollUntilVisible:
+    element:
+      id: "stock-bajo-summary-ver"
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: "stock-bajo-summary-ver"
-    optional: true
+
+# Routed to the Inventario tab (stock list) filtered to low-stock items.
+- extendedWaitUntil:
+    visible:
+      id: "stock-buscar"
+    timeout: 8000

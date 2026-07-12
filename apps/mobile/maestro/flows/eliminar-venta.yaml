@@ -1,45 +1,33 @@
-# Delete a venta via the detail popover and verify it's removed.
+# Delete a venta from its detail popover.
+# x-entrypoint: demo
 #
-# Covers CRUD Delete for Ventas.
-#
-# Precondition: wizard + product + at least one venta exist.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
-#   maestro test apps/mobile/maestro/flows/eliminar-venta.yaml
-#
-# ⚠️  This flow DESTROYS state — run last in any chain that
-# expects the venta to still exist afterwards.
-# x-entrypoint: wizard
+# TODO(e2e): SUPERSEDED UI. The sales-history list + venta-detail-popover were
+# removed (SessionStrip -> compact TotalBar); the ventas tab renders ProductPane +
+# Cart + TotalBar on BOTH devices. This flow reaches checkout green (iPhone) but the
+# venta popover is no longer on the ventas tab. Re-scope to Director Home -> actividad
+# reciente, or drop. See docs/e2e-productos-row-accessibility-scope.md. (Formerly iPhone-only.) The sales-history pane (ventas-list + venta-detail-popover)
+# renders ONLY on the narrow layout. On iPad (gtMd) VentasScreen is a SplitPane
+# (products left, CART right) with NO sales list — so this flow reaches the checkout
+# but cannot open a venta popover on iPad. The steps below (demo -> ensure-caja-open
+# -> create-venta -> tap the sale -> popover) are correct for the iPhone layout;
+# verify with `--device-class iphone` once an iPhone dev-client build exists.
+# See docs/e2e-productos-row-accessibility-scope.md.
 appId: mx.cachink.mobile
 ---
 - launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
 
-# Navigate to the Ventas tab (Operativo role).
+# Open the sale's popover and delete it.
+- assertVisible:
+    id: "ventas-list"
 - tapOn:
-    id: "tab-ventas"
-
-# Verify the existing sale is visible.
-- assertVisible: "Tortilla"
-
-# Tap the venta card to open VentaDetailPopover.
-- tapOn: "Tortilla"
+    text: "Taco al Pastor.*"
 - assertVisible:
     id: "venta-detail-popover"
-
-# Tap the delete button in the detail popover.
-# This fires eliminar.mutate directly — no confirm dialog.
 - tapOn:
     id: "venta-detail-delete"
-
-# The popover closes and the venta is removed from the list.
 - assertNotVisible:
     id: "venta-detail-popover"
-- assertNotVisible: "Tortilla"

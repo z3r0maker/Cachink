@@ -9,6 +9,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Animated, ScrollView } from 'react-native';
+import { useMedia } from '@tamagui/core';
 import type { User, UserId } from '@cachink/domain';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { usePinSlideIn } from './login-animations';
@@ -54,13 +55,18 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
   const [selectedUserId, setSelectedUserId] = useState<UserId | null>(null);
   const name = props.users.find((u) => u.id === selectedUserId)?.nombre ?? '';
   const forgotPin = props.onForgotPin;
+  const media = useMedia();
 
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'quick-switch'}>
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
-          justifyContent: 'center',
+          // Center on large screens; on short screens (phones) the greeting +
+          // avatars + PIN numpad exceed the viewport, and `center` clips the
+          // numpad's bottom row (0) out of the scrollable range. Top-align there
+          // so the whole numpad stays reachable (scrollable).
+          justifyContent: media.gtMd ? 'center' : 'flex-start',
           alignItems: 'center',
           padding: 24,
           gap: 24,

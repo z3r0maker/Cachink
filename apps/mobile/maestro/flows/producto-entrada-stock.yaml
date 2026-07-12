@@ -20,25 +20,25 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Open the product's detail via search (see find-producto-stock.yaml). On
+# iOS/Fabric, Tamagui onPress-cards expose a merged accessibilityText but NOT
+# their testID, so the row/detail buttons are matched by `text: "<label>.*"`
+# (anchored regex) — containers/inputs keep working by `id:`.
+- runFlow: shared/find-producto-stock.yaml
+
+# Tap the product row → navigates to the product detail route.
 - tapOn:
-    id: "tab-productos"
+    id: "producto-card-.*"
 
-# Verify the existing product is visible in the stock list.
-- assertVisible: "Tortilla"
-
-# Tap the product card to open ProductoDetailPopover.
-- tapOn: "Tortilla"
+# Detail screen — open the "Entrada" movimiento.
 - assertVisible:
-    id: "producto-detail-popover"
-
-# Tap the "Entrada" button to open the MovimientoModal.
+    text: "Entrada.*"
 - tapOn:
-    id: "producto-detail-entrada"
+    text: "Entrada.*"
 
-# MovimientoModal opens with tipo pre-set to "entrada".
+# MovimientoModal (tipo pre-set to "entrada"): CANTIDAD / MOTIVO / NOTA.
 - assertVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"
 
 # Enter quantity for the stock entrada.
 - tapOn:
@@ -46,11 +46,10 @@ appId: mx.cachink.mobile
 - eraseText
 - inputText: "50"
 
-# Submit the movement.
+# Submit the movement — the "REGISTRAR" button (NOT the "Registrar entrada" title).
 - tapOn:
-    id: "movimiento-submit"
+    text: "REGISTRAR"
 
-# Modal closes and the popover also closes. The product's
-# stock should now reflect the entrada.
+# Modal closes — the CANTIDAD field is gone.
 - assertNotVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"

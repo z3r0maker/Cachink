@@ -1,20 +1,9 @@
-# Stock salida with motivo + nota fields.
+# Stock salida with a motivo (reason) selected from the dropdown.
 #
-# Verifies:
-#   1. Navigate to product → tap "Salida"
-#   2. movimiento-tipo-toggle visible in modal
-#   3. Fill movimiento-motivo (reason for salida)
-#   4. Fill movimiento-nota (optional note)
-#   5. Submit → movement recorded
-#
-# Precondition: wizard complete, product "Tortilla" exists with stock ≥ 3.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/producto-entrada-stock.yaml
-#   maestro test apps/mobile/maestro/flows/movimiento-salida-con-motivo.yaml
+# Verifies: product detail -> Salida -> pick MOTIVO -> set CANTIDAD -> REGISTRAR.
+# MOTIVO is a dropdown for salida (Venta / Uso / Merma-dano / Muestra / Ajuste / Otro).
+# Order matters: pick the motivo FIRST, then commit CANTIDAD last, because changing
+# the motivo re-renders the form and drops an uncommitted wheel value.
 # x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
@@ -24,47 +13,33 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Open the product's detail via search, then the Salida movimiento.
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
-
-# Tap the product card to open ProductoDetailPopover.
-- tapOn: "Tortilla"
+    id: "producto-card-.*"
 - assertVisible:
-    id: "producto-detail-popover"
-
-# Tap "Salida" to open MovimientoModal.
+    text: "Salida.*"
 - tapOn:
-    id: "producto-detail-salida"
-
-# MovimientoModal opens.
+    text: "Salida.*"
 - assertVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"
 
-# Verify the tipo toggle is visible.
-- assertVisible:
-    id: "movimiento-tipo-toggle"
+# Pick the MOTIVO first (dropdown) — selecting it re-renders the form.
+- tapOn:
+    id: "movimiento-motivo"
+- tapOn:
+    text: "Merma.*"
 
-# Enter quantity.
+# Commit CANTIDAD last so the value survives the motivo re-render.
 - tapOn:
     id: "movimiento-cantidad"
 - eraseText
 - inputText: "2"
 
-# Fill the motivo (reason) field.
-- tapOn:
-    id: "movimiento-motivo"
-- inputText: "Producto dañado"
-
-# Fill the nota (optional note) field.
-- tapOn:
-    id: "movimiento-nota"
-- inputText: "Encontrado en revisión matutina"
-
 # Submit the movement.
 - tapOn:
-    id: "movimiento-submit"
+    text: "REGISTRAR"
 
-# Modal closes — movement recorded.
+# Modal closes — CANTIDAD gone, stock decremented.
 - assertNotVisible:
-    id: "movimiento-modal"
+    text: "CANTIDAD.*"

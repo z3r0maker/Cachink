@@ -83,19 +83,28 @@ function resolveHooks(input?: AppProvidersHooks): Required<AppProvidersHooks> {
   };
 }
 
+/** Gated navigation bridges, or a bare LAN provider when gating is off. */
+function renderContent(
+  gated: boolean,
+  platform: AppProvidersProps['platform'],
+  hooks: Required<AppProvidersHooks>,
+  children: ReactNode,
+): ReactElement {
+  return gated ? (
+    <GatedBridges platform={platform} hooks={hooks}>
+      {children}
+    </GatedBridges>
+  ) : (
+    <LanSyncProvider handle={null}>{children}</LanSyncProvider>
+  );
+}
+
 export function AppProviders(props: AppProvidersProps): ReactElement {
   const logStoreRef = useRef<LogStore | null>(null);
   const queryClient = useMemo(() => buildQueryClient(logStoreRef), []);
   const gated = props.gated ?? true;
   const hooks = useMemo(() => resolveHooks(props.hooks), [props.hooks]);
-
-  const content = gated ? (
-    <GatedBridges platform={props.platform} hooks={hooks}>
-      {props.children}
-    </GatedBridges>
-  ) : (
-    <LanSyncProvider handle={null}>{props.children}</LanSyncProvider>
-  );
+  const content = renderContent(gated, props.platform, hooks, props.children);
 
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
@@ -112,6 +121,10 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
                   >
                     <TelemetryBridge>
                       {content}
+                      {/* Inside the data providers but outside gated `content`:
+                          overlays (e.g. NotificationTapHost) stay mounted while
+                          locked yet can resolve repository/query hooks. */}
+                      {props.overlays}
                       <GlobalErrorToast />
                     </TelemetryBridge>
                   </ObservabilityBridge>
@@ -119,7 +132,6 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
               </DrizzleAppConfigBridge>
             </DatabaseProvider>
           </QueryClientProvider>
-          {props.overlays}
         </AppErrorBoundary>
       </PortalProvider>
     </TamaguiProvider>

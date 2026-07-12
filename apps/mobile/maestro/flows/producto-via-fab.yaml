@@ -1,15 +1,9 @@
-# Create a product using the FAB on the stock/productos screen.
-# Covers Gap G (Phase 17): stock-fab testID alternative entry point.
+# Create a new producto via the add-product affordance and verify it appears.
 #
-# testIDs exercised:
-#   stock-fab
-#
-# Precondition: wizard complete, operativo role.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/producto-via-fab.yaml
+# The FAB (stock-fab) is iPhone-only; the header button (stock-nuevo-producto) renders
+# on both devices and drives the same create flow. Tapping it navigates to the full
+# /nuevo-producto screen (Phase 18 — no longer a modal). Required fields: nombre,
+# costo, precio-venta (validateProducto).
 # x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
@@ -18,40 +12,47 @@ appId: mx.cachink.mobile
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
-# Select Operativo role if RolePicker is showing (cold start).
 
-# Navigate to Productos tab.
+# Productos tab -> add product (header button; FAB is iPhone-only).
 - tapOn:
     id: "tab-productos"
-
-# Use the FAB instead of the stock-nuevo-producto header button.
-- assertVisible:
-    id: "stock-fab"
 - tapOn:
-    id: "stock-fab"
+    id: "stock-nuevo-producto"
 
-# Fill the product form.
+# Full-page create form.
+- assertVisible:
+    id: "producto-nombre"
 - tapOn:
     id: "producto-nombre"
-- inputText: "Refresco"
+- inputText: "Refresco Cola"
 - tapOn:
     id: "producto-precio-venta"
 - eraseText
 - inputText: "25"
 - tapOn:
+    id: "producto-costo"
+- eraseText
+- inputText: "10"
+- hideKeyboard
+
+# Submit (fullWidth Btn inside the scroll — scroll to it if needed).
+- scrollUntilVisible:
+    element:
+      id: "producto-submit"
+    direction: DOWN
+    timeout: 8000
+- tapOn:
     id: "producto-submit"
-    optional: true
 
-# Wait for the modal to close.
-- extendedWaitUntil:
-    notVisible:
-      id: "nuevo-producto-modal"
-    timeout: 5000
-
-# Verify the product appears in the stock list.
+# Back on the stock list — verify the new product via search.
 - extendedWaitUntil:
     visible:
-      id: "stock-list"
-    timeout: 5000
+      id: "stock-buscar"
+    timeout: 8000
+- tapOn:
+    id: "stock-buscar"
+- eraseText
+- inputText: "Refresco Cola"
 - assertVisible:
-    text: ".*Refresco.*"
+    text: ".*Refresco Cola.*"
+- hideKeyboard

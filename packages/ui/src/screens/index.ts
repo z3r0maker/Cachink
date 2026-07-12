@@ -22,8 +22,6 @@ export {
   type ProductosTabBarProps,
   type ProductosSubTab,
   visibleSubTabs,
-  ProductoListRow,
-  type ProductoListRowProps,
   NuevoProductoScreen,
   type NuevoProductoScreenProps,
   initialProductoState,

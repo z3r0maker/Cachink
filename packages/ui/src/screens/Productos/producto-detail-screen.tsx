@@ -10,7 +10,7 @@ import { Text, View } from '@tamagui/core';
 import type { Product, ProductIcon } from '@cachink/domain';
 import { fromPesos, toPesosString } from '@cachink/domain';
 import type { ProductPatch } from '@cachink/data';
-import { Btn, Icon } from '../../components/index';
+import { Icon } from '../../components/index';
 import { colors, typography } from '../../theme';
 import { type DetailFormState, type DetailFormErrors } from './producto-detail-fields';
 import { DetailFormBody } from './producto-detail-form-body';
@@ -73,6 +73,55 @@ function validate(state: DetailFormState): DetailFormErrors {
   return e;
 }
 
+/*
+  Save action is a raw <Pressable>, NOT the shared <Btn>, on purpose.
+  <Btn> sets accessibilityRole="button" + accessibilityLabel, so RN collapses it into
+  a single merged a11y element. In THIS header (form ScrollView sibling rendered over
+  the header row) that merged element was not reliably tappable — <Btn> here never
+  fired its onPress under Maestro/XCUITest across many runs, while the adjacent raw
+  <Pressable> `detail-back` always did. A raw <Pressable> (native coordinate touch,
+  not merged) fires reliably and was verified green end-to-end. Same <Btn> works fine
+  elsewhere (e.g. MovimientoModal), so this is context-specific.
+  Full investigation + evidence: docs/e2e-productos-row-accessibility-scope.md.
+*/
+function DetailSaveButton(props: {
+  dirty: boolean;
+  saving: boolean;
+  onSave: () => void;
+}): ReactElement {
+  const disabled = !props.dirty || props.saving;
+  return (
+    <Pressable
+      onPress={props.onSave}
+      disabled={disabled}
+      testID="detail-save"
+      style={({ pressed }) => [
+        {
+          backgroundColor: props.dirty ? colors.yellow : 'transparent',
+          borderColor: colors.black,
+          borderWidth: 2,
+          borderRadius: 10,
+          height: 44,
+          paddingHorizontal: 18,
+          alignItems: 'center',
+          justifyContent: 'center',
+          opacity: disabled ? 0.5 : 1,
+        },
+        pressed ? { transform: [{ translateX: 2 }, { translateY: 2 }] } : null,
+      ]}
+    >
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={14}
+        color={colors.black}
+      >
+        Guardar
+      </Text>
+    </Pressable>
+  );
+}
+
 function DetailTopBar(props: {
   nombre: string;
   dirty: boolean;
@@ -102,14 +151,7 @@ function DetailTopBar(props: {
       >
         {props.nombre}
       </Text>
-      <Btn
-        variant={props.dirty ? 'primary' : 'ghost'}
-        onPress={props.onSave}
-        disabled={!props.dirty || props.saving}
-        testID="detail-save"
-      >
-        Guardar
-      </Btn>
+      <DetailSaveButton dirty={props.dirty} saving={props.saving} onSave={props.onSave} />
     </View>
   );
 }

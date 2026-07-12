@@ -1,0 +1,38 @@
+# Reusable subflow: create one cash sale via the POS so a venta exists in today's
+# ventas-list (the seeded sales are past-dated and don't show in the day view).
+#
+# Precondition: authenticated Operativo + caja open (shared/ensure-caja-open.yaml).
+# Leaves the app on the ventas POS with the new sale in `ventas-list`.
+appId: mx.cachink.mobile
+---
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 8000
+
+# Add a product to the cart and check out (Efectivo, $50 tendered).
+- tapOn:
+    text: "Taco al Pastor.*"
+- assertVisible:
+    id: "cart-strip"
+- tapOn:
+    id: "cart-checkout-btn"
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 8000
+- tapOn:
+    id: "checkout-method-continue"
+- extendedWaitUntil:
+    visible:
+      id: "checkout-efectivo"
+    timeout: 8000
+- tapOn: "\\$50"
+- tapOn:
+    id: "checkout-efectivo-submit"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 8000

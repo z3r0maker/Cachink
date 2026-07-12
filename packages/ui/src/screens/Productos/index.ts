@@ -1,5 +1,3 @@
-export { StockScreen, type StockScreenProps, filterProductos } from './stock-screen';
-export { ProductoListRow, type ProductoListRowProps } from './producto-list-row';
 export { EmptyProductos, type EmptyProductosProps } from './empty-productos';
 export { StockKpiStrip, type StockKpiStripProps } from './stock-kpi-strip';
 export { MovimientosScreen, type MovimientosScreenProps } from './movimientos-screen';

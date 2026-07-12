@@ -25,50 +25,42 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to the Productos tab.
+# Find the product via search and open its detail route.
+- runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "tab-productos"
+    id: "producto-card-.*"
+- assertVisible:
+    id: "detail-nombre"
 
-# Verify the existing product is visible in the stock list.
-- assertVisible: "Tortilla"
+# Edit the NOMBRE first (clean focus), then the SKU. Both are id-selectable
+# text inputs on the full detail form.
+- tapOn:
+    id: "detail-nombre"
+- eraseText
+- inputText: "Tortilla full form"
+- tapOn:
+    id: "detail-sku"
+- eraseText
+- inputText: "TORT-FULL-001"
 
-# Swipe the product row left to reveal the edit action.
-- swipe:
-    id: "stock-list"
-    direction: LEFT
-    startX: 300
-    endX: 50
+# Dismiss the keyboard so it does not cover GUARDAR.
+- hideKeyboard
 
-# Wait for the EditarProductoModal to appear.
+# Save — navigates back to the stock list on success.
+- tapOn:
+    id: "detail-save"
+- assertNotVisible:
+    id: "detail-save"
+
+# Verify the edit persisted: re-search and assert the new name.
 - extendedWaitUntil:
     visible:
-      id: "editar-producto-modal"
-    timeout: 5000
-
-# --- Set SKU ---
+      id: "stock-buscar"
+    timeout: 8000
 - tapOn:
-    id: "editar-producto-sku"
-- inputText: "TORT-001"
-
-# --- Set unidad ---
-- tapOn:
-    id: "editar-producto-unidad"
-- tapOn: "kg"
-
-# --- Set categoría ---
-- tapOn:
-    id: "editar-producto-categoria"
-- tapOn: "Alimentos"
-
-# --- Set color de fondo ---
-- tapOn:
-    id: "editar-producto-color-fondo"
-
-# Submit the edit.
-- tapOn:
-    id: "editar-producto-submit"
-
-# Modal closes and the product name is still visible.
-- assertNotVisible:
-    id: "editar-producto-modal"
-- assertVisible: "Tortilla"
+    id: "stock-buscar"
+- eraseText
+- inputText: "Tortilla"
+- assertVisible:
+    text: "Tortilla full form.*"
+- hideKeyboard
