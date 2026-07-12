@@ -3,7 +3,7 @@
 # P1C-M4-T02 (NuevoEgreso modal, Gasto tab).
 #
 # Precondition: wizard complete, business set, Operativo role active.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

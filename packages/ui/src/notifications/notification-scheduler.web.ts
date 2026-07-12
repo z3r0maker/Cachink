@@ -16,6 +16,7 @@ import type {
   NotificationPermission,
   NotificationScheduler,
   NotificationSchedulerOptions,
+  PresentNowOptions,
 } from './notification-scheduler.shared';
 
 type TauriNotification = typeof TauriNotificationModule;
@@ -70,6 +71,12 @@ export class TauriNotificationScheduler implements NotificationScheduler {
       void tick();
     }, initialDelay);
     this.#timers.set(options.id, timer);
+  }
+
+  async presentNow(options: PresentNowOptions): Promise<void> {
+    const plugin = await loadTauriNotification();
+    if (!plugin) return;
+    await plugin.sendNotification({ title: options.title, body: options.body });
   }
 
   async cancelById(id: string): Promise<void> {

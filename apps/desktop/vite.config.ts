@@ -31,6 +31,13 @@ export default defineConfig(async ({ mode }) => ({
   // workspace-root copy so only one @tamagui/web flows through the bundle.
   resolve: {
     dedupe: ['react', 'react-dom', '@tamagui/core', '@tamagui/web'],
+    alias: {
+      // Many @cachink/ui screens import ScrollView, Pressable, FlatList etc.
+      // from 'react-native'. On desktop (Vite) we redirect to react-native-web
+      // which provides browser-compatible implementations. Without this alias
+      // Vite tries to serve RN's Flow-syntax index.js → SyntaxError.
+      'react-native': 'react-native-web',
+    },
   },
   // Tamagui 2.x references `process.env.*` at module-eval time. The Tauri
   // webview has no Node globals. Three layers handle this:
@@ -60,6 +67,20 @@ export default defineConfig(async ({ mode }) => ({
     // their `import from 'react-native'` (Flow syntax esbuild cannot
     // parse). See ADR-029 which supersedes ADR-028.
     entries: ['index.html'],
+    // Pre-include deps that Vite discovers late (via alias or dynamic
+    // import) to avoid mid-session re-optimization that causes 504
+    // "Outdated Optimize Dep" errors and a blank screen.
+    include: [
+      'react',
+      'react-dom',
+      'react-dom/client',
+      'react/jsx-dev-runtime',
+      'react/jsx-runtime',
+      'react-native-web',
+      '@tamagui/core',
+      '@tamagui/web',
+      '@tanstack/react-query',
+    ],
     // Belt-and-braces: even if the scanner finds `react-native` as a bare
     // dep (e.g., a future file scans in), do not attempt to pre-bundle
     // it. The desktop runtime never renders a `react-native` primitive —
@@ -98,17 +119,13 @@ export default defineConfig(async ({ mode }) => ({
   // graph the way the array-form `manualChunks` would. This keeps a
   // Local-standalone build from ever downloading the cloud bundle.
   //
-  // `external` reaches Rollup directly (the production-build
-  // counterpart to `optimizeDeps.exclude` which only affects dev
-  // pre-bundling). `react-native` is a phantom static reach via
-  // `share.native.ts` — never runtime-reachable on desktop because
-  // `share/index.ts` explicitly imports `./share.web`. Treating it
-  // as external prevents Rollup from parsing its Flow-syntax
-  // `index.js` during the production build (extends ADR-032 to the
-  // build path).
+  // `react-native` imports are resolved to `react-native-web` via
+  // `resolve.alias` above, so no `external` declaration is needed.
+  // The alias handles both dev and production builds.
   build: {
     rolldownOptions: {
-      external: ['react-native'],
+      // react-native is aliased to react-native-web via resolve.alias,
+      // so no external declaration is needed — the alias handles it.
       output: {
         manualChunks(id: string) {
           if (

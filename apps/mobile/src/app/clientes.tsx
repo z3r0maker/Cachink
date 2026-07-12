@@ -10,6 +10,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
+import { useRouter } from 'expo-router';
 import {
   ClienteDetailRoute,
   ClientesScreen,
@@ -38,6 +39,7 @@ function useClientesItems(): readonly ClienteWithSaldo[] {
 }
 
 export default function ClientesRoute(): ReactElement {
+  const router = useRouter();
   const [query, setQuery] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [selected, setSelected] = useState<Client | null>(null);
@@ -46,7 +48,7 @@ export default function ClientesRoute(): ReactElement {
   const items = useClientesItems();
 
   return (
-    <AppShellWrapper activeTabKey="clientes">
+    <AppShellWrapper activeTabKey="clientes" onBack={() => router.back()}>
       <ClientesScreen
         query={query}
         onChangeQuery={setQuery}

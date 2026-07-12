@@ -14,7 +14,7 @@
     "bundle:check": "turbo run bundle:check",
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
-    "test:coverage": "turbo run test:coverage",
+    "test:coverage": "turbo run test:coverage --continue",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
     "typecheck": "turbo run typecheck",
@@ -26,7 +26,8 @@
     "release:dry-run": "./scripts/build-all.sh --dry-run",
     "store:screenshots": "tsx scripts/take-store-screenshots.ts",
     "deps:check": "taze -r",
-    "deps:update": "taze -r --write --maturity-period 7d && pnpm install"
+    "deps:update": "taze -r --write --maturity-period 7d && pnpm install",
+    "e2e:report": "open e2e-reports/index.html"
   },
   "devDependencies": {
     "@cachink/config": "workspace:*",
@@ -63,7 +64,8 @@
       }
     },
     "onlyBuiltDependencies": [
-      "better-sqlite3"
+      "better-sqlite3",
+      "@shopify/react-native-skia"
     ]
   }
 }

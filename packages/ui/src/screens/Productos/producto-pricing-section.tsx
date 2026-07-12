@@ -9,6 +9,7 @@ import { Combobox, OptionCardGroup } from '../../components/index';
 import { MoneyField } from '../../components/fields/index';
 import { INV_UNIDADES_OPTIONS, USO_PRODUCTO_CARDS } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
+import { MargenGananciaRow } from './margen-ganancia-row';
 import type { DetailFormState, DetailFormErrors } from './producto-detail-fields';
 
 type T = (key: string) => string;
@@ -18,6 +19,7 @@ function PricingFields(props: {
   errors: DetailFormErrors;
   showPrecio: boolean;
   onChange: (p: Partial<DetailFormState>) => void;
+  t: T;
 }): ReactElement {
   return (
     <>
@@ -30,14 +32,21 @@ function PricingFields(props: {
         testID="detail-costo"
       />
       {props.showPrecio && (
-        <MoneyField
-          label="Precio venta"
-          value={props.state.precioVentaPesos}
-          onChange={(v) => props.onChange({ precioVentaPesos: v })}
-          error={props.errors.precioVenta}
-          required
-          testID="detail-precio"
-        />
+        <>
+          <MoneyField
+            label="Precio venta"
+            value={props.state.precioVentaPesos}
+            onChange={(v) => props.onChange({ precioVentaPesos: v })}
+            error={props.errors.precioVenta}
+            required
+            testID="detail-precio"
+          />
+          <MargenGananciaRow
+            costoPesos={props.state.costoPesos}
+            precioVentaPesos={props.state.precioVentaPesos}
+            t={props.t}
+          />
+        </>
       )}
     </>
   );
@@ -87,6 +96,7 @@ export function PricingSection(props: {
         errors={props.errors}
         showPrecio={props.showPrecio}
         onChange={props.onChange}
+        t={props.t}
       />
       <UnitAndUsoFields
         state={props.state}

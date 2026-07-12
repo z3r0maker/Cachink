@@ -44,6 +44,13 @@ set -euo pipefail
 
 APP_ID="mx.cachink.mobile"
 IPAD_DEVICE="${MAESTRO_IPAD_DEVICE:-iPad (10th generation)}"
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+DIAGNOSE_SCRIPT="$SCRIPT_DIR/maestro-diagnose.sh"
+REPORT_COLLECT="$SCRIPT_DIR/report-collect.py"
+REPORT_FINALIZE="$SCRIPT_DIR/report-finalize.py"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+REPORT_ROOT="$REPO_ROOT/e2e-reports"
 EXCLUSIVE="${MAESTRO_EXCLUSIVE:-0}"
 MAX_RETRIES=10
 RETRY_INTERVAL=2
@@ -179,24 +186,69 @@ if ! curl -sf --connect-timeout 3 "$METRO_URL" >/dev/null 2>&1; then
   echo "    Proceeding anyway — the dev-client may reconnect on its own."
 fi
 
-# ─────────────────── Run Maestro with retry ─────────────────────
+# ─────────────────── Run Maestro with retry + report ────────────
 if [[ $# -gt 0 ]]; then
+  # Create run directory for E2E report
+  RUN_ID="$(date +%Y-%m-%d_%H%M)_ipad"
+  RUN_DIR="$REPORT_ROOT/runs/$RUN_ID"
+  mkdir -p "$RUN_DIR/tests"
+
+  # Trap handler: finalize partial report on interrupt
+  finalize_on_exit() {
+    python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" --interrupted 2>/dev/null || true
+  }
+  trap finalize_on_exit INT TERM
+
+  FLOW_PATH="$1"
+  FLOW_NAME="$(basename "$FLOW_PATH" .yaml)"
   ATTEMPT=1
   while [[ $ATTEMPT -le $MAX_RETRIES ]]; do
     echo ""
     echo "🚀  Attempt $ATTEMPT/$MAX_RETRIES:"
     echo "    maestro test --device $IPAD_UDID $*"
-    if maestro test --device "$IPAD_UDID" "$@"; then
-      echo "✅  Flow passed on attempt $ATTEMPT."
+
+    debug_dir="$RUN_DIR/tests/$FLOW_NAME/debug"
+    test_dir="$RUN_DIR/tests/$FLOW_NAME"
+    mkdir -p "$debug_dir" "$test_dir"
+    start_seconds=$SECONDS
+
+    if maestro test --debug-output "$debug_dir" --device "$IPAD_UDID" "$@"; then
+      elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+      echo "✅  Flow passed on attempt $ATTEMPT. (${elapsed_ms}ms)"
+
+      python3 "$REPORT_COLLECT" \
+        --run-dir "$RUN_DIR" --flow "$FLOW_PATH" --status passed \
+        --duration-ms "$elapsed_ms" --debug-dir "$debug_dir" || true
+      rm -rf "$debug_dir"
+
+      python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" || true
+      echo "🌐  HTML Report: $REPORT_ROOT/index.html"
       exit 0
     fi
 
+    elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+
     if [[ $ATTEMPT -lt $MAX_RETRIES ]]; then
       echo "⚠️   Attempt $ATTEMPT failed. Retrying in ${RETRY_INTERVAL}s..."
+      # Clean partial debug output before retry
+      rm -rf "$debug_dir" "$test_dir"
       sleep "$RETRY_INTERVAL"
+    else
+      # Last attempt failed — diagnose and collect
+      echo "  🔬  Running auto-diagnosis..."
+      "$DIAGNOSE_SCRIPT" "$FLOW_PATH" "$debug_dir" "$test_dir" || true
+
+      python3 "$REPORT_COLLECT" \
+        --run-dir "$RUN_DIR" --flow "$FLOW_PATH" --status failed \
+        --duration-ms "$elapsed_ms" --debug-dir "$debug_dir" || true
     fi
     ATTEMPT=$((ATTEMPT + 1))
   done
+
+  python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" || true
+  echo "🌐  HTML Report: $REPORT_ROOT/index.html"
+  echo "📂  Opening report in browser..."
+  open "$REPORT_ROOT/index.html" 2>/dev/null || true
 
   echo "❌  All $MAX_RETRIES attempts failed."
   exit 1

@@ -12,7 +12,7 @@
 #
 # ⚠️  This flow DESTROYS state — run last in any chain that
 # expects the egreso to still exist afterwards.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

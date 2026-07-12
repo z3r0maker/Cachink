@@ -37,6 +37,16 @@ appId: mx.cachink.mobile
 - assertVisible:
     id: "wizard-step3-cloud"
 
+# MVP: cloud sign-in is disabled — note explains why, tap is a no-op.
+- assertVisible:
+    id: "wizard-step3-cloud-note"
+- tapOn:
+    id: "wizard-step3-cloud-card"
+- assertNotVisible:
+    id: "cloud-onboarding-screen"
+- assertVisible:
+    id: "wizard-step3-lan"
+
 # Tap back → returns to Step 1.
 - tapOn:
     id: "wizard-back"

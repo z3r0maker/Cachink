@@ -56,13 +56,15 @@ appId: mx.cachink.mobile
       id: "notificaciones-config-tab"
     timeout: 3000
 
-# Check a few representative source toggles are visible.
+# Check representative source toggles (credito-vencido requires
+# ventasCredito flag which may be off in wizard-only state).
 - assertVisible:
     id: "notif-toggle-stock-bajo"
 - assertVisible:
     id: "notif-toggle-caja-discrepancia"
 - assertVisible:
     id: "notif-toggle-credito-vencido"
+    optional: true
 
 # Toggle one source switch.
 - tapOn:

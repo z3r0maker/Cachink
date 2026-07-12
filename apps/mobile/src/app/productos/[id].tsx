@@ -7,11 +7,18 @@ import type { ReactElement } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Text, View } from '@tamagui/core';
 import type { IsoDate } from '@cachink/domain';
-import {
-  ProductoDetailSmart,
-  useProductosConStock,
-  useProductFormStore,
-} from '@cachink/ui';
+import { ProductoDetailSmart, useProductosConStock, useProductFormStore } from '@cachink/ui';
+import { AppShellWrapper } from '../../shell/app-shell-wrapper';
+
+function NotFoundView({ onBack }: { onBack: () => void }): ReactElement {
+  return (
+    <AppShellWrapper activeTabKey="productos" onBack={onBack}>
+      <View flex={1} alignItems="center" justifyContent="center">
+        <Text>Producto no encontrado</Text>
+      </View>
+    </AppShellWrapper>
+  );
+}
 
 function todayIso(): IsoDate {
   const now = new Date();
@@ -30,11 +37,7 @@ export default function ProductoDetailRoute(): ReactElement {
   const setDraft = useProductFormStore((s) => s.setDraft);
 
   if (!row) {
-    return (
-      <View flex={1} alignItems="center" justifyContent="center">
-        <Text>Producto no encontrado</Text>
-      </View>
-    );
+    return <NotFoundView onBack={() => router.back()} />;
   }
 
   const handleSelectIcon = (): void => {
@@ -56,11 +59,13 @@ export default function ProductoDetailRoute(): ReactElement {
   };
 
   return (
-    <ProductoDetailSmart
-      row={row}
-      fecha={todayIso()}
-      onBack={() => router.back()}
-      onSelectIcon={handleSelectIcon}
-    />
+    <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
+      <ProductoDetailSmart
+        row={row}
+        fecha={todayIso()}
+        onBack={() => router.back()}
+        onSelectIcon={handleSelectIcon}
+      />
+    </AppShellWrapper>
   );
 }

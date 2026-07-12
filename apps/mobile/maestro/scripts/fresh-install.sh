@@ -125,6 +125,22 @@ if ! curl -sf --connect-timeout 3 "$METRO_URL" >/dev/null 2>&1; then
   echo "    Proceeding anyway — the dev-client may reconnect on its own."
 fi
 
+# ──────── Force dev-client to reconnect to localhost Metro ──────
+# The Expo dev-client caches the last Metro URL it connected to.
+# If the network IP changed (VPN, Wi-Fi switch, etc.), the cached
+# URL becomes stale and the app shows the dev-client launcher
+# instead of loading the JS bundle. We fix this by opening the
+# dev-client deep link with the explicit localhost URL, waiting
+# for the bundle to load, then terminating the app so Maestro's
+# `launchApp` gets a clean cold start.
+DEV_CLIENT_URL="exp+cachink://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+echo "🔗  Reconnecting dev-client to localhost:8081..."
+xcrun simctl terminate "$SIM_TARGET" "$APP_ID" 2>/dev/null || true
+xcrun simctl openurl "$SIM_TARGET" "$DEV_CLIENT_URL" 2>/dev/null || true
+sleep 5
+xcrun simctl terminate "$SIM_TARGET" "$APP_ID" 2>/dev/null || true
+echo "✅  Dev-client primed with localhost Metro URL."
+
 # ─────────────────── Run Maestro with retry ─────────────────────
 # After deleting the DB the app needs to relaunch + run migrations
 # before the UI is interactive. Maestro's `launchApp` triggers a

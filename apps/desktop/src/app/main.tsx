@@ -15,7 +15,7 @@
  * + the SQLite handle from inside the provider tree.
  */
 
-import { StrictMode } from 'react';
+import React, { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { AppProviders, type AppProvidersHooks } from '@cachink/ui';
 import { useLanHandle } from '@cachink/ui/sync';
@@ -25,6 +25,7 @@ import { useDesktopLanBridges } from '../shell/use-lan-bridges';
 import { useDesktopCloudBridges } from '../shell/use-cloud-bridges';
 import { useDesktopCloudHandle } from '../shell/use-cloud-handle';
 import { CloudInnerScreenHost } from '../shell/cloud-navigation';
+import { useDesktopDeviceContext } from '../shell/use-device-context';
 
 bootstrapI18n();
 
@@ -40,10 +41,17 @@ const desktopHooks: AppProvidersHooks = {
   useCloudHandle: useDesktopCloudHandle,
 };
 
-createRoot(rootEl).render(
-  <StrictMode>
-    <AppProviders platform="desktop" hooks={desktopHooks} overlays={<CloudInnerScreenHost />}>
+function DesktopApp(): React.ReactElement {
+  const deviceContext = useDesktopDeviceContext();
+  return (
+    <AppProviders platform="desktop" hooks={desktopHooks} deviceContext={deviceContext} overlays={<CloudInnerScreenHost />}>
       <DesktopRouter />
     </AppProviders>
+  );
+}
+
+createRoot(rootEl).render(
+  <StrictMode>
+    <DesktopApp />
   </StrictMode>,
 );

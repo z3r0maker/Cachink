@@ -1,9 +1,11 @@
-# Feature flag toggling E2E — Director → Otros → Funciones.
+# Feature flag toggling E2E — Director → Otros → Funciones (MVP).
 #
+# MVP: stock is the only toggleable flag. Other flags show as "Próximamente".
 # Verifies:
-#   1. Toggle stock OFF → Productos tab hides stock sub-tab
-#   2. Toggle merma ON → Merma tab appears in Productos
-#   3. Toggle all OFF → clean state
+#   1. Stock toggle is visible and interactable
+#   2. ComingSoon flags are visible as cards but have no switches
+#   3. Toggle stock OFF → Productos tab hides stock sub-tab
+#   4. Toggle stock back ON for subsequent flows
 #
 # Precondition: wizard + director-setup complete, logged in as Director.
 # Chain flows:
@@ -28,25 +30,85 @@ appId: mx.cachink.mobile
       id: "otros-funciones"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-funciones"
 
-# --- Toggle stock OFF ---
+# --- Verify stock toggle is visible ---
 - assertVisible:
     id: "funciones-route"
+- assertVisible:
+    id: "flag-stock-switch"
+
+# --- Verify comingSoon flags are present as cards but have NO switches ---
+- assertVisible:
+    id: "flag-ventasCredito"
+- assertNotVisible:
+    id: "flag-ventasCredito-switch"
+- scrollUntilVisible:
+    element:
+      id: "flag-merma"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "flag-merma"
+- assertNotVisible:
+    id: "flag-merma-switch"
+
+# --- Verify conversionMateriaPrima is Próximamente (no switch) ---
+- scrollUntilVisible:
+    element:
+      id: "flag-conversionMateriaPrima"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "flag-conversionMateriaPrima"
+- assertNotVisible:
+    id: "flag-conversionMateriaPrima-switch"
+
+# --- Verify auditoriaInventario is Próximamente (no switch) ---
+- scrollUntilVisible:
+    element:
+      id: "flag-auditoriaInventario"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- assertVisible:
+    id: "flag-auditoriaInventario"
+- assertNotVisible:
+    id: "flag-auditoriaInventario-switch"
+
+# --- Toggle stock OFF ---
+- scrollUntilVisible:
+    element:
+      id: "flag-stock-switch"
+    direction: UP
+    timeout: 5000
+    centerElement: true
 - tapOn:
     id: "flag-stock-switch"
 
 # Navigate to Productos via Otros and verify stock sub-tab is hidden.
 - tapOn:
-    id: "tab-otros"
+    id: "top-bar-back"
+- scrollUntilVisible:
+    element:
+      id: "otros-productos"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-productos"
+# Wait for the Productos screen to mount before asserting.
+- extendedWaitUntil:
+    visible: "Catálogo"
+    timeout: 5000
 - assertNotVisible:
     id: "productos-tab-stock"
 
-# --- Toggle merma ON ---
-# Return to Funciones via Otros.
+# --- Restore stock ON for subsequent flows ---
 - tapOn:
     id: "tab-otros"
 - scrollUntilVisible:
@@ -54,35 +116,8 @@ appId: mx.cachink.mobile
       id: "otros-funciones"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-funciones"
 - tapOn:
-    id: "flag-merma-switch"
-
-# Verify Merma appears as a bottom tab (replaces Productos for Operativo).
-- assertVisible:
-    id: "tab-merma"
-
-# --- Toggle all OFF → clean state ---
-# Switch back to Director to access Funciones.
-- tapOn:
-    id: "top-bar-role-chip"
-- tapOn:
-    id: "role-director-select"
-- tapOn:
-    id: "tab-otros"
-- scrollUntilVisible:
-    element:
-      id: "otros-funciones"
-    direction: DOWN
-    timeout: 5000
-- tapOn:
-    id: "otros-funciones"
-- tapOn:
-    id: "flag-merma-switch"
-
-# Verify Otros no longer shows merma-reportes (caja-reportes always visible).
-- tapOn:
-    id: "tab-otros"
-- assertNotVisible:
-    id: "otros-merma-reportes"
+    id: "flag-stock-switch"

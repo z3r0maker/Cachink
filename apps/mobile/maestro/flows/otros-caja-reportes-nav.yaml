@@ -26,11 +26,17 @@ appId: mx.cachink.mobile
     id: "tab-otros"
 
 # Tap the Caja Reportes grid item (Director-only item).
+- scrollUntilVisible:
+    element:
+      id: "otros-caja-reportes"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-caja-reportes"
 
 # Verify the placeholder screen renders.
 - extendedWaitUntil:
     visible:
-      id: "caja-reportes-placeholder"
+      id: "caja-reportes-screen"
     timeout: 5000

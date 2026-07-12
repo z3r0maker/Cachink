@@ -12,6 +12,7 @@ import { FeedbackAction } from './feedback-action';
 import { LanDetailsCard } from './lan-details-card';
 import { NotificationsToggle } from './notifications-toggle';
 import { CachinkSoundToggle } from './cachink-sound-toggle';
+import { CrashReportingToggle } from './crash-reporting-toggle';
 import type { SettingsProps } from './settings';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -101,6 +102,17 @@ export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): Reac
       )}
       {(props.showExportAction ?? true) && (
         <ExportarDatosAction businessName={props.business?.nombre} />
+      )}
+      {props.onCrashReportingChange && (
+        <CrashReportingToggle
+          enabled={props.crashReportingEnabled ?? false}
+          onChange={props.onCrashReportingChange}
+        />
+      )}
+      {props.onOpenBugReport && (
+        <Btn variant="ghost" onPress={props.onOpenBugReport} fullWidth testID="settings-open-bug-report">
+          {t('settings.reportBugCta')}
+        </Btn>
       )}
       <SettingsCloudAndUpdatesRows props={props} t={t} />
       {/*

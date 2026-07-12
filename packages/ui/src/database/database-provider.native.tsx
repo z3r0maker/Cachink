@@ -28,6 +28,7 @@ import {
   type AsyncDatabaseProviderProps,
 } from './_internal';
 import { nativeResetDatabase } from './database-reset.native';
+import { registerNativeHandle } from './database-native-handle';
 import { runMigrations } from './run-migrations';
 import {
   getSchemaVersion,
@@ -55,6 +56,7 @@ const DB_FILE_NAME = 'cachink.db';
 
 async function createNativeDatabase(): Promise<CachinkDatabase> {
   const native = openDatabaseSync(DB_FILE_NAME);
+  registerNativeHandle(native);
   try {
     // Enable FK enforcement before anything else (CLAUDE.md §conventions).
     // Must happen outside any transaction — pragma is a no-op inside one.
@@ -82,7 +84,8 @@ async function createNativeDatabase(): Promise<CachinkDatabase> {
           await logMigrationEvent(native as never, 'error', '', {
             fromVersion,
             toVersion: SCHEMA_VERSION,
-            error: migrationError instanceof Error ? migrationError.message : String(migrationError),
+            error:
+              migrationError instanceof Error ? migrationError.message : String(migrationError),
           });
           throw migrationError;
         }

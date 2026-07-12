@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState, type ReactElement } from 'react';
-import { View } from '@tamagui/core';
+import { ScrollView } from 'react-native';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import type { AppMode } from '../../app-config/index';
 import {
@@ -211,7 +211,15 @@ export function Wizard(props: WizardProps): ReactElement {
   const consent = useConsentIntercept(props.onSelectMode);
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'wizard'}>
-      <View flex={1} alignItems="center" justifyContent="center" padding={24} gap={14}>
+      <ScrollView
+        contentContainerStyle={{
+          flexGrow: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: 24,
+          gap: 14,
+        }}
+      >
         <SafeAreaSpacer />
         <ActiveStep
           platform={platform}
@@ -226,7 +234,7 @@ export function Wizard(props: WizardProps): ReactElement {
           onClose={() => help.setOpen(false)}
           onPick={help.pickScenario}
         />
-      </View>
+      </ScrollView>
     </FloatingCoinsBackground>
   );
 }

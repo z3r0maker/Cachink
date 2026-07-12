@@ -1,0 +1,68 @@
+# Venta with insufficient stock — verify sale still completes.
+#
+# RegistrarVenta does NOT block on insufficient stock; it allows
+# negative stock (salida movement created regardless). This flow
+# asserts that behavior: sell more than available → sale succeeds.
+#
+# Precondition: demo mode seeded (products + caja open).
+# x-entrypoint: demo
+appId: mx.cachink.mobile
+tags:
+  - ventas
+  - stock
+  - edge-case
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# Navigate to Ventas.
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+# Tap a product and set high quantity (exceeding stock).
+- tapOn: "Quesadilla"
+- assertVisible:
+    id: "cart-strip"
+
+# Set cantidad to a large number by tapping the quantity control.
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+
+# Checkout — should succeed even with high qty.
+- tapOn:
+    id: "cart-checkout-btn"
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+- tapOn:
+    id: "checkout-method-continue"
+- extendedWaitUntil:
+    visible:
+      id: "checkout-efectivo"
+    timeout: 5000
+- tapOn: "\\$500"
+- tapOn:
+    id: "checkout-efectivo-submit"
+
+# Returns to Ventas — sale completed (negative stock allowed).
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000

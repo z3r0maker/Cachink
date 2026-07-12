@@ -60,6 +60,15 @@ class InMemorySqliteDatabase implements SqliteDatabase {
         this.rows.push(row);
       }
     }
+    if (sql.includes('UPDATE') && sql.includes('shipped_at')) {
+      const shippedAt = params[0] as string;
+      const ids = params.slice(1) as string[];
+      for (const row of this.rows) {
+        if (ids.includes(row.id as string)) {
+          row.shipped_at = shippedAt;
+        }
+      }
+    }
     if (sql.includes('DELETE')) {
       const cutoff = params[0] as string;
       this.rows = this.rows.filter((r) => (r.timestamp as string) >= cutoff);
@@ -71,7 +80,16 @@ class InMemorySqliteDatabase implements SqliteDatabase {
     filtered = applyTypeFilter(filtered, sql, params);
     filtered = applyTimestampFilter(filtered, sql, params);
     filtered = applyOperationFilter(filtered, sql, params);
-    filtered.sort((a, b) => (b.timestamp as string).localeCompare(a.timestamp as string));
+    // Filter for unshipped errors
+    if (sql.includes('shipped_at IS NULL')) {
+      filtered = filtered.filter((r) => r.shipped_at == null);
+    }
+    // Sort order: DESC by default, ASC for unshipped queries
+    if (sql.includes('ORDER BY timestamp ASC')) {
+      filtered.sort((a, b) => (a.timestamp as string).localeCompare(b.timestamp as string));
+    } else {
+      filtered.sort((a, b) => (b.timestamp as string).localeCompare(a.timestamp as string));
+    }
     filtered = applyLimit(filtered, params);
     return filtered as T[];
   }
@@ -255,6 +273,70 @@ describe('SqliteLogStore', () => {
     expect(snapshot.auditEvents).toHaveLength(1);
     expect(snapshot.errors).toHaveLength(0);
     expect(snapshot.exportedAt).toBeTruthy();
+  });
+
+  // ─── Outbox methods (shipped_at) ──────────────────────────────
+
+  it('queryUnshippedErrors returns only unshipped error entries', async () => {
+    await store.writeError({
+      id: 'err-1',
+      timestamp: new Date().toISOString(),
+      source: 'ui',
+      errorName: 'TestError',
+      errorMessage: 'test',
+      userId: null,
+      deviceId: 'dev-001',
+      businessId: null,
+    });
+    await store.writeError({
+      id: 'err-2',
+      timestamp: new Date().toISOString(),
+      source: 'system',
+      errorName: 'OtherError',
+      errorMessage: 'other',
+      userId: null,
+      deviceId: 'dev-001',
+      businessId: null,
+    });
+
+    const unshipped = await store.queryUnshippedErrors(10);
+    expect(unshipped).toHaveLength(2);
+    expect(unshipped.map((e) => e.id)).toContain('err-1');
+    expect(unshipped.map((e) => e.id)).toContain('err-2');
+  });
+
+  it('markShipped marks entries and excludes them from queryUnshippedErrors', async () => {
+    await store.writeError({
+      id: 'err-ship-1',
+      timestamp: new Date().toISOString(),
+      source: 'ui',
+      errorName: 'TestError',
+      errorMessage: 'test',
+      userId: null,
+      deviceId: 'dev-001',
+      businessId: null,
+    });
+    await store.writeError({
+      id: 'err-ship-2',
+      timestamp: new Date().toISOString(),
+      source: 'ui',
+      errorName: 'TestError2',
+      errorMessage: 'test2',
+      userId: null,
+      deviceId: 'dev-001',
+      businessId: null,
+    });
+
+    await store.markShipped(['err-ship-1']);
+
+    const unshipped = await store.queryUnshippedErrors(10);
+    expect(unshipped).toHaveLength(1);
+    expect(unshipped[0].id).toBe('err-ship-2');
+  });
+
+  it('markShipped with empty array is a no-op', async () => {
+    await store.markShipped([]);
+    // Should not throw
   });
 
   it('prune removes old entries', async () => {

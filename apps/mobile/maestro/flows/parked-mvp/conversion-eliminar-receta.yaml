@@ -1,0 +1,43 @@
+# Delete a conversion recipe and verify it's removed.
+#
+# Depends on conversion-crear-receta.yaml having run first.
+#
+# Verifies:
+#   1. Navigate to /conversion → Recetas tab
+#   2. Tap delete on a recipe
+#   3. Recipe is removed from the list
+#
+# Precondition: conversion-crear-receta.yaml has been run.
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to conversion screen.
+- tapOn:
+    id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-conversion"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-conversion"
+- extendedWaitUntil:
+    visible:
+      id: "conversion-screen"
+    timeout: 5000
+
+# Tap delete on the first recipe row.
+- tapOn:
+    id: "receta-eliminar-btn"
+
+# Verify the recipe list shows empty state (assuming only one recipe existed).
+- extendedWaitUntil:
+    visible:
+      text: "No hay recetas de conversión"
+    timeout: 5000

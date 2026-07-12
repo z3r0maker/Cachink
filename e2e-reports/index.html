@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cachink! — E2E Report</title>
+  <link rel="stylesheet" href="viewer/styles.css">
+  <script src="viewer/vendor/chart.umd.min.js"></script>
+  <script src="runs-index.js"></script>
+</head>
+<body>
+  <div id="app">
+    <header id="topbar">
+      <div class="topbar-left">
+        <h1>🧪 Cachink! E2E Report</h1>
+      </div>
+      <div class="topbar-right">
+        <select id="run-selector" aria-label="Select run"></select>
+      </div>
+    </header>
+
+    <!-- ══════════ Dashboard View ══════════ -->
+    <main id="dashboard-view" class="view active">
+      <section class="summary-cards" id="summary-cards"></section>
+      <section class="charts-row">
+        <div class="chart-box" id="donut-box">
+          <h3>Estado de tests</h3>
+          <canvas id="donut-chart"></canvas>
+        </div>
+        <div class="chart-box" id="area-bar-box">
+          <h3>Por área funcional</h3>
+          <canvas id="area-bar-chart"></canvas>
+        </div>
+      </section>
+      <section class="chart-box wide" id="trend-box">
+        <h3>Tendencia de pass rate (últimas 30 corridas)</h3>
+        <canvas id="trend-chart"></canvas>
+      </section>
+      <section id="flaky-section" class="flaky-section" style="display:none">
+        <h3>⚡ Tests flaky</h3>
+        <p class="flaky-desc">Tests cuyo status cambió ≥2 veces en las últimas 10 corridas</p>
+        <ul id="flaky-list"></ul>
+      </section>
+    </main>
+
+    <!-- ══════════ Test List View ══════════ -->
+    <main id="list-view" class="view">
+      <div class="list-toolbar">
+        <input type="text" id="search-input" placeholder="Buscar test..." aria-label="Buscar test">
+        <div class="filter-chips" id="filter-chips"></div>
+      </div>
+      <div class="list-content">
+        <aside id="area-sidebar"></aside>
+        <div class="test-table-wrap">
+          <table id="test-table">
+            <thead>
+              <tr>
+                <th class="col-status">Estado</th>
+                <th class="col-name">Test</th>
+                <th class="col-area">Área</th>
+                <th class="col-phase">Fase</th>
+                <th class="col-dur">Duración</th>
+              </tr>
+            </thead>
+            <tbody id="test-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+    <!-- ══════════ Detail View ══════════ -->
+    <main id="detail-view" class="view">
+      <button id="back-to-list" class="back-btn">← Volver a la lista</button>
+      <div id="detail-header"></div>
+      <div id="detail-body">
+        <section id="detail-steps" class="detail-section">
+          <h3>📋 Step Trace</h3>
+          <table id="steps-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Estado</th>
+                <th>Tipo</th>
+                <th>Selector</th>
+                <th>Duración</th>
+              </tr>
+            </thead>
+            <tbody id="steps-table-body"></tbody>
+          </table>
+        </section>
+        <section id="detail-expected-actual" class="detail-section" style="display:none">
+          <h3>❌ Esperado vs Actual</h3>
+          <div id="expected-actual-content"></div>
+        </section>
+        <section id="detail-screenshot" class="detail-section" style="display:none">
+          <h3>📸 Screenshot al fallar</h3>
+          <div id="screenshot-container"></div>
+        </section>
+        <section id="detail-hierarchy" class="detail-section" style="display:none">
+          <h3>🔎 Jerarquía de vistas</h3>
+          <pre id="hierarchy-content"></pre>
+        </section>
+        <section id="detail-cause" class="detail-section" style="display:none">
+          <h3>💡 Causa probable</h3>
+          <p id="cause-content"></p>
+        </section>
+        <section id="detail-report" class="detail-section" style="display:none">
+          <h3>📄 Reporte de diagnóstico</h3>
+          <a id="report-link" target="_blank">Abrir report.md</a>
+        </section>
+      </div>
+    </main>
+
+    <!-- ══════════ Lightbox ══════════ -->
+    <div id="lightbox" class="lightbox" style="display:none">
+      <button class="lightbox-close" aria-label="Cerrar">&times;</button>
+      <img id="lightbox-img" alt="Screenshot zoom">
+    </div>
+
+    <!-- ══════════ Bottom nav ══════════ -->
+    <nav id="bottom-nav">
+      <button class="nav-btn active" data-view="dashboard-view">📊 Dashboard</button>
+      <button class="nav-btn" data-view="list-view">📋 Tests</button>
+    </nav>
+  </div>
+
+  <script src="viewer/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+# Recurring expense with quincenal frequency — happy path.
+#
+# Verifies:
+#   1. Create a recurring expense template with "Quincenal" frequency
+#   2. Verify the template appears in the recurrentes list
+#   3. Verify the frequency label shows "Quincenal"
+#
+# Precondition: demo mode seeded.
+# x-entrypoint: demo
+appId: mx.cachink.mobile
+tags:
+  - egresos
+  - recurrente
+  - edge-case
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to Egresos via Operativo tab.
+- tapOn:
+    id: "tab-gastos"
+
+# Create a new gasto with recurrente toggle.
+- tapOn:
+    id: "egresos-nuevo"
+- tapOn:
+    id: "gasto-concepto"
+- inputText: "Quincena Empleados"
+- tapOn:
+    id: "gasto-monto"
+- inputText: "5000"
+
+# Enable recurrente toggle.
+- tapOn:
+    id: "gasto-recurrente-toggle"
+- assertVisible: "Frecuencia"
+
+# Select Quincenal frequency.
+- tapOn:
+    id: "recurrente-frecuencia"
+- tapOn: "Quincenal"
+
+# Submit.
+- tapOn:
+    id: "gasto-submit"
+
+# Verify the egreso was created.
+- extendedWaitUntil:
+    visible:
+      text: "Quincena Empleados"
+    timeout: 5000

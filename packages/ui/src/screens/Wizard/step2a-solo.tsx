@@ -14,6 +14,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { CLOUD_MODE_ENABLED } from '../../app-config/index';
 import { WizardCard } from './wizard-card';
 import { DataPreservedCallout } from './data-preserved-callout';
 
@@ -93,6 +94,9 @@ export function Step2aSoloScreen(props: Step2aProps): ReactElement {
         icon="cloud"
         title={t('wizard.step2a.cloudTitle')}
         hint={t('wizard.step2a.cloudBody')}
+        disabled={!CLOUD_MODE_ENABLED}
+        chip={CLOUD_MODE_ENABLED ? undefined : { label: t('wizard.comingSoonChip') }}
+        disabledNote={CLOUD_MODE_ENABLED ? undefined : t('wizard.cloudComingSoonNote')}
         onPress={props.onSelectCloud}
       />
       <BackLink label={t('wizard.back')} onPress={props.onBack} />

@@ -1,0 +1,46 @@
+# Navigate to the Auditoria placeholder screen via Otros grid.
+#
+# Verifies:
+#   1. Enable auditoriaInventario flag (requires stock ON)
+#   2. Navigate to Operativo Otros → tap otros-auditoria
+#   3. auditoria-placeholder screen renders
+#
+# Precondition: wizard complete, logged in as Director.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/otros-auditoria-nav.yaml
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Enable the auditoria flag (Director only — navigates to Funciones).
+- runFlow: shared/enable-auditoria-flag.yaml
+
+# Switch to Operativo to verify the grid item appears.
+
+# Navigate to Otros tab.
+- tapOn:
+    id: "tab-otros"
+
+# Tap the Auditoria grid item.
+- scrollUntilVisible:
+    element:
+      id: "otros-auditoria"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-auditoria"
+
+# Verify the placeholder screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "auditoria-screen"
+    timeout: 5000

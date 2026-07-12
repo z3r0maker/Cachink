@@ -13,7 +13,8 @@
  * the same dismiss UX (backdrop tap, Escape) as the rest of the app.
  */
 
-import { useState, type ReactElement } from 'react';
+import { useEffect, useState, type ReactElement } from 'react';
+import { Keyboard, Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore - expo-camera is a peer dep resolved by Metro at runtime
@@ -46,14 +47,25 @@ function CameraBox({
   onScan: (arg: { data: string }) => void;
   disabled: boolean;
 }): ReactElement {
+  const [af, setAf] = useState<'on' | 'off'>('on');
+
+  /** Tap-to-refocus: toggle autofocus off→on to unstick iOS focus. */
+  const handleTapRefocus = (): void => {
+    setAf('off');
+    setTimeout(() => setAf('on'), 100);
+  };
+
   return (
     <View testID="scanner-camera" height={360} backgroundColor={colors.black}>
-      <CameraView
-        style={{ flex: 1 }}
-        facing="back"
-        barcodeScannerSettings={{ barcodeTypes: ['qr', 'code128', 'ean13', 'ean8', 'upc_a'] }}
-        onBarcodeScanned={disabled ? undefined : onScan}
-      />
+      <Pressable style={{ flex: 1 }} onPress={handleTapRefocus}>
+        <CameraView
+          style={{ flex: 1 }}
+          facing="back"
+          autofocus={af}
+          barcodeScannerSettings={{ barcodeTypes: ['qr', 'code128', 'ean13', 'ean8', 'upc_a'] }}
+          onBarcodeScanned={disabled ? undefined : onScan}
+        />
+      </Pressable>
     </View>
   );
 }
@@ -83,6 +95,11 @@ export function Scanner(props: ScannerProps): ReactElement {
   const mode = props.mode ?? 'single';
   const [scanned, setScanned] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+
+  // Dismiss the soft keyboard so the scanner sheet is fully visible.
+  useEffect(() => {
+    if (props.open) Keyboard.dismiss();
+  }, [props.open]);
 
   const handleBarcode = ({ data }: { data: string }): void => {
     if (mode === 'single' && scanned) return;

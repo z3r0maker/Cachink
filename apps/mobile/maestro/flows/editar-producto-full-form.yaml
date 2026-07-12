@@ -16,7 +16,7 @@
 #   maestro test apps/mobile/maestro/flows/editar-producto-full-form.yaml
 #
 # The inventario-producto flow creates "Tortilla".
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

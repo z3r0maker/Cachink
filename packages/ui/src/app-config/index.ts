@@ -8,3 +8,4 @@
 export * from './types';
 export * from './use-app-config';
 export { AppConfigProvider, type AppConfigProviderProps } from './app-config-provider';
+export { CLOUD_MODE_ENABLED } from './feature-availability';

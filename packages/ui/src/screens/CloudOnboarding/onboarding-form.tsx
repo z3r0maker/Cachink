@@ -20,9 +20,10 @@
  * A full RHF migration ships once the controller itself is rewritten.
  */
 
-import type { ReactElement } from 'react';
+import { useRef, type ReactElement } from 'react';
+import { type TextInput } from 'react-native';
 import { View } from '@tamagui/core';
-import { EmailField, PasswordField, TextField } from '../../components/fields/index';
+import { EmailField, focusRef, PasswordField, TextField } from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -54,8 +55,32 @@ export interface OnboardingFormProps {
   readonly onSubmitEditing?: () => void;
 }
 
+function BusinessNameField({ t, state, setField, onSubmitEditing, inputRef }: {
+  t: T; state: OnboardingFormState;
+  setField: (k: keyof OnboardingFormState, v: string) => void;
+  onSubmitEditing?: () => void; inputRef: React.RefObject<unknown>;
+}): ReactElement {
+  return (
+    <View marginTop={12}>
+      <TextField
+        label={t('cloudOnboarding.businessNameLabel')}
+        value={state.businessName}
+        onChange={(v) => setField('businessName', v)}
+        placeholder={t('cloudOnboarding.businessNamePlaceholder')}
+        testID="cloud-business-input"
+        returnKeyType="done"
+        onSubmitEditing={onSubmitEditing}
+        inputRef={inputRef}
+      />
+    </View>
+  );
+}
+
 export function OnboardingForm(props: OnboardingFormProps): ReactElement {
   const { t, tab, state, setField } = props;
+  const passwordRef = useRef<TextInput>(null);
+  const businessNameRef = useRef<TextInput>(null);
+  const onPasswordSubmit = tab === 'signup' ? () => focusRef(businessNameRef) : props.onSubmitEditing;
   return (
     <>
       <EmailField
@@ -65,6 +90,8 @@ export function OnboardingForm(props: OnboardingFormProps): ReactElement {
         placeholder="tú@correo.com"
         testID="cloud-email-input"
         returnKeyType="next"
+        onSubmitEditing={() => focusRef(passwordRef)}
+        blurOnSubmit={false}
       />
       <View marginTop={12}>
         <PasswordField
@@ -74,22 +101,12 @@ export function OnboardingForm(props: OnboardingFormProps): ReactElement {
           autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
           testID="cloud-password-input"
           returnKeyType={tab === 'signup' ? 'next' : 'done'}
-          onSubmitEditing={tab === 'signup' ? undefined : props.onSubmitEditing}
+          onSubmitEditing={onPasswordSubmit}
+          blurOnSubmit={tab !== 'signup'}
+          inputRef={passwordRef}
         />
       </View>
-      {tab === 'signup' && (
-        <View marginTop={12}>
-          <TextField
-            label={t('cloudOnboarding.businessNameLabel')}
-            value={state.businessName}
-            onChange={(v) => setField('businessName', v)}
-            placeholder={t('cloudOnboarding.businessNamePlaceholder')}
-            testID="cloud-business-input"
-            returnKeyType="done"
-            onSubmitEditing={props.onSubmitEditing}
-          />
-        </View>
-      )}
+      {tab === 'signup' && <BusinessNameField t={t} state={state} setField={setField} onSubmitEditing={props.onSubmitEditing} inputRef={businessNameRef} />}
     </>
   );
 }

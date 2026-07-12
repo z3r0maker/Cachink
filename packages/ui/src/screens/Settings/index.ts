@@ -13,3 +13,4 @@ export { EditEmpleadoModal, type EditEmpleadoModalProps } from './edit-empleado-
 export { TiposDePagoScreen, type TiposDePagoScreenProps } from './tipos-de-pago-screen';
 export { SettingsIndicadores, type SettingsIndicadoresProps } from './settings-indicadores';
 export { BugReportSheet, type BugReportSheetProps } from './bug-report-sheet';
+export { CrashReportingToggle, type CrashReportingToggleProps } from './crash-reporting-toggle';

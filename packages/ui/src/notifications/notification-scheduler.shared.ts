@@ -29,9 +29,18 @@ export interface NotificationSchedulerOptions {
   readonly payload?: Record<string, unknown>;
 }
 
+export interface PresentNowOptions {
+  readonly id: string;
+  readonly title: string;
+  readonly body: string;
+  readonly payload?: Record<string, unknown>;
+}
+
 export interface NotificationScheduler {
   requestPermission(): Promise<NotificationPermission>;
   scheduleDaily(options: NotificationSchedulerOptions): Promise<void>;
+  /** Fire a notification immediately (local push). */
+  presentNow(options: PresentNowOptions): Promise<void>;
   cancelById(id: string): Promise<void>;
   cancelAll(): Promise<void>;
 }
@@ -44,6 +53,7 @@ export interface NotificationScheduler {
  */
 export class InMemoryNotificationScheduler implements NotificationScheduler {
   readonly #scheduled = new Map<string, NotificationSchedulerOptions>();
+  readonly #presented: PresentNowOptions[] = [];
   #permission: NotificationPermission = 'undetermined';
 
   setPermission(next: NotificationPermission): void {
@@ -61,6 +71,15 @@ export class InMemoryNotificationScheduler implements NotificationScheduler {
 
   async scheduleDaily(options: NotificationSchedulerOptions): Promise<void> {
     this.#scheduled.set(options.id, options);
+  }
+
+  /** Test-observable list of notifications fired via `presentNow`. */
+  get presented(): readonly PresentNowOptions[] {
+    return this.#presented;
+  }
+
+  async presentNow(options: PresentNowOptions): Promise<void> {
+    this.#presented.push(options);
   }
 
   async cancelById(id: string): Promise<void> {

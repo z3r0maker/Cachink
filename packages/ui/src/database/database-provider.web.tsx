@@ -28,6 +28,7 @@
 import { useCallback, type ReactElement } from 'react';
 import Database from '@tauri-apps/plugin-sql';
 import { drizzle, type AsyncRemoteCallback } from 'drizzle-orm/sqlite-proxy';
+import type { SqliteDatabase } from '@cachink/observability';
 import * as schema from '@cachink/data/schema';
 import type { CachinkDatabase } from '@cachink/data';
 import {
@@ -48,11 +49,40 @@ import {
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
 const DB_PATH = 'sqlite:cachink.db';
 
+/** Adapt Tauri's Database to the SqliteDatabase interface for observability. */
+function wrapTauriAsSqliteDatabase(tauriDb: Database): SqliteDatabase {
+  return {
+    async execAsync(sqlText: string) {
+      await tauriDb.execute(sqlText);
+    },
+    async runAsync(sqlText: string, params: unknown[]) {
+      await tauriDb.execute(sqlText, params);
+    },
+    async getAllAsync<T>(sqlText: string, params?: unknown[]): Promise<T[]> {
+      return tauriDb.select<T[]>(sqlText, params ?? []);
+    },
+    async getFirstAsync<T>(sqlText: string, params?: unknown[]): Promise<T | null> {
+      const rows = await tauriDb.select<T[]>(sqlText, params ?? []);
+      return rows[0] ?? null;
+    },
+  };
+}
+
 /** Build the Drizzle sqlite-proxy callback that bridges to Tauri's plugin. */
 export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
   return async (sqlText, params, method) => {
     if (method === 'run') {
-      await tauriDb.execute(sqlText, params);
+      try {
+        await tauriDb.execute(sqlText, params);
+      } catch (err) {
+        console.error('[TAURI execute FAILED]', {
+          sql: sqlText.slice(0, 200),
+          params,
+          err: String(err),
+          msg: err instanceof Error ? err.message : '?',
+        });
+        throw err;
+      }
       return { rows: [] };
     }
 
@@ -76,6 +106,9 @@ async function createDesktopDatabase(): Promise<CachinkDatabase> {
     await tauriDb.execute('PRAGMA foreign_keys = ON');
     await tauriDb.execute('PRAGMA journal_mode = WAL');
     const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
+    // Attach a SqliteDatabase-compatible handle so the observability bridge
+    // (which reads `db.$client`) can use it for its log store.
+    (db as unknown as { $client: SqliteDatabase }).$client = wrapTauriAsSqliteDatabase(tauriDb);
 
     // Version gate: prevent old code from running against a newer schema.
     const dbVersion = await getSchemaVersion(db);
@@ -85,7 +118,7 @@ async function createDesktopDatabase(): Promise<CachinkDatabase> {
       case 'ok':
         return db;
       case 'needs_migration':
-        await runMigrations(db);
+        await runMigrations(db, { skipTransactions: true });
         await setSchemaVersion(db, SCHEMA_VERSION);
         return db;
       case 'app_too_old':

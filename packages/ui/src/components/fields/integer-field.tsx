@@ -9,7 +9,7 @@
  * Use cases: cantidad de inventario, días promedio, número de
  * empleados, cantidad de unidades.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { useCallback } from 'react';
 import { Input } from '../Input/input';
 
@@ -32,6 +32,8 @@ export interface IntegerFieldProps {
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
   readonly onSubmitEditing?: () => void;
   readonly blurOnSubmit?: boolean;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 function clean(raw: string): string {
@@ -78,6 +80,7 @@ export function IntegerField(props: IntegerFieldProps): ReactElement {
       returnKeyType={props.returnKeyType}
       onSubmitEditing={props.onSubmitEditing}
       blurOnSubmit={props.blurOnSubmit}
+      inputRef={props.inputRef}
     />
   );
 }

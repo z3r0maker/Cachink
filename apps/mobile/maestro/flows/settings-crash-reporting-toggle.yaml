@@ -1,0 +1,60 @@
+# Settings → Sistema → Crash Reporting Toggle
+#
+# Verifies:
+#   - CrashReportingToggle is visible on the Sistema sub-screen
+#   - Toggle can be turned on and off
+#   - Bug report button is visible
+#
+# Precondition: wizard complete.
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Open Settings via Otros → Configuración.
+- runFlow: shared/navigate-to-settings.yaml
+
+# Navigate to the Sistema sub-screen.
+- tapOn:
+    id: "settings-hub-sistema"
+- extendedWaitUntil:
+    visible: "Sistema"
+    timeout: 5000
+
+# Scroll to and assert crash reporting toggle is visible.
+- scrollUntilVisible:
+    element:
+      id: "settings-crash-reporting-toggle"
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: "settings-crash-reporting-toggle"
+
+# Tap the crash reporting button to toggle it.
+- tapOn:
+    id: "settings-crash-reporting-btn"
+- extendedWaitUntil:
+    visible:
+      id: "settings-crash-reporting-btn"
+    timeout: 3000
+
+# Tap again to toggle back.
+- tapOn:
+    id: "settings-crash-reporting-btn"
+- extendedWaitUntil:
+    visible:
+      id: "settings-crash-reporting-btn"
+    timeout: 3000
+
+# Scroll to and assert bug report button is visible.
+- scrollUntilVisible:
+    element:
+      id: "settings-open-bug-report"
+    direction: DOWN
+    timeout: 5000
+- assertVisible:
+    id: "settings-open-bug-report"

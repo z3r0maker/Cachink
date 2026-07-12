@@ -8,9 +8,11 @@
  */
 import type { ReactElement } from 'react';
 import { Input as TamaguiInput } from '@tamagui/input';
-import { colors, typography } from '../../theme';
+import { colors, radii, typography } from '../../theme';
 import type { FieldProps } from './input-shared';
-import { keyboardHintsFor, FIELD_RADIUS } from './input-shared';
+import { keyboardHintsFor } from './input-shared';
+
+const FIELD_RADIUS = radii[2]; // 12 — same as input-shared.ts
 
 /** Brand visual styling tokens for the underlying TamaguiInput. */
 const FIELD_VISUAL = {

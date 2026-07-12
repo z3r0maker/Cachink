@@ -27,33 +27,42 @@ interface FeatureCard {
   readonly nameKey: string;
   readonly descKey: string;
   readonly active: boolean;
+  /** When true, rendered with a "Próximamente" tag instead of the green active tag. */
+  readonly comingSoon?: boolean;
 }
 
+/**
+ * MVP: Stock is active; hidden features shown as "Próximamente".
+ */
 const CARDS: readonly FeatureCard[] = [
   { icon: 'package', nameKey: 'discovery.stock', descKey: 'discovery.stockDesc', active: true },
+  {
+    icon: 'credit-card',
+    nameKey: 'discovery.ventasCredito',
+    descKey: 'discovery.ventasCreditoDesc',
+    active: false,
+    comingSoon: true,
+  },
   {
     icon: 'refresh-cw',
     nameKey: 'discovery.conversion',
     descKey: 'discovery.conversionDesc',
     active: false,
+    comingSoon: true,
   },
   {
     icon: 'clipboard-list',
     nameKey: 'discovery.auditoria',
     descKey: 'discovery.auditoriaDesc',
     active: false,
+    comingSoon: true,
   },
   {
-    icon: 'trending-down',
+    icon: 'trash-2',
     nameKey: 'discovery.merma',
     descKey: 'discovery.mermaDesc',
     active: false,
-  },
-  {
-    icon: 'credit-card',
-    nameKey: 'discovery.ventasCredito',
-    descKey: 'discovery.ventasCreditoDesc',
-    active: false,
+    comingSoon: true,
   },
 ];
 
@@ -73,6 +82,21 @@ function DiscoveryActiveTag({ t }: { t: T }): ReactElement {
     >
       <Text fontSize={11} color={colors.white}>
         {t('discovery.active')}
+      </Text>
+    </View>
+  );
+}
+
+function ComingSoonTag({ t }: { t: T }): ReactElement {
+  return (
+    <View
+      backgroundColor={colors.gray200}
+      borderRadius={12}
+      paddingHorizontal={8}
+      paddingVertical={2}
+    >
+      <Text fontSize={11} color={colors.gray600}>
+        {t('discovery.comingSoon')}
       </Text>
     </View>
   );
@@ -104,6 +128,7 @@ function DiscoveryCardContent({
         </Text>
       </View>
       {isActive && <DiscoveryActiveTag t={t} />}
+      {card.comingSoon === true && !isActive && <ComingSoonTag t={t} />}
     </View>
   );
 }

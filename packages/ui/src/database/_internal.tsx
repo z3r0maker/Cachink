@@ -81,6 +81,14 @@ export function AsyncDatabaseProvider(props: AsyncDatabaseProviderProps): ReactE
     reset: props.reset,
     preInitialised: props.database,
   });
+  console.warn(
+    '[DB lifecycle]',
+    JSON.stringify({
+      loading: lifecycle.loading,
+      hasDb: !!lifecycle.db,
+      error: lifecycle.error ? String(lifecycle.error) : null,
+    }),
+  );
   if (lifecycle.error) {
     return (
       <DatabaseErrorState

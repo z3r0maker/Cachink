@@ -71,6 +71,36 @@ describe('InMemoryNotificationScheduler', () => {
     const s = new InMemoryNotificationScheduler();
     await expect(s.cancelById('missing')).resolves.toBeUndefined();
   });
+
+  it('presentNow records the notification in the presented array', async () => {
+    const s = new InMemoryNotificationScheduler();
+    await s.presentNow({
+      id: 'alert-1',
+      title: 'Discrepancia de caja',
+      body: 'Faltaron $50',
+      payload: { actionRoute: '/caja-reportes', alertId: 'alert-1' },
+    });
+    expect(s.presented).toHaveLength(1);
+    expect(s.presented[0]!.id).toBe('alert-1');
+    expect(s.presented[0]!.title).toBe('Discrepancia de caja');
+    expect(s.presented[0]!.payload).toEqual({
+      actionRoute: '/caja-reportes',
+      alertId: 'alert-1',
+    });
+  });
+
+  it('presentNow accumulates multiple notifications', async () => {
+    const s = new InMemoryNotificationScheduler();
+    await s.presentNow({ id: 'a', title: 'A', body: 'Body A' });
+    await s.presentNow({ id: 'b', title: 'B', body: 'Body B' });
+    expect(s.presented).toHaveLength(2);
+  });
+
+  it('presentNow works without payload (optional)', async () => {
+    const s = new InMemoryNotificationScheduler();
+    await s.presentNow({ id: 'no-payload', title: 'T', body: 'B' });
+    expect(s.presented[0]!.payload).toBeUndefined();
+  });
 });
 
 describe('millisUntilNextTrigger', () => {

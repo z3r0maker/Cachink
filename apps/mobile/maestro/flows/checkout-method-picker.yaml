@@ -40,3 +40,7 @@ tags:
 # Verify the continue button exists.
 - assertVisible:
     id: "checkout-method-continue"
+
+# ── MVP: Crédito must NOT appear in the payment picker ──
+- assertNotVisible:
+    id: "option-card-Crédito"

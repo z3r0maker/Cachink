@@ -14,7 +14,7 @@
  * applied at form submit. Keystroke-time validation produces too many
  * red-state false positives for an email-shaped field.
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { Input } from '../Input/input';
 
 export interface EmailFieldProps {
@@ -28,6 +28,8 @@ export interface EmailFieldProps {
   readonly returnKeyType?: 'default' | 'next' | 'done' | 'go' | 'send' | 'search';
   readonly onSubmitEditing?: () => void;
   readonly blurOnSubmit?: boolean;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 export function EmailField(props: EmailFieldProps): ReactElement {
@@ -44,6 +46,7 @@ export function EmailField(props: EmailFieldProps): ReactElement {
       returnKeyType={props.returnKeyType}
       onSubmitEditing={props.onSubmitEditing}
       blurOnSubmit={props.blurOnSubmit}
+      inputRef={props.inputRef}
     />
   );
 }

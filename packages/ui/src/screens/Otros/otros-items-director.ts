@@ -20,7 +20,7 @@ const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
     icon: 'file-text',
     labelKey: 'otros.gastos',
     descriptionKey: 'otros.desc.gastos',
-    path: '/egresos',
+    path: '/gastos',
   },
   {
     key: 'indicadores',
@@ -34,51 +34,26 @@ const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [
     icon: 'package',
     labelKey: 'otros.productos',
     descriptionKey: 'otros.desc.productos',
-    path: '/productos',
+    path: '/productos-otros',
   },
 ] as const;
 
+/**
+ * MVP: removed conversion, auditoria, merma-reportes, and ventas-credito.
+ * Restore hidden entries here when re-enabling post-MVP.
+ */
 const DIRECTOR_FLAG_ITEMS: readonly FlagItem[] = [
-  {
-    item: {
-      key: 'conversion',
-      icon: 'refresh-cw',
-      labelKey: 'otros.conversion',
-      descriptionKey: 'otros.desc.conversion',
-      path: '/conversion',
-    },
-    flagCheck: (f) => f.conversionMateriaPrima,
-  },
-  {
-    item: {
-      key: 'auditoria',
-      icon: 'clipboard-list',
-      labelKey: 'otros.auditoria',
-      descriptionKey: 'otros.desc.auditoria',
-      path: '/auditoria',
-    },
-    flagCheck: (f) => f.auditoriaInventario,
-  },
-  {
-    item: {
-      key: 'ventas-credito',
-      icon: 'credit-card',
-      labelKey: 'otros.ventasCredito',
-      descriptionKey: 'otros.desc.ventasCredito',
-      path: '/ventas-credito',
-    },
-    flagCheck: (f) => f.ventasCredito,
-  },
-  {
-    item: {
-      key: 'merma-reportes',
-      icon: 'trending-down',
-      labelKey: 'otros.mermaReportes',
-      descriptionKey: 'otros.desc.mermaReportes',
-      path: '/merma-reportes',
-    },
-    flagCheck: (f) => f.merma,
-  },
+  // ---- Restore post-MVP ----
+  // {
+  //   item: {
+  //     key: 'ventas-credito',
+  //     icon: 'credit-card',
+  //     labelKey: 'otros.ventasCredito',
+  //     descriptionKey: 'otros.desc.ventasCredito',
+  //     path: '/ventas-credito',
+  //   },
+  //   flagCheck: (f) => f.ventasCredito,
+  // },
 ] as const;
 
 const DIRECTOR_CAJA_ITEMS: readonly OtrosItem[] = [
@@ -113,13 +88,14 @@ const DIRECTOR_CAJA_ITEMS: readonly OtrosItem[] = [
 ] as const;
 
 const DIRECTOR_TAIL_ITEMS: readonly OtrosItem[] = [
-  {
-    key: 'empleados',
-    icon: 'users',
-    labelKey: 'otros.empleados',
-    descriptionKey: 'otros.desc.empleados',
-    path: '/empleados',
-  },
+  // ---- Restore post-MVP ----
+  // {
+  //   key: 'empleados',
+  //   icon: 'users',
+  //   labelKey: 'otros.empleados',
+  //   descriptionKey: 'otros.desc.empleados',
+  //   path: '/empleados',
+  // },
   {
     key: 'usuarios',
     icon: 'user-check',
@@ -145,7 +121,12 @@ const DIRECTOR_TAIL_ITEMS: readonly OtrosItem[] = [
 
 export function directorOtrosItems(flags: FeatureFlags): OtrosItem[] {
   const flagItems = DIRECTOR_FLAG_ITEMS.filter((e) => e.flagCheck(flags)).map((e) => e.item);
-  const items = [...DIRECTOR_ALWAYS_ITEMS, ...flagItems, ...DIRECTOR_CAJA_ITEMS, ...DIRECTOR_TAIL_ITEMS];
+  const items = [
+    ...DIRECTOR_ALWAYS_ITEMS,
+    ...flagItems,
+    ...DIRECTOR_CAJA_ITEMS,
+    ...DIRECTOR_TAIL_ITEMS,
+  ];
 
   if (typeof __DEV__ !== 'undefined' && __DEV__) {
     items.push({

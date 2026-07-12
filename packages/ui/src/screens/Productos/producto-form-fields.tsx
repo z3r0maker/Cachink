@@ -14,7 +14,7 @@ import {
   Input,
   OptionCardGroup,
 } from '../../components/index';
-import { IntegerField, MoneyField, StepperField, TextField } from '../../components/fields/index';
+import { focusRef, IntegerField, MoneyField, StepperField, TextField } from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';
 import {
   INV_CATEGORIAS,
@@ -22,6 +22,7 @@ import {
   USO_PRODUCTO_CARDS,
   type ProductoFormApi,
 } from './nuevo-producto-form';
+import { MargenGananciaRow } from './margen-ganancia-row';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
@@ -29,6 +30,7 @@ export function IdentityFields(props: {
   form: ProductoFormApi;
   t: T;
   onScan: () => void;
+  skuRef?: React.RefObject<unknown>;
 }): ReactElement {
   const { form, t } = props;
   return (
@@ -42,6 +44,8 @@ export function IdentityFields(props: {
         required
         testID="producto-nombre"
         returnKeyType="next"
+        onSubmitEditing={() => focusRef(props.skuRef)}
+        blurOnSubmit={false}
       />
       <TextField
         label={t('nuevoProducto.skuLabel')}
@@ -50,6 +54,7 @@ export function IdentityFields(props: {
         onChange={(v) => form.update({ sku: v })}
         testID="producto-sku"
         returnKeyType="next"
+        inputRef={props.skuRef}
       />
       <Btn variant="ghost" onPress={props.onScan} fullWidth icon={<Icon name="camera" size={16} />} testID="producto-scan">
         {t('scanner.title')}
@@ -90,10 +95,36 @@ export function CategoryFields({
   );
 }
 
+function PrecioVentaBlock({ form, t, precioRef }: {
+  form: ProductoFormApi; t: T; precioRef?: React.RefObject<unknown>;
+}): ReactElement {
+  return (
+    <>
+      <MoneyField
+        label={t('nuevoProducto.precioVentaLabel')}
+        value={form.state.precioVentaPesos}
+        onChange={(v) => form.update({ precioVentaPesos: v })}
+        error={form.errors.precioVenta}
+        required
+        testID="producto-precio-venta"
+        returnKeyType="next"
+        inputRef={precioRef}
+      />
+      <MargenGananciaRow
+        costoPesos={form.state.costoPesos}
+        precioVentaPesos={form.state.precioVentaPesos}
+        t={t}
+      />
+    </>
+  );
+}
+
 export function PricingFields(props: {
   form: ProductoFormApi;
   t: T;
   showPrecio: boolean;
+  costoRef?: React.RefObject<unknown>;
+  precioRef?: React.RefObject<unknown>;
 }): ReactElement {
   const { form, t } = props;
   return (
@@ -106,18 +137,11 @@ export function PricingFields(props: {
         required
         testID="producto-costo"
         returnKeyType="next"
+        inputRef={props.costoRef}
+        onSubmitEditing={props.showPrecio ? () => focusRef(props.precioRef) : undefined}
+        blurOnSubmit={!props.showPrecio}
       />
-      {props.showPrecio && (
-        <MoneyField
-          label={t('nuevoProducto.precioVentaLabel')}
-          value={form.state.precioVentaPesos}
-          onChange={(v) => form.update({ precioVentaPesos: v })}
-          error={form.errors.precioVenta}
-          required
-          testID="producto-precio-venta"
-          returnKeyType="next"
-        />
-      )}
+      {props.showPrecio && <PrecioVentaBlock form={form} t={t} precioRef={props.precioRef} />}
       <Combobox label={t('nuevoProducto.unidadLabel')} value={form.state.unidad} onChange={(v) => form.update({ unidad: v as InventoryUnit })} options={INV_UNIDADES_OPTIONS} testID="producto-unidad" />
     </>
   );

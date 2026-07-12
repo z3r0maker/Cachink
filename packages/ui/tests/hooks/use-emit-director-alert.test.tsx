@@ -12,8 +12,12 @@ import { InMemoryDirectorAlertsRepository, TEST_DEVICE_ID } from '@cachink/testi
 import type { BusinessId } from '@cachink/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEmitDirectorAlert } from '../../src/hooks/use-emit-director-alert';
+import { InMemoryNotificationScheduler } from '../../src/notifications/notification-scheduler.shared';
+import { initI18n } from '../../src/i18n/index';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
+
+initI18n();
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
@@ -32,6 +36,13 @@ function wrapper(
       </TamaguiProvider>
     );
   };
+}
+
+/** Helper: create a scheduler pre-set to granted permission. */
+function grantedScheduler(): InMemoryNotificationScheduler {
+  const s = new InMemoryNotificationScheduler();
+  s.setPermission('granted');
+  return s;
 }
 
 describe('useEmitDirectorAlert', () => {
@@ -117,5 +128,128 @@ describe('useEmitDirectorAlert', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data).toBeNull();
+  });
+
+  // ── Push notification tests ────────────────────────────────────
+
+  it('fires presentNow for critical severity', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    const scheduler = grantedScheduler();
+    const { result } = renderHook(
+      () => useEmitDirectorAlert({ testScheduler: scheduler }),
+      { wrapper: wrapper({ directorAlerts: repo }) },
+    );
+
+    await act(async () => {
+      result.current.mutate({
+        source: 'discrepancia-caja',
+        severity: 'critical',
+        titleKey: 'notificaciones.discrepanciaCaja',
+        message: 'Faltaron $50',
+        actionRoute: '/caja-reportes',
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(scheduler.presented).toHaveLength(1);
+    expect(scheduler.presented[0]!.body).toBe('Faltaron $50');
+    expect(scheduler.presented[0]!.payload).toMatchObject({
+      actionRoute: '/caja-reportes',
+    });
+  });
+
+  it('fires presentNow for warning severity', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    const scheduler = grantedScheduler();
+    const { result } = renderHook(
+      () => useEmitDirectorAlert({ testScheduler: scheduler }),
+      { wrapper: wrapper({ directorAlerts: repo }) },
+    );
+
+    await act(async () => {
+      result.current.mutate({
+        source: 'stock-bajo',
+        severity: 'warning',
+        titleKey: 'notificaciones.stockBajo',
+        message: 'Stock bajo en 3 productos',
+        actionRoute: '/productos',
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(scheduler.presented).toHaveLength(1);
+  });
+
+  it('does NOT fire presentNow for info severity', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    const scheduler = grantedScheduler();
+    const { result } = renderHook(
+      () => useEmitDirectorAlert({ testScheduler: scheduler }),
+      { wrapper: wrapper({ directorAlerts: repo }) },
+    );
+
+    await act(async () => {
+      result.current.mutate({
+        source: 'usuario-creado',
+        severity: 'info',
+        titleKey: 'notificaciones.usuarioCreado',
+        message: 'Nuevo operativo registrado',
+        actionRoute: '/usuarios',
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(scheduler.presented).toHaveLength(0);
+  });
+
+  it('carries actionRoute in payload, defaulting to /notificaciones', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    const scheduler = grantedScheduler();
+    const { result } = renderHook(
+      () => useEmitDirectorAlert({ testScheduler: scheduler }),
+      { wrapper: wrapper({ directorAlerts: repo }) },
+    );
+
+    await act(async () => {
+      result.current.mutate({
+        source: 'discrepancia-caja',
+        severity: 'critical',
+        titleKey: 'notificaciones.discrepanciaCaja',
+        message: 'Test',
+        actionRoute: null,
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(scheduler.presented[0]!.payload).toMatchObject({
+      actionRoute: '/notificaciones',
+    });
+  });
+
+  it('silently skips push when permission is denied', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    const scheduler = new InMemoryNotificationScheduler();
+    scheduler.setPermission('denied');
+    const { result } = renderHook(
+      () => useEmitDirectorAlert({ testScheduler: scheduler }),
+      { wrapper: wrapper({ directorAlerts: repo }) },
+    );
+
+    await act(async () => {
+      result.current.mutate({
+        source: 'discrepancia-caja',
+        severity: 'critical',
+        titleKey: 'notificaciones.discrepanciaCaja',
+        message: 'Test',
+        actionRoute: '/caja-reportes',
+      });
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    // Alert still created in repo
+    const alerts = await repo.findAll(BIZ);
+    expect(alerts).toHaveLength(1);
+    // But no OS notification fired
+    expect(scheduler.presented).toHaveLength(0);
   });
 });

@@ -1,19 +1,15 @@
-# Solo + Cloud-as-backup happy path (ADR-039 WUX-M4-T02).
+# MVP: Cloud card disabled — verify "Próximamente" state (ADR-039 WUX-M4-T02).
 #
-# Verifies the new path the wizard exposes for users who run Cachink on
-# a single device but want cloud-backup safety. Step 1 → Solo →
-# Step 2A → Cloud → CloudOnboarding signup tab → BusinessForm.
+# Step 1 → Solo → Step 2A → assert cloud card shows disabled note →
+# tap cloud card → assert still on Step 2A (no cloud-onboarding-screen) →
+# tap local card and proceed through consent.
 #
 # Precondition: fresh install. Run via wrapper:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-cloud-solo.yaml
 #
-# Requires the same env vars as cloud-signup-signin.yaml.
 # x-entrypoint: fresh
 appId: mx.cachink.mobile
-env:
-  EMAIL: ${MAESTRO_CLOUD_EMAIL_A}
-  PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
 ---
 - launchApp
 
@@ -24,19 +20,16 @@ env:
 - assertVisible: "¡Bienvenido a Cachink!"
 - tapOn: { id: "wizard-step1-solo-card" }
 
+# Cloud card should be visible but disabled with the "Próximamente" note.
 - assertVisible: { id: "wizard-step2a-cloud" }
+- assertVisible: { id: "wizard-step2a-cloud-note" }
+
+# Tapping the disabled cloud card should NOT navigate away.
 - tapOn: { id: "wizard-step2a-cloud-card" }
+- assertNotVisible: { id: "cloud-onboarding-screen" }
+- assertVisible: { id: "wizard-step2a-local" }
 
-# CloudOnboardingScreen mounts with sign-up tab pre-selected.
-- assertVisible: { id: "cloud-onboarding-screen" }
-- tapOn: { id: "cloud-tab-signup" }
-- tapOn: { id: "cloud-email-input" }
-- inputText: ${EMAIL}
-- tapOn: { id: "cloud-password-input" }
-- inputText: ${PASSWORD}
-- tapOn: { id: "cloud-business-input" }
-- inputText: "Solo Cloud Maestro"
-- tapOn: { id: "cloud-submit" }
-
-# Once authenticated, the GatedNavigation routes to RolePicker.
-- assertVisible: { id: "role-picker" }
+# Proceed with local mode instead.
+- tapOn: { id: "wizard-step2a-local-card" }
+- assertVisible: { id: "consent-yes" }
+- tapOn: { id: "consent-yes" }

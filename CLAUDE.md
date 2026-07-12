@@ -274,3 +274,20 @@ Every new database entity **must** satisfy all items below before its phase is m
 - [ ] New use case has at least one application test (happy + 3 unhappy paths)
 - [ ] File under 200 lines, functions under 40 lines
 - [ ] No `TODO`, `FIXME`, `any`, `@ts-ignore`, or `eslint-disable` in new code
+
+---
+
+## 12. E2E Report System — LLM Debugging Guide
+
+When an E2E test fails and you need to diagnose it, follow this reading order:
+
+1. **Find the latest run:** Read `e2e-reports/latest.json` → get `runId`.
+2. **Open the manifest:** Read `e2e-reports/runs/<runId>/manifest.json` → find tests with `"status": "failed"`.
+3. **Per-failure investigation:** For each failed test `<flow-name>`:
+   - Read `e2e-reports/runs/<runId>/tests/<flow-name>/result.json` — status, failed step, probable cause, artifact paths.
+   - Read `e2e-reports/runs/<runId>/tests/<flow-name>/screenshot.png` (use Read tool with `encoding: "base64"`) — see what the screen showed at failure time.
+   - Read `e2e-reports/runs/<runId>/tests/<flow-name>/hierarchy.json` — what testIDs and text were on screen.
+   - Read `e2e-reports/runs/<runId>/tests/<flow-name>/report.md` — structured diagnostic report.
+   - Optionally read `commands.json` for the full step trace.
+4. **Cross-reference** the expected testID from `result.json.failedStep.id` against the IDs in `hierarchy.json` to understand if the app was on the wrong screen or the element was missing.
+5. **Open the HTML report** for visual exploration: `pnpm e2e:report` or `open e2e-reports/index.html`.

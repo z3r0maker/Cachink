@@ -24,6 +24,7 @@ tags:
       id: "otros-configuracion"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-configuracion"
 - extendedWaitUntil:

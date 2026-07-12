@@ -1,0 +1,65 @@
+# Cloud mode airplane-mode replay (P1E-M4 C16). Toggles the OS airplane
+# mode via `runFlow: adb`, records 3 ventas locally, re-enables
+# connectivity, and asserts they sync to the Cloud within 5 s.
+# x-entrypoint: demo
+appId: mx.cachink.mobile
+env:
+  EMAIL: ${MAESTRO_CLOUD_EMAIL_A}
+  PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
+---
+- launchApp
+
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+- runFlow: cloud-signin-bootstrap
+
+# Enable airplane mode (Android). On iOS this is a manual pre-step
+# because Maestro can't toggle system control center.
+- runScript:
+    script: adb shell cmd connectivity airplane-mode enable
+
+# Ensure at least one product exists for the cart checkout flow.
+# If cloud-signin-bootstrap already seeds a product, this is redundant
+# but safe — the duplicate-name scenario is handled by the create form.
+- tapOn: { id: "tab-productos" }
+- tapOn: { id: "stock-nuevo-producto" }
+- tapOn: { id: "producto-nombre" }
+- inputText: "Offline producto"
+- tapOn: { id: "producto-precio-venta" }
+- inputText: "100"
+- tapOn: { id: "producto-submit" }
+- assertVisible: "Offline producto"
+
+# Record 3 ventas offline via the cart checkout flow.
+- repeat:
+    times: 3
+    commands:
+      - tapOn: { id: "tab-ventas" }
+      - extendedWaitUntil:
+          visible: { id: "ventas-product-grid" }
+          timeout: 5000
+      - tapOn: "Offline producto"
+      - assertVisible: { id: "cart-strip" }
+      - tapOn: { id: "cart-checkout-btn" }
+      - extendedWaitUntil:
+          visible: { id: "checkout-method-picker" }
+          timeout: 5000
+      - tapOn: { id: "checkout-method-continue" }
+      - extendedWaitUntil:
+          visible: { id: "checkout-efectivo" }
+          timeout: 5000
+      - tapOn: "\\$50"
+      - tapOn: { id: "checkout-efectivo-submit" }
+      - extendedWaitUntil:
+          visible: { id: "ventas-product-grid" }
+          timeout: 10000
+
+# Disable airplane mode — PowerSync queue drains.
+- runScript:
+    script: adb shell cmd connectivity airplane-mode disable
+
+- assertVisible:
+    text: "SINCRONIZADO"
+    timeout: 5000

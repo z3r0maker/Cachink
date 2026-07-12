@@ -5,12 +5,17 @@
  * create their account before anyone can use the app.
  *
  * ADR-049: PIN first (login credential), recovery password second.
+ *
+ * Note: Email and recovery password fields are hidden for now — email
+ * recovery is not yet available. The recovery password is auto-set to
+ * the PIN value so the domain layer receives a valid value. When email
+ * recovery launches, re-add those fields here.
  */
 
-import { useState, type ReactElement } from 'react';
-import { Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useRef, useState, type ReactElement } from 'react';
+import { Keyboard, KeyboardAvoidingView, Platform, ScrollView, type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { Btn, PasswordField, TextField } from '../../components/index';
+import { Btn, TextField } from '../../components/index';
 import { Input } from '../../components/Input/input';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -19,7 +24,6 @@ import { DirectorSetupValidation } from './director-setup-validation';
 
 export interface DirectorSetupSubmitInput {
   readonly nombre: string;
-  readonly email?: string;
   readonly pin: string;
   readonly recoveryPassword: string;
 }
@@ -32,50 +36,34 @@ export interface DirectorSetupScreenProps {
 
 type T = ReturnType<typeof useTranslation>['t'];
 
-function ErrorHint(props: { readonly text: string | undefined }): ReactElement | null {
-  if (!props.text) return null;
-  return (
-    <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red} marginTop={-8}>
-      {props.text}
-    </Text>
-  );
-}
-
 function useDirectorSetupForm(props: DirectorSetupScreenProps) {
   const { t } = useTranslation();
   const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
   const [pin, setPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
-  const [recoveryPassword, setRecoveryPassword] = useState('');
-  const [confirmRecoveryPassword, setConfirmRecoveryPassword] = useState('');
+  const pinRef = useRef<TextInput>(null);
+  const confirmPinRef = useRef<TextInput>(null);
   const validation = DirectorSetupValidation.validate({
     nombre,
     pin,
     confirmPin,
-    recoveryPassword,
-    confirmRecoveryPassword,
   });
   const handleSubmit = (): void => {
     if (!validation.valid) return;
-    props.onSubmit({ nombre, email: email.length > 0 ? email : undefined, pin, recoveryPassword });
+    props.onSubmit({ nombre, pin, recoveryPassword: pin });
   };
   return {
     t,
     nombre,
     setNombre,
-    email,
-    setEmail,
     pin,
     setPin,
     confirmPin,
     setConfirmPin,
-    recoveryPassword,
-    setRecoveryPassword,
-    confirmRecoveryPassword,
-    setConfirmRecoveryPassword,
     validation,
     handleSubmit,
+    pinRef,
+    confirmPinRef,
   };
 }
 
@@ -106,6 +94,13 @@ function DirectorSetupHeader({ t }: { t: T }): ReactElement {
   );
 }
 
+function handlePin(form: Form, v: string): void {
+  const trimmed = v.slice(0, 6);
+  form.setPin(trimmed);
+  // iOS number-pad has no return key — auto-advance to confirmPin on 6 digits
+  if (trimmed.length === 6) (form.confirmPinRef.current as TextInput | null)?.focus();
+}
+
 function handleConfirmPin(form: Form, v: string): void {
   const trimmed = v.slice(0, 6);
   form.setConfirmPin(trimmed);
@@ -118,10 +113,11 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
       <Input
         type="number"
         value={form.pin}
-        onChange={(v) => form.setPin(v.slice(0, 6))}
+        onChange={(v) => handlePin(form, v)}
         label={form.t('directorSetup.pin')}
         testID="director-pin"
         placeholder="000000"
+        inputRef={form.pinRef}
       />
       <Input
         type="number"
@@ -130,22 +126,8 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
         label={form.t('directorSetup.confirmPin')}
         testID="director-confirm-pin"
         error={form.validation.errors.confirmPin}
+        inputRef={form.confirmPinRef}
       />
-      <PasswordField
-        value={form.recoveryPassword}
-        onChange={form.setRecoveryPassword}
-        label={form.t('directorSetup.recoveryPassword')}
-        testID="director-recovery-password"
-        autoComplete="new-password"
-      />
-      <PasswordField
-        value={form.confirmRecoveryPassword}
-        onChange={form.setConfirmRecoveryPassword}
-        label={form.t('directorSetup.confirmRecoveryPassword')}
-        testID="director-confirm-recovery-password"
-        autoComplete="new-password"
-      />
-      <ErrorHint text={form.validation.errors.confirmRecoveryPassword} />
     </>
   );
 }
@@ -157,7 +139,7 @@ function DirectorSetupFields({
   form: Form;
   submitting: boolean;
 }): ReactElement {
-  const { t, nombre, setNombre, email, setEmail, validation, handleSubmit } = form;
+  const { t, nombre, setNombre, validation, handleSubmit } = form;
   return (
     <View width="100%" maxWidth={360} gap={12}>
       <TextField
@@ -166,13 +148,9 @@ function DirectorSetupFields({
         label={t('directorSetup.nombre')}
         testID="director-nombre"
         required
-      />
-      <TextField
-        value={email}
-        onChange={setEmail}
-        label={t('directorSetup.email')}
-        testID="director-email"
-        placeholder={t('directorSetup.emailHint')}
+        returnKeyType="next"
+        onSubmitEditing={() => (form.pinRef.current as TextInput | null)?.focus()}
+        blurOnSubmit={false}
       />
       <DirectorCredentialFields form={form} />
       <Btn

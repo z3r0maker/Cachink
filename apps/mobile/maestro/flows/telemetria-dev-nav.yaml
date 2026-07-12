@@ -30,6 +30,7 @@ tags:
       id: "otros-telemetria"
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: "otros-telemetria"
 # Verify key sub-components render (the telemetria screen shows

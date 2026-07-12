@@ -12,8 +12,14 @@ export interface FlagDisplayInfo {
   readonly labelKey: string;
   readonly descriptionKey: string;
   readonly parentKey?: FeatureFlagKey;
+  /** When true, the flag is shown as "Próximamente" and cannot be toggled. */
+  readonly comingSoon?: boolean;
 }
 
+/**
+ * MVP: stock is toggleable. All other flags are shown as "Próximamente"
+ * so users know the features exist and are coming.
+ */
 export const FLAG_DISPLAY_INFO: readonly FlagDisplayInfo[] = [
   {
     key: 'stock',
@@ -22,11 +28,18 @@ export const FLAG_DISPLAY_INFO: readonly FlagDisplayInfo[] = [
     descriptionKey: 'funciones.stockDesc',
   },
   {
+    key: 'ventasCredito',
+    icon: 'credit-card',
+    labelKey: 'funciones.ventasCredito',
+    descriptionKey: 'funciones.ventasCreditoDesc',
+    comingSoon: true,
+  },
+  {
     key: 'conversionMateriaPrima',
     icon: 'refresh-cw',
     labelKey: 'funciones.conversion',
     descriptionKey: 'funciones.conversionDesc',
-    parentKey: 'stock',
+    comingSoon: true,
   },
   {
     key: 'conversionAutomatica',
@@ -34,25 +47,20 @@ export const FLAG_DISPLAY_INFO: readonly FlagDisplayInfo[] = [
     labelKey: 'funciones.conversionAuto',
     descriptionKey: 'funciones.conversionAutoDesc',
     parentKey: 'conversionMateriaPrima',
+    comingSoon: true,
   },
   {
     key: 'auditoriaInventario',
     icon: 'clipboard-list',
     labelKey: 'funciones.auditoria',
     descriptionKey: 'funciones.auditoriaDesc',
-    parentKey: 'stock',
+    comingSoon: true,
   },
   {
     key: 'merma',
-    icon: 'trending-down',
+    icon: 'trash-2',
     labelKey: 'funciones.merma',
     descriptionKey: 'funciones.mermaDesc',
-    parentKey: 'stock',
-  },
-  {
-    key: 'ventasCredito',
-    icon: 'credit-card',
-    labelKey: 'funciones.ventasCredito',
-    descriptionKey: 'funciones.ventasCreditoDesc',
+    comingSoon: true,
   },
 ] as const;

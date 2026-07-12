@@ -47,7 +47,7 @@ fi
 echo "→ Mobile production build (EAS)"
 if (( DRY_RUN == 0 )); then
   pushd "$ROOT/apps/mobile" >/dev/null
-  npx --yes eas-cli build -p all --profile production --non-interactive --json > "$DIST/eas-build.json"
+  npx --yes eas-cli build -p android --profile production --non-interactive --json > "$DIST/eas-build.json"
   popd >/dev/null
 else
   echo "   [dry-run] would call: eas build -p all --profile production"

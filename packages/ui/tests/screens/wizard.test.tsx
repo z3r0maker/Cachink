@@ -90,14 +90,18 @@ describe('Wizard — Step 2A (solo)', () => {
     expect(onSelectMode).toHaveBeenCalledWith('local');
   });
 
-  it('"Guardar todo en la nube" fires onSelectMode("cloud") via the handoff', () => {
+  it('cloud card is disabled with "Próximamente" note visible (MVP)', () => {
+    renderWithProviders(withProviders(<Wizard onSelectMode={vi.fn()} platform="desktop" />));
+    tapCard('wizard-step1-solo');
+    expect(screen.getByTestId('wizard-step2a-cloud-note')).toBeInTheDocument();
+  });
+
+  it('tapping disabled cloud card does NOT fire onSelectMode (MVP)', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-solo');
     tapCard('wizard-step2a-cloud');
-    // Cloud handoff goes directly to consent then mode.
-    fireEvent.click(screen.getByTestId('consent-yes'));
-    expect(onSelectMode).toHaveBeenCalledWith('cloud');
+    expect(onSelectMode).not.toHaveBeenCalledWith('cloud');
   });
 
   it('Back link returns to Step 1', () => {
@@ -119,13 +123,18 @@ describe('Wizard — Step 2B (multi)', () => {
     expect(onSelectMode).toHaveBeenCalledWith('lan-server');
   });
 
-  it('desktop: cloud card fires onSelectMode("cloud") via handoff after consent', () => {
+  it('desktop: cloud card is disabled with "Próximamente" note visible (MVP)', () => {
+    renderWithProviders(withProviders(<Wizard onSelectMode={vi.fn()} platform="desktop" />));
+    tapCard('wizard-step1-multi');
+    expect(screen.getByTestId('wizard-step2b-cloud-note')).toBeInTheDocument();
+  });
+
+  it('desktop: tapping disabled cloud card does NOT fire onSelectMode (MVP)', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     tapCard('wizard-step1-multi');
     tapCard('wizard-step2b-cloud');
-    fireEvent.click(screen.getByTestId('consent-yes'));
-    expect(onSelectMode).toHaveBeenCalledWith('cloud');
+    expect(onSelectMode).not.toHaveBeenCalledWith('cloud');
   });
 
   it('desktop: importLink advances to migration-deferred screen', () => {
@@ -154,6 +163,17 @@ describe('Wizard — Step 2B (multi)', () => {
     tapCard('wizard-step1-multi');
     expect(screen.queryByTestId('wizard-step2b-import-link')).toBeNull();
   });
+
+  it('mobile: BOTH cards are disabled — Step 2B is informational only (MVP)', () => {
+    const onSelectMode = vi.fn();
+    renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="mobile" />));
+    tapCard('wizard-step1-multi');
+    expect(screen.getByTestId('wizard-step2b-server-note')).toBeInTheDocument();
+    expect(screen.getByTestId('wizard-step2b-cloud-note')).toBeInTheDocument();
+    tapCard('wizard-step2b-server');
+    tapCard('wizard-step2b-cloud');
+    expect(onSelectMode).not.toHaveBeenCalled();
+  });
 });
 
 describe('Wizard — Step 3 (join existing)', () => {
@@ -166,13 +186,18 @@ describe('Wizard — Step 3 (join existing)', () => {
     expect(onSelectMode).toHaveBeenCalledWith('lan-client');
   });
 
-  it('Cloud sign-in card fires onSelectMode("cloud") via handoff after consent', () => {
+  it('cloud sign-in card is disabled with "Próximamente" note visible (MVP)', () => {
+    renderWithProviders(withProviders(<Wizard onSelectMode={vi.fn()} platform="desktop" />));
+    fireEvent.click(screen.getByTestId('wizard-step1-join-existing-link'));
+    expect(screen.getByTestId('wizard-step3-cloud-note')).toBeInTheDocument();
+  });
+
+  it('tapping disabled cloud sign-in card does NOT fire onSelectMode (MVP)', () => {
     const onSelectMode = vi.fn();
     renderWithProviders(withProviders(<Wizard onSelectMode={onSelectMode} platform="desktop" />));
     fireEvent.click(screen.getByTestId('wizard-step1-join-existing-link'));
     tapCard('wizard-step3-cloud');
-    fireEvent.click(screen.getByTestId('consent-yes'));
-    expect(onSelectMode).toHaveBeenCalledWith('cloud');
+    expect(onSelectMode).not.toHaveBeenCalledWith('cloud');
   });
 
   it('back returns to Step 1', () => {

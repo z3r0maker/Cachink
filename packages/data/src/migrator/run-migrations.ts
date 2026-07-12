@@ -56,12 +56,8 @@ function readTag(row: RawRow): string | null {
 }
 
 /** Read applied-migration tags. Returns an empty set on a fresh database. */
-async function loadAppliedTags(
-  db: CachinkDatabase,
-): Promise<ReadonlySet<string>> {
-  const rows = (await db.all(
-    sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`),
-  )) as RawRow[];
+async function loadAppliedTags(db: CachinkDatabase): Promise<ReadonlySet<string>> {
+  const rows = (await db.all(sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`))) as RawRow[];
   const tags = new Set<string>();
   for (const row of rows) {
     const tag = readTag(row);
@@ -85,6 +81,13 @@ export interface RunMigrationsOptions {
    * diagnostics. Not called when nothing is pending.
    */
   readonly backupBefore?: BackupFn;
+  /**
+   * Skip BEGIN/COMMIT transaction wrapping around each migration.
+   * Required for drivers whose connection pool dispatches each
+   * `execute()` on a different connection (e.g. Tauri plugin-sql),
+   * making manual transaction state invisible across calls.
+   */
+  readonly skipTransactions?: boolean;
 }
 
 /**
@@ -133,13 +136,14 @@ function resolveMigrationSql(tag: string): string {
   return raw;
 }
 
-/** Apply a single migration inside a transaction. */
+/** Apply a single migration, optionally inside a transaction. */
 async function applySingleMigration(
   db: CachinkDatabase,
   tag: string,
   migrationSql: string,
+  skipTx: boolean,
 ): Promise<void> {
-  await db.run(sql.raw('BEGIN IMMEDIATE'));
+  if (!skipTx) await db.run(sql.raw('BEGIN IMMEDIATE'));
   try {
     for (const statement of splitStatements(migrationSql)) {
       await db.run(sql.raw(statement));
@@ -152,22 +156,21 @@ async function applySingleMigration(
       ),
     );
 
-    await db.run(sql.raw('COMMIT'));
+    if (!skipTx) await db.run(sql.raw('COMMIT'));
   } catch (error) {
-    try {
-      await db.run(sql.raw('ROLLBACK'));
-    } catch {
-      // ROLLBACK itself may fail if the DB is in a weird state.
+    if (!skipTx) {
+      try {
+        await db.run(sql.raw('ROLLBACK'));
+      } catch {
+        // ROLLBACK itself may fail if the DB is in a weird state.
+      }
     }
     throw new MigrationError(tag, error);
   }
 }
 
 /** Run optional backup before applying pending migrations. */
-async function runBackupIfNeeded(
-  options: RunMigrationsOptions,
-  firstTag: string,
-): Promise<void> {
+async function runBackupIfNeeded(options: RunMigrationsOptions, firstTag: string): Promise<void> {
   if (!options.backupBefore) return;
   try {
     await options.backupBefore(firstTag);
@@ -183,9 +186,7 @@ async function runMigrationsInternal(
   await db.run(sql.raw(CREATE_TRACKER_SQL));
   const applied = await loadAppliedTags(db);
 
-  const pending = migrationsBundle.journal.entries.filter(
-    (e) => !applied.has(e.tag),
-  );
+  const pending = migrationsBundle.journal.entries.filter((e) => !applied.has(e.tag));
 
   if (pending.length === 0) {
     await setSchemaVersion(db, SCHEMA_VERSION);
@@ -196,7 +197,7 @@ async function runMigrationsInternal(
 
   for (const entry of pending) {
     const migrationSql = resolveMigrationSql(entry.tag);
-    await applySingleMigration(db, entry.tag, migrationSql);
+    await applySingleMigration(db, entry.tag, migrationSql, options.skipTransactions === true);
   }
 
   await setSchemaVersion(db, SCHEMA_VERSION);

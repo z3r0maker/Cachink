@@ -49,3 +49,9 @@ export { checkObservabilityHealth, type ObservabilityHealth } from './health-che
 
 // Integrity verification
 export { verifyAuditChain, type AuditChainResult } from './verify-audit-chain.js';
+
+// Device context
+export type { DeviceContext } from './device-context.js';
+
+// Outbox flusher
+export { OutboxFlusher, type OutboxFlusherConfig } from './outbox-flusher.js';

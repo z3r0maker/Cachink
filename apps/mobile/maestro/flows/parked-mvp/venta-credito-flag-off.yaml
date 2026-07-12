@@ -1,0 +1,44 @@
+# Crédito option hidden when ventasCredito flag is OFF.
+#
+# Verifies:
+#   1. With ventasCredito flag OFF (default), the Crédito payment
+#      method is not shown in the checkout method picker.
+#
+# Precondition: demo mode seeded (ventasCredito flag OFF by default).
+# x-entrypoint: demo
+appId: mx.cachink.mobile
+tags:
+  - ventas
+  - cxc
+  - feature-flags
+  - edge-case
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
+
+# Navigate to Ventas and start checkout.
+- tapOn:
+    id: "tab-ventas"
+- extendedWaitUntil:
+    visible:
+      id: "ventas-product-grid"
+    timeout: 5000
+
+# Add product to cart.
+- tapOn: "Quesadilla"
+- assertVisible:
+    id: "cart-strip"
+
+# Open checkout.
+- tapOn:
+    id: "cart-checkout-btn"
+- extendedWaitUntil:
+    visible:
+      id: "checkout-method-picker"
+    timeout: 5000
+
+# Verify Crédito is NOT visible in the method picker.
+- assertNotVisible:
+    text: "Crédito"

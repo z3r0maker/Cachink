@@ -2,7 +2,7 @@
 # Covers P1C-M5-T05/T06 (scanner + manual fallback) for mobile. On
 # simulators without a physical camera the ManualEntry field is the
 # only reliable code source.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -31,6 +31,20 @@ appId: mx.cachink.mobile
 
 # Scanner closes + SKU populated on the form.
 - assertNotVisible: "Escanear código"
+
+# Enter pricing to verify Margen de ganancia row appears.
+- tapOn:
+    id: "producto-costo"
+- eraseText
+- inputText: "50"
+- pressKey: enter
+- tapOn:
+    id: "producto-precio-venta"
+- eraseText
+- inputText: "100"
+- hideKeyboard
+- assertVisible: "Margen de ganancia"
+
 - tapOn:
     id: "producto-submit"
 - assertVisible: "Refresco 600ml"

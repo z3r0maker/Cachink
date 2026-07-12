@@ -4,8 +4,9 @@
  * Mount in AppShell or route layout. Listens to pathname changes and
  * writes `nav.screen-view` audit events.
  *
- * **Dev-only gating**: Navigation tracking in prod would fill the ring
- * buffer too fast. Only logs when `__DEV__` is truthy.
+ * Logs in both dev and production. In production, breadcrumbs are
+ * stored locally and only shipped remotely when consent is enabled
+ * (via the outbox flusher).
  */
 
 import { useEffect, useRef } from 'react';
@@ -28,8 +29,6 @@ export function useNavigationObserver(pathname?: string): void {
   const prevPath = useRef(pathname);
 
   useEffect(() => {
-    // Only log in dev mode
-    if (typeof __DEV__ === 'undefined' || !__DEV__) return;
     if (!logStore || !deviceId || !pathname) return;
     if (pathname === prevPath.current) return;
 

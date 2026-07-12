@@ -11,7 +11,7 @@
 #   maestro test apps/mobile/maestro/flows/producto-movimientos.yaml
 #
 # The producto-entrada-stock flow creates an entrada movement.
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 ---
 - launchApp

@@ -95,4 +95,33 @@ describe('useUnreadAlertCount', () => {
 
     await waitFor(() => expect(result.current.data).toBe(0));
   });
+
+  it('excludes unread alerts for disabled feature flags from the count', async () => {
+    const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
+    // stock-bajo passes (stock ON by default)
+    await repo.create({
+      source: 'stock-bajo',
+      severity: 'warning',
+      titleKey: 'Stock bajo',
+      message: 'Stock alert',
+      actionRoute: null,
+      businessId: BIZ,
+    });
+    // merma-threshold blocked (merma OFF / MVP-hidden)
+    await repo.create({
+      source: 'merma-threshold',
+      severity: 'warning',
+      titleKey: 'Merma',
+      message: 'Merma alert',
+      actionRoute: null,
+      businessId: BIZ,
+    });
+
+    const { result } = renderHook(() => useUnreadAlertCount(), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
+
+    // Only 1 counted — merma-threshold excluded by flag filter
+    await waitFor(() => expect(result.current.data).toBe(1));
+  });
 });

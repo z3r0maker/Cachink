@@ -27,6 +27,11 @@ FRESH_SCRIPT="$SCRIPT_DIR/fresh-install.sh"
 DEMO_FLOW="$FLOWS_DIR/demo-mode-setup.yaml"
 WIZARD_FLOW="$FLOWS_DIR/wizard-local-standalone.yaml"
 STATE_FILE="/tmp/maestro-entry-state"
+DIAGNOSE_SCRIPT="$SCRIPT_DIR/maestro-diagnose.sh"
+REPORT_COLLECT="$SCRIPT_DIR/report-collect.py"
+REPORT_FINALIZE="$SCRIPT_DIR/report-finalize.py"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
+REPORT_ROOT="$REPO_ROOT/e2e-reports"
 
 # ──────── Ensure E2E mode (disables continuous animations) ──────
 # FloatingCoinsBackground renders 36 animated particles on gate
@@ -191,6 +196,22 @@ PASSED=0
 FAILED=0
 TOTAL=$#
 
+# Create run directory for E2E report
+RUN_ID="$(date +%Y-%m-%d_%H%M)_single-flow"
+RUN_DIR="$REPORT_ROOT/runs/$RUN_ID"
+if [[ "$DRY_RUN" == false ]]; then
+  mkdir -p "$RUN_DIR/tests"
+fi
+
+# Trap handler: finalize partial report on interrupt
+finalize_on_exit() {
+  if [[ "$DRY_RUN" == true ]] || [[ -z "${RUN_DIR:-}" ]]; then
+    return 0
+  fi
+  python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" --interrupted 2>/dev/null || true
+}
+trap finalize_on_exit INT TERM
+
 for flow in "$@"; do
   # Resolve relative paths
   if [[ ! -f "$flow" ]]; then
@@ -233,12 +254,32 @@ for flow in "$@"; do
 
   run_setup "$local_entry"
 
-  if maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$flow"; then
-    echo "  ✅  $name PASSED"
+  local debug_dir="$RUN_DIR/tests/$name/debug"
+  local test_dir="$RUN_DIR/tests/$name"
+  mkdir -p "$debug_dir" "$test_dir"
+
+  local start_seconds=$SECONDS
+
+  if maestro test --debug-output "$debug_dir" ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$flow"; then
+    local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+    echo "  ✅  $name PASSED (${elapsed_ms}ms)"
     PASSED=$((PASSED + 1))
+
+    python3 "$REPORT_COLLECT" \
+      --run-dir "$RUN_DIR" --flow "$flow" --status passed \
+      --duration-ms "$elapsed_ms" --debug-dir "$debug_dir" || true
+    rm -rf "$debug_dir"
   else
-    echo "  ❌  $name FAILED"
+    local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+    echo "  ❌  $name FAILED (${elapsed_ms}ms)"
     FAILED=$((FAILED + 1))
+
+    echo "  🔬  Running auto-diagnosis..."
+    "$DIAGNOSE_SCRIPT" "$flow" "$debug_dir" "$test_dir" || true
+
+    python3 "$REPORT_COLLECT" \
+      --run-dir "$RUN_DIR" --flow "$flow" --status failed \
+      --duration-ms "$elapsed_ms" --debug-dir "$debug_dir" || true
   fi
 done
 
@@ -249,6 +290,18 @@ if [[ "$DRY_RUN" == false && $TOTAL -gt 1 ]]; then
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
   echo "📊  SUMMARY: $PASSED passed, $FAILED failed (of $TOTAL)"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+fi
+
+# Finalize the report
+if [[ "$DRY_RUN" == false ]]; then
+  python3 "$REPORT_FINALIZE" --run-dir "$RUN_DIR" --report-root "$REPORT_ROOT" || true
+  echo ""
+  echo "🌐  HTML Report: $REPORT_ROOT/index.html"
+
+  if [[ $FAILED -gt 0 ]]; then
+    echo "📂  Opening report in browser..."
+    open "$REPORT_ROOT/index.html" 2>/dev/null || true
+  fi
 fi
 
 if [[ $FAILED -gt 0 ]]; then

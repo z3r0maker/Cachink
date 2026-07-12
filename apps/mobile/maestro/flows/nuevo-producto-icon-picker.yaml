@@ -14,7 +14,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
 #   maestro test apps/mobile/maestro/flows/nuevo-producto-icon-picker.yaml
-# x-entrypoint: wizard
+# x-entrypoint: demo
 appId: mx.cachink.mobile
 tags:
   - productos

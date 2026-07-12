@@ -13,6 +13,7 @@ import { useState, type ReactElement } from 'react';
 import type { Business } from '@cachink/domain';
 import {
   APP_CONFIG_KEYS,
+  BugReportSheet,
   SettingsHub,
   SettingsIndicadores,
   SettingsNegocio,
@@ -25,6 +26,7 @@ import {
   useMode,
   useNotificationsEnabled,
   useRole,
+  useSetCrashReportingEnabled,
   useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
@@ -37,7 +39,14 @@ import { useDesktopUpdateAdapter } from '../../shell/use-update-adapter';
 import { useCloudNavigation } from '../../shell/cloud-navigation';
 import { stopLanServer } from '../../shell/lan-host-bridge';
 
-const APP_VERSION = '0.1.0';
+const APP_VERSION = (() => {
+  try {
+    const env = (import.meta as unknown as { env?: Record<string, string | undefined> }).env;
+    return env?.VITE_APP_VERSION ?? '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+})();
 
 function platformKey(): 'desktop-mac' | 'desktop-windows' {
   if (typeof navigator !== 'undefined' && /Win/i.test(navigator.platform)) {
@@ -57,12 +66,14 @@ function useSettingsHandlers(
 ): {
   reRunWizard: () => void;
   notificationsChange: (next: boolean) => void;
+  crashReportingChange: (next: boolean) => void;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
   const appConfig = useAppConfigRepository();
   const setMode = useSetMode();
   const setNotificationsEnabled = useSetNotificationsEnabled();
+  const setCrashReportingEnabled = useSetCrashReportingEnabled();
   const updateAdapter = useDesktopUpdateAdapter();
   const updates = useCheckForUpdates(updateAdapter);
   const [statusLabel, setStatusLabel] = useState<string | undefined>();
@@ -77,6 +88,11 @@ function useSettingsHandlers(
       void appConfig
         .set(APP_CONFIG_KEYS.notificationsEnabled, next ? 'true' : 'false')
         .then(() => setNotificationsEnabled(next));
+    },
+    crashReportingChange: (next: boolean) => {
+      void appConfig
+        .set(APP_CONFIG_KEYS.crashReportingEnabled, next ? 'true' : 'false')
+        .then(() => setCrashReportingEnabled(next));
     },
     checkUpdates: () => {
       setStatusLabel('Buscando…');
@@ -105,6 +121,7 @@ interface SettingsSubContentProps {
   lanDetails: ReturnType<typeof useLanDetails>;
   cloudNav: ReturnType<typeof useCloudNavigation>;
   setSubRoute: (s: SettingsSection | null) => void;
+  onOpenBugReport: () => void;
 }
 
 function SettingsSistemaSubRoute(p: SettingsSubContentProps): ReactElement {
@@ -114,6 +131,9 @@ function SettingsSistemaSubRoute(p: SettingsSubContentProps): ReactElement {
       onReRunWizard: p.handlers.reRunWizard,
       notificationsEnabled: p.notificationsEnabled ?? undefined,
       onNotificationsChange: p.handlers.notificationsChange,
+      crashReportingEnabled: p.crashReportingEnabled === true,
+      onCrashReportingChange: p.handlers.crashReportingChange,
+      onOpenBugReport: p.onOpenBugReport,
       feedback: {
         appVersion: APP_VERSION, platform: platformKey(),
         role: roleLabel(p.role), crashReportingEnabled: p.crashReportingEnabled === true,
@@ -155,6 +175,7 @@ export function SettingsRoute(): ReactElement {
   const handlers = useSettingsHandlers(navigate);
   const { t } = useTranslation();
   const [subRoute, setSubRoute] = useState<SettingsSection | null>(null);
+  const [bugReportVisible, setBugReportVisible] = useState(false);
   const title = subRoute
     ? t(SECTION_TITLE_KEYS[subRoute] as 'settings.negocioCard')
     : t('settings.hubTitle');
@@ -169,6 +190,21 @@ export function SettingsRoute(): ReactElement {
         notificationsEnabled={notificationsEnabled}
         crashReportingEnabled={crashReportingEnabled} handlers={handlers}
         lanDetails={lanDetails} cloudNav={cloudNav} setSubRoute={setSubRoute}
+        onOpenBugReport={() => setBugReportVisible(true)}
+      />
+      <BugReportSheet
+        visible={bugReportVisible}
+        onClose={() => setBugReportVisible(false)}
+        onShare={(json, filename) => {
+          const blob = new Blob([json], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
+        }}
+        consentEnabled={crashReportingEnabled === true}
       />
     </DesktopAppShellWrapper>
   );

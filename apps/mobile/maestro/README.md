@@ -189,6 +189,19 @@ when the app is already past auth (e.g., warm launch in the same session).
 
 ---
 
+## Testing the Barcode Scanner
+
+The Scanner component uses `expo-camera`'s `onBarcodeScanned`. There are
+three ways to exercise it depending on your environment:
+
+| Environment      | How to test                                                                                                                                                           |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **iOS Simulator** | No camera available — use the **manual entry path**. The `inventario-barcode.yaml` Maestro flow covers this: taps "Escanear código", types a barcode in the manual input, and asserts the SKU populates. |
+| **Android Emulator** | Use the **VirtualScene camera**: AVD settings → Camera → Back = VirtualScene. Place a barcode PNG on the virtual poster wall (edit `~/.android/avd/<name>.avd/Toren1BD.posters` or drag an image into the scene), then "walk" to it with WASD keys. This exercises the real `onBarcodeScanned` pipeline end-to-end. |
+| **Real device**  | Run the Expo dev build and point the camera at any EAN-13 barcode on a product. A haptic confirms the read and the SKU auto-fills on the form.                         |
+
+---
+
 ## Performance
 
 ### E2E mode (`EXPO_PUBLIC_E2E=1`)
@@ -656,6 +669,72 @@ Tags are declared in flow YAML headers and usable with `--includeTags` /
 | `otros`         | Otros tab navigation               |
 | `caja`          | Cash drawer                        |
 | `auth`          | Authentication/PIN                 |
+
+---
+
+## HTML Report System
+
+Every test run (via `full-regression.sh`, `run-flow.sh`, or `run-ipad.sh`)
+automatically generates a structured HTML report at `e2e-reports/`.
+
+### Viewing the report
+
+```sh
+# Open the report in a browser:
+pnpm e2e:report
+# or:
+open e2e-reports/index.html
+```
+
+The report opens automatically when tests fail.
+
+### Report features
+
+- **Dashboard:** summary cards, donut chart, per-area stacked bar, 30-run trend line, flaky test list
+- **Test list:** grouped by feature area, filterable by status/area/flaky, text search
+- **Detail view:** full step trace, expected-vs-actual comparison, failure screenshot with zoom, view hierarchy, probable cause analysis
+
+### Directory structure
+
+```
+e2e-reports/                          # Repo root
+├── index.html                        # Viewer entry (checked in)
+├── viewer/                           # Checked in
+│   ├── app.js                        # Dashboard + list + detail views
+│   ├── styles.css                    # Dark theme
+│   └── vendor/chart.umd.min.js       # Vendored Chart.js 4.x
+├── runs-index.js                     # Generated (gitignored)
+├── latest.json                       # Generated (gitignored)
+└── runs/                             # Generated (gitignored)
+    └── <run-id>/
+        ├── manifest.json             # Run totals + per-test summary
+        ├── results.ndjson            # Crash-safe incremental log
+        ├── data.js                   # Viewer data payload
+        └── tests/<flow-name>/
+            ├── result.json           # Status, duration, failure details
+            ├── commands.json         # Step trace (all tests)
+            ├── screenshot.png        # Failures only
+            ├── hierarchy.json        # Failures only
+            └── report.md             # Failures only
+```
+
+### Run history
+
+- Last **30 runs** are kept; older runs are pruned automatically.
+- Run IDs are auto-generated: `<date>_<time>_<suite>_<phase>` (e.g. `2026-07-09_1430_full-regression_all`).
+- Override with `--run-name <name>`.
+
+### Feature area mapping
+
+Tests are grouped by feature area using regex rules in
+`apps/mobile/maestro/scripts/feature-areas.json`. First match wins;
+unmatched tests show as "Sin categoría".
+
+### LLM debugging
+
+See CLAUDE.md §12 for the reading order agents should follow when
+diagnosing failures: `latest.json` → `manifest.json` → `result.json` →
+`screenshot.png` + `hierarchy.json` + `report.md`.
 
 ---
 

@@ -51,3 +51,9 @@ src-tauri/target/
 packages/ui/storybook-static/
 packages/ui/playwright-report/
 packages/ui/test-results/
+
+# Maestro E2E reports — generated data (viewer is checked in)
+e2e-reports/runs/
+e2e-reports/latest.json
+e2e-reports/runs-index.js
+apps/mobile/maestro/reports/

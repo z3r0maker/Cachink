@@ -1,10 +1,11 @@
-# Mobile cannot host LAN — verify the lan-server card is disabled with
-# the inline explanation visible (ADR-039 WUX-M4-T03).
+# MVP dead-end: mobile Step 2B has zero tappable cards.
 #
-# This flow proves the platform-aware copy: mobile users navigating to
-# Step 2B see the host card greyed out and the explanation text
-# "Esta opción solo funciona en computadoras (Windows o Mac)…" visible
-# below it. The card should refuse taps.
+# On mobile, the server card is disabled (requires desktop) and the
+# cloud card is also disabled (Próximamente — MVP). This flow:
+#   1. Verifies both disabled notes are visible.
+#   2. Taps both cards and asserts neither navigates away.
+#   3. Uses the escape route: Back → Step 1 → join-existing → Step 3
+#      (where LAN-client IS tappable).
 #
 # Precondition: fresh install. Run via wrapper:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
@@ -31,6 +32,14 @@ appId: mx.cachink.mobile
 - tapOn: { id: "wizard-step2b-server-card" }
 - assertVisible: { id: "wizard-step2b-server" }
 
-# Cloud is the available alternative; tap to confirm the rest of the
-# screen is functional.
+# MVP: cloud is ALSO disabled — Step 2B has no tappable card on mobile.
 - assertVisible: { id: "wizard-step2b-cloud" }
+- assertVisible: { id: "wizard-step2b-cloud-note" }
+- tapOn: { id: "wizard-step2b-cloud-card" }
+- assertNotVisible: { id: "cloud-onboarding-screen" }
+- assertVisible: { id: "wizard-step2b-server" }
+
+# The escape route: Back → Step 1 → join-existing → LAN client is tappable.
+- tapOn: { id: "wizard-back" }
+- tapOn: { id: "wizard-step1-join-existing-link" }
+- assertVisible: { id: "wizard-step3-lan" }

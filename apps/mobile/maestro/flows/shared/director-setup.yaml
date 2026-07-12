@@ -3,9 +3,10 @@
 #
 # Test credentials (hardcoded for E2E):
 #   Name:              Director Test
-#   Email:             test@cachink.test
 #   PIN (login):       123456
-#   Recovery Password: Test1234
+#
+# Note: Email and recovery password fields are hidden (email recovery
+# not yet available). Recovery password is auto-set to PIN at UI layer.
 #
 # ADR-049: PIN first (login), recovery password second.
 appId: mx.cachink.mobile
@@ -20,44 +21,12 @@ appId: mx.cachink.mobile
 - inputText: "Director Test"
 
 - tapOn:
-    id: "director-email"
-- inputText: "test@cachink.test"
-
-- tapOn:
     id: "director-pin"
 - inputText: "123456"
 
 - tapOn:
     id: "director-confirm-pin"
 - inputText: "123456"
-# The numeric keyboard covers recovery-password fields.
-# Scroll within the ScrollView to bring them into view.
-- scrollUntilVisible:
-    element:
-      id: "director-recovery-password"
-    direction: DOWN
-    timeout: 5000
-- tapOn:
-    id: "director-recovery-password"
-- inputText: "Test1234"
-# Use pressKey Enter to submit the current field and move focus,
-# then dismiss keyboard by tapping the title area.
-- pressKey: Enter
-- tapOn:
-    point: "196,80"
-# Now scroll to reveal confirm password and submit.
-- swipe:
-    start: "50%,60%"
-    end: "50%,20%"
-- tapOn:
-    id: "director-confirm-recovery-password"
-- inputText: "Test1234"
-- pressKey: Enter
-- tapOn:
-    point: "196,80"
-- swipe:
-    start: "50%,60%"
-    end: "50%,20%"
 
 # Scroll to submit button.
 - scrollUntilVisible:

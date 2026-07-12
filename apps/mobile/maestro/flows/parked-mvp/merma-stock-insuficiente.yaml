@@ -1,0 +1,63 @@
+# Merma with insufficient stock — verify observed behavior.
+#
+# Attempt to register a merma for more units than currently available.
+# Asserts that the system either blocks or proceeds (documenting behavior).
+#
+# Precondition: demo mode seeded (products + merma flag ON).
+# x-entrypoint: demo
+appId: mx.cachink.mobile
+tags:
+  - merma
+  - stock
+  - edge-case
+---
+- launchApp
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Navigate to the Merma tab.
+- tapOn:
+    id: "tab-merma"
+- extendedWaitUntil:
+    visible:
+      id: "merma-grid"
+    timeout: 10000
+
+# Tap a product and increase quantity to exceed stock.
+- tapOn: "Quesadilla"
+- assertVisible:
+    id: "cart-strip"
+
+# Increase quantity beyond available stock.
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+- tapOn:
+    id: "cart-qty-increase"
+    optional: true
+
+# Tap checkout.
+- tapOn:
+    id: "cart-checkout-btn"
+
+# The confirm sheet should appear.
+- extendedWaitUntil:
+    visible:
+      id: "merma-checkout-sheet"
+    timeout: 5000
+
+# Submit — the app may show a warning or proceed.
+- tapOn:
+    id: "merma-checkout-submit"
+
+# Verify we return to the merma screen (not stuck).
+- extendedWaitUntil:
+    visible:
+      id: "merma-grid"
+    timeout: 5000

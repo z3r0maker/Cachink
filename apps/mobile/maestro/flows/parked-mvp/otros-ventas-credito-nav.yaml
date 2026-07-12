@@ -1,0 +1,54 @@
+# Navigate to the Ventas Crédito placeholder screen via Otros grid.
+#
+# Extends funciones-ventas-credito-toggle.yaml which toggles the flag
+# and verifies otros-ventas-credito exists, but never navigates to
+# the placeholder screen:
+#   - ventas-credito-placeholder
+#
+# Precondition: wizard complete, ventasCredito flag enabled, Director role.
+# Chain flows:
+#
+#   ./apps/mobile/maestro/scripts/fresh-install.sh \
+#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
+#   maestro test apps/mobile/maestro/flows/otros-ventas-credito-nav.yaml
+# x-entrypoint: wizard
+appId: mx.cachink.mobile
+---
+- launchApp
+
+# Dismiss any first-launch modals.
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Enable the ventasCredito flag.
+- tapOn:
+    id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-funciones"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-funciones"
+- tapOn:
+    id: "flag-ventasCredito-switch"
+    optional: true
+
+# Navigate to Otros → tap the Ventas Crédito grid item.
+- tapOn:
+    id: "tab-otros"
+- scrollUntilVisible:
+    element:
+      id: "otros-ventas-credito"
+    direction: DOWN
+    timeout: 5000
+    centerElement: true
+- tapOn:
+    id: "otros-ventas-credito"
+
+# Verify the placeholder screen renders.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-credito-screen"
+    timeout: 5000

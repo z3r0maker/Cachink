@@ -10,5 +10,6 @@ export {
   type NotificationScheduler,
   type NotificationPermission,
   type NotificationSchedulerOptions,
+  type PresentNowOptions,
 } from './notification-scheduler.shared';
 export { useNotificationScheduler, __resetSchedulerSingleton } from './use-notification-scheduler';

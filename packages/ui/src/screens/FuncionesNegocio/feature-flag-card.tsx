@@ -58,21 +58,41 @@ function FlagCardText({
   );
 }
 
+function ComingSoonBadge({ t }: { t: T }): ReactElement {
+  return (
+    <View
+      backgroundColor={colors.gray200}
+      borderRadius={12}
+      paddingHorizontal={10}
+      paddingVertical={3}
+    >
+      <Text fontSize={11} color={colors.gray600} fontFamily={typography.fontFamily}>
+        {t('funciones.comingSoon')}
+      </Text>
+    </View>
+  );
+}
+
 export function FeatureFlagCard(props: FeatureFlagCardProps): ReactElement {
   const { t } = useTranslation();
+  const isComingSoon = props.info.comingSoon === true;
   return (
     <Card testID={props.testID} variant="white" padding="md" fullWidth>
       <View flexDirection="row" alignItems="center" justifyContent="space-between">
         <FlagCardText info={props.info} dependencyHint={props.dependencyHint} t={t} />
-        <Switch
-          value={props.enabled}
-          onValueChange={props.onToggle}
-          disabled={!props.canToggle}
-          trackColor={{ false: colors.gray200, true: colors.yellow }}
-          thumbColor={Platform.OS === 'android' ? colors.white : undefined}
-          ios_backgroundColor={colors.gray200}
-          testID={`${props.testID}-switch`}
-        />
+        {isComingSoon ? (
+          <ComingSoonBadge t={t} />
+        ) : (
+          <Switch
+            value={props.enabled}
+            onValueChange={props.onToggle}
+            disabled={!props.canToggle}
+            trackColor={{ false: colors.gray200, true: colors.yellow }}
+            thumbColor={Platform.OS === 'android' ? colors.white : undefined}
+            ios_backgroundColor={colors.gray200}
+            testID={`${props.testID}-switch`}
+          />
+        )}
       </View>
     </Card>
   );

@@ -197,6 +197,13 @@ plain env vars in `app.config.ts` for local dev. Without them, the
 wizard's Cloud card renders the disabled-notice variant pointing at
 **Settings → Avanzado** for the BYO-backend flow.
 
+> **MVP note:** Cloud sync is disabled for the MVP launch, but
+> `EXPO_PUBLIC_CLOUD_ANON_KEY` is still required — it doubles as the
+> auth header for the bug-ingest pipeline (`readAnonKey()` in
+> `app-provider-bridges.tsx`). You also need `EXPO_PUBLIC_BUG_INGEST_URL`
+> pointing at the Supabase Edge Function so crash reports are shipped.
+> See [`docs/launch-checklist.md`](../../docs/launch-checklist.md) §4–6.
+
 ## LAN mode pairing (Slice 5 / S9-B1)
 
 The mobile app is always a LAN **client** — it never hosts. To pair:

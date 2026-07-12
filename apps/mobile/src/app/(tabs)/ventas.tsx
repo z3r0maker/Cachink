@@ -17,7 +17,7 @@ import {
   useVentasDetail,
   useVentasQueries,
 } from './_ventas-hooks';
-import { VentasCajaGate, VentasMainView, VentasOverlays } from './_ventas-overlays';
+import { VentasCajaGate, VentasMainView, VentasOverlays, VentasProductosGate } from './_ventas-overlays';
 
 function useVentasLocalState(): {
   fecha: IsoDate;
@@ -153,6 +153,10 @@ function VentasOverlaySection(props: ReturnType<typeof useVentasRouteState>): Re
 export default function VentasRoute(): ReactElement {
   const state = useVentasRouteState();
   if (!state.turnoLoading && state.openTurno === null) {
+    // Products gate takes priority: no products → nothing to sell
+    if (state.q.productosData !== undefined && state.q.productos.length === 0) {
+      return <VentasProductosGate />;
+    }
     return <VentasCajaGate role={state.q.role} setShowCorte={state.ls.setShowCorte} />;
   }
   return (

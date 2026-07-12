@@ -14,7 +14,7 @@
  *   - `<IntegerField>` — strips non-digits, clamps to min/max
  *   - `<DateField>` — platform-native date picker
  */
-import type { ReactElement } from 'react';
+import type { ReactElement, RefObject } from 'react';
 import { Input } from '../Input/input';
 
 export interface TextFieldProps {
@@ -33,6 +33,8 @@ export interface TextFieldProps {
   readonly onSubmitEditing?: () => void;
   readonly blurOnSubmit?: boolean;
   readonly autoComplete?: string;
+  /** Imperative ref to the underlying TextInput (focus / blur control). */
+  readonly inputRef?: RefObject<unknown>;
 }
 
 export function TextField(props: TextFieldProps): ReactElement {
@@ -52,6 +54,7 @@ export function TextField(props: TextFieldProps): ReactElement {
       onSubmitEditing={props.onSubmitEditing}
       blurOnSubmit={props.blurOnSubmit}
       autoComplete={props.autoComplete}
+      inputRef={props.inputRef}
     />
   );
 }
