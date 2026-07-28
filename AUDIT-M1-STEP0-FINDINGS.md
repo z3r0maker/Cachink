@@ -48,9 +48,10 @@ without actually running the bundle on a real iOS simulator.
 - **Fix shipped:** export `LANG=en_US.UTF-8` and `LC_ALL=en_US.UTF-8`
   before `pod install` (and any wrapping `expo prebuild`). Documented
   in SETUP.md.
-- **Long-term consideration:** Renaming the workspace dir to
-  `cachink/` (no `!`) would side-step this entirely. Out of scope
-  for this audit; the locale export is a one-line workaround.
+- **Long-term consideration (since adopted):** The workspace dir was
+  renamed from `Cachink!/` to `~/Downloads/Cachink/` (no `!`), which
+  side-steps this entirely. The locale export remains as a harmless
+  safety net.
 
 ---
 

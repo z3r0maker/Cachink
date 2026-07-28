@@ -274,12 +274,15 @@ should print a version string (e.g. `2.4.0`).
 
 ### CocoaPods + UTF-8 locale
 
-`pod install` from inside `apps/mobile/ios/` fails with a
+`pod install` from inside `apps/mobile/ios/` can fail with a
 `Encoding::CompatibilityError` (`Unicode Normalization not
-appropriate for ASCII-8BIT`) when the shell `LANG` is unset. The
-workspace path contains a `!` (`/Users/.../Downloads/Cachink!/`)
-which triggers the bug. Always run `pod install` (and any `expo
-prebuild` that wraps it) with the locale exported:
+appropriate for ASCII-8BIT`) when the shell `LANG` is unset and the
+workspace path contains a non-ASCII character such as `!`. The
+workspace was renamed from `Cachink!/` to `~/Downloads/Cachink/` to
+remove the `!` that triggered this, so the error should no longer
+occur. As a safety net (or if your path contains other non-ASCII
+characters), run `pod install` (and any `expo prebuild` that wraps
+it) with the locale exported:
 
 ```bash
 export LANG=en_US.UTF-8

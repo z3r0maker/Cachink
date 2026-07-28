@@ -50,7 +50,7 @@ Also deferred (lower priority, plan phases 4/5/6): empty-state entrypoints
 
 ## How to resume (environment + commands)
 
-Repo: `~/Downloads/Cachink!` (built in place). pnpm monorepo, Tamagui, RN 0.83.9 New
+Repo: `~/Downloads/Cachink` (built in place). pnpm monorepo, Tamagui, RN 0.83.9 New
 Arch (Fabric). Sims usually booted: **iPad Pro 13-inch (M5)**
 `CC1DFB58-11A0-43BD-9CAA-64B7431EEF2E`, **iPhone 17**
 `4C5FA73E-F0D9-41A4-A058-511EE3F807AE`.
