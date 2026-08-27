@@ -4,8 +4,14 @@
  *
  * The use-case enforces the one-per-(fecha, deviceId) rule and derives
  * the esperado — the UI only supplies contado + explicación. On success
- * we invalidate every downstream query that reads cortes or the
- * balance-general surface.
+ * we invalidate every downstream query that reads cortes.
+ *
+ * Review item #9: this used to invalidate `['balance-general']` alone.
+ * `useBalanceGeneral` does compose the period's cortes — but so does
+ * Flujo de Efectivo (NIF B-2 is cash movement by definition), and
+ * Indicadores derives from both. Cherry-picking one of the four left
+ * the others serving a pre-corte number, so the full estados sweep
+ * runs here.
  */
 
 import { useMemo } from 'react';
@@ -14,6 +20,7 @@ import { CerrarCorteDeDiaUseCase, type CerrarCorteDeDiaInput } from '@cachink/ap
 import type { DayClose } from '@cachink/domain';
 import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_CERRAR_CORTE } from '../observability/audit-configs';
 
@@ -45,7 +52,9 @@ export function useCerrarCorteDeDia(): CerrarCorteDeDiaResult {
         queryClient.invalidateQueries({ queryKey: ['corte-del-dia', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['corte-historial', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['efectivo-esperado', businessId] }),
-        queryClient.invalidateQueries({ queryKey: ['balance-general', businessId] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
     },
   });

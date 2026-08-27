@@ -1,8 +1,10 @@
-# Test form validation on the NuevoProducto modal — submit with
-# empty nombre and verify the error prevents submission.
+# Test form validation on the NuevoProducto modal.
 #
-# Covers validation edge case: empty nombre → error shown,
-# modal stays open.
+# Two cases:
+#   1. Empty nombre → error shown, modal stays open (nombre is the
+#      only truly required field).
+#   2. Empty costo → product saves (review item #5: costo is optional
+#      for services and donated / gifted stock).
 #
 # Precondition: wizard complete.
 # Chain flows:
@@ -30,7 +32,7 @@ appId: mx.cachink.mobile
 # The modal should be open.
 - assertVisible: "Nuevo producto"
 
-# Leave nombre empty and fill the required cost fields.
+# ── Case 1: empty nombre blocks submission ──────────────────────
 - tapOn:
     id: "producto-costo"
 - inputText: "5"
@@ -38,10 +40,27 @@ appId: mx.cachink.mobile
     id: "producto-precio-venta"
 - inputText: "15"
 
-# Try to submit with empty nombre.
 - tapOn:
     id: "producto-submit"
 
 # Modal should still be open — validation prevents submission
 # when nombre is empty.
 - assertVisible: "Nuevo producto"
+
+# ── Case 2: costo may be left empty ─────────────────────────────
+# Clear the cost we just typed and give the product a name. The
+# product must save: costo is optional, so the modal closes.
+- tapOn:
+    id: "producto-costo"
+- eraseText
+- tapOn:
+    id: "producto-nombre"
+- inputText: "Servicio de asesoría"
+- hideKeyboard
+
+- tapOn:
+    id: "producto-submit"
+
+# Modal closed → the save went through with no costo.
+- assertNotVisible: "Nuevo producto"
+- assertVisible: "Servicio de asesoría"

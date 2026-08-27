@@ -21,9 +21,9 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 
-# Navigate to Otros tab (still as Director).
-- tapOn:
-    id: "tab-otros"
+# Open the tool grid. Director reaches it through Configuración since
+# review item #7 dropped the Otros tab; Operativo still has the tab.
+- runFlow: shared/open-director-tools.yaml
 
 # Tap the Caja Reportes grid item (Director-only item).
 - scrollUntilVisible:

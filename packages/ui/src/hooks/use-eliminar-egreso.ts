@@ -8,6 +8,7 @@ import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { ExpenseId, IsoDate } from '@cachink/domain';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_ELIMINAR_EGRESO } from '../observability/audit-configs';
 
@@ -28,7 +29,12 @@ export function useEliminarEgreso(): EliminarEgresoResult {
       await expenses.delete(input.id);
     },
     async onSuccess(_void, variables) {
-      await queryClient.invalidateQueries({ queryKey: ['egresos', businessId, variables.fecha] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['egresos', businessId, variables.fecha] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

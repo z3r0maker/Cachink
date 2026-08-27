@@ -8,13 +8,21 @@
  */
 
 import type { ReactElement } from 'react';
-import { CajaContent } from '@cachink/ui';
+import { CajaContent, operativoCajaToolItems, useFeatureFlags, useRole } from '@cachink/ui';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
+import { useDesktopNavigate } from '../desktop-router-context';
 
 export function CajaRoute(): ReactElement {
+  const navigate = useDesktopNavigate();
+  const role = useRole();
+  const flags = useFeatureFlags();
+  // Review item #7: mirrors apps/mobile/src/app/(tabs)/caja.tsx — the
+  // Operativo tool grid lives here now that "Otros" left the bar.
+  const toolItems = role === 'director' ? undefined : operativoCajaToolItems(flags);
+
   return (
-    <DesktopAppShellWrapper activeTabKey="otros">
-      <CajaContent testID="desktop-caja" />
+    <DesktopAppShellWrapper activeTabKey="caja">
+      <CajaContent testID="desktop-caja" toolItems={toolItems} onNavigateTool={navigate} />
     </DesktopAppShellWrapper>
   );
 }

@@ -119,6 +119,21 @@ const DIRECTOR_TAIL_ITEMS: readonly OtrosItem[] = [
   },
 ] as const;
 
+/**
+ * The same Director tool list, minus the `configuracion` entry —
+ * for rendering *inside* Configuración (review item #7).
+ *
+ * The Director bottom bar dropped "Otros" so the four tabs can be the
+ * money story (Inicio | Ventas | Gastos | Estados). Everything that
+ * lived in that grid now hangs off the top-bar cog instead. Filtering
+ * `configuracion` keeps the screen from linking to itself; the list is
+ * otherwise the identical source of truth, so a new tool added to
+ * `directorOtrosItems` shows up in both places with no second edit.
+ */
+export function directorSettingsNavItems(flags: FeatureFlags): OtrosItem[] {
+  return directorOtrosItems(flags).filter((item) => item.key !== 'configuracion');
+}
+
 export function directorOtrosItems(flags: FeatureFlags): OtrosItem[] {
   const flagItems = DIRECTOR_FLAG_ITEMS.filter((e) => e.flagCheck(flags)).map((e) => e.item);
   const items = [

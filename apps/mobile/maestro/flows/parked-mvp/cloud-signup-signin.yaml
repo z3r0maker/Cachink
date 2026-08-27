@@ -20,11 +20,11 @@ env:
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Reach the wizard via Settings → Sistema → Re-run.
-- runFlow: shared/navigate-to-settings.yaml
+- runFlow: ../shared/navigate-to-settings.yaml
 - tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }
@@ -44,11 +44,11 @@ env:
 - tapOn: { id: "cloud-submit" }
 
 # Fresh cloud signup → no users → DirectorSetup gate fires.
-- runFlow: shared/director-setup.yaml
+- runFlow: ../shared/director-setup.yaml
 
 # Create a product first — fresh cloud signup has an empty catalogue.
 # Director accesses Productos via Otros grid.
-- tapOn: { id: "tab-otros" }
+- runFlow: ../shared/open-director-tools.yaml
 - tapOn: { id: "otros-productos" }
 - tapOn: { id: "stock-nuevo-producto" }
 - tapOn: { id: "producto-nombre" }

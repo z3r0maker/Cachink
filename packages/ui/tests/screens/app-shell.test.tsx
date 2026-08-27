@@ -26,9 +26,11 @@ const noop = (): void => {};
 const defaultFlags = DEFAULT_FEATURE_FLAGS;
 
 describe('tabsForRole', () => {
-  it('returns 5-tab Operativo set (without flags)', () => {
+  // ADR-052: "Otros" left the Operativo bar too, so both roles are 4 tabs.
+  it('returns 4-tab Operativo set (without flags)', () => {
     expect(tabsForRole('operativo')).toStrictEqual(OPERATIVO_TABS);
-    expect(tabsForRole('operativo')).toHaveLength(5);
+    expect(tabsForRole('operativo')).toHaveLength(4);
+    expect(tabsForRole('operativo').some((tab) => tab.key === 'otros')).toBe(false);
   });
 
   it('returns the 4-tab Director set', () => {
@@ -41,9 +43,8 @@ describe('tabsForRole', () => {
       ...defaultFlags,
       merma: true,
     });
-    expect(tabs).toHaveLength(5);
+    expect(tabs).toHaveLength(4);
     expect(tabs[3]!.key).toBe('merma');
-    expect(tabs[4]!.key).toBe('otros');
   });
 
   it('Operativo with merma OFF: 4th tab is productos', () => {
@@ -78,12 +79,14 @@ describe('AppShell — Operativo', () => {
     );
   }
 
-  it('renders the 4 Operativo tabs (Ventas, Gastos, Productos, Otros)', () => {
+  it('renders the 4 Operativo tabs (Ventas, Caja, Gastos, Productos)', () => {
     mountOperativo();
     expect(screen.getByTestId('tab-ventas')).toBeInTheDocument();
+    expect(screen.getByTestId('tab-caja')).toBeInTheDocument();
     expect(screen.getByTestId('tab-gastos')).toBeInTheDocument();
     expect(screen.getByTestId('tab-productos')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-otros')).toBeInTheDocument();
+    // ADR-052: Otros is gone from every bar; its tools moved into Caja.
+    expect(screen.queryByTestId('tab-otros')).toBeNull();
     expect(screen.queryByTestId('tab-home')).toBeNull();
     expect(screen.queryByTestId('tab-estados')).toBeNull();
   });
@@ -163,7 +166,10 @@ describe('AppShell — Director', () => {
         <span />
       </AppShell>,
     );
-    for (const key of ['home', 'ventas', 'estados', 'otros']) {
+    // Review item #7: "Otros" was replaced by "Gastos" so the Director
+    // bar reads Inicio | Ventas | Gastos | Estados. The Otros grid now
+    // lives inside Configuración, reached from the top-bar cog.
+    for (const key of ['home', 'ventas', 'gastos', 'estados']) {
       expect(screen.getByTestId(`tab-${key}`)).toBeInTheDocument();
     }
   });

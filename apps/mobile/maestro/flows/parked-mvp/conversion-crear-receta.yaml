@@ -11,11 +11,11 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Enable conversion flag.
-- runFlow: shared/enable-conversion-flag.yaml
+- runFlow: enable-conversion-flag.yaml
 
 # Create a materia-prima product first via /nuevo-producto.
 - tapOn:
@@ -67,8 +67,10 @@ appId: mx.cachink.mobile
     timeout: 5000
 
 # Navigate to conversion screen.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-conversion"

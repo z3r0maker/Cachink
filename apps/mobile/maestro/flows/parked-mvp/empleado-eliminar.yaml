@@ -19,12 +19,14 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to Otros tab.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 
 # Tap the Empleados card in the Otros grid.
 - scrollUntilVisible:

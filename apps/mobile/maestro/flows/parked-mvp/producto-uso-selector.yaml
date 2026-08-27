@@ -12,11 +12,11 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Enable conversion flag.
-- runFlow: shared/enable-conversion-flag.yaml
+- runFlow: enable-conversion-flag.yaml
 
 # Go to Productos tab.
 - tapOn:

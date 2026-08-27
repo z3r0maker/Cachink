@@ -19,6 +19,12 @@ export interface ProductPaneProps {
   readonly onProductSearchChange: (q: string) => void;
   readonly hasProductos: boolean;
   readonly onGoToProductos?: () => void;
+  /**
+   * Focus target for the "Nueva venta" CTA (review item #8). The CTA
+   * lives above this pane, so the screen owns the ref and hands it
+   * down rather than reaching into the pane's internals.
+   */
+  readonly searchRef?: React.RefObject<unknown>;
 }
 
 export function ProductPane(props: ProductPaneProps): ReactElement {
@@ -30,6 +36,7 @@ export function ProductPane(props: ProductPaneProps): ReactElement {
         onChange={props.onProductSearchChange}
         placeholder={t('ventas.searchProducto')}
         testID="ventas-product-search"
+        inputRef={props.searchRef}
       />
       {!props.hasProductos ? (
         <VentasEmptyProductos onGoToProductos={props.onGoToProductos} />

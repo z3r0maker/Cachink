@@ -21,8 +21,8 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals.
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-director.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate-director.yaml
 
 # Director Home should be showing. Verify the CxC card.
 - assertVisible:

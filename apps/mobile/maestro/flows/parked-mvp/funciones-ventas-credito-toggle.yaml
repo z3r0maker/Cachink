@@ -12,13 +12,15 @@
 appId: mx.cachink.mobile
 ---
 - launchApp
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-director.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate-director.yaml
 
 # --- Step 1: Enable ventasCredito via Settings → Funciones ---
-- tapOn:
-    id: "tab-otros"
-- runFlow: shared/navigate-to-settings.yaml
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
+- runFlow: ../shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"
@@ -32,8 +34,10 @@ appId: mx.cachink.mobile
 - back
 
 # Verify Director Otros shows the CxC link.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - assertVisible:
     id: "otros-ventas-credito"
 
@@ -67,9 +71,11 @@ appId: mx.cachink.mobile
     optional: true
 
 # --- Step 3: Disable ventasCredito via Settings → Funciones ---
-- tapOn:
-    id: "tab-otros"
-- runFlow: shared/navigate-to-settings.yaml
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
+- runFlow: ../shared/navigate-to-settings.yaml
 - extendedWaitUntil:
     visible:
       id: "settings-funciones"
@@ -83,8 +89,10 @@ appId: mx.cachink.mobile
 - back
 
 # Verify Director Otros no longer shows CxC link.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - assertNotVisible:
     id: "otros-ventas-credito"
 

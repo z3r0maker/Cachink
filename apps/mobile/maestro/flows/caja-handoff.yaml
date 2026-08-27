@@ -27,8 +27,10 @@ tags:
 # --- Step 1: Login as Director and open caja with $1000 ---
 - runFlow: shared/authenticate-director.yaml
 
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-caja"
@@ -58,8 +60,10 @@ tags:
 
 # --- Step 2: Switch to Operativo ---
 # Go back to home and switch user
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - tapOn:
     id: "otros-cerrar-sesion"
     optional: true
@@ -74,8 +78,10 @@ tags:
 - runFlow: shared/authenticate.yaml
 
 # --- Step 3: Navigate to Caja and verify handoff banner ---
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - tapOn:
     id: "otros-caja"
 

@@ -22,6 +22,7 @@ import {
   useSalesRepository,
 } from '../app/index';
 import { useCurrentBusinessId, useUserId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useFeatureFlag } from './use-feature-flags';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
 import { useAuditedUseCase } from '../observability/index';
@@ -54,10 +55,7 @@ async function checkStockBajo(
   }
 }
 
-function emitCreditoAlert(
-  sale: Sale,
-  emitAlert: ReturnType<typeof useEmitDirectorAlert>,
-): void {
+function emitCreditoAlert(sale: Sale, emitAlert: ReturnType<typeof useEmitDirectorAlert>): void {
   if (sale.metodo !== 'Crédito') return;
   emitAlert.mutate({
     source: 'credito-entrega',
@@ -81,10 +79,11 @@ export function useRegistrarVenta(): RegistrarVentaResult {
   const stockEnabled = useFeatureFlag('stock');
 
   const rawUseCase = useMemo(
-    () => new RegistrarVentaUseCase(
-      sales, clients, products, movements, cajaTurnos,
-      { stockEnabled, userId },
-    ),
+    () =>
+      new RegistrarVentaUseCase(sales, clients, products, movements, cajaTurnos, {
+        stockEnabled,
+        userId,
+      }),
     [sales, clients, products, movements, cajaTurnos, stockEnabled, userId],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_VENTA);
@@ -99,6 +98,9 @@ export function useRegistrarVenta(): RegistrarVentaResult {
         queryClient.invalidateQueries({ queryKey: ['ventas', businessId, sale.fecha] }),
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['frequentProductos', businessId] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
       emitCreditoAlert(sale, emitAlert);
       if (stockEnabled && sale.productoId) {

@@ -15,6 +15,7 @@ import type { SalePatch } from '@cachink/data';
 import { EditarVentaUseCase } from '@cachink/application';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { clienteKeys, estadosKeys, ventaKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_EDITAR_VENTA } from '../observability/audit-configs';
 
@@ -41,8 +42,15 @@ export function useEditarVenta(): EditarVentaResult {
       return useCase.execute(input);
     },
     async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ['sales', businessId] });
-      await queryClient.invalidateQueries({ queryKey: ['clients', businessId] });
+      // `['sales', …]` was a dead key — nothing queries under it. The
+      // ventas list caches under `ventaKeys.byBusiness`.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ventaKeys.byBusiness(businessId) }),
+        queryClient.invalidateQueries({ queryKey: clienteKeys.byBusiness(businessId) }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

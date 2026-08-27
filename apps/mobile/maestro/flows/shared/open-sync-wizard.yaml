@@ -1,0 +1,34 @@
+# Reusable subflow: open the device / sync wizard from Configuración.
+#
+# Review items #1/#2 removed the wizard from first run — a fresh
+# install boots to mode='local' and goes welcome → negocio. The wizard
+# still exists in full (solo/multi, local/nube, unirse a existente,
+# help modal); it just lives where it belongs now:
+#
+#   Configuración → Sistema → "Sincronización y dispositivos"
+#
+# Every wizard-*.yaml flow enters here, so the entry path is defined
+# once. Never inline these taps in an individual flow.
+#
+# Precondition: onboarding complete and the user is authenticated.
+#
+# Usage:
+#   - launchApp
+#   - runFlow: shared/dismiss-modals.yaml
+#   - runFlow: shared/authenticate.yaml
+#   - runFlow: shared/open-sync-wizard.yaml
+appId: mx.cachink.mobile
+---
+- runFlow: navigate-to-settings.yaml
+- tapOn:
+    id: "settings-hub-sistema"
+- extendedWaitUntil:
+    visible:
+      id: "settings-re-run-wizard"
+    timeout: 5000
+- tapOn:
+    id: "settings-re-run-wizard"
+- extendedWaitUntil:
+    visible:
+      id: "wizard"
+    timeout: 8000

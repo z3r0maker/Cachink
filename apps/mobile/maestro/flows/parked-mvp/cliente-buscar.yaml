@@ -19,11 +19,11 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals (ConsentModal, etc.)
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to the Clientes screen via deep link.
-- runFlow: shared/navigate-to-clientes.yaml
+- runFlow: ../shared/navigate-to-clientes.yaml
 
 # Verify the clientes list renders.
 - assertVisible:

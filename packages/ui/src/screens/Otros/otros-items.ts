@@ -72,4 +72,25 @@ export function operativoOtrosItems(flags: FeatureFlags): OtrosItem[] {
   return [...OPERATIVO_ALWAYS_ITEMS, ...flagItems];
 }
 
-export { directorOtrosItems } from './otros-items-director';
+/**
+ * The same Operativo tool list, minus the `caja` entry — for rendering
+ * *inside* the Caja screen (review item #7).
+ *
+ * "Otros" left the Operativo bar the way it left the Director's, but to
+ * a different home. The Director's grid was administration, so it went
+ * to Configuración. The Operativo's three items are shift-floor work
+ * done many times a day, and two of the three (movimientos de caja,
+ * cancelaciones) are caja operations — burying them behind the cog
+ * would have added taps to the most frequent path in the app. Inside
+ * Caja the tap count is unchanged: Caja → tool, where it used to be
+ * Otros → tool.
+ *
+ * Filtering `caja` mirrors how `directorSettingsNavItems` filters
+ * `configuracion`: a screen should not link to itself. Same source of
+ * truth, so a new Operativo tool appears in both places with one edit.
+ */
+export function operativoCajaToolItems(flags: FeatureFlags): OtrosItem[] {
+  return operativoOtrosItems(flags).filter((item) => item.key !== 'caja');
+}
+
+export { directorOtrosItems, directorSettingsNavItems } from './otros-items-director';

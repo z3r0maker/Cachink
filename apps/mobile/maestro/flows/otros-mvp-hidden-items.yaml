@@ -19,13 +19,9 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Otros tab.
-- tapOn:
-    id: "tab-otros"
-
-# Grid renders.
-- assertVisible:
-    id: "otros-route"
+# Open the tool grid. Director reaches it through Configuración since
+# review item #7 dropped the Otros tab; Operativo still has the tab.
+- runFlow: shared/open-director-tools.yaml
 
 # ── Director MVP-visible items ──
 - assertVisible:

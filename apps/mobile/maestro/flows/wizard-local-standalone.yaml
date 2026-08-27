@@ -1,7 +1,14 @@
-# Wizard → BusinessForm → DirectorSetup happy path (Phase 13 auth gates).
-# Covers P1C-M1-T01 (role picker), P1C-M2-T03 (wizard), P1C-M2-T04
-# (mode stored in AppConfig), P1C-M2-T05 (business creation form),
-# WUX-M4 (post-rewrite step IDs), Phase 13 DirectorSetup gate.
+# First-run happy path: welcome → negocio → DirectorSetup.
+#
+# Covers P1C-M1-T01 (role picker), P1C-M2-T04 (mode stored in
+# AppConfig), P1C-M2-T05 (business creation form), Phase 13
+# DirectorSetup gate.
+#
+# Review items #1/#2: the wizard's device/cloud questions are no
+# longer part of first run — a fresh install hydrates mode='local'
+# and goes straight from the welcome carousel to the business form.
+# The wizard itself is still covered, from its new home in
+# Configuración → Sistema, by wizard-rerun-with-data.yaml and friends.
 #
 # Precondition: fresh install. Run via the wrapper script:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
@@ -11,49 +18,20 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Dismiss any first-launch modals (ConsentModal, etc.)
-- runFlow: shared/dismiss-modals.yaml
+# launch → ¡Bienvenido a Cachink! → Comenzar → business form.
+- runFlow: shared/first-run-onboarding.yaml
 
-- assertVisible: "¡Bienvenido a Cachink!"
-
-# Step 1 → Solo → Step 2A → Local (single fastest path on mobile).
-- tapOn:
-    id: "wizard-step1-solo-card"
-- extendedWaitUntil:
-    visible:
-      id: "wizard-step2a-local"
-    timeout: 5000
-- tapOn:
-    id: "wizard-step2a-local-card"
-
-# Consent step
-- extendedWaitUntil:
-    visible:
-      id: "consent-no"
-    timeout: 5000
-    optional: true
-- tapOn:
-    id: "consent-no"
-    optional: true
-
-# BusinessForm — wait for the screen transition animation.
-- extendedWaitUntil:
-    visible:
-      id: "business-nombre"
-    timeout: 5000
 - tapOn:
     id: "business-nombre"
 - inputText: "Taquería Don Pedro"
-# Submit via the keyboard, NOT by tapping "business-submit". BusinessForm has
-# no KeyboardAvoidingView/ScrollView (unlike DirectorSetupScreen), so on the
-# iPad the on-screen keyboard covers the submit button and a coordinate tap
-# lands on the keyboard instead of the button. The designed keyboard-submit
-# path works: Return on the nombre field focuses the ISR field
-# (returnKeyType="next"), and Return on the ISR field submits the form
-# (returnKeyType="done" → onSubmitEditing → handleSubmit, the Audit M-1
-# Bluetooth-keyboard feature). See business-form.tsx:91-120.
-- pressKey: Enter
-- pressKey: Enter
+
+# BusinessForm now sits inside a KeyboardAwareForm (review item #3), so
+# the submit button is reachable with the keyboard open — tap it
+# directly instead of relying on the Return-key chain. Both paths work;
+# tapping is what a user actually does.
+- hideKeyboard
+- tapOn:
+    id: "business-submit"
 
 # DirectorSetup (replaces old RolePicker step)
 - runFlow: shared/director-setup.yaml

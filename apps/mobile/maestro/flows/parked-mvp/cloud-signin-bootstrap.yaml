@@ -16,7 +16,7 @@ appId: mx.cachink.mobile
 ---
 
 # Navigate to wizard via Settings → Sistema → Re-run.
-- runFlow: shared/navigate-to-settings.yaml
+- runFlow: ../shared/navigate-to-settings.yaml
 - tapOn: { id: "settings-hub-sistema" }
 - tapOn: { id: "settings-re-run-wizard" }
 - assertVisible: { id: "wizard" }
@@ -37,4 +37,4 @@ appId: mx.cachink.mobile
 - tapOn: { id: "cloud-submit" }
 
 # After cloud sign-in with existing business+users, QuickSwitch fires.
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/authenticate.yaml

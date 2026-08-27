@@ -17,17 +17,19 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals.
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Enable the auditoria flag (Director only — navigates to Funciones).
-- runFlow: shared/enable-auditoria-flag.yaml
+- runFlow: enable-auditoria-flag.yaml
 
 # Switch to Operativo to verify the grid item appears.
 
 # Navigate to Otros tab.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 
 # Tap the Auditoria grid item.
 - scrollUntilVisible:

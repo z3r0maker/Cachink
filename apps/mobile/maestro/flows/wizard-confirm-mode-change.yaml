@@ -26,13 +26,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Reach Settings → Sistema → Re-run asistente.
-- runFlow: shared/navigate-to-settings.yaml
-- tapOn:
-    id: "settings-hub-sistema"
-- tapOn:
-    id: "settings-re-run-wizard"
-- assertVisible:
-    id: "wizard"
+- runFlow: shared/open-sync-wizard.yaml
 
 # Step 1 → Multi-device to trigger mode change.
 - tapOn:

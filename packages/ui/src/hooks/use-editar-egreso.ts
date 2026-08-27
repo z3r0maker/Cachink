@@ -14,6 +14,7 @@ import type { ExpensePatch } from '@cachink/data';
 import { EditarEgresoUseCase } from '@cachink/application';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_EDITAR_EGRESO } from '../observability/audit-configs';
 
@@ -37,7 +38,14 @@ export function useEditarEgreso(): EditarEgresoResult {
       return useCase.execute(input);
     },
     async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ['expenses', businessId] });
+      // `['expenses', …]` was a dead key — the egresos list caches
+      // under `['egresos', businessId, fecha]`.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['egresos', businessId] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

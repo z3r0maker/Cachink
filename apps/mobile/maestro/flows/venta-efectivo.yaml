@@ -13,6 +13,16 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "tab-ventas"
 
+# Review item #8: the screen must read as "make a sale", not "list of
+# sales". Assert the unmistakable CTA and the hint before touching the
+# grid — if either regresses, this fails here rather than silently.
+- extendedWaitUntil:
+    visible:
+      id: "ventas-nueva-venta-cta"
+    timeout: 5000
+- assertVisible: "Nueva venta"
+- assertVisible: "Toca un producto para agregarlo a la venta"
+
 # The product grid should show demo products.
 - extendedWaitUntil:
     visible:

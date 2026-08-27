@@ -27,8 +27,10 @@ appId: mx.cachink.mobile
 # ══════════════════════════════════════════════════════════════════
 # Step 0: Open caja via Otros (Director has no tab-caja)
 # ══════════════════════════════════════════════════════════════════
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-caja"
@@ -186,8 +188,10 @@ appId: mx.cachink.mobile
 # ══════════════════════════════════════════════════════════════════
 # Step 5: Cancel one sale — navigate to Cancelaciones via Otros
 # ══════════════════════════════════════════════════════════════════
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-cancelaciones"

@@ -16,7 +16,9 @@ export interface EmptyCartHintProps {
 }
 
 export function EmptyCartHint(props: EmptyCartHintProps): ReactElement {
-  const hint = props.hint ?? 'Toca un producto para agregarlo';
+  // Says "a la venta" explicitly: review item #8 found users didn't
+  // connect the product grid to the sale they were trying to make.
+  const hint = props.hint ?? 'Toca un producto para agregarlo a la venta';
   return (
     <View
       testID={props.testID ?? 'empty-cart-hint'}

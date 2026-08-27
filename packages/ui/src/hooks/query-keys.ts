@@ -69,6 +69,22 @@ export const estadosKeys = {
     ['flujo-efectivo', businessId, from, to] as const,
   indicadores: (businessId: BusinessId | null, from: string, to: string): readonly unknown[] =>
     ['indicadores', businessId, from, to] as const,
+  /**
+   * Every Estados-financieros / Indicadores surface that derives from
+   * ventas or egresos. Returned as *prefixes* (no from/to) so a single
+   * `invalidateQueries` sweeps every cached period at once — a venta
+   * registered today invalidates the month view, the year view, and
+   * whatever custom range the user last opened.
+   *
+   * Any mutation that writes a sale, an expense, a payment, or a caja
+   * close MUST invalidate these.
+   */
+  dependentsForBusiness: (businessId: BusinessId | null): readonly (readonly unknown[])[] => [
+    ['estado-resultados', businessId] as const,
+    ['balance-general', businessId] as const,
+    ['flujo-efectivo', businessId] as const,
+    ['indicadores', businessId] as const,
+  ],
 } as const;
 
 export const frequentProductosKeys = {

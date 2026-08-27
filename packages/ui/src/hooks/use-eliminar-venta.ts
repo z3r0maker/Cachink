@@ -9,6 +9,7 @@ import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { IsoDate, SaleId } from '@cachink/domain';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_ELIMINAR_VENTA } from '../observability/audit-configs';
 
@@ -29,7 +30,12 @@ export function useEliminarVenta(): EliminarVentaResult {
       await sales.delete(input.id);
     },
     async onSuccess(_void, variables) {
-      await queryClient.invalidateQueries({ queryKey: ['ventas', businessId, variables.fecha] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['ventas', businessId, variables.fecha] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

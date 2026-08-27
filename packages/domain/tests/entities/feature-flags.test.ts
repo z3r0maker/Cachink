@@ -23,9 +23,7 @@ describe('feature-flags', () => {
 
     it('has everything else OFF by default', () => {
       const onByDefault: readonly string[] = ['stock'];
-      const others = FEATURE_FLAG_KEYS.filter(
-        (k) => !onByDefault.includes(k),
-      );
+      const others = FEATURE_FLAG_KEYS.filter((k) => !onByDefault.includes(k));
       for (const key of others) {
         expect(DEFAULT_FEATURE_FLAGS[key]).toBe(false);
       }
@@ -60,17 +58,13 @@ describe('feature-flags', () => {
         conversionMateriaPrima: true,
         conversionAutomatica: true,
       };
-      const result = resolveDisableCascade(
-        flags,
-        'conversionMateriaPrima',
-      );
+      const result = resolveDisableCascade(flags, 'conversionMateriaPrima');
 
       expect(result.conversionMateriaPrima).toBe(false);
       expect(result.conversionAutomatica).toBe(false);
       // stock stays ON
       expect(result.stock).toBe(true);
     });
-
   });
 
   describe('canEnableFlag', () => {
@@ -96,9 +90,7 @@ describe('feature-flags', () => {
         stock: true,
         conversionMateriaPrima: false,
       };
-      expect(
-        canEnableFlag(flags, 'conversionAutomatica'),
-      ).toBe(false);
+      expect(canEnableFlag(flags, 'conversionAutomatica')).toBe(false);
     });
 
     it('allows conversionAutomatica when conversionMateriaPrima ON', () => {
@@ -107,9 +99,7 @@ describe('feature-flags', () => {
         stock: true,
         conversionMateriaPrima: true,
       };
-      expect(
-        canEnableFlag(flags, 'conversionAutomatica'),
-      ).toBe(true);
+      expect(canEnableFlag(flags, 'conversionAutomatica')).toBe(true);
     });
   });
 
@@ -158,9 +148,11 @@ describe('feature-flags', () => {
       expect(result.conversionMateriaPrima).toBe(false);
       expect(result.conversionAutomatica).toBe(false);
       expect(result.auditoriaInventario).toBe(false);
+      // `ventasCredito` joined MVP_HIDDEN_FLAGS when the Crédito
+      // surfaces were pulled from the MVP; it clamps like the rest.
+      expect(result.ventasCredito).toBe(false);
       // Non-hidden flags preserved
       expect(result.stock).toBe(true);
-      expect(result.ventasCredito).toBe(true);
     });
 
     it('clamps hidden flags even in default fallback path', () => {

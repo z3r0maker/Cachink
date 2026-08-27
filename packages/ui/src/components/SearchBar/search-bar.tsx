@@ -36,6 +36,12 @@ export interface SearchBarProps {
   readonly ariaLabel?: string;
   /** Fires on Return / Enter — useful when the search is async. */
   readonly onSubmit?: () => void;
+  /**
+   * Ref to the underlying text input, so a CTA elsewhere on the screen
+   * can hand focus to the search field (review item #8 — the "Nueva
+   * venta" button on VentasScreen).
+   */
+  readonly inputRef?: React.RefObject<unknown>;
 }
 
 const ICON_LEFT = 14;
@@ -58,6 +64,7 @@ export function SearchBar(props: SearchBarProps): ReactElement {
         ariaLabel={props.ariaLabel ?? props.label}
         returnKeyType="search"
         onSubmitEditing={props.onSubmit}
+        inputRef={props.inputRef}
         paddingLeft={INPUT_PADDING_LEFT}
       />
       {/*

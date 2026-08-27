@@ -5,6 +5,14 @@
  * ['movimientos', businessId], ['productos', businessId],
  * ['productos-con-stock', businessId], and
  * ['egresos', businessId, fecha] on success.
+ *
+ * Review item #9: that dual-written Expense is a real gasto, and the
+ * movement itself moves the inventory line `useBalanceGeneral` reads
+ * from `InventoryMovementsRepository` + `ProductsRepository`. Both
+ * make the Estados/Indicadores caches stale, so the estados sweep runs
+ * here too. It is unconditional rather than keyed on tipo='entrada':
+ * a salida still changes stock, and one extra invalidation of a local
+ * SQLite query is cheaper than a wrong Estado de Resultados.
  */
 
 import { useMemo } from 'react';
@@ -13,6 +21,7 @@ import { RegistrarMovimientoInventarioUseCase } from '@cachink/application';
 import type { InventoryMovement, NewInventoryMovement } from '@cachink/domain';
 import { useExpensesRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_MOVIMIENTO_INVENTARIO } from '../observability/audit-configs';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
@@ -69,6 +78,9 @@ export function useRegistrarMovimiento(): RegistrarMovimientoResult {
         queryClient.invalidateQueries({ queryKey: ['productos', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId, movement.fecha] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
       emitMermaAlert(movement, emitAlert);
     },

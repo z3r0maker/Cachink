@@ -64,8 +64,12 @@ function buildPatch(state: DetailFormState): ProductPatch {
 function validate(state: DetailFormState): DetailFormErrors {
   const e: DetailFormErrors = {};
   if (!state.nombre.trim()) e.nombre = 'Requerido';
-  const c = Number(state.costoPesos);
-  if (!Number.isFinite(c) || c <= 0) e.costo = 'Mayor a 0';
+  // Costo is optional (review item #5) — mirrors `validateProducto`
+  // on the create path. Blank means "unknown", not "invalid".
+  if (state.costoPesos.trim() !== '') {
+    const c = Number(state.costoPesos);
+    if (!Number.isFinite(c) || c < 0) e.costo = 'Monto inválido';
+  }
   if (state.usoProducto !== 'materia-prima') {
     const pv = Number(state.precioVentaPesos);
     if (!Number.isFinite(pv) || pv <= 0) e.precioVenta = 'Mayor a 0';

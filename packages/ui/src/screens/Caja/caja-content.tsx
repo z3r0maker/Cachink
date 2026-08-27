@@ -12,21 +12,27 @@
 
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
-import type {
-  CajaMovimientoTipo,
-  CajaTurno,
-  Money,
-  UserId,
-} from '@cachink/domain';
+import type { CajaMovimientoTipo, CajaTurno, Money, UserId } from '@cachink/domain';
 import { CajaActiveTurnView } from './caja-active-turn';
 import { CajaOpenTurnView } from './caja-open-turn-view';
 import { MovimientoSheetWired } from './movimiento-sheet-wired';
 import { CerrarCajaModal } from './cerrar-caja-modal';
 import { useCerrarCaja } from '../../hooks/use-cerrar-caja';
 import { useOpenCajaTurno } from '../../hooks/use-open-caja-turno';
+import { useTranslation } from '../../i18n/index';
+import { SettingsNavSection } from '../Settings/settings-nav-section';
+import type { OtrosItem } from '../Otros/otros-items';
 
 export interface CajaContentProps {
   readonly testID?: string;
+  /**
+   * Operativo tool grid absorbed from the retired Otros tab (review
+   * item #7). Pass `operativoCajaToolItems(flags)` plus a navigator;
+   * omit both for the Director, whose tools live in Configuración.
+   */
+  readonly toolItems?: readonly OtrosItem[];
+  /** Required when `toolItems` is provided — receives the item `path`. */
+  readonly onNavigateTool?: (path: string) => void;
 }
 
 function hasBlindCountPending(turno: CajaTurno | null): boolean {
@@ -34,7 +40,26 @@ function hasBlindCountPending(turno: CajaTurno | null): boolean {
   return (turno as CajaTurno & { conteoCentavos?: Money | null }).conteoCentavos != null;
 }
 
-export function CajaContent(_props: CajaContentProps): ReactElement {
+/**
+ * The Operativo tool grid that used to be the "Otros" tab (ADR-052).
+ * Renders nothing for the Director, whose tools live in Configuración.
+ */
+function CajaToolsSection(props: {
+  items?: readonly OtrosItem[];
+  onNavigate?: (path: string) => void;
+}): ReactElement | null {
+  const { t } = useTranslation();
+  if (!props.items || !props.onNavigate) return null;
+  return (
+    <SettingsNavSection
+      items={props.items}
+      onNavigate={props.onNavigate}
+      title={t('settings.herramientas')}
+    />
+  );
+}
+
+export function CajaContent(props: CajaContentProps): ReactElement {
   const { userId, openTurno } = useOpenCajaTurno();
   const cerrar = useCerrarCaja();
   const [showCerrar, setShowCerrar] = useState(false);
@@ -69,6 +94,7 @@ export function CajaContent(_props: CajaContentProps): ReactElement {
           onClose={() => setMovSheet(null)}
         />
       )}
+      <CajaToolsSection items={props.toolItems} onNavigate={props.onNavigateTool} />
     </ScrollView>
   );
 }

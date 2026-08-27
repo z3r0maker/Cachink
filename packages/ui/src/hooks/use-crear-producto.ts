@@ -20,6 +20,7 @@ import type {
 import type { Money } from '@cachink/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_CREAR_PRODUCTO } from '../observability/audit-configs';
 
@@ -99,6 +100,13 @@ export function useCrearProducto(): CrearProductoResult {
         queryClient.invalidateQueries({ queryKey: ['productos', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['movimientos', businessId] }),
+        // Review item #9: `stockInicial` writes an entrada movement, and
+        // `useBalanceGeneral` values inventory from the current stock
+        // snapshot — so a new producto moves the Balance the moment it
+        // is created.
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
     },
   });

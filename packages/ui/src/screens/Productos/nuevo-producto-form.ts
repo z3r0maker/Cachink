@@ -125,8 +125,15 @@ export function validateProducto(
 ): ProductoFormErrors {
   const errors: ProductoFormErrors = {};
   if (!state.nombre.trim()) errors.nombre = msgs.required;
-  const c = Number(state.costoPesos);
-  if (!Number.isFinite(c) || c <= 0) errors.costo = msgs.greaterThanZero;
+  // Costo is optional (review item #5). Someone selling a service, or
+  // re-selling something they were given, has no cost — forcing a
+  // number there makes them invent one, which then poisons the margin
+  // and the Estado de Resultados. Empty means "unknown", stored as 0.
+  // We still reject a value that was typed but is not a valid amount.
+  if (state.costoPesos.trim() !== '') {
+    const c = Number(state.costoPesos);
+    if (!Number.isFinite(c) || c < 0) errors.costo = msgs.invalidNumber;
+  }
   // Precio de venta only required when not materia-prima-only
   if (state.usoProducto !== 'materia-prima') {
     const pv = Number(state.precioVentaPesos);

@@ -11,8 +11,8 @@
  *
  * Pure presentation — data, loading/error, and handlers are props.
  */
-import { useMemo, type ReactElement } from 'react';
-import { ScrollView } from 'react-native';
+import { useMemo, useRef, type ReactElement } from 'react';
+import { ScrollView, type TextInput } from 'react-native';
 import { View, useMedia } from '@tamagui/core';
 import type { Product } from '@cachink/domain';
 import type { Money, ProductId } from '@cachink/domain';
@@ -26,6 +26,7 @@ import { TotalBar } from './total-bar';
 import { CartStrip } from './cart-strip';
 import { CartFooter } from './cart-footer';
 import { EmptyCartHint } from './empty-cart-hint';
+import { NuevaVentaCta } from './nueva-venta-cta';
 
 export interface VentasScreenProps {
   // --- Products ---
@@ -51,17 +52,12 @@ export interface VentasScreenProps {
   readonly testID?: string;
 }
 
-function useFilteredProducts(
-  productos: readonly Product[],
-  search: string,
-): readonly Product[] {
+function useFilteredProducts(productos: readonly Product[], search: string): readonly Product[] {
   return useMemo(() => {
     const q = search.toLowerCase().trim();
     if (!q) return productos;
     return productos.filter(
-      (p) =>
-        p.nombre.toLowerCase().includes(q) ||
-        (p.sku && p.sku.toLowerCase().includes(q)),
+      (p) => p.nombre.toLowerCase().includes(q) || (p.sku && p.sku.toLowerCase().includes(q)),
     );
   }, [productos, search]);
 }
@@ -99,6 +95,8 @@ interface ProductPaneConfig {
   readonly onProductSearchChange: (q: string) => void;
   readonly hasProductos: boolean;
   readonly onGoToProductos?: () => void;
+  /** Focus target handed to the "Nueva venta" CTA (review item #8). */
+  readonly searchRef?: React.RefObject<unknown>;
 }
 
 function TabletLayout(props: {
@@ -106,6 +104,7 @@ function TabletLayout(props: {
   title: string;
   paneProps: ProductPaneConfig;
   totalBar: ReactElement;
+  cta: ReactElement;
   screenProps: VentasScreenProps;
 }): ReactElement {
   return (
@@ -113,7 +112,12 @@ function TabletLayout(props: {
       <View flex={1} padding={16}>
         <SectionTitle title={props.title} />
         <SplitPane
-          left={<ProductPane {...props.paneProps} />}
+          left={
+            <View flex={1} gap={12}>
+              {props.cta}
+              <ProductPane {...props.paneProps} />
+            </View>
+          }
           right={
             <View flex={1} gap={12}>
               {props.totalBar}
@@ -140,6 +144,7 @@ function useVentasSetup(props: VentasScreenProps) {
   const { t } = useTranslation();
   const filtered = useFilteredProducts(props.productos, props.productSearch);
   useProductColorMap(props.productos);
+  const searchRef = useRef<TextInput>(null);
 
   const paneProps: ProductPaneConfig = {
     filtered,
@@ -150,7 +155,16 @@ function useVentasSetup(props: VentasScreenProps) {
     onProductSearchChange: props.onProductSearchChange,
     hasProductos: props.productos.length > 0,
     onGoToProductos: props.onGoToProductos,
+    searchRef,
   };
+
+  const cta = (
+    <NuevaVentaCta
+      label={t('ventas.nuevaVenta')}
+      hint={t('ventas.hintTocaProducto')}
+      onPress={() => searchRef.current?.focus()}
+    />
+  );
 
   const totalBar = (
     <TotalBar
@@ -161,7 +175,7 @@ function useVentasSetup(props: VentasScreenProps) {
     />
   );
 
-  return { t, paneProps, totalBar, testID: props.testID ?? 'ventas-screen' };
+  return { t, paneProps, totalBar, cta, testID: props.testID ?? 'ventas-screen' };
 }
 
 function PhoneLayout(props: {
@@ -169,6 +183,7 @@ function PhoneLayout(props: {
   title: string;
   paneProps: ProductPaneConfig;
   totalBar: ReactElement;
+  cta: ReactElement;
   screenProps: VentasScreenProps;
 }): ReactElement {
   return (
@@ -179,6 +194,7 @@ function PhoneLayout(props: {
       >
         <SectionTitle title={props.title} />
         {props.totalBar}
+        {props.cta}
         <ProductPane {...props.paneProps} />
         <CartSection {...props.screenProps} />
       </ScrollView>
@@ -193,13 +209,17 @@ function PhoneLayout(props: {
 
 export function VentasScreen(props: VentasScreenProps): ReactElement {
   const media = useMedia();
-  const { t, paneProps, totalBar, testID } = useVentasSetup(props);
+  const { t, paneProps, totalBar, cta, testID } = useVentasSetup(props);
 
   const layoutProps = {
     testID,
-    title: t('ventas.title'),
+    // Review item #8: the tab used to be titled "Ventas", which read
+    // as a list of past sales. It is a POS screen — name it for what
+    // the user is here to do.
+    title: t('ventas.nuevaVenta'),
     paneProps,
     totalBar,
+    cta,
     screenProps: props,
   };
 

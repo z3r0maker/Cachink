@@ -26,11 +26,20 @@ function safeParsePesos(pesos: string): Money | null {
   }
 }
 
+/**
+ * Costo is optional (review item #5). With no cost recorded the margin
+ * is trivially 100%, which is a lie dressed as a metric — the row is
+ * withheld rather than showing a number the user can't trust.
+ */
+function costoIsBlank(costoPesos: string): boolean {
+  return costoPesos.trim() === '' || safeParsePesos(costoPesos) === 0n;
+}
+
 export function MargenGananciaRow(props: {
   costoPesos: string;
   precioVentaPesos: string;
   t: T;
-}): ReactElement {
+}): ReactElement | null {
   const margen = useMemo(() => {
     const costo = safeParsePesos(props.costoPesos);
     const precio = safeParsePesos(props.precioVentaPesos);
@@ -38,11 +47,15 @@ export function MargenGananciaRow(props: {
     return calcularMargenProducto(costo, precio);
   }, [props.costoPesos, props.precioVentaPesos]);
 
-  const display = margen
-    ? `${formatMoney(margen.gananciaCentavos)} (${margen.margenPct}%)`
-    : '—';
+  if (costoIsBlank(props.costoPesos)) return null;
+
+  const display = margen ? `${formatMoney(margen.gananciaCentavos)} (${margen.margenPct}%)` : '—';
   const isNegative = margen !== null && margen.margenPct < 0;
 
+  return <Row label={props.t('nuevoProducto.margenLabel')} value={display} negative={isNegative} />;
+}
+
+function Row(props: { label: string; value: string; negative: boolean }): ReactElement {
   return (
     <View
       flexDirection="row"
@@ -58,16 +71,16 @@ export function MargenGananciaRow(props: {
         fontSize={13}
         color={colors.gray600}
       >
-        {props.t('nuevoProducto.margenLabel')}
+        {props.label}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
         fontSize={13}
-        color={isNegative ? colors.red : colors.ink}
+        color={props.negative ? colors.red : colors.ink}
         testID="margen-ganancia-value"
       >
-        {display}
+        {props.value}
       </Text>
     </View>
   );

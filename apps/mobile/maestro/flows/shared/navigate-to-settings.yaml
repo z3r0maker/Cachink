@@ -1,25 +1,26 @@
 # Reusable subflow: navigate to the Settings Hub screen.
 #
-# Uses Otros tab → scroll to Configuración card → tap it.
-# Expo Dev Client floating gear icon blocks top-bar-open-settings,
-# so we navigate via the Otros grid instead.
+# Review item #7 removed the "Otros" tab from BOTH bars, so the
+# role-branching this flow used to do is gone: the top-bar cog is now
+# the single way into Configuración for every role.
+#
+#   Director  → Inicio | Ventas | Gastos | Estados
+#   Operativo → Ventas | Caja | Gastos | Productos
+#
+# (The old Operativo branch went Otros grid → "Configuración" card.
+# That card only ever existed in the *Director* grid, so the branch was
+# dead weight even before the tab left.)
+#
+# Caveat that motivated the old branching: the Expo Dev Client's
+# floating gear can sit over the top bar. Disable "Tools button" in the
+# dev menu before running the suite — see E2E-SESSION-NOTES.md.
 #
 # Precondition: user is authenticated and on any tab.
 appId: mx.cachink.mobile
 ---
 - tapOn:
-    id: "tab-otros"
-- extendedWaitUntil:
-    visible: "Otros"
-    timeout: 5000
-- scrollUntilVisible:
-    element:
-      id: "otros-configuracion"
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
-- tapOn:
-    id: "otros-configuracion"
+    id: "top-bar-open-settings"
+
 - extendedWaitUntil:
     visible: "Ajustes"
     timeout: 5000

@@ -1,5 +1,11 @@
 /**
  * useMovimientosRecientes hook tests.
+ *
+ * Fixture dates are relative to "today" on purpose. The hook queries a
+ * rolling 90-day window (`daysAgo(90)` → `today()`), so a hard-coded
+ * `fecha` is a time bomb: these tests were written with '2026-05-09'
+ * and started failing on 2026-08-07 when that date aged out of the
+ * window. Anything asserting "recent" must be dated relative to now.
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
@@ -20,6 +26,13 @@ import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
+
+/** A date inside the hook's rolling 90-day window, whenever "now" is. */
+function fechaReciente(daysAgo = 1): IsoDate {
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - daysAgo);
+  return d.toISOString().slice(0, 10) as IsoDate;
+}
 
 function wrapper(overrides?: Record<string, unknown>) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
@@ -46,7 +59,7 @@ describe('useMovimientosRecientes', () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ }));
     await movements.create({
       productoId: product.id,
-      fecha: '2026-05-09' as IsoDate,
+      fecha: fechaReciente(),
       tipo: 'entrada',
       cantidad: 10,
       costoUnitCentavos: 100n,
@@ -77,7 +90,7 @@ describe('useMovimientosRecientes', () => {
     for (let i = 0; i < 5; i++) {
       await movements.create({
         productoId: product.id,
-        fecha: '2026-05-09' as IsoDate,
+        fecha: fechaReciente(),
         tipo: 'entrada',
         cantidad: i + 1,
         costoUnitCentavos: 100n,

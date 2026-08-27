@@ -4,7 +4,13 @@
  * Wraps the app's router and renders the right pre-boarding screen:
  *
  *   hydrated=false                → null (splash stays)
- *   mode === null                 → <Wizard /> (first-run)
+ *   mode === null                 → <Wizard /> (only reachable from
+ *                                   Configuración → Sistema →
+ *                                   "Sincronización y dispositivos";
+ *                                   a fresh install hydrates to
+ *                                   'local' and skips it entirely —
+ *                                   review items #1/#2)
+ *   discoveryShown=false          → <FeatureDiscovery /> (the welcome)
  *   mode === 'lan'  + no token   → <LanGate>   (host or join)
  *   mode === 'cloud' + no sess   → <CloudGate> (onboarding)
  *   currentBusinessId === null    → <BusinessForm />
@@ -141,11 +147,7 @@ function AuthInner(props: {
   if (mustChange) {
     return <ChangePinGate />;
   }
-  return (
-    <FeatureDiscoveryGate>
-      <ActivityTracker onActivity={resetActivity}>{props.children}</ActivityTracker>
-    </FeatureDiscoveryGate>
-  );
+  return <ActivityTracker onActivity={resetActivity}>{props.children}</ActivityTracker>;
 }
 
 export function GatedNavigation(props: GatedNavigationProps): ReactElement | null {
@@ -167,12 +169,23 @@ export function GatedNavigation(props: GatedNavigationProps): ReactElement | nul
     return <WizardGate platform={platform} demoMode={demoMode} />;
   }
 
-  const inner =
-    currentBusinessId === null ? (
-      <BusinessGate />
-    ) : (
-      <AuthInner businessId={currentBusinessId}>{props.children}</AuthInner>
-    );
+  // Review items #1/#2: the welcome carousel now comes BEFORE business
+  // creation, so a fresh install reads welcome → negocio. It used to
+  // sit after the auth gates, which meant the first thing a new user
+  // saw was a form asking for a régimen fiscal.
+  //
+  // FeatureDiscoveryGate is still one-shot on the `discoveryShown`
+  // flag, so existing installs that already dismissed it go straight
+  // through and never see it again.
+  const inner = (
+    <FeatureDiscoveryGate>
+      {currentBusinessId === null ? (
+        <BusinessGate />
+      ) : (
+        <AuthInner businessId={currentBusinessId}>{props.children}</AuthInner>
+      )}
+    </FeatureDiscoveryGate>
+  );
 
   const { output, fallthrough } = renderPreBusinessGate(mode, props, inner);
   if (!fallthrough) return output;

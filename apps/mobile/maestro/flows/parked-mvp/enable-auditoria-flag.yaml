@@ -10,8 +10,10 @@
 #   - runFlow: shared/enable-auditoria-flag.yaml
 appId: mx.cachink.mobile
 ---
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"

@@ -4,12 +4,19 @@
  * Operativo always has 5 tabs — Caja is permanently present (not gated).
  * The 4th tab swaps between Merma/Productos based on feature flags.
  *
- * Operativo (merma ON):  Ventas | Caja | Pagos | Merma    | Otros
- * Operativo (merma OFF): Ventas | Caja | Pagos | Productos | Otros
- * Director (always):     Home | Ventas | Estados | Otros
+ * Operativo (merma ON):  Ventas | Caja | Gastos | Merma     | Otros
+ * Operativo (merma OFF): Ventas | Caja | Gastos | Productos | Otros
+ * Director (always):     Inicio | Ventas | Gastos | Estados
  *
- * "Pagos" is the UI label for the Egresos tab (code identifiers stay
- * `expense`/`egreso` — purely a label change).
+ * "Gastos" is the UI label for the Egresos tab in BOTH roles (code
+ * identifiers stay `expense`/`egreso` — purely a label change).
+ *
+ * Review item #7: the Operativo tab used to read "Pagos", which
+ * collided with the app's own vocabulary — a "pago" here is money
+ * coming IN from a client (`useRegistrarPago`, the `Pagos` sheet in the
+ * Excel export is `clientPayments`), while this tab is money going OUT.
+ * Toni's word is Gastos, and both roles now say the same thing about
+ * the same module.
  */
 
 import type { FeatureFlags } from '@cachink/domain';
@@ -26,16 +33,16 @@ export interface TabDefinition {
   readonly path: string;
 }
 
-/** Operativo tabs — dynamic based on merma flag. Always 5 tabs.
+/** Operativo tabs — dynamic based on merma flag. Always 4 tabs.
  *  MVP note: merma is clamped OFF by MVP_HIDDEN_FLAGS, so the merma
  *  branch below is effectively dead and tabs always render as:
- *  Ventas | Caja | Pagos | Productos | Otros.
+ *  Ventas | Caja | Gastos | Productos.
  *  No code change needed — the clamp in parseFeatureFlags handles it. */
 export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
   const tabs: TabDefinition[] = [
     { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
     { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
-    { key: 'gastos', labelKey: 'tabs.pagos', icon: 'file-text', path: '/egresos' },
+    { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
   ];
   if (flags.merma) {
     tabs.push({ key: 'merma', labelKey: 'tabs.merma', icon: 'trending-down', path: '/merma' });
@@ -47,16 +54,28 @@ export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
       path: '/productos',
     });
   }
-  tabs.push({ key: 'otros', labelKey: 'tabs.otros', icon: 'layout-grid', path: '/otros' });
+  // Review item #7: "Otros" is gone from BOTH bars now. Toni's note was
+  // unqualified — a label that says nothing does not earn a slot in
+  // either role. The Operativo's three tools moved into Caja (see
+  // `operativoCajaToolItems`), not into Configuración, because they are
+  // shift-floor work and the cog would have cost them a tap.
   return tabs;
 }
 
-/** Director tabs — always the same 4 tabs. */
+/**
+ * Director tabs — always the same 4 tabs (review item #7).
+ *
+ * "Otros" was a junk drawer: its label said nothing and it hid the two
+ * numbers a Director actually opens the app for. Gastos takes its slot
+ * so the bar reads as the money story — what came in, what went out,
+ * what it adds up to. Everything that lived under Otros moved into
+ * Configuración, reachable from the cog in the top bar.
+ */
 export const DIRECTOR_TABS: readonly TabDefinition[] = [
   { key: 'home', labelKey: 'tabs.home', icon: 'home', path: '/' },
   { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
+  { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
   { key: 'estados', labelKey: 'tabs.estados', icon: 'chart-bar', path: '/estados' },
-  { key: 'otros', labelKey: 'tabs.otros', icon: 'layout-grid', path: '/otros' },
 ] as const;
 
 /**
@@ -88,7 +107,6 @@ export function tabsForRole(
 export const OPERATIVO_TABS: readonly TabDefinition[] = [
   { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
   { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
-  { key: 'gastos', labelKey: 'tabs.pagos', icon: 'file-text', path: '/egresos' },
+  { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
   { key: 'productos', labelKey: 'tabs.productos', icon: 'package', path: '/productos' },
-  { key: 'otros', labelKey: 'tabs.otros', icon: 'layout-grid', path: '/otros' },
 ] as const;

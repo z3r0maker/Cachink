@@ -1,0 +1,49 @@
+# Reusable subflow: get a fresh install from launch to the business form.
+#
+# Review items #1/#2 changed what "first run" means. It used to be:
+#
+#   launch → wizard step 1 (¿solo o varios dispositivos?)
+#          → step 2A (local / nube?) → consent → negocio
+#
+# A first-time emprendedor has one phone and no opinion about LAN vs
+# cloud, so those two questions were asked before the app had earned
+# the right to ask anything. Now a fresh install hydrates
+# AppConfig.mode to 'local' and the boot flow is:
+#
+#   launch → ¡Bienvenido a Cachink! → Comenzar → negocio
+#
+# The device/cloud questions still exist — they moved to
+# Configuración → Sistema → "Sincronización y dispositivos", which is
+# where the wizard-*.yaml flows now enter.
+#
+# Usage (fresh install only):
+#   - launchApp
+#   - runFlow: shared/first-run-onboarding.yaml
+appId: mx.cachink.mobile
+---
+- runFlow: dismiss-modals.yaml
+
+# The welcome carousel is the first screen now.
+- extendedWaitUntil:
+    visible:
+      id: "feature-discovery"
+    timeout: 8000
+- assertVisible: "¡Bienvenido a Cachink!"
+- tapOn:
+    id: "discovery-continue"
+
+# Consent step (may or may not fire depending on build config).
+- extendedWaitUntil:
+    visible:
+      id: "consent-no"
+    timeout: 5000
+    optional: true
+- tapOn:
+    id: "consent-no"
+    optional: true
+
+# BusinessForm — one tap after the welcome, no device question in between.
+- extendedWaitUntil:
+    visible:
+      id: "business-nombre"
+    timeout: 8000

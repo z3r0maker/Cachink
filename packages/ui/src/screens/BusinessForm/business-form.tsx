@@ -24,8 +24,10 @@ import {
   Btn,
   FloatingCoinsBackground,
   Input,
+  KeyboardAwareForm,
   SafeAreaSpacer,
   SectionTitle,
+  dismissKeyboard,
 } from '../../components/index';
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { TextField } from '../../components/fields/index';
@@ -102,7 +104,12 @@ function FormFields(props: FormFieldsProps): ReactElement {
       <OptionCardGroup
         label={t('wizard.businessForm.regimenLabel')}
         value={props.regimen}
-        onChange={(v) => props.setRegimen(v)}
+        onChange={(v) => {
+          // Picking a régimen is not a text edit — close the keyboard
+          // so GUARDAR is visible without an extra dismiss tap.
+          dismissKeyboard();
+          props.setRegimen(v);
+        }}
         options={REGIMEN_CARDS}
         testID="business-regimen"
       />
@@ -225,7 +232,7 @@ export function BusinessForm(props: BusinessFormProps): ReactElement {
 
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'business-form'}>
-      <View flex={1} padding={24} alignItems="center" justifyContent="center">
+      <KeyboardAwareForm testID="business-form-scroll">
         <SafeAreaSpacer />
         <FormColumn
           s={s}
@@ -234,7 +241,7 @@ export function BusinessForm(props: BusinessFormProps): ReactElement {
           submitting={props.submitting === true}
           onBack={props.onBack}
         />
-      </View>
+      </KeyboardAwareForm>
     </FloatingCoinsBackground>
   );
 }

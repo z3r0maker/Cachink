@@ -20,12 +20,14 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals.
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to Otros → Funciones.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -60,8 +62,10 @@ appId: mx.cachink.mobile
 # --- Verify all children are now OFF ---
 # After disabling stock, the child flags should have auto-toggled OFF.
 # Navigate away and back to verify persisted state.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -74,8 +78,10 @@ appId: mx.cachink.mobile
 # The switches should now be OFF (we can't directly assert switch state,
 # but we can verify the UX impact: navigating to Productos should not
 # show stock-dependent sub-tabs).
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-productos"
@@ -94,8 +100,10 @@ appId: mx.cachink.mobile
     id: "tab-merma"
 
 # Re-enable stock for subsequent flows.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"

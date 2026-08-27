@@ -17,12 +17,24 @@ import { Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
 import { colors, typography } from '../../theme';
+import { SettingsNavSection } from './settings-nav-section';
+import type { OtrosItem } from '../Otros/otros-items';
 
 export type SettingsSection = 'negocio' | 'tasas-isr' | 'sistema' | 'tipos-de-pago' | 'indicadores';
 
 export interface SettingsHubProps {
   readonly business: Business | null;
   readonly onNavigate: (section: SettingsSection) => void;
+  /**
+   * Director only: the tool grid that used to be the "Otros" tab
+   * (review item #7). The Director bottom bar now ends in Estados, so
+   * these reach the user through the top-bar cog instead. Pass
+   * `directorSettingsNavItems(flags)`; omit for Operativo, who keeps
+   * the Otros tab in their five-slot bar.
+   */
+  readonly navItems?: readonly OtrosItem[];
+  /** Required when `navItems` is provided — receives the item `path`. */
+  readonly onNavigateTool?: (path: string) => void;
   readonly testID?: string;
 }
 
@@ -116,6 +128,13 @@ export function SettingsHub(props: SettingsHubProps): ReactElement {
         contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}
       >
         <SectionTitle title={t('settings.hubTitle')} />
+        {props.navItems && props.onNavigateTool && (
+          <SettingsNavSection
+            items={props.navItems}
+            onNavigate={props.onNavigateTool}
+            title={t('settings.herramientas')}
+          />
+        )}
         {categories.map((c) => (
           <CategoryCard
             key={c.section}

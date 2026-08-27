@@ -84,7 +84,7 @@ Links to discussion, docs, prior art.
 | [044](#adr-044) | 2026-04-26 | Component tests run on Vitest + jsdom + react-native-web alias, not Jest + RNTL (clarifies CLAUDE.md §3)                                               | Accepted                      |
 | [045](#adr-045) | 2026-04-28 | Rename `Inventario` tab → `Productos` with sub-tabs Catálogo / Stock / Movimientos (UXD-R3)                                                            | Accepted                      |
 | [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto schema design (UXD-R3)                                                          | Accepted                      |
-| [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                                | Accepted                      |
+| [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                               | Accepted                      |
 | [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS                                                                      | Accepted                      |
 | [049](#adr-049) | 2026-05-10 | PIN for login, Password for recovery                                                                                                                   | Accepted                      |
 
@@ -3103,16 +3103,19 @@ UXD-R3 introduces a "Smart Catalog" where productos can be physical goods (with 
 ### Decision
 
 **Product entity gains four fields:**
+
 - `tipo: 'producto' | 'servicio'` — discriminator.
 - `seguirStock: boolean` — opt-in stock tracking; forced `false` when `tipo='servicio'`.
 - `precioVentaCentavos: bigint` — selling price for quick-sell flow.
 - `atributos: Record<string, string>` — sparse key/value map for custom attributes.
 
 **Sale entity gains two fields:**
+
 - `productoId: ProductId | null` — optional FK to a catalogue producto.
 - `cantidad: number` — multi-unit sales (defaults to 1).
 
 **Business entity gains three fields:**
+
 - `tipoNegocio: 'producto-con-stock' | 'producto-sin-stock' | 'servicio' | 'mixto'` — archetype.
 - `categoriaVentaPredeterminada: SaleCategory` — default for quick-sell.
 - `atributosProducto: AttrDef[]` — custom attribute definitions for the catalogue.
@@ -3148,7 +3151,7 @@ The BottomTabBar was disappearing on certain routes (Inventario, Settings) becau
 1. **Shared parent layout:** Move all authenticated routes into an `(authenticated)/` group folder in Expo Router. The group's `_layout.tsx` renders `<AppShellWrapper>` once; child routes only swap the inner content.
 2. **`activeTabKey` resolution:** Centralize pathname → tab-key mapping in `useActiveTabKey()` so off-tab screens (Settings, Cuentas por Cobrar) light up the correct parent tab.
 3. **Scroll containment:** Every screen body that can overflow is wrapped in `<ScrollView>` to prevent content from bleeding into the BottomTabBar's space.
-4. **Keyboard avoidance:** `<KeyboardAvoidingView>` wraps the children area *above* the BottomTabBar inside AppShell, so the bar stays anchored when the keyboard opens.
+4. **Keyboard avoidance:** `<KeyboardAvoidingView>` wraps the children area _above_ the BottomTabBar inside AppShell, so the bar stays anchored when the keyboard opens.
 
 ### Alternatives Considered
 
@@ -3175,6 +3178,7 @@ The BottomTabBar was disappearing on certain routes (Inventario, Settings) becau
 Cachink's Phase 1 Ventas screen originally used a free-text form modal (concepto + monto + method). This UX was designed before the smart catalogue (ADR-046) existed. Now that every business has products with `precioVentaCentavos`, requiring users to type a concept and amount is redundant for businesses that sell catalogued items — which is all of them.
 
 The free-text form also:
+
 1. Broke the link between sales and inventory (no automatic stock deduction).
 2. Made "Total del día" unreliable because users would type amounts inconsistently.
 3. Violated the "less clicks, most value" principle — a product-card tap should be all it takes.
@@ -3302,3 +3306,192 @@ unbounded/large numbers. Keep StepperField for ±1 threshold tuning.
 
 - https://github.com/erksch/react-native-wheely
 - packages/ui/src/components/README.md (Input selector decision tree)
+
+---
+
+## ADR-051
+
+**Title:** First run drops the wizard; the Director bar drops "Otros"
+
+**Date:** 2026-08-18
+
+**Status:** Accepted — amends ADR-039
+
+**Context**
+
+A round of user feedback on the beta produced ten items. Six were UX,
+one was a genuine cache bug, and three were positive. Two of the UX
+items were about the same thing from opposite ends: what the app asks
+before it has earned the right to ask, and what it puts in front of a
+Director who opens it to check the numbers.
+
+1. **First run led with the sync wizard.** ADR-039 made the wizard the
+   boot entry point: step 1 asked "¿un dispositivo o varios?", step 2A
+   asked "¿local o nube?". An emprendedora with one phone has no
+   opinion on either and no vocabulary for the second. The very first
+   interaction with the product was a question about network topology.
+
+2. **The Director bottom bar ended in "Otros."** A label that means
+   nothing, occupying one of four slots, while Gastos — half of the
+   money story — had no tab at all.
+
+**Decision**
+
+_Onboarding._ `readAndMigrateMode` now defaults `AppConfig.mode` to
+`'local'` **when and only when the key is absent**, and persists it.
+`WizardGate` is therefore never reached on a fresh install. The boot
+order becomes:
+
+```
+hydrated → FeatureDiscovery ("¡Bienvenido a Cachink!") → BusinessForm → auth gates
+```
+
+`FeatureDiscoveryGate` moved ahead of `BusinessGate` so the welcome
+carousel is the first screen rather than a régimen-fiscal form. It is
+still one-shot on the `discoveryShown` flag, so existing installs pass
+straight through.
+
+The wizard is **not** deleted. Every branch it had — solo/multi,
+local/nube, unirse a un dispositivo existente, the help modal — is
+intact and now lives at **Configuración → Sistema → "Sincronización y
+dispositivos"**, which is where a user goes when they actually acquire
+a second device.
+
+_Director navigation._ `DIRECTOR_TABS` becomes
+`Inicio | Ventas | Gastos | Estados`. The Otros grid was not deleted
+either: `directorSettingsNavItems(flags)` renders it inside the
+Settings hub, above the category cards, reusing `OtrosCard` and the
+same `otros-<key>` testIDs. Operativo keeps its Otros tab — it has five
+slots and a genuinely different set of tools.
+
+**Consequences**
+
+- The `raw === null` guard is load-bearing. Keying the default on
+  `parseMode(raw) === null` instead would rewrite an unparseable stored
+  value to `local` and strand a LAN or cloud install past its sync
+  gate. `wizard-rerun-with-data.yaml` and
+  `wizard-confirm-mode-change.yaml` cover that boundary, and
+  `app-config-provider.test.tsx` asserts a stored `cloud` survives
+  hydration untouched.
+- E2E entry points moved. Three shared subflows now own the paths that
+  changed, so no individual flow inlines them:
+  `shared/first-run-onboarding.yaml` (launch → welcome → negocio),
+  `shared/open-sync-wizard.yaml` (Configuración → Sistema → wizard),
+  and `shared/open-director-tools.yaml` (the tool grid, role-agnostic).
+- `shared/navigate-to-settings.yaml` branches on role: Operativo still
+  goes via the Otros grid, Director via the top-bar cog.
+- The welcome copy moved from the wizard's step-1 header to
+  `discovery.title`, so "¡Bienvenido a Cachink!" is still the first
+  string a new user reads and flows asserting it keep working.
+
+**Alternatives considered**
+
+- _Keep the wizard but hide every option except "Local."_ Rejected:
+  it does not avoid the breaking change it appears to avoid. The seven
+  wizard flows key off the options being hidden
+  (`wizard-step1-multi`, `wizard-step1-join-existing-link`,
+  `wizard-step2a-cloud`), not off Local — so the same flows break,
+  and the user still gets a question screen with one answer.
+- _Delete the wizard._ Rejected: LAN and cloud are shipped features
+  with real users. Moving is not removing.
+- _Give Director five tabs._ Rejected: Phase 1 surface area is
+  deliberately fixed, and a five-slot bar on a phone is where labels
+  start truncating.
+
+**References**
+
+- ADR-039 (wizard as boot entry point — amended here)
+- ADR-045 (Inventario → Productos rename)
+- `packages/ui/src/app-config/app-config-provider.tsx`
+- `packages/ui/src/app/gated-navigation.tsx`
+- `packages/ui/src/screens/AppShell/tab-definitions.ts`
+
+---
+
+## ADR-052
+
+**Title:** "Otros" leaves the Operativo bar too — into Caja, not Configuración
+
+**Date:** 2026-08-18
+
+**Status:** Accepted — amends ADR-051
+
+**Context**
+
+ADR-051 read review item #7 as a Director problem and removed "Otros"
+from that bar only. Re-reading Toni's note against the code, the ask was
+unqualified: _"'Otros' debería moverse arriba, dentro de Configuración,
+en lugar de estar en la barra inferior."_ The Operativo bar still ended
+in a label that says nothing.
+
+Two facts decided where it should go instead of "Configuración,
+obviously":
+
+1. **The two grids are not the same kind of thing.** The Director's held
+   eleven mostly-administrative entries (usuarios, funciones,
+   configuración, notificaciones, indicadores). The Operativo's holds
+   three — `caja`, `caja-movimientos`, `cancelaciones` — all shift-floor
+   work done many times a day, and one of them duplicated a tab that
+   already existed.
+2. **Configuración would have cost a tap on the most frequent path in
+   the app.** That is the opposite of _the less clicks, the most value_.
+
+There was also a vocabulary bug sitting next to it: the same `/egresos`
+module was labelled **"Gastos"** for the Director and **"Pagos"** for the
+Operativo, while everywhere else in Cachink a _pago_ is money coming
+**in** from a client (`useRegistrarPago`, and the `Pagos` sheet of the
+Excel export is `clientPayments`).
+
+**Decision**
+
+`operativoTabs()` drops its fifth slot: **Ventas | Caja | Gastos |
+Productos**, mirroring the Director's four. The three Operativo tools
+move _inside the Caja tab_ via `operativoCajaToolItems(flags)`, which is
+`operativoOtrosItems` minus the self-referential `caja` entry — the exact
+shape `directorSettingsNavItems` already uses to filter `configuracion`.
+`CajaContent` renders them with the same `SettingsNavSection` /
+`OtrosCard` the Settings hub uses, keeping the `otros-<key>` testIDs
+byte-identical.
+
+Tap count is unchanged: **Caja → tool**, where it used to be **Otros →
+tool**.
+
+The `/egresos` label is **"Gastos"** in both roles. `tabs.pagos` and
+`tabs.egresos` remain in `es-mx.ts` resolving to "Gastos" so a stale
+caller renders a word rather than a raw key; nothing in the repo consumes
+them.
+
+**Consequences**
+
+- "Otros" no longer appears in any bottom bar. `OtrosScreen` and the
+  `/otros` route still exist and still render — nothing was deleted, and
+  the Director's grid is unchanged inside Configuración.
+- `shared/open-director-tools.yaml` now discriminates on `tab-caja`
+  (only the Operativo bar has it) instead of `tab-otros`, and both
+  branches land on `settings-nav-section`. `shared/navigate-to-settings.yaml`
+  loses its dead Operativo branch — the cog is the single entry for
+  every role. The ~26 MVP flows that address `otros-<key>` cards are
+  untouched, which is the whole reason the testIDs were preserved.
+- `apps/mobile/src/shell/use-active-tab-key.ts` was deleted in the same
+  change: nothing imported it but its own test, and its
+  `'/egresos' → 'egresos'` mapping contradicted the live `deriveActiveTab`
+  in `(tabs)/_layout.tsx`.
+
+**Alternatives considered**
+
+- _Move the Operativo grid to Configuración, symmetric with the
+  Director._ Rejected: symmetric on paper, worse in the hand. It buries
+  movimientos de caja and cancelaciones — mid-shift actions — behind a
+  cog, to make two dissimilar grids look alike in the code.
+- _Keep the Operativo Otros tab and just rename it._ Rejected: renaming
+  a junk drawer does not stop it being one, and the tab was 60%
+  redundant with Caja.
+- _Rename the module to "Pagos" everywhere instead._ Rejected: it
+  collides head-on with client payments, which are money in.
+
+**References**
+
+- ADR-051 (first-run + Director bar — amended here)
+- `packages/ui/src/screens/Otros/otros-items.ts`
+- `packages/ui/src/screens/Caja/caja-content.tsx`
+- `packages/ui/src/screens/AppShell/tab-definitions.ts`

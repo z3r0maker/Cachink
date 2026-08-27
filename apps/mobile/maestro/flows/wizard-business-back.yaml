@@ -13,31 +13,9 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Dismiss any consent modals.
-- runFlow: shared/dismiss-modals.yaml
-
-- assertVisible: "¡Bienvenido a Cachink!"
-
-# Step 1 → Solo → Step 2A → Local (reach BusinessForm).
-- tapOn:
-    id: "wizard-step1-solo-card"
-- extendedWaitUntil:
-    visible:
-      id: "wizard-step2a-local"
-    timeout: 5000
-- tapOn:
-    id: "wizard-step2a-local-card"
-
-# Consent step (dismiss if shown).
-- tapOn:
-    id: "consent-no"
-    optional: true
-
-# BusinessForm renders.
-- extendedWaitUntil:
-    visible:
-      id: "business-nombre"
-    timeout: 5000
+# Review items #1/#2: first run is welcome → negocio, no device or
+# cloud question in between. The shared subflow owns those steps.
+- runFlow: shared/first-run-onboarding.yaml
 
 # Tap the back button to return to mode selection.
 - tapOn:

@@ -18,12 +18,14 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals.
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to Otros → Funciones.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -52,8 +54,10 @@ appId: mx.cachink.mobile
 
 # conversionAutomatica should have auto-disabled. Navigate away and back
 # to verify persisted state.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"
@@ -79,8 +83,10 @@ appId: mx.cachink.mobile
     id: "flag-stock-switch"
 
 # Navigate to verify stock-dependent features are hidden.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-productos"
@@ -93,8 +99,10 @@ appId: mx.cachink.mobile
     id: "productos-tab-stock"
 
 # Re-enable stock for subsequent flows.
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-funciones"

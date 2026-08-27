@@ -71,8 +71,13 @@ export const esMX = {
   tabs: {
     ventas: 'Ventas',
     caja: 'Caja',
-    pagos: 'Pagos',
-    egresos: 'Pagos',
+    // Review item #7: the Egresos tab is "Gastos" in both roles now.
+    // `pagos`/`egresos` are kept only so an external/legacy caller of
+    // t('tabs.pagos') doesn't render a raw key — nothing in the repo
+    // consumes them. Both resolve to Gastos on purpose: "pago" in this
+    // app means money received from a client.
+    pagos: 'Gastos',
+    egresos: 'Gastos',
     gastos: 'Gastos',
     inventario: 'Inventario',
     productos: 'Productos',
@@ -152,7 +157,7 @@ export const esMX = {
     usoVenta: 'Para venta',
     usoMateriaPrima: 'Materia prima (para convertir)',
     usoAmbos: 'Ambos (venta y conversión)',
-    costoUnitLabel: 'Costo por unidad',
+    costoUnitLabel: 'Costo por unidad (opcional)',
     precioVentaLabel: 'Precio de venta',
     unidadLabel: 'Unidad',
     umbralLabel: 'Alerta de Stock Bajo',
@@ -264,6 +269,8 @@ export const esMX = {
     emptyTitle: 'Aún no hay ventas',
     emptyBody: 'Registra tu primera venta del día con el botón de abajo.',
     newCta: '+ Nueva Venta',
+    nuevaVenta: 'Nueva venta',
+    hintTocaProducto: 'Toca un producto para agregarlo a la venta',
     noCliente: 'Sin cliente',
     delete: 'Eliminar',
     share: 'Compartir comprobante',
@@ -288,11 +295,13 @@ export const esMX = {
     registrarVenta: 'Registrar venta',
     // Caja Gate
     cajaGateTitle: 'Abre tu caja para empezar a vender',
-    cajaGateDescription: 'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
+    cajaGateDescription:
+      'Necesitas un turno de caja abierto para registrar ventas. Esto permite cuadrar tu efectivo al final del día.',
     cajaGateCta: 'Ir a Caja',
     // Products Gate
     productosGateTitle: 'Registra tus productos para empezar a vender',
-    productosGateDescription: 'Aún no tienes productos. Agrega al menos uno para poder registrar ventas.',
+    productosGateDescription:
+      'Aún no tienes productos. Agrega al menos uno para poder registrar ventas.',
     productosGateCta: 'Ir a Productos',
     // Tap-to-Cart redesign
     carrito: 'Carrito',
@@ -474,7 +483,8 @@ export const esMX = {
 
     // ── Resumen card ──
     resultadosResumenTitle: 'Resumen del periodo',
-    resultadosResumenSentence: 'Vendiste {{ingresos}}, gastaste {{egresos}}, y te quedaron {{neto}}.',
+    resultadosResumenSentence:
+      'Vendiste {{ingresos}}, gastaste {{egresos}}, y te quedaron {{neto}}.',
 
     // ── Subtitles (always visible) ──
     resultadosIngresosSubtitle: 'Todo el dinero que entró por ventas',
@@ -779,8 +789,9 @@ export const esMX = {
     idiomaLabel: 'Idioma',
     idiomaValue: 'Español (es-MX)',
     funciones: 'Funciones del negocio',
-    reRunWizard: 'Re-ejecutar asistente',
-    reRunWizardHint: 'Volver al asistente de configuración',
+    herramientas: 'Herramientas',
+    reRunWizard: 'Sincronización y dispositivos',
+    reRunWizardHint: 'Conectar otro dispositivo o cambiar de modo',
     notificacionesLabel: 'Notificaciones',
     notificacionesHint: 'Recibir avisos de stock bajo al final del día',
     crashReportingTitle: '¿Enviar reportes de errores?',
@@ -1054,8 +1065,11 @@ export const esMX = {
     factoryReset: 'Restablecer aplicación',
   },
   discovery: {
-    title: '¡Tu negocio, tu sistema!',
-    subtitle: 'Cachink! tiene funciones que puedes activar según lo que necesites',
+    // Review items #1/#2: this is now the FIRST screen on a fresh
+    // install — the wizard's device/cloud questions moved behind
+    // Configuración. So it carries the welcome.
+    title: '¡Bienvenido a Cachink!',
+    subtitle: 'Tu negocio, tu sistema. Activa solo las funciones que necesites.',
     stock: 'Inventario / Stock',
     stockDesc: 'Controla las cantidades de tus productos',
     conversion: 'Conversión de Materia Prima',
@@ -1143,7 +1157,8 @@ export const esMX = {
     'reason.otro': 'Otro',
     // --- Handoff banner (QA #11) ---
     handoffTitle: '{{name}} ya abrió la caja',
-    handoffDescription: 'Este turno fue abierto con {{monto}}. ¿Deseas confirmar este monto o registrar uno diferente?',
+    handoffDescription:
+      'Este turno fue abierto con {{monto}}. ¿Deseas confirmar este monto o registrar uno diferente?',
     handoffConfirm: 'Confirmar monto',
     handoffDifferent: 'Registrar diferente',
   },
@@ -1208,8 +1223,7 @@ export const esMX = {
     prodNombre: 'Producto',
     cantidadUsada: 'Cantidad usada',
     cantidadCreada: 'Cantidad creada',
-    noProductsTitle:
-      'Necesitas al menos una materia prima y un producto de venta',
+    noProductsTitle: 'Necesitas al menos una materia prima y un producto de venta',
     noProductsHint:
       'Crea productos y asígnales su uso (materia prima o venta) para crear recetas de conversión.',
     validacion: {
@@ -1235,14 +1249,11 @@ export const esMX = {
     stockSistema: 'Sistema',
     stockReal: 'Conteo real',
     confirmarFinalizar: '¿Finalizar auditoría?',
-    confirmarFinalizarDesc:
-      'Se crearán ajustes de inventario para {{count}} discrepancias.',
+    confirmarFinalizarDesc: 'Se crearán ajustes de inventario para {{count}} discrepancias.',
     noProducts: 'No hay productos para auditar',
-    noProductsHint:
-      'Agrega productos con seguimiento de stock para iniciar una auditoría.',
+    noProductsHint: 'Agrega productos con seguimiento de stock para iniciar una auditoría.',
     cancelar: 'Cancelar auditoría',
-    cancelarConfirm:
-      '¿Cancelar esta auditoría? Los conteos no guardados se perderán.',
+    cancelarConfirm: '¿Cancelar esta auditoría? Los conteos no guardados se perderán.',
   },
   ventasCredito: {
     title: 'Ventas a Crédito',

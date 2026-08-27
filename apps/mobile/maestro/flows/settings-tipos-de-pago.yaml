@@ -12,12 +12,10 @@ tags:
 - runFlow: shared/authenticate.yaml
 
 # Navigate to Otros → Settings
-- tapOn:
-    id: "tab-otros"
-- extendedWaitUntil:
-    visible:
-      id: "otros-route"
-    timeout: 5000
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 
 - scrollUntilVisible:
     element:

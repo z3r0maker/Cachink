@@ -11,6 +11,7 @@ import { RegistrarPagoClienteUseCase } from '@cachink/application';
 import type { ClientPayment, NewClientPayment } from '@cachink/domain';
 import { useClientPaymentsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys, pagoKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_REGISTRAR_PAGO } from '../observability/audit-configs';
 
@@ -37,11 +38,16 @@ export function useRegistrarPago(): RegistrarPagoResult {
       return useCase.execute(input);
     },
     async onSuccess() {
-      // Invalidate every surface that derives from Crédito state.
+      // Invalidate every surface that derives from Crédito state. A
+      // pago moves cash and clears a receivable, so Flujo de Efectivo
+      // and Balance General are downstream of it too.
       await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ['ventas', businessId] }),
-        queryClient.invalidateQueries({ queryKey: ['cuentasPorCobrar', businessId] }),
-        queryClient.invalidateQueries({ queryKey: ['cliente-detail', businessId] }),
+        ...pagoKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
     },
   });

@@ -17,12 +17,10 @@ tags:
 - runFlow: shared/authenticate-director.yaml
 
 # Director Otros tab should show telemetria card in dev
-- tapOn:
-    id: "tab-otros"
-- extendedWaitUntil:
-    visible:
-      id: "otros-route"
-    timeout: 5000
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 
 # Scroll to telemetria card (last card in grid, below fold)
 - scrollUntilVisible:

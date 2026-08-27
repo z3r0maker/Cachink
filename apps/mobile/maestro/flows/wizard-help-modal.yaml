@@ -9,7 +9,7 @@
 # Precondition: fresh install. Run via wrapper:
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-help-modal.yaml
-# x-entrypoint: fresh
+# x-entrypoint: wizard
 appId: mx.cachink.mobile
 ---
 - launchApp
@@ -18,7 +18,10 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-- assertVisible: "¡Bienvenido a Cachink!"
+# Review items #1/#2: the wizard is no longer the first-run entry
+# point. It lives in Configuración → Sistema → "Sincronización y
+# dispositivos"; the shared subflow owns that path.
+- runFlow: shared/open-sync-wizard.yaml
 - tapOn: { id: "wizard-step1-help-link" }
 
 # Modal mounts with all three scenarios.

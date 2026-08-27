@@ -51,6 +51,7 @@ export * from './HelpAccordion/index';
 export * from './HealthIndicator/index';
 export * from './DeltaIndicator/index';
 export * from './NotificationBadge/index';
+export * from './KeyboardAwareForm/index';
 // NOTE: AppShellRouteWrapper is NOT re-exported here. It lives in
 // components/ but imports from screens/AppShell, which imports from
 // components/ — creating a require cycle. It's re-exported from

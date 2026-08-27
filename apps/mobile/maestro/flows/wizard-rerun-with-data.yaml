@@ -16,10 +16,7 @@ appId: mx.cachink.mobile
 - runFlow: shared/authenticate.yaml
 
 # Reach Settings → Sistema → Re-run asistente.
-- runFlow: shared/navigate-to-settings.yaml
-- tapOn: { id: "settings-hub-sistema" }
-- tapOn: { id: "settings-re-run-wizard" }
-- assertVisible: { id: "wizard" }
+- runFlow: shared/open-sync-wizard.yaml
 - assertVisible: "¡Bienvenido a Cachink!"
 
 # Step 1 → Solo → Step 2A. The data-preserved callout should be visible.

@@ -1,46 +1,67 @@
 /**
- * AppProviders overlays-slot integration test (Round 3 F1).
+ * AppProviders overlays-slot structural test (Round 3 F1, amended).
  *
  * Regression guard for the latent bug surfaced in Round 3:
  * `<MobileScannerHost />` and `<CloudInnerScreenHost />` were mounted as
- * children of `<AppProviders>`. When `<GatedNavigation>` returned a
- * `<LanGate>` or `<CloudGate>` (which ignore `props.children`), the
- * overlay components were silently dropped. Result: tapping "Escanear
- * QR" on the LAN pairing screen never opened the camera; tapping
- * "¿Olvidaste tu contraseña?" on Cloud onboarding never showed the
- * password-reset screen.
+ * children of `<AppProviders>`. When `<GatedNavigation>` short-circuits
+ * (it returns `null` before hydration, and `<LanGate>`/`<CloudGate>`
+ * ignore `props.children`), the overlay components were silently
+ * dropped. Result: tapping "Escanear QR" on the LAN pairing screen never
+ * opened the camera; tapping "¿Olvidaste tu contraseña?" on Cloud
+ * onboarding never showed the password-reset screen.
  *
- * The fix moves overlays to a dedicated `overlays?: ReactNode` slot
- * that renders inside `<TamaguiProvider>` + `<AppErrorBoundary>` but
- * **outside** `<DatabaseProvider>` and the gate chain — so they always
- * mount regardless of gate state.
+ * The fix is a dedicated `overlays?: ReactNode` slot rendered as a
+ * **sibling of the gated content**, so gate state can never drop it.
  *
- * The test below proves the contract by:
- *   1. Mocking `@tauri-apps/plugin-sql` so `<DatabaseProvider>` never
- *      resolves (mirrors the behaviour during a slow boot, a Cloud
- *      pairing flow before the user has signed in, etc.).
- *   2. Rendering `<AppProviders>` with both `children` and `overlays`.
- *   3. Asserting the overlay is in the document even though `children`
- *      are not (the DB hasn't loaded → the gate chain hasn't rendered).
+ * AMENDED (commit 5f76068): the slot originally sat outside
+ * `<DatabaseProvider>` too. `<NotificationTapHost>` calls
+ * `useRepositories()`, so it threw on launch from there. Overlays now
+ * render *inside* the data providers and *outside* the gate chain. The
+ * consequence is deliberate and documented in app-providers.tsx: an
+ * overlay does not mount until the DB resolves and a deviceId exists
+ * (`DrizzleRepositoryBridge` returns null without one). What must never
+ * regress is the gate-chain independence, which is what this file tests.
+ *
+ * The data providers are stubbed to pass-throughs because they are not
+ * under test — the contract under test is the JSX shape of
+ * `AppProviders` itself: `{content}` and `{props.overlays}` are
+ * siblings.
  */
 
-import type { ReactElement } from 'react';
-import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { act } from 'react';
+import type { ReactElement, ReactNode } from 'react';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
+import type * as DatabaseModule from '../../src/database/index';
+import type * as BridgesModule from '../../src/app/app-provider-bridges';
+
+function passthrough({ children }: { readonly children?: ReactNode }): ReactElement {
+  return <>{children}</>;
+}
+
+// The gate chain is the thing overlays must survive. `null` stands in for
+// every short-circuit it has: !hydrated, <LanGate>, <CloudGate>.
+const gateRendersChildren = { current: false };
+
+vi.mock('../../src/app/gated-navigation', () => ({
+  GatedNavigation: ({ children }: { readonly children?: ReactNode }): ReactElement | null =>
+    gateRendersChildren.current ? <>{children}</> : null,
+}));
+
+vi.mock('../../src/database/index', async (importOriginal) => ({
+  ...(await importOriginal<typeof DatabaseModule>()),
+  DatabaseProvider: passthrough,
+}));
+
+vi.mock('../../src/app/app-provider-bridges', async (importOriginal) => ({
+  ...(await importOriginal<typeof BridgesModule>()),
+  DrizzleAppConfigBridge: passthrough,
+  DrizzleRepositoryBridge: passthrough,
+  ObservabilityBridge: passthrough,
+  TelemetryBridge: passthrough,
+}));
+
 import { AppProviders } from '../../src/app/index';
 import { initI18n } from '../../src/i18n/index';
-import { useAppConfigStore } from '../../src/app-config/index';
-
-// Stop Tauri's plugin from trying to talk to the (non-existent) WebView
-// IPC bridge under JSDOM. The DatabaseProvider catches the rejection in
-// its async factory and renders null — the exact state where overlays
-// must still survive.
-vi.mock('@tauri-apps/plugin-sql', () => ({
-  default: {
-    load: vi.fn().mockRejectedValue(new Error('Tauri not available in tests')),
-  },
-}));
 
 initI18n();
 
@@ -49,42 +70,33 @@ function TestOverlay(): ReactElement {
 }
 
 describe('AppProviders overlays slot (Round 3 F1)', () => {
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-
   beforeEach(() => {
     cleanup();
-    // Reset to a clean store so other tests don't bleed mode/role through.
-    act(() => {
-      useAppConfigStore.setState({
-        hydrated: false,
-        mode: null,
-        currentBusinessId: null,
-        role: null,
-        deviceId: null,
-      });
-    });
-    // Silence the expected `[DatabaseProvider] failed to initialize` log
-    // so the test output stays readable. The error is the path under test
-    // (DB never resolves → gate stays null).
-    consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    gateRendersChildren.current = false;
   });
 
-  afterEach(() => {
-    consoleErrorSpy.mockRestore();
-  });
-
-  it('renders the overlays slot as a sibling of the gate chain so it survives a stuck DatabaseProvider', () => {
+  it('renders the overlays slot as a sibling of the gate chain so it survives a short-circuiting gate', () => {
     render(
       <AppProviders platform="desktop" overlays={<TestOverlay />}>
         <div data-testid="round3-app-body">app</div>
       </AppProviders>,
     );
 
-    // DB never resolves → DrizzleAppConfigBridge never renders → the
-    // gate chain returns null → app-body is NOT in the document.
+    // The gate chain rendered nothing → app-body is NOT in the document.
     expect(screen.queryByTestId('round3-app-body')).toBeNull();
     // …but the overlay must still be present because it's outside the
     // gate chain (Round 3 F1 contract).
+    expect(screen.getByTestId('round3-test-overlay')).toBeInTheDocument();
+  });
+
+  it('renders overlays alongside children once the gate chain lets the app through', () => {
+    gateRendersChildren.current = true;
+    render(
+      <AppProviders platform="desktop" overlays={<TestOverlay />}>
+        <div data-testid="round3-app-body">app</div>
+      </AppProviders>,
+    );
+    expect(screen.getByTestId('round3-app-body')).toBeInTheDocument();
     expect(screen.getByTestId('round3-test-overlay')).toBeInTheDocument();
   });
 
@@ -95,7 +107,7 @@ describe('AppProviders overlays slot (Round 3 F1)', () => {
       </AppProviders>,
     );
     expect(screen.queryByTestId('round3-test-overlay')).toBeNull();
-    // Children also missing for the same DB-stuck reason — the absence
+    // Children also missing for the same gate-chain reason — the absence
     // of an overlay shouldn't change that.
     expect(screen.queryByTestId('round3-no-overlay-children')).toBeNull();
   });

@@ -12,7 +12,7 @@ import { formatMoney } from '@cachink/domain';
 import type { BusinessId, CajaTurno, CajaTurnoId, DiscrepancyReason, Money } from '@cachink/domain';
 import { useCajaTurnosRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
-import { cajaKeys } from './query-keys';
+import { cajaKeys, estadosKeys } from './query-keys';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_CERRAR_CAJA } from '../observability/audit-configs';
@@ -26,10 +26,7 @@ export interface CerrarCajaHookInput {
 
 export type CerrarCajaResult = UseMutationResult<CajaTurno, Error, CerrarCajaHookInput, unknown>;
 
-function buildFullInput(
-  input: CerrarCajaHookInput,
-  businessId: BusinessId,
-): CerrarCajaFullInput {
+function buildFullInput(input: CerrarCajaHookInput, businessId: BusinessId): CerrarCajaFullInput {
   return {
     turnoId: input.turnoId,
     montoCierreCentavos: input.montoCierreCentavos,
@@ -96,6 +93,9 @@ export function useCerrarCaja(): CerrarCajaResult {
         queryClient.invalidateQueries({ queryKey: ['caja-open'] }),
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['efectivo-esperado', businessId] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
       ]);
       emitCajaAlerts(turno, emitAlert);
     },

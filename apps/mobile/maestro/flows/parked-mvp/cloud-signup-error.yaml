@@ -19,11 +19,11 @@ appId: mx.cachink.mobile
 - launchApp
 
 # Dismiss any first-launch modals.
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Reach Cloud Onboarding via Settings → Sistema → Re-run wizard.
-- runFlow: shared/navigate-to-settings.yaml
+- runFlow: ../shared/navigate-to-settings.yaml
 - tapOn:
     id: "settings-hub-sistema"
 - tapOn:

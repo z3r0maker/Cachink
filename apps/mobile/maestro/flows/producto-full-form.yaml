@@ -23,8 +23,10 @@ appId: mx.cachink.mobile
 
 # Navigate to Productos via Otros (when merma flag is on,
 # Productos tab is replaced by Merma — access via Otros grid).
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
       id: "otros-productos"

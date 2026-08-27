@@ -62,8 +62,6 @@ appId: mx.cachink.mobile
     id: "tab-productos"
 - assertVisible:
     id: "tab-estados"
-- assertVisible:
-    id: "tab-otros"
 
 # ── 3. Ventas tab (Operativo context) ────────────────────────────
 # Switch to Operativo to exercise the POS grid on iPad.
@@ -135,10 +133,10 @@ appId: mx.cachink.mobile
     id: "estados-tab-resultados"
 
 # ── 8. Otros tab grid ────────────────────────────────────────────
-- tapOn:
-    id: "tab-otros"
-- assertVisible:
-    id: "otros-route"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
 - assertVisible:
     id: "otros-usuarios"
 - assertVisible:

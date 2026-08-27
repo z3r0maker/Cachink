@@ -14,30 +14,9 @@ appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Dismiss any first-launch modals (ConsentModal, etc.)
-- runFlow: shared/dismiss-modals.yaml
-
-- assertVisible: "¡Bienvenido a Cachink!"
-
-# Step 1 → Solo → Step 2A → Local (fastest path to BusinessForm).
-- tapOn:
-    id: "wizard-step1-solo-card"
-- extendedWaitUntil:
-    visible:
-      id: "wizard-step2a-local"
-    timeout: 5000
-- tapOn:
-    id: "wizard-step2a-local-card"
-
-# Consent step
-- extendedWaitUntil:
-    visible:
-      id: "consent-no"
-    timeout: 5000
-    optional: true
-- tapOn:
-    id: "consent-no"
-    optional: true
+# Review items #1/#2: first run is welcome → negocio, no device or
+# cloud question in between. The shared subflow owns those steps.
+- runFlow: shared/first-run-onboarding.yaml
 
 # BusinessForm — wait for the screen transition animation.
 - extendedWaitUntil:
@@ -68,6 +47,15 @@ appId: mx.cachink.mobile
     id: "business-isr"
 - eraseText
 - inputText: "1.25"
+
+# Review item #3: with RESICO selected and the ISR field focused, the
+# soft keyboard used to cover GUARDAR with no way to scroll to it.
+# BusinessForm now sits in a KeyboardAwareForm, so the button is
+# reachable. Assert it while the keyboard is still up — that is the
+# exact state that was broken.
+- assertVisible:
+    id: "business-submit"
+- hideKeyboard
 
 # Submit.
 - tapOn:

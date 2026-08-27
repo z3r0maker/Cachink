@@ -49,14 +49,14 @@ Product-Only Sales + Inline POS implementation verified via Maestro emulation.
 Three findings identified and fixed:
 
 - [x] **Finding 1 — Maestro `clearState` + Expo dev-client on iOS 18:** Replaced `clearState: true`
-  in all 5 wizard/smoke flows with a `fresh-install.sh` wrapper script that does
-  `xcrun simctl uninstall/install`. Root cause: `clearState` wipes the Expo dev-client's
-  stored Metro URL on iOS 18+, causing "No script URL provided" errors.
+      in all 5 wizard/smoke flows with a `fresh-install.sh` wrapper script that does
+      `xcrun simctl uninstall/install`. Root cause: `clearState` wipes the Expo dev-client's
+      stored Metro URL on iOS 18+, causing "No script URL provided" errors.
 - [x] **Finding 2 — Migration 0002 unregistered:** Already fixed in UXD-R3 Phase A — all smart
-  catalog columns folded into `migration-0000.ts`. Verified via unit tests + manual launch.
+      catalog columns folded into `migration-0000.ts`. Verified via unit tests + manual launch.
 - [x] **Finding 3 — Venta Maestro flows stale:** Rewrote `venta-efectivo.yaml` and
-  `venta-credito.yaml` for the inline POS interaction (tap product card → VentaConfirmSheet → submit).
-  Old flows referenced deleted NuevaVenta modal components.
+      `venta-credito.yaml` for the inline POS interaction (tap product card → VentaConfirmSheet → submit).
+      Old flows referenced deleted NuevaVenta modal components.
 - [x] **ADR-048** added to `ARCHITECTURE.md`: documents product-only sales decision.
 - [x] **CLAUDE.md §9** updated: `Venta.producto_id` is now required (non-nullable).
 - [x] **TabItem `<View onPress>` → `<Pressable>`** (same root cause as F0-T04 Btn fix).
@@ -565,7 +565,7 @@ deferred to Phase 2 — see `ARCHITECTURE.md` "Deferred Decisions".
       Phase-2-deferred copy reachable from Step 2B importLink on
       desktop).
 - [x] **WUX-M2-T07** Extend `<WizardCard>` with `disabledNote?:
-  string` for the mobile lan-server card explanation.
+string` for the mobile lan-server card explanation.
 - [x] **WUX-M2-T08** Rewrite `wizard.tsx` orchestrator using the M1
       Zustand store; integrate `<CloudOnboardingScreen>` with new
       `initialTab` prop for sign-up vs sign-in entry points.
@@ -674,7 +674,7 @@ extra affordances the mocks suggest.
       2-px black border, hard shadow. For "CANCELAR" buttons that
       sit next to a primary `GUARDAR`. Update story matrix + tests.
 - [ ] **UXD-M1-T05** Extend `<ModalHeader>` API with `subtitle?:
-  string` and `leftAvatar?: ReactNode` slots; deprecate `emoji`
+string` and `leftAvatar?: ReactNode` slots; deprecate `emoji`
       while preserving back-compat for existing callers.
 
 ### Milestone UXD-M2 — Foundation migration
@@ -732,10 +732,10 @@ ships behind the foundation primitives M1/M2 already shipped.
       `<SegmentedToggle>`. Add helper `note` under the monto Input
       (`'Sin IVA. Se redondea al guardar.'`). Footer: side-by-side
       `<Btn variant="outline">CANCELAR</Btn>` + `<Btn variant="primary">
-  GUARDAR</Btn>` with equal flex.
+GUARDAR</Btn>` with equal flex.
 - [ ] **UXD-M3-T08** `ModalHeader` callers — pass `subtitle` =
       `Intl.DateTimeFormat('es-MX', { day:'numeric', month:'short',
-  hour:'2-digit', minute:'2-digit' }).format(now)` for
+hour:'2-digit', minute:'2-digit' }).format(now)` for
       transactional modals (NuevaVenta, NuevoEgreso). Use
       `leftAvatar` slot for the role-initials avatar.
 
@@ -1019,7 +1019,7 @@ The audit's PR 3 had two distinct workstreams:
 - [x] **M-1-PR3-T05** `<ComprobantePreview>` HTML rendering replaced
       with platform-extension `<PreviewFrame>` (audit 2.16). Web /
       Tauri variant uses sandboxed `<iframe srcDoc={html}
-  sandbox="allow-same-origin">` so the preview matches the shared
+sandbox="allow-same-origin">` so the preview matches the shared
       receipt 1:1 (the previous implementation displayed raw HTML as
       monospace text). RN variant keeps a labelled fallback until
       `react-native-webview` is added in a follow-up — the migration
@@ -1273,7 +1273,7 @@ list screens. Pattern is one-line import + one `<List>` swap.
       contract on web (native swipe gesture is verified via Maestro
       on a dev laptop per the Scanner.native pattern). Mobile route
       adapters (`apps/mobile/src/app/{ventas,egresos,clientes,
-    inventario}.tsx`) wire the new handlers to the edit modal +
+  inventario}.tsx`) wire the new handlers to the edit modal +
       `<ConfirmDialog>` mounts; per-route SwipeSlots / DetailSlots
       live in `apps/mobile/src/shell/{venta,egreso,cliente,inventario}-slots.tsx`
       so the route files stay under the §4.4 200-line cap. - **Workspace gate:** 9/9 typecheck, 9/9 lint, UI 923/923 tests
@@ -1406,6 +1406,92 @@ shipped. Tamagui `useMedia()` global adoption + `<SplitPane>` parked.
       `_ws-nowrap`, `_WebkitLineClamp-N`) on every primitive — 8
       cases pass. Closes the audit's
       "9.3/9.4 follow-through" item from the Round-2 charter.
+
+---
+
+## ✅ Beta feedback round 1 (2026-08-18)
+
+Ten items from a beta review session. Seven needed work; #4, #6 and #10
+were positive feedback with no action. See ADR-051 for the onboarding
+and navigation decisions.
+
+- [x] **#1 Onboarding pregunta por dispositivos antes de la bienvenida** —
+      fresh install now hydrates `mode='local'` and boots welcome →
+      negocio. Wizard moved to Configuración → Sistema →
+      "Sincronización y dispositivos". (ADR-051)
+- [x] **#2 Primera pantalla es un formulario fiscal** —
+      `FeatureDiscoveryGate` moved ahead of `BusinessGate`; the welcome
+      carousel carries "¡Bienvenido a Cachink!".
+- [x] **#3 El teclado atrapa la pantalla en RESICO** — new shared
+      `<KeyboardAwareForm>` (KeyboardAvoidingView + ScrollView +
+      `keyboardShouldPersistTaps`); BusinessForm adopts it and dismisses
+      the keyboard on régimen select. GUARDAR is reachable with the
+      keyboard open.
+- [ ] #4 — positive feedback, no action.
+- [x] **#5 Costo de producto no debería ser obligatorio** — optional on
+      both the create and edit paths; blank stores as 0 and the margin
+      row hides rather than showing a fake 100%.
+- [ ] #6 — positive feedback, no action.
+- [x] **#7 "Otros" no dice nada y falta Gastos** — Director bar is now
+      Inicio | Ventas | Gastos | Estados; the tool grid renders inside
+      Configuración via `directorSettingsNavItems`. (ADR-051)
+- [x] **#8 Ventas se lee como reporte, no como punto de venta** —
+      title → "Nueva venta", primary CTA that focuses the product
+      search, and an explicit "Toca un producto para agregarlo a la
+      venta" hint.
+- [x] **#9 Estados no refleja la venta/gasto recién registrado** — the
+      real bug of the round. Nine mutation hooks never invalidated the
+      estados query keys, and two of them
+      (`use-editar-venta`, `use-editar-egreso`) were invalidating dead
+      keys (`['sales', …]`, `['expenses', …]`) that nothing queries.
+      Added `estadosKeys.dependentsForBusiness()` and swept it from
+      every hook that moves money.
+- [ ] #10 — positive feedback, no action.
+
+**Follow-up:** the full Maestro regression has not been run on a device.
+`maestro` **is** installed (`~/.maestro/bin/maestro`, not on `PATH`) but
+refuses to start: _"Java 17 or higher is required"_. Install a JDK ≥ 17
+before running `./apps/mobile/maestro/scripts/full-regression.sh` —
+that is the last gate before tagging. Flows were updated statically:
+three new shared subflows plus ~45 flows re-anchored off `tab-otros`.
+
+**Static validation done in place of the device run:**
+
+- [x] All 482 `runFlow:` references resolve **relative to the calling
+      flow file** (Maestro's resolution rule). This surfaced two real
+      defects and one pre-existing one: - the two new shared subflows called siblings as
+      `shared/dismiss-modals.yaml` / `shared/navigate-to-settings.yaml`
+      from inside `flows/shared/`, which resolves to
+      `flows/shared/shared/…` → now bare filenames; - every `flows/parked-mvp/*.yaml` still called `shared/…` from a
+      subdirectory — latent since 51d2c08 moved them out of the flows
+      root without rewriting the paths. Now `../shared/…`, and the two
+      targets that actually live in `parked-mvp/`
+      (`enable-conversion-flag`, `enable-auditoria-flag`) are bare.
+- [x] `npm run test` — 10/10 packages green (ui: 1900 tests). Two
+      **pre-existing** failures fixed along the way, neither caused by
+      this round: - `tests/hooks/use-movimientos-recientes.test.tsx` was a time
+      bomb — fixtures dated `2026-05-09` aged out of the hook's
+      rolling 90-day window on 2026-08-07. Fixtures are now relative
+      to "now". - `tests/app/app-providers-overlays.test.tsx` asserted a contract
+      superseded by 5f76068, which deliberately moved the overlays
+      slot _inside_ the data providers so `<NotificationTapHost>`
+      could resolve `useRepositories()`. Rewritten to test the
+      contract that still holds: overlays are a sibling of the gate
+      chain, so a short-circuiting gate can never drop them.
+- [x] `npm run typecheck` + ESLint clean on everything this round
+      touched. Note the repo has ~40 **pre-existing** lint errors in
+      untouched files (`packages/ui` test `any`s and unused imports,
+      `packages/observability` max-lines/complexity,
+      `packages/data` unused import, `apps/mobile` two
+      max-lines-per-function plus a missing `react-hooks` rule
+      definition). Worth a dedicated cleanup pass; out of scope here.
+
+> **Environment note:** `node` on `PATH` is v24 but `better-sqlite3` in
+> `node_modules` is compiled for `NODE_MODULE_VERSION 141` (Node 25, at
+> `/opt/homebrew/bin/node`). Run the suite with that node first on
+> `PATH`, or `pnpm rebuild better-sqlite3` — otherwise `@cachink/data`,
+> `@cachink/sync-lan`, `@cachink/testing`, `@cachink/application` and
+> `@cachink/ui` fail to open a DB and report false negatives.
 
 ---
 

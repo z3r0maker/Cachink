@@ -12,8 +12,8 @@ tags:
   - edge-case
 ---
 - launchApp
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to the Merma tab.
 - tapOn:

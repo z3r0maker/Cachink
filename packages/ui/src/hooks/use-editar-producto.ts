@@ -6,6 +6,14 @@
  *
  * Audit Round 2 J3: powers the swipe-to-edit handler on the Stock
  * list (Phase K wiring).
+ *
+ * Review item #9: this invalidated `['products', businessId]` — an
+ * English key nothing queries, so editing a producto refreshed
+ * literally nothing. Same defect class as the dead `['sales']` /
+ * `['expenses']` keys found earlier in the round. Now it invalidates
+ * the real `['productos']` / `['productos-con-stock']` keys plus the
+ * estados sweep, since costo and stock feed the Balance's inventory
+ * line via `useBalanceGeneral`.
  */
 
 import { useMemo } from 'react';
@@ -15,6 +23,7 @@ import type { ProductPatch } from '@cachink/data';
 import { EditarProductoUseCase } from '@cachink/application';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_EDITAR_PRODUCTO } from '../observability/audit-configs';
 
@@ -37,7 +46,13 @@ export function useEditarProducto(): EditarProductoResult {
       return useCase.execute(input);
     },
     async onSuccess() {
-      await queryClient.invalidateQueries({ queryKey: ['products', businessId] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['productos', businessId] }),
+        queryClient.invalidateQueries({ queryKey: ['productos-con-stock', businessId] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

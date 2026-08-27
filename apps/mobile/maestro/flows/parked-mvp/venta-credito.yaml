@@ -6,9 +6,9 @@
 appId: mx.cachink.mobile
 ---
 - launchApp
-- runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
-- runFlow: shared/ensure-caja-open.yaml
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
+- runFlow: ../shared/ensure-caja-open.yaml
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:

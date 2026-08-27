@@ -75,6 +75,21 @@ async function readAndMigrateMode(
   resolveLegacyLan: AppConfigProviderProps['resolveLegacyLan'],
 ): Promise<AppMode | null> {
   const raw = await repo.get(APP_CONFIG_KEYS.mode);
+  if (raw === null) {
+    // Fresh install (review items #1/#2). A first-time user should not
+    // be asked whether they want LAN or cloud before they have even
+    // seen the app — they have one phone and no idea what those words
+    // mean. Boot straight into local and let them find
+    // Configuración → Sistema → "Sincronización y dispositivos" when
+    // they actually get a second device.
+    //
+    // This branch keys on `raw === null`, NOT on `parsed === null`:
+    // an existing LAN or cloud install must keep its stored mode, and
+    // an unparseable value must still fall through to the wizard
+    // rather than being silently rewritten to local.
+    await repo.set(APP_CONFIG_KEYS.mode, 'local');
+    return 'local';
+  }
   const parsed = parseMode(raw);
   if (parsed === null) return null;
   if (parsed === 'legacy-lan') {
@@ -120,10 +135,7 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
-  const cachinkSoundEnabled = parseBool(
-    await repo.get(APP_CONFIG_KEYS.cachinkSoundEnabled),
-    true,
-  );
+  const cachinkSoundEnabled = parseBool(await repo.get(APP_CONFIG_KEYS.cachinkSoundEnabled), true);
   return {
     deviceId,
     mode,

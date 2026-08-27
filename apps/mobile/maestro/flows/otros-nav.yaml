@@ -20,13 +20,11 @@ appId: mx.cachink.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Otros tab.
-- tapOn:
-    id: "tab-otros"
-
-# Grid renders.
-- assertVisible:
-    id: "otros-route"
+# Open the tool grid. Since review item #7 the Director reaches it
+# through Configuración (the bottom bar is Inicio | Ventas | Gastos |
+# Estados); Operativo still has the Otros tab. The shared subflow
+# handles both — never inline the branch here.
+- runFlow: shared/open-director-tools.yaml
 
 # --- Usuarios ---
 - scrollUntilVisible:
@@ -60,6 +58,5 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "top-bar-back"
 
-# Back on Otros grid.
-- assertVisible:
-    id: "otros-route"
+# Back on the tool grid.
+- runFlow: shared/open-director-tools.yaml

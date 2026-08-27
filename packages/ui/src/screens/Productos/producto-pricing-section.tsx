@@ -24,11 +24,10 @@ function PricingFields(props: {
   return (
     <>
       <MoneyField
-        label="Costo unitario"
+        label="Costo unitario (opcional)"
         value={props.state.costoPesos}
         onChange={(v) => props.onChange({ costoPesos: v })}
         error={props.errors.costo}
-        required
         testID="detail-costo"
       />
       {props.showPrecio && (

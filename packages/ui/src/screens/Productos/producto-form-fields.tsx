@@ -7,14 +7,14 @@
 
 import type { ReactElement } from 'react';
 import type { InventoryCategory, InventoryUnit, UsoProducto } from '@cachink/domain';
+import { Btn, Combobox, Icon, Input, OptionCardGroup } from '../../components/index';
 import {
-  Btn,
-  Combobox,
-  Icon,
-  Input,
-  OptionCardGroup,
-} from '../../components/index';
-import { focusRef, IntegerField, MoneyField, StepperField, TextField } from '../../components/fields/index';
+  focusRef,
+  IntegerField,
+  MoneyField,
+  StepperField,
+  TextField,
+} from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';
 import {
   INV_CATEGORIAS,
@@ -56,10 +56,22 @@ export function IdentityFields(props: {
         returnKeyType="next"
         inputRef={props.skuRef}
       />
-      <Btn variant="ghost" onPress={props.onScan} fullWidth icon={<Icon name="camera" size={16} />} testID="producto-scan">
-        {t('scanner.title')}
-      </Btn>
+      <ScanButton t={t} onScan={props.onScan} />
     </>
+  );
+}
+
+function ScanButton({ t, onScan }: { t: T; onScan: () => void }): ReactElement {
+  return (
+    <Btn
+      variant="ghost"
+      onPress={onScan}
+      fullWidth
+      icon={<Icon name="camera" size={16} />}
+      testID="producto-scan"
+    >
+      {t('scanner.title')}
+    </Btn>
   );
 }
 
@@ -95,8 +107,14 @@ export function CategoryFields({
   );
 }
 
-function PrecioVentaBlock({ form, t, precioRef }: {
-  form: ProductoFormApi; t: T; precioRef?: React.RefObject<unknown>;
+function PrecioVentaBlock({
+  form,
+  t,
+  precioRef,
+}: {
+  form: ProductoFormApi;
+  t: T;
+  precioRef?: React.RefObject<unknown>;
 }): ReactElement {
   return (
     <>
@@ -134,7 +152,6 @@ export function PricingFields(props: {
         value={form.state.costoPesos}
         onChange={(v) => form.update({ costoPesos: v })}
         error={form.errors.costo}
-        required
         testID="producto-costo"
         returnKeyType="next"
         inputRef={props.costoRef}
@@ -142,7 +159,13 @@ export function PricingFields(props: {
         blurOnSubmit={!props.showPrecio}
       />
       {props.showPrecio && <PrecioVentaBlock form={form} t={t} precioRef={props.precioRef} />}
-      <Combobox label={t('nuevoProducto.unidadLabel')} value={form.state.unidad} onChange={(v) => form.update({ unidad: v as InventoryUnit })} options={INV_UNIDADES_OPTIONS} testID="producto-unidad" />
+      <Combobox
+        label={t('nuevoProducto.unidadLabel')}
+        value={form.state.unidad}
+        onChange={(v) => form.update({ unidad: v as InventoryUnit })}
+        options={INV_UNIDADES_OPTIONS}
+        testID="producto-unidad"
+      />
     </>
   );
 }

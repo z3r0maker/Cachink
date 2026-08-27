@@ -10,6 +10,7 @@ import { RegistrarEgresoUseCase } from '@cachink/application';
 import type { Expense, NewExpense } from '@cachink/domain';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { estadosKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
 import { AUDIT_REGISTRAR_EGRESO } from '../observability/audit-configs';
 
@@ -31,7 +32,12 @@ export function useRegistrarEgreso(): RegistrarEgresoResult {
       return useCase.execute(input);
     },
     async onSuccess(egreso) {
-      await queryClient.invalidateQueries({ queryKey: ['egresos', businessId, egreso.fecha] });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['egresos', businessId, egreso.fecha] }),
+        ...estadosKeys
+          .dependentsForBusiness(businessId)
+          .map((queryKey) => queryClient.invalidateQueries({ queryKey })),
+      ]);
     },
   });
 }

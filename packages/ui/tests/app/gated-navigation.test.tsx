@@ -14,11 +14,8 @@ import type { BusinessId, UserId } from '@cachink/domain';
 import type { Repositories } from '../../src/app/repository-provider';
 import { GatedNavigation } from '../../src/app/index';
 import { MockRepositoryProvider } from '@cachink/testing/ui';
-import {
-  InMemoryAppConfigRepository,
-  InMemoryUsersRepository,
-} from '@cachink/testing';
-import { useAppConfigStore } from '../../src/app-config/index';
+import { InMemoryAppConfigRepository, InMemoryUsersRepository } from '@cachink/testing';
+import { APP_CONFIG_KEYS, useAppConfigStore } from '../../src/app-config/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -29,6 +26,17 @@ function setStore(state: Partial<ReturnType<typeof useAppConfigStore.getState>>)
   act(() => {
     useAppConfigStore.setState({ ...state });
   });
+}
+
+/**
+ * Repo with the discovery carousel already dismissed. Since review
+ * items #1/#2 the welcome carousel gates everything downstream of
+ * hydration, so any test asserting a *later* gate has to get past it.
+ */
+async function dismissedDiscoveryRepo(): Promise<InMemoryAppConfigRepository> {
+  const appConfig = new InMemoryAppConfigRepository();
+  await appConfig.set(APP_CONFIG_KEYS.discoveryShown, 'true');
+  return appConfig;
 }
 
 function mountGate(
@@ -72,7 +80,9 @@ describe('GatedNavigation', () => {
     expect(screen.getByTestId('wizard')).toBeInTheDocument();
   });
 
-  it('shows the business form when mode is set but no business exists', () => {
+  it('shows the welcome carousel before the business form on a fresh install', async () => {
+    // Review items #1/#2: first run must read welcome → negocio. The
+    // business form asks for a régimen fiscal — a rough first screen.
     setStore({
       hydrated: true,
       mode: 'local',
@@ -81,8 +91,23 @@ describe('GatedNavigation', () => {
       deviceId: null,
     });
     mountGate(<span data-testid="app-body">app</span>);
+    expect(await screen.findByTestId('feature-discovery')).toBeInTheDocument();
+    expect(screen.queryByTestId('business-form')).toBeNull();
+  });
+
+  it('shows the business form when mode is set but no business exists', async () => {
+    setStore({
+      hydrated: true,
+      mode: 'local',
+      currentBusinessId: null,
+      role: null,
+      deviceId: null,
+    });
+    mountGate(<span data-testid="app-body">app</span>, {
+      appConfig: await dismissedDiscoveryRepo(),
+    });
     expect(screen.queryByTestId('app-body')).toBeNull();
-    expect(screen.getByTestId('business-form')).toBeInTheDocument();
+    expect(await screen.findByTestId('business-form')).toBeInTheDocument();
   });
 
   it('shows the director setup when mode + business exist but no users', async () => {
@@ -94,7 +119,9 @@ describe('GatedNavigation', () => {
       role: null,
       deviceId: null,
     });
-    mountGate(<span data-testid="app-body">app</span>);
+    mountGate(<span data-testid="app-body">app</span>, {
+      appConfig: await dismissedDiscoveryRepo(),
+    });
     // With no users in the mock repo, the auth gate shows DirectorSetupGate
     const setup = await screen.findByTestId('director-setup');
     expect(setup).toBeInTheDocument();

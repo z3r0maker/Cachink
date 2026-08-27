@@ -133,10 +133,12 @@ appId: mx.cachink.mobile
 # ── 7. Settings hub nav items ────────────────────────────────────
 # On iPad, settings may render inline or as a split-view. Assert
 # the hub container and its nav items are in the tree.
-- tapOn:
-    id: "tab-otros"
-- assertVisible:
-    id: "otros-route"
-- tapOn:
-    id: "tab-otros"
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
+# Review item #7: the Director bar is Inicio | Ventas | Gastos |
+# Estados — no Otros tab. The tool grid moved into Configuración.
+# This subflow opens it for whichever role is logged in.
+- runFlow: shared/open-director-tools.yaml
     optional: true

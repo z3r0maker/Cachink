@@ -88,11 +88,32 @@ describe('AppConfigProvider — fresh install', () => {
 
     await waitFor(() => expect(screen.getByTestId('hydrated').textContent).toBe('yes'));
     expect(screen.getByTestId('deviceId').textContent).toBe(fakeDeviceId);
-    expect(screen.getByTestId('mode').textContent).toBe('none');
+    // Review items #1/#2: a fresh install boots straight into local
+    // mode instead of stopping at the wizard's device question.
+    expect(screen.getByTestId('mode').textContent).toBe('local');
     expect(screen.getByTestId('businessId').textContent).toBe('none');
 
     // Side-effect check: the generated deviceId was persisted.
     expect(await repo.get(APP_CONFIG_KEYS.deviceId)).toBe(fakeDeviceId);
+    // ...and so was the defaulted mode, so the next boot is a plain read.
+    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('local');
+  });
+
+  it('does NOT overwrite a mode that is already stored', async () => {
+    // Guardrail for the defaulting branch: an existing LAN or cloud
+    // install must keep its mode. Defaulting is only for a missing key.
+    const repo = new InMemoryAppConfigRepository();
+    await repo.set(APP_CONFIG_KEYS.mode, 'cloud');
+
+    renderWithProviders(
+      <AppConfigProvider appConfig={repo}>
+        <Probe />
+      </AppConfigProvider>,
+    );
+
+    await waitFor(() => expect(screen.getByTestId('hydrated').textContent).toBe('yes'));
+    expect(screen.getByTestId('mode').textContent).toBe('cloud');
+    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('cloud');
   });
 });
 
