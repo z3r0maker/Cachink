@@ -1,0 +1,37 @@
+# Reusable subflow: fresh install → app shell, logged in as Director.
+#
+# Covers the whole post-2026-08-27 first-run path in one call:
+#
+#   launch → FeatureDiscovery ("Comenzar") → BusinessForm → DirectorSetup
+#         → auto-login → Director Home
+#
+# Extracted so demo-mode-setup.yaml does not have to re-implement it.
+# wizard-local-standalone.yaml deliberately keeps its own inline copy —
+# that flow *is* the test of this path, so it asserts each step itself
+# rather than delegating them.
+#
+# Creates: business "Taquería Don Pedro", user "Director Test" (PIN 123456).
+#
+# Precondition: fresh install (DB cleared). Caller does `- launchApp` first.
+appId: mx.cachink.mobile
+---
+# launch → ¡Bienvenido a Cachink! → Comenzar → business form.
+- runFlow: first-run-onboarding.yaml
+
+- tapOn:
+    id: "business-nombre"
+- inputText: "Taquería Don Pedro"
+
+# BusinessForm sits inside a KeyboardAwareForm, so submit is reachable
+# with the keyboard open — but hide it first so the tap is unambiguous.
+- hideKeyboard
+- tapOn:
+    id: "business-submit"
+
+# DirectorSetup → auto-login as Director.
+- runFlow: director-setup.yaml
+
+- extendedWaitUntil:
+    visible:
+      id: "tab-estados"
+    timeout: 15000

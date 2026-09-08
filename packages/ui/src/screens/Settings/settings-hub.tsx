@@ -35,6 +35,14 @@ export interface SettingsHubProps {
   readonly navItems?: readonly OtrosItem[];
   /** Required when `navItems` is provided — receives the item `path`. */
   readonly onNavigateTool?: (path: string) => void;
+  /**
+   * Slot rendered at the end of the hub. Used by the app shell to inject
+   * `__DEV__`-only actions (demo seed / reset), mirroring `OtrosScreen`'s
+   * `footer`. Configuración is where those have to live now: review item
+   * #7 removed the "Otros" tab from both bars, which left
+   * `(tabs)/otros.tsx` — and the dev actions it hosted — unreachable.
+   */
+  readonly footer?: ReactElement | null;
   readonly testID?: string;
 }
 
@@ -145,6 +153,7 @@ export function SettingsHub(props: SettingsHubProps): ReactElement {
             testID={c.testID}
           />
         ))}
+        {props.footer}
       </ScrollView>
     </RNView>
   );

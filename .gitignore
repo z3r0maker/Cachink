@@ -54,9 +54,14 @@ packages/ui/test-results/
 
 # Maestro E2E reports — generated data (viewer is checked in)
 e2e-reports/runs/
+e2e-reports/fold-tours/
 e2e-reports/latest.json
 e2e-reports/runs-index.js
 apps/mobile/maestro/reports/
 
 # Process manager state (auto-generated)
 .pm-state/
+
+# Python bytecode from maestro helper scripts
+__pycache__/
+*.pyc

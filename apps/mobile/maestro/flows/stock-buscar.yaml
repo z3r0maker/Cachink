@@ -28,7 +28,7 @@ appId: mx.cachink.mobile
 
 # Switch to Stock sub-tab.
 - tapOn:
-    id: "productos-tab-stock"
+    id: "inventario-tab-stock"
 
 # Verify the search bar is visible.
 - assertVisible:

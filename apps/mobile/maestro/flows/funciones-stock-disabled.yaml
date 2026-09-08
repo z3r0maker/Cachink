@@ -48,7 +48,7 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "otros-productos"
 - assertNotVisible:
-    id: "productos-tab-stock"
+    id: "inventario-tab-stock"
 
 # Verify no stock column in products list.
 - assertNotVisible:
@@ -92,4 +92,4 @@ appId: mx.cachink.mobile
 - tapOn:
     id: "otros-productos"
 - assertNotVisible:
-    id: "productos-tab-movimientos"
+    id: "inventario-tab-movimientos"

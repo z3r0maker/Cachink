@@ -43,11 +43,63 @@ mkdir -p "$REPORT_DIR"
 # ──────────── 1. Capture the live view hierarchy ───────────────
 # The screen is still frozen on the failure state, so this shows
 # exactly what testIDs and text are visible right now.
+#
+# Two hard-won details:
+#
+#   --device: `--udid/--device` is a GLOBAL maestro option, so it must
+#   precede the subcommand. Without it, `maestro hierarchy` has to guess
+#   the target; with more than one booted simulator it can dump the WRONG
+#   device, or block forever waiting on a driver that never connects.
+#
+#   timeout: this call used to be unbounded. A hung driver would wedge the
+#   entire regression here — observed 2026-09-07 hanging 46 min mid-run,
+#   with the suite making no progress. macOS ships no `timeout(1)`, so
+#   run it in the background and kill it if it overruns.
+HIER_TIMEOUT="${MAESTRO_HIERARCHY_TIMEOUT:-45}"
 echo "🔍  Capturing view hierarchy..."
-if maestro hierarchy 2>/dev/null | tail -n +3 > "$REPORT_DIR/hierarchy.json" 2>/dev/null; then
+
+# A real hierarchy dump is ~30-450 KB. Anything past this is not data.
+# With two simulators booted and no --device, maestro prompts for a device,
+# gets EOF on stdin, and loops forever at ~20 MB/s: on 2026-09-07 that wrote
+# a 62 GB "hierarchy.json" of prompt text. The --device flag above is the
+# real fix; this cap is the seatbelt.
+HIER_MAX_BYTES="${MAESTRO_HIERARCHY_MAX_BYTES:-16777216}"   # 16 MB
+
+capture_hierarchy() {
+  local dest="$1" raw="$1.raw" pid waited=0 size=0
+  maestro ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} hierarchy \
+    </dev/null >"$raw" 2>/dev/null &
+  pid=$!
+  while kill -0 "$pid" 2>/dev/null; do
+    size=$(stat -f %z "$raw" 2>/dev/null || echo 0)
+    if (( size > HIER_MAX_BYTES )); then
+      echo "   ⚠️  Hierarchy output exceeded $((HIER_MAX_BYTES/1048576))MB — aborting (device prompt loop?)"
+      kill -9 "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      rm -f "$raw"
+      return 1
+    fi
+    if (( waited >= HIER_TIMEOUT )); then
+      kill -9 "$pid" 2>/dev/null || true
+      wait "$pid" 2>/dev/null || true
+      rm -f "$raw"
+      return 1
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  wait "$pid" 2>/dev/null || true
+  # Strip maestro's banner lines by starting at the first JSON object,
+  # rather than a fixed `tail -n +3` that breaks when the banner changes.
+  sed -n '/^[[:space:]]*{/,$p' "$raw" > "$dest" 2>/dev/null
+  rm -f "$raw"
+  python3 -c 'import json,sys; json.load(open(sys.argv[1]))' "$dest" 2>/dev/null
+}
+
+if capture_hierarchy "$REPORT_DIR/hierarchy.json"; then
   echo "   ✅ Hierarchy saved to $REPORT_DIR/hierarchy.json"
 else
-  echo "   ⚠️  Could not capture hierarchy (simulator may not be running)"
+  echo "   ⚠️  Could not capture hierarchy (timed out after ${HIER_TIMEOUT}s, or simulator not running)"
   echo "{}" > "$REPORT_DIR/hierarchy.json"
 fi
 

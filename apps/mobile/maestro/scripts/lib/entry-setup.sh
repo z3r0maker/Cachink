@@ -25,14 +25,31 @@ APP_ID="${APP_ID:-mx.cachink.mobile}"
 # ──────────── Entry point detection ───────────────────────────────
 # Prefer structured `# x-entrypoint:` metadata; fall back to a
 # `# Precondition:` comment; default to wizard.
+#
+# Scans the whole YAML front matter (everything before the `---`
+# separator), NOT a fixed line count.
+#
+# This used to be `head -15`, which silently mis-bucketed every flow whose
+# header comment ran long: 13 flows declare `# x-entrypoint: demo` on lines
+# 16-18 (stock-buscar, stock-kpi-strip, empty-egresos, validation-egreso,
+# editar-egreso-full-form, …). They fell through to the `wizard` default,
+# so they were set up WITHOUT demo data — no Ana Operativa, no demo
+# products — and failed every run, ~11% of the suite. The failure looked
+# like a flaky app bug rather than a setup mis-classification.
+_flow_header() {
+  # Front matter only; stop at the first `---`. Falls back to the whole
+  # file if a flow somehow has no separator.
+  sed -n '1,/^---[[:space:]]*$/p' "$1" 2>/dev/null
+}
+
 detect_entry() {
   local flow="$1"
   local xentry
-  xentry=$(head -15 "$flow" | sed -n 's/^# x-entrypoint: \([a-z]*\).*/\1/p' 2>/dev/null | head -1)
+  xentry=$(_flow_header "$flow" | sed -n 's/^# x-entrypoint: \([a-z]*\).*/\1/p' 2>/dev/null | head -1)
   if [[ -n "$xentry" ]]; then echo "$xentry"; return; fi
 
   local precondition
-  precondition=$(head -15 "$flow" | grep -i '# Precondition:' 2>/dev/null | head -1 || true)
+  precondition=$(_flow_header "$flow" | grep -i '# Precondition:' 2>/dev/null | head -1 || true)
   if [[ -z "$precondition" ]]; then echo "wizard"; return; fi
 
   if echo "$precondition" | grep -qi 'fresh install'; then echo "fresh"

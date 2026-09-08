@@ -22,7 +22,7 @@
 #   --no-open        Never open the report (even on failure)
 #   --open-reports   Alias for --open
 #   --run-name       Override the auto-generated run name
-#   --device-class   Target a specific device class ("iphone" | "ipad")
+#   --device-class   Target a specific device class ("se" | "iphone" | "ipad")
 # -------------------------------------------------------------------
 set -euo pipefail
 
@@ -36,6 +36,7 @@ FRESH_SCRIPT="$SCRIPT_DIR/fresh-install.sh"
 DIAGNOSE_SCRIPT="$SCRIPT_DIR/maestro-diagnose.sh"
 REPORT_COLLECT="$SCRIPT_DIR/report-collect.py"
 REPORT_FINALIZE="$SCRIPT_DIR/report-finalize.py"
+FOLD_AUDIT_SCRIPT="$SCRIPT_DIR/fold-audit.sh"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 REPORT_ROOT="$REPO_ROOT/e2e-reports"
 REPORT_BASE="apps/mobile/maestro/reports"
@@ -52,7 +53,7 @@ PHASE=""
 STOP_ON_FAIL=false
 DRY_RUN=false
 OPEN_REPORT="auto"   # auto = open on failure; always; never
-DEVICE_CLASS=""      # "iphone" | "ipad" — empty means use booted device
+DEVICE_CLASS=""      # "se" | "iphone" | "ipad" — empty means use booted device
 RUN_NAME=""          # Override auto-generated run name
 
 while [[ $# -gt 0 ]]; do
@@ -70,68 +71,27 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ──────────── Resolve device UDID for the chosen class ──────────
-# When --device-class ipad is passed, find the target iPad UDID and
-# export MAESTRO_DEVICE_UDID so fresh-install.sh and every maestro
-# test call targets the correct simulator.
+# When --device-class is passed, resolve the target UDID and export
+# MAESTRO_DEVICE_UDID so fresh-install.sh and every maestro test call
+# target the correct simulator, then boot it.
+#
+# Implementation lives in lib/device-resolve.sh, shared with run-flow.sh
+# and run-ipad.sh. The previous inline copy ran the resolution twice —
+# the first attempt set _RESOLVE_TARGET as a command-prefix assignment
+# AFTER the pipeline that reads it, so it always returned empty.
+# shellcheck source=lib/device-resolve.sh
+source "$SCRIPT_DIR/lib/device-resolve.sh"
+# with_timeout / kill_maestro_driver — bounds each `maestro test` so a dead
+# XCUITest driver cannot wedge the whole suite (see lib/with-timeout.sh).
+# shellcheck source=lib/with-timeout.sh
+source "$SCRIPT_DIR/lib/with-timeout.sh"
+
 if [[ -n "$DEVICE_CLASS" ]]; then
-  DEVICE_PATTERN="${MAESTRO_IPAD_DEVICE:-iPad (10th generation)}"
-  if [[ "$DEVICE_CLASS" == "iphone" ]]; then
-    DEVICE_PATTERN="${MAESTRO_IPHONE_DEVICE:-iPhone 16}"
-  fi
-
-  RESOLVED_UDID=$(xcrun simctl list devices available -j 2>/dev/null \
-    | python3 -c "
-import sys, json, os
-target = os.environ.get('_RESOLVE_TARGET', '')
-data = json.load(sys.stdin)
-for _, devs in data.get('devices', {}).items():
-    for d in devs:
-        if target.lower() in d.get('name', '').lower():
-            print(d['udid'])
-            sys.exit(0)
-" 2>/dev/null || true) _RESOLVE_TARGET="$DEVICE_PATTERN"
-
-  # Retry with python env var properly set
-  export _RESOLVE_TARGET="$DEVICE_PATTERN"
-  RESOLVED_UDID=$(xcrun simctl list devices available -j 2>/dev/null \
-    | python3 -c "
-import sys, json, os
-target = os.environ.get('_RESOLVE_TARGET', '')
-data = json.load(sys.stdin)
-for _, devs in data.get('devices', {}).items():
-    for d in devs:
-        if target.lower() in d.get('name', '').lower():
-            print(d['udid'])
-            sys.exit(0)
-" 2>/dev/null || true)
-
-  if [[ -z "$RESOLVED_UDID" ]]; then
-    echo "❌  Could not find simulator matching '$DEVICE_PATTERN'."
-    echo "    Set MAESTRO_IPAD_DEVICE (or MAESTRO_IPHONE_DEVICE) to override."
-    exit 1
-  fi
-
-  export MAESTRO_DEVICE_UDID="$RESOLVED_UDID"
-  echo "🎯  Device class: $DEVICE_CLASS → $DEVICE_PATTERN ($RESOLVED_UDID)"
-
-  # Boot the target simulator if not already booted.
-  STATE=$(xcrun simctl list devices -j 2>/dev/null \
-    | python3 -c "
-import sys, json, os
-data = json.load(sys.stdin)
-udid = os.environ.get('MAESTRO_DEVICE_UDID', '')
-for _, devs in data.get('devices', {}).items():
-    for d in devs:
-        if d.get('udid') == udid:
-            print(d.get('state', 'Unknown'))
-            sys.exit(0)
-print('Unknown')
-" 2>/dev/null || echo "Unknown")
-
-  if [[ "$STATE" != "Booted" ]]; then
-    echo "🔄  Booting $DEVICE_PATTERN..."
-    xcrun simctl boot "$RESOLVED_UDID"
-    xcrun simctl bootstatus "$RESOLVED_UDID" -b 2>/dev/null || sleep 8
+  # --dry-run only prints the flow list, so resolve the UDID but skip the boot.
+  if [[ "$DRY_RUN" == true ]]; then
+    ensure_device "$DEVICE_CLASS"
+  else
+    resolve_device "$DEVICE_CLASS"
   fi
 fi
 
@@ -191,10 +151,43 @@ run_flow() {
   # Time the flow execution
   local start_seconds=$SECONDS
 
-  if maestro test --debug-output "$debug_dir" "${device_flag[@]+"${device_flag[@]}"}" "$flow"; then
+  # Bounded: a hung driver returns 124 instead of blocking forever.
+  # FLOW_TIMEOUT is generous (default 6 min) because demo seeding inside a
+  # flow is legitimately slow on a debug build.
+  # `|| flow_rc=$?` is required, not stylistic: this script runs under
+  # `set -e`, so a bare failing call would abort the whole suite before the
+  # exit code could be inspected.
+  local flow_rc=0
+  with_timeout "${FLOW_TIMEOUT:-360}" \
+    maestro test --debug-output "$debug_dir" "${device_flag[@]+"${device_flag[@]}"}" "$flow" \
+    || flow_rc=$?
+
+  if [[ $flow_rc -eq 124 ]]; then
+    local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
+    echo "  ⏱️   $name TIMED OUT after ${FLOW_TIMEOUT:-360}s (${elapsed_ms}ms)"
+    FAILED=$((FAILED + 1))
+    FAILURES+=("$name (timeout)")
+    # A timeout almost always means the driver died; recover so the next
+    # flow does not fail with "Connection refused".
+    kill_maestro_driver
+    python3 "$REPORT_COLLECT" \
+      --run-dir "$RUN_DIR" --flow "$flow" --status failed \
+      --duration-ms "$elapsed_ms" --phase "$CURRENT_PHASE" \
+      --debug-dir "$debug_dir" || true
+    return 0
+  fi
+
+  if [[ $flow_rc -eq 0 ]]; then
     local elapsed_ms=$(( (SECONDS - start_seconds) * 1000 ))
     echo "  ✅  $name PASSED (${elapsed_ms}ms)"
     PASSED=$((PASSED + 1))
+
+    # Fold audit: scroll the terminal screen and diff the hierarchy to find
+    # controls that sit below the fold with no visual cue. Runs on the PASS
+    # branch only — on a failure the app is wherever the flow died, and
+    # maestro-diagnose.sh has already captured that state. Opt-in via
+    # FOLD_AUDIT=1; always exits 0 so it can never fail the suite.
+    "$FOLD_AUDIT_SCRIPT" "$flow" "$test_dir" || true
 
     # Collect result (commands.json extracted, then debug dir cleaned)
     python3 "$REPORT_COLLECT" \
@@ -396,22 +389,28 @@ fi
 
 # run_flow "$FLOWS_DIR/venta-credito.yaml"                   # (parked-mvp)
 
-if should_run "B"; then
-  run_flow "$FLOWS_DIR/venta-comprobante.yaml"
-fi
+# PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
+#   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
+# run_flow "$FLOWS_DIR/venta-comprobante.yaml"
 
 if should_run "C"; then
   run_flow "$FLOWS_DIR/venta-cantidad-multiple.yaml"
   run_flow "$FLOWS_DIR/venta-search-product.yaml"
-  run_flow "$FLOWS_DIR/venta-detail-popover-inspect.yaml" # Audit — previously excluded
+  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
+  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
+  # run_flow "$FLOWS_DIR/venta-detail-popover-inspect.yaml" # Audit — previously excluded
   run_flow "$FLOWS_DIR/checkout-method-picker.yaml"        # NEW — uncovered screen
   run_flow "$FLOWS_DIR/venta-stock-insuficiente.yaml"      # Edge — VEN-16
   # run_flow "$FLOWS_DIR/venta-credito-flag-off.yaml"        # Edge — CXC-08 (parked-mvp)
 fi
 
 if should_run "A"; then
-  run_flow "$FLOWS_DIR/editar-venta.yaml"
-  run_flow "$FLOWS_DIR/editar-venta-full-form.yaml"         # Gap 2 — Phase 16
+  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
+  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
+  # run_flow "$FLOWS_DIR/editar-venta.yaml"
+  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
+  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
+  # run_flow "$FLOWS_DIR/editar-venta-full-form.yaml"         # Gap 2 — Phase 16
   run_flow "$FLOWS_DIR/ventas-total-y-fecha.yaml"           # Gap 1 — Phase 16
 fi
 
@@ -656,7 +655,9 @@ if should_run "A"; then
   CURRENT_PHASE="Phase 12: Deletions"
   echo ""
   echo "📂  Phase 12: Deletions (state-destroying — run last)"
-  run_flow "$FLOWS_DIR/eliminar-venta.yaml"
+  # PARKED 2026-09-07: tests the removed SessionStrip sales-list + venta-detail-popover UI
+  #   (replaced by TotalBar; no layout renders `ventas-list`). Moved to flows/parked-mvp/.
+  # run_flow "$FLOWS_DIR/eliminar-venta.yaml"
   run_flow "$FLOWS_DIR/eliminar-egreso.yaml"
   run_flow "$FLOWS_DIR/eliminar-egreso-via-popover.yaml"    # Audit — previously excluded
   run_flow "$FLOWS_DIR/eliminar-producto.yaml"

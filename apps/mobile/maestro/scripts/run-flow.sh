@@ -59,7 +59,7 @@ while [[ $# -gt 0 ]]; do
       echo "Options:"
       echo "  --entry fresh|demo|wizard|auto   Force entry point (default: auto)"
       echo "  --skip-setup                     Skip setup (assume state is ready)"
-      echo "  --device-class iphone|ipad       Target device class"
+      echo "  --device-class se|iphone|ipad    Target device class"
       echo "  --dry-run                        Print what would run"
       echo "  -h, --help                       Show this help"
       exit 0
@@ -79,33 +79,21 @@ if [[ $# -eq 0 ]]; then
   exit 1
 fi
 
-# ──────────── Resolve device (reuse full-regression pattern) ──────
+# ──────────── Resolve device (shared lib) ─────────────────────────
+# device_pattern(), udid_for_name(), ensure_device(), boot_device() and
+# resolve_device() live in lib/device-resolve.sh so all three runners share
+# ONE implementation. It also creates the iPhone SE target on first use.
+# shellcheck source=lib/device-resolve.sh
+source "$SCRIPT_DIR/lib/device-resolve.sh"
+
 if [[ -n "$DEVICE_CLASS" ]]; then
-  DEVICE_PATTERN="${MAESTRO_IPAD_DEVICE:-iPad (10th generation)}"
-  if [[ "$DEVICE_CLASS" == "iphone" ]]; then
-    DEVICE_PATTERN="${MAESTRO_IPHONE_DEVICE:-iPhone 16}"
+  # --dry-run only prints the flow list, so resolve the UDID but do not pay
+  # the ~60s boot (and do not wake a simulator the user did not ask for).
+  if [[ "$DRY_RUN" == true ]]; then
+    ensure_device "$DEVICE_CLASS"
+  else
+    resolve_device "$DEVICE_CLASS"
   fi
-
-  export _RESOLVE_TARGET="$DEVICE_PATTERN"
-  RESOLVED_UDID=$(xcrun simctl list devices available -j 2>/dev/null \
-    | python3 -c "
-import sys, json, os
-target = os.environ.get('_RESOLVE_TARGET', '')
-data = json.load(sys.stdin)
-for _, devs in data.get('devices', {}).items():
-    for d in devs:
-        if target.lower() in d.get('name', '').lower():
-            print(d['udid'])
-            sys.exit(0)
-" 2>/dev/null || true)
-
-  if [[ -z "$RESOLVED_UDID" ]]; then
-    echo "❌  Could not find simulator matching '$DEVICE_PATTERN'."
-    exit 1
-  fi
-
-  export MAESTRO_DEVICE_UDID="$RESOLVED_UDID"
-  echo "🎯  Device: $DEVICE_PATTERN ($RESOLVED_UDID)"
 fi
 
 # ──────── Entry-point detection + state setup (shared lib) ────────

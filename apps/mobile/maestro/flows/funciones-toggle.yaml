@@ -108,7 +108,7 @@ appId: mx.cachink.mobile
     visible: "Catálogo"
     timeout: 5000
 - assertNotVisible:
-    id: "productos-tab-stock"
+    id: "inventario-tab-stock"
 
 # --- Restore stock ON for subsequent flows ---
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |

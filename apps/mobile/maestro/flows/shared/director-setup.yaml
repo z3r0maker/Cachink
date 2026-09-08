@@ -38,15 +38,24 @@ appId: mx.cachink.mobile
     id: "director-setup-submit"
 
 # After submit, the user is auto-logged in as Director.
-# On first run, FeatureDiscovery carousel appears showing available flags.
+#
+# FeatureDiscoveryGate is ONE-SHOT on `discoveryShown`
+# (app/gated-navigation.tsx). On a fresh DB it fires at launch, BEFORE the
+# business form — which is where shared/first-run-onboarding.yaml already
+# consumes it. So by the time we get here it has normally been dismissed and
+# will NOT appear again.
+#
+# It is left optional rather than deleted because a path that reaches
+# DirectorSetup without going through first-run-onboarding (e.g. a re-run
+# from Configuración → Sistema) can still surface it here.
 - extendedWaitUntil:
     visible:
       id: "feature-discovery"
-    timeout: 10000
-
-# Tap "Comenzar" to dismiss the feature discovery and enter the app.
+    timeout: 3000
+    optional: true
 - tapOn:
     id: "discovery-continue"
+    optional: true
 
 # Wait for the app shell (tabs) to render.
 - extendedWaitUntil:

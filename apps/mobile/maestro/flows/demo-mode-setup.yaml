@@ -1,21 +1,34 @@
 # Demo Mode setup: fresh install → seed DB with demo data.
 #
-# Precondition: app already launched and connected to Metro
-# (via deep link or manual server selection). Handles Expo
-# dev-client modals, then taps "Modo Demo" on the wizard.
+# REWRITTEN 2026-09-07. The old path tapped a "Modo Demo" link on wizard
+# step 1. That link (`wizard-step1-demo-mode`) still exists in
+# screens/Wizard/step1-welcome.tsx, but the 2026-08-27 prebeta refactor
+# moved Step1Welcome OUT of the first-run path — a fresh install now goes
+# FeatureDiscovery → BusinessForm → DirectorSetup (see
+# shared/first-run-onboarding.yaml). So the link is unreachable here and
+# the old flow failed with:
+#     No visible element found: id: wizard-step1-demo-mode
 #
-# After: app on QuickSwitch login with demo data (PIN 000000).
+# Demo data now comes from SeedDemoAction, the __DEV__-only card in
+# Configuración. It seeds the SAME users the demo flows expect:
+# Juan Director + Ana Operativa, both PIN 000000, plus ~130 records.
+#
+# NOTE: this leaves a THIRD user, "Director Test" (PIN 123456), created by
+# the first-run wizard. Demo flows authenticate via
+# shared/authenticate*.yaml, which select by `user-avatar-role-director` —
+# ambiguous with two directors present.
+#
+# Precondition: app installed and connected to Metro; DB cleared by
+# fresh-install.sh --reset-only.
 # x-entrypoint: fresh
 appId: mx.cachink.mobile
 ---
 - launchApp
 
-# Dismiss Expo dev-client welcome modal if present.
+# Dismiss Expo dev-client welcome modal / dev menu if present.
 - tapOn:
     text: "Continue"
     optional: true
-
-# Dismiss Expo dev menu if it appeared after Continue.
 - tapOn:
     text: "close"
     optional: true
@@ -23,23 +36,71 @@ appId: mx.cachink.mobile
 # Dismiss app consent modals.
 - runFlow: shared/dismiss-modals.yaml
 
-# Wait for wizard to be ready.
-- extendedWaitUntil:
-    visible: "¡Bienvenido a Cachink!"
-    timeout: 30000
+# Fresh install → Director Home.
+- runFlow: shared/complete-first-run.yaml
 
-# Scroll to Modo Demo and tap.
+# Open Configuración, which hosts the dev cards.
+#
+# Deliberately NOT shared/open-director-tools.yaml: that subflow asserts
+# `settings-nav-section`, which only renders when `navItems` is passed
+# (Director + tool grid). Here we are pre-seed with feature flags still at
+# their defaults, and all we actually need is the hub itself. Wait on
+# `settings-hub-screen`, which SettingsHub always renders.
+- tapOn:
+    id: "top-bar-open-settings"
+- extendedWaitUntil:
+    visible:
+      id: "settings-hub-screen"
+    timeout: 10000
+
+# The dev seed card sits at the very bottom of the hub, below the
+# category cards, so it always needs a scroll.
 - scrollUntilVisible:
     element:
-      id: "wizard-step1-demo-mode"
+      id: "seed-demo-btn"
     direction: DOWN
-    timeout: 5000
+    timeout: 20000
 - tapOn:
-    id: "wizard-step1-demo-mode"
+    id: "seed-demo-btn"
 
-# Wait for demo seeding to complete and land on login screen.
-# Seeding is bcrypt-bound on Hermes; on a debug dev-client build (esp. iPad)
-# it can exceed 3 min, so allow a generous 6 min before failing.
+# ConfirmDialog guards the action against accidental taps.
+- tapOn:
+    id: "confirm-dialog-confirm"
+
+# Seeding is bcrypt-bound on Hermes (2 users x 12 rounds) plus ~130
+# inserts; on a debug dev-client build it can exceed 3 min, so allow 6.
+# Wait on the success text, NOT on `seed-demo-status` — that element is
+# always present and shows the idle hint, so it would match immediately.
 - extendedWaitUntil:
-    visible: "Selecciona tu usuario"
+    visible: "¡Listo! Se cargaron.*"
     timeout: 360000
+
+# Return to QuickSwitch, so demo flows start from a deterministic
+# LOGGED-OUT state.
+#
+# This matters more than it looks. Seeding happens while logged in as
+# "Director Test" (the wizard user), and auto-lock is 5 minutes
+# (hooks/use-auto-lock.ts: DEFAULT_AUTO_LOCK_TIMEOUT = 300_000). During a
+# fast suite run the session is still warm, so a flow's `- launchApp`
+# RESUMES as Director instead of showing the login screen. Director is
+# read-only on transactional modules and has no productos tab, so those
+# flows then fail with `tab-productos` / `producto-card-.*` / "Nuevo
+# egreso" absent — which looks like an app regression but is really a
+# stale session. Whether it happened at all depended on how long the
+# previous flow took, making it intermittent.
+#
+# The role chip is the switch-user affordance (AppShell `onChangeRole` —
+# "Typically clears the session").
+- tapOn:
+    id: "top-bar-back"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "top-bar-role-chip"
+    timeout: 15000
+- tapOn:
+    id: "top-bar-role-chip"
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 15000

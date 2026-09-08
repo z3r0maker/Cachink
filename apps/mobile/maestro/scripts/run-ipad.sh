@@ -43,7 +43,8 @@
 set -euo pipefail
 
 APP_ID="mx.cachink.mobile"
-IPAD_DEVICE="${MAESTRO_IPAD_DEVICE:-iPad (10th generation)}"
+# Default comes from lib/device-resolve.sh (MAESTRO_IPAD_DEVICE), sourced below.
+IPAD_DEVICE=""
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DIAGNOSE_SCRIPT="$SCRIPT_DIR/maestro-diagnose.sh"
@@ -71,20 +72,16 @@ done
 set -- "${POSITIONAL_ARGS[@]+"${POSITIONAL_ARGS[@]}"}"
 
 # ──────────────── Resolve iPad UDID from display name ───────────
+# Shared with run-flow.sh / full-regression.sh. The previous inline copy
+# exported _IPAD_TARGET AFTER the heredoc that reads it, so the lookup ran
+# with an empty target and only worked by falling through to the error path.
+# shellcheck source=lib/device-resolve.sh
+source "$SCRIPT_DIR/lib/device-resolve.sh"
+
+IPAD_DEVICE="${IPAD_DEVICE:-$MAESTRO_IPAD_DEVICE}"
 echo "📱  Target: $IPAD_DEVICE"
 
-IPAD_UDID=$(xcrun simctl list devices available -j 2>/dev/null \
-  | python3 - <<'PYEOF'
-import sys, json, os
-target = os.environ.get("_IPAD_TARGET", "")
-data = json.load(sys.stdin)
-for runtime, devices in data.get("devices", {}).items():
-    for d in devices:
-        if target.lower() in d.get("name", "").lower():
-            print(d["udid"])
-            sys.exit(0)
-PYEOF
-)
+IPAD_UDID="$(udid_for_name "$IPAD_DEVICE")"
 
 if [[ -z "$IPAD_UDID" ]]; then
   echo "❌  Could not find an available simulator matching '$IPAD_DEVICE'."
@@ -92,10 +89,9 @@ if [[ -z "$IPAD_UDID" ]]; then
   echo "    Available iPad simulators:"
   xcrun simctl list devices available | grep -i ipad | sed 's/^/      /' || true
   echo ""
-  echo "    Override:  MAESTRO_IPAD_DEVICE='iPad Pro 13-inch (M4)' $0 ..."
+  echo "    Override:  MAESTRO_IPAD_DEVICE='iPad Pro 13-inch (M5)' $0 ..."
   exit 1
 fi
-export _IPAD_TARGET="$IPAD_DEVICE"
 
 echo "    UDID: $IPAD_UDID"
 

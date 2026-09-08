@@ -17,16 +17,47 @@ appId: mx.cachink.mobile
     id: "quick-switch"
 
 # Demo mode: an Operativo avatar is present → Juan Director, PIN 000000.
+#
+# Select by NAME here, not by `user-avatar-role-director`. Since
+# 2026-09-07 demo-mode-setup.yaml seeds via SeedDemoAction, which runs
+# AFTER the first-run wizard, so the demo DB holds TWO directors:
+# "Director Test" (PIN 123456, from the wizard) and "Juan Director"
+# (PIN 000000, from the seed). The role testID matches both and Maestro
+# taps the first, which would enter 000000 against Director Test's PIN.
+# `text:` is an anchored regex, hence the trailing `.*`.
 - runFlow:
     when:
       visible:
         id: "user-avatar-role-operativo"
     commands:
       - tapOn:
-          id: "user-avatar-role-director"
+          # Leading `.*` matters: maestro's `text:` is an ANCHORED regex and
+          # the avatar's merged accessibility label is
+          # "J, Juan Director, Director" — it does NOT start with the name.
+          text: ".*Juan Director.*"
       - assertVisible:
           id: "pin-numpad"
       - waitForAnimationToEnd
+      # On iPhone the numpad's bottom row (numpad-0, backspace) and
+      # `login-submit` sit BELOW THE FOLD — XCUITest clamps them out of the
+      # hierarchy entirely, so a tap by id fails with "element not found".
+      # authenticate.yaml already had this swipe; this branch never got it.
+      # Guarded on notVisible so it is skipped on iPad, where it all fits.
+      # Confirmed by the fold audit: 4 interactive controls below the fold
+      # on a 402x874 iPhone 17 login screen.
+      - runFlow:
+          when:
+            notVisible:
+              id: "numpad-0"
+          commands:
+            - swipe:
+                start: "50%, 45%"
+                end: "50%, 12%"
+            - waitForAnimationToEnd
+      - extendedWaitUntil:
+          visible:
+            id: "numpad-0"
+          timeout: 8000
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
@@ -50,6 +81,26 @@ appId: mx.cachink.mobile
       - assertVisible:
           id: "pin-numpad"
       - waitForAnimationToEnd
+      # On iPhone the numpad's bottom row (numpad-0, backspace) and
+      # `login-submit` sit BELOW THE FOLD — XCUITest clamps them out of the
+      # hierarchy entirely, so a tap by id fails with "element not found".
+      # authenticate.yaml already had this swipe; this branch never got it.
+      # Guarded on notVisible so it is skipped on iPad, where it all fits.
+      # Confirmed by the fold audit: 4 interactive controls below the fold
+      # on a 402x874 iPhone 17 login screen.
+      - runFlow:
+          when:
+            notVisible:
+              id: "numpad-0"
+          commands:
+            - swipe:
+                start: "50%, 45%"
+                end: "50%, 12%"
+            - waitForAnimationToEnd
+      - extendedWaitUntil:
+          visible:
+            id: "numpad-0"
+          timeout: 8000
       - tapOn: { id: "numpad-1" }
       - tapOn: { id: "numpad-2" }
       - tapOn: { id: "numpad-3" }
