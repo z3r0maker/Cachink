@@ -69,6 +69,7 @@ export * from './use-edit-empleado';
 export * from './use-eliminar-empleado';
 // Phase 1 — User Management + Auth
 export * from './use-auto-lock';
+export * from './use-reduced-motion';
 // Phase 3 — Feature Flags
 export * from './use-feature-flags';
 export * from './use-toggle-feature-flag';

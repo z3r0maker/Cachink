@@ -34,7 +34,7 @@ import { ScrollView } from 'react-native';
 import { Text, View, useMedia } from '@tamagui/core';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface DirectorHomeScreenProps {
   readonly greeting?: string;
@@ -72,7 +72,7 @@ function GreetingHeader({ text, badge }: { text: string; badge?: ReactNode }): R
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
         flexShrink={1}

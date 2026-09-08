@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { OnboardingFormState, OnboardingTab } from './onboarding-form';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -55,7 +55,7 @@ export function DisabledNotice({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         marginBottom={12}
       >

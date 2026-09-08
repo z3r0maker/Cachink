@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface TopBarProps {
   /** Optional title — weight 900, tight tracking. */
@@ -27,7 +27,7 @@ function Title({ text }: { text: string }): ReactElement {
       color={colors.black}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.black}
-      fontSize={20}
+      fontSize={fontSizes.xl2}
       letterSpacing={typography.letterSpacing.tight}
       textAlign="center"
       // Audit 9.3 — top-bar titles like the Director greeting
@@ -52,7 +52,7 @@ function Subtitle({ text }: { text: string }): ReactElement {
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       textAlign="center"
       marginTop={2}
       // Audit 9.3 — subtitles ("abril 2026 · 4 dispositivos") can

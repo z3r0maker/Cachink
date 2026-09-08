@@ -9,6 +9,7 @@ import { Text, View } from '@tamagui/core';
 import type { Conversion, Product } from '@cachink/domain';
 import { EmptyState } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes } from '../../theme';
 
 export interface ConversionHistorialProps {
   readonly conversiones: readonly Conversion[];
@@ -27,17 +28,17 @@ function HistorialRow(props: {
       padding={12}
       gap={4}
       borderBottomWidth={1}
-      borderBottomColor="$borderColor"
+      borderBottomColor={colors.black}
       testID="historial-row"
     >
-      <Text fontWeight="700" fontSize={14} color="$color">
+      <Text fontWeight="700" fontSize={fontSizes.md} color={colors.black}>
         {mp?.nombre ?? '—'} → {prod?.nombre ?? '—'}
       </Text>
-      <Text fontSize={13} color="$colorSubtle">
+      <Text fontSize={fontSizes.sm} color={colors.gray600}>
         -{props.conversion.cantidadOrigenUsada} {mp?.unidad ?? ''} / +
         {props.conversion.cantidadResultanteCreada} {prod?.unidad ?? ''}
       </Text>
-      <Text fontSize={12} color="$colorSubtle">
+      <Text fontSize={fontSizes.xs} color={colors.gray600}>
         {props.conversion.createdAt}
       </Text>
     </View>
@@ -62,9 +63,7 @@ export function ConversionHistorial(props: ConversionHistorialProps): ReactEleme
     <FlatList
       data={props.conversiones as Conversion[]}
       keyExtractor={(c) => c.id}
-      renderItem={({ item }) => (
-        <HistorialRow conversion={item} products={props.products} />
-      )}
+      renderItem={({ item }) => <HistorialRow conversion={item} products={props.products} />}
       testID={props.testID ?? 'conversion-historial'}
     />
   );

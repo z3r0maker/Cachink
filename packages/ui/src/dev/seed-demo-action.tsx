@@ -12,7 +12,7 @@ import { Btn, Card, ConfirmDialog, SectionTitle } from '../components/index';
 import { useRepositories } from '../app/repository-provider';
 import { useCurrentBusinessId, useDeviceId } from '../app-config/use-app-config';
 import { useTranslation } from '../i18n/index';
-import { colors, typography } from '../theme';
+import { colors, fontSizes, typography } from '../theme';
 import { seedDemoData } from './seed-demo-data';
 import type { BusinessId, DeviceId } from '@cachink/domain';
 
@@ -25,7 +25,11 @@ export function SeedDemoAction(): ReactElement | null {
   return <SeedDemoActionInner />;
 }
 
-function useSeedHandler(repos: ReturnType<typeof useRepositories>, businessId: BusinessId | null, deviceId: DeviceId | null) {
+function useSeedHandler(
+  repos: ReturnType<typeof useRepositories>,
+  businessId: BusinessId | null,
+  deviceId: DeviceId | null,
+) {
   const [state, setState] = useState<ActionState>('idle');
   const [count, setCount] = useState(0);
 
@@ -34,9 +38,15 @@ function useSeedHandler(repos: ReturnType<typeof useRepositories>, businessId: B
     setState('pending');
     try {
       const result = await seedDemoData({ repositories: repos, businessId, deviceId });
-      if (result.alreadySeeded) { setState('already'); }
-      else { setCount(result.totalRecords); setState('done'); }
-    } catch { setState('error'); }
+      if (result.alreadySeeded) {
+        setState('already');
+      } else {
+        setCount(result.totalRecords);
+        setState('done');
+      }
+    } catch {
+      setState('error');
+    }
   }, [repos, businessId, deviceId]);
 
   return { state, setState, count, handleSeed };
@@ -55,7 +65,13 @@ function SeedDemoActionInner(): ReactElement {
       <Card testID="seed-demo-card" padding="md" fullWidth>
         <SectionTitle title={t('dev.seedTitle')} />
         <SeedStatus state={state} count={count} />
-        <Btn variant="primary" onPress={() => setState('confirm')} disabled={disabled} fullWidth testID="seed-demo-btn">
+        <Btn
+          variant="primary"
+          onPress={() => setState('confirm')}
+          disabled={disabled}
+          fullWidth
+          testID="seed-demo-btn"
+        >
           {t('dev.seedBtn')}
         </Btn>
       </Card>
@@ -84,8 +100,8 @@ function SeedStatus({ state, count }: { state: ActionState; count: number }): Re
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={13}
-      color={state === 'error' ? colors.red : colors.gray600}
+      fontSize={fontSizes.sm}
+      color={state === 'error' ? colors.redText : colors.gray600}
       marginBottom={10}
       testID="seed-demo-status"
     >

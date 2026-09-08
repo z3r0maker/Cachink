@@ -10,7 +10,7 @@ import { Text, View } from '@tamagui/core';
 import { Card, Icon } from '../../components/index';
 import type { IconName } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { OtrosItem } from './otros-items';
 
 export interface OtrosCardProps {
@@ -52,7 +52,7 @@ export function OtrosCard(props: OtrosCardProps): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={14}
+            fontSize={fontSizes.md}
             color={colors.black}
             numberOfLines={1}
           >
@@ -62,7 +62,7 @@ export function OtrosCard(props: OtrosCardProps): ReactElement {
             <Text
               fontFamily={typography.fontFamily}
               fontWeight={typography.weights.medium}
-              fontSize={12}
+              fontSize={fontSizes.xs}
               color={colors.gray600}
               numberOfLines={2}
             >

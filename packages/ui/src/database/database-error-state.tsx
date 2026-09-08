@@ -2,7 +2,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, ConfirmDialog, SectionTitle } from '../components/index';
 import { useTranslation } from '../i18n/index';
-import { colors, typography } from '../theme';
+import { colors, fontSizes, typography } from '../theme';
 
 export interface DatabaseErrorStateProps {
   readonly error: Error;
@@ -66,7 +66,7 @@ function ErrorBody({ text }: ErrorBodyProps): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={14}
+      fontSize={fontSizes.md}
       color={colors.gray600}
       marginVertical={10}
     >

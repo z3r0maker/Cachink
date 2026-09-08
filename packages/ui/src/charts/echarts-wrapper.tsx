@@ -13,7 +13,17 @@ import {
   DatasetComponent,
 } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
+/*
+ * `esm/core`, not `lib/core`. Both exist in the package: `lib/` is CommonJS,
+ * `esm/` is real ESM with a plain `export default`. Importing the CJS path
+ * leaves the default export as a module namespace object under some bundler
+ * interop settings, and React then throws "Element type is invalid ... got:
+ * object" — which is what every chart story did. The ESM path needs no
+ * interop, so it behaves the same in Vite, Vitest, Storybook and Metro.
+ * Audit 2026-09.
+ */
+import ReactEChartsCore from 'echarts-for-react/esm/core';
+import { colors, fontSizes, typography } from '../theme';
 
 // Register only the pieces we need
 echarts.use([
@@ -29,15 +39,15 @@ echarts.use([
 
 // Cachink neobrutalist theme
 echarts.registerTheme('cachink', {
-  color: ['#00C896', '#FF4757', '#3B6FFF', '#FFB800', '#8B5CF6', '#0EA5E9'],
+  color: [colors.green, colors.red, colors.blue, colors.warning, colors.purple, colors.cyan],
   backgroundColor: 'transparent',
   textStyle: {
-    fontFamily: "'Plus Jakarta Sans', sans-serif",
-    color: '#1A1A18',
+    fontFamily: typography.fontFamily,
+    color: colors.ink,
   },
   bar: {
     itemStyle: {
-      borderColor: '#0D0D0D',
+      borderColor: colors.black,
       borderWidth: 2,
       borderRadius: [4, 4, 0, 0],
     },
@@ -50,28 +60,28 @@ echarts.registerTheme('cachink', {
   },
   pie: {
     itemStyle: {
-      borderColor: '#0D0D0D',
+      borderColor: colors.black,
       borderWidth: 2,
     },
   },
   categoryAxis: {
-    axisLine: { lineStyle: { color: '#E4E4E0' } },
+    axisLine: { lineStyle: { color: colors.gray200 } },
     axisTick: { show: false },
     axisLabel: {
-      color: '#5A5A56',
-      fontFamily: "'Plus Jakarta Sans', sans-serif",
-      fontSize: 11,
+      color: colors.gray600,
+      fontFamily: typography.fontFamily,
+      fontSize: fontSizes.xs,
     },
   },
   valueAxis: {
     axisLine: { show: false },
     axisTick: { show: false },
     axisLabel: {
-      color: '#5A5A56',
-      fontFamily: "'Plus Jakarta Sans', sans-serif",
-      fontSize: 11,
+      color: colors.gray600,
+      fontFamily: typography.fontFamily,
+      fontSize: fontSizes.xs,
     },
-    splitLine: { lineStyle: { color: '#F2F2F0' } },
+    splitLine: { lineStyle: { color: colors.gray100 } },
   },
 });
 

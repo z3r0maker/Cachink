@@ -8,22 +8,20 @@ import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { formatMoney } from '@cachink/domain';
 import { Icon } from '../../components/Icon/index';
-import { colors, typography } from '../../theme';
+import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes, typography } from '../../theme';
 import { impactLight, impactMedium } from '../../haptics/index';
 import type { CartItem } from '../../hooks/use-cart';
 
-function StockImpact(props: {
-  stock: number | undefined;
-  qty: number;
-}): ReactElement | null {
+function StockImpact(props: { stock: number | undefined; qty: number }): ReactElement | null {
   if (props.stock === undefined) return null;
   const after = props.stock - props.qty;
-  const fg = after < 0 ? colors.red : colors.gray400;
+  const fg = after < 0 ? colors.redText : colors.textMuted;
   return (
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.regular}
-      fontSize={11}
+      fontSize={fontSizes.xs}
       color={fg}
     >
       Stock: {props.stock} → {after}
@@ -37,7 +35,7 @@ function CartItemInfo(props: { item: CartItem }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
         numberOfLines={1}
       >
@@ -50,25 +48,67 @@ function CartItemInfo(props: { item: CartItem }): ReactElement {
 
 function RemoveButton(props: {
   productoId: string;
+  nombre: string;
   onRemoveOne: () => void;
   onRemoveAll: () => void;
 }): ReactElement {
+  const { t } = useTranslation();
   return (
     <Pressable
       testID={`cart-remove-${props.productoId}`}
-      onPress={() => { impactLight(); props.onRemoveOne(); }}
-      onLongPress={() => { impactMedium(); props.onRemoveAll(); }}
-      hitSlop={6}
+      onPress={() => {
+        impactLight();
+        props.onRemoveOne();
+      }}
+      onLongPress={() => {
+        impactMedium();
+        props.onRemoveAll();
+      }}
+      role="button"
+      aria-label={t('ventas.cartRemoveAriaLabel', { name: props.nombre })}
+      // 28pt glyph + 8pt slop each side = 44pt, the iOS HIG floor. Was 6.
+      hitSlop={8}
     >
       <View
-        width={28} height={28} borderRadius={14}
-        borderWidth={2} borderColor={colors.black}
-        alignItems="center" justifyContent="center"
+        width={28}
+        height={28}
+        borderRadius={14}
+        borderWidth={2}
+        borderColor={colors.black}
+        alignItems="center"
+        justifyContent="center"
         backgroundColor={colors.gray100}
       >
         <Icon name="minus" size={14} color={colors.black} />
       </View>
     </Pressable>
+  );
+}
+
+/** Quantity and line total. Split out to keep `CartRow` inside the §2.6
+ *  40-line budget once the remove button carries an accessible name. */
+function CartRowAmounts({ item }: { item: CartItem }): ReactElement {
+  return (
+    <>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={fontSizes.sm}
+        color={colors.gray600}
+      >
+        ×{item.cantidad}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={fontSizes.sm}
+        color={colors.black}
+        minWidth={64}
+        textAlign="right"
+      >
+        {formatMoney(item.precioUnitCentavos * BigInt(item.cantidad))}
+      </Text>
+    </>
   );
 }
 
@@ -86,26 +126,10 @@ export function CartRow(props: {
       gap={8}
     >
       <CartItemInfo item={props.item} />
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={13}
-        color={colors.gray600}
-      >
-        ×{props.item.cantidad}
-      </Text>
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={13}
-        color={colors.black}
-        minWidth={64}
-        textAlign="right"
-      >
-        {formatMoney(props.item.precioUnitCentavos * BigInt(props.item.cantidad))}
-      </Text>
+      <CartRowAmounts item={props.item} />
       <RemoveButton
         productoId={props.item.productoId}
+        nombre={props.item.nombre}
         onRemoveOne={props.onRemoveOne}
         onRemoveAll={props.onRemoveAll}
       />

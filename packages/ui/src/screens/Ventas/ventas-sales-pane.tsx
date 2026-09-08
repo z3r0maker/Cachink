@@ -10,7 +10,7 @@ import { formatMoney } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { Card, ErrorState, List, Skeleton, SwipeableRow } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { VentaCard } from './venta-card';
 
 // ---------------------------------------------------------------------------
@@ -23,7 +23,7 @@ export function TotalCard({ label, total }: { label: string; total: Money }): Re
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.black}
         style={{ textTransform: 'uppercase' }}
@@ -33,7 +33,7 @@ export function TotalCard({ label, total }: { label: string; total: Money }): Re
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
+        fontSize={fontSizes.xl5}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >
@@ -103,8 +103,8 @@ function SalesEmpty({ t }: { t: ReturnType<typeof useTranslation>['t'] }): React
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.gray400}
+        fontSize={fontSizes.md}
+        color={colors.textMuted}
       >
         {t('ventas.emptyTitle')}
       </Text>

@@ -7,7 +7,7 @@ import { Switch, Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { FlagDisplayInfo } from './flag-descriptions';
 
 export interface FeatureFlagCardProps {
@@ -20,6 +20,22 @@ export interface FeatureFlagCardProps {
 }
 
 type T = ReturnType<typeof useTranslation>['t'];
+
+/** Italic note naming the flag this one depends on. Renders nothing without one. */
+function DependencyHint({ hint }: { hint: string | null }): ReactElement | null {
+  if (hint === null) return null;
+  return (
+    <Text
+      fontFamily={typography.fontFamily}
+      fontSize={fontSizes.xs}
+      color={colors.textMuted}
+      marginTop={4}
+      fontStyle="italic"
+    >
+      {hint}
+    </Text>
+  );
+}
 
 function FlagCardText({
   info,
@@ -35,25 +51,20 @@ function FlagCardText({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {t(info.labelKey as never)}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600} marginTop={4}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={fontSizes.sm}
+        color={colors.gray600}
+        marginTop={4}
+      >
         {t(info.descriptionKey as never)}
       </Text>
-      {dependencyHint !== null && (
-        <Text
-          fontFamily={typography.fontFamily}
-          fontSize={12}
-          color={colors.gray400}
-          marginTop={4}
-          fontStyle="italic"
-        >
-          {dependencyHint}
-        </Text>
-      )}
+      <DependencyHint hint={dependencyHint} />
     </View>
   );
 }
@@ -66,7 +77,7 @@ function ComingSoonBadge({ t }: { t: T }): ReactElement {
       paddingHorizontal={10}
       paddingVertical={3}
     >
-      <Text fontSize={11} color={colors.gray600} fontFamily={typography.fontFamily}>
+      <Text fontSize={fontSizes.xs} color={colors.gray600} fontFamily={typography.fontFamily}>
         {t('funciones.comingSoon')}
       </Text>
     </View>

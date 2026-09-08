@@ -38,7 +38,7 @@ import type { ReactElement, ReactNode } from 'react';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../Icon/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { impactMedium } from '../../haptics/index';
 import type { SwipeableRowProps } from './swipeable-row';
 
@@ -74,7 +74,7 @@ function ActionPanel(props: ActionPanelProps): ReactElement {
         color={props.textColor}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         numberOfLines={1}
         ellipsizeMode="tail"

@@ -24,7 +24,7 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { Card } from '../Card/index';
 import { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, shapeRadii } from '../../theme';
 
 export interface SkeletonBarProps {
   /** Bar height. Defaults to 16. */
@@ -48,7 +48,7 @@ function SkeletonBar(props: SkeletonBarProps): ReactElement {
       height={props.height ?? 16}
       width={props.width ?? '100%'}
       backgroundColor={colors.gray100}
-      borderRadius={4}
+      borderRadius={shapeRadii.markLg}
     />
   );
 }

@@ -12,7 +12,7 @@ import type { BusinessId, PaymentMethod } from '@cachink/domain';
 import { Btn, Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import { useEnabledPaymentMethods } from '../../hooks/use-enabled-payment-methods';
 import { useEditarBusiness } from '../../hooks/use-editar-business';
@@ -40,7 +40,7 @@ function ToggleThumb({ enabled }: { enabled: boolean }): ReactElement {
     <View
       width={44}
       height={26}
-      borderRadius={13}
+      borderRadius={shapeRadii.pill}
       backgroundColor={enabled ? colors.yellow : colors.gray200}
       justifyContent="center"
       paddingHorizontal={2}
@@ -48,7 +48,7 @@ function ToggleThumb({ enabled }: { enabled: boolean }): ReactElement {
       <View
         width={22}
         height={22}
-        borderRadius={11}
+        borderRadius={shapeRadii.pill}
         backgroundColor={colors.white}
         alignSelf={enabled ? 'flex-end' : 'flex-start'}
       />
@@ -81,7 +81,7 @@ function ToggleRow(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold}
-          fontSize={15}
+          fontSize={fontSizes.lg}
           color={colors.black}
           flex={1}
         >
@@ -94,9 +94,7 @@ function ToggleRow(props: {
 }
 
 function usePaymentToggle(currentMethods: readonly PaymentMethod[]) {
-  const [selected, setSelected] = useState<Set<PaymentMethod>>(
-    () => new Set(currentMethods),
-  );
+  const [selected, setSelected] = useState<Set<PaymentMethod>>(() => new Set(currentMethods));
   const toggle = useCallback((key: PaymentMethod) => {
     impactLight();
     setSelected((prev) => {
@@ -156,8 +154,8 @@ function PaymentFooter(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.regular}
-        fontSize={12}
-        color={colors.gray400}
+        fontSize={fontSizes.xs}
+        color={colors.textMuted}
       >
         {props.t('tiposDePago.atLeastOne')}
       </Text>
@@ -190,7 +188,7 @@ export function TiposDePagoScreen(props: TiposDePagoScreenProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
       >
         {t('tiposDePago.description')}

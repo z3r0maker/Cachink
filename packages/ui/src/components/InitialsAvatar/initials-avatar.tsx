@@ -18,7 +18,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, shadows, typography } from '../../theme';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 
 export type InitialsAvatarSize = 'sm' | 'md' | 'lg';
 
@@ -59,9 +59,9 @@ interface SizeStyle {
 }
 
 const SIZES: Record<InitialsAvatarSize, SizeStyle> = {
-  sm: { box: 36, fontSize: 12 },
-  md: { box: 44, fontSize: 14 },
-  lg: { box: 52, fontSize: 16 },
+  sm: { box: 36, fontSize: fontSizes.xs },
+  md: { box: 44, fontSize: fontSizes.md },
+  lg: { box: 52, fontSize: fontSizes.lg },
 };
 
 interface VariantStyle {

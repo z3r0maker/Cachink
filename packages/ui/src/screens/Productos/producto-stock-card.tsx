@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Icon } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 function stockStatus(stock: number, umbral: number) {
   const isLow = stock <= umbral;
@@ -50,7 +50,7 @@ function StockBadge(props: { bg: string; fg: string; label: string }): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={props.fg}
       >
         {props.label}
@@ -68,7 +68,7 @@ function StockQuantityRow(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
       >
         {props.stock}

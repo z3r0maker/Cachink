@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, View } from '@tamagui/core';
 import { Icon, type IconName } from './index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 const ALL_ICONS: readonly IconName[] = [
   'home',
@@ -92,7 +92,7 @@ export const AllIcons: Story = {
           <Icon name={name} size={28} color={colors.black} />
           <Text
             fontFamily={typography.fontFamily}
-            fontSize={9}
+            fontSize={fontSizes.xs}
             fontWeight={typography.weights.bold}
             letterSpacing={typography.letterSpacing.wide}
             color={colors.gray600}

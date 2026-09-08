@@ -14,7 +14,7 @@ import { formatMoney } from '@cachink/domain';
 import { Btn, Combobox, Input, Modal } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 const METODOS: readonly PaymentMethod[] = [
   'Efectivo',
@@ -50,7 +50,7 @@ function ProductHeader({ product }: { product: Product }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.black}
         flex={1}
         numberOfLines={1}
@@ -60,7 +60,7 @@ function ProductHeader({ product }: { product: Product }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={colors.black}
       >
         {formatMoney(product.precioVentaCentavos)}
@@ -120,7 +120,11 @@ function SheetFields(props: {
   );
 }
 
-function useSheetSubmit(product: VentaConfirmSheetProps['product'], form: ReturnType<typeof useSheetForm>, onSubmit: VentaConfirmSheetProps['onSubmit']) {
+function useSheetSubmit(
+  product: VentaConfirmSheetProps['product'],
+  form: ReturnType<typeof useSheetForm>,
+  onSubmit: VentaConfirmSheetProps['onSubmit'],
+) {
   return useCallback((): void => {
     if (!product) return;
     const qty = Number.parseInt(form.cantidad, 10);
@@ -129,17 +133,42 @@ function useSheetSubmit(product: VentaConfirmSheetProps['product'], form: Return
       productoId: product.id,
       cantidad: qty,
       metodo: form.metodo,
-      clienteId: form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined,
+      clienteId:
+        form.metodo === 'Crédito' && form.clienteId ? (form.clienteId as ClientId) : undefined,
     });
   }, [product, form.cantidad, form.metodo, form.clienteId, onSubmit]);
 }
 
-function SheetFooter(props: { disabled?: boolean; disabledReason?: string; error?: Error | null }): ReactElement | null {
+function SheetFooter(props: {
+  disabled?: boolean;
+  disabledReason?: string;
+  error?: Error | null;
+}): ReactElement | null {
   if (props.disabled === true && props.disabledReason !== undefined) {
-    return <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600} textAlign="center" marginTop={4}>{props.disabledReason}</Text>;
+    return (
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+        textAlign="center"
+        marginTop={4}
+      >
+        {props.disabledReason}
+      </Text>
+    );
   }
   if (props.error != null) {
-    return <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red} textAlign="center" marginTop={4}>{props.error.message}</Text>;
+    return (
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={fontSizes.xs}
+        color={colors.redText}
+        textAlign="center"
+        marginTop={4}
+      >
+        {props.error.message}
+      </Text>
+    );
   }
   return null;
 }
@@ -154,7 +183,14 @@ function SheetBody(props: Omit<VentaConfirmSheetProps, 'open' | 'onClose'>): Rea
     <View gap={16}>
       <ProductHeader product={product} />
       <SheetFields form={form} clientes={clientes} t={t} />
-      <Btn variant="primary" onPress={handleSubmit} disabled={disabled === true || (form.metodo === 'Crédito' && !form.clienteId)} loading={submitting === true} fullWidth testID="venta-confirm-submit">
+      <Btn
+        variant="primary"
+        onPress={handleSubmit}
+        disabled={disabled === true || (form.metodo === 'Crédito' && !form.clienteId)}
+        loading={submitting === true}
+        fullWidth
+        testID="venta-confirm-submit"
+      >
         {t('ventas.registrarVenta')}
       </Btn>
       <SheetFooter disabled={disabled} disabledReason={disabledReason} error={error} />

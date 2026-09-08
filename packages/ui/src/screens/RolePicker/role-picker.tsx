@@ -19,7 +19,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn, Card, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { Role } from '../../app-config/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface RolePickerProps {
   /** Fires with the selected role. Wire to `useSetRole()` + router. */
@@ -50,7 +50,7 @@ function RoleCardBody(props: RoleCardBodyProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         letterSpacing={typography.letterSpacing.tighter}
         color={props.isDark ? colors.yellow : colors.black}
         style={{ textTransform: 'uppercase' }}
@@ -60,7 +60,7 @@ function RoleCardBody(props: RoleCardBodyProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={props.isDark ? colors.white : colors.gray600}
         marginTop={6}
       >
@@ -113,7 +113,7 @@ function Header({ title, subtitle }: { title: string; subtitle: string }): React
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={48}
+        fontSize={fontSizes.xl7}
         letterSpacing={typography.letterSpacing.tightest}
         color={colors.black}
       >
@@ -122,7 +122,7 @@ function Header({ title, subtitle }: { title: string; subtitle: string }): React
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.gray600}
         marginBottom={16}
       >

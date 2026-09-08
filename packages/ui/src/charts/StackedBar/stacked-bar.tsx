@@ -7,12 +7,52 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { echarts, ReactEChartsCore } from '../echarts-wrapper';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import type { BarSegment, StackedBarProps } from './stacked-types';
 
 export type { BarSegment, StackedBarProps } from './stacked-types';
 
 const DEFAULT_HEIGHT = 28;
+
+/** One legend entry: swatch, label, and optionally value and share. */
+function StackedLegendRow(props: {
+  seg: BarSegment;
+  pct: number;
+  formatted: string;
+  showValues: boolean;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={6}>
+      <View
+        width={8}
+        height={8}
+        borderRadius={shapeRadii.markLg}
+        backgroundColor={props.seg.color}
+      />
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
+        {props.seg.label}
+      </Text>
+      {props.showValues && (
+        <>
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
+            —
+          </Text>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontSize={fontSizes.xs}
+            fontWeight={typography.weights.bold}
+            color={colors.ink}
+          >
+            {props.formatted}
+          </Text>
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
+            ({props.pct}%)
+          </Text>
+        </>
+      )}
+    </View>
+  );
+}
 
 function StackedLegend(props: {
   segments: readonly BarSegment[];
@@ -22,31 +62,15 @@ function StackedLegend(props: {
 }): ReactElement {
   return (
     <View gap={4}>
-      {props.segments.map((seg, i) => {
-        const pct = props.total > 0 ? Math.round((seg.value / props.total) * 100) : 0;
-        const formatted = props.formatValue?.(seg.value) ?? `${seg.value.toFixed(0)}`;
-        return (
-          <View key={i} flexDirection="row" alignItems="center" gap={6}>
-            <View width={8} height={8} borderRadius={4} backgroundColor={seg.color} />
-            <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
-              {seg.label}
-            </Text>
-            {props.showValues && (
-              <>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  —
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} fontWeight={typography.weights.bold} color={colors.ink}>
-                  {formatted}
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  ({pct}%)
-                </Text>
-              </>
-            )}
-          </View>
-        );
-      })}
+      {props.segments.map((seg, i) => (
+        <StackedLegendRow
+          key={i}
+          seg={seg}
+          pct={props.total > 0 ? Math.round((seg.value / props.total) * 100) : 0}
+          formatted={props.formatValue?.(seg.value) ?? `${seg.value.toFixed(0)}`}
+          showValues={props.showValues}
+        />
+      ))}
     </View>
   );
 }

@@ -14,7 +14,7 @@ import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { CheckoutSummary } from '../Ventas/checkout-summary';
 import { useEnabledPaymentMethods } from '../../hooks/use-enabled-payment-methods';
 import type { CartItem } from '../../hooks/use-cart';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { PAYMENT_OPTIONS } from '../Ventas/venta-checkout-sheet';
 import { Btn } from '../../components/Btn/btn';
 import { useMemo, useState } from 'react';
@@ -35,9 +35,7 @@ function useVisibleMethods() {
   );
 }
 
-export function CheckoutMethodPicker(
-  props: CheckoutMethodPickerProps,
-): ReactElement {
+export function CheckoutMethodPicker(props: CheckoutMethodPickerProps): ReactElement {
   const [metodo, setMetodo] = useState<PaymentMethod>('Efectivo');
   const visibleOptions = useVisibleMethods();
 
@@ -49,7 +47,7 @@ export function CheckoutMethodPicker(
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
       >
         {`Cobrar ${formatMoney(props.totalCentavos)}`}

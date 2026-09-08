@@ -18,15 +18,12 @@ import { Icon } from '../../components/Icon/index';
 import { Input } from '../../components/Input/input';
 import { TextField } from '../../components/fields/text-field';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CountResultStepProps {
   readonly conteoCentavos: Money;
   readonly esperadoCentavos: Money;
-  readonly onClose: (
-    reason: DiscrepancyReason | null,
-    explicacion: string | null,
-  ) => void;
+  readonly onClose: (reason: DiscrepancyReason | null, explicacion: string | null) => void;
   readonly submitting: boolean;
   readonly testID?: string;
 }
@@ -40,6 +37,27 @@ const REASONS: readonly DiscrepancyReason[] = [
   'otro',
 ];
 
+/** The confirm action. Blocked until a discrepancy has been explained. */
+function CloseTurnoButton(props: {
+  onPress: () => void;
+  submitting: boolean;
+  disabled: boolean;
+}): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <Btn
+      variant="dark"
+      onPress={props.onPress}
+      fullWidth
+      loading={props.submitting}
+      disabled={props.disabled}
+      testID="count-result-close"
+    >
+      {t('caja.cerrarSubmit')}
+    </Btn>
+  );
+}
+
 export function CountResultStep(props: CountResultStepProps): ReactElement {
   const { t } = useTranslation();
   const diff = props.conteoCentavos - props.esperadoCentavos;
@@ -52,22 +70,28 @@ export function CountResultStep(props: CountResultStepProps): ReactElement {
       testID={props.testID ?? 'count-result-step'}
       keyboardShouldPersistTaps="handled"
     >
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black}
-        fontSize={22} color={colors.black}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.black}
+        fontSize={fontSizes.xl2}
+        color={colors.black}
+      >
         {t('caja.countResultTitle')}
       </Text>
-      <ComparisonCard conteo={props.conteoCentavos} esperado={props.esperadoCentavos}
-        diff={diff} />
+      <ComparisonCard conteo={props.conteoCentavos} esperado={props.esperadoCentavos} diff={diff} />
       {hasDiff && (
-        <ReasonSelector reason={reason} setReason={setReason}
-          explicacion={explicacion} setExplicacion={setExplicacion} />
+        <ReasonSelector
+          reason={reason}
+          setReason={setReason}
+          explicacion={explicacion}
+          setExplicacion={setExplicacion}
+        />
       )}
-      <Btn variant="dark"
+      <CloseTurnoButton
         onPress={() => props.onClose(reason, explicacion.length > 0 ? explicacion : null)}
-        fullWidth loading={props.submitting} disabled={hasDiff && !reason}
-        testID="count-result-close">
-        {t('caja.cerrarSubmit')}
-      </Btn>
+        submitting={props.submitting}
+        disabled={hasDiff && reason === null}
+      />
     </ScrollView>
   );
 }
@@ -77,22 +101,22 @@ export function CountResultStep(props: CountResultStepProps): ReactElement {
 function ComparisonRow(props: { label: string; value: string }): ReactElement {
   return (
     <View flexDirection="row" justifyContent="space-between">
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
         {props.label}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold}
-        fontSize={16} color={colors.black}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={fontSizes.lg}
+        color={colors.black}
+      >
         {props.value}
       </Text>
     </View>
   );
 }
 
-function ComparisonCard(props: {
-  conteo: Money;
-  esperado: Money;
-  diff: Money;
-}): ReactElement {
+function ComparisonCard(props: { conteo: Money; esperado: Money; diff: Money }): ReactElement {
   const { t } = useTranslation();
   const isNeg = props.diff < 0n;
   const diffColor = props.diff === ZERO ? colors.green : isNeg ? colors.red : colors.yellow;
@@ -103,13 +127,21 @@ function ComparisonCard(props: {
         <ComparisonRow label={t('caja.countResultEsperado')} value={formatMoney(props.esperado)} />
         <View height={1} backgroundColor={colors.gray200} />
         <View flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold}
-            fontSize={16} color={diffColor}>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.bold}
+            fontSize={fontSizes.lg}
+            color={diffColor}
+          >
             {t('caja.countResultDiff')}
           </Text>
           <View flexDirection="row" alignItems="center" gap={4}>
-            <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.black}
-              fontSize={18} color={diffColor}>
+            <Text
+              fontFamily={typography.fontFamily}
+              fontWeight={typography.weights.black}
+              fontSize={fontSizes.xl}
+              color={diffColor}
+            >
               {formatMoney(props.diff)}
             </Text>
             {props.diff !== ZERO && <Icon name="triangle-alert" size={16} color={diffColor} />}
@@ -129,8 +161,12 @@ function ReasonSelector(props: {
   const { t } = useTranslation();
   return (
     <View gap={12}>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold}
-        fontSize={16} color={colors.black}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={fontSizes.lg}
+        color={colors.black}
+      >
         {t('caja.countResultWhyLabel')}
       </Text>
       <Input

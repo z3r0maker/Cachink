@@ -10,8 +10,9 @@ import { Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { ProductIcon } from '@cachink/domain';
 import { Btn, Icon } from '../../components/index';
+import { useTranslation } from '../../i18n/index';
 import type { IconName } from '../../components/Icon/icon.shared';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { ICON_CATEGORIES, type IconCategory } from './icon-picker-data';
 
 export interface IconPickerScreenProps {
@@ -33,7 +34,7 @@ function CategoryHeader({ label }: { label: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
         letterSpacing={typography.letterSpacing.wide}
         textTransform="uppercase"
@@ -65,7 +66,7 @@ function TileContent(props: { icon: ProductIcon; selected: boolean }): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={9}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         numberOfLines={1}
         textAlign="center"
@@ -81,8 +82,15 @@ function IconTile(props: {
   selected: boolean;
   onPress: () => void;
 }): ReactElement {
+  const { t } = useTranslation();
   return (
-    <Pressable onPress={props.onPress} testID={`icon-tile-${props.icon}`}>
+    <Pressable
+      onPress={props.onPress}
+      testID={`icon-tile-${props.icon}`}
+      role="radio"
+      aria-checked={props.selected}
+      aria-label={t('productos.iconTileAriaLabel', { name: props.icon })}
+    >
       <TileContent icon={props.icon} selected={props.selected} />
     </Pressable>
   );
@@ -111,6 +119,7 @@ function CategorySection(props: {
 }
 
 function PickerTopBar(props: { onCancel: () => void }): ReactElement {
+  const { t } = useTranslation();
   return (
     <View
       flexDirection="row"
@@ -119,13 +128,18 @@ function PickerTopBar(props: { onCancel: () => void }): ReactElement {
       paddingHorizontal={16}
       paddingVertical={12}
     >
-      <Pressable onPress={props.onCancel} testID="icon-picker-cancel">
+      <Pressable
+        onPress={props.onCancel}
+        testID="icon-picker-cancel"
+        role="button"
+        aria-label={t('productos.iconPickerCancelAriaLabel')}
+      >
         <Icon name="chevron-left" size={24} color={colors.black} />
       </Pressable>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.black}
       >
         Seleccionar ícono
@@ -153,7 +167,9 @@ function PickerFooter(props: {
     >
       <Btn
         variant="primary"
-        onPress={() => { if (props.selected) props.onAccept(props.selected); }}
+        onPress={() => {
+          if (props.selected) props.onAccept(props.selected);
+        }}
         disabled={props.selected === null}
         fullWidth
         testID="icon-picker-accept"
@@ -171,10 +187,7 @@ export function IconPickerScreen(props: IconPickerScreenProps): ReactElement {
     <View testID={props.testID ?? 'icon-picker-screen'} flex={1} backgroundColor={colors.offwhite}>
       <View backgroundColor={colors.yellow} height={6} />
       <PickerTopBar onCancel={props.onCancel} />
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-      >
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
         {ICON_CATEGORIES.map((cat) => (
           <CategorySection
             key={cat.key}

@@ -13,7 +13,7 @@ import type { ReactElement } from 'react';
 import { Modal, StyleSheet } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Spinner } from '../Spinner/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface LoadingOverlayProps {
   /** Whether the overlay is visible. */
@@ -23,7 +23,7 @@ export interface LoadingOverlayProps {
   readonly testID?: string;
 }
 
-const BACKDROP_COLOR = 'rgba(13, 13, 13, 0.45)';
+const BACKDROP_COLOR = colors.scrim;
 const CARD_SIZE = 200;
 
 export function LoadingOverlay(props: LoadingOverlayProps): ReactElement {
@@ -53,7 +53,7 @@ export function LoadingOverlay(props: LoadingOverlayProps): ReactElement {
             <Text
               fontFamily={typography.fontFamily}
               fontWeight={typography.weights.semibold.toString()}
-              fontSize={15}
+              fontSize={fontSizes.lg}
               color={colors.gray600}
               textAlign="center"
             >

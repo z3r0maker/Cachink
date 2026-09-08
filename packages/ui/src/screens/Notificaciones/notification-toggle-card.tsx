@@ -13,7 +13,7 @@ import { Text, View } from '@tamagui/core';
 import type { AlertSeverity } from '@cachink/domain';
 import { Card, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import type { NotificationSourceInfo } from './notification-source-info';
 
 function severityDotColor(severity: AlertSeverity): string {
@@ -50,12 +50,12 @@ function ToggleLabelRow({
   const dotColor = locked ? colors.gray200 : severityDotColor(info.defaultSeverity);
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      <View width={8} height={8} borderRadius={4} backgroundColor={dotColor} />
+      <View width={8} height={8} borderRadius={shapeRadii.markLg} backgroundColor={dotColor} />
       <Icon name={info.icon} size={18} color={labelColor} />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={labelColor}
       >
         {t(info.labelKey as never)}
@@ -77,14 +77,14 @@ function ToggleLabelColumn({
   return (
     <View flex={1} marginRight={12} gap={4}>
       <ToggleLabelRow info={info} locked={locked} />
-      <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
         {t(info.descriptionKey as never)}
       </Text>
       {locked && lockedHint && (
         <Text
           fontFamily={typography.fontFamily}
-          fontSize={12}
-          color={colors.gray400}
+          fontSize={fontSizes.xs}
+          color={colors.textMuted}
           fontStyle="italic"
         >
           {lockedHint}

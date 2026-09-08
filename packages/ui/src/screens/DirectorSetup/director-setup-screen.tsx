@@ -19,7 +19,7 @@ import { Btn, TextField } from '../../components/index';
 import { Input } from '../../components/Input/input';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { DirectorSetupValidation } from './director-setup-validation';
 
 export interface DirectorSetupSubmitInput {
@@ -76,14 +76,14 @@ function DirectorSetupHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
+        fontSize={fontSizes.xl5}
         color={colors.black}
       >
         {t('directorSetup.title')}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
         maxWidth={360}

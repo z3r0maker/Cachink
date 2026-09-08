@@ -26,6 +26,7 @@
 
 import type { RasterizeOptions, RasterizedBlob } from './rasterize.shared';
 import { DEFAULT_FILENAME_STEM, DEFAULT_RASTERIZE_WIDTH } from './rasterize.shared';
+import { colors } from '../theme';
 
 interface Html2CanvasFn {
   (element: HTMLElement, options?: Record<string, unknown>): Promise<HTMLCanvasElement>;
@@ -67,13 +68,13 @@ async function captureHtml(html: string, width: number): Promise<HTMLCanvasEleme
   }
   const container = document.createElement('div');
   container.setAttribute('data-testid', 'comprobante-rasterize-host');
-  container.style.cssText = `position:absolute;left:-99999px;top:0;width:${width}px;background:#ffffff;`;
+  container.style.cssText = `position:absolute;left:-99999px;top:0;width:${width}px;background:${colors.white};`;
   container.innerHTML = html;
   document.body.append(container);
   try {
     const html2canvas = await loadHtml2Canvas();
     return await html2canvas(container, {
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.white,
       useCORS: true,
       // Tamagui + Plus Jakarta Sans render at 1× DPR on Tauri's WebView
       // by default; force scale=2 for crisp WhatsApp shares.

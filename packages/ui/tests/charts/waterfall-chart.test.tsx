@@ -9,17 +9,26 @@ import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
 // Mock ECharts renderer to a simple div
-vi.mock('echarts-for-react/lib/core', () => ({
+vi.mock('echarts-for-react/esm/core', () => ({
   __esModule: true,
   default: function MockECharts(props: Record<string, unknown>) {
-    return React.createElement('div', { 'data-testid': 'echarts-mock', 'data-option': JSON.stringify(props.option) });
+    return React.createElement('div', {
+      'data-testid': 'echarts-mock',
+      'data-option': JSON.stringify(props.option),
+    });
   },
 }));
 
 vi.mock('echarts/core', () => {
   const graphic = {
     LinearGradient: class {
-      constructor(public x: number, public y: number, public x2: number, public y2: number, public stops: unknown[]) {}
+      constructor(
+        public x: number,
+        public y: number,
+        public x2: number,
+        public y2: number,
+        public stops: unknown[],
+      ) {}
     },
   };
   return {
@@ -107,7 +116,13 @@ describe('buildWaterfallOption', () => {
       xAxis: { data: string[] };
     };
     expect(option.xAxis.data).toEqual([
-      'Ingresos', 'Costo', 'Ut. Bruta', 'Gastos Op.', 'Ut. Op.', 'ISR', 'Ut. Neta',
+      'Ingresos',
+      'Costo',
+      'Ut. Bruta',
+      'Gastos Op.',
+      'Ut. Op.',
+      'ISR',
+      'Ut. Neta',
     ]);
   });
 
@@ -130,9 +145,7 @@ describe('buildWaterfallOption', () => {
 
 describe('computeBarPositions', () => {
   it('income raises the running level', () => {
-    const data: WaterfallItem[] = [
-      { label: 'Ingresos', value: 15, type: 'income' },
-    ];
+    const data: WaterfallItem[] = [{ label: 'Ingresos', value: 15, type: 'income' }];
     const [pos] = computeBarPositions(data);
     expect(pos).toEqual({ base: 0, top: 15, exitLevel: 15 });
   });

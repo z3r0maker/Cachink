@@ -26,7 +26,7 @@ import { useTranslation } from '../../i18n/index';
 import { Icon } from '../Icon/index';
 import { InputLabel, InputNote } from '../Input/input-shared';
 import { Modal } from '../Modal/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import type { DateFieldProps, IsoDateString } from './date-field.shared';
 import { DatePickerPanel } from './date-field-picker.native';
 
@@ -102,10 +102,10 @@ function Trigger(props: TriggerProps): ReactElement {
       testID={`${props.testID}-trigger`}
     >
       <Text
-        color={props.display === '' ? colors.gray400 : colors.ink}
+        color={props.display === '' ? colors.textMuted : colors.ink}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={15}
+        fontSize={fontSizes.lg}
       >
         {props.display === '' ? props.placeholder : props.display}
       </Text>

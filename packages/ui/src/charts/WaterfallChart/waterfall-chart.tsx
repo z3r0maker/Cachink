@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { echarts, ReactEChartsCore } from '../echarts-wrapper';
 import { SEMANTIC, formatChartLabel } from '../chart-tokens';
-import { colors } from '../../theme';
+import { colors, fontSizes } from '../../theme';
 import { computeBarPositions, buildWaterfallAriaLabel } from './waterfall-positions';
 import type { WaterfallItem, WaterfallChartProps } from './waterfall-types';
 
@@ -66,7 +66,7 @@ function buildValueLabel(data: readonly WaterfallItem[]) {
       return colors.ink;
     },
     fontWeight: 700,
-    fontSize: 11,
+    fontSize: fontSizes.xs,
     fontFamily: "'Plus Jakarta Sans', sans-serif",
   };
 }

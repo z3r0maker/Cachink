@@ -7,7 +7,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import type { BarSegment, StackedBarProps } from './stacked-types';
 
 export type { BarSegment, StackedBarProps } from './stacked-types';
@@ -18,18 +18,18 @@ const INLINE_LABEL_THRESHOLD = 15;
 function LegendValues({ formatted, pct }: { formatted: string; pct: number }): ReactElement {
   return (
     <>
-      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
         —
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         fontWeight={typography.weights.bold}
         color={colors.ink}
       >
         {formatted}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
         ({pct}%)
       </Text>
     </>
@@ -46,8 +46,13 @@ function LegendRow(props: {
   const formatted = props.formatValue?.(props.seg.value) ?? `$${props.seg.value.toFixed(0)}`;
   return (
     <View flexDirection="row" alignItems="center" gap={6}>
-      <View width={8} height={8} borderRadius={4} backgroundColor={props.seg.color} />
-      <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
+      <View
+        width={8}
+        height={8}
+        borderRadius={shapeRadii.markLg}
+        backgroundColor={props.seg.color}
+      />
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
         {props.seg.label}
       </Text>
       {props.showValues && <LegendValues formatted={formatted} pct={pct} />}
@@ -91,7 +96,7 @@ function BarSegmentView({ seg, pct }: { seg: BarSegment; pct: number }): ReactEl
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={10}
+          fontSize={fontSizes.xs}
           color={colors.white}
           textAlign="center"
         >
@@ -112,7 +117,7 @@ function BarTrack(props: {
       testID="stacked-bar-track"
       flexDirection="row"
       height={props.height}
-      borderRadius={4}
+      borderRadius={shapeRadii.markLg}
       overflow="hidden"
       borderColor={colors.black}
       borderWidth={2}

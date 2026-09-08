@@ -1,0 +1,6 @@
+{
+  "$comment": "Ratchet for pnpm lint:design. Counts may fall, never rise. See scripts/design-lint/.",
+  "recordedAt": "2026-09-08",
+  "total": 0,
+  "rules": {}
+}

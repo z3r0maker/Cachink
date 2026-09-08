@@ -10,6 +10,7 @@ import { Btn, Combobox, Modal } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import { type FormErrors, type FormState, INITIAL_STATE, validate } from './receta-form-helpers';
+import { colors, fontSizes } from '../../theme';
 
 export interface NuevaRecetaModalProps {
   readonly open: boolean;
@@ -32,7 +33,7 @@ export interface RecetaFormPayload {
 
 function ErrorText({ msg }: { msg: string }): ReactElement {
   return (
-    <Text fontSize={12} color="$colorDanger">
+    <Text fontSize={fontSizes.xs} color={colors.redText}>
       {msg}
     </Text>
   );

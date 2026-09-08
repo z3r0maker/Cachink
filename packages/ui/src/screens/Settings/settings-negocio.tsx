@@ -12,7 +12,7 @@ import type { AppMode } from '../../app-config/index';
 import type { Business } from '@cachink/domain';
 import { Btn, Card, Icon, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { EditBusinessModal } from './edit-business-modal';
 
 export interface SettingsNegocioProps {
@@ -49,7 +49,7 @@ function InfoRow({ label, value }: { label: string; value: string }): ReactEleme
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -59,7 +59,7 @@ function InfoRow({ label, value }: { label: string; value: string }): ReactEleme
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {value}

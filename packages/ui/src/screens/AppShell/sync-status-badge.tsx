@@ -22,7 +22,7 @@ import { Text, View } from '@tamagui/core';
 import type { AppMode } from '../../app-config/index';
 import type { LanSyncStatus } from '../../sync/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { Btn } from '../../components/Btn/btn';
 
 export interface SyncStatusBadgeProps {
@@ -93,7 +93,7 @@ function renderChip(
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={11}
+          fontSize={fontSizes.xs}
           color={colors.black}
           letterSpacing={typography.letterSpacing.wide}
           style={{ textTransform: 'uppercase' }}

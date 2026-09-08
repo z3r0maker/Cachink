@@ -16,6 +16,7 @@ import { Animated, Easing, StyleSheet, View } from 'react-native';
 import { colors } from '../../theme';
 import { Icon } from '../Icon';
 import type { IconName } from '../Icon/icon.shared';
+import { useReducedMotion } from '../../hooks/use-reduced-motion';
 
 const IS_E2E = process.env.EXPO_PUBLIC_E2E === '1';
 const PARTICLE_COUNT = 36;
@@ -221,9 +222,14 @@ export function FloatingCoinsBackground({
   children,
   testID,
 }: FloatingCoinsBackgroundProps): ReactElement {
+  // This motion is purely decorative and nobody asks for it — it simply runs.
+  // That makes it the clearest case in the app for WCAG 2.3.3: when the user
+  // has asked for reduced motion the layer is not rendered at all, rather than
+  // slowed. The same escape hatch E2E already uses. Audit 2026-09.
+  const reduced = useReducedMotion();
   return (
     <View testID={testID} style={[styles.root, { backgroundColor: colors.offwhite }]}>
-      {!IS_E2E && (
+      {!IS_E2E && !reduced && (
         <View testID="floating-coins-layer" style={styles.coinLayer}>
           {PARTICLES.map((p) => (
             <MoneyParticle key={p.id} config={p} />

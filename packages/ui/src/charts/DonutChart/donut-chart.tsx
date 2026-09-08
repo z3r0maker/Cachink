@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { echarts, ReactEChartsCore } from '../echarts-wrapper';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import type { DonutSlice, DonutChartProps } from './donut-types';
 
 export type { DonutSlice, DonutChartProps } from './donut-types';
@@ -94,7 +94,7 @@ function DonutCenter(props: {
       pointerEvents="none"
     >
       {props.centerLabel && (
-        <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
           {props.centerLabel}
         </Text>
       )}
@@ -102,11 +102,51 @@ function DonutCenter(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={16}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {props.centerValue}
         </Text>
+      )}
+    </View>
+  );
+}
+
+/** One legend entry: swatch, label, and optionally value and share. */
+function DonutLegendRow(props: {
+  slice: DonutSlice;
+  pct: number;
+  formatted: string;
+  showValues: boolean;
+}): ReactElement {
+  return (
+    <View flexDirection="row" alignItems="center" gap={6}>
+      <View
+        width={10}
+        height={10}
+        borderRadius={shapeRadii.mark}
+        backgroundColor={props.slice.color}
+      />
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
+        {props.slice.label}
+      </Text>
+      {props.showValues && (
+        <>
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
+            —
+          </Text>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontSize={fontSizes.xs}
+            fontWeight={typography.weights.bold}
+            color={colors.ink}
+          >
+            {props.formatted}
+          </Text>
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
+            ({props.pct}%)
+          </Text>
+        </>
       )}
     </View>
   );
@@ -121,31 +161,15 @@ function DonutLegend(props: {
   if (props.slices.length === 0) return null;
   return (
     <View gap={6}>
-      {props.slices.map((slice, i) => {
-        const pct = props.total > 0 ? Math.round((slice.value / props.total) * 100) : 0;
-        const formatted = props.formatValue?.(slice.value) ?? `${slice.value.toFixed(0)}`;
-        return (
-          <View key={i} flexDirection="row" alignItems="center" gap={6}>
-            <View width={10} height={10} borderRadius={2} backgroundColor={slice.color} />
-            <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray600}>
-              {slice.label}
-            </Text>
-            {props.showValues && (
-              <>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  —
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} fontWeight={typography.weights.bold} color={colors.ink}>
-                  {formatted}
-                </Text>
-                <Text fontFamily={typography.fontFamily} fontSize={11} color={colors.gray400}>
-                  ({pct}%)
-                </Text>
-              </>
-            )}
-          </View>
-        );
-      })}
+      {props.slices.map((slice, i) => (
+        <DonutLegendRow
+          key={i}
+          slice={slice}
+          pct={props.total > 0 ? Math.round((slice.value / props.total) * 100) : 0}
+          formatted={props.formatValue?.(slice.value) ?? `${slice.value.toFixed(0)}`}
+          showValues={props.showValues}
+        />
+      ))}
     </View>
   );
 }
@@ -167,11 +191,7 @@ export function DonutChart(props: DonutChartProps): ReactElement {
           style={{ height: size, width: size }}
           notMerge
         />
-        <DonutCenter
-          centerLabel={props.centerLabel}
-          centerValue={props.centerValue}
-          size={size}
-        />
+        <DonutCenter centerLabel={props.centerLabel} centerValue={props.centerValue} size={size} />
       </View>
       <DonutLegend
         slices={merged}

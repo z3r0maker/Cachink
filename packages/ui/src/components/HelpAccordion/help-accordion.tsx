@@ -10,7 +10,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { Icon } from '../Icon/index';
 
 export interface HelpAccordionProps {
@@ -22,15 +22,21 @@ export interface HelpAccordionProps {
   readonly testID?: string;
 }
 
-function AccordionHeader({ subtitle, expanded, onToggle }: {
-  subtitle: string; expanded: boolean; onToggle: () => void;
+function AccordionHeader({
+  subtitle,
+  expanded,
+  onToggle,
+}: {
+  subtitle: string;
+  expanded: boolean;
+  onToggle: () => void;
 }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={6}>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         flex={1}
       >
@@ -68,7 +74,7 @@ function AccordionDetail({ detail }: { detail: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.regular}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.ink}
         lineHeight={18}
       >

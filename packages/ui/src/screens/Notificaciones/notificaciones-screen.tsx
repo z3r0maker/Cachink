@@ -13,7 +13,7 @@ import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Btn, EmptyState, SegmentedToggle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { useDirectorAlerts, type AlertFilter } from '../../hooks/use-director-alerts';
 import { useMarkAlertRead, useMarkAllAlertsRead } from '../../hooks/use-mark-alert-read';
 import {
@@ -144,7 +144,7 @@ export function NotificacionesScreen(props: NotificacionesScreenProps): ReactEle
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >

@@ -4,6 +4,7 @@
 
 import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
+import { colors, fontSizes } from '../../theme';
 
 export interface SectionHeaderProps {
   readonly label: string;
@@ -14,8 +15,8 @@ export function SectionHeader(props: SectionHeaderProps): ReactElement {
   return (
     <Text
       fontWeight="800"
-      fontSize={22}
-      color="$color"
+      fontSize={fontSizes.xl2}
+      color={colors.black}
       marginBottom={4}
       testID={props.testID}
     >

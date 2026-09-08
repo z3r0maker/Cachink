@@ -23,6 +23,9 @@
       "cache": false,
       "outputs": []
     },
+    "lint:design": {
+      "outputs": []
+    },
     "typecheck": {
       "outputs": []
     },

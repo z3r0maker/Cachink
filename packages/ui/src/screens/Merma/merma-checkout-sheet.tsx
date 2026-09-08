@@ -9,7 +9,7 @@ import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Btn, Modal, TextField } from '../../components/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { CartItem } from '../../hooks/use-cart';
 import { CheckoutSummary } from '../Ventas/checkout-summary';
 
@@ -18,8 +18,18 @@ import { CheckoutSummary } from '../Ventas/checkout-summary';
 // ---------------------------------------------------------------------------
 
 const MERMA_REASONS: readonly OptionCardItem[] = [
-  { key: 'Preparación incorrecta', icon: 'utensils', label: 'Preparación incorrecta', description: 'Error en cocina o preparación' },
-  { key: 'Caducidad', icon: 'calendar', label: 'Caducidad', description: 'Producto vencido o echado a perder' },
+  {
+    key: 'Preparación incorrecta',
+    icon: 'utensils',
+    label: 'Preparación incorrecta',
+    description: 'Error en cocina o preparación',
+  },
+  {
+    key: 'Caducidad',
+    icon: 'calendar',
+    label: 'Caducidad',
+    description: 'Producto vencido o echado a perder',
+  },
   { key: 'Daño', icon: 'circle-alert', label: 'Daño', description: 'Producto dañado o roto' },
   { key: 'Otro', icon: 'clipboard-list', label: 'Otro', description: 'Otra razón de pérdida' },
 ] as const;
@@ -69,7 +79,12 @@ function MermaFormBody(props: {
         testID="merma-nota"
       />
       {props.error != null && (
-        <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red} textAlign="center">
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={fontSizes.xs}
+          color={colors.redText}
+          textAlign="center"
+        >
           {props.error.message}
         </Text>
       )}
@@ -82,10 +97,30 @@ export function MermaCheckoutSheet(props: MermaCheckoutSheetProps): ReactElement
   const [nota, setNota] = useState('');
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title="Registrar merma" testID={props.testID ?? 'merma-checkout-sheet'}>
+    <Modal
+      open={props.open}
+      onClose={props.onClose}
+      title="Registrar merma"
+      testID={props.testID ?? 'merma-checkout-sheet'}
+    >
       <ScrollView style={{ maxHeight: 480 }}>
-        <MermaFormBody items={props.items} reason={reason} onReasonChange={setReason} nota={nota} onNotaChange={setNota} error={props.error} />
-        <Btn variant="danger" fullWidth size="lg" onPress={() => props.onSubmit(reason, nota.trim() || null)} disabled={props.items.length === 0} loading={props.submitting === true} testID="merma-checkout-submit">
+        <MermaFormBody
+          items={props.items}
+          reason={reason}
+          onReasonChange={setReason}
+          nota={nota}
+          onNotaChange={setNota}
+          error={props.error}
+        />
+        <Btn
+          variant="danger"
+          fullWidth
+          size="lg"
+          onPress={() => props.onSubmit(reason, nota.trim() || null)}
+          disabled={props.items.length === 0}
+          loading={props.submitting === true}
+          testID="merma-checkout-submit"
+        >
           Registrar merma
         </Btn>
       </ScrollView>

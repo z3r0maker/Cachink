@@ -12,7 +12,7 @@ import type { Product } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Btn, Icon, Modal, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ProductoDetailPopoverProps {
   readonly open: boolean;
@@ -36,8 +36,8 @@ function DetailBody({ producto, stock }: { producto: Product; stock: number }): 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
-        color={isLow ? colors.red : colors.black}
+        fontSize={fontSizes.xl5}
+        color={isLow ? colors.redText : colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >
         {stock}
@@ -45,7 +45,7 @@ function DetailBody({ producto, stock }: { producto: Product; stock: number }): 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
       >
         {formatMoney(producto.costoUnitCentavos)}

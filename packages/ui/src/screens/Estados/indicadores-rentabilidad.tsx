@@ -5,7 +5,7 @@ import { Text } from '@tamagui/core';
 import type { Indicadores } from '@cachink/domain';
 import { SectionTitle } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, fontSizes } from '../../theme';
 import type { MarginTrend } from '../../hooks/use-indicadores-trend';
 import { MarginCard } from './indicadores-cards';
 import { type HealthTones, healthVerdict, MARGIN_ZONES } from './indicadores-sections';
@@ -86,7 +86,11 @@ export function RentabilidadSection(props: RentabilidadProps): ReactElement {
   return (
     <>
       <SectionTitle title={t('estados.indicadoresRentabilidadTitle')} />
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>
+      <Text
+        fontFamily="'Plus Jakarta Sans', sans-serif"
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+      >
         {t('estados.indicadoresRentabilidadSubtitle')}
       </Text>
       <MargenBrutoCard {...props} />

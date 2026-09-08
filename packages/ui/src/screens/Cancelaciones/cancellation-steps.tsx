@@ -8,18 +8,16 @@ import { formatMoney } from '@cachink/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Input } from '../../components/Input/index';
 import { PinCodeInput } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, emojiSizes, fontSizes, typography } from '../../theme';
 
-export function PinStep(props: {
-  onSubmit: (pin: string) => void;
-}): ReactElement {
+export function PinStep(props: { onSubmit: (pin: string) => void }): ReactElement {
   const [pinValue, setPinValue] = useState('');
   return (
     <View gap={16} alignItems="center" padding={8}>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold.toString()}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
         textAlign="center"
       >
@@ -45,7 +43,7 @@ export function ReasonStep(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold.toString()}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
       >
         ¿Por qué cancelas esta venta?
@@ -77,11 +75,11 @@ export function CashConfirmStep(props: {
 }): ReactElement {
   return (
     <View gap={16} padding={8} alignItems="center">
-      <Text fontSize={40}>💵</Text>
+      <Text fontSize={emojiSizes.md}>💵</Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={24}
+        fontSize={fontSizes.xl3}
         color={colors.black}
         textAlign="center"
       >
@@ -89,7 +87,7 @@ export function CashConfirmStep(props: {
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
       >

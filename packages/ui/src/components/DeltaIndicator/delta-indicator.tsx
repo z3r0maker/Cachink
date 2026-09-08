@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface DeltaIndicatorProps {
   readonly current: number;
@@ -44,10 +44,11 @@ export function DeltaIndicator(props: DeltaIndicatorProps): ReactElement | null 
   const isNegative = pctChange < -0.005;
 
   const arrow = isPositive ? '↑' : isNegative ? '↓' : '=';
-  const label = isPositive || isNegative
-    ? `${arrow} ${formatDelta(Math.abs(pctChange), 'percent')} ${props.periodLabel}`
-    : `= sin cambio ${props.periodLabel}`;
-  const textColor = isPositive ? colors.green : isNegative ? colors.red : colors.gray400;
+  const label =
+    isPositive || isNegative
+      ? `${arrow} ${formatDelta(Math.abs(pctChange), 'percent')} ${props.periodLabel}`
+      : `= sin cambio ${props.periodLabel}`;
+  const textColor = isPositive ? colors.greenText : isNegative ? colors.redText : colors.textMuted;
 
   return (
     <View testID={props.testID ?? 'delta-indicator'}>
@@ -55,7 +56,7 @@ export function DeltaIndicator(props: DeltaIndicatorProps): ReactElement | null 
         testID="delta-indicator-label"
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={textColor}
         fontVariant={['tabular-nums']}
       >

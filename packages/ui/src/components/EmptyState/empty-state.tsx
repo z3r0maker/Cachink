@@ -23,7 +23,7 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, emojiSizes, fontSizes, radii, typography } from '../../theme';
 import { Icon, type IconName } from '../Icon/index';
 
 export interface EmptyStateProps {
@@ -72,7 +72,7 @@ function IconBox({ name }: { name: IconName }): ReactElement {
 
 function Emoji({ glyph }: { glyph: string }): ReactElement {
   return (
-    <Text testID="empty-state-emoji" fontSize={56} marginBottom={16}>
+    <Text testID="empty-state-emoji" fontSize={emojiSizes.lg} marginBottom={16}>
       {glyph}
     </Text>
   );
@@ -85,7 +85,7 @@ function Title({ text }: { text: string }): ReactElement {
       color={colors.black}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.black}
-      fontSize={20}
+      fontSize={fontSizes.xl2}
       letterSpacing={typography.letterSpacing.tight}
       textAlign="center"
       marginBottom={6}
@@ -108,10 +108,10 @@ function Description({ text }: { text: string }): ReactElement {
   return (
     <Text
       testID="empty-state-description"
-      color={colors.gray400}
+      color={colors.textMuted}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={14}
+      fontSize={fontSizes.md}
       lineHeight={20}
       textAlign="center"
       maxWidth={320}

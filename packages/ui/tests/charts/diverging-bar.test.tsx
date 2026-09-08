@@ -7,7 +7,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
-vi.mock('echarts-for-react/lib/core', () => ({
+vi.mock('echarts-for-react/esm/core', () => ({
   __esModule: true,
   default: function MockECharts(_props: Record<string, unknown>) {
     return React.createElement('div', { 'data-testid': 'echarts-mock' });
@@ -19,7 +19,13 @@ vi.mock('echarts/core', () => ({
   registerTheme: vi.fn(),
   graphic: {
     LinearGradient: class {
-      constructor(public x: number, public y: number, public x2: number, public y2: number, public stops: unknown[]) {}
+      constructor(
+        public x: number,
+        public y: number,
+        public x2: number,
+        public y2: number,
+        public stops: unknown[],
+      ) {}
     },
   },
   default: { use: vi.fn(), registerTheme: vi.fn(), graphic: {} },
@@ -49,9 +55,9 @@ function renderChart(items: readonly DivergingItem[]) {
 
 describe('buildDivergingOption', () => {
   it('produces a single bar series', () => {
-    const option = buildDivergingOption([
-      { label: 'Op', value: 1000 },
-    ]) as { series: Array<{ type: string }> };
+    const option = buildDivergingOption([{ label: 'Op', value: 1000 }]) as {
+      series: Array<{ type: string }>;
+    };
     expect(option.series.length).toBe(1);
     expect(option.series[0]!.type).toBe('bar');
   });
@@ -77,16 +83,16 @@ describe('buildDivergingOption', () => {
   });
 
   it('includes animation config', () => {
-    const option = buildDivergingOption([
-      { label: 'A', value: 100 },
-    ]) as { animationDuration: number };
+    const option = buildDivergingOption([{ label: 'A', value: 100 }]) as {
+      animationDuration: number;
+    };
     expect(option.animationDuration).toBe(600);
   });
 
   it('includes tooltip', () => {
-    const option = buildDivergingOption([
-      { label: 'A', value: 100 },
-    ]) as { tooltip: { trigger: string } };
+    const option = buildDivergingOption([{ label: 'A', value: 100 }]) as {
+      tooltip: { trigger: string };
+    };
     expect(option.tooltip.trigger).toBe('axis');
   });
 });

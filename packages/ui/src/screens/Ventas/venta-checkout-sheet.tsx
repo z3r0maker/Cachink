@@ -17,7 +17,7 @@ import type { PaymentMethod } from '@cachink/domain';
 import { formatMoney, type Money } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { CartItem } from '../../hooks/use-cart';
 import { useEnabledPaymentMethods } from '../../hooks/use-enabled-payment-methods';
 import { CheckoutSummary } from './checkout-summary';
@@ -28,7 +28,12 @@ import { CheckoutSummary } from './checkout-summary';
 
 export const PAYMENT_OPTIONS: readonly OptionCardItem<PaymentMethod>[] = [
   { key: 'Efectivo', icon: 'banknote', label: 'Efectivo', description: 'Pago en efectivo' },
-  { key: 'Transferencia', icon: 'wallet', label: 'Transferencia', description: 'SPEI o transferencia' },
+  {
+    key: 'Transferencia',
+    icon: 'wallet',
+    label: 'Transferencia',
+    description: 'SPEI o transferencia',
+  },
   { key: 'Tarjeta', icon: 'credit-card', label: 'Tarjeta', description: 'Crédito o débito' },
   { key: 'QR/CoDi', icon: 'smartphone', label: 'QR/CoDi', description: 'Cobro con código QR' },
 ] as const;
@@ -57,8 +62,8 @@ function ErrorText(props: { error?: Error | null }): ReactElement | null {
   return (
     <Text
       fontFamily={typography.fontFamily}
-      fontSize={12}
-      color={colors.red}
+      fontSize={fontSizes.xs}
+      color={colors.redText}
       textAlign="center"
     >
       {props.error.message}
@@ -77,9 +82,21 @@ interface SheetBodyProps {
   readonly submitting?: boolean;
 }
 
-function SheetSubmitBtn(props: Pick<SheetBodyProps, 'totalCentavos' | 'metodo' | 'onSubmit' | 'submitting'> & { disabled: boolean }): ReactElement {
+function SheetSubmitBtn(
+  props: Pick<SheetBodyProps, 'totalCentavos' | 'metodo' | 'onSubmit' | 'submitting'> & {
+    disabled: boolean;
+  },
+): ReactElement {
   return (
-    <Btn variant="primary" fullWidth size="lg" onPress={() => props.onSubmit(props.metodo)} disabled={props.disabled} loading={props.submitting === true} testID="checkout-submit">
+    <Btn
+      variant="primary"
+      fullWidth
+      size="lg"
+      onPress={() => props.onSubmit(props.metodo)}
+      disabled={props.disabled}
+      loading={props.submitting === true}
+      testID="checkout-submit"
+    >
       {`Registrar ${formatMoney(props.totalCentavos)}`}
     </Btn>
   );
@@ -99,7 +116,13 @@ function SheetBody(props: SheetBodyProps): ReactElement {
           testID="checkout-payment-method"
         />
         <ErrorText error={props.error} />
-        <SheetSubmitBtn totalCentavos={props.totalCentavos} metodo={props.metodo} onSubmit={props.onSubmit} submitting={props.submitting} disabled={props.items.length === 0} />
+        <SheetSubmitBtn
+          totalCentavos={props.totalCentavos}
+          metodo={props.metodo}
+          onSubmit={props.onSubmit}
+          submitting={props.submitting}
+          disabled={props.items.length === 0}
+        />
       </View>
     </ScrollView>
   );

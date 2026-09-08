@@ -9,7 +9,7 @@ import { Text, View } from '@tamagui/core';
 import type { ConversionReceta, Product } from '@cachink/domain';
 import { EmptyState, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, fontSizes } from '../../theme';
 
 export interface RecetaListProps {
   readonly recetas: readonly ConversionReceta[];
@@ -17,6 +17,35 @@ export interface RecetaListProps {
   readonly onConvertir: (receta: ConversionReceta) => void;
   readonly onEliminar: (receta: ConversionReceta) => void;
   readonly testID?: string;
+}
+
+/** Convert / delete actions for one recipe row. Split out to keep `RecetaRow`
+ *  inside the §2.6 40-line budget once both actions carry accessible names. */
+function RecetaRowActions(props: {
+  onConvertir: () => void;
+  onEliminar: () => void;
+}): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <>
+      <TouchableOpacity
+        onPress={props.onConvertir}
+        testID="receta-convertir-btn"
+        role="button"
+        aria-label={t('conversion.convertirAriaLabel')}
+      >
+        <Icon name="refresh-cw" size={20} color={colors.blue} />
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={props.onEliminar}
+        testID="receta-eliminar-btn"
+        role="button"
+        aria-label={t('conversion.eliminarAriaLabel')}
+      >
+        <Icon name="trash-2" size={20} color={colors.red} />
+      </TouchableOpacity>
+    </>
+  );
 }
 
 function RecetaRow(props: {
@@ -34,24 +63,19 @@ function RecetaRow(props: {
       padding={12}
       gap={12}
       borderBottomWidth={1}
-      borderBottomColor="$borderColor"
+      borderBottomColor={colors.black}
       testID="receta-row"
     >
       <View flex={1} gap={4}>
-        <Text fontWeight="700" fontSize={15} color="$color">
+        <Text fontWeight="700" fontSize={fontSizes.lg} color={colors.black}>
           {mp?.nombre ?? '—'} → {prod?.nombre ?? '—'}
         </Text>
-        <Text fontSize={13} color="$colorSubtle">
+        <Text fontSize={fontSizes.sm} color={colors.gray600}>
           {props.receta.cantidadOrigen} {mp?.unidad ?? ''} → {props.receta.cantidadResultante}{' '}
           {prod?.unidad ?? ''}
         </Text>
       </View>
-      <TouchableOpacity onPress={props.onConvertir} testID="receta-convertir-btn">
-        <Icon name="refresh-cw" size={20} color={colors.blue} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={props.onEliminar} testID="receta-eliminar-btn">
-        <Icon name="trash-2" size={20} color={colors.red} />
-      </TouchableOpacity>
+      <RecetaRowActions onConvertir={props.onConvertir} onEliminar={props.onEliminar} />
     </View>
   );
 }

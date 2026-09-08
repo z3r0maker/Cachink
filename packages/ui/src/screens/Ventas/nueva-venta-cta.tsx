@@ -17,7 +17,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Icon } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface NuevaVentaCtaProps {
   readonly label: string;
@@ -42,7 +42,7 @@ export function NuevaVentaCta(props: NuevaVentaCtaProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         textAlign="center"
       >

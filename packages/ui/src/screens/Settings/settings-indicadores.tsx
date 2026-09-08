@@ -12,7 +12,7 @@ import { Text, View } from '@tamagui/core';
 import type { HealthThresholds } from '@cachink/domain';
 import { DEFAULT_HEALTH_THRESHOLDS } from '@cachink/domain';
 import { Btn, Card, SectionTitle } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { useHealthThresholds, useUpdateHealthThresholds } from '../../hooks/use-health-thresholds';
 
 export interface SettingsIndicadoresProps {
@@ -56,7 +56,7 @@ function MetricLabel({ label }: { label: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={15}
+      fontSize={fontSizes.lg}
       color={colors.black}
     >
       {label}
@@ -142,7 +142,7 @@ export function SettingsIndicadores(props: SettingsIndicadoresProps): ReactEleme
       </Btn>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         textAlign="center"
       >
@@ -166,7 +166,7 @@ function ThresholdValueBox(props: { value: string; testID: string }): ReactEleme
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
         textAlign="center"
         testID={props.testID}
@@ -189,7 +189,7 @@ function ThresholdRow(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         flex={1}
       >
@@ -197,7 +197,7 @@ function ThresholdRow(props: {
       </Text>
       <View flexDirection="row" alignItems="center" gap={4}>
         <ThresholdValueBox value={props.value} testID={props.testID} />
-        <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
           {props.suffix}
         </Text>
       </View>

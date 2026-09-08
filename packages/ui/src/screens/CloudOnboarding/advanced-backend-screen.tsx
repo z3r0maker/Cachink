@@ -16,7 +16,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle, Tag } from '../../components/index';
 import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { CloudBackendConfig } from '../../sync/cloud-bridge';
 import { useAdvancedSave, useAdvancedState, type AdvancedState } from './advanced-backend-state';
 
@@ -146,7 +146,7 @@ export function AdvancedBackendScreen(props: AdvancedBackendScreenProps): ReactE
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
       >
         {t('advancedBackend.warning')}

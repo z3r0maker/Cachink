@@ -19,7 +19,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 
 export interface TabItemProps {
@@ -54,7 +54,7 @@ function Badge({ count }: { count: number }): ReactElement {
     <View
       testID="tab-item-badge"
       backgroundColor={colors.red}
-      borderRadius={9}
+      borderRadius={shapeRadii.pill}
       width={18}
       height={18}
       alignItems="center"
@@ -67,7 +67,7 @@ function Badge({ count }: { count: number }): ReactElement {
         color={colors.white}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={10}
+        fontSize={fontSizes.xs}
       >
         {count}
       </Text>
@@ -82,7 +82,7 @@ function Label({ text, active }: { text: string; active: boolean }): ReactElemen
       color={active ? colors.black : colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={10}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       style={{ textTransform: 'uppercase' }}
       numberOfLines={1}
@@ -137,7 +137,11 @@ export function TabItem(props: TabItemProps): ReactElement {
            * direct text-node children on both platforms. Consumers
            * normally pass an `<Icon>` element which renders unwrapped.
            */}
-          {typeof props.icon === 'string' ? <Text fontSize={22}>{props.icon}</Text> : props.icon}
+          {typeof props.icon === 'string' ? (
+            <Text fontSize={fontSizes.xl2}>{props.icon}</Text>
+          ) : (
+            props.icon
+          )}
         </View>
       )}
       <Label text={props.label} active={props.active} />

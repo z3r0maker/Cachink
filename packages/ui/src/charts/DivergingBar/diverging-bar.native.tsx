@@ -11,7 +11,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import { formatChartLabel } from '../chart-tokens';
 import type { DivergingItem, DivergingBarProps } from './diverging-types';
 
@@ -35,7 +35,12 @@ function BarFill(p: { item: DivergingItem; maxAbsValue: number }): ReactElement 
   const barColor = p.item.value >= 0 ? colors.green : colors.red;
   return (
     <View flex={1} height={BAR_HEIGHT} justifyContent="center">
-      <View height={BAR_HEIGHT} width={barWidth} backgroundColor={barColor} borderRadius={4} />
+      <View
+        height={BAR_HEIGHT}
+        width={barWidth}
+        backgroundColor={barColor}
+        borderRadius={shapeRadii.markLg}
+      />
     </View>
   );
 }
@@ -45,11 +50,26 @@ function BarRow(props: { item: DivergingItem; maxAbsValue: number }): ReactEleme
   const isPositive = item.value >= 0;
   return (
     <View flexDirection="row" alignItems="center" gap={ROW_GAP} paddingVertical={4}>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={11} color={colors.gray600} width={LABEL_WIDTH} numberOfLines={1}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+        width={LABEL_WIDTH}
+        numberOfLines={1}
+      >
         {item.label}
       </Text>
       <BarFill item={item} maxAbsValue={maxAbsValue} />
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} fontSize={11} color={isPositive ? colors.green : colors.red} width={VALUE_WIDTH} textAlign="right" numberOfLines={1}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.bold}
+        fontSize={fontSizes.xs}
+        color={isPositive ? colors.greenText : colors.redText}
+        width={VALUE_WIDTH}
+        textAlign="right"
+        numberOfLines={1}
+      >
         {formatChartLabel(item.value)}
       </Text>
     </View>

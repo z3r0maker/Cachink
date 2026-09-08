@@ -11,7 +11,7 @@ import type { Money } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 
 export interface TotalBarProps {
@@ -29,7 +29,7 @@ function CorteLeft(props: { onCorteOpen: () => void }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
       >
         {t('corteDeDia.cardTitle')}
@@ -38,7 +38,7 @@ function CorteLeft(props: { onCorteOpen: () => void }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.ink}
         >
           {t('corteDeDia.cardBody')}
@@ -65,7 +65,7 @@ function NormalLeft(props: { ventaCount: number }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={colors.black}
         letterSpacing={typography.letterSpacing.wide}
         textTransform="uppercase"
@@ -75,7 +75,7 @@ function NormalLeft(props: { ventaCount: number }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {props.ventaCount} venta{props.ventaCount !== 1 ? 's' : ''}
@@ -102,7 +102,7 @@ export function TotalBar(props: TotalBarProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={20}
+          fontSize={fontSizes.xl2}
           color={colors.black}
           letterSpacing={typography.letterSpacing.tight}
         >

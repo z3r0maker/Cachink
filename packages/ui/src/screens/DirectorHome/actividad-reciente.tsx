@@ -17,7 +17,7 @@ import { formatMoney } from '@cachink/domain';
 import { Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useActividadReciente, type ActividadEntry } from '../../hooks/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { todayIso } from './hoy-kpi-strip';
 
 export interface ActividadRecienteProps {
@@ -50,8 +50,8 @@ function EntryCircle({ kind }: { kind: EntryKind }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={18}
-        color={isVenta ? colors.green : colors.red}
+        fontSize={fontSizes.xl}
+        color={isVenta ? colors.greenText : colors.redText}
       >
         {CIRCLE_SYMBOLS[kind]}
       </Text>
@@ -77,7 +77,7 @@ function RowCenter({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
       >
         {titulo}
@@ -97,7 +97,7 @@ function RowBody(props: RowBodyProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={props.amountColor}
       >
         {props.amountText}

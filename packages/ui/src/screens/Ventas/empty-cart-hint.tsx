@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../../components/Icon/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface EmptyCartHintProps {
   /** Custom hint text — defaults to ventas hint. */
@@ -27,12 +27,12 @@ export function EmptyCartHint(props: EmptyCartHintProps): ReactElement {
       paddingVertical={32}
       gap={8}
     >
-      <Icon name="plus" size={28} color={colors.gray400} />
+      <Icon name="plus" size={28} color={colors.textMuted} />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.gray400}
+        fontSize={fontSizes.md}
+        color={colors.textMuted}
         textAlign="center"
       >
         {hint}

@@ -13,7 +13,7 @@ import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { ProductColor } from '@cachink/domain';
 import { PRODUCT_COLOR_OPTIONS } from '../../product-colors';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ColorSwatchPickerProps {
   readonly label: string;
@@ -59,7 +59,7 @@ export function ColorSwatchPicker(props: ColorSwatchPickerProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
       >
         {props.label}

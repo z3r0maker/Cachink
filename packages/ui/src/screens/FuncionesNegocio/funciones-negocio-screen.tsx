@@ -18,7 +18,7 @@ import {
 } from '@cachink/domain';
 import { SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { FLAG_DISPLAY_INFO, type FlagDisplayInfo } from './flag-descriptions';
 import { FeatureFlagCard } from './feature-flag-card';
 
@@ -37,14 +37,14 @@ function FuncionesHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
       >
         {t('funciones.title')}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         marginBottom={8}
       >

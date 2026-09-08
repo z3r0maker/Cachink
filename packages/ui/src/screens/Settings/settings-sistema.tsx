@@ -12,7 +12,7 @@ import { ScrollView, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { LanSection, SettingsTail } from './settings-tail';
 import type { SettingsProps } from './settings';
 
@@ -30,7 +30,7 @@ function LanguageCard(): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           letterSpacing={typography.letterSpacing.wide}
           color={colors.gray600}
           style={{ textTransform: 'uppercase' }}

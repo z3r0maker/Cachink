@@ -11,7 +11,8 @@ import type { Product, ProductIcon } from '@cachink/domain';
 import { fromPesos, toPesosString } from '@cachink/domain';
 import type { ProductPatch } from '@cachink/data';
 import { Icon } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes, typography } from '../../theme';
 import { type DetailFormState, type DetailFormErrors } from './producto-detail-fields';
 import { DetailFormBody } from './producto-detail-form-body';
 
@@ -117,7 +118,7 @@ function DetailSaveButton(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
       >
         Guardar
@@ -133,6 +134,7 @@ function DetailTopBar(props: {
   onBack: () => void;
   onSave: () => void;
 }): ReactElement {
+  const { t } = useTranslation();
   return (
     <View
       flexDirection="row"
@@ -141,13 +143,18 @@ function DetailTopBar(props: {
       paddingHorizontal={16}
       paddingVertical={12}
     >
-      <Pressable onPress={props.onBack} testID="detail-back">
+      <Pressable
+        onPress={props.onBack}
+        testID="detail-back"
+        role="button"
+        aria-label={t('productos.backAriaLabel')}
+      >
         <Icon name="chevron-left" size={24} color={colors.black} />
       </Pressable>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.black}
         numberOfLines={1}
         flex={1}

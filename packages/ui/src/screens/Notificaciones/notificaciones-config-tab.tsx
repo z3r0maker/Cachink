@@ -14,11 +14,8 @@ import { isSourceLocked, type NotificationPreferences } from '@cachink/domain';
 import type { FeatureFlags } from '@cachink/domain';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
-import {
-  NOTIFICATION_CATEGORIES,
-  NOTIFICATION_SOURCE_INFO,
-} from './notification-source-info';
+import { colors, fontSizes, typography } from '../../theme';
+import { NOTIFICATION_CATEGORIES, NOTIFICATION_SOURCE_INFO } from './notification-source-info';
 import { NotificationToggleCard } from './notification-toggle-card';
 import { FLAG_DISPLAY_INFO } from '../FuncionesNegocio/flag-descriptions';
 
@@ -34,7 +31,12 @@ function featureLabelForFlag(flagKey: string, t: (k: never) => string): string {
   return info ? t(info.labelKey as never) : flagKey;
 }
 
-function CategoryGroup({ cat, prefs, flags, onToggle }: {
+function CategoryGroup({
+  cat,
+  prefs,
+  flags,
+  onToggle,
+}: {
   cat: (typeof NOTIFICATION_CATEGORIES)[number];
   prefs: NotificationPreferences;
   flags: FeatureFlags;
@@ -48,11 +50,12 @@ function CategoryGroup({ cat, prefs, flags, onToggle }: {
       <SectionTitle title={t(cat.labelKey as never)} />
       {items.map((info) => {
         const locked = isSourceLocked(info.source, flags);
-        const lockedHint = locked && info.featureFlag
-          ? t('notificaciones.requiereHint' as never, {
-              feature: featureLabelForFlag(info.featureFlag, t),
-            })
-          : null;
+        const lockedHint =
+          locked && info.featureFlag
+            ? t('notificaciones.requiereHint' as never, {
+                feature: featureLabelForFlag(info.featureFlag, t),
+              })
+            : null;
         return (
           <NotificationToggleCard
             key={info.source}
@@ -73,7 +76,7 @@ export function NotificacionesConfigTab(props: NotificacionesConfigTabProps): Re
   const { t } = useTranslation();
   return (
     <View testID={testID ?? 'notificaciones-config-tab'} gap={16}>
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
         {t('notificaciones.configSubtitle')}
       </Text>
       {NOTIFICATION_CATEGORIES.map((cat) => (

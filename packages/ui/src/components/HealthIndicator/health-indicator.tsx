@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 
 export type HealthTone = 'healthy' | 'warning' | 'critical';
 
@@ -29,22 +29,20 @@ const TONE_COLOR: Record<HealthTone, string> = {
   critical: colors.red,
 };
 
-function VerdictRow({ tone, verdict }: {
-  tone: HealthTone; verdict: string;
-}): ReactElement {
+function VerdictRow({ tone, verdict }: { tone: HealthTone; verdict: string }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={6}>
       <View
         testID="health-indicator-dot"
         width={8}
         height={8}
-        borderRadius={4}
+        borderRadius={shapeRadii.markLg}
         backgroundColor={TONE_COLOR[tone]}
       />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.ink}
         flex={1}
       >
@@ -54,8 +52,12 @@ function VerdictRow({ tone, verdict }: {
   );
 }
 
-function ThresholdRow({ label, onOpenSettings }: {
-  label: string; onOpenSettings?: () => void;
+function ThresholdRow({
+  label,
+  onOpenSettings,
+}: {
+  label: string;
+  onOpenSettings?: () => void;
 }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={4} paddingLeft={14}>
@@ -63,8 +65,8 @@ function ThresholdRow({ label, onOpenSettings }: {
         testID="health-indicator-threshold"
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.regular}
-        fontSize={11}
-        color={colors.gray400}
+        fontSize={fontSizes.xs}
+        color={colors.textMuted}
       >
         {label}
       </Text>
@@ -73,8 +75,8 @@ function ThresholdRow({ label, onOpenSettings }: {
           testID="health-indicator-settings-link"
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={11}
-          color={colors.blue}
+          fontSize={fontSizes.xs}
+          color={colors.blueText}
           onPress={onOpenSettings}
           cursor="pointer"
         >

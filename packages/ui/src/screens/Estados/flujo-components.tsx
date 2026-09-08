@@ -6,7 +6,7 @@ import { formatMoney, type FlujoDeEfectivo, type Money, ZERO } from '@cachink/do
 import { Card, DeltaIndicator, HealthIndicator, SectionTitle } from '../../components/index';
 import { Icon } from '../../components/Icon/index';
 import type { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { moneyToNumber } from '../../charts/chart-tokens';
 
 export type T = ReturnType<typeof useTranslation>['t'];
@@ -24,7 +24,7 @@ export function SubRow(props: { label: string; value: Money; testID: string }): 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {props.label}
@@ -32,7 +32,7 @@ export function SubRow(props: { label: string; value: Money; testID: string }): 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
       >
         {formatMoney(props.value)}
@@ -55,7 +55,7 @@ function HeaderLabel({ label, open }: { label: string; open: boolean }): ReactEl
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
       >
         {label}
@@ -77,8 +77,8 @@ function CollapsibleHeader(p: CollapsibleHeaderProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={18}
-        color={p.total >= 0n ? colors.black : colors.red}
+        fontSize={fontSizes.xl}
+        color={p.total >= 0n ? colors.black : colors.redText}
       >
         {formatMoney(p.total)}
       </Text>
@@ -124,7 +124,7 @@ export function ResumenCard({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
         marginTop={4}
         marginBottom={8}
@@ -151,7 +151,7 @@ export function EmptyCard(props: { title: string; body: string }): ReactElement 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
       >
         {props.title}
@@ -159,7 +159,7 @@ export function EmptyCard(props: { title: string; body: string }): ReactElement 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginTop={4}
       >

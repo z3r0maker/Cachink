@@ -9,7 +9,7 @@ import { Text, View } from '@tamagui/core';
 import { REGIMENES_FISCALES, type IsrDefaults, type RegimenFiscal } from '@cachink/domain';
 import { Btn, Card, Input, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { useIsrDefaults, useUpdateIsrDefaults } from '../../hooks/use-isr-defaults';
 
 /** Convert a decimal rate (0–1) to a display-friendly percentage string. */
@@ -44,7 +44,7 @@ function IsrRateRow({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
         flex={1}
       >
@@ -52,7 +52,7 @@ function IsrRateRow({
       </Text>
       <View flexDirection="row" alignItems="center" gap={4} width={100}>
         <Input type="decimal" value={value} onChange={onChange} testID={`isr-default-${regimen}`} />
-        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
           %
         </Text>
       </View>
@@ -135,7 +135,12 @@ export function IsrDefaultsCard(): ReactElement | null {
     <Card testID="isr-defaults-card" padding="md" fullWidth>
       <SectionTitle title={t('settings.isrDefaultsTitle')} />
       <IsrDefaultsForm data={data} onSave={mutation.mutate} saving={mutation.isPending} />
-      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600} marginTop={8}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+        marginTop={8}
+      >
         ℹ️ {t('settings.isrDefaultsHint')}
       </Text>
     </Card>

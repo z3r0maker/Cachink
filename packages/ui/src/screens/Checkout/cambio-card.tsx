@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { formatMoney, type Money } from '@cachink/domain';
 import { Icon } from '../../components/Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface CambioCardProps {
   readonly cambio: Money;
@@ -19,18 +19,14 @@ export interface CambioCardProps {
 
 function CambioRow(props: { cambio: Money }): ReactElement {
   return (
-    <View
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="space-between"
-    >
+    <View flexDirection="row" alignItems="center" justifyContent="space-between">
       <View flexDirection="row" alignItems="center" gap={8}>
-        <Icon name="hand-coins" size={22} color={colors.green} />
+        <Icon name="hand-coins" size={22} color={colors.greenText} />
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold.toString()}
-          fontSize={16}
-          color={colors.green}
+          fontSize={fontSizes.lg}
+          color={colors.greenText}
         >
           Cambio
         </Text>
@@ -38,8 +34,8 @@ function CambioRow(props: { cambio: Money }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={22}
-        color={colors.green}
+        fontSize={fontSizes.xl2}
+        color={colors.greenText}
       >
         {formatMoney(props.cambio)}
       </Text>
@@ -78,12 +74,12 @@ function CashWarning(): ReactElement {
       paddingHorizontal={12}
     >
       <View flexDirection="row" alignItems="center" gap={8}>
-        <Icon name="circle-alert" size={16} color={colors.warning} />
+        <Icon name="circle-alert" size={16} color={colors.warningText} />
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold.toString()}
-          fontSize={13}
-          color={colors.warning}
+          fontSize={fontSizes.sm}
+          color={colors.warningText}
         >
           Tu caja podría no tener suficiente cambio
         </Text>

@@ -18,7 +18,7 @@ import { Component, type ErrorInfo, type ReactElement, type ReactNode } from 're
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle } from '../components/index';
 import { i18n } from '../i18n/index';
-import { colors, typography } from '../theme';
+import { colors, fontSizes, typography } from '../theme';
 import { getLogStoreRef } from '../observability/log-store-ref';
 
 export interface AppErrorBoundaryProps {
@@ -58,18 +58,20 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
     // Phase 7: Write render crash to local LogStore
     const logStore = getLogStoreRef();
     if (logStore) {
-      void logStore.writeError({
-        id: '',
-        timestamp: new Date().toISOString(),
-        source: 'ui',
-        errorName: error.name,
-        errorMessage: error.message,
-        errorStack: error.stack,
-        userId: null,
-        deviceId: '',
-        businessId: null,
-        context: { componentStack: info.componentStack ?? undefined },
-      }).catch(() => {});
+      void logStore
+        .writeError({
+          id: '',
+          timestamp: new Date().toISOString(),
+          source: 'ui',
+          errorName: error.name,
+          errorMessage: error.message,
+          errorStack: error.stack,
+          userId: null,
+          deviceId: '',
+          businessId: null,
+          context: { componentStack: info.componentStack ?? undefined },
+        })
+        .catch(() => {});
     }
   }
 
@@ -122,7 +124,7 @@ function FallbackCard(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         marginVertical={10}
       >

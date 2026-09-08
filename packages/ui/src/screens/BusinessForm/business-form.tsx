@@ -32,7 +32,7 @@ import {
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import {
   parseForm,
   useBusinessFormState,
@@ -136,7 +136,7 @@ function FormHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
       >
         {t('wizard.businessForm.subtitle')}

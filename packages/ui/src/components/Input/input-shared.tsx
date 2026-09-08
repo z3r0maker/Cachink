@@ -33,7 +33,7 @@
  */
 import type { CSSProperties, ReactElement, RefObject } from 'react';
 import { Text } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 /**
  * The full set of input variants supported by the `<Input>` primitive.
@@ -73,7 +73,7 @@ export const FIELD_STYLE: CSSProperties = {
   paddingRight: 14,
   paddingTop: 11,
   paddingBottom: 11,
-  fontSize: 15,
+  fontSize: fontSizes.lg,
   fontWeight: typography.weights.medium,
   color: colors.ink,
   backgroundColor: colors.white,
@@ -226,13 +226,13 @@ export function InputLabel({ text, required }: { text: string; required?: boolea
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       marginBottom={LABEL_MARGIN_BOTTOM}
       style={{ textTransform: 'uppercase' }}
     >
       {text}
-      {required === true && <Text color={colors.red}> *</Text>}
+      {required === true && <Text color={colors.redText}> *</Text>}
     </Text>
   );
 }
@@ -240,10 +240,10 @@ export function InputLabel({ text, required }: { text: string; required?: boolea
 export function InputNote({ text }: { text: string }): ReactElement {
   return (
     <Text
-      color={colors.gray400}
+      color={colors.textMuted}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={11}
+      fontSize={fontSizes.xs}
       marginTop={NOTE_MARGIN_TOP}
     >
       {text}
@@ -255,10 +255,10 @@ export function InputNote({ text }: { text: string }): ReactElement {
 export function InputError({ text }: { text: string }): ReactElement {
   return (
     <Text
-      color={colors.red}
+      color={colors.redText}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={11}
+      fontSize={fontSizes.xs}
       marginTop={NOTE_MARGIN_TOP}
     >
       {text}

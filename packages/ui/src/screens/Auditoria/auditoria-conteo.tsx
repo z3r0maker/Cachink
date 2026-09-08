@@ -11,7 +11,7 @@ import type { AuditoriaInventario, AuditoriaLinea } from '@cachink/domain';
 import { ConfirmDialog } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useActualizarAuditoria } from '../../hooks/use-actualizar-auditoria';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { ConteoLineaCard } from './conteo-linea-card';
 import { ConteoActionBar } from './conteo-action-bar';
 
@@ -127,7 +127,7 @@ export function AuditoriaConteo(props: AuditoriaConteoProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         testID="conteo-counter"
       >

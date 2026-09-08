@@ -15,7 +15,7 @@ import { useSalesRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId } from '../../app-config/use-app-config';
 import { SaleCancelCard } from './sale-cancel-card';
 import { CancellationFlow } from './cancellation-flow';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CancelacionesScreenProps {
   readonly testID?: string;
@@ -38,8 +38,8 @@ function SalesList(props: { sales: readonly Sale[]; onCancel: (s: Sale) => void 
     return (
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
-        color={colors.gray400}
+        fontSize={fontSizes.md}
+        color={colors.textMuted}
         textAlign="center"
         paddingVertical={40}
       >
@@ -73,14 +73,14 @@ export function CancelacionesScreen(_props: CancelacionesScreenProps): ReactElem
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black.toString()}
-          fontSize={28}
+          fontSize={fontSizes.xl4}
           color={colors.black}
         >
           Cancelaciones
         </Text>
         <Text
           fontFamily={typography.fontFamily}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.gray600}
         >{`Hoy · ${sales.length} ventas`}</Text>
         <SalesList sales={sales} onCancel={setCancelTarget} />

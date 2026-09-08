@@ -8,7 +8,7 @@ import { Text, View } from '@tamagui/core';
 import type { AuditoriaInventario } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface AuditoriaHistorialProps {
   readonly auditorias: readonly AuditoriaInventario[];
@@ -24,7 +24,7 @@ function AuditoriaRow({ audit }: { audit: AuditoriaInventario }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={14}
+            fontSize={fontSizes.md}
             color={colors.black}
           >
             {audit.fecha}
@@ -32,7 +32,7 @@ function AuditoriaRow({ audit }: { audit: AuditoriaInventario }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.regular}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             color={colors.gray600}
           >
             {audit.totalProductos} productos ·{' '}

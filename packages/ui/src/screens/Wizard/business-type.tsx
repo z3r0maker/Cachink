@@ -11,7 +11,7 @@ import { Text, View } from '@tamagui/core';
 import type { AttrDef, FeatureFlags, TipoNegocio } from '@cachink/domain';
 import { WizardCard } from './wizard-card';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface BusinessTypeChoice {
   readonly tipoNegocio: TipoNegocio;
@@ -107,7 +107,7 @@ function BusinessTypeHeader({ t }: { t: ReturnType<typeof useTranslation>['t'] }
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={24}
+        fontSize={fontSizes.xl3}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
         textAlign="center"
@@ -117,7 +117,7 @@ function BusinessTypeHeader({ t }: { t: ReturnType<typeof useTranslation>['t'] }
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
       >

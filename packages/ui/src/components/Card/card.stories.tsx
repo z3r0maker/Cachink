@@ -8,7 +8,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { Card } from './card';
 
 const meta: Meta<typeof Card> = {
@@ -35,7 +35,7 @@ export const WhiteDefault: Story = {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
         >
           Venta registrada · $450.00
         </Text>
@@ -53,7 +53,7 @@ export const YellowHero: Story = {
           color={colors.gray600}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={11}
+          fontSize={fontSizes.xs}
           letterSpacing={typography.letterSpacing.wide}
           style={{ textTransform: 'uppercase' }}
         >
@@ -63,7 +63,7 @@ export const YellowHero: Story = {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={36}
+          fontSize={fontSizes.xl6}
           letterSpacing={typography.letterSpacing.tightest}
           marginTop={6}
         >
@@ -83,7 +83,7 @@ export const BlackDirector: Story = {
           color={colors.white}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={11}
+          fontSize={fontSizes.xs}
           letterSpacing={typography.letterSpacing.wide}
           style={{ textTransform: 'uppercase' }}
         >
@@ -93,7 +93,7 @@ export const BlackDirector: Story = {
           color={colors.yellow}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={32}
+          fontSize={fontSizes.xl5}
           letterSpacing={typography.letterSpacing.tightest}
           marginTop={6}
         >
@@ -117,7 +117,7 @@ export const Tappable: Story = {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
         >
           Toca para abrir el detalle de la venta
         </Text>
@@ -135,7 +135,7 @@ export const AllVariants: Story = {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
         >
           White surface
         </Text>
@@ -145,7 +145,7 @@ export const AllVariants: Story = {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
         >
           Yellow surface
         </Text>
@@ -155,7 +155,7 @@ export const AllVariants: Story = {
           color={colors.white}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
         >
           Black surface
         </Text>

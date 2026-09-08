@@ -4,7 +4,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { useTranslation } from '@cachink/ui';
+import { fontSizes, useTranslation } from '@cachink/ui';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
 
 interface DesktopPlaceholderRouteProps {
@@ -13,9 +13,7 @@ interface DesktopPlaceholderRouteProps {
   readonly testID?: string;
 }
 
-export function DesktopPlaceholderRoute(
-  props: DesktopPlaceholderRouteProps,
-): ReactElement {
+export function DesktopPlaceholderRoute(props: DesktopPlaceholderRouteProps): ReactElement {
   const { t } = useTranslation();
   return (
     <DesktopAppShellWrapper activeTabKey={props.activeTabKey}>
@@ -27,10 +25,10 @@ export function DesktopPlaceholderRoute(
         gap={16}
         testID={props.testID ?? 'desktop-placeholder-route'}
       >
-        <Text fontWeight="900" fontSize={28} color="$color">
+        <Text fontWeight="900" fontSize={fontSizes.xl4} color="$color">
           {props.featureLabel}
         </Text>
-        <Text fontSize={16} color="$colorSubtle">
+        <Text fontSize={fontSizes.lg} color="$colorSubtle">
           {t('placeholder.subtitle')}
         </Text>
       </View>

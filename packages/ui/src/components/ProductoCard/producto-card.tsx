@@ -17,7 +17,7 @@ import { formatMoney, resolveProductIcon } from '@cachink/domain';
 import type { AttrDef, Product, ProductIcon } from '@cachink/domain';
 import { Card } from '../Card/card';
 import { Icon } from '../Icon/icon';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { PRODUCT_BG_COLORS } from '../../product-colors';
 import { QuantityBadge, type BadgeVariant } from './quantity-badge';
 import { StockBadge, AttrChips } from './stock-badge';
@@ -52,7 +52,7 @@ function CardHeader(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
         numberOfLines={2}
         flex={1}
@@ -62,8 +62,8 @@ function CardHeader(props: {
       {props.mode === 'manage' && (
         <Text
           fontFamily={typography.fontFamily}
-          fontSize={16}
-          color={colors.gray400}
+          fontSize={fontSizes.lg}
+          color={colors.textMuted}
           onPress={(e) => {
             e?.stopPropagation?.();
             props.onLongPress?.(props.producto);
@@ -90,7 +90,7 @@ function CardBodyDetails({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
         numberOfLines={1}
       >

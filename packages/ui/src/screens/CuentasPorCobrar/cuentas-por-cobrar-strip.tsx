@@ -14,7 +14,7 @@ import type { Client, Money, Sale } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CuentaPorCobrarRow {
   readonly cliente: Client;
@@ -35,7 +35,7 @@ function Row({ row }: { row: CuentaPorCobrarRow }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={16}
+            fontSize={fontSizes.lg}
             color={colors.black}
           >
             {row.cliente.nombre}
@@ -43,7 +43,7 @@ function Row({ row }: { row: CuentaPorCobrarRow }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             color={colors.gray600}
             marginTop={4}
           >
@@ -54,7 +54,7 @@ function Row({ row }: { row: CuentaPorCobrarRow }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.black}
-            fontSize={20}
+            fontSize={fontSizes.xl2}
             color={colors.black}
           >
             {formatMoney(row.total)}

@@ -16,7 +16,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ConsentModalProps {
   readonly open: boolean;
@@ -56,7 +56,7 @@ export function ConsentModal(props: ConsentModalProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.gray600}
         >
           {t('settings.crashReportingBody')}

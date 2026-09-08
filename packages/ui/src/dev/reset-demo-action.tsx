@@ -13,7 +13,7 @@ import { Btn, Card, ConfirmDialog, Modal, PinCodeInput, SectionTitle } from '../
 import { useRepositories } from '../app/repository-provider';
 import { useUserId } from '../app-config/use-app-config';
 import { useTranslation } from '../i18n/index';
-import { colors, typography } from '../theme';
+import { colors, fontSizes, typography } from '../theme';
 
 type ResetStep = 'idle' | 'pin' | 'confirm' | 'pending' | 'error';
 
@@ -99,8 +99,8 @@ function ResetDemoCard({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
-        color={step === 'error' ? colors.red : colors.gray600}
+        fontSize={fontSizes.sm}
+        color={step === 'error' ? colors.redText : colors.gray600}
         marginBottom={10}
       >
         {step === 'error' ? t('dev.resetError') : t('dev.resetHint')}
@@ -161,7 +161,7 @@ function PinGateContent(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
         textAlign="center"
       >
@@ -175,7 +175,7 @@ function PinGateContent(props: {
         testID="reset-pin-input"
       />
       {props.error && (
-        <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.red}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.redText}>
           {props.error}
         </Text>
       )}

@@ -9,7 +9,7 @@ import type { AuditoriaLinea } from '@cachink/domain';
 import { Card } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ConteoLineaCardProps {
   readonly linea: AuditoriaLinea;
@@ -20,7 +20,7 @@ function StockRow({ linea, onChange }: ConteoLineaCardProps): ReactElement {
   const { t } = useTranslation();
   return (
     <View flexDirection="row" gap={12} alignItems="center">
-      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
         {t('auditoria.stockSistema')}: {linea.stockSistema}
       </Text>
       <View flex={1}>
@@ -42,8 +42,11 @@ export function ConteoLineaCard(props: ConteoLineaCardProps): ReactElement {
     <Card padding="sm" fullWidth testID={`conteo-linea-${linea.productoId}`}>
       <View gap={4}>
         <Text
-          fontFamily={typography.fontFamily} fontWeight={typography.weights.bold}
-          fontSize={14} color={colors.black} numberOfLines={1}
+          fontFamily={typography.fontFamily}
+          fontWeight={typography.weights.bold}
+          fontSize={fontSizes.md}
+          color={colors.black}
+          numberOfLines={1}
         >
           {linea.productoNombre}
         </Text>

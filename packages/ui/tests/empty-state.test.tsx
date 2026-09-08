@@ -52,8 +52,10 @@ describe('EmptyState', () => {
       <EmptyState title="Sin ventas todavía" description="Registra tu primera venta del día." />,
     );
     const description = screen.getByText('Registra tu primera venta del día.');
-    // gray400 (#9E9E9A) → rgb(158, 158, 154).
-    expect(getComputedStyle(description).color.toLowerCase()).toContain('rgb(158, 158, 154)');
+    // textMuted (#6F6F6B) → rgb(111, 111, 107). Was gray400 (#9E9E9A) until the
+    // 2026-09 audit: that value is 2.51:1 on the app background and fails WCAG
+    // AA. See `tests/theme.test.ts` for the ratios this token has to hold.
+    expect(getComputedStyle(description).color.toLowerCase()).toContain('rgb(111, 111, 107)');
   });
 
   it('does not render a description node when `description` is omitted', () => {

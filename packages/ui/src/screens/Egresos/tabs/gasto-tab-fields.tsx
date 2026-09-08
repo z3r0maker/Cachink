@@ -10,7 +10,7 @@ import type { ExpenseCategory } from '@cachink/domain';
 import { Input } from '../../../components/index';
 import { MoneyField, TextField } from '../../../components/fields/index';
 import type { useTranslation } from '../../../i18n/index';
-import { colors, typography } from '../../../theme';
+import { colors, fontSizes, typography } from '../../../theme';
 import { GASTO_CATEGORIAS, type GastoFormErrors, type GastoFormState } from './gasto-tab-form';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -28,7 +28,9 @@ export interface GastoFieldsProps {
   readonly t: T;
 }
 
-function ProveedorField(props: GastoFieldsProps & { proveedorRef?: React.RefObject<unknown> }): ReactElement {
+function ProveedorField(
+  props: GastoFieldsProps & { proveedorRef?: React.RefObject<unknown> },
+): ReactElement {
   const { state, update, onSubmitEditing, t } = props;
   return (
     <TextField
@@ -133,7 +135,7 @@ export function RecurrenteToggle(props: RecurrenteToggleProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase', userSelect: 'none' }}

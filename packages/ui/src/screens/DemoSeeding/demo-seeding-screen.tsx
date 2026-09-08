@@ -12,7 +12,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Spinner } from '../../components/Spinner/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface DemoSeedingScreenProps {
   readonly testID?: string;
@@ -33,7 +33,7 @@ export function DemoSeedingScreen(props: DemoSeedingScreenProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.ink}
         textAlign="center"
       >
@@ -42,7 +42,7 @@ export function DemoSeedingScreen(props: DemoSeedingScreenProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
       >

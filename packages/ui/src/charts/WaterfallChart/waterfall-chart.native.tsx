@@ -11,7 +11,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import { formatChartLabel, SEMANTIC } from '../chart-tokens';
 import {
   computeBarPositions,
@@ -51,7 +51,7 @@ function ValueLabels(p: { data: readonly WaterfallItem[]; slotWidth: number }): 
           key={`val-${i}`}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={10}
+          fontSize={fontSizes.xs}
           color={valueColor(item.value)}
           textAlign="center"
           width={p.slotWidth}
@@ -73,7 +73,7 @@ function CategoryLabels(p: { data: readonly WaterfallItem[]; slotWidth: number }
           key={`lbl-${i}`}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={9}
+          fontSize={fontSizes.xs}
           color={colors.gray600}
           textAlign="center"
           width={p.slotWidth}
@@ -123,7 +123,7 @@ function WaterfallBarGroup({
         left={bar.x}
         width={bar.barWidth}
         height={bar.barH}
-        borderRadius={4}
+        borderRadius={shapeRadii.markLg}
         backgroundColor={barColor(bar.item.type, bar.item.value)}
       />
     </View>

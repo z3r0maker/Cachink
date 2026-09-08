@@ -15,7 +15,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Card, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
@@ -28,7 +28,7 @@ function BulletText({ children }: { children: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={14}
+      fontSize={fontSizes.md}
       color={colors.ink}
       marginTop={6}
     >
@@ -43,7 +43,7 @@ function BodyCard({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
       >
         {t('wizard.migrationDeferred.body')}
@@ -69,7 +69,7 @@ function BackLink({ label, onPress }: { label: string; onPress: () => void }): R
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         letterSpacing={typography.letterSpacing.wide}
       >

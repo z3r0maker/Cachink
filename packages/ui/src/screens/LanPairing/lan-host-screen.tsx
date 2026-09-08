@@ -12,7 +12,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface LanHostStartResult {
   readonly url: string;
@@ -58,7 +58,7 @@ function StartingMsg({ t }: { t: T }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={14}
+      fontSize={fontSizes.md}
       color={colors.gray600}
     >
       {t('lanPairing.hostStarting')}
@@ -71,8 +71,8 @@ function ErrorMsg({ t, error }: { t: T; error: string | null }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold}
-      fontSize={13}
-      color={colors.red}
+      fontSize={fontSizes.sm}
+      color={colors.redText}
       testID="lan-host-error"
     >
       {error ?? t('lanPairing.hostError')}
@@ -86,7 +86,7 @@ function QrCard({ t, data }: { t: T; data: LanHostStartResult }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -147,7 +147,7 @@ function DetailRow({ label, value }: { label: string; value: string }): ReactEle
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -157,7 +157,7 @@ function DetailRow({ label, value }: { label: string; value: string }): ReactEle
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
         numberOfLines={1}
         maxWidth={260}

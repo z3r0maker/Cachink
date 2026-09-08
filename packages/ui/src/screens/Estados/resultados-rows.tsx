@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { ZERO, formatMoney, type EstadoDeResultados, type Money } from '@cachink/domain';
 import { Card, HelpAccordion } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { useTranslation } from '../../i18n/index';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -23,8 +23,8 @@ interface RowProps {
 
 function valueColor(value: Money, emphasis: 'normal' | 'total'): string {
   if (emphasis !== 'total') return colors.black;
-  if (value < ZERO) return colors.red;
-  if (value > ZERO) return colors.green;
+  if (value < ZERO) return colors.redText;
+  if (value > ZERO) return colors.greenText;
   return colors.black;
 }
 
@@ -39,13 +39,18 @@ function Row(props: RowProps): ReactElement {
       alignItems="center"
       paddingVertical={8}
     >
-      <Text fontFamily={typography.fontFamily} fontWeight={weight} fontSize={14} color={colors.ink}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={weight}
+        fontSize={fontSizes.md}
+        color={colors.ink}
+      >
         {props.label}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={weight}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={valueColor(props.value, emphasis)}
       >
         {formatMoney(props.value)}
@@ -113,8 +118,8 @@ function IsrZeroHint({ estado, t }: { estado: EstadoDeResultados; t: T }): React
       testID="estado-isr-zero-hint"
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={11}
-      color={colors.gray400}
+      fontSize={fontSizes.xs}
+      color={colors.textMuted}
       paddingVertical={2}
     >
       {t('estados.isrZeroHint')}

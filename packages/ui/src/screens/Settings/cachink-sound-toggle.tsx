@@ -10,7 +10,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CachinkSoundToggleProps {
   readonly enabled: boolean;
@@ -24,14 +24,20 @@ function SoundLabel(props: { label: string; hint: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
       >
         {props.label}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.medium} fontSize={14} color={colors.gray600} marginTop={4}>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.medium}
+        fontSize={fontSizes.md}
+        color={colors.gray600}
+        marginTop={4}
+      >
         {props.hint}
       </Text>
     </View>
@@ -45,9 +51,17 @@ export function CachinkSoundToggle(props: CachinkSoundToggleProps): ReactElement
       <View flexDirection="row" justifyContent="space-between" alignItems="center" gap={12}>
         <View flexDirection="row" alignItems="center" gap={10} flex={1} paddingRight={12}>
           <Icon name="bell" size={20} color={props.enabled ? colors.black : colors.gray400} />
-          <SoundLabel label={t('settings.cachinkSoundLabel')} hint={t('settings.cachinkSoundHint')} />
+          <SoundLabel
+            label={t('settings.cachinkSoundLabel')}
+            hint={t('settings.cachinkSoundHint')}
+          />
         </View>
-        <Btn variant={props.enabled ? 'green' : 'ghost'} size="sm" onPress={() => props.onChange(!props.enabled)} testID="settings-cachink-sound-btn">
+        <Btn
+          variant={props.enabled ? 'green' : 'ghost'}
+          size="sm"
+          onPress={() => props.onChange(!props.enabled)}
+          testID="settings-cachink-sound-btn"
+        >
           {props.enabled ? t('common.yes') : t('common.no')}
         </Btn>
       </View>

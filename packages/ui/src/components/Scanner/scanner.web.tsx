@@ -89,7 +89,7 @@ function CameraSurface({
   }
   if (status === 'denied') {
     return (
-      <Text padding={12} color={colors.red}>
+      <Text padding={12} color={colors.redText}>
         {t('scanner.permissionDenied')}
       </Text>
     );

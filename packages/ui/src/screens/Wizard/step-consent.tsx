@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface StepConsentProps {
   readonly onComplete: (choice: boolean | null) => void;
@@ -51,7 +51,7 @@ export function StepConsent(props: StepConsentProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={22}
+        fontSize={fontSizes.xl2}
         color={colors.black}
         textAlign="center"
       >
@@ -60,7 +60,7 @@ export function StepConsent(props: StepConsentProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
         textAlign="center"
         maxWidth={360}

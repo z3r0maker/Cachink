@@ -11,7 +11,7 @@ import type { Expense } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface EgresoCardProps {
   readonly egreso: Expense;
@@ -38,7 +38,7 @@ export function EgresoCard(props: EgresoCardProps): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={16}
+            fontSize={fontSizes.lg}
             color={colors.black}
           >
             {props.egreso.concepto}
@@ -51,8 +51,8 @@ export function EgresoCard(props: EgresoCardProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={20}
-          color={colors.red}
+          fontSize={fontSizes.xl2}
+          color={colors.redText}
         >
           −{formatMoney(props.egreso.monto)}
         </Text>

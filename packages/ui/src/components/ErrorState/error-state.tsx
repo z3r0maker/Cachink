@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn } from '../Btn/index';
 import { Card } from '../Card/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ErrorStateProps {
   readonly title: string;
@@ -49,15 +49,15 @@ export function ErrorState(props: ErrorStateProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={18}
-          color={colors.red}
+          fontSize={fontSizes.xl}
+          color={colors.redText}
         >
           {props.title}
         </Text>
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.gray600}
           marginTop={6}
           marginBottom={showRetry ? 12 : 0}

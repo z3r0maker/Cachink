@@ -14,7 +14,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Icon } from '../Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 
 export interface ModalHeaderProps {
@@ -50,7 +50,7 @@ function EmojiBox({ emoji }: { emoji: string }): ReactElement {
       alignItems="center"
       justifyContent="center"
     >
-      <Text fontSize={22}>{emoji}</Text>
+      <Text fontSize={fontSizes.xl2}>{emoji}</Text>
     </View>
   );
 }
@@ -62,7 +62,7 @@ function Title({ text }: { text: string }): ReactElement {
       color={colors.black}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.black}
-      fontSize={20}
+      fontSize={fontSizes.xl2}
       letterSpacing={typography.letterSpacing.tight}
       // Audit 9.3 — modal titles like "¿Actualizar tasa de ISR?"
       // can exceed the modal-header width minus the close button +
@@ -85,7 +85,7 @@ function Subtitle({ text }: { text: string }): ReactElement {
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       marginTop={2}
       // Audit 9.3 — subtitles ("24 abr · 10:48") are short but the
       // header is also short. Cap to one line + ellipsis to preserve

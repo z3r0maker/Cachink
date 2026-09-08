@@ -21,7 +21,7 @@
  */
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface SectionTitleProps {
   /**
@@ -50,7 +50,7 @@ function Title({ text }: { text: string }): ReactElement {
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       // Audit 9.3 — long Spanish section labels ("ACTIVIDAD RECIENTE",
       // "CUENTAS POR COBRAR") wrap awkwardly on phone widths when the

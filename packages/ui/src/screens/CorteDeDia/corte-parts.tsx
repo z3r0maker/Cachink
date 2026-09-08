@@ -9,7 +9,7 @@ import { Text, View } from '@tamagui/core';
 import { ZERO, formatMoney, type Money } from '@cachink/domain';
 import { Card } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export type DiferenciaTone = 'neutral' | 'positive' | 'negative';
 
@@ -23,7 +23,7 @@ interface LineItemProps {
 export function LineItem(props: LineItemProps): ReactElement {
   const tone = props.tone ?? 'neutral';
   const valueColor =
-    tone === 'positive' ? colors.green : tone === 'negative' ? colors.red : colors.black;
+    tone === 'positive' ? colors.greenText : tone === 'negative' ? colors.redText : colors.black;
   return (
     <View
       testID={props.testID}
@@ -35,7 +35,7 @@ export function LineItem(props: LineItemProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase' }}
@@ -45,7 +45,7 @@ export function LineItem(props: LineItemProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={valueColor}
       >
         {props.value}

@@ -17,7 +17,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, shadows, typography } from '../../theme';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 
 export type CalloutTone = 'success' | 'warning' | 'info';
 
@@ -50,7 +50,7 @@ function CalloutText({ title, body }: { title?: string; body: string }): ReactEl
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
           letterSpacing={typography.letterSpacing.tight}
           color={colors.black}
         >
@@ -60,7 +60,7 @@ function CalloutText({ title, body }: { title?: string; body: string }): ReactEl
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.ink}
       >
         {body}
@@ -81,7 +81,7 @@ function CalloutIcon({ icon, accent }: { icon: string; accent: string }): ReactE
       alignItems="center"
       justifyContent="center"
     >
-      <Text fontSize={18}>{icon}</Text>
+      <Text fontSize={fontSizes.xl}>{icon}</Text>
     </View>
   );
 }

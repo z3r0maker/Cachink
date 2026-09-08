@@ -13,7 +13,7 @@ import { Text, View } from '@tamagui/core';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export function countBajoStock(items: readonly ProductoConStock[]): number {
   return items.reduce((acc, row) => (row.stock <= row.producto.umbralStockBajo ? acc + 1 : acc), 0);
@@ -36,15 +36,15 @@ export function StockBajoBanner(props: StockBajoBannerProps): ReactElement | nul
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.black}
-            fontSize={18}
-            color={colors.red}
+            fontSize={fontSizes.xl}
+            color={colors.redText}
           >
             {t('inventario.bajoStockTitle')} · {count}
           </Text>
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={13}
+            fontSize={fontSizes.sm}
             color={colors.gray600}
             marginTop={4}
           >

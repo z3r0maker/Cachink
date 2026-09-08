@@ -12,7 +12,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Spinner } from '../components/Spinner/index';
-import { colors, typography } from '../theme';
+import { colors, fontSizes, typography } from '../theme';
 
 export interface AppLoadingSkeletonProps {
   readonly testID?: string;
@@ -33,7 +33,7 @@ export function AppLoadingSkeleton(props: AppLoadingSkeletonProps): ReactElement
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
         textAlign="center"
       >

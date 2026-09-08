@@ -17,7 +17,7 @@ import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, Icon, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { IconName } from '../../components/Icon/index';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -80,7 +80,7 @@ function DiscoveryActiveTag({ t }: { t: T }): ReactElement {
       paddingHorizontal={8}
       paddingVertical={2}
     >
-      <Text fontSize={11} color={colors.white}>
+      <Text fontSize={fontSizes.xs} color={colors.white}>
         {t('discovery.active')}
       </Text>
     </View>
@@ -95,7 +95,7 @@ function ComingSoonTag({ t }: { t: T }): ReactElement {
       paddingHorizontal={8}
       paddingVertical={2}
     >
-      <Text fontSize={11} color={colors.gray600}>
+      <Text fontSize={fontSizes.xs} color={colors.gray600}>
         {t('discovery.comingSoon')}
       </Text>
     </View>
@@ -118,12 +118,17 @@ function DiscoveryCardContent({
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={16}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {t(card.nameKey as never)}
         </Text>
-        <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.gray600} marginTop={2}>
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={fontSizes.sm}
+          color={colors.gray600}
+          marginTop={2}
+        >
           {t(card.descKey as never)}
         </Text>
       </View>
@@ -150,7 +155,7 @@ function DiscoveryHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
         textAlign="center"
       >
@@ -158,7 +163,7 @@ function DiscoveryHeader({ t }: { t: T }): ReactElement {
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
         maxWidth={320}
@@ -190,8 +195,8 @@ export function FeatureDiscovery(props: FeatureDiscoveryProps): ReactElement {
       </View>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={12}
-        color={colors.gray400}
+        fontSize={fontSizes.xs}
+        color={colors.textMuted}
         textAlign="center"
       >
         {t('discovery.hint')}

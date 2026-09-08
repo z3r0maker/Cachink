@@ -14,7 +14,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { WizardScenario } from './state';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -45,12 +45,12 @@ function ScenarioRow(props: ScenarioRowProps): ReactElement {
       borderBottomColor={colors.gray200}
     >
       <View flexDirection="row" alignItems="center" gap={10}>
-        <Text fontSize={28}>{props.emoji}</Text>
+        <Text fontSize={fontSizes.xl4}>{props.emoji}</Text>
         <Text
           flex={1}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={15}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {props.title}
@@ -59,7 +59,7 @@ function ScenarioRow(props: ScenarioRowProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
       >
         {props.recommendation}
@@ -79,7 +79,7 @@ function FallbackFooter({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
       >
         {t('wizard.helpModal.fallbackTitle')}
@@ -87,7 +87,7 @@ function FallbackFooter({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginTop={4}
       >

@@ -10,7 +10,7 @@ import { View, Text } from '@tamagui/core';
 import { formatMoney, type Money, type PaymentMethod } from '@cachink/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Icon, type IconName } from '../../components/Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface CheckoutConfirmProps {
   readonly totalCentavos: Money;
@@ -86,7 +86,7 @@ function ConfirmHeader(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={32}
+        fontSize={fontSizes.xl5}
         color={colors.black}
         textAlign="center"
       >
@@ -95,7 +95,7 @@ function ConfirmHeader(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold.toString()}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.gray600}
         textAlign="center"
       >
@@ -103,8 +103,8 @@ function ConfirmHeader(props: {
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={16}
-        color={colors.gray400}
+        fontSize={fontSizes.lg}
+        color={colors.textMuted}
         textAlign="center"
       >
         {props.message}
@@ -113,9 +113,7 @@ function ConfirmHeader(props: {
   );
 }
 
-export function CheckoutConfirm(
-  props: CheckoutConfirmProps,
-): ReactElement {
+export function CheckoutConfirm(props: CheckoutConfirmProps): ReactElement {
   const config = getMethodConfig(props.metodo);
 
   return (

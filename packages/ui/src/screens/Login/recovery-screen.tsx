@@ -5,7 +5,7 @@ import { Text, View } from '@tamagui/core';
 import type { UserId } from '@cachink/domain';
 import { Btn, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import {
   RecoveryPasswordSection,
   RecoveryPinFields,
@@ -73,7 +73,7 @@ function EmailHint({ email, t }: { email: string; t: T }): ReactElement {
     <View marginTop={16}>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         textAlign="center"
       >
@@ -115,7 +115,7 @@ function RecoveryFormCard(props: {
       <RecoveryPasswordSection form={form} t={t} />
       <RecoveryPinFields form={form} t={t} />
       {screenProps.error && (
-        <Text fontSize={12} color={colors.red}>
+        <Text fontSize={fontSizes.xs} color={colors.redText}>
           {screenProps.error}
         </Text>
       )}
@@ -146,7 +146,7 @@ export function RecoveryScreen(props: RecoveryScreenProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={28}
+          fontSize={fontSizes.xl4}
           color={colors.black}
         >
           {t('recovery.title')}

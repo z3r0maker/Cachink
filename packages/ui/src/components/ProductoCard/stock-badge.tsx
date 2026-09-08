@@ -6,11 +6,11 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { AttrDef, Product } from '@cachink/domain';
 import { Tag } from '../Tag/tag';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export function StockBadge({ stock, umbral }: { stock: number; umbral: number }): ReactElement {
   const bg = stock <= 0 ? colors.redSoft : stock <= umbral ? colors.warningSoft : colors.greenSoft;
-  const fg = stock <= 0 ? colors.red : stock <= umbral ? colors.warning : colors.green;
+  const fg = stock <= 0 ? colors.redText : stock <= umbral ? colors.warningText : colors.greenText;
   return (
     <View
       backgroundColor={bg}
@@ -27,7 +27,7 @@ export function StockBadge({ stock, umbral }: { stock: number; umbral: number })
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={fg}
         flexShrink={0}
       >
@@ -36,7 +36,7 @@ export function StockBadge({ stock, umbral }: { stock: number; umbral: number })
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={fg}
         flexShrink={0}
       >

@@ -9,7 +9,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { ZERO, formatMoney, type EstadoDeResultados } from '@cachink/domain';
 import { Card, DeltaIndicator, HealthIndicator, Kpi, SectionTitle } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { moneyToNumber } from '../../charts/chart-tokens';
 import { Sparkline } from '../../charts/Sparkline/index';
 import { utilidadNetaVerdict } from './health-verdicts';
@@ -114,7 +114,7 @@ export function ResumenCard(props: ResumenCardProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
         marginTop={4}
         marginBottom={12}

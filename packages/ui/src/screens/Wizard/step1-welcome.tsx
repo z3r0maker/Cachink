@@ -14,7 +14,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { LoadingOverlay } from '../../components/index';
 import { WizardCard, type WizardCardChip } from './wizard-card';
 import type { WizardScenario } from './state';
@@ -45,7 +45,7 @@ function WelcomeHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
+        fontSize={fontSizes.xl5}
         letterSpacing={typography.letterSpacing.tightest}
         color={colors.black}
         textAlign="center"
@@ -55,7 +55,7 @@ function WelcomeHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
         textAlign="center"
         marginBottom={8}
@@ -91,8 +91,8 @@ function SecondaryLink({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
-        color={colors.blue}
+        fontSize={fontSizes.sm}
+        color={colors.blueText}
         textAlign="center"
       >
         {label}

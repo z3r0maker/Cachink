@@ -21,7 +21,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { Card } from '../Card/index';
 import { Icon } from '../Icon/index';
 import { SwipeableRow } from './swipeable-row';
@@ -35,7 +35,7 @@ function ExampleRow({ concepto, monto }: { concepto: string; monto: string }): R
             color={colors.black}
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={14}
+            fontSize={fontSizes.md}
           >
             {concepto}
           </Text>
@@ -43,7 +43,7 @@ function ExampleRow({ concepto, monto }: { concepto: string; monto: string }): R
             color={colors.gray600}
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             marginTop={2}
           >
             Hoy · 10:48
@@ -53,7 +53,7 @@ function ExampleRow({ concepto, monto }: { concepto: string; monto: string }): R
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={16}
+          fontSize={fontSizes.lg}
         >
           {monto}
         </Text>
@@ -98,7 +98,7 @@ function ActionPanelPreview({
         color={textColor}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase' }}
       >

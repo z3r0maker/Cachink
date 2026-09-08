@@ -8,7 +8,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import React from 'react';
 
-vi.mock('echarts-for-react/lib/core', () => ({
+vi.mock('echarts-for-react/esm/core', () => ({
   __esModule: true,
   default: function MockECharts(_props: Record<string, unknown>) {
     return React.createElement('div', { 'data-testid': 'echarts-mock' });
@@ -19,7 +19,9 @@ vi.mock('echarts/core', () => ({
   use: vi.fn(),
   registerTheme: vi.fn(),
   graphic: {
-    LinearGradient: class { constructor(..._args: unknown[]) {} },
+    LinearGradient: class {
+      constructor(..._args: unknown[]) {}
+    },
   },
   default: { use: vi.fn(), registerTheme: vi.fn(), graphic: {} },
 }));
@@ -38,7 +40,10 @@ import { tamaguiConfig } from '../../src/tamagui.config';
 import { DonutChart, type DonutSlice } from '../../src/charts/DonutChart/index';
 import { buildDonutOption } from '../../src/charts/DonutChart/donut-chart';
 
-function renderChart(slices: readonly DonutSlice[], extra?: Partial<Parameters<typeof DonutChart>[0]>) {
+function renderChart(
+  slices: readonly DonutSlice[],
+  extra?: Partial<Parameters<typeof DonutChart>[0]>,
+) {
   return render(
     <TamaguiProvider config={tamaguiConfig}>
       <DonutChart slices={slices} testID="donut" {...extra} />

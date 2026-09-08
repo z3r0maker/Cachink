@@ -4,7 +4,7 @@ import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
 import { PasswordField } from '../../components/index';
 import { Input } from '../../components/Input/input';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { useTranslation } from '../../i18n/index';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -32,7 +32,7 @@ export function RecoveryPasswordSection({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {t('recovery.passwordTitle')}
@@ -67,7 +67,7 @@ export function RecoveryPinFields({ form, t }: { form: RecoveryFormState; t: T }
         placeholder="000000"
       />
       {form.mismatch && (
-        <Text fontSize={12} color={colors.red}>
+        <Text fontSize={fontSizes.xs} color={colors.redText}>
           {t('changePin.mismatch')}
         </Text>
       )}

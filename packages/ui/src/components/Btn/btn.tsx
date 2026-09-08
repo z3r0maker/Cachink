@@ -34,7 +34,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { Pressable, type ViewStyle } from 'react-native';
 import { Text } from '@tamagui/core';
-import { colors, radii, shadows, typography } from '../../theme';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import { Spinner } from '../Spinner/index';
 
@@ -42,13 +42,7 @@ export type BtnVariant = 'primary' | 'dark' | 'ghost' | 'green' | 'danger' | 'so
 
 export type BtnSize = 'sm' | 'md' | 'lg';
 
-export interface BtnProps {
-  /**
-   * Uppercase label or plain-case string. Rendered inside the button.
-   * Optional when `icon` is present — icon-only buttons set the
-   * accessible name via `ariaLabel` instead.
-   */
-  readonly children?: string;
+interface BtnBaseProps {
   /** Variant token from CLAUDE.md §8.4. Defaults to `primary`. */
   readonly variant?: BtnVariant;
   /** Tap-target height: sm 36 / md 44 / lg 52 px. Defaults to `md`. */
@@ -63,16 +57,6 @@ export interface BtnProps {
   readonly fullWidth?: boolean;
   /** Forwarded to the root View so E2E tests can anchor to it. */
   readonly testID?: string;
-  /**
-   * Explicit screen-reader label. Falls back to the `children` string.
-   * Pass when the button label is an icon or abbreviation.
-   *
-   * Named `ariaLabel` per ADR-034 — the value is forwarded to Tamagui's
-   * `aria-label`, matching Tamagui 2.x's removal of RN-style a11y prop
-   * translation. On React Native we'll layer `accessibilityLabel` back
-   * in via a platform-variant when Phase 1B wires the mobile shell.
-   */
-  readonly ariaLabel?: string;
   /** When true, replaces the label with a Spinner and disables interaction. */
   readonly loading?: boolean;
   /**
@@ -89,6 +73,41 @@ export interface BtnProps {
   readonly ariaChecked?: boolean;
 }
 
+/**
+ * A button with a visible text label. The label *is* the accessible name, so
+ * `ariaLabel` is optional here and only needed to override it (an abbreviation
+ * a screen reader should expand, say).
+ */
+interface BtnWithLabelProps extends BtnBaseProps {
+  /** Uppercase label or plain-case string. Rendered inside the button. */
+  readonly children: string;
+  /**
+   * Overrides the accessible name that `children` would otherwise provide.
+   *
+   * Named `ariaLabel` per ADR-034 — forwarded to the RN `Pressable` as
+   * `aria-label`, which React Native maps to `accessibilityLabel` on iOS and
+   * Android (RN ≥ 0.71) and react-native-web renders directly.
+   */
+  readonly ariaLabel?: string;
+}
+
+/**
+ * An icon-only button. It renders no text, so `ariaLabel` is **required** —
+ * without it VoiceOver and TalkBack announce nothing but "button".
+ *
+ * This used to be optional, and `empleado-list-item.tsx` shipped a delete
+ * button whose accessible name resolved to the empty string. Requiring it
+ * here makes that unrepresentable rather than merely discouraged, matching
+ * the contract `FAB` has always had. Audit 2026-09.
+ */
+interface BtnIconOnlyProps extends BtnBaseProps {
+  readonly children?: undefined;
+  readonly icon: ReactNode;
+  readonly ariaLabel: string;
+}
+
+export type BtnProps = BtnWithLabelProps | BtnIconOnlyProps;
+
 interface VariantStyle {
   readonly background: string;
   readonly color: string;
@@ -100,7 +119,12 @@ const VARIANTS: Record<BtnVariant, VariantStyle> = {
   dark: { background: colors.black, color: colors.white, shadow: shadows.card },
   ghost: { background: 'transparent', color: colors.black, shadow: 'none' },
   green: { background: colors.green, color: colors.black, shadow: shadows.card },
-  danger: { background: colors.red, color: colors.white, shadow: shadows.card },
+  // Black label, not white: white on the brand red is 3.34:1 and fails WCAG
+  // AA, and darkening the red would break §8.1. Black on that same red is
+  // 5.82:1 — and `primary`, `green`, `soft` and `outline` already use black
+  // labels, so `danger` was the outlier. `tests/theme.test.ts` pins both
+  // ratios. Audit 2026-09.
+  danger: { background: colors.red, color: colors.black, shadow: shadows.card },
   soft: { background: colors.yellowSoft, color: colors.black, shadow: shadows.small },
   // `outline` is the white-with-hard-border companion to `primary` —
   // used as the CANCELAR slot next to a primary GUARDAR (mock 3,
@@ -112,9 +136,9 @@ const VARIANTS: Record<BtnVariant, VariantStyle> = {
 const SIZES: Record<BtnSize, { height: number; paddingX: number; fontSize: number }> = {
   // `sm` bumped 36 → 40 + hitSlop on root pushes the effective tap-target
   // over the 44×44 iOS HIG / Android Material target floor (P1C-M12-T04).
-  sm: { height: 40, paddingX: 14, fontSize: 12 },
-  md: { height: 44, paddingX: 18, fontSize: 14 },
-  lg: { height: 52, paddingX: 22, fontSize: 16 },
+  sm: { height: 40, paddingX: 14, fontSize: fontSizes.xs },
+  md: { height: 44, paddingX: 18, fontSize: fontSizes.md },
+  lg: { height: 52, paddingX: 22, fontSize: fontSizes.lg },
 };
 
 const BTN_RADIUS = radii[1]; // 10 — per CLAUDE.md §8.3 scale.
@@ -251,7 +275,11 @@ export function Btn(props: BtnProps): ReactElement {
       disabled={disabled}
       hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
       role={props.role ?? 'button'}
-      aria-label={props.ariaLabel ?? props.children ?? ''}
+      // No `?? ''` fallback: the union above guarantees one of these two is a
+      // non-empty string, and an empty accessible name is worse than none —
+      // it silently suppresses the label a screen reader would otherwise
+      // derive from the children.
+      aria-label={props.ariaLabel ?? props.children}
       aria-disabled={disabled}
       aria-checked={props.role === 'radio' ? props.ariaChecked === true : undefined}
       style={({ pressed }) => [baseStyle, pressed && !disabled ? PRESSED_STYLE : null]}

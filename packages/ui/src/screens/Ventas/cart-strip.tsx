@@ -12,7 +12,7 @@ import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { ProductId } from '@cachink/domain';
 import { ConfirmDialog } from '../../components/ConfirmDialog/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { CartItem } from '../../hooks/use-cart';
 import { CartRow } from './cart-strip-row';
 
@@ -32,31 +32,22 @@ function StripHeader(props: {
 }): ReactElement {
   const accent = props.variant === 'red' ? colors.red : colors.yellow;
   return (
-    <View
-      flexDirection="row"
-      justifyContent="space-between"
-      alignItems="center"
-      marginBottom={8}
-    >
+    <View flexDirection="row" justifyContent="space-between" alignItems="center" marginBottom={8}>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase' }}
       >
         Carrito ({props.count})
       </Text>
-      <Pressable
-        onPress={props.onClearRequest}
-        hitSlop={8}
-        testID="cart-strip-clear"
-      >
+      <Pressable onPress={props.onClearRequest} hitSlop={8} testID="cart-strip-clear">
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={accent}
         >
           Vaciar

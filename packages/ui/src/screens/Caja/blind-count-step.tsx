@@ -22,13 +22,9 @@ import { ZERO } from '@cachink/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';
-import {
-  Numpad,
-  NumpadDisplay,
-  useNumpadInput,
-} from '../../components/Numpad/index';
+import { Numpad, NumpadDisplay, useNumpadInput } from '../../components/Numpad/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface BlindCountStepProps {
   readonly onSubmit: (conteoCentavos: Money) => void;
@@ -110,16 +106,12 @@ function BlindCountHeader({ t }: { t: T }): ReactElement {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.black.toString()}
-            fontSize={18}
+            fontSize={fontSizes.xl}
             color={colors.black}
           >
             {t('caja.blindCountHeader')}
           </Text>
-          <Text
-            fontFamily={typography.fontFamily}
-            fontSize={14}
-            color={colors.gray600}
-          >
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
             {t('caja.blindCountHint')}
           </Text>
         </View>
@@ -130,16 +122,11 @@ function BlindCountHeader({ t }: { t: T }): ReactElement {
 
 function BlindCountWarning({ t }: { t: T }): ReactElement {
   return (
-    <View
-      flexDirection="row"
-      alignItems="center"
-      gap={8}
-      paddingHorizontal={4}
-    >
+    <View flexDirection="row" alignItems="center" gap={8} paddingHorizontal={4}>
       <Icon name="triangle-alert" size={16} color={colors.yellow} />
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         flex={1}
       >

@@ -12,6 +12,7 @@ import { Card } from '../Card/index';
 import { EmptyState } from '../EmptyState/index';
 import { SectionTitle } from '../SectionTitle/index';
 import { List } from './list';
+import { fontSizes } from '../../theme';
 
 interface Venta {
   readonly id: string;
@@ -64,7 +65,7 @@ export const WithHeaderFooter: Story = {
         keyExtractor={(v) => v.id}
         ListHeaderComponent={<SectionTitle title="Ventas hoy · 5" />}
         ListFooterComponent={
-          <Text fontSize={12} color="#5A5A56" marginTop={8}>
+          <Text fontSize={fontSizes.xs} color="#5A5A56" marginTop={8}>
             Mostrando 5 de 5
           </Text>
         }

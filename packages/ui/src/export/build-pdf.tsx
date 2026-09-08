@@ -23,6 +23,7 @@ import {
   type Money,
   type SaleCategory,
 } from '@cachink/domain';
+import { colors, fontSizes, radii } from '../theme';
 
 type PdfNs = typeof ReactPdf;
 
@@ -70,26 +71,26 @@ function categoryRowsOf<K extends SaleCategory | ExpenseCategory>(
 
 function makeStyles(ns: PdfNs): ReturnType<PdfNs['StyleSheet']['create']> {
   return ns.StyleSheet.create({
-    page: { padding: 32, fontSize: 11, fontFamily: 'Helvetica' },
-    h1: { fontSize: 18, fontWeight: 700, marginBottom: 6 },
-    subtitle: { fontSize: 12, marginBottom: 16 },
+    page: { padding: 32, fontSize: fontSizes.xs, fontFamily: 'Helvetica' },
+    h1: { fontSize: fontSizes.xl, fontWeight: 700, marginBottom: 6 },
+    subtitle: { fontSize: fontSizes.xs, marginBottom: 16 },
     section: { marginBottom: 14 },
-    sectionTitle: { fontSize: 13, fontWeight: 700, marginBottom: 6 },
+    sectionTitle: { fontSize: fontSizes.sm, fontWeight: 700, marginBottom: 6 },
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       paddingVertical: 3,
-      borderBottom: '1 solid #E4E4E0',
+      borderBottom: `1 solid ${colors.gray200}`,
     },
-    label: { fontSize: 11 },
-    value: { fontSize: 11, fontWeight: 700 },
+    label: { fontSize: fontSizes.xs },
+    value: { fontSize: fontSizes.xs, fontWeight: 700 },
     footer: {
       marginTop: 24,
       padding: 10,
-      backgroundColor: '#FFFBCC',
-      borderRadius: 6,
+      backgroundColor: colors.yellowSoft,
+      borderRadius: radii[0],
     },
-    footerText: { fontSize: 10, color: '#5A5A56' },
+    footerText: { fontSize: fontSizes.xs, color: colors.gray600 },
   });
 }
 

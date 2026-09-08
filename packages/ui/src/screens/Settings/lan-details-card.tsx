@@ -13,7 +13,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface LanDetailsCardProps {
   readonly serverUrl: string | null;
@@ -39,7 +39,7 @@ function Row({ label, value, t }: { label: string; value: string; t: T }): React
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -49,7 +49,7 @@ function Row({ label, value, t }: { label: string; value: string; t: T }): React
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
         numberOfLines={1}
       >

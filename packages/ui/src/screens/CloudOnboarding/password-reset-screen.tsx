@@ -8,7 +8,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle, Tag } from '../../components/index';
 import { EmailField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface PasswordResetScreenProps {
   readonly onReset: (email: string) => Promise<void>;
@@ -94,7 +94,7 @@ export function PasswordResetScreen(props: PasswordResetScreenProps): ReactEleme
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
       >
         {t('passwordReset.body')}

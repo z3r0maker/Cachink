@@ -8,7 +8,7 @@
  */
 import type { ReactElement } from 'react';
 import { Input as TamaguiInput } from '@tamagui/input';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import type { FieldProps } from './input-shared';
 import { keyboardHintsFor } from './input-shared';
 
@@ -22,7 +22,7 @@ const FIELD_VISUAL = {
   borderRadius: FIELD_RADIUS,
   paddingHorizontal: 14,
   paddingVertical: 11,
-  fontSize: 15,
+  fontSize: fontSizes.lg,
   fontWeight: typography.weights.medium,
   color: colors.ink,
   backgroundColor: colors.white,
@@ -67,7 +67,7 @@ export function TextField(props: FieldProps): ReactElement {
       onFocus={props.onFocus}
       inputMode={hints.inputMode}
       data-input-type={props.type}
-      placeholderTextColor="$gray400"
+      placeholderTextColor="$placeholderColor"
       ref={props.inputRef as never}
       {...FIELD_VISUAL}
       {...autofillOverride(resolvedAutoComplete)}

@@ -32,7 +32,7 @@ type T = ReturnType<typeof useTranslation>['t'];
 function PermissionBanner({ onRequest, t }: { onRequest: () => void; t: T }): ReactElement {
   return (
     <View padding={16} gap={12}>
-      <Text color={colors.red}>{t('scanner.permissionDenied')}</Text>
+      <Text color={colors.redText}>{t('scanner.permissionDenied')}</Text>
       <Btn variant="primary" onPress={onRequest} testID="scanner-permission">
         {t('actions.new')}
       </Btn>
@@ -47,6 +47,7 @@ function CameraBox({
   onScan: (arg: { data: string }) => void;
   disabled: boolean;
 }): ReactElement {
+  const { t } = useTranslation();
   const [af, setAf] = useState<'on' | 'off'>('on');
 
   /** Tap-to-refocus: toggle autofocus off→on to unstick iOS focus. */
@@ -57,7 +58,12 @@ function CameraBox({
 
   return (
     <View testID="scanner-camera" height={360} backgroundColor={colors.black}>
-      <Pressable style={{ flex: 1 }} onPress={handleTapRefocus}>
+      <Pressable
+        style={{ flex: 1 }}
+        onPress={handleTapRefocus}
+        role="button"
+        aria-label={t('scanner.refocusAriaLabel')}
+      >
         <CameraView
           style={{ flex: 1 }}
           facing="back"
@@ -90,11 +96,9 @@ function ScannerBody({
   return <CameraBox onScan={handleBarcode} disabled={disabled} />;
 }
 
-export function Scanner(props: ScannerProps): ReactElement {
-  const { t } = useTranslation();
-  const mode = props.mode ?? 'single';
+/** Scan state plus the barcode handler, which is a no-op after a single scan. */
+function useScanSession(props: ScannerProps, mode: 'single' | 'continuous') {
   const [scanned, setScanned] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
 
   // Dismiss the soft keyboard so the scanner sheet is fully visible.
   useEffect(() => {
@@ -108,6 +112,15 @@ export function Scanner(props: ScannerProps): ReactElement {
     props.onScan(data);
     if (mode === 'single') props.onClose();
   };
+
+  return { scanned, handleBarcode };
+}
+
+export function Scanner(props: ScannerProps): ReactElement {
+  const { t } = useTranslation();
+  const mode = props.mode ?? 'single';
+  const [permission, requestPermission] = useCameraPermissions();
+  const { scanned, handleBarcode } = useScanSession(props, mode);
 
   return (
     <Modal

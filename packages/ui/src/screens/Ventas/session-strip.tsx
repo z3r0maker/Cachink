@@ -11,7 +11,7 @@ import { Text, View } from '@tamagui/core';
 import type { Sale, Money } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card } from '../../components/Card/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import { SalesContent } from './ventas-sales-pane';
 
@@ -35,7 +35,7 @@ function LastSalePreview(props: { sale: Sale }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       color={colors.gray600}
       numberOfLines={1}
     >
@@ -50,7 +50,7 @@ function CollapsedHeader(props: { total: Money }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={colors.black}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase' }}
@@ -60,7 +60,7 @@ function CollapsedHeader(props: { total: Money }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tight}
       >
@@ -70,24 +70,23 @@ function CollapsedHeader(props: { total: Money }): ReactElement {
   );
 }
 
-function CollapsedFooter(props: {
-  ventaCount: number;
-  lastVenta?: Sale;
-}): ReactElement {
+function CollapsedFooter(props: { ventaCount: number; lastVenta?: Sale }): ReactElement {
   return (
     <View flexDirection="row" justifyContent="space-between" alignItems="center">
       <View flexDirection="row" gap={4} flex={1}>
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.gray600}
         >
           {props.ventaCount} venta{props.ventaCount !== 1 ? 's' : ''}
         </Text>
         {props.lastVenta && (
           <>
-            <Text fontSize={12} color={colors.gray400}>·</Text>
+            <Text fontSize={fontSizes.xs} color={colors.textMuted}>
+              ·
+            </Text>
             <LastSalePreview sale={props.lastVenta} />
           </>
         )}
@@ -95,7 +94,7 @@ function CollapsedFooter(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.black}
       >
         Ver más ▼
@@ -115,31 +114,31 @@ function CollapsedCard(props: {
       variant="yellow"
       padding="md"
       fullWidth
-      onPress={() => { impactLight(); props.onExpand(); }}
+      onPress={() => {
+        impactLight();
+        props.onExpand();
+      }}
       testID="session-strip-collapsed"
       ariaLabel="Ver ventas del día"
     >
       <View gap={4}>
         <CollapsedHeader total={props.total} />
-        <CollapsedFooter
-          ventaCount={props.ventaCount}
-          lastVenta={props.lastVenta}
-        />
+        <CollapsedFooter ventaCount={props.ventaCount} lastVenta={props.lastVenta} />
       </View>
     </Card>
   );
 }
 
-function ExpandedHeader(props: {
-  total: Money;
-  onCollapse: () => void;
-}): ReactElement {
+function ExpandedHeader(props: { total: Money; onCollapse: () => void }): ReactElement {
   return (
     <Card
       variant="yellow"
       padding="md"
       fullWidth
-      onPress={() => { impactLight(); props.onCollapse(); }}
+      onPress={() => {
+        impactLight();
+        props.onCollapse();
+      }}
       testID="session-strip-expanded-header"
       ariaLabel="Ocultar ventas del día"
     >
@@ -147,7 +146,7 @@ function ExpandedHeader(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={20}
+          fontSize={fontSizes.xl2}
           color={colors.black}
         >
           {formatMoney(props.total)}
@@ -155,7 +154,7 @@ function ExpandedHeader(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.black}
         >
           Ocultar ▲

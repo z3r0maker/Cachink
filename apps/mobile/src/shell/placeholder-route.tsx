@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { SafeAreaSpacer } from '@cachink/ui';
+import { SafeAreaSpacer, fontSizes } from '@cachink/ui';
 import { useTranslation } from '@cachink/ui';
 
 interface PlaceholderRouteProps {
@@ -15,9 +15,7 @@ interface PlaceholderRouteProps {
   readonly testID?: string;
 }
 
-export function PlaceholderRoute(
-  props: PlaceholderRouteProps,
-): ReactElement {
+export function PlaceholderRoute(props: PlaceholderRouteProps): ReactElement {
   const { t } = useTranslation();
   return (
     <View
@@ -29,10 +27,10 @@ export function PlaceholderRoute(
       testID={props.testID ?? 'placeholder-route'}
     >
       <SafeAreaSpacer />
-      <Text fontWeight="900" fontSize={28} color="$color">
+      <Text fontWeight="900" fontSize={fontSizes.xl4} color="$color">
         {props.featureLabel}
       </Text>
-      <Text fontSize={16} color="$colorSubtle">
+      <Text fontSize={fontSizes.lg} color="$colorSubtle">
         {t('placeholder.subtitle')}
       </Text>
     </View>

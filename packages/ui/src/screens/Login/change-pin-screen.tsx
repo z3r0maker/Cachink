@@ -13,7 +13,7 @@ import { Btn } from '../../components/index';
 import { Input } from '../../components/Input/input';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ChangePinScreenProps {
   readonly userName: string;
@@ -31,7 +31,7 @@ function ValidationHint(props: {
 }): ReactElement | null {
   if (!props.show) return null;
   return (
-    <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red}>
+    <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.redText}>
       {props.text}
     </Text>
   );
@@ -44,14 +44,14 @@ function ChangePinHeader({ t, userName }: { t: T; userName: string }): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
       >
         {t('changePin.title')}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
         maxWidth={320}
@@ -102,7 +102,7 @@ function ChangePinFormFields(props: ChangePinFieldsProps): ReactElement {
       />
       <ValidationHint show={props.mismatch} text={props.t('changePin.mismatch')} />
       {props.error !== null && (
-        <Text fontFamily={typography.fontFamily} fontSize={13} color={colors.red}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.redText}>
           {props.error}
         </Text>
       )}
@@ -116,8 +116,19 @@ function useChangePinForm(submitting: boolean) {
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm.length > 0 && newPin !== confirm;
   const tooShort = newPin.length > 0 && !/^\d{6}$/.test(newPin);
-  const canSubmit = /^\d{6}$/.test(current) && /^\d{6}$/.test(newPin) && newPin === confirm && !submitting;
-  return { current, setCurrent, newPin, setNewPin, confirm, setConfirm, mismatch, tooShort, canSubmit };
+  const canSubmit =
+    /^\d{6}$/.test(current) && /^\d{6}$/.test(newPin) && newPin === confirm && !submitting;
+  return {
+    current,
+    setCurrent,
+    newPin,
+    setNewPin,
+    confirm,
+    setConfirm,
+    mismatch,
+    tooShort,
+    canSubmit,
+  };
 }
 
 export function ChangePinScreen(props: ChangePinScreenProps): ReactElement {

@@ -13,7 +13,7 @@ import { Text, View } from '@tamagui/core';
 import { formatMoney, type DayClose } from '@cachink/domain';
 import { Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CorteHistorialStripProps {
   readonly cortes: readonly DayClose[];
@@ -51,7 +51,7 @@ function CorteRow(props: CorteRowProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
         >
           {corte.fecha}
@@ -59,7 +59,7 @@ function CorteRow(props: CorteRowProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.gray600}
         >
           {formatMoney(corte.efectivoContadoCentavos)}
@@ -78,7 +78,7 @@ export function CorteHistorialStrip(props: CorteHistorialStripProps): ReactEleme
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={13}
+          fontSize={fontSizes.sm}
           color={colors.gray600}
         >
           {t('corteDeDia.historialEmpty')}

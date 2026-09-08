@@ -3,7 +3,7 @@ import { Text } from '@tamagui/core';
 import { evaluateHealth, type HealthThresholds, type Indicadores } from '@cachink/domain';
 import { Card, SectionTitle } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
-import { colors } from '../../theme';
+import { colors, fontSizes } from '../../theme';
 import { NumericCard } from './indicadores-cards';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -139,7 +139,11 @@ export function SaludSection(props: SaludSectionProps): ReactElement {
   return (
     <>
       <SectionTitle title={props.t('estados.indicadoresSaludTitle')} />
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>
+      <Text
+        fontFamily="'Plus Jakarta Sans', sans-serif"
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+      >
         {props.t('estados.indicadoresSaludSubtitle')}
       </Text>
       <LiquidezCard {...props} />
@@ -152,15 +156,19 @@ export function SaludSection(props: SaludSectionProps): ReactElement {
 export function ThresholdDisclosure(props: { onOpenSettings?: () => void; t: T }): ReactElement {
   return (
     <Card testID="indicadores-threshold-disclosure" padding="md" fullWidth>
-      <Text fontFamily="'Plus Jakarta Sans', sans-serif" fontSize={12} color={colors.gray600}>
+      <Text
+        fontFamily="'Plus Jakarta Sans', sans-serif"
+        fontSize={fontSizes.xs}
+        color={colors.gray600}
+      >
         {props.t('estados.indicadoresThresholdDisclosure')}
       </Text>
       {props.onOpenSettings !== undefined && (
         <Text
           fontFamily="'Plus Jakarta Sans', sans-serif"
           fontWeight={500}
-          fontSize={12}
-          color={colors.blue}
+          fontSize={fontSizes.xs}
+          color={colors.blueText}
           onPress={props.onOpenSettings}
           cursor="pointer"
           marginTop={4}

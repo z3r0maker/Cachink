@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { echarts, ReactEChartsCore } from '../echarts-wrapper';
-import { colors } from '../../theme';
+import { colors, fontSizes, shapeRadii } from '../../theme';
 import { formatChartLabel, SEMANTIC } from '../chart-tokens';
 import type { DivergingItem, DivergingBarProps } from './diverging-types';
 
@@ -38,7 +38,7 @@ function buildBarData(items: readonly DivergingItem[]) {
       color: buildBarGradient(item.value),
       borderColor: colors.black,
       borderWidth: 2,
-      borderRadius: 4,
+      borderRadius: shapeRadii.markLg,
     },
   }));
 }
@@ -71,7 +71,7 @@ function buildDivergingAxes(labels: string[]) {
       axisTick: hidden,
       axisLabel: {
         color: colors.gray600,
-        fontSize: 11,
+        fontSize: fontSizes.xs,
         fontFamily: "'Plus Jakarta Sans', sans-serif",
         fontWeight: 500,
       },
@@ -90,7 +90,7 @@ function buildDivergingSeries(items: readonly DivergingItem[]) {
         position: 'right',
         formatter: (p: { value: number }) => formatChartLabel(p.value),
         fontWeight: 700,
-        fontSize: 11,
+        fontSize: fontSizes.xs,
         fontFamily: "'Plus Jakarta Sans', sans-serif",
         color: colors.ink,
       },

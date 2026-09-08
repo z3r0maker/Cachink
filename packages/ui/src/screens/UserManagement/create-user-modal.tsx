@@ -11,7 +11,7 @@ import type { UserRole } from '@cachink/domain';
 import { Btn, PasswordField, TextField } from '../../components/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 const ROLE_CARDS: readonly OptionCardItem<UserRole>[] = [
   {
@@ -46,7 +46,17 @@ function useCreateUserForm() {
   const [pin, setPin] = useState('');
   const [recoveryPassword, setRecoveryPassword] = useState('');
   const valid = nombre.length > 0 && /^\d{6}$/.test(pin) && recoveryPassword.length >= 6;
-  return { nombre, setNombre, role, setRole, pin, setPin, recoveryPassword, setRecoveryPassword, valid };
+  return {
+    nombre,
+    setNombre,
+    role,
+    setRole,
+    pin,
+    setPin,
+    recoveryPassword,
+    setRecoveryPassword,
+    valid,
+  };
 }
 
 type CreateUserForm = ReturnType<typeof useCreateUserForm>;
@@ -138,7 +148,7 @@ export function CreateUserModal(props: CreateUserModalProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={22}
+        fontSize={fontSizes.xl2}
         color={colors.black}
       >
         {t('userManagement.create')}

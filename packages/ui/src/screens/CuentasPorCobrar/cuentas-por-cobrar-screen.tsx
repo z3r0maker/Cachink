@@ -13,7 +13,7 @@ import { Text, View } from '@tamagui/core';
 import type { IsoDate, Sale } from '@cachink/domain';
 import { Card, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { CuentasPorCobrarStrip, type CuentaPorCobrarRow } from './cuentas-por-cobrar-strip';
 import { diasPromedioCobranza } from './cuentas-por-cobrar-kpis';
 
@@ -72,7 +72,7 @@ function SortToggle({
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={11}
+            fontSize={fontSizes.xs}
             color={colors.black}
             letterSpacing={typography.letterSpacing.wide}
             style={{ textTransform: 'uppercase', userSelect: 'none' }}

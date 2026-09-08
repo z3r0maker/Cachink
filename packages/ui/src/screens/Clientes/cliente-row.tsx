@@ -9,7 +9,7 @@ import { Text, View } from '@tamagui/core';
 import type { Client, Money } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { ClienteWithSaldo } from './clientes-screen';
 
 function ClienteInfo({ cliente }: { cliente: Client }): ReactElement {
@@ -18,7 +18,7 @@ function ClienteInfo({ cliente }: { cliente: Client }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {cliente.nombre}
@@ -27,7 +27,7 @@ function ClienteInfo({ cliente }: { cliente: Client }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.gray600}
           marginTop={2}
         >
@@ -45,8 +45,8 @@ function SaldoBadge({ saldo, saldoLabel }: { saldo: Money; saldoLabel: string })
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
-        color={colors.warning}
+        fontSize={fontSizes.lg}
+        color={colors.warningText}
       >
         {formatMoney(saldo)}
       </Text>

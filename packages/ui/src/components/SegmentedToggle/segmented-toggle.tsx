@@ -21,7 +21,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, shadows, typography } from '../../theme';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 
 export interface SegmentedToggleOption<T extends string> {
@@ -118,7 +118,7 @@ function SegmentChip(props: SegmentChipProps): ReactElement {
         color={color}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         letterSpacing={typography.letterSpacing.wide}
       >
         {props.label}
@@ -138,7 +138,7 @@ function Eyebrow(props: EyebrowProps): ReactElement {
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       marginBottom={6}
       style={{ textTransform: 'uppercase' }}

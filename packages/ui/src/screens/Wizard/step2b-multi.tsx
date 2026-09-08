@@ -15,7 +15,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { CLOUD_MODE_ENABLED } from '../../app-config/index';
 import { WizardCard } from './wizard-card';
 import { DataPreservedCallout } from './data-preserved-callout';
@@ -34,7 +34,7 @@ function StepHeader({ title, subtitle }: { title: string; subtitle: string }): R
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         letterSpacing={typography.letterSpacing.tightest}
         color={colors.black}
         textAlign="center"
@@ -44,7 +44,7 @@ function StepHeader({ title, subtitle }: { title: string; subtitle: string }): R
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         textAlign="center"
         marginBottom={8}
@@ -69,7 +69,7 @@ function BackLink({ label, onPress }: { label: string; onPress: () => void }): R
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
         letterSpacing={typography.letterSpacing.wide}
       >
@@ -92,8 +92,8 @@ function ImportLink({ label, onPress }: { label: string; onPress: () => void }):
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
-        color={colors.blue}
+        fontSize={fontSizes.sm}
+        color={colors.blueText}
         textAlign="center"
       >
         {label}

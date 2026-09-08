@@ -16,7 +16,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { type SyncConflictRow, useLastConflicts } from '../../hooks/use-last-conflicts';
 import { useTranslation } from '../../i18n/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { Card } from '../../components/Card/card';
 import { List } from '../../components/List/index';
 import { Tag } from '../../components/Tag/tag';
@@ -35,7 +35,7 @@ function Header({ t }: { t: T }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
           flex={1}
         >
@@ -45,7 +45,7 @@ function Header({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         marginBottom={10}
       >
@@ -70,7 +70,7 @@ function ConflictRow({ c }: { c: SyncConflictRow }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.black}
       >
         {c.tableName}
@@ -78,7 +78,7 @@ function ConflictRow({ c }: { c: SyncConflictRow }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {c.reason} · {shortDeviceId(c.loserDeviceId)}

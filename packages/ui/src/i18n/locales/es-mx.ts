@@ -36,6 +36,14 @@ export const esMX = {
     error: 'Algo salió mal',
   },
   forms: {
+    combobox: {
+      searchPlaceholder: 'Buscar...',
+      searchAriaLabel: 'Buscar opciones',
+    },
+    exactAmount: {
+      label: 'Exacto',
+      ariaLabel: 'Importe exacto',
+    },
     password: {
       showAriaLabel: 'Mostrar contraseña',
       hideAriaLabel: 'Ocultar contraseña',
@@ -109,7 +117,15 @@ export const esMX = {
     syncError: 'Error de sincronización',
     retryNow: 'Reintentar ahora',
   },
+  cancelaciones: {
+    cancelSale: 'Cancelar',
+    cancelSaleAriaLabel: 'Cancelar venta',
+  },
   productos: {
+    backAriaLabel: 'Volver',
+    iconTileAriaLabel: 'Icono {{name}}',
+    selectIconAriaLabel: 'Cambiar icono del producto',
+    iconPickerCancelAriaLabel: 'Cancelar selección de icono',
     catalogoTab: 'Catálogo',
     stockTab: 'Stock',
     movimientosTab: 'Movs.',
@@ -184,6 +200,7 @@ export const esMX = {
     typeLabel: 'Tipo',
   },
   scanner: {
+    refocusAriaLabel: 'Tocar para enfocar la cámara',
     title: 'Escanear código',
     close: 'Cerrar',
     permissionDenied: 'Permiso de cámara denegado',
@@ -240,6 +257,8 @@ export const esMX = {
     sinProductos: 'No hay productos. Crea uno primero.',
   },
   empleados: {
+    editAriaLabel: 'Editar a {{name}}',
+    deleteAriaLabel: 'Eliminar a {{name}}',
     nuevo: 'Nuevo empleado',
     nombreLabel: 'Nombre',
     puestoLabel: 'Puesto',
@@ -263,6 +282,7 @@ export const esMX = {
     due: 'Vence hoy',
   },
   ventas: {
+    cartRemoveAriaLabel: 'Quitar una unidad de {{name}}',
     title: 'Ventas',
     totalDelDia: 'Total del día',
     fechaLabel: 'Fecha',
@@ -918,6 +938,7 @@ export const esMX = {
     stockLowBodyMany: '{{count}} productos necesitan reposición',
   },
   notificaciones: {
+    badgeAriaLabel: 'Notificaciones: {{count}} sin leer',
     title: 'Notificaciones',
     // Top-level tabs
     tabInbox: 'Bandeja',
@@ -967,6 +988,9 @@ export const esMX = {
     requiereHint: 'Requiere {{feature}} activada',
     configSubtitle: 'Elige qué notificaciones quieres recibir',
   },
+  errors: {
+    dismissToastAriaLabel: 'Descartar aviso: {{message}}',
+  },
   errorBoundary: {
     title: 'Algo salió mal',
     body: 'Un error inesperado detuvo la aplicación.',
@@ -981,6 +1005,7 @@ export const esMX = {
   },
   // Phase 1 — User Management + Auth
   login: {
+    avatarAriaLabel: 'Entrar como {{name}}',
     title: '¡Hola!',
     greetingMorning: '¡Buenos días!',
     greetingAfternoon: '¡Buenas tardes!',
@@ -1182,6 +1207,8 @@ export const esMX = {
     comingSoon: 'Próximamente',
   },
   userManagement: {
+    editAriaLabel: 'Editar a {{name}}',
+    deleteAriaLabel: 'Eliminar a {{name}}',
     title: 'Usuarios',
     create: 'Nuevo usuario',
     editTitle: 'Editar usuario',
@@ -1191,6 +1218,8 @@ export const esMX = {
     tempPin: 'PIN temporal (6 dígitos)',
   },
   conversion: {
+    convertirAriaLabel: 'Convertir receta',
+    eliminarAriaLabel: 'Eliminar receta',
     title: 'Conversión de Materia Prima',
     tabRecetas: 'Recetas',
     tabHistorial: 'Historial',

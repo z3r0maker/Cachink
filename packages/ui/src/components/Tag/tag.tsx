@@ -29,7 +29,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export type TagVariant = 'neutral' | 'brand' | 'soft' | 'success' | 'info' | 'danger' | 'warning';
 
@@ -66,7 +66,7 @@ function TagText({ text, color }: { text: string; color: string }): ReactElement
       color={color}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={11}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       // Audit 9.3 — Tags are short by contract, but sit in tight
       // chip-row geometry (e.g. inside `<VentaCard>`). Cap to one

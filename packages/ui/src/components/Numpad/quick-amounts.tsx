@@ -12,9 +12,10 @@
 import type { ReactElement } from 'react';
 import { ScrollView, Pressable, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import { Icon } from '../Icon/index';
+import { useTranslation } from '../../i18n/index';
 
 export interface QuickAmountOption {
   /** Label shown on the button, e.g. "$500" */
@@ -46,7 +47,7 @@ export interface QuickAmountsProps {
 const PILL: ViewStyle = {
   paddingHorizontal: 16,
   paddingVertical: 10,
-  borderRadius: 9999,
+  borderRadius: shapeRadii.pill,
   borderWidth: 2,
   borderColor: colors.black,
   backgroundColor: colors.yellowSoft,
@@ -59,7 +60,7 @@ function PillLabel({ icon, label }: { icon: 'banknote' | 'check'; label: string 
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold.toString()}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {label}
@@ -68,14 +69,21 @@ function PillLabel({ icon, label }: { icon: 'banknote' | 'check'; label: string 
   );
 }
 
-function AmountPill({ amt, onSelect }: {
-  amt: QuickAmountOption; onSelect: (c: bigint) => void;
+function AmountPill({
+  amt,
+  onSelect,
+}: {
+  amt: QuickAmountOption;
+  onSelect: (c: bigint) => void;
 }): ReactElement {
   return (
     <Pressable
       key={amt.label}
       style={({ pressed }) => [PILL, pressed && { backgroundColor: colors.yellow }]}
-      onPress={() => { impactLight(); onSelect(amt.centavos); }}
+      onPress={() => {
+        impactLight();
+        onSelect(amt.centavos);
+      }}
       testID={`quick-amount-${amt.label}`}
       accessibilityRole="button"
       accessibilityLabel={amt.label}
@@ -86,18 +94,22 @@ function AmountPill({ amt, onSelect }: {
 }
 
 function ExactoPill({ onExacto }: { onExacto: () => void }): ReactElement {
+  const { t } = useTranslation();
   return (
     <Pressable
       style={({ pressed }) => [
         PILL,
         { backgroundColor: pressed ? colors.green : colors.greenSoft },
       ]}
-      onPress={() => { impactLight(); onExacto(); }}
+      onPress={() => {
+        impactLight();
+        onExacto();
+      }}
       testID="quick-amount-exacto"
-      accessibilityRole="button"
-      accessibilityLabel="Exacto"
+      role="button"
+      aria-label={t('forms.exactAmount.ariaLabel')}
     >
-      <PillLabel icon="check" label="Exacto" />
+      <PillLabel icon="check" label={t('forms.exactAmount.label')} />
     </Pressable>
   );
 }

@@ -18,7 +18,7 @@ import { formatMoney, formatPeriodoLabel } from '@cachink/domain';
 import { Btn, Card, Kpi } from '../../components/index';
 import { useEstadoResultados } from '../../hooks/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface UtilidadHeroProps {
   readonly onVerEstados?: () => void;
@@ -59,7 +59,7 @@ function HeroFooter(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {formatPeriodoLabel(props.from, props.to)}

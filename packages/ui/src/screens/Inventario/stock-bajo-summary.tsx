@@ -16,7 +16,7 @@ import { Text, View } from '@tamagui/core';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { countBajoStock } from './stock-bajo-banner';
 
 export interface StockBajoSummaryProps {
@@ -40,7 +40,7 @@ function SummaryBody({
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           letterSpacing={typography.letterSpacing.wide}
           color={colors.gray600}
           style={{ textTransform: 'uppercase' }}
@@ -50,8 +50,8 @@ function SummaryBody({
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={28}
-          color={colors.red}
+          fontSize={fontSizes.xl4}
+          color={colors.redText}
           letterSpacing={typography.letterSpacing.tighter}
         >
           {count}

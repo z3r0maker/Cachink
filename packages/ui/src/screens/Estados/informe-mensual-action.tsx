@@ -15,7 +15,7 @@ import { useInformeMensual } from '../../hooks/use-informe-mensual';
 import { buildInformeMensualPdf } from '../../export/build-pdf';
 import { shareFile } from '../../share/share-file';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface InformeMensualActionProps {
   /** `YYYY-MM` prefix — the action infers the period from the picker. */
@@ -84,7 +84,7 @@ function ActionBody(props: ActionBodyProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginBottom={10}
         testID="informe-mensual-status"

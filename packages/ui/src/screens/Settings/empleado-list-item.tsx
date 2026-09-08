@@ -5,7 +5,8 @@ import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { formatMoney, type Employee } from '@cachink/domain';
 import { Btn, Card, Icon, Tag } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes, typography } from '../../theme';
 
 function periodoLabel(periodo: string): string {
   switch (periodo) {
@@ -26,7 +27,7 @@ function EmpleadoInfo({ employee }: { employee: Employee }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {employee.nombre}
@@ -34,7 +35,7 @@ function EmpleadoInfo({ employee }: { employee: Employee }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginTop={2}
       >
@@ -44,7 +45,7 @@ function EmpleadoInfo({ employee }: { employee: Employee }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
         >
           {formatMoney(employee.salarioCentavos)}
@@ -66,9 +67,15 @@ export function EmpleadoListItem({
   onEdit: () => void;
   onDelete: () => void;
 }): ReactElement {
+  const { t } = useTranslation();
   return (
     <Card padding="md" fullWidth testID={`empleado-row-${index}`}>
-      <Pressable onPress={onEdit} testID={`empleado-edit-${index}`}>
+      <Pressable
+        onPress={onEdit}
+        testID={`empleado-edit-${index}`}
+        role="button"
+        aria-label={t('empleados.editAriaLabel', { name: employee.nombre })}
+      >
         <View flexDirection="row" alignItems="center" gap={12}>
           <EmpleadoInfo employee={employee} />
           <Btn
@@ -76,6 +83,7 @@ export function EmpleadoListItem({
             size="sm"
             onPress={onDelete}
             testID={`empleado-delete-${index}`}
+            ariaLabel={t('empleados.deleteAriaLabel', { name: employee.nombre })}
             icon={<Icon name="trash-2" size={16} color={colors.red} />}
           />
         </View>

@@ -8,7 +8,7 @@ import { Text, View } from '@tamagui/core';
 import { formatMoney, type CajaTurno } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CajaTurnoCardProps {
   readonly turno: CajaTurno;
@@ -30,9 +30,7 @@ export function CajaTurnoCard(props: CajaTurnoCardProps): ReactElement {
         <TurnoHeader fecha={turno.fecha} diff={turno.diferenciaCentavos} />
         <TurnoAmounts turno={turno} t={t} />
         <TurnoDiffLine diff={turno.diferenciaCentavos} t={t} />
-        {turno.discrepancyReason !== null && (
-          <Tag variant="neutral">{turno.discrepancyReason}</Tag>
-        )}
+        {turno.discrepancyReason !== null && <Tag variant="neutral">{turno.discrepancyReason}</Tag>}
       </View>
     </Card>
   );
@@ -46,7 +44,7 @@ function TurnoHeader(props: { fecha: string; diff: bigint | null }): ReactElemen
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
       >
         {props.fecha}
@@ -64,7 +62,7 @@ function TurnoAmounts(props: { turno: CajaTurno; t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
       >
         {props.t('cajaReportes.apertura')}: {formatMoney(props.turno.montoAperturaCentavos)}
@@ -73,7 +71,7 @@ function TurnoAmounts(props: { turno: CajaTurno; t: T }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={13}
+          fontSize={fontSizes.sm}
           color={colors.gray600}
         >
           {props.t('cajaReportes.cierre')}: {formatMoney(props.turno.montoCierreCentavos)}
@@ -84,10 +82,10 @@ function TurnoAmounts(props: { turno: CajaTurno; t: T }): ReactElement {
 }
 
 function diferenciaColor(diferencia: bigint | null): string {
-  if (diferencia === null) return colors.gray400;
-  if (diferencia === 0n) return colors.green;
-  if (diferencia < 0n) return colors.red;
-  return colors.warning;
+  if (diferencia === null) return colors.textMuted;
+  if (diferencia === 0n) return colors.greenText;
+  if (diferencia < 0n) return colors.redText;
+  return colors.warningText;
 }
 
 function TurnoDiffLine(props: { diff: bigint | null; t: T }): ReactElement | null {
@@ -96,7 +94,7 @@ function TurnoDiffLine(props: { diff: bigint | null; t: T }): ReactElement | nul
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold}
-      fontSize={13}
+      fontSize={fontSizes.sm}
       color={diferenciaColor(props.diff)}
     >
       {props.t('cajaReportes.diferencia')}: {formatMoney(props.diff)}

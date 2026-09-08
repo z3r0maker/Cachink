@@ -13,7 +13,7 @@ import type { Expense } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Btn, Modal, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface EgresoDetailPopoverProps {
   readonly open: boolean;
@@ -33,8 +33,8 @@ function DetailBody({ egreso }: { egreso: Expense }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
-        color={colors.red}
+        fontSize={fontSizes.xl5}
+        color={colors.redText}
         letterSpacing={typography.letterSpacing.tighter}
       >
         −{formatMoney(egreso.monto)}

@@ -16,7 +16,7 @@ import type { Business } from '@cachink/domain';
 import { Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { SettingsNavSection } from './settings-nav-section';
 import type { OtrosItem } from '../Otros/otros-items';
 
@@ -64,7 +64,7 @@ function CategoryCard(props: CategoryCardProps): ReactElement {
             <Text
               fontFamily={typography.fontFamily}
               fontWeight={typography.weights.semibold}
-              fontSize={16}
+              fontSize={fontSizes.lg}
               color={colors.black}
             >
               {props.title}
@@ -72,7 +72,7 @@ function CategoryCard(props: CategoryCardProps): ReactElement {
             <Text
               fontFamily={typography.fontFamily}
               fontWeight={typography.weights.medium}
-              fontSize={13}
+              fontSize={fontSizes.sm}
               color={colors.gray600}
               marginTop={2}
             >

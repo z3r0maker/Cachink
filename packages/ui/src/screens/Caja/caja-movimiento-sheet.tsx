@@ -13,12 +13,8 @@ import { ZERO } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
 import { Icon } from '../../components/Icon/index';
 import { Input } from '../../components/Input/index';
-import {
-  Numpad,
-  NumpadDisplay,
-  useNumpadInput,
-} from '../../components/Numpad/index';
-import { colors, typography } from '../../theme';
+import { Numpad, NumpadDisplay, useNumpadInput } from '../../components/Numpad/index';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CajaMovimientoSheetProps {
   readonly open: boolean;
@@ -109,7 +105,7 @@ function MovimientoQuestion(props: { label: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold.toString()}
-      fontSize={16}
+      fontSize={fontSizes.lg}
       color={colors.gray600}
       textAlign="center"
     >

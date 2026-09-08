@@ -12,7 +12,7 @@
  */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { Card } from '../Card/index';
 import { SectionTitle } from '../SectionTitle/index';
 import { SplitPane } from './split-pane';
@@ -31,7 +31,7 @@ function ListPane(): React.ReactElement {
             color={colors.black}
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={14}
+            fontSize={fontSizes.md}
           >
             {row.concepto}
           </Text>
@@ -39,7 +39,7 @@ function ListPane(): React.ReactElement {
             color={colors.gray600}
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={13}
+            fontSize={fontSizes.sm}
             marginTop={4}
           >
             {row.monto}
@@ -59,7 +59,7 @@ function DetailPane(): React.ReactElement {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={20}
+          fontSize={fontSizes.xl2}
         >
           Pan dulce · Caja 12
         </Text>
@@ -67,7 +67,7 @@ function DetailPane(): React.ReactElement {
           color={colors.ink}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={13}
+          fontSize={fontSizes.sm}
           marginTop={8}
         >
           Vendido el 26 abr 2026 · Método: Efectivo · $1,200.00 MXN

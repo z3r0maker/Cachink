@@ -21,7 +21,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export type KpiTone = 'neutral' | 'positive' | 'negative';
 
@@ -72,7 +72,7 @@ function Label({ text }: { text: string }): ReactElement {
       color={colors.gray600}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={11}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       // Audit 9.3 — long Spanish KPI labels ("CUENTAS POR COBRAR",
       // "MARGEN OPERATIVO") wrap on the narrow KPI columns at phone
@@ -96,7 +96,7 @@ function Value({ text, color }: { text: string; color: string }): ReactElement {
       color={color}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.black}
-      fontSize={36}
+      fontSize={fontSizes.xl6}
       letterSpacing={typography.letterSpacing.tightest}
       marginTop={6}
       // Audit 9.3 — KPI values like "$1,250,000.00" can exceed the
@@ -120,10 +120,10 @@ function Hint({ text }: { text: string }): ReactElement {
   return (
     <Text
       testID="kpi-hint"
-      color={colors.gray400}
+      color={colors.textMuted}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={13}
+      fontSize={fontSizes.sm}
       marginTop={4}
       // Audit 9.3 — hints like "vs. ayer +12%" or "5 productos bajo
       // umbral" are short but the KPI column is narrow. Cap to two

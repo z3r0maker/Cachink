@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
 import { Pressable, TextInput, type ViewStyle } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { InputError } from '../Input/input-shared';
 
 export interface StepperFieldProps {
@@ -90,7 +90,7 @@ function StepButton({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={colors.black}
       >
         {label}
@@ -105,7 +105,7 @@ const INPUT_STYLE = {
   textAlign: 'center' as const,
   fontFamily: typography.fontFamily,
   fontWeight: 'bold' as const,
-  fontSize: 18,
+  fontSize: fontSizes.xl,
   color: colors.black,
   borderWidth: 2,
   borderColor: colors.black,
@@ -143,7 +143,7 @@ function StepperCenter(props: StepperCenterProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.black}
         textAlign="center"
         minWidth={56}
@@ -183,7 +183,7 @@ export function StepperField(props: StepperFieldProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}

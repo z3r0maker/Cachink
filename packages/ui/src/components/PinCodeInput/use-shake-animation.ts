@@ -6,6 +6,7 @@
  */
 import { useRef, useCallback } from 'react';
 import { Animated, Easing } from 'react-native';
+import { useReducedMotion } from '../../hooks/use-reduced-motion';
 
 const SHAKE_DISTANCE = 10;
 const SHAKE_DURATION = 60;
@@ -23,8 +24,16 @@ export function useShakeAnimation(): {
   triggerShake: () => void;
 } {
   const translateX = useRef(new Animated.Value(0)).current;
+  const reduced = useReducedMotion();
 
   const triggerShake = useCallback(() => {
+    // A shake is a textbook vestibular trigger. Under reduced motion it is
+    // skipped entirely: the wrong-PIN error is already carried by the field's
+    // error colour and copy, so no information depends on the movement.
+    if (reduced) {
+      translateX.setValue(0);
+      return;
+    }
     const steps = SHAKE_SEQUENCE.map((toValue) =>
       Animated.timing(translateX, {
         toValue,
@@ -34,7 +43,7 @@ export function useShakeAnimation(): {
       }),
     );
     Animated.sequence(steps).start();
-  }, [translateX]);
+  }, [translateX, reduced]);
 
   return { translateX, triggerShake };
 }

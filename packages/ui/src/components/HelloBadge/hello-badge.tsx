@@ -18,7 +18,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, shadows, typography } from '../../theme';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 
 export interface HelloBadgeProps {
   /** Text shown in the small uppercase label row. Defaults to "CACHINK!". */
@@ -36,7 +36,7 @@ function LabelText({ children }: { children: string }): ReactElement {
       color={colors.black}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       // textTransform is a web/RN-compatible style; Tamagui passes it through.
       style={{ textTransform: 'uppercase' }}
@@ -53,7 +53,7 @@ function GreetingText({ children }: { children: string }): ReactElement {
       color={colors.ink}
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.black}
-      fontSize={24}
+      fontSize={fontSizes.xl3}
       letterSpacing={typography.letterSpacing.tight}
       marginTop={6}
     >

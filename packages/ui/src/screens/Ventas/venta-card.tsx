@@ -11,7 +11,7 @@ import { Text, View } from '@tamagui/core';
 import type { Sale } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface VentaCardProps {
   readonly venta: Sale;
@@ -35,7 +35,7 @@ function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={16}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {venta.concepto}
@@ -44,7 +44,7 @@ function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             color={colors.gray600}
           >
             {venta.hora}
@@ -61,7 +61,7 @@ function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }
 }
 
 export function VentaCard(props: VentaCardProps): ReactElement {
-  const montoColor = props.venta.estadoPago === 'pendiente' ? colors.warning : colors.black;
+  const montoColor = props.venta.estadoPago === 'pendiente' ? colors.warningText : colors.black;
   return (
     <Card
       testID={props.testID ?? `venta-card-${props.venta.id}`}
@@ -75,7 +75,7 @@ export function VentaCard(props: VentaCardProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={20}
+          fontSize={fontSizes.xl2}
           color={montoColor}
         >
           {formatMoney(props.venta.monto)}

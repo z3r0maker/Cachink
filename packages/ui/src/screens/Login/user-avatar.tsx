@@ -14,16 +14,17 @@ import { Animated, Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { User, UserId } from '@cachink/domain';
 import { Tag } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { useAvatarFade, useAvatarScale } from './login-animations';
+import { useTranslation } from '../../i18n/index';
 
 /** Map avatarColor domain strings → valid theme hex values. */
 const AVATAR_COLOR_MAP: Record<string, string> = {
   blue: colors.blue,
   green: colors.green,
   red: colors.red,
-  purple: '#8B5CF6',
-  cyan: '#06B6D4',
+  purple: colors.purple,
+  cyan: colors.cyan,
   slate: colors.gray600,
 };
 
@@ -106,7 +107,7 @@ function AvatarContent(props: { user: User; selected: boolean }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         textAlign="center"
         numberOfLines={2}
@@ -129,12 +130,18 @@ export function UserAvatar(props: {
   readonly selected: boolean;
   readonly anySelected: boolean;
 }): ReactElement {
+  const { t } = useTranslation();
   const fade = useAvatarFade(props.selected, props.anySelected);
   const scale = useAvatarScale(props.selected);
 
   return (
     <Animated.View style={{ opacity: fade, transform: [{ scale }] }}>
-      <Pressable onPress={props.onPress} testID={`user-avatar-${props.user.id}`}>
+      <Pressable
+        onPress={props.onPress}
+        testID={`user-avatar-${props.user.id}`}
+        role="button"
+        aria-label={t('login.avatarAriaLabel', { name: props.user.nombre })}
+      >
         <AvatarContent user={props.user} selected={props.selected} />
       </Pressable>
     </Animated.View>

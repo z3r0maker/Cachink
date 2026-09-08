@@ -10,7 +10,7 @@ import { useMemo, type ReactElement } from 'react';
 import { Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import WheelPicker from 'react-native-wheely';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { InputError } from '../Input/input-shared';
 
 export interface WheelQuantityPickerProps {
@@ -55,7 +55,7 @@ function FieldLabel({ label }: { label: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.bold}
-      fontSize={12}
+      fontSize={fontSizes.xs}
       letterSpacing={typography.letterSpacing.wide}
       color={colors.gray600}
       style={{ textTransform: 'uppercase' }}
@@ -75,7 +75,7 @@ const INDICATOR_STYLE = {
 const ITEM_TEXT_STYLE = {
   fontFamily: typography.fontFamily,
   fontWeight: String(typography.weights.black) as unknown as TextStyleWeight,
-  fontSize: 20,
+  fontSize: fontSizes.xl2,
   color: colors.black,
 };
 

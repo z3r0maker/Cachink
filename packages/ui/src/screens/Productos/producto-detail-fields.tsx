@@ -13,9 +13,10 @@ import { Text, View } from '@tamagui/core';
 import type { InventoryCategory, ProductIcon } from '@cachink/domain';
 import { resolveProductIcon } from '@cachink/domain';
 import { ColorSwatchPicker, Icon, Input } from '../../components/index';
+import { useTranslation } from '../../i18n/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { StepperField, TextField } from '../../components/fields/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { INV_CATEGORIAS } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
 
@@ -54,17 +55,23 @@ export function IconArea(props: {
   onSelectIcon: () => void;
   t: T;
 }): ReactElement {
+  const { t } = useTranslation();
   const resolved = resolveProductIcon(props.icono, props.categoria);
   return (
     <View alignItems="center" gap={6} marginBottom={8}>
-      <Pressable onPress={props.onSelectIcon} testID="detail-icon-tap">
+      <Pressable
+        onPress={props.onSelectIcon}
+        testID="detail-icon-tap"
+        role="button"
+        aria-label={t('productos.selectIconAriaLabel')}
+      >
         <Icon name={resolved as IconName} size={48} color={colors.black} />
       </Pressable>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
-        color={colors.blue}
+        fontSize={fontSizes.sm}
+        color={colors.blueText}
         onPress={props.onSelectIcon}
         testID="detail-change-icon-link"
       >

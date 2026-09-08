@@ -16,7 +16,7 @@ import { Btn } from '../../components/index';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CajaHandoffBannerProps {
   readonly otherUserName: string;
@@ -33,7 +33,7 @@ export function CajaHandoffBanner(props: CajaHandoffBannerProps): ReactElement {
     <Card variant="white" padding="lg" fullWidth testID={props.testID ?? 'caja-handoff-banner'}>
       <View gap={12}>
         <HandoffHeader name={props.otherUserName} t={t} />
-        <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
           {t('caja.handoffDescription', { monto: formatMoney(props.openingAmount) })}
         </Text>
         <HandoffActions
@@ -52,11 +52,11 @@ type T = ReturnType<typeof useTranslation>['t'];
 function HandoffHeader(props: { name: string; t: T }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={10}>
-      <Icon name="users" size={24} color={colors.green} />
+      <Icon name="users" size={24} color={colors.greenText} />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={'700'}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
         flex={1}
       >
@@ -83,12 +83,7 @@ function HandoffActions(props: {
       >
         {props.t('caja.handoffConfirm')}
       </Btn>
-      <Btn
-        variant="ghost"
-        onPress={props.onDifferent}
-        fullWidth
-        testID="caja-handoff-different"
-      >
+      <Btn variant="ghost" onPress={props.onDifferent} fullWidth testID="caja-handoff-different">
         {props.t('caja.handoffDifferent')}
       </Btn>
     </View>

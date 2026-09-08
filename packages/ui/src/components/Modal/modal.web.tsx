@@ -23,7 +23,7 @@ import type { ModalProps } from './modal';
 /** Top of the §8.3 radii scale — matches the mock's 24 intent. */
 const MODAL_RADIUS = radii[7]; // 22
 /** Universal overlay color — not a brand token, same as every other app's backdrop. */
-const BACKDROP = 'rgba(0,0,0,0.5)';
+const BACKDROP = colors.scrim;
 
 // Inline styles only carry purely-presentational values that don't fight
 // Tamagui's defaults. Positioning props are passed as Tamagui props below

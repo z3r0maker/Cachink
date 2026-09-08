@@ -11,20 +11,13 @@
  *      path when consent is off)
  */
 
-import React, { useCallback, useState, type ReactElement } from 'react';
+import React, { type ReactElement } from 'react';
 import { ScrollView, TextInput } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import {
-  scrubRecord,
-  formatTimelineAsText,
-  type BugReport,
-  type DeviceContext,
-  type LogSnapshot,
-  type RemoteLogStore,
-  type TimelineEntry,
-} from '@cachink/observability';
+import type { DeviceContext, RemoteLogStore } from '@cachink/observability';
 import { Btn } from '../../components/index';
-import { useLogStore } from '../../observability/observability-provider';
+import { useBugReportSubmit } from './use-bug-report-submit';
+import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 
 export interface BugReportSheetProps {
   readonly visible: boolean;
@@ -42,37 +35,14 @@ export interface BugReportSheetProps {
   readonly testID?: string;
 }
 
-function scrubSnapshot(snapshot: LogSnapshot) {
-  return {
-    ...snapshot,
-    auditEvents: snapshot.auditEvents.map((e) => ({
-      ...e,
-      metadata: e.metadata ? scrubRecord(e.metadata) : undefined,
-    })),
-    errors: snapshot.errors.map((e) => ({
-      ...e,
-      context: e.context ? scrubRecord(e.context) : undefined,
-      errorStack: undefined,
-    })),
-  };
-}
-
-function buildTimeline(snapshot: LogSnapshot): string {
-  const allEntries: readonly TimelineEntry[] = [
-    ...snapshot.auditEvents.map((e) => ({ type: 'audit' as const, ...e })),
-    ...snapshot.errors.map((e) => ({ type: 'error' as const, ...e })),
-  ].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
-  return formatTimelineAsText(allEntries);
-}
-
 const INPUT_STYLE = {
-  borderWidth: 1,
-  borderColor: '#ccc',
+  borderWidth: 2,
+  borderColor: colors.black,
   borderRadius: 8,
   padding: 12,
   minHeight: 100,
   textAlignVertical: 'top' as const,
-  fontSize: 14,
+  fontSize: fontSizes.md,
 };
 
 function BugReportShell({
@@ -88,13 +58,11 @@ function BugReportShell({
       bottom={0}
       left={0}
       right={0}
-      backgroundColor="$background"
-      borderTopLeftRadius="$4"
-      borderTopRightRadius="$4"
+      backgroundColor={colors.white}
+      borderTopLeftRadius={radii[3]}
+      borderTopRightRadius={radii[3]}
       maxHeight="60%"
-      shadowColor="black"
-      shadowOpacity={0.2}
-      shadowRadius={10}
+      boxShadow={shadows.hero}
       testID={testID}
     >
       {children}
@@ -107,11 +75,11 @@ function BugReportHeader({ onClose }: { onClose: () => void }): ReactElement {
     <View
       flexDirection="row"
       justifyContent="space-between"
-      padding="$3"
+      padding={12}
       borderBottomWidth={1}
-      borderBottomColor="$borderColor"
+      borderBottomColor={colors.black}
     >
-      <Text fontSize="$4" fontWeight="700">
+      <Text fontSize={fontSizes.lg} fontWeight={typography.weights.bold}>
         Enviar Reporte
       </Text>
       <Btn size="sm" variant="ghost" onPress={onClose}>
@@ -127,7 +95,7 @@ function BugReportBody(props: {
 }): ReactElement {
   return (
     <ScrollView style={{ padding: 12 }}>
-      <Text fontSize="$2" color="$colorSubtle" marginBottom="$2">
+      <Text fontSize={fontSizes.sm} color={colors.gray600} marginBottom={8}>
         Describe el problema que encontraste. Se adjuntarán automáticamente los últimos 50 eventos y
         20 errores (sin datos personales).
       </Text>
@@ -144,6 +112,44 @@ function BugReportBody(props: {
   );
 }
 
+/** Cancel plus the primary action, which sends remotely when that is wired up. */
+function PrimaryActions(props: {
+  onClose: () => void;
+  onSubmitRemote?: () => void;
+  onSubmitShare: () => void;
+  disabled: boolean;
+  isExporting: boolean;
+  showRemoteSubmit: boolean;
+}): ReactElement {
+  const remote = props.showRemoteSubmit && props.onSubmitRemote !== undefined;
+  return (
+    <View flexDirection="row" gap={8}>
+      <View flex={1}>
+        <Btn variant="outline" fullWidth onPress={props.onClose}>
+          Cancelar
+        </Btn>
+      </View>
+      <View flex={1}>
+        <Btn
+          variant="primary"
+          fullWidth
+          onPress={remote ? props.onSubmitRemote : props.onSubmitShare}
+          disabled={props.disabled}
+          testID={remote ? 'bug-report-submit-btn' : 'bug-report-share-btn'}
+        >
+          {remote
+            ? props.isExporting
+              ? 'Enviando…'
+              : 'Enviar Reporte'
+            : props.isExporting
+              ? 'Exportando…'
+              : 'Compartir Reporte'}
+        </Btn>
+      </View>
+    </View>
+  );
+}
+
 function BugReportActions(props: {
   onClose: () => void;
   onSubmitRemote?: () => void;
@@ -154,151 +160,26 @@ function BugReportActions(props: {
   statusMessage?: string;
 }): ReactElement {
   return (
-    <View padding="$3" gap="$2" borderTopWidth={1} borderTopColor="$borderColor">
+    <View padding={12} gap={8} borderTopWidth={2} borderTopColor={colors.black}>
       {props.statusMessage && (
-        <Text fontSize="$1" color="$colorSubtle" textAlign="center">
+        <Text fontSize={fontSizes.xs} color={colors.gray600} textAlign="center">
           {props.statusMessage}
         </Text>
       )}
-      <View flexDirection="row" gap="$2">
-        <View flex={1}>
-          <Btn variant="outline" fullWidth onPress={props.onClose}>
-            Cancelar
-          </Btn>
-        </View>
-        {props.showRemoteSubmit && props.onSubmitRemote ? (
-          <View flex={1}>
-            <Btn
-              variant="primary"
-              fullWidth
-              onPress={props.onSubmitRemote}
-              disabled={props.disabled}
-              testID="bug-report-submit-btn"
-            >
-              {props.isExporting ? 'Enviando…' : 'Enviar Reporte'}
-            </Btn>
-          </View>
-        ) : (
-          <View flex={1}>
-            <Btn
-              variant="primary"
-              fullWidth
-              onPress={props.onSubmitShare}
-              disabled={props.disabled}
-              testID="bug-report-share-btn"
-            >
-              {props.isExporting ? 'Exportando…' : 'Compartir Reporte'}
-            </Btn>
-          </View>
-        )}
-      </View>
+      <PrimaryActions {...props} />
       {props.showRemoteSubmit && (
-        <Btn variant="ghost" fullWidth onPress={props.onSubmitShare} disabled={props.disabled} testID="bug-report-share-fallback-btn">
+        <Btn
+          variant="ghost"
+          fullWidth
+          onPress={props.onSubmitShare}
+          disabled={props.disabled}
+          testID="bug-report-share-fallback-btn"
+        >
           Compartir como archivo
         </Btn>
       )}
     </View>
   );
-}
-
-function useBugReportSubmit(
-  onShare: BugReportSheetProps['onShare'],
-  onClose: () => void,
-  remote?: RemoteLogStore | null,
-  deviceContext?: DeviceContext | null,
-  featureFlags?: Record<string, boolean> | null,
-) {
-  const logStore = useLogStore();
-  const [description, setDescription] = useState('');
-  const [isExporting, setIsExporting] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<string | undefined>();
-
-  const buildReport = useCallback(async () => {
-    if (!logStore || !description.trim()) return null;
-    const snapshot = await logStore.exportSnapshot({
-      auditLimit: 50,
-      errorLimit: 20,
-    });
-    const readableTimeline = buildTimeline(snapshot);
-    const scrubbed = scrubSnapshot(snapshot);
-    return { snapshot, scrubbed, readableTimeline };
-  }, [logStore, description]);
-
-  const handleRemoteSubmit = useCallback(async () => {
-    if (!remote || !logStore || !description.trim()) return;
-    setIsExporting(true);
-    setStatusMessage(undefined);
-    try {
-      const data = await buildReport();
-      if (!data) return;
-
-      const report: BugReport = {
-        description: description.trim(),
-        deviceId: data.snapshot.deviceId,
-        businessId: null,
-        userId: null,
-        snapshot: {
-          auditEvents: data.scrubbed.auditEvents as readonly Record<string, unknown>[],
-          errors: data.scrubbed.errors as readonly Record<string, unknown>[],
-        },
-        submittedAt: new Date().toISOString(),
-      };
-
-      await remote.sendBugReport(report);
-      setStatusMessage('✓ Reporte enviado');
-      setDescription('');
-      setTimeout(() => {
-        setStatusMessage(undefined);
-        onClose();
-      }, 1500);
-    } catch {
-      setStatusMessage('No se pudo enviar. Intenta compartir como archivo.');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [remote, logStore, description, buildReport, onClose]);
-
-  const handleShareSubmit = useCallback(async () => {
-    if (!logStore || !description.trim()) return;
-    setIsExporting(true);
-    try {
-      const data = await buildReport();
-      if (!data) return;
-      const report = {
-        description: description.trim(),
-        submittedAt: new Date().toISOString(),
-        readableTimeline: data.readableTimeline,
-        snapshot: data.scrubbed,
-        ...(deviceContext ? {
-          deviceModel: deviceContext.model,
-          osName: deviceContext.osName,
-          osVersion: deviceContext.osVersion,
-          appVersion: deviceContext.appVersion,
-          platform: deviceContext.platform,
-        } : {}),
-        ...(featureFlags ? { featureFlags } : {}),
-      };
-      onShare(
-        JSON.stringify(report, null, 2),
-        `cachink-bug-report-${Date.now()}.json`,
-        data.readableTimeline,
-      );
-      setDescription('');
-      onClose();
-    } finally {
-      setIsExporting(false);
-    }
-  }, [logStore, description, buildReport, onShare, onClose, deviceContext, featureFlags]);
-
-  return {
-    logStore,
-    description,
-    setDescription,
-    isExporting,
-    statusMessage,
-    handleRemoteSubmit,
-    handleShareSubmit,
-  };
 }
 
 export function BugReportSheet({

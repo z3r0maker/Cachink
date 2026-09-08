@@ -12,7 +12,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export type BadgeVariant = 'yellow' | 'red';
 
@@ -53,7 +53,7 @@ export function QuantityBadge(props: QuantityBadgeProps): ReactElement | null {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={resolveFg(variant)}
         numberOfLines={1}
       >

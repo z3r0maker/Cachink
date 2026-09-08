@@ -13,7 +13,7 @@ import type { Sale } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Btn, Modal, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface VentaDetailPopoverProps {
   readonly open: boolean;
@@ -34,7 +34,7 @@ function DetailBody({ venta }: { venta: Sale }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
+        fontSize={fontSizes.xl5}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >

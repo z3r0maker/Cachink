@@ -18,7 +18,7 @@ import { useExportarDatos } from '../../hooks/use-exportar-datos';
 import { buildExcelWorkbook } from '../../export/build-excel';
 import { shareFile } from '../../share/share-file';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ExportarDatosActionProps {
   readonly businessName?: string;
@@ -99,7 +99,7 @@ export function ExportarDatosAction(props: ExportarDatosActionProps): ReactEleme
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginBottom={10}
         testID="export-datos-status"

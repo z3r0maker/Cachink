@@ -21,7 +21,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { CenterTrack } from './center-track';
 
 export type GaugeTone = 'neutral' | 'positive' | 'warning' | 'negative';
@@ -100,7 +100,7 @@ function Header(props: HeaderProps): ReactElement | null {
           color={colors.black}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={13}
+          fontSize={fontSizes.sm}
         >
           {props.label}
         </Text>
@@ -111,7 +111,7 @@ function Header(props: HeaderProps): ReactElement | null {
           color={colors.gray600}
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={13}
+          fontSize={fontSizes.sm}
         >
           {props.displayValue}
         </Text>
@@ -206,9 +206,7 @@ export function Gauge(props: GaugeProps): ReactElement {
   const origin = props.origin ?? 'start';
   const formatter = props.valueFormatter ?? defaultFormat;
   const isCenter = origin === 'center';
-  const clamped = isCenter
-    ? clampForCenter(props.value, max)
-    : clampToRange(props.value, max);
+  const clamped = isCenter ? clampForCenter(props.value, max) : clampToRange(props.value, max);
   const formattedValue = formatter(clamped, max);
   const ariaLabel =
     props.label !== undefined ? `${props.label}: ${formattedValue}` : formattedValue;

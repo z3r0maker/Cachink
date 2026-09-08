@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Card, Icon, Tag, type IconName, type TagVariant } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export type WizardCardBulletKind = 'pro' | 'con' | 'requirement';
 
@@ -76,7 +76,7 @@ function BulletRow({ bullet }: { bullet: WizardCardBullet }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={prefix.color}
       >
         {prefix.glyph}
@@ -85,7 +85,7 @@ function BulletRow({ bullet }: { bullet: WizardCardBullet }): ReactElement {
         flex={1}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.ink}
       >
         {bullet.text}
@@ -112,7 +112,7 @@ function TitleRow({ title, chip }: { title: string; chip?: WizardCardChip }): Re
         flex={1}
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={18}
+        fontSize={fontSizes.xl}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >
@@ -140,7 +140,7 @@ function CardGlyph({ emoji, icon }: { emoji?: string; icon?: IconName }): ReactE
       </View>
     );
   }
-  return <Text fontSize={32}>{emoji ?? ''}</Text>;
+  return <Text fontSize={fontSizes.xl5}>{emoji ?? ''}</Text>;
 }
 
 function WizardCardBody(props: WizardCardProps & { chip?: WizardCardChip }): ReactElement {
@@ -152,7 +152,7 @@ function WizardCardBody(props: WizardCardProps & { chip?: WizardCardChip }): Rea
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={13}
+          fontSize={fontSizes.sm}
           color={colors.gray600}
           marginTop={4}
         >
@@ -180,7 +180,7 @@ function DisabledNote({ text, testID }: { text: string; testID?: string }): Reac
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {text}

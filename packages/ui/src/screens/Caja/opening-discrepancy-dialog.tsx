@@ -17,7 +17,7 @@ import { Btn } from '../../components/Btn/btn';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface OpeningDiscrepancyDialogProps {
   readonly previousClose: Money;
@@ -31,9 +31,7 @@ export interface OpeningDiscrepancyDialogProps {
 
 type T = ReturnType<typeof useTranslation>['t'];
 
-export function OpeningDiscrepancyDialog(
-  props: OpeningDiscrepancyDialogProps,
-): ReactElement {
+export function OpeningDiscrepancyDialog(props: OpeningDiscrepancyDialogProps): ReactElement {
   const { t } = useTranslation();
 
   return (
@@ -44,7 +42,7 @@ export function OpeningDiscrepancyDialog(
         newOpening={props.newOpening}
         difference={props.difference}
       />
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
         {t('caja.discrepancyNotice')}
       </Text>
       <DiscrepancyActions
@@ -64,7 +62,7 @@ function DiscrepancyHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={colors.black}
       >
         {t('caja.discrepancyTitle')}
@@ -88,9 +86,7 @@ function DiffCard(props: {
         <DiffRow
           label={t('caja.discrepancyCierreAnterior', { monto: formatMoney(props.previousClose) })}
         />
-        <DiffRow
-          label={t('caja.discrepancyAbriendo', { monto: formatMoney(props.newOpening) })}
-        />
+        <DiffRow label={t('caja.discrepancyAbriendo', { monto: formatMoney(props.newOpening) })} />
         <DiffHighlight
           label={t('caja.discrepancyDiff', { monto: formatMoney(props.difference) })}
           isNegative={isNegative}
@@ -103,7 +99,7 @@ function DiffCard(props: {
 
 function DiffRow(props: { label: string }): ReactElement {
   return (
-    <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+    <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
       {props.label}
     </Text>
   );
@@ -127,7 +123,7 @@ function DiffHighlight(props: {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={props.diffColor}
       >
         {props.label}

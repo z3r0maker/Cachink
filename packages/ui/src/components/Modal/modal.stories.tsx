@@ -19,6 +19,7 @@ import { View } from '@tamagui/core';
 import { Btn } from '../Btn/btn';
 import { Input } from '../Input/input';
 import { Modal, type ModalProps } from './modal';
+import { fontSizes } from '../../theme';
 
 interface ControlledModalProps extends Omit<ModalProps, 'open' | 'onClose'> {
   readonly defaultOpen?: boolean;
@@ -130,7 +131,7 @@ function Text({ children }: { children: string }): ReturnType<typeof View> {
         style={{
           fontFamily: "'Plus Jakarta Sans', sans-serif",
           fontWeight: 500,
-          fontSize: 15,
+          fontSize: fontSizes.lg,
           color: '#1A1A18',
         }}
       >

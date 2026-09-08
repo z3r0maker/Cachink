@@ -11,7 +11,7 @@ import { Text, View } from '@tamagui/core';
 import { ColorSwatchPicker, Icon } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import type { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { ProductoFormApi } from './nuevo-producto-form';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -35,18 +35,18 @@ function IconPickerButton(props: {
         {props.icono ? (
           <Icon name={props.icono as IconName} size={32} color={colors.black} />
         ) : (
-          <Icon name="box" size={32} color={colors.gray400} />
+          <Icon name="box" size={32} color={colors.textMuted} />
         )}
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium.toString()}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
           flex={1}
         >
           {props.label}
         </Text>
-        <Icon name="chevron-right" size={20} color={colors.gray400} />
+        <Icon name="chevron-right" size={20} color={colors.textMuted} />
       </View>
     </Pressable>
   );
@@ -61,9 +61,7 @@ export function AppearanceField({
   t: T;
   onPickIcon?: () => void;
 }): ReactElement {
-  const label = form.state.icono
-    ? t('nuevoProducto.changeIcon')
-    : t('nuevoProducto.selectIcon');
+  const label = form.state.icono ? t('nuevoProducto.changeIcon') : t('nuevoProducto.selectIcon');
   return (
     <>
       {onPickIcon && (

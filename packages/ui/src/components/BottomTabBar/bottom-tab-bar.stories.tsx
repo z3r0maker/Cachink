@@ -9,13 +9,14 @@ import type { ReactElement } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Text, View } from '@tamagui/core';
 import { BottomTabBar } from './bottom-tab-bar';
+import { fontSizes } from '../../theme';
 
 const noop = (): void => {
   /* story-only: tap handler */
 };
 
 function Glyph({ char }: { char: string }): ReactElement {
-  return <Text fontSize={20}>{char}</Text>;
+  return <Text fontSize={fontSizes.xl2}>{char}</Text>;
 }
 
 const meta: Meta<typeof BottomTabBar> = {

@@ -11,7 +11,8 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Pressable } from 'react-native';
 import { Icon } from '../Icon/index';
-import { colors, typography } from '../../theme';
+import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 
 export interface NotificationBadgeProps {
   readonly count: number;
@@ -33,7 +34,7 @@ function CountDot({ label }: { label: string }): ReactElement {
       right={2}
       minWidth={18}
       height={18}
-      borderRadius={9}
+      borderRadius={shapeRadii.pill}
       backgroundColor={colors.red}
       alignItems="center"
       justifyContent="center"
@@ -43,8 +44,8 @@ function CountDot({ label }: { label: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={10}
-        color="#FFFFFF"
+        fontSize={fontSizes.xs}
+        color={colors.white}
         lineHeight={12}
       >
         {label}
@@ -54,14 +55,17 @@ function CountDot({ label }: { label: string }): ReactElement {
 }
 
 export function NotificationBadge(props: NotificationBadgeProps): ReactElement {
+  const { t } = useTranslation();
   const { count, onPress, testID } = props;
   const label = formatBadgeCount(count);
 
   return (
     <Pressable
       onPress={onPress}
-      accessibilityRole="button"
-      accessibilityLabel={`Notificaciones: ${count} sin leer`}
+      role="button"
+      // 36pt glyph + 4pt slop each side = 44pt, the iOS HIG floor.
+      hitSlop={4}
+      aria-label={t('notificaciones.badgeAriaLabel', { count })}
       testID={testID ?? 'notification-badge'}
     >
       <View position="relative" width={36} height={36} alignItems="center" justifyContent="center">

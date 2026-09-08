@@ -9,7 +9,8 @@ import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { formatMoney, type Sale } from '@cachink/domain';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
+import { useTranslation } from '../../i18n/index';
 
 export interface SaleCancelCardProps {
   readonly sale: Sale;
@@ -17,34 +18,27 @@ export interface SaleCancelCardProps {
   readonly testID?: string;
 }
 
-function SaleHeader(props: {
-  sale: Sale;
-  isCancelled: boolean;
-}): ReactElement {
+function SaleHeader(props: { sale: Sale; isCancelled: boolean }): ReactElement {
   return (
     <View flexDirection="row" justifyContent="space-between" alignItems="center">
       <View flex={1} gap={2}>
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold.toString()}
-          fontSize={16}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {props.sale.concepto}
         </Text>
-        <Text
-          fontFamily={typography.fontFamily}
-          fontSize={13}
-          color={colors.gray600}
-        >
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
           {`${props.sale.hora ?? ''} · ${props.sale.metodo}`}
         </Text>
       </View>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={18}
-        color={props.isCancelled ? colors.red : colors.black}
+        fontSize={fontSizes.xl}
+        color={props.isCancelled ? colors.redText : colors.black}
       >
         {formatMoney(props.sale.monto)}
       </Text>
@@ -55,23 +49,21 @@ function SaleHeader(props: {
 function CancelBadge(props: { motivo: string }): ReactElement {
   return (
     <View backgroundColor={colors.redSoft} borderRadius={radii[0]} padding={8}>
-      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.red}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.redText}>
         {`🔴 Cancelada · ${props.motivo}`}
       </Text>
     </View>
   );
 }
 
-function CancelButton(props: {
-  saleId: string;
-  onCancel: () => void;
-}): ReactElement {
+function CancelButton(props: { saleId: string; onCancel: () => void }): ReactElement {
+  const { t } = useTranslation();
   return (
     <Pressable
       onPress={props.onCancel}
       testID={`cancel-btn-${props.saleId}`}
-      accessibilityRole="button"
-      accessibilityLabel="Cancelar venta"
+      role="button"
+      aria-label={t('cancelaciones.cancelSaleAriaLabel')}
     >
       <View
         backgroundColor={colors.redSoft}
@@ -83,19 +75,17 @@ function CancelButton(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold.toString()}
-          fontSize={14}
-          color={colors.red}
+          fontSize={fontSizes.md}
+          color={colors.redText}
         >
-          Cancelar
+          {t('cancelaciones.cancelSale')}
         </Text>
       </View>
     </Pressable>
   );
 }
 
-export function SaleCancelCard(
-  props: SaleCancelCardProps,
-): ReactElement {
+export function SaleCancelCard(props: SaleCancelCardProps): ReactElement {
   const { sale } = props;
   const isCancelled = sale.cancelledAt !== null || sale.deletedAt !== null;
 
@@ -111,9 +101,7 @@ export function SaleCancelCard(
       testID={props.testID}
     >
       <SaleHeader sale={sale} isCancelled={isCancelled} />
-      {isCancelled && sale.cancelMotivo && (
-        <CancelBadge motivo={sale.cancelMotivo} />
-      )}
+      {isCancelled && sale.cancelMotivo && <CancelBadge motivo={sale.cancelMotivo} />}
       {!isCancelled && props.onCancel && (
         <CancelButton saleId={sale.id} onCancel={props.onCancel} />
       )}

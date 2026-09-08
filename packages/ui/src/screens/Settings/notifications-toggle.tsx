@@ -11,7 +11,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface NotificationsToggleProps {
   readonly enabled: boolean;
@@ -28,7 +28,7 @@ export function NotificationsToggle(props: NotificationsToggleProps): ReactEleme
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             letterSpacing={typography.letterSpacing.wide}
             color={colors.gray600}
             style={{ textTransform: 'uppercase' }}
@@ -38,7 +38,7 @@ export function NotificationsToggle(props: NotificationsToggleProps): ReactEleme
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={14}
+            fontSize={fontSizes.md}
             color={colors.gray600}
             marginTop={4}
           >

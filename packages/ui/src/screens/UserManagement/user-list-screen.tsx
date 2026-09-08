@@ -11,7 +11,7 @@ import { Text, View } from '@tamagui/core';
 import type { User } from '@cachink/domain';
 import { Btn, Card, Icon, InitialsAvatar, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface UserListScreenProps {
   readonly users: readonly User[];
@@ -19,6 +19,36 @@ export interface UserListScreenProps {
   readonly onEditUser: (user: User) => void;
   readonly onDeleteUser: (user: User) => void;
   readonly testID?: string;
+}
+
+/** Edit / delete actions for one user row. Split out to keep `UserRow` inside
+ *  the §2.6 40-line budget once both actions carry accessible names. */
+function UserRowActions(props: {
+  readonly user: User;
+  readonly onEdit: () => void;
+  readonly onDelete: () => void;
+}): ReactElement {
+  const { t } = useTranslation();
+  return (
+    <>
+      <Pressable
+        onPress={props.onEdit}
+        testID={`user-edit-${props.user.id}`}
+        role="button"
+        aria-label={t('userManagement.editAriaLabel', { name: props.user.nombre })}
+      >
+        <Icon name="pencil" size={18} color={colors.gray600} />
+      </Pressable>
+      <Pressable
+        onPress={props.onDelete}
+        testID={`user-del-${props.user.id}`}
+        role="button"
+        aria-label={t('userManagement.deleteAriaLabel', { name: props.user.nombre })}
+      >
+        <Icon name="trash-2" size={18} color={colors.red} />
+      </Pressable>
+    </>
+  );
 }
 
 function UserRow(props: {
@@ -34,21 +64,16 @@ function UserRow(props: {
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.bold}
-            fontSize={15}
+            fontSize={fontSizes.lg}
             color={colors.black}
           >
             {props.user.nombre}
           </Text>
-          <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600}>
+          <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
             {props.user.role === 'director' ? 'Director' : 'Operativo'}
           </Text>
         </View>
-        <Pressable onPress={props.onEdit} testID={`user-edit-${props.user.id}`}>
-          <Icon name="pencil" size={18} color={colors.gray600} />
-        </Pressable>
-        <Pressable onPress={props.onDelete} testID={`user-del-${props.user.id}`}>
-          <Icon name="trash-2" size={18} color={colors.red} />
-        </Pressable>
+        <UserRowActions user={props.user} onEdit={props.onEdit} onDelete={props.onDelete} />
       </View>
     </Card>
   );
@@ -66,7 +91,7 @@ export function UserListScreen(props: UserListScreenProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={28}
+          fontSize={fontSizes.xl4}
           color={colors.black}
         >
           {t('userManagement.title')}

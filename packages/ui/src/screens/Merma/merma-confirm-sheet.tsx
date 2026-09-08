@@ -10,7 +10,7 @@ import { Text, View } from '@tamagui/core';
 import type { Product } from '@cachink/domain';
 import { Btn, Input, IntegerField, TextField } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface MermaConfirmSheetProps {
   readonly producto: Product;
@@ -111,12 +111,12 @@ export function MermaConfirmSheet(props: MermaConfirmSheetProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
+        fontSize={fontSizes.xl2}
         color={colors.black}
       >
         {t('merma.registrar')}
       </Text>
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray600}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
         {props.producto.nombre}
       </Text>
       <MermaFormFields

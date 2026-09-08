@@ -11,8 +11,9 @@ import { useEffect, useRef } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Input as TamaguiInput } from '@tamagui/input';
 import { Icon } from '../Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import type { ComboboxOption } from './combobox-types';
+import { useTranslation } from '../../i18n/index';
 
 /** Trigger radius — same 12 as `<Input type="text">`. */
 const TRIGGER_RADIUS = radii[2];
@@ -55,8 +56,8 @@ export function TriggerView(props: TriggerViewProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={15}
-        color={props.isPlaceholder ? colors.gray400 : colors.ink}
+        fontSize={fontSizes.lg}
+        color={props.isPlaceholder ? colors.textMuted : colors.ink}
       >
         {props.displayText}
       </Text>
@@ -72,6 +73,7 @@ export interface SearchInputProps {
 }
 
 export function SearchInput(props: SearchInputProps): ReactElement {
+  const { t } = useTranslation();
   // Audit M-1 PR 5 (audit 5.5): the bare `autoFocus` prop on
   // TamaguiInput is unreliable across Tamagui's open-animation cycle
   // — browsers sometimes drop the focus call when the popover's
@@ -91,17 +93,17 @@ export function SearchInput(props: SearchInputProps): ReactElement {
         testID="combobox-search"
         value={props.value}
         onChangeText={props.onChange}
-        placeholder="Buscar..."
-        aria-label="Buscar opciones"
+        placeholder={t('forms.combobox.searchPlaceholder')}
+        aria-label={t('forms.combobox.searchAriaLabel')}
         autoFocus={props.autoFocus}
-        placeholderTextColor="$gray400"
+        placeholderTextColor="$placeholderColor"
         borderColor={colors.black}
         borderWidth={2}
         focusStyle={{ borderWidth: 2.5, borderColor: colors.black }}
         borderRadius={TRIGGER_RADIUS}
         paddingHorizontal={12}
         paddingVertical={9}
-        fontSize={14}
+        fontSize={fontSizes.md}
         fontWeight={typography.weights.medium}
         color={colors.ink}
         backgroundColor={colors.white}
@@ -137,7 +139,7 @@ export function OptionRow<T extends string>(props: OptionRowProps<T>): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={props.selected ? typography.weights.bold : typography.weights.medium}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.ink}
       >
         {props.option.label}
@@ -152,8 +154,8 @@ export function EmptyRow(): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
-        color={colors.gray400}
+        fontSize={fontSizes.md}
+        color={colors.textMuted}
       >
         Sin resultados
       </Text>

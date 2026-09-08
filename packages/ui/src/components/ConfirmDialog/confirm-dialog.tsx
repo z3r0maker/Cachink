@@ -31,7 +31,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn } from '../Btn';
 import { Modal } from '../Modal';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { notificationSuccess } from '../../haptics/index';
 
 export interface ConfirmDialogProps {
@@ -50,7 +50,7 @@ function Description({ children }: { children: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={14}
+      fontSize={fontSizes.md}
       color={colors.ink}
       marginBottom={16}
     >

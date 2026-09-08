@@ -11,7 +11,7 @@ import type { Business } from '@cachink/domain';
 import { Btn, Card, Icon, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { AppMode } from '../../app-config/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { FeedbackActionProps } from './feedback-action';
 import { EditBusinessModal } from './edit-business-modal';
 import { IsrDefaultsCard } from './isr-defaults-card';
@@ -101,7 +101,7 @@ function SettingsRow({ label, value }: { label: string; value: string }): ReactE
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -111,7 +111,7 @@ function SettingsRow({ label, value }: { label: string; value: string }): ReactE
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {value}
@@ -163,7 +163,7 @@ function LanguageCard({ t }: { t: T }): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           letterSpacing={typography.letterSpacing.wide}
           color={colors.gray600}
           style={{ textTransform: 'uppercase' }}
@@ -182,11 +182,16 @@ function FuncionesCard(props: { label: string; onPress: () => void }): ReactElem
       <View flexDirection="row" alignItems="center" justifyContent="space-between">
         <View flexDirection="row" alignItems="center" gap={8}>
           <Icon name="sliders" size={18} color={colors.black} />
-          <Text fontFamily={typography.fontFamily} fontWeight={typography.weights.semibold} fontSize={15} color={colors.black}>
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.semibold}
+            fontSize={fontSizes.lg}
+            color={colors.black}
+          >
             {props.label}
           </Text>
         </View>
-        <Icon name="chevron-right" size={16} color={colors.gray400} />
+        <Icon name="chevron-right" size={16} color={colors.textMuted} />
       </View>
     </Card>
   );
@@ -202,11 +207,16 @@ function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void
     >
       <SectionTitle title={props.t('settings.title')} />
       <Card testID="settings-mode-card" padding="md" fullWidth>
-        <SettingsRow label={props.t('settings.modoLabel')} value={props.t(modeLabelKey(props.mode) as 'wizard.modeNames.local')} />
+        <SettingsRow
+          label={props.t('settings.modoLabel')}
+          value={props.t(modeLabelKey(props.mode) as 'wizard.modeNames.local')}
+        />
       </Card>
       <BusinessCard business={props.business} t={props.t} onEdit={props.onEdit} />
       <IsrDefaultsCard />
-      {props.onOpenFunciones && <FuncionesCard label={props.t('settings.funciones')} onPress={props.onOpenFunciones} />}
+      {props.onOpenFunciones && (
+        <FuncionesCard label={props.t('settings.funciones')} onPress={props.onOpenFunciones} />
+      )}
       {isLan && props.lanDetails && <LanSection lan={props.lanDetails} />}
       <LanguageCard t={props.t} />
       <SettingsTail props={props} t={props.t} />

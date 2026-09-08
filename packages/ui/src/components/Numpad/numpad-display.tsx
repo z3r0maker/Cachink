@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { View, Text } from '@tamagui/core';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface NumpadDisplayProps {
   /** Display text, e.g. "$500.00" */
@@ -30,7 +30,7 @@ export function NumpadDisplay(props: NumpadDisplayProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={36}
+        fontSize={fontSizes.xl6}
         color={colors.black}
         numberOfLines={1}
       >

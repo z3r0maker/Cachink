@@ -12,7 +12,7 @@ import { formatMoney } from '@cachink/domain';
 import type { Product } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { PRODUCT_BG_COLORS } from '../../product-colors';
 
 export interface ProductoCardProps {
@@ -36,7 +36,7 @@ function ProductoInfo({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {producto.nombre}
@@ -64,15 +64,15 @@ function ProductoAmount({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
-        color={isLow ? colors.red : colors.black}
+        fontSize={fontSizes.xl2}
+        color={isLow ? colors.redText : colors.black}
       >
         {stock}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {formatMoney(costo)}

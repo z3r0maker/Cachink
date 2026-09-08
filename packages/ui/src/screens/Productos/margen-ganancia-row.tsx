@@ -10,7 +10,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { fromPesos, formatMoney, calcularMargenProducto, type Money } from '@cachink/domain';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { useTranslation } from '../../i18n/index';
 
 type T = ReturnType<typeof useTranslation>['t'];
@@ -68,7 +68,7 @@ function Row(props: { label: string; value: string; negative: boolean }): ReactE
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
       >
         {props.label}
@@ -76,8 +76,8 @@ function Row(props: { label: string; value: string; negative: boolean }): ReactE
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
-        color={props.negative ? colors.red : colors.ink}
+        fontSize={fontSizes.sm}
+        color={props.negative ? colors.redText : colors.ink}
         testID="margen-ganancia-value"
       >
         {props.value}

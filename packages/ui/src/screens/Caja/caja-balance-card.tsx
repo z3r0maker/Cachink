@@ -11,29 +11,25 @@ import { View, Text } from '@tamagui/core';
 import { formatMoney, type Money } from '@cachink/domain';
 import type { CajaBalanceResult } from '@cachink/domain';
 import { Icon } from '../../components/Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 
 export interface CajaBalanceCardProps {
   readonly balance: CajaBalanceResult;
   readonly testID?: string;
 }
 
-function Row(props: {
-  label: string;
-  amount: Money;
-  prefix: '+' | '−';
-}): ReactElement {
+function Row(props: { label: string; amount: Money; prefix: '+' | '−' }): ReactElement {
   const isZero = props.amount === 0n;
-  const color = isZero ? colors.gray400 : colors.ink;
+  const color = isZero ? colors.textMuted : colors.ink;
   return (
     <View flexDirection="row" justifyContent="space-between" paddingVertical={2}>
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={color}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={color}>
         {props.label}
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold.toString()}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={color}
       >
         {`${props.prefix} ${formatMoney(props.amount)}`}
@@ -65,15 +61,15 @@ export function CajaBalanceCard(props: CajaBalanceCardProps): ReactElement {
 function BalanceTotalRow(props: { efectivoEnCaja: Money }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      <Icon name="banknote" size={24} color={colors.green} />
+      <Icon name="banknote" size={24} color={colors.greenText} />
       <View>
-        <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray600}>
+        <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.gray600}>
           Efectivo en caja
         </Text>
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black.toString()}
-          fontSize={28}
+          fontSize={fontSizes.xl4}
           color={colors.black}
         >
           {formatMoney(props.efectivoEnCaja)}
@@ -83,9 +79,7 @@ function BalanceTotalRow(props: { efectivoEnCaja: Money }): ReactElement {
   );
 }
 
-function BalanceBreakdown(props: {
-  desglose: CajaBalanceResult['desglose'];
-}): ReactElement {
+function BalanceBreakdown(props: { desglose: CajaBalanceResult['desglose'] }): ReactElement {
   const d = props.desglose;
   return (
     <View>

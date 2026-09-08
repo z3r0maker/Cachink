@@ -12,7 +12,7 @@ import type { Client, ClientPayment, Money, Sale } from '@cachink/domain';
 import { formatDate, formatMoney } from '@cachink/domain';
 import { Btn, Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface ClienteDetailScreenProps {
   readonly cliente: Client;
@@ -37,7 +37,7 @@ function SaldoCard({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -47,8 +47,8 @@ function SaldoCard({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={36}
-        color={hasSaldo ? colors.warning : colors.black}
+        fontSize={fontSizes.xl6}
+        color={hasSaldo ? colors.warningText : colors.black}
         letterSpacing={typography.letterSpacing.tighter}
       >
         {formatMoney(saldo)}
@@ -60,10 +60,10 @@ function SaldoCard({
 function VentaInfo({ venta }: { venta: Sale }): ReactElement {
   return (
     <View flex={1} paddingRight={12}>
-      <Text fontWeight={typography.weights.bold} fontSize={15} color={colors.black}>
+      <Text fontWeight={typography.weights.bold} fontSize={fontSizes.lg} color={colors.black}>
         {venta.concepto}
       </Text>
-      <Text fontWeight={typography.weights.medium} fontSize={12} color={colors.gray600}>
+      <Text fontWeight={typography.weights.medium} fontSize={fontSizes.xs} color={colors.gray600}>
         {formatDate(venta.fecha)}
       </Text>
       <View flexDirection="row" gap={6} marginTop={4}>
@@ -86,7 +86,11 @@ function VentaActions({
 }): ReactElement {
   return (
     <View alignItems="flex-end" gap={6}>
-      <Text fontWeight={typography.weights.black} fontSize={16} color={colors.warning}>
+      <Text
+        fontWeight={typography.weights.black}
+        fontSize={fontSizes.lg}
+        color={colors.warningText}
+      >
         {formatMoney(saldo)}
       </Text>
       <Btn variant="green" size="sm" onPress={onRegistrarPago} testID={`registrar-pago-${ventaId}`}>

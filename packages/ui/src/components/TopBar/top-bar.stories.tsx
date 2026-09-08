@@ -11,6 +11,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn } from '../Btn/btn';
 import { Tag } from '../Tag/tag';
 import { TopBar } from './top-bar';
+import { fontSizes } from '../../theme';
 
 const noop = (): void => {
   /* story-only handler */
@@ -63,11 +64,11 @@ export const DirectorHome: Story = {
     <View width={520}>
       <TopBar
         left={
-          <Text fontWeight={700} fontSize={16}>
+          <Text fontWeight={700} fontSize={fontSizes.lg}>
             Hola, Mariana
           </Text>
         }
-        right={<Text fontSize={20}>⚙</Text>}
+        right={<Text fontSize={fontSizes.xl2}>⚙</Text>}
       />
     </View>
   ),

@@ -17,7 +17,7 @@ import { Text, View } from '@tamagui/core';
 import { ZERO, type EstadoDeResultados } from '@cachink/domain';
 import { Card, HelpAccordion, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { formatChartLabel, moneyToNumber } from '../../charts/chart-tokens';
 import { WaterfallChart } from '../../charts/WaterfallChart/index';
 import { DonutChart } from '../../charts/DonutChart/index';
@@ -45,7 +45,7 @@ function EmptyBody(props: { title: string; body: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.ink}
       >
         {props.title}
@@ -53,7 +53,7 @@ function EmptyBody(props: { title: string; body: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginTop={4}
       >
@@ -116,14 +116,23 @@ export function EstadoResultadosScreen(props: EstadoResultadosScreenProps): Reac
         <EmptyBody title={t('estados.emptyPeriodTitle')} body={t('estados.emptyPeriodBody')} />
       ) : (
         <>
-          <ResumenCard estado={props.estado} priorEstado={props.priorEstado} trend={props.utilidadNetaTrend} t={t} />
+          <ResumenCard
+            estado={props.estado}
+            priorEstado={props.priorEstado}
+            trend={props.utilidadNetaTrend}
+            t={t}
+          />
           <ResultadosRows estado={props.estado} t={t} />
           <Card padding="md" fullWidth testID="waterfall-card">
             <SectionTitle title={t('estados.chartCascadaLabel')} />
             <WaterfallChart data={toWaterfallData(props.estado, t)} testID="waterfall-chart" />
           </Card>
           {props.ingresosPorCategoria && props.ingresosPorCategoria.length > 0 && (
-            <IngresosDonutCard data={props.ingresosPorCategoria} totalIngresos={totalIngresos} t={t} />
+            <IngresosDonutCard
+              data={props.ingresosPorCategoria}
+              totalIngresos={totalIngresos}
+              t={t}
+            />
           )}
           {props.egresosPorCategoria && props.egresosPorCategoria.length > 0 && (
             <EgresosDonutCard data={props.egresosPorCategoria} t={t} />

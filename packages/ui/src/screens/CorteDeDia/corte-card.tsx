@@ -12,7 +12,7 @@ import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface CorteDeDiaCardProps {
   /** When false, renders nothing. */
@@ -37,7 +37,7 @@ export function CorteDeDiaCard(props: CorteDeDiaCardProps): ReactElement | null 
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.black}
-            fontSize={16}
+            fontSize={fontSizes.lg}
             color={colors.black}
             letterSpacing={typography.letterSpacing.tighter}
           >
@@ -46,7 +46,7 @@ export function CorteDeDiaCard(props: CorteDeDiaCardProps): ReactElement | null 
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.medium}
-            fontSize={12}
+            fontSize={fontSizes.xs}
             color={colors.ink}
             marginTop={2}
           >

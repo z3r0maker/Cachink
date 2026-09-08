@@ -17,7 +17,7 @@ import { Text } from '@tamagui/core';
 import type { Money } from '@cachink/domain';
 import { formatMoney } from '@cachink/domain';
 import { Card, ErrorState, Skeleton } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export function TotalCard({ label, total }: { label: string; total: Money }): ReactElement {
   return (
@@ -25,7 +25,7 @@ export function TotalCard({ label, total }: { label: string; total: Money }): Re
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         letterSpacing={typography.letterSpacing.wide}
         color={colors.gray600}
         style={{ textTransform: 'uppercase' }}
@@ -35,8 +35,8 @@ export function TotalCard({ label, total }: { label: string; total: Money }): Re
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={32}
-        color={colors.red}
+        fontSize={fontSizes.xl5}
+        color={colors.redText}
         letterSpacing={typography.letterSpacing.tighter}
       >
         −{formatMoney(total)}

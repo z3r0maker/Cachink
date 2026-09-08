@@ -9,6 +9,7 @@ import type { ConversionReceta, Product } from '@cachink/domain';
 import { Btn, Modal } from '../../components/index';
 import { WheelQuantityPicker } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes } from '../../theme';
 
 export interface ConvertirSheetProps {
   readonly open: boolean;
@@ -40,20 +41,41 @@ function computeConvertir(
   const prod = receta ? products.get(receta.productoResultanteId as string) : undefined;
   const mpStock = mp ? (stockMap.get(mp.id as string) ?? 0) : 0;
   const needed = receta ? receta.cantidadOrigen * multN : 0;
-  return { mp, prod, mpStock, needed, insufficient: needed > mpStock, cantResultante: receta ? receta.cantidadResultante * multN : 0 };
+  return {
+    mp,
+    prod,
+    mpStock,
+    needed,
+    insufficient: needed > mpStock,
+    cantResultante: receta ? receta.cantidadResultante * multN : 0,
+  };
 }
 
-function ConvertirPreview({ calc, t }: { calc: ConvertirCalc; t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
+function ConvertirPreview({
+  calc,
+  t,
+}: {
+  calc: ConvertirCalc;
+  t: ReturnType<typeof useTranslation>['t'];
+}): ReactElement {
   return (
     <>
-      <Text fontSize={14} color="$color">
-        {t('conversion.previewSalida', { cantidad: String(calc.needed), unidad: calc.mp?.unidad ?? '', nombre: calc.mp?.nombre ?? '—' })}
+      <Text fontSize={fontSizes.md} color={colors.black}>
+        {t('conversion.previewSalida', {
+          cantidad: String(calc.needed),
+          unidad: calc.mp?.unidad ?? '',
+          nombre: calc.mp?.nombre ?? '—',
+        })}
       </Text>
-      <Text fontSize={14} color="$color">
-        {t('conversion.previewEntrada', { cantidad: String(calc.cantResultante), unidad: calc.prod?.unidad ?? '', nombre: calc.prod?.nombre ?? '—' })}
+      <Text fontSize={fontSizes.md} color={colors.black}>
+        {t('conversion.previewEntrada', {
+          cantidad: String(calc.cantResultante),
+          unidad: calc.prod?.unidad ?? '',
+          nombre: calc.prod?.nombre ?? '—',
+        })}
       </Text>
       {calc.insufficient && (
-        <Text fontSize={13} color="$colorDanger" testID="convertir-error-stock">
+        <Text fontSize={fontSizes.sm} color={colors.redText} testID="convertir-error-stock">
           {t('conversion.stockInsuficiente', { stock: String(calc.mpStock) })}
         </Text>
       )}
@@ -68,12 +90,30 @@ export function ConvertirSheet(props: ConvertirSheetProps): ReactElement {
   const calc = computeConvertir(props.receta, props.products, props.stockMap, multN);
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title={t('conversion.convertirTitle')} testID={props.testID ?? 'convertir-sheet'}>
+    <Modal
+      open={props.open}
+      onClose={props.onClose}
+      title={t('conversion.convertirTitle')}
+      testID={props.testID ?? 'convertir-sheet'}
+    >
       {props.receta && (
         <View gap={12}>
-          <WheelQuantityPicker label={t('conversion.multiplicadorLabel')} value={mult} onChange={setMult} min={1} max={50} testID="convertir-multiplicador" />
+          <WheelQuantityPicker
+            label={t('conversion.multiplicadorLabel')}
+            value={mult}
+            onChange={setMult}
+            min={1}
+            max={50}
+            testID="convertir-multiplicador"
+          />
           <ConvertirPreview calc={calc} t={t} />
-          <Btn variant="primary" onPress={() => props.onConfirm(multN)} disabled={calc.insufficient || props.submitting === true} fullWidth testID="convertir-confirm">
+          <Btn
+            variant="primary"
+            onPress={() => props.onConfirm(multN)}
+            disabled={calc.insufficient || props.submitting === true}
+            fullWidth
+            testID="convertir-confirm"
+          >
             {t('conversion.confirmar')}
           </Btn>
         </View>

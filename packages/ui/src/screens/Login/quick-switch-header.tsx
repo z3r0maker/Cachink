@@ -11,7 +11,7 @@ import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
 import { SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 /** Resolve greeting i18n key from current hour. */
 function greetingKey(): string {
@@ -36,8 +36,8 @@ function SubtitleLine({ text, testID }: { text: string; testID?: string }): Reac
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.medium}
-      fontSize={13}
-      color={colors.gray400}
+      fontSize={fontSizes.sm}
+      color={colors.textMuted}
       textAlign="center"
       testID={testID}
     >
@@ -84,7 +84,7 @@ function FullHeader({ businessName }: { businessName?: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={36}
+        fontSize={fontSizes.xl6}
         letterSpacing={-1}
         color={colors.black}
       >
@@ -93,7 +93,7 @@ function FullHeader({ businessName }: { businessName?: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={16}
+        fontSize={fontSizes.lg}
         color={colors.gray600}
       >
         {t('login.selectUser')}
@@ -104,8 +104,8 @@ function FullHeader({ businessName }: { businessName?: string }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={12}
-        color={colors.gray400}
+        fontSize={fontSizes.xs}
+        color={colors.textMuted}
         textAlign="center"
         testID="login-date"
       >

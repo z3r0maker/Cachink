@@ -14,7 +14,7 @@ import { Text, View } from '@tamagui/core';
 import type { FeatureFlags } from '@cachink/domain';
 import { SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { operativoOtrosItems, directorOtrosItems } from './otros-items';
 import { OtrosCard } from './otros-card';
 
@@ -46,7 +46,7 @@ export function OtrosScreen(props: OtrosScreenProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={28}
+          fontSize={fontSizes.xl4}
           color={colors.black}
           marginBottom={8}
         >

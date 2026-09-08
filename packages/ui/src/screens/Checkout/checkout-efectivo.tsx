@@ -28,7 +28,7 @@ import {
   useNumpadInput,
   type NumpadKey,
 } from '../../components/Numpad/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, typography } from '../../theme';
 import { CambioCard } from './cambio-card';
 import { CheckoutFooter } from './checkout-footer';
 
@@ -58,7 +58,7 @@ function PaymentEntryCard(props: {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.semibold.toString()}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.gray600}
           letterSpacing={typography.letterSpacing.wide}
           style={{ textTransform: 'uppercase' }}
@@ -134,15 +134,15 @@ function TotalHeader(props: TotalHeaderProps): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium.toString()}
-        fontSize={14}
-        color={colors.gray400}
+        fontSize={fontSizes.md}
+        color={colors.textMuted}
       >
         Total a cobrar
       </Text>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black.toString()}
-        fontSize={28}
+        fontSize={fontSizes.xl4}
         color={colors.black}
         letterSpacing={typography.letterSpacing.tight}
       >

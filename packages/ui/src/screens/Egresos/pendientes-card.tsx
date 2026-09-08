@@ -13,7 +13,7 @@ import { formatMoney } from '@cachink/domain';
 import type { RecurringExpense } from '@cachink/domain';
 import { Btn, Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface PendientesCardProps {
   readonly pendientes: readonly RecurringExpense[];
@@ -32,7 +32,7 @@ function PendienteHeader({ pendiente, t }: { pendiente: RecurringExpense; t: T }
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.bold}
-          fontSize={15}
+          fontSize={fontSizes.lg}
           color={colors.black}
         >
           {pendiente.concepto}
@@ -45,8 +45,8 @@ function PendienteHeader({ pendiente, t }: { pendiente: RecurringExpense; t: T }
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={18}
-        color={colors.red}
+        fontSize={fontSizes.xl}
+        color={colors.redText}
       >
         −{formatMoney(pendiente.montoCentavos)}
       </Text>

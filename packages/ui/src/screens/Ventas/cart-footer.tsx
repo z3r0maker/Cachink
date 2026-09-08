@@ -13,7 +13,7 @@ import { formatMoney } from '@cachink/domain';
 import type { Money } from '@cachink/domain';
 import { Btn } from '../../components/Btn/index';
 import { Icon } from '../../components/Icon/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { notificationSuccess } from '../../haptics/index';
 
 export interface CartFooterProps {
@@ -26,17 +26,14 @@ export interface CartFooterProps {
   readonly testID?: string;
 }
 
-function CartSummaryRow(props: {
-  itemCount: number;
-  totalCentavos: Money;
-}): ReactElement {
+function CartSummaryRow(props: { itemCount: number; totalCentavos: Money }): ReactElement {
   return (
     <View flexDirection="row" alignItems="center" gap={8} marginBottom={8}>
       <Icon name="shopping-cart" size={18} color={colors.black} />
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.black}
       >
         {props.itemCount} producto{props.itemCount !== 1 ? 's' : ''} ·{' '}
@@ -52,8 +49,7 @@ export function CartFooter(props: CartFooterProps): ReactElement | null {
   const variant = props.variant ?? 'yellow';
   const bg = variant === 'red' ? colors.redSoft : colors.yellowSoft;
   const btnVariant = variant === 'red' ? 'danger' : 'primary';
-  const label =
-    props.checkoutLabel ?? `Cobrar ${formatMoney(props.totalCentavos)}`;
+  const label = props.checkoutLabel ?? `Cobrar ${formatMoney(props.totalCentavos)}`;
 
   return (
     <View
@@ -64,10 +60,7 @@ export function CartFooter(props: CartFooterProps): ReactElement | null {
       paddingHorizontal={16}
       paddingVertical={12}
     >
-      <CartSummaryRow
-        itemCount={props.itemCount}
-        totalCentavos={props.totalCentavos}
-      />
+      <CartSummaryRow itemCount={props.itemCount} totalCentavos={props.totalCentavos} />
       <Btn
         variant={btnVariant}
         fullWidth

@@ -23,7 +23,7 @@ import {
 import { Text, View } from '@tamagui/core';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../Icon/index';
-import { colors, radii, typography } from '../../theme';
+import { colors, fontSizes, radii, shapeRadii, typography } from '../../theme';
 import type { ComboboxOption, ComboboxProps } from './combobox-types';
 import { TriggerView } from './combobox-views';
 
@@ -34,7 +34,7 @@ const TRIGGER_RADIUS = radii[2];
 const styles = {
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.35)',
+    backgroundColor: colors.scrim,
   } satisfies ViewStyle,
   sheet: {
     backgroundColor: colors.white,
@@ -54,7 +54,7 @@ const styles = {
     borderRadius: TRIGGER_RADIUS,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    fontSize: 14,
+    fontSize: fontSizes.md,
     fontFamily: typography.fontFamily,
     color: colors.ink,
     marginBottom: 8,
@@ -73,7 +73,7 @@ const styles = {
   handle: {
     width: 36,
     height: 4,
-    borderRadius: 2,
+    borderRadius: shapeRadii.mark,
     backgroundColor: colors.gray400,
     alignSelf: 'center',
     marginBottom: 8,
@@ -99,7 +99,7 @@ function OptionRowNative<T extends string>({
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={selected ? typography.weights.bold : typography.weights.medium}
-          fontSize={16}
+          fontSize={fontSizes.lg}
           color={colors.ink}
         >
           {option.label}
@@ -113,7 +113,7 @@ function OptionRowNative<T extends string>({
 function EmptyResults(): ReactElement {
   return (
     <View paddingHorizontal={14} paddingVertical={12}>
-      <Text fontFamily={typography.fontFamily} fontSize={14} color={colors.gray400}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.textMuted}>
         Sin resultados
       </Text>
     </View>
@@ -195,7 +195,7 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>): Re
               value={h.query}
               onChangeText={h.setQuery}
               placeholder="Buscar..."
-              placeholderTextColor={colors.gray400}
+              placeholderTextColor={colors.textMuted}
               style={styles.searchInput}
               autoFocus
             />

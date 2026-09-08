@@ -18,7 +18,7 @@ import { Text, View } from '@tamagui/core';
 import { Btn, Card, SectionTitle } from '../../components/index';
 import { TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface LanPairSuccess {
   readonly serverUrl: string;
@@ -169,7 +169,7 @@ function JoinHeader({ t }: { t: T }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={14}
+        fontSize={fontSizes.md}
         color={colors.gray600}
       >
         {t('lanPairing.joinSubtitle')}
@@ -183,8 +183,8 @@ function ErrorLine({ msg }: { msg: string }): ReactElement {
     <Text
       fontFamily={typography.fontFamily}
       fontWeight={typography.weights.semibold}
-      fontSize={13}
-      color={colors.red}
+      fontSize={fontSizes.sm}
+      color={colors.redText}
       testID="lan-join-error"
     >
       {msg}

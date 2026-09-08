@@ -8,7 +8,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { formatMoney, type Money } from '@cachink/domain';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { CartItem } from '../../hooks/use-cart';
 
 export interface CheckoutSummaryProps {
@@ -30,7 +30,7 @@ function SummaryRow(props: { item: CartItem }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
         flex={1}
         numberOfLines={1}
@@ -40,7 +40,7 @@ function SummaryRow(props: { item: CartItem }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.semibold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.gray600}
         marginHorizontal={8}
       >
@@ -49,7 +49,7 @@ function SummaryRow(props: { item: CartItem }): ReactElement {
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={13}
+        fontSize={fontSizes.sm}
         color={colors.black}
       >
         {formatMoney(subtotal)}
@@ -67,7 +67,7 @@ function TotalRow(props: { items: readonly CartItem[]; total: Money }): ReactEle
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
         >
           Total
@@ -75,7 +75,7 @@ function TotalRow(props: { items: readonly CartItem[]; total: Money }): ReactEle
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.medium}
-          fontSize={12}
+          fontSize={fontSizes.xs}
           color={colors.gray600}
           marginHorizontal={8}
         >
@@ -84,7 +84,7 @@ function TotalRow(props: { items: readonly CartItem[]; total: Money }): ReactEle
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.black}
-          fontSize={14}
+          fontSize={fontSizes.md}
           color={colors.black}
         >
           {formatMoney(props.total)}
@@ -95,16 +95,15 @@ function TotalRow(props: { items: readonly CartItem[]; total: Money }): ReactEle
 }
 
 export function CheckoutSummary(props: CheckoutSummaryProps): ReactElement {
-  const total = props.totalCentavos ?? props.items.reduce(
-    (sum, i) => sum + i.precioUnitCentavos * BigInt(i.cantidad),
-    0n,
-  );
+  const total =
+    props.totalCentavos ??
+    props.items.reduce((sum, i) => sum + i.precioUnitCentavos * BigInt(i.cantidad), 0n);
   return (
     <View testID={props.testID ?? 'checkout-summary'} gap={2}>
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={12}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
         letterSpacing={typography.letterSpacing.wide}
         style={{ textTransform: 'uppercase' }}

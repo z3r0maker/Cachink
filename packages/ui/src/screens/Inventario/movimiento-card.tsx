@@ -10,7 +10,7 @@ import { Text, View } from '@tamagui/core';
 import { formatDate } from '@cachink/domain';
 import type { InventoryMovement, Product } from '@cachink/domain';
 import { Card, Tag } from '../../components/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 
 export interface MovimientoCardProps {
   readonly movimiento: InventoryMovement;
@@ -31,7 +31,7 @@ function MovInfo({
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.black}
       >
         {producto?.nombre ?? movimiento.productoId}
@@ -52,8 +52,8 @@ function MovAmount({ movimiento }: { movimiento: InventoryMovement }): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.black}
-        fontSize={20}
-        color={isEntrada ? colors.green : colors.red}
+        fontSize={fontSizes.xl2}
+        color={isEntrada ? colors.greenText : colors.redText}
       >
         {sign}
         {movimiento.cantidad}
@@ -61,7 +61,7 @@ function MovAmount({ movimiento }: { movimiento: InventoryMovement }): ReactElem
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.medium}
-        fontSize={11}
+        fontSize={fontSizes.xs}
         color={colors.gray600}
       >
         {formatDate(movimiento.fecha)}

@@ -12,7 +12,7 @@ import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { AlertSeverity, DirectorAlert } from '@cachink/domain';
 import { Icon, type IconName } from '../../components/Icon/index';
-import { colors, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import { useTranslation } from '../../i18n/index';
 
 export interface AlertCardProps {
@@ -24,19 +24,27 @@ export interface AlertCardProps {
 
 function severityIcon(severity: AlertSeverity): IconName {
   switch (severity) {
-    case 'critical': return 'triangle-alert';
-    case 'warning': return 'triangle-alert';
-    case 'info': return 'info';
-    default: return 'info';
+    case 'critical':
+      return 'triangle-alert';
+    case 'warning':
+      return 'triangle-alert';
+    case 'info':
+      return 'info';
+    default:
+      return 'info';
   }
 }
 
 function severityColor(severity: AlertSeverity): string {
   switch (severity) {
-    case 'critical': return colors.red;
-    case 'warning': return colors.warning;
-    case 'info': return colors.blue;
-    default: return colors.blue;
+    case 'critical':
+      return colors.red;
+    case 'warning':
+      return colors.warning;
+    case 'info':
+      return colors.blue;
+    default:
+      return colors.blue;
   }
 }
 
@@ -61,7 +69,7 @@ function AlertHeader({ alert, accent }: { alert: DirectorAlert; accent: string }
       <Text
         fontFamily={typography.fontFamily}
         fontWeight={typography.weights.bold}
-        fontSize={15}
+        fontSize={fontSizes.lg}
         color={colors.black}
         flexShrink={1}
       >
@@ -71,11 +79,17 @@ function AlertHeader({ alert, accent }: { alert: DirectorAlert; accent: string }
   );
 }
 
-function AlertFooter({ alert, onAction }: { alert: DirectorAlert; onAction?: () => void }): ReactElement {
+function AlertFooter({
+  alert,
+  onAction,
+}: {
+  alert: DirectorAlert;
+  onAction?: () => void;
+}): ReactElement {
   const { t } = useTranslation();
   return (
     <View flexDirection="row" alignItems="center" justifyContent="space-between">
-      <Text fontFamily={typography.fontFamily} fontSize={12} color={colors.gray400}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
         {formatRelativeTime(alert.createdAt)}
       </Text>
       {alert.actionRoute && (
@@ -83,8 +97,8 @@ function AlertFooter({ alert, onAction }: { alert: DirectorAlert; onAction?: () 
           <Text
             fontFamily={typography.fontFamily}
             fontWeight={typography.weights.semibold}
-            fontSize={13}
-            color={colors.blue}
+            fontSize={fontSizes.sm}
+            color={colors.blueText}
           >
             {t('notificaciones.ver')} →
           </Text>
@@ -116,7 +130,7 @@ export function AlertCard(props: AlertCardProps): ReactElement {
         <Text
           fontFamily={typography.fontFamily}
           fontWeight={typography.weights.regular}
-          fontSize={13}
+          fontSize={fontSizes.sm}
           color={colors.gray600}
           numberOfLines={2}
         >

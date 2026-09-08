@@ -37,14 +37,14 @@ import { KeyboardAvoidingView, Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
-import { colors, radii } from '../../theme';
+import { colors, radii, shapeRadii } from '../../theme';
 import { ModalHeader } from './modal-header';
 import type { ModalProps } from './modal';
 
 /** Top of the §8.3 radii scale — matches the mock's 24 intent. */
 const SHEET_RADIUS = radii[7]; // 22
 /** Universal overlay color — not a brand token, same as every other app's backdrop. */
-const BACKDROP = 'rgba(0,0,0,0.5)';
+const BACKDROP = colors.scrim;
 
 // As above, only non-positional presentational values stay in `style`.
 const SHEET_STYLE = {
@@ -58,7 +58,7 @@ function GrabHandle(): ReactElement {
       width={48}
       height={4}
       backgroundColor={colors.gray200}
-      borderRadius={4}
+      borderRadius={shapeRadii.markLg}
       alignSelf="center"
       marginBottom={12}
     />
