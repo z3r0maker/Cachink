@@ -1,0 +1,27 @@
+# Internal: scroll the CURRENT screen toward its bottom so fold-audit.sh can
+# diff the view hierarchy before/after and recover below-the-fold content.
+#
+# There is deliberately NO `launchApp` here. This flow must operate on
+# whatever the previous flow left in the foreground — relaunching would
+# destroy the very screen being audited. Same convention as the reusable
+# subflows in flows/shared/ (see dismiss-modals.yaml).
+#
+# Lives in flows/internal/ so it is excluded from `flows/*.yaml` globs and
+# from full-regression.sh's run_flow discovery, like flows/parked-mvp/.
+#
+# `scroll` targets the scrollable container; a raw swipe is a blind gesture
+# that can grab a horizontal carousel or a sheet drag-handle instead.
+# Repeated scrolls are a no-op once the bottom is reached, so a fixed count
+# is safe. Bottom-reached is recorded as "assumed", never asserted.
+appId: mx.cachink.mobile
+tags:
+  - internal
+---
+- repeat:
+    times: 6
+    commands:
+      - scroll
+      # Without settling, the snapshot can catch a mid-fling position and
+      # the diff becomes nondeterministic.
+      - waitForAnimationToEnd:
+          timeout: 1200

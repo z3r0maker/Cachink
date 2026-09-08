@@ -198,6 +198,21 @@ def collect_result(
         if os.path.exists(report_path):
             result["artifacts"]["report"] = f"tests/{flow_name}/report.md"
 
+    # ── Fold audit (pass AND fail) ─────────────────────────────────────
+    # Deliberately outside the `if status == "failed"` block above: a false
+    # bottom is a defect on a PASSING screen, which is exactly why it goes
+    # unnoticed.
+    fold_path = os.path.join(test_dir, "fold-audit.json")
+    if os.path.exists(fold_path):
+        result["artifacts"]["foldAudit"] = f"tests/{flow_name}/fold-audit.json"
+        try:
+            with open(fold_path) as fh:
+                fold = json.load(fh)
+            result["foldVerdict"] = fold.get("verdict")
+            result["foldPriority"] = fold.get("priority")
+        except (json.JSONDecodeError, OSError):
+            pass
+
     # ── Write result.json ──────────────────────────────────────────────
     result_path = os.path.join(test_dir, "result.json")
     with open(result_path, "w") as f:

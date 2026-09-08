@@ -1,0 +1,9 @@
+# Tour: Director Home (KPI strip, utilidad hero, actividad reciente).
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate-director.yaml
+- assertVisible:
+    id: "director-home-route"

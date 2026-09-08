@@ -1,0 +1,11 @@
+# Tour: Ventas / POS product grid.
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
+- tapOn:
+    id: "tab-ventas"
+- assertVisible:
+    id: "ventas-product-grid"

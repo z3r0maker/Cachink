@@ -1,0 +1,13 @@
+# Tour: Productos / Inventario stock list (Operativo only).
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
+- tapOn:
+    id: "tab-productos"
+- tapOn:
+    id: "inventario-tab-stock"
+- assertVisible:
+    id: "stock-buscar"

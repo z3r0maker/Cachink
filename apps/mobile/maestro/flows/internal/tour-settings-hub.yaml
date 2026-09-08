@@ -1,0 +1,11 @@
+# Tour: Configuración hub — the tool grid + category cards + dev cards.
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate-director.yaml
+- tapOn:
+    id: "top-bar-open-settings"
+- assertVisible:
+    id: "settings-hub-screen"

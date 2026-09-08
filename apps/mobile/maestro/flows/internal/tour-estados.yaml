@@ -1,0 +1,11 @@
+# Tour: Estados Financieros shell (sub-tabs + report body).
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate-director.yaml
+- tapOn:
+    id: "tab-estados"
+- assertVisible:
+    id: "estados-shell"

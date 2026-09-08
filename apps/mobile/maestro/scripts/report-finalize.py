@@ -218,6 +218,30 @@ def build_manifest(run_dir: str, ndjson_results: List[Dict]) -> Dict:
     return manifest
 
 
+
+def read_fold_audit(run_dir, flow_name):
+    """Trimmed fold-audit.json for inlining into data.js.
+
+    The viewer runs over file://, where fetch() is CORS-blocked, so anything
+    rendered inline must be embedded here rather than fetched.
+    """
+    path = os.path.join(run_dir, "tests", flow_name, "fold-audit.json")
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path) as fh:
+            fold = json.load(fh)
+    except (json.JSONDecodeError, OSError):
+        return None
+    return {
+        "verdict": fold.get("verdict"),
+        "priority": fold.get("priority"),
+        "counts": fold.get("counts", {}),
+        "hidden": fold.get("hidden", [])[:25],
+        "straddlers": fold.get("straddlers", [])[:10],
+        "warnings": fold.get("warnings", []),
+    }
+
 def build_data_js(run_dir: str, manifest: Dict) -> None:
     """Build data.js for the viewer (window.RUN_DATA = {...})."""
     test_results = read_test_results(run_dir)
@@ -247,6 +271,12 @@ def build_data_js(run_dir: str, manifest: Dict) -> None:
             hier = read_hierarchy_summary(run_dir, flow_name)
             if hier:
                 entry["hierarchy"] = hier
+
+        # Fold audit applies to PASSING flows too — a false bottom is a
+        # defect on a screen that otherwise works, which is why it hides.
+        fold = read_fold_audit(run_dir, flow_name)
+        if fold:
+            entry["fold"] = fold
 
         tests_data.append(entry)
 

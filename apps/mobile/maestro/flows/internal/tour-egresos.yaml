@@ -1,0 +1,11 @@
+# Tour: Egresos list.
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- runFlow: ../shared/authenticate.yaml
+- tapOn:
+    id: "tab-gastos"
+- assertVisible:
+    id: "egresos-screen"

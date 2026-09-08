@@ -1,0 +1,12 @@
+# Tour: QuickSwitch login + PIN numpad. Known below-fold offender on phones.
+appId: mx.cachink.mobile
+tags: [internal]
+---
+- launchApp
+- runFlow: ../shared/dismiss-modals.yaml
+- assertVisible:
+    id: "quick-switch"
+- tapOn:
+    text: ".*Juan Director.*"
+- assertVisible:
+    id: "pin-numpad"
