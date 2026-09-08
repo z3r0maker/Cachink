@@ -143,6 +143,22 @@ class TestFoldAudit(unittest.TestCase):
         r = audit(before, after)
         self.assertEqual(r["counts"]["hidden"], 0)
 
+    def test_status_bar_clock_is_not_a_finding(self):
+        """
+        The iOS status bar is not part of the app and its clock TICKS between
+        the two dumps, so it looks like newly revealed content on every run.
+        Note the U+202F narrow no-break space iOS uses in times — a literal
+        " ?" in the pattern does not match it.
+        """
+        before = screen(node(rid="card-a", bounds=(20, 100, 730, 600)))
+        after = screen(
+            node(rid="card-a", bounds=(20, -200, 730, 300)),
+            node(acc="6:54\u202fp.m.", bounds=(20, 900, 200, 930)),
+            node(acc="100% battery power", bounds=(600, 900, 730, 930)),
+        )
+        r = audit(before, after)
+        self.assertEqual(r["counts"]["hidden"], 0)
+
     def test_orientation_change_invalidates_the_diff(self):
         before = screen(node(rid="card-a", bounds=(20, 100, 730, 600)))
         after = node(bounds=(0, 0, 0, 0),

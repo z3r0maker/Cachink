@@ -46,9 +46,38 @@ function SubtitleLine({ text, testID }: { text: string; testID?: string }): Reac
   );
 }
 
-export function QuickSwitchHeader({ businessName }: { businessName?: string }): ReactElement {
-  const { t } = useTranslation();
+export function QuickSwitchHeader({
+  businessName,
+  compact = false,
+}: {
+  businessName?: string;
+  /**
+   * Drop the welcome chrome (greeting, "selecciona tu usuario", date) and keep
+   * only the business name.
+   *
+   * Set once a user is selected: at that point the PIN pad is on screen and the
+   * welcome copy is dead weight. Measured on an iPhone 17 (874pt), the full
+   * screen is 1087pt of content — 213pt of overflow — which pushed
+   * `login-submit`, `numpad-0`, `numpad-backspace` and `forgot-pin-link`
+   * entirely below the fold, where XCUITest cannot even see them.
+   */
+  compact?: boolean;
+}): ReactElement {
+  return compact ? (
+    <>
+      <SafeAreaSpacer />
+      {businessName !== undefined && (
+        <SubtitleLine text={businessName} testID="login-business-name" />
+      )}
+    </>
+  ) : (
+    <FullHeader businessName={businessName} />
+  );
+}
 
+/** The welcome chrome: greeting, prompt, business name, date. */
+function FullHeader({ businessName }: { businessName?: string }): ReactElement {
+  const { t } = useTranslation();
   return (
     <>
       <SafeAreaSpacer />

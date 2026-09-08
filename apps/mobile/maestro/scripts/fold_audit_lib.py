@@ -49,9 +49,20 @@ CONTROL_RE = re.compile(
     re.I,
 )
 # Text that is plainly data, not a label (currency, dates, times, percents).
+# `\s*` rather than a literal space: iOS formats times with U+202F NARROW
+# NO-BREAK SPACE ("6:54\u202fp.m."), so a plain " ?" does not match and the
+# status-bar clock was being reported as a below-fold finding.
 DATA_RE = re.compile(
     r"^\$?[\d.,]+$|^\d{1,2}/\d{1,2}(/\d{2,4})?$|"
-    r"^\d{1,2}:\d{2}( ?[ap]\.?m\.?)?$|^-?\d+%$"
+    r"^\d{1,2}:\d{2}(\s*[ap]\.?\s*m\.?)?$|^-?\d+%$",
+    re.I,
+)
+# The iOS status bar is not part of the app. Its clock ticks between the two
+# dumps, so without this it registers as newly revealed content on every run.
+SYSTEM_TEXT_RE = re.compile(
+    r"battery|wi-?fi bars|cellular|^ssid|signal strength|no service|"
+    r"horizontal scroll bar|vertical scroll bar",
+    re.I,
 )
 
 
@@ -189,6 +200,8 @@ def content_nodes(nodes: list[Node], screen_h: int) -> list[Node]:
 def classify_kind(n: Node) -> tuple[str, str]:
     """Return (kind, confidence). The iOS tree carries no element-type or
     trait field, so interactivity is a heuristic, never a fact."""
+    if not n.rid and SYSTEM_TEXT_RE.search(n.text or n.acc or ""):
+        return "data", "high"          # status bar / scroll indicators
     if n.rid and CONTROL_RE.search(n.rid):
         return "control", "high"
     if not n.rid and DATA_RE.match(n.text or n.acc or ""):

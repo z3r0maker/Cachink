@@ -56,6 +56,7 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
   const name = props.users.find((u) => u.id === selectedUserId)?.nombre ?? '';
   const forgotPin = props.onForgotPin;
   const media = useMedia();
+  const pinMode = selectedUserId !== null;
 
   return (
     <FloatingCoinsBackground testID={props.testID ?? 'quick-switch'}>
@@ -68,14 +69,19 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
           // so the whole numpad stays reachable (scrollable).
           justifyContent: media.gtMd ? 'center' : 'flex-start',
           alignItems: 'center',
-          padding: 24,
-          gap: 24,
+          // Tighten once the numpad is up. Top-aligning (above) only made the
+          // bottom row *scrollable*; it was still below the fold, so users had
+          // to discover a scroll to reach "Entrar". Measured 1087pt of content
+          // in an 874pt window on an iPhone 17. Compacting the header plus this
+          // spacing brings the whole flow above the fold.
+          padding: pinMode && !media.gtMd ? 16 : 24,
+          gap: pinMode && !media.gtMd ? 12 : 24,
         }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
       >
         <SafeAreaSpacer />
-        <QuickSwitchHeader businessName={props.businessName} />
+        <QuickSwitchHeader businessName={props.businessName} compact={pinMode && !media.gtMd} />
         <UserAvatarGrid
           users={props.users}
           selectedUserId={selectedUserId}
