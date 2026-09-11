@@ -138,7 +138,8 @@
 
 ### F-08 CI: GitHub Actions gate on every PR
 
-- [ ] Status
+- [~] Status
+  - 2026-09-11 · track/foundation · `.github/workflows/ci.yml` (PR + push main: install → `pnpm typecheck` (builds first via turbo) → `pnpm test` blocking; `pnpm lint` **reported, `continue-on-error: true` until F-09**; `drift` job self-skips until `packages/data-pg` exists) and `maestro-nightly.yml` (schedule + dispatch, macOS runner, best-effort). YAML validated locally. **Still open:** the acceptance ("a PR shows the `ci` check") needs the branch pushed and a draft PR opened — not done from this session; and branch protection on `main` is a GitHub setting to apply by hand. Flip lint to blocking when F-09 closes.
 - **Blocked by:** F-04 · **Blocks:** (gates all PRs)
 - **Context:** `.github/workflows/` does not exist. Q17: typecheck + lint + unit + drift test per PR; Maestro nightly/on-demand only.
 - **Files:** `.github/workflows/ci.yml`, `.github/workflows/maestro-nightly.yml`.

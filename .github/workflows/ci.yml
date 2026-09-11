@@ -1,0 +1,77 @@
+# CI gate for every PR and for pushes to main (docs/plan/01-foundation.md F-08).
+#
+# Blocking today: typecheck (builds referenced packages first, per turbo
+# `typecheck.dependsOn: ^build`) and unit tests.
+# Reported but NOT blocking until F-09 clears the pre-existing lint debt:
+# lint. Flip `continue-on-error` to false in F-09.
+# The schema-drift job runs only once packages/data-pg exists (B-02).
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: typecheck · test · lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        # Version comes from package.json#packageManager.
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ runner.os }}-${{ github.sha }}
+          restore-keys: turbo-${{ runner.os }}-
+
+      - name: Typecheck (builds referenced packages first)
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Lint (non-blocking until F-09)
+        run: pnpm lint
+        continue-on-error: true
+
+  drift:
+    name: sqlite ↔ postgres schema drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip until packages/data-pg exists (B-02)
+        id: gate
+        run: |
+          if [ -f packages/data-pg/package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
+      - if: steps.gate.outputs.present == 'true'
+        uses: pnpm/action-setup@v4
+      - if: steps.gate.outputs.present == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: steps.gate.outputs.present == 'true'
+        run: pnpm install --frozen-lockfile
+      - if: steps.gate.outputs.present == 'true'
+        run: pnpm --filter @xangarro/data-pg test
