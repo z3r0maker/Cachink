@@ -3,9 +3,15 @@
   "extends": "../config/tsconfig.lib.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "types": ["node"]
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.json"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [{ "path": "../domain" }]
+  "references": [
+    {
+      "path": "../domain"
+    }
+  ]
 }

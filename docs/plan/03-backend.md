@@ -56,8 +56,8 @@
 ### B-04 Seed + demo business for local dev and App Review
 
 - [ ] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
-- **Steps:** `pnpm --filter @xangarro/data-pg seed` creates: auth user `demo@xangarro.mx` (password from `.env.example`), business "Tacos La Esquina", emprendedor subscription, 2 operators (PINs `1234`, `5678` — bcrypt), 20 products with icons, 3 clients, 1 active activation code `DEMO0001`, 30 days of sales/expenses. Idempotent (re-run wipes and recreates that business only).
-- **Acceptance:** seed runs in < 10 s; portal login as demo works (after P-02); code `DEMO0001` activates the app (after B-07).
+- **Steps:** `pnpm --filter @xangarro/data-pg seed` creates: auth user `demo@xangarro.mx` (password from `.env.example`), business "Tacos La Esquina", emprendedor subscription, 2 operators (PINs `1234`, `5678` — bcrypt), 20 products with icons, 3 clients, 1 active activation code `DEMOK7M3` (codes must match `^[A-HJ-NP-Z2-9]{8}$` — no 0/O/1/I; `DEMO0001` would be rejected by `ActivationCodeSchema`), 30 days of sales/expenses. Idempotent (re-run wipes and recreates that business only).
+- **Acceptance:** seed runs in < 10 s; portal login as demo works (after P-02); code `DEMOK7M3` activates the app (after B-07).
 
 ### B-05 Auth: Supabase Auth config, membership claims hook, device-JWT minting
 
