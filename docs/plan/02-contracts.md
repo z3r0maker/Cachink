@@ -1,5 +1,9 @@
 # Track C — Contracts (shared, frozen after landing)
 
+> **Frozen: 2026-09-11** — encoded in `packages/contracts` (C-01…C-07). Wire form is **camelCase JSON**
+> (the domain entity shape) and every **bigint money field travels as a decimal string**; the examples
+> below were updated to match. The package README maps modules to sections.
+
 > The interface between the phone (Track A) and the cloud (Track B). Both tracks build against
 > **this file**, not against each other's code. Sections §1–§8 are the **spec**; tasks C-01…C-10
 > encode it in `packages/contracts` (zod) and provide a mock server so Track A never waits on Track B.
@@ -47,11 +51,18 @@ Request:
 Response `200`:
 
 ```json
-{ "device_token": "<jwt>", "device_id": "01J…", "business_id": "01J…",
+{ "deviceToken": "<jwt>", "deviceId": "01J…", "businessId": "01J…",
   "entitlement": { "payload": { …§6… }, "signature": "<base64>" },
-  "bootstrap": { "server_seq": 1234, "server_time": "2026-09-11T20:00:00Z",
+  "bootstrap": { "serverSeq": 1234, "serverTime": "2026-09-11T20:00:00Z",
                  "tables": { "businesses": [ … ], "products": [ … ], "clients": [ … ], "users": [ … ],
-                             "employees": [ … ], "recurring_expenses": [ … ], "feature_flags": { … } } } }
+                             "employees": [ … ], "recurring_expenses": [ … ], "conversion_recetas": [ … ],
+                             "feature_flags": { … } } } }
+```
+
+Rows inside `tables` are domain entities in camelCase (`ReferenceTablesSchema`); `users` rows never carry `email`.
+
+```json
+
 ```
 
 Errors: `400 CODE_INVALID` · `410 CODE_EXPIRED` · `409 CODE_USED` · `403 EMAIL_MISMATCH` (code exists but not for that email — same message to the user as CODE_INVALID) · `402 NO_DEVICE_SLOTS` (plan full; message names the plan) · `423 BUSINESS_SUSPENDED`.
@@ -62,8 +73,8 @@ Rules: code is single-use; on success it is burned atomically with device creati
 Request (≤ 500 deltas):
 
 ```json
-{ "deltas": [ { "table": "sales", "row_id": "01J…", "op": "insert|update", "client_seq": 8812,
-                "row": { …full row incl. business_id, device_id, created_by_user_id, created_at, updated_at, deleted_at… } } ] }
+{ "deltas": [ { "table": "sales", "rowId": "01J…", "op": "insert|update", "clientSeq": 8812,
+                "row": { …the domain entity, camelCase, incl. businessId, deviceId, createdByUserId, createdAt, updatedAt, deletedAt; money as "4500"… } } ] }
 ```
 
 Response `200` **always per-row** (the batch itself only fails for auth/protocol/rate-limit):
@@ -85,23 +96,23 @@ Response `200` **always per-row** (the batch itself only fails for auth/protocol
 }
 ```
 
-Server semantics: upsert by `(business_id, id)`; `business_id` in the row **must equal** the token's — otherwise `rejected` with `BUSINESS_MISMATCH` (non-retryable). Idempotent: re-pushing an accepted row returns accepted again with the same `server_seq`. Rows for tables in the DOWN-only set (§8) are rejected `TABLE_NOT_WRITABLE`. Hybrid tables accept `op:'insert'` only; `op:'update'` → `HYBRID_UPDATE_FORBIDDEN`.
+Server semantics: upsert by `(businessId, id)`; `businessId` in the row **must equal** the token's — otherwise `rejected` with `BUSINESS_MISMATCH` (non-retryable). Idempotent: re-pushing an accepted row returns accepted again with the same `server_seq`. Rows for tables in the DOWN-only set (§8) are rejected `TABLE_NOT_WRITABLE`. Hybrid tables accept `op:'insert'` only; `op:'update'` → `HYBRID_UPDATE_FORBIDDEN`.
 Rejection codes (initial set): `VALIDATION` (zod), `BUSINESS_MISMATCH`, `TABLE_NOT_WRITABLE`, `HYBRID_UPDATE_FORBIDDEN`, `FK_PRODUCT_MISSING`, `FK_USER_MISSING`, `FK_CLIENT_MISSING`, `DUPLICATE_CONFLICT` (same id, different business), `INTERNAL` (retryable:true).
 The app treats `retryable:false` as terminal (shown in "No enviados", retried only on manual retry after edit) and `retryable:true` as backoff-retry.
 
-## §5 `GET /sync/pull?since=<server_seq>`
+## §5 `GET /sync/pull?since=<serverSeq>`
 
 Response `200`:
 
 ```json
-{ "server_seq": 5040, "server_time": "…",
+{ "serverSeq": 5040, "serverTime": "…",
   "entitlement": { "payload": { … }, "signature": "…" },
   "tables": { "businesses": [ … ], "products": [ … ], "clients": [ … ], "users": [ … ], "employees": [ … ],
-              "recurring_expenses": [ … ], "feature_flags": { "stock": true, … } },
-  "acknowledged_through": 5001 }
+              "recurring_expenses": [ … ], "conversion_recetas": [ … ], "feature_flags": { "stock": true, … } },
+  "acknowledgedThrough": 5001 }
 ```
 
-Semantics: rows with `server_seq > since`, including soft-deletes (`deleted_at` set). `since=0` = full bootstrap. `acknowledged_through` is the highest `server_seq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `server_seq ≤ acknowledged_through`. `users` rows include `pin_hash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
+Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
 
 ## §6 Entitlement payload
 
@@ -119,7 +130,7 @@ Semantics: rows with `server_seq > since`, including soft-deletes (`deleted_at` 
 }
 ```
 
-Signature: Ed25519 over the canonical JSON (keys sorted, no whitespace) of `payload`, base64. Public key ships in the app (`EXPO_PUBLIC_ENTITLEMENT_PUBKEY`), private key only in the backend env. Freelancer: `valid_until` = +100 years, `grace_until` same. Lapsed paid plans are issued **as freelancer** (Q14: lapse → free tier), never as an expired paid token.
+Signature: Ed25519 over `canonicalize(payload)` (keys sorted at every depth, no whitespace, bigint as decimal string, `undefined` dropped), base64. Test vector + dev keypair: `packages/contracts/tests/entitlement.test.ts`. Public key ships in the app (`EXPO_PUBLIC_ENTITLEMENT_PUBKEY`), private key only in the backend env. Freelancer: `valid_until` = +100 years, `grace_until` same. Lapsed paid plans are issued **as freelancer** (Q14: lapse → free tier), never as an expired paid token.
 App-side state machine (domain `entitlementState`), using `nowAnchored = max(device_now, last_server_time_seen)` and `staleness = nowAnchored − last_successful_pull`:
 
 - `active` if `nowAnchored < valid_until` and `staleness < 30d`

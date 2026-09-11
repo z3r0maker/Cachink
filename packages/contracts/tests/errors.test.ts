@@ -1,6 +1,11 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
-import { ErrorEnvelopeSchema, isRetryableError } from '../src/errors.js';
+import {
+  ERROR_CATALOG,
+  ErrorEnvelopeSchema,
+  isKnownErrorCode,
+  isRetryableError,
+} from '../src/errors.js';
 
 describe('ErrorEnvelopeSchema', () => {
   it('accepts a well-formed envelope and strips nothing it needs', () => {
@@ -25,9 +30,13 @@ describe('ErrorEnvelopeSchema', () => {
 });
 
 describe('isRetryableError', () => {
-  it('treats 5xx as retryable and 4xx as terminal by default', () => {
-    assert.equal(isRetryableError('VALIDATION', 500), true);
-    assert.equal(isRetryableError('VALIDATION', 400), false);
+  it('treats 5xx as retryable and 4xx as terminal for codes not in the catalog', () => {
+    assert.equal(isRetryableError('SOMETHING_NEW', 500), true);
+    assert.equal(isRetryableError('SOMETHING_NEW', 400), false);
+  });
+
+  it('lets the catalog win over the status for known codes', () => {
+    assert.equal(isRetryableError('VALIDATION', 500), false);
   });
 
   it('lets a terminal code override a 5xx status', () => {
@@ -36,5 +45,15 @@ describe('isRetryableError', () => {
 
   it('lets a retryable code override a 4xx status', () => {
     assert.equal(isRetryableError('RATE_LIMITED', 429), true);
+  });
+
+  it('every catalog entry has a UPPER_SNAKE code, an HTTP status and a message key', () => {
+    for (const [code, entry] of Object.entries(ERROR_CATALOG)) {
+      assert.match(code, /^[A-Z][A-Z0-9_]*$/);
+      assert.ok(entry.httpStatus >= 200 && entry.httpStatus < 600, code);
+      assert.match(entry.userMessageKey, /^[a-z]+\.errors\.[a-zA-Z]+$/, code);
+      assert.equal(isKnownErrorCode(code), true);
+    }
+    assert.equal(isKnownErrorCode('NOPE'), false);
   });
 });

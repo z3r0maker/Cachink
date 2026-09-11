@@ -6,3 +6,11 @@
  */
 
 export * from './errors.js';
+export * from './transport.js';
+export * from './tokens.js';
+export * from './scope.js';
+export * from './wire.js';
+export * from './entitlement.js';
+export * from './activate.js';
+export * from './sync-push.js';
+export * from './sync-pull.js';
