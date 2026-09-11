@@ -3852,3 +3852,53 @@ a palette change.
   derivatives and store screenshots (`docs/store/screenshots/` currently
   holds only a README).
 - Update `docs/store/listing-app-store.md` and `listing-play-store.md`.
+
+---
+
+## ADR-055
+
+**Title:** GitHub Actions returns as the gate for `main`; the pre-push hook becomes its local mirror
+
+**Date:** 2026-09-11
+
+**Status:** Accepted — supersedes the decision of ADR-018 (its reasoning stands; its trigger has fired)
+
+**Context**
+
+ADR-018 removed `.github/workflows/ci.yml` for a solo-developer phase and
+named its own revisit condition: "a second contributor joins the repo".
+The Xangarro pivot (ADR-053) is executed as parallel tracks in separate
+sessions branching from `main` (docs/plan/00-README.md §1). That is
+several contributors, each of whom can push a red `main` for the others.
+A local hook cannot protect a shared branch from a machine it does not
+run on.
+
+**Decision**
+
+`.github/workflows/ci.yml` gates every pull request and every push to
+`main` with typecheck (building referenced packages first), unit tests,
+root script tests, and lint. The job is named `ci` so branch protection
+can require it by that name. `.husky/pre-push` stays, but as a local
+mirror of the same steps, not a replacement — ADR-018's "harder"
+consequence (gates only run where hooks are installed) is exactly the
+failure mode being closed.
+
+Two temporary carve-outs, removed together by task F-09: lint for
+`@xangarro/ui` is reported but not blocking, and the pre-push hook
+excludes the same package, because 29 pre-existing violations there
+predate the gate. Every other package lints clean today and is blocking
+from the first run.
+
+Maestro E2E does **not** gate merges. It runs on demand
+(`maestro-e2e.yml`, `workflow_dispatch`) until one run has been watched
+to completion on GitHub's macOS image; only then is a schedule worth
+paying for.
+
+**Consequences**
+
+- Coverage thresholds and Storybook visual snapshots remain manual, as
+  ADR-018 left them. Adding them to CI is a separate decision.
+- Renovate's `automerge` stays off; a green `ci` check is a prerequisite
+  for turning it back on, not a substitute for the decision.
+- `git push --no-verify` no longer weakens the shared branch: the server
+  side gate is the one that counts.

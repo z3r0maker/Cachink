@@ -1,10 +1,12 @@
 #!/usr/bin/env sh
-# Local quality gate — replaces GitHub Actions (see ADR-018).
+# Local quality gate — mirrors the CI job "ci" (ADR-055). Lint for
+# @xangarro/ui is excluded here exactly as in CI until F-09 clears the
+# pre-existing debt; flip both together.
 # Bypass in emergencies with: git push --no-verify
 set -e
 
-echo "▶ pre-push: pnpm lint"
-pnpm lint
+echo "▶ pre-push: pnpm lint (all packages except ui)"
+pnpm lint --filter='!@xangarro/ui'
 
 echo "▶ pre-push: pnpm typecheck"
 pnpm typecheck

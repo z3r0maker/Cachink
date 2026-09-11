@@ -1,10 +1,12 @@
-# CI gate for every PR and for pushes to main (docs/plan/01-foundation.md F-08).
+# CI gate for every PR and for pushes to main (ADR-055; docs/plan/01-foundation.md F-08).
 #
-# Blocking today: typecheck (builds referenced packages first, per turbo
-# `typecheck.dependsOn: ^build`) and unit tests.
-# Reported but NOT blocking until F-09 clears the pre-existing lint debt:
-# lint. Flip `continue-on-error` to false in F-09.
-# The schema-drift job runs only once packages/data-pg exists (B-02).
+# Blocking: typecheck (turbo builds referenced packages first), unit tests,
+# root script tests, and lint for every package except @xangarro/ui.
+# Reported but not blocking until F-09 clears the pre-existing debt:
+# lint for @xangarro/ui and prettier's format:check (446 files drift today).
+# The schema-drift job is added by B-02 together with packages/data-pg.
+#
+# Branch protection: require the check named "ci".
 
 name: ci
 
@@ -15,11 +17,11 @@ on:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  checks:
-    name: typecheck · test · lint
+  ci:
+    name: ci
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -49,29 +51,16 @@ jobs:
       - name: Unit tests
         run: pnpm test
 
-      - name: Lint (non-blocking until F-09)
-        run: pnpm lint
+      - name: Root script tests
+        run: pnpm test:scripts
+
+      - name: Lint (all packages except ui — blocking)
+        run: pnpm lint --filter='!@xangarro/ui'
+
+      - name: Lint ui (non-blocking until F-09)
+        run: pnpm --filter @xangarro/ui lint
         continue-on-error: true
 
-  drift:
-    name: sqlite ↔ postgres schema drift
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    needs: checks
-    steps:
-      - uses: actions/checkout@v4
-      - name: Skip until packages/data-pg exists (B-02)
-        id: gate
-        run: |
-          if [ -f packages/data-pg/package.json ]; then echo "present=true" >> "$GITHUB_OUTPUT"; else echo "present=false" >> "$GITHUB_OUTPUT"; fi
-      - if: steps.gate.outputs.present == 'true'
-        uses: pnpm/action-setup@v4
-      - if: steps.gate.outputs.present == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: pnpm
-      - if: steps.gate.outputs.present == 'true'
-        run: pnpm install --frozen-lockfile
-      - if: steps.gate.outputs.present == 'true'
-        run: pnpm --filter @xangarro/data-pg test
+      - name: Format check (non-blocking until F-09)
+        run: pnpm format:check
+        continue-on-error: true

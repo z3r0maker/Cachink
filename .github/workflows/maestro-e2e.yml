@@ -1,0 +1,83 @@
+# On-demand Maestro E2E on a hosted macOS runner (docs/plan/01-foundation.md F-08).
+#
+# Dispatch-only until someone has watched one run succeed end to end on
+# GitHub's macOS image (Xcode/runtime drift, 10x billing, and a ~3 h full
+# suite make an unattended nightly a bad first step). Failures are real
+# failures: no job-level continue-on-error, so a broken run goes red.
+# Known gap: the Expo dev-menu "Tools button" cannot be disabled from the
+# CLI on a fresh simulator (docs/plan/05-app.md A-16 harness fix).
+
+name: maestro-e2e
+
+on:
+  workflow_dispatch:
+    inputs:
+      phase:
+        description: 'full-regression.sh --phase (A|B|C|D|E|W); A is the smoke phase'
+        default: 'A'
+        required: true
+
+env:
+  MAESTRO_VERSION: '2.4.0'
+  EXPO_PUBLIC_E2E: '1'
+  LANG: en_US.UTF-8
+  LC_ALL: en_US.UTF-8
+
+jobs:
+  maestro:
+    runs-on: macos-15
+    timeout-minutes: 240
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Install Maestro (pinned)
+        run: |
+          curl --fail -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+          "$HOME/.maestro/bin/maestro" --version
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: |
+            apps/mobile/ios/Pods
+            ~/Library/Caches/CocoaPods
+          key: pods-${{ runner.os }}-${{ hashFiles('apps/mobile/package.json', 'pnpm-lock.yaml') }}
+
+      - name: Prebuild + build dev client on the iPhone class
+        working-directory: apps/mobile
+        run: |
+          npx expo prebuild --clean --platform ios
+          source maestro/scripts/lib/device-resolve.sh
+          npx expo run:ios --no-bundler --device "$MAESTRO_IPHONE_DEVICE"
+
+      - name: Start Metro
+        working-directory: apps/mobile
+        run: |
+          (CI=1 npx expo start --dev-client --port 8081 > /tmp/metro.log 2>&1 &)
+          curl --fail -s --retry 30 --retry-delay 2 --retry-connrefused http://localhost:8081/status
+
+      - name: Regression (selected phase, pinned to the iPhone class)
+        run: apps/mobile/maestro/scripts/full-regression.sh --phase "${{ inputs.phase }}" --device-class iphone
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: e2e-reports
+          path: |
+            e2e-reports/
+            /tmp/metro.log
