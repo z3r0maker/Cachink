@@ -1,14 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { BusinessId } from '@xangarro/domain';
-import {
-  InMemoryUsersRepository,
-  TEST_DEVICE_ID,
-  makeNewUser,
-} from '../../testing/src/index.js';
-import {
-  AutenticarUsuarioUseCase,
-  CrearUsuarioUseCase,
-} from '../src/index.js';
+import { InMemoryUsersRepository, TEST_DEVICE_ID, makeNewUser } from '../../testing/src/index.js';
+import { AutenticarUsuarioUseCase, CrearUsuarioUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
@@ -43,6 +36,21 @@ describe('AutenticarUsuarioUseCase', () => {
     expect(result.userId).not.toBeNull();
     expect(result.role).toBe('director');
     expect(result.mustChangePin).toBe(true);
+  });
+
+  it('returns failure for an operator deactivated in the portal', async () => {
+    const seeded = await users.findByNombre('Test Director', BIZ);
+    if (!seeded) throw new Error('seed missing');
+    await users.update(seeded.id, { active: false });
+
+    const result = await auth.execute({
+      nombre: 'Test Director',
+      pin: '123456',
+      businessId: BIZ,
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.userId).toBeNull();
   });
 
   it('returns failure for wrong PIN', async () => {

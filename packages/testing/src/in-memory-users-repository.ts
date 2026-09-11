@@ -6,19 +6,9 @@
  * ADR-049: PIN for login, Password for recovery.
  */
 
-import type {
-  BusinessId,
-  DeviceId,
-  IsoTimestamp,
-  User,
-  UserId,
-} from '@xangarro/domain';
+import type { BusinessId, DeviceId, IsoTimestamp, User, UserId } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
-import type {
-  CreateUserInput,
-  UserPatch,
-  UsersRepository,
-} from '@xangarro/data';
+import type { CreateUserInput, UserPatch, UsersRepository } from '@xangarro/data';
 
 export class InMemoryUsersRepository implements UsersRepository {
   private readonly rows = new Map<UserId, User>();
@@ -40,6 +30,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       role: input.role,
       mustChangePin: input.mustChangePin,
       avatarColor: input.avatarColor,
+      active: true,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -57,10 +48,7 @@ export class InMemoryUsersRepository implements UsersRepository {
     return row;
   }
 
-  async findByNombre(
-    nombre: string,
-    businessId: BusinessId,
-  ): Promise<User | null> {
+  async findByNombre(nombre: string, businessId: BusinessId): Promise<User | null> {
     for (const row of this.rows.values()) {
       if (
         row.businessId === businessId &&
@@ -73,13 +61,9 @@ export class InMemoryUsersRepository implements UsersRepository {
     return null;
   }
 
-  async findAllByBusiness(
-    businessId: BusinessId,
-  ): Promise<readonly User[]> {
+  async findAllByBusiness(businessId: BusinessId): Promise<readonly User[]> {
     return [...this.rows.values()]
-      .filter(
-        (r) => r.businessId === businessId && r.deletedAt === null,
-      )
+      .filter((r) => r.businessId === businessId && r.deletedAt === null)
       .sort((a, b) => a.nombre.localeCompare(b.nombre));
   }
 
@@ -102,6 +86,7 @@ export class InMemoryUsersRepository implements UsersRepository {
       ...(patch.mustChangePin !== undefined && {
         mustChangePin: patch.mustChangePin,
       }),
+      ...(patch.active !== undefined && { active: patch.active }),
       ...(patch.avatarColor !== undefined && {
         avatarColor: patch.avatarColor,
       }),
@@ -125,11 +110,7 @@ export class InMemoryUsersRepository implements UsersRepository {
   async countDirectors(businessId: BusinessId): Promise<number> {
     let count = 0;
     for (const row of this.rows.values()) {
-      if (
-        row.businessId === businessId &&
-        row.role === 'director' &&
-        row.deletedAt === null
-      ) {
+      if (row.businessId === businessId && row.role === 'director' && row.deletedAt === null) {
         count++;
       }
     }

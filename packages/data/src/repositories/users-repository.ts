@@ -24,6 +24,7 @@ export type UserPatch = Partial<
     | 'recoveryPasswordHash'
     | 'mustChangePin'
     | 'avatarColor'
+    | 'active'
   >
 >;
 

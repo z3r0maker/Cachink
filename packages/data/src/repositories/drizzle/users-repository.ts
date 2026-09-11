@@ -7,20 +7,9 @@
  */
 
 import { and, eq, isNull, sql } from 'drizzle-orm';
-import type {
-  BusinessId,
-  DeviceId,
-  IsoTimestamp,
-  User,
-  UserId,
-  UserRole,
-} from '@xangarro/domain';
+import type { BusinessId, DeviceId, IsoTimestamp, User, UserId, UserRole } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
-import type {
-  CreateUserInput,
-  UserPatch,
-  UsersRepository,
-} from '../users-repository.js';
+import type { CreateUserInput, UserPatch, UsersRepository } from '../users-repository.js';
 import { users } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
@@ -69,42 +58,23 @@ export class DrizzleUsersRepository implements UsersRepository {
     return row ? this.#mapRow(row) : null;
   }
 
-  async findByNombre(
-    nombre: string,
-    businessId: BusinessId,
-  ): Promise<User | null> {
+  async findByNombre(nombre: string, businessId: BusinessId): Promise<User | null> {
     const rows = await this.#db
       .select()
       .from(users)
-      .where(
-        and(
-          eq(users.businessId, businessId),
-          isNull(users.deletedAt),
-        ),
-      )
+      .where(and(eq(users.businessId, businessId), isNull(users.deletedAt)))
       .all();
-    const match = rows.find(
-      (r) => r.nombre.toLowerCase() === nombre.toLowerCase(),
-    );
+    const match = rows.find((r) => r.nombre.toLowerCase() === nombre.toLowerCase());
     return match ? this.#mapRow(match) : null;
   }
 
-  async findAllByBusiness(
-    businessId: BusinessId,
-  ): Promise<readonly User[]> {
+  async findAllByBusiness(businessId: BusinessId): Promise<readonly User[]> {
     const rows = await this.#db
       .select()
       .from(users)
-      .where(
-        and(
-          eq(users.businessId, businessId),
-          isNull(users.deletedAt),
-        ),
-      )
+      .where(and(eq(users.businessId, businessId), isNull(users.deletedAt)))
       .all();
-    return rows
-      .sort((a, b) => a.nombre.localeCompare(b.nombre))
-      .map((r) => this.#mapRow(r));
+    return rows.sort((a, b) => a.nombre.localeCompare(b.nombre)).map((r) => this.#mapRow(r));
   }
 
   async update(id: UserId, patch: UserPatch): Promise<User> {
@@ -121,19 +91,16 @@ export class DrizzleUsersRepository implements UsersRepository {
     if (patch.mustChangePin !== undefined) {
       set['mustChangePin'] = patch.mustChangePin;
     }
+    if (patch.active !== undefined) {
+      // Portal-managed (Q2); the SQLite column arrives with the A-17 migration.
+      // Failing loudly beats silently dropping a deactivation.
+      throw new TypeError('users.active is portal-managed; local column arrives in A-17');
+    }
     if (patch.avatarColor !== undefined) {
       set['avatarColor'] = patch.avatarColor;
     }
-    await this.#db
-      .update(users)
-      .set(set)
-      .where(eq(users.id, id))
-      .run();
-    const row = await this.#db
-      .select()
-      .from(users)
-      .where(eq(users.id, id))
-      .get();
+    await this.#db.update(users).set(set).where(eq(users.id, id)).run();
+    const row = await this.#db.select().from(users).where(eq(users.id, id)).get();
     if (!row) throw new Error(`User ${id} not found after update`);
     return this.#mapRow(row);
   }
@@ -152,11 +119,7 @@ export class DrizzleUsersRepository implements UsersRepository {
       .select({ value: sql<number>`count(*)` })
       .from(users)
       .where(
-        and(
-          eq(users.businessId, businessId),
-          eq(users.role, 'director'),
-          isNull(users.deletedAt),
-        ),
+        and(eq(users.businessId, businessId), eq(users.role, 'director'), isNull(users.deletedAt)),
       )
       .get();
     return result?.value ?? 0;
@@ -172,6 +135,8 @@ export class DrizzleUsersRepository implements UsersRepository {
       role: row.role as UserRole,
       mustChangePin: row.mustChangePin,
       avatarColor: row.avatarColor,
+      // `active` column lands with the A-17 migration; every local row is active until then.
+      active: true,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,
