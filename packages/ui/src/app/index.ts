@@ -36,13 +36,7 @@ export {
 // import from `@cachink/testing`.
 
 export { AppProviders, type AppProvidersProps, type AppProvidersHooks } from './app-providers';
-export {
-  GatedNavigation,
-  type GatedNavigationProps,
-  type LanBridges,
-  type CloudBridges,
-} from './gated-navigation';
+export { GatedNavigation, type GatedNavigationProps, type LanBridges } from './gated-navigation';
 export { LanGate, type LanGateProps } from './lan-gate';
-export { CloudGate, type CloudGateProps } from './cloud-gate';
 export { AppErrorBoundary, type AppErrorBoundaryProps } from './error-boundary';
 export { AppLoadingSkeleton, type AppLoadingSkeletonProps } from './app-loading-skeleton';

@@ -87,7 +87,7 @@ run_setup() {
       # seed flow's launchApp would only foreground it. Force a cold start
       # (dev-client is already primed to localhost:8081).
       local sim_target="${MAESTRO_DEVICE_UDID:-booted}"
-      local dev_url="exp+cachink://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+      local dev_url="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
       xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
       xcrun simctl openurl "$sim_target" "$dev_url" 2>/dev/null || true
       sleep 5

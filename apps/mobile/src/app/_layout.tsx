@@ -14,7 +14,7 @@
  *   5. Mount `<MobileScannerHost />` inside the provider tree so the
  *      LAN bridge's `onOpenScanner()` promise has a `<Scanner>` to
  *      show (expo-camera-backed).
- *   6. Mount `<CloudInnerScreenHost />` for Cloud overlay sub-screens
+ *   6. Mount `` for Cloud overlay sub-screens
  *      (Advanced Backend, Password Reset).
  *   7. Wrap the tree in `<GestureHandlerRootView>` (Phase C1) so
  *      `<SwipeableRow>` and any future gesture-driven primitive can
@@ -58,10 +58,7 @@ import { AppProviders, type AppProvidersHooks } from '@cachink/ui';
 import { useLanHandle } from '@cachink/ui/sync';
 import { bootstrapI18n } from '../shell/i18n';
 import { useMobileLanBridges } from '../shell/use-lan-bridges';
-import { useMobileCloudBridges } from '../shell/use-cloud-bridges';
-import { useMobileCloudHandle } from '../shell/use-cloud-handle';
 import { MobileScannerHost } from '../shell/scanner-host';
-import { CloudInnerScreenHost } from '../shell/cloud-navigation';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { useMobileDeviceContext } from '../shell/use-device-context';
 
@@ -72,8 +69,6 @@ bootstrapI18n();
 const mobileHooks: AppProvidersHooks = {
   useLan: useMobileLanBridges,
   useLanHandle,
-  useCloud: useMobileCloudBridges,
-  useCloudHandle: useMobileCloudHandle,
 };
 
 // Plus Jakarta Sans ships weights 200–800 on Google Fonts. CLAUDE.md
@@ -121,7 +116,12 @@ export default function RootLayout(): ReactElement | null {
             platform="mobile"
             hooks={mobileHooks}
             deviceContext={deviceContext}
-            overlays={<><MobileScannerHost /><CloudInnerScreenHost /><NotificationTapHost /></>}
+            overlays={
+              <>
+                <MobileScannerHost />
+                <NotificationTapHost />
+              </>
+            }
           >
             <MobileStack />
           </AppProviders>

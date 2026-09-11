@@ -30,7 +30,6 @@ import {
 } from '@cachink/ui';
 import { useLanDetails } from '@cachink/ui/sync';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
-import { useCloudNavigation } from '../../shell/cloud-navigation';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
 const APP_VERSION = Application.nativeApplicationVersion ?? '0.0.0';
@@ -45,44 +44,52 @@ function roleLabel(role: 'operativo' | 'director' | null): 'Operativo' | 'Direct
   return null;
 }
 
+type BoolSetting = (next: boolean) => void;
+
+/** The three persisted boolean toggles — split out to keep each hook under 40 lines. */
+function useToggleHandlers(appConfig: ReturnType<typeof useAppConfigRepository>): {
+  notificationsChange: BoolSetting;
+  cachinkSoundChange: BoolSetting;
+  crashReportingChange: BoolSetting;
+} {
+  const setNotificationsEnabled = useSetNotificationsEnabled();
+  const setCachinkSoundEnabled = useSetCachinkSoundEnabled();
+  const setCrashReportingEnabled = useSetCrashReportingEnabled();
+  const persist = (key: string, next: boolean, apply: BoolSetting): void => {
+    void appConfig.set(key, next ? 'true' : 'false').then(() => apply(next));
+  };
+  return {
+    notificationsChange: (next) =>
+      persist(APP_CONFIG_KEYS.notificationsEnabled, next, setNotificationsEnabled),
+    cachinkSoundChange: (next) =>
+      persist(APP_CONFIG_KEYS.cachinkSoundEnabled, next, setCachinkSoundEnabled),
+    crashReportingChange: (next) =>
+      persist(APP_CONFIG_KEYS.crashReportingEnabled, next, setCrashReportingEnabled),
+  };
+}
+
 function useSettingsHandlers(): {
   reRunWizard: () => void;
-  notificationsChange: (next: boolean) => void;
-  cachinkSoundChange: (next: boolean) => void;
-  crashReportingChange: (next: boolean) => void;
+  notificationsChange: BoolSetting;
+  cachinkSoundChange: BoolSetting;
+  crashReportingChange: BoolSetting;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
   const router = useRouter();
   const appConfig = useAppConfigRepository();
   const setMode = useSetMode();
-  const setNotificationsEnabled = useSetNotificationsEnabled();
-  const setCachinkSoundEnabled = useSetCachinkSoundEnabled();
-  const setCrashReportingEnabled = useSetCrashReportingEnabled();
+  const toggles = useToggleHandlers(appConfig);
   const updateAdapter = useMobileUpdateAdapter();
   const updates = useCheckForUpdates(updateAdapter);
   const [statusLabel, setStatusLabel] = useState<string | undefined>();
   return {
+    ...toggles,
     reRunWizard: () => {
       void appConfig.delete(APP_CONFIG_KEYS.mode).then(() => {
         setMode(null);
         router.replace('/wizard');
       });
-    },
-    notificationsChange: (next: boolean) => {
-      void appConfig
-        .set(APP_CONFIG_KEYS.notificationsEnabled, next ? 'true' : 'false')
-        .then(() => setNotificationsEnabled(next));
-    },
-    cachinkSoundChange: (next: boolean) => {
-      void appConfig
-        .set(APP_CONFIG_KEYS.cachinkSoundEnabled, next ? 'true' : 'false')
-        .then(() => setCachinkSoundEnabled(next));
-    },
-    crashReportingChange: (next: boolean) => {
-      void appConfig
-        .set(APP_CONFIG_KEYS.crashReportingEnabled, next ? 'true' : 'false')
-        .then(() => setCrashReportingEnabled(next));
     },
     checkUpdates: () => {
       setStatusLabel('Buscando…');
@@ -103,14 +110,14 @@ function useSistemaProps(): {
   const cachinkSoundEnabled = useCachinkSoundEnabled();
   const crashReportingEnabled = useCrashReportingEnabled();
   const lanDetails = useLanDetails();
-  const cloudNav = useCloudNavigation();
   const handlers = useSettingsHandlers();
   const { t } = useTranslation();
 
   return {
     title: t('settings.sistemaCard'),
     settingsProps: {
-      mode, business,
+      mode,
+      business,
       onReRunWizard: handlers.reRunWizard,
       notificationsEnabled,
       onNotificationsChange: handlers.notificationsChange,
@@ -128,7 +135,6 @@ function useSistemaProps(): {
       onCheckForUpdates: handlers.checkUpdates,
       checkForUpdatesStatus: handlers.statusLabel,
       lanDetails: lanDetails ?? undefined,
-      onOpenAdvancedBackend: mode === 'cloud' ? cloudNav.openAdvancedBackend : undefined,
     },
   };
 }

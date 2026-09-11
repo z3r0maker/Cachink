@@ -12,7 +12,7 @@
  *                                   review items #1/#2)
  *   discoveryShown=false          → <FeatureDiscovery /> (the welcome)
  *   mode === 'lan'  + no token   → <LanGate>   (host or join)
- *   mode === 'cloud' + no sess   → <CloudGate> (onboarding)
+ *   mode === 'cloud'             → treated as local (PowerSync archived, ADR-053 §6)
  *   currentBusinessId === null    → <BusinessForm />
  *   no users exist               → <DirectorSetupGate /> (NEW)
  *   userId === null               → <QuickSwitchGate /> (replaces RolePicker)
@@ -39,7 +39,6 @@ import { useIsrDefaults } from '../hooks/use-isr-defaults';
 import type { AppMode } from '../app-config/index';
 import type { BusinessId } from '@cachink/domain';
 import { LanGate, type LanBridges } from './lan-gate';
-import { CloudGate, type CloudBridges } from './cloud-gate';
 import { useAuthGateState, DirectorSetupGate, QuickSwitchGate, ChangePinGate } from './auth-gates';
 import { FeatureDiscoveryGate } from './feature-discovery-gate';
 import { useDemoMode, type DemoModeState } from '../dev/index';
@@ -47,13 +46,11 @@ import { DemoSeedingScreen } from '../screens/DemoSeeding/index';
 import { AppLoadingSkeleton } from './app-loading-skeleton';
 
 export { type LanBridges } from './lan-gate';
-export { type CloudBridges } from './cloud-gate';
 
 export interface GatedNavigationProps {
   readonly children: ReactNode;
   readonly platform?: 'mobile' | 'desktop';
   readonly lan?: LanBridges | null;
-  readonly cloud?: CloudBridges | null;
 }
 
 function WizardGate(props: {
@@ -111,12 +108,6 @@ function renderPreBusinessGate(
           {children}
         </LanGate>
       ),
-      fallthrough: false,
-    };
-  }
-  if (mode === 'cloud') {
-    return {
-      output: <CloudGate bridges={props.cloud ?? null}>{children}</CloudGate>,
       fallthrough: false,
     };
   }

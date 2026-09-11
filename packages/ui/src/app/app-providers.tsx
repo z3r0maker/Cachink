@@ -14,12 +14,10 @@ import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
 import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
-import { GatedNavigation, type LanBridges, type CloudBridges } from './gated-navigation';
+import { GatedNavigation, type LanBridges } from './gated-navigation';
 import { AppErrorBoundary } from './error-boundary';
 import { LanSyncProvider } from '../sync/lan-sync-context';
 import type { LanSyncHandle } from '../sync/lan-bridge';
-import type { CachinkDatabase } from '@cachink/data';
-import { CloudDatabaseProvider } from '../database/cloud-database-provider';
 import {
   DrizzleAppConfigBridge,
   DrizzleRepositoryBridge,
@@ -30,9 +28,7 @@ import {
 
 export interface AppProvidersHooks {
   readonly useLan?: () => LanBridges | null;
-  readonly useCloud?: () => CloudBridges | null;
   readonly useLanHandle?: () => LanSyncHandle | null;
-  readonly useCloudHandle?: () => CachinkDatabase | null;
 }
 
 export interface AppProvidersProps {
@@ -48,9 +44,7 @@ export interface AppProvidersProps {
 }
 
 const NULL_LAN_HOOK: () => LanBridges | null = () => null;
-const NULL_CLOUD_HOOK: () => CloudBridges | null = () => null;
 const NULL_HANDLE_HOOK: () => LanSyncHandle | null = () => null;
-const NULL_DB_HOOK: () => CachinkDatabase | null = () => null;
 
 interface GatedBridgesProps {
   readonly platform?: 'mobile' | 'desktop';
@@ -60,16 +54,12 @@ interface GatedBridgesProps {
 
 function GatedBridges({ platform, hooks, children }: GatedBridgesProps): ReactElement {
   const lan = hooks.useLan();
-  const cloud = hooks.useCloud();
   const lanHandle = hooks.useLanHandle();
-  const cloudHandle = hooks.useCloudHandle();
   return (
     <LanSyncProvider handle={lanHandle}>
-      <CloudDatabaseProvider cloudHandle={cloudHandle}>
-        <GatedNavigation platform={platform} lan={lan} cloud={cloud}>
-          {children}
-        </GatedNavigation>
-      </CloudDatabaseProvider>
+      <GatedNavigation platform={platform} lan={lan}>
+        {children}
+      </GatedNavigation>
     </LanSyncProvider>
   );
 }
@@ -77,9 +67,7 @@ function GatedBridges({ platform, hooks, children }: GatedBridgesProps): ReactEl
 function resolveHooks(input?: AppProvidersHooks): Required<AppProvidersHooks> {
   return {
     useLan: input?.useLan ?? NULL_LAN_HOOK,
-    useCloud: input?.useCloud ?? NULL_CLOUD_HOOK,
     useLanHandle: input?.useLanHandle ?? NULL_HANDLE_HOOK,
-    useCloudHandle: input?.useCloudHandle ?? NULL_DB_HOOK,
   };
 }
 

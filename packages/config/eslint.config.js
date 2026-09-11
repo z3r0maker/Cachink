@@ -24,6 +24,9 @@ export default tseslint.config(
   // Global ignores
   {
     ignores: [
+      // archive/ holds parked code (ADR-053 §6, docs/plan F-02/F-03): never built, never linted.
+      'archive/**',
+      '**/archive/**',
       '**/node_modules/**',
       '**/dist/**',
       '**/build/**',

@@ -116,9 +116,6 @@ const config: StorybookConfig = {
         'expo-notifications',
         'expo-file-system',
         '@cachink/sync-lan',
-        '@cachink/sync-cloud',
-        '@powersync/web',
-        '@powersync/common',
       ],
       esbuildOptions: {
         ...viteConfig.optimizeDeps?.esbuildOptions,

@@ -55,10 +55,18 @@ export interface OnboardingFormProps {
   readonly onSubmitEditing?: () => void;
 }
 
-function BusinessNameField({ t, state, setField, onSubmitEditing, inputRef }: {
-  t: T; state: OnboardingFormState;
+function BusinessNameField({
+  t,
+  state,
+  setField,
+  onSubmitEditing,
+  inputRef,
+}: {
+  t: T;
+  state: OnboardingFormState;
   setField: (k: keyof OnboardingFormState, v: string) => void;
-  onSubmitEditing?: () => void; inputRef: React.RefObject<unknown>;
+  onSubmitEditing?: () => void;
+  inputRef: React.RefObject<unknown>;
 }): ReactElement {
   return (
     <View marginTop={12}>
@@ -80,7 +88,8 @@ export function OnboardingForm(props: OnboardingFormProps): ReactElement {
   const { t, tab, state, setField } = props;
   const passwordRef = useRef<TextInput>(null);
   const businessNameRef = useRef<TextInput>(null);
-  const onPasswordSubmit = tab === 'signup' ? () => focusRef(businessNameRef) : props.onSubmitEditing;
+  const onPasswordSubmit =
+    tab === 'signup' ? () => focusRef(businessNameRef) : props.onSubmitEditing;
   return (
     <>
       <EmailField
@@ -106,7 +115,15 @@ export function OnboardingForm(props: OnboardingFormProps): ReactElement {
           inputRef={passwordRef}
         />
       </View>
-      {tab === 'signup' && <BusinessNameField t={t} state={state} setField={setField} onSubmitEditing={props.onSubmitEditing} inputRef={businessNameRef} />}
+      {tab === 'signup' && (
+        <BusinessNameField
+          t={t}
+          state={state}
+          setField={setField}
+          onSubmitEditing={props.onSubmitEditing}
+          inputRef={businessNameRef}
+        />
+      )}
     </>
   );
 }

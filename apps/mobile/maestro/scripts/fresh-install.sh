@@ -133,7 +133,7 @@ fi
 # dev-client deep link with the explicit localhost URL, waiting
 # for the bundle to load, then terminating the app so Maestro's
 # `launchApp` gets a clean cold start.
-DEV_CLIENT_URL="exp+cachink://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+DEV_CLIENT_URL="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
 echo "🔗  Reconnecting dev-client to localhost:8081..."
 xcrun simctl terminate "$SIM_TARGET" "$APP_ID" 2>/dev/null || true
 xcrun simctl openurl "$SIM_TARGET" "$DEV_CLIENT_URL" 2>/dev/null || true

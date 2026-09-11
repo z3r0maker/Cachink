@@ -58,9 +58,10 @@ function useCloudForm(props: CloudOnboardingScreenProps, tab: OnboardingTab) {
   async function submit(): Promise<void> {
     setState((s) => ({ ...s, status: 'submitting', errorMsg: null }));
     try {
-      const creds = tab === 'signin'
-        ? await props.onSignIn(state.email, state.password)
-        : await props.onSignUp(state.email, state.password, state.businessName);
+      const creds =
+        tab === 'signin'
+          ? await props.onSignIn(state.email, state.password)
+          : await props.onSignUp(state.email, state.password, state.businessName);
       props.onSuccess(creds);
       setState(initialOnboardingForm());
     } catch (err) {
