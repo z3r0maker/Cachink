@@ -6,11 +6,7 @@
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { IsoDate } from '@cachink/domain';
-import {
-  ProductoDetailSmart,
-  useProductosConStock,
-  useProductFormStore,
-} from '@cachink/ui';
+import { ProductoDetailSmart, useProductosConStock, useProductFormStore } from '@cachink/ui';
 import { useDesktopNavigate } from '../desktop-router-context';
 
 function todayIso(): IsoDate {
@@ -21,9 +17,7 @@ function todayIso(): IsoDate {
   return `${y}-${m}-${d}` as IsoDate;
 }
 
-export function ProductoDetailDesktopRoute(props: {
-  readonly productId: string;
-}): ReactElement {
+export function ProductoDetailDesktopRoute(props: { readonly productId: string }): ReactElement {
   const navigate = useDesktopNavigate();
   const itemsQ = useProductosConStock();
   const items = itemsQ.data ?? [];

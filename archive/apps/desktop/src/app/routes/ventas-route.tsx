@@ -4,7 +4,13 @@
  * Mirrors the mobile route with `navigate` in place of `useRouter`.
  */
 import { type ReactElement } from 'react';
-import { CajaGateBanner, CorteHomeCard, ProductosGateBanner, useOpenCajaTurno, useRole } from '@cachink/ui';
+import {
+  CajaGateBanner,
+  CorteHomeCard,
+  ProductosGateBanner,
+  useOpenCajaTurno,
+  useRole,
+} from '@cachink/ui';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
 import { useDesktopNavigate } from '../desktop-router-context';
 import { useVentasRouteState, VentasMainContent, VentasSheets } from './ventas-route-state';

@@ -3,7 +3,7 @@
 #
 # Produces:
 #   1. EAS production build (iOS + Android) via `eas build -p all`.
-#   2. Tauri desktop bundles for macOS + Windows.
+#   2. (desktop Tauri bundles — archived under archive/apps/desktop, F-02)
 #   3. SHA-256 checksums → dist/CHECKSUMS.txt.
 #   4. CycloneDX SBOM → dist/sbom.json.
 #
@@ -54,24 +54,11 @@ else
 fi
 
 # --------------------------------------------------------------------
-# Step 3 — desktop (Tauri)
-# --------------------------------------------------------------------
-echo "→ Desktop build (Tauri)"
-if (( DRY_RUN == 0 )); then
-  pushd "$ROOT/apps/desktop" >/dev/null
-  pnpm tauri build --target universal-apple-darwin --bundles dmg
-  pnpm tauri build --target x86_64-pc-windows-msvc --bundles msi
-  popd >/dev/null
-else
-  echo "   [dry-run] would call: tauri build for mac + windows"
-fi
-
-# --------------------------------------------------------------------
-# Step 4 — checksums
+# Step 3 — checksums
 # --------------------------------------------------------------------
 echo "→ Checksums"
 if (( DRY_RUN == 0 )); then
-  find "$ROOT/apps/desktop/src-tauri/target" -type f \( -name "*.dmg" -o -name "*.msi" \) \
+  find "$DIST" -type f \( -name "*.ipa" -o -name "*.aab" -o -name "*.apk" \) \
     -exec shasum -a 256 {} \; > "$DIST/CHECKSUMS.txt" || true
   cat "$DIST/CHECKSUMS.txt"
 else
@@ -79,7 +66,7 @@ else
 fi
 
 # --------------------------------------------------------------------
-# Step 5 — SBOM
+# Step 4 — SBOM
 # --------------------------------------------------------------------
 echo "→ SBOM (CycloneDX)"
 if (( DRY_RUN == 0 )); then

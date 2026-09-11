@@ -45,12 +45,15 @@ function parseOsName(): string {
 }
 
 export function useDesktopDeviceContext(): DeviceContext {
-  return useMemo<DeviceContext>(() => ({
-    model: null,
-    osName: parseOsName(),
-    osVersion: parseOsVersion(),
-    appVersion: readAppVersion(),
-    buildNumber: null,
-    platform: platformKey(),
-  }), []);
+  return useMemo<DeviceContext>(
+    () => ({
+      model: null,
+      osName: parseOsName(),
+      osVersion: parseOsVersion(),
+      appVersion: readAppVersion(),
+      buildNumber: null,
+      platform: platformKey(),
+    }),
+    [],
+  );
 }

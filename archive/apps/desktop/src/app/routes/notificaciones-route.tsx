@@ -13,10 +13,7 @@ export function NotificacionesRoute(): ReactElement {
   const { navigate } = useDesktopRouter();
   return (
     <DesktopAppShellWrapper activeTabKey="otros">
-      <NotificacionesScreen
-        onNavigate={navigate}
-        testID="desktop-notificaciones"
-      />
+      <NotificacionesScreen onNavigate={navigate} testID="desktop-notificaciones" />
     </DesktopAppShellWrapper>
   );
 }

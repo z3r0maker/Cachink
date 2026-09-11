@@ -12,9 +12,7 @@ import { useDesktopNavigate } from '../desktop-router-context';
 export function IconPickerRoute(): ReactElement {
   const navigate = useDesktopNavigate();
   const updateIcon = useProductFormStore((s) => s.updateIcon);
-  const currentIcon = useProductFormStore(
-    (s) => s.draft?.icono ?? null,
-  );
+  const currentIcon = useProductFormStore((s) => s.draft?.icono ?? null);
 
   const goBack = (): void => navigate('/productos');
 

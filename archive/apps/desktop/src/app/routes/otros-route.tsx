@@ -5,12 +5,7 @@
  */
 
 import type { ReactElement } from 'react';
-import {
-  OtrosScreen,
-  useFeatureFlags,
-  useRole,
-  ResetDemoAction,
-} from '@cachink/ui';
+import { OtrosScreen, useFeatureFlags, useRole, ResetDemoAction } from '@cachink/ui';
 import { webResetDatabase } from '@cachink/ui/database/reset-web';
 import { DesktopAppShellWrapper } from '../../shell/desktop-app-shell-wrapper';
 import { useDesktopNavigate } from '../desktop-router-context';
@@ -34,10 +29,7 @@ export function OtrosRoute(): ReactElement {
       />
       {typeof __DEV__ !== 'undefined' && __DEV__ && (
         <div style={{ padding: 16 }}>
-          <ResetDemoAction
-            resetDatabase={webResetDatabase}
-            onReload={reloadApp}
-          />
+          <ResetDemoAction resetDatabase={webResetDatabase} onReload={reloadApp} />
         </div>
       )}
     </DesktopAppShellWrapper>

@@ -30,7 +30,8 @@
 
 ### F-02 Archive the desktop (Tauri) app
 
-- [ ] Status
+- [x] Status
+  - Done: 2026-09-11 · track/foundation · `apps/desktop` → `archive/apps/desktop` (91 files), tag `archive/desktop-2026-09`, `archive/README.md` added; `pnpm-workspace.yaml` excludes `archive/**`; `scripts/build-all.sh` Tauri step removed (checksums now over mobile artifacts); `scripts/design-lint` ROOTS drops desktop. Deviations: no root scripts or committed `packages/ui/dist` existed, and Storybook only mentions desktop in comments — nothing else to edit. Verified: `pnpm install` (workspace no longer lists desktop), typecheck 9/9, all tests green.
 - **Blocked by:** — · **Blocks:** F-04
 - **Context:** Q8 decision — desktop is removed from the active tree but preserved. Same treatment as F-03.
 - **Files:** `apps/desktop/` → `archive/apps/desktop/`, `pnpm-workspace.yaml`, `turbo.json`, root `package.json` scripts, `.github/workflows/*` (F-08), `packages/ui/.storybook/main.ts`, `scripts/*` referencing desktop, `playwright.config.*` if root-level.

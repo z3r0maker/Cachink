@@ -13,7 +13,7 @@ export function TelemetriaRoute(): ReactElement {
   // Hard-gate: redirect in production
   if (typeof __DEV__ === 'undefined' || !__DEV__) {
     navigate('/');
-    return <></> as unknown as ReactElement;
+    return (<></>) as unknown as ReactElement;
   }
 
   return (

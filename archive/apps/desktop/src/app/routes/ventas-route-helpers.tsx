@@ -40,7 +40,10 @@ export function useShareComprobante(
 ): () => void {
   const html = useComprobanteHtml(selected, business);
   return () => {
-    if (!selected || !business || !html) { onDone(); return; }
+    if (!selected || !business || !html) {
+      onDone();
+      return;
+    }
     void shareComprobante({
       title: `Comprobante — ${selected.concepto}`,
       text: `${selected.concepto} — ${selected.fecha}`,
@@ -65,12 +68,19 @@ export function makeQuickSellHandler(
   }): void => {
     const product = productosQ.data?.find((p) => p.id === data.productoId);
     if (!product || !business) return;
-    const payload = buildQuickSellPayload({ producto: product, business, fecha, metodo: data.metodo });
+    const payload = buildQuickSellPayload({
+      producto: product,
+      business,
+      fecha,
+      metodo: data.metodo,
+    });
     registrar.mutate(
       { ...payload, cantidad: data.cantidad, clienteId: data.clienteId },
       {
         onSuccess: () => setConfirmProduct(null),
-        onError: (error) => { console.error('[ventas] registrar error:', error.message); },
+        onError: (error) => {
+          console.error('[ventas] registrar error:', error.message);
+        },
       },
     );
   };

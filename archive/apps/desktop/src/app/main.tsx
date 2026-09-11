@@ -44,7 +44,12 @@ const desktopHooks: AppProvidersHooks = {
 function DesktopApp(): React.ReactElement {
   const deviceContext = useDesktopDeviceContext();
   return (
-    <AppProviders platform="desktop" hooks={desktopHooks} deviceContext={deviceContext} overlays={<CloudInnerScreenHost />}>
+    <AppProviders
+      platform="desktop"
+      hooks={desktopHooks}
+      deviceContext={deviceContext}
+      overlays={<CloudInnerScreenHost />}
+    >
       <DesktopRouter />
     </AppProviders>
   );
