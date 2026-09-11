@@ -3495,3 +3495,360 @@ them.
 - `packages/ui/src/screens/Otros/otros-items.ts`
 - `packages/ui/src/screens/Caja/caja-content.tsx`
 - `packages/ui/src/screens/AppShell/tab-definitions.ts`
+
+---
+
+## ADR-053
+
+**Title:** Cachink becomes a capture client; the web portal owns everything else
+
+**Date:** 2026-09-11
+
+**Status:** Accepted — amends CLAUDE.md §1 (Phase 1 module list) and §2.2
+(local-first). Parks ADR-035 (PowerSync) and the LAN-sync runtime.
+
+**Context**
+
+Cachink shipped as a standalone, local-only app: a device held the whole
+product — capture, accounting, dashboards, users, settings — and cloud
+sync was an optional extra layered on top. Two years of that shape
+produced 33 screens and ~31k lines of screen code, of which roughly a
+third is administration and reporting that a phone is a poor host for.
+
+The product intent has changed. Cachink is now **the capture surface of a
+larger service**: the phone registers ventas, egresos, and movimientos de
+inventario on the shop floor, and a responsive web portal owns everything
+else — identity, roles, business configuration, catalog management,
+dashboards, financial statements, and billing. Subscriptions are sold and
+renewed on our own site, not through the app stores.
+
+This is not a new architecture so much as a subtraction. The Operativo
+role already _is_ the capture app: its bar reads
+`Ventas | Caja | Gastos | Productos`, which is the target product almost
+exactly. The work is deleting the Director half, moving administration to
+the web, and adding activation plus an upload path.
+
+**Decision**
+
+### 1. The app is strictly single-role
+
+The `role` dimension is removed, not narrowed. There is no Director build
+of the app, no role branching in `tab-definitions.ts`, no
+`otros-items-director.ts`, and no `auth.role` scoping in the sync streams.
+A director who wants to register a sale signs in as an ordinary capture
+user. Roles continue to exist as a concept — they are assigned and
+enforced **in the web portal**.
+
+`RolePicker` is deleted. `DirectorHome`, `DirectorSetup`, and
+`UserManagement` move to the web.
+
+### 2. First run is: email + code → capture
+
+The wizard leaves the app. A fresh install shows one activation screen:
+the user enters the email they signed up with on the website and the code
+that was mailed to them. On success the device receives a `business_id`
+and a signed entitlement (§5) and goes straight to Ventas.
+
+Business name, tipo de negocio, ISR rates, tipos de pago, feature flags,
+employees, and users are all configured in the portal and arrive on the
+device as reference data. `Wizard`, `BusinessForm`, `FuncionesNegocio`,
+and `CloudOnboarding` move to the web.
+
+### 3. Surface split
+
+**Stays (floor work):** Ventas, Egresos, Caja + turnos, Checkout,
+CorteDeDia, Cancelaciones, Login (PIN only), AppShell, ConsentModal.
+
+**Stays but dormant** (MVP flag-off; these are physical floor work and
+belong to capture when re-enabled): Merma, Conversion, Auditoria.
+
+**Moves to web:** Estados, DirectorHome, Wizard, CloudOnboarding,
+Telemetria, BusinessForm, Otros, UserManagement, FuncionesNegocio,
+CajaReportes, DirectorSetup, MermaReportes, Notificaciones.
+**Deleted:** RolePicker.
+
+**Split down the middle** — each keeps a thin capture seam on the device
+because forcing a trip to a laptop mid-shift violates _the less clicks,
+the most value_:
+
+- **Inventario/Productos.** The app keeps stock view, movimientos,
+  barcode scanning, and a **quick-add** that creates a minimal product
+  inline, plus on-device stock-low notifications. The portal owns full
+  catalog management: pricing, attributes, archive, the product icon set,
+  and **bulk import from Excel**.
+- **Clientes.** The app keeps a picker and quick-create for crédito
+  sales. The portal owns client management and history.
+- **Settings.** Split by what owns the value, not by topic. Tenant data
+  (business profile, ISR, tipos de pago, indicadores, empleados) → web.
+  Device data (sound, crash reporting, notifications, bug report, export,
+  activation and sync status) → app.
+
+`Estados`' UI moves, but the NIF B-2/B-3/B-6 calculations and the KPI
+logic **stay in `packages/domain`** and are consumed by the portal.
+
+### 4. The website lives in this monorepo
+
+The portal is a workspace in this repo so it imports `@cachink/domain`
+directly. Reimplementing NIF accounting in a second codebase would
+guarantee drift between what the phone captures and what the portal
+reports. This is the single constraint that makes the split safe.
+
+### 5. Entitlement: two clocks, never a lock-out
+
+The server issues a **signed entitlement** (`business_id`, `valid_until`,
+`grace_until`) that the device verifies offline against a public key and
+refreshes on every successful sync. Two independent clocks govern it:
+
+- **Payment grace (~7 days):** the server _says_ expired. Banner; full
+  capture continues. Mexican SMBs pay by SPEI and OXXO, which confirm in
+  hours or days, so a paid-up user routinely looks unpaid for a while.
+- **Offline staleness (~30 days):** the server _has not been reachable_.
+  A paid user in a market stall with no signal must never be locked out
+  by our inability to phone home.
+
+When both expire the app degrades to **read-only plus export**. Data is
+never deleted, never locked, never held hostage. The user can always see
+and export their own books.
+
+### 6. Sync is a hand-rolled outbox; PowerSync is parked
+
+Capture data is append-mostly: a venta is a fact, not mutable state. That
+makes general bidirectional sync the wrong tool.
+
+- **Upstream (device → cloud):** an append-only outbox. Every record
+  carries a client-generated UUID and is idempotent on it. Retry forever;
+  exactly-once by construction; conflicts structurally impossible.
+- **Downstream (cloud → device):** reference data only — catalog,
+  business config, entitlement. Small, infrequent, last-write-wins.
+
+`packages/sync-cloud` (PowerSync + Supabase, ADR-035) is **commented out
+of the code path, not deleted.** Its stream descriptors document the
+scoping model and stay as reference. Retained on disk, unreferenced at
+runtime.
+
+`packages/sync-lan` is likewise **parked, not retired** — code stays,
+nothing mounts it. The cloud is the backbone now.
+
+### 7. Multi-tenancy: shared schema, `business_id`, RLS
+
+Confirmed as-is from ADR-035. One Postgres database, one schema,
+`business_id` on every row, enforced by **Postgres RLS** rather than
+application-level filtering. This carries thousands of tenants.
+
+The escalation path, and the discipline that keeps it cheap:
+
+1. **Now** — shared DB + RLS.
+2. **Growth** — `business_id` as the _leading_ column of every index;
+   read replicas; a separate read model for portal analytics so reporting
+   never contends with capture writes.
+3. **Scale** — shard by tenant via a `business_id → shard` routing table,
+   or Citus.
+
+Rules that keep step 3 from becoming a rewrite, binding from today: never
+join across tenants; `business_id` on every table including join tables;
+client-generated UUIDs and no reliance on global sequences; no query
+reachable without a tenant predicate. **Schema-per-tenant is rejected** —
+it reads as isolation and becomes migration debt past a few hundred
+tenants.
+
+### 8. Local retention
+
+With the cloud as the archive and no Director reporting on the device,
+the 90-day window of ADR-035 becomes the _only_ window. The local SQLite
+database gets a real retention policy instead of growing without bound.
+
+**Consequences**
+
+- CLAUDE.md §1 no longer describes the app. Estados Financieros,
+  Indicadores, and Director Home leave the module list; a web portal
+  workspace joins the structure. **CLAUDE.md is edited by humans only —
+  this ADR is the authorisation, not the edit.**
+- CLAUDE.md §2.2 ("local-first ... never prerequisites") is amended:
+  activation requires one network round-trip, and continued use requires
+  periodic reachability under §5's two clocks. Between those bounds the
+  app remains fully offline-capable, which is the part that mattered.
+- Roughly 11k of ~31k lines of screen code leave the app.
+- App-store risk moves to the top of the register. Signing in to a
+  subscription sold on our own site is standard B2B practice (Apple
+  Guideline 3.1.3(b) multiplatform services). **In-app steering toward
+  external purchase is the exposed part.** The app therefore ships with
+  no purchase UI and no checkout link — activation and a neutral status
+  message only. Any outbound link is feature-flagged by storefront, and
+  the current rules for the Mexican storefront must be verified rather
+  than assumed. A working demo account is kept for review.
+- `sync-cloud` and `sync-lan` remain in the build graph as typechecked
+  but unmounted packages. They must not silently rot: either keep their
+  tests green or mark them explicitly excluded.
+
+**Follow-ups**
+
+- `packages/ui/src/screens/Inventario/` and `Productos/` hold ten
+  duplicated files — eight byte-identical, two (`producto-detail-popover`,
+  `producto-detail-route`) diverged, with the live copies in
+  `Inventario/` and the drifted copies unused. The comment at
+  `screens/index.ts:18` is false. Consolidate into `Productos/` before
+  the catalog split lands (CLAUDE.md §2.3).
+- ROADMAP.md's "last updated" still reads 2026-04-28 against commits
+  through September; it needs a truthful reset alongside this pivot.
+- Ventas Maestro flows still exercise the removed SessionStrip → TotalBar
+  UI and must be re-scoped to the inline POS or dropped.
+
+---
+
+## ADR-054
+
+**Title:** Rebrand to Xangarro — `Xangarro` in code, `Xangarro!` in presentation
+
+**Date:** 2026-09-11
+
+**Status:** Accepted, pending IMPI trademark clearance on "Xangarro".
+Does not amend ADR-053; the two land in sequence.
+
+**Context**
+
+The product is being renamed from **Cachink!** to **Xangarro!**
+(`xangarro.mx`), positioned as _"Finanzas para tu negocio — la app que le
+da flujo a las PyMEs de México."_ The brand keeps the trailing
+exclamation mark and the existing yellow-on-black palette.
+
+The exclamation mark is not cosmetic from an engineering standpoint. F0-T02
+recorded that a `!` anywhere in the workspace path triggers
+`Encoding::CompatibilityError` in CocoaPods under a non-UTF-8 locale; the
+abandoned `~/Downloads/Cachink!` checkout next to the live one is the
+scar. Carrying the bang into code would reproduce a bug we have already
+paid for once.
+
+Both names carry meaning, but of different kinds. _Cachink_ is
+onomatopoeia for a cash register — which is why a branded _cha-ching_
+sound ships in `apps/mobile/assets/sounds/cachink.mp3` behind
+`Settings/cachink-sound-toggle.tsx`. _Xangarro_ is wordplay on
+**changarro**, Mexican colloquial for a tiny corner business. It names
+the _customer_ rather than the sound of a sale — sharper positioning for
+"finanzas para tu negocio", and unmistakably Mexican in a way an English
+onomatopoeia never was. What it does not do is describe a noise.
+
+**Decision**
+
+### 1. Two forms, one rule
+
+**`Xangarro`** — no bang, no diacritics — is the only form permitted in
+anything a machine parses:
+
+| Surface                         | Value                   |
+| ------------------------------- | ----------------------- |
+| Workspace scope                 | `@xangarro/*`           |
+| iOS / Android bundle            | `mx.xangarro.mobile`    |
+| Tauri identifier                | `mx.xangarro.desktop`   |
+| Expo `slug` / `scheme`          | `xangarro`              |
+| Repo + all directory names      | `Xangarro` / `xangarro` |
+| testIDs, env vars, DB filenames | `xangarro`              |
+
+**`Xangarro!`** — with the bang — is for humans only: Expo `name`, Tauri
+`productName`, store listing titles, in-app copy, `es-mx.ts` strings,
+logos, marketing, and the landing site.
+
+The rule is mechanical: **if a compiler, shell, package manager, or
+filesystem reads it, no bang.**
+
+### 2. Identifiers change immediately; the sweep waits
+
+Bundle identifiers are **immutable once published** — changing one after
+release means a new store listing and the loss of every review, ranking,
+and install. The app is not yet published (`eas.json` carries an
+`appleTeamId` but no `ascAppId`; preview is `distribution: internal`; and
+`docs/landing/index.html` still points at the placeholder
+`apps.apple.com/mx/app/cachink/id0000000000`). The identifier change is
+therefore free today and impossible later. **It happens now.**
+
+The wider string sweep does not. Of 1,222 files containing "cachink",
+**592 sit in `packages/ui`** — the exact surface ADR-053 removes. The
+order is **ADR-053 teardown → rename sweep**, so the sweep never touches
+code that is about to be deleted.
+
+### 3. History is not rewritten
+
+`ARCHITECTURE.md` is append-only. ADR-001 … ADR-053 say "Cachink" because
+that was the product's name when those decisions were taken. They stay as
+written, as does `ROADMAP-archive.md`. This ADR is the pointer that
+explains the discontinuity.
+
+### 4. testIDs move atomically with their flows
+
+Any testID carrying the name is referenced by Maestro flows under
+`apps/mobile/maestro/flows/`. Renaming a testID without its flow silently
+breaks E2E coverage, so both change in a single commit or neither does.
+
+### 5. Local data paths are a migration, not a rename
+
+`mx.cachink.desktop` determines where the desktop SQLite database lives
+(`~/Library/Application Support/mx.cachink.desktop`). Changing the
+identifier orphans the data of every existing install; the Expo `scheme`
+change likewise breaks existing deep links. While the product is in
+prebeta on partner devices this is accepted **as a deliberate cost**, not
+absorbed as a surprise. Should the rename slip past first public release,
+a directory-migration step becomes mandatory.
+
+### 6. Asset rework, and a pipeline to restore
+
+ADR-016 designates `assets/brand/` the single source of truth, with
+derivatives copied out to each app. **Four of its five documented masters
+are missing from disk and from git** — `icon.png`, `logo.png`,
+`splash-mobile.png`, and `splash-desktop.png` are described in
+`assets/brand/README.md` but only `icon-padded.png` survives. The
+derivatives still exist in the apps; the originals they came from do not.
+
+The rebrand replaces all of them anyway, so this is the moment to
+**restore the pipeline rather than work around it**: land the new masters
+complete, and regenerate derivatives from them per ADR-016.
+
+The four role illustrations in `assets/brand/`
+(`role-{operativo,director}-{dark,light}.png`) are **not redrawn** —
+ADR-053 removes the role concept from the app and deletes the picker that
+consumed them.
+
+### 7. The sound loses its pun
+
+The _feature_ keeps its rationale: an audible confirmation that a sale
+registered is genuinely useful on a noisy shop floor, and nothing about
+the rename changes that. What breaks is only the **naming**.
+`cachink.mp3` and `cachink-sound-toggle.tsx` are named for the noise
+itself, and `xangarro.mp3` would carry a pun the new brand does not make
+— _changarro_ names the shop, not the register.
+
+So the sound survives under a neutral name (`sale-confirm.mp3`,
+`SaleSoundToggle`), decoupled from the wordmark for good. Whether to
+commission new audio for the brand is a product decision and explicitly
+**not** part of the mechanical sweep.
+
+### 8. The palette survives
+
+`theme.ts:16` is `#FFD60A` ("Amarillo Vibrante — hero color"), matching
+the mobile splash and Android adaptive-icon backgrounds. The new identity
+is the same yellow-on-black. The exact hex is to be confirmed against the
+final brand master, but the rebrand is a wordmark and artwork change, not
+a palette change.
+
+**Consequences**
+
+- Bundle identifiers, workspace scope, and directory names change ahead of
+  the string sweep, so the repo briefly reads `Xangarro` in its
+  identifiers and `Cachink` in its copy. This is intended and temporary.
+- Every developer re-clones or renames their working directory. **No path
+  may contain `!`.**
+- Existing prebeta installs lose local data on the desktop identifier
+  change and must be re-activated.
+- `assets/brand/README.md` needs rewriting once the masters land, since it
+  currently documents files that do not exist.
+- The name is not yet cleared at IMPI. Should clearance fail, everything
+  above is reversible except any store listing published under
+  `mx.xangarro.*` — which is one more reason the identifier change must
+  precede publication, not follow it.
+
+**Follow-ups**
+
+- IMPI trademark search on "Xangarro"; register `xangarro.mx`.
+- Product decision on the confirmation sound (§7).
+- New brand masters at the sizes ADR-016 specifies, then regenerate
+  derivatives and store screenshots (`docs/store/screenshots/` currently
+  holds only a README).
+- Update `docs/store/listing-app-store.md` and `listing-play-store.md`.
