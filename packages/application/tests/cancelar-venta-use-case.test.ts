@@ -94,9 +94,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('reverses stock when stock is enabled and product has seguirStock', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ, seguirStock: true }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: true }));
     const sale = await sales.create(
       makeNewSale({
         businessId: BIZ,
@@ -121,9 +119,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('does not reverse stock when product has seguirStock=false', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ, seguirStock: false }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: false }));
     const sale = await sales.create(
       makeNewSale({
         businessId: BIZ,
@@ -169,9 +165,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('rejects with wrong PIN', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ }),
-    );
+    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
 
     await expect(
       useCase.execute({
@@ -185,9 +179,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('rejects for non-existent user', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ }),
-    );
+    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
     const fakeUserId = '01HZ8XQN9GZJXV8AKQ5X0CFAKE' as UserId;
 
     await expect(
@@ -210,9 +202,7 @@ describe('CancelarVentaUseCase', () => {
         role: 'operativo',
       }),
     );
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ }),
-    );
+    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
 
     await expect(
       useCase.execute({
@@ -240,9 +230,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('rejects when sale is already cancelled', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ }),
-    );
+    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
     // Cancel it first
     await useCase.execute({
       saleId: sale.id,
@@ -267,9 +255,7 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('does not reverse stock when stockEnabled is false', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ, seguirStock: true }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: true }));
     const sale = await sales.create(
       makeNewSale({
         businessId: BIZ,

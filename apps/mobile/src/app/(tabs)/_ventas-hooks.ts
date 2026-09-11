@@ -82,8 +82,13 @@ export function useVentasQueries(fecha: IsoDate): {
   return {
     productos: productosQ.data ?? [],
     productosData: productosQ.data,
-    stockMap, business, registrar, eliminar, ventas,
-    total: totalDelDia(ventas), role,
+    stockMap,
+    business,
+    registrar,
+    eliminar,
+    ventas,
+    total: totalDelDia(ventas),
+    role,
   };
 }
 

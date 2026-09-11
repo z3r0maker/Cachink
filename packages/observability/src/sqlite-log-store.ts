@@ -79,10 +79,10 @@ export class SqliteLogStore implements LogStore {
     if (ids.length === 0) return;
     const now = new Date().toISOString();
     const placeholders = ids.map(() => '?').join(',');
-    await this.#db.runAsync(
-      `UPDATE ${TABLE} SET shipped_at = ? WHERE id IN (${placeholders})`,
-      [now, ...ids],
-    );
+    await this.#db.runAsync(`UPDATE ${TABLE} SET shipped_at = ? WHERE id IN (${placeholders})`, [
+      now,
+      ...ids,
+    ]);
   }
 
   async writeAudit(event: AuditEvent): Promise<void> {

@@ -24,8 +24,7 @@ export function useExpectedCash(turno: CajaTurno | null): Money {
 
   const salesQ = useQuery({
     queryKey: ['cerrar-sales', turno?.id],
-    queryFn: () =>
-      businessId && turno ? salesRepo.findByDateRange(fecha, fecha, businessId) : [],
+    queryFn: () => (businessId && turno ? salesRepo.findByDateRange(fecha, fecha, businessId) : []),
     enabled: !!turno && !!businessId,
   });
   const expensesQ = useQuery({

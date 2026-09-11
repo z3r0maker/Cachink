@@ -22,9 +22,7 @@ export function describeClientsRepositoryContract(
     });
 
     it('stamps audit + preserves nullable telefono/email/nota', async () => {
-      const row = await repo.create(
-        makeNewClient({ businessId: BIZ_A, telefono: undefined }),
-      );
+      const row = await repo.create(makeNewClient({ businessId: BIZ_A, telefono: undefined }));
       expect(row.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
       expect(row.telefono).toBeNull();
       expect(row.email).toBeNull();

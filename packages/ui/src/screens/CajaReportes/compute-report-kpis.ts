@@ -28,9 +28,6 @@ function computeAvgDiferencia(turnos: readonly CajaTurno[]): bigint {
   if (turnos.length === 0) return 0n;
   const closed = turnos.filter((tn) => tn.diferenciaCentavos !== null);
   if (closed.length === 0) return 0n;
-  const sum = closed.reduce(
-    (acc, tn) => acc + (tn.diferenciaCentavos ?? 0n),
-    0n,
-  );
+  const sum = closed.reduce((acc, tn) => acc + (tn.diferenciaCentavos ?? 0n), 0n);
   return sum / BigInt(closed.length);
 }

@@ -24,18 +24,12 @@ import type { CachinkDatabase } from './_db.js';
 
 type MovRow = typeof cajaMovimientos.$inferSelect;
 
-export class DrizzleCajaMovimientosRepository
-  implements CajaMovimientosRepository
-{
+export class DrizzleCajaMovimientosRepository implements CajaMovimientosRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(
-    db: CachinkDatabase,
-    deviceId: DeviceId,
-    userId: UserId | null = null,
-  ) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;
@@ -62,31 +56,20 @@ export class DrizzleCajaMovimientosRepository
     return this.#mapRow(row);
   }
 
-  async findById(
-    id: CajaMovimientoId,
-  ): Promise<CajaMovimiento | null> {
+  async findById(id: CajaMovimientoId): Promise<CajaMovimiento | null> {
     const row = await this.#db
       .select()
       .from(cajaMovimientos)
-      .where(
-        and(eq(cajaMovimientos.id, id), isNull(cajaMovimientos.deletedAt)),
-      )
+      .where(and(eq(cajaMovimientos.id, id), isNull(cajaMovimientos.deletedAt)))
       .get();
     return row ? this.#mapRow(row) : null;
   }
 
-  async findByTurno(
-    turnoId: CajaTurnoId,
-  ): Promise<readonly CajaMovimiento[]> {
+  async findByTurno(turnoId: CajaTurnoId): Promise<readonly CajaMovimiento[]> {
     const rows = await this.#db
       .select()
       .from(cajaMovimientos)
-      .where(
-        and(
-          eq(cajaMovimientos.turnoId, turnoId),
-          isNull(cajaMovimientos.deletedAt),
-        ),
-      )
+      .where(and(eq(cajaMovimientos.turnoId, turnoId), isNull(cajaMovimientos.deletedAt)))
       .orderBy(asc(cajaMovimientos.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));

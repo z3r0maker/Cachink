@@ -40,21 +40,20 @@ describe('EditarVentaUseCase', () => {
       efectivoAdicionalCentavos: 0n,
       businessId: BIZ,
     });
-    registrar = new RegistrarVentaUseCase(
-      sales, clients, products, movements, cajaTurnos,
-      { userId: USER_ID },
-    );
+    registrar = new RegistrarVentaUseCase(sales, clients, products, movements, cajaTurnos, {
+      userId: USER_ID,
+    });
     editar = new EditarVentaUseCase(sales, clients);
 
     // Seed a default product for use-case product validation
-    const defaultProduct = await products.create(
-      makeNewProduct({ businessId: BIZ }),
-    );
+    const defaultProduct = await products.create(makeNewProduct({ businessId: BIZ }));
     defaultProductId = defaultProduct.id;
   });
 
   it('applies a monto + concepto patch and returns the updated row', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, monto: 1000n, productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, monto: 1000n, productoId: defaultProductId }),
+    );
     const updated = await editar.execute({
       id: sale.id,
       patch: { monto: 2500n, concepto: 'Café americano grande' },
@@ -65,7 +64,9 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('preserves untouched fields (fecha, metodo, categoria)', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+    );
     const updated = await editar.execute({
       id: sale.id,
       patch: { monto: 9999n },
@@ -85,7 +86,9 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('rejects a Crédito patch without a clienteId on the merged row', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, metodo: 'Efectivo', productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', productoId: defaultProductId }),
+    );
     // Trying to flip metodo to Crédito while clienteId is null.
     await expect(editar.execute({ id: sale.id, patch: { metodo: 'Crédito' } })).rejects.toThrow(
       /clienteId/,
@@ -93,7 +96,9 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('rejects a Crédito patch when the clienteId points at a missing cliente', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+    );
     await expect(
       editar.execute({
         id: sale.id,
@@ -111,7 +116,9 @@ describe('EditarVentaUseCase', () => {
       telefono: '5512345678',
       businessId: BIZ,
     });
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+    );
     const updated = await editar.execute({
       id: sale.id,
       patch: { metodo: 'Crédito', clienteId: cliente.id },
@@ -121,7 +128,9 @@ describe('EditarVentaUseCase', () => {
   });
 
   it('Zod rejects an empty concepto', async () => {
-    const sale = await registrar.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId }));
+    const sale = await registrar.execute(
+      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+    );
     await expect(editar.execute({ id: sale.id, patch: { concepto: '' } })).rejects.toThrow();
   });
 });

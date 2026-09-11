@@ -7,10 +7,9 @@
  * Phase 18: new product form as a full page.
  */
 
-import { useEffect, useRef, useState, type ReactElement } from 'react';
-import { ScrollView, type TextInput } from 'react-native';
+import { useEffect, type ReactElement } from 'react';
+import { ScrollView } from 'react-native';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
-import { Btn, Scanner } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {
   buildProductoPayload,
@@ -20,13 +19,7 @@ import {
   type ProductoFormState,
 } from './nuevo-producto-form';
 import { SectionHeader } from './section-header';
-import {
-  AppearanceField,
-  CategoryFields,
-  IdentityFields,
-  PricingFields,
-  StockFields,
-} from './producto-form-fields';
+import { ProductoFormBody } from './producto-form-body';
 
 export interface NuevoProductoScreenProps {
   readonly onSubmit: (input: CrearProductoInput) => void;
@@ -60,11 +53,7 @@ function useScreenSubmit(
 export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactElement {
   const { t } = useTranslation();
   const form = useProductoForm();
-  const [scanOpen, setScanOpen] = useState(false);
   const handleSubmit = useScreenSubmit(form, props.onSubmit, t);
-  const skuRef = useRef<TextInput>(null);
-  const costoRef = useRef<TextInput>(null);
-  const precioRef = useRef<TextInput>(null);
   useEffect(() => props.onFormChange?.(form.state), [form.state]);
 
   return (
@@ -74,25 +63,12 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       testID={props.testID ?? 'nuevo-producto-screen'}
     >
       <SectionHeader label={t('nuevoProducto.title')} />
-      <IdentityFields form={form} t={t} onScan={() => setScanOpen(true)} skuRef={skuRef} />
-      <CategoryFields form={form} t={t} conversionEnabled={props.conversionEnabled === true} />
-      <PricingFields form={form} t={t} showPrecio={form.state.usoProducto !== 'materia-prima'} costoRef={costoRef} precioRef={precioRef} />
-      <StockFields form={form} t={t} onSubmitEditing={handleSubmit} />
-      <AppearanceField form={form} t={t} onPickIcon={props.onPickIcon} />
-      <Btn
-        variant="primary"
-        onPress={handleSubmit}
-        loading={props.submitting === true}
-        fullWidth
-        testID="producto-submit"
-      >
-        {t('nuevoProducto.save')}
-      </Btn>
-      <Scanner
-        open={scanOpen}
-        onClose={() => setScanOpen(false)}
-        onScan={(code) => form.update({ sku: code })}
-        mode="single"
+      <ProductoFormBody
+        form={form}
+        onSubmit={handleSubmit}
+        submitting={props.submitting === true}
+        conversionEnabled={props.conversionEnabled === true}
+        onPickIcon={props.onPickIcon}
       />
     </ScrollView>
   );

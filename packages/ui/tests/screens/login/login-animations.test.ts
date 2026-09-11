@@ -59,10 +59,9 @@ describe('useAvatarScale', () => {
   });
 
   it('updates when selected changes to true', () => {
-    const { result, rerender } = renderHook(
-      ({ selected }) => useAvatarScale(selected),
-      { initialProps: { selected: false } },
-    );
+    const { result, rerender } = renderHook(({ selected }) => useAvatarScale(selected), {
+      initialProps: { selected: false },
+    });
     act(() => {
       rerender({ selected: true });
     });
@@ -78,10 +77,9 @@ describe('usePinSlideIn', () => {
   });
 
   it('animates when visible becomes true', () => {
-    const { result, rerender } = renderHook(
-      ({ visible }) => usePinSlideIn(visible),
-      { initialProps: { visible: false } },
-    );
+    const { result, rerender } = renderHook(({ visible }) => usePinSlideIn(visible), {
+      initialProps: { visible: false },
+    });
     act(() => {
       rerender({ visible: true });
     });
@@ -90,10 +88,9 @@ describe('usePinSlideIn', () => {
   });
 
   it('resets when visible becomes false', () => {
-    const { result, rerender } = renderHook(
-      ({ visible }) => usePinSlideIn(visible),
-      { initialProps: { visible: true } },
-    );
+    const { result, rerender } = renderHook(({ visible }) => usePinSlideIn(visible), {
+      initialProps: { visible: true },
+    });
     act(() => {
       rerender({ visible: false });
     });

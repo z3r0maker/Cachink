@@ -23,9 +23,7 @@ export interface AbrirCajaFooterProps {
   readonly testID?: string;
 }
 
-export function AbrirCajaFooter(
-  props: AbrirCajaFooterProps,
-): ReactElement {
+export function AbrirCajaFooter(props: AbrirCajaFooterProps): ReactElement {
   return (
     <View
       position="absolute"

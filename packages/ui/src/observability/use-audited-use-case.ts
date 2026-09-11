@@ -7,7 +7,12 @@
  */
 
 import { useMemo } from 'react';
-import { AuditedUseCase, type AuditedUseCaseConfig, type AuditEvent, type LogStore } from '@xangarro/observability';
+import {
+  AuditedUseCase,
+  type AuditedUseCaseConfig,
+  type AuditEvent,
+  type LogStore,
+} from '@xangarro/observability';
 import { useDeviceId, useUserId } from '../app-config/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useLogStore } from './observability-provider';

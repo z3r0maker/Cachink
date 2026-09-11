@@ -16,10 +16,7 @@ if (OriginalTextDecoder) {
   globalThis.TextDecoder = class PatchedTextDecoder extends OriginalTextDecoder {
     constructor(label?: string, options?: TextDecoderOptions) {
       const normalized = (label ?? 'utf-8').toLowerCase().trim();
-      const safe =
-        normalized === 'ascii' || normalized === 'us-ascii'
-          ? 'utf-8'
-          : normalized;
+      const safe = normalized === 'ascii' || normalized === 'us-ascii' ? 'utf-8' : normalized;
       super(safe, options);
     }
   } as typeof TextDecoder;

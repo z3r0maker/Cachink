@@ -50,9 +50,7 @@ vi.mock('jspdf', () => {
   return {
     jsPDF: class MockJsPDF {
       addImage = vi.fn();
-      output = vi.fn().mockReturnValue(
-        new Blob(['fake-pdf-bytes'], { type: 'application/pdf' }),
-      );
+      output = vi.fn().mockReturnValue(new Blob(['fake-pdf-bytes'], { type: 'application/pdf' }));
     },
   };
 });

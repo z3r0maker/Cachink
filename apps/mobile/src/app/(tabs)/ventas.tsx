@@ -17,7 +17,12 @@ import {
   useVentasDetail,
   useVentasQueries,
 } from './_ventas-hooks';
-import { VentasCajaGate, VentasMainView, VentasOverlays, VentasProductosGate } from './_ventas-overlays';
+import {
+  VentasCajaGate,
+  VentasMainView,
+  VentasOverlays,
+  VentasProductosGate,
+} from './_ventas-overlays';
 
 function useVentasLocalState(): {
   fecha: IsoDate;

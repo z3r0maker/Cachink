@@ -155,11 +155,19 @@ export function buildHarness(opts?: {
   // --- Use-Cases ---------------------------------------------------
   const useCases: FullstackUseCases = {
     registrarVenta: new RegistrarVentaUseCase(
-      repos.sales, repos.clients, repos.products, repos.movements, repos.cajaTurnos,
+      repos.sales,
+      repos.clients,
+      repos.products,
+      repos.movements,
+      repos.cajaTurnos,
       { userId, stockEnabled },
     ),
     cancelarVenta: new CancelarVentaUseCase(
-      repos.sales, repos.users, repos.products, repos.movements, repos.cancelacionLogs,
+      repos.sales,
+      repos.users,
+      repos.products,
+      repos.movements,
+      repos.cancelacionLogs,
     ),
     editarVenta: new EditarVentaUseCase(repos.sales, repos.clients),
     abrirCaja: new AbrirCajaUseCase(repos.cajaTurnos),
@@ -180,7 +188,10 @@ export function buildHarness(opts?: {
     eliminarUsuario: new EliminarUsuarioUseCase(repos.users),
     toggleFeatureFlag: new ToggleFeatureFlagUseCase(repos.businesses),
     ejecutarConversion: new EjecutarConversionUseCase(
-      repos.recetas, repos.conversions, repos.movements, repos.products,
+      repos.recetas,
+      repos.conversions,
+      repos.movements,
+      repos.products,
     ),
   };
 

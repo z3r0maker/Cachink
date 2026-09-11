@@ -17,12 +17,7 @@ import { View, useMedia } from '@tamagui/core';
 import type { Money } from '@xangarro/domain';
 import { ZERO, formatMoney } from '@xangarro/domain';
 import { Card } from '../../components/Card/card';
-import {
-  Numpad,
-  NumpadDisplay,
-  QuickAmounts,
-  useNumpadInput,
-} from '../../components/Numpad/index';
+import { Numpad, NumpadDisplay, QuickAmounts, useNumpadInput } from '../../components/Numpad/index';
 import type { QuickAmountOption } from '../../components/Numpad/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, radii } from '../../theme';
@@ -51,9 +46,7 @@ const OPENING_AMOUNTS: readonly QuickAmountOption[] = [
 const BUILT_IN_AMOUNTS: readonly bigint[] = [50000n, 100000n];
 
 function filterExtraAmounts(): readonly QuickAmountOption[] {
-  return OPENING_AMOUNTS.filter(
-    (a) => !BUILT_IN_AMOUNTS.includes(a.centavos),
-  );
+  return OPENING_AMOUNTS.filter((a) => !BUILT_IN_AMOUNTS.includes(a.centavos));
 }
 
 export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
@@ -73,10 +66,7 @@ export function AbrirCajaModal(props: AbrirCajaModalProps): ReactElement {
 
   return (
     <View flex={1} testID={props.testID ?? 'abrir-caja-modal'}>
-      <AbrirCajaScrollBody
-        isPhone={isPhone}
-        numpad={numpad}
-      />
+      <AbrirCajaScrollBody isPhone={isPhone} numpad={numpad} />
       <AbrirCajaFooter
         buttonLabel={buttonLabel}
         canSubmit={numpad.centavos > ZERO}
@@ -107,17 +97,9 @@ function AbrirCajaScrollBody(props: {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      <View
-        width="100%"
-        height={6}
-        backgroundColor={colors.yellow}
-        borderRadius={radii[0]}
-      />
+      <View width="100%" height={6} backgroundColor={colors.yellow} borderRadius={radii[0]} />
       <AbrirCajaHeader t={t} />
-      <AbrirCajaEntryCard
-        isPhone={props.isPhone}
-        numpad={props.numpad}
-      />
+      <AbrirCajaEntryCard isPhone={props.isPhone} numpad={props.numpad} />
     </ScrollView>
   );
 }
@@ -132,10 +114,7 @@ function AbrirCajaEntryCard(props: {
   return (
     <Card variant="white" fullWidth padding="md" elevation="raised">
       <View gap={gap} alignItems="center">
-        <NumpadDisplay
-          value={props.numpad.display}
-          testID="abrir-numpad-display"
-        />
+        <NumpadDisplay value={props.numpad.display} testID="abrir-numpad-display" />
         <QuickAmounts
           onSelect={(c) => props.numpad.setFromCentavos(c)}
           onExacto={() => {}}
@@ -143,11 +122,7 @@ function AbrirCajaEntryCard(props: {
           extraAmounts={filterExtraAmounts()}
           testID="abrir-quick-amounts"
         />
-        <Numpad
-          onPress={props.numpad.onKey}
-          buttonSize={numpadSize}
-          testID="abrir-numpad"
-        />
+        <Numpad onPress={props.numpad.onKey} buttonSize={numpadSize} testID="abrir-numpad" />
       </View>
     </Card>
   );

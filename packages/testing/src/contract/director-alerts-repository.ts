@@ -77,10 +77,12 @@ export function describeDirectorAlertsRepositoryContract(
     });
 
     it('preserves actionRoute and metadata', async () => {
-      const row = await repo.create(input({
-        actionRoute: '/custom-route',
-        metadata: '{"key":"value"}',
-      }));
+      const row = await repo.create(
+        input({
+          actionRoute: '/custom-route',
+          metadata: '{"key":"value"}',
+        }),
+      );
       const found = await repo.findById(row.id);
       expect(found?.actionRoute).toBe('/custom-route');
     });

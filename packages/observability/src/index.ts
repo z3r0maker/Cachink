@@ -16,21 +16,24 @@
 export type { AuditOperation, AuditEvent } from './audit-event.js';
 export type { ErrorLogEntry, ErrorSource } from './error-log.js';
 export type { LogStats } from './log-stats.js';
-export type {
-  LogStore,
-  LogQueryOptions,
-  TimelineEntry,
-  LogSnapshot,
-} from './log-store.js';
+export type { LogStore, LogQueryOptions, TimelineEntry, LogSnapshot } from './log-store.js';
 export type { RemoteLogStore, BugReport } from './remote-log-store.js';
 
 // Implementations
-export { SqliteLogStore, type SqliteDatabase, type SqliteLogStoreConfig } from './sqlite-log-store.js';
+export {
+  SqliteLogStore,
+  type SqliteDatabase,
+  type SqliteLogStoreConfig,
+} from './sqlite-log-store.js';
 export { DualLogStore } from './dual-log-store.js';
 export { HttpRemoteLogStore, type HttpRemoteLogStoreConfig } from './http-remote-log-store.js';
 
 // Decorator
-export { AuditedUseCase, type AuditContext, type AuditedUseCaseConfig } from './audited-use-case.js';
+export {
+  AuditedUseCase,
+  type AuditContext,
+  type AuditedUseCaseConfig,
+} from './audited-use-case.js';
 
 // Factory
 export { createLogStore, type CreateLogStoreOptions } from './create-log-store.js';

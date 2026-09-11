@@ -150,11 +150,11 @@ describe('calculateEstadoDeResultados', () => {
   });
 
   it('rejects isrTasa outside [0, 10_000]', () => {
-    expect(() =>
-      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 15_000 }),
-    ).toThrow(/isrTasa/);
-    expect(() =>
-      calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: -100 }),
-    ).toThrow(/isrTasa/);
+    expect(() => calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: 15_000 })).toThrow(
+      /isrTasa/,
+    );
+    expect(() => calculateEstadoDeResultados({ ventas: [], egresos: [], isrTasa: -100 })).toThrow(
+      /isrTasa/,
+    );
   });
 });

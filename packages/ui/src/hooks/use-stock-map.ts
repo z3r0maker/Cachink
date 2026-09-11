@@ -7,9 +7,9 @@
  */
 import { useMemo } from 'react';
 
-export function useStockMap(
-  stockQ: { data?: readonly { producto: { id: string }; stock: number }[] },
-): Map<string, number> {
+export function useStockMap(stockQ: {
+  data?: readonly { producto: { id: string }; stock: number }[];
+}): Map<string, number> {
   return useMemo(() => {
     const map = new Map<string, number>();
     for (const row of stockQ.data ?? []) map.set(row.producto.id, row.stock);

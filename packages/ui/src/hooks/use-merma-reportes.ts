@@ -84,10 +84,7 @@ export function useMermaReportes(
   });
 
   const grouped = useMemo(
-    () =>
-      query.data
-        ? groupByProducto(query.data.movements, query.data.nameMap)
-        : undefined,
+    () => (query.data ? groupByProducto(query.data.movements, query.data.nameMap) : undefined),
     [query.data],
   );
 

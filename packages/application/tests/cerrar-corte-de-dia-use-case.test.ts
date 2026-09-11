@@ -27,7 +27,9 @@ describe('CerrarCorteDeDiaUseCase', () => {
   });
 
   it('computes esperado from today ventas/egresos and persists the corte', async () => {
-    await sales.create(makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 30_000n, fecha: TODAY }));
+    await sales.create(
+      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 30_000n, fecha: TODAY }),
+    );
     await expenses.create(makeNewExpense({ businessId: BIZ, monto: 5_000n, fecha: TODAY }));
     const corte = await useCase.execute({
       fecha: TODAY,
@@ -48,7 +50,9 @@ describe('CerrarCorteDeDiaUseCase', () => {
       cerradoPor: 'Operativo',
       businessId: BIZ,
     });
-    await sales.create(makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 20_000n, fecha: TODAY }));
+    await sales.create(
+      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 20_000n, fecha: TODAY }),
+    );
     const corte = await useCase.execute({
       fecha: TODAY,
       businessId: BIZ,
@@ -61,7 +65,9 @@ describe('CerrarCorteDeDiaUseCase', () => {
   });
 
   it('ignores non-Efectivo ventas in esperado', async () => {
-    await sales.create(makeNewSale({ businessId: BIZ, metodo: 'Transferencia', monto: 999_999n, fecha: TODAY }));
+    await sales.create(
+      makeNewSale({ businessId: BIZ, metodo: 'Transferencia', monto: 999_999n, fecha: TODAY }),
+    );
     const corte = await useCase.execute({
       fecha: TODAY,
       businessId: BIZ,
@@ -92,7 +98,9 @@ describe('CerrarCorteDeDiaUseCase', () => {
   });
 
   it('surfaces a negative diferencia when contado < esperado', async () => {
-    await sales.create(makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 10_000n, fecha: TODAY }));
+    await sales.create(
+      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 10_000n, fecha: TODAY }),
+    );
     const corte = await useCase.execute({
       fecha: TODAY,
       businessId: BIZ,

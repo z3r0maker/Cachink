@@ -69,9 +69,7 @@
       "category": "performance",
       "title": "sumStock() fetches ALL movements into JS and sums in a loop — should be SQL aggregate",
       "description": "DrizzleInventoryMovementsRepository.sumStock(productoId) calls findByProduct(productoId) which fetches every movement row for that product, maps them to domain objects, then loops over them in JavaScript to compute the stock sum. For a product with 500 movements, this transfers ~500 full rows just to compute one number. The SQL engine can do this in a single pass: SELECT SUM(CASE WHEN tipo='entrada' THEN cantidad ELSE -cantidad END) FROM inventory_movements WHERE producto_id = ? AND deleted_at IS NULL.",
-      "affected_objects": [
-        "DrizzleInventoryMovementsRepository.sumStock() — line 106-113"
-      ],
+      "affected_objects": ["DrizzleInventoryMovementsRepository.sumStock() — line 106-113"],
       "recommendation": "Replace with a SQL aggregate query. This is called on every product detail screen and every stock-low notification check — it's a hot path."
     },
     {
@@ -81,9 +79,7 @@
       "category": "performance",
       "title": "sumByVenta() fetches all payment rows and sums in JavaScript",
       "description": "DrizzleClientPaymentsRepository.sumByVenta(ventaId) calls findByVenta() to fetch all payment rows, then uses domain sum() on the array. Should be SELECT SUM(monto_centavos) FROM client_payments WHERE venta_id = ? AND deleted_at IS NULL.",
-      "affected_objects": [
-        "DrizzleClientPaymentsRepository.sumByVenta() — line 76-79"
-      ],
+      "affected_objects": ["DrizzleClientPaymentsRepository.sumByVenta() — line 76-79"],
       "recommendation": "Replace with SQL SUM aggregate. Lower priority than sumStock() since credit payments are less frequent."
     },
     {
@@ -93,9 +89,7 @@
       "category": "performance",
       "title": "findByMonth() uses LIKE pattern on fecha instead of BETWEEN range",
       "description": "DrizzleExpensesRepository.findByMonth('2026-05', businessId) generates WHERE fecha LIKE '2026-05-%'. While LIKE with a leading literal CAN use an index if the column has one, BETWEEN '2026-05-01' AND '2026-05-31' is more explicit and guaranteed to use a range scan. Currently moot since no index exists on fecha, but when indexes are added (Round 1 fix #1), the LIKE pattern will be suboptimal.",
-      "affected_objects": [
-        "DrizzleExpensesRepository.findByMonth() — line 100-113"
-      ],
+      "affected_objects": ["DrizzleExpensesRepository.findByMonth() — line 100-113"],
       "recommendation": "Replace LIKE with: gte(expenses.fecha, `${yearMonth}-01`), lte(expenses.fecha, `${yearMonth}-31`). Works for all months because ISO-8601 text sorts lexicographically."
     },
     {

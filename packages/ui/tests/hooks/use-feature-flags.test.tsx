@@ -7,10 +7,7 @@ import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import {
-  InMemoryBusinessesRepository,
-  TEST_DEVICE_ID,
-} from '@xangarro/testing';
+import { InMemoryBusinessesRepository, TEST_DEVICE_ID } from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
 import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -28,9 +25,7 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -77,7 +72,12 @@ describe('useFeatureFlags', () => {
 
   it('clamps MVP-hidden flags to false even when stored as true', async () => {
     const businesses = new InMemoryBusinessesRepository(TEST_DEVICE_ID);
-    const flags = { ...DEFAULT_FEATURE_FLAGS, merma: true, auditoriaInventario: true, ventasCredito: true };
+    const flags = {
+      ...DEFAULT_FEATURE_FLAGS,
+      merma: true,
+      auditoriaInventario: true,
+      ventasCredito: true,
+    };
     const biz = await businesses.create({
       nombre: 'Test',
       regimenFiscal: 'RIF',

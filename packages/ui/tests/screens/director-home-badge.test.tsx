@@ -13,10 +13,7 @@ import { NotificationBadge } from '../../src/components/NotificationBadge/notifi
 function renderScreen(badge?: React.ReactNode) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-      <DirectorHomeScreen
-        greeting="Hola, Director"
-        notificationBadge={badge}
-      />
+      <DirectorHomeScreen greeting="Hola, Director" notificationBadge={badge} />
     </TamaguiProvider>,
   );
 }
@@ -28,9 +25,7 @@ describe('DirectorHomeScreen badge slot', () => {
   });
 
   it('renders the badge slot when provided', () => {
-    renderScreen(
-      <NotificationBadge count={3} testID="test-badge" />,
-    );
+    renderScreen(<NotificationBadge count={3} testID="test-badge" />);
     expect(screen.getByTestId('director-home-badge-slot')).toBeTruthy();
     expect(screen.getByTestId('test-badge')).toBeTruthy();
   });

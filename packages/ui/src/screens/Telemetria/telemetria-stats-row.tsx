@@ -32,8 +32,12 @@ function StatCard({
       marginRight="$2"
       alignItems="center"
     >
-      <Text fontSize="$6" fontWeight="700" color={color}>{value}</Text>
-      <Text fontSize="$1" color="$colorSubtle" marginTop="$1">{label}</Text>
+      <Text fontSize="$6" fontWeight="700" color={color}>
+        {value}
+      </Text>
+      <Text fontSize="$1" color="$colorSubtle" marginTop="$1">
+        {label}
+      </Text>
     </View>
   );
 }
@@ -63,7 +67,11 @@ export function TelemetriaStatsRow({ stats, isLoading }: TelemetriaStatsRowProps
       <View flexDirection="row" paddingHorizontal="$3">
         <StatCard value={String(stats.totalAuditEvents)} label="Operaciones" color="$blue10" />
         <StatCard value={String(stats.totalErrors)} label="Errores" color="$red10" />
-        <StatCard value={formatRelativeTime(stats.lastErrorAt)} label="Último error" color="$yellow10" />
+        <StatCard
+          value={formatRelativeTime(stats.lastErrorAt)}
+          label="Último error"
+          color="$yellow10"
+        />
         <StatCard value="13/13" label="Cobertura" color="$green10" />
       </View>
     </ScrollView>

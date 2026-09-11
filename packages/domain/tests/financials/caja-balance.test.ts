@@ -28,9 +28,7 @@ describe('computeCajaBalance', () => {
   });
 
   it('adds cash sale amounts to balance', () => {
-    const result = computeCajaBalance(
-      input({ ventasEfectivoCentavos: [6500n, 15000n] }),
-    );
+    const result = computeCajaBalance(input({ ventasEfectivoCentavos: [6500n, 15000n] }));
     // 100000 + 6500 + 15000 = 121500
     expect(result.efectivoEnCaja).toBe(121500n);
     expect(result.desglose.ventasEfectivo).toBe(21500n);
@@ -64,35 +62,27 @@ describe('computeCajaBalance', () => {
   });
 
   it('subtracts cash expenses', () => {
-    const result = computeCajaBalance(
-      input({ egresosEfectivoCentavos: [25000n] }),
-    );
+    const result = computeCajaBalance(input({ egresosEfectivoCentavos: [25000n] }));
     // 100000 - 25000 = 75000
     expect(result.efectivoEnCaja).toBe(75000n);
     expect(result.desglose.egresosEfectivo).toBe(25000n);
   });
 
   it('adds manual deposits', () => {
-    const result = computeCajaBalance(
-      input({ depositosCentavos: [50000n, 20000n] }),
-    );
+    const result = computeCajaBalance(input({ depositosCentavos: [50000n, 20000n] }));
     expect(result.efectivoEnCaja).toBe(170000n);
     expect(result.desglose.depositos).toBe(70000n);
   });
 
   it('subtracts manual withdrawals', () => {
-    const result = computeCajaBalance(
-      input({ retirosCentavos: [200000n] }),
-    );
+    const result = computeCajaBalance(input({ retirosCentavos: [200000n] }));
     // 100000 - 200000 = -100000 (can go negative)
     expect(result.efectivoEnCaja).toBe(-100000n);
     expect(result.desglose.retiros).toBe(200000n);
   });
 
   it('subtracts cancelled cash sales (cash returned)', () => {
-    const result = computeCajaBalance(
-      input({ cancelacionesEfectivoCentavos: [6500n] }),
-    );
+    const result = computeCajaBalance(input({ cancelacionesEfectivoCentavos: [6500n] }));
     expect(result.efectivoEnCaja).toBe(93500n);
     expect(result.desglose.cancelacionesEfectivo).toBe(6500n);
   });

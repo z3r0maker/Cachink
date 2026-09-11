@@ -61,18 +61,12 @@ describe('Audit mutation configs', () => {
   }
 
   it('MUTATION_CREAR_CLIENTE extracts id from result', () => {
-    const id = MUTATION_CREAR_CLIENTE.extractEntityId(
-      { id: 'cli-123' } as never,
-      {} as never,
-    );
+    const id = MUTATION_CREAR_CLIENTE.extractEntityId({ id: 'cli-123' } as never, {} as never);
     expect(id).toBe('cli-123');
   });
 
   it('MUTATION_ELIMINAR_EMPLEADO extracts id from input (string)', () => {
-    const id = MUTATION_ELIMINAR_EMPLEADO.extractEntityId(
-      undefined as never,
-      'emp-456' as never,
-    );
+    const id = MUTATION_ELIMINAR_EMPLEADO.extractEntityId(undefined as never, 'emp-456' as never);
     expect(id).toBe('emp-456');
   });
 

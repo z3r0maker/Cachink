@@ -19,9 +19,7 @@ import {
 import type { CajaTurnosRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
-export class AbrirCajaUseCase
-  implements UseCase<NewCajaTurno, CajaTurno>
-{
+export class AbrirCajaUseCase implements UseCase<NewCajaTurno, CajaTurno> {
   readonly #turnos: CajaTurnosRepository;
 
   constructor(turnos: CajaTurnosRepository) {
@@ -34,9 +32,7 @@ export class AbrirCajaUseCase
     // Prevent duplicate open turns for the same user
     const open = await this.#turnos.findOpenByUser(parsed.userId);
     if (open) {
-      throw new TypeError(
-        'Ya tienes un turno abierto. Ciérralo antes de abrir uno nuevo.',
-      );
+      throw new TypeError('Ya tienes un turno abierto. Ciérralo antes de abrir uno nuevo.');
     }
 
     return this.#turnos.create({

@@ -50,10 +50,7 @@ export function useUpdateNotificationPrefs() {
 
   return useMutation({
     async mutationFn(next: NotificationPreferences) {
-      await appConfig.set(
-        APP_CONFIG_KEYS.notificationPrefs,
-        JSON.stringify(next),
-      );
+      await appConfig.set(APP_CONFIG_KEYS.notificationPrefs, JSON.stringify(next));
     },
     async onSuccess() {
       await queryClient.invalidateQueries({

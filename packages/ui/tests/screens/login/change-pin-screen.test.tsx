@@ -5,6 +5,7 @@
  * submit gating, and callback wiring.
  */
 
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import { ChangePinScreen } from '../../../src/screens/Login/index';
 import { initI18n } from '../../../src/i18n/index';
@@ -19,10 +20,8 @@ const defaultProps = {
   submitting: false,
 };
 
-function renderChangePin(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <ChangePinScreen {...defaultProps} {...overrides} />,
-  );
+function renderChangePin(overrides: Partial<ComponentProps<typeof ChangePinScreen>> = {}) {
+  return renderWithProviders(<ChangePinScreen {...defaultProps} {...overrides} />);
 }
 
 function fillInput(testId: string, value: string): void {
@@ -54,7 +53,7 @@ describe('ChangePinScreen', () => {
   });
 
   it('renders with a custom testID', () => {
-    renderChangePin({ testID: 'my-change-pin' } as any);
+    renderChangePin({ testID: 'my-change-pin' });
     expect(screen.getByTestId('my-change-pin')).toBeInTheDocument();
   });
 

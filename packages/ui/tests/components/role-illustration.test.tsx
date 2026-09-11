@@ -18,44 +18,32 @@ describe('RoleIllustration', () => {
   });
 
   it('forwards a custom testID to the root view', () => {
-    renderWithProviders(
-      <RoleIllustration role="director" testID="custom-illustration" />,
-    );
+    renderWithProviders(<RoleIllustration role="director" testID="custom-illustration" />);
     expect(screen.getByTestId('custom-illustration')).toBeInTheDocument();
   });
 
   it('renders for the director role with dark variant (default)', () => {
-    renderWithProviders(
-      <RoleIllustration role="director" testID="dir-dark" />,
-    );
+    renderWithProviders(<RoleIllustration role="director" testID="dir-dark" />);
     expect(screen.getByTestId('dir-dark')).toBeInTheDocument();
   });
 
   it('renders for the director role with light variant', () => {
-    renderWithProviders(
-      <RoleIllustration role="director" variant="light" testID="dir-light" />,
-    );
+    renderWithProviders(<RoleIllustration role="director" variant="light" testID="dir-light" />);
     expect(screen.getByTestId('dir-light')).toBeInTheDocument();
   });
 
   it('renders for the operativo role with dark variant', () => {
-    renderWithProviders(
-      <RoleIllustration role="operativo" variant="dark" testID="op-dark" />,
-    );
+    renderWithProviders(<RoleIllustration role="operativo" variant="dark" testID="op-dark" />);
     expect(screen.getByTestId('op-dark')).toBeInTheDocument();
   });
 
   it('renders for the operativo role with light variant', () => {
-    renderWithProviders(
-      <RoleIllustration role="operativo" variant="light" testID="op-light" />,
-    );
+    renderWithProviders(<RoleIllustration role="operativo" variant="light" testID="op-light" />);
     expect(screen.getByTestId('op-light')).toBeInTheDocument();
   });
 
   it('renders an <img> element inside the wrapper (react-native-web Image)', () => {
-    renderWithProviders(
-      <RoleIllustration role="operativo" testID="has-img" />,
-    );
+    renderWithProviders(<RoleIllustration role="operativo" testID="has-img" />);
     const wrapper = screen.getByTestId('has-img');
     const img = wrapper.querySelector('img');
     expect(img).not.toBeNull();
@@ -69,9 +57,7 @@ describe('RoleIllustration', () => {
     expect(screen.getByTestId('dir-seq')).toBeInTheDocument();
     unmount();
 
-    renderWithProviders(
-      <RoleIllustration role="operativo" variant="dark" testID="op-seq" />,
-    );
+    renderWithProviders(<RoleIllustration role="operativo" variant="dark" testID="op-seq" />);
     expect(screen.getByTestId('op-seq')).toBeInTheDocument();
   });
 });

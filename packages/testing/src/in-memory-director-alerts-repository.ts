@@ -1,39 +1,64 @@
 /**
  * In-memory DirectorAlertsRepository. Phase 11.
  */
-import type { AlertSeverity, AlertSource, BusinessId, DeviceId, DirectorAlert, DirectorAlertId, IsoTimestamp } from '@xangarro/domain';
+import type {
+  AlertSeverity,
+  AlertSource,
+  BusinessId,
+  DeviceId,
+  DirectorAlert,
+  DirectorAlertId,
+  IsoTimestamp,
+} from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { CreateDirectorAlertInput, DirectorAlertsRepository } from '@xangarro/data';
 
 export class InMemoryDirectorAlertsRepository implements DirectorAlertsRepository {
   private readonly rows = new Map<DirectorAlertId, DirectorAlert>();
   private readonly deviceId: DeviceId;
-  constructor(deviceId: DeviceId = newEntityId<DeviceId>()) { this.deviceId = deviceId; }
+  constructor(deviceId: DeviceId = newEntityId<DeviceId>()) {
+    this.deviceId = deviceId;
+  }
 
   async create(input: CreateDirectorAlertInput): Promise<DirectorAlert> {
-    const id = newEntityId<DirectorAlertId>(); const ts = now();
+    const id = newEntityId<DirectorAlertId>();
+    const ts = now();
     const row: DirectorAlert = {
-      id, source: input.source as AlertSource, severity: input.severity as AlertSeverity,
-      titleKey: input.titleKey, message: input.message,
-      read: false, actionRoute: input.actionRoute, metadata: input.metadata ?? '{}',
-      businessId: input.businessId, deviceId: this.deviceId,
-      createdByUserId: null, createdAt: ts, updatedAt: ts, deletedAt: null,
+      id,
+      source: input.source as AlertSource,
+      severity: input.severity as AlertSeverity,
+      titleKey: input.titleKey,
+      message: input.message,
+      read: false,
+      actionRoute: input.actionRoute,
+      metadata: input.metadata ?? '{}',
+      businessId: input.businessId,
+      deviceId: this.deviceId,
+      createdByUserId: null,
+      createdAt: ts,
+      updatedAt: ts,
+      deletedAt: null,
     };
-    this.rows.set(id, row); return row;
+    this.rows.set(id, row);
+    return row;
   }
   async findById(id: DirectorAlertId): Promise<DirectorAlert | null> {
-    const r = this.rows.get(id); return r && !r.deletedAt ? r : null;
+    const r = this.rows.get(id);
+    return r && !r.deletedAt ? r : null;
   }
   async findUnread(businessId: BusinessId): Promise<readonly DirectorAlert[]> {
-    return [...this.rows.values()].filter((r) => r.businessId === businessId && !r.read && !r.deletedAt)
+    return [...this.rows.values()]
+      .filter((r) => r.businessId === businessId && !r.read && !r.deletedAt)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   async findAll(businessId: BusinessId): Promise<readonly DirectorAlert[]> {
-    return [...this.rows.values()].filter((r) => r.businessId === businessId && !r.deletedAt)
+    return [...this.rows.values()]
+      .filter((r) => r.businessId === businessId && !r.deletedAt)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   async markRead(id: DirectorAlertId): Promise<void> {
-    const r = this.rows.get(id); if (!r) return;
+    const r = this.rows.get(id);
+    if (!r) return;
     this.rows.set(id, { ...r, read: true, updatedAt: now() as IsoTimestamp });
   }
   async markAllRead(businessId: BusinessId): Promise<void> {

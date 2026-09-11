@@ -42,9 +42,7 @@ export function useBalanceGeneralDelta(
     staleTime: 5 * 60 * 1000,
     async queryFn() {
       if (!businessId) throw new Error('No business selected');
-      const estado = await composeEstadoResultados(
-        sales, expenses, businesses, businessId, prior,
-      );
+      const estado = await composeEstadoResultados(sales, expenses, businesses, businessId, prior);
       return composeBalanceGeneral(
         { sales, clientPayments, dayCloses, products, movements },
         businessId,

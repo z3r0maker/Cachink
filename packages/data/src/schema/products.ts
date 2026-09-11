@@ -24,16 +24,22 @@ export const products = sqliteTable('products', {
     enum: ['pza', 'kg', 'lt', 'm', 'caja', 'bolsa', 'rollo', 'par', 'otro'],
   }).notNull(),
   umbralStockBajo: integer('umbral_stock_bajo').notNull().default(3),
-  tipo: text('tipo', { enum: ['producto', 'servicio'] }).notNull().default('producto'),
+  tipo: text('tipo', { enum: ['producto', 'servicio'] })
+    .notNull()
+    .default('producto'),
   seguirStock: integer('seguir_stock', { mode: 'boolean' }).notNull().default(true),
   precioVentaCentavos: numeric('precio_venta_centavos', { mode: 'bigint' }).notNull().default(0n),
   atributos: text('atributos').notNull().default('{}'),
   colorFondo: text('color_fondo', {
     enum: ['white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray'],
-  }).notNull().default('white'),
+  })
+    .notNull()
+    .default('white'),
   usoProducto: text('uso_producto', {
     enum: ['venta', 'materia-prima', 'ambos'],
-  }).notNull().default('venta'),
+  })
+    .notNull()
+    .default('venta'),
   icono: text('icono'),
   ...auditColumns,
 });

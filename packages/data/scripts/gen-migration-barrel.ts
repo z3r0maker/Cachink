@@ -82,9 +82,7 @@ function generateBarrel(journal: Journal): string {
   lines.push('');
 
   // migrationSqlByTag
-  lines.push(
-    'export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze({',
-  );
+  lines.push('export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze({');
   for (const entry of entries) {
     const varName = tagToVarName(entry.tag);
     lines.push(`  '${entry.tag}': ${varName},`);
@@ -141,14 +139,10 @@ for (const entry of journal.entries) {
   }
 }
 if (missing.length > 0) {
-  console.error(
-    `❌ Journal references migration(s) without .ts files: ${missing.join(', ')}`,
-  );
+  console.error(`❌ Journal references migration(s) without .ts files: ${missing.join(', ')}`);
   process.exit(1);
 }
 
 const barrel = generateBarrel(journal);
 writeFileSync(OUTPUT_PATH, barrel, 'utf-8');
-console.log(
-  `✅ Generated ${OUTPUT_PATH} with ${journal.entries.length} migration(s)`,
-);
+console.log(`✅ Generated ${OUTPUT_PATH} with ${journal.entries.length} migration(s)`);

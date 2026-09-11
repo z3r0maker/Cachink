@@ -8,7 +8,11 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { AuditedUseCase, type AuditContext, type AuditedUseCaseConfig } from '../src/audited-use-case.js';
+import {
+  AuditedUseCase,
+  type AuditContext,
+  type AuditedUseCaseConfig,
+} from '../src/audited-use-case.js';
 import type { LogStore } from '../src/log-store.js';
 import type { AuditEvent } from '../src/audit-event.js';
 import type { ErrorLogEntry } from '../src/error-log.js';
@@ -38,25 +42,48 @@ function createMockLogStore(): LogStore & {
   return {
     auditEvents,
     errorEntries,
-    async writeAudit(event: AuditEvent) { auditEvents.push(event); },
-    async writeError(entry: ErrorLogEntry) { errorEntries.push(entry); },
-    async queryAudit() { return []; },
-    async queryErrors() { return []; },
-    async queryTimeline() { return []; },
-    async stats() { return { totalAuditEvents: 0, totalErrors: 0, errorsBySource: {}, operationCounts: {}, lastErrorAt: null }; },
-    async prune() { return 0; },
-    async exportSnapshot() { return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] }; },
+    async writeAudit(event: AuditEvent) {
+      auditEvents.push(event);
+    },
+    async writeError(entry: ErrorLogEntry) {
+      errorEntries.push(entry);
+    },
+    async queryAudit() {
+      return [];
+    },
+    async queryErrors() {
+      return [];
+    },
+    async queryTimeline() {
+      return [];
+    },
+    async stats() {
+      return {
+        totalAuditEvents: 0,
+        totalErrors: 0,
+        errorsBySource: {},
+        operationCounts: {},
+        lastErrorAt: null,
+      };
+    },
+    async prune() {
+      return 0;
+    },
+    async exportSnapshot() {
+      return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] };
+    },
   };
 }
 
 // ─── Config ─────────────────────────────────────────────────────────
 
-const config: AuditedUseCaseConfig<{ id: string; amount: number }, { id: string; result: string }> = {
-  operation: 'venta.registrar',
-  entityType: 'sale',
-  extractEntityId: (result) => result.id,
-  extractMetadata: (input) => ({ amount: input.amount }),
-};
+const config: AuditedUseCaseConfig<{ id: string; amount: number }, { id: string; result: string }> =
+  {
+    operation: 'venta.registrar',
+    entityType: 'sale',
+    extractEntityId: (result) => result.id,
+    extractMetadata: (input) => ({ amount: input.amount }),
+  };
 
 const context: AuditContext = {
   deviceId: 'dev-test-001',
@@ -118,14 +145,36 @@ describe('AuditedUseCase', () => {
 
   it('LogStore failure does not crash the use case', async () => {
     const failingStore: LogStore = {
-      async writeAudit() { throw new Error('DB full'); },
-      async writeError() { throw new Error('DB full'); },
-      async queryAudit() { return []; },
-      async queryErrors() { return []; },
-      async queryTimeline() { return []; },
-      async stats() { return { totalAuditEvents: 0, totalErrors: 0, errorsBySource: {}, operationCounts: {}, lastErrorAt: null }; },
-      async prune() { return 0; },
-      async exportSnapshot() { return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] }; },
+      async writeAudit() {
+        throw new Error('DB full');
+      },
+      async writeError() {
+        throw new Error('DB full');
+      },
+      async queryAudit() {
+        return [];
+      },
+      async queryErrors() {
+        return [];
+      },
+      async queryTimeline() {
+        return [];
+      },
+      async stats() {
+        return {
+          totalAuditEvents: 0,
+          totalErrors: 0,
+          errorsBySource: {},
+          operationCounts: {},
+          lastErrorAt: null,
+        };
+      },
+      async prune() {
+        return 0;
+      },
+      async exportSnapshot() {
+        return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] };
+      },
     };
 
     const auditedWithFailingStore = new AuditedUseCase(inner, failingStore, config, context);

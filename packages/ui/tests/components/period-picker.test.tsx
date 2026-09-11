@@ -6,7 +6,10 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { PeriodoState, PeriodPickerLabels } from '../../src/components/PeriodPicker/period-picker';
+import type {
+  PeriodoState,
+  PeriodPickerLabels,
+} from '../../src/components/PeriodPicker/period-picker';
 import { PeriodPicker } from '../../src/components/PeriodPicker/period-picker';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';
@@ -49,38 +52,28 @@ const RANGO: PeriodoState = {
 
 describe('PeriodPicker', () => {
   it('renders with default testID period-picker', () => {
-    renderWithProviders(
-      <PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByTestId('period-picker')).toBeInTheDocument();
   });
 
   it('renders mode tabs', () => {
-    renderWithProviders(
-      <PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByTestId('period-picker-tabs')).toBeInTheDocument();
   });
 
   it('renders year and month fields in mensual mode', () => {
-    renderWithProviders(
-      <PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByTestId('period-picker-year')).toBeInTheDocument();
     expect(screen.getByTestId('period-picker-month')).toBeInTheDocument();
   });
 
   it('renders year-only field in anual mode', () => {
-    renderWithProviders(
-      <PeriodPicker value={ANUAL} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={ANUAL} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByTestId('period-picker-year-only')).toBeInTheDocument();
   });
 
   it('renders from and to fields in rango mode', () => {
-    renderWithProviders(
-      <PeriodPicker value={RANGO} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={RANGO} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByTestId('period-picker-from')).toBeInTheDocument();
     expect(screen.getByTestId('period-picker-to')).toBeInTheDocument();
   });
@@ -93,9 +86,7 @@ describe('PeriodPicker', () => {
   });
 
   it('renders tab labels from labels prop', () => {
-    renderWithProviders(
-      <PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />,
-    );
+    renderWithProviders(<PeriodPicker value={MENSUAL} onChange={vi.fn()} labels={LABELS} />);
     expect(screen.getByText('Mensual')).toBeInTheDocument();
     expect(screen.getByText('Anual')).toBeInTheDocument();
     expect(screen.getByText('Rango')).toBeInTheDocument();

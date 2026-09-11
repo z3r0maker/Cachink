@@ -25,13 +25,17 @@ function makeMockWebSocket() {
       list.push(handler);
       this.handlers.set(event, list);
     }
-    removeEventListener(): void { /* noop */ }
+    removeEventListener(): void {
+      /* noop */
+    }
     close(): void {
       this.readyState = 3;
       const closers = this.handlers.get('close') ?? [];
       for (const h of closers) h({ code: 1000 });
     }
-    send(): void { /* noop */ }
+    send(): void {
+      /* noop */
+    }
   };
 }
 

@@ -13,9 +13,7 @@ export interface EliminarUsuarioInput {
   readonly userId: UserId;
 }
 
-export class EliminarUsuarioUseCase
-  implements UseCase<EliminarUsuarioInput, void>
-{
+export class EliminarUsuarioUseCase implements UseCase<EliminarUsuarioInput, void> {
   readonly #users: UsersRepository;
 
   constructor(users: UsersRepository) {
@@ -29,13 +27,9 @@ export class EliminarUsuarioUseCase
     }
 
     if (user.role === 'director') {
-      const directorCount = await this.#users.countDirectors(
-        user.businessId,
-      );
+      const directorCount = await this.#users.countDirectors(user.businessId);
       if (directorCount <= 1) {
-        throw new TypeError(
-          'No se puede eliminar al último Director del negocio',
-        );
+        throw new TypeError('No se puede eliminar al último Director del negocio');
       }
     }
 

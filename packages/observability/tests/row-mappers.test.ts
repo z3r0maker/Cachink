@@ -71,16 +71,12 @@ describe('rowToAuditEvent', () => {
   });
 
   it('parses metadata JSON', () => {
-    const event = rowToAuditEvent(
-      makeRawAuditRow({ metadata: '{"amount":5000}' }),
-    );
+    const event = rowToAuditEvent(makeRawAuditRow({ metadata: '{"amount":5000}' }));
     expect(event.metadata).toEqual({ amount: 5000 });
   });
 
   it('handles invalid metadata JSON gracefully', () => {
-    const event = rowToAuditEvent(
-      makeRawAuditRow({ metadata: 'not json{' }),
-    );
+    const event = rowToAuditEvent(makeRawAuditRow({ metadata: 'not json{' }));
     expect(event.metadata).toBeUndefined();
   });
 

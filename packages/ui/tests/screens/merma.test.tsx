@@ -4,6 +4,8 @@
  * Covers reason selection, nota field, submit gating, and error display.
  */
 
+import type { ProductId } from '@xangarro/domain';
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { CartItem } from '../../src/hooks/use-cart';
 import { MermaCheckoutSheet } from '../../src/screens/Merma/merma-checkout-sheet';
@@ -14,7 +16,7 @@ initI18n();
 
 const CART_ITEMS: CartItem[] = [
   {
-    productoId: 'P001' as any,
+    productoId: 'P001' as ProductId,
     nombre: 'Taco al pastor',
     precioUnitCentavos: 4500n,
     cantidad: 2,
@@ -29,10 +31,8 @@ const defaultProps = {
   submitting: false,
 };
 
-function renderSheet(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <MermaCheckoutSheet {...defaultProps} {...overrides} />,
-  );
+function renderSheet(overrides: Partial<ComponentProps<typeof MermaCheckoutSheet>> = {}) {
+  return renderWithProviders(<MermaCheckoutSheet {...defaultProps} {...overrides} />);
 }
 
 describe('MermaCheckoutSheet', () => {
@@ -76,7 +76,7 @@ describe('MermaCheckoutSheet', () => {
   });
 
   it('renders with custom testID', () => {
-    renderSheet({ testID: 'my-sheet' } as any);
+    renderSheet({ testID: 'my-sheet' });
     expect(screen.getByTestId('my-sheet')).toBeInTheDocument();
   });
 });

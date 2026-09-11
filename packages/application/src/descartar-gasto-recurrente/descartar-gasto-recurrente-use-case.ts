@@ -22,18 +22,17 @@ export interface DescartarGastoRecurrenteResult {
   nextProximoDisparo: IsoDate | null;
 }
 
-export class DescartarGastoRecurrenteUseCase
-  implements UseCase<DescartarGastoRecurrenteInput, DescartarGastoRecurrenteResult>
-{
+export class DescartarGastoRecurrenteUseCase implements UseCase<
+  DescartarGastoRecurrenteInput,
+  DescartarGastoRecurrenteResult
+> {
   readonly #recurring: RecurringExpensesRepository;
 
   constructor(recurring: RecurringExpensesRepository) {
     this.#recurring = recurring;
   }
 
-  async execute(
-    input: DescartarGastoRecurrenteInput,
-  ): Promise<DescartarGastoRecurrenteResult> {
+  async execute(input: DescartarGastoRecurrenteInput): Promise<DescartarGastoRecurrenteResult> {
     const { template, today } = input;
     if (!template.activo || template.proximoDisparo > today) {
       return { skipped: true, nextProximoDisparo: null };

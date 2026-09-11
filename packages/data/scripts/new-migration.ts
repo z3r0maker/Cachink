@@ -21,10 +21,7 @@ import { execSync } from 'node:child_process';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = resolve(__dirname, '../drizzle/migrations');
 const JOURNAL_PATH = resolve(MIGRATIONS_DIR, 'meta/_journal.json');
-const SCHEMA_VERSION_PATH = resolve(
-  __dirname,
-  '../src/migrator/schema-version.ts',
-);
+const SCHEMA_VERSION_PATH = resolve(__dirname, '../src/migrator/schema-version.ts');
 const GEN_BARREL_SCRIPT = resolve(__dirname, 'gen-migration-barrel.ts');
 
 interface JournalEntry {
@@ -125,7 +122,9 @@ try {
     stdio: 'inherit',
   });
 } catch {
-  console.error('⚠️  Failed to regenerate barrel. Run `npx tsx scripts/gen-migration-barrel.ts` manually.');
+  console.error(
+    '⚠️  Failed to regenerate barrel. Run `npx tsx scripts/gen-migration-barrel.ts` manually.',
+  );
 }
 
 console.log(`\n✅ Migration ${tag} scaffolded. Next steps:`);

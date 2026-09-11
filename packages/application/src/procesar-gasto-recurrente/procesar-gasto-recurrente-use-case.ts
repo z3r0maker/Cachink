@@ -13,15 +13,8 @@
  * by one; each call is atomic at the app level but not cross-template.
  */
 
-import type {
-  Expense,
-  IsoDate,
-  RecurringExpense,
-} from '@xangarro/domain';
-import type {
-  ExpensesRepository,
-  RecurringExpensesRepository,
-} from '@xangarro/data';
+import type { Expense, IsoDate, RecurringExpense } from '@xangarro/domain';
+import type { ExpensesRepository, RecurringExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface ProcesarGastoRecurrenteInput {
@@ -35,23 +28,19 @@ export interface ProcesarGastoRecurrenteResult {
   nextProximoDisparo: IsoDate | null;
 }
 
-export class ProcesarGastoRecurrenteUseCase
-  implements UseCase<ProcesarGastoRecurrenteInput, ProcesarGastoRecurrenteResult>
-{
+export class ProcesarGastoRecurrenteUseCase implements UseCase<
+  ProcesarGastoRecurrenteInput,
+  ProcesarGastoRecurrenteResult
+> {
   readonly #expenses: ExpensesRepository;
   readonly #recurring: RecurringExpensesRepository;
 
-  constructor(
-    expenses: ExpensesRepository,
-    recurring: RecurringExpensesRepository,
-  ) {
+  constructor(expenses: ExpensesRepository, recurring: RecurringExpensesRepository) {
     this.#expenses = expenses;
     this.#recurring = recurring;
   }
 
-  async execute(
-    input: ProcesarGastoRecurrenteInput,
-  ): Promise<ProcesarGastoRecurrenteResult> {
+  async execute(input: ProcesarGastoRecurrenteInput): Promise<ProcesarGastoRecurrenteResult> {
     const { template, today } = input;
     if (!template.activo) {
       return { processed: false, egreso: null, nextProximoDisparo: null };
@@ -64,10 +53,7 @@ export class ProcesarGastoRecurrenteUseCase
     // recurring template already exists for today, skip. Prevents double
     // registration when the UI fires the confirm handler twice before
     // the query cache refreshes.
-    const existing = await this.#expenses.findByGastoRecurrenteAndDate(
-      template.id,
-      today,
-    );
+    const existing = await this.#expenses.findByGastoRecurrenteAndDate(template.id, today);
     if (existing !== null) {
       return { processed: true, egreso: existing, nextProximoDisparo: null };
     }

@@ -69,7 +69,9 @@ export default function NuevoProductoRoute(): ReactElement {
         submitting={h.crear.isPending}
         conversionEnabled={h.conversionEnabled}
         onPickIcon={h.handlePickIcon}
-        onFormChange={(s) => { h.formRef.current = s; }}
+        onFormChange={(s) => {
+          h.formRef.current = s;
+        }}
       />
     </AppShellWrapper>
   );

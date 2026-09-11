@@ -76,9 +76,7 @@ describe('calculateFlujoDeEfectivo', () => {
   });
 
   it('Crédito ventas do NOT count as cash-in', () => {
-    const ventas = [
-      makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n }),
-    ];
+    const ventas = [makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n })];
     const result = calculateFlujoDeEfectivo({ ventas, egresos: [], pagosClientes: [] });
     expect(result.operacion).toBe(0n);
   });
@@ -165,8 +163,9 @@ describe('calculateFlujoDeEfectivo', () => {
     const pagos = [makePago({ montoCentavos: 5_000n })];
     const egresos = [makeExpense({ categoria: 'Renta', monto: 3_000n })];
     const result = calculateFlujoDeEfectivo({ ventas, egresos, pagosClientes: pagos });
-    expect(result.cobroVentasContado + result.cobroCreditoClientes - result.egresoOperativo)
-      .toBe(result.operacion);
+    expect(result.cobroVentasContado + result.cobroCreditoClientes - result.egresoOperativo).toBe(
+      result.operacion,
+    );
   });
 
   it('sub-components sum to aggregates: ZERO - egresoInversion = inversion', () => {

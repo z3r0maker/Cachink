@@ -58,10 +58,7 @@ export function DirectorHomeRoute(props: DirectorHomeRouteProps): ReactElement {
     <DirectorHomeScreen
       testID={props.testID ?? 'director-home-route'}
       notificationBadge={
-        <NotificationBadge
-          count={unreadCount.data ?? 0}
-          onPress={() => nav?.('/notificaciones')}
-        />
+        <NotificationBadge count={unreadCount.data ?? 0} onPress={() => nav?.('/notificaciones')} />
       }
       hero={<UtilidadHero onVerEstados={() => nav?.('/estados')} />}
       corte={<CorteHomeCard />}

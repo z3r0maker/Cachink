@@ -10,7 +10,9 @@ import type { Business, BusinessId, NewBusiness } from '@xangarro/domain';
 export type { Business, NewBusiness };
 
 /** Patchable fields for an existing Business (Settings edit flow). */
-export type BusinessPatch = Partial<Pick<Business, 'nombre' | 'regimenFiscal' | 'isrTasa' | 'featureFlags' | 'enabledPaymentMethods'>>;
+export type BusinessPatch = Partial<
+  Pick<Business, 'nombre' | 'regimenFiscal' | 'isrTasa' | 'featureFlags' | 'enabledPaymentMethods'>
+>;
 
 export interface BusinessesRepository {
   create(input: NewBusiness): Promise<Business>;

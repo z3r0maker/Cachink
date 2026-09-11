@@ -21,10 +21,7 @@ import type { Sale } from '../entities/sale.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
 
-const COSTO_DE_VENTAS_CATS = new Set<Expense['categoria']>([
-  'Materia Prima',
-  'Inventario',
-]);
+const COSTO_DE_VENTAS_CATS = new Set<Expense['categoria']>(['Materia Prima', 'Inventario']);
 
 export interface EstadoDeResultados {
   ingresos: Money;
@@ -47,34 +44,25 @@ export interface EstadoDeResultadosInput {
   isrTasa: number;
 }
 
-export function calculateEstadoDeResultados(
-  input: EstadoDeResultadosInput,
-): EstadoDeResultados {
+export function calculateEstadoDeResultados(input: EstadoDeResultadosInput): EstadoDeResultados {
   const { ventas, egresos, isrTasa } = input;
   if (!Number.isInteger(isrTasa) || isrTasa < 0 || isrTasa > 10_000) {
-    throw new TypeError(
-      `isrTasa must be an integer in [0, 10_000], got ${isrTasa}`,
-    );
+    throw new TypeError(`isrTasa must be an integer in [0, 10_000], got ${isrTasa}`);
   }
 
   const ingresos = sum(ventas.map((v) => v.monto));
 
   const costoDeVentas = sum(
-    egresos
-      .filter((e) => COSTO_DE_VENTAS_CATS.has(e.categoria))
-      .map((e) => e.monto),
+    egresos.filter((e) => COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
   );
   const gastosOperativos = sum(
-    egresos
-      .filter((e) => !COSTO_DE_VENTAS_CATS.has(e.categoria))
-      .map((e) => e.monto),
+    egresos.filter((e) => !COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
   );
 
   const merma = calculateMermaTotal(input.mermaMovements ?? []);
 
   const utilidadBruta = ingresos - costoDeVentas;
-  const utilidadOperativa =
-    utilidadBruta - merma - gastosOperativos;
+  const utilidadOperativa = utilidadBruta - merma - gastosOperativos;
 
   const isr = calculateIsr(utilidadOperativa, isrTasa);
   const utilidadNeta = utilidadOperativa - isr;
@@ -92,21 +80,12 @@ export function calculateEstadoDeResultados(
 }
 
 /** Merma cost = Σ(cantidad × costoUnitCentavos) for merma movements. */
-function calculateMermaTotal(
-  movements: readonly InventoryMovement[],
-): Money {
-  return sum(
-    movements.map(
-      (m) => BigInt(m.cantidad) * m.costoUnitCentavos,
-    ),
-  );
+function calculateMermaTotal(movements: readonly InventoryMovement[]): Money {
+  return sum(movements.map((m) => BigInt(m.cantidad) * m.costoUnitCentavos));
 }
 
 /** ISR computed on positive utilidad only (no tax credits). */
-function calculateIsr(
-  utilidadOperativa: Money,
-  isrTasa: number,
-): Money {
+function calculateIsr(utilidadOperativa: Money, isrTasa: number): Money {
   if (utilidadOperativa <= ZERO) return ZERO;
   return (utilidadOperativa * BigInt(isrTasa)) / 10_000n;
 }

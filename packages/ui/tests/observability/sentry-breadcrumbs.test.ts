@@ -4,7 +4,7 @@
  * Covers no-Sentry guard and never-crash guarantee.
  */
 
-import { describe, expect, it, vi, afterEach } from 'vitest';
+import { describe, it, afterEach } from 'vitest';
 import type { AuditEvent } from '@xangarro/observability';
 import { addAuditBreadcrumb } from '../../src/observability/sentry-breadcrumbs';
 
@@ -23,7 +23,7 @@ const EVENT: AuditEvent = {
 describe('addAuditBreadcrumb', () => {
   afterEach(() => {
     // Clean up global
-    delete (globalThis as any).__SENTRY__;
+    delete (globalThis as { __SENTRY__?: unknown }).__SENTRY__;
   });
 
   it('does nothing when __SENTRY__ is not set', () => {
@@ -36,7 +36,7 @@ describe('addAuditBreadcrumb', () => {
   });
 
   it('does not crash when __SENTRY__ is a non-object', () => {
-    (globalThis as any).__SENTRY__ = 'bad';
+    (globalThis as { __SENTRY__?: unknown }).__SENTRY__ = 'bad';
     // Dynamic import will fail but should be caught
     addAuditBreadcrumb(EVENT);
   });

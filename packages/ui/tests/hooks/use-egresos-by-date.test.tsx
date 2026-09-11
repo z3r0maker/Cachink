@@ -7,11 +7,7 @@ import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import {
-  InMemoryExpensesRepository,
-  TEST_DEVICE_ID,
-  makeNewExpense,
-} from '@xangarro/testing';
+import { InMemoryExpensesRepository, TEST_DEVICE_ID, makeNewExpense } from '@xangarro/testing';
 import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEgresosByDate } from '../../src/hooks/use-egresos-by-date';
@@ -29,9 +25,7 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );

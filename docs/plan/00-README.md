@@ -90,7 +90,7 @@ These are binding unless a new ADR changes them. Where an item says _(ADR-053 §
 
 **Sync**
 
-- **Hand-rolled outbox.** Up (device→cloud): sales, expenses, inventory_movements, caja_turnos, caja_movimientos, cancelacion_logs, day_closes, client_payments (+ dormant tables). Down (cloud→device): businesses, products, clients, users (operators), employees, recurring_expenses, feature flags, entitlement. **Hybrid:** products, clients — up on insert only; all edits are portal-only. **No conflict class exists.** _(Q6, ADR-053 §6)_
+- **Hand-rolled outbox.** Up (device→cloud): sales, expenses, inventory*movements, caja_turnos, caja_movimientos, cancelacion_logs, day_closes, client_payments (+ dormant tables). Down (cloud→device): businesses, products, clients, users (operators), employees, recurring_expenses, feature flags, entitlement. **Hybrid:** products, clients — up on insert only; all edits are portal-only. **No conflict class exists.** *(Q6, ADR-053 §6)\_
 - Triggers: **push-on-write** (2 s debounce, batched), **pull on foreground/resume + every 15 min**, manual **"Actualizar"** does both and reports. Background sync is opportunistic only. _(Q3)_
 - **Rejected rows are never dropped**: per-row status, server reason stored, retried with backoff, visible in the app ("no enviados") and the portal (Sync health). Server returns per-row outcomes, never fails a whole batch for one row. Batches coalesce per row; batched reads (no N+1); drain cap per trigger. _(Q4)_
 - **Retention:** phone purges transactional rows older than 90 days **only if server-acknowledged**; "now" = server time at last sync, never device clock. Portal keeps everything forever. Data is never deleted in any abuse scenario. _(Q9)_

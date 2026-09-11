@@ -17,11 +17,7 @@ export class DrizzleAppConfigRepository implements AppConfigRepository {
   }
 
   async get(key: string): Promise<string | null> {
-    const row = await this.#db
-      .select()
-      .from(appConfig)
-      .where(eq(appConfig.key, key))
-      .get();
+    const row = await this.#db.select().from(appConfig).where(eq(appConfig.key, key)).get();
     return row?.value ?? null;
   }
 

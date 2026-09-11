@@ -23,14 +23,14 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 function wrapper(
   overrides?: Record<string, unknown>,
 ): (props: { children: ReactNode }) => ReactNode {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );

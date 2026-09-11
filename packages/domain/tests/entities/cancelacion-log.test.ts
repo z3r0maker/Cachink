@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  CancelacionLogSchema,
-  NewCancelacionLogSchema,
-} from '../../src/entities/index.js';
+import { CancelacionLogSchema, NewCancelacionLogSchema } from '../../src/entities/index.js';
 
 const BIZ_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEP';
@@ -56,9 +53,7 @@ describe('CancelacionLogSchema', () => {
   });
 
   it('rejects empty motivo', () => {
-    expect(() =>
-      CancelacionLogSchema.parse({ ...validLog, motivo: '' }),
-    ).toThrow();
+    expect(() => CancelacionLogSchema.parse({ ...validLog, motivo: '' })).toThrow();
   });
 
   it('rejects motivo longer than 500 chars', () => {

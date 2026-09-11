@@ -20,9 +20,7 @@ export interface CambiarPinInput {
   readonly newPin: string;
 }
 
-export class CambiarPinUseCase
-  implements UseCase<CambiarPinInput, void>
-{
+export class CambiarPinUseCase implements UseCase<CambiarPinInput, void> {
   readonly #users: UsersRepository;
 
   constructor(users: UsersRepository) {
@@ -31,9 +29,7 @@ export class CambiarPinUseCase
 
   async execute(input: CambiarPinInput): Promise<void> {
     if (!/^\d{6}$/.test(input.newPin)) {
-      throw new TypeError(
-        'El nuevo PIN debe ser de 6 dígitos',
-      );
+      throw new TypeError('El nuevo PIN debe ser de 6 dígitos');
     }
 
     const user = await this.#users.findById(input.userId);
@@ -41,10 +37,7 @@ export class CambiarPinUseCase
       throw new TypeError('Usuario no encontrado');
     }
 
-    const matches = await compare(
-      input.currentPin,
-      user.pinHash,
-    );
+    const matches = await compare(input.currentPin, user.pinHash);
     if (!matches) {
       throw new TypeError('PIN actual incorrecto');
     }

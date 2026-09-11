@@ -29,11 +29,7 @@ describe('Notificaciones tab UI', () => {
     const prefs = deriveDefaultPrefs(ALL_ON);
     render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-        <NotificacionesConfigTab
-          prefs={prefs}
-          flags={ALL_ON}
-          onToggle={() => {}}
-        />
+        <NotificacionesConfigTab prefs={prefs} flags={ALL_ON} onToggle={() => {}} />
       </TamaguiProvider>,
     );
     // Config subtitle is rendered (raw i18n key in test env)
@@ -45,11 +41,7 @@ describe('Notificaciones tab UI', () => {
     const prefs = deriveDefaultPrefs(flags);
     render(
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-        <NotificacionesConfigTab
-          prefs={prefs}
-          flags={flags}
-          onToggle={() => {}}
-        />
+        <NotificacionesConfigTab prefs={prefs} flags={flags} onToggle={() => {}} />
       </TamaguiProvider>,
     );
     // Credito sources should exist but be locked

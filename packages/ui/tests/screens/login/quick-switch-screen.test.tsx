@@ -5,6 +5,7 @@
  * onAuthenticate + onForgotPin callback wiring.
  */
 
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { UserId } from '@xangarro/domain';
 import { makeUser } from '@xangarro/testing';
@@ -34,10 +35,8 @@ const defaultProps = {
   submitting: false,
 };
 
-function renderScreen(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <QuickSwitchScreen {...defaultProps} {...overrides} />,
-  );
+function renderScreen(overrides: Partial<ComponentProps<typeof QuickSwitchScreen>> = {}) {
+  return renderWithProviders(<QuickSwitchScreen {...defaultProps} {...overrides} />);
 }
 
 describe('QuickSwitchScreen', () => {
@@ -59,8 +58,6 @@ describe('QuickSwitchScreen', () => {
 
   it('shows the PIN prompt when a user avatar is tapped', () => {
     renderScreen();
-    // Before selection, PIN prompt should not be visible (collapsed)
-    const pinPrompt = screen.queryByTestId('pin-prompt');
     // After selecting a user, the prompt should appear
     fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
     expect(screen.getByTestId('pin-prompt')).toBeInTheDocument();
@@ -117,7 +114,7 @@ describe('QuickSwitchScreen', () => {
   });
 
   it('renders with a custom testID', () => {
-    renderScreen({ testID: 'my-quick-switch' } as any);
+    renderScreen({ testID: 'my-quick-switch' });
     expect(screen.getByTestId('my-quick-switch')).toBeInTheDocument();
   });
 

@@ -13,14 +13,18 @@ export interface CreateAuditoriaInput {
   readonly businessId: BusinessId;
 }
 
-export type AuditoriaPatch = Partial<Pick<AuditoriaInventario,
-  'estado' | 'lineas' | 'totalDiscrepancias' | 'productosContados'
->>;
+export type AuditoriaPatch = Partial<
+  Pick<AuditoriaInventario, 'estado' | 'lineas' | 'totalDiscrepancias' | 'productosContados'>
+>;
 
 export interface AuditoriasInventarioRepository {
   create(input: CreateAuditoriaInput): Promise<AuditoriaInventario>;
   findById(id: AuditoriaInventarioId): Promise<AuditoriaInventario | null>;
   findLatest(businessId: BusinessId): Promise<AuditoriaInventario | null>;
-  findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly AuditoriaInventario[]>;
+  findByDateRange(
+    from: string,
+    to: string,
+    businessId: BusinessId,
+  ): Promise<readonly AuditoriaInventario[]>;
   update(id: AuditoriaInventarioId, patch: AuditoriaPatch): Promise<AuditoriaInventario>;
 }

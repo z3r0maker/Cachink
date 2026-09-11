@@ -23,9 +23,7 @@ describe('Kpi', () => {
     renderWithProviders(<Kpi label="Ventas hoy" value="$8,450.00" />);
     const label = screen.getByTestId('kpi-label');
     // gray600 (#5A5A56) → rgb(90, 90, 86).
-    expect(getComputedStyle(label).color.toLowerCase()).toContain(
-      'rgb(90, 90, 86)',
-    );
+    expect(getComputedStyle(label).color.toLowerCase()).toContain('rgb(90, 90, 86)');
   });
 
   it('renders the value at weight 900 with tabular numerals', () => {
@@ -42,9 +40,7 @@ describe('Kpi', () => {
     renderWithProviders(<Kpi label="Ventas hoy" value="$8,450.00" />);
     const value = screen.getByTestId('kpi-value');
     // black (#0D0D0D) → rgb(13, 13, 13).
-    expect(getComputedStyle(value).color.toLowerCase()).toContain(
-      'rgb(13, 13, 13)',
-    );
+    expect(getComputedStyle(value).color.toLowerCase()).toContain('rgb(13, 13, 13)');
   });
 
   it('maps each tone to its brand color', () => {
@@ -54,27 +50,16 @@ describe('Kpi', () => {
       ['negative', 'rgb(255, 71, 87)'], // red #FF4757
     ];
     for (const [tone, expected] of cases) {
-      renderWithProviders(
-        <Kpi
-          label="x"
-          value="1"
-          tone={tone}
-          testID={`kpi-${tone}`}
-        />,
-      );
+      renderWithProviders(<Kpi label="x" value="1" tone={tone} testID={`kpi-${tone}`} />);
       const root = screen.getAllByTestId(`kpi-${tone}`)[0]!;
       const valueNode = root.querySelector('[data-testid="kpi-value"]');
       expect(valueNode).not.toBeNull();
-      expect(getComputedStyle(valueNode!).color.toLowerCase()).toContain(
-        expected,
-      );
+      expect(getComputedStyle(valueNode!).color.toLowerCase()).toContain(expected);
     }
   });
 
   it('renders the hint when provided', () => {
-    renderWithProviders(
-      <Kpi label="Ventas hoy" value="$8,450.00" hint="vs. ayer +12%" />,
-    );
+    renderWithProviders(<Kpi label="Ventas hoy" value="$8,450.00" hint="vs. ayer +12%" />);
     expect(screen.getByTestId('kpi-hint')).toBeDefined();
     expect(screen.getByText('vs. ayer +12%')).toBeDefined();
   });
@@ -85,9 +70,7 @@ describe('Kpi', () => {
   });
 
   it('forwards testID so E2E tests can anchor to it', () => {
-    renderWithProviders(
-      <Kpi label="Ventas hoy" value="$8,450.00" testID="ventas-hoy-kpi" />,
-    );
+    renderWithProviders(<Kpi label="Ventas hoy" value="$8,450.00" testID="ventas-hoy-kpi" />);
     expect(screen.getAllByTestId('ventas-hoy-kpi').length).toBeGreaterThan(0);
   });
 

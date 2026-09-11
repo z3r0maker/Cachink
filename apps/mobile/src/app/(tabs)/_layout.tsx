@@ -66,10 +66,7 @@ export default function TabsLayout(): ReactElement | null {
       }}
       onOpenSettings={() => router.push('/settings' as never)}
     >
-      <Tabs
-        screenOptions={{ headerShown: false }}
-        tabBar={() => null}
-      />
+      <Tabs screenOptions={{ headerShown: false }} tabBar={() => null} />
     </AppShell>
   );
 }

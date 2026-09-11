@@ -8,14 +8,24 @@ initI18n();
 describe('DeltaIndicator', () => {
   it('renders nothing when previous is null', () => {
     const { container } = renderWithProviders(
-      <DeltaIndicator current={100} previous={null} format="percent" periodLabel="vs mes anterior" />,
+      <DeltaIndicator
+        current={100}
+        previous={null}
+        format="percent"
+        periodLabel="vs mes anterior"
+      />,
     );
     expect(container.textContent).toBe('');
   });
 
   it('renders ↑ with green for positive delta', () => {
     renderWithProviders(
-      <DeltaIndicator current={120} previous={100} format="percent" periodLabel="vs mes anterior" />,
+      <DeltaIndicator
+        current={120}
+        previous={100}
+        format="percent"
+        periodLabel="vs mes anterior"
+      />,
     );
     const label = screen.getByTestId('delta-indicator-label');
     expect(label.textContent).toContain('↑');
@@ -34,7 +44,12 @@ describe('DeltaIndicator', () => {
 
   it('renders "= sin cambio" when delta is zero', () => {
     renderWithProviders(
-      <DeltaIndicator current={100} previous={100} format="percent" periodLabel="vs mes anterior" />,
+      <DeltaIndicator
+        current={100}
+        previous={100}
+        format="percent"
+        periodLabel="vs mes anterior"
+      />,
     );
     const label = screen.getByTestId('delta-indicator-label');
     expect(label.textContent).toContain('sin cambio');
@@ -59,7 +74,13 @@ describe('DeltaIndicator', () => {
 
   it('supports custom testID', () => {
     renderWithProviders(
-      <DeltaIndicator current={100} previous={80} format="percent" periodLabel="vs" testID="my-delta" />,
+      <DeltaIndicator
+        current={100}
+        previous={80}
+        format="percent"
+        periodLabel="vs"
+        testID="my-delta"
+      />,
     );
     expect(screen.getByTestId('my-delta')).toBeInTheDocument();
   });

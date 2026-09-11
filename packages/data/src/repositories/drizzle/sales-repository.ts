@@ -8,26 +8,20 @@
 import { and, desc, eq, gte, inArray, isNull, lte, sql } from 'drizzle-orm';
 import type {
   BusinessId,
-  CajaTurnoId,
   ClientId,
   DeviceId,
   UserId,
-  IsoDate,
-  IsoTimestamp,
-  Money,
   NewSale,
   PaymentState,
   ProductId,
   Sale,
-  SaleCategory,
   SaleId,
 } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { SalePatch, SalesRepository } from '../sales-repository.js';
 import { sales } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
-
-type SaleRow = typeof sales.$inferSelect;
+import { mapSaleRow } from './sales-row-mapper.js';
 
 export class DrizzleSalesRepository implements SalesRepository {
   readonly #db: CachinkDatabase;
@@ -69,7 +63,7 @@ export class DrizzleSalesRepository implements SalesRepository {
       deletedAt: null as string | null,
     };
     await this.#db.insert(sales).values(row).run();
-    return this.#mapRow(row);
+    return mapSaleRow(row);
   }
 
   async findById(id: SaleId): Promise<Sale | null> {
@@ -78,7 +72,7 @@ export class DrizzleSalesRepository implements SalesRepository {
       .from(sales)
       .where(and(eq(sales.id, id), isNull(sales.deletedAt)))
       .get();
-    return row ? this.#mapRow(row) : null;
+    return row ? mapSaleRow(row) : null;
   }
 
   async findByDate(date: string, businessId: BusinessId): Promise<readonly Sale[]> {
@@ -88,30 +82,51 @@ export class DrizzleSalesRepository implements SalesRepository {
       .where(and(eq(sales.fecha, date), eq(sales.businessId, businessId), isNull(sales.deletedAt)))
       .orderBy(desc(sales.createdAt))
       .all();
-    return rows.map((r) => this.#mapRow(r));
+    return rows.map((r) => mapSaleRow(r));
   }
 
-  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Sale[]> {
+  async findByDateRange(
+    from: string,
+    to: string,
+    businessId: BusinessId,
+  ): Promise<readonly Sale[]> {
     const rows = await this.#db
       .select()
       .from(sales)
-      .where(and(gte(sales.fecha, from), lte(sales.fecha, to), eq(sales.businessId, businessId), isNull(sales.deletedAt)))
+      .where(
+        and(
+          gte(sales.fecha, from),
+          lte(sales.fecha, to),
+          eq(sales.businessId, businessId),
+          isNull(sales.deletedAt),
+        ),
+      )
       .orderBy(desc(sales.fecha), desc(sales.createdAt))
       .all();
-    return rows.map((r) => this.#mapRow(r));
+    return rows.map((r) => mapSaleRow(r));
   }
 
   async findPendingByClient(clientId: ClientId): Promise<readonly Sale[]> {
     const rows = await this.#db
       .select()
       .from(sales)
-      .where(and(eq(sales.clienteId, clientId), inArray(sales.estadoPago, ['pendiente', 'parcial']), isNull(sales.deletedAt)))
+      .where(
+        and(
+          eq(sales.clienteId, clientId),
+          inArray(sales.estadoPago, ['pendiente', 'parcial']),
+          isNull(sales.deletedAt),
+        ),
+      )
       .all();
-    return rows.map((r) => this.#mapRow(r));
+    return rows.map((r) => mapSaleRow(r));
   }
 
   async updatePaymentState(id: SaleId, state: PaymentState): Promise<void> {
-    await this.#db.update(sales).set({ estadoPago: state, updatedAt: now() }).where(eq(sales.id, id)).run();
+    await this.#db
+      .update(sales)
+      .set({ estadoPago: state, updatedAt: now() })
+      .where(eq(sales.id, id))
+      .run();
   }
 
   async update(id: SaleId, patch: SalePatch): Promise<Sale | null> {
@@ -131,7 +146,11 @@ export class DrizzleSalesRepository implements SalesRepository {
 
   async delete(id: SaleId): Promise<void> {
     const ts = now();
-    await this.#db.update(sales).set({ deletedAt: ts, updatedAt: ts }).where(eq(sales.id, id)).run();
+    await this.#db
+      .update(sales)
+      .set({ deletedAt: ts, updatedAt: ts })
+      .where(eq(sales.id, id))
+      .run();
   }
 
   async count(businessId: BusinessId): Promise<number> {
@@ -155,11 +174,13 @@ export class DrizzleSalesRepository implements SalesRepository {
         ultimaVenta: sql<string>`max(${sales.fecha})`.as('ultima_venta'),
       })
       .from(sales)
-      .where(and(
-        eq(sales.businessId, opts.businessId),
-        isNull(sales.deletedAt),
-        gte(sales.fecha, opts.since),
-      ))
+      .where(
+        and(
+          eq(sales.businessId, opts.businessId),
+          isNull(sales.deletedAt),
+          gte(sales.fecha, opts.since),
+        ),
+      )
       .groupBy(sales.productoId)
       .orderBy(sql`veces DESC`)
       .limit(opts.limit)
@@ -169,32 +190,5 @@ export class DrizzleSalesRepository implements SalesRepository {
       veces: Number(r.veces),
       ultimaVenta: r.ultimaVenta,
     }));
-  }
-
-  #mapRow(row: SaleRow): Sale {
-    return {
-      id: row.id as SaleId,
-      fecha: row.fecha as IsoDate,
-      hora: row.hora ?? null,
-      concepto: row.concepto,
-      categoria: row.categoria as SaleCategory,
-      monto: row.monto,
-      metodo: row.metodo,
-      clienteId: (row.clienteId ?? null) as ClientId | null,
-      estadoPago: row.estadoPago,
-      productoId: row.productoId as ProductId,
-      cantidad: row.cantidad,
-      efectivoRecibidoCentavos: (row.efectivoRecibidoCentavos ?? null) as Money | null,
-      cancelledByUserId: (row.cancelledByUserId ?? null) as UserId | null,
-      cancelMotivo: row.cancelMotivo ?? null,
-      cancelledAt: (row.cancelledAt ?? null) as IsoTimestamp | null,
-      cajaTurnoId: (row.cajaTurnoId ?? null) as CajaTurnoId | null,
-      businessId: row.businessId as BusinessId,
-      deviceId: row.deviceId as DeviceId,
-      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
-      createdAt: row.createdAt as IsoTimestamp,
-      updatedAt: row.updatedAt as IsoTimestamp,
-      deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
-    };
   }
 }

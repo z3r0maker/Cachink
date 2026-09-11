@@ -24,7 +24,9 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER = '01HZ8XQN9GZJXV8AKQ5X0C7SR1' as UserId;
 
 function wrapper(overrides?: Record<string, unknown>) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>

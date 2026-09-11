@@ -15,7 +15,7 @@ export default function TelemetriaRoute(): ReactElement {
   // Belt-and-suspenders: unreachable from Otros grid in prod, but
   // also hard-gate the route itself for safety.
   if (typeof __DEV__ === 'undefined' || !__DEV__) {
-    return <Redirect href="/" /> as unknown as ReactElement;
+    return (<Redirect href="/" />) as unknown as ReactElement;
   }
 
   return (

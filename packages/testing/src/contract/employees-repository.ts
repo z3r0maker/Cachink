@@ -37,9 +37,7 @@ export function describeEmployeesRepositoryContract(
     it('listActive returns per-business, nombre asc, excludes deleted', async () => {
       await repo.create(makeNewEmployee({ businessId: BIZ_A, nombre: 'Beto Rodríguez' }));
       await repo.create(makeNewEmployee({ businessId: BIZ_A, nombre: 'Ana Lopez' }));
-      const drop = await repo.create(
-        makeNewEmployee({ businessId: BIZ_A, nombre: 'Zacarías' }),
-      );
+      const drop = await repo.create(makeNewEmployee({ businessId: BIZ_A, nombre: 'Zacarías' }));
       await repo.delete(drop.id);
       await repo.create(makeNewEmployee({ businessId: BIZ_B, nombre: 'Outside' }));
       const rows = await repo.listActive(BIZ_A);
@@ -55,9 +53,7 @@ export function describeEmployeesRepositoryContract(
     });
 
     it('persists periodo enum values', async () => {
-      const row = await repo.create(
-        makeNewEmployee({ businessId: BIZ_A, periodo: 'mensual' }),
-      );
+      const row = await repo.create(makeNewEmployee({ businessId: BIZ_A, periodo: 'mensual' }));
       expect((await repo.findById(row.id))?.periodo).toBe('mensual');
     });
 

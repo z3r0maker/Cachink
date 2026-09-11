@@ -20,7 +20,9 @@ import { tamaguiConfig } from '../../src/tamagui.config';
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
 function wrapper(overrides?: Record<string, unknown>) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>

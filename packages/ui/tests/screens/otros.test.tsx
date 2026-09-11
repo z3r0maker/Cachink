@@ -9,9 +9,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FeatureFlags } from '@xangarro/domain';
 import { OtrosScreen } from '../../src/screens/Otros/otros-screen';
 import { OtrosCard } from '../../src/screens/Otros/otros-card';
-import {
-  operativoOtrosItems,
-} from '../../src/screens/Otros/otros-items';
+import { operativoOtrosItems } from '../../src/screens/Otros/otros-items';
 import { directorOtrosItems } from '../../src/screens/Otros/otros-items-director';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
@@ -83,25 +81,19 @@ describe('directorOtrosItems', () => {
 
 describe('OtrosScreen', () => {
   it('renders with default testID otros-screen', () => {
-    renderWithProviders(
-      <OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={vi.fn()} />,
-    );
+    renderWithProviders(<OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={vi.fn()} />);
     expect(screen.getByTestId('otros-screen')).toBeInTheDocument();
   });
 
   it('renders always-on cards for operativo', () => {
-    renderWithProviders(
-      <OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={vi.fn()} />,
-    );
+    renderWithProviders(<OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={vi.fn()} />);
     expect(screen.getByTestId('otros-caja')).toBeInTheDocument();
     expect(screen.getByTestId('otros-cancelaciones')).toBeInTheDocument();
   });
 
   it('calls onNavigate with item path when card is pressed', () => {
     const onNavigate = vi.fn();
-    renderWithProviders(
-      <OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={onNavigate} />,
-    );
+    renderWithProviders(<OtrosScreen role="operativo" flags={NO_FLAGS} onNavigate={onNavigate} />);
     fireEvent.click(screen.getByTestId('otros-caja'));
     expect(onNavigate).toHaveBeenCalledWith('/caja');
   });
@@ -129,18 +121,14 @@ describe('OtrosScreen', () => {
 describe('OtrosCard', () => {
   it('renders with testID', () => {
     const item = operativoOtrosItems(NO_FLAGS)[0]!;
-    renderWithProviders(
-      <OtrosCard item={item} onPress={vi.fn()} testID="my-card" />,
-    );
+    renderWithProviders(<OtrosCard item={item} onPress={vi.fn()} testID="my-card" />);
     expect(screen.getByTestId('my-card')).toBeInTheDocument();
   });
 
   it('calls onPress when tapped', () => {
     const onPress = vi.fn();
     const item = operativoOtrosItems(NO_FLAGS)[0]!;
-    renderWithProviders(
-      <OtrosCard item={item} onPress={onPress} testID="test-card" />,
-    );
+    renderWithProviders(<OtrosCard item={item} onPress={onPress} testID="test-card" />);
     fireEvent.click(screen.getByTestId('test-card'));
     expect(onPress).toHaveBeenCalled();
   });

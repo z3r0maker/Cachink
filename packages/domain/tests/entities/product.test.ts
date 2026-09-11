@@ -105,9 +105,7 @@ describe('ProductSchema', () => {
   });
 
   it('rejects an unknown tipo value', () => {
-    expect(() =>
-      ProductSchema.parse({ ...validProduct, tipo: 'combo' }),
-    ).toThrow();
+    expect(() => ProductSchema.parse({ ...validProduct, tipo: 'combo' })).toThrow();
   });
 
   it('defaults colorFondo to white when omitted', () => {
@@ -218,7 +216,14 @@ describe('ProductoTipoEnum', () => {
 describe('ProductColorEnum', () => {
   it('enumerates the eight color options', () => {
     expect(ProductColorEnum.options).toEqual([
-      'white', 'yellow', 'green', 'blue', 'pink', 'purple', 'peach', 'gray',
+      'white',
+      'yellow',
+      'green',
+      'blue',
+      'pink',
+      'purple',
+      'peach',
+      'gray',
     ]);
   });
 });

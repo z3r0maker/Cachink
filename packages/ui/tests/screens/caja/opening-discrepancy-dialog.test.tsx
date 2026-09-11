@@ -5,6 +5,7 @@
  * positive vs negative difference color coding.
  */
 
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { OpeningDiscrepancyDialog } from '../../../src/screens/Caja/opening-discrepancy-dialog';
 import { initI18n } from '../../../src/i18n/index';
@@ -21,10 +22,8 @@ const defaultProps = {
   submitting: false,
 };
 
-function renderDialog(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <OpeningDiscrepancyDialog {...defaultProps} {...overrides} />,
-  );
+function renderDialog(overrides: Partial<ComponentProps<typeof OpeningDiscrepancyDialog>> = {}) {
+  return renderWithProviders(<OpeningDiscrepancyDialog {...defaultProps} {...overrides} />);
 }
 
 describe('OpeningDiscrepancyDialog', () => {
@@ -64,7 +63,7 @@ describe('OpeningDiscrepancyDialog', () => {
   });
 
   it('renders with custom testID', () => {
-    renderDialog({ testID: 'my-discrepancy' } as any);
+    renderDialog({ testID: 'my-discrepancy' });
     expect(screen.getByTestId('my-discrepancy')).toBeInTheDocument();
   });
 });

@@ -33,11 +33,7 @@ export default function CuentasPorCobrarRoute(): ReactElement {
   };
 
   return (
-    <AppShellWrapper
-      activeTabKey="home"
-      title={t('cuentasPorCobrar.title')}
-      onBack={handleBack}
-    >
+    <AppShellWrapper activeTabKey="home" title={t('cuentasPorCobrar.title')} onBack={handleBack}>
       <CuentasPorCobrarScreen rows={cxcQ.data ?? []} today={todayIso()} />
     </AppShellWrapper>
   );

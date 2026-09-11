@@ -12,33 +12,20 @@ import { renderWithProviders, screen, fireEvent } from '../test-utils';
 
 describe('WheelQuantityPicker', () => {
   it('renders with the provided label', () => {
-    renderWithProviders(
-      <WheelQuantityPicker label="CANTIDAD" value={1} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<WheelQuantityPicker label="CANTIDAD" value={1} onChange={vi.fn()} />);
     expect(screen.getByText('CANTIDAD')).toBeInTheDocument();
   });
 
   it('renders the testID on the wrapper', () => {
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Qty"
-        value={5}
-        onChange={vi.fn()}
-        testID="my-qty"
-      />,
+      <WheelQuantityPicker label="Qty" value={5} onChange={vi.fn()} testID="my-qty" />,
     );
     expect(screen.getByTestId('my-qty')).toBeInTheDocument();
   });
 
   it('displays the current value as selected', () => {
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Cantidad"
-        value={3}
-        onChange={vi.fn()}
-        min={1}
-        max={10}
-      />,
+      <WheelQuantityPicker label="Cantidad" value={3} onChange={vi.fn()} min={1} max={10} />,
     );
     // The mock renders each option; value=3 with min=1 → index 2 is selected
     const selectedOption = screen.getByTestId('wheel-option-2');
@@ -49,13 +36,7 @@ describe('WheelQuantityPicker', () => {
   it('fires onChange with the correct numeric value when scrolled to', () => {
     const onChange = vi.fn();
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Cantidad"
-        value={1}
-        onChange={onChange}
-        min={1}
-        max={10}
-      />,
+      <WheelQuantityPicker label="Cantidad" value={1} onChange={onChange} min={1} max={10} />,
     );
     // Click option at index 4 → min(1) + 4 = 5
     fireEvent.click(screen.getByTestId('wheel-option-4'));
@@ -64,13 +45,7 @@ describe('WheelQuantityPicker', () => {
 
   it('respects min/max bounds — only generates options within range', () => {
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Qty"
-        value={5}
-        onChange={vi.fn()}
-        min={3}
-        max={7}
-      />,
+      <WheelQuantityPicker label="Qty" value={5} onChange={vi.fn()} min={3} max={7} />,
     );
     // Should have options: 3, 4, 5, 6, 7 → indices 0-4
     expect(screen.getByTestId('wheel-option-0')).toHaveTextContent('3');
@@ -80,20 +55,13 @@ describe('WheelQuantityPicker', () => {
 
   it('shows error text when error prop is provided', () => {
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Qty"
-        value={1}
-        onChange={vi.fn()}
-        error="Valor requerido"
-      />,
+      <WheelQuantityPicker label="Qty" value={1} onChange={vi.fn()} error="Valor requerido" />,
     );
     expect(screen.getByText('Valor requerido')).toBeInTheDocument();
   });
 
   it('does not render error text when error is undefined', () => {
-    renderWithProviders(
-      <WheelQuantityPicker label="Qty" value={1} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<WheelQuantityPicker label="Qty" value={1} onChange={vi.fn()} />);
     // No red error text should appear
     expect(screen.queryByText('Valor requerido')).toBeNull();
   });
@@ -135,9 +103,7 @@ describe('WheelQuantityPicker', () => {
   });
 
   it('defaults to min=1, max=99 when not specified', () => {
-    renderWithProviders(
-      <WheelQuantityPicker label="Qty" value={1} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<WheelQuantityPicker label="Qty" value={1} onChange={vi.fn()} />);
     // Should have 99 options (1 through 99)
     expect(screen.getByTestId('wheel-option-0')).toHaveTextContent('1');
     expect(screen.getByTestId('wheel-option-98')).toHaveTextContent('99');
@@ -146,13 +112,7 @@ describe('WheelQuantityPicker', () => {
 
   it('clamps selectedIndex to 0 when value < min', () => {
     renderWithProviders(
-      <WheelQuantityPicker
-        label="Qty"
-        value={0}
-        onChange={vi.fn()}
-        min={1}
-        max={10}
-      />,
+      <WheelQuantityPicker label="Qty" value={0} onChange={vi.fn()} min={1} max={10} />,
     );
     // value - min = 0 - 1 = -1, clamped to 0
     const firstOption = screen.getByTestId('wheel-option-0');

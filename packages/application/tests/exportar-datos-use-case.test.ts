@@ -84,24 +84,20 @@ describe('ExportarDatosUseCase', () => {
   });
 
   it('collects every populated entity for the business', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId, fecha: '2026-04-23' as IsoDate }),
-    );
-    await expenses.create(
-      makeNewExpense({ businessId, fecha: '2026-04-23' as IsoDate }),
-    );
+    const sale = await sales.create(makeNewSale({ businessId, fecha: '2026-04-23' as IsoDate }));
+    await expenses.create(makeNewExpense({ businessId, fecha: '2026-04-23' as IsoDate }));
     const product = await products.create(makeNewProduct({ businessId }));
     await inventoryMovements.create(
-      makeNewInventoryMovement({ businessId, productoId: product.id, fecha: '2026-04-23' as IsoDate }),
+      makeNewInventoryMovement({
+        businessId,
+        productoId: product.id,
+        fecha: '2026-04-23' as IsoDate,
+      }),
     );
     await employees.create(makeNewEmployee({ businessId }));
     await clients.create(makeNewClient({ businessId }));
-    await clientPayments.create(
-      makeNewClientPayment({ businessId, ventaId: sale.id }),
-    );
-    await dayCloses.create(
-      makeNewDayClose({ businessId, fecha: '2026-04-23' as IsoDate }),
-    );
+    await clientPayments.create(makeNewClientPayment({ businessId, ventaId: sale.id }));
+    await dayCloses.create(makeNewDayClose({ businessId, fecha: '2026-04-23' as IsoDate }));
     await recurringExpenses.create(makeNewRecurringExpense({ businessId }));
 
     const ds = await useCase.execute({ businessId });
@@ -126,12 +122,8 @@ describe('ExportarDatosUseCase', () => {
 
   it('does not leak rows from another business', async () => {
     const other = await businesses.create(makeNewBusiness({ nombre: 'Other Co' }));
-    await sales.create(
-      makeNewSale({ businessId: other.id, fecha: '2026-04-23' as IsoDate }),
-    );
-    await sales.create(
-      makeNewSale({ businessId, fecha: '2026-04-23' as IsoDate }),
-    );
+    await sales.create(makeNewSale({ businessId: other.id, fecha: '2026-04-23' as IsoDate }));
+    await sales.create(makeNewSale({ businessId, fecha: '2026-04-23' as IsoDate }));
     const ds = await useCase.execute({ businessId });
     expect(ds.sales.length).toBe(1);
     expect(ds.sales[0]?.businessId).toBe(businessId);

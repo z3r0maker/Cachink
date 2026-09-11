@@ -21,9 +21,7 @@ const SELECT_DEF: AttrDef = {
 
 describe('AtributosForm', () => {
   it('renders nothing when defs is empty', () => {
-    renderWithProviders(
-      <AtributosForm defs={[]} values={{}} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<AtributosForm defs={[]} values={{}} onChange={vi.fn()} />);
     expect(screen.queryByTestId('atributos-form')).toBeNull();
   });
 
@@ -36,9 +34,7 @@ describe('AtributosForm', () => {
   });
 
   it('renders the label for each attribute', () => {
-    renderWithProviders(
-      <AtributosForm defs={[TEXT_DEF]} values={{}} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<AtributosForm defs={[TEXT_DEF]} values={{}} onChange={vi.fn()} />);
     expect(screen.getByText('Color')).toBeInTheDocument();
   });
 

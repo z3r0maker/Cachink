@@ -13,9 +13,7 @@ describe('LoadingOverlay', () => {
   });
 
   it('renders message text when provided', () => {
-    renderWithProviders(
-      <LoadingOverlay visible={true} message="Cargando datos..." />,
-    );
+    renderWithProviders(<LoadingOverlay visible={true} message="Cargando datos..." />);
     expect(screen.getByText('Cargando datos...')).toBeDefined();
   });
 
@@ -30,9 +28,7 @@ describe('LoadingOverlay', () => {
   });
 
   it('accepts custom testID', () => {
-    renderWithProviders(
-      <LoadingOverlay visible={true} testID="custom-overlay" />,
-    );
+    renderWithProviders(<LoadingOverlay visible={true} testID="custom-overlay" />);
     expect(screen.getByTestId('custom-overlay')).toBeDefined();
   });
 });

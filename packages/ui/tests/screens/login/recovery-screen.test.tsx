@@ -5,6 +5,7 @@
  * new PIN → confirm PIN, plus factory-reset and back button wiring.
  */
 
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { UserId } from '@xangarro/domain';
 import { RecoveryScreen } from '../../../src/screens/Login/index';
@@ -25,10 +26,8 @@ const defaultProps = {
   submitting: false,
 };
 
-function renderRecovery(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <RecoveryScreen {...defaultProps} {...overrides} />,
-  );
+function renderRecovery(overrides: Partial<ComponentProps<typeof RecoveryScreen>> = {}) {
+  return renderWithProviders(<RecoveryScreen {...defaultProps} {...overrides} />);
 }
 
 function fillInput(testId: string, value: string): void {
@@ -156,7 +155,7 @@ describe('RecoveryScreen', () => {
   });
 
   it('renders with a custom testID', () => {
-    renderRecovery({ testID: 'my-recovery' } as any);
+    renderRecovery({ testID: 'my-recovery' });
     expect(screen.getByTestId('my-recovery')).toBeInTheDocument();
   });
 });

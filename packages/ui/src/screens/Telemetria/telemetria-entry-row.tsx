@@ -18,7 +18,12 @@ export interface TelemetriaEntryRowProps {
 function formatTime(iso: string): string {
   try {
     const d = new Date(iso);
-    return d.toLocaleTimeString('es-MX', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    return d.toLocaleTimeString('es-MX', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
   } catch {
     return iso.slice(11, 19);
   }
@@ -50,7 +55,11 @@ function getDurationBadge(entry: TimelineEntry): { text: string; color: string }
 function DurationBadge({ entry }: { entry: TimelineEntry }): ReactElement | null {
   const badge = getDurationBadge(entry);
   if (!badge) return null;
-  return <Text fontSize="$1" fontFamily="$mono" color={badge.color} marginLeft="$1">{badge.text}</Text>;
+  return (
+    <Text fontSize="$1" fontFamily="$mono" color={badge.color} marginLeft="$1">
+      {badge.text}
+    </Text>
+  );
 }
 
 function EntryInfo({ entry }: { entry: TimelineEntry }): ReactElement {
@@ -60,12 +69,20 @@ function EntryInfo({ entry }: { entry: TimelineEntry }): ReactElement {
     <View flex={1}>
       <View flexDirection="row" alignItems="center" gap="$1">
         <Text fontSize="$1">{indicator}</Text>
-        <Text fontSize="$2" fontFamily="$mono" color="$colorSubtle">{formatTime(entry.timestamp)}</Text>
-        <Text fontSize="$2" fontWeight="600" marginLeft="$1">{getOperation(entry)}</Text>
+        <Text fontSize="$2" fontFamily="$mono" color="$colorSubtle">
+          {formatTime(entry.timestamp)}
+        </Text>
+        <Text fontSize="$2" fontWeight="600" marginLeft="$1">
+          {getOperation(entry)}
+        </Text>
         <DurationBadge entry={entry} />
       </View>
-      <Text fontSize="$1" color="$colorSubtle" marginTop="$0.5" numberOfLines={1}>{getDescription(entry)}</Text>
-      <Text fontSize="$1" color="$colorSubtle" numberOfLines={1}>{entry.userId?.slice(0, 8) ?? '\u2014'} \u00b7 {entry.deviceId.slice(0, 8)}</Text>
+      <Text fontSize="$1" color="$colorSubtle" marginTop="$0.5" numberOfLines={1}>
+        {getDescription(entry)}
+      </Text>
+      <Text fontSize="$1" color="$colorSubtle" numberOfLines={1}>
+        {entry.userId?.slice(0, 8) ?? '\u2014'} \u00b7 {entry.deviceId.slice(0, 8)}
+      </Text>
     </View>
   );
 }
@@ -74,8 +91,16 @@ export function TelemetriaEntryRow({ entry, onPress }: TelemetriaEntryRowProps):
   const isError = entry.type === 'error' || (entry.type === 'audit' && entry.status === 'error');
   const accentColor = isError ? '$red8' : '$green8';
   return (
-    <View onPress={() => onPress(entry)} flexDirection="row" paddingVertical="$2" paddingHorizontal="$3"
-      borderBottomWidth={1} borderBottomColor="$borderColor" pressStyle={{ opacity: 0.7 }} cursor="pointer">
+    <View
+      onPress={() => onPress(entry)}
+      flexDirection="row"
+      paddingVertical="$2"
+      paddingHorizontal="$3"
+      borderBottomWidth={1}
+      borderBottomColor="$borderColor"
+      pressStyle={{ opacity: 0.7 }}
+      cursor="pointer"
+    >
       <View width={4} borderRadius="$1" backgroundColor={accentColor} marginRight="$2" />
       <EntryInfo entry={entry} />
     </View>

@@ -63,13 +63,7 @@ export async function logMigrationEvent(
        (id, type, timestamp, operation, entity_type, entity_id,
         user_id, device_id, business_id, status, metadata)
        VALUES (?, 'audit', ?, 'system.migration', 'migration', '', NULL, ?, '', ?, ?)`,
-      [
-        ulid(),
-        new Date().toISOString(),
-        deviceId,
-        status,
-        JSON.stringify(metadata),
-      ],
+      [ulid(), new Date().toISOString(), deviceId, status, JSON.stringify(metadata)],
     );
   } catch {
     // Silently swallow — migration logging must never block the migration itself.

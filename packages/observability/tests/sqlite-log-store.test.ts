@@ -15,7 +15,7 @@ import type { ErrorLogEntry } from '../src/error-log.js';
 type Row = Record<string, unknown>;
 
 function applyTypeFilter(rows: Row[], sql: string, params?: unknown[]): Row[] {
-  if (!sql.includes("type = ?")) return rows;
+  if (!sql.includes('type = ?')) return rows;
   const typeParam = params?.find((p) => p === 'audit' || p === 'error');
   return typeParam ? rows.filter((r) => r.type === typeParam) : rows;
 }
@@ -36,7 +36,7 @@ function applyLimit(rows: Row[], params?: unknown[]): Row[] {
   if (!params) return rows;
   const numParams = params.filter((p) => typeof p === 'number');
   const limit = numParams[numParams.length - 1] as number | undefined;
-  return (limit && limit > 0) ? rows.slice(0, limit) : rows;
+  return limit && limit > 0 ? rows.slice(0, limit) : rows;
 }
 
 // ─── In-memory SQLite mock ──────────────────────────────────────────

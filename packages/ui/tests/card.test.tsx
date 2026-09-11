@@ -21,9 +21,7 @@ describe('Card', () => {
     const root = screen.getAllByTestId('card-default')[0]!;
     const styles = getComputedStyle(root);
     // white (#FFFFFF) → rgb(255, 255, 255).
-    expect(styles.backgroundColor.toLowerCase()).toContain(
-      'rgb(255, 255, 255)',
-    );
+    expect(styles.backgroundColor.toLowerCase()).toContain('rgb(255, 255, 255)');
     // 2px black border per §8.3.
     expect(styles.borderTopWidth).toBe('2px');
   });
@@ -36,9 +34,7 @@ describe('Card', () => {
     );
     const root = screen.getAllByTestId('card-yellow')[0]!;
     // yellow (#FFD60A) → rgb(255, 214, 10).
-    expect(getComputedStyle(root).backgroundColor.toLowerCase()).toContain(
-      'rgb(255, 214, 10)',
-    );
+    expect(getComputedStyle(root).backgroundColor.toLowerCase()).toContain('rgb(255, 214, 10)');
   });
 
   it('applies the black variant with 2.5px border and no shadow by default', () => {

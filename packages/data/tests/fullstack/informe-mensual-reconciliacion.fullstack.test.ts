@@ -34,9 +34,7 @@ describe('Informe Mensual — Reconciliation [fullstack]', () => {
     h = buildHarness({ userId: USER_ID, stockEnabled: false });
 
     // Business with 3% ISR (300 basis points)
-    const biz = await h.repos.businesses.create(
-      makeNewBusiness({ isrTasa: 300 }),
-    );
+    const biz = await h.repos.businesses.create(makeNewBusiness({ isrTasa: 300 }));
     bizId = biz.id;
 
     const product = await h.repos.products.create(

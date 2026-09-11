@@ -17,7 +17,10 @@ export interface ObservabilityProviderProps {
   readonly logStore: LogStore | null;
 }
 
-export function ObservabilityProvider({ children, logStore }: ObservabilityProviderProps): ReactElement {
+export function ObservabilityProvider({
+  children,
+  logStore,
+}: ObservabilityProviderProps): ReactElement {
   const value = useMemo(() => logStore, [logStore]);
   return <LogStoreContext.Provider value={value}>{children}</LogStoreContext.Provider>;
 }

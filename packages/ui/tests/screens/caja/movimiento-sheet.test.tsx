@@ -21,9 +21,7 @@ const defaultProps = {
 };
 
 function renderSheet(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <CajaMovimientoSheet {...defaultProps} {...overrides} />,
-  );
+  return renderWithProviders(<CajaMovimientoSheet {...defaultProps} {...overrides} />);
 }
 
 describe('CajaMovimientoSheet', () => {

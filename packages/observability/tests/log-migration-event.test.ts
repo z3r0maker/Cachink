@@ -6,10 +6,12 @@ import { describe, it, expect } from 'vitest';
 import { logMigrationEvent } from '../src/log-migration-event.js';
 import type { SqliteDatabase } from '../src/sqlite-log-store-sql.js';
 
-function createMockDb(opts: {
-  shouldThrowOnExec?: boolean;
-  shouldThrowOnRun?: boolean;
-} = {}): SqliteDatabase & { inserts: unknown[][] } {
+function createMockDb(
+  opts: {
+    shouldThrowOnExec?: boolean;
+    shouldThrowOnRun?: boolean;
+  } = {},
+): SqliteDatabase & { inserts: unknown[][] } {
   const inserts: unknown[][] = [];
   return {
     inserts,

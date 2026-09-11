@@ -40,20 +40,14 @@ describe('Migration integrity', () => {
 
   it('every journal tag has SQL registered in migrationSqlByTag', () => {
     for (const entry of journal.entries) {
-      expect(
-        migrationSqlByTag[entry.tag],
-        `Missing SQL for tag '${entry.tag}'`,
-      ).toBeDefined();
+      expect(migrationSqlByTag[entry.tag], `Missing SQL for tag '${entry.tag}'`).toBeDefined();
     }
   });
 
   it('every registered SQL key has a journal entry', () => {
     const journalTags = new Set(journal.entries.map((e) => e.tag));
     for (const key of Object.keys(migrationSqlByTag)) {
-      expect(
-        journalTags.has(key),
-        `SQL key '${key}' has no journal entry`,
-      ).toBe(true);
+      expect(journalTags.has(key), `SQL key '${key}' has no journal entry`).toBe(true);
     }
   });
 
@@ -164,14 +158,8 @@ describe('Migration integrity', () => {
     ];
 
     for (const table of syncedTables) {
-      expect(
-        triggerNames,
-        `expected trigger trg_${table}_ai`,
-      ).toContain(`trg_${table}_ai`);
-      expect(
-        triggerNames,
-        `expected trigger trg_${table}_au`,
-      ).toContain(`trg_${table}_au`);
+      expect(triggerNames, `expected trigger trg_${table}_ai`).toContain(`trg_${table}_ai`);
+      expect(triggerNames, `expected trigger trg_${table}_au`).toContain(`trg_${table}_au`);
     }
   });
 

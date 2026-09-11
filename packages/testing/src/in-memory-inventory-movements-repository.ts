@@ -66,10 +66,7 @@ export class InMemoryInventoryMovementsRepository implements InventoryMovementsR
     return [...this.rows.values()]
       .filter(
         (r) =>
-          r.businessId === businessId &&
-          r.deletedAt === null &&
-          r.fecha >= from &&
-          r.fecha <= to,
+          r.businessId === businessId && r.deletedAt === null && r.fecha >= from && r.fecha <= to,
       )
       .sort((a, b) => b.fecha.localeCompare(a.fecha));
   }

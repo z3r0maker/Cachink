@@ -45,8 +45,8 @@ export const HealthThresholdsSchema = z.object({
 });
 
 export const DEFAULT_HEALTH_THRESHOLDS: HealthThresholds = {
-  margenBruto: { healthy: 0.20, warning: 0.10 },
-  margenOperativo: { healthy: 0.10, warning: 0.05 },
+  margenBruto: { healthy: 0.2, warning: 0.1 },
+  margenOperativo: { healthy: 0.1, warning: 0.05 },
   margenNeto: { healthy: 0.08, warning: 0.03 },
   razonDeLiquidez: { healthy: 1.5, warning: 1.0 },
   rotacionInventario: { healthy: 4.0, warning: 2.0 },

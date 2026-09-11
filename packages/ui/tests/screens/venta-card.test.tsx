@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { SaleId } from '@xangarro/domain';
+import type { Sale, SaleId } from '@xangarro/domain';
 import { makeSale } from '@xangarro/testing';
 import { VentaCard } from '../../src/screens/Ventas/venta-card';
 import { initI18n } from '../../src/i18n/index';
@@ -77,7 +77,7 @@ describe('VentaCard', () => {
   });
 
   it('renders credito metodo as warning tag', () => {
-    const creditoSale = makeSale({ ...SALE, metodo: 'Crédito' as any });
+    const creditoSale = makeSale({ ...SALE, metodo: 'Crédito' as Sale['metodo'] });
     renderWithProviders(<VentaCard venta={creditoSale} />);
     expect(screen.getByText('Crédito')).toBeInTheDocument();
   });

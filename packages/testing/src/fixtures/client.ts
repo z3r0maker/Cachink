@@ -49,9 +49,7 @@ export function makeClient(overrides: Partial<Client> = {}): Client {
   } as Client;
 }
 
-export function makeNewClientPayment(
-  overrides: Partial<NewClientPayment> = {},
-): NewClientPayment {
+export function makeNewClientPayment(overrides: Partial<NewClientPayment> = {}): NewClientPayment {
   return {
     ventaId: DEFAULT_VENTA,
     fecha: '2026-04-23' as IsoDate,

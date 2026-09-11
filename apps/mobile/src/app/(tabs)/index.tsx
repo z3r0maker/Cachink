@@ -31,7 +31,5 @@ export default function HomeIndex(): ReactElement | null {
     return <Redirect href="/ventas" />;
   }
 
-  return (
-    <DirectorHomeRoute onNavigate={(path) => router.push(path as never)} />
-  );
+  return <DirectorHomeRoute onNavigate={(path) => router.push(path as never)} />;
 }

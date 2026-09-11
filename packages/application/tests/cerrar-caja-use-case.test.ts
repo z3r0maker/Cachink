@@ -134,11 +134,7 @@ describe('CerrarCajaUseCase', () => {
     expect(closed.egresoAutoId).not.toBeNull();
     // The egreso should exist in the expenses repo
     const todayStr = today();
-    const all = await expenses.findByDateRange(
-      todayStr,
-      todayStr,
-      BIZ,
-    );
+    const all = await expenses.findByDateRange(todayStr, todayStr, BIZ);
     expect(all.length).toBe(1);
     expect(all[0]!.concepto).toBe('Compra de bolsas');
   });
@@ -146,12 +142,14 @@ describe('CerrarCajaUseCase', () => {
   it('accounts for sales in the expected cash computation', async () => {
     const turnoId = await openTurn();
     // Add an Efectivo sale of $30
-    await sales.create(makeNewSale({
-      businessId: BIZ,
-      metodo: 'Efectivo',
-      monto: 3000n,
-      fecha: '2026-05-09',
-    }));
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
+        metodo: 'Efectivo',
+        monto: 3000n,
+        fecha: '2026-05-09',
+      }),
+    );
     // Expected = apertura (5000) + efectivo ventas (3000) = 8000
     const closed = await useCase.execute({
       turnoId,
@@ -218,25 +216,31 @@ describe('CerrarCajaUseCase', () => {
       businessId: BIZ,
     });
     // 2 cash sales: 3000 + 1500 = 4500
-    await sales.create(makeNewSale({
-      businessId: BIZ,
-      metodo: 'Efectivo',
-      monto: 3000n,
-      fecha: '2026-05-09',
-    }));
-    await sales.create(makeNewSale({
-      businessId: BIZ,
-      metodo: 'Efectivo',
-      monto: 1500n,
-      fecha: '2026-05-09',
-    }));
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
+        metodo: 'Efectivo',
+        monto: 3000n,
+        fecha: '2026-05-09',
+      }),
+    );
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
+        metodo: 'Efectivo',
+        monto: 1500n,
+        fecha: '2026-05-09',
+      }),
+    );
     // 1 non-cash sale (should NOT affect esperado)
-    await sales.create(makeNewSale({
-      businessId: BIZ,
-      metodo: 'Transferencia',
-      monto: 9000n,
-      fecha: '2026-05-09',
-    }));
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
+        metodo: 'Transferencia',
+        monto: 9000n,
+        fecha: '2026-05-09',
+      }),
+    );
     // 1 expense: 1000
     await expenses.create({
       fecha: '2026-05-09',

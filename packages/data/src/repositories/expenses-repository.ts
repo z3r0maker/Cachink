@@ -55,8 +55,5 @@ export interface ExpensesRepository {
    * Returns the first egreso linked to `gastoRecurrenteId` on `date`, or
    * null if none exists.
    */
-  findByGastoRecurrenteAndDate(
-    gastoRecurrenteId: string,
-    date: IsoDate,
-  ): Promise<Expense | null>;
+  findByGastoRecurrenteAndDate(gastoRecurrenteId: string, date: IsoDate): Promise<Expense | null>;
 }

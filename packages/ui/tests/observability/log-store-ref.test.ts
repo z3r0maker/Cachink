@@ -12,7 +12,13 @@ const fakeStore = {
   queryAudit: async () => [],
   queryErrors: async () => [],
   queryTimeline: async () => [],
-  stats: async () => ({ totalAuditEvents: 0, totalErrors: 0, errorsBySource: {}, operationCounts: {}, lastErrorAt: null }),
+  stats: async () => ({
+    totalAuditEvents: 0,
+    totalErrors: 0,
+    errorsBySource: {},
+    operationCounts: {},
+    lastErrorAt: null,
+  }),
   prune: async () => 0,
   exportSnapshot: async () => ({ exportedAt: '', deviceId: '', auditEvents: [], errors: [] }),
 } as LogStore;

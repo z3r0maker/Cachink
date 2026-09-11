@@ -72,8 +72,13 @@ export interface EmpleadoFieldsProps {
   readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
-function PeriodoSelector({ state, update, t }: {
-  state: EmpleadoFormState; update: (p: Partial<EmpleadoFormState>) => void;
+function PeriodoSelector({
+  state,
+  update,
+  t,
+}: {
+  state: EmpleadoFormState;
+  update: (p: Partial<EmpleadoFormState>) => void;
   t: ReturnType<typeof useTranslation>['t'];
 }): ReactElement {
   return (
@@ -87,9 +92,17 @@ function PeriodoSelector({ state, update, t }: {
   );
 }
 
-export function EmpleadoFields({ state, update, errors, t, onSubmitEditing }: EmpleadoFieldsProps): ReactElement {
-  const puestoRef = useRef<TextInput>(null);
-  const salarioRef = useRef<TextInput>(null);
+function NombrePuestoFields({
+  state,
+  update,
+  errors,
+  t,
+  puestoRef,
+  salarioRef,
+}: EmpleadoFieldsProps & {
+  puestoRef: React.RefObject<TextInput | null>;
+  salarioRef: React.RefObject<TextInput | null>;
+}): ReactElement {
   return (
     <>
       <TextField
@@ -112,6 +125,29 @@ export function EmpleadoFields({ state, update, errors, t, onSubmitEditing }: Em
         inputRef={puestoRef}
         onSubmitEditing={() => focusRef(salarioRef)}
         blurOnSubmit={false}
+      />
+    </>
+  );
+}
+
+export function EmpleadoFields({
+  state,
+  update,
+  errors,
+  t,
+  onSubmitEditing,
+}: EmpleadoFieldsProps): ReactElement {
+  const puestoRef = useRef<TextInput>(null);
+  const salarioRef = useRef<TextInput>(null);
+  return (
+    <>
+      <NombrePuestoFields
+        state={state}
+        update={update}
+        errors={errors}
+        t={t}
+        puestoRef={puestoRef}
+        salarioRef={salarioRef}
       />
       <MoneyField
         label={t('empleados.salarioLabel')}

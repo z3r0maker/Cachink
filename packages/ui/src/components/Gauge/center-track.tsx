@@ -59,8 +59,14 @@ function CenterZones(p: { zones: readonly GaugeZone[]; max: number }): ReactElem
   );
 }
 
-function FillBar({ fillPct, tone, isNegative }: {
-  fillPct: string; tone: GaugeTone; isNegative: boolean;
+function FillBar({
+  fillPct,
+  tone,
+  isNegative,
+}: {
+  fillPct: string;
+  tone: GaugeTone;
+  isNegative: boolean;
 }): ReactElement {
   return (
     <View
@@ -112,9 +118,7 @@ export function CenterTrack(props: CenterTrackProps): ReactElement {
       overflow="hidden"
       position="relative"
     >
-      {zones !== undefined && zones.length > 0 && (
-        <CenterZones zones={zones} max={max} />
-      )}
+      {zones !== undefined && zones.length > 0 && <CenterZones zones={zones} max={max} />}
       <FillBar fillPct={fillPct} tone={tone} isNegative={clamped < 0} />
       <CenterDivider />
     </View>

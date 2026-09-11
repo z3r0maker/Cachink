@@ -7,10 +7,7 @@ import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import {
-  InMemoryCajaTurnosRepository,
-  TEST_DEVICE_ID,
-} from '@xangarro/testing';
+import { InMemoryCajaTurnosRepository, TEST_DEVICE_ID } from '@xangarro/testing';
 import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useCajaHistorial } from '../../src/hooks/use-caja-historial';
@@ -27,9 +24,7 @@ function wrapper(overrides?: Record<string, unknown>) {
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>
-        <MockRepositoryProvider overrides={overrides}>
-          {children}
-        </MockRepositoryProvider>
+        <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
       </QueryClientProvider>
     </TamaguiProvider>
   );

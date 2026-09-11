@@ -22,14 +22,11 @@ export function useOtherOpenTurno(currentUserId: UserId | null): {
   const usersRepo = useUsersRepository();
   const turnoQ = useQuery({
     queryKey: [...cajaKeys.byBusiness(businessId as BusinessId | null), 'open-other'],
-    queryFn: () =>
-      businessId ? turnosRepo.findOpenByBusiness(businessId as BusinessId) : null,
+    queryFn: () => (businessId ? turnosRepo.findOpenByBusiness(businessId as BusinessId) : null),
     enabled: businessId !== null,
   });
   const otherTurno =
-    turnoQ.data && currentUserId && turnoQ.data.userId !== currentUserId
-      ? turnoQ.data
-      : null;
+    turnoQ.data && currentUserId && turnoQ.data.userId !== currentUserId ? turnoQ.data : null;
   const userQ = useQuery({
     queryKey: ['user', otherTurno?.userId],
     queryFn: () => (otherTurno ? usersRepo.findById(otherTurno.userId) : null),

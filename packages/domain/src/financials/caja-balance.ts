@@ -58,9 +58,7 @@ export interface CajaBalanceResult {
   };
 }
 
-export function computeCajaBalance(
-  input: CajaBalanceInput,
-): CajaBalanceResult {
+export function computeCajaBalance(input: CajaBalanceInput): CajaBalanceResult {
   const ventasEfectivo = sum(input.ventasEfectivoCentavos);
   const cambiosDados = computeCambiosDados(input.efectivoRecibidoPorVenta);
   const egresosEfectivo = sum(input.egresosEfectivoCentavos);
@@ -94,9 +92,7 @@ export function computeCajaBalance(
 }
 
 /** Sum of (efectivoRecibido − monto) for sales where customer overpaid. */
-function computeCambiosDados(
-  ventas: readonly { monto: Money; efectivoRecibido: Money }[],
-): Money {
+function computeCambiosDados(ventas: readonly { monto: Money; efectivoRecibido: Money }[]): Money {
   let total: Money = ZERO;
   for (const v of ventas) {
     const cambio = v.efectivoRecibido - v.monto;

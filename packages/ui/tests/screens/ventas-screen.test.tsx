@@ -3,7 +3,14 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId, DeviceId, IsoDate, IsoTimestamp, ProductId, SaleId } from '@xangarro/domain';
+import type {
+  BusinessId,
+  DeviceId,
+  IsoDate,
+  IsoTimestamp,
+  ProductId,
+  SaleId,
+} from '@xangarro/domain';
 import type { Sale } from '@xangarro/domain';
 import { VentasScreen } from '../../src/screens/index';
 import { totalDelDia } from '../../src/hooks/use-total-del-dia';
@@ -73,31 +80,23 @@ describe('totalDelDia', () => {
 
 describe('VentasScreen', () => {
   it('renders the empty-productos state when product list is empty', () => {
-    renderWithProviders(
-      <VentasScreen {...defaultProps()} />,
-    );
+    renderWithProviders(<VentasScreen {...defaultProps()} />);
     expect(screen.getByTestId('empty-productos')).toBeInTheDocument();
   });
 
   it('renders the total bar with the formatted total', () => {
-    renderWithProviders(
-      <VentasScreen {...defaultProps({ total: 35000n, ventaCount: 2 })} />,
-    );
+    renderWithProviders(<VentasScreen {...defaultProps({ total: 35000n, ventaCount: 2 })} />);
     // TotalBar shows the total
     expect(screen.getByTestId('total-bar').textContent).toContain('$350.00');
   });
 
   it('renders the search bar for product filtering', () => {
-    renderWithProviders(
-      <VentasScreen {...defaultProps()} />,
-    );
+    renderWithProviders(<VentasScreen {...defaultProps()} />);
     expect(screen.getByTestId('ventas-product-search')).toBeInTheDocument();
   });
 
   it('renders the empty cart hint when cart is empty', () => {
-    renderWithProviders(
-      <VentasScreen {...defaultProps()} />,
-    );
+    renderWithProviders(<VentasScreen {...defaultProps()} />);
     expect(screen.getByTestId('empty-cart-hint')).toBeInTheDocument();
   });
 
@@ -126,7 +125,12 @@ describe('VentasScreen', () => {
         {...defaultProps({
           cart: {
             items: [
-              { productoId: PROD_ID, nombre: 'Taco al Pastor', precioUnitCentavos: 2500n, cantidad: 3 },
+              {
+                productoId: PROD_ID,
+                nombre: 'Taco al Pastor',
+                precioUnitCentavos: 2500n,
+                cantidad: 3,
+              },
             ],
             totalCentavos: 7500n,
             itemCount: 3,

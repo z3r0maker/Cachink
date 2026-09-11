@@ -11,10 +11,7 @@ import { TamaguiProvider } from '@tamagui/core';
 import { render, type RenderOptions, type RenderResult } from '@testing-library/react';
 import { tamaguiConfig } from '../src/tamagui.config';
 
-export function renderWithProviders(
-  ui: ReactElement,
-  options?: RenderOptions,
-): RenderResult {
+export function renderWithProviders(ui: ReactElement, options?: RenderOptions): RenderResult {
   return render(ui, {
     wrapper: ({ children }) => (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">

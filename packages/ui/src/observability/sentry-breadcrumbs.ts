@@ -19,18 +19,20 @@ export function addAuditBreadcrumb(event: AuditEvent): void {
     if (!sentry) return;
 
     // Use the lightweight addBreadcrumb from @sentry/browser
-    void import('@sentry/browser').then((Sentry) => {
-      Sentry.addBreadcrumb({
-        category: 'business',
-        message: `${event.operation} → ${event.entityId.slice(0, 8)}`,
-        level: event.status === 'error' ? 'error' : 'info',
-        data: {
-          entityType: event.entityType,
-          status: event.status,
-          ...(event.errorCode ? { errorCode: event.errorCode } : {}),
-        },
-      });
-    }).catch(() => {});
+    void import('@sentry/browser')
+      .then((Sentry) => {
+        Sentry.addBreadcrumb({
+          category: 'business',
+          message: `${event.operation} → ${event.entityId.slice(0, 8)}`,
+          level: event.status === 'error' ? 'error' : 'info',
+          data: {
+            entityType: event.entityType,
+            status: event.status,
+            ...(event.errorCode ? { errorCode: event.errorCode } : {}),
+          },
+        });
+      })
+      .catch(() => {});
   } catch {
     // Never crash for breadcrumbs
   }

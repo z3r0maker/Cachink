@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { ConversionRecetaSchema, NewConversionRecetaSchema } from '../../src/entities/conversion-receta.js';
+import {
+  ConversionRecetaSchema,
+  NewConversionRecetaSchema,
+} from '../../src/entities/conversion-receta.js';
 
 const VALID_ULID = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 const VALID_ULID2 = '01HZ8XQN9GZJXV8AKQ5X0C7BK1';

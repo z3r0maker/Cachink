@@ -12,9 +12,7 @@ initI18n();
 
 describe('FrecuentesGrid', () => {
   it('renders nothing when productos is empty', () => {
-    renderWithProviders(
-      <FrecuentesGrid productos={[]} onTap={vi.fn()} />,
-    );
+    renderWithProviders(<FrecuentesGrid productos={[]} onTap={vi.fn()} />);
     expect(screen.queryByTestId('frecuentes-grid')).toBeNull();
   });
 

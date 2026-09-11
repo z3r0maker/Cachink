@@ -31,9 +31,7 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -53,7 +51,9 @@ describe('useVentasByDate', () => {
   it('returns sales for the given date', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ }));
     await sales.create(makeNewSale({ businessId: BIZ, fecha: DATE, productoId: product.id }));
-    await sales.create(makeNewSale({ businessId: BIZ, fecha: '2026-05-10' as IsoDate, productoId: product.id }));
+    await sales.create(
+      makeNewSale({ businessId: BIZ, fecha: '2026-05-10' as IsoDate, productoId: product.id }),
+    );
 
     const { result } = renderHook(() => useVentasByDate(DATE), {
       wrapper: wrapper({ sales }),

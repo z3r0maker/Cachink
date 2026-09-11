@@ -29,10 +29,7 @@ export function CajaActiveTurnView(props: CajaActiveTurnViewProps): ReactElement
     <View gap={12}>
       <CajaStatusCard turno={props.turno} onCerrar={props.onCerrar} />
       <CajaBalanceCard balance={balance} />
-      <CajaActionButtons
-        onDeposit={props.onDeposit}
-        onWithdraw={props.onWithdraw}
-      />
+      <CajaActionButtons onDeposit={props.onDeposit} onWithdraw={props.onWithdraw} />
       <Btn variant="dark" onPress={props.onCerrar} fullWidth testID="caja-cerrar-btn">
         {t('caja.cerrarTitle')}
       </Btn>
@@ -40,10 +37,7 @@ export function CajaActiveTurnView(props: CajaActiveTurnViewProps): ReactElement
   );
 }
 
-function CajaActionButtons(props: {
-  onDeposit: () => void;
-  onWithdraw: () => void;
-}): ReactElement {
+function CajaActionButtons(props: { onDeposit: () => void; onWithdraw: () => void }): ReactElement {
   return (
     <View flexDirection="row" gap={8}>
       <View flex={1}>

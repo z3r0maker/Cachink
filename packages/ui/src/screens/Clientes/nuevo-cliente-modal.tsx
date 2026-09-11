@@ -26,7 +26,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import type { Client } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
-import { focusRef, RhfEmailField, RhfPhoneField, RhfTextField } from '../../components/fields/index';
+import {
+  focusRef,
+  RhfEmailField,
+  RhfPhoneField,
+  RhfTextField,
+} from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
 import type { CrearClienteInput } from '../../hooks/use-crear-cliente';
 
@@ -77,9 +82,18 @@ function toPayload(values: NuevoClienteFormValues): CrearClienteInput {
   };
 }
 
-function ContactInfoFields({ control, t, telefonoRef, emailRef, notaRef }: {
-  control: Control<NuevoClienteFormValues>; t: ReturnType<typeof useTranslation>['t'];
-  telefonoRef: React.RefObject<unknown>; emailRef: React.RefObject<unknown>; notaRef: React.RefObject<unknown>;
+function ContactInfoFields({
+  control,
+  t,
+  telefonoRef,
+  emailRef,
+  notaRef,
+}: {
+  control: Control<NuevoClienteFormValues>;
+  t: ReturnType<typeof useTranslation>['t'];
+  telefonoRef: React.RefObject<unknown>;
+  emailRef: React.RefObject<unknown>;
+  notaRef: React.RefObject<unknown>;
 }): ReactElement {
   return (
     <>
@@ -108,7 +122,35 @@ function ContactInfoFields({ control, t, telefonoRef, emailRef, notaRef }: {
   );
 }
 
-function ClienteFields({ control, t, onSubmitEditing }: {
+function NotaField({
+  control,
+  t,
+  notaRef,
+  onSubmitEditing,
+}: {
+  control: Control<NuevoClienteFormValues>;
+  t: ReturnType<typeof useTranslation>['t'];
+  notaRef: React.RefObject<TextInput | null>;
+  onSubmitEditing: () => void;
+}): ReactElement {
+  return (
+    <RhfTextField
+      control={control}
+      name="nota"
+      label={t('clientes.notaLabel')}
+      testID="nuevo-cliente-nota"
+      returnKeyType="done"
+      onSubmitEditing={onSubmitEditing}
+      inputRef={notaRef}
+    />
+  );
+}
+
+function ClienteFields({
+  control,
+  t,
+  onSubmitEditing,
+}: {
   control: Control<NuevoClienteFormValues>;
   t: ReturnType<typeof useTranslation>['t'];
   onSubmitEditing: () => void;
@@ -128,16 +170,14 @@ function ClienteFields({ control, t, onSubmitEditing }: {
         onSubmitEditing={() => focusRef(telefonoRef)}
         blurOnSubmit={false}
       />
-      <ContactInfoFields control={control} t={t} telefonoRef={telefonoRef} emailRef={emailRef} notaRef={notaRef} />
-      <RhfTextField
+      <ContactInfoFields
         control={control}
-        name="nota"
-        label={t('clientes.notaLabel')}
-        testID="nuevo-cliente-nota"
-        returnKeyType="done"
-        onSubmitEditing={onSubmitEditing}
-        inputRef={notaRef}
+        t={t}
+        telefonoRef={telefonoRef}
+        emailRef={emailRef}
+        notaRef={notaRef}
       />
+      <NotaField control={control} t={t} notaRef={notaRef} onSubmitEditing={onSubmitEditing} />
     </>
   );
 }

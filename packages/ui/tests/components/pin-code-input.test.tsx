@@ -16,7 +16,9 @@ import { colors } from '../../src/theme';
 initI18n();
 
 /** Controlled wrapper so onChange updates the rendered value. */
-function Wrapper(props: Omit<PinCodeInputProps, 'value' | 'onChange'> & { initial?: string }): React.ReactElement {
+function Wrapper(
+  props: Omit<PinCodeInputProps, 'value' | 'onChange'> & { initial?: string },
+): React.ReactElement {
   const [value, setValue] = useState(props.initial ?? '');
   return (
     <PinCodeInput

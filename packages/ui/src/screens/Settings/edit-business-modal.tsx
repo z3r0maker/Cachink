@@ -8,11 +8,7 @@
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import {
-  type Business,
-  type IsrDefaults,
-  type RegimenFiscal,
-} from '@xangarro/domain';
+import { type Business, type IsrDefaults, type RegimenFiscal } from '@xangarro/domain';
 import { Btn, ConfirmDialog, Input, Modal } from '../../components/index';
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { TextField } from '../../components/fields/index';

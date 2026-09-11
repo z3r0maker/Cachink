@@ -52,13 +52,13 @@ export const BusinessSchema = z
     categoriaVentaPredeterminada: SaleCategoryEnum.default('Producto'),
     atributosProducto: z.array(AttrDefSchema).default([]),
     /** JSON array of enabled payment method keys. Defaults to all 4. */
-    enabledPaymentMethods: z.string().default(
-      '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
-    ),
+    enabledPaymentMethods: z.string().default('["Efectivo","Transferencia","Tarjeta","QR/CoDi"]'),
     /** JSON string storing business feature flags. Parsed by callers. */
-    featureFlags: z.string().default(
-      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
-    ),
+    featureFlags: z
+      .string()
+      .default(
+        '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+      ),
   })
   .merge(auditSchema);
 

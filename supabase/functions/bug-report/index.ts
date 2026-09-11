@@ -88,7 +88,10 @@ function validateErrorEvent(entry: any): ErrorEventInput | null {
     errorMessage: entry.errorMessage.slice(0, 2000),
     source: entry.source,
     operation: isString(entry.operation) ? entry.operation : undefined,
-    context: entry.context && typeof entry.context === 'object' ? sanitizeContext(entry.context) : undefined,
+    context:
+      entry.context && typeof entry.context === 'object'
+        ? sanitizeContext(entry.context)
+        : undefined,
     deviceId: entry.deviceId,
     businessId: isString(entry.businessId) ? entry.businessId : null,
     userId: isString(entry.userId) ? entry.userId : null,
@@ -97,7 +100,8 @@ function validateErrorEvent(entry: any): ErrorEventInput | null {
     osVersion: isString(entry.osVersion) ? entry.osVersion : undefined,
     deviceModel: isString(entry.deviceModel) ? entry.deviceModel : undefined,
     platform: isString(entry.platform) ? entry.platform : undefined,
-    featureFlags: entry.featureFlags && typeof entry.featureFlags === 'object' ? entry.featureFlags : undefined,
+    featureFlags:
+      entry.featureFlags && typeof entry.featureFlags === 'object' ? entry.featureFlags : undefined,
     occurredAt: entry.occurredAt,
   };
 }
@@ -118,7 +122,8 @@ function validateBugReport(body: any): BugReportInput | null {
     osVersion: isString(body.osVersion) ? body.osVersion : undefined,
     deviceModel: isString(body.deviceModel) ? body.deviceModel : undefined,
     platform: isString(body.platform) ? body.platform : undefined,
-    featureFlags: body.featureFlags && typeof body.featureFlags === 'object' ? body.featureFlags : undefined,
+    featureFlags:
+      body.featureFlags && typeof body.featureFlags === 'object' ? body.featureFlags : undefined,
     submittedAt: body.submittedAt,
   };
 }
@@ -134,13 +139,19 @@ function sanitizeContext(ctx: Record<string, unknown>): Record<string, unknown> 
 }
 
 /** Compute fingerprint: sha256(errorName|operation|messagePrefix) */
-async function computeFingerprint(errorName: string, operation: string | undefined, errorMessage: string): Promise<string> {
+async function computeFingerprint(
+  errorName: string,
+  operation: string | undefined,
+  errorMessage: string,
+): Promise<string> {
   const msgPrefix = errorMessage.slice(0, 100);
   const input = `${errorName}|${operation ?? ''}|${msgPrefix}`;
   const data = new TextEncoder().encode(input);
   const hash = await crypto.subtle.digest('SHA-256', data);
   const bytes = new Uint8Array(hash);
-  return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 // ---------------------------------------------------------------------------
@@ -203,24 +214,27 @@ async function handleErrors(body: any, client: ReturnType<typeof createClient>):
   }
 
   // Compute fingerprints and insert
-  const rows = await Promise.all(validated.map(async (e) => ({
-    fingerprint: e.fingerprint || await computeFingerprint(e.errorName, e.operation, e.errorMessage),
-    error_name: e.errorName,
-    error_message: e.errorMessage,
-    source: e.source,
-    operation: e.operation ?? null,
-    context: e.context ?? null,
-    device_id: e.deviceId,
-    business_id: e.businessId ?? null,
-    user_id: e.userId ?? null,
-    app_version: e.appVersion ?? null,
-    os_name: e.osName ?? null,
-    os_version: e.osVersion ?? null,
-    device_model: e.deviceModel ?? null,
-    platform: e.platform ?? null,
-    feature_flags: e.featureFlags ?? null,
-    occurred_at: e.occurredAt,
-  })));
+  const rows = await Promise.all(
+    validated.map(async (e) => ({
+      fingerprint:
+        e.fingerprint || (await computeFingerprint(e.errorName, e.operation, e.errorMessage)),
+      error_name: e.errorName,
+      error_message: e.errorMessage,
+      source: e.source,
+      operation: e.operation ?? null,
+      context: e.context ?? null,
+      device_id: e.deviceId,
+      business_id: e.businessId ?? null,
+      user_id: e.userId ?? null,
+      app_version: e.appVersion ?? null,
+      os_name: e.osName ?? null,
+      os_version: e.osVersion ?? null,
+      device_model: e.deviceModel ?? null,
+      platform: e.platform ?? null,
+      feature_flags: e.featureFlags ?? null,
+      occurred_at: e.occurredAt,
+    })),
+  );
 
   const { error } = await client.from('error_events').insert(rows);
   if (error) {
@@ -231,14 +245,22 @@ async function handleErrors(body: any, client: ReturnType<typeof createClient>):
   return new Response(JSON.stringify({ accepted: rows.length }), { status: 201 });
 }
 
-async function handleBugReport(body: any, client: ReturnType<typeof createClient>): Promise<Response> {
+async function handleBugReport(
+  body: any,
+  client: ReturnType<typeof createClient>,
+): Promise<Response> {
   const report = validateBugReport(body);
   if (!report) {
     return new Response(JSON.stringify({ error: 'Invalid bug report payload' }), { status: 400 });
   }
 
   // Rate limit check
-  const currentCount = await countDeviceEvents(client, report.deviceId, 'bug_reports', 'received_at');
+  const currentCount = await countDeviceEvents(
+    client,
+    report.deviceId,
+    'bug_reports',
+    'received_at',
+  );
   if (currentCount >= MAX_REPORTS_PER_DAY) {
     return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), { status: 429 });
   }

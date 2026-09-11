@@ -30,7 +30,4 @@ declare module 'i18next' {
  * Use this alias when passing `t` as a prop instead of calling it
  * directly from `useTranslation`.
  */
-export type TranslateFunction = (
-  key: string,
-  options?: Record<string, unknown>,
-) => string;
+export type TranslateFunction = (key: string, options?: Record<string, unknown>) => string;

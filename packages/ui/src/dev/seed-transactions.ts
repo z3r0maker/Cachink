@@ -60,10 +60,7 @@ export async function seedSales(
   return count;
 }
 
-export async function seedExpenses(
-  r: Repositories,
-  biz: BusinessId,
-): Promise<number> {
+export async function seedExpenses(r: Repositories, biz: BusinessId): Promise<number> {
   let count = 0;
   for (let i = 0; i < DEMO_EXPENSE_TEMPLATES.length; i++) {
     const tpl = DEMO_EXPENSE_TEMPLATES[i]!;
@@ -81,10 +78,7 @@ export async function seedExpenses(
   return count;
 }
 
-export async function seedRecurringExpenses(
-  r: Repositories,
-  biz: BusinessId,
-): Promise<number> {
+export async function seedRecurringExpenses(r: Repositories, biz: BusinessId): Promise<number> {
   const nextMonth = new Date();
   nextMonth.setMonth(nextMonth.getMonth() + 1);
   nextMonth.setDate(1);

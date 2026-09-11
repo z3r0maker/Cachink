@@ -14,15 +14,9 @@ import type {
   UserId,
 } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
-import type {
-  CajaTurnoPatch,
-  CajaTurnosRepository,
-  CreateCajaTurnoInput,
-} from '@xangarro/data';
+import type { CajaTurnoPatch, CajaTurnosRepository, CreateCajaTurnoInput } from '@xangarro/data';
 
-function pickDefinedFields(
-  patch: CajaTurnoPatch,
-): Partial<CajaTurno> {
+function pickDefinedFields(patch: CajaTurnoPatch): Partial<CajaTurno> {
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(patch) as (keyof CajaTurnoPatch)[]) {
     if (patch[key] !== undefined) {
@@ -32,9 +26,7 @@ function pickDefinedFields(
   return result as Partial<CajaTurno>;
 }
 
-export class InMemoryCajaTurnosRepository
-  implements CajaTurnosRepository
-{
+export class InMemoryCajaTurnosRepository implements CajaTurnosRepository {
   private readonly rows = new Map<CajaTurnoId, CajaTurno>();
   private readonly deviceId: DeviceId;
 
@@ -84,40 +76,25 @@ export class InMemoryCajaTurnosRepository
 
   async findOpenByUser(userId: UserId): Promise<CajaTurno | null> {
     for (const row of this.rows.values()) {
-      if (
-        row.userId === userId &&
-        row.cierreAt === null &&
-        row.deletedAt === null
-      ) {
+      if (row.userId === userId && row.cierreAt === null && row.deletedAt === null) {
         return row;
       }
     }
     return null;
   }
 
-  async findOpenByBusiness(
-    businessId: BusinessId,
-  ): Promise<CajaTurno | null> {
+  async findOpenByBusiness(businessId: BusinessId): Promise<CajaTurno | null> {
     for (const row of this.rows.values()) {
-      if (
-        row.businessId === businessId &&
-        row.cierreAt === null &&
-        row.deletedAt === null
-      ) {
+      if (row.businessId === businessId && row.cierreAt === null && row.deletedAt === null) {
         return row;
       }
     }
     return null;
   }
 
-  async findLatest(
-    businessId: BusinessId,
-  ): Promise<CajaTurno | null> {
+  async findLatest(businessId: BusinessId): Promise<CajaTurno | null> {
     const rows = [...this.rows.values()]
-      .filter(
-        (r) =>
-          r.businessId === businessId && r.deletedAt === null,
-      )
+      .filter((r) => r.businessId === businessId && r.deletedAt === null)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     return rows[0] ?? null;
   }
@@ -130,18 +107,12 @@ export class InMemoryCajaTurnosRepository
     return [...this.rows.values()]
       .filter(
         (r) =>
-          r.businessId === businessId &&
-          r.deletedAt === null &&
-          r.fecha >= from &&
-          r.fecha <= to,
+          r.businessId === businessId && r.deletedAt === null && r.fecha >= from && r.fecha <= to,
       )
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async update(
-    id: CajaTurnoId,
-    patch: CajaTurnoPatch,
-  ): Promise<CajaTurno> {
+  async update(id: CajaTurnoId, patch: CajaTurnoPatch): Promise<CajaTurno> {
     const existing = this.rows.get(id);
     if (!existing || existing.deletedAt !== null) {
       throw new Error(`CajaTurno ${id} not found`);

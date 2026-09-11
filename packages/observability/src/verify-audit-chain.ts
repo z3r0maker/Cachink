@@ -35,9 +35,7 @@ interface ChainRow {
  * on each write (Phase 10.2/10.3). This function provides the
  * verification interface for when that's implemented.
  */
-export async function verifyAuditChain(
-  db: SqliteDatabase,
-): Promise<AuditChainResult> {
+export async function verifyAuditChain(db: SqliteDatabase): Promise<AuditChainResult> {
   const rows = await db.getAllAsync<ChainRow>(
     `SELECT id, prev_hash, timestamp FROM ${TABLE}
      WHERE type = 'audit'

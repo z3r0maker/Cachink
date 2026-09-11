@@ -112,15 +112,40 @@ interface OverlayProps {
 export function VentasOverlays(p: OverlayProps): ReactElement {
   return (
     <>
-      <VentasCorteSlot role={p.role} showCorte={p.showCorte} setShowCorte={p.setShowCorte} corteOpen={p.corteOpen} setCorteOpen={p.setCorteOpen} />
-      <VentaCheckoutSheet
-        open={p.checkoutOpen} onClose={() => p.setCheckoutOpen(false)}
-        items={p.cartItems} totalCentavos={p.totalCentavos}
-        onSubmit={p.handleCheckoutSubmit} submitting={p.submitting} error={p.checkoutError}
+      <VentasCorteSlot
+        role={p.role}
+        showCorte={p.showCorte}
+        setShowCorte={p.setShowCorte}
+        corteOpen={p.corteOpen}
+        setCorteOpen={p.setCorteOpen}
       />
-      <DetailSlot selected={p.selected} setSelected={p.setSelected} handleShare={p.handleShare} eliminar={p.eliminar} />
-      <SwipeSlots editing={p.swipe.editing} setEditing={p.swipe.setEditing} confirmDelete={p.swipe.confirmDelete} setConfirmDelete={p.swipe.setConfirmDelete} eliminar={p.eliminar} />
-      <CachinkBurst visible={p.showCachink} onComplete={() => p.setShowCachink(false)} testID="cachink-burst" />
+      <VentaCheckoutSheet
+        open={p.checkoutOpen}
+        onClose={() => p.setCheckoutOpen(false)}
+        items={p.cartItems}
+        totalCentavos={p.totalCentavos}
+        onSubmit={p.handleCheckoutSubmit}
+        submitting={p.submitting}
+        error={p.checkoutError}
+      />
+      <DetailSlot
+        selected={p.selected}
+        setSelected={p.setSelected}
+        handleShare={p.handleShare}
+        eliminar={p.eliminar}
+      />
+      <SwipeSlots
+        editing={p.swipe.editing}
+        setEditing={p.swipe.setEditing}
+        confirmDelete={p.swipe.confirmDelete}
+        setConfirmDelete={p.swipe.setConfirmDelete}
+        eliminar={p.eliminar}
+      />
+      <CachinkBurst
+        visible={p.showCachink}
+        onComplete={() => p.setShowCachink(false)}
+        testID="cachink-burst"
+      />
     </>
   );
 }

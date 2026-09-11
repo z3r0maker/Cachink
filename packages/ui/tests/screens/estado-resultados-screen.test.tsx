@@ -92,9 +92,7 @@ describe('EstadoResultadosScreen', () => {
   // ── Help accordion tests ──
 
   it('renders HelpAccordions for each financial term', () => {
-    renderWithProviders(
-      <EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />,
-    );
+    renderWithProviders(<EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />);
     // Subtitles should be visible (always-on)
     expect(screen.getByText('Todo el dinero que entró por ventas')).toBeInTheDocument();
     expect(screen.getByText('Lo que gastaste para producir lo que vendiste')).toBeInTheDocument();
@@ -115,9 +113,7 @@ describe('EstadoResultadosScreen', () => {
   });
 
   it('does NOT show ISR $0 hint when ISR is non-zero', () => {
-    renderWithProviders(
-      <EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />,
-    );
+    renderWithProviders(<EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />);
     expect(screen.queryByTestId('estado-isr-zero-hint')).toBeNull();
   });
 
@@ -136,9 +132,7 @@ describe('EstadoResultadosScreen', () => {
   });
 
   it('does NOT render delta indicator when prior estado is not provided', () => {
-    renderWithProviders(
-      <EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />,
-    );
+    renderWithProviders(<EstadoResultadosScreen estado={estado()} periodoLabel="Abril" />);
     expect(screen.queryByTestId('estado-resumen-delta')).toBeNull();
   });
 });

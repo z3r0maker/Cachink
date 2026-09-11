@@ -7,13 +7,7 @@
  */
 
 import { z } from 'zod';
-import type {
-  CancelacionLogId,
-  ProductId,
-  SaleId,
-  UserId,
-  BusinessId,
-} from '../ids/index.js';
+import type { CancelacionLogId, ProductId, SaleId, UserId, BusinessId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { moneyField } from './_fields.js';

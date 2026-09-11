@@ -96,11 +96,7 @@ describe('formatTimelineAsText', () => {
   });
 
   it('formats multiple entries in order', () => {
-    const output = formatTimelineAsText([
-      AUDIT_SUCCESS,
-      AUDIT_WITH_DURATION,
-      ERROR_ENTRY,
-    ]);
+    const output = formatTimelineAsText([AUDIT_SUCCESS, AUDIT_WITH_DURATION, ERROR_ENTRY]);
     expect(output).toContain('Total entries: 3');
     // All entry types should be present
     expect(output).toContain('✅');

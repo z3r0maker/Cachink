@@ -41,45 +41,31 @@ describe('RegistrarPagoClienteUseCase', () => {
 
   it('partial pago sets estadoPago to parcial', async () => {
     const venta = await seedCreditVenta(sales, 10_000n);
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 3_000n }),
-    );
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 3_000n }));
     const updated = await sales.findById(venta.id);
     expect(updated?.estadoPago).toBe('parcial');
   });
 
   it('exact full pago sets estadoPago to pagado', async () => {
     const venta = await seedCreditVenta(sales, 10_000n);
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 10_000n }),
-    );
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 10_000n }));
     expect((await sales.findById(venta.id))?.estadoPago).toBe('pagado');
   });
 
   it('multiple partials accumulate correctly and end as pagado', async () => {
     const venta = await seedCreditVenta(sales, 10_000n);
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 3_000n }),
-    );
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 2_000n }),
-    );
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 5_000n }),
-    );
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 3_000n }));
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 2_000n }));
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 5_000n }));
     expect((await sales.findById(venta.id))?.estadoPago).toBe('pagado');
     expect(await payments.sumByVenta(venta.id)).toBe(10_000n);
   });
 
   it('rejects overpayment', async () => {
     const venta = await seedCreditVenta(sales, 10_000n);
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 7_000n }),
-    );
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 7_000n }));
     await expect(
-      useCase.execute(
-        makeNewClientPayment({ ventaId: venta.id, montoCentavos: 5_000n }),
-      ),
+      useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 5_000n })),
     ).rejects.toThrow(/excede/);
   });
 
@@ -92,13 +78,9 @@ describe('RegistrarPagoClienteUseCase', () => {
 
   it('rejects pago against a venta that is already pagado', async () => {
     const venta = await seedCreditVenta(sales, 10_000n);
-    await useCase.execute(
-      makeNewClientPayment({ ventaId: venta.id, montoCentavos: 10_000n }),
-    );
+    await useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 10_000n }));
     await expect(
-      useCase.execute(
-        makeNewClientPayment({ ventaId: venta.id, montoCentavos: 1n }),
-      ),
+      useCase.execute(makeNewClientPayment({ ventaId: venta.id, montoCentavos: 1n })),
     ).rejects.toThrow(/pagada/);
   });
 

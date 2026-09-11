@@ -16,10 +16,18 @@ export type { Product, NewProduct };
  * Audit Round 2 J3: enables per-row swipe-to-edit (Phase K wiring).
  */
 export type ProductPatch = Partial<
-  Pick<Product,
-    | 'nombre' | 'sku' | 'categoria' | 'unidad' | 'umbralStockBajo'
-    | 'colorFondo' | 'usoProducto' | 'icono'
-    | 'costoUnitCentavos' | 'precioVentaCentavos'
+  Pick<
+    Product,
+    | 'nombre'
+    | 'sku'
+    | 'categoria'
+    | 'unidad'
+    | 'umbralStockBajo'
+    | 'colorFondo'
+    | 'usoProducto'
+    | 'icono'
+    | 'costoUnitCentavos'
+    | 'precioVentaCentavos'
   >
 >;
 

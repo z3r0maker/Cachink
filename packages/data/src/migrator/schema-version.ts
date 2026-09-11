@@ -25,10 +25,7 @@ export async function getSchemaVersion(db: CachinkDatabase): Promise<number> {
   return (result as { user_version: number } | undefined)?.user_version ?? 0;
 }
 
-export async function setSchemaVersion(
-  db: CachinkDatabase,
-  version: number,
-): Promise<void> {
+export async function setSchemaVersion(db: CachinkDatabase, version: number): Promise<void> {
   await db.run(sql.raw(`PRAGMA user_version = ${version}`));
 }
 

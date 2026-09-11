@@ -31,10 +31,7 @@ export interface MargenProducto {
  * @returns `null` when `precioVenta` is ≤ 0 (nothing meaningful to
  *          show — the product is free or has no price yet).
  */
-export function calcularMargenProducto(
-  costo: Money,
-  precioVenta: Money,
-): MargenProducto | null {
+export function calcularMargenProducto(costo: Money, precioVenta: Money): MargenProducto | null {
   if (precioVenta <= ZERO) return null;
 
   const ganancia = subtract(precioVenta, costo);

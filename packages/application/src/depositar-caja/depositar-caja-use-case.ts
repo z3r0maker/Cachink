@@ -10,22 +10,14 @@ import {
   type CajaMovimiento,
   type NewCajaMovimiento,
 } from '@xangarro/domain';
-import type {
-  CajaMovimientosRepository,
-  CajaTurnosRepository,
-} from '@xangarro/data';
+import type { CajaMovimientosRepository, CajaTurnosRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
-export class DepositarCajaUseCase
-  implements UseCase<NewCajaMovimiento, CajaMovimiento>
-{
+export class DepositarCajaUseCase implements UseCase<NewCajaMovimiento, CajaMovimiento> {
   readonly #movimientos: CajaMovimientosRepository;
   readonly #turnos: CajaTurnosRepository;
 
-  constructor(
-    movimientos: CajaMovimientosRepository,
-    turnos: CajaTurnosRepository,
-  ) {
+  constructor(movimientos: CajaMovimientosRepository, turnos: CajaTurnosRepository) {
     this.#movimientos = movimientos;
     this.#turnos = turnos;
   }

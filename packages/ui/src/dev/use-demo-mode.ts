@@ -89,7 +89,11 @@ async function seedToDatabase(
   });
 
   await appConfig.set(APP_CONFIG_KEYS.currentBusinessId, business.id);
-  await seedDemoData({ repositories: repos, businessId: business.id, deviceId: deviceId ?? PLACEHOLDER_DEV });
+  await seedDemoData({
+    repositories: repos,
+    businessId: business.id,
+    deviceId: deviceId ?? PLACEHOLDER_DEV,
+  });
 
   const users = await repos.users.findAllByBusiness(business.id);
   const director = users.find((u) => u.role === 'director');
@@ -97,6 +101,30 @@ async function seedToDatabase(
   await appConfig.set(APP_CONFIG_KEYS.discoveryShown, 'true');
 
   return { businessId: business.id, directorId: director?.id ?? null };
+}
+
+interface SeedSetters {
+  readonly setMode: ReturnType<typeof useSetMode>;
+  readonly setBusinessId: ReturnType<typeof useSetCurrentBusinessId>;
+  readonly setUserId: ReturnType<typeof useSetUserId>;
+  readonly setUserRole: ReturnType<typeof useSetUserRole>;
+  readonly setMustChangePin: ReturnType<typeof useSetMustChangePin>;
+  readonly setDiscoveryShown: ReturnType<typeof useSetDiscoveryShown>;
+}
+
+/** Atomic Zustand update once the demo business is seeded (single render burst). */
+function applySeededIdentity(
+  s: SeedSetters,
+  seeded: Awaited<ReturnType<typeof seedToDatabase>>,
+): void {
+  s.setMode('local');
+  s.setBusinessId(seeded.businessId);
+  if (seeded.directorId) {
+    s.setUserId(seeded.directorId);
+    s.setUserRole('director');
+    s.setMustChangePin(false);
+  }
+  s.setDiscoveryShown(true);
 }
 
 /**
@@ -121,23 +149,15 @@ function useDemoModeInner(): DemoModeState {
   const trigger = useCallback(async () => {
     setLoading(true);
     try {
-      const { businessId, directorId } = await seedToDatabase(repos, appConfig, deviceId);
-
-      // ── Persist mode to DB now that all demo data is ready ──
+      const seeded = await seedToDatabase(repos, appConfig, deviceId);
+      // Persist mode to DB now that all demo data is ready, then update state atomically.
       await appConfig.set(APP_CONFIG_KEYS.mode, 'local');
-
-      // ── Atomic Zustand + cache update (single render burst) ──
-      setMode('local');
-      setBusinessId(businessId);
-      if (directorId) {
-        setUserId(directorId);
-        setUserRole('director');
-        setMustChangePin(false);
-      }
-      setDiscoveryShown(true);
-
+      applySeededIdentity(
+        { setMode, setBusinessId, setUserId, setUserRole, setMustChangePin, setDiscoveryShown },
+        seeded,
+      );
       await queryClient.invalidateQueries({ queryKey: ['currentBusiness'] });
-      await queryClient.invalidateQueries({ queryKey: ['users', businessId] });
+      await queryClient.invalidateQueries({ queryKey: ['users', seeded.businessId] });
     } finally {
       // Small delay lets AuthInner's useAuthGateState query resolve
       // before we drop the DemoSeedingScreen, avoiding a flash of
@@ -145,9 +165,16 @@ function useDemoModeInner(): DemoModeState {
       setTimeout(() => setLoading(false), 400);
     }
   }, [
-    repos, appConfig, setMode, setBusinessId,
-    setUserId, setUserRole, setMustChangePin,
-    setDiscoveryShown, queryClient, deviceId,
+    repos,
+    appConfig,
+    setMode,
+    setBusinessId,
+    setUserId,
+    setUserRole,
+    setMustChangePin,
+    setDiscoveryShown,
+    queryClient,
+    deviceId,
   ]);
 
   return { trigger: () => void trigger(), loading };

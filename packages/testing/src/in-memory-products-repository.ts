@@ -13,9 +13,7 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 
-function pickDefinedProductFields(
-  patch: ProductPatch,
-): Partial<Product> {
+function pickDefinedProductFields(patch: ProductPatch): Partial<Product> {
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(patch) as (keyof ProductPatch)[]) {
     if (patch[key] !== undefined) {

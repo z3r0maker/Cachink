@@ -51,17 +51,17 @@ describe('Audit configs (AuditedUseCaseConfig)', () => {
   }
 
   it('AUDIT_REGISTRAR_VENTA extracts entity ID from result', () => {
-    const id = AUDIT_REGISTRAR_VENTA.extractEntityId(
-      { id: 'sale-123' } as never,
-      {} as never,
-    );
+    const id = AUDIT_REGISTRAR_VENTA.extractEntityId({ id: 'sale-123' } as never, {} as never);
     expect(id).toBe('sale-123');
   });
 
   it('AUDIT_REGISTRAR_VENTA extracts metadata from input', () => {
-    const meta = AUDIT_REGISTRAR_VENTA.extractMetadata?.(
-      { monto: 5000n, metodo: 'Efectivo', categoria: 'Producto', productoId: 'p1' } as never,
-    );
+    const meta = AUDIT_REGISTRAR_VENTA.extractMetadata?.({
+      monto: 5000n,
+      metodo: 'Efectivo',
+      categoria: 'Producto',
+      productoId: 'p1',
+    } as never);
     expect(meta).toEqual({
       monto: '5000',
       metodo: 'Efectivo',
@@ -79,9 +79,7 @@ describe('Audit configs (AuditedUseCaseConfig)', () => {
   });
 
   it('AUDIT_ABRIR_CAJA extracts montoAperturaCentavos as metadata', () => {
-    const meta = AUDIT_ABRIR_CAJA.extractMetadata?.(
-      { montoAperturaCentavos: 5000n } as never,
-    );
+    const meta = AUDIT_ABRIR_CAJA.extractMetadata?.({ montoAperturaCentavos: 5000n } as never);
     expect(meta).toEqual({ montoAperturaCentavos: '5000' });
   });
 });

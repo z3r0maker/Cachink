@@ -23,9 +23,7 @@ function wrapper(overrides?: Record<string, unknown>) {
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>
-        <MockRepositoryProvider overrides={overrides}>
-          {children}
-        </MockRepositoryProvider>
+        <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
       </QueryClientProvider>
     </TamaguiProvider>
   );

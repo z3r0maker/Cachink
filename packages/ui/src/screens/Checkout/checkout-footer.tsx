@@ -22,9 +22,7 @@ export interface CheckoutFooterProps {
   readonly onConfirm: () => void;
 }
 
-export function CheckoutFooter(
-  props: CheckoutFooterProps,
-): ReactElement {
+export function CheckoutFooter(props: CheckoutFooterProps): ReactElement {
   return (
     <View
       position="absolute"

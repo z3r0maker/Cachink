@@ -24,17 +24,13 @@ export function useTurnBalance(turno: CajaTurno): CajaBalanceResult {
   const salesQ = useQuery({
     queryKey: ['caja-balance-sales', turno.id],
     queryFn: () =>
-      businessId
-        ? salesRepo.findByDateRange(turno.fecha, turno.fecha, businessId)
-        : [],
+      businessId ? salesRepo.findByDateRange(turno.fecha, turno.fecha, businessId) : [],
     enabled: businessId !== null,
   });
   const expensesQ = useQuery({
     queryKey: ['caja-balance-expenses', turno.id],
     queryFn: () =>
-      businessId
-        ? expensesRepo.findByDateRange(turno.fecha, turno.fecha, businessId)
-        : [],
+      businessId ? expensesRepo.findByDateRange(turno.fecha, turno.fecha, businessId) : [],
     enabled: businessId !== null,
   });
   const movQ = useQuery({

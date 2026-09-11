@@ -67,20 +67,13 @@ describe('Gauge', () => {
 
   it('honors a custom valueFormatter override', () => {
     renderWithProviders(
-      <Gauge
-        label="Liquidez"
-        value={1.3}
-        max={2}
-        valueFormatter={(v) => `${v.toFixed(1)}×`}
-      />,
+      <Gauge label="Liquidez" value={1.3} max={2} valueFormatter={(v) => `${v.toFixed(1)}×`} />,
     );
     expect(screen.getByText('1.3×')).toBeDefined();
   });
 
   it('hides the value when showValue is false but keeps the label', () => {
-    renderWithProviders(
-      <Gauge label="Margen bruto" value={62} showValue={false} />,
-    );
+    renderWithProviders(<Gauge label="Margen bruto" value={62} showValue={false} />);
     expect(screen.getByTestId('gauge-label')).toBeDefined();
     expect(screen.queryByTestId('gauge-value')).toBeNull();
   });
@@ -93,9 +86,7 @@ describe('Gauge', () => {
       ['negative', 'rgb(255, 71, 87)'], // red
     ];
     for (const [tone, expected] of cases) {
-      renderWithProviders(
-        <Gauge value={50} tone={tone} testID={`g-${tone}`} />,
-      );
+      renderWithProviders(<Gauge value={50} tone={tone} testID={`g-${tone}`} />);
       const fill = screen
         .getAllByTestId(`g-${tone}`)[0]!
         .querySelector('[data-testid="gauge-fill"]');
@@ -107,17 +98,13 @@ describe('Gauge', () => {
 
   it('forwards testID so E2E tests can anchor to it', () => {
     renderWithProviders(<Gauge value={50} testID="margen-bruto-gauge" />);
-    expect(screen.getAllByTestId('margen-bruto-gauge').length).toBeGreaterThan(
-      0,
-    );
+    expect(screen.getAllByTestId('margen-bruto-gauge').length).toBeGreaterThan(0);
   });
 });
 
 describe('Gauge center-origin mode', () => {
   it('renders center divider when origin is center', () => {
-    renderWithProviders(
-      <Gauge value={-67} origin="center" testID="g-center" />,
-    );
+    renderWithProviders(<Gauge value={-67} origin="center" testID="g-center" />);
     expect(screen.queryByTestId('gauge-center-divider')).not.toBeNull();
   });
 
@@ -127,31 +114,23 @@ describe('Gauge center-origin mode', () => {
   });
 
   it('negative value displays the actual number, not clamped to 0', () => {
-    renderWithProviders(
-      <Gauge value={-67} origin="center" testID="g-neg" />,
-    );
+    renderWithProviders(<Gauge value={-67} origin="center" testID="g-neg" />);
     // Default formatter: -67%
     expect(screen.getByText('-67%')).toBeDefined();
   });
 
   it('positive value in center mode displays the actual positive number', () => {
-    renderWithProviders(
-      <Gauge value={42} origin="center" testID="g-pos-center" />,
-    );
+    renderWithProviders(<Gauge value={42} origin="center" testID="g-pos-center" />);
     expect(screen.getByText('42%')).toBeDefined();
   });
 
   it('clamps center-origin value to [-max, max]', () => {
-    renderWithProviders(
-      <Gauge value={-200} max={100} origin="center" testID="g-clamp-neg" />,
-    );
+    renderWithProviders(<Gauge value={-200} max={100} origin="center" testID="g-clamp-neg" />);
     expect(screen.getByText('-100%')).toBeDefined();
   });
 
   it('uses negative tone for the fill', () => {
-    renderWithProviders(
-      <Gauge value={-50} origin="center" tone="negative" testID="g-neg-tone" />,
-    );
+    renderWithProviders(<Gauge value={-50} origin="center" tone="negative" testID="g-neg-tone" />);
     const fill = screen
       .getAllByTestId('g-neg-tone')[0]!
       .querySelector('[data-testid="gauge-fill"]');
@@ -167,9 +146,7 @@ describe('Gauge center-origin with zones', () => {
   ] as const;
 
   it('center-origin negative value fills left from center', () => {
-    renderWithProviders(
-      <Gauge value={-50} max={100} origin="center" testID="g-center-neg" />,
-    );
+    renderWithProviders(<Gauge value={-50} max={100} origin="center" testID="g-center-neg" />);
     const fill = getFill('g-center-neg');
     expect(fill).not.toBeNull();
     // Fill width should be 25% (50/100 * 50%)
@@ -185,9 +162,7 @@ describe('Gauge center-origin with zones', () => {
   });
 
   it('center-origin zones do not render when zones is undefined', () => {
-    renderWithProviders(
-      <Gauge value={50} max={100} origin="center" testID="g-center-no-zones" />,
-    );
+    renderWithProviders(<Gauge value={50} max={100} origin="center" testID="g-center-no-zones" />);
     expect(screen.queryAllByTestId('gauge-zone').length).toBe(0);
   });
 });
@@ -200,9 +175,7 @@ describe('Gauge zones', () => {
   ] as const;
 
   it('renders zone segments when zones prop is provided', () => {
-    renderWithProviders(
-      <Gauge value={50} zones={zones} testID="g-zones" />,
-    );
+    renderWithProviders(<Gauge value={50} zones={zones} testID="g-zones" />);
     const zoneEls = screen.getAllByTestId('gauge-zone');
     expect(zoneEls.length).toBe(3);
   });
@@ -218,9 +191,7 @@ describe('Gauge zones', () => {
   });
 
   it('fill bar renders on top of zones (positioned absolute)', () => {
-    renderWithProviders(
-      <Gauge value={50} zones={zones} testID="g-zones-fill" />,
-    );
+    renderWithProviders(<Gauge value={50} zones={zones} testID="g-zones-fill" />);
     const fill = screen
       .getAllByTestId('g-zones-fill')[0]!
       .querySelector('[data-testid="gauge-fill"]');

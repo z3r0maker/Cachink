@@ -44,20 +44,45 @@ async function seedUsers(r: Repositories, biz: BusinessId) {
     hash(DEFAULT_PIN, BCRYPT_ROUNDS),
     hash(DEFAULT_RECOVERY, BCRYPT_ROUNDS),
   ]);
-  const base = { email: null, pinHash, recoveryPasswordHash: recoveryHash, mustChangePin: false, businessId: biz };
-  const director = await r.users.create({ ...base, nombre: 'Juan Director', role: 'director', avatarColor: 'blue' });
-  const operativo = await r.users.create({ ...base, nombre: 'Ana Operativa', role: 'operativo', avatarColor: 'green' });
+  const base = {
+    email: null,
+    pinHash,
+    recoveryPasswordHash: recoveryHash,
+    mustChangePin: false,
+    businessId: biz,
+  };
+  const director = await r.users.create({
+    ...base,
+    nombre: 'Juan Director',
+    role: 'director',
+    avatarColor: 'blue',
+  });
+  const operativo = await r.users.create({
+    ...base,
+    nombre: 'Ana Operativa',
+    role: 'operativo',
+    avatarColor: 'green',
+  });
   return { director, operativo, count: 2 };
 }
 
 async function seedCatalog(r: Repositories, biz: BusinessId) {
   let count = 0;
   const products: Product[] = [];
-  for (const np of demoProducts(biz)) { products.push(await r.products.create(np)); count += 1; }
+  for (const np of demoProducts(biz)) {
+    products.push(await r.products.create(np));
+    count += 1;
+  }
   count += await seedInventory(r, biz, products);
   const clients = [];
-  for (const nc of demoClients(biz)) { clients.push(await r.clients.create(nc)); count += 1; }
-  for (const ne of demoEmployees(biz)) { await r.employees.create(ne); count += 1; }
+  for (const nc of demoClients(biz)) {
+    clients.push(await r.clients.create(nc));
+    count += 1;
+  }
+  for (const ne of demoEmployees(biz)) {
+    await r.employees.create(ne);
+    count += 1;
+  }
   return { products, clients, count };
 }
 

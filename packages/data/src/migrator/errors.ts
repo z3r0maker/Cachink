@@ -13,9 +13,7 @@ export class MigrationError extends Error {
   override readonly cause: unknown;
 
   constructor(tag: string, cause: unknown) {
-    super(
-      `Migration '${tag}' failed: ${cause instanceof Error ? cause.message : String(cause)}`,
-    );
+    super(`Migration '${tag}' failed: ${cause instanceof Error ? cause.message : String(cause)}`);
     this.name = 'MigrationError';
     this.migrationTag = tag;
     this.cause = cause;

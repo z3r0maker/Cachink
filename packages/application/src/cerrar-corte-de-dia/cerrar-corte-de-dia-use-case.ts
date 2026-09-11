@@ -16,11 +16,7 @@ import {
   type IsoDate,
   type Money,
 } from '@xangarro/domain';
-import type {
-  DayClosesRepository,
-  ExpensesRepository,
-  SalesRepository,
-} from '@xangarro/data';
+import type { DayClosesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface CerrarCorteDeDiaInput {
@@ -32,18 +28,12 @@ export interface CerrarCorteDeDiaInput {
   cerradoPor: DayCloseRole;
 }
 
-export class CerrarCorteDeDiaUseCase
-  implements UseCase<CerrarCorteDeDiaInput, DayClose>
-{
+export class CerrarCorteDeDiaUseCase implements UseCase<CerrarCorteDeDiaInput, DayClose> {
   readonly #sales: SalesRepository;
   readonly #expenses: ExpensesRepository;
   readonly #closes: DayClosesRepository;
 
-  constructor(
-    sales: SalesRepository,
-    expenses: ExpensesRepository,
-    closes: DayClosesRepository,
-  ) {
+  constructor(sales: SalesRepository, expenses: ExpensesRepository, closes: DayClosesRepository) {
     this.#sales = sales;
     this.#expenses = expenses;
     this.#closes = closes;

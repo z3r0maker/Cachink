@@ -27,12 +27,12 @@ describe('IsrDisclaimer', () => {
   });
 
   it('shows the rate in the title when isrRate is provided', () => {
-    renderWithProviders(<IsrDisclaimer isrRate={0.30} />);
+    renderWithProviders(<IsrDisclaimer isrRate={0.3} />);
     expect(screen.getByText('ISR referencial (30%)')).toBeInTheDocument();
   });
 
   it('shows zero-explanation when ISR is zero due to loss', () => {
-    renderWithProviders(<IsrDisclaimer isrRate={0.30} isrIsZeroDueToLoss />);
+    renderWithProviders(<IsrDisclaimer isrRate={0.3} isrIsZeroDueToLoss />);
     expect(
       screen.getByText(
         'Tu tasa de ISR es del 30%, pero como la utilidad operativa es negativa, no se calcula ISR. Consulta a tu contador.',
@@ -41,7 +41,7 @@ describe('IsrDisclaimer', () => {
   });
 
   it('shows default body when isrIsZeroDueToLoss is false', () => {
-    renderWithProviders(<IsrDisclaimer isrRate={0.30} isrIsZeroDueToLoss={false} />);
+    renderWithProviders(<IsrDisclaimer isrRate={0.3} isrIsZeroDueToLoss={false} />);
     expect(
       screen.getByText('La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.'),
     ).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('IsrDisclaimer', () => {
 
   it('shows rate in the settings button label when isrRate is provided', () => {
     const onOpenSettings = vi.fn();
-    renderWithProviders(<IsrDisclaimer onOpenSettings={onOpenSettings} isrRate={0.30} />);
+    renderWithProviders(<IsrDisclaimer onOpenSettings={onOpenSettings} isrRate={0.3} />);
     expect(screen.getByText('Ajustar tasa (30%)')).toBeInTheDocument();
   });
 });

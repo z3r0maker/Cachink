@@ -7,52 +7,38 @@ initI18n();
 
 describe('HealthIndicator', () => {
   it('renders the verdict text', () => {
-    renderWithProviders(
-      <HealthIndicator tone="healthy" verdict="Tu margen es saludable" />,
-    );
+    renderWithProviders(<HealthIndicator tone="healthy" verdict="Tu margen es saludable" />);
     expect(screen.getByText('Tu margen es saludable')).toBeInTheDocument();
   });
 
   it('renders a green dot for healthy tone', () => {
-    renderWithProviders(
-      <HealthIndicator tone="healthy" verdict="Saludable" />,
-    );
+    renderWithProviders(<HealthIndicator tone="healthy" verdict="Saludable" />);
     const dot = screen.getByTestId('health-indicator-dot');
     expect(dot).toBeInTheDocument();
   });
 
   it('renders correctly for warning tone', () => {
-    renderWithProviders(
-      <HealthIndicator tone="warning" verdict="Bajo" />,
-    );
+    renderWithProviders(<HealthIndicator tone="warning" verdict="Bajo" />);
     expect(screen.getByText('Bajo')).toBeInTheDocument();
     expect(screen.getByTestId('health-indicator-dot')).toBeInTheDocument();
   });
 
   it('renders correctly for critical tone', () => {
-    renderWithProviders(
-      <HealthIndicator tone="critical" verdict="Crítico" />,
-    );
+    renderWithProviders(<HealthIndicator tone="critical" verdict="Crítico" />);
     expect(screen.getByText('Crítico')).toBeInTheDocument();
     expect(screen.getByTestId('health-indicator-dot')).toBeInTheDocument();
   });
 
   it('shows threshold label when provided', () => {
     renderWithProviders(
-      <HealthIndicator
-        tone="healthy"
-        verdict="Saludable"
-        thresholdLabel="Rango saludable: >20%"
-      />,
+      <HealthIndicator tone="healthy" verdict="Saludable" thresholdLabel="Rango saludable: >20%" />,
     );
     expect(screen.getByTestId('health-indicator-threshold')).toBeInTheDocument();
     expect(screen.getByText('Rango saludable: >20%')).toBeInTheDocument();
   });
 
   it('does not show threshold label when not provided', () => {
-    renderWithProviders(
-      <HealthIndicator tone="healthy" verdict="Saludable" />,
-    );
+    renderWithProviders(<HealthIndicator tone="healthy" verdict="Saludable" />);
     expect(screen.queryByTestId('health-indicator-threshold')).toBeNull();
   });
 
@@ -86,9 +72,7 @@ describe('HealthIndicator', () => {
   });
 
   it('supports a custom testID', () => {
-    renderWithProviders(
-      <HealthIndicator tone="healthy" verdict="OK" testID="custom-health" />,
-    );
+    renderWithProviders(<HealthIndicator tone="healthy" verdict="OK" testID="custom-health" />);
     expect(screen.getByTestId('custom-health')).toBeInTheDocument();
   });
 });

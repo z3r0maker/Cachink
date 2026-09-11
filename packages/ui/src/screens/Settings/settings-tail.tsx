@@ -85,7 +85,8 @@ function SettingsCloudAndUpdatesRows({ props, t }: { props: SettingsProps; t: T 
   );
 }
 
-export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): ReactElement {
+/** The four opt-in device toggles — split out of SettingsTail to keep its complexity under the cap. */
+function SettingsToggleRows({ props }: { props: SettingsProps }): ReactElement {
   return (
     <>
       {(props.showNotificationsToggle ?? true) && props.onNotificationsChange && (
@@ -109,8 +110,21 @@ export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): Reac
           onChange={props.onCrashReportingChange}
         />
       )}
+    </>
+  );
+}
+
+export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): ReactElement {
+  return (
+    <>
+      <SettingsToggleRows props={props} />
       {props.onOpenBugReport && (
-        <Btn variant="ghost" onPress={props.onOpenBugReport} fullWidth testID="settings-open-bug-report">
+        <Btn
+          variant="ghost"
+          onPress={props.onOpenBugReport}
+          fullWidth
+          testID="settings-open-bug-report"
+        >
           {t('settings.reportBugCta')}
         </Btn>
       )}

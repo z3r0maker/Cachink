@@ -16,9 +16,10 @@ export interface FindFrequentProductosInput {
   readonly days?: number;
 }
 
-export class FindFrequentProductosUseCase
-  implements UseCase<FindFrequentProductosInput, readonly Product[]>
-{
+export class FindFrequentProductosUseCase implements UseCase<
+  FindFrequentProductosInput,
+  readonly Product[]
+> {
   readonly #sales: SalesRepository;
   readonly #products: ProductsRepository;
 
@@ -54,14 +55,9 @@ export class FindFrequentProductosUseCase
     return results;
   }
 
-  async #fallbackNewest(
-    businessId: BusinessId,
-    limit: number,
-  ): Promise<readonly Product[]> {
+  async #fallbackNewest(businessId: BusinessId, limit: number): Promise<readonly Product[]> {
     const all = await this.#products.listForBusiness(businessId);
-    return [...all]
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .slice(0, limit);
+    return [...all].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit);
   }
 
   #daysAgo(days: number): string {

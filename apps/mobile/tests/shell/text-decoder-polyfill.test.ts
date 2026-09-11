@@ -27,7 +27,7 @@ describe('TextDecoder polyfill', () => {
 
   it('new TextDecoder("utf-8") still works (no regression)', () => {
     const decoder = new TextDecoder('utf-8');
-    const result = decoder.decode(new Uint8Array([0xC2, 0xA1, 72, 111, 108, 97, 0x21]));
+    const result = decoder.decode(new Uint8Array([0xc2, 0xa1, 72, 111, 108, 97, 0x21]));
     expect(result).toBe('¡Hola!');
   });
 

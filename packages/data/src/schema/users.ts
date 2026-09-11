@@ -18,9 +18,7 @@ export const users = sqliteTable('users', {
   pinHash: text('pin_hash').notNull(),
   recoveryPasswordHash: text('recovery_password_hash').notNull(),
   role: text('role', { enum: ['operativo', 'director'] }).notNull(),
-  mustChangePin: integer('must_change_pin', { mode: 'boolean' })
-    .notNull()
-    .default(false),
+  mustChangePin: integer('must_change_pin', { mode: 'boolean' }).notNull().default(false),
   avatarColor: text('avatar_color').notNull().default('blue'),
   /** JSON permissions object, parsed with UserPermissionsSchema. */
   permissions: text('permissions').notNull().default('{}'),

@@ -18,7 +18,13 @@ export const FRECUENCIAS: readonly RecurrenceFrequency[] = ['semanal', 'quincena
 
 /** Abbreviated day-of-week labels for the wheel picker (Mon–Sun, es-MX). */
 export const DIAS_SEMANA_CORTO: readonly string[] = [
-  'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom',
+  'Lun',
+  'Mar',
+  'Mié',
+  'Jue',
+  'Vie',
+  'Sáb',
+  'Dom',
 ];
 
 export const FRECUENCIA_CARDS: readonly OptionCardItem<RecurrenceFrequency>[] = [

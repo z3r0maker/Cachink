@@ -4,11 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import type { BusinessId, IsoDate } from '@xangarro/domain';
-import {
-  InMemorySalesRepository,
-  TEST_DEVICE_ID,
-  makeNewSale,
-} from '@xangarro/testing';
+import { InMemorySalesRepository, TEST_DEVICE_ID, makeNewSale } from '@xangarro/testing';
 import { composeIngresosPorCategoria } from '../../src/hooks/use-ingresos-por-categoria';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -30,13 +26,28 @@ describe('composeIngresosPorCategoria', () => {
 
   it('groups sales by category', async () => {
     await sales.create(
-      makeNewSale({ businessId: BIZ, categoria: 'Producto', monto: 3000n, fecha: '2026-05-10' as IsoDate }),
+      makeNewSale({
+        businessId: BIZ,
+        categoria: 'Producto',
+        monto: 3000n,
+        fecha: '2026-05-10' as IsoDate,
+      }),
     );
     await sales.create(
-      makeNewSale({ businessId: BIZ, categoria: 'Producto', monto: 2000n, fecha: '2026-05-15' as IsoDate }),
+      makeNewSale({
+        businessId: BIZ,
+        categoria: 'Producto',
+        monto: 2000n,
+        fecha: '2026-05-15' as IsoDate,
+      }),
     );
     await sales.create(
-      makeNewSale({ businessId: BIZ, categoria: 'Servicio' as never, monto: 1000n, fecha: '2026-05-20' as IsoDate }),
+      makeNewSale({
+        businessId: BIZ,
+        categoria: 'Servicio' as never,
+        monto: 1000n,
+        fecha: '2026-05-20' as IsoDate,
+      }),
     );
 
     const result = await composeIngresosPorCategoria(sales, BIZ, {

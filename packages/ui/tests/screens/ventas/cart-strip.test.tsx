@@ -9,7 +9,7 @@ import type { ProductId } from '@xangarro/domain';
 import type { CartItem } from '../../../src/hooks/use-cart';
 import { CartStrip } from '../../../src/screens/Ventas/cart-strip';
 import { initI18n } from '../../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../../test-utils';
+import { renderWithProviders, screen } from '../../test-utils';
 
 initI18n();
 
@@ -42,14 +42,26 @@ describe('CartStrip', () => {
 
   it('renders with red variant', () => {
     renderWithProviders(
-      <CartStrip items={ITEMS} onRemoveOne={vi.fn()} onRemoveAll={vi.fn()} onClear={vi.fn()} variant="red" />,
+      <CartStrip
+        items={ITEMS}
+        onRemoveOne={vi.fn()}
+        onRemoveAll={vi.fn()}
+        onClear={vi.fn()}
+        variant="red"
+      />,
     );
     expect(screen.getByTestId('cart-strip')).toBeInTheDocument();
   });
 
   it('renders with custom testID', () => {
     renderWithProviders(
-      <CartStrip items={ITEMS} onRemoveOne={vi.fn()} onRemoveAll={vi.fn()} onClear={vi.fn()} testID="my-strip" />,
+      <CartStrip
+        items={ITEMS}
+        onRemoveOne={vi.fn()}
+        onRemoveAll={vi.fn()}
+        onClear={vi.fn()}
+        testID="my-strip"
+      />,
     );
     expect(screen.getByTestId('my-strip')).toBeInTheDocument();
   });

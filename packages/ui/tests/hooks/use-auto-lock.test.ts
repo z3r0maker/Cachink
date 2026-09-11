@@ -6,10 +6,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import {
-  AUTO_LOCK_OPTIONS,
-  DEFAULT_AUTO_LOCK_TIMEOUT,
-} from '../../src/hooks/use-auto-lock';
+import { AUTO_LOCK_OPTIONS, DEFAULT_AUTO_LOCK_TIMEOUT } from '../../src/hooks/use-auto-lock';
 
 describe('AUTO_LOCK_OPTIONS', () => {
   it('has 6 options', () => {

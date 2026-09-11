@@ -8,11 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import {
-  FuncionesNegocioScreen,
-  useFeatureFlags,
-  useToggleFeatureFlag,
-} from '@xangarro/ui';
+import { FuncionesNegocioScreen, useFeatureFlags, useToggleFeatureFlag } from '@xangarro/ui';
 import type { FeatureFlagKey, FeatureFlags } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
@@ -21,10 +17,7 @@ export default function FuncionesRoute(): ReactElement {
   const flags = useFeatureFlags();
   const toggle = useToggleFeatureFlag();
 
-  function handleToggle(
-    _key: FeatureFlagKey,
-    newFlags: FeatureFlags,
-  ): void {
+  function handleToggle(_key: FeatureFlagKey, newFlags: FeatureFlags): void {
     const allKeys = Object.keys(newFlags) as FeatureFlagKey[];
     for (const k of allKeys) {
       if (newFlags[k] !== flags[k]) {
@@ -35,11 +28,7 @@ export default function FuncionesRoute(): ReactElement {
 
   return (
     <AppShellWrapper activeTabKey="otros" onBack={() => router.back()}>
-      <FuncionesNegocioScreen
-        flags={flags}
-        onToggle={handleToggle}
-        testID="funciones-route"
-      />
+      <FuncionesNegocioScreen flags={flags} onToggle={handleToggle} testID="funciones-route" />
     </AppShellWrapper>
   );
 }

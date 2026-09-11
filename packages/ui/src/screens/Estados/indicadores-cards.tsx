@@ -53,9 +53,14 @@ export interface MarginCardProps {
 function MarginCardGauge(props: Pick<MarginCardProps, 'value' | 'label' | 'zones'>): ReactElement {
   return (
     <Gauge
-      value={percentValue(props.value)} max={100} label={props.label}
-      tone={marginTone(props.value)} origin="center" showValue
-      valueFormatter={() => formatMarginPercent(props.value)} zones={props.zones}
+      value={percentValue(props.value)}
+      max={100}
+      label={props.label}
+      tone={marginTone(props.value)}
+      origin="center"
+      showValue
+      valueFormatter={() => formatMarginPercent(props.value)}
+      zones={props.zones}
     />
   );
 }
@@ -69,11 +74,21 @@ export function MarginCard(props: MarginCardProps): ReactElement {
         <HealthIndicator tone={props.healthTone} verdict={props.healthVerdict} />
       )}
       {props.priorValue != null && props.value !== null && (
-        <DeltaIndicator current={props.value} previous={props.priorValue} format="percent" periodLabel={props.t('estados.deltaVsMesAnterior')} />
+        <DeltaIndicator
+          current={props.value}
+          previous={props.priorValue}
+          format="percent"
+          periodLabel={props.t('estados.deltaVsMesAnterior')}
+        />
       )}
       {props.trend !== undefined && props.trend.length >= 2 && (
         <View marginTop={8}>
-          <Sparkline points={props.trend.map((v) => v * 100)} color={marginTone(props.value) === 'positive' ? colors.green : colors.red} height={40} testID={`${props.testID}-sparkline`} />
+          <Sparkline
+            points={props.trend.map((v) => v * 100)}
+            color={marginTone(props.value) === 'positive' ? colors.green : colors.red}
+            height={40}
+            testID={`${props.testID}-sparkline`}
+          />
         </View>
       )}
     </Card>
@@ -95,13 +110,22 @@ export function NumericCard(props: {
 }): ReactElement {
   return (
     <Card testID={props.testID} padding="md" fullWidth>
-      <Kpi label={props.label} value={props.value === null ? props.nanLabel : props.formatter(props.value)} tone={props.value === null ? 'neutral' : 'positive'} />
+      <Kpi
+        label={props.label}
+        value={props.value === null ? props.nanLabel : props.formatter(props.value)}
+        tone={props.value === null ? 'neutral' : 'positive'}
+      />
       <HelpAccordion subtitle={props.subtitle} detail={props.detail} />
       {props.healthVerdict !== null && props.healthTone !== null && (
         <HealthIndicator tone={props.healthTone} verdict={props.healthVerdict} />
       )}
       {props.priorValue != null && props.value !== null && (
-        <DeltaIndicator current={props.value} previous={props.priorValue} format="number" periodLabel={props.t('estados.deltaVsMesAnterior')} />
+        <DeltaIndicator
+          current={props.value}
+          previous={props.priorValue}
+          format="number"
+          periodLabel={props.t('estados.deltaVsMesAnterior')}
+        />
       )}
     </Card>
   );

@@ -19,10 +19,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
 import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
-import {
-  InMemoryExpensesRepository,
-  InMemoryRecurringExpensesRepository,
-} from '@xangarro/testing';
+import { InMemoryExpensesRepository, InMemoryRecurringExpensesRepository } from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { NuevoEgresoModalSmart } from '../../src/screens/index';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';

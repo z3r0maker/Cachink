@@ -35,21 +35,19 @@ export function formatTimelineAsText(
   return lines.join('\n');
 }
 
-function formatEntry(
-  entry: TimelineEntry, locale: string, lines: string[],
-): void {
+function formatEntry(entry: TimelineEntry, locale: string, lines: string[]): void {
   const time = formatTime(entry.timestamp, locale);
   if (entry.type === 'audit') {
     formatAuditEntry(entry, time, lines);
   } else {
-    lines.push(
-      `${time} 🔴 ERROR [${entry.source}] ${entry.errorName}: ${entry.errorMessage}`,
-    );
+    lines.push(`${time} 🔴 ERROR [${entry.source}] ${entry.errorName}: ${entry.errorMessage}`);
   }
 }
 
 function formatAuditEntry(
-  entry: TimelineEntry & { type: 'audit' }, time: string, lines: string[],
+  entry: TimelineEntry & { type: 'audit' },
+  time: string,
+  lines: string[],
 ): void {
   const status = entry.status === 'success' ? '✅' : '❌';
   const entityShort = entry.entityId ? entry.entityId.slice(0, 8) : '—';

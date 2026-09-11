@@ -17,20 +17,45 @@ import type { ErrorLogEntry } from '../src/error-log.js';
 
 // ─── Mocks ──────────────────────────────────────────────────────────
 
-function createMockLocal(): LogStore & { auditEvents: AuditEvent[]; errorEntries: ErrorLogEntry[] } {
+function createMockLocal(): LogStore & {
+  auditEvents: AuditEvent[];
+  errorEntries: ErrorLogEntry[];
+} {
   const auditEvents: AuditEvent[] = [];
   const errorEntries: ErrorLogEntry[] = [];
   return {
     auditEvents,
     errorEntries,
-    async writeAudit(event) { auditEvents.push(event); },
-    async writeError(entry) { errorEntries.push(entry); },
-    async queryAudit() { return auditEvents; },
-    async queryErrors() { return errorEntries; },
-    async queryTimeline() { return []; },
-    async stats() { return { totalAuditEvents: 0, totalErrors: 0, errorsBySource: {}, operationCounts: {}, lastErrorAt: null }; },
-    async prune() { return 0; },
-    async exportSnapshot() { return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] }; },
+    async writeAudit(event) {
+      auditEvents.push(event);
+    },
+    async writeError(entry) {
+      errorEntries.push(entry);
+    },
+    async queryAudit() {
+      return auditEvents;
+    },
+    async queryErrors() {
+      return errorEntries;
+    },
+    async queryTimeline() {
+      return [];
+    },
+    async stats() {
+      return {
+        totalAuditEvents: 0,
+        totalErrors: 0,
+        errorsBySource: {},
+        operationCounts: {},
+        lastErrorAt: null,
+      };
+    },
+    async prune() {
+      return 0;
+    },
+    async exportSnapshot() {
+      return { exportedAt: '', deviceId: '', auditEvents: [], errors: [] };
+    },
   };
 }
 
@@ -38,8 +63,12 @@ function createMockRemote(): RemoteLogStore & { calls: unknown[][] } {
   const calls: unknown[][] = [];
   return {
     calls,
-    async sendErrorBatch(entries) { calls.push(['sendErrorBatch', entries]); },
-    async sendBugReport(report) { calls.push(['sendBugReport', report]); },
+    async sendErrorBatch(entries) {
+      calls.push(['sendErrorBatch', entries]);
+    },
+    async sendBugReport(report) {
+      calls.push(['sendBugReport', report]);
+    },
   };
 }
 
@@ -116,8 +145,12 @@ describe('DualLogStore', () => {
 
   it('remote failure does not crash local write', async () => {
     const failingRemote: RemoteLogStore = {
-      async sendErrorBatch() { throw new Error('Network timeout'); },
-      async sendBugReport() { throw new Error('Network timeout'); },
+      async sendErrorBatch() {
+        throw new Error('Network timeout');
+      },
+      async sendBugReport() {
+        throw new Error('Network timeout');
+      },
     };
     const dualWithFailing = new DualLogStore(local, failingRemote);
 

@@ -2,13 +2,7 @@
  * Business fixture builders.
  */
 
-import type {
-  Business,
-  BusinessId,
-  DeviceId,
-  IsoTimestamp,
-  NewBusiness,
-} from '@xangarro/domain';
+import type { Business, BusinessId, DeviceId, IsoTimestamp, NewBusiness } from '@xangarro/domain';
 import { newEntityId } from '@xangarro/domain';
 
 const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -25,7 +19,8 @@ export function makeNewBusiness(overrides: Partial<NewBusiness> = {}): NewBusine
     categoriaVentaPredeterminada: 'Producto',
     atributosProducto: [],
     enabledPaymentMethods: '["Efectivo","Transferencia","Tarjeta","QR/CoDi"]',
-    featureFlags: '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
+    featureFlags:
+      '{"stock":true,"conversionMateriaPrima":false,"conversionAutomatica":false,"auditoriaInventario":false,"merma":false,"ventasCredito":false}',
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdByUserId: null,

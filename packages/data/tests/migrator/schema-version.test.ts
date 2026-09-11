@@ -3,10 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import {
-  checkSchemaCompatibility,
-  SCHEMA_VERSION,
-} from '../../src/migrator/schema-version.js';
+import { checkSchemaCompatibility, SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
 describe('checkSchemaCompatibility', () => {
   it('returns ok when versions match', () => {

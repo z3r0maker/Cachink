@@ -80,7 +80,11 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
     return rows.map((r) => this.#mapRow(r));
   }
 
-  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]> {
+  async findByDateRange(
+    from: string,
+    to: string,
+    businessId: BusinessId,
+  ): Promise<readonly Expense[]> {
     const rows = await this.#db
       .select()
       .from(expenses)

@@ -13,17 +13,8 @@
  */
 
 import { compare } from 'bcryptjs';
-import {
-  today,
-  parseUserPermissions,
-  canUserCancelSales,
-  type Sale,
-} from '@xangarro/domain';
-import type {
-  BusinessId,
-  SaleId,
-  UserId,
-} from '@xangarro/domain';
+import { today, parseUserPermissions, canUserCancelSales, type Sale } from '@xangarro/domain';
+import type { BusinessId, SaleId, UserId } from '@xangarro/domain';
 import type {
   CancelacionLogsRepository,
   InventoryMovementsRepository,
@@ -51,9 +42,7 @@ export interface CancelarVentaResult {
   readonly cantidadDevuelta: number | null;
 }
 
-export class CancelarVentaUseCase
-  implements UseCase<CancelarVentaInput, CancelarVentaResult>
-{
+export class CancelarVentaUseCase implements UseCase<CancelarVentaInput, CancelarVentaResult> {
   readonly #sales: SalesRepository;
   readonly #users: UsersRepository;
   readonly #products: ProductsRepository;
@@ -79,10 +68,8 @@ export class CancelarVentaUseCase
     const sale = await this.#loadAndValidateSale(input.saleId);
     await this.#sales.delete(input.saleId);
 
-    const { stockReversed, cantidadDevuelta } =
-      await this.#reverseStock(sale, input);
-    const cashToReturn =
-      sale.metodo === 'Efectivo' ? sale.monto : null;
+    const { stockReversed, cantidadDevuelta } = await this.#reverseStock(sale, input);
+    const cashToReturn = sale.metodo === 'Efectivo' ? sale.monto : null;
 
     await this.#createAuditLog(input, sale, cashToReturn, stockReversed, cantidadDevuelta);
     return { sale, cashToReturn, stockReversed, cantidadDevuelta };
@@ -95,9 +82,7 @@ export class CancelarVentaUseCase
     if (!pinOk) throw new TypeError('PIN incorrecto');
 
     const raw = (user as Record<string, unknown>).permissions;
-    const perms = parseUserPermissions(
-      typeof raw === 'string' ? raw : '{}',
-    );
+    const perms = parseUserPermissions(typeof raw === 'string' ? raw : '{}');
     if (!canUserCancelSales(user.role, perms)) {
       throw new TypeError('No tienes permiso para cancelar ventas');
     }

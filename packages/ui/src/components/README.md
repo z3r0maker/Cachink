@@ -23,18 +23,18 @@
 
 ## Form + input primitives
 
-| Primitive             | One-liner                                                                                                                                          | Storybook                           |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
-| **`<Input>`**         | The brand-styled text input. Type union covers text / number / decimal / email / phone / password / date / select. Field primitives below wrap it. | `Phase 1A / Primitives / Input`     |
-| **`<Combobox>`**      | Searchable single-select. Used for currency, role, and category pickers.                                                                           | `Phase 1A / Primitives / Combobox`  |
-| **`<TextField>`**     | RHF-friendly text input with `<RhfTextField>` controlled wrapper.                                                                                  | `Phase 1A / Fields / TextField`     |
-| **`<MoneyField>`**    | Peso-amount input. Strips locale separators, formats on blur, exposes canonical `Money` bigint.                                                    | `Phase 1A / Fields / MoneyField`    |
-| **`<EmailField>`**    | Email keyboard + `autoComplete="email"`.                                                                                                           | `Phase 1A / Fields / EmailField`    |
-| **`<PhoneField>`**    | Phone-pad keyboard + `autoComplete="tel"`.                                                                                                         | `Phase 1A / Fields / PhoneField`    |
-| **`<PasswordField>`** | Masked input with brand show/hide toggle. `current-password` / `new-password` autofill.                                                            | `Phase 1A / Fields / PasswordField` |
-| **`<IntegerField>`**  | Strips non-digits at the input layer; clamps to `min`/`max` on blur.                                                                               | `Phase 1A / Fields / IntegerField`  |
-| **`<WheelQuantityPicker>`** | iOS-style scroll drum for bounded integers (1–999). Wraps `react-native-wheely`.                                                              | `Phase 1C / Fields / WheelQuantityPicker` |
-| **`<DateField>`**     | Platform-extension date input — native HTML5 on web, brand Modal-Combobox on RN.                                                                   | `Phase 1A / Fields / DateField`     |
+| Primitive                   | One-liner                                                                                                                                          | Storybook                                 |
+| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **`<Input>`**               | The brand-styled text input. Type union covers text / number / decimal / email / phone / password / date / select. Field primitives below wrap it. | `Phase 1A / Primitives / Input`           |
+| **`<Combobox>`**            | Searchable single-select. Used for currency, role, and category pickers.                                                                           | `Phase 1A / Primitives / Combobox`        |
+| **`<TextField>`**           | RHF-friendly text input with `<RhfTextField>` controlled wrapper.                                                                                  | `Phase 1A / Fields / TextField`           |
+| **`<MoneyField>`**          | Peso-amount input. Strips locale separators, formats on blur, exposes canonical `Money` bigint.                                                    | `Phase 1A / Fields / MoneyField`          |
+| **`<EmailField>`**          | Email keyboard + `autoComplete="email"`.                                                                                                           | `Phase 1A / Fields / EmailField`          |
+| **`<PhoneField>`**          | Phone-pad keyboard + `autoComplete="tel"`.                                                                                                         | `Phase 1A / Fields / PhoneField`          |
+| **`<PasswordField>`**       | Masked input with brand show/hide toggle. `current-password` / `new-password` autofill.                                                            | `Phase 1A / Fields / PasswordField`       |
+| **`<IntegerField>`**        | Strips non-digits at the input layer; clamps to `min`/`max` on blur.                                                                               | `Phase 1A / Fields / IntegerField`        |
+| **`<WheelQuantityPicker>`** | iOS-style scroll drum for bounded integers (1–999). Wraps `react-native-wheely`.                                                                   | `Phase 1C / Fields / WheelQuantityPicker` |
+| **`<DateField>`**           | Platform-extension date input — native HTML5 on web, brand Modal-Combobox on RN.                                                                   | `Phase 1A / Fields / DateField`           |
 
 ## Layout + chrome
 
@@ -76,19 +76,20 @@
 - **Input selector decision tree:** When adding a new form field that
   captures a number, follow this table:
 
-  | Scenario                                       | Component                |
-  | ---------------------------------------------- | ------------------------ |
-  | Bounded integer ≤999 (qty, units, day of month) | `WheelQuantityPicker`    |
-  | Small threshold, ±1 fine-tuning                 | `StepperField`           |
-  | Unbounded / large number / keyboard required    | `IntegerField`           |
-  | Money amount                                    | `MoneyField`             |
-  | ≤5 mutually-exclusive choices                   | `OptionCardGroup`        |
-  | 6+ options or open-ended lists                  | `Combobox`               |
+  | Scenario                                        | Component             |
+  | ----------------------------------------------- | --------------------- |
+  | Bounded integer ≤999 (qty, units, day of month) | `WheelQuantityPicker` |
+  | Small threshold, ±1 fine-tuning                 | `StepperField`        |
+  | Unbounded / large number / keyboard required    | `IntegerField`        |
+  | Money amount                                    | `MoneyField`          |
+  | ≤5 mutually-exclusive choices                   | `OptionCardGroup`     |
+  | 6+ options or open-ended lists                  | `Combobox`            |
 
   **Never use a raw `<Input type="number">` for small quantities.** The
   wheel picker avoids keyboard pop-up, prevents invalid input by
   construction, and is faster for the small numbers typical in micro-POS
   workflows.
+
 - **i18n:** Spanish (es-MX) only at launch — see CLAUDE.md §8.5. All user-facing strings flow through `useTranslation` from `@xangarro/ui/i18n`.
 - **Tests:** Vitest + Testing Library, jsdom environment. Below-floor primitives carry ≥6 tests apiece (Audit Round 2 G4).
 

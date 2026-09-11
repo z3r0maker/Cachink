@@ -8,7 +8,12 @@
  * branch has been removed.
  */
 
-import { type IsoDate, type NewSale, type PaymentMethod, type SaleCategory } from '@xangarro/domain';
+import {
+  type IsoDate,
+  type NewSale,
+  type PaymentMethod,
+  type SaleCategory,
+} from '@xangarro/domain';
 import type { Business, Product } from '@xangarro/domain';
 
 /** Derive SaleCategory from a Product's tipo. */

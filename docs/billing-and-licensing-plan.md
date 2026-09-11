@@ -38,13 +38,13 @@
 
 These were discussed and agreed during the May 15, 2026 planning session:
 
-| Decision | Answer |
-|---|---|
-| Pricing model | **Subscription** (recurring) |
-| Cross-platform | **Buy once, use everywhere** |
-| Desktop scope | **Mac + Windows** both at launch |
-| After subscription expires (offline) | **Read-only mode** (view data, can't create) |
-| First-time experience | **Freemium with limits** (e.g., 30 ventas/month) |
+| Decision                             | Answer                                           |
+| ------------------------------------ | ------------------------------------------------ |
+| Pricing model                        | **Subscription** (recurring)                     |
+| Cross-platform                       | **Buy once, use everywhere**                     |
+| Desktop scope                        | **Mac + Windows** both at launch                 |
+| After subscription expires (offline) | **Read-only mode** (view data, can't create)     |
+| First-time experience                | **Freemium with limits** (e.g., 30 ventas/month) |
 
 ---
 
@@ -97,8 +97,8 @@ type AppTier = 'free' | 'subscribed' | 'read_only';
 
 interface Entitlement {
   readonly tier: AppTier;
-  readonly currentPeriodEnd: string | null;   // ISO timestamp
-  readonly gracePeriodEnd: string | null;      // ISO timestamp
+  readonly currentPeriodEnd: string | null; // ISO timestamp
+  readonly gracePeriodEnd: string | null; // ISO timestamp
   readonly source: 'app_store' | 'google_play' | 'stripe' | null;
   readonly isInGracePeriod: boolean;
   readonly daysUntilLockout: number | null;
@@ -107,19 +107,19 @@ interface Entitlement {
 
 ### What each state allows
 
-| Action | `free` | `subscribed` | `read_only` |
-|---|---|---|---|
-| View ventas, egresos, productos | Yes | Yes | Yes |
-| View Estados Financieros, Indicadores | Yes | Yes | Yes |
-| Register new venta | Yes (up to limit) | Yes | **No** |
-| Register new egreso | Yes (up to limit) | Yes | **No** |
-| Create/edit producto | Yes (up to limit) | Yes | **No** |
-| Register inventory movement | Yes | Yes | **No** |
-| Corte de dia | Yes | Yes | **No** |
-| Export data (Excel/PDF) | Yes | Yes | **Yes (always)** |
-| Generate comprobante | Yes | Yes | **No** |
-| Multi-device sync | No | Yes | No |
-| Backup and restore (.cachink) | Yes | Yes | **Yes (always)** |
+| Action                                | `free`            | `subscribed` | `read_only`      |
+| ------------------------------------- | ----------------- | ------------ | ---------------- |
+| View ventas, egresos, productos       | Yes               | Yes          | Yes              |
+| View Estados Financieros, Indicadores | Yes               | Yes          | Yes              |
+| Register new venta                    | Yes (up to limit) | Yes          | **No**           |
+| Register new egreso                   | Yes (up to limit) | Yes          | **No**           |
+| Create/edit producto                  | Yes (up to limit) | Yes          | **No**           |
+| Register inventory movement           | Yes               | Yes          | **No**           |
+| Corte de dia                          | Yes               | Yes          | **No**           |
+| Export data (Excel/PDF)               | Yes               | Yes          | **Yes (always)** |
+| Generate comprobante                  | Yes               | Yes          | **No**           |
+| Multi-device sync                     | No                | Yes          | No               |
+| Backup and restore (.cachink)         | Yes               | Yes          | **Yes (always)** |
 
 **Key principle:** Data export and backup are ALWAYS available in every state.
 The user's data is never held hostage.
@@ -133,14 +133,14 @@ The limits create natural upgrade pressure as the business grows.
 
 ### Recommended limits (adjustable via remote config)
 
-| Resource | Free limit | Subscribed |
-|---|---|---|
-| Ventas per month | 30 | Unlimited |
-| Egresos per month | 20 | Unlimited |
-| Products in catalogue | 15 | Unlimited |
-| Devices | 1 | Up to 5 |
-| LAN sync | No | Yes |
-| Informe mensual PDF | No | Yes |
+| Resource              | Free limit | Subscribed |
+| --------------------- | ---------- | ---------- |
+| Ventas per month      | 30         | Unlimited  |
+| Egresos per month     | 20         | Unlimited  |
+| Products in catalogue | 15         | Unlimited  |
+| Devices               | 1          | Up to 5    |
+| LAN sync              | No         | Yes        |
+| Informe mensual PDF   | No         | Yes        |
 
 > **Note:** These numbers are starting points. They should be stored as
 > remote config so they can be adjusted without an app update. 30 ventas/month
@@ -169,7 +169,7 @@ throughout the month so users see it coming and are never surprised.
 
 ```ts
 interface UsageLimits {
-  readonly ventasPerMonth: number | null;    // null = unlimited
+  readonly ventasPerMonth: number | null; // null = unlimited
   readonly egresosPerMonth: number | null;
   readonly maxProductos: number | null;
   readonly maxDevices: number;
@@ -265,24 +265,24 @@ Jun 20     gracePeriodEnd passes.
 
 ### Why RevenueCat?
 
-| Criteria | RevenueCat | Keygen.sh | LemonSqueezy | Roll your own |
-|---|---|---|---|---|
-| iOS + Android native billing | Yes (SDK) | No | No | You build it |
-| Cross-platform entitlements | Yes (built-in) | No | No | You build it |
-| Web/desktop billing | Yes (via Stripe) | Yes (license keys) | Yes (license keys) | You build it |
-| Subscription lifecycle | Yes (automatic) | No (manual) | Partial | You build it |
-| React Native SDK | Yes | No | No | — |
-| Free tier | Up to $2,500 MTR/mo | Limited | Limited | $0 + your time |
-| Tauri-specific SDK | No (use web SDK) | Yes (keygen-rs) | No | — |
+| Criteria                     | RevenueCat          | Keygen.sh          | LemonSqueezy       | Roll your own  |
+| ---------------------------- | ------------------- | ------------------ | ------------------ | -------------- |
+| iOS + Android native billing | Yes (SDK)           | No                 | No                 | You build it   |
+| Cross-platform entitlements  | Yes (built-in)      | No                 | No                 | You build it   |
+| Web/desktop billing          | Yes (via Stripe)    | Yes (license keys) | Yes (license keys) | You build it   |
+| Subscription lifecycle       | Yes (automatic)     | No (manual)        | Partial            | You build it   |
+| React Native SDK             | Yes                 | No                 | No                 | —              |
+| Free tier                    | Up to $2,500 MTR/mo | Limited            | Limited            | $0 + your time |
+| Tauri-specific SDK           | No (use web SDK)    | Yes (keygen-rs)    | No                 | —              |
 
 ### How each platform pays
 
-| Platform | Billing method | SDK | Store fee |
-|---|---|---|---|
-| iOS | App Store (StoreKit 2) | `react-native-purchases` | 15% |
-| macOS | App Store via Universal Purchase | Tauri plugin + REST API | 15% |
-| Android | Google Play Billing | `react-native-purchases` | 15% |
-| Windows | RevenueCat Web Billing (Stripe) | `@revenuecat/purchases-js` | ~3% |
+| Platform | Billing method                   | SDK                        | Store fee |
+| -------- | -------------------------------- | -------------------------- | --------- |
+| iOS      | App Store (StoreKit 2)           | `react-native-purchases`   | 15%       |
+| macOS    | App Store via Universal Purchase | Tauri plugin + REST API    | 15%       |
+| Android  | Google Play Billing              | `react-native-purchases`   | 15%       |
+| Windows  | RevenueCat Web Billing (Stripe)  | `@revenuecat/purchases-js` | ~3%       |
 
 ### How "buy once, use everywhere" works
 
@@ -310,6 +310,7 @@ same App Store Connect record. A user who subscribes on iPhone automatically
 has the subscription on Mac, and vice versa.
 
 Requirements:
+
 - Same Apple Developer account for both apps
 - Same bundle ID prefix (e.g., mx.cachink.app)
 - macOS build uploaded from a separate Xcode target with matching bundle ID
@@ -403,11 +404,11 @@ Data export works in ALL states — free, subscribed, and read-only.
 One subscription allows up to **5 active devices**. Enforced by tracking
 device registrations in RevenueCat subscriber attributes.
 
-| Event | Behavior |
-|---|---|
-| Activate device 1-5 | Allowed |
-| Activate device 6 | Blocked: "Ya tienes 5 dispositivos. Desactiva uno desde Configuracion." |
-| Deactivate a device | Settings -> "Mis dispositivos" -> tap to remove |
+| Event               | Behavior                                                                |
+| ------------------- | ----------------------------------------------------------------------- |
+| Activate device 1-5 | Allowed                                                                 |
+| Activate device 6   | Blocked: "Ya tienes 5 dispositivos. Desactiva uno desde Configuracion." |
+| Deactivate a device | Settings -> "Mis dispositivos" -> tap to remove                         |
 
 ---
 
@@ -512,16 +513,17 @@ always returns `subscribed` so existing behavior doesn't change.
 
 ## 10. Cost Summary
 
-| Component | At launch | At $10K MRR |
-|---|---|---|
-| RevenueCat | Free (< $2,500 MTR) | ~$100/mo (1% of MTR) |
-| Apple (iOS + Mac) | 15% commission | 15% |
-| Google Play | 15% commission | 15% |
-| Stripe (Windows) | ~3% per transaction | ~3% |
-| Apple Developer Account | $99/year | $99/year |
-| Google Developer Account | $25 one-time | $0 |
+| Component                | At launch           | At $10K MRR          |
+| ------------------------ | ------------------- | -------------------- |
+| RevenueCat               | Free (< $2,500 MTR) | ~$100/mo (1% of MTR) |
+| Apple (iOS + Mac)        | 15% commission      | 15%                  |
+| Google Play              | 15% commission      | 15%                  |
+| Stripe (Windows)         | ~3% per transaction | ~3%                  |
+| Apple Developer Account  | $99/year            | $99/year             |
+| Google Developer Account | $25 one-time        | $0                   |
 
 Net revenue per $99/year subscription:
+
 - iOS/Mac (Apple): $99 x 85% = $84.15 (Apple takes 15%)
 - Android (Google): $99 x 85% = $84.15 (Google takes 15%)
 - Windows (Stripe): $99 x 97.1% - $0.30 = $95.73 (Stripe takes ~3%)
@@ -530,14 +532,14 @@ Net revenue per $99/year subscription:
 
 ## 11. Key Risks
 
-| Risk | Mitigation |
-|---|---|
-| RevenueCat web SDK doesn't work in Tauri webview | Test early in Phase E4. Fallback: open Stripe checkout in system browser, poll for completion. |
-| Mac App Store rejects Tauri app | Tauri 2.0 has official MAS docs. Test submission early. Fallback: distribute Mac via DMG + Stripe (same as Windows). |
-| Free tier too generous -> low conversion | Limits stored as remote config, adjustable without app update. |
-| Free tier too restrictive -> bad reviews | 30 ventas/month ~= 1/day. Even a tiny business exceeds this quickly. |
-| Read-only mode feels punitive | Always allow export. Empathetic copy: "Tus datos estan seguros." |
-| Apple rejects full lockout | Read-only mode (not full lockout) + always-available export should satisfy App Store guidelines. |
+| Risk                                             | Mitigation                                                                                                           |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| RevenueCat web SDK doesn't work in Tauri webview | Test early in Phase E4. Fallback: open Stripe checkout in system browser, poll for completion.                       |
+| Mac App Store rejects Tauri app                  | Tauri 2.0 has official MAS docs. Test submission early. Fallback: distribute Mac via DMG + Stripe (same as Windows). |
+| Free tier too generous -> low conversion         | Limits stored as remote config, adjustable without app update.                                                       |
+| Free tier too restrictive -> bad reviews         | 30 ventas/month ~= 1/day. Even a tiny business exceeds this quickly.                                                 |
+| Read-only mode feels punitive                    | Always allow export. Empathetic copy: "Tus datos estan seguros."                                                     |
+| Apple rejects full lockout                       | Read-only mode (not full lockout) + always-available export should satisfy App Store guidelines.                     |
 
 ---
 

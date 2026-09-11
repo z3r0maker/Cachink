@@ -18,9 +18,7 @@ describe('NuevoProductoScreen', () => {
   const noop = vi.fn();
 
   it('renders core fields', () => {
-    renderWithProviders(
-      <NuevoProductoScreen onSubmit={noop} onBack={noop} />,
-    );
+    renderWithProviders(<NuevoProductoScreen onSubmit={noop} onBack={noop} />);
     expect(screen.getByTestId('producto-nombre')).toBeTruthy();
     expect(screen.getByTestId('producto-sku')).toBeTruthy();
     expect(screen.getByTestId('producto-categoria')).toBeTruthy();
@@ -44,9 +42,7 @@ describe('NuevoProductoScreen', () => {
   });
 
   it('shows precio de venta by default (uso = venta)', () => {
-    renderWithProviders(
-      <NuevoProductoScreen onSubmit={noop} onBack={noop} />,
-    );
+    renderWithProviders(<NuevoProductoScreen onSubmit={noop} onBack={noop} />);
     // Default usoProducto is 'venta', so precio should be visible.
     expect(screen.getByTestId('producto-precio-venta')).toBeTruthy();
   });

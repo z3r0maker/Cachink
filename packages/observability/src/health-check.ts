@@ -14,13 +14,15 @@ export interface ObservabilityHealth {
 }
 
 const BROKEN_RESULT: Omit<ObservabilityHealth, 'status'> = {
-  tableExists: false, rowCount: 0, oldestEntry: null,
-  newestEntry: null, lastWriteSucceeded: false, dbSizeBytes: null,
+  tableExists: false,
+  rowCount: 0,
+  oldestEntry: null,
+  newestEntry: null,
+  lastWriteSucceeded: false,
+  dbSizeBytes: null,
 };
 
-export async function checkObservabilityHealth(
-  db: SqliteDatabase,
-): Promise<ObservabilityHealth> {
+export async function checkObservabilityHealth(db: SqliteDatabase): Promise<ObservabilityHealth> {
   const tableExists = await checkTableExists(db);
   if (tableExists === null) return { status: 'broken', ...BROKEN_RESULT };
   if (!tableExists) return { status: 'broken', ...BROKEN_RESULT };
@@ -29,8 +31,7 @@ export async function checkObservabilityHealth(
   const lastWriteSucceeded = await testWriteDelete(db);
   const dbSizeBytes = await estimateDbSize(db);
 
-  const status: ObservabilityHealth['status'] =
-    lastWriteSucceeded ? 'healthy' : 'degraded';
+  const status: ObservabilityHealth['status'] = lastWriteSucceeded ? 'healthy' : 'degraded';
 
   return { status, tableExists, lastWriteSucceeded, dbSizeBytes, ...rowInfo };
 }
@@ -48,7 +49,9 @@ async function checkTableExists(db: SqliteDatabase): Promise<boolean | null> {
 }
 
 async function fetchRowInfo(db: SqliteDatabase): Promise<{
-  rowCount: number; oldestEntry: string | null; newestEntry: string | null;
+  rowCount: number;
+  oldestEntry: string | null;
+  newestEntry: string | null;
 }> {
   try {
     const countResult = await db.getFirstAsync<{ cnt: number }>(
@@ -86,12 +89,8 @@ async function testWriteDelete(db: SqliteDatabase): Promise<boolean> {
 
 async function estimateDbSize(db: SqliteDatabase): Promise<number | null> {
   try {
-    const pageCount = await db.getFirstAsync<{ page_count: number }>(
-      'PRAGMA page_count',
-    );
-    const pageSize = await db.getFirstAsync<{ page_size: number }>(
-      'PRAGMA page_size',
-    );
+    const pageCount = await db.getFirstAsync<{ page_count: number }>('PRAGMA page_count');
+    const pageSize = await db.getFirstAsync<{ page_size: number }>('PRAGMA page_size');
     if (pageCount && pageSize) {
       return pageCount.page_count * pageSize.page_size;
     }

@@ -198,6 +198,8 @@ describe('IndicadoresScreen', () => {
         periodoMode="rango"
       />,
     );
-    expect(screen.getByTestId('indicador-rotacion').textContent).toContain('2.08 veces en el periodo');
+    expect(screen.getByTestId('indicador-rotacion').textContent).toContain(
+      '2.08 veces en el periodo',
+    );
   });
 });

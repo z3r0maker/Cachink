@@ -19,11 +19,7 @@ export interface AuthResult {
 }
 
 /** Successful authentication result. */
-export function authSuccess(
-  userId: UserId,
-  role: UserRole,
-  mustChangePin: boolean,
-): AuthResult {
+export function authSuccess(userId: UserId, role: UserRole, mustChangePin: boolean): AuthResult {
   return { success: true, userId, role, mustChangePin };
 }
 

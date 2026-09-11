@@ -25,18 +25,12 @@ import type { CachinkDatabase } from './_db.js';
 
 type LogRow = typeof cancelacionLogs.$inferSelect;
 
-export class DrizzleCancelacionLogsRepository
-  implements CancelacionLogsRepository
-{
+export class DrizzleCancelacionLogsRepository implements CancelacionLogsRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(
-    db: CachinkDatabase,
-    deviceId: DeviceId,
-    userId: UserId | null = null,
-  ) {
+  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;
@@ -67,9 +61,7 @@ export class DrizzleCancelacionLogsRepository
     return this.#mapRow(row);
   }
 
-  async findById(
-    id: CancelacionLogId,
-  ): Promise<CancelacionLog | null> {
+  async findById(id: CancelacionLogId): Promise<CancelacionLog | null> {
     const row = await this.#db
       .select()
       .from(cancelacionLogs)
@@ -78,9 +70,7 @@ export class DrizzleCancelacionLogsRepository
     return row ? this.#mapRow(row) : null;
   }
 
-  async findBySaleId(
-    saleId: SaleId,
-  ): Promise<CancelacionLog | null> {
+  async findBySaleId(saleId: SaleId): Promise<CancelacionLog | null> {
     const row = await this.#db
       .select()
       .from(cancelacionLogs)

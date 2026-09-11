@@ -68,9 +68,7 @@ export interface ExportarDatosRepositories {
   recurringExpenses: RecurringExpensesRepository;
 }
 
-export class ExportarDatosUseCase
-  implements UseCase<ExportarDatosInput, ExportDataset>
-{
+export class ExportarDatosUseCase implements UseCase<ExportarDatosInput, ExportDataset> {
   readonly #repos: ExportarDatosRepositories;
 
   constructor(repos: ExportarDatosRepositories) {

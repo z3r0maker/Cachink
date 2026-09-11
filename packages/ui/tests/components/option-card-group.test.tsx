@@ -18,9 +18,7 @@ const OPTIONS: readonly OptionCardItem<'a' | 'b' | 'c'>[] = [
 
 describe('OptionCardGroup', () => {
   it('renders all options with icons, labels, and descriptions', () => {
-    renderWithProviders(
-      <OptionCardGroup value="a" onChange={vi.fn()} options={OPTIONS} />,
-    );
+    renderWithProviders(<OptionCardGroup value="a" onChange={vi.fn()} options={OPTIONS} />);
     expect(screen.getByText('Option A')).toBeInTheDocument();
     expect(screen.getByText('Description A')).toBeInTheDocument();
     expect(screen.getByText('Option B')).toBeInTheDocument();
@@ -30,9 +28,7 @@ describe('OptionCardGroup', () => {
   });
 
   it('selected card has yellowSoft background', () => {
-    renderWithProviders(
-      <OptionCardGroup value="b" onChange={vi.fn()} options={OPTIONS} />,
-    );
+    renderWithProviders(<OptionCardGroup value="b" onChange={vi.fn()} options={OPTIONS} />);
     const selectedCard = screen.getByTestId('option-card-b');
     // The Pressable wraps a View — the View carries the background style.
     // In JSDOM the selected card's inner View should have the yellowSoft bg.
@@ -44,9 +40,7 @@ describe('OptionCardGroup', () => {
 
   it('tapping an unselected card fires onChange with the correct key', () => {
     const onChange = vi.fn();
-    renderWithProviders(
-      <OptionCardGroup value="a" onChange={onChange} options={OPTIONS} />,
-    );
+    renderWithProviders(<OptionCardGroup value="a" onChange={onChange} options={OPTIONS} />);
     fireEvent.click(screen.getByTestId('option-card-b'));
     expect(onChange).toHaveBeenCalledWith('b');
     expect(onChange).toHaveBeenCalledTimes(1);
@@ -54,33 +48,21 @@ describe('OptionCardGroup', () => {
 
   it('tapping the already-selected card does NOT fire onChange', () => {
     const onChange = vi.fn();
-    renderWithProviders(
-      <OptionCardGroup value="a" onChange={onChange} options={OPTIONS} />,
-    );
+    renderWithProviders(<OptionCardGroup value="a" onChange={onChange} options={OPTIONS} />);
     fireEvent.click(screen.getByTestId('option-card-a'));
     expect(onChange).not.toHaveBeenCalled();
   });
 
   it('testID is forwarded to the root element', () => {
     renderWithProviders(
-      <OptionCardGroup
-        value="a"
-        onChange={vi.fn()}
-        options={OPTIONS}
-        testID="my-card-group"
-      />,
+      <OptionCardGroup value="a" onChange={vi.fn()} options={OPTIONS} testID="my-card-group" />,
     );
     expect(screen.getByTestId('my-card-group')).toBeInTheDocument();
   });
 
   it('renders optional uppercase label above the cards when provided', () => {
     renderWithProviders(
-      <OptionCardGroup
-        value="a"
-        onChange={vi.fn()}
-        options={OPTIONS}
-        label="Choose one"
-      />,
+      <OptionCardGroup value="a" onChange={vi.fn()} options={OPTIONS} label="Choose one" />,
     );
     expect(screen.getByTestId('option-card-group-label')).toBeInTheDocument();
     expect(screen.getByText('Choose one')).toBeInTheDocument();

@@ -35,9 +35,9 @@ describe('GenerarInformeMensualUseCase', () => {
   });
 
   it('rejects an invalid yearMonth format', async () => {
-    await expect(
-      useCase.execute({ businessId, yearMonth: '2026/04' }),
-    ).rejects.toThrow(/yearMonth/);
+    await expect(useCase.execute({ businessId, yearMonth: '2026/04' })).rejects.toThrow(
+      /yearMonth/,
+    );
   });
 
   it('rejects when the business does not exist', async () => {
@@ -160,9 +160,7 @@ describe('GenerarInformeMensualUseCase', () => {
     await sales.create(
       makeNewSale({ businessId, fecha: '2026-03-30' as IsoDate, monto: 999_999n }),
     );
-    await sales.create(
-      makeNewSale({ businessId, fecha: '2026-04-01' as IsoDate, monto: 10_000n }),
-    );
+    await sales.create(makeNewSale({ businessId, fecha: '2026-04-01' as IsoDate, monto: 10_000n }));
     await sales.create(
       makeNewSale({ businessId, fecha: '2026-05-01' as IsoDate, monto: 999_999n }),
     );

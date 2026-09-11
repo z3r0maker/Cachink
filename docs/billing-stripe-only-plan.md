@@ -44,6 +44,7 @@ This plan simplifies everything to a single billing provider (Stripe) for
 ALL platforms. The stores are used only as free download hosts.
 
 Key advantages:
+
 - **One billing integration** instead of four
 - **~3% fees** instead of 15% (saves ~$12/subscriber/year on a $99/yr plan)
 - **No RevenueCat dependency** (and its 1% fee above $2,500 MTR)
@@ -139,6 +140,7 @@ The Epic v. Apple ruling (finalized December 2025) established that:
 ### Regulatory trajectory
 
 Alternative distribution is expanding country by country:
+
 - EU: Full alternative marketplaces + web distribution (iOS 17.4+)
 - Japan: Alternative marketplaces (December 2025)
 - Brazil: Apple agreed to allow alternatives (December 2025)
@@ -154,12 +156,12 @@ Budget for this possibility.
 
 ## 4. Platform Distribution Matrix
 
-| Platform | Distribution | Billing | Store fee | Notes |
-|---|---|---|---|---|
-| iOS / iPad | App Store (free) | External Link -> Stripe | 0% (+ Stripe 3%) | Epic v. Apple ruling |
-| Android | Google Play (free) | External Link -> Stripe | 0% (+ Stripe 3%) | Or direct APK from website |
-| macOS | .dmg from cachink.mx | Stripe | 0% (+ Stripe 3%) | Notarized, no MAS needed |
-| Windows | .msi from cachink.mx | Stripe | 0% (+ Stripe 3%) | Tauri native installer |
+| Platform   | Distribution         | Billing                 | Store fee        | Notes                      |
+| ---------- | -------------------- | ----------------------- | ---------------- | -------------------------- |
+| iOS / iPad | App Store (free)     | External Link -> Stripe | 0% (+ Stripe 3%) | Epic v. Apple ruling       |
+| Android    | Google Play (free)   | External Link -> Stripe | 0% (+ Stripe 3%) | Or direct APK from website |
+| macOS      | .dmg from cachink.mx | Stripe                  | 0% (+ Stripe 3%) | Notarized, no MAS needed   |
+| Windows    | .msi from cachink.mx | Stripe                  | 0% (+ Stripe 3%) | Tauri native installer     |
 
 ### Why not sideload on Android?
 
@@ -181,26 +183,26 @@ users the same trust signal ("Apple verified this app").
 
 ### Per subscriber, on a $99/year plan
 
-| Channel | Gross | Fees | Net to you |
-|---|---|---|---|
-| App Store IAP (15%) | $99 | $14.85 | $84.15 |
-| Google Play (15%) | $99 | $14.85 | $84.15 |
-| RevenueCat (1% MTR) | — | ~$1.00 | — |
-| **Plan A total** | $99 | **$15.85** | **$83.15** |
-| | | | |
-| Stripe (2.9% + $0.30) | $99 | $3.17 | $95.83 |
-| **Plan B total** | $99 | **$3.17** | **$95.83** |
-| | | | |
-| **Savings per subscriber** | | | **$12.68/yr** |
+| Channel                    | Gross | Fees       | Net to you    |
+| -------------------------- | ----- | ---------- | ------------- |
+| App Store IAP (15%)        | $99   | $14.85     | $84.15        |
+| Google Play (15%)          | $99   | $14.85     | $84.15        |
+| RevenueCat (1% MTR)        | —     | ~$1.00     | —             |
+| **Plan A total**           | $99   | **$15.85** | **$83.15**    |
+|                            |       |            |               |
+| Stripe (2.9% + $0.30)      | $99   | $3.17      | $95.83        |
+| **Plan B total**           | $99   | **$3.17**  | **$95.83**    |
+|                            |       |            |               |
+| **Savings per subscriber** |       |            | **$12.68/yr** |
 
 ### At scale
 
 | Subscribers | Plan A annual revenue | Plan B annual revenue | Difference |
-|---|---|---|---|
-| 100 | $8,315 | $9,583 | +$1,268 |
-| 500 | $41,575 | $47,915 | +$6,340 |
-| 1,000 | $83,150 | $95,830 | +$12,680 |
-| 5,000 | $415,750 | $479,150 | +$63,400 |
+| ----------- | --------------------- | --------------------- | ---------- |
+| 100         | $8,315                | $9,583                | +$1,268    |
+| 500         | $41,575               | $47,915               | +$6,340    |
+| 1,000       | $83,150               | $95,830               | +$12,680   |
+| 5,000       | $415,750              | $479,150              | +$63,400   |
 
 ---
 
@@ -248,12 +250,12 @@ Your infrastructure:
 
 ### Technology options for the API
 
-| Option | Pros | Cons |
-|---|---|---|
-| Cloudflare Workers | Edge-fast, free tier generous, D1 for SQLite | Vendor lock-in |
-| Vercel Edge Functions | Easy deployment, works with Stripe | Cold starts |
-| Supabase Edge Functions | Already in the stack (sync-cloud) | Adds dependency |
-| Fly.io | Full control, global regions | More ops work |
+| Option                  | Pros                                         | Cons            |
+| ----------------------- | -------------------------------------------- | --------------- |
+| Cloudflare Workers      | Edge-fast, free tier generous, D1 for SQLite | Vendor lock-in  |
+| Vercel Edge Functions   | Easy deployment, works with Stripe           | Cold starts     |
+| Supabase Edge Functions | Already in the stack (sync-cloud)            | Adds dependency |
+| Fly.io                  | Full control, global regions                 | More ops work   |
 
 The API is extremely simple — two endpoints + a webhook handler. Total
 code is likely under 200 lines. Any serverless platform works.
@@ -281,6 +283,7 @@ Plan A, but the token comes from your own API instead of RevenueCat.
 ### Mexican payment methods
 
 Stripe supports these payment methods in Mexico:
+
 - Credit/debit card (Visa, Mastercard, Amex)
 - OXXO (cash payment at convenience stores — huge in Mexico)
 - SPEI (bank transfer)
@@ -297,11 +300,11 @@ at OXXO.
 Identical to Plan A. See billing-and-licensing-plan.md Section 2 for full
 details. Summary:
 
-| State | When | What works |
-|---|---|---|
-| `free` | Never subscribed, or subscription expired + online | Everything with usage limits |
-| `subscribed` | Active subscription (online or cached token valid) | Everything, unlimited |
-| `read_only` | Subscription expired + offline + grace period over | View and export only |
+| State        | When                                               | What works                   |
+| ------------ | -------------------------------------------------- | ---------------------------- |
+| `free`       | Never subscribed, or subscription expired + online | Everything with usage limits |
+| `subscribed` | Active subscription (online or cached token valid) | Everything, unlimited        |
+| `read_only`  | Subscription expired + offline + grace period over | View and export only         |
 
 ---
 
@@ -309,14 +312,14 @@ details. Summary:
 
 Identical to Plan A. See billing-and-licensing-plan.md Section 3.
 
-| Resource | Free | Subscribed |
-|---|---|---|
-| Ventas per month | 30 | Unlimited |
-| Egresos per month | 20 | Unlimited |
-| Products in catalogue | 15 | Unlimited |
-| Devices | 1 | Up to 5 |
-| LAN sync | No | Yes |
-| Informe mensual PDF | No | Yes |
+| Resource              | Free | Subscribed |
+| --------------------- | ---- | ---------- |
+| Ventas per month      | 30   | Unlimited  |
+| Egresos per month     | 20   | Unlimited  |
+| Products in catalogue | 15   | Unlimited  |
+| Devices               | 1    | Up to 5    |
+| LAN sync              | No   | Yes        |
+| Informe mensual PDF   | No   | Yes        |
 
 ---
 
@@ -326,6 +329,7 @@ Same mechanism as Plan A (signed expiration token + grace period), but the
 token comes from your own API (api.cachink.mx) instead of RevenueCat.
 
 The key fields are baked into the JWT at subscription time:
+
 - `currentPeriodEnd` — when the billing period ends
 - `gracePeriodEnd` — 5 days after period end
 
@@ -343,6 +347,7 @@ each billing cycle. The app fetches the new token when it comes online.
 Identical to Plan A. See billing-and-licensing-plan.md Section 6.
 
 The .cachink backup file works the same regardless of billing provider:
+
 - Export: Settings -> "Exportar respaldo completo" -> .cachink file
 - Import: First-run wizard or Settings -> "Importar respaldo"
 - Always available in all states (free, subscribed, read_only)
@@ -408,6 +413,7 @@ Wire up the subscription flow in the app.
 ### Phase S5 — Data Portability (.cachink backup)
 
 Same as Plan A Phase E5:
+
 1. Build exportBackup() and importBackup()
 2. Add to Settings screen and first-run Wizard
 3. Add to ReadOnlyLockScreen
@@ -428,37 +434,39 @@ Same as Plan A Phase E5:
 
 ### What Plan B does better
 
-| Aspect | Plan A (RevenueCat) | Plan B (Stripe-only) |
-|---|---|---|
-| Commission | 15% + 1% | ~3% |
-| Billing integrations | 4 (iOS, Android, Mac, Stripe) | 1 (Stripe only) |
-| SDKs | react-native-purchases + purchases-js | None (HTTPS calls) |
-| Mexican payment methods | Card only (store limitation) | Card + OXXO + SPEI |
-| Subscription management | RevenueCat dashboard | Stripe Dashboard |
-| Vendor dependencies | RevenueCat + Apple + Google + Stripe | Stripe only |
-| Backend required | No (RevenueCat is the backend) | Yes (lightweight API) |
+| Aspect                  | Plan A (RevenueCat)                   | Plan B (Stripe-only)  |
+| ----------------------- | ------------------------------------- | --------------------- |
+| Commission              | 15% + 1%                              | ~3%                   |
+| Billing integrations    | 4 (iOS, Android, Mac, Stripe)         | 1 (Stripe only)       |
+| SDKs                    | react-native-purchases + purchases-js | None (HTTPS calls)    |
+| Mexican payment methods | Card only (store limitation)          | Card + OXXO + SPEI    |
+| Subscription management | RevenueCat dashboard                  | Stripe Dashboard      |
+| Vendor dependencies     | RevenueCat + Apple + Google + Stripe  | Stripe only           |
+| Backend required        | No (RevenueCat is the backend)        | Yes (lightweight API) |
 
 ### What Plan B does worse
 
-| Aspect | Plan A (RevenueCat) | Plan B (Stripe-only) |
-|---|---|---|
-| Purchase friction | Native store UX (Face ID, 1-tap) | Opens browser, manual card entry |
-| User trust | "Pay via App Store" feels safe | "Pay on website" may feel less safe |
-| Backend ops | None (RevenueCat manages) | You host + maintain a small API |
-| OXXO async payments | N/A | Need to handle 24-48h confirmation delay |
-| Apple compliance risk | Zero (using their system) | Low but nonzero (external link rules may change) |
-| Auto-renew UX | Store handles silently | Stripe handles, but no "Manage Subscriptions" in iOS Settings |
-| Refund handling | Store handles | You handle via Stripe |
-| Tax compliance | Store handles | Stripe Tax or you handle |
+| Aspect                | Plan A (RevenueCat)              | Plan B (Stripe-only)                                          |
+| --------------------- | -------------------------------- | ------------------------------------------------------------- |
+| Purchase friction     | Native store UX (Face ID, 1-tap) | Opens browser, manual card entry                              |
+| User trust            | "Pay via App Store" feels safe   | "Pay on website" may feel less safe                           |
+| Backend ops           | None (RevenueCat manages)        | You host + maintain a small API                               |
+| OXXO async payments   | N/A                              | Need to handle 24-48h confirmation delay                      |
+| Apple compliance risk | Zero (using their system)        | Low but nonzero (external link rules may change)              |
+| Auto-renew UX         | Store handles silently           | Stripe handles, but no "Manage Subscriptions" in iOS Settings |
+| Refund handling       | Store handles                    | You handle via Stripe                                         |
+| Tax compliance        | Store handles                    | Stripe Tax or you handle                                      |
 
 ### The biggest trade-off: purchase friction
 
 Native store billing (Plan A):
+
 ```
 User taps "Subscribe" -> Face ID -> Done. 2 seconds.
 ```
 
 External billing (Plan B):
+
 ```
 User taps "Subscribe" -> Safari opens -> Enter email ->
 Enter card (or choose OXXO) -> Confirm -> Return to app.
@@ -474,14 +482,14 @@ at smaller scale.
 
 ## 13. Key Risks
 
-| Risk | Severity | Mitigation |
-|---|---|---|
-| Apple changes external payment rules | Medium | Monitor legal developments. Keep Plan A as fallback. Both plans share the same entitlement architecture — switching billing provider doesn't require UI changes. |
-| Apple charges reduced commission on external payments | Medium | Budget for up to 10% Apple fee. Even at 10%, you'd still save vs 15% store fee. |
-| Lower conversion rate from browser checkout | High | Optimize checkout page for speed. Support OXXO (huge in Mexico). A/B test against in-store billing if needed. |
-| OXXO payments are async (24-48h) | Low | Show "Pago pendiente" state in app. Stripe webhook fires when OXXO payment clears. App unlocks on next online check. |
-| API downtime blocks new subscriptions | Low | Serverless/edge deployment with 99.9%+ uptime. Cached tokens keep existing subscribers working offline. |
-| Tax compliance in Mexico | Medium | Use Stripe Tax for automatic tax calculation and invoicing. Mexico requires RFC-based invoicing for some business expenses. |
+| Risk                                                  | Severity | Mitigation                                                                                                                                                       |
+| ----------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Apple changes external payment rules                  | Medium   | Monitor legal developments. Keep Plan A as fallback. Both plans share the same entitlement architecture — switching billing provider doesn't require UI changes. |
+| Apple charges reduced commission on external payments | Medium   | Budget for up to 10% Apple fee. Even at 10%, you'd still save vs 15% store fee.                                                                                  |
+| Lower conversion rate from browser checkout           | High     | Optimize checkout page for speed. Support OXXO (huge in Mexico). A/B test against in-store billing if needed.                                                    |
+| OXXO payments are async (24-48h)                      | Low      | Show "Pago pendiente" state in app. Stripe webhook fires when OXXO payment clears. App unlocks on next online check.                                             |
+| API downtime blocks new subscriptions                 | Low      | Serverless/edge deployment with 99.9%+ uptime. Cached tokens keep existing subscribers working offline.                                                          |
+| Tax compliance in Mexico                              | Medium   | Use Stripe Tax for automatic tax calculation and invoicing. Mexico requires RFC-based invoicing for some business expenses.                                      |
 
 ---
 

@@ -4,13 +4,7 @@
  * Shared by useTurnBalance and useExpectedCash to avoid duplication.
  */
 
-import type {
-  CajaBalanceInput,
-  CajaMovimiento,
-  CajaTurno,
-  Expense,
-  Sale,
-} from '@xangarro/domain';
+import type { CajaBalanceInput, CajaMovimiento, CajaTurno, Expense, Sale } from '@xangarro/domain';
 
 function cashSales(sales: readonly Sale[]): readonly Sale[] {
   return sales.filter((s) => s.metodo === 'Efectivo' && !s.cancelledAt);

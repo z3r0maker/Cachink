@@ -4,7 +4,7 @@
  * Covers time-aware greeting, business name display, and date rendering.
  */
 
-import { describe, expect, it, vi, afterEach, beforeEach } from 'vitest';
+import { describe, expect, it, vi, afterEach } from 'vitest';
 import { QuickSwitchHeader } from '../../../src/screens/Login/quick-switch-header';
 import { initI18n } from '../../../src/i18n/index';
 import { renderWithProviders, screen } from '../../test-utils';

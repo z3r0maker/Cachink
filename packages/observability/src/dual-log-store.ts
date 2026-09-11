@@ -67,17 +67,19 @@ export class DualLogStore implements LogStore {
     if (this.#inRemoteWrite) return;
     this.#inRemoteWrite = true;
     try {
-      await this.#remote.sendErrorBatch([{
-        id: event.id,
-        timestamp: event.timestamp,
-        source: 'use-case',
-        operation: event.operation,
-        errorName: event.errorCode ?? 'UnknownError',
-        errorMessage: event.errorMessage ?? '',
-        userId: event.userId,
-        deviceId: event.deviceId,
-        businessId: event.businessId,
-      }]);
+      await this.#remote.sendErrorBatch([
+        {
+          id: event.id,
+          timestamp: event.timestamp,
+          source: 'use-case',
+          operation: event.operation,
+          errorName: event.errorCode ?? 'UnknownError',
+          errorMessage: event.errorMessage ?? '',
+          userId: event.userId,
+          deviceId: event.deviceId,
+          businessId: event.businessId,
+        },
+      ]);
     } catch {
       // Swallow — remote failure is non-critical
     } finally {

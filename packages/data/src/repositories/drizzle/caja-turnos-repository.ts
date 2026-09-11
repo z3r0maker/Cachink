@@ -27,9 +27,7 @@ import type { CachinkDatabase } from './_db.js';
 
 type TurnoRow = typeof cajaTurnos.$inferSelect;
 
-export class DrizzleCajaTurnosRepository
-  implements CajaTurnosRepository
-{
+export class DrizzleCajaTurnosRepository implements CajaTurnosRepository {
   readonly #db: CachinkDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
@@ -119,12 +117,7 @@ export class DrizzleCajaTurnosRepository
     const row = await this.#db
       .select()
       .from(cajaTurnos)
-      .where(
-        and(
-          eq(cajaTurnos.businessId, businessId),
-          isNull(cajaTurnos.deletedAt),
-        ),
-      )
+      .where(and(eq(cajaTurnos.businessId, businessId), isNull(cajaTurnos.deletedAt)))
       .orderBy(desc(cajaTurnos.createdAt))
       .limit(1)
       .get();
@@ -156,10 +149,19 @@ export class DrizzleCajaTurnosRepository
     const ts = now();
     const set: Record<string, unknown> = { updatedAt: ts };
     const keys: (keyof CajaTurnoPatch)[] = [
-      'cierreAt', 'montoCierreCentavos', 'efectivoEsperadoCentavos',
-      'diferenciaCentavos', 'discrepancyReason', 'explicacion',
-      'totalTransferencias', 'totalTarjeta', 'totalQr', 'totalCredito', 'egresoAutoId',
-      'conteoCentavos', 'conteoAt',
+      'cierreAt',
+      'montoCierreCentavos',
+      'efectivoEsperadoCentavos',
+      'diferenciaCentavos',
+      'discrepancyReason',
+      'explicacion',
+      'totalTransferencias',
+      'totalTarjeta',
+      'totalQr',
+      'totalCredito',
+      'egresoAutoId',
+      'conteoCentavos',
+      'conteoAt',
     ];
     for (const k of keys) {
       if (patch[k] !== undefined) set[k] = patch[k];

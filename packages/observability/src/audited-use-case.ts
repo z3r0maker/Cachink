@@ -77,11 +77,16 @@ export class AuditedUseCase<TInput, TOutput> implements Executable<TInput, TOutp
   }
 
   #logSuccess(
-    id: string, timestamp: string, durationMs: number,
-    input: TInput, result: TOutput,
+    id: string,
+    timestamp: string,
+    durationMs: number,
+    input: TInput,
+    result: TOutput,
   ): void {
     const event: AuditEvent = {
-      id, timestamp, durationMs,
+      id,
+      timestamp,
+      durationMs,
       operation: this.#config.operation,
       entityType: this.#config.entityType,
       entityId: this.#config.extractEntityId(result, input),
@@ -95,12 +100,17 @@ export class AuditedUseCase<TInput, TOutput> implements Executable<TInput, TOutp
   }
 
   #logFailure(
-    id: string, timestamp: string, durationMs: number,
-    input: TInput, err: unknown,
+    id: string,
+    timestamp: string,
+    durationMs: number,
+    input: TInput,
+    err: unknown,
   ): void {
     const error = err instanceof Error ? err : new Error(String(err));
     const event: AuditEvent = {
-      id, timestamp, durationMs,
+      id,
+      timestamp,
+      durationMs,
       operation: this.#config.operation,
       entityType: this.#config.entityType,
       entityId: '',
@@ -113,17 +123,20 @@ export class AuditedUseCase<TInput, TOutput> implements Executable<TInput, TOutp
       errorMessage: error.message,
     };
     void this.#logStore.writeAudit(event).catch(() => {});
-    void this.#logStore.writeError({
-      id: ulid(), timestamp,
-      source: 'use-case',
-      operation: this.#config.operation,
-      errorName: error.name,
-      errorMessage: error.message,
-      errorStack: error.stack,
-      userId: this.#context.userId,
-      deviceId: this.#context.deviceId,
-      businessId: this.#context.businessId,
-      context: this.#config.extractMetadata?.(input),
-    }).catch(() => {});
+    void this.#logStore
+      .writeError({
+        id: ulid(),
+        timestamp,
+        source: 'use-case',
+        operation: this.#config.operation,
+        errorName: error.name,
+        errorMessage: error.message,
+        errorStack: error.stack,
+        userId: this.#context.userId,
+        deviceId: this.#context.deviceId,
+        businessId: this.#context.businessId,
+        context: this.#config.extractMetadata?.(input),
+      })
+      .catch(() => {});
   }
 }

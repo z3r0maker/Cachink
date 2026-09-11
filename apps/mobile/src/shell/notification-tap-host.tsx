@@ -39,9 +39,7 @@ interface NotificationPayload {
   readonly alertId?: string;
 }
 
-function extractPayload(
-  response: Notifications.NotificationResponse,
-): NotificationPayload {
+function extractPayload(response: Notifications.NotificationResponse): NotificationPayload {
   return (response.notification.request.content.data ?? {}) as NotificationPayload;
 }
 
@@ -86,8 +84,8 @@ export function NotificationTapHost(): ReactElement | null {
 
   // ── Warm-start tap listener ────────────────────────────────────
   useEffect(() => {
-    const subscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => handleTap(extractPayload(response)),
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) =>
+      handleTap(extractPayload(response)),
     );
     return () => subscription.remove();
   }, [userId]);

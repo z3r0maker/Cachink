@@ -41,13 +41,13 @@
 
 Every entity table MUST have these columns:
 
-| Column       | Type | Nullable | Purpose                            |
-|-------------|------|----------|------------------------------------|
-| `business_id` | TEXT | NOT NULL | Tenant isolation                  |
-| `device_id`   | TEXT | NOT NULL | Origin device for sync            |
-| `created_at`  | TEXT | NOT NULL | ISO-8601 creation timestamp       |
-| `updated_at`  | TEXT | NOT NULL | ISO-8601 last-update timestamp    |
-| `deleted_at`  | TEXT | NULL     | ISO-8601 soft-delete timestamp    |
+| Column        | Type | Nullable | Purpose                        |
+| ------------- | ---- | -------- | ------------------------------ |
+| `business_id` | TEXT | NOT NULL | Tenant isolation               |
+| `device_id`   | TEXT | NOT NULL | Origin device for sync         |
+| `created_at`  | TEXT | NOT NULL | ISO-8601 creation timestamp    |
+| `updated_at`  | TEXT | NOT NULL | ISO-8601 last-update timestamp |
+| `deleted_at`  | TEXT | NULL     | ISO-8601 soft-delete timestamp |
 
 ## Foreign Keys
 

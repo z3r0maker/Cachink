@@ -13,7 +13,14 @@
  * Phase 5: `stockEnabled` flag supersedes `tipoNegocio` for stock decisions.
  */
 
-import { NewSaleSchema, today, type CajaTurnoId, type NewSale, type Sale, type UserId } from '@xangarro/domain';
+import {
+  NewSaleSchema,
+  today,
+  type CajaTurnoId,
+  type NewSale,
+  type Sale,
+  type UserId,
+} from '@xangarro/domain';
 import { CajaNoAbiertaError } from '@xangarro/domain';
 import type {
   CajaTurnosRepository,

@@ -11,7 +11,7 @@ import { FuncionesNegocioScreen } from '../../src/screens/FuncionesNegocio/funci
 import { FeatureFlagCard } from '../../src/screens/FuncionesNegocio/feature-flag-card';
 import { FLAG_DISPLAY_INFO } from '../../src/screens/FuncionesNegocio/flag-descriptions';
 import { initI18n } from '../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../test-utils';
+import { renderWithProviders, screen } from '../test-utils';
 
 initI18n();
 
@@ -35,16 +35,12 @@ const ALL_OFF: FeatureFlags = {
 
 describe('FuncionesNegocioScreen', () => {
   it('renders with default testID funciones-negocio', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />);
     expect(screen.getByTestId('funciones-negocio')).toBeInTheDocument();
   });
 
   it('renders all 6 flag cards (stock toggleable + 5 comingSoon) for MVP', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />);
     expect(FLAG_DISPLAY_INFO).toHaveLength(6);
     for (const info of FLAG_DISPLAY_INFO) {
       expect(screen.getByTestId(`flag-${info.key}`)).toBeInTheDocument();
@@ -52,9 +48,7 @@ describe('FuncionesNegocioScreen', () => {
   });
 
   it('renders switch only for non-comingSoon flags (stock)', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />);
     // Stock is toggleable
     expect(screen.getByTestId('flag-stock-switch')).toBeInTheDocument();
     // comingSoon flags should NOT have a switch
@@ -64,9 +58,7 @@ describe('FuncionesNegocioScreen', () => {
   });
 
   it('renders comingSoon flags with Próximamente badge text', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />);
     // All comingSoon flags should be visible as cards
     expect(screen.getByTestId('flag-merma')).toBeInTheDocument();
     expect(screen.getByTestId('flag-conversionMateriaPrima')).toBeInTheDocument();
@@ -75,18 +67,14 @@ describe('FuncionesNegocioScreen', () => {
   });
 
   it('renders stock switch checked when stock is on', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_ON} onToggle={vi.fn()} />);
     const switchEl = screen.getByTestId('flag-stock-switch');
     // The Switch should be rendered (presence test)
     expect(switchEl).toBeInTheDocument();
   });
 
   it('renders stock switch unchecked when stock is off', () => {
-    renderWithProviders(
-      <FuncionesNegocioScreen flags={ALL_OFF} onToggle={vi.fn()} />,
-    );
+    renderWithProviders(<FuncionesNegocioScreen flags={ALL_OFF} onToggle={vi.fn()} />);
     const switchEl = screen.getByTestId('flag-stock-switch');
     expect(switchEl).toBeInTheDocument();
   });

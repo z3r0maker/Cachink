@@ -3,11 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "dependsOn": [
-        "@xangarro/domain#build",
-        "@xangarro/data#build",
-        "@xangarro/application#build"
-      ]
+      "dependsOn": ["@xangarro/domain#build", "@xangarro/data#build", "@xangarro/application#build"]
     }
   }
 }

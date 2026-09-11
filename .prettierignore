@@ -1,0 +1,9 @@
+# Parked code, generated reports, and files agents must not rewrite are never formatted.
+archive/
+e2e-reports/
+audit-screenshots/
+CLAUDE.md
+ARCHITECTURE.md
+ROADMAP-archive.md
+apps/*/ios/
+apps/*/android/

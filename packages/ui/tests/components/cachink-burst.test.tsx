@@ -35,9 +35,7 @@ describe('CachinkBurst', () => {
   });
 
   it('renders with a custom testID', () => {
-    renderWithProviders(
-      <CachinkBurst visible={true} onComplete={vi.fn()} testID="custom-burst" />,
-    );
+    renderWithProviders(<CachinkBurst visible={true} onComplete={vi.fn()} testID="custom-burst" />);
     expect(screen.getByTestId('custom-burst')).toBeInTheDocument();
   });
 

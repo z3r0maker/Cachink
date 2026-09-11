@@ -16,11 +16,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { BusinessId, ClientId, ProductId, UserId } from '@xangarro/domain';
 import { newEntityId } from '@xangarro/domain';
-import {
-  makeNewBusiness,
-  makeNewProduct,
-  makeNewSale,
-} from '../../../testing/src/index.js';
+import { makeNewBusiness, makeNewProduct, makeNewSale } from '../../../testing/src/index.js';
 import { buildHarness, type FullstackHarness } from './fullstack-harness.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

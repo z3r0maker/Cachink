@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { BusinessId, UserId } from '@xangarro/domain';
-import {
-  InMemoryCajaTurnosRepository,
-  TEST_DEVICE_ID,
-} from '../../testing/src/index.js';
+import { InMemoryCajaTurnosRepository, TEST_DEVICE_ID } from '../../testing/src/index.js';
 import { AbrirCajaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -32,20 +29,25 @@ describe('AbrirCajaUseCase', () => {
 
   it('prevents duplicate open turns for the same user', async () => {
     await useCase.execute({
-      userId: USER, fecha: '2026-05-09',
-      montoAperturaCentavos: 5000n, businessId: BIZ,
+      userId: USER,
+      fecha: '2026-05-09',
+      montoAperturaCentavos: 5000n,
+      businessId: BIZ,
     });
     await expect(
       useCase.execute({
-        userId: USER, fecha: '2026-05-09',
-        montoAperturaCentavos: 3000n, businessId: BIZ,
+        userId: USER,
+        fecha: '2026-05-09',
+        montoAperturaCentavos: 3000n,
+        businessId: BIZ,
       }),
     ).rejects.toThrow(/turno abierto/);
   });
 
   it('accepts additional cash', async () => {
     const turno = await useCase.execute({
-      userId: USER, fecha: '2026-05-09',
+      userId: USER,
+      fecha: '2026-05-09',
       montoAperturaCentavos: 5000n,
       efectivoAdicionalCentavos: 2000n,
       businessId: BIZ,

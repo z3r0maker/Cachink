@@ -108,9 +108,7 @@
       "category": "data-integrity",
       "title": "Tax rate stored as REAL (businesses.isr_tasa)",
       "description": "The businesses.isr_tasa column is declared as REAL and stores 0.3 (30%). This value is used in ISR monetary calculations against centavo amounts. IEEE 754 floating-point arithmetic produces precision errors (e.g., 0.3 * 10000 = 2999.9999... in some contexts). The column should use INTEGER basis points (3000 = 30%) to keep all financial arithmetic in integer space.",
-      "affected_objects": [
-        "businesses.isr_tasa (current value: 0.3, typeof: real)"
-      ],
+      "affected_objects": ["businesses.isr_tasa (current value: 0.3, typeof: real)"],
       "convention_violated": "CLAUDE.md §2.8: 'Money is never a float.' Tax rates participate in monetary calculations and should follow the same principle.",
       "recommendation": "Change isr_tasa from REAL to INTEGER storing basis points (30% = 3000). Update all ISR calculations to divide by 10000 instead of multiplying by the rate directly."
     },
@@ -179,9 +177,7 @@
       "category": "performance",
       "title": "Redundant explicit index idx_cachink_change_log_id on INTEGER PRIMARY KEY AUTOINCREMENT column",
       "description": "The index idx_cachink_change_log_id indexes the `id` column of __cachink_change_log, which is declared as INTEGER PRIMARY KEY AUTOINCREMENT. In SQLite, INTEGER PRIMARY KEY is automatically the rowid alias — it is already the fastest possible lookup path. The explicit index duplicates the B-tree, wastes space, and slows writes with no query benefit.",
-      "affected_objects": [
-        "__cachink_change_log.id — idx_cachink_change_log_id"
-      ],
+      "affected_objects": ["__cachink_change_log.id — idx_cachink_change_log_id"],
       "recommendation": "Drop the index: DROP INDEX idx_cachink_change_log_id;"
     },
     {
@@ -191,9 +187,7 @@
       "category": "performance",
       "title": "No composite index on __cachink_change_log(table_name, row_id)",
       "description": "Sync pull queries need to find changes by table+row combination. The only explicit index is on `id` (redundant, see above). Queries like 'SELECT * FROM __cachink_change_log WHERE table_name = ? AND row_id = ?' require a full table scan of the change log.",
-      "affected_objects": [
-        "__cachink_change_log — no index on (table_name, row_id)"
-      ],
+      "affected_objects": ["__cachink_change_log — no index on (table_name, row_id)"],
       "recommendation": "Add a composite index: CREATE INDEX idx_changelog_table_row ON __cachink_change_log(table_name, row_id);"
     },
     {
@@ -203,9 +197,7 @@
       "category": "performance",
       "title": "Soft-delete pattern with no partial index on deleted_at",
       "description": "Every entity table uses soft deletes (deleted_at IS NULL for active rows). Every read query must filter WHERE deleted_at IS NULL, but no partial index exists to accelerate this. As tables grow and soft-deleted rows accumulate, every query pays the cost of scanning deleted rows.",
-      "affected_objects": [
-        "All 11 entity tables — deleted_at column with no partial index"
-      ],
+      "affected_objects": ["All 11 entity tables — deleted_at column with no partial index"],
       "recommendation": "Add partial indexes: CREATE INDEX idx_<table>_active ON <table>(business_id) WHERE deleted_at IS NULL; on high-traffic tables (sales, expenses, products, inventory_movements)."
     },
     {
@@ -227,9 +219,7 @@
       "category": "data-integrity",
       "title": "No UNIQUE constraint on day_closes(fecha, device_id)",
       "description": "The business rule 'one corte de día per day per device' is enforced only at the application layer. Without a UNIQUE(fecha, device_id) constraint, duplicate day-close records are possible via raw SQL or sync race conditions.",
-      "affected_objects": [
-        "day_closes — no UNIQUE(fecha, device_id)"
-      ],
+      "affected_objects": ["day_closes — no UNIQUE(fecha, device_id)"],
       "recommendation": "Add UNIQUE constraint before multi-device sync goes live."
     },
     {
@@ -251,9 +241,7 @@
       "category": "schema-design",
       "title": "TEXT primary keys (ULIDs) — accepted tradeoff",
       "description": "All entity tables use TEXT primary keys storing ULIDs (26-char Crockford Base32). This is larger than INTEGER rowids (8 bytes vs 26 bytes) and creates larger auto-indexes. However, ULIDs are required for distributed ID generation in multi-device sync scenarios without a central server.",
-      "affected_objects": [
-        "All 11 entity tables in live DB + 9 in code schema"
-      ],
+      "affected_objects": ["All 11 entity tables in live DB + 9 in code schema"],
       "recommendation": "No change needed. This is a correct architectural decision for multi-device sync."
     },
     {

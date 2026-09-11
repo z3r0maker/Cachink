@@ -29,17 +29,10 @@ function makeAlert(overrides?: Partial<DirectorAlert>): DirectorAlert {
   } as DirectorAlert;
 }
 
-function renderCard(
-  alert: DirectorAlert,
-  opts?: { onPress?: () => void; onAction?: () => void },
-) {
+function renderCard(alert: DirectorAlert, opts?: { onPress?: () => void; onAction?: () => void }) {
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-      <AlertCard
-        alert={alert}
-        onPress={opts?.onPress}
-        onAction={opts?.onAction}
-      />
+      <AlertCard alert={alert} onPress={opts?.onPress} onAction={opts?.onAction} />
     </TamaguiProvider>,
   );
 }

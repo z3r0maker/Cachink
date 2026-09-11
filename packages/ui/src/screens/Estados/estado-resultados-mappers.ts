@@ -21,19 +21,47 @@ type T = ReturnType<typeof useTranslation>['t'];
  */
 function topItems(estado: EstadoDeResultados, t: T): WaterfallItem[] {
   return [
-    { label: t('estados.resultadosIngresosBrief'), value: moneyToNumber(estado.ingresos), type: 'income' },
-    { label: t('estados.resultadosCostoVentasBrief'), value: moneyToNumber(estado.costoDeVentas), type: 'expense' },
-    { label: t('estados.resultadosUtilidadBrutaBrief'), value: moneyToNumber(estado.utilidadBruta), type: 'subtotal' },
-    { label: t('estados.resultadosMermaBrief'), value: moneyToNumber(estado.merma), type: 'expense' },
+    {
+      label: t('estados.resultadosIngresosBrief'),
+      value: moneyToNumber(estado.ingresos),
+      type: 'income',
+    },
+    {
+      label: t('estados.resultadosCostoVentasBrief'),
+      value: moneyToNumber(estado.costoDeVentas),
+      type: 'expense',
+    },
+    {
+      label: t('estados.resultadosUtilidadBrutaBrief'),
+      value: moneyToNumber(estado.utilidadBruta),
+      type: 'subtotal',
+    },
+    {
+      label: t('estados.resultadosMermaBrief'),
+      value: moneyToNumber(estado.merma),
+      type: 'expense',
+    },
   ];
 }
 
 function bottomItems(estado: EstadoDeResultados, t: T): WaterfallItem[] {
   return [
-    { label: t('estados.resultadosGastosOperativosBrief'), value: moneyToNumber(estado.gastosOperativos), type: 'expense' },
-    { label: t('estados.resultadosUtilidadOperativaBrief'), value: moneyToNumber(estado.utilidadOperativa), type: 'subtotal' },
+    {
+      label: t('estados.resultadosGastosOperativosBrief'),
+      value: moneyToNumber(estado.gastosOperativos),
+      type: 'expense',
+    },
+    {
+      label: t('estados.resultadosUtilidadOperativaBrief'),
+      value: moneyToNumber(estado.utilidadOperativa),
+      type: 'subtotal',
+    },
     { label: t('estados.resultadosIsrBrief'), value: moneyToNumber(estado.isr), type: 'expense' },
-    { label: t('estados.resultadosUtilidadNetaBrief'), value: moneyToNumber(estado.utilidadNeta), type: 'subtotal' },
+    {
+      label: t('estados.resultadosUtilidadNetaBrief'),
+      value: moneyToNumber(estado.utilidadNeta),
+      type: 'subtotal',
+    },
   ];
 }
 
@@ -68,7 +96,7 @@ const SALE_CATEGORY_INDEX: Record<SaleCategory, number> = {
   Producto: 0,
   Servicio: 1,
   Anticipo: 2,
-  'Suscripción': 3,
+  Suscripción: 3,
   Otro: 4,
 };
 

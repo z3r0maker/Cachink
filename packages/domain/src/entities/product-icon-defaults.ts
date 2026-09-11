@@ -8,10 +8,10 @@ import type { InventoryCategory, ProductIcon } from './product.js';
 const CATEGORY_ICON_DEFAULTS: Record<InventoryCategory, ProductIcon> = {
   'Materia Prima': 'box',
   'Producto Terminado': 'package',
-  'Empaque': 'archive',
-  'Herramienta': 'wrench',
-  'Insumo': 'clipboard-list',
-  'Otro': 'tag',
+  Empaque: 'archive',
+  Herramienta: 'wrench',
+  Insumo: 'clipboard-list',
+  Otro: 'tag',
 };
 
 /**

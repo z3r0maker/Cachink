@@ -49,9 +49,15 @@ function useConfirmDeps(): {
   const cachinkPlayer = useCachinkPlayer();
   const { play: playCachink } = useCachinkSound(cachinkPlayer);
   return {
-    router, metodo: (metodo ?? 'Tarjeta') as PaymentMethod,
-    cart, clearCheckout, registrar, business,
-    productos, fecha: today() as IsoDate, playCachink,
+    router,
+    metodo: (metodo ?? 'Tarjeta') as PaymentMethod,
+    cart,
+    clearCheckout,
+    registrar,
+    business,
+    productos,
+    fecha: today() as IsoDate,
+    playCachink,
   };
 }
 
@@ -69,7 +75,12 @@ export function useConfirmState(): ConfirmState {
       if (!producto) continue;
       try {
         await d.registrar.mutateAsync({
-          ...buildQuickSellPayload({ producto, business: d.business, fecha: d.fecha, metodo: d.metodo }),
+          ...buildQuickSellPayload({
+            producto,
+            business: d.business,
+            fecha: d.fecha,
+            metodo: d.metodo,
+          }),
           cantidad: item.cantidad,
         });
       } catch (err) {
@@ -87,6 +98,8 @@ export function useConfirmState(): ConfirmState {
     metodo: d.metodo,
     totalCentavos: d.cart?.totalCentavos ?? 0n,
     submitting: d.registrar.isPending,
-    showCachink, setShowCachink, handleConfirm,
+    showCachink,
+    setShowCachink,
+    handleConfirm,
   };
 }

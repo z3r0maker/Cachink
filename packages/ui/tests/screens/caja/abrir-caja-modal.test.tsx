@@ -4,6 +4,7 @@
  * Covers numpad entry, quick amounts, header rendering, footer submit gating.
  */
 
+import type { ComponentProps } from 'react';
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { Money } from '@xangarro/domain';
 import { AbrirCajaModal } from '../../../src/screens/Caja/abrir-caja-modal';
@@ -25,9 +26,7 @@ describe('AbrirCajaModal', () => {
   };
 
   function renderModal(overrides: Partial<typeof defaultProps> = {}) {
-    return renderWithProviders(
-      <AbrirCajaModal {...defaultProps} {...overrides} />,
-    );
+    return renderWithProviders(<AbrirCajaModal {...defaultProps} {...overrides} />);
   }
 
   it('renders with default testID abrir-caja-modal', () => {
@@ -73,9 +72,7 @@ describe('AbrirCajaModal', () => {
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <AbrirCajaModal {...defaultProps} testID="my-modal" />,
-    );
+    renderWithProviders(<AbrirCajaModal {...defaultProps} testID="my-modal" />);
     expect(screen.getByTestId('my-modal')).toBeInTheDocument();
   });
 });
@@ -83,7 +80,11 @@ describe('AbrirCajaModal', () => {
 describe('AbrirCajaHeader', () => {
   it('renders with testID abrir-caja-header', () => {
     // AbrirCajaHeader only needs a t() function
-    renderWithProviders(<AbrirCajaHeader t={((k: string) => k) as any} />);
+    renderWithProviders(
+      <AbrirCajaHeader
+        t={((k: string) => k) as unknown as ComponentProps<typeof AbrirCajaHeader>['t']}
+      />,
+    );
     expect(screen.getByTestId('abrir-caja-header')).toBeInTheDocument();
   });
 });
@@ -91,12 +92,7 @@ describe('AbrirCajaHeader', () => {
 describe('AbrirCajaFooter', () => {
   it('renders the submit button', () => {
     renderWithProviders(
-      <AbrirCajaFooter
-        buttonLabel="Abrir turno"
-        canSubmit
-        submitting={false}
-        onSubmit={vi.fn()}
-      />,
+      <AbrirCajaFooter buttonLabel="Abrir turno" canSubmit submitting={false} onSubmit={vi.fn()} />,
     );
     expect(screen.getByTestId('caja-abrir-submit')).toBeInTheDocument();
     expect(screen.getByText('Abrir turno')).toBeInTheDocument();

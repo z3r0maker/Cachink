@@ -38,10 +38,7 @@ export async function seedInventory(
 
 // ── Day closes ─────────────────────────────────────────────────────────
 
-export async function seedDayCloses(
-  r: Repositories,
-  biz: BusinessId,
-): Promise<number> {
+export async function seedDayCloses(r: Repositories, biz: BusinessId): Promise<number> {
   let count = 0;
   const offsets = [1, 2, 3, 4, 5];
   for (const offset of offsets) {
@@ -121,11 +118,7 @@ async function seedClosedTurn(
   return 1;
 }
 
-async function seedTodayMorning(
-  r: Repositories,
-  biz: BusinessId,
-  userId: UserId,
-): Promise<number> {
+async function seedTodayMorning(r: Repositories, biz: BusinessId, userId: UserId): Promise<number> {
   const todayDate = new Date();
   const morningOpen = new Date(todayDate);
   morningOpen.setUTCHours(8, 0, 0, 0);

@@ -16,12 +16,15 @@ function platformKey(): DeviceContext['platform'] {
 }
 
 export function useMobileDeviceContext(): DeviceContext {
-  return useMemo<DeviceContext>(() => ({
-    model: Device.modelName,
-    osName: Platform.OS === 'ios' ? 'iOS' : 'Android',
-    osVersion: Platform.Version?.toString() ?? 'unknown',
-    appVersion: Application.nativeApplicationVersion ?? '0.0.0',
-    buildNumber: Application.nativeBuildVersion,
-    platform: platformKey(),
-  }), []);
+  return useMemo<DeviceContext>(
+    () => ({
+      model: Device.modelName,
+      osName: Platform.OS === 'ios' ? 'iOS' : 'Android',
+      osVersion: Platform.Version?.toString() ?? 'unknown',
+      appVersion: Application.nativeApplicationVersion ?? '0.0.0',
+      buildNumber: Application.nativeBuildVersion,
+      platform: platformKey(),
+    }),
+    [],
+  );
 }

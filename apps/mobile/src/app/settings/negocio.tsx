@@ -4,12 +4,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import {
-  SettingsNegocio,
-  useCurrentBusiness,
-  useMode,
-  useTranslation,
-} from '@xangarro/ui';
+import { SettingsNegocio, useCurrentBusiness, useMode, useTranslation } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 export default function NegocioRoute(): ReactElement {

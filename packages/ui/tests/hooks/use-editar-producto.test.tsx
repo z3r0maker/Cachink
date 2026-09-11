@@ -7,11 +7,7 @@ import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import {
-  InMemoryProductsRepository,
-  TEST_DEVICE_ID,
-  makeNewProduct,
-} from '@xangarro/testing';
+import { InMemoryProductsRepository, TEST_DEVICE_ID, makeNewProduct } from '@xangarro/testing';
 import type { BusinessId, ProductId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEditarProducto } from '../../src/hooks/use-editar-producto';
@@ -21,7 +17,9 @@ import { tamaguiConfig } from '../../src/tamagui.config';
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
 function wrapper(overrides?: Record<string, unknown>) {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>
@@ -40,9 +38,7 @@ describe('useEditarProducto', () => {
   });
 
   it('updates a product via the mutation', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ, nombre: 'Original' }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ, nombre: 'Original' }));
 
     const { result } = renderHook(() => useEditarProducto(), {
       wrapper: wrapper({ products }),

@@ -54,8 +54,8 @@ export type IsrDefaults = z.infer<typeof IsrDefaultsSchema>;
  *   rate is roughly 25 %–32 %. Seed at 30 %.
  */
 export const ISR_DEFAULTS_SEED: IsrDefaults = {
-  RIF: 200,       // 2%
-  RESICO: 125,    // 1.25%
+  RIF: 200, // 2%
+  RESICO: 125, // 1.25%
   Asalariados: 2500, // 25%
-  Otro: 3000,     // 30%
+  Otro: 3000, // 30%
 };

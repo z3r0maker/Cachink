@@ -6,7 +6,10 @@ export { CajaContent, type CajaContentProps } from './caja-content';
 export { CajaBalanceCard, type CajaBalanceCardProps } from './caja-balance-card';
 export { CajaMovimientoSheet, type CajaMovimientoSheetProps } from './caja-movimiento-sheet';
 export { CajaActiveTurnView, type CajaActiveTurnViewProps } from './caja-active-turn';
-export { OpeningDiscrepancyDialog, type OpeningDiscrepancyDialogProps } from './opening-discrepancy-dialog';
+export {
+  OpeningDiscrepancyDialog,
+  type OpeningDiscrepancyDialogProps,
+} from './opening-discrepancy-dialog';
 export { MovimientoSheetWired, type MovimientoSheetWiredProps } from './movimiento-sheet-wired';
 export { BlindCountStep, type BlindCountStepProps } from './blind-count-step';
 export { CountResultStep, type CountResultStepProps } from './count-result-step';

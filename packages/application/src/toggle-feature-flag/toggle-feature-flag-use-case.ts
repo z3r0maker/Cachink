@@ -24,21 +24,15 @@ export interface ToggleFeatureFlagInput {
   readonly newValue: boolean;
 }
 
-export class ToggleFeatureFlagUseCase
-  implements UseCase<ToggleFeatureFlagInput, FeatureFlags>
-{
+export class ToggleFeatureFlagUseCase implements UseCase<ToggleFeatureFlagInput, FeatureFlags> {
   readonly #businesses: BusinessesRepository;
 
   constructor(businesses: BusinessesRepository) {
     this.#businesses = businesses;
   }
 
-  async execute(
-    input: ToggleFeatureFlagInput,
-  ): Promise<FeatureFlags> {
-    const business = await this.#businesses.findById(
-      input.businessId,
-    );
+  async execute(input: ToggleFeatureFlagInput): Promise<FeatureFlags> {
+    const business = await this.#businesses.findById(input.businessId);
     if (!business) {
       throw new TypeError('Negocio no encontrado');
     }
@@ -48,9 +42,7 @@ export class ToggleFeatureFlagUseCase
     let resolved: FeatureFlags;
     if (input.newValue) {
       if (!canEnableFlag(current, input.flagKey)) {
-        throw new TypeError(
-          `No se puede activar ${input.flagKey}: dependencia no activa`,
-        );
+        throw new TypeError(`No se puede activar ${input.flagKey}: dependencia no activa`);
       }
       resolved = { ...current, [input.flagKey]: true };
     } else {

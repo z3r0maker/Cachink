@@ -1,4 +1,1 @@
-export {
-  RecuperarPinUseCase,
-  type RecuperarPinInput,
-} from './recuperar-pin-use-case.js';
+export { RecuperarPinUseCase, type RecuperarPinInput } from './recuperar-pin-use-case.js';

@@ -46,9 +46,17 @@ function createMockLogStore(unshipped: ErrorLogEntry[] = []): LogStore & {
     queryAudit: vi.fn().mockResolvedValue([]),
     queryErrors: vi.fn().mockResolvedValue([]),
     queryTimeline: vi.fn().mockResolvedValue([]),
-    stats: vi.fn().mockResolvedValue({ totalAuditEvents: 0, totalErrors: 0, errorsBySource: {}, operationCounts: {}, lastErrorAt: null }),
+    stats: vi.fn().mockResolvedValue({
+      totalAuditEvents: 0,
+      totalErrors: 0,
+      errorsBySource: {},
+      operationCounts: {},
+      lastErrorAt: null,
+    }),
     prune: vi.fn().mockResolvedValue(0),
-    exportSnapshot: vi.fn().mockResolvedValue({ exportedAt: '', deviceId: '', auditEvents: [], errors: [] }),
+    exportSnapshot: vi
+      .fn()
+      .mockResolvedValue({ exportedAt: '', deviceId: '', auditEvents: [], errors: [] }),
     queryUnshippedErrors: vi.fn().mockResolvedValue(unshipped),
     markShipped: vi.fn().mockResolvedValue(undefined),
   };
@@ -113,10 +121,12 @@ describe('OutboxFlusher', () => {
   });
 
   it('never ships errorStack in enriched context', async () => {
-    logStore = createMockLogStore([{
-      ...makeError('e3'),
-      context: { errorStack: 'Error: foo\n  at bar.ts:1' },
-    }]);
+    logStore = createMockLogStore([
+      {
+        ...makeError('e3'),
+        context: { errorStack: 'Error: foo\n  at bar.ts:1' },
+      },
+    ]);
     const flusher = build();
     await flusher.flush();
 
@@ -171,7 +181,12 @@ describe('OutboxFlusher', () => {
 
   it('prevents re-entrant flushes', async () => {
     let resolveFirst: () => void;
-    remote.sendErrorBatch.mockImplementation(() => new Promise<void>((r) => { resolveFirst = r; }));
+    remote.sendErrorBatch.mockImplementation(
+      () =>
+        new Promise<void>((r) => {
+          resolveFirst = r;
+        }),
+    );
 
     const flusher = build();
     const first = flusher.flush();

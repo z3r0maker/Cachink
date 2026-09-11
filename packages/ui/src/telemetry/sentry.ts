@@ -31,7 +31,9 @@ export async function initSentryIfConsented(consent: boolean | null): Promise<vo
   if (consent !== true && _initialised && _sentry) {
     try {
       await _sentry.close();
-    } catch { /* closing failed — non-critical */ }
+    } catch {
+      /* closing failed — non-critical */
+    }
     _initialised = false;
     _sentry = null;
     return;

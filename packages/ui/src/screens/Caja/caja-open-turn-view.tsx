@@ -28,8 +28,7 @@ function usePreviousClose(): Money | null {
   const turnosRepo = useCajaTurnosRepository();
   const latestQ = useQuery({
     queryKey: ['caja-previous-close', businessId],
-    queryFn: () =>
-      businessId ? turnosRepo.findLatest(businessId as BusinessId) : null,
+    queryFn: () => (businessId ? turnosRepo.findLatest(businessId as BusinessId) : null),
     enabled: businessId !== null,
   });
   return latestQ.data?.montoCierreCentavos ?? null;

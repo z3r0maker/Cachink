@@ -40,10 +40,7 @@ export function useUpdateHealthThresholds() {
 
   return useMutation({
     async mutationFn(next: HealthThresholds) {
-      await appConfig.set(
-        APP_CONFIG_KEYS.healthThresholds,
-        JSON.stringify(next),
-      );
+      await appConfig.set(APP_CONFIG_KEYS.healthThresholds, JSON.stringify(next));
     },
     async onSuccess() {
       await queryClient.invalidateQueries({

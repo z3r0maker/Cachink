@@ -51,9 +51,7 @@ export function formatDateLong(date: IsoDate): string {
 /** "abril 2026" — month + year header form. Input: "YYYY-MM". */
 export function formatMonth(yearMonth: string): string {
   if (!YEAR_MONTH_RE.test(yearMonth)) {
-    throw new TypeError(
-      `Invalid yearMonth: "${yearMonth}". Expected YYYY-MM with a 01..12 month.`,
-    );
+    throw new TypeError(`Invalid yearMonth: "${yearMonth}". Expected YYYY-MM with a 01..12 month.`);
   }
   return MONTH.format(new Date(`${yearMonth}-01T12:00:00Z`));
 }

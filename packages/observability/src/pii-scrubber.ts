@@ -31,10 +31,12 @@ export function scrubRecord<T extends Record<string, unknown>>(input: T): T {
   for (const key of Object.keys(clone)) {
     if (PII_FIELDS.has(key)) {
       (clone as Record<string, unknown>)[key] = '[REDACTED]';
-    } else if (typeof clone[key] === 'object' && clone[key] !== null && !Array.isArray(clone[key])) {
-      (clone as Record<string, unknown>)[key] = scrubRecord(
-        clone[key] as Record<string, unknown>,
-      );
+    } else if (
+      typeof clone[key] === 'object' &&
+      clone[key] !== null &&
+      !Array.isArray(clone[key])
+    ) {
+      (clone as Record<string, unknown>)[key] = scrubRecord(clone[key] as Record<string, unknown>);
     }
   }
   return clone;

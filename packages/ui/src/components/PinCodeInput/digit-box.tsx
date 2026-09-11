@@ -29,14 +29,32 @@ export function DigitBox(props: {
 }): ReactElement {
   const border = resolveBorder(props.error, props.active);
   const bg = props.active && !props.filled ? colors.yellowSoft : colors.white;
-  const content = props.filled
-    ? <Text fontSize={DOT_SIZE} color={colors.black} fontFamily={typography.fontFamily} fontWeight={typography.weights.bold} lineHeight={DOT_SIZE}>●</Text>
-    : props.active
-      ? <BlinkingCursor />
-      : null;
+  const content = props.filled ? (
+    <Text
+      fontSize={DOT_SIZE}
+      color={colors.black}
+      fontFamily={typography.fontFamily}
+      fontWeight={typography.weights.bold}
+      lineHeight={DOT_SIZE}
+    >
+      ●
+    </Text>
+  ) : props.active ? (
+    <BlinkingCursor />
+  ) : null;
 
   return (
-    <View width={BOX_SIZE} height={BOX_HEIGHT} borderColor={border.color} borderWidth={border.width} borderRadius={RADIUS} backgroundColor={bg} alignItems="center" justifyContent="center" borderStyle="solid">
+    <View
+      width={BOX_SIZE}
+      height={BOX_HEIGHT}
+      borderColor={border.color}
+      borderWidth={border.width}
+      borderRadius={RADIUS}
+      backgroundColor={bg}
+      alignItems="center"
+      justifyContent="center"
+      borderStyle="solid"
+    >
       {content}
     </View>
   );

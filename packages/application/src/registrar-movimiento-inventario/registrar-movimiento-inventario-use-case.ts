@@ -19,22 +19,17 @@ import {
   type InventoryMovement,
   type NewInventoryMovement,
 } from '@xangarro/domain';
-import type {
-  ExpensesRepository,
-  InventoryMovementsRepository,
-} from '@xangarro/data';
+import type { ExpensesRepository, InventoryMovementsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
-export class RegistrarMovimientoInventarioUseCase
-  implements UseCase<NewInventoryMovement, InventoryMovement>
-{
+export class RegistrarMovimientoInventarioUseCase implements UseCase<
+  NewInventoryMovement,
+  InventoryMovement
+> {
   readonly #movements: InventoryMovementsRepository;
   readonly #expenses: ExpensesRepository;
 
-  constructor(
-    movements: InventoryMovementsRepository,
-    expenses: ExpensesRepository,
-  ) {
+  constructor(movements: InventoryMovementsRepository, expenses: ExpensesRepository) {
     this.#movements = movements;
     this.#expenses = expenses;
   }

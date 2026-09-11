@@ -1,10 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { BusinessId, UserId } from '@xangarro/domain';
-import {
-  InMemoryUsersRepository,
-  TEST_DEVICE_ID,
-  makeNewUser,
-} from '../../testing/src/index.js';
+import { InMemoryUsersRepository, TEST_DEVICE_ID, makeNewUser } from '../../testing/src/index.js';
 import {
   AutenticarUsuarioUseCase,
   CrearUsuarioUseCase,

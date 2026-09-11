@@ -15,11 +15,7 @@ import {
   type CerrarCajaInput,
   CerrarCajaSchema,
 } from '@xangarro/domain';
-import type {
-  CajaTurnosRepository,
-  ExpensesRepository,
-  SalesRepository,
-} from '@xangarro/data';
+import type { CajaTurnosRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import type { BusinessId, ExpenseId } from '@xangarro/domain';
 import { sum, ZERO, type Money } from '@xangarro/domain';
 import type { UseCase } from '../_use-case.js';
@@ -28,18 +24,12 @@ export interface CerrarCajaFullInput extends CerrarCajaInput {
   readonly businessId: BusinessId;
 }
 
-export class CerrarCajaUseCase
-  implements UseCase<CerrarCajaFullInput, CajaTurno>
-{
+export class CerrarCajaUseCase implements UseCase<CerrarCajaFullInput, CajaTurno> {
   readonly #turnos: CajaTurnosRepository;
   readonly #sales: SalesRepository;
   readonly #expenses: ExpensesRepository;
 
-  constructor(
-    turnos: CajaTurnosRepository,
-    sales: SalesRepository,
-    expenses: ExpensesRepository,
-  ) {
+  constructor(turnos: CajaTurnosRepository, sales: SalesRepository, expenses: ExpensesRepository) {
     this.#turnos = turnos;
     this.#sales = sales;
     this.#expenses = expenses;
@@ -62,9 +52,7 @@ export class CerrarCajaUseCase
     if (diferencia !== ZERO && !parsed.discrepancyReason) {
       throw new TypeError('Se requiere una razón para la diferencia en el cierre');
     }
-    const egresoAutoId = await this.#maybeCreateAutoEgreso(
-      parsed, diferencia, input.businessId,
-    );
+    const egresoAutoId = await this.#maybeCreateAutoEgreso(parsed, diferencia, input.businessId);
     return this.#turnos.update(parsed.turnoId, {
       cierreAt: now(),
       montoCierreCentavos: parsed.montoCierreCentavos,

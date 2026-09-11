@@ -4,7 +4,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import { useBusinessFormState, parseForm } from '../../src/screens/BusinessForm/business-form-state';
+import {
+  useBusinessFormState,
+  parseForm,
+} from '../../src/screens/BusinessForm/business-form-state';
 import type { IsrDefaults } from '@xangarro/domain';
 
 const mockIsrDefaults: IsrDefaults = {
@@ -16,9 +19,7 @@ const mockIsrDefaults: IsrDefaults = {
 
 describe('useBusinessFormState with ISR defaults', () => {
   it('uses ISR defaults for initial regime when no explicit defaults provided', () => {
-    const { result } = renderHook(() =>
-      useBusinessFormState({ isrDefaults: mockIsrDefaults }),
-    );
+    const { result } = renderHook(() => useBusinessFormState({ isrDefaults: mockIsrDefaults }));
     // Default regime is RIF → ISR should be 2 (= 0.02 * 100)
     expect(result.current.isrTasaPct).toBe('2');
   });
@@ -34,9 +35,7 @@ describe('useBusinessFormState with ISR defaults', () => {
   });
 
   it('auto-fills ISR when regime changes and ISR not manually edited', () => {
-    const { result } = renderHook(() =>
-      useBusinessFormState({ isrDefaults: mockIsrDefaults }),
-    );
+    const { result } = renderHook(() => useBusinessFormState({ isrDefaults: mockIsrDefaults }));
     expect(result.current.regimen).toBe('RIF');
     expect(result.current.isrTasaPct).toBe('2');
 
@@ -58,9 +57,7 @@ describe('useBusinessFormState with ISR defaults', () => {
   });
 
   it('does NOT auto-fill ISR after manual edit', () => {
-    const { result } = renderHook(() =>
-      useBusinessFormState({ isrDefaults: mockIsrDefaults }),
-    );
+    const { result } = renderHook(() => useBusinessFormState({ isrDefaults: mockIsrDefaults }));
 
     // Manual edit
     act(() => {

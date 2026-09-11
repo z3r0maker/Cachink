@@ -18,9 +18,7 @@ const defaultProps = {
 };
 
 function renderStep(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <BlindCountStep {...defaultProps} {...overrides} />,
-  );
+  return renderWithProviders(<BlindCountStep {...defaultProps} {...overrides} />);
 }
 
 describe('BlindCountStep', () => {
@@ -61,9 +59,7 @@ describe('BlindCountStep', () => {
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <BlindCountStep {...defaultProps} testID="my-step" />,
-    );
+    renderWithProviders(<BlindCountStep {...defaultProps} testID="my-step" />);
     expect(screen.getByTestId('my-step')).toBeInTheDocument();
   });
 });

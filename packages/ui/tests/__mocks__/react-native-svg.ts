@@ -16,9 +16,12 @@ import React from 'react';
 type SvgMockProps = Record<string, unknown> & { children?: React.ReactNode };
 
 function createMockComponent(name: string) {
-  const MockComponent = React.forwardRef<HTMLDivElement, SvgMockProps>(
-    (props, ref) =>
-      React.createElement('div', { ref, 'data-testid': `svg-mock-${name}`, ...filterProps(props) }, props.children),
+  const MockComponent = React.forwardRef<HTMLDivElement, SvgMockProps>((props, ref) =>
+    React.createElement(
+      'div',
+      { ref, 'data-testid': `svg-mock-${name}`, ...filterProps(props) },
+      props.children,
+    ),
   );
   MockComponent.displayName = name;
   return MockComponent;

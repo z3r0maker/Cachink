@@ -59,11 +59,7 @@ function recompute(items: readonly CartItem[]): CartState {
   return { items, totalCentavos: total, itemCount: count };
 }
 
-function addItem(
-  state: CartState,
-  product: Product,
-  stock?: number,
-): CartState {
+function addItem(state: CartState, product: Product, stock?: number): CartState {
   const idx = state.items.findIndex((i) => i.productoId === product.id);
   if (idx >= 0) {
     const prev = state.items[idx]!;
@@ -98,10 +94,7 @@ function removeAll(state: CartState, productoId: ProductId): CartState {
   return recompute(filtered);
 }
 
-function updateStock(
-  state: CartState,
-  stockMap: ReadonlyMap<string, number>,
-): CartState {
+function updateStock(state: CartState, stockMap: ReadonlyMap<string, number>): CartState {
   const items = state.items.map((item) => {
     const s = stockMap.get(item.productoId);
     return s !== undefined ? { ...item, stock: s } : item;

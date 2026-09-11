@@ -15,9 +15,7 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { CajaMovimientosRepository } from '@xangarro/data';
 
-export class InMemoryCajaMovimientosRepository
-  implements CajaMovimientosRepository
-{
+export class InMemoryCajaMovimientosRepository implements CajaMovimientosRepository {
   private readonly rows = new Map<CajaMovimientoId, CajaMovimiento>();
   private readonly deviceId: DeviceId;
 
@@ -46,21 +44,15 @@ export class InMemoryCajaMovimientosRepository
     return row;
   }
 
-  async findById(
-    id: CajaMovimientoId,
-  ): Promise<CajaMovimiento | null> {
+  async findById(id: CajaMovimientoId): Promise<CajaMovimiento | null> {
     const row = this.rows.get(id);
     if (!row || row.deletedAt !== null) return null;
     return row;
   }
 
-  async findByTurno(
-    turnoId: CajaTurnoId,
-  ): Promise<readonly CajaMovimiento[]> {
+  async findByTurno(turnoId: CajaTurnoId): Promise<readonly CajaMovimiento[]> {
     return [...this.rows.values()]
-      .filter(
-        (r) => r.turnoId === turnoId && r.deletedAt === null,
-      )
+      .filter((r) => r.turnoId === turnoId && r.deletedAt === null)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 

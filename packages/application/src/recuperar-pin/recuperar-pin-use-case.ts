@@ -20,9 +20,7 @@ export interface RecuperarPinInput {
   readonly newPin: string;
 }
 
-export class RecuperarPinUseCase
-  implements UseCase<RecuperarPinInput, void>
-{
+export class RecuperarPinUseCase implements UseCase<RecuperarPinInput, void> {
   readonly #users: UsersRepository;
 
   constructor(users: UsersRepository) {
@@ -31,9 +29,7 @@ export class RecuperarPinUseCase
 
   async execute(input: RecuperarPinInput): Promise<void> {
     if (!/^\d{6}$/.test(input.newPin)) {
-      throw new TypeError(
-        'El nuevo PIN debe ser de 6 dígitos',
-      );
+      throw new TypeError('El nuevo PIN debe ser de 6 dígitos');
     }
 
     const user = await this.#users.findById(input.userId);
@@ -41,10 +37,7 @@ export class RecuperarPinUseCase
       throw new TypeError('Usuario no encontrado');
     }
 
-    const matches = await compare(
-      input.recoveryPassword,
-      user.recoveryPasswordHash,
-    );
+    const matches = await compare(input.recoveryPassword, user.recoveryPasswordHash);
     if (!matches) {
       throw new TypeError('La contraseña de recuperación es incorrecta');
     }

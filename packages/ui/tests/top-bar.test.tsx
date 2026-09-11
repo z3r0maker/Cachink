@@ -15,9 +15,7 @@ describe('TopBar', () => {
   });
 
   it('renders the subtitle text when provided', () => {
-    renderWithProviders(
-      <TopBar title="Estados Financieros" subtitle="abril 2026" />,
-    );
+    renderWithProviders(<TopBar title="Estados Financieros" subtitle="abril 2026" />);
     expect(screen.getByText('abril 2026')).toBeDefined();
     expect(screen.getByTestId('top-bar-subtitle')).toBeDefined();
   });
@@ -29,20 +27,14 @@ describe('TopBar', () => {
 
   it('renders content placed in the left slot', () => {
     renderWithProviders(
-      <TopBar
-        title="Ventas"
-        left={<span data-testid="left-content">Operativo</span>}
-      />,
+      <TopBar title="Ventas" left={<span data-testid="left-content">Operativo</span>} />,
     );
     expect(screen.getByTestId('left-content')).toBeDefined();
   });
 
   it('renders content placed in the right slot', () => {
     renderWithProviders(
-      <TopBar
-        title="Ventas"
-        right={<span data-testid="right-content">⚙</span>}
-      />,
+      <TopBar title="Ventas" right={<span data-testid="right-content">⚙</span>} />,
     );
     expect(screen.getByTestId('right-content')).toBeDefined();
   });
@@ -66,9 +58,7 @@ describe('TopBar', () => {
     renderWithProviders(<TopBar title="Estados" subtitle="abril 2026" />);
     const subtitle = screen.getByTestId('top-bar-subtitle');
     // gray600 (#5A5A56) → rgb(90, 90, 86).
-    expect(getComputedStyle(subtitle).color.toLowerCase()).toContain(
-      'rgb(90, 90, 86)',
-    );
+    expect(getComputedStyle(subtitle).color.toLowerCase()).toContain('rgb(90, 90, 86)');
   });
 
   it('forwards testID so E2E tests can anchor to it', () => {

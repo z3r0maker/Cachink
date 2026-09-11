@@ -78,7 +78,9 @@ function DetailDialogs(props: {
         onClose={() => m.setConfirmDeleteOpen(false)}
         onConfirm={m.handleConfirmDelete}
         title={hasStock ? t('inventario.deleteBlockedTitle') : t('inventario.deleteConfirmTitle')}
-        description={hasStock ? t('inventario.deleteBlockedBody') : t('inventario.deleteConfirmBody')}
+        description={
+          hasStock ? t('inventario.deleteBlockedBody') : t('inventario.deleteConfirmBody')
+        }
         confirmLabel={t('actions.delete')}
         tone="danger"
       />
@@ -121,12 +123,7 @@ export function ProductoDetailSmart(props: ProductoDetailSmartProps): ReactEleme
         iconOverride={iconOverride}
         testID={props.testID}
       />
-      <DetailDialogs
-        row={props.row}
-        fecha={props.fecha}
-        businessId={businessId}
-        m={m}
-      />
+      <DetailDialogs row={props.row} fecha={props.fecha} businessId={businessId} m={m} />
     </>
   );
 }

@@ -108,7 +108,8 @@ export class DrizzleProductsRepository implements ProductsRepository {
     if (patch.usoProducto !== undefined) updates.usoProducto = patch.usoProducto;
     if (patch.icono !== undefined) updates.icono = patch.icono;
     if (patch.costoUnitCentavos !== undefined) updates.costoUnitCentavos = patch.costoUnitCentavos;
-    if (patch.precioVentaCentavos !== undefined) updates.precioVentaCentavos = patch.precioVentaCentavos;
+    if (patch.precioVentaCentavos !== undefined)
+      updates.precioVentaCentavos = patch.precioVentaCentavos;
     await this.#db.update(products).set(updates).where(eq(products.id, id)).run();
     return this.findById(id);
   }

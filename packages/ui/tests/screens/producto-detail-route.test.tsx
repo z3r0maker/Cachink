@@ -155,7 +155,9 @@ describe('ProductoDetailRoute', () => {
       expect(screen.getByTestId('confirm-dialog')).toBeInTheDocument();
       // Audit M-1 PR 4: stock-aware copy for products with stock.
       expect(screen.getByText('Este producto tiene stock')).toBeInTheDocument();
-      expect(screen.getByText('Hay unidades en stock. ¿Eliminar de todas formas?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Hay unidades en stock. ¿Eliminar de todas formas?'),
+      ).toBeInTheDocument();
     });
 
     tap(screen.getAllByTestId('confirm-dialog-cancel')[0]!);

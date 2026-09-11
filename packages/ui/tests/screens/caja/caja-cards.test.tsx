@@ -129,9 +129,7 @@ describe('CajaStatusCard', () => {
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <CajaStatusCard turno={TURNO} onCerrar={vi.fn()} testID="my-status" />,
-    );
+    renderWithProviders(<CajaStatusCard turno={TURNO} onCerrar={vi.fn()} testID="my-status" />);
     expect(screen.getByTestId('my-status')).toBeInTheDocument();
   });
 });

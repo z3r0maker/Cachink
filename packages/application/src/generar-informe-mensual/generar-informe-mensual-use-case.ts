@@ -21,11 +21,7 @@ import {
   type Sale,
   type SaleCategory,
 } from '@xangarro/domain';
-import type {
-  BusinessesRepository,
-  ExpensesRepository,
-  SalesRepository,
-} from '@xangarro/data';
+import type { BusinessesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface GenerarInformeMensualInput {
@@ -44,9 +40,10 @@ export interface InformeMensual {
   egresosPorCategoria: Record<ExpenseCategory, Money>;
 }
 
-export class GenerarInformeMensualUseCase
-  implements UseCase<GenerarInformeMensualInput, InformeMensual>
-{
+export class GenerarInformeMensualUseCase implements UseCase<
+  GenerarInformeMensualInput,
+  InformeMensual
+> {
   readonly #sales: SalesRepository;
   readonly #expenses: ExpensesRepository;
   readonly #businesses: BusinessesRepository;
@@ -87,8 +84,16 @@ export class GenerarInformeMensualUseCase
       ventas,
       egresos,
       estadoResultados,
-      ventasPorCategoria: groupByCategory(ventas, (v) => v.categoria, (v) => v.monto),
-      egresosPorCategoria: groupByCategory(egresos, (e) => e.categoria, (e) => e.monto),
+      ventasPorCategoria: groupByCategory(
+        ventas,
+        (v) => v.categoria,
+        (v) => v.monto,
+      ),
+      egresosPorCategoria: groupByCategory(
+        egresos,
+        (e) => e.categoria,
+        (e) => e.monto,
+      ),
     };
   }
 
@@ -102,10 +107,7 @@ export class GenerarInformeMensualUseCase
    * When P1C adds a monthly ventas view we'll promote findByMonth to
    * the SalesRepository interface and simplify this call.
    */
-  async #findSalesForMonth(
-    yearMonth: string,
-    businessId: BusinessId,
-  ): Promise<readonly Sale[]> {
+  async #findSalesForMonth(yearMonth: string, businessId: BusinessId): Promise<readonly Sale[]> {
     const [year, month] = yearMonth.split('-').map(Number) as [number, number];
     const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
     const dates = Array.from({ length: daysInMonth }, (_, i) => {

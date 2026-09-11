@@ -53,7 +53,10 @@ function commitValue(
 function useErrorShake(hasError: boolean): Animated.Value {
   const { translateX, triggerShake } = useShakeAnimation();
   useEffect(() => {
-    if (hasError) { triggerShake(); notificationError(); }
+    if (hasError) {
+      triggerShake();
+      notificationError();
+    }
   }, [hasError, triggerShake]);
   return translateX;
 }
@@ -70,6 +73,27 @@ function useAutoFocus(
   }, [ref, disabled, numpad]);
 }
 
+/** Keyboard + numpad digit handlers, shared by both input modes. */
+function useDigitHandlers(
+  props: PinCodeInputProps,
+  off: boolean,
+): { handleChange: (raw: string) => void; handleNumpad: (key: string) => void } {
+  const handleChange = (raw: string): void => {
+    if (off) return;
+    commitValue(sanitize(raw), props.value, props.onChange, props.onComplete);
+  };
+  const handleNumpad = (key: string): void => {
+    if (off) return;
+    if (key === 'backspace') {
+      props.onChange(props.value.slice(0, -1));
+      return;
+    }
+    if (key !== '.')
+      commitValue(sanitize(props.value + key), props.value, props.onChange, props.onComplete);
+  };
+  return { handleChange, handleNumpad };
+}
+
 export function PinCodeInput(props: PinCodeInputProps): ReactElement {
   const inputRef = useRef<HTMLInputElement>(null);
   const off = props.disabled === true;
@@ -77,21 +101,24 @@ export function PinCodeInput(props: PinCodeInputProps): ReactElement {
   const shakeX = useErrorShake(props.error === true);
 
   useAutoFocus(inputRef, off, numpad);
-
-  const handleChange = (raw: string): void => {
-    if (off) return;
-    commitValue(sanitize(raw), props.value, props.onChange, props.onComplete);
-  };
-
-  const handleNumpad = (key: string): void => {
-    if (off) return;
-    if (key === 'backspace') { props.onChange(props.value.slice(0, -1)); return; }
-    if (key !== '.') commitValue(sanitize(props.value + key), props.value, props.onChange, props.onComplete);
-  };
+  const { handleChange, handleNumpad } = useDigitHandlers(props, off);
 
   return (
-    <View testID={props.testID} onPress={() => !off && !numpad && inputRef.current?.focus()} opacity={off ? DISABLED_OPACITY : 1} gap={16}>
-      {!numpad && <HiddenInput ref={inputRef} value={props.value} onChangeText={handleChange} disabled={off} testID={props.testID} />}
+    <View
+      testID={props.testID}
+      onPress={() => !off && !numpad && inputRef.current?.focus()}
+      opacity={off ? DISABLED_OPACITY : 1}
+      gap={16}
+    >
+      {!numpad && (
+        <HiddenInput
+          ref={inputRef}
+          value={props.value}
+          onChangeText={handleChange}
+          disabled={off}
+          testID={props.testID}
+        />
+      )}
       <Animated.View style={{ transform: [{ translateX: shakeX }] }}>
         <DigitBoxRow value={props.value} disabled={off} error={props.error === true} />
       </Animated.View>
@@ -102,18 +129,37 @@ export function PinCodeInput(props: PinCodeInputProps): ReactElement {
 
 // --- Small extracted sub-components ---
 
-function DigitBoxRow({ value, disabled, error }: { value: string; disabled: boolean; error: boolean }): ReactElement {
+function DigitBoxRow({
+  value,
+  disabled,
+  error,
+}: {
+  value: string;
+  disabled: boolean;
+  error: boolean;
+}): ReactElement {
   const cursor = activeIndex(value.length);
   return (
     <View flexDirection="row" gap={BOX_GAP} justifyContent="center">
       {Array.from({ length: PIN_LENGTH }, (_, i) => (
-        <DigitBox key={i} filled={i < value.length} active={!disabled && i === cursor} error={error} />
+        <DigitBox
+          key={i}
+          filled={i < value.length}
+          active={!disabled && i === cursor}
+          error={error}
+        />
       ))}
     </View>
   );
 }
 
-function NumpadSection({ disabled, onPress }: { disabled: boolean; onPress: (k: string) => void }): ReactElement {
+function NumpadSection({
+  disabled,
+  onPress,
+}: {
+  disabled: boolean;
+  onPress: (k: string) => void;
+}): ReactElement {
   return (
     <View opacity={disabled ? DISABLED_OPACITY : 1} pointerEvents={disabled ? 'none' : 'auto'}>
       <Numpad onPress={onPress} allowDecimal={false} testID="pin-numpad" />
@@ -121,28 +167,29 @@ function NumpadSection({ disabled, onPress }: { disabled: boolean; onPress: (k: 
   );
 }
 
-const HiddenInput = forwardRef<HTMLInputElement, { value: string; onChangeText: (r: string) => void; disabled: boolean; testID?: string }>(
-  function HiddenInput(props, ref) {
-    return (
-      <TamaguiInput
-        ref={ref as never}
-        value={props.value}
-        onChangeText={props.onChangeText}
-        keyboardType="number-pad"
-        inputMode="numeric"
-        maxLength={PIN_LENGTH}
-        autoFocus={!props.disabled}
-        pointerEvents={props.disabled ? 'none' : 'auto'}
-        testID={props.testID ? `${props.testID}-field` : 'pin-input-field'}
-        caretHidden
-        position="absolute"
-        opacity={0.01}
-        width={1}
-        height={1}
-        borderWidth={0}
-        padding={0}
-        aria-hidden
-      />
-    );
-  },
-);
+const HiddenInput = forwardRef<
+  HTMLInputElement,
+  { value: string; onChangeText: (r: string) => void; disabled: boolean; testID?: string }
+>(function HiddenInput(props, ref) {
+  return (
+    <TamaguiInput
+      ref={ref as never}
+      value={props.value}
+      onChangeText={props.onChangeText}
+      keyboardType="number-pad"
+      inputMode="numeric"
+      maxLength={PIN_LENGTH}
+      autoFocus={!props.disabled}
+      pointerEvents={props.disabled ? 'none' : 'auto'}
+      testID={props.testID ? `${props.testID}-field` : 'pin-input-field'}
+      caretHidden
+      position="absolute"
+      opacity={0.01}
+      width={1}
+      height={1}
+      borderWidth={0}
+      padding={0}
+      aria-hidden
+    />
+  );
+});

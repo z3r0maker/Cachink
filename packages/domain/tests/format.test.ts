@@ -179,18 +179,12 @@ describe('formatDateSlash', () => {
 
 describe('formatPeriodoLabel', () => {
   it('formats a same-month range as "01/MAY/2026 - 31/MAY/2026"', () => {
-    const out = formatPeriodoLabel(
-      parseIsoDate('2026-05-01'),
-      parseIsoDate('2026-05-31'),
-    );
+    const out = formatPeriodoLabel(parseIsoDate('2026-05-01'), parseIsoDate('2026-05-31'));
     expect(out).toBe('01/MAY/2026 - 31/MAY/2026');
   });
 
   it('formats a cross-month range as "05/OCT/2025 - 05/NOV/2025"', () => {
-    const out = formatPeriodoLabel(
-      parseIsoDate('2025-10-05'),
-      parseIsoDate('2025-11-05'),
-    );
+    const out = formatPeriodoLabel(parseIsoDate('2025-10-05'), parseIsoDate('2025-11-05'));
     expect(out).toBe('05/OCT/2025 - 05/NOV/2025');
   });
 });

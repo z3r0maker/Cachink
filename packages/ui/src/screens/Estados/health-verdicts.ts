@@ -10,10 +10,7 @@ import type { HealthTone } from '../../components/HealthIndicator/index';
 
 type T = (key: string, options?: Record<string, unknown>) => string;
 
-export function utilidadNetaVerdict(
-  value: Money,
-  t: T,
-): { tone: HealthTone; verdict: string } {
+export function utilidadNetaVerdict(value: Money, t: T): { tone: HealthTone; verdict: string } {
   if (value > ZERO) {
     return { tone: 'healthy', verdict: t('estados.verdictUtilidadNetaPositive') };
   }

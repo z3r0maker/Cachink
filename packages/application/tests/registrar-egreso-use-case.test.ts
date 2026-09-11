@@ -52,7 +52,10 @@ describe('RegistrarEgresoUseCase', () => {
   });
 
   it('Zod rejections propagate (e.g. invalid categoria)', async () => {
-    const input = { ...makeNewExpense({ businessId: BIZ }), categoria: 'NoExiste' } as unknown as NewExpense;
+    const input = {
+      ...makeNewExpense({ businessId: BIZ }),
+      categoria: 'NoExiste',
+    } as unknown as NewExpense;
     await expect(useCase.execute(input)).rejects.toThrow();
   });
 });

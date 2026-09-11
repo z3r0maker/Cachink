@@ -8,7 +8,11 @@
  * The factory initializes the SQLite table on first call.
  */
 
-import { SqliteLogStore, type SqliteDatabase, type SqliteLogStoreConfig } from './sqlite-log-store.js';
+import {
+  SqliteLogStore,
+  type SqliteDatabase,
+  type SqliteLogStoreConfig,
+} from './sqlite-log-store.js';
 import { DualLogStore } from './dual-log-store.js';
 import { HttpRemoteLogStore, type HttpRemoteLogStoreConfig } from './http-remote-log-store.js';
 import type { LogStore } from './log-store.js';

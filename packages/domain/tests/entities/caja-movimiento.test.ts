@@ -31,21 +31,15 @@ describe('CajaMovimientoSchema', () => {
   });
 
   it('accepts a retiro movimiento', () => {
-    expect(() =>
-      CajaMovimientoSchema.parse({ ...validMovimiento, tipo: 'retiro' }),
-    ).not.toThrow();
+    expect(() => CajaMovimientoSchema.parse({ ...validMovimiento, tipo: 'retiro' })).not.toThrow();
   });
 
   it('rejects an unknown tipo', () => {
-    expect(() =>
-      CajaMovimientoSchema.parse({ ...validMovimiento, tipo: 'ajuste' }),
-    ).toThrow();
+    expect(() => CajaMovimientoSchema.parse({ ...validMovimiento, tipo: 'ajuste' })).toThrow();
   });
 
   it('rejects empty motivo', () => {
-    expect(() =>
-      CajaMovimientoSchema.parse({ ...validMovimiento, motivo: '' }),
-    ).toThrow();
+    expect(() => CajaMovimientoSchema.parse({ ...validMovimiento, motivo: '' })).toThrow();
   });
 
   it('rejects motivo longer than 200 chars', () => {
@@ -58,9 +52,7 @@ describe('CajaMovimientoSchema', () => {
   });
 
   it('rejects non-bigint monto', () => {
-    expect(() =>
-      CajaMovimientoSchema.parse({ ...validMovimiento, montoCentavos: 500 }),
-    ).toThrow();
+    expect(() => CajaMovimientoSchema.parse({ ...validMovimiento, montoCentavos: 500 })).toThrow();
   });
 });
 

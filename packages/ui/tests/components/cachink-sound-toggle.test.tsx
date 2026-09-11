@@ -35,48 +35,36 @@ import { renderWithProviders, screen, fireEvent } from '../test-utils';
 
 describe('CachinkSoundToggle', () => {
   it('renders with default testID', () => {
-    renderWithProviders(
-      <CachinkSoundToggle enabled={true} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} />);
     expect(screen.getByTestId('settings-cachink-sound-toggle')).toBeInTheDocument();
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <CachinkSoundToggle enabled={true} onChange={vi.fn()} testID="custom" />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} testID="custom" />);
     expect(screen.getByTestId('custom')).toBeInTheDocument();
   });
 
   it('shows yes label when enabled', () => {
-    renderWithProviders(
-      <CachinkSoundToggle enabled={true} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} />);
     // In test env, i18n returns raw keys; the key is 'common.yes'
     expect(screen.getByTestId('settings-cachink-sound-btn')).toHaveTextContent('common.yes');
   });
 
   it('shows no label when disabled', () => {
-    renderWithProviders(
-      <CachinkSoundToggle enabled={false} onChange={vi.fn()} />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={false} onChange={vi.fn()} />);
     expect(screen.getByTestId('settings-cachink-sound-btn')).toHaveTextContent('common.no');
   });
 
   it('calls onChange with toggled value on press', () => {
     const onChange = vi.fn();
-    renderWithProviders(
-      <CachinkSoundToggle enabled={true} onChange={onChange} />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={onChange} />);
     fireEvent.click(screen.getByTestId('settings-cachink-sound-btn'));
     expect(onChange).toHaveBeenCalledWith(false);
   });
 
   it('calls onChange(true) when currently disabled', () => {
     const onChange = vi.fn();
-    renderWithProviders(
-      <CachinkSoundToggle enabled={false} onChange={onChange} />,
-    );
+    renderWithProviders(<CachinkSoundToggle enabled={false} onChange={onChange} />);
     fireEvent.click(screen.getByTestId('settings-cachink-sound-btn'));
     expect(onChange).toHaveBeenCalledWith(true);
   });

@@ -24,11 +24,7 @@ function renderTab(flags: FeatureFlags = ALL_ON, onToggle = vi.fn()) {
   const prefs = deriveDefaultPrefs(flags);
   return render(
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
-      <NotificacionesConfigTab
-        prefs={prefs}
-        flags={flags}
-        onToggle={onToggle}
-      />
+      <NotificacionesConfigTab prefs={prefs} flags={flags} onToggle={onToggle} />
     </TamaguiProvider>,
   );
 }

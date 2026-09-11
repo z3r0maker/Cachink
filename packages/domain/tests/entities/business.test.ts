@@ -88,9 +88,7 @@ describe('BusinessSchema', () => {
   });
 
   it('rejects an unknown tipoNegocio', () => {
-    expect(() =>
-      BusinessSchema.parse({ ...validBusiness, tipoNegocio: 'franquicia' }),
-    ).toThrow();
+    expect(() => BusinessSchema.parse({ ...validBusiness, tipoNegocio: 'franquicia' })).toThrow();
   });
 });
 
@@ -155,20 +153,14 @@ describe('AttrDefSchema', () => {
   });
 
   it('rejects a clave starting with a number', () => {
-    expect(() =>
-      AttrDefSchema.parse({ clave: '1color', label: 'Color', tipo: 'texto' }),
-    ).toThrow();
+    expect(() => AttrDefSchema.parse({ clave: '1color', label: 'Color', tipo: 'texto' })).toThrow();
   });
 
   it('rejects a clave with uppercase letters', () => {
-    expect(() =>
-      AttrDefSchema.parse({ clave: 'Color', label: 'Color', tipo: 'texto' }),
-    ).toThrow();
+    expect(() => AttrDefSchema.parse({ clave: 'Color', label: 'Color', tipo: 'texto' })).toThrow();
   });
 
   it('rejects an empty clave', () => {
-    expect(() =>
-      AttrDefSchema.parse({ clave: '', label: 'Color', tipo: 'texto' }),
-    ).toThrow();
+    expect(() => AttrDefSchema.parse({ clave: '', label: 'Color', tipo: 'texto' })).toThrow();
   });
 });

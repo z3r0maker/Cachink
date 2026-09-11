@@ -168,8 +168,6 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const rows = sqlite.prepare('SELECT tag FROM __cachink_migrations').all() as Array<{
       tag: string;
     }>;
-    expect(rows).toEqual([
-      { tag: '0000_initial' },
-    ]);
+    expect(rows).toEqual([{ tag: '0000_initial' }]);
   });
 });

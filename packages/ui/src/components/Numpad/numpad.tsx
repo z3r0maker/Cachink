@@ -29,8 +29,18 @@ export interface NumpadProps {
 }
 
 export type NumpadKey =
-  | '0' | '1' | '2' | '3' | '4' | '5'
-  | '6' | '7' | '8' | '9' | '.' | 'backspace';
+  | '0'
+  | '1'
+  | '2'
+  | '3'
+  | '4'
+  | '5'
+  | '6'
+  | '7'
+  | '8'
+  | '9'
+  | '.'
+  | 'backspace';
 
 const ROWS: readonly (readonly NumpadKey[])[] = [
   ['1', '2', '3'],
@@ -49,18 +59,9 @@ export function Numpad(props: NumpadProps): ReactElement {
   const size = props.buttonSize ?? 72;
 
   return (
-    <View
-      gap={8}
-      alignItems="center"
-      testID={props.testID ?? 'numpad'}
-    >
+    <View gap={8} alignItems="center" testID={props.testID ?? 'numpad'}>
       {ROWS.map((row, ri) => (
-        <View
-          key={ri}
-          flexDirection="row"
-          gap={8}
-          justifyContent="center"
-        >
+        <View key={ri} flexDirection="row" gap={8} justifyContent="center">
           {row.map((key) => {
             const disabled = key === '.' && !allowDecimal;
             return (
@@ -111,10 +112,7 @@ function NumpadButton(props: NumpadButtonProps): ReactElement {
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        baseStyle,
-        pressed && { backgroundColor: colors.gray100 },
-      ]}
+      style={({ pressed }) => [baseStyle, pressed && { backgroundColor: colors.gray100 }]}
       onPress={props.onPress}
       disabled={props.disabled}
       testID={props.testID}

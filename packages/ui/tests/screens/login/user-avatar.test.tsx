@@ -78,11 +78,7 @@ describe('UserAvatar', () => {
 describe('UserAvatarGrid', () => {
   it('renders all user avatars', () => {
     renderWithProviders(
-      <UserAvatarGrid
-        users={[DIRECTOR, OPERATIVO]}
-        selectedUserId={null}
-        onSelect={vi.fn()}
-      />,
+      <UserAvatarGrid users={[DIRECTOR, OPERATIVO]} selectedUserId={null} onSelect={vi.fn()} />,
     );
     expect(screen.getByTestId(`user-avatar-${DIRECTOR.id}`)).toBeInTheDocument();
     expect(screen.getByTestId(`user-avatar-${OPERATIVO.id}`)).toBeInTheDocument();
@@ -91,20 +87,14 @@ describe('UserAvatarGrid', () => {
   it('calls onSelect with user ID when avatar is clicked', () => {
     const onSelect = vi.fn();
     renderWithProviders(
-      <UserAvatarGrid
-        users={[DIRECTOR, OPERATIVO]}
-        selectedUserId={null}
-        onSelect={onSelect}
-      />,
+      <UserAvatarGrid users={[DIRECTOR, OPERATIVO]} selectedUserId={null} onSelect={onSelect} />,
     );
     fireEvent.click(screen.getByTestId(`user-avatar-${OPERATIVO.id}`));
     expect(onSelect).toHaveBeenCalledWith(OPERATIVO.id);
   });
 
   it('renders with empty user list', () => {
-    renderWithProviders(
-      <UserAvatarGrid users={[]} selectedUserId={null} onSelect={vi.fn()} />,
-    );
+    renderWithProviders(<UserAvatarGrid users={[]} selectedUserId={null} onSelect={vi.fn()} />);
     // Should not crash
     expect(screen.queryByTestId(/user-avatar-/)).toBeNull();
   });

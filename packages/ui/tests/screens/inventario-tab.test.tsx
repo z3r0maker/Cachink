@@ -69,12 +69,7 @@ describe('InventarioTab', () => {
   it('shows product name in the picker, not the raw ID', () => {
     const p = producto();
     renderWithProviders(
-      <InventarioTab
-        businessId={businessId}
-        fecha={fecha}
-        productos={[p]}
-        onSubmit={vi.fn()}
-      />,
+      <InventarioTab businessId={businessId} fecha={fecha} productos={[p]} onSubmit={vi.fn()} />,
     );
     const picker = screen.getByTestId('inventario-producto');
     // The combobox trigger or option should contain the product name.

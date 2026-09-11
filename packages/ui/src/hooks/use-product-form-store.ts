@@ -38,7 +38,6 @@ interface ProductFormStore {
 export const useProductFormStore = create<ProductFormStore>((set) => ({
   draft: null,
   setDraft: (d) => set({ draft: d }),
-  updateIcon: (icon) =>
-    set((s) => (s.draft ? { draft: { ...s.draft, icono: icon } } : s)),
+  updateIcon: (icon) => set((s) => (s.draft ? { draft: { ...s.draft, icono: icon } } : s)),
   clear: () => set({ draft: null }),
 }));

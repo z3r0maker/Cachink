@@ -7,11 +7,7 @@ import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import {
-  InMemoryExpensesRepository,
-  TEST_DEVICE_ID,
-  makeNewExpense,
-} from '@xangarro/testing';
+import { InMemoryExpensesRepository, TEST_DEVICE_ID, makeNewExpense } from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEliminarEgreso } from '../../src/hooks/use-eliminar-egreso';
@@ -23,14 +19,14 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 function wrapper(
   overrides?: Record<string, unknown>,
 ): (props: { children: ReactNode }) => ReactNode {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -46,9 +42,7 @@ describe('useEliminarEgreso', () => {
   });
 
   it('soft-deletes an expense via the mutation', async () => {
-    const expense = await expenses.create(
-      makeNewExpense({ businessId: BIZ }),
-    );
+    const expense = await expenses.create(makeNewExpense({ businessId: BIZ }));
 
     const { result } = renderHook(() => useEliminarEgreso(), {
       wrapper: wrapper({ expenses }),

@@ -18,9 +18,7 @@ const defaultProps = {
 };
 
 function renderSetup(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <DirectorSetupScreen {...defaultProps} {...overrides} />,
-  );
+  return renderWithProviders(<DirectorSetupScreen {...defaultProps} {...overrides} />);
 }
 
 function fillInput(testId: string, value: string): void {
@@ -104,9 +102,7 @@ describe('DirectorSetupScreen', () => {
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <DirectorSetupScreen {...defaultProps} testID="my-setup" />,
-    );
+    renderWithProviders(<DirectorSetupScreen {...defaultProps} testID="my-setup" />);
     expect(screen.getByTestId('my-setup')).toBeInTheDocument();
   });
 });

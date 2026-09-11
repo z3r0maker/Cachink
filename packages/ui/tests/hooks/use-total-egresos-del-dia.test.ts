@@ -16,10 +16,7 @@ describe('totalEgresosDelDia', () => {
   });
 
   it('sums multiple expenses', () => {
-    const expenses = [
-      makeExpense({ monto: 500n }),
-      makeExpense({ monto: 1500n }),
-    ];
+    const expenses = [makeExpense({ monto: 500n }), makeExpense({ monto: 1500n })];
     expect(totalEgresosDelDia(expenses)).toBe(2000n);
   });
 });

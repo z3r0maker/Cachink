@@ -49,11 +49,7 @@ export interface CajaTurnosRepository {
   /** Find the most recent turn for a business. */
   findLatest(businessId: BusinessId): Promise<CajaTurno | null>;
   /** List turns in a date range, newest first. */
-  findByDateRange(
-    from: string,
-    to: string,
-    businessId: BusinessId,
-  ): Promise<readonly CajaTurno[]>;
+  findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly CajaTurno[]>;
   /** Partial update for closing a turn. */
   update(id: CajaTurnoId, patch: CajaTurnoPatch): Promise<CajaTurno>;
 }

@@ -6,7 +6,7 @@
  * with gap compensation so tiles fill evenly without JS measurement.
  */
 
-import type { ReactElement } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { View } from '@tamagui/core';
 import type { AttrDef, Product } from '@xangarro/domain';
 import { ProductoCard, type ProductoCardProps } from '../ProductoCard/index';
@@ -30,8 +30,34 @@ export interface ProductoCardGridProps {
 
 const GAP = 12;
 
+/** One responsive cell: 2 / 3 / 4 / 5-wide at $sm / $gtSm / $gtMd / $gtLg. */
+function GridCell({ children }: { readonly children: ReactNode }): ReactElement {
+  return (
+    <View
+      flexBasis="47%"
+      flexGrow={1}
+      flexShrink={0}
+      minWidth={140}
+      $gtSm={{ flexBasis: '31%' }}
+      $gtMd={{ flexBasis: '23%' }}
+      $gtLg={{ flexBasis: '18%' }}
+    >
+      {children}
+    </View>
+  );
+}
+
 export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
-  const { productos, stockMap, atributoDefs = [], cartQuantities, badgeVariant, mode, onPress, onLongPress } = props;
+  const {
+    productos,
+    stockMap,
+    atributoDefs = [],
+    cartQuantities,
+    badgeVariant,
+    mode,
+    onPress,
+    onLongPress,
+  } = props;
   return (
     <View
       testID={props.testID ?? 'producto-card-grid'}
@@ -40,16 +66,7 @@ export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
       gap={GAP}
     >
       {productos.map((p) => (
-        <View
-          key={p.id}
-          flexBasis="47%"
-          flexGrow={1}
-          flexShrink={0}
-          minWidth={140}
-          $gtSm={{ flexBasis: '31%' }}
-          $gtMd={{ flexBasis: '23%' }}
-          $gtLg={{ flexBasis: '18%' }}
-        >
+        <GridCell key={p.id}>
           <ProductoCard
             producto={p}
             stock={stockMap?.get(p.id)}
@@ -60,7 +77,7 @@ export function ProductoCardGrid(props: ProductoCardGridProps): ReactElement {
             badgeCount={cartQuantities?.get(p.id) ?? 0}
             badgeVariant={badgeVariant}
           />
-        </View>
+        </GridCell>
       ))}
     </View>
   );

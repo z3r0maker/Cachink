@@ -7,7 +7,7 @@ import {
 } from '../../src/financials/health-thresholds.js';
 
 describe('evaluateHealth', () => {
-  const threshold: MetricThreshold = { healthy: 0.20, warning: 0.10 };
+  const threshold: MetricThreshold = { healthy: 0.2, warning: 0.1 };
 
   it('returns null when value is null', () => {
     expect(evaluateHealth(null, threshold)).toBeNull();
@@ -16,15 +16,15 @@ describe('evaluateHealth', () => {
   // ── Normal scale (higher = better) ──
 
   it('healthy when value is at the healthy threshold', () => {
-    expect(evaluateHealth(0.20, threshold)).toBe('healthy');
+    expect(evaluateHealth(0.2, threshold)).toBe('healthy');
   });
 
   it('healthy when value exceeds the healthy threshold', () => {
-    expect(evaluateHealth(0.50, threshold)).toBe('healthy');
+    expect(evaluateHealth(0.5, threshold)).toBe('healthy');
   });
 
   it('warning when value is at the warning threshold', () => {
-    expect(evaluateHealth(0.10, threshold)).toBe('warning');
+    expect(evaluateHealth(0.1, threshold)).toBe('warning');
   });
 
   it('warning when value is between warning and healthy', () => {
@@ -40,7 +40,7 @@ describe('evaluateHealth', () => {
   });
 
   it('critical when value is negative', () => {
-    expect(evaluateHealth(-0.10, threshold)).toBe('critical');
+    expect(evaluateHealth(-0.1, threshold)).toBe('critical');
   });
 
   // ── Inverted scale (lower = better, e.g. días de cobranza) ──
@@ -105,9 +105,9 @@ describe('HealthThresholdsSchema', () => {
 
   it('validates a custom thresholds object', () => {
     const result = HealthThresholdsSchema.safeParse({
-      margenBruto: { healthy: 0.30, warning: 0.15 },
+      margenBruto: { healthy: 0.3, warning: 0.15 },
       margenOperativo: { healthy: 0.15, warning: 0.08 },
-      margenNeto: { healthy: 0.10, warning: 0.05 },
+      margenNeto: { healthy: 0.1, warning: 0.05 },
       razonDeLiquidez: { healthy: 2.0, warning: 1.2 },
       rotacionInventario: { healthy: 6.0, warning: 3.0 },
       diasPromedioCobranza: { healthy: 20, warning: 45 },
@@ -117,7 +117,7 @@ describe('HealthThresholdsSchema', () => {
 
   it('rejects when a metric is missing', () => {
     const result = HealthThresholdsSchema.safeParse({
-      margenBruto: { healthy: 0.30, warning: 0.15 },
+      margenBruto: { healthy: 0.3, warning: 0.15 },
       // Missing other metrics
     });
     expect(result.success).toBe(false);
@@ -126,7 +126,7 @@ describe('HealthThresholdsSchema', () => {
   it('rejects when healthy is not a number', () => {
     const result = HealthThresholdsSchema.safeParse({
       ...DEFAULT_HEALTH_THRESHOLDS,
-      margenBruto: { healthy: 'not-a-number', warning: 0.10 },
+      margenBruto: { healthy: 'not-a-number', warning: 0.1 },
     });
     expect(result.success).toBe(false);
   });

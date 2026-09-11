@@ -84,18 +84,22 @@ function useExecuteCancellation(
   return { execute, submitting };
 }
 
-export function CancellationFlow(
-  props: CancellationFlowProps,
-): ReactElement {
+export function CancellationFlow(props: CancellationFlowProps): ReactElement {
   const [step, setStep] = useState<Step>('pin');
   const [motivo, setMotivo] = useState('');
   const ctx = useAuditContext(props.sale);
   const { execute, submitting } = useExecuteCancellation(props, motivo, ctx);
 
-  const handlePin = useCallback((_p: string) => { setStep('reason'); }, []);
+  const handlePin = useCallback((_p: string) => {
+    setStep('reason');
+  }, []);
   const handleReason = useCallback(() => {
     if (motivo.trim().length === 0) return;
-    if (ctx.isCashSale) { setStep('cash-confirm'); } else { execute(); }
+    if (ctx.isCashSale) {
+      setStep('cash-confirm');
+    } else {
+      execute();
+    }
   }, [motivo, ctx.isCashSale, execute]);
 
   return (

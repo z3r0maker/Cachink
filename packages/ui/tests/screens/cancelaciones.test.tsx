@@ -6,8 +6,12 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { Sale, SaleId, BusinessId, DeviceId, UserId } from '@xangarro/domain';
-import { makeSale, InMemorySalesRepository, InMemoryCancelacionLogsRepository } from '@xangarro/testing';
+import type { Sale, SaleId, BusinessId, DeviceId, UserId, IsoTimestamp } from '@xangarro/domain';
+import {
+  makeSale,
+  InMemorySalesRepository,
+  InMemoryCancelacionLogsRepository,
+} from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -39,22 +43,18 @@ const CANCELLED_SALE = makeSale({
   monto: 3000n,
   metodo: 'Efectivo',
   hora: '11:00',
-  cancelledAt: '2026-06-15T12:00:00.000Z' as any,
+  cancelledAt: '2026-06-15T12:00:00.000Z' as IsoTimestamp,
   cancelMotivo: 'Cliente no pagó',
 });
 
 describe('SaleCancelCard', () => {
   it('renders the sale concepto', () => {
-    renderWithProviders(
-      <SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />,
-    );
+    renderWithProviders(<SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />);
     expect(screen.getByText('Taco al pastor')).toBeInTheDocument();
   });
 
   it('renders the formatted amount', () => {
-    renderWithProviders(
-      <SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />,
-    );
+    renderWithProviders(<SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />);
     expect(screen.getByText('$45.00')).toBeInTheDocument();
   });
 
@@ -82,23 +82,17 @@ describe('SaleCancelCard', () => {
   });
 
   it('shows cancellation badge for cancelled sales', () => {
-    renderWithProviders(
-      <SaleCancelCard sale={CANCELLED_SALE} testID="test-card" />,
-    );
+    renderWithProviders(<SaleCancelCard sale={CANCELLED_SALE} testID="test-card" />);
     expect(screen.getByText(/Cliente no pagó/)).toBeInTheDocument();
   });
 
   it('does not show cancel button when onCancel is not provided', () => {
-    renderWithProviders(
-      <SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />,
-    );
+    renderWithProviders(<SaleCancelCard sale={ACTIVE_SALE} testID="test-card" />);
     expect(screen.queryByTestId(`cancel-btn-${ACTIVE_SALE.id}`)).toBeNull();
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <SaleCancelCard sale={ACTIVE_SALE} testID="my-card" />,
-    );
+    renderWithProviders(<SaleCancelCard sale={ACTIVE_SALE} testID="my-card" />);
     expect(screen.getByTestId('my-card')).toBeInTheDocument();
   });
 });
@@ -117,24 +111,18 @@ describe('PinStep', () => {
 
 describe('ReasonStep', () => {
   it('renders the reason input', () => {
-    renderWithProviders(
-      <ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />,
-    );
+    renderWithProviders(<ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />);
     expect(screen.getByTestId('cancel-reason-input')).toBeInTheDocument();
   });
 
   it('renders the submit button', () => {
-    renderWithProviders(
-      <ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />,
-    );
+    renderWithProviders(<ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />);
     expect(screen.getByTestId('cancel-reason-submit')).toBeInTheDocument();
   });
 
   it('disables submit when motivo is empty', () => {
     const onSubmit = vi.fn();
-    renderWithProviders(
-      <ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={onSubmit} />,
-    );
+    renderWithProviders(<ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={onSubmit} />);
     fireEvent.click(screen.getByTestId('cancel-reason-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -142,32 +130,30 @@ describe('ReasonStep', () => {
   it('enables submit when motivo is filled', () => {
     const onSubmit = vi.fn();
     renderWithProviders(
-      <ReasonStep motivo="Cliente cambió de opinión" onChangeMotivo={vi.fn()} onSubmit={onSubmit} />,
+      <ReasonStep
+        motivo="Cliente cambió de opinión"
+        onChangeMotivo={vi.fn()}
+        onSubmit={onSubmit}
+      />,
     );
     fireEvent.click(screen.getByTestId('cancel-reason-submit'));
     expect(onSubmit).toHaveBeenCalled();
   });
 
   it('renders the question text', () => {
-    renderWithProviders(
-      <ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />,
-    );
+    renderWithProviders(<ReasonStep motivo="" onChangeMotivo={vi.fn()} onSubmit={vi.fn()} />);
     expect(screen.getByText('¿Por qué cancelas esta venta?')).toBeInTheDocument();
   });
 });
 
 describe('CashConfirmStep', () => {
   it('renders the confirm button', () => {
-    renderWithProviders(
-      <CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />,
-    );
+    renderWithProviders(<CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />);
     expect(screen.getByTestId('cancel-cash-confirm')).toBeInTheDocument();
   });
 
   it('displays the formatted amount to return', () => {
-    renderWithProviders(
-      <CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />,
-    );
+    renderWithProviders(<CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />);
     expect(screen.getByText(/\$45\.00/)).toBeInTheDocument();
   });
 
@@ -181,9 +167,7 @@ describe('CashConfirmStep', () => {
   });
 
   it('shows disclaimer text about cash deduction', () => {
-    renderWithProviders(
-      <CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />,
-    );
+    renderWithProviders(<CashConfirmStep amount={4500n} onConfirm={vi.fn()} submitting={false} />);
     expect(screen.getByText(/efectivo será descontado/)).toBeInTheDocument();
   });
 });
@@ -216,11 +200,7 @@ function renderFlow(
   return renderWithProviders(
     <QueryClientProvider client={qc}>
       <MockRepositoryProvider overrides={overrides}>
-        <CancellationFlow
-          sale={sale}
-          onClose={callbacks.onClose}
-          onSuccess={callbacks.onSuccess}
-        />
+        <CancellationFlow sale={sale} onClose={callbacks.onClose} onSuccess={callbacks.onSuccess} />
       </MockRepositoryProvider>
     </QueryClientProvider>,
   );

@@ -31,14 +31,24 @@ describe('UserListScreen', () => {
 
   it('renders with default testID user-list', () => {
     renderWithProviders(
-      <UserListScreen users={[]} onCreateUser={vi.fn()} onEditUser={vi.fn()} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[]}
+        onCreateUser={vi.fn()}
+        onEditUser={vi.fn()}
+        onDeleteUser={vi.fn()}
+      />,
     );
     expect(screen.getByTestId('user-list')).toBeInTheDocument();
   });
 
   it('renders a row per user', () => {
     renderWithProviders(
-      <UserListScreen users={[DIRECTOR, OPERATIVO]} onCreateUser={vi.fn()} onEditUser={vi.fn()} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[DIRECTOR, OPERATIVO]}
+        onCreateUser={vi.fn()}
+        onEditUser={vi.fn()}
+        onDeleteUser={vi.fn()}
+      />,
     );
     expect(screen.getByText('Ana Director')).toBeInTheDocument();
     expect(screen.getByText('Beto Operativo')).toBeInTheDocument();
@@ -46,7 +56,12 @@ describe('UserListScreen', () => {
 
   it('shows role labels', () => {
     renderWithProviders(
-      <UserListScreen users={[DIRECTOR, OPERATIVO]} onCreateUser={vi.fn()} onEditUser={vi.fn()} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[DIRECTOR, OPERATIVO]}
+        onCreateUser={vi.fn()}
+        onEditUser={vi.fn()}
+        onDeleteUser={vi.fn()}
+      />,
     );
     expect(screen.getByText('Director')).toBeInTheDocument();
     expect(screen.getByText('Operativo')).toBeInTheDocument();
@@ -54,7 +69,12 @@ describe('UserListScreen', () => {
 
   it('renders the create button', () => {
     renderWithProviders(
-      <UserListScreen users={[]} onCreateUser={vi.fn()} onEditUser={vi.fn()} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[]}
+        onCreateUser={vi.fn()}
+        onEditUser={vi.fn()}
+        onDeleteUser={vi.fn()}
+      />,
     );
     expect(screen.getByTestId('user-create-btn')).toBeInTheDocument();
   });
@@ -62,7 +82,12 @@ describe('UserListScreen', () => {
   it('calls onCreateUser when create button is clicked', () => {
     const onCreateUser = vi.fn();
     renderWithProviders(
-      <UserListScreen users={[]} onCreateUser={onCreateUser} onEditUser={vi.fn()} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[]}
+        onCreateUser={onCreateUser}
+        onEditUser={vi.fn()}
+        onDeleteUser={vi.fn()}
+      />,
     );
     fireEvent.click(screen.getByTestId('user-create-btn'));
     expect(onCreateUser).toHaveBeenCalled();
@@ -71,7 +96,12 @@ describe('UserListScreen', () => {
   it('calls onEditUser when edit icon is clicked', () => {
     const onEditUser = vi.fn();
     renderWithProviders(
-      <UserListScreen users={[DIRECTOR]} onCreateUser={vi.fn()} onEditUser={onEditUser} onDeleteUser={vi.fn()} />,
+      <UserListScreen
+        users={[DIRECTOR]}
+        onCreateUser={vi.fn()}
+        onEditUser={onEditUser}
+        onDeleteUser={vi.fn()}
+      />,
     );
     fireEvent.click(screen.getByTestId(`user-edit-${DIRECTOR.id}`));
     expect(onEditUser).toHaveBeenCalledWith(DIRECTOR);
@@ -80,7 +110,12 @@ describe('UserListScreen', () => {
   it('calls onDeleteUser when delete icon is clicked', () => {
     const onDeleteUser = vi.fn();
     renderWithProviders(
-      <UserListScreen users={[DIRECTOR]} onCreateUser={vi.fn()} onEditUser={vi.fn()} onDeleteUser={onDeleteUser} />,
+      <UserListScreen
+        users={[DIRECTOR]}
+        onCreateUser={vi.fn()}
+        onEditUser={vi.fn()}
+        onDeleteUser={onDeleteUser}
+      />,
     );
     fireEvent.click(screen.getByTestId(`user-del-${DIRECTOR.id}`));
     expect(onDeleteUser).toHaveBeenCalledWith(DIRECTOR);
@@ -135,7 +170,12 @@ describe('CreateUserModal', () => {
 
   it('renders with custom testID', () => {
     renderWithProviders(
-      <CreateUserModal onSubmit={vi.fn()} onCancel={vi.fn()} submitting={false} testID="my-modal" />,
+      <CreateUserModal
+        onSubmit={vi.fn()}
+        onCancel={vi.fn()}
+        submitting={false}
+        testID="my-modal"
+      />,
     );
     expect(screen.getByTestId('my-modal')).toBeInTheDocument();
   });

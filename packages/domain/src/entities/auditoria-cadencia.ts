@@ -21,9 +21,7 @@ export function isAuditDue(
   if (lastAuditDate === null) return true;
   const last = new Date(`${lastAuditDate}T00:00:00Z`);
   const now = new Date(`${today}T00:00:00Z`);
-  const daysDiff = Math.floor(
-    (now.getTime() - last.getTime()) / 86_400_000,
-  );
+  const daysDiff = Math.floor((now.getTime() - last.getTime()) / 86_400_000);
 
   switch (cadencia.tipo) {
     case 'semanal':

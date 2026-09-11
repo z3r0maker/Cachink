@@ -25,14 +25,14 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 function wrapper(
   overrides?: Record<string, unknown>,
 ): (props: { children: ReactNode }) => ReactNode {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -53,12 +53,8 @@ describe('useEliminarVenta', () => {
   });
 
   it('soft-deletes a sale via the mutation', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ }),
-    );
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ, productoId: product.id }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ }));
+    const sale = await sales.create(makeNewSale({ businessId: BIZ, productoId: product.id }));
 
     const { result } = renderHook(() => useEliminarVenta(), {
       wrapper: wrapper({ sales }),

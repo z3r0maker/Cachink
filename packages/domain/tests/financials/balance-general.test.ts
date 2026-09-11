@@ -75,7 +75,11 @@ describe('calculateBalanceGeneral', () => {
         efectivoContadoCentavos: 60_000n,
         createdAt: '2026-04-23T20:00:00.000Z',
       }),
-      makeCorte({ id: '01HZ8XQN9GZJXV8AKQ5X0C7C03', fecha: '2026-04-24', efectivoContadoCentavos: 30_000n }),
+      makeCorte({
+        id: '01HZ8XQN9GZJXV8AKQ5X0C7C03',
+        fecha: '2026-04-24',
+        efectivoContadoCentavos: 30_000n,
+      }),
     ];
     const result = calculateBalanceGeneral({
       cortesDelDia: cortes,

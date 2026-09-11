@@ -72,10 +72,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
       .select()
       .from(inventoryMovements)
       .where(
-        and(
-          eq(inventoryMovements.productoId, productoId),
-          isNull(inventoryMovements.deletedAt),
-        ),
+        and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
       )
       .orderBy(desc(inventoryMovements.createdAt))
       .all();
@@ -110,10 +107,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
       })
       .from(inventoryMovements)
       .where(
-        and(
-          eq(inventoryMovements.productoId, productoId),
-          isNull(inventoryMovements.deletedAt),
-        ),
+        and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
       )
       .get();
     return result?.total ?? 0;

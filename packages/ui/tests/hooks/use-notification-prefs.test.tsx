@@ -10,7 +10,11 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InMemoryAppConfigRepository, InMemoryBusinessesRepository, TEST_DEVICE_ID } from '@xangarro/testing';
+import {
+  InMemoryAppConfigRepository,
+  InMemoryBusinessesRepository,
+  TEST_DEVICE_ID,
+} from '@xangarro/testing';
 import {
   deriveDefaultPrefs,
   DEFAULT_FEATURE_FLAGS,
@@ -47,9 +51,7 @@ function wrapper(repos: Partial<Repositories>) {
   return ({ children }: { children: ReactNode }) => (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
       <QueryClientProvider client={qc}>
-        <RepositoryProvider repositories={fullRepos}>
-          {children}
-        </RepositoryProvider>
+        <RepositoryProvider repositories={fullRepos}>{children}</RepositoryProvider>
       </QueryClientProvider>
     </TamaguiProvider>
   );
@@ -162,9 +164,7 @@ describe('useUpdateNotificationPrefs', () => {
     const Wrapper = ({ children }: { children: ReactNode }) => (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <RepositoryProvider repositories={fullRepos}>
-            {children}
-          </RepositoryProvider>
+          <RepositoryProvider repositories={fullRepos}>{children}</RepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -176,10 +176,9 @@ describe('useUpdateNotificationPrefs', () => {
     expect(readResult.current.data?.['stock-bajo']).toBe(true);
 
     // Now write an update
-    const { result: writeResult } = renderHook(
-      () => useUpdateNotificationPrefs(),
-      { wrapper: Wrapper },
-    );
+    const { result: writeResult } = renderHook(() => useUpdateNotificationPrefs(), {
+      wrapper: Wrapper,
+    });
 
     const next: NotificationPreferences = {
       ...deriveDefaultPrefs(DEFAULT_FEATURE_FLAGS),

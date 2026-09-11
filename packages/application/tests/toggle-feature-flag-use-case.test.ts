@@ -23,14 +23,18 @@ describe('ToggleFeatureFlagUseCase', () => {
 
   it('enables a flag that has no dependencies', async () => {
     const result = await useCase.execute({
-      businessId, flagKey: 'ventasCredito', newValue: true,
+      businessId,
+      flagKey: 'ventasCredito',
+      newValue: true,
     });
     expect(result.ventasCredito).toBe(true);
   });
 
   it('enables merma when stock is ON', async () => {
     const result = await useCase.execute({
-      businessId, flagKey: 'merma', newValue: true,
+      businessId,
+      flagKey: 'merma',
+      newValue: true,
     });
     expect(result.merma).toBe(true);
   });
@@ -38,9 +42,9 @@ describe('ToggleFeatureFlagUseCase', () => {
   it('rejects enabling merma when stock is OFF', async () => {
     // First disable stock
     await useCase.execute({ businessId, flagKey: 'stock', newValue: false });
-    await expect(
-      useCase.execute({ businessId, flagKey: 'merma', newValue: true }),
-    ).rejects.toThrow(/dependencia/);
+    await expect(useCase.execute({ businessId, flagKey: 'merma', newValue: true })).rejects.toThrow(
+      /dependencia/,
+    );
   });
 
   it('cascade-disables dependents when disabling stock', async () => {
@@ -49,7 +53,9 @@ describe('ToggleFeatureFlagUseCase', () => {
     await useCase.execute({ businessId, flagKey: 'auditoriaInventario', newValue: true });
 
     const result = await useCase.execute({
-      businessId, flagKey: 'stock', newValue: false,
+      businessId,
+      flagKey: 'stock',
+      newValue: false,
     });
     expect(result.stock).toBe(false);
     expect(result.merma).toBe(false);

@@ -35,7 +35,9 @@ export async function initSentryIfConsented(consent: boolean | null): Promise<vo
   if (consent !== true && _initialised && _sentry) {
     try {
       await _sentry.close();
-    } catch { /* closing failed — non-critical */ }
+    } catch {
+      /* closing failed — non-critical */
+    }
     _initialised = false;
     _sentry = null;
     return;
@@ -46,7 +48,7 @@ export async function initSentryIfConsented(consent: boolean | null): Promise<vo
   const dsn = readDsn();
   if (!dsn) return;
 
-  _sentry = await import('@sentry/react-native') as unknown as SentryModule;
+  _sentry = (await import('@sentry/react-native')) as unknown as SentryModule;
   _sentry.init({
     dsn,
     beforeSend(event: unknown) {

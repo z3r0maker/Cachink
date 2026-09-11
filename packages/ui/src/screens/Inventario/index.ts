@@ -21,5 +21,11 @@ export {
 } from './inventario-tab-bar';
 export { MovimientosRoute } from './movimientos-route';
 // Phase 18 consolidation: re-export from canonical Productos location.
-export { NuevoProductoModal, type NuevoProductoModalProps } from '../Productos/nuevo-producto-modal';
-export { EditarProductoModal, type EditarProductoModalProps } from '../Productos/editar-producto-modal';
+export {
+  NuevoProductoModal,
+  type NuevoProductoModalProps,
+} from '../Productos/nuevo-producto-modal';
+export {
+  EditarProductoModal,
+  type EditarProductoModalProps,
+} from '../Productos/editar-producto-modal';

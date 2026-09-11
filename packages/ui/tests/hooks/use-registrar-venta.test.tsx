@@ -30,14 +30,14 @@ const USER = '01HZ8XQN9GZJXV8AKQ5X0CUSER' as UserId;
 function wrapper(
   overrides?: Record<string, unknown>,
 ): (props: { children: ReactNode }) => ReactNode {
-  const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } } });
+  const qc = new QueryClient({
+    defaultOptions: { queries: { retry: 0 }, mutations: { retry: 0 } },
+  });
   return function Wrapper({ children }: { children: ReactNode }) {
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -70,17 +70,13 @@ describe('useRegistrarVenta', () => {
   });
 
   it('creates a sale via the mutation', async () => {
-    const product = await products.create(
-      makeNewProduct({ businessId: BIZ }),
-    );
+    const product = await products.create(makeNewProduct({ businessId: BIZ }));
     const { result } = renderHook(() => useRegistrarVenta(), {
       wrapper: wrapper({ products, sales, cajaTurnos }),
     });
 
     await act(async () => {
-      result.current.mutate(
-        makeNewSale({ businessId: BIZ, productoId: product.id }),
-      );
+      result.current.mutate(makeNewSale({ businessId: BIZ, productoId: product.id }));
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -93,9 +89,7 @@ describe('useRegistrarVenta', () => {
     });
 
     await act(async () => {
-      result.current.mutate(
-        makeNewSale({ businessId: BIZ }),
-      );
+      result.current.mutate(makeNewSale({ businessId: BIZ }));
     });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

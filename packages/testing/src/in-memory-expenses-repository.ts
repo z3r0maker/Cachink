@@ -58,7 +58,11 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
-  async findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]> {
+  async findByDateRange(
+    from: string,
+    to: string,
+    businessId: BusinessId,
+  ): Promise<readonly Expense[]> {
     return this.#live()
       .filter((r) => r.businessId === businessId && r.fecha >= from && r.fecha <= to)
       .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.createdAt.localeCompare(a.createdAt));
@@ -109,9 +113,8 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
     date: IsoDate,
   ): Promise<Expense | null> {
     return (
-      this.#live().find(
-        (r) => r.gastoRecurrenteId === gastoRecurrenteId && r.fecha === date,
-      ) ?? null
+      this.#live().find((r) => r.gastoRecurrenteId === gastoRecurrenteId && r.fecha === date) ??
+      null
     );
   }
 

@@ -29,9 +29,7 @@ describe('ProductosGateBanner', () => {
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(
-      <ProductosGateBanner onGoToProductos={vi.fn()} testID="my-gate" />,
-    );
+    renderWithProviders(<ProductosGateBanner onGoToProductos={vi.fn()} testID="my-gate" />);
     expect(screen.getByTestId('my-gate')).toBeInTheDocument();
   });
 });

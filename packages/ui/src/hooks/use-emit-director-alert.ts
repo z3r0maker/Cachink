@@ -45,6 +45,58 @@ export interface UseEmitDirectorAlertOptions {
   readonly testScheduler?: NotificationScheduler;
 }
 
+interface EmitDeps {
+  readonly repo: ReturnType<typeof useDirectorAlertsRepository>;
+  readonly businessId: BusinessId;
+  readonly scheduler: NotificationScheduler;
+  readonly t: ReturnType<typeof useTranslation>['t'];
+}
+
+/** Fire the OS push for critical/warning alerts; `info` stays in-app only. Never throws. */
+async function pushIfNeeded(
+  deps: EmitDeps,
+  alert: DirectorAlert,
+  input: EmitDirectorAlertInput,
+): Promise<void> {
+  if (!PUSH_SEVERITIES.has(input.severity)) return;
+  try {
+    const permission = await deps.scheduler.requestPermission();
+    if (permission !== 'granted') return;
+    await deps.scheduler.presentNow({
+      id: alert.id,
+      title: deps.t(input.titleKey as never),
+      body: input.message,
+      payload: { actionRoute: input.actionRoute ?? '/notificaciones', alertId: alert.id },
+    });
+  } catch {
+    // Permission denied or notification API unavailable — the alert still
+    // lands in the in-app inbox; silently skip the push.
+  }
+}
+
+/** Deduplication guard + create + push. Returns null when suppressed. */
+async function emitDirectorAlert(
+  deps: EmitDeps,
+  input: EmitDirectorAlertInput,
+): Promise<DirectorAlert | null> {
+  if (input.dedupeKey) {
+    const key = input.dedupeKey;
+    const unread = await deps.repo.findUnread(deps.businessId);
+    if (unread.some((a) => a.source === input.source && a.metadata.includes(key))) return null;
+  }
+  const alert = await deps.repo.create({
+    source: input.source,
+    severity: input.severity,
+    titleKey: input.titleKey,
+    message: input.message,
+    actionRoute: input.actionRoute,
+    metadata: input.metadata ?? '{}',
+    businessId: deps.businessId,
+  });
+  await pushIfNeeded(deps, alert, input);
+  return alert;
+}
+
 export function useEmitDirectorAlert(
   options: UseEmitDirectorAlertOptions = {},
 ): EmitDirectorAlertResult {
@@ -58,53 +110,9 @@ export function useEmitDirectorAlert(
   return useMutation<DirectorAlert | null, Error, EmitDirectorAlertInput>({
     async mutationFn(input) {
       if (!businessId) return null;
-
-      // Preferences gate: skip if Director has suppressed this source
+      // Preferences gate: skip if the Director has suppressed this source.
       if (effectivePrefs[input.source] === false) return null;
-
-      const bid = businessId as BusinessId;
-
-      // Deduplication guard
-      if (input.dedupeKey) {
-        const unread = await repo.findUnread(bid);
-        const duplicate = unread.some(
-          (a) => a.source === input.source && a.metadata.includes(input.dedupeKey!),
-        );
-        if (duplicate) return null;
-      }
-
-      const alert = await repo.create({
-        source: input.source,
-        severity: input.severity,
-        titleKey: input.titleKey,
-        message: input.message,
-        actionRoute: input.actionRoute,
-        metadata: input.metadata ?? '{}',
-        businessId: bid,
-      });
-
-      // Fire OS push for critical/warning — info stays in-app only
-      if (PUSH_SEVERITIES.has(input.severity)) {
-        try {
-          const permission = await scheduler.requestPermission();
-          if (permission === 'granted') {
-            await scheduler.presentNow({
-              id: alert.id,
-              title: t(input.titleKey as never),
-              body: input.message,
-              payload: {
-                actionRoute: input.actionRoute ?? '/notificaciones',
-                alertId: alert.id,
-              },
-            });
-          }
-        } catch {
-          // Permission denied or notification API unavailable — alert
-          // still lands in the in-app inbox, silently skip push.
-        }
-      }
-
-      return alert;
+      return emitDirectorAlert({ repo, businessId: businessId as BusinessId, scheduler, t }, input);
     },
     async onSuccess(result) {
       if (result) {

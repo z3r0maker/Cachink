@@ -25,7 +25,13 @@ const WRONG_PIN = '999999';
 const PIN_HASH = hashSync(USER_PIN, 10);
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
-function Wrapper({ children, usersRepo }: { children: ReactNode; usersRepo: InMemoryUsersRepository }): ReactElement {
+function Wrapper({
+  children,
+  usersRepo,
+}: {
+  children: ReactNode;
+  usersRepo: InMemoryUsersRepository;
+}): ReactElement {
   const repos = buildTestRepos({ users: usersRepo });
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
@@ -50,7 +56,8 @@ async function renderAction(
   });
   useAppConfigStore.getState().setUserId(user.id);
 
-  const resetDatabase = (overrides?.resetDatabase as ReturnType<typeof vi.fn>) ?? vi.fn().mockResolvedValue(undefined);
+  const resetDatabase =
+    (overrides?.resetDatabase as ReturnType<typeof vi.fn>) ?? vi.fn().mockResolvedValue(undefined);
   const onReload = (overrides?.onReload as ReturnType<typeof vi.fn>) ?? vi.fn();
 
   render(

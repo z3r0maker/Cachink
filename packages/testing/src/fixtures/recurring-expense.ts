@@ -33,9 +33,7 @@ export function makeNewRecurringExpense(
   };
 }
 
-export function makeRecurringExpense(
-  overrides: Partial<RecurringExpense> = {},
-): RecurringExpense {
+export function makeRecurringExpense(overrides: Partial<RecurringExpense> = {}): RecurringExpense {
   const id = (overrides.id ?? newEntityId<RecurringExpenseId>()) as RecurringExpenseId;
   return {
     id,

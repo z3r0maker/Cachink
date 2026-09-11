@@ -1273,7 +1273,7 @@ list screens. Pattern is one-line import + one `<List>` swap.
       contract on web (native swipe gesture is verified via Maestro
       on a dev laptop per the Scanner.native pattern). Mobile route
       adapters (`apps/mobile/src/app/{ventas,egresos,clientes,
-  inventario}.tsx`) wire the new handlers to the edit modal +
+inventario}.tsx`) wire the new handlers to the edit modal +
       `<ConfirmDialog>` mounts; per-route SwipeSlots / DetailSlots
       live in `apps/mobile/src/shell/{venta,egreso,cliente,inventario}-slots.tsx`
       so the route files stay under the §4.4 200-line cap. - **Workspace gate:** 9/9 typecheck, 9/9 lint, UI 923/923 tests

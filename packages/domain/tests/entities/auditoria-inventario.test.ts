@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { AuditoriaInventarioSchema, AuditoriaEstadoEnum } from '../../src/entities/auditoria-inventario.js';
+import {
+  AuditoriaInventarioSchema,
+  AuditoriaEstadoEnum,
+} from '../../src/entities/auditoria-inventario.js';
 
 const VALID_ULID = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 const VALID_AUDIT = {

@@ -43,14 +43,8 @@ export default mergeConfig(
           __dirname,
           'tests/__mocks__/react-native-safe-area-context.ts',
         ),
-        'react-native-wheely': resolve(
-          __dirname,
-          'tests/__mocks__/react-native-wheely.tsx',
-        ),
-        '@xangarro/observability': resolve(
-          __dirname,
-          'tests/__mocks__/cachink-observability.ts',
-        ),
+        'react-native-wheely': resolve(__dirname, 'tests/__mocks__/react-native-wheely.tsx'),
+        '@xangarro/observability': resolve(__dirname, 'tests/__mocks__/cachink-observability.ts'),
       },
     },
     test: {

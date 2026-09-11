@@ -21,14 +21,10 @@ export function impactMedium(): void {
 
 /** Success notification — checkout confirm, scan success. */
 export function notificationSuccess(): void {
-  void Haptics.notificationAsync(
-    Haptics.NotificationFeedbackType.Success,
-  );
+  void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 }
 
 /** Error notification — clear-all confirm, failed action. */
 export function notificationError(): void {
-  void Haptics.notificationAsync(
-    Haptics.NotificationFeedbackType.Error,
-  );
+  void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
 }

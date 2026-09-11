@@ -24,9 +24,7 @@ const defaultProps = {
 };
 
 function renderPrompt(overrides: Partial<typeof defaultProps> = {}) {
-  return renderWithProviders(
-    <PinPrompt {...defaultProps} {...overrides} />,
-  );
+  return renderWithProviders(<PinPrompt {...defaultProps} {...overrides} />);
 }
 
 describe('PinPrompt', () => {

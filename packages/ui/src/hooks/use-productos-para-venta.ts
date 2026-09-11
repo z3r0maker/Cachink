@@ -16,10 +16,7 @@ import { useProductos } from './use-productos';
 export function useProductosParaVenta(): UseQueryResult<readonly Product[], Error> {
   const productosQ = useProductos();
   const filtered = useMemo(
-    () =>
-      (productosQ.data ?? []).filter(
-        (p: Product) => p.usoProducto !== 'materia-prima',
-      ),
+    () => (productosQ.data ?? []).filter((p: Product) => p.usoProducto !== 'materia-prima'),
     [productosQ.data],
   );
   return { ...productosQ, data: filtered } as UseQueryResult<readonly Product[], Error>;

@@ -117,7 +117,9 @@ describe('Text overflow + clamp props (audit 9.3) across 7 primitives', () => {
     // ModalHeader title uses WebkitLineClamp for multi-line overflow;
     // subtitle uses single-line text-overflow ellipsis.
     expect(screen.getByTestId('modal-title').className).toMatch(/_WebkitLineClamp/);
-    expect(screen.getByTestId('modal-subtitle').className).toMatch(/_textOverflow-ellipsis|_WebkitLineClamp/);
+    expect(screen.getByTestId('modal-subtitle').className).toMatch(
+      /_textOverflow-ellipsis|_WebkitLineClamp/,
+    );
   });
 
   it('InitialsAvatar text clamps at 1 line (clip mode)', () => {

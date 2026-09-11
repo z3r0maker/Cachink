@@ -106,18 +106,24 @@ describe('seedDemoData', () => {
 
   it('creates sales across last 30 days', async () => {
     await seedDemoData(deps);
-    const from = new Date(); from.setDate(from.getDate() - 30);
+    const from = new Date();
+    from.setDate(from.getDate() - 30);
     const sales = await repos.sales.findByDateRange(
-      from.toISOString().slice(0, 10), new Date().toISOString().slice(0, 10), bizId,
+      from.toISOString().slice(0, 10),
+      new Date().toISOString().slice(0, 10),
+      bizId,
     );
     expect(sales.length).toBeGreaterThanOrEqual(290);
   });
 
   it('creates 15 expenses', async () => {
     await seedDemoData(deps);
-    const from = new Date(); from.setDate(from.getDate() - 31);
+    const from = new Date();
+    from.setDate(from.getDate() - 31);
     const expenses = await repos.expenses.findByDateRange(
-      from.toISOString().slice(0, 10), new Date().toISOString().slice(0, 10), bizId,
+      from.toISOString().slice(0, 10),
+      new Date().toISOString().slice(0, 10),
+      bizId,
     );
     expect(expenses.length).toBe(15);
   });
@@ -185,9 +191,12 @@ describe('seedDemoData', () => {
 
   it('all sale montos are bigint (no floats)', async () => {
     await seedDemoData(deps);
-    const from = new Date(); from.setDate(from.getDate() - 31);
+    const from = new Date();
+    from.setDate(from.getDate() - 31);
     const sales = await repos.sales.findByDateRange(
-      from.toISOString().slice(0, 10), new Date().toISOString().slice(0, 10), bizId,
+      from.toISOString().slice(0, 10),
+      new Date().toISOString().slice(0, 10),
+      bizId,
     );
     for (const sale of sales) expect(typeof sale.monto).toBe('bigint');
   });

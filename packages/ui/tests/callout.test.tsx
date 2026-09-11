@@ -13,9 +13,7 @@ describe('Callout', () => {
   });
 
   it('renders the title when provided', () => {
-    renderWithProviders(
-      <Callout title="Importante" body="Tus datos se conservan" />,
-    );
+    renderWithProviders(<Callout title="Importante" body="Tus datos se conservan" />);
     expect(screen.getByText('Importante')).toBeDefined();
     expect(screen.getByText('Tus datos se conservan')).toBeDefined();
   });

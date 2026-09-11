@@ -1,8 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type {
-  BalanceGeneral,
-  EstadoDeResultados,
-} from '../../src/financials/index.js';
+import type { BalanceGeneral, EstadoDeResultados } from '../../src/financials/index.js';
 import { calculateIndicadores } from '../../src/financials/index.js';
 
 function makeER(overrides: Partial<EstadoDeResultados> = {}): EstadoDeResultados {

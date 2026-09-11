@@ -16,11 +16,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { BusinessId, UserId, ProductId } from '@xangarro/domain';
 import { CajaNoAbiertaError, newEntityId } from '@xangarro/domain';
-import {
-  makeNewBusiness,
-  makeNewProduct,
-  makeNewSale,
-} from '../../../testing/src/index.js';
+import { makeNewBusiness, makeNewProduct, makeNewSale } from '../../../testing/src/index.js';
 import { buildHarness, type FullstackHarness } from './fullstack-harness.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -148,9 +144,7 @@ describe('Venta Lifecycle [fullstack]', () => {
   it('sale without caja throws CajaNoAbiertaError', async () => {
     // No caja opened — should throw
     await expect(
-      h.useCases.registrarVenta.execute(
-        makeNewSale({ businessId: BIZ, productoId: productId }),
-      ),
+      h.useCases.registrarVenta.execute(makeNewSale({ businessId: BIZ, productoId: productId })),
     ).rejects.toThrow(CajaNoAbiertaError);
   });
 

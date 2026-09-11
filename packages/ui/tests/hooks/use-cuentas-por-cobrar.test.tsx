@@ -32,9 +32,7 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -64,9 +62,7 @@ describe('useCuentasPorCobrar', () => {
 
   it('returns cuentas with pending Crédito sales', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ }));
-    const client = await clients.create(
-      makeNewClient({ businessId: BIZ, nombre: 'Laura' }),
-    );
+    const client = await clients.create(makeNewClient({ businessId: BIZ, nombre: 'Laura' }));
     await sales.create(
       makeNewSale({
         businessId: BIZ,

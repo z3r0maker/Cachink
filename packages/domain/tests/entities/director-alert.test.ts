@@ -140,10 +140,7 @@ describe('filterAlertsByFlags', () => {
   });
 
   it('blocks auditoria alerts when auditoriaInventario is OFF', () => {
-    const alerts = [
-      makeAlert('auditoria-pendiente'),
-      makeAlert('auditoria-discrepancia'),
-    ];
+    const alerts = [makeAlert('auditoria-pendiente'), makeAlert('auditoria-discrepancia')];
     const flags: FeatureFlags = { ...DEFAULT_FEATURE_FLAGS, auditoriaInventario: false };
     expect(filterAlertsByFlags(alerts, flags)).toHaveLength(0);
   });
@@ -162,10 +159,10 @@ describe('filterAlertsByFlags', () => {
 
   it('filters mixed sources correctly', () => {
     const alerts = [
-      makeAlert('stock-bajo'),         // stock ON → pass
-      makeAlert('merma-threshold'),    // merma OFF → block
-      makeAlert('caja-discrepancia'),  // always-on → pass
-      makeAlert('credito-entrega'),    // ventasCredito OFF → block
+      makeAlert('stock-bajo'), // stock ON → pass
+      makeAlert('merma-threshold'), // merma OFF → block
+      makeAlert('caja-discrepancia'), // always-on → pass
+      makeAlert('credito-entrega'), // ventasCredito OFF → block
     ];
     const flags: FeatureFlags = {
       ...DEFAULT_FEATURE_FLAGS,

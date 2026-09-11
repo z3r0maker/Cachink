@@ -29,9 +29,7 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>
-            {children}
-          </MockRepositoryProvider>
+          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -135,10 +133,9 @@ describe('useEmitDirectorAlert', () => {
   it('fires presentNow for critical severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(
-      () => useEmitDirectorAlert({ testScheduler: scheduler }),
-      { wrapper: wrapper({ directorAlerts: repo }) },
-    );
+    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
 
     await act(async () => {
       result.current.mutate({
@@ -161,10 +158,9 @@ describe('useEmitDirectorAlert', () => {
   it('fires presentNow for warning severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(
-      () => useEmitDirectorAlert({ testScheduler: scheduler }),
-      { wrapper: wrapper({ directorAlerts: repo }) },
-    );
+    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
 
     await act(async () => {
       result.current.mutate({
@@ -183,10 +179,9 @@ describe('useEmitDirectorAlert', () => {
   it('does NOT fire presentNow for info severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(
-      () => useEmitDirectorAlert({ testScheduler: scheduler }),
-      { wrapper: wrapper({ directorAlerts: repo }) },
-    );
+    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
 
     await act(async () => {
       result.current.mutate({
@@ -205,10 +200,9 @@ describe('useEmitDirectorAlert', () => {
   it('carries actionRoute in payload, defaulting to /notificaciones', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(
-      () => useEmitDirectorAlert({ testScheduler: scheduler }),
-      { wrapper: wrapper({ directorAlerts: repo }) },
-    );
+    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
 
     await act(async () => {
       result.current.mutate({
@@ -230,10 +224,9 @@ describe('useEmitDirectorAlert', () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = new InMemoryNotificationScheduler();
     scheduler.setPermission('denied');
-    const { result } = renderHook(
-      () => useEmitDirectorAlert({ testScheduler: scheduler }),
-      { wrapper: wrapper({ directorAlerts: repo }) },
-    );
+    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
+      wrapper: wrapper({ directorAlerts: repo }),
+    });
 
     await act(async () => {
       result.current.mutate({

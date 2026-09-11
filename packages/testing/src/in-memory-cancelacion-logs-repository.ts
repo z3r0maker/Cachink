@@ -16,9 +16,7 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { CancelacionLogsRepository } from '@xangarro/data';
 
-export class InMemoryCancelacionLogsRepository
-  implements CancelacionLogsRepository
-{
+export class InMemoryCancelacionLogsRepository implements CancelacionLogsRepository {
   private readonly rows = new Map<CancelacionLogId, CancelacionLog>();
   private readonly deviceId: DeviceId;
 
@@ -51,15 +49,11 @@ export class InMemoryCancelacionLogsRepository
     return row;
   }
 
-  async findById(
-    id: CancelacionLogId,
-  ): Promise<CancelacionLog | null> {
+  async findById(id: CancelacionLogId): Promise<CancelacionLog | null> {
     return this.rows.get(id) ?? null;
   }
 
-  async findBySaleId(
-    saleId: SaleId,
-  ): Promise<CancelacionLog | null> {
+  async findBySaleId(saleId: SaleId): Promise<CancelacionLog | null> {
     for (const row of this.rows.values()) {
       if (row.saleId === saleId) return row;
     }
@@ -72,12 +66,7 @@ export class InMemoryCancelacionLogsRepository
     businessId: BusinessId,
   ): Promise<readonly CancelacionLog[]> {
     return [...this.rows.values()]
-      .filter(
-        (r) =>
-          r.businessId === businessId &&
-          r.createdAt >= from &&
-          r.createdAt <= to + 'Z',
-      )
+      .filter((r) => r.businessId === businessId && r.createdAt >= from && r.createdAt <= to + 'Z')
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 

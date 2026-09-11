@@ -18,15 +18,10 @@ import {
   type NewClientPayment,
   type PaymentState,
 } from '@xangarro/domain';
-import type {
-  ClientPaymentsRepository,
-  SalesRepository,
-} from '@xangarro/data';
+import type { ClientPaymentsRepository, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
-export class RegistrarPagoClienteUseCase
-  implements UseCase<NewClientPayment, ClientPayment>
-{
+export class RegistrarPagoClienteUseCase implements UseCase<NewClientPayment, ClientPayment> {
   readonly #payments: ClientPaymentsRepository;
   readonly #sales: SalesRepository;
 

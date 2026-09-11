@@ -48,7 +48,7 @@ export const ALL_ALERT_SOURCES = Object.keys(ALERT_SOURCE_FLAG_MAP) as AlertSour
 export function deriveDefaultPrefs(flags: FeatureFlags): NotificationPreferences {
   const prefs: Record<string, boolean> = {};
   for (const [source, flagKey] of Object.entries(ALERT_SOURCE_FLAG_MAP)) {
-    prefs[source] = flagKey === null ? true : flags[flagKey] ?? false;
+    prefs[source] = flagKey === null ? true : (flags[flagKey] ?? false);
   }
   return prefs as NotificationPreferences;
 }

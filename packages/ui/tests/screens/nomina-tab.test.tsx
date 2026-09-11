@@ -66,12 +66,7 @@ describe('NominaTab', () => {
   it('shows employee name in the picker, not the raw ID', () => {
     const emp = empleado();
     renderWithProviders(
-      <NominaTab
-        businessId={businessId}
-        fecha={fecha}
-        empleados={[emp]}
-        onSubmit={vi.fn()}
-      />,
+      <NominaTab businessId={businessId} fecha={fecha} empleados={[emp]} onSubmit={vi.fn()} />,
     );
     const picker = screen.getByTestId('nomina-empleado');
     expect(picker.textContent).not.toContain(emp.id);

@@ -6,7 +6,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
 import type { BusinessId, DeviceId } from '@xangarro/domain';
-import { InMemoryInventoryMovementsRepository, InMemoryProductsRepository } from '@xangarro/testing';
+import {
+  InMemoryInventoryMovementsRepository,
+  InMemoryProductsRepository,
+} from '@xangarro/testing';
 import { StockBajoCard } from '../../src/screens/DirectorHome/stock-bajo-card';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';

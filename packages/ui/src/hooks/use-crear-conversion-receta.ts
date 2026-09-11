@@ -17,7 +17,11 @@ export interface CrearRecetaInput {
   readonly cantidadResultante: number;
 }
 
-export function useCrearConversionReceta(): UseMutationResult<ConversionReceta, Error, CrearRecetaInput> {
+export function useCrearConversionReceta(): UseMutationResult<
+  ConversionReceta,
+  Error,
+  CrearRecetaInput
+> {
   const repo = useConversionRecetasRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
