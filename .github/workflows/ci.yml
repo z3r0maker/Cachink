@@ -1,9 +1,8 @@
 # CI gate for every PR and for pushes to main (ADR-055; docs/plan/01-foundation.md F-08).
 #
 # Blocking: typecheck (turbo builds referenced packages first), unit tests,
-# root script tests, and lint for every package except @xangarro/ui.
-# Reported but not blocking until F-09 clears the pre-existing debt:
-# lint for @xangarro/ui and prettier's format:check (446 files drift today).
+# root script tests, lint, and prettier's format:check (F-09 cleared the
+# pre-existing debt on 2026-09-11).
 # The schema-drift job is added by B-02 together with packages/data-pg.
 #
 # Branch protection: require the check named "ci".
@@ -54,13 +53,8 @@ jobs:
       - name: Root script tests
         run: pnpm test:scripts
 
-      - name: Lint (all packages except ui — blocking)
-        run: pnpm lint --filter='!@xangarro/ui'
+      - name: Lint
+        run: pnpm lint
 
-      - name: Lint ui (non-blocking until F-09)
-        run: pnpm --filter @xangarro/ui lint
-        continue-on-error: true
-
-      - name: Format check (non-blocking until F-09)
+      - name: Format check
         run: pnpm format:check
-        continue-on-error: true
