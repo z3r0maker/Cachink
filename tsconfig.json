@@ -3,13 +3,29 @@
   "extends": "./tsconfig.base.json",
   "files": [],
   "references": [
-    { "path": "./packages/domain" },
-    { "path": "./packages/application" },
-    { "path": "./packages/data" },
-    { "path": "./packages/ui" },
-    { "path": "./packages/sync-lan" },
-    { "path": "./packages/sync-cloud" },
-    { "path": "./packages/testing" },
-    { "path": "./packages/observability" }
+    {
+      "path": "./packages/domain"
+    },
+    {
+      "path": "./packages/contracts"
+    },
+    {
+      "path": "./packages/application"
+    },
+    {
+      "path": "./packages/data"
+    },
+    {
+      "path": "./packages/ui"
+    },
+    {
+      "path": "./packages/sync-lan"
+    },
+    {
+      "path": "./packages/testing"
+    },
+    {
+      "path": "./packages/observability"
+    }
   ]
 }

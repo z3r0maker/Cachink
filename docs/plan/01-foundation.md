@@ -85,7 +85,8 @@
 
 ### F-05 Create `packages/contracts` (shared zod schemas for the API and wire format)
 
-- [ ] Status
+- [x] Status
+  - Done: 2026-09-11 · track/foundation · `packages/contracts` scaffolded from `domain`'s shape (zod `^4.6.2`, current on npm); lands `index.ts` + `errors.ts` (`ErrorEnvelopeSchema`, `isRetryableError`, retryable/terminal code sets — C-07 extends) + 7 tests. Added to root `tsconfig.json` references (and dropped the archived `sync-cloud` reference there); declared as a dependency of `ui` and `mobile` so A-04/A-06 can import it. Verified: typecheck/test/lint green; a scratch import compiled from both `packages/ui` and `apps/mobile` (scratch files removed).
 - **Blocked by:** F-04 · **Blocks:** C-01…C-10, A-04, A-06, B-07…B-09
 - **Context:** Both tracks need the same request/response shapes. `packages/domain` must stay free of transport concerns (CLAUDE.md §2.5), so the API/wire types get their own package. The **content** of the schemas is specified in `02-contracts.md`; this task creates the package and the skeleton.
 - **Files:** `packages/contracts/{package.json,tsconfig.json,src/index.ts,src/activate.ts,src/sync.ts,src/entitlement.ts,src/errors.ts,tests/}`.
@@ -151,6 +152,7 @@
 ---
 
 ### F-09 Clear latent root-lint debt so CI can gate on lint
+
 - [ ] Status
 - **Blocked by:** F-04 · **Blocks:** F-08 (surfaced by F-04: root `pnpm lint` was never run as a gate)
 - **Context:** `pnpm lint` fails only inside `packages/ui`: 29 errors — `tests/observability/sync-observer.test.ts` (9× `no-explicit-any`), `tests/observability/sentry-breadcrumbs.test.ts` (2× any, 2× unused), `tests/screens/merma.test.tsx` (2× any), one each of `any`/unused in `tests/screens/{venta-card,cancelaciones,caja/opening-discrepancy-dialog,caja/abrir-caja-modal,login/recovery-screen,login/quick-switch-screen,login/quick-switch-header,login/change-pin-screen,funciones-negocio,ventas/cart-strip}.test.tsx`; in `src`: `screens/Settings/settings-tail.tsx` (complexity), `hooks/use-emit-director-alert.ts` and `app/app-provider-bridges.tsx` (max-lines-per-function). Two of the three `src` offenders are in files A-01 archives; don't polish those — archive them there.

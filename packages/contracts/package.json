@@ -1,0 +1,33 @@
+{
+  "name": "@xangarro/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "API + wire contracts shared by the phone and the cloud (zod). See docs/plan/02-contracts.md. No transport, no crypto, no IO.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./errors": "./src/errors.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@xangarro/domain": "workspace:*",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@xangarro/config": "workspace:*",
+    "@vitest/coverage-v8": "^4.1.6",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}
