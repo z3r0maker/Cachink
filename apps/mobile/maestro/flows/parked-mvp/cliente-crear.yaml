@@ -7,7 +7,7 @@
 #
 # Precondition: wizard + business + role already set up.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

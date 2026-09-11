@@ -5,7 +5,7 @@
 # (Aceite 20L, Carne pastor kg, ...). Tapping "ver" routes to the Inventario tab
 # filtered by bajoStock. Requires the DIRECTOR (Juan Director) in demo.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

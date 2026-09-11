@@ -3,7 +3,7 @@
 #
 # Precondition: authenticated Operativo + caja open (shared/ensure-caja-open.yaml).
 # Leaves the app on the ventas POS with the new sale in `ventas-list`.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: "tab-ventas"

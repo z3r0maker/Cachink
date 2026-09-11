@@ -15,7 +15,7 @@
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/validation-venta.yaml
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

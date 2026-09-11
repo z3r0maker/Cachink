@@ -176,7 +176,7 @@ The **demo mode** path is for standalone flows that test demo-specific features.
 Every flow MUST follow this pattern:
 
 ```yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml
@@ -194,11 +194,11 @@ when the app is already past auth (e.g., warm launch in the same session).
 The Scanner component uses `expo-camera`'s `onBarcodeScanned`. There are
 three ways to exercise it depending on your environment:
 
-| Environment      | How to test                                                                                                                                                           |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **iOS Simulator** | No camera available — use the **manual entry path**. The `inventario-barcode.yaml` Maestro flow covers this: taps "Escanear código", types a barcode in the manual input, and asserts the SKU populates. |
+| Environment          | How to test                                                                                                                                                                                                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **iOS Simulator**    | No camera available — use the **manual entry path**. The `inventario-barcode.yaml` Maestro flow covers this: taps "Escanear código", types a barcode in the manual input, and asserts the SKU populates.                                                                                                            |
 | **Android Emulator** | Use the **VirtualScene camera**: AVD settings → Camera → Back = VirtualScene. Place a barcode PNG on the virtual poster wall (edit `~/.android/avd/<name>.avd/Toren1BD.posters` or drag an image into the scene), then "walk" to it with WASD keys. This exercises the real `onBarcodeScanned` pipeline end-to-end. |
-| **Real device**  | Run the Expo dev build and point the camera at any EAN-13 barcode on a product. A haptic confirms the read and the SKU auto-fills on the form.                         |
+| **Real device**      | Run the Expo dev build and point the camera at any EAN-13 barcode on a product. A haptic confirms the read and the SKU auto-fills on the form.                                                                                                                                                                      |
 
 ---
 

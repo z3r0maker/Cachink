@@ -13,7 +13,7 @@
 # that can grab a horizontal carousel or a sheet drag-handle instead.
 # Repeated scrolls are a no-op once the bottom is reached, so a fixed count
 # is safe. Bottom-reached is recorded as "assumed", never asserted.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - internal
 ---

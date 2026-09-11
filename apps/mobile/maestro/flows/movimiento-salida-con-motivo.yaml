@@ -5,7 +5,7 @@
 # Order matters: pick the motivo FIRST, then commit CANTIDAD last, because changing
 # the motivo re-renders the form and drops an uncommitted wheel value.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

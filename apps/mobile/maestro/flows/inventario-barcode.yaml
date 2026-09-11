@@ -3,7 +3,7 @@
 # simulators without a physical camera the ManualEntry field is the
 # only reliable code source.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

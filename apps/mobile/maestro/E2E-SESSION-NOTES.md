@@ -43,7 +43,7 @@ gotchas that otherwise cost ~30 min of debugging.
 
 - `fresh-install.sh --reset-only` deletes the DB but **exits before relaunching**,
   so the app keeps stale in-memory state; a following `launchApp` just foregrounds
-  it. Force a cold start: `simctl terminate booted mx.cachink.mobile` +
+  it. Force a cold start: `simctl terminate booted mx.xangarro.mobile` +
   `simctl openurl booted "exp+cachink://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"`
   - terminate again. (`run-flow.sh`'s demo setup now does this.)
 - **Demo seeding takes 3–5 min** (bcrypt on Hermes, debug build). Seed-wait

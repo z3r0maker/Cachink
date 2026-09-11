@@ -11,7 +11,7 @@
 #   - launchApp
 #   - runFlow: shared/dismiss-modals.yaml
 #   - runFlow: shared/authenticate-director.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - assertVisible:
     id: "quick-switch"

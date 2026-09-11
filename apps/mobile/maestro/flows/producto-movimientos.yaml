@@ -12,7 +12,7 @@
 #
 # The producto-entrada-stock flow creates an entrada movement.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

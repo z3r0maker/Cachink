@@ -20,7 +20,7 @@ FRESH_SCRIPT="${FRESH_SCRIPT:-$SCRIPT_DIR/fresh-install.sh}"
 DEMO_FLOW="${DEMO_FLOW:-$FLOWS_DIR/demo-mode-setup.yaml}"
 WIZARD_FLOW="${WIZARD_FLOW:-$FLOWS_DIR/wizard-local-standalone.yaml}"
 STATE_FILE="${STATE_FILE:-/tmp/maestro-entry-state}"
-APP_ID="${APP_ID:-mx.cachink.mobile}"
+APP_ID="${APP_ID:-mx.xangarro.mobile}"
 
 # ──────────── Entry point detection ───────────────────────────────
 # Prefer structured `# x-entrypoint:` metadata; fall back to a

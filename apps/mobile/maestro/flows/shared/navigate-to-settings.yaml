@@ -16,7 +16,7 @@
 # dev menu before running the suite — see E2E-SESSION-NOTES.md.
 #
 # Precondition: user is authenticated and on any tab.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: "top-bar-open-settings"

@@ -8,7 +8,7 @@
 # Usage (from any flow that needs caja open):
 #   - runFlow: shared/authenticate.yaml
 #   - runFlow: shared/ensure-caja-open.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: "tab-caja"

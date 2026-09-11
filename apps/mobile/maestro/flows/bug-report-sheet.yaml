@@ -7,7 +7,7 @@
 # errors and supports server-first submit (when consent on) or
 # file-share fallback.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - settings
   - observability

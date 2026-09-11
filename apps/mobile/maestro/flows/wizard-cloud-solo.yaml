@@ -9,7 +9,7 @@
 #       apps/mobile/maestro/flows/wizard-cloud-solo.yaml
 #
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

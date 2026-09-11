@@ -6,7 +6,7 @@ _Human-gated task — the agent lands this doc as the runbook._
 
 1. **Apple Developer account** — $99/year. Enrol the `mx.cachink` team.
 2. **App Store Connect** — create the "Cachink!" record with bundle
-   identifier `mx.cachink.mobile`.
+   identifier `mx.xangarro.mobile`.
 3. **Certificates** — EAS Build handles these automatically (`eas
 credentials`). No manual p12 juggling required.
 

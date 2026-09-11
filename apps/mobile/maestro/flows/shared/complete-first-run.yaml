@@ -13,7 +13,7 @@
 # Creates: business "Taquería Don Pedro", user "Director Test" (PIN 123456).
 #
 # Precondition: fresh install (DB cleared). Caller does `- launchApp` first.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 # launch → ¡Bienvenido a Cachink! → Comenzar → business form.
 - runFlow: first-run-onboarding.yaml

@@ -6,7 +6,7 @@
 # of the just-created template — run with MAESTRO_CLOCK_OFFSET if your
 # harness supports it, or simulate by manually advancing the system clock.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

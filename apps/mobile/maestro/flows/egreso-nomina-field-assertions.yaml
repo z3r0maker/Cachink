@@ -15,7 +15,7 @@
 #
 # The egreso-nomina flow creates "Ana Pérez" as an empleado.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

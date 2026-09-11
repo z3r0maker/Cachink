@@ -25,7 +25,7 @@
 # DB). In a full suite run, order it late or reset demo data after — flows that
 # assert the exact original name "Tortilla maíz kg" would otherwise see the new one
 # (searches by the "Tortilla" prefix still match).
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

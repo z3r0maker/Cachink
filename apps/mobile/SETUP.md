@@ -71,7 +71,7 @@ into `app.json`:
 {
   "expo": {
     "name": "Cachink!",
-    "slug": "cachink",
+    "slug": "xangarro",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -79,10 +79,10 @@ into `app.json`:
       "backgroundColor": "#FFD60A"
     },
     "ios": {
-      "bundleIdentifier": "mx.cachink.mobile"
+      "bundleIdentifier": "mx.xangarro.mobile"
     },
     "android": {
-      "package": "mx.cachink.mobile",
+      "package": "mx.xangarro.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFD60A"

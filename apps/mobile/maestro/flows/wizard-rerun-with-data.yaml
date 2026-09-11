@@ -7,7 +7,7 @@
 # fixtures in at boot. The "data preserved" callout reads from the
 # repositories at render time, so any pre-existing data triggers it.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

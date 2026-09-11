@@ -19,7 +19,7 @@
 # Usage (fresh install only):
 #   - launchApp
 #   - runFlow: shared/first-run-onboarding.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - runFlow: dismiss-modals.yaml
 

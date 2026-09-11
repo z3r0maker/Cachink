@@ -10,7 +10,7 @@
 # whose merged accessibilityText is matchable by `text: "<name>.*"` but whose
 # child text/name is not exactly matchable; the row's `producto-card-<id>` testID
 # IS matchable by the `producto-card-.*` regex once the list is filtered to one row.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: "tab-productos"

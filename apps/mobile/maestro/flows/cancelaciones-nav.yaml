@@ -2,7 +2,7 @@
 # Route: /cancelaciones (via Otros → cancelaciones card)
 # Verifies: cancelaciones-screen testID, empty-state text.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - otros
   - cancelaciones

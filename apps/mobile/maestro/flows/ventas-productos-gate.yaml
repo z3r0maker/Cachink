@@ -2,7 +2,7 @@
 # On a fresh install, Ventas should show "Registra tus productos" instead of
 # the Caja gate, since there's nothing to sell yet.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - ventas
   - productos

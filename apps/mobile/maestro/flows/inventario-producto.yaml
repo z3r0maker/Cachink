@@ -1,7 +1,7 @@
 # Create a producto and register an entrada; verify stock + egreso.
 # Covers P1C-M5-T01 (Stock list) and P1C-M5-T03 (NuevoProducto modal).
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

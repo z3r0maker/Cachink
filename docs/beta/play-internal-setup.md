@@ -5,7 +5,7 @@ _Human-gated task — the agent lands this doc as the runbook._
 ## One-time
 
 1. **Google Play Developer** account — one-time $25 fee.
-2. Create the "Cachink!" app record with package name `mx.cachink.mobile`.
+2. Create the "Cachink!" app record with package name `mx.xangarro.mobile`.
 3. Choose "Tablets and phones" for device support.
 
 ## Service account (for EAS submit)

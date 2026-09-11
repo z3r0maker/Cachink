@@ -13,7 +13,7 @@
 #   - runFlow: shared/dismiss-modals.yaml
 #   - runFlow: shared/authenticate.yaml
 #   - runFlow: shared/select-operativo.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 # If the role picker is showing (navigated via top-bar chip or
 # initial launch), select Operativo.

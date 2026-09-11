@@ -27,7 +27,7 @@
 # -------------------------------------------------------------------
 set -euo pipefail
 
-APP_ID="mx.cachink.mobile"
+APP_ID="mx.xangarro.mobile"
 MAX_RETRIES=10
 RETRY_INTERVAL=2  # seconds
 

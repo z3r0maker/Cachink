@@ -11,7 +11,7 @@
 # Usage (from any flow):
 #   - launchApp
 #   - runFlow: shared/dismiss-modals.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 # Wizard-integrated consent step (wizard-step-consent).
 # On fresh install the wizard shows consent as an inline step

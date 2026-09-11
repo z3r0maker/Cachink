@@ -12,7 +12,7 @@
 # -> create-venta -> tap the sale -> popover) are correct for the iPhone layout;
 # verify with `--device-class iphone` once an iPhone dev-client build exists.
 # See docs/e2e-productos-row-accessibility-scope.md.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: shared/dismiss-modals.yaml

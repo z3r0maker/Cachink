@@ -8,7 +8,7 @@
 #
 # Usage (from any flow needing Clientes):
 #   - runFlow: shared/navigate-to-clientes.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - openLink: "cachink:///clientes"
 - extendedWaitUntil:

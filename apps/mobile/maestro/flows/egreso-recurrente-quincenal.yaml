@@ -7,7 +7,7 @@
 #
 # Precondition: demo mode seeded.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - egresos
   - recurrente

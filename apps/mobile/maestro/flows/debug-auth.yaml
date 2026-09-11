@@ -1,6 +1,6 @@
 # Debug flow: full auth + verify home screen
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 - assertVisible: "Selecciona tu usuario"

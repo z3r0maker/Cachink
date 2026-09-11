@@ -18,7 +18,7 @@
 #
 # Priority: LOW — may be deferred if timeout mocking is not available.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

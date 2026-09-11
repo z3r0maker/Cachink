@@ -16,7 +16,7 @@
 #   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
 #   maestro test apps/mobile/maestro/flows/settings-export-datos.yaml
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

@@ -9,7 +9,7 @@
 # one venta in Efectivo so esperado > 0. Run wizard-local-standalone.yaml +
 # venta-efectivo.yaml first (or seed via EXPO_PUBLIC_E2E_SEED).
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

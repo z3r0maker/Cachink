@@ -10,7 +10,8 @@
 
 ### F-01 Change the mobile identifiers to Xangarro
 
-- [ ] Status
+- [x] Status
+  - Done: 2026-09-11 · track/foundation · app.json name/slug/scheme/bundle/package → Xangarro; new EAS project `@z3r0makers-organization/xangarro` (ID `819fa99a-ea6b-44f8-ab3f-c3d168504967`, old `dece170a…` left in place) and `updates.url` repointed; 366 Maestro flows/scripts/build docs switched to `mx.xangarro.mobile` (machine-read, so done here not A-15). Deviations: Android prebuild was already broken (`assets/adaptive-icon.png` missing) — pointed at `icon.png` until X-07; removed deprecated `edgeToEdgeEnabled`. Verified: prebuild green, dev client installed on iPad Pro 13" beside the old Cachink app.
 - **Blocked by:** — · **Blocks:** L-01, X-05, A-15
 - **Context:** Bundle IDs are immutable once published. The app is unpublished (`eas.json` has no `ascAppId`; `docs/landing/index.html:114` still links `id0000000000`). Per ADR-054 §1–2 identifiers change now; display name keeps the `!`.
 - **Files:** `apps/mobile/app.json`, `apps/mobile/eas.json`, `apps/mobile/ios/`, `apps/mobile/android/` (regenerated), `README.md`, `SETUP.md` (any prebuild notes).

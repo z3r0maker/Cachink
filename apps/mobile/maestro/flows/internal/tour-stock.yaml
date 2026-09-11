@@ -1,5 +1,5 @@
 # Tour: Productos / Inventario stock list (Operativo only).
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags: [internal]
 ---
 - launchApp

@@ -2,7 +2,7 @@
 # error-boundary card renders with the "Volver al inicio" Btn
 # (P1C-M12-T01, S4-C22).
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp:
     arguments:

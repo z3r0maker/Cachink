@@ -5,7 +5,7 @@
 # /nuevo-producto screen (Phase 18 — no longer a modal). Required fields: nombre,
 # costo, precio-venta (validateProducto).
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

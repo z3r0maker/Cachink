@@ -26,7 +26,7 @@
 #
 # The defaultTags key is empty — all flows run by default.
 # Use full-regression.sh for phased, ordered execution.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 # iOS-first simulator target. Android testing uses MAESTRO_ANDROID=1 env.
 defaultTags: []
 # Disable iOS simulator animations to speed up tap commands.

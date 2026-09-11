@@ -17,7 +17,7 @@
 #   maestro test apps/mobile/maestro/flows/venta-credito.yaml
 #   maestro test apps/mobile/maestro/flows/cliente-detail-screen.yaml
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

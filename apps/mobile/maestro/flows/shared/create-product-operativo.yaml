@@ -9,7 +9,7 @@
 #
 # Usage (from any flow that needs a product):
 #   - runFlow: shared/create-product-operativo.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: "tab-productos"

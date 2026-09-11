@@ -8,7 +8,7 @@
 # Precondition: wizard complete, Director role.
 # Some cards may show "Sin datos" if no transactions exist.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

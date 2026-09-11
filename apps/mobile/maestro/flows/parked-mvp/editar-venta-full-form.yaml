@@ -17,7 +17,7 @@
 #
 # The venta-efectivo flow creates a sale for "Tortilla".
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

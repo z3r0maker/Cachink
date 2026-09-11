@@ -17,7 +17,7 @@
 #   - runFlow: shared/dismiss-modals.yaml
 #   - runFlow: shared/authenticate.yaml
 #   - runFlow: shared/open-sync-wizard.yaml
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - runFlow: navigate-to-settings.yaml
 - tapOn:

@@ -13,7 +13,7 @@
 #
 # The egreso-gasto flow creates "Renta del local" at $8,000.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

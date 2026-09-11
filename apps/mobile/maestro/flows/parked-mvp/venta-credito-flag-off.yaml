@@ -6,7 +6,7 @@
 #
 # Precondition: demo mode seeded (ventasCredito flag OFF by default).
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - ventas
   - cxc

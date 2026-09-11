@@ -6,7 +6,7 @@
 #
 # Precondition: demo mode seeded (products + caja open).
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - ventas
   - stock

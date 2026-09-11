@@ -6,7 +6,7 @@
 #
 # Precondition: demo mode with a client + credit sale.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - cxc
   - pagos

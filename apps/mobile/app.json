@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "Cachink!",
-    "slug": "cachink",
-    "scheme": "cachink",
+    "name": "Xangarro!",
+    "slug": "xangarro",
+    "scheme": "xangarro",
     "version": "0.1.0",
     "orientation": "default",
     "icon": "./assets/icon.png",
@@ -15,17 +15,16 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "mx.cachink.mobile",
+      "bundleIdentifier": "mx.xangarro.mobile",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "mx.cachink.mobile",
-      "edgeToEdgeEnabled": true,
+      "package": "mx.xangarro.mobile",
       "predictiveBackGestureEnabled": false,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#FFD60A"
       }
     },
@@ -42,7 +41,7 @@
       "expo-updates"
     ],
     "updates": {
-      "url": "https://u.expo.dev/dece170a-8337-4258-bfc7-07e88b0699b8",
+      "url": "https://u.expo.dev/819fa99a-ea6b-44f8-ab3f-c3d168504967",
       "fallbackToCacheTimeout": 0
     },
     "runtimeVersion": {
@@ -51,7 +50,7 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "dece170a-8337-4258-bfc7-07e88b0699b8"
+        "projectId": "819fa99a-ea6b-44f8-ab3f-c3d168504967"
       }
     },
     "owner": "z3r0makers-organization"

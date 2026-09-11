@@ -13,7 +13,7 @@
 #   maestro test apps/mobile/maestro/flows/venta-efectivo.yaml
 #   maestro test apps/mobile/maestro/flows/director-home-ver-ventas.yaml
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

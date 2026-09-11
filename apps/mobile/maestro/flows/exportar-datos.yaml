@@ -5,7 +5,7 @@
 #
 # Precondition: wizard-local-standalone.yaml complete.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

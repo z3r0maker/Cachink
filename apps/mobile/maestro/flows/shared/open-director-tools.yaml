@@ -21,7 +21,7 @@
 # Inicio | Ventas | Gastos | Estados), so `tab-caja` is the discriminator.
 #
 # Precondition: user is authenticated and on any tab.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 # Operativo: the tools live inside Caja.
 - runFlow:

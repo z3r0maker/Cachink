@@ -2,7 +2,7 @@
 # Route: /caja-movimientos (via Otros → caja-movimientos card)
 # Verifies: screen renders, empty-state message visible.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - otros
   - caja

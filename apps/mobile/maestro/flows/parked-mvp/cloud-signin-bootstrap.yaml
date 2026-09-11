@@ -12,7 +12,7 @@
 # Maestro Flow Audit plan. Uses the Step 3 "Join existing" path
 # (sign-in, not sign-up) since the account already exists.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 
 # Navigate to wizard via Settings → Sistema → Re-run.

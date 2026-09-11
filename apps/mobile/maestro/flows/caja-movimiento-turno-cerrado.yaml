@@ -5,7 +5,7 @@
 #
 # Precondition: wizard mode (fresh state, open + close caja first).
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - caja
   - edge-case

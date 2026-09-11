@@ -17,7 +17,7 @@
 #
 # The inventario-producto flow creates "Tortilla".
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

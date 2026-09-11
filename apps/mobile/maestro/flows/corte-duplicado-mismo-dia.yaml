@@ -6,7 +6,7 @@
 #
 # Precondition: wizard mode + caja opened + closed + corte done.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - caja
   - corte

@@ -9,7 +9,7 @@
 #
 # Precondition: conversion-crear-receta.yaml has been run.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

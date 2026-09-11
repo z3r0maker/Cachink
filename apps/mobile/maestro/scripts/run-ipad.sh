@@ -42,7 +42,7 @@
 # -------------------------------------------------------------------
 set -euo pipefail
 
-APP_ID="mx.cachink.mobile"
+APP_ID="mx.xangarro.mobile"
 # Default comes from lib/device-resolve.sh (MAESTRO_IPAD_DEVICE), sourced below.
 IPAD_DEVICE=""
 

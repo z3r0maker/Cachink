@@ -9,7 +9,7 @@
 # not yet available). Recovery password is auto-set to PIN at UI layer.
 #
 # ADR-049: PIN first (login), recovery password second.
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - extendedWaitUntil:
     visible:

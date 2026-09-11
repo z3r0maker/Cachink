@@ -44,12 +44,12 @@ a Supabase project to receive crash reports and bug submissions.
 2. [ ] Export your PAT: `export SUPABASE_ACCESS_TOKEN="sbp_…"`
 3. [ ] Link: `cd supabase && supabase link --project-ref <ref>`
 4. [ ] Push schema: `supabase db push`
-   — runs `0001_schema.sql` (required — defines `cachink_generate_ulid()`)
-   and `0002_bug_database.sql` (error_events + bug_reports tables,
-   deny-by-default RLS, pg_cron nightly prune).
+       — runs `0001_schema.sql` (required — defines `cachink_generate_ulid()`)
+       and `0002_bug_database.sql` (error_events + bug_reports tables,
+       deny-by-default RLS, pg_cron nightly prune).
 5. [ ] Deploy the Edge Function:
-   `supabase functions deploy bug-report --project-ref <ref>`
-   Set the service-role key as a function secret.
+       `supabase functions deploy bug-report --project-ref <ref>`
+       Set the service-role key as a function secret.
 6. [ ] Run the ULID smoke check:
    ```sh
    supabase test db supabase/tests/ulid.spec.sql
@@ -57,20 +57,20 @@ a Supabase project to receive crash reports and bug submissions.
 
 ### ☐ 5. Sentry (optional)
 
-- [ ] Create a Sentry project for `mx.cachink.mobile`.
+- [ ] Create a Sentry project for `mx.xangarro.mobile`.
 - [ ] Grab the DSN — it goes into `PRODUCTION_SENTRY_DSN` (step 6).
 
 ### ☐ 6. EAS secrets
 
 Set these via `eas secret:create` (one-time per environment):
 
-| Secret                         | Value                                                                  |
-| ------------------------------ | ---------------------------------------------------------------------- |
-| `PRODUCTION_CLOUD_ANON_KEY`    | Supabase publishable anon key (doubles as bug-ingest auth header).     |
-| `PRODUCTION_BUG_INGEST_URL`    | `https://<ref>.supabase.co/functions/v1/bug-report`                    |
-| `PRODUCTION_SENTRY_DSN`        | Sentry DSN (optional — omit if no Sentry account yet).                 |
-| `PRODUCTION_CLOUD_API_URL`     | Supabase project URL (harmless — cloud sync unreachable in MVP).       |
-| `PRODUCTION_POWERSYNC_URL`     | PowerSync URL (harmless — cloud sync unreachable in MVP).              |
+| Secret                      | Value                                                              |
+| --------------------------- | ------------------------------------------------------------------ |
+| `PRODUCTION_CLOUD_ANON_KEY` | Supabase publishable anon key (doubles as bug-ingest auth header). |
+| `PRODUCTION_BUG_INGEST_URL` | `https://<ref>.supabase.co/functions/v1/bug-report`                |
+| `PRODUCTION_SENTRY_DSN`     | Sentry DSN (optional — omit if no Sentry account yet).             |
+| `PRODUCTION_CLOUD_API_URL`  | Supabase project URL (harmless — cloud sync unreachable in MVP).   |
+| `PRODUCTION_POWERSYNC_URL`  | PowerSync URL (harmless — cloud sync unreachable in MVP).          |
 
 Preview variants (`PREVIEW_*`) follow the same pattern if needed.
 

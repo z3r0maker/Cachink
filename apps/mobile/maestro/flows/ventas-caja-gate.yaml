@@ -3,7 +3,7 @@
 # doesn't take priority. Product is created by inventario-producto.yaml
 # earlier in the regression chain.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - ventas
   - caja

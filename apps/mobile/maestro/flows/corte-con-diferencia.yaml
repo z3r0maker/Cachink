@@ -5,7 +5,7 @@
 # one venta in Efectivo of 150 MXN. Run wizard-local-standalone.yaml +
 # venta-efectivo.yaml first.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

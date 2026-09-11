@@ -9,7 +9,7 @@
 #
 # Precondition: demo mode seeded (products + users + clients exist).
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 - runFlow: ../shared/dismiss-modals.yaml

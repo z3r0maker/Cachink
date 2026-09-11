@@ -8,7 +8,7 @@
 #
 # Precondition: wizard complete, logged in as Director.
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

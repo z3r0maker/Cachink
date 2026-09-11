@@ -65,7 +65,7 @@ cd apps/mobile && EXPO_PUBLIC_E2E=1 npx expo run:ios --device "iPhone 17"
 maestro --udid=<UDID> test apps/mobile/maestro/flows/demo-mode-setup.yaml
 
 # Run one flow (terminate first = cold start = fresh Metro bundle for app edits):
-xcrun simctl terminate <UDID> mx.cachink.mobile
+xcrun simctl terminate <UDID> mx.xangarro.mobile
 maestro --udid=<UDID> test apps/mobile/maestro/flows/<flow>.yaml
 ```
 

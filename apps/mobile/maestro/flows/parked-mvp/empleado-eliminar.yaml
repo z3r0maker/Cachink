@@ -14,7 +14,7 @@
 # ⚠️  This flow DESTROYS state — run last in any chain that
 # expects the empleado to still exist afterwards.
 # x-entrypoint: wizard
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 ---
 - launchApp
 

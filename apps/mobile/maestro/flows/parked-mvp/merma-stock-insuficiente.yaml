@@ -5,7 +5,7 @@
 #
 # Precondition: demo mode seeded (products + merma flag ON).
 # x-entrypoint: demo
-appId: mx.cachink.mobile
+appId: mx.xangarro.mobile
 tags:
   - merma
   - stock
