@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAG_KEYS,
-  MVP_HIDDEN_FLAGS,
+  PLATFORM_AVAILABLE,
   canEnableFlag,
   parseFeatureFlags,
   resolveDisableCascade,
@@ -22,7 +22,7 @@ describe('feature-flags', () => {
     });
 
     it('has everything else OFF by default', () => {
-      const onByDefault: readonly string[] = ['stock'];
+      const onByDefault: readonly string[] = ['stock', 'barcode'];
       const others = FEATURE_FLAG_KEYS.filter((k) => !onByDefault.includes(k));
       for (const key of others) {
         expect(DEFAULT_FEATURE_FLAGS[key]).toBe(false);
@@ -34,6 +34,7 @@ describe('feature-flags', () => {
     it('disables stock → cascades conversion, auditoria, merma OFF', () => {
       const flags: FeatureFlags = {
         stock: true,
+        barcode: true,
         conversionMateriaPrima: true,
         conversionAutomatica: true,
         auditoriaInventario: true,
@@ -133,33 +134,20 @@ describe('feature-flags', () => {
       expect(result.merma).toBe(false); // default
     });
 
-    it('clamps MVP-hidden flags to false even when stored as true', () => {
-      const json = JSON.stringify({
-        stock: true,
-        merma: true,
-        conversionMateriaPrima: true,
-        conversionAutomatica: true,
-        auditoriaInventario: true,
-        ventasCredito: true,
-      });
+    it('no longer clamps: stored values pass through (clamping is the platform layer)', () => {
+      const json = JSON.stringify({ stock: true, merma: true, ventasCredito: true });
       const result = parseFeatureFlags(json);
-      // Hidden flags forced OFF
-      expect(result.merma).toBe(false);
-      expect(result.conversionMateriaPrima).toBe(false);
-      expect(result.conversionAutomatica).toBe(false);
-      expect(result.auditoriaInventario).toBe(false);
-      // `ventasCredito` joined MVP_HIDDEN_FLAGS when the Crédito
-      // surfaces were pulled from the MVP; it clamps like the rest.
-      expect(result.ventasCredito).toBe(false);
-      // Non-hidden flags preserved
+      expect(result.merma).toBe(true);
+      expect(result.ventasCredito).toBe(true);
       expect(result.stock).toBe(true);
     });
+  });
 
-    it('clamps hidden flags even in default fallback path', () => {
-      const result = parseFeatureFlags('{}');
-      for (const key of MVP_HIDDEN_FLAGS) {
-        expect(result[key]).toBe(false);
-      }
+  describe('PLATFORM_AVAILABLE', () => {
+    it('covers every key and releases only stock + barcode today', () => {
+      for (const key of FEATURE_FLAG_KEYS) expect(key in PLATFORM_AVAILABLE).toBe(true);
+      const released = FEATURE_FLAG_KEYS.filter((k) => PLATFORM_AVAILABLE[k]);
+      expect(released).toEqual(['stock', 'barcode']);
     });
   });
 });

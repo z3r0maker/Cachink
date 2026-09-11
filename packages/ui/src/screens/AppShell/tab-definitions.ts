@@ -34,10 +34,9 @@ export interface TabDefinition {
 }
 
 /** Operativo tabs — dynamic based on merma flag. Always 4 tabs.
- *  MVP note: merma is clamped OFF by MVP_HIDDEN_FLAGS, so the merma
- *  branch below is effectively dead and tabs always render as:
- *  Ventas | Caja | Gastos | Productos.
- *  No code change needed — the clamp in parseFeatureFlags handles it. */
+ *  Note: merma is dark in PLATFORM_AVAILABLE (F-06), so the merma branch
+ *  below is effectively dead and tabs always render as:
+ *  Ventas | Caja | Gastos | Productos. Releasing the flag needs no change here. */
 export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
   const tabs: TabDefinition[] = [
     { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
@@ -93,6 +92,7 @@ export function tabsForRole(
     // Fallback for callers that haven't been updated to pass flags yet
     return operativoTabs({
       stock: true,
+      barcode: true,
       conversionMateriaPrima: false,
       conversionAutomatica: false,
       auditoriaInventario: false,

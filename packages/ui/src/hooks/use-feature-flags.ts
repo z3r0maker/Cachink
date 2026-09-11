@@ -10,17 +10,31 @@
 
 import {
   DEFAULT_FEATURE_FLAGS,
+  PLATFORM_AVAILABLE,
   parseFeatureFlags,
+  resolveEffectiveFlags,
   type FeatureFlagKey,
   type FeatureFlags,
+  type PlanId,
 } from '@xangarro/domain';
 import { useCurrentBusiness } from './use-current-business';
 
-/** Parse and return all flags from the current business. */
+/**
+ * Until A-10 wires the signed entitlement, the device assumes the most
+ * permissive plan so that platform availability is the only clamp — which
+ * is exactly the pre-pivot MVP behaviour (stock + barcode on, the rest dark).
+ */
+const DEVICE_PLAN_UNTIL_ENTITLEMENT: PlanId = 'mipyme_pro';
+
+/** Effective flags (platform × plan × tenant) for the current business. */
 export function useFeatureFlags(): FeatureFlags {
   const { data: business } = useCurrentBusiness();
-  if (!business) return DEFAULT_FEATURE_FLAGS;
-  return parseFeatureFlags(business.featureFlags);
+  const tenant = business ? parseFeatureFlags(business.featureFlags) : DEFAULT_FEATURE_FLAGS;
+  return resolveEffectiveFlags({
+    platform: PLATFORM_AVAILABLE,
+    plan: DEVICE_PLAN_UNTIL_ENTITLEMENT,
+    tenant,
+  });
 }
 
 /** Single flag convenience hook. */

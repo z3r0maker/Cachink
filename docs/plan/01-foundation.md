@@ -102,7 +102,8 @@
 
 ### F-06 Domain: plans, plan limits, three-level flags, entitlement type
 
-- [ ] Status
+- [x] Status
+  - Done: 2026-09-11 · track/foundation · `plan.ts` (`PLAN_IDS`, `PlanIdSchema`, `PLAN_LIMITS`, `FALLBACK_PLAN`), `feature-flags.ts` (+`barcode` key, `PLATFORM_AVAILABLE` replaces `MVP_HIDDEN_FLAGS`, `parseFeatureFlags` no longer clamps), `effective-flags.ts` (`resolveEffectiveFlags` = platform × plan × tenant + dependency cascade; own file to avoid a plan↔flags import cycle), `entitlement.ts` (`EntitlementSchema`, `entitlementState` with the two clocks + `OFFLINE_STALENESS_MS`/`OFFLINE_GRACE_MS`). Deviations: emprendedor's plan features include `ventasCredito` (Z-01 says Emprendedor+; platform keeps it dark); `useFeatureFlags` assumes `mipyme_pro` until A-10 wires the entitlement (documented constant) so device behaviour is unchanged. Tests: 16 new (473 domain total). Verified: typecheck, all tests, lint on touched files.
 - **Blocked by:** F-04 · **Blocks:** A-10, A-14, B-06, P-10, P-15
 - **Context:** Q10 + Q14. Today `packages/domain/src/entities/feature-flags.ts` has `DEFAULT_FEATURE_FLAGS` and a hardcoded `MVP_HIDDEN_FLAGS` clamp inside `parseFeatureFlags`. The new model is `effective = platformAvailable[key] && planIncludes[plan][key] && tenantEnabled[key]`. Plans: `freelancer | emprendedor | mipyme_pro`. Limits per plan: `operators`, `devices` (= operators), `recordsPerMonth` (`50 | null`), and feature keys included.
 - **Files:** `packages/domain/src/entities/plan.ts` (new), `packages/domain/src/entities/feature-flags.ts` (extend), `packages/domain/src/entities/entitlement.ts` (new), `packages/domain/src/entities/index.ts`, tests in `packages/domain/tests/entities/`.

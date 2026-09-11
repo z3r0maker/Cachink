@@ -11,6 +11,7 @@
 
 export const FEATURE_FLAG_KEYS = [
   'stock',
+  'barcode',
   'conversionMateriaPrima',
   'conversionAutomatica',
   'auditoriaInventario',
@@ -23,6 +24,7 @@ export type FeatureFlags = Record<FeatureFlagKey, boolean>;
 
 export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
   stock: true,
+  barcode: true,
   conversionMateriaPrima: false,
   conversionAutomatica: false,
   auditoriaInventario: false,
@@ -31,22 +33,24 @@ export const DEFAULT_FEATURE_FLAGS: FeatureFlags = {
 } as const;
 
 /**
- * MVP-hidden flags — advanced features suppressed for the initial release.
- * Removing a key from this array re-enables the feature across the entire UI.
- * The underlying entities, use cases, repositories, and migrations are preserved.
+ * Platform availability — the first of the three flag levels
+ * (platform × plan × tenant, docs/plan Q10). A key that is `false` here is
+ * dark for every business regardless of plan or toggle: the feature may be
+ * built but is not released. Flip a key to `true` to release it; Directors
+ * then opt in per business from the portal. Replaces the MVP clamp.
  */
-export const MVP_HIDDEN_FLAGS: readonly FeatureFlagKey[] = [
-  'merma',
-  'conversionMateriaPrima',
-  'conversionAutomatica',
-  'auditoriaInventario',
-  'ventasCredito',
-] as const;
+export const PLATFORM_AVAILABLE: FeatureFlags = {
+  stock: true,
+  barcode: true,
+  conversionMateriaPrima: false,
+  conversionAutomatica: false,
+  auditoriaInventario: false,
+  merma: false,
+  ventasCredito: false,
+} as const;
 
 /** Parent flag that must be ON for the child to be enabled. */
-export const FEATURE_FLAG_DEPENDENCIES: Partial<
-  Record<FeatureFlagKey, FeatureFlagKey>
-> = {
+export const FEATURE_FLAG_DEPENDENCIES: Partial<Record<FeatureFlagKey, FeatureFlagKey>> = {
   conversionMateriaPrima: 'stock',
   conversionAutomatica: 'conversionMateriaPrima',
   auditoriaInventario: 'stock',
@@ -64,10 +68,7 @@ export function resolveDisableCascade(
   disabledKey: FeatureFlagKey,
 ): FeatureFlags {
   const result = { ...flags, [disabledKey]: false };
-  const deps = Object.entries(FEATURE_FLAG_DEPENDENCIES) as [
-    FeatureFlagKey,
-    FeatureFlagKey,
-  ][];
+  const deps = Object.entries(FEATURE_FLAG_DEPENDENCIES) as [FeatureFlagKey, FeatureFlagKey][];
   // Pass 1: disable direct children
   for (const [child, parent] of deps) {
     if (!result[parent]) {
@@ -84,18 +85,14 @@ export function resolveDisableCascade(
 }
 
 /** Check if enabling a flag is allowed (parent must be ON). */
-export function canEnableFlag(
-  flags: FeatureFlags,
-  key: FeatureFlagKey,
-): boolean {
+export function canEnableFlag(flags: FeatureFlags, key: FeatureFlagKey): boolean {
   const parent = FEATURE_FLAG_DEPENDENCIES[key];
   return parent === undefined || flags[parent];
 }
 
-/** Parse a JSON string into FeatureFlags, falling back to defaults.
- *  MVP clamp: flags listed in MVP_HIDDEN_FLAGS are forced OFF regardless
- *  of the stored value, ensuring hidden features stay disabled even for
- *  pre-existing businesses that had them enabled. */
+/** Parse the **tenant** layer from the stored JSON, falling back to defaults.
+ *  No clamping happens here any more — availability and plan are applied by
+ *  `resolveEffectiveFlags` (effective-flags.ts). */
 export function parseFeatureFlags(raw: string): FeatureFlags {
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>;
@@ -104,10 +101,6 @@ export function parseFeatureFlags(raw: string): FeatureFlags {
       if (typeof parsed[key] === 'boolean') {
         result[key] = parsed[key];
       }
-    }
-    // MVP clamp — force hidden flags OFF
-    for (const hidden of MVP_HIDDEN_FLAGS) {
-      result[hidden] = false;
     }
     return result;
   } catch {
