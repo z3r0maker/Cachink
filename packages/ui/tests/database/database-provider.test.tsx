@@ -26,7 +26,7 @@ import {
   splitStatements,
   useDatabase,
 } from '../../src/database/index';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import { renderWithProviders, screen, waitFor } from '../test-utils';
 
 /** Tiny placeholder — we never touch any SQL method in these tests. */

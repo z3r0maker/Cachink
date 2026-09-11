@@ -10,11 +10,11 @@
 import type { ReactElement } from 'react';
 import { describe, expect, it } from 'vitest';
 import { act } from 'react';
-import type { BusinessId, UserId } from '@cachink/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
 import type { Repositories } from '../../src/app/repository-provider';
 import { GatedNavigation } from '../../src/app/index';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
-import { InMemoryAppConfigRepository, InMemoryUsersRepository } from '@cachink/testing';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
+import { InMemoryAppConfigRepository, InMemoryUsersRepository } from '@xangarro/testing';
 import { APP_CONFIG_KEYS, useAppConfigStore } from '../../src/app-config/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

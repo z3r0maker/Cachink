@@ -12,8 +12,8 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { RegistrarVentaUseCase } from '@cachink/application';
-import type { NewSale, Sale } from '@cachink/domain';
+import { RegistrarVentaUseCase } from '@xangarro/application';
+import type { NewSale, Sale } from '@xangarro/domain';
 import {
   useCajaTurnosRepository,
   useClientsRepository,

@@ -12,9 +12,9 @@ import {
   authFailure,
   authSuccess,
   type AuthResult,
-} from '@cachink/domain';
-import type { BusinessId } from '@cachink/domain';
-import type { UsersRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
+import type { UsersRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface AuthInput {

@@ -19,7 +19,7 @@
 import { type ReactElement, useCallback } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type Money, ZERO } from '@cachink/domain';
+import { formatMoney, type Money, ZERO } from '@xangarro/domain';
 import { Card } from '../../components/Card/card';
 import {
   Numpad,

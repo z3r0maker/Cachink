@@ -10,7 +10,7 @@ import type {
   EmployeeId,
   IsoDate,
   IsoTimestamp,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { NominaTab, NuevoEmpleadoModal } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

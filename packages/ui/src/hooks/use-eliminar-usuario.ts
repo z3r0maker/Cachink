@@ -7,8 +7,8 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { EliminarUsuarioUseCase } from '@cachink/application';
-import type { BusinessId, UserId } from '@cachink/domain';
+import { EliminarUsuarioUseCase } from '@xangarro/application';
+import type { BusinessId, UserId } from '@xangarro/domain';
 import { useUsersRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { userKeys } from './query-keys';

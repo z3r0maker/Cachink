@@ -10,7 +10,7 @@ import type {
   CajaTurno,
   Expense,
   Sale,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 function cashSales(sales: readonly Sale[]): readonly Sale[] {
   return sales.filter((s) => s.metodo === 'Efectivo' && !s.cancelledAt);

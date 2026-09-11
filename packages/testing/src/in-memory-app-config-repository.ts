@@ -3,7 +3,7 @@
  * matching the Drizzle upsert semantics.
  */
 
-import type { AppConfig, AppConfigRepository } from '@cachink/data';
+import type { AppConfig, AppConfigRepository } from '@xangarro/data';
 
 export class InMemoryAppConfigRepository implements AppConfigRepository {
   private readonly store = new Map<string, string>();

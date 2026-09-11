@@ -2,7 +2,7 @@
  * NotificacionesScreen tab rendering test.
  *
  * Verifies the tab structure renders correctly. Uses minimal wrappers
- * since full repo context triggers the @cachink/observability import.
+ * since full repo context triggers the @xangarro/observability import.
  *
  * Phase 11 — Director Notification Inbox.
  */
@@ -12,8 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 import { NotificacionesConfigTab } from '../../src/screens/Notificaciones/notificaciones-config-tab';
-import { deriveDefaultPrefs } from '@cachink/domain';
-import type { FeatureFlags } from '@cachink/domain';
+import { deriveDefaultPrefs } from '@xangarro/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 
 const ALL_ON: FeatureFlags = {
   stock: true,

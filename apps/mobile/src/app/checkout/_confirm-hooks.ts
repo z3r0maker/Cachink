@@ -6,8 +6,8 @@
 import { useCallback, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Alert } from 'react-native';
-import type { Business, IsoDate, PaymentMethod, Product } from '@cachink/domain';
-import { today } from '@cachink/domain';
+import type { Business, IsoDate, PaymentMethod, Product } from '@xangarro/domain';
+import { today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
   useCachinkSound,
@@ -16,7 +16,7 @@ import {
   useProductosParaVenta,
   useRegistrarVenta,
   type CartState,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { useCachinkPlayer } from '../../shell/use-cachink-player';
 
 export interface ConfirmState {

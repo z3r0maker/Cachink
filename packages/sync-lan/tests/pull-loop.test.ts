@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest';
 import { makeFreshDb } from './helpers/fresh-db.js';
 import { createFakeLanServer } from './helpers/fake-server.js';
 import { runPullCycle } from '../src/client/pull-loop.js';
-import { readHwm } from '@cachink/data';
+import { readHwm } from '@xangarro/data';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 const DEV_A = '01HZ8XQN9GZJXV8AKQ5X0C7DEA';

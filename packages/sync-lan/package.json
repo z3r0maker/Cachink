@@ -1,5 +1,5 @@
 {
-  "name": "@cachink/sync-lan",
+  "name": "@xangarro/sync-lan",
   "version": "0.0.0",
   "private": true,
   "description": "First-party LAN sync client. Bundled with the Tauri desktop server. Phase 1D.",
@@ -22,13 +22,13 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@cachink/data": "workspace:*",
-    "@cachink/domain": "workspace:*",
+    "@xangarro/data": "workspace:*",
+    "@xangarro/domain": "workspace:*",
     "drizzle-orm": "^0.45.2",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@cachink/config": "workspace:*",
+    "@xangarro/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@vitest/coverage-v8": "^4.1.6",
     "better-sqlite3": "^12.10.0",

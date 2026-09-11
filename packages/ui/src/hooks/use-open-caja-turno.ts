@@ -9,7 +9,7 @@
  * Shared between CajaContent and the Ventas route caja gate.
  */
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, CajaTurno, UserId } from '@cachink/domain';
+import type { BusinessId, CajaTurno, UserId } from '@xangarro/domain';
 import { useCajaTurnosRepository } from '../app/repository-provider';
 import { useCurrentBusinessId, useUserId } from '../app-config/use-app-config';
 import { cajaKeys } from './query-keys';

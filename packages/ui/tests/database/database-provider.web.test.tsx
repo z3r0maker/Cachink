@@ -23,8 +23,8 @@ import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import { describe, expect, it } from 'vitest';
 import { buildTauriCallback } from '../../src/database/database-provider.web';
 import { runMigrations } from '../../src/database/run-migrations';
-import * as schema from '@cachink/data/schema';
-import type { CachinkDatabase } from '@cachink/data';
+import * as schema from '@xangarro/data/schema';
+import type { CachinkDatabase } from '@xangarro/data';
 
 type TauriLikeDatabase = Parameters<typeof buildTauriCallback>[0];
 

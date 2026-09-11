@@ -4,9 +4,9 @@
 import { describe, expect, it } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { makeSale } from '@cachink/testing';
-import type { Business, BusinessId, DeviceId, IsoTimestamp } from '@cachink/domain';
-import { DEFAULT_FEATURE_FLAGS } from '@cachink/domain';
+import { makeSale } from '@xangarro/testing';
+import type { Business, BusinessId, DeviceId, IsoTimestamp } from '@xangarro/domain';
+import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import { useComprobanteHtml } from '../../src/hooks/use-comprobante-html';
 import { initI18n } from '../../src/i18n/index';
 import { TamaguiProvider } from '@tamagui/core';

@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { SettingsEmpleados, useTranslation } from '@cachink/ui';
+import { SettingsEmpleados, useTranslation } from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function EmpleadosRoute(): ReactElement {

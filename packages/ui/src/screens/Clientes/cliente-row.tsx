@@ -6,8 +6,8 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Client, Money } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { Client, Money } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Card, Tag } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import type { ClienteWithSaldo } from './clientes-screen';

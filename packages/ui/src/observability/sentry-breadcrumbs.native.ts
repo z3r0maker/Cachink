@@ -4,7 +4,7 @@
  * Same API as sentry-breadcrumbs.ts but uses @sentry/react-native.
  */
 
-import type { AuditEvent } from '@cachink/observability';
+import type { AuditEvent } from '@xangarro/observability';
 
 /**
  * Add a Sentry breadcrumb for a completed audit event.

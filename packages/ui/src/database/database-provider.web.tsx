@@ -14,7 +14,7 @@
  *      internals expect. One ~40-line callback keeps the rest of the
  *      Drizzle surface identical on both platforms.
  *   3. `runMigrations` applies any pending migrations from
- *      `@cachink/data/migrations` — same code path as the mobile variant.
+ *      `@xangarro/data/migrations` — same code path as the mobile variant.
  *
  * Important cross-driver quirk: Tauri's plugin returns `select` rows as
  * objects (`Array<Record<string, unknown>>`), but the sqlite-proxy contract
@@ -28,9 +28,9 @@
 import { useCallback, type ReactElement } from 'react';
 import Database from '@tauri-apps/plugin-sql';
 import { drizzle, type AsyncRemoteCallback } from 'drizzle-orm/sqlite-proxy';
-import type { SqliteDatabase } from '@cachink/observability';
-import * as schema from '@cachink/data/schema';
-import type { CachinkDatabase } from '@cachink/data';
+import type { SqliteDatabase } from '@xangarro/observability';
+import * as schema from '@xangarro/data/schema';
+import type { CachinkDatabase } from '@xangarro/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
@@ -44,7 +44,7 @@ import {
   checkSchemaCompatibility,
   SCHEMA_VERSION,
   SchemaVersionError,
-} from '@cachink/data/migrator';
+} from '@xangarro/data/migrator';
 
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
 const DB_PATH = 'sqlite:cachink.db';

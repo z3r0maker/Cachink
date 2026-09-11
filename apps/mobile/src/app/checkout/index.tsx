@@ -7,8 +7,8 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import type { PaymentMethod } from '@cachink/domain';
-import { CheckoutMethodPicker, useCheckoutStore } from '@cachink/ui';
+import type { PaymentMethod } from '@xangarro/domain';
+import { CheckoutMethodPicker, useCheckoutStore } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 export default function CheckoutRoute(): ReactElement {

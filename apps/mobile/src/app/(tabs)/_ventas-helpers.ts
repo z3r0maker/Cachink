@@ -6,7 +6,7 @@
  * Underscore prefix → Expo Router ignores this file as a route.
  */
 
-import type { IsoDate } from '@cachink/domain';
+import type { IsoDate } from '@xangarro/domain';
 
 export function todayIso(): IsoDate {
   const now = new Date();

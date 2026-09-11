@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import type { TimelineEntry } from '@cachink/observability';
+import type { TimelineEntry } from '@xangarro/observability';
 import { Btn } from '../../components/index';
 
 export interface TelemetriaDetailSheetProps {

@@ -6,13 +6,13 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryExpensesRepository,
   TEST_DEVICE_ID,
   makeNewExpense,
-} from '@cachink/testing';
-import type { BusinessId, ExpenseId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, ExpenseId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEditarEgreso } from '../../src/hooks/use-editar-egreso';
 import { TamaguiProvider } from '@tamagui/core';

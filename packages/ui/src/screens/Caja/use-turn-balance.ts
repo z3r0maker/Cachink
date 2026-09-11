@@ -5,8 +5,8 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, CajaBalanceResult, CajaTurno } from '@cachink/domain';
-import { computeCajaBalance } from '@cachink/domain';
+import type { BusinessId, CajaBalanceResult, CajaTurno } from '@xangarro/domain';
+import { computeCajaBalance } from '@xangarro/domain';
 import {
   useSalesRepository,
   useExpensesRepository,

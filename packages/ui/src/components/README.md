@@ -1,4 +1,4 @@
-# `@cachink/ui` Component Index
+# `@xangarro/ui` Component Index
 
 > One index per primitive — what it is, when to reach for it, and the
 > Storybook entry-point. Generated as part of Audit Round 2 G4 once
@@ -89,7 +89,7 @@
   wheel picker avoids keyboard pop-up, prevents invalid input by
   construction, and is faster for the small numbers typical in micro-POS
   workflows.
-- **i18n:** Spanish (es-MX) only at launch — see CLAUDE.md §8.5. All user-facing strings flow through `useTranslation` from `@cachink/ui/i18n`.
+- **i18n:** Spanish (es-MX) only at launch — see CLAUDE.md §8.5. All user-facing strings flow through `useTranslation` from `@xangarro/ui/i18n`.
 - **Tests:** Vitest + Testing Library, jsdom environment. Below-floor primitives carry ≥6 tests apiece (Audit Round 2 G4).
 
 > **Did this README go stale?** Run `find packages/ui/src/components -maxdepth 2 -type d` to compare against the table above. Add new primitives here as part of the same PR that ships them.

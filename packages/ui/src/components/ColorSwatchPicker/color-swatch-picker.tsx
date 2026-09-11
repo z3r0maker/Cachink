@@ -11,7 +11,7 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { ProductColor } from '@cachink/domain';
+import type { ProductColor } from '@xangarro/domain';
 import { PRODUCT_COLOR_OPTIONS } from '../../product-colors';
 import { colors, fontSizes, typography } from '../../theme';
 

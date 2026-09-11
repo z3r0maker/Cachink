@@ -4,7 +4,7 @@ import {
   DEFAULT_HEALTH_THRESHOLDS,
   type HealthThresholds,
   type Indicadores,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { MarginTrend } from '../../hooks/use-indicadores-trend';

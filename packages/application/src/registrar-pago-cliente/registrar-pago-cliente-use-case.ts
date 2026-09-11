@@ -17,11 +17,11 @@ import {
   type ClientPayment,
   type NewClientPayment,
   type PaymentState,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   ClientPaymentsRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class RegistrarPagoClienteUseCase

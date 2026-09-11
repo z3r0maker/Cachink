@@ -11,7 +11,7 @@ import {
   type ExpenseCategory,
   type IsoDate,
   type NewExpense,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { initialRecurrenteState, type RecurrenteState } from './gasto-recurrente';
 
 export const GASTO_CATEGORIAS: readonly ExpenseCategory[] = [

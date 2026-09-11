@@ -10,7 +10,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, User } from '@cachink/domain';
+import type { BusinessId, User } from '@xangarro/domain';
 import { UserListScreen } from './user-list-screen';
 import { CreateUserModal } from './create-user-modal';
 import { useCrearUsuario } from '../../hooks/use-crear-usuario';

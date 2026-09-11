@@ -8,8 +8,8 @@
  */
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Sale, Money } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { Sale, Money } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Card } from '../../components/Card/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { impactLight } from '../../haptics/index';

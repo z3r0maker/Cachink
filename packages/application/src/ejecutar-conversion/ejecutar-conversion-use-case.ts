@@ -19,13 +19,13 @@ import {
   type ConversionReceta,
   type ConversionRecetaId,
   type Product,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   ConversionRecetasRepository,
   ConversionsRepository,
   InventoryMovementsRepository,
   ProductsRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EjecutarConversionInput {

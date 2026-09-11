@@ -9,8 +9,8 @@
 
 import { useMemo, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { IsoDate, Money } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { IsoDate, Money } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Btn, Card, Kpi } from '../../components/index';
 import type { KpiTone } from '../../components/Kpi/kpi';
 import {

@@ -5,7 +5,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { InventoryMovement, IsoDate } from '@cachink/domain';
+import type { InventoryMovement, IsoDate } from '@xangarro/domain';
 import { useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

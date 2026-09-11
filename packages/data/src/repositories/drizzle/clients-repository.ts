@@ -4,8 +4,8 @@
 
 import { and, asc, eq, isNull, like, sql } from 'drizzle-orm';
 import type { BusinessId, ClientId, DeviceId,
-  UserId, IsoTimestamp, NewClient } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+  UserId, IsoTimestamp, NewClient } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { Client, ClientPatch, ClientsRepository } from '../clients-repository.js';
 import { clients } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

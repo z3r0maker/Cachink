@@ -12,7 +12,7 @@ import {
   HealthThresholdsSchema,
   DEFAULT_HEALTH_THRESHOLDS,
   type HealthThresholds,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { useAppConfigRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS } from '../app-config/types';
 

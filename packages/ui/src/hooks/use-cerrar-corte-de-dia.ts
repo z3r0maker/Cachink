@@ -16,8 +16,8 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { CerrarCorteDeDiaUseCase, type CerrarCorteDeDiaInput } from '@cachink/application';
-import type { DayClose } from '@cachink/domain';
+import { CerrarCorteDeDiaUseCase, type CerrarCorteDeDiaInput } from '@xangarro/application';
+import type { DayClose } from '@xangarro/domain';
 import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

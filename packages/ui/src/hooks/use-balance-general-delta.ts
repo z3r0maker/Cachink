@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { BalanceGeneral, PeriodRange } from '@cachink/domain';
+import type { BalanceGeneral, PeriodRange } from '@xangarro/domain';
 import {
   useBusinessesRepository,
   useClientPaymentsRepository,

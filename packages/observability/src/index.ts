@@ -1,5 +1,5 @@
 /**
- * @cachink/observability — audit logging, error telemetry, and observability.
+ * @xangarro/observability — audit logging, error telemetry, and observability.
  *
  * This package provides:
  *   - `AuditEvent` / `ErrorLogEntry` types for structured logging
@@ -9,7 +9,7 @@
  *   - `scrubRecord` / `scrubLogMetadata` for PII removal before export
  *
  * No React, no UI — pure TypeScript. The UI integration lives in
- * `@cachink/ui` (`observability-provider.tsx`).
+ * `@xangarro/ui` (`observability-provider.tsx`).
  */
 
 // Types

@@ -9,9 +9,9 @@
  * Shared between Ventas (prices matter) and Merma (all prices are 0n).
  */
 import { useCallback, useMemo, useReducer } from 'react';
-import type { Money } from '@cachink/domain';
-import type { Product } from '@cachink/domain';
-import type { ProductId } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
+import type { Product } from '@xangarro/domain';
+import type { ProductId } from '@xangarro/domain';
 
 // ---------------------------------------------------------------------------
 // Public types

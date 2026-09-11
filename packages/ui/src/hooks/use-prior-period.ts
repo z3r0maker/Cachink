@@ -5,7 +5,7 @@
  * range shifted back by its own length.
  */
 
-import type { IsoDate, PeriodRange } from '@cachink/domain';
+import type { IsoDate, PeriodRange } from '@xangarro/domain';
 
 /** Day count in a period (inclusive). */
 function dayCount(p: PeriodRange): number {

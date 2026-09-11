@@ -1,9 +1,9 @@
 /**
  * UI-dependent test helpers — separated from the main barrel so that
- * packages without react-native / @cachink/ui in their dependency graph
+ * packages without react-native / @xangarro/ui in their dependency graph
  * (domain, application, data) never transitively load react-native-svg.
  *
- * Import from `@cachink/testing/ui` instead of `@cachink/testing`.
+ * Import from `@xangarro/testing/ui` instead of `@xangarro/testing`.
  * See the `./contract` subpath for the same pattern applied to vitest-
  * dependent contract-test factories.
  */

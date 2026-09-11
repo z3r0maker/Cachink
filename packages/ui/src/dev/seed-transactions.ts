@@ -5,7 +5,7 @@
  * 200-line budget (CLAUDE.md §2.6).
  */
 
-import type { BusinessId, ClientId, IsoDate, Product } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate, Product } from '@xangarro/domain';
 import type { Repositories } from '../app/repository-provider';
 import { DEMO_EXPENSE_TEMPLATES, DEMO_SALE_TEMPLATES } from './demo-data-catalog';
 import { toIsoDate, toHora, daysAgo } from './seed-helpers';

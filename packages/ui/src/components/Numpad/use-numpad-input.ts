@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import { fromPesos, type Money, ZERO } from '@cachink/domain';
+import { fromPesos, type Money, ZERO } from '@xangarro/domain';
 import type { NumpadKey } from './numpad';
 
 export interface NumpadInputState {

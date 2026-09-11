@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
-import type { ExpensesRepository } from '@cachink/data';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
+import type { ExpensesRepository } from '@xangarro/data';
 import { makeNewExpense } from '../fixtures/expense.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 

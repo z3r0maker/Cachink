@@ -12,8 +12,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, IsoDate } from '@cachink/domain';
-import type { SalesRepository } from '@cachink/data';
+import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
+import type { SalesRepository } from '@xangarro/data';
 import { makeNewSale } from '../fixtures/sale.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 

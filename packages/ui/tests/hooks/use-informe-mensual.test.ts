@@ -4,15 +4,15 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { GenerarInformeMensualUseCase } from '@cachink/application';
+import { GenerarInformeMensualUseCase } from '@xangarro/application';
 import {
   InMemoryBusinessesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
   makeNewExpense,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 

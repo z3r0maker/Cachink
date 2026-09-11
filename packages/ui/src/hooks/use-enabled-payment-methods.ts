@@ -4,7 +4,7 @@
  *
  * Falls back to the default set (all 4) when no business is loaded.
  */
-import type { PaymentMethod } from '@cachink/domain';
+import type { PaymentMethod } from '@xangarro/domain';
 import { useCurrentBusiness } from './use-current-business';
 
 const DEFAULT_METHODS: readonly PaymentMethod[] = [

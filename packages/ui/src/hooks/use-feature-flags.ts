@@ -13,7 +13,7 @@ import {
   parseFeatureFlags,
   type FeatureFlagKey,
   type FeatureFlags,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { useCurrentBusiness } from './use-current-business';
 
 /** Parse and return all flags from the current business. */

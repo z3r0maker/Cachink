@@ -4,7 +4,7 @@
 
 import { useState, useCallback, type ReactElement } from 'react';
 import { Alert } from 'react-native';
-import type { BusinessId, Sale, UserId } from '@cachink/domain';
+import type { BusinessId, Sale, UserId } from '@xangarro/domain';
 import { Modal } from '../../components/index';
 import { useSalesRepository, useCancelacionLogsRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId, useDeviceId } from '../../app-config/use-app-config';

@@ -8,7 +8,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { formatPeriodoLabel } from '@cachink/domain';
+import { formatPeriodoLabel } from '@xangarro/domain';
 import {
   EstadosShell,
   defaultPeriodoState,
@@ -16,7 +16,7 @@ import {
   useIndicadoresTrend,
   usePeriodoRange,
   type PeriodoState,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function IndicadoresRoute(): ReactElement {

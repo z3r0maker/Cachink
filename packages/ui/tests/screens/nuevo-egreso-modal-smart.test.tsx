@@ -18,12 +18,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecurringExpensesRepository,
-} from '@cachink/testing';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+} from '@xangarro/testing';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { NuevoEgresoModalSmart } from '../../src/screens/index';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

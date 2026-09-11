@@ -6,9 +6,9 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { Sale, SaleId, BusinessId, DeviceId, UserId } from '@cachink/domain';
-import { makeSale, InMemorySalesRepository, InMemoryCancelacionLogsRepository } from '@cachink/testing';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import type { Sale, SaleId, BusinessId, DeviceId, UserId } from '@xangarro/domain';
+import { makeSale, InMemorySalesRepository, InMemoryCancelacionLogsRepository } from '@xangarro/testing';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { SaleCancelCard } from '../../src/screens/Cancelaciones/sale-cancel-card';

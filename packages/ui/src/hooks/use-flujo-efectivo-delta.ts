@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { FlujoDeEfectivo, PeriodRange } from '@cachink/domain';
+import type { FlujoDeEfectivo, PeriodRange } from '@xangarro/domain';
 import {
   useClientPaymentsRepository,
   useExpensesRepository,

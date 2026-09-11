@@ -12,7 +12,7 @@ import {
   type Business,
   type IsrDefaults,
   type RegimenFiscal,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { Btn, ConfirmDialog, Input, Modal } from '../../components/index';
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { TextField } from '../../components/fields/index';

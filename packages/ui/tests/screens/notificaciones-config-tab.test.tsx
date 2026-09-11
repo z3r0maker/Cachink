@@ -8,8 +8,8 @@ import { render, screen } from '@testing-library/react';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 import { NotificacionesConfigTab } from '../../src/screens/Notificaciones/notificaciones-config-tab';
-import { deriveDefaultPrefs } from '@cachink/domain';
-import type { FeatureFlags } from '@cachink/domain';
+import { deriveDefaultPrefs } from '@xangarro/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 
 const ALL_ON: FeatureFlags = {
   stock: true,

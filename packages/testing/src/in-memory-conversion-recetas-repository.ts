@@ -1,10 +1,10 @@
 /**
  * In-memory ConversionRecetasRepository. Phase 8.
  */
-import type { BusinessId, ConversionReceta, ConversionRecetaId, DeviceId, ProductId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { ConversionRecetasRepository, CreateConversionRecetaInput } from '@cachink/data';
-import type { IsoTimestamp } from '@cachink/domain';
+import type { BusinessId, ConversionReceta, ConversionRecetaId, DeviceId, ProductId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { ConversionRecetasRepository, CreateConversionRecetaInput } from '@xangarro/data';
+import type { IsoTimestamp } from '@xangarro/domain';
 
 export class InMemoryConversionRecetasRepository implements ConversionRecetasRepository {
   private readonly rows = new Map<ConversionRecetaId, ConversionReceta>();

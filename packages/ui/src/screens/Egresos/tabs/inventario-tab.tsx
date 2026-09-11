@@ -23,7 +23,7 @@ import {
   type NewInventoryMovement,
   type Product,
   type ProductId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { Btn, Combobox } from '../../../components/index';
 import { MoneyField, WheelQuantityPicker } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';

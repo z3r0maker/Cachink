@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { InventoryCategory, InventoryUnit, UsoProducto } from '@cachink/domain';
+import type { InventoryCategory, InventoryUnit, UsoProducto } from '@xangarro/domain';
 import { Btn, Combobox, Icon, Input, OptionCardGroup } from '../../components/index';
 import {
   focusRef,

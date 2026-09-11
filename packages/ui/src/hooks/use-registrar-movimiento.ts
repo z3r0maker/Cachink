@@ -17,8 +17,8 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { RegistrarMovimientoInventarioUseCase } from '@cachink/application';
-import type { InventoryMovement, NewInventoryMovement } from '@cachink/domain';
+import { RegistrarMovimientoInventarioUseCase } from '@xangarro/application';
+import type { InventoryMovement, NewInventoryMovement } from '@xangarro/domain';
 import { useExpensesRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

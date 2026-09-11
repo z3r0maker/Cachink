@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter, Redirect } from 'expo-router';
-import { TelemetriaScreen } from '@cachink/ui';
+import { TelemetriaScreen } from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function TelemetriaRoute(): ReactElement {

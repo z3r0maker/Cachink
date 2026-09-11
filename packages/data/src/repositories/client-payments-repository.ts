@@ -11,7 +11,7 @@ import type {
   Money,
   NewClientPayment,
   SaleId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export type { ClientPayment, NewClientPayment };
 

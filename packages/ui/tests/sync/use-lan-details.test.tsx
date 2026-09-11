@@ -8,8 +8,8 @@
  * retired.
  */
 
-import type * as CachinkData from '@cachink/data';
-import type { CachinkDatabase } from '@cachink/data';
+import type * as CachinkData from '@xangarro/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
@@ -32,8 +32,8 @@ vi.mock('../../src/database/_internal', () => ({
 
 let MOCK_SERVER_URL: string | null = 'http://192.168.1.10:8787';
 const clearSyncStateMock = vi.fn(async () => {});
-vi.mock('@cachink/data', async () => {
-  const actual = await vi.importActual<typeof CachinkData>('@cachink/data');
+vi.mock('@xangarro/data', async () => {
+  const actual = await vi.importActual<typeof CachinkData>('@xangarro/data');
   return {
     ...actual,
     readSyncState: vi.fn(async (_db: unknown, scope: string) => {

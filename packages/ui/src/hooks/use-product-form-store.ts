@@ -11,7 +11,7 @@ import type {
   ProductColor,
   ProductIcon,
   UsoProducto,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export interface ProductFormDraft {
   nombre: string;

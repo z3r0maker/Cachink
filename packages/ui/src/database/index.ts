@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/ui/database`.
+ * Public surface of `@xangarro/ui/database`.
  *
  * Re-exports from the shared entry, which in turn re-exports the platform
  * `DatabaseProvider`. Metro/Vite resolve the platform variant via the

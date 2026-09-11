@@ -19,7 +19,7 @@ import {
   useProductosConStock,
   type InventarioSubTab,
   type ProductoConStock,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 
 function toggleNext(tab: InventarioSubTab): InventarioSubTab {
   return tab === 'stock' ? 'movimientos' : 'stock';

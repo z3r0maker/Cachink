@@ -24,7 +24,7 @@ export default defineConfig({
     alias: {
       // React Native ships its index.js with Flow syntax (`import typeof`),
       // which Rollup/Vite can't parse. Any package that transitively depends
-      // on @cachink/ui (which imports from 'react-native' in .native.tsx
+      // on @xangarro/ui (which imports from 'react-native' in .native.tsx
       // variants) needs this alias so Vitest resolves the web shim instead.
       'react-native': 'react-native-web',
     },

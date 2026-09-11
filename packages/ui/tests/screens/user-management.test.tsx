@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { UserId } from '@cachink/domain';
-import { makeUser } from '@cachink/testing';
+import type { UserId } from '@xangarro/domain';
+import { makeUser } from '@xangarro/testing';
 import { UserListScreen } from '../../src/screens/UserManagement/user-list-screen';
 import { CreateUserModal } from '../../src/screens/UserManagement/create-user-modal';
 import { initI18n } from '../../src/i18n/index';

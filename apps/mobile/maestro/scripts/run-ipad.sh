@@ -10,7 +10,7 @@
 # IMPORTANT: The Cachink dev client must be installed on the iPad
 # simulator before this script can run. One-time setup per device:
 #
-#   pnpm --filter @cachink/mobile ios -- --device "iPad (10th generation)"
+#   pnpm --filter @xangarro/mobile ios -- --device "iPad (10th generation)"
 #
 # After that initial install the binary stays on the simulator; you
 # only need to reinstall when upgrading the Expo SDK or resetting Xcode.
@@ -141,7 +141,7 @@ if [[ -z "$APP_DATA" ]]; then
   echo "❌  $APP_ID is not installed on $IPAD_DEVICE."
   echo ""
   echo "    First-time setup (one-time per device class):"
-  echo "      pnpm --filter @cachink/mobile ios -- --device \"$IPAD_DEVICE\""
+  echo "      pnpm --filter @xangarro/mobile ios -- --device \"$IPAD_DEVICE\""
   exit 1
 fi
 

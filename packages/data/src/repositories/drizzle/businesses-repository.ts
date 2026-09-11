@@ -12,8 +12,8 @@ import type {
   IsoTimestamp,
   SaleCategory,
   TipoNegocio,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type {
   Business,
   BusinessesRepository,

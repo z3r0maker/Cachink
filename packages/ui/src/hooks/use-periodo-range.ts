@@ -11,7 +11,7 @@
  */
 
 import { useMemo } from 'react';
-import type { IsoDate } from '@cachink/domain';
+import type { IsoDate } from '@xangarro/domain';
 import type { PeriodoState } from '../components/PeriodPicker/period-picker';
 
 export interface PeriodoRange {

@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate, ProductId } from '@cachink/domain';
-import type { InventoryMovementsRepository } from '@cachink/data';
+import type { BusinessId, IsoDate, ProductId } from '@xangarro/domain';
+import type { InventoryMovementsRepository } from '@xangarro/data';
 import { makeNewInventoryMovement } from '../fixtures/inventory-movement.js';
 
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7A01' as BusinessId;

@@ -5,7 +5,7 @@
  */
 
 import { useAudioPlayer } from 'expo-audio';
-import type { CachinkSoundPlayer } from '@cachink/ui';
+import type { CachinkSoundPlayer } from '@xangarro/ui';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const CACHINK_SFX = require('../../assets/sounds/cachink.mp3');

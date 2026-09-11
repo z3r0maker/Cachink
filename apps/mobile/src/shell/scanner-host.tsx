@@ -31,7 +31,7 @@
 
 import { useCallback, type ReactElement } from 'react';
 import { create } from 'zustand';
-import { Scanner } from '@cachink/ui';
+import { Scanner } from '@xangarro/ui';
 
 interface ScannerStoreState {
   readonly open: boolean;

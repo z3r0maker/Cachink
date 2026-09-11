@@ -9,7 +9,7 @@
  * Guadalajara, running for ~1 month.
  */
 
-import type { BusinessId, NewClient, NewEmployee, NewProduct } from '@cachink/domain';
+import type { BusinessId, NewClient, NewEmployee, NewProduct } from '@xangarro/domain';
 
 // ---------------------------------------------------------------------------
 // Products — mix of venta + materia-prima

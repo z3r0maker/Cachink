@@ -11,7 +11,7 @@
 import { useMemo, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View, useMedia } from '@tamagui/core';
-import type { Product, ProductId } from '@cachink/domain';
+import type { Product, ProductId } from '@xangarro/domain';
 import {
   EmptyState,
   SafeAreaSpacer,

@@ -1,9 +1,9 @@
 /**
  * In-memory DirectorAlertsRepository. Phase 11.
  */
-import type { AlertSeverity, AlertSource, BusinessId, DeviceId, DirectorAlert, DirectorAlertId, IsoTimestamp } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { CreateDirectorAlertInput, DirectorAlertsRepository } from '@cachink/data';
+import type { AlertSeverity, AlertSource, BusinessId, DeviceId, DirectorAlert, DirectorAlertId, IsoTimestamp } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { CreateDirectorAlertInput, DirectorAlertsRepository } from '@xangarro/data';
 
 export class InMemoryDirectorAlertsRepository implements DirectorAlertsRepository {
   private readonly rows = new Map<DirectorAlertId, DirectorAlert>();

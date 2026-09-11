@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { Money } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
 import { AbrirCajaModal } from '../../../src/screens/Caja/abrir-caja-modal';
 import { AbrirCajaHeader } from '../../../src/screens/Caja/abrir-caja-header';
 import { AbrirCajaFooter } from '../../../src/screens/Caja/abrir-caja-footer';

@@ -1,5 +1,5 @@
 /**
- * `@cachink/ui/components/fields` — typed field primitives that wrap
+ * `@xangarro/ui/components/fields` — typed field primitives that wrap
  * `<Input>` with the right keyboard / autofill / formatting hints for
  * each domain (money, email, phone, password, integer, date, plain
  * text).

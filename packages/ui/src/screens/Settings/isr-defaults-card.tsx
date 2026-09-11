@@ -6,7 +6,7 @@
 
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { REGIMENES_FISCALES, type IsrDefaults, type RegimenFiscal } from '@cachink/domain';
+import { REGIMENES_FISCALES, type IsrDefaults, type RegimenFiscal } from '@xangarro/domain';
 import { Btn, Card, Input, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

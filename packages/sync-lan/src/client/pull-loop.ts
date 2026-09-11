@@ -16,8 +16,8 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '@cachink/data';
-import { readHwm, writeHwm } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
+import { readHwm, writeHwm } from '@xangarro/data';
 import {
   API_PATHS,
   API_PREFIX,

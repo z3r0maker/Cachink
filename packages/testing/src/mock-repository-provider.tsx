@@ -17,12 +17,12 @@
  * (e.g. a ClientsRepository with one fixture client for the Crédito
  * path). Unspecified keys fall back to fresh empty in-memory instances.
  *
- * Lives in `@cachink/testing` (not `@cachink/ui`) per ADR-033 so that
+ * Lives in `@xangarro/testing` (not `@xangarro/ui`) per ADR-033 so that
  * test-only code never enters the runtime import graph of either app.
  */
 
 import { useMemo, type ReactElement, type ReactNode } from 'react';
-import { RepositoryProvider, type Repositories } from '@cachink/ui';
+import { RepositoryProvider, type Repositories } from '@xangarro/ui';
 import { InMemoryAppConfigRepository } from './in-memory-app-config-repository.js';
 import { InMemoryBusinessesRepository } from './in-memory-businesses-repository.js';
 import { InMemoryClientPaymentsRepository } from './in-memory-client-payments-repository.js';

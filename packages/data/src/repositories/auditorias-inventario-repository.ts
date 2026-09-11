@@ -1,8 +1,8 @@
 /**
  * AuditoriasInventarioRepository — physical inventory count CRUD. Phase 10.
  */
-import type { AuditoriaInventario } from '@cachink/domain';
-import type { AuditoriaInventarioId, BusinessId } from '@cachink/domain';
+import type { AuditoriaInventario } from '@xangarro/domain';
+import type { AuditoriaInventarioId, BusinessId } from '@xangarro/domain';
 
 export type { AuditoriaInventario };
 

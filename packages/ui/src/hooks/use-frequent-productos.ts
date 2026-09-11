@@ -8,8 +8,8 @@
 
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { FindFrequentProductosUseCase } from '@cachink/application';
-import type { BusinessId, Product } from '@cachink/domain';
+import { FindFrequentProductosUseCase } from '@xangarro/application';
+import type { BusinessId, Product } from '@xangarro/domain';
 import { useProductsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { frequentProductosKeys } from './query-keys';

@@ -11,7 +11,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView, useWindowDimensions, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import { SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

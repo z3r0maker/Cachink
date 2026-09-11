@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CachinkBurst, CheckoutEfectivo } from '@cachink/ui';
+import { CachinkBurst, CheckoutEfectivo } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useEfectivoState } from './_efectivo-hooks';
 

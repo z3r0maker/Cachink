@@ -10,7 +10,7 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { ProductId } from '@cachink/domain';
+import type { ProductId } from '@xangarro/domain';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';

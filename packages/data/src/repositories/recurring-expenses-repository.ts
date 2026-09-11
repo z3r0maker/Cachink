@@ -10,7 +10,7 @@ import type {
   NewRecurringExpense,
   RecurringExpense,
   RecurringExpenseId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export type { RecurringExpense, NewRecurringExpense };
 

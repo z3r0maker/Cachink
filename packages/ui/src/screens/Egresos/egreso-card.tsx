@@ -7,8 +7,8 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Expense } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { Expense } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

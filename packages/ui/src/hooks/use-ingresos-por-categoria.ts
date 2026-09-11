@@ -12,8 +12,8 @@ import {
   type Money,
   type PeriodRange,
   type SaleCategory,
-} from '@cachink/domain';
-import type { SalesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { SalesRepository } from '@xangarro/data';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

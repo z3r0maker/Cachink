@@ -43,7 +43,7 @@
 - **Local standalone mode** — fully offline, no account required
 - **LAN sync** — SQLite-to-SQLite sync over local Wi-Fi (desktop server + up to 3 tablets)
 - **Cloud sync** — PowerSync + Supabase backend for multi-location
-- **Observability** — local audit logging, error telemetry, and health checks (`@cachink/observability`)
+- **Observability** — local audit logging, error telemetry, and health checks (`@xangarro/observability`)
 - **Cross-platform UI** — shared Tamagui component library rendering on iOS, Android, macOS, and Windows
 
 ### 🟡 In Progress
@@ -120,10 +120,10 @@ pnpm install
 pnpm test                              # full monorepo tests (~2,100 tests)
 pnpm lint                              # enforce layer boundaries + style
 pnpm typecheck                         # strict TS across all packages
-pnpm --filter @cachink/mobile ios      # dev build (needs Metro running)
-pnpm --filter @cachink/mobile ios:clean    # nuke Pods + full clean rebuild
-pnpm --filter @cachink/mobile ios:preview  # preview build (tap icon, no Metro)
-pnpm --filter @cachink/desktop tauri dev   # launch Tauri desktop app
+pnpm --filter @xangarro/mobile ios      # dev build (needs Metro running)
+pnpm --filter @xangarro/mobile ios:clean    # nuke Pods + full clean rebuild
+pnpm --filter @xangarro/mobile ios:preview  # preview build (tap icon, no Metro)
+pnpm --filter @xangarro/desktop tauri dev   # launch Tauri desktop app
 ```
 
 ### iOS Build — encoding note
@@ -140,7 +140,7 @@ export LC_ALL=en_US.UTF-8
 Clean rebuild after encoding or Pods issues:
 
 ```bash
-pnpm --filter @cachink/mobile ios:clean
+pnpm --filter @xangarro/mobile ios:clean
 ```
 
 **Xcode 26+ note:** Build for an iOS 26.4 simulator (not 18.x). The
@@ -185,7 +185,7 @@ Requirements:
 - **PowerSync** (Cloud mode), first-party LAN sync (LAN mode)
 - **Zustand** + **TanStack Query** for state
 - **Vitest** + **React Native Testing Library** + **Maestro** + **Playwright** for testing
-- **@cachink/observability** for local audit logging + error telemetry
+- **@xangarro/observability** for local audit logging + error telemetry
 - **Turborepo** + **pnpm workspaces** monorepo
 
 See CLAUDE.md §3 for pinned version floors and full list.

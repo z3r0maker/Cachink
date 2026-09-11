@@ -10,8 +10,8 @@ import {
   makeNewClientPayment,
   makeNewExpense,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate, SaleId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate, SaleId } from '@xangarro/domain';
 import { composeFlujoEfectivo } from '../../src/hooks/use-flujo-efectivo';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

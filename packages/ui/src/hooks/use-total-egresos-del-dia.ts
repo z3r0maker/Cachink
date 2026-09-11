@@ -4,7 +4,7 @@
  */
 
 import { useMemo } from 'react';
-import type { Expense, Money } from '@cachink/domain';
+import type { Expense, Money } from '@xangarro/domain';
 
 export function totalEgresosDelDia(egresos: readonly Expense[]): Money {
   let total = 0n as Money;

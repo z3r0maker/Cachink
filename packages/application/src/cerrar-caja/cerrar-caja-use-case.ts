@@ -14,14 +14,14 @@ import {
   type CajaTurno,
   type CerrarCajaInput,
   CerrarCajaSchema,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   CajaTurnosRepository,
   ExpensesRepository,
   SalesRepository,
-} from '@cachink/data';
-import type { BusinessId, ExpenseId } from '@cachink/domain';
-import { sum, ZERO, type Money } from '@cachink/domain';
+} from '@xangarro/data';
+import type { BusinessId, ExpenseId } from '@xangarro/domain';
+import { sum, ZERO, type Money } from '@xangarro/domain';
 import type { UseCase } from '../_use-case.js';
 
 export interface CerrarCajaFullInput extends CerrarCajaInput {

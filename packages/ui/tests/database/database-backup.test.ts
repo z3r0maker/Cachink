@@ -33,7 +33,7 @@ describe('runMigrations + backupBefore', () => {
       run: vi.fn().mockResolvedValue(undefined),
       all: vi.fn().mockImplementation(async () => {
         // Pretend every known migration is already applied.
-        const mod = await import('@cachink/data/migrations');
+        const mod = await import('@xangarro/data/migrations');
         return mod.default.journal.entries.map((e) => ({ tag: e.tag }));
       }),
     };

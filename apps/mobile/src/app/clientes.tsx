@@ -19,8 +19,8 @@ import {
   useClientsForBusiness,
   useCuentasPorCobrar,
   useCrearCliente,
-} from '@cachink/ui';
-import type { Client } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { Client } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 import { useSwipeState } from '../shell/use-swipe-state';
 import { ClienteSwipeSlots } from '../shell/clientes-slots';

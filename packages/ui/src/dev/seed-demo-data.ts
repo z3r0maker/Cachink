@@ -8,7 +8,7 @@
  */
 
 import { hash } from 'bcryptjs';
-import type { BusinessId, DeviceId, Product } from '@cachink/domain';
+import type { BusinessId, DeviceId, Product } from '@xangarro/domain';
 import type { Repositories } from '../app/repository-provider';
 import { demoProducts, demoClients, demoEmployees } from './demo-data-catalog';
 import { seedSales, seedExpenses, seedRecurringExpenses } from './seed-transactions';

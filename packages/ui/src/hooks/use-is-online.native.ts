@@ -12,7 +12,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ulid } from 'ulid';
-import type { AuditEvent, AuditOperation } from '@cachink/observability';
+import type { AuditEvent, AuditOperation } from '@xangarro/observability';
 import { useLogStore } from '../observability/observability-provider';
 import { useDeviceId } from '../app-config/index';
 

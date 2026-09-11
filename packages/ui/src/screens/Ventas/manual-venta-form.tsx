@@ -8,7 +8,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { PaymentMethod } from '@cachink/domain';
+import type { PaymentMethod } from '@xangarro/domain';
 import { Btn, Input } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 

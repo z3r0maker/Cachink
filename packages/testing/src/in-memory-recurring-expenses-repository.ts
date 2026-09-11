@@ -10,9 +10,9 @@ import type {
   NewRecurringExpense,
   RecurringExpense,
   RecurringExpenseId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { RecurringExpensesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { RecurringExpensesRepository } from '@xangarro/data';
 
 export class InMemoryRecurringExpensesRepository implements RecurringExpensesRepository {
   private readonly rows = new Map<RecurringExpenseId, RecurringExpense>();

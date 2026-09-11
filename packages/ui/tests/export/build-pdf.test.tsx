@@ -13,14 +13,14 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { InformeMensual } from '@cachink/application';
+import type { InformeMensual } from '@xangarro/application';
 import type {
   BusinessId,
   EstadoDeResultados,
   ExpenseCategory,
   Money,
   SaleCategory,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { buildInformeMensualPdf, buildViewModel } from '../../src/export/build-pdf';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

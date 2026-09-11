@@ -7,7 +7,7 @@
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { View, Text } from '@tamagui/core';
-import type { TimelineEntry } from '@cachink/observability';
+import type { TimelineEntry } from '@xangarro/observability';
 import { SectionTitle } from '../../components/index';
 import { TelemetriaStatsRow } from './telemetria-stats-row';
 import { TelemetriaFilterBar } from './telemetria-filter-bar';

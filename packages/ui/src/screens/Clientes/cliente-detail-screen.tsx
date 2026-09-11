@@ -8,8 +8,8 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Client, ClientPayment, Money, Sale } from '@cachink/domain';
-import { formatDate, formatMoney } from '@cachink/domain';
+import type { Client, ClientPayment, Money, Sale } from '@xangarro/domain';
+import { formatDate, formatMoney } from '@xangarro/domain';
 import { Btn, Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

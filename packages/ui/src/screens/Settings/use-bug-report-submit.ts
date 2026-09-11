@@ -17,7 +17,7 @@ import {
   type LogSnapshot,
   type RemoteLogStore,
   type TimelineEntry,
-} from '@cachink/observability';
+} from '@xangarro/observability';
 import { useLogStore } from '../../observability/observability-provider';
 
 /** Share callback shape, mirrored from `BugReportSheetProps['onShare']`. */

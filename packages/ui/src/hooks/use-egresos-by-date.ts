@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Expense, IsoDate } from '@cachink/domain';
+import type { Expense, IsoDate } from '@xangarro/domain';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

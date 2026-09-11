@@ -11,7 +11,7 @@
 
 import { useEffect, useRef } from 'react';
 import { ulid } from 'ulid';
-import type { AuditEvent } from '@cachink/observability';
+import type { AuditEvent } from '@xangarro/observability';
 import { useLogStore } from './observability-provider';
 import { useDeviceId, useUserId, useCurrentBusinessId } from '../app-config/index';
 

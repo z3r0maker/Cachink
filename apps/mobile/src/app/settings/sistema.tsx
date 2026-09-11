@@ -27,8 +27,8 @@ import {
   useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
-} from '@cachink/ui';
-import { useLanDetails } from '@cachink/ui/sync';
+} from '@xangarro/ui';
+import { useLanDetails } from '@xangarro/ui/sync';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 

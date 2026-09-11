@@ -4,7 +4,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney } from '@cachink/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Input } from '../../components/Input/index';
 import { PinCodeInput } from '../../components/index';

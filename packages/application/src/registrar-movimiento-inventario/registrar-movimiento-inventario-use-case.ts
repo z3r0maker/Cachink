@@ -18,11 +18,11 @@ import {
   multiplyByInteger,
   type InventoryMovement,
   type NewInventoryMovement,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   ExpensesRepository,
   InventoryMovementsRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class RegistrarMovimientoInventarioUseCase

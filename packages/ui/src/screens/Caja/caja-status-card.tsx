@@ -7,11 +7,11 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { CajaTurno } from '@cachink/domain';
+import type { CajaTurno } from '@xangarro/domain';
 import { Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
-import { formatMoney } from '@cachink/domain';
+import { formatMoney } from '@xangarro/domain';
 
 export interface CajaStatusCardProps {
   readonly turno: CajaTurno;

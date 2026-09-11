@@ -7,8 +7,8 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { SafeAreaSpacer, fontSizes } from '@cachink/ui';
-import { useTranslation } from '@cachink/ui';
+import { SafeAreaSpacer, fontSizes } from '@xangarro/ui';
+import { useTranslation } from '@xangarro/ui';
 
 interface PlaceholderRouteProps {
   readonly featureLabel: string;

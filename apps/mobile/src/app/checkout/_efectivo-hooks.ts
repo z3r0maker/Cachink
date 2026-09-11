@@ -6,8 +6,8 @@
 import { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
-import type { Business, Money, PaymentMethod, Product, IsoDate } from '@cachink/domain';
-import { today } from '@cachink/domain';
+import type { Business, Money, PaymentMethod, Product, IsoDate } from '@xangarro/domain';
+import { today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
   useCachinkSound,
@@ -17,7 +17,7 @@ import {
   useProductosParaVenta,
   useRegistrarVenta,
   type CartState,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { useCachinkPlayer } from '../../shell/use-cachink-player';
 
 function handleMutationError(err: unknown): void {

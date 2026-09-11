@@ -9,9 +9,9 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Expense, ExpenseId } from '@cachink/domain';
-import type { ExpensePatch } from '@cachink/data';
-import { EditarEgresoUseCase } from '@cachink/application';
+import type { Expense, ExpenseId } from '@xangarro/domain';
+import type { ExpensePatch } from '@xangarro/data';
+import { EditarEgresoUseCase } from '@xangarro/application';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

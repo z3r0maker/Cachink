@@ -16,7 +16,7 @@ import type { ReactElement } from 'react';
 
 /**
  * ISO 8601 date string in the `YYYY-MM-DD` form. Same shape as the
- * `IsoDate` brand from `@cachink/domain`. Empty string represents an
+ * `IsoDate` brand from `@xangarro/domain`. Empty string represents an
  * empty field (the form has not committed a value yet).
  */
 export type IsoDateString = string;

@@ -2,7 +2,7 @@
  * Expo Router entry for /nuevo-producto — full-page product creation.
  *
  * Phase 18: replaces the NuevoProductoModal on mobile. Uses
- * NuevoProductoScreen from @cachink/ui with AppShellWrapper for
+ * NuevoProductoScreen from @xangarro/ui with AppShellWrapper for
  * persistent bottom tab bar.
  *
  * QA Fix #13: wires onPickIcon to navigate to icon-picker route
@@ -19,7 +19,7 @@ import {
   useProductFormStore,
   type CrearProductoInput,
   type ProductoFormState,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 function useNuevoProductoHandlers(): {

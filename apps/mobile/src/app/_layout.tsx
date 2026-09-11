@@ -6,7 +6,7 @@
  *      VERY FIRST import — `ulid` reads it during module evaluation
  *      via `hydrateAppConfig`. See ADR-038.)
  *   2. Load Plus Jakarta Sans (the brand font — CLAUDE.md §8.2).
- *   3. Mount the Tamagui provider (required by every `@cachink/ui`
+ *   3. Mount the Tamagui provider (required by every `@xangarro/ui`
  *      component).
  *   4. Pass the mobile LAN + Cloud bridge factories into
  *      `<AppProviders>` so `LanGate` + `CloudGate` render end-to-end
@@ -23,7 +23,7 @@
  *      https://docs.swmansion.com/react-native-gesture-handler/docs/fundamentals/installation).
  *   8. Render the active route via `<Stack />`.
  *
- * No business UI lives here — that belongs to `@cachink/ui` (shared
+ * No business UI lives here — that belongs to `@xangarro/ui` (shared
  * components) or to route files under `src/app/`.
  */
 
@@ -54,8 +54,8 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { AppProviders, type AppProvidersHooks } from '@cachink/ui';
-import { useLanHandle } from '@cachink/ui/sync';
+import { AppProviders, type AppProvidersHooks } from '@xangarro/ui';
+import { useLanHandle } from '@xangarro/ui/sync';
 import { bootstrapI18n } from '../shell/i18n';
 import { useMobileLanBridges } from '../shell/use-lan-bridges';
 import { MobileScannerHost } from '../shell/scanner-host';

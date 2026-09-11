@@ -14,8 +14,8 @@ import type {
   IsoTimestamp,
   NewExpense,
   RecurringExpenseId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { Expense, ExpensePatch, ExpensesRepository } from '../expenses-repository.js';
 import { expenses } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

@@ -19,7 +19,7 @@ import {
   type Money,
   type PeriodRange,
   type Sale,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   BusinessesRepository,
   ClientPaymentsRepository,
@@ -28,7 +28,7 @@ import type {
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import {
   useBusinessesRepository,
   useClientPaymentsRepository,

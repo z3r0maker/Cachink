@@ -10,9 +10,9 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { Expense, Money } from '@cachink/domain';
-import { formatDate } from '@cachink/domain';
-import type { IsoDate } from '@cachink/domain';
+import type { Expense, Money } from '@xangarro/domain';
+import { formatDate } from '@xangarro/domain';
+import type { IsoDate } from '@xangarro/domain';
 import { Btn, FAB, Icon, List, SectionTitle, SwipeableRow } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

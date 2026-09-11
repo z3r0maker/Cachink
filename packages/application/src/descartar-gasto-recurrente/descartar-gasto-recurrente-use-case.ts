@@ -7,8 +7,8 @@
  * not to register the expense this period.
  */
 
-import type { IsoDate, RecurringExpense } from '@cachink/domain';
-import type { RecurringExpensesRepository } from '@cachink/data';
+import type { IsoDate, RecurringExpense } from '@xangarro/domain';
+import type { RecurringExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 import { advanceProximoDisparo } from '../procesar-gasto-recurrente/procesar-gasto-recurrente-use-case.js';
 

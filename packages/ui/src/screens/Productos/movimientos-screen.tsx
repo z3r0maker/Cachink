@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { InventoryMovement, Product, ProductId } from '@cachink/domain';
+import type { InventoryMovement, Product, ProductId } from '@xangarro/domain';
 import { EmptyState, List, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';

@@ -5,7 +5,7 @@
  * Before this existed, both app shells declared `useLanHandle` as
  * absent → `AppProviders` fell back to `NULL_HANDLE_HOOK` →
  * `<LanSyncProvider handle={null}>` kept every consumer in the inert
- * idle state. The LAN backend (`@cachink/sync-lan/createLanSyncClient`)
+ * idle state. The LAN backend (`@xangarro/sync-lan/createLanSyncClient`)
  * existed and was tested, but no caller ever instantiated it.
  *
  * Contract:
@@ -41,7 +41,7 @@ function useServerUrl(db: ReturnType<typeof useDatabase>, refreshKey: unknown): 
     let cancelled = false;
     async function load(): Promise<void> {
       try {
-        const { readSyncState } = await import('@cachink/data');
+        const { readSyncState } = await import('@xangarro/data');
         const raw = await readSyncState(db, 'auth.serverUrl');
         if (!cancelled) setServerUrl(typeof raw === 'string' ? raw : null);
       } catch {

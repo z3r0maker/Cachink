@@ -3,7 +3,7 @@ import type { Expense, Sale } from '../../src/entities/index.js';
 import { calculateEstadoDeResultados } from '../../src/financials/index.js';
 
 /**
- * Fixture builder local to this test file — avoids pulling @cachink/testing
+ * Fixture builder local to this test file — avoids pulling @xangarro/testing
  * from a domain test (domain must not depend on testing at runtime).
  */
 

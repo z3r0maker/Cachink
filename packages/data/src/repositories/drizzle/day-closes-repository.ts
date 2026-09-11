@@ -12,8 +12,8 @@ import type {
   IsoDate,
   IsoTimestamp,
   NewDayClose,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { DayClose, DayClosesRepository } from '../day-closes-repository.js';
 import { dayCloses } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { BusinessId, DeviceId, IsoTimestamp, Product, ProductId } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoTimestamp, Product, ProductId } from '@xangarro/domain';
 import { computeKpis } from '../../src/hooks/use-inventario-kpis';
 import type { ProductoConStock } from '../../src/hooks/use-productos-con-stock';
 

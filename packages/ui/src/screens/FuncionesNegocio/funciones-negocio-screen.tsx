@@ -15,7 +15,7 @@ import {
   resolveDisableCascade,
   type FeatureFlagKey,
   type FeatureFlags,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

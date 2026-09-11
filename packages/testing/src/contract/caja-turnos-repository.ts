@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoTimestamp, UserId } from '@cachink/domain';
-import type { CajaTurnosRepository, CreateCajaTurnoInput } from '@cachink/data';
+import type { BusinessId, IsoTimestamp, UserId } from '@xangarro/domain';
+import type { CajaTurnosRepository, CreateCajaTurnoInput } from '@xangarro/data';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER = '01HZ8XQN9GZJXV8AKQ5X0C7SR1' as UserId;

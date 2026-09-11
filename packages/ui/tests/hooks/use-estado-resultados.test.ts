@@ -10,8 +10,8 @@ import {
   InMemorySalesRepository,
   makeNewExpense,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   collectExpensesInRange,
   composeEstadoResultados,

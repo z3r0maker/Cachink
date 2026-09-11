@@ -6,15 +6,15 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryProductsRepository,
   InMemorySalesRepository,
   TEST_DEVICE_ID,
   makeNewProduct,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, IsoDate, SaleId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, IsoDate, SaleId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEliminarVenta } from '../../src/hooks/use-eliminar-venta';
 import { TamaguiProvider } from '@tamagui/core';

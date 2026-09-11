@@ -20,8 +20,8 @@ import {
   usePendientesGastosRecurrentes,
   useProcesarGastoRecurrente,
   useDescartarGastoRecurrente,
-} from '@cachink/ui';
-import type { Expense, IsoDate } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { Expense, IsoDate } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 import { useSwipeState } from '../shell/use-swipe-state';
 import { EgresoSwipeSlots } from '../shell/egresos-slots';

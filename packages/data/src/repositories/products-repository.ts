@@ -2,7 +2,7 @@
  * ProductsRepository — catalogue CRUD + SKU / business-scope lookups.
  */
 
-import type { BusinessId, NewProduct, Product, ProductId } from '@cachink/domain';
+import type { BusinessId, NewProduct, Product, ProductId } from '@xangarro/domain';
 
 export type { Product, NewProduct };
 

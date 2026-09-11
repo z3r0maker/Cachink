@@ -14,8 +14,8 @@
 import { useMemo, useRef, type ReactElement } from 'react';
 import { ScrollView, type TextInput } from 'react-native';
 import { View, useMedia } from '@tamagui/core';
-import type { Product } from '@cachink/domain';
-import type { Money, ProductId } from '@cachink/domain';
+import type { Product } from '@xangarro/domain';
+import type { Money, ProductId } from '@xangarro/domain';
 import { SectionTitle, SplitPane } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';

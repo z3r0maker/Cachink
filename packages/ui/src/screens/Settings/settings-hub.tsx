@@ -12,7 +12,7 @@
 import type { ReactElement } from 'react';
 import { Pressable, ScrollView, View as RNView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { Business } from '@cachink/domain';
+import type { Business } from '@xangarro/domain';
 import { Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';

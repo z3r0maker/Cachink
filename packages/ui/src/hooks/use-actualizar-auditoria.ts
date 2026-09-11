@@ -16,7 +16,7 @@ import {
   type AuditoriaInventarioId,
   type AuditoriaLinea,
   type BusinessId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { useAuditoriasInventarioRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { auditoriaKeys } from './query-keys';

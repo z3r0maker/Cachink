@@ -20,20 +20,20 @@ pnpm add expo-router expo-sqlite expo-camera expo-localization i18next react-i18
 pnpm add tamagui @tamagui/core @tamagui/config
 
 # Wire up the workspace packages
-pnpm add @cachink/domain@workspace:* @cachink/application@workspace:* @cachink/data@workspace:* @cachink/ui@workspace:*
+pnpm add @xangarro/domain@workspace:* @xangarro/application@workspace:* @xangarro/data@workspace:* @xangarro/ui@workspace:*
 ```
 
 ## Required edits after init
 
-1. **package.json** — change `"name"` to `"@cachink/mobile"`. Add a `test` script that runs Jest with `jest-expo`. Add `"lint": "eslint 'src/**/*.{ts,tsx}' --config ../../eslint.config.js"`.
+1. **package.json** — change `"name"` to `"@xangarro/mobile"`. Add a `test` script that runs Jest with `jest-expo`. Add `"lint": "eslint 'src/**/*.{ts,tsx}' --config ../../eslint.config.js"`.
 
 2. **tsconfig.json** — extend `../../tsconfig.base.json` and add the workspace packages as references.
 
-3. **Folder structure** — create `src/app/` (Expo Router root) and `src/shell/` (platform bootstrap) per CLAUDE.md §4.1 and §5.6. **Do not** create a `src/components/` directory — all reusable components live in `@cachink/ui`.
+3. **Folder structure** — create `src/app/` (Expo Router root) and `src/shell/` (platform bootstrap) per CLAUDE.md §4.1 and §5.6. **Do not** create a `src/components/` directory — all reusable components live in `@xangarro/ui`.
 
-4. **App shell** (`src/app/_layout.tsx`) — set up the Expo Router root, load Plus Jakarta Sans, render a "Hello Cachink" screen that imports a component from `@cachink/ui` to validate the cross-platform pipeline (ROADMAP P0-M4-T05).
+4. **App shell** (`src/app/_layout.tsx`) — set up the Expo Router root, load Plus Jakarta Sans, render a "Hello Cachink" screen that imports a component from `@xangarro/ui` to validate the cross-platform pipeline (ROADMAP P0-M4-T05).
 
-5. **Metro config** — enable symlinks and add the monorepo workspace roots so Metro resolves `@cachink/*` packages correctly. Create `metro.config.js`:
+5. **Metro config** — enable symlinks and add the monorepo workspace roots so Metro resolves `@xangarro/*` packages correctly. Create `metro.config.js`:
 
    ```js
    const { getDefaultConfig } = require('expo/metro-config');
@@ -115,8 +115,8 @@ There are two ways to run the app, depending on what you need:
 
 ### Dev build (for active coding — needs Metro running)
 
-- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios`
-- **Android emulator**: `pnpm --filter @cachink/mobile android`
+- **iOS Simulator** (Mac): `pnpm --filter @xangarro/mobile ios`
+- **Android emulator**: `pnpm --filter @xangarro/mobile android`
 
 These build a Debug binary that downloads JS from Metro at runtime.
 Metro starts automatically. Hot reload works — save a file, see the
@@ -126,8 +126,8 @@ reachable.
 
 ### Preview build (for testing / playing — NO Metro needed)
 
-- **iOS Simulator** (Mac): `pnpm --filter @cachink/mobile ios:preview`
-- **Android emulator**: `pnpm --filter @cachink/mobile android:preview`
+- **iOS Simulator** (Mac): `pnpm --filter @xangarro/mobile ios:preview`
+- **Android emulator**: `pnpm --filter @xangarro/mobile android:preview`
 
 These build a Release binary with the JS bundle **embedded inside the
 app**. Tap the icon any time — it just works, no terminal needed.
@@ -148,7 +148,7 @@ bump:
 
 1. **Regenerate native projects** (Expo Continuous Native Generation):
    ```sh
-   pnpm --filter @cachink/mobile exec expo prebuild --clean
+   pnpm --filter @xangarro/mobile exec expo prebuild --clean
    ```
 2. **iOS** — install pods after prebuild:
    ```sh
@@ -156,14 +156,14 @@ bump:
    ```
 3. **Re-run the dev client**:
    ```sh
-   pnpm --filter @cachink/mobile exec expo run:ios
-   pnpm --filter @cachink/mobile exec expo run:android
+   pnpm --filter @xangarro/mobile exec expo run:ios
+   pnpm --filter @xangarro/mobile exec expo run:android
    ```
 4. **EAS Build** — rebuild any profile that distributes a binary
    (development / preview / production) so the new native module is
    bundled:
    ```sh
-   pnpm --filter @cachink/mobile exec eas build --profile development --platform all
+   pnpm --filter @xangarro/mobile exec eas build --profile development --platform all
    ```
 
 If you skip the prebuild + pod install, the app crashes on launch
@@ -238,11 +238,11 @@ Tick these on ROADMAP.md once the init runs clean:
 - [ ] P0-M4-T02 — Wire Expo Router, TypeScript, Plus Jakarta Sans
 - [ ] P0-M4-T03 — Create apps/mobile/src/app/\_layout.tsx app-shell only
 - [ ] P0-M4-T04 — Verify dev server launches in simulator
-- [ ] P0-M4-T05 — Placeholder "Hello Cachink" screen imports from @cachink/ui
+- [ ] P0-M4-T05 — Placeholder "Hello Cachink" screen imports from @xangarro/ui
 
 ## Maestro local-dev setup (Audit M-1 Step 0 — added 2026-04-26)
 
-`pnpm --filter @cachink/mobile test:e2e` runs Maestro flows against
+`pnpm --filter @xangarro/mobile test:e2e` runs Maestro flows against
 the iPad Pro 11" simulator (or Android emulator behind
 `MAESTRO_ANDROID=1`). The runner is the `~/.maestro/bin/maestro`
 launcher script bundled under `~/.maestro/`.
@@ -324,13 +324,13 @@ every workspace package.)
 ~/.maestro/bin/maestro test apps/mobile/maestro/flows/smoke-launch.yaml
 ```
 
-The full sweep (`pnpm --filter @cachink/mobile test:e2e`) requires the
+The full sweep (`pnpm --filter @xangarro/mobile test:e2e`) requires the
 audit M-1 ConsentModal-dismiss + Btn-tap blockers to be resolved
 first — see the Audit M-1 ROADMAP entries.
 
 ### Android emulator (deferred)
 
-`MAESTRO_ANDROID=1 pnpm --filter @cachink/mobile test:e2e` runs the
+`MAESTRO_ANDROID=1 pnpm --filter @xangarro/mobile test:e2e` runs the
 flows against an Android emulator. The dev laptop only has Xcode +
 iOS sims today; Android testing is a follow-up slice.
 

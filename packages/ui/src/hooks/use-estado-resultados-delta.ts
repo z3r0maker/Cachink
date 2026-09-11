@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { EstadoDeResultados, PeriodRange } from '@cachink/domain';
+import type { EstadoDeResultados, PeriodRange } from '@xangarro/domain';
 import { useBusinessesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeEstadoResultados } from './use-estado-resultados';

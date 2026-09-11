@@ -13,8 +13,8 @@ import type {
   Product,
   ProductColor,
   UsoProducto,
-} from '@cachink/domain';
-import type { ProductPatch } from '@cachink/data';
+} from '@xangarro/domain';
+import type { ProductPatch } from '@xangarro/data';
 import { Btn, ColorSwatchPicker, Combobox, Modal } from '../../components/index';
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { Input } from '../../components/Input/index';

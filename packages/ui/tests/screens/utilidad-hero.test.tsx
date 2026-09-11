@@ -9,16 +9,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   InMemoryBusinessesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
   makeNewExpense,
   makeNewSale,
-} from '@cachink/testing';
+} from '@xangarro/testing';
 import { UtilidadHero, currentMonthRange } from '../../src/screens/DirectorHome/utilidad-hero';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';

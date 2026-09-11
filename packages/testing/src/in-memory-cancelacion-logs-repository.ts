@@ -12,9 +12,9 @@ import type {
   NewCancelacionLog,
   ProductId,
   SaleId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { CancelacionLogsRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { CancelacionLogsRepository } from '@xangarro/data';
 
 export class InMemoryCancelacionLogsRepository
   implements CancelacionLogsRepository

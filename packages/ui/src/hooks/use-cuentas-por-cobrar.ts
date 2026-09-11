@@ -12,7 +12,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Client, Money, Sale } from '@cachink/domain';
+import type { Client, Money, Sale } from '@xangarro/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

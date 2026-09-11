@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { ProductId } from '@cachink/domain';
+import type { ProductId } from '@xangarro/domain';
 import type { CartItem } from '../../../src/hooks/use-cart';
 import { CartStrip } from '../../../src/screens/Ventas/cart-strip';
 import { initI18n } from '../../../src/i18n/index';

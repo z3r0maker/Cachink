@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ProductId } from '@cachink/domain';
-import type { ConversionRecetasRepository, CreateConversionRecetaInput } from '@cachink/data';
+import type { BusinessId, ProductId } from '@xangarro/domain';
+import type { ConversionRecetasRepository, CreateConversionRecetaInput } from '@xangarro/data';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const MP = '01HZ8XQN9GZJXV8AKQ5X0C7MP1' as ProductId;

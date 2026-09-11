@@ -1,4 +1,4 @@
-# @cachink/data
+# @xangarro/data
 
 Repository interfaces, Drizzle/SQLite schema, and hardware abstraction
 interfaces for Cachink.
@@ -6,7 +6,7 @@ interfaces for Cachink.
 ## Schema & migrations
 
 The Drizzle schema lives in [`src/schema/`](./src/schema). Each file defines
-one table and mirrors its Zod schema in `@cachink/domain/entities` 1:1.
+one table and mirrors its Zod schema in `@xangarro/domain/entities` 1:1.
 
 ### Generating a new migration
 
@@ -15,13 +15,13 @@ one table and mirrors its Zod schema in `@cachink/domain/entities` 1:1.
 2. From the monorepo root:
 
    ```bash
-   pnpm --filter @cachink/data db:generate
+   pnpm --filter @xangarro/data db:generate
    ```
 
 3. Drizzle Kit writes a numbered SQL file under `drizzle/migrations/` plus
    snapshot + journal entries in `drizzle/migrations/meta/`. **Commit all
    three**.
-4. Sanity-check the generated diff with `pnpm --filter @cachink/data db:check`.
+4. Sanity-check the generated diff with `pnpm --filter @xangarro/data db:check`.
 
 ### Rules for committed migrations
 

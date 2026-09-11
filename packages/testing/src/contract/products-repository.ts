@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId } from '@cachink/domain';
-import type { ProductsRepository } from '@cachink/data';
+import type { BusinessId } from '@xangarro/domain';
+import type { ProductsRepository } from '@xangarro/data';
 import { makeNewProduct } from '../fixtures/product.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 

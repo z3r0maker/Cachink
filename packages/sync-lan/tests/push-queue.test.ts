@@ -8,8 +8,8 @@ import { describe, expect, it } from 'vitest';
 import { makeFreshDb } from './helpers/fresh-db.js';
 import { createFakeLanServer } from './helpers/fake-server.js';
 import { drainPushQueue } from '../src/client/push-queue.js';
-import { readHwm } from '@cachink/data';
-import { sales } from '@cachink/data/schema';
+import { readHwm } from '@xangarro/data';
+import { sales } from '@xangarro/data/schema';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV';

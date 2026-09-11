@@ -12,15 +12,15 @@ importers:
 
   .:
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:packages/config
       '@types/node':
         specifier: ^22.10.0
         version: 22.19.17
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:packages/config
       eslint:
         specifier: ^10.4.0
         version: 10.4.0(jiti@2.7.0)
@@ -51,18 +51,6 @@ importers:
 
   apps/mobile:
     dependencies:
-      '@cachink/application':
-        specifier: workspace:^
-        version: link:../../packages/application
-      '@cachink/data':
-        specifier: workspace:^
-        version: link:../../packages/data
-      '@cachink/domain':
-        specifier: workspace:^
-        version: link:../../packages/domain
-      '@cachink/ui':
-        specifier: workspace:^
-        version: link:../../packages/ui
       '@expo-google-fonts/plus-jakarta-sans':
         specifier: ^0.4.2
         version: 0.4.2
@@ -99,6 +87,18 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.100.10
         version: 5.100.10(react@19.2.6)
+      '@xangarro/application':
+        specifier: workspace:^
+        version: link:../../packages/application
+      '@xangarro/data':
+        specifier: workspace:^
+        version: link:../../packages/data
+      '@xangarro/domain':
+        specifier: workspace:^
+        version: link:../../packages/domain
+      '@xangarro/ui':
+        specifier: workspace:^
+        version: link:../../packages/ui
       dinero.js:
         specifier: ^2.0.2
         version: 2.0.2
@@ -214,10 +214,10 @@ importers:
 
   packages/application:
     dependencies:
-      '@cachink/data':
+      '@xangarro/data':
         specifier: workspace:*
         version: link:../data
-      '@cachink/domain':
+      '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
       bcryptjs:
@@ -227,12 +227,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -269,22 +269,22 @@ importers:
 
   packages/data:
     dependencies:
-      '@cachink/domain':
+      '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@types/better-sqlite3@7.6.13)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.9(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(gel@2.2.0)
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
@@ -307,12 +307,12 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
@@ -322,19 +322,19 @@ importers:
 
   packages/observability:
     dependencies:
-      '@cachink/domain':
+      '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
       ulid:
         specifier: ^3.0.2
         version: 3.0.2
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
@@ -347,10 +347,10 @@ importers:
 
   packages/sync-lan:
     dependencies:
-      '@cachink/data':
+      '@xangarro/data':
         specifier: workspace:*
         version: link:../data
-      '@cachink/domain':
+      '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
       drizzle-orm:
@@ -360,15 +360,15 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@types/better-sqlite3':
         specifier: ^7.6.13
         version: 7.6.13
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0
@@ -381,25 +381,28 @@ importers:
 
   packages/testing:
     dependencies:
-      '@cachink/data':
+      '@xangarro/data':
         specifier: workspace:*
         version: link:../data
-      '@cachink/domain':
+      '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
       vitest:
         specifier: ^4.1.6
         version: 4.1.6(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.14.6(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.47.1)(tsx@4.23.13)(yaml@2.9.0))
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
       '@types/react':
         specifier: ^19.2.14
         version: 19.2.14
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
+      '@xangarro/ui':
+        specifier: workspace:*
+        version: link:../ui
       react:
         specifier: 19.2.6
         version: 19.2.6
@@ -409,18 +412,6 @@ importers:
 
   packages/ui:
     dependencies:
-      '@cachink/application':
-        specifier: workspace:*
-        version: link:../application
-      '@cachink/data':
-        specifier: workspace:*
-        version: link:../data
-      '@cachink/domain':
-        specifier: workspace:*
-        version: link:../domain
-      '@cachink/observability':
-        specifier: workspace:*
-        version: link:../observability
       '@react-pdf/renderer':
         specifier: ^4.5.1
         version: 4.5.1(react@19.2.6)
@@ -430,6 +421,18 @@ importers:
       '@tamagui/web':
         specifier: 2.0.0-rc.42
         version: 2.0.0-rc.42(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      '@xangarro/application':
+        specifier: workspace:*
+        version: link:../application
+      '@xangarro/data':
+        specifier: workspace:*
+        version: link:../data
+      '@xangarro/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@xangarro/observability':
+        specifier: workspace:*
+        version: link:../observability
       bcryptjs:
         specifier: 3.0.3
         version: 3.0.3
@@ -452,15 +455,6 @@ importers:
         specifier: ^15.15.0
         version: 15.15.4(react-native@0.83.6(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
     devDependencies:
-      '@cachink/config':
-        specifier: workspace:*
-        version: link:../config
-      '@cachink/sync-lan':
-        specifier: workspace:*
-        version: link:../sync-lan
-      '@cachink/testing':
-        specifier: workspace:*
-        version: link:../testing
       '@hookform/resolvers':
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.76.0(react@19.2.6))
@@ -527,6 +521,15 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
+      '@xangarro/sync-lan':
+        specifier: workspace:*
+        version: link:../sync-lan
+      '@xangarro/testing':
+        specifier: workspace:*
+        version: link:../testing
       better-sqlite3:
         specifier: ^12.10.0
         version: 12.10.0

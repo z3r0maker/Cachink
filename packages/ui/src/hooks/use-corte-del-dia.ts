@@ -8,7 +8,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { DayClose, DeviceId, IsoDate } from '@cachink/domain';
+import type { DayClose, DeviceId, IsoDate } from '@xangarro/domain';
 import { useDayClosesRepository } from '../app/index';
 import { useDeviceId } from '../app-config/index';
 

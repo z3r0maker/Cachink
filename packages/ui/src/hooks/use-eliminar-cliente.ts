@@ -9,7 +9,7 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { ClientId } from '@cachink/domain';
+import type { ClientId } from '@xangarro/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';

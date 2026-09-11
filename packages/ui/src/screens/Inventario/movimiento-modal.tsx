@@ -17,7 +17,7 @@ import type {
   MovementType,
   NewInventoryMovement,
   Product,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {

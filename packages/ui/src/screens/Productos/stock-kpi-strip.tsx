@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { formatMoneyCompact } from '@cachink/domain';
+import { formatMoneyCompact } from '@xangarro/domain';
 import type { InventarioKpis } from '../../hooks/use-inventario-kpis';
 import { Card, Kpi } from '../../components/index';
 import { useTranslation } from '../../i18n/index';

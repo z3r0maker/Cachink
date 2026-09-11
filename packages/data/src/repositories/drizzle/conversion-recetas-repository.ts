@@ -5,8 +5,8 @@ import { and, eq, isNull } from 'drizzle-orm';
 import type {
   BusinessId, ConversionReceta, ConversionRecetaId,
   DeviceId, IsoTimestamp, ProductId, UserId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { ConversionRecetasRepository, CreateConversionRecetaInput } from '../conversion-recetas-repository.js';
 import { conversionRecetas } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

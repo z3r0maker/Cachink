@@ -6,8 +6,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { hashSync } from 'bcryptjs';
 import type { ReactElement, ReactNode } from 'react';
-import type { BusinessId } from '@cachink/domain';
-import { InMemoryUsersRepository } from '@cachink/testing';
+import type { BusinessId } from '@xangarro/domain';
+import { InMemoryUsersRepository } from '@xangarro/testing';
 import { TamaguiProvider } from '@tamagui/core';
 import { render } from '@testing-library/react';
 import { RepositoryProvider } from '../../src/app/repository-provider';

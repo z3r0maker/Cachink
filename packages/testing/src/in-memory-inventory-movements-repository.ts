@@ -11,9 +11,9 @@ import type {
   IsoTimestamp,
   NewInventoryMovement,
   ProductId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { InventoryMovementsRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { InventoryMovementsRepository } from '@xangarro/data';
 
 export class InMemoryInventoryMovementsRepository implements InventoryMovementsRepository {
   private readonly rows = new Map<InventoryMovementId, InventoryMovement>();

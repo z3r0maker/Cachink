@@ -8,8 +8,8 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { CajaMovimientoTipo, Money } from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
+import type { CajaMovimientoTipo, Money } from '@xangarro/domain';
+import { ZERO } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { Icon } from '../../components/Icon/index';
 import { Input } from '../../components/Input/index';

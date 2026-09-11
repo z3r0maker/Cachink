@@ -7,7 +7,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, IsoDate } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
 import { clienteKeys, cxcKeys, estadosKeys, pagoKeys, ventaKeys } from '../../src/hooks/query-keys';
 
 const biz = '01JPHK00000000000000000008' as BusinessId;

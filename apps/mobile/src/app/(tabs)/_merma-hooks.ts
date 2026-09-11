@@ -13,8 +13,8 @@ import {
   useStockMap,
   useRegistrarMovimiento,
   useCurrentBusinessId,
-} from '@cachink/ui';
-import type { BusinessId, IsoDate, Product, ProductId } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { BusinessId, IsoDate, Product, ProductId } from '@xangarro/domain';
 
 function todayIso(): IsoDate {
   const now = new Date();

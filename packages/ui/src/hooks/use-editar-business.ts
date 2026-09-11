@@ -5,8 +5,8 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Business, BusinessId } from '@cachink/domain';
-import type { BusinessPatch } from '@cachink/data';
+import type { Business, BusinessId } from '@xangarro/domain';
+import type { BusinessPatch } from '@xangarro/data';
 import { useBusinessesRepository } from '../app/repository-provider';
 
 export interface EditarBusinessInput {

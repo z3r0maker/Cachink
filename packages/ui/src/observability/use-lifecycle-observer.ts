@@ -15,7 +15,7 @@
 import { useEffect, useRef } from 'react';
 import { AppState, Platform, type AppStateStatus } from 'react-native';
 import { ulid } from 'ulid';
-import type { AuditEvent, AuditOperation } from '@cachink/observability';
+import type { AuditEvent, AuditOperation } from '@xangarro/observability';
 import { useLogStore } from './observability-provider';
 import { useDeviceId, useUserId, useCurrentBusinessId } from '../app-config/index';
 

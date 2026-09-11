@@ -5,7 +5,7 @@
  * Used by ProductoCard, ProductoListRow, and the ColorSwatchPicker.
  */
 
-import type { ProductColor } from '@cachink/domain';
+import type { ProductColor } from '@xangarro/domain';
 import { colors } from './theme';
 
 /** Maps domain ProductColor keys to soft hex background values. */

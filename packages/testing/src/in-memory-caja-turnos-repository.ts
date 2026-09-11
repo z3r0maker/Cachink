@@ -12,13 +12,13 @@ import type {
   IsoDate,
   IsoTimestamp,
   UserId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type {
   CajaTurnoPatch,
   CajaTurnosRepository,
   CreateCajaTurnoInput,
-} from '@cachink/data';
+} from '@xangarro/data';
 
 function pickDefinedFields(
   patch: CajaTurnoPatch,

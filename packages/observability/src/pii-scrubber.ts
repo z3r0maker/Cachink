@@ -4,7 +4,7 @@
  * Before any log data leaves the device (bug reports, remote shipping),
  * this module strips fields that may contain user-entered text.
  *
- * Mirrors the Sentry PII_FIELDS list from `@cachink/ui/telemetry` but
+ * Mirrors the Sentry PII_FIELDS list from `@xangarro/ui/telemetry` but
  * operates on our own log structures rather than Sentry event payloads.
  */
 

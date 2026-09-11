@@ -10,9 +10,9 @@ import type {
   IsoTimestamp,
   NewEmployee,
   UpdateEmployee,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { EmployeesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { EmployeesRepository } from '@xangarro/data';
 
 export class InMemoryEmployeesRepository implements EmployeesRepository {
   private readonly rows = new Map<EmployeeId, Employee>();

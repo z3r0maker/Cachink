@@ -7,9 +7,9 @@
 import { useEffect, useState, type ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { Product, ProductIcon } from '@cachink/domain';
-import { fromPesos, toPesosString } from '@cachink/domain';
-import type { ProductPatch } from '@cachink/data';
+import type { Product, ProductIcon } from '@xangarro/domain';
+import { fromPesos, toPesosString } from '@xangarro/domain';
+import type { ProductPatch } from '@xangarro/data';
 import { Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

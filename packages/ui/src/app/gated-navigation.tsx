@@ -37,7 +37,7 @@ import { BusinessForm, type BusinessFormSubmitInput } from '../screens/BusinessF
 import { useCrearBusiness } from '../hooks/use-crear-business';
 import { useIsrDefaults } from '../hooks/use-isr-defaults';
 import type { AppMode } from '../app-config/index';
-import type { BusinessId } from '@cachink/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { LanGate, type LanBridges } from './lan-gate';
 import { useAuthGateState, DirectorSetupGate, QuickSwitchGate, ChangePinGate } from './auth-gates';
 import { FeatureDiscoveryGate } from './feature-discovery-gate';

@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { UserId } from '@cachink/domain';
+import type { UserId } from '@xangarro/domain';
 import { Btn, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

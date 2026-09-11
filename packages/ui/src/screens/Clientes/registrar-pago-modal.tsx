@@ -24,7 +24,7 @@ import {
   type PaymentMethod,
   type Sale,
   type SaleId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { Btn, Input, Modal } from '../../components/index';
 import { RhfMoneyField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

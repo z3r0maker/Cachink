@@ -15,8 +15,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act } from 'react';
 import type { ReactElement } from 'react';
-import { InMemoryAppConfigRepository } from '@cachink/testing';
-import type { BusinessId, DeviceId } from '@cachink/domain';
+import { InMemoryAppConfigRepository } from '@xangarro/testing';
+import type { BusinessId, DeviceId } from '@xangarro/domain';
 import {
   APP_CONFIG_KEYS,
   AppConfigProvider,

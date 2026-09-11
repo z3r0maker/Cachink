@@ -25,8 +25,8 @@ web bundle using Playwright. Six flows × four device sizes = 24 images.
 
 ```sh
 # Ensure the dev servers are running:
-pnpm --filter @cachink/desktop dev           # desktop Tauri
-pnpm --filter @cachink/mobile web            # Expo web bundle
+pnpm --filter @xangarro/desktop dev           # desktop Tauri
+pnpm --filter @xangarro/mobile web            # Expo web bundle
 
 # In a third shell:
 pnpm store:screenshots

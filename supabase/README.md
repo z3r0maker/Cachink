@@ -130,7 +130,7 @@ see `packages/ui/src/sync/lan-bridge.ts` counterpart for cloud
 ## Rolling the schema
 
 - Edit `packages/data/src/schema/**` (Drizzle source of truth) and run
-  `pnpm --filter @cachink/data db:generate` to emit the next SQLite
+  `pnpm --filter @xangarro/data db:generate` to emit the next SQLite
   migration.
 - **Mirror the change** in `supabase/migrations/0002_*.sql` by hand
   (Drizzle and Postgres dialects differ — `BIGINT` vs. `numeric({mode:'bigint'})`).
@@ -185,7 +185,7 @@ see `packages/ui/src/sync/lan-bridge.ts` counterpart for cloud
 ## Rolling the schema
 
 - Edit `packages/data/src/schema/**` (Drizzle source of truth) and run
-  `pnpm --filter @cachink/data db:generate` to emit the next SQLite
+  `pnpm --filter @xangarro/data db:generate` to emit the next SQLite
   migration.
 - **Mirror the change** in `supabase/migrations/0002_*.sql` by hand
   (Drizzle and Postgres dialects differ — `BIGINT` vs. `numeric({mode:'bigint'})`).

@@ -18,19 +18,19 @@ import {
   parseUserPermissions,
   canUserCancelSales,
   type Sale,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   BusinessId,
   SaleId,
   UserId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   CancelacionLogsRepository,
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
   UsersRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface CancelarVentaInput {

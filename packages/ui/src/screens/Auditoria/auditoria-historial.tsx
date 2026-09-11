@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { AuditoriaInventario } from '@cachink/domain';
+import type { AuditoriaInventario } from '@xangarro/domain';
 import { Card, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

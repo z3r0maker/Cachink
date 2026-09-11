@@ -33,7 +33,7 @@
  */
 import type { ReactElement, RefObject } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { fromPesos, formatPesos, type Money } from '@cachink/domain';
+import { fromPesos, formatPesos, type Money } from '@xangarro/domain';
 import { Input } from '../Input/input';
 
 export interface MoneyFieldProps {

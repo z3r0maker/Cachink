@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 import { defineConfig, mergeConfig } from 'vitest/config';
-import base from '@cachink/config/vitest';
+import base from '@xangarro/config/vitest';
 
 /**
  * UI-package Vitest config.
@@ -47,7 +47,7 @@ export default mergeConfig(
           __dirname,
           'tests/__mocks__/react-native-wheely.tsx',
         ),
-        '@cachink/observability': resolve(
+        '@xangarro/observability': resolve(
           __dirname,
           'tests/__mocks__/cachink-observability.ts',
         ),

@@ -12,8 +12,8 @@ import {
   type ExpenseCategory,
   type Money,
   type PeriodRange,
-} from '@cachink/domain';
-import type { ExpensesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { ExpensesRepository } from '@xangarro/data';
 import { useExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { collectExpensesInRange } from './use-estado-resultados';

@@ -1,9 +1,9 @@
 /**
  * In-memory EntregasCreditoRepository. Phase 11.
  */
-import type { BusinessId, ClientId, DeviceId, EntregaCredito, EntregaCreditoId, IsoDate } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { CreateEntregaCreditoInput, EntregasCreditoRepository } from '@cachink/data';
+import type { BusinessId, ClientId, DeviceId, EntregaCredito, EntregaCreditoId, IsoDate } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { CreateEntregaCreditoInput, EntregasCreditoRepository } from '@xangarro/data';
 
 export class InMemoryEntregasCreditoRepository implements EntregasCreditoRepository {
   private readonly rows = new Map<EntregaCreditoId, EntregaCredito>();

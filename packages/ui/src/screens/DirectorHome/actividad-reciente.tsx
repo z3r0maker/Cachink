@@ -12,8 +12,8 @@
 
 import { useMemo, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Expense, IsoDate, Sale } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { Expense, IsoDate, Sale } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useActividadReciente, type ActividadEntry } from '../../hooks/index';
 import { useTranslation } from '../../i18n/index';

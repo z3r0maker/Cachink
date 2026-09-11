@@ -21,7 +21,7 @@ If `icon.png` ever changes (redesign, color tweak), re-run:
 
 ```bash
 python3 scripts/pad-icon.py assets/brand/icon.png assets/brand/icon-padded.png --scale 0.82
-pnpm --filter @cachink/desktop tauri icon ../../assets/brand/icon-padded.png
+pnpm --filter @xangarro/desktop tauri icon ../../assets/brand/icon-padded.png
 ```
 
 `--scale 0.82` matches Apple's 824/1024 grid (~80%). Tune this up (e.g. 0.86)
@@ -47,7 +47,7 @@ is already square-to-the-edge. The script validates the input is square.
 
 Per CLAUDE.md §2.3 ("code lives in exactly one place") the **in-app logo**
 has a single source in `packages/ui` that both apps consume via
-`@cachink/ui`. The **app icon** and **splash** must exist in each platform's
+`@xangarro/ui`. The **app icon** and **splash** must exist in each platform's
 native asset location (Expo convention for mobile, Tauri convention for
 desktop) — this is build-output duplication, not code duplication, and it is
 allowed because the platforms require it. This directory is the upstream

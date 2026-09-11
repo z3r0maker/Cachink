@@ -14,7 +14,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { ZERO, type EstadoDeResultados } from '@cachink/domain';
+import { ZERO, type EstadoDeResultados } from '@xangarro/domain';
 import { Card, HelpAccordion, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

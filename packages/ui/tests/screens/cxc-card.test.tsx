@@ -5,10 +5,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
-import { InMemoryClientsRepository, InMemorySalesRepository, makeNewSale } from '@cachink/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
+import { InMemoryClientsRepository, InMemorySalesRepository, makeNewSale } from '@xangarro/testing';
 import { CxCCard } from '../../src/screens/DirectorHome/cxc-card';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';

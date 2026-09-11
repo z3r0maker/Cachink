@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, NewSale, ProductId, UserId } from '@cachink/domain';
-import { CajaNoAbiertaError } from '@cachink/domain';
+import type { BusinessId, ClientId, NewSale, ProductId, UserId } from '@xangarro/domain';
+import { CajaNoAbiertaError } from '@xangarro/domain';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryClientsRepository,

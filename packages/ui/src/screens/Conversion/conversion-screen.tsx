@@ -5,7 +5,7 @@
 
 import { useMemo, useState, type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { ConversionReceta, Product } from '@cachink/domain';
+import type { ConversionReceta, Product } from '@xangarro/domain';
 import { Btn, EmptyState, SegmentedToggle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import {

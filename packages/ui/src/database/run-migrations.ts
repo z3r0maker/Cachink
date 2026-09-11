@@ -1,5 +1,5 @@
 /**
- * Re-export of the unified migration runner from `@cachink/data/migrator`.
+ * Re-export of the unified migration runner from `@xangarro/data/migrator`.
  *
  * The runner now lives in `packages/data/src/migrator/` — the single
  * source of truth for both prod and tests. This file exists solely for
@@ -12,4 +12,4 @@ export {
   splitStatements,
   type RunMigrationsOptions,
   type BackupFn,
-} from '@cachink/data/migrator';
+} from '@xangarro/data/migrator';

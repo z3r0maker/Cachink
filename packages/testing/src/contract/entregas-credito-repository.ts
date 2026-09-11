@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId } from '@cachink/domain';
-import type { EntregasCreditoRepository, CreateEntregaCreditoInput } from '@cachink/data';
+import type { BusinessId, ClientId } from '@xangarro/domain';
+import type { EntregasCreditoRepository, CreateEntregaCreditoInput } from '@xangarro/data';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const CLIENT_A = '01HZ8XQN9GZJXV8AKQ5X0C7CL1' as ClientId;

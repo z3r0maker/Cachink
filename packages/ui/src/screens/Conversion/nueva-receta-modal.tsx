@@ -5,7 +5,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text } from '@tamagui/core';
-import type { Product, ProductId } from '@cachink/domain';
+import type { Product, ProductId } from '@xangarro/domain';
 import { Btn, Combobox, Modal } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

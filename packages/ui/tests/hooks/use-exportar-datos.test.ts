@@ -8,7 +8,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { ExportarDatosUseCase } from '@cachink/application';
+import { ExportarDatosUseCase } from '@xangarro/application';
 import {
   InMemoryAppConfigRepository,
   InMemoryBusinessesRepository,
@@ -23,8 +23,8 @@ import {
   InMemorySalesRepository,
   makeNewClient,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId } from '@xangarro/domain';
 
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 

@@ -1,6 +1,6 @@
 # packages/ui/src/assets
 
-Brand-art files consumed by components inside `@cachink/ui`.
+Brand-art files consumed by components inside `@xangarro/ui`.
 
 ## Rules
 

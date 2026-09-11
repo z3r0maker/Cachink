@@ -5,8 +5,8 @@
  */
 
 import { useMemo } from 'react';
-import type { Business, Sale } from '@cachink/domain';
-import { buildComprobanteHtml } from '@cachink/domain';
+import type { Business, Sale } from '@xangarro/domain';
+import { buildComprobanteHtml } from '@xangarro/domain';
 import { useTranslation } from '../i18n/index';
 
 export function useComprobanteHtml(sale: Sale | null, business: Business | null): string | null {

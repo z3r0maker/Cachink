@@ -10,8 +10,8 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CuentasPorCobrarScreen, useCuentasPorCobrar, useTranslation } from '@cachink/ui';
-import type { IsoDate } from '@cachink/domain';
+import { CuentasPorCobrarScreen, useCuentasPorCobrar, useTranslation } from '@xangarro/ui';
+import type { IsoDate } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 function todayIso(): IsoDate {

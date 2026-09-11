@@ -6,8 +6,8 @@
  * template, the template must exist and be active.
  */
 
-import { NewExpenseSchema, type Expense, type NewExpense } from '@cachink/domain';
-import type { ExpensesRepository, RecurringExpensesRepository } from '@cachink/data';
+import { NewExpenseSchema, type Expense, type NewExpense } from '@xangarro/domain';
+import type { ExpensesRepository, RecurringExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class RegistrarEgresoUseCase implements UseCase<NewExpense, Expense> {

@@ -7,8 +7,8 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type * as CachinkData from '@cachink/data';
-import type { CachinkDatabase } from '@cachink/data';
+import type * as CachinkData from '@xangarro/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 // Controllable mode value the hook reads.
 let MOCK_MODE: 'local' | 'cloud' | 'lan-server' | 'lan-client' | null = 'lan-client';
@@ -30,8 +30,8 @@ vi.mock('../../src/database/_internal', () => ({
 }));
 
 let MOCK_HWM = 0;
-vi.mock('@cachink/data', async () => {
-  const actual = await vi.importActual<typeof CachinkData>('@cachink/data');
+vi.mock('@xangarro/data', async () => {
+  const actual = await vi.importActual<typeof CachinkData>('@xangarro/data');
   return {
     ...actual,
     readHwm: vi.fn(async () => MOCK_HWM),

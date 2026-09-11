@@ -133,7 +133,7 @@ emulation pass" plan, ran the toolchain end-to-end on the iPad Pro
   `ActiveStrip` ×2). The audit plan estimated 18; only 5 were
   actually drifting on `main` — the other 13 had been silently
   resolved between plan-drafting and execution.
-- ✅ `pnpm --filter @cachink/ui test:visual` reports 113/113
+- ✅ `pnpm --filter @xangarro/ui test:visual` reports 113/113
   passing.
 - ✅ Workspace gate green: typecheck 9/9, lint 9/9 (1 unused-disable
   warning unchanged from baseline).
@@ -199,7 +199,7 @@ clientes,inventario}.tsx`) wire the new handlers to the edit modal +
 - **Phase M — real-device QA (M3 + native-module rebuild):** cannot
   run from this environment. Requires `expo prebuild --clean`,
   `pod install`, `expo run:ios` / `run:android`, then the full
-  `pnpm --filter @cachink/mobile test:e2e` Maestro sweep.
+  `pnpm --filter @xangarro/mobile test:e2e` Maestro sweep.
 
 Slice 8 closes the audit gaps Slice 9.5/9.6 left open:
 
@@ -220,7 +220,7 @@ Slice 8 closes the audit gaps Slice 9.5/9.6 left open:
 (was 1,070); typecheck 9/9; lint 9/9; desktop production build emits
 the expected `sync-cloud` chunk.
 
-**Note (2026-04-25):** the 9/9 typecheck claim above was later invalidated by a missing `@cachink/sync-cloud` dependency in `apps/mobile`; Audit M-1 PR1 restores the workspace edge.
+**Note (2026-04-25):** the 9/9 typecheck claim above was later invalidated by a missing `@xangarro/sync-cloud` dependency in `apps/mobile`; Audit M-1 PR1 restores the workspace edge.
 
 **Phase 1 recap:** 136/136 backend tasks shipped across 6 phases.
 Slice 9.5/9.6/8 closed the route-adapter, design-revision, and
@@ -244,10 +244,10 @@ Carry-overs (environmental, not blockers):
 
 ## ✅ Phase 1A — Brand & Component Primitives (Completed 2026-04-23)
 
-All 11 primitives from CLAUDE.md §8.4 ship in `@cachink/ui` with 100% unit
+All 11 primitives from CLAUDE.md §8.4 ship in `@xangarro/ui` with 100% unit
 coverage and 56 Playwright visual baselines on both targets. Strict-typed
-i18n infrastructure (es-MX) lives in `@cachink/ui/i18n`; pure-function
-money + date formatters live in `@cachink/domain/format`. 127 UI tests + 66
+i18n infrastructure (es-MX) lives in `@xangarro/ui/i18n`; pure-function
+money + date formatters live in `@xangarro/domain/format`. 127 UI tests + 66
 domain tests, all green; lint 9/9, typecheck 13/13. Full detail in
 `ROADMAP-archive.md`.
 
@@ -282,7 +282,7 @@ Indicadores, Director Home (utilidad-hero + hoy KPI + CxC + actividad
 
 16/16 tasks shipped via Slice 5 (~22 commits). First-party SQLite-to-SQLite
 LAN sync with no external vendor: Rust axum server inside Tauri, JS
-client in `@cachink/sync-lan`, wizard + UI wiring in `@cachink/ui`.
+client in `@xangarro/sync-lan`, wizard + UI wiring in `@xangarro/ui`.
 ADR-029 pins the HTTP push/pull + WebSocket wire protocol; ADR-030
 pins the `__cachink_change_log` trigger strategy. Playwright + Maestro
 E2E specs scaffolded for real-hardware runs. Full detail in
@@ -294,7 +294,7 @@ Carry-overs (environmental, not blockers):
   `lan-offline-replay.spec.ts`, `lan-conflict.spec.ts`) need the Tauri binary
   running on one Mac/PC plus two tablets on the same Wi-Fi — documented
   in the archive entry's "Manual QA" section.
-- `pnpm --filter @cachink/desktop tauri:check` verifies the Rust axum
+- `pnpm --filter @xangarro/desktop tauri:check` verifies the Rust axum
   server compiles — requires a local Rust toolchain not available in
   headless CI yet.
 
@@ -323,7 +323,7 @@ Carry-overs (environmental, not blockers):
   against a live hosted instance.
 - PowerSync native modules (`@powersync/react-native`,
   `@powersync/web`) are installed in the app packages (not
-  `@cachink/sync-cloud`) to preserve the lazy-load contract — see the
+  `@xangarro/sync-cloud`) to preserve the lazy-load contract — see the
   archive entry's "Manual install" section.
 
 ---
@@ -348,7 +348,7 @@ announcement posting. Full detail in `ROADMAP-archive.md`.
 ## 🚧 Slice 9 — Wiring Catch-up (in progress)
 
 **Purpose.** An audit of Phase 1 shipment found real wiring gaps — the
-backend hooks + `@cachink/ui` screens are complete, but a few
+backend hooks + `@xangarro/ui` screens are complete, but a few
 shell-level bridges and desktop route adapters are missing. This slice
 closes those gaps without reopening Phase 1's domain/data/application
 work. It is additive only.
@@ -361,7 +361,7 @@ follow-ups.
 Closed 2026-04-24. ADR-037 added (`@supabase/supabase-js` as a direct
 mobile dependency).
 
-- [x] **S9.5-T01** Extract `<NuevoEgresoModalSmart>` into `@cachink/ui`
+- [x] **S9.5-T01** Extract `<NuevoEgresoModalSmart>` into `@xangarro/ui`
       (3 tabs + mutation hooks). Wired in mobile `egresos.tsx` +
       desktop `egresos-route.tsx`. 4 new tests.
 - [x] **S9.5-T02** Wire `onShare` comprobante on both ventas routes
@@ -373,7 +373,7 @@ mobile dependency).
       (ProductoDetailPopover + MovimientoModal + delete with
       StockNotEmpty confirm). Both inventario routes pass
       `onProductoPress`.
-- [x] **S9.5-T05** Add `useLanHandle` factory in `@cachink/ui/sync`;
+- [x] **S9.5-T05** Add `useLanHandle` factory in `@xangarro/ui/sync`;
       both shells pass it via `AppProviders.hooks.useLanHandle` so LAN
       replication actually runs after pair.
 
@@ -398,7 +398,7 @@ Closed 2026-04-24.
 - [x] **S9.6-T07** Wire `NuevoProductoModal` + `useCrearProducto` on
       both inventario routes.
 - [x] **S9.6-T08** Add `<InventarioTabBar>` + `<MovimientosRoute>` in
-      `@cachink/ui`; mounted as the Movimientos sub-tab on both apps.
+      `@xangarro/ui`; mounted as the Movimientos sub-tab on both apps.
 - [x] **S9.6-T09** Add `<CorteHomeCard>` smart wrapper. Mounted on
       Director Home (slot prop) + Operativo Ventas header.
 - [x] **S9.6-T10** Mount `<FeedbackAction>` inside `<Settings>` (via
@@ -408,7 +408,7 @@ Closed 2026-04-24.
       `useDesktopUpdateAdapter` (`@tauri-apps/plugin-updater`) shell
       hooks with graceful-degrade dynamic imports. Both Settings routes
       mount the "Buscar actualizaciones" row.
-- [x] **S9.6-T12** Add `useLanDetails` in `@cachink/ui/sync`; both
+- [x] **S9.6-T12** Add `useLanDetails` in `@xangarro/ui/sync`; both
       Settings routes pass `lanDetails` when mode === 'lan'. Desktop
       wires `stopHostServer` via the Tauri lan-host-bridge.
 - [x] **S9.6-T13** Wire `onOpenAdvancedBackend` in both Settings routes
@@ -434,7 +434,7 @@ Closed 2026-04-24.
 
 ### Milestone S9-B — LAN / Cloud bridge gaps
 
-- [x] **S9-B1-T01** Extract `pairWithLanServer` to `@cachink/ui/sync`
+- [x] **S9-B1-T01** Extract `pairWithLanServer` to `@xangarro/ui/sync`
       (removes the duplicated fetch helper in
       `apps/desktop/src/shell/lan-pair-bridge.ts` per CLAUDE.md §2.3).
       6 new unit tests cover happy path + error branches.
@@ -546,7 +546,7 @@ deferred to Phase 2 — see `ARCHITECTURE.md` "Deferred Decisions".
       keys. Drop `settings.modoLocal/modoTabletOnly/modoLan/modoCloud`.
 - [x] **WUX-M1-T10** Sweep test fixtures across `packages/ui/tests`
       and `packages/ui/src` for legacy mode strings; run
-      `pnpm --filter @cachink/ui typecheck && test` until green.
+      `pnpm --filter @xangarro/ui typecheck && test` until green.
 
 ### Milestone WUX-M2 — Wizard rewrite (user-visible)
 
@@ -780,7 +780,7 @@ production-impacting regressions:
       `react-native-svg@15.15.4` to `apps/mobile/package.json`;
       add `lucide-react@^1.11.0` to `apps/desktop/package.json`.
 - [x] **UXD-R2-T02** Add `@tamagui/popover@2.0.0-rc.41` as a
-      peer dep of `@cachink/ui`.
+      peer dep of `@xangarro/ui`.
 - [x] **UXD-R2-T03** Build `<Combobox>` primitive at
       `packages/ui/src/components/Combobox/`: orchestrator
       (`combobox.tsx`), sub-views (`combobox-views.tsx`), shared
@@ -828,7 +828,7 @@ polish). Sequential dependencies — each PR unblocks the next.
 Closed the 5 user-blocking issues that prevented the app from running
 at all on certain configurations:
 
-- **Typecheck unblocked** — `@cachink/sync-cloud` added to
+- **Typecheck unblocked** — `@xangarro/sync-cloud` added to
   `apps/mobile/package.json` so the workspace gate moves from 8/9 to 9/9.
 - **Blank-screen DB-failure replaced** — new
   `<DatabaseErrorState>` + `useDatabaseLifecycle` hook owns the
@@ -843,12 +843,12 @@ at all on certain configurations:
   iPhone notch / iPad rounded corners.
 - **`<ConfirmDialog>` primitive** — replaces `globalThis.confirm()`
   in `producto-detail-route.tsx` (silently no-op on RN). Available as
-  `@cachink/ui/components/ConfirmDialog`.
+  `@xangarro/ui/components/ConfirmDialog`.
 - Modal close-button hit area expanded to 44 pt via `hitSlop`;
   `data-hit-slop` attribute exposed for testability.
 - Stray Unicode glyphs (`✕`, `▾`) replaced with `<Icon>` calls.
 
-- [x] **M-1-PR1-T01** `@cachink/sync-cloud` workspace dep added to
+- [x] **M-1-PR1-T01** `@xangarro/sync-cloud` workspace dep added to
       `apps/mobile/package.json` + `pnpm install` + workspace
       typecheck back to 9/9.
 - [x] **M-1-PR1-T02** `<DatabaseErrorState>` + `useDatabaseLifecycle`
@@ -1118,7 +1118,7 @@ plan). Full context in
       taps fire `onPress`. Today every Maestro flow that taps a Btn
       is silently no-op'd at the JS layer, even though Maestro
       reports "Tap … COMPLETED". This blocks the full
-      `pnpm --filter @cachink/mobile test:e2e` sweep — Step 4 of
+      `pnpm --filter @xangarro/mobile test:e2e` sweep — Step 4 of
       the audit plan cannot reach green until this lands. Tested
       with explicit testID, text-match, and direct-coordinate taps;
       none fire the Btn's `onPress`. Fix swap is the Btn primitive
@@ -1144,7 +1144,7 @@ plan). Full context in
       `index.ts`; three are self-imports in `.native.tsx`
       platform-extension files that look like re-export typos.
 - [ ] **M-1-STEP0-T05 (Medium, S+S)** Run
-      `pnpm --filter @cachink/mobile exec expo install --fix`,
+      `pnpm --filter @xangarro/mobile exec expo install --fix`,
       commit the resulting native-dep downgrades (5 packages
       currently mismatched with Expo SDK 55), and re-verify
       typecheck across the workspace. Pairs with M-1-STEP0-T01:
@@ -1252,7 +1252,7 @@ list screens. Pattern is one-line import + one `<List>` swap.
       `update(id, patch)` method + matching Drizzle + InMemory
       implementations + contract-test coverage. Built
       `EditarVentaUseCase`, `EditarEgresoUseCase`, and
-      `EditarProductoUseCase` in `@cachink/application` (all three
+      `EditarProductoUseCase` in `@xangarro/application` (all three
       re-validate via the entity Zod schemas; Sales additionally
       re-asserts the Crédito invariant). Added the matching RHF-
       agnostic mutation hooks `useEditarVenta`, `useEditarEgreso`,
@@ -1489,9 +1489,9 @@ three new shared subflows plus ~45 flows re-anchored off `tab-otros`.
 > **Environment note:** `node` on `PATH` is v24 but `better-sqlite3` in
 > `node_modules` is compiled for `NODE_MODULE_VERSION 141` (Node 25, at
 > `/opt/homebrew/bin/node`). Run the suite with that node first on
-> `PATH`, or `pnpm rebuild better-sqlite3` — otherwise `@cachink/data`,
-> `@cachink/sync-lan`, `@cachink/testing`, `@cachink/application` and
-> `@cachink/ui` fail to open a DB and report false negatives.
+> `PATH`, or `pnpm rebuild better-sqlite3` — otherwise `@xangarro/data`,
+> `@xangarro/sync-lan`, `@xangarro/testing`, `@xangarro/application` and
+> `@xangarro/ui` fail to open a DB and report false negatives.
 
 ---
 

@@ -1,5 +1,5 @@
 {
-  "name": "@cachink/mobile",
+  "name": "@xangarro/mobile",
   "version": "0.0.0",
   "private": true,
   "main": "expo-router/entry",
@@ -23,10 +23,10 @@
     "eas-build-post-install": "cd ../.. && npx install-skia || node node_modules/@shopify/react-native-skia/scripts/install-libs.js"
   },
   "dependencies": {
-    "@cachink/application": "workspace:^",
-    "@cachink/data": "workspace:^",
-    "@cachink/domain": "workspace:^",
-    "@cachink/ui": "workspace:^",
+    "@xangarro/application": "workspace:^",
+    "@xangarro/data": "workspace:^",
+    "@xangarro/domain": "workspace:^",
+    "@xangarro/ui": "workspace:^",
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo/log-box": "^55.0.12",
     "@expo/metro-runtime": "~55.0.11",

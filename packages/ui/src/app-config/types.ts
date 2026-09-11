@@ -16,7 +16,7 @@
  * and `app-config-provider.tsx#hydrateAppConfig`.
  */
 
-import type { BusinessId, DeviceId, UserId, UserRole } from '@cachink/domain';
+import type { BusinessId, DeviceId, UserId, UserRole } from '@xangarro/domain';
 
 /** Deployment mode selected in the first-run wizard (CLAUDE.md §7.1, ADR-039). */
 export type AppMode = 'local' | 'cloud' | 'lan-server' | 'lan-client';

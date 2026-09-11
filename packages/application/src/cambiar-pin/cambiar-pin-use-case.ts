@@ -8,8 +8,8 @@
  */
 
 import { compare, hash } from 'bcryptjs';
-import type { UserId } from '@cachink/domain';
-import type { UsersRepository } from '@cachink/data';
+import type { UserId } from '@xangarro/domain';
+import type { UsersRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 const BCRYPT_ROUNDS = 10;

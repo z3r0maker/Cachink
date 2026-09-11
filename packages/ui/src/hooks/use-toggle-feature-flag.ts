@@ -9,8 +9,8 @@
 
 import { useMemo } from 'react';
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { ToggleFeatureFlagUseCase, type ToggleFeatureFlagInput } from '@cachink/application';
-import type { FeatureFlagKey, FeatureFlags, BusinessId } from '@cachink/domain';
+import { ToggleFeatureFlagUseCase, type ToggleFeatureFlagInput } from '@xangarro/application';
+import type { FeatureFlagKey, FeatureFlags, BusinessId } from '@xangarro/domain';
 import { useBusinessesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useEmitDirectorAlert } from './use-emit-director-alert';

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { IsoDate, PeriodRange } from '@cachink/domain';
+import type { IsoDate, PeriodRange } from '@xangarro/domain';
 import { priorPeriod } from '../../src/hooks/use-prior-period';
 
 describe('priorPeriod', () => {

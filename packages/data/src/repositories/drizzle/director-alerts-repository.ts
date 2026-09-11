@@ -2,8 +2,8 @@
  * Drizzle-backed DirectorAlertsRepository. Phase 11.
  */
 import { and, desc, eq, isNull } from 'drizzle-orm';
-import type { AlertSeverity, AlertSource, BusinessId, DeviceId, DirectorAlert, DirectorAlertId, IsoTimestamp, UserId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+import type { AlertSeverity, AlertSource, BusinessId, DeviceId, DirectorAlert, DirectorAlertId, IsoTimestamp, UserId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { CreateDirectorAlertInput, DirectorAlertsRepository } from '../director-alerts-repository.js';
 import { directorAlerts } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

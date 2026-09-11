@@ -19,7 +19,7 @@
 import { useRef, type ReactElement } from 'react';
 import { type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { type IsrDefaults, type NewBusiness } from '@cachink/domain';
+import { type IsrDefaults, type NewBusiness } from '@xangarro/domain';
 import {
   Btn,
   FloatingCoinsBackground,

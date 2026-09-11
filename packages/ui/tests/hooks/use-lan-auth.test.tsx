@@ -4,7 +4,7 @@
  *
  * Both hooks read from `__cachink_sync_state` via the same `safeRead`
  * wrapper that swallows "table missing" errors. This file stubs
- * `@cachink/data`'s `readSyncState` to drive each branch of the tiny
+ * `@xangarro/data`'s `readSyncState` to drive each branch of the tiny
  * mapping logic each hook owns:
  *
  *   - useLanAuthToken: returns `{ token, businessId, loading }` mapped
@@ -17,8 +17,8 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type * as CachinkData from '@cachink/data';
-import type { CachinkDatabase } from '@cachink/data';
+import type * as CachinkData from '@xangarro/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 // --- Mocks ---------------------------------------------------------
 
@@ -34,8 +34,8 @@ const readSyncStateMock = vi.fn(async (_db: unknown, scope: string) => {
   return MOCK_VALUES[scope] ?? null;
 });
 
-vi.mock('@cachink/data', async () => {
-  const actual = await vi.importActual<typeof CachinkData>('@cachink/data');
+vi.mock('@xangarro/data', async () => {
+  const actual = await vi.importActual<typeof CachinkData>('@xangarro/data');
   return {
     ...actual,
     readSyncState: (db: unknown, scope: string) => readSyncStateMock(db, scope),

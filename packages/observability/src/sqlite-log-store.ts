@@ -24,25 +24,12 @@ import {
   type SqliteLogStoreConfig,
 } from './sqlite-log-store-sql.js';
 export type { SqliteDatabase, ArchiveFn, SqliteLogStoreConfig } from './sqlite-log-store-sql.js';
-interface DedupEntry {
-  count: number;
-  firstAt: number;
-}
-const DEFAULT_DEDUP_WINDOW_MS = 5_000;
-
-function buildDedupContext(
-  entry: ErrorLogEntry,
-  recent: DedupEntry | undefined,
-): Record<string, unknown> | undefined {
-  if (recent?.count && recent.count > 1) return { ...entry.context, suppressedCount: recent.count };
-  return entry.context;
-}
-
-function cleanStaleDedups(map: Map<string, DedupEntry>, windowMs: number, now: number): void {
-  for (const [key, val] of map) {
-    if (now - val.firstAt >= windowMs) map.delete(key);
-  }
-}
+import {
+  type DedupEntry,
+  DEFAULT_DEDUP_WINDOW_MS,
+  buildDedupContext,
+  cleanStaleDedups,
+} from './sqlite-log-store-dedup.js';
 
 export class SqliteLogStore implements LogStore {
   readonly #db: SqliteDatabase;

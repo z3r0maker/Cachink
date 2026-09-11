@@ -7,7 +7,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import type { BusinessId, IsoDate, MovementType, NewInventoryMovement } from '@cachink/domain';
+import type { BusinessId, IsoDate, MovementType, NewInventoryMovement } from '@xangarro/domain';
 import { ConfirmDialog } from '../../components/index';
 import { useCurrentBusinessId } from '../../app-config/index';
 import { useEditarProducto } from '../../hooks/use-editar-producto';

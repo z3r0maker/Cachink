@@ -11,7 +11,7 @@ import type {
   IsoTimestamp,
   Sale,
   SaleId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { ComprobantePreview } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

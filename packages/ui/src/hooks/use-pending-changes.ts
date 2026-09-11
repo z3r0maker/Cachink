@@ -15,7 +15,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { sql } from 'drizzle-orm';
-import { readHwm, type CachinkDatabase } from '@cachink/data';
+import { readHwm, type CachinkDatabase } from '@xangarro/data';
 import { useDatabase } from '../database/_internal';
 import { useMode } from '../app-config/index';
 import { syncKeys } from './query-keys';

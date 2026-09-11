@@ -1,5 +1,5 @@
 {
-  "name": "@cachink/ui",
+  "name": "@xangarro/ui",
   "version": "0.0.0",
   "private": true,
   "description": "Shared cross-platform UI components and brand tokens. Tamagui-based.",
@@ -36,10 +36,10 @@
     "test:visual": "playwright test --config=playwright.config.ts"
   },
   "dependencies": {
-    "@cachink/application": "workspace:*",
-    "@cachink/data": "workspace:*",
-    "@cachink/domain": "workspace:*",
-    "@cachink/observability": "workspace:*",
+    "@xangarro/application": "workspace:*",
+    "@xangarro/data": "workspace:*",
+    "@xangarro/domain": "workspace:*",
+    "@xangarro/observability": "workspace:*",
     "bcryptjs": "3.0.3",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/browser": "^10.53.1",
@@ -49,7 +49,7 @@
     "jspdf": "^4.2.1"
   },
   "peerDependencies": {
-    "@cachink/sync-lan": "workspace:*",
+    "@xangarro/sync-lan": "workspace:*",
     "@hookform/resolvers": "^5.2",
     "@sentry/react-native": "^8",
     "@shopify/react-native-skia": ">=2",
@@ -83,7 +83,7 @@
     "zustand": "^5"
   },
   "peerDependenciesMeta": {
-    "@cachink/sync-lan": {
+    "@xangarro/sync-lan": {
       "optional": true
     },
     "echarts": {
@@ -133,9 +133,9 @@
     }
   },
   "devDependencies": {
-    "@cachink/config": "workspace:*",
-    "@cachink/sync-lan": "workspace:*",
-    "@cachink/testing": "workspace:*",
+    "@xangarro/config": "workspace:*",
+    "@xangarro/sync-lan": "workspace:*",
+    "@xangarro/testing": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.60.0",
     "@sentry/react-native": "^8.11.1",

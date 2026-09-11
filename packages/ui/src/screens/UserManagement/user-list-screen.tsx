@@ -8,7 +8,7 @@ import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { User } from '@cachink/domain';
+import type { User } from '@xangarro/domain';
 import { Btn, Card, Icon, InitialsAvatar, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

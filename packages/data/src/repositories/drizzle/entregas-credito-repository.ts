@@ -2,8 +2,8 @@
  * Drizzle-backed EntregasCreditoRepository. Phase 11.
  */
 import { and, eq, isNull } from 'drizzle-orm';
-import type { BusinessId, ClientId, DeviceId, EntregaCredito, EntregaCreditoId, IsoDate, IsoTimestamp, UserId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+import type { BusinessId, ClientId, DeviceId, EntregaCredito, EntregaCreditoId, IsoDate, IsoTimestamp, UserId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { CreateEntregaCreditoInput, EntregasCreditoRepository } from '../entregas-credito-repository.js';
 import { entregasCredito } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

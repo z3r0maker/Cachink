@@ -10,8 +10,8 @@
 import type { ReactElement } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { UsuariosContent } from '@cachink/ui';
-import type { User } from '@cachink/domain';
+import { UsuariosContent } from '@xangarro/ui';
+import type { User } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function UsuariosRoute(): ReactElement {

@@ -12,13 +12,13 @@ import type {
   IsoTimestamp,
   User,
   UserId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type {
   CreateUserInput,
   UserPatch,
   UsersRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 
 export class InMemoryUsersRepository implements UsersRepository {
   private readonly rows = new Map<UserId, User>();

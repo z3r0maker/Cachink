@@ -15,8 +15,8 @@
 
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
-import type * as CachinkData from '@cachink/data';
-import type { CachinkDatabase } from '@cachink/data';
+import type * as CachinkData from '@xangarro/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import type * as LanBridgeModule from '../../src/sync/lan-bridge';
 import type { LanSyncHandle } from '../../src/sync/lan-bridge';
 
@@ -69,8 +69,8 @@ vi.mock('../../src/hooks/use-lan-auth', () => ({
 }));
 
 const MOCK_SERVER_URL = 'http://192.168.1.10:8787';
-vi.mock('@cachink/data', async () => {
-  const actual = await vi.importActual<typeof CachinkData>('@cachink/data');
+vi.mock('@xangarro/data', async () => {
+  const actual = await vi.importActual<typeof CachinkData>('@xangarro/data');
   return {
     ...actual,
     readSyncState: vi.fn(async (_db: unknown, scope: string) => {

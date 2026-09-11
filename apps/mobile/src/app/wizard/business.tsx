@@ -18,7 +18,7 @@
 import type { ReactElement } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BusinessForm, useCrearBusiness, type BusinessFormSubmitInput } from '@cachink/ui';
+import { BusinessForm, useCrearBusiness, type BusinessFormSubmitInput } from '@xangarro/ui';
 
 export default function WizardBusinessRoute(): ReactElement {
   const router = useRouter();

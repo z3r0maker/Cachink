@@ -12,7 +12,7 @@ import type {
   IsoTimestamp,
   Sale,
   SaleId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import {
   CuentasPorCobrarScreen,
   daysBetween,

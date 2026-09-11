@@ -1,9 +1,9 @@
 /**
  * In-memory ConversionsRepository. Phase 8.
  */
-import type { BusinessId, Conversion, ConversionId, ConversionRecetaId, DeviceId, InventoryMovementId, ProductId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { ConversionsRepository, CreateConversionInput } from '@cachink/data';
+import type { BusinessId, Conversion, ConversionId, ConversionRecetaId, DeviceId, InventoryMovementId, ProductId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { ConversionsRepository, CreateConversionInput } from '@xangarro/data';
 
 export class InMemoryConversionsRepository implements ConversionsRepository {
   private readonly rows = new Map<ConversionId, Conversion>();

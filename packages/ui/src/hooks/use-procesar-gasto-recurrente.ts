@@ -15,7 +15,7 @@ import {
   ProcesarGastoRecurrenteUseCase,
   type ProcesarGastoRecurrenteInput,
   type ProcesarGastoRecurrenteResult,
-} from '@cachink/application';
+} from '@xangarro/application';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useEmitDirectorAlert } from './use-emit-director-alert';

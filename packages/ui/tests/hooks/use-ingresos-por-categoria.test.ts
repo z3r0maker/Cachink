@@ -3,12 +3,12 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import {
   InMemorySalesRepository,
   TEST_DEVICE_ID,
   makeNewSale,
-} from '@cachink/testing';
+} from '@xangarro/testing';
 import { composeIngresosPorCategoria } from '../../src/hooks/use-ingresos-por-categoria';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

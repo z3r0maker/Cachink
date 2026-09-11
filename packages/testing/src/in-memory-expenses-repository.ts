@@ -12,9 +12,9 @@ import type {
   IsoDate,
   IsoTimestamp,
   NewExpense,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { ExpensePatch, ExpensesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { ExpensePatch, ExpensesRepository } from '@xangarro/data';
 
 export class InMemoryExpensesRepository implements ExpensesRepository {
   private readonly rows = new Map<ExpenseId, Expense>();

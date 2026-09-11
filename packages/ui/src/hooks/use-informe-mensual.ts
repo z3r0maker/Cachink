@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { GenerarInformeMensualUseCase, type InformeMensual } from '@cachink/application';
+import { GenerarInformeMensualUseCase, type InformeMensual } from '@xangarro/application';
 import { useBusinessesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

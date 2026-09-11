@@ -14,7 +14,7 @@ import type {
   ExpenseId,
   IsoDate,
   NewExpense,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export type { Expense, NewExpense };
 

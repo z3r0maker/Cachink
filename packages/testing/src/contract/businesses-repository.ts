@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessesRepository } from '@cachink/data';
+import type { BusinessesRepository } from '@xangarro/data';
 import { makeNewBusiness } from '../fixtures/business.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 

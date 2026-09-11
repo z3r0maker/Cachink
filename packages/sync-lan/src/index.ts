@@ -1,5 +1,5 @@
 /**
- * @cachink/sync-lan — first-party LAN sync client. Phase 1D per ROADMAP.md.
+ * @xangarro/sync-lan — first-party LAN sync client. Phase 1D per ROADMAP.md.
  *
  * The Rust server lives inside `apps/desktop/src-tauri/` and exposes HTTP +
  * WebSocket endpoints; this JS package is the client that runs on every

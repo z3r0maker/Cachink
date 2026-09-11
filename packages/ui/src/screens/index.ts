@@ -1,5 +1,5 @@
 /**
- * Barrel for `@cachink/ui/screens`.
+ * Barrel for `@xangarro/ui/screens`.
  *
  * Every screen owns a folder under `./screens/<Name>/` with the screen
  * component, sub-components, and an `index.ts` that re-exports the main
@@ -41,7 +41,7 @@ export * from './LanPairing/index';
 // AppShellRouteWrapper lives in components/ but imports from
 // screens/AppShell — exporting it from the components barrel would
 // create a require cycle. Re-exported here to break the cycle while
-// keeping a single `@cachink/ui` import for consumers.
+// keeping a single `@xangarro/ui` import for consumers.
 export {
   AppShellRouteWrapper,
   type AppShellRouteWrapperProps,

@@ -16,7 +16,7 @@ import {
   type EstadoDeResultados,
   type FlujoDeEfectivo,
   type Indicadores,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type { EgresoPorCategoria } from '../../hooks/use-egresos-por-categoria';
 import type { IngresoPorCategoria } from '../../hooks/use-ingresos-por-categoria';
 import type { MarginTrend } from '../../hooks/use-indicadores-trend';

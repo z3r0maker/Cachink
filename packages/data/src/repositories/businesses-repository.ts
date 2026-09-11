@@ -5,7 +5,7 @@
  * without a migration.
  */
 
-import type { Business, BusinessId, NewBusiness } from '@cachink/domain';
+import type { Business, BusinessId, NewBusiness } from '@xangarro/domain';
 
 export type { Business, NewBusiness };
 

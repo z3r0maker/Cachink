@@ -23,8 +23,8 @@ import {
   useVentasByDate,
   type CartAction,
   type CartState,
-} from '@cachink/ui';
-import type { Business, IsoDate, PaymentMethod, Product, Sale } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { Business, IsoDate, PaymentMethod, Product, Sale } from '@xangarro/domain';
 import { useCachinkPlayer } from '../../shell/use-cachink-player';
 import { useSwipeState } from '../../shell/use-swipe-state';
 import { useShareComprobante } from '../../shell/ventas-slots';

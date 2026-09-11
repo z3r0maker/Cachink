@@ -5,7 +5,7 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, Client, NewClient } from '@cachink/domain';
+import type { BusinessId, Client, NewClient } from '@xangarro/domain';
 import { useClientsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';

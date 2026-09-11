@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
-import type { DayClosesRepository } from '@cachink/data';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
+import type { DayClosesRepository } from '@xangarro/data';
 import { makeNewDayClose } from '../fixtures/day-close.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 

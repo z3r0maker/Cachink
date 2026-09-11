@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { NewRecurringExpense, RecurringExpense } from '@cachink/domain';
+import type { NewRecurringExpense, RecurringExpense } from '@xangarro/domain';
 import { useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

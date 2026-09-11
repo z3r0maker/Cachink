@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { InMemoryDayClosesRepository, makeNewDayClose } from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import { InMemoryDayClosesRepository, makeNewDayClose } from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;

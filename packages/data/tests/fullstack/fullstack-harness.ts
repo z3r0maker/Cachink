@@ -19,7 +19,7 @@
  * ```
  */
 
-import type { UserId } from '@cachink/domain';
+import type { UserId } from '@xangarro/domain';
 import { makeFreshDb } from '../helpers/fresh-db.js';
 import { TEST_DEVICE_ID } from '../../../testing/src/index.js';
 import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';

@@ -20,7 +20,7 @@
 import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
 import { View } from '@tamagui/core';
-import type { Business, Sale } from '@cachink/domain';
+import type { Business, Sale } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useComprobanteHtml } from '../../hooks/use-comprobante-html';

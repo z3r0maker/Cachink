@@ -11,9 +11,9 @@ import type {
   CajaTurnoId,
   DeviceId,
   NewCajaMovimiento,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { CajaMovimientosRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { CajaMovimientosRepository } from '@xangarro/data';
 
 export class InMemoryCajaMovimientosRepository
   implements CajaMovimientosRepository

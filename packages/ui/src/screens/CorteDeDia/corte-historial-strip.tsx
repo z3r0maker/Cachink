@@ -10,7 +10,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type DayClose } from '@cachink/domain';
+import { formatMoney, type DayClose } from '@xangarro/domain';
 import { Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

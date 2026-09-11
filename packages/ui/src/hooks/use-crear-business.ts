@@ -18,14 +18,14 @@
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { useAppConfigRepository, useBusinessesRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId, type Role } from '../app-config/index';
-import type { Business, BusinessId, DeviceId } from '@cachink/domain';
-import { DEFAULT_FEATURE_FLAGS } from '@cachink/domain';
+import type { Business, BusinessId, DeviceId } from '@xangarro/domain';
+import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import type { BusinessFormSubmitInput } from '../screens/BusinessForm/index';
 import { useDeviceId } from '../app-config/use-app-config';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_CREAR_BUSINESS } from '../observability/audit-configs';
 
-// Role is re-exported via the barrel for apps that import from '@cachink/ui/hooks'.
+// Role is re-exported via the barrel for apps that import from '@xangarro/ui/hooks'.
 export type { Role };
 
 export type CrearBusinessResult = UseMutationResult<

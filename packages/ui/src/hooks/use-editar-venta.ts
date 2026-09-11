@@ -10,9 +10,9 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Sale, SaleId } from '@cachink/domain';
-import type { SalePatch } from '@cachink/data';
-import { EditarVentaUseCase } from '@cachink/application';
+import type { Sale, SaleId } from '@xangarro/domain';
+import type { SalePatch } from '@xangarro/data';
+import { EditarVentaUseCase } from '@xangarro/application';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { clienteKeys, estadosKeys, ventaKeys } from './query-keys';

@@ -12,7 +12,7 @@
  */
 
 import { create } from 'zustand';
-import type { BusinessId, DeviceId, UserId, UserRole } from '@cachink/domain';
+import type { BusinessId, DeviceId, UserId, UserRole } from '@xangarro/domain';
 import type { AppConfigState, AppMode, Role } from './types';
 
 interface AppConfigStore extends AppConfigState {

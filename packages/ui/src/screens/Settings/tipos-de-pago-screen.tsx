@@ -8,7 +8,7 @@
 import { useState, useCallback, type ReactElement } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { BusinessId, PaymentMethod } from '@cachink/domain';
+import type { BusinessId, PaymentMethod } from '@xangarro/domain';
 import { Btn, Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';

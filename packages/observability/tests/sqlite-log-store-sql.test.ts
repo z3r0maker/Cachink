@@ -85,7 +85,7 @@ describe('buildQuery', () => {
   });
 
   it('builds query for error type', () => {
-    const { sql, params } = buildQuery('error', { limit: 10 });
+    const { params } = buildQuery('error', { limit: 10 });
     expect(params).toContain('error');
     expect(params).toContain(10);
   });

@@ -18,8 +18,8 @@ import {
   type BusinessId,
   type IsoDate,
   type Money,
-} from '@cachink/domain';
-import type { DayClosesRepository, ExpensesRepository, SalesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { DayClosesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

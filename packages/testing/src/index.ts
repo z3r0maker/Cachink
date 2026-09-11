@@ -1,5 +1,5 @@
 /**
- * @cachink/testing — shared test utilities for the monorepo.
+ * @xangarro/testing — shared test utilities for the monorepo.
  *
  * The main barrel is safe to import from runtime code (e.g., a
  * `MockRepositoryProvider` for component tests). It exposes:
@@ -8,7 +8,7 @@
  *   3. A `MockRepositoryProvider` React component for component tests.
  *
  * Contract-test factories live in a separate entry point,
- * `@cachink/testing/contract`, because they import `vitest` at module
+ * `@xangarro/testing/contract`, because they import `vitest` at module
  * load time and must never leak into a runtime bundle. Any `*.test.ts`
  * file that exercises a repository contract imports from that subpath.
  * See ADR-033.
@@ -39,5 +39,5 @@ export * from './fixtures/index.js';
 // tests inside this package and downstream contract tests. Re-exported
 // here so the main barrel stays the single import target for runtime
 // test helpers — contract factories still live under
-// `@cachink/testing/contract` (see `./contract/index.ts`).
+// `@xangarro/testing/contract` (see `./contract/index.ts`).
 export { TEST_DEVICE_ID } from './contract/_shared.js';

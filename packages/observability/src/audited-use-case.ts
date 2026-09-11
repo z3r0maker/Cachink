@@ -36,7 +36,7 @@ export interface AuditedUseCaseConfig<TInput, TOutput> {
   readonly extractMetadata?: (input: TInput, result?: TOutput) => Record<string, unknown>;
 }
 
-/** Minimal use-case interface (matches @cachink/application's UseCase<I,O>). */
+/** Minimal use-case interface (matches @xangarro/application's UseCase<I,O>). */
 interface Executable<TInput, TOutput> {
   execute(input: TInput): Promise<TOutput>;
 }

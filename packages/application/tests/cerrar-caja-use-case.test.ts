@@ -5,8 +5,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, CajaTurnoId, UserId } from '@cachink/domain';
-import { today } from '@cachink/domain';
+import type { BusinessId, CajaTurnoId, UserId } from '@xangarro/domain';
+import { today } from '@xangarro/domain';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryExpensesRepository,

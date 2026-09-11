@@ -1,9 +1,9 @@
 /**
  * DirectorAlertsRepository — notification inbox CRUD. Phase 11.
  */
-import type { DirectorAlert } from '@cachink/domain';
-import type { BusinessId, DirectorAlertId } from '@cachink/domain';
-import type { AlertSeverity, AlertSource } from '@cachink/domain';
+import type { DirectorAlert } from '@xangarro/domain';
+import type { BusinessId, DirectorAlertId } from '@xangarro/domain';
+import type { AlertSeverity, AlertSource } from '@xangarro/domain';
 
 export type { DirectorAlert };
 

@@ -10,7 +10,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import type { ReactElement, ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { View } from '@tamagui/core';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import { initI18n } from '../../i18n/index';
 import { DatabaseContext } from '../../database/_internal';
 import { ConflictosRecientesCard } from './conflictos-recientes-card';

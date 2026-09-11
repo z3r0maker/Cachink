@@ -18,8 +18,8 @@ import {
   type Sale,
   type SaleCategory,
   type PaymentMethod,
-} from '@cachink/domain';
-import type { SalePatch } from '@cachink/data';
+} from '@xangarro/domain';
+import type { SalePatch } from '@xangarro/data';
 import { Btn, Modal } from '../../components/index';
 import { Input } from '../../components/Input/index';
 import { MoneyField, TextField } from '../../components/fields/index';

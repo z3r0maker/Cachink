@@ -6,7 +6,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, DirectorAlertId } from '@cachink/domain';
+import type { BusinessId, DirectorAlertId } from '@xangarro/domain';
 import { useDirectorAlertsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { directorAlertKeys } from './query-keys';

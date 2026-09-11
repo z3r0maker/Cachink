@@ -3,7 +3,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { AppConfigRepository } from '@cachink/data';
+import type { AppConfigRepository } from '@xangarro/data';
 
 export function describeAppConfigRepositoryContract(
   implName: string,

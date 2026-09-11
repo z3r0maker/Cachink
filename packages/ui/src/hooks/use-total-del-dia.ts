@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import type { Sale, Money } from '@cachink/domain';
+import type { Sale, Money } from '@xangarro/domain';
 
 export function totalDelDia(ventas: readonly Sale[]): Money {
   let total = 0n as Money;

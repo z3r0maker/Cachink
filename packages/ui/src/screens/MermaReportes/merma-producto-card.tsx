@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { InventoryMovement } from '@cachink/domain';
+import type { InventoryMovement } from '@xangarro/domain';
 import { Card } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 

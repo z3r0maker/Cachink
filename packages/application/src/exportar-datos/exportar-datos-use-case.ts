@@ -23,7 +23,7 @@ import type {
   Product,
   RecurringExpense,
   Sale,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   BusinessesRepository,
   ClientPaymentsRepository,
@@ -35,7 +35,7 @@ import type {
   ProductsRepository,
   RecurringExpensesRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface ExportarDatosInput {

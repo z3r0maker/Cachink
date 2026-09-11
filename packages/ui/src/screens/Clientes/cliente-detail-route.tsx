@@ -8,7 +8,7 @@
  * `onClientePress` as `undefined`, orphaning ClienteDetailScreen,
  * RegistrarPagoModal, useClienteDetail, useRegistrarPago,
  * useEditarCliente, and useEliminarCliente. This wrapper closes all
- * six gaps in one component and keeps the pattern in `@cachink/ui`
+ * six gaps in one component and keeps the pattern in `@xangarro/ui`
  * (CLAUDE.md §2.3 — one place for shared smart glue).
  *
  * Surface: the route mounts `<ClienteDetailRoute cliente={...}
@@ -25,8 +25,8 @@ import type {
   Money,
   NewClientPayment,
   Sale,
-} from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
+} from '@xangarro/domain';
+import { ZERO } from '@xangarro/domain';
 import { Modal } from '../../components/index';
 import { useClienteDetail } from '../../hooks/use-cliente-detail';
 import { useRegistrarPago } from '../../hooks/use-registrar-pago';

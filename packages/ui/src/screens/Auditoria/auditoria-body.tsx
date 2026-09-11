@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { AuditoriaInventario } from '@cachink/domain';
+import type { AuditoriaInventario } from '@xangarro/domain';
 import { Btn, EmptyState, ErrorState, PeriodPicker, Skeleton } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import type { useTranslation } from '../../i18n/index';

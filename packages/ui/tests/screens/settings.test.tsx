@@ -7,8 +7,8 @@
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { ReactElement, ReactNode } from 'react';
-import type { Business } from '@cachink/domain';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import type { Business } from '@xangarro/domain';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Settings } from '../../src/screens/Settings/settings';
 import { initI18n } from '../../src/i18n/index';

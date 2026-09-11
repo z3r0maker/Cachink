@@ -8,7 +8,7 @@
  */
 
 import { createContext, useContext, useMemo, type ReactElement, type ReactNode } from 'react';
-import type { LogStore } from '@cachink/observability';
+import type { LogStore } from '@xangarro/observability';
 
 const LogStoreContext = createContext<LogStore | null>(null);
 

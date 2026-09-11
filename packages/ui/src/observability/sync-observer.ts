@@ -6,7 +6,7 @@
  */
 
 import { ulid } from 'ulid';
-import type { AuditOperation, AuditEvent, LogStore } from '@cachink/observability';
+import type { AuditOperation, AuditEvent, LogStore } from '@xangarro/observability';
 
 export type SyncEventType =
   | 'sync.lan.pair'

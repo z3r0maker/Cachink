@@ -6,8 +6,8 @@
 import type { ReactElement } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Text, View } from '@tamagui/core';
-import type { IsoDate } from '@cachink/domain';
-import { ProductoDetailSmart, useProductosConStock, useProductFormStore } from '@cachink/ui';
+import type { IsoDate } from '@xangarro/domain';
+import { ProductoDetailSmart, useProductosConStock, useProductFormStore } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 function NotFoundView({ onBack }: { onBack: () => void }): ReactElement {

@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import { OtrosScreen } from '../../src/screens/Otros/otros-screen';
 import { OtrosCard } from '../../src/screens/Otros/otros-card';
 import {

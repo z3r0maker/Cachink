@@ -4,7 +4,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { MovementType } from '@cachink/domain';
+import type { MovementType } from '@xangarro/domain';
 import { Input, SegmentedToggle } from '../../components/index';
 import { MoneyField, TextField, WheelQuantityPicker } from '../../components/fields/index';
 import type { useTranslation } from '../../i18n/index';

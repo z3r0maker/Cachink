@@ -5,7 +5,7 @@
  * Phase 11 — Director Notification Inbox.
  */
 
-import type { AlertSeverity, AlertSource, FeatureFlagKey } from '@cachink/domain';
+import type { AlertSeverity, AlertSource, FeatureFlagKey } from '@xangarro/domain';
 import type { IconName } from '../../components/Icon/index';
 
 export type NotificationCategory = 'caja' | 'inventario' | 'credito' | 'sistema';

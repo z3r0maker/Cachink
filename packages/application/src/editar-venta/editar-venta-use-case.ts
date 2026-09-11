@@ -16,8 +16,8 @@
  * the race.
  */
 
-import { SaleSchema, type Sale, type SaleId } from '@cachink/domain';
-import type { ClientsRepository, SalePatch, SalesRepository } from '@cachink/data';
+import { SaleSchema, type Sale, type SaleId } from '@xangarro/domain';
+import type { ClientsRepository, SalePatch, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EditarVentaInput {

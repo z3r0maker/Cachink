@@ -9,7 +9,7 @@ import React from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 import { AlertCard } from '../../src/screens/Notificaciones/alert-card';
-import type { DirectorAlert } from '@cachink/domain';
+import type { DirectorAlert } from '@xangarro/domain';
 
 function makeAlert(overrides?: Partial<DirectorAlert>): DirectorAlert {
   return {

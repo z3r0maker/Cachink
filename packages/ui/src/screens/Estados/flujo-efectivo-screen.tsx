@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import { formatMoney, type FlujoDeEfectivo, ZERO } from '@cachink/domain';
+import { formatMoney, type FlujoDeEfectivo, ZERO } from '@xangarro/domain';
 import { HelpAccordion, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { DivergingBar } from '../../charts/DivergingBar/index';

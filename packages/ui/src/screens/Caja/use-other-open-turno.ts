@@ -8,7 +8,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, CajaTurno, UserId } from '@cachink/domain';
+import type { BusinessId, CajaTurno, UserId } from '@xangarro/domain';
 import { useCajaTurnosRepository, useUsersRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId } from '../../app-config/use-app-config';
 import { cajaKeys } from '../../hooks/query-keys';

@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Sale } from '@cachink/domain';
+import type { Sale } from '@xangarro/domain';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

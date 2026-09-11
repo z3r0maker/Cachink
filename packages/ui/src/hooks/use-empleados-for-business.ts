@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Employee } from '@cachink/domain';
+import type { Employee } from '@xangarro/domain';
 import { useEmployeesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

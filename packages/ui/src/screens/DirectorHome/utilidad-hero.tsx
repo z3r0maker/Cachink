@@ -13,8 +13,8 @@
 
 import { useMemo, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { IsoDate } from '@cachink/domain';
-import { formatMoney, formatPeriodoLabel } from '@cachink/domain';
+import type { IsoDate } from '@xangarro/domain';
+import { formatMoney, formatPeriodoLabel } from '@xangarro/domain';
 import { Btn, Card, Kpi } from '../../components/index';
 import { useEstadoResultados } from '../../hooks/index';
 import { useTranslation } from '../../i18n/index';

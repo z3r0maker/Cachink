@@ -5,9 +5,9 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId } from '@cachink/domain';
-import type { Business } from '@cachink/domain';
-import { DEFAULT_FEATURE_FLAGS } from '@cachink/domain';
+import type { BusinessId } from '@xangarro/domain';
+import type { Business } from '@xangarro/domain';
+import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import {
   AppShell,
   OPERATIVO_TABS,
@@ -16,7 +16,7 @@ import {
   tabsForRole,
 } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 

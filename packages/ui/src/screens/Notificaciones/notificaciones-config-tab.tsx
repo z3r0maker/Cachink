@@ -10,8 +10,8 @@
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
 import { Text } from '@tamagui/core';
-import { isSourceLocked, type NotificationPreferences } from '@cachink/domain';
-import type { FeatureFlags } from '@cachink/domain';
+import { isSourceLocked, type NotificationPreferences } from '@xangarro/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

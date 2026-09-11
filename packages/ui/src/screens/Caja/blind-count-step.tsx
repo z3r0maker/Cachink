@@ -17,8 +17,8 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View, useMedia } from '@tamagui/core';
-import type { Money } from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
+import { ZERO } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';

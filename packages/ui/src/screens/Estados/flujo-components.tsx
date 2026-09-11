@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type FlujoDeEfectivo, type Money, ZERO } from '@cachink/domain';
+import { formatMoney, type FlujoDeEfectivo, type Money, ZERO } from '@xangarro/domain';
 import { Card, DeltaIndicator, HealthIndicator, SectionTitle } from '../../components/index';
 import { Icon } from '../../components/Icon/index';
 import type { useTranslation } from '../../i18n/index';

@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { Product } from '@cachink/domain';
+import type { Product } from '@xangarro/domain';
 import { ProductoCardGrid, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 

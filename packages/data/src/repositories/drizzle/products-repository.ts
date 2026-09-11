@@ -16,8 +16,8 @@ import type {
   UsoProducto,
   ProductId,
   ProductoTipo,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { Product, ProductPatch, ProductsRepository } from '../products-repository.js';
 import { products } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

@@ -14,7 +14,7 @@ import {
   DescartarGastoRecurrenteUseCase,
   type DescartarGastoRecurrenteInput,
   type DescartarGastoRecurrenteResult,
-} from '@cachink/application';
+} from '@xangarro/application';
 import { useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';

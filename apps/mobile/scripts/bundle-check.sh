@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Pre-Maestro bundle sanity check.
 # Runs a headless Metro bundle and fails on require-cycle warnings.
-# Usage: pnpm --filter @cachink/mobile bundle:check
+# Usage: pnpm --filter @xangarro/mobile bundle:check
 set -euo pipefail
 
 OUTDIR=$(mktemp -d)

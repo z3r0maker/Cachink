@@ -10,7 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useUsersRepository } from './repository-provider';
 import { useUserId, useSetMustChangePin } from '../app-config/use-app-config';
 import { ChangePinScreen } from '../screens/Login/index';
-import { CambiarPinUseCase } from '@cachink/application';
+import { CambiarPinUseCase } from '@xangarro/application';
 
 function useChangePinSubmit() {
   const users = useUsersRepository();

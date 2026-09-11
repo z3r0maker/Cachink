@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { AlertSeverity, DirectorAlert } from '@cachink/domain';
+import type { AlertSeverity, DirectorAlert } from '@xangarro/domain';
 import { Icon, type IconName } from '../../components/Icon/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { useTranslation } from '../../i18n/index';

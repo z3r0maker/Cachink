@@ -5,7 +5,7 @@
  * string. Used by ResumenCard and inline HealthIndicators.
  */
 
-import { ZERO, type Money } from '@cachink/domain';
+import { ZERO, type Money } from '@xangarro/domain';
 import type { HealthTone } from '../../components/HealthIndicator/index';
 
 type T = (key: string, options?: Record<string, unknown>) => string;

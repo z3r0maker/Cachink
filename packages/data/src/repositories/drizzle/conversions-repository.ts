@@ -2,8 +2,8 @@
  * Drizzle-backed ConversionsRepository. Phase 8.
  */
 import { and, eq, isNull } from 'drizzle-orm';
-import type { BusinessId, Conversion, ConversionId, ConversionRecetaId, DeviceId, InventoryMovementId, IsoTimestamp, ProductId, UserId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+import type { BusinessId, Conversion, ConversionId, ConversionRecetaId, DeviceId, InventoryMovementId, IsoTimestamp, ProductId, UserId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { ConversionsRepository, CreateConversionInput } from '../conversions-repository.js';
 import { conversions } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

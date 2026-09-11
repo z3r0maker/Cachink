@@ -15,8 +15,8 @@ import {
   type CajaTurno,
   type NewCajaTurno,
   NewCajaTurnoSchema,
-} from '@cachink/domain';
-import type { CajaTurnosRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { CajaTurnosRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class AbrirCajaUseCase

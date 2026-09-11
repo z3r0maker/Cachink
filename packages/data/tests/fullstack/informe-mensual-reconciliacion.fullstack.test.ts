@@ -12,8 +12,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ProductId, UserId } from '@cachink/domain';
-import { newEntityId, type IsoDate } from '@cachink/domain';
+import type { BusinessId, ProductId, UserId } from '@xangarro/domain';
+import { newEntityId, type IsoDate } from '@xangarro/domain';
 import {
   makeNewBusiness,
   makeNewProduct,

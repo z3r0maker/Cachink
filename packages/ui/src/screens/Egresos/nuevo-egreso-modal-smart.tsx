@@ -23,7 +23,7 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import type { BusinessId, IsoDate } from '@cachink/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { NuevoEgresoModal, type EgresoTab } from './nuevo-egreso-modal';
 import { GastoTab } from './tabs/gasto-tab';
 import { NominaTab } from './tabs/nomina-tab';

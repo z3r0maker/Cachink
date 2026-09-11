@@ -10,8 +10,8 @@
  */
 
 import { useEffect, useState, type ReactElement } from 'react';
-import { fromPesos, toPesosString, type Expense, type ExpenseCategory } from '@cachink/domain';
-import type { ExpensePatch } from '@cachink/data';
+import { fromPesos, toPesosString, type Expense, type ExpenseCategory } from '@xangarro/domain';
+import type { ExpensePatch } from '@xangarro/data';
 import { Btn, Modal } from '../../components/index';
 import { Input } from '../../components/Input/index';
 import { MoneyField, TextField } from '../../components/fields/index';

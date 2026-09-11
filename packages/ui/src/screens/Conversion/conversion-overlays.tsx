@@ -1,7 +1,7 @@
 /** ConversionOverlays — NuevaRecetaModal + ConvertirSheet modals. */
 
 import type { ReactElement } from 'react';
-import type { ConversionReceta, Product } from '@cachink/domain';
+import type { ConversionReceta, Product } from '@xangarro/domain';
 import type { useCrearConversionReceta, useEjecutarConversion } from '../../hooks/index';
 import { NuevaRecetaModal } from './nueva-receta-modal';
 import { ConvertirSheet } from './convertir-sheet';

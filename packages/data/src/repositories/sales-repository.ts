@@ -5,20 +5,20 @@
  * Every entity gets:
  *   1. A TypeScript interface defined here.
  *   2. A Drizzle implementation in `./drizzle/` (production).
- *   3. An in-memory implementation in `@cachink/testing` (tests).
+ *   3. An in-memory implementation in `@xangarro/testing` (tests).
  *
- * Use-cases in `@cachink/application` depend on the interface, never the
+ * Use-cases in `@xangarro/application` depend on the interface, never the
  * concrete implementation. Concrete implementations are injected at the
  * composition root of each app.
  *
  * The `Sale` / `NewSale` / `PaymentMethod` / `SaleCategory` / `PaymentState`
- * types live in `@cachink/domain/entities` as Zod schemas (P1B-M2-T02); we
- * re-export them here so downstream consumers (e.g. `@cachink/testing`) keep
+ * types live in `@xangarro/domain/entities` as Zod schemas (P1B-M2-T02); we
+ * re-export them here so downstream consumers (e.g. `@xangarro/testing`) keep
  * a single import path.
  */
 
-import type { Sale, NewSale, PaymentMethod, PaymentState, SaleCategory } from '@cachink/domain';
-import type { BusinessId, ClientId, ProductId, SaleId } from '@cachink/domain';
+import type { Sale, NewSale, PaymentMethod, PaymentState, SaleCategory } from '@xangarro/domain';
+import type { BusinessId, ClientId, ProductId, SaleId } from '@xangarro/domain';
 
 export type { Sale, NewSale, PaymentMethod, PaymentState, SaleCategory };
 

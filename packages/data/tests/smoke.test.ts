@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { NoopReceiptPrinter, NoopBarcodeScanner, NoopPaymentTerminal } from '../src/index.js';
 
-describe('@cachink/data — hardware noop implementations', () => {
+describe('@xangarro/data — hardware noop implementations', () => {
   it('ReceiptPrinter noop reports unavailable', async () => {
     expect(await NoopReceiptPrinter.isAvailable()).toBe(false);
   });

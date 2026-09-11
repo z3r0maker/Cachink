@@ -10,7 +10,7 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { AlertSeverity, AlertSource, BusinessId, DirectorAlert } from '@cachink/domain';
+import type { AlertSeverity, AlertSource, BusinessId, DirectorAlert } from '@xangarro/domain';
 import { useDirectorAlertsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useTranslation } from '../i18n/index';

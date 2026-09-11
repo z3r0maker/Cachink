@@ -13,8 +13,8 @@ import type {
   MovementType,
   NewInventoryMovement,
   ProductId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type {
   InventoryMovement,
   InventoryMovementsRepository,

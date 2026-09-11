@@ -1,5 +1,5 @@
 /**
- * Storybook preview for `@cachink/ui`.
+ * Storybook preview for `@xangarro/ui`.
  *
  * Wraps every story in `<TamaguiProvider>` so Tamagui primitives resolve
  * tokens, and seeds the neobrutalist background palette (offwhite / yellow /

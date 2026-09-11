@@ -12,7 +12,7 @@
  * seconds while still covering every module graph in the package.
  *
  * Usage:
- *   pnpm --filter @cachink/ui build-storybook
+ *   pnpm --filter @xangarro/ui build-storybook
  *   pnpm storybook:smoke [storybook-static-dir]
  */
 

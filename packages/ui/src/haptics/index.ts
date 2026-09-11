@@ -1,5 +1,5 @@
 /**
- * Barrel for `@cachink/ui/haptics`.
+ * Barrel for `@xangarro/ui/haptics`.
  *
  * Metro / Vite resolve `haptics.native.ts` on iOS/Android and
  * `haptics.ts` (web no-op) everywhere else — the platform extension

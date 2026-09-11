@@ -4,8 +4,8 @@
  * Records are never updated or deleted. Part of the Cancelaciones feature.
  */
 
-import type { CancelacionLog, NewCancelacionLog } from '@cachink/domain';
-import type { CancelacionLogId, BusinessId, SaleId } from '@cachink/domain';
+import type { CancelacionLog, NewCancelacionLog } from '@xangarro/domain';
+import type { CancelacionLogId, BusinessId, SaleId } from '@xangarro/domain';
 
 export type { CancelacionLog, NewCancelacionLog };
 

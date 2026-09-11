@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { RegistrarPagoClienteUseCase } from '@cachink/application';
-import type { ClientPayment, NewClientPayment } from '@cachink/domain';
+import { RegistrarPagoClienteUseCase } from '@xangarro/application';
+import type { ClientPayment, NewClientPayment } from '@xangarro/domain';
 import { useClientPaymentsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys, pagoKeys } from './query-keys';

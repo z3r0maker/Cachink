@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { FlujoDeEfectivo } from '@cachink/domain';
+import type { FlujoDeEfectivo } from '@xangarro/domain';
 import { FlujoEfectivoScreen } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

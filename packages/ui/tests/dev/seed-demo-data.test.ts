@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   InMemoryAppConfigRepository,
   InMemoryBusinessesRepository,
@@ -26,7 +26,7 @@ import {
   InMemoryEntregasCreditoRepository,
   InMemoryDirectorAlertsRepository,
   TEST_DEVICE_ID,
-} from '@cachink/testing';
+} from '@xangarro/testing';
 import type { Repositories } from '../../src/app/repository-provider';
 import { seedDemoData, type SeedDeps } from '../../src/dev/seed-demo-data';
 

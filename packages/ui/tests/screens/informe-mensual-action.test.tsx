@@ -5,14 +5,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import type { BusinessId } from '@cachink/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { InformeMensualAction } from '../../src/screens/index';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useBusinessesRepository } from '../../src/app/repository-provider';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';
-import { InMemoryBusinessesRepository } from '@cachink/testing';
+import { InMemoryBusinessesRepository } from '@xangarro/testing';
 
 initI18n();
 

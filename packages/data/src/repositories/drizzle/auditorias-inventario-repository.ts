@@ -2,8 +2,8 @@
  * Drizzle-backed AuditoriasInventarioRepository. Phase 10.
  */
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
-import type { AuditoriaEstado, AuditoriaInventario, AuditoriaInventarioId, BusinessId, DeviceId, IsoDate, IsoTimestamp, UserId } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+import type { AuditoriaEstado, AuditoriaInventario, AuditoriaInventarioId, BusinessId, DeviceId, IsoDate, IsoTimestamp, UserId } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { AuditoriaPatch, AuditoriasInventarioRepository, CreateAuditoriaInput } from '../auditorias-inventario-repository.js';
 import { auditoriasInventario } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

@@ -3,7 +3,7 @@
  * `apps/desktop/src/shell/use-lan-bridges.ts` (Slice 9, Phase B1).
  *
  * Composes the three mobile-side functions the `LanGate` consumes:
- *   - `pair` → shared `pairWithLanServer` (`@cachink/ui/sync`)
+ *   - `pair` → shared `pairWithLanServer` (`@xangarro/ui/sync`)
  *   - `onPaired` → shared `useLanBridgeCallbacks` (same as desktop)
  *   - `onOpenScanner` → `openScannerForResult` (mobile-only —
  *     drives the expo-camera-backed `<Scanner>` modal rendered by
@@ -19,8 +19,8 @@
  */
 
 import { useMemo } from 'react';
-import { useDeviceId, type LanBridges } from '@cachink/ui';
-import { pairWithLanServer, useLanBridgeCallbacks } from '@cachink/ui/sync';
+import { useDeviceId, type LanBridges } from '@xangarro/ui';
+import { pairWithLanServer, useLanBridgeCallbacks } from '@xangarro/ui/sync';
 import { openScannerForResult } from './scanner-host';
 
 export function useMobileLanBridges(): LanBridges | null {

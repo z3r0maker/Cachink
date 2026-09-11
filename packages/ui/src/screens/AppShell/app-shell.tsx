@@ -25,7 +25,7 @@ import { KeyboardAvoidingView } from 'react-native';
 import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import type { AppMode, Role } from '../../app-config/index';
 import { tabsForRole } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';

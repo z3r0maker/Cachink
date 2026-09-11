@@ -10,7 +10,7 @@
  */
 
 import { useMemo } from 'react';
-import type { Money } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
 import type { ProductoConStock } from './use-productos-con-stock';
 
 export interface InventarioKpis {

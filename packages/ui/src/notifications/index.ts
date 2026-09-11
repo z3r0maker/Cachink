@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/ui/notifications`.
+ * Public surface of `@xangarro/ui/notifications`.
  *
  * Consumers import one name regardless of platform. Metro / Vite pick
  * the `.native.ts` / `.web.ts` variant. See ADR-026.

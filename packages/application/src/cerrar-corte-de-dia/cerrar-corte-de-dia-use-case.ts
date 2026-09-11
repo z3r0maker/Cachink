@@ -15,12 +15,12 @@ import {
   type DayCloseRole,
   type IsoDate,
   type Money,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   DayClosesRepository,
   ExpensesRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface CerrarCorteDeDiaInput {

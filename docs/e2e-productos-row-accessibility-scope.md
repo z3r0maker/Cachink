@@ -57,7 +57,7 @@ Rules of thumb for this app under Maestro/iOS Fabric:
 - If testID-based selectors are wanted for these cards, expose the `testID` as the
   merged element's identifier (Tamagui/Fabric-specific) — nontrivial, low value now.
 - **Delete the dead `screens/Productos/` duplicate** (`stock-screen.tsx` +
-  `producto-list-row.tsx`); `@cachink/ui` ships the `Inventario/` one. This
+  `producto-list-row.tsx`); `@xangarro/ui` ships the `Inventario/` one. This
   duplication cost real time here (edited dead code). CLAUDE.md §2.3. Add to ROADMAP.
 
 ## Effort

@@ -1,5 +1,5 @@
 /**
- * Test mock for @cachink/observability.
+ * Test mock for @xangarro/observability.
  *
  * The observability package hasn't been published yet, so Vite can't
  * resolve it during test runs. This mock provides the minimal surface

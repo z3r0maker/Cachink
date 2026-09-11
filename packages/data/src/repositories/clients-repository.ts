@@ -4,7 +4,7 @@
  * the Venta form can autocomplete.
  */
 
-import type { BusinessId, Client, ClientId, NewClient } from '@cachink/domain';
+import type { BusinessId, Client, ClientId, NewClient } from '@xangarro/domain';
 
 export type { Client, NewClient };
 

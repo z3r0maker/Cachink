@@ -1,4 +1,4 @@
-# `@cachink/ui` Responsive Contract
+# `@xangarro/ui` Responsive Contract
 
 > The breakpoint contract that governs every responsive decision in
 > `packages/ui`. Read this before adding any width-conditional layout.

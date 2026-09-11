@@ -5,7 +5,7 @@
  * tests exercise the merge/ordering independently of the hooks.
  */
 
-import type { Expense, IsoDate, Sale } from '@cachink/domain';
+import type { Expense, IsoDate, Sale } from '@xangarro/domain';
 import { useEgresosByDate } from './use-egresos-by-date';
 import { useVentasByDate } from './use-ventas-by-date';
 

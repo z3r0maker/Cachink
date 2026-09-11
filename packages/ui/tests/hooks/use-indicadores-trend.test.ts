@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { IsoDate, PeriodRange } from '@cachink/domain';
+import type { IsoDate, PeriodRange } from '@xangarro/domain';
 import { previousNMonths, stripLeadingNulls } from '../../src/hooks/use-indicadores-trend';
 
 describe('previousNMonths', () => {

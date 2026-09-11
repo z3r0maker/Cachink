@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { BusinessId, IsoDate, PeriodRange } from '@cachink/domain';
+import type { BusinessId, IsoDate, PeriodRange } from '@xangarro/domain';
 import {
   useBusinessesRepository,
   useClientPaymentsRepository,

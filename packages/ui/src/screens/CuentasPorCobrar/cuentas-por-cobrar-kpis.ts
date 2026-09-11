@@ -6,7 +6,7 @@
  * sales exist.
  */
 
-import type { IsoDate, Sale } from '@cachink/domain';
+import type { IsoDate, Sale } from '@xangarro/domain';
 
 export function daysBetween(from: IsoDate | string, to: IsoDate | string): number {
   const a = new Date(`${from}T00:00:00.000Z`).getTime();

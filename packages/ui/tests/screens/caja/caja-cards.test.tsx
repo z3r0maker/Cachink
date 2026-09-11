@@ -13,8 +13,8 @@ import type {
   IsoDate,
   IsoTimestamp,
   UserId,
-} from '@cachink/domain';
-import type { CajaBalanceResult } from '@cachink/domain';
+} from '@xangarro/domain';
+import type { CajaBalanceResult } from '@xangarro/domain';
 import { CajaBalanceCard } from '../../../src/screens/Caja/caja-balance-card';
 import { CajaStatusCard } from '../../../src/screens/Caja/caja-status-card';
 import { initI18n } from '../../../src/i18n/index';

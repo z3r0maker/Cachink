@@ -4,7 +4,7 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, ConversionReceta, ProductId } from '@cachink/domain';
+import type { BusinessId, ConversionReceta, ProductId } from '@xangarro/domain';
 import { useConversionRecetasRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';

@@ -8,8 +8,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { Product } from '@cachink/domain';
-import { makeProduct } from '@cachink/testing';
+import type { Product } from '@xangarro/domain';
+import { makeProduct } from '@xangarro/testing';
 import { renderWithProviders, screen, fireEvent } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
 import { NuevaRecetaModal } from '../../src/screens/Conversion/nueva-receta-modal';

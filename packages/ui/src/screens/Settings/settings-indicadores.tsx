@@ -9,8 +9,8 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { HealthThresholds } from '@cachink/domain';
-import { DEFAULT_HEALTH_THRESHOLDS } from '@cachink/domain';
+import type { HealthThresholds } from '@xangarro/domain';
+import { DEFAULT_HEALTH_THRESHOLDS } from '@xangarro/domain';
 import { Btn, Card, SectionTitle } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { useHealthThresholds, useUpdateHealthThresholds } from '../../hooks/use-health-thresholds';

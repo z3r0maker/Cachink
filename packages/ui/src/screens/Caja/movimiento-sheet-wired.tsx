@@ -6,7 +6,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { BusinessId, CajaMovimientoTipo, CajaTurnoId, Money, UserId } from '@cachink/domain';
+import type { BusinessId, CajaMovimientoTipo, CajaTurnoId, Money, UserId } from '@xangarro/domain';
 import { CajaMovimientoSheet } from './caja-movimiento-sheet';
 import { useCajaMovimientosRepository } from '../../app/repository-provider';
 import { useCurrentBusinessId } from '../../app-config/use-app-config';

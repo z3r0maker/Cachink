@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { IconPickerScreen, useProductFormStore } from '@cachink/ui';
+import { IconPickerScreen, useProductFormStore } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 export default function IconPickerRoute(): ReactElement {

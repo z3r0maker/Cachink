@@ -9,7 +9,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text } from '@tamagui/core';
-import { formatMoney, type Money, type PaymentMethod } from '@cachink/domain';
+import { formatMoney, type Money, type PaymentMethod } from '@xangarro/domain';
 import { OptionCardGroup } from '../../components/OptionCardGroup/index';
 import { CheckoutSummary } from '../Ventas/checkout-summary';
 import { useEnabledPaymentMethods } from '../../hooks/use-enabled-payment-methods';

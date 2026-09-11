@@ -9,7 +9,7 @@ import { useMemo, useRef, type ReactElement, type ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
 import { PortalProvider } from '@tamagui/portal';
 import { QueryClientProvider } from '@tanstack/react-query';
-import type { DeviceContext, LogStore } from '@cachink/observability';
+import type { DeviceContext, LogStore } from '@xangarro/observability';
 import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';

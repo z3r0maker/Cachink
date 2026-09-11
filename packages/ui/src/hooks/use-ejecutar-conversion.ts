@@ -5,11 +5,11 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { BusinessId, ConversionRecetaId, IsoDate } from '@cachink/domain';
+import type { BusinessId, ConversionRecetaId, IsoDate } from '@xangarro/domain';
 import {
   EjecutarConversionUseCase,
   type EjecutarConversionResult,
-} from '@cachink/application';
+} from '@xangarro/application';
 import {
   useConversionRecetasRepository,
   useConversionsRepository,

@@ -10,7 +10,7 @@
 import { useState, type ReactElement } from 'react';
 import { Animated, ScrollView } from 'react-native';
 import { useMedia } from '@tamagui/core';
-import type { User, UserId } from '@cachink/domain';
+import type { User, UserId } from '@xangarro/domain';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { usePinSlideIn } from './login-animations';
 import { PinPrompt } from './pin-prompt';

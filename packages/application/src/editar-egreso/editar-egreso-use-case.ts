@@ -13,8 +13,8 @@
  * recurring-expense template flow.
  */
 
-import { ExpenseSchema, type Expense, type ExpenseId } from '@cachink/domain';
-import type { ExpensePatch, ExpensesRepository } from '@cachink/data';
+import { ExpenseSchema, type Expense, type ExpenseId } from '@xangarro/domain';
+import type { ExpensePatch, ExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EditarEgresoInput {

@@ -15,9 +15,9 @@ import type {
   IsoTimestamp,
   ProductId,
   SaleId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { NewSale, PaymentState, Sale, SalePatch, SalesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { NewSale, PaymentState, Sale, SalePatch, SalesRepository } from '@xangarro/data';
 
 export class InMemorySalesRepository implements SalesRepository {
   private readonly sales = new Map<SaleId, Sale>();

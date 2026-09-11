@@ -16,12 +16,12 @@
 
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
-import { InMemorySalesRepository } from '@cachink/testing';
-import type { DeviceId } from '@cachink/domain';
-import type { CachinkDatabase, SalesRepository } from '@cachink/data';
+import { InMemorySalesRepository } from '@xangarro/testing';
+import type { DeviceId } from '@xangarro/domain';
+import type { CachinkDatabase, SalesRepository } from '@xangarro/data';
 import Sqlite from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
-import * as schema from '@cachink/data/schema';
+import * as schema from '@xangarro/data/schema';
 import { buildTauriCallback } from '../../src/database/database-provider.web';
 import {
   buildDrizzleRepositories,
@@ -38,7 +38,7 @@ import {
   useRepositories,
   useSalesRepository,
 } from '../../src/app/index';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { renderWithProviders, screen } from '../test-utils';
 
 function RepoProbe(): ReactElement {

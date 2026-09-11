@@ -9,8 +9,8 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView, View as RNView } from 'react-native';
 import { View } from '@tamagui/core';
-import { formatMoney } from '@cachink/domain';
-import type { CajaTurno } from '@cachink/domain';
+import { formatMoney } from '@xangarro/domain';
+import type { CajaTurno } from '@xangarro/domain';
 import { ErrorState, Kpi, PeriodPicker, SectionTitle, Skeleton } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';

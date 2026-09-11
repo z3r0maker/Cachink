@@ -10,7 +10,7 @@
 
 import { useMemo, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { IsoDate, Sale } from '@cachink/domain';
+import type { IsoDate, Sale } from '@xangarro/domain';
 import { Card, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, radii, typography } from '../../theme';

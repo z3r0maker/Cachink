@@ -10,7 +10,7 @@
 import type { ReactNode } from 'react';
 import { describe, expect, it } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
 import { ConversionScreen } from '../../src/screens/Conversion/conversion-screen';

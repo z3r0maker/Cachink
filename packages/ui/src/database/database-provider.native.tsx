@@ -8,7 +8,7 @@
  *   2. `drizzle(native, { schema })` from `drizzle-orm/expo-sqlite` wraps
  *      it with the shared `CachinkDatabase` type.
  *   3. {@link runMigrations} applies any pending migrations from
- *      `@cachink/data/migrations`.
+ *      `@xangarro/data/migrations`.
  *   4. Children mount once the db is ready.
  *
  * Why we don't use Drizzle's `useMigrations` hook: it's bundled with the
@@ -20,8 +20,8 @@
 import { useCallback, type ReactElement } from 'react';
 import { openDatabaseSync } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
-import * as schema from '@cachink/data/schema';
-import type { CachinkDatabase } from '@cachink/data';
+import * as schema from '@xangarro/data/schema';
+import type { CachinkDatabase } from '@xangarro/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
@@ -36,8 +36,8 @@ import {
   checkSchemaCompatibility,
   SCHEMA_VERSION,
   SchemaVersionError,
-} from '@cachink/data/migrator';
-import { logMigrationEvent } from '@cachink/observability';
+} from '@xangarro/data/migrator';
+import { logMigrationEvent } from '@xangarro/observability';
 
 // Mirror the surface of `./database-provider.tsx` so the barrel
 // `./index.ts` can re-export the same names regardless of which
@@ -49,7 +49,7 @@ export { DatabaseContext, useDatabase, TestDatabaseProvider } from './_internal'
 export { AsyncDatabaseProvider };
 export type { DatabaseProviderProps, AsyncDatabaseProviderProps };
 export { runMigrations, splitStatements } from './run-migrations';
-export { SCHEMA_VERSION, SchemaVersionError } from '@cachink/data/migrator';
+export { SCHEMA_VERSION, SchemaVersionError } from '@xangarro/data/migrator';
 
 /** SQLite file name on device storage. Changing this breaks existing users. */
 const DB_FILE_NAME = 'cachink.db';

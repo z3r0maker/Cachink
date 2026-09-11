@@ -21,8 +21,8 @@ import type {
   Sale,
   SaleCategory,
   SaleId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { SalePatch, SalesRepository } from '../sales-repository.js';
 import { sales } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

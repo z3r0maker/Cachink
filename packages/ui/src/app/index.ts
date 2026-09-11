@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/ui/app` — the composition root primitives
+ * Public surface of `@xangarro/ui/app` — the composition root primitives
  * both apps wire in their shell.
  */
 
@@ -31,9 +31,9 @@ export {
   type RepositoryProviderProps,
 } from './repository-provider';
 
-// MockRepositoryProvider moved to `@cachink/testing` in ADR-033 — it was
+// MockRepositoryProvider moved to `@xangarro/testing` in ADR-033 — it was
 // test-only code inside a runtime package. Test suites that need it now
-// import from `@cachink/testing`.
+// import from `@xangarro/testing`.
 
 export { AppProviders, type AppProvidersProps, type AppProvidersHooks } from './app-providers';
 export { GatedNavigation, type GatedNavigationProps, type LanBridges } from './gated-navigation';

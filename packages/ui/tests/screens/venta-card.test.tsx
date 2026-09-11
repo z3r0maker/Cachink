@@ -5,8 +5,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { SaleId } from '@cachink/domain';
-import { makeSale } from '@cachink/testing';
+import type { SaleId } from '@xangarro/domain';
+import { makeSale } from '@xangarro/testing';
 import { VentaCard } from '../../src/screens/Ventas/venta-card';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

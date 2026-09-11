@@ -8,7 +8,7 @@
  */
 
 import { useState } from 'react';
-import type { BusinessId, User, UserId, UserRole } from '@cachink/domain';
+import type { BusinessId, User, UserId, UserRole } from '@xangarro/domain';
 import { useQuery } from '@tanstack/react-query';
 import { useUsersRepository } from './repository-provider';
 import type { Role } from '../app-config/types';
@@ -18,7 +18,7 @@ import {
   useSetUserRole,
   useSetMustChangePin,
 } from '../app-config/use-app-config';
-import { AutenticarUsuarioUseCase, RecuperarPinUseCase } from '@cachink/application';
+import { AutenticarUsuarioUseCase, RecuperarPinUseCase } from '@xangarro/application';
 import { USERS_KEY } from './query-keys-auth';
 
 /** Mask an email: "a***@g***.com" */

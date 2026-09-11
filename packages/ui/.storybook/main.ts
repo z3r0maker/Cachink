@@ -1,5 +1,5 @@
 /**
- * Storybook 10 config for `@cachink/ui`.
+ * Storybook 10 config for `@xangarro/ui`.
  *
  * Uses the `@storybook/react-native-web-vite` framework preset so Tamagui
  * primitives render via react-native-web in a Vite-powered preview server.
@@ -115,7 +115,7 @@ const config: StorybookConfig = {
         'expo-sqlite',
         'expo-notifications',
         'expo-file-system',
-        '@cachink/sync-lan',
+        '@xangarro/sync-lan',
       ],
       esbuildOptions: {
         ...viteConfig.optimizeDeps?.esbuildOptions,

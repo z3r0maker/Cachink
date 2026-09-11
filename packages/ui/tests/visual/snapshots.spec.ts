@@ -1,12 +1,12 @@
 /**
- * Visual regression snapshots for `@cachink/ui` stories.
+ * Visual regression snapshots for `@xangarro/ui` stories.
  *
  * Storybook exposes each story at `/iframe.html?id=<kebab-title>--<kebab-story>`.
  * Playwright navigates to each URL, waits for the story to mount, and diffs
  * the rendered page against the committed baseline in `__snapshots__/`.
  *
  * To update baselines after an intentional visual change:
- *   pnpm --filter @cachink/ui test:visual --update-snapshots
+ *   pnpm --filter @xangarro/ui test:visual --update-snapshots
  */
 import { test, expect } from '@playwright/test';
 

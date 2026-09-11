@@ -12,8 +12,8 @@ import {
   FuncionesNegocioScreen,
   useFeatureFlags,
   useToggleFeatureFlag,
-} from '@cachink/ui';
-import type { FeatureFlagKey, FeatureFlags } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { FeatureFlagKey, FeatureFlags } from '@xangarro/domain';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function FuncionesRoute(): ReactElement {

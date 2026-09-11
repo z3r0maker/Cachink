@@ -16,8 +16,8 @@ import type {
   ProductColor,
   ProductIcon,
   ProductoTipo,
-} from '@cachink/domain';
-import type { Money } from '@cachink/domain';
+} from '@xangarro/domain';
+import type { Money } from '@xangarro/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

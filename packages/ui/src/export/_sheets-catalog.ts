@@ -5,7 +5,7 @@
  */
 
 import type ExcelJS from 'exceljs';
-import type { ExportDataset } from '@cachink/application';
+import type { ExportDataset } from '@xangarro/application';
 import { DATE_FORMAT, MONEY_FORMAT, centavosToPesos } from './_sheets-shared';
 
 export function addProductosSheet(wb: ExcelJS.Workbook, ds: ExportDataset): void {

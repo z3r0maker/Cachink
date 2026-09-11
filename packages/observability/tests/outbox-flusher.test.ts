@@ -8,7 +8,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { OutboxFlusher } from '../src/outbox-flusher.js';
 import type { LogStore } from '../src/log-store.js';
-import type { RemoteLogStore, BugReport } from '../src/remote-log-store.js';
+import type { RemoteLogStore } from '../src/remote-log-store.js';
 import type { ErrorLogEntry } from '../src/error-log.js';
 import type { DeviceContext } from '../src/device-context.js';
 

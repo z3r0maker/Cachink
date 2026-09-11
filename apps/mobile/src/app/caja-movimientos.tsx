@@ -10,8 +10,8 @@ import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { useQuery } from '@tanstack/react-query';
-import { formatMoney, today, type BusinessId } from '@cachink/domain';
-import { fontSizes, useCajaMovimientosRepository, useCurrentBusinessId } from '@cachink/ui';
+import { formatMoney, today, type BusinessId } from '@xangarro/domain';
+import { fontSizes, useCajaMovimientosRepository, useCurrentBusinessId } from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 interface CajaMovimiento {

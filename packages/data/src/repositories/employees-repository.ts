@@ -3,7 +3,7 @@
  * minimal: fixed-salary rows, no IMSS/ISR withholding math).
  */
 
-import type { BusinessId, Employee, EmployeeId, NewEmployee, UpdateEmployee } from '@cachink/domain';
+import type { BusinessId, Employee, EmployeeId, NewEmployee, UpdateEmployee } from '@xangarro/domain';
 
 export type { Employee, NewEmployee, UpdateEmployee };
 

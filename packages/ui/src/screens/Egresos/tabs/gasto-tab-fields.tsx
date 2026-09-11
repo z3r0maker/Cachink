@@ -6,7 +6,7 @@
 import { useRef, type ReactElement } from 'react';
 import { type TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { ExpenseCategory } from '@cachink/domain';
+import type { ExpenseCategory } from '@xangarro/domain';
 import { Input } from '../../../components/index';
 import { MoneyField, TextField } from '../../../components/fields/index';
 import type { useTranslation } from '../../../i18n/index';

@@ -9,9 +9,9 @@ import type {
   NewProduct,
   Product,
   ProductId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { ProductPatch, ProductsRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 
 function pickDefinedProductFields(
   patch: ProductPatch,

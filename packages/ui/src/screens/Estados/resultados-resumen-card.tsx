@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { ZERO, formatMoney, type EstadoDeResultados } from '@cachink/domain';
+import { ZERO, formatMoney, type EstadoDeResultados } from '@xangarro/domain';
 import { Card, DeltaIndicator, HealthIndicator, Kpi, SectionTitle } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { moneyToNumber } from '../../charts/chart-tokens';

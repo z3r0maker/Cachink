@@ -10,7 +10,7 @@
 
 import { useEffect, type ReactElement } from 'react';
 import { Redirect, useRouter } from 'expo-router';
-import { DirectorHomeRoute, useRole } from '@cachink/ui';
+import { DirectorHomeRoute, useRole } from '@xangarro/ui';
 
 export default function HomeIndex(): ReactElement | null {
   const role = useRole();

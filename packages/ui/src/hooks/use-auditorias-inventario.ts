@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { AuditoriaInventario, IsoDate } from '@cachink/domain';
+import type { AuditoriaInventario, IsoDate } from '@xangarro/domain';
 import { useAuditoriasInventarioRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { auditoriaKeys } from './query-keys';

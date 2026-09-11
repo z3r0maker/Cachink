@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, UserId } from '@cachink/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
 import {
   InMemoryUsersRepository,
   TEST_DEVICE_ID,

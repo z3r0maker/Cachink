@@ -13,8 +13,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, CajaTurnoId, UserId } from '@cachink/domain';
-import { newEntityId } from '@cachink/domain';
+import type { BusinessId, CajaTurnoId, UserId } from '@xangarro/domain';
+import { newEntityId } from '@xangarro/domain';
 import {
   makeNewBusiness,
   makeNewProduct,

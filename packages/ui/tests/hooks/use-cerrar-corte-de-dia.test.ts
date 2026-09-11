@@ -12,14 +12,14 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { CerrarCorteDeDiaUseCase } from '@cachink/application';
+import { CerrarCorteDeDiaUseCase } from '@xangarro/application';
 import {
   InMemoryDayClosesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate, Money } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate, Money } from '@xangarro/domain';
 import { corteKeys } from '../../src/hooks/query-keys';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

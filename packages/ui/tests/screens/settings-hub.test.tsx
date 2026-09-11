@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { Business } from '@cachink/domain';
+import type { Business } from '@xangarro/domain';
 import { SettingsHub } from '../../src/screens/Settings/settings-hub';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

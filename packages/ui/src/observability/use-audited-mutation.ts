@@ -19,7 +19,7 @@ import {
   type UseMutationOptions,
   type UseMutationResult,
 } from '@tanstack/react-query';
-import type { AuditOperation, AuditEvent } from '@cachink/observability';
+import type { AuditOperation, AuditEvent } from '@xangarro/observability';
 import { useLogStore } from './observability-provider';
 import { useDeviceId, useUserId, useCurrentBusinessId } from '../app-config/index';
 import { addAuditBreadcrumb } from './sentry-breadcrumbs';

@@ -9,11 +9,11 @@ import {
   NewCajaMovimientoSchema,
   type CajaMovimiento,
   type NewCajaMovimiento,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   CajaMovimientosRepository,
   CajaTurnosRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class RetirarCajaUseCase

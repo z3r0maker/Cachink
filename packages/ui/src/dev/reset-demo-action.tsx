@@ -8,7 +8,7 @@
 import { useCallback, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import { compare } from 'bcryptjs';
-import type { UserId } from '@cachink/domain';
+import type { UserId } from '@xangarro/domain';
 import { Btn, Card, ConfirmDialog, Modal, PinCodeInput, SectionTitle } from '../components/index';
 import { useRepositories } from '../app/repository-provider';
 import { useUserId } from '../app-config/use-app-config';

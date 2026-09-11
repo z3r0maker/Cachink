@@ -1,5 +1,5 @@
 /**
- * Barrel for `@cachink/ui/hooks` — composable hooks used by app shells and
+ * Barrel for `@xangarro/ui/hooks` — composable hooks used by app shells and
  * screens. Each hook lives in its own file under this folder; add one line
  * per hook as new ones land.
  */

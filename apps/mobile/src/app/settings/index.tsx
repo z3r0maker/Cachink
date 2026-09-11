@@ -20,8 +20,8 @@ import {
   useRole,
   useTranslation,
   type SettingsSection,
-} from '@cachink/ui';
-import { nativeResetDatabase } from '@cachink/ui/database/reset-native';
+} from '@xangarro/ui';
+import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 function reloadApp(): void {

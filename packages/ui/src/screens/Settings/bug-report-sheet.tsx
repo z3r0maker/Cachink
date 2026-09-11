@@ -4,7 +4,7 @@
  * Server-first submit:
  *   1. User writes a description of the issue
  *   2. App auto-attaches last 50 audit + 20 error entries
- *   3. PII is scrubbed via @cachink/observability/pii-scrubber
+ *   3. PII is scrubbed via @xangarro/observability/pii-scrubber
  *   4. When consent is on → POST to Edge Function → user sees "Reporte enviado"
  *   5. On network failure → report is silently queued for retry
  *   6. "Compartir como archivo" remains as secondary button (and the only
@@ -14,7 +14,7 @@
 import React, { type ReactElement } from 'react';
 import { ScrollView, TextInput } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import type { DeviceContext, RemoteLogStore } from '@cachink/observability';
+import type { DeviceContext, RemoteLogStore } from '@xangarro/observability';
 import { Btn } from '../../components/index';
 import { useBugReportSubmit } from './use-bug-report-submit';
 import { colors, fontSizes, radii, shadows, typography } from '../../theme';

@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { ZERO, formatMoney, type Money } from '@cachink/domain';
+import { ZERO, formatMoney, type Money } from '@xangarro/domain';
 import { Card } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

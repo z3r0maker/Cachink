@@ -18,7 +18,7 @@ import {
   useProductosConStock,
   type InventarioSubTab,
   type ProductoConStock,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 function toggleNext(tab: InventarioSubTab): InventarioSubTab {

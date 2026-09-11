@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ConversionRecetaId, IsoDate, ProductId } from '@cachink/domain';
+import type { BusinessId, ConversionRecetaId, IsoDate, ProductId } from '@xangarro/domain';
 import {
   InMemoryConversionRecetasRepository,
   InMemoryConversionsRepository,

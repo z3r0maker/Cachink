@@ -4,9 +4,9 @@
   "tasks": {
     "build": {
       "dependsOn": [
-        "@cachink/domain#build",
-        "@cachink/data#build",
-        "@cachink/application#build"
+        "@xangarro/domain#build",
+        "@xangarro/data#build",
+        "@xangarro/application#build"
       ]
     }
   }

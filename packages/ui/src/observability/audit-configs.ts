@@ -8,7 +8,7 @@
  * AuditedMutationConfig — for mutation hooks wrapped via useAuditedMutation.
  */
 
-import type { AuditedUseCaseConfig } from '@cachink/observability';
+import type { AuditedUseCaseConfig } from '@xangarro/observability';
 import type {
   Sale,
   Expense,
@@ -19,12 +19,12 @@ import type {
   NewExpense,
   NewCajaTurno,
   NewClientPayment,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   CerrarCorteDeDiaInput,
   EjecutarConversionInput,
   EjecutarConversionResult,
-} from '@cachink/application';
+} from '@xangarro/application';
 import type { AuditedMutationConfig } from './use-audited-mutation';
 
 // ─── Ventas ─────────────────────────────────────────────────────────

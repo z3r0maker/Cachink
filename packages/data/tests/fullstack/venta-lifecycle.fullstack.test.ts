@@ -14,8 +14,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, UserId, ProductId } from '@cachink/domain';
-import { CajaNoAbiertaError, newEntityId } from '@cachink/domain';
+import type { BusinessId, UserId, ProductId } from '@xangarro/domain';
+import { CajaNoAbiertaError, newEntityId } from '@xangarro/domain';
 import {
   makeNewBusiness,
   makeNewProduct,

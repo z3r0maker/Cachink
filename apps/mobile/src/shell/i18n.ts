@@ -13,7 +13,7 @@
 // `expo-localization` is intentionally side-effect-imported but not used:
 // it pre-warms the native module so future locale-detection lands cheaply.
 import * as Localization from 'expo-localization';
-import { initI18n } from '@cachink/ui/i18n';
+import { initI18n } from '@xangarro/ui/i18n';
 
 export function bootstrapI18n(): void {
   initI18n();

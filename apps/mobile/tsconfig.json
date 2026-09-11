@@ -6,12 +6,12 @@
     "jsx": "react-jsx",
     "moduleResolution": "Bundler",
     "paths": {
-      "@cachink/ui": ["../../packages/ui/src/index.ts"],
-      "@cachink/ui/*": ["../../packages/ui/src/*"],
-      "@cachink/domain": ["../../packages/domain/src/index.ts"],
-      "@cachink/application": ["../../packages/application/src/index.ts"],
-      "@cachink/data": ["../../packages/data/src/index.ts"],
-      "@cachink/observability": ["../../packages/observability/src/index.ts"]
+      "@xangarro/ui": ["../../packages/ui/src/index.ts"],
+      "@xangarro/ui/*": ["../../packages/ui/src/*"],
+      "@xangarro/domain": ["../../packages/domain/src/index.ts"],
+      "@xangarro/application": ["../../packages/application/src/index.ts"],
+      "@xangarro/data": ["../../packages/data/src/index.ts"],
+      "@xangarro/observability": ["../../packages/observability/src/index.ts"]
     }
   },
   "include": [

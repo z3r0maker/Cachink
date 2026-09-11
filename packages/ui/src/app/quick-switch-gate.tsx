@@ -9,7 +9,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { BusinessId } from '@cachink/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { QuickSwitchScreen, RecoveryScreen } from '../screens/Login/index';
 import { useCurrentBusiness } from '../hooks/use-current-business';
 import { useQuickSwitchAuth } from './use-quick-switch-auth';

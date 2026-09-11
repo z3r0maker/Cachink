@@ -12,8 +12,8 @@ import {
   makeNewClientPayment,
   makeNewDayClose,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate, ProductId, SaleId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate, ProductId, SaleId } from '@xangarro/domain';
 import { composeBalanceGeneral } from '../../src/hooks/use-balance-general';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

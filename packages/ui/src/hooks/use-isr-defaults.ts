@@ -7,7 +7,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { IsrDefaultsSchema, ISR_DEFAULTS_SEED, type IsrDefaults } from '@cachink/domain';
+import { IsrDefaultsSchema, ISR_DEFAULTS_SEED, type IsrDefaults } from '@xangarro/domain';
 import { useAppConfigRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS } from '../app-config/types';
 

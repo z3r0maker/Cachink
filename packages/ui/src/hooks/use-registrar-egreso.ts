@@ -6,8 +6,8 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { RegistrarEgresoUseCase } from '@cachink/application';
-import type { Expense, NewExpense } from '@cachink/domain';
+import { RegistrarEgresoUseCase } from '@xangarro/application';
+import type { Expense, NewExpense } from '@xangarro/domain';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

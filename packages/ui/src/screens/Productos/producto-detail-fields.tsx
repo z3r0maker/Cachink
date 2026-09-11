@@ -10,8 +10,8 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { InventoryCategory, ProductIcon } from '@cachink/domain';
-import { resolveProductIcon } from '@cachink/domain';
+import type { InventoryCategory, ProductIcon } from '@xangarro/domain';
+import { resolveProductIcon } from '@xangarro/domain';
 import { ColorSwatchPicker, Icon, Input } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { IconName } from '../../components/Icon/icon.shared';
@@ -24,7 +24,7 @@ import { SectionHeader } from './section-header';
 export { StockActionCard } from './producto-stock-card';
 export { PricingSection } from './producto-pricing-section';
 
-import type { InventoryUnit, UsoProducto } from '@cachink/domain';
+import type { InventoryUnit, UsoProducto } from '@xangarro/domain';
 
 type T = (key: string) => string;
 

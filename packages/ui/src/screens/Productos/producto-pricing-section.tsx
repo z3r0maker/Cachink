@@ -4,7 +4,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { InventoryUnit, UsoProducto } from '@cachink/domain';
+import type { InventoryUnit, UsoProducto } from '@xangarro/domain';
 import { Combobox, OptionCardGroup } from '../../components/index';
 import { MoneyField } from '../../components/fields/index';
 import { INV_UNIDADES_OPTIONS, USO_PRODUCTO_CARDS } from './nuevo-producto-form';

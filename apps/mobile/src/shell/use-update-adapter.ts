@@ -20,7 +20,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { UpdateAdapter } from '@cachink/ui';
+import type { UpdateAdapter } from '@xangarro/ui';
 
 interface ExpoUpdatesShape {
   checkForUpdateAsync: () => Promise<{ isAvailable: boolean }>;

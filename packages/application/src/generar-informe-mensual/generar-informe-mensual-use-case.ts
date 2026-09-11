@@ -20,12 +20,12 @@ import {
   type Money,
   type Sale,
   type SaleCategory,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   BusinessesRepository,
   ExpensesRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface GenerarInformeMensualInput {

@@ -7,7 +7,7 @@
  */
 
 import { colors } from '../theme';
-import type { Money } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
 
 /** 10-category chart fills — aligned with ExpenseCategory order. */
 export const CHART_PALETTE = [

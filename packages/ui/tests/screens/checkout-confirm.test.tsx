@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { PaymentMethod } from '@cachink/domain';
+import type { PaymentMethod } from '@xangarro/domain';
 import { CheckoutConfirm } from '../../src/screens/Checkout/checkout-confirm';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import { InMemoryExpensesRepository, makeNewExpense } from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import { InMemoryExpensesRepository, makeNewExpense } from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import { composeEgresosPorCategoria } from '../../src/hooks/use-egresos-por-categoria';
 
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;

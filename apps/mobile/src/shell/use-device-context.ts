@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { Platform } from 'react-native';
 import * as Application from 'expo-application';
 import * as Device from 'expo-device';
-import type { DeviceContext } from '@cachink/observability';
+import type { DeviceContext } from '@xangarro/observability';
 
 function platformKey(): DeviceContext['platform'] {
   return Platform.OS === 'ios' ? 'ios' : 'android';

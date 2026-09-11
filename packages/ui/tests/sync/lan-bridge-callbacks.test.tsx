@@ -7,7 +7,7 @@
  * and clients persist `auth.accessToken / serverUrl / businessId / pairedAt`
  * + the `currentBusinessId` AppConfig key as before.
  *
- * Mocks `@cachink/data`'s `writeSyncState` so we can assert exact (scope,
+ * Mocks `@xangarro/data`'s `writeSyncState` so we can assert exact (scope,
  * value) writes, and stubs `useDatabase` + `useAppConfigRepository` +
  * `useSetCurrentBusinessId` so the hook runs without a real DB.
  */
@@ -16,8 +16,8 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { act, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type * as CachinkData from '@cachink/data';
-import type { CachinkDatabase } from '@cachink/data';
+import type * as CachinkData from '@xangarro/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 // --- Mocks ---------------------------------------------------------
 
@@ -27,8 +27,8 @@ vi.mock('../../src/database/_internal', () => ({
 }));
 
 const writeSyncStateMock = vi.fn(async () => {});
-vi.mock('@cachink/data', async () => {
-  const actual = await vi.importActual<typeof CachinkData>('@cachink/data');
+vi.mock('@xangarro/data', async () => {
+  const actual = await vi.importActual<typeof CachinkData>('@xangarro/data');
   return {
     ...actual,
     writeSyncState: (db: unknown, scope: string, value: unknown) =>

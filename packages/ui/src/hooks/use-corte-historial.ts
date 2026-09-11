@@ -7,7 +7,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { DayClose, IsoDate } from '@cachink/domain';
+import type { DayClose, IsoDate } from '@xangarro/domain';
 import { useDayClosesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { corteKeys } from './query-keys';

@@ -1,9 +1,9 @@
 /**
  * In-memory AuditoriasInventarioRepository. Phase 10.
  */
-import type { AuditoriaEstado, AuditoriaInventario, AuditoriaInventarioId, BusinessId, DeviceId, IsoDate, IsoTimestamp } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { AuditoriaPatch, AuditoriasInventarioRepository, CreateAuditoriaInput } from '@cachink/data';
+import type { AuditoriaEstado, AuditoriaInventario, AuditoriaInventarioId, BusinessId, DeviceId, IsoDate, IsoTimestamp } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { AuditoriaPatch, AuditoriasInventarioRepository, CreateAuditoriaInput } from '@xangarro/data';
 
 export class InMemoryAuditoriasInventarioRepository implements AuditoriasInventarioRepository {
   private readonly rows = new Map<AuditoriaInventarioId, AuditoriaInventario>();

@@ -8,7 +8,7 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View } from '@tamagui/core';
-import type { Employee } from '@cachink/domain';
+import type { Employee } from '@xangarro/domain';
 import { Btn, ConfirmDialog, EmptyState, Icon, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';

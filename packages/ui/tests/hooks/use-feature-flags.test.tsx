@@ -6,13 +6,13 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryBusinessesRepository,
   TEST_DEVICE_ID,
-} from '@cachink/testing';
-import type { BusinessId } from '@cachink/domain';
-import { DEFAULT_FEATURE_FLAGS } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId } from '@xangarro/domain';
+import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useFeatureFlags, useFeatureFlag } from '../../src/hooks/use-feature-flags';
 import { TamaguiProvider } from '@tamagui/core';

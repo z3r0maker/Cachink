@@ -13,8 +13,8 @@ import {
   InMemorySalesRepository,
   makeNewSale,
   makeSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate, SaleId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate, SaleId } from '@xangarro/domain';
 import {
   composeIndicadores,
   diasInPeriodo,

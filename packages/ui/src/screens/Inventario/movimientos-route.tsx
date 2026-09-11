@@ -4,13 +4,13 @@
  *
  * Both apps previously had no "/inventario/movimientos" screen even
  * though MovimientosScreen + MovimientoCard + useMovimientosRecientes
- * shipped in Phase 1C. This wrapper lives inside `@cachink/ui` so
+ * shipped in Phase 1C. This wrapper lives inside `@xangarro/ui` so
  * mobile + desktop just mount `<MovimientosRoute />` as the
  * Movimientos sub-tab body.
  */
 
 import type { ReactElement } from 'react';
-import type { Product, ProductId } from '@cachink/domain';
+import type { Product, ProductId } from '@xangarro/domain';
 import { useMovimientosRecientes } from '../../hooks/use-movimientos-recientes';
 import { useProductos } from '../../hooks/use-productos';
 import { MovimientosScreen } from './movimientos-screen';

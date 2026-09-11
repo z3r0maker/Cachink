@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId, Client, ClientId, DeviceId, IsoTimestamp } from '@cachink/domain';
+import type { BusinessId, Client, ClientId, DeviceId, IsoTimestamp } from '@xangarro/domain';
 import { ClientesScreen, filterClientes, type ClienteWithSaldo } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

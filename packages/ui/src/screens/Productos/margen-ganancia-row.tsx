@@ -9,7 +9,7 @@
 
 import { useMemo, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { fromPesos, formatMoney, calcularMargenProducto, type Money } from '@cachink/domain';
+import { fromPesos, formatMoney, calcularMargenProducto, type Money } from '@xangarro/domain';
 import { colors, fontSizes, typography } from '../../theme';
 import type { useTranslation } from '../../i18n/index';
 

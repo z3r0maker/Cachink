@@ -4,7 +4,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CajaReportesScreen } from '@cachink/ui';
+import { CajaReportesScreen } from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function CajaReportesRoute(): ReactElement {

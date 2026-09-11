@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react';
 import type { UseQueryResult } from '@tanstack/react-query';
-import type { Product } from '@cachink/domain';
+import type { Product } from '@xangarro/domain';
 import { useProductos } from './use-productos';
 
 export function useProductosParaVenta(): UseQueryResult<readonly Product[], Error> {

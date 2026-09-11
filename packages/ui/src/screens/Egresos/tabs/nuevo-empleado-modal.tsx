@@ -10,7 +10,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { fromPesos } from '@cachink/domain';
+import { fromPesos } from '@xangarro/domain';
 import type { CrearEmpleadoInput } from '../../../hooks/use-crear-empleado';
 import { Btn, Modal } from '../../../components/index';
 import { useTranslation } from '../../../i18n/index';

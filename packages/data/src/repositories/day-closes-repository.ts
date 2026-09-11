@@ -11,7 +11,7 @@ import type {
   DeviceId,
   IsoDate,
   NewDayClose,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export type { DayClose, NewDayClose };
 

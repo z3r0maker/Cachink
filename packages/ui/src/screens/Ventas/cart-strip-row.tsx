@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { formatMoney } from '@cachink/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Icon } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

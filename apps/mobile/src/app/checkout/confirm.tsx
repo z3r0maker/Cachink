@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CachinkBurst, CheckoutConfirm } from '@cachink/ui';
+import { CachinkBurst, CheckoutConfirm } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useConfirmState } from './_confirm-hooks';
 

@@ -8,8 +8,8 @@
  * branch has been removed.
  */
 
-import { type IsoDate, type NewSale, type PaymentMethod, type SaleCategory } from '@cachink/domain';
-import type { Business, Product } from '@cachink/domain';
+import { type IsoDate, type NewSale, type PaymentMethod, type SaleCategory } from '@xangarro/domain';
+import type { Business, Product } from '@xangarro/domain';
 
 /** Derive SaleCategory from a Product's tipo. */
 export function deriveVentaCategoria(producto: Product, _business: Business): SaleCategory {

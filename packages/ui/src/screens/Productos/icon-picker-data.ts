@@ -3,7 +3,7 @@
  * icon selection screen.
  */
 
-import type { ProductIcon } from '@cachink/domain';
+import type { ProductIcon } from '@xangarro/domain';
 
 export interface IconCategory {
   readonly key: string;

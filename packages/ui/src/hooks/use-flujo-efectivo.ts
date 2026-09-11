@@ -12,8 +12,8 @@ import {
   type BusinessId,
   type FlujoDeEfectivo,
   type PeriodRange,
-} from '@cachink/domain';
-import type { ClientPaymentsRepository, ExpensesRepository, SalesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { ClientPaymentsRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import {
   useClientPaymentsRepository,
   useExpensesRepository,

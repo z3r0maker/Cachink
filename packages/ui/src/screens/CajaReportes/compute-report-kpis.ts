@@ -4,7 +4,7 @@
  * Extracted to keep CajaReportesScreen under 40 lines and complexity 12.
  */
 
-import type { CajaTurno } from '@cachink/domain';
+import type { CajaTurno } from '@xangarro/domain';
 
 export interface ReportKpis {
   totalTurnos: number;

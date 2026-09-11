@@ -8,7 +8,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { InventoryMovement, IsoDate, ProductId } from '@cachink/domain';
+import type { InventoryMovement, IsoDate, ProductId } from '@xangarro/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { mermaKeys } from './query-keys';

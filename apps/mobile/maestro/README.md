@@ -14,7 +14,7 @@ before any change that touches the wizard, tabs, or onboarding flows.
 - An iOS simulator (Xcode-provided) OR an Android emulator running,
   with the Cachink dev client installed:
   ```sh
-  pnpm --filter @cachink/mobile ios   # or `android`
+  pnpm --filter @xangarro/mobile ios   # or `android`
   ```
 
 ### Required env vars (set before running cloud / LAN flows)
@@ -614,7 +614,7 @@ runs as a native iPad app when launched on an iPad simulator.
    var.
 2. **Dev client installed on the iPad simulator (one-time per device):**
    ```sh
-   pnpm --filter @cachink/mobile ios -- --device "iPad (10th generation)"
+   pnpm --filter @xangarro/mobile ios -- --device "iPad (10th generation)"
    ```
 3. **Metro bundler running** (same as for iPhone flows):
    ```sh

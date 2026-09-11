@@ -14,7 +14,7 @@ import {
   deriveDefaultPrefs,
   resolveEffectivePrefs,
   type NotificationPreferences,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { useAppConfigRepository } from '../app/repository-provider';
 import { APP_CONFIG_KEYS } from '../app-config/types';
 import { useFeatureFlags } from './use-feature-flags';

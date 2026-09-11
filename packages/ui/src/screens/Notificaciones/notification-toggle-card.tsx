@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import { Switch, Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { AlertSeverity } from '@cachink/domain';
+import type { AlertSeverity } from '@xangarro/domain';
 import { Card, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, shapeRadii, typography } from '../../theme';

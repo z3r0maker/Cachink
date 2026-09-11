@@ -10,8 +10,8 @@ import {
   useEditarCliente,
   useEliminarCliente,
   useTranslation,
-} from '@cachink/ui';
-import type { Client } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { Client } from '@xangarro/domain';
 
 export interface ClienteSwipeSlotsProps {
   readonly editing: Client | null;

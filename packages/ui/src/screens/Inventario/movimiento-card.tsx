@@ -7,8 +7,8 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatDate } from '@cachink/domain';
-import type { InventoryMovement, Product } from '@cachink/domain';
+import { formatDate } from '@xangarro/domain';
+import type { InventoryMovement, Product } from '@xangarro/domain';
 import { Card, Tag } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 

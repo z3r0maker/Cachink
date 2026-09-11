@@ -43,7 +43,7 @@ export interface DirectorHomeScreenProps {
   readonly hero?: ReactNode;
   /**
    * Corte de Día card — rendered above the grid, below the hero.
-   * Typically a `<CorteHomeCard />` from `@cachink/ui` that auto-hides
+   * Typically a `<CorteHomeCard />` from `@xangarro/ui` that auto-hides
    * outside the 18:00 gate (Slice 9.6 T09).
    */
   readonly corte?: ReactNode;

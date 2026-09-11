@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import type { PaymentMethod, Product, Sale } from '@cachink/domain';
+import type { PaymentMethod, Product, Sale } from '@xangarro/domain';
 import {
   CachinkBurst,
   CajaGateBanner,
@@ -15,7 +15,7 @@ import {
   VentasScreen,
   type CartState,
   type EliminarVentaResult,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import type { CartAction } from './_ventas-hooks';
 import { DetailSlot, SwipeSlots } from '../../shell/ventas-slots';
 

@@ -9,7 +9,7 @@ import {
   useCurrentBusiness,
   useMode,
   useTranslation,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 
 export default function NegocioRoute(): ReactElement {

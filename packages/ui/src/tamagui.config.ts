@@ -1,5 +1,5 @@
 /**
- * Tamagui config for `@cachink/ui`.
+ * Tamagui config for `@xangarro/ui`.
  *
  * Tamagui 2.x requires `createTamagui` to be called once before any Tamagui
  * primitive renders. This file registers the full brand palette (all 18

@@ -12,9 +12,9 @@ import type {
   Money,
   NewClientPayment,
   SaleId,
-} from '@cachink/domain';
-import { ZERO, newEntityId, now, sum } from '@cachink/domain';
-import type { ClientPaymentsRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { ZERO, newEntityId, now, sum } from '@xangarro/domain';
+import type { ClientPaymentsRepository } from '@xangarro/data';
 
 export class InMemoryClientPaymentsRepository implements ClientPaymentsRepository {
   private readonly rows = new Map<ClientPaymentId, ClientPayment>();

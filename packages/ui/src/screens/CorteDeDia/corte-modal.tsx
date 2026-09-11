@@ -16,7 +16,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { Money } from '@cachink/domain';
+import type { Money } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { MoneyField, TextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

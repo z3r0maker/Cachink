@@ -2,8 +2,8 @@
  * ConversionRecetasRepository — recipe CRUD for materia prima conversion.
  * Phase 8.
  */
-import type { ConversionReceta } from '@cachink/domain';
-import type { BusinessId, ConversionRecetaId, ProductId } from '@cachink/domain';
+import type { ConversionReceta } from '@xangarro/domain';
+import type { BusinessId, ConversionRecetaId, ProductId } from '@xangarro/domain';
 
 export type { ConversionReceta };
 

@@ -3,9 +3,9 @@
  * use-case tests and the shared contract suite.
  */
 
-import type { BusinessId, DeviceId, IsoTimestamp } from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { Business, BusinessesRepository, BusinessPatch, NewBusiness } from '@cachink/data';
+import type { BusinessId, DeviceId, IsoTimestamp } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { Business, BusinessesRepository, BusinessPatch, NewBusiness } from '@xangarro/data';
 
 export class InMemoryBusinessesRepository implements BusinessesRepository {
   private readonly rows = new Map<BusinessId, Business>();

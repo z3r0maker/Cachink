@@ -17,11 +17,11 @@ import type {
   Expense,
   IsoDate,
   RecurringExpense,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   ExpensesRepository,
   RecurringExpensesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface ProcesarGastoRecurrenteInput {

@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId } from '@cachink/domain';
-import type { ClientsRepository } from '@cachink/data';
+import type { BusinessId } from '@xangarro/domain';
+import type { ClientsRepository } from '@xangarro/data';
 import { makeNewClient } from '../fixtures/client.js';
 
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7A01' as BusinessId;

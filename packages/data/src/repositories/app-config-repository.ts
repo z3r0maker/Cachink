@@ -2,11 +2,11 @@
  * AppConfigRepository — key/value singleton settings (CLAUDE.md §9).
  *
  * Unlike the other repositories this one is key-addressed, not id-addressed,
- * and carries no audit columns (see `AppConfigSchema` in @cachink/domain).
+ * and carries no audit columns (see `AppConfigSchema` in @xangarro/domain).
  * Values are opaque strings — JSON encoding is the caller's job.
  */
 
-import type { AppConfig } from '@cachink/domain';
+import type { AppConfig } from '@xangarro/domain';
 
 export type { AppConfig };
 

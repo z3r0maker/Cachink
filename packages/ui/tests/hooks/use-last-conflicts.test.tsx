@@ -11,7 +11,7 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 let MOCK_ROWS: ReadonlyArray<unknown> = [];
 let SHOULD_THROW = false;

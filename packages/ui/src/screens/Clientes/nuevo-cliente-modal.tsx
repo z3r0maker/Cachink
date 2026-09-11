@@ -14,7 +14,7 @@
  * `useCrearCliente` + closes the modal on success.
  *
  * Each field uses the `<Rhf*Field>` wrappers from
- * `@cachink/ui/components/fields/controlled` so a Zod-validated row is
+ * `@xangarro/ui/components/fields/controlled` so a Zod-validated row is
  * one line at the call site.
  */
 
@@ -24,7 +24,7 @@ import type { Control } from 'react-hook-form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { Client } from '@cachink/domain';
+import type { Client } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { focusRef, RhfEmailField, RhfPhoneField, RhfTextField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';
@@ -35,7 +35,7 @@ import type { CrearClienteInput } from '../../hooks/use-crear-cliente';
  * and uses optional-empty-string semantics so the optional fields
  * round-trip through controlled `<Input>` state without forcing the
  * user to leave them as `undefined`. Phone regex matches the
- * entity-level `ClientSchema` from `@cachink/domain`.
+ * entity-level `ClientSchema` from `@xangarro/domain`.
  */
 const NuevoClienteFormSchema = z.object({
   nombre: z.string().min(1).max(120),

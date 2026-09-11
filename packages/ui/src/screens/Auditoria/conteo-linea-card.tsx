@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { AuditoriaLinea } from '@cachink/domain';
+import type { AuditoriaLinea } from '@xangarro/domain';
 import { Card } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

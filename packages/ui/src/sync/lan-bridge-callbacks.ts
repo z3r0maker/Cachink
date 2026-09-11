@@ -14,13 +14,13 @@
  *      sentinel that polluted `auth.accessToken`). `LanGate` then
  *      falls through via `(token || (lanRole === 'host' && hostReady))`.
  *
- * Lives in `@cachink/ui/sync` (not in the apps) because both mobile and
+ * Lives in `@xangarro/ui/sync` (not in the apps) because both mobile and
  * desktop need the same persistence logic — only the underlying invoke
  * mechanism differs.
  */
 
-import type { BusinessId } from '@cachink/domain';
-import { writeSyncState, type CachinkDatabase } from '@cachink/data';
+import type { BusinessId } from '@xangarro/domain';
+import { writeSyncState, type CachinkDatabase } from '@xangarro/data';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId } from '../app-config/index';

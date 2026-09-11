@@ -2,7 +2,7 @@
  * HelloBadge — Phase 0 proof-of-pipeline component.
  *
  * Rendered identically by `apps/mobile` and `apps/desktop` to verify that the
- * `@cachink/ui` → Tamagui → React Native / React DOM rendering pipeline works
+ * `@xangarro/ui` → Tamagui → React Native / React DOM rendering pipeline works
  * end-to-end. This is NOT one of the 11 Phase 1A primitives (see CLAUDE.md
  * §8.4). When Phase 1A lands, Btn / Card / Tag etc. replace this as the
  * canonical "look at our brand on screen" surface.

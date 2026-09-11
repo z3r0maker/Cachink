@@ -3,8 +3,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId, DeviceId, IsoDate, IsoTimestamp, ProductId, SaleId } from '@cachink/domain';
-import type { Sale } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate, IsoTimestamp, ProductId, SaleId } from '@xangarro/domain';
+import type { Sale } from '@xangarro/domain';
 import { VentasScreen } from '../../src/screens/index';
 import { totalDelDia } from '../../src/hooks/use-total-del-dia';
 import { initI18n } from '../../src/i18n/index';

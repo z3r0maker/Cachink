@@ -16,7 +16,7 @@ import {
   useRole,
   useFeatureFlags,
   useSetUserId,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 
 /**
  * Map the current pathname to the matching BottomTabBar `activeKey`.

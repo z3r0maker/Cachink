@@ -14,7 +14,7 @@ import { useCurrentBusinessId, useDeviceId } from '../app-config/use-app-config'
 import { useTranslation } from '../i18n/index';
 import { colors, fontSizes, typography } from '../theme';
 import { seedDemoData } from './seed-demo-data';
-import type { BusinessId, DeviceId } from '@cachink/domain';
+import type { BusinessId, DeviceId } from '@xangarro/domain';
 
 type ActionState = 'idle' | 'confirm' | 'pending' | 'done' | 'error' | 'already';
 

@@ -3,21 +3,21 @@
  * Phase 11 — Director Notification Inbox.
  *
  * Uses a direct RepositoryProvider wrapper (not MockRepositoryProvider) to
- * avoid the @cachink/observability transitive import chain.
+ * avoid the @xangarro/observability transitive import chain.
  */
 
 import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { InMemoryAppConfigRepository, InMemoryBusinessesRepository, TEST_DEVICE_ID } from '@cachink/testing';
+import { InMemoryAppConfigRepository, InMemoryBusinessesRepository, TEST_DEVICE_ID } from '@xangarro/testing';
 import {
   deriveDefaultPrefs,
   DEFAULT_FEATURE_FLAGS,
   type FeatureFlags,
   type NotificationPreferences,
-} from '@cachink/domain';
-import type { BusinessId } from '@cachink/domain';
+} from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { RepositoryProvider, type Repositories } from '../../src/app/repository-provider';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import {
@@ -32,7 +32,7 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
 /**
  * Minimal wrapper that only provides the repos needed by the hooks under test.
- * Avoids the full MockRepositoryProvider → app-providers → @cachink/observability chain.
+ * Avoids the full MockRepositoryProvider → app-providers → @xangarro/observability chain.
  */
 function wrapper(repos: Partial<Repositories>) {
   const qc = new QueryClient({

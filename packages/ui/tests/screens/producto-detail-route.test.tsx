@@ -21,12 +21,12 @@ import type {
   NewProduct,
   Product,
   ProductId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import {
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
-} from '@cachink/testing';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+} from '@xangarro/testing';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { ProductoDetailRoute } from '../../src/screens/Inventario/producto-detail-route';
 import type { ProductoConStock } from '../../src/hooks/use-productos-con-stock';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';

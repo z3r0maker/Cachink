@@ -10,7 +10,7 @@
  */
 
 import type ExcelJS from 'exceljs';
-import type { ExportDataset } from '@cachink/application';
+import type { ExportDataset } from '@xangarro/application';
 import {
   addClientesSheet,
   addCortesSheet,

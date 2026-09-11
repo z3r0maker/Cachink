@@ -6,8 +6,8 @@
 
 import { useState, type ReactElement } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, Money, UserId } from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
+import type { BusinessId, Money, UserId } from '@xangarro/domain';
+import { ZERO } from '@xangarro/domain';
 import { AbrirCajaModal } from './abrir-caja-modal';
 import { OpeningDiscrepancyDialog } from './opening-discrepancy-dialog';
 import { CajaHandoffBanner } from './caja-handoff-banner';

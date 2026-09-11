@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { Indicadores } from '@cachink/domain';
+import type { Indicadores } from '@xangarro/domain';
 import { IndicadoresScreen } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

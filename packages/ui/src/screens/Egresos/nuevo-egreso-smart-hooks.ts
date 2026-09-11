@@ -17,7 +17,7 @@ import type {
   NewExpense,
   NewInventoryMovement,
   PayrollFrequency,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { useRegistrarEgreso } from '../../hooks/use-registrar-egreso';
 import { useCrearGastoRecurrente } from '../../hooks/use-crear-gasto-recurrente';
 import { useCrearEmpleado } from '../../hooks/use-crear-empleado';

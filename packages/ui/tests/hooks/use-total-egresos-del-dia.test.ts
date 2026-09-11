@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { totalEgresosDelDia } from '../../src/hooks/use-total-egresos-del-dia';
-import { makeExpense } from '@cachink/testing';
+import { makeExpense } from '@xangarro/testing';
 
 describe('totalEgresosDelDia', () => {
   it('returns 0n for empty array', () => {

@@ -6,7 +6,7 @@
  */
 import { useState, useCallback, type ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import type { IsoDate } from '@cachink/domain';
+import type { IsoDate } from '@xangarro/domain';
 import { todayIso } from './_ventas-helpers';
 import {
   useCachinkTrigger,

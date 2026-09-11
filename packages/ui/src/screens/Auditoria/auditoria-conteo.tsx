@@ -7,7 +7,7 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { AuditoriaInventario, AuditoriaLinea } from '@cachink/domain';
+import type { AuditoriaInventario, AuditoriaLinea } from '@xangarro/domain';
 import { ConfirmDialog } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useActualizarAuditoria } from '../../hooks/use-actualizar-auditoria';

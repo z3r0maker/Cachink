@@ -4,7 +4,7 @@
  * i18n keys and icon mappings for the Funciones del negocio screen.
  */
 
-import type { FeatureFlagKey } from '@cachink/domain';
+import type { FeatureFlagKey } from '@xangarro/domain';
 
 export interface FlagDisplayInfo {
   readonly key: FeatureFlagKey;

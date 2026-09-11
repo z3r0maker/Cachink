@@ -21,7 +21,7 @@ import {
   type EmployeeId,
   type IsoDate,
   type NewExpense,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { Btn, Combobox } from '../../../components/index';
 import { MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';

@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { AttrDef } from '@cachink/domain';
+import type { AttrDef } from '@xangarro/domain';
 import { AtributosForm } from '../../src/components/AtributosForm/atributos-form';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

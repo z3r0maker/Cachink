@@ -10,7 +10,7 @@
 
 import { useEffect, useRef } from 'react';
 import { AppState, type AppStateStatus } from 'react-native';
-import type { OutboxFlusher } from '@cachink/observability';
+import type { OutboxFlusher } from '@xangarro/observability';
 
 /**
  * Mount once in the provider tree (after ObservabilityBridge).

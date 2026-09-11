@@ -10,8 +10,8 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { DiscrepancyReason, Money } from '@cachink/domain';
-import { formatMoney, ZERO } from '@cachink/domain';
+import type { DiscrepancyReason, Money } from '@xangarro/domain';
+import { formatMoney, ZERO } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';

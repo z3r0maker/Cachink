@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { IsoDate, RecurringExpense } from '@cachink/domain';
+import type { IsoDate, RecurringExpense } from '@xangarro/domain';
 import { useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

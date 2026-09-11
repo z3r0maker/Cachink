@@ -8,7 +8,7 @@ import type {
   EstadoDeResultados,
   FlujoDeEfectivo,
   Indicadores,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { EstadosShell } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

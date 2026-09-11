@@ -13,7 +13,7 @@ import {
   useEliminarProducto,
   useTranslation,
   type ProductoConStock,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 
 export interface ProductoSwipeSlotsProps {
   readonly editing: ProductoConStock | null;

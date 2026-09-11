@@ -6,7 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { LogQueryOptions, TimelineEntry, LogStats } from '@cachink/observability';
+import type { LogQueryOptions, TimelineEntry, LogStats } from '@xangarro/observability';
 import { useRequiredLogStore } from '../../observability/observability-provider';
 
 export type TelemetriaFilter = 'all' | 'audit' | 'error';

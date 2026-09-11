@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { AuditEvent } from '@cachink/observability';
+import type { AuditEvent } from '@xangarro/observability';
 import { addAuditBreadcrumb } from '../../src/observability/sentry-breadcrumbs';
 
 const EVENT: AuditEvent = {

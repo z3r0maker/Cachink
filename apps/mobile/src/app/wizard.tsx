@@ -23,7 +23,7 @@ import {
   useAppConfigRepository,
   useSetMode,
   type AppMode,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 
 export default function WizardRoute(): ReactElement {
   const router = useRouter();

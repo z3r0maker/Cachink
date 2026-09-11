@@ -11,7 +11,7 @@
 
 import { useMemo } from 'react';
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { ExportarDatosUseCase, type ExportDataset } from '@cachink/application';
+import { ExportarDatosUseCase, type ExportDataset } from '@xangarro/application';
 import {
   useBusinessesRepository,
   useClientPaymentsRepository,

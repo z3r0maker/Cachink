@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { AttrDef, Product } from '@cachink/domain';
+import type { AttrDef, Product } from '@xangarro/domain';
 import { ProductoCard, type ProductoCardProps } from '../ProductoCard/index';
 import type { BadgeVariant } from '../ProductoCard/quantity-badge';
 

@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import { AbrirCajaUseCase } from '@cachink/application';
-import { today } from '@cachink/domain';
-import type { BusinessId, CajaTurno, Money, UserId } from '@cachink/domain';
+import { AbrirCajaUseCase } from '@xangarro/application';
+import { today } from '@xangarro/domain';
+import type { BusinessId, CajaTurno, Money, UserId } from '@xangarro/domain';
 import { useCajaTurnosRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { cajaKeys } from './query-keys';

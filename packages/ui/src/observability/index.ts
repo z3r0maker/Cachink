@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/ui` observability integration.
+ * Public surface of `@xangarro/ui` observability integration.
  */
 export {
   ObservabilityProvider,

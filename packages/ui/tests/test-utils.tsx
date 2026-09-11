@@ -1,5 +1,5 @@
 /**
- * Test helpers for `@cachink/ui`.
+ * Test helpers for `@xangarro/ui`.
  *
  * Wraps `@testing-library/react`'s `render` with Tamagui's provider so
  * component tests don't have to import and mount the provider themselves.

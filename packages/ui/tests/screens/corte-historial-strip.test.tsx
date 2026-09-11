@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from 'vitest';
 import { CorteHistorialStrip } from '../../src/screens/index';
-import { makeDayClose } from '@cachink/testing';
-import type { DayClose, DayCloseId, IsoDate } from '@cachink/domain';
+import { makeDayClose } from '@xangarro/testing';
+import type { DayClose, DayCloseId, IsoDate } from '@xangarro/domain';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';
 

@@ -10,7 +10,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { AttrDef } from '@cachink/domain';
+import type { AttrDef } from '@xangarro/domain';
 import { Input } from '../Input/input';
 
 export interface AtributosFormProps {

@@ -1,8 +1,8 @@
 /**
  * EntregasCreditoRepository — grouped credit delivery CRUD. Phase 11.
  */
-import type { EntregaCredito } from '@cachink/domain';
-import type { BusinessId, ClientId, EntregaCreditoId } from '@cachink/domain';
+import type { EntregaCredito } from '@xangarro/domain';
+import type { BusinessId, ClientId, EntregaCreditoId } from '@xangarro/domain';
 
 export type { EntregaCredito };
 

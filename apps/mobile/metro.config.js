@@ -8,7 +8,7 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 const config = getDefaultConfig(projectRoot);
 
 // Metro needs to watch the monorepo root so changes in workspace packages
-// (`@cachink/ui`, `@cachink/domain`, etc.) trigger hot reload.
+// (`@xangarro/ui`, `@xangarro/domain`, etc.) trigger hot reload.
 config.watchFolders = [workspaceRoot];
 
 // Exclude the pnpm virtual store from Metro resolution. With
@@ -24,12 +24,12 @@ config.resolver.blockList = [
 // is required for pnpm so Metro doesn't climb past the workspace root and
 // discover duplicate React copies — but disabling it also stops Metro
 // from finding workspace peers that live in a sibling package's
-// node_modules (e.g. `@cachink/sync-{lan,cloud}` are symlinked into
-// `packages/ui/node_modules/@cachink/` by pnpm because they are
-// optional peers of `@cachink/ui`, not deps of `apps/mobile`).
+// node_modules (e.g. `@xangarro/sync-{lan,cloud}` are symlinked into
+// `packages/ui/node_modules/@xangarro/` by pnpm because they are
+// optional peers of `@xangarro/ui`, not deps of `apps/mobile`).
 //
 // Listing those package-local `node_modules` here lets the dynamic
-// `await import('@cachink/sync-{lan,cloud}')` calls in
+// `await import('@xangarro/sync-{lan,cloud}')` calls in
 // `packages/ui/src/sync/{lan,cloud}-bridge.ts` resolve cleanly, while
 // `disableHierarchicalLookup: true` still prevents Metro from
 // discovering duplicate React copies further up the tree.
@@ -52,7 +52,7 @@ config.resolver.unstable_enableSymlinks = true;
 // on disk is `.ts` / `.tsx` (e.g. `export * from './lan-bridge.js';`
 // in `packages/ui/src/sync/index.ts`). Vite/Vitest rewrite this; Metro
 // does not. Without this hook the iOS bundle dies the first time it
-// reaches a NodeNext-style barrel inside any `@cachink/*` package.
+// reaches a NodeNext-style barrel inside any `@xangarro/*` package.
 //
 // We intercept relative imports ending in `.js` and try `.ts` / `.tsx`
 // before falling back to Metro's default resolver. Limited to relative
@@ -76,8 +76,8 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 
 // Bundle splitting for sync packages (Slice 8 M2-C11).
 //
-// `@cachink/sync-{lan,cloud}` and the heavy `@powersync/react-native`
-// peer are loaded via `await import('@cachink/sync-...')` from
+// `@xangarro/sync-{lan,cloud}` and the heavy `@powersync/react-native`
+// peer are loaded via `await import('@xangarro/sync-...')` from
 // `packages/ui/src/sync/{lan,cloud}-bridge.ts` so Local-standalone users
 // never download them. Metro respects dynamic imports — it emits a
 // `__loadBundleAsync(...)` call and produces a separate split bundle —

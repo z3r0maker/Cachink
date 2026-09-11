@@ -11,13 +11,13 @@
 import type { ReactElement, ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { BusinessId, Client, ClientId, DeviceId } from '@cachink/domain';
+import type { BusinessId, Client, ClientId, DeviceId } from '@xangarro/domain';
 import {
   InMemoryClientPaymentsRepository,
   InMemoryClientsRepository,
   InMemorySalesRepository,
-} from '@cachink/testing';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+} from '@xangarro/testing';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { ClienteDetailRoute } from '../../src/screens/Clientes/cliente-detail-route';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

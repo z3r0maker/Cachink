@@ -10,9 +10,9 @@ import type {
   IsoDate,
   IsoTimestamp,
   NewDayClose,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { DayClosesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { DayClosesRepository } from '@xangarro/data';
 
 export class InMemoryDayClosesRepository implements DayClosesRepository {
   private readonly rows = new Map<DayCloseId, DayClose>();

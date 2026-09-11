@@ -11,8 +11,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, UserId } from '@cachink/domain';
-import { newEntityId } from '@cachink/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
+import { newEntityId } from '@xangarro/domain';
 import {
   makeNewBusiness,
 } from '../../../testing/src/index.js';

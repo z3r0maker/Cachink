@@ -9,7 +9,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { NewRecurringExpense, RecurrenceFrequency } from '@cachink/domain';
+import type { NewRecurringExpense, RecurrenceFrequency } from '@xangarro/domain';
 import { OptionCardGroup, type OptionCardItem } from '../../../components/OptionCardGroup/index';
 import { WheelQuantityPicker } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';

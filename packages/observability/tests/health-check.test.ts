@@ -42,28 +42,21 @@ function createMockDb(
       if (opts.throwOnTableCheck && sql.includes('sqlite_master')) {
         throw new Error('DB error');
       }
-      if (sql.includes('sqlite_master')) {
-        return { cnt: opts.tableExists ? 1 : 0 } as T;
-      }
-      if (sql.includes('COUNT(*)')) {
-        return { cnt: opts.rowCount } as T;
-      }
-      if (sql.includes('ORDER BY timestamp ASC')) {
-        return opts.oldest ? { timestamp: opts.oldest } as T : null;
-      }
-      if (sql.includes('ORDER BY timestamp DESC')) {
-        return opts.newest ? { timestamp: opts.newest } as T : null;
-      }
-      if (sql.includes('page_count')) {
-        return opts.sizeBytes ? { page_count: opts.sizeBytes / 4096 } as T : null;
-      }
-      if (sql.includes('page_size')) {
-        return opts.sizeBytes ? { page_size: 4096 } as T : null;
-      }
-      return null;
+      const hit = FIRST_ROW_RESOLVERS.find(([needle]) => sql.includes(needle));
+      return hit ? (hit[1](opts) as T | null) : null;
     },
   };
 }
+
+/** `getFirstAsync` mock: first matching SQL fragment wins (order matters). */
+const FIRST_ROW_RESOLVERS: ReadonlyArray<[string, (o: MockOpts) => unknown]> = [
+  ['sqlite_master', (o) => ({ cnt: o.tableExists ? 1 : 0 })],
+  ['COUNT(*)', (o) => ({ cnt: o.rowCount })],
+  ['ORDER BY timestamp ASC', (o) => (o.oldest ? { timestamp: o.oldest } : null)],
+  ['ORDER BY timestamp DESC', (o) => (o.newest ? { timestamp: o.newest } : null)],
+  ['page_count', (o) => (o.sizeBytes ? { page_count: o.sizeBytes / 4096 } : null)],
+  ['page_size', (o) => (o.sizeBytes ? { page_size: 4096 } : null)],
+];
 
 describe('checkObservabilityHealth', () => {
   it('returns healthy when table exists and write succeeds', async () => {

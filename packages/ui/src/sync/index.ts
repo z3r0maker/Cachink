@@ -1,5 +1,5 @@
 /**
- * Public surface for `@cachink/ui/sync`. The LAN + Cloud bridges each
+ * Public surface for `@xangarro/ui/sync`. The LAN + Cloud bridges each
  * lazy-load their respective package — see `lan-bridge.ts` and
  * `cloud-bridge.ts` for the rationale (CLAUDE.md §7 / ADR-029 / ADR-035).
  */

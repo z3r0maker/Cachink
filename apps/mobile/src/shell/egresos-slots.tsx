@@ -4,9 +4,9 @@
  * added swipe-to-edit + ConfirmDialog plumbing.
  */
 import type { ReactElement } from 'react';
-import { ConfirmDialog, EditarEgresoModal, useTranslation } from '@cachink/ui';
-import type { useEliminarEgreso } from '@cachink/ui';
-import type { Expense } from '@cachink/domain';
+import { ConfirmDialog, EditarEgresoModal, useTranslation } from '@xangarro/ui';
+import type { useEliminarEgreso } from '@xangarro/ui';
+import type { Expense } from '@xangarro/domain';
 
 export interface EgresoSwipeSlotsProps {
   readonly editing: Expense | null;

@@ -7,7 +7,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { CajaTurno, IsoDate } from '@cachink/domain';
+import type { CajaTurno, IsoDate } from '@xangarro/domain';
 import { useCajaTurnosRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { cajaHistorialKeys } from './query-keys';

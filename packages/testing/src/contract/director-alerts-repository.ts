@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId } from '@cachink/domain';
-import type { DirectorAlertsRepository, CreateDirectorAlertInput } from '@cachink/data';
+import type { BusinessId } from '@xangarro/domain';
+import type { DirectorAlertsRepository, CreateDirectorAlertInput } from '@xangarro/data';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 

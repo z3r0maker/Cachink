@@ -5,9 +5,9 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Sale } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
-import type { Money } from '@cachink/domain';
+import type { Sale } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
+import type { Money } from '@xangarro/domain';
 import { Card, ErrorState, List, Skeleton, SwipeableRow } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

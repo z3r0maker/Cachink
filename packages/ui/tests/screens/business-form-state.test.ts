@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useBusinessFormState, parseForm } from '../../src/screens/BusinessForm/business-form-state';
-import type { IsrDefaults } from '@cachink/domain';
+import type { IsrDefaults } from '@xangarro/domain';
 
 const mockIsrDefaults: IsrDefaults = {
   RIF: 200,

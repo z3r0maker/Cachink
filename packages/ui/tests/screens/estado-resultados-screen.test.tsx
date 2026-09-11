@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { EstadoDeResultados } from '@cachink/domain';
+import type { EstadoDeResultados } from '@xangarro/domain';
 import { EstadoResultadosScreen } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

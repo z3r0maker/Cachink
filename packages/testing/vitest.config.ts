@@ -1,5 +1,5 @@
 import { defineConfig, mergeConfig } from 'vitest/config';
-import base from '@cachink/config/vitest';
+import base from '@xangarro/config/vitest';
 
 /**
  * Testing-package Vitest config.

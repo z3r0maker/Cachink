@@ -2,8 +2,8 @@
  * Shared test helper — builds a full `Repositories` record from
  * in-memory implementations without going through MockRepositoryProvider.
  *
- * Avoids the transitive `@cachink/observability` import that blocks
- * Vitest when using `@cachink/testing/ui`'s MockRepositoryProvider.
+ * Avoids the transitive `@xangarro/observability` import that blocks
+ * Vitest when using `@xangarro/testing/ui`'s MockRepositoryProvider.
  */
 
 import {
@@ -27,7 +27,7 @@ import {
   InMemoryDirectorAlertsRepository,
   InMemoryCajaMovimientosRepository,
   InMemoryCancelacionLogsRepository,
-} from '@cachink/testing';
+} from '@xangarro/testing';
 import type { Repositories } from '../src/app/repository-provider';
 
 /**

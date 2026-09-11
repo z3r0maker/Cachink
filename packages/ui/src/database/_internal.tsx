@@ -5,7 +5,7 @@
  * identity stays consistent whether the mobile `.native.tsx` or the
  * desktop `.web.tsx` implementation renders the provider. Not re-exported
  * from the package barrel — consumers use `useDatabase` + `DatabaseProvider`
- * from `@cachink/ui`.
+ * from `@xangarro/ui`.
  *
  * `AsyncDatabaseProvider` is the testable workhorse: a generic provider
  * that takes a factory function and renders children once it resolves.
@@ -15,7 +15,7 @@
  */
 
 import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import { DatabaseErrorState } from './database-error-state';
 import type { ResetDatabaseFn } from './database-reset';
 import { useDatabaseLifecycle } from './use-database-lifecycle';

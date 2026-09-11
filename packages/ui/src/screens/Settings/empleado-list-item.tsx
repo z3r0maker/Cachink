@@ -3,7 +3,7 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type Employee } from '@cachink/domain';
+import { formatMoney, type Employee } from '@xangarro/domain';
 import { Btn, Card, Icon, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

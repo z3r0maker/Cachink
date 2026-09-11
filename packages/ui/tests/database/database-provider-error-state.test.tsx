@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import { AsyncDatabaseProvider, useDatabase } from '../../src/database/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';

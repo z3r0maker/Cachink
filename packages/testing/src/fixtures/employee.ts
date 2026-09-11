@@ -9,8 +9,8 @@ import type {
   EmployeeId,
   IsoTimestamp,
   NewEmployee,
-} from '@cachink/domain';
-import { newEntityId } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId } from '@xangarro/domain';
 
 const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;

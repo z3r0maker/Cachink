@@ -5,7 +5,7 @@
  * Items are filtered based on active feature flags.
  */
 
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import type { IconName } from '../../components/Icon/index';
 
 export interface OtrosItem {

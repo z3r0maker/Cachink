@@ -13,9 +13,9 @@ import {
   parseFeatureFlags,
   type FeatureFlagKey,
   type FeatureFlags,
-} from '@cachink/domain';
-import type { BusinessId } from '@cachink/domain';
-import type { BusinessesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
+import type { BusinessesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface ToggleFeatureFlagInput {

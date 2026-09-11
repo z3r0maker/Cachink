@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { AttrDef, FeatureFlags, TipoNegocio } from '@cachink/domain';
+import type { AttrDef, FeatureFlags, TipoNegocio } from '@xangarro/domain';
 import { WizardCard } from './wizard-card';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

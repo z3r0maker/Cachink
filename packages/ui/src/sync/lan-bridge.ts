@@ -1,20 +1,20 @@
 /**
  * `useLanSync()` — React hook that exposes the LAN sync client's status
- * to the UI layer without statically importing `@cachink/sync-lan`.
+ * to the UI layer without statically importing `@xangarro/sync-lan`.
  *
- * Importing `@cachink/sync-lan` statically would pull the protocol codec,
+ * Importing `@xangarro/sync-lan` statically would pull the protocol codec,
  * axum-protocol types, and push/pull loop into Local-standalone and Cloud
  * bundles where they're never used — contradicting CLAUDE.md §7 (local-first
  * is default, sync is additive). This module uses a dynamic `import()`
  * gated on `mode === 'lan'` so the payload only ships when it's needed.
  *
- * Types reach into `@cachink/sync-lan` are deliberately replaced with a
+ * Types reach into `@xangarro/sync-lan` are deliberately replaced with a
  * narrow local contract so ESLint's layer boundaries + the bundler both
  * see zero compile-time edge. The dynamic `await import(...)` is cast to
  * the contract at call time.
  */
 
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 export type LanSyncStatus = 'idle' | 'connecting' | 'syncing' | 'online' | 'offline' | 'error';
 
@@ -41,7 +41,7 @@ export interface LanSyncHandle {
 }
 
 /**
- * Shape we expect the lazy-loaded `@cachink/sync-lan` module to export.
+ * Shape we expect the lazy-loaded `@xangarro/sync-lan` module to export.
  * Duplicated here (rather than imported) so this file creates no static
  * dependency edge to the sync-lan package. The cast happens at runtime
  * inside `initLanSync`.
@@ -73,21 +73,21 @@ const INITIAL_STATE: LanSyncState = {
 
 /**
  * Lazily instantiate the LAN sync client and return a lightweight handle.
- * Importing this function does NOT pull `@cachink/sync-lan` into the bundle;
+ * Importing this function does NOT pull `@xangarro/sync-lan` into the bundle;
  * the dynamic `import()` does, only when the function is called.
  *
  * Uses a literal-string dynamic import so Vite/Rollup splits
- * `@cachink/sync-lan` into the dedicated `sync-lan-*.js` chunk
+ * `@xangarro/sync-lan` into the dedicated `sync-lan-*.js` chunk
  * declared in `apps/desktop/vite.config.ts`'s `manualChunks` rule
  * (Slice 8 M2-C11). The boundary test (`lan-bridge.boundary.test.ts`)
  * permits the dynamic-import form — only static `import ... from
- * '@cachink/sync-lan'` is forbidden in `packages/ui/src/**`.
- * `@cachink/sync-lan` is declared as an OPTIONAL `peerDependency` of
- * `@cachink/ui` so type resolution succeeds without making sync-lan
+ * '@xangarro/sync-lan'` is forbidden in `packages/ui/src/**`.
+ * `@xangarro/sync-lan` is declared as an OPTIONAL `peerDependency` of
+ * `@xangarro/ui` so type resolution succeeds without making sync-lan
  * required at install time for Local-only consumers.
  */
 export async function initLanSync(args: InitLanSyncArgs): Promise<LanSyncHandle> {
-  const mod = (await import('@cachink/sync-lan')) as unknown as LazyLanSyncModule;
+  const mod = (await import('@xangarro/sync-lan')) as unknown as LazyLanSyncModule;
   const client = mod.createLanSyncClient(args);
   let cached: LanSyncState = { ...INITIAL_STATE };
   const listeners = new Set<(state: LanSyncState) => void>();

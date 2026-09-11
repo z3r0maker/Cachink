@@ -13,9 +13,9 @@
 
 import { useState, type ReactElement } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { CajaTurno, DiscrepancyReason, Money } from '@cachink/domain';
-import { now } from '@cachink/domain';
-import type { BusinessId } from '@cachink/domain';
+import type { CajaTurno, DiscrepancyReason, Money } from '@xangarro/domain';
+import { now } from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { useQuery } from '@tanstack/react-query';
 import { BlindCountStep } from './blind-count-step';
 import { CountResultStep } from './count-result-step';

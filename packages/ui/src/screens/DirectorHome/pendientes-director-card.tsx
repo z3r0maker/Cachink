@@ -9,7 +9,7 @@
  */
 
 import { useMemo, type ReactElement } from 'react';
-import type { IsoDate } from '@cachink/domain';
+import type { IsoDate } from '@xangarro/domain';
 import { usePendientesGastosRecurrentes, useProcesarGastoRecurrente } from '../../hooks/index';
 import { PendientesCard } from '../Egresos/pendientes-card';
 import { todayIso } from './hoy-kpi-strip';

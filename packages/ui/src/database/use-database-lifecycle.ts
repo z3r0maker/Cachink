@@ -9,7 +9,7 @@
  * orchestrator just wires them together.
  */
 import { useEffect, useRef, useState } from 'react';
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 import type { ResetDatabaseFn } from './database-reset';
 
 export interface DatabaseLifecycleState {

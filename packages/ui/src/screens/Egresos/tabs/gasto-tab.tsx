@@ -9,7 +9,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { BusinessId, IsoDate, NewExpense, NewRecurringExpense } from '@cachink/domain';
+import type { BusinessId, IsoDate, NewExpense, NewRecurringExpense } from '@xangarro/domain';
 import { Btn } from '../../../components/index';
 import { useTranslation } from '../../../i18n/index';
 import { GastoRecurrenteFields, buildRecurrenteDraft } from './gasto-recurrente';

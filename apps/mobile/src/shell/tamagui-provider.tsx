@@ -2,7 +2,7 @@
  * Shell-level Tamagui provider for `apps/mobile`.
  *
  * Wraps the app in Tamagui's `TamaguiProvider` using the shared minimal
- * config from `@cachink/ui`. All components from `@cachink/ui` (including
+ * config from `@xangarro/ui`. All components from `@xangarro/ui` (including
  * `<HelloBadge />` today and every Phase 1A primitive to come) depend on
  * this provider being present somewhere in the tree.
  *
@@ -12,7 +12,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import { TamaguiProvider } from '@tamagui/core';
-import { tamaguiConfig } from '@cachink/ui';
+import { tamaguiConfig } from '@xangarro/ui';
 
 export function AppTamaguiProvider({ children }: { children: ReactNode }): ReactElement {
   return (

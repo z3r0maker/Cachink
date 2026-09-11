@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { View, Text } from '@tamagui/core';
-import type { LogStats } from '@cachink/observability';
+import type { LogStats } from '@xangarro/observability';
 
 export interface TelemetriaStatsRowProps {
   readonly stats: LogStats | undefined;

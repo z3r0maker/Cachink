@@ -12,7 +12,7 @@
  * without a cast.
  */
 
-import type { BusinessId, ClientId, IsoDate } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
 
 export const ventaKeys = {
   all: ['ventas'] as const,

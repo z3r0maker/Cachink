@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { BusinessId, Sale } from '@cachink/domain';
+import type { BusinessId, Sale } from '@xangarro/domain';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useRole } from '../app-config/index';

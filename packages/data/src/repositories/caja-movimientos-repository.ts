@@ -4,8 +4,8 @@
  * Part of the Caja Completa feature.
  */
 
-import type { CajaMovimiento, NewCajaMovimiento } from '@cachink/domain';
-import type { CajaMovimientoId, CajaTurnoId, BusinessId } from '@cachink/domain';
+import type { CajaMovimiento, NewCajaMovimiento } from '@xangarro/domain';
+import type { CajaMovimientoId, CajaTurnoId, BusinessId } from '@xangarro/domain';
 
 export type { CajaMovimiento, NewCajaMovimiento };
 

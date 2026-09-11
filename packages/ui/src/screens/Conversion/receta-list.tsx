@@ -6,7 +6,7 @@
 import type { ReactElement } from 'react';
 import { FlatList, TouchableOpacity } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { ConversionReceta, Product } from '@cachink/domain';
+import type { ConversionReceta, Product } from '@xangarro/domain';
 import { EmptyState, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes } from '../../theme';

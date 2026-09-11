@@ -18,9 +18,9 @@
 
 import { useMemo } from 'react';
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Product, ProductId } from '@cachink/domain';
-import type { ProductPatch } from '@cachink/data';
-import { EditarProductoUseCase } from '@cachink/application';
+import type { Product, ProductId } from '@xangarro/domain';
+import type { ProductPatch } from '@xangarro/data';
+import { EditarProductoUseCase } from '@xangarro/application';
 import { useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

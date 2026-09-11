@@ -1,5 +1,5 @@
 /**
- * Vitest setup file for `@cachink/ui`.
+ * Vitest setup file for `@xangarro/ui`.
  *
  * Loaded once before any test file. Imports the Tamagui config so
  * `createTamagui(...)` runs at module-eval time and Tamagui's global

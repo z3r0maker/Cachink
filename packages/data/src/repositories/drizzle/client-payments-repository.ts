@@ -14,8 +14,8 @@ import type {
   NewClientPayment,
   PaymentMethod,
   SaleId,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
 import { clientPayments } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

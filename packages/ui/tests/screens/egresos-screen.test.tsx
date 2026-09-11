@@ -10,7 +10,7 @@ import type {
   ExpenseId,
   IsoDate,
   IsoTimestamp,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { EgresosScreen } from '../../src/screens/index';
 import { totalEgresosDelDia } from '../../src/hooks/use-total-egresos-del-dia';
 import { initI18n } from '../../src/i18n/index';

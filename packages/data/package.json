@@ -1,5 +1,5 @@
 {
-  "name": "@cachink/data",
+  "name": "@xangarro/data",
   "version": "0.0.0",
   "private": true,
   "description": "Repository interfaces and Drizzle/SQLite implementations. Pure types; no UI.",
@@ -29,11 +29,11 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@cachink/domain": "workspace:*",
+    "@xangarro/domain": "workspace:*",
     "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
-    "@cachink/config": "workspace:*",
+    "@xangarro/config": "workspace:*",
     "@types/better-sqlite3": "^7.6.13",
     "@vitest/coverage-v8": "^4.1.6",
     "better-sqlite3": "^12.10.0",

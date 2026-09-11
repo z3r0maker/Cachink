@@ -6,17 +6,17 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
   TEST_DEVICE_ID,
-} from '@cachink/testing';
-import type { BusinessId, CajaTurnoId, UserId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, CajaTurnoId, UserId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useCerrarCaja } from '../../src/hooks/use-cerrar-caja';
-import { AbrirCajaUseCase } from '@cachink/application';
+import { AbrirCajaUseCase } from '@xangarro/application';
 import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 

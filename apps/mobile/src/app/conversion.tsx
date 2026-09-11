@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { ConversionScreen } from '@cachink/ui';
+import { ConversionScreen } from '@xangarro/ui';
 import { AppShellWrapper } from '../shell/app-shell-wrapper';
 
 export default function ConversionRoute(): ReactElement {

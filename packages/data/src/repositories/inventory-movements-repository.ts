@@ -13,7 +13,7 @@ import type {
   IsoDate,
   NewInventoryMovement,
   ProductId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export type { InventoryMovement, NewInventoryMovement };
 

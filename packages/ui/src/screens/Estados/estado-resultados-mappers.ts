@@ -3,7 +3,7 @@
  * Extracted to keep the screen component under 200 lines.
  */
 
-import { type EstadoDeResultados, type ExpenseCategory, type SaleCategory } from '@cachink/domain';
+import { type EstadoDeResultados, type ExpenseCategory, type SaleCategory } from '@xangarro/domain';
 import { moneyToNumber, CHART_PALETTE } from '../../charts/chart-tokens';
 import type { WaterfallItem } from '../../charts/WaterfallChart/index';
 import type { DonutSlice } from '../../charts/DonutChart/index';

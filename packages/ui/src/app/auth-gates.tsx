@@ -11,7 +11,7 @@
  */
 
 import type { ReactElement } from 'react';
-import type { BusinessId, UserRole } from '@cachink/domain';
+import type { BusinessId, UserRole } from '@xangarro/domain';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useUsersRepository } from './repository-provider';
 import {
@@ -21,7 +21,7 @@ import {
   useSetMustChangePin,
 } from '../app-config/use-app-config';
 import { DirectorSetupScreen, type DirectorSetupSubmitInput } from '../screens/DirectorSetup/index';
-import { CrearUsuarioUseCase } from '@cachink/application';
+import { CrearUsuarioUseCase } from '@xangarro/application';
 import { USERS_KEY } from './query-keys-auth';
 
 export interface AuthGatesProps {

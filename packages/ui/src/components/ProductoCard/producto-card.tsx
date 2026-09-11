@@ -13,8 +13,8 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, resolveProductIcon } from '@cachink/domain';
-import type { AttrDef, Product, ProductIcon } from '@cachink/domain';
+import { formatMoney, resolveProductIcon } from '@xangarro/domain';
+import type { AttrDef, Product, ProductIcon } from '@xangarro/domain';
 import { Card } from '../Card/card';
 import { Icon } from '../Icon/icon';
 import { colors, fontSizes, typography } from '../../theme';

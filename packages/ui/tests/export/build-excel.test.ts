@@ -9,7 +9,7 @@
 
 import { describe, expect, it } from 'vitest';
 import ExcelJS from 'exceljs';
-import type { ExportDataset } from '@cachink/application';
+import type { ExportDataset } from '@xangarro/application';
 import type {
   BusinessId,
   DayClose,
@@ -28,9 +28,9 @@ import type {
   RecurringExpense,
   RecurringExpenseId,
   SaleId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { buildExcelWorkbook, centavosToPesos } from '../../src/export/build-excel';
-import { makeClient, makeClientPayment, makeDayClose, makeSale } from '@cachink/testing';
+import { makeClient, makeClientPayment, makeDayClose, makeSale } from '@xangarro/testing';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;

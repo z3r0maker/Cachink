@@ -6,7 +6,7 @@
  * Read by AppErrorBoundary.componentDidCatch.
  */
 
-import type { LogStore } from '@cachink/observability';
+import type { LogStore } from '@xangarro/observability';
 
 let _logStoreRef: LogStore | null = null;
 

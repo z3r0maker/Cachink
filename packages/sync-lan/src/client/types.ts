@@ -2,11 +2,11 @@
  * Public types surfaced by the LAN sync client (Slice 5 C11).
  *
  * Kept separate from the internal implementation so consumers in
- * `@cachink/ui` can import a stable surface without reaching into the
+ * `@xangarro/ui` can import a stable surface without reaching into the
  * push-queue / pull-loop internals.
  */
 
-import type { CachinkDatabase } from '@cachink/data';
+import type { CachinkDatabase } from '@xangarro/data';
 
 export type LanSyncStatus = 'idle' | 'connecting' | 'syncing' | 'online' | 'offline' | 'error';
 

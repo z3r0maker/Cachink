@@ -16,11 +16,11 @@
  *     a full `Repositories` record wired onto the Drizzle implementations.
  *
  * Tests use the same `RepositoryProvider` but pass a record built from
- * `@cachink/testing` in-memory impls.
+ * `@xangarro/testing` in-memory impls.
  */
 
 import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
-import type { DeviceId, UserId } from '@cachink/domain';
+import type { DeviceId, UserId } from '@xangarro/domain';
 import type {
   AppConfigRepository,
   BusinessesRepository,
@@ -43,7 +43,7 @@ import type {
   AuditoriasInventarioRepository,
   EntregasCreditoRepository,
   DirectorAlertsRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import {
   DrizzleAppConfigRepository,
   DrizzleBusinessesRepository,
@@ -65,7 +65,7 @@ import {
   DrizzleDirectorAlertsRepository,
   DrizzleCajaMovimientosRepository,
   DrizzleCancelacionLogsRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 
 /**
  * Full set of repositories the app depends on. Every screen, hook, and

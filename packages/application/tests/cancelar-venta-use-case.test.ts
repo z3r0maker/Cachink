@@ -6,7 +6,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, SaleId, UserId } from '@cachink/domain';
+import type { BusinessId, SaleId, UserId } from '@xangarro/domain';
 import {
   InMemoryCancelacionLogsRepository,
   InMemoryInventoryMovementsRepository,

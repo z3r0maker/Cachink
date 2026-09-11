@@ -5,7 +5,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { ConversionReceta, Product } from '@cachink/domain';
+import type { ConversionReceta, Product } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { WheelQuantityPicker } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

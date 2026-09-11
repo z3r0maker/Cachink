@@ -12,7 +12,7 @@
 import type { ReactElement } from 'react';
 import { Animated, Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { User, UserId } from '@cachink/domain';
+import type { User, UserId } from '@xangarro/domain';
 import { Tag } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { useAvatarFade, useAvatarScale } from './login-animations';

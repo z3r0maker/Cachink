@@ -18,14 +18,14 @@ import {
   type BalanceGeneral,
   type BusinessId,
   type PeriodRange,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type {
   ClientPaymentsRepository,
   DayClosesRepository,
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import {
   useClientPaymentsRepository,
   useDayClosesRepository,

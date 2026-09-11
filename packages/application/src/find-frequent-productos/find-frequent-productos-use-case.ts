@@ -6,8 +6,8 @@
  * (cold start), falls back to the newest productos by `created_at`.
  */
 
-import type { BusinessId, Product } from '@cachink/domain';
-import type { ProductsRepository, SalesRepository } from '@cachink/data';
+import type { BusinessId, Product } from '@xangarro/domain';
+import type { ProductsRepository, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface FindFrequentProductosInput {

@@ -1,7 +1,7 @@
 /**
  * Driver-agnostic migration runner — the single source of truth.
  *
- * Executes the SQL from `@cachink/data/migrations` on any Drizzle-wrapped
+ * Executes the SQL from `@xangarro/data/migrations` on any Drizzle-wrapped
  * SQLite connection — expo-sqlite (mobile), Tauri sqlite-proxy (desktop),
  * or better-sqlite3 (tests). Tracks applied migrations in a bookkeeping
  * table `__cachink_migrations` so re-runs are idempotent.
@@ -129,7 +129,7 @@ function resolveMigrationSql(tag: string): string {
       new Error(
         `Migration '${tag}' is listed in the journal but missing ` +
           `from migrationSqlByTag. Did you forget to register its SQL ` +
-          `in @cachink/data/drizzle/migrations/index.ts?`,
+          `in @xangarro/data/drizzle/migrations/index.ts?`,
       ),
     );
   }

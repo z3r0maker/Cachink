@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/domain/format`.
+ * Public surface of `@xangarro/domain/format`.
  *
  * Pure presentation helpers — zero IO, zero React, zero Tamagui. The UI
  * layer imports from here to render currency / dates; nothing in domain

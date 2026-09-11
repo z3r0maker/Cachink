@@ -8,7 +8,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Client } from '@cachink/domain';
+import type { Client } from '@xangarro/domain';
 import { useClientsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

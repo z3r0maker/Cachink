@@ -15,7 +15,7 @@ import {
   type NewInventoryMovement,
   type Product,
   type ProductId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 
 export const ENTRADA_MOTIVOS: readonly EntryReason[] = [
   'Compra a proveedor',

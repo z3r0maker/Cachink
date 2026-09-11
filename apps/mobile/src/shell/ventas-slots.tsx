@@ -13,9 +13,9 @@ import {
   shareComprobante,
   useComprobanteHtml,
   useTranslation,
-} from '@cachink/ui';
-import type { useEliminarVenta } from '@cachink/ui';
-import type { Business, Sale } from '@cachink/domain';
+} from '@xangarro/ui';
+import type { useEliminarVenta } from '@xangarro/ui';
+import type { Business, Sale } from '@xangarro/domain';
 
 export function useShareComprobante(
   selected: Sale | null,

@@ -9,8 +9,8 @@
 
 import { useState, useCallback, useEffect, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Client, ClientId, PaymentMethod, Product, ProductId } from '@cachink/domain';
-import { formatMoney } from '@cachink/domain';
+import type { Client, ClientId, PaymentMethod, Product, ProductId } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { Btn, Combobox, Input, Modal } from '../../components/index';
 import { IntegerField } from '../../components/fields/index';
 import { useTranslation } from '../../i18n/index';

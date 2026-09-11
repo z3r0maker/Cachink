@@ -5,14 +5,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement } from 'react';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecurringExpensesRepository,
   makeNewRecurringExpense,
-} from '@cachink/testing';
+} from '@xangarro/testing';
 import { PendientesDirectorCard } from '../../src/screens/DirectorHome/pendientes-director-card';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen, waitFor } from '../test-utils';

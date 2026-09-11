@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi, afterEach } from 'vitest';
-import type { UserId } from '@cachink/domain';
+import type { UserId } from '@xangarro/domain';
 import { PinPrompt } from '../../../src/screens/Login/index';
 import { initI18n } from '../../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../../test-utils';

@@ -1,5 +1,5 @@
 /**
- * Public client surface for `@cachink/sync-lan/client`.
+ * Public client surface for `@xangarro/sync-lan/client`.
  *
  * UI-layer consumers (`packages/ui/src/sync/lan-bridge.ts`) import
  * `createLanSyncClient` via a dynamic `import()` so the LAN sync bundle

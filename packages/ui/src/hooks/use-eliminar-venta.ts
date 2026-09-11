@@ -6,7 +6,7 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { IsoDate, SaleId } from '@cachink/domain';
+import type { IsoDate, SaleId } from '@xangarro/domain';
 import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';

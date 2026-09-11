@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { ZERO, formatMoney, type EstadoDeResultados, type Money } from '@cachink/domain';
+import { ZERO, formatMoney, type EstadoDeResultados, type Money } from '@xangarro/domain';
 import { Card, HelpAccordion } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import type { useTranslation } from '../../i18n/index';

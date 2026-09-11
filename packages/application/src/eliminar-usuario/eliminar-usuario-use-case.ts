@@ -5,8 +5,8 @@
  * there is always at least one Director who can manage the business.
  */
 
-import type { UserId } from '@cachink/domain';
-import type { UsersRepository } from '@cachink/data';
+import type { UserId } from '@xangarro/domain';
+import type { UsersRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EliminarUsuarioInput {

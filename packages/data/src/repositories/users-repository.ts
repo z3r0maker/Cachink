@@ -3,14 +3,14 @@
  *
  * Follows the same interface/Drizzle/in-memory triple pattern as
  * SalesRepository. The `User` and `NewUser` domain types live in
- * `@cachink/domain/entities`; we re-export them here for convenience.
+ * `@xangarro/domain/entities`; we re-export them here for convenience.
  *
  * Phase 1 of the Feature Flags plan: user management + auth.
  * ADR-049: PIN for login, Password for recovery.
  */
 
-import type { User, UserRole } from '@cachink/domain';
-import type { BusinessId, UserId } from '@cachink/domain';
+import type { User, UserRole } from '@xangarro/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
 
 export type { User };
 

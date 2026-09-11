@@ -4,7 +4,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setLogStoreRef, getLogStoreRef } from '../../src/observability/log-store-ref';
-import type { LogStore } from '@cachink/observability';
+import type { LogStore } from '@xangarro/observability';
 
 const fakeStore = {
   writeAudit: async () => {},

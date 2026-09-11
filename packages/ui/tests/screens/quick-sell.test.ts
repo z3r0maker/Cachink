@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { makeProduct } from '../../../testing/src/fixtures/product';
 import { makeBusiness } from '../../../testing/src/fixtures/business';
 import { deriveVentaCategoria, buildQuickSellPayload } from '../../src/screens/Ventas/quick-sell';

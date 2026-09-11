@@ -7,7 +7,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { UserRole } from '@cachink/domain';
+import type { UserRole } from '@xangarro/domain';
 import { Btn, PasswordField, TextField } from '../../components/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
 import { useTranslation } from '../../i18n/index';

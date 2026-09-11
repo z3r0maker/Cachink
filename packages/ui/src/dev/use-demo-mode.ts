@@ -10,7 +10,7 @@
 
 import { useCallback, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import type { BusinessId, DeviceId, UserId } from '@cachink/domain';
+import type { BusinessId, DeviceId, UserId } from '@xangarro/domain';
 import { useRepositories } from '../app/repository-provider';
 import { useAppConfigRepository } from '../app/repository-provider';
 import {

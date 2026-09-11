@@ -12,8 +12,8 @@ import type {
   NewEmployee,
   PayrollFrequency,
   UpdateEmployee,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { Employee, EmployeesRepository } from '../employees-repository.js';
 import { employees } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';

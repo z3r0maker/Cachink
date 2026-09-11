@@ -10,7 +10,7 @@
 import { useState, type ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { ProductId } from '@cachink/domain';
+import type { ProductId } from '@xangarro/domain';
 import { ConfirmDialog } from '../../components/ConfirmDialog/index';
 import { colors, fontSizes, typography } from '../../theme';
 import type { CartItem } from '../../hooks/use-cart';

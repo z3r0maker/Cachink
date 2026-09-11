@@ -6,7 +6,7 @@
  */
 
 import { useState, type ReactElement } from 'react';
-import { fromPesos, toPesosString, type Employee } from '@cachink/domain';
+import { fromPesos, toPesosString, type Employee } from '@xangarro/domain';
 import type { EditEmpleadoInput } from '../../hooks/use-edit-empleado';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';

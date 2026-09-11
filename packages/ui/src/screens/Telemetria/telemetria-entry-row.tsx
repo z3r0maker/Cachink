@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { View, Text } from '@tamagui/core';
-import type { TimelineEntry } from '@cachink/observability';
+import type { TimelineEntry } from '@xangarro/observability';
 
 export interface TelemetriaEntryRowProps {
   readonly entry: TimelineEntry;

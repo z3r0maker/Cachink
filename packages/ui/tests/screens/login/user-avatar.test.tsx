@@ -6,8 +6,8 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { UserId } from '@cachink/domain';
-import { makeUser } from '@cachink/testing';
+import type { UserId } from '@xangarro/domain';
+import { makeUser } from '@xangarro/testing';
 import { UserAvatar, UserAvatarGrid } from '../../../src/screens/Login/user-avatar';
 import { initI18n } from '../../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../../test-utils';

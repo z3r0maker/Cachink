@@ -15,14 +15,14 @@
  */
 
 import type * as ReactPdf from '@react-pdf/renderer';
-import type { InformeMensual } from '@cachink/application';
+import type { InformeMensual } from '@xangarro/application';
 import {
   formatMoney,
   type EstadoDeResultados,
   type ExpenseCategory,
   type Money,
   type SaleCategory,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { colors, fontSizes, radii } from '../theme';
 
 type PdfNs = typeof ReactPdf;

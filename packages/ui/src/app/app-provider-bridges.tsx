@@ -7,14 +7,14 @@
 
 import { useCallback, useEffect, useMemo, useState, type ReactElement, type ReactNode } from 'react';
 import { QueryClient } from '@tanstack/react-query';
-import { DrizzleAppConfigRepository, readSyncState } from '@cachink/data';
+import { DrizzleAppConfigRepository, readSyncState } from '@xangarro/data';
 import {
   createLogStore,
   HttpRemoteLogStore,
   OutboxFlusher,
   type DeviceContext,
   type LogStore,
-} from '@cachink/observability';
+} from '@xangarro/observability';
 import { useDatabase } from '../database/index';
 import { AppConfigProvider, useAppConfigHydrated, useCrashReportingEnabled, useDeviceId, useUserId } from '../app-config/index';
 import { captureException, initSentryIfConsented } from '../telemetry/index';

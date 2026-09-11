@@ -1,15 +1,15 @@
 /**
  * Spin up a fresh in-memory SQLite with the complete Cachink schema.
- * Uses the same migration SQL as `@cachink/data`'s test harness and
+ * Uses the same migration SQL as `@xangarro/data`'s test harness and
  * the production runner — single source of truth.
  */
 
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
-import * as schema from '@cachink/data/schema';
-import type { CachinkDatabase } from '@cachink/data';
-import { migration0000Sql } from '@cachink/data/migrations';
-import { splitStatements, SCHEMA_VERSION } from '@cachink/data/migrator';
+import * as schema from '@xangarro/data/schema';
+import type { CachinkDatabase } from '@xangarro/data';
+import { migration0000Sql } from '@xangarro/data/migrations';
+import { splitStatements, SCHEMA_VERSION } from '@xangarro/data/migrator';
 
 export function makeFreshDb(): CachinkDatabase {
   const sqlite = new Database(':memory:');

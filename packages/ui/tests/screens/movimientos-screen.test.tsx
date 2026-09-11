@@ -12,7 +12,7 @@ import type {
   IsoTimestamp,
   Product,
   ProductId,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import { MovimientosScreen } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

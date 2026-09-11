@@ -4,7 +4,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Conversion } from '@cachink/domain';
+import type { Conversion } from '@xangarro/domain';
 import { useConversionsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

@@ -1,8 +1,8 @@
 /**
  * ConversionsRepository — executed conversion records. Phase 8.
  */
-import type { Conversion } from '@cachink/domain';
-import type { BusinessId, ConversionId, ConversionRecetaId } from '@cachink/domain';
+import type { Conversion } from '@xangarro/domain';
+import type { BusinessId, ConversionId, ConversionRecetaId } from '@xangarro/domain';
 
 export type { Conversion };
 

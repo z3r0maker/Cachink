@@ -4,7 +4,7 @@
  */
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { AttrDef, Product } from '@cachink/domain';
+import type { AttrDef, Product } from '@xangarro/domain';
 import { Tag } from '../Tag/tag';
 import { colors, fontSizes, typography } from '../../theme';
 

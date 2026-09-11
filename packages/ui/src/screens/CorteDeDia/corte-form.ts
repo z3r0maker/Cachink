@@ -7,7 +7,7 @@
  */
 
 import { useState } from 'react';
-import { ZERO, fromPesos, type Money } from '@cachink/domain';
+import { ZERO, fromPesos, type Money } from '@xangarro/domain';
 
 export interface CorteFormState {
   contadoPesos: string;

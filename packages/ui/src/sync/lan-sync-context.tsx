@@ -4,9 +4,9 @@
  * `useLanSync()` returns an inert snapshot so every consumer (primarily
  * `SyncStatusBadge` in the AppShell) can call the hook unconditionally.
  *
- * Shape matches the rest of `@cachink/ui/sync`: lazy-imported behind a
+ * Shape matches the rest of `@xangarro/ui/sync`: lazy-imported behind a
  * narrow interface so Local-standalone / Cloud bundles never pull in
- * `@cachink/sync-lan`. The provider simply stores the handle — it does
+ * `@xangarro/sync-lan`. The provider simply stores the handle — it does
  * NOT call `initLanSync` — because lifecycle ownership belongs to the
  * shell route, not the UI tree.
  */

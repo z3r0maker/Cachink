@@ -1,8 +1,8 @@
 // @vitest-environment node
 /**
  * Lint-style boundary test — asserts that nothing under `packages/ui/src/**`
- * contains a STATIC import of `@cachink/sync-lan`. Only the dynamic
- * `import('@cachink/sync-lan')` form is allowed so Local-standalone and
+ * contains a STATIC import of `@xangarro/sync-lan`. Only the dynamic
+ * `import('@xangarro/sync-lan')` form is allowed so Local-standalone and
  * Cloud bundles never include the LAN sync code (CLAUDE.md §7 / ADR-029).
  *
  * Runs in the node env (not jsdom) because it walks the filesystem via
@@ -30,7 +30,7 @@ async function walk(dir: string, out: string[]): Promise<void> {
   }
 }
 
-describe('UI layer — no static imports of @cachink/sync-lan', () => {
+describe('UI layer — no static imports of @xangarro/sync-lan', () => {
   it('passes for every file under packages/ui/src/**', async () => {
     const files: string[] = [];
     await walk(UI_SRC, files);

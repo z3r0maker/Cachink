@@ -20,9 +20,9 @@
  * "no value" instead of throwing.
  */
 
-import type { BusinessId } from '@cachink/domain';
+import type { BusinessId } from '@xangarro/domain';
 import { useQuery } from '@tanstack/react-query';
-import { readSyncState, type CachinkDatabase } from '@cachink/data';
+import { readSyncState, type CachinkDatabase } from '@xangarro/data';
 import { useDatabase } from '../database/_internal';
 import { syncKeys } from './query-keys';
 

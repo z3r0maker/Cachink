@@ -3,8 +3,8 @@
  * to stay under the 200-line and complexity budgets.
  */
 
-import type { BusinessId, Sale, UserId } from '@cachink/domain';
-import type { LogStore } from '@cachink/observability';
+import type { BusinessId, Sale, UserId } from '@xangarro/domain';
+import type { LogStore } from '@xangarro/observability';
 import { addAuditBreadcrumb } from '../../observability/sentry-breadcrumbs';
 
 interface AuditContext {

@@ -8,7 +8,7 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type Sale } from '@cachink/domain';
+import { formatMoney, type Sale } from '@xangarro/domain';
 import { colors, fontSizes, radii, typography } from '../../theme';
 import { useTranslation } from '../../i18n/index';
 

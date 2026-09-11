@@ -17,8 +17,8 @@ import {
   type Expense,
   type IsoDate,
   type PeriodRange,
-} from '@cachink/domain';
-import type { BusinessesRepository, ExpensesRepository, SalesRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import type { BusinessesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
 import { useBusinessesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 

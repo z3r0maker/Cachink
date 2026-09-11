@@ -1,5 +1,5 @@
 /**
- * @cachink/ui — shared cross-platform components.
+ * @xangarro/ui — shared cross-platform components.
  *
  * The 11 Phase 1A primitives (Btn, Input, Tag, Modal, EmptyState, SectionTitle,
  * Card, Kpi, Gauge, BottomTabBar, TopBar) land after Phase 0 closes. Today
@@ -24,7 +24,7 @@ export * from './notifications/index';
 export * from './telemetry/index';
 // The Tamagui config has to be mounted in each app's shell via
 // <TamaguiProvider config={tamaguiConfig}>. Re-exported here so app shells
-// never reach into `@cachink/ui`'s internal paths.
+// never reach into `@xangarro/ui`'s internal paths.
 export { tamaguiConfig } from './tamagui.config';
 export type { AppTamaguiConfig } from './tamagui.config';
 // Audit Round 2 K — app shells need the i18n hook to render

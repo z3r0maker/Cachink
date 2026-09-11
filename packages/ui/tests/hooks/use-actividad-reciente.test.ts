@@ -3,9 +3,9 @@
  */
 
 import { describe, expect, it } from 'vitest';
-import type { DeviceId, IsoDate } from '@cachink/domain';
-import { makeNewExpense, makeNewSale } from '@cachink/testing';
-import { InMemoryExpensesRepository, InMemorySalesRepository } from '@cachink/testing';
+import type { DeviceId, IsoDate } from '@xangarro/domain';
+import { makeNewExpense, makeNewSale } from '@xangarro/testing';
+import { InMemoryExpensesRepository, InMemorySalesRepository } from '@xangarro/testing';
 import { mergeActividad } from '../../src/hooks/use-actividad-reciente';
 
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;

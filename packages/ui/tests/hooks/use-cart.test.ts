@@ -8,8 +8,8 @@
  */
 import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
-import type { ProductId } from '@cachink/domain';
-import type { Product } from '@cachink/domain';
+import type { ProductId } from '@xangarro/domain';
+import type { Product } from '@xangarro/domain';
 import { useCart } from '../../src/hooks/use-cart';
 
 // ---------------------------------------------------------------------------

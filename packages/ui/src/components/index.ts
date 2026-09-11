@@ -1,9 +1,9 @@
 /**
- * Barrel for all reusable components in `@cachink/ui`.
+ * Barrel for all reusable components in `@xangarro/ui`.
  *
  * Every new component gets one line here: `export * from './<Name>/index';`.
- * Both `apps/mobile` and `apps/desktop` import by name from `@cachink/ui`
- * (via `.` entry) or from `@cachink/ui/components` (this file).
+ * Both `apps/mobile` and `apps/desktop` import by name from `@xangarro/ui`
+ * (via `.` entry) or from `@xangarro/ui/components` (this file).
  */
 export * from './HelloBadge/index';
 export * from './Btn/index';

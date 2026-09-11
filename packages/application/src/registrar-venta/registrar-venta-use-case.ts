@@ -13,15 +13,15 @@
  * Phase 5: `stockEnabled` flag supersedes `tipoNegocio` for stock decisions.
  */
 
-import { NewSaleSchema, today, type CajaTurnoId, type NewSale, type Sale, type UserId } from '@cachink/domain';
-import { CajaNoAbiertaError } from '@cachink/domain';
+import { NewSaleSchema, today, type CajaTurnoId, type NewSale, type Sale, type UserId } from '@xangarro/domain';
+import { CajaNoAbiertaError } from '@xangarro/domain';
 import type {
   CajaTurnosRepository,
   ClientsRepository,
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
-} from '@cachink/data';
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 function currentHHMM(): string {

@@ -15,7 +15,7 @@ import {
   BusinessType,
   useAppConfigRepository,
   type BusinessTypeChoice,
-} from '@cachink/ui';
+} from '@xangarro/ui';
 
 export default function WizardBusinessTypeRoute(): ReactElement {
   const router = useRouter();

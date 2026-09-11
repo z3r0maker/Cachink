@@ -19,7 +19,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { clearSyncState, readSyncState, type CachinkDatabase } from '@cachink/data';
+import { clearSyncState, readSyncState, type CachinkDatabase } from '@xangarro/data';
 import { useDatabase } from '../database/_internal';
 import { useMode } from '../app-config/index';
 import { useLanSync } from '../hooks/use-lan-sync';

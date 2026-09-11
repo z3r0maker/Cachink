@@ -2,7 +2,7 @@
 
 import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
-import type { Indicadores } from '@cachink/domain';
+import type { Indicadores } from '@xangarro/domain';
 import { SectionTitle } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { colors, fontSizes } from '../../theme';

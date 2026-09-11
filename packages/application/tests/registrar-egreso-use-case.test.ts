@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, NewExpense, RecurringExpenseId } from '@cachink/domain';
+import type { BusinessId, NewExpense, RecurringExpenseId } from '@xangarro/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecurringExpensesRepository,

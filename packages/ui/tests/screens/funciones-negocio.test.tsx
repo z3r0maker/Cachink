@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import { FuncionesNegocioScreen } from '../../src/screens/FuncionesNegocio/funciones-negocio-screen';
 import { FeatureFlagCard } from '../../src/screens/FuncionesNegocio/feature-flag-card';
 import { FLAG_DISPLAY_INFO } from '../../src/screens/FuncionesNegocio/flag-descriptions';

@@ -1,5 +1,5 @@
 /**
- * Public surface of `@cachink/ui/i18n`.
+ * Public surface of `@xangarro/ui/i18n`.
  *
  * Apps consume `initI18n()` once from their shell (see
  * `apps/mobile/src/shell/i18n.ts` and `apps/desktop/src/shell/i18n.ts`),

@@ -6,7 +6,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import { filterAlertsByFlags, type BusinessId, type DirectorAlert } from '@cachink/domain';
+import { filterAlertsByFlags, type BusinessId, type DirectorAlert } from '@xangarro/domain';
 import { useDirectorAlertsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { directorAlertKeys } from './query-keys';

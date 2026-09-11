@@ -10,8 +10,8 @@ import {
   InMemorySalesRepository,
   makeNewDayClose,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, DeviceId, IsoDate } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import { composeEfectivoEsperado } from '../../src/hooks/use-efectivo-esperado';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;

@@ -7,7 +7,7 @@
  * clean slate — same behaviour for the in-memory and Drizzle impls.
  */
 
-import type { DeviceId } from '@cachink/domain';
+import type { DeviceId } from '@xangarro/domain';
 
 /**
  * Fixed device id used across every contract test. Using a constant makes

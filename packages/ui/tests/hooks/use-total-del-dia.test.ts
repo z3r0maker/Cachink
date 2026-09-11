@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { totalDelDia } from '../../src/hooks/use-total-del-dia';
-import { makeSale } from '@cachink/testing';
+import { makeSale } from '@xangarro/testing';
 
 describe('totalDelDia', () => {
   it('returns 0n for empty array', () => {

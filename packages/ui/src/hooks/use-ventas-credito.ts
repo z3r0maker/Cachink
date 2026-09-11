@@ -10,7 +10,7 @@
 
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { BusinessId, ClientId, IsoDate, Sale } from '@cachink/domain';
+import type { BusinessId, ClientId, IsoDate, Sale } from '@xangarro/domain';
 import { useClientsRepository, useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { ventasCreditoKeys } from './query-keys';

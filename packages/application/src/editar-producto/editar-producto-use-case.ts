@@ -14,8 +14,8 @@
  * for misuse from JS callers.
  */
 
-import { ProductSchema, type Product, type ProductId } from '@cachink/domain';
-import type { ProductPatch, ProductsRepository } from '@cachink/data';
+import { ProductSchema, type Product, type ProductId } from '@xangarro/domain';
+import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EditarProductoInput {

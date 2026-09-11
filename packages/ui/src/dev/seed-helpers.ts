@@ -4,7 +4,7 @@
  * Pure functions — no side effects, no imports from app layer.
  */
 
-import type { IsoDate, IsoTimestamp } from '@cachink/domain';
+import type { IsoDate, IsoTimestamp } from '@xangarro/domain';
 
 /** Format a Date to YYYY-MM-DD (IsoDate). */
 export function toIsoDate(d: Date): IsoDate {

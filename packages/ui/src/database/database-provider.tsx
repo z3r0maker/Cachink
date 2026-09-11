@@ -2,7 +2,7 @@
  * DatabaseProvider — Vite/Vitest/Tauri fallback variant.
  *
  * This file is the "shared entry" in the CLAUDE.md §5.3 platform-extension
- * pattern. Both consumers of `@cachink/ui` and tools that don't honour
+ * pattern. Both consumers of `@xangarro/ui` and tools that don't honour
  * platform extensions (Vitest, Storybook, Playwright) resolve here by
  * default. Metro auto-picks `./database-provider.native.tsx` on mobile.
  *

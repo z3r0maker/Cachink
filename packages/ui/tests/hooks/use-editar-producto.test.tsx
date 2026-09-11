@@ -6,13 +6,13 @@ import { describe, expect, it, beforeEach } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryProductsRepository,
   TEST_DEVICE_ID,
   makeNewProduct,
-} from '@cachink/testing';
-import type { BusinessId, ProductId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, ProductId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEditarProducto } from '../../src/hooks/use-editar-producto';
 import { TamaguiProvider } from '@tamagui/core';

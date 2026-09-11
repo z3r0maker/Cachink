@@ -5,14 +5,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
-import type { BusinessId, DeviceId } from '@cachink/domain';
-import { InMemoryInventoryMovementsRepository, InMemoryProductsRepository } from '@cachink/testing';
+import type { BusinessId, DeviceId } from '@xangarro/domain';
+import { InMemoryInventoryMovementsRepository, InMemoryProductsRepository } from '@xangarro/testing';
 import {
   InMemoryNotificationScheduler,
   useScheduleStockLowCheck,
   STOCK_LOW_NOTIFICATION_ID,
 } from '../../src/index';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, waitFor } from '../test-utils';

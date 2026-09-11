@@ -3,7 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { GastoTab } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';

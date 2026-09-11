@@ -16,7 +16,7 @@ import {
   type DeviceId,
   type IsrDefaults,
   type RegimenFiscal,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type { OptionCardItem } from '../../components/OptionCardGroup/index';
 
 /** Backward-compat re-export — existing consumers import REGIMENES/Regimen. */

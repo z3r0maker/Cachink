@@ -7,7 +7,7 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { Business } from '@cachink/domain';
+import type { Business } from '@xangarro/domain';
 import { Btn, Card, Icon, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { AppMode } from '../../app-config/index';

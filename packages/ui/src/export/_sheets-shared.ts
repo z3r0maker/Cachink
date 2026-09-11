@@ -4,8 +4,8 @@
  */
 
 import type ExcelJS from 'exceljs';
-import type { ExportDataset } from '@cachink/application';
-import type { Money } from '@cachink/domain';
+import type { ExportDataset } from '@xangarro/application';
+import type { Money } from '@xangarro/domain';
 
 /** ES-MX currency format applied to every monetary column. */
 export const MONEY_FORMAT = '"$"#,##0.00';

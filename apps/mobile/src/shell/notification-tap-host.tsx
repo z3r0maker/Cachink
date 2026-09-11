@@ -19,8 +19,8 @@
 import { useEffect, useRef, useState, type ReactElement } from 'react';
 import * as Notifications from 'expo-notifications';
 import { useRouter } from 'expo-router';
-import { useUserId, useMarkAlertRead } from '@cachink/ui';
-import type { DirectorAlertId } from '@cachink/domain';
+import { useUserId, useMarkAlertRead } from '@xangarro/ui';
+import type { DirectorAlertId } from '@xangarro/domain';
 
 // ── Foreground handler ─────────────────────────────────────────────
 // Show banner + badge + sound even when the app is open.
@@ -46,31 +46,43 @@ function extractPayload(
 }
 
 // ── Component ──────────────────────────────────────────────────────
-export function NotificationTapHost(): ReactElement | null {
-  const router = useRouter();
-  const userId = useUserId();
-  const markRead = useMarkAlertRead();
+interface TapHandler {
+  readonly handleTap: (payload: NotificationPayload) => void;
+  readonly pendingRoute: string | null;
+  readonly pendingAlertId: string | null;
+  readonly clearPending: () => void;
+}
 
-  // Pending route when the app is locked at tap time
+/** Navigate immediately when unlocked; otherwise queue the route until unlock. */
+function useNotificationTapHandler(userId: string | null): TapHandler {
+  const router = useRouter();
+  const markRead = useMarkAlertRead();
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
   const [pendingAlertId, setPendingAlertId] = useState<string | null>(null);
-  const coldStartHandled = useRef(false);
-
-  // Handle notification tap — navigate or queue
   const handleTap = (payload: NotificationPayload): void => {
     const route = payload.actionRoute ?? '/notificaciones';
     const alertId = payload.alertId ?? null;
-
     if (userId !== null) {
-      // Unlocked — navigate immediately
       if (alertId) markRead.mutate(alertId as DirectorAlertId);
       router.push(route as never);
-    } else {
-      // Locked — queue until QuickSwitchGate passes
-      setPendingRoute(route);
-      setPendingAlertId(alertId);
+      return;
     }
+    setPendingRoute(route);
+    setPendingAlertId(alertId);
   };
+  const clearPending = (): void => {
+    if (pendingAlertId) markRead.mutate(pendingAlertId as DirectorAlertId);
+    if (pendingRoute) router.push(pendingRoute as never);
+    setPendingRoute(null);
+    setPendingAlertId(null);
+  };
+  return { handleTap, pendingRoute, pendingAlertId, clearPending };
+}
+
+export function NotificationTapHost(): ReactElement | null {
+  const userId = useUserId();
+  const { handleTap, pendingRoute, clearPending } = useNotificationTapHandler(userId);
+  const coldStartHandled = useRef(false);
 
   // ── Warm-start tap listener ────────────────────────────────────
   useEffect(() => {
@@ -78,29 +90,20 @@ export function NotificationTapHost(): ReactElement | null {
       (response) => handleTap(extractPayload(response)),
     );
     return () => subscription.remove();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   // ── Cold-start tap (app was killed) ────────────────────────────
   useEffect(() => {
     if (coldStartHandled.current) return;
     coldStartHandled.current = true;
-
     void Notifications.getLastNotificationResponseAsync().then((response) => {
       if (response) handleTap(extractPayload(response));
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Flush pending route once user unlocks ──────────────────────
   useEffect(() => {
-    if (userId !== null && pendingRoute !== null) {
-      if (pendingAlertId) markRead.mutate(pendingAlertId as DirectorAlertId);
-      router.push(pendingRoute as never);
-      setPendingRoute(null);
-      setPendingAlertId(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (userId !== null && pendingRoute !== null) clearPending();
   }, [userId, pendingRoute]);
 
   // Renderless — all logic lives in effects.

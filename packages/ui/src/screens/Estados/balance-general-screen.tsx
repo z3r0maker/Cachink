@@ -10,7 +10,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { BalanceGeneral } from '@cachink/domain';
+import type { BalanceGeneral } from '@xangarro/domain';
 import { SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { EmptyCard, ResumenCard } from './balance-general-cards';

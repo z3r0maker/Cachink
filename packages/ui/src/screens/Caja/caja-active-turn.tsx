@@ -7,7 +7,7 @@
 
 import { type ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { CajaTurno } from '@cachink/domain';
+import type { CajaTurno } from '@xangarro/domain';
 import { CajaStatusCard } from './caja-status-card';
 import { CajaBalanceCard } from './caja-balance-card';
 import { Btn } from '../../components/Btn/btn';

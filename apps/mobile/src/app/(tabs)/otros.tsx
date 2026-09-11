@@ -9,8 +9,8 @@
 import type { ReactElement } from 'react';
 import { View } from 'react-native';
 import { useRouter } from 'expo-router';
-import { OtrosScreen, useFeatureFlags, useRole, ResetDemoAction } from '@cachink/ui';
-import { nativeResetDatabase } from '@cachink/ui/database/reset-native';
+import { OtrosScreen, useFeatureFlags, useRole, ResetDemoAction } from '@xangarro/ui';
+import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 
 function reloadApp(): void {
   // In dev, DevSettings.reload() restarts the JS bundle

@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate } from '@cachink/domain';
-import type { RecurringExpensesRepository } from '@cachink/data';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
+import type { RecurringExpensesRepository } from '@xangarro/data';
 import { makeNewRecurringExpense } from '../fixtures/recurring-expense.js';
 
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7A01' as BusinessId;

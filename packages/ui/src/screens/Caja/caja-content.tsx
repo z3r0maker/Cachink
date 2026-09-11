@@ -12,7 +12,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { ScrollView } from 'react-native';
-import type { CajaMovimientoTipo, CajaTurno, Money, UserId } from '@cachink/domain';
+import type { CajaMovimientoTipo, CajaTurno, Money, UserId } from '@xangarro/domain';
 import { CajaActiveTurnView } from './caja-active-turn';
 import { CajaOpenTurnView } from './caja-open-turn-view';
 import { MovimientoSheetWired } from './movimiento-sheet-wired';

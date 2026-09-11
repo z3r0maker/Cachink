@@ -8,7 +8,7 @@
 
 import { useRef, type ReactElement } from 'react';
 import { type TextInput } from 'react-native';
-import type { PayrollFrequency } from '@cachink/domain';
+import type { PayrollFrequency } from '@xangarro/domain';
 import { focusRef, MoneyField, TextField } from '../../components/fields/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
 import type { useTranslation } from '../../i18n/index';

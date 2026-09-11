@@ -13,7 +13,7 @@ import {
   type ProductColor,
   type ProductIcon,
   type UsoProducto,
-} from '@cachink/domain';
+} from '@xangarro/domain';
 import type { OptionCardItem } from '../../components/OptionCardGroup/index';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
 

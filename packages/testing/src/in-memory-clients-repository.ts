@@ -9,9 +9,9 @@ import type {
   DeviceId,
   IsoTimestamp,
   NewClient,
-} from '@cachink/domain';
-import { newEntityId, now } from '@cachink/domain';
-import type { ClientPatch, ClientsRepository } from '@cachink/data';
+} from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
+import type { ClientPatch, ClientsRepository } from '@xangarro/data';
 
 export class InMemoryClientsRepository implements ClientsRepository {
   private readonly rows = new Map<ClientId, Client>();

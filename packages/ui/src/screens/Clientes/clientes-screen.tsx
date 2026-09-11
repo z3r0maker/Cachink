@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { View } from '@tamagui/core';
-import type { Client, Money, Sale } from '@cachink/domain';
+import type { Client, Money, Sale } from '@xangarro/domain';
 import {
   Btn,
   EmptyState,

@@ -7,7 +7,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type Money } from '@cachink/domain';
+import { formatMoney, type Money } from '@xangarro/domain';
 import { Icon } from '../../components/Icon/index';
 import { colors, fontSizes, radii, typography } from '../../theme';
 

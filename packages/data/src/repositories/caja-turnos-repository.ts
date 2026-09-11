@@ -4,8 +4,8 @@
  * Phase 6 of the Feature Flags plan: Caja.
  */
 
-import type { CajaTurno } from '@cachink/domain';
-import type { BusinessId, CajaTurnoId, UserId } from '@cachink/domain';
+import type { CajaTurno } from '@xangarro/domain';
+import type { BusinessId, CajaTurnoId, UserId } from '@xangarro/domain';
 
 export type { CajaTurno };
 

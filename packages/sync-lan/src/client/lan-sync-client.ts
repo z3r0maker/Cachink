@@ -2,7 +2,7 @@
  * LanSyncClient — the user-facing orchestrator.
  *
  * Wires push + pull + WebSocket together, exposes a status listener API
- * for `@cachink/ui/sync/lan-bridge.ts`, and handles `retryNow()` for the
+ * for `@xangarro/ui/sync/lan-bridge.ts`, and handles `retryNow()` for the
  * "SIN CONEXIÓN · REINTENTANDO" SyncStatusBadge variant (Slice 5 C18).
  */
 

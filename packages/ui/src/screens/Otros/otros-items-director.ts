@@ -4,7 +4,7 @@
  * Extracted from otros-items.ts to keep each file under 200 lines.
  */
 
-import type { FeatureFlags } from '@cachink/domain';
+import type { FeatureFlags } from '@xangarro/domain';
 import type { OtrosItem, FlagItem } from './otros-items';
 
 const DIRECTOR_ALWAYS_ITEMS: readonly OtrosItem[] = [

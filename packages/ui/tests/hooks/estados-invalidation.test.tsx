@@ -16,7 +16,7 @@ import { describe, expect, it, beforeEach, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { MockRepositoryProvider } from '@cachink/testing/ui';
+import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryDayClosesRepository,
@@ -28,8 +28,8 @@ import {
   makeNewExpense,
   makeNewProduct,
   makeNewSale,
-} from '@cachink/testing';
-import type { BusinessId, IsoDate, UserId } from '@cachink/domain';
+} from '@xangarro/testing';
+import type { BusinessId, IsoDate, UserId } from '@xangarro/domain';
 import { TamaguiProvider } from '@tamagui/core';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useRegistrarVenta } from '../../src/hooks/use-registrar-venta';

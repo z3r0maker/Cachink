@@ -1,5 +1,5 @@
 /**
- * i18next instance for `@cachink/ui`.
+ * i18next instance for `@xangarro/ui`.
  *
  * The single source of truth for i18n bootstrapping. Both apps (mobile and
  * desktop) call `initI18n()` from their shells before rendering any

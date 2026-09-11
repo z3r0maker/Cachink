@@ -12,8 +12,8 @@
  */
 
 import { useEffect, useState, type ReactElement, type ReactNode } from 'react';
-import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '@cachink/domain';
-import type { AppConfigRepository } from '@cachink/data';
+import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '@xangarro/domain';
+import type { AppConfigRepository } from '@xangarro/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
 

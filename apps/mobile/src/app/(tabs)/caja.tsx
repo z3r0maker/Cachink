@@ -13,7 +13,7 @@
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CajaContent, operativoCajaToolItems, useFeatureFlags, useRole } from '@cachink/ui';
+import { CajaContent, operativoCajaToolItems, useFeatureFlags, useRole } from '@xangarro/ui';
 
 export default function CajaTabRoute(): ReactElement {
   const router = useRouter();

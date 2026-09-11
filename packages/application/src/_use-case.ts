@@ -1,5 +1,5 @@
 /**
- * Marker interface for every use-case in @cachink/application.
+ * Marker interface for every use-case in @xangarro/application.
  *
  * Use-cases are classes with constructor-injected repositories (never
  * concrete impls) and a single public `execute(input)` method. Input

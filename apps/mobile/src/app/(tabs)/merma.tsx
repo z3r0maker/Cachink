@@ -6,7 +6,7 @@
  * (tipo='salida', motivo='Merma / daño').
  */
 import type { ReactElement } from 'react';
-import { MermaScreen, MermaCheckoutSheet } from '@cachink/ui';
+import { MermaScreen, MermaCheckoutSheet } from '@xangarro/ui';
 import { useMermaState } from './_merma-hooks';
 
 export default function MermaRoute(): ReactElement {

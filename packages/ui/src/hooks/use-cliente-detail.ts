@@ -5,8 +5,8 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Client, ClientId, ClientPayment, Money, Sale } from '@cachink/domain';
-import { ZERO } from '@cachink/domain';
+import type { Client, ClientId, ClientPayment, Money, Sale } from '@xangarro/domain';
+import { ZERO } from '@xangarro/domain';
 import {
   useClientPaymentsRepository,
   useClientsRepository,

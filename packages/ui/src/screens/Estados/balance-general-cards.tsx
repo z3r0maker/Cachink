@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type BalanceGeneral, type Money, ZERO } from '@cachink/domain';
+import { formatMoney, type BalanceGeneral, type Money, ZERO } from '@xangarro/domain';
 import { Card, DeltaIndicator, HealthIndicator, SectionTitle } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';

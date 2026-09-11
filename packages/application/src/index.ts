@@ -1,8 +1,8 @@
 /**
- * @cachink/application — Use-case layer.
+ * @xangarro/application — Use-case layer.
  *
  * Use-cases orchestrate domain logic + repositories. They depend on
- * repository **interfaces** (from @cachink/data) and receive concrete
+ * repository **interfaces** (from @xangarro/data) and receive concrete
  * implementations via constructor injection at the composition root of
  * each app. See CLAUDE.md §4.3.
  *
