@@ -59,11 +59,7 @@ import {
   ProcesarGastoRecurrenteUseCase,
   DescartarGastoRecurrenteUseCase,
   GenerarInformeMensualUseCase,
-  CrearUsuarioUseCase,
   AutenticarUsuarioUseCase,
-  CambiarPinUseCase,
-  RecuperarPinUseCase,
-  EliminarUsuarioUseCase,
   ToggleFeatureFlagUseCase,
   EjecutarConversionUseCase,
 } from '../../../application/src/index.js';
@@ -107,11 +103,7 @@ export interface FullstackUseCases {
   readonly procesarGastoRecurrente: ProcesarGastoRecurrenteUseCase;
   readonly descartarGastoRecurrente: DescartarGastoRecurrenteUseCase;
   readonly generarInforme: GenerarInformeMensualUseCase;
-  readonly crearUsuario: CrearUsuarioUseCase;
   readonly autenticarUsuario: AutenticarUsuarioUseCase;
-  readonly cambiarPin: CambiarPinUseCase;
-  readonly recuperarPin: RecuperarPinUseCase;
-  readonly eliminarUsuario: EliminarUsuarioUseCase;
   readonly toggleFeatureFlag: ToggleFeatureFlagUseCase;
   readonly ejecutarConversion: EjecutarConversionUseCase;
 }
@@ -181,11 +173,7 @@ export function buildHarness(opts?: {
     procesarGastoRecurrente: new ProcesarGastoRecurrenteUseCase(repos.expenses, repos.recurring),
     descartarGastoRecurrente: new DescartarGastoRecurrenteUseCase(repos.recurring),
     generarInforme: new GenerarInformeMensualUseCase(repos.sales, repos.expenses, repos.businesses),
-    crearUsuario: new CrearUsuarioUseCase(repos.users),
     autenticarUsuario: new AutenticarUsuarioUseCase(repos.users),
-    cambiarPin: new CambiarPinUseCase(repos.users),
-    recuperarPin: new RecuperarPinUseCase(repos.users),
-    eliminarUsuario: new EliminarUsuarioUseCase(repos.users),
     toggleFeatureFlag: new ToggleFeatureFlagUseCase(repos.businesses),
     ejecutarConversion: new EjecutarConversionUseCase(
       repos.recetas,

@@ -6,6 +6,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
+import { hashSync } from 'bcryptjs';
 import type { BusinessId, SaleId, UserId } from '@xangarro/domain';
 import {
   InMemoryCancelacionLogsRepository,
@@ -16,9 +17,7 @@ import {
   TEST_DEVICE_ID,
   makeNewProduct,
   makeNewSale,
-  makeNewUser,
 } from '../../testing/src/index.js';
-import { CrearUsuarioUseCase } from '../src/index.js';
 import { CancelarVentaUseCase } from '../src/cancelar-venta/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -29,10 +28,9 @@ describe('CancelarVentaUseCase', () => {
   let products: InMemoryProductsRepository;
   let movements: InMemoryInventoryMovementsRepository;
   let logs: InMemoryCancelacionLogsRepository;
-  let crearUsuario: CrearUsuarioUseCase;
   let useCase: CancelarVentaUseCase;
 
-  let directorId: UserId;
+  let cajeroId: UserId;
 
   beforeEach(async () => {
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
@@ -41,19 +39,17 @@ describe('CancelarVentaUseCase', () => {
     movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
     logs = new InMemoryCancelacionLogsRepository(TEST_DEVICE_ID);
 
-    crearUsuario = new CrearUsuarioUseCase(users);
     useCase = new CancelarVentaUseCase(sales, users, products, movements, logs);
 
-    // Seed a director user (bcrypt-hashed PIN via CrearUsuarioUseCase)
-    const director = await crearUsuario.execute(
-      makeNewUser({
-        businessId: BIZ,
-        nombre: 'Director Test',
-        pin: '123456',
-        role: 'director',
-      }),
-    );
-    directorId = director.id;
+    // Seed an operator the portal allowed to cancel sales.
+    const cajero = await users.create({
+      nombre: 'Cajero Test',
+      pinHash: hashSync('123456', 4),
+      avatarColor: 'blue',
+      businessId: BIZ,
+      permissions: { canCancelSales: true },
+    });
+    cajeroId = cajero.id;
   });
 
   it('cancels a cash sale and returns cashToReturn', async () => {
@@ -63,7 +59,7 @@ describe('CancelarVentaUseCase', () => {
 
     const result = await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Cliente cambió de opinión',
       businessId: BIZ,
@@ -83,7 +79,7 @@ describe('CancelarVentaUseCase', () => {
 
     const result = await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Error en cobro',
       businessId: BIZ,
@@ -107,7 +103,7 @@ describe('CancelarVentaUseCase', () => {
 
     const result = await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Devolución',
       businessId: BIZ,
@@ -132,7 +128,7 @@ describe('CancelarVentaUseCase', () => {
 
     const result = await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Devolución',
       businessId: BIZ,
@@ -150,7 +146,7 @@ describe('CancelarVentaUseCase', () => {
 
     await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Producto defectuoso',
       businessId: BIZ,
@@ -160,7 +156,7 @@ describe('CancelarVentaUseCase', () => {
     const log = await logs.findBySaleId(sale.id);
     expect(log).not.toBeNull();
     expect(log!.motivo).toBe('Producto defectuoso');
-    expect(log!.cancelledByUserId).toBe(directorId);
+    expect(log!.cancelledByUserId).toBe(cajeroId);
     expect(log!.montoOriginalCentavos).toBe(2000n);
   });
 
@@ -170,7 +166,7 @@ describe('CancelarVentaUseCase', () => {
     await expect(
       useCase.execute({
         saleId: sale.id,
-        userId: directorId,
+        userId: cajeroId,
         pin: '999999',
         motivo: 'Test',
         businessId: BIZ,
@@ -194,14 +190,12 @@ describe('CancelarVentaUseCase', () => {
   });
 
   it('rejects for operativo user without canCancelSales permission', async () => {
-    const operativo = await crearUsuario.execute(
-      makeNewUser({
-        businessId: BIZ,
-        nombre: 'Operativo Test',
-        pin: '654321',
-        role: 'operativo',
-      }),
-    );
+    const operativo = await users.create({
+      nombre: 'Operativo Test',
+      pinHash: hashSync('654321', 4),
+      avatarColor: 'green',
+      businessId: BIZ,
+    });
     const sale = await sales.create(makeNewSale({ businessId: BIZ }));
 
     await expect(
@@ -221,7 +215,7 @@ describe('CancelarVentaUseCase', () => {
     await expect(
       useCase.execute({
         saleId: fakeSaleId,
-        userId: directorId,
+        userId: cajeroId,
         pin: '123456',
         motivo: 'Test',
         businessId: BIZ,
@@ -234,7 +228,7 @@ describe('CancelarVentaUseCase', () => {
     // Cancel it first
     await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'First cancel',
       businessId: BIZ,
@@ -245,7 +239,7 @@ describe('CancelarVentaUseCase', () => {
     await expect(
       useCase.execute({
         saleId: sale.id,
-        userId: directorId,
+        userId: cajeroId,
         pin: '123456',
         motivo: 'Double cancel',
         businessId: BIZ,
@@ -266,7 +260,7 @@ describe('CancelarVentaUseCase', () => {
 
     const result = await useCase.execute({
       saleId: sale.id,
-      userId: directorId,
+      userId: cajeroId,
       pin: '123456',
       motivo: 'Devolución',
       businessId: BIZ,

@@ -13,7 +13,7 @@
  */
 
 import { compare } from 'bcryptjs';
-import { today, parseUserPermissions, canUserCancelSales, type Sale } from '@xangarro/domain';
+import { today, canUserCancelSales, type Sale } from '@xangarro/domain';
 import type { BusinessId, SaleId, UserId } from '@xangarro/domain';
 import type {
   CancelacionLogsRepository,
@@ -81,9 +81,7 @@ export class CancelarVentaUseCase implements UseCase<CancelarVentaInput, Cancela
     const pinOk = await compare(pin, user.pinHash);
     if (!pinOk) throw new TypeError('PIN incorrecto');
 
-    const raw = (user as Record<string, unknown>).permissions;
-    const perms = parseUserPermissions(typeof raw === 'string' ? raw : '{}');
-    if (!canUserCancelSales(user.role, perms)) {
+    if (!canUserCancelSales(user.permissions)) {
       throw new TypeError('No tienes permiso para cancelar ventas');
     }
   }

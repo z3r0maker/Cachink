@@ -90,12 +90,10 @@ function operator(n: number, nombre: keyof typeof OPERATOR_PINS, avatarColor: st
   return UserSchema.parse({
     id: ulidOf('PRS', n),
     nombre,
-    email: null,
     pinHash: pinHash(OPERATOR_PINS[nombre]),
-    recoveryPasswordHash: pinHash('recovery'),
-    role: 'operativo',
-    mustChangePin: false,
     avatarColor,
+    // Ana may cancel sales, Toni may not — both permission paths are testable.
+    permissions: { canCancelSales: nombre === 'Ana' },
     active: true,
     ...audit(1 + n),
   });

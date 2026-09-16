@@ -81,20 +81,10 @@ describe('useScheduleStockLowCheck', () => {
     };
     scheduler = new InMemoryNotificationScheduler();
     useAppConfigStore.getState().setCurrentBusinessId(BIZ);
-    useAppConfigStore.getState().setRole('director');
   });
 
   afterEach(() => {
     useAppConfigStore.getState().reset();
-  });
-
-  it('does not schedule when role is not director', async () => {
-    useAppConfigStore.getState().setRole('operativo');
-    await seedLowStock(harness);
-    renderWithProviders(wrap(<Harnessed enabled={true} scheduler={scheduler} />, harness));
-    await waitFor(() => {
-      expect(scheduler.scheduled.has(STOCK_LOW_NOTIFICATION_ID)).toBe(false);
-    });
   });
 
   it('does not schedule when disabled', async () => {
@@ -112,7 +102,7 @@ describe('useScheduleStockLowCheck', () => {
     });
   });
 
-  it('schedules a 19:00 daily trigger when director + stock is low', async () => {
+  it('schedules a 19:00 daily trigger when stock is low (no role gate)', async () => {
     await seedLowStock(harness);
     renderWithProviders(wrap(<Harnessed enabled={true} scheduler={scheduler} />, harness));
     await waitFor(() => {

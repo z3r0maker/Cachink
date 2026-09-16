@@ -14,7 +14,6 @@ describe('buildFeedbackMailto', () => {
     const url = buildFeedbackMailto({
       appVersion: '0.1.0',
       platform: 'ios',
-      role: 'Director',
       consent: false,
       breadcrumbs: [],
     });
@@ -27,7 +26,6 @@ describe('buildFeedbackMailto', () => {
     const url = buildFeedbackMailto({
       appVersion: '0.1.0',
       platform: 'android',
-      role: 'Operativo',
       consent: false,
       breadcrumbs: [{ message: 'Tap venta', timestamp: '2026-04-23T10:00:00Z' }],
     });
@@ -38,7 +36,6 @@ describe('buildFeedbackMailto', () => {
     const url = buildFeedbackMailto({
       appVersion: '0.1.0',
       platform: 'ios',
-      role: 'Director',
       consent: true,
       breadcrumbs: Array.from({ length: 15 }, (_, i) => ({
         message: `event-${i}`,
@@ -56,7 +53,6 @@ describe('buildFeedbackMailto', () => {
     const url = buildFeedbackMailto({
       appVersion: '0.1.0',
       platform: 'ios',
-      role: 'Director',
       consent: true,
       breadcrumbs: [{ message: 'Contacto cliente@ejemplo.com', timestamp: 'ts' }],
     });
@@ -69,7 +65,6 @@ describe('buildFeedbackMailto', () => {
     const url = buildFeedbackMailto({
       appVersion: '0.1.0',
       platform: 'ios',
-      role: 'Director',
       consent: true,
       breadcrumbs: [{ message: 'Llamar +52 33 1234 5678', timestamp: 'ts' }],
     });

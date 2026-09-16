@@ -58,7 +58,7 @@ export function RoleAvatar(props: RoleAvatarProps): ReactElement {
       hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
       style={{ boxShadow: shadows.small, userSelect: 'none' }}
     >
-      <RoleIllustration role="operativo" variant="dark" size={36} />
+      <RoleIllustration variant="dark" size={36} />
     </View>
   );
 }

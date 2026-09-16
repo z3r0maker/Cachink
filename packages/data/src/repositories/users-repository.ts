@@ -1,43 +1,29 @@
 /**
- * UsersRepository — CRUD for local user accounts.
+ * UsersRepository — operators on this device.
  *
- * Follows the same interface/Drizzle/in-memory triple pattern as
- * SalesRepository. The `User` and `NewUser` domain types live in
- * `@xangarro/domain/entities`; we re-export them here for convenience.
- *
- * Phase 1 of the Feature Flags plan: user management + auth.
- * ADR-049: PIN for login, Password for recovery.
+ * Operators are created, PIN-set and deactivated in the portal and arrive by
+ * sync (A-05). The device reads them to sign in; `create`/`update`/`delete`
+ * remain for tests, fixtures and dev tooling. The `User` domain type lives
+ * in `@xangarro/domain/entities`; it is re-exported here for convenience.
  */
 
-import type { User, UserRole } from '@xangarro/domain';
-import type { BusinessId, UserId } from '@xangarro/domain';
+import type { BusinessId, User, UserId, UserPermissions } from '@xangarro/domain';
 
 export type { User };
 
 /** Patchable fields on an existing User (excludes id + audit). */
 export type UserPatch = Partial<
-  Pick<
-    User,
-    | 'nombre'
-    | 'email'
-    | 'pinHash'
-    | 'recoveryPasswordHash'
-    | 'mustChangePin'
-    | 'avatarColor'
-    | 'active'
-  >
+  Pick<User, 'nombre' | 'pinHash' | 'avatarColor' | 'active' | 'permissions'>
 >;
 
-/** Input for creating a user — hashed credentials, not plaintext. */
+/** Input for creating a user — hashed PIN, not plaintext. */
 export interface CreateUserInput {
   readonly nombre: string;
-  readonly email: string | null;
   readonly pinHash: string;
-  readonly recoveryPasswordHash: string;
-  readonly role: UserRole;
-  readonly mustChangePin: boolean;
   readonly avatarColor: string;
   readonly businessId: BusinessId;
+  /** Defaults to no permissions. */
+  readonly permissions?: UserPermissions;
 }
 
 export interface UsersRepository {
@@ -58,7 +44,4 @@ export interface UsersRepository {
 
   /** Soft-delete a user (sets deletedAt). */
   delete(id: UserId): Promise<void>;
-
-  /** Count non-deleted users with role='director' for a business. */
-  countDirectors(businessId: BusinessId): Promise<number>;
 }

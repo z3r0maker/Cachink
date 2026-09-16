@@ -18,13 +18,11 @@ initI18n();
 const USER_A = makeUser({
   id: '01JPHK0000000000000000USR1' as UserId,
   nombre: 'Ana Director',
-  role: 'director',
   avatarColor: 'blue',
 });
 const USER_B = makeUser({
   id: '01JPHK0000000000000000USR2' as UserId,
   nombre: 'Beto Operativo',
-  role: 'operativo',
   avatarColor: 'green',
 });
 
@@ -48,12 +46,6 @@ describe('QuickSwitchScreen', () => {
     renderScreen();
     expect(screen.getByTestId(`user-avatar-${USER_A.id}`)).toBeInTheDocument();
     expect(screen.getByTestId(`user-avatar-${USER_B.id}`)).toBeInTheDocument();
-  });
-
-  it('renders role badges for each user', () => {
-    renderScreen();
-    expect(screen.getByTestId(`user-role-${USER_A.id}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`user-role-${USER_B.id}`)).toBeInTheDocument();
   });
 
   it('shows the PIN prompt when a user avatar is tapped', () => {

@@ -1,10 +1,8 @@
 /**
  * AutenticarUsuarioUseCase — authenticates a user by nombre + PIN.
  *
- * Returns an AuthResult indicating success, the userId, the role, and
- * whether the user must change their PIN on first login.
- *
- * ADR-049: PIN for daily login, Password for recovery.
+ * Returns an AuthResult with the operator id on success. Operators, their
+ * PINs and `active` come from the portal (A-05).
  */
 
 import { compare } from 'bcryptjs';
@@ -35,6 +33,6 @@ export class AutenticarUsuarioUseCase implements UseCase<AuthInput, AuthResult> 
     const matches = await compare(input.pin, user.pinHash);
     if (!matches) return authFailure();
 
-    return authSuccess(user.id, user.role, user.mustChangePin);
+    return authSuccess(user.id);
   }
 }

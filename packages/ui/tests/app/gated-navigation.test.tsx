@@ -36,7 +36,6 @@ function signedOut(): Partial<ReturnType<typeof useAppConfigStore.getState>> {
     mode: 'local',
     currentBusinessId: BIZ,
     userId: null,
-    role: null,
     deviceId: null,
   };
 }
@@ -45,11 +44,7 @@ async function usersWithOperator(active: boolean): Promise<InMemoryUsersReposito
   const users = new InMemoryUsersRepository();
   const toni = await users.create({
     nombre: 'Toni',
-    email: null,
     pinHash: 'hash',
-    recoveryPasswordHash: 'unused',
-    role: 'operativo',
-    mustChangePin: false,
     avatarColor: 'blue',
     businessId: BIZ,
   });
@@ -88,7 +83,6 @@ describe('GatedNavigation', () => {
       hydrated: false,
       mode: null,
       currentBusinessId: null,
-      role: null,
       deviceId: null,
     });
     mountGate(<span data-testid="app-body">app</span>);
@@ -96,7 +90,7 @@ describe('GatedNavigation', () => {
   });
 
   it('shows the activation screen on a device that was never activated', async () => {
-    setStore({ hydrated: true, mode: null, currentBusinessId: null, role: null, deviceId: null });
+    setStore({ hydrated: true, mode: null, currentBusinessId: null, deviceId: null });
     mountGate(<span data-testid="app-body">app</span>);
     expect(await screen.findByTestId('activation-screen')).toBeInTheDocument();
     expect(screen.queryByTestId('wizard')).toBeNull();
@@ -108,7 +102,6 @@ describe('GatedNavigation', () => {
       hydrated: true,
       mode: 'local',
       currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
-      role: null,
       deviceId: null,
     });
     mountGate(<span data-testid="app-body">app</span>);

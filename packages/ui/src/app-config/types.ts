@@ -1,11 +1,8 @@
 /**
  * AppConfig types — the three pieces of cross-session state the shell
  * needs to boot: which deployment mode, which business, who's using the
- * tablet right now.
- *
- * Role is a session attribute (not persisted) — CLAUDE.md §1 two-role
- * model: `operativo` (read/write) vs `director` (read-only on
- * transactional modules + full access to financial views).
+ * tablet right now. There is one role on the device (ADR-053); who is
+ * signed in is `userId`.
  *
  * Mode is persisted so the wizard runs only once. `null` means the
  * wizard has not completed; every boot after that skips it.
@@ -17,7 +14,7 @@
  */
 
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
-import type { BusinessId, DeviceId, UserId, UserRole } from '@xangarro/domain';
+import type { BusinessId, DeviceId, UserId } from '@xangarro/domain';
 
 /** Deployment mode selected in the first-run wizard (CLAUDE.md §7.1, ADR-039). */
 export type AppMode = 'local' | 'cloud' | 'lan-server' | 'lan-client';
@@ -29,9 +26,6 @@ export type AppMode = 'local' | 'cloud' | 'lan-server' | 'lan-client';
  * reading `__cachink_sync_state.lanRole`. Never written by new code.
  */
 export type LegacyLanSentinel = 'legacy-lan';
-
-/** User role for the current session (CLAUDE.md §1). */
-export type Role = 'operativo' | 'director';
 
 /** AppConfig-repository keys used by the provider. */
 export const APP_CONFIG_KEYS = {
@@ -62,16 +56,11 @@ export interface AppConfigState {
   readonly deviceId: DeviceId | null;
   readonly mode: AppMode | null;
   readonly currentBusinessId: BusinessId | null;
-  readonly role: Role | null;
   readonly hydrated: boolean;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
   /** Currently authenticated user (null = not logged in). */
   readonly userId: UserId | null;
-  /** Role derived from User.role at login. */
-  readonly userRole: UserRole | null;
-  /** Whether the user must change their PIN on first login. */
-  readonly mustChangePin: boolean;
   /** Whether the feature-discovery screen was shown after first setup. */
   readonly discoveryShown: boolean;
   /** Whether the "¡CACHINK!" sound plays on each sale. Defaults to true. */

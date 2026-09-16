@@ -18,7 +18,7 @@ import type { CachinkDatabase } from '../repositories/drizzle/_db.js';
  * Current schema version. Must match the number of entries in
  * `_journal.json`. After consolidation this starts at 1.
  */
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 
 export async function getSchemaVersion(db: CachinkDatabase): Promise<number> {
   const result = await db.get(sql.raw('PRAGMA user_version'));

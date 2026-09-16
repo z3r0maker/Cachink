@@ -21,6 +21,8 @@ import { buildHarness, type FullstackHarness } from './fullstack-harness.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER_ID = newEntityId<UserId>();
+/** bcrypt("123456", 4 rounds) — the portal hashes PINs; the device only compares. */
+const PIN_123456_HASH = '$2b$04$evzlfJ7TAHvaDduEWaAAVOK7cs/r3lNuH5VAZ0G5Zr0DTkx1vaHa.';
 
 describe('Venta Lifecycle [fullstack]', () => {
   let h: FullstackHarness;
@@ -32,14 +34,13 @@ describe('Venta Lifecycle [fullstack]', () => {
     // Seed business
     await h.repos.businesses.create(makeNewBusiness({ businessId: BIZ }));
 
-    // Seed a Director user (needed for cancel PIN verification)
-    await h.useCases.crearUsuario.execute({
-      nombre: 'Director Test',
-      pin: '123456',
-      recoveryPassword: 'Test1234',
-      role: 'director',
-      mustChangePin: false,
+    // Seed an operator the portal allowed to cancel sales (PIN 123456).
+    await h.repos.users.create({
+      nombre: 'Cajero Test',
+      pinHash: PIN_123456_HASH,
+      avatarColor: 'blue',
       businessId: BIZ,
+      permissions: { canCancelSales: true },
     });
 
     // Seed a stock-tracked product
@@ -119,13 +120,13 @@ describe('Venta Lifecycle [fullstack]', () => {
     expect(await h.repos.movements.sumStock(productId)).toBe(8);
 
     // Find the user for PIN verification
-    const director = await h.repos.users.findByNombre('Director Test', BIZ);
-    expect(director).not.toBeNull();
+    const cajero = await h.repos.users.findByNombre('Cajero Test', BIZ);
+    expect(cajero).not.toBeNull();
 
     // Cancel the sale
     const result = await h.useCases.cancelarVenta.execute({
       saleId: sale.id,
-      userId: director.id,
+      userId: cajero!.id,
       pin: '123456',
       motivo: 'Cliente no quiso',
       businessId: BIZ,

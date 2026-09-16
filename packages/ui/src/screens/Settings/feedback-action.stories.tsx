@@ -21,7 +21,6 @@ const meta: Meta<typeof FeedbackAction> = {
   args: {
     appVersion: '1.0.0',
     platform: 'desktop-mac',
-    role: 'Director',
     crashReportingEnabled: false,
     breadcrumbs: [],
     openLink: () => undefined,
@@ -33,9 +32,8 @@ type Story = StoryObj<typeof FeedbackAction>;
 
 export const Default: Story = {};
 
-export const WithRoleAndConsent: Story = {
+export const WithConsent: Story = {
   args: {
-    role: 'Operativo',
     crashReportingEnabled: true,
     breadcrumbs: [
       { message: 'opened sales screen', timestamp: '2026-04-25T10:00:00Z' },

@@ -112,7 +112,7 @@ Response `200`:
   "acknowledgedThrough": 5001 }
 ```
 
-Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows include `pinHash` (bcrypt) and `active`; never `email`. `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
+Semantics: rows with `serverSeq > since`, including soft-deletes (`deletedAt` set). `since=0` = full bootstrap. `acknowledgedThrough` is the highest `serverSeq` the server has durably stored for **this device's pushes** — the app's retention purge (A-11) may only purge rows with `serverSeq ≤ acknowledgedThrough`. `users` rows carry `nombre`, `pinHash` (bcrypt), `avatarColor`, `permissions` (`{ canCancelSales }`) and `active`; never `email`, `role`, `mustChangePin` or `recoveryPasswordHash` (C-11). `feature_flags` is the **tenant** layer only; the app resolves effective flags with `PLATFORM_AVAILABLE` (domain) × plan (entitlement) × tenant.
 
 ## §6 Entitlement payload
 
@@ -228,3 +228,10 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 - **Steps:** one test file per endpoint asserting the §3–§7 rules (idempotent re-push, per-row rejection, single-use code under concurrent redemption (two parallel requests → exactly one 200), `acknowledged_through` monotonic, entitlement signature verifies with the public key).
 - **Acceptance:** green against `pnpm mock:api`; Track B runs the same suite against `localhost:3000` (real portal dev server + local Supabase) in B-07…B-09.
 - **How to test:** `API_BASE=http://localhost:3000 pnpm --filter @xangarro/contracts test -- conformance`.
+
+### C-11 Operator row shape: drop the transitional user fields, add `permissions`
+
+- [x] Status · **Blocked by:** C-02, F-07 · **Blocks:** B-02, B-13, A-05
+  - Done: 2026-09-16 · track/app (landed with A-05 — **merge to `main` before B/P build on `users`**) · `UserSchema` (and so `WireUserSchema`) drops `role`, `mustChangePin`, `recoveryPasswordHash`, `email`, and gains `permissions: { canCancelSales }` (default none). Zod strips unknown keys, so a server still sending the old fields parses fine; a server omitting them no longer fails validation (before, `role` and `recoveryPasswordHash` were required — the documented §5 shape would have been rejected). Mock fixtures: Ana may cancel sales, Toni may not.
+- **Why `permissions` is new on the wire:** with `role` gone, the Director's implicit right to cancel sales disappears; the only remaining grant is the per-operator permission, so the portal must be able to send it. Without it no one could cancel a sale on the device.
+- **Impact:** B-02 — `users` needs `permissions JSONB NOT NULL DEFAULT '{}'`; the four-column drift allow-list is no longer needed (SQLite dropped them in migration `0002_operator_only`). B-13 — operator editor needs a "Puede cancelar ventas" toggle.

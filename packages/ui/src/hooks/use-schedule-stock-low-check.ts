@@ -18,7 +18,6 @@ import type { NotificationScheduler } from '../notifications/index';
 import { useNotificationScheduler } from '../notifications/index';
 import { countBajoStock } from '../screens/Productos/stock-bajo-banner';
 import { useTranslation } from '../i18n/index';
-import { useRole } from '../app-config/index';
 import { useProductosConStock } from './use-productos-con-stock';
 
 export const STOCK_LOW_NOTIFICATION_ID = 'stock-low-check' as const;
@@ -31,13 +30,12 @@ export interface UseScheduleStockLowCheckOptions {
 
 export function useScheduleStockLowCheck(options: UseScheduleStockLowCheckOptions = {}): void {
   const { t } = useTranslation();
-  const role = useRole();
   const scheduler = useNotificationScheduler(options.testScheduler);
   const productosQ = useProductosConStock();
   const enabled = options.enabled ?? true;
 
   useEffect(() => {
-    const active = enabled && role === 'director';
+    const active = enabled;
     if (!active) {
       void scheduler.cancelById(STOCK_LOW_NOTIFICATION_ID);
       return;
@@ -64,5 +62,5 @@ export function useScheduleStockLowCheck(options: UseScheduleStockLowCheckOption
     return () => {
       void scheduler.cancelById(STOCK_LOW_NOTIFICATION_ID);
     };
-  }, [enabled, role, scheduler, productosQ.data, t]);
+  }, [enabled, scheduler, productosQ.data, t]);
 }

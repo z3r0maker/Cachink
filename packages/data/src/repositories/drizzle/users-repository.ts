@@ -2,13 +2,12 @@
  * Drizzle-backed {@link UsersRepository}. Follows the same audit +
  * mapping pattern as DrizzleSalesRepository.
  *
- * Phase 1 of the Feature Flags plan: user management + auth.
- * ADR-049: PIN for login, Password for recovery.
+ * Operators come from the portal (A-05); `permissions` is stored as JSON.
  */
 
-import { and, eq, isNull, sql } from 'drizzle-orm';
-import type { BusinessId, DeviceId, IsoTimestamp, User, UserId, UserRole } from '@xangarro/domain';
-import { newEntityId, now } from '@xangarro/domain';
+import { and, eq, isNull } from 'drizzle-orm';
+import type { BusinessId, DeviceId, IsoTimestamp, User, UserId } from '@xangarro/domain';
+import { newEntityId, now, parseUserPermissions } from '@xangarro/domain';
 import type { CreateUserInput, UserPatch, UsersRepository } from '../users-repository.js';
 import { users } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
@@ -32,13 +31,10 @@ export class DrizzleUsersRepository implements UsersRepository {
     const row = {
       id,
       nombre: input.nombre,
-      email: input.email,
       pinHash: input.pinHash,
-      recoveryPasswordHash: input.recoveryPasswordHash,
-      role: input.role,
-      mustChangePin: input.mustChangePin,
       avatarColor: input.avatarColor,
       active: true,
+      permissions: JSON.stringify(input.permissions ?? { canCancelSales: false }),
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -82,15 +78,11 @@ export class DrizzleUsersRepository implements UsersRepository {
     const ts = now();
     const set: Record<string, unknown> = { updatedAt: ts };
     if (patch.nombre !== undefined) set['nombre'] = patch.nombre;
-    if (patch.email !== undefined) set['email'] = patch.email;
     if (patch.pinHash !== undefined) {
       set['pinHash'] = patch.pinHash;
     }
-    if (patch.recoveryPasswordHash !== undefined) {
-      set['recoveryPasswordHash'] = patch.recoveryPasswordHash;
-    }
-    if (patch.mustChangePin !== undefined) {
-      set['mustChangePin'] = patch.mustChangePin;
+    if (patch.permissions !== undefined) {
+      set['permissions'] = JSON.stringify(patch.permissions);
     }
     if (patch.active !== undefined) {
       set['active'] = patch.active;
@@ -113,27 +105,13 @@ export class DrizzleUsersRepository implements UsersRepository {
       .run();
   }
 
-  async countDirectors(businessId: BusinessId): Promise<number> {
-    const result = await this.#db
-      .select({ value: sql<number>`count(*)` })
-      .from(users)
-      .where(
-        and(eq(users.businessId, businessId), eq(users.role, 'director'), isNull(users.deletedAt)),
-      )
-      .get();
-    return result?.value ?? 0;
-  }
-
   #mapRow(row: UserRow): User {
     return {
       id: row.id as UserId,
       nombre: row.nombre,
-      email: row.email ?? null,
       pinHash: row.pinHash,
-      recoveryPasswordHash: row.recoveryPasswordHash,
-      role: row.role as UserRole,
-      mustChangePin: row.mustChangePin,
       avatarColor: row.avatarColor,
+      permissions: parseUserPermissions(row.permissions),
       active: row.active,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,

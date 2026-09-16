@@ -57,22 +57,6 @@ export const MUTATION_ELIMINAR_EMPLEADO: AuditedMutationConfig<string, void> = {
   extractEntityId: (_result, input) => input,
 };
 
-export const MUTATION_CREAR_USUARIO: AuditedMutationConfig<
-  { nombre: string; role: string },
-  { id: string }
-> = {
-  operation: 'usuario.crear',
-  entityType: 'user',
-  extractEntityId: (result) => result.id,
-  extractMetadata: (input) => ({ nombre: input.nombre, role: input.role }),
-};
-
-export const MUTATION_ELIMINAR_USUARIO: AuditedMutationConfig<string, void> = {
-  operation: 'usuario.eliminar',
-  entityType: 'user',
-  extractEntityId: (_result, input) => input,
-};
-
 export const MUTATION_TOGGLE_FLAG: AuditedMutationConfig<
   { key: string; newValue: boolean },
   unknown

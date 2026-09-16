@@ -35,11 +35,7 @@ function wrapper(overrides: Record<string, unknown>) {
 async function operator(users: InMemoryUsersRepository, nombre: string): Promise<User> {
   return users.create({
     nombre,
-    email: null,
     pinHash: hashSync('123456', 4),
-    recoveryPasswordHash: 'unused',
-    role: 'operativo',
-    mustChangePin: false,
     avatarColor: 'blue',
     businessId: BIZ,
   });

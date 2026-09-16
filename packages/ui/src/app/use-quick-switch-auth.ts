@@ -8,18 +8,12 @@
  */
 
 import { useState } from 'react';
-import type { BusinessId, User, UserId, UserRole } from '@xangarro/domain';
+import type { BusinessId, User, UserId } from '@xangarro/domain';
 import { useQuery } from '@tanstack/react-query';
 import { AutenticarUsuarioUseCase } from '@xangarro/application';
 import type { AppConfigRepository } from '@xangarro/data';
 import { APP_CONFIG_KEYS } from '../app-config/index';
-import type { Role } from '../app-config/types';
-import {
-  useSetMustChangePin,
-  useSetRole,
-  useSetUserId,
-  useSetUserRole,
-} from '../app-config/use-app-config';
+import { useSetUserId } from '../app-config/use-app-config';
 import { useTranslation } from '../i18n/index';
 import { NO_LOCKOUT, parsePinLockout, recordPinFailure, remainingLockMs } from './pin-lockout';
 import { USERS_KEY } from './query-keys-auth';
@@ -42,7 +36,7 @@ interface AuthDeps {
   readonly messages: { readonly wrongPin: string; readonly lockedOut: (s: number) => string };
   readonly setSubmitting: (v: boolean) => void;
   readonly setError: (v: string | null) => void;
-  readonly signIn: (userId: UserId, role: UserRole | null) => void;
+  readonly signIn: (userId: UserId) => void;
 }
 
 /** Verifies a PIN; returns the error message to show, or null on success. */
@@ -66,7 +60,7 @@ async function verifyPin(deps: AuthDeps, userId: UserId, pin: string): Promise<s
     return nowLocked > 0 ? deps.messages.lockedOut(nowLocked / 1000) : deps.messages.wrongPin;
   }
   await deps.appConfig.set(APP_CONFIG_KEYS.pinLockout, JSON.stringify(NO_LOCKOUT));
-  deps.signIn(result.userId, result.role);
+  deps.signIn(result.userId);
   return null;
 }
 
@@ -87,24 +81,11 @@ async function runAuth(deps: AuthDeps, userId: UserId, pin: string): Promise<voi
   }
 }
 
-function useSignIn(): (userId: UserId, role: UserRole | null) => void {
-  const setUserId = useSetUserId();
-  const setUserRole = useSetUserRole();
-  const setRole = useSetRole();
-  const setMustChangePin = useSetMustChangePin();
-  return (userId, role) => {
-    setUserId(userId);
-    setUserRole(role);
-    setRole(role as Role | null);
-    setMustChangePin(false);
-  };
-}
-
 export function useQuickSwitchAuth(businessId: BusinessId): QuickSwitchAuthResult {
   const { t } = useTranslation();
   const usersRepo = useUsersRepository();
   const appConfig = useAppConfigRepository();
-  const signIn = useSignIn();
+  const signIn = useSetUserId();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const query = useQuery({

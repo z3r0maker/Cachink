@@ -21,7 +21,6 @@ import {
   useCurrentBusiness,
   useMode,
   useNotificationsEnabled,
-  useRole,
   useSetCachinkSoundEnabled,
   useSetCrashReportingEnabled,
   useSetNotificationsEnabled,
@@ -35,12 +34,6 @@ const APP_VERSION = Application.nativeApplicationVersion ?? '0.0.0';
 
 function platformKey(): 'ios' | 'android' | 'desktop-mac' | 'desktop-windows' {
   return Platform.OS === 'ios' ? 'ios' : 'android';
-}
-
-function roleLabel(role: 'operativo' | 'director' | null): 'Operativo' | 'Director' | null {
-  if (role === 'operativo') return 'Operativo';
-  if (role === 'director') return 'Director';
-  return null;
 }
 
 type BoolSetting = (next: boolean) => void;
@@ -95,7 +88,6 @@ function useSistemaProps(): {
 } {
   const mode = useMode();
   const business = useCurrentBusiness().data ?? null;
-  const role = useRole();
   const notificationsEnabled = useNotificationsEnabled();
   const cachinkSoundEnabled = useCachinkSoundEnabled();
   const crashReportingEnabled = useCrashReportingEnabled();
@@ -117,7 +109,6 @@ function useSistemaProps(): {
       feedback: {
         appVersion: APP_VERSION,
         platform: platformKey(),
-        role: roleLabel(role),
         crashReportingEnabled: crashReportingEnabled === true,
         breadcrumbs: [],
       },

@@ -1,6 +1,6 @@
 /**
  * FeedbackAction — Settings row that opens a `mailto:` to
- * `feedback@cachink.mx` prefilled with the app version, platform, role,
+ * `feedback@cachink.mx` prefilled with the app version, platform,
  * and (only if Sentry consent was granted per ADR-027) the last 10
  * breadcrumbs.
  *
@@ -16,7 +16,6 @@ import { useTranslation } from '../../i18n/index';
 export interface FeedbackActionProps {
   readonly appVersion: string;
   readonly platform: 'ios' | 'android' | 'desktop-mac' | 'desktop-windows';
-  readonly role: 'Operativo' | 'Director' | null;
   readonly crashReportingEnabled: boolean;
   readonly breadcrumbs: readonly { readonly message: string; readonly timestamp: string }[];
   /** Injected so tests can intercept the link without opening the OS mail client. */
@@ -36,17 +35,10 @@ function safeMessage(message: string): string {
 export function buildFeedbackMailto(args: {
   appVersion: string;
   platform: string;
-  role: string | null;
   consent: boolean;
   breadcrumbs: readonly { message: string; timestamp: string }[];
 }): string {
-  const bodyLines = [
-    '',
-    '---',
-    `App: Cachink! ${args.appVersion}`,
-    `Plataforma: ${args.platform}`,
-    `Rol: ${args.role ?? 'n/a'}`,
-  ];
+  const bodyLines = ['', '---', `App: Cachink! ${args.appVersion}`, `Plataforma: ${args.platform}`];
   if (args.consent && args.breadcrumbs.length > 0) {
     bodyLines.push('', 'Últimos eventos:');
     for (const b of args.breadcrumbs.slice(-10)) {
@@ -71,7 +63,6 @@ export function FeedbackAction(props: FeedbackActionProps): ReactElement {
     const url = buildFeedbackMailto({
       appVersion: props.appVersion,
       platform: props.platform,
-      role: props.role,
       consent: props.crashReportingEnabled,
       breadcrumbs: [...props.breadcrumbs],
     });

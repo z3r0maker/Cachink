@@ -24,7 +24,6 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
       <FeedbackAction
         appVersion="1.0.0"
         platform="desktop-mac"
-        role="Director"
         crashReportingEnabled={false}
         breadcrumbs={[]}
       />,
@@ -39,7 +38,6 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
       <FeedbackAction
         appVersion="1.0.0"
         platform="desktop-mac"
-        role="Director"
         crashReportingEnabled={false}
         breadcrumbs={[]}
         openLink={openLink}
@@ -51,7 +49,6 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
     expect(url).toMatch(/^mailto:feedback@cachink\.mx\?subject=/);
     expect(decodeURIComponent(url)).toContain('Cachink! 1.0.0');
     expect(decodeURIComponent(url)).toContain('desktop-mac');
-    expect(decodeURIComponent(url)).toContain('Director');
   });
 
   it('embeds breadcrumbs only when crashReportingEnabled is true', () => {
@@ -62,7 +59,6 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
       <FeedbackAction
         appVersion="1.0.0"
         platform="ios"
-        role="Operativo"
         crashReportingEnabled={false}
         breadcrumbs={breadcrumbs}
         openLink={openLink}
@@ -79,7 +75,6 @@ describe('FeedbackAction render path (Slice 8 M3-C12)', () => {
       <FeedbackAction
         appVersion="1.0.0"
         platform="ios"
-        role="Operativo"
         crashReportingEnabled={true}
         breadcrumbs={breadcrumbs}
         openLink={openLink}

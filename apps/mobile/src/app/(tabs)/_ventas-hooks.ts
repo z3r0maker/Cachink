@@ -18,7 +18,6 @@ import {
   useProductosParaVenta,
   useProductosConStock,
   useRegistrarVenta,
-  useRole,
   useStockMap,
   useVentasByDate,
   type CartAction,
@@ -30,7 +29,7 @@ import { useSwipeState } from '../../shell/use-swipe-state';
 import { useShareComprobante } from '../../shell/ventas-slots';
 
 export type { CartAction, CartState };
-export { useRole, useOpenCajaTurno };
+export { useOpenCajaTurno };
 
 function useCheckoutReturnClear(dispatch: React.Dispatch<CartAction>): void {
   const checkoutCart = useCheckoutStore((s) => s.cart);

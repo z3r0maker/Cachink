@@ -72,8 +72,6 @@ export * from './use-reduced-motion';
 export * from './use-feature-flags';
 export * from './use-toggle-feature-flag';
 // Phase 1 — User Management hooks
-export * from './use-crear-usuario';
-export * from './use-eliminar-usuario';
 // Phase 6 — Caja
 export * from './use-abrir-caja';
 export * from './use-cerrar-caja';
@@ -112,5 +110,4 @@ export * from './use-emit-director-alert';
 export * from './use-unread-alert-count';
 export * from './use-director-alerts';
 export * from './use-mark-alert-read';
-export * from './use-check-creditos-vencidos';
 export * from './use-notification-prefs';
