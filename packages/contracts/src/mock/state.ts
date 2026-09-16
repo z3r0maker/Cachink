@@ -37,6 +37,8 @@ export const MOCK_CODES = {
 
 export class MockState {
   rows = new Map<string, StoredRow>();
+  /** Rows removed by `/__mock/forget`, restorable with `/__mock/restore`. */
+  forgotten = new Map<string, StoredRow>();
   devices = new Map<string, Device>();
   codes = new Map<string, ActivationCode>();
   serverSeq = 0;
@@ -49,6 +51,7 @@ export class MockState {
 
   reset(): void {
     this.rows.clear();
+    this.forgotten.clear();
     this.devices.clear();
     this.codes.clear();
     this.serverSeq = 0;

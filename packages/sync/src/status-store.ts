@@ -7,7 +7,7 @@
  * after exponential backoff; non-retryable ones wait for a manual retry.
  */
 
-import { and, count, eq, lte, sql } from 'drizzle-orm';
+import { and, count, desc, eq, lte, sql } from 'drizzle-orm';
 import type { CachinkDatabase } from '@xangarro/data';
 import { syncRowStatus } from '@xangarro/data';
 import type { CoalescedChange } from './outbox-reader.js';
@@ -24,6 +24,18 @@ export interface Rejection {
   readonly code: string;
   readonly message: string;
   readonly retryable: boolean;
+}
+
+/** A row the server refused, as "No enviados" (A-08) shows it. */
+export interface RejectedEntry {
+  readonly tableName: string;
+  readonly rowId: string;
+  readonly code: string;
+  readonly message: string;
+  /** True while automatic retries are still scheduled. */
+  readonly retryable: boolean;
+  readonly attempts: number;
+  readonly lastAttemptAt: string | null;
 }
 
 export class StatusStore {
@@ -118,6 +130,26 @@ export class StatusStore {
       .limit(limit)
       .all();
     return rows.map((r) => ({ tableName: r.tableName, rowId: r.rowId, op: 'insert' as const }));
+  }
+
+  /** Rejected rows, most recent attempt first. */
+  async listRejected(limit: number): Promise<readonly RejectedEntry[]> {
+    const rows = await this.#db
+      .select()
+      .from(syncRowStatus)
+      .where(eq(syncRowStatus.status, 'rejected'))
+      .orderBy(desc(syncRowStatus.lastAttemptAt))
+      .limit(limit)
+      .all();
+    return rows.map((r) => ({
+      tableName: r.tableName,
+      rowId: r.rowId,
+      code: r.code ?? 'INTERNAL',
+      message: r.message ?? '',
+      retryable: r.retryable,
+      attempts: r.attempts,
+      lastAttemptAt: r.lastAttemptAt ?? null,
+    }));
   }
 
   /** Manual retry from "No enviados" (A-08): makes a rejected row due now. */

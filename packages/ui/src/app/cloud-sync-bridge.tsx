@@ -22,7 +22,7 @@ import {
 import { AppState } from 'react-native';
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import type { AppConfigRepository } from '@xangarro/data';
-import { SyncEngine, type SyncRunResult } from '@xangarro/sync';
+import { SyncEngine, type RejectedRow, type SyncRunResult } from '@xangarro/sync';
 import { APP_CONFIG_KEYS } from '../app-config/index';
 import { useActivationContext } from '../activation/activation-context';
 import type { DeviceTokenStore } from '../activation/activation-config';
@@ -40,17 +40,28 @@ export interface CloudSyncContextValue {
   readonly state: CloudSyncState;
   /** "Actualizar": push then pull now. */
   readonly syncNow: () => void;
-  /** Manual retry of a rejected row ("No enviados", A-08). */
-  readonly requeue: (tableName: string, rowId: string) => Promise<void>;
+  /** Rows the server refused, with local data ("No enviados", A-08). */
+  readonly listRejected: () => Promise<readonly RejectedRow[]>;
+  /** Manual retry of rejected rows: all due now, then one push. */
+  readonly requeue: (rows: readonly RowRef[]) => Promise<void>;
 }
 
 const CloudSyncContext = createContext<CloudSyncContextValue>({
   state: INITIAL_CLOUD_SYNC_STATE,
   syncNow: () => undefined,
+  listRejected: async () => [],
   requeue: async () => undefined,
 });
 
+export interface RowRef {
+  readonly tableName: string;
+  readonly rowId: string;
+}
+
 export const useCloudSync = (): CloudSyncContextValue => useContext(CloudSyncContext);
+
+/** Prefix for queries derived from sync state; invalidated after every run. */
+export const CLOUD_SYNC_QUERY_KEY = ['cloudSync'] as const;
 
 function phaseOf(result: SyncRunResult): CloudSyncPhase {
   const error = result.push?.error ?? result.pull?.error ?? null;
@@ -89,6 +100,9 @@ function useSyncRunner(
         counts,
         lastSyncAt: reached ? new Date().toISOString() : s.lastSyncAt,
       }));
+      // Row outcomes may change without the counts changing (a manual retry
+      // rejected again), so "No enviados" always refreshes after a run.
+      await queryClient.invalidateQueries({ queryKey: CLOUD_SYNC_QUERY_KEY });
       if ((result.pull?.applied ?? 0) > 0) await queryClient.invalidateQueries();
     };
     return { runPush: () => void run('push'), runSync: () => void run('both') };
@@ -135,7 +149,15 @@ export function CloudSyncBridge(props: { readonly children: ReactNode }): ReactE
   const runner = useSyncRunner(engine, setState);
   useSchedulerWiring(runner, Boolean(record));
   const value = useMemo<CloudSyncContextValue>(
-    () => ({ state, syncNow: runner.runSync, requeue: (t, id) => engine.requeue(t, id) }),
+    () => ({
+      state,
+      syncNow: runner.runSync,
+      listRejected: () => engine.rejected(),
+      requeue: async (rows) => {
+        for (const r of rows) await engine.requeue(r.tableName, r.rowId);
+        runner.runPush();
+      },
+    }),
     [state, runner, engine],
   );
   return <CloudSyncContext.Provider value={value}>{props.children}</CloudSyncContext.Provider>;

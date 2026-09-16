@@ -36,3 +36,4 @@ export * from './Auditoria/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';
 export * from './Cancelaciones/index';
+export * from './SyncRejected/index';

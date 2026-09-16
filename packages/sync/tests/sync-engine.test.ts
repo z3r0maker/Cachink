@@ -173,6 +173,45 @@ describe('SyncEngine', () => {
     assert.equal((await revoked.syncNow()).revoked, true);
   });
 
+  it('lists rejected rows with their local data and requeues them for retry (A-08)', async () => {
+    const d = await activatedDevice();
+    // The product the device knows was purged on the server (mock control route).
+    const forgot = await fetch(`${mock.url}/__mock/forget`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ table: 'products', id: d.productId }),
+    });
+    assert.deepEqual(await forgot.json(), { removed: true });
+    const saleId = await ringSale(d);
+    const engine = new SyncEngine({
+      db: d.db,
+      client: new ApiClient({ baseUrl: mock.url }),
+      getToken: async () => d.token,
+    });
+    await engine.syncNow();
+    const [row] = await engine.rejected();
+    assert.equal(row?.tableName, 'sales');
+    assert.equal(row?.rowId, saleId);
+    assert.equal(row?.code, 'FK_PRODUCT_MISSING');
+    assert.equal(row?.retryable, false);
+    assert.equal(row?.row?.['concepto'], 'Tacos');
+    await engine.requeue('sales', saleId);
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 0, retrying: 1 });
+    assert.equal((await engine.rejected())[0]?.retryable, true);
+    // Still missing on the server: the retry is refused again and waits for a human.
+    await engine.syncNow();
+    assert.deepEqual(await engine.counts(), { pending: 0, rejected: 1, retrying: 0 });
+    // The portal restores the product: the next manual retry is accepted.
+    await fetch(`${mock.url}/__mock/restore`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ table: 'products', id: d.productId }),
+    });
+    await engine.requeue('sales', saleId);
+    await engine.syncNow();
+    assert.deepEqual(await engine.rejected(), []);
+  });
+
   it('does nothing before activation', async () => {
     const engine = new SyncEngine({
       db: makeFreshDb(),

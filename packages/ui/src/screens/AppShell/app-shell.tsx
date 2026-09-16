@@ -72,6 +72,7 @@ export interface AppShellProps {
 interface RightSlotProps {
   readonly mode: AppMode | null;
   readonly onOpenSettings: () => void;
+  readonly onNavigate: (path: string) => void;
 }
 
 function RightSlot(props: RightSlotProps): ReactElement {
@@ -87,7 +88,7 @@ function RightSlot(props: RightSlotProps): ReactElement {
           onRetry={() => void lan.retryNow()}
         />
       ) : (
-        <CloudSyncPill />
+        <CloudSyncPill onOpenRejected={() => props.onNavigate('/no-enviados')} />
       )}
       {/*
        * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
@@ -137,7 +138,13 @@ export function AppShell(props: AppShellProps): ReactElement {
         title={props.title}
         subtitle={props.subtitle}
         left={leftSlot}
-        right={<RightSlot mode={props.mode} onOpenSettings={props.onOpenSettings} />}
+        right={
+          <RightSlot
+            mode={props.mode}
+            onOpenSettings={props.onOpenSettings}
+            onNavigate={props.onNavigate}
+          />
+        }
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

@@ -1,6 +1,7 @@
 /**
  * CloudSyncPill — top-bar sync status for an activated device (A-07).
- * Tapping it is "Actualizar": push then pull now.
+ * Tapping it is "Actualizar" (push then pull now) — or, when the server
+ * rejected rows, opens "No enviados" (A-08) where a human can act.
  */
 
 import type { ReactElement } from 'react';
@@ -25,14 +26,16 @@ const TONE_FG: Record<PillTone, string> = {
   danger: colors.white,
 };
 
-export function CloudSyncPill(): ReactElement {
+export function CloudSyncPill(props: { readonly onOpenRejected?: () => void }): ReactElement {
   const { t } = useTranslation();
   const { state, syncNow } = useCloudSync();
   const view = pillView(state);
   const label = t(view.labelKey as never, { count: view.count, time: view.time } as never);
+  const onPress =
+    view.labelKey === 'syncPill.rejected' && props.onOpenRejected ? props.onOpenRejected : syncNow;
   return (
     <Pressable
-      onPress={syncNow}
+      onPress={onPress}
       testID="cloud-sync-pill"
       accessibilityRole="button"
       accessibilityLabel={`${label}. ${t('syncPill.tapToUpdate')}`}

@@ -11,7 +11,9 @@ import { DrizzleAppConfigRepository, type CachinkDatabase } from '@xangarro/data
 import type { ApiClient } from './api-client.js';
 import { pullAll, type PullOutcome } from './pull.js';
 import { drainPush, type PushOutcome } from './push.js';
-import { StatusStore } from './status-store.js';
+import { readRows } from './row-reader.js';
+import { rowKey } from './table-map.js';
+import { StatusStore, type RejectedEntry } from './status-store.js';
 
 export interface SyncEngineDeps {
   readonly db: CachinkDatabase;
@@ -33,6 +35,13 @@ export interface SyncCounts {
   readonly rejected: number;
   readonly retrying: number;
 }
+
+/** A rejected row plus its current local data (null if the row is gone locally). */
+export interface RejectedRow extends RejectedEntry {
+  readonly row: Readonly<Record<string, unknown>> | null;
+}
+
+const MAX_REJECTED_LISTED = 200;
 
 const NOT_ACTIVATED: SyncRunResult = { push: null, pull: null, revoked: false };
 
@@ -62,6 +71,16 @@ export class SyncEngine {
 
   counts(): Promise<SyncCounts> {
     return this.#status.countByStatus();
+  }
+
+  /** Rows the server refused, with their local data for a human summary (A-08). */
+  async rejected(): Promise<readonly RejectedRow[]> {
+    const entries = await this.#status.listRejected(MAX_REJECTED_LISTED);
+    const rows = await readRows(
+      this.#deps.db,
+      entries.map((e) => ({ tableName: e.tableName, rowId: e.rowId, op: 'insert' as const })),
+    );
+    return entries.map((e) => ({ ...e, row: rows.get(rowKey(e.tableName, e.rowId)) ?? null }));
   }
 
   requeue(tableName: string, rowId: string): Promise<void> {

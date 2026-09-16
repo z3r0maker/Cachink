@@ -18,6 +18,7 @@ import devKeys from './dev-keys.json' with { type: 'json' };
 import { FIXTURE_BUSINESS_ID } from './fixtures.js';
 import { applyPush } from './push-handler.js';
 import { entitlementFor, scenarioOf, type Scenario } from './scenarios.js';
+import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
 
 export interface MockRequest {
@@ -77,7 +78,7 @@ export class MockApi {
   }
 
   async handle(req: MockRequest): Promise<MockResponse> {
-    const control = this.controlRoute(req);
+    const control = controlRoute(this.state, req);
     if (control) return control;
     if (req.headers[HEADER_PROTOCOL.toLowerCase()] !== String(PROTOCOL_VERSION)) {
       return err('PROTOCOL_UNSUPPORTED', 'send X-Xangarro-Protocol: 1');
@@ -88,17 +89,6 @@ export class MockApi {
     const device = this.authenticate(req, scenario);
     if (!device) return err(req.headers['authorization'] ? 'DEVICE_REVOKED' : 'UNAUTHENTICATED');
     return this.deviceRoute(req, device, scenario);
-  }
-
-  /** Mock-only control endpoints (not part of the contract). */
-  private controlRoute(req: MockRequest): MockResponse | null {
-    if (req.method !== 'POST') return null;
-    if (req.path === '/__mock/reset') {
-      this.state.reset();
-      return { status: 200, body: { ok: true } };
-    }
-    if (req.path === '/__mock/code') return { status: 200, body: { code: this.state.issueCode() } };
-    return null;
   }
 
   private async deviceRoute(
