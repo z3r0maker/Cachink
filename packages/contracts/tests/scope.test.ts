@@ -22,7 +22,7 @@ function localTables(): string[] {
   for (const f of readdirSync(SCHEMA_DIR)) {
     if (!f.endsWith('.ts')) continue;
     const src = readFileSync(resolve(SCHEMA_DIR, f), 'utf8');
-    for (const m of src.matchAll(/sqliteTable\('([a-z_]+)'/g)) names.push(m[1] as string);
+    for (const m of src.matchAll(/sqliteTable\(\s*'([a-z_]+)'/g)) names.push(m[1] as string);
   }
   return names.sort();
 }

@@ -7,6 +7,7 @@
  *      cliente must exist.
  *   3. Validate that the referenced producto exists (ADR-048).
  *   4. Delegate persistence to SalesRepository.create().
+ *   0. Refuse when the plan's monthly records are used up (A-10).
  *   5. When stock flag is ON AND the producto has `seguirStock=true`,
  *      auto-create a salida MovimientoInventario with `cantidad` units.
  *
@@ -30,6 +31,7 @@ import type {
   SalesRepository,
 } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { UNLIMITED_QUOTA, type RecordQuota } from '../record-quota/record-quota.js';
 
 function currentHHMM(): string {
   const d = new Date();
@@ -43,6 +45,8 @@ export interface RegistrarVentaConfig {
   readonly stockEnabled?: boolean;
   /** Current user — needed to look up their open turno. */
   readonly userId: UserId | null;
+  /** Plan record limit (A-10). Defaults to unlimited. */
+  readonly quota?: RecordQuota;
 }
 
 export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
@@ -53,6 +57,7 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
   readonly #cajaTurnos: CajaTurnosRepository;
   readonly #stockEnabled: boolean;
   readonly #userId: UserId | null;
+  readonly #quota: RecordQuota;
 
   constructor(
     sales: SalesRepository,
@@ -69,11 +74,13 @@ export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
     this.#cajaTurnos = cajaTurnos;
     this.#stockEnabled = config.stockEnabled ?? true;
     this.#userId = config.userId;
+    this.#quota = config.quota ?? UNLIMITED_QUOTA;
   }
 
   async execute(input: NewSale): Promise<Sale> {
     const parsed = NewSaleSchema.parse(input);
     const cajaTurnoId = await this.#requireOpenTurno();
+    await this.#quota.assertCanCreate();
 
     const producto = await this.#products.findById(parsed.productoId);
     if (!producto) {

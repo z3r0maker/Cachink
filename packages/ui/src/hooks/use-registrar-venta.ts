@@ -13,6 +13,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarVentaUseCase } from '@xangarro/application';
+import { useRecordQuota } from '../entitlement/use-record-quota';
 import type { NewSale, Sale } from '@xangarro/domain';
 import {
   useCajaTurnosRepository,
@@ -67,26 +68,34 @@ function emitCreditoAlert(sale: Sale, emitAlert: ReturnType<typeof useEmitDirect
   });
 }
 
-export function useRegistrarVenta(): RegistrarVentaResult {
+/** The audited use case, rebuilt when its repositories or config change. */
+function useVentaUseCase(stockEnabled: boolean) {
   const sales = useSalesRepository();
   const clients = useClientsRepository();
   const products = useProductsRepository();
   const movements = useInventoryMovementsRepository();
   const cajaTurnos = useCajaTurnosRepository();
-  const queryClient = useQueryClient();
-  const businessId = useCurrentBusinessId();
   const userId = useUserId();
-  const stockEnabled = useFeatureFlag('stock');
-
+  const quota = useRecordQuota();
   const rawUseCase = useMemo(
     () =>
       new RegistrarVentaUseCase(sales, clients, products, movements, cajaTurnos, {
         stockEnabled,
         userId,
+        quota,
       }),
-    [sales, clients, products, movements, cajaTurnos, stockEnabled, userId],
+    [sales, clients, products, movements, cajaTurnos, stockEnabled, userId, quota],
   );
-  const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_VENTA);
+  return useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_VENTA);
+}
+
+export function useRegistrarVenta(): RegistrarVentaResult {
+  const products = useProductsRepository();
+  const movements = useInventoryMovementsRepository();
+  const queryClient = useQueryClient();
+  const businessId = useCurrentBusinessId();
+  const stockEnabled = useFeatureFlag('stock');
+  const useCase = useVentaUseCase(stockEnabled);
   const emitAlert = useEmitDirectorAlert();
 
   return useMutation<Sale, Error, NewSale>({

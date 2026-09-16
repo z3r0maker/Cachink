@@ -29,6 +29,7 @@ import { InMemoryBusinessesRepository } from './in-memory-businesses-repository.
 import { InMemoryClientPaymentsRepository } from './in-memory-client-payments-repository.js';
 import { InMemoryClientsRepository } from './in-memory-clients-repository.js';
 import { InMemoryDayClosesRepository } from './in-memory-day-closes-repository.js';
+import { InMemoryRecordUsageRepository } from './in-memory-record-usage-repository.js';
 import { InMemoryEmployeesRepository } from './in-memory-employees-repository.js';
 import { InMemoryExpensesRepository } from './in-memory-expenses-repository.js';
 import { InMemoryInventoryMovementsRepository } from './in-memory-inventory-movements-repository.js';
@@ -60,6 +61,7 @@ function buildInMemoryRepositories(): Repositories {
   return {
     appConfig: new InMemoryAppConfigRepository(),
     referenceData: new InMemoryReferenceDataRepository(),
+    recordUsage: new InMemoryRecordUsageRepository(),
     businesses: new InMemoryBusinessesRepository(),
     sales: new InMemorySalesRepository(),
     expenses: new InMemoryExpensesRepository(),

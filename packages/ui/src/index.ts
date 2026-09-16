@@ -34,3 +34,4 @@ export type { AppTamaguiConfig } from './tamagui.config';
 export { useTranslation } from './i18n/index';
 export * from './dev/index';
 export * from './activation/index';
+export * from './entitlement/index';

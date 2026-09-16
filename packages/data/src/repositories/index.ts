@@ -25,3 +25,4 @@ export * from './director-alerts-repository.js';
 export * from './caja-movimientos-repository.js';
 export * from './cancelacion-logs-repository.js';
 export * from './drizzle/index.js';
+export * from './record-usage-repository.js';

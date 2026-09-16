@@ -1,22 +1,9 @@
 /**
- * RepositoryProvider — composition root for the 18 Cachink repositories.
- *
- * CLAUDE.md §4.3 mandates constructor-injected repository interfaces for
- * use-cases. The app-level composition happens here: each app's
- * `AppProviders` wraps children in `RepositoryProvider` with one concrete
- * implementation per repo. Screens + hooks pull repos via the
- * `useXRepository` accessors instead of constructing their own — keeping
- * the dependency graph testable.
- *
- * Two variants ship:
- *   - `RepositoryProvider`: production. Takes a pre-built `Repositories`
- *     record (the `DrizzleRepositoryBridge` in `./app-providers` builds
- *     one from the DB + deviceId).
- *   - `buildDrizzleRepositories(db, deviceId)`: pure factory that produces
- *     a full `Repositories` record wired onto the Drizzle implementations.
- *
- * Tests use the same `RepositoryProvider` but pass a record built from
- * `@xangarro/testing` in-memory impls.
+ * RepositoryProvider — composition root for the app's repositories
+ * (CLAUDE.md §4.3). `buildDrizzleRepositories(db, deviceId)` wires the
+ * Drizzle implementations for production; tests pass a record of
+ * `@xangarro/testing` in-memory implementations. Screens and hooks read
+ * repositories through the `useXRepository` accessors, never construct them.
  */
 
 import { DrizzleReferenceDataRepository, type ReferenceDataRepository } from '@xangarro/sync';
@@ -35,6 +22,7 @@ import type {
   ExpensesRepository,
   InventoryMovementsRepository,
   ProductsRepository,
+  RecordUsageRepository,
   RecurringExpensesRepository,
   SalesRepository,
   UsersRepository,
@@ -55,6 +43,7 @@ import {
   DrizzleExpensesRepository,
   DrizzleInventoryMovementsRepository,
   DrizzleProductsRepository,
+  DrizzleRecordUsageRepository,
   DrizzleRecurringExpensesRepository,
   DrizzleSalesRepository,
   DrizzleUsersRepository,
@@ -77,6 +66,7 @@ export interface Repositories {
   readonly appConfig: AppConfigRepository;
   /** Writes cloud-authoritative reference tables (activation bootstrap, pulls). */
   readonly referenceData: ReferenceDataRepository;
+  readonly recordUsage: RecordUsageRepository;
   readonly businesses: BusinessesRepository;
   readonly sales: SalesRepository;
   readonly expenses: ExpensesRepository;
@@ -113,6 +103,7 @@ export function buildDrizzleRepositories(
   return {
     appConfig: new DrizzleAppConfigRepository(db),
     referenceData: new DrizzleReferenceDataRepository(db),
+    recordUsage: new DrizzleRecordUsageRepository(db),
     businesses: new DrizzleBusinessesRepository(db, deviceId, uid),
     sales: new DrizzleSalesRepository(db, deviceId, uid),
     expenses: new DrizzleExpensesRepository(db, deviceId, uid),
@@ -168,6 +159,7 @@ export function useRepositories(): Repositories {
 export const useAppConfigRepository = (): AppConfigRepository => useRepositories().appConfig;
 export const useReferenceDataRepository = (): ReferenceDataRepository =>
   useRepositories().referenceData;
+export const useRecordUsageRepository = (): RecordUsageRepository => useRepositories().recordUsage;
 export const useBusinessesRepository = (): BusinessesRepository => useRepositories().businesses;
 export const useSalesRepository = (): SalesRepository => useRepositories().sales;
 export const useExpensesRepository = (): ExpensesRepository => useRepositories().expenses;

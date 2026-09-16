@@ -21,6 +21,7 @@ import {
 } from '@xangarro/domain';
 import type { ExpensesRepository, InventoryMovementsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { UNLIMITED_QUOTA, type RecordQuota } from '../record-quota/record-quota.js';
 
 export class RegistrarMovimientoInventarioUseCase implements UseCase<
   NewInventoryMovement,
@@ -28,14 +29,21 @@ export class RegistrarMovimientoInventarioUseCase implements UseCase<
 > {
   readonly #movements: InventoryMovementsRepository;
   readonly #expenses: ExpensesRepository;
+  readonly #quota: RecordQuota;
 
-  constructor(movements: InventoryMovementsRepository, expenses: ExpensesRepository) {
+  constructor(
+    movements: InventoryMovementsRepository,
+    expenses: ExpensesRepository,
+    quota: RecordQuota = UNLIMITED_QUOTA,
+  ) {
     this.#movements = movements;
     this.#expenses = expenses;
+    this.#quota = quota;
   }
 
   async execute(input: NewInventoryMovement): Promise<InventoryMovement> {
     const parsed = NewInventoryMovementSchema.parse(input);
+    await this.#quota.assertCanCreate();
     const movement = await this.#movements.create(parsed);
     if (parsed.tipo === 'entrada') {
       await this.#expenses.create({

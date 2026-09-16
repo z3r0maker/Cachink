@@ -5,6 +5,7 @@
 
 import { buildFixtures, FIXTURE_BUSINESS_ID, FIXTURE_EMAIL } from './fixtures.js';
 import { ulidOf } from './ids.js';
+import type { Scenario } from './scenarios.js';
 
 export interface StoredRow {
   readonly table: string;
@@ -39,6 +40,10 @@ export class MockState {
   rows = new Map<string, StoredRow>();
   /** Rows removed by `/__mock/forget`, restorable with `/__mock/restore`. */
   forgotten = new Map<string, StoredRow>();
+  /** Scenario for requests without `X-Mock-Scenario` (`/__mock/scenario`). */
+  defaultScenario: Scenario = 'emprendedor';
+  /** Overrides the entitlement's records-per-month; `undefined` = plan default. */
+  recordsPerMonth: number | null | undefined = undefined;
   devices = new Map<string, Device>();
   codes = new Map<string, ActivationCode>();
   serverSeq = 0;
@@ -52,6 +57,8 @@ export class MockState {
   reset(): void {
     this.rows.clear();
     this.forgotten.clear();
+    this.defaultScenario = 'emprendedor';
+    this.recordsPerMonth = undefined;
     this.devices.clear();
     this.codes.clear();
     this.serverSeq = 0;

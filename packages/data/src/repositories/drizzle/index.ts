@@ -28,3 +28,4 @@ export * from './entregas-credito-repository.js';
 export * from './director-alerts-repository.js';
 export * from './caja-movimientos-repository.js';
 export * from './cancelacion-logs-repository.js';
+export * from './record-usage-repository.js';

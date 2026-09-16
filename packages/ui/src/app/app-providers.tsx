@@ -14,6 +14,7 @@ import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
 import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
+import { PlanLimitSheet } from '../entitlement/plan-limit-sheet';
 import { GatedNavigation } from './gated-navigation';
 import { ActivationProvider } from '../activation/activation-context';
 import { CloudSyncBridge } from './cloud-sync-bridge';
@@ -57,6 +58,7 @@ function SessionLayer(props: {
       </ActivationProvider>
       {props.overlays}
       <GlobalErrorToast />
+      <PlanLimitSheet />
     </TelemetryBridge>
   );
 }

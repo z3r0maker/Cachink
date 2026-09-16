@@ -26,6 +26,7 @@ import type { FeatureFlags } from '@xangarro/domain';
 import type { AppMode } from '../../app-config/index';
 import { appTabs } from './tab-definitions';
 import { CloudSyncPill } from './cloud-sync-pill';
+import { EntitlementBanner } from '../../entitlement/entitlement-banner';
 import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
 export interface AppShellProps {
@@ -127,6 +128,7 @@ export function AppShell(props: AppShellProps): ReactElement {
         left={leftSlot}
         right={<RightSlot onOpenSettings={props.onOpenSettings} onNavigate={props.onNavigate} />}
       />
+      <EntitlementBanner />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}

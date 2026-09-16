@@ -7,7 +7,7 @@ import { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import type { Business, Money, PaymentMethod, Product, IsoDate } from '@xangarro/domain';
-import { today } from '@xangarro/domain';
+import { PlanLimitError, today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
   useCachinkSound,
@@ -21,6 +21,8 @@ import {
 import { useCachinkPlayer } from '../../shell/use-cachink-player';
 
 function handleMutationError(err: unknown): void {
+  // The plan-limit sheet already explains this one (A-10).
+  if (err instanceof PlanLimitError) return;
   const msg = (err as Error).message;
   if (msg.includes('no column named')) {
     Alert.alert(

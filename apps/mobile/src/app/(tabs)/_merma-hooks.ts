@@ -5,6 +5,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { Alert } from 'react-native';
+import { PlanLimitError } from '@xangarro/domain';
 import {
   impactLight,
   useCart,
@@ -45,7 +46,8 @@ async function submitMermaItems(
         businessId: businessId as BusinessId,
       });
     } catch (err) {
-      Alert.alert('Error parcial', (err as Error).message);
+      // The plan-limit sheet already explains a PlanLimitError (A-10).
+      if (!(err instanceof PlanLimitError)) Alert.alert('Error parcial', (err as Error).message);
       return false;
     }
   }

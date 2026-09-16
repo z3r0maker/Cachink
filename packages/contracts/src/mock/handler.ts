@@ -83,7 +83,7 @@ export class MockApi {
     if (req.headers[HEADER_PROTOCOL.toLowerCase()] !== String(PROTOCOL_VERSION)) {
       return err('PROTOCOL_UNSUPPORTED', 'send X-Xangarro-Protocol: 1');
     }
-    const scenario = scenarioOf(req.headers);
+    const scenario = scenarioOf(req.headers, this.state.defaultScenario);
     if (req.path === API_PATHS.activate && req.method === 'POST')
       return this.activate(req, scenario);
     const device = this.authenticate(req, scenario);
@@ -104,7 +104,9 @@ export class MockApi {
       return {
         status: 200,
         body: {
-          entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, new Date())),
+          entitlement: await sign(
+            entitlementFor(scenario, FIXTURE_BUSINESS_ID, new Date(), this.state.recordsPerMonth),
+          ),
         },
       };
     }
@@ -145,7 +147,9 @@ export class MockApi {
       deviceToken: `mock-device:${device.id}`,
       deviceId: device.id,
       businessId: FIXTURE_BUSINESS_ID,
-      entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, now)),
+      entitlement: await sign(
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+      ),
       bootstrap: {
         serverSeq: this.state.serverSeq,
         serverTime: now.toISOString(),
@@ -166,7 +170,9 @@ export class MockApi {
     const body: PullResponse = {
       serverSeq: this.state.serverSeq,
       serverTime: now.toISOString(),
-      entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, now)),
+      entitlement: await sign(
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+      ),
       tables: referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,
     };

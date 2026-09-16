@@ -26,7 +26,16 @@ export interface ActivationConfig {
   readonly deviceInfo: DeviceInfo;
   /** Dev-only extra headers, e.g. `X-Mock-Scenario`. */
   readonly extraHeaders?: Readonly<Record<string, string>>;
+  /**
+   * Hex Ed25519 public key that signs entitlements (A-10). An empty or wrong
+   * key means nothing verifies → Freelancer limits, never a lock.
+   */
+  readonly entitlementPublicKeyHex: string;
 }
+
+/** DEV ONLY — the contracts mock's signing key (`packages/contracts/src/mock/dev-keys.json`). */
+export const DEV_ENTITLEMENT_PUBLIC_KEY_HEX =
+  'd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a';
 
 /** Persisted in app_config under `activation`. */
 export interface ActivationRecord {
@@ -52,6 +61,7 @@ export const DEFAULT_ACTIVATION_CONFIG: ActivationConfig = {
   apiBase: 'http://localhost:3000',
   tokenStore: memoryTokenStore(),
   deviceInfo: { name: 'Dispositivo', platform: 'ios', appVersion: '0.0.0', osVersion: '0' },
+  entitlementPublicKeyHex: DEV_ENTITLEMENT_PUBLIC_KEY_HEX,
 };
 
 export function parseActivationRecord(raw: string | null): ActivationRecord | null {

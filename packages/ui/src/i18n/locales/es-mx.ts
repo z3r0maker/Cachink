@@ -1070,6 +1070,17 @@ export const esMX = {
       userMissing: 'El operador fue eliminado en el portal.',
     },
   },
+  planLimit: {
+    title: 'Llegaste a {{limit}} registros este mes',
+    body: 'Tu plan Freelancer incluye {{limit}} registros al mes. Con Emprendedor tus registros son ilimitados.',
+    where: 'Cambia tu plan en app.xangarro.mx. Lo que ya registraste sigue guardado.',
+    ok: 'Entendido',
+  },
+  planBanner: {
+    grace: 'Tu pago está pendiente — tienes hasta el {{date}}.',
+    fellBack:
+      'Tu negocio está en el plan Freelancer (50 registros al mes). Renueva en app.xangarro.mx.',
+  },
   syncPill: {
     syncing: 'Sincronizando…',
     rejected: '{{count}} no enviados',

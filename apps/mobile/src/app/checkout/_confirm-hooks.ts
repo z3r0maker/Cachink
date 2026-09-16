@@ -7,7 +7,7 @@ import { useCallback, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Alert } from 'react-native';
 import type { Business, IsoDate, PaymentMethod, Product } from '@xangarro/domain';
-import { today } from '@xangarro/domain';
+import { PlanLimitError, today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
   useCachinkSound,
@@ -84,7 +84,8 @@ export function useConfirmState(): ConfirmState {
           cantidad: item.cantidad,
         });
       } catch (err) {
-        Alert.alert('Error', (err as Error).message);
+        // The plan-limit sheet already explains a PlanLimitError (A-10).
+        if (!(err instanceof PlanLimitError)) Alert.alert('Error', (err as Error).message);
         return;
       }
     }

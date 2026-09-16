@@ -47,19 +47,25 @@ describe('AppShell', () => {
     onSwitchOperator?: () => void;
     onOpenSettings?: () => void;
   }) {
+    // The plan banner reads app_config through the repository provider.
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
     return renderWithProviders(
-      <AppShell
-        activeTabKey="ventas"
-        onNavigate={overrides?.onNavigate ?? noop}
-        onSwitchOperator={overrides?.onSwitchOperator ?? noop}
-        onOpenSettings={overrides?.onOpenSettings ?? noop}
-        mode="local"
-        title="Ventas"
-        subtitle="jueves, 24 abril"
-        flags={defaultFlags}
-      >
-        <span data-testid="shell-body">hello</span>
-      </AppShell>,
+      <QueryClientProvider client={qc}>
+        <MockRepositoryProvider>
+          <AppShell
+            activeTabKey="ventas"
+            onNavigate={overrides?.onNavigate ?? noop}
+            onSwitchOperator={overrides?.onSwitchOperator ?? noop}
+            onOpenSettings={overrides?.onOpenSettings ?? noop}
+            mode="local"
+            title="Ventas"
+            subtitle="jueves, 24 abril"
+            flags={defaultFlags}
+          >
+            <span data-testid="shell-body">hello</span>
+          </AppShell>
+        </MockRepositoryProvider>
+      </QueryClientProvider>,
     );
   }
 
@@ -108,19 +114,24 @@ describe('AppShell', () => {
 
   it('renders the back button instead of the avatar when onBack is set', () => {
     const onBack = vi.fn();
+    const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
     renderWithProviders(
-      <AppShell
-        activeTabKey="ventas"
-        onNavigate={noop}
-        onSwitchOperator={noop}
-        onOpenSettings={noop}
-        onBack={onBack}
-        mode="local"
-        title="Ajustes"
-        flags={defaultFlags}
-      >
-        <span />
-      </AppShell>,
+      <QueryClientProvider client={qc}>
+        <MockRepositoryProvider>
+          <AppShell
+            activeTabKey="ventas"
+            onNavigate={noop}
+            onSwitchOperator={noop}
+            onOpenSettings={noop}
+            onBack={onBack}
+            mode="local"
+            title="Ajustes"
+            flags={defaultFlags}
+          >
+            <span />
+          </AppShell>
+        </MockRepositoryProvider>
+      </QueryClientProvider>,
     );
     expect(screen.queryByTestId('top-bar-role-chip')).toBeNull();
     fireEvent.click(screen.getByTestId('top-bar-back'));

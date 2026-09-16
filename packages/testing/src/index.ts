@@ -42,3 +42,4 @@ export * from './fixtures/index.js';
 // test helpers — contract factories still live under
 // `@xangarro/testing/contract` (see `./contract/index.ts`).
 export { TEST_DEVICE_ID } from './contract/_shared.js';
+export * from './in-memory-record-usage-repository.js';
