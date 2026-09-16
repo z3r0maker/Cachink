@@ -20,13 +20,11 @@ import {
   type ReactNode,
 } from 'react';
 import { AppState } from 'react-native';
-import { useQueryClient, type QueryClient } from '@tanstack/react-query';
-import type { AppConfigRepository } from '@xangarro/data';
+import { useQueryClient } from '@tanstack/react-query';
 import { SyncEngine, type RejectedRow, type SyncRunResult } from '@xangarro/sync';
-import { APP_CONFIG_KEYS } from '../app-config/index';
 import { useActivationContext } from '../activation/activation-context';
-import type { DeviceTokenStore } from '../activation/activation-config';
-import { ACTIVATION_QUERY_KEY, useActivationState } from '../activation/use-activation-state';
+import { forgetDevice } from '../activation/forget-device';
+import { useActivationState } from '../activation/use-activation-state';
 import { useDatabase } from '../database/index';
 import {
   INITIAL_CLOUD_SYNC_STATE,
@@ -67,16 +65,6 @@ function phaseOf(result: SyncRunResult): CloudSyncPhase {
   const error = result.push?.error ?? result.pull?.error ?? null;
   if (!error) return 'idle';
   return error.code === 'NETWORK' ? 'offline' : 'error';
-}
-
-async function forgetDevice(deps: {
-  appConfig: AppConfigRepository;
-  tokenStore: DeviceTokenStore;
-  queryClient: QueryClient;
-}): Promise<void> {
-  await deps.tokenStore.clear();
-  await deps.appConfig.delete(APP_CONFIG_KEYS.activation);
-  await deps.queryClient.invalidateQueries({ queryKey: ACTIVATION_QUERY_KEY });
 }
 
 function useSyncRunner(

@@ -1,31 +1,24 @@
 /**
- * SettingsNavSection — the Director's tool grid, rendered inside
- * Configuración (review item #7).
- *
- * The Director bottom bar used to end in "Otros", a label that told
- * the user nothing and cost a tab slot that Gastos needed. The grid
- * itself was fine — it just belonged behind the top-bar cog rather
- * than in the four-slot bar.
- *
- * This reuses `OtrosCard` and the `otros-<key>` testIDs verbatim, so
- * the cards look and address identically wherever they render; only
- * the path the user takes to reach them changed.
+ * ToolGridSection — the Caja tool grid (Movimientos, Cancelaciones…).
+ * Reuses `OtrosCard` and the `otros-<key>` testIDs so flows address the
+ * cards the same way they always have. Moved here from Settings in A-12,
+ * which no longer renders it.
  */
 
 import type { ReactElement } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { View } from '@tamagui/core';
 import { SectionTitle } from '../../components/index';
-import { OtrosCard } from '../Caja/tool-card';
-import type { OtrosItem } from '../Caja/tool-items';
+import { OtrosCard } from './tool-card';
+import type { OtrosItem } from './tool-items';
 
-export interface SettingsNavSectionProps {
+export interface ToolGridSectionProps {
   readonly items: readonly OtrosItem[];
   readonly onNavigate: (path: string) => void;
   readonly title: string;
 }
 
-export function SettingsNavSection(props: SettingsNavSectionProps): ReactElement | null {
+export function ToolGridSection(props: ToolGridSectionProps): ReactElement | null {
   const { width } = useWindowDimensions();
   if (props.items.length === 0) return null;
 

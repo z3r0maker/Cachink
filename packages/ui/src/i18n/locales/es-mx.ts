@@ -657,7 +657,7 @@ export const esMX = {
   export: {
     title: 'Exportar datos',
     exportarCta: 'Exportar todos los datos',
-    exportarHint: 'Descarga un Excel con toda la historia del negocio.',
+    exportarHint: 'Descarga un Excel con lo que guarda este dispositivo.',
     exportarError: 'No se pudo generar el archivo.',
     exportando: 'Generando archivo…',
     exportarListo: 'Listo para compartir',
@@ -797,6 +797,24 @@ export const esMX = {
     },
   },
   settings: {
+    cuenta: 'Cuenta',
+    negocio: 'Negocio',
+    plan: 'Plan',
+    plans: { freelancer: 'Freelancer', emprendedor: 'Emprendedor', mipyme_pro: 'MiPyME Pro' },
+    dispositivo: 'Este dispositivo',
+    portalHint: 'Administra tu negocio, operadores y productos en app.xangarro.mx.',
+    unlink: 'Desvincular este dispositivo',
+    unlinkConfirmTitle: '¿Desvincular este dispositivo?',
+    unlinkConfirmBody:
+      'Tus registros se quedan guardados aquí. Para volver a usarlo necesitarás un código de activación nuevo. Libera el lugar del dispositivo desde el portal.',
+    unlinkConfirm: 'Desvincular',
+    sincronizacion: 'Sincronización',
+    estado: 'Estado',
+    noEnviados: 'Ver {{count}} no enviados',
+    dispositivoSection: 'Dispositivo',
+    datos: 'Datos',
+    exportHint:
+      'La exportación incluye lo que guarda este dispositivo: los últimos 90 días ya enviados y todo lo pendiente.',
     title: 'Ajustes',
     hubTitle: 'Ajustes',
     negocioCard: 'Negocio',
@@ -1089,6 +1107,7 @@ export const esMX = {
     synced: 'Sincronizado {{time}}',
     never: 'Sin sincronizar',
     tapToUpdate: 'Toca para actualizar',
+    update: 'Actualizar',
   },
   activate: {
     title: 'Activa este dispositivo',

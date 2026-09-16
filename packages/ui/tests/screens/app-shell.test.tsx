@@ -1,14 +1,12 @@
 /**
- * AppShell + Settings component tests.
+ * AppShell component tests.
  *
  * Single role (ADR-053): one 4-tab bar, operator avatar locks the screen.
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { BusinessId } from '@xangarro/domain';
-import type { Business } from '@xangarro/domain';
 import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
-import { AppShell, Settings, appTabs } from '../../src/screens/index';
+import { AppShell, appTabs } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -136,77 +134,5 @@ describe('AppShell', () => {
     expect(screen.queryByTestId('top-bar-role-chip')).toBeNull();
     fireEvent.click(screen.getByTestId('top-bar-back'));
     expect(onBack).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('Settings', () => {
-  const business: Business = {
-    id: '01JPHK00000000000000000008' as BusinessId,
-    nombre: 'Taquería Don Pedro',
-    regimenFiscal: 'RIF',
-    isrTasa: 3000,
-    logoUrl: null,
-    featureFlags: JSON.stringify(defaultFlags),
-    businessId: '01JPHK00000000000000000008' as BusinessId,
-    deviceId: 'dev' as Business['deviceId'],
-    createdByUserId: null,
-    createdAt: '2026-04-24T00:00:00Z' as Business['createdAt'],
-    updatedAt: '2026-04-24T00:00:00Z' as Business['updatedAt'],
-    deletedAt: null,
-  };
-
-  function wrapSettings(ui: React.ReactElement) {
-    const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
-    return (
-      <QueryClientProvider client={qc}>
-        <MockRepositoryProvider>{ui}</MockRepositoryProvider>
-      </QueryClientProvider>
-    );
-  }
-
-  it('renders the business nombre, regimen fiscal and ISR', () => {
-    renderWithProviders(
-      wrapSettings(
-        <Settings mode="local" business={business} onReRunWizard={noop} showExportAction={false} />,
-      ),
-    );
-    expect(screen.getByText('Taquería Don Pedro')).toBeInTheDocument();
-    expect(screen.getAllByText('RIF').length).toBeGreaterThanOrEqual(1);
-    expect(screen.getAllByText('30%').length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('renders a placeholder when no business', () => {
-    renderWithProviders(
-      wrapSettings(
-        <Settings mode="local" business={null} onReRunWizard={noop} showExportAction={false} />,
-      ),
-    );
-    expect(screen.getByText('Sin configurar')).toBeInTheDocument();
-  });
-
-  it('fires onReRunWizard when tapped', () => {
-    const onReRunWizard = vi.fn();
-    renderWithProviders(
-      wrapSettings(
-        <Settings
-          mode="local"
-          business={business}
-          onReRunWizard={onReRunWizard}
-          showExportAction={false}
-        />,
-      ),
-    );
-    const button = screen.getAllByTestId('settings-re-run-wizard')[0]!;
-    fireEvent.click(button);
-    expect(onReRunWizard).toHaveBeenCalled();
-  });
-
-  it('renders the localized mode label for local mode', () => {
-    renderWithProviders(
-      wrapSettings(
-        <Settings mode="local" business={business} onReRunWizard={noop} showExportAction={false} />,
-      ),
-    );
-    expect(screen.getByText('Solo en este dispositivo')).toBeInTheDocument();
   });
 });

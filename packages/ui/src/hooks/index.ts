@@ -53,7 +53,6 @@ export * from './use-last-conflicts';
 export * from './use-check-for-updates';
 export * from './use-frequent-productos';
 export * from './use-isr-defaults';
-export * from './use-editar-business';
 export * from './use-egresos-por-categoria';
 export * from './use-indicadores-trend';
 export * from './use-edit-empleado';

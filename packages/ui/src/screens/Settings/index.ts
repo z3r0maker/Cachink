@@ -1,16 +1,7 @@
-export { Settings, type SettingsProps } from './settings';
-export { SettingsHub, type SettingsHubProps, type SettingsSection } from './settings-hub';
-export { SettingsNegocio, type SettingsNegocioProps } from './settings-negocio';
-export { SettingsTasasIsr, type SettingsTasasIsrProps } from './settings-tasas-isr';
-export { SettingsEmpleados, type SettingsEmpleadosProps } from './settings-empleados';
-export { SettingsSistema, type SettingsSistemaProps } from './settings-sistema';
+export { SettingsScreen, type SettingsScreenProps } from './settings-screen';
+export type { DeviceSettings } from './settings-device-section';
 export { ExportarDatosAction, type ExportarDatosActionProps } from './exportar-datos-action';
 export { NotificationsToggle, type NotificationsToggleProps } from './notifications-toggle';
 export { CachinkSoundToggle, type CachinkSoundToggleProps } from './cachink-sound-toggle';
-export { IsrDefaultsCard } from './isr-defaults-card';
-export { EditBusinessModal, type EditBusinessModalProps } from './edit-business-modal';
-export { EditEmpleadoModal, type EditEmpleadoModalProps } from './edit-empleado-modal';
-export { TiposDePagoScreen, type TiposDePagoScreenProps } from './tipos-de-pago-screen';
-export { SettingsIndicadores, type SettingsIndicadoresProps } from './settings-indicadores';
 export { BugReportSheet, type BugReportSheetProps } from './bug-report-sheet';
 export { CrashReportingToggle, type CrashReportingToggleProps } from './crash-reporting-toggle';

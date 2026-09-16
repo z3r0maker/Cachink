@@ -9,9 +9,9 @@
 import { useRef, type ReactElement } from 'react';
 import { type TextInput } from 'react-native';
 import type { PayrollFrequency } from '@xangarro/domain';
-import { focusRef, MoneyField, TextField } from '../../components/fields/index';
-import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
-import type { useTranslation } from '../../i18n/index';
+import { focusRef, MoneyField, TextField } from '../../../components/fields/index';
+import { OptionCardGroup, type OptionCardItem } from '../../../components/OptionCardGroup/index';
+import type { useTranslation } from '../../../i18n/index';
 
 const PERIODO_CARDS: readonly OptionCardItem<PayrollFrequency>[] = [
   {
