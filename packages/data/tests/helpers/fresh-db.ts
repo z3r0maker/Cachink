@@ -17,7 +17,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../../src/schema/index.js';
 import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
-import { migration0000Sql } from '../../drizzle/migrations/0000_initial.js';
+import { journal, migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from '../../src/migrator/split-statements.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
@@ -34,8 +34,10 @@ export function makeFreshDb(): CachinkDatabase {
 
   // Apply the same migration SQL the async runner uses, but via
   // better-sqlite3's synchronous exec() to keep test factories sync.
-  for (const stmt of splitStatements(migration0000Sql)) {
-    sqlite.exec(stmt);
+  for (const entry of journal.entries) {
+    for (const stmt of splitStatements(migrationSqlByTag[entry.tag] ?? '')) {
+      sqlite.exec(stmt);
+    }
   }
 
   // Bookkeeping: match what runMigrations() would create.
@@ -47,7 +49,7 @@ export function makeFreshDb(): CachinkDatabase {
   );
   sqlite.exec(
     `INSERT INTO __cachink_migrations (tag, applied_at)
-     VALUES ('0000_initial', datetime('now'))`,
+     SELECT value, datetime('now') FROM json_each('${JSON.stringify(journal.entries.map((e) => e.tag))}')`,
   );
   sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
 

@@ -164,6 +164,16 @@ export default tseslint.config(
     },
   },
 
+  // Drizzle migrations: filenames must match the journal tag
+  // (`0001_capture_client`), and SQL payloads are long by nature.
+  {
+    files: ['**/drizzle/migrations/*.ts'],
+    rules: {
+      'unicorn/filename-case': 'off',
+      'max-lines': 'off',
+    },
+  },
+
   // Allow config files to use require / any
   {
     files: ['**/*.config.{js,ts,mjs}', '**/eslint.config.js'],

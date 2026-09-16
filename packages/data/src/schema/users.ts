@@ -20,6 +20,8 @@ export const users = sqliteTable('users', {
   role: text('role', { enum: ['operativo', 'director'] }).notNull(),
   mustChangePin: integer('must_change_pin', { mode: 'boolean' }).notNull().default(false),
   avatarColor: text('avatar_color').notNull().default('blue'),
+  /** Portal-managed deactivation (migration 0001). */
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
   /** JSON permissions object, parsed with UserPermissionsSchema. */
   permissions: text('permissions').notNull().default('{}'),
   ...auditColumns,

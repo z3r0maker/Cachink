@@ -38,6 +38,7 @@ export class DrizzleUsersRepository implements UsersRepository {
       role: input.role,
       mustChangePin: input.mustChangePin,
       avatarColor: input.avatarColor,
+      active: true,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -92,9 +93,7 @@ export class DrizzleUsersRepository implements UsersRepository {
       set['mustChangePin'] = patch.mustChangePin;
     }
     if (patch.active !== undefined) {
-      // Portal-managed (Q2); the SQLite column arrives with the A-17 migration.
-      // Failing loudly beats silently dropping a deactivation.
-      throw new TypeError('users.active is portal-managed; local column arrives in A-17');
+      set['active'] = patch.active;
     }
     if (patch.avatarColor !== undefined) {
       set['avatarColor'] = patch.avatarColor;
@@ -135,8 +134,7 @@ export class DrizzleUsersRepository implements UsersRepository {
       role: row.role as UserRole,
       mustChangePin: row.mustChangePin,
       avatarColor: row.avatarColor,
-      // `active` column lands with the A-17 migration; every local row is active until then.
-      active: true,
+      active: row.active,
       businessId: row.businessId as BusinessId,
       deviceId: row.deviceId as DeviceId,
       createdByUserId: (row.createdByUserId ?? null) as UserId | null,

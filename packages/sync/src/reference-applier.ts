@@ -10,7 +10,7 @@
  * records) are JSON-encoded, matching how the repositories store them.
  */
 
-import { eq, getTableColumns } from 'drizzle-orm';
+import { eq, getTableColumns, getTableName, sql } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import type { ReferenceTables } from '@xangarro/contracts';
 import type { CachinkDatabase } from '@xangarro/data';
@@ -89,9 +89,11 @@ export async function applyReferenceTables(
   businessId: string,
 ): Promise<ApplyReferenceResult> {
   const applied = {} as Record<RefTableName, number>;
+  const floor = await changeLogHighWater(db);
   for (const name of APPLY_ORDER) {
     const rows = tables[name] as readonly Record<string, unknown>[];
     for (const row of rows) await upsertRow(db, TABLES[name], row);
+    await forgetEchoes(db, TABLES[name], rows, floor);
     applied[name] = rows.length;
   }
   const flags = JSON.stringify(tables.feature_flags);
@@ -100,5 +102,34 @@ export async function applyReferenceTables(
     .set({ featureFlags: flags })
     .where(eq(businesses.id, businessId))
     .run();
+  await forgetEchoes(db, businesses, [{ id: businessId }], floor);
   return { applied };
+}
+
+async function changeLogHighWater(db: CachinkDatabase): Promise<number> {
+  const row = (await db.get(sql`SELECT COALESCE(MAX(id), 0) AS hw FROM __cachink_change_log`)) as
+    | { hw: number }
+    | undefined;
+  return row?.hw ?? 0;
+}
+
+/**
+ * The change-log triggers fire on every write, including rows the server just
+ * sent. Drop those entries so a pull never pushes server rows back (only
+ * entries created after `floor`, and only for the rows applied here).
+ */
+async function forgetEchoes(
+  db: CachinkDatabase,
+  table: SQLiteTable,
+  rows: readonly Record<string, unknown>[],
+  floor: number,
+): Promise<void> {
+  if (rows.length === 0) return;
+  const ids = rows.map((r) => String(r['id']));
+  await db.run(
+    sql`DELETE FROM __cachink_change_log WHERE id > ${floor} AND table_name = ${getTableName(table)} AND row_id IN (${sql.join(
+      ids.map((id) => sql`${id}`),
+      sql`, `,
+    )})`,
+  );
 }

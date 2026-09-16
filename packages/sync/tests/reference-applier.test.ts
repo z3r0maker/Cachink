@@ -11,6 +11,7 @@ import type { BusinessId, ProductId } from '@xangarro/domain';
 import { makeFreshDb } from '../../data/tests/helpers/fresh-db.js';
 import { applyReferenceTables, toColumnValues } from '../src/reference-applier.js';
 import { products } from '@xangarro/data';
+import { sql } from 'drizzle-orm';
 
 function tables(over: Partial<ReferenceTables> = {}): ReferenceTables {
   const fx = buildFixtures();
@@ -75,6 +76,33 @@ describe('applyReferenceTables', () => {
       all.some((p) => p.id === gone.id),
       false,
     );
+  });
+
+  it('does not leave change-log entries for server rows (no echo on the next push)', async () => {
+    const db = makeFreshDb();
+    await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
+    const rows = (await db.all(sql`SELECT table_name FROM __cachink_change_log`)) as unknown[];
+    assert.equal(rows.length, 0);
+  });
+
+  it('keeps change-log entries for local writes that happen before the apply', async () => {
+    const db = makeFreshDb();
+    await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
+    const repo = new DrizzleProductsRepository(db, 'DEV' as never);
+    await repo.create({
+      nombre: 'Local quick-add',
+      categoria: 'Producto Terminado',
+      costoUnitCentavos: 100n,
+      unidad: 'pza',
+      precioVentaCentavos: 200n,
+      businessId: FIXTURE_BUSINESS_ID,
+    } as never);
+    await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
+    const rows = (await db.all(sql`SELECT table_name, op FROM __cachink_change_log`)) as {
+      table_name: string;
+      op: string;
+    }[];
+    assert.deepEqual(rows, [{ table_name: 'products', op: 'insert' }]);
   });
 
   it('drops keys the local table does not have and JSON-encodes structured values', () => {
