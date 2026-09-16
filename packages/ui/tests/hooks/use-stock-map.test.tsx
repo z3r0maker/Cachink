@@ -40,6 +40,13 @@ describe('useStockMap', () => {
     await waitFor(() => expect([...result.current.map.entries()]).toEqual([['A', 5]]));
   });
 
+  it('maps every tracked product including zero stock, and nothing unknown', async () => {
+    const result = await render('emprendedor');
+    await waitFor(() => expect(result.current.map.get('A')).toBe(5));
+    expect(result.current.map.get('B')).toBeUndefined();
+    expect(result.current.map.get('unknown')).toBeUndefined();
+  });
+
   it('is empty on Freelancer (no stock)', async () => {
     const result = await render(null);
     expect(result.current.map.size).toBe(0);
