@@ -25,6 +25,7 @@ import { buildTauriCallback } from '../../src/database/database-provider.web';
 import { runMigrations } from '../../src/database/run-migrations';
 import * as schema from '@xangarro/data/schema';
 import type { CachinkDatabase } from '@xangarro/data';
+import { journal } from '@xangarro/data/migrations';
 
 type TauriLikeDatabase = Parameters<typeof buildTauriCallback>[0];
 
@@ -168,6 +169,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const rows = sqlite.prepare('SELECT tag FROM __cachink_migrations').all() as Array<{
       tag: string;
     }>;
-    expect(rows).toEqual([{ tag: '0000_initial' }]);
+    // Exactly one row per journal entry — none applied twice.
+    expect(rows).toEqual(journal.entries.map((e) => ({ tag: e.tag })));
   });
 });

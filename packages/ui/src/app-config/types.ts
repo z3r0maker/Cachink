@@ -16,6 +16,7 @@
  * and `app-config-provider.tsx#hydrateAppConfig`.
  */
 
+import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, DeviceId, UserId, UserRole } from '@xangarro/domain';
 
 /** Deployment mode selected in the first-run wizard (CLAUDE.md §7.1, ADR-039). */
@@ -50,12 +51,8 @@ export const APP_CONFIG_KEYS = {
   notificationPrefs: 'notificationPrefs',
   /** JSON `{ deviceId, businessId, activatedAt }` once the device is activated (A-04). */
   activation: 'activation',
-  /** JSON SignedEntitlement last received from the server (A-10 verifies it). */
-  entitlement: 'entitlement',
-  /** ISO server time last seen — anchors every clock decision (Q9). */
-  lastServerTime: 'lastServerTime',
-  /** Highest serverSeq applied from pulls (A-06). */
-  pullSeq: 'pullSeq',
+  /** Cloud-sync keys (entitlement, server time, cursors) are owned by @xangarro/sync. */
+  ...SYNC_CONFIG_KEYS,
 } as const;
 
 /** Shape of the Zustand store populated on launch. */
