@@ -1,0 +1,38 @@
+{
+  "name": "@xangarro/sync",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Cloud sync for the capture app: API client, reference-data applier, outbox push/pull (docs/plan A-04, A-06). No React.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@xangarro/contracts": "workspace:*",
+    "@xangarro/data": "workspace:*",
+    "@xangarro/domain": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "zod": "^4.6.2"
+  },
+  "devDependencies": {
+    "@xangarro/config": "workspace:*",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^4.1.6",
+    "better-sqlite3": "^12.10.0",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}

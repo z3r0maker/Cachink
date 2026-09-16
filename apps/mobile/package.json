@@ -74,7 +74,8 @@
     "victory-native": "~41.20.3",
     "zod": "^4.6.2",
     "zustand": "^5.0.13",
-    "@xangarro/contracts": "workspace:*"
+    "@xangarro/contracts": "workspace:*",
+    "@xangarro/sync": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "~19.2.14",
