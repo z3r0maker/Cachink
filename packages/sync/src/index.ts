@@ -5,3 +5,4 @@
 
 export * from './api-client.js';
 export * from './reference-applier.js';
+export * from './reference-data-repository.js';

@@ -14,6 +14,7 @@
  * See ADR-033.
  */
 
+export { InMemoryReferenceDataRepository } from './in-memory-reference-data-repository.js';
 export * from './in-memory-sales-repository.js';
 export * from './in-memory-businesses-repository.js';
 export * from './in-memory-app-config-repository.js';

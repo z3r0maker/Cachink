@@ -48,6 +48,14 @@ export const APP_CONFIG_KEYS = {
   cachinkSoundEnabled: 'cachinkSoundEnabled',
   healthThresholds: 'healthThresholds',
   notificationPrefs: 'notificationPrefs',
+  /** JSON `{ deviceId, businessId, activatedAt }` once the device is activated (A-04). */
+  activation: 'activation',
+  /** JSON SignedEntitlement last received from the server (A-10 verifies it). */
+  entitlement: 'entitlement',
+  /** ISO server time last seen — anchors every clock decision (Q9). */
+  lastServerTime: 'lastServerTime',
+  /** Highest serverSeq applied from pulls (A-06). */
+  pullSeq: 'pullSeq',
 } as const;
 
 /** Shape of the Zustand store populated on launch. */

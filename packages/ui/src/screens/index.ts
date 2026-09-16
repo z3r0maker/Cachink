@@ -27,6 +27,7 @@ export {
 } from '../components/AppShellRouteWrapper/index';
 // Phase 1-12 new screens
 export * from './Login/index';
+export * from './Activation/index';
 export * from './DirectorSetup/index';
 export * from './Caja/index';
 export * from './Merma/index';

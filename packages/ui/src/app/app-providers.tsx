@@ -15,6 +15,8 @@ import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
 import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
 import { GatedNavigation, type LanBridges } from './gated-navigation';
+import { ActivationProvider } from '../activation/activation-context';
+import type { ActivationConfig } from '../activation/activation-config';
 import { AppErrorBoundary } from './error-boundary';
 import { LanSyncProvider } from '../sync/lan-sync-context';
 import type { LanSyncHandle } from '../sync/lan-bridge';
@@ -41,6 +43,8 @@ export interface AppProvidersProps {
   readonly deviceContext?: DeviceContext | null;
   /** Live accessor for current feature-flag state. */
   readonly getFeatureFlags?: () => Record<string, boolean> | null;
+  /** API base, secure token store and device info (A-04). Defaults to an in-memory dev config. */
+  readonly activation?: ActivationConfig;
 }
 
 const NULL_LAN_HOOK: () => LanBridges | null = () => null;
@@ -108,7 +112,7 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
                     getFeatureFlags={props.getFeatureFlags}
                   >
                     <TelemetryBridge>
-                      {content}
+                      <ActivationProvider config={props.activation}>{content}</ActivationProvider>
                       {/* Inside the data providers but outside gated `content`:
                           overlays (e.g. NotificationTapHost) stay mounted while
                           locked yet can resolve repository/query hooks. */}

@@ -38,7 +38,8 @@
       "expo-sqlite",
       "expo-localization",
       "expo-font",
-      "expo-updates"
+      "expo-updates",
+      "expo-secure-store"
     ],
     "updates": {
       "url": "https://u.expo.dev/819fa99a-ea6b-44f8-ab3f-c3d168504967",

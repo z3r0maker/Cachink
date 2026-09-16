@@ -19,6 +19,7 @@
  * `@xangarro/testing` in-memory impls.
  */
 
+import { DrizzleReferenceDataRepository, type ReferenceDataRepository } from '@xangarro/sync';
 import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
 import type { DeviceId, UserId } from '@xangarro/domain';
 import type {
@@ -74,6 +75,8 @@ import {
  */
 export interface Repositories {
   readonly appConfig: AppConfigRepository;
+  /** Writes cloud-authoritative reference tables (activation bootstrap, pulls). */
+  readonly referenceData: ReferenceDataRepository;
   readonly businesses: BusinessesRepository;
   readonly sales: SalesRepository;
   readonly expenses: ExpensesRepository;
@@ -109,6 +112,7 @@ export function buildDrizzleRepositories(
   const uid = userId ?? null;
   return {
     appConfig: new DrizzleAppConfigRepository(db),
+    referenceData: new DrizzleReferenceDataRepository(db),
     businesses: new DrizzleBusinessesRepository(db, deviceId, uid),
     sales: new DrizzleSalesRepository(db, deviceId, uid),
     expenses: new DrizzleExpensesRepository(db, deviceId, uid),
@@ -162,6 +166,8 @@ export function useRepositories(): Repositories {
 }
 
 export const useAppConfigRepository = (): AppConfigRepository => useRepositories().appConfig;
+export const useReferenceDataRepository = (): ReferenceDataRepository =>
+  useRepositories().referenceData;
 export const useBusinessesRepository = (): BusinessesRepository => useRepositories().businesses;
 export const useSalesRepository = (): SalesRepository => useRepositories().sales;
 export const useExpensesRepository = (): ExpensesRepository => useRepositories().expenses;

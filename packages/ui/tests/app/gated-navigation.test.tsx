@@ -2,7 +2,8 @@
  * GatedNavigation state-machine tests (P1C C9, closes M1).
  *
  * Verifies the branch table the boot flow depends on: hydration pending,
- * then wizard, then business form, then role picker, then children. The
+ * then activation (A-04), then wizard, then business form, then auth,
+ * then children. The
  * gate is context-driven — we skip the AppConfigProvider's async
  * hydration by pre-setting the Zustand store in each test.
  */
@@ -34,8 +35,18 @@ function setStore(state: Partial<ReturnType<typeof useAppConfigStore.getState>>)
  * hydration, so any test asserting a *later* gate has to get past it.
  */
 async function dismissedDiscoveryRepo(): Promise<InMemoryAppConfigRepository> {
-  const appConfig = new InMemoryAppConfigRepository();
+  const appConfig = await activatedRepo();
   await appConfig.set(APP_CONFIG_KEYS.discoveryShown, 'true');
+  return appConfig;
+}
+
+/** A device that already redeemed an activation code (A-04 gate passes). */
+async function activatedRepo(): Promise<InMemoryAppConfigRepository> {
+  const appConfig = new InMemoryAppConfigRepository();
+  await appConfig.set(
+    APP_CONFIG_KEYS.activation,
+    JSON.stringify({ deviceId: 'DEV', businessId: 'BIZ', activatedAt: '2026-09-16T00:00:00.000Z' }),
+  );
   return appConfig;
 }
 
@@ -67,7 +78,27 @@ describe('GatedNavigation', () => {
     expect(screen.queryByTestId('app-body')).toBeNull();
   });
 
-  it('shows the wizard when mode is null', () => {
+  it('shows the activation screen on a device that was never activated', async () => {
+    setStore({ hydrated: true, mode: null, currentBusinessId: null, role: null, deviceId: null });
+    mountGate(<span data-testid="app-body">app</span>);
+    expect(await screen.findByTestId('activation-screen')).toBeInTheDocument();
+    expect(screen.queryByTestId('wizard')).toBeNull();
+    expect(screen.queryByTestId('app-body')).toBeNull();
+  });
+
+  it('shows the activation screen even when a business already exists locally (prebeta installs start fresh, Q7)', async () => {
+    setStore({
+      hydrated: true,
+      mode: 'local',
+      currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
+      role: null,
+      deviceId: null,
+    });
+    mountGate(<span data-testid="app-body">app</span>);
+    expect(await screen.findByTestId('activation-screen')).toBeInTheDocument();
+  });
+
+  it('shows the wizard when mode is null', async () => {
     setStore({
       hydrated: true,
       mode: null,
@@ -75,9 +106,9 @@ describe('GatedNavigation', () => {
       role: null,
       deviceId: null,
     });
-    mountGate(<span data-testid="app-body">app</span>);
+    mountGate(<span data-testid="app-body">app</span>, { appConfig: await activatedRepo() });
     expect(screen.queryByTestId('app-body')).toBeNull();
-    expect(screen.getByTestId('wizard')).toBeInTheDocument();
+    expect(await screen.findByTestId('wizard')).toBeInTheDocument();
   });
 
   it('shows the welcome carousel before the business form on a fresh install', async () => {
@@ -90,7 +121,7 @@ describe('GatedNavigation', () => {
       role: null,
       deviceId: null,
     });
-    mountGate(<span data-testid="app-body">app</span>);
+    mountGate(<span data-testid="app-body">app</span>, { appConfig: await activatedRepo() });
     expect(await screen.findByTestId('feature-discovery')).toBeInTheDocument();
     expect(screen.queryByTestId('business-form')).toBeNull();
   });
@@ -141,9 +172,8 @@ describe('GatedNavigation', () => {
       businessId: '01JPHK0000000000000000000B' as BusinessId,
     });
 
-    // Seed appConfig with discoveryShown so FeatureDiscoveryGate passes through
-    const appConfig = new InMemoryAppConfigRepository();
-    await appConfig.set('discoveryShown', 'true');
+    // Activated device with discoveryShown so both gates pass through
+    const appConfig = await dismissedDiscoveryRepo();
 
     setStore({
       hydrated: true,

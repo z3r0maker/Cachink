@@ -24,6 +24,7 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react';
 import { RepositoryProvider, type Repositories } from '@xangarro/ui';
 import { InMemoryAppConfigRepository } from './in-memory-app-config-repository.js';
+import { InMemoryReferenceDataRepository } from './in-memory-reference-data-repository.js';
 import { InMemoryBusinessesRepository } from './in-memory-businesses-repository.js';
 import { InMemoryClientPaymentsRepository } from './in-memory-client-payments-repository.js';
 import { InMemoryClientsRepository } from './in-memory-clients-repository.js';
@@ -58,6 +59,7 @@ export interface MockRepositoryProviderProps {
 function buildInMemoryRepositories(): Repositories {
   return {
     appConfig: new InMemoryAppConfigRepository(),
+    referenceData: new InMemoryReferenceDataRepository(),
     businesses: new InMemoryBusinessesRepository(),
     sales: new InMemorySalesRepository(),
     expenses: new InMemoryExpensesRepository(),

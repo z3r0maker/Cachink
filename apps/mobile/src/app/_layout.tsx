@@ -61,6 +61,7 @@ import { useMobileLanBridges } from '../shell/use-lan-bridges';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { useMobileDeviceContext } from '../shell/use-device-context';
+import { mobileActivationConfig } from '../shell/activation-config';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
 // Refresh re-evaluations are safe.
@@ -111,6 +112,7 @@ export default function RootLayout(): ReactElement | null {
             platform="mobile"
             hooks={mobileHooks}
             deviceContext={deviceContext}
+            activation={mobileActivationConfig}
             overlays={
               <>
                 <MobileScannerHost />

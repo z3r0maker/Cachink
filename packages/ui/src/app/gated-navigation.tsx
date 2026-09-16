@@ -4,6 +4,7 @@
  * Wraps the app's router and renders the right pre-boarding screen:
  *
  *   hydrated=false                → null (splash stays)
+ *   not activated                 → <ActivationScreen /> (A-04; email + code)
  *   mode === null                 → <Wizard /> (only reachable from
  *                                   Configuración → Sistema →
  *                                   "Sincronización y dispositivos";
@@ -32,6 +33,7 @@ import { useUserId, useMustChangePin } from '../app-config/use-app-config';
 import { useAutoLock, DEFAULT_AUTO_LOCK_TIMEOUT } from '../hooks/use-auto-lock';
 import { ActivityTracker } from '../components/ActivityTracker/index';
 import { useAppConfigRepository } from './repository-provider';
+import { ActivationGate } from './activation-gate';
 import { Wizard } from '../screens/Wizard/index';
 import { BusinessForm, type BusinessFormSubmitInput } from '../screens/BusinessForm/index';
 import { useCrearBusiness } from '../hooks/use-crear-business';
@@ -143,12 +145,20 @@ function AuthInner(props: {
 
 export function GatedNavigation(props: GatedNavigationProps): ReactElement | null {
   const hydrated = useAppConfigHydrated();
+  if (!hydrated) return null;
+  return (
+    <ActivationGate>
+      <GatedFlow {...props} />
+    </ActivationGate>
+  );
+}
+
+/** Everything after hydration + activation: demo seeding, wizard, business, auth. */
+function GatedFlow(props: GatedNavigationProps): ReactElement | null {
   const mode = useMode();
   const currentBusinessId = useCurrentBusinessId();
   const platform = props.platform ?? 'desktop';
   const demoMode = useDemoMode();
-
-  if (!hydrated) return null;
 
   // Demo seeding overlay — renders ABOVE the wizard/auth gates
   // so it persists across the mode=null → mode='local' transition.
