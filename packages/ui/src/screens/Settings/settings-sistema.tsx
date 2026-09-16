@@ -2,7 +2,7 @@
  * SettingsSistema — system settings sub-screen.
  *
  * Combines: LanguageCard, NotificationsToggle, ExportarDatosAction,
- * CheckForUpdates, FeedbackAction, LanDetailsCard, AdvancedBackend,
+ * CheckForUpdates, FeedbackAction, AdvancedBackend,
  * and ReRunWizard. All components are existing — just re-arranged
  * into a dedicated screen reachable from the Settings hub.
  */
@@ -13,7 +13,7 @@ import { Text, View } from '@tamagui/core';
 import { Card, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
-import { LanSection, SettingsTail } from './settings-tail';
+import { SettingsTail } from './settings-tail';
 import type { SettingsProps } from './settings';
 
 export interface SettingsSistemaProps {
@@ -55,9 +55,6 @@ export function SettingsSistema(props: SettingsSistemaProps): ReactElement {
       >
         <SectionTitle title={t('settings.sistemaCard')} />
         <LanguageCard />
-        {(sp.mode === 'lan-server' || sp.mode === 'lan-client') && sp.lanDetails && (
-          <LanSection lan={sp.lanDetails} />
-        )}
         <SettingsTail props={sp} t={t} />
       </ScrollView>
     </RNView>

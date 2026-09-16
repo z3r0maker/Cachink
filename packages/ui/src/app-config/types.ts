@@ -1,31 +1,17 @@
 /**
- * AppConfig types — the three pieces of cross-session state the shell
- * needs to boot: which deployment mode, which business, who's using the
- * tablet right now. There is one role on the device (ADR-053); who is
- * signed in is `userId`.
+ * AppConfig types — the cross-session state the shell needs to boot: which
+ * mode, which business, who is signed in. There is one role on the device
+ * (ADR-053); who is signed in is `userId`.
  *
- * Mode is persisted so the wizard runs only once. `null` means the
- * wizard has not completed; every boot after that skips it.
- *
- * The four AppMode values are documented in CLAUDE.md §7.1 and ADR-039.
- * Legacy values (`'local-standalone'`, `'tablet-only'`, `'lan'`) are
- * migrated to the new enum at hydration time — see {@link parseMode}
- * and `app-config-provider.tsx#hydrateAppConfig`.
+ * `mode` is vestigial after activation (always `'local'`, syncing to the
+ * cloud); retired values are normalised by {@link parseMode}.
  */
 
 import { SYNC_CONFIG_KEYS } from '@xangarro/sync';
 import type { BusinessId, DeviceId, UserId } from '@xangarro/domain';
 
-/** Deployment mode selected in the first-run wizard (CLAUDE.md §7.1, ADR-039). */
-export type AppMode = 'local' | 'cloud' | 'lan-server' | 'lan-client';
-
-/**
- * Internal sentinel returned by {@link parseMode} when the persisted
- * value is the pre-ADR-039 `'lan'` string. The caller (hydration code)
- * must resolve `'lan'` to either `'lan-server'` or `'lan-client'` by
- * reading `__cachink_sync_state.lanRole`. Never written by new code.
- */
-export type LegacyLanSentinel = 'legacy-lan';
+/** Storage mode. LAN modes were retired in A-18 (ADR-053 §6). */
+export type AppMode = 'local' | 'cloud';
 
 /** AppConfig-repository keys used by the provider. */
 export const APP_CONFIG_KEYS = {
@@ -67,24 +53,21 @@ export interface AppConfigState {
   readonly cachinkSoundEnabled: boolean;
 }
 
-/** Allowed mode values — keep in sync with CLAUDE.md §7.1 and ADR-039. */
-export const APP_MODES: readonly AppMode[] = ['local', 'cloud', 'lan-server', 'lan-client'];
+/** Allowed mode values. */
+export const APP_MODES: readonly AppMode[] = ['local', 'cloud'];
 
-/**
- * Narrow a raw string to a valid {@link AppMode}, returning the
- * {@link LegacyLanSentinel} when the persisted value is the
- * pre-ADR-039 `'lan'` (caller resolves via sync-state).
- *
- * Maps:
- *   - `'local-standalone'` → `'local'`
- *   - `'tablet-only'`      → `'local'`
- *   - `'lan'`              → `'legacy-lan'` (caller resolves role)
- *   - any current AppMode  → returned unchanged
- *   - anything else        → `null`
- */
-export function parseMode(raw: string | null): AppMode | LegacyLanSentinel | null {
+/** Values older installs may hold; all of them boot as `'local'`. */
+const RETIRED_MODES: readonly string[] = [
+  'local-standalone',
+  'tablet-only',
+  'lan',
+  'lan-server',
+  'lan-client',
+];
+
+/** Narrow a stored string to an {@link AppMode}; unknown → `null`. */
+export function parseMode(raw: string | null): AppMode | null {
   if (raw === null) return null;
-  if (raw === 'local-standalone' || raw === 'tablet-only') return 'local';
-  if (raw === 'lan') return 'legacy-lan';
+  if (RETIRED_MODES.includes(raw)) return 'local';
   return (APP_MODES as readonly string[]).includes(raw) ? (raw as AppMode) : null;
 }

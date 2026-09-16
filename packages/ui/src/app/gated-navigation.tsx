@@ -3,7 +3,6 @@
  *
  *   hydrated=false             → null (splash stays)
  *   not activated              → <ActivationScreen /> (A-04; email + code)
- *   mode lan-server/lan-client → <LanGate> (dormant; removed in A-18)
  *   no current business        → loading (activation always sets it)
  *   userId === null            → <QuickSwitchGate /> (operator + PIN, A-05)
  *   otherwise                  → children (the app's router / tabs)
@@ -16,21 +15,17 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type { BusinessId } from '@xangarro/domain';
-import { useAppConfigHydrated, useCurrentBusinessId, useMode } from '../app-config/index';
+import { useAppConfigHydrated, useCurrentBusinessId } from '../app-config/index';
 import { useUserId } from '../app-config/use-app-config';
 import { ActivityTracker } from '../components/ActivityTracker/index';
 import { DEFAULT_AUTO_LOCK_TIMEOUT, useAutoLock } from '../hooks/use-auto-lock';
 import { ActivationGate } from './activation-gate';
 import { AppLoadingSkeleton } from './app-loading-skeleton';
 import { QuickSwitchGate } from './auth-gates';
-import { LanGate, type LanBridges } from './lan-gate';
-
-export { type LanBridges } from './lan-gate';
 
 export interface GatedNavigationProps {
   readonly children: ReactNode;
   readonly platform?: 'mobile' | 'desktop';
-  readonly lan?: LanBridges | null;
 }
 
 function AuthInner(props: {
@@ -56,20 +51,7 @@ export function GatedNavigation(props: GatedNavigationProps): ReactElement | nul
 
 /** Everything after hydration + activation. */
 function GatedFlow(props: GatedNavigationProps): ReactElement {
-  const mode = useMode();
   const currentBusinessId = useCurrentBusinessId();
-  const inner =
-    currentBusinessId === null ? (
-      <AppLoadingSkeleton />
-    ) : (
-      <AuthInner businessId={currentBusinessId}>{props.children}</AuthInner>
-    );
-  if (mode === 'lan-server' || mode === 'lan-client') {
-    return (
-      <LanGate bridges={props.lan ?? null} mode={mode}>
-        {inner}
-      </LanGate>
-    );
-  }
-  return inner;
+  if (currentBusinessId === null) return <AppLoadingSkeleton />;
+  return <AuthInner businessId={currentBusinessId}>{props.children}</AuthInner>;
 }

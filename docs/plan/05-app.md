@@ -181,7 +181,8 @@
 
 ### A-18 Remove LAN mount points (keep `packages/sync-lan` on disk)
 
-- [ ] Status · **Blocked by:** A-01
+- [x] Status · **Blocked by:** A-01
+  - Done: 2026-09-16 · track/app · Archived the UI/shell LAN surface: `sync/{lan-bridge,lan-sync-context,use-lan-handle,lan-bridge-callbacks,lan-pair,use-lan-details}`, `app/lan-gate`, `hooks/{use-lan-sync,use-lan-auth,use-pending-changes}`, `screens/LanPairing`, `AppShell/sync-status-badge`, `Settings/lan-details-card`, mobile `shell/use-lan-bridges`, their 11 test files and the `lan-pair` / `shared/open-sync-wizard` flows. `AppProviders` has no `hooks` prop and no `LanSyncProvider`; `GatedNavigation` has no `LanGate`; the top bar always shows the cloud pill; `@xangarro/ui/sync` now exports the cloud sync state + scheduler. **Beyond the plan:** `AppMode` is `'local' | 'cloud'` — stored `lan`, `lan-server`, `lan-client` (and the older retired values) hydrate as `'local'` and are rewritten; `resolveLegacyLan`/`LegacyLanSentinel` removed. `@xangarro/sync-lan` dropped from `packages/ui` deps and Storybook. Acceptance: no `@xangarro/sync-lan` import in `packages/ui` or `apps/mobile`; `pnpm --filter @xangarro/sync-lan test` 61/61. Verified on the iPad sim (`sync-actualizar.yaml`). Left as-is: the dead `@cachink/sync-lan` regex in `apps/mobile/metro.config.js` (harmless; X-track cleanup).
 - **Files:** `packages/ui/src/sync/{lan-bridge.ts,lan-sync-context.tsx,use-lan-handle.ts}`, `apps/mobile/src/shell/use-lan-bridges.ts`, `packages/ui/tests/sync/lan-*.test.ts`, Settings `lan-details-card.tsx` (archived in A-01), `.storybook/main.ts`.
 - **Steps:** delete the UI/shell bridges (they're thin); `packages/sync-lan` stays in the workspace with its own tests green (it must not rot — CLAUDE.md consequence in ADR-053); nothing imports it from `ui`/`mobile`.
 - **Acceptance:** `grep -rn "@xangarro/sync-lan" packages/ui apps/mobile` → 0; `pnpm --filter @xangarro/sync-lan test` still green.

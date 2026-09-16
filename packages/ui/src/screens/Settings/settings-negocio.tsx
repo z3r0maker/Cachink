@@ -27,10 +27,6 @@ function modeLabelKey(mode: AppMode | null): string {
   switch (mode) {
     case 'local':
       return 'wizard.modeNames.local';
-    case 'lan-server':
-      return 'wizard.modeNames.lanServer';
-    case 'lan-client':
-      return 'wizard.modeNames.lanClient';
     case 'cloud':
       return 'wizard.modeNames.cloud';
     default:

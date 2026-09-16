@@ -12,7 +12,7 @@
  *     screen so another Operator signs in with their PIN.
  *   - onOpenSettings — called when the settings cog is tapped.
  *   - title / subtitle — current screen's title.
- *   - mode — drives the sync-state badge; local-standalone renders none.
+ *   - mode — kept for callers; the top bar always shows the cloud sync pill.
  */
 
 import type { ReactElement, ReactNode } from 'react';
@@ -25,9 +25,7 @@ import { colors } from '../../theme';
 import type { FeatureFlags } from '@xangarro/domain';
 import type { AppMode } from '../../app-config/index';
 import { appTabs } from './tab-definitions';
-import { SyncStatusBadge } from './sync-status-badge';
 import { CloudSyncPill } from './cloud-sync-pill';
-import { useLanSync } from '../../hooks/use-lan-sync';
 import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
 export interface AppShellProps {
@@ -70,26 +68,15 @@ export interface AppShellProps {
 }
 
 interface RightSlotProps {
-  readonly mode: AppMode | null;
   readonly onOpenSettings: () => void;
   readonly onNavigate: (path: string) => void;
 }
 
 function RightSlot(props: RightSlotProps): ReactElement {
   const { t } = useTranslation();
-  const lan = useLanSync();
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      {props.mode === 'lan-server' || props.mode === 'lan-client' ? (
-        <SyncStatusBadge
-          mode={props.mode}
-          lanStatus={lan.status}
-          connectedDevices={lan.connectedDevices}
-          onRetry={() => void lan.retryNow()}
-        />
-      ) : (
-        <CloudSyncPill onOpenRejected={() => props.onNavigate('/no-enviados')} />
-      )}
+      <CloudSyncPill onOpenRejected={() => props.onNavigate('/no-enviados')} />
       {/*
        * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
        * (children optional when icon is set, see PR 2.5). The ariaLabel
@@ -138,13 +125,7 @@ export function AppShell(props: AppShellProps): ReactElement {
         title={props.title}
         subtitle={props.subtitle}
         left={leftSlot}
-        right={
-          <RightSlot
-            mode={props.mode}
-            onOpenSettings={props.onOpenSettings}
-            onNavigate={props.onNavigate}
-          />
-        }
+        right={<RightSlot onOpenSettings={props.onOpenSettings} onNavigate={props.onNavigate} />}
       />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

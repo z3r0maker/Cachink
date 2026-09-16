@@ -51,7 +51,6 @@
     "@xangarro/sync": "workspace:*"
   },
   "peerDependencies": {
-    "@xangarro/sync-lan": "workspace:*",
     "@hookform/resolvers": "^5.2",
     "@sentry/react-native": "^8",
     "@shopify/react-native-skia": ">=2",
@@ -85,9 +84,6 @@
     "zustand": "^5"
   },
   "peerDependenciesMeta": {
-    "@xangarro/sync-lan": {
-      "optional": true
-    },
     "echarts": {
       "optional": true
     },
@@ -136,7 +132,6 @@
   },
   "devDependencies": {
     "@xangarro/config": "workspace:*",
-    "@xangarro/sync-lan": "workspace:*",
     "@xangarro/testing": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.60.0",

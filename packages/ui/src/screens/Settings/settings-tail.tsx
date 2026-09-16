@@ -9,31 +9,12 @@ import { Btn } from '../../components/index';
 import type { useTranslation } from '../../i18n/index';
 import { ExportarDatosAction } from './exportar-datos-action';
 import { FeedbackAction } from './feedback-action';
-import { LanDetailsCard } from './lan-details-card';
 import { NotificationsToggle } from './notifications-toggle';
 import { CachinkSoundToggle } from './cachink-sound-toggle';
 import { CrashReportingToggle } from './crash-reporting-toggle';
 import type { SettingsProps } from './settings';
 
 type T = ReturnType<typeof useTranslation>['t'];
-
-export function LanSection({
-  lan,
-}: {
-  lan: NonNullable<SettingsProps['lanDetails']>;
-}): ReactElement {
-  return (
-    <LanDetailsCard
-      serverUrl={lan.serverUrl}
-      connectedDevices={lan.connectedDevices}
-      isHost={lan.isHost}
-      onUnpair={lan.onUnpair}
-      unpairSubmitting={lan.unpairSubmitting}
-      onStopHostServer={lan.onStopHostServer}
-      stopHostSubmitting={lan.stopHostSubmitting}
-    />
-  );
-}
 
 // Audit M-1 follow-up (UI-AUDIT-1, Issue 3): the legacy `<View
 // marginTop={4|8}>` overrides on each tail row created an inconsistent

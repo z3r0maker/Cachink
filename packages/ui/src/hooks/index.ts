@@ -51,8 +51,6 @@ export * from './use-actividad-reciente';
 export * from './use-schedule-stock-low-check';
 export * from './use-last-conflicts';
 export * from './use-check-for-updates';
-export * from './use-lan-sync';
-export * from './use-lan-auth';
 export * from './use-frequent-productos';
 export * from './use-isr-defaults';
 export * from './use-editar-business';

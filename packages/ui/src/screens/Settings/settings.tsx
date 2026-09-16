@@ -15,7 +15,7 @@ import { colors, fontSizes, typography } from '../../theme';
 import type { FeedbackActionProps } from './feedback-action';
 import { EditBusinessModal } from './edit-business-modal';
 import { IsrDefaultsCard } from './isr-defaults-card';
-import { LanSection, SettingsTail } from './settings-tail';
+import { SettingsTail } from './settings-tail';
 
 type T = ReturnType<typeof useTranslation>['t'];
 
@@ -37,16 +37,6 @@ export interface SettingsProps {
   /** Whether the "¡CACHINK!" sale sound is enabled. Defaults to `true`. */
   readonly cachinkSoundEnabled?: boolean;
   readonly onCachinkSoundChange?: (next: boolean) => void;
-  /** LAN-only: metadata for the LanDetailsCard. Omit to hide. */
-  readonly lanDetails?: {
-    serverUrl: string | null;
-    connectedDevices: number;
-    isHost: boolean;
-    onUnpair: () => void;
-    unpairSubmitting?: boolean;
-    onStopHostServer?: () => void;
-    stopHostSubmitting?: boolean;
-  };
   /**
    * Cloud-only: tapping "Avanzado" routes the user to AdvancedBackendRoute
    * so they can paste a custom Supabase / Postgres config (Slice 8 C4).
@@ -80,10 +70,6 @@ function modeLabelKey(mode: AppMode | null): string {
   switch (mode) {
     case 'local':
       return 'wizard.modeNames.local';
-    case 'lan-server':
-      return 'wizard.modeNames.lanServer';
-    case 'lan-client':
-      return 'wizard.modeNames.lanClient';
     case 'cloud':
       return 'wizard.modeNames.cloud';
     default:
@@ -199,7 +185,6 @@ function FuncionesCard(props: { label: string; onPress: () => void }): ReactElem
 }
 
 function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void }): ReactElement {
-  const isLan = props.mode === 'lan-server' || props.mode === 'lan-client';
   return (
     <ScrollView
       testID={props.testID ?? 'settings-screen'}
@@ -218,7 +203,6 @@ function SettingsScrollContent(props: SettingsProps & { t: T; onEdit: () => void
       {props.onOpenFunciones && (
         <FuncionesCard label={props.t('settings.funciones')} onPress={props.onOpenFunciones} />
       )}
-      {isLan && props.lanDetails && <LanSection lan={props.lanDetails} />}
       <LanguageCard t={props.t} />
       <SettingsTail props={props} t={props.t} />
     </ScrollView>

@@ -115,7 +115,6 @@ const config: StorybookConfig = {
         'expo-sqlite',
         'expo-notifications',
         'expo-file-system',
-        '@xangarro/sync-lan',
       ],
       esbuildOptions: {
         ...viteConfig.optimizeDeps?.esbuildOptions,

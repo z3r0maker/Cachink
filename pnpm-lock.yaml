@@ -627,9 +627,6 @@ importers:
       '@xangarro/config':
         specifier: workspace:*
         version: link:../config
-      '@xangarro/sync-lan':
-        specifier: workspace:*
-        version: link:../sync-lan
       '@xangarro/testing':
         specifier: workspace:*
         version: link:../testing

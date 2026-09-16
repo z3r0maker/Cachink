@@ -14,7 +14,6 @@ export * from './Egresos/index';
 export * from './Productos/index';
 export * from './CorteDeDia/index';
 export * from './ConsentModal/index';
-export * from './LanPairing/index';
 // AppShellRouteWrapper lives in components/ but imports from
 // screens/AppShell — exporting it from the components barrel would
 // create a require cycle. Re-exported here to break the cycle while

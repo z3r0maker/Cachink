@@ -5,9 +5,9 @@
  * (CLAUDE.md 2.6).
  */
 
-import { useCallback, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { QueryClient } from '@tanstack/react-query';
-import { DrizzleAppConfigRepository, readSyncState } from '@xangarro/data';
+import { DrizzleAppConfigRepository } from '@xangarro/data';
 import type { LogStore } from '@xangarro/observability';
 import { useDatabase } from '../database/index';
 import {
@@ -28,19 +28,7 @@ export function DrizzleAppConfigBridge({
 }): ReactElement {
   const db = useDatabase();
   const repo = useMemo(() => new DrizzleAppConfigRepository(db), [db]);
-  const resolveLegacyLan = useCallback(async (): Promise<'lan-server' | 'lan-client'> => {
-    try {
-      const role = await readSyncState(db, 'lanRole');
-      return role === 'host' ? 'lan-server' : 'lan-client';
-    } catch {
-      return 'lan-client';
-    }
-  }, [db]);
-  return (
-    <AppConfigProvider appConfig={repo} resolveLegacyLan={resolveLegacyLan}>
-      {children}
-    </AppConfigProvider>
-  );
+  return <AppConfigProvider appConfig={repo}>{children}</AppConfigProvider>;
 }
 
 export function DrizzleRepositoryBridge({

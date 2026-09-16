@@ -14,13 +14,11 @@ import { tamaguiConfig } from '../tamagui.config';
 import { DatabaseProvider } from '../database/index';
 import { captureException } from '../telemetry/index';
 import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
-import { GatedNavigation, type LanBridges } from './gated-navigation';
+import { GatedNavigation } from './gated-navigation';
 import { ActivationProvider } from '../activation/activation-context';
 import { CloudSyncBridge } from './cloud-sync-bridge';
 import type { ActivationConfig } from '../activation/activation-config';
 import { AppErrorBoundary } from './error-boundary';
-import { LanSyncProvider } from '../sync/lan-sync-context';
-import type { LanSyncHandle } from '../sync/lan-bridge';
 import {
   DrizzleAppConfigBridge,
   DrizzleRepositoryBridge,
@@ -29,16 +27,10 @@ import {
   buildQueryClient,
 } from './app-provider-bridges';
 
-export interface AppProvidersHooks {
-  readonly useLan?: () => LanBridges | null;
-  readonly useLanHandle?: () => LanSyncHandle | null;
-}
-
 export interface AppProvidersProps {
   readonly children: ReactNode;
   readonly platform?: 'mobile' | 'desktop';
   readonly gated?: boolean;
-  readonly hooks?: AppProvidersHooks;
   readonly overlays?: ReactNode;
   /** Device context for outbox enrichment (supplied by mobile/desktop shell). */
   readonly deviceContext?: DeviceContext | null;
@@ -48,56 +40,36 @@ export interface AppProvidersProps {
   readonly activation?: ActivationConfig;
 }
 
-const NULL_LAN_HOOK: () => LanBridges | null = () => null;
-const NULL_HANDLE_HOOK: () => LanSyncHandle | null = () => null;
-
-interface GatedBridgesProps {
-  readonly platform?: 'mobile' | 'desktop';
-  readonly hooks: Required<AppProvidersHooks>;
+/**
+ * Activation + cloud sync around the gated app. Overlays sit inside the data
+ * providers but outside the gated content, so hosts like NotificationTapHost
+ * stay mounted while locked yet can resolve repository/query hooks.
+ */
+function SessionLayer(props: {
+  readonly activation?: ActivationConfig;
+  readonly overlays?: ReactNode;
   readonly children: ReactNode;
-}
-
-function GatedBridges({ platform, hooks, children }: GatedBridgesProps): ReactElement {
-  const lan = hooks.useLan();
-  const lanHandle = hooks.useLanHandle();
+}): ReactElement {
   return (
-    <LanSyncProvider handle={lanHandle}>
-      <GatedNavigation platform={platform} lan={lan}>
-        {children}
-      </GatedNavigation>
-    </LanSyncProvider>
-  );
-}
-
-function resolveHooks(input?: AppProvidersHooks): Required<AppProvidersHooks> {
-  return {
-    useLan: input?.useLan ?? NULL_LAN_HOOK,
-    useLanHandle: input?.useLanHandle ?? NULL_HANDLE_HOOK,
-  };
-}
-
-/** Gated navigation bridges, or a bare LAN provider when gating is off. */
-function renderContent(
-  gated: boolean,
-  platform: AppProvidersProps['platform'],
-  hooks: Required<AppProvidersHooks>,
-  children: ReactNode,
-): ReactElement {
-  return gated ? (
-    <GatedBridges platform={platform} hooks={hooks}>
-      {children}
-    </GatedBridges>
-  ) : (
-    <LanSyncProvider handle={null}>{children}</LanSyncProvider>
+    <TelemetryBridge>
+      <ActivationProvider config={props.activation}>
+        <CloudSyncBridge>{props.children}</CloudSyncBridge>
+      </ActivationProvider>
+      {props.overlays}
+      <GlobalErrorToast />
+    </TelemetryBridge>
   );
 }
 
 export function AppProviders(props: AppProvidersProps): ReactElement {
   const logStoreRef = useRef<LogStore | null>(null);
   const queryClient = useMemo(() => buildQueryClient(logStoreRef), []);
-  const gated = props.gated ?? true;
-  const hooks = useMemo(() => resolveHooks(props.hooks), [props.hooks]);
-  const content = renderContent(gated, props.platform, hooks, props.children);
+  const content =
+    props.gated === false ? (
+      props.children
+    ) : (
+      <GatedNavigation platform={props.platform}>{props.children}</GatedNavigation>
+    );
 
   return (
     <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
@@ -112,16 +84,9 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
                     deviceContext={props.deviceContext}
                     getFeatureFlags={props.getFeatureFlags}
                   >
-                    <TelemetryBridge>
-                      <ActivationProvider config={props.activation}>
-                        <CloudSyncBridge>{content}</CloudSyncBridge>
-                      </ActivationProvider>
-                      {/* Inside the data providers but outside gated `content`:
-                          overlays (e.g. NotificationTapHost) stay mounted while
-                          locked yet can resolve repository/query hooks. */}
-                      {props.overlays}
-                      <GlobalErrorToast />
-                    </TelemetryBridge>
+                    <SessionLayer activation={props.activation} overlays={props.overlays}>
+                      {content}
+                    </SessionLayer>
                   </ObservabilityBridge>
                 </DrizzleRepositoryBridge>
               </DrizzleAppConfigBridge>

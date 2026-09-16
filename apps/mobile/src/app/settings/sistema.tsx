@@ -26,7 +26,6 @@ import {
   useSetNotificationsEnabled,
   useTranslation,
 } from '@xangarro/ui';
-import { useLanDetails } from '@xangarro/ui/sync';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
@@ -91,7 +90,6 @@ function useSistemaProps(): {
   const notificationsEnabled = useNotificationsEnabled();
   const cachinkSoundEnabled = useCachinkSoundEnabled();
   const crashReportingEnabled = useCrashReportingEnabled();
-  const lanDetails = useLanDetails();
   const handlers = useSettingsHandlers();
   const { t } = useTranslation();
 
@@ -114,7 +112,6 @@ function useSistemaProps(): {
       },
       onCheckForUpdates: handlers.checkUpdates,
       checkForUpdatesStatus: handlers.statusLabel,
-      lanDetails: lanDetails ?? undefined,
     },
   };
 }
