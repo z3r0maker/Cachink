@@ -1,4 +1,4 @@
-# Single role (ADR-053): after sign-in every user lands on Ventas.
+# Single role (ADR-053): after sign-in every user gets the one tab bar; tab-caja exists only there.
 # Reusable subflow: complete DirectorSetup with test credentials.
 # Called by wizard-local-standalone.yaml after BusinessForm submit.
 #
@@ -61,5 +61,5 @@ appId: mx.xangarro.mobile
 # Wait for the app shell (tabs) to render.
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: "tab-caja"
     timeout: 10000

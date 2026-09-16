@@ -68,7 +68,7 @@ export function CajaContent(props: CajaContentProps): ReactElement {
   const shouldShowCerrar = showCerrar || hasBlindCountPending(openTurno);
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView testID={props.testID} contentContainerStyle={{ padding: 16, gap: 16 }}>
       {openTurno === null && !shouldShowCerrar && (
         <CajaOpenTurnView userId={userId as UserId | null} />
       )}

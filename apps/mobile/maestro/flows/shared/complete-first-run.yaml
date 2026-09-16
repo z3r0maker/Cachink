@@ -1,4 +1,4 @@
-# Single role (ADR-053): after sign-in every user lands on Ventas.
+# Single role (ADR-053): after sign-in every user gets the one tab bar; tab-caja exists only there.
 # Reusable subflow: fresh install → app shell, logged in as Director.
 #
 # Covers the whole post-2026-08-27 first-run path in one call:
@@ -34,5 +34,5 @@ appId: mx.xangarro.mobile
 
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: "tab-caja"
     timeout: 15000
