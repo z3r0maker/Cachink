@@ -24,7 +24,6 @@ export * from './exportar-datos/index.js';
 // Audit Round 2 J — partial-update use cases (powers swipe-to-edit).
 export * from './editar-venta/index.js';
 export * from './editar-egreso/index.js';
-export * from './editar-producto/index.js';
 export * from './find-frequent-productos/index.js';
 // Phase 1 — User Management + Auth
 export * from './autenticar-usuario/index.js';

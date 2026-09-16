@@ -130,6 +130,7 @@ export const esMX = {
     catalogoTab: 'Catálogo',
     stockTab: 'Stock',
     movimientosTab: 'Movs.',
+    editInPortal: 'Para editar o eliminar este producto entra a app.xangarro.mx.',
   },
   inventario: {
     title: 'Inventario',
@@ -187,6 +188,11 @@ export const esMX = {
     required: 'Requerido',
     back: 'Volver',
     margenLabel: 'Margen de ganancia',
+    conStock: 'Llevar inventario',
+    conStockHint: 'Descuenta existencias con cada venta.',
+    sinStock: 'Sin inventario',
+    sinStockHint: 'Servicios o productos que no se cuentan.',
+    portalHint: 'Costo, unidad, alerta de stock e ícono se ajustan en app.xangarro.mx.',
   },
   movimiento: {
     titleEntrada: 'Registrar entrada',

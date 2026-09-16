@@ -30,16 +30,11 @@ export * from './use-productos-con-stock';
 export * from './use-inventario-kpis';
 export * from './use-movimientos-recientes';
 export * from './use-crear-producto';
-export * from './use-eliminar-producto';
-export * from './use-editar-cliente';
 // Audit Round 2 J — partial-update hooks (powers swipe-to-edit).
 export * from './use-editar-venta';
 export * from './use-editar-egreso';
-export * from './use-editar-producto';
-export * from './use-cliente-detail';
 export * from './use-registrar-pago';
 export * from './query-keys';
-export * from './use-eliminar-cliente';
 export * from './use-corte-gate';
 export * from './use-efectivo-esperado';
 export * from './use-cerrar-corte-de-dia';
@@ -102,7 +97,6 @@ export * from './use-require-pin';
 // Shared derived-state hooks
 export * from './use-stock-map';
 // Product form state (zustand — persists across icon picker navigation)
-export * from './use-product-form-store';
 // Health thresholds (customizable from Settings)
 export * from './use-health-thresholds';
 // Phase 11 — Director Notification Inbox

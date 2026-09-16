@@ -93,25 +93,7 @@ describe('StockScreen', () => {
     expect(onNuevoProducto).toHaveBeenCalled();
   });
 
-  // Audit Round 2 K3: per-row swipe wiring.
-  it('wraps each row in `<SwipeableRow>` when swipe handlers are supplied', () => {
-    const items = [row(producto({ id: '01JPHK0000000000000000R099' as ProductId }), 5)];
-    renderWithProviders(
-      <StockScreen
-        query=""
-        onChangeQuery={vi.fn()}
-        items={items}
-        onNuevoProducto={vi.fn()}
-        onEditProducto={vi.fn()}
-        onEliminarProducto={vi.fn()}
-      />,
-    );
-    expect(
-      screen.getAllByTestId('producto-swipe-01JPHK0000000000000000R099').length,
-    ).toBeGreaterThan(0);
-  });
-
-  it('does NOT wrap rows when swipe handlers are unset', () => {
+  it('offers no swipe-to-edit or delete on rows (create-only, A-09)', () => {
     const items = [row(producto({ id: '01JPHK0000000000000000R098' as ProductId }), 5)];
     renderWithProviders(
       <StockScreen query="" onChangeQuery={vi.fn()} items={items} onNuevoProducto={vi.fn()} />,

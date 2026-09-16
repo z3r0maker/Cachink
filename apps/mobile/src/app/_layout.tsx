@@ -83,7 +83,6 @@ function MobileStack(): ReactElement {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="wizard" />
       <Stack.Screen name="settings" />
-      <Stack.Screen name="clientes" />
       <Stack.Screen name="cuentas-por-cobrar" />
       <Stack.Screen name="inventario" />
       <Stack.Screen name="caja" />
