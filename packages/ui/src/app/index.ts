@@ -40,3 +40,4 @@ export { GatedNavigation, type GatedNavigationProps } from './gated-navigation';
 export { AppErrorBoundary, type AppErrorBoundaryProps } from './error-boundary';
 export { AppLoadingSkeleton, type AppLoadingSkeletonProps } from './app-loading-skeleton';
 export { CloudSyncBridge, useCloudSync, type CloudSyncContextValue } from './cloud-sync-bridge';
+export { StockLowScheduleHost } from './stock-low-schedule-host';

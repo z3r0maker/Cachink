@@ -7,8 +7,10 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactElement, ReactNode } from 'react';
 import type { BusinessId, DeviceId } from '@xangarro/domain';
 import {
+  InMemoryAppConfigRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
+  seedTestEntitlement,
 } from '@xangarro/testing';
 import {
   InMemoryNotificationScheduler,
@@ -28,6 +30,7 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0BUSIN' as BusinessId;
 interface Harness {
   products: InMemoryProductsRepository;
   movements: InMemoryInventoryMovementsRepository;
+  appConfig: InMemoryAppConfigRepository;
 }
 
 function seedLowStock(harness: Harness): Promise<unknown> {
@@ -62,6 +65,7 @@ function wrap(children: ReactNode, harness: Harness): ReactElement {
         overrides={{
           products: harness.products,
           inventoryMovements: harness.movements,
+          appConfig: harness.appConfig,
         }}
       >
         {children}
@@ -74,13 +78,17 @@ describe('useScheduleStockLowCheck', () => {
   let harness: Harness;
   let scheduler: InMemoryNotificationScheduler;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     harness = {
       products: new InMemoryProductsRepository(DEV),
       movements: new InMemoryInventoryMovementsRepository(DEV),
+      appConfig: new InMemoryAppConfigRepository(),
     };
+    // Stock must be on for the plan (A-14) and the device toggle on (A-13).
+    await seedTestEntitlement(harness.appConfig, 'emprendedor');
     scheduler = new InMemoryNotificationScheduler();
     useAppConfigStore.getState().setCurrentBusinessId(BIZ);
+    useAppConfigStore.getState().setNotificationsEnabled(true);
   });
 
   afterEach(() => {
@@ -102,7 +110,7 @@ describe('useScheduleStockLowCheck', () => {
     });
   });
 
-  it('schedules a 19:00 daily trigger when stock is low (no role gate)', async () => {
+  it('schedules a 19:00 daily trigger on any device when stock is low (no role gate)', async () => {
     await seedLowStock(harness);
     renderWithProviders(wrap(<Harnessed enabled={true} scheduler={scheduler} />, harness));
     await waitFor(() => {

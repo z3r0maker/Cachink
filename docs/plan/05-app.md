@@ -136,7 +136,8 @@
 
 ### A-13 Stock-low local notification survives without a Director
 
-- [ ] Status · **Blocked by:** A-03
+- [x] Status · **Blocked by:** A-03
+  - Done: 2026-09-16 · track/app · The 19:00 scheduler was not mounted anywhere (it lived on the archived Director Home). Now `StockLowScheduleHost` (renders nothing) is mounted in the mobile overlays, outside the sign-in gate, so the reminder stays scheduled while the app runs. Predicate extracted to `notifications/stock-low.ts` (`stockLowCount`): device notifications toggle on **and** stock on for the plan (A-14) **and** tracked products at/below threshold; no role gate; otherwise the trigger is cancelled. Copy speaks to the operator ("N productos están por agotarse. Registra las entradas cuando lleguen o avísale al dueño."); tap opens `/productos`. Tests: predicate (4) and the hook with a seeded plan (3). Not verified: the notification actually firing at 19:00 on a device (no dev trigger helper was added); app boot with the host verified on the iPad sim. Also: the `@react-pdf` renderer smoke test got a 30 s timeout (it crossed 5 s under the full parallel suite).
 - **Steps:** locate the 19:00 scheduler (search `19:00`, `stock-low`, `expo-notifications`); it was Director-gated — make it unconditional per device (respecting the Dispositivo toggle); copy addressed to the Operator.
 - **Acceptance:** unit test for the scheduler predicate; manual: set a product stock ≤ threshold, trigger the scheduled notification (dev helper).
 

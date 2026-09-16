@@ -52,7 +52,7 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { AppProviders } from '@xangarro/ui';
+import { AppProviders, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
@@ -106,6 +106,7 @@ export default function RootLayout(): ReactElement | null {
               <>
                 <MobileScannerHost />
                 <NotificationTapHost />
+                <StockLowScheduleHost />
               </>
             }
           >

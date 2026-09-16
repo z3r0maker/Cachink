@@ -959,8 +959,10 @@ export const esMX = {
   },
   notifications: {
     stockLowTitle: 'Stock bajo',
-    stockLowBodyOne: '1 producto necesita reposición',
-    stockLowBodyMany: '{{count}} productos necesitan reposición',
+    stockLowBodyOne:
+      'Un producto está por agotarse. Registra la entrada cuando llegue o avísale al dueño.',
+    stockLowBodyMany:
+      '{{count}} productos están por agotarse. Registra las entradas cuando lleguen o avísale al dueño.',
   },
   notificaciones: {
     badgeAriaLabel: 'Notificaciones: {{count}} sin leer',
