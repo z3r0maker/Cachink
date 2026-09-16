@@ -156,7 +156,8 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ### C-01 Encode §1–§2 (transport, headers, error envelope, token claim shapes)
 
-- [ ] Status · **Blocked by:** F-05 · **Blocks:** C-02…C-08
+- [x] Status · **Blocked by:** F-05 · **Blocks:** C-02…C-08
+  - Done: 2026-09-11 · track/foundation · `transport.ts`, `tokens.ts`, `errors.ts`, tests.
 - **Files:** `packages/contracts/src/{transport.ts,errors.ts,tokens.ts}` + tests.
 - **Steps:** zod schemas for `ErrorEnvelope`, `DeviceTokenClaims`, constants `PROTOCOL_VERSION=1`, `HEADER_PROTOCOL`, `API_PREFIX`. Export `isRetryableError(code, status)`.
 - **Acceptance:** schema round-trip tests (valid, missing field, wrong type, extra field stripped) green.
@@ -164,46 +165,54 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ### C-02 Encode §3 `/activate` request/response
 
-- [ ] Status · **Blocked by:** C-01 · **Blocks:** A-04, B-07
+- [x] Status · **Blocked by:** C-01 · **Blocks:** A-04, B-07
+  - Done: 2026-09-11 · track/foundation · `activate.ts` — request/response, `ActivationCodeSchema` (trim+upper, no 0/O/1/I), `ReferenceTablesSchema` reusing domain schemas via `wireSchema`; `users` rows omit `email`.
 - **Files:** `packages/contracts/src/activate.ts` + tests. Row schemas for bootstrap tables reuse **domain** entity zod schemas (`@xangarro/domain`) — do not redefine columns.
 - **Acceptance:** `ActivateRequest`, `ActivateResponse`, `ActivateErrorCode` exported; code format validator `^[A-HJ-NP-Z2-9]{8}$`.
 
 ### C-03 Encode §4 `/sync/push`
 
-- [ ] Status · **Blocked by:** C-01 · **Blocks:** A-06, B-08
+- [x] Status · **Blocked by:** C-01 · **Blocks:** A-06, B-08
+  - Done: 2026-09-11 · track/foundation · `sync-push.ts` — `DeltaSchema` discriminated on `table`, one branch per pushable table; down-only tables fail validation client-side.
 - **Files:** `packages/contracts/src/sync-push.ts`. `Delta` discriminated by `table` with per-table row schema from domain; `PushResponse`; `RejectionCode` enum with `retryable` map.
 - **Acceptance:** a delta for a DOWN-only table fails schema validation client-side (so it can never be sent).
 
 ### C-04 Encode §5 + §7 `/sync/pull`, `/entitlement`
 
-- [ ] Status · **Blocked by:** C-01, C-05 · **Blocks:** A-06, B-09
+- [x] Status · **Blocked by:** C-01, C-05 · **Blocks:** A-06, B-09
+  - Done: 2026-09-11 · track/foundation · `sync-pull.ts` + `EntitlementResponseSchema`; `acknowledgedThrough` required.
 - **Files:** `packages/contracts/src/sync-pull.ts`, `src/entitlement-endpoint.ts`.
 
 ### C-05 Encode §6 entitlement payload + canonical JSON + signature envelope
 
-- [ ] Status · **Blocked by:** C-01 · **Blocks:** A-10, B-06
+- [x] Status · **Blocked by:** C-01 · **Blocks:** A-10, B-06
+  - Done: 2026-09-11 · track/foundation · `SignedEntitlementSchema`, `canonicalize()`; Ed25519 vector with committed dev key. Deviation: bigint → decimal string in the canonical form.
 - **Files:** `packages/contracts/src/entitlement.ts` (re-export domain `Entitlement`; add `SignedEntitlement = {payload, signature}`; `canonicalize(payload): string` with sorted keys, deterministic).
 - **Acceptance:** `canonicalize` test: key order independence; unicode; nested objects; numbers vs strings preserved. **No crypto in this package** (verify in app, sign in backend) — but include a test vector: a fixed payload, a fixed keypair, the expected signature (generated once with `tweetnacl` in a test-only devDependency) so both sides can prove compatibility.
 
 ### C-06 Encode §8 table scope as data
 
-- [ ] Status · **Blocked by:** C-01 · **Blocks:** A-06, B-08, B-09
+- [x] Status · **Blocked by:** C-01 · **Blocks:** A-06, B-08, B-09
+  - Done: 2026-09-11 · track/foundation · `scope.ts`; exhaustive test asserts every `sqliteTable` is classified exactly once.
 - **Files:** `packages/contracts/src/scope.ts`: `UP_TABLES`, `HYBRID_TABLES`, `DOWN_TABLES`, `isPushable(table, op)`, `isPullable(table)`. Replaces `isSyncedTable` from `sync-lan` for cloud use.
 - **Acceptance:** exhaustive test: every table in `packages/data/src/schema` is classified exactly once or explicitly in `NEVER_SYNCED`.
 
 ### C-07 Error codes + retryability table (single source)
 
-- [ ] Status · **Blocked by:** C-01
+- [x] Status · **Blocked by:** C-01
+  - Done: 2026-09-11 · track/foundation · folded into `errors.ts`: `ERROR_CATALOG` (httpStatus, retryable, i18n key), `ErrorCodeSchema`.
 - **Files:** fold into `errors.ts`; export `ERROR_CATALOG` with `{code, httpStatus, retryable, userMessageKey}` used by both app i18n and portal Sync-health.
 
 ### C-08 Contract document freeze
 
-- [ ] Status · **Blocked by:** C-01…C-07
+- [x] Status · **Blocked by:** C-01…C-07
+  - Done: 2026-09-11 · track/foundation · freeze header + `packages/contracts/README.md`; examples switched to camelCase + bigint-as-string.
 - **Steps:** bump this file's header with `Frozen: <date> <sha>`; add `packages/contracts/README.md` linking here; add a CI check (F-08) that `packages/contracts` has no `TODO`.
 
 ### C-09 Mock API server for Track A
 
-- [ ] Status · **Blocked by:** C-02…C-06 · **Blocks:** A-04, A-06, A-07, A-16
+- [x] Status · **Blocked by:** C-02…C-06 · **Blocks:** A-04, A-06, A-07, A-16
+  - Done: 2026-09-11 · track/foundation · `@xangarro/contracts/mock` — `pnpm mock:api` (`:3000`), msw adapter, fixture business, `X-Mock-Scenario`. Codes `VALDK7M3` / `USEDK7M3` / `EXPRK7M3` / `NSLTK7M3` (the doc's `VALID001` etc. violate the §3 alphabet).
 - **Context:** Track A must be able to run activation and sync end-to-end before B-07/B-08/B-09 exist. `msw` is already a devDependency in the archived sync-cloud tests; use it (check latest version).
 - **Files:** `packages/contracts/mock/{server.ts,fixtures.ts,scenarios.ts}`; a script `pnpm mock:api` that runs it as a standalone Node HTTP server on `:3000` (msw `setupServer` for unit tests + a tiny `http` wrapper for the simulator).
 - **Steps:** implement §3–§7 in memory: a fixture business with 2 operators, 20 products, 3 clients; codes `VALID001`, `USED0002`, `EXPIRED3`, `NOSLOTS4`; push validates with the zod schemas and applies §4 rules (rejects `HYBRID_UPDATE_FORBIDDEN`, `BUSINESS_MISMATCH`; fixture product id `MISSING…` → `FK_PRODUCT_MISSING`); pull returns rows since seq; entitlement signed with a **dev keypair** committed under `mock/dev-keys.json` (documented as dev-only; the app's dev build uses that public key).
@@ -213,7 +222,8 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ### C-10 Contract conformance suite (runs against mock **and** real backend)
 
-- [ ] Status · **Blocked by:** C-09 · **Blocks:** B-07, B-08, B-09 (must pass against real handlers before those are marked done)
+- [x] Status · **Blocked by:** C-09 · **Blocks:** B-07, B-08, B-09 (must pass against real handlers before those are marked done)
+  - Done: 2026-09-11 · track/foundation · `tests/conformance/` — 44 cases incl. concurrent double-redeem; `pnpm --filter @xangarro/contracts test:conformance`, or with `API_BASE` against a real backend.
 - **Files:** `packages/contracts/conformance/*.test.ts`, parameterised by `API_BASE` env.
 - **Steps:** one test file per endpoint asserting the §3–§7 rules (idempotent re-push, per-row rejection, single-use code under concurrent redemption (two parallel requests → exactly one 200), `acknowledged_through` monotonic, entitlement signature verifies with the public key).
 - **Acceptance:** green against `pnpm mock:api`; Track B runs the same suite against `localhost:3000` (real portal dev server + local Supabase) in B-07…B-09.
