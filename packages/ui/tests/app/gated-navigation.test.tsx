@@ -2,8 +2,7 @@
  * GatedNavigation state-machine tests (P1C C9, closes M1).
  *
  * Verifies the branch table the boot flow depends on: hydration pending,
- * then activation (A-04), then wizard, then business form, then auth,
- * then children. The
+ * then activation (A-04), then operator sign-in (A-05), then children. The
  * gate is context-driven — we skip the AppConfigProvider's async
  * hydration by pre-setting the Zustand store in each test.
  */
@@ -29,15 +28,33 @@ function setStore(state: Partial<ReturnType<typeof useAppConfigStore.getState>>)
   });
 }
 
-/**
- * Repo with the discovery carousel already dismissed. Since review
- * items #1/#2 the welcome carousel gates everything downstream of
- * hydration, so any test asserting a *later* gate has to get past it.
- */
-async function dismissedDiscoveryRepo(): Promise<InMemoryAppConfigRepository> {
-  const appConfig = await activatedRepo();
-  await appConfig.set(APP_CONFIG_KEYS.discoveryShown, 'true');
-  return appConfig;
+const BIZ = '01JPHK0000000000000000000B' as BusinessId;
+
+function signedOut(): Partial<ReturnType<typeof useAppConfigStore.getState>> {
+  return {
+    hydrated: true,
+    mode: 'local',
+    currentBusinessId: BIZ,
+    userId: null,
+    role: null,
+    deviceId: null,
+  };
+}
+
+async function usersWithOperator(active: boolean): Promise<InMemoryUsersRepository> {
+  const users = new InMemoryUsersRepository();
+  const toni = await users.create({
+    nombre: 'Toni',
+    email: null,
+    pinHash: 'hash',
+    recoveryPasswordHash: 'unused',
+    role: 'operativo',
+    mustChangePin: false,
+    avatarColor: 'blue',
+    businessId: BIZ,
+  });
+  if (!active) await users.update(toni.id, { active: false });
+  return users;
 }
 
 /** A device that already redeemed an activation code (A-04 gate passes). */
@@ -98,98 +115,36 @@ describe('GatedNavigation', () => {
     expect(await screen.findByTestId('activation-screen')).toBeInTheDocument();
   });
 
-  it('shows the wizard when mode is null', async () => {
-    setStore({
-      hydrated: true,
-      mode: null,
-      currentBusinessId: null,
-      role: null,
-      deviceId: null,
-    });
+  it('asks for an operator and PIN once the device is activated', async () => {
+    const users = await usersWithOperator(true);
+    setStore(signedOut());
+    mountGate(<span data-testid="app-body">app</span>, { users, appConfig: await activatedRepo() });
+    expect(await screen.findByTestId('quick-switch')).toBeInTheDocument();
+    expect(screen.getByText(/Toni/)).toBeInTheDocument();
+    expect(screen.queryByTestId('app-body')).toBeNull();
+  });
+
+  it('explains where operators come from when none is active yet', async () => {
+    const users = await usersWithOperator(false);
+    setStore(signedOut());
+    mountGate(<span data-testid="app-body">app</span>, { users, appConfig: await activatedRepo() });
+    expect(await screen.findByTestId('quick-switch-empty')).toBeInTheDocument();
+    expect(screen.getByTestId('quick-switch-refresh')).toBeInTheDocument();
+  });
+
+  it('never shows the retired first-run screens', async () => {
+    setStore({ ...signedOut(), mode: null, currentBusinessId: BIZ });
     mountGate(<span data-testid="app-body">app</span>, { appConfig: await activatedRepo() });
-    expect(screen.queryByTestId('app-body')).toBeNull();
-    expect(await screen.findByTestId('wizard')).toBeInTheDocument();
+    expect(await screen.findByTestId('quick-switch-empty')).toBeInTheDocument();
+    for (const id of ['wizard', 'feature-discovery', 'business-form', 'director-setup']) {
+      expect(screen.queryByTestId(id)).toBeNull();
+    }
   });
 
-  it('shows the welcome carousel before the business form on a fresh install', async () => {
-    // Review items #1/#2: first run must read welcome → negocio. The
-    // business form asks for a régimen fiscal — a rough first screen.
-    setStore({
-      hydrated: true,
-      mode: 'local',
-      currentBusinessId: null,
-      role: null,
-      deviceId: null,
-    });
-    mountGate(<span data-testid="app-body">app</span>, { appConfig: await activatedRepo() });
-    expect(await screen.findByTestId('feature-discovery')).toBeInTheDocument();
-    expect(screen.queryByTestId('business-form')).toBeNull();
-  });
-
-  it('shows the business form when mode is set but no business exists', async () => {
-    setStore({
-      hydrated: true,
-      mode: 'local',
-      currentBusinessId: null,
-      role: null,
-      deviceId: null,
-    });
-    mountGate(<span data-testid="app-body">app</span>, {
-      appConfig: await dismissedDiscoveryRepo(),
-    });
-    expect(screen.queryByTestId('app-body')).toBeNull();
-    expect(await screen.findByTestId('business-form')).toBeInTheDocument();
-  });
-
-  it('shows the director setup when mode + business exist but no users', async () => {
-    setStore({
-      hydrated: true,
-      mode: 'local',
-      currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
-      userId: null,
-      role: null,
-      deviceId: null,
-    });
-    mountGate(<span data-testid="app-body">app</span>, {
-      appConfig: await dismissedDiscoveryRepo(),
-    });
-    // With no users in the mock repo, the auth gate shows DirectorSetupGate
-    const setup = await screen.findByTestId('director-setup');
-    expect(setup).toBeInTheDocument();
-    expect(screen.queryByTestId('app-body')).toBeNull();
-  });
-
-  it('renders children when every gate is satisfied', async () => {
-    // Seed users repo so AuthInner sees hasUsers=true
-    const users = new InMemoryUsersRepository();
-    await users.create({
-      nombre: 'Test Director',
-      email: null,
-      pinHash: 'hash',
-      recoveryPasswordHash: 'pin',
-      role: 'director',
-      mustChangePin: false,
-      businessId: '01JPHK0000000000000000000B' as BusinessId,
-    });
-
-    // Activated device with discoveryShown so both gates pass through
-    const appConfig = await dismissedDiscoveryRepo();
-
-    setStore({
-      hydrated: true,
-      mode: 'local',
-      currentBusinessId: '01JPHK0000000000000000000B' as BusinessId,
-      userId: '01JPHK0000000000000000USR1' as UserId,
-      role: 'operativo',
-      mustChangePin: false,
-      deviceId: null,
-    });
-    mountGate(<span data-testid="app-body">app</span>, { users, appConfig });
-    // AuthInner resolves users from the query — when userId is set +
-    // mustChangePin is false, children render.
-    const body = await screen.findByTestId('app-body');
-    expect(body).toBeInTheDocument();
-    expect(screen.queryByTestId('wizard')).toBeNull();
-    expect(screen.queryByTestId('director-setup')).toBeNull();
+  it('renders children when an operator is signed in', async () => {
+    const users = await usersWithOperator(true);
+    setStore({ ...signedOut(), userId: '01JPHK0000000000000000USR1' as UserId });
+    mountGate(<span data-testid="app-body">app</span>, { users, appConfig: await activatedRepo() });
+    expect(await screen.findByTestId('app-body')).toBeInTheDocument();
   });
 });

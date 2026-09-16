@@ -1016,6 +1016,10 @@ export const esMX = {
     verifying: 'Verificando…',
     error: 'PIN incorrecto',
     forgotPin: '¿Olvidaste tu PIN?',
+    lockedOut: 'Demasiados intentos. Espera {{seconds}} s.',
+    noOperatorsTitle: 'Aún no hay operadores',
+    noOperatorsBody: 'Crea un operador en app.xangarro.mx y luego toca Actualizar.',
+    refresh: 'Actualizar',
   },
   syncPill: {
     syncing: 'Sincronizando…',

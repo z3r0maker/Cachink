@@ -13,7 +13,6 @@ import { useRouter } from 'expo-router';
 import {
   SettingsHub,
   ResetDemoAction,
-  SeedDemoAction,
   useCurrentBusiness,
   useTranslation,
   type SettingsSection,
@@ -53,14 +52,9 @@ export default function SettingsHubRoute(): ReactElement {
   // item #7 removed the Otros tab from both bars, leaving that route — and
   // `ResetDemoAction` with it — unreachable, while `SeedDemoAction` was never
   // mounted at all. Configuración is the place both roles can still reach.
-  //
-  // `SeedDemoAction` is the only demo-seed entry point since the prebeta
-  // refactor moved Step1Welcome (owner of `wizard-step1-demo-mode`) out of the
-  // first-run path; the ~29 demo E2E flows enter through it.
   const devFooter =
     typeof __DEV__ !== 'undefined' && __DEV__ ? (
       <View style={{ gap: 16 }}>
-        <SeedDemoAction />
         <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={reloadApp} />
       </View>
     ) : null;

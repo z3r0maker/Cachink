@@ -51,6 +51,8 @@ export const APP_CONFIG_KEYS = {
   notificationPrefs: 'notificationPrefs',
   /** JSON `{ deviceId, businessId, activatedAt }` once the device is activated (A-04). */
   activation: 'activation',
+  /** JSON `{ failures, lockedUntil }` — wrong-PIN cooldown survives restarts (A-05). */
+  pinLockout: 'pinLockout',
   /** Cloud-sync keys (entitlement, server time, cursors) are owned by @xangarro/sync. */
   ...SYNC_CONFIG_KEYS,
 } as const;

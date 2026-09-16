@@ -20,7 +20,6 @@ import { UserAvatarGrid } from './user-avatar';
 export interface QuickSwitchScreenProps {
   readonly users: readonly User[];
   readonly onAuthenticate: (userId: UserId, pin: string) => void;
-  readonly onForgotPin?: (userId: UserId) => void;
   readonly error: string | null;
   readonly submitting: boolean;
   readonly businessName?: string;
@@ -54,7 +53,6 @@ function AnimatedPinPrompt(props: {
 export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
   const [selectedUserId, setSelectedUserId] = useState<UserId | null>(null);
   const name = props.users.find((u) => u.id === selectedUserId)?.nombre ?? '';
-  const forgotPin = props.onForgotPin;
   const media = useMedia();
   const pinMode = selectedUserId !== null;
 
@@ -92,7 +90,6 @@ export function QuickSwitchScreen(props: QuickSwitchScreenProps): ReactElement {
             userId={selectedUserId!}
             userName={name}
             onSubmit={(pin) => props.onAuthenticate(selectedUserId!, pin)}
-            onForgotPin={forgotPin ? () => forgotPin(selectedUserId!) : undefined}
             error={props.error}
             submitting={props.submitting}
           />

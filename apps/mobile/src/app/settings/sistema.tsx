@@ -24,7 +24,6 @@ import {
   useRole,
   useSetCachinkSoundEnabled,
   useSetCrashReportingEnabled,
-  useSetMode,
   useSetNotificationsEnabled,
   useTranslation,
 } from '@xangarro/ui';
@@ -69,28 +68,19 @@ function useToggleHandlers(appConfig: ReturnType<typeof useAppConfigRepository>)
 }
 
 function useSettingsHandlers(): {
-  reRunWizard: () => void;
   notificationsChange: BoolSetting;
   cachinkSoundChange: BoolSetting;
   crashReportingChange: BoolSetting;
   checkUpdates: () => void;
   statusLabel: string | undefined;
 } {
-  const router = useRouter();
   const appConfig = useAppConfigRepository();
-  const setMode = useSetMode();
   const toggles = useToggleHandlers(appConfig);
   const updateAdapter = useMobileUpdateAdapter();
   const updates = useCheckForUpdates(updateAdapter);
   const [statusLabel, setStatusLabel] = useState<string | undefined>();
   return {
     ...toggles,
-    reRunWizard: () => {
-      void appConfig.delete(APP_CONFIG_KEYS.mode).then(() => {
-        setMode(null);
-        router.replace('/wizard');
-      });
-    },
     checkUpdates: () => {
       setStatusLabel('Buscando…');
       void updates.check().then(() => setStatusLabel(updates.status));
@@ -118,7 +108,6 @@ function useSistemaProps(): {
     settingsProps: {
       mode,
       business,
-      onReRunWizard: handlers.reRunWizard,
       notificationsEnabled,
       onNotificationsChange: handlers.notificationsChange,
       cachinkSoundEnabled,

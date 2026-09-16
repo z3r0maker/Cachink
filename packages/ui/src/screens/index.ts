@@ -7,8 +7,6 @@
  */
 export * from './AppShell/index';
 export * from './Settings/index';
-export * from './Wizard/index';
-export * from './BusinessForm/index';
 export * from './Ventas/index';
 export * from './Clientes/index';
 export * from './CuentasPorCobrar/index';
@@ -28,7 +26,6 @@ export {
 // Phase 1-12 new screens
 export * from './Login/index';
 export * from './Activation/index';
-export * from './DirectorSetup/index';
 export * from './Caja/index';
 export * from './Merma/index';
 // Phase 18 — Conversion
@@ -36,7 +33,6 @@ export * from './Conversion/index';
 // Feature-flagged screens (dormant, flag-off in v1)
 export * from './VentasCredito/index';
 export * from './Auditoria/index';
-export * from './DemoSeeding/index';
 // Phase Caja Completa — Checkout + Cancelaciones
 export * from './Checkout/index';
 export * from './Cancelaciones/index';

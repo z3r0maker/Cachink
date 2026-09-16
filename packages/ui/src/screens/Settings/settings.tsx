@@ -22,7 +22,8 @@ type T = ReturnType<typeof useTranslation>['t'];
 export interface SettingsProps {
   readonly mode: AppMode | null;
   readonly business: Business | null;
-  readonly onReRunWizard: () => void;
+  /** Legacy mode picker re-run; unset on activated devices (A-05). Removed in A-12. */
+  readonly onReRunWizard?: () => void;
   /**
    * When false, the ExportarDatosAction card is hidden. Tests that
    * render <Settings /> outside a RepositoryProvider rely on this to

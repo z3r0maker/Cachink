@@ -134,9 +134,11 @@ export function SettingsTail({ props, t }: { props: SettingsProps; t: T }): Reac
        * `<View marginTop={8}>` wrapper — `Settings`'s parent
        * `<View gap={20}>` drives row spacing uniformly.
        */}
-      <Btn variant="soft" onPress={props.onReRunWizard} fullWidth testID="settings-re-run-wizard">
-        {t('settings.reRunWizard')}
-      </Btn>
+      {props.onReRunWizard && (
+        <Btn variant="soft" onPress={props.onReRunWizard} fullWidth testID="settings-re-run-wizard">
+          {t('settings.reRunWizard')}
+        </Btn>
+      )}
     </>
   );
 }
