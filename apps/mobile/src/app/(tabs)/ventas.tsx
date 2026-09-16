@@ -121,7 +121,6 @@ function VentasMainSection(props: ReturnType<typeof useVentasRouteState>): React
         onCheckout,
         total: q.total,
         ventaCount: q.ventas.length,
-        role: q.role,
         showCorte: ls.showCorte,
         onCorteOpen: () => ls.setCorteOpen(true),
       }}
@@ -134,7 +133,6 @@ function VentasOverlaySection(props: ReturnType<typeof useVentasRouteState>): Re
   return (
     <VentasOverlays
       {...{
-        role: q.role,
         showCorte: ls.showCorte,
         setShowCorte: ls.setShowCorte,
         corteOpen: ls.corteOpen,
@@ -162,7 +160,7 @@ export default function VentasRoute(): ReactElement {
     if (state.q.productosData !== undefined && state.q.productos.length === 0) {
       return <VentasProductosGate />;
     }
-    return <VentasCajaGate role={state.q.role} setShowCorte={state.ls.setShowCorte} />;
+    return <VentasCajaGate setShowCorte={state.ls.setShowCorte} />;
   }
   return (
     <>

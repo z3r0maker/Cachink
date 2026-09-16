@@ -1,3 +1,4 @@
+# Single role (ADR-053): after sign-in every user lands on Ventas.
 # Reusable subflow: authenticate as Director (deterministic, both entry points).
 #
 #   - Demo mode  → Juan Director   (PIN 000000)  — an Operativo avatar is present
@@ -111,5 +112,5 @@ appId: mx.xangarro.mobile
 # Director lands on the estados tab (both paths).
 - extendedWaitUntil:
     visible:
-      id: "tab-estados"
+      id: "tab-ventas"
     timeout: 10000

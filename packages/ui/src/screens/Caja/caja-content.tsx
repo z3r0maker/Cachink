@@ -21,7 +21,7 @@ import { useCerrarCaja } from '../../hooks/use-cerrar-caja';
 import { useOpenCajaTurno } from '../../hooks/use-open-caja-turno';
 import { useTranslation } from '../../i18n/index';
 import { SettingsNavSection } from '../Settings/settings-nav-section';
-import type { OtrosItem } from '../Otros/otros-items';
+import type { OtrosItem } from './tool-items';
 
 export interface CajaContentProps {
   readonly testID?: string;

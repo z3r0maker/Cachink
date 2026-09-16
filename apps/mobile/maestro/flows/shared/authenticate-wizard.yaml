@@ -1,3 +1,4 @@
+# Single role (ADR-053): after sign-in every user lands on Ventas.
 # Reusable subflow: authenticate as Director Test (wizard-created user, PIN 123456).
 #
 # Use this in regression-path flows that start from the wizard setup
@@ -33,5 +34,5 @@ appId: mx.xangarro.mobile
 # Director lands on the estados tab.
 - extendedWaitUntil:
     visible:
-      id: "tab-estados"
+      id: "tab-ventas"
     timeout: 10000

@@ -2,17 +2,14 @@
  * AppShell — the sticky chrome wrapping every post-wizard screen
  * (P1C-M1-T02, T03).
  *
- * Layout: TopBar (role chip + title + settings cog + sync badge) →
- * children → BottomTabBar (3 tabs for Operativo, 6 for Director). The
- * tab list is picked via `tabsForRole` per CLAUDE.md §1.
+ * Layout: TopBar (operator avatar + title + settings cog + sync badge) →
+ * children → BottomTabBar (`appTabs`, single role — ADR-053).
  *
- * Consumers (both app-shell route wrappers) pass:
- *   - role + activeTabKey — drive which tab set is rendered + which is
- *     active.
- *   - onNavigate(path) — called when a tab is tapped. The app-shell
- *     route wrapper plugs Expo Router / wouter here.
- *   - onChangeRole — called when "Cambiar" is tapped. Typically clears
- *     the role in Zustand and routes to `/role-picker`.
+ * Consumers pass:
+ *   - activeTabKey — which tab is highlighted.
+ *   - onNavigate(path) — called when a tab is tapped.
+ *   - onSwitchOperator — called when the avatar is tapped; locks the
+ *     screen so another Operator signs in with their PIN.
  *   - onOpenSettings — called when the settings cog is tapped.
  *   - title / subtitle — current screen's title.
  *   - mode — drives the sync-state badge; local-standalone renders none.
@@ -26,17 +23,16 @@ import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { FeatureFlags } from '@xangarro/domain';
-import type { AppMode, Role } from '../../app-config/index';
-import { tabsForRole } from './tab-definitions';
+import type { AppMode } from '../../app-config/index';
+import { appTabs } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';
 import { useLanSync } from '../../hooks/use-lan-sync';
 import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
 export interface AppShellProps {
-  readonly role: Role;
   readonly activeTabKey: string;
   readonly onNavigate: (path: string) => void;
-  readonly onChangeRole: () => void;
+  readonly onSwitchOperator: () => void;
   readonly onOpenSettings: () => void;
   readonly title?: string;
   readonly subtitle?: string;
@@ -119,18 +115,12 @@ function useLeftSlot(
   if (props.onBack !== undefined) {
     return <BackButton onPress={props.onBack} ariaLabel={backLabel} />;
   }
-  return (
-    <RoleAvatar
-      role={props.role}
-      onChange={props.onChangeRole}
-      ariaLabel={t('topBar.cambiarRol')}
-    />
-  );
+  return <RoleAvatar onChange={props.onSwitchOperator} ariaLabel={t('topBar.cambiarRol')} />;
 }
 
 export function AppShell(props: AppShellProps): ReactElement {
   const { t } = useTranslation();
-  const tabs = tabsForRole(props.role, props.flags);
+  const tabs = appTabs(props.flags);
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),

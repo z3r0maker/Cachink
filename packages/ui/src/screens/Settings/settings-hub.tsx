@@ -17,24 +17,12 @@ import { Card, Icon, SectionTitle } from '../../components/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
-import { SettingsNavSection } from './settings-nav-section';
-import type { OtrosItem } from '../Otros/otros-items';
 
 export type SettingsSection = 'negocio' | 'tasas-isr' | 'sistema' | 'tipos-de-pago' | 'indicadores';
 
 export interface SettingsHubProps {
   readonly business: Business | null;
   readonly onNavigate: (section: SettingsSection) => void;
-  /**
-   * Director only: the tool grid that used to be the "Otros" tab
-   * (review item #7). The Director bottom bar now ends in Estados, so
-   * these reach the user through the top-bar cog instead. Pass
-   * `directorSettingsNavItems(flags)`; omit for Operativo, who keeps
-   * the Otros tab in their five-slot bar.
-   */
-  readonly navItems?: readonly OtrosItem[];
-  /** Required when `navItems` is provided — receives the item `path`. */
-  readonly onNavigateTool?: (path: string) => void;
   /**
    * Slot rendered at the end of the hub. Used by the app shell to inject
    * `__DEV__`-only actions (demo seed / reset), mirroring `OtrosScreen`'s
@@ -105,30 +93,17 @@ function cat(
 
 type T = ReturnType<typeof useTranslation>['t'];
 
-function buildCategories(t: T, businessName: string): HubCategory[] {
-  return [
-    cat('negocio', 'building-2', t('settings.negocioCard'), businessName),
-    cat('tasas-isr', 'banknote', t('settings.tasasIsrCard'), t('settings.tasasIsrSubtitle')),
-    cat(
-      'tipos-de-pago',
-      'credit-card',
-      t('settings.tiposDePagoCard'),
-      t('settings.tiposDePagoSubtitle'),
-    ),
-    cat(
-      'indicadores',
-      'chart-bar',
-      t('settings.indicadoresCard'),
-      t('settings.indicadoresSubtitle'),
-    ),
-    cat('sistema', 'settings', t('settings.sistemaCard'), t('settings.sistemaSubtitle')),
-  ];
+/**
+ * Device-only settings (ADR-053 §3): business profile, ISR, tipos de pago and
+ * indicadores are tenant data managed in the portal. A-12 reshapes this hub.
+ */
+function buildCategories(t: T): HubCategory[] {
+  return [cat('sistema', 'settings', t('settings.sistemaCard'), t('settings.sistemaSubtitle'))];
 }
 
 export function SettingsHub(props: SettingsHubProps): ReactElement {
   const { t } = useTranslation();
-  const businessName = props.business?.nombre ?? t('settings.negocioNoConfigurado');
-  const categories = buildCategories(t, businessName);
+  const categories = buildCategories(t);
   return (
     <RNView testID={props.testID ?? 'settings-hub-screen'} style={{ flex: 1 }}>
       <ScrollView
@@ -136,13 +111,6 @@ export function SettingsHub(props: SettingsHubProps): ReactElement {
         contentContainerStyle={{ padding: 20, gap: 16, paddingBottom: 24 }}
       >
         <SectionTitle title={t('settings.hubTitle')} />
-        {props.navItems && props.onNavigateTool && (
-          <SettingsNavSection
-            items={props.navItems}
-            onNavigate={props.onNavigateTool}
-            title={t('settings.herramientas')}
-          />
-        )}
         {categories.map((c) => (
           <CategoryCard
             key={c.section}

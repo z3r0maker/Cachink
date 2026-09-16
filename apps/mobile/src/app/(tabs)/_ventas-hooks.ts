@@ -68,7 +68,6 @@ export function useVentasQueries(fecha: IsoDate): {
   eliminar: ReturnType<typeof useEliminarVenta>;
   ventas: readonly Sale[];
   total: bigint;
-  role: ReturnType<typeof useRole>;
 } {
   const ventasQ = useVentasByDate(fecha);
   const productosQ = useProductosParaVenta();
@@ -77,7 +76,6 @@ export function useVentasQueries(fecha: IsoDate): {
   const registrar = useRegistrarVenta();
   const eliminar = useEliminarVenta();
   const stockMap = useStockMap(stockQ);
-  const role = useRole();
   const ventas = ventasQ.data ?? [];
   return {
     productos: productosQ.data ?? [],
@@ -88,7 +86,6 @@ export function useVentasQueries(fecha: IsoDate): {
     eliminar,
     ventas,
     total: totalDelDia(ventas),
-    role,
   };
 }
 

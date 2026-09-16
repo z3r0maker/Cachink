@@ -16,8 +16,8 @@ import type { ReactElement } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { View } from '@tamagui/core';
 import { SectionTitle } from '../../components/index';
-import { OtrosCard } from '../Otros/otros-card';
-import type { OtrosItem } from '../Otros/otros-items';
+import { OtrosCard } from '../Caja/tool-card';
+import type { OtrosItem } from '../Caja/tool-items';
 
 export interface SettingsNavSectionProps {
   readonly items: readonly OtrosItem[];

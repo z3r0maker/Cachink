@@ -1,20 +1,14 @@
 /**
  * AppShell + Settings component tests.
  *
- * Updated for Phase 4: 5-tab bottom bar with Otros grid pattern.
+ * Single role (ADR-053): one 4-tab bar, operator avatar locks the screen.
  */
 
 import { describe, expect, it, vi } from 'vitest';
 import type { BusinessId } from '@xangarro/domain';
 import type { Business } from '@xangarro/domain';
 import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
-import {
-  AppShell,
-  OPERATIVO_TABS,
-  DIRECTOR_TABS,
-  Settings,
-  tabsForRole,
-} from '../../src/screens/index';
+import { AppShell, Settings, appTabs } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -25,49 +19,39 @@ initI18n();
 const noop = (): void => {};
 const defaultFlags = DEFAULT_FEATURE_FLAGS;
 
-describe('tabsForRole', () => {
-  // ADR-052: "Otros" left the Operativo bar too, so both roles are 4 tabs.
-  it('returns 4-tab Operativo set (without flags)', () => {
-    expect(tabsForRole('operativo')).toStrictEqual(OPERATIVO_TABS);
-    expect(tabsForRole('operativo')).toHaveLength(4);
-    expect(tabsForRole('operativo').some((tab) => tab.key === 'otros')).toBe(false);
+describe('appTabs', () => {
+  // Single role (ADR-053) and no "Otros" slot (ADR-052): always 4 tabs.
+  it('returns the v1 bar without flags: Ventas, Caja, Gastos, Productos', () => {
+    expect(appTabs().map((tab) => tab.key)).toEqual(['ventas', 'caja', 'gastos', 'productos']);
   });
 
-  it('returns the 4-tab Director set', () => {
-    expect(tabsForRole('director')).toBe(DIRECTOR_TABS);
-    expect(tabsForRole('director')).toHaveLength(4);
-  });
-
-  it('Operativo with merma ON: 4th tab is merma', () => {
-    const tabs = tabsForRole('operativo', {
-      ...defaultFlags,
-      merma: true,
-    });
+  it('swaps the 4th tab to merma when the flag is on', () => {
+    const tabs = appTabs({ ...defaultFlags, merma: true });
     expect(tabs).toHaveLength(4);
     expect(tabs[3]!.key).toBe('merma');
   });
 
-  it('Operativo with merma OFF: 4th tab is productos', () => {
-    const tabs = tabsForRole('operativo', {
-      ...defaultFlags,
-      merma: false,
-    });
-    expect(tabs[3]!.key).toBe('productos');
+  it('keeps productos when merma is off', () => {
+    expect(appTabs({ ...defaultFlags, merma: false })[3]!.key).toBe('productos');
+  });
+
+  it('never exposes the retired Director tabs', () => {
+    const keys = appTabs({ ...defaultFlags, merma: true }).map((tab) => tab.key);
+    for (const retired of ['home', 'estados', 'otros']) expect(keys).not.toContain(retired);
   });
 });
 
-describe('AppShell — Operativo', () => {
-  function mountOperativo(overrides?: {
+describe('AppShell', () => {
+  function mount(overrides?: {
     onNavigate?: (p: string) => void;
-    onChangeRole?: () => void;
+    onSwitchOperator?: () => void;
     onOpenSettings?: () => void;
   }) {
     return renderWithProviders(
       <AppShell
-        role="operativo"
         activeTabKey="ventas"
         onNavigate={overrides?.onNavigate ?? noop}
-        onChangeRole={overrides?.onChangeRole ?? noop}
+        onSwitchOperator={overrides?.onSwitchOperator ?? noop}
         onOpenSettings={overrides?.onOpenSettings ?? noop}
         mode="local"
         title="Ventas"
@@ -79,62 +63,56 @@ describe('AppShell — Operativo', () => {
     );
   }
 
-  it('renders the 4 Operativo tabs (Ventas, Caja, Gastos, Productos)', () => {
-    mountOperativo();
-    expect(screen.getByTestId('tab-ventas')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-caja')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-gastos')).toBeInTheDocument();
-    expect(screen.getByTestId('tab-productos')).toBeInTheDocument();
-    // ADR-052: Otros is gone from every bar; its tools moved into Caja.
-    expect(screen.queryByTestId('tab-otros')).toBeNull();
-    expect(screen.queryByTestId('tab-home')).toBeNull();
-    expect(screen.queryByTestId('tab-estados')).toBeNull();
+  it('renders the 4 tabs (Ventas, Caja, Gastos, Productos) and no Director tabs', () => {
+    mount();
+    for (const key of ['ventas', 'caja', 'gastos', 'productos']) {
+      expect(screen.getByTestId(`tab-${key}`)).toBeInTheDocument();
+    }
+    for (const key of ['otros', 'home', 'estados']) {
+      expect(screen.queryByTestId(`tab-${key}`)).toBeNull();
+    }
   });
 
   it("fires onNavigate with the tapped tab's path", () => {
     const onNavigate = vi.fn();
-    mountOperativo({ onNavigate });
+    mount({ onNavigate });
     fireEvent.click(screen.getByTestId('tab-gastos'));
     expect(onNavigate).toHaveBeenCalledWith('/egresos');
   });
 
-  it('fires onChangeRole when the role avatar is tapped', () => {
-    const onChangeRole = vi.fn();
-    mountOperativo({ onChangeRole });
-    const avatar = screen.getAllByTestId('top-bar-role-chip')[0]!;
-    fireEvent.click(avatar);
-    expect(onChangeRole).toHaveBeenCalled();
+  it('fires onSwitchOperator when the avatar is tapped', () => {
+    const onSwitchOperator = vi.fn();
+    mount({ onSwitchOperator });
+    fireEvent.click(screen.getAllByTestId('top-bar-role-chip')[0]!);
+    expect(onSwitchOperator).toHaveBeenCalledTimes(1);
   });
 
   it('fires onOpenSettings when the settings cog is tapped', () => {
     const onOpenSettings = vi.fn();
-    mountOperativo({ onOpenSettings });
-    const button = screen.getAllByTestId('top-bar-open-settings')[0]!;
-    fireEvent.click(button);
+    mount({ onOpenSettings });
+    fireEvent.click(screen.getAllByTestId('top-bar-open-settings')[0]!);
     expect(onOpenSettings).toHaveBeenCalled();
   });
 
-  it('renders the role avatar with an illustration', () => {
-    mountOperativo();
+  it('renders the operator avatar with an illustration', () => {
+    mount();
     const chip = screen.getByTestId('top-bar-role-chip');
     expect(chip.getAttribute('aria-label')).toBe('Cambiar');
     expect(screen.getByTestId('role-illustration')).toBeInTheDocument();
-    expect(screen.queryByTestId('initials-avatar-text')).toBeNull();
   });
 
   it('renders no sync badge in local mode', () => {
-    mountOperativo();
+    mount();
     expect(screen.queryByTestId('sync-status-badge')).toBeNull();
   });
 
-  it('renders back button when onBack is set', () => {
+  it('renders the back button instead of the avatar when onBack is set', () => {
     const onBack = vi.fn();
     renderWithProviders(
       <AppShell
-        role="operativo"
         activeTabKey="ventas"
         onNavigate={noop}
-        onChangeRole={noop}
+        onSwitchOperator={noop}
         onOpenSettings={noop}
         onBack={onBack}
         mode="local"
@@ -144,34 +122,9 @@ describe('AppShell — Operativo', () => {
         <span />
       </AppShell>,
     );
-    expect(screen.getByTestId('top-bar-back')).toBeInTheDocument();
     expect(screen.queryByTestId('top-bar-role-chip')).toBeNull();
     fireEvent.click(screen.getByTestId('top-bar-back'));
     expect(onBack).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('AppShell — Director', () => {
-  it('renders all 4 Director tabs', () => {
-    renderWithProviders(
-      <AppShell
-        role="director"
-        activeTabKey="home"
-        onNavigate={noop}
-        onChangeRole={noop}
-        onOpenSettings={noop}
-        mode="local"
-        flags={defaultFlags}
-      >
-        <span />
-      </AppShell>,
-    );
-    // Review item #7: "Otros" was replaced by "Gastos" so the Director
-    // bar reads Inicio | Ventas | Gastos | Estados. The Otros grid now
-    // lives inside Configuración, reached from the top-bar cog.
-    for (const key of ['home', 'ventas', 'gastos', 'estados']) {
-      expect(screen.getByTestId(`tab-${key}`)).toBeInTheDocument();
-    }
   });
 });
 

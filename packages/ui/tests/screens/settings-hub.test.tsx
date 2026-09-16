@@ -1,8 +1,8 @@
 /**
- * SettingsHub tests — top-level settings navigation.
+ * SettingsHub tests — device-only settings navigation (ADR-053 §3).
  *
- * Covers category card rendering, navigation callback wiring, and
- * business name display.
+ * Business profile, ISR, tipos de pago and indicadores are tenant data
+ * managed in the portal, so the hub lists only the device section.
  */
 
 import { describe, expect, it, vi } from 'vitest';
@@ -13,9 +13,7 @@ import { fireEvent, renderWithProviders, screen } from '../test-utils';
 
 initI18n();
 
-const BUSINESS = {
-  nombre: 'Mi Tienda',
-} as unknown as Business;
+const BUSINESS = { nombre: 'Mi Tienda' } as unknown as Business;
 
 describe('SettingsHub', () => {
   it('renders with default testID settings-hub-screen', () => {
@@ -23,25 +21,12 @@ describe('SettingsHub', () => {
     expect(screen.getByTestId('settings-hub-screen')).toBeInTheDocument();
   });
 
-  it('renders all 5 category cards', () => {
+  it('renders only the device-scoped sistema card', () => {
     renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={vi.fn()} />);
-    expect(screen.getByTestId('settings-hub-negocio')).toBeInTheDocument();
-    expect(screen.getByTestId('settings-hub-tasas-isr')).toBeInTheDocument();
-    expect(screen.getByTestId('settings-hub-tipos-de-pago')).toBeInTheDocument();
-    expect(screen.getByTestId('settings-hub-indicadores')).toBeInTheDocument();
     expect(screen.getByTestId('settings-hub-sistema')).toBeInTheDocument();
-  });
-
-  it('shows business name as negocio subtitle', () => {
-    renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={vi.fn()} />);
-    expect(screen.getByText('Mi Tienda')).toBeInTheDocument();
-  });
-
-  it('calls onNavigate with negocio when negocio card is tapped', () => {
-    const onNavigate = vi.fn();
-    renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByTestId('settings-hub-negocio'));
-    expect(onNavigate).toHaveBeenCalledWith('negocio');
+    for (const moved of ['negocio', 'tasas-isr', 'tipos-de-pago', 'indicadores']) {
+      expect(screen.queryByTestId(`settings-hub-${moved}`)).toBeNull();
+    }
   });
 
   it('calls onNavigate with sistema when sistema card is tapped', () => {
@@ -49,27 +34,6 @@ describe('SettingsHub', () => {
     renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={onNavigate} />);
     fireEvent.click(screen.getByTestId('settings-hub-sistema'));
     expect(onNavigate).toHaveBeenCalledWith('sistema');
-  });
-
-  it('calls onNavigate with tasas-isr', () => {
-    const onNavigate = vi.fn();
-    renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByTestId('settings-hub-tasas-isr'));
-    expect(onNavigate).toHaveBeenCalledWith('tasas-isr');
-  });
-
-  it('calls onNavigate with tipos-de-pago', () => {
-    const onNavigate = vi.fn();
-    renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByTestId('settings-hub-tipos-de-pago'));
-    expect(onNavigate).toHaveBeenCalledWith('tipos-de-pago');
-  });
-
-  it('calls onNavigate with indicadores', () => {
-    const onNavigate = vi.fn();
-    renderWithProviders(<SettingsHub business={BUSINESS} onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByTestId('settings-hub-indicadores'));
-    expect(onNavigate).toHaveBeenCalledWith('indicadores');
   });
 
   it('handles null business', () => {

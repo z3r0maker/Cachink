@@ -14,10 +14,7 @@ import {
   SettingsHub,
   ResetDemoAction,
   SeedDemoAction,
-  directorSettingsNavItems,
   useCurrentBusiness,
-  useFeatureFlags,
-  useRole,
   useTranslation,
   type SettingsSection,
 } from '@xangarro/ui';
@@ -47,17 +44,10 @@ export default function SettingsHubRoute(): ReactElement {
   const business = useCurrentBusiness().data ?? null;
   const handleBack = useBackToParent();
   const { t } = useTranslation();
-  const role = useRole();
-  const flags = useFeatureFlags();
 
   const handleNavigate = (section: SettingsSection): void => {
     router.push(`/settings/${section}` as never);
   };
-
-  // Director dropped the "Otros" tab (review item #7) so Gastos could
-  // take its slot; the grid lives here now. Operativo still has the
-  // tab, so it is not duplicated for them.
-  const navItems = role === 'director' ? directorSettingsNavItems(flags) : undefined;
 
   // Dev-only actions. These used to hang off `(tabs)/otros.tsx`, but review
   // item #7 removed the Otros tab from both bars, leaving that route — and
@@ -77,13 +67,7 @@ export default function SettingsHubRoute(): ReactElement {
 
   return (
     <AppShellWrapper activeTabKey="ajustes" title={t('settings.hubTitle')} onBack={handleBack}>
-      <SettingsHub
-        business={business}
-        onNavigate={handleNavigate}
-        navItems={navItems}
-        onNavigateTool={(path) => router.push(path as never)}
-        footer={devFooter}
-      />
+      <SettingsHub business={business} onNavigate={handleNavigate} footer={devFooter} />
     </AppShellWrapper>
   );
 }

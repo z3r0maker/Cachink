@@ -81,19 +81,14 @@ function MobileStack(): ReactElement {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="wizard" />
-      <Stack.Screen name="role-picker" />
       <Stack.Screen name="settings" />
       <Stack.Screen name="clientes" />
       <Stack.Screen name="cuentas-por-cobrar" />
       <Stack.Screen name="inventario" />
-      <Stack.Screen name="funciones" />
-      <Stack.Screen name="usuarios" />
       <Stack.Screen name="caja" />
       <Stack.Screen name="conversion" />
       <Stack.Screen name="auditoria" />
       <Stack.Screen name="ventas-credito" />
-      <Stack.Screen name="caja-reportes" />
-      <Stack.Screen name="merma-reportes" />
     </Stack>
   );
 }

@@ -11,7 +11,7 @@ import { Card, Icon } from '../../components/index';
 import type { IconName } from '../../components/Icon/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
-import type { OtrosItem } from './otros-items';
+import type { OtrosItem } from './tool-items';
 
 export interface OtrosCardProps {
   readonly item: OtrosItem;

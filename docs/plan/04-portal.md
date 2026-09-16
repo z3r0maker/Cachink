@@ -90,13 +90,13 @@
 ### P-13 Dashboard (Inicio)
 
 - [ ] Status · **Blocked by:** P-02, P-09
-- **Steps:** port `DirectorHome` intent, not code: today's ventas/gastos/utilidad tiles, 30-day sparkline (Recharts), caja status per device (open turno?), stock bajo list, cuentas por cobrar placeholder (hidden until Z-01), unresolved rejections banner, onboarding progress if incomplete. Read via `@xangarro/domain` KPI functions where they exist (`packages/domain/src/**/kpi*`).
+- **Steps:** port `DirectorHome` intent, not code (reference: `archive/ui-screens/DirectorHome/`, `archive/ui-screens/CajaReportes/compute-report-kpis.ts`): today's ventas/gastos/utilidad tiles, 30-day sparkline (Recharts), caja status per device (open turno?), stock bajo list, cuentas por cobrar placeholder (hidden until Z-01), unresolved rejections banner, onboarding progress if incomplete. Read via `@xangarro/domain` KPI functions where they exist (`packages/domain/src/**/kpi*`).
 - **Acceptance:** numbers match P-09 totals for "hoy"; renders at 768 px width without horizontal scroll.
 
 ### P-14 Estados Financieros
 
 - [ ] Status · **Blocked by:** P-02, P-09
-- **Steps:** period picker (mes/trimestre/año/custom); NIF B-3 Estado de Resultados, B-6 Balance, B-2 Flujo de Efectivo computed with the **existing** `@xangarro/domain` functions used by `packages/ui/src/screens/Estados` (locate them; do not reimplement); print stylesheet; "Exportar Excel" (all plans). "Informe mensual PDF" button visible but gated to Pro → Z-06.
+- **Steps:** (the archived app UI in `archive/ui-screens/Estados/` holds `health-verdicts.ts` and `estado-resultados-mappers.ts` — port their logic into `@xangarro/domain` rather than rewriting it) period picker (mes/trimestre/año/custom); NIF B-3 Estado de Resultados, B-6 Balance, B-2 Flujo de Efectivo computed with the **existing** `@xangarro/domain` functions used by `packages/ui/src/screens/Estados` (locate them; do not reimplement); print stylesheet; "Exportar Excel" (all plans). "Informe mensual PDF" button visible but gated to Pro → Z-06.
 - **Acceptance:** a fixture business (seed) produces the same numbers as the domain unit tests' expectations; print preview is one page per statement.
 
 ### P-15 Funciones (feature flags, read-mostly)
