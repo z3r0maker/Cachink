@@ -9,26 +9,26 @@ appId: mx.xangarro.mobile
 - runFlow: shared/login-operator.yaml
 - extendedWaitUntil:
     visible:
-      id: "cloud-sync-pill-synced"
+      id: 'cloud-sync-pill-synced'
     timeout: 20000
 - tapOn:
-    id: "tab-caja"
+    id: 'tab-caja'
 - runFlow:
     when:
       visible:
-        id: "caja-abrir-submit"
+        id: 'caja-abrir-submit'
     commands:
       - tapOn:
           text: ".*\\$500.*"
       - tapOn:
-          id: "caja-abrir-submit"
+          id: 'caja-abrir-submit'
 - extendedWaitUntil:
     visible:
-      id: "cloud-sync-pill-synced"
+      id: 'cloud-sync-pill-synced'
     timeout: 30000
 - tapOn:
-    id: "cloud-sync-pill"
+    id: 'cloud-sync-pill'
 - extendedWaitUntil:
     visible:
-      id: "cloud-sync-pill-synced"
+      id: 'cloud-sync-pill-synced'
     timeout: 20000

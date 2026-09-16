@@ -4,21 +4,21 @@ appId: mx.xangarro.mobile
 ---
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 60000
 - tapOn:
-    text: ".*Toni.*"
+    text: '.*Toni.*'
 - extendedWaitUntil:
     visible:
-      id: "numpad-1"
+      id: 'numpad-1'
     timeout: 8000
-- tapOn: { id: "numpad-1" }
-- tapOn: { id: "numpad-2" }
-- tapOn: { id: "numpad-3" }
-- tapOn: { id: "numpad-4" }
-- tapOn: { id: "numpad-5" }
-- tapOn: { id: "numpad-6" }
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-2' }
+- tapOn: { id: 'numpad-3' }
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
 - extendedWaitUntil:
     visible:
-      id: "tab-caja"
+      id: 'tab-caja'
     timeout: 15000
