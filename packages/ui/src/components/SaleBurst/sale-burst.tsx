@@ -1,11 +1,11 @@
 /**
- * CachinkBurst — neobrutalist "¡CACHINK!" celebration overlay.
+ * SaleBurst — neobrutalist "¡XANGARRO!" celebration overlay.
  *
  * Fires exclusively when a new sale (venta) is registered. Shows a yellow
  * badge with burst rays that pops in and fades out in ~900ms.
  *
  * Animation ported from CachinkLanding/landing/AnimatedHero.jsx (CSS
- * @keyframes cachinkPop + rayShoot) to React Native `Animated` with
+ * @keyframes saleBurstPop + rayShoot) to React Native `Animated` with
  * `useNativeDriver: true`. Same easing, same timing, same visual output.
  */
 
@@ -18,7 +18,7 @@ import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 const RAY_COUNT = 8;
 const RAY_STAGGER_MS = 20;
 
-export interface CachinkBurstProps {
+export interface SaleBurstProps {
   /** When true, plays the animation once then calls onComplete. */
   readonly visible: boolean;
   /** Called after the animation finishes (~900ms). */
@@ -151,7 +151,7 @@ function BadgeLabel(): ReactElement {
       letterSpacing={typography.letterSpacing.tightest}
       userSelect="none"
     >
-      ¡CACHINK!
+      ¡XANGARRO!
     </Text>
   );
 }
@@ -170,17 +170,13 @@ function AnimatedBadge({
   );
 }
 
-export function CachinkBurst({
-  visible,
-  onComplete,
-  testID,
-}: CachinkBurstProps): ReactElement | null {
+export function SaleBurst({ visible, onComplete, testID }: SaleBurstProps): ReactElement | null {
   const anim = useBurstAnimation(visible, onComplete);
 
   if (!visible) return null;
 
   return (
-    <View testID={testID ?? 'cachink-burst'} style={styles.overlay} pointerEvents="none">
+    <View testID={testID ?? 'sale-burst'} style={styles.overlay} pointerEvents="none">
       {anim.rays.map((ray, i) => (
         <BurstRay key={i} index={i} anim={ray} />
       ))}

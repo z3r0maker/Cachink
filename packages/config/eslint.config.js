@@ -4,7 +4,7 @@ import unicorn from 'eslint-plugin-unicorn';
 import boundaries from 'eslint-plugin-boundaries';
 
 /**
- * Shared ESLint flat config for the Cachink monorepo.
+ * Shared ESLint flat config for the Xangarro monorepo.
  *
  * Encodes the layer boundaries from CLAUDE.md §4.2. Each package declares its
  * element type via `settings.boundaries/elements` below, and the

@@ -4,7 +4,7 @@ import { MOCK_CODES, startMockServer, type RunningMock } from '@xangarro/contrac
 import {
   DrizzleAppConfigRepository,
   DrizzleSalesRepository,
-  type CachinkDatabase,
+  type XangarroDatabase,
 } from '@xangarro/data';
 import type { BusinessId, DeviceId, ProductId } from '@xangarro/domain';
 import { makeFreshDb } from '../../data/tests/helpers/fresh-db.js';
@@ -26,7 +26,7 @@ afterAll(async () => {
 });
 
 interface Device {
-  db: CachinkDatabase;
+  db: XangarroDatabase;
   token: string;
   businessId: BusinessId;
   deviceId: DeviceId;

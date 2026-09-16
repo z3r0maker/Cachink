@@ -30,7 +30,7 @@ import Database from '@tauri-apps/plugin-sql';
 import { drizzle, type AsyncRemoteCallback } from 'drizzle-orm/sqlite-proxy';
 import type { SqliteDatabase } from '@xangarro/observability';
 import * as schema from '@xangarro/data/schema';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
@@ -98,14 +98,14 @@ export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
   };
 }
 
-async function createDesktopDatabase(): Promise<CachinkDatabase> {
+async function createDesktopDatabase(): Promise<XangarroDatabase> {
   const tauriDb = await Database.load(DB_PATH);
   try {
     // Enable FK enforcement before migrations run.
     // Must happen outside any transaction — pragma is a no-op inside one.
     await tauriDb.execute('PRAGMA foreign_keys = ON');
     await tauriDb.execute('PRAGMA journal_mode = WAL');
-    const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as XangarroDatabase;
     // Attach a SqliteDatabase-compatible handle so the observability bridge
     // (which reads `db.$client`) can use it for its log store.
     (db as unknown as { $client: SqliteDatabase }).$client = wrapTauriAsSqliteDatabase(tauriDb);

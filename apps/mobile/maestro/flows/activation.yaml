@@ -8,30 +8,30 @@ appId: mx.xangarro.mobile
 ---
 - extendedWaitUntil:
     visible:
-      id: "activation-screen"
+      id: 'activation-screen'
     timeout: 60000
 # Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
-    id: "activation-email"
-    point: "95%,50%"
+    id: 'activation-email'
+    point: '95%,50%'
 - eraseText: 60
-- inputText: "dueno@tacoslaesquina.mx"
+- inputText: 'dueno@tacoslaesquina.mx'
 # Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
-    id: "activation-code"
-    point: "95%,50%"
+    id: 'activation-code'
+    point: '95%,50%'
 - eraseText: 20
-- inputText: "valdk7m3"
+- inputText: 'valdk7m3'
 - hideKeyboard
 - tapOn:
-    id: "activation-submit"
+    id: 'activation-submit'
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 20000
 - assertNotVisible:
-    id: "activation-screen"
+    id: 'activation-screen'
 - assertVisible:
-    text: ".*Toni.*"
+    text: '.*Toni.*'
 - assertVisible:
-    text: ".*Ana.*"
+    text: '.*Ana.*'

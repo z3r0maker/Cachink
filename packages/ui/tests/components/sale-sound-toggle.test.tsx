@@ -1,5 +1,5 @@
 /**
- * CachinkSoundToggle component tests.
+ * SaleSoundToggle component tests.
  *
  * Validates render, label text, toggle interaction, and custom testID.
  */
@@ -30,42 +30,42 @@ vi.mock('react-native-svg', () => {
   };
 });
 
-import { CachinkSoundToggle } from '../../src/screens/Settings/cachink-sound-toggle';
+import { SaleSoundToggle } from '../../src/screens/Settings/sale-sound-toggle';
 import { renderWithProviders, screen, fireEvent } from '../test-utils';
 
-describe('CachinkSoundToggle', () => {
+describe('SaleSoundToggle', () => {
   it('renders with default testID', () => {
-    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} />);
-    expect(screen.getByTestId('settings-cachink-sound-toggle')).toBeInTheDocument();
+    renderWithProviders(<SaleSoundToggle enabled={true} onChange={vi.fn()} />);
+    expect(screen.getByTestId('settings-sale-sound-toggle')).toBeInTheDocument();
   });
 
   it('renders with custom testID', () => {
-    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} testID="custom" />);
+    renderWithProviders(<SaleSoundToggle enabled={true} onChange={vi.fn()} testID="custom" />);
     expect(screen.getByTestId('custom')).toBeInTheDocument();
   });
 
   it('shows yes label when enabled', () => {
-    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={vi.fn()} />);
+    renderWithProviders(<SaleSoundToggle enabled={true} onChange={vi.fn()} />);
     // In test env, i18n returns raw keys; the key is 'common.yes'
-    expect(screen.getByTestId('settings-cachink-sound-btn')).toHaveTextContent('common.yes');
+    expect(screen.getByTestId('settings-sale-sound-btn')).toHaveTextContent('common.yes');
   });
 
   it('shows no label when disabled', () => {
-    renderWithProviders(<CachinkSoundToggle enabled={false} onChange={vi.fn()} />);
-    expect(screen.getByTestId('settings-cachink-sound-btn')).toHaveTextContent('common.no');
+    renderWithProviders(<SaleSoundToggle enabled={false} onChange={vi.fn()} />);
+    expect(screen.getByTestId('settings-sale-sound-btn')).toHaveTextContent('common.no');
   });
 
   it('calls onChange with toggled value on press', () => {
     const onChange = vi.fn();
-    renderWithProviders(<CachinkSoundToggle enabled={true} onChange={onChange} />);
-    fireEvent.click(screen.getByTestId('settings-cachink-sound-btn'));
+    renderWithProviders(<SaleSoundToggle enabled={true} onChange={onChange} />);
+    fireEvent.click(screen.getByTestId('settings-sale-sound-btn'));
     expect(onChange).toHaveBeenCalledWith(false);
   });
 
   it('calls onChange(true) when currently disabled', () => {
     const onChange = vi.fn();
-    renderWithProviders(<CachinkSoundToggle enabled={false} onChange={onChange} />);
-    fireEvent.click(screen.getByTestId('settings-cachink-sound-btn'));
+    renderWithProviders(<SaleSoundToggle enabled={false} onChange={onChange} />);
+    fireEvent.click(screen.getByTestId('settings-sale-sound-btn'));
     expect(onChange).toHaveBeenCalledWith(true);
   });
 });

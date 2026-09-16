@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "expo-router/entry",
-  "description": "Cachink mobile app (iOS and Android tablets). See ./SETUP.md.",
+  "description": "Xangarro mobile app (iOS and Android tablets). See ./SETUP.md.",
   "scripts": {
     "bundle:check": "bash scripts/bundle-check.sh",
     "start": "expo run:ios",

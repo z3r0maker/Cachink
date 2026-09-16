@@ -1,6 +1,6 @@
 /**
- * CachinkSoundToggle — Settings card letting the user enable / disable
- * the "¡CACHINK!" cash register sound that plays on each sale.
+ * SaleSoundToggle — Settings card letting the user enable / disable
+ * the "¡XANGARRO!" cash register sound that plays on each sale.
  *
  * Follows the same pattern as `NotificationsToggle`: pure UI driven
  * by props. The parent route handles the AppConfig persistence.
@@ -12,7 +12,7 @@ import { Btn, Card, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
 
-export interface CachinkSoundToggleProps {
+export interface SaleSoundToggleProps {
   readonly enabled: boolean;
   readonly onChange: (next: boolean) => void;
   readonly testID?: string;
@@ -44,23 +44,20 @@ function SoundLabel(props: { label: string; hint: string }): ReactElement {
   );
 }
 
-export function CachinkSoundToggle(props: CachinkSoundToggleProps): ReactElement {
+export function SaleSoundToggle(props: SaleSoundToggleProps): ReactElement {
   const { t } = useTranslation();
   return (
-    <Card testID={props.testID ?? 'settings-cachink-sound-toggle'} padding="md" fullWidth>
+    <Card testID={props.testID ?? 'settings-sale-sound-toggle'} padding="md" fullWidth>
       <View flexDirection="row" justifyContent="space-between" alignItems="center" gap={12}>
         <View flexDirection="row" alignItems="center" gap={10} flex={1} paddingRight={12}>
           <Icon name="bell" size={20} color={props.enabled ? colors.black : colors.gray400} />
-          <SoundLabel
-            label={t('settings.cachinkSoundLabel')}
-            hint={t('settings.cachinkSoundHint')}
-          />
+          <SoundLabel label={t('settings.saleSoundLabel')} hint={t('settings.saleSoundHint')} />
         </View>
         <Btn
           variant={props.enabled ? 'green' : 'ghost'}
           size="sm"
           onPress={() => props.onChange(!props.enabled)}
-          testID="settings-cachink-sound-btn"
+          testID="settings-sale-sound-btn"
         >
           {props.enabled ? t('common.yes') : t('common.no')}
         </Btn>

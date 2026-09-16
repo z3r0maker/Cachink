@@ -30,6 +30,6 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 
 # Wizard renders directly on fresh launch.
-- assertVisible: "¡Bienvenido a Cachink!"
+- assertVisible: '¡Bienvenido a Xangarro!'
 - assertVisible:
-    id: "wizard-step1-solo"
+    id: 'wizard-step1-solo'

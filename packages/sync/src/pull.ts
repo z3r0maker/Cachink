@@ -7,14 +7,14 @@
  * `acknowledgedThrough` (the retention purge bound, A-11).
  */
 
-import type { AppConfigRepository, CachinkDatabase } from '@xangarro/data';
+import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
 import type { SyncError } from './push.js';
 import { applyReferenceTables } from './reference-applier.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
 export interface PullDeps {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly appConfig: AppConfigRepository;
   readonly client: ApiClient;
   readonly token: string;

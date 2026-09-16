@@ -11,7 +11,7 @@ import {
   impactLight,
   totalDelDia,
   useCart,
-  useCachinkSound,
+  useSaleSound,
   useCheckoutStore,
   useCurrentBusiness,
   useEliminarVenta,
@@ -25,7 +25,7 @@ import {
   type CartState,
 } from '@xangarro/ui';
 import type { Business, IsoDate, PaymentMethod, Product, Sale } from '@xangarro/domain';
-import { useCachinkPlayer } from '../../shell/use-cachink-player';
+import { useSaleSoundPlayer } from '../../shell/use-sale-sound-player';
 import { useSwipeState } from '../../shell/use-swipe-state';
 import { useShareComprobante } from '../../shell/ventas-slots';
 
@@ -44,19 +44,19 @@ function useCheckoutReturnClear(dispatch: React.Dispatch<CartAction>): void {
   }, [checkoutCart, dispatch]);
 }
 
-export function useCachinkTrigger(): {
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
-  triggerCachink: () => void;
+export function useSaleConfirmation(): {
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
+  triggerSaleConfirmation: () => void;
 } {
-  const [showCachink, setShowCachink] = useState(false);
-  const cachinkPlayer = useCachinkPlayer();
-  const { play: playCachink } = useCachinkSound(cachinkPlayer);
-  const triggerCachink = useCallback(() => {
-    setShowCachink(true);
-    playCachink();
-  }, [playCachink]);
-  return { showCachink, setShowCachink, triggerCachink };
+  const [showSaleBurst, setShowSaleBurst] = useState(false);
+  const saleSoundPlayer = useSaleSoundPlayer();
+  const { play: playSaleSound } = useSaleSound(saleSoundPlayer);
+  const triggerSaleConfirmation = useCallback(() => {
+    setShowSaleBurst(true);
+    playSaleSound();
+  }, [playSaleSound]);
+  return { showSaleBurst, setShowSaleBurst, triggerSaleConfirmation };
 }
 
 export function useVentasQueries(fecha: IsoDate): {

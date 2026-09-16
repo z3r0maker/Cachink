@@ -14,11 +14,11 @@ import {
   ResetDemoAction,
   SettingsScreen,
   useAppConfigRepository,
-  useCachinkSoundEnabled,
+  useSaleSoundEnabled,
   useCheckForUpdates,
   useCrashReportingEnabled,
   useNotificationsEnabled,
-  useSetCachinkSoundEnabled,
+  useSetSaleSoundEnabled,
   useSetCrashReportingEnabled,
   useSetNotificationsEnabled,
   useTranslation,
@@ -63,9 +63,9 @@ function useUpdateCheck(): { check: () => void; status: string | undefined } {
 function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
   const K = APP_CONFIG_KEYS;
   const [sound, onSound] = usePersistedToggle(
-    K.cachinkSoundEnabled,
-    useCachinkSoundEnabled(),
-    useSetCachinkSoundEnabled(),
+    K.saleSoundEnabled,
+    useSaleSoundEnabled(),
+    useSetSaleSoundEnabled(),
   );
   const [notif, onNotif] = usePersistedToggle(
     K.notificationsEnabled,

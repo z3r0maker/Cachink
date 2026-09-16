@@ -16,15 +16,15 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { ConversionsRepository, CreateConversionInput } from '../conversions-repository.js';
 import { conversions } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type Row = typeof conversions.$inferSelect;
 
 export class DrizzleConversionsRepository implements ConversionsRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

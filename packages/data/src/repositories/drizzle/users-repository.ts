@@ -10,16 +10,16 @@ import type { BusinessId, DeviceId, IsoTimestamp, User, UserId } from '@xangarro
 import { newEntityId, now, parseUserPermissions } from '@xangarro/domain';
 import type { CreateUserInput, UserPatch, UsersRepository } from '../users-repository.js';
 import { users } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type UserRow = typeof users.$inferSelect;
 
 export class DrizzleUsersRepository implements UsersRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

@@ -15,18 +15,18 @@
 appId: mx.xangarro.mobile
 ---
 - assertVisible:
-    id: "quick-switch"
+    id: 'quick-switch'
 
 # Demo mode: Operativo avatar present → Ana Operativa, PIN 000000.
 - runFlow:
     when:
       visible:
-        id: "user-avatar-role-operativo"
+        id: 'user-avatar-role-operativo'
     commands:
       - tapOn:
-          id: "user-avatar-role-operativo"
+          id: 'user-avatar-role-operativo'
       - assertVisible:
-          id: "pin-numpad"
+          id: 'pin-numpad'
       - waitForAnimationToEnd
       # On short screens (iPhone) the numpad's bottom row (0) sits below the fold.
       # Scroll the login ScrollView up by swiping over the avatar/greeting area
@@ -35,22 +35,22 @@ appId: mx.xangarro.mobile
       - runFlow:
           when:
             notVisible:
-              id: "numpad-0"
+              id: 'numpad-0'
           commands:
             - swipe:
-                start: "50%, 45%"
-                end: "50%, 12%"
+                start: '50%, 45%'
+                end: '50%, 12%'
             - waitForAnimationToEnd
       - extendedWaitUntil:
           visible:
-            id: "numpad-0"
+            id: 'numpad-0'
           timeout: 8000
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
 
 # Wizard mode: no Operativo avatar → Director Test, PIN 123456.
 # Guard on `quick-switch` still being visible so this branch does NOT fire after
@@ -59,24 +59,24 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: "quick-switch"
+        id: 'quick-switch'
       notVisible:
-        id: "user-avatar-role-operativo"
+        id: 'user-avatar-role-operativo'
     commands:
       - tapOn:
-          id: "user-avatar-role-director"
+          id: 'user-avatar-role-director'
       - assertVisible:
-          id: "pin-numpad"
+          id: 'pin-numpad'
       - waitForAnimationToEnd
-      - tapOn: { id: "numpad-1" }
-      - tapOn: { id: "numpad-2" }
-      - tapOn: { id: "numpad-3" }
-      - tapOn: { id: "numpad-4" }
-      - tapOn: { id: "numpad-5" }
-      - tapOn: { id: "numpad-6" }
+      - tapOn: { id: 'numpad-1' }
+      - tapOn: { id: 'numpad-2' }
+      - tapOn: { id: 'numpad-3' }
+      - tapOn: { id: 'numpad-4' }
+      - tapOn: { id: 'numpad-5' }
+      - tapOn: { id: 'numpad-6' }
 
 # Either role lands with the bottom tab bar mounted.
 - extendedWaitUntil:
     visible:
-      id: "bottom-tab-bar"
+      id: 'bottom-tab-bar'
     timeout: 10000

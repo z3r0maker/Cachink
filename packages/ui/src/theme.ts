@@ -1,5 +1,5 @@
 /**
- * Cachink brand tokens — the neobrutalist-yellow visual DNA.
+ * Xangarro brand tokens — the neobrutalist-yellow visual DNA.
  *
  * All values are encoded exactly from CLAUDE.md §8. This file is the single
  * source of truth for colors, typography, shape, and shadow scales. Tamagui's
@@ -102,7 +102,7 @@ export type ColorToken = keyof typeof colors;
  * checked. Pick the step that looks right; the name makes no claim.
  *
  * **`xs` is 12, and that is the floor.** 61 call sites previously sat at 9-11px,
- * which is below the practical minimum for sustained reading — and Cachink is
+ * which is below the practical minimum for sustained reading — and Xangarro is
  * used at arm's length on a counter, often by older shopkeepers. Nothing in the
  * product needs to be smaller than this.
  */
@@ -226,7 +226,7 @@ export const pressTransform = {
 /**
  * Responsive breakpoints (audit M-1 PR 5.5-T01 / B1).
  *
- * Cachink ships on phones, tablets (the primary form factor — see CLAUDE.md
+ * Xangarro ships on phones, tablets (the primary form factor — see CLAUDE.md
  * §1), and desktops. The breakpoint scale below maps Tamagui's `useMedia()`
  * keys onto the iOS / iPad / Android / desktop form-factor matrix. A
  * breakpoint key is the **minimum** parent-width threshold for which the

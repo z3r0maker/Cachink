@@ -22,34 +22,34 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Verify an existing sale is visible.
-- assertVisible: "Tortilla"
+- assertVisible: 'Tortilla'
 
 # Tap the venta card to open VentaDetailPopover.
-- tapOn: "Tortilla"
+- tapOn: 'Tortilla'
 - assertVisible:
-    id: "venta-detail-popover"
+    id: 'venta-detail-popover'
 
 # Tap the "Compartir comprobante" button.
 - tapOn:
-    id: "venta-detail-share"
+    id: 'venta-detail-share'
 
 # ComprobantePreview modal opens.
 - extendedWaitUntil:
     visible:
-      id: "comprobante-preview"
+      id: 'comprobante-preview'
     timeout: 5000
 
 # Verify the share and close buttons are visible.
 - assertVisible:
-    id: "comprobante-share"
+    id: 'comprobante-share'
 - assertVisible:
-    id: "comprobante-close"
+    id: 'comprobante-close'
 
 # Close the comprobante preview.
 - tapOn:
-    id: "comprobante-close"
+    id: 'comprobante-close'
 - assertNotVisible:
-    id: "comprobante-preview"
+    id: 'comprobante-preview'

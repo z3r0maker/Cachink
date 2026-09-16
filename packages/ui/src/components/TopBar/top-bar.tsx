@@ -1,5 +1,5 @@
 /**
- * TopBar — the Cachink sticky-header primitive.
+ * TopBar — the Xangarro sticky-header primitive.
  *
  * Fixed-position top shell rendered on every screen. Holds three slots:
  * `left` (back button, role chip, greeting), a centered title block with

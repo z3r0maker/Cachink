@@ -25,55 +25,55 @@ appId: mx.xangarro.mobile
 # Reach Cloud Onboarding via Settings → Sistema → Re-run wizard.
 - runFlow: ../shared/navigate-to-settings.yaml
 - tapOn:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'
 - tapOn:
-    id: "settings-re-run-wizard"
+    id: 'settings-re-run-wizard'
 - assertVisible:
-    id: "wizard"
+    id: 'wizard'
 
 # Step 1 → multi-device → Step 2B → cloud.
 - tapOn:
-    id: "wizard-step1-multi-card"
+    id: 'wizard-step1-multi-card'
 - tapOn:
-    id: "wizard-step2b-cloud-card"
+    id: 'wizard-step2b-cloud-card'
 - assertVisible:
-    id: "cloud-onboarding-screen"
+    id: 'cloud-onboarding-screen'
 
 # Select signup tab.
 - tapOn:
-    id: "cloud-tab-signup"
+    id: 'cloud-tab-signup'
 
 # --- Test 1: Invalid email format ---
 - tapOn:
-    id: "cloud-email-input"
-- inputText: "not-an-email"
+    id: 'cloud-email-input'
+- inputText: 'not-an-email'
 - tapOn:
-    id: "cloud-password-input"
-- inputText: "ValidPass123"
+    id: 'cloud-password-input'
+- inputText: 'ValidPass123'
 - tapOn:
-    id: "cloud-business-input"
-- inputText: "Test Business"
+    id: 'cloud-business-input'
+- inputText: 'Test Business'
 - tapOn:
-    id: "cloud-submit"
+    id: 'cloud-submit'
 
 # Error should be visible — modal stays open.
 - assertVisible:
-    id: "cloud-onboarding-error"
+    id: 'cloud-onboarding-error'
 - assertVisible:
-    id: "cloud-onboarding-screen"
+    id: 'cloud-onboarding-screen'
 
 # --- Test 2: Valid email + weak password ---
 - tapOn:
-    id: "cloud-email-input"
+    id: 'cloud-email-input'
 - eraseText
-- inputText: "test@example.com"
+- inputText: 'test@example.com'
 - tapOn:
-    id: "cloud-password-input"
+    id: 'cloud-password-input'
 - eraseText
-- inputText: "123"
+- inputText: '123'
 - tapOn:
-    id: "cloud-submit"
+    id: 'cloud-submit'
 
 # Error persists — screen still visible.
 - assertVisible:
-    id: "cloud-onboarding-screen"
+    id: 'cloud-onboarding-screen'

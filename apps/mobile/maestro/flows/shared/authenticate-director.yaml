@@ -15,7 +15,7 @@
 appId: mx.xangarro.mobile
 ---
 - assertVisible:
-    id: "quick-switch"
+    id: 'quick-switch'
 
 # Demo mode: an Operativo avatar is present → Juan Director, PIN 000000.
 #
@@ -29,15 +29,15 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: "user-avatar-role-operativo"
+        id: 'user-avatar-role-operativo'
     commands:
       - tapOn:
           # Leading `.*` matters: maestro's `text:` is an ANCHORED regex and
           # the avatar's merged accessibility label is
           # "J, Juan Director, Director" — it does NOT start with the name.
-          text: ".*Juan Director.*"
+          text: '.*Juan Director.*'
       - assertVisible:
-          id: "pin-numpad"
+          id: 'pin-numpad'
       - waitForAnimationToEnd
       # On iPhone the numpad's bottom row (numpad-0, backspace) and
       # `login-submit` sit BELOW THE FOLD — XCUITest clamps them out of the
@@ -49,22 +49,22 @@ appId: mx.xangarro.mobile
       - runFlow:
           when:
             notVisible:
-              id: "numpad-0"
+              id: 'numpad-0'
           commands:
             - swipe:
-                start: "50%, 45%"
-                end: "50%, 12%"
+                start: '50%, 45%'
+                end: '50%, 12%'
             - waitForAnimationToEnd
       - extendedWaitUntil:
           visible:
-            id: "numpad-0"
+            id: 'numpad-0'
           timeout: 8000
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
+      - tapOn: { id: 'numpad-0' }
 
 # Wizard mode: no Operativo avatar → Director Test, PIN 123456.
 # Guard on `quick-switch` still being visible so this branch does NOT fire after
@@ -73,14 +73,14 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: "quick-switch"
+        id: 'quick-switch'
       notVisible:
-        id: "user-avatar-role-operativo"
+        id: 'user-avatar-role-operativo'
     commands:
       - tapOn:
-          id: "user-avatar-role-director"
+          id: 'user-avatar-role-director'
       - assertVisible:
-          id: "pin-numpad"
+          id: 'pin-numpad'
       - waitForAnimationToEnd
       # On iPhone the numpad's bottom row (numpad-0, backspace) and
       # `login-submit` sit BELOW THE FOLD — XCUITest clamps them out of the
@@ -92,25 +92,25 @@ appId: mx.xangarro.mobile
       - runFlow:
           when:
             notVisible:
-              id: "numpad-0"
+              id: 'numpad-0'
           commands:
             - swipe:
-                start: "50%, 45%"
-                end: "50%, 12%"
+                start: '50%, 45%'
+                end: '50%, 12%'
             - waitForAnimationToEnd
       - extendedWaitUntil:
           visible:
-            id: "numpad-0"
+            id: 'numpad-0'
           timeout: 8000
-      - tapOn: { id: "numpad-1" }
-      - tapOn: { id: "numpad-2" }
-      - tapOn: { id: "numpad-3" }
-      - tapOn: { id: "numpad-4" }
-      - tapOn: { id: "numpad-5" }
-      - tapOn: { id: "numpad-6" }
+      - tapOn: { id: 'numpad-1' }
+      - tapOn: { id: 'numpad-2' }
+      - tapOn: { id: 'numpad-3' }
+      - tapOn: { id: 'numpad-4' }
+      - tapOn: { id: 'numpad-5' }
+      - tapOn: { id: 'numpad-6' }
 
 # Director lands on the estados tab (both paths).
 - extendedWaitUntil:
     visible:
-      id: "tab-caja"
+      id: 'tab-caja'
     timeout: 10000

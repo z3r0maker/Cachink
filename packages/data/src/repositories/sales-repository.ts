@@ -1,6 +1,6 @@
 /**
  * SalesRepository — canonical example of the repository pattern used
- * throughout Cachink (see CLAUDE.md §4.3 and ADR-005).
+ * throughout Xangarro (see CLAUDE.md §4.3 and ADR-005).
  *
  * Every entity gets:
  *   1. A TypeScript interface defined here.

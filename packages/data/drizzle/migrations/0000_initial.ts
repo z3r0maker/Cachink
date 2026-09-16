@@ -1,7 +1,7 @@
 /**
  * Migration 0000 — Consolidated initial schema.
  *
- * This single migration produces the complete Cachink database schema,
+ * This single migration produces the complete Xangarro database schema,
  * replacing the prior 19 incremental migrations (0000–0018). It was
  * created during the Migration Engine Overhaul because:
  *   - Zero production users → no upgrade path to preserve.

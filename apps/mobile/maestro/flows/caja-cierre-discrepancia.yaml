@@ -34,63 +34,63 @@ appId: mx.xangarro.mobile
 - runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-caja"
+      id: 'otros-caja'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-caja"
+    id: 'otros-caja'
 
 # Open caja with 500 via numpad.
 - extendedWaitUntil:
     visible:
-      id: "abrir-caja-modal"
+      id: 'abrir-caja-modal'
     timeout: 5000
-- tapOn: { id: "numpad-5" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
 
 # Status card visible.
 - assertVisible:
-    id: "caja-status-card"
+    id: 'caja-status-card'
 
 # --- Close with discrepancy ---
 - tapOn:
-    id: "caja-cerrar-btn"
+    id: 'caja-cerrar-btn'
 
 # Step 1: BlindCountStep — enter 400 (expected was 500 → -100 discrepancy).
 - assertVisible:
-    id: "cerrar-caja-step-1"
-- tapOn: { id: "numpad-4" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
+    id: 'cerrar-caja-step-1'
+- tapOn: { id: 'numpad-4' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 - tapOn:
-    id: "blind-count-continue"
+    id: 'blind-count-continue'
 
 # Step 2: CountResultStep — comparison shows discrepancy.
 - assertVisible:
-    id: "cerrar-caja-step-2"
+    id: 'cerrar-caja-step-2'
 - assertVisible:
-    id: "comparison-card"
+    id: 'comparison-card'
 
 # Try to close without reason — button should be disabled (diff ≠ 0).
 # Select a reason from the dropdown.
 - tapOn:
-    id: "count-result-reason"
+    id: 'count-result-reason'
 - tapOn:
     index: 0
 
 # Enter explanation text.
 - tapOn:
-    id: "count-result-explicacion"
-- inputText: "Error de cambio al cliente"
+    id: 'count-result-explicacion'
+- inputText: 'Error de cambio al cliente'
 
 # Now submit should succeed.
 - tapOn:
-    id: "count-result-close"
+    id: 'count-result-close'
 
 # Verify caja is closed.
 - assertVisible:
-    id: "caja-status-card"
+    id: 'caja-status-card'

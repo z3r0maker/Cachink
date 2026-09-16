@@ -4,7 +4,7 @@
  */
 
 import type { ReferenceTables } from '@xangarro/contracts';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { applyReferenceTables, type ApplyReferenceResult } from './reference-applier.js';
 
 export interface ReferenceDataRepository {
@@ -12,8 +12,8 @@ export interface ReferenceDataRepository {
 }
 
 export class DrizzleReferenceDataRepository implements ReferenceDataRepository {
-  readonly #db: CachinkDatabase;
-  constructor(db: CachinkDatabase) {
+  readonly #db: XangarroDatabase;
+  constructor(db: XangarroDatabase) {
     this.#db = db;
   }
   apply(tables: ReferenceTables, businessId: string): Promise<ApplyReferenceResult> {

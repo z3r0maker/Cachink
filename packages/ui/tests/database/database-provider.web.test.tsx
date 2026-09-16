@@ -24,7 +24,7 @@ import { describe, expect, it } from 'vitest';
 import { buildTauriCallback } from '../../src/database/database-provider.web';
 import { runMigrations } from '../../src/database/run-migrations';
 import * as schema from '@xangarro/data/schema';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { journal } from '@xangarro/data/migrations';
 
 type TauriLikeDatabase = Parameters<typeof buildTauriCallback>[0];
@@ -116,7 +116,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const sqlite = new Sqlite(':memory:');
     const db = drizzle(buildTauriCallback(makeTauriShim(sqlite)), {
       schema,
-    }) as unknown as CachinkDatabase;
+    }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -160,7 +160,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const sqlite = new Sqlite(':memory:');
     const db = drizzle(buildTauriCallback(makeTauriShim(sqlite)), {
       schema,
-    }) as unknown as CachinkDatabase;
+    }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
     // Second call must not throw (tables already exist) nor re-insert.

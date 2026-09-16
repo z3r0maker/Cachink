@@ -187,7 +187,7 @@ export function DonutChart(props: DonutChartProps): ReactElement {
         <ReactEChartsCore
           echarts={echarts}
           option={option}
-          theme="cachink"
+          theme="xangarro"
           style={{ height: size, width: size }}
           notMerge
         />

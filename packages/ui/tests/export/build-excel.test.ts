@@ -271,7 +271,7 @@ describe('buildExcelWorkbook', () => {
     const when = new Date('2026-04-24T08:00:00Z');
     const buffer = await buildExcelWorkbook(emptyDataset(), when);
     const wb = await readBack(buffer);
-    expect(wb.creator).toBe('Cachink!');
+    expect(wb.creator).toBe('Xangarro!');
     expect(wb.created?.toISOString()).toBe('2026-04-24T08:00:00.000Z');
   });
 });

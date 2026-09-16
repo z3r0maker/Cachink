@@ -6,7 +6,7 @@
 
 import { getTableColumns, inArray } from 'drizzle-orm';
 import { PUSH_ROW_SCHEMAS, type PushableTable } from '@xangarro/contracts';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import type { z } from 'zod';
 import type { CoalescedChange } from './outbox-reader.js';
 import { PUSH_TABLES, rowKey } from './table-map.js';
@@ -46,7 +46,7 @@ function toDomain(table: PushableTable, row: Record<string, unknown>): Record<st
 
 /** `rowKey(table, id)` → domain-shaped row. Rows missing locally are absent. */
 export async function readRows(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   changes: readonly CoalescedChange[],
 ): Promise<Map<string, Record<string, unknown>>> {
   const idsByTable = new Map<PushableTable, string[]>();

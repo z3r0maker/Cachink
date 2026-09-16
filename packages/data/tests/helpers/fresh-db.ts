@@ -1,7 +1,7 @@
 /**
  * makeFreshDb() — spin up an in-memory SQLite via `better-sqlite3`, apply
  * the committed migrations, and return a Drizzle handle typed as the
- * driver-agnostic {@link CachinkDatabase} so test files can share the same
+ * driver-agnostic {@link XangarroDatabase} so test files can share the same
  * repo impls they'd use in production.
  *
  * Every call returns a brand-new database, isolated from every other
@@ -16,12 +16,12 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../../src/schema/index.js';
-import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../../src/repositories/drizzle/_db.js';
 import { journal, migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from '../../src/migrator/split-statements.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
-export function makeFreshDb(): CachinkDatabase {
+export function makeFreshDb(): XangarroDatabase {
   const sqlite = new Database(':memory:');
 
   // Disable FK enforcement in contract tests — repositories test CRUD
@@ -54,5 +54,5 @@ export function makeFreshDb(): CachinkDatabase {
   sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
 
   const db = drizzle(sqlite, { schema });
-  return db as unknown as CachinkDatabase;
+  return db as unknown as XangarroDatabase;
 }

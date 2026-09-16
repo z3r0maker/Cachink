@@ -8,7 +8,7 @@ import type { ReactElement } from 'react';
 import { Btn } from '../../components/index';
 import { useCurrentBusiness } from '../../hooks/use-current-business';
 import { useTranslation } from '../../i18n/index';
-import { CachinkSoundToggle } from './cachink-sound-toggle';
+import { SaleSoundToggle } from './sale-sound-toggle';
 import { CrashReportingToggle } from './crash-reporting-toggle';
 import { ExportarDatosAction } from './exportar-datos-action';
 import { NotificationsToggle } from './notifications-toggle';
@@ -34,7 +34,7 @@ export function SettingsDeviceSection(props: { readonly device: DeviceSettings }
     : t('settings.checkForUpdatesCta');
   return (
     <SettingsSection title={t('settings.dispositivoSection')} testID="settings-device">
-      <CachinkSoundToggle enabled={d.soundEnabled} onChange={d.onSoundChange} />
+      <SaleSoundToggle enabled={d.soundEnabled} onChange={d.onSoundChange} />
       <NotificationsToggle enabled={d.notificationsEnabled} onChange={d.onNotificationsChange} />
       <CrashReportingToggle enabled={d.crashReportingEnabled} onChange={d.onCrashReportingChange} />
       <Btn variant="ghost" onPress={d.onReportProblem} fullWidth testID="settings-open-bug-report">

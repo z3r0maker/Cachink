@@ -23,16 +23,16 @@ import type {
   CreateCajaTurnoInput,
 } from '../caja-turnos-repository.js';
 import { cajaTurnos } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type TurnoRow = typeof cajaTurnos.$inferSelect;
 
 export class DrizzleCajaTurnosRepository implements CajaTurnosRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

@@ -19,16 +19,16 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # No products registered yet — the productos gate renders.
 - assertVisible:
-    id: "productos-gate-banner"
+    id: 'productos-gate-banner'
 
 # The CTA button to navigate to Productos should be visible.
 - assertVisible:
-    id: "productos-gate-go-to-productos"
+    id: 'productos-gate-go-to-productos'
 
 # Product grid should NOT be visible.
 - assertNotVisible:
-    id: "ventas-product-grid"
+    id: 'ventas-product-grid'

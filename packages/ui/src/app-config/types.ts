@@ -26,7 +26,7 @@ export const APP_CONFIG_KEYS = {
   isrDefaults: 'isrDefaults',
   autoLockTimeout: 'autoLockTimeout',
   discoveryShown: 'discoveryShown',
-  cachinkSoundEnabled: 'cachinkSoundEnabled',
+  saleSoundEnabled: 'saleSoundEnabled',
   healthThresholds: 'healthThresholds',
   notificationPrefs: 'notificationPrefs',
   /** JSON `{ deviceId, businessId, activatedAt }` once the device is activated (A-04). */
@@ -49,8 +49,8 @@ export interface AppConfigState {
   readonly userId: UserId | null;
   /** Whether the feature-discovery screen was shown after first setup. */
   readonly discoveryShown: boolean;
-  /** Whether the "¡CACHINK!" sound plays on each sale. Defaults to true. */
-  readonly cachinkSoundEnabled: boolean;
+  /** Whether the "¡XANGARRO!" sound plays on each sale. Defaults to true. */
+  readonly saleSoundEnabled: boolean;
 }
 
 /** Allowed mode values. */

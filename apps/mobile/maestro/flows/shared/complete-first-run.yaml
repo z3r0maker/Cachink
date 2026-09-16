@@ -16,23 +16,23 @@
 # Precondition: fresh install (DB cleared). Caller does `- launchApp` first.
 appId: mx.xangarro.mobile
 ---
-# launch → ¡Bienvenido a Cachink! → Comenzar → business form.
+# launch → ¡Bienvenido a Xangarro! → Comenzar → business form.
 - runFlow: first-run-onboarding.yaml
 
 - tapOn:
-    id: "business-nombre"
-- inputText: "Taquería Don Pedro"
+    id: 'business-nombre'
+- inputText: 'Taquería Don Pedro'
 
 # BusinessForm sits inside a KeyboardAwareForm, so submit is reachable
 # with the keyboard open — but hide it first so the tap is unambiguous.
 - hideKeyboard
 - tapOn:
-    id: "business-submit"
+    id: 'business-submit'
 
 # DirectorSetup → auto-login as Director.
 - runFlow: director-setup.yaml
 
 - extendedWaitUntil:
     visible:
-      id: "tab-caja"
+      id: 'tab-caja'
     timeout: 15000

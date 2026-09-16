@@ -13,7 +13,7 @@
 import { eq, getTableColumns, getTableName, sql } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
 import type { ReferenceTables } from '@xangarro/contracts';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import {
   businesses,
   clients,
@@ -68,7 +68,7 @@ export function toColumnValues(
 }
 
 async function upsertRow(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   table: SQLiteTable,
   row: Readonly<Record<string, unknown>>,
 ): Promise<void> {
@@ -84,7 +84,7 @@ async function upsertRow(
  * the business row (`useFeatureFlags` reads `businesses.feature_flags`).
  */
 export async function applyReferenceTables(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   tables: ReferenceTables,
   businessId: string,
 ): Promise<ApplyReferenceResult> {
@@ -106,7 +106,7 @@ export async function applyReferenceTables(
   return { applied };
 }
 
-async function changeLogHighWater(db: CachinkDatabase): Promise<number> {
+async function changeLogHighWater(db: XangarroDatabase): Promise<number> {
   const row = (await db.get(sql`SELECT COALESCE(MAX(id), 0) AS hw FROM __cachink_change_log`)) as
     | { hw: number }
     | undefined;
@@ -119,7 +119,7 @@ async function changeLogHighWater(db: CachinkDatabase): Promise<number> {
  * entries created after `floor`, and only for the rows applied here).
  */
 async function forgetEchoes(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   table: SQLiteTable,
   rows: readonly Record<string, unknown>[],
   floor: number,

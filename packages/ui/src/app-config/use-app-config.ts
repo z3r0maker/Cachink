@@ -23,7 +23,7 @@ interface AppConfigStore extends AppConfigState {
   setCrashReportingEnabled: (next: boolean | null) => void;
   setUserId: (id: UserId | null) => void;
   setDiscoveryShown: (shown: boolean) => void;
-  setCachinkSoundEnabled: (next: boolean) => void;
+  setSaleSoundEnabled: (next: boolean) => void;
   /** Full reset — used by tests and by the "re-run wizard" settings action. */
   reset: () => void;
   /** Hydration complete marker — flips once the provider finishes loading. */
@@ -39,7 +39,7 @@ const INITIAL_STATE: AppConfigState = {
   crashReportingEnabled: null,
   userId: null,
   discoveryShown: false,
-  cachinkSoundEnabled: true,
+  saleSoundEnabled: true,
 };
 
 export const useAppConfigStore = create<AppConfigStore>((set) => ({
@@ -52,7 +52,7 @@ export const useAppConfigStore = create<AppConfigStore>((set) => ({
   setCrashReportingEnabled: (crashReportingEnabled) => set({ crashReportingEnabled }),
   setUserId: (userId) => set({ userId }),
   setDiscoveryShown: (discoveryShown) => set({ discoveryShown }),
-  setCachinkSoundEnabled: (cachinkSoundEnabled) => set({ cachinkSoundEnabled }),
+  setSaleSoundEnabled: (saleSoundEnabled) => set({ saleSoundEnabled }),
   reset: () => set(INITIAL_STATE),
 }));
 
@@ -106,12 +106,11 @@ export const useDiscoveryShown = (): boolean => useAppConfigStore((s) => s.disco
 export const useSetDiscoveryShown = (): ((shown: boolean) => void) =>
   useAppConfigStore((s) => s.setDiscoveryShown);
 
-// --- Cachink sound selectors ---
+// --- Xangarro sound selectors ---
 
-/** Selector: whether the "¡CACHINK!" sound plays on each sale. */
-export const useCachinkSoundEnabled = (): boolean =>
-  useAppConfigStore((s) => s.cachinkSoundEnabled);
+/** Selector: whether the "¡XANGARRO!" sound plays on each sale. */
+export const useSaleSoundEnabled = (): boolean => useAppConfigStore((s) => s.saleSoundEnabled);
 
-/** Setter: toggle the "¡CACHINK!" sale sound on/off. */
-export const useSetCachinkSoundEnabled = (): ((next: boolean) => void) =>
-  useAppConfigStore((s) => s.setCachinkSoundEnabled);
+/** Setter: toggle the "¡XANGARRO!" sale sound on/off. */
+export const useSetSaleSoundEnabled = (): ((next: boolean) => void) =>
+  useAppConfigStore((s) => s.setSaleSoundEnabled);

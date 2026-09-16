@@ -15,7 +15,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { readHwm, writeHwm } from '@xangarro/data';
 import {
   API_PATHS,
@@ -35,7 +35,7 @@ interface ChangeLogEntry {
 }
 
 export interface PushDeps {
-  db: CachinkDatabase;
+  db: XangarroDatabase;
   serverUrl: string;
   accessToken: string;
   fetchImpl?: typeof fetch;
@@ -74,7 +74,7 @@ export async function drainPushQueue(deps: PushDeps): Promise<PushResult> {
   }
 }
 
-async function readChangeLogBatch(db: CachinkDatabase, since: number): Promise<ChangeLogEntry[]> {
+async function readChangeLogBatch(db: XangarroDatabase, since: number): Promise<ChangeLogEntry[]> {
   const rows = (await db.all(
     sql`SELECT id, table_name, row_id, op
         FROM __cachink_change_log
@@ -86,7 +86,7 @@ async function readChangeLogBatch(db: CachinkDatabase, since: number): Promise<C
 }
 
 async function encodeBatch(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   batch: readonly ChangeLogEntry[],
 ): Promise<Delta[]> {
   const deltas: Delta[] = [];
@@ -100,7 +100,7 @@ async function encodeBatch(
 }
 
 async function readEntityRow(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   table: string,
   rowId: string,
 ): Promise<Record<string, unknown> | null> {

@@ -16,7 +16,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { readHwm, writeHwm } from '@xangarro/data';
 import {
   API_PATHS,
@@ -30,7 +30,7 @@ import { pullResponseSchema, type Delta } from '../protocol/wire.js';
 import { buildUpsertLww, rowsAffectedFrom } from './upsert-lww.js';
 
 export interface PullDeps {
-  db: CachinkDatabase;
+  db: XangarroDatabase;
   serverUrl: string;
   accessToken: string;
   fetchImpl?: typeof fetch;
@@ -88,7 +88,7 @@ interface ApplyResult {
   rejected: number;
 }
 
-async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promise<ApplyResult> {
+async function applyDeltas(db: XangarroDatabase, deltas: readonly Delta[]): Promise<ApplyResult> {
   const decoded = deltas.filter((d) => isSyncedTable(d.table)).map((d) => decodeDelta(d));
   if (decoded.length === 0) return { applied: 0, rejected: 0 };
 
@@ -119,7 +119,7 @@ async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promi
   return { applied, rejected };
 }
 
-async function recordInboundConflict(db: CachinkDatabase, delta: Delta): Promise<void> {
+async function recordInboundConflict(db: XangarroDatabase, delta: Delta): Promise<void> {
   const tableQuoted = sql.raw(`"${delta.table}"`);
   await db.run(sql`
     INSERT INTO __cachink_conflicts

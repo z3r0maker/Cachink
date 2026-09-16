@@ -5,14 +5,14 @@
  */
 
 import { useAudioPlayer } from 'expo-audio';
-import type { CachinkSoundPlayer } from '@xangarro/ui';
+import type { SaleSoundPlayer } from '@xangarro/ui';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const CACHINK_SFX = require('../../assets/sounds/cachink.mp3');
+const SALE_CONFIRM_SFX = require('../../assets/sounds/sale-confirm.mp3');
 const IS_E2E = process.env.EXPO_PUBLIC_E2E === '1';
 
 /** Returns null in E2E mode, a real AudioPlayer otherwise. */
-export function useCachinkPlayer(): CachinkSoundPlayer | null {
+export function useSaleSoundPlayer(): SaleSoundPlayer | null {
   if (IS_E2E) return null;
-  return useAudioPlayer(CACHINK_SFX); // hook call gated by compile-time constant
+  return useAudioPlayer(SALE_CONFIRM_SFX); // hook call gated by compile-time constant
 }

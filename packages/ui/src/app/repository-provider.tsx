@@ -12,7 +12,7 @@ import type { DeviceId, UserId } from '@xangarro/domain';
 import type {
   AppConfigRepository,
   BusinessesRepository,
-  CachinkDatabase,
+  XangarroDatabase,
   CajaMovimientosRepository,
   CancelacionLogsRepository,
   ClientPaymentsRepository,
@@ -95,7 +95,7 @@ const RepositoryContext = createContext<Repositories | null>(null);
  * `userId` is optional (null before login) — repos stamp it on created rows.
  */
 export function buildDrizzleRepositories(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   deviceId: DeviceId,
   userId?: UserId | null,
 ): Repositories {

@@ -1,5 +1,5 @@
 /**
- * Spinner — branded Cachink loading indicator (mobile variant).
+ * Spinner — branded Xangarro loading indicator (mobile variant).
  *
  * Uses Lottie animations:
  *   - `sm` → coin-spin.json (24×24, inline in buttons)

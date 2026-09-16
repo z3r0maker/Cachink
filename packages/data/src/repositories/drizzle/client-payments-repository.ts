@@ -18,16 +18,16 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
 import { clientPayments } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type PaymentRow = typeof clientPayments.$inferSelect;
 
 export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

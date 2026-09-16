@@ -26,14 +26,14 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Verify the existing egreso is visible.
-- assertVisible: "Renta del local"
+- assertVisible: 'Renta del local'
 
 # Swipe the egreso row left to reveal the edit action.
 - swipe:
-    id: "egresos-list"
+    id: 'egresos-list'
     direction: LEFT
     startX: 300
     endX: 50
@@ -41,30 +41,30 @@ appId: mx.xangarro.mobile
 # Wait for the EditarEgresoModal to appear.
 - extendedWaitUntil:
     visible:
-      id: "editar-egreso-modal"
+      id: 'editar-egreso-modal'
     timeout: 5000
 
 # --- Change categoría ---
 - tapOn:
-    id: "editar-egreso-categoria"
-- tapOn: "Servicios"
+    id: 'editar-egreso-categoria'
+- tapOn: 'Servicios'
 
 # --- Change monto ---
 - tapOn:
-    id: "editar-egreso-monto"
+    id: 'editar-egreso-monto'
 - eraseText
-- inputText: "9500"
+- inputText: '9500'
 
 # --- Change proveedor ---
 - tapOn:
-    id: "editar-egreso-proveedor"
+    id: 'editar-egreso-proveedor'
 - eraseText
-- inputText: "Inmobiliaria Centro"
+- inputText: 'Inmobiliaria Centro'
 
 # Submit the edit.
 - tapOn:
-    id: "editar-egreso-submit"
+    id: 'editar-egreso-submit'
 
 # Modal closes and the updated egreso appears in the list.
 - assertNotVisible:
-    id: "editar-egreso-modal"
+    id: 'editar-egreso-modal'

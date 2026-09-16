@@ -25,25 +25,25 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # The manual venta form sits above the product grid.
 - assertVisible:
-    id: "manual-venta-form"
+    id: 'manual-venta-form'
 
 # Fill in the concepto field.
 - tapOn:
-    id: "manual-venta-concepto"
-- inputText: "Servicio de limpieza"
+    id: 'manual-venta-concepto'
+- inputText: 'Servicio de limpieza'
 
 # Fill in the monto field (in pesos).
 - tapOn:
-    id: "manual-venta-monto"
-- inputText: "250"
+    id: 'manual-venta-monto'
+- inputText: '250'
 
 # Submit the manual venta.
 - tapOn:
-    id: "manual-venta-submit"
+    id: 'manual-venta-submit'
 
 # The new sale appears in the sales list below.
-- assertVisible: "Servicio de limpieza"
+- assertVisible: 'Servicio de limpieza'

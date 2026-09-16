@@ -20,15 +20,15 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { SalePatch, SalesRepository } from '../sales-repository.js';
 import { sales } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 import { mapSaleRow } from './sales-row-mapper.js';
 
 export class DrizzleSalesRepository implements SalesRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

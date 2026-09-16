@@ -1,6 +1,6 @@
 /**
- * useCachinkSound — pre-loads the cash register SFX and exposes a
- * `play()` function gated by the `cachinkSoundEnabled` AppConfig setting.
+ * useSaleSound — pre-loads the cash register SFX and exposes a
+ * `play()` function gated by the `saleSoundEnabled` AppConfig setting.
  *
  * The hook accepts an optional `player` parameter so the mobile shell
  * can inject the expo-audio player while packages/ui stays free of the
@@ -11,15 +11,15 @@
  */
 
 import { useCallback } from 'react';
-import { useCachinkSoundEnabled } from '../app-config/index';
+import { useSaleSoundEnabled } from '../app-config/index';
 
-export interface CachinkSoundPlayer {
+export interface SaleSoundPlayer {
   play: () => void;
   seekTo: (seconds: number) => void;
 }
 
-export function useCachinkSound(player?: CachinkSoundPlayer | null): { play: () => void } {
-  const enabled = useCachinkSoundEnabled();
+export function useSaleSound(player?: SaleSoundPlayer | null): { play: () => void } {
+  const enabled = useSaleSoundEnabled();
 
   const play = useCallback(() => {
     if (!enabled || !player) return;

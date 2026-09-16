@@ -46,7 +46,7 @@ export * from './PinCodeInput/index';
 export * from './OptionCardGroup/index';
 export * from './Spinner/index';
 export * from './LoadingOverlay/index';
-export * from './CachinkBurst/index';
+export * from './SaleBurst/index';
 export * from './HelpAccordion/index';
 export * from './HealthIndicator/index';
 export * from './DeltaIndicator/index';

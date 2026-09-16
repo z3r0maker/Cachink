@@ -16,24 +16,24 @@ appId: mx.xangarro.mobile
 
 # Create the recurrente.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Luz del local"
+    id: 'gasto-concepto'
+- inputText: 'Luz del local'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "900"
+    id: 'gasto-monto'
+- inputText: '900'
 - tapOn:
-    id: "gasto-recurrente-toggle"
-- assertVisible: "Frecuencia"
+    id: 'gasto-recurrente-toggle'
+- assertVisible: 'Frecuencia'
 - tapOn:
-    id: "gasto-submit"
-- assertNotVisible: "Nuevo egreso"
+    id: 'gasto-submit'
+- assertNotVisible: 'Nuevo egreso'
 
 # The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
-- assertVisible: "Pendientes de registrar"
+- assertVisible: 'Pendientes de registrar'
 - tapOn:
-    id: "pendiente-confirmar-01JPHK0000000000000000RE01"
-- assertVisible: "Luz del local"
+    id: 'pendiente-confirmar-01JPHK0000000000000000RE01'
+- assertVisible: 'Luz del local'

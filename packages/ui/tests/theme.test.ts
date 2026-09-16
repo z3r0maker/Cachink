@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { colors, shadows, borders, typography, radii, emojiSizes } from '../src/theme';
 
-describe('Cachink brand theme', () => {
+describe('Xangarro brand theme', () => {
   it('exposes the hero yellow exactly as specified in CLAUDE.md §8.1', () => {
     expect(colors.yellow).toBe('#FFD60A');
   });
@@ -39,7 +39,7 @@ describe('Cachink brand theme', () => {
   });
 
   it('never goes below the 12px reading floor', () => {
-    // 61 call sites sat at 9-11px before the 2026-09 audit. Cachink is read at
+    // 61 call sites sat at 9-11px before the 2026-09 audit. Xangarro is read at
     // arm's length on a shop counter; nothing in it needs to be smaller.
     for (const step of Object.values(typography.sizes)) {
       expect(step).toBeGreaterThanOrEqual(12);

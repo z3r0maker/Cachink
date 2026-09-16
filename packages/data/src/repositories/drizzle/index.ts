@@ -2,12 +2,12 @@
  * Drizzle repository implementations barrel.
  *
  * Entity-specific repositories land here during Phase 1B-M4 (one per entity
- * from CLAUDE.md §9). Each implementation takes a {@link CachinkDatabase}
+ * from CLAUDE.md §9). Each implementation takes a {@link XangarroDatabase}
  * + a {@link DeviceId} in its constructor and satisfies the matching
  * interface exported from `../index.js`.
  */
 
-export type { CachinkDatabase, CachinkSchema } from './_db.js';
+export type { XangarroDatabase, XangarroSchema } from './_db.js';
 export * from './sales-repository.js';
 export * from './businesses-repository.js';
 export * from './app-config-repository.js';

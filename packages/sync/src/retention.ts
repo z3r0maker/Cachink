@@ -15,7 +15,7 @@
  */
 
 import { sql, type SQL } from 'drizzle-orm';
-import type { AppConfigRepository, CachinkDatabase } from '@xangarro/data';
+import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
 import { RETENTION_DAYS, RETENTION_RULES, type RetentionRule } from './retention-rules.js';
 import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 
@@ -64,14 +64,14 @@ function purgeable(rule: RetentionRule, b: Bounds): SQL {
   return sql.join(parts, sql` AND `);
 }
 
-async function foldMovementsIntoBaseline(db: CachinkDatabase, where: SQL): Promise<void> {
+async function foldMovementsIntoBaseline(db: XangarroDatabase, where: SQL): Promise<void> {
   await db.run(sql`INSERT INTO __stock_baseline (producto_id, cantidad)
     SELECT t.producto_id, SUM(CASE WHEN t.tipo = 'entrada' THEN t.cantidad ELSE -t.cantidad END)
     FROM inventory_movements t WHERE ${where} AND t.deleted_at IS NULL GROUP BY t.producto_id
     ON CONFLICT(producto_id) DO UPDATE SET cantidad = cantidad + excluded.cantidad`);
 }
 
-async function purgeTable(db: CachinkDatabase, rule: RetentionRule, b: Bounds): Promise<number> {
+async function purgeTable(db: XangarroDatabase, rule: RetentionRule, b: Bounds): Promise<number> {
   const table = sql.raw(rule.table);
   const where = purgeable(rule, b);
   const row = await db.get<{ n: number }>(sql`SELECT COUNT(*) AS n FROM ${table} t WHERE ${where}`);
@@ -87,7 +87,7 @@ async function purgeTable(db: CachinkDatabase, rule: RetentionRule, b: Bounds): 
 }
 
 export async function purgeAcknowledged(deps: {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly appConfig: AppConfigRepository;
 }): Promise<PurgeOutcome> {
   const bounds = await readBounds(deps.appConfig);

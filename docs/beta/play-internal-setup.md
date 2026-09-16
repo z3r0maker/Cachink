@@ -5,13 +5,13 @@ _Human-gated task — the agent lands this doc as the runbook._
 ## One-time
 
 1. **Google Play Developer** account — one-time $25 fee.
-2. Create the "Cachink!" app record with package name `mx.xangarro.mobile`.
+2. Create the "Xangarro!" app record with package name `mx.xangarro.mobile`.
 3. Choose "Tablets and phones" for device support.
 
 ## Service account (for EAS submit)
 
 Create a Google Cloud service account with the **Release Manager**
-role on the Cachink app. Export the JSON key to
+role on the Xangarro app. Export the JSON key to
 `apps/mobile/fastlane/service-account.json`.
 
 > ⚠️ **Never commit the JSON key.** It's listed in `.gitignore`.

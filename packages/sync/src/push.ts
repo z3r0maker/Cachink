@@ -10,7 +10,7 @@
  */
 
 import { DeltaSchema, ERROR_CATALOG, isKnownErrorCode, type Delta } from '@xangarro/contracts';
-import type { AppConfigRepository, CachinkDatabase } from '@xangarro/data';
+import type { AppConfigRepository, XangarroDatabase } from '@xangarro/data';
 import type { ApiClient, ClientErrorCode } from './api-client.js';
 import { coalesce, readChangeSlice, type CoalescedChange } from './outbox-reader.js';
 import { readRows } from './row-reader.js';
@@ -19,7 +19,7 @@ import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 import { rowKey } from './table-map.js';
 
 export interface PushDeps {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly appConfig: AppConfigRepository;
   readonly client: ApiClient;
   readonly token: string;

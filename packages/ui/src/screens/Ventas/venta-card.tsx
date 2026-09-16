@@ -2,7 +2,7 @@
  * VentaCard — one row in the Ventas list.
  *
  * Displays concepto + categoria Tag + cliente chip (if set) + monto + metodo
- * in the canonical Cachink Card look. Tapping (if `onPress` is provided)
+ * in the canonical Xangarro Card look. Tapping (if `onPress` is provided)
  * fires the parent's detail-popover / share flow.
  */
 

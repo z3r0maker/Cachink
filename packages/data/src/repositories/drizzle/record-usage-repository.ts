@@ -6,12 +6,12 @@
 import { sql } from 'drizzle-orm';
 import type { BusinessId } from '@xangarro/domain';
 import type { RecordUsageRepository } from '../record-usage-repository.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 export class DrizzleRecordUsageRepository implements RecordUsageRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
 
-  constructor(db: CachinkDatabase) {
+  constructor(db: XangarroDatabase) {
     this.#db = db;
   }
 

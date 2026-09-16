@@ -18,16 +18,16 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { Expense, ExpensePatch, ExpensesRepository } from '../expenses-repository.js';
 import { expenses } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type ExpenseRow = typeof expenses.$inferSelect;
 
 export class DrizzleExpensesRepository implements ExpensesRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

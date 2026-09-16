@@ -23,21 +23,21 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Verify the existing egreso is visible.
-- assertVisible: "Renta del local"
+- assertVisible: 'Renta del local'
 
 # Tap the egreso to open EgresoDetailPopover.
-- tapOn: "Renta del local"
+- tapOn: 'Renta del local'
 - assertVisible:
-    id: "egreso-detail-popover"
+    id: 'egreso-detail-popover'
 
 # Tap the delete button — fires eliminar directly (no confirm).
 - tapOn:
-    id: "egreso-detail-delete"
+    id: 'egreso-detail-delete'
 
 # Popover closes and the egreso is removed from the list.
 - assertNotVisible:
-    id: "egreso-detail-popover"
-- assertNotVisible: "Renta del local"
+    id: 'egreso-detail-popover'
+- assertNotVisible: 'Renta del local'

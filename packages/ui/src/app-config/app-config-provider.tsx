@@ -39,7 +39,7 @@ interface HydratedConfig {
   readonly currentBusinessId: BusinessId | null;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
-  readonly cachinkSoundEnabled: boolean;
+  readonly saleSoundEnabled: boolean;
 }
 
 function parseBool(raw: string | null, fallback: boolean): boolean {
@@ -114,14 +114,14 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
-  const cachinkSoundEnabled = parseBool(await repo.get(APP_CONFIG_KEYS.cachinkSoundEnabled), true);
+  const saleSoundEnabled = parseBool(await repo.get(APP_CONFIG_KEYS.saleSoundEnabled), true);
   return {
     deviceId,
     mode,
     currentBusinessId: rawBusinessId as BusinessId | null,
     notificationsEnabled,
     crashReportingEnabled,
-    cachinkSoundEnabled,
+    saleSoundEnabled,
   };
 }
 
@@ -131,7 +131,7 @@ interface Setters {
   readonly setCurrentBusinessId: (v: BusinessId | null) => void;
   readonly setNotificationsEnabled: (v: boolean) => void;
   readonly setCrashReportingEnabled: (v: boolean | null) => void;
-  readonly setCachinkSoundEnabled: (v: boolean) => void;
+  readonly setSaleSoundEnabled: (v: boolean) => void;
   readonly setHydrated: (v: boolean) => void;
 }
 
@@ -141,7 +141,7 @@ function applyHydrated(c: HydratedConfig, s: Setters): void {
   s.setCurrentBusinessId(c.currentBusinessId);
   s.setNotificationsEnabled(c.notificationsEnabled);
   s.setCrashReportingEnabled(c.crashReportingEnabled);
-  s.setCachinkSoundEnabled(c.cachinkSoundEnabled);
+  s.setSaleSoundEnabled(c.saleSoundEnabled);
   s.setHydrated(true);
 }
 
@@ -152,7 +152,7 @@ function useStoreSetters(): Setters {
     setCurrentBusinessId: useAppConfigStore((s) => s.setCurrentBusinessId),
     setNotificationsEnabled: useAppConfigStore((s) => s.setNotificationsEnabled),
     setCrashReportingEnabled: useAppConfigStore((s) => s.setCrashReportingEnabled),
-    setCachinkSoundEnabled: useAppConfigStore((s) => s.setCachinkSoundEnabled),
+    setSaleSoundEnabled: useAppConfigStore((s) => s.setSaleSoundEnabled),
     setHydrated: useAppConfigStore((s) => s.setHydrated),
   };
 }

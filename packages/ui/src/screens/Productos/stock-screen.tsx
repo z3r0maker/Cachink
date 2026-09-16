@@ -4,7 +4,7 @@
  *
  * Buscar input filters by nombre or SKU. Pure UI — accepts the
  * hydrated ProductoConStock list as props, surfaces loading / error /
- * empty states in the standard Cachink shapes.
+ * empty states in the standard Xangarro shapes.
  */
 
 import type { ReactElement } from 'react';

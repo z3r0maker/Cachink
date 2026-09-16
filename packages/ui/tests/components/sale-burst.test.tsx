@@ -1,16 +1,16 @@
 /**
- * CachinkBurst component tests.
+ * SaleBurst component tests.
  *
- * Validates that the "¡CACHINK!" celebration overlay renders/hides
+ * Validates that the "¡XANGARRO!" celebration overlay renders/hides
  * correctly and calls onComplete after the animation duration.
  */
 
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import React from 'react';
-import { CachinkBurst } from '../../src/components/CachinkBurst/index';
+import { SaleBurst } from '../../src/components/SaleBurst/index';
 import { renderWithProviders, screen } from '../test-utils';
 
-describe('CachinkBurst', () => {
+describe('SaleBurst', () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });
@@ -20,28 +20,28 @@ describe('CachinkBurst', () => {
   });
 
   it('renders nothing when visible is false', () => {
-    renderWithProviders(<CachinkBurst visible={false} onComplete={vi.fn()} />);
-    expect(screen.queryByTestId('cachink-burst')).toBeNull();
+    renderWithProviders(<SaleBurst visible={false} onComplete={vi.fn()} />);
+    expect(screen.queryByTestId('sale-burst')).toBeNull();
   });
 
   it('renders the overlay when visible is true', () => {
-    renderWithProviders(<CachinkBurst visible={true} onComplete={vi.fn()} />);
-    expect(screen.getByTestId('cachink-burst')).toBeInTheDocument();
+    renderWithProviders(<SaleBurst visible={true} onComplete={vi.fn()} />);
+    expect(screen.getByTestId('sale-burst')).toBeInTheDocument();
   });
 
-  it('renders "¡CACHINK!" text', () => {
-    renderWithProviders(<CachinkBurst visible={true} onComplete={vi.fn()} />);
-    expect(screen.getByText('¡CACHINK!')).toBeInTheDocument();
+  it('renders "¡XANGARRO!" text', () => {
+    renderWithProviders(<SaleBurst visible={true} onComplete={vi.fn()} />);
+    expect(screen.getByText('¡XANGARRO!')).toBeInTheDocument();
   });
 
   it('renders with a custom testID', () => {
-    renderWithProviders(<CachinkBurst visible={true} onComplete={vi.fn()} testID="custom-burst" />);
+    renderWithProviders(<SaleBurst visible={true} onComplete={vi.fn()} testID="custom-burst" />);
     expect(screen.getByTestId('custom-burst')).toBeInTheDocument();
   });
 
   it('overlay does not block interaction (pointerEvents none)', () => {
-    renderWithProviders(<CachinkBurst visible={true} onComplete={vi.fn()} />);
-    const overlay = screen.getByTestId('cachink-burst');
+    renderWithProviders(<SaleBurst visible={true} onComplete={vi.fn()} />);
+    const overlay = screen.getByTestId('sale-burst');
     const inline = overlay.style.pointerEvents;
     const computed = window.getComputedStyle(overlay).pointerEvents;
     const resolved = inline || computed;
@@ -50,7 +50,7 @@ describe('CachinkBurst', () => {
 
   it('calls onComplete after animation duration', () => {
     const onComplete = vi.fn();
-    renderWithProviders(<CachinkBurst visible={true} onComplete={onComplete} />);
+    renderWithProviders(<SaleBurst visible={true} onComplete={onComplete} />);
 
     // The animation should complete within ~900ms
     expect(onComplete).not.toHaveBeenCalled();

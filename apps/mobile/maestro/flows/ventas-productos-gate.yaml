@@ -14,10 +14,10 @@ tags:
 
 # Navigate to Ventas tab — should show products gate (no products exist).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - assertVisible:
-    id: "productos-gate-banner"
+    id: 'productos-gate-banner'
 - assertVisible:
-    text: "Registra tus productos para empezar a vender"
+    text: 'Registra tus productos para empezar a vender'
 - tapOn:
-    id: "productos-gate-go-to-productos"
+    id: 'productos-gate-go-to-productos'

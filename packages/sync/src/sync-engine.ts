@@ -7,7 +7,7 @@
  * layer (A-07); this class only runs and reports.
  */
 
-import { DrizzleAppConfigRepository, type CachinkDatabase } from '@xangarro/data';
+import { DrizzleAppConfigRepository, type XangarroDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
 import { pullAll, type PullOutcome } from './pull.js';
 import { purgeAcknowledged, type PurgeOutcome } from './retention.js';
@@ -18,7 +18,7 @@ import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 import { StatusStore, type RejectedEntry } from './status-store.js';
 
 export interface SyncEngineDeps {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly client: ApiClient;
   /** Device token from secure storage; `null` = not activated. */
   readonly getToken: () => Promise<string | null>;
@@ -38,7 +38,7 @@ const PURGE_EVERY_MS = 86_400_000;
 
 /** After a clean pull: purge once per server day. Anchored on server time only. */
 async function purgeIfDue(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   appConfig: DrizzleAppConfigRepository,
 ): Promise<PurgeOutcome | null> {
   const serverTime = await appConfig.get(SYNC_CONFIG_KEYS.lastServerTime);

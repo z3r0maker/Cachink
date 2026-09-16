@@ -17,7 +17,7 @@ import {
   DrizzleRecordUsageRepository,
   DrizzleSalesRepository,
 } from '../src/repositories/drizzle/index.js';
-import type { CachinkDatabase } from '../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../src/repositories/drizzle/_db.js';
 import { makeFreshDb } from './helpers/fresh-db.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -26,7 +26,7 @@ const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const SEP = '2026-09-10' as IsoDate;
 
 describe('DrizzleRecordUsageRepository', () => {
-  let db: CachinkDatabase;
+  let db: XangarroDatabase;
   beforeEach(() => {
     db = makeFreshDb();
   });

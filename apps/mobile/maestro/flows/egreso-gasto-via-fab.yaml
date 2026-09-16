@@ -21,25 +21,25 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Use the FAB instead of the egresos-nuevo header button.
 - assertVisible:
-    id: "egresos-fab"
+    id: 'egresos-fab'
 - tapOn:
-    id: "egresos-fab"
+    id: 'egresos-fab'
 
 # Gasto tab is the default — fill concepto + monto.
-- assertVisible: "Nuevo egreso"
+- assertVisible: 'Nuevo egreso'
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Agua purificada"
+    id: 'gasto-concepto'
+- inputText: 'Agua purificada'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "200"
+    id: 'gasto-monto'
+- inputText: '200'
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal closes + egreso visible.
-- assertNotVisible: "Nuevo egreso"
-- assertVisible: "Agua purificada"
+- assertNotVisible: 'Nuevo egreso'
+- assertVisible: 'Agua purificada'

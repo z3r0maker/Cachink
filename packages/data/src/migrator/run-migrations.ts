@@ -26,7 +26,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '../repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
 import migrationsBundle, { migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from './split-statements.js';
 import { MigrationError } from './errors.js';
@@ -56,7 +56,7 @@ function readTag(row: RawRow): string | null {
 }
 
 /** Read applied-migration tags. Returns an empty set on a fresh database. */
-async function loadAppliedTags(db: CachinkDatabase): Promise<ReadonlySet<string>> {
+async function loadAppliedTags(db: XangarroDatabase): Promise<ReadonlySet<string>> {
   const rows = (await db.all(sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`))) as RawRow[];
   const tags = new Set<string>();
   for (const row of rows) {
@@ -108,7 +108,7 @@ let migrationPromise: Promise<void> | null = null;
  * {@link SCHEMA_VERSION} for the version gate.
  */
 export async function runMigrations(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   options: RunMigrationsOptions = {},
 ): Promise<void> {
   if (migrationPromise) return migrationPromise;
@@ -138,7 +138,7 @@ function resolveMigrationSql(tag: string): string {
 
 /** Apply a single migration, optionally inside a transaction. */
 async function applySingleMigration(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   tag: string,
   migrationSql: string,
   skipTx: boolean,
@@ -180,7 +180,7 @@ async function runBackupIfNeeded(options: RunMigrationsOptions, firstTag: string
 }
 
 async function runMigrationsInternal(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   options: RunMigrationsOptions,
 ): Promise<void> {
   await db.run(sql.raw(CREATE_TRACKER_SQL));

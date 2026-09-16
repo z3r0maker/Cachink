@@ -6,6 +6,6 @@ tags: [internal]
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate-director.yaml
 - tapOn:
-    id: "top-bar-open-settings"
+    id: 'top-bar-open-settings'
 - assertVisible:
-    id: "settings-hub-screen"
+    id: 'settings-hub-screen'

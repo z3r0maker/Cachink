@@ -83,7 +83,7 @@ export * from './use-ventas-credito';
 export * from './use-auditorias-inventario';
 export * from './use-crear-auditoria';
 export * from './use-actualizar-auditoria';
-export * from './use-cachink-sound';
+export * from './use-sale-sound';
 export * from './use-enabled-payment-methods';
 // Tap-to-Cart POS redesign
 export * from './use-cart';

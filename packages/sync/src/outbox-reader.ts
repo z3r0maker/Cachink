@@ -7,7 +7,7 @@
 
 import { sql } from 'drizzle-orm';
 import { MAX_PUSH_DELTAS, isPushable, type DeltaOp } from '@xangarro/contracts';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { rowKey } from './table-map.js';
 
 export interface ChangeEntry {
@@ -24,7 +24,7 @@ export interface CoalescedChange {
 }
 
 export async function readChangeSlice(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   afterId: number,
   limit: number = MAX_PUSH_DELTAS,
 ): Promise<readonly ChangeEntry[]> {

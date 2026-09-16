@@ -14,29 +14,29 @@ appId: mx.xangarro.mobile
 ---
 - extendedWaitUntil:
     visible:
-      id: "director-setup"
+      id: 'director-setup'
     timeout: 10000
 
 - tapOn:
-    id: "director-nombre"
-- inputText: "Director Test"
+    id: 'director-nombre'
+- inputText: 'Director Test'
 
 - tapOn:
-    id: "director-pin"
-- inputText: "123456"
+    id: 'director-pin'
+- inputText: '123456'
 
 - tapOn:
-    id: "director-confirm-pin"
-- inputText: "123456"
+    id: 'director-confirm-pin'
+- inputText: '123456'
 
 # Scroll to submit button.
 - scrollUntilVisible:
     element:
-      id: "director-setup-submit"
+      id: 'director-setup-submit'
     direction: DOWN
     timeout: 5000
 - tapOn:
-    id: "director-setup-submit"
+    id: 'director-setup-submit'
 
 # After submit, the user is auto-logged in as Director.
 #
@@ -51,15 +51,15 @@ appId: mx.xangarro.mobile
 # from Configuración → Sistema) can still surface it here.
 - extendedWaitUntil:
     visible:
-      id: "feature-discovery"
+      id: 'feature-discovery'
     timeout: 3000
     optional: true
 - tapOn:
-    id: "discovery-continue"
+    id: 'discovery-continue'
     optional: true
 
 # Wait for the app shell (tabs) to render.
 - extendedWaitUntil:
     visible:
-      id: "tab-caja"
+      id: 'tab-caja'
     timeout: 10000

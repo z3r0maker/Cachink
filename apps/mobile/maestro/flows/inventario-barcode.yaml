@@ -12,39 +12,39 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Refresco 600ml"
+    id: 'producto-nombre'
+- inputText: 'Refresco 600ml'
 - tapOn:
-    id: "producto-scan"
+    id: 'producto-scan'
 
-- assertVisible: "Escanear código"
+- assertVisible: 'Escanear código'
 - tapOn:
-    id: "scanner-manual"
-- inputText: "7501055300005"
+    id: 'scanner-manual'
+- inputText: '7501055300005'
 - tapOn:
-    id: "scanner-manual-submit"
+    id: 'scanner-manual-submit'
 
 # Scanner closes + SKU populated on the form.
-- assertNotVisible: "Escanear código"
+- assertNotVisible: 'Escanear código'
 
 # Enter pricing to verify Margen de ganancia row appears.
 - tapOn:
-    id: "producto-costo"
+    id: 'producto-costo'
 - eraseText
-- inputText: "50"
+- inputText: '50'
 - pressKey: enter
 - tapOn:
-    id: "producto-precio-venta"
+    id: 'producto-precio-venta'
 - eraseText
-- inputText: "100"
+- inputText: '100'
 - hideKeyboard
-- assertVisible: "Margen de ganancia"
+- assertVisible: 'Margen de ganancia'
 
 - tapOn:
-    id: "producto-submit"
-- assertVisible: "Refresco 600ml"
+    id: 'producto-submit'
+- assertVisible: 'Refresco 600ml'

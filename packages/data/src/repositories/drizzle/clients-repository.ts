@@ -14,16 +14,16 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { Client, ClientPatch, ClientsRepository } from '../clients-repository.js';
 import { clients } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type ClientRow = typeof clients.$inferSelect;
 
 export class DrizzleClientsRepository implements ClientsRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

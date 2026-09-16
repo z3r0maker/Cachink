@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import type { PaymentMethod, Product, Sale } from '@xangarro/domain';
 import {
-  CachinkBurst,
+  SaleBurst,
   CajaGateBanner,
   CorteHomeCard,
   ProductosGateBanner,
@@ -98,8 +98,8 @@ interface OverlayProps {
   handleShare: () => void;
   eliminar: EliminarVentaResult;
   swipe: SwipeData;
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
 }
 
 export function VentasOverlays(p: OverlayProps): ReactElement {
@@ -133,10 +133,10 @@ export function VentasOverlays(p: OverlayProps): ReactElement {
         setConfirmDelete={p.swipe.setConfirmDelete}
         eliminar={p.eliminar}
       />
-      <CachinkBurst
-        visible={p.showCachink}
-        onComplete={() => p.setShowCachink(false)}
-        testID="cachink-burst"
+      <SaleBurst
+        visible={p.showSaleBurst}
+        onComplete={() => p.setShowSaleBurst(false)}
+        testID="sale-burst"
       />
     </>
   );

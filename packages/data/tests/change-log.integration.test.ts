@@ -31,7 +31,7 @@ import {
   writeHwm,
   writeSyncState,
 } from '../src/sync-state.js';
-import type { CachinkDatabase } from '../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../src/repositories/drizzle/_db.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV_A = '01HZ8XQN9GZJXV8AKQ5X0C7TEA';
@@ -55,7 +55,7 @@ type ChangeLogRow = {
   captured_at: string;
 };
 
-async function readChangeLog(db: CachinkDatabase): Promise<ChangeLogRow[]> {
+async function readChangeLog(db: XangarroDatabase): Promise<ChangeLogRow[]> {
   return (await db.all(
     sql`SELECT "id", "table_name", "row_id", "row_updated_at", "row_device_id", "op", "captured_at"
         FROM "__cachink_change_log" ORDER BY "id" ASC`,
@@ -63,7 +63,7 @@ async function readChangeLog(db: CachinkDatabase): Promise<ChangeLogRow[]> {
 }
 
 describe('migration 0001 — change-log triggers capture every row change', () => {
-  let db: CachinkDatabase;
+  let db: XangarroDatabase;
 
   beforeEach(() => {
     db = makeFreshDb();
@@ -377,7 +377,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
 });
 
 describe('__cachink_sync_state helpers — readSyncState / writeSyncState', () => {
-  let db: CachinkDatabase;
+  let db: XangarroDatabase;
 
   beforeEach(() => {
     db = makeFreshDb();

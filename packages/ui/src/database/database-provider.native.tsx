@@ -6,7 +6,7 @@
  *   1. `openDatabaseSync('cachink.db')` from `expo-sqlite` creates/opens
  *      the SQLite file under the app's sandboxed storage.
  *   2. `drizzle(native, { schema })` from `drizzle-orm/expo-sqlite` wraps
- *      it with the shared `CachinkDatabase` type.
+ *      it with the shared `XangarroDatabase` type.
  *   3. {@link runMigrations} applies any pending migrations from
  *      `@xangarro/data/migrations`.
  *   4. Children mount once the db is ready.
@@ -21,7 +21,7 @@ import { useCallback, type ReactElement } from 'react';
 import { openDatabaseSync } from 'expo-sqlite';
 import { drizzle } from 'drizzle-orm/expo-sqlite';
 import * as schema from '@xangarro/data/schema';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
@@ -54,7 +54,7 @@ export { SCHEMA_VERSION, SchemaVersionError } from '@xangarro/data/migrator';
 /** SQLite file name on device storage. Changing this breaks existing users. */
 const DB_FILE_NAME = 'cachink.db';
 
-async function createNativeDatabase(): Promise<CachinkDatabase> {
+async function createNativeDatabase(): Promise<XangarroDatabase> {
   const native = openDatabaseSync(DB_FILE_NAME);
   registerNativeHandle(native);
   try {
@@ -62,7 +62,7 @@ async function createNativeDatabase(): Promise<CachinkDatabase> {
     // Must happen outside any transaction — pragma is a no-op inside one.
     native.execSync('PRAGMA foreign_keys = ON');
     native.execSync('PRAGMA journal_mode = WAL');
-    const db = drizzle(native, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(native, { schema }) as unknown as XangarroDatabase;
 
     // Version gate: prevent old code from running against a newer schema.
     const dbVersion = await getSchemaVersion(db);

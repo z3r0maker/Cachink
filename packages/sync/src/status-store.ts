@@ -8,7 +8,7 @@
  */
 
 import { and, count, desc, eq, lte, sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { syncRowStatus } from '@xangarro/data';
 import type { CoalescedChange } from './outbox-reader.js';
 
@@ -39,8 +39,8 @@ export interface RejectedEntry {
 }
 
 export class StatusStore {
-  readonly #db: CachinkDatabase;
-  constructor(db: CachinkDatabase) {
+  readonly #db: XangarroDatabase;
+  constructor(db: XangarroDatabase) {
     this.#db = db;
   }
 

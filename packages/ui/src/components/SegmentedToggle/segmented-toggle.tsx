@@ -149,7 +149,7 @@ function Eyebrow(props: EyebrowProps): ReactElement {
 }
 
 /**
- * Renders the canonical Cachink chip-toggle row. See
+ * Renders the canonical Xangarro chip-toggle row. See
  * `segmented-toggle.stories.tsx` for the full variant catalog.
  */
 export function SegmentedToggle<T extends string>(props: SegmentedToggleProps<T>): ReactElement {

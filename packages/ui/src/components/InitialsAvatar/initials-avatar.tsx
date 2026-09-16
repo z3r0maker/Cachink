@@ -148,7 +148,7 @@ function InitialsText(props: InitialsTextProps): ReactElement {
 }
 
 /**
- * Renders the canonical Cachink initials avatar. See
+ * Renders the canonical Xangarro initials avatar. See
  * `initials-avatar.stories.tsx` for the full variant catalog.
  */
 export function InitialsAvatar(props: InitialsAvatarProps): ReactElement {

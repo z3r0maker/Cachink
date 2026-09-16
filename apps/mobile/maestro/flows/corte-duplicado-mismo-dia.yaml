@@ -18,71 +18,71 @@ tags:
 
 # Open and close caja to enable corte.
 - tapOn:
-    id: "tab-caja"
+    id: 'tab-caja'
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
     optional: true
 - extendedWaitUntil:
     visible:
-      id: "caja-status-card"
+      id: 'caja-status-card'
     timeout: 10000
 
 # Close the turno.
 - tapOn:
-    id: "caja-cerrar-btn"
+    id: 'caja-cerrar-btn'
 - extendedWaitUntil:
     visible:
-      id: "caja-cerrar-sheet"
+      id: 'caja-cerrar-sheet'
     timeout: 5000
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "caja-cerrar-submit"
+    id: 'caja-cerrar-submit'
 - extendedWaitUntil:
     visible:
-      id: "caja-cerrado-banner"
+      id: 'caja-cerrado-banner'
     timeout: 5000
 
 # Run first corte de día.
 - tapOn:
-    id: "corte-de-dia-btn"
+    id: 'corte-de-dia-btn'
 - extendedWaitUntil:
     visible:
-      id: "corte-sheet"
+      id: 'corte-sheet'
     timeout: 5000
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "corte-submit"
+    id: 'corte-submit'
 - extendedWaitUntil:
     visible:
-      id: "corte-success"
+      id: 'corte-success'
     timeout: 5000
 
 # Try to run second corte — should be blocked.
 # The corte button should be disabled or show "already exists" message.
 - tapOn:
-    id: "corte-de-dia-btn"
+    id: 'corte-de-dia-btn'
     optional: true
 - extendedWaitUntil:
     visible:
-      text: "Ya existe un corte"
+      text: 'Ya existe un corte'
     timeout: 5000
     optional: true
