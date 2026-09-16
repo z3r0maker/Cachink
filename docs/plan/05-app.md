@@ -45,7 +45,8 @@
 
 ### A-04 Activation screen (email + code) + device identity storage
 
-- [ ] Status · **Blocked by:** C-02, C-09 · **Blocks:** A-05, A-10, A-16
+- [x] Status · **Blocked by:** C-02, C-09 · **Blocks:** A-05, A-10, A-16
+  - Done: 2026-09-16 · track/app · ActivationGate is the first gate after hydration; `ActivationScreen` (email + 8-char code sanitised to the code alphabet, plain-text website pointer, no purchase link); `useActivate` → `@xangarro/sync` `ApiClient` → `persistActivation` stores the token via injected `DeviceTokenStore` (expo-secure-store on mobile), writes the bootstrap through a new `ReferenceDataRepository` seam (the UI never touches the DB — CLAUDE.md §2.5), and records entitlement/serverTime/pullSeq/business/activation in app_config. **Verified on the iPad simulator against the mock**: `activation-errors.yaml` (used code → message) and `activation.yaml` (valid code → QuickSwitch listing Ana and Toni from the server). Deviations: API base must be `127.0.0.1` (mock is IPv4-only; Docker holds :3000 on the dev machine → run `PORT=3100 pnpm mock:api` and `EXPO_PUBLIC_API_BASE=http://127.0.0.1:3100`). Native rebuild needed Xcode 27 fixes (config plugin raising pod targets to 15.1; pnpm patch guarding an iOS 16 API in expo-router) — `expo run:ios` can't find Simulator.app on this Xcode, so build with `xcodebuild … -destination id=<UDID>` + `simctl install`.
 - **Context:** Replaces the wizard as the first-run gate. `02-contracts.md` §3.
 - **Files:** new `packages/ui/src/screens/Activation/{activation-screen.tsx,use-activate.ts,code-input.tsx,index.ts}`; `packages/ui/src/app/activation-gate.tsx`; `apps/mobile/src/app/activate.tsx`; `apps/mobile/src/shell/device-identity.ts` (SecureStore); `packages/ui/src/api/client.ts` (fetch wrapper with headers from contracts).
 - **Steps:**
@@ -66,7 +67,8 @@
 
 ### A-06 Cloud outbox: `packages/sync` (retarget the change-log + push queue)
 
-- [ ] Status · **Blocked by:** F-03, C-03, C-04, C-06, C-09 · **Blocks:** A-07, A-08, A-11, A-16
+- [~] Status · **Blocked by:** F-03, C-03, C-04, C-06, C-09 · **Blocks:** A-07, A-08, A-11, A-16
+  - 2026-09-16 · track/app · **Engine done in `packages/sync`:** `drainPush` (change-log slice + due retries → coalesce per row → one SELECT per table → local zod validation → send → record every per-row outcome in `__sync_row_status` BEFORE advancing `pushHwm`; whole-batch failures leave the cursor; retryable rejections back off 1 min→2 h; drain capped at 10 batches), `pullAll` (applies reference tables, stores entitlement, `lastServerTime`, `lastPullAt`, `acknowledgedThrough`, `pullSeq`), `SyncEngine` (push then pull, single-flight, revocation flag). 8 engine tests against real SQLite + mock (accept, per-row reject kept, offline cursor, flaky backoff, pull cursors, single-flight, revoked). `applyReferenceTables` deletes the change-log entries its own writes create so pulls never echo back. **Remaining:** mount it in the app — that is A-07's triggers + pill; netinfo lands there.
 - **Context:** Reuse `packages/data/src/sync-state.ts` (`__cachink_change_log`, HWM) and the design of `packages/sync-lan/src/client/push-queue.ts`, fixing its defects (README §6). New package so `sync-lan` stays untouched.
 - **Files:** `packages/sync/{package.json,src/push.ts,src/pull.ts,src/coalesce.ts,src/status.ts,src/backoff.ts,src/orchestrator.ts,src/index.ts,tests/*}`; `packages/data/src/schema/sync-row-status.ts` (new table `__sync_row_status {table_name, row_id, status pending|accepted|rejected, server_seq, code, message, retryable, attempts, last_attempt_at, PK(table_name,row_id)}` — migration in A-17); `packages/data` triggers unchanged.
 - **Steps:**
@@ -160,7 +162,8 @@
 
 ### A-17 SQLite migrations for the new shape + migration test
 
-- [ ] Status · **Blocked by:** F-07, A-06
+- [x] Status · **Blocked by:** F-07, A-06
+  - Done: 2026-09-16 · track/app · Migration `0001_capture_client` (SCHEMA_VERSION 2): `users.active`, `__sync_row_status`, and change-log triggers for `caja_turnos, caja_movimientos, cancelacion_logs, entregas_credito, conversions, auditorias_inventario` — **LAN sync never captured these six, so shifts and cancellations would never have synced.** Old→new migration test from a 0000 database. `server_seq` columns were NOT added: the accepted row's serverSeq lives in `__sync_row_status`, which A-11 joins on. Column drops (role/must_change_pin/recovery_password_hash/email) stay with A-05. Removed the orphan `0001_add_caja_turno_id_to_sales` (already in 0000, never journaled); ESLint override for `drizzle/migrations` replaces inline disables.
 - **Files:** `packages/data/drizzle/migrations/000N_*.sql`, `meta/_journal.json`, `migrations/index.ts`, `packages/data/tests/migrations/*.test.ts`.
 - **Steps:** one migration: `users` drop `role`, `must_change_pin`, `recovery_password_hash`, `email`; add `active INTEGER NOT NULL DEFAULT 1` (then replace the typed-error guard for `patch.active` in `packages/data/src/repositories/drizzle/users-repository.ts` with a real `set['active']`, and map the column in `#mapRow` instead of the hardcoded `true` — both left by F-07); new `__sync_row_status`; `app_config` rows for entitlement/server time; add `server_seq INTEGER NULL` to every UP/HYBRID table (set from push responses; used by A-11); optionally rename `__cachink_change_log` → `__sync_change_log` (update triggers + `sync-state.ts`). Migration test: build a DB at the previous version with fixture rows (incl. a director user) → migrate → users kept with `active=1`, director row still present (portal will have deactivated it server-side anyway), no data loss (CLAUDE.md §2.9).
 - **Acceptance:** `pnpm --filter @xangarro/data test -- migrations` green; fresh install and upgraded install both boot.

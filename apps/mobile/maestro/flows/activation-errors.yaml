@@ -12,11 +12,15 @@ appId: mx.xangarro.mobile
     visible:
       id: "activation-screen"
     timeout: 60000
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
     id: "activation-email"
+    point: "95%,50%"
 - inputText: "dueno@tacoslaesquina.mx"
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
     id: "activation-code"
+    point: "95%,50%"
 - inputText: "USEDK7M3"
 - hideKeyboard
 - tapOn:
