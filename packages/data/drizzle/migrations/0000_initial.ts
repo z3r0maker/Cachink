@@ -1,4 +1,3 @@
-/* eslint-disable unicorn/filename-case, max-lines */
 /**
  * Migration 0000 — Consolidated initial schema.
  *

@@ -1,0 +1,34 @@
+# Cloud sync (A-07): a local write is pushed within seconds and the pill
+# reports it; tapping the pill ("Actualizar") runs push + pull again.
+#
+# Precondition: device activated against the mock (run activation.yaml
+# first). Opens a caja turno only when none is open, so reruns pass.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow: shared/login-operator.yaml
+- extendedWaitUntil:
+    visible:
+      id: "cloud-sync-pill-synced"
+    timeout: 20000
+- tapOn:
+    id: "tab-caja"
+- runFlow:
+    when:
+      visible:
+        id: "caja-abrir-submit"
+    commands:
+      - tapOn:
+          text: ".*\\$500.*"
+      - tapOn:
+          id: "caja-abrir-submit"
+- extendedWaitUntil:
+    visible:
+      id: "cloud-sync-pill-synced"
+    timeout: 30000
+- tapOn:
+    id: "cloud-sync-pill"
+- extendedWaitUntil:
+    visible:
+      id: "cloud-sync-pill-synced"
+    timeout: 20000

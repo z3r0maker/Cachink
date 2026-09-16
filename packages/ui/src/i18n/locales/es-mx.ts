@@ -1017,6 +1017,15 @@ export const esMX = {
     error: 'PIN incorrecto',
     forgotPin: '¿Olvidaste tu PIN?',
   },
+  syncPill: {
+    syncing: 'Sincronizando…',
+    rejected: '{{count}} no enviados',
+    offline: 'Sin conexión',
+    pending: '{{count}} pendientes',
+    synced: 'Sincronizado {{time}}',
+    never: 'Sin sincronizar',
+    tapToUpdate: 'Toca para actualizar',
+  },
   activate: {
     title: 'Activa este dispositivo',
     subtitle: 'Escribe el correo de tu cuenta y el código que te enviamos.',

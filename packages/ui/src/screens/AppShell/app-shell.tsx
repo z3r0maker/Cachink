@@ -26,6 +26,7 @@ import type { FeatureFlags } from '@xangarro/domain';
 import type { AppMode } from '../../app-config/index';
 import { appTabs } from './tab-definitions';
 import { SyncStatusBadge } from './sync-status-badge';
+import { CloudSyncPill } from './cloud-sync-pill';
 import { useLanSync } from '../../hooks/use-lan-sync';
 import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
@@ -78,16 +79,16 @@ function RightSlot(props: RightSlotProps): ReactElement {
   const lan = useLanSync();
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      <SyncStatusBadge
-        mode={props.mode}
-        lanStatus={lan.status}
-        connectedDevices={lan.connectedDevices}
-        onRetry={
-          props.mode === 'lan-server' || props.mode === 'lan-client'
-            ? () => void lan.retryNow()
-            : undefined
-        }
-      />
+      {props.mode === 'lan-server' || props.mode === 'lan-client' ? (
+        <SyncStatusBadge
+          mode={props.mode}
+          lanStatus={lan.status}
+          connectedDevices={lan.connectedDevices}
+          onRetry={() => void lan.retryNow()}
+        />
+      ) : (
+        <CloudSyncPill />
+      )}
       {/*
        * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
        * (children optional when icon is set, see PR 2.5). The ariaLabel

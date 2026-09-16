@@ -1,0 +1,24 @@
+# Operator sign-in on an activated device (A-05/A-07): pick Toni (mock
+# operator, PIN 123456) on QuickSwitch and land on the capture tabs.
+appId: mx.xangarro.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: "quick-switch"
+    timeout: 60000
+- tapOn:
+    text: ".*Toni.*"
+- extendedWaitUntil:
+    visible:
+      id: "numpad-1"
+    timeout: 8000
+- tapOn: { id: "numpad-1" }
+- tapOn: { id: "numpad-2" }
+- tapOn: { id: "numpad-3" }
+- tapOn: { id: "numpad-4" }
+- tapOn: { id: "numpad-5" }
+- tapOn: { id: "numpad-6" }
+- extendedWaitUntil:
+    visible:
+      id: "tab-caja"
+    timeout: 15000

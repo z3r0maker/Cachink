@@ -16,6 +16,7 @@ import { captureException } from '../telemetry/index';
 import { GlobalErrorToast } from '../components/GlobalErrorToast/index';
 import { GatedNavigation, type LanBridges } from './gated-navigation';
 import { ActivationProvider } from '../activation/activation-context';
+import { CloudSyncBridge } from './cloud-sync-bridge';
 import type { ActivationConfig } from '../activation/activation-config';
 import { AppErrorBoundary } from './error-boundary';
 import { LanSyncProvider } from '../sync/lan-sync-context';
@@ -112,7 +113,9 @@ export function AppProviders(props: AppProvidersProps): ReactElement {
                     getFeatureFlags={props.getFeatureFlags}
                   >
                     <TelemetryBridge>
-                      <ActivationProvider config={props.activation}>{content}</ActivationProvider>
+                      <ActivationProvider config={props.activation}>
+                        <CloudSyncBridge>{content}</CloudSyncBridge>
+                      </ActivationProvider>
                       {/* Inside the data providers but outside gated `content`:
                           overlays (e.g. NotificationTapHost) stay mounted while
                           locked yet can resolve repository/query hooks. */}
