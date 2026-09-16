@@ -212,6 +212,18 @@ describe('SyncEngine', () => {
     assert.deepEqual(await engine.rejected(), []);
   });
 
+  it('runs the retention purge after a clean pull, at most once per server day (A-11)', async () => {
+    const d = await activatedDevice();
+    const engine = new SyncEngine({
+      db: d.db,
+      client: new ApiClient({ baseUrl: mock.url }),
+      getToken: async () => d.token,
+    });
+    const first = await engine.syncNow();
+    assert.deepEqual(first.purge, { skipped: null, cutoff: first.purge?.cutoff, deleted: {} });
+    assert.equal((await engine.syncNow()).purge, null);
+  });
+
   it('does nothing before activation', async () => {
     const engine = new SyncEngine({
       db: makeFreshDb(),

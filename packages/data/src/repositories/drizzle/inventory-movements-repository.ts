@@ -19,7 +19,7 @@ import type {
   InventoryMovement,
   InventoryMovementsRepository,
 } from '../inventory-movements-repository.js';
-import { inventoryMovements } from '../../schema/index.js';
+import { inventoryMovements, stockBaseline } from '../../schema/index.js';
 import type { CachinkDatabase } from './_db.js';
 
 type MovementRow = typeof inventoryMovements.$inferSelect;
@@ -100,6 +100,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
     return rows.map((r) => this.#mapRow(r));
   }
 
+  /** Remaining movements plus the baseline folded in by the retention purge (A-11). */
   async sumStock(productoId: ProductId): Promise<number> {
     const result = await this.#db
       .select({
@@ -110,7 +111,12 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
         and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
       )
       .get();
-    return result?.total ?? 0;
+    const baseline = await this.#db
+      .select({ cantidad: stockBaseline.cantidad })
+      .from(stockBaseline)
+      .where(eq(stockBaseline.productoId, productoId))
+      .get();
+    return (result?.total ?? 0) + (baseline?.cantidad ?? 0);
   }
 
   async delete(id: InventoryMovementId): Promise<void> {

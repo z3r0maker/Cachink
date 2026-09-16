@@ -10,9 +10,11 @@
 import { DrizzleAppConfigRepository, type CachinkDatabase } from '@xangarro/data';
 import type { ApiClient } from './api-client.js';
 import { pullAll, type PullOutcome } from './pull.js';
+import { purgeAcknowledged, type PurgeOutcome } from './retention.js';
 import { drainPush, type PushOutcome } from './push.js';
 import { readRows } from './row-reader.js';
 import { rowKey } from './table-map.js';
+import { SYNC_CONFIG_KEYS } from './sync-keys.js';
 import { StatusStore, type RejectedEntry } from './status-store.js';
 
 export interface SyncEngineDeps {
@@ -28,6 +30,25 @@ export interface SyncRunResult {
   readonly pull: PullOutcome | null;
   /** True when the server says this device is revoked (A-04 returns to activation). */
   readonly revoked: boolean;
+  /** Retention purge run after this pull, if one was due (A-11). */
+  readonly purge?: PurgeOutcome | null;
+}
+
+const PURGE_EVERY_MS = 86_400_000;
+
+/** After a clean pull: purge once per server day. Anchored on server time only. */
+async function purgeIfDue(
+  db: CachinkDatabase,
+  appConfig: DrizzleAppConfigRepository,
+): Promise<PurgeOutcome | null> {
+  const serverTime = await appConfig.get(SYNC_CONFIG_KEYS.lastServerTime);
+  if (!serverTime) return null;
+  const last = await appConfig.get(SYNC_CONFIG_KEYS.lastPurgeAt);
+  if (last && new Date(serverTime).getTime() - new Date(last).getTime() < PURGE_EVERY_MS)
+    return null;
+  const outcome = await purgeAcknowledged({ db, appConfig });
+  await appConfig.set(SYNC_CONFIG_KEYS.lastPurgeAt, serverTime);
+  return outcome;
 }
 
 export interface SyncCounts {
@@ -97,6 +118,7 @@ export class SyncEngine {
     if (push.error?.code === 'DEVICE_REVOKED') return { push, pull: null, revoked: true };
     if (mode === 'push') return { push, pull: null, revoked: false };
     const pull = await pullAll(base);
-    return { push, pull, revoked: pull.error?.code === 'DEVICE_REVOKED' };
+    if (pull.error) return { push, pull, revoked: pull.error.code === 'DEVICE_REVOKED' };
+    return { push, pull, revoked: false, purge: await purgeIfDue(this.#deps.db, appConfig) };
   }
 }

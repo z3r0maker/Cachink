@@ -16,4 +16,6 @@ export const SYNC_CONFIG_KEYS = {
   acknowledgedThrough: 'acknowledgedThrough',
   /** ISO time of the last successful pull (offline-staleness clock). */
   lastPullAt: 'lastPullAt',
+  /** Server time of the last retention purge (A-11) — runs at most daily. */
+  lastPurgeAt: 'lastPurgeAt',
 } as const;

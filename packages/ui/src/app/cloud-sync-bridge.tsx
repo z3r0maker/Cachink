@@ -105,7 +105,15 @@ function useSyncRunner(
       await queryClient.invalidateQueries({ queryKey: CLOUD_SYNC_QUERY_KEY });
       if ((result.pull?.applied ?? 0) > 0) await queryClient.invalidateQueries();
     };
-    return { runPush: () => void run('push'), runSync: () => void run('both') };
+    // A throw (e.g. a SQLite error during the retention purge) must not leave
+    // the pill stuck on "Sincronizando…"; the next trigger retries.
+    const runSafely = (mode: 'push' | 'both'): void => {
+      run(mode).catch((error: unknown) => {
+        console.error('[cloud-sync] run failed', error);
+        setState((s) => ({ ...s, phase: 'error' }));
+      });
+    };
+    return { runPush: () => runSafely('push'), runSync: () => runSafely('both') };
   }, [engine, setState, appConfig, config.tokenStore, queryClient]);
 }
 

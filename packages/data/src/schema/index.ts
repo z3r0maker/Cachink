@@ -40,3 +40,4 @@ export * from './director-alerts';
 export * from './caja-movimientos';
 export * from './cancelacion-logs';
 export * from './sync-row-status';
+export * from './stock-baseline';

@@ -10,4 +10,6 @@ export * from './outbox-reader.js';
 export * from './status-store.js';
 export * from './push.js';
 export * from './pull.js';
+export * from './retention-rules.js';
+export * from './retention.js';
 export * from './sync-engine.js';
