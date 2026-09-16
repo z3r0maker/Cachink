@@ -1,0 +1,31 @@
+# Activation — error path (A-04).
+#
+# Precondition: fresh install (no activation record) showing
+# `activation-screen`; contracts mock running and reset:
+#   PORT=3100 pnpm mock:api   ·   curl -X POST http://127.0.0.1:3100/__mock/reset
+# App bundled with EXPO_PUBLIC_API_BASE=http://127.0.0.1:3100.
+# Mock codes: USEDK7M3 (already redeemed) → "ya se usó".
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: "activation-screen"
+    timeout: 60000
+- tapOn:
+    id: "activation-email"
+- inputText: "dueno@tacoslaesquina.mx"
+- tapOn:
+    id: "activation-code"
+- inputText: "USEDK7M3"
+- hideKeyboard
+- tapOn:
+    id: "activation-submit"
+- extendedWaitUntil:
+    visible:
+      id: "activation-error"
+    timeout: 15000
+- assertVisible:
+    text: ".*ya se usó.*"
+- assertVisible:
+    id: "activation-screen"

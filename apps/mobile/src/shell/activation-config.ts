@@ -3,7 +3,10 @@
  * expo-device / expo-application, and the API base.
  *
  * `EXPO_PUBLIC_API_BASE` defaults to the local contracts mock
- * (`pnpm mock:api`), reachable from the iOS simulator as localhost.
+ * (`pnpm mock:api`). Use `127.0.0.1`, not `localhost`: the mock binds IPv4
+ * only, and `localhost` may resolve to `::1` where another service can be
+ * listening (Docker takes :3000 on some machines — run the mock with
+ * `PORT=3100` and set EXPO_PUBLIC_API_BASE accordingly).
  * `EXPO_PUBLIC_MOCK_SCENARIO` (dev only) forwards `X-Mock-Scenario`.
  */
 
@@ -19,7 +22,7 @@ function scenarioHeaders(): Record<string, string> | undefined {
 }
 
 export const mobileActivationConfig: ActivationConfig = {
-  apiBase: process.env.EXPO_PUBLIC_API_BASE ?? 'http://localhost:3000',
+  apiBase: process.env.EXPO_PUBLIC_API_BASE ?? 'http://127.0.0.1:3000',
   tokenStore: secureDeviceTokenStore,
   deviceInfo: {
     name: (Device.deviceName ?? Device.modelName ?? 'Dispositivo').slice(0, 80),
