@@ -3,7 +3,8 @@
  *
  * Shows nombre, categoria Tag, unidad, current stock, costo
  * unitario. Low-stock Tag (red) appears when stock ≤
- * umbralStockBajo.
+ * umbralStockBajo. With `showStock={false}` (stock off for the plan, A-14)
+ * the row is a catalog entry: no stock, no low-stock tag, sale price.
  */
 
 import type { ReactElement } from 'react';
@@ -18,6 +19,8 @@ import { PRODUCT_BG_COLORS } from '../../product-colors';
 export interface ProductoCardProps {
   readonly producto: Product;
   readonly stock: number;
+  /** Defaults to true. */
+  readonly showStock?: boolean;
   readonly onPress?: () => void;
   readonly testID?: string;
 }
@@ -83,7 +86,8 @@ function ProductoAmount({
 
 export function ProductoCard(props: ProductoCardProps): ReactElement {
   const { t } = useTranslation();
-  const isLow = props.stock <= props.producto.umbralStockBajo;
+  const showStock = props.showStock !== false;
+  const isLow = showStock && props.stock <= props.producto.umbralStockBajo;
   const bg = PRODUCT_BG_COLORS[props.producto.colorFondo ?? 'white'];
   return (
     <Card
@@ -99,11 +103,22 @@ export function ProductoCard(props: ProductoCardProps): ReactElement {
           isLow={isLow}
           bajoStockLabel={t('inventario.bajoStockTitle')}
         />
-        <ProductoAmount
-          stock={props.stock}
-          isLow={isLow}
-          costo={props.producto.costoUnitCentavos}
-        />
+        {showStock ? (
+          <ProductoAmount
+            stock={props.stock}
+            isLow={isLow}
+            costo={props.producto.costoUnitCentavos}
+          />
+        ) : (
+          <Text
+            fontFamily={typography.fontFamily}
+            fontWeight={typography.weights.bold}
+            fontSize={fontSizes.lg}
+            color={colors.black}
+          >
+            {formatMoney(props.producto.precioVentaCentavos)}
+          </Text>
+        )}
       </View>
     </Card>
   );

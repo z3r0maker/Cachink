@@ -8,7 +8,12 @@ import type { ReactNode } from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import { InMemoryDirectorAlertsRepository, TEST_DEVICE_ID } from '@xangarro/testing';
+import {
+  InMemoryAppConfigRepository,
+  InMemoryDirectorAlertsRepository,
+  TEST_DEVICE_ID,
+  seedTestEntitlement,
+} from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useDirectorAlerts } from '../../src/hooks/use-director-alerts';
@@ -16,6 +21,8 @@ import { TamaguiProvider } from '@tamagui/core';
 import { tamaguiConfig } from '../../src/tamagui.config';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
+
+let planConfig = new InMemoryAppConfigRepository();
 
 function wrapper(
   overrides?: Record<string, unknown>,
@@ -25,7 +32,9 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
+          <MockRepositoryProvider overrides={{ appConfig: planConfig, ...overrides }}>
+            {children}
+          </MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -33,7 +42,10 @@ function wrapper(
 }
 
 describe('useDirectorAlerts', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Alerts are filtered by effective feature flags, which need a verified plan (A-14).
+    planConfig = new InMemoryAppConfigRepository();
+    await seedTestEntitlement(planConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,

@@ -6,6 +6,7 @@
 import { useState, type ReactElement } from 'react';
 import type { BusinessId, IsoDate, MovementType, NewInventoryMovement } from '@xangarro/domain';
 import { useCurrentBusinessId } from '../../app-config/index';
+import { useFeatureFlag } from '../../hooks/use-feature-flags';
 import type { ProductoConStock } from '../../hooks/use-productos-con-stock';
 import { useRegistrarMovimiento } from '../../hooks/use-registrar-movimiento';
 import { MovimientoModal } from './movimiento-modal';
@@ -21,6 +22,7 @@ export interface ProductoDetailSmartProps {
 export function ProductoDetailSmart(props: ProductoDetailSmartProps): ReactElement {
   const businessId = useCurrentBusinessId() as BusinessId | null;
   const registrar = useRegistrarMovimiento();
+  const stockOn = useFeatureFlag('stock');
   const [movTipo, setMovTipo] = useState<MovementType | null>(null);
   const handleSubmit = (input: NewInventoryMovement): void => {
     registrar.mutate(input, { onSuccess: () => setMovTipo(null) });
@@ -33,6 +35,7 @@ export function ProductoDetailSmart(props: ProductoDetailSmartProps): ReactEleme
         onEntrada={() => setMovTipo('entrada')}
         onSalida={() => setMovTipo('salida')}
         onBack={props.onBack}
+        showStock={stockOn}
         testID={props.testID}
       />
       {businessId && movTipo && (

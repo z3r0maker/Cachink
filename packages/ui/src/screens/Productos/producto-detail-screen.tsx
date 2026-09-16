@@ -23,6 +23,8 @@ export interface ProductoDetailScreenProps {
   readonly onEntrada: () => void;
   readonly onSalida: () => void;
   readonly onBack: () => void;
+  /** False when the plan has no stock (A-14). Defaults to true. */
+  readonly showStock?: boolean;
   readonly testID?: string;
 }
 
@@ -108,7 +110,7 @@ export function ProductoDetailScreen(props: ProductoDetailScreenProps): ReactEle
         <View alignItems="center" testID="detail-icon">
           <Icon name={icon} size={48} color={colors.black} />
         </View>
-        {p.seguirStock !== false && (
+        {props.showStock !== false && p.seguirStock !== false && (
           <StockActionCard
             stock={props.stock}
             umbral={p.umbralStockBajo}

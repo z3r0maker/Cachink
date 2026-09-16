@@ -17,6 +17,7 @@ import {
 } from './nuevo-producto-form';
 
 type Props = { readonly form: ProductoFormApi };
+type SaleProps = Props & { readonly stockEnabled: boolean };
 
 /** "Escanear código" button + scanner sheet. */
 function ScanCode(props: { onCode: (code: string) => void }): ReactElement {
@@ -70,7 +71,7 @@ function IdentityInputs({ form }: Props): ReactElement {
 }
 
 /** Categoría, precio de venta and whether stock is tracked. */
-function SaleInputs({ form }: Props): ReactElement {
+function SaleInputs({ form, stockEnabled }: SaleProps): ReactElement {
   const { t } = useTranslation();
   return (
     <>
@@ -90,21 +91,27 @@ function SaleInputs({ form }: Props): ReactElement {
         required
         testID="producto-precio-venta"
       />
-      <OptionCardGroup<StockTracking>
-        value={form.state.stock}
-        onChange={(v) => form.update({ stock: v })}
-        options={stockTrackingCards(t)}
-        testID="producto-stock-tracking"
-      />
+      {stockEnabled && (
+        <OptionCardGroup<StockTracking>
+          value={form.state.stock}
+          onChange={(v) => form.update({ stock: v })}
+          options={stockTrackingCards(t)}
+          testID="producto-stock-tracking"
+        />
+      )}
     </>
   );
 }
 
-export function QuickAddFields({ form }: Props): ReactElement {
+/** `stockEnabled` hides the stock-tracking choice when the plan has no stock (A-14). */
+export function QuickAddFields({
+  form,
+  stockEnabled = true,
+}: Props & { readonly stockEnabled?: boolean }): ReactElement {
   return (
     <>
       <IdentityInputs form={form} />
-      <SaleInputs form={form} />
+      <SaleInputs form={form} stockEnabled={stockEnabled} />
     </>
   );
 }

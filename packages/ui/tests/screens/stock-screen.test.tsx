@@ -4,6 +4,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { BusinessId, DeviceId, IsoTimestamp, Product, ProductId } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { StockScreen, filterProductos } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
@@ -99,5 +100,25 @@ describe('StockScreen', () => {
       <StockScreen query="" onChangeQuery={vi.fn()} items={items} onNuevoProducto={vi.fn()} />,
     );
     expect(screen.queryByTestId('producto-swipe-01JPHK0000000000000000R098')).toBeNull();
+  });
+});
+
+describe('StockScreen without stock on the plan (A-14)', () => {
+  it('lists products as a catalog: price instead of stock, no low-stock tag', () => {
+    const item = row(
+      producto({ id: '01JPHK0000000000000000R097' as ProductId, precioVentaCentavos: 2500n }),
+      0,
+    );
+    renderWithProviders(
+      <StockScreen
+        query=""
+        onChangeQuery={vi.fn()}
+        items={[item]}
+        onNuevoProducto={vi.fn()}
+        showStock={false}
+      />,
+    );
+    expect(screen.queryByText('Stock bajo')).toBeNull();
+    expect(screen.getByText(formatMoney(item.producto.precioVentaCentavos))).toBeInTheDocument();
   });
 });

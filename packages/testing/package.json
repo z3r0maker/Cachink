@@ -27,17 +27,19 @@
     "vitest": "^4.1.6"
   },
   "peerDependencies": {
-    "react": "^19",
-    "@xangarro/ui": "workspace:*"
+    "@xangarro/ui": "workspace:*",
+    "react": "^19"
   },
   "devDependencies": {
-    "@xangarro/config": "workspace:*",
+    "@noble/ed25519": "3.2.0",
+    "@noble/hashes": "2.4.0",
     "@types/react": "^19.2.14",
     "@vitest/coverage-v8": "^4.1.6",
-    "react": "^19",
-    "typescript": "^6.0.3",
-    "@xangarro/ui": "workspace:*",
+    "@xangarro/config": "workspace:*",
+    "@xangarro/contracts": "workspace:*",
     "@xangarro/sync": "workspace:*",
-    "@xangarro/contracts": "workspace:*"
+    "@xangarro/ui": "workspace:*",
+    "react": "^19",
+    "typescript": "^6.0.3"
   }
 }

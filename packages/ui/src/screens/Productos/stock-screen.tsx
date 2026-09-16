@@ -27,6 +27,8 @@ export interface StockScreenProps {
   readonly testID?: string;
   /** Audit 4.6 — opt-in mobile FAB for the primary action. */
   readonly showFab?: boolean;
+  /** False when the plan has no stock (A-14): rows become a catalog. Defaults to true. */
+  readonly showStock?: boolean;
 }
 
 export function filterProductos(
@@ -45,11 +47,13 @@ export function filterProductos(
 interface StockListProps {
   readonly items: readonly ProductoConStock[];
   readonly onProductoPress?: (item: ProductoConStock) => void;
+  readonly showStock?: boolean;
 }
 
 function ProductoRow({
   row,
   onProductoPress,
+  showStock,
 }: { row: ProductoConStock } & StockListProps): ReactElement {
   // Products are create-only on the device (A-09): no swipe-to-edit or delete.
   return (
@@ -57,6 +61,7 @@ function ProductoRow({
       <ProductoCard
         producto={row.producto}
         stock={row.stock}
+        showStock={showStock}
         onPress={() => onProductoPress?.(row)}
       />
     </View>
@@ -82,7 +87,13 @@ function StockBody(
   if (props.filtered.length === 0) {
     return <EmptyProductos onNuevoProducto={props.onNuevoProducto} />;
   }
-  return <StockList items={props.filtered} onProductoPress={props.onProductoPress} />;
+  return (
+    <StockList
+      items={props.filtered}
+      onProductoPress={props.onProductoPress}
+      showStock={props.showStock}
+    />
+  );
 }
 
 export function StockScreen(props: StockScreenProps): ReactElement {

@@ -23,6 +23,8 @@ export interface NuevoProductoScreenProps {
   readonly onSubmit: (input: CrearProductoInput) => void;
   readonly onBack: () => void;
   readonly submitting?: boolean;
+  /** False when the plan has no stock (A-14). Defaults to true. */
+  readonly stockEnabled?: boolean;
   readonly testID?: string;
 }
 
@@ -43,7 +45,7 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       testID={props.testID ?? 'nuevo-producto-screen'}
     >
       <SectionHeader label={t('nuevoProducto.title')} />
-      <QuickAddFields form={form} />
+      <QuickAddFields form={form} stockEnabled={props.stockEnabled} />
       <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
         {t('nuevoProducto.portalHint')}
       </Text>
