@@ -27,7 +27,7 @@ import {
   InMemoryProductsRepository,
 } from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import { ProductoDetailRoute } from '../../src/screens/Inventario/producto-detail-route';
+import { ProductoDetailRoute } from '../../src/screens/Productos/producto-detail-route';
 import type { ProductoConStock } from '../../src/hooks/use-productos-con-stock';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';

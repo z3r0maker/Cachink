@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import { useProductosConStock } from '../../hooks/index';
-import { StockBajoSummary } from '../Inventario/stock-bajo-summary';
+import { StockBajoSummary } from '../Productos/stock-bajo-summary';
 
 export interface StockBajoCardProps {
   readonly onVerBajoStock?: () => void;

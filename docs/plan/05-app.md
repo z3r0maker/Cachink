@@ -27,7 +27,8 @@
 
 ### A-02 Consolidate `Inventario/` ↔ `Productos/` duplication
 
-- [ ] Status · **Blocked by:** F-04 · **Blocks:** A-09
+- [x] Status · **Blocked by:** F-04 · **Blocks:** A-09
+  - Done: 2026-09-16 · track/app · Larger than recorded: **12 byte-identical files + 2 cosmetic-only diffs** (`readonly` modifiers, destructuring, comments — no behaviour difference) + 2 Inventario-only files (`stock-screen.tsx`, `producto-card.tsx`). Moved the two into `Productos/`, kept the stricter (`readonly`) popover, deleted `Inventario/`, barrel now `export * from './Productos/index'` (stale comment gone), 2 src + 4 test importers repointed. Verified: typecheck/lint/format/1,877 ui tests green; app entry bundle built fresh (no `screens/Inventario/` paths) and the app boots on the iPad sim. Productos Maestro flows not re-run (A-16 owns the harness fix). Note for A-16: Metro must not run with `CI=1` during development — it disables file watching and serves a stale bundle.
 - **Context:** 10 duplicated files; 8 identical, 2 diverged (`producto-detail-popover.tsx`, `producto-detail-route.tsx`); the app runs the `Inventario/` copies because `screens/index.ts:17-18` exports `Inventario` wholesale and only new names from `Productos`. CLAUDE.md §2.3 violation.
 - **Steps:** diff the two diverged files; keep the **behaviour the app currently runs** (`Inventario/` versions) but move everything into `Productos/`; delete `Inventario/`; fix the barrel and the stale comment; keep `apps/mobile/src/app/inventario.tsx` redirect one more release.
 - **Acceptance:** `packages/ui/src/screens/Inventario` gone; all 10 productos Maestro flows green (`run-flow.sh` each, or `full-regression.sh --filter productos` if supported); `pnpm --filter @xangarro/ui test` green.

@@ -55,20 +55,20 @@ function DetailBody({ producto, stock }: { producto: Product; stock: number }): 
 }
 
 interface ActionStackProps {
-  onEntrada: () => void;
-  onSalida: () => void;
-  onDelete: () => void;
-  deleting: boolean;
-  t: ReturnType<typeof useTranslation>['t'];
+  readonly onEntrada: () => void;
+  readonly onSalida: () => void;
+  readonly onDelete: () => void;
+  readonly deleting: boolean;
+  readonly t: ReturnType<typeof useTranslation>['t'];
 }
 
 function ActionStack(props: ActionStackProps): ReactElement {
-  const { t } = props;
+  const { onEntrada, onSalida, onDelete, deleting, t } = props;
   return (
     <View marginTop={16} gap={8}>
       <Btn
         variant="green"
-        onPress={props.onEntrada}
+        onPress={onEntrada}
         fullWidth
         testID="producto-detail-entrada"
         icon={<Icon name="plus" size={18} color={colors.white} />}
@@ -77,7 +77,7 @@ function ActionStack(props: ActionStackProps): ReactElement {
       </Btn>
       <Btn
         variant="primary"
-        onPress={props.onSalida}
+        onPress={onSalida}
         fullWidth
         testID="producto-detail-salida"
         icon={<Icon name="minus" size={18} color={colors.black} />}
@@ -86,8 +86,8 @@ function ActionStack(props: ActionStackProps): ReactElement {
       </Btn>
       <Btn
         variant="danger"
-        onPress={props.onDelete}
-        disabled={props.deleting}
+        onPress={onDelete}
+        disabled={deleting}
         fullWidth
         testID="producto-detail-delete"
         icon={<Icon name="trash-2" size={18} color={colors.white} />}

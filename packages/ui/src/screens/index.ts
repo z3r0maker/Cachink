@@ -14,25 +14,7 @@ export * from './Ventas/index';
 export * from './Clientes/index';
 export * from './CuentasPorCobrar/index';
 export * from './Egresos/index';
-export * from './Inventario/index';
-// Productos/ re-exports come from Inventario/ which still has the full set.
-// ProductosTabBar + visibleSubTabs are new and only in Productos/.
-export {
-  ProductosTabBar,
-  type ProductosTabBarProps,
-  type ProductosSubTab,
-  visibleSubTabs,
-  NuevoProductoScreen,
-  type NuevoProductoScreenProps,
-  initialProductoState,
-  type ProductoFormState,
-  IconPickerScreen,
-  type IconPickerScreenProps,
-  ProductoDetailScreen,
-  type ProductoDetailScreenProps,
-  ProductoDetailSmart,
-  type ProductoDetailSmartProps,
-} from './Productos/index';
+export * from './Productos/index';
 export * from './CorteDeDia/index';
 export * from './Estados/index';
 export * from './DirectorHome/index';

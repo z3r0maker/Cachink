@@ -16,7 +16,7 @@
 import { useEffect } from 'react';
 import type { NotificationScheduler } from '../notifications/index';
 import { useNotificationScheduler } from '../notifications/index';
-import { countBajoStock } from '../screens/Inventario/stock-bajo-banner';
+import { countBajoStock } from '../screens/Productos/stock-bajo-banner';
 import { useTranslation } from '../i18n/index';
 import { useRole } from '../app-config/index';
 import { useProductosConStock } from './use-productos-con-stock';
