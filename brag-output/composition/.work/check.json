@@ -1,0 +1,2696 @@
+{
+  "ok": false,
+  "strict": false,
+  "lint": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 2,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "duplicate_media_discovery_risk",
+        "severity": "warning",
+        "message": "Detected 3 matching img entries with the same source/start/duration.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "/Users/eduardo.torres/Downloads/Cachink/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Avoid duplicated media nodes that can be discovered twice during compilation."
+      },
+      {
+        "code": "composition_file_too_large",
+        "severity": "warning",
+        "message": "This HTML composition file has 340 lines. Smaller sub-compositions are easier to read, iterate on, and diff.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {},
+        "sourceFile": "/Users/eduardo.torres/Downloads/Cachink/brag-output/composition/index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 0,
+          "height": 0
+        },
+        "time": 0,
+        "fixHint": "Split coherent scenes or layers into separate .html files under compositions/, then mount them from the parent with data-composition-src so each file stays small enough to inspect, revise, and validate independently."
+      }
+    ],
+    "filesScanned": 1
+  },
+  "runtime": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 21,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-1\" is 0.18s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.18s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-2\" is 0.15s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.15s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-3\" is 0.12s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.12s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-4\" is 0.18s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.18s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-5\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-6\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-7\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-8\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-9\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-10\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-11\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-12\" is 0.25s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.25s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-13\" is 0.25s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.25s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-14\" is 0.25s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.25s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-15\" is 0.25s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.25s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-16\" is 0.15s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.15s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-17\" is 0.01s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.01s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-19\" is 0.18s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.18s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-20\" is 0.65s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.65s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-21\" is 0.61s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.61s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      },
+      {
+        "code": "clip_media_fit",
+        "severity": "warning",
+        "message": "Audio \"sfx-22\" is 0.15s but its slot (data-duration) is 1.20s — the slot is shortened to the media length when rendered. Set data-duration to ~0.15s if that isn't intended.",
+        "selector": "[data-composition-id]",
+        "dataAttributes": {
+          "data-composition-id": "main",
+          "data-start": "0",
+          "data-duration": "21",
+          "data-width": "1920",
+          "data-height": "1080"
+        },
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "time": 0
+      }
+    ]
+  },
+  "layout": {
+    "ok": false,
+    "errorCount": 26,
+    "warningCount": 4,
+    "infoCount": 32,
+    "findings": [
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 10.875,
+        "selector": "#v-title",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1242,
+          "top": 170,
+          "right": 1396.14,
+          "bottom": 231,
+          "width": 154.14,
+          "height": 61
+        },
+        "containerSelector": "#sh-title",
+        "text": "Ventas",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 170,
+          "width": 154.14,
+          "height": 61
+        },
+        "firstSeen": 10.875,
+        "lastSeen": 15.875,
+        "occurrences": 43,
+        "heldMs": 5000
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 10.875,
+        "selector": "#t1 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 344,
+          "right": 1438.47,
+          "bottom": 377,
+          "width": 174.47,
+          "height": 33
+        },
+        "containerSelector": "#sh-total",
+        "text": "Taco al pastor",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 344,
+          "width": 174.47,
+          "height": 33
+        },
+        "firstSeen": 10.875,
+        "lastSeen": 15.875,
+        "occurrences": 43,
+        "heldMs": 5000
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 10.875,
+        "selector": "#b1-3",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1447.03,
+          "top": 323.5,
+          "right": 1462.95,
+          "bottom": 356.5,
+          "width": 15.92,
+          "height": 33
+        },
+        "containerSelector": "#sh-total",
+        "text": "3",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1447.03,
+          "y": 323.5,
+          "width": 15.92,
+          "height": 33
+        },
+        "firstSeen": 10.875,
+        "lastSeen": 15.875,
+        "occurrences": 43,
+        "heldMs": 5000
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 10.875,
+        "selector": "#fb5",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1357.17,
+          "top": 896,
+          "right": 1602.81,
+          "bottom": 936,
+          "width": 245.64,
+          "height": 40
+        },
+        "containerSelector": "#registrar",
+        "text": "Cobrar $145.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1357.17,
+          "y": 896,
+          "width": 245.64,
+          "height": 40
+        },
+        "firstSeen": 10.875,
+        "lastSeen": 15.875,
+        "occurrences": 43,
+        "heldMs": 5000
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 11,
+        "selector": "#v-hint",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1242,
+          "top": 236,
+          "right": 1647.88,
+          "bottom": 261,
+          "width": 405.88,
+          "height": 25
+        },
+        "containerSelector": "#sh-total-l",
+        "text": "Toca un producto para agregarlo a la venta",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 236,
+          "width": 405.88,
+          "height": 25
+        },
+        "firstSeen": 11,
+        "lastSeen": 15.875,
+        "occurrences": 42,
+        "heldMs": 4875
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 11.125,
+        "selector": "#t3 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 564,
+          "right": 1377.91,
+          "bottom": 626.11,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "containerSelector": "#m3 > div:nth-of-type(1)",
+        "text": "Agua de horchata",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 564,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "firstSeen": 11.125,
+        "lastSeen": 12.125,
+        "occurrences": 9,
+        "heldMs": 1000
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 11.25,
+        "selector": "#t3 > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 682,
+          "right": 1374.56,
+          "bottom": 722,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#m4 > div:nth-of-type(1)",
+        "text": "$30.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 682,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 11.25,
+        "lastSeen": 12.125,
+        "occurrences": 8,
+        "heldMs": 875
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#v-title",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1242,
+          "top": 170,
+          "right": 1396.14,
+          "bottom": 231,
+          "width": 154.14,
+          "height": 61
+        },
+        "containerSelector": "#sheet",
+        "text": "Ventas",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 170,
+          "width": 154.14,
+          "height": 61
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#v-hint",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1242,
+          "top": 236,
+          "right": 1647.88,
+          "bottom": 261,
+          "width": 405.88,
+          "height": 25
+        },
+        "containerSelector": "#sheet",
+        "text": "Toca un producto para agregarlo a la venta",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 236,
+          "width": 405.88,
+          "height": 25
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#t1 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 344,
+          "right": 1438.47,
+          "bottom": 377,
+          "width": 174.47,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "Taco al pastor",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 344,
+          "width": 174.47,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#b1-3",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1447.03,
+          "top": 323.5,
+          "right": 1462.95,
+          "bottom": 356.5,
+          "width": 15.92,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "3",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1447.03,
+          "y": 323.5,
+          "width": 15.92,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#t2 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 344,
+          "right": 1645.81,
+          "bottom": 377,
+          "width": 134.81,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "Quesadilla",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 344,
+          "width": 134.81,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#b2 > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1696.63,
+          "top": 323.5,
+          "right": 1707.38,
+          "bottom": 356.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "1",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1696.63,
+          "y": 323.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#t3 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 682,
+          "right": 1374.56,
+          "bottom": 722,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#sheet",
+        "text": "$30.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 682,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#t4 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 682,
+          "right": 1621.56,
+          "bottom": 722,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#sheet",
+        "text": "$60.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 682,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#fs5",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1242,
+          "top": 832,
+          "right": 1477.02,
+          "bottom": 860,
+          "width": 235.02,
+          "height": 28
+        },
+        "containerSelector": "#sheet",
+        "text": "5 productos · $145.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 832,
+          "width": 235.02,
+          "height": 28
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "error",
+        "time": 12.833,
+        "selector": "#fb5",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1357.17,
+          "top": 896,
+          "right": 1602.81,
+          "bottom": 936,
+          "width": 245.64,
+          "height": 40
+        },
+        "containerSelector": "#registrar",
+        "text": "Cobrar $145.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1357.17,
+          "y": 896,
+          "width": 245.64,
+          "height": 40
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 15.167,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 13,
+        "selector": "#t2 > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1511,
+          "top": 462,
+          "right": 1621.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#e4",
+        "text": "$40.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 13,
+        "lastSeen": 15.875,
+        "occurrences": 25,
+        "heldMs": 2875
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 13.125,
+        "selector": "#t3 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 564,
+          "right": 1377.91,
+          "bottom": 626.11,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "containerSelector": "div.cl",
+        "text": "Agua de horchata",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 564,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "firstSeen": 13.125,
+        "lastSeen": 15.875,
+        "occurrences": 24,
+        "heldMs": 2750
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 13.125,
+        "selector": "#t4 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1511,
+          "top": 564,
+          "right": 1595.73,
+          "bottom": 597,
+          "width": 84.73,
+          "height": 33
+        },
+        "containerSelector": "div.cv.num",
+        "text": "Gringa",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 564,
+          "width": 84.73,
+          "height": 33
+        },
+        "firstSeen": 13.125,
+        "lastSeen": 15.875,
+        "occurrences": 24,
+        "heldMs": 2750
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "#t3 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 564,
+          "right": 1377.91,
+          "bottom": 626.11,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "containerSelector": "div.ct",
+        "text": "Agua de horchata",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 564,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 11,
+        "heldMs": 1250
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "#b3 > span:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1449.63,
+          "top": 543.5,
+          "right": 1460.38,
+          "bottom": 576.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "containerSelector": "div.ct",
+        "text": "1",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1449.63,
+          "y": 543.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 12,
+        "heldMs": 1250
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "#t4 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1511,
+          "top": 564,
+          "right": 1595.73,
+          "bottom": 597,
+          "width": 84.73,
+          "height": 33
+        },
+        "containerSelector": "div.ct",
+        "text": "Gringa",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 564,
+          "width": 84.73,
+          "height": 33
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 12,
+        "heldMs": 1250
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "#t4 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1511,
+          "top": 564,
+          "right": 1595.73,
+          "bottom": 597,
+          "width": 84.73,
+          "height": 33
+        },
+        "containerSelector": "div.cs.num",
+        "text": "Gringa",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 564,
+          "width": 84.73,
+          "height": 33
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 12,
+        "heldMs": 1250
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "div.cv.num",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1541.97,
+          "top": 571,
+          "right": 1694,
+          "bottom": 627,
+          "width": 152.03,
+          "height": 56
+        },
+        "containerSelector": "div.ct",
+        "text": "$55.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1541.97,
+          "y": 571,
+          "width": 152.03,
+          "height": 56
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 11,
+        "heldMs": 1250
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 14.625,
+        "selector": "div.cv.num",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1541.97,
+          "top": 571,
+          "right": 1694,
+          "bottom": 627,
+          "width": 152.03,
+          "height": 56
+        },
+        "containerSelector": "div.cs.num",
+        "text": "$55.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1541.97,
+          "y": 571,
+          "width": 152.03,
+          "height": 56
+        },
+        "firstSeen": 14.625,
+        "lastSeen": 15.875,
+        "occurrences": 12,
+        "heldMs": 1250
+      },
+      {
+        "code": "container_overflow",
+        "severity": "warning",
+        "time": 5.833,
+        "selector": "#sheet",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1456.33,
+          "top": 1170,
+          "right": 1988.33,
+          "bottom": 2026,
+          "width": 532,
+          "height": 856
+        },
+        "containerSelector": "#screen",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 1456.33,
+          "top": 194,
+          "right": 1988.33,
+          "bottom": 1126,
+          "width": 532,
+          "height": 932
+        },
+        "overflow": {
+          "bottom": 900
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1456.33,
+          "y": 1170,
+          "width": 532,
+          "height": 856
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 10.5,
+        "occurrences": 3,
+        "heldMs": 0
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "warning",
+        "time": 8.167,
+        "selector": "#sheet",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 1214,
+          "top": 1050,
+          "right": 1746,
+          "bottom": 1906,
+          "width": 532,
+          "height": 856
+        },
+        "containerSelector": "#root",
+        "text": "Cobrar Total a cobrar $145.00 Efectivo Transfere",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 826
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1214,
+          "y": 1050,
+          "width": 532,
+          "height": 856
+        },
+        "firstSeen": 8.167,
+        "lastSeen": 10.5,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 12.375,
+        "selector": "#t1 > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 462,
+          "right": 1374.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#e1",
+        "text": "$25.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.375,
+        "lastSeen": 12.5,
+        "occurrences": 2,
+        "heldMs": 125
+      },
+      {
+        "code": "content_overlap",
+        "severity": "warning",
+        "time": 12.625,
+        "selector": "#t1 > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 462,
+          "right": 1374.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#e2",
+        "text": "$25.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.625,
+        "lastSeen": 12.75,
+        "occurrences": 2,
+        "heldMs": 125
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "div.pill",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1833.08,
+          "top": 236,
+          "right": 1944.33,
+          "bottom": 259,
+          "width": 111.25,
+          "height": 23
+        },
+        "containerSelector": "#root",
+        "text": "Sin conexión",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 24.33
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1833.08,
+          "y": 236,
+          "width": 111.25,
+          "height": 23
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#fs1",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1484.33,
+          "top": 1152,
+          "right": 1694.83,
+          "bottom": 1180,
+          "width": 210.5,
+          "height": 28
+        },
+        "containerSelector": "#root",
+        "text": "1 producto · $25.00",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 100
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1484.33,
+          "y": 1152,
+          "width": 210.5,
+          "height": 28
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#fb1",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1609.11,
+          "top": 1216,
+          "right": 1835.55,
+          "bottom": 1256,
+          "width": 226.44,
+          "height": 40
+        },
+        "containerSelector": "#root",
+        "text": "Cobrar $25.00",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 176
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1609.11,
+          "y": 1216,
+          "width": 226.44,
+          "height": 40
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#sh-title",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1484.33,
+          "top": 1209,
+          "right": 1615.1,
+          "bottom": 1256,
+          "width": 130.77,
+          "height": 47
+        },
+        "containerSelector": "#root",
+        "text": "Cobrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 176
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1484.33,
+          "y": 1209,
+          "width": 130.77,
+          "height": 47
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#sh-total-l",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1484.33,
+          "top": 1273,
+          "right": 1627.05,
+          "bottom": 1301,
+          "width": 142.72,
+          "height": 28
+        },
+        "containerSelector": "#root",
+        "text": "Total a cobrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 221
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1484.33,
+          "y": 1273,
+          "width": 142.72,
+          "height": 28
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#sh-total",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1484.33,
+          "top": 1303,
+          "right": 1730.43,
+          "bottom": 1383,
+          "width": 246.09,
+          "height": 80
+        },
+        "containerSelector": "#root",
+        "text": "$145.00",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 303
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1484.33,
+          "y": 1303,
+          "width": 246.09,
+          "height": 80
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#registrar",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1651.18,
+          "top": 1930,
+          "right": 1793.49,
+          "bottom": 1970,
+          "width": 142.31,
+          "height": 40
+        },
+        "containerSelector": "#root",
+        "text": "Registrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 890
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1651.18,
+          "y": 1930,
+          "width": 142.31,
+          "height": 40
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#s3-frame",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 242.33,
+          "top": 0,
+          "right": 2162.33,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "containerSelector": "#s3",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 242.33
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 242.33,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "container_overflow",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#footer",
+        "message": "Element extends outside a clipping layout container.",
+        "rect": {
+          "left": 1456.33,
+          "top": 1130,
+          "right": 1988.33,
+          "bottom": 1326,
+          "width": 532,
+          "height": 196
+        },
+        "containerSelector": "#screen",
+        "fixHint": "Resize/reposition the child or container, or mark intentional overflow with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 1456.33,
+          "top": 194,
+          "right": 1988.33,
+          "bottom": 1126,
+          "width": 532,
+          "height": 932
+        },
+        "overflow": {
+          "bottom": 200
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1456.33,
+          "y": 1130,
+          "width": 532,
+          "height": 196
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "panel_out_of_canvas",
+        "severity": "info",
+        "time": 5.833,
+        "selector": "#phone",
+        "message": "Painted panel extends outside the composition canvas.",
+        "rect": {
+          "left": 1442.33,
+          "top": 180,
+          "right": 2002.33,
+          "bottom": 1140,
+          "width": 560,
+          "height": 960
+        },
+        "containerSelector": "#root",
+        "text": "Taquería Don Pedro Sin conexión Ventas Toca un p",
+        "fixHint": "Move the panel inward, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "right": 82.33,
+          "bottom": 60
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1442.33,
+          "y": 180,
+          "width": 560,
+          "height": 960
+        },
+        "firstSeen": 5.833,
+        "lastSeen": 5.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 8.167,
+        "selector": "#sh-title",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1242,
+          "top": 1089,
+          "right": 1372.77,
+          "bottom": 1136,
+          "width": 130.77,
+          "height": 47
+        },
+        "containerSelector": "#root",
+        "text": "Cobrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 56
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 1089,
+          "width": 130.77,
+          "height": 47
+        },
+        "firstSeen": 8.167,
+        "lastSeen": 10.5,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 8.167,
+        "selector": "#sh-total-l",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1242,
+          "top": 1153,
+          "right": 1384.72,
+          "bottom": 1181,
+          "width": 142.72,
+          "height": 28
+        },
+        "containerSelector": "#root",
+        "text": "Total a cobrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 101
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 1153,
+          "width": 142.72,
+          "height": 28
+        },
+        "firstSeen": 8.167,
+        "lastSeen": 10.5,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 8.167,
+        "selector": "#sh-total",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1242,
+          "top": 1183,
+          "right": 1488.09,
+          "bottom": 1263,
+          "width": 246.09,
+          "height": 80
+        },
+        "containerSelector": "#root",
+        "text": "$145.00",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 183
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 1183,
+          "width": 246.09,
+          "height": 80
+        },
+        "firstSeen": 8.167,
+        "lastSeen": 10.5,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "info",
+        "time": 8.167,
+        "selector": "#registrar",
+        "message": "Text extends outside the composition canvas.",
+        "rect": {
+          "left": 1408.84,
+          "top": 1810,
+          "right": 1551.16,
+          "bottom": 1850,
+          "width": 142.31,
+          "height": 40
+        },
+        "containerSelector": "#root",
+        "text": "Registrar",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "containerRect": {
+          "left": 0,
+          "top": 0,
+          "right": 1920,
+          "bottom": 1080,
+          "width": 1920,
+          "height": 1080
+        },
+        "overflow": {
+          "bottom": 770
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1408.84,
+          "y": 1810,
+          "width": 142.31,
+          "height": 40
+        },
+        "firstSeen": 8.167,
+        "lastSeen": 10.5,
+        "occurrences": 2,
+        "heldMs": 0
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 10.75,
+        "selector": "#t1 > div:nth-of-type(1)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 344,
+          "right": 1438.47,
+          "bottom": 377,
+          "width": 174.47,
+          "height": 33
+        },
+        "containerSelector": "#sh-title",
+        "text": "Taco al pastor",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 344,
+          "width": 174.47,
+          "height": 33
+        },
+        "firstSeen": 10.75,
+        "lastSeen": 10.75,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 10.75,
+        "selector": "#t1 > div:nth-of-type(2)",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1264,
+          "top": 462,
+          "right": 1374.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#sh-total",
+        "text": "$25.00",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 10.75,
+        "lastSeen": 10.75,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "content_overlap",
+        "severity": "info",
+        "time": 10.875,
+        "selector": "#v-hint",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "rect": {
+          "left": 1242,
+          "top": 236,
+          "right": 1647.88,
+          "bottom": 261,
+          "width": 405.88,
+          "height": 25
+        },
+        "containerSelector": "#sh-title",
+        "text": "Toca un producto para agregarlo a la venta",
+        "fixHint": "Give each block its own zone, or mark intentional layering with data-layout-allow-overlap.",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 236,
+          "width": 405.88,
+          "height": 25
+        },
+        "firstSeen": 10.875,
+        "lastSeen": 10.875,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.833,
+        "selector": "#t1 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 462,
+          "right": 1374.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "div.field.num",
+        "text": "$25.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 12.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.833,
+        "selector": "#t2 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 462,
+          "right": 1621.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "div.field.num",
+        "text": "$40.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 12.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.833,
+        "selector": "#t3 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 564,
+          "right": 1377.91,
+          "bottom": 626.11,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "containerSelector": "#sheet",
+        "text": "Agua de horchata",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 564,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 12.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.833,
+        "selector": "#b3 > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1449.63,
+          "top": 543.5,
+          "right": 1460.38,
+          "bottom": 576.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "1",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1449.63,
+          "y": 543.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 12.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 12.833,
+        "selector": "#t4 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 564,
+          "right": 1595.73,
+          "bottom": 597,
+          "width": 84.73,
+          "height": 33
+        },
+        "containerSelector": "#sheet",
+        "text": "Gringa",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 564,
+          "width": 84.73,
+          "height": 33
+        },
+        "firstSeen": 12.833,
+        "lastSeen": 12.833,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#t1 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 462,
+          "right": 1374.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "#confirm",
+        "text": "$25.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#t2 > div:nth-of-type(2)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 462,
+          "right": 1621.56,
+          "bottom": 502,
+          "width": 110.56,
+          "height": 40
+        },
+        "containerSelector": "div.check",
+        "text": "$40.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 462,
+          "width": 110.56,
+          "height": 40
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#t3 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1264,
+          "top": 564,
+          "right": 1377.91,
+          "bottom": 626.11,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "containerSelector": "#confirm",
+        "text": "Agua de horchata",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1264,
+          "y": 564,
+          "width": 113.91,
+          "height": 62.11
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#b3 > span:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1449.63,
+          "top": 543.5,
+          "right": 1460.38,
+          "bottom": 576.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "containerSelector": "#confirm",
+        "text": "1",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1449.63,
+          "y": 543.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#t4 > div:nth-of-type(1)",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1511,
+          "top": 564,
+          "right": 1595.73,
+          "bottom": 597,
+          "width": 84.73,
+          "height": 33
+        },
+        "containerSelector": "#confirm",
+        "text": "Gringa",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1511,
+          "y": 564,
+          "width": 84.73,
+          "height": 33
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "div.field-l",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1242,
+          "top": 391,
+          "right": 1424.25,
+          "bottom": 419,
+          "width": 182.25,
+          "height": 28
+        },
+        "containerSelector": "#confirm",
+        "text": "Efectivo recibido",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1242,
+          "y": 391,
+          "width": 182.25,
+          "height": 28
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_box_overflow",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#e4",
+        "message": "Text extends outside its nearest visual/container box.",
+        "rect": {
+          "left": 1531.98,
+          "top": 448.5,
+          "right": 1726.63,
+          "bottom": 509.5,
+          "width": 194.64,
+          "height": 61
+        },
+        "containerSelector": "div.field.num",
+        "text": "$200.00",
+        "fixHint": "Text is 195px x 61px inside 476px x 92px and overflows by up to 9px; widen the container to at least ~485px, or allow wrapping with max-width/fitTextFontSize.",
+        "containerRect": {
+          "left": 1242,
+          "top": 433,
+          "right": 1718,
+          "bottom": 525,
+          "width": 476,
+          "height": 92
+        },
+        "overflow": {
+          "right": 8.63
+        },
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1531.98,
+          "y": 448.5,
+          "width": 194.64,
+          "height": 61
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "#e4",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1531.98,
+          "top": 448.5,
+          "right": 1726.63,
+          "bottom": 509.5,
+          "width": 194.64,
+          "height": 61
+        },
+        "containerSelector": "#confirm",
+        "text": "$200.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 0.85,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1531.98,
+          "y": 448.5,
+          "width": 194.64,
+          "height": 61
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "div.cl",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1266,
+          "top": 581.5,
+          "right": 1373.64,
+          "bottom": 616.5,
+          "width": 107.64,
+          "height": 35
+        },
+        "containerSelector": "#confirm",
+        "text": "Cambio",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1266,
+          "y": 581.5,
+          "width": 107.64,
+          "height": 35
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      },
+      {
+        "code": "text_occluded",
+        "severity": "info",
+        "time": 15.167,
+        "selector": "div.cv.num",
+        "message": "Text is hidden beneath an opaque element.",
+        "rect": {
+          "left": 1541.97,
+          "top": 571,
+          "right": 1694,
+          "bottom": 627,
+          "width": 152.03,
+          "height": 56
+        },
+        "containerSelector": "#confirm",
+        "text": "$55.00",
+        "fixHint": "Give the text its own zone, raise its stacking order above the covering element, or mark intentional layering with data-layout-allow-occlusion.",
+        "coveredFraction": 1,
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1541.97,
+          "y": 571,
+          "width": 152.03,
+          "height": 56
+        },
+        "firstSeen": 15.167,
+        "lastSeen": 15.167,
+        "occurrences": 1,
+        "heldMs": 0
+      }
+    ],
+    "duration": 21,
+    "samples": [
+      1.167,
+      3.5,
+      5.833,
+      8.167,
+      10.5,
+      12.833,
+      15.167,
+      17.5,
+      19.833
+    ],
+    "transitionSamples": [],
+    "transitionSamplesDropped": 0,
+    "tolerance": 2,
+    "totalIssueCount": 62,
+    "truncated": false
+  },
+  "motion": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 0,
+    "infoCount": 0,
+    "findings": [],
+    "enabled": false,
+    "samples": 0
+  },
+  "contrast": {
+    "ok": true,
+    "errorCount": 0,
+    "warningCount": 3,
+    "infoCount": 0,
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.41:1; WCAG AA requires 3:1.",
+        "text": "3",
+        "fg": "rgb(255,214,10)",
+        "bg": "rgb(255,255,255)",
+        "ratio": 1.41,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(175,147,7)",
+        "large": true,
+        "selector": "#b1-3",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1447.03125,
+          "y": 323.5,
+          "width": 15.921875,
+          "height": 33
+        },
+        "time": 15.167
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.41:1; WCAG AA requires 3:1.",
+        "text": "1",
+        "fg": "rgb(255,214,10)",
+        "bg": "rgb(255,255,255)",
+        "ratio": 1.41,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(175,147,7)",
+        "large": true,
+        "selector": "div > div:nth-of-type(3) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(5) > div:nth-of-type(3) > span",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1696.625,
+          "y": 323.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "time": 15.167
+      },
+      {
+        "code": "contrast_aa_failure",
+        "severity": "warning",
+        "message": "Contrast is 1.31:1; WCAG AA requires 3:1.",
+        "text": "1",
+        "fg": "rgb(255,214,10)",
+        "bg": "rgb(214,255,244)",
+        "ratio": 1.31,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(168,141,7)",
+        "large": true,
+        "selector": "div > div:nth-of-type(3) > div > div > div:nth-of-type(2) > div:nth-of-type(2) > div > div:nth-of-type(6) > div:nth-of-type(3) > span",
+        "dataAttributes": {},
+        "sourceFile": "index.html",
+        "bbox": {
+          "x": 1449.625,
+          "y": 543.5,
+          "width": 10.75,
+          "height": 33
+        },
+        "time": 15.167
+      }
+    ],
+    "enabled": true,
+    "samples": [
+      1.167,
+      5.833,
+      10.5,
+      15.167,
+      19.833
+    ],
+    "checked": 66,
+    "passed": 63
+  },
+  "hdr": {
+    "autoPromotion": null,
+    "inspection": "available"
+  },
+  "snapshots": {
+    "enabled": false,
+    "files": [],
+    "times": [],
+    "findingFiles": []
+  },
+  "_meta": {
+    "version": "0.8.43",
+    "latestVersion": "0.8.43",
+    "updateAvailable": false
+  }
+}
