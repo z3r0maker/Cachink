@@ -1,0 +1,11 @@
+# Hide the soft keyboard on a full-screen form by pulling the form down (its
+# ScrollView uses keyboardDismissMode="on-drag"). Needed after the precio
+# field: its numeric keypad has no return key and covers the save button on
+# phones, and Maestro's `hideKeyboard` taps outside the keyboard, which can
+# land on another control. Verified on the iPhone 17 sim: a long, slow pull.
+appId: mx.xangarro.mobile
+---
+- swipe:
+    start: '50%,30%'
+    end: '50%,70%'
+    duration: 600

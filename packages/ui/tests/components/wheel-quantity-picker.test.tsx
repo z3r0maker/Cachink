@@ -118,4 +118,12 @@ describe('WheelQuantityPicker', () => {
     const firstOption = screen.getByTestId('wheel-option-0');
     expect(firstOption).toHaveAttribute('data-selected', 'true');
   });
+  it('ignores a wheel change the user did not drag to (layout shift after the keyboard closes)', () => {
+    const onChange = vi.fn();
+    renderWithProviders(
+      <WheelQuantityPicker label="Cantidad" value={1} onChange={onChange} min={1} max={10} />,
+    );
+    fireEvent.click(screen.getByTestId('wheel-settle-1'));
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

@@ -3,7 +3,7 @@
  * scanner that fills the código.
  */
 
-import { useRef, useState, type ReactElement } from 'react';
+import { useRef, useState, type ReactElement, type RefObject } from 'react';
 import type { TextInput } from 'react-native';
 import type { InventoryCategory } from '@xangarro/domain';
 import { Btn, Icon, Input, OptionCardGroup, Scanner } from '../../components/index';
@@ -17,7 +17,9 @@ import {
 } from './nuevo-producto-form';
 
 type Props = { readonly form: ProductoFormApi };
-type SaleProps = Props & { readonly stockEnabled: boolean };
+/** Precio de venta's input, focused from the código's Return key. */
+type PrecioRef = { readonly precioRef: RefObject<TextInput | null> };
+type SaleProps = Props & PrecioRef & { readonly stockEnabled: boolean };
 
 /** "Escanear código" button + scanner sheet. */
 function ScanCode(props: { onCode: (code: string) => void }): ReactElement {
@@ -40,7 +42,7 @@ function ScanCode(props: { onCode: (code: string) => void }): ReactElement {
 }
 
 /** Nombre + código, with the scanner that fills the código. */
-function IdentityInputs({ form }: Props): ReactElement {
+function IdentityInputs({ form, precioRef }: Props & PrecioRef): ReactElement {
   const { t } = useTranslation();
   const skuRef = useRef<TextInput>(null);
   return (
@@ -64,6 +66,11 @@ function IdentityInputs({ form }: Props): ReactElement {
         onChange={(v) => form.update({ sku: v })}
         testID="producto-sku"
         inputRef={skuRef}
+        // Return walks nombre → código → precio: on phones the keyboard covers
+        // the precio field, and this keeps it reachable without closing it.
+        returnKeyType="next"
+        onSubmitEditing={() => focusRef(precioRef)}
+        blurOnSubmit={false}
       />
       <ScanCode onCode={(code) => form.update({ sku: code })} />
     </>
@@ -71,7 +78,7 @@ function IdentityInputs({ form }: Props): ReactElement {
 }
 
 /** Categoría, precio de venta and whether stock is tracked. */
-function SaleInputs({ form, stockEnabled }: SaleProps): ReactElement {
+function SaleInputs({ form, stockEnabled, precioRef }: SaleProps): ReactElement {
   const { t } = useTranslation();
   return (
     <>
@@ -90,6 +97,7 @@ function SaleInputs({ form, stockEnabled }: SaleProps): ReactElement {
         error={form.errors.precioVenta}
         required
         testID="producto-precio-venta"
+        inputRef={precioRef}
       />
       {stockEnabled && (
         <OptionCardGroup<StockTracking>
@@ -108,10 +116,11 @@ export function QuickAddFields({
   form,
   stockEnabled = true,
 }: Props & { readonly stockEnabled?: boolean }): ReactElement {
+  const precioRef = useRef<TextInput>(null);
   return (
     <>
-      <IdentityInputs form={form} />
-      <SaleInputs form={form} stockEnabled={stockEnabled} />
+      <IdentityInputs form={form} precioRef={precioRef} />
+      <SaleInputs form={form} stockEnabled={stockEnabled} precioRef={precioRef} />
     </>
   );
 }

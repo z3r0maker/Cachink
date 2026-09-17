@@ -8,19 +8,14 @@ appId: mx.xangarro.mobile
     visible:
       id: 'ventas-product-grid'
     timeout: 8000
-# The grid is alphabetical and long: search so the tile is on screen.
-- tapOn:
-    id: 'ventas-product-search'
-# The search keeps its text after a sale.
-- eraseText
-- inputText: ${PRODUCT}
-- hideKeyboard
-# The search leaves one tile. Tap it by id: a text match also hits the search
-# box, which shows the same name.
-- tapOn:
-    id: 'producto-tile-.*'
+- runFlow:
+    file: add-to-cart.yaml
+    env:
+      PRODUCT: ${PRODUCT}
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 - tapOn:
     id: 'cart-checkout-btn'
 - extendedWaitUntil:

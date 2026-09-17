@@ -43,7 +43,8 @@ export function EgresoCard(props: EgresoCardProps): ReactElement {
           >
             {props.egreso.concepto}
           </Text>
-          <View flexDirection="row" gap={6} marginTop={6}>
+          {/* Wraps: a long proveedor otherwise runs under the monto on phones. */}
+          <View flexDirection="row" flexWrap="wrap" gap={6} marginTop={6}>
             <CategoriaTag categoria={props.egreso.categoria} />
             <Tag variant="neutral">{props.egreso.proveedor ?? t('egresos.sinProveedor')}</Tag>
           </View>

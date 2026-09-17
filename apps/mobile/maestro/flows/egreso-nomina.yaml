@@ -20,6 +20,11 @@ appId: mx.xangarro.mobile
 - tapOn: 'Ana — Cajera'
 - assertVisible:
     id: 'nomina-monto'
+- scrollUntilVisible:
+    element:
+      id: 'nomina-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'nomina-submit'
 

@@ -48,7 +48,8 @@ appId: mx.xangarro.mobile
 # --- Change categoría ---
 - tapOn:
     id: 'editar-egreso-categoria'
-- tapOn: 'Servicios'
+- tapOn:
+    id: 'combobox-option-Servicios'
 
 # --- Change monto ---
 - tapOn:
@@ -65,6 +66,11 @@ appId: mx.xangarro.mobile
 - runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Submit the edit.
+- scrollUntilVisible:
+    element:
+      id: 'editar-egreso-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'editar-egreso-submit'
 

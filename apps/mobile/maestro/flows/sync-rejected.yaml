@@ -20,7 +20,10 @@ env:
       ACTION: forget
       TABLE: products
       ROW_ID: 01JPRD00000000000000000007
-- tapOn: 'Agua de horchata'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Agua de horchata'
 - tapOn:
     id: 'cart-checkout-btn'
 - tapOn: 'Transferencia'

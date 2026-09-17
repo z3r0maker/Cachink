@@ -1,0 +1,14 @@
+# Scroll a full-screen form back to its top so its first field clears the top
+# bar. `scrollUntilVisible` stops as soon as the field is in the hierarchy,
+# which on phones can be under the top bar (the tap then misses the field).
+appId: mx.xangarro.mobile
+---
+- swipe:
+    start: '50%,30%'
+    end: '50%,75%'
+    duration: 500
+- swipe:
+    start: '50%,30%'
+    end: '50%,75%'
+    duration: 500
+- waitForAnimationToEnd

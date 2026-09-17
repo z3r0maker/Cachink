@@ -24,6 +24,7 @@ appId: mx.xangarro.mobile
       id: 'settings-crash-reporting-toggle'
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - assertVisible:
     id: 'settings-crash-reporting-toggle'
 
@@ -49,5 +50,6 @@ appId: mx.xangarro.mobile
       id: 'settings-open-bug-report'
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - assertVisible:
     id: 'settings-open-bug-report'

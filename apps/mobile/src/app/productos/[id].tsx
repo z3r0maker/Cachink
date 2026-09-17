@@ -14,10 +14,13 @@ export default function ProductoDetailRoute(): ReactElement {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const row = (useProductosConStock().data ?? []).find((r) => r.producto.id === id) ?? null;
+  // Explicitly back to the Productos tab: tabs switch with `router.replace`, so
+  // `router.back()` can land on whichever tab was open before (see nuevo-producto).
+  const toProductos = (): void => router.dismissTo('/productos' as never);
   return (
-    <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
+    <AppShellWrapper activeTabKey="productos" onBack={toProductos}>
       {row ? (
-        <ProductoDetailSmart row={row} fecha={today()} onBack={() => router.back()} />
+        <ProductoDetailSmart row={row} fecha={today()} onBack={toProductos} />
       ) : (
         <View flex={1} alignItems="center" justifyContent="center">
           <Text>Producto no encontrado</Text>

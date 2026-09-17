@@ -2,7 +2,8 @@
 #
 # Verifies:
 #   1. Empty cart → empty-cart-hint shown, no "Cobrar" button
-#   2. Tapping a product adds it → cart strip + "Cobrar" appear
+#   2. Tapping a product adds it → "Cobrar" and the cart strip appear
+#      (on phones the cart sits below the grid, so the flow scrolls to it)
 #
 # The free-text manual sale form was retired with the tap-to-cart POS (A-16).
 # x-entrypoint: activated
@@ -19,13 +20,22 @@ appId: mx.xangarro.mobile
       id: 'ventas-product-grid'
     timeout: 5000
 
-- assertVisible:
-    id: 'empty-cart-hint'
+- scrollUntilVisible:
+    element:
+      id: 'empty-cart-hint'
+    direction: DOWN
+    timeout: 20000
 - assertNotVisible:
     id: 'cart-checkout-btn'
 
-- tapOn: 'Quesadilla'
-- assertVisible:
-    id: 'cart-strip'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+- scrollUntilVisible:
+    element:
+      id: 'cart-strip'
+    direction: DOWN
+    timeout: 20000
 - assertVisible:
     id: 'cart-checkout-btn'

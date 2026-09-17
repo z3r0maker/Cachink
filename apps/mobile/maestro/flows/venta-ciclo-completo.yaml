@@ -13,32 +13,35 @@ appId: mx.xangarro.mobile
 ---
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/login-ana.yaml
-- runFlow: shared/ensure-caja-open.yaml
 
 # Step 1: create a product with quick-add.
 - tapOn:
     id: 'tab-productos'
+- extendedWaitUntil:
+    visible:
+      id: 'stock-nuevo-producto'
+    timeout: 8000
 - tapOn:
     id: 'stock-nuevo-producto'
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Taco E2E'
-- tapOn:
-    id: 'producto-precio-venta'
-- eraseText
+# Return walks nombre → código → precio (the keyboard covers precio on phones).
+- pressKey: Enter
+- pressKey: Enter
 - inputText: '20'
-- hideKeyboard
-- scrollUntilVisible:
-    element:
-      id: 'producto-submit'
-    direction: DOWN
-    timeout: 8000
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
 - extendedWaitUntil:
     visible:
       id: 'stock-buscar'
     timeout: 8000
+
+# Open the caja after creating the product: on the iPhone a tab tap made from
+# the Caja screen opened "Retirar efectivo" (open question in e2e-HANDOFF).
+- runFlow: shared/ensure-caja-open.yaml
 
 # Step 2: two cash sales.
 - runFlow:
@@ -57,7 +60,7 @@ appId: mx.xangarro.mobile
     element:
       id: 'otros-cancelaciones'
     direction: DOWN
-    timeout: 5000
+    timeout: 20000
     centerElement: true
 - tapOn:
     id: 'otros-cancelaciones'

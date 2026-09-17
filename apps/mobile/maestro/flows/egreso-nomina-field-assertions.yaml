@@ -44,6 +44,11 @@ appId: mx.xangarro.mobile
     id: 'nomina-monto'
 
 # Submit the nómina egreso.
+- scrollUntilVisible:
+    element:
+      id: 'nomina-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'nomina-submit'
 

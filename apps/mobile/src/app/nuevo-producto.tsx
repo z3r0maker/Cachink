@@ -12,11 +12,15 @@ export default function NuevoProductoRoute(): ReactElement {
   const router = useRouter();
   const crear = useCrearProducto();
   const stockEnabled = useFeatureFlag('stock');
+  // Back to the Productos tab explicitly, not `router.back()`: tabs switch with
+  // `router.replace`, so the history entry before this screen can be another
+  // tab (saving a product landed on Gastos on the iPhone sim).
+  const toProductos = (): void => router.dismissTo('/productos' as never);
   return (
-    <AppShellWrapper activeTabKey="productos" onBack={() => router.back()}>
+    <AppShellWrapper activeTabKey="productos" onBack={toProductos}>
       <NuevoProductoScreen
-        onSubmit={(input) => crear.mutate(input, { onSuccess: () => router.back() })}
-        onBack={() => router.back()}
+        onSubmit={(input) => crear.mutate(input, { onSuccess: toProductos })}
+        onBack={toProductos}
         submitting={crear.isPending}
         stockEnabled={stockEnabled}
       />

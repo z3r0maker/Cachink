@@ -21,13 +21,20 @@ appId: mx.xangarro.mobile
     timeout: 5000
 
 # Tap the same product 3 times to set qty=3.
-- tapOn: 'Quesadilla'
-- tapOn: 'Quesadilla'
-- tapOn: 'Quesadilla'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+- tapOn:
+    id: 'producto-tile-.*'
+- tapOn:
+    id: 'producto-tile-.*'
 
 # Cart strip should show the item.
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 
 # Checkout with Efectivo (default).
 - tapOn:

@@ -1,0 +1,20 @@
+# Add PRODUCT (its name) to the POS cart: search so the tile is on screen on
+# every form factor (the iPhone grid is 2 columns and long), then tap the tile
+# by id — a text match also hits the search box, which shows the same name.
+# Precondition: on the Ventas tab with the product grid visible.
+appId: mx.xangarro.mobile
+---
+# The caller may have scrolled down (on phones the cart sits below the grid).
+- scrollUntilVisible:
+    element:
+      id: 'ventas-product-search'
+    direction: UP
+    timeout: 10000
+- tapOn:
+    id: 'ventas-product-search'
+# The search keeps its text after a sale.
+- eraseText
+- inputText: ${PRODUCT}
+- hideKeyboard
+- tapOn:
+    id: 'producto-tile-.*'

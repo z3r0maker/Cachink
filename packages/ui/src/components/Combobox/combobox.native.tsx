@@ -11,7 +11,7 @@
  * (Popover-anchored picker).
  */
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
-import { FlatList, Modal, Pressable, TextInput, type ListRenderItemInfo } from 'react-native';
+import { Modal, Pressable, ScrollView, TextInput } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../Icon/index';
@@ -20,6 +20,7 @@ import type { ComboboxOption, ComboboxProps } from './combobox-types';
 import { TriggerView } from './combobox-views';
 import { styles } from './combobox-styles.native';
 import { ComboboxField } from './combobox-field';
+import { useKeyboardHeight } from '../../hooks/use-keyboard-height';
 
 export type { ComboboxOption, ComboboxProps };
 
@@ -97,8 +98,9 @@ function useComboboxHandlers<T extends string>(props: ComboboxProps<T>) {
     setQuery('');
   }, []);
   const renderItem = useCallback(
-    ({ item }: ListRenderItemInfo<ComboboxOption<T>>) => (
+    (item: ComboboxOption<T>) => (
       <OptionRowNative
+        key={item.key}
         option={item}
         selected={item.key === props.value}
         onSelect={() => handleSelect(item.key)}
@@ -109,12 +111,44 @@ function useComboboxHandlers<T extends string>(props: ComboboxProps<T>) {
   return { open, setOpen, query, setQuery, visibleOptions, handleClose, renderItem };
 }
 
+/** Optional search field plus the option rows. */
+function ComboboxOptions<T extends string>(props: {
+  readonly h: ReturnType<typeof useComboboxHandlers<T>>;
+  readonly searchable: boolean;
+}): ReactElement {
+  return (
+    <>
+      {props.searchable && (
+        <TextInput
+          testID="combobox-search"
+          value={props.h.query}
+          onChangeText={props.h.setQuery}
+          placeholder="Buscar..."
+          placeholderTextColor={colors.textMuted}
+          style={styles.searchInput}
+          autoFocus
+        />
+      )}
+      {/* Options render in a ScrollView (short lists); the tap on an option
+          must land even while the search keyboard is up. */}
+      <ScrollView keyboardShouldPersistTaps="handled">
+        {props.h.visibleOptions.length === 0 ? (
+          <EmptyResults />
+        ) : (
+          props.h.visibleOptions.map(props.h.renderItem)
+        )}
+      </ScrollView>
+    </>
+  );
+}
+
 /** The bottom sheet with the (optionally searchable) option list. */
 function ComboboxSheet<T extends string>(props: {
   readonly h: ReturnType<typeof useComboboxHandlers<T>>;
   readonly searchable: boolean;
   readonly bottomInset: number;
 }): ReactElement {
+  const keyboardHeight = useKeyboardHeight();
   return (
     <Modal
       visible={props.h.open}
@@ -123,25 +157,20 @@ function ComboboxSheet<T extends string>(props: {
       onRequestClose={props.h.handleClose}
     >
       <Pressable style={styles.backdrop} onPress={props.h.handleClose} />
-      <View style={[styles.sheet, { paddingBottom: props.bottomInset + 16 }] as never}>
+      {/* Rests on the keyboard when it is up: the search field autofocuses, and
+          on phones the keyboard otherwise covers every option. */}
+      <View
+        style={
+          [
+            styles.sheet,
+            keyboardHeight > 0
+              ? { marginBottom: keyboardHeight, paddingBottom: 12 }
+              : { paddingBottom: props.bottomInset + 16 },
+          ] as never
+        }
+      >
         <View style={styles.handle} />
-        {props.searchable && (
-          <TextInput
-            testID="combobox-search"
-            value={props.h.query}
-            onChangeText={props.h.setQuery}
-            placeholder="Buscar..."
-            placeholderTextColor={colors.textMuted}
-            style={styles.searchInput}
-            autoFocus
-          />
-        )}
-        <FlatList
-          data={props.h.visibleOptions as ComboboxOption<T>[]}
-          keyExtractor={(item) => item.key}
-          renderItem={props.h.renderItem}
-          ListEmptyComponent={<EmptyResults />}
-        />
+        <ComboboxOptions<T> h={props.h} searchable={props.searchable} />
       </View>
     </Modal>
   );

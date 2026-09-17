@@ -20,6 +20,19 @@ appId: mx.xangarro.mobile
 # Inventario tab — fill producto + cantidad + costo_unit.
 - tapOn:
     id: 'inventario-producto'
+# Wait for the picker sheet to finish presenting: a scroll that starts earlier
+# lands on the payment sheet underneath and drags the cantidad wheel.
+- extendedWaitUntil:
+    visible:
+      id: 'combobox-option-.*'
+    timeout: 5000
+- waitForAnimationToEnd
+# The picker lists the whole catalog; on phones Quesadilla is below the fold.
+- scrollUntilVisible:
+    element:
+      text: '.*Quesadilla.*'
+    direction: DOWN
+    timeout: 20000
 - tapOn: '.*Quesadilla.*'
 # Cantidad is a wheel picker (default 1); Maestro can't type into it, so the
 # purchase is 1 unit at $600.
@@ -28,9 +41,9 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'inventario-costo'
 - inputText: '600'
-- runFlow: shared/hide-keyboard-in-sheet.yaml
-- tapOn:
-    id: 'inventario-submit'
+# Submit from the keyboard ("Listo" on the cost field): scrolling the sheet down
+# to the button swipes across the cantidad wheel and changes the quantity.
+- pressKey: Enter
 
 # Modal closes + egreso visible (1 × $600 = $600.00).
 - assertNotVisible: 'Nuevo pago'

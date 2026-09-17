@@ -31,8 +31,11 @@ appId: mx.xangarro.mobile
 - hideKeyboard
 - tapOn:
     id: 'producto-tile-.*'
-- assertVisible:
-    id: 'cart-strip'
+- scrollUntilVisible:
+    element:
+      id: 'cart-strip'
+    direction: DOWN
+    timeout: 20000
 - tapOn:
     id: 'cart-checkout-btn'
 - extendedWaitUntil:
@@ -56,8 +59,11 @@ appId: mx.xangarro.mobile
     timeout: 6000
 - assertVisible:
     id: 'gasto-monto'
-- assertVisible:
-    id: 'gasto-submit'
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'nuevo-egreso-cancel'
 
@@ -91,7 +97,7 @@ appId: mx.xangarro.mobile
     element:
       id: 'otros-cancelaciones'
     direction: DOWN
-    timeout: 5000
+    timeout: 20000
 
 # 5. Configuración.
 - runFlow: shared/navigate-to-settings.yaml

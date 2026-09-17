@@ -28,16 +28,21 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'producto-precio-venta'
 - inputText: '15'
-- hideKeyboard
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
-- assertVisible: 'Nuevo producto'
+# Still on the form (the title may be scrolled away on phones).
+- assertVisible:
+    id: 'producto-submit'
 
 # Add the name: it saves and the product is listed.
+- runFlow: shared/scroll-form-to-top.yaml
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Servicio de asesoría'
-- hideKeyboard
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
 - assertNotVisible: 'Nuevo producto'

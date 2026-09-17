@@ -25,9 +25,15 @@ tags:
     timeout: 5000
 
 # Tap a product and set high quantity (exceeding stock).
-- tapOn: 'Quesadilla'
-- assertVisible:
-    id: 'cart-strip'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+- scrollUntilVisible:
+    element:
+      id: 'cart-strip'
+    direction: DOWN
+    timeout: 20000
 
 # Set cantidad to a large number by tapping the quantity control.
 - tapOn:
@@ -56,12 +62,17 @@ tags:
     visible:
       id: 'checkout-efectivo'
     timeout: 5000
-- tapOn: "\\$500"
+# $200 covers up to 5 × $32.50 and is on screen on phones (the bill chips
+# scroll sideways; $500 is off to the right on an iPhone).
+- tapOn: "\\$200"
 - tapOn:
     id: 'checkout-efectivo-submit'
 
-# Returns to Ventas — sale completed (negative stock allowed).
+# Sale completed (negative stock allowed): checkout closes and the cart
+# empties (no Cobrar footer). The grid may be scrolled away on phones.
 - extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 5000
+    notVisible:
+      id: 'checkout-efectivo-submit'
+    timeout: 8000
+- assertNotVisible:
+    id: 'cart-checkout-btn'

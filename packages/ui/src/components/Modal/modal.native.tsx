@@ -34,7 +34,7 @@
  *   under the keyboard (A-16).
  */
 import type { ReactElement, ReactNode } from 'react';
-import { Keyboard, View as RNView } from 'react-native';
+import { FlatList, Keyboard, View as RNView, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
@@ -91,6 +91,8 @@ interface SheetContentProps {
   readonly paddingBottom: number;
   /** Lifts the sheet above the soft keyboard. */
   readonly bottom: number;
+  /** Tallest the sheet may be (the space above the keyboard when it is up). */
+  readonly maxHeight: number | `${number}%`;
 }
 
 function SheetContent(props: SheetContentProps): ReactElement {
@@ -114,7 +116,7 @@ function SheetContent(props: SheetContentProps): ReactElement {
       // auto — RN doesn't centre absolute children with auto margins
       // (they default to 0, causing left-alignment). maxHeight uses
       // a percentage string instead of 'vh' which RN ignores.
-      maxHeight="90%"
+      maxHeight={props.maxHeight}
       position="absolute"
       bottom={props.bottom}
       left={0}
@@ -135,7 +137,7 @@ function SheetContent(props: SheetContentProps): ReactElement {
 function DismissKeyboardOnTap({ children }: { children: ReactNode }): ReactElement {
   return (
     <RNView
-      style={{ width: '100%' }}
+      style={{ width: '100%', flexShrink: 1 }}
       onStartShouldSetResponder={() => true}
       onResponderRelease={() => Keyboard.dismiss()}
     >
@@ -144,11 +146,53 @@ function DismissKeyboardOnTap({ children }: { children: ReactNode }): ReactEleme
   );
 }
 
-export function Modal(props: ModalProps): ReactElement {
+/** Rows for the body list: none — the content renders as the list header. */
+const NO_ROWS: readonly never[] = [];
+
+/**
+ * Scrollable sheet body. A FlatList with the content as its header, not a
+ * ScrollView: sheet content includes VirtualizedList-backed controls (the
+ * react-native-wheely wheels), and nesting those in a plain ScrollView breaks
+ * their windowing and raises a LogBox error that covers the screen.
+ */
+function SheetBody({ children }: { children: ReactNode }): ReactElement {
+  return (
+    <FlatList
+      testID="modal-scroll"
+      style={{ flexShrink: 1 }}
+      data={NO_ROWS}
+      renderItem={null}
+      ListHeaderComponent={<>{children}</>}
+      keyboardShouldPersistTaps="handled"
+    />
+  );
+}
+
+/**
+ * Where the sheet sits. With the keyboard up it rests on the keyboard (no
+ * home-indicator inset) and may only use the space above it; the body scrolls
+ * so the header stays in view.
+ */
+function useSheetLayout(): {
+  bottom: number;
+  paddingBottom: number;
+  maxHeight: number | `${number}%`;
+} {
   const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
   const keyboardHeight = useKeyboardHeight();
-  // With the keyboard up the sheet sits on it, so no home-indicator inset.
-  const bottomPad = keyboardHeight > 0 ? 20 : Math.max(36, insets.bottom + 16);
+  if (keyboardHeight === 0) {
+    return { bottom: 0, paddingBottom: Math.max(36, insets.bottom + 16), maxHeight: '90%' };
+  }
+  return {
+    bottom: keyboardHeight,
+    paddingBottom: 20,
+    maxHeight: height - keyboardHeight - insets.top - 8,
+  };
+}
+
+export function Modal(props: ModalProps): ReactElement {
+  const layout = useSheetLayout();
   return (
     <Dialog
       modal
@@ -159,7 +203,12 @@ export function Modal(props: ModalProps): ReactElement {
     >
       <Dialog.Portal>
         <Backdrop onClose={props.onClose} />
-        <SheetContent testID={props.testID} paddingBottom={bottomPad} bottom={keyboardHeight}>
+        <SheetContent
+          testID={props.testID}
+          paddingBottom={layout.paddingBottom}
+          bottom={layout.bottom}
+          maxHeight={layout.maxHeight}
+        >
           <DismissKeyboardOnTap>
             <GrabHandle />
             <ModalHeader
@@ -169,7 +218,7 @@ export function Modal(props: ModalProps): ReactElement {
               emoji={props.emoji}
               onClose={props.onClose}
             />
-            {props.children}
+            <SheetBody>{props.children}</SheetBody>
           </DismissKeyboardOnTap>
         </SheetContent>
       </Dialog.Portal>

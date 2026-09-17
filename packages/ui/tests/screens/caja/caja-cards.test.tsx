@@ -85,9 +85,9 @@ describe('CajaBalanceCard', () => {
     expect(screen.getByText('Ventas efectivo:')).toBeInTheDocument();
   });
 
-  it('displays cambios dados row', () => {
+  it('leaves change given out of the breakdown (sale amounts already net it)', () => {
     renderWithProviders(<CajaBalanceCard balance={BALANCE} />);
-    expect(screen.getByText('Cambios dados:')).toBeInTheDocument();
+    expect(screen.queryByText('Cambios dados:')).toBeNull();
   });
 
   it('displays retiros row', () => {

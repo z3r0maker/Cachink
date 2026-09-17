@@ -33,6 +33,17 @@ describe('NuevoProductoScreen (quick-add)', () => {
     }
   });
 
+  it('moves from código to precio on Return (the keyboard covers precio on phones)', () => {
+    renderWithProviders(<NuevoProductoScreen onSubmit={vi.fn()} onBack={vi.fn()} />);
+    const input = (id: string): HTMLInputElement => {
+      const el = screen.getByTestId(id);
+      return (el.tagName === 'INPUT' ? el : el.querySelector('input'))! as HTMLInputElement;
+    };
+    input('producto-sku').focus();
+    fireEvent.keyDown(input('producto-sku'), { key: 'Enter', code: 'Enter', keyCode: 13 });
+    expect(document.activeElement).toBe(input('producto-precio-venta'));
+  });
+
   it('does not submit without nombre and a positive price', () => {
     const onSubmit = vi.fn();
     renderWithProviders(<NuevoProductoScreen onSubmit={onSubmit} onBack={vi.fn()} />);

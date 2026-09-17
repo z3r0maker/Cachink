@@ -17,7 +17,11 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Refresco 600ml'
-- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'producto-scan'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'producto-scan'
 
@@ -39,8 +43,9 @@ appId: mx.xangarro.mobile
     id: 'producto-precio-venta'
 - eraseText
 - inputText: '100'
-- hideKeyboard
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
 
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
 - extendedWaitUntil:

@@ -29,11 +29,16 @@ appId: mx.xangarro.mobile
     timeout: 5000
 
 # Tap a demo product to add to cart.
-- tapOn: 'Quesadilla'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
 
 # Cart strip should appear.
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 
 # Tap checkout.
 - tapOn:

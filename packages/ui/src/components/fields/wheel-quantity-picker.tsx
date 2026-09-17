@@ -6,7 +6,7 @@
  * día del mes, día de la semana. Keep IntegerField for
  * unbounded/large numbers. Keep StepperField for ±1 thresholds.
  */
-import { useMemo, type ReactElement } from 'react';
+import { useMemo, useRef, type ReactElement } from 'react';
 import { Platform } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import WheelPicker from 'react-native-wheely';
@@ -86,6 +86,33 @@ function scaleFn(x: number): number {
   return 1 - Math.min(0.3, Math.abs(x) * 0.12);
 }
 
+/**
+ * The wheel reports a change whenever its list ends a momentum scroll, which a
+ * layout shift can cause too (a sheet dropping as the keyboard closes moved a
+ * purchase from 1 to 2 units on the iPhone sim). Only a change that follows
+ * the user's own drag is applied.
+ */
+function useUserDrivenChange(onChange: (i: number) => void): {
+  flatListProps: { onScrollBeginDrag: () => void };
+  handleChange: (i: number) => void;
+} {
+  const dragged = useRef(false);
+  const flatListProps = useMemo(
+    () => ({
+      onScrollBeginDrag: () => {
+        dragged.current = true;
+      },
+    }),
+    [],
+  );
+  const handleChange = (index: number): void => {
+    if (!dragged.current) return;
+    dragged.current = false;
+    onChange(index);
+  };
+  return { flatListProps, handleChange };
+}
+
 function WheelContainer({
   selectedIndex,
   options,
@@ -95,6 +122,7 @@ function WheelContainer({
   options: string[];
   onChange: (i: number) => void;
 }): ReactElement {
+  const { flatListProps, handleChange } = useUserDrivenChange(onChange);
   return (
     <View
       height={ITEM_HEIGHT * (VISIBLE_REST * 2 + 1)}
@@ -107,7 +135,8 @@ function WheelContainer({
       <WheelPicker
         selectedIndex={selectedIndex}
         options={options}
-        onChange={onChange}
+        onChange={handleChange}
+        flatListProps={flatListProps}
         itemHeight={ITEM_HEIGHT}
         visibleRest={VISIBLE_REST}
         containerStyle={{ backgroundColor: colors.white }}

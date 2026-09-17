@@ -11,6 +11,14 @@ appId: mx.xangarro.mobile
 # Open settings via the cog in the TopBar.
 - runFlow: shared/navigate-to-settings.yaml
 
+# On phones the toggle sits low on Configuración, under the bottom tab bar;
+# bring it fully into view so the tap doesn't land on a tab.
+- scrollUntilVisible:
+    element:
+      id: 'settings-notifications-btn'
+    direction: DOWN
+    timeout: 10000
+    centerElement: true
 - assertVisible:
     id: 'settings-notifications-toggle'
 

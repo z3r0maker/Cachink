@@ -36,6 +36,11 @@ appId: mx.xangarro.mobile
 - runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Tap submit — should fail because concepto is empty.
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 
@@ -55,6 +60,11 @@ appId: mx.xangarro.mobile
 - runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Submit — should fail because monto is 0.
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 
@@ -68,6 +78,11 @@ appId: mx.xangarro.mobile
 - inputText: '250'
 - runFlow: shared/hide-keyboard-in-sheet.yaml
 
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 

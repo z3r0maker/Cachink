@@ -1,0 +1,15 @@
+# Scroll a full-screen form to its end so its last button clears the bottom tab
+# bar. `scrollUntilVisible` stops as soon as the button is in the hierarchy, and
+# on phones that can be behind the tab bar (Guardar at y 794–838 under a tab
+# bar starting at 770), so the tap lands on a tab.
+appId: mx.xangarro.mobile
+---
+- swipe:
+    start: '50%,70%'
+    end: '50%,25%'
+    duration: 500
+- swipe:
+    start: '50%,70%'
+    end: '50%,25%'
+    duration: 500
+- waitForAnimationToEnd

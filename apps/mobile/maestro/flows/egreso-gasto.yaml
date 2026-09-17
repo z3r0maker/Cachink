@@ -27,6 +27,11 @@ appId: mx.xangarro.mobile
     id: 'gasto-monto'
 - inputText: '8000'
 - runFlow: shared/hide-keyboard-in-sheet.yaml
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 

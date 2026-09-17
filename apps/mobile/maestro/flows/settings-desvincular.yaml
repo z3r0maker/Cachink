@@ -27,12 +27,19 @@ env:
     element:
       id: 'settings-data'
     direction: DOWN
+    centerElement: true
+# Centered: on phones the button otherwise sits under the bottom tab bar.
 - scrollUntilVisible:
     element:
       id: 'settings-unlink'
     direction: UP
+    centerElement: true
 - tapOn:
     id: 'settings-unlink'
+- extendedWaitUntil:
+    visible:
+      id: 'confirm-dialog-confirm'
+    timeout: 5000
 - tapOn:
     id: 'confirm-dialog-confirm'
 - extendedWaitUntil:

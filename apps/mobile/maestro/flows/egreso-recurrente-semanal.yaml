@@ -54,6 +54,11 @@ appId: mx.xangarro.mobile
 # The wheel keeps its default day.
 
 # Submit the egreso.
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 

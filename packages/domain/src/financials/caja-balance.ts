@@ -11,11 +11,15 @@
  *       apertura
  *     + adicional
  *     + Σ ventas efectivo (monto)
- *     - Σ cambios dados (efectivoRecibido − monto, for cash sales)
  *     - Σ egresos efectivo
  *     + Σ depósitos manuales
  *     - Σ retiros manuales
  *     - Σ cancelaciones efectivo (cash returned)
+ *
+ * `cambiosDados` (efectivoRecibido − monto) is reported in the breakdown but
+ * not subtracted: the drawer gains efectivoRecibido and pays the change back,
+ * which nets to `monto`, already counted in ventas efectivo. Subtracting it
+ * too made the expected close amount short by every peso of change (A-16).
  */
 
 import { type Money, ZERO, sum } from '../money/index.js';
@@ -70,7 +74,6 @@ export function computeCajaBalance(input: CajaBalanceInput): CajaBalanceResult {
     input.aperturaCentavos +
     input.adicionalCentavos +
     ventasEfectivo -
-    cambiosDados -
     egresosEfectivo +
     depositos -
     retiros -

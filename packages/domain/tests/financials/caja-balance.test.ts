@@ -34,7 +34,9 @@ describe('computeCajaBalance', () => {
     expect(result.desglose.ventasEfectivo).toBe(21500n);
   });
 
-  it('subtracts change given to customers', () => {
+  it('reports change given but does not subtract it again from the drawer', () => {
+    // A $65 sale paid with $100: $100 goes in, $35 comes back out, so the
+    // drawer grows by the sale amount. `monto` already nets the change out.
     const result = computeCajaBalance(
       input({
         ventasEfectivoCentavos: [6500n],
@@ -43,8 +45,8 @@ describe('computeCajaBalance', () => {
         ],
       }),
     );
-    // 100000 + 6500 - 3500 = 103000
-    expect(result.efectivoEnCaja).toBe(103000n);
+    // 100000 + 6500 = 106500
+    expect(result.efectivoEnCaja).toBe(106500n);
     expect(result.desglose.cambiosDados).toBe(3500n);
   });
 
@@ -104,8 +106,9 @@ describe('computeCajaBalance', () => {
         cancelacionesEfectivoCentavos: [6500n],
       }),
     );
-    // 100000 + 0 + 25000 - 8500 - 5000 + 50000 - 200000 - 6500 = -45000
-    expect(result.efectivoEnCaja).toBe(-45000n);
+    // 100000 + 0 + 25000 - 5000 + 50000 - 200000 - 6500 = -36500
+    // (the 8500 in change is informational: the sale montos already net it)
+    expect(result.efectivoEnCaja).toBe(-36500n);
   });
 
   it('handles empty arrays gracefully', () => {

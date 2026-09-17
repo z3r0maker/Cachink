@@ -22,9 +22,14 @@ appId: mx.xangarro.mobile
 # --- Sale 1: Transferencia ---
 
 # Tap a product to add to cart.
-- tapOn: 'Quesadilla'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 - tapOn:
     id: 'cart-checkout-btn'
 
@@ -54,9 +59,14 @@ appId: mx.xangarro.mobile
 
 # --- Sale 2: Tarjeta ---
 
-- tapOn: 'Quesadilla'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 - tapOn:
     id: 'cart-checkout-btn'
 

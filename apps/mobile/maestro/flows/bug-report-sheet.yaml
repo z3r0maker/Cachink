@@ -25,6 +25,7 @@ tags:
       id: 'settings-open-bug-report'
     direction: DOWN
     timeout: 5000
+    centerElement: true
 - tapOn:
     id: 'settings-open-bug-report'
 

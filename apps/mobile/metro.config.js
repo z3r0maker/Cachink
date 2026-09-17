@@ -99,4 +99,12 @@ config.serializer.processModuleFilter = (mod) => {
   return true;
 };
 
+// METRO_NO_WATCHMAN=1 makes Metro crawl and watch files itself. For machines
+// where Watchman is unavailable or stuck (a restarted watchman server can hang
+// on `watch-project` waiting for macOS folder access, and a stale watch stops
+// reporting edits, so Metro serves old code). Off by default.
+if (process.env.METRO_NO_WATCHMAN === '1') {
+  config.resolver.useWatchman = false;
+}
+
 module.exports = config;

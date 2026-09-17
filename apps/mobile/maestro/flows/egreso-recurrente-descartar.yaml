@@ -15,6 +15,7 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-recurrente-descartar.yaml
 # x-entrypoint: activated
+# x-flow-timeout: 600
 appId: mx.xangarro.mobile
 ---
 # Dismiss any first-launch modals (ConsentModal, etc.)
@@ -48,6 +49,11 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-recurrente-toggle'
 - assertVisible: 'Frecuencia'
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 - assertNotVisible: 'Nuevo pago'

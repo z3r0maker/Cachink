@@ -19,6 +19,17 @@ function tap(el: Element): void {
 }
 
 describe('Modal (native variant)', () => {
+  it('keeps the title fixed and scrolls the body', () => {
+    renderWithProviders(
+      <Modal open onClose={() => undefined} title="Nuevo pago">
+        <span>body</span>
+      </Modal>,
+    );
+    const scroll = screen.getAllByTestId('modal-scroll')[0]!;
+    expect(scroll).toHaveTextContent('body');
+    expect(scroll).not.toHaveTextContent('Nuevo pago');
+  });
+
   it('hides the keyboard, not the sheet, when the sheet body is tapped', () => {
     const dismiss = vi.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
     const onClose = vi.fn();

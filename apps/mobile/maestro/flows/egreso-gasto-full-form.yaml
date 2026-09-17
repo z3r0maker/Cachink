@@ -35,7 +35,8 @@ appId: mx.xangarro.mobile
 # Select a category from the categoria selector.
 - tapOn:
     id: 'gasto-categoria'
-- tapOn: 'Servicios'
+- tapOn:
+    id: 'combobox-option-Servicios'
 
 # Fill proveedor.
 - tapOn:
@@ -50,6 +51,11 @@ appId: mx.xangarro.mobile
 - runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Submit the egreso.
+- scrollUntilVisible:
+    element:
+      id: 'gasto-submit'
+    direction: DOWN
+    timeout: 10000
 - tapOn:
     id: 'gasto-submit'
 

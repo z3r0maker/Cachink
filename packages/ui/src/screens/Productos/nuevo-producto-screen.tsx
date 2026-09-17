@@ -42,6 +42,10 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
     <ScrollView
       contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 48 }}
       keyboardShouldPersistTaps="handled"
+      // On phones the keyboard covers the lower fields (price, stock, save):
+      // dragging dismisses it and iOS insets the content so they scroll into view.
+      keyboardDismissMode="on-drag"
+      automaticallyAdjustKeyboardInsets
       testID={props.testID ?? 'nuevo-producto-screen'}
     >
       <SectionHeader label={t('nuevoProducto.title')} />

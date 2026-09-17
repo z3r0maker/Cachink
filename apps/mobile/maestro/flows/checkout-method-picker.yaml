@@ -18,11 +18,16 @@ tags:
     visible:
       id: 'ventas-product-grid'
     timeout: 5000
-- tapOn: 'Quesadilla'
+- runFlow:
+    file: shared/add-to-cart.yaml
+    env:
+      PRODUCT: 'Quesadilla'
 
 # Cart strip appears — tap checkout.
+# The item is in the cart: the sticky Cobrar footer appears (the cart strip
+# itself sits below the grid on phones).
 - assertVisible:
-    id: 'cart-strip'
+    id: 'cart-checkout-btn'
 - tapOn:
     id: 'cart-checkout-btn'
 

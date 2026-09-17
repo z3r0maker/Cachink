@@ -23,18 +23,14 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Refresco Cola'
-- tapOn:
-    id: 'producto-precio-venta'
-- eraseText
+# Return walks nombre → código → precio (the keyboard covers precio on phones).
+- pressKey: Enter
+- pressKey: Enter
 - inputText: '25'
-- hideKeyboard
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
 
 # Submit (fullWidth Btn inside the scroll — scroll to it if needed).
-- scrollUntilVisible:
-    element:
-      id: 'producto-submit'
-    direction: DOWN
-    timeout: 8000
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
 

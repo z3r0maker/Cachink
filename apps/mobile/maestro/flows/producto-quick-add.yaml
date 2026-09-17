@@ -20,10 +20,12 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Agua mineral'
-- tapOn:
-    id: 'producto-precio-venta'
+# Return walks nombre → código → precio (the keyboard covers precio on phones).
+- pressKey: Enter
+- pressKey: Enter
 - inputText: '18'
-- hideKeyboard
+- runFlow: shared/dismiss-keyboard-by-drag.yaml
+- runFlow: shared/scroll-form-to-end.yaml
 - tapOn:
     id: 'producto-submit'
 - extendedWaitUntil:

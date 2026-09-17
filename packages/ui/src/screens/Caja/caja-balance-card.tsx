@@ -86,7 +86,6 @@ function BalanceBreakdown(props: { desglose: CajaBalanceResult['desglose'] }): R
       <Row label="Apertura:" amount={d.apertura} prefix="+" />
       {d.adicional > 0n && <Row label="Adicional:" amount={d.adicional} prefix="+" />}
       <Row label="Ventas efectivo:" amount={d.ventasEfectivo} prefix="+" />
-      <Row label="Cambios dados:" amount={d.cambiosDados} prefix="−" />
       <Row label="Depósitos:" amount={d.depositos} prefix="+" />
       <Row label="Retiros:" amount={d.retiros} prefix="−" />
       <Row label="Egresos:" amount={d.egresosEfectivo} prefix="−" />
