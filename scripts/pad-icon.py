@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Pad + squircle-mask the Cachink brand icon to macOS-dock convention.
+Pad + squircle-mask the Xangarro brand icon to macOS-dock convention.
 
 macOS / Apple HIG requires app icons to:
   1. Have transparent padding around the artwork (~9% on each side, so the

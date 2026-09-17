@@ -105,7 +105,7 @@ Moved `{props.overlays}` from outside the provider bridges to a sibling of
 ### Verification
 
 App relaunched (JS-only change, Metro rebundle — no native rebuild). Red screen
-gone; wizard renders ("¡Bienvenido a Cachink!" with both mode cards), matching
+gone; wizard renders ("¡Bienvenido a Xangarro" with both mode cards), matching
 `smoke-launch.yaml`'s expectations.
 
 ---

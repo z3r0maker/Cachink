@@ -1,5 +1,5 @@
 /**
- * Typed helpers for the `__cachink_sync_state` key/value table (ADR-029,
+ * Typed helpers for the `__xangarro_sync_state` key/value table (ADR-029,
  * ADR-030). Every sync-client component — the LAN client's push queue,
  * the pull loop, the pairing flow — stores its cursors and auth material
  * here rather than in `app_config` so Phase 1C's existing AppConfigRepository
@@ -7,7 +7,7 @@
  *
  * Scopes used today:
  *
- *   - `localPushHwm`            — highest `__cachink_change_log.id`
+ *   - `localPushHwm`            — highest `__xangarro_change_log.id`
  *                                 already pushed to the LAN server
  *                                 (ADR-029 push path).
  *   - `serverPullHwm`           — highest `serverSeq` this client has
@@ -27,8 +27,8 @@
  *   - `lanHostReady`            — boolean. Stamped `true` once the
  *                                 bundled Tauri LAN server reports ready
  *                                 (Slice 8 A2 revision). Replaces the
- *                                 pre-revision `auth.accessToken =
- *                                 'cachink-host'` sentinel: hosts don't
+ *                                 pre-revision host sentinel stored in
+ *                                 `auth.accessToken`: hosts don't
  *                                 pair, so they have no real bearer
  *                                 token — the gate uses this scope
  *                                 instead to decide "host is past the
@@ -75,7 +75,7 @@ export async function readSyncState(
   scope: SyncStateScope,
 ): Promise<unknown | null> {
   const rows = (await db.all(
-    sql`SELECT "value" FROM "__cachink_sync_state" WHERE "scope" = ${scope} LIMIT 1`,
+    sql`SELECT "value" FROM "__xangarro_sync_state" WHERE "scope" = ${scope} LIMIT 1`,
   )) as Array<{ value: string }>;
   const first = rows[0];
   if (!first) return null;
@@ -99,7 +99,7 @@ export async function writeSyncState(
 ): Promise<void> {
   const serialised = JSON.stringify(value);
   await db.run(
-    sql`INSERT INTO "__cachink_sync_state" ("scope", "value") VALUES (${scope}, ${serialised})
+    sql`INSERT INTO "__xangarro_sync_state" ("scope", "value") VALUES (${scope}, ${serialised})
         ON CONFLICT ("scope") DO UPDATE SET "value" = excluded."value"`,
   );
 }
@@ -109,7 +109,7 @@ export async function writeSyncState(
  * Settings (Slice 5 C19) to return the device to the unpaired state.
  */
 export async function clearSyncState(db: XangarroDatabase): Promise<void> {
-  await db.run(sql`DELETE FROM "__cachink_sync_state"`);
+  await db.run(sql`DELETE FROM "__xangarro_sync_state"`);
 }
 
 /**

@@ -1,8 +1,8 @@
-# Política de Privacidad — Cachink!
+# Política de Privacidad — Xangarro
 
 _Vigente desde: 2026-04-24_
 
-Cachink! ("la app") es una herramienta de finanzas y punto de venta
+Xangarro ("la app") es una herramienta de finanzas y punto de venta
 diseñada para funcionar localmente en tu dispositivo. Esta política
 describe qué datos recolectamos, qué datos **no** recolectamos, y
 cómo tú controlas la información que produces usando la app.
@@ -35,7 +35,7 @@ siguiente:
 
 - Si eliges sincronizar en la nube, tu información se almacena en el
   proveedor de base de datos que uses (por defecto, una instancia de
-  Supabase alojada por Cachink; puedes usar la tuya si lo prefieres en
+  Supabase alojada por Xangarro; puedes usar la tuya si lo prefieres en
   Ajustes → Avanzado).
 - Tu correo y contraseña se manejan vía el proveedor de autenticación
   (Supabase Auth). Nunca almacenamos contraseñas en texto plano.
@@ -83,5 +83,5 @@ que entre en vigor la nueva versión.
 
 ## 7. Contacto
 
-Si tienes preguntas sobre tu privacidad en Cachink!, escríbenos a
+Si tienes preguntas sobre tu privacidad en Xangarro, escríbenos a
 **privacidad@cachink.mx**.

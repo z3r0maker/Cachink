@@ -30,7 +30,7 @@ export async function readChangeSlice(
 ): Promise<readonly ChangeEntry[]> {
   return (await db.all(
     sql`SELECT id, table_name AS tableName, row_id AS rowId, op
-        FROM __cachink_change_log WHERE id > ${afterId} ORDER BY id ASC LIMIT ${limit}`,
+        FROM __xangarro_change_log WHERE id > ${afterId} ORDER BY id ASC LIMIT ${limit}`,
   )) as ChangeEntry[];
 }
 

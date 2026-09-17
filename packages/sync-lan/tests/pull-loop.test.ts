@@ -1,6 +1,6 @@
 /**
  * Pull loop tests (Slice 5 C13) — verifies LWW apply behaviour and the
- * batches-then-stops progression through `__cachink_sync_state`.
+ * batches-then-stops progression through `__xangarro_sync_state`.
  */
 
 import { sql } from 'drizzle-orm';
@@ -126,7 +126,7 @@ describe('pull loop — runPullCycle', () => {
     expect(res.deltasRejected).toBe(1);
 
     const conflicts = (await db.all(
-      sql`SELECT direction, reason FROM __cachink_conflicts WHERE row_id = '01HZ8XQN9GZJXV8AKQ5X0C7S03'`,
+      sql`SELECT direction, reason FROM __xangarro_conflicts WHERE row_id = '01HZ8XQN9GZJXV8AKQ5X0C7S03'`,
     )) as Array<{ direction: string; reason: string }>;
     expect(conflicts).toEqual([{ direction: 'inbound', reason: 'stale' }]);
   });

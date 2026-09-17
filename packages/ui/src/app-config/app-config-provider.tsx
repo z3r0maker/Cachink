@@ -12,6 +12,7 @@ import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '
 import type { AppConfigRepository } from '@xangarro/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
+import { readSaleSoundSetting } from './legacy-keys';
 
 export interface AppConfigProviderProps {
   readonly children: ReactNode;
@@ -114,7 +115,7 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
-  const saleSoundEnabled = parseBool(await repo.get(APP_CONFIG_KEYS.saleSoundEnabled), true);
+  const saleSoundEnabled = parseBool(await readSaleSoundSetting(repo), true);
   return {
     deviceId,
     mode,

@@ -110,7 +110,7 @@ describe('push queue — drainPushQueue', () => {
     // Insert a change-log row for a made-up table. The queue should skip
     // it, advance the HWM past it, and keep going.
     await db.run(
-      sql`INSERT INTO __cachink_change_log
+      sql`INSERT INTO __xangarro_change_log
           (table_name, row_id, row_updated_at, row_device_id, op)
           VALUES ('app_config', '01HZ8XQN9GZJXV8AKQ5X0C7SX1', ${TS}, ${DEV}, 'insert')`,
     );

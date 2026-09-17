@@ -3902,3 +3902,73 @@ paying for.
   for turning it back on, not a substitute for the decision.
 - `git push --no-verify` no longer weakens the shared branch: the server
   side gate is the one that counts.
+
+## ADR-056
+
+**Title:** Stored and wire identifiers move from Cachink to Xangarro, with a one-way upgrade path for every one of them
+
+**Date:** 2026-09-16
+
+**Status:** Accepted
+
+**Context**
+
+A-15 renamed code symbols and user-facing text to Xangarro but left the
+names that existing installs and other devices depend on: the
+`__cachink_*` SQLite tables, the `cachink.db` file, the
+`X-Cachink-Protocol` LAN header, the Supabase `cachink_generate_ulid()`
+function and (silently) the `cachinkSoundEnabled` AppConfig key, which it
+renamed without a fallback. Renaming any of these naïvely either boots an
+existing install into an empty database, re-runs migration 0000 against
+an existing schema, drops a muted setting, or breaks pairing with an
+older device. CLAUDE.md §2.2 (local-first) and §2.9 (no silent breaking
+changes) rule all of those out.
+
+**Decision**
+
+Every stored or wire name is renamed, and each keeps exactly one legacy
+reference that exists only to upgrade old data:
+
+- **Sync tables** — migration `0004_xangarro_sync_tables` renames
+  `__cachink_change_log`, `__cachink_sync_state` and `__cachink_conflicts`
+  with `ALTER TABLE … RENAME`. SQLite rewrites the change-log trigger
+  bodies and keeps the AUTOINCREMENT sequence, so no id can fall at or
+  below a stored push HWM. The conflicts index is recreated under a new
+  name. Applied migrations 0000 and 0001 are not edited.
+- **Migrations tracker** — the runner renames `__cachink_migrations`
+  before reading applied tags (`legacy-tracker.ts`), only when the new
+  tracker does not exist yet.
+- **Observability log** — `@xangarro/observability` renames
+  `__cachink_observability_log` before creating its table, because that
+  table is not created by a data migration.
+- **Database file** — before opening, `resolveDatabaseFileName` moves
+  `cachink.db` and its WAL/SHM sidecars to `xangarro.db`, main file last.
+  On any failure the sidecars are moved back and the legacy file is
+  opened: the user keeps their data and the move is retried next launch.
+  Reset deletes both names; Maestro reset scripts do too.
+- **AppConfig** — `saleSoundEnabled` falls back to `cachinkSoundEnabled`
+  once, copying before deleting.
+- **LAN protocol** — clients send `X-Xangarro-Protocol`.
+  `LEGACY_PROTOCOL_HEADER` is exported for servers, which must accept
+  either name. The archived Rust server treats a request with no
+  recognised header as compatible, so new clients still reach it.
+- **Supabase** — migration `0003_xangarro_ulid.sql` renames the function
+  (column defaults follow by OID) and redefines
+  `seed_business_on_signup()`, whose PL/pgSQL body refers to it by name.
+
+New sync infrastructure tables should prefer the unbranded `__` prefix
+already used by `__sync_row_status` and `__stock_baseline`, so a future
+rebrand never touches stored names again.
+
+**Consequences**
+
+- `git grep -i cachink` in live code returns only these legacy references,
+  the immutable migrations 0000/0001, and tests that build pre-rename
+  databases on purpose.
+- The fallbacks can be removed once no pre-0004 install remains in the
+  field; that removal needs its own ADR because the only evidence is
+  telemetry.
+- `cachink.mx` domains and mailboxes in docs are unchanged until the
+  Xangarro equivalents exist.
+- CLAUDE.md still says "Cachink!"; it is human-edited and needs updating
+  by a person, per its own rules.

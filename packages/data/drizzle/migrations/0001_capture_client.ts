@@ -1,6 +1,10 @@
 /**
  * Migration 0001 — capture client (A-17, ADR-053).
  *
+ * Legacy names: the `__cachink_*` tables below are intentional. This
+ * migration is applied on existing installs and must not change; 0004
+ * renames the tables and SQLite rewrites these trigger bodies (ADR-056).
+ *
  *   1. `users.active` — portal-managed deactivation; existing rows stay active.
  *   2. `__sync_row_status` — per-row cloud outcome (pending / accepted /
  *      rejected with server code), so a rejected row is never silently lost

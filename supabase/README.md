@@ -1,15 +1,16 @@
-# Cachink Supabase — provisioning guide
+# Xangarro Supabase — provisioning guide
 
 > **MVP scope:** For the iOS-only MVP, only `0002_bug_database.sql`
 > (error_events + bug_reports) and the `bug-report` Edge Function are
 > needed. Skip PowerSync setup and the synced-table RLS policies until
 > cloud sync is re-enabled post-MVP. **However**, `0001_schema.sql` must
-> still be pushed first — it defines `cachink_generate_ulid()` which
-> `0002` depends on. Run `supabase db push` (which applies both in order)
+> still be pushed first — it defines the ULID generator `0002` depends on
+> (renamed to `xangarro_generate_ulid()` by `0003`). Run `supabase db push`
+> (which applies all of them in order)
 > rather than cherry-picking individual migrations.
 
 This directory holds the **developer-laptop-only** assets needed to
-stand up the Cachink-hosted Supabase backend (ADR-035). None of these
+stand up the Xangarro-hosted Supabase backend (ADR-035). None of these
 files are imported by the mobile or desktop app; they only run via
 the Supabase CLI on a developer machine.
 
@@ -85,7 +86,7 @@ deny-by-default access on `error_events` / `bug_reports` — neither anon
 nor authenticated roles can SELECT or INSERT into the bug database
 tables.
 
-The ULID tests verify the `cachink_generate_ulid()` PL/pgSQL function
+The ULID tests verify the `xangarro_generate_ulid()` PL/pgSQL function
 returns a 26-char Crockford-base32 string that the domain layer's regex
 will accept (Slice 8 C8 fix). **First-time provisioners should run this
 test before opening the app for sign-up** — Slices 5–7 shipped with a
@@ -100,8 +101,8 @@ up:
 
 ```sh
 psql "$(supabase status --output env | grep '^DB_URL=' | cut -d= -f2)" \
-  -c "SELECT public.cachink_generate_ulid()" \
-  -c "SELECT public.cachink_generate_ulid() ~ '^[0-9A-HJKMNP-TV-Z]{26}
+  -c "SELECT public.xangarro_generate_ulid()" \
+  -c "SELECT public.xangarro_generate_ulid() ~ '^[0-9A-HJKMNP-TV-Z]{26}
 
 ## What the app binary sees
 
@@ -123,7 +124,7 @@ per-user JWTs that PowerSync validates server-side.
 Power users who want their own backend enter project URL + anon key in
 **Settings → Avanzado**. The input explicitly rejects PATs and
 service-role keys (the UI copy says "solo URL pública + llave
-anónima"). Settings writes the override to `__cachink_sync_state` —
+anónima"). Settings writes the override to `__xangarro_sync_state` —
 see `packages/ui/src/sync/lan-bridge.ts` counterpart for cloud
 (`cloud-bridge.ts`).
 
@@ -149,7 +150,7 @@ second cloud backend (Neon / self-hosted).
 | Supabase PAT                       | Developer laptop only                   | Never             |
 | Service-role key                   | Not used                                | Never             |
 | Project URL + anon key (hosted)    | Baked into build via `EXPO_PUBLIC_*`    | No                |
-| Project URL + anon key (BYO)       | `__cachink_sync_state` after Avanzado   | Only if chosen    |
+| Project URL + anon key (BYO)       | `__xangarro_sync_state` after Avanzado   | Only if chosen    |
 | User email + password              | Supabase Auth → JWT                     | Yes               |
 "
 ```
@@ -178,7 +179,7 @@ per-user JWTs that PowerSync validates server-side.
 Power users who want their own backend enter project URL + anon key in
 **Settings → Avanzado**. The input explicitly rejects PATs and
 service-role keys (the UI copy says "solo URL pública + llave
-anónima"). Settings writes the override to `__cachink_sync_state` —
+anónima"). Settings writes the override to `__xangarro_sync_state` —
 see `packages/ui/src/sync/lan-bridge.ts` counterpart for cloud
 (`cloud-bridge.ts`).
 
@@ -199,10 +200,10 @@ second cloud backend (Neon / self-hosted).
 
 ## Credentials boundary recap (ADR-035)
 
-| Credential                      | Where it lives                        | Asked at runtime? |
-| ------------------------------- | ------------------------------------- | ----------------- |
-| Supabase PAT                    | Developer laptop only                 | Never             |
-| Service-role key                | Not used                              | Never             |
-| Project URL + anon key (hosted) | Baked into build via `EXPO_PUBLIC_*`  | No                |
-| Project URL + anon key (BYO)    | `__cachink_sync_state` after Avanzado | Only if chosen    |
-| User email + password           | Supabase Auth → JWT                   | Yes               |
+| Credential                      | Where it lives                         | Asked at runtime? |
+| ------------------------------- | -------------------------------------- | ----------------- |
+| Supabase PAT                    | Developer laptop only                  | Never             |
+| Service-role key                | Not used                               | Never             |
+| Project URL + anon key (hosted) | Baked into build via `EXPO_PUBLIC_*`   | No                |
+| Project URL + anon key (BYO)    | `__xangarro_sync_state` after Avanzado | Only if chosen    |
+| User email + password           | Supabase Auth → JWT                    | Yes               |

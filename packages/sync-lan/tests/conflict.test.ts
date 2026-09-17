@@ -187,7 +187,7 @@ describe('Slice 5 conflict scenarios (ADR-029 §Conflict resolution)', () => {
       ],
     });
     // Reset the pull HWM so the new server replays its state.
-    await db.run(sql`DELETE FROM __cachink_sync_state WHERE scope = 'serverPullHwm'`);
+    await db.run(sql`DELETE FROM __xangarro_sync_state WHERE scope = 'serverPullHwm'`);
     await runPullCycle({
       db,
       serverUrl: 'http://fake',

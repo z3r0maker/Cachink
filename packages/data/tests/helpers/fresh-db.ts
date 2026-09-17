@@ -42,13 +42,13 @@ export function makeFreshDb(): XangarroDatabase {
 
   // Bookkeeping: match what runMigrations() would create.
   sqlite.exec(
-    `CREATE TABLE IF NOT EXISTS __cachink_migrations (
+    `CREATE TABLE IF NOT EXISTS __xangarro_migrations (
       tag TEXT PRIMARY KEY NOT NULL,
       applied_at TEXT NOT NULL
     )`,
   );
   sqlite.exec(
-    `INSERT INTO __cachink_migrations (tag, applied_at)
+    `INSERT INTO __xangarro_migrations (tag, applied_at)
      SELECT value, datetime('now') FROM json_each('${JSON.stringify(journal.entries.map((e) => e.tag))}')`,
   );
   sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);

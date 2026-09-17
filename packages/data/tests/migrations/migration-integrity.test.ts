@@ -89,10 +89,10 @@ describe('Migration integrity', () => {
       'director_alerts',
       'caja_movimientos',
       'cancelacion_logs',
-      '__cachink_migrations',
-      '__cachink_change_log',
-      '__cachink_sync_state',
-      '__cachink_conflicts',
+      '__xangarro_migrations',
+      '__xangarro_change_log',
+      '__xangarro_sync_state',
+      '__xangarro_conflicts',
     ];
 
     for (const table of expectedTables) {
@@ -108,7 +108,7 @@ describe('Migration integrity', () => {
     await runMigrations(db); // Must not throw
 
     const rows = sqlite
-      .prepare('SELECT tag FROM __cachink_migrations ORDER BY tag')
+      .prepare('SELECT tag FROM __xangarro_migrations ORDER BY tag')
       .all() as Array<{ tag: string }>;
 
     // Each tag appears exactly once
@@ -187,7 +187,7 @@ describe('Migration integrity', () => {
       'idx_clients_biz',
       'idx_recurring_expenses_biz',
       'idx_changelog_table_row',
-      'idx_cachink_conflicts_detected_at',
+      'idx_xangarro_conflicts_detected_at',
     ];
 
     for (const idx of expectedIndexes) {

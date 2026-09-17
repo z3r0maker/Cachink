@@ -3,8 +3,9 @@
  *
  * Metro auto-picks this file over `./database-provider.tsx` on React
  * Native targets. The wiring:
- *   1. `openDatabaseSync('cachink.db')` from `expo-sqlite` creates/opens
- *      the SQLite file under the app's sandboxed storage.
+ *   1. {@link resolveDatabaseFileName} adopts a pre-rebrand database file,
+ *      then `openDatabaseSync` from `expo-sqlite` creates/opens the SQLite
+ *      file under the app's sandboxed storage (ADR-056).
  *   2. `drizzle(native, { schema })` from `drizzle-orm/expo-sqlite` wraps
  *      it with the shared `XangarroDatabase` type.
  *   3. {@link runMigrations} applies any pending migrations from
@@ -28,6 +29,8 @@ import {
   type AsyncDatabaseProviderProps,
 } from './_internal';
 import { nativeResetDatabase } from './database-reset.native';
+import { resolveDatabaseFileName } from './database-file.shared';
+import { loadNativeDatabaseFileOps } from './database-file.native';
 import { registerNativeHandle } from './database-native-handle';
 import { runMigrations } from './run-migrations';
 import {
@@ -51,11 +54,13 @@ export type { DatabaseProviderProps, AsyncDatabaseProviderProps };
 export { runMigrations, splitStatements } from './run-migrations';
 export { SCHEMA_VERSION, SchemaVersionError } from '@xangarro/data/migrator';
 
-/** SQLite file name on device storage. Changing this breaks existing users. */
-const DB_FILE_NAME = 'cachink.db';
+/** Open the database file, adopting a pre-rebrand `cachink.db` first (ADR-056). */
+async function openNativeFile(): Promise<ReturnType<typeof openDatabaseSync>> {
+  return openDatabaseSync(await resolveDatabaseFileName(await loadNativeDatabaseFileOps()));
+}
 
 async function createNativeDatabase(): Promise<XangarroDatabase> {
-  const native = openDatabaseSync(DB_FILE_NAME);
+  const native = await openNativeFile();
   registerNativeHandle(native);
   try {
     // Enable FK enforcement before anything else (CLAUDE.md §conventions).

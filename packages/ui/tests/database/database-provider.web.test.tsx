@@ -147,10 +147,10 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       'director_alerts',
       'caja_movimientos',
       'cancelacion_logs',
-      '__cachink_migrations',
-      '__cachink_change_log',
-      '__cachink_sync_state',
-      '__cachink_conflicts',
+      '__xangarro_migrations',
+      '__xangarro_change_log',
+      '__xangarro_sync_state',
+      '__xangarro_conflicts',
     ]) {
       expect(names, `expected ${expected} to exist`).toContain(expected);
     }
@@ -166,7 +166,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     // Second call must not throw (tables already exist) nor re-insert.
     await runMigrations(db);
 
-    const rows = sqlite.prepare('SELECT tag FROM __cachink_migrations').all() as Array<{
+    const rows = sqlite.prepare('SELECT tag FROM __xangarro_migrations').all() as Array<{
       tag: string;
     }>;
     // Exactly one row per journal entry — none applied twice.

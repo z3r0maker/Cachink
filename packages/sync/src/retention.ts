@@ -54,7 +54,7 @@ function purgeable(rule: RetentionRule, b: Bounds): SQL {
     sql`t.created_at < ${b.cutoff}`,
     sql`t.id IN (SELECT s.row_id FROM __sync_row_status s WHERE s.table_name = ${table}
       AND s.status = 'accepted' AND s.server_seq IS NOT NULL AND s.server_seq <= ${b.acknowledgedThrough})`,
-    sql`NOT EXISTS (SELECT 1 FROM __cachink_change_log c WHERE c.table_name = ${table}
+    sql`NOT EXISTS (SELECT 1 FROM __xangarro_change_log c WHERE c.table_name = ${table}
       AND c.row_id = t.id AND c.id > ${b.pushHwm})`,
   ];
   if (rule.keep) parts.push(sql.raw(`NOT (${rule.keep})`));
@@ -81,7 +81,7 @@ async function purgeTable(db: XangarroDatabase, rule: RetentionRule, b: Bounds):
   await db.run(sql`DELETE FROM ${table} AS t WHERE ${where}`);
   await db.run(sql`DELETE FROM __sync_row_status WHERE table_name = ${rule.table}
     AND row_id NOT IN (SELECT id FROM ${table})`);
-  await db.run(sql`DELETE FROM __cachink_change_log WHERE table_name = ${rule.table}
+  await db.run(sql`DELETE FROM __xangarro_change_log WHERE table_name = ${rule.table}
     AND row_id NOT IN (SELECT id FROM ${table})`);
   return n;
 }

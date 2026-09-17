@@ -1,5 +1,5 @@
 /**
- * Push queue — drains `__cachink_change_log` to the LAN server in batches
+ * Push queue — drains `__xangarro_change_log` to the LAN server in batches
  * (ADR-029 push path).
  *
  * Reads every change-log row with `id > localPushHwm`, joins to the
@@ -77,7 +77,7 @@ export async function drainPushQueue(deps: PushDeps): Promise<PushResult> {
 async function readChangeLogBatch(db: XangarroDatabase, since: number): Promise<ChangeLogEntry[]> {
   const rows = (await db.all(
     sql`SELECT id, table_name, row_id, op
-        FROM __cachink_change_log
+        FROM __xangarro_change_log
         WHERE id > ${since}
         ORDER BY id ASC
         LIMIT ${MAX_BATCH_SIZE}`,

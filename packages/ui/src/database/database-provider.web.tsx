@@ -6,7 +6,8 @@
  * mobile and never loads this file.
  *
  * Wiring:
- *   1. `@tauri-apps/plugin-sql`'s `Database.load('sqlite:cachink.db')`
+ *   1. `@tauri-apps/plugin-sql`'s `Database.load('sqlite:xangarro.db')`, after
+ *      {@link resolveDatabaseFileName} adopts a pre-rebrand file (ADR-056)
  *      opens the SQLite file under the app's sandboxed data directory
  *      (resolved by Tauri from `BaseDirectory::App`).
  *   2. Drizzle's `sqlite-proxy` driver adapts the plugin's
@@ -37,6 +38,8 @@ import {
   type AsyncDatabaseProviderProps,
 } from './_internal';
 import { webResetDatabase } from './database-reset.web';
+import { resolveDatabaseFileName } from './database-file.shared';
+import { loadWebDatabaseFileOps } from './database-file.web';
 import { runMigrations } from './run-migrations';
 import {
   getSchemaVersion,
@@ -47,7 +50,6 @@ import {
 } from '@xangarro/data/migrator';
 
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
-const DB_PATH = 'sqlite:cachink.db';
 
 /** Adapt Tauri's Database to the SqliteDatabase interface for observability. */
 function wrapTauriAsSqliteDatabase(tauriDb: Database): SqliteDatabase {
@@ -99,7 +101,8 @@ export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
 }
 
 async function createDesktopDatabase(): Promise<XangarroDatabase> {
-  const tauriDb = await Database.load(DB_PATH);
+  const fileName = await resolveDatabaseFileName(await loadWebDatabaseFileOps());
+  const tauriDb = await Database.load(`sqlite:${fileName}`);
   try {
     // Enable FK enforcement before migrations run.
     // Must happen outside any transaction — pragma is a no-op inside one.

@@ -10,7 +10,7 @@ export const SYNC_CONFIG_KEYS = {
   lastServerTime: 'lastServerTime',
   /** Highest serverSeq applied from pulls. */
   pullSeq: 'pullSeq',
-  /** Highest __cachink_change_log.id already handed to the pusher. */
+  /** Highest __xangarro_change_log.id already handed to the pusher. */
   pushHwm: 'pushHwm',
   /** Highest serverSeq the server durably stored for this device's pushes. */
   acknowledgedThrough: 'acknowledgedThrough',

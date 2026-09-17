@@ -12,7 +12,7 @@
 #   - Consent step appears inline within the wizard after mode
 #     selection (Audit M-1 PR 6 moved consent into the wizard).
 #
-# Precondition: cachink.db does NOT exist (fresh install). Run via
+# Precondition: xangarro.db does NOT exist (fresh install). Run via
 # the wrapper script to get a clean slate without breaking Metro:
 #
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \

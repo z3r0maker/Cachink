@@ -107,7 +107,7 @@ export async function applyReferenceTables(
 }
 
 async function changeLogHighWater(db: XangarroDatabase): Promise<number> {
-  const row = (await db.get(sql`SELECT COALESCE(MAX(id), 0) AS hw FROM __cachink_change_log`)) as
+  const row = (await db.get(sql`SELECT COALESCE(MAX(id), 0) AS hw FROM __xangarro_change_log`)) as
     | { hw: number }
     | undefined;
   return row?.hw ?? 0;
@@ -127,7 +127,7 @@ async function forgetEchoes(
   if (rows.length === 0) return;
   const ids = rows.map((r) => String(r['id']));
   await db.run(
-    sql`DELETE FROM __cachink_change_log WHERE id > ${floor} AND table_name = ${getTableName(table)} AND row_id IN (${sql.join(
+    sql`DELETE FROM __xangarro_change_log WHERE id > ${floor} AND table_name = ${getTableName(table)} AND row_id IN (${sql.join(
       ids.map((id) => sql`${id}`),
       sql`, `,
     )})`,

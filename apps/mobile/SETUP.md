@@ -212,9 +212,9 @@ The mobile app is always a LAN **client** — it never hosts. To pair:
 2. The app surfaces `<LanJoinScreen>` with a **Escanear QR** CTA
    (powered by `expo-camera`).
 3. Scan the QR shown by the desktop host (or paste the
-   `cachink-lan://...?token=...` URL into the fallback input).
+   `xangarro-lan://...?token=...` URL into the fallback input).
 4. `useLanBridgeCallbacks.onPaired` writes the bearer token into
-   `__cachink_sync_state` and the gate flips to the role picker.
+   `__xangarro_sync_state` and the gate flips to the role picker.
 
 The pairing UI is documented end-to-end in
 `packages/ui/src/screens/LanPairing/` and tested via
@@ -226,7 +226,7 @@ Power users (and developers running their own Supabase project) can
 override the baked-in defaults from **Settings → Avanzado** without
 forking. The screen lives at `<AdvancedBackendRoute>` (mounted on
 mobile via `<CloudInnerScreenHost />`) and persists the URL +
-anon-key to `__cachink_sync_state` under `cloud.byoBackend`. ADR-035
+anon-key to `__xangarro_sync_state` under `cloud.byoBackend`. ADR-035
 formalises the precedence: BYO config wins over the build-baked
 defaults whenever it's present.
 
@@ -278,7 +278,7 @@ should print a version string (e.g. `2.4.0`).
 `Encoding::CompatibilityError` (`Unicode Normalization not
 appropriate for ASCII-8BIT`) when the shell `LANG` is unset and the
 workspace path contains a non-ASCII character such as `!`. The
-workspace was renamed from `Xangarro!/` to `~/Downloads/Cachink/` to
+workspace was renamed from `Cachink!/` to `~/Downloads/Cachink/` to
 remove the `!` that triggered this, so the error should no longer
 occur. As a safety net (or if your path contains other non-ASCII
 characters), run `pod install` (and any `expo prebuild` that wraps

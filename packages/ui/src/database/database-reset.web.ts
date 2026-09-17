@@ -1,9 +1,11 @@
 import type * as TauriFsModule from '@tauri-apps/plugin-fs';
 import type SqlDatabase from '@tauri-apps/plugin-sql';
 import type { ResetDatabaseFn } from './database-reset';
+import { DB_FILE_NAME, LEGACY_DB_FILE_NAME, databaseFileSet } from './database-file.shared';
 
-const DB_PATH = 'sqlite:cachink.db';
-const DB_FILE_NAMES = ['cachink.db', 'cachink.db-shm', 'cachink.db-wal'] as const;
+const DB_PATH = `sqlite:${DB_FILE_NAME}`;
+/** Includes the pre-rebrand files so a failed adoption can't resurrect them (ADR-056). */
+const DB_FILE_NAMES = [...databaseFileSet(DB_FILE_NAME), ...databaseFileSet(LEGACY_DB_FILE_NAME)];
 
 type TauriFs = typeof TauriFsModule;
 

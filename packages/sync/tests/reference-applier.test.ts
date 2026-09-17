@@ -81,7 +81,7 @@ describe('applyReferenceTables', () => {
   it('does not leave change-log entries for server rows (no echo on the next push)', async () => {
     const db = makeFreshDb();
     await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
-    const rows = (await db.all(sql`SELECT table_name FROM __cachink_change_log`)) as unknown[];
+    const rows = (await db.all(sql`SELECT table_name FROM __xangarro_change_log`)) as unknown[];
     assert.equal(rows.length, 0);
   });
 
@@ -98,7 +98,7 @@ describe('applyReferenceTables', () => {
       businessId: FIXTURE_BUSINESS_ID,
     } as never);
     await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
-    const rows = (await db.all(sql`SELECT table_name, op FROM __cachink_change_log`)) as {
+    const rows = (await db.all(sql`SELECT table_name, op FROM __xangarro_change_log`)) as {
       table_name: string;
       op: string;
     }[];

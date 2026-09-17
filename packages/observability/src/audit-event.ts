@@ -2,7 +2,7 @@
  * AuditEvent — immutable record of a money-movement or business operation.
  *
  * Every use-case instrumented with `AuditedUseCase` produces one of these
- * on success or failure. The event is persisted to `__cachink_observability_log`
+ * on success or failure. The event is persisted to `__xangarro_observability_log`
  * by the active `LogStore` implementation.
  *
  * All monetary values in metadata are integer centavos (CLAUDE.md §2.8).

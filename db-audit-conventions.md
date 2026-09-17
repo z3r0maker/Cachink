@@ -1,4 +1,4 @@
-# Cachink! Database Conventions
+# Xangarro Database Conventions
 
 > Source: CLAUDE.md §2, §6, §7. This file codifies the project-specific
 > SQLite conventions so the antipattern audit can elevate violations to
@@ -61,7 +61,7 @@ Every entity table MUST have these columns:
 
 - Every entity table that participates in sync must have corresponding
   `AFTER INSERT` and `AFTER UPDATE` triggers writing to
-  `__cachink_change_log`.
+  `__xangarro_change_log`.
 - Tables without sync triggers are invisible to LAN sync.
 
 ## Enum Columns

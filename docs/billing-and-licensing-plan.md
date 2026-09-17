@@ -1,4 +1,4 @@
-# Billing & Licensing Plan — Cachink!
+# Billing & Licensing Plan — Xangarro
 
 > **Status:** DRAFT — Pending business model decisions.
 > **Created:** 2026-05-15
@@ -23,7 +23,7 @@
 3. [Freemium Limits](#3-freemium-limits)
 4. [Offline Abuse Prevention](#4-offline-abuse-prevention)
 5. [Cross-Platform Billing via RevenueCat](#5-cross-platform-billing-via-revenuecat)
-6. [Data Portability — .cachink Backup](#6-data-portability--cachink-backup)
+6. [Data Portability — .xangarro Backup](#6-data-portability--xangarro-backup)
 7. [Device Limits](#7-device-limits)
 8. [New Package Structure](#8-new-package-structure)
 9. [Implementation Phases](#9-implementation-phases)
@@ -119,7 +119,7 @@ interface Entitlement {
 | Export data (Excel/PDF)               | Yes               | Yes          | **Yes (always)** |
 | Generate comprobante                  | Yes               | Yes          | **No**           |
 | Multi-device sync                     | No                | Yes          | No               |
-| Backup and restore (.cachink)         | Yes               | Yes          | **Yes (always)** |
+| Backup and restore (.xangarro)        | Yes               | Yes          | **Yes (always)** |
 
 **Key principle:** Data export and backup are ALWAYS available in every state.
 The user's data is never held hostage.
@@ -312,7 +312,7 @@ has the subscription on Mac, and vice versa.
 Requirements:
 
 - Same Apple Developer account for both apps
-- Same bundle ID prefix (e.g., mx.cachink.app)
+- Same bundle ID prefix (e.g., mx.xangarro.app)
 - macOS build uploaded from a separate Xcode target with matching bundle ID
 - Tauri 2.0 supports Mac App Store distribution (App Sandbox required)
 
@@ -357,31 +357,31 @@ fee. Both stores automatically show:
 
 ---
 
-## 6. Data Portability — .cachink Backup
+## 6. Data Portability — .xangarro Backup
 
 When a user moves from Mac to Windows (or any platform change):
 
 - **Subscription:** Transfers automatically via RevenueCat (same email)
-- **Data:** Requires manual transfer via .cachink backup file
+- **Data:** Requires manual transfer via .xangarro backup file
 
 ### How it works
 
 ```
 Source device (Mac):
   Settings -> "Exportar respaldo completo"
-  -> Generates: Cachink-2026-05-15.cachink
+  -> Generates: Xangarro-2026-05-15.xangarro
   -> User shares via AirDrop / USB / email / cloud drive
 
 Target device (Windows):
   First-run wizard -> "Tienes datos de otro dispositivo?"
-  -> "Importar respaldo" -> select .cachink file
+  -> "Importar respaldo" -> select .xangarro file
   -> All data restored into local SQLite
 ```
 
 ### File format
 
 ```
-.cachink file = ZIP archive containing:
+.xangarro file = ZIP archive containing:
   manifest.json       <- version, date, device info
   database.sqlite     <- full SQLite database dump
   checksum.sha256     <- integrity verification
@@ -390,7 +390,7 @@ Target device (Windows):
 - Optionally encrypted with a user-chosen PIN (same PIN system in the app)
 - Works cross-platform (SQLite is platform-independent)
 - The ExportarDatosAction component already exists in the codebase at
-  packages/ui/src/screens/Settings/exportar-datos-action.tsx — the .cachink
+  packages/ui/src/screens/Settings/exportar-datos-action.tsx — the .xangarro
   backup extends this with a full SQLite export + import flow
 
 ### Always available
@@ -492,10 +492,10 @@ always returns `subscribed` so existing behavior doesn't change.
 4. Build checkout flow (Stripe-hosted page in Tauri webview)
 5. Test: subscribe on Windows -> verify on iOS/Android/Mac
 
-### Phase E5 — Data Portability (.cachink backup)
+### Phase E5 — Data Portability (.xangarro backup)
 
-1. Build exportBackup() — dumps SQLite to .cachink zip
-2. Build importBackup() — reads .cachink, restores into local SQLite
+1. Build exportBackup() — dumps SQLite to .xangarro zip
+2. Build importBackup() — reads .xangarro, restores into local SQLite
 3. Add "Exportar respaldo" and "Importar respaldo" to Settings
 4. Add import option to first-run Wizard
 5. Add "Exportar mis datos" button to ReadOnlyLockScreen

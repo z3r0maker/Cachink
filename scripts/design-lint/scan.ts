@@ -1,5 +1,5 @@
 /**
- * scan.ts — the Cachink design-system rule engine.
+ * scan.ts — the Xangarro design-system rule engine.
  *
  * Exists because no off-the-shelf detector can read this codebase. Styling
  * lives in Tamagui props and JS token objects, not CSS, so HTML/CSS engines

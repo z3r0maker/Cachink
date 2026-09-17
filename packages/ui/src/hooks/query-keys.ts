@@ -111,7 +111,7 @@ export const flagKeys = {
 export const syncKeys = {
   /** Recent LAN sync conflicts surfaced in DirectorHome (ADR-029). */
   conflicts: (limit: number): readonly unknown[] => ['sync-conflicts', limit] as const,
-  /** LAN pairing material stored in `__cachink_sync_state` (Slice 8 C1). */
+  /** LAN pairing material stored in `__xangarro_sync_state` (Slice 8 C1). */
   lanAuth: (): readonly unknown[] => ['sync-lan-auth'] as const,
   /**
    * @deprecated Removed in ADR-039 — kept as a key factory for any
@@ -122,8 +122,8 @@ export const syncKeys = {
   lanRole: (): readonly unknown[] => ['sync-lan-role'] as const,
   /**
    * Host-side flag stamped after the bundled Tauri LAN server reports
-   * ready (Slice 8 A2 revision). Replaces the prior `'cachink-host'`
-   * `auth.accessToken` sentinel — see `sync-state.ts` for the rationale.
+   * ready (Slice 8 A2 revision). Replaces the prior host sentinel stored in
+   * `auth.accessToken` — see `sync-state.ts` for the rationale.
    */
   lanHostReady: (): readonly unknown[] => ['sync-lan-host-ready'] as const,
   /** Pending push HWM for the unsynced-changes blocker (ADR-039). */

@@ -1,6 +1,6 @@
 /**
- * Integration tests for the `__cachink_change_log` triggers and the
- * `__cachink_sync_state` helpers added in migration 0001 (ADR-029,
+ * Integration tests for the `__xangarro_change_log` triggers and the
+ * `__xangarro_sync_state` helpers added in migration 0001 (ADR-029,
  * ADR-030).
  *
  * The tests run against a freshly-migrated `:memory:` `better-sqlite3`
@@ -12,11 +12,11 @@
  *     exactly one `insert` change-log row with matching id + device_id.
  *   - Updating a row (including soft-delete via `deleted_at`) produces an
  *     `update` change-log row.
- *   - The `__cachink_change_log.id` column is monotonically increasing so
+ *   - The `__xangarro_change_log.id` column is monotonically increasing so
  *     sync clients can paginate without losing rows.
  *   - `app_config` writes never appear in the change log (only business
  *     tables are synced).
- *   - The `__cachink_sync_state` round-trips JSON values of every
+ *   - The `__xangarro_sync_state` round-trips JSON values of every
  *     useful shape.
  */
 
@@ -58,7 +58,7 @@ type ChangeLogRow = {
 async function readChangeLog(db: XangarroDatabase): Promise<ChangeLogRow[]> {
   return (await db.all(
     sql`SELECT "id", "table_name", "row_id", "row_updated_at", "row_device_id", "op", "captured_at"
-        FROM "__cachink_change_log" ORDER BY "id" ASC`,
+        FROM "__xangarro_change_log" ORDER BY "id" ASC`,
   )) as ChangeLogRow[];
 }
 
@@ -376,7 +376,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
   });
 });
 
-describe('__cachink_sync_state helpers — readSyncState / writeSyncState', () => {
+describe('__xangarro_sync_state helpers — readSyncState / writeSyncState', () => {
   let db: XangarroDatabase;
 
   beforeEach(() => {

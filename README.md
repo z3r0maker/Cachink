@@ -208,7 +208,7 @@ Full principles in CLAUDE.md §2.
 ## Repository Layout
 
 ```
-cachink/
+xangarro/
 ├── apps/
 │   ├── mobile/           Expo app (iOS / Android tablets)
 │   └── desktop/          Tauri app (Windows / macOS)

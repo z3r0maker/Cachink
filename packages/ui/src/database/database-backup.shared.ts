@@ -9,11 +9,13 @@
  * picks `database-backup.native.ts` first when resolving `./database-backup`.
  */
 
+import { DB_FILE_NAME } from './database-file.shared';
+
 export type BackupFn = (tagBeingApplied: string) => Promise<string>;
 
 export function formatBackupFilename(tag: string, now: Date = new Date()): string {
   const stamp = now.toISOString().replace(/[:.]/g, '-');
-  return `cachink.db.backup-${stamp}-${tag}.bak`;
+  return `${DB_FILE_NAME}.backup-${stamp}-${tag}.bak`;
 }
 
 export const noopBackup: BackupFn = async () => 'noop';

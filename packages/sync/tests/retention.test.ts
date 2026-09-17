@@ -161,7 +161,7 @@ describe('purgeAcknowledged', () => {
     await aged('client_payments', pago.id, OLD);
     await aged('sales', edited.id, OLD);
     const log = await db.get<{ id: number }>(
-      sql`SELECT MAX(id) AS id FROM __cachink_change_log WHERE row_id = ${edited.id}`,
+      sql`SELECT MAX(id) AS id FROM __xangarro_change_log WHERE row_id = ${edited.id}`,
     );
     await synced({ hwm: (log?.id ?? 1) - 1 });
     expect((await purge()).deleted).toEqual({});

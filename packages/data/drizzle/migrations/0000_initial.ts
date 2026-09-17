@@ -1,6 +1,10 @@
 /**
  * Migration 0000 — Consolidated initial schema.
  *
+ * Legacy names: the `__cachink_*` tables below are intentional. This
+ * migration is applied on existing installs and must not change; 0004
+ * renames the tables and SQLite rewrites these trigger bodies (ADR-056).
+ *
  * This single migration produces the complete Xangarro database schema,
  * replacing the prior 19 incremental migrations (0000–0018). It was
  * created during the Migration Engine Overhaul because:

@@ -11,7 +11,7 @@
  *   - Every row goes through the same LWW SQL the server uses: the
  *     local row wins if its `updated_at` is strictly greater, or equal
  *     and its `device_id` is lexicographically smaller.
- *   - Rejected rows go into `__cachink_conflicts` so the UI can surface
+ *   - Rejected rows go into `__xangarro_conflicts` so the UI can surface
  *     them (Slice 5 C20).
  */
 
@@ -122,7 +122,7 @@ async function applyDeltas(db: XangarroDatabase, deltas: readonly Delta[]): Prom
 async function recordInboundConflict(db: XangarroDatabase, delta: Delta): Promise<void> {
   const tableQuoted = sql.raw(`"${delta.table}"`);
   await db.run(sql`
-    INSERT INTO __cachink_conflicts
+    INSERT INTO __xangarro_conflicts
       (direction, table_name, row_id, loser_updated_at, loser_device_id,
        winner_updated_at, winner_device_id, reason)
     VALUES (

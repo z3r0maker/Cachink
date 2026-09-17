@@ -3,7 +3,7 @@
  *
  * Covers the three observable branches: empty result, mapped rows, and
  * the swallow-on-missing-table fallback. The hook reads
- * `__cachink_conflicts` via `db.all(sql\`...\`)` so we stub the
+ * `__xangarro_conflicts` via `db.all(sql\`...\`)` so we stub the
  * `useDatabase()` return value with a controllable `all` method.
  */
 
@@ -16,7 +16,7 @@ import type { XangarroDatabase } from '@xangarro/data';
 let MOCK_ROWS: ReadonlyArray<unknown> = [];
 let SHOULD_THROW = false;
 const allMock = vi.fn(async () => {
-  if (SHOULD_THROW) throw new Error('no such table: __cachink_conflicts');
+  if (SHOULD_THROW) throw new Error('no such table: __xangarro_conflicts');
   return MOCK_ROWS;
 });
 
