@@ -1,0 +1,20 @@
+# Close any open caja turno so the flow starts from "no turno" (A-16).
+# Flows share one activated device, so an earlier flow may have left a turno
+# open or a close half done; finish-caja-close.yaml resumes either.
+# Precondition: signed in.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'tab-caja'
+- runFlow:
+    when:
+      visible:
+        id: 'caja-cerrar-btn'
+    commands:
+      - tapOn:
+          id: 'caja-cerrar-btn'
+      - extendedWaitUntil:
+          visible:
+            id: 'cerrar-caja-step-1'
+          timeout: 5000
+- runFlow: finish-caja-close.yaml

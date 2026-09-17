@@ -1,67 +1,31 @@
-# Test form validation on the manual venta form — submit with
-# invalid data and verify errors prevent submission.
+# POS guard: a sale cannot be settled with an empty cart.
 #
-# Covers validation edge cases:
-#   1. Submit with empty concepto → form NOT submitted
-#   2. Submit with $0 monto → form NOT submitted
+# Verifies:
+#   1. Empty cart → empty-cart-hint shown, no "Cobrar" button
+#   2. Tapping a product adds it → cart strip + "Cobrar" appear
 #
-# Precondition: wizard complete + at least one product exists
-# (so the manual form is visible alongside the product grid).
-#
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/validation-venta.yaml
-# x-entrypoint: wizard
+# The free-text manual sale form was retired with the tap-to-cart POS (A-16).
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# Navigate to the Ventas tab.
 - tapOn:
     id: 'tab-ventas'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 5000
 
-# --- Test 1: Empty concepto + valid monto ---
-# The manual venta form's submit button should be disabled when
-# concepto is empty.
 - assertVisible:
-    id: 'manual-venta-form'
+    id: 'empty-cart-hint'
+- assertNotVisible:
+    id: 'cart-checkout-btn'
 
-# Enter a valid monto but leave concepto blank.
-- tapOn:
-    id: 'manual-venta-monto'
-- inputText: '100'
-
-# The submit button should be disabled (validation: concepto is
-# required and monto > 0). Tap it — nothing should happen.
-- tapOn:
-    id: 'manual-venta-submit'
-
-# The form should still be visible (not submitted).
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: 'manual-venta-form'
-
-# --- Test 2: Valid concepto + $0 monto ---
-# Clear the monto and enter a concepto.
-- tapOn:
-    id: 'manual-venta-monto'
-- eraseText
-- inputText: '0'
-
-- tapOn:
-    id: 'manual-venta-concepto'
-- inputText: 'Test producto'
-
-# Submit button should still be disabled (monto = 0).
-- tapOn:
-    id: 'manual-venta-submit'
-
-# Form still visible — validation prevented submission.
+    id: 'cart-strip'
 - assertVisible:
-    id: 'manual-venta-form'
+    id: 'cart-checkout-btn'

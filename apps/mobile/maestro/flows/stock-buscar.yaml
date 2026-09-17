@@ -4,7 +4,6 @@
 #   1. Navigate to Productos → Stock tab
 #   2. stock-buscar search bar visible
 #   3. Type product name → filtered list updates
-#   4. stock-instructions help text visible
 #
 # Precondition: wizard complete, at least one product exists.
 # Chain flows:
@@ -13,11 +12,9 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/stock-buscar.yaml
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -35,20 +32,17 @@ appId: mx.xangarro.mobile
     id: 'stock-buscar'
 
 # Verify instructions/help text is visible.
-- assertVisible:
-    id: 'stock-instructions'
-
 # Type the product name to filter the list.
 - tapOn:
     id: 'stock-buscar'
-- inputText: 'Tortilla'
+- inputText: 'Gringa'
 
 # Product should still be visible in filtered results.
-- assertVisible: 'Tortilla'
+- assertVisible: '.*Gringa.*'
 
 # Clear and type a non-existent name.
 - eraseText
 - inputText: 'ZZZNOFOUND'
 
 # Product should disappear from filtered list.
-- assertNotVisible: 'Tortilla'
+- assertNotVisible: '.*Gringa.*'

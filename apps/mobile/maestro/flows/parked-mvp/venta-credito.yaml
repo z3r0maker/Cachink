@@ -2,10 +2,9 @@
 # surfaces under Cuentas por Cobrar for the Director role.
 #
 # Precondition: demo mode seeded (products + users + clients exist).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - runFlow: ../shared/ensure-caja-open.yaml

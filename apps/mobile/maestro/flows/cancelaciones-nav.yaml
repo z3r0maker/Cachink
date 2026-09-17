@@ -1,20 +1,18 @@
-# Navigate to Cancelaciones screen and verify empty state renders.
-# Route: /cancelaciones (via Otros → cancelaciones card)
-# Verifies: cancelaciones-screen testID, empty-state text.
-# x-entrypoint: wizard
+# Navigate to the Cancelaciones screen from the Caja tool grid.
+# Route: /cancelaciones (Caja → cancelaciones card)
+# Verifies: the screen renders. Earlier flows on the shared device have sold
+# today, so the empty state is not asserted.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - otros
   - cancelaciones
   - regression
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
+# The tool grid lives on the Caja tab.
 - runFlow: shared/open-director-tools.yaml
 
 - scrollUntilVisible:
@@ -29,8 +27,3 @@ tags:
     visible:
       id: 'mobile-cancelaciones'
     timeout: 5000
-
-# Verify the screen title renders
-- assertVisible: 'Cancelaciones'
-# Empty state (no sales today expected at test start)
-- assertVisible: 'No hay ventas registradas hoy'

@@ -15,28 +15,29 @@
 #   maestro test apps/mobile/maestro/flows/editar-egreso-full-form.yaml
 #
 # The egreso-gasto flow creates "Renta del local" at $8,000.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+# Create the gasto this flow edits/deletes (no demo data on an activated device).
+- runFlow: egreso-gasto.yaml
 
 # Navigate to the Egresos tab.
 - tapOn:
     id: 'tab-gastos'
 
 # Verify the existing egreso is visible.
-- assertVisible: 'Renta del local'
+- assertVisible: '.*Renta del local.*'
 
 # Swipe the egreso row left to reveal the edit action.
+# Swipe right on the payment's own row: that reveals Editar (swiping left
+# reveals Borrar).
 - swipe:
-    id: 'egresos-list'
-    direction: LEFT
-    startX: 300
-    endX: 50
+    from:
+      text: '.*Renta del local.*'
+    direction: RIGHT
 
 # Wait for the EditarEgresoModal to appear.
 - extendedWaitUntil:
@@ -54,12 +55,14 @@ appId: mx.xangarro.mobile
     id: 'editar-egreso-monto'
 - eraseText
 - inputText: '9500'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # --- Change proveedor ---
 - tapOn:
     id: 'editar-egreso-proveedor'
 - eraseText
 - inputText: 'Inmobiliaria Centro'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Submit the edit.
 - tapOn:

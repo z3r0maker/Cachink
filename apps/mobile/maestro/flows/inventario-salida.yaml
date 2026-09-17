@@ -2,13 +2,10 @@
 # movimiento visible in the Movimientos view.
 # Covers P1C-M5-T04 (Entrada/Salida modal).
 #
-# Precondition: producto 'Tortilla' with stock >= 5 exists (create via
-# inventario-producto.yaml and an entrada flow, or seed e2e-seed.json).
-# x-entrypoint: demo
+# Precondition: mock product 'Gringa' exists.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml

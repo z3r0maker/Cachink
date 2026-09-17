@@ -2,11 +2,9 @@
 # Covers P1C-M5-T05/T06 (scanner + manual fallback) for mobile. On
 # simulators without a physical camera the ManualEntry field is the
 # only reliable code source.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -19,6 +17,7 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'producto-nombre'
 - inputText: 'Refresco 600ml'
+- hideKeyboard
 - tapOn:
     id: 'producto-scan'
 
@@ -26,25 +25,30 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'scanner-manual'
 - inputText: '7501055300005'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'scanner-manual-submit'
 
 # Scanner closes + SKU populated on the form.
-- assertNotVisible: 'Escanear código'
+# The scanner sheet closes (the "Escanear código" button itself stays on the form).
+- assertNotVisible:
+    id: 'scanner-manual'
 
-# Enter pricing to verify Margen de ganancia row appears.
-- tapOn:
-    id: 'producto-costo'
-- eraseText
-- inputText: '50'
-- pressKey: enter
+# Quick-add has no costo or margen; only the sale price is required.
 - tapOn:
     id: 'producto-precio-venta'
 - eraseText
 - inputText: '100'
 - hideKeyboard
-- assertVisible: 'Margen de ganancia'
 
 - tapOn:
     id: 'producto-submit'
-- assertVisible: 'Refresco 600ml'
+- extendedWaitUntil:
+    visible:
+      id: 'stock-buscar'
+    timeout: 8000
+- tapOn:
+    id: 'stock-buscar'
+- inputText: 'Refresco 600'
+- assertVisible: '.*Refresco 600ml.*'
+- hideKeyboard

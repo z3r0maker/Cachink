@@ -25,7 +25,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
-import { NuevoEmpleadoModal } from '../../src/screens/Egresos/tabs/nuevo-empleado-modal';
 import { NuevoClienteModal } from '../../src/screens/Clientes/nuevo-cliente-modal';
 
 initI18n();
@@ -42,15 +41,6 @@ function pressEnterOn(testID: string): void {
 }
 
 describe('Keyboard-submit on last form field (audit 5.4)', () => {
-  it('NuevoEmpleadoModal: Enter on salario fires submit (validation may reject)', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(<NuevoEmpleadoModal open onClose={vi.fn()} onSubmit={onSubmit} />);
-    pressEnterOn('empleado-salario');
-    // Validation rejects empty fields; the test confirms the Enter key
-    // didn't crash and the form is still mounted.
-    expect(screen.getByTestId('empleado-salario')).toBeInTheDocument();
-  });
-
   it('NuevoClienteModal: Enter on teléfono fires submit with valid nombre', () => {
     const onSubmit = vi.fn();
     renderWithProviders(<NuevoClienteModal open onClose={vi.fn()} onSubmit={onSubmit} />);

@@ -109,6 +109,7 @@ function CajaCloseSection(props: {
 
   return (
     <CerrarCajaModal
+      turno={props.openTurno}
       onSubmit={(monto, reason, explicacion) => {
         props.cerrar.mutate(
           {

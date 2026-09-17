@@ -17,7 +17,6 @@ export * from './use-egresos-by-date';
 export * from './use-total-egresos-del-dia';
 export * from './use-registrar-egreso';
 export * from './use-empleados-for-business';
-export * from './use-crear-empleado';
 export * from './use-productos';
 export * from './use-productos-para-venta';
 export * from './use-registrar-movimiento';

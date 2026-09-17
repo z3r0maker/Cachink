@@ -9,7 +9,7 @@
  * sub-types — sub-type-specific edits land in a Phase 2 follow-up.
  */
 
-import { useEffect, useState, type ReactElement } from 'react';
+import { useState, type ReactElement } from 'react';
 import { fromPesos, toPesosString, type Expense, type ExpenseCategory } from '@xangarro/domain';
 import type { ExpensePatch } from '@xangarro/data';
 import { Btn, Modal } from '../../components/index';
@@ -123,28 +123,31 @@ function buildPatch(state: FormState): ExpensePatch {
   };
 }
 
-export function EditarEgresoModal(props: EditarEgresoModalProps): ReactElement {
+/**
+ * The form lives below `<Modal>` so a keystroke re-renders only the form, not
+ * the sheet: re-rendering the Dialog portal on every keystroke made the
+ * controlled inputs drop characters under fast typing ("Editado" → "Editao"),
+ * seen on the iPad sim. Keyed by the payment id so a new payment starts fresh.
+ * The mutation hook stays in `EditarEgresoModal`: on native the Modal renders
+ * its children through a portal outside the RepositoryProvider.
+ */
+function EditarEgresoForm(props: {
+  editing: Expense;
+  onClose: () => void;
+  editar: ReturnType<typeof useEditarEgreso>;
+}): ReactElement {
   const { t } = useTranslation();
-  const editar = useEditarEgreso();
-  const [state, setState] = useState<FormState>(fromExpense(props.editing));
-  useEffect(() => {
-    setState(fromExpense(props.editing));
-  }, [props.editing]);
+  const { editar } = props;
+  const [state, setState] = useState<FormState>(() => fromExpense(props.editing));
   const patch = (next: Partial<FormState>): void => setState((prev) => ({ ...prev, ...next }));
   const handleSubmit = (): void => {
-    if (!props.editing) return;
     editar.mutate(
       { id: props.editing.id, patch: buildPatch(state) },
       { onSuccess: () => props.onClose() },
     );
   };
   return (
-    <Modal
-      open={props.open}
-      onClose={props.onClose}
-      title={t('editarEgreso.title')}
-      testID={props.testID ?? 'editar-egreso-modal'}
-    >
+    <>
       <ConceptoFields state={state} patch={patch} t={t} />
       <MontoAndProveedor state={state} patch={patch} t={t} onSubmit={handleSubmit} />
       <Btn
@@ -156,6 +159,28 @@ export function EditarEgresoModal(props: EditarEgresoModalProps): ReactElement {
       >
         {t('editarEgreso.save')}
       </Btn>
+    </>
+  );
+}
+
+export function EditarEgresoModal(props: EditarEgresoModalProps): ReactElement {
+  const { t } = useTranslation();
+  const editar = useEditarEgreso();
+  return (
+    <Modal
+      open={props.open}
+      onClose={props.onClose}
+      title={t('editarEgreso.title')}
+      testID={props.testID ?? 'editar-egreso-modal'}
+    >
+      {props.editing !== null && (
+        <EditarEgresoForm
+          key={props.editing.id}
+          editing={props.editing}
+          onClose={props.onClose}
+          editar={editar}
+        />
+      )}
     </Modal>
   );
 }

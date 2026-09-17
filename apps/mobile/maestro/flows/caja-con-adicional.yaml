@@ -17,28 +17,21 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/funciones-toggle.yaml
 #   maestro test apps/mobile/maestro/flows/caja-con-adicional.yaml
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-closed.yaml
 
 # Navigate to Otros → Caja.
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |
 # Estados — no Otros tab. The tool grid moved into Configuración.
 # This subflow opens it for whichever role is logged in.
 - runFlow: shared/open-director-tools.yaml
-- scrollUntilVisible:
-    element:
-      id: 'otros-caja'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
 - tapOn:
-    id: 'otros-caja'
+    id: 'tab-caja'
 
 # The abrir-caja-modal should appear.
 - extendedWaitUntil:
@@ -55,6 +48,19 @@ appId: mx.xangarro.mobile
 # Submit the apertura.
 - tapOn:
     id: 'caja-abrir-submit'
+# Opening with a different amount than the last close asks for confirmation.
+- extendedWaitUntil:
+    visible:
+      id: 'discrepancy-continue'
+    timeout: 3000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: 'discrepancy-continue'
+    commands:
+      - tapOn:
+          id: 'discrepancy-continue'
 
 # Status card should be visible showing the turn is open.
 - assertVisible:
@@ -78,3 +84,9 @@ appId: mx.xangarro.mobile
     id: 'cerrar-caja-step-2'
 - tapOn:
     id: 'count-result-close'
+
+# The turno is closed: the open-caja form is back.
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 10000

@@ -34,6 +34,7 @@ import { colors, radii, shadows } from '../../theme';
 import { impactLight } from '../../haptics/index';
 import type { ComboboxOption, ComboboxProps } from './combobox-types';
 import { EmptyRow, OptionRow, SearchInput, TriggerView, readSearchEvent } from './combobox-views';
+import { ComboboxField } from './combobox-field';
 
 export type { ComboboxOption, ComboboxProps };
 
@@ -206,17 +207,19 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>): Re
       stayInFrame
       offset={PANEL_OFFSET}
     >
-      <Popover.Anchor>
-        <TriggerView
-          testID={props.testID ?? 'combobox-trigger'}
-          ariaLabel={props.ariaLabel ?? props.label}
-          open={b.open}
-          disabled={b.disabled}
-          displayText={b.triggerLabel}
-          isPlaceholder={b.isPlaceholder}
-          onPress={b.handleTriggerPress}
-        />
-      </Popover.Anchor>
+      <ComboboxField label={props.label} note={props.note}>
+        <Popover.Anchor>
+          <TriggerView
+            testID={props.testID ?? 'combobox-trigger'}
+            ariaLabel={props.ariaLabel ?? props.label}
+            open={b.open}
+            disabled={b.disabled}
+            displayText={b.triggerLabel}
+            isPlaceholder={b.isPlaceholder}
+            onPress={b.handleTriggerPress}
+          />
+        </Popover.Anchor>
+      </ComboboxField>
       <ComboboxPanel<T>
         searchable={b.searchable}
         query={b.query}

@@ -1,14 +1,12 @@
 # Cloud mode airplane-mode replay (P1E-M4 C16). Toggles the OS airplane
 # mode via `runFlow: adb`, records 3 ventas locally, re-enables
 # connectivity, and asserts they sync to the Cloud within 5 s.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 env:
   EMAIL: ${MAESTRO_CLOUD_EMAIL_A}
   PASSWORD: ${MAESTRO_CLOUD_PASSWORD}
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml

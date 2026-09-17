@@ -1,0 +1,87 @@
+# Full regression manifest (A-16), run in this order by
+# scripts/full-regression.sh. Activated flows share one activated device
+# (each starts from a cold launch); fresh flows run afterwards.
+# Order matters only where a flow depends on, or leaves behind, device state.
+
+# ── Shell smoke ──
+ipad-smoke.yaml
+a11y-smoke.yaml
+ipad-form-factor-audit.yaml
+
+# ── Before anything is captured ──
+empty-egresos.yaml             # needs zero egresos
+
+# ── Caja ──
+ventas-caja-gate.yaml          # closes the shift itself
+caja-abrir-cerrar.yaml
+caja-cierre-discrepancia.yaml
+caja-con-adicional.yaml
+caja-movimiento-turno-cerrado.yaml
+caja-movimientos-nav.yaml
+caja-handoff.yaml
+
+# ── Ventas ──
+checkout-method-picker.yaml
+validation-venta.yaml
+venta-efectivo.yaml
+venta-otros-metodos.yaml
+venta-cantidad-multiple.yaml
+venta-search-product.yaml
+venta-stock-insuficiente.yaml
+ventas-total-y-fecha.yaml
+venta-ciclo-completo.yaml
+cancelaciones-nav.yaml
+
+# ── Gastos ──
+egreso-gasto.yaml
+egreso-gasto-full-form.yaml
+egreso-nomina.yaml
+egreso-nomina-field-assertions.yaml
+egreso-inventario.yaml
+egreso-recurrente.yaml
+egreso-recurrente-mensual.yaml
+egreso-recurrente-quincenal.yaml
+egreso-recurrente-semanal.yaml
+egreso-recurrente-descartar.yaml
+egresos-total-y-fecha.yaml
+editar-egreso.yaml
+editar-egreso-full-form.yaml
+eliminar-egreso.yaml
+eliminar-egreso-via-popover.yaml
+nuevo-egreso-cancel.yaml
+validation-egreso.yaml
+
+# ── Productos / stock ──
+producto-quick-add.yaml
+producto-via-fab.yaml
+validation-producto.yaml
+inventario-barcode.yaml
+producto-entrada-stock.yaml
+producto-movimientos.yaml
+movimiento-entrada-con-nota.yaml
+movimiento-salida-con-motivo.yaml
+inventario-salida.yaml
+stock-buscar.yaml
+notificaciones-stock-bajo.yaml
+
+# ── Settings / sync ──
+bug-report-sheet.yaml
+exportar-datos.yaml
+settings-check-updates.yaml
+settings-crash-reporting-toggle.yaml
+sync-actualizar.yaml
+sync-rejected.yaml             # forgets then restores a mock product
+
+# ── Operators ──
+usuario-multi-switch.yaml
+auto-lock-smoke.yaml           # waits for the inactivity timeout
+
+# ── Mock-scenario flows: they change the plan, so they run last ──
+entitlement-feature-gates.yaml
+entitlement-freelancer-limit.yaml
+settings-desvincular.yaml      # unlinks, resets the mock and re-activates
+login-lockout.yaml             # leaves PIN entry locked for 30 s
+
+# ── Fresh device ──
+activation-errors.yaml
+activation.yaml

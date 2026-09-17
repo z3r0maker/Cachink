@@ -4,8 +4,16 @@
 #
 # Sourced by both run-flow.sh and full-regression.sh so the two runners
 # share ONE implementation of "read a flow's x-entrypoint and put the app
-# into the right state (fresh / demo / wizard), caching the current state
-# so consecutive same-entry flows don't re-seed".
+# into the right state (fresh / activated), caching the current state so
+# consecutive same-entry flows don't re-activate".
+#
+# Entry points (A-16):
+#   fresh     — mock reset + local DB deleted; the app boots at activation.
+#   activated — fresh + activation.yaml: the device holds the mock business
+#               (Tacos La Esquina, operators Toni 123456 / Ana 567890,
+#               28 products, 3 clients). Flows sign in with
+#               shared/login-operator.yaml.
+#   demo, wizard — retired first-run entries; treated as `activated`.
 #
 # Provides: detect_entry <flow>, current_state, run_setup <entry>.
 # Honors (with defaults): SKIP_SETUP, MAESTRO_DEVICE_UDID, STATE_FILE.
@@ -17,8 +25,8 @@ _ENTRY_LIB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRIPT_DIR="${SCRIPT_DIR:-$(cd "$_ENTRY_LIB_DIR/.." && pwd)}"
 FLOWS_DIR="${FLOWS_DIR:-$(cd "$SCRIPT_DIR/../flows" && pwd)}"
 FRESH_SCRIPT="${FRESH_SCRIPT:-$SCRIPT_DIR/fresh-install.sh}"
-DEMO_FLOW="${DEMO_FLOW:-$FLOWS_DIR/demo-mode-setup.yaml}"
-WIZARD_FLOW="${WIZARD_FLOW:-$FLOWS_DIR/wizard-local-standalone.yaml}"
+ACTIVATION_FLOW="${ACTIVATION_FLOW:-$FLOWS_DIR/activation.yaml}"
+MOCK_API="${MOCK_API:-http://127.0.0.1:3100}"
 STATE_FILE="${STATE_FILE:-/tmp/maestro-entry-state}"
 APP_ID="${APP_ID:-mx.xangarro.mobile}"
 
@@ -46,19 +54,43 @@ detect_entry() {
   local flow="$1"
   local xentry
   xentry=$(_flow_header "$flow" | sed -n 's/^# x-entrypoint: \([a-z]*\).*/\1/p' 2>/dev/null | head -1)
+  if [[ "$xentry" == demo || "$xentry" == wizard ]]; then echo "activated"; return; fi
   if [[ -n "$xentry" ]]; then echo "$xentry"; return; fi
 
   local precondition
   precondition=$(_flow_header "$flow" | grep -i '# Precondition:' 2>/dev/null | head -1 || true)
-  if [[ -z "$precondition" ]]; then echo "wizard"; return; fi
-
   if echo "$precondition" | grep -qi 'fresh install'; then echo "fresh"
-  elif echo "$precondition" | grep -qi 'demo mode'; then echo "demo"
-  else echo "wizard"; fi
+  else echo "activated"; fi
 }
 
 current_state() {
   if [[ -f "$STATE_FILE" ]]; then cat "$STATE_FILE"; else echo "none"; fi
+}
+
+# Mock back to its fixtures, local DB deleted, cold start on Metro. The
+# device token in the keychain survives, but without the activation record
+# (in the DB) the app boots at the activation screen.
+_fresh_device() {
+  if ! curl -sf -X POST "$MOCK_API/__mock/reset" >/dev/null; then
+    echo "❌  Mock API not reachable at $MOCK_API — start it: PORT=3100 pnpm mock:api"
+    return 1
+  fi
+  "$FRESH_SCRIPT" --reset-only
+  local sim_target="${MAESTRO_DEVICE_UDID:-booted}"
+  local dev_url="exp+xangarro://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081"
+  xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
+  xcrun simctl openurl "$sim_target" "$dev_url" 2>/dev/null || true
+  sleep 20
+}
+
+# Terminate and relaunch the app on Metro so a flow starts from the operator
+# list instead of wherever the previous flow left it. Data is untouched.
+cold_start_app() {
+  local sim_target="${MAESTRO_DEVICE_UDID:-booted}"
+  xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
+  xcrun simctl openurl "$sim_target" \
+    "exp+xangarro://expo-development-client/?url=http%3A%2F%2F127.0.0.1%3A8081" 2>/dev/null || true
+  sleep "${COLD_START_WAIT:-18}"
 }
 
 # ──────────── Setup runner (state-cached) ─────────────────────────
@@ -70,33 +102,20 @@ run_setup() {
     echo "⏭️   Skipping setup (--skip-setup)"
     return 0
   fi
-  if [[ "$prev" == "$entry" ]]; then
+  # `fresh` is never reused: its flows (activation) change the state they start from.
+  if [[ "$prev" == "$entry" && "$entry" != fresh ]]; then
     echo "♻️   State already '$entry' — skipping setup"
     return 0
   fi
 
   echo "🔧  Setting up entry point: $entry"
   case "$entry" in
-    fresh)
-      "$FRESH_SCRIPT" --reset-only
-      ;;
-    demo)
-      "$FRESH_SCRIPT" --reset-only
-      # fresh-install.sh --reset-only deletes the DB but exits before its
-      # terminate+reconnect, so the app keeps stale in-memory state and the
-      # seed flow's launchApp would only foreground it. Force a cold start
-      # (dev-client is already primed to localhost:8081).
-      local sim_target="${MAESTRO_DEVICE_UDID:-booted}"
-      local dev_url="exp+xangarro://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
-      xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
-      xcrun simctl openurl "$sim_target" "$dev_url" 2>/dev/null || true
-      sleep 5
-      xcrun simctl terminate "$sim_target" "$APP_ID" 2>/dev/null || true
-      echo "🌱  Seeding demo data (this takes 2-3 minutes)..."
-      maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$DEMO_FLOW"
-      ;;
-    wizard)
-      "$FRESH_SCRIPT" "$WIZARD_FLOW"
+    fresh | activated)
+      _fresh_device
+      if [[ "$entry" == activated ]]; then
+        echo "🔑  Activating against the mock ($MOCK_API)..."
+        maestro test ${MAESTRO_DEVICE_UDID:+--device "$MAESTRO_DEVICE_UDID"} "$ACTIVATION_FLOW"
+      fi
       ;;
     *)
       echo "❌  Unknown entry point: $entry"

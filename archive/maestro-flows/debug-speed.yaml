@@ -1,0 +1,11 @@
+# Speed test: measure tap latency
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'consent-no'
+    optional: true
+- tapOn:
+    id: 'consent-modal-no'
+    optional: true
+- assertVisible: '¡Bienvenido a Xangarro!'

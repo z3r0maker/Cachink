@@ -15,7 +15,7 @@ import { formatMoney, ZERO } from '@xangarro/domain';
 import { Btn } from '../../components/Btn/btn';
 import { Card } from '../../components/Card/card';
 import { Icon } from '../../components/Icon/index';
-import { Input } from '../../components/Input/input';
+import { Combobox } from '../../components/Combobox/index';
 import { TextField } from '../../components/fields/text-field';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
@@ -169,12 +169,11 @@ function ReasonSelector(props: {
       >
         {t('caja.countResultWhyLabel')}
       </Text>
-      <Input
+      <Combobox
         label={String(t('caja.razon'))}
-        type="select"
         value={props.reason ?? ''}
-        onChange={(v) => props.setReason((v || null) as DiscrepancyReason | null)}
-        options={REASONS as unknown as readonly string[]}
+        onChange={(v) => props.setReason(v)}
+        options={REASONS.map((r) => ({ key: r, label: String(t(`caja.reason.${r}`)) }))}
         testID="count-result-reason"
       />
       <TextField

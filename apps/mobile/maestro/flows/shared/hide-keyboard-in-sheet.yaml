@@ -1,0 +1,9 @@
+# Hide the soft keyboard while a bottom-sheet Modal is open. Maestro's
+# `hideKeyboard` taps outside the keyboard, which lands on the backdrop and
+# closes the sheet; tapping the sheet title hides the keyboard instead
+# (Modal dismisses it on any unclaimed tap in the sheet body).
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'modal-title'
+    optional: true

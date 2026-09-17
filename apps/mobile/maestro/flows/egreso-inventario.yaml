@@ -2,13 +2,10 @@
 # Dual-writes: MovimientoInventario (stock up) + Egreso (money out)
 # per ADR-021.
 #
-# Precondition: at least one producto exists (created via the flow
-# from P1C-M5, or seeded in e2e-seed.json).
-# x-entrypoint: demo
+# Precondition: the mock catalog is synced (the flow buys Quesadilla).
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -23,17 +20,19 @@ appId: mx.xangarro.mobile
 # Inventario tab — fill producto + cantidad + costo_unit.
 - tapOn:
     id: 'inventario-producto'
-- tapOn:
-    index: 0
-- tapOn:
+- tapOn: '.*Quesadilla.*'
+# Cantidad is a wheel picker (default 1); Maestro can't type into it, so the
+# purchase is 1 unit at $600.
+- assertVisible:
     id: 'inventario-cantidad'
-- inputText: '50'
 - tapOn:
     id: 'inventario-costo'
-- inputText: '12'
+- inputText: '600'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'inventario-submit'
 
-# Modal closes + egreso visible (50 × 12 = $600.00).
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: '−$600.00'
+# Modal closes + egreso visible (1 × $600 = $600.00).
+- assertNotVisible: 'Nuevo pago'
+- assertVisible: '.*Compra inventario.*'
+- assertVisible: '.*\$600\.00.*'

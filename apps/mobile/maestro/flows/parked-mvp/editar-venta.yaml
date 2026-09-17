@@ -13,11 +13,9 @@
 #   maestro test apps/mobile/maestro/flows/editar-venta.yaml
 #
 # The venta-efectivo flow creates a sale for "Tortilla".
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml

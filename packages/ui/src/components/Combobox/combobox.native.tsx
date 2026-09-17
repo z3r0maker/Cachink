@@ -11,74 +11,17 @@
  * (Popover-anchored picker).
  */
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
-import {
-  FlatList,
-  Modal,
-  Pressable,
-  TextInput,
-  type ListRenderItemInfo,
-  type TextStyle,
-  type ViewStyle,
-} from 'react-native';
+import { FlatList, Modal, Pressable, TextInput, type ListRenderItemInfo } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from '../Icon/index';
-import { colors, fontSizes, radii, shapeRadii, typography } from '../../theme';
+import { colors, fontSizes, typography } from '../../theme';
 import type { ComboboxOption, ComboboxProps } from './combobox-types';
 import { TriggerView } from './combobox-views';
+import { styles } from './combobox-styles.native';
+import { ComboboxField } from './combobox-field';
 
 export type { ComboboxOption, ComboboxProps };
-
-const TRIGGER_RADIUS = radii[2];
-
-const styles = {
-  backdrop: {
-    flex: 1,
-    backgroundColor: colors.scrim,
-  } satisfies ViewStyle,
-  sheet: {
-    backgroundColor: colors.white,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderColor: colors.black,
-    borderTopWidth: 2.5,
-    borderLeftWidth: 2.5,
-    borderRightWidth: 2.5,
-    maxHeight: '60%',
-    paddingHorizontal: 16,
-    paddingTop: 12,
-  } satisfies ViewStyle,
-  searchInput: {
-    borderColor: colors.black,
-    borderWidth: 2,
-    borderRadius: TRIGGER_RADIUS,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: fontSizes.md,
-    fontFamily: typography.fontFamily,
-    color: colors.ink,
-    marginBottom: 8,
-  } satisfies TextStyle,
-  optionRow: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: radii[1],
-  } satisfies ViewStyle,
-  selectedRow: {
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: radii[1],
-    backgroundColor: colors.gray100,
-  } satisfies ViewStyle,
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: shapeRadii.mark,
-    backgroundColor: colors.gray400,
-    alignSelf: 'center',
-    marginBottom: 8,
-  } as ViewStyle,
-} as const;
 
 function OptionRowNative<T extends string>({
   option,
@@ -166,6 +109,44 @@ function useComboboxHandlers<T extends string>(props: ComboboxProps<T>) {
   return { open, setOpen, query, setQuery, visibleOptions, handleClose, renderItem };
 }
 
+/** The bottom sheet with the (optionally searchable) option list. */
+function ComboboxSheet<T extends string>(props: {
+  readonly h: ReturnType<typeof useComboboxHandlers<T>>;
+  readonly searchable: boolean;
+  readonly bottomInset: number;
+}): ReactElement {
+  return (
+    <Modal
+      visible={props.h.open}
+      animationType="slide"
+      transparent
+      onRequestClose={props.h.handleClose}
+    >
+      <Pressable style={styles.backdrop} onPress={props.h.handleClose} />
+      <View style={[styles.sheet, { paddingBottom: props.bottomInset + 16 }] as never}>
+        <View style={styles.handle} />
+        {props.searchable && (
+          <TextInput
+            testID="combobox-search"
+            value={props.h.query}
+            onChangeText={props.h.setQuery}
+            placeholder="Buscar..."
+            placeholderTextColor={colors.textMuted}
+            style={styles.searchInput}
+            autoFocus
+          />
+        )}
+        <FlatList
+          data={props.h.visibleOptions as ComboboxOption<T>[]}
+          keyExtractor={(item) => item.key}
+          renderItem={props.h.renderItem}
+          ListEmptyComponent={<EmptyResults />}
+        />
+      </View>
+    </Modal>
+  );
+}
+
 /**
  * Renders a brand-styled bottom-sheet picker for mobile. Same public
  * API as the desktop `Combobox` — consumers don't know which variant
@@ -176,38 +157,18 @@ export function Combobox<T extends string = string>(props: ComboboxProps<T>): Re
   const d = useComboboxDisplay(props);
   return (
     <>
-      <TriggerView
-        testID={props.testID ?? 'combobox-trigger'}
-        ariaLabel={props.ariaLabel ?? props.label}
-        open={h.open}
-        disabled={d.disabled}
-        displayText={d.triggerLabel}
-        isPlaceholder={d.isPlaceholder}
-        onPress={() => !d.disabled && h.setOpen(true)}
-      />
-      <Modal visible={h.open} animationType="slide" transparent onRequestClose={h.handleClose}>
-        <Pressable style={styles.backdrop} onPress={h.handleClose} />
-        <View style={[styles.sheet, { paddingBottom: d.insets.bottom + 16 }] as never}>
-          <View style={styles.handle} />
-          {d.searchable && (
-            <TextInput
-              testID="combobox-search"
-              value={h.query}
-              onChangeText={h.setQuery}
-              placeholder="Buscar..."
-              placeholderTextColor={colors.textMuted}
-              style={styles.searchInput}
-              autoFocus
-            />
-          )}
-          <FlatList
-            data={h.visibleOptions as ComboboxOption<T>[]}
-            keyExtractor={(item) => item.key}
-            renderItem={h.renderItem}
-            ListEmptyComponent={<EmptyResults />}
-          />
-        </View>
-      </Modal>
+      <ComboboxField label={props.label} note={props.note}>
+        <TriggerView
+          testID={props.testID ?? 'combobox-trigger'}
+          ariaLabel={props.ariaLabel ?? props.label}
+          open={h.open}
+          disabled={d.disabled}
+          displayText={d.triggerLabel}
+          isPlaceholder={d.isPlaceholder}
+          onPress={() => !d.disabled && h.setOpen(true)}
+        />
+      </ComboboxField>
+      <ComboboxSheet<T> h={h} searchable={d.searchable} bottomInset={d.insets.bottom} />
     </>
   );
 }

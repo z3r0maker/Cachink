@@ -2,16 +2,16 @@
 # Precondition: at least one product must exist so the products gate
 # doesn't take priority. Product is created by inventario-producto.yaml
 # earlier in the regression chain.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - ventas
   - caja
   - gate
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-closed.yaml
 
 # Navigate to Ventas tab — should show caja gate (product exists, no turno).
 - tapOn:

@@ -1,197 +1,58 @@
-# Full sales lifecycle: multi-item → sales → cancel → KPI verification.
+# Full sales lifecycle on the POS: create a product → sell it and a mock
+# product in cash → cancel the newest sale from Caja → Cancelaciones.
 #
-# The flagship gap-filler flow that covers the complete sales cycle:
-#   1. Create a 2nd product (Taco, $20)
-#   2. Generate 2 cash sales (Tortilla $15, Taco $20)
-#   3. Assert aggregate KPI (ventas-total-card = $35.00)
-#   4. Cancel the Taco sale via Cancelaciones flow (PIN → reason → cash)
-#   5. Verify KPI adjusts (total = $15.00) and cancelled badge appears
+#   1. Ana signs in (in the mock only Ana has canCancelSales; the cancel use
+#      case checks the signed-in operator's PIN and permission)
+#   2. Quick-add "Taco E2E" ($20)
+#   3. Two cash sales: Quesadilla, then Taco E2E
+#   4. Caja → Cancelaciones → cancel the newest sale (PIN → reason → cash)
 #
-# Precondition: wizard + director-setup complete, Tortilla ($15) exists
-# (created by inventario-producto.yaml in Phase 2). No prior sales today.
-# Must run FIRST in Phase 4 for deterministic totals.
-#
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
-#   maestro test apps/mobile/maestro/flows/venta-ciclo-completo.yaml
-# x-entrypoint: wizard
+# The day's total is covered by ventas-total-y-fecha.yaml.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate.yaml
+- runFlow: shared/login-ana.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# ══════════════════════════════════════════════════════════════════
-# Step 0: Open caja via Otros (Director has no tab-caja)
-# ══════════════════════════════════════════════════════════════════
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-- scrollUntilVisible:
-    element:
-      id: 'otros-caja'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
+# Step 1: create a product with quick-add.
 - tapOn:
-    id: 'otros-caja'
-
-# Handle caja opening — may need numpad entry or confirm.
-- tapOn:
-    text: 'CONFIRMAR MONTO'
-    optional: true
-- tapOn:
-    id: 'numpad-5'
-    optional: true
-- tapOn:
-    id: 'numpad-0'
-    optional: true
-- tapOn:
-    id: 'numpad-0'
-    optional: true
-- tapOn:
-    id: 'caja-abrir-submit'
-    optional: true
-
-- extendedWaitUntil:
-    visible:
-      id: 'caja-status-card'
-    timeout: 10000
-
-# ══════════════════════════════════════════════════════════════════
-# Step 1: Create 2nd product — Taco ($20)
-# ══════════════════════════════════════════════════════════════════
-- tapOn:
-    id: 'top-bar-back'
-
-# Now on Otros grid — navigate to Productos.
-- scrollUntilVisible:
-    element:
-      id: 'otros-productos'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
-- tapOn:
-    id: 'otros-productos'
-
+    id: 'tab-productos'
 - tapOn:
     id: 'stock-nuevo-producto'
-
 - tapOn:
     id: 'producto-nombre'
-- inputText: 'Taco'
-- pressKey: enter
-
+- inputText: 'Taco E2E'
 - tapOn:
     id: 'producto-precio-venta'
 - eraseText
 - inputText: '20'
-- pressKey: enter
-
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: 'producto-submit'
+    direction: DOWN
+    timeout: 8000
 - tapOn:
     id: 'producto-submit'
-    optional: true
-
-- extendedWaitUntil:
-    notVisible:
-      id: 'nuevo-producto-modal'
-    timeout: 5000
-
-# Verify Taco appears in the stock list.
 - extendedWaitUntil:
     visible:
-      id: 'stock-list'
-    timeout: 5000
-- assertVisible:
-    text: '.*Taco.*'
+      id: 'stock-buscar'
+    timeout: 8000
 
-# ══════════════════════════════════════════════════════════════════
-# Step 2: Sell Tortilla ($15, Efectivo)
-# ══════════════════════════════════════════════════════════════════
+# Step 2: two cash sales.
+- runFlow:
+    file: shared/sell-cash.yaml
+    env:
+      PRODUCT: 'Quesadilla'
+- runFlow:
+    file: shared/sell-cash.yaml
+    env:
+      PRODUCT: 'Taco E2E'
+
+# Step 3: cancel the newest sale.
 - tapOn:
-    id: 'tab-ventas'
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 5000
-
-- tapOn: 'Tortilla'
-- assertVisible:
-    id: 'cart-strip'
-- tapOn:
-    id: 'cart-checkout-btn'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 5000
-- tapOn:
-    id: 'checkout-method-continue'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 5000
-- tapOn: "\\$50"
-- tapOn:
-    id: 'checkout-efectivo-submit'
-
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 5000
-
-# ══════════════════════════════════════════════════════════════════
-# Step 3: Sell Taco ($20, Efectivo)
-# ══════════════════════════════════════════════════════════════════
-- tapOn: 'Taco'
-- assertVisible:
-    id: 'cart-strip'
-- tapOn:
-    id: 'cart-checkout-btn'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-method-picker'
-    timeout: 5000
-- tapOn:
-    id: 'checkout-method-continue'
-
-- extendedWaitUntil:
-    visible:
-      id: 'checkout-efectivo'
-    timeout: 5000
-- tapOn: "\\$50"
-- tapOn:
-    id: 'checkout-efectivo-submit'
-
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 5000
-
-# ══════════════════════════════════════════════════════════════════
-# Step 4: Assert aggregate KPI — $35.00 (both sales)
-# ══════════════════════════════════════════════════════════════════
-- assertVisible:
-    id: 'ventas-total-card'
-- assertVisible:
-    text: ".*\\$35\\.00.*"
-
-- assertVisible:
-    id: 'ventas-list'
-
-# ══════════════════════════════════════════════════════════════════
-# Step 5: Cancel one sale — navigate to Cancelaciones via Otros
-# ══════════════════════════════════════════════════════════════════
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
+    id: 'tab-caja'
 - scrollUntilVisible:
     element:
       id: 'otros-cancelaciones'
@@ -200,37 +61,20 @@ appId: mx.xangarro.mobile
     centerElement: true
 - tapOn:
     id: 'otros-cancelaciones'
-
 - extendedWaitUntil:
     visible:
-      id: 'cancelaciones-screen'
+      id: 'mobile-cancelaciones'
     timeout: 5000
-
-# Tap the first "Cancelar" button (newest sale = Taco, $20).
-- tapOn: 'Cancelar'
-
-# ── PIN step ──
+- tapOn:
+    id: 'cancel-btn-.*'
 - extendedWaitUntil:
     visible:
-      id: 'cancellation-flow'
+      id: 'cancel-pin-input'
     timeout: 5000
-- assertVisible:
+# The authorization PIN is a keyboard field (PinCodeInput), not the numpad.
+- tapOn:
     id: 'cancel-pin-input'
-# Enter PIN 123456 (Director Test PIN).
-- tapOn:
-    id: 'numpad-1'
-- tapOn:
-    id: 'numpad-2'
-- tapOn:
-    id: 'numpad-3'
-- tapOn:
-    id: 'numpad-4'
-- tapOn:
-    id: 'numpad-5'
-- tapOn:
-    id: 'numpad-6'
-
-# ── Reason step ──
+- inputText: '567890'
 - extendedWaitUntil:
     visible:
       id: 'cancel-reason-input'
@@ -238,40 +82,26 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'cancel-reason-input'
 - inputText: 'Prueba E2E'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'cancel-reason-submit'
-
-# ── Cash confirm step (Taco was cash/Efectivo) ──
+# Cash to hand back is confirmed only for Efectivo sales (earlier flows on the
+# shared device may have left a card or transfer sale on top of the list).
 - extendedWaitUntil:
     visible:
       id: 'cancel-cash-confirm'
     timeout: 5000
-- tapOn:
-    id: 'cancel-cash-confirm'
-
-# ══════════════════════════════════════════════════════════════════
-# Step 6: Verify cancellation — badge visible on cancelled sale
-# ══════════════════════════════════════════════════════════════════
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: 'cancel-cash-confirm'
+    commands:
+      - tapOn:
+          id: 'cancel-cash-confirm'
 - extendedWaitUntil:
     notVisible:
-      id: 'cancellation-flow'
+      id: 'cancel-reason-input'
     timeout: 5000
-
-# The cancelled sale should show the badge text.
-- assertVisible:
-    text: '.*Cancelada.*Prueba E2E.*'
-
-# ══════════════════════════════════════════════════════════════════
-# Step 7: Verify KPI adjusts — back to Ventas, total = $15.00
-# ══════════════════════════════════════════════════════════════════
-- tapOn:
-    id: 'tab-ventas'
-- extendedWaitUntil:
-    visible:
-      id: 'ventas-product-grid'
-    timeout: 5000
-
-- assertVisible:
-    id: 'ventas-total-card'
-- assertVisible:
-    text: ".*\\$15\\.00.*"
+# CancelarVentaUseCase deletes the sale, so it leaves the list (no badge).
+- assertNotVisible: '.*Taco E2E.*'

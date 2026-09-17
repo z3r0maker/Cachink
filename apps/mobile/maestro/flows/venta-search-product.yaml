@@ -13,14 +13,13 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/venta-search-product.yaml
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals.
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
 # Navigate to the Ventas tab.
 - tapOn:
@@ -35,10 +34,14 @@ appId: mx.xangarro.mobile
     id: 'ventas-product-search'
 
 # Type a product name to filter.
-- inputText: 'Tortilla'
+- inputText: 'Gringa'
 
 # The filtered grid should still show the matching product.
-- assertVisible: 'Tortilla'
+# Exactly the matching tile remains (by id: the search box also shows the name).
+- assertVisible:
+    id: 'producto-tile-.*'
+# A non-matching product is filtered out.
+- assertNotVisible: '.*Quesadilla.*'
 
 # Clear the search to restore full grid.
 - tapOn:

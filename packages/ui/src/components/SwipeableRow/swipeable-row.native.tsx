@@ -1,9 +1,10 @@
 /**
  * SwipeableRow — mobile (React Native) variant (audit M-1 PR 4.5-T09).
  *
- * Wraps the row in `react-native-gesture-handler`'s `Swipeable` so users
- * can left-swipe to reach the Edit affordance and right-swipe to reach
- * the Delete affordance. Metro auto-picks this file over
+ * Wraps the row in `react-native-gesture-handler`'s `Swipeable`. Swiping
+ * right reveals the left panel (Edit, `onSwipeLeft`); swiping left reveals
+ * the right panel (Delete, `onSwipeRight`) — the prop names follow the
+ * panel side, not the finger direction. Metro auto-picks this file over
  * `./swipeable-row.tsx` (and `.web.tsx`) on RN.
  *
  * **Why the legacy `Swipeable` over `ReanimatedSwipeable`:** the

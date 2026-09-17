@@ -1,45 +1,29 @@
-# Tap egreso card → popover opens → tap egreso-detail-delete → egreso removed.
-# Covers Gap K (Phase 17): tap-to-popover → delete path (alternative to swipe-to-delete).
-#
-# testIDs exercised:
-#   egreso-detail-popover, egreso-detail-delete (via tap, not swipe)
-#
-# Precondition: wizard complete + at least one egreso exists.
-# Chain flows:
-#
-#   ./apps/mobile/maestro/scripts/fresh-install.sh \
-#       apps/mobile/maestro/flows/wizard-local-standalone.yaml
-#   maestro test apps/mobile/maestro/flows/egreso-gasto.yaml
-#   maestro test apps/mobile/maestro/flows/eliminar-egreso-via-popover.yaml
-#
-# ⚠️  This flow DESTROYS state — run last in any chain that
-# expects the egreso to still exist afterwards.
-# x-entrypoint: demo
+# Delete a payment from its detail popover (tap row → Eliminar) — the
+# alternative to swipe-to-delete. The flow creates its own uniquely named
+# payment first.
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+# Create the gasto this flow edits/deletes (no demo data on an activated device).
+# A payment with a name no other flow uses, so "gone after delete" is meaningful
+# on the shared device.
+- runFlow:
+    file: shared/create-gasto.yaml
+    env:
+      CONCEPTO: 'Pago a borrar popover'
+      MONTO: '123'
+- assertVisible: '.*Pago a borrar popover.*'
 
-# Navigate to the Egresos tab.
-- tapOn:
-    id: 'tab-gastos'
-
-# Verify the existing egreso is visible.
-- assertVisible: 'Renta del local'
-
-# Tap the egreso card to open EgresoDetailPopover.
-- tapOn: 'Renta del local'
+- tapOn: '.*Pago a borrar popover.*'
 - assertVisible:
     id: 'egreso-detail-popover'
 
-# Tap the delete button inside the popover.
 - tapOn:
     id: 'egreso-detail-delete'
 
-# Popover closes and the egreso is removed from the list.
 - assertNotVisible:
     id: 'egreso-detail-popover'
-- assertNotVisible: 'Renta del local'
+- assertNotVisible: '.*Pago a borrar popover.*'

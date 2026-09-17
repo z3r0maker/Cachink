@@ -1,0 +1,9 @@
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+- assertVisible:
+    id: 'tab-gastos'
+- assertVisible:
+    id: 'tab-ventas'

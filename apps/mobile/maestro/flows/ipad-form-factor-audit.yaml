@@ -1,144 +1,97 @@
-# iPad form-factor audit — walk every responsive surface and assert
-# that testIDs used by the iPhone flow library remain accessible on
-# the iPad $gtMd breakpoint.
+# iPad form-factor audit — walk every capture surface and assert the testIDs
+# the flow library drives stay reachable at the iPad ($gtMd) breakpoint.
 #
-# PURPOSE: Tamagui responsive breakpoints ($gtMd = min-width 768 px)
-# can reflow or hide controls when the app runs on iPad. This flow
-# acts as a tripwire: if any testID that drives an iPhone flow
-# becomes inaccessible on iPad (hidden behind a breakpoint, moved
-# to a different layout slot, or simply clipped), this flow fails
-# fast so we know before running the full 130-flow regression.
+# PURPOSE: responsive breakpoints can reflow, hide or clip controls on iPad.
+# This is a fast tripwire before the full regression.
 #
-# What it audits (in dependency order):
-#   1. POS product grid (ventas) — 3-column on iPad vs 2-column iPhone
-#   2. Checkout method picker — sheet vs centered modal on iPad
-#   3. NuevoEgreso modal — concepto + monto fields
-#   4. NuevoProducto modal — all creation fields
-#   5. Director Home KPI strip — assert no KPIs are scrolled off-screen
-#   6. CxC card visibility
-#   7. Settings hub nav items
-#
-# Precondition: demo mode seeded (products + users exist).
-# x-entrypoint: demo
+# What it audits:
+#   1. Ventas POS — product grid, search, a tile, cart strip, Cobrar, method picker
+#   2. Gastos — Nuevo pago sheet fields and submit
+#   3. Productos — quick-add form fields and submit
+#   4. Caja — status card and the tool grid (Cancelaciones)
+#   5. Configuración — reachable from the top bar
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 - runFlow: shared/dismiss-modals.yaml
-- runFlow: shared/authenticate-director.yaml
+- runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-open.yaml
 
-# ── 1. POS product grid ──────────────────────────────────────────
-# On iPhone the grid renders 2 columns. On iPad ($gtMd) it renders
-# 3 columns. The testID on the container must still be present.
+# 1. Ventas POS.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 8000
-
-# Assert a demo product card is visible.
-- assertVisible: "Quesadilla"
-
-# ── 2. Checkout method picker ────────────────────────────────────
-# On iPhone this renders as a full screen. On iPad, React Native
-# may render it as a centered popover/modal. The testID must still
-# be in the accessibility tree regardless of position.
-- tapOn: "Quesadilla"
-- assertVisible:
-    id: "cart-strip"
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'ventas-product-search'
+- eraseText
+- inputText: 'Quesadilla'
+- hideKeyboard
+- tapOn:
+    id: 'producto-tile-.*'
+- assertVisible:
+    id: 'cart-strip'
+- tapOn:
+    id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 6000
-
-# Assert all interactive controls inside are reachable.
 - assertVisible:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
+- tapOn:
+    id: 'top-bar-back'
+    optional: true
 
-# Go back without completing.
+# 2. Gastos: the Nuevo pago sheet.
 - tapOn:
-    id: "top-bar-back"
-
-# ── 3. NuevoEgreso modal ─────────────────────────────────────────
+    id: 'tab-gastos'
 - tapOn:
-    id: "tab-gastos"
-- tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - extendedWaitUntil:
     visible:
-      id: "gasto-concepto"
+      id: 'gasto-concepto'
     timeout: 6000
 - assertVisible:
-    id: "gasto-monto"
+    id: 'gasto-monto'
 - assertVisible:
-    id: "gasto-submit"
+    id: 'gasto-submit'
+- tapOn:
+    id: 'nuevo-egreso-cancel'
 
-# Dismiss without saving.
+# 3. Productos: quick-add.
 - tapOn:
-    id: "top-bar-back"
-
-# ── 4. NuevoProducto modal ───────────────────────────────────────
+    id: 'tab-productos'
 - tapOn:
-    id: "tab-productos"
-- tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 - extendedWaitUntil:
     visible:
-      id: "producto-nombre"
+      id: 'producto-nombre'
     timeout: 6000
 - assertVisible:
-    id: "producto-costo"
+    id: 'producto-scan'
 - assertVisible:
-    id: "producto-precio-venta"
-- assertVisible:
-    id: "producto-umbral"
-- assertVisible:
-    id: "producto-submit"
-
-# Dismiss without saving.
+    id: 'producto-precio-venta'
+- scrollUntilVisible:
+    element:
+      id: 'producto-submit'
+    direction: DOWN
+    timeout: 8000
 - tapOn:
-    id: "top-bar-back"
+    id: 'top-bar-back'
 
-# ── 5. Director Home KPI strip ───────────────────────────────────
-# On iPhone the strip is horizontally scrollable and KPIs may be
-# off-screen. On iPad ($gtMd) all KPIs should be visible without
-# scrolling. Assert each KPI testID is directly visible.
+# 4. Caja.
 - tapOn:
-    id: "top-bar-role-chip"
-    optional: true
-- tapOn:
-    id: "role-director-select"
-    optional: true
+    id: 'tab-caja'
+- assertVisible:
+    id: 'caja-status-card'
+- scrollUntilVisible:
+    element:
+      id: 'otros-cancelaciones'
+    direction: DOWN
+    timeout: 5000
 
-- assertVisible:
-    id: "director-home-route"
-- assertVisible:
-    id: "hoy-kpi-strip"
-- assertVisible:
-    id: "hoy-kpi-ventas"
-- assertVisible:
-    id: "hoy-kpi-egresos"
-- assertVisible:
-    id: "utilidad-hero"
-
-# ── 6. CxC card ──────────────────────────────────────────────────
-# CxC card is a Director-only card that must be in the layout tree
-# on iPad. Verify it isn't clipped by the $gtMd grid reflow.
-- assertVisible:
-    id: "cxc-card"
-
-# ── 7. Settings hub nav items ────────────────────────────────────
-# On iPad, settings may render inline or as a split-view. Assert
-# the hub container and its nav items are in the tree.
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-    optional: true
+# 5. Configuración.
+- runFlow: shared/navigate-to-settings.yaml

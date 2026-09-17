@@ -6,10 +6,9 @@
 #   3. Tap product → cart → checkout → confirm sheet → submit
 #
 # Precondition: demo mode seeded (products + merma flag ON).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 

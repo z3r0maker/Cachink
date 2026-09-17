@@ -70,8 +70,8 @@ describe('NuevoEgresoModalSmart', () => {
         <NuevoEgresoModalSmart open onClose={() => {}} fecha={FECHA} initialTab="nomina" />
       </Wrapper>,
     );
-    // Empty empleados list shows the "Crear empleado" Btn from NominaTab.
-    expect(screen.getByTestId('nomina-crear-empleado')).toBeInTheDocument();
+    // No empleados synced yet: NominaTab points to the portal.
+    expect(screen.getByTestId('nomina-sin-empleados')).toBeInTheDocument();
   });
 
   it('wires onCrearProducto through to the InventarioTab empty state', () => {

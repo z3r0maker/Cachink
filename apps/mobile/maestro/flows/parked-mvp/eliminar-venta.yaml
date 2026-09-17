@@ -1,5 +1,5 @@
 # Delete a venta from its detail popover.
-# x-entrypoint: demo
+# x-entrypoint: activated
 #
 # TODO(e2e): SUPERSEDED UI. The sales-history list + venta-detail-popover were
 # removed (SessionStrip -> compact TotalBar); the ventas tab renders ProductPane +
@@ -14,7 +14,6 @@
 # See docs/e2e-productos-row-accessibility-scope.md.
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 - runFlow: shared/ensure-caja-open.yaml

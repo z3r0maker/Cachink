@@ -4,9 +4,10 @@
  * Fields: empleado (select), periodo (auto from empleado, overridable),
  * monto (pre-fills from empleado.salario, editable).
  *
- * Empty-state: when no empleados exist, shows a "Crear empleado" Btn
- * that opens NuevoEmpleadoModal. Creating an empleado mid-flow
- * auto-selects them.
+ * Empty-state: employees are managed in the portal and arrive by sync
+ * (download-only on the device), so the tab says where to add them instead
+ * of creating one locally — a device-created employee would be refused by
+ * the server.
  *
  * Submit creates an Egreso with categoria="Nómina" — same use-case,
  * different categoria.
@@ -18,26 +19,18 @@ import {
   fromPesos,
   type BusinessId,
   type Employee,
-  type EmployeeId,
   type IsoDate,
   type NewExpense,
 } from '@xangarro/domain';
-import { Btn, Combobox } from '../../../components/index';
+import { Btn, Combobox, EmptyState } from '../../../components/index';
 import { MoneyField } from '../../../components/fields/index';
 import { useTranslation } from '../../../i18n/index';
-import { NuevoEmpleadoModal } from './nuevo-empleado-modal';
 
 export interface NominaTabProps {
   readonly businessId: BusinessId;
   readonly fecha: IsoDate;
   readonly empleados: readonly Employee[];
   readonly onSubmit: (input: NewExpense) => void;
-  readonly onCrearEmpleado?: (draft: {
-    readonly nombre: string;
-    readonly puesto: string;
-    readonly salario: bigint;
-    readonly periodo: Employee['periodo'];
-  }) => Promise<Employee | void>;
   readonly submitting?: boolean;
 }
 
@@ -76,17 +69,14 @@ function buildNominaPayload(
   });
 }
 
-function EmptyEmpleados({
-  onCrearEmpleado,
-  t,
-}: {
-  onCrearEmpleado: () => void;
-  t: ReturnType<typeof useTranslation>['t'];
-}): ReactElement {
+function EmptyEmpleados({ t }: { t: ReturnType<typeof useTranslation>['t'] }): ReactElement {
   return (
-    <Btn variant="soft" onPress={onCrearEmpleado} fullWidth testID="nomina-crear-empleado">
-      {t('nuevoEgreso.crearEmpleado')}
-    </Btn>
+    <EmptyState
+      icon="users"
+      title={t('nuevoEgreso.sinEmpleados')}
+      description={t('nuevoEgreso.sinEmpleadosHint')}
+      testID="nomina-sin-empleados"
+    />
   );
 }
 
@@ -137,56 +127,9 @@ function NominaForm(props: NominaFormProps): ReactElement {
   );
 }
 
-function useEmpleadoModal(
-  onCrearEmpleado: NominaTabProps['onCrearEmpleado'],
-  setEmpleadoId: (v: string) => void,
-): {
-  open: boolean;
-  openModal: () => void;
-  close: () => void;
-  handleCreated: (
-    input: Parameters<NonNullable<NominaTabProps['onCrearEmpleado']>>[0],
-  ) => Promise<void>;
-} {
-  const [open, setOpen] = useState(false);
-  async function handleCreated(
-    input: Parameters<NonNullable<NominaTabProps['onCrearEmpleado']>>[0],
-  ): Promise<void> {
-    const created = await onCrearEmpleado?.(input);
-    if (created && 'id' in created) setEmpleadoId(created.id as EmployeeId);
-    setOpen(false);
-  }
-  return {
-    open,
-    openModal: () => setOpen(true),
-    close: () => setOpen(false),
-    handleCreated,
-  };
-}
-
-function EmptyEmpleadosBranch({
-  modal,
-  t,
-}: {
-  modal: ReturnType<typeof useEmpleadoModal>;
-  t: ReturnType<typeof useTranslation>['t'];
-}): ReactElement {
-  return (
-    <>
-      <EmptyEmpleados onCrearEmpleado={modal.openModal} t={t} />
-      <NuevoEmpleadoModal
-        open={modal.open}
-        onClose={modal.close}
-        onSubmit={(input) => void modal.handleCreated(input)}
-      />
-    </>
-  );
-}
-
 export function NominaTab(props: NominaTabProps): ReactElement {
   const { t } = useTranslation();
   const s = useNominaState(props.empleados);
-  const modal = useEmpleadoModal(props.onCrearEmpleado, s.setEmpleadoId);
   const [error, setError] = useState<string | undefined>();
 
   const handleSubmit = (): void => {
@@ -207,7 +150,7 @@ export function NominaTab(props: NominaTabProps): ReactElement {
     props.onSubmit(payload);
   };
 
-  if (props.empleados.length === 0) return <EmptyEmpleadosBranch modal={modal} t={t} />;
+  if (props.empleados.length === 0) return <EmptyEmpleados t={t} />;
   return (
     <NominaForm
       state={s}

@@ -14,7 +14,7 @@
  * open onClose fecha />` in place of the old dumb modal. All three
  * tabs become fully functional — gasto fires `useRegistrarEgreso`
  * (and `useCrearGastoRecurrente` when the recurrente toggle is on),
- * nómina fires `useCrearEmpleado` + `useRegistrarEgreso`, and
+ * nómina fires `useRegistrarEgreso` (employees come from the portal), and
  * inventario-purchase fires `useRegistrarMovimiento` (which
  * dual-writes the Egreso per ADR-021).
  *
@@ -82,7 +82,6 @@ function useTabRenderers(args: TabRenderArgs): TabRenderers {
         fecha={args.fecha}
         empleados={empleadosQ.data ?? []}
         onSubmit={nomina.handle}
-        onCrearEmpleado={nomina.crearEmpleado}
         submitting={nomina.submitting}
       />
     ),

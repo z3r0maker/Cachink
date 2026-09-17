@@ -5,11 +5,9 @@
 # The flow relies on the app clock being set to a date >= proximoDisparo
 # of the just-created template — run with MAESTRO_CLOCK_OFFSET if your
 # harness supports it, or simulate by manually advancing the system clock.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -22,18 +20,20 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-concepto'
 - inputText: 'Luz del local'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-monto'
 - inputText: '900'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-recurrente-toggle'
 - assertVisible: 'Frecuencia'
 - tapOn:
     id: 'gasto-submit'
-- assertNotVisible: 'Nuevo egreso'
+- assertNotVisible: 'Nuevo pago'
 
 # The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
 - assertVisible: 'Pendientes de registrar'
 - tapOn:
-    id: 'pendiente-confirmar-01JPHK0000000000000000RE01'
-- assertVisible: 'Luz del local'
+    id: 'pendiente-confirmar-.*'
+- assertVisible: '.*Luz del local.*'

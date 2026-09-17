@@ -11,16 +11,9 @@
  */
 
 import { useCallback } from 'react';
-import type {
-  Employee,
-  Money,
-  NewExpense,
-  NewInventoryMovement,
-  PayrollFrequency,
-} from '@xangarro/domain';
+import type { NewExpense, NewInventoryMovement } from '@xangarro/domain';
 import { useRegistrarEgreso } from '../../hooks/use-registrar-egreso';
 import { useCrearGastoRecurrente } from '../../hooks/use-crear-gasto-recurrente';
-import { useCrearEmpleado } from '../../hooks/use-crear-empleado';
 import { useRegistrarMovimiento } from '../../hooks/use-registrar-movimiento';
 import type { GastoSubmitPayload } from './tabs/gasto-tab';
 
@@ -55,42 +48,21 @@ export function useGastoSubmit(onClose: () => void): GastoSubmit {
   };
 }
 
-export interface NominaEmpleadoDraft {
-  readonly nombre: string;
-  readonly puesto: string;
-  readonly salario: bigint;
-  readonly periodo: PayrollFrequency;
-}
-
 export interface NominaSubmit {
   readonly handle: (input: NewExpense) => void;
-  readonly crearEmpleado: (draft: NominaEmpleadoDraft) => Promise<Employee>;
   readonly submitting: boolean;
 }
 
 export function useNominaSubmit(onClose: () => void): NominaSubmit {
   const registrar = useRegistrarEgreso();
-  const crear = useCrearEmpleado();
   const handle = useCallback(
     (input: NewExpense) => {
       registrar.mutate(input, { onSuccess: () => onClose() });
     },
     [registrar, onClose],
   );
-  const crearEmpleado = useCallback(
-    async (draft: NominaEmpleadoDraft): Promise<Employee> => {
-      return crear.mutateAsync({
-        nombre: draft.nombre,
-        puesto: draft.puesto,
-        salario: draft.salario as Money,
-        periodo: draft.periodo,
-      });
-    },
-    [crear],
-  );
   return {
     handle,
-    crearEmpleado,
     submitting: registrar.isPending,
   };
 }

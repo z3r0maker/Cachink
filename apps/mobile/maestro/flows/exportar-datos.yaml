@@ -4,22 +4,15 @@
 # los datos" → native share sheet surfaces the .xlsx file.
 #
 # Precondition: wizard-local-standalone.yaml complete.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
 # Navigate to Settings → Sistema where export lives.
 - runFlow: shared/navigate-to-settings.yaml
-- tapOn:
-    id: 'settings-hub-sistema'
-- extendedWaitUntil:
-    visible: 'Sistema'
-    timeout: 5000
 
 # Scroll to the export datos card.
 - scrollUntilVisible:

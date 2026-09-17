@@ -5,16 +5,15 @@
 #   2. Merma tab disappears from the bottom bar / Otros grid
 #
 # Precondition: demo mode seeded (merma flag initially ON).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - merma
   - feature-flags
   - edge-case
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
-- runFlow: ../shared/authenticate-director.yaml
+- runFlow: ../shared/authenticate.yaml
 
 # Navigate to Otros → Funciones and toggle merma OFF.
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |

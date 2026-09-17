@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { Keyboard } from 'react-native';
 import { Modal } from '../src/components/Modal/modal.native';
 import { fireEvent, renderWithProviders, screen } from './test-utils';
 
@@ -18,6 +19,22 @@ function tap(el: Element): void {
 }
 
 describe('Modal (native variant)', () => {
+  it('hides the keyboard, not the sheet, when the sheet body is tapped', () => {
+    const dismiss = vi.spyOn(Keyboard, 'dismiss').mockImplementation(() => undefined);
+    const onClose = vi.fn();
+    renderWithProviders(
+      <Modal open onClose={onClose} title="Nuevo pago">
+        <span>body</span>
+      </Modal>,
+    );
+    const title = screen.getAllByTestId('modal-title')[0]!;
+    fireEvent.mouseDown(title);
+    fireEvent.mouseUp(title);
+    expect(dismiss).toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+    dismiss.mockRestore();
+  });
+
   it('renders nothing when open is false', () => {
     renderWithProviders(
       <Modal open={false} onClose={() => undefined}>

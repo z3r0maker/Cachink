@@ -1,0 +1,32 @@
+# Sign in as the second mock operator, Ana (PIN 567890) — for flows that
+# need a different person than Toni (e.g. caja handoff). Locks first when
+# someone is signed in.
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      visible:
+        id: 'tab-caja'
+    commands:
+      - tapOn:
+          id: 'top-bar-left'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 20000
+- tapOn:
+    text: '.*Ana.*'
+- extendedWaitUntil:
+    visible:
+      id: 'numpad-5'
+    timeout: 8000
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-6' }
+- tapOn: { id: 'numpad-7' }
+- tapOn: { id: 'numpad-8' }
+- tapOn: { id: 'numpad-9' }
+- tapOn: { id: 'numpad-0' }
+- extendedWaitUntil:
+    visible:
+      id: 'tab-caja'
+    timeout: 15000

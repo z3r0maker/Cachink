@@ -1,0 +1,29 @@
+# "Ver bajo stock" link on the Director Home dashboard.
+#
+# The low-stock summary/link lives on Director Home (StockBajoCard -> StockBajoSummary),
+# NOT the Operativo Productos stock tab. It shows because demo seeds low-stock products
+# (Aceite 20L, Carne pastor kg, ...). Tapping "ver" routes to the Inventario tab
+# filtered by bajoStock. Requires the DIRECTOR (Juan Director) in demo.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+
+# Log in as the Director (Director Home has the stock-bajo card).
+- runFlow: shared/authenticate.yaml
+
+# Director Home — scroll to the low-stock card and follow its "ver" link.
+- scrollUntilVisible:
+    element:
+      id: 'stock-bajo-summary-ver'
+    direction: DOWN
+    timeout: 10000
+- tapOn:
+    id: 'stock-bajo-summary-ver'
+
+# Routed to the Inventario tab (stock list) filtered to low-stock items.
+- extendedWaitUntil:
+    visible:
+      id: 'stock-buscar'
+    timeout: 8000

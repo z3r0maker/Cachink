@@ -23,6 +23,26 @@ appId: mx.xangarro.mobile
       - tapOn: { id: 'numpad-3' }
       - tapOn: { id: 'numpad-4' }
       - tapOn: { id: 'numpad-5' }
+      # Optional: under load a digit tap can register twice and submit early,
+      # hiding the keypad before this tap — the retry below recovers.
+      - tapOn:
+          id: 'numpad-6'
+          optional: true
+# One retry when the first PIN did not land on the tabs.
+- runFlow:
+    when:
+      notVisible:
+        id: 'tab-caja'
+    commands:
+      - extendedWaitUntil:
+          visible:
+            id: 'numpad-1'
+          timeout: 10000
+      - tapOn: { id: 'numpad-1' }
+      - tapOn: { id: 'numpad-2' }
+      - tapOn: { id: 'numpad-3' }
+      - tapOn: { id: 'numpad-4' }
+      - tapOn: { id: 'numpad-5' }
       - tapOn: { id: 'numpad-6' }
 - extendedWaitUntil:
     visible:

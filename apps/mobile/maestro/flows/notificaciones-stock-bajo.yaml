@@ -1,10 +1,8 @@
 # Verify the Director can toggle stock-low notifications in Settings
 # (P1C-M11-T01..T03, S4-C13).
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml

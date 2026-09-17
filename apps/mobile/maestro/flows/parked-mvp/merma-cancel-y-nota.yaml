@@ -16,11 +16,9 @@
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/merma-cancel-y-nota.yaml
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals.
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml

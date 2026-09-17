@@ -14,11 +14,9 @@
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-recurrente-descartar.yaml
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -26,29 +24,43 @@ appId: mx.xangarro.mobile
 # Create a recurrente gasto.
 - tapOn:
     id: 'tab-gastos'
+
+# Flows share one device: clear pendientes left by earlier recurrente flows so
+# the only one on screen is the template this flow creates.
+- repeat:
+    while:
+      visible:
+        id: 'pendiente-descartar-.*'
+    commands:
+      - tapOn:
+          id: 'pendiente-descartar-.*'
+
 - tapOn:
     id: 'egresos-nuevo'
 - tapOn:
     id: 'gasto-concepto'
 - inputText: 'Internet del local'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-monto'
 - inputText: '500'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-recurrente-toggle'
 - assertVisible: 'Frecuencia'
 - tapOn:
     id: 'gasto-submit'
-- assertNotVisible: 'Nuevo egreso'
+- assertNotVisible: 'Nuevo pago'
 
 # The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
 - assertVisible: 'Pendientes de registrar'
-- assertVisible: 'Internet del local'
+- assertVisible:
+    id: 'pendiente-descartar-.*'
 
-# Tap Descartar instead of Confirmar — row should disappear.
-# The dynamic testID uses the template's ULID. We use a text-based
-# tap to find the Descartar button near the pendiente row.
-- tapOn: 'Descartar'
+# Descartar instead of Confirmar: the only pendiente is this flow's template.
+- tapOn:
+    id: 'pendiente-descartar-.*'
 
-# After descartar, the pendiente row is optimistically removed.
-- assertNotVisible: 'Internet del local'
+# The pendiente is gone (the payment itself stays in the list below).
+- assertNotVisible:
+    id: 'pendientes-card'

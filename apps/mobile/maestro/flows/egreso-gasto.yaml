@@ -3,11 +3,9 @@
 # P1C-M4-T02 (NuevoEgreso modal, Gasto tab).
 #
 # Precondition: wizard complete, business set, Operativo role active.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -24,14 +22,17 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-concepto'
 - inputText: 'Renta del local'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-monto'
 - inputText: '8000'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 - tapOn:
     id: 'gasto-submit'
 
 # Modal closes + Total de egresos reflects the new amount.
 - assertNotVisible:
     id: 'nuevo-egreso-modal'
-- assertVisible: '−$8,000.00'
-- assertVisible: 'Renta del local'
+# Other flows share the device, so the day's total may include earlier gastos.
+- assertVisible: '.*8,000.00.*'
+- assertVisible: '.*Renta del local.*'

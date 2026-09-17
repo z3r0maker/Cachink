@@ -5,11 +5,9 @@
 #   settings-check-for-updates
 #
 # Precondition: wizard complete.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -18,11 +16,6 @@ appId: mx.xangarro.mobile
 - runFlow: shared/navigate-to-settings.yaml
 
 # Navigate to Sistema sub-screen.
-- tapOn:
-    id: 'settings-hub-sistema'
-- extendedWaitUntil:
-    visible: 'Sistema'
-    timeout: 5000
 
 # Scroll down to find the "Check for updates" button.
 - scrollUntilVisible:

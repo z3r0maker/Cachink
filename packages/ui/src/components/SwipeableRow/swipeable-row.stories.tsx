@@ -119,7 +119,7 @@ type Story = StoryObj<typeof SwipeableRow>;
 
 /**
  * Web baseline — the wrapper renders children verbatim. On mobile,
- * the same component would expose left-swipe Edit + right-swipe Delete.
+ * the same component would expose swipe-right Edit + swipe-left Delete.
  */
 export const WebPassthrough: Story = {
   render: () => (

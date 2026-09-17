@@ -2,8 +2,8 @@
 # used up, the next sale is refused with the informational limit sheet (no
 # purchase link) and nothing is saved.
 #
-# Precondition: device activated against the mock (activation.yaml) with at
-# least one capture this month. The mock serves a Freelancer entitlement
+# Precondition: device activated against the mock (activation.yaml). The flow
+# records its own first sale this month before the limit applies. The mock serves a Freelancer entitlement
 # limited to 1 record; the flow restores the default scenario at the end.
 # x-entrypoint: activated
 appId: mx.xangarro.mobile
@@ -11,6 +11,8 @@ env:
   MOCK_API: http://127.0.0.1:3100
 ---
 - runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- runFlow: shared/create-venta.yaml
 - runScript:
     file: shared/mock-scenario.js
     env:
@@ -22,10 +24,15 @@ env:
     visible:
       id: 'cloud-sync-pill-synced'
     timeout: 20000
-- runFlow: shared/ensure-caja-open.yaml
 - tapOn:
     id: 'tab-ventas'
-- tapOn: 'Agua de jamaica'
+- tapOn:
+    id: 'ventas-product-search'
+- eraseText
+- inputText: 'Agua de jamaica'
+- hideKeyboard
+- tapOn:
+    id: 'producto-tile-.*'
 - tapOn:
     id: 'cart-checkout-btn'
 - tapOn: 'Transferencia'

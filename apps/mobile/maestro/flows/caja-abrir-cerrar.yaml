@@ -5,12 +5,12 @@
 #   2. Tap "Cerrar turno" → blind count step 1 → step 2 → close
 #
 # Precondition: demo mode seeded.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-closed.yaml
 
 # Ensure caja is open (handles demo state where Director opened it).
 - runFlow: shared/ensure-caja-open.yaml
@@ -45,3 +45,9 @@ appId: mx.xangarro.mobile
     timeout: 5000
 - tapOn:
     id: 'count-result-close'
+
+# The turno is closed: the open-caja form is back.
+- extendedWaitUntil:
+    visible:
+      id: 'abrir-caja-modal'
+    timeout: 10000

@@ -26,19 +26,21 @@
  *   flow. Replaced with `position: 'absolute'` — same screen-edge
  *   anchoring inside the Dialog.Portal mount. Closes audit Blocker
  *   1.10.
- * - Children are now wrapped in `<KeyboardAvoidingView>` so the soft
- *   keyboard doesn't cover the input the user is typing into. Closes
- *   audit Blocker 1.9 across every modal call site (the wrap lives in
- *   the primitive, so every Modal-based form benefits without code
- *   changes).
+ * - The sheet lifts itself by the soft keyboard's height
+ *   (`useKeyboardHeight`) so the keyboard doesn't cover the input the user
+ *   is typing into (audit Blocker 1.9, every Modal call site). A
+ *   `<KeyboardAvoidingView>` did this first but mis-measured inside the
+ *   absolutely positioned portal sheet on iPad, leaving the whole sheet
+ *   under the keyboard (A-16).
  */
 import type { ReactElement, ReactNode } from 'react';
-import { KeyboardAvoidingView, Platform } from 'react-native';
+import { Keyboard, View as RNView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dialog } from '@tamagui/dialog';
 import { View } from '@tamagui/core';
 import { colors, radii, shapeRadii } from '../../theme';
 import { ModalHeader } from './modal-header';
+import { useKeyboardHeight } from '../../hooks/use-keyboard-height';
 import type { ModalProps } from './modal';
 
 /** Top of the §8.3 radii scale — matches the mock's 24 intent. */
@@ -87,6 +89,8 @@ interface SheetContentProps {
   readonly testID?: string;
   readonly children: ReactNode;
   readonly paddingBottom: number;
+  /** Lifts the sheet above the soft keyboard. */
+  readonly bottom: number;
 }
 
 function SheetContent(props: SheetContentProps): ReactElement {
@@ -112,7 +116,7 @@ function SheetContent(props: SheetContentProps): ReactElement {
       // a percentage string instead of 'vh' which RN ignores.
       maxHeight="90%"
       position="absolute"
-      bottom={0}
+      bottom={props.bottom}
       left={0}
       right={0}
       style={SHEET_STYLE}
@@ -123,28 +127,28 @@ function SheetContent(props: SheetContentProps): ReactElement {
 }
 
 /**
- * `<KeyboardAvoidingView>` shifts the sheet content up when the soft
- * keyboard mounts so the focused input stays visible. iOS and Android
- * handle this differently — `behavior='padding'` is the right answer
- * on iOS (the keyboard slides up under the view, padding pushes the
- * content above it), `behavior='height'` on Android (the OS resizes
- * the window). Both are off the default ('undefined') because the
- * default does nothing.
+ * Sheet body: a tap no control claims hides the keyboard. Without it the only
+ * way to hide the keyboard is a tap outside the sheet, which closes the sheet
+ * and drops what the user typed. Plain responder props, not a Touchable
+ * wrapper, so children keep their own accessibility elements.
  */
-function KeyboardAware({ children }: { children: ReactNode }): ReactElement {
+function DismissKeyboardOnTap({ children }: { children: ReactNode }): ReactElement {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <RNView
       style={{ width: '100%' }}
+      onStartShouldSetResponder={() => true}
+      onResponderRelease={() => Keyboard.dismiss()}
     >
       {children}
-    </KeyboardAvoidingView>
+    </RNView>
   );
 }
 
 export function Modal(props: ModalProps): ReactElement {
   const insets = useSafeAreaInsets();
-  const bottomPad = Math.max(36, insets.bottom + 16);
+  const keyboardHeight = useKeyboardHeight();
+  // With the keyboard up the sheet sits on it, so no home-indicator inset.
+  const bottomPad = keyboardHeight > 0 ? 20 : Math.max(36, insets.bottom + 16);
   return (
     <Dialog
       modal
@@ -155,8 +159,8 @@ export function Modal(props: ModalProps): ReactElement {
     >
       <Dialog.Portal>
         <Backdrop onClose={props.onClose} />
-        <SheetContent testID={props.testID} paddingBottom={bottomPad}>
-          <KeyboardAware>
+        <SheetContent testID={props.testID} paddingBottom={bottomPad} bottom={keyboardHeight}>
+          <DismissKeyboardOnTap>
             <GrabHandle />
             <ModalHeader
               title={props.title}
@@ -166,7 +170,7 @@ export function Modal(props: ModalProps): ReactElement {
               onClose={props.onClose}
             />
             {props.children}
-          </KeyboardAware>
+          </DismissKeyboardOnTap>
         </SheetContent>
       </Dialog.Portal>
     </Dialog>

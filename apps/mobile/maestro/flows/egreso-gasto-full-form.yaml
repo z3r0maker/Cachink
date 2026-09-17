@@ -12,11 +12,9 @@
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-gasto-full-form.yaml
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -28,10 +26,11 @@ appId: mx.xangarro.mobile
     id: 'egresos-nuevo'
 
 # Gasto tab is the default — fill concepto.
-- assertVisible: 'Nuevo egreso'
+- assertVisible: 'Nuevo pago'
 - tapOn:
     id: 'gasto-concepto'
 - inputText: 'Material de limpieza'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Select a category from the categoria selector.
 - tapOn:
@@ -42,16 +41,18 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'gasto-proveedor'
 - inputText: 'Proveedor Industrial SA'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Fill monto.
 - tapOn:
     id: 'gasto-monto'
 - inputText: '2500'
+- runFlow: shared/hide-keyboard-in-sheet.yaml
 
 # Submit the egreso.
 - tapOn:
     id: 'gasto-submit'
 
 # Modal closes and the egreso appears in the list with context.
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: 'Material de limpieza'
+- assertNotVisible: 'Nuevo pago'
+- assertVisible: '.*Material de limpieza.*'

@@ -1,13 +1,12 @@
 # Verify the multi-step checkout flow renders the method picker.
 # Precondition: demo mode seeded (products + users exist).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - ventas
   - checkout
   - regression
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 - runFlow: shared/ensure-caja-open.yaml

@@ -11,11 +11,9 @@
 #   maestro test apps/mobile/maestro/flows/producto-movimientos.yaml
 #
 # The producto-entrada-stock flow creates an entrada movement.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml

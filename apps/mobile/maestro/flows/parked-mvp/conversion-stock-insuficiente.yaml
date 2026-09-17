@@ -5,14 +5,13 @@
 # "Stock insuficiente" — assert the UI shows the error.
 #
 # Precondition: conversion-crear-receta.yaml has been run.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - conversion
   - stock
   - edge-case
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 

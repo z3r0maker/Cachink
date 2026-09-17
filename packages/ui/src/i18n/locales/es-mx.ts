@@ -248,9 +248,9 @@ export const esMX = {
     diaDelMesLabel: 'Día del mes',
     diaDeLaSemanaLabel: 'Día de la semana',
     diasSemanaCorto: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-    crearEmpleado: 'Crear empleado',
     crearProducto: 'Crear producto',
-    sinEmpleados: 'No hay empleados. Crea uno primero.',
+    sinEmpleados: 'Aún no hay empleados',
+    sinEmpleadosHint: 'Agrégalos en app.xangarro.mx y toca Actualizar.',
     sinProductos: 'No hay productos. Crea uno primero.',
   },
   empleados: {
@@ -983,7 +983,7 @@ export const esMX = {
     discrepancyCierreAnterior: 'El cierre anterior fue {{monto}}',
     discrepancyAbriendo: 'Estás abriendo con {{monto}}',
     discrepancyDiff: 'Diferencia: {{monto}}',
-    discrepancyNotice: 'Si continúas, se notificará al Director de esta diferencia.',
+    discrepancyNotice: 'Si continúas, la diferencia quedará registrada.',
     discrepancyGoBack: 'Volver a contar',
     discrepancyContinue: 'Continuar',
     // --- Blind close step 1 ---

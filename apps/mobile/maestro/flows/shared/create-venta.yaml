@@ -14,7 +14,15 @@ appId: mx.xangarro.mobile
 
 # Add a product to the cart and check out (Efectivo, $50 tendered).
 - tapOn:
-    text: 'Taco al Pastor.*'
+    id: 'ventas-product-search'
+# The search keeps its text after a sale.
+- eraseText
+- inputText: 'Taco al pastor'
+- hideKeyboard
+# The search leaves one tile. Tap it by id: a text match also hits the search
+# box, which shows the same name.
+- tapOn:
+    id: 'producto-tile-.*'
 - assertVisible:
     id: 'cart-strip'
 - tapOn:

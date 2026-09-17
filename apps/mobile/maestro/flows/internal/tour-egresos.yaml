@@ -2,7 +2,6 @@
 appId: mx.xangarro.mobile
 tags: [internal]
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - tapOn:

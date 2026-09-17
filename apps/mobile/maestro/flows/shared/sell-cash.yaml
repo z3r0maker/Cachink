@@ -1,0 +1,42 @@
+# Sell one unit of PRODUCT (the product's name) in cash with
+# a $50 bill. Precondition: signed in, caja open.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'tab-ventas'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000
+# The grid is alphabetical and long: search so the tile is on screen.
+- tapOn:
+    id: 'ventas-product-search'
+# The search keeps its text after a sale.
+- eraseText
+- inputText: ${PRODUCT}
+- hideKeyboard
+# The search leaves one tile. Tap it by id: a text match also hits the search
+# box, which shows the same name.
+- tapOn:
+    id: 'producto-tile-.*'
+- assertVisible:
+    id: 'cart-strip'
+- tapOn:
+    id: 'cart-checkout-btn'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-method-picker'
+    timeout: 8000
+- tapOn:
+    id: 'checkout-method-continue'
+- extendedWaitUntil:
+    visible:
+      id: 'checkout-efectivo'
+    timeout: 8000
+- tapOn: "\\$50"
+- tapOn:
+    id: 'checkout-efectivo-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'ventas-product-grid'
+    timeout: 8000

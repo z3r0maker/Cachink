@@ -5,7 +5,7 @@
 #      method is not shown in the checkout method picker.
 #
 # Precondition: demo mode seeded (ventasCredito flag OFF by default).
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - ventas
@@ -13,7 +13,6 @@ tags:
   - feature-flags
   - edge-case
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - runFlow: ../shared/ensure-caja-open.yaml

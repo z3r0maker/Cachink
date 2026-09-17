@@ -1,0 +1,39 @@
+# Finish a caja close that is already under way: the blind count (step 1) or
+# the result step (step 2). The count survives an app restart, so a flow that
+# failed mid-close leaves the Caja tab on these steps for the next flow.
+# Counts $1 on purpose: the difference is always non-zero, so the reason +
+# note step always appears. No-op when no close is in progress.
+# Precondition: signed in, on the Caja tab.
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      visible:
+        id: 'cerrar-caja-step-1'
+    commands:
+      - tapOn: { id: 'numpad-1' }
+      - tapOn:
+          id: 'blind-count-continue'
+      - extendedWaitUntil:
+          visible:
+            id: 'cerrar-caja-step-2'
+          timeout: 5000
+- runFlow:
+    when:
+      visible:
+        id: 'cerrar-caja-step-2'
+    commands:
+      - tapOn:
+          id: 'count-result-reason'
+      - tapOn:
+          id: 'combobox-option-otro'
+      - tapOn:
+          id: 'count-result-explicacion'
+      - inputText: 'Cierre de prueba'
+      - hideKeyboard
+      - tapOn:
+          id: 'count-result-close'
+      - extendedWaitUntil:
+          visible:
+            id: 'abrir-caja-modal'
+          timeout: 10000

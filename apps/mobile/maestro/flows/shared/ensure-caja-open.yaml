@@ -12,6 +12,8 @@ appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: 'tab-caja'
+# A close left half done by an earlier flow blocks opening: finish it first.
+- runFlow: finish-caja-close.yaml
 
 # State 2: Director already opened — confirm prompt visible.
 - tapOn:
@@ -31,6 +33,20 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'caja-abrir-submit'
     optional: true
+
+# Opening with a different amount than the last close asks for confirmation.
+- extendedWaitUntil:
+    visible:
+      id: 'discrepancy-continue'
+    timeout: 3000
+    optional: true
+- runFlow:
+    when:
+      visible:
+        id: 'discrepancy-continue'
+    commands:
+      - tapOn:
+          id: 'discrepancy-continue'
 
 # All states should now show the active turn.
 - extendedWaitUntil:

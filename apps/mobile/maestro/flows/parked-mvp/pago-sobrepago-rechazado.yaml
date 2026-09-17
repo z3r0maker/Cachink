@@ -5,14 +5,13 @@
 # shows the rejection.
 #
 # Precondition: demo mode with a client + credit sale.
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - cxc
   - pagos
   - edge-case
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - runFlow: ../shared/ensure-caja-open.yaml

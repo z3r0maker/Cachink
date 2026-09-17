@@ -3,8 +3,8 @@
  * (audit M-1 PR 4.5-T09).
  *
  * The mobile variant (`./swipeable-row.native.tsx`) wraps the row in
- * `react-native-gesture-handler`'s `Swipeable` so users can left-swipe to
- * Edit and right-swipe to Delete a list row. The web / Tauri variant
+ * `react-native-gesture-handler`'s `Swipeable` so users can swipe right to
+ * Edit and swipe left to Delete a list row. The web / Tauri variant
  * (`./swipeable-row.web.tsx`) is a passthrough — desktop's equivalent
  * affordance is a right-click context menu, which is out of scope for
  * this primitive (a future `<RowMenu>` primitive can wrap the same row

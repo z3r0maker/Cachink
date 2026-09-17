@@ -13,12 +13,10 @@
 #   maestro test apps/mobile/maestro/flows/egreso-nomina.yaml
 #   maestro test apps/mobile/maestro/flows/egreso-nomina-field-assertions.yaml
 #
-# The egreso-nomina flow creates "Ana Pérez" as an empleado.
-# x-entrypoint: demo
+# The mock business syncs one empleado: "Ana — Cajera".
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
@@ -31,15 +29,15 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'egreso-tab-nomina'
 
-# With empleado "Ana Pérez" already existing, the combobox renders.
+# With the synced empleado present, the combobox renders.
 # Assert the nomina-empleado combobox is visible.
 - assertVisible:
     id: 'nomina-empleado'
 
-# Tap the empleado combobox and select Ana Pérez.
+# Tap the empleado combobox and select Ana.
 - tapOn:
     id: 'nomina-empleado'
-- tapOn: 'Ana Pérez'
+- tapOn: 'Ana — Cajera'
 
 # Assert nomina-monto is visible and auto-filled from salario.
 - assertVisible:
@@ -50,5 +48,5 @@ appId: mx.xangarro.mobile
     id: 'nomina-submit'
 
 # Modal closes + egreso visible.
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: 'Nómina Ana Pérez'
+- assertNotVisible: 'Nuevo pago'
+- assertVisible: '.*Nómina Ana.*'

@@ -1,0 +1,16 @@
+# Director Home → "Ver ventas" hoy card → lands on Ventas tab
+# (P1C-M10-T02, S4-C8).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+# Dismiss any first-launch modals (ConsentModal, etc.)
+- runFlow: shared/dismiss-modals.yaml
+- runFlow: shared/authenticate.yaml
+
+# Director is already on Home after authenticate.yaml.
+- assertVisible:
+    id: 'hoy-kpi-ventas'
+- tapOn:
+    id: 'hoy-kpi-ventas-ver'
+- assertVisible:
+    id: 'ventas-screen'

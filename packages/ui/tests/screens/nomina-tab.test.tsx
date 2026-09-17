@@ -11,7 +11,7 @@ import type {
   IsoDate,
   IsoTimestamp,
 } from '@xangarro/domain';
-import { NominaTab, NuevoEmpleadoModal } from '../../src/screens/index';
+import { NominaTab } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 
@@ -37,17 +37,12 @@ function empleado(overrides: Partial<Employee> = {}): Employee {
 }
 
 describe('NominaTab', () => {
-  it('renders empty-state Btn when no empleados exist', () => {
+  it('points to the portal when no empleados exist — the device never creates them', () => {
     renderWithProviders(
-      <NominaTab
-        businessId={businessId}
-        fecha={fecha}
-        empleados={[]}
-        onSubmit={vi.fn()}
-        onCrearEmpleado={vi.fn(async () => empleado())}
-      />,
+      <NominaTab businessId={businessId} fecha={fecha} empleados={[]} onSubmit={vi.fn()} />,
     );
-    expect(screen.getByTestId('nomina-crear-empleado')).toBeInTheDocument();
+    expect(screen.getByTestId('nomina-sin-empleados')).toBeInTheDocument();
+    expect(screen.queryByTestId('nomina-crear-empleado')).toBeNull();
   });
 
   it('renders empleado select when empleados exist', () => {
@@ -83,24 +78,6 @@ describe('NominaTab', () => {
       />,
     );
     const submit = screen.getAllByTestId('nomina-submit')[0]!;
-    fireEvent.click(submit);
-    expect(onSubmit).not.toHaveBeenCalled();
-  });
-});
-
-describe('NuevoEmpleadoModal', () => {
-  it('renders nombre, puesto, salario, periodo fields when open', () => {
-    renderWithProviders(<NuevoEmpleadoModal open onClose={vi.fn()} onSubmit={vi.fn()} />);
-    expect(screen.getByTestId('empleado-nombre')).toBeInTheDocument();
-    expect(screen.getByTestId('empleado-puesto')).toBeInTheDocument();
-    expect(screen.getByTestId('empleado-salario')).toBeInTheDocument();
-    expect(screen.getByTestId('empleado-periodo')).toBeInTheDocument();
-  });
-
-  it('blocks submit with empty nombre', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(<NuevoEmpleadoModal open onClose={vi.fn()} onSubmit={onSubmit} />);
-    const submit = screen.getAllByTestId('empleado-submit')[0]!;
     fireEvent.click(submit);
     expect(onSubmit).not.toHaveBeenCalled();
   });

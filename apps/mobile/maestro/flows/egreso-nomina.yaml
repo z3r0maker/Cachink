@@ -1,11 +1,8 @@
-# Create a Nómina egreso with a freshly-created empleado.
-# Covers P1C-M4-T02 (Nómina tab + NuevoEmpleadoModal empty-state path).
-# x-entrypoint: demo
+# Create a Nómina egreso for a synced empleado (A-16).
+# Employees come from the portal; the mock business has "Ana — Cajera".
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
@@ -16,29 +13,15 @@ appId: mx.xangarro.mobile
 - tapOn:
     id: 'egreso-tab-nomina'
 
-# No empleados yet — Crear empleado Btn appears.
-- assertVisible: 'Crear empleado'
+- assertVisible:
+    id: 'nomina-empleado'
 - tapOn:
-    id: 'nomina-crear-empleado'
-
-# Fill empleado form.
-- tapOn:
-    id: 'empleado-nombre'
-- inputText: 'Ana Pérez'
-- tapOn:
-    id: 'empleado-puesto'
-- inputText: 'Cocinera'
-- tapOn:
-    id: 'empleado-salario'
-- inputText: '5000'
-- tapOn:
-    id: 'empleado-submit'
-
-# Back on Nómina tab; empleado auto-selected + monto auto-filled.
-- assertVisible: 'Nuevo egreso'
+    id: 'nomina-empleado'
+- tapOn: 'Ana — Cajera'
+- assertVisible:
+    id: 'nomina-monto'
 - tapOn:
     id: 'nomina-submit'
 
-# Modal closes + egreso visible.
-- assertNotVisible: 'Nuevo egreso'
-- assertVisible: 'Nómina Ana Pérez'
+- assertNotVisible: 'Nuevo pago'
+- assertVisible: '.*Nómina Ana.*'

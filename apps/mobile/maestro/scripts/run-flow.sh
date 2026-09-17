@@ -5,18 +5,15 @@
 # Reads each flow's entry-point metadata (# x-entrypoint: or
 # # Precondition:) and runs the correct setup before executing it.
 #
-# Entry points:
-#   fresh  — DB reset only (no wizard). For flows that test the
-#            fresh-install experience itself.
-#   demo   — DB reset + demo-mode seeding. Pre-creates users
-#            (Ana Operativa, Juan Director, PIN 000000) and sample
-#            data (~50 records). ~2-3 min seeding time.
-#   wizard — DB reset + wizard-local-standalone. Creates Director
-#            Test user (PIN 123456). The default for most flows.
+# Entry points (lib/entry-setup.sh):
+#   fresh     — mock reset + local DB deleted; the app boots at activation.
+#   activated — fresh + activation.yaml; each flow then starts from a cold
+#               launch on the operator list (Toni 123456 / Ana 567890).
+# Requires `PORT=3100 pnpm mock:api` and Metro on :8081.
 #
 # Usage:
 #   ./apps/mobile/maestro/scripts/run-flow.sh flows/venta-efectivo.yaml
-#   ./apps/mobile/maestro/scripts/run-flow.sh --entry demo flows/smoke-launch.yaml
+#   ./apps/mobile/maestro/scripts/run-flow.sh --entry fresh flows/activation.yaml
 #   ./apps/mobile/maestro/scripts/run-flow.sh --dry-run flows/*.yaml
 # -------------------------------------------------------------------
 set -euo pipefail
@@ -24,8 +21,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 FLOWS_DIR="$(cd "$SCRIPT_DIR/../flows" && pwd)"
 FRESH_SCRIPT="$SCRIPT_DIR/fresh-install.sh"
-DEMO_FLOW="$FLOWS_DIR/demo-mode-setup.yaml"
-WIZARD_FLOW="$FLOWS_DIR/wizard-local-standalone.yaml"
 STATE_FILE="/tmp/maestro-entry-state"
 DIAGNOSE_SCRIPT="$SCRIPT_DIR/maestro-diagnose.sh"
 REPORT_COLLECT="$SCRIPT_DIR/report-collect.py"
@@ -57,7 +52,7 @@ while [[ $# -gt 0 ]]; do
       echo "Usage: run-flow.sh [OPTIONS] <flow.yaml> [flow2.yaml ...]"
       echo ""
       echo "Options:"
-      echo "  --entry fresh|demo|wizard|auto   Force entry point (default: auto)"
+      echo "  --entry fresh|activated|auto     Force entry point (default: auto)"
       echo "  --skip-setup                     Skip setup (assume state is ready)"
       echo "  --device-class se|iphone|ipad    Target device class"
       echo "  --dry-run                        Print what would run"
@@ -99,7 +94,7 @@ fi
 # ──────── Entry-point detection + state setup (shared lib) ────────
 # detect_entry(), current_state(), run_setup() live in lib/entry-setup.sh so
 # full-regression.sh shares the exact same implementation. The vars above
-# (FLOWS_DIR, FRESH_SCRIPT, DEMO_FLOW, WIZARD_FLOW, STATE_FILE) are honored by it.
+# (FLOWS_DIR, FRESH_SCRIPT, STATE_FILE) are honored by it.
 source "$SCRIPT_DIR/lib/entry-setup.sh"
 
 # ──────────── Main: process each flow ─────────────────────────────
@@ -150,9 +145,8 @@ for flow in "$@"; do
     echo "📋  $name"
     echo "    entry: $local_entry"
     case "$local_entry" in
-      fresh)  echo "    setup: fresh-install.sh --reset-only" ;;
-      demo)   echo "    setup: fresh-install.sh --reset-only + maestro test demo-mode-setup.yaml" ;;
-      wizard) echo "    setup: fresh-install.sh wizard-local-standalone.yaml" ;;
+      fresh)     echo "    setup: mock reset + fresh-install.sh --reset-only" ;;
+      activated) echo "    setup: mock reset + fresh-install.sh --reset-only + activation.yaml, cold start" ;;
     esac
     echo "    run:   maestro test $flow"
     echo ""
@@ -165,6 +159,7 @@ for flow in "$@"; do
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   run_setup "$local_entry"
+  if [[ "$local_entry" == activated ]]; then cold_start_app; fi
 
   # NOTE: this block runs in the top-level for-loop, not a function, so `local`
   # is invalid here (aborts under set -e). Use plain assignments.

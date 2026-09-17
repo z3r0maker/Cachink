@@ -1,14 +1,13 @@
 # Navigate to Caja Movimientos screen and verify empty state.
 # Route: /caja-movimientos (via Otros → caja-movimientos card)
 # Verifies: screen renders, empty-state message visible.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - otros
   - caja
   - regression
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 

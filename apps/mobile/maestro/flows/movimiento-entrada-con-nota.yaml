@@ -6,18 +6,16 @@
 #   3. Fill movimiento-nota (delivery note reference)
 #   4. Submit → stock increases
 #
-# Precondition: wizard complete, product "Tortilla" exists.
+# Precondition: wizard complete, mock product "Gringa" exists.
 # Chain flows:
 #
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
 #       apps/mobile/maestro/flows/wizard-local-standalone.yaml
 #   maestro test apps/mobile/maestro/flows/inventario-producto.yaml
 #   maestro test apps/mobile/maestro/flows/movimiento-entrada-con-nota.yaml
-# x-entrypoint: demo
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml

@@ -1,26 +1,12 @@
-# Reusable subflow: navigate to the Settings Hub screen.
-#
-# Review item #7 removed the "Otros" tab from BOTH bars, so the
-# role-branching this flow used to do is gone: the top-bar cog is now
-# the single way into Configuración for every role.
-#
-#   Director  → Inicio | Ventas | Gastos | Estados
-#   Operativo → Ventas | Caja | Gastos | Productos
-#
-# (The old Operativo branch went Otros grid → "Configuración" card.
-# That card only ever existed in the *Director* grid, so the branch was
-# dead weight even before the tab left.)
-#
-# Caveat that motivated the old branching: the Expo Dev Client's
-# floating gear can sit over the top bar. Disable "Tools button" in the
-# dev menu before running the suite — see E2E-SESSION-NOTES.md.
-#
-# Precondition: user is authenticated and on any tab.
+# Open Configuración through the top-bar cog (A-12: one device-only screen).
+# The dev client's floating "Tools button" can cover the cog on iPad — turn it
+# off in the dev menu before running the suite.
+# Precondition: signed in, any tab.
 appId: mx.xangarro.mobile
 ---
 - tapOn:
     id: 'top-bar-open-settings'
-
 - extendedWaitUntil:
-    visible: 'Ajustes'
-    timeout: 5000
+    visible:
+      id: 'settings-screen'
+    timeout: 10000

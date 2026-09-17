@@ -1,21 +1,18 @@
-# a11y smoke — navigates Director Home and confirms every accessibilityLabel
-# / testID is rendered (P1C-M12-T04, S4-C22).
-# x-entrypoint: wizard
+# Accessibility smoke: the shell's landmark elements are exposed to the
+# accessibility tree (Maestro reads the same tree VoiceOver uses).
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
-# Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Director is already on Home after authenticate.yaml.
-# The role chip, tab bar, hero, and strip all need visible anchors.
 - assertVisible:
-    id: 'top-bar-role-chip'
+    id: 'top-bar-left'
+- assertVisible:
+    id: 'top-bar-open-settings'
 - assertVisible:
     id: 'bottom-tab-bar'
-- assertVisible:
-    id: 'utilidad-hero'
-- assertVisible:
-    id: 'hoy-kpi-strip'
+- assertVisible: 'Ventas'
+- assertVisible: 'Caja'
+- assertVisible: 'Gastos'
+- assertVisible: 'Productos'

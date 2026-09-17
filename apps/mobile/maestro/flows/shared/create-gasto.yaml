@@ -1,0 +1,22 @@
+# Record a Gasto payment with CONCEPTO and MONTO (pesos) from the Gastos tab.
+# Precondition: signed in.
+appId: mx.xangarro.mobile
+---
+- tapOn:
+    id: 'tab-gastos'
+- tapOn:
+    id: 'egresos-nuevo'
+- assertVisible:
+    id: 'nuevo-egreso-modal'
+- tapOn:
+    id: 'gasto-concepto'
+- inputText: ${CONCEPTO}
+- runFlow: hide-keyboard-in-sheet.yaml
+- tapOn:
+    id: 'gasto-monto'
+- inputText: ${MONTO}
+- runFlow: hide-keyboard-in-sheet.yaml
+- tapOn:
+    id: 'gasto-submit'
+- assertNotVisible:
+    id: 'nuevo-egreso-modal'

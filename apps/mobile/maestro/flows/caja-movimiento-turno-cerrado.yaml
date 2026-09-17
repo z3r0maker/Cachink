@@ -4,56 +4,21 @@
 # The UI should not allow the action (button disabled or error shown).
 #
 # Precondition: wizard mode (fresh state, open + close caja first).
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - caja
   - edge-case
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
+- runFlow: shared/ensure-caja-closed.yaml
 
 # Open caja.
-- tapOn:
-    id: 'tab-caja'
-- tapOn:
-    id: 'numpad-5'
-    optional: true
-- tapOn:
-    id: 'numpad-0'
-    optional: true
-- tapOn:
-    id: 'numpad-0'
-    optional: true
-- tapOn:
-    id: 'caja-abrir-submit'
-    optional: true
-- extendedWaitUntil:
-    visible:
-      id: 'caja-status-card'
-    timeout: 10000
+- runFlow: shared/ensure-caja-open.yaml
 
 # Close the turno immediately.
-- tapOn:
-    id: 'caja-cerrar-btn'
-- extendedWaitUntil:
-    visible:
-      id: 'caja-cerrar-sheet'
-    timeout: 5000
-# Enter counted amount.
-- tapOn:
-    id: 'numpad-5'
-- tapOn:
-    id: 'numpad-0'
-- tapOn:
-    id: 'numpad-0'
-- tapOn:
-    id: 'caja-cerrar-submit'
-- extendedWaitUntil:
-    visible:
-      id: 'caja-cerrado-banner'
-    timeout: 5000
+- runFlow: shared/ensure-caja-closed.yaml
 
 # Now verify retiro/depósito buttons are disabled or not visible.
 - assertNotVisible:

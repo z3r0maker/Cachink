@@ -76,6 +76,24 @@ describe('CountResultStep', () => {
     expect(screen.getByTestId('count-result-explicacion')).toBeInTheDocument();
   });
 
+  it('lists discrepancy reasons by their Spanish label, not the stored key', () => {
+    renderWithProviders(
+      <CountResultStep
+        conteoCentavos={40000n}
+        esperadoCentavos={50000n}
+        onClose={vi.fn()}
+        submitting={false}
+      />,
+    );
+    const trigger = screen.getAllByTestId('count-result-reason')[0]!;
+    fireEvent.pointerDown(trigger);
+    fireEvent.pointerUp(trigger);
+    fireEvent.click(trigger);
+    const option = screen.getAllByTestId('combobox-option-error-en-cambio')[0]!;
+    expect(option).toHaveTextContent('Error al dar cambio');
+    expect(screen.queryByText('error-en-cambio')).toBeNull();
+  });
+
   it('does not show reason selector when amounts match', () => {
     renderWithProviders(
       <CountResultStep

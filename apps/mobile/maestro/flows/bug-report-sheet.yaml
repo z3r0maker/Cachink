@@ -1,49 +1,23 @@
-# Open the Bug Report sheet from Settings → Sistema → "Reportar un problema".
+# Open the Bug Report sheet from Configuración → Dispositivo → "Reportar un problema".
 # Verifies: the bug report sheet opens, shows description input,
 # the share/submit button is visible, and the sheet can be closed.
 #
 # The BugReportSheet is a bottom sheet triggered from the "Reportar un
-# problema" button in Settings Sistema. It auto-attaches audit events +
+# problema" button in Configuración. It auto-attaches audit events +
 # errors and supports server-first submit (when consent on) or
 # file-share fallback.
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 tags:
   - settings
   - observability
   - regression
 ---
-- launchApp
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate.yaml
 
-# Navigate to Otros tab, then scroll to Configuración card.
-# Review item #7: the Director bar is Inicio | Ventas | Gastos |
-# Estados — no Otros tab. The tool grid moved into Configuración.
-# This subflow opens it for whichever role is logged in.
-- runFlow: shared/open-director-tools.yaml
-- extendedWaitUntil:
-    visible: 'Otros'
-    timeout: 5000
-- scrollUntilVisible:
-    element:
-      id: 'otros-configuracion'
-    direction: DOWN
-    timeout: 5000
-    centerElement: true
-- tapOn:
-    id: 'otros-configuracion'
-- extendedWaitUntil:
-    visible:
-      id: 'settings-hub-screen'
-    timeout: 5000
-
-- tapOn:
-    id: 'settings-hub-sistema'
-- extendedWaitUntil:
-    visible:
-      id: 'settings-sistema-screen'
-    timeout: 5000
+# Configuración is one device-only screen (A-12).
+- runFlow: shared/navigate-to-settings.yaml
 
 # Scroll to and tap the "Reportar un problema" button.
 - scrollUntilVisible:
@@ -67,7 +41,8 @@ tags:
 # Type a description.
 - tapOn:
     id: 'bug-report-description-input'
-- inputText: 'La app se cerró al editar un producto'
+- inputText: 'La app se cerró al registrar una venta'
+- hideKeyboard
 
 # Assert share button is visible (fallback path when consent is off).
 - assertVisible:

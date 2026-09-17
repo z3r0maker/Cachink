@@ -2,9 +2,8 @@
 appId: mx.xangarro.mobile
 tags: [internal]
 ---
-- launchApp
 - runFlow: ../shared/dismiss-modals.yaml
-- runFlow: ../shared/authenticate-director.yaml
+- runFlow: ../shared/authenticate.yaml
 - tapOn:
     id: 'top-bar-open-settings'
 - assertVisible:

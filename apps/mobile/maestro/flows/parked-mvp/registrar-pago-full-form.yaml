@@ -17,11 +17,9 @@
 #   maestro test apps/mobile/maestro/flows/cliente-crear.yaml
 #   maestro test apps/mobile/maestro/flows/venta-credito.yaml
 #   maestro test apps/mobile/maestro/flows/registrar-pago-full-form.yaml
-# x-entrypoint: wizard
+# x-entrypoint: activated
 appId: mx.xangarro.mobile
 ---
-- launchApp
-
 # Dismiss any first-launch modals (ConsentModal, etc.)
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
