@@ -47,8 +47,10 @@ MAESTRO_DEVICE_UDID=<UDID> apps/mobile/maestro/scripts/run-flow.sh flows/<flow>.
 Simulators: **iPad Pro 13-inch (M5)** `CC1DFB58-11A0-43BD-9CAA-64B7431EEF2E`,
 **iPhone 17** `4C5FA73E-F0D9-41A4-A058-511EE3F807AE`. Both sims run the same simulator
 build (it declares iPhone + iPad): copy the `.app` from one sim to the other with
-`simctl get_app_container` + `simctl install`. A fresh iOS build currently fails in
-`expo-sqlite` (`cannot find 'exsqlite3_open'`) — unresolved; `ios/.xcode.env.local` must
+`simctl get_app_container` + `simctl install`. An iOS build failing in `expo-sqlite` with
+`cannot find 'exsqlite3_open'` means `node_modules` was reinstalled after `pod install`:
+the podspec copies `sqlite3.c`/`.h` into `node_modules/expo-sqlite/ios/` only at pod
+install time. Run `pod install` in `apps/mobile/ios` again. `ios/.xcode.env.local` must
 point `NODE_BINARY` at an installed Node (Homebrew upgrades delete the old path). First
 launch on a new sim: accept iOS's "Open in Xangarro!?" prompt and turn off the dev
 menu's Tools button and Fast refresh.
