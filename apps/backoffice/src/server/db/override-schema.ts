@@ -7,7 +7,7 @@
  * `mode: 'date'` as in `./support-schema.ts`: these rows are read back, and
  * postgres.js renders a timestamptz string in a non-ISO form.
  */
-import { index, integer, pgSchema, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { staffMembers } from './schema';
 
@@ -32,9 +32,3 @@ export const planOverrides = pgTable(
 );
 
 export type PlanOverrideRow = typeof planOverrides.$inferSelect;
-
-/** Supabase's identity table: the console may read `id` and `email`, nothing else. */
-export const authUsers = pgSchema('auth').table('users', {
-  id: uuid('id').primaryKey(),
-  email: text('email').notNull(),
-});

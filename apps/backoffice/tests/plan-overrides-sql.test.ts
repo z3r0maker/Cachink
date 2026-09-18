@@ -19,6 +19,7 @@ const read = (name: string) =>
 const sql = read('0003_plan_overrides.sql');
 const code = sql.replace(/--.*$/gm, '');
 const read4 = read('0004_admin_tenant_read.sql').replace(/--.*$/gm, '');
+const email10 = read('0010_admin_user_email.sql').replace(/--.*$/gm, '');
 
 const createTable = sql.slice(sql.indexOf('CREATE TABLE'), sql.indexOf('CONSTRAINT'));
 const sqlColumns = [...createTable.matchAll(/^ {2}([a-z_]+)\s+(text|integer|timestamptz)/gm)]
@@ -65,8 +66,25 @@ describe('0004_admin_tenant_read.sql', () => {
     assert.doesNotMatch(read4, /INSERT|UPDATE|DELETE|FOR ALL/);
   });
 
-  it('reads auth.users by column: id and email, never the password hash', () => {
-    assert.match(read4, /GRANT SELECT \(id, email\) ON auth\.users TO xangarro_admin/);
-    assert.doesNotMatch(read4, /encrypted_password/);
+  it('grants nothing on auth.users: hosted postgres has no GRANT OPTION there', () => {
+    assert.doesNotMatch(read4, /auth\.users|SCHEMA auth/);
+  });
+});
+
+describe('0010_admin_user_email.sql', () => {
+  it('answers one question through a pinned SECURITY DEFINER function', () => {
+    assert.match(email10, /FUNCTION xangarro\.admin_user_email\(p_user_id text\)/);
+    assert.match(email10, /SECURITY DEFINER/);
+    assert.match(email10, /SET search_path = pg_catalog/);
+    assert.match(email10, /SELECT u\.email/);
+  });
+
+  it('is executable by the console only and never exposes the password hash', () => {
+    assert.match(email10, /REVOKE ALL ON FUNCTION xangarro\.admin_user_email\(text\) FROM PUBLIC/);
+    assert.match(
+      email10,
+      /GRANT EXECUTE ON FUNCTION xangarro\.admin_user_email\(text\) TO xangarro_admin/,
+    );
+    assert.doesNotMatch(email10, /encrypted_password|GRANT SELECT/);
   });
 });

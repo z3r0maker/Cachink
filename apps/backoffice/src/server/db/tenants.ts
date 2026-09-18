@@ -10,7 +10,6 @@ import type {
   TenantSummary,
 } from '../tenants/port';
 import type { Db, Tx } from './client';
-import { authUsers } from './override-schema';
 import { deviceStats, isoText, ownerEmails, tenantWhere } from './tenant-queries';
 
 /**
@@ -52,9 +51,12 @@ async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
 
 async function members(conn: Conn, id: BusinessId): Promise<TenantMember[]> {
   return conn
-    .select({ userId: businessMembers.userId, email: authUsers.email, role: businessMembers.role })
+    .select({
+      userId: businessMembers.userId,
+      email: sql<string | null>`xangarro.admin_user_email(${businessMembers.userId})`,
+      role: businessMembers.role,
+    })
     .from(businessMembers)
-    .leftJoin(authUsers, sql`${authUsers.id}::text = ${businessMembers.userId}`)
     .where(eq(businessMembers.businessId, id))
     .orderBy(asc(businessMembers.role), asc(businessMembers.createdAt));
 }

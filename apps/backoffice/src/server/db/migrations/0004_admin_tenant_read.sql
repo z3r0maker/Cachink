@@ -9,9 +9,9 @@
 -- Only the three tables N-06 reads. Anything more (usage in N-07, sync
 -- health in N-46) adds its table in its own migration, deliberately.
 --
--- auth.users: the owner's email only (column-level grant). last_sign_in_at
--- exists on hosted Supabase but not in data-pg's local compat table, so it is
--- not granted until both sides have it.
+-- auth.users: no grant here. Member emails come from the SECURITY DEFINER
+-- function in 0010 — hosted `postgres` cannot re-grant auth.users (it has no
+-- GRANT OPTION there), so a column grant would block db:migrate:hosted.
 
 DO $$
 DECLARE
@@ -28,8 +28,5 @@ BEGIN
       'CREATE POLICY admin_read ON public.%I FOR SELECT TO xangarro_admin USING (true)', t
     );
   END LOOP;
-
-  GRANT USAGE ON SCHEMA auth TO xangarro_admin;
-  GRANT SELECT (id, email) ON auth.users TO xangarro_admin;
 END
 $$;

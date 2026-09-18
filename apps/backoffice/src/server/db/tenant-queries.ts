@@ -16,7 +16,6 @@ import { businesses, businessMembers, devices } from '@xangarro/data-pg';
 
 import type { TenantQuery } from '../tenants/port';
 import type { Db, Tx } from './client';
-import { authUsers } from './override-schema';
 
 /** A timestamptz as ISO-8601 text, full precision (the keyset needs every microsecond). */
 export const isoText = (col: AnyPgColumn | SQL | SQL.Aliased) =>
@@ -41,10 +40,11 @@ export function ownerEmails(conn: Db | Tx) {
   return conn
     .select({
       businessId: businessMembers.businessId,
-      email: sql<string | null>`min(${authUsers.email})`.as('owner_email'),
+      email: sql<string | null>`min(xangarro.admin_user_email(${businessMembers.userId}))`.as(
+        'owner_email',
+      ),
     })
     .from(businessMembers)
-    .leftJoin(authUsers, sql`${authUsers.id}::text = ${businessMembers.userId}`)
     .where(eq(businessMembers.role, 'owner'))
     .groupBy(businessMembers.businessId)
     .as('ow');
