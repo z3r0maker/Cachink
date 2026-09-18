@@ -236,7 +236,11 @@
 
 ### B-15 Retention acknowledgment support
 
-- [ ] Status · **Blocked by:** B-08, B-09
+- [x] Status · **Blocked by:** B-08, B-09
+  - Done 2026-09-17: `e2e/sync.spec.ts` › "retention" over HTTP — accepted rows are covered by the
+    next pull's `acknowledgedThrough`; a rejected row gets no serverSeq and no receipt, so nothing
+    can cover it until it is fixed and re-pushed; and one phone's pushes never move another's bound
+    (the bound is per device, `devices.acknowledged_through`).
 - **Context:** Q9 — the phone may purge only rows the server has durably stored. `acknowledged_through` in pull (B-09) + `server_seq` per accepted row in push (B-08) already give this. This task adds the **integration test** proving a row acknowledged in push is ≤ `acknowledged_through` on the next pull, and that a row rejected is never acknowledged.
 - **Acceptance:** that test, green.
 

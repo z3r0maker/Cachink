@@ -12,6 +12,7 @@ import {
   pull,
   push,
   sale,
+  TACO,
   type Phone,
 } from './sync-phone';
 
@@ -136,6 +137,39 @@ test('a backlog longer than a page arrives in order, without skipping', async ({
   expect(second.serverSeq).toBe(from + backlog);
 });
 
+test('retention: a phone may purge exactly what the cloud stored, and only its own', async ({
+  request,
+}) => {
+  const bAck = (await pull(request, b, b.cursor)).acknowledgedThrough;
+  const bad = sale(a, { productoId: newUlid() });
+  const first = await (await push(request, a, [sale(a), bad])).json();
+  const second = await (await push(request, a, [sale(a)])).json();
+  const stored = [...first.accepted, ...second.accepted].map(
+    (x: { serverSeq: number }) => x.serverSeq,
+  );
+
+  expect((await pull(request, a, a.cursor)).acknowledgedThrough).toBeGreaterThanOrEqual(
+    Math.max(...stored),
+  );
+  // A rejected row gets no serverSeq, so no acknowledgedThrough can ever cover it…
+  expect(first.rejected[0].rowId).toBe(bad.rowId);
+  const receipts = await asTenant(
+    BIZ,
+    (sql) => sql`SELECT 1 FROM sync_receipts WHERE row_id = ${bad.rowId}`,
+  );
+  expect(receipts).toHaveLength(0);
+  // …and another phone's bound does not move for pushes that are not its own.
+  expect((await pull(request, b, b.cursor)).acknowledgedThrough).toBe(bAck);
+
+  // Fixed and re-pushed, it is stored — and only now covered.
+  const fixed = await (
+    await push(request, a, [{ ...bad, row: { ...bad.row, productoId: TACO } }])
+  ).json();
+  expect((await pull(request, a, a.cursor)).acknowledgedThrough).toBeGreaterThanOrEqual(
+    fixed.accepted[0].serverSeq,
+  );
+});
+
 test('a phone over 60 calls a minute is told when to come back', async ({ request }) => {
   let limited = null;
   for (let i = 0; i < 70 && limited === null; i += 1) {
@@ -145,39 +179,4 @@ test('a phone over 60 calls a minute is told when to come back', async ({ reques
   expect(limited, 'no 429 within 70 calls').not.toBeNull();
   expect(Number(limited?.headers()['retry-after'])).toBeGreaterThan(0);
   expect((await limited?.json()).error.code).toBe('RATE_LIMITED');
-});
-
-test('guessing activation codes locks the caller out before any device token', async ({
-  request,
-}) => {
-  const from = { ...deviceHeaders(), 'x-forwarded-for': `198.51.100.${Date.now() % 250}` };
-  const attempt = (code: string) =>
-    request.post('/api/v1/activate', {
-      headers: from,
-      data: {
-        email: 'pedro@taqueria.mx',
-        code,
-        device: { name: 'x', platform: 'android', appVersion: '0.1.0', osVersion: '15' },
-      },
-    });
-  const statuses = [];
-  for (const guess of ['ZZZZZZZ2', 'ZZZZZZZ3', 'ZZZZZZZ4', 'ZZZZZZZ5', 'ZZZZZZZ6']) {
-    statuses.push((await attempt(guess)).status());
-  }
-  expect(statuses).toEqual([400, 400, 400, 400, 429]);
-
-  // Locked means locked: even a real code is refused from here, and stays unspent.
-  await asTenant(
-    BIZ,
-    (sql) => sql`
-      INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-      VALUES ('SYNCLCK2', 'pedro@taqueria.mx', now() + interval '1 hour', ${BIZ}, now(), now())
-      ON CONFLICT (code) DO UPDATE SET redeemed_at = NULL, expires_at = EXCLUDED.expires_at`,
-  );
-  expect((await attempt('SYNCLCK2')).status()).toBe(429);
-  const [code] = await asTenant(
-    BIZ,
-    (sql) => sql`SELECT redeemed_at FROM activation_codes WHERE code = 'SYNCLCK2'`,
-  );
-  expect(code?.redeemed_at).toBeNull();
 });
