@@ -7,7 +7,16 @@
  * rather than synced entities under CLAUDE.md §11 in full.
  */
 
-import { bigint, boolean, index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+  bigint,
+  boolean,
+  index,
+  jsonb,
+  pgTable,
+  primaryKey,
+  text,
+  timestamp,
+} from 'drizzle-orm/pg-core';
 
 import { centavos, tenantStamps } from './_columns';
 
@@ -38,6 +47,22 @@ export const notices = pgTable(
     ...tenantStamps,
   },
   (t) => [index('notices_business_created_idx').on(t.businessId, t.createdAt)],
+);
+
+/**
+ * `notice_preferences` — each member's «Cómo quieres enterarte» (P-32): a
+ * sparse map of channel overrides per aviso type. Defaults and the
+ * critical-types rule live in `@xangarro/domain/avisos`.
+ */
+export const noticePreferences = pgTable(
+  'notice_preferences',
+  {
+    businessId: text('business_id').notNull(),
+    userId: text('user_id').notNull(),
+    prefs: jsonb('prefs').notNull().default({}),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+  },
+  (t) => [primaryKey({ name: 'notice_preferences_pk', columns: [t.businessId, t.userId] })],
 );
 
 /** `metas` — the Asesor's goals. Deterministic arithmetic, portal-only. */
