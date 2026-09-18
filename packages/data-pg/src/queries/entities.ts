@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, isNull } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNull, ne } from 'drizzle-orm';
 
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { expenses, sales } from '../schema/ledger.js';
@@ -105,4 +105,32 @@ export async function periodLedger(tx: Tx, from: string, to: string) {
     ventas: v.filter((r) => (r.fecha ?? '') >= from && (r.fecha ?? '') <= to),
     egresos: g.filter((r) => (r.fecha ?? '') >= from && (r.fecha ?? '') <= to),
   };
+}
+
+/**
+ * The two counts the app shell shows on every page: unsent rows and unread
+ * notices.
+ *
+ * Counted in SQL rather than by fetching rows and measuring the array — the
+ * shell renders on every navigation, and the lists it would otherwise pull are
+ * unbounded.
+ *
+ * The bell excludes the Asesor: the design gives the badge and the Asesor nav
+ * item separate unread notions (ADR-060). `state = 'nuevo'` is what "unread"
+ * means for a notice.
+ */
+export async function shellCounts(tx: Tx): Promise<{ pendingRows: number; unreadNotices: number }> {
+  const [pending] = await tx
+    .select({ n: count() })
+    .from(syncRejections)
+    .where(isNull(syncRejections.resolvedAt));
+
+  const [unread] = await tx
+    .select({ n: count() })
+    .from(notices)
+    .where(
+      and(isNull(notices.resolvedAt), eq(notices.state, 'nuevo'), ne(notices.source, 'asesor')),
+    );
+
+  return { pendingRows: pending?.n ?? 0, unreadNotices: unread?.n ?? 0 };
 }

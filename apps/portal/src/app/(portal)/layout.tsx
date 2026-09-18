@@ -1,3 +1,5 @@
+import { SESSION } from '@/fixtures/business';
+import { loadShellCounts } from '@/server/shell';
 import { Header } from '@/shell/header';
 import { Sidebar } from '@/shell/sidebar';
 import { column, content, frame, main } from '@/shell/shell.css';
@@ -6,10 +8,17 @@ import { column, content, frame, main } from '@/shell/shell.css';
  * The application shell, built once and shared by every portal screen.
  *
  * Navigating between routes must not move it a single pixel — that is the
- * Fase 2 compuerta. The session values below are placeholders until P-02
- * wires Supabase auth and the membership guard.
+ * Fase 2 compuerta.
+ *
+ * The **counts are real**: they come from `sync_rejections` and `notices`
+ * through `loadShellCounts`, which catches so that a database blip degrades two
+ * badges instead of handing every route to `global-error`. The **identity**
+ * fields are still placeholders until P-02 wires auth and the membership guard
+ * — `businessName` in particular is session data, not a query.
  */
-export default function PortalLayout({ children }: { children: React.ReactNode }) {
+export default async function PortalLayout({ children }: { children: React.ReactNode }) {
+  const counts = await loadShellCounts(SESSION.businessId);
+
   return (
     <div className={frame}>
       <Sidebar />
@@ -19,8 +28,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           businessInitials="TP"
           role="owner"
           planLabel="Xangarro"
-          pendingRows={3}
-          unreadNotices={4}
+          pendingRows={counts.pendingRows}
+          unreadNotices={counts.unreadNotices}
           userInitials="PR"
         />
         <main className={main}>

@@ -43,11 +43,35 @@ test('the sidebar and header borders form one line', async ({ page }) => {
   expect(brand?.height).toBe(header?.height);
 });
 
-test('the sync pill tells the truth', async ({ page }) => {
-  await page.goto('/');
-  // The fixture queue holds 3 rows, so it must not claim to be synced.
-  await expect(page.getByText('3 registros no enviados')).toBeVisible();
-  await expect(page.getByText('Sincronizado', { exact: true })).toHaveCount(0);
+/**
+ * The pill and Sincronización read the same table, so they must agree.
+ *
+ * This replaces an assertion that the pill showed "3 registros no enviados" —
+ * which was a literal in `layout.tsx`, so the test asserted that a constant
+ * equalled itself, and would have kept passing however wrong the number was.
+ * Re-anchoring it to the seed's count would only have moved the tautology.
+ *
+ * A cross-screen invariant cannot rot: it needs no hardcoded number, and it
+ * fails if either surface drifts from the database or from the other.
+ */
+test('the sync pill agrees with Sincronización', async ({ page }) => {
+  await page.goto('/sincronizacion');
+
+  // The KPI card renders `<span>{label}</span><p>{value}</p>`, so the figure is
+  // the first paragraph beside its own label — not "the first number on the
+  // page", which would silently latch onto whichever card rendered first.
+  const label = page.locator('main').getByText('Registros rechazados', { exact: true });
+  const figure = await label.locator('..').locator('p').first().innerText();
+  const pending = Number(figure);
+  expect(Number.isInteger(pending), `expected a count, got "${figure}"`).toBe(true);
+
+  const pill = page.locator('header');
+  if (pending === 0) {
+    await expect(pill.getByText('Sincronizado', { exact: true })).toBeVisible();
+  } else {
+    const noun = pending === 1 ? 'registro no enviado' : 'registros no enviados';
+    await expect(pill.getByText(`${pending} ${noun}`)).toBeVisible();
+  }
 });
 
 test('every interactive control meets the 44 px touch target on tablet', async ({
