@@ -1,4 +1,5 @@
 import { requireSession } from '@/server/auth';
+import { listarFacturas } from '@/server/billing/facturas';
 import { loadSuscripcion } from '@/server/suscripcion';
 
 import { SuscripcionScreen } from './screen';
@@ -14,6 +15,9 @@ export const dynamic = 'force-dynamic';
 
 export default async function SuscripcionPage() {
   const session = await requireSession();
-  const data = await loadSuscripcion(session.business_id).catch(() => null);
-  return <SuscripcionScreen data={data} />;
+  const [data, facturas] = await Promise.all([
+    loadSuscripcion(session.business_id).catch(() => null),
+    listarFacturas(),
+  ]);
+  return <SuscripcionScreen data={data} facturas={facturas} />;
 }

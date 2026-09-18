@@ -2,6 +2,7 @@ import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import {
+  datosFiscalesCompletos,
   ISR_DEFAULTS_SEED,
   REGIMEN_FISCAL,
   REGIMEN_NOMBRE,
@@ -45,5 +46,24 @@ describe('régimen: SAT code is the truth, the bucket is derived', () => {
       () => regimenPatch('999'),
       (e: unknown) => (e as { code?: string }).code === 'REGIMEN_INVALID',
     );
+  });
+});
+
+describe('datosFiscalesCompletos', () => {
+  const full = {
+    rfc: 'XOJI740919U48',
+    razonSocial: 'Pedro',
+    codigoPostal: '06600',
+    regimenSat: '626',
+  };
+
+  it('needs RFC, razón social, CP and régimen', () => {
+    assert.equal(datosFiscalesCompletos(full), true);
+  });
+
+  it('any missing or blank one makes it incomplete', () => {
+    assert.equal(datosFiscalesCompletos({ ...full, rfc: null }), false);
+    assert.equal(datosFiscalesCompletos({ ...full, razonSocial: '  ' }), false);
+    assert.equal(datosFiscalesCompletos({ ...full, regimenSat: null }), false);
   });
 });

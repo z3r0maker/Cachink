@@ -127,18 +127,3 @@ export const ASESOR_TIERS: readonly AsesorTier[] = [
     emphasis: false,
   },
 ];
-
-export interface Invoice {
-  readonly date: string;
-  readonly folio: string;
-  readonly state: string;
-  readonly amount: string;
-}
-
-export const INVOICES: readonly Invoice[] = [
-  { date: '01/may/2026', folio: 'XG-2026-0512', state: 'Pagado', amount: '$199.00' },
-  { date: '01/abr/2026', folio: 'XG-2026-0411', state: 'Pagado', amount: '$199.00' },
-  { date: '01/mar/2026', folio: 'XG-2026-0308', state: 'Pagado', amount: '$199.00' },
-  { date: '01/feb/2026', folio: 'XG-2026-0204', state: 'Pagado', amount: '$199.00' },
-  { date: '01/ene/2026', folio: 'XG-2026-0101', state: 'Pagado', amount: '$199.00' },
-];

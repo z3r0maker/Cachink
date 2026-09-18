@@ -1,8 +1,8 @@
 import 'server-only';
 
 import { billingStatusSnapshot, type BillingStatusSnapshot } from '@xangarro/application/billing';
-import { subscriptionsOfBusiness } from '@xangarro/data-pg';
-import type { PlanId } from '@xangarro/domain';
+import { getBusiness, subscriptionsOfBusiness } from '@xangarro/data-pg';
+import { datosFiscalesCompletos, type PlanId } from '@xangarro/domain';
 import { sql } from 'drizzle-orm';
 
 import { tenantEntitlement } from './billing/plan';
@@ -23,6 +23,8 @@ export interface SuscripcionData {
     readonly registros: number | null;
   };
   readonly recibe: { readonly plan: PlanId; readonly validUntil: string };
+  /** Whether a payment can be invoiced by name now (RFC, razón social, CP, régimen). */
+  readonly fiscalCompleto: boolean;
 }
 
 type Counts = { operadores: number; dispositivos: number };
@@ -34,7 +36,9 @@ export async function loadSuscripcion(businessId: string): Promise<SuscripcionDa
       SELECT (SELECT count(*)::int FROM users WHERE role = 'operativo' AND active AND deleted_at IS NULL) AS operadores,
              (SELECT count(*)::int FROM devices WHERE revoked_at IS NULL) AS dispositivos`);
     const ent = await tenantEntitlement(tx, businessId, now);
+    const b = await getBusiness(tx);
     return {
+      fiscalCompleto: b !== undefined && datosFiscalesCompletos(b),
       estado: billingStatusSnapshot(await subscriptionsOfBusiness(tx, businessId)),
       counts: c ?? { operadores: 0, dispositivos: 0 },
       recibe: { plan: ent.plan, validUntil: ent.validUntil },
@@ -45,5 +49,6 @@ export async function loadSuscripcion(businessId: string): Promise<SuscripcionDa
     estado: base.estado,
     uso: { ...base.counts, registros: uso?.transactions ?? null },
     recibe: base.recibe,
+    fiscalCompleto: base.fiscalCompleto,
   };
 }

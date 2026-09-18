@@ -3,16 +3,18 @@
 import { formatFechaHora, PLAN_LIMITS, PLAN_NOMBRE } from '@xangarro/domain';
 
 import { Banner, Card, ScreenBody, UsageBar } from '@/components';
-import { ASESOR_TIERS, INVOICES, PLAN_CARDS } from '@/fixtures/planes';
+import { ASESOR_TIERS, PLAN_CARDS } from '@/fixtures/planes';
+import type { ListarFacturasResult } from '@/server/billing/facturas-core';
 import { administrarSuscripcion } from '@/server/billing/actions';
 import type { SuscripcionData } from '@/server/suscripcion';
-import { isOwner, resolveScreenState } from '@/session/gating';
+import { canWrite, isOwner, resolveScreenState } from '@/session/gating';
 import { useSession } from '@/session/provider';
 import { eyebrow, eyebrowOnYellow } from '@/styles/text.css';
 
 import { accionDePlan, BotonStripe } from './acciones';
 import { estadoCopy } from './estado';
-import { AsesorBlock, Comprobantes, PauseRow } from './parts';
+import { Facturas } from './facturas';
+import { AsesorBlock, PauseRow } from './parts';
 import { PlanCard } from './plan-card';
 import { pageSubtitle, pageTitle, planGrid, planName, usageLabel } from './suscripcion.css';
 
@@ -104,7 +106,13 @@ function Planes({ owner }: { readonly owner: boolean }) {
   );
 }
 
-function Contenido({ data, owner }: { readonly data: SuscripcionData; readonly owner: boolean }) {
+function Contenido(props: {
+  readonly data: SuscripcionData;
+  readonly facturas: ListarFacturasResult;
+  readonly owner: boolean;
+}) {
+  const { data, owner } = props;
+  const mayWrite = canWrite(useSession().role);
   const aviso = estadoCopy(data.estado).aviso;
   return (
     <>
@@ -121,7 +129,12 @@ function Contenido({ data, owner }: { readonly data: SuscripcionData; readonly o
       </div>
       <Planes owner={owner} />
       <AsesorBlock tiers={ASESOR_TIERS} />
-      <Comprobantes invoices={INVOICES} />
+      <Facturas
+        r={props.facturas}
+        owner={owner}
+        mayWrite={mayWrite}
+        fiscalCompleto={data.fiscalCompleto}
+      />
       {owner && data.estado !== null ? <PauseRow /> : null}
       {/* The entitlement the phones are signed right now (P-10's debug line). */}
       <p style={{ fontWeight: 600 }} data-testid="entitlement-debug">
@@ -132,7 +145,13 @@ function Contenido({ data, owner }: { readonly data: SuscripcionData; readonly o
   );
 }
 
-export function SuscripcionScreen({ data }: { readonly data: SuscripcionData | null }) {
+export function SuscripcionScreen({
+  data,
+  facturas,
+}: {
+  readonly data: SuscripcionData | null;
+  readonly facturas: ListarFacturasResult;
+}) {
   const owner = isOwner(useSession().role);
   return (
     <>
@@ -148,7 +167,7 @@ export function SuscripcionScreen({ data }: { readonly data: SuscripcionData | n
           body: 'Estás en el plan Xangarrito, que es gratis para siempre. Cuando cambies de plan verás aquí tus comprobantes.',
         }}
       >
-        {data === null ? null : <Contenido data={data} owner={owner} />}
+        {data === null ? null : <Contenido data={data} facturas={facturas} owner={owner} />}
       </ScreenBody>
     </>
   );

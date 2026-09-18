@@ -916,9 +916,12 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     (2 / 340 / 2) — now active operators, linked devices and the metering counter («—» until
     computed). The entitlement debug line names the plan the phones receive and until when. e2e:
     owner view against the seed; a past-due throwaway tenant seen by a viewer.
-  - **Still to do:** the «Facturas» list replacing «Solicitar factura» (`factura_requests` is dropped
-    — N-33 invoices every payment): Timbrada → PDF/XML, En factura global → «Solicitar factura a mi
-    nombre», Pendiente → emailed; waits on the billing track's `facturasDelNegocio` (0019).
+  - 2026-09-18 · **«Facturas»** replaces the fixture «Comprobantes» and the dropped «Solicitar
+    factura» (`factura_requests` is gone — N-33 invoices every payment): each payment with its CFDI
+    state from `listarFacturas` (0019). Timbrada → PDF/XML for owner and admin; invoiced by hand →
+    «Emitida · UUID …»; En la factura global → «Solicitar factura a mi nombre» when the fiscal data
+    is complete (`datosFiscalesCompletos`, the one domain rule), else a link to complete it in
+    Negocio; Pendiente → «se enviará a tu correo». e2e on a throwaway tenant with three payments.
 - **Amended 2026-09-17 (ADR-059):** plan names and the Asesor block.
 - **Steps:** **Tu plan** on flat `--yellow` (name at 44 px, price, "Siguiente cobro", owner-only
   "Cambiar plan" / "Administrar pago"). **Tu consumo este mes** — **only capped allowances render a

@@ -1,13 +1,13 @@
 'use client';
 
+import { colors } from '@xangarro/tokens';
+
+import { Card, Tag } from '@/components';
+import { eyebrow, planLabel } from '@/styles/text.css';
+import type { AsesorTier } from '@/fixtures/planes';
 import { administrarSuscripcion } from '@/server/billing/actions';
 
 import { BotonStripe } from './acciones';
-import { colors } from '@xangarro/tokens';
-
-import { Button, Card, Tag } from '@/components';
-import { cardTitle, eyebrow, muted, planLabel } from '@/styles/text.css';
-import type { AsesorTier, Invoice } from '@/fixtures/planes';
 
 import { featureMark, featureRow, planCard, planGrid } from './suscripcion.css';
 
@@ -58,40 +58,6 @@ export function AsesorBlock({ tiers }: { readonly tiers: readonly AsesorTier[] }
         ))}
       </div>
     </div>
-  );
-}
-
-export function Comprobantes({ invoices }: { readonly invoices: readonly Invoice[] }) {
-  return (
-    <Card>
-      <div className={cardTitle} style={{ marginBottom: 16 }}>
-        Comprobantes
-      </div>
-      {invoices.map((i) => (
-        <div
-          key={i.folio}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-            padding: '12px 0',
-            borderBottom: `2px solid ${colors.gray200}`,
-          }}
-        >
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{i.date}</div>
-            <div className={muted}>{i.folio}</div>
-          </div>
-          <span style={{ marginLeft: 'auto' }}>
-            <Tag tone="success">{i.state}</Tag>
-          </span>
-          <strong style={{ fontVariantNumeric: 'tabular-nums' }}>{i.amount}</strong>
-          <Button size="sm" variant="secondary">
-            Descargar
-          </Button>
-        </div>
-      ))}
-    </Card>
   );
 }
 

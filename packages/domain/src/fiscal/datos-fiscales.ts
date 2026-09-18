@@ -61,3 +61,19 @@ export function validateDatosFiscales(input: DatosFiscalesInput): DatosFiscalesR
       : [];
   return { ok: true, value, warnings };
 }
+
+/**
+ * Whether a business can be invoiced by name (N-33, P-10): RFC, razón social,
+ * código postal and régimen all set. Uso CFDI is not needed — it defaults to
+ * G03. One rule for the Facturas list, Negocio's banner and the CFDI router.
+ */
+export function datosFiscalesCompletos(d: {
+  readonly rfc: string | null;
+  readonly razonSocial: string | null;
+  readonly codigoPostal: string | null;
+  readonly regimenSat: string | null;
+}): boolean {
+  return [d.rfc, d.razonSocial, d.codigoPostal, d.regimenSat].every(
+    (v) => v !== null && v.trim() !== '',
+  );
+}
