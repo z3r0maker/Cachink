@@ -42,3 +42,22 @@ export class SuscripcionActivaError extends Error {
     this.name = 'SuscripcionActivaError';
   }
 }
+
+/** Typed errors for the payroll roster (P-12). */
+export class EmpleadoInvalidoError extends Error {
+  readonly code = 'EMPLEADO_INVALIDO' as const;
+
+  constructor(readonly campos: Readonly<Record<string, string>>) {
+    super(Object.values(campos)[0] ?? 'Revisa los datos del empleado.');
+    this.name = 'EmpleadoInvalidoError';
+  }
+}
+
+export class EmpleadoNoEncontradoError extends Error {
+  readonly code = 'EMPLEADO_NO_ENCONTRADO' as const;
+
+  constructor(readonly id: string) {
+    super('Ese empleado ya no está en tu nómina.');
+    this.name = 'EmpleadoNoEncontradoError';
+  }
+}

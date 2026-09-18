@@ -1,77 +1,77 @@
 'use server';
 
-import { EmployeeSchema, newUlid } from '@xangarro/domain';
-import { employees } from '@xangarro/data-pg';
+import {
+  DarDeBajaEmpleadoUseCase,
+  GuardarEmpleadoUseCase,
+  type EmpleadoForm,
+} from '@xangarro/application';
+import {
+  EmpleadoInvalidoError,
+  EmpleadoNoEncontradoError,
+  type BusinessId,
+  type EmployeeId,
+} from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { recordChange } from '../repositories/sync-log';
 import { reportError } from '../observability/report';
-import { PORTAL_DEVICE_ID } from '../repositories/portal-device';
+import { pgEmployeesRepository } from '../repositories/employees';
 
 /**
- * Add an employee to the payroll roster.
- *
- * `employees` is a DOWN table: the portal owns it and every device pulls it
- * (contract §8). So unlike `notices`, this write **must** append to `sync_log`,
- * in the same transaction — otherwise the roster diverges silently and the
- * phone keeps showing a payroll that no longer exists.
- *
- * Validated through `EmployeeSchema` before it touches Postgres. Drizzle's
- * `text(..., { enum })` is a TypeScript type, not a CHECK constraint, so the
- * database would happily accept `periodo: 'Semanal'` — which is exactly how the
- * seed came to hold rows its own domain rejected.
+ * The payroll roster from the portal (P-12): add, edit, dar de baja. Admins
+ * and owners; the use cases hold the rules, the repository logs every write
+ * for the phones (`employees` is DOWN).
  */
+export type EmpleadoResult =
+  | { ok: true }
+  | { ok: false; message: string; campos: Readonly<Record<string, string>> };
 
-export interface NuevoEmpleado {
-  readonly nombre: string;
-  readonly puesto: string;
-  readonly salarioCentavos: bigint;
-  readonly periodo: 'semanal' | 'quincenal' | 'mensual';
+function failure(error: unknown, endpoint: string): EmpleadoResult {
+  if (error instanceof EmpleadoInvalidoError) {
+    return { ok: false, message: error.message, campos: error.campos };
+  }
+  if (
+    error instanceof EmpleadoNoEncontradoError ||
+    (error as { code?: string } | null)?.code === 'NOT_PERMITTED'
+  ) {
+    return { ok: false, message: (error as Error).message, campos: {} };
+  }
+  reportError(error, { endpoint });
+  return { ok: false, message: 'No pudimos guardar. Intenta de nuevo.', campos: {} };
 }
 
-export type CreateResult = { ok: true; id: string } | { ok: false; message: string };
-
-export async function crearEmpleado(input: NuevoEmpleado): Promise<CreateResult> {
+export async function guardarEmpleado(
+  id: string | null,
+  form: EmpleadoForm,
+): Promise<EmpleadoResult> {
   try {
     const session = await requireMember('admin');
-    const now = new Date().toISOString();
-    const id = newUlid();
-
-    const row = {
-      id,
-      nombre: input.nombre.trim(),
-      puesto: input.puesto.trim(),
-      salarioCentavos: input.salarioCentavos,
-      periodo: input.periodo,
-      businessId: session.business_id,
-      // A portal-created row has no device and no operator. Both columns are
-      // ULID-typed device ids, and a portal member's `sub` is a UUID from
-      // `auth.users` — a different id space entirely, which is what the first
-      // attempt at this discovered. `createdByUserId` is nullable and honestly
-      // null; `deviceId` is NOT NULL, so it carries a documented sentinel
-      // rather than a business id pretending to be a phone.
-      deviceId: PORTAL_DEVICE_ID,
-      createdByUserId: null,
-      createdAt: now,
-      updatedAt: now,
-      deletedAt: null,
-    };
-
-    EmployeeSchema.parse({ ...row, salarioCentavos: row.salarioCentavos });
-
-    await withTenant(session.business_id, async (tx) => {
-      await tx.insert(employees).values(row);
-      await recordChange(tx, session.business_id, 'employees', id, 'insert');
-    });
-
+    const biz = session.business_id as BusinessId;
+    await withTenant(biz, (tx) =>
+      new GuardarEmpleadoUseCase(pgEmployeesRepository(tx, biz)).execute({
+        businessId: biz,
+        id: id as EmployeeId | null,
+        form,
+      }),
+    );
     revalidatePath('/empleados');
-    return { ok: true, id };
+    return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'crearEmpleado' });
-    const message =
-      error instanceof Error ? error.message : 'No pudimos guardar al empleado. Intenta de nuevo.';
-    return { ok: false, message };
+    return failure(error, 'guardarEmpleado');
+  }
+}
+
+export async function darDeBajaEmpleado(id: string): Promise<EmpleadoResult> {
+  try {
+    const session = await requireMember('admin');
+    const biz = session.business_id;
+    await withTenant(biz, (tx) =>
+      new DarDeBajaEmpleadoUseCase(pgEmployeesRepository(tx, biz)).execute(id as EmployeeId),
+    );
+    revalidatePath('/empleados');
+    return { ok: true };
+  } catch (error) {
+    return failure(error, 'darDeBajaEmpleado');
   }
 }

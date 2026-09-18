@@ -660,8 +660,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     from the pending run, so it cannot contradict the rows beneath it.
   - Nómina's footer states the relationship plainly — "Cada pago de nómina se registra también como
     un gasto, capturado en el teléfono" — which is why there is no "Registrar nómina" button.
-  - **Still to do:** the create/edit sheet with the three periodo option cards, and the employee
-    drawer with recent payments.
+  - 2026-09-18 · **Create/edit sheet.** One Drawer for «Nuevo empleado» and «Editar»: nombre,
+    puesto, salario and the periodo as three option cards (Quincenal by default), plus «Dar de baja»
+    (soft delete). `GuardarEmpleadoUseCase` / `DarDeBajaEmpleadoUseCase` hold the rules (7 tests);
+    `pgEmployeesRepository` logs every write for the phones. The pesos parser moved to
+    `@xangarro/domain` (one copy). **Fixed:** «Nómina de la semana» summed salaries regardless of
+    period — it now uses each one's weekly equivalent (`salarioSemanal`, integer maths). e2e:
+    create → edit → baja, stored centavos, periodo and `sync_log` checked in Postgres.
+  - **Still to do:** the employee drawer with recent payments, and a contrato field (needs a column).
 - **Amended 2026-09-17 (ADR-058 §3, §5):** **two tabs — Personas and Nómina.** Asistencia is cut.
   Nómina is a read-only grouping; no "Registrar nómina".
 - **Steps:** Title "Empleados" / "Quién trabaja contigo y cuánto le pagas". Header chip "Nómina de la

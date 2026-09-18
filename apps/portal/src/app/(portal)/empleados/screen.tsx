@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { formatMoney } from '@xangarro/domain';
+import { formatMoney, salarioSemanal } from '@xangarro/domain';
 
 import {
+  Button,
   DataTable,
   KpiCard,
   ScreenBody,
@@ -17,12 +18,15 @@ import type { EmpleadosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 import { eyebrow } from '@/styles/text.css';
 
-import { NuevoEmpleadoDialog } from './new-dialog';
+import { EditarEmpleadoSheet, NuevoEmpleadoSheet } from './sheet';
+import type { Empleado as Row } from './use-empleado-form';
 import { pageSubtitle, pageTitle } from './empleados.css';
 
 type Empleado = EmpleadosData[number];
 
-const COLUMNS: readonly ColumnDef<Empleado>[] = [
+const PERIODO_LABEL = { semanal: 'Semanal', quincenal: 'Quincenal', mensual: 'Mensual' } as const;
+
+const columns = (onEdit: ((e: Row) => void) | null): readonly ColumnDef<Empleado>[] => [
   {
     key: 'empleado',
     header: 'Empleado',
@@ -36,9 +40,22 @@ const COLUMNS: readonly ColumnDef<Empleado>[] = [
   {
     key: 'periodo',
     header: 'Periodo',
-    render: (e) => <StatusPill tone="soft">{e.periodo}</StatusPill>,
+    render: (e) => <StatusPill tone="soft">{PERIODO_LABEL[e.periodo]}</StatusPill>,
   },
   { key: 'salario', header: 'Salario', numeric: true, render: (e) => formatMoney(e.salario ?? 0n) },
+  ...(onEdit === null
+    ? []
+    : [
+        {
+          key: 'acciones',
+          header: '',
+          render: (e: Row) => (
+            <Button variant="ghost" onClick={() => onEdit(e)} aria-label={`Editar a ${e.nombre}`}>
+              Editar
+            </Button>
+          ),
+        },
+      ]),
 ];
 
 function Heading() {
@@ -51,7 +68,7 @@ function Heading() {
       </div>
       {canWrite(session.role) ? (
         <div style={{ marginLeft: 'auto' }}>
-          <NuevoEmpleadoDialog />
+          <NuevoEmpleadoSheet />
         </div>
       ) : null}
     </div>
@@ -61,9 +78,11 @@ function Heading() {
 function Body({
   rows,
   list,
+  onEdit,
 }: {
   readonly rows: EmpleadosData | null;
   readonly list: EmpleadosData;
+  readonly onEdit: ((e: Row) => void) | null;
 }) {
   return (
     <ScreenBody
@@ -76,7 +95,7 @@ function Body({
     >
       <DataTable
         caption="Personas"
-        columns={COLUMNS}
+        columns={columns(onEdit)}
         rows={list}
         rowKey={(e) => e.id}
         minWidth={620}
@@ -92,8 +111,11 @@ function Body({
 
 export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null }) {
   const [tab, setTab] = useState('personas');
+  const [editing, setEditing] = useState<Row | null>(null);
+  const mayWrite = canWrite(useSession().role);
   const list = rows ?? [];
-  const semana = list.reduce((t, e) => t + (e.salario ?? 0n), 0n);
+  // Weekly equivalent: a quincenal or mensual salary is not a week's pay.
+  const semana = list.reduce((t, e) => t + salarioSemanal(e.salario ?? 0n, e.periodo), 0n);
 
   return (
     <>
@@ -111,7 +133,8 @@ export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null 
         <KpiCard label="Empleados activos" value={`${list.length}`} />
         <KpiCard label="Nómina de la semana" value={formatMoney(semana)} tone="negative" />
       </div>
-      <Body rows={rows} list={list} />
+      <Body rows={rows} list={list} onEdit={mayWrite ? setEditing : null} />
+      <EditarEmpleadoSheet empleado={editing} onClose={() => setEditing(null)} />
     </>
   );
 }

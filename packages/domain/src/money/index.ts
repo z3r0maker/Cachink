@@ -81,3 +81,6 @@ export function toPesosString(value: Money): string {
   const sign = negative ? '-' : '';
   return `${sign}${pesos.toString()}.${centavos.toString().padStart(2, '0')}`;
 }
+
+/** A typed amount (commas allowed, never negative), or null — see `pesos.ts`. */
+export { pesosToCentavos } from './pesos.js';
