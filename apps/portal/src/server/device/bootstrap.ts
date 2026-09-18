@@ -16,6 +16,7 @@ import { isNull } from 'drizzle-orm';
 import { PLAN_FIXTURE } from '@/fixtures/business';
 
 import type { Tx } from '../db';
+import { rowToWire } from '../sync/codec';
 
 /**
  * The reference tables a phone receives on activation (contract §3), and the
@@ -31,46 +32,8 @@ import type { Tx } from '../db';
  * domain requires — the same conversion the portal's repositories do.
  */
 
-const TIMESTAMPS = ['createdAt', 'updatedAt', 'deletedAt'] as const;
-
-type Row = Record<string, unknown>;
-
-function toWire(row: Row): Row {
-  const out: Row = { ...row };
-  for (const key of TIMESTAMPS) {
-    const v = out[key];
-    if (typeof v === 'string') out[key] = new Date(v).toISOString();
-  }
-  return out;
-}
-
-/**
- * Columns stored as JSON text for device parity, which the **domain** types as
- * structures. They must be decoded or `wireSchema(DomainSchema)` rejects them.
- *
- * Deliberately absent: `users.permissions`. It is also JSON text, but
- * `UserSchema` does not declare it — the phone decodes it itself with
- * `parsePermissions` — so it travels as the string it is. Decoding it here
- * would send a shape the phone does not expect.
- *
- * Found by the conformance suite, which failed on `atributosProducto` alone.
- */
-function decodeJson(row: Row, columns: readonly string[]): Row {
-  const out: Row = { ...row };
-  for (const c of columns) {
-    if (typeof out[c] === 'string') out[c] = JSON.parse(out[c] as string) as unknown;
-  }
-  return out;
-}
-
-const productToWire = (row: Row): Row => toWire(decodeJson(row, ['atributos']));
-const businessToWire = (row: Row): Row => toWire(decodeJson(row, ['atributosProducto']));
-
-/** Operators never carry an email over the wire (contract §5). */
-function userToWire(row: Row): Row {
-  const { email: _email, ...rest } = row;
-  return toWire(rest);
-}
+/** Tenant layer only; the device resolves platform × plan itself (§3). */
+export const tenantFeatureFlags = () => ({ ...PLAN_FIXTURE.features });
 
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
@@ -86,15 +49,14 @@ export async function referenceTables(tx: Tx) {
   ]);
 
   return {
-    businesses: b.map((row) => businessToWire(row as Row)),
-    products: p.map((row) => productToWire(row as Row)),
-    clients: c.map((row) => toWire(row as Row)),
-    users: u.map((row) => userToWire(row as Row)),
-    employees: e.map((row) => toWire(row as Row)),
-    recurring_expenses: r.map((row) => toWire(row as Row)),
-    conversion_recetas: cr.map((row) => toWire(row as Row)),
-    // Tenant layer only; the device resolves platform × plan itself (§3).
-    feature_flags: { ...PLAN_FIXTURE.features },
+    businesses: b.map((row) => rowToWire('businesses', row)),
+    products: p.map((row) => rowToWire('products', row)),
+    clients: c.map((row) => rowToWire('clients', row)),
+    users: u.map((row) => rowToWire('users', row)),
+    employees: e.map((row) => rowToWire('employees', row)),
+    recurring_expenses: r.map((row) => rowToWire('recurring_expenses', row)),
+    conversion_recetas: cr.map((row) => rowToWire('conversion_recetas', row)),
+    feature_flags: tenantFeatureFlags(),
   };
 }
 

@@ -2,7 +2,8 @@ import { and, asc, count, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { expenses, sales } from '../schema/ledger.js';
-import { activationCodes, devices, notices, syncRejections } from '../schema/portal.js';
+import { activationCodes, devices, notices } from '../schema/portal.js';
+import { syncRejections } from '../schema/sync.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];

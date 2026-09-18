@@ -53,6 +53,4 @@ suite() {
 }
 
 suite tests/conformance/activate.test.ts
-# Only the /entitlement block of sync.test.ts until /sync/push and /sync/pull
-# land (B-08, B-09); then this becomes the whole file.
-suite tests/conformance/sync.test.ts -t 'GET /entitlement'
+suite tests/conformance/sync.test.ts

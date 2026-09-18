@@ -6,7 +6,7 @@ import {
   type ActivateResponse,
   type ERROR_CATALOG,
 } from '@xangarro/contracts';
-import { devices } from '@xangarro/data-pg';
+import { committedCursor, devices } from '@xangarro/data-pg';
 import { newUlid } from '@xangarro/domain';
 import { sql } from 'drizzle-orm';
 
@@ -94,9 +94,10 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
     const entitlement = entitlementFor(businessId, now);
     await assertSlotFree(tx, businessId, entitlement.limits.devices);
     await registerDevice(tx, deviceId, businessId, input.device, now.toISOString());
-    const [seq] = await tx.execute<{ seq: string | null }>(
-      sql`SELECT max(seq)::text AS seq FROM sync_log`,
-    );
+    // The committed counter, read BEFORE the tables: a write landing between
+    // the two is then sent twice (harmless) rather than never (DB-SYNC-01).
+    // `max(seq)` was the bug — it could sit above a row still in flight.
+    const serverSeq = await committedCursor(tx as Tx);
 
     // Parsed, not cast. The server validates its own response against the
     // contract before sending it, so a future schema drift — a new JSON column,
@@ -109,7 +110,7 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
       businessId,
       entitlement: await signEntitlement(entitlement),
       bootstrap: {
-        serverSeq: Number(seq?.seq ?? 0),
+        serverSeq,
         serverTime: now.toISOString(),
         tables: await referenceTables(tx as Tx),
       },

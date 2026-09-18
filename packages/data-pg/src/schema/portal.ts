@@ -7,15 +7,9 @@
  * rather than synced entities under CLAUDE.md §11 in full.
  */
 
-import { boolean, index, integer, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { bigint, boolean, index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-import { centavos } from './_columns';
-
-const tenantStamps = {
-  businessId: text('business_id').notNull(),
-  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
-} as const;
+import { centavos, tenantStamps } from './_columns';
 
 /**
  * `notices` — **one table, two surfaces** (ADR-060).
@@ -79,6 +73,8 @@ export const devices = pgTable('devices', {
   lastPushAt: timestamp('last_push_at', { withTimezone: true, mode: 'string' }),
   lastPullAt: timestamp('last_pull_at', { withTimezone: true, mode: 'string' }),
   revokedAt: timestamp('revoked_at', { withTimezone: true, mode: 'string' }),
+  /** Highest serverSeq this device's pushes were accepted at — its purge bound (A-11). */
+  acknowledgedThrough: bigint('acknowledged_through', { mode: 'number' }).notNull().default(0),
   ...tenantStamps,
 });
 
@@ -90,32 +86,3 @@ export const activationCodes = pgTable('activation_codes', {
   redeemedByDeviceId: text('redeemed_by_device_id'),
   ...tenantStamps,
 });
-
-/**
- * Rejected rows are **never dropped** (ADR-053 Q4). The server stores the
- * reason, the portal shows it as a human sentence, and the device retries.
- */
-export const syncRejections = pgTable('sync_rejections', {
-  id: text('id').primaryKey(),
-  deviceId: text('device_id').notNull(),
-  tableName: text('table_name').notNull(),
-  rowId: text('row_id').notNull(),
-  code: text('code').notNull(),
-  payload: jsonb('payload'),
-  receivedAt: timestamp('received_at', { withTimezone: true, mode: 'string' }).notNull(),
-  resolvedAt: timestamp('resolved_at', { withTimezone: true, mode: 'string' }),
-  ...tenantStamps,
-});
-
-/** The monotonic cursor devices pull from. One row per change, per table. */
-export const syncLog = pgTable(
-  'sync_log',
-  {
-    seq: integer('seq').primaryKey().generatedAlwaysAsIdentity(),
-    tableName: text('table_name').notNull(),
-    rowId: text('row_id').notNull(),
-    op: text('op', { enum: ['insert', 'update'] }).notNull(),
-    ...tenantStamps,
-  },
-  (t) => [index('sync_log_business_seq_idx').on(t.businessId, t.seq)],
-);

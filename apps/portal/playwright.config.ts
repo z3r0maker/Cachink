@@ -88,6 +88,7 @@ export default defineConfig({
     {
       name: 'desktop',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
@@ -98,6 +99,7 @@ export default defineConfig({
     {
       name: 'laptop',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 800 },
@@ -107,11 +109,21 @@ export default defineConfig({
     {
       name: 'tablet',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
         storageState: OWNER_STORAGE,
       },
+    },
+    // Phones pushing and pulling against the demo business. Last, after every
+    // viewport, so activating phones and rewriting Taquería's rows cannot race
+    // the specs that read them — devices.spec above all, which counts slots.
+    {
+      name: 'sync',
+      dependencies: ['desktop', 'laptop', 'tablet'],
+      testMatch: /sync\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], storageState: OWNER_STORAGE },
     },
   ],
 });

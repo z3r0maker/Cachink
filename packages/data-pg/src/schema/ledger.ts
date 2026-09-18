@@ -55,7 +55,8 @@ export const expenses = pgTable('expenses', {
       'Otro',
     ],
   }).notNull(),
-  montoCentavos: centavos('monto_centavos').notNull(),
+  /** Same key as the device (`monto`); the column is `monto_centavos`. */
+  monto: centavos('monto_centavos').notNull(),
   proveedor: text('proveedor'),
   gastoRecurrenteId: text('gasto_recurrente_id'),
   ...auditColumns,
@@ -96,7 +97,8 @@ export const sales = pgTable('sales', {
   categoria: text('categoria', {
     enum: ['Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro'],
   }).notNull(),
-  montoCentavos: centavos('monto_centavos').notNull(),
+  /** Same key as the device (`monto`); the column is `monto_centavos`. */
+  monto: centavos('monto_centavos').notNull(),
   metodo: text('metodo', {
     enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'],
   }).notNull(),

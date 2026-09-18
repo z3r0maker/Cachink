@@ -31,7 +31,7 @@ export interface DayTotals {
 export async function totalsForRange(tx: Tx, from: string, to: string): Promise<DayTotals> {
   const [v] = await tx
     .select({
-      total: sql<string>`coalesce(sum(${sales.montoCentavos}), 0)`,
+      total: sql<string>`coalesce(sum(${sales.monto}), 0)`,
       n: sql<string>`count(*)`,
     })
     .from(sales)
@@ -46,7 +46,7 @@ export async function totalsForRange(tx: Tx, from: string, to: string): Promise<
 
   const [g] = await tx
     .select({
-      total: sql<string>`coalesce(sum(${expenses.montoCentavos}), 0)`,
+      total: sql<string>`coalesce(sum(${expenses.monto}), 0)`,
       n: sql<string>`count(*)`,
     })
     .from(expenses)

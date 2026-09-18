@@ -1,5 +1,6 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
+import { getTableColumns, getTableName, is, Table } from 'drizzle-orm';
 import { getTableConfig as pgConfig } from 'drizzle-orm/pg-core';
 import { getTableConfig as sqliteConfig } from 'drizzle-orm/sqlite-core';
 
@@ -72,7 +73,37 @@ const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
   users: ['active'],
 };
 
+/** SQL column name → the Drizzle property key it is read and written by. */
+function propertyKeys(schema: Record<string, unknown>): ReadonlyMap<string, Map<string, string>> {
+  const out = new Map<string, Map<string, string>>();
+  for (const v of Object.values(schema)) {
+    if (!is(v, Table)) continue;
+    const byColumn = new Map<string, string>();
+    for (const [key, col] of Object.entries(getTableColumns(v))) byColumn.set(col.name, key);
+    out.set(getTableName(v), byColumn);
+  }
+  return out;
+}
+
 describe('cloud ↔ device schema drift', () => {
+  /**
+   * Same column names are not enough. Rows cross the wire as objects keyed by
+   * the Drizzle property, so `monto_centavos` keyed `monto` on the phone and
+   * `montoCentavos` in the cloud meant every pushed sale arrived with no money
+   * (a null into a NOT NULL column) and every portal reader had to remap it.
+   */
+  it('keys every shared column by the same property name on both sides', () => {
+    const pg = propertyKeys(pgSchema as Record<string, unknown>);
+    const device = propertyKeys(sqliteSchema as Record<string, unknown>);
+    const differ = SYNCED.flatMap((t) =>
+      [...(device.get(t) ?? [])].flatMap(([column, key]) => {
+        const cloud = pg.get(t)?.get(column);
+        return cloud === undefined || cloud === key ? [] : [`${t}.${column}: ${key} ≠ ${cloud}`];
+      }),
+    );
+    assert.deepEqual(differ, []);
+  });
+
   it('has a Postgres table for every synced table in the contract', () => {
     const missing = SYNCED.filter((t) => !PG.has(t));
     assert.deepEqual(missing, [], `no cloud table for: ${missing.join(', ')}`);
@@ -149,7 +180,9 @@ describe('cloud ↔ device schema drift', () => {
       'devices',
       'metas',
       'notices',
+      'sync_cursors',
       'sync_log',
+      'sync_receipts',
       'sync_rejections',
     ]);
   });

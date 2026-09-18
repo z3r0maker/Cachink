@@ -5,15 +5,20 @@ import { encodeJson, ERROR_CATALOG, HEADER_PROTOCOL, PROTOCOL_VERSION } from '@x
 /**
  * The phone API's two response shapes (contract §1), in one place.
  *
- * The status comes from `ERROR_CATALOG`, never from the route: a route that
- * picked its own status for `DEVICE_REVOKED` would be a second opinion on the
- * contract, and the phone decides whether to retry from the status.
+ * The status comes from `ERROR_CATALOG`: a route that picked its own status for
+ * `DEVICE_REVOKED` would be a second opinion on the contract, and the phone
+ * decides whether to retry from the status.
  */
 export type ApiErrorCode = keyof typeof ERROR_CATALOG;
 
-export function fail(code: ApiErrorCode, message: string): Response {
+/**
+ * `status` overrides the catalog only where the contract says a code means
+ * something else as a whole-request answer: `VALIDATION` is a per-row code
+ * (200), but a batch that fails the schema is refused outright with 400 (§4).
+ */
+export function fail(code: ApiErrorCode, message: string, status?: number): Response {
   return new Response(encodeJson({ error: { code, message } }), {
-    status: ERROR_CATALOG[code].httpStatus,
+    status: status ?? ERROR_CATALOG[code].httpStatus,
     headers: { 'Content-Type': 'application/json' },
   });
 }
