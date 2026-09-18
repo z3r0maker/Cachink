@@ -46,3 +46,4 @@ export function yearMonth(date: IsoDate): string {
 export function year(date: IsoDate): string {
   return date.slice(0, 4);
 }
+export * from './periodo.js';

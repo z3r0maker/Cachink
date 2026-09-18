@@ -66,6 +66,8 @@ export default defineConfig({
       // in its own step and is alone on the runner.
       ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
       DATABASE_URL: databaseUrl(),
+      // The seed's day (seed-data.ts `TODAY`): its May rows are "this month".
+      PORTAL_TODAY: process.env.PORTAL_TODAY ?? '2026-05-12',
       // /activate signs a device token and an entitlement. The entitlement key
       // is the contract's published TEST key, passed explicitly: the portal has
       // no default for it on purpose (server/device/credentials.ts).
