@@ -20,7 +20,7 @@ const root = resolve(__dirname, '..')
 
 // Load env so we can substitute the real domain into static files
 const env = loadEnv('production', root, '')
-const SITE_URL = (env.VITE_SITE_URL || 'https://cachink.mx').replace(/\/$/, '')
+const SITE_URL = (env.VITE_SITE_URL || 'https://xangarro.mx').replace(/\/$/, '')
 
 // ── Route manifest ─────────────────────────────────────────────────────────
 // Each entry drives: SSR render, output path, <title>, <meta description>,
@@ -29,42 +29,42 @@ const ROUTES = [
   {
     path: '/',
     outDir: 'dist',
-    title: 'Cachink · Finanzas para emprendedores',
-    description: 'Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.',
+    title: 'Xangarro · Finanzas para emprendedores',
+    description: 'Xangarro es la plataforma mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.',
     smoke: 'Tu caja',
   },
   {
     path: '/recursos/',
     outDir: 'dist/recursos',
-    title: 'Recursos para pequeños negocios · Cachink',
+    title: 'Recursos para pequeños negocios · Xangarro',
     description: 'Guías prácticas sobre control de caja, estados financieros NIF y comparativas para dueños de pequeños negocios en México.',
     smoke: 'Guías para llevar mejor',
   },
   {
     path: '/recursos/sin-excel/',
     outDir: 'dist/recursos/sin-excel',
-    title: 'Cómo llevar la caja de tu negocio sin Excel · Cachink',
+    title: 'Cómo llevar la caja de tu negocio sin Excel · Xangarro',
     description: 'Guía práctica para dueños de pequeños negocios en México que quieren dejar de usar hojas de cálculo y llevar un control de caja más rápido, preciso y sin errores.',
     smoke: 'Cómo llevar la caja',
   },
   {
     path: '/recursos/nif/',
     outDir: 'dist/recursos/nif',
-    title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador · Cachink',
+    title: 'Estados financieros NIF: qué son y cómo generarlos sin ser contador · Xangarro',
     description: 'Guía en lenguaje simple sobre los estados financieros en formato NIF que solicitan los contadores y bancos en México, y cómo generarlos desde tu app de caja.',
     smoke: 'Estados financieros NIF',
   },
   {
     path: '/recursos/errores-caja/',
     outDir: 'dist/recursos/errores-caja',
-    title: '5 errores comunes al registrar ventas en efectivo · Cachink',
+    title: '5 errores comunes al registrar ventas en efectivo · Xangarro',
     description: 'Los errores más frecuentes que cometen los dueños de pequeños negocios al llevar el control de caja en efectivo, y cómo un sistema de registro simple los elimina.',
     smoke: '5 errores comunes',
   },
   {
     path: '/recursos/vs-excel/',
     outDir: 'dist/recursos/vs-excel',
-    title: 'Cachink vs hojas de cálculo: comparativa honesta · Cachink',
+    title: 'Xangarro vs hojas de cálculo: comparativa honesta · Xangarro',
     description: 'Comparación directa entre usar Excel o Google Sheets y una app de caja especializada para el control financiero de pequeños negocios en México.',
     smoke: 'comparativa honesta',
   },
@@ -159,7 +159,7 @@ if (failures.length > 0) {
 }
 
 // ── 5. Substitute domain in static crawler files ───────────────────────────
-const PLACEHOLDER = 'https://cachink.mx'
+const PLACEHOLDER = 'https://xangarro.mx'
 for (const filename of ['robots.txt', 'sitemap.xml']) {
   const filePath = resolve(root, 'dist', filename)
   if (!existsSync(filePath)) continue

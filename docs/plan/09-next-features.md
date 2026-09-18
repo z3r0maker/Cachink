@@ -552,12 +552,32 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-31 Landing copy for this track `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
+- [x] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
 - **Where:** `apps/landing/` in this repo (ADR-084), not the old `CachinkLanding` repo.
 - **What:** pricing table with the new limits and annual toggle, every price marked **"+ IVA"** with the
   total on hover/footnote; "Tu negocio sigue aunque se vaya el
   internet" (decision 20); fix L-03's stale `freelancer/emprendedor/mipyme_pro` slugs (ADR-059).
   Payment-method line: "Tarjeta de crédito o débito · Transferencia SPEI en plan anual" (no OXXO).
+- Progress/Done: 2026-09-18 · `track-n/n31-landing` · full rebrand to Xangarro! plus the pricing
+  rebuild — this **also delivers L-01, L-02 and L-03** (Done lines there). Pricing card from a new
+  single source `apps/landing/landing/planes.js`: xangarrito $0 / xangarro $199 / xangarrote $399
+  MXN·mes ("Recomendado" on xangarro), monthly/annual toggle (annual 10× monthly = "2 meses gratis"),
+  **"+ IVA"** badge on paid prices with IVA-inclusive totals in the footnote (230.84 / 462.84 /
+  2,308.40 / 4,628.40), limits 300/50 · 10k/1k · 30k/5k + operadores 1/2/5, exportación on every
+  tier, "Multi-sucursal (próximamente)" on xangarrote. Payment line "Tarjeta de crédito o débito, o
+  por transferencia SPEI en plan anual" (no OXXO); offline line "Tu negocio sigue aunque se vaya el
+  internet" in the Precios intro, hero FAQ and llms files. All CTAs →
+  `app.xangarro.mx/signup?plan=xangarrito|xangarro|xangarrote` with utm_* passthrough; the waitlist
+  form and `VITE_WAITLIST_ENDPOINT` are gone. FAQ (14 answers), JSON-LD offers, `llms.txt` and
+  `llms-full.txt` rewritten to the decided product facts (web portal today, apps próximamente,
+  per-negocio accounts, CFDI answer now covers the subscription CFDI). Canonical domain switched to
+  `xangarro.mx` everywhere (`.env.example`, vite.config, prerender, structured-data, robots,
+  sitemap); brand assets are sharp-generated text-wordmark placeholders (`generate-og.mjs` now also
+  emits favicon / apple-touch-icon / `site.webmanifest`). Verified: `grep -rni cachink apps/landing
+  docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), screenshots at 360 px
+  and 1440 px, annual toggle prices/cadence/aria-pressed/CTA params asserted in-DOM. **Deviation:**
+  shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
+  contract; if C-12 ever changes them, `planes.js` is the one place to update.
 
 ### N-32 Store-compliance sweep `[LAUNCH]`
 

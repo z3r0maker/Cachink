@@ -2,7 +2,7 @@
    1. Show the Operativo home
    2. Open the "Nueva venta" sheet (slides up)
    3. Type a monto + pick method
-   4. Tap GUARDAR — sheet slides down, ¡CACHINK! burst overlay
+   4. Tap GUARDAR — sheet slides down, ¡XANGARRO! burst overlay
    5. New row slides into the list, ventasHoy counts up
    6. pause 1.5s, loop
    Times in ms; each step handled by a tiny scheduler. */
@@ -56,7 +56,7 @@ function AnimatedTag({ children, variant = 'neutral' }) {
 }
 
 function AnimatedOperativo({ motion = true }) {
-  // phase: 'idle' | 'opening' | 'typing' | 'saving' | 'cachink' | 'settled'
+  // phase: 'idle' | 'opening' | 'typing' | 'saving' | 'burst' | 'settled'
   const [phase, setPhase] = useState('idle');
   const [typedAmount, setTypedAmount] = useState(0);
   const [rows, setRows] = useState(initialRows);
@@ -95,7 +95,7 @@ function AnimatedOperativo({ motion = true }) {
     const targets = [45, 105, 145];
     targets.forEach((v, i) => at(2000 + i * 260, () => setTypedAmount(v)));
     at(2950, () => setPhase('saving'));
-    at(3300, () => setPhase('cachink'));
+    at(3300, () => setPhase('burst'));
     at(3300, () => {
       setRows((r) => [INCOMING, ...r]);
     });
@@ -123,7 +123,7 @@ function AnimatedOperativo({ motion = true }) {
   }, [loopKey, motion]);
 
   const sheetOpen = phase === 'opening' || phase === 'typing' || phase === 'saving';
-  const showCachink = phase === 'cachink';
+  const showBurst = phase === 'burst';
 
   return (
     <div
@@ -173,7 +173,7 @@ function AnimatedOperativo({ motion = true }) {
               letterSpacing: '-0.02em',
             }}
           >
-            Cachink
+            Xangarro
           </div>
           <div style={{ fontWeight: 600, fontSize: 10, color: 'var(--gray-600)', marginTop: 1 }}>
             Panadería La Esquina
@@ -618,8 +618,8 @@ function AnimatedOperativo({ motion = true }) {
         </div>
       </div>
 
-      {/* ¡CACHINK! burst */}
-      {showCachink && (
+      {/* ¡XANGARRO! burst */}
+      {showBurst && (
         <div
           style={{
             position: 'absolute',
@@ -639,7 +639,7 @@ function AnimatedOperativo({ motion = true }) {
               boxShadow: '6px 6px 0 var(--black)',
               padding: '14px 22px',
               transform: 'rotate(-6deg)',
-              animation: 'cachinkPop 700ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+              animation: 'burstPop 700ms cubic-bezier(0.2, 0.8, 0.2, 1)',
               display: 'flex',
               alignItems: 'center',
               gap: 10,
@@ -654,7 +654,7 @@ function AnimatedOperativo({ motion = true }) {
                 whiteSpace: 'nowrap',
               }}
             >
-              ¡CACHINK!
+              ¡XANGARRO!
             </div>
           </div>
           {/* burst rays */}
@@ -684,7 +684,7 @@ function AnimatedOperativo({ motion = true }) {
           to { transform: translateY(0); opacity: 1; max-height: 80px; }
         }
         @keyframes caretBlink { 0%,49% { opacity: 1; } 50%,100% { opacity: 0; } }
-        @keyframes cachinkPop {
+        @keyframes burstPop {
           0%   { transform: rotate(-6deg) scale(0.3); opacity: 0; }
           50%  { transform: rotate(-3deg) scale(1.15); opacity: 1; }
           70%  { transform: rotate(-6deg) scale(0.98); }

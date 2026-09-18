@@ -284,7 +284,7 @@ export default function SinExcel() {
             marginBottom: 10,
           }}
         >
-          Cachink lanza en verano 2026
+          Xangarro · crea tu cuenta hoy
         </div>
         <p
           style={{
@@ -295,10 +295,10 @@ export default function SinExcel() {
             lineHeight: 1.5,
           }}
         >
-          Únete a la lista de espera y consigue 3 meses gratis en cualquier plan de pago.
+          Empieza gratis con Xangarrito y crece cuando tu negocio crezca.
         </p>
         <a
-          href="/#top"
+          href="https://app.xangarro.mx/signup?plan=xangarrito"
           style={{
             display: 'inline-block',
             background: 'var(--black)',

@@ -176,7 +176,7 @@ function OperativoStatic() {
   ];
   return (
     <div style={{ height: '100%', position: 'relative', background: 'var(--offwhite)' }}>
-      <SmallTopBar title="Cachink" subtitle="Panadería La Esquina" />
+      <SmallTopBar title="Xangarro" subtitle="Panadería La Esquina" />
       <div style={{ padding: '12px 12px 66px', display: 'flex', flexDirection: 'column', gap: 10 }}>
         <div
           style={{

@@ -10,9 +10,10 @@ import { AnimatedOperativo } from './AnimatedHero.jsx';
 import { Parallax } from './Motion.jsx';
 import { useViewport } from './Viewport.jsx';
 import { TONE_COPY, Eyebrow, HardBtn, HardCard, StoreBadge } from './copy.jsx';
+import { signupUrl } from './planes.js';
 
 /* ─────────────── MOBILE MENU ─────────────── */
-function MobileMenu({ links, onClose, onWaitlist, triggerRef }) {
+function MobileMenu({ links, onClose, triggerRef }) {
   const drawerRef = useRef(null);
 
   useEffect(() => {
@@ -148,14 +149,8 @@ function MobileMenu({ links, onClose, onWaitlist, triggerRef }) {
           </a>
         ))}
         <div style={{ marginTop: 20 }}>
-          <HardBtn
-            size="lg"
-            onClick={() => {
-              onClose();
-              onWaitlist?.();
-            }}
-          >
-            Unirme a la lista →
+          <HardBtn size="lg" href={signupUrl('xangarrito')}>
+            Crear cuenta gratis →
           </HardBtn>
         </div>
       </div>
@@ -164,12 +159,12 @@ function MobileMenu({ links, onClose, onWaitlist, triggerRef }) {
 }
 
 /* ─────────────── NAV ─────────────── */
-export function Nav({ onWaitlist }) {
+export function Nav() {
   const { isMobile } = useViewport();
   const [menuOpen, setMenuOpen] = useState(false);
   const hamburgerRef = useRef(null);
   const links = [
-    ['#por-que', 'Por qué Cachink'],
+    ['#por-que', 'Por qué Xangarro'],
     ['#como', 'Cómo funciona'],
     ['#recorrido', 'Recorrido'],
     ['#precios', 'Precios'],
@@ -207,7 +202,7 @@ export function Nav({ onWaitlist }) {
           {/* Explicit dimensions prevent CLS while image loads */}
           <img
             src="/assets/apple-touch-icon.png"
-            alt="Cachink"
+            alt="Xangarro!"
             width={isMobile ? 40 : 52}
             height={isMobile ? 40 : 52}
             style={{ width: isMobile ? 40 : 52, height: isMobile ? 40 : 52 }}
@@ -243,8 +238,8 @@ export function Nav({ onWaitlist }) {
             gap: 10,
           }}
         >
-          <HardBtn size="sm" onClick={onWaitlist}>
-            Lista de espera
+          <HardBtn size="sm" href={signupUrl('xangarrito')}>
+            Crear cuenta
           </HardBtn>
           {isMobile && (
             <button
@@ -306,7 +301,6 @@ export function Nav({ onWaitlist }) {
         <MobileMenu
           links={links}
           onClose={() => setMenuOpen(false)}
-          onWaitlist={onWaitlist}
           triggerRef={hamburgerRef}
         />
       )}
@@ -317,40 +311,7 @@ export function Nav({ onWaitlist }) {
 /* ─────────────── HERO ─────────────── */
 export function Hero({ tone, yellowIntensity }) {
   const c = TONE_COPY[tone];
-  const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [formError, setFormError] = useState(null);
   const { isMobile, isTablet } = useViewport();
-
-  async function handleWaitlist(e) {
-    e.preventDefault();
-    if (!email.includes('@')) return;
-    const endpoint =
-      typeof import.meta !== 'undefined' && import.meta.env
-        ? import.meta.env.VITE_WAITLIST_ENDPOINT
-        : null;
-    if (!endpoint) {
-      setSent(true);
-      return;
-    }
-    setLoading(true);
-    setFormError(null);
-    try {
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setSent(true);
-    } catch (err) {
-      setFormError('Algo salió mal. Intenta de nuevo.');
-      console.error('[Cachink waitlist]', err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const heroBg = yellowIntensity === 'low' ? 'var(--offwhite)' : 'var(--yellow)';
   const sparkles = yellowIntensity !== 'low';
@@ -438,92 +399,22 @@ export function Hero({ tone, yellowIntensity }) {
           </p>
 
           <HardCard variant="white" padding={18} style={{ maxWidth: isMobile ? 'none' : 520 }}>
-            <Eyebrow>Próximamente · Únete a la lista</Eyebrow>
-            {sent ? (
-              <div
-                style={{
-                  marginTop: 10,
-                  padding: '14px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                }}
-              >
-                <div
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 10,
-                    background: 'var(--green-soft)',
-                    border: '2px solid var(--black)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 900,
-                    color: 'var(--green)',
-                  }}
-                >
-                  ✓
-                </div>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--black)' }}>
-                    ¡Estás en la lista!
-                  </div>
-                  <div style={{ fontSize: 13, color: 'var(--gray-600)', fontWeight: 500 }}>
-                    Te avisamos el día del lanzamiento.
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <>
-                <form
-                  onSubmit={handleWaitlist}
-                  style={{
-                    display: 'flex',
-                    flexDirection: isMobile ? 'column' : 'row',
-                    gap: 8,
-                    marginTop: 10,
-                  }}
-                >
-                  <input
-                    value={email}
-                    onChange={(e) => {
-                      setEmail(e.target.value);
-                      setFormError(null);
-                    }}
-                    type="email"
-                    required
-                    placeholder="tu@correo.com"
-                    disabled={loading}
-                    aria-label="Tu correo electrónico"
-                    style={{
-                      flex: 1,
-                      border: `2px solid ${formError ? 'var(--red)' : 'var(--black)'}`,
-                      borderRadius: 12,
-                      padding: '12px 14px',
-                      fontSize: 15,
-                      fontFamily: 'var(--font-sans)',
-                      fontWeight: 500,
-                      color: 'var(--ink)',
-                      background: 'var(--white)',
-                      outline: 'none',
-                      opacity: loading ? 0.6 : 1,
-                    }}
-                  />
-                  <HardBtn size="sm" variant="dark" disabled={loading}>
-                    {loading ? 'Enviando…' : c.cta1}
-                  </HardBtn>
-                </form>
-                {formError && (
-                  <div
-                    role="alert"
-                    style={{ marginTop: 6, fontSize: 13, color: 'var(--red)', fontWeight: 600 }}
-                  >
-                    {formError}
-                  </div>
-                )}
-              </>
-            )}
+            <Eyebrow>Crea tu cuenta hoy</Eyebrow>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                gap: 10,
+                marginTop: 12,
+              }}
+            >
+              <HardBtn size="sm" variant="dark" href={signupUrl('xangarrito')}>
+                {c.cta1}
+              </HardBtn>
+              <HardBtn size="sm" variant="white" href="#precios">
+                Ver precios
+              </HardBtn>
+            </div>
             <div
               style={{
                 display: 'flex',
@@ -544,7 +435,7 @@ export function Hero({ tone, yellowIntensity }) {
                   textTransform: 'uppercase',
                 }}
               >
-                Verano 2026
+                Web hoy · Apps próximamente
               </span>
             </div>
           </HardCard>

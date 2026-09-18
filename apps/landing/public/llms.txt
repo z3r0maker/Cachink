@@ -1,10 +1,10 @@
-# Cachink
+# Xangarro
 
 > Especificación completa del producto: /llms-full.txt
 
-> Cachink es la app mexicana para llevar la caja de tu negocio.
+> Xangarro es la plataforma mexicana para llevar la caja de tu negocio.
 
-Cachink es una aplicación móvil de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos, ver el estado del negocio en tiempo real y compartir estados financieros con un contador.
+Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: panaderías, cafeterías, tiendas de barrio, talleres y cualquier negocio que maneje caja diaria. Permite registrar ventas y egresos en segundos — desde el navegador o desde la app del equipo —, ver el estado del negocio en tiempo real y compartir estados financieros con un contador.
 
 ## Para quién es
 
@@ -22,17 +22,20 @@ Cachink es una aplicación móvil de finanzas para pequeños emprendedores mexic
 
 - Registro de ingresos y egresos con categorías y métodos de pago
 - Vista de caja diaria y mensual
-- Soporte offline — funciona sin internet
+- Captura sin internet — tu negocio sigue aunque se vaya el internet
 - Estados financieros exportables para contadores
-- Disponible en iOS y Android
+- Portal web hoy; apps para iOS y Android próximamente
 
 ## Planes
 
-- **Plan Gratis** — Para arrancar: registro básico de ventas y egresos, vista de caja diaria
-- **Plan Pro** — Para crecer: reportes mensuales, exportación a contador, soporte prioritario
+- **Xangarrito** — Gratis para siempre: 300 movimientos al mes, 50 productos, 1 operador
+- **Xangarro** — $199 MXN/mes + IVA: 10,000 movimientos, 1,000 productos, 2 operadores, estados financieros NIF
+- **Xangarrote** — $399 MXN/mes + IVA: 30,000 movimientos, 5,000 productos, 5 operadores, reportes avanzados
+- Plan anual con 2 meses gratis; 14 días de prueba en los planes de pago, sin tarjeta
 
 ## Información de contacto
 
-- Sitio web: https://cachink.mx
+- Sitio web: https://xangarro.mx
+- Crear cuenta: https://app.xangarro.mx/signup
 - País: México
 - Idioma: Español (México)

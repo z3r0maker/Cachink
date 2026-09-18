@@ -38,7 +38,7 @@ function HomePage() {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <Nav onWaitlist={() => {}} />
+        <Nav />
         <Hero tone={T.tone} yellowIntensity={T.yellowIntensity} />
         <ParaQuienEs tone={T.tone} />
         <ComoFunciona tone={T.tone} darkSection={T.darkComoSection} />
