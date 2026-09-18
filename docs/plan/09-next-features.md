@@ -156,7 +156,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
+- [~] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
 - **What:** portal-only `support_items (kind ∈ bug | factura | migracion | escalacion | limite |
 explorador | sistema, status ∈ nuevo | en_curso | resuelto, urgent, owner_staff_id, business_id,
 body, attachments)`.
@@ -164,6 +164,12 @@ body, attachments)`.
   the app's "Reportar problema", "Solicitar factura" (P-10), "Hazlo por mí" (N-18), N-03 alerts, the
   GLM explorer (N-49).
 - **Acceptance:** each source creates an item; assignment and status changes are audited.
+- Progress: 2026-09-17 · 7fd151d…b554e02 (branch `track-n/n08-admin-inbox`, on top of N-05, unmerged) ·
+  `SupportItem` (factura needs a CFDI UUID to resolve), `support_items` (no DELETE grant),
+  create/assign/status/list use cases with tests, inbox list + detail with «Pagos sin CFDI», audited
+  mutations, `POST /api/internal/support-items` (shared secret). 96 admin tests. **Still to do:** wire
+  each source (bug-report, Ayuda, P-10, N-18, N-03, Stripe → factura), move tables to `data-pg`, real
+  DB test for the Postgres adapter.
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
@@ -175,11 +181,15 @@ body, attachments)`.
 
 ### N-10 Staff alerts `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-08, B-14, B-18
+- [~] Status · **Blocked by:** N-08, B-14, B-18
 - **What:** daily 08:00 (America/Mexico_City) digest to `soporte@xangarro.mx` — new inbox items, over
   limit tenants, dormancy candidates, B-18 rejection summary. Urgent items also POST to a Slack/Discord
   incoming webhook (URL in env).
 - **Acceptance:** digest renders with zero and with many items; urgent items arrive within 1 minute.
+- Progress: 2026-09-17 · ad53bdc, 16ed374 (branch `track-n/n08-admin-inbox`) · `buildDailyDigest`,
+  `GET /api/cron/digest` (CRON_SECRET, Vercel Cron `0 14 * * *` = 08:00 CDMX), Slack/Discord urgent
+  webhook. **Still to do:** real email adapter (B-14; stub logs only), over-limit (N-07), dormancy and
+  B-18 sections.
 
 ### Settings and onboarding
 
