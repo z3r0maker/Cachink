@@ -45,6 +45,16 @@ export const BusinessSchema = z
     id: ulidField<BusinessId>(),
     nombre: z.string().min(1).max(120),
     regimenFiscal: z.string().min(1).max(80),
+    /**
+     * Fiscal data for CFDI (README Q15, P-08). Nullable: collected when the
+     * owner has it, never required to sell. Validated by `@xangarro/domain`'s
+     * fiscal rules where it is entered; stored as typed (normalised).
+     */
+    rfc: z.string().max(13).nullable().default(null),
+    razonSocial: z.string().max(254).nullable().default(null),
+    codigoPostal: z.string().max(5).nullable().default(null),
+    /** c_UsoCFDI; null means the CFDI router's default, G03. */
+    usoCfdi: z.string().max(4).nullable().default(null),
     /** ISR rate in basis points (3000 = 30%). */
     isrTasa: z.number().int().min(0).max(10_000),
     logoUrl: z.string().url().nullable(),
@@ -70,6 +80,7 @@ export const NewBusinessSchema = BusinessSchema.omit({
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
-});
+  // A business starts without fiscal data; it is filled in later (P-08).
+}).partial({ rfc: true, razonSocial: true, codigoPostal: true, usoCfdi: true });
 
 export type NewBusiness = z.infer<typeof NewBusinessSchema>;

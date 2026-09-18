@@ -43,6 +43,13 @@
       "when": 1789744302943,
       "tag": "0008_metering_cfdi",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789747857850,
+      "tag": "0012_business_fiscal",
+      "breakpoints": true
     }
   ]
 }

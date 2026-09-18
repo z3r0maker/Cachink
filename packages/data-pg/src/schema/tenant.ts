@@ -19,6 +19,12 @@ export const businesses = pgTable('businesses', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
   regimenFiscal: text('regimen_fiscal').notNull(),
+  /** Fiscal data for CFDI (P-08, README Q15). Nullable until the owner fills it in. */
+  rfc: text('rfc'),
+  razonSocial: text('razon_social'),
+  codigoPostal: text('codigo_postal'),
+  /** c_UsoCFDI; null → the CFDI router's default, G03. */
+  usoCfdi: text('uso_cfdi'),
   isrTasa: integer('isr_tasa').notNull(),
   logoUrl: text('logo_url'),
   tipoNegocio: text('tipo_negocio', {

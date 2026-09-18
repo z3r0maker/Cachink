@@ -177,6 +177,14 @@ export default tseslint.config(
     },
   },
 
+  // Migration files are named by their journal tag (`0001_add_business_fiscal`),
+  // Drizzle's underscore convention, which the runner and the barrel key on.
+  // One rule here instead of an eslint-disable header in every migration.
+  {
+    files: ['**/drizzle/migrations/*.ts'],
+    rules: { 'unicorn/filename-case': 'off' },
+  },
+
   // Allow config files to use require / any.
   //
   // This block was dead until the lint-coverage fix: `**/*.config.*` sat in the

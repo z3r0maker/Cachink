@@ -11,14 +11,17 @@ import { isOwner, resolveScreenState } from '@/session/gating';
 import { FuncionesCard } from './funciones';
 import { CapabilitiesCard, SectionCard } from './parts';
 import { EditNegocioDialog } from './edit-dialog';
+import { FiscalDialog, type FiscalActual } from './fiscal-dialog';
 import { pageSubtitle, pageTitle, sectionGrid } from './negocio.css';
 
 function Heading({
   owner,
   current,
+  fiscal,
 }: {
   readonly owner: boolean;
   readonly current: { nombre: string; regimenFiscal: string };
+  readonly fiscal: FiscalActual;
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
@@ -31,6 +34,7 @@ function Heading({
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Re-run the onboarding wizard (N-15): answers change, features follow. */}
           <Link href="/bienvenida/revisar">Volver a configurar mi negocio</Link>
+          <FiscalDialog actual={fiscal} />
           <EditNegocioDialog current={current} />
         </div>
       ) : null}
@@ -62,12 +66,30 @@ function buildSections(business: NegocioData | null | undefined) {
       title: 'Datos fiscales',
       tone: 'info' as const,
       fields: [
-        { label: 'RFC', value: null },
-        { label: 'Domicilio fiscal', value: null },
+        { label: 'RFC', value: business.rfc },
+        { label: 'Razón social', value: business.razonSocial },
+        { label: 'Código postal fiscal', value: business.codigoPostal },
+        // An empty uso is not missing: invoices use G03 until the owner picks.
+        {
+          label: 'Uso de CFDI',
+          value: business.usoCfdi ?? 'G03 · Gastos en general (predeterminado)',
+        },
       ],
     },
   ];
 }
+
+const currentOf = (b: NegocioData | null) => ({
+  nombre: b?.nombre ?? '',
+  regimenFiscal: b?.regimenFiscal ?? '',
+});
+
+const fiscalOf = (b: NegocioData | null): FiscalActual => ({
+  rfc: b?.rfc ?? null,
+  razonSocial: b?.razonSocial ?? null,
+  codigoPostal: b?.codigoPostal ?? null,
+  usoCfdi: b?.usoCfdi ?? null,
+});
 
 export function NegocioScreen({ business }: { readonly business: NegocioData | null }) {
   const session = useSession();
@@ -79,16 +101,13 @@ export function NegocioScreen({ business }: { readonly business: NegocioData | n
 
   return (
     <>
-      <Heading
-        owner={owner}
-        current={{ nombre: business?.nombre ?? '', regimenFiscal: business?.regimenFiscal ?? '' }}
-      />
+      <Heading owner={owner} current={currentOf(business)} fiscal={fiscalOf(business)} />
 
       {incomplete ? (
         <Banner
           tone="warning"
-          title="Falta tu domicilio fiscal."
-          body="Sin él no podemos poner tus datos completos en los comprobantes."
+          title="Faltan tus datos fiscales."
+          body="Con tu RFC, razón social y código postal podemos facturar a tu nombre."
         />
       ) : null}
 

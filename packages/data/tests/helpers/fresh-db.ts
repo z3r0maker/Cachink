@@ -17,7 +17,7 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../../src/schema/index.js';
 import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
-import { migration0000Sql } from '../../drizzle/migrations/0000_initial.js';
+import { journal, migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from '../../src/migrator/split-statements.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
@@ -32,10 +32,13 @@ export function makeFreshDb(): CachinkDatabase {
   // so we must explicitly turn it off here.
   sqlite.pragma('foreign_keys = OFF');
 
-  // Apply the same migration SQL the async runner uses, but via
-  // better-sqlite3's synchronous exec() to keep test factories sync.
-  for (const stmt of splitStatements(migration0000Sql)) {
-    sqlite.exec(stmt);
+  // Apply every committed migration, in journal order — the same SQL the
+  // async runner uses, via better-sqlite3's synchronous exec() to keep test
+  // factories sync. (This used to apply 0000 alone; it went unnoticed until
+  // the first new migration, P-08's fiscal columns.)
+  const tags = journal.entries.map((e) => e.tag);
+  for (const tag of tags) {
+    for (const stmt of splitStatements(migrationSqlByTag[tag] ?? '')) sqlite.exec(stmt);
   }
 
   // Bookkeeping: match what runMigrations() would create.
@@ -45,10 +48,10 @@ export function makeFreshDb(): CachinkDatabase {
       applied_at TEXT NOT NULL
     )`,
   );
-  sqlite.exec(
-    `INSERT INTO __cachink_migrations (tag, applied_at)
-     VALUES ('0000_initial', datetime('now'))`,
+  const record = sqlite.prepare(
+    `INSERT INTO __cachink_migrations (tag, applied_at) VALUES (?, datetime('now'))`,
   );
+  for (const tag of tags) record.run(tag);
   sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
 
   const db = drizzle(sqlite, { schema });

@@ -15,6 +15,11 @@ export const businesses = sqliteTable('businesses', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
   regimenFiscal: text('regimen_fiscal').notNull(),
+  /** Fiscal data for CFDI (P-08, migration 0001). Filled in from the portal. */
+  rfc: text('rfc'),
+  razonSocial: text('razon_social'),
+  codigoPostal: text('codigo_postal'),
+  usoCfdi: text('uso_cfdi'),
   isrTasa: integer('isr_tasa').notNull(),
   logoUrl: text('logo_url'),
   tipoNegocio: text('tipo_negocio', {

@@ -22,37 +22,7 @@ export type MotivoCancelacion = '01' | '02' | '03' | '04';
 
 // RFC rules, persona types and c_RegimenFiscal live in @xangarro/domain (P-08),
 // shared with the portal's Negocio form; re-exported for this module's callers.
-export { REGIMEN_FISCAL, type TipoPersona } from '@xangarro/domain';
-
-/**
- * c_UsoCFDI values valid on an income (tipo I) CFDI. CP01 (pagos) and CN01
- * (nómina) are excluded on purpose. D01–D10 are deducciones personales:
- * persona física only.
- */
-export const USO_CFDI_INGRESO = [
-  'G01',
-  'G02',
-  'G03',
-  'I01',
-  'I02',
-  'I03',
-  'I04',
-  'I05',
-  'I06',
-  'I07',
-  'I08',
-  'D01',
-  'D02',
-  'D03',
-  'D04',
-  'D05',
-  'D06',
-  'D07',
-  'D08',
-  'D09',
-  'D10',
-  'S01',
-] as const;
+export { REGIMEN_FISCAL, USO_CFDI_INGRESO, type TipoPersona } from '@xangarro/domain';
 
 /** The generic receptor of a global CFDI ("público en general"). */
 export const PUBLICO_EN_GENERAL = {

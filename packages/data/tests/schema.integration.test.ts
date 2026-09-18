@@ -16,27 +16,15 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import Database from 'better-sqlite3';
 import type { BetterSQLite3Database } from 'drizzle-orm/better-sqlite3';
-import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { eq } from 'drizzle-orm';
 import * as schema from '../src/schema/index.js';
-import { migration0000Sql } from '../drizzle/migrations/0000_initial.js';
-import { splitStatements } from '../src/migrator/split-statements.js';
+import { makeFreshDb } from './helpers/fresh-db.js';
 
 type DB = BetterSQLite3Database<typeof schema>;
 
-function freshDb(): DB {
-  const sqlite = new Database(':memory:');
-  // Disable FK enforcement — this test validates schema shape and
-  // round-trip, not referential integrity (see fk-enforcement.test.ts).
-  sqlite.pragma('foreign_keys = OFF');
-  for (const stmt of splitStatements(migration0000Sql)) {
-    sqlite.exec(stmt);
-  }
-  const db = drizzle(sqlite, { schema });
-  return db;
-}
+/** Every committed migration applied, FKs off: this checks shape and round-trip. */
+const freshDb = (): DB => makeFreshDb() as unknown as DB;
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7TEP';

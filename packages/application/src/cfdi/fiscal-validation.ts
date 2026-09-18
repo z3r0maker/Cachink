@@ -11,6 +11,7 @@ import {
   normalizeRfc,
   REGIMEN_FISCAL,
   tipoPersona,
+  USO_CFDI_DEFAULT,
   type TipoPersona,
 } from '@xangarro/domain';
 
@@ -20,7 +21,8 @@ import type { CfdiReceptor, TenantFiscalData } from './types.js';
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NOMBRE = 254;
 /** Uso CFDI when the tenant hasn't chosen one: G03, gastos en general. */
-export const USO_CFDI_DEFAULT = 'G03';
+// The default uso is the domain's, shared with the portal's Negocio form (P-08).
+export { USO_CFDI_DEFAULT };
 
 export type FiscalIssue =
   | 'rfc_missing'

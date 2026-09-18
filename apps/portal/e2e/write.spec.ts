@@ -94,7 +94,7 @@ test('editing the business writes it and tells the devices', async ({ page }, te
   const renamed = `Taquería Don Pedro ${Date.now()}`;
 
   await page.goto('/negocio');
-  await page.getByRole('button', { name: 'Editar datos' }).click();
+  await page.getByRole('button', { name: 'Editar datos', exact: true }).click();
   await page.getByTestId('negocio-nombre').fill(renamed);
   await page.getByRole('button', { name: 'Guardar' }).click();
 

@@ -791,9 +791,18 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     not an absence. The incomplete banner is derived from the same data, so it cannot claim a gap
     the fields do not show.
   - "Editar datos" is owner-only. Verified in the rendered HTML.
-  - **Still to do:** edit mode with the sticky yellow save bar, RFC checksum validation, the
-    régimen option cards with the ISR confirm, tipos de pago switches, atributos de producto, and
-    the archive row.
+  - 2026-09-18 · **Datos fiscales** (README Q15): RFC, razón social, código postal and uso de CFDI —
+    nullable columns on the DOWN `businesses` table (SQLite migration 0001, Postgres 0012, old→new
+    tests on both; drift green), edited owner-only in «Editar datos fiscales» and pulled by every
+    phone. Validation is `@xangarro/domain/fiscal` — moved out of the CFDI module so both use one
+    copy — and now includes the **RFC check digit** (SAT's test RFCs pass; a one-character typo
+    fails). Uso defaults to G03; a D-uso on a persona moral warns, it doesn't block. e2e: a typo is
+    refused, a valid RFC saves and reaches the phone, the contador cannot edit.
+  - **Gap to close next:** `regimenFiscal` is free text («RESICO»), while the CFDI router expects
+    SAT's c_RegimenFiscal code (626). The régimen option cards should store the code — until then a
+    tenant with a valid RFC still gets the global CFDI.
+  - **Still to do:** edit mode with the sticky yellow save bar, the régimen option cards (SAT codes)
+    with the ISR confirm, tipos de pago switches, atributos de producto, and the archive row.
 - **Steps:** Four section cards (`minmax(420px, 1fr)`), each with a 38×38 icon tile: **Datos
   generales** (`--yellow`), **Datos fiscales** (`--blue-soft`), **Contacto y comprobantes**
   (`--peach-soft`), **Preferencias** (`--purple-soft`). Read mode shows values at 16px/700 and
