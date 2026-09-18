@@ -12,3 +12,4 @@ export * from './errors/operador-errors.js';
 export * from './errors/entitlement-errors.js';
 export * from './errors/feature-flag-errors.js';
 export * from './errors/cobranza-errors.js';
+export * from './onboarding/index.js';
