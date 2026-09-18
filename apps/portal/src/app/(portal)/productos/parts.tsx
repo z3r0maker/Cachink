@@ -15,6 +15,7 @@ import type { ProductosData } from '@/server/screens';
 
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
+import { ImportarSheet } from './importar/sheet';
 import { NuevoProductoSheet } from './nuevo/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
@@ -33,6 +34,7 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
           <ExportButton dataset="productos" />
+          <ImportarSheet />
           <NuevoProductoSheet />
         </div>
       ) : null}
