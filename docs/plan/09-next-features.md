@@ -468,7 +468,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 
-- [ ] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
+- [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
 - **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
   an aviso de privacidad (integral on the landing and portal footer, simplified at signup and in the
   app's sign-in) covering purposes, transfers (Supabase, Vercel, Stripe, PAC, Sentry), the ADR-064
@@ -477,6 +477,22 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   capture versioned per aviso version. Text reviewed by counsel.
 - **Acceptance:** aviso reachable from every surface; an ARCO request creates an inbox item with its
   due dates; consent version stored per user.
+- Progress: 2026-09-17 · 8fae254 (branch `track-n/n34-aviso-draft`, unmerged) · Spanish drafts for
+  counsel in `docs/legal/aviso/`: aviso integral, three simplified avisos (signup, device linking,
+  operator NIP), encargado clauses (for the merchant's own customers' data), ARCO procedure plus an
+  internal annex, and a README with 16 questions for counsel and verified citations (LFPDPPP DOF
+  2025-03-20 / reform 2025-11-14; Reglamento 2011; CFF art. 30).
+- **Product requirements the law implies (added to this task's scope; confirm with counsel):**
+  self-service "eliminar mi cuenta / negocio"; a public ARCO form for people without an account;
+  separate blocked-data storage with scheduled deletion; notify the person when a cancellation is
+  complete (art. 24); Configuración → Privacidad to withdraw consent; ARCO deadlines in business days
+  with a holiday calendar; delete overdue-receivable data after 72 months (art. 10); pass requests from
+  a merchant's customers on to the merchant (Xangarro acts as encargado); a data-processing agreement
+  with each provider; a separate, unticked consent for datos patrimoniales (art. 7) pending counsel.
+- **Open with counsel:** whether ADR-064's 6-year archive is _bloqueo_ (the law allows only settling
+  liabilities) or a stated purpose (restore + support for the owner's CFF duty), which is how it's
+  drafted; responsable vs encargado for a persona física owner's books; whether the 2013 Lineamientos
+  still apply.
 
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
