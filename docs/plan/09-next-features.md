@@ -77,7 +77,7 @@
 - **Acceptance:** test-mode Checkout for all four prices; a no-card trial that converts by card and one
   that converts by SPEI (test-mode bank transfer); trial end without payment falls to xangarrito;
   Z-10 marked superseded.
-- Progress: 2026-09-18 · 4a7df64…2528ca2 (branch `track-n/b10-stripe`, also delivers **B-10**) · stripe
+- Progress: 2026-09-18 · 4a7df64…2528ca2 (branch `track-n/b10-stripe`, merged to main 302c95d 2026-09-18, also delivers **B-10**) · stripe
   22.6.2; four `plan_` prices with a flat **exclusive 16 % IVA tax rate** (not Stripe Tax: exact
   centavo totals, same on Checkout and SPEI invoices, no address prompt, no per-transaction fee);
   card-less 14-day trial on both tiers; SPEI annual via `send_invoice`; no OXXO; tables
@@ -101,7 +101,7 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   cron share one use case.
 - **Acceptance:** 1 happy + 3 unhappy use-case tests; nightly recompute corrects an injected drift;
   pull payload validates against the contract.
-- Progress: 2026-09-17 · e7741c6 (branch `track-n/n02-usage-engine`, unmerged) · pure core in
+- Progress: 2026-09-17 · e7741c6 (branch `track-n/n02-usage-engine`, merged to main 2f04868 2026-09-18, unmerged) · pure core in
   `@xangarro/domain/usage`: `countsTowardUsage` (OQ-5), `usagePeriod` (America/Mexico_City),
   `computeUsage`; limits accepted as `UsageLimits` until C-12. Rules settled while building: **every
   manual movement counts** (incl. muestra / uso en producción / otro), sale-generated and
@@ -123,7 +123,7 @@ computed_at)` table (ADR-060 portal-only entity checklist).
 metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 - **Acceptance:** crossing each threshold fires exactly once; a paid tenant at 150 % still syncs
   every row (contract test).
-- Progress: 2026-09-17 · a80a4ef (branch `track-n/n02-usage-engine`) · `crossedThresholds` (80 → owner,
+- Progress: 2026-09-17 · a80a4ef (branch `track-n/n02-usage-engine`, merged to main 2f04868 2026-09-18) · `crossedThresholds` (80 → owner,
   100 → owner + provider, 150 → provider; idempotency key `business:period:metric:threshold`),
   `consecutiveMonthsOver`, `canCreateProduct` (free tier from `FALLBACK_PLAN`, typed result with
   `excess` for the import dry-run), neutral phone codes `USAGE_NEAR_LIMIT` / `USAGE_AT_LIMIT`. 53 tests.
@@ -154,7 +154,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   check fails if `SUPABASE_SERVICE_ROLE_KEY` is referenced under `apps/portal`.
 - **Acceptance:** non-allowlisted user → 403; allowlisted without 2FA → forced enrolment; audit row
   per mutation; CI guard green.
-- Progress: 2026-09-17 · d6e83d7…6119ef0 (branch `worktree-agent-a9df007511aecbb56`, unmerged) ·
+- Progress: 2026-09-17 · d6e83d7…6119ef0 (branch `worktree-agent-a9df007511aecbb56`, merged to main 907a08f, in-house auth `track-n/n05-inhouse-auth` 4d524f4 2026-09-18, unmerged) ·
   `apps/admin` (Next 16, :3200): Supabase Auth + `staff_members` allowlist + mandatory TOTP/AAL2 via
   `proxy.ts` + `resolveGate` (re-checked in layout and every action); `auditedMutation` →
   `recordStaffAction` in one tx; nonce CSP; noindex ×3; service-role guard in admin `lint`. 31 tests.
@@ -170,7 +170,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   expiry: **extend trial**, **comp plan** (e.g. beta testers, N-30), **re-issue entitlement**
   (forces a fresh signed token on the next pull).
 - **Acceptance:** an override changes the next pulled entitlement; expiry reverts it; audit row.
-- Progress: 2026-09-17 · cb03934…7aec8da (branch `track-n/n06-admin-tenants`, on top of N-08, unmerged)
+- Progress: 2026-09-17 · cb03934…7aec8da (branch `track-n/n06-admin-tenants`, merged to main 907a08f 2026-09-18, on top of N-08, unmerged)
   · tenant list (keyset pagination, search by name/owner email/id, "sin sincronizar > 7 días" from
   `devices.last_push_at`/`last_pull_at`) and detail (members, devices, inbox link); append-only,
   audited, expiring `PlanOverride` (extend_trial / comp_plan / reissue_entitlement) +
@@ -187,7 +187,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 - **What:** per-tenant usage vs limits with an "over limit" filter; a **capacity card** — DB size,
   largest tables by rows, sync p95 (B-18) — each against its N-51 / N-52 trigger, reviewed monthly.
 - **Acceptance:** the capacity card goes amber at 80 % of a trigger and red at the trigger.
-- Progress: 2026-09-17 · 46f8a75…(renumber) (branch `track-n/n07-usage-capacity`: N-06 + N-02 merged,
+- Progress: 2026-09-17 · 46f8a75…(renumber) (branch `track-n/n07-usage-capacity`, merged to main 907a08f 2026-09-18: N-06 + N-02 merged,
   unmerged) · `admin_tenant_usage()` read-only SQL (`0006_admin_usage_read.sql`, counts OQ-5 rules;
   0 mismatches vs `computeUsage` over 15 tenant-months on a throwaway PG17, 200 tenants / 600k rows:
   ~120 ms all tenants, ~43 ms with `(business_id, created_at)` indexes); `/uso` (80/100/150 bands,
@@ -210,7 +210,7 @@ body, attachments)`.
   the app's "Reportar problema", "Solicitar factura" (P-10), "Hazlo por mí" (N-18), N-03 alerts, the
   GLM explorer (N-49).
 - **Acceptance:** each source creates an item; assignment and status changes are audited.
-- Progress: 2026-09-17 · 7fd151d…b554e02 (branch `track-n/n08-admin-inbox`, on top of N-05, unmerged) ·
+- Progress: 2026-09-17 · 7fd151d…b554e02 (branch `track-n/n08-admin-inbox`, merged to main 907a08f 2026-09-18, on top of N-05, unmerged) ·
   `SupportItem` (factura needs a CFDI UUID to resolve), `support_items` (no DELETE grant),
   create/assign/status/list use cases with tests, inbox list + detail with «Pagos sin CFDI», audited
   mutations, `POST /api/internal/support-items` (shared secret). 96 admin tests. **Still to do:** wire
@@ -228,7 +228,7 @@ body, attachments)`.
   admin-editable table; a key with no row uses the code default; devices still receive flags only
   through the signed entitlement (no contract change); the ADR-059 LLM gate becomes the `asesorLlm`
   kill switch.
-- Progress: 2026-09-17 · 45acd01…7784fe7 (branch `track-n/n09-platform-flags`, on top of N-06, unmerged)
+- Progress: 2026-09-17 · 45acd01…7784fe7 (branch `track-n/n09-platform-flags`, merged to main 907a08f 2026-09-18, on top of N-06, unmerged)
   · `PlatformFlag` + `isPlatformAvailable` / `resolvePlatformFlags` (domain, TDD); `0005_platform_flags.sql`
   — append-only `platform_flag_events`, latest-state view, narrow portal view (no reason/author,
   allowlist cut to the caller's business); `/flags` with allowlist, "afecta a N negocios"
@@ -245,11 +245,11 @@ body, attachments)`.
   limit tenants, dormancy candidates, B-18 rejection summary. Urgent items also POST to a Slack/Discord
   incoming webhook (URL in env).
 - **Acceptance:** digest renders with zero and with many items; urgent items arrive within 1 minute.
-- Progress: 2026-09-17 · ad53bdc, 16ed374 (branch `track-n/n08-admin-inbox`) · `buildDailyDigest`,
+- Progress: 2026-09-17 · ad53bdc, 16ed374 (branch `track-n/n08-admin-inbox`, merged to main 907a08f 2026-09-18) · `buildDailyDigest`,
   `GET /api/cron/digest` (CRON_SECRET, Vercel Cron `0 14 * * *` = 08:00 CDMX), Slack/Discord urgent
   webhook. **Still to do:** real email adapter (B-14; stub logs only), over-limit (N-07), dormancy and
   B-18 sections.
-- Progress: 2026-09-18 · 94aee74 (branch `track-n/n10-b18-integration`: N-07 + N-09 + main merged) ·
+- Progress: 2026-09-18 · 94aee74 (branch `track-n/n10-b18-integration`, merged to main 907a08f 2026-09-18: N-07 + N-09 + main merged) ·
   digest section "Rechazos de sincronización (24 h)" reuses B-18's `rejectionDigest` from data-pg
   unchanged; admin migration 0007 grants the admin role four columns of `sync_rejections`
   (payload/message stay unreadable). Degrades to "No disponible". **Still to do:** B-14 mailer.
@@ -280,12 +280,12 @@ body, attachments)`.
 suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. Answers stored in
   `businesses.onboarding` JSONB alongside the checklist.
 - **Acceptance:** domain tests cover every answer combination that changes the suggested plan.
-- Progress: 2026-09-17 · 535ceaa (branch `worktree-agent-ae32577e7f3c1c8b5`, unmerged) · domain core:
+- Progress: 2026-09-17 · 535ceaa (branch `worktree-agent-ae32577e7f3c1c8b5`, merged to main 0546038 2026-09-18, unmerged) · domain core:
   `WizardAnswersSchema`, `answersToConfiguration` / `diffConfiguration` / `applyConfiguration` in
   `@xangarro/domain/onboarding`; plan = cheapest `PLAN_IDS` entry whose `PLAN_LIMITS` satisfy
   stock / ventasCredito / operators; paid-only answers returned as pending; 102 tests incl. a 72-case
   plan table. **Still to do:** portal wizard UI, persistence in `businesses.onboarding`.
-- Progress: 2026-09-18 · b063d4b (branch `track-n/n13-signup-wizard`, unmerged; also delivers P-03/P-04)
+- Progress: 2026-09-18 · b063d4b (branch `track-n/n13-signup-wizard`, merged to main 360678a 2026-09-18, unmerged; also delivers P-03/P-04)
   · 8-step wizard at `/bienvenida`, saved per step to a **portal-only `business_onboarding` table**
   (migration `0003_business_onboarding`; deviation from `businesses.onboarding` — keeps it off the
   DOWN wire), contradictory answers prevented in the UI; Playwright happy path green. Answers with no
@@ -299,7 +299,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 - **How:** paid-only answers show an "Incluido en Xangarro" badge; if the tenant stays free they are
   stored as **pending** and applied automatically by the subscription webhook on upgrade.
 - **Acceptance:** free path never touches Stripe; upgrade applies pending answers exactly once.
-- Progress: 2026-09-18 · 8d430e6, ad8c3c0 (branch `track-n/n13-signup-wizard`) · `/signup` (ADR-080: in-house
+- Progress: 2026-09-18 · 8d430e6, ad8c3c0 (branch `track-n/n13-signup-wizard`, merged to main 360678a 2026-09-18) · `/signup` (ADR-080: in-house
   bcrypt cost 10 + `startSession`, throttled per email + IP) → wizard → "Tu plan ideal" with reasons,
   prices + IVA, pending paid answers stored. **Still to do:** B-10 replaces the stub
   `startTrialCheckout()` (`server/onboarding/checkout.ts`); the webhook applies pending answers.
@@ -310,7 +310,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 - **What:** P-04's checklist keeps its items (operator, products/import, code, device activated,
   first sale synced) and adds "Sube tu logo". "Conecta Mercado Pago / Clip" appears only when
   `cobrosIntegrados` is platform-available (N-44).
-- Progress: 2026-09-18 · b063d4b · `/como-empiezo` checklist detected from data; MP/Clip item waits on N-44.
+- Progress: 2026-09-18 · b063d4b (merged to main 360678a 2026-09-18) · `/como-empiezo` checklist detected from data; MP/Clip item waits on N-44.
 
 ### N-15 Re-run the wizard `[LAUNCH]`
 
@@ -319,7 +319,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   applying, a summary "esto cambiará" (e.g. "Se desactivará Inventario — tus productos no se
   borran").
 - **Acceptance:** applying with no changes is a no-op; every change is listed.
-- Progress: 2026-09-18 · b063d4b · `/bienvenida/revisar` with the "esto cambiará" summary; no change → no
+- Progress: 2026-09-18 · b063d4b (merged to main 360678a 2026-09-18) · `/bienvenida/revisar` with the "esto cambiará" summary; no change → no
   write. **Still to do:** a "Volver a configurar mi negocio" link on the Negocio screen (portal session);
   until then it lives on the checklist page.
 
@@ -467,7 +467,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   B-17 rate limits; dependency and secret scanning in CI; LFPDPPP aviso de privacidad and ARCO flow.
 - **Output:** `docs/audits/security-YYYY-MM-DD.md`, findings ranked; each critical/high becomes a task
   and blocks launch until fixed.
-- Progress: 2026-09-17 · 317de29 (branch `worktree-agent-a35a775587ea084ce`, unmerged) · first pass
+- Progress: 2026-09-17 · 317de29 (branch `worktree-agent-a35a775587ea084ce`, merged to main 8e737b7 2026-09-18, unmerged) · first pass
   `docs/audits/security-2026-09-17.md` (static, ASVS L1; main + N-05/N-33/app branches; `pnpm audit
 --prod`; git-history secret scan clean): 0 critical, 6 high, 8 medium, 11 low. Decided from it:
   QR long token + `/activate` limiter (C-14, B-17), billing role instead of service role (B-10,
@@ -482,7 +482,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   top queries and plans, `business_id`-leading indexes, RLS predicate cost, enum CHECK constraints
   (ADR-062 follow-up), migration safety, **a PITR restore drill** with a timed runbook.
 - **Output:** `docs/audits/db-YYYY-MM-DD.md`.
-- Progress: 2026-09-17 · d7ae514 (branch `worktree-agent-a820b032ab0f869b4`, unmerged) · first pass
+- Progress: 2026-09-17 · d7ae514 (branch `worktree-agent-a820b032ab0f869b4`, merged to main 106ebc1 2026-09-18, unmerged) · first pass
   `docs/audits/db-2026-09-17.md` (static + EXPLAIN on a disposable PG17, 200 tenants × 3k tx): 1
   critical (pull cursor loses rows — reproduced), 7 high, 12 medium, 3 low. **Still to do:** pre-beta
   re-run on hosted Supabase with `pg_stat_statements`, and the timed PITR restore drill.
@@ -534,7 +534,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   employees (3.1.3(c)); operators sign in with a code issued by their employer; no digital content is
   sold in the app." Demo account `DEMOK7M3` kept live (2.1). Play: declare no in-app purchases.
 - **Acceptance:** the CI check is green; a reviewer checklist is attached to X-05.
-- Progress: 2026-09-17 · 682a48a (branch `track-n/n32-store-compliance`, unmerged) · `pnpm lint:store`
+- Progress: 2026-09-17 · 682a48a (branch `track-n/n32-store-compliance`, merged to main 331f784 2026-09-18, unmerged) · `pnpm lint:store`
   (TypeScript-AST string extraction over the app bundle + `es-mx.ts`, 52 tests, one allowlist entry:
   "Suscripción" as a sale category, 3.1.3(e)). **main: 0 violations. App branch
   `rename/xangarro-stored-ids`: 20** — mostly `es-mx.ts`: `planBanner.fellBack` / `planLimit.*`
@@ -556,7 +556,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   capture versioned per aviso version. Text reviewed by counsel.
 - **Acceptance:** aviso reachable from every surface; an ARCO request creates an inbox item with its
   due dates; consent version stored per user.
-- Progress: 2026-09-17 · 8fae254 (branch `track-n/n34-aviso-draft`, unmerged) · Spanish drafts for
+- Progress: 2026-09-17 · 8fae254 (branch `track-n/n34-aviso-draft`, merged to main 0c91ff2 2026-09-18, unmerged) · Spanish drafts for
   counsel in `docs/legal/aviso/`: aviso integral, three simplified avisos (signup, device linking,
   operator NIP), encargado clauses (for the merchant's own customers' data), ARCO procedure plus an
   internal annex, and a README with 16 questions for counsel and verified citations (LFPDPPP DOF
@@ -593,7 +593,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   else; marking it with a UUID clears it; with `test`, sandbox stamps for each path (individual,
   global, SPEI complemento, cancellation); duplicate webhook → one CFDI; the monthly global close
   lists every un-invoiced payment of the period.
-- Progress: 2026-09-17 · ee74233…b7f68ad (branch `worktree-agent-a190a4834b0fffb88`, unmerged) · core:
+- Progress: 2026-09-17 · ee74233…b7f68ad (branch `worktree-agent-a190a4834b0fffb88`, merged to main d533928 2026-09-18, unmerged) · core:
   `PacProvider` port, use cases (issue for payment, close monthly global, cancel for refund),
   Facturapi adapter over injected `fetch` (vendor rationale in `docs/spikes/pac-vendor.md`), 71 tests
   on mocked HTTP, exported as `@xangarro/application/cfdi` (not the root barrel). **Still to do:**
