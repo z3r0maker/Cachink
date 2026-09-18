@@ -1,4 +1,7 @@
+import { rangoDelMes } from '@xangarro/domain';
+
 import { requireSession } from '@/server/auth';
+import { hoy } from '@/server/clock';
 import { loadEstadosModel } from '@/server/estados';
 
 import { EstadosScreen } from './screen';
@@ -18,7 +21,8 @@ export const dynamic = 'force-dynamic';
 export default async function EstadosPage() {
   const session = await requireSession();
   try {
-    const model = await loadEstadosModel(session.business_id, '2026-05-01', '2026-05-31');
+    const mes = rangoDelMes(hoy());
+    const model = await loadEstadosModel(session.business_id, mes.desde, mes.hasta);
     return <EstadosScreen model={model} />;
   } catch {
     return <EstadosScreen model={null} />;
