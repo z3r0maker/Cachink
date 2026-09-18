@@ -1,0 +1,28 @@
+{
+  "name": "@xangarro/landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Xangarro! marketing site (xangarro.mx): Vite + React, prerendered to static HTML (ADR-084).",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs && node scripts/prerender.mjs",
+    "build:client": "node scripts/build.mjs",
+    "preview": "vite preview --port 4173",
+    "lint": "cd ../.. && eslint apps/landing --config eslint.config.js",
+    "lint:fix": "cd ../.. && eslint apps/landing --config eslint.config.js --fix",
+    "typecheck": "echo 'apps/landing is plain JS; its build (the test task) is its check (ADR-084)'",
+    "test": "pnpm run build",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "@xangarro/config": "workspace:*",
+    "sharp": "^0.34.5",
+    "vite": "^5.4.8"
+  }
+}

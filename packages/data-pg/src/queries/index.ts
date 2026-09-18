@@ -7,3 +7,4 @@ export * from './metering.js';
 export * from './cfdi.js';
 export * from './fiscal.js';
 export * from './avisos.js';
+export * from './historial.js';

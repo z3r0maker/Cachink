@@ -1,0 +1,213 @@
+/* =======================================================================
+   Cachink! Design System — Core tokens
+   Source of truth: packages/ui/src/theme.ts + CLAUDE.md §8
+   Neobrutalist yellow. Hard borders. Hard shadows. No gradients. No softness.
+   ======================================================================= */
+
+/* --- Fonts ---------------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* Plus Jakarta Sans ships weights 400–800 on Google Fonts. For the
+   brand's heaviest headings we request weight 900 which Google Fonts
+   silently substitutes with 800 + synthetic bolding. Flag: request a
+   self-hosted 900 cut from the design team if true weight 900 is
+   needed in print output. */
+
+:root {
+  /* ---- BRAND ------------------------------------------------------ */
+  --yellow:       #FFD60A;  /* Amarillo Vibrante — hero color           */
+  --yellow-deep:  #F5C800;
+  --yellow-soft:  #FFFBCC;
+
+  /* ---- INK -------------------------------------------------------- */
+  --black:        #0D0D0D;  /* Every border. All primary text.          */
+  --ink:          #1A1A18;  /* Body text (slightly softer than black)   */
+  --white:        #FFFFFF;
+
+  /* ---- SURFACES --------------------------------------------------- */
+  --offwhite:     #F7F7F5;  /* App background                           */
+  --gray-100:     #F2F2F0;
+  --gray-200:     #E4E4E0;
+  --gray-400:     #9E9E9A;  /* Secondary text                           */
+  --gray-600:     #5A5A56;  /* Label text                               */
+
+  /* ---- SEMANTIC --------------------------------------------------- */
+  --green:        #00C896;  --green-soft:   #D6FFF4;  /* ingresos       */
+  --red:          #FF4757;  --red-soft:     #FFE8EA;  /* egresos        */
+  --blue:         #3B6FFF;  --blue-soft:    #E5ECFF;  /* nómina/info    */
+  --warning:      #FFB800;  --warning-soft: #FFF8E1;
+
+  /* ---- SEMANTIC ALIASES (for designers) --------------------------- */
+  --fg-1:         var(--black);
+  --fg-2:         var(--ink);
+  --fg-muted:     var(--gray-600);
+  --fg-faint:     var(--gray-400);
+  --bg:           var(--offwhite);
+  --surface:      var(--white);
+  --surface-hero: var(--yellow);
+
+  /* ---- TYPOGRAPHY ------------------------------------------------- */
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont,
+               'Segoe UI', Roboto, sans-serif;
+
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+  --fw-bold:    700;
+  --fw-xbold:   800;
+  --fw-black:   900;
+
+  --tracking-tightest: -0.04em;
+  --tracking-tighter:  -0.03em;
+  --tracking-tight:    -0.02em;
+  --tracking-normal:   0;
+  --tracking-wide:      0.05em;
+  --tracking-wider:     0.07em;
+  --tracking-widest:    0.08em;
+
+  /* ---- RADII (strict scale, per §8.3) ----------------------------- */
+  --r-8:  8px;   /* gauge track, tiny pills            */
+  --r-10: 10px;  /* Btn                                */
+  --r-12: 12px;  /* Input                              */
+  --r-14: 14px;  /* Card                               */
+  --r-16: 16px;
+  --r-18: 18px;
+  --r-20: 20px;  /* Tag (full pill)                    */
+  --r-22: 22px;
+
+  /* ---- BORDERS (only two widths exist) ---------------------------- */
+  --border-thin:  2px   solid var(--black);
+  --border-thick: 2.5px solid var(--black);
+
+  /* ---- SHADOWS — HARD ONLY (no blur, no rgba) --------------------- */
+  --shadow-sm:   3px 3px 0 var(--black);
+  --shadow-card: 4px 4px 0 var(--black);
+  --shadow-hero: 5px 5px 0 var(--black);
+  --shadow-pressed: 1px 1px 0 var(--black);
+
+  /* ---- MOTION ----------------------------------------------------- */
+  --press-duration: 100ms;
+  --press-ease:     cubic-bezier(0.2, 0.8, 0.2, 1);
+  --press-shift:    2px;
+}
+
+/* --- Base type ------------------------------------------------------ */
+html, body {
+  background: var(--offwhite);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- Semantic type styles (match packages/ui §8.2) ------------------ */
+
+/* H1 — page hero / onboarding headline */
+.t-display,
+h1 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-black);
+  font-size: clamp(28px, 7vw, 40px);
+  line-height: 1.05;
+  letter-spacing: var(--tracking-tightest);
+  color: var(--black);
+}
+
+/* H2 — screen title in TopBar / section headers */
+.t-title,
+h2 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-black);
+  font-size: 20px;
+  line-height: 1.15;
+  letter-spacing: var(--tracking-tight);
+  color: var(--black);
+}
+
+/* H3 — card headline */
+.t-card-title,
+h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-xbold);
+  font-size: 16px;
+  line-height: 1.2;
+  letter-spacing: var(--tracking-tight);
+  color: var(--black);
+}
+
+/* KPI — hero big-number */
+.t-kpi {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-black);
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: var(--tracking-tightest);
+  font-variant-numeric: tabular-nums;
+  color: var(--black);
+}
+
+/* Eyebrow / section title — uppercase label voice */
+.t-eyebrow {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: 12px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+
+/* Button label */
+.t-btn {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: 14px;
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+/* Body */
+.t-body,
+p {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* Muted body / description */
+.t-muted {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-medium);
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--gray-400);
+}
+
+/* Small input label (above fields) */
+.t-input-label {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: 12px;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--gray-600);
+}
+
+/* Tag text */
+.t-tag {
+  font-family: var(--font-sans);
+  font-weight: var(--fw-bold);
+  font-size: 11px;
+  letter-spacing: var(--tracking-wide);
+}
+
+/* ---- MOTION: respect user preference ---------------------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

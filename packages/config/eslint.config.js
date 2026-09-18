@@ -185,6 +185,27 @@ export default tseslint.config(
     rules: { 'unicorn/filename-case': 'off' },
   },
 
+  // The marketing site (apps/landing, ADR-084): plain JS + JSX imported from its
+  // own repo. Naming this block's `files` is also what makes ESLint reach its
+  // `.jsx` at all — and because `files` resolves from the cwd, the landing's
+  // `lint` script runs from the repo root. It keeps every correctness rule and
+  // drops only the size/shape limits of CLAUDE.md §2.6, which ADR-084 scopes
+  // to the product:
+  // its components are PascalCase `.jsx` and its page sections are long,
+  // declarative JSX. Splitting them is Track L's call, not the import's.
+  {
+    files: ['apps/landing/**/*.{js,jsx,mjs}'],
+    languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
+    rules: {
+      'max-lines': 'off',
+      'max-lines-per-function': 'off',
+      complexity: 'off',
+      'sonarjs/cognitive-complexity': 'off',
+      'sonarjs/no-duplicate-string': 'off',
+      'unicorn/filename-case': 'off',
+    },
+  },
+
   // Allow config files to use require / any.
   //
   // This block was dead until the lint-coverage fix: `**/*.config.*` sat in the

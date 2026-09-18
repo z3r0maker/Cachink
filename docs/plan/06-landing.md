@@ -1,4 +1,9 @@
-# Track L — Landing (`~/Projects/CachinkLanding`, separate repo)
+# Track L — Landing (`apps/landing`; was `~/Projects/CachinkLanding`)
+
+> **Now in the monorepo (ADR-084, 2026-09-18).** The site was imported with its history into
+> `apps/landing` (`@xangarro/landing`, pnpm workspace member, Vercel project `xangarro-landing`).
+> Paths in the tasks below (`src/`, `public/`, `index.html`, …) are relative to `apps/landing/`;
+> "the app repo" and "the landing repo" are now the same repo. The old GitHub repo is to be archived.
 
 > Marketing only (Q18). Vite site, existing SEO/GEO work preserved. Its only contract with the
 > product is the signup URL: `https://app.xangarro.mx/signup?plan=<freelancer|emprendedor|mipyme_pro>`.

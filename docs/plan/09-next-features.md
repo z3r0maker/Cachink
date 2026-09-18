@@ -550,6 +550,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-31 Landing copy for this track `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
+- **Where:** `apps/landing/` in this repo (ADR-084), not the old `CachinkLanding` repo.
 - **What:** pricing table with the new limits and annual toggle, every price marked **"+ IVA"** with the
   total on hover/footnote; "Tu negocio sigue aunque se vaya el
   internet" (decision 20); fix L-03's stale `freelancer/emprendedor/mipyme_pro` slugs (ADR-059).

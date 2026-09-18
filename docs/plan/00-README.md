@@ -160,7 +160,7 @@ These are binding unless a new ADR changes them. Where an item says _(ADR-053 §
 - Portal: **Next.js App Router** in `apps/web`, Tailwind + shadcn/ui, Drizzle **pg-core** in new `packages/data-pg` (+ drift test vs SQLite schema), Supabase Auth, Recharts, Vercel, `app.xangarro.mx`. Mobile API = route handlers under `/api/v1/*`, thin adapters over `packages/application`. _(Q13)_
 - Shared API/wire schemas live in a new **`packages/contracts`** (zod). _(F-05)_
 - **Environments:** local (Docker `supabase start`) + **one hosted project now**; staging is created **before the first paying customer** (X-01). ~~Region `us-east-1`, Vercel functions pinned to the same.~~ **Amended 2026-09-18 (owner decision):** the hosted project is in **`us-west-2` (Oregon)** and stays there; Vercel functions are pinned to **`pdx1`** in both projects (B-01). _(Q17)_
-- Landing stays a **separate Vite repo**, marketing only; CTAs link to `app.xangarro.mx/signup?plan=…`. _(Q18)_
+- ~~Landing stays a **separate Vite repo**~~, marketing only; CTAs link to `app.xangarro.mx/signup?plan=…`. _(Q18 — repo half superseded by ADR-084: the landing now lives in `apps/landing`)_
 - CI: GitHub Actions — typecheck + lint + unit + drift test per PR; Maestro nightly/on-demand. _(F-08)_
 
 **Rename** _(ADR-054)_
