@@ -18,7 +18,7 @@
 # database to prove another job has one) asserts from this file that every
 # integration suite really runs against Postgres.
 #
-# Branch protection: require the checks named "ci" and "db".
+# Branch protection: require the checks named "ci", "db" and "portal-e2e".
 
 name: ci
 
@@ -128,3 +128,79 @@ jobs:
       # protecting nothing.
       - name: Integration tests (RLS, claims, compat, queries)
         run: pnpm --filter @xangarro/data-pg test:db
+
+  # The portal, rendered, against a seeded database.
+  #
+  # Its own job rather than a step in `ci`: a production Next build plus 112
+  # browser tests across three viewports would turn a ~10-minute hermetic gate
+  # into a ~28-minute serial one. In parallel, wall-clock barely moves, and
+  # "the portal broke" stays distinguishable from "a type broke".
+  #
+  # This suite refuses to run without a database (see playwright.config.ts).
+  # That is deliberate: it previously passed with none, because every page
+  # catches its loader's throw and renders an error state, so 79 specs were
+  # sweeping eleven error cards.
+  portal-e2e:
+    name: portal-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: xangarro
+          POSTGRES_DB: xangarro
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d xangarro"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # The app role, behind the same policies a request hits — never `postgres`.
+      DATABASE_URL: postgres://xangarro_app:xangarro_app@localhost:55432/xangarro
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm --filter @xangarro/portal exec playwright install --with-deps chromium
+
+      - run: pnpm --filter @xangarro/data-pg db:apply
+      - run: pnpm --filter @xangarro/data-pg db:seed
+
+      # Deliberately NOT `turbo run build`: turbo.json's `build` task declares
+      # outputs `dist/**` and `build/**` but not `.next/**`, so a cache hit
+      # would restore nothing and `next start` would serve a build that is not
+      # there. Building here also makes a build failure read as a build
+      # failure rather than as "webServer timed out".
+      - name: Build the portal (production, webpack — P-20)
+        run: pnpm --filter @xangarro/portal run build
+
+      - name: E2E (data, a11y and shell, three viewports)
+        run: pnpm --filter @xangarro/portal run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            apps/portal/playwright-report/
+            apps/portal/test-results/
+          retention-days: 7
