@@ -5,9 +5,15 @@ import { SignedEntitlementSchema, canonicalize } from '../src/entitlement.js';
 
 const PAYLOAD = {
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
-  plan: 'emprendedor',
+  plan: 'xangarro',
   limits: { operators: 2, devices: 2, recordsPerMonth: null },
   features: ['stock', 'barcode'],
+  capabilities: {
+    estadosFinancieros: true,
+    informeMensual: false,
+    permisosPorUsuario: false,
+    asesor: 'diario',
+  },
   validUntil: '2026-10-11T00:00:00.000Z',
   graceUntil: '2026-10-18T00:00:00.000Z',
   issuedAt: '2026-09-11T00:00:00.000Z',
@@ -43,7 +49,7 @@ describe('signed entitlement', () => {
     const sig = await ed.signAsync(msg, priv);
     const signature = Buffer.from(sig).toString('base64');
     const parsed = SignedEntitlementSchema.parse({ payload: PAYLOAD, signature });
-    assert.equal(parsed.payload.plan, 'emprendedor');
+    assert.equal(parsed.payload.plan, 'xangarro');
     assert.equal(await ed.verifyAsync(sig, msg, pub), true);
     // A reordered-but-equal payload verifies too — that is the point of canonicalize.
     const reordered = { ...PAYLOAD, limits: { recordsPerMonth: null, devices: 2, operators: 2 } };
@@ -52,7 +58,7 @@ describe('signed entitlement', () => {
       true,
     );
     // A tampered payload does not.
-    const tampered = { ...PAYLOAD, plan: 'mipyme_pro' };
+    const tampered = { ...PAYLOAD, plan: 'xangarrote' };
     assert.equal(
       await ed.verifyAsync(sig, new TextEncoder().encode(canonicalize(tampered)), pub),
       false,

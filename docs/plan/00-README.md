@@ -70,6 +70,45 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 
 ## 4. Decision summary (what the interview settled)
 
+> **Amended 2026-09-17 by the portal design interview — ADR-056 … ADR-060.** The items below still
+> describe the pivot correctly except where this block overrides them. Read ADR-058 before touching
+> any portal screen.
+>
+> - **Plans are renamed** to `xangarrito` / `xangarro` / `xangarrote` ($0 / $199 / $399 MXN·mes) —
+>   **identifiers, not just labels** — by contract task **C-11**, amended at protocol version 1 with
+>   no bump and no aliases. Stripe lookup keys take a `plan_` prefix. _(ADR-059, supersedes the Q14
+>   tier names below.)_
+> - **`PlanLimits` gains `capabilities`** — `estadosFinancieros`, `informeMensual`,
+>   `permisosPorUsuario`, `asesor: 'semanal'|'diario'|'completo'` — plan-level gates with no tenant
+>   switch. `FEATURE_FLAG_KEYS` is unchanged. **Xangarrito has no NIF statements**; raw export stays
+>   on every tier, which is what the Q14 line below means. _(ADR-059.)_
+> - **The portal never writes a transactional table.** `UP_TABLES` has no down path, so the designed
+>   "Nueva venta", "Nuevo gasto", drawer "Cancelar", "Ajustar inventario", "Registrar movimiento" and
+>   "Registrar nómina" are all removed. Two writers would create the first conflict class in a system
+>   built on there being none. _(ADR-058 §2.)_
+> - **Sincronización has no mode selector.** The four modes are mobile-era strings; a browser cannot
+>   be "solo este dispositivo" and F-02 archived the app that could have been a local server. The
+>   onboarding wizard drops to four steps. _(ADR-058 §1.)_
+> - **Operators keep `permissions`, lose `role`.** A-03/A-17 are rescoped to remove `role` while
+>   preserving `UserPermissionsSchema` (`canCancelSales`), portal-managed and gated by
+>   `capabilities.permisosPorUsuario`. _(ADR-058 §4.)_
+> - **A new product surface: the Asesor** (Para ti · Metas · Diagnóstico) plus **Avisos**, both
+>   backed by one portal-only `notices` table. Generation runs in `apps/portal` on Vercel Cron, one
+>   business per invocation, extraction to `apps/api` planned for product phase 2.
+>   _(ADR-056, ADR-060.)_
+> - **Production gates on the model call:** any code path that makes an LLM call renders
+>   «Próximamente» in production; **locally nothing is gated.** Local development runs on recorded
+>   fixtures. _(ADR-059.)_
+> - **Portal stack:** Radix primitives + vanilla-extract over a new zero-dependency
+>   `@xangarro/tokens`; **not** Tailwind, **not** shadcn/ui. `packages/ui/src/theme.ts` becomes a
+>   re-export. `design-lint` extends to `apps/portal/src`. _(ADR-057, amends P-01.)_
+> - **CLAUDE.md §11 gains two entity classes** — synced and portal-only — applied by X-06.
+>   _(ADR-060.)_
+> - **Track P is reorganised into the design plan's ten fases**, each with a compuerta. P-01…P-17
+>   keep their ids and are amended in place; P-18…P-34 are new. See `04-portal.md`.
+> - **The design is the specification**, mirrored read-only at `/design-reference/` and refreshed by
+>   `pnpm design:pull`. Visual changes land in the Claude Design project **first**.
+
 These are binding unless a new ADR changes them. Where an item says _(ADR-053 §n)_ the full reasoning is there.
 
 **Product shape**
@@ -133,6 +172,7 @@ F-08 CI ──► (gates all PRs)
 C-01..C-08 contract spec ──► B-07, B-08, B-09, A-04, A-06
 C-09 mock server ──► A-04, A-06, A-07, A-16 (until B-09 is live)
 C-10 contract tests ──► B-07..B-09 (must pass against real handlers)
+C-11 plan rename + capabilities ──► P-03, P-10, P-14, P-15, A-10, B-06, B-07, B-09
 
 B-01 supabase project ──► B-03, P-01
 B-02 data-pg schema ──► B-03, B-08, B-09, P-*
@@ -153,6 +193,11 @@ A-04 activation ──► A-05, A-10, A-16
 A-06 sync engine ──► A-07, A-08, A-11, A-16
 A-15 rename sweep ──► X-05
 
+P-18 design amendments + /design-reference/ ──► every P screen task
+P-20 vanilla-extract spike ──► P-01, P-22, P-23
+P-22 @xangarro/tokens ──► P-23 ──► P-24 ──► every P screen task
+P-25 container/presentational + 4 states ──► every P screen task
+P-31 notices ──► P-26 (Asesor feed), P-32
 P-03 signup ──► X-02
 P-04 onboarding ──► X-02
 P-06 devices ──► X-02

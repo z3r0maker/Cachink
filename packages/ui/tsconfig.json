@@ -10,9 +10,20 @@
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.json"],
   "exclude": ["node_modules", "dist", "tests"],
   "references": [
-    { "path": "../domain" },
-    { "path": "../application" },
-    { "path": "../data" },
-    { "path": "../observability" }
+    {
+      "path": "../tokens"
+    },
+    {
+      "path": "../domain"
+    },
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../data"
+    },
+    {
+      "path": "../observability"
+    }
   ]
 }

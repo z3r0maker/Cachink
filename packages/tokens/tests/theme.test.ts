@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { colors, shadows, borders, typography, radii, emojiSizes } from '../src/theme';
+import { colors, shadows, borders, typography, radii, emojiSizes } from '../src/index.js';
 
 describe('Cachink brand theme', () => {
   it('exposes the hero yellow exactly as specified in CLAUDE.md §8.1', () => {

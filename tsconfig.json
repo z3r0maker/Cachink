@@ -4,6 +4,9 @@
   "files": [],
   "references": [
     {
+      "path": "./packages/tokens"
+    },
+    {
       "path": "./packages/domain"
     },
     {
@@ -26,6 +29,9 @@
     },
     {
       "path": "./packages/observability"
+    },
+    {
+      "path": "./packages/data-pg"
     }
   ]
 }

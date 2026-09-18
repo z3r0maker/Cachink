@@ -14,31 +14,31 @@ const ALL_ON: FeatureFlags = {
 
 describe('resolveEffectiveFlags', () => {
   it('is on only when platform, plan and tenant all say so', () => {
-    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'mipyme_pro', tenant: ALL_ON });
+    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'xangarrote', tenant: ALL_ON });
     expect(r).toEqual(ALL_ON);
   });
 
   it('platform off wins over plan and tenant', () => {
     const platform = { ...ALL_ON, merma: false };
-    const r = resolveEffectiveFlags({ platform, plan: 'mipyme_pro', tenant: ALL_ON });
+    const r = resolveEffectiveFlags({ platform, plan: 'xangarrote', tenant: ALL_ON });
     expect(r.merma).toBe(false);
   });
 
   it('a plan that excludes the feature wins over platform and tenant', () => {
-    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'freelancer', tenant: ALL_ON });
+    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'xangarrito', tenant: ALL_ON });
     expect(r.stock).toBe(false);
     expect(r.barcode).toBe(false);
   });
 
   it('tenant off wins over platform and plan', () => {
     const tenant = { ...DEFAULT_FEATURE_FLAGS, stock: false };
-    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'emprendedor', tenant });
+    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'xangarro', tenant });
     expect(r.stock).toBe(false);
   });
 
   it('a dependency parent being off cascades to its children', () => {
     const tenant = { ...ALL_ON, stock: false };
-    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'mipyme_pro', tenant });
+    const r = resolveEffectiveFlags({ platform: ALL_ON, plan: 'xangarrote', tenant });
     expect(r.merma).toBe(false);
     expect(r.conversionMateriaPrima).toBe(false);
     expect(r.conversionAutomatica).toBe(false);

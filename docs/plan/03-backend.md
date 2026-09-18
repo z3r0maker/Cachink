@@ -24,7 +24,28 @@
 
 ### B-02 `packages/data-pg`: Postgres Drizzle schema + drift test
 
-- [ ] Status · **Blocked by:** F-04, F-07 · **Blocks:** B-03, B-08, B-09, P-\*
+- [~] Status · **Blocked by:** F-04, F-07 · **Blocks:** B-03, B-08, B-09, P-\*
+  - In progress: 2026-09-17 · `packages/data-pg` exists with the schema and the drift test.
+    **Needs no Supabase instance** — Drizzle table definitions are ordinary code, which is why this
+    could land before B-01.
+  - **18 synced tables** across `tenant.ts` / `catalog.ts` / `ledger.ts` / `caja.ts`, bootstrapped
+    from the device's SQLite schema so column names match **by construction**, then maintained by
+    hand. `app_config` and `director_alerts` are deliberately absent: they are in
+    `NEVER_SYNCED_TABLES`.
+  - **7 portal-only tables** in `portal.ts` — `notices` (one table, two surfaces, ADR-060),
+    `metas`, `business_members`, `devices`, `activation_codes`, `sync_rejections`, `sync_log` with
+    its identity cursor. None appears in `scope.ts`, so none crosses the wire.
+  - Types diverge where Postgres is better — `timestamptz` for audit stamps, real `bigint` for
+    centavos — but **never the names**.
+  - **The drift test is the point, and it was verified to fail.** 22 assertions: a cloud table for
+    every contract table and vice versa, identical column names per table, no device-only table
+    mirrored into Postgres, and a pinned list of the portal-only tables so adding one to
+    `scope.ts` breaks the build and forces the full §11 checklist. Renaming a single column made
+    four tables fail, which is the behaviour that matters: **the wire format addresses columns by
+    name, so a silent rename writes a row with a missing field rather than rejecting it** — the
+    worst failure mode this system has, and one both sides would otherwise compile through.
+  - **Still to do:** the migrations themselves and RLS (B-03), which do need a database, plus
+    repositories and the `sync_log` write-through the portal screens will call.
 - **Context:** All 21 local schema files are `sqlite-core`; the portal needs `pg-core`. Authored once, kept in lockstep by a test. Two Postgres **schemas**: `tenant` (synced tables + `sync_log`, `sync_rejections`, `devices`) and `billing` (`business_members`, `activation_codes`, `subscriptions`, `fiscal_profiles`, `factura_requests`, `plans`). `businesses` lives in `tenant` (it syncs down) but is created by billing code.
 - **Files:** `packages/data-pg/{package.json,drizzle.config.ts,src/schema/tenant/*.ts,src/schema/billing/*.ts,src/index.ts,tests/drift.test.ts}`.
 - **Steps:**
@@ -39,7 +60,32 @@
 
 ### B-03 Migrations + RLS (replace hand-written SQL)
 
-- [ ] Status · **Blocked by:** B-01, B-02 · **Blocks:** B-05, B-08, B-09, P-02
+- [~] Status · **Blocked by:** B-02 · **Blocks:** B-05, B-08, B-09, P-02
+  - In progress: 2026-09-17 · migrations and RLS are written, **applied to a real Postgres 17, and
+    proven**. `pnpm --filter @xangarro/data-pg db:up && pnpm --filter @xangarro/data-pg test:db`
+    goes from nothing to 25 tables, 25 policies and 30 green tests.
+  - **Unblocked from B-01.** Supabase is not needed to develop against the real schema — a plain
+    `postgres:17-alpine` container applies the same SQL. Supabase adds auth, storage and the
+    hosted project; it does not change the DDL.
+  - `drizzle/0000_*.sql` is **generated** from the schema (`db:generate`), per CLAUDE.md §6's "no
+    hand-written SQL". `drizzle/0001_rls.sql` is the documented exception: Drizzle Kit does not
+    model policies.
+  - RLS on all 25 tables with `FORCE`, one `tenant_isolation` policy each, keyed on
+    `xangarro.current_business_id()` — a `STABLE` function reading the `business_id` JWT claim,
+    with a `current_setting` fallback for tests. One function rather than twenty-five inlined
+    claims, so a claim rename is one edit.
+  - **The test found a defect that reading the SQL would never have shown: superusers bypass RLS
+    entirely, and `FORCE` does not apply to them.** Run as `postgres`, every isolation assertion
+    passed while protecting nothing. The migration now creates a non-superuser `xangarro_app` role
+    (Supabase's `authenticated` plays this part in production) and the suite asserts
+    `rolsuper = false AND rolbypassrls = false` **before** trusting any other assertion.
+  - 8 RLS assertions: a tenant sees only its own rows, the other tenant sees only its own, a
+    portal-only table isolates identically, a write claiming another tenant is **rejected rather
+    than silently dropped**, an absent claim yields **no rows rather than all rows**, `FORCE` is
+    on, and no table in `public` is left unprotected. Disabling RLS on one table fails four of
+    them — verified.
+  - **Still to do:** the seed (B-04), wiring `DATABASE_URL` into the portal so the screens read
+    real rows instead of fixtures, and pointing this at a hosted Supabase project (B-01).
 - **Context:** `supabase/migrations/0001_schema.sql` is hand-written (violates CLAUDE.md §6) and PowerSync-specific. Replace with `drizzle-kit generate` output committed into `supabase/migrations/` (so `supabase db push`/`db reset` still drive it) + a hand-written **policies** migration (RLS is not expressible in Drizzle schema).
 - **Steps:**
   1. Delete `0001_schema.sql`'s PowerSync publication; regenerate the schema migration from `data-pg`. Keep `0002_bug_database.sql`.
@@ -55,7 +101,17 @@
 
 ### B-04 Seed + demo business for local dev and App Review
 
-- [ ] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
+- [~] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
+  - In progress: 2026-09-17 · `pnpm --filter @xangarro/data-pg db:seed` populates Taquería Don
+    Pedro — the business every design file uses — with 6 ventas, 5 gastos, 6 productos, their
+    inventory movements and one corte.
+  - **Seeds through the app role**, so every insert passes the same RLS policy a request does.
+    Seeding as a superuser would prove nothing about the policies.
+  - Two schema rules the seed had to learn, and that the queries now honour: `cantidad` on
+    `inventory_movements` is **always positive** with the direction carried by `tipo`, and
+    `motivo` is required. The first mattered — summing `cantidad` raw would have counted every
+    sale as a restock, so `lowStock` signs by `tipo`.
+  - **Still to do:** an App Review demo tenant distinct from the dev seed, and employees/operators.
 - **Steps:** `pnpm --filter @xangarro/data-pg seed` creates: auth user `demo@xangarro.mx` (password from `.env.example`), business "Tacos La Esquina", emprendedor subscription, 2 operators (PINs `1234`, `5678` — bcrypt), 20 products with icons, 3 clients, 1 active activation code `DEMOK7M3` (codes must match `^[A-HJ-NP-Z2-9]{8}$` — no 0/O/1/I; `DEMO0001` would be rejected by `ActivationCodeSchema`), 30 days of sales/expenses. Idempotent (re-run wipes and recreates that business only).
 - **Acceptance:** seed runs in < 10 s; portal login as demo works (after P-02); code `DEMOK7M3` activates the app (after B-07).
 

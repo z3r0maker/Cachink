@@ -24,7 +24,7 @@ import { useCurrentBusiness } from './use-current-business';
  * permissive plan so that platform availability is the only clamp — which
  * is exactly the pre-pivot MVP behaviour (stock + barcode on, the rest dark).
  */
-const DEVICE_PLAN_UNTIL_ENTITLEMENT: PlanId = 'mipyme_pro';
+const DEVICE_PLAN_UNTIL_ENTITLEMENT: PlanId = 'xangarrote';
 
 /** Effective flags (platform × plan × tenant) for the current business. */
 export function useFeatureFlags(): FeatureFlags {

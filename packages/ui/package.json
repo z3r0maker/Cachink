@@ -36,18 +36,19 @@
     "test:visual": "playwright test --config=playwright.config.ts"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
+    "@sentry/browser": "^10.53.1",
     "@xangarro/application": "workspace:*",
+    "@xangarro/contracts": "workspace:*",
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/observability": "workspace:*",
+    "@xangarro/tokens": "workspace:*",
     "bcryptjs": "3.0.3",
-    "@react-pdf/renderer": "^4.5.1",
-    "@sentry/browser": "^10.53.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1",
-    "@xangarro/contracts": "workspace:*"
+    "jspdf": "^4.2.1"
   },
   "peerDependencies": {
     "@xangarro/sync-lan": "workspace:*",

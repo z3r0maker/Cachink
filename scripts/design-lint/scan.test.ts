@@ -152,3 +152,75 @@ describe('token/fontsize-literal', () => {
     assert.deepEqual(rules(`<Text fontSize={emojiSizes.lg}>🎉</Text>`), []);
   });
 });
+
+/**
+ * P-22 / ADR-057 — the portal styles in vanilla-extract, whose `.css.ts` files
+ * are TypeScript with camelCase properties. The rules above already match
+ * `borderRadius` and `fontSize` there; these cases pin the two CSS-only shapes
+ * the Tamagui rules could not see: the `border` shorthand and `boxShadow`.
+ */
+const veRules = (src: string): readonly string[] =>
+  scanFile('apps/portal/src/components/card.css.ts', src).map((f) => f.rule);
+
+describe('token/borderwidth-offscale — CSS border shorthand', () => {
+  it('accepts the only two widths that exist', () => {
+    assert.deepEqual(veRules(`export const a = style({ border: '2px solid #0D0D0D' });`), [
+      'token/hex-inline-duplicate',
+    ]);
+    assert.deepEqual(
+      veRules(`export const a = style({ border: '2.5px solid ' + colors.black });`),
+      [],
+    );
+  });
+
+  it('flags a width off the ladder', () => {
+    assert.deepEqual(veRules(`export const a = style({ border: '1px solid ' + colors.black });`), [
+      'token/borderwidth-offscale',
+    ]);
+    assert.deepEqual(
+      veRules(`export const a = style({ borderBottom: '3px solid ' + colors.black });`),
+      ['token/borderwidth-offscale'],
+    );
+  });
+});
+
+describe('token/soft-shadow — CSS boxShadow', () => {
+  it('accepts a hard drop shadow', () => {
+    assert.deepEqual(
+      veRules("export const a = style({ boxShadow: '4px 4px 0 ' + colors.black });"),
+      [],
+    );
+    assert.deepEqual(veRules("export const a = style({ boxShadow: 'none' });"), []);
+  });
+
+  it('flags any non-zero blur radius', () => {
+    assert.deepEqual(
+      veRules("export const a = style({ boxShadow: '4px 4px 6px ' + colors.black });"),
+      ['token/soft-shadow'],
+    );
+  });
+
+  it('flags a blurred layer inside a multi-layer shadow', () => {
+    assert.deepEqual(
+      veRules("export const a = style({ boxShadow: '4px 4px 0 #0D0D0D, 0 0 8px #0D0D0D' });"),
+      ['token/hex-inline-duplicate', 'token/hex-inline-duplicate', 'token/soft-shadow'],
+    );
+  });
+});
+
+describe('token/radius-offscale — CSS px values', () => {
+  it('accepts a laddered radius written as a CSS length', () => {
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '18px' });`), []);
+  });
+
+  it('flags one off the ladder', () => {
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '13px' });`), [
+      'token/radius-offscale',
+    ]);
+  });
+
+  it('accepts the off-ladder shapes that are legitimate (chart marks, pills)', () => {
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '9999px' });`), []);
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '2px' });`), []);
+  });
+});

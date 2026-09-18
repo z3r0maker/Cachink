@@ -3902,3 +3902,625 @@ paying for.
   for turning it back on, not a substitute for the decision.
 - `git push --no-verify` no longer weakens the shared branch: the server
   side gate is the one that counts.
+
+---
+
+## ADR-056
+
+**Title:** The Asesor generates inside `apps/portal` on Vercel Cron; extraction to a dedicated runtime is scheduled for product phase 2
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — names its own revisit trigger (see *Phase 2*)
+
+**Context**
+
+The portal design project ships an **Asesor** surface (Para ti, Metas,
+Diagnóstico) that is sold as the primary differentiator between the three
+plans: Xangarrito gets one aviso per week, Xangarro a daily "Para ti"
+plus conclusions on the estados financieros, caja-difference explanations
+and Metas, and Xangarrote adds a monthly Diagnóstico, the "¿Me alcanza?"
+forecast and a written estrategia. The decision to build all of it,
+including the generative parts, was taken in the plan interview of
+2026-09-17.
+
+Most of what the design draws is deterministic: cost deltas, category
+baselines, staleness windows, duplicate detection, margin math and goal
+pacing. Those are SQL plus functions that already exist in
+`@xangarro/domain` — the same functions `packages/ui/src/screens/Estados`
+renders and that P-14 instructs implementers to locate rather than
+reimplement. A minority is genuinely generative: the Diagnóstico prose,
+the estrategia, and the "importa tu catálogo con una foto" vision step.
+
+Nothing in Track B funds a scheduled job. The work needs a runtime, a
+trigger, and a home for the model credentials.
+
+**Decision**
+
+Generation runs as a **route handler inside `apps/portal`**, invoked by
+**Vercel Cron** declared in the same `vercel.json` that P-01 already
+creates, in the same `iad1` region as the rest of the deployment.
+
+- **One business per invocation.** The cron entry enqueues; it does not
+  loop over tenants inside a single request. This is a structural
+  requirement, not a performance note — a monthly Diagnóstico over a
+  year of history plus a model call will not fit a single request
+  budget, and the design already renders `diagState: 'generating'`, so
+  asynchronous production is what the screens expect.
+- **Cadence derives from `capabilities.asesor`** (the plan-level enum
+  added in the same amendment as the plan-id rename). A daily job
+  selects the businesses that are due; the tier decides how many rows
+  get written and how often, never what the store looks like.
+- **Output is `notices` rows with `source='asesor'`** — the single
+  notice entity shared with Avisos. No separate insight table.
+- **The deterministic layer is computed from `@xangarro/domain` and the
+  generative call is the last step**, prompted from the values those
+  functions produced. A figure may never be computed twice by two
+  different paths: what the Diagnóstico asserts and what Estados
+  financieros displays are the same number or the feature is worse than
+  not shipping.
+
+**Alternatives considered**
+
+- **Supabase Edge Function + `pg_cron`.** Rejected: the Deno runtime
+  cannot consume the TypeScript workspace packages the analytics live
+  in, so the margin and NIF math would be duplicated in SQL or Deno.
+  That is the CLAUDE.md §2.3 duplication rule violated on the most
+  correctness-sensitive code in the product, and it splits the model
+  credential across two secret stores.
+- **A separate worker service.** Rejected for now: a second deploy
+  target, a second observability wiring and a second set of database
+  credentials, bought before any evidence that the portal's runtime is
+  the constraint. Its strongest argument — that slow vision and
+  Diagnóstico jobs contend with interactive page renders — is real but
+  is an argument for acting when it bites, not before.
+
+**Consequences**
+
+- `packages/observability` and the Sentry wiring the portal already
+  carries cover the Asesor for free; B-18 extends to the cron handler
+  with no new integration.
+- The model credential lives in one place, in the portal's Vercel
+  environment, and is never exposed to the browser.
+- Prompt inputs are tenant-controlled strings (product names, expense
+  concepts, uploaded photographs). Treating them as data rather than
+  instruction is a requirement of the generative task, not an optional
+  hardening step.
+- Any text the model produced carries the «Asesor» marker and the
+  «Generado con IA a partir de tus registros» footer, per the design
+  plan §6. Deterministic insights must **not** claim AI authorship.
+- Vercel function limits become a real operating constraint. The
+  one-business-per-invocation rule is what keeps them survivable.
+
+**Phase 2**
+
+Extraction to a dedicated runtime (`apps/api`, per the pre-existing
+Z-04 task) is **planned, not conditional on failure**. It lands in
+product phase 2 — the same phase that carries ventas a crédito — and a
+superseding ADR records the move at that point. Z-04's existing triggers
+stand as early-exit conditions if any fires sooner: sync p95 latency
+above 800 ms at the handler, Vercel function limits reached, or a second
+client needing the API without the portal.
+
+---
+
+## ADR-057
+
+**Title:** The portal styles with vanilla-extract over `@xangarro/tokens` and Radix primitives; no Tailwind, no styled component library
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends the stack named in `docs/plan/04-portal.md` P-01
+
+**Context**
+
+P-01 as originally written scaffolded `apps/portal` with Tailwind plus
+`shadcn/ui`. The portal design plan forbids both in §2b: «no librerías de
+componentes con estilo propio, no Tailwind por defecto sin mapear
+tokens». Its Fase 5 verification adds a value auditor that fails on any
+colour outside the tokens, any radius off the 8/10/12/14/16/18/20/22
+ladder, any shadow with blur, and any border that is not 2 or 2.5 px.
+
+That auditor already exists. `scripts/design-lint/` enforces
+`token/hex-offscale`, `token/hex-inline-duplicate`, `token/rgba-literal`,
+`token/radius-offscale`, `token/borderwidth-offscale`,
+`token/soft-shadow` and `token/fontsize-literal`, plus a11y rules for
+44 px targets and `gray400`-as-text. It imports `colors` and `radii` from
+the theme so that, in its own words, "the linter can never drift from the
+design system it enforces", it ratchets against
+`.design-lint-baseline.json`, and that baseline currently reads
+`total: 0`. Its rules are line regexes over raw source matching camelCase
+properties — `borderRadius`, `borderWidth`, `shadowRadius`, `fontSize` —
+and its `ROOTS` are `packages/ui/src` and `apps/mobile/src`.
+
+`packages/ui/src/theme.ts` is the real token source: 275 lines, zero
+imports, and the only place carrying the contrast-verified `textMuted`,
+`greenText`, `redText`, `blueText` and `warningText` values that
+`tests/theme.test.ts` recomputes on every run. The design system's
+`colors_and_type.css` is a derived artifact — its own header says so —
+and a stale one: it lacks those five tokens plus `purple`, `cyan` and
+`scrim`, and its `.t-muted` rule sets body text to `var(--gray-400)`,
+which `theme.ts` annotates "NOT text". Every `.dc.html` prototype
+re-declares the missing tokens inline for exactly this reason.
+
+**Decision**
+
+- **Behaviour comes from Radix UI primitives used directly** — Dialog,
+  Popover, DropdownMenu, Tabs, RadioGroup, Select, Tooltip. No shadcn
+  styled layer. `shadcn/ui` is Radix plus Tailwind classes; taking Radix
+  alone adopts the engine and discards only the skin, which the design
+  contract requires discarding anyway. The behaviours the design
+  specifies — drawer dismissal on backdrop, close button and Escape;
+  dropdowns closing on outside pointerdown with `aria-expanded`; tabs
+  with `aria-selected`; `role="radio"` groups — are the ones that are
+  genuinely hard to hand-write correctly.
+- **Styling is vanilla-extract** (`.css.ts`). Because its style objects
+  are TypeScript with camelCase properties, the existing design-lint
+  rules match them unchanged. `scripts/design-lint/index.ts` gains
+  `apps/portal/src` in `ROOTS`, and two new rules cover the CSS-shaped
+  `border` shorthand and `boxShadow`. The portal joins the existing
+  ratchet rather than needing a second auditor built against a CSS
+  parser and then kept in agreement with the first.
+- **Tokens move to a new zero-dependency `packages/tokens`
+  (`@xangarro/tokens`).** `packages/ui/src/theme.ts` becomes a re-export,
+  so none of its fifteen existing consumers change and the mobile app is
+  untouched. `tests/theme.test.ts` moves with the tokens and therefore
+  guards both consumers. The extraction is also the moment to split the
+  file, which is 275 lines against the §2.6 ceiling of 200.
+- **The portal depends on `@xangarro/tokens`, never on `@xangarro/ui`.**
+  `theme.ts` is pure, but the package around it is not: it pulls
+  `@xangarro/application`, `@xangarro/data`, `drizzle-orm`, `exceljs`,
+  `jspdf`, `@react-pdf/renderer`, `html2canvas`, `bcryptjs` and
+  `@sentry/browser`. None of that belongs in a Next.js install closure
+  for 275 lines of constants.
+- **`@xangarro/tokens/css` emits the `:root` custom properties** as a
+  build artifact, and DESIGN_CONTRACT.md's token table is generated from
+  the same source so the contract cannot drift from the code it governs.
+
+**Gate.** Fase 0 carries an explicit spike: scaffold the portal on
+`next@16` with `@vanilla-extract/next-plugin` and confirm both `build`
+and `dev`. The plugin is webpack-shaped and was last published
+2026-04-12, with its most recent prerelease tagged
+`fix-broken-webpack-externals`, while Next 16 defaults to Turbopack; its
+peer range is `>=12.1.7`, so npm will not warn. If the spike fails and
+`--webpack` is not acceptable, the fallback is CSS Modules plus a
+purpose-built CSS auditor, budgeted as a Fase 0 task rather than
+discovered in Fase 5.
+
+**Alternatives considered**
+
+- **Tailwind + shadcn/ui** (P-01 as written). Rejected: Tailwind ships a
+  default palette, a blurred shadow scale and a radius scale that does
+  not match the ladder — precisely the values the Fase 5 auditor exists
+  to reject. Overriding them is possible but means maintaining a
+  permanent deny-list against a library whose value is its defaults.
+- **CSS Modules.** Rejected: the token rules cannot see `.module.css`,
+  so the portal would need a second auditor; and `var(--yellow)` is an
+  unchecked string, so a typo silently drops the property — which in
+  this design means a missing black border nobody notices in review.
+- **Shipping `colors_and_type.css` as the portal's stylesheet.**
+  Rejected: it inverts the direction of truth and imports the stale
+  file's defects, including the `gray-400`-as-text rule.
+
+**Consequences**
+
+- The portal starts under the same ratchet as the rest of the repo, at
+  `total: 0`, gated by the CI job ADR-055 established.
+- `recipes` can express the scales as types — radius restricted to the
+  ladder, border to `2 | 2.5` — so the contract is enforced at compile
+  time, not only after the fact.
+- One more build plugin on the Renovate treadmill, and a Next major
+  upgrade now has a second thing to verify.
+- Table, Toast, the segmented tab bar, the money input and the charts
+  are hand-built. Recharts still covers charting per P-01.
+
+---
+
+## ADR-058
+
+**Title:** The Claude Design project is the portal's specification; where it contradicts ADR-053, the architecture wins and the design is amended upstream
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — does not amend ADR-053; resolves conflicts against it
+
+**Context**
+
+The design project `5dd266f3-42e7-403f-b941-95c8e6551dc6` carries twelve
+portal screens, a design system, and a `Plan de implementación` that
+states the governing rule: «El diseño no es inspiración: es la
+especificación. Si el código y el diseño no coinciden, el código está
+mal.» It also states the exception, in §6: «Cuando un requisito del
+diseño choque con el código existente, el agente se detiene y pregunta;
+no improvisa una tercera opción.»
+
+Several requirements do collide with decisions already executed. The
+design descends in part from a brief written against the Cachink-era
+architecture, and its design-system README still describes Tauri,
+PowerSync and the Operativo/Director role split — all archived by F-02,
+F-03 and F-07. The reconciliations below were settled in the plan
+interview of 2026-09-17.
+
+**Decision**
+
+The design governs everything visual: structure, measurement, colour,
+typography, copy, interaction, states and accessibility, at the eight
+conditions the plan's §1 lists. ADR-053 governs data flow, sync and
+device scope. The following nine conflicts resolve in favour of the
+architecture, and the design files are amended upstream in the design
+project before the corresponding code is written — never edited in the
+repository.
+
+1. **Sincronización loses its four mode cards.** «Solo este dispositivo
+   · En la nube · Conectar a un servidor local · Ser el servidor local»
+   are strings inherited from the mobile sync chip; the design-system
+   README lists them verbatim under *Voice samples*. A browser has no
+   local SQLite, so "solo este dispositivo" is not a state a web portal
+   can occupy, and "ser el servidor local" would require the desktop app
+   F-02 archived. The screen becomes read-only sync health: per-device
+   last push and pull, pending counts, the rejected-rows table with
+   `ERROR_CATALOG` messages, "Marcar como resuelto", and the history
+   log — which is what P-11 already specified. The onboarding wizard
+   drops its step 3 and runs four steps instead of five. The Resumen
+   card also loses "Conflictos por resolver", because ADR-053 Q6 records
+   that no conflict class exists.
+
+2. **The portal never writes a transactional table.** `scope.ts` lists
+   `sales`, `expenses`, `inventory_movements`, `cancelacion_logs` and
+   the rest as `UP_TABLES` — device to cloud — with no down path, and
+   C-08 froze it. The design's "Nueva venta", "Nuevo gasto", the
+   drawer's "Cancelar", Productos' "Ajustar inventario" and "Registrar
+   movimiento", and Empleados' "Registrar nómina" are all removed. The
+   design brief's own §8 already said so: "the portal only views them".
+   Two writers on one table would create the first conflict class in the
+   system, which the entire outbox design presumes does not exist. A
+   portal-created venta would also carry no device, operator, turno or
+   folio — every field its own detail drawer displays.
+
+3. **Nómina becomes a read-only view.** Payroll is captured on the phone
+   as a nómina-category gasto (ADR-053 §3). The tab groups those
+   expenses by period, and the header chip "Nómina de la semana por
+   pagar" is derived: expected, from the sum of employee salaries,
+   against recorded, from the nómina gastos. The design's own footer
+   note — that each payroll payment is also recorded as a gasto —
+   already describes this relationship.
+
+4. **Operators keep permissions and lose roles.** A-03 and A-17 are
+   rescoped: they remove `role` and `UserRoleEnum` as planned, but
+   **preserve** `UserPermissionsSchema`, which is not deprecated and
+   carries `canCancelSales`. ADR-053 Q1 makes the app single-role; it
+   does not require every operator to hold identical powers, and since
+   cancellation stays on the phone, who may cancel is a portal decision
+   with cash attached. `canUserCancelSales` loses its role argument.
+   `users` is already a `DOWN_TABLE`, so permissions ride a row that
+   flows down and no contract change is needed. The design's uppercase
+   role label and its "Escritorio" operator state pill are removed; the
+   latter presumes a desktop client that no longer exists.
+
+5. **Empleados ships two tabs, not three.** Asistencia is cut from v1:
+   nothing produces attendance data. There is no clock-in anywhere, and
+   ADR-053 §3 fixes the app's surface. Deriving hours from `caja_turnos`
+   would cover a minority — the design's own KPIs say two of five
+   employees have app access — leaving a grid that is structurally blank
+   for the rest, and manual entry would decay until "Horas de la semana
+   168 h" became a confidently wrong number on a screen whose job is
+   trust. Revisit when a customer with "Por horas" employees asks how
+   their pay is computed; that question will also reveal which capture
+   surface they want.
+
+6. **Fase 8 ships in full, including rachas.** The design-system
+   README's «No gamification, no streaks, no emoji confetti» is
+   superseded: the designer already relaxed it twice, in the onboarding
+   confetti and in the Asesor. The *sello* is the brand's own metaphor —
+   every pressable element stamps — so a seal awarded on a goal is that
+   metaphor paying off at its largest scale. One constraint attaches:
+   the streak metric must not be protectable by junk entry. Measure
+   goals met per month, not days with a record; a streak on "days you
+   recorded something" rewards recording something, which corrupts the
+   data the product exists to keep true.
+
+7. **The hero illustration does not ship in v1.** `hero-taqueria.png`
+   was generated from a text prompt and the handoff says to replace it
+   with a licensed or commissioned asset before shipping. Commissioning
+   it now would put a second external dependency on the X-07 → X-05 →
+   X-10 chain, which is already blocked on external logo work. The auth
+   panel's flex column reflows around the four-scene looping animation,
+   which is the block that actually demonstrates the product. Commission
+   in parallel; land post-launch at the specified 2.5:1 ratio with the
+   right third empty.
+
+8. **Both typefaces are self-hosted, and 800 is the portal's maximum
+   weight.** Anton and Plus Jakarta Sans are Google Fonts under the SIL
+   OFL; the design files load them over the network and production must
+   not. `theme.ts` exports `weights.black: 900` and the design-system
+   README asks for 900 headings, but Google Fonts tops out at 800, so
+   900 renders as synthetic bold — inconsistently across engines. Every
+   prototype uses 800. Whether `theme.ts` drops `black` is a separate
+   question, because it touches the phone.
+
+9. **Screens are presentational; containers fetch.** Fase 3 requires
+   that every state can be forced «sin tocar código», while the
+   handoff requires deleting the prototype's state-switching FAB and its
+   `panelOpen` state. Both hold only if the screen is a pure component
+   taking `{ state, role, data }` and a server component resolves the
+   request lifecycle above it. Forcing then means rendering with fixed
+   props — in Storybook, in Playwright, and via a development-only
+   affordance compiled out of production. Fase 5's 4 states × 3 roles
+   sweep becomes a loop over props rather than twelve sign-ins.
+
+**The design reference is committed and read-only.** The twelve
+`.dc.html` files, the `_ds/` folder, `assets/hero-taqueria.png` and the
+design tool's runtime (`support.js`, `doc-page.js`, `image-slot.js`,
+`_ds_bundle.js`) live at `/design-reference/` at the repository root,
+pinned per commit so that a screenshot comparison is reproducible and a
+design change arrives as a reviewable diff. They are refreshed by pulling
+from the design project, never hand-edited. They are excluded from
+Prettier, from ESLint and from `design-lint`'s `ROOTS`, and sit outside
+`apps/portal` so Next never compiles them. The runtime files are vendored
+for rendering only and are never imported by product code.
+
+**Verification splits three ways.** Fase 5's check 1 — the side-by-side
+comparison — is a **review harness**, not a CI gate: the plan itself
+lists browser width, text reflow and real data as acceptable
+differences, which no pixel-diff can distinguish from a wrong padding,
+and the design files render through a vendored runtime that fetches
+fonts over the network. Check 2 is `design-lint` (ADR-057). Check 3 is
+Playwright, including `@axe-core/playwright` per P-16. Separately, the
+portal gets its own visual-regression suite against its own committed
+baselines, reusing the ADR-017 Storybook harness — the two comparisons
+answer different questions and both are needed.
+
+**Consequences**
+
+- Design amendments are a real work item with a real ordering
+  constraint: upstream first, then code. Tasks that depend on an amended
+  screen are blocked until the pull lands.
+- The design-system README is stale on platforms, sync, roles and icons,
+  and is refreshed as part of the same upstream pass.
+- Removing the five write CTAs means a director who miscounts stock must
+  correct it on the phone. Revisit alongside a designed down path for
+  transactional tables, not before.
+
+---
+
+## ADR-059
+
+**Title:** Plans are renamed to Xangarrito / Xangarro / Xangarrote, entitlement gains `capabilities`, and every LLM-backed surface ships «Próximamente» in production
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — requires contract task C-11; extends ADR-053 §5
+
+**Context**
+
+The Suscripción design is marked by its handoff as the one screen whose
+content is real — "The pricing on this screen is real. Copy it
+verbatim." It names three plans **Xangarrito $0**, **Xangarro $199** and
+**Xangarrote $399 MXN/mes**, against the `freelancer` / `emprendedor` /
+`mipyme_pro` identifiers in `packages/domain/src/entities/plan.ts`,
+`packages/contracts/src/entitlement.ts` and
+`packages/contracts/src/mock/scenarios.ts`.
+
+That screen also sells **«Asesor en cada plan»** as a block of its own,
+separate from the plan feature lists: Xangarrito one aviso per week plus
+catalogue import from a photograph; Xangarro a daily "Para ti",
+conclusions on the estados financieros, caja-difference explanations,
+Metas with daily tracking, and one free Diagnóstico at ninety days;
+Xangarrote adding a monthly Diagnóstico, "¿Cuánto puedo sacar?", the
+"¿Me alcanza?" forecast and a written estrategia. None of that fits
+`FEATURE_FLAG_KEYS`, whose seven members — `stock`, `barcode`,
+`conversionMateriaPrima`, `conversionAutomatica`, `auditoriaInventario`,
+`merma`, `ventasCredito` — are tenant-toggleable business capabilities
+with dependency cascades, rendered by Negocio §5 as switches under
+«Disponible · En tu plan · Activada».
+
+**Decision**
+
+- **`PLAN_IDS` become `xangarrito | xangarro | xangarrote`,** amended in
+  place at `PROTOCOL_VERSION = 1` by a new contracts task **C-11**. No
+  version bump and no legacy aliases: `PROTOCOL_VERSION` exists to
+  protect deployed clients from deployed servers, and there are none —
+  B-01 is unstarted, `00-README.md` §6 records that no hosted project
+  exists, and no device has ever received an entitlement. Aliases would
+  permanently enshrine identifiers no tenant ever held. C-11 touches
+  `plan.ts`, `entitlement.ts`, both domain tests, `mock/scenarios.ts`,
+  `mock/cli.ts`, the contracts signature-vector test,
+  `use-feature-flags.ts`, the i18n labels and the `?plan=` URLs in P-03,
+  then re-freezes.
+- **Stripe lookup keys carry a `plan_` prefix.** The mid-tier plan id and
+  the product name are both `xangarro`; inside external namespaces they
+  must be distinguishable.
+- **`PlanLimits` gains `capabilities`** — plan-level gates with no
+  tenant switch: `estadosFinancieros`, `informeMensual`,
+  `permisosPorUsuario`, and `asesor: 'semanal' | 'diario' | 'completo'`.
+  `FEATURE_FLAG_KEYS` is unchanged and keeps its meaning. Nobody toggles
+  off their financial statements, so putting these in the flag array
+  would force P-15 to render permanently-disabled switches or maintain
+  an exclusion list; and the Asesor is not a boolean — six booleans that
+  must move together admit sixty-one invalid plans, where one enum
+  admits none. The design already draws the distinction by rendering the
+  two sets in different places. `capabilities` lands in the signed
+  payload as part of the same C-11 amendment, so the contract is
+  unfrozen once.
+- **Xangarrito has no NIF statements.** Estados financieros gains a
+  fifth state, `locked`, alongside `happy / loading / empty / error`,
+  reusing the teaser treatment the Asesor already defines. Raw export of
+  ventas and gastos stays on every tier and for every role, which is
+  what `00-README.md` Q14 means by "raw export is on every tier (Pro
+  gates formatted reports)". Inicio's "Utilidad del mes" hero stays on
+  every tier — it is arithmetic, not a statement — and its "Ver estados"
+  link lands on the locked state. The paywall sits at the report, not at
+  the number.
+- **The Asesor is built in full**, deterministic and generative, per the
+  decision recorded in ADR-056.
+- **Production gates on the model call, not on the feature.** Any code
+  path that makes an LLM call renders «Próximamente» in production;
+  **locally nothing is gated** and every surface is live and
+  developable. One environment flag, checked at the single model-call
+  module boundary ADR-056 establishes. At launch this puts the
+  Diagnóstico tab, the estrategia and the photo catalogue import behind
+  «Próximamente», while the Para ti feed, capacidades gating, Metas in
+  all seven states, trophies, celebrations and Avisos ship live —
+  because all of those are SQL and `@xangarro/domain` arithmetic.
+- **A useful consequence, adopted deliberately:** the rule makes "does
+  this call a model?" decide whether a feature ships. For borderline
+  surfaces — conclusiones on the estados financieros, the caja-
+  difference explanation, "¿Me alcanza?" — prefer templated prose over
+  computed figures. That ships them live *and* makes them testable in
+  CI, which a model call is not.
+- **Local development uses recorded fixtures** as the default path, with
+  a real API key for the occasional live call. Fixtures are what make
+  CLAUDE.md §2.4's one-happy-plus-three-unhappy-paths possible against a
+  generative feature. Proxying a Claude consumer subscription is not
+  used: it is outside those terms, and it offers no Batches API and no
+  stable limits.
+- **Model selection.** `claude-opus-5` by default. The two scheduled
+  jobs go through the **Message Batches** API at half cost, since
+  neither is latency-sensitive — the design renders `diagState:
+  'generating'` — while the photo import uses a normal streaming call
+  because a person is waiting. The stable prefix (brand voice, es-MX
+  register rules, notice schema, the "never assert a figure you were not
+  given" constraint) sits before the last `cache_control` breakpoint so
+  only per-tenant numbers bill at full rate. Adaptive thinking
+  (`thinking: {type: "adaptive"}`); `budget_tokens` returns 400 on this
+  model. Structured output (`strict: true` or `output_config.format`) on
+  the photo import so extracted rows validate against the `Producto`
+  schema rather than arriving as prose. Every tenant string — product
+  names, expense concepts, uploaded photographs — is data, never
+  instruction.
+- **The production credential is deferred**: a direct Anthropic API key
+  or Microsoft Foundry. Foundry bills through the Microsoft Marketplace
+  at the same standard rates, so it is a procurement choice, not a cost
+  one. **Batches and prompt caching availability must be verified before
+  Foundry is chosen**, because both are load-bearing above.
+
+**Alternatives considered**
+
+- **Keeping the plan identifiers and renaming only the labels.**
+  Rejected by the owner in favour of coherence between what customers
+  say and what engineers type. The cost is C-11 and one rebase, taken
+  now because nothing is persisted yet and it will never be cheaper.
+- **Extending `FEATURE_FLAG_KEYS` with ten booleans.** Rejected: it
+  conflates tenant-toggleable capabilities with plan gates and cannot
+  express the Asesor's tiers.
+- **NIF statements on every tier.** Rejected: it requires declaring the
+  one artifact marked authoritative to be wrong, and a Balance computed
+  from a fifty-record monthly ceiling is a demo, not a decision tool.
+
+**Consequences**
+
+- Xangarrote's headline features are dark at launch and light up when
+  the production credential lands. Nothing is cut; it is shipped dark.
+- The Diagnóstico's `teaser`, `free` and `notenough` states, and Fase 7's
+  «Próximamente» WhatsApp card, already give the gate a visual
+  treatment. No new design work.
+- Two `capabilities` entries — `estadosFinancieros` and
+  `informeMensual` — are the first plan gates the phone must also
+  honour, since it renders neither. They travel in the same signed
+  payload and are inert on the device until it does.
+
+---
+
+## ADR-060
+
+**Title:** Two entity classes — synced and portal-only — amending CLAUDE.md §11; Avisos and the Asesor feed share one `notices` table
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — the CLAUDE.md edit is applied by task X-06
+
+**Context**
+
+CLAUDE.md §11 requires, for every new entity: a branded ID, Zod schema
+and domain test; a Drizzle **SQLite** table, migration, journal entry and
+registration, plus a repository interface and implementation; an
+in-memory repository in `packages/testing` and an entry in
+`mock-repository-provider.tsx`; entries in `Repositories` and
+`buildDrizzleRepositories()` plus a `useXRepository()` hook in
+`packages/ui`; and route files in `apps/mobile/src/app/` and
+`apps/desktop/src/app/routes/`.
+
+The portal introduces entities that only Postgres and Next.js will ever
+touch: `notices`, `metas`, `diagnosticos`, and the seals and streaks of
+Fase 8. None crosses the wire — `scope.ts` is untouched. Following §11
+literally would produce SQLite tables, in-memory repositories, accessor
+hooks and Expo Router files for data the device never reads, on a device
+whose surface A-01 is actively removing. §7 forbids exactly that. Not
+following §11 is worse: §2.10 states the contract "grows only when new
+rules are added" and that "if a rule must change, add an ADR in
+`ARCHITECTURE.md` first".
+
+§11 is also already stale. Its `apps/desktop/src/app/routes/` (wouter)
+line names an app F-02 archived out of the workspace, so anyone
+following the checklist today produces a file with nowhere to go.
+
+**Decision**
+
+§11 is amended to define two entity classes, with membership derived
+from a classification the codebase already makes.
+
+- **Synced entity** — a table named in `UP_TABLES`, `HYBRID_TABLES`,
+  `DOWN_TABLES` or `NEVER_SYNCED_TABLES` in
+  `packages/contracts/src/scope.ts`. The full §11 checklist applies,
+  minus the archived `apps/desktop` line.
+- **Portal-only entity** — a table named in none of them. The checklist
+  is: branded ID type; Zod schema and inferred type, exported from the
+  entities barrel; a domain entity test; a Drizzle **pg-core** table in
+  `@xangarro/data-pg` with its migration; a repository interface and
+  implementation, both exported; the portal screen and its route; i18n
+  keys in `es-mx.ts`; the §2.6 file and function budgets; and CLAUDE.md
+  §2.4's one happy path plus three unhappy paths per use case. No SQLite
+  table, no `packages/testing` in-memory repository, no `Repositories`
+  entry, no `useXRepository()` hook, no Expo Router file.
+
+The checklist gets shorter, not weaker: every rule that is not
+mobile-specific survives.
+
+**`notices` is one table serving two surfaces.** Avisos and the Asesor's
+"Para ti" feed have the same shape and the same lifecycle — severity,
+title, body, a deep link, a relative timestamp, and an unread → read →
+resolved/dismissed progression, each with four data states. Xangarrito's
+Asesor entitlement is literally "1 **aviso** por semana". The table
+carries `source ∈ sistema | operacion | asesor`, severity, title, body,
+a CTA target, `state ∈ nuevo | leído | listo | descartado`, and a `data`
+JSONB column for per-insight payload such as the price-suggestion table
+and product references.
+
+- The Avisos page renders `sistema` and `operacion` as its two tabs; the
+  Asesor tab filters `source='asesor'`.
+- **The header bell counts unread excluding `source='asesor'`** — the
+  design shows the badge and the Asesor nav item carrying separate
+  unread notions.
+- Plan tiering governs the **generator**, not the store: `capabilities
+  .asesor` decides how many `source='asesor'` rows are written and how
+  often. Read and dismiss behave identically regardless of origin.
+- One table means one RLS policy, one retention rule, one index, and one
+  delivery configuration for Fase 7's «Configurar» matrix — without
+  which the weekly aviso could not be delivered by WhatsApp, which is
+  the whole Xangarrito Asesor promise.
+- `notices` is portal-only and never synced. `NEVER_SYNCED_TABLES`
+  already holds `director_alerts`, the device's own local alert store,
+  so the phone keeps its stock-low notification (A-13) unchanged and
+  `scope.ts` is not touched again by C-11.
+
+**Alternatives considered**
+
+- **Following §11 literally.** Rejected: guaranteed dead code, which
+  A-15's rename sweep would then have to carry.
+- **Skipping §11 silently.** Rejected: precisely the drift §2.10 exists
+  to prevent, and the next reader of §11 would have no way to know it
+  did not apply.
+- **Separate `notices` and `asesor_insights` tables.** Rejected: it
+  duplicates the state machine, the badge counting and the empty states,
+  and it splits the delivery configuration in two.
+
+**Consequences**
+
+- X-06 grows: it now carries the §11 amendment and the removal of the
+  stale `apps/desktop` line, alongside whatever else it accumulates.
+- A future decision to sync one of these tables is a real migration —
+  adding it to `scope.ts` promotes it to a synced entity and the full
+  checklist applies from that point.
+- The `source` column plus `data` JSONB absorbs a good deal of
+  divergence before a split would be warranted. Splitting later is
+  easier than merging later.

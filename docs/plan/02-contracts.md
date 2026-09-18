@@ -228,3 +228,52 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 - **Steps:** one test file per endpoint asserting the §3–§7 rules (idempotent re-push, per-row rejection, single-use code under concurrent redemption (two parallel requests → exactly one 200), `acknowledged_through` monotonic, entitlement signature verifies with the public key).
 - **Acceptance:** green against `pnpm mock:api`; Track B runs the same suite against `localhost:3000` (real portal dev server + local Supabase) in B-07…B-09.
 - **How to test:** `API_BASE=http://localhost:3000 pnpm --filter @xangarro/contracts test -- conformance`.
+
+### C-11 Rename the plan ids and add `capabilities` to the entitlement (unfreezes §6, then re-freezes)
+
+- [x] Status · **Blocked by:** C-08 · **Blocks:** P-03, P-10, P-14, P-15, A-10, B-06, B-07, B-09
+  - Done: 2026-09-17 · `PLAN_IDS = ['xangarrito', 'xangarro', 'xangarrote']`, `PLAN_LIMITS` rekeyed,
+    `FALLBACK_PLAN = 'xangarrito'`, and `PlanCapabilities` added to both `PlanLimits` and the signed
+    `EntitlementSchema`. Amended at protocol version 1 — no bump, no aliases — and re-frozen.
+  - Swept: `plan.ts`, `entitlement.ts`, `mock/scenarios.ts` (the `X-Mock-Scenario` values are now
+    `xangarro|xangarrito|grace|lapsed|revoked|flaky`), `mock/cli.ts`, `use-feature-flags.ts`, and
+    the domain + contracts test fixtures including the entitlement signature vector.
+  - **475 domain tests and 44 contract tests pass**; `pnpm typecheck` 20/20 and `pnpm test` 11/11
+    green workspace-wide. `rg "'freelancer'|'mipyme_pro'"` returns nothing outside `dist/`.
+  - The word "emprendedor" survives in `HelloBadge` ("Hola, emprendedor.") and a comment in
+    `format/money.ts`. Those are the Spanish noun, not the plan id, and were deliberately left.
+  - Stripe lookup keys take the `plan_` prefix when B-10 creates them — not needed yet.
+  - **Context:** ADR-059. The Suscripción design is the one artifact its handoff marks as real
+    ("copy it verbatim") and it names the plans **Xangarrito $0 / Xangarro $199 / Xangarrote $399
+    MXN/mes**. The owner chose to rename the identifiers, not only the labels. The design also
+    sells «Asesor en cada plan» as a tiered capability that `FEATURE_FLAG_KEYS` cannot express.
+    Both changes land in **one** amendment so the contract is unfrozen once.
+  - **Why no protocol bump and no aliases:** `PROTOCOL_VERSION` protects deployed clients from
+    deployed servers and there are none — B-01 is unstarted, `00-README.md` §6 records that no
+    hosted project exists, and no device has ever received an entitlement. Aliases would
+    permanently enshrine identifiers no tenant ever held. Amend at version **1** and re-freeze.
+- **Files:** `packages/domain/src/entities/plan.ts`, `packages/domain/src/entities/entitlement.ts`,
+  `packages/domain/tests/entities/{plan,entitlement}.test.ts`,
+  `packages/contracts/src/{entitlement,activate,sync-pull}.ts`,
+  `packages/contracts/src/mock/{scenarios,cli}.ts`, `packages/contracts/tests/entitlement.test.ts`
+  (the signature vector changes — `canonicalize` output differs), `packages/ui/src/hooks/use-feature-flags.ts`,
+  the i18n plan labels, and `docs/plan/02-contracts.md` §6.
+- **Steps:**
+  1. `PLAN_IDS = ['xangarrito', 'xangarro', 'xangarrote']`; rekey `PLAN_LIMITS`; `FALLBACK_PLAN = 'xangarrito'`.
+  2. Add `capabilities` to `PlanLimits` and to the signed payload: `estadosFinancieros: boolean`,
+     `informeMensual: boolean`, `permisosPorUsuario: boolean`,
+     `asesor: 'semanal' | 'diario' | 'completo'`. Xangarrito: `estadosFinancieros: false`,
+     `asesor: 'semanal'`. Xangarro: statements on, `asesor: 'diario'`. Xangarrote: all on,
+     `asesor: 'completo'`. **`FEATURE_FLAG_KEYS` is unchanged** — it keeps meaning
+     tenant-toggleable business capabilities.
+  3. Regenerate the entitlement signature test vector.
+  4. Rename the mock scenarios (`X-Mock-Scenario: xangarrito|xangarro|grace|lapsed|revoked|flaky`)
+     and the `mock:api` help string.
+  5. Update `?plan=` slugs in P-03. **Stripe lookup keys take a `plan_` prefix** — the mid-tier plan
+     id and the product name are both `xangarro` and must be distinguishable in external namespaces.
+  6. Re-freeze §6 and note the amendment date under C-08.
+- **Acceptance:** `pnpm typecheck` and `pnpm test` green workspace-wide; the C-10 conformance suite
+  passes against `pnpm mock:api` with the renamed scenarios; no occurrence of `freelancer`,
+  `emprendedor` or `mipyme_pro` remains outside `ARCHITECTURE.md` and archived directories.
+- **How to test:** `pnpm --filter @xangarro/contracts test`; `pnpm --filter @xangarro/domain test`;
+  `rg -n 'freelancer|emprendedor|mipyme_pro' --glob '!archive/**' --glob '!ARCHITECTURE.md' -g '!**/dist/**'`.

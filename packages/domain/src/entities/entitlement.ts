@@ -21,6 +21,13 @@ export const EntitlementSchema = z.object({
     recordsPerMonth: z.number().int().positive().nullable(),
   }),
   features: z.array(z.enum(FEATURE_FLAG_KEYS)),
+  /** Plan-level gates with no tenant switch (ADR-059, task C-11). */
+  capabilities: z.object({
+    estadosFinancieros: z.boolean(),
+    informeMensual: z.boolean(),
+    permisosPorUsuario: z.boolean(),
+    asesor: z.enum(['semanal', 'diario', 'completo']),
+  }),
   validUntil: isoDate,
   graceUntil: isoDate,
   issuedAt: isoDate,

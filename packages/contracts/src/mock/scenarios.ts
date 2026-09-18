@@ -6,30 +6,23 @@
 import type { Entitlement, PlanId } from '@xangarro/domain';
 import { PLAN_LIMITS } from '@xangarro/domain';
 
-export const SCENARIOS = [
-  'emprendedor',
-  'freelancer',
-  'grace',
-  'lapsed',
-  'revoked',
-  'flaky',
-] as const;
+export const SCENARIOS = ['xangarro', 'xangarrito', 'grace', 'lapsed', 'revoked', 'flaky'] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 export const SCENARIO_HEADER = 'x-mock-scenario';
 
 export function scenarioOf(headers: Record<string, string>): Scenario {
   const v = headers[SCENARIO_HEADER];
-  return (SCENARIOS as readonly string[]).includes(v ?? '') ? (v as Scenario) : 'emprendedor';
+  return (SCENARIOS as readonly string[]).includes(v ?? '') ? (v as Scenario) : 'xangarro';
 }
 
 const DAY = 86_400_000;
 
 export function entitlementFor(scenario: Scenario, businessId: string, now: Date): Entitlement {
-  const plan: PlanId = scenario === 'freelancer' ? 'freelancer' : 'emprendedor';
+  const plan: PlanId = scenario === 'xangarrito' ? 'xangarrito' : 'xangarro';
   const limits = PLAN_LIMITS[plan];
   const t = now.getTime();
   const shift = scenario === 'grace' ? -12 * DAY : scenario === 'lapsed' ? -40 * DAY : 0;
-  const validUntil = plan === 'freelancer' ? t + 36_500 * DAY : t + 30 * DAY + shift;
+  const validUntil = plan === 'xangarrito' ? t + 36_500 * DAY : t + 30 * DAY + shift;
   return {
     businessId,
     plan,
@@ -39,6 +32,7 @@ export function entitlementFor(scenario: Scenario, businessId: string, now: Date
       recordsPerMonth: limits.recordsPerMonth,
     },
     features: [...limits.features],
+    capabilities: { ...limits.capabilities },
     validUntil: new Date(validUntil).toISOString(),
     graceUntil: new Date(validUntil + 7 * DAY).toISOString(),
     issuedAt: now.toISOString(),

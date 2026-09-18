@@ -65,3 +65,8 @@ apps/mobile/maestro/reports/
 # Python bytecode from maestro helper scripts
 __pycache__/
 *.pyc
+
+# Next.js (apps/portal)
+.next/
+next-env.d.ts
+.vercel/

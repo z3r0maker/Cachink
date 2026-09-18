@@ -11,9 +11,15 @@ const iso = (ms: number): string => new Date(ms).toISOString();
 
 const base: Entitlement = {
   businessId: '01JBUSINESS',
-  plan: 'emprendedor',
+  plan: 'xangarro',
   limits: { operators: 2, devices: 2, recordsPerMonth: null },
   features: ['stock', 'barcode'],
+  capabilities: {
+    estadosFinancieros: true,
+    informeMensual: false,
+    permisosPorUsuario: false,
+    asesor: 'diario',
+  },
   validUntil: iso(T0 + 10 * DAY),
   graceUntil: iso(T0 + 17 * DAY),
   issuedAt: iso(T0 - DAY),
@@ -24,7 +30,7 @@ const fresh = { nowAnchored: iso(T0), lastPullAt: iso(T0 - DAY) };
 
 describe('EntitlementSchema', () => {
   it('parses a valid payload', () => {
-    expect(EntitlementSchema.parse(base).plan).toBe('emprendedor');
+    expect(EntitlementSchema.parse(base).plan).toBe('xangarro');
   });
   it('rejects an unknown feature key, a bad plan, and a non-ISO date', () => {
     expect(() => EntitlementSchema.parse({ ...base, features: ['jetpack'] })).toThrow();

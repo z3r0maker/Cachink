@@ -21,7 +21,7 @@ import { scanFile, type Finding } from './scan';
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..');
 const BASELINE_PATH = join(REPO_ROOT, '.design-lint-baseline.json');
-const ROOTS = ['packages/ui/src', 'apps/mobile/src'];
+const ROOTS = ['packages/ui/src', 'apps/mobile/src', 'apps/portal/src'];
 
 type RuleCounts = Readonly<Record<string, number>>;
 
