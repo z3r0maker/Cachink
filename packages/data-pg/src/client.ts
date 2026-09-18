@@ -14,7 +14,13 @@ import * as schema from './schema/index.js';
 export type Db = ReturnType<typeof createDb>;
 
 export function createDb(url: string) {
-  const sql = postgres(url, { max: 5, onnotice: () => undefined });
+  // `prepare: false` (audit DB-CONN-01): Supabase's transaction pooler (6543)
+  // hands each transaction a different server connection, where a named
+  // prepared statement from the last one does not exist. Safe here because
+  // every piece of per-request state — the tenant claim, the JWT claims — is
+  // set with `set_config(..., true)`, i.e. transaction-local, never on the
+  // session. Direct and session-pooler connections lose nothing that matters.
+  const sql = postgres(url, { max: 5, prepare: false, onnotice: () => undefined });
   return drizzle(sql, { schema });
 }
 
