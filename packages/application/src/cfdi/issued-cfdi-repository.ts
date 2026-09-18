@@ -2,8 +2,9 @@
  * IssuedCfdiRepository — the port that makes CFDI issuance idempotent per
  * external payment id and remembers which payments await the global CFDI.
  *
- * Postgres implementation is future work (packages/data-pg); `claim` maps to
- * an INSERT … ON CONFLICT DO NOTHING on `external_payment_id`.
+ * Postgres: `cfdi_payments` / `cfdi_globals` (data-pg 0008), adapted in the
+ * portal; `claim` is an INSERT … ON CONFLICT DO NOTHING on
+ * `external_payment_id`.
  */
 
 import type { Money } from '@xangarro/domain';
@@ -15,6 +16,7 @@ import type { CancellationStatus, CfdiDocumentRef, CfdiReceptor } from './types.
 export type CfdiRoute = 'individual_pue' | 'individual_ppd' | 'global';
 
 /**
+ * `manual`: recorded with `CFDI_MODE=off`; staff issue it in the SAT portal.
  * `claimed`: reserved, stamping not finished (retry resumes it).
  * `stamped`: individual CFDI (and REP, for PPD) done.
  * `pending_global` → `in_global`: waiting for / included in a global CFDI.
@@ -22,6 +24,7 @@ export type CfdiRoute = 'individual_pue' | 'individual_ppd' | 'global';
  * `cancel_requested` → `cancelled`: refund cancellation in flight / done.
  */
 export type IssuedCfdiStatus =
+  | 'manual'
   | 'claimed'
   | 'stamped'
   | 'pending_global'
@@ -29,6 +32,9 @@ export type IssuedCfdiStatus =
   | 'excluded_from_global'
   | 'cancel_requested'
   | 'cancelled';
+
+/** Statuses of a payment still owed a CFDI. */
+export const UNINVOICED_STATUSES = ['manual', 'claimed', 'pending_global'] as const;
 
 export interface CfdiCancellationState {
   readonly motivo: MotivoCancelacion;
@@ -78,6 +84,8 @@ export interface IssuedCfdiRepository {
   update(record: IssuedCfdiRecord): Promise<void>;
   /** Records with status `pending_global` in a period, oldest payment first. */
   listPendingGlobal(period: string): Promise<IssuedCfdiRecord[]>;
+  /** Payments of a period still owed a CFDI (`manual`, `claimed`, `pending_global`), oldest first. */
+  listUninvoiced(period: string): Promise<IssuedCfdiRecord[]>;
   /** Global CFDIs of a period, by sequence. */
   listGlobals(period: string): Promise<GlobalCfdiRecord[]>;
   /** Insert or replace a global CFDI record (matched by id). */

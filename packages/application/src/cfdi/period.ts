@@ -44,3 +44,10 @@ export function parseFiscalPeriod(period: string): FiscalPeriod {
   const endsAt = new Date(Date.UTC(anio, Number(meses), 1) + CDMX_OFFSET_MS);
   return { period, meses, anio, endsAt };
 }
+
+/** The fiscal month before the one `instant` falls in (the one a cron on the 1st closes). */
+export function previousFiscalPeriodOf(instant: Date): string {
+  const { anio, meses } = parseFiscalPeriod(fiscalPeriodOf(instant));
+  const month = Number(meses);
+  return month === 1 ? `${anio - 1}-12` : `${anio}-${String(month - 1).padStart(2, '0')}`;
+}

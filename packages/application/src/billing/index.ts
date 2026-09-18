@@ -15,3 +15,4 @@ export * from './start-trial-checkout.js';
 export * from './start-spei-annual.js';
 export * from './open-customer-portal.js';
 export * from './apply-stripe-event.js';
+export * from './cfdi-listener.js';

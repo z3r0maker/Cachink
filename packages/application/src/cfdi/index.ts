@@ -4,7 +4,8 @@
  * Provider-independent core: a `PacProvider` port, the use cases that decide
  * individual vs global CFDI and drive stamping / cancellation, and an
  * `IssuedCfdiRepository` port for idempotency. Adapters live in `./adapters`.
- * Not wired to Stripe or the portal yet (B-10).
+ * Wired to Stripe's `invoice.paid` and the monthly cron by the portal, behind
+ * `CFDI_MODE` (`cfdi-mode.ts`).
  */
 
 export * from './errors.js';
@@ -22,4 +23,8 @@ export * from './issue-cfdi-for-payment.js';
 export * from './close-monthly-global-cfdi.js';
 export * from './cancel-cfdi-for-refund.js';
 export * from './issuer-config.js';
+export * from './cfdi-mode.js';
+export * from './cfdi-inbox-items.js';
+export * from './record-payment-for-cfdi.js';
+export * from './close-cfdi-period.js';
 export * from './adapters/facturapi/index.js';

@@ -9,7 +9,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./cfdi": "./src/cfdi/index.ts",
-    "./billing": "./src/billing/index.ts"
+    "./billing": "./src/billing/index.ts",
+    "./support-inbox": "./src/support-inbox/index.ts",
+    "./usage": "./src/usage/index.ts"
   },
   "scripts": {
     "build": "tsc --build",

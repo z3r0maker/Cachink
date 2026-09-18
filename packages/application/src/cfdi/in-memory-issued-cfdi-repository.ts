@@ -4,11 +4,14 @@
  */
 
 import { CfdiError } from './errors.js';
-import type {
-  GlobalCfdiRecord,
-  IssuedCfdiRecord,
-  IssuedCfdiRepository,
+import {
+  UNINVOICED_STATUSES,
+  type GlobalCfdiRecord,
+  type IssuedCfdiRecord,
+  type IssuedCfdiRepository,
 } from './issued-cfdi-repository.js';
+
+const UNINVOICED = new Set<string>(UNINVOICED_STATUSES);
 
 export class InMemoryIssuedCfdiRepository implements IssuedCfdiRepository {
   readonly #records = new Map<string, IssuedCfdiRecord>();
@@ -34,6 +37,12 @@ export class InMemoryIssuedCfdiRepository implements IssuedCfdiRepository {
   async listPendingGlobal(period: string): Promise<IssuedCfdiRecord[]> {
     return [...this.#records.values()]
       .filter((r) => r.period === period && r.status === 'pending_global')
+      .sort((a, b) => a.paidAt.getTime() - b.paidAt.getTime());
+  }
+
+  async listUninvoiced(period: string): Promise<IssuedCfdiRecord[]> {
+    return [...this.#records.values()]
+      .filter((r) => r.period === period && UNINVOICED.has(r.status))
       .sort((a, b) => a.paidAt.getTime() - b.paidAt.getTime());
   }
 
