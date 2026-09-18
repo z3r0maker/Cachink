@@ -58,6 +58,11 @@ export const ROUTES: readonly Route[] = [
     heading: 'Revisión de caja',
     data: { kind: 'fixture', reason: 'fixture until C-18 — revision-caja/page.tsx' },
   },
+  {
+    path: '/cortes',
+    heading: 'Cortes de turno',
+    data: { kind: 'fixture', reason: 'fixture until C-18 — cortes/page.tsx' },
+  },
   // USERS u-ana; default tab `operadores`.
   { path: '/equipo', heading: 'Tu equipo', data: { kind: 'db', sentinel: 'Ana Robledo' } },
   // EMPLOYEES emp-rosa — deliberately not Ana, who is also a USER, so this

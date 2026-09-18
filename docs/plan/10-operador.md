@@ -251,6 +251,11 @@ Collected while building fase 10; none is edited in `design-reference/`.
     label with a 13 px ink hint and a 230 px grid, 13 px-radius buttons with a 4 px shadow, and a
     green-check empty state; the owner portal's `SegmentedTabs`, `KpiCard`, `Button` and
     `EmptyState` differ. The files should follow the owner components.
+14. **Cortes de turno:** every corte shows the same count (×1 … ×10 = $3,780.00) and the same
+    «qué más pasó», whatever its «Contado» (code stores a count per corte and derives «Contado»
+    from it); the breadcrumb link is blue on gray at 4.19:1 (under AA — code uses ink); «Pedir
+    aclaración» says WhatsApp while ADR-075 routes owner→operator messages through
+    `mensajes_operador` (Avisos); the owner Drawer's header has no avatar or meta line.
 
 ## 5. Fase 11 — Caja y captura
 
@@ -453,7 +458,22 @@ O-06); fase 13 is next.
 
 ### O-31 Dueño · Cortes de turno
 
-- [ ] Status · **Blocked by:** O-28 (the close it reviews) · **Wires with:** C-18, O-06
+- [x] Status · **Blocked by:** O-28 (the close it reviews) · **Wires with:** C-18, O-06
+  - Done: 2026-09-18 · `app/(portal)/cortes/`, behind `requireSession()`; the sidebar lights
+    «Operadores» (`NavItem.activeOn`). Expected cash from the domain's `efectivoEsperado`, counted
+    cash from each corte's stored count (`totalContado`), the difference from `diferenciaCorte`;
+    KPIs, state / register filters, search, the owner `DataTable`, and the owner `Drawer` at 560 px
+    (new optional `width`, owner decision; default stays 460) with the difference, the note, how the
+    expected was formed, the count and the rest of the turno. «Marcar como aclarado» and «Pedir
+    aclaración» resolve on the page until C-18 / ADR-075's owner→operator message; «Exportar mes»
+    downloads a CSV of the month. Owner components throughout (owner decision extended to table and
+    chips). `tests/operador/cortes.test.ts`, `e2e/dueno-cortes.spec.ts`, and `/cortes` in the route
+    sweep; a11y clean after darkening the breadcrumb link.
+
+**Fase 13 screens are complete.** Every screen of the handoff except Acceso (O-12, blocked on the
+Access amendment and O-04/O-06) and the lock (O-13) is built on fixtures; real data follows the
+groundwork (O-02 to O-06) and C-18.
+
 - **Steps:** `/cortes` (the design marks «Operadores» active). Four KPIs including the month's
   accumulated difference; state and register filters and search; the list with expected, counted
   and difference per turno; the 560 px side panel (owner `Drawer`) with how the expected cash was
