@@ -9,7 +9,7 @@
  * ADR-049: PIN for login, Password for recovery.
  */
 
-import type { User, UserRole } from '@xangarro/domain';
+import type { User, UserPermissions, UserRole } from '@xangarro/domain';
 import type { BusinessId, UserId } from '@xangarro/domain';
 
 export type { User };
@@ -26,7 +26,10 @@ export type UserPatch = Partial<
     | 'avatarColor'
     | 'active'
   >
->;
+> & {
+  /** Per-operator permissions (P-05), stored as the JSON the phones parse. */
+  readonly permissions?: UserPermissions;
+};
 
 /** Input for creating a user — hashed credentials, not plaintext. */
 export interface CreateUserInput {

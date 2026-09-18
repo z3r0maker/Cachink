@@ -61,6 +61,11 @@ test('a full allowance is freed by deactivating, and a new operator takes the sl
   await page.getByRole('button', { name: 'Nuevo operador' }).click();
   await page.getByTestId('operador-nombre').fill('Rosa Medina');
   await page.getByTestId('operador-pin').fill('4321');
+  await expect(page.getByTestId('operador-pin')).toHaveAttribute('type', 'password');
+  await page.getByTestId('operador-pin-confirmar').fill('4312');
+  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
+  await expect(page.getByText('Los dos NIP no coinciden.')).toBeVisible();
+  await page.getByTestId('operador-pin-confirmar').fill('4321');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByText('2 de 2 operadores')).toBeVisible();
   await expect(page.locator('main').getByText('Rosa Medina', { exact: true })).toBeVisible();
@@ -83,12 +88,18 @@ test('a NIP reset replaces the old one', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'mutates shared operators');
 
   await page.goto('/equipo');
+  // The seeded tenant is on Xangarro: an active card, and no permissions editor.
+  await expect(
+    card(page, 'Rosa Medina').getByRole('button', { name: 'Reiniciar NIP' }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Editar permisos' })).toHaveCount(0);
   await card(page, 'Rosa Medina').getByRole('button', { name: 'Reiniciar NIP' }).click();
   await page.getByTestId('operador-nuevo-pin').fill('12');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByText('El NIP debe tener 4 números.')).toBeVisible();
 
   await page.getByTestId('operador-nuevo-pin').fill('9090');
+  await page.getByTestId('operador-nuevo-pin-confirmar').fill('9090');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 

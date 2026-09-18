@@ -1,6 +1,7 @@
 'use server';
 
 import {
+  CambiarPermisosOperadorUseCase,
   CrearOperadorUseCase,
   DesactivarOperadorUseCase,
   RestablecerPinOperadorUseCase,
@@ -34,6 +35,7 @@ const KNOWN = new Set([
   'OPERATOR_NOT_FOUND',
   'DUPLICATE_OPERATOR',
   'NOT_PERMITTED',
+  'PERMISOS_NO_INCLUIDOS',
 ]);
 
 function fail(error: unknown, where: string): OperadorResult {
@@ -101,5 +103,29 @@ export async function desactivarOperador(operatorId: string): Promise<OperadorRe
       : { ok: true };
   } catch (error) {
     return fail(error, 'desactivarOperador');
+  }
+}
+
+/** «Editar permisos» (P-05): only where the plan includes per-operator permissions. */
+export async function cambiarPermisos(
+  operatorId: string,
+  permisos: { canCancelSales: boolean },
+): Promise<OperadorResult> {
+  try {
+    const session = await requireMember('admin');
+    const businessId = session.business_id as BusinessId;
+    await withTenant(businessId, async (tx) =>
+      new CambiarPermisosOperadorUseCase(pgUsersRepository(tx, businessId)).execute({
+        businessId,
+        operatorId: operatorId as UserId,
+        permisos,
+        incluidoEnPlan: (await tenantEntitlement(tx, businessId, new Date())).capabilities
+          .permisosPorUsuario,
+      }),
+    );
+    revalidatePath('/equipo');
+    return { ok: true };
+  } catch (error) {
+    return fail(error, 'cambiarPermisos');
   }
 }

@@ -703,8 +703,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     per card, the counter counting **active** operators against `PLAN_LIMITS` (no local constant),
     an «Inactivo» pill, and the last-active warning. `e2e/operators.spec.ts` frees a full allowance
     by deactivating, creates into the slot, and checks the bcrypt hash and `sync_log` in Postgres.
-  - **Still to do:** masking the NIP field, the permissions editor itself, and the operator drawer
-    with recent shifts.
+  - 2026-09-18 · **NIP masked** (`type=password`, numeric keypad, 4 digits, non-digits dropped) with
+    a **confirm field** on create and reset. **Permissions editor:** «Editar permisos» → «Puede
+    cancelar ventas», only where `capabilities.permisosPorUsuario` (Xangarrote);
+    `CambiarPermisosOperadorUseCase` refuses below that plan and for another business's operator (4
+    tests); stored as the JSON phones parse (`UserPatch.permissions`, SQLite and Postgres repos), and
+    logged. e2e: mismatch refused and field masked; on a throwaway Xangarrote tenant the permission
+    saves and is logged; absent on Xangarro.
+  - **Still to do:** the operator drawer with recent shifts.
 - **Amended 2026-09-17 (ADR-058 §4):** no role label, no "Escritorio" state pill; **permissions are
   kept** and gated by `capabilities.permisosPorUsuario`.
 - **Amended 2026-09-17 (ADR-072):** the NIP is **exactly four digits**, set and reset only here; where
