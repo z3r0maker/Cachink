@@ -449,6 +449,9 @@ importers:
       '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
+      bcryptjs:
+        specifier: 3.0.3
+        version: 3.0.3
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@types/better-sqlite3@7.6.13)(better-sqlite3@12.10.0)(expo-sqlite@55.0.16(expo@55.0.24)(react-native@0.83.9(@babel/core@7.29.0)(@react-native/metro-config@0.85.2(@babel/core@7.29.0))(@types/react@19.3.0)(react@19.2.6))(react@19.2.6))(gel@2.2.0)(postgres@3.4.9)

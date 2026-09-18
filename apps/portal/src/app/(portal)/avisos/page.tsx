@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadAvisos } from '@/server/screens';
 
 import { AvisosScreen } from './screen';
@@ -14,8 +14,9 @@ import { AvisosScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function AvisosPage() {
+  const session = await requireSession();
   try {
-    return <AvisosScreen rows={await loadAvisos(SESSION.businessId)} />;
+    return <AvisosScreen rows={await loadAvisos(session.business_id)} />;
   } catch {
     return <AvisosScreen rows={null} />;
   }

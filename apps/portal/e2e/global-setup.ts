@@ -35,14 +35,28 @@ async function assertSeeded(url: string): Promise<void> {
   }
 }
 
-async function assertServerSeesDatabase(baseURL: string): Promise<void> {
-  const res = await fetch(`${baseURL}/productos`);
+/**
+ * The server is up, compiled, and serving the gate.
+ *
+ * This used to fetch `/productos` and look for seeded data, which stopped
+ * meaning what it said the moment P-02 landed: every product route now
+ * redirects a cookie-less request to `/login`, so the absence of `TAC-001`
+ * proves the gate works, not that the database is unreachable.
+ *
+ * The server-side database proof moved somewhere better. `auth.setup.ts` signs
+ * in, and login reads `auth.users` **on the server** — so a server without a
+ * working `DATABASE_URL` fails there, before any spec runs. Checking the login
+ * page here still catches the cruder failure: a stale dev server on this port,
+ * or a build that never compiled.
+ */
+async function assertServerIsServingTheGate(baseURL: string): Promise<void> {
+  const res = await fetch(`${baseURL}/login`, { redirect: 'follow' });
   const body = await res.text();
-  if (!body.includes('TAC-001')) {
+  if (!res.ok || !body.includes('Entra a tu portal')) {
     throw new Error(
-      `The server at ${baseURL} is not rendering seeded data.\n` +
-        'Most likely a dev server was already listening on that port without ' +
-        'DATABASE_URL, so Playwright reused it and webServer.env never applied.\n' +
+      `The server at ${baseURL} did not serve the login page (HTTP ${res.status}).\n` +
+        'Most likely something else is already listening on that port, or the ' +
+        'build did not complete.\n' +
         `Stop it and run:\n  ${RESET}`,
     );
   }
@@ -54,5 +68,5 @@ export default async function globalSetup(): Promise<void> {
     throw new Error(`DATABASE_URL is not set. Run:\n  ${RESET}`);
   }
   await assertSeeded(url);
-  await assertServerSeesDatabase(process.env.E2E_BASE_URL ?? 'http://localhost:3100');
+  await assertServerIsServingTheGate(process.env.E2E_BASE_URL ?? 'http://localhost:3100');
 }

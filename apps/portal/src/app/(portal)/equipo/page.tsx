@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadEquipo } from '@/server/screens';
 
 import { EquipoScreen } from './screen';
@@ -11,10 +11,11 @@ export default async function EquipoPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  const session = await requireSession();
   const { tab } = await searchParams;
   const initialTab = tab === 'dispositivos' ? 'dispositivos' : 'operadores';
   try {
-    return <EquipoScreen initialTab={initialTab} data={await loadEquipo(SESSION.businessId)} />;
+    return <EquipoScreen initialTab={initialTab} data={await loadEquipo(session.business_id)} />;
   } catch {
     return <EquipoScreen initialTab={initialTab} data={null} />;
   }

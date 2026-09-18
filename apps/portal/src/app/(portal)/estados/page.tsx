@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadEstadosModel } from '@/server/estados';
 
 import { EstadosScreen } from './screen';
@@ -16,8 +16,9 @@ import { EstadosScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function EstadosPage() {
+  const session = await requireSession();
   try {
-    const model = await loadEstadosModel(SESSION.businessId, '2026-05-01', '2026-05-31');
+    const model = await loadEstadosModel(session.business_id, '2026-05-01', '2026-05-31');
     return <EstadosScreen model={model} />;
   } catch {
     return <EstadosScreen model={null} />;

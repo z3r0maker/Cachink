@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadSincronizacion } from '@/server/screens';
 
 import { SincronizacionScreen } from './screen';
@@ -13,8 +13,9 @@ import { SincronizacionScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function SincronizacionPage() {
+  const session = await requireSession();
   try {
-    return <SincronizacionScreen data={await loadSincronizacion(SESSION.businessId)} />;
+    return <SincronizacionScreen data={await loadSincronizacion(session.business_id)} />;
   } catch {
     return <SincronizacionScreen data={null} />;
   }

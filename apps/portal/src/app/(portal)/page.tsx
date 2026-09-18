@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadInicio } from '@/server/inicio';
 
 import { InicioScreen } from './_inicio/screen';
@@ -21,11 +21,12 @@ const MONTH_FROM = '2026-05-01';
 const MONTH_TO = '2026-05-31';
 
 export default async function InicioPage() {
+  const session = await requireSession();
   try {
-    const data = await loadInicio(SESSION.businessId, TODAY, MONTH_FROM, MONTH_TO);
-    return <InicioScreen data={data} role={SESSION.role} />;
+    const data = await loadInicio(session.business_id, TODAY, MONTH_FROM, MONTH_TO);
+    return <InicioScreen data={data} role={session.member_role} />;
   } catch {
     // The screen owns the error state; the container only decides which one.
-    return <InicioScreen data={null} role={SESSION.role} />;
+    return <InicioScreen data={null} role={session.member_role} />;
   }
 }

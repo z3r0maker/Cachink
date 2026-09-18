@@ -11,6 +11,7 @@
  *
  *   pnpm --filter @xangarro/data-pg db:seed
  */
+import { hash } from 'bcryptjs';
 import postgres from 'postgres';
 
 import {
@@ -20,6 +21,8 @@ import {
   DEV,
   DAY_CLOSE_ID,
   DEVICES,
+  OWNER,
+  VIEWER,
   EMPLOYEES,
   EXPENSES,
   MOVEMENTS,
@@ -163,6 +166,28 @@ async function seedPortal(sql: Sql): Promise<void> {
   }
 }
 
+/**
+ * Portal members: an identity in `auth.users` plus a row in
+ * `business_members` giving it a role on this business.
+ *
+ * Two of them, because role gating needs something real to gate: an owner who
+ * may write and a viewer who may not. Passwords are bcrypt at cost 10, the same
+ * as GoTrue, so the login check is identical against either issuer.
+ */
+async function seedMembers(sql: Sql): Promise<void> {
+  for (const m of [OWNER, VIEWER]) {
+    const encrypted = await hash(m.password, 10);
+    await sql`
+      INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at)
+      VALUES (${m.id}::uuid, ${m.email}, ${encrypted}, now())
+      ON CONFLICT (id) DO UPDATE SET encrypted_password = EXCLUDED.encrypted_password`;
+    await sql`
+      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
+      VALUES (${m.memberId}, ${m.id}, ${m.role}, ${BIZ}, ${CREATED}, ${CREATED})
+      ON CONFLICT (id) DO NOTHING`;
+  }
+}
+
 async function main(): Promise<void> {
   const sql = postgres(URL as string, { max: 1, onnotice: () => undefined });
   try {
@@ -175,12 +200,13 @@ async function main(): Promise<void> {
     await seedDayClose(sql);
     await seedPeople(sql);
     await seedPortal(sql);
+    await seedMembers(sql);
 
     const [{ count }] = await sql<{ count: string }[]>`SELECT count(*)::text FROM sales`;
     console.log(
       `seeded Taquería Don Pedro — ${count} ventas, ${PRODUCTS.length} productos, ` +
         `${USERS.length} operadores, ${EMPLOYEES.length} empleados, ${DEVICES.length} dispositivos, ` +
-        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos`,
+        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos, 2 miembros`,
     );
   } finally {
     await sql.end({ timeout: 5 });

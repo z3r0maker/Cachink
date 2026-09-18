@@ -13,7 +13,7 @@ import {
   kpiGrid,
   type ColumnDef,
 } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { EmpleadosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 import { eyebrow } from '@/styles/text.css';
@@ -42,13 +42,14 @@ const COLUMNS: readonly ColumnDef<Empleado>[] = [
 ];
 
 function Heading() {
+  const session = useSession();
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
         <h1 className={pageTitle}>Empleados</h1>
         <p className={pageSubtitle}>Quién trabaja contigo y cuánto le pagas</p>
       </div>
-      {canWrite(SESSION.role) ? (
+      {canWrite(session.role) ? (
         <div style={{ marginLeft: 'auto' }}>
           <Button>Nuevo empleado</Button>
         </div>

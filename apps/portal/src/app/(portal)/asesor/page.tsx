@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadAsesor } from '@/server/screens';
 
 import { AsesorScreen } from './screen';
@@ -15,8 +15,9 @@ import { AsesorScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function AsesorPage() {
+  const session = await requireSession();
   try {
-    return <AsesorScreen insights={await loadAsesor(SESSION.businessId)} />;
+    return <AsesorScreen insights={await loadAsesor(session.business_id)} />;
   } catch {
     return <AsesorScreen insights={null} />;
   }

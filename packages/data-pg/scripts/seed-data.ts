@@ -164,3 +164,27 @@ export const REJECTIONS = [
     'Ajuste · Refresco · −1',
   ],
 ] as const;
+
+/**
+ * The portal's owner.
+ *
+ * A UUID because `auth.users.id` is Supabase's shape; the device-minted ULIDs
+ * elsewhere are a different id space and deliberately not mixed with it.
+ * The password is a fixture — local development and E2E only.
+ */
+export const OWNER = {
+  id: '3f1c0e2a-0000-4000-8000-000000000001',
+  email: 'pedro@taqueria.mx',
+  password: 'donpedro123',
+  memberId: id('MEMB1'),
+  role: 'owner',
+} as const;
+
+/** A read-only member, so role gating has something real to gate. */
+export const VIEWER = {
+  id: '3f1c0e2a-0000-4000-8000-000000000002',
+  email: 'contador@taqueria.mx',
+  password: 'contador123',
+  memberId: id('MEMB2'),
+  role: 'viewer',
+} as const;

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { ScreenBody, SegmentedTabs } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
@@ -108,10 +108,11 @@ function Body({
 }
 
 export function ProductosScreen({ data }: { readonly data: ProductosData | null }) {
+  const session = useSession();
   const [tab, setTab] = useState('catalogo');
   const [filter, setFilter] = useState('Todos');
   const [editing, setEditing] = useState<Producto | null>(null);
-  const mayWrite = canWrite(SESSION.role);
+  const mayWrite = canWrite(session.role);
 
   const catalogo = data?.catalogo ?? [];
   const rows = useMemo(

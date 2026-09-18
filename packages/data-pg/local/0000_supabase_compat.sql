@@ -105,6 +105,27 @@ AS $$
   );
 $$;
 
+-- auth.users — the identity store.
+--
+-- Column names and types are Supabase's, so the portal's queries read the same
+-- on a hosted project as they do here. What differs is who *writes* the table:
+-- locally the seed and the signup action do, on Supabase GoTrue does. That is a
+-- change of issuer, not of every query downstream, which is the whole point of
+-- keeping the shape.
+--
+-- `encrypted_password` is bcrypt on both sides, so the login check is identical.
+-- No RLS: this table is reached only through the server, never PostgREST, and
+-- on Supabase it lives outside the API schema entirely.
+CREATE TABLE IF NOT EXISTS auth.users (
+  id uuid PRIMARY KEY,
+  email text UNIQUE NOT NULL,
+  encrypted_password text,
+  email_confirmed_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role, xangarro_app;
 GRANT EXECUTE ON FUNCTION auth.jwt(), auth.uid(), auth.role(), auth.email()
   TO anon, authenticated, service_role, xangarro_app;
+GRANT SELECT, INSERT, UPDATE ON auth.users TO xangarro_app, service_role;

@@ -3,7 +3,7 @@
 import { PLAN_LIMITS } from '@xangarro/domain';
 
 import { Button, Card, ScreenBody, UsageBar } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import { ASESOR_TIERS, INVOICES, PLAN_CARDS } from '@/fixtures/planes';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
@@ -14,7 +14,8 @@ import { PlanCard } from './plan-card';
 import { pageSubtitle, pageTitle, planGrid, planName, usageLabel } from './suscripcion.css';
 
 function CurrentPlan({ owner }: { readonly owner: boolean }) {
-  const plan = PLAN_CARDS.find((p) => p.id === SESSION.planId);
+  const session = useSession();
+  const plan = PLAN_CARDS.find((p) => p.id === session.planId);
   return (
     <Card tone="hero" emphasis="hero">
       <div className={eyebrowOnYellow}>Tu plan</div>
@@ -40,7 +41,8 @@ function CurrentPlan({ owner }: { readonly owner: boolean }) {
  * quota misreports it, so "sin límite" rows show text alone.
  */
 function Consumo() {
-  const limits = PLAN_LIMITS[SESSION.planId];
+  const session = useSession();
+  const limits = PLAN_LIMITS[session.planId];
   return (
     <Card>
       <div className={eyebrow} style={{ marginBottom: 16 }}>
@@ -70,7 +72,8 @@ function Consumo() {
 }
 
 export function SuscripcionScreen() {
-  const owner = isOwner(SESSION.role);
+  const session = useSession();
+  const owner = isOwner(session.role);
   return (
     <>
       <div>
@@ -97,7 +100,7 @@ export function SuscripcionScreen() {
         </div>
         <div className={planGrid}>
           {PLAN_CARDS.map((p) => (
-            <PlanCard key={p.id} plan={p} current={p.id === SESSION.planId} />
+            <PlanCard key={p.id} plan={p} current={p.id === session.planId} />
           ))}
         </div>
         <AsesorBlock tiers={ASESOR_TIERS} />

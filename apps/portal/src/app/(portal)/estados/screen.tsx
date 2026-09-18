@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
 import { Button, ScreenBody, SegmentedTabs } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { EstadosModel } from '@/server/estados';
 import { hasStatements, resolveScreenState } from '@/session/gating';
 
@@ -81,6 +81,7 @@ function Heading() {
 }
 
 export function EstadosScreen({ model }: { readonly model: EstadosModel | null }) {
+  const session = useSession();
   const [tab, setTab] = useState('resultados');
 
   return (
@@ -94,7 +95,7 @@ export function EstadosScreen({ model }: { readonly model: EstadosModel | null }
       />
       <ScreenBody
         state={resolveScreenState({
-          entitled: hasStatements(SESSION.capabilities),
+          entitled: hasStatements(session.capabilities),
           error: model === null,
         })}
         onRetry={() => window.location.reload()}

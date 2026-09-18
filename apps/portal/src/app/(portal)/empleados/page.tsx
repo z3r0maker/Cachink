@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadEmpleados } from '@/server/screens';
 
 import { EmpleadosScreen } from './screen';
@@ -14,8 +14,9 @@ import { EmpleadosScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function EmpleadosPage() {
+  const session = await requireSession();
   try {
-    return <EmpleadosScreen rows={await loadEmpleados(SESSION.businessId)} />;
+    return <EmpleadosScreen rows={await loadEmpleados(session.business_id)} />;
   } catch {
     return <EmpleadosScreen rows={null} />;
   }

@@ -13,7 +13,7 @@ import {
   kpiGrid,
   type ColumnDef,
 } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { SincronizacionData } from '@/server/screens';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
@@ -40,13 +40,14 @@ const preview = (payload: unknown): string => {
 };
 
 function Heading() {
+  const session = useSession();
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
         <h1 className={pageTitle}>Sincronización</h1>
         <p className={pageSubtitle}>Qué falta por enviar</p>
       </div>
-      {isOwner(SESSION.role) ? (
+      {isOwner(session.role) ? (
         <div style={{ marginLeft: 'auto' }}>
           <Button>Sincronizar ahora</Button>
         </div>

@@ -5,7 +5,7 @@ import { EditarProductoUseCase } from '@xangarro/application';
 import type { ProductPatch } from '@xangarro/data';
 import type { BusinessId, ProductId } from '@xangarro/domain';
 
-import { SESSION } from '@/fixtures/business';
+import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { pgProductsRepository } from '../repositories/products';
 
@@ -31,11 +31,14 @@ import { pgProductsRepository } from '../repositories/products';
 export type EditResult = { ok: true } | { ok: false; message: string };
 
 export async function editarProducto(id: string, patch: ProductPatch): Promise<EditResult> {
-  // P-02 replaces the fixture with the real session; the tenant claim and the
-  // write both key off this one value, so there is a single place to change.
-  const businessId = SESSION.businessId as BusinessId;
-
   try {
+    // Before anything else, and on the server: hiding the Editar button from a
+    // viewer is a courtesy, not a control — a viewer can still call this action
+    // directly. The tenant comes from the same signed cookie, so a caller
+    // cannot name someone else's business either.
+    const session = await requireMember('admin');
+    const businessId = session.business_id as BusinessId;
+
     await withTenant(businessId, async (tx) => {
       const useCase = new EditarProductoUseCase(pgProductsRepository(tx, businessId));
       await useCase.execute({ id: id as ProductId, patch });

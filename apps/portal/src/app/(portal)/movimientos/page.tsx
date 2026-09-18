@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadMovimientos } from '@/server/screens';
 
 import { MovimientosScreen } from './screen';
@@ -17,12 +17,13 @@ export default async function MovimientosPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
+  const session = await requireSession();
   const { tab } = await searchParams;
   const initialTab = tab === 'gastos' ? 'gastos' : 'ventas';
   try {
     const [ventas, gastos] = await Promise.all([
-      loadMovimientos(SESSION.businessId, 'venta'),
-      loadMovimientos(SESSION.businessId, 'gasto'),
+      loadMovimientos(session.business_id, 'venta'),
+      loadMovimientos(session.business_id, 'gasto'),
     ]);
     return <MovimientosScreen initialTab={initialTab} ventas={ventas} gastos={gastos} />;
   } catch {

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { OWNER_STORAGE } from './e2e/auth-state';
+
 /**
  * Portal accessibility and state/role sweep (P-16).
  *
@@ -50,7 +52,13 @@ export default defineConfig({
     timeout: process.env.CI ? 60_000 : 240_000,
     // Redundant with env inheritance, and kept anyway: it is the only place a
     // reader learns this server is database-backed.
-    env: { DATABASE_URL: databaseUrl() },
+    env: {
+      DATABASE_URL: databaseUrl(),
+      // A fixture secret: this server is local and disposable. Production sets
+      // its own, and `session.ts` throws when it is missing rather than
+      // falling back to a default that would make every cookie forgeable.
+      SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-only-not-a-real-secret',
+    },
   },
   use: {
     baseURL: 'http://localhost:3100',
@@ -60,18 +68,37 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
+    // Signs in once; every other project reuses the cookie. `auth.spec.ts`
+    // exercises the form and the gate, so the suite is not also testing login
+    // a hundred times.
+    { name: 'setup', testMatch: /auth\.setup\.ts/ },
     {
       name: 'desktop',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        storageState: OWNER_STORAGE,
+      },
     },
     // The design's two responsive breakpoints: laptop and the tablet rail.
     {
       name: 'laptop',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 1024, height: 800 } },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1024, height: 800 },
+        storageState: OWNER_STORAGE,
+      },
     },
     {
       name: 'tablet',
-      use: { ...devices['Desktop Chrome'], viewport: { width: 768, height: 1024 } },
+      dependencies: ['setup'],
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 768, height: 1024 },
+        storageState: OWNER_STORAGE,
+      },
     },
   ],
 });

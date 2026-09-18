@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadProductos } from '@/server/screens';
 
 import { ProductosScreen } from './screen';
@@ -13,8 +13,9 @@ import { ProductosScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function ProductosPage() {
+  const session = await requireSession();
   try {
-    return <ProductosScreen data={await loadProductos(SESSION.businessId)} />;
+    return <ProductosScreen data={await loadProductos(session.business_id)} />;
   } catch {
     return <ProductosScreen data={null} />;
   }

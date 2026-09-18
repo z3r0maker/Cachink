@@ -29,6 +29,7 @@
   "dependencies": {
     "@xangarro/contracts": "workspace:*",
     "@xangarro/domain": "workspace:*",
+    "bcryptjs": "3.0.3",
     "drizzle-orm": "^0.45.2",
     "postgres": "^3.4.9"
   },
@@ -36,8 +37,8 @@
     "@xangarro/config": "workspace:*",
     "@xangarro/data": "workspace:*",
     "drizzle-kit": "^0.31.10",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6",
-    "tsx": "^4.23.13"
+    "vitest": "^4.1.6"
   }
 }

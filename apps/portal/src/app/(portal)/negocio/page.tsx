@@ -1,4 +1,4 @@
-import { SESSION } from '@/fixtures/business';
+import { requireSession } from '@/server/auth';
 import { loadNegocio } from '@/server/screens';
 
 import { NegocioScreen } from './screen';
@@ -10,8 +10,9 @@ import { NegocioScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function NegocioPage() {
+  const session = await requireSession();
   try {
-    return <NegocioScreen business={(await loadNegocio(SESSION.businessId)) ?? null} />;
+    return <NegocioScreen business={(await loadNegocio(session.business_id)) ?? null} />;
   } catch {
     return <NegocioScreen business={null} />;
   }

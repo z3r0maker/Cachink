@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { Button, ScreenBody, SegmentedTabs, UsageBar } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
@@ -64,9 +64,10 @@ export function EquipoScreen({
   readonly initialTab: EquipoTab;
   readonly data: EquipoData | null;
 }) {
+  const session = useSession();
   const [tab, setTab] = useState<string>(initialTab);
   const isOperadores = tab === 'operadores';
-  const mayWrite = canWrite(SESSION.role);
+  const mayWrite = canWrite(session.role);
   const activos = data?.operadores.length ?? 0;
 
   return (

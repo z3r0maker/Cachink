@@ -1,7 +1,7 @@
 'use client';
 
 import { Banner, Button, ScreenBody } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { NegocioData } from '@/server/screens';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
@@ -57,7 +57,8 @@ function buildSections(business: NegocioData | null | undefined) {
 }
 
 export function NegocioScreen({ business }: { readonly business: NegocioData | null }) {
-  const owner = isOwner(SESSION.role);
+  const session = useSession();
+  const owner = isOwner(session.role);
   // A missing fiscal address is a thing to do, not an absence — the banner and
   // the amber "Falta por completar" field come from the same row.
   const sections = buildSections(business);

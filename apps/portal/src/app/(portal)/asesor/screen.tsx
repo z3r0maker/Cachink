@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 import { ScreenBody, SegmentedTabs, Tag } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import { asesorShowsDiagnostico, resolveScreenState } from '@/session/gating';
 
 import type { AvisosData } from '@/server/screens';
@@ -43,10 +43,11 @@ function Heading() {
 }
 
 function Diagnostico() {
+  const session = useSession();
   return (
     <ScreenBody
       state={resolveScreenState({
-        entitled: asesorShowsDiagnostico(SESSION.capabilities),
+        entitled: asesorShowsDiagnostico(session.capabilities),
         llmBacked: true,
         llmEnabled: LLM_ENABLED,
       })}

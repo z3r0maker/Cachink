@@ -11,6 +11,33 @@ import type { Session } from '@/session/types';
  * Money is `bigint` centavos throughout, never a float (CLAUDE.md §2.8), and
  * is formatted only at the boundary with `@xangarro/domain`'s `formatMoney`.
  */
+/**
+ * Plan tiering, still a fixture.
+ *
+ * Identity and role come from the signed cookie now; these three ride in the
+ * signed entitlement (B-06), which has no issuer yet. Split out so the swap is
+ * one change in `server/current-session.ts`.
+ */
+export const PLAN_FIXTURE = {
+  planId: 'xangarro',
+  capabilities: {
+    estadosFinancieros: true,
+    informeMensual: false,
+    permisosPorUsuario: false,
+    asesor: 'diario',
+  },
+  features: {
+    stock: true,
+    barcode: true,
+    conversionMateriaPrima: false,
+    conversionAutomatica: false,
+    auditoriaInventario: false,
+    merma: false,
+    ventasCredito: false,
+  },
+} as const satisfies Pick<Session, 'planId' | 'capabilities' | 'features'>;
+
+/** @deprecated Superseded by the real session; remaining uses are being migrated. */
 export const SESSION: Session = {
   role: 'owner',
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',

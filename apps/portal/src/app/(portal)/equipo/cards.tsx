@@ -1,7 +1,7 @@
 'use client';
 
 import { Button, Card, StatusPill, Tag } from '@/components';
-import { SESSION } from '@/fixtures/business';
+import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 import { ACTIVATION_CODE, CODE_EXPIRES_IN } from '@/fixtures/equipo';
@@ -58,7 +58,8 @@ function canCancel(permissions: unknown): boolean {
 }
 
 export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }) {
-  const showPerms = SESSION.capabilities.permisosPorUsuario && canWrite(SESSION.role);
+  const session = useSession();
+  const showPerms = session.capabilities.permisosPorUsuario && canWrite(session.role);
   return (
     <div className={cardGrid}>
       {rows.map((o) => (
