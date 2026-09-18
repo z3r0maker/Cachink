@@ -1,0 +1,32 @@
+{
+  "name": "@xangarro/auth-core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "In-house authentication primitives (ADR-079, ADR-080): bcrypt passwords with a constant-time miss, session tokens, throttle policies, TOTP and recovery codes. Pure and DB-agnostic; storage comes in through ports.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --config ../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
+    "clean": "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.17",
+    "@vitest/coverage-v8": "^4.1.6",
+    "@xangarro/config": "workspace:*",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
+  }
+}
