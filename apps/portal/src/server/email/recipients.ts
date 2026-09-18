@@ -13,10 +13,9 @@ import type {
  * read outside a session (only `xangarro.login_lookup` by email, and the
  * session resolver). Billing already copies it to the Stripe customer when
  * the owner starts a trial or subscribes, so the Stripe customer is the
- * recipient here. A business with no Stripe customer (never started a trial:
- * xangarrito from day one) has no address this code can reach — see
- * `docs/ops/email.md` «Open items» for the security-definer function that
- * would close that gap (a migration, not on this branch).
+ * recipient for the trial emails. The usage emails, which a free business
+ * with no Stripe customer must also get, are addressed through
+ * `xangarro.owner_email()` instead (`../usage/owner-notifier.ts`).
  */
 
 /** The slice of the Stripe SDK used; tests pass a fake. */

@@ -6,6 +6,7 @@ import {
   beginUsageNotice,
   finishUsageNotice,
   saveUsageCounters,
+  usageCounterOf,
   usageCountersOf,
 } from '../src/queries/metering';
 import {
@@ -113,6 +114,9 @@ describe('metering and CFDI tables: one writer each, nobody deletes', () => {
     await saveUsageCounters(metering, [{ ...row, transactions: 7 }], '2026-09-19T09:00:00.000Z');
     const stored = (await usageCountersOf(metering, [period])).filter((r) => r.businessId === biz);
     assert.deepEqual(stored, [{ ...row, transactions: 7 }]);
+    const one = await usageCounterOf(metering, biz, period);
+    assert.equal(one?.computedAt, '2026-09-19T09:00:00.000Z');
+    assert.equal(await usageCounterOf(metering, biz, '2097-02'), null);
 
     const key = `${biz}:${period}:transactions:100`;
     assert.equal(await beginUsageNotice(metering, key, 'owner', biz), 'new');

@@ -103,6 +103,26 @@ export async function usageCountersOf(
   }));
 }
 
+/** One business's stored counter for a month, with when it was computed. */
+export async function usageCounterOf(
+  db: Conn,
+  businessId: string,
+  period: string,
+): Promise<(UsageCountRow & { readonly computedAt: string }) | null> {
+  const [r] = await db
+    .select()
+    .from(usageCounters)
+    .where(and(eq(usageCounters.businessId, businessId), eq(usageCounters.period, period)));
+  if (!r) return null;
+  return {
+    businessId: r.businessId,
+    period: r.period,
+    transactions: r.transactions,
+    activeProducts: r.products,
+    computedAt: new Date(r.computedAt).toISOString(),
+  };
+}
+
 /**
  * Claim a notice. `new` — first time, send it; `retry` — claimed before but
  * never delivered, send it again; `done` — delivered, send nothing.
@@ -142,4 +162,15 @@ export async function finishUsageNotice(
         isNull(usageNotices.deliveredAt),
       ),
     );
+}
+
+/**
+ * The business owner's address (`xangarro.owner_email`, 0011) — the recipient
+ * of the usage emails. Null when the business has no owner with an account.
+ */
+export async function ownerEmailOf(db: Conn, businessId: string): Promise<string | null> {
+  const rows = await db.execute<{ email: string | null }>(
+    sql`SELECT xangarro.owner_email(${businessId}) AS email`,
+  );
+  return rows[0]?.email ?? null;
 }

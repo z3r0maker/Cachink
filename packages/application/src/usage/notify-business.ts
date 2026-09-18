@@ -50,7 +50,16 @@ async function crossingNotices(
   for (const recipient of crossing.recipients) {
     const send =
       recipient === 'owner'
-        ? () => deps.owner.notifyUsageThreshold({ crossing, value, limit })
+        ? () =>
+            deps.owner.notifyUsageThreshold({
+              businessId: crossing.businessId,
+              period: crossing.period,
+              metric: crossing.metric,
+              threshold: crossing.threshold,
+              used: value,
+              limit,
+              idempotencyKey: crossing.idempotencyKey,
+            })
         : () => deps.inbox.file(limitItem(crossing, value, limit));
     sent += await deliver(
       deps.ledger,

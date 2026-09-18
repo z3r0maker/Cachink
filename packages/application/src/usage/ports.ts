@@ -1,16 +1,15 @@
 /**
  * What the usage recompute (N-02 / N-03) needs from the outside world.
  * The portal implements them over `@xangarro/data-pg` (the
- * `xangarro_metering` connection), the admin inbox and — once B-14 lands —
- * the transactional email; tests use fakes.
+ * `xangarro_metering` connection), the admin inbox and B-14's transactional
+ * email; tests use fakes.
  */
 
-import type {
-  ThresholdCrossing,
-  UsageLimits,
-  UsagePeriod,
-  UsageSnapshot,
-} from '@xangarro/domain/usage';
+import type { UsageLimits, UsagePeriod, UsageSnapshot } from '@xangarro/domain/usage';
+
+import type { UsageThresholdNotice } from '../email/notify-usage-threshold.js';
+
+export type { UsageThresholdNotice };
 
 /** `xangarro.usage_counts()`: every live business, `first`..`last`, zeros included. */
 export interface UsageCountSource {
@@ -44,39 +43,12 @@ export interface UsageNoticeLedger {
   finish(key: string, recipient: NoticeRecipient): Promise<void>;
 }
 
-/** A threshold the owner is told about (80 % / 100 %). */
-export interface UsageThresholdNotice {
-  readonly crossing: ThresholdCrossing;
-  readonly value: number;
-  readonly limit: number;
-}
-
 /**
- * The owner's warning (N-03): an email once B-14's mailer lands
- * (`track-n/b14-email`); until then `logUsageThresholdNotifier`. Swap the
- * adapter in the portal's composition root — nothing else changes.
+ * The owner's 80 % / 100 % warning (N-03). The portal implements it with
+ * B-14's `notifyUsageThreshold` email (`@xangarro/application/email`),
+ * addressed to the owner from `xangarro.owner_email()`. It must throw when the
+ * email was not sent, so the ledger retries it on the next run.
  */
 export interface UsageThresholdNotifier {
   notifyUsageThreshold(notice: UsageThresholdNotice): Promise<void>;
-}
-
-/** One structured log line per notice — ids and numbers, no PII. */
-export function logUsageThresholdNotifier(log: (line: string) => void): UsageThresholdNotifier {
-  return {
-    notifyUsageThreshold({ crossing, value, limit }) {
-      log(
-        JSON.stringify({
-          evt: 'usage_threshold',
-          business_id: crossing.businessId,
-          period: crossing.period,
-          metric: crossing.metric,
-          threshold: crossing.threshold,
-          value,
-          limit,
-          key: crossing.idempotencyKey,
-        }),
-      );
-      return Promise.resolve();
-    },
-  };
 }

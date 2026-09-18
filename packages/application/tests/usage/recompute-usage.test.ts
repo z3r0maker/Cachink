@@ -45,7 +45,7 @@ describe('RecomputeUsageUseCase (N-02 nightly + N-03 notices)', () => {
     );
     assert.equal(h.store.rows.size, 3);
     assert.deepEqual(
-      h.owner.sent.map((n) => n.crossing.threshold),
+      h.owner.sent.map((n) => n.threshold),
       [80, 100],
     );
     assert.deepEqual(
@@ -93,11 +93,11 @@ describe('RecomputeUsageUseCase (N-02 nightly + N-03 notices)', () => {
       first.failures.map((f) => f.businessId),
       ['a'],
     );
-    assert.ok(h.owner.sent.every((n) => n.crossing.businessId === 'b'));
+    assert.ok(h.owner.sent.every((n) => n.businessId === 'b'));
     h.owner.failFor = null;
     const second = await h.useCase.execute();
     assert.deepEqual(second.failures, []);
-    assert.equal(h.owner.sent.filter((n) => n.crossing.businessId === 'a').length, 2);
+    assert.equal(h.owner.sent.filter((n) => n.businessId === 'a').length, 2);
   });
 
   it('fails the whole run when usage cannot be counted, storing nothing', async () => {

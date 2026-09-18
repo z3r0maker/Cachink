@@ -18,12 +18,9 @@ import { portalEmailSender, portalUrl } from './sender';
 /**
  * The owner's 80 % / 100 % usage email (N-03).
  *
- * **Call site (for the N-02 wiring branch):** after the usage use case
- * computes a snapshot, call this once per `crossedThresholds(prev, next,
- * limits)` crossing whose `recipients` include `'owner'`, with the counts:
- *
- *     await notifyUsageThreshold({ ...crossing, used: next[crossing.metric],
- *       limit: limitFor(limits, crossing.metric) });
+ * **Call site:** the nightly usage recompute (`../usage/owner-notifier.ts`),
+ * once per owner crossing (80 / 100 %), with the owner from
+ * `xangarro.owner_email()` passed as `owners`.
  *
  * Once per threshold per month is the crossing's job; the idempotency key
  * (`usage-threshold:` + the crossing's key) makes a retried call send once.

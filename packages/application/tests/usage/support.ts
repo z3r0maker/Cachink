@@ -69,7 +69,7 @@ export class RecordingOwner implements UsageThresholdNotifier {
   failFor: string | null = null;
 
   notifyUsageThreshold(notice: UsageThresholdNotice): Promise<void> {
-    if (notice.crossing.businessId === this.failFor) return Promise.reject(new Error('smtp'));
+    if (notice.businessId === this.failFor) return Promise.reject(new Error('smtp'));
     this.sent.push(notice);
     return Promise.resolve();
   }

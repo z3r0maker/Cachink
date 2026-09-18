@@ -103,12 +103,13 @@ To send for real from a laptop, export a **test** Resend key in your shell
 
 ## 6. Open items
 
-- **Owner address for businesses without a Stripe customer.** The owner's
-  email is in `auth.users`, readable by no portal role outside a session. The
-  trial and usage emails therefore use the Stripe customer's email, which a
-  business has once it starts a trial. A free-from-day-one business gets no
-  usage email until a `xangarro.owner_email(business_id)` security-definer
-  function (granted to `xangarro_billing`) exists — a data-pg migration.
+- ~~**Owner address for businesses without a Stripe customer.**~~ Closed
+  (N-02/N-03 wiring): `xangarro.owner_email(business_id)` (data-pg
+  `0011_owner_email.sql`, SECURITY DEFINER, EXECUTE granted only to
+  `xangarro_metering`) returns the earliest owner's `auth.users` email. The
+  nightly usage cron (`/api/cron/usage`) addresses the usage emails with it,
+  so a free-from-day-one business is reached too. Trial emails still use the
+  Stripe customer, which every trialing business has.
 - **Logo.** The layout shows a text wordmark; swap in the hosted logo when it
   exists (`packages/email/src/templates/layout.tsx`).
 - **B-14's original templates** `activation-code`, `welcome`, `payment-failed`,
