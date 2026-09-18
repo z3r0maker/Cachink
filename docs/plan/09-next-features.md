@@ -153,13 +153,23 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
 - **What:** tenant list (plan, Stripe status active/trialing/past_due/lapsed, next charge, interval,
   devices, last sync, last login) and detail with a link to the Stripe customer.
 - **How:** Stripe stays the source of truth (webhooks). Overrides, each audited and each with an
   expiry: **extend trial**, **comp plan** (e.g. beta testers, N-30), **re-issue entitlement**
   (forces a fresh signed token on the next pull).
 - **Acceptance:** an override changes the next pulled entitlement; expiry reverts it; audit row.
+- Progress: 2026-09-17 · cb03934…7aec8da (branch `track-n/n06-admin-tenants`, on top of N-08, unmerged)
+  · tenant list (keyset pagination, search by name/owner email/id, "sin sincronizar > 7 días" from
+  `devices.last_push_at`/`last_pull_at`) and detail (members, devices, inbox link); append-only,
+  audited, expiring `PlanOverride` (extend_trial / comp_plan / reissue_entitlement) +
+  `effectivePlan` (13 tests); read-only cross-tenant SQL for `xangarro_admin`, verified on a
+  throwaway PG17. Billing fields come from a `BillingStatusSource` stub ("Sin datos") until B-10. No
+  RFC column exists yet on main, so no RFC search. **Still to do:** B-10 adapter; B-06's
+  `computeEntitlement` (`compute-entitlement.ts:83-99`) must consume `effectivePlan` (comp before the
+  free fallback, trial extension on `currentPeriodEnd`, reissue invalidates older cached tokens) —
+  a Track B change; last-login grant; Playwright.
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
