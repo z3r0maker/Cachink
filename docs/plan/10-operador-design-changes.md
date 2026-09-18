@@ -14,9 +14,10 @@ Detalle de cliente (one history, «a su favor»), WhatsApp wording, Cierre (coun
 unsent records) and the two owner screens (owner components, per-corte count and events, Avisos,
 ink breadcrumb). The code follows all of them.
 
-## Second round — open
+## Second round — deferred to a UX audit
 
-Each block can be pasted into Claude Design as it stands.
+Owner decision (2026-09-18): the code keeps its versions of the three points below until a later
+UX audit decides. Each block can be pasted into Claude Design as it stands if the audit agrees.
 
 ### Operador Inicio and Operador Turno — capital letters
 

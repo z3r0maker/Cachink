@@ -5,6 +5,7 @@ import {
   calculateEstadoDeResultados,
   calculateFlujoDeEfectivo,
   calculateIndicadores,
+  desgloseDeResultados,
   type Expense,
   type Sale,
 } from '@xangarro/domain';
@@ -28,6 +29,8 @@ export interface EstadosModel {
   readonly indicadores: ReturnType<typeof calculateIndicadores>;
   /** The business's own ISR rate (Negocio, P-08), in basis points. */
   readonly isrTasa: number;
+  /** What each expandable line is made of — sums to the line (domain test). */
+  readonly desglose: ReturnType<typeof desgloseDeResultados>;
 }
 
 const DIA_MS = 86_400_000;
@@ -77,5 +80,6 @@ export async function loadEstadosModel(
     periodoDiasVenta: diasEntre(from, to),
   });
 
-  return { resultados, balance, flujo, indicadores, isrTasa };
+  const desglose = desgloseDeResultados({ ventas, egresos });
+  return { resultados, balance, flujo, indicadores, isrTasa, desglose };
 }

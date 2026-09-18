@@ -16,3 +16,4 @@ export * from './margen-producto.js';
 export * from './abonos.js';
 export * from './estado-cuenta.js';
 export * from './cierre-turno.js';
+export * from './desglose.js';

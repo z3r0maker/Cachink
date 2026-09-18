@@ -646,8 +646,13 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     notice shows that rate, with the no-utilidad variant; `periodoDiasVenta` was 31 for any period
     and is now the period's days; `periodLedger` loaded every sale and filtered in JS by string
     (dropping timestamped `fecha` on the last day) — it now filters by day in SQL (2 DB tests).
-  - **Still to do:** expandable disclosure rows, the waterfall and donuts, the print stylesheet,
-    and "Informe mensual PDF" gated by `capabilities.informeMensual` (P-34).
+  - 2026-09-18 · **Disclosure rows**: Ingresos (by payment method), Costo de ventas and Gastos
+    operativos (by category) carry a 23×23 toggle (`aria-expanded`) that lists their parts, largest
+    first. `desgloseDeResultados` in the domain classifies with the statement's own
+    `esCostoDeVentas` (now exported, the one copy of the rule); a test holds every breakdown equal
+    to its line. e2e expands Gastos operativos against the seed.
+  - **Still to do:** the waterfall and donuts, the print stylesheet, and "Informe mensual PDF"
+    gated by `capabilities.informeMensual` (P-34).
 - **Amended 2026-09-17 (ADR-059):** adds the fifth `locked` state; Xangarrito has no NIF statements.
 - **Steps:** Period switcher (Mensual / Trimestral / Anual / Personalizado, `height 44`,
   `radius 14`, `3px 3px 0`) and statement tabs (Resultados / Posición / Flujo / Indicadores,
