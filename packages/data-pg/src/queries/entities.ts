@@ -108,18 +108,26 @@ export async function listClientes(tx: Tx) {
 }
 
 /** Real `Sale` and `Expense` rows for the NIF statements. */
+/**
+ * A period's ledger for the statements (P-14): live sales and expenses whose
+ * day falls in [from, to]. Filtered in SQL on the first ten characters of
+ * `fecha` (text on both sides of the wire), so a timestamped fecha on the last
+ * day still counts and a year's statement does not pull every row ever sold.
+ */
 export async function periodLedger(tx: Tx, from: string, to: string) {
-  const [v, g] = await Promise.all([
+  const inRange = (col: typeof sales.fecha | typeof expenses.fecha) =>
+    sql`left(${col}, 10) BETWEEN ${from} AND ${to}`;
+  const [ventas, egresos] = await Promise.all([
     tx
       .select()
       .from(sales)
-      .where(and(isNull(sales.deletedAt), isNull(sales.cancelledAt))),
-    tx.select().from(expenses).where(isNull(expenses.deletedAt)),
+      .where(and(isNull(sales.deletedAt), isNull(sales.cancelledAt), inRange(sales.fecha))),
+    tx
+      .select()
+      .from(expenses)
+      .where(and(isNull(expenses.deletedAt), inRange(expenses.fecha))),
   ]);
-  return {
-    ventas: v.filter((r) => (r.fecha ?? '') >= from && (r.fecha ?? '') <= to),
-    egresos: g.filter((r) => (r.fecha ?? '') >= from && (r.fecha ?? '') <= to),
-  };
+  return { ventas, egresos };
 }
 
 /**

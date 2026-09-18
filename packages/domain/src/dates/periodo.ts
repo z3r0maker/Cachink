@@ -37,6 +37,19 @@ export function rangoDelMes(date: IsoDate): Rango {
   return { desde: iso(Date.UTC(y, m - 1, 1)), hasta: iso(Date.UTC(y, m, 0)) };
 }
 
+/** The calendar quarter holding `date`: Jan–Mar, Apr–Jun, Jul–Sep, Oct–Dec. */
+export function rangoDelTrimestre(date: IsoDate): Rango {
+  const [y, m] = date.split('-').map(Number) as [number, number];
+  const q = Math.floor((m - 1) / 3) * 3;
+  return { desde: iso(Date.UTC(y, q, 1)), hasta: iso(Date.UTC(y, q + 3, 0)) };
+}
+
+/** The calendar year holding `date` — the fiscal year in Mexico. */
+export function rangoDelAnio(date: IsoDate): Rango {
+  const y = date.slice(0, 4);
+  return { desde: `${y}-01-01` as IsoDate, hasta: `${y}-12-31` as IsoDate };
+}
+
 export function rangoDeSemana(date: IsoDate): Rango {
   const t = utc(date);
   const desdeLunes = (new Date(t).getUTCDay() + 6) % 7;

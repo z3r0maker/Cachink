@@ -9,7 +9,9 @@ import {
   type Sale,
 } from '@xangarro/domain';
 
-import { loadEstados } from './screens';
+import { getBusiness, periodLedger } from '@xangarro/data-pg';
+
+import { withTenant } from './db';
 
 /**
  * The NIF statements, computed from **real ledger rows** by the existing
@@ -24,17 +26,24 @@ export interface EstadosModel {
   readonly balance: ReturnType<typeof calculateBalanceGeneral>;
   readonly flujo: ReturnType<typeof calculateFlujoDeEfectivo>;
   readonly indicadores: ReturnType<typeof calculateIndicadores>;
+  /** The business's own ISR rate (Negocio, P-08), in basis points. */
+  readonly isrTasa: number;
 }
 
-/** RESICO — 1.25%, in basis points, as the domain requires. */
-const ISR_BPS = 125;
+const DIA_MS = 86_400_000;
+const diasEntre = (from: string, to: string) =>
+  Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / DIA_MS) + 1);
 
 export async function loadEstadosModel(
   businessId: string,
   from: string,
   to: string,
 ): Promise<EstadosModel> {
-  const rows = await loadEstados(businessId, from, to);
+  // One tenant transaction: the period's ledger and the rate the owner set.
+  const { rows, isrTasa } = await withTenant(businessId, async (tx) => ({
+    rows: await periodLedger(tx, from, to),
+    isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
+  }));
 
   // The cloud schema now keys `monto_centavos` as `monto`, like the device
   // and the domain (drift.test.ts holds the keys equal). Before, it said
@@ -47,7 +56,7 @@ export async function loadEstadosModel(
     (r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Expense,
   );
 
-  const resultados = calculateEstadoDeResultados({ ventas, egresos, isrTasa: ISR_BPS });
+  const resultados = calculateEstadoDeResultados({ ventas, egresos, isrTasa });
 
   const balance = calculateBalanceGeneral({
     cortesDelDia: [],
@@ -65,8 +74,8 @@ export async function loadEstadosModel(
     balanceGeneral: balance,
     inventarioPromedio: 0n,
     ventasCreditoPeriodoCentavos: 0n,
-    periodoDiasVenta: 31,
+    periodoDiasVenta: diasEntre(from, to),
   });
 
-  return { resultados, balance, flujo, indicadores };
+  return { resultados, balance, flujo, indicadores, isrTasa };
 }

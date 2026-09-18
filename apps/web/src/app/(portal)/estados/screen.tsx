@@ -11,6 +11,8 @@ import { hasStatements, resolveScreenState } from '@/session/gating';
 import { activoLines, flujoLines, pasivoLines, resultadosLines } from './lines';
 import { Indicadores, IsrNotice, Resumen } from './parts';
 import { pageSubtitle, pageTitle } from './estados.css';
+import type { Periodo } from './periodo';
+import { PeriodoSwitcher } from './periodo-switcher';
 import { Statement } from './statement';
 
 const TABS = [
@@ -30,7 +32,7 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         figure={ER.utilidadNeta}
         label="Utilidad neta"
       />
-      <IsrNotice />
+      <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} />
       <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER)} />
     </>
   );
@@ -83,13 +85,27 @@ function Heading() {
   );
 }
 
-export function EstadosScreen({ model }: { readonly model: EstadosModel | null }) {
+function Tab({ tab, m }: { readonly tab: string; readonly m: EstadosModel }) {
+  if (tab === 'posicion') return <Posicion m={m} />;
+  if (tab === 'flujo') return <Flujo m={m} />;
+  if (tab === 'indicadores') return <Indicadores indicadores={m.indicadores} />;
+  return <Resultados m={m} />;
+}
+
+export function EstadosScreen({
+  model,
+  periodo,
+}: {
+  readonly model: EstadosModel | null;
+  readonly periodo: Periodo;
+}) {
   const session = useSession();
   const [tab, setTab] = useState('resultados');
 
   return (
     <>
       <Heading />
+      <PeriodoSwitcher periodo={periodo} />
       <SegmentedTabs
         ariaLabel="Estados financieros"
         value={tab}
@@ -112,14 +128,7 @@ export function EstadosScreen({ model }: { readonly model: EstadosModel | null }
           plan: 'Xangarro',
         }}
       >
-        {model === null ? null : (
-          <>
-            {tab === 'resultados' ? <Resultados m={model} /> : null}
-            {tab === 'posicion' ? <Posicion m={model} /> : null}
-            {tab === 'flujo' ? <Flujo m={model} /> : null}
-            {tab === 'indicadores' ? <Indicadores indicadores={model.indicadores} /> : null}
-          </>
-        )}
+        {model === null ? null : <Tab tab={tab} m={model} />}
       </ScreenBody>
     </>
   );

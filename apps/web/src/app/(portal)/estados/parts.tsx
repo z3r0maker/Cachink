@@ -41,13 +41,20 @@ export function Resumen({
 }
 
 /** This disclaimer must survive into production (design handoff, ADR-058). */
-export function IsrNotice() {
+/**
+ * The ISR notice survives into production (P-14). The rate is the one the owner
+ * set in Negocio, not a constant; a period without utilidad says why there is
+ * no estimate rather than showing a zero that looks like a calculation.
+ */
+export function IsrNotice({ isrTasa, isr }: { readonly isrTasa: number; readonly isr: bigint }) {
   return (
     <div className={isrNotice}>
       <div>
-        <strong>ISR referencial (1.25%)</strong>
+        <strong>ISR referencial ({isrTasa / 100}%)</strong>
         <p style={{ margin: '6px 0 0', fontWeight: 600 }}>
-          La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.
+          {isr > 0n
+            ? 'La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.'
+            : 'En este periodo no hubo utilidad, así que no hay ISR estimado. Consulta a tu contador antes de declarar.'}
         </p>
       </div>
     </div>

@@ -12,7 +12,6 @@ import {
   listProductos,
   historialSync,
   listRejections,
-  periodLedger,
 } from '@xangarro/data-pg';
 
 import { withTenant } from './db';
@@ -59,9 +58,6 @@ export const loadAvisos = (biz: string) => withTenant(biz, (tx) => listNotices(t
 
 export const loadAsesor = (biz: string) => withTenant(biz, (tx) => listNotices(tx, 'asesor'));
 
-export const loadEstados = (biz: string, from: string, to: string) =>
-  withTenant(biz, (tx) => periodLedger(tx, from, to));
-
 export type MovimientosData = Awaited<ReturnType<typeof loadMovimientos>>;
 export type ProductosData = Awaited<ReturnType<typeof loadProductos>>;
 export type EquipoData = Awaited<ReturnType<typeof loadEquipo>>;
@@ -69,4 +65,3 @@ export type EmpleadosData = Awaited<ReturnType<typeof loadEmpleados>>;
 export type NegocioData = Awaited<ReturnType<typeof loadNegocio>>;
 export type SincronizacionData = Awaited<ReturnType<typeof loadSincronizacion>>;
 export type AvisosData = Awaited<ReturnType<typeof loadAvisos>>;
-export type EstadosData = Awaited<ReturnType<typeof loadEstados>>;

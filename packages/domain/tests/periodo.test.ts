@@ -7,6 +7,8 @@ import {
   nombreDelMes,
   rangoDelMes,
   rangoDeSemana,
+  rangoDelAnio,
+  rangoDelTrimestre,
   sumarDias,
   ultimosDias,
   type IsoDate,
@@ -56,5 +58,24 @@ describe('periodos', () => {
       desde: '2026-04-13',
       hasta: '2026-05-12',
     });
+  });
+
+  it('a quarter is its three calendar months', () => {
+    assert.deepEqual(rangoDelTrimestre(d('2026-05-12')), {
+      desde: '2026-04-01',
+      hasta: '2026-06-30',
+    });
+    assert.deepEqual(rangoDelTrimestre(d('2026-12-31')), {
+      desde: '2026-10-01',
+      hasta: '2026-12-31',
+    });
+    assert.deepEqual(rangoDelTrimestre(d('2026-01-01')), {
+      desde: '2026-01-01',
+      hasta: '2026-03-31',
+    });
+  });
+
+  it('a year is the calendar (fiscal) year', () => {
+    assert.deepEqual(rangoDelAnio(d('2026-05-12')), { desde: '2026-01-01', hasta: '2026-12-31' });
   });
 });

@@ -639,8 +639,15 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
   - **The ISR disclaimer survives into production**, verbatim: "La cifra de ISR es orientativa.
     Consulta a tu contador antes de declarar."
   - Xangarrito renders the `locked` state; "Exportar Excel" stays open to every plan and role.
-  - **Still to do:** the period switcher, expandable disclosure rows, the waterfall and donuts, the
-    print stylesheet, and "Informe mensual PDF" gated by `capabilities.informeMensual` (P-34).
+  - 2026-09-18 · **Period switcher**: Mensual / Trimestral / Anual / Personalizado (Desde–Hasta,
+    Aplicar), carried in the URL so the server recomputes and a period can be linked; relative to
+    the business clock (`rangoDelTrimestre`, `rangoDelAnio` in the domain). **Fixed:** the statements
+    used a constant 1.25% ISR whatever the owner set in Negocio — they now read `isr_tasa`, and the
+    notice shows that rate, with the no-utilidad variant; `periodoDiasVenta` was 31 for any period
+    and is now the period's days; `periodLedger` loaded every sale and filtered in JS by string
+    (dropping timestamped `fecha` on the last day) — it now filters by day in SQL (2 DB tests).
+  - **Still to do:** expandable disclosure rows, the waterfall and donuts, the print stylesheet,
+    and "Informe mensual PDF" gated by `capabilities.informeMensual` (P-34).
 - **Amended 2026-09-17 (ADR-059):** adds the fifth `locked` state; Xangarrito has no NIF statements.
 - **Steps:** Period switcher (Mensual / Trimestral / Anual / Personalizado, `height 44`,
   `radius 14`, `3px 3px 0`) and statement tabs (Resultados / Posición / Flujo / Indicadores,
