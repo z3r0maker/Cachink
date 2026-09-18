@@ -22,6 +22,7 @@ import { ulidField } from './_ulid-field.js';
 import type { StaffMemberId } from './staff.js';
 
 export type SupportItemId = Ulid & { readonly __entity: 'SupportItem' };
+export const SupportItemIdSchema = ulidField<SupportItemId>();
 
 export const SUPPORT_KINDS = [
   'bug',
@@ -57,7 +58,7 @@ export const SupportSourceSchema = z.string().regex(/^[a-z][a-z0-9-]{1,39}$/);
 const isoInstant = z.iso.datetime({ offset: true });
 
 const SupportItemShape = z.object({
-  id: ulidField<SupportItemId>(),
+  id: SupportItemIdSchema,
   kind: SupportKindSchema,
   status: SupportStatusSchema,
   urgent: z.boolean(),
