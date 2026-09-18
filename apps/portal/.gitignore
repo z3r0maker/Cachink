@@ -5,4 +5,4 @@ playwright-report/
 e2e/.auth/
 # Dev-only symlink to /design-reference/operador for same-origin design comparison.
 public/__design
-public/__cmp.js
+public/__cmp.txt
