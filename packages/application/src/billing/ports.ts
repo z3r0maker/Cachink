@@ -118,10 +118,9 @@ export interface PaidInvoice {
 }
 
 /**
- * Told about every paid invoice. N-08's ingestion will implement it by filing a
- * "pago sin CFDI" item in the admin inbox (ADR-070, `CFDI_MODE=off`); until
- * then the portal logs one `pago_sin_cfdi` line — the event itself stays in
- * `stripe_events`, so no payment is lost for the backfill. Implementations
+ * Told about every paid invoice. `cfdiInvoicePaidListener` (N-33) implements
+ * it: the payment is recorded for its CFDI and, per `CFDI_MODE`, filed as a
+ * "pago sin CFDI" admin inbox item or stamped (ADR-070). Implementations
  * must be idempotent per `stripeInvoiceId`: the ledger stops redelivery once
  * an event is processed, but two concurrent deliveries can both run.
  */

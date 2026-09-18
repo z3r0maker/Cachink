@@ -5,10 +5,10 @@ import {
   OpenCustomerPortalUseCase,
   StartSpeiAnnualUseCase,
   StartTrialCheckoutUseCase,
-  type InvoicePaidListener,
 } from '@xangarro/application/billing';
 
 import { pendingPaidAnswersListener } from '../onboarding/paid-answers';
+import { liveCfdiInvoiceListener } from './cfdi';
 import { billingDb, stripeClient, webhookSecret } from './config';
 import { stripeGateway } from './gateway';
 import { pgBillingRepository, pgStripeEventLedger } from './repository';
@@ -19,29 +19,6 @@ import type { WebhookDeps } from './webhook';
  * connection. Nothing is built until a request needs it, so a portal without
  * Stripe configured only fails on the billing paths.
  */
-
-/**
- * Until N-08 files "pago sin CFDI" items (ADR-070, `CFDI_MODE=off`), each paid
- * invoice is one structured log line — ids and centavos, no PII — and its
- * event stays in `stripe_events` for the backfill.
- */
-export const pagoSinCfdiLog: InvoicePaidListener = {
-  onInvoicePaid(invoice) {
-    console.log(
-      JSON.stringify({
-        evt: 'pago_sin_cfdi',
-        business_id: invoice.businessId,
-        invoice_id: invoice.stripeInvoiceId,
-        subtotal_centavos: invoice.subtotalCentavos,
-        tax_centavos: invoice.taxCentavos,
-        total_centavos: invoice.totalCentavos,
-        collection_method: invoice.collectionMethod,
-        paid_at: invoice.paidAt,
-      }),
-    );
-    return Promise.resolve();
-  },
-};
 
 function parts() {
   const db = billingDb();
@@ -54,7 +31,8 @@ export function liveWebhookDeps(): WebhookDeps {
     repo,
     gateway,
     ledger: pgStripeEventLedger(db),
-    invoices: pagoSinCfdiLog,
+    // N-33: records every paid invoice and, per CFDI_MODE, files it or stamps it.
+    invoices: liveCfdiInvoiceListener(),
     entitlements: pendingPaidAnswersListener,
     now: () => new Date(),
   });
