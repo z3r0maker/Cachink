@@ -35,7 +35,10 @@ export interface CustomerRecipients {
 export interface SendTrialRemindersDeps {
   readonly trials: TrialSubscriptionSource;
   readonly recipients: CustomerRecipients;
-  readonly compose: (reminder: TrialReminder, to: EmailRecipient) => EmailContent;
+  readonly compose: (
+    reminder: TrialReminder,
+    to: EmailRecipient,
+  ) => EmailContent | Promise<EmailContent>;
   readonly sender: EmailSender;
   readonly report: (error: unknown, businessId: string) => void;
 }
@@ -68,7 +71,7 @@ export class SendTrialRemindersUseCase {
       const to = await this.deps.recipients.of(reminder.stripeCustomerId);
       if (to === null) return 'skipped';
       const result = await this.deps.sender.send({
-        ...this.deps.compose(reminder, to),
+        ...(await this.deps.compose(reminder, to)),
         to: to.email,
         tags: [
           { name: 'kind', value: reminder.kind },

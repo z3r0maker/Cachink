@@ -1,0 +1,226 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`auth links (ADR-080) > magic link 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Entra al portal con un toque.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Usa este botón para entrar al portal de Xangarro.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/entrar?t=xyz" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Entrar a Xangarro</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">El enlace funciona una sola vez durante <!-- -->15<!-- --> minutos. Si no lo pediste, ignora este correo: nadie entra sin él.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Si el botón no funciona, copia este enlace en tu navegador: <a href="https://portal.xangarro.mx/entrar?t=xyz" style="color:#067df7;text-decoration-line:none" target="_blank">https://portal.xangarro.mx/entrar?t=xyz</a></p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque alguien lo pidió desde el portal de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu enlace para entrar a Xangarro",
+  "text": "Xangarro!
+
+Hola:
+
+Usa este botón para entrar al portal de Xangarro.
+
+Entrar a Xangarro https://portal.xangarro.mx/entrar?t=xyz
+
+El enlace funciona una sola vez durante 15 minutos. Si no lo pediste, ignora este correo: nadie entra sin él.
+
+Si el botón no funciona, copia este enlace en tu navegador: https://portal.xangarro.mx/entrar?t=xyz
+
+----------------------------------------
+
+Recibes este correo porque alguien lo pidió desde el portal de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`auth links (ADR-080) > password reset carries the link, its lifetime and a fallback 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Crea una contraseña nueva para tu cuenta.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Pediste restablecer la contraseña de tu cuenta de Xangarro.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/restablecer?t=abc" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Crear contraseña nueva</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">El enlace funciona una sola vez durante <!-- -->30<!-- --> minutos. Si no fuiste tú, ignora este correo: tu contraseña no cambia.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Si el botón no funciona, copia este enlace en tu navegador: <a href="https://portal.xangarro.mx/restablecer?t=abc" style="color:#067df7;text-decoration-line:none" target="_blank">https://portal.xangarro.mx/restablecer?t=abc</a></p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque alguien lo pidió desde el portal de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Restablece tu contraseña de Xangarro",
+  "text": "Xangarro!
+
+Hola:
+
+Pediste restablecer la contraseña de tu cuenta de Xangarro.
+
+Crear contraseña nueva https://portal.xangarro.mx/restablecer?t=abc
+
+El enlace funciona una sola vez durante 30 minutos. Si no fuiste tú, ignora este correo: tu contraseña no cambia.
+
+Si el botón no funciona, copia este enlace en tu navegador: https://portal.xangarro.mx/restablecer?t=abc
+
+----------------------------------------
+
+Recibes este correo porque alguien lo pidió desde el portal de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`generic notice > escapes text and renders an optional CTA 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Te respondemos en 20 días hábiles.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Recibimos tu solicitud &lt;b&gt;ARCO&lt;/b&gt;.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/privacidad" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Ver solicitud</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque hiciste una solicitud ARCO.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Recibimos tu solicitud ARCO",
+  "text": "Xangarro!
+
+Hola:
+
+Recibimos tu solicitud <b>ARCO</b>.
+
+Ver solicitud https://portal.xangarro.mx/privacidad
+
+----------------------------------------
+
+Recibes este correo porque hiciste una solicitud ARCO.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`staff digest (N-10) > renders sections with links, urgent tags, empty lines and notes 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Xangarro · Resumen del 17 sep — 1 nuevo · 1 urgente<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0"><strong>Xangarro · Resumen del 17 sep — 1 nuevo · 1 urgente</strong></p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody><tr><td><h2 style="color:#0D0D0D;font-size:17px;margin:20px 0 8px">Nuevos · Soporte (1)</h2><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">• <strong>URGENTE </strong><a href="https://admin.xangarro.mx/inbox/i1" style="color:#067df7;text-decoration-line:none" target="_blank">No sincroniza</a></p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody><tr><td><h2 style="color:#0D0D0D;font-size:17px;margin:20px 0 8px">Urgentes abiertos (0)</h2><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Ningún urgente abierto.</p></td></tr></tbody></table><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation"><tbody><tr><td><h2 style="color:#0D0D0D;font-size:17px;margin:20px 0 8px">Rechazos (24 h): 2</h2><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">• <!-- -->FK_PRODUCT_MISSING: 2</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Revisa el detalle en Studio.</p></td></tr></tbody></table><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Resumen interno del equipo de soporte de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Xangarro · Resumen del 17 sep — 1 nuevo · 1 urgente",
+  "text": "Xangarro!
+
+Xangarro · Resumen del 17 sep — 1 nuevo · 1 urgente
+
+
+NUEVOS · SOPORTE (1)
+
+• URGENTE No sincroniza https://admin.xangarro.mx/inbox/i1
+
+
+URGENTES ABIERTOS (0)
+
+Ningún urgente abierto.
+
+
+RECHAZOS (24 H): 2
+
+• FK_PRODUCT_MISSING: 2
+
+Revisa el detalle en Studio.
+
+----------------------------------------
+
+Resumen interno del equipo de soporte de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`trial emails (N-01) > day 11: ending in 3 days, card or SPEI, prices + IVA 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Tu prueba de Xangarro termina el 20 de septiembre de 2026.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola, Tacos Don Pepe:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Tu prueba de <!-- -->Xangarro<!-- --> termina el <!-- -->20 de septiembre de 2026<!-- -->. Para seguir sin interrupciones, agrega una tarjeta o paga el plan anual por transferencia (SPEI).</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/suscripcion" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Agregar tarjeta o pagar por SPEI</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis)<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Si ya agregaste una tarjeta, no tienes que hacer nada.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque tienes una cuenta de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu prueba termina en 3 días",
+  "text": "Xangarro!
+
+Hola, Tacos Don Pepe:
+
+Tu prueba de Xangarro termina el 20 de septiembre de 2026. Para seguir sin interrupciones, agrega una tarjeta o paga el plan anual por transferencia (SPEI).
+
+Agregar tarjeta o pagar por SPEI https://portal.xangarro.mx/suscripcion
+
+Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis).
+
+Si ya agregaste una tarjeta, no tienes que hacer nada.
+
+----------------------------------------
+
+Recibes este correo porque tienes una cuenta de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`trial emails (N-01) > day 14: ended, the business fell to Xangarrito and keeps its data 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Tus datos siguen ahí y puedes seguir vendiendo.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Tu prueba de <!-- -->Xangarrote<!-- --> terminó el <!-- -->20 de septiembre de 2026<!-- -->. Tu negocio pasó al plan gratuito Xangarrito: tus datos siguen ahí y puedes seguir vendiendo, con los límites del plan gratuito.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Cuando quieras volver a <!-- -->Xangarrote<!-- -->, contrátalo con tarjeta, o paga el plan anual por SPEI.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/suscripcion" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Volver a <!-- -->Xangarrote</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis)<!-- -->.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque tienes una cuenta de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu prueba terminó: tu negocio sigue en Xangarrito",
+  "text": "Xangarro!
+
+Hola:
+
+Tu prueba de Xangarrote terminó el 20 de septiembre de 2026. Tu negocio pasó al plan gratuito Xangarrito: tus datos siguen ahí y puedes seguir vendiendo, con los límites del plan gratuito.
+
+Cuando quieras volver a Xangarrote, contrátalo con tarjeta, o paga el plan anual por SPEI.
+
+Volver a Xangarrote https://portal.xangarro.mx/suscripcion
+
+Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis).
+
+----------------------------------------
+
+Recibes este correo porque tienes una cuenta de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`usage threshold (N-03) > 80 % undefined is celebratory, lists prices + IVA 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Llevas 1,200 de 1,500 movimientos registrados este mes.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola, Tacos Don Pepe:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">¡Buenas noticias! Tu negocio va en <!-- -->1,200 de 1,500 movimientos registrados este mes<!-- -->.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Todo sigue funcionando igual. Te avisamos con tiempo para que decidas con calma.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si quieres más espacio, puedes cambiar de plan cuando quieras:</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis)<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis)<!-- -->.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/suscripcion" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Ver planes y precios</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Los precios no incluyen IVA (16 %); el total se muestra antes de pagar.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque tienes una cuenta de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu negocio está creciendo 🎉 Vas en el 80 % de tu plan",
+  "text": "Xangarro!
+
+Hola, Tacos Don Pepe:
+
+¡Buenas noticias! Tu negocio va en 1,200 de 1,500 movimientos registrados este mes.
+
+Todo sigue funcionando igual. Te avisamos con tiempo para que decidas con calma.
+
+Si quieres más espacio, puedes cambiar de plan cuando quieras:
+
+Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis).
+
+Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis).
+
+Ver planes y precios https://portal.xangarro.mx/suscripcion
+
+Los precios no incluyen IVA (16 %); el total se muestra antes de pagar.
+
+----------------------------------------
+
+Recibes este correo porque tienes una cuenta de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;
+
+exports[`usage threshold (N-03) > 100 % undefined is celebratory, lists prices + IVA 1`] = `
+{
+  "html": "<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html dir="ltr" lang="es-MX"><head><meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/><meta name="x-apple-disable-message-reformatting"/></head><body style="background-color:#F7F7F5;margin:0;padding:0"><!--$--><!--html--><!--head--><div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0" data-skip-in-text="true">Llevas 1,500 de 1,500 movimientos registrados este mes.<div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿</div></div><!--body--><table border="0" width="100%" cellPadding="0" cellSpacing="0" role="presentation" align="center"><tbody><tr><td style="background-color:#F7F7F5;font-family:Helvetica, Arial, sans-serif;margin:0;padding:24px 0"><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="max-width:560px;background-color:#FFFFFF;border:2px solid #0D0D0D;border-radius:12px;padding:24px 28px"><tbody><tr style="width:100%"><td><p style="font-size:20px;line-height:24px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:8px;color:#0D0D0D;display:inline-block;font-weight:800;margin:0 0 16px;padding:4px 12px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Xangarro!</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Hola, Tacos Don Pepe:</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">¡Buenas noticias! Tu negocio va en <!-- -->1,500 de 1,500 movimientos registrados este mes<!-- -->.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Nada se detiene: todo lo que registren tus teléfonos se sigue guardando y sincronizando.</p><p style="font-size:16px;line-height:24px;color:#1A1A18;margin:0 0 16px;margin-top:0;margin-right:0;margin-bottom:16px;margin-left:0">Si quieres más espacio, puedes cambiar de plan cuando quieras:</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis)<!-- -->.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis)<!-- -->.</p><table align="center" width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="margin:8px 0 24px"><tbody><tr><td><a href="https://portal.xangarro.mx/suscripcion" style="line-height:100%;text-decoration:none;display:inline-block;max-width:100%;mso-padding-alt:0px;background-color:#FFD60A;border:2px solid #0D0D0D;border-radius:10px;color:#0D0D0D;font-size:16px;font-weight:700;padding:12px 20px;padding-top:12px;padding-right:20px;padding-bottom:12px;padding-left:20px" target="_blank"><span><!--[if mso]><i style="mso-font-width:500%;mso-text-raise:18" hidden>&#8202;&#8202;</i><![endif]--></span><span style="max-width:100%;display:inline-block;line-height:120%;mso-padding-alt:0px;mso-text-raise:9px">Ver planes y precios</span><span><!--[if mso]><i style="mso-font-width:500%" hidden>&#8202;&#8202;&#8203;</i><![endif]--></span></a></td></tr></tbody></table><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Los precios no incluyen IVA (16 %); el total se muestra antes de pagar.</p><hr style="width:100%;border:none;border-top:1px solid #eaeaea;border-color:#E4E4E0;margin:24px 0 16px"/><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Recibes este correo porque tienes una cuenta de Xangarro.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">¿Dudas? Responde a este correo y te ayudamos.</p><p style="font-size:13px;line-height:20px;color:#6F6F6B;margin:0 0 8px;margin-top:0;margin-right:0;margin-bottom:8px;margin-left:0">Xangarro · Finanzas para emprendedores</p></td></tr></tbody></table></td></tr></tbody></table><!--/$--></body></html>",
+  "subject": "Tu negocio está creciendo 🎉 Llegaste al límite de tu plan",
+  "text": "Xangarro!
+
+Hola, Tacos Don Pepe:
+
+¡Buenas noticias! Tu negocio va en 1,500 de 1,500 movimientos registrados este mes.
+
+Nada se detiene: todo lo que registren tus teléfonos se sigue guardando y sincronizando.
+
+Si quieres más espacio, puedes cambiar de plan cuando quieras:
+
+Xangarro: $199 + IVA al mes, o $1,990 + IVA al año (2 meses gratis).
+
+Xangarrote: $399 + IVA al mes, o $3,990 + IVA al año (2 meses gratis).
+
+Ver planes y precios https://portal.xangarro.mx/suscripcion
+
+Los precios no incluyen IVA (16 %); el total se muestra antes de pagar.
+
+----------------------------------------
+
+Recibes este correo porque tienes una cuenta de Xangarro.
+
+¿Dudas? Responde a este correo y te ayudamos.
+
+Xangarro · Finanzas para emprendedores",
+}
+`;

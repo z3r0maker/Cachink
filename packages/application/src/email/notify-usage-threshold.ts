@@ -31,7 +31,10 @@ export interface OwnerRecipients {
 
 export interface NotifyUsageThresholdDeps {
   readonly owners: OwnerRecipients;
-  readonly compose: (notice: UsageThresholdNotice, to: EmailRecipient) => EmailContent;
+  readonly compose: (
+    notice: UsageThresholdNotice,
+    to: EmailRecipient,
+  ) => EmailContent | Promise<EmailContent>;
   readonly sender: EmailSender;
 }
 
@@ -52,7 +55,7 @@ export class NotifyUsageThresholdUseCase {
     const to = await this.deps.owners.of(notice.businessId);
     if (to === null) return { status: 'skipped', reason: 'no_recipient' };
     const result = await this.deps.sender.send({
-      ...this.deps.compose(notice, to),
+      ...(await this.deps.compose(notice, to)),
       to: to.email,
       tags: [
         { name: 'kind', value: 'usage-threshold' },
