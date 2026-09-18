@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--yellow);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--black);outline-offset:2px;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;box-sizing:border-box;background:var(--yellow);font-family:var(--font-sans);color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:{{ pagePad }}">
+
+  <div style="width:100%;max-width:1100px;display:flex;align-items:center;gap:12px;margin-bottom:26px;">
+    <div style="width:44px;height:44px;flex:none;border-radius:9999px;background:var(--white);border:2.5px solid var(--black);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;">
+      <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+    </div>
+    <span style="font-family:'Anton',var(--font-sans);font-size:30px;line-height:0.92;color:var(--black);">XANGARRO!</span>
+    <span style="margin-left:auto;display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:var(--white);">
+      <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:{{ stateDot }}"></span>
+      <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">{{ stateLabel }}</span>
+    </span>
+  </div>
+
+  <div style="width:100%;max-width:1100px;display:grid;grid-template-columns:{{ cols }};gap:20px;align-items:start;">
+
+    <div style="box-sizing:border-box;padding:{{ cardPad }};border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);display:flex;flex-direction:column;gap:18px;min-width:0;">
+
+      <sc-if value="{{ isVincular }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Paso 1 de 2</div>
+            <h1 style="margin:8px 0 0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Vincula esta caja</h1>
+            <p style="margin:10px 0 0;font-size:16px;font-weight:600;color:var(--ink);text-wrap:pretty;">Pedro genera un código en su portal, en Operadores y dispositivos. Escríbelo aquí una sola vez: este navegador queda como caja del negocio.</p>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:9px;">Código de vinculación</div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;">
+              <sc-for list="{{ codeBoxes }}" as="c" hint-placeholder-count="6">
+                <span style="width:54px;height:66px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:13px;background:{{ c.bg }};font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ c.ch }}</span>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-width:330px;">
+            <sc-for list="{{ codeKeys }}" as="k" hint-placeholder-count="12">
+              <div role="button" tabindex="0" onClick="{{ k.press }}" data-press="1" style="height:56px;display:grid;place-items:center;border:2px solid var(--black);border-radius:13px;background:{{ k.bg }};box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:21px;font-weight:800;color:var(--black);">{{ k.label }}</div>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{ vincular }}" data-press="1" style="height:58px;border:2.5px solid var(--black);border-radius:14px;background:{{ vincularBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ vincularOpacity }}">Vincular caja</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isNip }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Caja 1 · Taquería Don Pedro</div>
+            <h1 style="margin:8px 0 0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Quién abre turno?</h1>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <sc-for list="{{ operadores }}" as="o" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ o.pick }}" data-press="1" style="display:flex;align-items:center;gap:11px;padding:10px 15px 10px 10px;border:{{ o.border }};border-radius:9999px;background:{{ o.bg }};box-shadow:{{ o.shadow }};cursor:pointer;">
+                <span style="flex:none;width:40px;height:40px;border:2px solid var(--black);border-radius:9999px;background:{{ o.tint }};display:grid;place-items:center;font-size:14px;font-weight:800;color:var(--black);">{{ o.initials }}</span>
+                <span style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;">{{ o.name }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:9px;">Tu NIP de cuatro dígitos</div>
+            <div style="display:flex;gap:11px;">
+              <sc-for list="{{ nipBoxes }}" as="n" hint-placeholder-count="4">
+                <span style="width:60px;height:72px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:14px;background:{{ n.bg }};font-size:34px;font-weight:800;color:var(--black);">{{ n.ch }}</span>
+              </sc-for>
+            </div>
+            <sc-if value="{{ nipError }}" hint-placeholder-val="{{ false }}">
+              <div style="margin-top:10px;display:inline-flex;align-items:center;gap:8px;border:2px solid var(--black);border-radius:9999px;padding:5px 12px;background:var(--red-soft);font-size:13px;font-weight:700;color:var(--red-text);">NIP incorrecto. Te quedan 2 intentos.</div>
+            </sc-if>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-width:330px;">
+            <sc-for list="{{ nipKeys }}" as="k" hint-placeholder-count="12">
+              <div role="button" tabindex="0" onClick="{{ k.press }}" data-press="1" style="height:62px;display:grid;place-items:center;border:2px solid var(--black);border-radius:14px;background:{{ k.bg }};box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ k.label }}</div>
+            </sc-for>
+          </div>
+          <button type="button" onClick="{{ entrar }}" data-press="1" style="height:58px;border:2.5px solid var(--black);border-radius:14px;background:{{ entrarBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ entrarOpacity }}">Continuar</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isFondo }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:18px;">
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ opLabel }} · Caja 1</div>
+            <h1 style="margin:8px 0 0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Con cuánto abres la caja?</h1>
+            <p style="margin:10px 0 0;font-size:16px;font-weight:600;color:var(--ink);text-wrap:pretty;">Cuenta el efectivo con el que empiezas. Contra este fondo se calcula lo esperado cuando cierres.</p>
+          </div>
+          <div>
+            <label for="ac-fondo" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:6px;">Fondo de caja</label>
+            <div style="display:flex;align-items:center;gap:10px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);padding:0 16px;height:74px;">
+              <span style="font-size:30px;font-weight:800;color:var(--gray-400);">$</span>
+              <input id="ac-fondo" type="text" inputmode="decimal" placeholder="0.00" value="{{ fondo }}" onChange="{{ typeFondo }}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:inherit;font-size:36px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--ink);">
+            </div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:11px;">
+              <sc-for list="{{ fondoQuick }}" as="q" hint-placeholder-count="4">
+                <div role="button" tabindex="0" onClick="{{ q.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:44px;padding:0 16px;border:2px solid var(--black);border-radius:9999px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ q.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;gap:11px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">Solo puede haber un turno abierto por caja. Si otra persona dejó el turno abierto, ciérralo antes de abrir el tuyo.</div>
+          </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Caja.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:60px;border:2.5px solid var(--black);border-radius:14px;background:{{ abrirBg }};box-shadow:4px 4px 0 var(--black);font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);text-decoration:none;opacity:{{ abrirOpacity }}">Abrir turno y empezar a cobrar</a>
+        </div>
+      </sc-if>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px;min-width:0;">
+      <sc-for list="{{ steps }}" as="s" hint-placeholder-count="3">
+        <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:{{ s.bg }};box-shadow:4px 4px 0 var(--black);display:flex;align-items:flex-start;gap:12px;">
+          <span style="flex:none;width:34px;height:34px;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--white);font-size:14px;font-weight:800;color:var(--black);">{{ s.n }}</span>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);">{{ s.title }}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ s.body }}</div>
+          </div>
+        </div>
+      </sc-for>
+      <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Si olvidaste tu NIP</div>
+        <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:5px;text-wrap:pretty;">Pedro lo reinicia desde el portal, en Operadores y dispositivos. Nadie más puede cambiarlo desde la caja.</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startStep&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;vincular&quot;,&quot;nip&quot;,&quot;fondo&quot;],&quot;default&quot;:&quot;nip&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+const OPERADORES = [
+  ['Ana Robledo', 'AR', 'var(--yellow)'],
+  ['Luis Ortega', 'LO', 'var(--blue-soft)'],
+  ['Sofía Márquez', 'SM', 'var(--purple-soft)']
+];
+
+class Component extends DCLogic {
+  state = { step: null, code: '', nip: '', op: null, fondo: '', error: false, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this.onResize); }
+
+  keypad(field, max, extra) {
+    return ['1', '2', '3', '4', '5', '6', '7', '8', '9', extra, '0', '⌫'].map(k => ({
+      label: k,
+      bg: k === '⌫' || k === 'C' ? 'var(--gray-100)' : 'var(--white)',
+      press: () => this.setState(s => {
+        const cur = s[field] ?? '';
+        if (k === '⌫') return { [field]: cur.slice(0, -1), error: false };
+        if (k === 'C') return { [field]: '', error: false };
+        if (cur.length >= max) return {};
+        return { [field]: cur + k, error: false };
+      })
+    }));
+  }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = this.props.forcePhone === true || st.vw < 760;
+    const isNarrow = isPhone || st.vw < 1060;
+    const step = st.step ?? this.props.startStep ?? 'nip';
+    const fondoVal = st.fondo === '' ? null : parseFloat(st.fondo);
+    const fondoOk = fondoVal != null && !isNaN(fondoVal) && fondoVal >= 0 && st.fondo !== '';
+
+    const codeStr = (st.code + '      ').slice(0, 6);
+    const nipStr = st.nip;
+
+    const stepsMeta = [
+      ['1', 'Vincular la caja', 'Una sola vez por navegador, con el código que genera el dueño.', 'vincular'],
+      ['2', 'Identificarte con tu NIP', 'Cada quien entra con su NIP. Así cada venta queda con nombre.', 'nip'],
+      ['3', 'Abrir turno con fondo de caja', 'El efectivo con el que empiezas; contra eso se cuadra al cerrar.', 'fondo']
+    ];
+
+    return {
+      isPhone,
+      cols: isNarrow ? 'minmax(0,1fr)' : 'minmax(0,1fr) 320px',
+      pagePad: isPhone ? '18px 16px 40px' : '30px 32px 48px',
+      cardPad: isPhone ? '20px' : '28px',
+      h1Size: isPhone ? '28px' : '34px',
+      isVincular: step === 'vincular',
+      isNip: step === 'nip',
+      isFondo: step === 'fondo',
+      stateDot: step === 'vincular' ? 'var(--warning)' : 'var(--green)',
+      stateLabel: step === 'vincular' ? 'Caja sin vincular' : 'Caja vinculada · TD4 91K',
+      codeBoxes: codeStr.split('').map(ch => ({
+        ch: ch.trim() === '' ? '' : ch,
+        bg: ch.trim() === '' ? 'var(--gray-100)' : 'var(--yellow-soft)'
+      })),
+      codeKeys: this.keypad('code', 6, 'C'),
+      vincular: () => { if (st.code.length === 6) this.setState({ step: 'nip', code: st.code }); },
+      vincularBg: st.code.length === 6 ? 'var(--yellow)' : 'var(--gray-100)',
+      vincularOpacity: st.code.length === 6 ? '1' : '0.5',
+      operadores: OPERADORES.map(([name, initials, tint]) => ({
+        name, initials, tint,
+        bg: st.op === name ? 'var(--yellow-soft)' : 'var(--white)',
+        border: st.op === name ? '2.5px solid var(--black)' : '2px solid var(--gray-200)',
+        shadow: st.op === name ? '3px 3px 0 var(--black)' : 'none',
+        pick: () => this.setState({ op: name, nip: '', error: false })
+      })),
+      nipBoxes: [0, 1, 2, 3].map(i => ({
+        ch: nipStr.length > i ? '•' : '',
+        bg: nipStr.length > i ? 'var(--yellow)' : 'var(--gray-100)'
+      })),
+      nipKeys: this.keypad('nip', 4, 'C'),
+      nipError: st.error,
+      entrar: () => {
+        if (!st.op || st.nip.length !== 4) return;
+        if (st.nip === '0000') { this.setState({ error: true, nip: '' }); return; }
+        this.setState({ step: 'fondo', error: false });
+      },
+      entrarBg: st.op && st.nip.length === 4 ? 'var(--yellow)' : 'var(--gray-100)',
+      entrarOpacity: st.op && st.nip.length === 4 ? '1' : '0.5',
+      opLabel: st.op ?? 'Ana Robledo',
+      fondo: st.fondo,
+      typeFondo: e => this.setState({ fondo: String(e.target.value).replace(/[^0-9.]/g, '') }),
+      fondoQuick: [500, 800, 1000, 1500].map(v => ({
+        label: MXN(v),
+        pick: () => this.setState({ fondo: String(v) })
+      })),
+      abrirBg: fondoOk ? 'var(--yellow)' : 'var(--gray-100)',
+      abrirOpacity: fondoOk ? '1' : '0.5',
+      steps: stepsMeta.map(([n, title, body, key]) => ({
+        n, title, body,
+        bg: key === step ? 'var(--yellow)' : 'var(--white)'
+      }))
+    };
+  }
+}
+
+</script>
+</body>
+</html>

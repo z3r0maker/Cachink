@@ -14,6 +14,7 @@ import {
   fontSizes,
   portalFontSizes,
   radii,
+  denseRadii,
   shadows,
   shapeRadii,
   typography,
@@ -79,7 +80,7 @@ function shape(): readonly string[] {
   return [
     '## 4. Shape',
     '',
-    `**Radii** — the strict ladder, nothing else: ${radii.join(', ')}.`,
+    `**Radii** — the strict ladder, nothing else: ${radii.join(', ')}; plus the dense steps ${Object.values(denseRadii).join(' and ')} (ADR-076).`,
     '',
     `**Off-ladder shapes** (data-viz marks and full pills): ${pairsTickKey(shapeRadii)}.`,
     '',

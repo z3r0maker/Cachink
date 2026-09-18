@@ -18,7 +18,15 @@ export {
   type FontSize,
   type PortalFontSize,
 } from './type.js';
-export { radii, shapeRadii, borders, shadows, pressTransform, type Radius } from './shape.js';
+export {
+  radii,
+  denseRadii,
+  shapeRadii,
+  borders,
+  shadows,
+  pressTransform,
+  type Radius,
+} from './shape.js';
 export { breakpoints, type BreakpointKey } from './layout.js';
 export { brand } from './brand.js';
 

@@ -340,6 +340,8 @@ not move a pixel between routes.
 
 ### P-03 Signup (`/signup?plan=xangarrito|xangarro|xangarrote`)
 
+> **Amended 2026-09-17 by Track N:** signup now goes to the wizard first; Checkout comes after "Tu plan ideal" — see N-13 (ADR-067).
+
 - [ ] Status · **Blocked by:** P-02, C-11, B-10, B-14 · **Blocks:** X-02, L-03
 - **Amended 2026-09-17 (ADR-059):** plan slugs renamed. Invalid → `xangarrito`.
 - **Steps:** Step 1 cuenta (email + password, or magic link). Step 2 negocio — name + the four
@@ -352,6 +354,8 @@ not move a pixel between routes.
   `4242…` reaches onboarding with the "Xangarro" plan badge; the OXXO flow shows the confirming state.
 
 ### P-04 Onboarding — wizard + "¿Cómo empiezo?" checklist
+
+> **Amended 2026-09-17 by Track N:** the four steps are replaced by the 8-step "Platícanos de ti" wizard (N-12); the checklist stays (N-14); re-runnable (N-15). ADR-067.
 
 - [ ] Status · **Blocked by:** P-02 · **Blocks:** X-02
 - **Amended 2026-09-17 (ADR-058):** the wizard is **four steps, not five** — the Sincronización step
@@ -507,6 +511,8 @@ without touching code.
   correct types; viewer can export; drawer closes on backdrop, button and **Escape**; four states.
 
 ### P-07 Productos + Excel import
+
+> **Amended 2026-09-17 by Track N:** the import steps are generalised into a template registry with Clientes and Saldos iniciales (N-16, N-17) and a free-tier 50-product cap (N-04).
 
 > **Wired to Postgres 2026-09-17.** The container/screen split is real, not
 > aspirational: `page.tsx` is an async server component that queries inside
@@ -665,6 +671,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
   disabled with tooltip; viewer read-only; permissions editor absent below Xangarrote.
 
 ### P-06 Dispositivos
+
+> **Amended 2026-09-17 by Track N:** the pairing panel also shows a QR / https app link (N-25, C-14).
 
 > **Wired to Postgres 2026-09-17.** The container/screen split is real, not
 > aspirational: `page.tsx` is an async server component that queries inside

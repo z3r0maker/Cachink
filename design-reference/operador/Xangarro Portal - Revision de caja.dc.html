@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+[data-row]:hover{background:var(--yellow-soft);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="flex:none;width:248px;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+      <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+        <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+        </div>
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </div>
+      <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="13">
+          <a href="{{ n.href }}" title="{{ n.label }}" data-press="1" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+            <span style="flex:1;min-width:0;font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+            <sc-if value="{{ n.badge }}" hint-placeholder-val="{{ false }}">
+              <span style="flex:none;min-width:22px;height:22px;padding:0 6px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ n.badge }}</span>
+            </sc-if>
+          </a>
+          <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+              <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+            </div>
+          </sc-if>
+        </sc-for>
+      </nav>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);min-height:76px;box-sizing:border-box;padding:12px {{ pagePad }}">
+      <div style="max-width:1760px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">Dueño</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <a href="Xangarro%20Portal%20-%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 4 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">4</span>
+          </a>
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);box-shadow:3px 3px 0 var(--black);">PR</div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px {{ pagePad }} 60px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div>
+          <h1 style="margin:0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Revisión de caja</h1>
+          <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;text-wrap:pretty;">Lo que tus operadores crearon en el mostrador para no detener la venta. Apruébalo, corrígelo o fusiónalo con lo que ya existe.</div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+            <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
+              <div style="font-size:32px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:{{ k.color }};margin-top:6px;">{{ k.value }}</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ k.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:inline-flex;align-self:flex-start;border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
+            <div role="tab" tabindex="0" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 22px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
+              {{ t.label }}
+              <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:{{ t.countBg }}">{{ t.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ hasItems }}" hint-placeholder-val="{{ true }}">
+          <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+            <sc-for list="{{ items }}" as="it" hint-placeholder-count="4">
+              <div data-row="1" style="display:flex;align-items:center;gap:14px;padding:16px 18px;border-bottom:{{ it.divider }}">
+                <span style="flex:none;width:44px;height:44px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:{{ it.tint }};color:var(--black);">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.icon }}"></path></svg>
+                </span>
+                <div style="flex:1;min-width:0;">
+                  <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+                    <span style="font-size:16px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">{{ it.name }}</span>
+                    <sc-if value="{{ it.dupe }}" hint-placeholder-val="{{ false }}">
+                      <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--warning-soft);color:var(--warning-text);">Se parece a {{ it.dupe }}</span>
+                    </sc-if>
+                  </div>
+                  <div style="font-size:13px;font-weight:600;color:var(--gray-600);margin-top:3px;text-wrap:pretty;">{{ it.detail }}</div>
+                </div>
+                <div style="flex:none;min-width:120px;text-align:right;">
+                  <div style="font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--black);">{{ it.figure }}</div>
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:2px;">{{ it.figureLabel }}</div>
+                </div>
+                <div style="flex:none;display:flex;gap:9px;">
+                  <button type="button" onClick="{{ it.open }}" data-press="1" data-onyellow="1" style="height:46px;padding:0 17px;border:2.5px solid var(--black);border-radius:13px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;" style-hover="background:var(--yellow-deep);">Revisar</button>
+                  <span role="button" tabindex="0" onClick="{{ it.reject }}" data-press="1" title="Rechazar" style="width:46px;height:46px;display:grid;place-items:center;border:2px solid var(--black);border-radius:13px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+                  </span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="padding:52px 24px;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
+            <div style="width:62px;height:62px;border:2.5px solid var(--black);border-radius:17px;background:var(--green-soft);display:grid;place-items:center;">
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+            </div>
+            <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ emptyTitle }}</div>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);max-width:460px;text-wrap:pretty;">{{ emptyBody }}</div>
+          </div>
+        </sc-if>
+
+        <div style="display:flex;gap:12px;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--yellow-soft);">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+          <div style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">Mientras no lo revises, el producto se vende sin costo y no calcula margen, y el cliente fiado no tiene límite. Puedes quitarle el permiso de crear en caja a un operador desde <a href="Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html">Operadores y dispositivos</a>.</div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ formOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:80;background:rgba(13,13,13,0.45);display:grid;place-items:start center;padding:16px;overflow-y:auto;">
+      <div style="width:min(560px,100%);box-sizing:border-box;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--yellow);border-bottom:2.5px solid var(--black);">
+          <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">{{ form.title }}</span>
+          <span role="button" tabindex="0" onClick="{{ closeForm }}" data-onyellow="1" title="Cerrar" style="margin-left:auto;flex:none;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:16px;">
+
+          <div style="padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--gray-100);">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Lo que capturó la caja</div>
+            <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:5px;text-wrap:pretty;">{{ form.captured }}</div>
+          </div>
+
+          <sc-if value="{{ form.isProducto }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                <div>
+                  <label for="rv-precio" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Precio de venta</label>
+                  <input id="rv-precio" type="text" inputmode="decimal" value="{{ form.precio }}" onChange="{{ form.typePrecio }}" style="width:100%;box-sizing:border-box;height:54px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+                <div>
+                  <label for="rv-costo" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Costo</label>
+                  <input id="rv-costo" type="text" inputmode="decimal" placeholder="0.00" value="{{ form.costo }}" onChange="{{ form.typeCosto }}" style="width:100%;box-sizing:border-box;height:54px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:10px;padding:14px 16px;border:2.5px solid var(--black);border-radius:14px;background:{{ form.margenBg }}">
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Margen</span>
+                <span style="margin-left:auto;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--black);">{{ form.margen }}</span>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Categoría</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <sc-for list="{{ form.cats }}" as="c" hint-placeholder-count="4">
+                    <div role="button" tabindex="0" onClick="{{ c.pick }}" style="display:inline-flex;align-items:center;height:42px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:700;color:var(--black);background:{{ c.bg }}">{{ c.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;">
+                <div>
+                  <label for="rv-exist" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Existencias</label>
+                  <input id="rv-exist" type="text" inputmode="numeric" placeholder="0" value="{{ form.existencias }}" onChange="{{ form.typeExistencias }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+                <div>
+                  <label for="rv-umbral" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Umbral para reponer</label>
+                  <input id="rv-umbral" type="text" inputmode="numeric" placeholder="0" value="{{ form.umbral }}" onChange="{{ form.typeUmbral }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ form.isCliente }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;">
+                <div>
+                  <label for="rv-nombre" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Nombre</label>
+                  <input id="rv-nombre" type="text" value="{{ form.nombre }}" onChange="{{ form.typeNombre }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:16px;font-weight:700;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+                <div>
+                  <label for="rv-tel" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Teléfono</label>
+                  <input id="rv-tel" type="tel" value="{{ form.tel }}" onChange="{{ form.typeTel }}" style="width:100%;box-sizing:border-box;height:50px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+                </div>
+              </div>
+              <div>
+                <label for="rv-limite" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Límite de fiado</label>
+                <div style="display:flex;align-items:center;gap:10px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);padding:0 14px;height:62px;">
+                  <span style="font-size:24px;font-weight:800;color:var(--gray-400);">$</span>
+                  <input id="rv-limite" type="text" inputmode="decimal" placeholder="0.00" value="{{ form.limite }}" onChange="{{ form.typeLimite }}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:inherit;font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);">
+                </div>
+                <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:10px;">
+                  <sc-for list="{{ form.limites }}" as="l" hint-placeholder-count="4">
+                    <div role="button" tabindex="0" onClick="{{ l.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:42px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ l.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Plazo para pagar</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <sc-for list="{{ form.plazos }}" as="p" hint-placeholder-count="4">
+                    <div role="button" tabindex="0" onClick="{{ p.pick }}" style="display:inline-flex;align-items:center;height:42px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:700;color:var(--black);background:{{ p.bg }}">{{ p.label }}</div>
+                  </sc-for>
+                </div>
+              </div>
+              <div style="display:flex;align-items:baseline;gap:10px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--gray-100);">
+                <span style="font-size:13px;font-weight:700;color:var(--ink);">Ya debe</span>
+                <span style="margin-left:auto;font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ form.debe }}</span>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ form.dupe }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2.5px solid var(--black);border-radius:14px;background:var(--warning-soft);flex-wrap:wrap;">
+              <div style="flex:1;min-width:180px;font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">Ya existe <strong>{{ form.dupe }}</strong>. Si es lo mismo, fusiónalos: las ventas capturadas se mueven al registro existente.</div>
+              <button type="button" onClick="{{ form.merge }}" data-press="1" style="flex:none;height:46px;padding:0 17px;border:2.5px solid var(--black);border-radius:13px;background:var(--white);box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Fusionar</button>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" onClick="{{ closeForm }}" data-press="1" style="flex:none;height:52px;padding:0 18px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Cancelar</button>
+            <button type="button" onClick="{{ form.approve }}" data-press="1" data-onyellow="1" style="flex:1;min-width:180px;height:52px;border:2.5px solid var(--black);border-radius:12px;background:{{ form.approveBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ form.approveOpacity }}" style-hover="background:var(--yellow-deep);">{{ form.cta }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:fixed;right:32px;bottom:32px;z-index:70;width:min(380px,calc(100vw - 32px));box-sizing:border-box;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:{{ toast.bg }};border-bottom:2px solid var(--black);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+        <span style="font-size:14px;font-weight:800;color:var(--black);">{{ toast.title }}</span>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ toast.body }}</div>
+        <button type="button" onClick="{{ dismissToast }}" data-press="1" style="height:44px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;">Entendido</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;productos&quot;,&quot;clientes&quot;],&quot;default&quot;:&quot;productos&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+
+const PRODUCTOS = [
+  ['Orden de tripa', 95, 'Ana Robledo · Caja 1 · hoy 13:20 · vendido 4 veces desde entonces', 'var(--red-soft)', 'Taco de tripa'],
+  ['Michelada preparada', 75, 'Luis Ortega · Caja 2 · ayer 20:40 · vendido 11 veces', 'var(--blue-soft)', null],
+  ['Combo dos gringas y refresco', 140, 'Ana Robledo · Caja 1 · ayer 14:05 · vendido 6 veces', 'var(--peach-soft)', 'Gringa'],
+  ['Elote preparado', 35, 'Luis Ortega · Caja 2 · 12 may · vendido 3 veces', 'var(--green-soft)', null]
+];
+
+const CLIENTES = [
+  ['Doña Chelo', '5566 210 884', 'Ana Robledo · Caja 1 · hoy 12:10 · fiado por ' + MXN(240), 'var(--purple-soft)', 240, null],
+  ['Raul obra', '5521 664 019', 'Luis Ortega · Caja 2 · ayer 19:30 · fiado por ' + MXN(180), 'var(--yellow-soft)', 180, 'Raúl (obra de la esquina)']
+];
+
+const ICON_PROD = 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8';
+const ICON_CLI = 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8';
+
+class Component extends DCLogic {
+  state = { tab: null, sel: null, resolved: [], costo: '', cat: null, existencias: '', umbral: '', limite: '', plazo: null, precio: '', nombre: '', tel: '', toast: null, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ sel: null, toast: null }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = st.vw < 900;
+    const isDesktop = !isPhone;
+    const tab = st.tab ?? this.props.startTab ?? 'productos';
+    const isProd = tab === 'productos';
+    const resolved = st.resolved;
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Asesor', 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3ZM18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Revisión de caja', 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Asesor': 'Xangarro%20Portal%20-%20Asesor.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Revisión de caja': 'Xangarro%20Portal%20-%20Revision%20de%20caja.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const pendCount = PRODUCTOS.length + CLIENTES.length - resolved.length;
+    const nav = navDefs.map(([label, icon, _a, div]) => {
+      const href = pages[label] || '#';
+      const active = label === 'Revisión de caja';
+      return {
+        label, icon, href,
+        dividerAfter: div === 1,
+        badge: label === 'Revisión de caja' && pendCount > 0 ? String(pendCount) : '',
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const source = isProd ? PRODUCTOS : CLIENTES;
+    const visibles = source.filter(r => resolved.indexOf(r[0]) === -1);
+
+    const items = visibles.map((r, i) => ({
+      name: r[0],
+      detail: r[2],
+      tint: r[3],
+      icon: isProd ? ICON_PROD : ICON_CLI,
+      dupe: r[isProd ? 4 : 5] ?? '',
+      figure: isProd ? MXN(r[1]) : MXN(r[4]),
+      figureLabel: isProd ? 'Precio en caja' : 'Fiado acumulado',
+      divider: i === visibles.length - 1 ? 'none' : '2px solid var(--gray-100)',
+      open: () => this.setState({
+        sel: r[0], costo: '', cat: null, existencias: '', umbral: '',
+        precio: isProd ? String(r[1]) : '', nombre: isProd ? '' : r[0], tel: isProd ? '' : r[1],
+        limite: '', plazo: null
+      }),
+      reject: () => this.setState({
+        resolved: resolved.concat([r[0]]),
+        toast: { bg: 'var(--red-soft)', title: isProd ? 'Producto rechazado' : 'Cliente rechazado', body: r[0] + ' ya no se puede vender en caja. Las ventas capturadas quedan para clasificar en Ventas y gastos.' }
+      })
+    }));
+
+    const sel = st.sel;
+    const rec = sel ? source.find(r => r[0] === sel) : null;
+    const precioVal = parseFloat(st.precio || '0');
+    const costoVal = parseFloat(st.costo || '0');
+    const margen = precioVal > 0 && costoVal > 0 ? Math.round((1 - costoVal / precioVal) * 100) : null;
+    const prodOk = !!st.cat && costoVal > 0 && st.existencias !== '';
+    const cliOk = st.limite !== '' && !!st.plazo;
+    const ok = isProd ? prodOk : cliOk;
+
+    const form = {
+      title: rec ? (isProd ? 'Revisar ' + rec[0] : 'Revisar cliente ' + rec[0]) : '',
+      captured: rec ? (isProd
+        ? 'Nombre «' + rec[0] + '» y precio ' + MXN(rec[1]) + '. ' + rec[2]
+        : 'Nombre «' + rec[0] + '», teléfono ' + rec[1] + '. ' + rec[2]) : '',
+      isProducto: isProd, isCliente: !isProd,
+      precio: st.precio,
+      typePrecio: e => this.setState({ precio: String(e.target.value).replace(/[^0-9.]/g, '') }),
+      costo: st.costo,
+      typeCosto: e => this.setState({ costo: String(e.target.value).replace(/[^0-9.]/g, '') }),
+      margen: margen == null ? '—' : margen + '%',
+      margenBg: margen == null ? 'var(--gray-100)' : (margen >= 40 ? 'var(--green-soft)' : (margen >= 20 ? 'var(--yellow-soft)' : 'var(--red-soft)')),
+      cats: ['Tacos', 'Guisados', 'Bebidas', 'Extras'].map(label => ({
+        label, bg: st.cat === label ? 'var(--yellow)' : 'var(--white)',
+        pick: () => this.setState({ cat: label })
+      })),
+      existencias: st.existencias,
+      typeExistencias: e => this.setState({ existencias: String(e.target.value).replace(/[^0-9]/g, '') }),
+      umbral: st.umbral,
+      typeUmbral: e => this.setState({ umbral: String(e.target.value).replace(/[^0-9]/g, '') }),
+      nombre: st.nombre,
+      typeNombre: e => this.setState({ nombre: e.target.value }),
+      tel: st.tel,
+      typeTel: e => this.setState({ tel: String(e.target.value).replace(/[^0-9 ]/g, '') }),
+      limite: st.limite,
+      typeLimite: e => this.setState({ limite: String(e.target.value).replace(/[^0-9.]/g, '') }),
+      limites: [500, 1000, 2000, 5000].map(v => ({ label: MXN(v), pick: () => this.setState({ limite: String(v) }) })),
+      plazos: ['Al contado del día', '7 días', '15 días', '30 días'].map(label => ({
+        label, bg: st.plazo === label ? 'var(--yellow)' : 'var(--white)',
+        pick: () => this.setState({ plazo: label })
+      })),
+      debe: rec && !isProd ? MXN(rec[4]) : MXN(0),
+      dupe: rec ? (rec[isProd ? 4 : 5] ?? '') : '',
+      merge: () => {
+        if (!rec) return;
+        const con = rec[isProd ? 4 : 5];
+        this.setState({
+          sel: null, resolved: resolved.concat([rec[0]]),
+          toast: { bg: 'var(--blue-soft)', title: 'Registros fusionados', body: rec[0] + ' se fusionó con ' + con + '. Las ventas capturadas se movieron a ese registro.' }
+        });
+      },
+      cta: isProd ? 'Aprobar y agregar al catálogo' : 'Aprobar cliente con límite',
+      approveBg: ok ? 'var(--yellow)' : 'var(--gray-100)',
+      approveOpacity: ok ? '1' : '0.5',
+      approve: () => {
+        if (!ok || !rec) return;
+        this.setState({
+          sel: null, resolved: resolved.concat([rec[0]]),
+          toast: isProd
+            ? { bg: 'var(--green-soft)', title: 'Producto aprobado', body: rec[0] + ' entra al catálogo con costo ' + MXN(costoVal) + ' y margen ' + (margen ?? 0) + '%. Ya calcula utilidad en tus estados.' }
+            : { bg: 'var(--green-soft)', title: 'Cliente aprobado', body: (st.nombre || rec[0]) + ' queda con límite ' + MXN(parseFloat(st.limite || '0')) + ' y plazo ' + st.plazo + '.' }
+        });
+      }
+    };
+
+    return {
+      isDesktop, nav, items, form,
+      hasItems: items.length > 0,
+      isEmpty: items.length === 0,
+      emptyTitle: isProd ? 'Nada por revisar en productos' : 'Nada por revisar en clientes',
+      emptyBody: isProd
+        ? 'Todo lo que tus operadores crearon en caja ya tiene costo, categoría y existencias.'
+        : 'Todos los clientes fiados tienen límite y plazo definidos por ti.',
+      formOpen: !!sel,
+      closeForm: () => this.setState({ sel: null }),
+      tabs: [['productos', 'Productos', String(PRODUCTOS.filter(r => resolved.indexOf(r[0]) === -1).length)], ['clientes', 'Clientes fiados', String(CLIENTES.filter(r => resolved.indexOf(r[0]) === -1).length)]].map(([k, l, c], i) => ({
+        label: l, count: c, selected: tab === k,
+        bg: tab === k ? 'var(--yellow)' : 'var(--white)',
+        countBg: tab === k ? 'var(--white)' : 'var(--gray-100)',
+        divider: i === 0 ? 'none' : '2px solid var(--black)',
+        pick: () => this.setState({ tab: k, sel: null })
+      })),
+      kpis: [
+        { label: 'Por revisar', value: String(pendCount), color: 'var(--warning-text)', hint: 'Productos y clientes creados en el mostrador' },
+        { label: 'Vendido sin costo', value: MXN(2840), color: 'var(--red-text)', hint: 'No calcula margen hasta que pongas costo' },
+        { label: 'Fiado sin límite', value: MXN(420), color: 'var(--black)', hint: 'Dos clientes nuevos sin límite ni plazo' }
+      ],
+      toast: st.toast,
+      dismissToast: () => this.setState({ toast: null }),
+      pagePad: isPhone ? '18px' : '32px',
+      h1Size: isPhone ? '28px' : '36px'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

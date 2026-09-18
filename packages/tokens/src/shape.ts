@@ -20,6 +20,14 @@ export const radii = [8, 10, 12, 14, 16, 18, 20, 22] as const;
 export type Radius = (typeof radii)[number];
 
 /**
+ * The two dense steps the operator handoff adds to the scale (ADR-076): 11 for
+ * 40–42px icon boxes and quantity steppers, 13 for 52px buttons, keypad keys
+ * and inputs. Kept out of `radii` because ~80 call sites index that array;
+ * inserting would silently re-round every one of them.
+ */
+export const denseRadii = { r11: 11, r13: 13 } as const;
+
+/**
  * Radii the card ladder above was never meant to cover.
  *
  * `radii` describes cards, buttons, and sheets. It says nothing about a 2px

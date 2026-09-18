@@ -32,6 +32,8 @@
 
 ### X-05 Store listings + review readiness
 
+> **Amended 2026-09-17 by Track N:** submit under the business-employee framing of ADR-069 (3.1.3(c)); blocked by N-32 (store-compliance sweep); send an external TestFlight build early for a review signal (OQ-6).
+
 - [ ] Status · **Blocked by:** F-01, A-15, X-07, B-04 · **Blocks:** L-05
 - **Steps:** App Store Connect + Play Console apps under `mx.xangarro.mobile`, name "Xangarro!"; update `docs/store/listing-*.md`; screenshots via `pnpm store:screenshots` after X-07; **review notes** with the demo account (B-04: email/password + activation code `DEMOK7M3`) and a sentence: "Xangarro is a business tool; subscriptions are purchased by business owners on our website; the app contains no purchase flow." `eas submit` profiles get `ascAppId`. Privacy nutrition labels updated (data now leaves the device). Confirm the current external-purchase/steering rules for the **Mexican** storefront before submission and record the source + date in the Done line (ADR-053 consequence).
 - **Acceptance:** both listings in review with the demo account working from a fresh install.

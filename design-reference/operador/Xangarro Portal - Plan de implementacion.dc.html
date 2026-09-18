@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<script src="./doc-page.js"></script>
+<style>
+doc-page:not(:defined){visibility:hidden}
+:root{--text-muted:#6F6F6B;--green-text:#007E5E;--red-text:#DA0013;--blue-text:#1D59FF;--warning-text:#8E6600;}
+body{margin:0;}
+a{color:#1D59FF;font-weight:700;text-decoration:underline;text-underline-offset:2px;}
+a:hover{color:#0D0D0D;}
+</style>
+</helmet>
+
+<doc-page margin="0.7in">
+  <div slot="header" style="display:flex;align-items:center;gap:10px;border-bottom:2.5px solid #0D0D0D;padding-bottom:8px;font-family:var(--font-sans);">
+    <span style="width:22px;height:22px;flex:none;border-radius:9999px;background:#FFD60A;border:2px solid #0D0D0D;display:grid;place-items:center;">
+      <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="#0D0D0D" stroke-width="4.6"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+    </span>
+    <span style="font-size:11pt;font-weight:800;letter-spacing:-0.01em;color:#0D0D0D;">Xangarro! · Portal web</span>
+    <span style="margin-left:auto;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Plan de implementación</span>
+  </div>
+
+  <div style="font-family:var(--font-sans);color:#1A1A18;">
+
+    <h1 style="margin:0;font-size:30pt;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:#0D0D0D;">Plan de implementación por fases</h1>
+    <p style="margin:12px 0 0;font-size:13pt;font-weight:700;color:#0D0D0D;">Portal web de Xangarro! — construcción con un agente de código, replicando el diseño tal cual.</p>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;color:#6F6F6B;">Versión 3 · septiembre 2026 · Diseño de referencia: 27 pantallas —14 del dueño y 13 del operador— y el sistema de diseño en este proyecto.</p>
+
+    <div style="margin:22px 0 0;border:2.5px solid #0D0D0D;border-radius:16px;background:#FFF4C2;padding:18px 20px;break-inside:avoid;">
+      <div style="font-size:9.5pt;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#6F6F6B;">La regla que ordena todo</div>
+      <p style="margin:8px 0 0;font-size:13pt;font-weight:700;color:#0D0D0D;">El diseño no es inspiración: es la especificación. Si el código y el diseño no coinciden, el código está mal. Cualquier cambio visual se hace primero en el archivo de diseño y después en el código, nunca al revés.</p>
+    </div>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">1. Qué significa «replicar» (definición operativa)</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">Una pantalla se considera replicada cuando cumple las ocho condiciones siguientes. Son las que el agente debe verificar antes de cerrar cualquier tarea.</p>
+    <ol style="margin:12px 0 0;padding-left:22px;font-size:11.5pt;font-weight:600;line-height:1.5;">
+      <li><strong>Estructura.</strong> Mismo orden y jerarquía de bloques: barra lateral, encabezado, contenido a 1760 px máximo, panel de control.</li>
+      <li><strong>Medidas.</strong> Bordes de 2 px (2.5 px en tarjetas héroe y barras fijas), radios de la escala 8/10/12/14/16/18/20/22, sombras duras 3/4/5 px sin difuminado.</li>
+      <li><strong>Color.</strong> Solo tokens del sistema. Ningún color nuevo, ningún degradado, ninguna transparencia salvo el velo de modal.</li>
+      <li><strong>Tipografía.</strong> Plus Jakarta Sans; títulos en 800 con tracking negativo, etiquetas en mayúsculas 700 con tracking positivo, cuerpo 600.</li>
+      <li><strong>Copy.</strong> Textos en español (es-MX) copiados literalmente del diseño, incluidos montos y nombres de ejemplo. No se reescriben.</li>
+      <li><strong>Interacción.</strong> El sello al presionar (2 px + sombra a 1 px, 100 ms) en todo lo tocable; hover solo eleva en escritorio.</li>
+      <li><strong>Estados.</strong> Cada lista y cada reporte implementan cargando, vacío, error y con datos, más el recorte por rol.</li>
+      <li><strong>Accesibilidad.</strong> Foco visible amarillo, objetivos de 44 px mínimo, severidad siempre con icono además de color.</li>
+    </ol>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">2. Cómo se le entrega el diseño al agente</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">El agente trabaja con tres insumos y una sola instrucción de arranque:</p>
+    <div style="margin:14px 0 0;display:flex;flex-direction:column;gap:12px;">
+      <div style="border:2px solid #0D0D0D;border-radius:14px;background:#FFFFFF;padding:16px 18px;break-inside:avoid;">
+        <div style="font-size:11.5pt;font-weight:800;color:#0D0D0D;">a. Carpeta de diseño, en solo lectura</div>
+        <p style="margin:6px 0 0;font-size:11pt;font-weight:600;">Los veintisiete archivos del portal más el sistema de diseño, dentro del repositorio en <strong>/design-reference/</strong>. El agente los lee y los abre en el navegador; no los edita nunca.</p>
+      </div>
+      <div style="border:2px solid #0D0D0D;border-radius:14px;background:#FFFFFF;padding:16px 18px;break-inside:avoid;">
+        <div style="font-size:11.5pt;font-weight:800;color:#0D0D0D;">b. Contrato visual</div>
+        <p style="margin:6px 0 0;font-size:11pt;font-weight:600;">Un archivo <strong>DESIGN_CONTRACT.md</strong> con la sección 1 de este plan, la tabla de tokens y las prohibiciones: no librerías de componentes con estilo propio, no Tailwind por defecto sin mapear tokens, no iconos fuera de Lucide, no emoji en la interfaz.</p>
+      </div>
+      <div style="border:2px solid #0D0D0D;border-radius:14px;background:#FFFFFF;padding:16px 18px;break-inside:avoid;">
+        <div style="font-size:11.5pt;font-weight:800;color:#0D0D0D;">c. Tareas por pantalla</div>
+        <p style="margin:6px 0 0;font-size:11pt;font-weight:600;">Una tarea por pantalla, cada una con su archivo de diseño, la lista de estados a cubrir y el criterio de aceptación. El agente no avanza a la siguiente pantalla sin cerrar la anterior.</p>
+      </div>
+    </div>
+    <p style="margin:14px 0 0;font-size:11.5pt;font-weight:600;">Instrucción de arranque, textual: «Abre el archivo de diseño de esta pantalla, recórrelo de arriba a abajo y reprodúcelo. Toma cada valor del archivo, no de tu memoria. Cuando termines, captura tu pantalla y la del diseño al mismo ancho y compáralas; corrige lo que no coincida antes de reportar.»</p>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">3. Las fases</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">Catorce fases secuenciales. Cada una termina en una compuerta de verificación; sin compuerta cerrada no empieza la siguiente.</p>
+
+    <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:10.5pt;">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Fase</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Entrega</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Compuerta</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{ phases }}" as="p" hint-placeholder-count="10">
+          <tr style="break-inside:avoid;">
+            <td style="padding:11px 10px;border-bottom:2px solid #E8E8E4;vertical-align:top;">
+              <div style="font-weight:800;color:#0D0D0D;">{{ p.n }}</div>
+              <div style="font-weight:800;color:#0D0D0D;margin-top:2px;">{{ p.name }}</div>
+            </td>
+            <td style="padding:11px 10px;border-bottom:2px solid #E8E8E4;vertical-align:top;font-weight:600;">{{ p.deliver }}</td>
+            <td style="padding:11px 10px;border-bottom:2px solid #E8E8E4;vertical-align:top;font-weight:600;color:#1A1A18;">{{ p.gate }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">4. Mapa de pantallas</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">Cada pantalla del producto tiene un archivo de diseño que la define. La columna de estados es la lista mínima que debe existir en código.</p>
+    <table style="width:100%;border-collapse:collapse;margin-top:14px;font-size:10.5pt;">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Pantalla</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Archivo de diseño</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Fase</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2.5px solid #0D0D0D;font-size:9.5pt;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#6F6F6B;">Estados</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{ screens }}" as="s" hint-placeholder-count="12">
+          <tr style="break-inside:avoid;">
+            <td style="padding:10px;border-bottom:2px solid #E8E8E4;font-weight:800;color:#0D0D0D;vertical-align:top;">{{ s.name }}</td>
+            <td style="padding:10px;border-bottom:2px solid #E8E8E4;font-weight:600;vertical-align:top;">{{ s.file }}</td>
+            <td style="padding:10px;border-bottom:2px solid #E8E8E4;font-weight:800;color:#0D0D0D;vertical-align:top;font-variant-numeric:tabular-nums;">{{ s.phase }}</td>
+            <td style="padding:10px;border-bottom:2px solid #E8E8E4;font-weight:600;vertical-align:top;">{{ s.states }}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">5. Reglas del modelo operativo</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">Las ocho pantallas del operador dependen de siete reglas de negocio. El agente no las inventa ni las flexibiliza: están dibujadas en los archivos de diseño y aquí quedan escritas para que el backend las respete.</p>
+    <ol style="margin:12px 0 0;padding-left:22px;font-size:11.5pt;font-weight:600;line-height:1.5;">
+      <li><strong>Caja vinculada, persona identificada.</strong> El navegador se vincula una vez con el código que genera el dueño; cada operador abre turno con un NIP de cuatro dígitos. El NIP también bloquea la caja y cambia de turno sin perder el ticket en curso. El NIP solo lo reinicia el dueño.</li>
+      <li><strong>Un turno abierto por caja.</strong> Dos cajas pueden operar a la vez, cada una con su fondo y su conteo. El turno abre con fondo de caja y cierra con conteo por denominación.</li>
+      <li><strong>El corte se cuadra contra lo esperado.</strong> Esperado = fondo + ventas en efectivo + abonos en efectivo − gastos de caja chica. Si el conteo no coincide, la nota y el motivo son obligatorios para poder cerrar.</li>
+      <li><strong>Catálogo primero.</strong> La venta se arma tocando productos y el inventario se descuenta solo. Lo que no está en catálogo lo crea el operador con nombre y precio, y queda marcado «creado en caja» para revisión del dueño. Los clientes nuevos siguen la misma regla.</li>
+      <li><strong>Fiado es ingreso completo, no venta negativa.</strong> Una venta fiada exige cliente, registra el ingreso a su valor total contra una cuenta por cobrar y no entra al efectivo esperado. El abono posterior sí entra a la caja y no se vuelve a contar como venta. Los abonos se aplican a las ventas más antiguas primero. Si se cancela una venta fiada que ya recibió abonos, el dinero abonado no sale de la caja: queda como <strong>saldo a favor</strong> del cliente, aplicable solo a su siguiente compra, y el dueño lo ve marcado.</li>
+      <li><strong>Nada se borra.</strong> El operador cancela ventas de su turno abierto con un motivo; la venta queda visible como cancelada y viaja al portal del dueño y al corte. No puede editar ventas cerradas ni ajustar existencias libremente: solo registra entradas y mermas.</li>
+      <li><strong>Sin conexión se sigue cobrando.</strong> La venta se encola en el navegador y sube al reconectar. El turno no puede cerrarse con registros sin enviar, porque el efectivo esperado estaría incompleto.</li>
+    </ol>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">6. Cómo se verifica la réplica</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">Tres controles, en este orden, en cada pantalla:</p>
+    <div style="margin:14px 0 0;display:flex;flex-direction:column;gap:12px;">
+      <sc-for list="{{ checks }}" as="c" hint-placeholder-count="3">
+        <div style="border:2px solid #0D0D0D;border-radius:14px;background:#FFFFFF;padding:16px 18px;break-inside:avoid;">
+          <div style="font-size:11.5pt;font-weight:800;color:#0D0D0D;">{{ c.title }}</div>
+          <p style="margin:6px 0 0;font-size:11pt;font-weight:600;">{{ c.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+    <p style="margin:14px 0 0;font-size:11.5pt;font-weight:600;">Diferencias aceptables: el ancho real del navegador, el texto que reflowa, y los datos reales en lugar de los de Taquería Don Pedro. Todo lo demás se corrige.</p>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">7. Reglas para el agente</h2>
+    <ul style="margin:12px 0 0;padding-left:22px;font-size:11.5pt;font-weight:600;line-height:1.5;">
+      <li>Un archivo de diseño por tarea. No mezclar pantallas en un mismo cambio.</li>
+      <li>Los tokens viven en un solo lugar y se leen del sistema de diseño; prohibido escribir un hex suelto en un componente.</li>
+      <li>Antes de crear un componente nuevo, buscar el existente en el inventario de la fase 1. El portal tiene un vocabulario cerrado: tarjeta, etiqueta, píldora de estado, fila de lista, tira del Asesor, fila bloqueada, renglón de aviso.</li>
+      <li>Nada de texto de relleno. Si falta un dato, se usa el estado vacío del diseño.</li>
+      <li>Los montos se guardan en centavos enteros y se formatean con Intl es-MX al mostrarse.</li>
+      <li>Ningún texto escrito por la IA aparece sin su marcador «Asesor» y su pie de «Generado con IA a partir de tus registros».</li>
+      <li>Cuando un requisito del diseño choque con el código existente, el agente se detiene y pregunta; no improvisa una tercera opción.</li>
+    </ul>
+
+    <h2 style="margin:30px 0 0;font-size:17pt;font-weight:800;letter-spacing:-0.02em;color:#0D0D0D;">8. Fuera de alcance de este plan</h2>
+    <p style="margin:10px 0 0;font-size:11.5pt;font-weight:600;">La vista del operador y su cierre con el dueño están diseñados y entran en las fases 10 a 13. Quedan fuera tres cosas: el <strong>envío real por WhatsApp</strong> —hoy diseñado en la caja, en el detalle de venta y en el recordatorio de cobranza, pero sin integración—; el <strong>saldo a favor</strong> visto desde el portal del dueño, que la regla 5 ya define pero no tiene pantalla propia; y las ofertas de crédito, que siguen siendo fase 2 del producto. El Asesor no se recorta para el operador: simplemente no aparece en su barra.</p>
+
+    <div style="margin:24px 0 0;border:2.5px solid #0D0D0D;border-radius:16px;background:#0D0D0D;padding:20px;break-inside:avoid;">
+      <div style="font-size:9.5pt;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:#FFD60A;">Siguiente paso</div>
+      <p style="margin:8px 0 0;font-size:12.5pt;font-weight:700;color:#FFFFFF;">Cerrar el paquete de entrega: copiar las veintisiete pantallas y el sistema de diseño a /design-reference/, escribir DESIGN_CONTRACT.md con la sección 1 y la tabla de tokens, y crear las tareas de la fase 0 y 1. Con eso el agente puede arrancar sin más contexto.</p>
+    </div>
+  </div>
+</doc-page>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const phases = [
+      ['Fase 0', 'Contrato y andamio', 'Repositorio, stack, carpeta /design-reference/ en solo lectura, DESIGN_CONTRACT.md, entorno de capturas para comparar.', 'El agente abre cualquier pantalla de diseño en el navegador y explica en voz propia las ocho condiciones de réplica.'],
+      ['Fase 1', 'Tokens y primitivas', 'Tokens de color, tipografía, radios, sombras y bordes; botón en sus seis variantes, tarjeta, input, etiqueta, píldora de estado, fila de lista, tabla, medidor.', 'Una página de inventario en la app se ve idéntica al sistema de diseño, lado a lado, incluido el sello al presionar.'],
+      ['Fase 2', 'Cascarón de la aplicación', 'Barra lateral con sus doce destinos y riel de iconos, encabezado con selector de negocio, indicador de sincronización, campana con contador y menú de usuario; ruteo.', 'Navegar entre pantallas vacías conserva el estado activo del menú y el cascarón no se mueve un píxel entre rutas.'],
+      ['Fase 3', 'Datos, roles y estados', 'Capa de datos, formato de moneda y fechas es-MX, recorte por rol (Dueño, Administrador, Solo lectura) y los cuatro estados como patrón reutilizable.', 'Cambiar de rol oculta botones en vez de deshabilitarlos, y cada estado se puede forzar sin tocar código.'],
+      ['Fase 4', 'Operación diaria', 'Inicio, Ventas y gastos, Productos.', 'Las tres pantallas pasan los tres controles de la sección 6 en sus cuatro estados.'],
+      ['Fase 5', 'Números y administración', 'Estados financieros, Empleados, Operadores y dispositivos, Sincronización, Negocio, Suscripción.', 'Las tablas replican alineación, numeración tabular y encabezados repetidos; los planes muestran Xangarrito, Xangarro y Xangarrote con sus frases.'],
+      ['Fase 6', 'Asesor', 'Para ti con el panel de capacidades, Metas con sus tres pasos y sus estados, Diagnóstico con las diez secciones y su versión imprimible.', 'Ninguna conclusión aparece sin datos suficientes: las capacidades bloqueadas muestran progreso, no texto inventado.'],
+      ['Fase 7', 'Avisos y compartir', 'Panel lateral, página completa, pestañas Operación y Sistema, Configurar con tres columnas y la tarjeta de WhatsApp en «Próximamente», diálogo de Compartir por WhatsApp.', 'Cada renglón lleva a su pantalla, la severidad siempre va con icono y los avisos críticos no se pueden apagar.'],
+      ['Fase 8', 'Celebración y sellos', 'Takeover de meta lograda, juego de sellos por tipo y nivel, rachas, toast de hitos, respeto a prefers-reduced-motion.', 'Se muestra una sola vez por logro, nunca a Solo lectura, y se puede saltar con clic, Esc o botón.'],
+      ['Fase 9', 'Impresión, exportes y cierre', 'PDF del Diagnóstico y de los estados financieros, exportes de listas, revisión de accesibilidad y desempeño.', 'El PDF sale sin cromo del navegador y con el mismo ritmo visual que la pantalla.'],
+      ['Fase 10', 'Acceso del operador, inicio y turno', 'Vinculación de caja con código, NIP de cuatro dígitos, bloqueo de caja y cambio de turno, apertura con fondo de caja, Inicio con su tarjeta de «lo primero» según la situación, Turno con pendientes recurrentes, Avisos del operador con respuesta al corte.', 'Dos operadores se alternan en la misma caja sin perder el ticket, y el turno no abre sin fondo capturado.'],
+      ['Fase 11', 'Caja y captura', 'Catálogo con icono y color por categoría, búsqueda, ticket fijo con total anclado, cobro en modal con calculadora de cambio y entrada manual, producto creado en caja, comprobante compartible.', 'Una venta en efectivo con cambio y una fiada con cliente se capturan completas; el total y COBRAR nunca se pierden por largo el ticket.'],
+      ['Fase 12', 'Turno completo, detalles y cola sin conexión', 'Ventas con cancelación motivada y su detalle de ticket, Gastos con comprobante, Inventario con entradas y mermas, Cobranza con abonos y detalle de cliente fiado, Cierre con conteo por denominación, cola de registros pendientes, y los cuatro estados en las once pantallas.', 'El corte cuadra contra lo esperado, la diferencia exige nota, y con registros sin enviar el cierre queda bloqueado.'],
+      ['Fase 13', 'Cierre del circuito con el dueño', 'Revisión de caja para aprobar, fusionar o rechazar lo que el operador creó en el mostrador, y Cortes de turno con el conteo, la diferencia y la nota de cada turno.', 'Un producto creado en caja se aprueba con costo y ya calcula margen; un corte con faltante se lee completo y se marca como aclarado.']
+    ].map(([n, name, deliver, gate]) => ({ n, name, deliver, gate }));
+
+    const screens = [
+      ['Acceso y onboarding', 'Acceso y onboarding', '2', 'Formulario, error de credenciales, alta de negocio'],
+      ['Inicio', 'Inicio', '4', 'Cargando · vacío · error · con datos · sin meta · negocio nuevo'],
+      ['Ventas y gastos', 'Ventas y gastos', '4', 'Cargando · vacío · error · con datos'],
+      ['Productos', 'Productos', '4', 'Cargando · vacío · error · con datos · stock bajo'],
+      ['Estados financieros', 'Estados financieros', '5', 'Cuatro pestañas · tira del Asesor en sus tres estados'],
+      ['Empleados', 'Empleados', '5', 'Nómina · expedientes · asistencia · cuatro estados'],
+      ['Operadores y dispositivos', 'Operadores y dispositivos', '5', 'Cuatro estados · códigos de activación · revocación'],
+      ['Sincronización', 'Sincronización', '5', 'Cuatro estados · registros rechazados'],
+      ['Negocio', 'Negocio', '5', 'Datos fiscales · sucursal · métodos de pago'],
+      ['Suscripción', 'Suscripción', '5', 'Cuatro estados · comparación de planes · Asesor por plan'],
+      ['Asesor', 'Asesor', '6', 'Para ti · Metas (pasos 1-3, activa, lograda, sin meta) · Diagnóstico (a-e)'],
+      ['Avisos', 'Avisos', '7', 'Panel · página · Configurar · vacío · cargando · error'],
+      ['Operador · Acceso', 'Operador Acceso', '10', 'Vincular caja · NIP (con error) · fondo de caja'],
+      ['Operador · Turno', 'Operador Turno', '10', 'Con datos · pendientes recurrentes · sin conexión'],
+      ['Operador · Caja', 'Operador Caja', '11', 'Catálogo · ticket · cobro (método, efectivo, fiado) · producto nuevo · comprobante · caja bloqueada · sin conexión'],
+      ['Operador · Ventas', 'Operador Ventas', '12', 'Con datos · búsqueda y filtros · cancelación con motivo · sin resultados'],
+      ['Operador · Gastos', 'Operador Gastos', '12', 'Con datos · alta con comprobante · sin comprobante · sin resultados'],
+      ['Operador · Inventario', 'Operador Inventario', '12', 'Existencias · movimientos del turno · entrada · merma con motivo'],
+      ['Operador · Cobranza', 'Operador Cobranza', '12', 'Clientes con saldo · atrasados · abono parcial · abonos del día'],
+      ['Operador · Cierre de turno', 'Operador Cierre de turno', '12', 'Conteo · cuadra · falta · sobra · nota obligatoria · bloqueado por pendientes · turno cerrado'],
+      ['Operador · Inicio', 'Operador Inicio', '10', 'Vendiendo · turno cerrado · hora de cerrar · corte por aclarar · sin conexión · cuatro estados'],
+      ['Operador · Avisos', 'Operador Avisos', '10', 'De Pedro · de tu caja · respuesta al corte · leído · cuatro estados'],
+      ['Operador · Registros por enviar', 'Operador Pendientes', '12', 'En espera · enviando · todo enviado · error de lectura'],
+      ['Operador · Detalle de venta', 'Operador Detalle de venta', '12', 'Efectivo con cambio · fiada · cancelada · compartir comprobante · cuatro estados'],
+      ['Operador · Detalle de cliente', 'Operador Detalle de cliente', '12', 'Con saldo · atrasado · liquidado · abono aplicado · recordatorio por WhatsApp'],
+      ['Revisión de caja', 'Revision de caja', '13', 'Productos · clientes fiados · aprobar · fusionar · rechazar · vacío'],
+      ['Cortes de turno', 'Cortes de turno', '13', 'Cuadró · por aclarar · aclarado · panel de detalle · sin resultados']
+    ].map(([name, file, phase, states]) => ({ name, file: 'Xangarro Portal - ' + file, phase, states }));
+
+    const checks = [
+      { title: '1. Comparación lado a lado', body: 'Captura de la pantalla en código y del archivo de diseño al mismo ancho, una sobre otra. Se revisan alturas de barra, paddings de tarjeta, tamaños de título y posición de botones.' },
+      { title: '2. Auditoría de valores', body: 'Un guion recorre los estilos calculados y falla si aparece un color fuera de los tokens, un radio fuera de la escala, una sombra con difuminado o un borde distinto de 2 y 2.5 px.' },
+      { title: '3. Recorrido de estados y rol', body: 'Para cada pantalla se fuerzan los cuatro estados y los tres roles, y se verifica el sello al presionar, el foco visible y los objetivos de 44 px.' }
+    ];
+
+    return { phases, screens, checks };
+  }
+}
+
+</script>
+</body>
+</html>

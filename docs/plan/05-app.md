@@ -13,6 +13,8 @@
 
 ### A-01 Screen teardown (ADR-053 §3)
 
+> **Amended 2026-09-17 by Track N:** blocked additionally by N-11 (portal settings parity) and N-24 (design-first app redesign).
+
 - [ ] Status · **Blocked by:** F-04, F-07 · **Blocks:** A-03, A-09, A-12, A-15
 - **Context:** 33 screen folders in `packages/ui/src/screens`. Leaving the app: `Estados, DirectorHome, Wizard, CloudOnboarding, Telemetria, BusinessForm, Otros, UserManagement, FuncionesNegocio, CajaReportes, DirectorSetup, MermaReportes, Notificaciones, RolePicker, LanPairing`. Their **domain** logic stays (portal reuses it); only UI + routes go. Per the user's preference for recoverability, move rather than delete.
 - **Files:** the folders above; `packages/ui/src/screens/index.ts`; `apps/mobile/src/app/{wizard.tsx,wizard/,role-picker.tsx,telemetria.tsx,usuarios.tsx,funciones.tsx,caja-reportes.tsx,merma-reportes.tsx,notificaciones.tsx,indicadores.tsx,empleados.tsx,productos-otros.tsx}` (+ any route whose screen is gone); `apps/mobile/src/app/_layout.tsx` (Stack.Screen entries); `packages/ui/src/app/{cloud-gate,lan-gate,feature-discovery-gate,change-pin-gate}.tsx`; `packages/ui/src/i18n/locales/es-mx.ts` (leave keys; A-15 prunes); Maestro flows that reference these screens.
@@ -41,6 +43,8 @@
 - **Acceptance:** `grep -rn "director" -i packages/ui/src apps/mobile/src --include=*.ts --include=*.tsx | grep -v i18n | grep -v archive` → 0; typecheck green; smoke-launch + `select-operativo` flows adjusted and green.
 
 ### A-04 Activation screen (email + code) + device identity storage
+
+> **Amended 2026-09-17 by Track N:** the activation screen opens on the camera (QR), email + code is the fallback — N-25, C-14.
 
 - [ ] Status · **Blocked by:** C-02, C-09 · **Blocks:** A-05, A-10, A-16
 - **Context:** Replaces the wizard as the first-run gate. `02-contracts.md` §3.
@@ -74,6 +78,8 @@
 
 ### A-07 Sync triggers, "Actualizar", status pill
 
+> **Amended 2026-09-17 by Track N:** conditional banners are added on top of the pill — N-22.
+
 - [ ] Status · **Blocked by:** A-06 · **Blocks:** A-16
 - **Files:** `packages/ui/src/sync/{use-sync-orchestrator.ts,sync-status-pill.tsx}`, `AppShell` top bar, Settings "Sincronización" row, `apps/mobile/src/shell/*` (AppState listener).
 - **Steps:** push trigger: subscribe to change-log inserts (SQLite update hook or after each repository write) → debounce 2 s → `drain`. Pull: on `AppState` active + every 15 min while active (`setInterval`, cleared on background) + after activation + after a push that had rejections (so fixes flow down). "Actualizar" button (Settings + pill tap): runs `syncNow`, toast "12 ventas enviadas · 3 productos nuevos · 1 no enviado". Pill states: `Sincronizado hh:mm` / `N pendientes` / `N no enviados` (tap → A-08) / `Sin conexión`.
@@ -94,6 +100,8 @@
 - **Acceptance:** no UI path calls `update` on products/clients (grep test); productos flows updated: `producto-via-fab` = quick-add; `editar-producto*` flows deleted; detail screen flow asserts read-only.
 
 ### A-10 Entitlement: verify, two clocks, plan limits, upsell surfaces
+
+> **Amended 2026-09-17 by Track N:** no transaction is ever blocked; the free-tier limit is a 50-product cap and usage warnings — N-03, N-04, C-12 (ADR-065).
 
 - [ ] Status · **Blocked by:** F-06, C-05, A-04, A-06 · **Blocks:** A-16
 - **Files:** `packages/ui/src/entitlement/{verify.ts,use-entitlement.ts,limit-gate.tsx,upsell-sheet.tsx}`, `apps/mobile` env `EXPO_PUBLIC_ENTITLEMENT_PUBKEY`; `packages/application/src/use-cases/registrar-venta`, `registrar-egreso`, `registrar-movimiento` (limit check hook).

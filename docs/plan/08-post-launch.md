@@ -17,7 +17,7 @@
 
 ### Z-03 CFDI automation (PAC)
 
-- [ ] Status · **Trigger:** ≥ 50 paying businesses **or** > 2 h/month spent issuing manually.
+- [x] Done: dropped — superseded by N-33 (ADR-070), pulled forward to launch · Original status · **Trigger:** ≥ 50 paying businesses **or** > 2 h/month spent issuing manually.
 - **Scope:** Facturama or SW Sapien; CSD upload; webhook `invoice.paid` → CFDI issue → XML/PDF to storage → `factura_requests.issued` → email; cancellations; complemento de pago for OXXO/SPEI-settled invoices.
 
 ### Z-04 Extract `apps/api`
@@ -47,12 +47,12 @@
 
 ### Z-09 Internal support app (Q16 option C)
 
-- [ ] Status · **Trigger:** the same Studio query is run weekly by a non-engineer, or support volume > 10 tickets/week.
+- [x] Done: dropped — superseded by N-05 … N-10 (`apps/admin`, ADR-063), pulled forward to launch · Original status · **Trigger:** the same Studio query is run weekly by a non-engineer, or support volume > 10 tickets/week.
 - **Scope:** separate `apps/internal`, separate auth (staff SSO), separate DB role, IP-restricted; never a route in the portal.
 
 ### Z-10 Annual pricing + plan changes proration
 
-- [ ] Status · **Trigger:** churn or requests.
+- [x] Done: dropped — superseded by N-01 (ADR-067), pulled forward to launch · Original status · **Trigger:** churn or requests.
 - **Scope:** second Stripe Price per plan; Customer Portal already handles switch/proration.
 
 ### Z-11 Pro extras: audit history + per-operator permissions UI

@@ -55,6 +55,12 @@ describe('rootCss', () => {
     }
   });
 
+  it('emits the dense steps 11 and 13 without shifting the indexed ladder (ADR-076)', () => {
+    assert.ok(css.includes('--r-11: 11px;'));
+    assert.ok(css.includes('--r-13: 13px;'));
+    assert.deepEqual([...radii], [8, 10, 12, 14, 16, 18, 20, 22]);
+  });
+
   it('emits only hard shadows — no blur, no rgba', () => {
     for (const [name, value] of Object.entries(shadows)) {
       assert.ok(css.includes(`${cssVarName(`shadow-${name}`)}: ${value};`));

@@ -68,7 +68,7 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 
 ## 4. Shape
 
-**Radii** — the strict ladder, nothing else: 8, 10, 12, 14, 16, 18, 20, 22.
+**Radii** — the strict ladder, nothing else: 8, 10, 12, 14, 16, 18, 20, 22; plus the dense steps 11 and 13 (ADR-076).
 
 **Off-ladder shapes** (data-viz marks and full pills): `mark` 2, `markLg` 4, `pill` 9999.
 

@@ -15,7 +15,7 @@
 
 import { colors } from './colors.js';
 import { fontSizes, typography } from './type.js';
-import { radii, shapeRadii, shadows } from './shape.js';
+import { denseRadii, radii, shapeRadii, shadows } from './shape.js';
 
 /** `camelCase` → `kebab-case`, so `yellowDeep` becomes `--yellow-deep`. */
 export function cssVarName(token: string): string {
@@ -37,7 +37,7 @@ function declarations(): readonly string[] {
     out.push(`${cssVarName(`tracking-${name}`)}: ${value};`);
   }
   out.push(`--font-sans: ${typography.fontFamily};`);
-  for (const value of radii) {
+  for (const value of [...radii, ...Object.values(denseRadii)]) {
     out.push(`--r-${value}: ${value}px;`);
   }
   for (const [name, value] of Object.entries(shapeRadii)) {

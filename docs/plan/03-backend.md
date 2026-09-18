@@ -162,6 +162,8 @@
 
 ### B-10 Stripe: products/prices, Checkout session, webhook, subscription state machine
 
+> **Amended 2026-09-17 by Track N:** annual prices and a 14-day trial on **both** paid tiers with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
+
 - [ ] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
 - **Steps:**
   1. Stripe test mode: 1 product "Xangarro" with 2 recurring prices (Emprendedor 19900 MXN, MiPyME Pro 39900 MXN; `trial_period_days: 14` applied at Checkout for Pro only). Enable payment methods: card, **OXXO**, **SPEI** (customer balance / bank transfer for MX). Record price IDs in `billing.plans`.

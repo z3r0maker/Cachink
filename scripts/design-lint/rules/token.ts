@@ -6,11 +6,11 @@
  * from the design system it enforces.
  */
 
-import { colors, radii } from '../../../packages/tokens/src/index';
+import { colors, denseRadii, radii } from '../../../packages/tokens/src/index';
 import type { LineRule, Push } from './types';
 
 const THEME_HEX: ReadonlySet<string> = new Set(Object.values(colors).map((c) => c.toUpperCase()));
-const RADII: ReadonlySet<number> = new Set(radii);
+const RADII: ReadonlySet<number> = new Set([...radii, ...Object.values(denseRadii)]);
 /** Off-ladder shapes that are still legitimate: chart marks and full pills. */
 const SHAPE_RADII: ReadonlySet<number> = new Set([2, 4, 9999]);
 /** Borders are always 2 or 2.5px solid black; 0 means "no border" and is fine. */

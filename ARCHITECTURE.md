@@ -4683,3 +4683,667 @@ device *operator*, so for a portal write it is honestly null.
 - Follow-up: a CHECK constraint per enum column would make the database
   enforce what Drizzle only describes. Not done here; it is a migration with
   its own old→new test (CLAUDE.md §2.9).
+
+## ADR-063
+
+**Title:** An internal admin console, `apps/admin` at `admin.xangarro.mx`, replaces "Supabase Studio + Stripe Dashboard" as the back-office
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — supersedes README Q16 and Track Z-09; tasks N-05 … N-10, N-46 … N-48
+
+**Context**
+
+Q16 made the back-office Supabase Studio plus the Stripe Dashboard, with a
+separate internal app (Z-09) only once support passed ten tickets a week. The
+feature interview of 2026-09-17 added needs neither tool covers: linking Stripe
+licence state to tenants with audited overrides, usage-versus-limit alerts to
+the provider, an inbox for escalations and migration requests, platform kill
+switches, and a dormant-account lifecycle. Several of these are launch-day
+needs, not support-volume needs.
+
+**Decision**
+
+- A separate Next.js app, `apps/admin`, its own Vercel project, at
+  `admin.xangarro.mx`. It is **never** a route in `apps/portal`.
+- Staff authenticate with Supabase Auth against a `staff_members` allowlist;
+  TOTP 2FA (AAL2) is mandatory; every mutation writes `staff_audit_log`.
+- The Supabase service-role key exists only in this project. A CI check fails if
+  it is referenced under `apps/portal`.
+- v1 at launch: tenants + licences + Stripe, usage and capacity, inbox, platform
+  flags. Post-launch: sync health, broadcasts, dormancy.
+- Staff alerts: inbox for everything, a daily 08:00 digest email, and a
+  Slack/Discord webhook for urgent items only.
+- Stripe remains the billing source of truth; the admin reads webhook-derived
+  state and applies expiring, audited overrides.
+
+**Alternatives considered**
+
+- *Route group inside `apps/portal`.* Rejected: the cross-tenant key and code
+  would ship in the customer deployment; a portal bug could expose every tenant.
+- *Keep Studio + Stripe.* Rejected: no place for alerts, inbox or overrides.
+- *Retool / Appsmith.* Rejected: paid vendor, logic outside the repo, no reuse
+  of `packages/application`.
+
+**Consequences**
+
+- One more deployable and one more auth surface — covered by the N-26 audit.
+- Z-09 is dropped as superseded. B-16's Studio queries stay useful until N-46.
+
+## ADR-064
+
+**Title:** Dormant free-tier accounts are archived to cold storage after 180 days, amending "the portal keeps everything forever"
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends README Q9 retention; task N-48
+
+**Context**
+
+Q9 says the portal keeps everything forever and data is never deleted in any
+abuse scenario. The owner wants abandoned accounts out of the live database. Two
+constraints shape the answer: Mexican taxpayers must keep accounting records for
+five years (CFF art. 30), so deleting a customer's books can destroy their tax
+evidence; and LFPDPPP requires personal data not be kept beyond its purpose.
+
+**Decision**
+
+- Scope: **free-tier tenants only**. A paying tenant is never dormant.
+- Dormant = no portal login **and** no device sync for 90 days. Emails at day 90
+  and day 150; any activity resets the clock.
+- Day 180: a full export (Excel + JSON, the P-34 exporter) is written to a
+  private, encrypted storage bucket and verified by row counts; then the
+  tenant's rows are deleted from Postgres.
+- The archive is retained **6 years**, then purged. CFF art. 30 counts the
+  taxpayer's 5 years from the filing of the annual return, not from the
+  transaction or from inactivity, so 5 years after archiving would fall short
+  for the last archived year; 6 covers it. The obligation is the taxpayer's; the
+  emails and the aviso de privacidad say so and offer "Descarga tus datos".
+- The archive is held under the LFPDPPP (DOF 2025-03-20; authority: Secretaría
+  Anticorrupción y Buen Gobierno) *bloqueo* regime: kept only for restore or an
+  authority's request, then deleted.
+- A returning owner can "Restaurar mis datos", which re-imports the archive.
+- Q9's "never deleted in any abuse scenario" still holds: abuse never triggers
+  deletion; only verified, archived inactivity does.
+
+**Alternatives considered**
+
+- *A second "dormant" Supabase project.* Rejected: a second database to migrate,
+  secure and pay for.
+- *Mark dormant, never move.* Rejected by the owner: rows stay in the hot DB.
+- *Hard delete after notice.* Rejected: risks customers' SAT records; no way back.
+
+**Consequences**
+
+- The restore path must accept archives from older schema versions (the JSON
+  carries its schema version; restore runs through migrations).
+
+## ADR-065
+
+**Title:** Plan limits measure transactions per month and active products, are advisory for transactions on every tier, and are counted by the server
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends README Q14 ("50 records/month enforced on the phone"), A-10, and ADR-059's limit values; contract task C-12
+
+**Context**
+
+`PLAN_LIMITS` had one metric, records per month, with xangarrito blocking the
+51st record on the phone. Fifty records is less than one day of a taquería. A
+single metric also lets one business shape escape: a taquería has few products
+and many sales; a ferretería has many products and few sales. The owner's rule:
+"if they hit the limit we don't stop their operation, but we need a warning to
+the user and to me".
+
+**Decision**
+
+- Metrics: **transactions/month** (ventas + gastos + inventory movements) and
+  **active catalog products**.
+- Values: xangarrito 300 / 50 · xangarro 10 000 / 1 000 · xangarrote 30 000 / 5 000.
+- **A transaction is never blocked on any tier.** Thresholds at 80 % and 100 %
+  warn the owner (app, portal, email); 100 % and 150 % alert the provider via
+  the admin inbox; two consecutive months over create an upgrade-suggestion task.
+- Free tier only: the product cap is hard in the portal and in app quick-add.
+  The server still accepts overflow rows from offline phones (rows are never
+  dropped, Q4) and flags them.
+- The server is authoritative for usage (computed on push and nightly) and sends
+  it down unsigned beside the entitlement.
+- On the phone, limit messages are neutral and never name a plan or price
+  (ADR-069); the upgrade prompt lives in the portal and in email.
+
+**Alternatives considered**
+
+- *Transactions only / products only.* Rejected: each lets a business shape
+  escape.
+- *Keep the free hard block.* Rejected: breaks a sale at the counter.
+
+**Consequences**
+
+- The free tier's conversion lever becomes capabilities, devices and catalog
+  size, not a blocked register.
+
+## ADR-066
+
+**Title:** Merchant card collection through a `PaymentProvider` port (Mercado Pago + Clip); the server holds the intent, the device still writes the venta
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — post-launch; tasks N-40 … N-45, contract C-13
+
+**Context**
+
+Merchants want to charge cards and have the money land in their own account.
+The Mexican micro-merchant market uses Clip and Mercado Pago almost exclusively,
+both cheap. The owner wants both QR / payment links and physical terminals.
+ADR-053 §6 and ADR-058 §2 require that the server never writes transactional
+tables — the one-writer rule that means no conflict class exists.
+
+**Decision**
+
+- A `PaymentProvider` port in `packages/application`; adapters for Mercado Pago
+  and Clip, backend only. Modes: dynamic QR / link and terminal push.
+- **Mercado Pago first, Clip immediately after, both before public release.**
+  Verified 2026-09-17: MP offers OAuth, a sandbox, HMAC-signed webhooks, the
+  Orders API for Point Smart 1/2 in Mexico and dynamic QR. Clip offers a PinPad
+  API (Total 3 / Ultra / PinPad / Stand 2, not Plus) that requires Clip to
+  install an app per device, production-only testing, merchant-created
+  Basic-auth keys instead of OAuth, and **unsigned** webhooks. Therefore every
+  webhook is a signal only; status is confirmed by fetching from the provider.
+- Money settles to the merchant's own provider account. **Xangarro takes no
+  fee** and never holds funds. Gated by `capabilities.cobrosIntegrados` on the
+  paid tiers.
+- Provider tokens live server-side (encrypted), never on devices.
+- Flow: the device creates an intent via the API; the provider webhook resolves
+  it; the device polls and, on approval, **writes the venta itself** with a
+  `payment_ref` and syncs it as usual. Nightly reconciliation surfaces approved
+  intents with no venta. Offline, the button is disabled with a manual fallback.
+- An external penetration test precedes enabling it in production.
+
+**Alternatives considered**
+
+- *Single provider (MP or Stripe Connect + Terminal).* Rejected: leaves half the
+  market; Stripe Terminal availability in MX is uncertain and needs new KYC.
+- *Server writes the venta on the webhook.* Rejected: breaks the one-writer rule.
+- *Device calls the provider directly.* Rejected: payment tokens on shared phones.
+- *A platform fee.* Rejected: inconsistent across providers, regulatory exposure,
+  erodes the "cheap" pitch.
+
+**Consequences**
+
+- Card collection needs connectivity; the offline fallback is the merchant's
+  existing terminal plus a manual "Tarjeta" venta.
+- Provider API availability (Clip terminal push, MP Point cloud in MX) is
+  unverified until the N-40 spikes.
+
+## ADR-067
+
+**Title:** Onboarding is signup → "Platícanos de ti" wizard → recommended plan; annual billing and a 14-day trial on both paid tiers at launch
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends P-03, P-04, B-10; supersedes Z-10; tasks N-01, N-12 … N-15
+
+**Context**
+
+P-03 sent signup straight to Stripe Checkout, and P-04 was a four-step setup
+that could not be re-run. The owner wants a questionnaire ("¿qué tipo de negocio
+tienes? ¿cómo cobras? ¿inventario? ¿caja?…") with visible progress, re-runnable
+from settings. Several answers map to paid-only features.
+
+**Decision**
+
+- Order: signup → an 8-step, every-step-skippable wizard whose answers are
+  turned into configuration by a pure domain function → "Tu plan ideal" with
+  reasons → trial Checkout or stay free.
+- Paid-only answers are badged; if the tenant stays free they are stored as
+  pending and applied on upgrade by the subscription webhook.
+- The "¿Cómo empiezo?" checklist tracks tasks; the wizard only configures.
+- Re-running shows a summary of what will change before applying.
+- Stripe: monthly and annual prices (annual = 10× monthly); 14-day trial on both
+  paid tiers **without collecting a payment method up front**
+  (`payment_method_collection=if_required`).
+- Payment methods (verified against Stripe's Mexico docs, 2026-09-17): **card**
+  on both intervals through Checkout; **SPEI** on annual only, through an
+  API-created `send_invoice` subscription paid to a per-customer CLABE
+  (`customer_balance`); **no OXXO** — Stripe supports it neither for
+  subscriptions nor for invoices, and OXXO prohibits merchant category 6538
+  (Software). This amends README Q13 ("cards + OXXO + SPEI").
+
+**Alternatives considered**
+
+- *Plan-first (P-03 as written).* Rejected: people choose before understanding.
+- *Everyone free, upsell later.* Rejected: an extra step to reach paid features.
+- *Two flows (P-04 + questionnaire).* Rejected: overlapping questions twice.
+
+**Consequences**
+
+- Landing CTAs still pass `?plan=`, now only a preselection (N-31, L-03).
+
+## ADR-068
+
+**Title:** Database scaling moves by measured triggers, reviewed monthly, amending ADR-053 §7
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends ADR-053 §7; tasks N-07, N-51, N-52
+
+**Context**
+
+ADR-053 §7 names the stages (shared schema + RLS → replicas and an analytics
+model → sharding) without saying when to move. Projection: 1 000 tenants ×
+~3 000 transactions/month ≈ 36 M rows ≈ 18 GB per year.
+
+**Decision**
+
+- **S1 (now):** shared schema, RLS, `business_id`-leading indexes, dormancy
+  archive (ADR-064).
+- **S2** when any of: DB > 25 GB, a table > 50 M rows, sync p95 > 800 ms —
+  monthly range partitioning of transactional tables, a read replica for portal
+  reports and the Asesor, the next compute size.
+- **S3** when DB > 500 GB or > 10 000 active tenants — an analytics read model;
+  evaluate Citus or tenant sharding under a new ADR.
+- The triggers are displayed on the admin capacity card and reviewed monthly.
+
+**Alternatives considered**
+
+- *Customer-count milestones.* Rejected: tenants differ in weight by orders of
+  magnitude.
+- *No numeric triggers.* Rejected: reactive scaling under load.
+
+**Consequences**
+
+- Partitioning is a migration with an old→new test (CLAUDE.md §2.9) and must
+  keep `server_seq` ordering intact.
+
+## ADR-069
+
+**Title:** The mobile app is a business-employee sign-in tool with no in-app selling, to satisfy App Store 3.1.1/3.1.3 and Play payments policy in Mexico
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends ADR-053's store posture; tasks N-32, N-25, N-03, N-04; X-05
+
+**Context**
+
+ADR-053 made the app free with no purchase UI, unlocked by activation codes,
+with the plan bought on the web. Checked against the current App Store Review
+Guidelines on 2026-09-17: 3.1.1 names unlocking features with "license keys…
+QR codes" as requiring in-app purchase; the link-out/steering exception applies
+to the United States storefront only, not Mexico; 3.1.3(f) allows a free
+companion only with no purchasing and no calls to action to buy outside;
+3.1.3(c) allows apps sold directly to organizations for their employees to give
+access to what the organization bought. Google Play allows consumption-only
+apps as long as they do not steer to other payment methods; Mexico has no
+user-choice billing. Track N had added in-app upsell copy (limit warnings,
+"Incluido en Xangarro") that would count as steering.
+
+**Decision**
+
+- The app is positioned and submitted as a tool that businesses provide to
+  their employees (3.1.3(c)); the owner/Director buys and administers on the
+  web; operators never buy anything.
+- Pairing is a **sign-in to the business account** ("Vincular este dispositivo
+  a tu negocio"), never "activar", "licencia" or "desbloquear".
+- **No selling in the app:** no plan names, prices, upgrade prompts or links to
+  the portal. Limit messages on the phone are neutral and say the owner is
+  notified. All upsell happens in the portal and by email.
+- A CI string check enforces this (N-32). A demo account stays live for review
+  (Guideline 2.1).
+
+**Alternatives considered**
+
+- *Add StoreKit / Play Billing in-app purchase.* Rejected for now: a 15–30 % fee
+  and a second billing path to reconcile with Stripe. It remains the fallback
+  if review rejects the framing (OQ-6).
+- *Ship as designed and see.* Rejected: launch would depend on a review outcome.
+
+**Consequences**
+
+- Operators discover limits only as neutral notices; conversion depends on the
+  owner's portal and email experience.
+- An early external TestFlight submission gives a review signal before launch.
+
+## ADR-070
+
+**Title:** CFDI for Xangarro's own subscription revenue is automated from the first payment
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — supersedes README Q15's "issue manually; automate at ~50 paying customers" and Track Z-03; task N-33
+
+**Context**
+
+Q15 planned to issue CFDI by hand until about 50 paying customers. A CFDI is
+required for every payment received (CFF art. 29), and a Stripe invoice has no
+SAT validity. With monthly billing that is one CFDI per customer per month from
+the first customer, plus a monthly "público en general" global CFDI for payers
+without fiscal data, complementos de pago for SPEI-paid invoices, and
+cancellations for refunds — a growing manual chore with deadlines.
+
+**Decision**
+
+- Stripe `invoice.paid` drives a PAC API adapter that stamps CFDI 4.0: an
+  individual CFDI when the tenant's fiscal data is complete, otherwise the
+  payment joins the monthly global CFDI; SPEI invoices get a complemento de
+  pago; refunds trigger cancellation. Idempotent per Stripe invoice id.
+- The PAC vendor is chosen inside N-33 by current price and SDK quality.
+- The "Solicitar factura" request remains for customers who add fiscal data
+  after paying (re-stamp from the global CFDI).
+
+**Alternatives considered**
+
+- *Manual until ~50 customers.* Rejected: a monthly obligation per customer.
+- *A Stripe-app connector.* Rejected: a third-party subscription and less control.
+
+**Consequences**
+
+- Z-03 is dropped as superseded; the collected fiscal fields (Q15) become
+  required inputs to a live integration, so their validation (RFC, régimen,
+  uso, CP) must be strict in the portal.
+
+## ADR-071
+
+**Title:** A linked browser is a capture device — the operator's register ("caja") runs in the portal's origin, but it is a device with its own outbox, never a portal writer
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends ADR-053 §1 and §3 (capture is no longer phone-only); supersedes Track N decision row 20 ("No web capture"); keeps ADR-058 §2 intact. Track O (`docs/plan/10-operador.md`).
+
+**Context**
+
+The second design handoff (`design_handoff_operador/`, fifteen screens) puts a
+point-of-sale in the browser for the Operativo role: the browser is linked once
+with a code the owner generates, each operator opens a turno with a NIP, sales
+are captured by tapping the catalog, and — the handoff's rule 7 — «sin conexión
+se sigue cobrando»: the sale queues in the browser and uploads on reconnect, and
+a turno cannot close while records are unsent.
+
+That collides with three recorded decisions: ADR-053 §1/§3 (the phone is the
+capture surface), ADR-058 §2 («the portal never writes a transactional table»)
+and Track N row 20, settled earlier the same day («the portal stays online-only
+… No web capture»). The owner chose web capture after seeing the conflict, in
+the operator-plan interview of 2026-09-17.
+
+**Decision**
+
+1. **The browser register is a device, not the portal.** It redeems an
+   activation code through `POST /api/v1/activate` exactly as a phone does,
+   receives a `deviceId`, a device token and the signed entitlement, and writes
+   `UP_TABLES` only through `POST /sync/push` with `clientSeq`. The portal
+   server still writes no transactional table; ADR-058 §2 stands. The
+   register's routes live in their own route group in `apps/portal` with their
+   own shell; they authenticate by device token, never by the owner's session
+   cookie.
+2. **`DevicePlatformSchema` gains `web`** (contract task). `devices.plataforma`
+   follows with a migration.
+3. **A register is a device, one to one.** «Caja 1» is `devices.nombre`,
+   assigned at linking and editable by the owner. «Un turno abierto por caja»
+   becomes a local invariant on one device, which is the only form of it that
+   is enforceable offline — two devices without a connection cannot
+   coordinate. Phones are registers by the same rule. Re-linking a browser
+   whose data was cleared produces a new device; its history shows under the
+   same name but a different id. A `cajas` entity was rejected for v1 because
+   it adds a picker the owner's pairing design does not have.
+4. **Local storage is SQLite compiled to WebAssembly, persisted in OPFS**,
+   running in a Web Worker, with `navigator.storage.persist()` requested. It
+   runs the same Drizzle schema, migrations, repositories, application use
+   cases and change-log outbox as the phone, so there is exactly one data layer
+   (CLAUDE.md §2.3). The WASM bundle is loaded only by the register routes,
+   never by the owner portal. Before committing to it, a spike (O-02) proves
+   the Drizzle driver on WASM; if it fails, work stops and the owner is asked
+   before any fallback.
+5. **`/sync/push` and `/sync/pull` become real routes in the portal** (today
+   they exist only in the contract's mock server), serving phones and browsers
+   alike.
+
+**Alternatives considered**
+
+- *The portal server writes sales through server actions.* Rejected: breaks
+  ADR-058 §2, creates the first sync-conflict class, and makes offline capture
+  impossible — rule 7 would be unimplementable.
+- *IndexedDB with its own repositories.* Rejected: every repository and the
+  outbox would exist twice and drift precisely on the sale and cash rules.
+- *No web register; reinterpret the designs as phone screens.* Rejected by the
+  owner.
+
+**Consequences**
+
+- `packages/sync/src` is absent from this checkout (only `dist/` exists); it is
+  recovered from its branch before anything else (O-02).
+- Browser storage can be cleared by the user. The operator screens carry the
+  design's warning («no cerrar la pestaña ni borrar los datos del sitio»), and
+  the turno-close block on unsent records (rule 7) is what keeps cash honest.
+- Track N row 20's "friendly offline page" still applies to the owner portal;
+  it does not apply to the register routes.
+
+---
+
+## ADR-072
+
+**Title:** The operator NIP is four digits and only the owner sets or resets it; the activation code stays eight characters and the design is amended
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends ADR-049 (PIN + recovery password), P-05 (PIN 4–6) and the Access design; Track O
+
+**Context**
+
+Three sources disagreed on the PIN: the operator design uses four digits
+(rule 1, four boxes on Acceso and on the lock screen), the domain enforces six
+(`UserSchema`'s `/^\d{6}$/`), and P-05 allowed four to six. One operator uses one
+NIP on the phone and on the browser, because both read `users`.
+
+The phone also has two device-side PIN paths — `recuperar-pin` (recovery
+password) and `cambiar-pin` (including the `mustChangePin` flow). `users` is a
+`DOWN_TABLE`: a device can never push it. Either path therefore changed the PIN
+on one device only, silently; the cloud and every other device kept the old
+hash. Harmless while one phone was the whole product, wrong once a NIP is shared
+across devices.
+
+Separately, the Access design links with a six-box code typed on a digits-only
+keypad, while its own example (`TD4 91K`) contains letters and a `1`. The
+contract's `ACTIVATION_CODE_REGEX` is eight characters from an alphabet without
+`0`, `O`, `1`, `I`, and the owner's pairing panel (P-06) already shows eight
+boxes of that code.
+
+**Decision**
+
+1. **NIP = exactly four digits** in the domain, the contract, the phone and the
+   portal. Pre-launch, so existing rows are re-set from the seed; no
+   `mustChangePin` migration is needed.
+2. **Only the owner sets and resets a NIP**, from the portal (P-05's «Nuevo
+   operador» and «Reiniciar NIP»). The new hash reaches devices through
+   `sync_log` like any DOWN row. The phone's recovery screen and change-PIN flow
+   are removed; `recoveryPasswordHash` is deprecated in place (column kept; its
+   removal is a later migration with its own old → new test).
+3. **Failed-attempt limits are enforced on the device** («NIP incorrecto. Te
+   quedan 2 intentos.»). A four-digit bcrypt hash stored on a device is
+   guessable offline by someone who extracts it; the threat model is a
+   coworker at the counter, which the attempt limit and owner-only reset cover.
+4. **The activation code is unchanged** — eight characters, the contract's
+   alphabet. The Access screen is amended upstream first (ADR-058's order):
+   eight boxes, a text input that takes the physical or on-screen keyboard
+   (uppercased, spaces and hyphens ignored) instead of the numeric keypad, and
+   an example code that obeys the alphabet.
+
+**Alternatives considered**
+
+- *Six digits and amend the design.* More entropy, more friction on a screen
+  used many times a shift with a queue waiting.
+- *Owner resets, operator then chooses.* Better accountability, but needs an
+  upward path carrying a PIN hash and a contract change the design does not ask
+  for. Revisit if a dispute over "who made this sale" ever turns on it.
+- *Six-character numeric codes for browsers only.* Two code formats, and the
+  owner would need to know the device kind before generating one.
+
+**Consequences**
+
+- The owner knows every operator's NIP.
+- Acceso (O-12) is blocked until the design amendment lands and is pulled.
+
+---
+
+## ADR-073
+
+**Title:** A sale is a ticket: a header entity carries folio, method, client, cash tendered and cancellation; `sales` become its lines
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — new UP entity; migration of `sales`; Track O
+
+**Context**
+
+`Sale` holds one `productoId` and one `cantidad`. The phone's checkout
+(`apps/mobile/src/app/checkout/_confirm-hooks.ts`) loops over the cart and
+writes one sale per product: not atomic (a failure on line three leaves lines
+one and two), nothing groups them, and neither cash tendered nor change is
+stored. There is no folio anywhere.
+
+The operator design treats a sale as a ticket: V-0405 has several lines, one
+folio, one method, one «recibido / cambio entregado», one cancellation with a
+reason; fiado is per ticket, and abonos apply to the oldest tickets first.
+
+**Decision**
+
+- **New UP entity, the ticket (sale header):** folio, `metodo`, `clienteId`,
+  `efectivoRecibidoCentavos`, `cambioCentavos`, `cajaTurnoId`, and the
+  cancellation (`cancelMotivo`, `cancelledByUserId`, `cancelledAt`).
+- **`sales` become lines:** `ticketId`, product, quantity, amount. Ticket-level
+  fields leave the line; the migration moves them without loss.
+- **Folio = a per-device counter**, unique on (device, folio), displayed
+  `V-0405`. The operator only sees their own register, so it is unambiguous
+  there; the owner sees «Caja 1 · V-0405». Assigned locally at capture, so it
+  works offline.
+- **Registering and cancelling a ticket are one atomic use case each**,
+  reused by the phone, which fixes its non-atomic loop.
+- Migration: every existing sale becomes a one-line ticket, with an
+  old → new test (CLAUDE.md §2.9). Pre-launch, so it touches seed and test data.
+
+**Alternatives considered**
+
+- *`ticketId` + `folio` columns on each line.* Ticket data would be duplicated
+  per line or parked on "the first line" — the duplicated state the handoff
+  says caused several errors in the design.
+- *One row per ticket with lines in JSON.* Breaks automatic stock deduction and
+  per-product reporting.
+
+**Consequences**
+
+- Every reader of `sales` (NIF statements, KPIs, portal Ventas, exports) moves
+  to ticket + lines; the domain calculators change once, in `packages/domain`.
+
+---
+
+## ADR-074
+
+**Title:** Receivables are derived from two facts — fiado tickets and client abonos — and the turno's expected cash has one calculator
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — migration of `client_payments`; new columns on `clients`, `products`, `expenses`, `caja_turnos`; Track O
+
+**Context**
+
+The handoff's rule 5 and its client-detail spec: «dos únicos datos por
+cliente: sus ventas fiadas y sus abonos»; balance, open sales, available credit,
+last payment and history are **derived** — «no duplicar estado: fue la causa de
+varios errores en el diseño». Abonos apply to the oldest sales first; cancelling
+a fiado ticket that has abonos turns the paid money into store credit (saldo a
+favor), usable only on the client's next purchase.
+
+Today an abono (`client_payments`) belongs to one sale, there is no FIFO and no
+balance calculator in the domain (it lives in a UI hook). Separately,
+`computeCajaBalance` exists but `CerrarCajaUseCase` computes the expected amount
+its own way — by date range rather than by turno — so the saved esperado and
+the on-screen one can disagree. Expenses carry no turno reference at all.
+
+**Decision**
+
+1. **An abono belongs to the client** (`clienteId`, amount, method, date).
+   Its application — oldest fiado ticket first — and the client's balance,
+   available credit and saldo a favor are pure functions in `packages/domain`
+   over tickets + abonos. Nothing stores a balance.
+2. **Clients gain `limiteCentavos` and `plazoDias`** (owner-set; `clients` is
+   HYBRID, so the portal edits them). **Products and clients gain a review
+   status** (`pendiente`, `aprobado`, `fusionado`, `rechazado`) for «creado en
+   caja».
+3. **One expected-cash calculator per turno:** `fondo + ventas en efectivo +
+   abonos en efectivo − gastos de caja`. `CerrarCajaUseCase` uses it; fiado is
+   excluded by construction. **Expenses gain `cajaTurnoId`.**
+4. **The denomination count is a JSON column on `caja_turnos`**, written once
+   at close and immutable afterwards.
+
+**Consequences**
+
+- `client_payments` migrates from per-sale to per-client with an old → new test.
+- The receivables UI hook in `packages/ui` is replaced by the domain function.
+
+---
+
+## ADR-075
+
+**Title:** Owner-to-operator messages and operator replies are two synced tables; «De tu caja» is derived on the device; `notices` is untouched
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — two new entities; Track O
+
+**Context**
+
+The operator's Avisos has two tabs. «De Pedro» carries owner messages — chiefly
+«Pedro te pidió aclarar el corte del 13» — which the operator answers in place,
+and which also drive the «Lo primero» card on Inicio. «De tu caja» carries
+system notices (unsent records, low stock). `notices` (ADR-060) is portal-only,
+has no recipient, holds one owner-scoped `state`, and shares rows with the
+Asesor, which must never reach a device.
+
+**Decision**
+
+- **`mensajes_operador` (DOWN):** recipient operator, optional turno reference,
+  severity, body, created time. Written by the portal (Cortes de turno's
+  «Pedir aclaración», phase 13) with its `sync_log` append (ADR-062).
+- **`respuestas_operador` (UP):** the message answered, the text, the operator.
+  Shown in the owner's cortes panel and Avisos.
+- **Read state per operator lives only on the device.**
+- **«De tu caja» is derived locally** from the device's own data; nothing syncs.
+
+**Alternatives considered**
+
+- *Sync `notices` down with a recipient column.* Pulls would have to filter out
+  Asesor rows, and one `state` cannot hold two readers.
+- *An online-only API for notices.* A reply written offline would be lost or
+  need a second queue.
+
+
+---
+
+## ADR-076
+
+**Title:** The radius scale gains the dense steps 11 and 13; 15 and 17 are corrected upstream to 16
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — amends ADR-057's radius ladder; Track O
+
+**Context**
+
+ADR-057 fixed the portal's radii at 8/10/12/14/16/18/20/22, and `design-lint`
+enforces it. The operator handoff uses 13 px (24 times: keypad keys, 52 px
+buttons, inputs) and 11 px (17 times: 40–42 px icon boxes, quantity steppers),
+and its README names both in the scale («8/10/11/12/13/14/16/18/20/22»). It also
+uses 15 px twice and 17 px three times, values neither list contains.
+
+**Decision**
+
+- `@xangarro/tokens` exports `denseRadii = { r11: 11, r13: 13 }`, emitted as
+  `--r-11`/`--r-13`, accepted by `design-lint` and listed in `DESIGN_CONTRACT.md`.
+- `radii` is **not** changed: about eighty call sites (portal and phone) index it
+  by position, and inserting values would silently re-round every one of them.
+- The five uses of 15 and 17 (`Operador Estado`, Inicio, Detalle de cliente,
+  Revisión de caja) are corrected to 16 in the design project. Until that pull
+  lands, code uses 16 and says so in the task's Done line.
+
+**Consequences**
+
+- The dense steps are for the operator's density; the owner portal keeps the
+  original ladder unless a design file asks for 11 or 13.

@@ -1,0 +1,180 @@
+# Track O — Operator view (the browser register) and its owner-side close
+
+> **Origin:** the second design handoff (`design_handoff_operador/` in Claude Design project
+> `5dd266f3-42e7-403f-b941-95c8e6551dc6`): fifteen screens, thirteen for the Operativo role and two
+> for the owner, plus `Operador Estado` (the shared four-state component). The implementation plan
+> in that project (`Xangarro Portal - Plan de implementacion.dc.html`, v3) numbers them **fases 10
+> to 13**; this track keeps that numbering.
+>
+> **Read first:** ADR-071 (the browser register is a device), ADR-072 (NIP and activation code),
+> ADR-073 (ticket entity), ADR-074 (receivables and expected cash), ADR-075 (operator messages).
+> Each was settled one question at a time in the operator-plan interview of 2026-09-17.
+>
+> Status rules, Done lines and "never renumber" are those of `00-README.md` §3. Contract changes are
+> `C-` tasks in `02-contracts.md` (C-16 … C-19 were added for this track) and land on `main` first.
+
+---
+
+## 1. Decision summary
+
+| #   | Topic             | Decision                                                                                                                                                                   | ADR |
+| --- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
+| 1   | Web capture       | The linked browser is a **device**: activates like a phone, own outbox, writes only via `/sync/push`. ADR-058 §2 stands. Supersedes Track N row 20.                        | 071 |
+| 2   | NIP length        | **Four digits** everywhere (domain, contract, phone, portal).                                                                                                              | 072 |
+| 3   | Activation code   | **Eight characters, unchanged.** Access design amended upstream: 8 boxes, text input instead of the numeric keypad, a valid example code.                                  | 072 |
+| 4   | Who changes a NIP | **Only the owner**, from the portal. Phone recovery and change-PIN flows removed (they never synced: `users` is DOWN). `recoveryPasswordHash` deprecated in place.         | 072 |
+| 5   | Register ↔ device | **One to one.** «Caja 1» is `devices.nombre`. One open turno per device, enforced locally.                                                                                 | 071 |
+| 6   | Sale shape        | **Ticket header entity** (folio, method, client, tendered, change, cancellation, turno); `sales` become lines. Folio = per-device counter. Atomic register/cancel.         | 073 |
+| 7   | Browser storage   | **SQLite-WASM in OPFS** in a Worker, reusing `@xangarro/data`, use cases and the outbox. Spike first; stop and ask if it fails.                                            | 071 |
+| 8   | Operator notices  | `mensajes_operador` (DOWN) + `respuestas_operador` (UP); read state device-only; «De tu caja» derived locally; `notices` untouched.                                        | 075 |
+| —   | Receivables       | Abonos belong to the client; FIFO application, balance and saldo a favor are derived in `packages/domain`. Clients gain limit + plazo; review status for «creado en caja». | 074 |
+| —   | Expected cash     | One per-turno calculator (`fondo + efectivo + abonos en efectivo − gastos de caja`), used by `CerrarCajaUseCase`. Expenses gain `cajaTurnoId`. Denominations as JSON.      | 074 |
+
+**Deferred to the phase that needs them (ask before starting that phase):** the five close-out
+reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt photo storage
+(fase 12); what «marcar como aclarado» writes (fase 13).
+
+---
+
+## 2. Working rules (from the handoff; binding on every task here)
+
+- `design-reference/` is the specification and is never edited. One screen per task; the next
+  screen does not start until the previous one is closed.
+- Open the design file in the browser, walk it top to bottom, and reproduce it taking every value
+  from the file. The control panel (top right) forces the states to implement.
+- Before reporting a screen: capture ours and the design's at the same width, compare, fix.
+- If a README rule collides with existing code: stop and ask.
+- Screens are presentational (`{ state, data }`); containers fetch (ADR-058 §9).
+- Every new entity passes the CLAUDE.md §11 checklist; every migration has an old → new test.
+
+---
+
+## 3. Fase 10 — Groundwork (10a)
+
+### O-01 Mirror the design into `/design-reference/` with `pnpm design:pull`
+
+- [x] Status · **Blocked by:** — · **Blocks:** every screen task · **Overlaps:** P-18 steps 3–5
+  - Done: 2026-09-17 · uncommitted · the 21 files of `design_handoff_operador/` + `_ds/` + `doc-page.js`
+    mirrored byte-for-byte into `design-reference/operador/` via the Claude Design MCP; all 17 `.dc.html`
+    render at 1440 px (`.claude/launch.json` → `design-operador`, port 4300). ESLint now ignores
+    `design-reference/**` (Prettier already did; `design-lint` never scanned it). **Deviation:** no
+    `pnpm design:pull` script — the design API needs the MCP's authorization, which a repo script
+    lacks; refreshing is a manual MCP pull, recorded in `design-reference/README.md`. P-18's script stays open.
+- **Steps:** `scripts/design-pull.ts` + `pnpm design:pull` pulling both handoffs, `_ds/`, and the
+  runtime (`support.js`, `doc-page.js`, `image-slot.js`, `_ds_bundle.js`) into `/design-reference/`
+  (owner screens at the root per P-18, operator screens under `operador/`). Exclusions in
+  `.prettierignore`, ESLint ignores and `design-lint`'s `ROOTS`. `/design-reference/README.md`
+  states read-only.
+- **Acceptance:** every operator `.dc.html` opens and renders locally; lint, format and
+  `lint:design` unaffected.
+
+### O-02 Recover `packages/sync/src`; SQLite-WASM spike
+
+> **Reordered 2026-09-17 (owner, question 9):** O-10 and O-11 run first on fixtures; O-02 waits for
+> `track/app` to land on `main`, because `packages/sync/src` exists only on that unmerged track.
+
+- [ ] Status · **Blocked by:** — · **Blocks:** O-05, O-06
+- **Steps:** restore `packages/sync/src` from the branch that has it (see `git log --all -- packages/sync/src`), make
+  it build and pass its tests on this checkout. Spike: a Worker running
+  SQLite-WASM on OPFS, the `@xangarro/data` migrations applied, one repository round-trip and one
+  change-log row, in Chromium and WebKit via Playwright.
+- **Acceptance:** spike green in both engines, bundle cost measured and recorded here. **If the
+  Drizzle driver does not run on WASM, stop and ask the owner** (ADR-071 §4).
+
+### O-03 Expected-cash calculator, one per turno
+
+- [ ] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+- **Steps:** TDD in `packages/domain`: `fondo + ventas en efectivo + abonos en efectivo −
+gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` uses it instead of its
+  date-range sum. Happy path + 3 unhappy.
+- **Acceptance:** the handoff's figures reproduce exactly: fondo $800.00 + $2,140.00 + $550.00 −
+  $620.00 = **$2,870.00**.
+
+### O-04 Owner creates operators and resets NIPs (completes P-05)
+
+- [ ] Status · **Blocked by:** C-16 · **Blocks:** O-12
+- **Steps:** «Nuevo operador» (nombre, NIP 4 masked + confirm) and «Reiniciar NIP» in `/equipo`,
+  writing `users` through the application use case with its `sync_log` append (ADR-062). Remove the
+  phone's recovery screen and change-PIN flow (ADR-072).
+- **Acceptance:** server-action tests; the new hash appears in `/sync/pull`.
+
+### O-05 Real `/sync/push` and `/sync/pull` (B-08, B-09)
+
+- [ ] Status · **Blocked by:** O-02, C-16 … C-19 · **Blocks:** O-06
+- **Steps:** as specified in B-08/B-09, now also serving `plataforma = web` devices.
+- **Acceptance:** B-08/B-09 acceptance, plus a browser device round-trip in Playwright.
+
+### O-06 Register runtime: device token, Worker, outbox flusher
+
+- [ ] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
+- **Steps:** register route group in `apps/portal` (device-token auth, no owner cookie), the SQLite
+  Worker, `navigator.storage.persist()`, push/pull loop with retry, connection state for the header.
+- **Acceptance:** a sale captured offline is pushed on reconnect exactly once.
+
+---
+
+## 4. Fase 10 — Screens (10b), one at a time
+
+Each task: design file, all states from its control panel, side-by-side capture at the same width
+before reporting, Maestro/Playwright flow for the happy path.
+
+### O-10 `Operador Estado` — the four shared states
+
+- [x] Status · **Blocked by:** O-01 · **Blocks:** O-11 … O-16
+  - Done: 2026-09-17 · uncommitted · `apps/portal/src/operador/estado.tsx` + `.css.ts`, previewed at
+    `/inventario/operador?mode=loading|empty|error[&cta=1]`. Compared at 640 px against the design
+    forced through the runtime's `__dcSetProps` (the editor's control panel is not in the standalone
+    runtime): every box, font, colour, radius and shadow matches in all four variants. Deviations:
+    tile radius 16 (file: 17, ADR-076). Finding for every later screen: the design sizes fixed
+    boxes **content-box** (62 px + 2.5 px borders renders 67 px) except native `<button>`s, which
+    are border-box; the portal's reset is border-box, so fixed-size non-button boxes restore
+    `content-box`. Playwright coverage lands with the first screen that uses it (O-14).
+- **States:** happy · cargando (pulsing yellow dot + five `--gray-100` skeleton rows, no shimmer) ·
+  vacío (62 px icon box, title, body, optional action) · error («Lo que capturaste no se pierde…»,
+  Reintentar).
+
+### O-11 Operator shell
+
+- [ ] Status · **Blocked by:** O-10 · **Blocks:** O-12 … O-16
+- **Scope:** 248 px sidebar (Inicio · Caja · Turno · Ventas · Gastos · Inventario · Cobranza), turno
+  block with lock and «Cerrar turno», 76 px header with sync indicator and bell, phone bar
+  (< 760 px: Inicio · Caja · Ventas · Turno), `connection: sin-conexion` indicator.
+
+### O-12 Operador · Acceso (vincular → NIP → fondo)
+
+- [!] Status · **Blocked by:** O-04, O-06, **the ADR-072 design amendment landing upstream**
+- **Gate contribution:** the turno does not open without a captured fondo.
+
+### O-13 Register lock and operator switch
+
+- [ ] Status · **Blocked by:** O-12
+- **Gate:** two operators alternate on one register without losing the ticket in progress.
+
+### O-14 Operador · Inicio
+
+- [ ] Status · **Blocked by:** O-11, O-03
+- **States:** vendiendo · turno-cerrado · hora-de-cerrar · corte-por-aclarar · sin-conexion · four
+  data states.
+
+### O-15 Operador · Turno
+
+- [ ] Status · **Blocked by:** O-11, O-03
+- **States:** con datos · pendientes recurrentes · sin conexión.
+
+### O-16 Operador · Avisos
+
+- [ ] Status · **Blocked by:** O-11, C-19
+- **States:** De Pedro · De tu caja · respuesta al corte · leído · four data states.
+
+**Fase 10 gate:** two operators alternate on the same register without losing the ticket, and the
+turno does not open without a fondo.
+
+---
+
+## 5. Fases 11–13 (tasks written when fase 10 closes)
+
+- **Fase 11 — Caja y captura:** catalog, ticket, checkout modal (método · efectivo · fiado),
+  producto creado en caja, comprobante, caja bloqueada.
+- **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
+  de cliente, Registros por enviar, then Cierre de turno last.
+- **Fase 13 — Dueño:** Revisión de caja, Cortes de turno.

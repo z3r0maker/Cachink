@@ -44,6 +44,8 @@ export default tseslint.config(
       '**/playwright-report/**',
       'e2e-reports/**',
       'audit-screenshots/**',
+      // Read-only mirror of the Claude Design project (ADR-058); vendored runtime, never ours.
+      'design-reference/**',
       // Read-only mirror of the Claude Design project (ADR-058).
       'design-reference/**',
       // Deno, not Node: `supabase/functions/**` imports from URLs, carries

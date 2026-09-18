@@ -277,3 +277,77 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
   `emprendedor` or `mipyme_pro` remains outside `ARCHITECTURE.md` and archived directories.
 - **How to test:** `pnpm --filter @xangarro/contracts test`; `pnpm --filter @xangarro/domain test`;
   `rg -n 'freelancer|emprendedor|mipyme_pro' --glob '!archive/**' --glob '!ARCHITECTURE.md' -g '!**/dist/**'`.
+
+### C-12 Limits rework: transactions + products, `usage` in the payload, `cobrosIntegrados`, annual lookup keys
+
+- [ ] Status · **Surfaced by:** Track N (ADR-065, ADR-066, ADR-067) · **Blocks:** N-01, N-02, N-31, A-10
+- **Steps:**
+  1. `PlanLimits`: replace `recordsPerMonth` with `transactionsPerMonth` and add `activeProducts`.
+     Values: xangarrito 300 / 50 · xangarro 10 000 / 1 000 · xangarrote 30 000 / 5 000.
+     Operators/devices unchanged.
+  2. Add `capabilities.cobrosIntegrados: boolean` (false on xangarrito, true on the paid tiers).
+  3. Add an unsigned `usage { period, transactions, products, computedAt }` block to `/sync/pull` and
+     `/entitlement` responses (it is server-computed, informational, and must not force a re-sign).
+  4. Document that limits are **advisory for transactions** on every tier; `activeProducts` is
+     enforced client-side only on xangarrito; the server accepts every row.
+  5. Stripe lookup keys: `plan_<tier>_monthly`, `plan_<tier>_annual`.
+  6. Regenerate the signature test vector; update mock scenarios (`over-limit`).
+- **Acceptance:** C-10 conformance suite green against the mock; domain tests for the new limits.
+
+### C-13 Payment intents API
+
+- [ ] Status · **Surfaced by:** N-41 (ADR-066) · **Trigger:** N-40 go decision · **Blocks:** N-41, N-42
+- **Steps:** `POST /api/v1/payments/intents` `{ clientIntentId (ULID), amountCentavos, mode:
+'qr'|'terminal', terminalId? }` → `{ intentId, status, qrPayload?, expiresAt }`;
+  `GET /api/v1/payments/intents/:id` → `{ status: pending|approved|declined|expired|cancelled,
+paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent on
+  `clientIntentId`. Error codes added to `ERROR_CATALOG` (`PAYMENTS_NOT_CONNECTED`,
+  `PAYMENTS_NOT_ENTITLED`, `PROVIDER_UNAVAILABLE` retryable).
+- **Acceptance:** zod schemas + mock scenarios `pay-approve|pay-decline|pay-timeout`; conformance tests.
+
+### C-14 QR activation (email optional)
+
+- [ ] Status · **Surfaced by:** N-25 · **Blocks:** N-25, A-04
+- **Steps:** `/activate` request: `email` becomes optional when `via: 'qr'`; the code alone
+  identifies the business. Document the universal link `https://app.xangarro.mx/activar?c=<code>`.
+  Rate limit per IP unchanged (B-17).
+- **Acceptance:** conformance tests for both paths; used/expired code errors unchanged.
+
+### C-15 Business branding and contact columns on the `businesses` DOWN table
+
+- [ ] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+- **Steps:** add `brand_color`, `receipt_template ∈ clasico|moderno|ticket|minimal`,
+  `receipt_leyenda`, `address_print`, `whatsapp`, `social_links` (JSON) to the wire schema, pg-core and
+  SQLite (`logo_url` already exists). SQLite migration with an old→new test (CLAUDE.md §2.9).
+- **Acceptance:** drift test green; pull applies the new columns; old devices ignore unknown fields.
+
+### C-16 Browser devices and the four-digit NIP
+
+- [ ] Status · **Surfaced by:** Track O (ADR-071, ADR-072) · **Blocks:** O-04, O-05
+- **Steps:** `DevicePlatformSchema` gains `web` (wire, pg-core `devices.plataforma`); NIP becomes
+  `/^\d{4}$/` in `UserSchema` and every PIN use case; `recoveryPasswordHash` marked deprecated
+  (column kept). Protocol version 1, no bump (additive enum value; PIN length is not on the wire).
+- **Acceptance:** drift test green; activate accepts `plataforma: 'web'`.
+
+### C-17 Ticket header entity; `sales` become lines
+
+- [ ] Status · **Surfaced by:** Track O (ADR-073) · **Blocks:** O-05, fase 11
+- **Steps:** new UP table (folio, metodo, clienteId, efectivoRecibido, cambio, cajaTurnoId,
+  cancellation fields); `sales` gain `ticketId` and lose the ticket-level fields; unique
+  (device, folio). SQLite + pg migrations with old → new tests (each sale → one-line ticket).
+- **Acceptance:** CLAUDE.md §11 checklist; push accepts a ticket and its lines in one delta.
+
+### C-18 Receivables, expected cash and review status
+
+- [ ] Status · **Surfaced by:** Track O (ADR-074) · **Blocks:** O-03, O-05
+- **Steps:** `client_payments` per client (`clienteId`, no `ventaId`); `clients` + `limiteCentavos`,
+  `plazoDias`, review status; `products` + review status; `expenses` + `cajaTurnoId`; `caja_turnos`
+  - denomination JSON. Migrations with old → new tests.
+- **Acceptance:** drift test green; old devices ignore unknown fields.
+
+### C-19 Operator messages and replies
+
+- [ ] Status · **Surfaced by:** Track O (ADR-075) · **Blocks:** O-16, fase 13
+- **Steps:** `mensajes_operador` (DOWN) and `respuestas_operador` (UP) in `scope.ts`, wire schemas,
+  pg-core and SQLite.
+- **Acceptance:** CLAUDE.md §11 checklist; a message pulled, a reply pushed.
