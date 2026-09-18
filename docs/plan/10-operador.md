@@ -224,10 +224,37 @@ Collected while building fase 10; none is edited in `design-reference/`.
    with zero or several receipts. Invented and awaiting wording: «Vence en N días» (dues beyond
    tomorrow).
 
-## 5. Fases 11–13 (tasks written when fase 10 closes)
+## 5. Fase 11 — Caja y captura
 
-- **Fase 11 — Caja y captura:** catalog, ticket, checkout modal (método · efectivo · fiado),
-  producto creado en caja, comprobante, caja bloqueada.
+> **Started before the fase 10 gate closed (owner, «continue», 2026-09-17).** O-12/O-13 wait on the
+> Acceso amendment and the runtime; fase 11 proceeds on fixtures so the screens are not idle.
+
+### O-20 Operador · Caja
+
+- [x] Status · **Blocked by:** O-11 · **Blocks:** fase 11 gate
+  - Done: 2026-09-17 · `src/operador/caja/` (catalogue, ticket column / bottom sheet, Cobrar modal
+    in three steps, post-sale card with its 8 s bar, Compartir comprobante, Producto nuevo en caja),
+    `/operador/caja`; pure ticket maths in `caja/ticket.ts` with unit tests
+    (`tests/operador/ticket.test.ts`); shared `OpModal` (Radix) and `Note`. Harness comparison at
+    1440, 1024 and 375 px, empty ticket, loading/empty/error, each Cobrar step, the post-sale card
+    and both modals: box-for-box except the agreed radius, a design button left in browser-default
+    black (#000; code keeps the token), and harness noise where the runtime splits mixed text.
+    **Gate met** by `e2e/operador-caja.spec.ts` at 1440/1024/768: cash sale with change, credit sale
+    that needs a client, a long ticket whose total and COBRAR stay in view, Deshacer.
+  - Deviations: the lock overlay in this file is O-13's (NIP verification) and not built here;
+    «Guardar imagen» / «Copiar texto» / WhatsApp do real things on the device (PNG, clipboard,
+    `wa.me` text per Track N row 13) instead of the prototype's canned confirmations; «Agregar al
+    ticket» requires a name and a price. `portalFontSizes.total = 38` added.
+  - For the design project (§4b): the WhatsApp confirmation says «enviado» but the app can only open
+    WhatsApp; the owner must know the message still needs sending.
+
+**Open question found while building O-20:** `portalFontSizes` documents «the floor of 12 holds for
+both» surfaces, but the operator design uses 11 px (tab labels, chips, «Sin leer», «Quedan N»), and
+O-11 added `portalFontSizes.tag = 11`. Needs the owner's call: keep 11 (amend the floor) or raise
+those texts to 12 upstream.
+
+## 6. Fases 12–13 (tasks written when fase 11 closes)
+
 - **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
   de cliente, Registros por enviar, then Cierre de turno last.
 - **Fase 13 — Dueño:** Revisión de caja, Cortes de turno.

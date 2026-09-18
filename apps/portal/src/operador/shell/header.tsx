@@ -29,7 +29,9 @@ export function OperadorHeader({ data }: { readonly data: OperadorShellData }) {
         )}
         <div className={h.right}>
           {mode.status === 'none' ? null : <SyncPill data={data} asLink={mode.status === 'full'} />}
-          {mode.status === 'full' ? <Bell unread={data.avisosSinLeer} /> : null}
+          {mode.status === 'full' && mode.bell !== false ? (
+            <Bell unread={data.avisosSinLeer} />
+          ) : null}
           <div id={HEADER_ACTION_ID} style={{ display: 'contents' }} />
         </div>
       </div>

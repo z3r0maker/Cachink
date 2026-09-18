@@ -64,6 +64,8 @@ export interface HeaderMode {
   readonly back?: { readonly label: string; readonly title: string; readonly href: string };
   /** `full`: sync link + bell · `static`: sync pill only, not a link · `none`. */
   readonly status: 'full' | 'static' | 'none';
+  /** Caja swaps the bell for its «Ventas del turno» pill. */
+  readonly bell?: boolean;
 }
 
 const back = (label: string, title: string, slug: string) => ({
@@ -86,5 +88,6 @@ export function headerFor(pathname: string): HeaderMode {
     return { back: back('Cobranza', 'Volver a cobranza', 'cobranza'), status: 'none' };
   }
   if (first === 'cierre') return { status: 'static' };
+  if (first === 'caja') return { status: 'full', bell: false };
   return { status: 'full' };
 }

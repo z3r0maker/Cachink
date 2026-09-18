@@ -2,7 +2,7 @@
 
 import { Icon } from '../../shell/icon';
 import { OperadorEstado } from '../estado';
-import * as h from '../shell/header.css';
+import * as h from '../shell/actions.css';
 import { ICONS } from '../shell/nav';
 import { HeaderAction } from '../shell/shell';
 import { OpMain } from '../ui/parts';

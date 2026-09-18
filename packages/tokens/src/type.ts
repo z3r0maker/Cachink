@@ -113,6 +113,8 @@ export const portalFontSizes = {
   xl5: 30,
   xl6: 34,
   pageTitle: 36,
+  /** The register's ticket total, the change due and the counted cash (Caja, Cierre). */
+  total: 38,
   display: 40,
   displayLg: 44,
   /** The Suscripción price figure. */

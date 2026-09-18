@@ -12,14 +12,17 @@ import * as u from './ui.css';
 export function OpMain({
   top,
   narrow = false,
+  caja = false,
   children,
 }: {
   readonly top: 22 | 24;
   readonly narrow?: boolean;
+  readonly caja?: boolean;
   readonly children: ReactNode;
 }) {
+  const cls = [u.main[top === 22 ? 'top22' : 'top24'], u.mainPhone, caja ? u.mainCaja : ''];
   return (
-    <main className={`${u.main[top === 22 ? 'top22' : 'top24']} ${u.mainPhone}`}>
+    <main className={cls.join(' ')}>
       <div className={u.stack} style={narrow ? { maxWidth: 1100 } : undefined}>
         {children}
       </div>
@@ -113,5 +116,34 @@ export function TintBox({
     <span className={u.tintBox} style={{ width: size, height: size, background: tint }}>
       <Icon path={icon} size={glyph} strokeWidth={stroke} />
     </span>
+  );
+}
+
+/** A multi-path glyph (the product icons). */
+export function Glyph({
+  paths,
+  size,
+  stroke,
+}: {
+  readonly paths: readonly string[];
+  readonly size: number;
+  readonly stroke: number;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={stroke}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {paths.map((d) => (
+        <path key={d} d={d} />
+      ))}
+    </svg>
   );
 }
