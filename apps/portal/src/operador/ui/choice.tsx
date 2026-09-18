@@ -4,7 +4,8 @@ import * as f from './field.css';
 
 /** A row of mutually exclusive chips (motivo, categoría, método): 40, 42 or 44 px in the files. */
 export function ChoiceChips<T extends string>(p: {
-  readonly label: string;
+  /** Omitted where the card's own eyebrow names the choice (Cierre). */
+  readonly label?: string;
   readonly options: readonly T[];
   readonly value: T | null;
   readonly onChange: (v: T) => void;
@@ -12,9 +13,11 @@ export function ChoiceChips<T extends string>(p: {
 }) {
   return (
     <div>
-      <div className={f.label} style={{ marginBottom: 8 }}>
-        {p.label}
-      </div>
+      {p.label ? (
+        <div className={f.label} style={{ marginBottom: 8 }}>
+          {p.label}
+        </div>
+      ) : null}
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {p.options.map((o) => (
           <button

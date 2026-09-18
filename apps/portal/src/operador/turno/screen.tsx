@@ -6,6 +6,7 @@ import { NuevaVenta } from '../shell/actions';
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
 import { KpiRow, OpMain } from '../ui/parts';
 import * as t from '../ui/title.css';
+import { desglose } from './desglose';
 import { Movimientos } from './movimientos';
 import { Atajos, kpis } from './parts';
 import { PendientesRecurrentes } from './pendientes';
@@ -49,12 +50,7 @@ export function TurnoScreen({ state, data }: TurnoScreenProps) {
 }
 
 function EsperadoCard({ data }: { readonly data: TurnoData }) {
-  const rows: readonly [string, string][] = [
-    ['Fondo de caja', formatMoney(data.fondo)],
-    ['Ventas en efectivo', formatMoney(data.ventasEfectivo)],
-    ['Abonos en efectivo', formatMoney(data.abonosEfectivo)],
-    ['Gastos de caja chica', `−${formatMoney(data.gastosEfectivo)}`],
-  ];
+  const rows = desglose(data);
   return (
     <div className={s.hero}>
       <div className={s.heroLabel}>Efectivo esperado en caja</div>

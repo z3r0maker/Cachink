@@ -1,23 +1,35 @@
 'use client';
 
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 
 import type { Connection } from './types';
+
+/** How long the fixture «send» takes, as in `Operador Pendientes.dc.html`. */
+const ENVIO_MS = 1400;
 
 export interface Cola {
   readonly connection: Connection;
   /** Records captured here and not yet accepted by the server. */
   readonly pendientes: number;
-  /** The queue went up: nothing waits and the register is evidently online. */
-  readonly vaciada: () => void;
+  readonly enviando: boolean;
+  /** «Reintentar envío», from Registros por enviar or the close's banner. */
+  readonly enviar: () => void;
 }
 
 const ColaContext = createContext<Cola | null>(null);
 
 /**
- * The register's send queue as the shell and Registros por enviar see it. One
- * state, so the header pill and the screen never disagree. The outbox flusher
- * (O-06) will drive it; until then it starts from the shell fixture.
+ * The register's send queue as every screen sees it. One state, so the header
+ * pill, Registros por enviar and Cierre never disagree. The outbox flusher
+ * (O-06) will drive it; until then a retry succeeds after the file's 1.4 s.
  */
 export function ColaProvider(p: {
   readonly connection: Connection;
@@ -25,13 +37,24 @@ export function ColaProvider(p: {
   readonly children: ReactNode;
 }) {
   const [vacia, setVacia] = useState(false);
+  const [enviando, setEnviando] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => (timer.current ? clearTimeout(timer.current) : undefined), []);
   const value = useMemo<Cola>(
     () => ({
       connection: vacia ? 'en-linea' : p.connection,
       pendientes: vacia ? 0 : p.pendientes,
-      vaciada: () => setVacia(true),
+      enviando,
+      enviar: () => {
+        if (enviando) return;
+        setEnviando(true);
+        timer.current = setTimeout(() => {
+          setEnviando(false);
+          setVacia(true);
+        }, ENVIO_MS);
+      },
     }),
-    [vacia, p.connection, p.pendientes],
+    [vacia, enviando, p.connection, p.pendientes],
   );
   return <ColaContext.Provider value={value}>{p.children}</ColaContext.Provider>;
 }

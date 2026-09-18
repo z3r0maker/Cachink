@@ -84,6 +84,11 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
 ### O-03 Expected-cash calculator, one per turno
 
 - [ ] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+  - Calculator done 2026-09-18 (with O-28): `efectivoEsperado`, `totalContado`, `diferenciaCorte`
+    and `DENOMINACIONES_MXN` in `packages/domain/src/financials/cierre-turno.ts`, 7 tests, the
+    handoff's $2,870.00 reproduced; Turno's fixture now computes its figure with it. **Open:**
+    scoping by `cajaTurnoId` and `CerrarCajaUseCase` using it wait on C-18 (expenses gain
+    `cajaTurnoId`).
 - **Steps:** TDD in `packages/domain`: `fondo + ventas en efectivo + abonos en efectivo −
 gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` uses it instead of its
   date-range sum. Happy path + 3 unhappy.
@@ -237,6 +242,10 @@ Collected while building fase 10; none is edited in `design-reference/`.
     Detalle, whose tickets and abonos also give $860.00. Cobranza's figure is the one Inicio, Turno
     and Cierre use ($550.00 cash abonos). The files need one history. Detalle's «se aplicó hasta»
     loop names the wrong ticket (see O-26).
+12. **Cierre:** the sidebar footer here says «08:15 – 21:04 · Caja 1» and «Turno cerrado» after
+    closing, while every other file says «Desde 08:15 · Caja 1»; the shell keeps one footer until
+    the files agree. The band in the file only appears offline; the README ties it to unsent
+    records (built that way). The count starts pre-filled ($3,780.00, «Sobra $910.00»).
 
 ## 5. Fase 11 — Caja y captura
 
@@ -380,6 +389,30 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
   - Found: the design system sets `p { line-height: 1.45 }`; a `<p>` in the portal must say so.
   - Undesigned wording, generalised from the file's one case: the hero's sum with no expense
     («Suman $283.00 de ventas.») or several («y 2 gastos por $1,240.00»).
+
+### O-28 Operador · Cierre de turno
+
+- [x] Status · **Blocked by:** O-27, O-03 (calculator)
+  - Done: 2026-09-18 · `src/operador/cierre/`, `/operador/cierre`. Count by denomination ($1,000
+    to $1, tinted bills, − / field / +, amount), «Contado» in 38 px; the yellow expected-cash card
+    (domain `efectivoEsperado`, the same four rows as Turno via `turno/desglose.ts`); the
+    difference card (Cuadra / Falta / Sobra, domain `diferenciaCorte`); with a difference, a
+    required reason (five chips) and note; the turno summary (Turno's figures, cancellations from
+    Ventas, movements from Inventario); «Cerrar turno» blocked while the note is missing or the
+    queue holds records. The amber band reads the shell's queue (`useCola`, whose `enviar` now
+    serves Registros por enviar too) and its «Reintentar envío» empties it. Closed: the green card
+    with counted, expected, signed difference and sales. Harness at 1440, 1024 and 375 px: open,
+    blocked, cuadra, falta, sobra with note, both closed variants, loading/empty/error — 0 diffs
+    (agreed radius aside). `tests/operador/cierre.test.ts`, `e2e/operador-cierre.spec.ts`. With
+    every operator screen routed, the placeholder catch-all and `PendingScreen` are gone; unknown
+    operator paths still 404.
+  - Deviations: the band shows whenever the queue holds records (README: «si hay registros sin
+    enviar»), not only offline as in the file. «Abrir otro turno» goes to Inicio until Acceso
+    (O-12) exists. The close is device-local until O-06; the count starts where the file's does.
+  - Open with O-06: the five reasons vs the six-value `caja_turnos` enum (asked above).
+
+**Fase 12 screens are complete** (O-21 to O-28). Its real data waits on the groundwork (O-02 to
+O-06); fase 13 is next.
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 
