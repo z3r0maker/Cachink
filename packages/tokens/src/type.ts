@@ -97,6 +97,8 @@ export const typography = {
  * holds for both — Xangarro is read at arm's length on a counter.
  */
 export const portalFontSizes = {
+  /** Tags, chips and the phone tab bar — the design system's `.t-tag` (11px). */
+  tag: 11,
   xs: 12,
   sm: 13,
   md: 14,

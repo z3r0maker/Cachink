@@ -135,7 +135,17 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-11 Operator shell
 
-- [ ] Status · **Blocked by:** O-10 · **Blocks:** O-12 … O-16
+- [x] Status · **Blocked by:** O-10 · **Blocks:** O-12 … O-16
+  - Done: 2026-09-17 · `apps/portal/src/operador/shell/*`, `/operador` layout + catch-all for screens not
+    built yet (empty content area; unknown path → 404). Measured against Turno at 1440 px and Inicio at
+    375 px: sidebar, header and phone bar match element by element (content-box, see O-10). Gate
+    verified in the browser and pinned by `e2e/operador-shell.spec.ts` (sidebar is the same node and
+    rect across the seven destinations; active item follows the route). Decisions and deviations:
+    the design files disagree on the shell, so the README's version is built everywhere — bell
+    always shown, per-screen yellow action through `HeaderAction`, footer with lock + «Cerrar turno»
+    (the lock button is hidden until O-13 gives it a screen: no dead buttons); tab bar order is the
+    README's (Inicio · Caja · Ventas · Turno). `portalFontSizes.tag = 11` added (the design system's
+    `.t-tag`). Dev-only `?connection=sin-conexion` forces the offline header.
 - **Scope:** 248 px sidebar (Inicio · Caja · Turno · Ventas · Gastos · Inventario · Cobranza), turno
   block with lock and «Cerrar turno», 76 px header with sync indicator and bell, phone bar
   (< 760 px: Inicio · Caja · Ventas · Turno), `connection: sin-conexion` indicator.
