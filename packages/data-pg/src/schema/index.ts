@@ -12,3 +12,4 @@ export * from './ledger';
 export * from './caja';
 export * from './portal';
 export * from './sync';
+export * from './billing';

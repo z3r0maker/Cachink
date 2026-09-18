@@ -22,6 +22,13 @@
       "when": 1789705717447,
       "tag": "0002_sync_cursor",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1789713229479,
+      "tag": "0003_billing",
+      "breakpoints": true
     }
   ]
 }
