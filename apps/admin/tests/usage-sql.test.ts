@@ -56,10 +56,17 @@ describe('0006_admin_usage_read.sql', () => {
     assert.match(shared, /CREATE OR REPLACE FUNCTION public\.admin_tenant_usage\(/);
     assert.match(shared, /FROM xangarro\.usage_counts\(/);
     assert.match(shared, /SECURITY INVOKER/);
-    // The OQ-5 rules live in data-pg's 0010 only (one definition).
+    // The OQ-5 rules live in data-pg's 0010 only (one definition): the body
+    // touches no counted table.
+    const body = shared.slice(shared.indexOf('AS $fn$'), shared.lastIndexOf('$fn$;'));
     for (const table of ['sales', 'expenses', 'inventory_movements', 'products']) {
-      assert.doesNotMatch(shared, new RegExp(`public\\.${table}\\b`));
+      assert.doesNotMatch(body, new RegExp(`public\\.${table}\\b`));
     }
+    // The shared count tells portal movements by device, so the console reads that column too.
+    assert.match(
+      shared,
+      /GRANT SELECT \(device_id\) ON public\.inventory_movements TO xangarro_admin/,
+    );
     const exec = [...shared.matchAll(/GRANT EXECUTE ON FUNCTION [^;]* TO (\w+)/g)].map((m) => m[1]);
     assert.deepEqual(exec, ['xangarro_admin']);
   });
