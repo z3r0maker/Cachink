@@ -1,10 +1,13 @@
 'use client';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
-import { Button, Card, Input } from '@/components';
+import { Button, Input } from '@/components';
 import { login } from '@/server/actions/auth';
+
+import { AuthCard } from './auth-card';
 
 interface FieldsProps {
   readonly email: string;
@@ -69,28 +72,30 @@ export function LoginForm() {
   const { email, setEmail, password, setPassword, error, setError, pending, submit } = useLogin();
 
   return (
-    <main style={{ maxWidth: 460, margin: '10vh auto', padding: '0 16px' }}>
-      <Card>
-        <h1 style={{ marginTop: 0 }}>Entra a tu portal</h1>
-        <form onSubmit={submit} noValidate>
-          <Fields
-            email={email}
-            password={password}
-            error={error}
-            onEmail={(v) => {
-              setEmail(v);
-              setError(null);
-            }}
-            onPassword={(v) => {
-              setPassword(v);
-              setError(null);
-            }}
-          />
-          <Button type="submit" disabled={pending}>
-            {pending ? 'Entrando…' : 'Entrar'}
-          </Button>
-        </form>
-      </Card>
-    </main>
+    <AuthCard title="Entra a tu portal">
+      <form onSubmit={submit} noValidate>
+        <Fields
+          email={email}
+          password={password}
+          error={error}
+          onEmail={(v) => {
+            setEmail(v);
+            setError(null);
+          }}
+          onPassword={(v) => {
+            setPassword(v);
+            setError(null);
+          }}
+        />
+        <Button type="submit" disabled={pending}>
+          {pending ? 'Entrando…' : 'Entrar'}
+        </Button>
+      </form>
+      {/* ADR-080: our own emailed links, no auth vendor. */}
+      <p style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
+        <Link href="/login/recuperar">¿Olvidaste tu contraseña?</Link>
+        <Link href="/login/enlace">Entrar con un enlace por correo</Link>
+      </p>
+    </AuthCard>
   );
 }

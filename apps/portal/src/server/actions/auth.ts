@@ -10,14 +10,12 @@ import {
   verifyPassword,
 } from '@xangarro/auth-core';
 import { loginLookup, throttleStore } from '@xangarro/data-pg';
-import { sql } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
-import type { Role } from '@/session/types';
-
 import { db } from '../db';
-import { endSession, startSession } from '../session';
+import { endSession } from '../session';
+import { NO_BUSINESS, signInUser } from '../sign-in';
 
 /**
  * Email + password sign-in (audit SEC-AUTH-02).
@@ -28,8 +26,6 @@ import { endSession, startSession } from '../session';
  * - **One hash, by email**: the app role cannot read `encrypted_password`;
  *   `xangarro.login_lookup` returns exactly one account's.
  *
- * The membership lookup runs outside any tenant transaction on purpose: it is
- * the query that decides *which* tenant (see `xangarro.memberships_for_user`).
  */
 export type LoginResult = { ok: true } | { ok: false; message: string };
 
@@ -71,12 +67,7 @@ export async function login(email: string, password: string): Promise<LoginResul
   if (guarded.kind === 'locked') return tooMany(guarded.wait);
   if (guarded.kind === 'failed') return { ok: false, message: WRONG };
 
-  const [member] = await db().execute<{ business_id: string; role: Role }>(
-    sql`SELECT business_id, role FROM xangarro.memberships_for_user(${guarded.value.id})`,
-  );
-  if (!member) return { ok: false, message: 'Tu cuenta aún no pertenece a ningún negocio.' };
-
-  await startSession(guarded.value.id, member.business_id);
+  if (!(await signInUser(guarded.value.id))) return { ok: false, message: NO_BUSINESS };
   return { ok: true };
 }
 

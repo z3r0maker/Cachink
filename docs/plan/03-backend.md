@@ -243,7 +243,7 @@
     429/5xx backoff; dev outbox `.email-outbox/` without a key). Templates: trial-ending (day
     11/14), usage-threshold, staff-digest, password-reset, magic-link, generic-notice —
     snapshot-tested. Wired: admin digest (N-10), portal trial cron (N-01). Seams:
-    `sendPasswordReset`/`sendMagicLink` (ADR-080 flows not on main yet),
+    `sendPasswordReset`/`sendMagicLink` (wired 2026-09-18 in P-02's emailed links),
     `notifyUsageThreshold` (N-03, for the N-02 wiring). Runbook `docs/ops/email.md`.
     **Still to do:** `activation-code`, `welcome`, `payment-failed`, `factura-issued`; DNS
     verification of xangarro.mx (owner); owner address for businesses with no Stripe customer.
