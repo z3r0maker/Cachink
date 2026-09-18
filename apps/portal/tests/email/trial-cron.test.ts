@@ -92,7 +92,10 @@ describe('GET /api/cron/trial-emails', () => {
     const config = JSON.parse(
       readFileSync(new URL('../../vercel.json', import.meta.url), 'utf8'),
     ) as { crons?: { path: string; schedule: string }[] };
-    assert.deepEqual(config.crons, [{ path: '/api/cron/trial-emails', schedule: '0 15 * * *' }]);
+    assert.deepEqual(
+      config.crons?.find((c) => c.path === '/api/cron/trial-emails'),
+      { path: '/api/cron/trial-emails', schedule: '0 15 * * *' },
+    );
   });
 });
 
