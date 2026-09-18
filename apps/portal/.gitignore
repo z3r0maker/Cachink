@@ -6,3 +6,4 @@ e2e/.auth/
 # Dev-only symlink to /design-reference/operador for same-origin design comparison.
 public/__design
 public/__cmp.txt
+.next-e2e/
