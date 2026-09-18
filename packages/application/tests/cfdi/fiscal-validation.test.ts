@@ -11,7 +11,9 @@ describe('isValidRfc', () => {
   it('accepts persona moral (12) and persona física (13) RFCs', () => {
     assert.equal(isValidRfc('EKU9003173C9'), true);
     assert.equal(isValidRfc('XOJI740919U48'), true);
-    assert.equal(isValidRfc('ÑAÑ010101AB1'), true);
+    // Ñ and & are RFC letters. Since P-08 the check digit is verified too, so
+    // the sample carries its real one (A), not a made-up homoclave.
+    assert.equal(isValidRfc('ÑAÑ010101ABA'), true);
     assert.equal(isValidRfc('A&C010101AB1'), true);
   });
 

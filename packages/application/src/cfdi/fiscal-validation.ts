@@ -5,17 +5,18 @@
  */
 
 import {
+  isGenericRfc,
+  isValidCodigoPostal,
+  isValidRfc,
+  normalizeRfc,
   REGIMEN_FISCAL,
-  RFC_EXTRANJERO_GENERICO,
-  PUBLICO_EN_GENERAL,
-  USO_CFDI_INGRESO,
+  tipoPersona,
   type TipoPersona,
-} from './sat-catalogs.js';
+} from '@xangarro/domain';
+
+import { USO_CFDI_INGRESO } from './sat-catalogs.js';
 import type { CfdiReceptor, TenantFiscalData } from './types.js';
 
-/** The pattern of the RFC in the CFDI 4.0 XSD (tdCFDI:t_RFC), anchored. */
-const RFC_RE = /^[A-Z&Ñ]{3,4}\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z\d]{2}[\dA]$/u;
-const CP_RE = /^\d{5}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NOMBRE = 254;
 
@@ -38,9 +39,8 @@ export type FiscalValidation =
   | { readonly ok: true; readonly receptor: CfdiReceptor }
   | { readonly ok: false; readonly reasons: readonly FiscalIssue[] };
 
-export function isValidRfc(rfc: string): boolean {
-  return RFC_RE.test(rfc);
-}
+/** RFC format and SAT check digit — the domain's rule, shared with the portal (P-08). */
+export { isValidRfc };
 
 function clean(value: string | null | undefined): string {
   return (value ?? '').trim();
@@ -48,12 +48,8 @@ function clean(value: string | null | undefined): string {
 
 function rfcIssue(rfc: string): FiscalIssue | null {
   if (!rfc) return 'rfc_missing';
-  if (rfc === PUBLICO_EN_GENERAL.rfc || rfc === RFC_EXTRANJERO_GENERICO) return 'rfc_generic';
+  if (isGenericRfc(rfc)) return 'rfc_generic';
   return isValidRfc(rfc) ? null : 'rfc_invalid';
-}
-
-function tipoPersona(rfc: string): TipoPersona {
-  return [...rfc].length === 12 ? 'moral' : 'fisica';
 }
 
 function regimenIssue(regimen: string, persona: TipoPersona | null): FiscalIssue | null {
@@ -76,12 +72,12 @@ function nombreIssue(nombre: string): FiscalIssue | null {
 
 function cpIssue(cp: string): FiscalIssue | null {
   if (!cp) return 'codigo_postal_missing';
-  return CP_RE.test(cp) ? null : 'codigo_postal_invalid';
+  return isValidCodigoPostal(cp) ? null : 'codigo_postal_invalid';
 }
 
 /** Validate and normalise (trim, upper-case RFC) a tenant's fiscal data. */
 export function validateTenantFiscal(data: TenantFiscalData): FiscalValidation {
-  const rfc = clean(data.rfc).toUpperCase();
+  const rfc = normalizeRfc(clean(data.rfc));
   const nombre = clean(data.razonSocial);
   const regimenFiscal = clean(data.regimenFiscal);
   const usoCfdi = clean(data.usoCfdi).toUpperCase();
