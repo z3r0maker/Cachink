@@ -12,7 +12,7 @@ export function MontoInput(p: {
   readonly label: string;
   readonly value: string;
   readonly onChange: (raw: string) => void;
-  readonly size: 'caja' | 'gasto';
+  readonly size: 'caja' | 'gasto' | 'limite';
   readonly trailing?: ReactNode;
 }) {
   return (

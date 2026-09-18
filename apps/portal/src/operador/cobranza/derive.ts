@@ -33,8 +33,9 @@ export function filtrar(
     .filter((c) => matches(query, `${c.nombre} ${c.telefono}`));
 }
 
+/** «Tres abonos recibidos»; one reads «Un abono…» (apocope), not «Uno». */
 const plural = (n: number, una: string, varias: string) =>
-  `${enPalabras(n)} ${n === 1 ? una : varias}`;
+  n === 1 ? `Un ${una}` : `${enPalabras(n)} ${varias}`;
 
 /** The three KPIs and their hints. */
 export function resumen(clientes: readonly ClienteCobranza[], abonos: readonly AbonoHoy[]) {
