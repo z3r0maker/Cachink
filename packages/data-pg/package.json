@@ -21,8 +21,10 @@
     "db:generate": "drizzle-kit generate",
     "db:up": "./scripts/db-local.sh up",
     "db:down": "./scripts/db-local.sh down",
-    "test:db": "DATABASE_URL=$(./scripts/db-local.sh url) vitest run",
-    "db:seed": "DATABASE_URL=$(./scripts/db-local.sh url) tsx ./scripts/seed.ts"
+    "test:db": "REQUIRE_DB=1 DATABASE_URL=$(./scripts/db-local.sh url) vitest run",
+    "db:seed": "DATABASE_URL=$(./scripts/db-local.sh url) tsx ./scripts/seed.ts",
+    "db:apply": "./scripts/db-local.sh apply",
+    "db:reset": "./scripts/db-local.sh down && ./scripts/db-local.sh up && pnpm db:seed"
   },
   "dependencies": {
     "@xangarro/contracts": "workspace:*",

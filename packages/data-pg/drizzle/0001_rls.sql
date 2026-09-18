@@ -21,7 +21,15 @@ STABLE
 AS $$
   SELECT NULLIF(
     COALESCE(
-      current_setting('request.jwt.claims', true)::jsonb ->> 'business_id',
+      -- `NULLIF(…, '')` **before** the cast. `''::jsonb` raises 22P02, and an
+      -- empty `request.jwt.claims` is a state PostgREST produces — so without
+      -- this, one empty GUC turns every query on all 25 tenant tables into an
+      -- error. Supabase's own `auth.jwt()` guards the same way.
+      --
+      -- A malformed (non-empty, non-JSON) claim still raises. That is
+      -- fail-*closed* — an error, never a leak — so it is an availability
+      -- question, not a security one.
+      NULLIF(current_setting('request.jwt.claims', true), '')::jsonb ->> 'business_id',
       current_setting('xangarro.business_id', true)
     ),
     ''
@@ -61,17 +69,19 @@ $$;
 --
 -- **Superusers bypass RLS entirely, and `FORCE` does not apply to them.** A
 -- policy is therefore worthless if the app connects as `postgres`: every query
--- silently sees every tenant. This role has no BYPASSRLS and is not a
+-- silently sees every tenant. `xangarro_app` has no BYPASSRLS and is not a
 -- superuser, so the policies above actually bind. Supabase's `authenticated`
--- role plays the same part in production; this is its local equivalent.
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_app') THEN
-    CREATE ROLE xangarro_app LOGIN PASSWORD 'xangarro_app';
-  END IF;
-END
-$$;
-
+-- role plays the same part in production.
+--
+-- The role is **created** in `../local/0000_supabase_compat.sql`, not here: a
+-- migration carrying `CREATE ROLE … LOGIN PASSWORD` would put a login role with
+-- a repo-published password on production the first time anyone ran
+-- `supabase db push`. Provisioning is environment-specific; policies are not.
+--
+-- The grants below stay, because they need the tables from `0000_*`, which do
+-- not exist when the compat layer runs. Note honestly that they name a role a
+-- hosted Supabase project will not have — so this file is **not pushable as
+-- written**, and B-03 owns splitting the hosted grants from the local ones.
 GRANT USAGE ON SCHEMA public, xangarro TO xangarro_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO xangarro_app;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO xangarro_app;

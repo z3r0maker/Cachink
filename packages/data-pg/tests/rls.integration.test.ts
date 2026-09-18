@@ -1,6 +1,9 @@
-import { afterAll, beforeAll, describe, it } from 'vitest';
+import { afterAll, beforeAll, it } from 'vitest';
 import assert from 'node:assert/strict';
 import postgres from 'postgres';
+
+import { integrationSuite } from './support/db';
+import { BIZ_A, BIZ_B, seedTwoTenants } from './support/tenants';
 
 /**
  * RLS integration test (B-03).
@@ -12,39 +15,27 @@ import postgres from 'postgres';
  * planner, the policy expressions and the claim plumbing all have to agree, and
  * none of that can be checked by reading SQL.
  *
- *   docker run -d --name xangarro-pg -e POSTGRES_PASSWORD=xangarro \
- *     -e POSTGRES_DB=xangarro -p 55432:5432 postgres:17-alpine
- *   psql … -f drizzle/0000_*.sql -f drizzle/0001_rls.sql
- *   DATABASE_URL=postgres://postgres:xangarro@localhost:55432/xangarro pnpm test
+ *   pnpm --filter @xangarro/data-pg db:reset
+ *   pnpm --filter @xangarro/data-pg test:db
  *
- * Skipped when `DATABASE_URL` is unset so the unit suite stays hermetic.
+ * `test:db` sets `REQUIRE_DB=1`, so a missing database fails this suite rather
+ * than skipping it. See `./support/db.ts` for why that matters.
+ *
+ * The session-GUC path is asserted here; the access-token path that production
+ * uses is asserted in `claims.integration.test.ts`.
  */
-const URL = process.env.DATABASE_URL;
-const describeDb = URL ? describe : describe.skip;
-
-const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7AAA';
-const BIZ_B = '01HZ8XQN9GZJXV8AKQ5X0C7BBB';
 const NOW = '2026-09-17T12:00:00.000Z';
+const { url, describe } = integrationSuite();
 
-describeDb('row-level security isolates tenants', () => {
+describe('row-level security isolates tenants', () => {
   let sql: postgres.Sql;
 
   beforeAll(async () => {
     // Connects as `xangarro_app`, **not** as a superuser: superusers bypass RLS
     // entirely and `FORCE` does not apply to them, so a test run as `postgres`
     // would pass every assertion while protecting nothing.
-    sql = postgres(URL as string, { max: 1, onnotice: () => undefined });
-    for (const biz of [BIZ_A, BIZ_B]) {
-      await sql`SELECT set_config('xangarro.business_id', ${biz}, false)`;
-      await sql`
-        INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-        VALUES (${biz}, ${'Negocio ' + biz.slice(-3)}, 'RESICO', 125, ${biz}, 'dev', ${NOW}, ${NOW})
-        ON CONFLICT (id) DO NOTHING`;
-      await sql`
-        INSERT INTO notices (id, source, severity, title, body, business_id, created_at, updated_at)
-        VALUES (${'n-' + biz.slice(-3)}, 'operacion', 'info', 'Aviso', 'Cuerpo', ${biz}, ${NOW}, ${NOW})
-        ON CONFLICT (id) DO NOTHING`;
-    }
+    sql = postgres(url as string, { max: 1, onnotice: () => undefined });
+    await seedTwoTenants(sql);
   });
 
   afterAll(async () => {

@@ -1,23 +1,24 @@
-import { afterAll, beforeAll, describe, it } from 'vitest';
+import { afterAll, beforeAll, it } from 'vitest';
 import assert from 'node:assert/strict';
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { lastCortes, lowStock, recentActivity, totalsForRange } from '../src/queries/dashboard.js';
+import { integrationSuite } from './support/db';
 
 /**
  * Query integration (B-04 + the portal's read path).
  *
  * These run against the seeded Taquería Don Pedro through the **app role**, so
- * they exercise the policy as well as the SQL. Requires `pnpm db:up && pnpm db:seed`.
+ * they exercise the policy as well as the SQL. Requires the seed, not just the
+ * schema: `pnpm --filter @xangarro/data-pg db:reset`.
  */
-const URL = process.env.DATABASE_URL;
-const describeDb = URL ? describe : describe.skip;
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
+const { url, describe } = integrationSuite();
 
-describeDb('dashboard queries against real Postgres', () => {
+describe('dashboard queries against real Postgres', () => {
   let db: Db;
   beforeAll(() => {
-    db = createDb(URL as string);
+    db = createDb(url as string);
   });
   afterAll(async () => {
     await (db as unknown as { $client: { end: (o: object) => Promise<void> } }).$client.end({

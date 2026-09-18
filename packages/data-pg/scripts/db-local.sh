@@ -7,7 +7,17 @@
 #
 #   ./scripts/db-local.sh up      # start, create, migrate
 #   ./scripts/db-local.sh down    # remove the container
+#   ./scripts/db-local.sh apply   # migrate a FRESH Postgres someone else
+#                                 # started — CI's service container. Like
+#                                 # `up`, it aborts against an already-migrated
+#                                 # database; locally you want `db:reset`.
 #   ./scripts/db-local.sh url     # print the app-role DATABASE_URL
+#
+# `up` is NOT idempotent: `drizzle/0000_*.sql` has 25 bare `CREATE TABLE`s, so
+# re-applying to a migrated database aborts under `ON_ERROR_STOP=1`. Use
+# `pnpm db:reset` (down, up, seed) rather than re-running `up`. Do not "fix"
+# this by guarding on table existence — that would silently stop applying newly
+# added migrations, which is a worse bug in a script four suites depend on.
 set -euo pipefail
 
 NAME=xangarro-pg
@@ -16,6 +26,18 @@ DB=xangarro
 SUPER_URL="postgres://postgres:xangarro@localhost:${PORT}/${DB}"
 APP_URL="postgres://xangarro_app:xangarro_app@localhost:${PORT}/${DB}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# `local/` before `drizzle/`: the compat layer creates the roles the migrations
+# grant to. CI calls this against its own service container, so both sides run
+# byte-identical SQL in the same order from one place (CLAUDE.md §2.3).
+apply_sql() {
+  for f in "$HERE"/local/*.sql "$HERE"/drizzle/*.sql; do
+    [ -e "$f" ] || continue
+    PGPASSWORD=xangarro PGOPTIONS='-c client_min_messages=warning' \
+      psql -q -h localhost -p "$PORT" -U postgres -d "$DB" \
+      -v ON_ERROR_STOP=1 -f "$f" >/dev/null
+  done
+}
 
 case "${1:-up}" in
   up)
@@ -30,15 +52,12 @@ case "${1:-up}" in
       docker exec "$NAME" pg_isready -U postgres >/dev/null 2>&1 && break
       sleep 1
     done
-    for f in "$HERE"/drizzle/*.sql; do
-      PGPASSWORD=xangarro PGOPTIONS='-c client_min_messages=warning' \
-        psql -q -h localhost -p "$PORT" -U postgres -d "$DB" \
-        -v ON_ERROR_STOP=1 -f "$f" >/dev/null
-    done
+    apply_sql
     echo "ready: $APP_URL"
     ;;
+  apply) apply_sql; echo "applied: $APP_URL" ;;
   down) docker rm -f "$NAME" >/dev/null 2>&1 || true; echo "removed $NAME" ;;
   url)  echo "$APP_URL" ;;
   super-url) echo "$SUPER_URL" ;;
-  *) echo "usage: $0 {up|down|url|super-url}" >&2; exit 1 ;;
+  *) echo "usage: $0 {up|apply|down|url|super-url}" >&2; exit 1 ;;
 esac
