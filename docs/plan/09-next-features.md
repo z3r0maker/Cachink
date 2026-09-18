@@ -26,7 +26,7 @@
 | 3   | Admin v1 modules           | Tenants + licences + Stripe · usage & limit alerts · inbox (support/escalations) · platform flags & kill switches — **launch**. Sync health & devices · broadcast announcements · dormancy lifecycle — **post-launch**. Not built: MRR dashboard (Stripe covers it), impersonation.                                                                                                                                                                                                                                                                                                                                                                 | 063 |
 | 4   | Staff alerts               | Everything lands in the inbox; daily 08:00 digest email; urgent items (payment webhook failure, rejection spike, customer-marked urgent, security event) also go to a Slack/Discord webhook.                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 063 |
 | 5   | Dormant accounts           | Free tier only. No portal login **and** no device sync for 90 d → dormant. Emails at d90 / d150 (with "descarga tus datos"). d180 → full export (Excel + JSON) to a private bucket, rows deleted from Postgres. Archive kept **6 y** (covers CFF art. 30's 5 years counted from the _annual return_, not from inactivity) then purged; held under LFPDPPP 2025 _bloqueo_. "Restaurar mis datos" re-imports. Paying tenants are never dormant. Amends Q9.                                                                                                                                                                                            | 064 |
-| 6   | Limit metrics              | Two: **transactions / month** (ventas + gastos + movimientos de inventario) and **active catalog products**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 065 |
+| 6   | Limit metrics              | Two: **transactions / month** (venta tickets + gastos + manual inventory movements — see OQ-5) and **active catalog products**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 065 |
 | 7   | Limit values               | xangarrito **300 tx / 50 products** · xangarro **10 000 / 1 000** · xangarrote **30 000 / 5 000**. Operators/devices unchanged (1/2/5).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 065 |
 | 8   | Overage                    | **Never block a transaction on any tier.** Warnings at 80 % and 100 % (app + portal banner, owner email). Provider alert (admin inbox) at 100 % and 150 %. Two consecutive months over → "sugerir upgrade" inbox task. Free tier: the **product** cap is hard (51st product refused in the portal). Replaces "block the 51st record".                                                                                                                                                                                                                                                                                                               | 065 |
 | 9   | Usage counting             | Server-authoritative: computed on each push + a nightly job, sent down with the entitlement. The phone only estimates between syncs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 065 |
@@ -44,7 +44,7 @@
 | 21  | Audits                     | Three internal audits (security, DB, performance) are launch blockers. External pentest before `cobrosIntegrados` goes live, then yearly.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | —   |
 | 22  | E2E                        | Deterministic full-stack suite gates CI. A GLM agent explores staging nightly with synthetic data, files bugs to the inbox, never gates.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | —   |
 | 23  | Beta                       | Closed, 10–20 businesses, 4 weeks, production with a Beta badge, free xangarrote then 50 % off 3 months, exit criteria in N-30.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | —   |
-| 24  | App phase 2                | **Design-first** capture redesign in the Claude Design project (shared `@xangarro/tokens`) before the A-01 teardown. Free store app, no in-app purchase (ADR-053, framed per row 25). **QR pairing** with typed-code fallback.                                                                                                                                                                                                                                                                                                                                                                                                                      | —   |
+| 24  | App phase 2                | The phone app **adopts the Track O operator design** (same screens and tokens, 375 px layout); native-only extras (scanner, WhatsApp image, notifications, camera pairing) are design amendments upstream. Free store app, no in-app purchase (row 25). **QR pairing** with typed-code fallback.                                                                                                                                                                                                                                                                                                                                                    | 071 |
 | 25  | Store compliance           | The app is a **business-employee sign-in** tool (App Store 3.1.3(c) framing; Play "consumption-only"). Pairing is "Vincular este dispositivo a tu negocio" — a sign-in, never a "license key" (3.1.1). **Zero upsell in the app:** no plan names, prices, "mejora tu plan" or links to the portal; usage warnings on the phone are neutral and say the owner will be notified. All selling happens in the portal and email. Demo account for review (X-05).                                                                                                                                                                                         | 069 |
 | 26  | CFDI for our subscriptions | **Every payment gets a CFDI** — individual when the customer gave fiscal data, otherwise in the monthly **global "público en general"** CFDI. **Automation is built and wired but switched by `CFDI_MODE = off \| test \| live`**: production starts `off` and the owner issues CFDIs **manually in the SAT portal** for the first customers, driven by an admin "pagos sin CFDI" list; staging runs `test` (Facturapi test keys, never reach SAT). `live` when manual work reaches ~10–15 CFDIs/month or the contador signs off. Supersedes Q15/Z-03.                                                                                              | 070 |
 
@@ -249,7 +249,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-16 · **Open question:** OQ-1
+- [ ] Status · **Blocked by:** N-16, C-20
 - **What:** opening balances so the Balance (NIF B-6) is right on day 1: caja, bancos, cuentas por
   cobrar per cliente, inventory valuation (from stock inicial × costo).
 - **Acceptance:** after import, the portal Balance equals the imported figures; statements tests.
@@ -329,29 +329,33 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### App phase 2
 
-### N-24 Capture-app redesign (design-first) `[LAUNCH]`
+### N-24 Phone app adopts the Track O operator design `[LAUNCH]`
 
-> **Status note 2026-09-17:** A-01…A-18 are already implemented on the unmerged branch
-> `rename/xangarro-stored-ids`, so "before the A-01 teardown" is no longer possible. The redesign
-> becomes a pass over the torn-down capture screens after that branch merges (the owner accepted
-> "design-first"; revisit whether it stays `[LAUNCH]`).
+> **Re-scoped 2026-09-17 (owner decision):** A-01…A-18 are already built on the unmerged branch
+> `rename/xangarro-stored-ids`, and Track O (`10-operador.md`, ADR-071) already carries a finished
+> operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
-- [ ] Status · **Blocked by:** P-22 · **Blocks:** A-01, N-20, N-22, N-25
-- **What:** design, in the Claude Design project and **before** the A-01 teardown, every capture
-  screen: activation (QR-first), operator PIN, Ventas/checkout (with a reserved slot for "Cobrar con
-  tarjeta"), Caja, Gastos, Productos + quick-add, Corte de día, sync pill + banners, receipt share,
-  device Settings. Uses `@xangarro/tokens` so the app and portal read as one product.
-- **How:** same governance as ADR-058 — the design is the spec; conflicts with the architecture stop
-  and ask. Each A-task gets a "design ref" line when its screen lands.
-- **Acceptance:** every screen above exists in the design project and is mirrored under
-  `/design-reference/`.
+- [ ] Status · **Blocked by:** merge of `rename/xangarro-stored-ids`; each Track O screen closed
+      (O-xx) before its phone counterpart starts · **Blocks:** N-20, N-22, N-25
+- **What:** the native app's capture screens (activation, operator NIP, register/ventas, ticket,
+  caja/turno, gastos, productos + quick-add, corte/cierre, sync pill + banners, receipt share,
+  device Configuración) are rebuilt to match the Track O design and `@xangarro/tokens`, so an
+  operator sees the same register on the phone and in the browser.
+- **How:** `design-reference/operador/` is the spec at its 375 px width. Native-only surfaces not in
+  the handoff — barcode scanner, WhatsApp image share (N-21), stock-low notification (A-13), camera
+  activation (N-25) — are added upstream in the Claude Design project first as small amendments
+  (ADR-058 governance: conflicts stop and ask). Screens stay presentational; one screen per task,
+  compared side by side with the design before reporting.
+- **Acceptance:** each phone screen matches its Track O counterpart at 375 px; Maestro flows updated
+  (CLAUDE.md §6).
 
 ### N-25 QR device pairing `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
-  `https://app.xangarro.mx/activar?c=K7M3PQ2X` (custom schemes aren't tappable in WhatsApp; the https
+  `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
+  SEC-DEV-01) (custom schemes aren't tappable in WhatsApp; the https
   link falls back to the store listing). The app's activation screen opens on the camera; a scan
   activates with no other input. "Escribir código" (email + code) remains the fallback.
 - **Store framing (ADR-069):** all copy says **"Vincular este dispositivo a tu negocio"** — a sign-in
@@ -364,12 +368,19 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-26 Security audit `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
   staff token handling; Stripe webhook signature; secrets and service-role isolation (N-05 guard);
   B-17 rate limits; dependency and secret scanning in CI; LFPDPPP aviso de privacidad and ARCO flow.
 - **Output:** `docs/audits/security-YYYY-MM-DD.md`, findings ranked; each critical/high becomes a task
   and blocks launch until fixed.
+- Progress: 2026-09-17 · 317de29 (branch `worktree-agent-a35a775587ea084ce`, unmerged) · first pass
+  `docs/audits/security-2026-09-17.md` (static, ASVS L1; main + N-05/N-33/app branches; `pnpm audit
+--prod`; git-history secret scan clean): 0 critical, 6 high, 8 medium, 11 low. Decided from it:
+  QR long token + `/activate` limiter (C-14, B-17), billing role instead of service role (B-10,
+  ADR-063), aviso + ARCO (N-34). Backend highs (session expiry SEC-AUTH-01, login hardening
+  SEC-AUTH-02, Data API exposure SEC-DATA-01) belong to Track B. **Still to do:** pre-launch re-run
+  on hosted B-01 with the built sync, register and webhooks; live rate-limit and PostgREST tests.
 
 ### N-27 Database audit `[LAUNCH]`
 
@@ -430,6 +441,18 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   employees (3.1.3(c)); operators sign in with a code issued by their employer; no digital content is
   sold in the app." Demo account `DEMOK7M3` kept live (2.1). Play: declare no in-app purchases.
 - **Acceptance:** the CI check is green; a reviewer checklist is attached to X-05.
+
+### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
+
+- [ ] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
+- **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
+  an aviso de privacidad (integral on the landing and portal footer, simplified at signup and in the
+  app's sign-in) covering purposes, transfers (Supabase, Vercel, Stripe, PAC, Sentry), the ADR-064
+  dormancy archive and 6-year _bloqueo_, and ARCO rights; an ARCO request form in the portal that files
+  an inbox item (`kind=arco`) with the legal clock (answer in 20 days, execute within 15 more); consent
+  capture versioned per aviso version. Text reviewed by counsel.
+- **Acceptance:** aviso reachable from every surface; an ARCO request creates an inbox item with its
+  due dates; consent version stored per user.
 
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
@@ -599,9 +622,11 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ## 4. Open questions (not decided in the interview)
 
-- **OQ-1 Saldos iniciales shape.** A new portal-only `opening_balances` entity, or a dated
-  "apertura" entry in existing tables? The latter touches transactional tables (ADR-058 §2) — needs a
-  decision before N-17.
+- ~~OQ-1 Saldos iniciales shape~~ — **closed 2026-09-17:** a new **DOWN** entity `opening_balances`
+  (header: fecha de apertura, caja, bancos; lines: saldo inicial per cliente; inventory valuation =
+  stock inicial × costo), written only by the portal, synced to devices so ADR-074's single
+  receivables calculator adds the cliente's opening balance as a third fact. Statements use it as the
+  starting Balance. Editable until the first period closes. Contract task C-20.
 - ~~OQ-2 WhatsApp on iOS~~ — **closed 2026-09-17:** verified, decided in row 13 / N-21.
 - ~~OQ-3 Clip terminal API~~ — **closed 2026-09-17:** public PinPad API exists, with per-device install
   and no OAuth (row 12, N-40, N-53).
@@ -610,9 +635,10 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 - **OQ-6 Apple review outcome.** ADR-069 is our most defensible reading, not a guarantee; a rejection
   would force the StoreKit option. Mitigation: submit a TestFlight external build early (X-05) to get a
   review signal before launch week.
-- **OQ-5 Transactions definition edge cases.** Do cancelaciones, corte de día and caja movimientos
-  count toward the monthly transaction limit? Proposed: no — only ventas, gastos and inventory
-  movements.
+- ~~OQ-5 Transactions definition~~ — **closed 2026-09-17:** one per **venta ticket** (ADR-073 header,
+  not per line), one per **gasto**, one per **manual inventory movement** (entrada / ajuste / merma).
+  Not counted: cancellations, corte de día, caja movements and turnos, abonos, operator messages,
+  stock changes generated by a sale. Applies to N-02 and C-12.
 
 ---
 
@@ -630,7 +656,7 @@ N-05 admin ──► N-06 … N-10, N-18, N-46 … N-48
 N-11 parity ──► A-01, N-12 ──► N-13, N-14, N-15
 P-07 ──► N-16 ──► N-17, N-18
 N-19 ──► N-20 ──► N-21
-N-24 app design ──► A-01, N-20, N-22, N-25
+app-branch merge + Track O screens ──► N-24 ──► N-20, N-22, N-25
 N-26, N-27, N-28, N-29 ──► N-30 beta ──► X-10
 N-24, A-15 ──► N-32 ──► X-05 · B-10 ──► N-33 ──► N-30
 N-30 ──► N-40 ──► N-41 ──► N-42, N-43, N-53 ──► N-45 ──► N-44

@@ -13,7 +13,7 @@
 
 ### A-01 Screen teardown (ADR-053 §3)
 
-> **Amended 2026-09-17 by Track N:** blocked additionally by N-11 (portal settings parity) and N-24 (design-first app redesign).
+> **Amended 2026-09-17 by Track N:** blocked additionally by N-11 (portal settings parity). _(The N-24 dependency was dropped 2026-09-17: A-01 was already built; N-24 now restyles the torn-down screens to the Track O design.)_
 
 - [ ] Status · **Blocked by:** F-04, F-07 · **Blocks:** A-03, A-09, A-12, A-15
 - **Context:** 33 screen folders in `packages/ui/src/screens`. Leaving the app: `Estados, DirectorHome, Wizard, CloudOnboarding, Telemetria, BusinessForm, Otros, UserManagement, FuncionesNegocio, CajaReportes, DirectorSetup, MermaReportes, Notificaciones, RolePicker, LanPairing`. Their **domain** logic stays (portal reuses it); only UI + routes go. Per the user's preference for recoverability, move rather than delete.

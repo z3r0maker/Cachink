@@ -4710,6 +4710,10 @@ needs, not support-volume needs.
   TOTP 2FA (AAL2) is mandatory; every mutation writes `staff_audit_log`.
 - The Supabase service-role key exists only in this project. A CI check fails if
   it is referenced under `apps/portal`.
+- Portal-side privileged writes (the Stripe webhook, B-10) use a dedicated
+  least-privilege Postgres role (`xangarro_billing`: billing tables plus one
+  SECURITY DEFINER entitlement function), never the service role — confirmed
+  after the N-26 audit (SEC-SEC-01), 2026-09-17.
 - v1 at launch: tenants + licences + Stripe, usage and capacity, inbox, platform
   flags. Post-launch: sync health, broadcasts, dormancy.
 - Staff alerts: inbox for everything, a daily 08:00 digest email, and a
@@ -5396,3 +5400,60 @@ there.
   outright and invites more.
 - *Amend the design to `yellowDeep` or black.* Changes the look; the designer's
   call, not ours.
+
+---
+
+## ADR-078
+
+**Title:** The sync cursor is a per-tenant counter taken under a row lock; pull pages one ordered stream; UP rows get receipts, not log entries
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — B-08, B-09; closes audit findings DB-SYNC-01, -03, -04, -05 and DB-TYPE-01
+
+**Context**
+
+`sync_log.seq` was a global identity column, assigned at INSERT, not at commit.
+Two writers could take 5 and 6, commit 6 first, and a pull serving `max(seq)`
+would hand out 6 — the device then never pulls 5. The DB audit reproduced this,
+and `/activate` already served `max(seq)`. The planned pull also paged each table
+to 5 000 rows and served "the max returned", which skips rows whenever two tables
+truncate at different seqs, and logging every pushed UP row would make each pull
+scan past other phones' sales.
+
+**Decision**
+
+1. **`sync_cursors`**: one row per tenant, incremented with `INSERT … ON CONFLICT
+   DO UPDATE … RETURNING`. The row lock lasts until commit, so within a tenant
+   seqs commit in order, and a reader serving the *committed* counter can never
+   serve a cursor above an in-flight row. `sync_log.seq` becomes `bigint`, keyed
+   `(business_id, seq)`. Existing seqs are kept and each counter starts at its
+   tenant's maximum.
+2. **Pull reads the cursor first**, then the rows: a write landing in between is
+   sent twice (harmless), never zero times. `since = 0` is the full reference set;
+   otherwise the page is the first N log entries in seq order, and a truncated
+   page's cursor is its last seq.
+3. **`sync_log` holds DOWN and HYBRID changes only.** A pushed UP row gets a
+   `sync_receipts` row (its serverSeq and accepted version), which answers the
+   idempotent re-push and feeds `devices.acknowledged_through`.
+4. **Each pushed row runs in a savepoint, on the savepoint's own handle.** An id
+   owned by another tenant surfaces as RLS 42501 (upsert) or as an invisible
+   existing row (HYBRID insert); both become `DUPLICATE_CONFLICT`.
+
+**Alternatives considered**
+
+- *Cap the served cursor below the oldest in-flight xid (`pg_snapshot_xmin`).*
+  No write serialisation, but the cap is global, so one slow tenant would stall
+  every tenant's cursor, and the reasoning is harder to test.
+- *`pg_advisory_xact_lock` per tenant.* Same serialisation, but the counter
+  would still need a home, and a row lock on it is the lock.
+
+**Consequences**
+
+- Writers for one business are serialised for the length of their transaction.
+  A micro-business has a handful of phones; if that ever shows, allocate a block
+  of seqs per batch.
+- Push's top-level `serverSeq` is informational. The phone must take its pull
+  cursor from pull responses only (recorded in B-08 for A-06).
+- The contract has no `hasMore`; the phone pulls again while a pull returns rows
+  until C-04 is amended.

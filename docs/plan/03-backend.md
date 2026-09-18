@@ -158,20 +158,41 @@
 
 ### B-08 `POST /api/v1/sync/push`
 
-- [ ] Status · **Blocked by:** C-03, C-06, C-10, B-03, B-05 · **Blocks:** A-06 (real), P-11, X-02
+- [x] Status · **Blocked by:** C-03, C-06, C-10, B-03, B-05 · **Blocks:** A-06 (real), P-11, X-02
+  - Done 2026-09-17 (ADR-078). The rules are `ApplyPushUseCase` in `@xangarro/application` (12
+    tests over an in-memory store that, like Postgres, refuses writes outside the row's savepoint);
+    Postgres is `server/sync/pg-push-store.ts`. The contract's `sync.test.ts` passes **in full
+    against the real portal**, and `e2e/sync.spec.ts` covers what conformance cannot: money stored
+    in centavos, a rejection shown on Sincronización, a HYBRID client reaching a second phone, and
+    both cross-tenant paths → `DUPLICATE_CONFLICT` (audit DB-SYNC-05).
+  - Found on the way: with postgres-js a savepoint only isolates statements run on **its own**
+    handle — the first run lost a whole batch to one bad row. And the cloud keyed `monto_centavos`
+    as `montoCentavos` on `sales`/`expenses` while the device says `monto`; drift now compares
+    property keys, not only column names.
+  - Push's top-level `serverSeq` is the tenant cursor at commit and is **informational**: UP rows
+    are not in the pull stream, so A-06 must take its pull cursor from pull responses only.
 - **Files:** `apps/portal/src/app/api/v1/sync/push/route.ts` → `packages/application/src/use-cases/apply-push.ts` + `packages/data-pg/src/repositories/sync-push-repository.ts`.
 - **Steps:** per delta: scope check (`isPushable`), zod row validation, `business_id === token.business_id`, FK checks (product/user/client exist in that business) → upsert `ON CONFLICT (id) DO UPDATE` **only if** existing `business_id` matches (else `DUPLICATE_CONFLICT`) → append `sync_log` → collect `server_seq`. Rejections → `sync_rejections` (upsert by `(device_id, table_name, row_id)` so a retry updates instead of duplicating) and returned. Process in one transaction per batch but **never** abort the batch for a per-row failure (use savepoints per row). Update `devices.last_push_at`.
 - **Acceptance:** application tests: all accepted; one FK missing → that row rejected, others accepted; hybrid update → rejected; business mismatch → rejected non-retryable; re-push same rows → same `server_seq`. Conformance green.
 
 ### B-09 `GET /api/v1/sync/pull`
 
-- [ ] Status · **Blocked by:** C-04, C-06, B-03, B-05, B-06 · **Blocks:** A-06 (real), X-02
+- [x] Status · **Blocked by:** C-04, C-06, B-03, B-05, B-06 · **Blocks:** A-06 (real), X-02
+  - Done 2026-09-17 (ADR-078). Serves the **committed** per-tenant cursor, read before the tables
+    (DB-SYNC-01; `/activate` no longer serves `max(seq)`). Pages **one ordered stream** of
+    `sync_log` rather than 5 000 per table (DB-SYNC-04); a truncated page's `serverSeq` is its last
+    seq, shown by a 5 050-entry backlog arriving in two pulls. `acknowledgedThrough` is stored on
+    the device row. **Still open:** a `hasMore` flag needs a C-04 amendment; until then the phone
+    pulls again while a pull returns rows.
 - **Steps:** for each DOWN + HYBRID table: rows where `business_id = token.business_id AND server_seq > since` (limit 5 000 per table; if truncated set `server_seq` to the max returned so the app pages). `acknowledged_through` = `MAX(server_seq) FROM sync_log WHERE device_id = token.device_id`. Include current signed entitlement and tenant `feature_flags` (from `businesses.feature_flags JSONB`). Update `devices.last_pull_at`.
 - **Acceptance:** tests: since=0 returns everything; since=N returns only newer incl. tombstones; `acknowledged_through` correct after a push; paging when > 5 000. Conformance green.
 
 ### B-10 Stripe: products/prices, Checkout session, webhook, subscription state machine
 
-> **Amended 2026-09-17 by Track N:** annual prices and a 14-day trial on **both** paid tiers with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
+> **Amended 2026-09-17 by Track N:** the webhook connects as a dedicated least-privilege Postgres role `xangarro_billing` (billing tables +
+> one SECURITY DEFINER entitlement function) — **never the service-role key in the portal** (ADR-063,
+> N-26 SEC-SEC-01; also amends B-01's env list). Annual prices and a 14-day trial on **both** paid tiers
+> with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
 
 - [ ] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
 - **Steps:**
@@ -226,6 +247,10 @@
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 
 ### B-17 Rate limiting + protocol check middleware
+
+> **Amended 2026-09-17 (N-26 audit, SEC-DEV-01):** `/activate` is rate-limited per IP and per
+> code/QR token **before** any device token exists (5 failures / 15 min → 15-min lockout), with one
+> generic error. See C-14.
 
 - [ ] Status · **Blocked by:** B-05
 - **Steps:** `X-Xangarro-Protocol` check → `426`; per-device token bucket (60/min) in Postgres or Upstash (prefer Postgres `billing.rate_limits` to avoid a new vendor at this size); `429` + `Retry-After`.

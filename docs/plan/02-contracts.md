@@ -305,13 +305,19 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
   `PAYMENTS_NOT_ENTITLED`, `PROVIDER_UNAVAILABLE` retryable).
 - **Acceptance:** zod schemas + mock scenarios `pay-approve|pay-decline|pay-timeout`; conformance tests.
 
-### C-14 QR activation (email optional)
+### C-14 QR activation with a long single-use token
 
-- [ ] Status · **Surfaced by:** N-25 · **Blocks:** N-25, A-04
-- **Steps:** `/activate` request: `email` becomes optional when `via: 'qr'`; the code alone
-  identifies the business. Document the universal link `https://app.xangarro.mx/activar?c=<code>`.
-  Rate limit per IP unchanged (B-17).
-- **Acceptance:** conformance tests for both paths; used/expired code errors unchanged.
+- [ ] Status · **Surfaced by:** N-25; **amended 2026-09-17 by the N-26 security audit (SEC-DEV-01)** ·
+      **Blocks:** N-25, A-04
+- **Steps:** "Agregar dispositivo" mints, alongside the 8-character code, a **QR token** of ≥ 128
+  random bits (base64url, ~22 chars), single-use, same 48 h expiry, stored hashed. `/activate` accepts
+  either `{ email, code }` (typed path, unchanged) or `{ qrToken }` (scan path — no email). The
+  universal link is `https://app.xangarro.mx/activar?t=<qrToken>`; the 8-character code is never put
+  in a URL or QR. Both paths return **one generic error** for any wrong code/email/token combination
+  (no `EMAIL_MISMATCH` oracle). Rate limit (B-17 amendment): per IP and per code/token — 5 failed
+  attempts per 15 min, then a 15-min lockout — applied **before** a device token exists.
+- **Acceptance:** conformance tests for both paths, the generic error, and the limiter; used/expired
+  token errors.
 
 ### C-15 Business branding and contact columns on the `businesses` DOWN table
 
@@ -351,3 +357,15 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 - **Steps:** `mensajes_operador` (DOWN) and `respuestas_operador` (UP) in `scope.ts`, wire schemas,
   pg-core and SQLite.
 - **Acceptance:** CLAUDE.md §11 checklist; a message pulled, a reply pushed.
+
+### C-20 `opening_balances` DOWN table (saldos iniciales)
+
+- [ ] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+- **Steps:** new DOWN entities `opening_balances` (id, business_id, fecha_apertura, caja_centavos,
+  bancos_centavos, locked_at nullable, updated_at) and `opening_balance_clients` (id, business_id,
+  cliente_id, saldo_centavos, updated_at); add both to `DOWN_TABLES` in `scope.ts`; pg-core + SQLite
+  schemas, migrations with old→new tests (CLAUDE.md §2.9); the ADR-074 receivables calculator takes the
+  opening per-cliente balance as a third input. Inventory valuation is derived (stock inicial × costo),
+  not stored. Rows become read-only once `locked_at` is set (first period close).
+- **Acceptance:** conformance tests for pull of both tables; receivables calculator tests with an
+  opening balance; drift test green.
