@@ -14,7 +14,7 @@ import {
 } from '@/components';
 import type { ProductosData } from '@/server/screens';
 
-import { catalogoColumns, MOV_COLUMNS } from './columns';
+import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
 
 export type Producto = ProductosData['catalogo'][number];
@@ -100,19 +100,19 @@ export function Chips({
 
 export function CatalogoTable({
   rows,
-  onEdit,
+  onAction,
 }: {
   readonly rows: readonly Producto[];
   /** `null` for a viewer: the affordance is hidden, not disabled. */
-  readonly onEdit: ((p: Producto) => void) | null;
+  readonly onAction: OnRowAction;
 }) {
   return (
     <DataTable
       caption="Catálogo"
-      columns={catalogoColumns(onEdit)}
+      columns={catalogoColumns(onAction)}
       rows={rows}
       rowKey={(p) => p.id}
-      minWidth={onEdit === null ? 860 : 960}
+      minWidth={onAction === null ? 860 : 1060}
       footer={<span>Mostrando {rows.length} productos</span>}
     />
   );

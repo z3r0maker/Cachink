@@ -143,12 +143,15 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ## §8 Table scope
 
-| Direction                                              | Tables                                                                                                                                                                                            |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UP** (device → cloud, insert + update)               | `sales`, `expenses`, `inventory_movements`, `caja_turnos`, `caja_movimientos`, `cancelacion_logs`, `day_closes`, `client_payments`, `entregas_credito`†, `conversions`†, `auditorias_inventario`† |
-| **HYBRID** (insert up; updates portal-only, flow down) | `products`, `clients`                                                                                                                                                                             |
-| **DOWN** (cloud → device only)                         | `businesses`, `users`, `employees`, `recurring_expenses`, `conversion_recetas`†, `feature_flags` (virtual), entitlement (virtual)                                                                 |
-| **Never synced**                                       | `app_config` (device settings), `director_alerts` (dead), `__cachink_change_log` / sync state                                                                                                     |
+> **Amended 2026-09-18 (ADR-081):** `inventory_movements` moved from UP to HYBRID and joined
+> `ReferenceTablesSchema` (default `[]`).
+
+| Direction                                              | Tables                                                                                                                                                                     |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UP** (device → cloud, insert + update)               | `sales`, `expenses`, `caja_turnos`, `caja_movimientos`, `cancelacion_logs`, `day_closes`, `client_payments`, `entregas_credito`†, `conversions`†, `auditorias_inventario`† |
+| **HYBRID** (insert up; updates portal-only, flow down) | `products`, `clients`, `inventory_movements` (never updated)                                                                                                               |
+| **DOWN** (cloud → device only)                         | `businesses`, `users`, `employees`, `recurring_expenses`, `conversion_recetas`†, `feature_flags` (virtual), entitlement (virtual)                                          |
+| **Never synced**                                       | `app_config` (device settings), `director_alerts` (dead), `__cachink_change_log` / sync state                                                                              |
 
 † dormant (flag off in v1) but in scope so no protocol change is needed later.
 

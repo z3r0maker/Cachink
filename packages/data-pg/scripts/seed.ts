@@ -103,7 +103,7 @@ async function seedMovements(sql: Sql): Promise<void> {
     await sql`
       INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
                                        costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${productoId}, ${fecha}, ${tipo}, ${cantidad}, ${costo}, 'Compra',
+      VALUES (${id}, ${productoId}, ${fecha}, ${tipo}, ${cantidad}, ${costo}, 'Compra a proveedor',
               ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
   }

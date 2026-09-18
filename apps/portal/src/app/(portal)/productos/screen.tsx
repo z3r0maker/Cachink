@@ -7,7 +7,9 @@ import { useSession } from '@/session/provider';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
+import type { OnRowAction } from './columns';
 import { EditProductDialog } from './edit-dialog';
+import { MovimientoDialog } from './movimiento-dialog';
 import {
   CatalogoTable,
   Chips,
@@ -85,13 +87,13 @@ function Body({
   rows,
   movimientos,
   error,
-  onEdit,
+  onAction,
 }: {
   readonly isCatalogo: boolean;
   readonly rows: readonly Producto[];
   readonly movimientos: readonly Movimiento[];
   readonly error: boolean;
-  readonly onEdit: ((p: Producto) => void) | null;
+  readonly onAction: OnRowAction;
 }) {
   return (
     <ScreenBody
@@ -102,7 +104,11 @@ function Body({
         body: 'Agrega tu primer producto o impórtalos desde Excel.',
       }}
     >
-      {isCatalogo ? <CatalogoTable rows={rows} onEdit={onEdit} /> : <MovTable rows={movimientos} />}
+      {isCatalogo ? (
+        <CatalogoTable rows={rows} onAction={onAction} />
+      ) : (
+        <MovTable rows={movimientos} />
+      )}
     </ScreenBody>
   );
 }
@@ -112,6 +118,7 @@ export function ProductosScreen({ data }: { readonly data: ProductosData | null 
   const [tab, setTab] = useState('catalogo');
   const [filter, setFilter] = useState('Todos');
   const [editing, setEditing] = useState<Producto | null>(null);
+  const [moving, setMoving] = useState<Producto | null>(null);
   const mayWrite = canWrite(session.role);
 
   const catalogo = data?.catalogo ?? [];
@@ -139,9 +146,10 @@ export function ProductosScreen({ data }: { readonly data: ProductosData | null 
         rows={rows}
         movimientos={data?.movimientos ?? []}
         error={data === null}
-        onEdit={mayWrite ? setEditing : null}
+        onAction={mayWrite ? (p, a) => (a === 'editar' ? setEditing(p) : setMoving(p)) : null}
       />
       <EditProductDialog producto={editing} onClose={() => setEditing(null)} />
+      <MovimientoDialog producto={moving} onClose={() => setMoving(null)} />
     </>
   );
 }

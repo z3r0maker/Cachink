@@ -518,6 +518,11 @@ without touching code.
 > **Amended 2026-09-18 (ADR-080):** the portal may create products («Nuevo producto» and the Excel
 > import); they reach phones through `sync_log`. Phones still only insert them (HYBRID).
 
+> **Amended 2026-09-18 (ADR-081):** products created in the portal start at **zero stock** — no
+> `stock_inicial` in the create sheet or the import template. Stock is added with a movement:
+> «Movimiento» on each catalogue row records an entrada/salida (done 2026-09-18, reaches every phone;
+> Movimientos is no longer read-only).
+
 > **Amended 2026-09-17 by Track N:** the import steps are generalised into a template registry with Clientes and Saldos iniciales (N-16, N-17) and a free-tier 50-product cap (N-04).
 
 > **Wired to Postgres 2026-09-17.** The container/screen split is real, not

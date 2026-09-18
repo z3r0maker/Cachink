@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import { afterAll, beforeAll, it } from 'vitest';
-import { EmployeeSchema, ProductSchema } from '@xangarro/domain';
+import { EmployeeSchema, InventoryMovementSchema, ProductSchema } from '@xangarro/domain';
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { listProductos } from '../src/queries/lists.js';
-import { products } from '../src/schema/catalog.js';
+import { inventoryMovements, products } from '../src/schema/catalog.js';
 import { employees } from '../src/schema/tenant.js';
 import { integrationSuite } from './support/db';
 
@@ -90,6 +90,27 @@ describe('the seed satisfies the domain schemas', () => {
       .filter((r) => !r.parsed.success)
       .map((r) => `${r.id}: ${r.parsed.error?.issues.map((i) => i.path.join('.')).join(', ')}`);
 
+    assert.deepEqual(failures, []);
+  });
+
+  it('every seeded movement parses as a domain InventoryMovement', async () => {
+    // Added when movements joined the bootstrap (ADR-081): the seed's
+    // `'Compra'` is not an entry reason, so the first activation that sent
+    // movements failed its own response check.
+    const rows = await withBusiness(db, BIZ, (tx) => tx.select().from(inventoryMovements));
+    assert.ok(rows.length > 0, 'the seed must have run');
+    const failures = rows
+      .map((row) => ({
+        id: row.id,
+        parsed: InventoryMovementSchema.safeParse({
+          ...row,
+          createdAt: new Date(row.createdAt).toISOString(),
+          updatedAt: new Date(row.updatedAt).toISOString(),
+          deletedAt: row.deletedAt === null ? null : new Date(row.deletedAt).toISOString(),
+        }),
+      }))
+      .filter((r) => !r.parsed.success)
+      .map((r) => `${r.id}: ${r.parsed.error?.issues.map((i) => i.path.join('.')).join(', ')}`);
     assert.deepEqual(failures, []);
   });
 

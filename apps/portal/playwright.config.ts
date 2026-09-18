@@ -119,6 +119,9 @@ export default defineConfig({
       name: 'sync',
       dependencies: ['desktop', 'laptop', 'tablet'],
       testMatch: /sync\.spec\.ts/,
+      // One file at a time: each activates phones on Taquería, which has two
+      // device slots, and revokes the previous file's.
+      workers: 1,
       use: { ...devices['Desktop Chrome'], storageState: OWNER_STORAGE },
     },
   ],

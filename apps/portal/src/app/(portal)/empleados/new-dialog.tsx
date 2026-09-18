@@ -5,6 +5,7 @@ import { useState, useTransition } from 'react';
 
 import { Button, ConfirmDialog, Input } from '@/components';
 import { crearEmpleado } from '@/server/actions/empleados';
+import { pesosToCentavos } from '@/lib/money';
 
 type Periodo = 'semanal' | 'quincenal' | 'mensual';
 
@@ -16,21 +17,6 @@ interface Draft {
 }
 
 const EMPTY: Draft = { nombre: '', puesto: '', salario: '', periodo: 'semanal' };
-
-/**
- * Pesos in, centavos out.
- *
- * The shopkeeper types `2100.50`; the column is integer centavos (CLAUDE.md
- * §2.8). Rounding at this boundary is the only place a float is allowed to
- * exist, and it stops existing immediately. Rejects anything that is not a
- * plain positive amount rather than coercing it — `Number('')` is 0, and a
- * silent zero salary is worse than a refusal.
- */
-export function pesosToCentavos(input: string): number | null {
-  const trimmed = input.trim().replace(/,/g, '');
-  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null;
-  return Math.round(Number.parseFloat(trimmed) * 100);
-}
 
 function useNuevoEmpleado(onClose: () => void) {
   const [draft, setDraft] = useState<Draft>(EMPTY);

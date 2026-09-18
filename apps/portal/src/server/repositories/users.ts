@@ -6,6 +6,7 @@ import { newUlid, type BusinessId, type User, type UserId } from '@xangarro/doma
 import type { CreateUserInput, UserPatch, UsersRepository } from '@xangarro/data';
 
 import type { Tx } from '../db';
+import { PORTAL_DEVICE_ID } from './portal-device';
 import { recordChange } from './sync-log';
 
 /**
@@ -17,9 +18,6 @@ import { recordChange } from './sync-log';
  * `businessId` is never used as a filter; and every write appends to
  * `sync_log`, because `users` is a DOWN table every phone pulls.
  */
-
-/** Rows created in the portal have no originating phone (see `empleados.ts`). */
-const PORTAL_DEVICE_ID = '01HZ8XQN9GZJXV8AKQ5X0WEB01';
 
 const iso = (t: string | null): string | null => (t === null ? null : new Date(t).toISOString());
 

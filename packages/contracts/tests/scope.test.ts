@@ -39,6 +39,12 @@ describe('table scope', () => {
     assert.equal(isPushable('products', 'update'), false);
   });
 
+  it('inventory movements flow to every phone: pushed as inserts, never updated, pulled (ADR-081)', () => {
+    assert.equal(isPushable('inventory_movements', 'insert'), true);
+    assert.equal(isPushable('inventory_movements', 'update'), false);
+    assert.equal(isPullable('inventory_movements'), true);
+  });
+
   it('down-only tables are never pushable and up-only tables are never pullable', () => {
     assert.equal(isPushable('users', 'insert'), false);
     assert.equal(isPullable('sales'), false);

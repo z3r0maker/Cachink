@@ -26,10 +26,14 @@ export class RegistrarMovimientoInventarioUseCase implements UseCase<
   NewInventoryMovement,
   InventoryMovement
 > {
-  readonly #movements: InventoryMovementsRepository;
-  readonly #expenses: ExpensesRepository;
+  readonly #movements: Pick<InventoryMovementsRepository, 'create'>;
+  readonly #expenses: Pick<ExpensesRepository, 'create'>;
 
-  constructor(movements: InventoryMovementsRepository, expenses: ExpensesRepository) {
+  /** Only `create` of each: the portal (ADR-081) implements no more than it uses. */
+  constructor(
+    movements: Pick<InventoryMovementsRepository, 'create'>,
+    expenses: Pick<ExpensesRepository, 'create'>,
+  ) {
     this.#movements = movements;
     this.#expenses = expenses;
   }

@@ -11,19 +11,26 @@ import { isLow, type Movimiento, type Producto } from './parts';
  * because `viewer` must not see the affordance at all — gating hides rather
  * than disables (`session/gating.ts`), and the server rejects regardless.
  */
-export function catalogoColumns(
-  onEdit: ((p: Producto) => void) | null,
-): readonly ColumnDef<Producto>[] {
-  if (onEdit === null) return CATALOGO_COLUMNS;
+/** What a row can ask for; the screen owns the dialogs. */
+export type RowAction = 'editar' | 'movimiento';
+export type OnRowAction = ((p: Producto, action: RowAction) => void) | null;
+
+export function catalogoColumns(onAction: OnRowAction): readonly ColumnDef<Producto>[] {
+  if (onAction === null) return CATALOGO_COLUMNS;
   return [
     ...CATALOGO_COLUMNS,
     {
       key: 'acciones',
       header: 'Acciones',
       render: (p) => (
-        <Button size="sm" variant="secondary" onClick={() => onEdit(p)}>
-          Editar
-        </Button>
+        <span style={{ display: 'flex', gap: 8 }}>
+          <Button size="sm" variant="secondary" onClick={() => onAction(p, 'editar')}>
+            Editar
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => onAction(p, 'movimiento')}>
+            Movimiento
+          </Button>
+        </span>
       ),
     },
   ];

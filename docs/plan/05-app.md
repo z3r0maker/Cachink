@@ -65,6 +65,10 @@
 
 ### A-06 Cloud outbox: `packages/sync` (retarget the change-log + push queue)
 
+> **Amended 2026-09-18 (ADR-081):** `inventory_movements` is HYBRID. Pull brings every phone's
+> and the portal's movements, the phone's own included; apply them idempotently by id and recompute
+> stock from the merged set. Updates to movements are rejected (`HYBRID_UPDATE_FORBIDDEN`).
+
 - [ ] Status · **Blocked by:** F-03, C-03, C-04, C-06, C-09 · **Blocks:** A-07, A-08, A-11, A-16
 - **Context:** Reuse `packages/data/src/sync-state.ts` (`__cachink_change_log`, HWM) and the design of `packages/sync-lan/src/client/push-queue.ts`, fixing its defects (README §6). New package so `sync-lan` stays untouched.
 - **Files:** `packages/sync/{package.json,src/push.ts,src/pull.ts,src/coalesce.ts,src/status.ts,src/backoff.ts,src/orchestrator.ts,src/index.ts,tests/*}`; `packages/data/src/schema/sync-row-status.ts` (new table `__sync_row_status {table_name, row_id, status pending|accepted|rejected, server_seq, code, message, retryable, attempts, last_attempt_at, PK(table_name,row_id)}` — migration in A-17); `packages/data` triggers unchanged.

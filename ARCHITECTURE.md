@@ -5553,3 +5553,49 @@ through SECURITY DEFINER functions with a pinned `search_path` (as 0002).
 - B-14 (transactional email) now carries the sign-in link and reset templates.
 - ADR-061's provider-neutrality note is settled in favour of our own issuer; the
   Supabase claim shape stays, because RLS reads it.
+
+---
+
+## ADR-081
+
+**Title:** Inventory movements flow to every phone (UP → HYBRID); the portal records movements; portal-created products start at zero stock
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends contract §8, ADR-058 §2 (Movimientos no longer read-only) and P-07
+
+**Context**
+
+Phones do not store stock; they sum `inventory_movements`. The table was UP
+(phone → cloud only), so a phone only ever summed its **own** movements: with
+two phones, each showed stock missing the other's sales and entradas, and a
+movement recorded in the portal could never reach any phone. The owner also
+wanted the portal to record stock (entradas, mermas, ajustes), and decided that
+products created in the portal start at zero rather than carrying an initial
+stock.
+
+**Decision**
+
+1. `inventory_movements` moves from `UP_TABLES` to `HYBRID_TABLES`: phones and
+   the portal insert; nobody updates (a movement is never edited, only
+   recorded); every insert is logged and pulled by every phone. The bootstrap
+   (`/activate`, `since = 0`) sends every live movement, so a new phone's stock
+   is right from the first pull. `ReferenceTablesSchema` gains
+   `inventory_movements` (default `[]`, so older servers still parse).
+2. The portal records movements per product («Movimiento» on a catalogue row)
+   through `RegistrarMovimientoInventarioUseCase`, the phone's own. Salidas
+   leave out «Venta»: sales come from phones, with a ticket.
+3. The entrada's "Compra inventario" expense stays UP-scoped (cloud-side):
+   phones capture expenses, the portal reports them.
+4. Products created in the portal (ADR-080) start at stock 0; the import
+   template has no `stock_inicial`. Stock is added with a movement.
+
+**Consequences**
+
+- Track A (A-06): the phone must apply pulled movements idempotently by id —
+  its own come back too — and recompute stock from the merged set.
+- The activation payload grows with the movement history. Fine for a micro
+  business; if it ever is not, page the bootstrap through `/sync/pull`.
+- Found on the way: the seed's entradas used the motivo `'Compra'`, which is not
+  an entry reason; the first bootstrap that carried movements failed its own
+  response check. The seed-contract test now parses every seeded movement.

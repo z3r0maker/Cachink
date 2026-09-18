@@ -7,7 +7,6 @@
 export const UP_TABLES = [
   'sales',
   'expenses',
-  'inventory_movements',
   'caja_turnos',
   'caja_movimientos',
   'cancelacion_logs',
@@ -18,8 +17,15 @@ export const UP_TABLES = [
   'auditorias_inventario',
 ] as const;
 
-/** Insert up only; every edit is portal-only and flows down. */
-export const HYBRID_TABLES = ['products', 'clients'] as const;
+/**
+ * Inserted by phones **and** the portal; every insert flows down to every
+ * phone; edits are portal-only (products, clients) or never happen (movements).
+ *
+ * `inventory_movements` moved here from UP (ADR-081): phones compute stock by
+ * summing movements, so a movement only one phone had — another phone's sale,
+ * or an entrada recorded in the portal — left every other phone's stock wrong.
+ */
+export const HYBRID_TABLES = ['products', 'clients', 'inventory_movements'] as const;
 
 /** Cloud → device only. */
 export const DOWN_TABLES = [

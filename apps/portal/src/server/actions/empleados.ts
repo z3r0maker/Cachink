@@ -8,6 +8,7 @@ import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { recordChange } from '../repositories/sync-log';
 import { reportError } from '../observability/report';
+import { PORTAL_DEVICE_ID } from '../repositories/portal-device';
 
 /**
  * Add an employee to the payroll roster.
@@ -22,19 +23,11 @@ import { reportError } from '../observability/report';
  * database would happily accept `periodo: 'Semanal'` — which is exactly how the
  * seed came to hold rows its own domain rejected.
  */
-/**
- * "Created in the portal, not on a device."
- *
- * A valid ULID so it satisfies the domain, and a fixed, greppable one so a row
- * that never came from a phone is obvious in the data rather than looking like
- * a device nobody can find.
- */
-const PORTAL_DEVICE_ID = '01HZ8XQN9GZJXV8AKQ5X0WEB01';
 
 export interface NuevoEmpleado {
   readonly nombre: string;
   readonly puesto: string;
-  readonly salarioCentavos: number;
+  readonly salarioCentavos: bigint;
   readonly periodo: 'semanal' | 'quincenal' | 'mensual';
 }
 
@@ -50,7 +43,7 @@ export async function crearEmpleado(input: NuevoEmpleado): Promise<CreateResult>
       id,
       nombre: input.nombre.trim(),
       puesto: input.puesto.trim(),
-      salarioCentavos: BigInt(input.salarioCentavos),
+      salarioCentavos: input.salarioCentavos,
       periodo: input.periodo,
       businessId: session.business_id,
       // A portal-created row has no device and no operator. Both columns are

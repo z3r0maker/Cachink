@@ -5,6 +5,7 @@ import {
   clients,
   conversionRecetas,
   employees,
+  inventoryMovements,
   products,
   recurringExpenses,
   users,
@@ -44,7 +45,7 @@ export async function tenantFeatureFlags(tx: Tx): Promise<FeatureFlags> {
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
 
-  const [b, p, c, u, e, r, cr] = await Promise.all([
+  const [b, p, c, u, e, r, cr, m] = await Promise.all([
     tx.select().from(businesses),
     tx.select().from(products).where(live(products)),
     tx.select().from(clients).where(live(clients)),
@@ -52,6 +53,8 @@ export async function referenceTables(tx: Tx) {
     tx.select().from(employees).where(live(employees)),
     tx.select().from(recurringExpenses).where(live(recurringExpenses)),
     tx.select().from(conversionRecetas).where(live(conversionRecetas)),
+    // Every movement, not a stock snapshot: the phone's stock is their sum (ADR-081).
+    tx.select().from(inventoryMovements).where(live(inventoryMovements)),
   ]);
 
   return {
@@ -62,6 +65,7 @@ export async function referenceTables(tx: Tx) {
     employees: e.map((row) => rowToWire('employees', row)),
     recurring_expenses: r.map((row) => rowToWire('recurring_expenses', row)),
     conversion_recetas: cr.map((row) => rowToWire('conversion_recetas', row)),
+    inventory_movements: m.map((row) => rowToWire('inventory_movements', row)),
     feature_flags: await tenantFeatureFlags(tx),
   };
 }
