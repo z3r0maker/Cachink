@@ -31,6 +31,15 @@ export const lineText = style({
   textWrap: 'pretty',
 });
 
+/** The option's one-line hint: 12 px semibold in ink. */
+export const optionHint = style({
+  display: 'block',
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.semibold,
+  color: colors.ink,
+  textWrap: 'pretty',
+});
+
 export const lineAmount = style({
   flex: 'none',
   fontSize: portalFontSizes.sm,

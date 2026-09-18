@@ -13,7 +13,7 @@ import { Note } from '../ui/note';
 import { KpiRow, OpMain } from '../ui/parts';
 import * as t from '../ui/title.css';
 import { Toast } from '../ui/toast';
-import { CancelarVenta, type Motivo } from './cancelar';
+import { CancelarDeLista, type Motivo } from './cancelar';
 import { filtrar, resumen } from './derive';
 import { ListaVentas } from './lista';
 import type { MetodoVenta, VentaTurno, VentasScreenProps } from './types';
@@ -45,7 +45,7 @@ export function VentasScreen({ state, data, filtro: filtroInicial }: VentasScree
         cancelada y Pedro la ve en su portal y en tu corte.
       </Note>
       {v.cancelando ? (
-        <CancelarVenta
+        <CancelarDeLista
           venta={v.cancelando}
           onClose={() => v.setCancelando(null)}
           onConfirm={v.cancelar}

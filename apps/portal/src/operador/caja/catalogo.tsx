@@ -10,15 +10,10 @@ import { Glyph } from '../ui/parts';
 import { PRODUCT_ICONS } from '../ui/product-icons';
 import * as t from '../ui/title.css';
 import * as c from './catalogo.css';
-import type { Categoria, Producto } from './types';
+import { TINT } from './categorias';
+import type { Producto } from './types';
 import type { Caja, Filtro } from './use-caja';
 
-const TINT: Record<Categoria, string> = {
-  Tacos: colors.redSoft,
-  Guisados: colors.peachSoft,
-  Bebidas: colors.blueSoft,
-  Extras: colors.greenSoft,
-};
 const FILTROS: readonly Filtro[] = ['Todos', 'Tacos', 'Guisados', 'Bebidas', 'Extras'];
 const SEARCH = 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14ZM21 21l-4.3-4.3';
 const PLUS = 'M12 5v14M5 12h14';

@@ -223,6 +223,9 @@ Collected while building fase 10; none is edited in `design-reference/`.
    several cancellations; Inicio «Cerró» for a last turno that did not balance; Turno «Gastos» hint
    with zero or several receipts. Invented and awaiting wording: «Vence en N días» (dues beyond
    tomorrow).
+8. **Detalle de venta:** V-0412 is $160.00 (3 pastor, 1 gringa, 1 horchata) here and $320.00
+   («8 pastor · 2 gringa · 2 horchata») in Ventas; the header's state pill stays on in the empty
+   and error states. «Enviada al portal» has no offline wording (a sale still in the queue).
 
 ## 5. Fase 11 — Caja y captura
 
@@ -268,6 +271,22 @@ those texts to 12 upstream.
     `Toast` width. Harness: default, loading, empty, error, 375 px and the cancel modal match
     (agreed radius aside). The design's `startFilter` control is not wired in the file itself.
     Cancellations are device-local until O-06. Playwright: `e2e/operador-ventas.spec.ts`.
+
+### O-22 Operador · Detalle de venta
+
+- [x] Status · **Blocked by:** O-21
+  - Done: 2026-09-17 · `src/operador/ventas/detalle/`, `/operador/ventas/[folio]` (Ventas rows now
+    link here; the catch-all no longer 404s them). The ticket card, «Quién y cuándo», «Qué puedes
+    hacer» and the fiado card; the header carries the sale's state pill. Cancel reuses Ventas'
+    modal (`CancelarVenta`, now generic; the list opens `CancelarDeLista`), and sharing reuses
+    Caja's (`Share variant="detalle"`: 420 px, titled with the folio, no preview); the category
+    tints moved to `caja/categorias.ts`. Dev forcing: `dataState`, `venta=efectivo|fiado`,
+    `estado=cancelada`. Harness at 1440, 1000 and 375 px, cancelled, fiado, loading/empty/error,
+    both cancel modals and the share modal: match, the agreed radius and the runtime's split text
+    aside. Playwright: `e2e/operador-detalle-venta.spec.ts`.
+  - Deviations: the state pill shows only when a ticket is on screen (the file keeps «Venta
+    registrada y enviada» above «Esta venta ya no existe»); a folio the fixture does not hold renders
+    the empty state (only V-0412 and V-0409 have designed lines).
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 

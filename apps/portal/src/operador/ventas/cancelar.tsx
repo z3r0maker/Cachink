@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { formatMoney } from '@xangarro/domain';
 import { colors, portalFontSizes } from '@xangarro/tokens';
 
@@ -25,9 +25,14 @@ export type Motivo = (typeof MOTIVOS)[number];
 /**
  * Cancel a sale of the open turno (rule 6): a reason is required, nothing is
  * deleted. Rendered only while a sale is chosen, so each opening starts clean.
+ * Ventas opens it with the sale's summary and a note; Detalle de venta with a
+ * sentence, since the ticket is already on screen.
  */
 export function CancelarVenta(p: {
-  readonly venta: VentaTurno;
+  readonly titulo: string;
+  readonly intro: ReactNode;
+  readonly extra?: ReactNode;
+  readonly aviso: string;
   readonly onClose: () => void;
   readonly onConfirm: (motivo: Motivo) => void;
 }) {
@@ -36,17 +41,16 @@ export function CancelarVenta(p: {
     <OpModal
       open
       onClose={p.onClose}
-      title={`Cancelar venta ${p.venta.folio}`}
+      title={p.titulo}
       titleSize={portalFontSizes.lgx}
       width={480}
       headBg={colors.redSoft}
     >
-      <Resumen venta={p.venta} />
+      {p.intro}
       <ChoiceChips label="Motivo" options={MOTIVOS} value={motivo} onChange={setMotivo} />
-      <NotaOpcional />
+      {p.extra}
       <Note bg={colors.warningSoft} textColor={colors.ink}>
-        La venta queda visible como cancelada con tu nombre. Si fue en efectivo, el monto sale de lo
-        esperado en caja.
+        {p.aviso}
       </Note>
       <Botones
         listo={motivo !== null}
@@ -54,6 +58,24 @@ export function CancelarVenta(p: {
         onConfirm={() => motivo && p.onConfirm(motivo)}
       />
     </OpModal>
+  );
+}
+
+/** Ventas' version: the list row does not show the lines, so the modal sums them up. */
+export function CancelarDeLista(p: {
+  readonly venta: VentaTurno;
+  readonly onClose: () => void;
+  readonly onConfirm: (motivo: Motivo) => void;
+}) {
+  return (
+    <CancelarVenta
+      titulo={`Cancelar venta ${p.venta.folio}`}
+      intro={<Resumen venta={p.venta} />}
+      extra={<NotaOpcional />}
+      aviso="La venta queda visible como cancelada con tu nombre. Si fue en efectivo, el monto sale de lo esperado en caja."
+      onClose={p.onClose}
+      onConfirm={p.onConfirm}
+    />
   );
 }
 
