@@ -113,6 +113,17 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   recompute absorbs late pushes; active products are counted as of now. **Still to do:**
   `usage_counters` + use case in data-pg/application, push hook, nightly cron; `origen` column on
   inventory movements (C-12 step 7) to replace the motivo/nota heuristic.
+- Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · data-pg `0008_metering_cfdi` (`usage_counters`, `usage_notices`),
+  `0009` grants (new `xangarro_metering` role, no DELETE), `0010` **`xangarro.usage_counts()` — the one
+  SQL count** (OQ-5 + portal movements: `device_id = PORTAL_DEVICE_ID` → `portal`, counted; heuristic
+  on device rows only), held equal to `computeUsage` on a throwaway PG17; admin `0009` makes
+  `admin_tenant_usage()` call it (no second definition). `RecomputeUsageUseCase`
+  (`@xangarro/application/usage`) + `GET /api/cron/usage` (`0 9 * * *` = 03:00 CDMX) recount the open
+  and previous MX month for every tenant. `usageLimitsOf` / `previousUsagePeriod` /
+  `PORTAL_DEVICE_ID` now live in `@xangarro/domain/usage`. **Still to do:** the push-time increment
+  (`/sync/push` belongs to Track B — the nightly recompute covers it within a day); `usage` in
+  pull/entitlement once C-12's field exists (`usageFor()` in `apps/portal/src/server/usage/live.ts`
+  is ready); C-12 limits (the `usageLimitsOf` mapper stays until then); `origen` column (C-12 step 7).
 
 ### N-03 Overage warnings and provider alerts `[LAUNCH]`
 
@@ -135,6 +146,12 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
   `notifyUsageThreshold(notice)` (`apps/portal/src/server/email/usage.ts`; 80/100 % template,
   prices + IVA, never punitive); the N-02 wiring calls it per owner crossing. Businesses with no
   Stripe customer have no reachable owner address yet (`docs/ops/email.md` §6).
+- Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · the nightly recompute fires `crossedThresholds` once each (ledger
+  `usage_notices`, key `business:period:metric:threshold` + recipient, retried if a send failed):
+  owner → B-14's `notifyUsageThreshold()` addressed via `xangarro.owner_email()` (data-pg `0011`,
+  SECURITY DEFINER, EXECUTE only to `xangarro_metering` — free businesses without a Stripe customer
+  are reached); provider → inbox `kind=limite` at 100/150 %; `consecutiveMonthsOver` → one
+  "sugerir upgrade" item per period. **Still to do:** portal and app banners (need C-12's `usage`).
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
@@ -201,6 +218,9 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   amber 80 %, red at trigger; p95 "sin datos" until B-18). **Still to do:** switch to `usage_counters`
   (N-02) and C-12 limits; count tickets once the ADR-073 table is on main; movement origin via
   `origen` (C-12 step 7) instead of the motivo/nota heuristic; the indexes (DB-IDX-01, Track B).
+- Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · `/uso` now counts through data-pg's shared
+  `xangarro.usage_counts()` (admin migration `0009_admin_usage_shared_count.sql`; same rows), which
+  also counts portal-written movements.
 - 2026-09-18 · sync p95 stays "sin datos": B-18 logs per-call timing to stdout only. Needs a queryable
   per-call timing table (endpoint, duration, at) from Track B — see
   `apps/admin/docs/b18-b16-integration.md`. Noted overlap: the "last seen" rule exists in three
@@ -222,6 +242,9 @@ body, attachments)`.
   mutations, `POST /api/internal/support-items` (shared secret). 96 admin tests. **Still to do:** wire
   each source (bug-report, Ayuda, P-10, N-18, N-03, Stripe → factura), move tables to `data-pg`, real
   DB test for the Postgres adapter.
+- Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · sources wired: Stripe → `factura` (webhook, `stripe-webhook`), CFDI
+  monthly close (`cfdi-cron`), N-03 `limite` (`usage-cron`), through
+  `@xangarro/application/support-inbox`'s HTTP client (`ADMIN_INGEST_URL` + `ADMIN_INGEST_SECRET`).
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
@@ -609,6 +632,16 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   B-10 webhook + cron wiring, Postgres repository, sandbox stamps per path, egreso (partial refunds),
   and **contador sign-off** on: PUE vs PPD for SPEI paid-on-receipt, ClaveProdServ 81112106 / E48,
   forma de pago mapping, global CFDI periodicity/deadline, cancellation motivo defaults.
+- Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · wired behind `CFDI_MODE` (default `off`; a Facturapi key that does not
+  match the mode is refused): `invoice.paid` → `RecordPaymentForCfdiUseCase` always records the
+  payment in `cfdi_payments` (data-pg `0008`, only `xangarro_billing`, no DELETE; Postgres
+  `IssuedCfdiRepository` replaces the in-memory one); `off` → "pago sin CFDI" inbox item (amount incl.
+  IVA, `sourceRef` = Stripe invoice id); `test`/`live` → Facturapi, item only on failure. Monthly
+  close `GET /api/cron/cfdi-close` (`0 7 1 * *` = 01:00 CDMX on the 1st): `off` lists the period's
+  un-invoiced payments in one item, `test`/`live` stamps the global CFDI. **Still to do:** sandbox
+  stamps per path with real test keys; tenant fiscal data (no RFC fields on main → every payment
+  routes global, P-10); marking a `factura` item with its UUID does not yet update `cfdi_payments`;
+  refunds/egreso; contador sign-off.
 
 ---
 
