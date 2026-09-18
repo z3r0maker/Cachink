@@ -1,11 +1,14 @@
 'use client';
 
+import { parseFeatureFlags } from '@xangarro/domain';
+
 import { Banner, ScreenBody } from '@/components';
 import { useSession } from '@/session/provider';
 import type { NegocioData } from '@/server/screens';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
-import { CapabilitiesCard, FuncionesCard, SectionCard } from './parts';
+import { FuncionesCard } from './funciones';
+import { CapabilitiesCard, SectionCard } from './parts';
 import { EditNegocioDialog } from './edit-dialog';
 import { pageSubtitle, pageTitle, sectionGrid } from './negocio.css';
 
@@ -96,7 +99,7 @@ export function NegocioScreen({ business }: { readonly business: NegocioData | n
             <SectionCard key={s.title} section={s} />
           ))}
         </div>
-        <FuncionesCard />
+        <FuncionesCard flags={parseFeatureFlags(business?.featureFlags ?? '{}')} />
         <CapabilitiesCard />
       </ScreenBody>
     </>

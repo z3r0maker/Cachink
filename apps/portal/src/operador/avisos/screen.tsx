@@ -6,6 +6,7 @@ import * as h from '../shell/actions.css';
 import { ICONS } from '../shell/nav';
 import { HeaderAction } from '../shell/shell';
 import { OpMain } from '../ui/parts';
+import { SegTabs } from '../ui/tabs';
 import { Toast } from '../ui/toast';
 import * as a from './avisos.css';
 import { AvisoCard } from './card';
@@ -59,21 +60,14 @@ type Avisos = ReturnType<typeof useAvisos>;
 
 function Tabs({ v, dueno }: { readonly v: Avisos; readonly dueno: string }) {
   return (
-    <div className={r.tabs} role="tablist">
-      {TABS.map(([key, label]) => (
-        <button
-          key={key}
-          type="button"
-          role="tab"
-          aria-selected={v.tab === key}
-          className={r.tab}
-          onClick={() => v.setTab(key)}
-        >
-          {label.replace('Pedro', dueno)}
-          <span className={r.tabCount}>{v.sinLeer(key)}</span>
-        </button>
-      ))}
-    </div>
+    <SegTabs
+      items={TABS.map(
+        ([key, label]) => [key, label.replace('Pedro', dueno), v.sinLeer(key)] as const,
+      )}
+      value={v.tab}
+      onChange={v.setTab}
+      density="avisos"
+    />
   );
 }
 

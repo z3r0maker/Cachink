@@ -226,6 +226,12 @@ Collected while building fase 10; none is edited in `design-reference/`.
 8. **Detalle de venta:** V-0412 is $160.00 (3 pastor, 1 gringa, 1 horchata) here and $320.00
    («8 pastor · 2 gringa · 2 horchata») in Ventas; the header's state pill stays on in the empty
    and error states. «Enviada al portal» has no offline wording (a sale still in the queue).
+9. **Gastos:** the list totals $1,530.00 while Turno's breakdown shows «gastos −$620.00»; the
+   category filters omit «Otros» although the form offers it; at 760–1000 px the row squeezes
+   the concept to zero width (as in Turno, item 6).
+10. **Inventario at phone width:** the stock row keeps every element on one line, so at 375 px the
+    name and «Umbral · unidad» wrap word by word and the «Registrar merma» button is cut off at the
+    right edge (same in the file). The row needs a phone layout.
 
 ## 5. Fase 11 — Caja y captura
 
@@ -287,6 +293,51 @@ those texts to 12 upstream.
   - Deviations: the state pill shows only when a ticket is on screen (the file keeps «Venta
     registrada y enviada» above «Esta venta ya no existe»); a folio the fixture does not hold renders
     the empty state (only V-0412 and V-0409 have designed lines).
+
+### O-23 Operador · Gastos
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/gastos/`, `/operador/gastos` (out of the catch-all, with
+    Ventas); figures and filters unit-tested (`tests/operador/gastos.test.ts`: 6 expenses,
+    $1,530.00, 2 without a receipt). «Registrar gasto» is a header button that opens the form; a new
+    expense goes on top of the list, device-local until O-06. Shared pieces: `MontoInput` (now also
+    Cobrar · efectivo), `ModalBotones` (now also Ventas' cancel). The receipt card opens the camera
+    (`capture="environment"`, the file picker on desktop) and shows the file's name; tapping it
+    again removes it. Harness at 1440, 768 and 375 px, loading/empty/error, the form empty, filled
+    and with a receipt, and the toast: match, the agreed radius, the README's bell and a design
+    button in browser-default black aside. Playwright: `e2e/operador-gastos.spec.ts`.
+  - Open with O-06 (already listed above): where the receipt photo is stored, and how these five
+    categories map to the domain's expense categories.
+
+### O-24 Operador · Inventario
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/inventario/`, `/operador/inventario`; figures, KPI hints
+    («Pastor, tortilla y agua»), stock moves and search unit-tested
+    (`tests/operador/inventario.test.ts`). Existencias / Movimientos de mi turno tabs (now the shared
+    `SegTabs`, also used by Avisos), search, «Entrada de mercancía» and «Merma» from the bar or from
+    each row with the product preselected; a write-off needs one of four reasons, an entry may name
+    the supplier. A movement moves the stock and joins the list, device-local until O-06. The
+    owner-only rule sits under the stock. Dev forcing: `dataState`, `startTab`. Harness at 1440,
+    1024 and 375 px, both tabs, loading/empty/error, both forms and the toast: match, the agreed
+    radius, the runtime's split text and the design's default-black buttons aside.
+    Playwright: `e2e/operador-inventario.spec.ts`.
+
+### O-25 Operador · Cobranza
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/cobranza/`, `/operador/cobranza`. The abono allocation of
+    ADR-074 lands in the domain, test-first: `aplicarAbono` (`packages/domain/src/financials/
+abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInvalidoError` on
+    zero or less; 6 tests). The screen derives balances, state, card text, quick amounts and the
+    «se aplica a» line from it (`tests/operador/cobranza.test.ts`: $1,780.00 owed, $760.00 in
+    abonos, $550.00 cash — Turno's figures). An abono settles tickets and joins today's list,
+    device-local until O-06. Harness at 1440 and 375 px, loading/empty/error, the abono modal empty
+    and filled, and the toast: match (agreed radius and default-black button aside).
+    Playwright: `e2e/operador-cobranza.spec.ts`. The card's arrow leads to Detalle de cliente
+    (O-26).
+  - The file caps an abono at the balance and says nothing about the excess; the domain returns it
+    as `excedente` so the use case can decide (saldo a favor or change) with O-06.
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 

@@ -319,6 +319,9 @@ not move a pixel between routes.
 
 ### P-02 Auth pages + membership guard + business switcher wiring
 
+> **Amended 2026-09-18 (ADR-080):** the provider is decided — our own login (ADR-079) plus emailed
+> sign-in/reset links (B-14). No GoTrue.
+
 - [~] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
   - 2026-09-17 · Sign-in/out, signed session, membership guard, 11 routes gated, forged cookie refused, identical message for wrong password and unknown address. `SESSION` fixture replaced in 19 files by a provider seeded from the server. **Still to do:** magic link, business switcher, the four-scene login animation, and the provider decision (ADR-061).
 - **Amended 2026-09-17:** copy and layout now come from _Acceso y onboarding_.
@@ -511,6 +514,9 @@ without touching code.
   correct types; viewer can export; drawer closes on backdrop, button and **Escape**; four states.
 
 ### P-07 Productos + Excel import
+
+> **Amended 2026-09-18 (ADR-080):** the portal may create products («Nuevo producto» and the Excel
+> import); they reach phones through `sync_log`. Phones still only insert them (HYBRID).
 
 > **Amended 2026-09-17 by Track N:** the import steps are generalised into a template registry with Clientes and Saldos iniciales (N-16, N-17) and a free-tier 50-product cap (N-04).
 
@@ -810,7 +816,15 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 
 ### P-15 Funciones (in Negocio) — flags and capabilities
 
-- [~] Status · **Blocked by:** P-25, F-06, C-11 · **Blocks:** —
+- [x] Status · **Blocked by:** P-25, F-06, C-11 · **Blocks:** —
+  - Done 2026-09-18: the switches write `businesses.feature_flags` through
+    `ToggleFeatureFlagUseCase` — the phone's own rules, now with typed errors and an `allowed` set
+    the portal fills with platform ∩ plan, so a dark or unpaid key is refused server-side
+    (`FLAG_NOT_ALLOWED`). The write is logged, and activation and pull now send the business's
+    stored flags instead of the fixture's. Turning a parent off asks first when the domain's
+    cascade would take dependents with it. `e2e/sync.spec.ts` switches Inventario off in the
+    portal and sees `stock: false` on the phone's next pull. A new `Switch` primitive (Radix,
+    44 px target) — the design has none yet, so it follows the system's border/shadow language.
   - In progress: 2026-09-17 · rendered beneath Negocio, as the design places it.
   - **Two groups, as ADR-059 requires.** "Funciones del negocio" lists the seven
     `FEATURE_FLAG_KEYS` with the three columns «Disponible · En tu plan · Activada», each resolved
@@ -819,8 +833,6 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     no switch.
   - "Tu plan incluye" lists the plan `capabilities` **without switches**, because a tenant cannot
     toggle them. That is the distinction the whole `capabilities` structure exists to express.
-  - **Still to do:** making the switch write `businesses.feature_flags` + `sync_log`, and the
-    cascade warning when a parent flag is turned off.
 - **Amended 2026-09-17 (ADR-059):** renders **two** groups.
 - **Steps:** **Funciones del negocio** — the seven `FEATURE_FLAG_KEYS` with the three columns
   «Disponible · En tu plan · Activada», the switch editable only when the first two are true,

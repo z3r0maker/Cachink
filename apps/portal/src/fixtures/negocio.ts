@@ -1,9 +1,10 @@
 import {
-  DEFAULT_FEATURE_FLAGS,
   FEATURE_FLAG_KEYS,
   PLATFORM_AVAILABLE,
   PLAN_LIMITS,
   type FeatureFlagKey,
+  type FeatureFlags,
+  type PlanId,
 } from '@xangarro/domain';
 
 import { SESSION } from './business';
@@ -95,12 +96,14 @@ export interface FlagRow {
   readonly activada: boolean;
 }
 
-export const FLAG_ROWS: readonly FlagRow[] = FEATURE_FLAG_KEYS.map((key) => ({
-  key,
-  disponible: PLATFORM_AVAILABLE[key],
-  enTuPlan: PLAN_LIMITS[SESSION.planId].features.includes(key),
-  activada: DEFAULT_FEATURE_FLAGS[key] && PLATFORM_AVAILABLE[key],
-}));
+export function flagRows(flags: FeatureFlags, planId: PlanId): readonly FlagRow[] {
+  return FEATURE_FLAG_KEYS.map((key) => ({
+    key,
+    disponible: PLATFORM_AVAILABLE[key],
+    enTuPlan: PLAN_LIMITS[planId].features.includes(key),
+    activada: flags[key] && PLATFORM_AVAILABLE[key],
+  }));
+}
 
 /** Plan-level capabilities have no tenant switch — they are read-only rows. */
 export const CAPABILITY_ROWS: readonly (readonly [string, string])[] = [

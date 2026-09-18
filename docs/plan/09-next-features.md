@@ -173,10 +173,22 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
+- [~] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
 - **What:** per-tenant usage vs limits with an "over limit" filter; a **capacity card** — DB size,
   largest tables by rows, sync p95 (B-18) — each against its N-51 / N-52 trigger, reviewed monthly.
 - **Acceptance:** the capacity card goes amber at 80 % of a trigger and red at the trigger.
+- Progress: 2026-09-17 · 46f8a75…(renumber) (branch `track-n/n07-usage-capacity`: N-06 + N-02 merged,
+  unmerged) · `admin_tenant_usage()` read-only SQL (`0006_admin_usage_read.sql`, counts OQ-5 rules;
+  0 mismatches vs `computeUsage` over 15 tenant-months on a throwaway PG17, 200 tenants / 600k rows:
+  ~120 ms all tenants, ~43 ms with `(business_id, created_at)` indexes); `/uso` (80/100/150 bands,
+  "sobre el límite", "2 meses seguidos", keyset); capacity card with ADR-068 triggers (`capacityStatus`,
+  amber 80 %, red at trigger; p95 "sin datos" until B-18). **Still to do:** switch to `usage_counters`
+  (N-02) and C-12 limits; count tickets once the ADR-073 table is on main; movement origin via
+  `origen` (C-12 step 7) instead of the motivo/nota heuristic; the indexes (DB-IDX-01, Track B).
+- 2026-09-18 · sync p95 stays "sin datos": B-18 logs per-call timing to stdout only. Needs a queryable
+  per-call timing table (endpoint, duration, at) from Track B — see
+  `apps/admin/docs/b18-b16-integration.md`. Noted overlap: the "last seen" rule exists in three
+  places (B-16 Studio query, two N-06 files) — consolidate when data-pg gains a shared query.
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`
 
@@ -227,6 +239,10 @@ body, attachments)`.
   `GET /api/cron/digest` (CRON_SECRET, Vercel Cron `0 14 * * *` = 08:00 CDMX), Slack/Discord urgent
   webhook. **Still to do:** real email adapter (B-14; stub logs only), over-limit (N-07), dormancy and
   B-18 sections.
+- Progress: 2026-09-18 · 94aee74 (branch `track-n/n10-b18-integration`: N-07 + N-09 + main merged) ·
+  digest section "Rechazos de sincronización (24 h)" reuses B-18's `rejectionDigest` from data-pg
+  unchanged; admin migration 0007 grants the admin role four columns of `sync_rejections`
+  (payload/message stay unreadable). Degrades to "No disponible". **Still to do:** B-14 mailer.
 
 ### Settings and onboarding
 

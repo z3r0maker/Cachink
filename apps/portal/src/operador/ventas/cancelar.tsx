@@ -5,12 +5,12 @@ import { formatMoney } from '@xangarro/domain';
 import { colors, portalFontSizes } from '@xangarro/tokens';
 
 import * as l from '../turno/lists.css';
+import { ModalBotones } from '../ui/botones';
 import { ChoiceChips } from '../ui/choice';
 import * as f from '../ui/field.css';
 import { OpModal } from '../ui/modal';
 import { Note } from '../ui/note';
 import * as u from '../ui/ui.css';
-import * as n from '../caja/nuevo.css';
 import type { VentaTurno } from './types';
 import * as v from './ventas.css';
 
@@ -52,8 +52,11 @@ export function CancelarVenta(p: {
       <Note bg={colors.warningSoft} textColor={colors.ink}>
         {p.aviso}
       </Note>
-      <Botones
+      <ModalBotones
+        volver="Volver"
+        confirmar="Cancelar la venta"
         listo={motivo !== null}
+        tint={colors.redSoft}
         onBack={p.onClose}
         onConfirm={() => motivo && p.onConfirm(motivo)}
       />
@@ -102,29 +105,6 @@ function NotaOpcional() {
         Nota (opcional)
       </label>
       <input id="vc-nota" type="text" className={f.text} placeholder="Se cobró de más" />
-    </div>
-  );
-}
-
-function Botones(p: {
-  readonly listo: boolean;
-  readonly onBack: () => void;
-  readonly onConfirm: () => void;
-}) {
-  return (
-    <div style={{ display: 'flex', gap: 10 }}>
-      <button type="button" className={n.cancel} style={{ height: 52 }} onClick={p.onBack}>
-        Volver
-      </button>
-      <button
-        type="button"
-        className={n.add}
-        style={{ height: 52, background: p.listo ? colors.redSoft : colors.gray100 }}
-        disabled={!p.listo}
-        onClick={p.onConfirm}
-      >
-        Cancelar la venta
-      </button>
     </div>
   );
 }

@@ -16,38 +16,6 @@ export const label = style({
   color: colors.gray600,
 });
 
-export const amountBox = style({
-  height: 64,
-  padding: '0 14px',
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  boxSizing: CONTENT_BOX,
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[3],
-  background: colors.white,
-});
-
-export const peso = style({
-  fontSize: portalFontSizes.xl3,
-  fontWeight: typography.weights.extraBold,
-  color: colors.gray400,
-});
-
-export const amountInput = style({
-  flex: 1,
-  minWidth: 0,
-  border: 'none',
-  outline: 'none',
-  background: 'transparent',
-  fontFamily: 'inherit',
-  fontSize: portalFontSizes.xl5,
-  fontWeight: typography.weights.extraBold,
-  fontVariantNumeric: 'tabular-nums',
-  letterSpacing: typography.letterSpacing.tight,
-  color: colors.ink,
-});
-
 export const clear = style({
   boxSizing: CONTENT_BOX,
   flex: 'none',
