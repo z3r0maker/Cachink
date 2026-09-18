@@ -1,34 +1,57 @@
 import 'server-only';
 
 import { getBusiness } from '@xangarro/data-pg';
+import {
+  FEATURE_FLAG_KEYS,
+  PLATFORM_AVAILABLE,
+  parseFeatureFlags,
+  type Entitlement,
+  type FeatureFlagKey,
+} from '@xangarro/domain';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
 import type { Role, Session } from '@/session/types';
 
 import { requireSession } from './auth';
+import { tenantEntitlement } from './billing/plan';
 import { withTenant } from './db';
 
 /**
  * The `Session` the screens render from, assembled server-side.
  *
- * Identity and role are real — the signed cookie and `business_members`.
- * The business name is read from the row rather than hardcoded in the shell,
- * which is what made `Taquería Don Pedro` appear on every route regardless of
- * who was looking.
+ * Identity and role are the signed cookie and `business_members`; the name is
+ * the business row. `planId`, `capabilities` and `features` come from the
+ * business's subscription through `tenantEntitlement` (B-10) — the same
+ * entitlement its phones are signed — read in the same tenant transaction.
  *
- * `planId`, `capabilities` and `features` are still fixtures. They ride in the
- * signed entitlement, which has no issuer until B-06; putting the seam here
- * means that lands as one change instead of nine.
+ * `features` is resolved three ways, as on the phone: released on the
+ * platform, included in the plan, and switched on by the owner (P-15).
  */
+function resolveFeatures(
+  entitlement: Entitlement,
+  flagsJson: string | undefined,
+): Record<FeatureFlagKey, boolean> {
+  const tenant = parseFeatureFlags(flagsJson ?? '{}');
+  const inPlan = new Set<string>(entitlement.features);
+  return Object.fromEntries(
+    FEATURE_FLAG_KEYS.map((k) => [k, PLATFORM_AVAILABLE[k] && inPlan.has(k) && tenant[k]]),
+  ) as Record<FeatureFlagKey, boolean>;
+}
+
 export async function currentSession(): Promise<Session> {
   const claims = await requireSession();
+  const businessId = claims.business_id;
 
-  const business = await withTenant(claims.business_id, (tx) => getBusiness(tx)).catch(() => null);
+  const { business, entitlement } = await withTenant(businessId, async (tx) => ({
+    business: await getBusiness(tx),
+    entitlement: await tenantEntitlement(tx, businessId, new Date()),
+  }));
 
   return {
     role: claims.member_role as Role,
-    businessId: claims.business_id,
+    businessId,
     businessName: business?.nombre ?? 'Tu negocio',
-    ...PLAN_FIXTURE,
+    planId: entitlement.plan,
+    capabilities: entitlement.capabilities,
+    features: resolveFeatures(entitlement, business?.featureFlags),
   };
 }

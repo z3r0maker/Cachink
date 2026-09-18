@@ -2,6 +2,7 @@ import { ok } from '@/server/api/respond';
 import { deviceRoute } from '@/server/api/device-route';
 import { entitlementFor } from '@/server/device/bootstrap';
 import { signEntitlement } from '@/server/device/credentials';
+import { withTenant } from '@/server/db';
 
 /**
  * `GET /api/v1/entitlement` — the cheap refresh (contract §7).
@@ -14,8 +15,11 @@ export const GET = (request: Request): Promise<Response> =>
   deviceRoute(
     'entitlement',
     request,
-    async ({ businessId }) => ({
-      response: ok({ entitlement: await signEntitlement(entitlementFor(businessId, new Date())) }),
-    }),
+    async ({ businessId }) => {
+      const entitlement = await withTenant(businessId, (tx) =>
+        entitlementFor(tx, businessId, new Date()),
+      );
+      return { response: ok({ entitlement: await signEntitlement(entitlement) }) };
+    },
     'No pudimos revisar tu plan. Intenta de nuevo.',
   );

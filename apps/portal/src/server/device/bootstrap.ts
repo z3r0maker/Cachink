@@ -9,12 +9,10 @@ import {
   recurringExpenses,
   users,
 } from '@xangarro/data-pg';
-import { computeEntitlement } from '@xangarro/application';
 import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
-
+import { tenantEntitlement } from '../billing/plan';
 import type { Tx } from '../db';
 import { rowToWire } from '../sync/codec';
 
@@ -67,18 +65,11 @@ export async function referenceTables(tx: Tx) {
 }
 
 /**
- * The entitlement for this business: `computeEntitlement` over its subscription.
- *
- * The subscription is still the fixture plan: plans ride in
- * `billing.subscriptions`, which has no writer until payments land (B-10). This
- * is the one place that changes when it does — the rules (grace, Q14's lapse to
- * the free plan) are already the application's.
+ * The entitlement for this business: `computeEntitlement` over its
+ * `subscriptions` rows (B-10), read inside the caller's tenant transaction —
+ * activation, pull and `GET /entitlement` all hold one. No row is the free
+ * plan; the rules (grace, Q14's lapse to the free plan) are the application's.
  */
-export function entitlementFor(businessId: string, now: Date): Entitlement {
-  const periodEnd = new Date(now.getTime() + 30 * 86_400_000).toISOString();
-  return computeEntitlement(
-    businessId,
-    { planId: PLAN_FIXTURE.planId, status: 'active', currentPeriodEnd: periodEnd },
-    now,
-  );
+export function entitlementFor(tx: Tx, businessId: string, now: Date): Promise<Entitlement> {
+  return tenantEntitlement(tx, businessId, now);
 }

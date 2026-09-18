@@ -5,12 +5,11 @@ import {
   DesactivarOperadorUseCase,
   RestablecerPinOperadorUseCase,
 } from '@xangarro/application';
-import { PLAN_LIMITS, type BusinessId, type UserId } from '@xangarro/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
-
 import { requireMember } from '../auth';
+import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
 import { pgUsersRepository } from '../repositories/users';
@@ -50,14 +49,13 @@ export async function crearOperador(nombre: string, pin: string): Promise<Operad
   try {
     const session = await requireMember('admin');
     const businessId = session.business_id as BusinessId;
-    await withTenant(businessId, (tx) =>
+    await withTenant(businessId, async (tx) =>
       new CrearOperadorUseCase(pgUsersRepository(tx, businessId)).execute({
         businessId,
         nombre,
         pin,
-        // The rule is the use case's; the number is the plan's. Still the
-        // fixture plan until billing (B-10) gives each business its own.
-        operatorLimit: PLAN_LIMITS[PLAN_FIXTURE.planId].operators,
+        // The rule is the use case's; the number is the plan's (B-10).
+        operatorLimit: (await tenantEntitlement(tx, businessId, new Date())).limits.operators,
       }),
     );
     revalidatePath('/equipo');

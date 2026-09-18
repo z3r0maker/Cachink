@@ -3,7 +3,6 @@
 import { ToggleFeatureFlagUseCase } from '@xangarro/application';
 import {
   FEATURE_FLAG_KEYS,
-  PLAN_LIMITS,
   PLATFORM_AVAILABLE,
   type BusinessId,
   type FeatureFlagKey,
@@ -11,9 +10,8 @@ import {
 } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
-
 import { requireMember } from '../auth';
+import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
 import { pgBusinessesRepository } from '../repositories/businesses';
@@ -37,9 +35,8 @@ const KNOWN = new Set([
   'NOT_PERMITTED',
 ]);
 
-function allowedKeys(): ReadonlySet<FeatureFlagKey> {
-  // The plan is still the fixture's until B-10 gives each business its own.
-  const inPlan = PLAN_LIMITS[PLAN_FIXTURE.planId].features;
+/** Released on the platform ∩ included in the business's plan (B-10). */
+function allowedKeys(inPlan: readonly string[]): ReadonlySet<FeatureFlagKey> {
   return new Set(FEATURE_FLAG_KEYS.filter((k) => PLATFORM_AVAILABLE[k] && inPlan.includes(k)));
 }
 
@@ -47,12 +44,12 @@ export async function cambiarFuncion(key: FeatureFlagKey, on: boolean): Promise<
   try {
     const session = await requireMember('owner');
     const businessId = session.business_id as BusinessId;
-    const flags = await withTenant(businessId, (tx) =>
+    const flags = await withTenant(businessId, async (tx) =>
       new ToggleFeatureFlagUseCase(pgBusinessesRepository(tx, businessId)).execute({
         businessId,
         flagKey: key,
         newValue: on,
-        allowed: allowedKeys(),
+        allowed: allowedKeys((await tenantEntitlement(tx, businessId, new Date())).features),
       }),
     );
     revalidatePath('/negocio');

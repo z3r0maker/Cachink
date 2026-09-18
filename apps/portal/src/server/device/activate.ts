@@ -91,7 +91,7 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
     const businessId = await claim(tx, input.code, input.email, deviceId);
     // Only now is there a tenant. Scope the rest by it, exactly as a request is.
     await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
-    const entitlement = entitlementFor(businessId, now);
+    const entitlement = await entitlementFor(tx as Tx, businessId, now);
     await assertSlotFree(tx, businessId, entitlement.limits.devices);
     await registerDevice(tx, deviceId, businessId, input.device, now.toISOString());
     // The committed counter, read BEFORE the tables: a write landing between

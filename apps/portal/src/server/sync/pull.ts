@@ -37,7 +37,7 @@ export async function pull(caller: DeviceCaller, since: number): Promise<PullRes
     return PullResponseSchema.parse({
       serverSeq: page.serverSeq,
       serverTime: now.toISOString(),
-      entitlement: await signEntitlement(entitlementFor(caller.businessId, now)),
+      entitlement: await signEntitlement(await entitlementFor(tx, caller.businessId, now)),
       tables: page.tables,
       acknowledgedThrough: device?.acknowledgedThrough ?? 0,
     });
