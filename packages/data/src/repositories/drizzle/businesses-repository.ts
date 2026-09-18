@@ -104,6 +104,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       id: row.id as BusinessId,
       nombre: row.nombre,
       regimenFiscal: row.regimenFiscal,
+      regimenSat: row.regimenSat ?? null,
       rfc: row.rfc ?? null,
       razonSocial: row.razonSocial ?? null,
       codigoPostal: row.codigoPostal ?? null,

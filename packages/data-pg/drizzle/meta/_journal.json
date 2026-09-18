@@ -50,6 +50,13 @@
       "when": 1789747857850,
       "tag": "0012_business_fiscal",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789751462157,
+      "tag": "0013_business_regimen_sat",
+      "breakpoints": true
     }
   ]
 }

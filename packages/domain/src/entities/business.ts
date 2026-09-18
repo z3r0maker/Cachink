@@ -50,6 +50,12 @@ export const BusinessSchema = z
      * owner has it, never required to sell. Validated by `@xangarro/domain`'s
      * fiscal rules where it is entered; stored as typed (normalised).
      */
+    /**
+     * The SAT c_RegimenFiscal code — the business's régimen (owner decision
+     * 2026-09-18). `regimenFiscal` above is derived from it (the ISR bucket),
+     * kept for phones that still read names; see `regimenPatch`. Null: not set.
+     */
+    regimenSat: z.string().max(3).nullable().default(null),
     rfc: z.string().max(13).nullable().default(null),
     razonSocial: z.string().max(254).nullable().default(null),
     codigoPostal: z.string().max(5).nullable().default(null),
@@ -81,6 +87,6 @@ export const NewBusinessSchema = BusinessSchema.omit({
   updatedAt: true,
   deletedAt: true,
   // A business starts without fiscal data; it is filled in later (P-08).
-}).partial({ rfc: true, razonSocial: true, codigoPostal: true, usoCfdi: true });
+}).partial({ regimenSat: true, rfc: true, razonSocial: true, codigoPostal: true, usoCfdi: true });
 
 export type NewBusiness = z.infer<typeof NewBusinessSchema>;

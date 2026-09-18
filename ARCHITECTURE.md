@@ -5599,3 +5599,94 @@ stock.
 - Found on the way: the seed's entradas used the motivo `'Compra'`, which is not
   an entry reason; the first bootstrap that carried movements failed its own
   response check. The seed-contract test now parses every seeded movement.
+
+---
+
+## ADR-082
+
+**Title:** Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner
+
+**Date:** 2026-09-18
+
+**Status:** Accepted, provisional — the owner may reverse any item; each lists what changes if so.
+
+**Context**
+
+Fases 10–13 of Track O (the operator register and two owner screens) left seven
+questions that the design files do not settle. Waiting on each would leave
+screens with known wrong behaviour (an abono larger than the balance silently
+lost; a WhatsApp confirmation claiming a message was sent), so they are decided
+here with the option Track O recommended, and marked provisional.
+
+**Decision**
+
+1. **D1 — Type floor.** 12 px stays the floor for both ramps; the one exception
+   is `portalFontSizes.tag` (11) for tags, chips and the phone tab bar, the
+   design system's `.t-tag` (always bold, never a sentence). *If reversed:* raise
+   `tag` to 12 and ask the design to follow.
+2. **D2 — WhatsApp wording.** The portal opens `wa.me` with the text; it cannot
+   send. Confirmations say «WhatsApp abierto con el comprobante / recordatorio
+   para el …» instead of the files' «enviado». *If reversed:* restore the file's
+   sentence (two strings).
+3. **D3 — Receipt photos.** Stored in a private Supabase Storage bucket per
+   business (`comprobantes/<business>/<turno>/<gasto>.jpg`), uploaded by the
+   register's outbox after the expense row syncs, and referenced from the
+   expense by path. No bytes travel through `/sync`. Built with O-06; nothing
+   ships now.
+4. **D4 — Expense categories.** The operator's five map onto the domain's
+   `ExpenseCategory`: Insumos → Materia Prima, Servicios → Servicios,
+   Transporte → Logística, Mantenimiento → Mantenimiento, Otros → Otro
+   (`src/operador/vocabulario.ts`).
+5. **D5 — An abono above the balance.** The whole amount is recorded; what
+   exceeds every open ticket is **saldo a favor** (ADR-074's term), shown in the
+   abono preview and the toast, and applied to the client's next fiado. Never
+   capped silently: the cash is in the drawer.
+6. **D6 — Close-out reasons.** The five map onto `DiscrepancyReason`'s six:
+   Cambio mal dado → error-en-cambio; Vale de empleado → retiro-autorizado;
+   No sé → faltante-sin-explicacion or sobrante; Venta no registrada and
+   Propinas → sobrante when over, otro when short. `gasto-no-registrado` is left
+   to the expense screen. The operator's label travels in the note.
+7. **D7 — One account history.** Cobranza and Detalle de cliente read one set of
+   accounts (tickets + abonos). Where the files disagree (Chuy's abono today),
+   Cobranza's history wins, because Inicio, Turno and Cierre depend on its
+   $550.00 in cash abonos. Detalle de cliente's Chuy therefore differs from its
+   file until the design adopts one history.
+
+**Consequences**
+
+- The design amendments list (plan §4b) gains the files' side of D2 and D7.
+- D3 and D6 bind O-06's writers; D4 binds the Gastos writer.
+
+## ADR-082
+
+**Title:** The business's régimen is stored as its SAT code; the name bucket is derived
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends P-08 (régimen option cards)
+
+**Context**
+
+`businesses.regimen_fiscal` held a name bucket («RESICO», «RIF», «Asalariados»,
+«Otro») typed on the phone. The CFDI router needs SAT's c_RegimenFiscal code
+(626), so a tenant with a valid RFC still fell through to the global CFDI, and
+«Otro» cannot be turned into a code at all.
+
+**Decision**
+
+1. New nullable column `regimen_sat` (SQLite 0002, Postgres 0013), the source of
+   truth. Existing rows are backfilled from the bucket (RESICO → 626, RIF → 621,
+   Asalariados → 605); «Otro» stays NULL and the portal shows «Falta por
+   completar» until the owner picks.
+2. `regimen_fiscal` stays, **derived** from the code by `regimenPatch()` in
+   `@xangarro/domain/fiscal` (626 → RESICO, 621 → RIF, 605 → Asalariados, any
+   other → Otro), so phones that read the bucket for ISR keep working.
+3. Display names come from one map, `REGIMEN_NOMBRE`. The portal picks the
+   régimen from cards (626, 612, 601, 606, 605); a change offers the bucket's
+   suggested ISR rate behind a switch, never silently.
+
+**Consequences**
+
+- Track A: the phone's BusinessForm should write the code too (via
+  `regimenPatch`), not the bucket.
+- The CFDI port should read `regimen_sat` instead of mapping the bucket.

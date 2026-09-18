@@ -49,8 +49,8 @@ type Sql = ReturnType<typeof postgres>;
 
 async function seedBusiness(sql: Sql): Promise<void> {
   await sql`
-    INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-    VALUES (${BIZ}, 'Taquería Don Pedro', 'RESICO', 125, ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
+    INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
+    VALUES (${BIZ}, 'Taquería Don Pedro', 'RESICO', '626', 125, ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
     ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre`;
 }
 
@@ -194,8 +194,8 @@ async function seedConformance(sql: Sql): Promise<void> {
   const c = CONFORMANCE;
   await sql`SELECT set_config('xangarro.business_id', ${c.businessId}, false)`;
   await sql`
-    INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-    VALUES (${c.businessId}, 'Conformance', 'RESICO', 125, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
+    INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
+    VALUES (${c.businessId}, 'Conformance', 'RESICO', '626', 125, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
     ON CONFLICT (id) DO NOTHING`;
   await sql`
     INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,

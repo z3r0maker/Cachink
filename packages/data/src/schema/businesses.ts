@@ -15,6 +15,8 @@ export const businesses = sqliteTable('businesses', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
   regimenFiscal: text('regimen_fiscal').notNull(),
+  /** SAT régimen code; `regimenFiscal` is derived from it (migration 0002). */
+  regimenSat: text('regimen_sat'),
   /** Fiscal data for CFDI (P-08, migration 0001). Filled in from the portal. */
   rfc: text('rfc'),
   razonSocial: text('razon_social'),

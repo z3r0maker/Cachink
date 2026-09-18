@@ -1,6 +1,6 @@
 'use client';
 
-import { parseFeatureFlags } from '@xangarro/domain';
+import { parseFeatureFlags, REGIMEN_NOMBRE } from '@xangarro/domain';
 import Link from 'next/link';
 
 import { Banner, ScreenBody } from '@/components';
@@ -10,7 +10,7 @@ import { isOwner, resolveScreenState } from '@/session/gating';
 
 import { FuncionesCard } from './funciones';
 import { CapabilitiesCard, SectionCard } from './parts';
-import { EditNegocioDialog } from './edit-dialog';
+import { EditNegocioDialog, type Current } from './edit-dialog';
 import { FiscalDialog, type FiscalActual } from './fiscal-dialog';
 import { pageSubtitle, pageTitle, sectionGrid } from './negocio.css';
 
@@ -20,7 +20,7 @@ function Heading({
   fiscal,
 }: {
   readonly owner: boolean;
-  readonly current: { nombre: string; regimenFiscal: string };
+  readonly current: Current;
   readonly fiscal: FiscalActual;
 }) {
   return (
@@ -49,6 +49,9 @@ function Heading({
  * a thing to do, not an absence, and the incomplete banner reads the same data
  * so the two cannot disagree.
  */
+const regimenLabel = (code: string | null): string | null =>
+  code === null ? null : `${code} · ${REGIMEN_NOMBRE[code] ?? code}`;
+
 function buildSections(business: NegocioData | null | undefined) {
   if (business === null || business === undefined) return [];
   return [
@@ -57,7 +60,9 @@ function buildSections(business: NegocioData | null | undefined) {
       tone: 'hero' as const,
       fields: [
         { label: 'Nombre del negocio', value: business.nombre },
-        { label: 'Régimen fiscal', value: business.regimenFiscal },
+        // The SAT code and its name, from one domain map — or «Falta» when the
+        // old «Otro» could not be mapped (owner decision 2026-09-18).
+        { label: 'Régimen fiscal', value: regimenLabel(business.regimenSat) },
         { label: 'Tasa de ISR', value: `${(business.isrTasa ?? 0) / 100}%` },
         { label: 'Tipo de negocio', value: business.tipoNegocio },
       ],
@@ -79,9 +84,10 @@ function buildSections(business: NegocioData | null | undefined) {
   ];
 }
 
-const currentOf = (b: NegocioData | null) => ({
+const currentOf = (b: NegocioData | null): Current => ({
   nombre: b?.nombre ?? '',
-  regimenFiscal: b?.regimenFiscal ?? '',
+  regimenSat: b?.regimenSat ?? null,
+  isrTasa: b?.isrTasa ?? 0,
 });
 
 const fiscalOf = (b: NegocioData | null): FiscalActual => ({

@@ -1,6 +1,7 @@
 'use server';
 
 import { businesses } from '@xangarro/data-pg';
+import { regimenPatch } from '@xangarro/domain';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -23,7 +24,8 @@ import { reportError } from '../observability/report';
  */
 export interface NegocioPatch {
   readonly nombre?: string;
-  readonly regimenFiscal?: string;
+  /** SAT régimen code; the bucket in `regimenFiscal` is derived from it here. */
+  readonly regimenSat?: string;
   /** Basis points: 12.5% is 125. Integer, never a float (CLAUDE.md §2.8 in spirit). */
   readonly isrTasa?: number;
 }
@@ -42,10 +44,17 @@ export async function editarNegocio(patch: NegocioPatch): Promise<SaveResult> {
       return { ok: false, message: 'La tasa de ISR debe ser un número entero de puntos base.' };
     }
 
+    // The régimen is its SAT code; the name-bucket old phones read is derived
+    // in one place (`regimenPatch`), never typed. Throws REGIMEN_INVALID.
+    const { regimenSat, ...rest } = patch;
+    const regimen =
+      regimenSat === undefined
+        ? {}
+        : (({ isrSugerido: _isr, ...r }) => r)(regimenPatch(regimenSat));
     await withTenant(session.business_id, async (tx) => {
       const [row] = await tx
         .update(businesses)
-        .set({ ...patch, nombre, updatedAt: new Date().toISOString() })
+        .set({ ...rest, ...regimen, nombre, updatedAt: new Date().toISOString() })
         .where(eq(businesses.id, session.business_id))
         .returning({ id: businesses.id });
       if (!row) throw new TypeError('No encontramos tu negocio.');

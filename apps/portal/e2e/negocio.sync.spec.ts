@@ -56,3 +56,31 @@ test('the contador (viewer) cannot edit the fiscal data', async ({ browser }) =>
   await expect(page.getByRole('button', { name: 'Editar datos fiscales' })).toHaveCount(0);
   await context.close();
 });
+
+test('the régimen is picked by SAT code and offers its suggested ISR rate', async ({
+  page,
+  request,
+}) => {
+  const cursor = (await pull(request, phone, phone.cursor)).serverSeq;
+  await page.goto('/negocio');
+  await page.getByRole('button', { name: 'Editar datos', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('radio', { name: /^612/ }).click();
+  await expect(dialog.getByRole('switch', { name: 'Usar la tasa de ISR sugerida' })).toBeChecked();
+  await dialog.getByRole('button', { name: 'Guardar' }).click();
+  await expect(dialog).toHaveCount(0);
+  await expect(page.locator('main').getByText(/^612 · /)).toBeVisible();
+
+  // Old phones keep reading the bucket; new ones read the code.
+  const [biz] = (await pull(request, phone, cursor)).tables.businesses;
+  expect(biz).toMatchObject({ regimenSat: '612', regimenFiscal: 'Otro' });
+});
+
+test.afterAll(async () => {
+  // Other projects read the seeded RESICO row; put it back.
+  await asTenant(
+    BIZ,
+    (sql) =>
+      sql`UPDATE businesses SET regimen_sat = '626', regimen_fiscal = 'RESICO', isr_tasa = 125 WHERE id = ${BIZ}`,
+  );
+});

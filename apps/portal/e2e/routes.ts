@@ -81,7 +81,11 @@ export const ROUTES: readonly Route[] = [
     data: { kind: 'db', sentinel: 'Venta · Gringa ×1 · $60.00' },
   },
   // `businesses.regimen_fiscal` → `negocio/screen.tsx`.
-  { path: '/negocio', heading: 'Negocio', data: { kind: 'db', sentinel: 'RESICO' } },
+  {
+    path: '/negocio',
+    heading: 'Negocio',
+    data: { kind: 'db', sentinel: '626 · Régimen Simplificado de Confianza' },
+  },
   {
     path: '/suscripcion',
     heading: 'Suscripción',

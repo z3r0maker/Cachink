@@ -22,6 +22,7 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       id,
       nombre: input.nombre,
       regimenFiscal: input.regimenFiscal,
+      regimenSat: input.regimenSat ?? null,
       rfc: input.rfc ?? null,
       razonSocial: input.razonSocial ?? null,
       codigoPostal: input.codigoPostal ?? null,

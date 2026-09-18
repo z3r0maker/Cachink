@@ -19,6 +19,8 @@ export const businesses = pgTable('businesses', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
   regimenFiscal: text('regimen_fiscal').notNull(),
+  /** SAT régimen code — the régimen; `regimenFiscal` is derived from it (0013). */
+  regimenSat: text('regimen_sat'),
   /** Fiscal data for CFDI (P-08, README Q15). Nullable until the owner fills it in. */
   rfc: text('rfc'),
   razonSocial: text('razon_social'),
