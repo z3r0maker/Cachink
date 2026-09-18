@@ -76,6 +76,8 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
       subject: digest.subject,
       text: digest.text,
       html: digest.html,
+      sections: digest.emailSections,
+      idempotencyKey: `staff-digest:${digest.window.start.toISOString()}`,
     });
   } catch (error) {
     log('digest: sending failed', error);

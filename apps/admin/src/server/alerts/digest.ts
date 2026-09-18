@@ -9,9 +9,10 @@
  * for tenants over their limit until N-07/N-02 exist.
  */
 import { SUPPORT_KINDS, type SupportItem, type SupportKind } from '@xangarro/domain';
+import type { DigestSection } from '@xangarro/email';
 
 import { KIND_LABELS } from '../inbox/labels';
-import { renderHtml, renderText } from './digest-render';
+import { emailSections, renderHtml, renderText } from './digest-render';
 import { digestWindow, mxDayLabel } from './mx-day';
 import { REJECTIONS_UNAVAILABLE, type RejectionSummary } from './rejections';
 import { DEFAULT_CONSOLE_URL } from './webhook-notifier';
@@ -26,6 +27,8 @@ export interface DailyDigest {
   readonly subject: string;
   readonly text: string;
   readonly html: string;
+  /** The sections as data, for the React Email template (B-14). */
+  readonly emailSections: readonly DigestSection[];
   readonly dayLabel: string;
   readonly window: { readonly start: Date; readonly end: Date };
   readonly counts: {
@@ -97,5 +100,10 @@ export function buildDailyDigest(
     urgentOpen,
     consoleUrl: options.consoleUrl ?? DEFAULT_CONSOLE_URL,
   };
-  return { ...base, text: renderText(base), html: renderHtml(base) };
+  return {
+    ...base,
+    text: renderText(base),
+    html: renderHtml(base),
+    emailSections: emailSections(base),
+  };
 }

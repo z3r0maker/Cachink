@@ -24,7 +24,9 @@ import { resendSender, type ResendClient } from './resend.js';
 
 export const DEFAULT_EMAIL_FROM = 'Xangarro <hola@xangarro.mx>';
 
+/** `process.env` fits as-is. */
 export interface EmailEnv {
+  readonly [name: string]: string | undefined;
   readonly RESEND_API_KEY?: string;
   readonly EMAIL_FROM?: string;
   readonly EMAIL_REPLY_TO?: string;

@@ -132,7 +132,7 @@ describe('GET /api/cron/digest', () => {
   });
 });
 
-describe('logMailer (stub until B-14)', () => {
+describe('logMailer (email disabled)', () => {
   it('logs the envelope, not the body', async () => {
     const lines: string[] = [];
     await logMailer((m) => lines.push(m)).send({
