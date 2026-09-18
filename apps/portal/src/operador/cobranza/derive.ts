@@ -85,3 +85,9 @@ export function abonar(c: ClienteCobranza, a: AplicacionAbono): ClienteCobranza 
 
 export const toastAbono = (nombre: string, metodo: string, a: AplicacionAbono) =>
   `${formatMoney(a.aplicado)} de ${nombre} por ${metodo.toLowerCase()}. Se aplicó a lo más antiguo; queda ${formatMoney(a.restante)}.`;
+
+/** The modal's preview: «V-0361 · 8 may completa · …» and the balance left. */
+export function vista(c: ClienteCobranza, monto: Money): { texto: string; restante: Money } {
+  const a = aplicar(c, monto);
+  return { texto: aplicaTexto(c, a), restante: a.restante };
+}

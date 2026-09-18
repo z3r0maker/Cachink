@@ -14,3 +14,4 @@ export * from './health-thresholds.js';
 export * from './caja-balance.js';
 export * from './margen-producto.js';
 export * from './abonos.js';
+export * from './estado-cuenta.js';

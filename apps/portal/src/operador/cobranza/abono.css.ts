@@ -1,5 +1,13 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, shapeRadii, shadows, typography } from '@xangarro/tokens';
+import {
+  colors,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shapeRadii,
+  shadows,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../../styles/press.css';
 
@@ -79,3 +87,6 @@ export const restante = style({
   letterSpacing: typography.letterSpacing.tighter,
   color: colors.black,
 });
+
+/** Detalle de cliente's remaining balance: 32 px. */
+export const restanteChico = style([restante, { fontSize: fontSizes.xl5 }]);

@@ -116,6 +116,8 @@ export const portalFontSizes = {
   /** The register's ticket total, the change due and the counted cash (Caja, Cierre). */
   total: 38,
   display: 40,
+  /** A client's balance in the Detalle de cliente hero (34 on the phone, `xl6`). */
+  balance: 42,
   displayLg: 44,
   /** The Suscripción price figure. */
   price: 52,

@@ -15,7 +15,7 @@ import * as u from '../ui/ui.css';
 import { RecibirAbono } from './abono';
 import { AbonosHoy } from './abonos-hoy';
 import * as c from './cobranza.css';
-import { filtrar, resumen } from './derive';
+import { filtrar, resumen, saldo, vista } from './derive';
 import { Tarjeta } from './tarjeta';
 import type { CobranzaScreenProps } from './types';
 import { useCobranza, type Cobranza } from './use-cobranza';
@@ -108,10 +108,18 @@ function Cuerpo({ x }: { readonly x: Cobranza }) {
 }
 
 function Capas({ x }: { readonly x: Cobranza }) {
+  const cl = x.cliente;
   return (
     <>
-      {x.cliente ? (
-        <RecibirAbono cliente={x.cliente} onClose={() => x.setSel(null)} onSave={x.registrar} />
+      {cl ? (
+        <RecibirAbono
+          nombre={cl.nombre}
+          total={saldo(cl)}
+          vista={(m) => vista(cl, m)}
+          variante="cobranza"
+          onClose={() => x.setSel(null)}
+          onSave={x.registrar}
+        />
       ) : null}
       {x.toast ? (
         <Toast

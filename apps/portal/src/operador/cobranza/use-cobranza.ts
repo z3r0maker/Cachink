@@ -1,9 +1,9 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import type { AplicacionAbono } from '@xangarro/domain';
+import type { Money } from '@xangarro/domain';
 
-import { abonar, aplicaTexto, toastAbono } from './derive';
+import { abonar, aplicar, aplicaTexto, toastAbono } from './derive';
 import type { AbonoHoy, CobranzaData, FiltroCobranza, MetodoAbono } from './types';
 
 const hhmm = (d: Date) =>
@@ -21,8 +21,9 @@ export function useCobranza(data: CobranzaData) {
   const [sel, setSel] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const cliente = clientes.find((c) => c.id === sel) ?? null;
-  const registrar = (metodo: MetodoAbono, a: AplicacionAbono) => {
+  const registrar = (metodo: MetodoAbono, monto: Money) => {
     if (!cliente) return;
+    const a = aplicar(cliente, monto);
     const nuevo: AbonoHoy = {
       id: `a-${Date.now()}`,
       clienteId: cliente.id,

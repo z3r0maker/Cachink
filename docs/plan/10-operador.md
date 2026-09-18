@@ -232,6 +232,11 @@ Collected while building fase 10; none is edited in `design-reference/`.
 10. **Inventario at phone width:** the stock row keeps every element on one line, so at 375 px the
     name and «Umbral · unidad» wrap word by word and the «Registrar merma» button is cut off at the
     right edge (same in the file). The row needs a phone layout.
+11. **Cobranza vs Detalle de cliente:** Chuy's abono today is $400.00 «contra saldo de
+    $1,260.00» in Cobranza (itself inconsistent: after it V-0288 is still open) and $120.00 in
+    Detalle, whose tickets and abonos also give $860.00. Cobranza's figure is the one Inicio, Turno
+    and Cierre use ($550.00 cash abonos). The files need one history. Detalle's «se aplicó hasta»
+    loop names the wrong ticket (see O-26).
 
 ## 5. Fase 11 — Caja y captura
 
@@ -338,6 +343,26 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
     (O-26).
   - The file caps an abono at the balance and says nothing about the excess; the domain returns it
     as `excedente` so the use case can decide (saldo a favor or change) with O-06.
+
+### O-26 Operador · Detalle de cliente
+
+- [x] Status · **Blocked by:** O-25
+  - Done: 2026-09-18 · `src/operador/cobranza/cliente/`, `/operador/cobranza/[cliente]`. Per the
+    README, an account is only its fiado tickets and abonos; `estadoDeCuenta` joins the domain
+    test-first (7 tests: abonos applied in date order over `aplicarAbono`, balance, saldo a favor,
+    the last ticket each abono reached; `disponible`). Hero, four KPIs, open tickets oldest first
+    with «Ya abonó», history newest first, the limit note, the abono modal (Cobranza's
+    `RecibirAbono`, now fed a preview by the caller, `variante="detalle"`) and «Recordarle por
+    WhatsApp» (prefilled phone, live balance, opens `wa.me`). An abono is the only write; everything
+    re-derives. `portalFontSizes.balance = 42` for the hero figure. Harness at 1440 and 375 px for
+    both clients, header, loading/empty/error, both modals and the toast: match (agreed radius,
+    split text, default-black button aside). `tests/operador/cliente.test.ts`,
+    `e2e/operador-cliente.spec.ts`.
+  - Deviations: «se aplicó hasta» comes from the domain, so Chuy's $120.00 abono reads V-0288
+    (the file's loop says V-0244, which the earlier $300.00 had already settled). A new abono is
+    dated now, not on the file's frozen «hoy».
+  - Cobranza (O-25) still stores open balances per ticket in its fixture; with O-06 both screens
+    read accounts through `estadoDeCuenta`.
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 
