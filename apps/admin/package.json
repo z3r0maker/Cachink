@@ -13,12 +13,12 @@
     "test:watch": "vitest",
     "lint": "eslint . --config ../../eslint.config.js && tsx scripts/guard-service-role.ts",
     "lint:fix": "eslint . --config ../../eslint.config.js --fix",
+    "staff": "tsx scripts/staff.ts",
     "clean": "rm -rf .next dist .turbo"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.12.7",
-    "@supabase/supabase-js": "^2.116.0",
     "@vanilla-extract/css": "^1.21.2",
+    "@xangarro/auth-core": "workspace:*",
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/tokens": "workspace:*",
@@ -27,6 +27,7 @@
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "server-only": "^0.0.1",
+    "uqr": "0.1.3",
     "zod": "^4.6.5"
   },
   "devDependencies": {

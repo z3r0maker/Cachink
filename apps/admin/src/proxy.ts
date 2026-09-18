@@ -1,33 +1,21 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { ADMIN_COOKIE } from './server/auth/config';
 import { FORBIDDEN_PATH, isMachinePath, isPublicPath, type GateDecision } from './server/gate';
 import { resolveGate } from './server/resolve-gate';
 import { buildCsp, newNonce } from './server/security/csp';
-import { supabaseEnv } from './server/supabase/env';
 
 /**
- * Every page request: a fresh CSP nonce, a refreshed Supabase session, and
- * the staff gate (`decideAccess`). Next 16 names this file `proxy.ts`
- * (formerly `middleware.ts`) and runs it on the Node.js runtime, which is
- * what lets it query the allowlist in Postgres.
+ * Every page request: a fresh CSP nonce and the staff gate (`decideAccess`)
+ * over the console's own server-side session (ADR-080). Next 16 names this
+ * file `proxy.ts` (formerly `middleware.ts`) and runs it on the Node.js
+ * runtime, which is what lets it resolve the session in Postgres.
  */
-type CookieToSet = { name: string; value: string; options: CookieOptions };
-
-async function gate(request: NextRequest, cookiesOut: CookieToSet[]): Promise<GateDecision> {
+async function gate(request: NextRequest): Promise<GateDecision> {
   const path = request.nextUrl.pathname;
   if (isPublicPath(path) || isMachinePath(path)) return { kind: 'allow' };
-
-  const { url, anonKey } = supabaseEnv();
-  const client = createServerClient(url, anonKey, {
-    cookies: {
-      getAll: () => request.cookies.getAll(),
-      setAll: (toSet) => {
-        for (const c of toSet) cookiesOut.push(c);
-      },
-    },
-  });
-  return (await resolveGate(client, path)).decision;
+  const token = request.cookies.get(ADMIN_COOKIE)?.value;
+  return (await resolveGate(token, path)).decision;
 }
 
 function respond(decision: GateDecision, request: NextRequest, headers: Headers): NextResponse {
@@ -51,10 +39,9 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   headers.set('x-nonce', nonce);
   headers.set('Content-Security-Policy', csp);
 
-  const cookiesOut: CookieToSet[] = [];
-  const response = respond(await gate(request, cookiesOut), request, headers);
-  for (const { name, value, options } of cookiesOut) response.cookies.set(name, value, options);
-  if (cookiesOut.length > 0) response.headers.set('Cache-Control', 'private, no-store');
+  const response = respond(await gate(request), request, headers);
+  // Every console page is per-staff-member; none may be cached by anyone.
+  response.headers.set('Cache-Control', 'private, no-store');
   response.headers.set('Content-Security-Policy', csp);
   return response;
 }

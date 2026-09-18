@@ -3,9 +3,10 @@
  *
  * Scripts run only with this request's nonce (`'strict-dynamic'` lets those
  * scripts load Next's chunks), so an injected `<script>` does nothing. There
- * is no third-party origin at all: auth calls go server-to-server from server
- * actions, fonts come from the token stack, and the TOTP QR code Supabase
- * returns is a `data:` SVG — hence `img-src data:`, and nothing broader.
+ * is no third-party origin at all: sign-in is the console's own (server
+ * actions against Postgres), fonts come from the token stack, and the TOTP QR
+ * code is rendered on the server as a `data:` SVG — hence `img-src data:`, and
+ * nothing broader.
  *
  * `'unsafe-eval'` is added in development only, where React needs it to
  * rebuild server error stacks; production never has it.

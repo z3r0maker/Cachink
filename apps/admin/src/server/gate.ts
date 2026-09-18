@@ -1,14 +1,15 @@
 /**
  * The admin console's access rule, as one pure function (N-05, ADR-063).
  *
- * Three facts decide every request — who is signed in (Supabase Auth), whether
- * they are on the `staff_members` allowlist, and the assurance level of their
- * session — and they are checked **in that order**:
+ * Identity is the console's own (ADR-080): a server-side session opened by
+ * password sign-in, raised to AAL2 by a TOTP code. The facts that decide every
+ * request are checked **in this order**:
  *
- *  1. nobody signed in            → /login
- *  2. signed in, not allowlisted  → 403, even at AAL2 (a stranger with 2FA is
+ *  1. no live session             → /login
+ *  2. session, not allowlisted    → 403, even at AAL2 (a stranger with 2FA is
  *     still a stranger), and never offered MFA enrolment
- *  3. allowlisted, below AAL2     → /mfa (enrol if no factor, else challenge)
+ *  3. allowlisted, below AAL2     → /mfa/enroll (no authenticator yet) or
+ *                                   /mfa/verify — and only that one
  *  4. allowlisted at AAL2         → through
  *
  * `src/proxy.ts` applies it to page requests; `requireStaff()` applies it
@@ -20,24 +21,30 @@ export type Aal = 'aal1' | 'aal2';
 
 export interface GateInput {
   readonly path: string;
-  /** `auth.users.id` from verified JWT claims, or null when signed out. */
-  readonly userId: string | null;
-  /** A live (non-revoked) `staff_members` row exists for `userId`. */
+  /** `staff_members.id` of the session, or null with no live session. */
+  readonly staffId: string | null;
+  /** The session's staff row is live (not revoked) — re-read on every request. */
   readonly isStaff: boolean;
-  /** The session's `aal` claim; null is treated as AAL1. */
+  /** The session's assurance level; null is treated as AAL1. */
   readonly aal: Aal | null;
+  /** The staff member has confirmed an authenticator (`totp_enrolled_at`). */
+  readonly enrolled: boolean;
 }
+
+export type MfaPath = '/mfa/enroll' | '/mfa/verify';
 
 export type GateDecision =
   | { readonly kind: 'allow' }
-  | { readonly kind: 'redirect'; readonly to: '/login' | '/mfa' | '/' }
+  | { readonly kind: 'redirect'; readonly to: '/login' | MfaPath | '/' }
   | { readonly kind: 'forbidden' };
 
 export const LOGIN_PATH = '/login';
-export const MFA_PATH = '/mfa';
+export const MFA_ENROLL_PATH = '/mfa/enroll';
+export const MFA_VERIFY_PATH = '/mfa/verify';
 export const FORBIDDEN_PATH = '/prohibido';
 
 const PUBLIC_PATHS: ReadonlySet<string> = new Set([LOGIN_PATH, FORBIDDEN_PATH]);
+const MFA_PATHS: ReadonlySet<string> = new Set([MFA_ENROLL_PATH, MFA_VERIFY_PATH]);
 
 export function isPublicPath(path: string): boolean {
   return PUBLIC_PATHS.has(path);
@@ -55,28 +62,26 @@ export function isMachinePath(path: string): boolean {
   return MACHINE_PREFIXES.some((p) => path.startsWith(p)) && !path.includes('..');
 }
 
+/** The one MFA page an AAL1 session may see. */
+export function mfaPathFor(enrolled: boolean): MfaPath {
+  return enrolled ? MFA_VERIFY_PATH : MFA_ENROLL_PATH;
+}
+
 const ALLOW: GateDecision = { kind: 'allow' };
 
 export function decideAccess(input: GateInput): GateDecision {
   if (isPublicPath(input.path)) return ALLOW;
-  if (input.userId === null) return { kind: 'redirect', to: LOGIN_PATH };
+  if (input.staffId === null) return { kind: 'redirect', to: LOGIN_PATH };
   if (!input.isStaff) return { kind: 'forbidden' };
 
-  const atAal2 = input.aal === 'aal2';
-  if (input.path === MFA_PATH) return atAal2 ? { kind: 'redirect', to: '/' } : ALLOW;
-  return atAal2 ? ALLOW : { kind: 'redirect', to: MFA_PATH };
+  if (input.aal === 'aal2') {
+    return MFA_PATHS.has(input.path) ? { kind: 'redirect', to: '/' } : ALLOW;
+  }
+  const step = mfaPathFor(input.enrolled);
+  return input.path === step ? ALLOW : { kind: 'redirect', to: step };
 }
 
-/** What the /mfa page shows. Enrolment is only ever offered with no verified factor. */
-export function mfaStep(input: {
-  readonly aal: Aal | null;
-  readonly verifiedFactors: number;
-}): 'enrol' | 'challenge' | 'done' {
-  if (input.aal === 'aal2') return 'done';
-  return input.verifiedFactors > 0 ? 'challenge' : 'enrol';
-}
-
-/** Narrow a raw JWT `aal` claim. Anything unrecognised is not AAL2. */
+/** Narrow a stored `aal` value. Anything unrecognised is not AAL2. */
 export function toAal(value: unknown): Aal | null {
   return value === 'aal1' || value === 'aal2' ? value : null;
 }

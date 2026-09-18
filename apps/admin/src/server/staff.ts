@@ -2,11 +2,11 @@ import 'server-only';
 
 import { redirect } from 'next/navigation';
 
+import { readSessionToken } from './auth/cookie';
+import type { StaffSession } from './auth/ports';
 import type { ActiveStaff } from './db/staff';
 import { FORBIDDEN_PATH, type GateDecision } from './gate';
 import { resolveGate } from './resolve-gate';
-import type { Identity } from './supabase/identity';
-import { supabaseServer } from './supabase/server';
 
 /**
  * The server-side half of the gate. `src/proxy.ts` is an optimistic check on
@@ -23,19 +23,25 @@ export class NotPermitted extends Error {
 }
 
 export interface StaffContext {
-  readonly identity: Identity;
   readonly staff: ActiveStaff;
+  readonly session: StaffSession;
+  /** The raw cookie token — the MFA step replaces it with an AAL2 one. */
+  readonly token: string;
 }
 
-/** Any console path that is neither public nor /mfa: the full gate applies. */
+/** Any console path that is neither public nor an MFA step: the full gate applies. */
 const CONSOLE_PATH = '/';
 
 async function evaluate(
   path: string,
 ): Promise<{ decision: GateDecision; ctx: StaffContext | null }> {
-  const { decision, identity, staff } = await resolveGate(await supabaseServer(), path);
-  const ctx = identity && staff && decision.kind === 'allow' ? { identity, staff } : null;
-  return { decision, ctx };
+  const token = await readSessionToken();
+  const { decision, session } = await resolveGate(token, path);
+  if (session === null || token === undefined || decision.kind !== 'allow') {
+    return { decision, ctx: null };
+  }
+  const staff = { id: session.staffId, email: session.email, nombre: session.nombre };
+  return { decision, ctx: { staff, session, token } };
 }
 
 /** For server actions: throws rather than redirecting, so the caller can show why. */
@@ -46,8 +52,9 @@ export async function requireStaff(): Promise<StaffContext> {
 }
 
 /**
- * For layouts, pages and the /mfa action: follows the gate's redirect.
- * With `MFA_PATH` it admits an allowlisted user who is still at AAL1.
+ * For layouts, pages and the MFA actions: follows the gate's redirect. With
+ * an MFA path it admits an allowlisted member still at AAL1 — on the one MFA
+ * step the gate assigns them.
  */
 export async function requireStaffPage(path: string = CONSOLE_PATH): Promise<StaffContext> {
   const { decision, ctx } = await evaluate(path);
