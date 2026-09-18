@@ -36,7 +36,6 @@ interface Facts {
   id_type: string | null;
   missing: string[];
   read_write: boolean;
-  regrant: boolean;
 }
 
 async function facts(sql: Sql): Promise<Facts | undefined> {
@@ -53,15 +52,12 @@ async function facts(sql: Sql): Promise<Facts | undefined> {
            CASE WHEN to_regclass('auth.users') IS NULL THEN false
                 ELSE has_schema_privilege('auth', 'USAGE')
                  AND has_table_privilege('auth.users', 'SELECT')
-                 AND has_table_privilege('auth.users', 'UPDATE') END AS read_write,
-           CASE WHEN to_regclass('auth.users') IS NULL THEN false
-                ELSE has_schema_privilege('auth', 'USAGE WITH GRANT OPTION')
-                 AND has_table_privilege('auth.users', 'SELECT WITH GRANT OPTION') END AS regrant
+                 AND has_table_privilege('auth.users', 'UPDATE') END AS read_write
     FROM pg_roles r WHERE r.rolname = current_user`;
   return row;
 }
 
-function authBlockers(f: Facts, pending: ReadonlySet<string>): Blocker[] {
+function authBlockers(f: Facts): Blocker[] {
   if (!f.auth) return [{ problem: 'auth.users does not exist: this is not a Supabase project' }];
   const out: Blocker[] = [];
   if (f.id_type !== 'uuid' || f.missing.length > 0) {
@@ -76,16 +72,10 @@ function authBlockers(f: Facts, pending: ReadonlySet<string>): Blocker[] {
       fix: `GRANT USAGE ON SCHEMA auth TO ${f.user}; GRANT SELECT, UPDATE ON auth.users TO ${f.user}; -- ${SUPPORT}`,
     });
   }
-  if (!f.regrant && pending.has('admin/0004_admin_tenant_read.sql')) {
-    out.push({
-      problem: `${f.user} cannot re-grant auth.users; admin/0004 grants SELECT (id, email) to xangarro_admin`,
-      fix: `GRANT USAGE ON SCHEMA auth TO ${f.user} WITH GRANT OPTION; GRANT SELECT ON auth.users TO ${f.user} WITH GRANT OPTION; -- ${SUPPORT}`,
-    });
-  }
   return out;
 }
 
-export async function preflight(sql: Sql, pending: ReadonlySet<string>): Promise<Blocker[]> {
+export async function preflight(sql: Sql): Promise<Blocker[]> {
   const f = await facts(sql);
   if (f === undefined) return [{ problem: 'cannot read the current role' }];
   const out: Blocker[] = [];
@@ -101,5 +91,5 @@ export async function preflight(sql: Sql, pending: ReadonlySet<string>): Promise
       fix: `ALTER ROLE ${f.user} BYPASSRLS; -- ${SUPPORT}`,
     });
   }
-  return [...out, ...authBlockers(f, pending)];
+  return [...out, ...authBlockers(f)];
 }

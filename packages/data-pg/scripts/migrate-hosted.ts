@@ -120,8 +120,8 @@ async function applyAll(sql: Sql, files: readonly MigrationFile[], dryRun: boole
   );
 }
 
-async function checkPreflight(sql: Sql, files: readonly MigrationFile[]): Promise<number> {
-  const blockers = await preflight(sql, new Set(files.map((f) => f.name)));
+async function checkPreflight(sql: Sql): Promise<number> {
+  const blockers = await preflight(sql);
   for (const b of blockers) {
     console.log(`BLOCKER   ${b.problem}`);
     if (b.fix !== undefined) console.log(`  fix:    ${b.fix}`);
@@ -146,7 +146,7 @@ async function run(sql: Sql, options: Options, passwords: Map<string, string>): 
   await sql`SET statement_timeout = 0`;
   await sql`SELECT pg_advisory_lock(hashtext('xangarro:migrate-hosted'))`;
   const files = await pending(sql, options.root);
-  const blockers = await checkPreflight(sql, files);
+  const blockers = await checkPreflight(sql);
   if (blockers > 0 && !options.dryRun)
     throw new UsageError(`${blockers} preflight blocker(s); nothing was written.`);
   await provisionRoles(sql, passwords, options.dryRun);
