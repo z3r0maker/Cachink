@@ -1,7 +1,7 @@
 import { style, styleVariants } from '@vanilla-extract/css';
 import { colors, fontSizes, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
-/** The big «$ 0.00» field: Cobrar · efectivo (64 px) and Registrar gasto (62 px). */
+/** The big «$ 0.00» field: Cobrar · efectivo (64 px), Registrar gasto and Revisión de caja's limit (62 px). */
 export const box = style({
   boxSizing: 'content-box',
   padding: '0 14px',
@@ -13,7 +13,11 @@ export const box = style({
   background: colors.white,
 });
 
-export const boxSize = styleVariants({ caja: { height: 64 }, gasto: { height: 62 } });
+export const boxSize = styleVariants({
+  caja: { height: 64 },
+  gasto: { height: 62 },
+  limite: { height: 62 },
+});
 
 export const peso = style({
   fontSize: portalFontSizes.xl3,
@@ -40,4 +44,5 @@ export const field = styleVariants({
     letterSpacing: typography.letterSpacing.tight,
   },
   gasto: { ...input, fontSize: fontSizes.xl4 },
+  limite: { ...input, fontSize: portalFontSizes.xl4 },
 });
