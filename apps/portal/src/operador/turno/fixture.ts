@@ -1,3 +1,4 @@
+import { esperadoDe } from './desglose';
 import type { TurnoData } from './types';
 
 /**
@@ -12,7 +13,12 @@ export const TURNO_FIXTURE: TurnoData = {
   ventasEfectivo: 214_000n,
   abonosEfectivo: 55_000n,
   gastosEfectivo: 62_000n,
-  esperado: 287_000n,
+  esperado: esperadoDe({
+    fondo: 80_000n,
+    ventasEfectivo: 214_000n,
+    abonosEfectivo: 55_000n,
+    gastosEfectivo: 62_000n,
+  }),
   ventas: 12,
   canceladas: 1,
   ultimaCancelada: '12:58',
