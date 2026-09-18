@@ -1,10 +1,11 @@
 import 'server-only';
 
-import { devices } from '@xangarro/data-pg';
+import { devices, throttleKey, throttleTake } from '@xangarro/data-pg';
 import { eq } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
-import { withTenant } from '../db';
+import { db, withTenant } from '../db';
+import { DEVICE_CALLS_PER_MINUTE } from '../throttle-policy';
 import { deviceTokenSecret } from './credentials';
 
 /**
@@ -18,6 +19,16 @@ import { deviceTokenSecret } from './credentials';
 export interface DeviceCaller {
   readonly businessId: string;
   readonly deviceId: string;
+}
+
+/** The device is over its allowance (B-17); `retryAfter` is in seconds. */
+export class RateLimitedError extends Error {
+  readonly code = 'RATE_LIMITED' as const;
+
+  constructor(readonly retryAfter: number) {
+    super('RATE_LIMITED');
+    this.name = 'RateLimitedError';
+  }
 }
 
 export class DeviceAuthError extends Error {
@@ -55,5 +66,14 @@ export async function authenticateDevice(request: Request): Promise<DeviceCaller
   // A signed token for a row that is gone is a token we no longer honour.
   if (row === undefined) throw new DeviceAuthError('UNAUTHENTICATED');
   if (row.revokedAt !== null) throw new DeviceAuthError('DEVICE_REVOKED');
+  // Counted only for a real, live device: an unauthenticated flood never
+  // reaches the table, and one phone's burst never slows another.
+  const wait = await throttleTake(
+    db(),
+    throttleKey('device', caller.deviceId),
+    DEVICE_CALLS_PER_MINUTE,
+    60,
+  );
+  if (wait > 0) throw new RateLimitedError(wait);
   return caller;
 }

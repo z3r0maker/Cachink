@@ -128,4 +128,12 @@ CREATE TABLE IF NOT EXISTS auth.users (
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role, xangarro_app;
 GRANT EXECUTE ON FUNCTION auth.jwt(), auth.uid(), auth.role(), auth.email()
   TO anon, authenticated, service_role, xangarro_app;
-GRANT SELECT, INSERT, UPDATE ON auth.users TO xangarro_app, service_role;
+GRANT SELECT, INSERT, UPDATE ON auth.users TO service_role;
+-- The app role may write identities (seed, signup) and read who they are, but
+-- **not** `encrypted_password`: a query mistake must not be able to dump every
+-- tenant's hashes (audit SEC-AUTH-02). Sign-in reads one account's hash through
+-- `xangarro.login_lookup` (drizzle/0005). REVOKE first so a re-apply narrows an
+-- older, wider grant.
+REVOKE SELECT ON auth.users FROM xangarro_app;
+GRANT SELECT (id, email, email_confirmed_at, created_at, updated_at), INSERT, UPDATE
+  ON auth.users TO xangarro_app;

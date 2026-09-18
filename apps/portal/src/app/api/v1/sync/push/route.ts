@@ -1,9 +1,10 @@
 import { ApplyPushUseCase } from '@xangarro/application';
 import { PushRequestSchema, PushResponseSchema } from '@xangarro/contracts';
 
+import { deviceFailure } from '@/server/api/device-failure';
 import { fail, ok, protocolRefusal } from '@/server/api/respond';
 import { withTenant } from '@/server/db';
-import { authenticateDevice, DeviceAuthError } from '@/server/device/authenticate';
+import { authenticateDevice } from '@/server/device/authenticate';
 import { PgPushStore } from '@/server/sync/pg-push-store';
 
 /**
@@ -28,7 +29,8 @@ export async function POST(request: Request): Promise<Response> {
     );
     return ok(PushResponseSchema.parse({ ...result, serverTime: new Date().toISOString() }));
   } catch (error) {
-    if (error instanceof DeviceAuthError) return fail(error.code, error.code);
+    const refused = deviceFailure(error);
+    if (refused !== null) return refused;
     console.error('[sync/push]', error);
     return fail('INTERNAL', 'No pudimos recibir los cambios. Se reintentará.');
   }

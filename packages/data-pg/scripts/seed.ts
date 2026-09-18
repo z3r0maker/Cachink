@@ -181,7 +181,7 @@ async function seedMembers(sql: Sql): Promise<void> {
     await sql`
       INSERT INTO auth.users (id, email, encrypted_password, email_confirmed_at)
       VALUES (${m.id}::uuid, ${m.email}, ${encrypted}, now())
-      ON CONFLICT (id) DO UPDATE SET encrypted_password = EXCLUDED.encrypted_password`;
+      ON CONFLICT (id) DO NOTHING`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${m.memberId}, ${m.id}, ${m.role}, ${BIZ}, ${CREATED}, ${CREATED})

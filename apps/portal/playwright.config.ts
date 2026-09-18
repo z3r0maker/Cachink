@@ -62,10 +62,6 @@ export default defineConfig({
     // reader learns this server is database-backed.
     env: {
       DATABASE_URL: databaseUrl(),
-      // A fixture secret: this server is local and disposable. Production sets
-      // its own, and `session.ts` throws when it is missing rather than
-      // falling back to a default that would make every cookie forgeable.
-      SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-only-not-a-real-secret',
       // /activate signs a device token and an entitlement. The entitlement key
       // is the contract's published TEST key, passed explicitly: the portal has
       // no default for it on purpose (server/device/credentials.ts).

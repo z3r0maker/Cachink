@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { deviceHeaders } from '@xangarro/contracts';
 import { newUlid } from '@xangarro/domain';
 
 import {
@@ -133,4 +134,50 @@ test('a backlog longer than a page arrives in order, without skipping', async ({
   expect(first.tables.products).toHaveLength(1);
   const second = await pull(request, b, first.serverSeq);
   expect(second.serverSeq).toBe(from + backlog);
+});
+
+test('a phone over 60 calls a minute is told when to come back', async ({ request }) => {
+  let limited = null;
+  for (let i = 0; i < 70 && limited === null; i += 1) {
+    const r = await request.get('/api/v1/entitlement', { headers: deviceHeaders(b.token) });
+    if (r.status() === 429) limited = r;
+  }
+  expect(limited, 'no 429 within 70 calls').not.toBeNull();
+  expect(Number(limited?.headers()['retry-after'])).toBeGreaterThan(0);
+  expect((await limited?.json()).error.code).toBe('RATE_LIMITED');
+});
+
+test('guessing activation codes locks the caller out before any device token', async ({
+  request,
+}) => {
+  const from = { ...deviceHeaders(), 'x-forwarded-for': `198.51.100.${Date.now() % 250}` };
+  const attempt = (code: string) =>
+    request.post('/api/v1/activate', {
+      headers: from,
+      data: {
+        email: 'pedro@taqueria.mx',
+        code,
+        device: { name: 'x', platform: 'android', appVersion: '0.1.0', osVersion: '15' },
+      },
+    });
+  const statuses = [];
+  for (const guess of ['ZZZZZZZ2', 'ZZZZZZZ3', 'ZZZZZZZ4', 'ZZZZZZZ5', 'ZZZZZZZ6']) {
+    statuses.push((await attempt(guess)).status());
+  }
+  expect(statuses).toEqual([400, 400, 400, 400, 429]);
+
+  // Locked means locked: even a real code is refused from here, and stays unspent.
+  await asTenant(
+    BIZ,
+    (sql) => sql`
+      INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
+      VALUES ('SYNCLCK2', 'pedro@taqueria.mx', now() + interval '1 hour', ${BIZ}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET redeemed_at = NULL, expires_at = EXCLUDED.expires_at`,
+  );
+  expect((await attempt('SYNCLCK2')).status()).toBe(429);
+  const [code] = await asTenant(
+    BIZ,
+    (sql) => sql`SELECT redeemed_at FROM activation_codes WHERE code = 'SYNCLCK2'`,
+  );
+  expect(code?.redeemed_at).toBeNull();
 });

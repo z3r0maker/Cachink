@@ -13,6 +13,7 @@
 import postgres from 'postgres';
 
 import { CODE_TTL_MS, mintActivationCode } from '../src/lib/activation-code';
+import { clearLocalThrottles } from './local-throttles';
 
 // The conformance tenant, not the demo business (see CONFORMANCE in seed-data):
 // it activates real devices, and Taquería Don Pedro is seeded at its limit.
@@ -30,6 +31,7 @@ async function main(): Promise<void> {
     // Each run activates devices, and the plan caps them. Revoking the previous
     // run's phones gives this one free slots — on the conformance tenant only.
     await sql`UPDATE devices SET revoked_at = now(), updated_at = now() WHERE revoked_at IS NULL`;
+    await clearLocalThrottles(sql);
     const now = new Date();
     const expires = new Date(now.getTime() + CODE_TTL_MS).toISOString();
     const codes: string[] = [];

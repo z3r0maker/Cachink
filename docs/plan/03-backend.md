@@ -252,7 +252,18 @@
 > code/QR token **before** any device token exists (5 failures / 15 min → 15-min lockout), with one
 > generic error. See C-14.
 
-- [ ] Status · **Blocked by:** B-05
+- [x] Status · **Blocked by:** B-05
+  - Done 2026-09-17 (ADR-079). Postgres throttle (`xangarro.throttle`, hashed keys): 60 calls/min
+    per device → `429` + `Retry-After`; `/activate` 5 guesses per IP and 5 per code in 15 min →
+    15-min lockout, before any device token; `426` was already there. Folded in from the security
+    audit: **server-side portal sessions** (logout revokes, 30 d absolute / 7 d idle, a removed or
+    demoted member loses access on the next request — SEC-AUTH-01, plus the «Cerrar sesión» menu the
+    portal lacked), and sign-in throttled per address and IP, constant-time on unknown addresses,
+    reading one hash through `xangarro.login_lookup` (SEC-AUTH-02). Proven by
+    `security.integration.test.ts` and E2E (a copied cookie dies at logout, five wrong passwords
+    lock, a phone's 61st call gets 429, a locked IP cannot spend a real code).
+  - **Not here:** the 429 conformance test and C-14's single generic error / QR token are contract
+    changes (C-14, Track C); the mock has no limiter yet.
 - **Steps:** `X-Xangarro-Protocol` check → `426`; per-device token bucket (60/min) in Postgres or Upstash (prefer Postgres `billing.rate_limits` to avoid a new vendor at this size); `429` + `Retry-After`.
 - **Acceptance:** conformance tests for 426 and 429.
 

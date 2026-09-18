@@ -5,7 +5,7 @@
   "description": "Xangarro! admin portal — the Director's web surface. Next.js App Router, Radix primitives, vanilla-extract over @xangarro/tokens (ADR-057).",
   "type": "module",
   "scripts": {
-    "dev": "SESSION_SECRET=${SESSION_SECRET:-dev-only-not-a-real-secret} next dev --webpack -p 3100",
+    "dev": "next dev --webpack -p 3100",
     "build": "NODE_ENV=production next build --webpack",
     "start": "next start -p 3100",
     "typecheck": "tsc --noEmit",

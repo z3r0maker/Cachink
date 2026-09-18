@@ -1,23 +1,24 @@
 import 'server-only';
 
-import { createHmac, timingSafeEqual } from 'node:crypto';
+import { openSession, resolveSession, revokeSession } from '@xangarro/data-pg';
 import { cookies } from 'next/headers';
+import { cache } from 'react';
+
+import { db } from './db';
 
 /**
  * The portal session: who is looking, and at which business.
  *
- * The payload is deliberately **the claim shape Supabase's access token
- * carries** — `sub`, `role`, `business_id`. Two consequences, both wanted:
+ * **Server-side** (audit SEC-AUTH-01). The cookie used to be a signed copy of
+ * the claims, so it never expired, logout could not invalidate a copy, and a
+ * removed or demoted member kept their role until the cookie aged out. Now the
+ * cookie is 256 random bits and every request looks it up: logout, expiry,
+ * idleness and a membership change end or change it at once
+ * (`xangarro.session_resolve` reads the role as it is **now**).
  *
- *  - `withTenant` can put it straight into `request.jwt.claims`, so the branch
- *    of `xangarro.current_business_id()` that RLS uses in production is the one
- *    the integration suite already proves (`claims.integration.test.ts`).
- *  - Adopting GoTrue later replaces the *issuer* of this payload, not every
- *    query, guard and policy downstream.
- *
- * It is signed, not encrypted: it carries no secret, and the server must be
- * able to detect tampering, not hide the contents. HMAC-SHA256 over the exact
- * bytes that were signed, compared in constant time.
+ * The claims keep **the shape Supabase's access token carries** — `sub`,
+ * `role`, `business_id` — so `withTenant` can still put them straight into
+ * `request.jwt.claims`, and adopting GoTrue later replaces the issuer only.
  */
 export interface SessionClaims {
   /** `auth.users.id`. */
@@ -26,51 +27,45 @@ export interface SessionClaims {
   /** Always `authenticated` — the shape PostgREST expects. */
   readonly role: 'authenticated';
   readonly business_id: string;
-  /** The member's role on that business, from `business_members`. */
+  /** The member's role on that business, from `business_members`, as of this request. */
   readonly member_role: 'owner' | 'admin' | 'viewer';
 }
 
 export const SESSION_COOKIE = 'xg_session';
+/** A session ends 30 days after sign-in, whatever happens. */
+export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 30;
+/** …or after 7 days unseen. */
+export const SESSION_IDLE_SECONDS = 60 * 60 * 24 * 7;
 
-function secret(): string {
-  const value = process.env.SESSION_SECRET;
-  if (value === undefined || value === '') {
-    throw new Error(
-      'SESSION_SECRET is not set. Sessions are signed with it; without one the ' +
-        'portal cannot tell a real cookie from a forged one.',
-    );
-  }
-  return value;
+/** One lookup per request, however many components ask. */
+export const readSession = cache(async (): Promise<SessionClaims | null> => {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (token === undefined || token === '') return null;
+  const s = await resolveSession(db(), token, SESSION_IDLE_SECONDS);
+  if (s === null) return null;
+  return {
+    sub: s.userId,
+    email: s.email,
+    role: 'authenticated',
+    business_id: s.businessId,
+    member_role: s.role,
+  };
+});
+
+export async function startSession(userId: string, businessId: string): Promise<void> {
+  const token = await openSession(db(), userId, businessId, SESSION_TTL_SECONDS);
+  (await cookies()).set(SESSION_COOKIE, token, {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: SESSION_TTL_SECONDS,
+  });
 }
 
-const sign = (payload: string): string =>
-  createHmac('sha256', secret()).update(payload).digest('base64url');
-
-export function serializeSession(claims: SessionClaims): string {
-  const payload = Buffer.from(JSON.stringify(claims)).toString('base64url');
-  return `${payload}.${sign(payload)}`;
-}
-
-/** `null` for anything not signed by this server — never a partial session. */
-export function parseSession(token: string | undefined): SessionClaims | null {
-  if (token === undefined) return null;
-  const [payload, signature] = token.split('.');
-  if (payload === undefined || signature === undefined) return null;
-
-  const expected = Buffer.from(sign(payload));
-  const given = Buffer.from(signature);
-  // `timingSafeEqual` throws on a length mismatch, which is itself a leak of
-  // sorts; check the length first so both paths cost the same.
-  if (expected.length !== given.length || !timingSafeEqual(expected, given)) return null;
-
-  try {
-    return JSON.parse(Buffer.from(payload, 'base64url').toString()) as SessionClaims;
-  } catch {
-    return null;
-  }
-}
-
-export async function readSession(): Promise<SessionClaims | null> {
+export async function endSession(): Promise<void> {
   const jar = await cookies();
-  return parseSession(jar.get(SESSION_COOKIE)?.value);
+  const token = jar.get(SESSION_COOKIE)?.value;
+  if (token !== undefined && token !== '') await revokeSession(db(), token);
+  jar.delete(SESSION_COOKIE);
 }

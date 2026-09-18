@@ -474,6 +474,9 @@ importers:
         specifier: ^3.4.9
         version: 3.4.9
     devDependencies:
+      '@types/node':
+        specifier: ^22.19.17
+        version: 22.19.17
       '@xangarro/config':
         specifier: workspace:*
         version: link:../config

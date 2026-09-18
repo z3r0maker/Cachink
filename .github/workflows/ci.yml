@@ -160,10 +160,6 @@ jobs:
     env:
       # The app role, behind the same policies a request hits — never `postgres`.
       DATABASE_URL: postgres://xangarro_app:xangarro_app@localhost:55432/xangarro
-      # Sessions are signed with this. `session.ts` throws when it is missing
-      # rather than defaulting, because a default would make every cookie
-      # forgeable. Disposable here; production sets its own.
-      SESSION_SECRET: ci-only-not-a-real-secret
     steps:
       - uses: actions/checkout@v4
 

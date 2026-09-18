@@ -1,5 +1,6 @@
+import { deviceFailure } from '@/server/api/device-failure';
 import { fail, ok, protocolRefusal } from '@/server/api/respond';
-import { authenticateDevice, DeviceAuthError } from '@/server/device/authenticate';
+import { authenticateDevice } from '@/server/device/authenticate';
 import { entitlementFor } from '@/server/device/bootstrap';
 import { signEntitlement } from '@/server/device/credentials';
 
@@ -18,7 +19,8 @@ export async function GET(request: Request): Promise<Response> {
     const { businessId } = await authenticateDevice(request);
     return ok({ entitlement: await signEntitlement(entitlementFor(businessId, new Date())) });
   } catch (error) {
-    if (error instanceof DeviceAuthError) return fail(error.code, error.code);
+    const refused = deviceFailure(error);
+    if (refused !== null) return refused;
     console.error('[entitlement]', error);
     return fail('INTERNAL', 'No pudimos revisar tu plan. Intenta de nuevo.');
   }

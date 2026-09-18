@@ -26,7 +26,6 @@ PUB="$(node -e "console.log(require('$KEYS').publicHex)")"
 
 cd "$HERE"
 DATABASE_URL="$DATABASE_URL" \
-  SESSION_SECRET="${SESSION_SECRET:-conformance-only}" \
   DEVICE_TOKEN_SECRET="${DEVICE_TOKEN_SECRET:-conformance-only}" \
   ENTITLEMENT_PRIVATE_KEY="$PRIV" \
   NODE_ENV=production PORT="$PORT" \

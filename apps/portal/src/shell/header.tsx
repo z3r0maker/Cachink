@@ -6,9 +6,8 @@ import { Tag } from '@/components';
 
 import { Icon } from './icon';
 import { SyncPill } from './sync-pill';
+import { UserMenu } from './user-menu';
 import {
-  avatar,
-  avatarHit,
   badge,
   bell,
   bizName,
@@ -61,9 +60,7 @@ export function Header(props: HeaderProps) {
           </Link>
           <Tag tone="brand">Plan {props.planLabel}</Tag>
           <SyncPill pending={props.pendingRows} />
-          <button type="button" className={avatarHit} aria-label="Menú de usuario">
-            <span className={avatar}>{props.userInitials}</span>
-          </button>
+          <UserMenu initials={props.userInitials} />
         </div>
       </div>
     </header>

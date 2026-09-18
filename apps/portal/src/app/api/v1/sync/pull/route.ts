@@ -1,7 +1,8 @@
 import { PullQuerySchema } from '@xangarro/contracts';
 
+import { deviceFailure } from '@/server/api/device-failure';
 import { fail, ok, protocolRefusal } from '@/server/api/respond';
-import { authenticateDevice, DeviceAuthError } from '@/server/device/authenticate';
+import { authenticateDevice } from '@/server/device/authenticate';
 import { pull } from '@/server/sync/pull';
 
 /** `GET /api/v1/sync/pull?since=<serverSeq>` (B-09; contract §5). */
@@ -18,7 +19,8 @@ export async function GET(request: Request): Promise<Response> {
     }
     return ok(await pull(caller, query.data.since));
   } catch (error) {
-    if (error instanceof DeviceAuthError) return fail(error.code, error.code);
+    const refused = deviceFailure(error);
+    if (refused !== null) return refused;
     console.error('[sync/pull]', error);
     return fail('INTERNAL', 'No pudimos traer los cambios. Se reintentará.');
   }
