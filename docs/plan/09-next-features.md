@@ -662,6 +662,18 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   stamps per path with real test keys; tenant fiscal data (no RFC fields on main → every payment
   routes global, P-10); marking a `factura` item with its UUID does not yet update `cfdi_payments`;
   refunds/egreso; contador sign-off.
+- Progress: 2026-09-18 · branch `track-n/n33-facturas-list` · data side of the customer **Facturas** list
+  (UI is P-10's). Migration `0019_facturas_del_negocio.sql`: `xangarro.facturas_del_negocio(business_id)`
+  (SECURITY DEFINER, EXECUTE `xangarro_app` only, empty unless the id is the caller's tenant claim) maps
+  `cfdi_payments` to `timbrada | en_global | pendiente | error` (stamped / pending_global+in_global /
+  manual / claimed; refunded payments not listed); `xangarro.cfdi_marcar_emitido()` (EXECUTE
+  `xangarro_admin`) — **resolving a `factura` inbox item with its UUID now marks the payment** (individual
+  → `stamped` without PAC id = `emitidaManual`, global → `in_global`). Server functions for P-10 in
+  `apps/web/src/server/billing/facturas.ts`: `listarFacturas()` (any member),
+  `urlDescargaFactura(paymentId, 'pdf'|'xml')` (owner/admin; `data:` URL from the PAC; `NO_DISPONIBLE`
+  with `CFDI_MODE=off`), `solicitarFacturaNominal(paymentId)` (owner; `en_global` + valid fiscal data →
+  one inbox item per payment, else `NO_APLICA` / `DATOS_FISCALES_INCOMPLETOS`). Result types in
+  `facturas-core.ts`. **Still to do:** the monthly close's own item (`cfdi-global:<period>`) marks nothing.
 
 ---
 

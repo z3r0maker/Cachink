@@ -2,6 +2,7 @@ import 'server-only';
 
 import {
   assertKeyMatchesMode,
+  CfdiError,
   CloseCfdiPeriodUseCase,
   CloseMonthlyGlobalCfdiUseCase,
   FacturapiPacProvider,
@@ -44,14 +45,20 @@ interface CfdiParts {
 
 const platformFetch: HttpFetch = (url, init) => fetch(url, init);
 
+/** The PAC for `test` / `live`, its key checked against the mode; throws for `off`. */
+export function livePacProvider(env: EnvSource = process.env): PacProvider {
+  const mode = readCfdiMode(env);
+  if (mode === 'off') throw new CfdiError('CFDI_PROVIDER_CONFIG', 'CFDI_MODE=off no usa PAC');
+  const config = readFacturapiConfig(env);
+  assertKeyMatchesMode(mode, config.livemode);
+  return new FacturapiPacProvider({ ...config, fetch: platformFetch });
+}
+
 function parts(env: EnvSource = process.env): CfdiParts {
   const mode = readCfdiMode(env);
   const repo = pgIssuedCfdiRepository(billingDb());
   if (mode === 'off') return { mode, repo, pac: null, issuer: null };
-  const config = readFacturapiConfig(env);
-  assertKeyMatchesMode(mode, config.livemode);
-  const pac = new FacturapiPacProvider({ ...config, fetch: platformFetch });
-  return { mode, repo, pac, issuer: readCfdiIssuerConfig(env) };
+  return { mode, repo, pac: livePacProvider(env), issuer: readCfdiIssuerConfig(env) };
 }
 
 /** What `invoice.paid` does for the CFDI, per `CFDI_MODE`. */

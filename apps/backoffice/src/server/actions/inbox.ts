@@ -2,9 +2,12 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { marcarCfdiEmitido } from '@xangarro/data-pg';
+
 import { auditedMutation } from '../audited';
 import { drizzleSupportItems } from '../db/support-items';
 import { assignSupportItem, type AssignResult } from '../inbox/assign';
+import { markPaymentInvoiced } from '../inbox/cfdi-payment';
 import { SupportItemError, type SupportItemErrorCode } from '../inbox/errors';
 import { changeSupportItemStatus, type StatusResult } from '../inbox/status';
 import { NotPermitted } from '../staff';
@@ -75,7 +78,12 @@ export async function cambiarEstado(_prev: FormState, form: FormData): Promise<F
           cfdiUuid: item.cfdiUuid,
         },
       }),
-      (tx) => changeSupportItemStatus(drizzleSupportItems(tx), input, { now: () => new Date() }),
+      async (tx) => {
+        const clock = { now: () => new Date() };
+        const result = await changeSupportItemStatus(drizzleSupportItems(tx), input, clock);
+        await markPaymentInvoiced((mark) => marcarCfdiEmitido(tx, mark), result);
+        return result;
+      },
     );
     refresh(id);
     return { ok: true, message: 'Estado actualizado.' };
