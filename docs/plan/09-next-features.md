@@ -56,7 +56,7 @@
 
 ### N-01 Stripe: annual prices + trial on both paid tiers `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** B-10, C-12 · **Blocks:** N-13, N-31
+- [~] Status · **Blocked by:** B-10, C-12 · **Blocks:** N-13, N-31
 - **What:** second Stripe Price per paid plan. Lookup keys `plan_xangarro_monthly`,
   `plan_xangarro_annual`, `plan_xangarrote_monthly`, `plan_xangarrote_annual`. `trial_period_days: 14`
   on both tiers (B-10 had it on the top tier only), **no payment method collected at trial start**
@@ -77,6 +77,16 @@
 - **Acceptance:** test-mode Checkout for all four prices; a no-card trial that converts by card and one
   that converts by SPEI (test-mode bank transfer); trial end without payment falls to xangarrito;
   Z-10 marked superseded.
+- Progress: 2026-09-18 · 4a7df64…2528ca2 (branch `track-n/b10-stripe`, also delivers **B-10**) · stripe
+  22.6.2; four `plan_` prices with a flat **exclusive 16 % IVA tax rate** (not Stripe Tax: exact
+  centavo totals, same on Checkout and SPEI invoices, no address prompt, no per-transaction fee);
+  card-less 14-day trial on both tiers; SPEI annual via `send_invoice`; no OXXO; tables
+  `billing_customers` / `subscriptions` / `stripe_events` (`0003_billing` + `0007_billing_grants.sql`,
+  written only by `xangarro_billing`); idempotent signed webhook; state machine (trial counts from its
+  end; a missed payment counts from the start of the unpaid period). `PLAN_FIXTURE` removed: activation,
+  pull, `GET /entitlement`, session, operator limit and Funciones read the real subscription (no row →
+  free plan). **Still to do:** a live test-mode run by the owner (env keys, Customer Portal config,
+  `stripe:seed`, `stripe listen`), day-11/14 trial emails (B-14), P-10 buttons.
 
 ### Plan limits and usage
 
