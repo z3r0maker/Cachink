@@ -12,15 +12,16 @@
 
 ### B-01 Provision Supabase (local + one hosted project) and secrets layout
 
-- [ ] Status · **Blocked by:** F-04 · **Blocks:** B-03, P-01
-- **Context:** No hosted project exists; `supabase/README.md` is placeholders. Q17: local Docker + one hosted project now; staging is X-01.
+- [~] Status · **Blocked by:** F-04 · **Blocks:** B-03, P-01
+  - 2026-09-18 · Tooling landed; the owner runs it (`docs/ops/provisioning.md`). `apps/{portal,admin}/.env.example` + CI drift check (`scripts/env-example.test.ts`); `entitlement:keygen`; `db:migrate:hosted` (LOGIN roles from env with SCRAM verifiers and DB-CONN-01 timeouts, ledger `xangarro_ops.migrations` with checksums, `hosted/` → `drizzle/` → admin migrations, `--dry-run`, preflight blockers + DB-RLS-03 posture warnings), proven by `db:migrate:hosted:selftest` on a throwaway container; both `vercel.json` → `pdx1`. **Still to do (owner):** run it on the hosted project, set Vercel env, DNS, smoke checks. **Open:** hosted sign-up has no `auth.users` access for `xangarro_app` (compat grants excluded by owner rule); `createDb` needs `prepare: false` for the Transaction pooler (portal owner); backups/PITR (DB-OPS-01).
+- **Context:** Hosted project exists: ref `jijggmddzacwcldwnmzj`, **us-west-2**, Nano, no backups yet. Auth is ours (ADR-079/080, no GoTrue), the Data API is off (SEC-DATA-01), and **no anon/service-role/JWT key is used anywhere** — each app connects to Postgres as its own login role. Q17: one hosted project now; staging is X-01.
 - **Steps:**
-  1. `supabase init` at repo root if `supabase/config.toml` is missing; `supabase start`; commit `config.toml` (no secrets).
-  2. Create hosted project `xangarro-prod` in `us-east-1`. Record project ref in `supabase/README.md` (ref is not secret; keys are).
-  3. Secrets layout: `apps/portal/.env.local` (gitignored) with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`, `ENTITLEMENT_PRIVATE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or SMTP). Commit `apps/portal/.env.example` with every key and a one-line meaning.
-  4. Enable Auth providers: email (magic link + password). Set site URL + redirect allow-list for `http://localhost:3000/**`.
-- **Acceptance:** `supabase status` shows local stack; hosted project reachable; `.env.example` complete; nothing secret in git (`git grep -n "sb_secret\|sk_live\|sk_test"` → 0).
-- **How to test:** commands above.
+  1. Local stays `packages/data-pg/scripts/db-local.sh` (plain Postgres + `local/` compat layer); no `supabase start` needed.
+  2. Record the hosted facts in `docs/ops/provisioning.md` (ref is not secret; passwords are).
+  3. Secrets layout: `apps/portal/.env.example` and `apps/admin/.env.example` list every key with a one-line meaning, its DB role and how to generate it; values live only in each Vercel project and `.env.local` (gitignored). Portal: `DATABASE_URL` (`xangarro_app`), `BILLING_DATABASE_URL` (`xangarro_billing`), `METERING_DATABASE_URL` (`xangarro_metering`), `DEVICE_TOKEN_SECRET`, `ENTITLEMENT_PRIVATE_KEY`, `CRON_SECRET`, `STRIPE_*`, `CFDI_*`/`FACTURAPI_*`, `RESEND_API_KEY`, `EMAIL_*`, `ADMIN_INGEST_*`, `PORTAL_URL`, `SENTRY_DSN`. Admin: `DATABASE_URL` (`xangarro_admin`), `ADMIN_TOTP_KEY`, `ADMIN_INGEST_SECRET`, `CRON_SECRET`, `RESEND_API_KEY`, `EMAIL_*`, `ADMIN_BASE_URL`, `DIGEST_TO`, `ALERT_WEBHOOK_URL`. Migration inputs (`SUPERUSER_URL`, four role passwords) in `packages/data-pg/.env.local`.
+  4. Supabase Auth: sign-ups and providers **off** (we write `auth.users` ourselves).
+- **Acceptance:** `db:migrate:hosted --dry-run` on the hosted project shows no blocker and 0 pending after the real run; both apps answer on their domains from `pdx1`; `.env.example` complete (CI); nothing secret in git (`git grep -nE "sk_(test|live)_[A-Za-z0-9]{20,}|sb_secret_[A-Za-z0-9]{10,}|whsec_[A-Za-z0-9]{20,}"` → 0; the bare prefixes appear in comments on purpose).
+- **How to test:** `pnpm --filter @xangarro/data-pg db:migrate:hosted:selftest`; `pnpm test:scripts`; provisioning.md §9.
 
 ### B-02 `packages/data-pg`: Postgres Drizzle schema + drift test
 
