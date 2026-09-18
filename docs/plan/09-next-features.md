@@ -197,11 +197,24 @@ body, attachments)`.
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
 - **What:** UI over the **platform-availability** level of the three-level flags (ADR-053): global
   on/off per feature, plus a beta allowlist of tenants. Kill switches for the Asesor LLM, receipts
   share, card collection (once built).
 - **Acceptance:** flipping a flag reaches a device on its next pull; audited.
+- **Decision (2026-09-17):** platform availability moves from the `PLATFORM_AVAILABLE` constant to an
+  admin-editable table; a key with no row uses the code default; devices still receive flags only
+  through the signed entitlement (no contract change); the ADR-059 LLM gate becomes the `asesorLlm`
+  kill switch.
+- Progress: 2026-09-17 · 45acd01…7784fe7 (branch `track-n/n09-platform-flags`, on top of N-06, unmerged)
+  · `PlatformFlag` + `isPlatformAvailable` / `resolvePlatformFlags` (domain, TDD); `0005_platform_flags.sql`
+  — append-only `platform_flag_events`, latest-state view, narrow portal view (no reason/author,
+  allowlist cut to the caller's business); `/flags` with allowlist, "afecta a N negocios"
+  confirmation, history; integration note `apps/admin/docs/platform-flags-integration.md`.
+  **Still to do (Track B/A):** `computeEntitlement` (`compute-entitlement.ts:68,83`) and
+  `entitlementFor` (`bootstrap.ts:71`) read the portal view; the app must take platform availability
+  from `entitlement.features`, not the compiled constant (A-10/A-14); a C- task so `comprobanteShare`
+  and `cobrosIntegrados` can reach devices.
 
 ### N-10 Staff alerts `[LAUNCH]`
 
