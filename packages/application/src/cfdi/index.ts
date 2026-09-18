@@ -21,3 +21,5 @@ export * from './in-memory-issued-cfdi-repository.js';
 export * from './issue-cfdi-for-payment.js';
 export * from './close-monthly-global-cfdi.js';
 export * from './cancel-cfdi-for-refund.js';
+export * from './issuer-config.js';
+export * from './adapters/facturapi/index.js';
