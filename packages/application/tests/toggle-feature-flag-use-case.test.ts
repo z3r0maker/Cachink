@@ -80,4 +80,57 @@ describe('ToggleFeatureFlagUseCase', () => {
       }),
     ).rejects.toThrow(/no encontrado/);
   });
+
+  describe('what a caller may enable (P-15: the portal passes platform ∩ plan)', () => {
+    const allowed = new Set(['stock', 'barcode'] as const);
+
+    it('refuses to enable a key outside the allowed set, with a typed error, and stores nothing', async () => {
+      await expect(
+        useCase.execute({ businessId, flagKey: 'ventasCredito', newValue: true, allowed }),
+      ).rejects.toMatchObject({ code: 'FLAG_NOT_ALLOWED' });
+      const stored = await businesses.findById(businessId);
+      expect(stored?.featureFlags).not.toContain('"ventasCredito":true');
+    });
+
+    it('always allows turning a key off, even one outside the set', async () => {
+      const result = await useCase.execute({
+        businessId,
+        flagKey: 'merma',
+        newValue: false,
+        allowed,
+      });
+      expect(result.merma).toBe(false);
+    });
+
+    it('still enables a key inside the set', async () => {
+      await useCase.execute({ businessId, flagKey: 'stock', newValue: false, allowed });
+      const result = await useCase.execute({
+        businessId,
+        flagKey: 'stock',
+        newValue: true,
+        allowed,
+      });
+      expect(result.stock).toBe(true);
+    });
+  });
+
+  it('raises typed errors, keeping the messages the phone already shows', async () => {
+    await useCase.execute({ businessId, flagKey: 'stock', newValue: false });
+    await expect(
+      useCase.execute({ businessId, flagKey: 'merma', newValue: true }),
+    ).rejects.toMatchObject({
+      code: 'FLAG_DEPENDENCY',
+      message: expect.stringMatching(/dependencia/),
+    });
+    await expect(
+      useCase.execute({
+        businessId: '01HZ8XQN9GZJXV8AKQ5X0ZZZZZ' as BusinessId,
+        flagKey: 'stock',
+        newValue: true,
+      }),
+    ).rejects.toMatchObject({
+      code: 'BUSINESS_NOT_FOUND',
+      message: expect.stringMatching(/no encontrado/),
+    });
+  });
 });

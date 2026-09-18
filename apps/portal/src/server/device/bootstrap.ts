@@ -10,7 +10,7 @@ import {
   users,
 } from '@xangarro/data-pg';
 import { computeEntitlement } from '@xangarro/application';
-import type { Entitlement } from '@xangarro/domain';
+import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
 
 import { PLAN_FIXTURE } from '@/fixtures/business';
@@ -32,8 +32,14 @@ import { rowToWire } from '../sync/codec';
  * domain requires — the same conversion the portal's repositories do.
  */
 
-/** Tenant layer only; the device resolves platform × plan itself (§3). */
-export const tenantFeatureFlags = () => ({ ...PLAN_FIXTURE.features });
+/**
+ * The tenant layer only — what the owner switched on in Funciones (P-15). The
+ * device resolves platform × plan × tenant itself (§3).
+ */
+export async function tenantFeatureFlags(tx: Tx): Promise<FeatureFlags> {
+  const [row] = await tx.select({ flags: businesses.featureFlags }).from(businesses);
+  return parseFeatureFlags(row?.flags ?? '{}');
+}
 
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
@@ -56,7 +62,7 @@ export async function referenceTables(tx: Tx) {
     employees: e.map((row) => rowToWire('employees', row)),
     recurring_expenses: r.map((row) => rowToWire('recurring_expenses', row)),
     conversion_recetas: cr.map((row) => rowToWire('conversion_recetas', row)),
-    feature_flags: tenantFeatureFlags(),
+    feature_flags: await tenantFeatureFlags(tx),
   };
 }
 

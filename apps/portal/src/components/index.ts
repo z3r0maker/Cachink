@@ -32,6 +32,7 @@ export {
 } from './gated-states';
 export { OptionCards, type OptionDef, type OptionCardsProps } from './option-card';
 export { UsageBar, type UsageBarProps } from './usage-bar';
+export { Switch, type SwitchProps } from './switch';
 export { ConfirmDialog, type ConfirmDialogProps } from './dialog';
 export { Seal, type SealLevel, type SealProps } from './seal';
 export { sealPath } from './seal-path';

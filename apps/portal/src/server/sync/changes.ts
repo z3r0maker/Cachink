@@ -60,6 +60,6 @@ export async function changesSince(tx: Tx, since: number, cursor: number, pageSi
   );
   return {
     serverSeq,
-    tables: { ...Object.fromEntries(loaded), feature_flags: tenantFeatureFlags() },
+    tables: { ...Object.fromEntries(loaded), feature_flags: await tenantFeatureFlags(tx) },
   };
 }

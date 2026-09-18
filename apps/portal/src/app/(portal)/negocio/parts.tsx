@@ -2,26 +2,14 @@
 
 import { colors } from '@xangarro/tokens';
 
-import { Card, StatusPill, Tag } from '@/components';
-import {
-  CAPABILITY_ROWS,
-  FLAG_DESC,
-  FLAG_LABEL,
-  FLAG_ROWS,
-  type FlagRow,
-  type Section,
-} from '@/fixtures/negocio';
-import { eyebrow } from '@/styles/text.css';
+import { Card } from '@/components';
+import { CAPABILITY_ROWS, type Section } from '@/fixtures/negocio';
 
 import {
-  cell,
-  colLabel,
   fieldLabel,
   fieldMissing,
   fieldRow,
   fieldValue,
-  flagHead,
-  flagRow,
   sectionHead,
   sectionTile,
   sectionTitle,
@@ -52,62 +40,6 @@ export function SectionCard({ section }: { readonly section: Section }) {
             {f.value ?? 'Falta por completar'}
           </span>
         </div>
-      ))}
-    </Card>
-  );
-}
-
-/**
- * Funciones (P-15) — the three levels, rendered as three columns.
- *
- * The switch is editable only when **disponible** and **en tu plan** are both
- * true. A key that is not available on the platform reads "Próximamente" and
- * cannot be toggled; the server rejects it regardless (F-06).
- */
-function FlagLine({ r }: { readonly r: FlagRow }) {
-  const editable = r.disponible && r.enTuPlan;
-  return (
-    <div className={flagRow}>
-      <span>
-        <span style={{ fontWeight: 800, display: 'block' }}>{FLAG_LABEL[r.key]}</span>
-        <span className={fieldLabel}>{FLAG_DESC[r.key]}</span>
-      </span>
-      <span className={cell}>
-        {r.disponible ? <Tag tone="success">Sí</Tag> : <Tag tone="neutral">Próximamente</Tag>}
-      </span>
-      <span className={cell}>
-        {r.enTuPlan ? <Tag tone="success">Sí</Tag> : <Tag tone="neutral">No</Tag>}
-      </span>
-      <span className={cell}>
-        {editable ? (
-          <StatusPill tone={r.activada ? 'success' : 'neutral'}>
-            {r.activada ? 'Activada' : 'Apagada'}
-          </StatusPill>
-        ) : (
-          <Tag tone="neutral">—</Tag>
-        )}
-      </span>
-    </div>
-  );
-}
-
-export function FuncionesCard() {
-  return (
-    <Card>
-      <div className={sectionTitle} style={{ marginBottom: 6 }}>
-        Funciones del negocio
-      </div>
-      <p className={fieldLabel} style={{ marginBottom: 14 }}>
-        Activa o desactiva las funciones que necesita tu negocio.
-      </p>
-      <div className={flagHead}>
-        <span className={eyebrow}>Función</span>
-        <span className={colLabel}>Disponible</span>
-        <span className={colLabel}>En tu plan</span>
-        <span className={colLabel}>Activada</span>
-      </div>
-      {FLAG_ROWS.map((r) => (
-        <FlagLine key={r.key} r={r} />
       ))}
     </Card>
   );

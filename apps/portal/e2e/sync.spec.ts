@@ -82,6 +82,22 @@ test('a portal edit reaches the next pull, and only it', async ({ page, request 
   expect(got.tables.users).toEqual([]);
 });
 
+test('switching a feature off in Negocio reaches the phone on its next pull', async ({
+  page,
+  request,
+}) => {
+  const cursor = (await pull(request, b, b.cursor)).serverSeq;
+  await page.goto('/negocio');
+  await page.getByRole('switch', { name: 'Inventario / Stock' }).click();
+  await expect(page.getByRole('switch', { name: 'Inventario / Stock' })).toHaveAttribute(
+    'aria-checked',
+    'false',
+  );
+  const got = await pull(request, b, cursor);
+  expect(got.tables.feature_flags).toMatchObject({ stock: false });
+  expect(JSON.parse(got.tables.businesses[0].featureFlags)).toMatchObject({ stock: false });
+});
+
 test('an id owned by another business is a conflict, and that business is untouched', async ({
   request,
 }) => {

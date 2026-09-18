@@ -10,3 +10,4 @@ export * from './errors/conversion-errors.js';
 export * from './errors/caja-errors.js';
 export * from './errors/operador-errors.js';
 export * from './errors/entitlement-errors.js';
+export * from './errors/feature-flag-errors.js';
