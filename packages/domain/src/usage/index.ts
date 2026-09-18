@@ -14,3 +14,13 @@ export {
   nextUsagePeriod,
 } from './usage-period.js';
 export { computeUsage } from './compute-usage.js';
+export { assertUsageLimits } from './limits.js';
+export {
+  USAGE_MESSAGE_CODES,
+  THRESHOLD_MESSAGE_CODE,
+  usageMessageCode,
+  type UsageMessageCode,
+} from './messages.js';
+export { crossedThresholds, THRESHOLD_RECIPIENTS, type ThresholdCrossing } from './thresholds.js';
+export { consecutiveMonthsOver, type ConsecutiveMonthsOptions } from './consecutive-months.js';
+export { canCreateProduct, isFreePlan, type ProductCapResult } from './product-cap.js';
