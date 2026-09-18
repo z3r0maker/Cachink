@@ -34,6 +34,10 @@ describe('StaffMemberSchema', () => {
     assert.equal(StaffMemberSchema.safeParse(member).success, true);
   });
 
+  it('accepts a staff member with no auth.users id (in-house auth, ADR-080)', () => {
+    assert.equal(StaffMemberSchema.safeParse({ ...member, userId: null }).success, true);
+  });
+
   it('rejects a userId that is not an auth.users uuid', () => {
     assert.equal(StaffMemberSchema.safeParse({ ...member, userId: ULID }).success, false);
   });

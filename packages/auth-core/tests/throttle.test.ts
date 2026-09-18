@@ -7,32 +7,10 @@ import {
   LOGIN_PER_EMAIL,
   LOGIN_PER_IP,
   throttleKey,
-  type FailurePolicy,
   type ThrottleStore,
   type ThrottleSubject,
 } from '../src/index.js';
-
-/** A store with the same semantics as `xangarro.throttle_*`, on a fake clock. */
-function memoryStore(): ThrottleStore & { readonly now: { t: number } } {
-  const now = { t: 0 };
-  const rows = new Map<string, { start: number; hits: number; locked: number }>();
-  return {
-    now,
-    wait: async (key) => Math.max(0, (rows.get(key)?.locked ?? 0) - now.t),
-    fail: async (key, p: FailurePolicy) => {
-      const r = rows.get(key);
-      const fresh = !r || r.start < now.t - p.window;
-      const row = fresh ? { start: now.t, hits: 1, locked: 0 } : { ...r, hits: r.hits + 1 };
-      if (row.hits >= p.max) {
-        rows.set(key, { start: now.t, hits: 0, locked: now.t + p.lockout });
-        return p.lockout;
-      }
-      rows.set(key, row);
-      return 0;
-    },
-    clear: async (key) => void rows.delete(key),
-  };
-}
+import { memoryThrottleStore as memoryStore } from '../src/testing.js';
 
 const subjects = (email: string, ip: string): ThrottleSubject[] => [
   { key: throttleKey('login', 'email', email), policy: LOGIN_PER_EMAIL, clearOnSuccess: true },
@@ -101,7 +79,7 @@ describe('guardAttempt', () => {
   it('lets the account try again once the lockout has passed', async () => {
     const store = memoryStore();
     for (let i = 0; i < 5; i++) await guardAttempt(store, subjects('a', '1'), wrong);
-    store.now.t += LOGIN_PER_EMAIL.lockout;
+    store.clock.t += LOGIN_PER_EMAIL.lockout;
     assert.equal((await guardAttempt(store, subjects('a', '1'), right)).kind, 'ok');
   });
 
