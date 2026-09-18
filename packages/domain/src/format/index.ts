@@ -13,3 +13,4 @@ export {
   formatMonth,
   formatPeriodoLabel,
 } from './date.js';
+export * from './fecha-hora.js';

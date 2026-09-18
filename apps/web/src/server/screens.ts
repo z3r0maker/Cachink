@@ -10,6 +10,7 @@ import {
   listNotices,
   listOperadores,
   listProductos,
+  historialSync,
   listRejections,
   periodLedger,
 } from '@xangarro/data-pg';
@@ -51,6 +52,7 @@ export const loadSincronizacion = (biz: string) =>
   withTenant(biz, async (tx) => ({
     rechazos: await listRejections(tx),
     dispositivos: await listDispositivos(tx),
+    historial: await historialSync(tx),
   }));
 
 export const loadAvisos = (biz: string) => withTenant(biz, (tx) => listNotices(tx));

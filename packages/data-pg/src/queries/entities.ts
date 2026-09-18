@@ -67,6 +67,8 @@ export async function listRejections(tx: Tx) {
     .select({
       id: syncRejections.id,
       deviceId: syncRejections.deviceId,
+      /** The device's name, for the owner; null if the device row is gone. */
+      dispositivo: devices.nombre,
       tableName: syncRejections.tableName,
       rowId: syncRejections.rowId,
       code: syncRejections.code,
@@ -74,6 +76,7 @@ export async function listRejections(tx: Tx) {
       receivedAt: syncRejections.receivedAt,
     })
     .from(syncRejections)
+    .leftJoin(devices, eq(devices.id, syncRejections.deviceId))
     .where(isNull(syncRejections.resolvedAt))
     .orderBy(desc(syncRejections.receivedAt));
 }
@@ -135,6 +138,7 @@ export async function shellCounts(tx: Tx): Promise<{ pendingRows: number; unread
   const [pending] = await tx
     .select({ n: count() })
     .from(syncRejections)
+    .leftJoin(devices, eq(devices.id, syncRejections.deviceId))
     .where(isNull(syncRejections.resolvedAt));
 
   const [unread] = await tx

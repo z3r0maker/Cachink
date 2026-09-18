@@ -783,7 +783,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     dispositivo" and no "Conflictos" (ADR-058 §1). "Sincronizar ahora" is owner-only.
   - Motivos are **human sentences, never codes** — "El producto de este registro ya no existe en
     el portal." In production they come from `ERROR_CATALOG`.
-  - **Still to do:** the event history log, and real rejection rows at B-08.
+  - 2026-09-18 · **Historial** (derived — `historialSync` groups accepted pushes, refused rows and
+    portal changes per device per minute, 3 DB tests) as sentences on the business's clock.
+    **«Marcar como resuelto» is saved** (`resolved_at`, admin+, hidden for Solo lectura) — it used to
+    only hide the row in local state. Rows name their device (not its id), and motivos come from
+    the contract's `ERROR_CATALOG` keys (`lib/sync-motivos.ts`; a test fails if a per-row code has no
+    sentence). Device cards say «Con registros rechazados» when they have any. `formatFechaHora` in
+    the domain. e2e on a throwaway tenant.
+  - **Still to do:** real rejection rows at B-08.
 - **Amended 2026-09-17 (ADR-058 §1):** **the four mode cards are removed**, along with the
   mode-derived suppression logic and the "Conflictos por resolver" tile. Read-only sync health.
 - **Steps:** Title "Sincronización" / "Qué falta por enviar". Pending banner (`--warning-soft`):
