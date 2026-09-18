@@ -6,6 +6,7 @@
 import { ERROR_CATALOG, type ErrorCode } from '../errors.js';
 import { isPushable } from '../scope.js';
 import {
+  PUSH_REFERENCES,
   PushRequestSchema,
   type Delta,
   type PushResponse,
@@ -33,17 +34,11 @@ function reject(
   };
 }
 
-const FK_CHECKS: ReadonlyArray<[field: string, table: string, code: ErrorCode]> = [
-  ['productoId', 'products', 'FK_PRODUCT_MISSING'],
-  ['clienteId', 'clients', 'FK_CLIENT_MISSING'],
-  ['createdByUserId', 'users', 'FK_USER_MISSING'],
-];
-
 function missingFk(
   state: MockState,
   row: Record<string, unknown>,
 ): { code: ErrorCode; message: string } | null {
-  for (const [field, table, code] of FK_CHECKS) {
+  for (const [field, table, code] of PUSH_REFERENCES) {
     const v = row[field];
     if (typeof v === 'string' && !state.get(table, v))
       return { code, message: `${field}=${v} not found` };

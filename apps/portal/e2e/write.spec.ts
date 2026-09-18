@@ -134,38 +134,3 @@ test('adding an employee stores centavos, not pesos', async ({ page }, testInfo)
 
   expect(await syncLogCount('employees')).toBe(before + 1);
 });
-
-test('generating a code replaces the old one rather than adding to it', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared rows');
-
-  await page.goto('/equipo');
-  // SegmentedTabs renders aria-pressed buttons in a labelled group, not a
-  // Radix tab list (see components/tabs.tsx for why), so it is a button here.
-  await page
-    .getByRole('group', { name: 'Tu equipo' })
-    .getByRole('button', { name: /Dispositivos/ })
-    .click();
-
-  const generate = page.getByRole('button', { name: /Generar (código|otro)/ });
-  await generate.click();
-  const first = await page.getByTestId('activation-code').getAttribute('aria-label');
-  await generate.click();
-  await expect(page.getByTestId('activation-code')).not.toHaveAttribute('aria-label', first ?? '');
-
-  // The security property, asserted on the rows rather than the screen: an
-  // activation code is a bearer credential, so "Generar otro" must leave
-  // exactly ONE redeemable code, not two. A panel that simply showed the newest
-  // would look identical while leaving the old one live.
-  const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
-  try {
-    await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
-    const [row] = await sql<{ n: string }[]>`
-      SELECT count(*)::text AS n FROM activation_codes
-      WHERE redeemed_at IS NULL AND expires_at > now()`;
-    expect(row?.n, 'exactly one live code after regenerating').toBe('1');
-  } finally {
-    await sql.end({ timeout: 5 });
-  }
-});

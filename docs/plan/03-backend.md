@@ -131,7 +131,16 @@
 
 ### B-06 Entitlement signer + computation
 
-- [ ] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+- [~] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+  - 2026-09-17 · `computeEntitlement(businessId, subscription, now)` in `@xangarro/application`
+    (8 tests: active, trialing, past_due inside and past grace, lapsed/none → free plan, unknown
+    plan → `UNKNOWN_PLAN`, paid status without a period end → `MISSING_PERIOD_END`). The signer is
+    `signEntitlement` in `server/device/credentials.ts`; `tests/entitlement-signer.test.ts` pins it
+    byte-for-byte to the contract vector (shown to fail when it signs `JSON.stringify`).
+    `GET /api/v1/entitlement` passes the contract's `GET /entitlement` conformance block against
+    the real portal, and `devices.spec.ts` shows a validly signed token for a **revoked** device
+    gets `401 DEVICE_REVOKED`. **Still to do:** step 1's production keypair (an ops step, with
+    B-03), and the subscription is the fixture until B-10 writes `billing.subscriptions`.
 - **Steps:**
   1. Generate Ed25519 keypair (`node -e` with `crypto.generateKeyPairSync('ed25519')`); private → `ENTITLEMENT_PRIVATE_KEY` env; public → `apps/mobile` env `EXPO_PUBLIC_ENTITLEMENT_PUBKEY` (hand to Track A via `02-contracts.md` — append the prod public key under a "Keys" note; dev key is the mock's).
   2. `computeEntitlement(subscription, plans, now)` in `packages/application` (pure): status `active|trialing` → plan limits; `past_due|grace` → same plan with `grace_until`; `lapsed|free` → **freelancer** (Q14). `valid_until = current_period_end`, `grace_until = valid_until + 7 d`.
@@ -149,18 +158,41 @@
 
 ### B-08 `POST /api/v1/sync/push`
 
-- [ ] Status · **Blocked by:** C-03, C-06, C-10, B-03, B-05 · **Blocks:** A-06 (real), P-11, X-02
+- [x] Status · **Blocked by:** C-03, C-06, C-10, B-03, B-05 · **Blocks:** A-06 (real), P-11, X-02
+  - Done 2026-09-17 (ADR-078). The rules are `ApplyPushUseCase` in `@xangarro/application` (12
+    tests over an in-memory store that, like Postgres, refuses writes outside the row's savepoint);
+    Postgres is `server/sync/pg-push-store.ts`. The contract's `sync.test.ts` passes **in full
+    against the real portal**, and `e2e/sync.spec.ts` covers what conformance cannot: money stored
+    in centavos, a rejection shown on Sincronización, a HYBRID client reaching a second phone, and
+    both cross-tenant paths → `DUPLICATE_CONFLICT` (audit DB-SYNC-05).
+  - Found on the way: with postgres-js a savepoint only isolates statements run on **its own**
+    handle — the first run lost a whole batch to one bad row. And the cloud keyed `monto_centavos`
+    as `montoCentavos` on `sales`/`expenses` while the device says `monto`; drift now compares
+    property keys, not only column names.
+  - Push's top-level `serverSeq` is the tenant cursor at commit and is **informational**: UP rows
+    are not in the pull stream, so A-06 must take its pull cursor from pull responses only.
 - **Files:** `apps/portal/src/app/api/v1/sync/push/route.ts` → `packages/application/src/use-cases/apply-push.ts` + `packages/data-pg/src/repositories/sync-push-repository.ts`.
 - **Steps:** per delta: scope check (`isPushable`), zod row validation, `business_id === token.business_id`, FK checks (product/user/client exist in that business) → upsert `ON CONFLICT (id) DO UPDATE` **only if** existing `business_id` matches (else `DUPLICATE_CONFLICT`) → append `sync_log` → collect `server_seq`. Rejections → `sync_rejections` (upsert by `(device_id, table_name, row_id)` so a retry updates instead of duplicating) and returned. Process in one transaction per batch but **never** abort the batch for a per-row failure (use savepoints per row). Update `devices.last_push_at`.
 - **Acceptance:** application tests: all accepted; one FK missing → that row rejected, others accepted; hybrid update → rejected; business mismatch → rejected non-retryable; re-push same rows → same `server_seq`. Conformance green.
 
 ### B-09 `GET /api/v1/sync/pull`
 
-- [ ] Status · **Blocked by:** C-04, C-06, B-03, B-05, B-06 · **Blocks:** A-06 (real), X-02
+- [x] Status · **Blocked by:** C-04, C-06, B-03, B-05, B-06 · **Blocks:** A-06 (real), X-02
+  - Done 2026-09-17 (ADR-078). Serves the **committed** per-tenant cursor, read before the tables
+    (DB-SYNC-01; `/activate` no longer serves `max(seq)`). Pages **one ordered stream** of
+    `sync_log` rather than 5 000 per table (DB-SYNC-04); a truncated page's `serverSeq` is its last
+    seq, shown by a 5 050-entry backlog arriving in two pulls. `acknowledgedThrough` is stored on
+    the device row. **Still open:** a `hasMore` flag needs a C-04 amendment; until then the phone
+    pulls again while a pull returns rows.
 - **Steps:** for each DOWN + HYBRID table: rows where `business_id = token.business_id AND server_seq > since` (limit 5 000 per table; if truncated set `server_seq` to the max returned so the app pages). `acknowledged_through` = `MAX(server_seq) FROM sync_log WHERE device_id = token.device_id`. Include current signed entitlement and tenant `feature_flags` (from `businesses.feature_flags JSONB`). Update `devices.last_pull_at`.
 - **Acceptance:** tests: since=0 returns everything; since=N returns only newer incl. tombstones; `acknowledged_through` correct after a push; paging when > 5 000. Conformance green.
 
 ### B-10 Stripe: products/prices, Checkout session, webhook, subscription state machine
+
+> **Amended 2026-09-17 by Track N:** the webhook connects as a dedicated least-privilege Postgres role `xangarro_billing` (billing tables +
+> one SECURITY DEFINER entitlement function) — **never the service-role key in the portal** (ADR-063,
+> N-26 SEC-SEC-01; also amends B-01's env list). Annual prices and a 14-day trial on **both** paid tiers
+> with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
 
 - [ ] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
 - **Steps:**
@@ -180,13 +212,19 @@
 
 ### B-12 Device revocation + slot accounting
 
-- [ ] Status · **Blocked by:** B-11, B-05
+- [x] Status · **Blocked by:** B-11, B-05
+  - Done: 2026-09-17 · Slot enforcement in `/activate` (`NO_DEVICE_SLOTS`, 402) and revocation from the portal (Revocar, behind a confirmation carrying the plan's copy). The task's acceptance is an E2E: at the limit a new phone is refused, Revocar frees a slot, and **the same code** then succeeds — proving the refusal rolled the claim back rather than burning it. Two races, both shown to discriminate: the same code redeemed twice (atomic UPDATE, B-07), and two _different_ codes competing for the last slot, closed by locking the business row — without the lock it failed 12/12, two phones taking one slot every time. `requireDevice`/`401 DEVICE_REVOKED` is phone-side and stays with B-05.
 - **Steps:** `activeDeviceCount(business_id)` = devices with status `active`; used by B-07 and P-06. Revoked device's next API call → `401 DEVICE_REVOKED` (B-05). Its unsynced rows: lost on that phone unless re-activated — document in P-06 UI copy ("Revocar borra el acceso, no los datos ya sincronizados").
 - **Acceptance:** application test: activate → revoke → activate again with a new code succeeds and slot count is unchanged.
 
 ### B-13 Operator management writes (users) + plan limit
 
-- [ ] Status · **Blocked by:** F-07, B-03 · **Blocks:** P-05
+- [x] Status · **Blocked by:** F-07, B-03 · **Blocks:** P-05
+  - Done 2026-09-17: `CrearOperador` / `RestablecerPinOperador` / `DesactivarOperador` in
+    `@xangarro/application` (13 tests), `users.active` via `0001_users_active.sql` with its
+    old → new test, `pgUsersRepository` appending to `sync_log`, and the `/equipo` dialogs.
+    `operatorLimit` still comes from `PLAN_FIXTURE` until B-10 gives each business its plan.
+  - **Amended (ADR-072):** the NIP is exactly 4 digits, not 4–6.
 - **Steps:** server actions `createOperator(businessId, {nombre, pin})` → bcrypt (cost 10) server-side, `active=true`, bumps `server_seq` (insert into `sync_log`); `setOperatorPin`; `deactivateOperator`; enforce `count(active) < plan.operators` → typed error `OPERATOR_LIMIT`. Every write appends to `sync_log` so devices pull it.
 - **Acceptance:** application tests: happy; limit reached; PIN not 4–6 digits; deactivating the last active operator is allowed but returns a warning flag (portal shows it).
 
@@ -209,6 +247,10 @@
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 
 ### B-17 Rate limiting + protocol check middleware
+
+> **Amended 2026-09-17 (N-26 audit, SEC-DEV-01):** `/activate` is rate-limited per IP and per
+> code/QR token **before** any device token exists (5 failures / 15 min → 15-min lockout), with one
+> generic error. See C-14.
 
 - [ ] Status · **Blocked by:** B-05
 - **Steps:** `X-Xangarro-Protocol` check → `426`; per-device token bucket (60/min) in Postgres or Upstash (prefer Postgres `billing.rate_limits` to avoid a new vendor at this size); `429` + `Retry-After`.

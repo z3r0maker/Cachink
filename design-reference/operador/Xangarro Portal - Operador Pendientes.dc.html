@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+@keyframes xg-spin{to{transform:rotate(360deg)}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="flex:none;width:248px;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+      <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+        <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+        </div>
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </div>
+      <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="6">
+          <a href="{{ n.href }}" title="{{ n.label }}" data-press="1" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;color:var(--black);text-decoration:none;border:2px solid transparent;font-weight:700;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;">{{ n.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+      <div style="padding:14px 12px;border-top:2.5px solid var(--black);display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Turno abierto</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">AR</span>
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);min-height:76px;box-sizing:border-box;padding:12px {{ pagePad }}">
+      <div style="max-width:1760px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <a href="Xangarro%20Portal%20-%20Operador%20Caja.dc.html" data-press="1" title="Volver a la caja" style="display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 14px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+          Volver a la caja
+        </a>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:{{ syncBg }}">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:{{ syncDot }}"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">{{ syncLabel }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:22px {{ pagePad }} {{ mainBottom }}">
+      <div style="max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px;">
+
+        <div>
+          <h1 style="margin:0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Registros por enviar</h1>
+          <p style="margin:8px 0 0;font-size:15px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">{{ intro }}</p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;border:2.5px solid var(--black);border-radius:18px;background:{{ heroBg }};box-shadow:5px 5px 0 var(--black);flex-wrap:wrap;">
+          <span style="flex:none;width:52px;height:52px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:14px;background:var(--white);color:var(--black);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="{{ spinStyle }}"><path d="M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5"></path></svg>
+          </span>
+          <div style="flex:1;min-width:200px;">
+            <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ heroTitle }}</div>
+            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ heroBody }}</div>
+          </div>
+          <button type="button" onClick="{{ retry }}" data-press="1" data-onyellow="1" style="flex:none;height:50px;padding:0 20px;border:2.5px solid var(--black);border-radius:14px;background:{{ retryBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;" style-hover="background:var(--yellow-deep);">{{ retryLabel }}</button>
+        </div>
+
+        <sc-if value="{{ notHappy }}" hint-placeholder-val="{{ false }}">
+          <dc-import name="Operador Estado" mode="{{ dataState }}" icon="{{ estadoIcon }}" empty-title="Nada pendiente" empty-body="Todo lo que capturaste ya está en el portal de Pedro." error-title="No pudimos leer la cola de este navegador" retry="{{ retryEstado }}" hint-size="100%,280px"></dc-import>
+        </sc-if>
+
+        <sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+        <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);">
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">La cola</span>
+            <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;background:var(--white);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ queueCount }}</span>
+          </div>
+          <sc-for list="{{ queue }}" as="q" hint-placeholder-count="4">
+            <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:{{ q.divider }}">
+              <span style="flex:none;width:42px;height:42px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:{{ q.tint }};color:var(--black);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ q.icon }}"></path></svg>
+              </span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);text-wrap:pretty;">{{ q.title }}</div>
+                <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;text-wrap:pretty;">{{ q.detail }}</div>
+              </div>
+              <span style="flex:none;display:inline-flex;align-items:center;gap:7px;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ q.stateBg }};color:{{ q.stateColor }}">{{ q.state }}</span>
+              <span style="flex:none;min-width:56px;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray-600);">{{ q.time }}</span>
+              <span style="flex:none;min-width:96px;text-align:right;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ q.amount }}</span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
+              <div style="width:58px;height:58px;border:2.5px solid var(--black);border-radius:16px;background:var(--green-soft);display:grid;place-items:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              </div>
+              <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Nada pendiente</div>
+              <div style="font-size:14px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">Todo lo que capturaste ya está en el portal de Pedro. Puedes cerrar el turno cuando quieras.</div>
+              <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="margin-top:6px;display:inline-flex;align-items:center;height:48px;padding:0 20px;border:2.5px solid var(--black);border-radius:13px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Ir al cierre de turno</a>
+            </div>
+          </sc-if>
+        </div>
+        </sc-if>
+
+        <div style="display:flex;gap:11px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">Nada se pierde: lo capturado vive en este navegador hasta que suba. No cierres la pestaña ni borres los datos del sitio. El turno no se puede cerrar mientras haya algo en la cola, porque el efectivo esperado se calcula con estas ventas.</div>
+        </div>
+
+      </div>
+    </main>
+
+    <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+      <nav style="position:fixed;left:0;right:0;bottom:0;z-index:60;height:68px;background:var(--white);border-top:2.5px solid var(--black);display:grid;grid-template-columns:repeat(4,1fr);">
+        <sc-for list="{{ tabbar }}" as="t" hint-placeholder-count="4">
+          <a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--black);background:var(--white);border-left:{{ t.divider }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.icon }}"></path></svg>
+            <span style="font-size:11px;font-weight:800;letter-spacing:0.02em;">{{ t.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+    </sc-if>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;connection&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sin-conexion&quot;,&quot;en-linea&quot;],&quot;default&quot;:&quot;sin-conexion&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+
+const QUEUE = [
+  ['Venta V-0412', '3 pastor · 1 gringa · 1 horchata · efectivo', 160, 'venta', '14:52'],
+  ['Venta V-0410', '4 suadero · 1 agua · efectivo', 123, 'venta', '14:21'],
+  ['Gasto · Gas', 'Cilindro de 30 kg · con foto del comprobante', -620, 'gasto', '14:10']
+];
+
+class Component extends DCLogic {
+  state = { sent: false, sending: false, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
+    clearTimeout(this.t);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = this.props.forcePhone === true || st.vw < 760;
+    const isDesktop = !isPhone;
+    const offline = this.props.connection === 'sin-conexion' && !st.sent;
+    const queueData = st.sent ? [] : QUEUE;
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10', 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
+      ['Caja', 'M4 4h16v16H4V4Zm4 4h8M8 12h3m5 0h.01M8 16h3m5 0h.01', 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html'],
+      ['Turno', 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18', 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html'],
+      ['Ventas', 'M3 6h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6', 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html'],
+      ['Gastos', 'M12 3v14M6 11l6 6 6-6M4 21h16', 'Xangarro%20Portal%20-%20Operador%20Gastos.dc.html'],
+      ['Inventario', 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4', 'Xangarro%20Portal%20-%20Operador%20Inventario.dc.html'],
+      ['Cobranza', 'M4 6h16v12H4V6Zm3 12v2m10-2v2M8 12h8', 'Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html']
+    ];
+
+    const tints = { venta: 'var(--green-soft)', gasto: 'var(--red-soft)' };
+    const icons = {
+      venta: 'M3 6h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6',
+      gasto: 'M12 3v14M6 11l6 6 6-6M4 21h16'
+    };
+
+    const queue = queueData.map((q, i) => ({
+      title: q[0], detail: q[1], time: q[4],
+      amount: q[2] < 0 ? '−' + MXN(Math.abs(q[2])) : MXN(q[2]),
+      tint: tints[q[3]], icon: icons[q[3]],
+      state: st.sending ? 'Enviando' : (offline ? 'Esperando conexión' : 'En cola'),
+      stateBg: st.sending ? 'var(--blue-soft)' : 'var(--warning-soft)',
+      stateColor: st.sending ? 'var(--blue-text)' : 'var(--warning-text)',
+      divider: i === queueData.length - 1 ? 'none' : '2px solid var(--gray-100)'
+    }));
+
+    return {
+      isPhone, isDesktop,
+      nav: navDefs.map(([label, icon, href]) => ({ label, icon, href })),
+      tabbar: [
+        ['Caja', 'M4 4h16v16H4V4Zm4 4h8M8 12h3m5 0h.01M8 16h3m5 0h.01', 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html'],
+        ['Ventas', 'M3 6h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6', 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html'],
+        ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10', 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
+        ['Turno', 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18', 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html']
+      ].map(([label, icon, href], i) => ({ label, icon, href, divider: i === 0 ? 'none' : '2px solid var(--black)' })),
+      queue,
+      queueCount: String(queueData.length),
+      empty: queueData.length === 0,
+      intro: queueData.length === 0
+        ? 'Tu caja está al día con el portal de Pedro.'
+        : 'Lo que capturaste sin conexión vive en este navegador hasta que suba. Puedes seguir cobrando mientras tanto.',
+      heroBg: st.sending ? 'var(--blue-soft)' : (queueData.length === 0 ? 'var(--green-soft)' : 'var(--warning-soft)'),
+      heroTitle: st.sending ? 'Enviando 3 registros…' : (queueData.length === 0 ? 'Todo enviado' : queueData.length + ' registros en espera'),
+      heroBody: st.sending
+        ? 'No cierres la pestaña. En cuanto suban, el turno se puede cerrar.'
+        : (queueData.length === 0
+          ? 'El último envío fue hace unos segundos.'
+          : 'Suman ' + MXN(283) + ' de ventas y un gasto de ' + MXN(620) + '. El turno no se puede cerrar hasta que se envíen.'),
+      spinStyle: st.sending ? 'animation:xg-spin 1s linear infinite;' : '',
+      retryLabel: st.sending ? 'Enviando…' : (queueData.length === 0 ? 'Revisar de nuevo' : 'Reintentar envío'),
+      retryBg: st.sending ? 'var(--white)' : 'var(--yellow)',
+      retry: () => {
+        if (st.sending) return;
+        this.setState({ sending: true });
+        clearTimeout(this.t);
+        this.t = setTimeout(() => this.setState({ sending: false, sent: true }), 1400);
+      },
+      syncBg: offline ? 'var(--warning-soft)' : 'var(--green-soft)',
+      syncDot: offline ? 'var(--warning)' : 'var(--green)',
+      syncLabel: offline ? 'Sin conexión · ' + queueData.length + ' por enviar' : 'Todo enviado',
+      dataState: st.dataState ?? this.props.dataState ?? 'happy',
+      isHappy: (st.dataState ?? this.props.dataState ?? 'happy') === 'happy',
+      notHappy: (st.dataState ?? this.props.dataState ?? 'happy') !== 'happy',
+      estadoIcon: 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5',
+      retryEstado: () => this.setState({ dataState: 'happy' }),
+      pagePad: isPhone ? '16px' : '32px',
+      mainBottom: isPhone ? '96px' : '40px',
+      h1Size: isPhone ? '26px' : '32px'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

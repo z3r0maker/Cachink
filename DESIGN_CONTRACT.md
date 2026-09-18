@@ -65,10 +65,11 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 | `purple` | `#8B5CF6` | `--purple` |
 | `cyan` | `#06B6D4` | `--cyan` |
 | `scrim` | `rgba(13, 13, 13, 0.45)` | `--scrim` |
+| `yellowRule` | `#DBB80A` | `--yellow-rule` |
 
 ## 4. Shape
 
-**Radii** — the strict ladder, nothing else: 8, 10, 12, 14, 16, 18, 20, 22.
+**Radii** — the strict ladder, nothing else: 8, 10, 12, 14, 16, 18, 20, 22; plus the dense steps 11 and 13 (ADR-076).
 
 **Off-ladder shapes** (data-viz marks and full pills): `mark` 2, `markLg` 4, `pill` 9999.
 
@@ -91,7 +92,7 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 
 **Mobile ramp** (`fontSizes`) — 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48.
 
-**Portal ramp** (`portalFontSizes`) — 12, 13, 14, 15, 16, 17, 19, 20, 22, 24, 26, 30, 34, 36, 40, 44, 52, 56. Richer than the phone's, per the design handoff. **12 is the floor for both.**
+**Portal ramp** (`portalFontSizes`) — 11, 12, 13, 14, 15, 16, 17, 19, 20, 22, 24, 26, 30, 34, 36, 40, 44, 52, 56. Richer than the phone's, per the design handoff. **12 is the floor for both.**
 
 **Emoji as illustration** — md 40, lg 56. Never dragged along by a type-scale change.
 

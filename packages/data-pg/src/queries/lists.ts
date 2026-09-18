@@ -27,7 +27,7 @@ async function listVentas(tx: Tx): Promise<readonly MovimientoRow[]> {
       fecha: sales.fecha,
       concepto: sales.concepto,
       clasificacion: sales.metodo,
-      amount: sales.montoCentavos,
+      amount: sales.monto,
       cancelledAt: sales.cancelledAt,
     })
     .from(sales)
@@ -52,7 +52,7 @@ async function listGastos(tx: Tx): Promise<readonly MovimientoRow[]> {
       fecha: expenses.fecha,
       concepto: expenses.concepto,
       clasificacion: expenses.categoria,
-      amount: expenses.montoCentavos,
+      amount: expenses.monto,
     })
     .from(expenses)
     .where(isNull(expenses.deletedAt))

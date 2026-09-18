@@ -188,3 +188,22 @@ export const VIEWER = {
   memberId: id('MEMB2'),
   role: 'viewer',
 } as const;
+
+/**
+ * A second tenant, used only by the contract conformance suite.
+ *
+ * Conformance activates real devices, and Taquería Don Pedro is seeded at its
+ * plan's device limit — realistic, and exactly what makes it unusable for a
+ * suite that needs activations to succeed. Revoking the demo business's phones
+ * before each run would silently rewrite the data every screen is tested
+ * against, so conformance gets its own business instead, with one operator and
+ * one product because the happy path asserts both arrive in the bootstrap.
+ *
+ * It is also a second tenant in the seed, which the RLS suite already wanted.
+ */
+export const CONFORMANCE = {
+  businessId: id('CNF01'),
+  email: 'conformance@xangarro.mx',
+  productId: id('CNFP1'),
+  userId: id('CNFW1'),
+} as const;

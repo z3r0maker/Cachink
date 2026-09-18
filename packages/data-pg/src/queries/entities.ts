@@ -2,7 +2,8 @@ import { and, asc, count, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { expenses, sales } from '../schema/ledger.js';
-import { activationCodes, devices, notices, syncRejections } from '../schema/portal.js';
+import { activationCodes, devices, notices } from '../schema/portal.js';
+import { syncRejections } from '../schema/sync.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -10,11 +11,22 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 /* ── Equipo, Empleados, Negocio, Sync, Avisos ────────────────────────── */
 
 export async function listOperadores(tx: Tx) {
-  return tx
-    .select({ id: users.id, nombre: users.nombre, permissions: users.permissions })
-    .from(users)
-    .where(isNull(users.deletedAt))
-    .orderBy(asc(users.nombre));
+  return (
+    tx
+      // `role` and `active` so the screen can count *active operators* — the
+      // plan's allowance — rather than every row, which would keep charging a
+      // slot for someone already deactivated.
+      .select({
+        id: users.id,
+        nombre: users.nombre,
+        permissions: users.permissions,
+        role: users.role,
+        active: users.active,
+      })
+      .from(users)
+      .where(and(isNull(users.deletedAt), eq(users.role, 'operativo')))
+      .orderBy(asc(users.nombre))
+  );
 }
 
 export async function listDispositivos(tx: Tx) {

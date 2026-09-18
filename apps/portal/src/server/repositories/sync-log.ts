@@ -1,7 +1,7 @@
 import 'server-only';
 
 import type { DOWN_TABLES, HYBRID_TABLES } from '@xangarro/contracts';
-import { syncLog } from '@xangarro/data-pg';
+import { logChange } from '@xangarro/data-pg';
 
 import type { Tx } from '../db';
 
@@ -36,8 +36,5 @@ export async function recordChange(
   rowId: string,
   op: 'insert' | 'update',
 ): Promise<void> {
-  const now = new Date().toISOString();
-  await tx
-    .insert(syncLog)
-    .values({ tableName, rowId, op, businessId, createdAt: now, updatedAt: now });
+  await logChange(tx, businessId, tableName, rowId, op);
 }

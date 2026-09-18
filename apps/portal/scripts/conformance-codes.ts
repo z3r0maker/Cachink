@@ -14,8 +14,10 @@ import postgres from 'postgres';
 
 import { CODE_TTL_MS, mintActivationCode } from '../src/lib/activation-code';
 
-const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-const EMAIL = 'pedro@taqueria.mx';
+// The conformance tenant, not the demo business (see CONFORMANCE in seed-data):
+// it activates real devices, and Taquería Don Pedro is seeded at its limit.
+const BIZ = '01HZ8XQN9GZJXV8AKQ5X0CNF01';
+const EMAIL = 'conformance@xangarro.mx';
 
 async function main(): Promise<void> {
   const url = process.env.DATABASE_URL;
@@ -25,6 +27,9 @@ async function main(): Promise<void> {
   const sql = postgres(url, { max: 1, onnotice: () => undefined });
   try {
     await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
+    // Each run activates devices, and the plan caps them. Revoking the previous
+    // run's phones gives this one free slots — on the conformance tenant only.
+    await sql`UPDATE devices SET revoked_at = now(), updated_at = now() WHERE revoked_at IS NULL`;
     const now = new Date();
     const expires = new Date(now.getTime() + CODE_TTL_MS).toISOString();
     const codes: string[] = [];

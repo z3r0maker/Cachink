@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+[data-row]:hover{background:var(--yellow-soft);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="flex:none;width:248px;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+      <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+        <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+        </div>
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </div>
+      <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+          <a href="{{ n.href }}" title="{{ n.label }}" data-press="1" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;">{{ n.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+      <div style="padding:14px 12px;border-top:2.5px solid var(--black);display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Turno abierto</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">AR</span>
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);min-height:76px;box-sizing:border-box;padding:12px {{ pagePad }}">
+      <div style="max-width:1760px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <a href="Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html" data-press="1" title="Volver a cobranza" style="display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 14px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+          Cobranza
+        </a>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <button type="button" onClick="{{ openRecordar }}" data-press="1" style="display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 16px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5A10 10 0 0 0 3.2 15.6L2 22l6.5-1.2A10 10 0 1 0 20.5 3.5"></path></svg>
+            Recordarle por WhatsApp
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:24px {{ pagePad }} {{ mainBottom }}">
+      <sc-if value="{{ notHappy }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1100px;margin:0 auto;">
+          <dc-import name="Operador Estado" mode="{{ dataState }}" icon="{{ estadoIcon }}" empty-title="Este cliente no tiene cuenta abierta" empty-body="No le has fiado nada todavía, o ya liquidó todo lo que debía." error-title="No pudimos cargar su estado de cuenta" cta="Ver cobranza" href="Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html" retry="{{ retry }}" hint-size="100%,280px"></dc-import>
+        </div>
+      </sc-if>
+
+      <div style="max-width:1100px;margin:0 auto;display:{{ contentDisplay }};flex-direction:column;gap:18px;">
+
+        <div style="display:flex;align-items:center;gap:16px;padding:{{ heroPad }};border:2.5px solid var(--black);border-radius:20px;background:{{ heroBg }};box-shadow:5px 5px 0 var(--black);flex-wrap:wrap;">
+          <span style="flex:none;width:62px;height:62px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:9999px;background:var(--white);font-size:20px;font-weight:800;color:var(--black);">{{ cliente.initials }}</span>
+          <div style="flex:1;min-width:200px;">
+            <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+              <span style="font-size:{{ nameSize }};line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);text-wrap:pretty;">{{ cliente.name }}</span>
+              <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ cliente.stateBg }};color:{{ cliente.stateColor }}">{{ cliente.state }}</span>
+            </div>
+            <div style="font-size:15px;font-weight:600;color:var(--ink);margin-top:6px;">{{ cliente.phone }} · cliente desde {{ cliente.desde }}</div>
+          </div>
+          <div style="flex:none;text-align:right;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Saldo</div>
+            <div style="font-size:{{ saldoSize }};line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.04em;color:var(--black);margin-top:6px;">{{ cliente.saldo }}</div>
+          </div>
+          <button type="button" onClick="{{ openAbono }}" data-press="1" data-onyellow="1" style="flex:none;height:62px;padding:0 24px;border:2.5px solid var(--black);border-radius:16px;background:{{ ctaBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);cursor:{{ ctaCursor }};opacity:{{ ctaOpacity }}" style-hover="background:var(--yellow-deep);">{{ ctaLabel }}</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
+              <div style="font-size:26px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:{{ k.color }};margin-top:6px;">{{ k.value }}</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ k.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Ventas abiertas</span>
+            <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;background:var(--white);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ abiertasCount }}</span>
+            <span style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">Lo que abone se aplica a la más antigua primero.</span>
+          </div>
+          <sc-for list="{{ abiertas }}" as="v" hint-placeholder-count="3">
+            <div data-row="1" style="display:flex;align-items:center;gap:13px;padding:14px 18px;border-bottom:{{ v.divider }}">
+              <span style="flex:none;min-width:62px;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gray-600);">{{ v.folio }}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);text-wrap:pretty;">{{ v.concepto }}</div>
+                <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;">{{ v.fecha }} · {{ v.antiguedad }}</div>
+              </div>
+              <sc-if value="{{ v.parcial }}" hint-placeholder-val="{{ false }}">
+                <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--blue-soft);color:var(--blue-text);">{{ v.parcial }}</span>
+              </sc-if>
+              <span style="flex:none;min-width:96px;text-align:right;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ v.resta }}</span>
+              <a href="{{ v.href }}" data-press="1" title="Ver el ticket" style="flex:none;width:40px;height:40px;display:grid;place-items:center;border:2px solid var(--black);border-radius:11px;background:var(--white);box-shadow:2px 2px 0 var(--black);color:var(--black);text-decoration:none;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+              </a>
+            </div>
+          </sc-for>
+          <sc-if value="{{ sinAbiertas }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;">
+              <div style="width:52px;height:52px;border:2.5px solid var(--black);border-radius:15px;background:var(--green-soft);display:grid;place-items:center;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+              </div>
+              <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">No debe nada</div>
+              <div style="font-size:14px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">Todas sus ventas fiadas están liquidadas.</div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);">
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Movimientos</span>
+          </div>
+          <sc-for list="{{ movs }}" as="m" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;gap:13px;padding:13px 18px;border-bottom:{{ m.divider }}">
+              <span style="flex:none;width:38px;height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:11px;background:{{ m.tint }};color:var(--black);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{ m.icon }}"></path></svg>
+              </span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:14px;font-weight:800;letter-spacing:-0.01em;color:var(--black);text-wrap:pretty;">{{ m.title }}</div>
+                <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;text-wrap:pretty;">{{ m.detail }}</div>
+              </div>
+              <span style="flex:none;min-width:96px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ m.color }}">{{ m.amount }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;gap:11px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ limiteNota }}</div>
+        </div>
+
+      </div>
+    </main>
+
+    <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+      <nav style="position:fixed;left:0;right:0;bottom:0;z-index:60;height:68px;background:var(--white);border-top:2.5px solid var(--black);display:grid;grid-template-columns:repeat(4,1fr);">
+        <sc-for list="{{ tabbar }}" as="t" hint-placeholder-count="4">
+          <a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--black);background:var(--white);border-left:{{ t.divider }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.icon }}"></path></svg>
+            <span style="font-size:11px;font-weight:800;letter-spacing:0.02em;">{{ t.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ recordarOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-label="Recordatorio" style="position:fixed;inset:0;z-index:82;background:rgba(13,13,13,0.45);display:grid;place-items:start center;padding:16px;overflow-y:auto;">
+      <div style="width:min(460px,100%);box-sizing:border-box;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--green-soft);border-bottom:2.5px solid var(--black);">
+          <span style="font-size:16px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Recordarle su saldo</span>
+          <span role="button" tabindex="0" onClick="{{ closeRecordar }}" title="Cerrar" style="margin-left:auto;flex:none;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label for="rc-tel" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Teléfono</label>
+            <input id="rc-tel" type="tel" inputmode="tel" value="{{ recTel }}" onChange="{{ typeRecTel }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+          </div>
+          <div style="padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--gray-100);">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Mensaje que se envía</div>
+            <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:6px;text-wrap:pretty;">{{ recMensaje }}</div>
+          </div>
+          <button type="button" onClick="{{ sendRecordar }}" data-press="1" style="height:56px;border:2.5px solid var(--black);border-radius:14px;background:{{ recBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ recOpacity }}">Enviar por WhatsApp</button>
+          <sc-if value="{{ recSent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:11px;padding:14px 16px;border:2.5px solid var(--black);border-radius:14px;background:var(--green-soft);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+              <div style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ recSent }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ abonoOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:80;background:rgba(13,13,13,0.45);display:grid;place-items:start center;padding:16px;overflow-y:auto;">
+      <div style="width:min(520px,100%);box-sizing:border-box;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--blue-soft);border-bottom:2.5px solid var(--black);">
+          <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">Abono de {{ cliente.name }}</span>
+          <span role="button" tabindex="0" onClick="{{ closeAbono }}" title="Cerrar" style="margin-left:auto;flex:none;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label for="dc-monto" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Cuánto abona</label>
+            <div style="display:flex;align-items:center;gap:10px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);padding:0 14px;height:62px;">
+              <span style="font-size:24px;font-weight:800;color:var(--gray-400);">$</span>
+              <input id="dc-monto" type="text" inputmode="decimal" placeholder="0.00" value="{{ monto }}" onChange="{{ typeMonto }}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:inherit;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--ink);">
+            </div>
+            <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:10px;">
+              <sc-for list="{{ quick }}" as="q" hint-placeholder-count="3">
+                <div role="button" tabindex="0" onClick="{{ q.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:42px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ q.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Cómo paga</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <sc-for list="{{ methods }}" as="m" hint-placeholder-count="4">
+                <div role="button" tabindex="0" onClick="{{ m.pick }}" style="display:inline-flex;align-items:center;height:44px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:700;color:var(--black);background:{{ m.bg }}">{{ m.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px;padding:14px 16px;border:2.5px solid var(--black);border-radius:16px;background:var(--green-soft);">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Se aplica a</div>
+            <div style="font-size:14px;font-weight:800;color:var(--black);text-wrap:pretty;">{{ aplica }}</div>
+            <div style="height:2px;background:var(--black);"></div>
+            <div style="display:flex;align-items:baseline;gap:10px;">
+              <span style="font-size:13px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--black);">Saldo restante</span>
+              <span style="margin-left:auto;font-size:32px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:var(--black);">{{ restante }}</span>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" onClick="{{ closeAbono }}" data-press="1" style="flex:none;height:52px;padding:0 18px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Cancelar</button>
+            <button type="button" onClick="{{ confirmAbono }}" data-press="1" data-onyellow="1" style="flex:1;height:52px;border:2.5px solid var(--black);border-radius:12px;background:{{ confirmBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ confirmOpacity }}" style-hover="background:var(--yellow-deep);">Registrar abono</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:fixed;right:{{ toastRight }};bottom:{{ toastBottom }};z-index:90;width:min(380px,calc(100vw - 32px));box-sizing:border-box;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--green-soft);border-bottom:2px solid var(--black);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+        <span style="font-size:14px;font-weight:800;color:var(--black);">Abono registrado</span>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ toast }}</div>
+        <button type="button" onClick="{{ dismissToast }}" data-press="1" style="height:44px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;">Entendido</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;cliente&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;chuy&quot;,&quot;mari&quot;],&quot;default&quot;:&quot;chuy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+const ICON = {
+  inicio: 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10',
+  caja: 'M4 4h16v16H4V4Zm4 4h8M8 12h3m5 0h.01M8 16h3m5 0h.01',
+  turno: 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',
+  ventas: 'M3 6h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6',
+  gastos: 'M12 3v14M6 11l6 6 6-6M4 21h16',
+  inventario: 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4',
+  cobranza: 'M4 6h16v12H4V6Zm3 12v2m10-2v2M8 12h8',
+  abono: 'M12 19V5M5 12l7-7 7 7',
+  fiado: 'M12 5v14M5 12l7 7 7-7'
+};
+
+// Única fuente de verdad: ventas abiertas (folio, concepto, fecha, monto, abonado, capturó, hora del abono)
+// y ventas ya liquidadas. El historial de movimientos se deriva de aquí, nunca se escribe aparte.
+// Dos únicos datos por cliente: sus ventas fiadas y sus abonos, cada uno con fecha ordenable.
+// venta: [folio, concepto, ts, etiqueta, monto, capturó] · abono: [ts, etiqueta, monto, método]
+const CLIENTES = {
+  chuy: {
+    name: 'Taller de Chuy', initials: 'TC', phone: '5533 981 204', desde: 'enero 2026',
+    limite: 1500, plazo: '15 días',
+    ventas: [
+      ['V-0244', 'Comida para 4', '2026-04-18T13:40', '18 abr', 300, 'Ana Robledo · Caja 1'],
+      ['V-0288', 'Comida para 6 · orden de pastor y refrescos', '2026-04-28T13:10', '28 abr', 520, 'Ana Robledo · Caja 1'],
+      ['V-0310', 'Comida para 8 · gringas y aguas', '2026-05-02T14:20', '2 may', 460, 'Luis Ortega · Caja 2']
+    ],
+    abonos: [
+      ['2026-04-24T17:05', '24 abr', 300, 'transferencia'],
+      ['2026-05-14T13:52', 'hoy 13:52', 120, 'efectivo']
+    ]
+  },
+  mari: {
+    name: 'Doña Mari de la tienda', initials: 'DM', phone: '5512 447 903', desde: 'marzo 2026',
+    limite: 800, plazo: '7 días',
+    ventas: [
+      ['V-0340', 'Tacos del sábado', '2026-05-06T13:20', '6 may', 210, 'Ana Robledo · Caja 1'],
+      ['V-0361', 'Tacos para la familia', '2026-05-08T19:30', '8 may', 100, 'Luis Ortega · Caja 2'],
+      ['V-0388', 'Orden de pastor y aguas', '2026-05-11T14:05', '11 may', 150, 'Ana Robledo · Caja 1'],
+      ['V-0409', 'Volcán y consomé', '2026-05-14T14:04', 'hoy', 90, 'Ana Robledo · Caja 1']
+    ],
+    abonos: [['2026-05-14T11:18', 'hoy 11:18', 210, 'transferencia']]
+  }
+};
+
+// Reparte los abonos sobre las ventas, de la más antigua a la más nueva.
+function aplicar(ventas, abonos) {
+  const pagos = ventas.map(() => 0);
+  let bolsa = abonos.reduce((s, a) => s + a[2], 0);
+  for (let i = 0; i < ventas.length && bolsa > 0; i++) {
+    const toma = Math.min(bolsa, ventas[i][4]);
+    pagos[i] = toma;
+    bolsa -= toma;
+  }
+  return pagos;
+}
+
+// El historial se deriva de ventas y abonos, ordenado de lo más nuevo a lo más viejo.
+function historial(ventas, abonos, pagos) {
+  const filas = ventas.map((v, i) => [v[2], 'Venta fiada ' + v[0], 'Capturada por ' + v[5] + ' · ' + v[3], v[4], 'fiado']);
+  for (const a of abonos) {
+    let destino = '';
+    let acumulado = 0;
+    for (let i = 0; i < ventas.length; i++) {
+      acumulado += pagos[i];
+      if (pagos[i] > 0 && acumulado >= a[2]) { destino = ventas[i][0]; break; }
+    }
+    filas.push([a[0], 'Abono de ' + MXN(a[2]), 'Recibido ' + a[1] + ' en ' + a[3] + (destino ? ' · se aplicó hasta ' + destino : ''), a[2], 'abono']);
+  }
+  return filas.sort((x, y) => (x[0] < y[0] ? 1 : (x[0] > y[0] ? -1 : 0)));
+}
+
+class Component extends DCLogic {
+  state = { open: false, monto: '', method: 'Efectivo', abonos: null, abonosKey: null, recordar: false, recTel: null, recSent: null, toast: null, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ open: false, toast: null }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = this.props.forcePhone === true || st.vw < 760;
+    const isDesktop = !isPhone;
+    let qs = null;
+    try { qs = new URLSearchParams(window.location.search).get('cliente'); } catch (e) { }
+    const key = qs ?? this.props.cliente ?? 'chuy';
+    const c = CLIENTES[key] ?? CLIENTES.chuy;
+
+    const abonos = (st.abonos && st.abonosKey === key) ? st.abonos : c.abonos;
+    const pagos = aplicar(c.ventas, abonos);
+    const movs = historial(c.ventas, abonos, pagos);
+    const ultimoAbono = abonos.slice().sort((a, b) => (a[0] < b[0] ? 1 : -1))[0] ?? null;
+    const base = c.ventas.map((v, i) => [v[0], v[1], v[2], v[3], v[4], pagos[i], v[5]]);
+    const saldo = base.reduce((s, v) => s + (v[4] - v[5]), 0);
+    const monto = st.monto === '' ? null : parseFloat(st.monto);
+    const valid = monto != null && !isNaN(monto) && monto > 0 && saldo > 0;
+    const aplicado = valid ? Math.min(monto, saldo) : 0;
+    const restante = saldo - aplicado;
+
+    let aplica = 'Elige un monto';
+    if (valid) {
+      const cubre = [];
+      let resto = aplicado;
+      for (const v of base) {
+        if (resto <= 0) break;
+        const pend = v[4] - v[5];
+        if (pend <= 0) continue;
+        cubre.push(resto >= pend ? v[0] + ' completa' : v[0] + ' parcial');
+        resto -= pend;
+      }
+      aplica = cubre.join(' · ');
+    }
+
+    const navDefs = [
+      ['Inicio', ICON.inicio, 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
+      ['Caja', ICON.caja, 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html'],
+      ['Turno', ICON.turno, 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html'],
+      ['Ventas', ICON.ventas, 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html'],
+      ['Gastos', ICON.gastos, 'Xangarro%20Portal%20-%20Operador%20Gastos.dc.html'],
+      ['Inventario', ICON.inventario, 'Xangarro%20Portal%20-%20Operador%20Inventario.dc.html'],
+      ['Cobranza', ICON.cobranza, 'Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html']
+    ];
+    const nav = navDefs.map(([label, icon, href]) => {
+      const active = label === 'Cobranza';
+      return {
+        label, icon, href,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const pendientes = base.filter(v => v[4] - v[5] > 0);
+    const masAntigua = pendientes.length ? pendientes[0] : null;
+    const atrasado = key === 'chuy' && saldo > 0;
+
+    const abiertas = pendientes.map((v, i) => ({
+      folio: v[0], concepto: v[1], fecha: v[3],
+      antiguedad: i === 0 ? 'la más antigua' : 'después de ' + pendientes[i - 1][0],
+      parcial: v[5] > 0 ? 'Ya abonó ' + MXN(v[5]) : '',
+      resta: MXN(v[4] - v[5]),
+      href: 'Xangarro%20Portal%20-%20Operador%20Detalle%20de%20venta.dc.html?venta=fiado',
+      divider: i === pendientes.length - 1 ? 'none' : '2px solid var(--gray-100)'
+    }));
+
+    return {
+      isPhone, isDesktop, nav,
+      dataState: st.dataState ?? this.props.dataState ?? 'happy',
+      contentDisplay: (st.dataState ?? this.props.dataState ?? 'happy') === 'happy' ? 'flex' : 'none',
+      notHappy: (st.dataState ?? this.props.dataState ?? 'happy') !== 'happy',
+      estadoIcon: 'M4 6h16v12H4V6Zm3 12v2m10-2v2M8 12h8',
+      retry: () => this.setState({ dataState: 'happy' }),
+      tabbar: [
+        ['Inicio', ICON.inicio, 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
+        ['Caja', ICON.caja, 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html'],
+        ['Ventas', ICON.ventas, 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html'],
+        ['Turno', ICON.turno, 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html']
+      ].map(([label, icon, href], i) => ({ label, icon, href, divider: i === 0 ? 'none' : '2px solid var(--black)' })),
+      cliente: {
+        name: c.name, initials: c.initials, phone: c.phone, desde: c.desde,
+        saldo: MXN(saldo),
+        state: saldo === 0 ? 'Sin saldo' : (atrasado ? 'Atrasado' : 'Al día'),
+        stateBg: saldo === 0 ? 'var(--green-soft)' : (atrasado ? 'var(--warning-soft)' : 'var(--gray-100)'),
+        stateColor: saldo === 0 ? 'var(--green-text)' : (atrasado ? 'var(--warning-text)' : 'var(--gray-600)')
+      },
+      heroBg: saldo === 0 ? 'var(--green-soft)' : (atrasado ? 'var(--warning-soft)' : 'var(--white)'),
+      kpis: [
+        { label: 'Ventas abiertas', value: String(pendientes.length), color: 'var(--black)', hint: masAntigua ? 'La más antigua es del ' + masAntigua[3] : 'Ninguna pendiente' },
+        { label: 'Límite de fiado', value: MXN(c.limite), color: saldo > c.limite * 0.8 ? 'var(--red-text)' : 'var(--black)', hint: 'Lo fijó Pedro · plazo ' + c.plazo },
+        { label: 'Disponible', value: MXN(Math.max(0, c.limite - saldo)), color: 'var(--green-text)', hint: 'Lo que le puedes fiar hoy' },
+        { label: 'Último abono', value: ultimoAbono ? MXN(ultimoAbono[2]) : '—', color: 'var(--black)', hint: ultimoAbono ? ultimoAbono[1] + ' · ' + ultimoAbono[3] : 'Todavía no ha abonado' }
+      ],
+      abiertas,
+      abiertasCount: String(pendientes.length),
+      sinAbiertas: pendientes.length === 0,
+      movs: movs.map((m, i) => ({
+        title: m[1], detail: m[2],
+        amount: (m[4] === 'abono' ? '−' : '+') + MXN(m[3]),
+        color: m[4] === 'abono' ? 'var(--green-text)' : 'var(--black)',
+        tint: m[4] === 'abono' ? 'var(--green-soft)' : 'var(--warning-soft)',
+        icon: m[4] === 'abono' ? ICON.abono : ICON.fiado,
+        divider: i === movs.length - 1 ? 'none' : '2px solid var(--gray-100)'
+      })),
+      limiteNota: saldo > c.limite
+        ? 'Pasó su límite de ' + MXN(c.limite) + '. No le fíes más hasta que abone; si insiste, que hable con Pedro.'
+        : 'Puede fiar hasta ' + MXN(c.limite) + ' con plazo de ' + c.plazo + '. El límite y el plazo los define Pedro en el portal.',
+      recordarOpen: st.recordar === true,
+      openRecordar: () => this.setState({ recordar: true, recTel: st.recTel ?? c.phone, recSent: null }),
+      closeRecordar: () => this.setState({ recordar: false }),
+      recTel: st.recTel ?? c.phone,
+      typeRecTel: e => this.setState({ recTel: String(e.target.value).replace(/[^0-9 ]/g, '') }),
+      recMensaje: saldo > 0
+        ? 'Hola ' + c.name + ', le recuerdo que tiene ' + MXN(saldo) + ' pendiente en Taquería Don Pedro. Puede abonar en efectivo, transferencia o tarjeta cuando pase. ¡Gracias!'
+        : 'Hola ' + c.name + ', su cuenta en Taquería Don Pedro está al día. ¡Gracias!',
+      recBg: (st.recTel ?? c.phone).replace(/\D/g, '').length >= 10 ? 'var(--yellow)' : 'var(--gray-100)',
+      recOpacity: (st.recTel ?? c.phone).replace(/\D/g, '').length >= 10 ? '1' : '0.5',
+      recSent: st.recSent,
+      sendRecordar: () => {
+        if ((st.recTel ?? c.phone).replace(/\D/g, '').length < 10) return;
+        this.setState({ recSent: 'Recordatorio enviado al ' + (st.recTel ?? c.phone) + ' por WhatsApp.' });
+      },
+      ctaLabel: saldo > 0 ? 'Recibir abono' : 'Sin saldo por cobrar',
+      ctaBg: saldo > 0 ? 'var(--yellow)' : 'var(--gray-100)',
+      ctaCursor: saldo > 0 ? 'pointer' : 'not-allowed',
+      ctaOpacity: saldo > 0 ? '1' : '0.5',
+      openAbono: () => { if (saldo > 0) this.setState({ open: true, monto: '', method: 'Efectivo' }); },
+      closeAbono: () => this.setState({ open: false }),
+      abonoOpen: st.open,
+      monto: st.monto,
+      typeMonto: e => this.setState({ monto: String(e.target.value).replace(/[^0-9.]/g, '') }),
+      quick: [saldo, 100, 200, 500].filter((v, i, a) => v > 0 && v <= saldo && a.indexOf(v) === i).slice(0, 4).map(v => ({
+        label: v === saldo ? 'Todo · ' + MXN(v) : MXN(v),
+        pick: () => this.setState({ monto: String(v) })
+      })),
+      methods: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR / CoDi'].map(label => ({
+        label, bg: st.method === label ? 'var(--yellow)' : 'var(--white)',
+        pick: () => this.setState({ method: label })
+      })),
+      aplica,
+      restante: MXN(restante),
+      confirmBg: valid ? 'var(--yellow)' : 'var(--gray-100)',
+      confirmOpacity: valid ? '1' : '0.5',
+      confirmAbono: () => {
+        if (!valid) return;
+        const ahora = new Date();
+        const dosDigitos = n => (n < 10 ? '0' : '') + n;
+        const hora = dosDigitos(ahora.getHours()) + ':' + dosDigitos(ahora.getMinutes());
+        const next = abonos.concat([['2026-05-14T' + hora, 'hoy ' + hora, aplicado, st.method.toLowerCase()]]);
+        this.setState({
+          open: false, abonos: next, abonosKey: key, monto: '',
+          toast: MXN(aplicado) + ' por ' + st.method.toLowerCase() + '. Se aplicó a lo más antiguo; queda ' + MXN(restante) + '.'
+        });
+      },
+      toast: st.toast,
+      dismissToast: () => this.setState({ toast: null }),
+      pagePad: isPhone ? '16px' : '32px',
+      mainBottom: isPhone ? '96px' : '44px',
+      heroPad: isPhone ? '18px' : '24px',
+      nameSize: isPhone ? '24px' : '30px',
+      saldoSize: isPhone ? '34px' : '42px',
+      toastRight: isPhone ? '16px' : '32px',
+      toastBottom: isPhone ? '84px' : '32px'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

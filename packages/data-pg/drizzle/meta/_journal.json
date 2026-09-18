@@ -8,6 +8,20 @@
       "when": 1789689821168,
       "tag": "0000_furry_spacker_dave",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789704166001,
+      "tag": "0001_users_active",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789705717447,
+      "tag": "0002_sync_cursor",
+      "breakpoints": true
     }
   ]
 }

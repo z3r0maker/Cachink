@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 
+import { BASE_URL } from './base-url';
 import { ROUTES } from './routes';
 
 /**
@@ -61,7 +62,7 @@ test('a forged session cookie is refused, not trusted', async ({ page, context }
     {
       name: 'xg_session',
       value: `${claims}.forged-signature`,
-      url: 'http://localhost:3100',
+      url: BASE_URL,
     },
   ]);
 

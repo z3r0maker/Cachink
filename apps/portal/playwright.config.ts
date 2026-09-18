@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { type: 'json' };
+
 import { OWNER_STORAGE } from './e2e/auth-state';
+import { BASE_URL, E2E_PORT } from './e2e/base-url';
+
+/** The contract's published test key — never a production fallback. */
+const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
 
 /**
  * Portal accessibility and state/role sweep (P-16).
@@ -46,8 +52,10 @@ export default defineConfig({
   webServer: {
     // CI builds in its own step, so a build failure reads as a build failure
     // rather than as "webServer timed out".
-    command: process.env.CI ? 'pnpm start' : 'pnpm build && pnpm start',
-    url: 'http://localhost:3100',
+    command: process.env.CI
+      ? `pnpm exec next start -p ${E2E_PORT}`
+      : `pnpm build && pnpm exec next start -p ${E2E_PORT}`,
+    url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 60_000 : 240_000,
     // Redundant with env inheritance, and kept anyway: it is the only place a
@@ -58,10 +66,15 @@ export default defineConfig({
       // its own, and `session.ts` throws when it is missing rather than
       // falling back to a default that would make every cookie forgeable.
       SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-only-not-a-real-secret',
+      // /activate signs a device token and an entitlement. The entitlement key
+      // is the contract's published TEST key, passed explicitly: the portal has
+      // no default for it on purpose (server/device/credentials.ts).
+      DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
+      ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
     },
   },
   use: {
-    baseURL: 'http://localhost:3100',
+    baseURL: BASE_URL,
     // No retries locally, so `retain-on-failure`: the first failure is the one
     // that has to be debuggable.
     trace: 'retain-on-failure',
@@ -75,6 +88,7 @@ export default defineConfig({
     {
       name: 'desktop',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
@@ -85,6 +99,7 @@ export default defineConfig({
     {
       name: 'laptop',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 800 },
@@ -94,11 +109,21 @@ export default defineConfig({
     {
       name: 'tablet',
       dependencies: ['setup'],
+      testIgnore: /sync\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
         storageState: OWNER_STORAGE,
       },
+    },
+    // Phones pushing and pulling against the demo business. Last, after every
+    // viewport, so activating phones and rewriting Taquería's rows cannot race
+    // the specs that read them — devices.spec above all, which counts slots.
+    {
+      name: 'sync',
+      dependencies: ['desktop', 'laptop', 'tablet'],
+      testMatch: /sync\.spec\.ts/,
+      use: { ...devices['Desktop Chrome'], storageState: OWNER_STORAGE },
     },
   ],
 });

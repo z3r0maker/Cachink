@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
+
 import { Card, StatusPill, Tag } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
+import { OperadorActions } from './operador-actions';
+import { RevokeButton } from './revoke-button';
 import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
 const initials = (n: string) =>
@@ -27,29 +31,52 @@ function canCancel(permissions: unknown): boolean {
 export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }) {
   const session = useSession();
   const showPerms = session.capabilities.permisosPorUsuario && canWrite(session.role);
+  const [warning, setWarning] = useState<string | null>(null);
   return (
-    <div className={cardGrid}>
-      {rows.map((o) => (
-        <Card key={o.id}>
-          <div className={cardHead}>
-            <span className={avatar} aria-hidden="true">
-              {initials(o.nombre ?? '')}
-            </span>
-            <strong className={cardName}>{o.nombre}</strong>
-          </div>
-          {showPerms && canCancel(o.permissions) ? (
-            <div style={{ marginTop: 14 }}>
-              <Tag tone="success">Puede cancelar ventas</Tag>
+    <>
+      {warning === null ? null : (
+        <p role="status" data-testid="operador-warning">
+          {warning}
+        </p>
+      )}
+      <div className={cardGrid}>
+        {rows.map((o) => (
+          <Card key={o.id}>
+            <div className={cardHead}>
+              <span className={avatar} aria-hidden="true">
+                {initials(o.nombre ?? '')}
+              </span>
+              <strong className={cardName}>{o.nombre}</strong>
+              {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
             </div>
-          ) : null}
-          <p className={cardFoot}>Entra con su nombre y su PIN. No necesita correo.</p>
-        </Card>
-      ))}
-    </div>
+            {showPerms && canCancel(o.permissions) ? (
+              <div style={{ marginTop: 14 }}>
+                <Tag tone="success">Puede cancelar ventas</Tag>
+              </div>
+            ) : null}
+            <p className={cardFoot}>
+              {o.active
+                ? 'Entra con su nombre y su NIP. No necesita correo.'
+                : 'Desactivado: no puede entrar a los teléfonos.'}
+            </p>
+            {canWrite(session.role) && o.active ? (
+              <OperadorActions id={o.id} nombre={o.nombre ?? ''} onWarning={setWarning} />
+            ) : null}
+          </Card>
+        ))}
+      </div>
+    </>
   );
 }
 
-export function Dispositivos({ rows }: { readonly rows: EquipoData['dispositivos'] }) {
+export function Dispositivos({
+  rows,
+  mayWrite,
+}: {
+  readonly rows: EquipoData['dispositivos'];
+  /** A viewer sees no Revocar at all — hidden, not disabled. The action refuses regardless. */
+  readonly mayWrite: boolean;
+}) {
   return (
     <div className={cardGrid}>
       {rows.map((d) => (
@@ -67,6 +94,9 @@ export function Dispositivos({ rows }: { readonly rows: EquipoData['dispositivos
             {d.plataforma === 'ios' ? 'iOS' : 'Android'} · {d.modelo}
           </p>
           <p className={cardFoot}>Última sincronización: {d.lastPushAt ?? '—'}</p>
+          {mayWrite && d.revokedAt === null ? (
+            <RevokeButton deviceId={d.id} nombre={d.nombre} />
+          ) : null}
         </Card>
       ))}
     </div>

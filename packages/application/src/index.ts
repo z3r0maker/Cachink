@@ -30,6 +30,9 @@ export * from './find-frequent-productos/index.js';
 export * from './crear-usuario/index.js';
 export * from './autenticar-usuario/index.js';
 export * from './cambiar-pin/index.js';
+export * from './operadores/index.js';
+export * from './compute-entitlement/index.js';
+export * from './apply-push/index.js';
 export * from './recuperar-pin/index.js';
 export * from './eliminar-usuario/index.js';
 // Phase 3 — Feature Flags

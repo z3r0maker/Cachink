@@ -396,6 +396,9 @@ importers:
 
   packages/application:
     dependencies:
+      '@xangarro/contracts':
+        specifier: workspace:*
+        version: link:../contracts
       '@xangarro/data':
         specifier: workspace:*
         version: link:../data

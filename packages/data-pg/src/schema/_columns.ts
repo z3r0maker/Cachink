@@ -21,6 +21,13 @@ export const auditColumns = {
   deletedAt: timestamp('deleted_at', { withTimezone: true, mode: 'string' }),
 } as const;
 
+/** Stamps for portal-only tables: the tenant and the audit times, no device. */
+export const tenantStamps = {
+  businessId: text('business_id').notNull(),
+  createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+} as const;
+
 /** Money is integer centavos everywhere (CLAUDE.md §2.8) — never numeric/float. */
 export const centavos = (name: string) => bigint(name, { mode: 'bigint' });
 

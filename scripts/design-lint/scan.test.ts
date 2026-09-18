@@ -214,7 +214,15 @@ describe('token/radius-offscale — CSS px values', () => {
   });
 
   it('flags one off the ladder', () => {
-    assert.deepEqual(veRules(`export const a = style({ borderRadius: '13px' });`), [
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '15px' });`), [
+      'token/radius-offscale',
+    ]);
+  });
+
+  it('accepts the two dense steps of the operator handoff (ADR-076)', () => {
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '11px' });`), []);
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '13px' });`), []);
+    assert.deepEqual(veRules(`export const a = style({ borderRadius: '17px' });`), [
       'token/radius-offscale',
     ]);
   });

@@ -19,10 +19,10 @@ import {
   ProductSchema,
   SaleSchema,
 } from '@xangarro/domain';
-import { ErrorCodeSchema } from './errors.js';
+import { ErrorCodeSchema, type ErrorCode } from './errors.js';
 import { MAX_PUSH_DELTAS } from './transport.js';
 import { wireSchema } from './wire.js';
-import type { PushableTable } from './scope.js';
+import type { PullableTable, PushableTable } from './scope.js';
 
 const OpSchema = z.enum(['insert', 'update']);
 
@@ -95,3 +95,15 @@ export const PushResponseSchema = z.object({
 });
 export type PushResponse = z.infer<typeof PushResponseSchema>;
 export type RejectedRow = z.infer<typeof RejectedRowSchema>;
+
+/**
+ * Row fields that point at another table, and the rejection when the target is
+ * missing in this business (§4). The mock and the server both check exactly
+ * this list — one copy, so they cannot disagree on what a dangling id is.
+ */
+export const PUSH_REFERENCES = [
+  ['productoId', 'products', 'FK_PRODUCT_MISSING'],
+  ['clienteId', 'clients', 'FK_CLIENT_MISSING'],
+  ['createdByUserId', 'users', 'FK_USER_MISSING'],
+] as const satisfies ReadonlyArray<readonly [string, PullableTable, ErrorCode]>;
+export type ReferencedTable = (typeof PUSH_REFERENCES)[number][1];

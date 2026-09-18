@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+@keyframes xg-slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+[data-row]{transition:background 90ms linear;}
+[data-row]:hover{background:var(--yellow-soft);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="flex:none;width:248px;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+      <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+        <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+        </div>
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </div>
+      <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="13">
+          <a href="{{ n.href }}" title="{{ n.label }}" data-press="1" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+            <span style="flex:1;min-width:0;font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </a>
+          <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+              <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+            </div>
+          </sc-if>
+        </sc-for>
+      </nav>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);min-height:76px;box-sizing:border-box;padding:12px {{ pagePad }}">
+      <div style="max-width:1760px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">Dueño</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <a href="Xangarro%20Portal%20-%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 4 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">4</span>
+          </a>
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);box-shadow:3px 3px 0 var(--black);">PR</div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px {{ pagePad }} 60px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);"><a href="Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html">Tu equipo</a> · Cortes</div>
+            <h1 style="margin:8px 0 0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Cortes de turno</h1>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;text-wrap:pretty;">Lo que cada quien contó al cerrar, contra lo que el sistema esperaba.</div>
+          </div>
+          <button type="button" data-press="1" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
+            Exportar mes
+          </button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
+              <div style="font-size:30px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:{{ k.color }};margin-top:6px;">{{ k.value }}</div>
+              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ k.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+              <div role="button" tabindex="0" onClick="{{ f.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:44px;padding:0 17px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:800;color:var(--black);background:{{ f.bg }};box-shadow:{{ f.shadow }}">{{ f.label }}</div>
+            </sc-for>
+          </div>
+          <div style="margin-left:auto;display:flex;align-items:center;gap:10px;height:48px;padding:0 15px;border:2px solid var(--black);border-radius:14px;background:var(--white);min-width:240px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray-600)" stroke-width="2.4" stroke-linecap="round" style="flex:none;"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            <input type="search" aria-label="Buscar corte" placeholder="Buscar por operador o caja" value="{{ query }}" onChange="{{ typeQuery }}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-family:inherit;font-size:16px;font-weight:600;color:var(--ink);">
+          </div>
+        </div>
+
+        <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:14px;padding:12px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);">
+            <span style="flex:1;min-width:0;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Turno</span>
+            <span style="flex:none;min-width:110px;text-align:right;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Esperado</span>
+            <span style="flex:none;min-width:110px;text-align:right;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Contado</span>
+            <span style="flex:none;min-width:120px;text-align:right;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Diferencia</span>
+            <span style="flex:none;width:130px;"></span>
+          </div>
+          <sc-for list="{{ cortes }}" as="c" hint-placeholder-count="6">
+            <div data-row="1" role="button" tabindex="0" onClick="{{ c.open }}" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:{{ c.divider }};cursor:pointer;">
+              <span style="flex:none;width:42px;height:42px;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:{{ c.tint }};font-size:13px;font-weight:800;color:var(--black);">{{ c.initials }}</span>
+              <div style="flex:1;min-width:0;">
+                <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);">{{ c.name }}</div>
+                <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;">{{ c.meta }}</div>
+              </div>
+              <span style="flex:none;min-width:110px;text-align:right;font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray-600);">{{ c.esperado }}</span>
+              <span style="flex:none;min-width:110px;text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ c.contado }}</span>
+              <span style="flex:none;min-width:120px;text-align:right;">
+                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;background:{{ c.diffBg }};color:{{ c.diffColor }}">{{ c.diff }}</span>
+              </span>
+              <span style="flex:none;width:130px;text-align:right;">
+                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ c.stateBg }};color:{{ c.stateColor }}">{{ c.state }}</span>
+              </span>
+            </div>
+          </sc-for>
+          <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+            <div style="padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
+              <div style="width:58px;height:58px;border:2.5px solid var(--black);border-radius:16px;background:var(--yellow-soft);display:grid;place-items:center;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              </div>
+              <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Sin resultados</div>
+              <div style="font-size:14px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">Ningún corte coincide con ese filtro.</div>
+            </div>
+          </sc-if>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ detailOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:rgba(13,13,13,0.45);display:flex;justify-content:flex-end;">
+      <div role="dialog" aria-modal="true" style="width:min(560px,100%);height:100%;box-sizing:border-box;display:flex;flex-direction:column;background:var(--white);border-left:2.5px solid var(--black);animation:xg-slide 160ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:2.5px solid var(--black);background:{{ detail.headerBg }}">
+          <span style="flex:none;width:42px;height:42px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:9999px;background:var(--white);font-size:14px;font-weight:800;color:var(--black);">{{ detail.initials }}</span>
+          <div style="min-width:0;">
+            <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ detail.name }}</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">{{ detail.meta }}</div>
+          </div>
+          <span role="button" tabindex="0" onClick="{{ closeDetail }}" title="Cerrar" style="margin-left:auto;flex:none;width:40px;height:40px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:18px;">
+
+          <div style="padding:18px;border:2.5px solid var(--black);border-radius:16px;background:{{ detail.diffBg }};display:flex;flex-direction:column;gap:8px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ detail.diffLabel }}</div>
+            <div style="font-size:42px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:var(--black);">{{ detail.diffValue }}</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;">
+              <span style="font-size:13px;font-weight:700;color:var(--ink);">Esperado {{ detail.esperado }}</span>
+              <span style="font-size:13px;font-weight:700;color:var(--ink);">Contado {{ detail.contado }}</span>
+            </div>
+          </div>
+
+          <sc-if value="{{ detail.nota }}" hint-placeholder-val="{{ true }}">
+            <div style="padding:16px 18px;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Nota de {{ detail.firstName }} · {{ detail.motivo }}</div>
+              <div style="font-size:15px;font-weight:700;color:var(--black);margin-top:6px;text-wrap:pretty;">«{{ detail.nota }}»</div>
+            </div>
+          </sc-if>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Cómo se formó lo esperado</div>
+            <div style="border:2px solid var(--black);border-radius:14px;overflow:hidden;">
+              <sc-for list="{{ detail.breakdown }}" as="b" hint-placeholder-count="4">
+                <div style="display:flex;align-items:baseline;gap:10px;padding:12px 15px;border-bottom:{{ b.divider }};background:var(--white);">
+                  <span style="font-size:14px;font-weight:700;color:var(--ink);">{{ b.label }}</span>
+                  <span style="margin-left:auto;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ b.color }}">{{ b.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Conteo que capturó</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;">
+              <sc-for list="{{ detail.denoms }}" as="d" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:2px solid var(--black);border-radius:12px;background:var(--white);">
+                  <span style="flex:none;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ d.label }}</span>
+                  <span style="margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gray-600);">×{{ d.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Qué más pasó en el turno</div>
+            <div style="display:flex;flex-direction:column;gap:9px;">
+              <sc-for list="{{ detail.eventos }}" as="e" hint-placeholder-count="4">
+                <div style="display:flex;align-items:center;gap:11px;padding:12px 14px;border:2px solid var(--black);border-radius:13px;background:{{ e.bg }}">
+                  <span style="flex:1;min-width:0;font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ e.label }}</span>
+                  <span style="flex:none;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ e.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+        </div>
+
+        <div style="flex:none;padding:16px 20px;border-top:2.5px solid var(--black);background:var(--white);display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" onClick="{{ detail.ask }}" data-press="1" style="flex:1;min-width:150px;height:52px;border:2px solid var(--black);border-radius:13px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Pedir aclaración</button>
+          <button type="button" onClick="{{ detail.clear }}" data-press="1" data-onyellow="1" style="flex:1;min-width:150px;height:52px;border:2.5px solid var(--black);border-radius:13px;background:{{ detail.clearBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ detail.clearOpacity }}" style-hover="background:var(--yellow-deep);">{{ detail.clearLabel }}</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div role="status" style="position:fixed;right:32px;bottom:32px;z-index:90;width:min(380px,calc(100vw - 32px));box-sizing:border-box;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+      <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:{{ toast.bg }};border-bottom:2px solid var(--black);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+        <span style="font-size:14px;font-weight:800;color:var(--black);">{{ toast.title }}</span>
+      </div>
+      <div style="padding:14px 16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ toast.body }}</div>
+        <button type="button" onClick="{{ dismissToast }}" data-press="1" style="height:44px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;">Entendido</button>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startFilter&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Todos&quot;,&quot;Por aclarar&quot;,&quot;Con diferencia&quot;],&quot;default&quot;:&quot;Todos&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+
+// nombre, iniciales, tinte, caja, fecha y horario, fondo, ventas ef., abonos ef., gastos ef., contado, motivo, nota, estado
+const CORTES = [
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '14 may · 08:15 a 21:04', 800, 2140, 550, 620, 2870, null, null, 'Cuadró'],
+  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '13 may · 12:00 a 22:10', 600, 1880, 0, 240, 2180, 'Cambio mal dado', 'Le di cambio de 200 a un cliente que pagó con 100, ya no lo alcancé', 'Por aclarar'],
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '13 may · 08:00 a 20:40', 800, 2450, 300, 180, 3370, null, null, 'Cuadró'],
+  ['Sofía Márquez', 'SM', 'var(--purple-soft)', 'Caja 2', '12 may · 08:10 a 15:30', 600, 1240, 150, 95, 1935, 'Venta no registrada', 'Creo que cobré unos tacos y no los capturé en la hora de la comida', 'Aclarado'],
+  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '11 may · 12:00 a 22:00', 600, 1720, 200, 310, 2150, 'No sé', 'Conté tres veces y no encontré de dónde sale', 'Por aclarar'],
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '11 may · 08:05 a 20:55', 800, 2310, 0, 150, 2960, null, null, 'Cuadró']
+];
+
+const DENOMS = [[1000, 1], [500, 2], [200, 4], [100, 6], [50, 3], [20, 5], [10, 8], [5, 6], [2, 5], [1, 10]];
+
+class Component extends DCLogic {
+  state = { filter: 'Todos', query: '', sel: null, cleared: [], toast: null, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ sel: null, toast: null }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+  }
+
+  esperado(c) { return c[5] + c[6] + c[7] - c[8]; }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = st.vw < 900;
+    const isDesktop = !isPhone;
+    const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const q = norm((st.query ?? '').trim());
+    const estadoDe = c => st.cleared.indexOf(c[0] + c[4]) !== -1 ? 'Aclarado' : c[12];
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Asesor', 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3ZM18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Revisión de caja', 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Asesor': 'Xangarro%20Portal%20-%20Asesor.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Revisión de caja': 'Xangarro%20Portal%20-%20Revision%20de%20caja.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, div]) => {
+      const active = label === 'Operadores';
+      return {
+        label, icon, href: pages[label] || '#', dividerAfter: div === 1,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const filtered = CORTES
+      .filter(c => {
+        if (st.filter === 'Todos') return true;
+        if (st.filter === 'Por aclarar') return estadoDe(c) === 'Por aclarar';
+        if (st.filter === 'Con diferencia') return c[9] !== this.esperado(c);
+        return c[3] === st.filter;
+      })
+      .filter(c => q === '' || norm(c[0] + ' ' + c[3] + ' ' + c[4]).indexOf(q) !== -1);
+
+    const cortes = filtered.map((c, i) => {
+      const esp = this.esperado(c);
+      const diff = c[9] - esp;
+      const estado = estadoDe(c);
+      return {
+        name: c[0], initials: c[1], tint: c[2],
+        meta: c[3] + ' · ' + c[4],
+        esperado: MXN(esp), contado: MXN(c[9]),
+        diff: diff === 0 ? MXN(0) : (diff < 0 ? '−' + MXN(Math.abs(diff)) : '+' + MXN(diff)),
+        diffBg: diff === 0 ? 'var(--green-soft)' : (diff < 0 ? 'var(--red-soft)' : 'var(--blue-soft)'),
+        diffColor: diff === 0 ? 'var(--green-text)' : (diff < 0 ? 'var(--red-text)' : 'var(--blue-text)'),
+        state: estado,
+        stateBg: estado === 'Por aclarar' ? 'var(--warning-soft)' : (estado === 'Aclarado' ? 'var(--blue-soft)' : 'var(--green-soft)'),
+        stateColor: estado === 'Por aclarar' ? 'var(--warning-text)' : (estado === 'Aclarado' ? 'var(--blue-text)' : 'var(--green-text)'),
+        divider: i === filtered.length - 1 ? 'none' : '2px solid var(--gray-100)',
+        open: () => this.setState({ sel: c[0] + c[4] })
+      };
+    });
+
+    const rec = CORTES.find(c => c[0] + c[4] === st.sel);
+    const esp = rec ? this.esperado(rec) : 0;
+    const diff = rec ? rec[9] - esp : 0;
+    const estado = rec ? estadoDe(rec) : '';
+
+    const detail = {
+      name: rec ? rec[0] : '',
+      firstName: rec ? rec[0].split(' ')[0] : '',
+      initials: rec ? rec[1] : '',
+      meta: rec ? rec[3] + ' · ' + rec[4] : '',
+      headerBg: rec ? rec[2] : 'var(--white)',
+      esperado: MXN(esp), contado: rec ? MXN(rec[9]) : MXN(0),
+      diffLabel: diff === 0 ? 'Cuadró' : (diff < 0 ? 'Faltó' : 'Sobró'),
+      diffValue: diff === 0 ? MXN(0) : MXN(Math.abs(diff)),
+      diffBg: diff === 0 ? 'var(--green-soft)' : (diff < 0 ? 'var(--red-soft)' : 'var(--blue-soft)'),
+      motivo: rec ? (rec[10] ?? '') : '',
+      nota: rec ? (rec[11] ?? '') : '',
+      breakdown: rec ? [
+        { label: 'Fondo de caja', value: MXN(rec[5]), color: 'var(--black)' },
+        { label: 'Ventas en efectivo', value: MXN(rec[6]), color: 'var(--black)' },
+        { label: 'Abonos en efectivo', value: MXN(rec[7]), color: 'var(--black)' },
+        { label: 'Gastos de caja chica', value: '−' + MXN(rec[8]), color: 'var(--red-text)' },
+        { label: 'Esperado', value: MXN(esp), color: 'var(--black)' }
+      ].map((b, i, a) => ({ ...b, divider: i === a.length - 1 ? 'none' : '2px solid var(--gray-100)' })) : [],
+      denoms: DENOMS.map(([v, n]) => ({ label: '$' + v, count: String(n) })),
+      eventos: [
+        { label: 'Ventas capturadas', value: '12', bg: 'var(--white)' },
+        { label: 'Ventas canceladas', value: '1 · ' + MXN(60), bg: 'var(--red-soft)' },
+        { label: 'Ventas fiadas', value: MXN(182), bg: 'var(--warning-soft)' },
+        { label: 'Movimientos de inventario', value: '3 entradas · 2 mermas', bg: 'var(--white)' },
+        { label: 'Productos creados en caja', value: '1', bg: 'var(--yellow-soft)' }
+      ],
+      clearLabel: estado === 'Cuadró' ? 'Sin nada que aclarar' : (estado === 'Aclarado' ? 'Ya está aclarado' : 'Marcar como aclarado'),
+      clearBg: estado === 'Por aclarar' ? 'var(--yellow)' : 'var(--gray-100)',
+      clearOpacity: estado === 'Por aclarar' ? '1' : '0.5',
+      clear: () => {
+        if (!rec || estado !== 'Por aclarar') return;
+        this.setState({
+          sel: null, cleared: st.cleared.concat([rec[0] + rec[4]]),
+          toast: { bg: 'var(--green-soft)', title: 'Corte aclarado', body: 'El corte de ' + rec[0] + ' del ' + rec[4].split(' ·')[0] + ' queda cerrado. La diferencia se registra como ajuste de caja.' }
+        });
+      },
+      ask: () => {
+        if (!rec) return;
+        this.setState({
+          sel: null,
+          toast: { bg: 'var(--blue-soft)', title: 'Aclaración pedida', body: 'Se le mandó a ' + rec[0].split(' ')[0] + ' el detalle del corte por WhatsApp. Verás su respuesta en Avisos.' }
+        });
+      }
+    };
+
+    const diffMes = CORTES.reduce((s, c) => s + (c[9] - this.esperado(c)), 0);
+    const porAclarar = CORTES.filter(c => estadoDe(c) === 'Por aclarar').length;
+
+    return {
+      isDesktop, nav, cortes, detail,
+      noResults: cortes.length === 0,
+      query: st.query,
+      typeQuery: e => this.setState({ query: e.target.value }),
+      filters: ['Todos', 'Por aclarar', 'Con diferencia', 'Caja 1', 'Caja 2'].map(label => ({
+        label,
+        bg: st.filter === label ? 'var(--yellow)' : 'var(--white)',
+        shadow: st.filter === label ? '3px 3px 0 var(--black)' : 'none',
+        pick: () => this.setState({ filter: label })
+      })),
+      kpis: [
+        { label: 'Cortes del mes', value: String(CORTES.length), color: 'var(--black)', hint: 'Dos cajas, tres personas' },
+        { label: 'Por aclarar', value: String(porAclarar), color: porAclarar > 0 ? 'var(--warning-text)' : 'var(--green-text)', hint: 'Esperan tu revisión' },
+        { label: 'Diferencia acumulada', value: (diffMes < 0 ? '−' : '') + MXN(Math.abs(diffMes)), color: diffMes < 0 ? 'var(--red-text)' : 'var(--black)', hint: 'Suma de faltantes y sobrantes del mes' },
+        { label: 'Cortes que cuadraron', value: String(CORTES.filter(c => c[9] === this.esperado(c)).length) + ' de ' + CORTES.length, color: 'var(--green-text)', hint: 'Sin diferencia alguna' }
+      ],
+      detailOpen: !!rec,
+      closeDetail: () => this.setState({ sel: null }),
+      toast: st.toast,
+      dismissToast: () => this.setState({ toast: null }),
+      pagePad: isPhone ? '18px' : '32px',
+      h1Size: isPhone ? '28px' : '36px'
+    };
+  }
+}
+
+</script>
+</body>
+</html>

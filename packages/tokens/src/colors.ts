@@ -83,6 +83,13 @@ export const colors = {
    * three different alphas (0.35 / 0.45 / 0.5); one token, one weight.
    */
   scrim: 'rgba(13, 13, 13, 0.45)',
+
+  /**
+   * Rules between rows on a yellow hero card (Turno, Cierre). The design draws
+   * them as 15% black over yellow; this is that colour flattened, so no
+   * transparency ships (ADR-077). Only valid on `yellow`.
+   */
+  yellowRule: '#DBB80A',
 } as const;
 
 export type ColorToken = keyof typeof colors;

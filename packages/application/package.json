@@ -20,6 +20,7 @@
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {
+    "@xangarro/contracts": "workspace:*",
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "bcryptjs": "3.0.3",

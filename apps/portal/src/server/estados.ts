@@ -36,15 +36,15 @@ export async function loadEstadosModel(
 ): Promise<EstadosModel> {
   const rows = await loadEstados(businessId, from, to);
 
-  // The database column is `monto_centavos`, which Drizzle surfaces as
-  // `montoCentavos`; the domain entity calls the same value `monto`. Mapping
-  // rather than casting is the point — an `as unknown as Sale[]` compiled
-  // fine and produced `undefined` money, which surfaced as the error state.
+  // The cloud schema now keys `monto_centavos` as `monto`, like the device
+  // and the domain (drift.test.ts holds the keys equal). Before, it said
+  // `montoCentavos`, and an `as unknown as Sale[]` compiled fine and produced
+  // `undefined` money, which surfaced as the error state.
   const ventas: readonly Sale[] = rows.ventas.map(
-    (r) => ({ ...r, monto: r.montoCentavos ?? 0n }) as unknown as Sale,
+    (r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Sale,
   );
   const egresos: readonly Expense[] = rows.egresos.map(
-    (r) => ({ ...r, monto: r.montoCentavos ?? 0n }) as unknown as Expense,
+    (r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Expense,
   );
 
   const resultados = calculateEstadoDeResultados({ ventas, egresos, isrTasa: ISR_BPS });

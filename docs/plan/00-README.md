@@ -15,16 +15,18 @@
 Work is split into **tracks**. Each track is one file, meant for one session. Task IDs are prefixed
 by track so a task is identifiable anywhere (commit messages, PR titles, chat).
 
-| Track                          | File                | Prefix | Owner session            | Can start when                      |
-| ------------------------------ | ------------------- | ------ | ------------------------ | ----------------------------------- |
-| **Foundation** (shared)        | `01-foundation.md`  | `F-`   | one session, first       | now                                 |
-| **Contracts** (shared, frozen) | `02-contracts.md`   | `C-`   | same session as F        | after F-05                          |
-| **Backend / Supabase**         | `03-backend.md`     | `B-`   | session "Backend+Portal" | after F + C                         |
-| **Portal** (admin web)         | `04-portal.md`      | `P-`   | session "Backend+Portal" | after B-01..B-05                    |
-| **App** (mobile)               | `05-app.md`         | `A-`   | session "App"            | after F + C (uses mock server C-09) |
-| **Landing**                    | `06-landing.md`     | `L-`   | anyone, small            | after F-01                          |
-| **Launch** (integration)       | `07-launch.md`      | `X-`   | one session              | after A, B, P, L                    |
-| **Post-launch**                | `08-post-launch.md` | `Z-`   | later                    | after X                             |
+| Track                                | File                  | Prefix | Owner session            | Can start when                                     |
+| ------------------------------------ | --------------------- | ------ | ------------------------ | -------------------------------------------------- |
+| **Foundation** (shared)              | `01-foundation.md`    | `F-`   | one session, first       | now                                                |
+| **Contracts** (shared, frozen)       | `02-contracts.md`     | `C-`   | same session as F        | after F-05                                         |
+| **Backend / Supabase**               | `03-backend.md`       | `B-`   | session "Backend+Portal" | after F + C                                        |
+| **Portal** (admin web)               | `04-portal.md`        | `P-`   | session "Backend+Portal" | after B-01..B-05                                   |
+| **App** (mobile)                     | `05-app.md`           | `A-`   | session "App"            | after F + C (uses mock server C-09)                |
+| **Landing**                          | `06-landing.md`       | `L-`   | anyone, small            | after F-01                                         |
+| **Launch** (integration)             | `07-launch.md`        | `X-`   | one session              | after A, B, P, L                                   |
+| **Post-launch**                      | `08-post-launch.md`   | `Z-`   | later                    | after X                                            |
+| **Next features**                    | `09-next-features.md` | `N-`   | per task group           | §2 launch blockers join the X gate; §3 on triggers |
+| **Operator view** (browser register) | `10-operador.md`      | `O-`   | per fase (10 → 13)       | now; screens after O-01, O-06 (ADR-071 … ADR-075)  |
 
 **Parallelism rule:** Track A and Track B/P run in parallel **only after F and C are merged to
 `main`.** They meet at the API contract in `02-contracts.md`. Neither track may change the contract
@@ -69,6 +71,16 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 ---
 
 ## 4. Decision summary (what the interview settled)
+
+> **Amended 2026-09-17 by the feature interview — ADR-063 … ADR-068, Track N (`09-next-features.md`).**
+> Internal admin console `apps/admin` at `admin.xangarro.mx` replaces Q16's Studio-only back-office;
+> limits become transactions/month + active products (300/50 · 10k/1k · 30k/5k), never blocking a
+> sale, server-counted; dormant free accounts archive at 180 d (amends Q9); signup → wizard → plan;
+> annual billing + trial on both paid tiers; merchant card collection via Mercado Pago + Clip
+> (post-launch); metric-based DB scaling triggers. **Research pass the same day (ADR-069, ADR-070):**
+> no OXXO (Stripe doesn't support it for subscriptions — amends Q13); SPEI on annual only; CFDI
+> automated from day 1 (supersedes Q15's manual phase and Z-03); the app is a business-employee
+> sign-in with no in-app selling (App Store 3.1.1/3.1.3). See the decision table in `09-next-features.md` §1.
 
 > **Amended 2026-09-17 by the portal design interview — ADR-056 … ADR-060.** The items below still
 > describe the pivot correctly except where this block overrides them. Read ADR-058 before touching
@@ -205,6 +217,10 @@ P-06 devices ──► X-02
 L-03 CTAs ──► X-02 (needs P-03 URL)
 X-01 staging ──► X-02
 X-06 CLAUDE.md amendments ──► (human)
+
+N (09-next-features.md) — see its §5. Key cross-track edges:
+C-12 ──► N-01, N-02, A-10 · C-14 ──► N-25, A-04 · C-15 ──► N-11, N-19
+N-11 settings parity ──► A-01 · N-24 app design ──► A-01 · N-30 beta ──► X-10
 ```
 
 ---

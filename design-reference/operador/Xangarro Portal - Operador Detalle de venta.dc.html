@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-pop{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:none}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <aside style="flex:none;width:248px;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;">
+      <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+        <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+        </div>
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </div>
+      <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+        <sc-for list="{{ nav }}" as="n" hint-placeholder-count="7">
+          <a href="{{ n.href }}" title="{{ n.label }}" data-press="1" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;">{{ n.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+      <div style="padding:14px 12px;border-top:2.5px solid var(--black);display:flex;flex-direction:column;gap:8px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Turno abierto</div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">AR</span>
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
+            <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </sc-if>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);min-height:76px;box-sizing:border-box;padding:12px {{ pagePad }}">
+      <div style="max-width:1760px;margin:0 auto;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <a href="Xangarro%20Portal%20-%20Operador%20Ventas.dc.html" data-press="1" title="Volver a ventas" style="display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 14px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg>
+          Ventas del turno
+        </a>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:{{ estadoBg }}">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:{{ estadoDot }}"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">{{ estadoLabel }}</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:24px {{ pagePad }} {{ mainBottom }}">
+      <sc-if value="{{ notHappy }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:1100px;margin:0 auto;">
+          <dc-import name="Operador Estado" mode="{{ dataState }}" icon="{{ estadoIcon }}" empty-title="Esta venta ya no existe" empty-body="Puede que se haya cancelado desde otra caja. Vuelve a la lista de ventas de tu turno." error-title="No pudimos cargar el ticket" cta="Ver mis ventas" href="Xangarro%20Portal%20-%20Operador%20Ventas.dc.html" retry="{{ retry }}" hint-size="100%,280px"></dc-import>
+        </div>
+      </sc-if>
+
+      <div style="max-width:1100px;margin:0 auto;display:{{ contentDisplay }};grid-template-columns:{{ cols }};gap:18px;align-items:start;">
+
+        <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;min-width:0;">
+          <div style="padding:20px;border-bottom:2.5px solid var(--black);background:{{ headBg }};display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:180px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Venta {{ folio }}</div>
+              <div style="font-size:{{ totalSize }};line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.04em;color:var(--black);margin-top:8px;text-decoration:{{ strike }}">{{ total }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:8px;">{{ hora }} · {{ metodo }}</div>
+            </div>
+            <sc-if value="{{ cancelada }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:none;padding:12px 14px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);max-width:280px;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--red-text);">Cancelada</div>
+                <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:4px;text-wrap:pretty;">{{ cancelMotivo }}</div>
+              </div>
+            </sc-if>
+          </div>
+
+          <div style="padding:8px 0;">
+            <sc-for list="{{ lineas }}" as="l" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;padding:13px 20px;border-bottom:{{ l.divider }}">
+                <span style="flex:none;min-width:34px;height:34px;padding:0 9px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:{{ l.tint }};font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ l.qty }}</span>
+                <div style="flex:1;min-width:0;">
+                  <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);text-wrap:pretty;">{{ l.name }}</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;">{{ l.each }} cada uno</div>
+                </div>
+                <span style="flex:none;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ l.amount }}</span>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="padding:16px 20px 20px;border-top:2.5px solid var(--black);display:flex;flex-direction:column;gap:9px;">
+            <sc-for list="{{ resumen }}" as="r" hint-placeholder-count="3">
+              <div style="display:flex;align-items:baseline;gap:10px;">
+                <span style="font-size:14px;font-weight:700;color:{{ r.labelColor }}">{{ r.label }}</span>
+                <span style="margin-left:auto;font-size:{{ r.size }};font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ r.value }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:18px;min-width:0;">
+
+          <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+            <div style="padding:14px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Quién y cuándo</div>
+            <div style="padding:16px 18px;display:flex;flex-direction:column;gap:11px;">
+              <sc-for list="{{ trazas }}" as="t" hint-placeholder-count="4">
+                <div style="display:flex;align-items:baseline;gap:10px;">
+                  <span style="font-size:13px;font-weight:700;color:var(--gray-600);">{{ t.label }}</span>
+                  <span style="margin-left:auto;font-size:14px;font-weight:800;color:var(--black);text-align:right;text-wrap:pretty;">{{ t.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+            <div style="padding:14px 18px;background:var(--gray-100);border-bottom:2.5px solid var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Qué puedes hacer</div>
+            <div style="padding:16px 18px;display:flex;flex-direction:column;gap:11px;">
+              <button type="button" onClick="{{ openShare }}" data-press="1" data-onyellow="1" style="height:54px;border:2.5px solid var(--black);border-radius:13px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;" style-hover="background:var(--yellow-deep);">Compartir comprobante</button>
+              <button type="button" onClick="{{ openCancel }}" data-press="1" style="height:54px;border:2px solid var(--black);border-radius:13px;background:{{ cancelBg }};box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:{{ cancelCursor }};opacity:{{ cancelOpacity }}">Cancelar venta</button>
+              <div style="font-size:13px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">{{ cancelHint }}</div>
+            </div>
+          </div>
+
+          <sc-if value="{{ esFiado }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--warning-soft);box-shadow:5px 5px 0 var(--black);padding:18px;display:flex;flex-direction:column;gap:11px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Esta venta quedó fiada</div>
+              <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ cliente }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ fiadoDetalle }}</div>
+              <a href="Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html" data-press="1" style="display:inline-flex;align-items:center;justify-content:center;height:50px;border:2px solid var(--black);border-radius:13px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);text-decoration:none;">Recibir un abono</a>
+            </div>
+          </sc-if>
+
+        </div>
+      </div>
+    </main>
+
+    <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+      <nav style="position:fixed;left:0;right:0;bottom:0;z-index:60;height:68px;background:var(--white);border-top:2.5px solid var(--black);display:grid;grid-template-columns:repeat(4,1fr);">
+        <sc-for list="{{ tabbar }}" as="t" hint-placeholder-count="4">
+          <a href="{{ t.href }}" style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-decoration:none;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.icon }}"></path></svg>
+            <span style="font-size:11px;font-weight:800;letter-spacing:0.02em;">{{ t.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+    </sc-if>
+
+  </div>
+
+  <sc-if value="{{ cancelOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:80;background:rgba(13,13,13,0.45);display:grid;place-items:start center;padding:16px;overflow-y:auto;">
+      <div style="width:min(480px,100%);box-sizing:border-box;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--red-soft);border-bottom:2.5px solid var(--black);">
+          <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Cancelar {{ folio }}</span>
+          <span role="button" tabindex="0" onClick="{{ closeCancel }}" title="Cerrar" style="margin-left:auto;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;">
+          <div style="font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ cancelIntro }}</div>
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Motivo</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <sc-for list="{{ motivos }}" as="m" hint-placeholder-count="4">
+                <div role="button" tabindex="0" onClick="{{ m.pick }}" style="display:inline-flex;align-items:center;height:42px;padding:0 15px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:700;color:var(--black);background:{{ m.bg }}">{{ m.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;gap:11px;padding:13px 14px;border:2px solid var(--black);border-radius:14px;background:var(--warning-soft);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v.01M12 11v5"></path></svg>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ cancelWarn }}</div>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button type="button" onClick="{{ closeCancel }}" data-press="1" style="flex:none;height:52px;padding:0 18px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Volver</button>
+            <button type="button" onClick="{{ confirmCancel }}" data-press="1" style="flex:1;height:52px;border:2.5px solid var(--black);border-radius:12px;background:{{ confirmBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ confirmOpacity }}">Cancelar la venta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" style="position:fixed;inset:0;z-index:85;background:rgba(13,13,13,0.45);display:grid;place-items:start center;padding:16px;overflow-y:auto;">
+      <div style="width:min(420px,100%);box-sizing:border-box;max-height:calc(100vh - 32px);display:flex;flex-direction:column;border:2.5px solid var(--black);border-radius:20px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1);">
+        <div style="flex:none;display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--yellow);border-bottom:2.5px solid var(--black);">
+          <span style="font-size:16px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Compartir {{ folio }}</span>
+          <span role="button" tabindex="0" onClick="{{ closeShare }}" data-onyellow="1" title="Cerrar" style="margin-left:auto;width:32px;height:32px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+          </span>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <label for="dv-tel" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Teléfono del cliente</label>
+            <input id="dv-tel" type="tel" inputmode="tel" placeholder="55 1234 5678" value="{{ tel }}" onChange="{{ typeTel }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);" style-focus="border-width:2.5px;">
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ shareOptions }}" as="o" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ o.pick }}" data-press="1" style="display:flex;align-items:center;gap:13px;min-height:60px;padding:0 16px;border:2px solid var(--black);border-radius:14px;background:{{ o.bg }};box-shadow:3px 3px 0 var(--black);cursor:pointer;opacity:{{ o.opacity }}">
+                <span style="flex:none;width:38px;height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:11px;background:var(--white);color:var(--black);">
+                  <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ o.icon }}"></path></svg>
+                </span>
+                <div style="min-width:0;">
+                  <div style="font-size:15px;font-weight:800;color:var(--black);">{{ o.label }}</div>
+                  <div style="font-size:12px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ o.hint }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ shareSent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:11px;padding:14px 16px;border:2.5px solid var(--black);border-radius:14px;background:var(--green-soft);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="M20 6 9 17l-5-5"></path></svg>
+              <div style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ shareSent }}</div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;venta&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;efectivo&quot;,&quot;fiado&quot;],&quot;default&quot;:&quot;efectivo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;registrada&quot;,&quot;cancelada&quot;],&quot;default&quot;:&quot;registrada&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
+const ICON = {
+  inicio: 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10',
+  caja: 'M4 4h16v16H4V4Zm4 4h8M8 12h3m5 0h.01M8 16h3m5 0h.01',
+  turno: 'M12 7v5l3 2M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18',
+  ventas: 'M3 6h2l2.4 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L21 9H6',
+  gastos: 'M12 3v14M6 11l6 6 6-6M4 21h16',
+  inventario: 'M4 8l8-4 8 4v8l-8 4-8-4V8Zm8-4v20M4 8l8 4 8-4',
+  cobranza: 'M4 6h16v12H4V6Zm3 12v2m10-2v2M8 12h8',
+  wa: 'M20.5 3.5A10 10 0 0 0 3.2 15.6L2 22l6.5-1.2A10 10 0 1 0 20.5 3.5M8.5 8.5c.3 1.5 1 2.8 2 3.8s2.3 1.7 3.8 2c.6-.6 1-1.3 1.4-1.2l2 .8c.2 1.3-.6 2.2-1.8 2.3-3 .2-7.7-4.4-7.9-7.5-.1-1.2.8-2 2.1-1.8l.8 2c.1.4-.6.9-1.2 1.4',
+  descargar: 'M12 3v12M7 11l5 5 5-5M4 21h16',
+  copiar: 'M9 9h10v10H9V9Zm-4 6H3V3h12v2'
+};
+
+const VENTAS = {
+  efectivo: {
+    folio: 'V-0412', hora: 'Hoy 14:52', metodo: 'Efectivo',
+    lineas: [['Taco de pastor', 25, 3, 'var(--red-soft)'], ['Gringa', 60, 1, 'var(--peach-soft)'], ['Agua de horchata', 25, 1, 'var(--blue-soft)']],
+    recibido: 200, cliente: null
+  },
+  fiado: {
+    folio: 'V-0409', hora: 'Hoy 14:04', metodo: 'Fiado',
+    lineas: [['Volcán', 55, 1, 'var(--peach-soft)'], ['Consomé', 35, 1, 'var(--green-soft)']],
+    recibido: null, cliente: 'Doña Mari de la tienda'
+  }
+};
+
+class Component extends DCLogic {
+  state = { cancelOpen: false, motivo: null, cancelada: false, shareOpen: false, tel: '', shareSent: null, vw: 1440 };
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ vw: window.innerWidth });
+    this.onResize();
+    window.addEventListener('resize', this.onResize);
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ cancelOpen: false, shareOpen: false }); };
+    window.addEventListener('keydown', this.onKey);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+  }
+
+  renderVals() {
+    const st = this.state;
+    const isPhone = this.props.forcePhone === true || st.vw < 760;
+    const isDesktop = !isPhone;
+    const isNarrow = isPhone || st.vw < 1060;
+    let qsVenta = null, qsEstado = null;
+    try {
+      const qp = new URLSearchParams(window.location.search);
+      qsVenta = qp.get('venta');
+      qsEstado = qp.get('estado');
+    } catch (e) { }
+    const tipo = qsVenta ?? this.props.venta ?? 'efectivo';
+    const v = VENTAS[tipo] ?? VENTAS.efectivo;
+    const esFiado = tipo === 'fiado';
+    const cancelada = st.cancelada || (qsEstado ?? this.props.estado) === 'cancelada';
+    const total = v.lineas.reduce((s, l) => s + l[1] * l[2], 0);
+    const cambio = v.recibido != null ? v.recibido - total : null;
+    const telOk = st.tel.replace(/\D/g, '').length >= 10;
+
+    const navDefs = [
+      ['Inicio', ICON.inicio, 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
+      ['Caja', ICON.caja, 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html'],
+      ['Turno', ICON.turno, 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html'],
+      ['Ventas', ICON.ventas, 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html'],
+      ['Gastos', ICON.gastos, 'Xangarro%20Portal%20-%20Operador%20Gastos.dc.html'],
+      ['Inventario', ICON.inventario, 'Xangarro%20Portal%20-%20Operador%20Inventario.dc.html'],
+      ['Cobranza', ICON.cobranza, 'Xangarro%20Portal%20-%20Operador%20Cobranza.dc.html']
+    ];
+    const nav = navDefs.map(([label, icon, href]) => {
+      const active = label === 'Ventas';
+      return {
+        label, icon, href,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const resumen = [
+      { label: 'Subtotal', value: MXN(total), size: '16px', labelColor: 'var(--gray-600)' }
+    ];
+    if (cambio != null) {
+      resumen.push({ label: 'Recibido en efectivo', value: MXN(v.recibido), size: '16px', labelColor: 'var(--gray-600)' });
+      resumen.push({ label: 'Cambio que se entregó', value: MXN(cambio), size: '16px', labelColor: 'var(--gray-600)' });
+    }
+    resumen.push({ label: 'Total', value: MXN(total), size: '26px', labelColor: 'var(--black)' });
+
+    return {
+      isPhone, isDesktop, nav,
+      tabbar: [
+        ['Inicio', ICON.inicio, 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html', false],
+        ['Caja', ICON.caja, 'Xangarro%20Portal%20-%20Operador%20Caja.dc.html', false],
+        ['Ventas', ICON.ventas, 'Xangarro%20Portal%20-%20Operador%20Ventas.dc.html', true],
+        ['Turno', ICON.turno, 'Xangarro%20Portal%20-%20Operador%20Turno.dc.html', false]
+      ].map(([label, icon, href, active], i) => ({
+        label, icon, href,
+        bg: active ? 'var(--yellow)' : 'var(--white)',
+        divider: i === 0 ? 'none' : '2px solid var(--black)'
+      })),
+      cols: isNarrow ? 'minmax(0,1fr)' : 'minmax(0,1.3fr) minmax(0,1fr)',
+      dataState: st.dataState ?? this.props.dataState ?? 'happy',
+      contentDisplay: (st.dataState ?? this.props.dataState ?? 'happy') === 'happy' ? 'grid' : 'none',
+      notHappy: (st.dataState ?? this.props.dataState ?? 'happy') !== 'happy',
+      estadoIcon: 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6',
+      retry: () => this.setState({ dataState: 'happy' }),
+      folio: v.folio, hora: v.hora, metodo: v.metodo,
+      total: MXN(total),
+      totalSize: isPhone ? '40px' : '52px',
+      strike: cancelada ? 'line-through' : 'none',
+      headBg: cancelada ? 'var(--gray-100)' : (esFiado ? 'var(--warning-soft)' : 'var(--green-soft)'),
+      estadoBg: cancelada ? 'var(--red-soft)' : 'var(--green-soft)',
+      estadoDot: cancelada ? 'var(--red)' : 'var(--green)',
+      estadoLabel: cancelada ? 'Venta cancelada' : 'Venta registrada y enviada',
+      lineas: v.lineas.map(([name, price, qty, tint], i) => ({
+        name, qty: String(qty) + '×', each: MXN(price), amount: MXN(price * qty), tint,
+        divider: i === v.lineas.length - 1 ? 'none' : '2px solid var(--gray-100)'
+      })),
+      resumen,
+      trazas: [
+        { label: 'Capturó', value: 'Ana Robledo' },
+        { label: 'Caja', value: 'Caja 1' },
+        { label: 'Turno', value: 'Hoy, abierto 08:15' },
+        { label: 'Enviada al portal', value: cancelada ? 'Sí, con su cancelación' : 'Sí, hace un momento' }
+      ],
+      cancelada,
+      cancelMotivo: st.motivo ?? 'Error de captura',
+      esFiado,
+      cliente: v.cliente ?? '',
+      fiadoDetalle: esFiado ? 'Se sumó a su saldo, que quedó en ' + MXN(340) + '. No entró efectivo a la caja.' : '',
+      cancelBg: cancelada ? 'var(--gray-100)' : 'var(--red-soft)',
+      cancelCursor: cancelada ? 'not-allowed' : 'pointer',
+      cancelOpacity: cancelada ? '0.5' : '1',
+      cancelHint: cancelada
+        ? 'Ya está cancelada. Queda visible en tu turno y en el corte, con tu nombre.'
+        : (esFiado
+          ? 'Puedes cancelarla porque es de tu turno abierto. Si ya tenía abonos, el dinero abonado queda como saldo a favor del cliente.'
+          : 'Solo puedes cancelar ventas de tu turno abierto, y siempre con un motivo.'),
+      openCancel: () => { if (!cancelada) this.setState({ cancelOpen: true, motivo: null }); },
+      closeCancel: () => this.setState({ cancelOpen: false }),
+      cancelOpen: st.cancelOpen,
+      cancelIntro: esFiado
+        ? 'Esta venta es fiada. Al cancelarla, el saldo de ' + v.cliente + ' baja ' + MXN(total) + '.'
+        : 'La venta no se borra: queda marcada como cancelada, con tu nombre y el motivo.',
+      cancelWarn: esFiado
+        ? 'Si el cliente ya abonó contra esta venta, ese dinero no sale de la caja: queda como saldo a favor suyo y se aplica solo a su siguiente compra. Pedro lo ve marcado en su portal.'
+        : 'Si fue en efectivo, el monto sale de lo esperado en tu caja al cerrar el turno.',
+      motivos: ['Error de captura', 'El cliente se arrepintió', 'Producto equivocado', 'Cobro duplicado'].map(label => ({
+        label, bg: st.motivo === label ? 'var(--yellow)' : 'var(--white)',
+        pick: () => this.setState({ motivo: label })
+      })),
+      confirmBg: st.motivo ? 'var(--red-soft)' : 'var(--gray-100)',
+      confirmOpacity: st.motivo ? '1' : '0.5',
+      confirmCancel: () => { if (st.motivo) this.setState({ cancelada: true, cancelOpen: false }); },
+      shareOpen: st.shareOpen,
+      openShare: () => this.setState({ shareOpen: true, shareSent: null }),
+      closeShare: () => this.setState({ shareOpen: false }),
+      tel: st.tel,
+      typeTel: e => this.setState({ tel: String(e.target.value).replace(/[^0-9 ]/g, '') }),
+      shareSent: st.shareSent,
+      shareOptions: [
+        ['Enviar por WhatsApp', 'Se abre WhatsApp con el comprobante listo', ICON.wa, 'var(--green-soft)', true],
+        ['Guardar imagen', 'PNG del comprobante en este dispositivo', ICON.descargar, 'var(--white)', false],
+        ['Copiar texto', 'Para pegarlo donde quieras', ICON.copiar, 'var(--white)', false]
+      ].map(([label, hint, icon, bg, needsTel]) => ({
+        label, hint, icon, bg,
+        opacity: needsTel && !telOk ? '0.5' : '1',
+        pick: () => {
+          if (needsTel && !telOk) return;
+          this.setState({
+            shareSent: needsTel
+              ? 'Comprobante enviado al ' + st.tel + ' por WhatsApp.'
+              : (label === 'Copiar texto' ? 'Texto del comprobante copiado.' : 'Imagen guardada como comprobante-' + v.folio + '.png.')
+          });
+        }
+      })),
+      pagePad: isPhone ? '16px' : '32px',
+      mainBottom: isPhone ? '96px' : '44px'
+    };
+  }
+}
+
+</script>
+</body>
+</html>
