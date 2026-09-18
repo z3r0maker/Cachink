@@ -20,7 +20,12 @@ export const aside = style({
   background: colors.white,
   borderRight: `2.5px solid ${colors.black}`,
   '@media': { 'screen and (max-width: 1023px)': { width: RAIL_WIDTH } },
+  // Chosen by the owner at any width (P-24); below 1024 px the rail is forced.
+  selectors: { '&[data-rail="true"]': { width: RAIL_WIDTH } },
 });
+
+/** What the rail hides: labels that would not fit in 84 px. */
+const hiddenInRail = { [`${aside}[data-rail="true"] &`]: { display: 'none' } };
 
 export const brandBlock = style({
   display: 'flex',
@@ -40,6 +45,7 @@ export const wordmark = style({
   color: colors.black,
   whiteSpace: 'nowrap',
   '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: hiddenInRail,
 });
 
 export const nav = style({
@@ -86,6 +92,7 @@ export const navLabel = style({
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: hiddenInRail,
 });
 
 export const divider = style({
@@ -104,6 +111,7 @@ export const dividerLabel = style({
   whiteSpace: 'nowrap',
   paddingLeft: 8,
   '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  selectors: hiddenInRail,
 });
 
 export const dividerRule = style({ flex: 1, height: 2, background: colors.gray200 });
@@ -125,3 +133,18 @@ export const badge = style({
   fontVariantNumeric: 'tabular-nums',
   color: colors.black,
 });
+
+/** «Contraer menú» at the foot of the sidebar; absent below 1024 px, where the rail is forced. */
+export const railToggle = style([
+  pressable,
+  {
+    margin: '0 12px 14px',
+    height: 40,
+    border: `2px solid ${colors.black}`,
+    borderRadius: radii[3],
+    background: colors.white,
+    fontWeight: typography.weights.bold,
+    cursor: 'pointer',
+    '@media': { 'screen and (max-width: 1023px)': { display: 'none' } },
+  },
+]);

@@ -291,9 +291,11 @@ not move a pixel between routes.
   - `brand` tokens added to `@xangarro/tokens` for the lockup's off-ramp measurements (wordmark
     23 px, coin 38 px, X stroke 4.6). They are deliberately not on the type scale — Anton is a
     display face for the mark only — and naming them stopped `design-lint` flagging a literal.
-  - **Still to do:** the business-switcher dropdown (320 px) and user menu (272 px) are buttons
-    without their popovers; the rail is CSS-only and not yet togglable; the session values are
-    hardcoded until P-02 wires Supabase auth.
+  - 2026-09-18 · The business-switcher dropdown (320 px, P-02) and the user menu (272 px) are real
+    popovers; the session values come from the server session (P-02). **The rail is togglable**:
+    «Contraer menú» folds the sidebar to 84 px at any width, remembered per browser (storage may be
+    missing — it then starts expanded), and navigation keeps it; below 1024 px the rail stays forced
+    and the toggle is hidden. e2e: fold, reload, navigate, unfold.
 - **Steps:** Build once, per the handoff's measurements. **Sidebar:** sticky, `100vh`, white,
   `border-right: 2.5px`, **248 px expanded / 84 px icon rail**, rail engaging below 1024 px and also
   togglable. Brand block `min-height: 76px` with a `2.5px` bottom border — **this must equal the

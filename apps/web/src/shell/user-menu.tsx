@@ -19,7 +19,7 @@ export function UserMenu({ initials }: { readonly initials: string }) {
         <span className={avatar}>{initials}</span>
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Content className={menu} align="end" sideOffset={8}>
+        <Menu.Content className={menu} style={{ width: 272 }} align="end" sideOffset={8}>
           <form action={logout}>
             <Menu.Item asChild onSelect={(e) => e.preventDefault()}>
               <button type="submit" className={item}>

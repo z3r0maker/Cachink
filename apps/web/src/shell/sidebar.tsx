@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Coin, Icon } from './icon';
 import { NAV_ITEMS, type NavItem } from './nav-items';
@@ -14,6 +15,7 @@ import {
   dividerRule,
   nav,
   navItem,
+  railToggle,
   navLabel,
   wordmark,
 } from './sidebar.css';
@@ -49,10 +51,37 @@ function NavLink(p: { readonly item: NavItem; readonly active: boolean; readonly
   );
 }
 
+/**
+ * The owner's rail choice (P-24), remembered in this browser only. Storage can
+ * be missing or throw (private windows); the sidebar then just starts expanded.
+ */
+const RAIL_KEY = 'xg-sidebar-rail';
+
+function useRail() {
+  const [rail, setRail] = useState(false);
+  useEffect(() => {
+    try {
+      setRail(window.localStorage.getItem(RAIL_KEY) === '1');
+    } catch {
+      // No storage: keep the default.
+    }
+  }, []);
+  const toggle = () => {
+    setRail(!rail);
+    try {
+      window.localStorage.setItem(RAIL_KEY, rail ? '0' : '1');
+    } catch {
+      // No storage: the choice lasts this visit.
+    }
+  };
+  return { rail, toggle };
+}
+
 export function Sidebar({ badges = {} }: { readonly badges?: NavBadges }) {
   const pathname = usePathname();
+  const { rail, toggle } = useRail();
   return (
-    <aside className={aside}>
+    <aside className={aside} data-rail={rail}>
       <div className={brandBlock}>
         <Coin />
         <span className={wordmark}>XANGARRO!</span>
@@ -70,6 +99,15 @@ export function Sidebar({ badges = {} }: { readonly badges?: NavBadges }) {
           </div>
         ))}
       </nav>
+      <button
+        type="button"
+        className={railToggle}
+        aria-pressed={rail}
+        aria-label={rail ? 'Expandir menú' : 'Contraer menú'}
+        onClick={toggle}
+      >
+        {rail ? '»' : '« Contraer menú'}
+      </button>
     </aside>
   );
 }

@@ -66,7 +66,7 @@ export function BusinessSwitcher(props: {
         <Chip nombre={props.current.nombre} role={props.current.role} />
       </Menu.Trigger>
       <Menu.Portal>
-        <Menu.Content className={menu} align="start" sideOffset={8}>
+        <Menu.Content className={menu} style={{ width: 320 }} align="start" sideOffset={8}>
           <Menu.RadioGroup value={props.current.businessId} onValueChange={pick}>
             {props.negocios.map((n) => (
               <Menu.RadioItem key={n.businessId} value={n.businessId} className={item}>
