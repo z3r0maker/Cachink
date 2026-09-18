@@ -59,6 +59,10 @@ export function drizzleCapacityProbe(conn: Conn): CapacityProbe {
         dbBytes: bytes,
         topTables: tables,
         activeTenants: tenants,
+        // Not measurable yet. B-18 times every phone call (`deviceRoute`), but
+        // the `ms` only reaches a stdout JSON line (`logApi`) and Sentry runs
+        // with tracesSampleRate 0 — nothing Postgres can query. It needs
+        // `(endpoint, ms, at)` persisted somewhere readable; see N-07 notes.
         syncP95Ms: null,
         measuredAt: new Date().toISOString(),
       };

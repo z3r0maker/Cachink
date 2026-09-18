@@ -61,7 +61,10 @@ export interface CapacitySnapshot {
   readonly largestTable: { readonly name: string; readonly approxRows: number } | null;
   /** Tenants with a non-revoked device that pushed in the last 30 days. */
   readonly activeTenants: number;
-  /** Sync p95 in ms; null until B-18 records per-request timings. */
+  /**
+   * Sync p95 in ms over the last 24 h; null until B-18's per-call `ms`
+   * (logged to stdout only) is persisted where the console can query it.
+   */
   readonly syncP95Ms: number | null;
 }
 

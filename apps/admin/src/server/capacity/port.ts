@@ -19,7 +19,7 @@ export interface CapacityReading {
   /** Largest first by estimated rows; at most ten. */
   readonly topTables: readonly TableSize[];
   readonly activeTenants: number;
-  /** Null until B-18 logs sync request timings. */
+  /** Null: B-18 logs each call's ms to stdout only, not somewhere queryable. */
   readonly syncP95Ms: number | null;
   /** When it was measured, ISO-8601. */
   readonly measuredAt: string;

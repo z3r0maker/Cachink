@@ -7,6 +7,7 @@
 import type { SupportItem } from '@xangarro/domain';
 
 import type { DailyDigest } from './digest';
+import { rejectionSection } from './rejections';
 
 type DigestData = Omit<DailyDigest, 'text' | 'html'>;
 
@@ -17,6 +18,8 @@ interface Section {
   readonly title: string;
   readonly empty: string;
   readonly items: readonly SupportItem[];
+  /** Plain lines (no link) listed after the items. */
+  readonly lines?: readonly string[];
   readonly note?: string;
 }
 
@@ -41,6 +44,7 @@ function sections(d: DigestData): Section[] {
       items: [],
       note: `Emítelos en el portal del SAT y registra el UUID: ${d.consoleUrl}/inbox?filtro=pagos_sin_cfdi`,
     },
+    { ...rejectionSection(d.rejections), items: [] },
     {
       title: 'Negocios sobre su límite',
       empty: 'Pendiente: esta sección llega con el uso contra límites (N-07).',
@@ -53,6 +57,10 @@ function line(i: SupportItem, consoleUrl: string): string {
   return `${i.urgent ? '[URGENTE] ' : ''}${i.title} — ${consoleUrl}/inbox/${i.id}`;
 }
 
+function isEmpty(s: Section): boolean {
+  return s.items.length === 0 && (s.lines ?? []).length === 0 && s.empty !== '';
+}
+
 function more(n: number): string | null {
   return n > SECTION_CAP ? `y ${n - SECTION_CAP} más` : null;
 }
@@ -61,10 +69,11 @@ export function renderText(d: DigestData): string {
   const out = [d.subject, ''];
   for (const s of sections(d)) {
     out.push(s.title);
-    if (s.items.length === 0 && s.empty !== '') out.push(`  ${s.empty}`);
+    if (isEmpty(s)) out.push(`  ${s.empty}`);
     for (const i of s.items.slice(0, SECTION_CAP)) out.push(`  - ${line(i, d.consoleUrl)}`);
     const rest = more(s.items.length);
     if (rest) out.push(`  ${rest}`);
+    for (const l of s.lines ?? []) out.push(`  - ${l}`);
     if (s.note) out.push(`  ${s.note}`);
     out.push('');
   }
@@ -91,9 +100,10 @@ function htmlSection(s: Section, consoleUrl: string): string {
   });
   const rest = more(s.items.length);
   if (rest) items.push(`<li>${rest}</li>`);
+  for (const l of s.lines ?? []) items.push(`<li>${escapeHtml(l)}</li>`);
   const body = [
     items.length > 0 ? `<ul>${items.join('')}</ul>` : '',
-    s.items.length === 0 && s.empty !== '' ? `<p>${escapeHtml(s.empty)}</p>` : '',
+    isEmpty(s) ? `<p>${escapeHtml(s.empty)}</p>` : '',
     s.note ? `<p>${escapeHtml(s.note)}</p>` : '',
   ].join('');
   return `<h2>${escapeHtml(s.title)}</h2>${body}`;

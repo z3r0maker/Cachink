@@ -4,14 +4,16 @@
  * items and hands the result to the email port.
  *
  * Sections: yesterday's new items by kind; every open urgent item, whenever
- * filed; the «pagos sin CFDI» count (ADR-070); and a placeholder for tenants
- * over their limit until N-07/N-02 exist.
+ * filed; the «pagos sin CFDI» count (ADR-070); B-18's unresolved sync
+ * rejections of the last 24 h by code (`./rejections.ts`); and a placeholder
+ * for tenants over their limit until N-07/N-02 exist.
  */
 import { SUPPORT_KINDS, type SupportItem, type SupportKind } from '@xangarro/domain';
 
 import { KIND_LABELS } from '../inbox/labels';
 import { renderHtml, renderText } from './digest-render';
 import { digestWindow, mxDayLabel } from './mx-day';
+import { REJECTIONS_UNAVAILABLE, type RejectionSummary } from './rejections';
 import { DEFAULT_CONSOLE_URL } from './webhook-notifier';
 
 export interface KindGroup {
@@ -30,7 +32,10 @@ export interface DailyDigest {
     readonly nuevos: number;
     readonly urgentesAbiertos: number;
     readonly pagosSinCfdi: number;
+    /** Null when the rejections could not be read. */
+    readonly rechazos: number | null;
   };
+  readonly rejections: RejectionSummary;
   readonly newByKind: readonly KindGroup[];
   readonly urgentOpen: readonly SupportItem[];
   readonly consoleUrl: string;
@@ -57,6 +62,7 @@ function subjectFor(day: string, c: DailyDigest['counts']): string {
     c.nuevos > 0 ? plural(c.nuevos, 'nuevo', 'nuevos') : null,
     c.urgentesAbiertos > 0 ? plural(c.urgentesAbiertos, 'urgente', 'urgentes') : null,
     c.pagosSinCfdi > 0 ? plural(c.pagosSinCfdi, 'pago sin CFDI', 'pagos sin CFDI') : null,
+    (c.rechazos ?? 0) > 0 ? plural(c.rechazos ?? 0, 'rechazo', 'rechazos') : null,
   ].filter((b) => b !== null);
   return `Xangarro · Resumen del ${day} — ${bits.length > 0 ? bits.join(' · ') : 'sin novedades'}`;
 }
@@ -64,7 +70,7 @@ function subjectFor(day: string, c: DailyDigest['counts']): string {
 export function buildDailyDigest(
   items: readonly SupportItem[],
   now: Date,
-  options: { readonly consoleUrl?: string } = {},
+  options: { readonly consoleUrl?: string; readonly rejections?: RejectionSummary } = {},
 ): DailyDigest {
   const window = digestWindow(now);
   const inWindow = (i: SupportItem) => {
@@ -73,10 +79,12 @@ export function buildDailyDigest(
   };
   const fresh = items.filter(inWindow);
   const urgentOpen = items.filter((i) => i.urgent && open(i)).sort(newestFirst);
+  const rejections = options.rejections ?? REJECTIONS_UNAVAILABLE;
   const counts = {
     nuevos: fresh.length,
     urgentesAbiertos: urgentOpen.length,
     pagosSinCfdi: items.filter((i) => i.kind === 'factura' && open(i)).length,
+    rechazos: rejections.status === 'ok' ? rejections.total : null,
   };
   const dayLabel = mxDayLabel(window.start);
   const base = {
@@ -84,6 +92,7 @@ export function buildDailyDigest(
     dayLabel,
     window,
     counts,
+    rejections,
     newByKind: groupByKind(fresh),
     urgentOpen,
     consoleUrl: options.consoleUrl ?? DEFAULT_CONSOLE_URL,

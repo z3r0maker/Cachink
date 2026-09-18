@@ -5,6 +5,7 @@ import type { SupportItem, SupportItemId } from '@xangarro/domain';
 
 import { buildDailyDigest } from '@/server/alerts/digest';
 import { digestWindow, mxDayStart } from '@/server/alerts/mx-day';
+import { summarizeRejections } from '@/server/alerts/rejections';
 
 import { CFDI, item } from './support/inbox';
 
@@ -35,7 +36,12 @@ describe('buildDailyDigest', () => {
     const d = buildDailyDigest([], RUN);
     assert.match(d.subject, /sin novedades/);
     assert.match(d.subject, /16 sept?\.? 2026/);
-    assert.deepEqual(d.counts, { nuevos: 0, urgentesAbiertos: 0, pagosSinCfdi: 0 });
+    assert.deepEqual(d.counts, {
+      nuevos: 0,
+      urgentesAbiertos: 0,
+      pagosSinCfdi: 0,
+      rechazos: null,
+    });
     assert.match(d.text, /No llegaron items nuevos/);
     assert.match(d.html, /<html/);
     assert.match(d.text, /límite/i);
@@ -77,7 +83,12 @@ describe('buildDailyDigest', () => {
       }),
     ];
     const d = buildDailyDigest(items, RUN);
-    assert.deepEqual(d.counts, { nuevos: 0, urgentesAbiertos: 1, pagosSinCfdi: 1 });
+    assert.deepEqual(d.counts, {
+      nuevos: 0,
+      urgentesAbiertos: 1,
+      pagosSinCfdi: 1,
+      rechazos: null,
+    });
     assert.match(d.subject, /1 urgente/);
     assert.match(d.subject, /1 pago sin CFDI/);
     assert.match(d.text, /Cobro caído/);
@@ -100,5 +111,26 @@ describe('buildDailyDigest', () => {
     );
     assert.doesNotMatch(d.html, /<script>/);
     assert.match(d.html, /&lt;script&gt;x&lt;\/script&gt; &amp; &quot;y&quot;/);
+  });
+
+  it('adds the 24 h sync-rejection section, by code, to both renderings and the subject', () => {
+    const rejections = summarizeRejections([
+      { code: 'HYBRID_UPDATE_FORBIDDEN', n: 1 },
+      { code: 'FK_PRODUCT_MISSING', n: 4 },
+    ]);
+    const d = buildDailyDigest([], RUN, { rejections });
+    assert.equal(d.counts.rechazos, 5);
+    assert.match(d.subject, /5 rechazos/);
+    assert.doesNotMatch(d.subject, /sin novedades/);
+    assert.match(d.text, /Rechazos de sincronización \(24 h\): 5\n {2}- FK_PRODUCT_MISSING: 4\n/);
+    assert.match(d.html, /<li>HYBRID_UPDATE_FORBIDDEN: 1<\/li>/);
+  });
+
+  it('says «ningún rechazo» with zero, and «no disponible» when unread', () => {
+    const zero = buildDailyDigest([], RUN, { rejections: summarizeRejections([]) });
+    assert.equal(zero.counts.rechazos, 0);
+    assert.match(zero.subject, /sin novedades/);
+    assert.match(zero.text, /Ningún rechazo sin resolver/);
+    assert.match(buildDailyDigest([], RUN).text, /No disponible/);
   });
 });
