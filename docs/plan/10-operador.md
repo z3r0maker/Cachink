@@ -253,7 +253,23 @@ both» surfaces, but the operator design uses 11 px (tab labels, chips, «Sin le
 O-11 added `portalFontSizes.tag = 11`. Needs the owner's call: keep 11 (amend the floor) or raise
 those texts to 12 upstream.
 
-## 6. Fases 12–13 (tasks written when fase 11 closes)
+## 6. Fase 12 — Turno completo, detalles y cola sin conexión
+
+> **Open for fase 12 (asked when wiring, not blocking the fixture screens):** the five close-out
+> reasons vs the six-value `caja_turnos` enum (Cierre), and where expense receipt photos live
+> (Gastos). The screens are built on fixtures; the questions come back with O-06.
+
+### O-21 Operador · Ventas
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-17 · `src/operador/ventas/`, `/operador/ventas`; figures derived and unit-tested
+    (`tests/operador/ventas.test.ts`: 12 active, $3,280.00, $2,140.00 cash, V-0405 out of every
+    total). Shared `SearchBox`, `FilterChips`, `SinResultados`, `ChoiceChips`, field styles and a
+    `Toast` width. Harness: default, loading, empty, error, 375 px and the cancel modal match
+    (agreed radius aside). The design's `startFilter` control is not wired in the file itself.
+    Cancellations are device-local until O-06. Playwright: `e2e/operador-ventas.spec.ts`.
+
+## 7. Fase 13 (tasks written when fase 12 closes)
 
 - **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
   de cliente, Registros por enviar, then Cierre de turno last.

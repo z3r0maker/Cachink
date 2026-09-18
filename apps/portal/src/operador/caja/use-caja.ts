@@ -2,23 +2,20 @@
 
 import { useState } from 'react';
 
+import { matches } from '../ui/search';
 import { addProducto, bump, contar, total } from './ticket';
 import type { CajaData, Categoria, CobroPaso, LineaTicket, Producto } from './types';
 import { useSaleToast, type VentaHecha } from './use-sale-toast';
 
 export type Filtro = 'Todos' | Categoria;
 
-/** Accent- and case-insensitive search (README: «buscador insensible a acentos»). */
-const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-
 /** The catalogue filter: a search resets the category to «Todos», as in the design. */
 function useCatalogo(catalogo: CajaData['catalogo']) {
   const [filtro, setFiltro] = useState<Filtro>('Todos');
   const [query, setQuery] = useState('');
-  const q = norm(query.trim());
   const productos = catalogo
     .filter((p) => filtro === 'Todos' || p.categoria === filtro)
-    .filter((p) => q === '' || norm(p.nombre).includes(q));
+    .filter((p) => matches(query, p.nombre));
   const buscar = (text: string) => {
     setQuery(text);
     setFiltro('Todos');
