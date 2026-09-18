@@ -1,6 +1,6 @@
-import { createRoot } from 'react-dom/client'
-import '../colors_and_type.css'
-import './global.css'
+import { createRoot } from 'react-dom/client';
+import '../colors_and_type.css';
+import './global.css';
 
 /**
  * Client-side entry point. Switches on pathname so each article page
@@ -10,26 +10,26 @@ import './global.css'
  * all routes eagerly so prerender emits full HTML for crawlers.
  */
 async function mountApp() {
-  const path = window.location.pathname.replace(/\/$/, '') || '/'
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
 
-  let Component
+  let Component;
 
   if (path === '/recursos/sin-excel') {
-    Component = (await import('./pages/articles/SinExcel.jsx')).default
+    Component = (await import('./pages/articles/SinExcel.jsx')).default;
   } else if (path === '/recursos/nif') {
-    Component = (await import('./pages/articles/NIF.jsx')).default
+    Component = (await import('./pages/articles/NIF.jsx')).default;
   } else if (path === '/recursos/errores-caja') {
-    Component = (await import('./pages/articles/ErroresCaja.jsx')).default
+    Component = (await import('./pages/articles/ErroresCaja.jsx')).default;
   } else if (path === '/recursos/vs-excel') {
-    Component = (await import('./pages/articles/VsExcel.jsx')).default
+    Component = (await import('./pages/articles/VsExcel.jsx')).default;
   } else if (path === '/recursos') {
-    Component = (await import('./pages/Recursos.jsx')).default
+    Component = (await import('./pages/Recursos.jsx')).default;
   } else {
     // Default: home / landing page (with lazy below-fold sections)
-    Component = (await import('./App.jsx')).default
+    Component = (await import('./App.jsx')).default;
   }
 
-  createRoot(document.getElementById('root')).render(<Component />)
+  createRoot(document.getElementById('root')).render(<Component />);
 }
 
-mountApp()
+mountApp();

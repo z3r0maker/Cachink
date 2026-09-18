@@ -13,10 +13,10 @@
  */
 
 // FAQ_ITEMS is the single source of truth — also consumed by FAQAccordion
-import { FAQ_ITEMS } from '../landing/copy.jsx'
+import { FAQ_ITEMS } from '../landing/copy.jsx';
 
-const SITE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL)
-  || 'https://cachink.mx'
+const SITE_URL =
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://cachink.mx';
 
 const organization = {
   '@type': 'Organization',
@@ -38,7 +38,7 @@ const organization = {
   },
   areaServed: { '@type': 'Country', name: 'México' },
   inLanguage: 'es-MX',
-}
+};
 
 const softwareApplication = {
   '@type': 'SoftwareApplication',
@@ -64,7 +64,8 @@ const softwareApplication = {
       name: 'Plan Pro',
       price: '149',
       priceCurrency: 'MXN',
-      description: 'Todo lo de Gratis más multi-dispositivo sincronizado, Panel Director, estados financieros NIF y soporte por WhatsApp.',
+      description:
+        'Todo lo de Gratis más multi-dispositivo sincronizado, Panel Director, estados financieros NIF y soporte por WhatsApp.',
       availability: 'https://schema.org/InStock',
       billingIncrement: 'P1M',
     },
@@ -73,13 +74,14 @@ const softwareApplication = {
       name: 'Plan Contador',
       price: '299',
       priceCurrency: 'MXN',
-      description: 'Todo lo de Pro más hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
+      description:
+        'Todo lo de Pro más hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
       availability: 'https://schema.org/InStock',
       billingIncrement: 'P1M',
     },
   ],
   publisher: { '@id': `${SITE_URL}/#organization` },
-}
+};
 
 // Service schema: positions Cachink as a cash-management service for Mexican SMBs.
 // This phrasing matches voice-search and LLM intent better than "BusinessApplication".
@@ -106,7 +108,7 @@ const service = {
       { '@type': 'Offer', name: 'Plan Contador', price: '299', priceCurrency: 'MXN' },
     ],
   },
-}
+};
 
 // FAQPage — built from the single source of truth in landing/copy.jsx
 const faqPage = {
@@ -117,12 +119,12 @@ const faqPage = {
     name: q,
     acceptedAnswer: { '@type': 'Answer', text: a },
   })),
-}
+};
 
 export const structuredData = {
   '@context': 'https://schema.org',
   '@graph': [organization, softwareApplication, service, faqPage],
-}
+};
 
 // Per-article schema builder — used by /recursos article pages
 export function buildArticleSchema({ slug, title, description, datePublished }) {
@@ -139,5 +141,5 @@ export function buildArticleSchema({ slug, title, description, datePublished }) 
     mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/recursos/${slug}/` },
     author: { '@id': `${SITE_URL}/#organization` },
     publisher: { '@id': `${SITE_URL}/#organization` },
-  }
+  };
 }

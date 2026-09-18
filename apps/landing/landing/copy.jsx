@@ -3,7 +3,7 @@
  * Single source of truth — FAQs are also exported from here so
  * structured-data.js and the visible FAQ component stay in sync.
  */
-import { useState } from 'react'
+import { useState } from 'react';
 
 /* ─────────────── Copy decks for the 3 tones ─────────────── */
 export const TONE_COPY = {
@@ -21,9 +21,13 @@ export const TONE_COPY = {
     ],
     howTitle: 'Así funciona',
     how: [
-      { n: '01', t: 'Capturas',   d: 'Cada venta o egreso del día. Tarda menos que abrir WhatsApp.' },
-      { n: '02', t: 'Ves',        d: 'Ventas de hoy, del mes, efectivo en caja. Actualizado al instante.' },
-      { n: '03', t: 'Decides',    d: 'KPIs para dueños, estados financieros para tu contador.' },
+      { n: '01', t: 'Capturas', d: 'Cada venta o egreso del día. Tarda menos que abrir WhatsApp.' },
+      {
+        n: '02',
+        t: 'Ves',
+        d: 'Ventas de hoy, del mes, efectivo en caja. Actualizado al instante.',
+      },
+      { n: '03', t: 'Decides', d: 'KPIs para dueños, estados financieros para tu contador.' },
     ],
   },
   educational: {
@@ -34,15 +38,33 @@ export const TONE_COPY = {
     cta1: 'Quiero probarla cuando salga',
     cta2: 'Conocer los módulos',
     why: [
-      { t: 'Pensada en español, para México', d: 'IVA, NIF, CFDI, MXN. No traducimos software gringo.' },
+      {
+        t: 'Pensada en español, para México',
+        d: 'IVA, NIF, CFDI, MXN. No traducimos software gringo.',
+      },
       { t: 'Tu información es tuya', d: 'Los datos viven en tu dispositivo. La nube es opcional.' },
-      { t: 'Tan simple como una libreta', d: 'Si sabes anotar en una libreta, sabes usar Cachink.' },
+      {
+        t: 'Tan simple como una libreta',
+        d: 'Si sabes anotar en una libreta, sabes usar Cachink.',
+      },
     ],
     howTitle: 'Así te ayuda, paso a paso',
     how: [
-      { n: '01', t: 'Registras cada movimiento', d: 'Ventas, egresos, inventario. En segundos, sin fórmulas.' },
-      { n: '02', t: 'Cachink hace las cuentas', d: 'Corte del día, utilidad del mes, cuentas por cobrar — automático.' },
-      { n: '03', t: 'Compartes con tu contador', d: 'Exporta estados financieros en el formato que él necesita.' },
+      {
+        n: '01',
+        t: 'Registras cada movimiento',
+        d: 'Ventas, egresos, inventario. En segundos, sin fórmulas.',
+      },
+      {
+        n: '02',
+        t: 'Cachink hace las cuentas',
+        d: 'Corte del día, utilidad del mes, cuentas por cobrar — automático.',
+      },
+      {
+        n: '03',
+        t: 'Compartes con tu contador',
+        d: 'Exporta estados financieros en el formato que él necesita.',
+      },
     ],
   },
   playful: {
@@ -59,35 +81,46 @@ export const TONE_COPY = {
     ],
     howTitle: '¿Cómo se usa? Así',
     how: [
-      { n: '01', t: 'Anotas',   d: 'La venta de la doña, el café del cliente fiel, la compra del día.' },
-      { n: '02', t: 'Miras',    d: 'Ventas hoy, utilidad del mes, qué te deben. De un vistazo.' },
-      { n: '03', t: 'Creces',   d: 'Con números reales — no con la corazonada de siempre.' },
+      {
+        n: '01',
+        t: 'Anotas',
+        d: 'La venta de la doña, el café del cliente fiel, la compra del día.',
+      },
+      { n: '02', t: 'Miras', d: 'Ventas hoy, utilidad del mes, qué te deben. De un vistazo.' },
+      { n: '03', t: 'Creces', d: 'Con números reales — no con la corazonada de siempre.' },
     ],
   },
-}
+};
 
 /* ─────────────── Primitive components ─────────────── */
 export const Eyebrow = ({ children, light }) => (
-  <div style={{
-    display: 'inline-block',
-    fontSize: 11, fontWeight: 700, letterSpacing: '0.1em',
-    textTransform: 'uppercase',
-    color: light ? '#D6D6D2' : 'var(--gray-600)',
-  }}>{children}</div>
-)
+  <div
+    style={{
+      display: 'inline-block',
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: '0.1em',
+      textTransform: 'uppercase',
+      color: light ? '#D6D6D2' : 'var(--gray-600)',
+    }}
+  >
+    {children}
+  </div>
+);
 
 export function HardBtn({ children, variant = 'primary', size = 'lg', onClick, href, disabled }) {
   const V = {
     primary: { bg: 'var(--yellow)', fg: 'var(--black)' },
-    dark:    { bg: 'var(--black)',  fg: 'var(--white)' },
-    ghost:   { bg: 'transparent',  fg: 'var(--black)' },
-    white:   { bg: 'var(--white)', fg: 'var(--black)' },
-  }[variant]
-  const S = size === 'lg' ? { h: 54, px: 22, fs: 14 } : { h: 44, px: 18, fs: 12 }
-  const [p, setP] = useState(false)
-  const Tag = href ? 'a' : 'button'
+    dark: { bg: 'var(--black)', fg: 'var(--white)' },
+    ghost: { bg: 'transparent', fg: 'var(--black)' },
+    white: { bg: 'var(--white)', fg: 'var(--black)' },
+  }[variant];
+  const S = size === 'lg' ? { h: 54, px: 22, fs: 14 } : { h: 44, px: 18, fs: 12 };
+  const [p, setP] = useState(false);
+  const Tag = href ? 'a' : 'button';
   return (
-    <Tag href={href}
+    <Tag
+      href={href}
       disabled={disabled}
       onMouseDown={() => setP(true)}
       onMouseUp={() => setP(false)}
@@ -96,20 +129,34 @@ export function HardBtn({ children, variant = 'primary', size = 'lg', onClick, h
       onTouchEnd={() => setP(false)}
       onClick={onClick}
       style={{
-        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-        background: V.bg, color: V.fg,
-        border: '2px solid var(--black)', borderRadius: 12,
-        height: S.h, padding: `0 ${S.px}px`, fontSize: S.fs,
-        fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase',
-        fontFamily: 'var(--font-sans)', cursor: disabled ? 'not-allowed' : 'pointer',
-        userSelect: 'none', opacity: disabled ? 0.6 : 1,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        background: V.bg,
+        color: V.fg,
+        border: '2px solid var(--black)',
+        borderRadius: 12,
+        height: S.h,
+        padding: `0 ${S.px}px`,
+        fontSize: S.fs,
+        fontWeight: 800,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        fontFamily: 'var(--font-sans)',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        userSelect: 'none',
+        opacity: disabled ? 0.6 : 1,
         boxShadow: p ? '1px 1px 0 var(--black)' : '4px 4px 0 var(--black)',
         transform: p ? 'translate(3px,3px)' : 'none',
         transition: 'transform 100ms var(--press-ease), box-shadow 100ms var(--press-ease)',
         textDecoration: 'none',
         WebkitTapHighlightColor: 'transparent',
-      }}>{children}</Tag>
-  )
+      }}
+    >
+      {children}
+    </Tag>
+  );
 }
 
 export const HardCard = ({ children, variant = 'white', padding = 24, style }) => {
@@ -118,17 +165,22 @@ export const HardCard = ({ children, variant = 'white', padding = 24, style }) =
     yellow: 'var(--yellow)',
     black: 'var(--black)',
     offwhite: 'var(--offwhite)',
-  }[variant]
+  }[variant];
   return (
-    <div style={{
-      background: BG,
-      border: `${variant === 'black' ? 2.5 : 2}px solid var(--black)`,
-      borderRadius: 18,
-      boxShadow: variant === 'black' ? '6px 6px 0 var(--black)' : '5px 5px 0 var(--black)',
-      padding, ...style,
-    }}>{children}</div>
-  )
-}
+    <div
+      style={{
+        background: BG,
+        border: `${variant === 'black' ? 2.5 : 2}px solid var(--black)`,
+        borderRadius: 18,
+        boxShadow: variant === 'black' ? '6px 6px 0 var(--black)' : '5px 5px 0 var(--black)',
+        padding,
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  );
+};
 
 /* ─────────────── FAQ — single source of truth ─────────────── */
 /* Used by both structured-data.js (JSON-LD) and the visible FAQAccordion.
@@ -190,21 +242,39 @@ export const FAQ_ITEMS = [
     q: '¿Cuándo estará disponible Cachink?',
     a: 'Cachink lanza en verano de 2026 para iOS y Android. Únete a la lista de espera y te avisamos el día del lanzamiento. Los primeros en registrarse tendrán 3 meses gratis en cualquier plan de pago.',
   },
-]
+];
 
 export function StoreBadge({ platform }) {
   return (
-    <div style={{
-      display: 'inline-flex', alignItems: 'center', gap: 8,
-      background: 'var(--gray-100)', color: 'var(--gray-400)',
-      border: '2px dashed var(--gray-400)', borderRadius: 12,
-      padding: '8px 12px', opacity: 0.8,
-    }}>
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        background: 'var(--gray-100)',
+        color: 'var(--gray-400)',
+        border: '2px dashed var(--gray-400)',
+        borderRadius: 12,
+        padding: '8px 12px',
+        opacity: 0.8,
+      }}
+    >
       <div style={{ fontSize: 16, fontWeight: 900 }}>{platform === 'ios' ? '' : '▶'}</div>
       <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.05 }}>
-        <span style={{ fontSize: 8, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase' }}>Próximamente en</span>
-        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--gray-600)' }}>{platform === 'ios' ? 'App Store' : 'Google Play'}</span>
+        <span
+          style={{
+            fontSize: 8,
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Próximamente en
+        </span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--gray-600)' }}>
+          {platform === 'ios' ? 'App Store' : 'Google Play'}
+        </span>
       </div>
     </div>
-  )
+  );
 }

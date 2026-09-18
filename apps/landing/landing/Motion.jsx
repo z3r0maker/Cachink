@@ -6,14 +6,16 @@
    - <Wiggle>        : wrapper that wiggles on hover
    All honor a `motion` boolean — when false, children render statically. */
 
-import { useState, useEffect, useRef, createContext, useContext } from 'react'
+import { useState, useEffect, useRef, createContext, useContext } from 'react';
 
 const MotionContext = createContext(true);
 
 function MotionProvider({ enabled, children }) {
   return <MotionContext.Provider value={enabled}>{children}</MotionContext.Provider>;
 }
-function useMotionOn() { return useContext(MotionContext); }
+function useMotionOn() {
+  return useContext(MotionContext);
+}
 
 /* ─────── Scroll reveal ─────── */
 function Reveal({ children, delay = 0, from = 'up', distance = 32, style = {} }) {
@@ -22,7 +24,10 @@ function Reveal({ children, delay = 0, from = 'up', distance = 32, style = {} })
   const [shown, setShown] = useState(!motion);
 
   useEffect(() => {
-    if (!motion) { setShown(true); return; }
+    if (!motion) {
+      setShown(true);
+      return;
+    }
     const el = ref.current;
     if (!el) return;
     let done = false;
@@ -48,7 +53,11 @@ function Reveal({ children, delay = 0, from = 'up', distance = 32, style = {} })
     // Belt-and-suspenders failsafe: reveal after 3s no matter what so
     // nothing is ever stuck invisible.
     const failsafe = setTimeout(() => {
-      if (!done) { done = true; setShown(true); cancelAnimationFrame(rafId); }
+      if (!done) {
+        done = true;
+        setShown(true);
+        cancelAnimationFrame(rafId);
+      }
     }, 3000);
 
     return () => {
@@ -57,21 +66,28 @@ function Reveal({ children, delay = 0, from = 'up', distance = 32, style = {} })
     };
   }, [motion, delay]);
 
-  const fromT = {
-    up:    `translateY(${distance}px)`,
-    down:  `translateY(-${distance}px)`,
-    left:  `translateX(${distance}px)`,
-    right: `translateX(-${distance}px)`,
-    scale: 'scale(0.92)',
-  }[from] || `translateY(${distance}px)`;
+  const fromT =
+    {
+      up: `translateY(${distance}px)`,
+      down: `translateY(-${distance}px)`,
+      left: `translateX(${distance}px)`,
+      right: `translateX(-${distance}px)`,
+      scale: 'scale(0.92)',
+    }[from] || `translateY(${distance}px)`;
 
   return (
-    <div ref={ref} style={{
-      opacity: shown ? 1 : 0,
-      transform: shown ? 'none' : fromT,
-      transition: 'opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1)',
-      ...style,
-    }}>{children}</div>
+    <div
+      ref={ref}
+      style={{
+        opacity: shown ? 1 : 0,
+        transform: shown ? 'none' : fromT,
+        transition:
+          'opacity 700ms cubic-bezier(0.2, 0.8, 0.2, 1), transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1)',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
   );
 }
 
@@ -93,7 +109,7 @@ function Parallax({ children, strength = 0.15, style = {} }) {
         const rect = el.getBoundingClientRect();
         const vh = window.innerHeight;
         const center = rect.top + rect.height / 2;
-        const progress = (center - vh / 2) / vh;  // -1..1-ish
+        const progress = (center - vh / 2) / vh; // -1..1-ish
         setY(-progress * 60 * strength * 10);
       });
     }
@@ -103,7 +119,14 @@ function Parallax({ children, strength = 0.15, style = {} }) {
   }, [motion, strength]);
 
   return (
-    <div ref={ref} style={{ transform: motion ? `translate3d(0, ${y}px, 0)` : 'none', willChange: 'transform', ...style }}>
+    <div
+      ref={ref}
+      style={{
+        transform: motion ? `translate3d(0, ${y}px, 0)` : 'none',
+        willChange: 'transform',
+        ...style,
+      }}
+    >
       {children}
     </div>
   );
@@ -124,7 +147,9 @@ function TiltCard({ children, max = 6, lift = 4, style = {} }) {
     const py = (e.clientY - r.top) / r.height;
     setT({ rx: (0.5 - py) * max, ry: (px - 0.5) * max, l: lift });
   }
-  function onLeave() { setT({ rx: 0, ry: 0, l: 0 }); }
+  function onLeave() {
+    setT({ rx: 0, ry: 0, l: 0 });
+  }
 
   return (
     <div
@@ -156,7 +181,9 @@ function Wiggle({ children, style = {} }) {
         display: 'inline-block',
         animation: motion && hover ? 'wiggle 400ms cubic-bezier(0.2, 0.8, 0.2, 1)' : 'none',
         ...style,
-      }}>{children}
+      }}
+    >
+      {children}
       <style>{`@keyframes wiggle { 0%{transform:rotate(0)} 25%{transform:rotate(-2deg)} 50%{transform:rotate(2deg)} 75%{transform:rotate(-1deg)} 100%{transform:rotate(0)} }`}</style>
     </span>
   );
@@ -166,17 +193,29 @@ function Wiggle({ children, style = {} }) {
 function SpinCoin({ size = 48, style = {} }) {
   const motion = useMotionOn();
   return (
-    <div style={{
-      width: size, height: size,
-      borderRadius: '50%', background: 'var(--yellow)',
-      border: '2.5px solid var(--black)', boxShadow: '3px 3px 0 var(--black)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: size * 0.45, fontWeight: 900, color: 'var(--black)',
-      animation: motion ? 'coinBob 3s ease-in-out infinite' : 'none',
-      cursor: 'default',
-      ...style,
-    }}
-    onMouseEnter={e => { if (motion) e.currentTarget.style.animation = 'coinSpin 500ms cubic-bezier(0.2, 0.8, 0.2, 1), coinBob 3s ease-in-out infinite 500ms'; }}
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: '50%',
+        background: 'var(--yellow)',
+        border: '2.5px solid var(--black)',
+        boxShadow: '3px 3px 0 var(--black)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: size * 0.45,
+        fontWeight: 900,
+        color: 'var(--black)',
+        animation: motion ? 'coinBob 3s ease-in-out infinite' : 'none',
+        cursor: 'default',
+        ...style,
+      }}
+      onMouseEnter={(e) => {
+        if (motion)
+          e.currentTarget.style.animation =
+            'coinSpin 500ms cubic-bezier(0.2, 0.8, 0.2, 1), coinBob 3s ease-in-out infinite 500ms';
+      }}
     >
       $
       <style>{`
@@ -187,4 +226,4 @@ function SpinCoin({ size = 48, style = {} }) {
   );
 }
 
-export { MotionProvider, useMotionOn, Reveal, Parallax, TiltCard, Wiggle, SpinCoin }
+export { MotionProvider, useMotionOn, Reveal, Parallax, TiltCard, Wiggle, SpinCoin };
