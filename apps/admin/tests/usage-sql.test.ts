@@ -11,12 +11,12 @@ import { classifyMovementOrigin, DEFAULT_USAGE_TIME_ZONE } from '@xangarro/domai
  * (see the N-07 progress note).
  */
 const raw = readFileSync(
-  new URL('../src/server/db/migrations/0005_admin_usage_read.sql', import.meta.url),
+  new URL('../src/server/db/migrations/0006_admin_usage_read.sql', import.meta.url),
   'utf8',
 );
 const code = raw.replace(/--.*$/gm, '');
 
-describe('0005_admin_usage_read.sql', () => {
+describe('0006_admin_usage_read.sql', () => {
   it('grants only SELECT, only to the console, and only the columns the count needs', () => {
     const grants = [...code.matchAll(/GRANT (\w+) (\([^)]*\) )?ON public\.(\w+) TO (\w+)/g)];
     assert.deepEqual(

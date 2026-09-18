@@ -1,7 +1,7 @@
 /**
  * Port for the usage page (N-07). `memory.ts` implements it with the domain's
  * `computeUsage`, `../db/usage.ts` with `admin_tenant_usage()`
- * (0005_admin_usage_read.sql). Both honour the same contract:
+ * (0006_admin_usage_read.sql). Both honour the same contract:
  *
  * - tenants newest first (`createdAt` desc, then `id` desc), strictly after
  *   `after`, at most `limit`;

@@ -7,7 +7,7 @@ import type { Db, Tx } from './client';
 
 /**
  * Postgres adapter for `UsageSource` (N-07): one call to
- * `admin_tenant_usage()` (0005_admin_usage_read.sql), which recomputes the
+ * `admin_tenant_usage()` (0006_admin_usage_read.sql), which recomputes the
  * page's usage from source rows with the OQ-5 rules. Rows arrive one per
  * tenant per month, tenants already in keyset order.
  */
