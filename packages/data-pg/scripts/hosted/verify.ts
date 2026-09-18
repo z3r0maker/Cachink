@@ -84,20 +84,22 @@ async function exposureWarnings(sql: Sql): Promise<string[]> {
 }
 
 /**
- * The app role's view of `auth.users`. The local compat layer grants it; on
- * hosted those grants are excluded (provisioning.md §4), so say what breaks.
+ * Sign-up runs as the app role through two SECURITY DEFINER functions (0018),
+ * never through grants on `auth.users` (which hosted cannot give). Say so if the
+ * app role lost EXECUTE on them.
  */
 async function appAuthWarnings(sql: Sql): Promise<string[]> {
-  const [row] = await sql<{ insert: boolean; select: boolean }[]>`
-    SELECT has_table_privilege(r.oid, 'auth.users', 'INSERT') AS insert,
-           has_column_privilege(r.oid, 'auth.users', 'email', 'SELECT') AS select
-    FROM pg_roles r WHERE r.rolname = 'xangarro_app' AND to_regclass('auth.users') IS NOT NULL`;
-  if (row === undefined || (row.insert && row.select)) return [];
-  return [
-    'xangarro_app cannot INSERT into / SELECT email from auth.users: portal sign-up ' +
-      '(server/onboarding/signup-store.ts) will fail with permission denied until the portal owner ' +
-      'moves it behind a SECURITY DEFINER function or approves the grants',
-  ];
+  const rows = await sql<{ fn: string; ok: boolean }[]>`
+    SELECT f.fn, COALESCE(has_function_privilege(r.oid, f.fn, 'EXECUTE'), false) AS ok
+    FROM (VALUES ('xangarro.account_email_taken(text)'),
+                 ('xangarro.account_create(uuid, text, text, timestamptz)')) AS f(fn)
+    JOIN pg_roles r ON r.rolname = 'xangarro_app'
+    WHERE to_regprocedure(f.fn) IS NOT NULL`;
+  return rows
+    .filter((r) => !r.ok)
+    .map(
+      (r) => `xangarro_app cannot EXECUTE ${r.fn}: web sign-up will fail with permission denied`,
+    );
 }
 
 export async function verifyPosture(sql: Sql): Promise<string[]> {
