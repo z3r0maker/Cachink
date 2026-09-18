@@ -61,3 +61,13 @@ export function nextUsagePeriod(period: UsagePeriod): UsagePeriod {
     ? `${String(year + 1).padStart(4, '0')}-01`
     : `${period.slice(0, 4)}-${String(month + 1).padStart(2, '0')}`;
 }
+
+/** The month before `period`. */
+export function previousUsagePeriod(period: UsagePeriod): UsagePeriod {
+  assertUsagePeriod(period);
+  const year = Number(period.slice(0, 4));
+  const month = Number(period.slice(5, 7));
+  return month === 1
+    ? `${String(year - 1).padStart(4, '0')}-12`
+    : `${period.slice(0, 4)}-${String(month - 1).padStart(2, '0')}`;
+}

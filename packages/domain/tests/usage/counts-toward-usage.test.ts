@@ -3,6 +3,7 @@ import { describe, it } from 'vitest';
 import {
   classifyMovementOrigin,
   countsTowardUsage,
+  PORTAL_DEVICE_ID,
   type UsageRecord,
 } from '../../src/usage/index.js';
 
@@ -14,6 +15,7 @@ describe('countsTowardUsage (OQ-5)', () => {
       { kind: 'ticket', at: AT },
       { kind: 'gasto', at: AT },
       { kind: 'movimientoInventario', at: AT, origen: 'manual' },
+      { kind: 'movimientoInventario', at: AT, origen: 'portal' },
     ];
     for (const r of counted) assert.equal(countsTowardUsage(r), true, r.kind);
   });
@@ -69,5 +71,17 @@ describe('classifyMovementOrigin', () => {
 
   it('classifies conversion movements as generated', () => {
     assert.equal(classifyMovementOrigin({ motivo: 'Conversión', nota: undefined }), 'conversion');
+  });
+
+  it('classifies a movement written in the portal as portal, whatever its motivo (C-12)', () => {
+    const portal = { deviceId: PORTAL_DEVICE_ID };
+    assert.equal(classifyMovementOrigin({ ...portal, motivo: 'Ajuste de inventario' }), 'portal');
+    assert.equal(classifyMovementOrigin({ ...portal, motivo: 'Venta' }), 'portal');
+  });
+
+  it('applies the motivo heuristic to device rows only', () => {
+    const phone = { deviceId: '01HZ8XQN9GZJXV8AKQ5X0PH0NE' };
+    assert.equal(classifyMovementOrigin({ ...phone, motivo: 'Venta' }), 'venta');
+    assert.equal(classifyMovementOrigin({ ...phone, motivo: 'Merma' }), 'manual');
   });
 });

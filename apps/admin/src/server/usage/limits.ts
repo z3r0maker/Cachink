@@ -3,7 +3,6 @@
  * usage core so the console and the N-03 notices can never disagree about
  * where 80 / 100 / 150 % fall.
  */
-import type { PlanLimits } from '@xangarro/domain';
 import {
   assertUsagePeriod,
   crossedThresholds,
@@ -14,17 +13,8 @@ import {
   type UsageThreshold,
 } from '@xangarro/domain/usage';
 
-/**
- * The plan's limits in the usage core's shape, from `PLAN_LIMITS` as it is
- * today: one metric, `recordsPerMonth`, and no product limit. C-12 adds
- * `transactionsPerMonth` and `activeProducts` to the plan table (ADR-065:
- * 300 / 50 · 10 000 / 1 000 · 30 000 / 5 000); this mapper is then replaced
- * by reading those two fields, and the page picks up the product column's
- * percentages with no other change.
- */
-export function usageLimitsOf(plan: PlanLimits): UsageLimits {
-  return { transactionsPerMonth: plan.recordsPerMonth, activeProducts: null };
-}
+/** Shared with the nightly recompute (N-02); re-exported for the console's callers. */
+export { previousUsagePeriod, usageLimitsOf } from '@xangarro/domain/usage';
 
 export interface MetricUsage {
   readonly value: number;
@@ -65,14 +55,4 @@ export function usageByMetric(
     transactions: one('transactions', limits.transactionsPerMonth),
     activeProducts: one('activeProducts', limits.activeProducts),
   };
-}
-
-/** The month before `period`. */
-export function previousUsagePeriod(period: UsagePeriod): UsagePeriod {
-  assertUsagePeriod(period);
-  const year = Number(period.slice(0, 4));
-  const month = Number(period.slice(5, 7));
-  return month === 1
-    ? `${String(year - 1).padStart(4, '0')}-12`
-    : `${period.slice(0, 4)}-${String(month - 1).padStart(2, '0')}`;
 }

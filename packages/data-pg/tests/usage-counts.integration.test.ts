@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
-import { classifyMovementOrigin, computeUsage, type UsageRecord } from '@xangarro/domain/usage';
+import {
+  classifyMovementOrigin,
+  computeUsage,
+  PORTAL_DEVICE_ID,
+  type UsageRecord,
+} from '@xangarro/domain/usage';
 
 import { createDb, type Db } from '../src/client';
 import { usageCounts } from '../src/queries/metering';
@@ -10,7 +15,8 @@ import { integrationSuite } from './support/db';
 /**
  * `xangarro.usage_counts()` (0010) — the single SQL definition of usage — is
  * held equal to its TypeScript twin, `computeUsage`, over rows that sit on
- * every OQ-5 edge: the CDMX month boundary, each movement origin, a
+ * every OQ-5 edge: the CDMX month boundary, each movement origin (portal
+ * rows included), a
  * soft-deleted sale, a product deleted mid-month. Seeded as the owner, read
  * as `xangarro_metering`, the role the nightly recompute uses.
  */
@@ -37,7 +43,10 @@ const MOVES = [
   { motivo: 'Devolución de cliente', nota: 'Cancelación de venta: V-1' },
   { motivo: 'Devolución de cliente', nota: null },
   { motivo: 'Merma', nota: null },
-].map((m) => ({ ...m, at: '2026-09-05T12:00:00.000Z' }));
+  // Written in the portal: counted as `portal` whatever the motivo (C-12).
+  { motivo: 'Ajuste de inventario', nota: null, device: PORTAL_DEVICE_ID },
+  { motivo: 'Venta', nota: null, device: PORTAL_DEVICE_ID },
+].map((m) => ({ device: 'dev', ...m, at: '2026-09-05T12:00:00.000Z' }));
 const PRODUCTS = [
   { at: '2026-07-01T12:00:00.000Z', deleted: null },
   { at: '2026-07-01T12:00:00.000Z', deleted: '2026-08-15T12:00:00.000Z' },
@@ -61,7 +70,7 @@ async function seed(owner: postgres.Sql): Promise<void> {
     await owner`INSERT INTO expenses ${owner({ ...audit(`${BIZ}-e${i}`, at, null), fecha: at.slice(0, 10), concepto: 'x', categoria: 'Otro', monto_centavos: 100 })}`;
   }
   for (const [i, m] of MOVES.entries()) {
-    await owner`INSERT INTO inventory_movements ${owner({ ...audit(`${BIZ}-m${i}`, m.at, null), producto_id: 'p', fecha: m.at.slice(0, 10), tipo: 'entrada', cantidad: 1, costo_unit_centavos: 1, motivo: m.motivo, nota: m.nota })}`;
+    await owner`INSERT INTO inventory_movements ${owner({ ...audit(`${BIZ}-m${i}`, m.at, null), device_id: m.device, producto_id: 'p', fecha: m.at.slice(0, 10), tipo: 'entrada', cantidad: 1, costo_unit_centavos: 1, motivo: m.motivo, nota: m.nota })}`;
   }
   for (const [i, p] of PRODUCTS.entries()) {
     await owner`INSERT INTO products ${owner({ ...audit(`${BIZ}-p${i}`, p.at, p.deleted), nombre: 'x', categoria: 'Otro', costo_unit_centavos: 1, unidad: 'pza', precio_venta_centavos: 1 })}`;
@@ -75,7 +84,7 @@ function domainRecords(): UsageRecord[] {
     ...MOVES.map((m) => ({
       kind: 'movimientoInventario' as const,
       at: m.at,
-      origen: classifyMovementOrigin({ motivo: m.motivo, nota: m.nota }),
+      origen: classifyMovementOrigin({ motivo: m.motivo, nota: m.nota, deviceId: m.device }),
     })),
     ...PRODUCTS.map((p) => ({ kind: 'producto' as const, deletedAt: p.deleted })),
   ];
@@ -116,7 +125,7 @@ describe('xangarro.usage_counts(): the one SQL count, equal to computeUsage', ()
 
   it('with no ids, counts every live business', async () => {
     const rows = await usageCounts(metering, null, '2026-09', '2026-09');
-    assert.equal(rows.find((r) => r.businessId === BIZ)?.transactions, 5);
+    assert.equal(rows.find((r) => r.businessId === BIZ)?.transactions, 7);
   });
 
   it('refuses more than 24 months and a reversed range by returning nothing', async () => {

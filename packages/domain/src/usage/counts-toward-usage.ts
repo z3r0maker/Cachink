@@ -18,7 +18,7 @@ export function countsTowardUsage(record: UsageRecord): boolean {
     case 'ventaLinea':
       return record.ticketId === null;
     case 'movimientoInventario':
-      return record.origen === 'manual';
+      return record.origen === 'manual' || record.origen === 'portal';
     default:
       return false;
   }
@@ -28,17 +28,27 @@ export function countsTowardUsage(record: UsageRecord): boolean {
 const CANCELLATION_NOTE_PREFIX = 'Cancelación de venta:';
 
 /**
+ * The `device_id` of every row created in the portal rather than on a phone
+ * (a fixed, valid ULID). `inventory_movements` is HYBRID (ADR-081), so a
+ * movement with this device is the owner's own entry: origin `portal`.
+ */
+export const PORTAL_DEVICE_ID = '01HZ8XQN9GZJXV8AKQ5X0WEB01';
+
+/**
  * Best-effort origin of a stored `InventoryMovement`, until the entity
- * carries an explicit origin column. Mirrors what the application use cases
- * write today: `RegistrarVenta` → motivo `Venta`; `CancelarVenta` → motivo
- * `Devolución de cliente` with a `Cancelación de venta:` note;
- * `EjecutarConversion` → motivo `Conversión`. Everything else was entered by
- * a person.
+ * carries C-12's `origen` column. A portal row is `portal`. For device rows it
+ * mirrors what the application use cases write today: `RegistrarVenta` →
+ * motivo `Venta`; `CancelarVenta` → motivo `Devolución de cliente` with a
+ * `Cancelación de venta:` note; `EjecutarConversion` → motivo `Conversión`.
+ * Everything else was entered by a person. `xangarro.usage_counts()`
+ * (data-pg 0010) applies the same rules in SQL.
  */
 export function classifyMovementOrigin(movement: {
   readonly motivo: string;
   readonly nota?: string | null;
+  readonly deviceId?: string;
 }): MovementOrigin {
+  if (movement.deviceId === PORTAL_DEVICE_ID) return 'portal';
   if (movement.motivo === 'Venta') return 'venta';
   if (movement.motivo === 'Conversión') return 'conversion';
   const nota = movement.nota ?? '';

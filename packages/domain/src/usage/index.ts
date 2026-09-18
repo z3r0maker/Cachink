@@ -5,14 +5,20 @@
 
 export * from './types.js';
 export * from './errors.js';
-export { countsTowardUsage, classifyMovementOrigin } from './counts-toward-usage.js';
+export {
+  countsTowardUsage,
+  classifyMovementOrigin,
+  PORTAL_DEVICE_ID,
+} from './counts-toward-usage.js';
 export {
   DEFAULT_USAGE_TIME_ZONE,
   usagePeriod,
   isUsagePeriod,
   assertUsagePeriod,
   nextUsagePeriod,
+  previousUsagePeriod,
 } from './usage-period.js';
+export { usageLimitsOf } from './plan-limits.js';
 export { computeUsage } from './compute-usage.js';
 export { assertUsageLimits } from './limits.js';
 export {

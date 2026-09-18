@@ -14,8 +14,11 @@
 --     sale is a pre-ticket one-line sale and counts once. When the tickets
 --     table lands, count tickets here — and only here.
 --   * expenses: one per row.
---   * inventory_movements: manual ones only. No `origen` column yet (C-12
---     step 7), so origin is inferred as `classifyMovementOrigin` does:
+--   * inventory_movements: origin `manual` and `portal` count; `venta`,
+--     `cancelacion`, `conversion` (and C-12's future `apertura`) never do. No
+--     `origen` column yet (C-12 step 7), so origin is inferred as
+--     `classifyMovementOrigin` does: device_id = PORTAL_DEVICE_ID → portal
+--     (the table is HYBRID, ADR-081), whatever its motivo; for device rows,
 --     motivo 'Venta' → sale, 'Conversión' → conversion, 'Devolución de
 --     cliente' with a nota starting 'Cancelación de venta:' → cancellation;
 --     anything else is manual.
@@ -75,9 +78,10 @@ AS $fn$
       FROM public.inventory_movements im, win
      WHERE im.business_id IN (SELECT id FROM ids)
        AND im.created_at >= win.lo AND im.created_at < win.hi
-       AND im.motivo NOT IN ('Venta', 'Conversión')
-       AND NOT (im.motivo = 'Devolución de cliente'
-                AND starts_with(coalesce(im.nota, ''), 'Cancelación de venta:'))
+       AND (im.device_id = '01HZ8XQN9GZJXV8AKQ5X0WEB01'
+            OR (im.motivo NOT IN ('Venta', 'Conversión')
+                AND NOT (im.motivo = 'Devolución de cliente'
+                         AND starts_with(coalesce(im.nota, ''), 'Cancelación de venta:'))))
   ),
   tx_n AS (
     SELECT tx.business_id, p.period, count(*)::int AS n
@@ -116,7 +120,7 @@ GRANT EXECUTE ON FUNCTION xangarro.current_business_id() TO xangarro_metering;
 GRANT SELECT (id, deleted_at) ON public.businesses TO xangarro_metering;
 GRANT SELECT (business_id, created_at) ON public.sales TO xangarro_metering;
 GRANT SELECT (business_id, created_at) ON public.expenses TO xangarro_metering;
-GRANT SELECT (business_id, created_at, motivo, nota) ON public.inventory_movements
+GRANT SELECT (business_id, created_at, device_id, motivo, nota) ON public.inventory_movements
   TO xangarro_metering;
 GRANT SELECT (business_id, created_at, deleted_at) ON public.products TO xangarro_metering;
 

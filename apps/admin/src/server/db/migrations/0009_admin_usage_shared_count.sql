@@ -60,6 +60,8 @@ DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_admin') THEN
     GRANT USAGE ON SCHEMA xangarro TO xangarro_admin;
+    -- The shared count tells a portal movement by its device (C-12, ADR-081).
+    GRANT SELECT (device_id) ON public.inventory_movements TO xangarro_admin;
     GRANT EXECUTE ON FUNCTION xangarro.usage_counts(text[], text, text) TO xangarro_admin;
   END IF;
 END

@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
-import { classifyMovementOrigin, DEFAULT_USAGE_TIME_ZONE } from '@xangarro/domain/usage';
+import {
+  classifyMovementOrigin,
+  DEFAULT_USAGE_TIME_ZONE,
+  PORTAL_DEVICE_ID,
+} from '@xangarro/domain/usage';
 
 /**
  * `0010_usage_counts.sql` as text, for the hermetic run: the rules it encodes
@@ -18,7 +22,9 @@ describe('0010_usage_counts.sql', () => {
     assert.ok(code.includes(`AT TIME ZONE '${DEFAULT_USAGE_TIME_ZONE}'`));
   });
 
-  it('excludes exactly the movements classifyMovementOrigin does not call manual', () => {
+  it('excludes exactly the movements classifyMovementOrigin does not count', () => {
+    assert.ok(code.includes(`im.device_id = '${PORTAL_DEVICE_ID}'`));
+    assert.equal(classifyMovementOrigin({ motivo: 'Venta', deviceId: PORTAL_DEVICE_ID }), 'portal');
     assert.match(code, /im\.motivo NOT IN \('Venta', 'Conversión'\)/);
     assert.match(code, /im\.motivo = 'Devolución de cliente'/);
     assert.match(code, /starts_with\(coalesce\(im\.nota, ''\), 'Cancelación de venta:'\)/);
@@ -45,7 +51,11 @@ describe('0010_usage_counts.sql', () => {
         ['businesses', '(id, deleted_at)', 'xangarro_metering'],
         ['sales', '(business_id, created_at)', 'xangarro_metering'],
         ['expenses', '(business_id, created_at)', 'xangarro_metering'],
-        ['inventory_movements', '(business_id, created_at, motivo, nota)', 'xangarro_metering'],
+        [
+          'inventory_movements',
+          '(business_id, created_at, device_id, motivo, nota)',
+          'xangarro_metering',
+        ],
         ['products', '(business_id, created_at, deleted_at)', 'xangarro_metering'],
       ],
     );

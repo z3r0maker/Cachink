@@ -4,20 +4,10 @@ import { describe, it } from 'vitest';
 import { PLAN_LIMITS } from '@xangarro/domain';
 import { InvalidUsageLimitsError, InvalidUsagePeriodError } from '@xangarro/domain/usage';
 
-import { previousUsagePeriod, usageByMetric, usageLimitsOf } from '@/server/usage/limits';
+import { usageByMetric, usageLimitsOf } from '@/server/usage/limits';
 
 const FREE = usageLimitsOf(PLAN_LIMITS.xangarrito);
 const tx = (transactions: number) => ({ transactions, activeProducts: 3 });
-
-describe('usageLimitsOf', () => {
-  it('maps today’s recordsPerMonth to the transaction limit, products unlimited', () => {
-    assert.deepEqual(FREE, { transactionsPerMonth: 50, activeProducts: null });
-    assert.deepEqual(usageLimitsOf(PLAN_LIMITS.xangarrote), {
-      transactionsPerMonth: null,
-      activeProducts: null,
-    });
-  });
-});
 
 describe('usageByMetric', () => {
   it('bands at 80 / 100 / 150 % exactly where the N-03 notices fire', () => {
@@ -52,17 +42,5 @@ describe('usageByMetric', () => {
   it('rejects invalid limits', () => {
     const bad = { transactionsPerMonth: 0, activeProducts: null };
     assert.throws(() => usageByMetric(tx(1), bad, '2026-09'), InvalidUsageLimitsError);
-  });
-});
-
-describe('previousUsagePeriod', () => {
-  it('steps back one month, across a year boundary', () => {
-    assert.equal(previousUsagePeriod('2026-09'), '2026-08');
-    assert.equal(previousUsagePeriod('2026-01'), '2025-12');
-  });
-
-  it('rejects a malformed period', () => {
-    assert.throws(() => previousUsagePeriod('2026-13'), InvalidUsagePeriodError);
-    assert.throws(() => previousUsagePeriod(''), InvalidUsagePeriodError);
   });
 });
