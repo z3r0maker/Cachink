@@ -9,8 +9,8 @@ test('from Cobranza to the account: balance, open tickets, history', async ({ pa
   await page.getByTitle('Ver historial').nth(1).click();
   await expect(page).toHaveURL(/\/operador\/cobranza\/chuy$/);
   await expect(page.getByText('$860.00')).toBeVisible();
-  await expect(page.getByText('Ya abonó $120.00')).toBeVisible();
-  await expect(page.getByText('Venta fiada V-0244')).toBeAttached();
+  await expect(page.getByText('Ya abonó $400.00')).toBeVisible();
+  await expect(page.getByText('Venta fiada V-0288')).toBeAttached();
 });
 
 test('an abono settles the oldest ticket and lowers the balance', async ({ page }) => {

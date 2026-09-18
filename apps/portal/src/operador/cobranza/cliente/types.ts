@@ -24,6 +24,8 @@ export interface AbonoCuenta {
   readonly dia: string;
   readonly monto: Money;
   readonly metodo: MetodoAbono;
+  /** What the operator wrote, shown instead of the derived line in today's abonos. */
+  readonly nota?: string;
 }
 
 /**
@@ -35,6 +37,8 @@ export interface CuentaCliente {
   readonly nombre: string;
   readonly iniciales: string;
   readonly telefono: string;
+  /** Avatar tint on Cobranza's card. */
+  readonly tint: string;
   /** «enero 2026». */
   readonly desde: string;
   /** Set by the owner. */

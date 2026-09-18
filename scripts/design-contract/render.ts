@@ -106,7 +106,7 @@ function type(): readonly string[] {
     '',
     `**Mobile ramp** (\`fontSizes\`) — ${Object.values(fontSizes).join(', ')}.`,
     '',
-    `**Portal ramp** (\`portalFontSizes\`) — ${Object.values(portalFontSizes).join(', ')}. Richer than the phone's, per the design handoff. **12 is the floor for both.**`,
+    `**Portal ramp** (\`portalFontSizes\`) — ${Object.values(portalFontSizes).join(', ')}. Richer than the phone's, per the design handoff. **12 is the floor for both**; the one exception is \`tag\` (11) for tags, chips and the phone tab bar (ADR-083).`,
     '',
     `**Emoji as illustration** — ${pairs(emojiSizes)}. Never dragged along by a type-scale change.`,
     '',

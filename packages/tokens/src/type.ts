@@ -94,7 +94,9 @@ export const typography = {
  * Kept as its own scale rather than merged, because the two surfaces have
  * genuinely different ranges: a 56 px figure is right on a 1760 px dashboard
  * and wrong on a phone. `fontSizes` stays the mobile ramp and the floor of 12
- * holds for both — Xangarro is read at arm's length on a counter.
+ * holds for both — Xangarro is read at arm's length on a counter. One
+ * exception, decision D1 (ADR-083): `tag` (11) for tags, chips and the phone
+ * tab bar only — the design system's `.t-tag`, always bold and never a sentence.
  */
 export const portalFontSizes = {
   /** Tags, chips and the phone tab bar — the design system's `.t-tag` (11px). */
