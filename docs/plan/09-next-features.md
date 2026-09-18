@@ -605,6 +605,21 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   drafted; responsable vs encargado for a persona física owner's books; whether the 2013 Lineamientos
   still apply.
 
+### N-35 Rename the web apps: `portal` → `web`, `admin` → `backoffice` `[LAUNCH]`
+
+- [ ] Status · **Owner decision 2026-09-18** · **Blocked by:** a quiet window agreed with the session that
+      owns `apps/portal` (all its work pushed, pushes paused)
+- **Why:** Director and Operador both live in the customer web app (ADR-071), and "admin" collides with the
+  owner/admin member roles. The real split is customer web app vs internal staff console.
+- **What:** `apps/portal` → `apps/web` (`@xangarro/web`, Vercel project `xangarro-web`, still
+  `app.xangarro.mx`); `apps/admin` → `apps/backoffice` (`@xangarro/backoffice`, Vercel project
+  `xangarro-backoffice`, still `admin.xangarro.mx`). One atomic commit: `git mv`, package names, every
+  `--filter`, `.github/workflows/*`, turbo, scripts, design-lint paths, playwright, docs/plan paths, ops
+  docs. Code identifiers and routes that merely say "portal" stay unless they are paths.
+- **After merge (owner):** in Vercel, update each project's Root Directory to `apps/web` / `apps/backoffice`.
+- **Acceptance:** `rg -n "apps/(portal|admin)|@xangarro/(portal|admin)"` → 0 outside ARCHITECTURE.md history and
+  archives; typecheck/lint/test/e2e green; both Vercel projects build.
+
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-10, P-10, N-08 · **Blocks:** N-30
