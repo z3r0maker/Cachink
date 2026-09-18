@@ -27,7 +27,8 @@ export function opciones(c: Comprobante, tel: string): readonly Opcion[] {
       disabled: digits(tel).length < 10,
       run: () => {
         window.open(whatsappUrl(tel, c), '_blank', 'noopener');
-        return `Comprobante enviado al ${tel} por WhatsApp.`;
+        // D2 (ADR-083): WhatsApp opens with the text; the person still presses send.
+        return `WhatsApp abierto con el comprobante para el ${tel}.`;
       },
     },
     {

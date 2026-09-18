@@ -1,4 +1,4 @@
-import { COBRANZA_FIXTURE } from '@/operador/cobranza/fixture';
+import { CUENTAS, HOY } from '@/operador/cobranza/cuentas';
 import { CobranzaScreen } from '@/operador/cobranza/screen';
 import type { CobranzaScreenProps } from '@/operador/cobranza/types';
 
@@ -17,5 +17,5 @@ export default async function OperadorCobranzaPage({
   readonly searchParams: Promise<{ readonly dataState?: string }>;
 }) {
   const { dataState } = await searchParams;
-  return <CobranzaScreen state={forced(dataState)} data={COBRANZA_FIXTURE} />;
+  return <CobranzaScreen state={forced(dataState)} data={{ cuentas: CUENTAS, hoy: HOY }} />;
 }

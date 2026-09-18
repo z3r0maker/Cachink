@@ -5,13 +5,10 @@ import * as u from '../ui/ui.css';
 import { METODO_BG } from '../ventas/lista';
 import * as v from '../ventas/ventas.css';
 import * as c from './cobranza.css';
-import type { AbonoHoy, ClienteCobranza } from './types';
+import type { AbonoDelDia } from './derive';
 
 /** «Abonos que recibiste hoy», newest first. */
-export function AbonosHoy(p: {
-  readonly abonos: readonly AbonoHoy[];
-  readonly clientes: readonly ClienteCobranza[];
-}) {
+export function AbonosHoy(p: { readonly abonos: readonly AbonoDelDia[] }) {
   return (
     <div className={u.listCard}>
       <div className={c.abonosHead}>
@@ -20,7 +17,7 @@ export function AbonosHoy(p: {
       {p.abonos.map((a) => (
         <div key={a.id} className={c.abonoRow}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className={l.name}>{p.clientes.find((x) => x.id === a.clienteId)?.nombre}</div>
+            <div className={l.name}>{a.cliente}</div>
             <div className={l.detail}>{a.detalle}</div>
           </div>
           <span className={v.method} style={{ background: METODO_BG[a.metodo] }}>

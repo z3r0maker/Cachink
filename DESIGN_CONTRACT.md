@@ -92,7 +92,7 @@ A screen is replicated when it satisfies all eight. Verify before closing any ta
 
 **Mobile ramp** (`fontSizes`) — 12, 13, 14, 16, 18, 20, 24, 28, 32, 36, 48.
 
-**Portal ramp** (`portalFontSizes`) — 11, 12, 13, 14, 15, 16, 17, 19, 20, 22, 24, 26, 30, 34, 36, 38, 40, 42, 44, 52, 56. Richer than the phone's, per the design handoff. **12 is the floor for both.**
+**Portal ramp** (`portalFontSizes`) — 11, 12, 13, 14, 15, 16, 17, 19, 20, 22, 24, 26, 30, 34, 36, 38, 40, 42, 44, 52, 56. Richer than the phone's, per the design handoff. **12 is the floor for both**; the one exception is `tag` (11) for tags, chips and the phone tab bar (ADR-083).
 
 **Emoji as illustration** — md 40, lg 56. Never dragged along by a type-scale change.
 

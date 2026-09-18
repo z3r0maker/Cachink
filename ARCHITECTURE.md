@@ -5602,7 +5602,7 @@ stock.
 
 ---
 
-## ADR-082
+## ADR-083
 
 **Title:** Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner
 

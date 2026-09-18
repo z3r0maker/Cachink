@@ -15,7 +15,9 @@ import * as u from '../ui/ui.css';
 import { RecibirAbono } from './abono';
 import { AbonosHoy } from './abonos-hoy';
 import * as c from './cobranza.css';
-import { filtrar, resumen, saldo, vista } from './derive';
+import { vistaAbono } from './cliente/abono';
+import { estadoCuenta } from './cliente/derive';
+import { abonosDeHoy, filtrar, resumen, saldo } from './derive';
 import { Tarjeta } from './tarjeta';
 import type { CobranzaScreenProps } from './types';
 import { useCobranza, type Cobranza } from './use-cobranza';
@@ -59,7 +61,7 @@ export function CobranzaScreen({ state, data }: CobranzaScreenProps) {
 }
 
 function Kpis({ x }: { readonly x: Cobranza }) {
-  const r = resumen(x.clientes, x.abonos);
+  const r = resumen(x.cuentas, x.hoy);
   return (
     <KpiRow
       min={220}
@@ -89,7 +91,7 @@ function Kpis({ x }: { readonly x: Cobranza }) {
 }
 
 function Cuerpo({ x }: { readonly x: Cobranza }) {
-  const visibles = filtrar(x.clientes, x.filtro, x.query);
+  const visibles = filtrar(x.cuentas, x.filtro, x.query);
   return (
     <>
       <div className={c.cards}>
@@ -102,7 +104,7 @@ function Cuerpo({ x }: { readonly x: Cobranza }) {
           <SinResultados body="Ningún cliente coincide con lo que buscas." />
         </div>
       ) : null}
-      <AbonosHoy abonos={x.abonos} clientes={x.clientes} />
+      <AbonosHoy abonos={abonosDeHoy(x.cuentas, x.hoy)} />
     </>
   );
 }
@@ -115,7 +117,7 @@ function Capas({ x }: { readonly x: Cobranza }) {
         <RecibirAbono
           nombre={cl.nombre}
           total={saldo(cl)}
-          vista={(m) => vista(cl, m)}
+          vista={(m) => vistaAbono(cl, estadoCuenta(cl), m, true)}
           variante="cobranza"
           onClose={() => x.setSel(null)}
           onSave={x.registrar}

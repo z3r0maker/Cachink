@@ -209,7 +209,9 @@ turno does not open without a fondo.
 
 ## 4b. Upstream design amendments (Claude Design first, then pull — ADR-058)
 
-Collected while building fase 10; none is edited in `design-reference/`.
+Collected while building fases 10–13; none is edited in `design-reference/`. The same list,
+written as requests to paste into Claude Design, is in
+[10-operador-design-changes.md](10-operador-design-changes.md).
 
 1. **Acceso** (ADR-072): 8 code boxes instead of 6; a text input (uppercased, spaces/hyphens
    ignored) instead of the numeric keypad; an example code from the contract alphabet
@@ -279,18 +281,21 @@ Collected while building fase 10; none is edited in `design-reference/`.
     `wa.me` text per Track N row 13) instead of the prototype's canned confirmations; «Agregar al
     ticket» requires a name and a price. `portalFontSizes.total = 38` added.
   - For the design project (§4b): the WhatsApp confirmation says «enviado» but the app can only open
-    WhatsApp; the owner must know the message still needs sending.
+    WhatsApp; the owner must know the message still needs sending. **Resolved (ADR-083 D2,
+    provisional):** «WhatsApp abierto con el comprobante para el …».
 
 **Open question found while building O-20:** `portalFontSizes` documents «the floor of 12 holds for
 both» surfaces, but the operator design uses 11 px (tab labels, chips, «Sin leer», «Quedan N»), and
-O-11 added `portalFontSizes.tag = 11`. Needs the owner's call: keep 11 (amend the floor) or raise
-those texts to 12 upstream.
+O-11 added `portalFontSizes.tag = 11`. **Resolved (ADR-083 D1, provisional):** 12 stays the floor;
+`tag` (11) is the one exception for tags, chips and the phone tab bar (tokens comment and
+DESIGN_CONTRACT updated).
 
 ## 6. Fase 12 — Turno completo, detalles y cola sin conexión
 
-> **Open for fase 12 (asked when wiring, not blocking the fixture screens):** the five close-out
-> reasons vs the six-value `caja_turnos` enum (Cierre), and where expense receipt photos live
-> (Gastos). The screens are built on fixtures; the questions come back with O-06.
+> **Resolved (ADR-083, provisional):** the five close-out reasons map onto the six-value enum
+> (D6) and the expense categories onto `ExpenseCategory` (D4), both in `src/operador/vocabulario.ts`
+> with tests; receipt photos live in a private Storage bucket uploaded by the outbox (D3, built
+> with O-06).
 
 ### O-21 Operador · Ventas
 
@@ -360,8 +365,9 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
     and filled, and the toast: match (agreed radius and default-black button aside).
     Playwright: `e2e/operador-cobranza.spec.ts`. The card's arrow leads to Detalle de cliente
     (O-26).
-  - The file caps an abono at the balance and says nothing about the excess; the domain returns it
-    as `excedente` so the use case can decide (saldo a favor or change) with O-06.
+  - The file caps an abono at the balance and says nothing about the excess. **Resolved (ADR-083
+    D5, provisional):** the whole amount is recorded and the excess is saldo a favor, shown in the
+    preview («$X a su favor») and the toast.
 
 ### O-26 Operador · Detalle de cliente
 
@@ -380,8 +386,11 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
   - Deviations: «se aplicó hasta» comes from the domain, so Chuy's $120.00 abono reads V-0288
     (the file's loop says V-0244, which the earlier $300.00 had already settled). A new abono is
     dated now, not on the file's frozen «hoy».
-  - Cobranza (O-25) still stores open balances per ticket in its fixture; with O-06 both screens
-    read accounts through `estadoDeCuenta`.
+  - **Resolved (ADR-083 D7):** Cobranza and Detalle de cliente read one set of accounts
+    (`cobranza/cuentas.ts`, tickets + abonos only) through `estadoDeCuenta`; Cobranza's history
+    wins, so Detalle's Chuy now has V-0288 $800.00 with a $400.00 abono today (Cobranza still
+    matches its file with 0 diffs; Detalle de cliente for Chuy differs from its file until the
+    design adopts one history). Raúl and Delgado now have accounts and detail pages.
 
 ### O-27 Operador · Registros por enviar
 

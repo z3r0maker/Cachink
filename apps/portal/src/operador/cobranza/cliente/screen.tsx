@@ -8,7 +8,8 @@ import { Note } from '../../ui/note';
 import { OpMain } from '../../ui/parts';
 import { Toast } from '../../ui/toast';
 import { RecibirAbono } from '../abono';
-import { limiteNota, recordatorio, vista } from './derive';
+import { vistaAbono } from './abono';
+import { limiteNota, recordatorio } from './derive';
 import { Heroe, Indicadores } from './hero';
 import { Abiertas, Movimientos } from './listas';
 import { Recordar, RecordarBoton } from './recordar';
@@ -75,7 +76,7 @@ function Capas({
         <RecibirAbono
           nombre={c.nombre}
           total={x.e.saldo}
-          vista={(m) => vista(x.e, m)}
+          vista={(m) => vistaAbono(c, x.e, m, false)}
           variante="detalle"
           onClose={() => x.setModal(null)}
           onSave={x.registrar}

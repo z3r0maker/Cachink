@@ -1,4 +1,4 @@
-import { CUENTAS } from '@/operador/cobranza/cliente/fixture';
+import { cuentaPorId } from '@/operador/cobranza/cuentas';
 import { DetalleClienteScreen } from '@/operador/cobranza/cliente/screen';
 import type { DetalleClienteProps } from '@/operador/cobranza/cliente/types';
 
@@ -23,7 +23,7 @@ export default async function OperadorDetalleClientePage({
 }) {
   const { cliente } = await params;
   const { dataState } = await searchParams;
-  const cuenta = cliente === 'chuy' || cliente === 'mari' ? CUENTAS[cliente] : null;
+  const cuenta = cuentaPorId(cliente);
   return (
     <DetalleClienteScreen
       state={forced(dataState)}

@@ -8,7 +8,7 @@ import * as l from '../turno/lists.css';
 import * as u from '../ui/ui.css';
 import * as c from './cobranza.css';
 import { estado, resumenCliente, saldo, type EstadoCliente } from './derive';
-import type { ClienteCobranza } from './types';
+import type { CuentaCliente } from './cliente/types';
 
 const CHEVRON = 'M9 6l6 6-6 6';
 
@@ -23,7 +23,7 @@ export function Tarjeta({
   x,
   onAbonar,
 }: {
-  readonly x: ClienteCobranza;
+  readonly x: CuentaCliente;
   readonly onAbonar: () => void;
 }) {
   const debe = saldo(x) > 0n;
@@ -57,7 +57,7 @@ export function Tarjeta({
   );
 }
 
-function Cabeza({ x }: { readonly x: ClienteCobranza }) {
+function Cabeza({ x }: { readonly x: CuentaCliente }) {
   const e = estado(x);
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

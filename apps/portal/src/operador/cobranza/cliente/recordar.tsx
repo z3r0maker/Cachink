@@ -45,7 +45,7 @@ export function Recordar(p: {
       '_blank',
       'noopener',
     );
-    setSent(`Recordatorio enviado al ${tel} por WhatsApp.`);
+    setSent(`WhatsApp abierto con el recordatorio para el ${tel}.`); // D2 (ADR-083)
   };
   return (
     <OpModal

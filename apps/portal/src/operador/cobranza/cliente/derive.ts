@@ -1,5 +1,4 @@
 import {
-  aplicarAbono,
   disponible,
   estadoDeCuenta,
   formatMoney,
@@ -91,22 +90,4 @@ export function recordatorio(c: CuentaCliente, e: EstadoCuenta, negocio: string)
   return e.saldo > 0n
     ? `Hola ${c.nombre}, le recuerdo que tiene ${formatMoney(e.saldo)} pendiente en ${negocio}. Puede abonar en efectivo, transferencia o tarjeta cuando pase. ¡Gracias!`
     : `Hola ${c.nombre}, su cuenta en ${negocio} está al día. ¡Gracias!`;
-}
-
-/** The abono modal's preview: «V-0288 parcial · …» (folios only here) and what is left. */
-export function vista(e: EstadoCuenta, monto: Money): { texto: string; restante: Money } {
-  const a = aplicarAbono(
-    e.ventas.map((v, i) => ({
-      id: v.id,
-      fecha: String(i).padStart(4, '0'),
-      pendiente: v.pendiente,
-    })),
-    monto,
-  );
-  return {
-    texto: a.aplicaciones
-      .map((x) => `${x.ventaId} ${x.completa ? 'completa' : 'parcial'}`)
-      .join(' · '),
-    restante: a.restante,
-  };
 }
