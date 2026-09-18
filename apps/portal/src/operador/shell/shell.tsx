@@ -3,6 +3,7 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
+import { ColaProvider, useCola } from './cola';
 import { OperadorHeader, HEADER_ACTION_ID } from './header';
 import { OperadorSidebar } from './sidebar';
 import { OperadorTabbar } from './tabbar';
@@ -33,7 +34,22 @@ export function OperadorShell({
   readonly data: OperadorShellData;
   readonly children: ReactNode;
 }) {
-  const shown = { ...data, connection: useForcedConnection(data.connection) };
+  return (
+    <ColaProvider connection={useForcedConnection(data.connection)} pendientes={data.pendientes}>
+      <Frame data={data}>{children}</Frame>
+    </ColaProvider>
+  );
+}
+
+function Frame({
+  data,
+  children,
+}: {
+  readonly data: OperadorShellData;
+  readonly children: ReactNode;
+}) {
+  const cola = useCola();
+  const shown = { ...data, connection: cola.connection, pendientes: cola.pendientes };
   return (
     <div className={s.frame}>
       <OperadorSidebar data={shown} />

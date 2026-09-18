@@ -364,6 +364,23 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
   - Cobranza (O-25) still stores open balances per ticket in its fixture; with O-06 both screens
     read accounts through `estadoDeCuenta`.
 
+### O-27 Operador · Registros por enviar
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/pendientes/`, `/operador/pendientes` (out of the catch-all).
+    Hero in three phases (amber waiting, blue sending with the icon spinning, green sent), «La
+    cola» with each record's kind, state chip («Esperando conexión» offline, «En cola» online,
+    «Enviando»), time and amount; «Nada pendiente» leads to the close; the rule not to close the
+    tab or clear site data. The shell now holds the queue in one client state (`shell/cola.tsx`,
+    `ColaProvider` / `useCola`), so the header pill and this screen never disagree and the result
+    survives navigation; O-06's outbox flusher will drive it. Until then a retry succeeds after the
+    file's 1.4 s. Harness at 1440 and 375 px, offline and online, sending, sent, and
+    loading/empty/error: 0 diffs (agreed radius aside). `tests/operador/pendientes.test.ts`,
+    `e2e/operador-pendientes.spec.ts`.
+  - Found: the design system sets `p { line-height: 1.45 }`; a `<p>` in the portal must say so.
+  - Undesigned wording, generalised from the file's one case: the hero's sum with no expense
+    («Suman $283.00 de ventas.») or several («y 2 gastos por $1,240.00»).
+
 ## 7. Fase 13 (tasks written when fase 12 closes)
 
 - **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
