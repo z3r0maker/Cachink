@@ -229,6 +229,9 @@ Collected while building fase 10; none is edited in `design-reference/`.
 9. **Gastos:** the list totals $1,530.00 while Turno's breakdown shows «gastos −$620.00»; the
    category filters omit «Otros» although the form offers it; at 760–1000 px the row squeezes
    the concept to zero width (as in Turno, item 6).
+10. **Inventario at phone width:** the stock row keeps every element on one line, so at 375 px the
+    name and «Umbral · unidad» wrap word by word and the «Registrar merma» button is cut off at the
+    right edge (same in the file). The row needs a phone layout.
 
 ## 5. Fase 11 — Caja y captura
 
@@ -305,6 +308,20 @@ those texts to 12 upstream.
     button in browser-default black aside. Playwright: `e2e/operador-gastos.spec.ts`.
   - Open with O-06 (already listed above): where the receipt photo is stored, and how these five
     categories map to the domain's expense categories.
+
+### O-24 Operador · Inventario
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/inventario/`, `/operador/inventario`; figures, KPI hints
+    («Pastor, tortilla y agua»), stock moves and search unit-tested
+    (`tests/operador/inventario.test.ts`). Existencias / Movimientos de mi turno tabs (now the shared
+    `SegTabs`, also used by Avisos), search, «Entrada de mercancía» and «Merma» from the bar or from
+    each row with the product preselected; a write-off needs one of four reasons, an entry may name
+    the supplier. A movement moves the stock and joins the list, device-local until O-06. The
+    owner-only rule sits under the stock. Dev forcing: `dataState`, `startTab`. Harness at 1440,
+    1024 and 375 px, both tabs, loading/empty/error, both forms and the toast: match, the agreed
+    radius, the runtime's split text and the design's default-black buttons aside.
+    Playwright: `e2e/operador-inventario.spec.ts`.
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 
