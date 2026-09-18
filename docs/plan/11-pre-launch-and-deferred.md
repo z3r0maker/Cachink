@@ -8,7 +8,9 @@
 > 2. **§2 Deferred by decision** — items that were specified and decided, and deliberately scheduled
 >    after launch. Each has a trigger; do not start one before its trigger is true.
 >
-> Pending or partial **engineering** work is in `12-glm-handoff.md`, not here.
+> Pending or partial **engineering** work is in `12-glm-handoff.md` (Track N) and
+> `13-web-portal-handoff.md` (web portal, P-track), not here. §3 below adds the web portal's owner
+> actions and deferred items.
 
 ---
 
@@ -74,3 +76,28 @@
 | Z-05            | Xangarro as tenant #1: Stripe payouts → ventas importer                                                                                                                                                                                                                                                                                                                                                                        | billing live 2 months                                                            | `08-post-launch.md`                    |
 | —               | Landing dependency upgrades (React 18 → 19 via removing the root override; Vite 5 → 8; plugin-react 4 → 6)                                                                                                                                                                                                                                                                                                                     | after the L-track rebrand                                                        | ADR-084                                |
 | —               | WhatsApp Business Cloud API (automatic sending)                                                                                                                                                                                                                                                                                                                                                                                | not planned; revisit on demand                                                   | row 13 (deep link + image only)        |
+
+---
+
+## 3. Web portal (P-track) — added 2026-09-18
+
+### 3.1 Owner actions
+
+| #    | Action                                                                                                                                                                                                                                   | Unblocks                                                            |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| O-23 | Mirror the Claude Design project into `design-reference/` (P-18) — at least **«Acceso y onboarding»**; today only `operador/` is mirrored. Needs the design MCP authorisation, which a repo script does not have.                        | P-02 four-scene login animation, P-32 WhatsApp dialog copy, P-21    |
+| O-24 | Decide where an account's **display name** lives (signup collects `nombre`): `auth.users` metadata or `business_members`. Inicio's «Hola, {nombre}» still says «Pedro».                                                                  | P-13 greeting                                                       |
+| O-25 | Add to the contador questions (O-14): **ISR by régimen** — the statements apply `isr_tasa` to utilidad operativa, but RESICO (626) is levied on gross income. Which base per régimen, and should the portal estimate at all for 612/601? | a régimen-aware ISR (finding F-2 in `13-…`)                         |
+| O-26 | Agree with the app-branch owner (Track A): `empleado_id` on `expenses` (payroll payments), and making «Tipos de pago» read-only on the phone like the flags (ADR-080) since the portal now owns it.                                      | P-12 employee drawer; one source of truth for payment methods (F-3) |
+
+### 3.2 Deferred by decision
+
+| Item                                                                      | Trigger                                                                   | Decision / spec                                                   |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| P-02 four-scene login animation                                           | O-23 (design mirrored)                                                    | The design file is the spec; not invented from the plan's timings |
+| P-28 Diagnóstico + estrategia, P-29 catálogo desde una foto, P-30 runtime | ADR-059 LLM production gate lifted (`asesorLlm` kill switch) + credential | ADR-056, ADR-059 — «Próximamente» in production                   |
+| P-12 employee drawer with recent payments                                 | `empleado_id` on `expenses` (O-26)                                        | Never match payments to employees by name                         |
+| P-08 «Contacto y comprobantes» card                                       | Track N's C-15 branding columns                                           | Do together with N-19                                             |
+| P-11 real rejection rows                                                  | B-08 against hosted                                                       | The UI already reads and resolves real rows                       |
+| Per-push sync event log (full Historial / audit)                          | an audit need, or N-07 p95 (whichever first)                              | Historial today is derived from latest receipts                   |
+| Stripe buttons end-to-end                                                 | O-12 test-mode keys                                                       | Presence and role gating are e2e-tested                           |
