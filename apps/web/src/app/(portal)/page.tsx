@@ -21,14 +21,14 @@ export const dynamic = 'force-dynamic';
 
 export default async function InicioPage() {
   const session = await requireSession();
+  // The business's today and its month — never a date pinned in code.
+  const today = hoy();
   try {
-    // The business's today and its month — never a date pinned in code.
-    const today = hoy();
     const mes = rangoDelMes(today);
     const data = await loadInicio(session.business_id, today, mes.desde, mes.hasta);
-    return <InicioScreen data={data} role={session.member_role} />;
+    return <InicioScreen data={data} role={session.member_role} hoy={today} />;
   } catch {
     // The screen owns the error state; the container only decides which one.
-    return <InicioScreen data={null} role={session.member_role} />;
+    return <InicioScreen data={null} role={session.member_role} hoy={today} />;
   }
 }

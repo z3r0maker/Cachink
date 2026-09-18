@@ -7,6 +7,8 @@ import {
   nombreDelMes,
   rangoDelMes,
   rangoDeSemana,
+  sumarDias,
+  ultimosDias,
   type IsoDate,
 } from '../src/index.js';
 
@@ -42,5 +44,17 @@ describe('periodos', () => {
     assert.equal(enRango('2026-05-31T23:59:00Z', r), true);
     assert.equal(enRango('2026-06-01', r), false);
     assert.equal(enRango('', r), false);
+  });
+
+  it('moves by days across a month and a year', () => {
+    assert.equal(sumarDias(d('2026-05-01'), -1), '2026-04-30');
+    assert.equal(sumarDias(d('2026-12-31'), 1), '2027-01-01');
+  });
+
+  it('the last 30 days end today and start 29 days before', () => {
+    assert.deepEqual(ultimosDias(d('2026-05-12'), 30), {
+      desde: '2026-04-13',
+      hasta: '2026-05-12',
+    });
   });
 });

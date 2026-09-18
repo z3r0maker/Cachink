@@ -6,21 +6,26 @@ import { canWrite, resolveScreenState } from '@/session/gating';
 import type { Role } from '@/session/types';
 
 import { ActividadReciente, CajaCard, ResumenDeHoy, StockBajoCard, UtilidadHero } from './cards';
+import { Ultimos30Dias } from './ultimos-30';
 import { grid3, heroRow, pageDate, pageTitle, sectionTitle } from './inicio.css';
 
-const TODAY_LABEL = new Intl.DateTimeFormat('es-MX', {
+const LONG = new Intl.DateTimeFormat('es-MX', {
   weekday: 'long',
   day: 'numeric',
   month: 'long',
   year: 'numeric',
-}).format(new Date(2026, 4, 12));
+  timeZone: 'UTC',
+});
 
-function PageHeading({ mayWrite }: { readonly mayWrite: boolean }) {
+/** «martes, 12 de mayo de 2026» — the business's today, from the server clock. */
+const fechaLarga = (hoy: string) => LONG.format(new Date(`${hoy}T12:00:00Z`));
+
+function PageHeading({ mayWrite, hoy }: { readonly mayWrite: boolean; readonly hoy: string }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
         <h1 className={pageTitle}>Hola, Pedro</h1>
-        <p className={pageDate}>{TODAY_LABEL}</p>
+        <p className={pageDate}>{fechaLarga(hoy)}</p>
       </div>
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
@@ -54,6 +59,8 @@ function Dashboard({ data }: { readonly data: InicioData }) {
       </div>
       <h2 className={sectionTitle}>Resumen de hoy</h2>
       <ResumenDeHoy today={data.today} />
+      <h2 className={sectionTitle}>Últimos 30 días</h2>
+      <Ultimos30Dias serie={data.serie} />
       <div className={grid3}>
         <CajaCard cortes={data.cortes} />
         <StockBajoCard rows={data.lowStock} />
@@ -67,9 +74,11 @@ export interface InicioScreenProps {
   /** `null` when the read failed — the screen renders its error state. */
   readonly data: InicioData | null;
   readonly role: Role;
+  /** The business's today (`server/clock`), for the heading's date. */
+  readonly hoy: string;
 }
 
-export function InicioScreen({ data, role }: InicioScreenProps) {
+export function InicioScreen({ data, role, hoy }: InicioScreenProps) {
   const state = resolveScreenState({
     error: data === null,
     isEmpty: data !== null && data.month.ventasCount === 0 && data.month.gastosCount === 0,
@@ -81,7 +90,7 @@ export function InicioScreen({ data, role }: InicioScreenProps) {
         <LowStockBanner count={data.lowStock.length} />
       ) : null}
 
-      <PageHeading mayWrite={canWrite(role)} />
+      <PageHeading mayWrite={canWrite(role)} hoy={hoy} />
 
       <ScreenBody
         state={state}

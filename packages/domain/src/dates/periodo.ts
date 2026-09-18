@@ -22,6 +22,16 @@ export function hoyEn(now: Date = new Date(), zona: string = ZONA_NEGOCIO): IsoD
   return new Intl.DateTimeFormat('en-CA', { timeZone: zona }).format(now) as IsoDate;
 }
 
+/** `date` moved by `dias` days (negative goes back), across months and years. */
+export function sumarDias(date: IsoDate, dias: number): IsoDate {
+  return iso(utc(date) + dias * DIA_MS);
+}
+
+/** The `dias` days ending on `hasta`, both included — «Últimos 30 días». */
+export function ultimosDias(hasta: IsoDate, dias: number): Rango {
+  return { desde: sumarDias(hasta, -(dias - 1)), hasta };
+}
+
 export function rangoDelMes(date: IsoDate): Rango {
   const [y, m] = date.split('-').map(Number) as [number, number];
   return { desde: iso(Date.UTC(y, m - 1, 1)), hasta: iso(Date.UTC(y, m, 0)) };

@@ -463,8 +463,13 @@ without touching code.
     those are absent from `fontSizes`, which was derived from what the mobile app actually used.
     Kept as its own scale rather than merged — a 56 px figure is right on a 1760 px dashboard and
     wrong on a phone — with the 12 px floor holding for both.
-  - **Still to do:** the ¿Cómo empiezo? checklist card (needs P-04), the 30-day Recharts line, and
-    the real container when B-02 lands. The component tree is already the shape the real container
+  - 2026-09-18 · **«Últimos 30 días»**: a Recharts line of ventas vs gastos from `serieDiaria` (one
+    point per day, zeros included; its sum is asserted equal to the hero's totals), plotted as
+    integer centavos and formatted back through `formatMoney`; the SVG is labelled and the totals
+    are also stated in text. The heading's date now comes from the business clock (it was pinned
+    to 12 May 2026). `sumarDias` / `ultimosDias` in the domain. e2e: date, totals, two lines, axe.
+  - **Still to do:** the ¿Cómo empiezo? checklist card (needs P-04), and «Hola, {nombre}» (the
+    greeting is still «Pedro»: accounts carry no display name yet). The component tree is already the shape the real container
     will render, so wiring is a data swap rather than a rewrite.
 - **Amended 2026-09-17:** built from _Inicio_, not ported from `DirectorHome`.
 - **Steps:** Rejection banner (`--red-soft`, happy only) → title "Hola, {nombre}" with the full
