@@ -3,3 +3,5 @@ export * from './lists.js';
 export * from './entities.js';
 export * from './digest.js';
 export * from './billing.js';
+export * from './metering.js';
+export * from './cfdi.js';

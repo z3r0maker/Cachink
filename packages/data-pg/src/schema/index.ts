@@ -14,3 +14,5 @@ export * from './portal';
 export * from './onboarding';
 export * from './sync';
 export * from './billing';
+export * from './metering';
+export * from './cfdi';

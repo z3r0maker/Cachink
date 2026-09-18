@@ -13,6 +13,7 @@
 #                                 # database; locally you want `db:reset`.
 #   ./scripts/db-local.sh url     # print the app-role DATABASE_URL
 #   ./scripts/db-local.sh billing-url  # the Stripe webhook's BILLING_DATABASE_URL
+#   ./scripts/db-local.sh metering-url # the usage cron's METERING_DATABASE_URL
 #
 # `up` is NOT idempotent: `drizzle/0000_*.sql` has 25 bare `CREATE TABLE`s, so
 # re-applying to a migrated database aborts under `ON_ERROR_STOP=1`. Use
@@ -27,6 +28,7 @@ DB=xangarro
 SUPER_URL="postgres://postgres:xangarro@localhost:${PORT}/${DB}"
 APP_URL="postgres://xangarro_app:xangarro_app@localhost:${PORT}/${DB}"
 BILLING_URL="postgres://xangarro_billing:xangarro_billing@localhost:${PORT}/${DB}"
+METERING_URL="postgres://xangarro_metering:xangarro_metering@localhost:${PORT}/${DB}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # `local/` before `drizzle/`: the compat layer creates the roles the migrations
@@ -67,5 +69,6 @@ case "${1:-up}" in
   url)  echo "$APP_URL" ;;
   super-url) echo "$SUPER_URL" ;;
   billing-url) echo "$BILLING_URL" ;;
-  *) echo "usage: $0 {up|apply|down|url|super-url|billing-url}" >&2; exit 1 ;;
+  metering-url) echo "$METERING_URL" ;;
+  *) echo "usage: $0 {up|apply|down|url|super-url|billing-url|metering-url}" >&2; exit 1 ;;
 esac

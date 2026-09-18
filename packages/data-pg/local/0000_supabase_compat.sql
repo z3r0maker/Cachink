@@ -51,6 +51,12 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_billing') THEN
     CREATE ROLE xangarro_billing LOGIN PASSWORD 'xangarro_billing';
   END IF;
+
+  -- The nightly usage recompute (N-02/N-03). Its grants are in
+  -- drizzle/0009_metering_cfdi_grants.sql, which creates it NOLOGIN.
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_metering') THEN
+    CREATE ROLE xangarro_metering LOGIN PASSWORD 'xangarro_metering';
+  END IF;
 END
 $$;
 

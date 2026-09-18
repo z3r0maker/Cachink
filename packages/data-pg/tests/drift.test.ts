@@ -179,6 +179,8 @@ describe('cloud ↔ device schema drift', () => {
       'billing_customers',
       'business_members',
       'business_onboarding',
+      'cfdi_globals',
+      'cfdi_payments',
       'devices',
       'metas',
       'notices',
@@ -188,6 +190,8 @@ describe('cloud ↔ device schema drift', () => {
       'sync_log',
       'sync_receipts',
       'sync_rejections',
+      'usage_counters',
+      'usage_notices',
     ]);
   });
 });

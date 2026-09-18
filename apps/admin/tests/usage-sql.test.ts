@@ -2,13 +2,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 
-import { classifyMovementOrigin, DEFAULT_USAGE_TIME_ZONE } from '@xangarro/domain/usage';
-
 /**
- * No Postgres in this package's unit run, so 0005 is checked as text against
- * the domain rules it mirrors. It was also applied to a scratch Postgres
- * during N-07 and its counts compared with `computeUsage` over the same rows
- * (see the N-07 progress note).
+ * No Postgres in this package's unit run, so the migrations are checked as
+ * text. 0006 keeps the console's column grants; 0009 replaced its counting
+ * body with a call to data-pg's `xangarro.usage_counts()`, whose rules are
+ * tested there against `computeUsage` on real Postgres
+ * (packages/data-pg/tests/usage-counts*.test.ts).
  */
 const raw = readFileSync(
   new URL('../src/server/db/migrations/0006_admin_usage_read.sql', import.meta.url),
@@ -49,23 +48,19 @@ describe('0006_admin_usage_read.sql', () => {
     assert.deepEqual(exec, ['xangarro_admin']);
   });
 
-  it('places rows in months by the domain’s time zone', () => {
-    assert.ok(code.includes(`AT TIME ZONE '${DEFAULT_USAGE_TIME_ZONE}'`));
-  });
-
-  it('excludes exactly the movements classifyMovementOrigin does not call manual', () => {
-    assert.match(code, /im\.motivo NOT IN \('Venta', 'Conversión'\)/);
-    assert.match(code, /im\.motivo = 'Devolución de cliente'/);
-    assert.match(code, /starts_with\(coalesce\(im\.nota, ''\), 'Cancelación de venta:'\)/);
-    assert.equal(classifyMovementOrigin({ motivo: 'Venta' }), 'venta');
-    assert.equal(classifyMovementOrigin({ motivo: 'Conversión' }), 'conversion');
-    const cancel = { motivo: 'Devolución de cliente', nota: 'Cancelación de venta: V-1' };
-    assert.equal(classifyMovementOrigin(cancel), 'cancelacion');
-    assert.equal(classifyMovementOrigin({ motivo: 'Devolución de cliente' }), 'manual');
-  });
-
-  it('does not un-count soft-deleted transactions', () => {
-    const tx = code.slice(code.indexOf('tx AS ('), code.indexOf('tx_n AS ('));
-    assert.doesNotMatch(tx, /deleted_at/);
+  it('0009 keeps the page and delegates every count to xangarro.usage_counts()', () => {
+    const shared = readFileSync(
+      new URL('../src/server/db/migrations/0009_admin_usage_shared_count.sql', import.meta.url),
+      'utf8',
+    ).replace(/--.*$/gm, '');
+    assert.match(shared, /CREATE OR REPLACE FUNCTION public\.admin_tenant_usage\(/);
+    assert.match(shared, /FROM xangarro\.usage_counts\(/);
+    assert.match(shared, /SECURITY INVOKER/);
+    // The OQ-5 rules live in data-pg's 0010 only (one definition).
+    for (const table of ['sales', 'expenses', 'inventory_movements', 'products']) {
+      assert.doesNotMatch(shared, new RegExp(`public\\.${table}\\b`));
+    }
+    const exec = [...shared.matchAll(/GRANT EXECUTE ON FUNCTION [^;]* TO (\w+)/g)].map((m) => m[1]);
+    assert.deepEqual(exec, ['xangarro_admin']);
   });
 });
