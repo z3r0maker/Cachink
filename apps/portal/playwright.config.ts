@@ -1,6 +1,11 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { type: 'json' };
+
 import { OWNER_STORAGE } from './e2e/auth-state';
+
+/** The contract's published test key — never a production fallback. */
+const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
 
 /**
  * Portal accessibility and state/role sweep (P-16).
@@ -58,6 +63,11 @@ export default defineConfig({
       // its own, and `session.ts` throws when it is missing rather than
       // falling back to a default that would make every cookie forgeable.
       SESSION_SECRET: process.env.SESSION_SECRET ?? 'e2e-only-not-a-real-secret',
+      // /activate signs a device token and an entitlement. The entitlement key
+      // is the contract's published TEST key, passed explicitly: the portal has
+      // no default for it on purpose (server/device/credentials.ts).
+      DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
+      ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
     },
   },
   use: {

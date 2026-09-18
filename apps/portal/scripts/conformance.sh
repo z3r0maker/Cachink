@@ -43,7 +43,7 @@ CODES="$(DATABASE_URL="$DATABASE_URL" npx tsx scripts/conformance-codes.ts 8)"
 
 cd "$REPO/packages/contracts"
 API_BASE="http://localhost:$PORT" \
-  CONFORMANCE_EMAIL="pedro@taqueria.mx" \
+  CONFORMANCE_EMAIL="conformance@xangarro.mx" \
   CONFORMANCE_CODES="$CODES" \
   ENTITLEMENT_PUBKEY="$PUB" \
   npx vitest run tests/conformance/activate.test.ts

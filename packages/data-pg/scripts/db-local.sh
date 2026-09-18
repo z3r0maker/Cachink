@@ -56,7 +56,12 @@ case "${1:-up}" in
     echo "ready: $APP_URL"
     ;;
   apply) apply_sql; echo "applied: $APP_URL" ;;
-  down) docker rm -f "$NAME" >/dev/null 2>&1 || true; echo "removed $NAME" ;;
+  # `-v`: the postgres image declares an anonymous data volume. Without it,
+  # every `down` orphans that volume, and `db:reset` runs `down` each time — a
+  # few hundred resets filled Docker's disk until initdb itself failed with
+  # "No space left on device". The volume is this container's throwaway data,
+  # never anything worth keeping.
+  down) docker rm -f -v "$NAME" >/dev/null 2>&1 || true; echo "removed $NAME" ;;
   url)  echo "$APP_URL" ;;
   super-url) echo "$SUPER_URL" ;;
   *) echo "usage: $0 {up|apply|down|url|super-url}" >&2; exit 1 ;;

@@ -36,9 +36,11 @@ function Quota({ activos }: { readonly activos: number }) {
 function Body({
   data,
   isOperadores,
+  mayWrite,
 }: {
   readonly data: EquipoData | null;
   readonly isOperadores: boolean;
+  readonly mayWrite: boolean;
 }) {
   return (
     <ScreenBody
@@ -52,7 +54,7 @@ function Body({
       {data === null ? null : isOperadores ? (
         <Operadores rows={data.operadores} />
       ) : (
-        <Dispositivos rows={data.dispositivos} />
+        <Dispositivos rows={data.dispositivos} mayWrite={mayWrite} />
       )}
     </ScreenBody>
   );
@@ -90,7 +92,7 @@ export function EquipoScreen({
         ]}
       />
       {!isOperadores && mayWrite ? <PairingPanel initial={data?.codigo ?? null} /> : null}
-      <Body data={data} isOperadores={isOperadores} />
+      <Body data={data} isOperadores={isOperadores} mayWrite={mayWrite} />
     </>
   );
 }

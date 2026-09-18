@@ -180,7 +180,8 @@
 
 ### B-12 Device revocation + slot accounting
 
-- [ ] Status · **Blocked by:** B-11, B-05
+- [x] Status · **Blocked by:** B-11, B-05
+  - Done: 2026-09-17 · Slot enforcement in `/activate` (`NO_DEVICE_SLOTS`, 402) and revocation from the portal (Revocar, behind a confirmation carrying the plan's copy). The task's acceptance is an E2E: at the limit a new phone is refused, Revocar frees a slot, and **the same code** then succeeds — proving the refusal rolled the claim back rather than burning it. Two races, both shown to discriminate: the same code redeemed twice (atomic UPDATE, B-07), and two _different_ codes competing for the last slot, closed by locking the business row — without the lock it failed 12/12, two phones taking one slot every time. `requireDevice`/`401 DEVICE_REVOKED` is phone-side and stays with B-05.
 - **Steps:** `activeDeviceCount(business_id)` = devices with status `active`; used by B-07 and P-06. Revoked device's next API call → `401 DEVICE_REVOKED` (B-05). Its unsynced rows: lost on that phone unless re-activated — document in P-06 UI copy ("Revocar borra el acceso, no los datos ya sincronizados").
 - **Acceptance:** application test: activate → revoke → activate again with a new code succeeds and slot count is unchanged.
 

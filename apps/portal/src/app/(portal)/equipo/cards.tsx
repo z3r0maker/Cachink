@@ -5,6 +5,7 @@ import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
+import { RevokeButton } from './revoke-button';
 import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
 const initials = (n: string) =>
@@ -49,7 +50,14 @@ export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }
   );
 }
 
-export function Dispositivos({ rows }: { readonly rows: EquipoData['dispositivos'] }) {
+export function Dispositivos({
+  rows,
+  mayWrite,
+}: {
+  readonly rows: EquipoData['dispositivos'];
+  /** A viewer sees no Revocar at all — hidden, not disabled. The action refuses regardless. */
+  readonly mayWrite: boolean;
+}) {
   return (
     <div className={cardGrid}>
       {rows.map((d) => (
@@ -67,6 +75,9 @@ export function Dispositivos({ rows }: { readonly rows: EquipoData['dispositivos
             {d.plataforma === 'ios' ? 'iOS' : 'Android'} · {d.modelo}
           </p>
           <p className={cardFoot}>Última sincronización: {d.lastPushAt ?? '—'}</p>
+          {mayWrite && d.revokedAt === null ? (
+            <RevokeButton deviceId={d.id} nombre={d.nombre} />
+          ) : null}
         </Card>
       ))}
     </div>

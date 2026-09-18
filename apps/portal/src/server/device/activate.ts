@@ -43,6 +43,28 @@ async function claim(tx: Tx, code: string, email: string, deviceId: string): Pro
   return row.business_id;
 }
 
+/**
+ * Refuse when the plan's device slots are full (B-12).
+ *
+ * There are **two** races here, and the code claim only settles one of them.
+ * Redeeming the *same* code twice is decided by the atomic UPDATE in
+ * `redeem_activation_code`. But two *different* codes for the same business,
+ * redeemed at once with one slot left, would each count `limit − 1` active
+ * devices and each insert — one phone over the plan. Locking the business row
+ * first serialises activations per business, so the count and the insert are
+ * atomic with respect to each other. It costs nothing across businesses.
+ *
+ * A refusal throws inside the transaction, so the code claim rolls back and the
+ * shopkeeper's code is still good once a slot is freed.
+ */
+async function assertSlotFree(tx: Tx, businessId: string, limit: number): Promise<void> {
+  await tx.execute(sql`SELECT 1 FROM businesses WHERE id = ${businessId} FOR UPDATE`);
+  const [row] = await tx.execute<{ n: string }>(
+    sql`SELECT count(*)::text AS n FROM devices WHERE revoked_at IS NULL`,
+  );
+  if (Number(row?.n ?? 0) >= limit) throw new Refusal('NO_DEVICE_SLOTS');
+}
+
 async function registerDevice(
   tx: Tx,
   deviceId: string,
@@ -50,8 +72,6 @@ async function registerDevice(
   device: ActivateRequest['device'],
   now: string,
 ): Promise<void> {
-  // Only now is there a tenant. Scope the rest by it, exactly as a request is.
-  await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
   await tx.insert(devices).values({
     id: deviceId,
     nombre: device.name,
@@ -69,6 +89,10 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
 
   return db().transaction(async (tx) => {
     const businessId = await claim(tx, input.code, input.email, deviceId);
+    // Only now is there a tenant. Scope the rest by it, exactly as a request is.
+    await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
+    const entitlement = entitlementFor(businessId, now);
+    await assertSlotFree(tx, businessId, entitlement.limits.devices);
     await registerDevice(tx, deviceId, businessId, input.device, now.toISOString());
     const [seq] = await tx.execute<{ seq: string | null }>(
       sql`SELECT max(seq)::text AS seq FROM sync_log`,
@@ -83,7 +107,7 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
       deviceToken: await mintDeviceToken(businessId, deviceId),
       deviceId,
       businessId,
-      entitlement: await signEntitlement(entitlementFor(businessId, now)),
+      entitlement: await signEntitlement(entitlement),
       bootstrap: {
         serverSeq: Number(seq?.seq ?? 0),
         serverTime: now.toISOString(),

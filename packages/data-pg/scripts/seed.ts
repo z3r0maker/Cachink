@@ -16,6 +16,7 @@ import postgres from 'postgres';
 
 import {
   BIZ,
+  CONFORMANCE,
   COST,
   CREATED,
   DEV,
@@ -188,6 +189,30 @@ async function seedMembers(sql: Sql): Promise<void> {
   }
 }
 
+/** See `CONFORMANCE` in seed-data.ts: an isolated tenant with free device slots. */
+async function seedConformance(sql: Sql): Promise<void> {
+  const c = CONFORMANCE;
+  await sql`SELECT set_config('xangarro.business_id', ${c.businessId}, false)`;
+  await sql`
+    INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
+    VALUES (${c.businessId}, 'Conformance', 'RESICO', 125, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
+    ON CONFLICT (id) DO NOTHING`;
+  await sql`
+    INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
+                          seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
+    VALUES (${c.productId}, 'Producto de prueba', 'CNF-001', 'Producto Terminado', 100, 'pza', 3, 'producto',
+            true, 200, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
+    ON CONFLICT (id) DO NOTHING`;
+  const pin = await hash('0000', 10);
+  await sql`
+    INSERT INTO users (id, nombre, pin_hash, recovery_password_hash, must_change_pin, avatar_color, permissions, role,
+                       business_id, device_id, created_at, updated_at)
+    VALUES (${c.userId}, 'Operador de prueba', ${pin}, ${pin}, false, '#3B6FFF', '{}', 'operativo',
+            ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
+    ON CONFLICT (id) DO NOTHING`;
+  await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
+}
+
 async function main(): Promise<void> {
   const sql = postgres(URL as string, { max: 1, onnotice: () => undefined });
   try {
@@ -201,6 +226,7 @@ async function main(): Promise<void> {
     await seedPeople(sql);
     await seedPortal(sql);
     await seedMembers(sql);
+    await seedConformance(sql);
 
     const [{ count }] = await sql<{ count: string }[]>`SELECT count(*)::text FROM sales`;
     console.log(
