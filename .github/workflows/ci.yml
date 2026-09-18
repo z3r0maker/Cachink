@@ -198,7 +198,7 @@ jobs:
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
       - name: Install Chromium
-        run: pnpm --filter @xangarro/portal exec playwright install --with-deps chromium
+        run: pnpm --filter @xangarro/web exec playwright install --with-deps chromium
 
       - run: pnpm --filter @xangarro/data-pg db:apply
       - run: pnpm --filter @xangarro/data-pg db:seed
@@ -209,10 +209,10 @@ jobs:
       # there. Building here also makes a build failure read as a build
       # failure rather than as "webServer timed out".
       - name: Build the portal (production, webpack — P-20)
-        run: pnpm --filter @xangarro/portal run build
+        run: pnpm --filter @xangarro/web run build
 
       - name: E2E (data, a11y and shell, three viewports)
-        run: pnpm --filter @xangarro/portal run test:e2e
+        run: pnpm --filter @xangarro/web run test:e2e
 
       # The contract's own conformance suite, pointed at this portal instead of
       # the mock. It is the acceptance for `/activate`: identical assertions pass
@@ -220,13 +220,13 @@ jobs:
       # concurrent-redemption test is the one that matters most — a
       # check-then-write implementation lets one single-use code bind two phones.
       - name: Contract conformance (/activate against the real portal)
-        run: pnpm --filter @xangarro/portal run test:conformance
+        run: pnpm --filter @xangarro/web run test:conformance
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
           path: |
-            apps/portal/playwright-report/
-            apps/portal/test-results/
+            apps/web/playwright-report/
+            apps/web/test-results/
           retention-days: 7

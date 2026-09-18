@@ -112,7 +112,7 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 ### O-06 Register runtime: device token, Worker, outbox flusher
 
 - [ ] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
-- **Steps:** register route group in `apps/portal` (device-token auth, no owner cookie), the SQLite
+- **Steps:** register route group in `apps/web` (device-token auth, no owner cookie), the SQLite
   Worker, `navigator.storage.persist()`, push/pull loop with retry, connection state for the header.
 - **Acceptance:** a sale captured offline is pushed on reconnect exactly once.
 
@@ -126,7 +126,7 @@ before reporting, Maestro/Playwright flow for the happy path.
 ### O-10 `Operador Estado` — the four shared states
 
 - [x] Status · **Blocked by:** O-01 · **Blocks:** O-11 … O-16
-  - Done: 2026-09-17 · uncommitted · `apps/portal/src/operador/estado.tsx` + `.css.ts`, previewed at
+  - Done: 2026-09-17 · uncommitted · `apps/web/src/operador/estado.tsx` + `.css.ts`, previewed at
     `/inventario/operador?mode=loading|empty|error[&cta=1]`. Compared at 640 px against the design
     forced through the runtime's `__dcSetProps` (the editor's control panel is not in the standalone
     runtime): every box, font, colour, radius and shadow matches in all four variants. Deviations:
@@ -141,7 +141,7 @@ before reporting, Maestro/Playwright flow for the happy path.
 ### O-11 Operator shell
 
 - [x] Status · **Blocked by:** O-10 · **Blocks:** O-12 … O-16
-  - Done: 2026-09-17 · `apps/portal/src/operador/shell/*`, `/operador` layout + catch-all for screens not
+  - Done: 2026-09-17 · `apps/web/src/operador/shell/*`, `/operador` layout + catch-all for screens not
     built yet (empty content area; unknown path → 404). Measured against Turno at 1440 px and Inicio at
     375 px: sidebar, header and phone bar match element by element (content-box, see O-10). Gate
     verified in the browser and pinned by `e2e/operador-shell.spec.ts` (sidebar is the same node and

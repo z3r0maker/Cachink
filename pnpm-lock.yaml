@@ -52,7 +52,7 @@ importers:
         specifier: 2.9.1
         version: 2.9.1
 
-  apps/admin:
+  apps/backoffice:
     dependencies:
       '@vanilla-extract/css':
         specifier: ^1.21.2
@@ -288,7 +288,7 @@ importers:
         specifier: ^6.0.3
         version: 6.0.3
 
-  apps/portal:
+  apps/web:
     dependencies:
       '@noble/ed25519':
         specifier: 3.2.0

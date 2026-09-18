@@ -1,6 +1,6 @@
 /**
  * The 08:00 staff digest (N-10). The console builds the sections
- * (`apps/admin/src/server/alerts/digest-render.ts` → `digestSections`); this
+ * (`apps/backoffice/src/server/alerts/digest-render.ts` → `digestSections`); this
  * only lays them out. Staff-facing, so it is dense and link-heavy.
  */
 import { Heading, Link, Section } from '@react-email/components';

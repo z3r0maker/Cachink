@@ -1,7 +1,7 @@
 # Track B — Backend / Supabase (session "Backend+Portal", part 1)
 
 > Owns the cloud: Postgres schema, RLS, auth, the `/api/v1/*` handlers, Stripe, entitlement signing,
-> activation codes, email. The handlers physically live in `apps/portal` (Next route handlers, Q13)
+> activation codes, email. The handlers physically live in `apps/web` (Next route handlers, Q13)
 > but are **thin adapters** over `packages/application` + `packages/data-pg`, so they can move to
 > `apps/api` later (Z-04) without a rewrite.
 >
@@ -17,7 +17,7 @@
 - **Steps:**
   1. `supabase init` at repo root if `supabase/config.toml` is missing; `supabase start`; commit `config.toml` (no secrets).
   2. Create hosted project `xangarro-prod` in `us-east-1`. Record project ref in `supabase/README.md` (ref is not secret; keys are).
-  3. Secrets layout: `apps/portal/.env.local` (gitignored) with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`, `ENTITLEMENT_PRIVATE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or SMTP). Commit `apps/portal/.env.example` with every key and a one-line meaning.
+  3. Secrets layout: `apps/web/.env.local` (gitignored) with `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`, `ENTITLEMENT_PRIVATE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `RESEND_API_KEY` (or SMTP). Commit `apps/web/.env.example` with every key and a one-line meaning.
   4. Enable Auth providers: email (magic link + password). Set site URL + redirect allow-list for `http://localhost:3000/**`.
 - **Acceptance:** `supabase status` shows local stack; hosted project reachable; `.env.example` complete; nothing secret in git (`git grep -n "sb_secret\|sk_live\|sk_test"` → 0).
 - **How to test:** commands above.
@@ -96,7 +96,7 @@
      - **Portal member**: `USING (EXISTS (SELECT 1 FROM billing.business_members m WHERE m.business_id = <table>.business_id AND m.user_id = auth.uid()))` for SELECT on all tenant tables; INSERT/UPDATE on DOWN + HYBRID tables (edits) and `devices`, `sync_rejections.resolved_at`; `viewer` role is read-only (check `m.role <> 'viewer'` in WITH CHECK).
      - `billing.subscriptions`, `fiscal_profiles`, `factura_requests`: SELECT for members; writes only via service role (webhooks/server actions).
      - `billing.activation_codes`: no client access at all (service role only).
-  3. Service-role bypass is used **only** in server code paths listed in B-07/B-10/B-11/B-13; document each in `apps/portal/src/server/README.md`.
+  3. Service-role bypass is used **only** in server code paths listed in B-07/B-10/B-11/B-13; document each in `apps/web/src/server/README.md`.
   4. Indexes: `(business_id, server_seq)` on every synced table; `(business_id, updated_at)`; `sync_log(business_id, server_seq)`; `activation_codes(expires_at)`.
 - **Acceptance:** `supabase db reset` applies cleanly; RLS tests in `packages/data-pg/tests/rls.test.ts`: device token can read own business rows and not another's; viewer cannot update a product; anon gets nothing. (Use `supabase-js` with hand-minted JWTs signed by the local JWT secret.)
 - **How to test:** `supabase db reset && pnpm --filter @xangarro/data-pg test -- rls`.
@@ -124,7 +124,7 @@
   - 2026-09-17 · **Portal slice only**, provider-neutral (ADR-061): HMAC-signed session carrying the Supabase claim shape, `requireSession`/`requireMember`, `withSession` writing `request.jwt.claims`. **Still to do:** device-JWT minting and `requireDevice` (phone-side), and GoTrue if chosen.
 - **Steps:**
   1. Custom Access Token Hook (Postgres function) adds `memberships` array from `billing.business_members` to portal JWTs.
-  2. `apps/portal/src/server/auth/mint-device-token.ts`: signs `02-contracts.md` §2 claims with `SUPABASE_JWT_SECRET`, `exp` 365 d. Unit test: token verifies with the secret and PostgREST accepts it (integration test against local).
+  2. `apps/web/src/server/auth/mint-device-token.ts`: signs `02-contracts.md` §2 claims with `SUPABASE_JWT_SECRET`, `exp` 365 d. Unit test: token verifies with the secret and PostgREST accepts it (integration test against local).
   3. `requireDevice(req)` middleware: verifies JWT, loads `tenant.devices` row, `401 DEVICE_REVOKED` if revoked, updates `last_seen_at` (throttled to once/min).
   4. `requireMember(req, businessId, minRole)` for server actions.
 - **Acceptance:** tests: valid token passes; revoked → 401 with the contract error envelope; wrong `kind` → 401; membership hook shows in a decoded portal JWT.
@@ -144,14 +144,14 @@
 - **Steps:**
   1. Generate Ed25519 keypair (`node -e` with `crypto.generateKeyPairSync('ed25519')`); private → `ENTITLEMENT_PRIVATE_KEY` env; public → `apps/mobile` env `EXPO_PUBLIC_ENTITLEMENT_PUBKEY` (hand to Track A via `02-contracts.md` — append the prod public key under a "Keys" note; dev key is the mock's).
   2. `computeEntitlement(subscription, plans, now)` in `packages/application` (pure): status `active|trialing` → plan limits; `past_due|grace` → same plan with `grace_until`; `lapsed|free` → **freelancer** (Q14). `valid_until = current_period_end`, `grace_until = valid_until + 7 d`.
-  3. `signEntitlement(payload)` in `apps/portal/src/server/entitlement.ts` using `canonicalize` from contracts; must reproduce the C-05 test vector with the dev key.
+  3. `signEntitlement(payload)` in `apps/web/src/server/entitlement.ts` using `canonicalize` from contracts; must reproduce the C-05 test vector with the dev key.
 - **Acceptance:** application tests (1 happy + 3 unhappy: past_due inside grace, lapsed, unknown plan → throws typed error); signature test vector passes.
 
 ### B-07 `POST /api/v1/activate`
 
 - [~] Status · **Blocked by:** C-02, C-10, B-04, B-05, B-06, B-11 · **Blocks:** A-04 (real), X-02
-  - 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/portal test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. **Still to do:** device-slot enforcement (`NO_DEVICE_SLOTS`, with B-12), `BUSINESS_SUSPENDED`, and the plan comes from the fixture until B-10.
-- **Files:** `apps/portal/src/app/api/v1/activate/route.ts` (adapter) → `packages/application/src/use-cases/activate-device.ts` (logic, testable with in-memory repos in `packages/testing`).
+  - 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/web test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. **Still to do:** device-slot enforcement (`NO_DEVICE_SLOTS`, with B-12), `BUSINESS_SUSPENDED`, and the plan comes from the fixture until B-10.
+- **Files:** `apps/web/src/app/api/v1/activate/route.ts` (adapter) → `packages/application/src/use-cases/activate-device.ts` (logic, testable with in-memory repos in `packages/testing`).
 - **Steps:** validate with `ActivateRequest`; in one transaction with `SELECT … FOR UPDATE` on the code: check exists/not expired/not redeemed/email matches (case-insensitive) → count active devices vs plan `devices` → insert `tenant.devices` → set `redeemed_at`, `redeemed_device_id` → mint token → compute+sign entitlement → bootstrap payload (`/sync/pull?since=0` internals, reuse B-09's query). Error mapping per §3.
 - **Acceptance:** application tests: happy; expired; used; slots full; email mismatch. Conformance suite (C-10) green against the dev server incl. the **concurrent redemption** test (exactly one 200).
 - **How to test:** `pnpm --filter @xangarro/application test -- activate-device`; `API_BASE=http://localhost:3000 pnpm --filter @xangarro/contracts test -- conformance/activate`.
@@ -171,7 +171,7 @@
     property keys, not only column names.
   - Push's top-level `serverSeq` is the tenant cursor at commit and is **informational**: UP rows
     are not in the pull stream, so A-06 must take its pull cursor from pull responses only.
-- **Files:** `apps/portal/src/app/api/v1/sync/push/route.ts` → `packages/application/src/use-cases/apply-push.ts` + `packages/data-pg/src/repositories/sync-push-repository.ts`.
+- **Files:** `apps/web/src/app/api/v1/sync/push/route.ts` → `packages/application/src/use-cases/apply-push.ts` + `packages/data-pg/src/repositories/sync-push-repository.ts`.
 - **Steps:** per delta: scope check (`isPushable`), zod row validation, `business_id === token.business_id`, FK checks (product/user/client exist in that business) → upsert `ON CONFLICT (id) DO UPDATE` **only if** existing `business_id` matches (else `DUPLICATE_CONFLICT`) → append `sync_log` → collect `server_seq`. Rejections → `sync_rejections` (upsert by `(device_id, table_name, row_id)` so a retry updates instead of duplicating) and returned. Process in one transaction per batch but **never** abort the batch for a per-row failure (use savepoints per row). Update `devices.last_push_at`.
 - **Acceptance:** application tests: all accepted; one FK missing → that row rejected, others accepted; hybrid update → rejected; business mismatch → rejected non-retryable; re-push same rows → same `server_seq`. Conformance green.
 

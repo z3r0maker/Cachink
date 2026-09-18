@@ -44,10 +44,10 @@
 - **Context:** CLAUDE.md is humans-only; ADR-053/054 authorise. Prepare the exact diff in `docs/plan/x06-claude-md.diff` and the human applies it.
 - **Diff to prepare:**
   - §1 Project Overview: app = capture client; portal owns Estados/Indicadores/Director Home/config; roles paragraph → Director (portal) / Operator (app).
-  - §1 Modules list: remove Estados Financieros, Indicadores, Director Home; add "Activation" and "Sync status"; note portal modules live in `apps/portal`.
+  - §1 Modules list: remove Estados Financieros, Indicadores, Director Home; add "Activation" and "Sync status"; note portal modules live in `apps/web`.
   - §2.2 Local-first: amend per ADR-053 consequences (one activation round-trip; two-clock entitlement; fully offline in between).
-  - §3/§4: add `apps/portal`, `packages/contracts`, `packages/data-pg`, `packages/sync`; mark `archive/` as not-built; remove `apps/desktop` and Tauri mentions; remove PowerSync from `sync-cloud` line (archived).
-  - §5 commands: add `pnpm mock:api`, `pnpm --filter @xangarro/portal dev`, `supabase start`.
+  - §3/§4: add `apps/web`, `packages/contracts`, `packages/data-pg`, `packages/sync`; mark `archive/` as not-built; remove `apps/desktop` and Tauri mentions; remove PowerSync from `sync-cloud` line (archived).
+  - §5 commands: add `pnpm mock:api`, `pnpm --filter @xangarro/web dev`, `supabase start`.
   - §6: Maestro rule unchanged; add "Portal screens ship with a Playwright smoke step"; add "No hand-written SQL — Postgres schema lives in `packages/data-pg`".
   - §7: remove "Playwright E2E for desktop (Tauri)".
   - §9 (entity fields): `Venta.producto_id` note stays; add `server_seq` audit column note.

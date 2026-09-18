@@ -3,7 +3,7 @@
 --
 -- `xangarro.usage_counts()` is called by the nightly recompute (as
 -- `xangarro_metering`, writing `usage_counters`) and by the admin console's
--- `admin_tenant_usage()` (as `xangarro_admin`, apps/admin migration 0009).
+-- `admin_tenant_usage()` (as `xangarro_admin`, apps/backoffice migration 0009).
 -- It replaces the body 0006_admin_usage_read.sql carried, so the two readers
 -- can never count differently. Its TypeScript twin is `computeUsage` in
 -- @xangarro/domain/usage; `tests/usage-counts.integration.test.ts` holds them

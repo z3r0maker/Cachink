@@ -66,13 +66,13 @@ apps/mobile/maestro/reports/
 __pycache__/
 *.pyc
 
-# Next.js (apps/portal)
+# Next.js (apps/web)
 .next/
 next-env.d.ts
 .vercel/
 
 # Playwright storage state: a signed session cookie. Never commit it, and
-# keep prettier out of it (format:check reads this file, not apps/portal/.gitignore).
+# keep prettier out of it (format:check reads this file, not apps/web/.gitignore).
 **/e2e/.auth/
 
 # Dev email outbox (B-14): .eml/.html written when RESEND_API_KEY is unset

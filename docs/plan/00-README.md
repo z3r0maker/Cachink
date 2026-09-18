@@ -73,7 +73,7 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 ## 4. Decision summary (what the interview settled)
 
 > **Amended 2026-09-17 by the feature interview — ADR-063 … ADR-068, Track N (`09-next-features.md`).**
-> Internal admin console `apps/admin` at `admin.xangarro.mx` replaces Q16's Studio-only back-office;
+> Internal admin console `apps/backoffice` at `admin.xangarro.mx` replaces Q16's Studio-only back-office;
 > limits become transactions/month + active products (300/50 · 10k/1k · 30k/5k), never blocking a
 > sale, server-counted; dormant free accounts archive at 180 d (amends Q9); signup → wizard → plan;
 > annual billing + trial on both paid tiers; merchant card collection via Mercado Pago + Clip
@@ -105,7 +105,7 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 >   preserving `UserPermissionsSchema` (`canCancelSales`), portal-managed and gated by
 >   `capabilities.permisosPorUsuario`. _(ADR-058 §4.)_
 > - **A new product surface: the Asesor** (Para ti · Metas · Diagnóstico) plus **Avisos**, both
->   backed by one portal-only `notices` table. Generation runs in `apps/portal` on Vercel Cron, one
+>   backed by one portal-only `notices` table. Generation runs in `apps/web` on Vercel Cron, one
 >   business per invocation, extraction to `apps/api` planned for product phase 2.
 >   _(ADR-056, ADR-060.)_
 > - **Production gates on the model call:** any code path that makes an LLM call renders
@@ -113,7 +113,7 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 >   fixtures. _(ADR-059.)_
 > - **Portal stack:** Radix primitives + vanilla-extract over a new zero-dependency
 >   `@xangarro/tokens`; **not** Tailwind, **not** shadcn/ui. `packages/ui/src/theme.ts` becomes a
->   re-export. `design-lint` extends to `apps/portal/src`. _(ADR-057, amends P-01.)_
+>   re-export. `design-lint` extends to `apps/web/src`. _(ADR-057, amends P-01.)_
 > - **CLAUDE.md §11 gains two entity classes** — synced and portal-only — applied by X-06.
 >   _(ADR-060.)_
 > - **Track P is reorganised into the design plan's ten fases**, each with a compuerta. P-01…P-17
@@ -157,7 +157,7 @@ These are binding unless a new ADR changes them. Where an item says _(ADR-053 §
 
 **Stack & infra**
 
-- Portal: **Next.js App Router** in `apps/portal`, Tailwind + shadcn/ui, Drizzle **pg-core** in new `packages/data-pg` (+ drift test vs SQLite schema), Supabase Auth, Recharts, Vercel, `app.xangarro.mx`. Mobile API = route handlers under `/api/v1/*`, thin adapters over `packages/application`. _(Q13)_
+- Portal: **Next.js App Router** in `apps/web`, Tailwind + shadcn/ui, Drizzle **pg-core** in new `packages/data-pg` (+ drift test vs SQLite schema), Supabase Auth, Recharts, Vercel, `app.xangarro.mx`. Mobile API = route handlers under `/api/v1/*`, thin adapters over `packages/application`. _(Q13)_
 - Shared API/wire schemas live in a new **`packages/contracts`** (zod). _(F-05)_
 - **Environments:** local (Docker `supabase start`) + **one hosted project now**; staging is created **before the first paying customer** (X-01). Region `us-east-1`, Vercel functions pinned to the same. _(Q17)_
 - Landing stays a **separate Vite repo**, marketing only; CTAs link to `app.xangarro.mx/signup?plan=…`. _(Q18)_

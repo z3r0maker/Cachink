@@ -22,7 +22,7 @@
 | #   | Topic                      | Decision                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | ADR |
 | --- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- |
 | 1   | Domains                    | `xangarro.mx` = landing (separate Vite repo) · `app.xangarro.mx` = customer portal (login exists, P-02) · **`admin.xangarro.mx` = internal console (new)**. DNS in L-04.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 063 |
-| 2   | Admin console              | Separate `apps/admin` (Next.js, own Vercel project). Staff allowlist + mandatory 2FA. The Supabase **service role lives only here**. Supersedes Q16 and Z-09.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 063 |
+| 2   | Admin console              | Separate `apps/backoffice` (Next.js, own Vercel project). Staff allowlist + mandatory 2FA. The Supabase **service role lives only here**. Supersedes Q16 and Z-09.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 063 |
 | 3   | Admin v1 modules           | Tenants + licences + Stripe · usage & limit alerts · inbox (support/escalations) · platform flags & kill switches — **launch**. Sync health & devices · broadcast announcements · dormancy lifecycle — **post-launch**. Not built: MRR dashboard (Stripe covers it), impersonation.                                                                                                                                                                                                                                                                                                                                                                 | 063 |
 | 4   | Staff alerts               | Everything lands in the inbox; daily 08:00 digest email; urgent items (payment webhook failure, rejection spike, customer-marked urgent, security event) also go to a Slack/Discord webhook.                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 063 |
 | 5   | Dormant accounts           | Free tier only. No portal login **and** no device sync for 90 d → dormant. Emails at d90 / d150 (with "descarga tus datos"). d180 → full export (Excel + JSON) to a private bucket, rows deleted from Postgres. Archive kept **6 y** (covers CFF art. 30's 5 years counted from the _annual return_, not from inactivity) then purged; held under LFPDPPP 2025 _bloqueo_. "Restaurar mis datos" re-imports. Paying tenants are never dormant. Amends Q9.                                                                                                                                                                                            | 064 |
@@ -122,7 +122,7 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   and previous MX month for every tenant. `usageLimitsOf` / `previousUsagePeriod` /
   `PORTAL_DEVICE_ID` now live in `@xangarro/domain/usage`. **Still to do:** the push-time increment
   (`/sync/push` belongs to Track B — the nightly recompute covers it within a day); `usage` in
-  pull/entitlement once C-12's field exists (`usageFor()` in `apps/portal/src/server/usage/live.ts`
+  pull/entitlement once C-12's field exists (`usageFor()` in `apps/web/src/server/usage/live.ts`
   is ready); C-12 limits (the `usageLimitsOf` mapper stays until then); `origen` column (C-12 step 7).
 
 ### N-03 Overage warnings and provider alerts `[LAUNCH]`
@@ -143,7 +143,7 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
   `excess` for the import dry-run), neutral phone codes `USAGE_NEAR_LIMIT` / `USAGE_AT_LIMIT`. 53 tests.
   **Still to do:** emails (B-14), inbox items (N-08 ingestion), portal and app banners.
 - Progress: 2026-09-18 · branch `track-n/b14-email` · owner email ready as
-  `notifyUsageThreshold(notice)` (`apps/portal/src/server/email/usage.ts`; 80/100 % template,
+  `notifyUsageThreshold(notice)` (`apps/web/src/server/email/usage.ts`; 80/100 % template,
   prices + IVA, never punitive); the N-02 wiring calls it per owner crossing. Businesses with no
   Stripe customer have no reachable owner address yet (`docs/ops/email.md` §6).
 - Progress: 2026-09-18 · branch `track-n/n33-n02-wiring` · the nightly recompute fires `crossedThresholds` once each (ledger
@@ -167,7 +167,7 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 
 ### Admin console
 
-### N-05 `apps/admin` scaffold + staff auth `[LAUNCH]`
+### N-05 `apps/backoffice` scaffold + staff auth `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-01, P-22 · **Blocks:** N-06 … N-10, N-46 … N-48
 - **What:** Next.js App Router app at `admin.xangarro.mx`, its own Vercel project, reusing
@@ -175,15 +175,15 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 - **How:** Supabase Auth with a `staff_members` allowlist; **TOTP 2FA mandatory** (AAL2 required by
   middleware); every mutating action writes `staff_audit_log (staff_id, action, business_id, payload,
 at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this project only — a CI
-  check fails if `SUPABASE_SERVICE_ROLE_KEY` is referenced under `apps/portal`.
+  check fails if `SUPABASE_SERVICE_ROLE_KEY` is referenced under `apps/web`.
 - **Acceptance:** non-allowlisted user → 403; allowlisted without 2FA → forced enrolment; audit row
   per mutation; CI guard green.
 - Progress: 2026-09-17 · d6e83d7…6119ef0 (branch `worktree-agent-a9df007511aecbb56`, merged to main 907a08f, in-house auth `track-n/n05-inhouse-auth` 4d524f4 2026-09-18) ·
-  `apps/admin` (Next 16, :3200): Supabase Auth + `staff_members` allowlist + mandatory TOTP/AAL2 via
+  `apps/backoffice` (Next 16, :3200): Supabase Auth + `staff_members` allowlist + mandatory TOTP/AAL2 via
   `proxy.ts` + `resolveGate` (re-checked in layout and every action); `auditedMutation` →
   `recordStaffAction` in one tx; nonce CSP; noindex ×3; service-role guard in admin `lint`. 31 tests.
   **Still to do:** Playwright against a real Supabase (403, forced MFA, audit row); move staff SQL from
-  `apps/admin/src/server/db/` into `data-pg` + `db-local.sh`; provision the `xangarro_admin` role.
+  `apps/backoffice/src/server/db/` into `data-pg` + `db-local.sh`; provision the `xangarro_admin` role.
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
@@ -223,7 +223,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   also counts portal-written movements.
 - 2026-09-18 · sync p95 stays "sin datos": B-18 logs per-call timing to stdout only. Needs a queryable
   per-call timing table (endpoint, duration, at) from Track B — see
-  `apps/admin/docs/b18-b16-integration.md`. Noted overlap: the "last seen" rule exists in three
+  `apps/backoffice/docs/b18-b16-integration.md`. Noted overlap: the "last seen" rule exists in three
   places (B-16 Studio query, two N-06 files) — consolidate when data-pg gains a shared query.
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`
@@ -261,7 +261,7 @@ body, attachments)`.
   · `PlatformFlag` + `isPlatformAvailable` / `resolvePlatformFlags` (domain, TDD); `0005_platform_flags.sql`
   — append-only `platform_flag_events`, latest-state view, narrow portal view (no reason/author,
   allowlist cut to the caller's business); `/flags` with allowlist, "afecta a N negocios"
-  confirmation, history; integration note `apps/admin/docs/platform-flags-integration.md`.
+  confirmation, history; integration note `apps/backoffice/docs/platform-flags-integration.md`.
   **Still to do (Track B/A):** `computeEntitlement` (`compute-entitlement.ts:68,83`) and
   `entitlementFor` (`bootstrap.ts:71`) read the portal view; the app must take platform availability
   from `entitlement.features`, not the compiled constant (A-10/A-14); a C- task so `comprobanteShare`
@@ -386,7 +386,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   inbox item `kind=migracion`, SLA 3 business days. Free (one migration) on xangarro / xangarrote;
   xangarrito sees "disponible en planes de pago".
 - **How:** staff map the data to the N-16 templates and run the import **on behalf of** the tenant
-  from `apps/admin` (audited); the tenant receives the dry-run preview and approves before commit.
+  from `apps/backoffice` (audited); the tenant receives the dry-run preview and approves before commit.
   Uploads in a private bucket, **auto-deleted 30 days after the item is resolved** (LFPDPPP).
 - **Acceptance:** commit is impossible without tenant approval; the purge job deletes files and logs.
 
@@ -607,12 +607,16 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-35 Rename the web apps: `portal` → `web`, `admin` → `backoffice` `[LAUNCH]`
 
-- [ ] Status · **Owner decision 2026-09-18** · **Blocked by:** a quiet window agreed with the session that
-      owns `apps/portal` (all its work pushed, pushes paused)
+- [x] Status · **Owner decision 2026-09-18** · **Blocked by:** a quiet window agreed with the session that
+      owns the customer web app (all its work pushed, pushes paused)
+- **Done 2026-09-18:** one atomic commit — `git mv` of both app dirs, package names, `--filter`s, CI,
+  launch.json, `.gitignore`, design-lint roots, service-role guard, store/lint-coverage tests, docs and
+  plan paths. Env vars (`PORTAL_URL`, `PORTAL_TODAY`, `PORTAL_DEVICE_ID`) and code identifiers kept.
+  Vercel Root Directory switch is still the owner's step below.
 - **Why:** Director and Operador both live in the customer web app (ADR-071), and "admin" collides with the
   owner/admin member roles. The real split is customer web app vs internal staff console.
-- **What:** `apps/portal` → `apps/web` (`@xangarro/web`, Vercel project `xangarro-web`, still
-  `app.xangarro.mx`); `apps/admin` → `apps/backoffice` (`@xangarro/backoffice`, Vercel project
+- **What:** `apps/{portal → web}` (`@xangarro/web`, Vercel project `xangarro-web`, still
+  `app.xangarro.mx`); `apps/{admin → backoffice}` (`@xangarro/backoffice`, Vercel project
   `xangarro-backoffice`, still `admin.xangarro.mx`). One atomic commit: `git mv`, package names, every
   `--filter`, `.github/workflows/*`, turbo, scripts, design-lint paths, playwright, docs/plan paths, ops
   docs. Code identifiers and routes that merely say "portal" stay unless they are paths.

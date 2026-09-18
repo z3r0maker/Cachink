@@ -23,7 +23,7 @@
 ### Z-04 Extract `apps/api`
 
 - [ ] Status · **Trigger:** sync p95 latency > 800 ms at the handler, or Vercel function limits hit, or a second client (e.g. a future POS) needs the API without the portal.
-- **Scope:** move `apps/portal/src/app/api/v1/*` adapters to `apps/api` (Hono/Fastify), same `packages/application` use cases; portal keeps server actions. Conformance suite (C-10) must pass unchanged.
+- **Scope:** move `apps/web/src/app/api/v1/*` adapters to `apps/api` (Hono/Fastify), same `packages/application` use cases; portal keeps server actions. Conformance suite (C-10) must pass unchanged.
 
 ### Z-05 Stripe payouts → ventas importer (dogfood)
 
@@ -47,7 +47,7 @@
 
 ### Z-09 Internal support app (Q16 option C)
 
-- [x] Done: dropped — superseded by N-05 … N-10 (`apps/admin`, ADR-063), pulled forward to launch · Original status · **Trigger:** the same Studio query is run weekly by a non-engineer, or support volume > 10 tickets/week.
+- [x] Done: dropped — superseded by N-05 … N-10 (`apps/backoffice`, ADR-063), pulled forward to launch · Original status · **Trigger:** the same Studio query is run weekly by a non-engineer, or support volume > 10 tickets/week.
 - **Scope:** separate `apps/internal`, separate auth (staff SSO), separate DB role, IP-restricted; never a route in the portal.
 
 ### Z-10 Annual pricing + plan changes proration

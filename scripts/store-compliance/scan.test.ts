@@ -108,7 +108,7 @@ describe('file selection', () => {
       'apps/mobile/src/app/index.tsx',
       'packages/ui/src/a.web.tsx',
       'packages/ui/src/b.ts',
-      'apps/portal/src/pricing.tsx',
+      'apps/web/src/pricing.tsx',
     ]) {
       mkdirSync(dirname(join(root, rel)), { recursive: true });
       writeFileSync(join(root, rel), '');

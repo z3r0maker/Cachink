@@ -91,7 +91,7 @@ export function isLive(record: SubscriptionRecord | null): boolean {
 
 /**
  * The shape the admin console's `BillingStatusSource` port reads (N-06,
- * `apps/admin/src/server/billing/port.ts`): a business with no rows is the
+ * `apps/backoffice/src/server/billing/port.ts`): a business with no rows is the
  * adapter's `UNKNOWN_BILLING`, so `null` here.
  */
 export interface BillingStatusSnapshot {

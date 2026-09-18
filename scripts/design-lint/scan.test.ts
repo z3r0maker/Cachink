@@ -160,7 +160,7 @@ describe('token/fontsize-literal', () => {
  * the Tamagui rules could not see: the `border` shorthand and `boxShadow`.
  */
 const veRules = (src: string): readonly string[] =>
-  scanFile('apps/portal/src/components/card.css.ts', src).map((f) => f.rule);
+  scanFile('apps/web/src/components/card.css.ts', src).map((f) => f.rule);
 
 describe('token/borderwidth-offscale — CSS border shorthand', () => {
   it('accepts the only two widths that exist', () => {

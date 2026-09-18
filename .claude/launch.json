@@ -10,7 +10,7 @@
     {
       "name": "portal",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@xangarro/portal", "dev"],
+      "runtimeArgs": ["--filter", "@xangarro/web", "dev"],
       "port": 3100,
       "env": {
         "DATABASE_URL": "postgres://xangarro_app:xangarro_app@localhost:55432/xangarro"

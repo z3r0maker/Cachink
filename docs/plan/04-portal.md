@@ -1,6 +1,6 @@
 # Track P — Admin Portal (session "Backend+Portal", part 2)
 
-> `apps/portal` — Next.js App Router, **Radix primitives + vanilla-extract over
+> `apps/web` — Next.js App Router, **Radix primitives + vanilla-extract over
 > `@xangarro/tokens`** (ADR-057; _not_ Tailwind, _not_ shadcn/ui), Drizzle `pg-core`
 > (`@xangarro/data-pg`), Supabase Auth, Recharts, Vercel. Responsive to a 768 px tablet.
 > Spanish (es-MX). Reuses `@xangarro/domain` for every calculation; imports **`@xangarro/tokens`
@@ -71,16 +71,16 @@ réplica in its own words.
      `_ds_bundle.js`). Add `scripts/design-pull.ts` + `pnpm design:pull` so refreshes are a
      reviewable diff, never a hand edit.
   4. Exclusions, all four: `.prettierignore`, the ESLint ignores, `design-lint`'s `ROOTS` in
-     `scripts/design-lint/index.ts`, and confirm Next never compiles it (root, not `apps/portal`).
+     `scripts/design-lint/index.ts`, and confirm Next never compiles it (root, not `apps/web`).
   5. `/design-reference/README.md` stating the folder is read-only, refreshed by `design:pull`,
      and that the runtime files are vendored for rendering only and never imported.
 - **Acceptance:** every `.dc.html` opens and renders locally; `pnpm lint`, `pnpm format:check` and
   `pnpm lint:design` are unaffected by the new files (`.design-lint-baseline.json` still `total: 0`).
 
-### P-01 Scaffold `apps/portal`
+### P-01 Scaffold `apps/web`
 
 - [x] Status · **Blocked by:** F-04, P-20 · **Blocks:** P-24, P-02…P-17
-  - Done: 2026-09-17 · `apps/portal` on Next 16.3.5 · `pnpm --filter @xangarro/portal dev` serves
+  - Done: 2026-09-17 · `apps/web` on Next 16.3.5 · `pnpm --filter @xangarro/web dev` serves
     `/` at :3100 (HTTP 200, vanilla-extract classes applied as `page_scaffoldCard__100es8i0`) and
     `build` compiles and prerenders clean. The emitted `:root` carries all 29 colour tokens
     including the eight `colors_and_type.css` is missing. `@xangarro/ui` is **not** in the
@@ -97,18 +97,18 @@ réplica in its own words.
     `@xangarro/*` import fails with `Module not found: Can't resolve './colors.js'`.
   - Root `.gitignore` and `.prettierignore` gained `.next/`, `next-env.d.ts` (and
     `design-reference/` ahead of P-18) — Prettier's `--ignore-path` reads only the root files, so
-    `apps/portal/.gitignore` alone left 80 generated files failing `format:check`.
+    `apps/web/.gitignore` alone left 80 generated files failing `format:check`.
 - **Amended 2026-09-17 (ADR-057):** no Tailwind, no shadcn/ui. The layout moves to P-24.
 - **Moved to Fase 0 on 2026-09-17:** the design plan's Fase 0 delivers «Repositorio, stack», and
   Fase 1's primitives (P-23) need an app to live in. Building them before the scaffold is not
   possible; the fase table is corrected to match.
-- **Steps:** `next@16` App Router + TS + `src/`, named `@xangarro/portal`. Add `@vanilla-extract/css`
+- **Steps:** `next@16` App Router + TS + `src/`, named `@xangarro/web`. Add `@vanilla-extract/css`
   - its Next plugin (or the P-20 fallback), the Radix primitives P-23 needs, `@supabase/ssr`, the
     Drizzle client (`postgres` driver, pooled `DATABASE_URL`), Recharts, `zod`. **Check every version
     on npm first.** `vercel.json` with `regions: ["iad1"]` — the same file ADR-056's cron entry lands
     in. Add to Turbo (`build`, `typecheck`, `lint`, `test`). Import `@xangarro/tokens` and
     `@xangarro/data-pg`; do **not** add `@xangarro/ui`.
-- **Acceptance:** `pnpm --filter @xangarro/portal dev` serves `/`; typecheck and lint green;
+- **Acceptance:** `pnpm --filter @xangarro/web dev` serves `/`; typecheck and lint green;
   `@xangarro/ui` absent from the portal's dependency closure.
 
 ### P-19 `DESIGN_CONTRACT.md` with a generated token table
@@ -198,7 +198,7 @@ including the press stamp.
     (39) / `css.ts` (64), every file under the §2.6 ceiling the 275-line original had blown.
     `tests/theme.test.ts` moved with the tokens (17 contrast assertions) and `tests/css.test.ts`
     adds 10 more for the emitter. `design-lint` now imports from `@xangarro/tokens` directly, its
-    `ROOTS` include `apps/portal/src`, and it gained CSS-shaped rules for the `border` shorthand and
+    `ROOTS` include `apps/web/src`, and it gained CSS-shaped rules for the `border` shorthand and
     `boxShadow`; 27 linter tests pass and the ratchet still reads `total: 0`.
   - **One bug found and fixed while writing those tests:** the first `boxShadow` rule matched
     lengths with `/(-?[\d.]+)px/g`, so a CSS shadow with unitless zeros — `0 0 8px #0D0D0D` —
@@ -220,7 +220,7 @@ including the press stamp.
   4. Add a `@xangarro/tokens/css` entry emitting `:root { --yellow: …; }` for every token,
      **including** `textMuted`, `greenText`, `redText`, `blueText`, `warningText`, `purple`, `cyan`
      and `scrim` — the eight that `colors_and_type.css` is missing.
-  5. `scripts/design-lint/index.ts`: add `apps/portal/src` to `ROOTS`. `scripts/design-lint/scan.ts`:
+  5. `scripts/design-lint/index.ts`: add `apps/web/src` to `ROOTS`. `scripts/design-lint/scan.ts`:
      add rules for the CSS-shaped `border` shorthand and `boxShadow` (blur ≠ 0 is a soft shadow).
   6. Add `packages/tokens` to `tsconfig.json` references and Turbo.
 - **Acceptance:** `pnpm typecheck` and `pnpm test` green across the workspace with no call-site
@@ -1022,7 +1022,7 @@ never invented text.
 
 - [ ] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
 - **Context:** ADR-056.
-- **Steps:** A route handler in `apps/portal` invoked by **Vercel Cron** declared in the same
+- **Steps:** A route handler in `apps/web` invoked by **Vercel Cron** declared in the same
   `vercel.json` as P-01, in `iad1`. **One business per invocation** — the cron entry enqueues, it
   does not loop over tenants. Cadence from `capabilities.asesor` (`semanal` / `diario` / `completo`).
   Writes `notices` rows with `source='asesor'`. The deterministic layer runs first from
@@ -1139,7 +1139,7 @@ critical avisos cannot be switched off.
 - [x] Status · **Blocked by:** P-05…P-14, P-26…P-33 · **Blocks:** P-17
   - Done: 2026-09-17 · The remaining item — "re-running once the screens read real data" — is done. The suite had been sweeping eleven error cards (no `DATABASE_URL` reached the server); it now refuses to run without a seeded database, and per-route sentinels gate both a11y tests. Zero serious/critical violations over data-bearing DOM across three viewports; no ratchet baseline was needed.
   - In progress: 2026-09-17 · **79 Playwright tests pass across desktop (1440), laptop (1024) and
-    tablet (768), zero failures.** `pnpm --filter @xangarro/portal test:e2e`.
+    tablet (768), zero failures.** `pnpm --filter @xangarro/web test:e2e`.
   - `@axe-core/playwright` over WCAG 2.0/2.1 A and AA on all eleven product routes: **zero serious
     or critical violations.** Plus a no-horizontal-scroll assertion per route per viewport, the
     shell-does-not-move check (Fase 2's compuerta), the active-nav assertion, the

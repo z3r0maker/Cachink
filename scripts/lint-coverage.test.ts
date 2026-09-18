@@ -3,7 +3,7 @@
  * *cleanliness*.
  *
  * `pnpm lint` was green for months while `scripts/`, each package's own
- * `scripts/` directory, `apps/portal/e2e/` and `packages/ui/.storybook/` were
+ * `scripts/` directory, `apps/web/e2e/` and `packages/ui/.storybook/` were
  * never linted at all —
  * `turbo run lint` only runs per-package tasks, and each task named its own
  * directories by hand. Six real errors sat in that hole until a pre-commit hook

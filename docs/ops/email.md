@@ -4,12 +4,12 @@ Xangarro sends email through **Resend**, from `Xangarro <hola@xangarro.mx>`.
 Two Vercel projects send: the **portal** (trial reminders, usage alerts,
 sign-in and reset links) and the **admin console** (the 08:00 staff digest).
 
-| Piece                                  | Where                                                             |
-| -------------------------------------- | ----------------------------------------------------------------- |
-| `EmailSender` port, retries, use cases | `packages/application/src/email/` (`@xangarro/application/email`) |
-| Templates (React Email) and adapters   | `packages/email/` (`@xangarro/email`)                             |
-| Portal helpers and trial cron          | `apps/portal/src/server/email/`, `GET /api/cron/trial-emails`     |
-| Staff digest                           | `apps/admin/src/server/alerts/email.ts`, `GET /api/cron/digest`   |
+| Piece                                  | Where                                                                |
+| -------------------------------------- | -------------------------------------------------------------------- |
+| `EmailSender` port, retries, use cases | `packages/application/src/email/` (`@xangarro/application/email`)    |
+| Templates (React Email) and adapters   | `packages/email/` (`@xangarro/email`)                                |
+| Portal helpers and trial cron          | `apps/web/src/server/email/`, `GET /api/cron/trial-emails`           |
+| Staff digest                           | `apps/backoffice/src/server/alerts/email.ts`, `GET /api/cron/digest` |
 
 ## 1. Domain setup in Resend (once, owner)
 
@@ -64,13 +64,13 @@ Try the crons locally:
 
 ```bash
 # admin digest
-CRON_SECRET=dev pnpm --filter @xangarro/admin dev
+CRON_SECRET=dev pnpm --filter @xangarro/backoffice dev
 curl -H 'Authorization: Bearer dev' http://localhost:3200/api/cron/digest
 
 # portal trial emails (needs the local DB and Stripe test env from B-10)
-CRON_SECRET=dev pnpm --filter @xangarro/portal dev
+CRON_SECRET=dev pnpm --filter @xangarro/web dev
 curl -H 'Authorization: Bearer dev' http://localhost:3100/api/cron/trial-emails
-ls apps/portal/.email-outbox/
+ls apps/web/.email-outbox/
 ```
 
 To send for real from a laptop, export a **test** Resend key in your shell
@@ -95,9 +95,9 @@ To send for real from a laptop, export a **test** Resend key in your shell
 
 - **ADR-080 reset / magic link** (portal auth owner): call
   `sendPasswordReset(email, url)` / `sendMagicLink(email, url)` from
-  `apps/portal/src/server/email/auth-links.ts` after minting the token.
+  `apps/web/src/server/email/auth-links.ts` after minting the token.
 - **N-03 owner emails** (N-02 wiring): call `notifyUsageThreshold(notice)` from
-  `apps/portal/src/server/email/usage.ts` for each owner crossing.
+  `apps/web/src/server/email/usage.ts` for each owner crossing.
 - **N-34 / N-48** (ARCO, dormancy): `renderGenericNoticeEmail` until they get
   their own templates.
 
