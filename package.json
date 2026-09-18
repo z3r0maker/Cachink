@@ -36,18 +36,19 @@
     "lint:root": "eslint scripts '*.config.ts' --config eslint.config.js"
   },
   "devDependencies": {
-    "@xangarro/config": "workspace:*",
     "@types/node": "^22.10.0",
     "@vitest/coverage-v8": "^4.1.6",
+    "@xangarro/config": "workspace:*",
     "eslint": "^10.4.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.5",
     "prettier": "^3.8.3",
+    "taze": "^19.12.0",
     "tsx": "^4.23.13",
     "turbo": "^2.9.14",
     "typescript": "^6.0.3",
-    "taze": "^19.12.0",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "yaml": "2.9.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

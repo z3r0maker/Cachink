@@ -9,9 +9,16 @@
 # `scripts/lint-coverage.test.ts`, which asserts that every tracked TypeScript
 # file is actually reachable by one of those tasks — a green lint over a
 # partial file set is what this workflow shipped until 2026-09-17 (F-08).
-# The schema-drift job is added by B-02 together with packages/data-pg.
 #
-# Branch protection: require the check named "ci".
+# The `db` job exists because the same failure had a second form: the 14 RLS
+# and query assertions in `packages/data-pg` self-skipped without a
+# DATABASE_URL, and this workflow never set one — so they reported as "skipped"
+# beside 22 green drift tests for as long as the package existed.
+# `scripts/integration-coverage.test.ts` (run by the `ci` job, which needs no
+# database to prove another job has one) asserts from this file that every
+# integration suite really runs against Postgres.
+#
+# Branch protection: require the checks named "ci" and "db".
 
 name: ci
 
@@ -64,3 +71,60 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
+
+  # Integration tests against a real Postgres.
+  #
+  # The service container owns the lifecycle (its `pg_isready` health gate
+  # replaces a hand-rolled poll); `db-local.sh` owns the contents, so a laptop
+  # and this runner apply byte-identical SQL in the same order from one place.
+  #
+  # Port 55432, not 5432, so `db-local.sh url` — the single place the app-role
+  # connection string is written down — is correct here unchanged.
+  db:
+    name: db
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: xangarro
+          POSTGRES_DB: xangarro
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d xangarro"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # `local/*.sql` (the Supabase compat layer) then `drizzle/*.sql`. The
+      # compat layer creates `xangarro_app`, which the migrations grant to.
+      - name: Apply the compat layer and the migrations
+        run: pnpm --filter @xangarro/data-pg db:apply
+
+      # The query suite asserts real figures for Taquería Don Pedro, so the
+      # seed is required, not just the schema. It runs through the app role,
+      # so every insert passes the same policy a request does.
+      - name: Seed
+        run: pnpm --filter @xangarro/data-pg db:seed
+
+      # `test:db` sets REQUIRE_DB=1: a missing DATABASE_URL throws here rather
+      # than skipping. These 14 assertions are the only proof the RLS policies
+      # bind, and they connect as the non-superuser `xangarro_app` — a
+      # superuser bypasses RLS entirely and would pass every assertion while
+      # protecting nothing.
+      - name: Integration tests (RLS, claims, compat, queries)
+        run: pnpm --filter @xangarro/data-pg test:db
