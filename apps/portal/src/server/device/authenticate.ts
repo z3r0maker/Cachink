@@ -1,11 +1,11 @@
 import 'server-only';
 
+import { DEVICE_CALLS_PER_MINUTE } from '@xangarro/auth-core';
 import { devices, throttleKey, throttleTake } from '@xangarro/data-pg';
 import { eq } from 'drizzle-orm';
 import { jwtVerify } from 'jose';
 
 import { db, withTenant } from '../db';
-import { DEVICE_CALLS_PER_MINUTE } from '../throttle-policy';
 import { deviceTokenSecret } from './credentials';
 
 /**

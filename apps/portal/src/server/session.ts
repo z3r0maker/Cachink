@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { isPlausibleToken } from '@xangarro/auth-core';
 import { openSession, resolveSession, revokeSession } from '@xangarro/data-pg';
 import { cookies } from 'next/headers';
 import { cache } from 'react';
@@ -40,7 +41,8 @@ export const SESSION_IDLE_SECONDS = 60 * 60 * 24 * 7;
 /** One lookup per request, however many components ask. */
 export const readSession = cache(async (): Promise<SessionClaims | null> => {
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
-  if (token === undefined || token === '') return null;
+  // A cookie that cannot be one of ours never costs a database round trip.
+  if (token === undefined || !isPlausibleToken(token)) return null;
   const s = await resolveSession(db(), token, SESSION_IDLE_SECONDS);
   if (s === null) return null;
   return {

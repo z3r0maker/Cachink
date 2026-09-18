@@ -329,6 +329,9 @@ importers:
       '@xangarro/application':
         specifier: workspace:*
         version: link:../../packages/application
+      '@xangarro/auth-core':
+        specifier: workspace:*
+        version: link:../../packages/auth-core
       '@xangarro/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

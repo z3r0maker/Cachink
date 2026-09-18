@@ -1,13 +1,15 @@
 'use server';
 
 import {
-  loginLookup,
-  throttleClear,
-  throttleFail,
+  clientIp,
+  guardAttempt,
+  LOGIN_PER_EMAIL,
+  LOGIN_PER_IP,
+  minutes,
   throttleKey,
-  throttleWait,
-} from '@xangarro/data-pg';
-import { compare } from 'bcryptjs';
+  verifyPassword,
+} from '@xangarro/auth-core';
+import { loginLookup, throttleStore } from '@xangarro/data-pg';
 import { sql } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -16,7 +18,6 @@ import type { Role } from '@/session/types';
 
 import { db } from '../db';
 import { endSession, startSession } from '../session';
-import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '../throttle-policy';
 
 /**
  * Email + password sign-in (audit SEC-AUTH-02).
@@ -33,18 +34,16 @@ import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '../throttle-po
 export type LoginResult = { ok: true } | { ok: false; message: string };
 
 const WRONG = 'Correo o contraseña incorrectos.';
-/** bcrypt, cost 10, of a random string nobody knows — only ever compared against. */
-const DUMMY_HASH = '$2b$10$8S3S44VqKonb5aKgKp4CQOeYprcpwCtEl/EmGvLTKhk1PcW/tRfcO';
 
 const tooMany = (wait: number): LoginResult => ({
   ok: false,
   message: `Demasiados intentos. Vuelve a intentar en ${minutes(wait)} min.`,
 });
 
+/** The account, if the password is its — the dummy compare is `verifyPassword`'s. */
 async function passwordMatches(email: string, password: string) {
   const user = await loginLookup(db(), email);
-  const ok = await compare(password, user?.hash ?? DUMMY_HASH);
-  return ok && user?.hash ? user : null;
+  return (await verifyPassword(password, user?.hash ?? null)) && user?.hash ? user : null;
 }
 
 export async function login(email: string, password: string): Promise<LoginResult> {
@@ -52,27 +51,32 @@ export async function login(email: string, password: string): Promise<LoginResul
   if (address.length === 0 || password.length === 0) {
     return { ok: false, message: 'Escribe tu correo y tu contraseña.' };
   }
-  const byEmail = throttleKey('login', 'email', address);
-  const byIp = throttleKey('login', 'ip', clientIp(await headers()));
-  const wait = Math.max(await throttleWait(db(), byEmail), await throttleWait(db(), byIp));
-  if (wait > 0) return tooMany(wait);
-
-  const user = await passwordMatches(address, password);
-  if (user === null) {
-    const locked = Math.max(
-      await throttleFail(db(), byEmail, LOGIN_PER_EMAIL),
-      await throttleFail(db(), byIp, LOGIN_PER_IP),
-    );
-    return locked > 0 ? tooMany(locked) : { ok: false, message: WRONG };
-  }
-  await throttleClear(db(), byEmail);
+  // Locked → refuse; wrong → count both; right → forget the address, not the IP.
+  const guarded = await guardAttempt(
+    throttleStore(db()),
+    [
+      {
+        key: throttleKey('login', 'email', address),
+        policy: LOGIN_PER_EMAIL,
+        clearOnSuccess: true,
+      },
+      {
+        key: throttleKey('login', 'ip', clientIp(await headers())),
+        policy: LOGIN_PER_IP,
+        clearOnSuccess: false,
+      },
+    ],
+    () => passwordMatches(address, password),
+  );
+  if (guarded.kind === 'locked') return tooMany(guarded.wait);
+  if (guarded.kind === 'failed') return { ok: false, message: WRONG };
 
   const [member] = await db().execute<{ business_id: string; role: Role }>(
-    sql`SELECT business_id, role FROM xangarro.memberships_for_user(${user.id})`,
+    sql`SELECT business_id, role FROM xangarro.memberships_for_user(${guarded.value.id})`,
   );
   if (!member) return { ok: false, message: 'Tu cuenta aún no pertenece a ningún negocio.' };
 
-  await startSession(user.id, member.business_id);
+  await startSession(guarded.value.id, member.business_id);
   return { ok: true };
 }
 

@@ -345,7 +345,10 @@ not move a pixel between routes.
 
 > **Amended 2026-09-17 by Track N:** signup now goes to the wizard first; Checkout comes after "Tu plan ideal" — see N-13 (ADR-067).
 
-- [ ] Status · **Blocked by:** P-02, C-11, B-10, B-14 · **Blocks:** X-02, L-03
+- [x] Status · **Blocked by:** P-02, C-11, B-10, B-14 · **Blocks:** X-02, L-03
+  - Done via N-13 (`360678a`, merged 2026-09-18, Track N): `/signup` with `?plan=`, our own auth
+    (ADR-080: bcrypt + `startSession`), throttled per address and IP; then the wizard. Checkout is
+    B-10's.
 - **Amended 2026-09-17 (ADR-059):** plan slugs renamed. Invalid → `xangarrito`.
 - **Steps:** Step 1 cuenta (email + password, or magic link). Step 2 negocio — name + the four
   tipo-de-negocio option cards with their verbatim descriptions → `tenant.businesses` +
@@ -360,7 +363,10 @@ not move a pixel between routes.
 
 > **Amended 2026-09-17 by Track N:** the four steps are replaced by the 8-step "Platícanos de ti" wizard (N-12); the checklist stays (N-14); re-runnable (N-15). ADR-067.
 
-- [ ] Status · **Blocked by:** P-02 · **Blocks:** X-02
+- [x] Status · **Blocked by:** P-02 · **Blocks:** X-02
+  - Done via N-12/N-13/N-14 (merged 2026-09-18, Track N): the 8-step «Platícanos de ti» wizard, the
+    «¿Cómo empiezo?» checklist, and the re-run from Negocio («Volver a configurar mi negocio» →
+    `/bienvenida/revisar`, 2026-09-18).
 - **Amended 2026-09-17 (ADR-058):** the wizard is **four steps, not five** — the Sincronización step
   is removed.
 - **Steps:** Wizard: 1 Negocio (nombre, giro, ciudad) · 2 Datos fiscales (RFC, régimen, inicio del

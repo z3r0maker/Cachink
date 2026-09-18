@@ -1,9 +1,9 @@
 import 'server-only';
 
+import { ACTIVATE_PER_CODE, ACTIVATE_PER_IP, clientIp } from '@xangarro/auth-core';
 import { throttleFail, throttleKey, throttleWait } from '@xangarro/data-pg';
 
 import { db } from '../db';
-import { ACTIVATE_PER_CODE, ACTIVATE_PER_IP, clientIp } from '../throttle-policy';
 
 /**
  * `/activate` is the one door with no token in front of it: a correct guess

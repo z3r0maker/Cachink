@@ -1,6 +1,7 @@
 'use client';
 
 import { parseFeatureFlags } from '@xangarro/domain';
+import Link from 'next/link';
 
 import { Banner, ScreenBody } from '@/components';
 import { useSession } from '@/session/provider';
@@ -27,7 +28,9 @@ function Heading({
       </div>
       {/* Editing the business is owner-only (design handoff, "Roles"). */}
       {owner ? (
-        <div style={{ marginLeft: 'auto' }}>
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
+          {/* Re-run the onboarding wizard (N-15): answers change, features follow. */}
+          <Link href="/bienvenida/revisar">Volver a configurar mi negocio</Link>
           <EditNegocioDialog current={current} />
         </div>
       ) : null}

@@ -36,6 +36,7 @@
     "@vanilla-extract/css": "^1.21.2",
     "@vanilla-extract/recipes": "^0.5.7",
     "@xangarro/application": "workspace:*",
+    "@xangarro/auth-core": "workspace:*",
     "@xangarro/contracts": "workspace:*",
     "@xangarro/data": "workspace:*",
     "@xangarro/data-pg": "workspace:*",

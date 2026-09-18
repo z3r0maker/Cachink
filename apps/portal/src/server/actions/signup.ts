@@ -1,5 +1,6 @@
 'use server';
 
+import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '@xangarro/auth-core';
 import { RegistrarCuentaUseCase, SignupError } from '@xangarro/application';
 import { throttleKey, throttleTake } from '@xangarro/data-pg';
 import { randomUUID } from 'node:crypto';
@@ -9,14 +10,13 @@ import { db } from '../db';
 import { failure } from '../onboarding/errors';
 import { pgSignupStore } from '../onboarding/signup-store';
 import { startSession } from '../session';
-import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '../throttle-policy';
 
 /**
  * Signup (P-03, reordered by N-13): account + business + owner membership,
  * then a session, then the wizard. No plan and no payment here.
  *
  * - **Throttled** per address and per IP with the sign-in limits
- *   (`throttle-policy.ts`), counted on every attempt — a signup that succeeds
+ *   (`@xangarro/auth-core` policies), counted on every attempt — a signup that succeeds
  *   is still a request someone could repeat.
  * - **Generic** failures: validation says what to fix; a taken address gets
  *   one neutral line pointing to sign-in; anything else is reported, never
