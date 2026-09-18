@@ -4908,6 +4908,12 @@ from settings. Several answers map to paid-only features.
   (`customer_balance`); **no OXXO** — Stripe supports it neither for
   subscriptions nor for invoices, and OXXO prohibits merchant category 6538
   (Software). This amends README Q13 ("cards + OXXO + SPEI").
+- **Prices are plus IVA** (owner decision): $199 / $399 monthly and $1 990 / $3 990
+  annual are subtotals; Stripe applies 16 % IVA as an exclusive tax, so the
+  customer pays $230.84 / $462.84 and $2 308.40 / $4 628.40. Every displayed
+  price carries "+ IVA". Risk noted: PROFECO expects total prices when selling
+  to consumers; many customers are personas físicas, so checkout always shows
+  the IVA-inclusive total before payment.
 
 **Alternatives considered**
 
@@ -5005,11 +5011,11 @@ user-choice billing. Track N had added in-app upsell copy (limit warnings,
 
 ## ADR-070
 
-**Title:** CFDI for Xangarro's own subscription revenue is automated from the first payment
+**Title:** Every subscription payment gets a CFDI; the automation is built and wired behind a switch, and production starts with manual issuance in the SAT portal
 
 **Date:** 2026-09-17
 
-**Status:** Accepted — supersedes README Q15's "issue manually; automate at ~50 paying customers" and Track Z-03; task N-33
+**Status:** Accepted (amended the same day after owner review) — supersedes README Q15's "issue manually; automate at ~50 paying customers" and Track Z-03; task N-33
 
 **Context**
 
@@ -5026,7 +5032,20 @@ cancellations for refunds — a growing manual chore with deadlines.
   individual CFDI when the tenant's fiscal data is complete, otherwise the
   payment joins the monthly global CFDI; SPEI invoices get a complemento de
   pago; refunds trigger cancellation. Idempotent per Stripe invoice id.
-- The PAC vendor is chosen inside N-33 by current price and SDK quality.
+- **Rollout switch `CFDI_MODE = off | test | live`.** Formal release is a month or more away and
+  the first customers are few, so production starts `off`: the owner issues CFDIs manually in SAT's
+  free portal, driven by an admin "pagos sin CFDI" list that each payment stays on until it is marked
+  with its folio fiscal. Staging runs `test` with the PAC's test keys (never reach SAT, no cost).
+  `live` is a configuration change once manual work reaches ~10–15 CFDIs a month or the contador
+  signs off on the open fiscal questions (PUE vs PPD for SPEI, ClaveProdServ, global periodicity).
+- Payers without fiscal data are never skipped: they go into the monthly global "público en
+  general" CFDI (RFC XAXX010101000).
+- Only an authorized PAC (or SAT's own manual portal) can certify a CFDI; becoming a PAC (RMF
+  2.7.2.1: persona moral, MX$10 M capital, TESOFE bond, SAT technical validation) is out of
+  proportion. A PAC reseller programme is the route if merchants ever invoice through Xangarro
+  (N-54).
+- The PAC vendor is chosen inside N-33 by current price and SDK quality (first adapter: Facturapi;
+  prepaid stamp packages from another PAC to be compared before going `live`).
 - The "Solicitar factura" request remains for customers who add fiscal data
   after paying (re-stamp from the global CFDI).
 

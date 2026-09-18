@@ -31,7 +31,7 @@
 | 8   | Overage                    | **Never block a transaction on any tier.** Warnings at 80 % and 100 % (app + portal banner, owner email). Provider alert (admin inbox) at 100 % and 150 %. Two consecutive months over → "sugerir upgrade" inbox task. Free tier: the **product** cap is hard (51st product refused in the portal). Replaces "block the 51st record".                                                                                                                                                                                                                                                                                                               | 065 |
 | 9   | Usage counting             | Server-authoritative: computed on each push + a nightly job, sent down with the entitlement. The phone only estimates between syncs.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 065 |
 | 10  | DB scaling                 | Metric triggers reviewed monthly on the admin capacity card. **S1** now. **S2** when DB > 25 GB, or any table > 50 M rows, or sync p95 > 800 ms: monthly partitioning of transactional tables, read replica for portal reports/Asesor, bigger compute. **S3** when DB > 500 GB or > 10 000 active tenants: analytics read model, evaluate Citus / tenant sharding.                                                                                                                                                                                                                                                                                  | 068 |
-| 11  | Subscription billing       | Stripe Billing (B-10 stands). **Monthly + annual** (annual = 10× monthly: $1 990 / $3 990). **Card** (credit/debit) via Checkout on both intervals; **SPEI** (per-customer CLABE, `send_invoice`) as an option on **annual only**; **no OXXO** (Stripe doesn't support it for subscriptions/invoices, and OXXO prohibits MCC 6538 Software). **14-day trial on both paid tiers, no card up front** (`payment_method_collection=if_required`). Supersedes Z-10.                                                                                                                                                                                      | 067 |
+| 11  | Subscription billing       | Stripe Billing (B-10 stands). **Monthly + annual** (annual = 10× monthly: $1 990 / $3 990). **Prices are plus IVA** (customer pays $230.84 / $462.84 monthly, $2 308.40 / $4 628.40 annual). **Card** (credit/debit) via Checkout on both intervals; **SPEI** (per-customer CLABE, `send_invoice`) as an option on **annual only**; **no OXXO** (Stripe doesn't support it for subscriptions/invoices, and OXXO prohibits MCC 6538 Software). **14-day trial on both paid tiers, no card up front** (`payment_method_collection=if_required`). Supersedes Z-10.                                                                                     | 067 |
 | 12  | Merchant card payments     | **Both** dynamic QR / payment link **and** physical terminal. `PaymentProvider` port; **Mercado Pago first** (OAuth, sandbox, signed webhooks, Point Smart 1/2 via Orders API, dynamic QR), **Clip right after** in the same epic (merchant-pasted API keys, PinPad API on Total 3 / Ultra / PinPad / Stand 2 with per-device Clip install, payment links, unsigned webhooks → verify via API). Clip partnership conversation starts now. Capability `cobrosIntegrados` on xangarro + xangarrote, **no Xangarro fee**. Server holds provider tokens and the intent; **the device still writes the venta**. Post-launch, after the external pentest. | 066 |
 | 13  | WhatsApp                   | No API, no unofficial automation. One "Enviar comprobante" button: **Android + known number** → targeted intent (`jid`) opens that chat with the **image** attached, auto-fallback to the share sheet; **iOS or no number** → share sheet with the image (merchant picks the chat — iOS never allows a preset recipient for images); secondary "Enviar como texto" → `wa.me/<número>` text receipt. "Ligar WhatsApp" = store the business number and print it on the receipt.                                                                                                                                                                       | —   |
 | 14  | Receipts / branding        | Portal: logo upload (Supabase Storage), brand colour auto-extracted + editable, 4 designed templates with live preview, leyenda / dirección / WhatsApp / redes. Logo also in the portal shell and the monthly PDF. AI logo generation post-launch behind the ADR-059 gate.                                                                                                                                                                                                                                                                                                                                                                          | —   |
@@ -40,13 +40,13 @@
 | 17  | Import                     | Self-service: Productos (+ stock inicial), Clientes, Saldos iniciales. .xlsx / .csv, dry-run, one transaction, ≤ 5 000 rows. **No historical ventas/gastos** (ADR-058 §2).                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | —   |
 | 18  | "Lo hacemos por ti"        | Request form → admin inbox, SLA 3 business days, staff import on the tenant's behalf (audited, tenant approves the preview). Files auto-deleted 30 d after completion. Free (one migration) on paid tiers.                                                                                                                                                                                                                                                                                                                                                                                                                                          | —   |
 | 19  | Offline — app              | Keep the A-07 pill; add **conditional** banners: amber (offline + pending), red (rejected → A-08), grey (> 72 h unsynced).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | —   |
-| 20  | Offline — "own DB"         | Already delivered by the app's on-device SQLite + outbox. State it as a selling point. The portal stays online-only with a friendly offline page. No web capture.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | —   |
+| 20  | Offline — "own DB"         | ~~No web capture~~ — **superseded by ADR-071 (Track O, same day):** a linked browser is a capture _device_ (own outbox, `/sync/push`, «sin conexión se sigue cobrando»); the phone keeps its SQLite. The portal's Director surface stays online-only.                                                                                                                                                                                                                                                                                                                                                                                               | 071 |
 | 21  | Audits                     | Three internal audits (security, DB, performance) are launch blockers. External pentest before `cobrosIntegrados` goes live, then yearly.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | —   |
 | 22  | E2E                        | Deterministic full-stack suite gates CI. A GLM agent explores staging nightly with synthetic data, files bugs to the inbox, never gates.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | —   |
 | 23  | Beta                       | Closed, 10–20 businesses, 4 weeks, production with a Beta badge, free xangarrote then 50 % off 3 months, exit criteria in N-30.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | —   |
 | 24  | App phase 2                | **Design-first** capture redesign in the Claude Design project (shared `@xangarro/tokens`) before the A-01 teardown. Free store app, no in-app purchase (ADR-053, framed per row 25). **QR pairing** with typed-code fallback.                                                                                                                                                                                                                                                                                                                                                                                                                      | —   |
 | 25  | Store compliance           | The app is a **business-employee sign-in** tool (App Store 3.1.3(c) framing; Play "consumption-only"). Pairing is "Vincular este dispositivo a tu negocio" — a sign-in, never a "license key" (3.1.1). **Zero upsell in the app:** no plan names, prices, "mejora tu plan" or links to the portal; usage warnings on the phone are neutral and say the owner will be notified. All selling happens in the portal and email. Demo account for review (X-05).                                                                                                                                                                                         | 069 |
-| 26  | CFDI for our subscriptions | **Automated from day 1**: Stripe `invoice.paid` → PAC API (Facturapi/Facturama class) stamps CFDI 4.0 per payment for customers with fiscal data, monthly "público en general" global CFDI for the rest, complemento de pago for SPEI, cancellation on refund. Supersedes Q15's "manual until ~50" and Z-03.                                                                                                                                                                                                                                                                                                                                        | 070 |
+| 26  | CFDI for our subscriptions | **Every payment gets a CFDI** — individual when the customer gave fiscal data, otherwise in the monthly **global "público en general"** CFDI. **Automation is built and wired but switched by `CFDI_MODE = off \| test \| live`**: production starts `off` and the owner issues CFDIs **manually in the SAT portal** for the first customers, driven by an admin "pagos sin CFDI" list; staging runs `test` (Facturapi test keys, never reach SAT). `live` when manual work reaches ~10–15 CFDIs/month or the contador signs off. Supersedes Q15/Z-03.                                                                                              | 070 |
 
 ---
 
@@ -67,6 +67,10 @@
   or the Customer Portal, so the Suscripción screen offers "Pagar por transferencia" itself).
   **No OXXO** — unsupported for subscriptions/invoices and MCC 6538 (Software) is on OXXO's prohibited
   list.
+- **IVA:** prices are **plus 16 % IVA** — Stripe prices with `tax_behavior: 'exclusive'` and a 16 %
+  IVA tax rate applied on Checkout and on SPEI invoices; totals in centavos: 23 084 / 46 284 monthly,
+  230 840 / 462 840 annual. Every price display (portal, emails, landing) says "+ IVA" next to the
+  amount and shows the total at checkout. The CFDI subtotal is the list price; IVA is its 16 %.
 - **How:** extend B-10's price seeding script; Checkout session takes `interval`; the Suscripción
   screen (P-10) shows the current interval and "Cambiar a anual — 2 meses gratis" through the
   Customer Portal (proration is Stripe's).
@@ -117,7 +121,7 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 
 ### N-05 `apps/admin` scaffold + staff auth `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** B-01, P-22 · **Blocks:** N-06 … N-10, N-46 … N-48
+- [~] Status · **Blocked by:** B-01, P-22 · **Blocks:** N-06 … N-10, N-46 … N-48
 - **What:** Next.js App Router app at `admin.xangarro.mx`, its own Vercel project, reusing
   `@xangarro/tokens`, `data-pg`, `contracts`, `application`.
 - **How:** Supabase Auth with a `staff_members` allowlist; **TOTP 2FA mandatory** (AAL2 required by
@@ -126,6 +130,12 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   check fails if `SUPABASE_SERVICE_ROLE_KEY` is referenced under `apps/portal`.
 - **Acceptance:** non-allowlisted user → 403; allowlisted without 2FA → forced enrolment; audit row
   per mutation; CI guard green.
+- Progress: 2026-09-17 · d6e83d7…6119ef0 (branch `worktree-agent-a9df007511aecbb56`, unmerged) ·
+  `apps/admin` (Next 16, :3200): Supabase Auth + `staff_members` allowlist + mandatory TOTP/AAL2 via
+  `proxy.ts` + `resolveGate` (re-checked in layout and every action); `auditedMutation` →
+  `recordStaffAction` in one tx; nonce CSP; noindex ×3; service-role guard in admin `lint`. 31 tests.
+  **Still to do:** Playwright against a real Supabase (403, forced MFA, audit row); move staff SQL from
+  `apps/admin/src/server/db/` into `data-pg` + `db-local.sh`; provision the `xangarro_admin` role.
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
@@ -310,6 +320,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-23 Portal offline page `[LAUNCH]`
 
+> **Note (ADR-071):** the offline page applies to the Director surface only; the operator register
+> (Track O) has its own offline outbox and must never be replaced by this page.
+
 - [ ] Status · **Blocked by:** P-24
 - **What:** a minimal service worker that serves a branded "Sin conexión — tus ventas siguen
   guardándose en tus dispositivos" page when navigation fails. No data caching, no writes.
@@ -401,7 +414,8 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-31 Landing copy for this track `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
-- **What:** pricing table with the new limits and annual toggle; "Tu negocio sigue aunque se vaya el
+- **What:** pricing table with the new limits and annual toggle, every price marked **"+ IVA"** with the
+  total on hover/footnote; "Tu negocio sigue aunque se vaya el
   internet" (decision 20); fix L-03's stale `freelancer/emprendedor/mipyme_pro` slugs (ADR-059).
   Payment-method line: "Tarjeta de crédito o débito · Transferencia SPEI en plan anual" (no OXXO).
 
@@ -419,17 +433,31 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** B-10, P-10 · **Blocks:** N-30
-- **What:** a CFDI 4.0 for every subscription payment from day 1 (ADR-070; supersedes Q15's manual
-  phase and Z-03).
+- [~] Status · **Blocked by:** B-10, P-10, N-08 · **Blocks:** N-30
+- **What:** a CFDI 4.0 for every subscription payment (ADR-070). **Launch scope:** the automation is
+  wired to the Stripe webhook behind `CFDI_MODE = off | test | live` (production `off`, staging
+  `test`), plus an admin **"Pagos sin CFDI"** list (N-08 inbox kind `factura`) so the owner issues
+  CFDIs manually in the SAT portal — individual ones for customers with fiscal data, one monthly
+  global "público en general" CFDI for the rest — and marks each payment with its folio fiscal (UUID).
+  Switching to `live` needs a paid PAC plan, the owner's CSD (CertiSAT) and contador sign-off; it is
+  a config change, not a code task.
 - **How:** Stripe `invoice.paid` webhook → PAC API adapter (Facturapi/Facturama class, chosen in the
   task by price and SDK quality — verify current pricing then) → if the tenant has RFC/razón
   social/régimen/uso/CP: stamp an individual CFDI (PUE for card; PPD + complemento de pago for SPEI
   invoices), email PDF + XML, attach to the Suscripción screen's history; else accumulate into a
   monthly **"público en general"** global CFDI. Refund → CFDI cancellation (motivo 02/03). Idempotent
   per Stripe invoice id. PAC credentials in env; CSD in the PAC's vault.
-- **Acceptance:** sandbox stamps for each path (individual, global, SPEI complemento, cancellation);
-  duplicate webhook → one CFDI.
+- **Acceptance:** with `CFDI_MODE=off` a paid invoice creates a "pago sin CFDI" item and nothing
+  else; marking it with a UUID clears it; with `test`, sandbox stamps for each path (individual,
+  global, SPEI complemento, cancellation); duplicate webhook → one CFDI; the monthly global close
+  lists every un-invoiced payment of the period.
+- Progress: 2026-09-17 · ee74233…b7f68ad (branch `worktree-agent-a190a4834b0fffb88`, unmerged) · core:
+  `PacProvider` port, use cases (issue for payment, close monthly global, cancel for refund),
+  Facturapi adapter over injected `fetch` (vendor rationale in `docs/spikes/pac-vendor.md`), 71 tests
+  on mocked HTTP, exported as `@xangarro/application/cfdi` (not the root barrel). **Still to do:**
+  B-10 webhook + cron wiring, Postgres repository, sandbox stamps per path, egreso (partial refunds),
+  and **contador sign-off** on: PUE vs PPD for SPEI paid-on-receipt, ClaveProdServ 81112106 / E48,
+  forma de pago mapping, global CFDI periodicity/deadline, cancellation motivo defaults.
 
 ---
 
@@ -547,6 +575,17 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 - [ ] Status · **Trigger:** DB > 500 GB or > 10 000 active tenants.
 - **What:** separate analytics read model; evaluate Citus or tenant sharding (new ADR).
+
+### N-54 Facturación for merchants (white-label PAC reseller)
+
+- [ ] Status · **Trigger:** N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own
+      clients.
+- **What:** let tenants issue CFDI to _their_ customers from a venta ("Facturar esta venta") and a
+  self-invoicing page for their clients. **Not** by becoming a PAC (needs a persona moral with
+  MX$10 M paid-in capital, a TESOFE bond, SAT technical validation and ongoing audits — RMF 2.7.2.1 /
+  Anexo 1-A); instead through a PAC reseller / white-label programme (e.g. one PAC organization per
+  tenant, stamps bought in bulk and resold). Needs each tenant's CSD upload, a new ADR, and pricing
+  (per-stamp packs as an add-on).
 
 ### N-53 Clip adapter
 
