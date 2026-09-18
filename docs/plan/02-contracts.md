@@ -300,8 +300,8 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
      travels both ways), with an old→new migration defaulting existing rows from the motivo/nota
      heuristic in `@xangarro/domain/usage` and `device_id = PORTAL_DEVICE_ID` rows to `portal`; add
      `Conversión` to the motivo enum it is already written with. `portal` = an owner's manual movement
-     recorded in the portal; `apertura` = opening stock written by the import (N-16) or opening
-     balances (C-20). Usage counts `manual` and `portal`; never `apertura`, `venta`, `cancelacion`,
+     recorded in the portal; `apertura` = opening stock captured in N-17's explicit "inventario inicial"
+     step (owner decision 2026-09-18; the product import writes **no** movements, ADR-081). Usage counts `manual` and `portal`; never `apertura`, `venta`, `cancelacion`,
      `conversion` (N-02, OQ-5).
 - **Acceptance:** C-10 conformance suite green against the mock; domain tests for the new limits.
 

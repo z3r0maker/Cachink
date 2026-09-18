@@ -318,10 +318,8 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-16 Import engine + Clientes template `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
-- **Note (ADR-081, 2026-09-18):** portal-created products start at zero stock and the import template has
-  no `stock_inicial` column. Opening stock is written as portal inventory movements with
-  `origen = apertura` (C-12 step 7), which don't count toward usage; `inventory_movements` is HYBRID,
-  so phones receive them.
+- **Note (ADR-081, 2026-09-18):** portal-created products start at zero stock, the import template has no
+  `stock_inicial` column, and **the import writes no movements**. Opening stock is N-17's job.
 - **What:** generalise P-07's three steps (template → dry-run with row-level errors → one-transaction
   commit, ≤ 5 000 rows, .xlsx and .csv) into a template registry; add **Clientes** (nombre, teléfono,
   RFC optional).
@@ -330,6 +328,11 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** N-16, C-20
+- **Inventario inicial (owner decision 2026-09-18):** an explicit one-time step, "Captura tu inventario
+  inicial" (grid or Excel: producto + cantidad + costo), writing portal inventory movements with
+  `origen = apertura` (C-12 step 7). They are **not** counted toward the monthly limit, they feed the
+  opening inventory valuation, and the step closes with the first period close. Products and the
+  product import stay stock-free (ADR-081).
 - **What:** opening balances so the Balance (NIF B-6) is right on day 1: caja, bancos, cuentas por
   cobrar per cliente, inventory valuation (from stock inicial × costo).
 - **Acceptance:** after import, the portal Balance equals the imported figures; statements tests.
