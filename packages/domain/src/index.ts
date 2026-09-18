@@ -15,3 +15,5 @@ export * from './errors/feature-flag-errors.js';
 export * from './errors/product-errors.js';
 export * from './errors/cobranza-errors.js';
 export * from './onboarding/index.js';
+export * from './preferencias/index.js';
+export * from './errors/negocio-errors.js';

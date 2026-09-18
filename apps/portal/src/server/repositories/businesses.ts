@@ -2,7 +2,7 @@ import 'server-only';
 
 import type { BusinessPatch, BusinessesRepository } from '@xangarro/data';
 import { businesses } from '@xangarro/data-pg';
-import type { Business, BusinessId } from '@xangarro/domain';
+import { parseAtributos, type Business, type BusinessId } from '@xangarro/domain';
 import { eq } from 'drizzle-orm';
 
 import type { Tx } from '../db';
@@ -20,6 +20,7 @@ const iso = (t: string | null): string | null => (t === null ? null : new Date(t
 function toDomain(row: typeof businesses.$inferSelect): Business {
   return {
     ...row,
+    atributosProducto: parseAtributos(row.atributosProducto),
     createdAt: iso(row.createdAt),
     updatedAt: iso(row.updatedAt),
     deletedAt: iso(row.deletedAt),
@@ -35,9 +36,14 @@ export function pgBusinessesRepository(tx: Tx, businessId: string): BusinessesRe
     findById,
     findCurrent: findById,
     async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
+      const { atributosProducto, ...rest } = patch;
+      const atributos =
+        atributosProducto === undefined
+          ? {}
+          : { atributosProducto: JSON.stringify(atributosProducto) };
       const [row] = await tx
         .update(businesses)
-        .set({ ...patch, updatedAt: new Date().toISOString() })
+        .set({ ...rest, ...atributos, updatedAt: new Date().toISOString() })
         .where(eq(businesses.id, id))
         .returning();
       if (!row) throw new Error(`business ${id} not found`);

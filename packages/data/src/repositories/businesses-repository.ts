@@ -18,6 +18,7 @@ export type BusinessPatch = Partial<
     | 'isrTasa'
     | 'featureFlags'
     | 'enabledPaymentMethods'
+    | 'atributosProducto'
     | 'regimenSat'
     | 'rfc'
     | 'razonSocial'

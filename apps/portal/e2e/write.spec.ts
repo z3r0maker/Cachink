@@ -94,9 +94,9 @@ test('editing the business writes it and tells the devices', async ({ page }, te
   const renamed = `Taquería Don Pedro ${Date.now()}`;
 
   await page.goto('/negocio');
-  await page.getByRole('button', { name: 'Editar datos', exact: true }).click();
+  await page.getByRole('button', { name: 'Editar negocio' }).click();
   await page.getByTestId('negocio-nombre').fill(renamed);
-  await page.getByRole('button', { name: 'Guardar' }).click();
+  await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
   // The shell reads the business name from the row, so seeing it in the header
   // proves the value came back out of Postgres.

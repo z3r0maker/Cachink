@@ -77,13 +77,15 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
 
   async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
     const ts = now();
-    const set: Record<string, unknown> = { updatedAt: ts };
-    if (patch.nombre !== undefined) set['nombre'] = patch.nombre;
-    if (patch.regimenFiscal !== undefined) set['regimenFiscal'] = patch.regimenFiscal;
-    if (patch.isrTasa !== undefined) set['isrTasa'] = patch.isrTasa;
-    if (patch.featureFlags !== undefined) set['featureFlags'] = patch.featureFlags;
-    if (patch.enabledPaymentMethods !== undefined)
-      set['enabledPaymentMethods'] = patch.enabledPaymentMethods;
+    // Every patchable column maps 1:1; only the attribute list is stored as JSON.
+    const { atributosProducto, ...rest } = patch;
+    const set: Record<string, unknown> = {
+      ...rest,
+      ...(atributosProducto === undefined
+        ? {}
+        : { atributosProducto: JSON.stringify(atributosProducto) }),
+      updatedAt: ts,
+    };
     await this.#db.update(businesses).set(set).where(eq(businesses.id, id)).run();
     const row = await this.#db.select().from(businesses).where(eq(businesses.id, id)).get();
     if (!row) throw new Error(`Business ${id} not found after update`);

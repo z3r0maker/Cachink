@@ -804,8 +804,15 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     derived by `regimenPatch()` so older phones keep their ISR bucket. «Editar datos» picks the code
     from option cards and offers the suggested ISR rate behind a switch; «Otro» rows show «Falta por
     completar». e2e: picking 612 reaches the phone as `{regimenSat: '612', regimenFiscal: 'Otro'}`.
-  - **Still to do:** edit mode with the sticky yellow save bar, tipos de pago switches, atributos
-    de producto, and the archive row.
+  - 2026-09-18 · **Edit mode.** «Editar negocio» turns every card into inputs at once — Datos
+    generales (name, régimen cards + suggested-ISR switch), Datos fiscales, **Tipos de pago**
+    (switches; the last one on is disabled; Crédito stays a Función) and **Atributos de producto**
+    (repeatable rows: name, optional comma-separated choices, obligatorio; key and kind derived by
+    `@xangarro/domain/preferencias`) — with one sticky yellow «Cancelar / Guardar cambios» bar.
+    `GuardarNegocioUseCase` validates everything and writes **one** patch (one `sync_log` entry); a
+    bad field saves nothing. Replaces the two dialogs. e2e: RFC, viewer, régimen, pagos + atributos
+    reach the phone, last method locked.
+  - **Still to do:** the archive row; «Contacto y comprobantes» needs columns first.
 - **Steps:** Four section cards (`minmax(420px, 1fr)`), each with a 38×38 icon tile: **Datos
   generales** (`--yellow`), **Datos fiscales** (`--blue-soft`), **Contacto y comprobantes**
   (`--peach-soft`), **Preferencias** (`--purple-soft`). Read mode shows values at 16px/700 and

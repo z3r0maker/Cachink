@@ -64,17 +64,9 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       throw new Error(`Business ${id} not found`);
     }
     const ts = now();
-    const updated: Business = {
-      ...existing,
-      ...(patch.nombre !== undefined && { nombre: patch.nombre }),
-      ...(patch.regimenFiscal !== undefined && { regimenFiscal: patch.regimenFiscal }),
-      ...(patch.isrTasa !== undefined && { isrTasa: patch.isrTasa }),
-      ...(patch.featureFlags !== undefined && { featureFlags: patch.featureFlags }),
-      ...(patch.enabledPaymentMethods !== undefined && {
-        enabledPaymentMethods: patch.enabledPaymentMethods,
-      }),
-      updatedAt: ts,
-    };
+    // Same contract as the Drizzle repo: every defined key of the patch lands.
+    const defined = Object.fromEntries(Object.entries(patch).filter(([, v]) => v !== undefined));
+    const updated: Business = { ...existing, ...defined, updatedAt: ts };
     this.rows.set(id, updated);
     return updated;
   }

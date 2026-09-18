@@ -98,6 +98,24 @@ export function describeBusinessesRepositoryContract(
       expect(updated.isrTasa).toBe(1500);
     });
 
+    it('update patches the fiscal fields, payment methods and product attributes', async () => {
+      const row = await repo.create(makeNewBusiness());
+      const atributos = [
+        { clave: 'talla', label: 'Talla', tipo: 'texto' as const, obligatorio: false },
+      ];
+      const updated = await repo.update(row.id, {
+        regimenSat: '612',
+        rfc: 'XOJI740919U48',
+        enabledPaymentMethods: '["Efectivo"]',
+        atributosProducto: atributos,
+      });
+      expect(updated.regimenSat).toBe('612');
+      expect(updated.rfc).toBe('XOJI740919U48');
+      expect(updated.enabledPaymentMethods).toBe('["Efectivo"]');
+      expect(updated.atributosProducto).toEqual(atributos);
+      expect((await repo.findById(row.id))?.atributosProducto).toEqual(atributos);
+    });
+
     it('update on missing id throws', async () => {
       await expect(
         repo.update('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, { nombre: 'X' }),

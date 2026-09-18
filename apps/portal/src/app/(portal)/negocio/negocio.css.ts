@@ -91,3 +91,21 @@ export const colLabel = style({
 });
 
 export const cell = style({ display: 'grid', placeItems: 'center' });
+
+/** Edit mode's save bar: sticky to the bottom of the viewport, yellow, never covering the last card. */
+export const saveBar = style({
+  position: 'sticky',
+  bottom: 'calc(12px + env(safe-area-inset-bottom, 0px))',
+  zIndex: 5,
+  display: 'flex',
+  flexWrap: 'wrap',
+  alignItems: 'center',
+  gap: 12,
+  marginTop: 16,
+  padding: '14px 18px',
+  background: colors.yellow,
+  border: `2.5px solid ${colors.black}`,
+  borderRadius: radii[3],
+});
+
+export const attrRow = style({ padding: '10px 0', borderBottom: `2px solid ${colors.gray200}` });

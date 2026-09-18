@@ -22,26 +22,51 @@ const TILE_BG = {
   purple: colors.purpleSoft,
 } as const;
 
-export function SectionCard({ section }: { readonly section: Section }) {
+/** A section's card with its icon tile — read mode fills it with rows, edit mode with inputs. */
+export function SectionShell(props: {
+  readonly title: string;
+  readonly tone: Section['tone'];
+  readonly children: React.ReactNode;
+}) {
   return (
     <Card>
       <div className={sectionHead}>
         <span
           className={sectionTile}
-          style={{ background: TILE_BG[section.tone] }}
+          style={{ background: TILE_BG[props.tone] }}
           aria-hidden="true"
         />
-        <span className={sectionTitle}>{section.title}</span>
+        <span className={sectionTitle}>{props.title}</span>
       </div>
-      {section.fields.map((f) => (
-        <div key={f.label} className={fieldRow}>
-          <span className={fieldLabel}>{f.label}</span>
-          <span className={f.value === null ? fieldMissing : fieldValue}>
-            {f.value ?? 'Falta por completar'}
-          </span>
-        </div>
-      ))}
+      {props.children}
     </Card>
+  );
+}
+
+export function FieldRow({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: string | null;
+}) {
+  return (
+    <div className={fieldRow}>
+      <span className={fieldLabel}>{label}</span>
+      <span className={value === null ? fieldMissing : fieldValue}>
+        {value ?? 'Falta por completar'}
+      </span>
+    </div>
+  );
+}
+
+export function SectionCard({ section }: { readonly section: Section }) {
+  return (
+    <SectionShell title={section.title} tone={section.tone}>
+      {section.fields.map((f) => (
+        <FieldRow key={f.label} label={f.label} value={f.value} />
+      ))}
+    </SectionShell>
   );
 }
 
