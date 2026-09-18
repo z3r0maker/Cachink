@@ -5,6 +5,7 @@ import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
+import { OperadorActions } from './operador-dialogs';
 import { RevokeButton } from './revoke-button';
 import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
@@ -37,13 +38,21 @@ export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }
               {initials(o.nombre ?? '')}
             </span>
             <strong className={cardName}>{o.nombre}</strong>
+            {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
           </div>
           {showPerms && canCancel(o.permissions) ? (
             <div style={{ marginTop: 14 }}>
               <Tag tone="success">Puede cancelar ventas</Tag>
             </div>
           ) : null}
-          <p className={cardFoot}>Entra con su nombre y su PIN. No necesita correo.</p>
+          <p className={cardFoot}>
+            {o.active
+              ? 'Entra con su nombre y su PIN. No necesita correo.'
+              : 'Desactivado: no puede entrar a los teléfonos.'}
+          </p>
+          {canWrite(session.role) && o.active ? (
+            <OperadorActions id={o.id} nombre={o.nombre ?? ''} />
+          ) : null}
         </Card>
       ))}
     </div>

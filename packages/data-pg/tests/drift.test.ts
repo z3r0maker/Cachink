@@ -53,6 +53,25 @@ const PG = pgTables();
 const SQLITE = sqliteTables();
 const SYNCED = [...UP_TABLES, ...HYBRID_TABLES, ...DOWN_TABLES];
 
+/**
+ * Columns the cloud may carry ahead of the device. The only exception to
+ * "identical names on both sides", and deliberately narrow:
+ *
+ *  - **DOWN tables only.** This test exists for the UP direction — a device
+ *    *sending* a column the cloud renamed writes a row with a silently missing
+ *    field. On a DOWN table the device never sends; a cloud-ahead column is one
+ *    it receives before it can store it.
+ *  - **Only columns the wire contract already carries.** `users.active` is in
+ *    `UserSchema`, so `WireUserSchema` sends it today; the cloud simply could
+ *    not store it until B-13.
+ *  - **Self-expiring.** The test below fails the moment the device gains the
+ *    column (A-17), so this list has to be emptied rather than left to rot.
+ */
+const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
+  // B-13 stores it; the device column arrives with A-17.
+  users: ['active'],
+};
+
 describe('cloud ↔ device schema drift', () => {
   it('has a Postgres table for every synced table in the contract', () => {
     const missing = SYNCED.filter((t) => !PG.has(t));
@@ -71,13 +90,47 @@ describe('cloud ↔ device schema drift', () => {
       assert.ok(pg !== undefined, `${table} missing from the cloud schema`);
       assert.ok(lite !== undefined, `${table} missing from the device schema`);
 
-      const onlyCloud = [...pg].filter((c) => !lite.has(c)).sort();
+      const allowed = new Set(CLOUD_AHEAD[table] ?? []);
+      const onlyCloud = [...pg].filter((c) => !lite.has(c) && !allowed.has(c)).sort();
       const onlyDevice = [...lite].filter((c) => !pg.has(c)).sort();
 
       assert.deepEqual(onlyCloud, [], `${table}: columns only in the cloud`);
       assert.deepEqual(onlyDevice, [], `${table}: columns only on the device`);
     });
   }
+
+  it('allows cloud-ahead columns only on DOWN tables', () => {
+    const down = new Set<string>(DOWN_TABLES);
+    const misplaced = Object.keys(CLOUD_AHEAD).filter((t) => !down.has(t));
+    assert.deepEqual(
+      misplaced,
+      [],
+      'a cloud-only column on an UP or HYBRID table means the device can send a row missing it',
+    );
+  });
+
+  it('expires each cloud-ahead exception once the device has the column', () => {
+    // Self-expiring on purpose: when A-17 adds `users.active` locally this
+    // fails, and the exception must be deleted rather than left to excuse the
+    // next drift that happens to share its name.
+    const stale = Object.entries(CLOUD_AHEAD).flatMap(([table, cols]) =>
+      cols.filter((c) => SQLITE.get(table)?.has(c) === true).map((c) => `${table}.${c}`),
+    );
+    assert.deepEqual(
+      stale,
+      [],
+      'these columns now exist on the device — remove them from CLOUD_AHEAD',
+    );
+
+    const phantom = Object.entries(CLOUD_AHEAD).flatMap(([table, cols]) =>
+      cols.filter((c) => PG.get(table)?.has(c) !== true).map((c) => `${table}.${c}`),
+    );
+    assert.deepEqual(
+      phantom,
+      [],
+      'these are listed as cloud-ahead but the cloud does not have them',
+    );
+  });
 
   it('never mirrors a device-only table into the cloud', () => {
     // `app_config` and `director_alerts` are local to the phone by decision.

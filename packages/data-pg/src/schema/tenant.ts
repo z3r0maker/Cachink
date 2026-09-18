@@ -71,5 +71,12 @@ export const users = pgTable('users', {
   mustChangePin: boolean('must_change_pin').notNull().default(false),
   avatarColor: text('avatar_color').notNull().default('blue'),
   permissions: text('permissions').notNull().default('{}'),
+  /**
+   * Portal-managed deactivation (F-07, B-13). Inactive operators cannot
+   * authenticate. The domain `User` and the wire contract already carry it;
+   * the device column arrives with A-17, which is why `drift.test.ts` lists it
+   * as the one cloud-ahead column — see `CLOUD_AHEAD` there.
+   */
+  active: boolean('active').notNull().default(true),
   ...auditColumns,
 });

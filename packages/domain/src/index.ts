@@ -8,3 +8,4 @@ export * from './comprobante/index.js';
 export * from './auth/index.js';
 export * from './errors/conversion-errors.js';
 export * from './errors/caja-errors.js';
+export * from './errors/operador-errors.js';

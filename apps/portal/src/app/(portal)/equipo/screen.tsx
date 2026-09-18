@@ -2,32 +2,34 @@
 
 import { useState } from 'react';
 
-import { Button, ScreenBody, SegmentedTabs, UsageBar } from '@/components';
+import { PLAN_LIMITS } from '@xangarro/domain';
+
+import { ScreenBody, SegmentedTabs, UsageBar } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
 import { Dispositivos, Operadores } from './cards';
+import { NuevoOperadorDialog } from './operador-dialogs';
 import { PairingPanel } from './pairing-panel';
 import { pageSubtitle, pageTitle } from './equipo.css';
 
 export type EquipoTab = 'operadores' | 'dispositivos';
 
-/** Xangarro includes 2 operators; the counter and the disabled CTA say so. */
-const OPERATOR_LIMIT = 2;
-
-function Quota({ activos }: { readonly activos: number }) {
+/**
+ * The operator allowance. The number comes from the plan (`PLAN_LIMITS`), not a
+ * constant here — the old `OPERATOR_LIMIT = 2` was a second copy of the
+ * Xangarro limit, which would have kept saying 2 on every other plan.
+ */
+function Quota({ activos, limit }: { readonly activos: number; readonly limit: number }) {
   return (
     <div style={{ marginLeft: 'auto', minWidth: 220 }}>
       <div style={{ marginBottom: 8, fontWeight: 700 }}>
-        {activos} de {OPERATOR_LIMIT} operadores
+        {activos} de {limit} operadores
       </div>
-      <UsageBar used={activos} limit={OPERATOR_LIMIT} label="Operadores usados" />
+      <UsageBar used={activos} limit={limit} label="Operadores usados" />
       <div style={{ marginTop: 10 }}>
-        {/* Disabled rather than hidden: the limit is the message. */}
-        <Button disabled={activos >= OPERATOR_LIMIT} title="Tu plan incluye 2 operadores">
-          Nuevo operador
-        </Button>
+        <NuevoOperadorDialog disabled={activos >= limit} limit={limit} />
       </div>
     </div>
   );
@@ -71,7 +73,9 @@ export function EquipoScreen({
   const [tab, setTab] = useState<string>(initialTab);
   const isOperadores = tab === 'operadores';
   const mayWrite = canWrite(session.role);
-  const activos = data?.operadores.length ?? 0;
+  // Active operators only: a deactivated one no longer spends the allowance.
+  const activos = data?.operadores.filter((o) => o.active).length ?? 0;
+  const limit = PLAN_LIMITS[session.planId].operators;
 
   return (
     <>
@@ -80,7 +84,7 @@ export function EquipoScreen({
           <h1 className={pageTitle}>Tu equipo</h1>
           <p className={pageSubtitle}>Quién captura, desde qué dispositivo y qué tan al día está</p>
         </div>
-        {mayWrite && isOperadores ? <Quota activos={activos} /> : null}
+        {mayWrite && isOperadores ? <Quota activos={activos} limit={limit} /> : null}
       </div>
       <SegmentedTabs
         ariaLabel="Tu equipo"
