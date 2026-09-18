@@ -25,6 +25,7 @@
 ### B-02 `packages/data-pg`: Postgres Drizzle schema + drift test
 
 - [~] Status · **Blocked by:** F-04, F-07 · **Blocks:** B-03, B-08, B-09, P-\*
+  - 2026-09-17 · data-pg is used by the portal for every read and write. Integration suite 48 tests, run in CI by the new `db` job with `REQUIRE_DB=1` so it can no longer silently skip. **Still to do:** point it at a hosted project (B-01).
   - In progress: 2026-09-17 · `packages/data-pg` exists with the schema and the drift test.
     **Needs no Supabase instance** — Drizzle table definitions are ordinary code, which is why this
     could land before B-01.
@@ -61,6 +62,7 @@
 ### B-03 Migrations + RLS (replace hand-written SQL)
 
 - [~] Status · **Blocked by:** B-02 · **Blocks:** B-05, B-08, B-09, P-02
+  - 2026-09-17 · Local Supabase compat layer (`local/0000_supabase_compat.sql`, ADR-061); `NULLIF` fix for the 22P02 that made an empty `request.jwt.claims` error every RLS query; `CREATE ROLE … PASSWORD` moved out of `drizzle/`; `0002_membership_lookup.sql` SECURITY DEFINER function. **Still to do:** the hosted posture — `0001_rls.sql` is not pushable as written (grants name `xangarro_app`, policies have no `TO` clause), pinned by `supabase-compat.integration.test.ts`.
   - In progress: 2026-09-17 · migrations and RLS are written, **applied to a real Postgres 17, and
     proven**. `pnpm --filter @xangarro/data-pg db:up && pnpm --filter @xangarro/data-pg test:db`
     goes from nothing to 25 tables, 25 policies and 30 green tests.
@@ -102,6 +104,7 @@
 ### B-04 Seed + demo business for local dev and App Review
 
 - [~] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
+  - 2026-09-17 · Seed rewritten to satisfy its own domain schemas — ULID ids (was `p-tac`, `s1`), `'producto'`/`'semanal'` casing, two portal members (owner + viewer). `seed-contract.integration.test.ts` enforces it. **Still to do:** App Review data.
   - In progress: 2026-09-17 · `pnpm --filter @xangarro/data-pg db:seed` populates Taquería Don
     Pedro — the business every design file uses — with 6 ventas, 5 gastos, 6 productos, their
     inventory movements and one corte.
@@ -117,7 +120,8 @@
 
 ### B-05 Auth: Supabase Auth config, membership claims hook, device-JWT minting
 
-- [ ] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-02
+- [~] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-02
+  - 2026-09-17 · **Portal slice only**, provider-neutral (ADR-061): HMAC-signed session carrying the Supabase claim shape, `requireSession`/`requireMember`, `withSession` writing `request.jwt.claims`. **Still to do:** device-JWT minting and `requireDevice` (phone-side), and GoTrue if chosen.
 - **Steps:**
   1. Custom Access Token Hook (Postgres function) adds `memberships` array from `billing.business_members` to portal JWTs.
   2. `apps/portal/src/server/auth/mint-device-token.ts`: signs `02-contracts.md` §2 claims with `SUPABASE_JWT_SECRET`, `exp` 365 d. Unit test: token verifies with the secret and PostgREST accepts it (integration test against local).
@@ -168,7 +172,8 @@
 
 ### B-11 Activation code issuance (portal + Studio-callable)
 
-- [ ] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-06
+- [~] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-06
+  - 2026-09-17 · **Portal half:** `generarCodigo` mints from `crypto.randomInt` with the alphabet derived from `ACTIVATION_CODE_REGEX`; regenerating expires every other unredeemed code (E2E asserts exactly one live code — verified it fails with two). **Still to do:** Studio-callable issuance, redemption (B-07).
 - **Steps:** Postgres function `billing.issue_activation_code(business_id, email, issued_by)` → generates 8 chars from alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, `expires_at = now() + 48 h`, returns the code; security definer, executable by members with role ≠ viewer and by service role. Server action wrapper + email (B-14). Also `billing.revoke_device(device_id)` (sets status, `revoked_at`; frees the slot).
 - **Acceptance:** SQL tests: alphabet has no `0 O 1 I`; uniqueness under 10 000 generations; viewer call → permission error.
 

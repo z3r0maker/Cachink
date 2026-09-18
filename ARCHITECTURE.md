@@ -4524,3 +4524,162 @@ and product references.
 - The `source` column plus `data` JSONB absorbs a good deal of
   divergence before a split would be warranted. Splitting later is
   easier than merging later.
+
+---
+
+## ADR-061
+
+**Title:** The portal's database is a Supabase-shaped Postgres, and its session carries the Supabase claim shape — so the RLS path production uses is the one we test
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — auth provider for production still open; this decision keeps it open
+
+**Context**
+
+The portal needed a real database under test, and then real authentication.
+Three facts shaped both:
+
+1. `xangarro.current_business_id()` coalesces **two** claim sources: Supabase's
+   `request.jwt.claims ->> 'business_id'`, and our own session GUC
+   `xangarro.business_id`. Every existing test exercised only the second.
+   Nothing in the repository ever set `request.jwt.claims`, so the branch
+   production would use was untested from the day it was written.
+2. Writing the first test against it found a shipping defect:
+   `current_setting('request.jwt.claims', true)::jsonb` raises 22P02 on an
+   empty string, a state PostgREST produces. One empty GUC turned every query
+   on all 25 tenant tables into an error.
+3. The production auth provider is undecided (Q in the Phase 2 interview).
+   Supabase Auth is assumed by B-05/P-02, but nothing is committed.
+
+**Decision**
+
+**The local database is Supabase-shaped, through a local-only layer.**
+`packages/data-pg/local/0000_supabase_compat.sql` provisions what a hosted
+project provides before any migration runs: the `auth` schema and
+`auth.users` (in Supabase's own column shape), the `anon`/`authenticated`/
+`service_role` roles, and `auth.jwt()`/`uid()`/`role()`/`email()` transcribed
+from Supabase's definitions. It lives **outside** `drizzle/`: that directory
+is what a hosted project receives, where `CREATE ROLE anon` fails and
+`CREATE OR REPLACE FUNCTION auth.uid()` would overwrite the platform's own.
+`db-local.sh` applies `local/*.sql` before `drizzle/*.sql`, and CI calls the
+same script, so both run byte-identical SQL from one place.
+
+**Migrations stay platform-agnostic.** They never call `auth.*`; they read
+`current_setting` directly, so they apply to plain Postgres, Neon or a
+self-host as well as Supabase. The compat layer makes the *environment*
+match; it does not give the schema a platform dependency.
+
+**The session payload is the Supabase claim shape** — `sub`, `role`,
+`business_id` — in an HMAC-signed cookie. `withSession` writes it into
+`request.jwt.claims`, so the branch of `current_business_id()` that binds in
+production is the one `claims.integration.test.ts` proves, including that the
+claim wins over the GUC when they disagree. Adopting GoTrue later replaces the
+*issuer* of that payload, not every query, guard and policy downstream.
+
+**Sign-in's membership lookup goes through a `SECURITY DEFINER` function**,
+`xangarro.memberships_for_user(text)`, with `search_path` pinned. Sign-in is
+the query that decides *which* tenant, so it cannot be tenant-scoped, and with
+no claim set `tenant_isolation` correctly returns zero rows. The function's
+whole surface is one user id in, membership rows out.
+
+**Alternatives considered**
+
+- *Full `supabase start` locally and in CI.* Highest fidelity, and the only
+  thing that can issue a GoTrue session. Rejected for now: several containers,
+  most of whose surface the portal does not use, and it would commit us to
+  GoTrue's shape before the provider decision is made.
+- *Plain Postgres, no compat layer.* Sufficient for reads. Rejected because it
+  leaves the production claim path permanently untested — which is precisely
+  how the 22P02 defect survived.
+- *Give the app a `BYPASSRLS` role for the membership lookup.* One query's
+  convenience, at the cost of every other query being one mistake away from
+  reading across tenants. Rejected.
+
+**Consequences**
+
+- `drizzle/0001_rls.sql` is **not pushable to a hosted project as written**:
+  its grants name `xangarro_app`, which a hosted project lacks, and its
+  policies carry no `TO` clause. `supabase-compat.integration.test.ts` pins that
+  state deliberately, so B-03 cannot grant to `authenticated` by accident.
+- `CREATE ROLE xangarro_app LOGIN PASSWORD …` moved out of `drizzle/` into the
+  compat layer. Left where it was, the first `supabase db push` would have put
+  a login role with a repository-published password on production.
+- `SESSION_SECRET` has no default. A fallback would make every cookie forgeable
+  on any host that forgot to set it.
+- Choosing GoTrue later is a change to `server/actions/auth.ts` and the seed,
+  not to `withSession`, `requireMember` or any policy.
+
+---
+
+## ADR-062
+
+**Title:** Portal writes reuse the application use cases through Postgres repositories, and the table's sync scope — not the author — decides whether a write reaches the devices
+
+**Date:** 2026-09-17
+
+**Status:** Accepted
+
+**Context**
+
+The portal began writing. Its rules already existed: `EditarProductoUseCase`
+re-validates a patch, refuses a missing row and forbids retroactive cost edits,
+and the phone runs it over SQLite. Separately, `@xangarro/contracts` already
+classifies every table as UP, HYBRID, DOWN or never-synced, and devices only
+learn of a cloud-side change by finding a row in `sync_log`.
+
+Two failure modes were live. Reimplementing a rule in the portal would
+duplicate it (CLAUDE.md §2.3). And a portal write that updated its table but
+skipped `sync_log` would look perfect on screen while never reaching the
+phone — invisible in any UI.
+
+**Decision**
+
+**Use cases are reused, not reimplemented.** Each takes a repository
+interface from `@xangarro/data`; the portal supplies a Postgres implementation
+(`apps/portal/src/server/repositories/`) bound to one tenant transaction.
+`server/actions/*` are composition roots and nothing else. Repositories do not
+filter by the `businessId` their interface carries — RLS already scopes the
+transaction, and trusting a caller-supplied id over the policy is how
+cross-tenant reads happen.
+
+**The table's scope decides the `sync_log` append.**
+`repositories/sync-log.ts` derives its accepted tables from `DOWN_TABLES` and
+`HYBRID_TABLES` in `@xangarro/contracts`, so a table moving scope is a compile
+error at every call site. The append always shares the write's transaction: a
+row must never change without the record a device pulls, nor be announced
+when the write rolled back. Portal-only tables (`notices`,
+`activation_codes`) never append — no device has them.
+
+**Where a table is device-created, the portal does not create.** `products`
+is HYBRID: born on a phone mid-sale, corrected in the portal. The Postgres
+repository's `create`/`delete` throw, and the portal's "Nuevo producto" is
+labelled «próximamente» pending a product decision rather than wired against
+the contract.
+
+**Portal-created rows carry a documented device sentinel**, a fixed ULID,
+because `deviceId` is NOT NULL and ULID-typed, and a portal member's `sub` is
+a UUID from `auth.users` — a different id space. `createdByUserId` names a
+device *operator*, so for a portal write it is honestly null.
+
+**Alternatives considered**
+
+- *Write through the phone's `POST /sync/push`.* Rejected: the portal would
+  impersonate a device, invent a `clientSeq`, and be refused by the very
+  `isPushable` rule that protects portal-only edits.
+- *Let each action decide whether to log.* Rejected: it is exactly the
+  judgement that gets forgotten, and forgetting it is silent.
+
+**Consequences**
+
+- Writing forced domain validation onto data no read path had ever validated,
+  and the seed failed it: non-ULID ids, `'Producto'` for `'producto'`,
+  `'Semanal'` for `'semanal'`. Postgres accepted all of them, because ids are
+  `text` and Drizzle's `enum` is a TypeScript type, not a CHECK constraint.
+  `seed-contract.integration.test.ts` now validates seeded rows against their
+  domain schemas.
+- Postgres renders `timestamptz` as `2026-01-02 15:00:00+00`, not ISO 8601, so
+  every pg repository converts at the boundary.
+- Follow-up: a CHECK constraint per enum column would make the database
+  enforce what Drizzle only describes. Not done here; it is a migration with
+  its own old→new test (CLAUDE.md §2.9).

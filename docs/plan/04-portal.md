@@ -319,7 +319,8 @@ not move a pixel between routes.
 
 ### P-02 Auth pages + membership guard + business switcher wiring
 
-- [ ] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
+- [~] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
+  - 2026-09-17 · Sign-in/out, signed session, membership guard, 11 routes gated, forged cookie refused, identical message for wrong password and unknown address. `SESSION` fixture replaced in 19 files by a provider seeded from the server. **Still to do:** magic link, business switcher, the four-scene login animation, and the provider decision (ADR-061).
 - **Amended 2026-09-17:** copy and layout now come from _Acceso y onboarding_.
 - **Steps:** `/login` per the design — two-column grid `minmax(420px, 1fr)`, left flat-yellow panel
   (sticky, `100vh`, `border-right: 2.5px`) with wordmark row, the **four-scene looping animation**
@@ -514,6 +515,7 @@ without touching code.
 > when a read throws.
 
 - [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - 2026-09-17 · Product **edit** works end to end through the reused `EditarProductoUseCase` (ADR-062), appending `sync_log`. "Nuevo producto" is labelled «próximamente»: `products` is HYBRID and the button contradicts the contract — **needs a product decision**. Excel import not started.
   - In progress: 2026-09-17 · `/productos` serves HTTP 200.
   - Catálogo / Movimientos tabs with counts; the low-stock banner whose "Ver stock bajo"
     **applies the filter** rather than only highlighting; four KPIs; the catalogue table with
@@ -605,6 +607,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > when a read throws.
 
 - [~] Status · **Blocked by:** P-25 · **Blocks:** —
+  - 2026-09-17 · "Nuevo empleado" works; salary parsed pesos→centavos at the boundary and the E2E asserts the **stored** value (`187550`), not the rendered one.
   - In progress: 2026-09-17 · `/empleados` serves HTTP 200.
   - **Two tabs, and Asistencia is verified absent from the rendered HTML.** Personas (avatar-less
     name + puesto, contrato pill, ingreso, "Acceso a la app", sueldo semanal) and Nómina (periodo,
@@ -730,6 +733,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > when a read throws.
 
 - [~] Status · **Blocked by:** P-25 · **Blocks:** —
+  - 2026-09-17 · "Editar datos" works, owner-only on the server as well as the screen, appending `sync_log` (`businesses` is DOWN).
   - In progress: 2026-09-17 · `/negocio` serves HTTP 200.
   - Four section cards with their icon tiles — Datos generales (yellow), Datos fiscales (blue),
     Contacto y comprobantes (peach), Preferencias (purple) — in read mode.
@@ -1029,7 +1033,8 @@ critical avisos cannot be switched off.
 
 ### P-16 Responsive + accessibility pass
 
-- [~] Status · **Blocked by:** P-05…P-14, P-26…P-33 · **Blocks:** P-17
+- [x] Status · **Blocked by:** P-05…P-14, P-26…P-33 · **Blocks:** P-17
+  - Done: 2026-09-17 · The remaining item — "re-running once the screens read real data" — is done. The suite had been sweeping eleven error cards (no `DATABASE_URL` reached the server); it now refuses to run without a seeded database, and per-route sentinels gate both a11y tests. Zero serious/critical violations over data-bearing DOM across three viewports; no ratchet baseline was needed.
   - In progress: 2026-09-17 · **79 Playwright tests pass across desktop (1440), laptop (1024) and
     tablet (768), zero failures.** `pnpm --filter @xangarro/portal test:e2e`.
   - `@axe-core/playwright` over WCAG 2.0/2.1 A and AA on all eleven product routes: **zero serious
@@ -1066,7 +1071,8 @@ critical avisos cannot be switched off.
 
 ### P-17 Portal smoke E2E (Playwright)
 
-- [ ] Status · **Blocked by:** P-03…P-07, P-11, P-16 · **Blocks:** X-02
+- [~] Status · **Blocked by:** P-03…P-07, P-11, P-16 · **Blocks:** X-02
+  - 2026-09-17 · The `portal-e2e` CI job exists and runs the full suite (170 tests) against a seeded Postgres — against a plain Postgres + compat layer, not "local Supabase" as written above. **Still to do:** the flow this task actually names (signup → onboarding → activate → pushed sale), which needs P-03, P-04 and B-07.
 - **Steps:** One flow — free signup → onboarding → create operator → import 3 products → issue a
   device code → call `/activate` via the C-10 conformance helper → device appears → push one sale
   via the helper → it appears in Movimientos. Runs against local Supabase and the dev server in CI
@@ -1075,7 +1081,8 @@ critical avisos cannot be switched off.
 
 ### P-34 Print, PDF and exports
 
-- [ ] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
+- [~] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
+  - 2026-09-17 · Exports: `GET /api/export/<dataset>` returns real .xlsx for ventas, gastos, productos, movimientos and empleados — authenticated, dataset checked against a closed union, RLS-scoped. E2E asserts the `PK` zip magic number. **Still to do:** print stylesheets, the PDF informe mensual.
 - **Steps:** Print stylesheets for the statements (one page each) and the Diagnóstico; the "Informe
   mensual PDF" gated by `capabilities.informeMensual`; CSV and XLSX exports on Movimientos and
   Estados for every plan and role.
