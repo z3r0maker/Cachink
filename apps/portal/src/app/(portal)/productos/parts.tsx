@@ -5,7 +5,7 @@ import { formatMoney } from '@xangarro/domain';
 import { Banner, Button, DataTable, FilterChip, KpiCard, kpiGrid } from '@/components';
 import type { ProductosData } from '@/server/screens';
 
-import { CATALOGO_COLUMNS, MOV_COLUMNS } from './columns';
+import { catalogoColumns, MOV_COLUMNS } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
 
 export type Producto = ProductosData['catalogo'][number];
@@ -84,14 +84,21 @@ export function Chips({
   );
 }
 
-export function CatalogoTable({ rows }: { readonly rows: readonly Producto[] }) {
+export function CatalogoTable({
+  rows,
+  onEdit,
+}: {
+  readonly rows: readonly Producto[];
+  /** `null` for a viewer: the affordance is hidden, not disabled. */
+  readonly onEdit: ((p: Producto) => void) | null;
+}) {
   return (
     <DataTable
       caption="Catálogo"
-      columns={CATALOGO_COLUMNS}
+      columns={catalogoColumns(onEdit)}
       rows={rows}
       rowKey={(p) => p.id}
-      minWidth={860}
+      minWidth={onEdit === null ? 860 : 960}
       footer={<span>Mostrando {rows.length} productos</span>}
     />
   );

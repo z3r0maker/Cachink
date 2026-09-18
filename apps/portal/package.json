@@ -31,6 +31,8 @@
     "@supabase/supabase-js": "^2.116.0",
     "@vanilla-extract/css": "^1.21.2",
     "@vanilla-extract/recipes": "^0.5.7",
+    "@xangarro/application": "workspace:*",
+    "@xangarro/data": "workspace:*",
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/tokens": "workspace:*",

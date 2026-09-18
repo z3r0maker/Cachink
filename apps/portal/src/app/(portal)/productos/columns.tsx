@@ -1,8 +1,33 @@
 import { formatMoney } from '@xangarro/domain';
 
-import { StatusPill, type ColumnDef } from '@/components';
+import { Button, StatusPill, type ColumnDef } from '@/components';
 
 import { isLow, type Movimiento, type Producto } from './parts';
+
+/**
+ * The catalogue, plus an edit action when the viewer may write.
+ *
+ * A function rather than a constant because the action needs a callback, and
+ * because `viewer` must not see the affordance at all — gating hides rather
+ * than disables (`session/gating.ts`), and the server rejects regardless.
+ */
+export function catalogoColumns(
+  onEdit: ((p: Producto) => void) | null,
+): readonly ColumnDef<Producto>[] {
+  if (onEdit === null) return CATALOGO_COLUMNS;
+  return [
+    ...CATALOGO_COLUMNS,
+    {
+      key: 'acciones',
+      header: 'Acciones',
+      render: (p) => (
+        <Button size="sm" variant="secondary" onClick={() => onEdit(p)}>
+          Editar
+        </Button>
+      ),
+    },
+  ];
+}
 
 export const CATALOGO_COLUMNS: readonly ColumnDef<Producto>[] = [
   { key: 'nombre', header: 'Producto', render: (p) => p.nombre },

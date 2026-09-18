@@ -7,6 +7,7 @@ import { SESSION } from '@/fixtures/business';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
+import { EditProductDialog } from './edit-dialog';
 import {
   CatalogoTable,
   Chips,
@@ -84,11 +85,13 @@ function Body({
   rows,
   movimientos,
   error,
+  onEdit,
 }: {
   readonly isCatalogo: boolean;
   readonly rows: readonly Producto[];
   readonly movimientos: readonly Movimiento[];
   readonly error: boolean;
+  readonly onEdit: ((p: Producto) => void) | null;
 }) {
   return (
     <ScreenBody
@@ -99,7 +102,7 @@ function Body({
         body: 'Agrega tu primer producto o impórtalos desde Excel.',
       }}
     >
-      {isCatalogo ? <CatalogoTable rows={rows} /> : <MovTable rows={movimientos} />}
+      {isCatalogo ? <CatalogoTable rows={rows} onEdit={onEdit} /> : <MovTable rows={movimientos} />}
     </ScreenBody>
   );
 }
@@ -107,6 +110,8 @@ function Body({
 export function ProductosScreen({ data }: { readonly data: ProductosData | null }) {
   const [tab, setTab] = useState('catalogo');
   const [filter, setFilter] = useState('Todos');
+  const [editing, setEditing] = useState<Producto | null>(null);
+  const mayWrite = canWrite(SESSION.role);
 
   const catalogo = data?.catalogo ?? [];
   const rows = useMemo(
@@ -117,7 +122,7 @@ export function ProductosScreen({ data }: { readonly data: ProductosData | null 
 
   return (
     <>
-      <Heading mayWrite={canWrite(SESSION.role)} />
+      <Heading mayWrite={mayWrite} />
       <Controls
         tab={tab}
         setTab={setTab}
@@ -133,7 +138,9 @@ export function ProductosScreen({ data }: { readonly data: ProductosData | null 
         rows={rows}
         movimientos={data?.movimientos ?? []}
         error={data === null}
+        onEdit={mayWrite ? setEditing : null}
       />
+      <EditProductDialog producto={editing} onClose={() => setEditing(null)} />
     </>
   );
 }

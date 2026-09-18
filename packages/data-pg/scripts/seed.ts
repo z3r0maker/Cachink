@@ -18,12 +18,15 @@ import {
   COST,
   CREATED,
   DEV,
+  DAY_CLOSE_ID,
   DEVICES,
   EMPLOYEES,
   EXPENSES,
   MOVEMENTS,
+  movementIdFor,
   NOTICES,
   PRODUCTS,
+  REJECTING_DEVICE,
   REJECTIONS,
   SALES,
   TODAY,
@@ -54,7 +57,7 @@ async function seedProducts(sql: Sql): Promise<void> {
                             umbral_stock_bajo, tipo, seguir_stock, precio_venta_centavos,
                             business_id, device_id, created_at, updated_at)
       VALUES (${id}, ${nombre}, ${sku}, 'Producto Terminado', ${costo}, 'pza', ${umbral},
-              'Producto', ${stock}, ${precio}, ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
+              'producto', ${stock}, ${precio}, ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
       ON CONFLICT (id) DO NOTHING`;
   }
 }
@@ -74,7 +77,7 @@ async function seedSales(sql: Sql): Promise<void> {
     await sql`
       INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
                                        costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-      VALUES (${'mv-' + id}, ${productoId}, ${fecha}, 'salida', ${cantidad},
+      VALUES (${movementIdFor(id)}, ${productoId}, ${fecha}, 'salida', ${cantidad},
               ${COST[productoId] ?? 0}, 'Venta', ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
   }
@@ -106,7 +109,7 @@ async function seedDayClose(sql: Sql): Promise<void> {
   await sql`
     INSERT INTO day_closes (id, fecha, efectivo_esperado_centavos, efectivo_contado_centavos,
                             diferencia_centavos, cerrado_por, business_id, device_id, created_at, updated_at)
-    VALUES ('dc1', '2026-05-11', ${peso(2118)}, ${peso(2112)}, ${-peso(6)}, 'Director',
+    VALUES (${DAY_CLOSE_ID}, '2026-05-11', ${peso(2118)}, ${peso(2112)}, ${-peso(6)}, 'Director',
             ${BIZ}, ${DEV}, ${TS('2026-05-11')}, ${TS('2026-05-11')})
     ON CONFLICT (id) DO NOTHING`;
 }
@@ -154,7 +157,7 @@ async function seedPortal(sql: Sql): Promise<void> {
     await sql`
       INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, payload, received_at,
                                    business_id, created_at, updated_at)
-      VALUES (${id}, 'd-android', ${table}, ${rowId}, ${code},
+      VALUES (${id}, ${REJECTING_DEVICE}, ${table}, ${rowId}, ${code},
               ${JSON.stringify({ preview })}, ${now}, ${BIZ}, ${now}, ${now})
       ON CONFLICT (id) DO NOTHING`;
   }

@@ -256,6 +256,12 @@ importers:
       '@vanilla-extract/recipes':
         specifier: ^0.5.7
         version: 0.5.7(@vanilla-extract/css@1.21.2)
+      '@xangarro/application':
+        specifier: workspace:*
+        version: link:../../packages/application
+      '@xangarro/data':
+        specifier: workspace:*
+        version: link:../../packages/data
       '@xangarro/data-pg':
         specifier: workspace:*
         version: link:../../packages/data-pg
@@ -17551,7 +17557,7 @@ snapshots:
       metro-cache: 0.84.4
       metro-core: 0.84.4
       metro-runtime: 0.84.4
-      yaml: 2.9.0
+      yaml: 2.9.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
