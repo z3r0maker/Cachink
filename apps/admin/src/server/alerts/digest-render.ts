@@ -5,11 +5,12 @@
  * and the text part is what many staff will read anyway.
  */
 import type { SupportItem } from '@xangarro/domain';
+import type { DigestLine, DigestSection } from '@xangarro/email';
 
 import type { DailyDigest } from './digest';
 import { rejectionSection } from './rejections';
 
-type DigestData = Omit<DailyDigest, 'text' | 'html'>;
+type DigestData = Omit<DailyDigest, 'text' | 'html' | 'emailSections'>;
 
 /** Items shown per section before «y N más». */
 export const SECTION_CAP = 20;
@@ -107,6 +108,21 @@ function htmlSection(s: Section, consoleUrl: string): string {
     s.note ? `<p>${escapeHtml(s.note)}</p>` : '',
   ].join('');
   return `<h2>${escapeHtml(s.title)}</h2>${body}`;
+}
+
+/** The same sections for the React Email template (B-14, `@xangarro/email` staff-digest). */
+export function emailSections(d: DigestData): DigestSection[] {
+  return sections(d).map((s) => {
+    const lines: DigestLine[] = s.items.slice(0, SECTION_CAP).map((i) => ({
+      label: i.title,
+      href: `${d.consoleUrl}/inbox/${i.id}`,
+      urgent: i.urgent,
+    }));
+    const rest = more(s.items.length);
+    if (rest) lines.push({ label: rest });
+    for (const l of s.lines ?? []) lines.push({ label: l });
+    return { title: s.title, empty: isEmpty(s) ? s.empty : null, lines, note: s.note ?? null };
+  });
 }
 
 export function renderHtml(d: DigestData): string {

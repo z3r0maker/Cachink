@@ -246,6 +246,11 @@ Collected while building fase 10; none is edited in `design-reference/`.
     closing, while every other file says «Desde 08:15 · Caja 1»; the shell keeps one footer until
     the files agree. The band in the file only appears offline; the README ties it to unsent
     records (built that way). The count starts pre-filled ($3,780.00, «Sobra $910.00»).
+13. **Owner screens vs the owner vocabulary** (owner decision: the components win): the new files
+    draw tabs at 22 px padding with a 2 px divider and 0.04em tracking, KPI figures 6 px under the
+    label with a 13 px ink hint and a 230 px grid, 13 px-radius buttons with a 4 px shadow, and a
+    green-check empty state; the owner portal's `SegmentedTabs`, `KpiCard`, `Button` and
+    `EmptyState` differ. The files should follow the owner components.
 
 ## 5. Fase 11 — Caja y captura
 
@@ -414,8 +419,44 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
 **Fase 12 screens are complete** (O-21 to O-28). Its real data waits on the groundwork (O-02 to
 O-06); fase 13 is next.
 
-## 7. Fase 13 (tasks written when fase 12 closes)
+## 7. Fase 13 — Dueño: Revisión de caja y Cortes de turno
 
-- **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
-  de cliente, Registros por enviar, then Cierre de turno last.
-- **Fase 13 — Dueño:** Revisión de caja, Cortes de turno.
+> Written 2026-09-18 when fase 12's screens closed. Both screens live in the **owner** portal
+> (`app/(portal)/…`), built from the owner component vocabulary (`@/components`), behind
+> `requireSession()`. They need data that does not exist yet in `data-pg` (review status on
+> products and clients, ADR-074 §2; the per-denomination count on `caja_turnos`, §4), so they run
+> on fixtures like fases 11–12 until C-18 and O-06 land. The owner shell (`shell/nav-items.ts`,
+> sidebar) belongs to the Web Portal session: the 13th nav row with its badge is coordinated with
+> it, not taken.
+
+### O-30 Dueño · Revisión de caja
+
+- [x] Status · **Blocked by:** — (fixtures) · **Wires with:** C-18
+  - Done: 2026-09-18 · `app/(portal)/revision-caja/`, behind `requireSession()`. Owner vocabulary
+    for the title, KPIs, tabs, button and empty state (owner decision 2026-09-18: the owner
+    components win over the new files' small differences); the review modal and toast reuse the
+    operator `OpModal` / `Toast`, which match this handoff. Live margin from the domain's
+    `calcularMargenProducto` with the file's traffic light. Harness (through Playwright with the
+    E2E owner session): list rows, both modals and the toast match; the remaining diffs are the
+    owner components' (KPI spacing and hint, tab padding and tracking, button radius and shadow,
+    empty state). `tests/operador/revision-caja.test.ts`, `e2e/dueno-revision-caja.spec.ts` (run
+    against `pnpm dev`: the production build's /login does not hydrate right now — reported to the
+    Web Portal session). The sidebar row with its badge waits on that session (shell ownership);
+    until then the screen is reached by URL.
+- **Steps:** `/revision-caja`. Tabs Productos / Clientes fiados with counts; three KPIs (por revisar,
+  vendido sin costo, fiado sin límite); rows with who created it, where, how often it sold, and
+  «Se parece a …»; the review modal (product: price, cost, live margin with the traffic light,
+  category, stock, threshold; client: name, phone, credit limit with quick amounts, term, what
+  they already owe); three exits — approve, merge with the duplicate, reject — each with its toast.
+- **Acceptance:** harness match in both tabs, empty tabs, both modals and the toasts; approving
+  needs cost + category + stock (product) or limit + term (client); Playwright spec.
+
+### O-31 Dueño · Cortes de turno
+
+- [ ] Status · **Blocked by:** O-28 (the close it reviews) · **Wires with:** C-18, O-06
+- **Steps:** `/cortes` (the design marks «Operadores» active). Four KPIs including the month's
+  accumulated difference; state and register filters and search; the list with expected, counted
+  and difference per turno; the 560 px side panel (owner `Drawer`) with how the expected cash was
+  formed, the operator's count by denomination, their note and reason, and the rest of the turno;
+  two actions: ask for clarification by WhatsApp, or mark as clarified.
+- **Acceptance:** harness match for the list, filters, panel and actions; Playwright spec.

@@ -87,6 +87,9 @@
   pull, `GET /entitlement`, session, operator limit and Funciones read the real subscription (no row →
   free plan). **Still to do:** a live test-mode run by the owner (env keys, Customer Portal config,
   `stripe:seed`, `stripe listen`), day-11/14 trial emails (B-14), P-10 buttons.
+- Progress: 2026-09-18 · branch `track-n/b14-email` · day-11/14 trial emails: daily portal cron
+  `/api/cron/trial-emails` (09:00 CDMX), idempotent per (business, kind, trial-end date),
+  recipient = the Stripe customer's email; no email for a business already paying.
 
 ### Plan limits and usage
 
@@ -128,6 +131,10 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
   `consecutiveMonthsOver`, `canCreateProduct` (free tier from `FALLBACK_PLAN`, typed result with
   `excess` for the import dry-run), neutral phone codes `USAGE_NEAR_LIMIT` / `USAGE_AT_LIMIT`. 53 tests.
   **Still to do:** emails (B-14), inbox items (N-08 ingestion), portal and app banners.
+- Progress: 2026-09-18 · branch `track-n/b14-email` · owner email ready as
+  `notifyUsageThreshold(notice)` (`apps/portal/src/server/email/usage.ts`; 80/100 % template,
+  prices + IVA, never punitive); the N-02 wiring calls it per owner crossing. Businesses with no
+  Stripe customer have no reachable owner address yet (`docs/ops/email.md` §6).
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
@@ -252,6 +259,9 @@ body, attachments)`.
   digest section "Rechazos de sincronización (24 h)" reuses B-18's `rejectionDigest` from data-pg
   unchanged; admin migration 0007 grants the admin role four columns of `sync_rejections`
   (payload/message stay unreadable). Degrades to "No disponible". **Still to do:** B-14 mailer.
+- Progress: 2026-09-18 · branch `track-n/b14-email` · the digest cron sends through B-14's
+  `transactionalMailer` (React Email staff-digest from the same sections; Resend with
+  `RESEND_API_KEY`, dev outbox without), keyed per window so a re-run sends once.
 
 ### Settings and onboarding
 

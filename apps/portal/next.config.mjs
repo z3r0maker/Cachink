@@ -17,7 +17,17 @@ const nextConfig = {
   // build output, so Next must compile them rather than treat them as external.
   transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],
   typedRoutes: true,
-  webpack: (config) => {
+  // Sentry's Node SDK (B-18) loads Node built-ins at run time; bundling it
+  // breaks. Keep it external on the Node server…
+  serverExternalPackages: ['@sentry/node'],
+  webpack: (config, { nextRuntime }) => {
+    // …and absent from any non-Node compile. `next dev` also compiles
+    // `src/instrumentation.ts` for the Edge runtime, where `path` and the other
+    // built-ins do not exist; without this every page returned 500 in dev
+    // (`Can't resolve 'path'`) while production builds still passed.
+    if (nextRuntime !== 'nodejs') {
+      config.resolve.alias = { ...(config.resolve.alias ?? {}), '@sentry/node': false };
+    }
     // The workspace packages are ESM TypeScript and follow the Node
     // convention of importing siblings as `./colors.js` while the file on
     // disk is `colors.ts`. TypeScript resolves that; webpack does not,

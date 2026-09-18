@@ -74,3 +74,6 @@ next-env.d.ts
 # Playwright storage state: a signed session cookie. Never commit it, and
 # keep prettier out of it (format:check reads this file, not apps/portal/.gitignore).
 **/e2e/.auth/
+
+# Dev email outbox (B-14): .eml/.html written when RESEND_API_KEY is unset
+.email-outbox/

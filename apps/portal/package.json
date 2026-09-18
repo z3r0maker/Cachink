@@ -41,6 +41,7 @@
     "@xangarro/data": "workspace:*",
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
+    "@xangarro/email": "workspace:*",
     "@xangarro/tokens": "workspace:*",
     "exceljs": "^4.4.0",
     "jose": "6.2.12",

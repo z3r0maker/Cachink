@@ -27,6 +27,11 @@ describe('cobranza del turno', () => {
     assert.equal(r.efectivo, 550_00n);
   });
 
+  it('says «Un» for one, not «Uno»', () => {
+    assert.equal(resumen(clientes.slice(0, 1), abonos.slice(0, 1)).recibidos, 'Un abono recibido');
+    assert.equal(resumen(clientes.slice(0, 1), []).conSaldo, 'Un cliente con saldo');
+  });
+
   it('describes each card as the file does', () => {
     assert.equal(resumenCliente(mari), '3 ventas abiertas · la más antigua V-0361 · 8 may');
     assert.equal(resumenCliente(clientes[3]!), 'No debe nada. Última venta liquidada el 9 may.');
