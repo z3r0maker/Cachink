@@ -5457,3 +5457,61 @@ scan past other phones' sales.
   cursor from pull responses only (recorded in B-08 for A-06).
 - The contract has no `hasMore`; the phone pulls again while a pull returns rows
   until C-04 is amended.
+
+---
+
+## ADR-079
+
+**Title:** Portal sessions are server-side; throttling lives in Postgres
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — B-17; closes security audit findings SEC-AUTH-01 and SEC-AUTH-02, and the rate-limit half of SEC-DEV-01
+
+**Context**
+
+The portal session cookie was an HMAC-signed copy of the claims. It had no
+expiry of its own, logout only deleted the browser's copy, and a member removed
+or demoted kept their old role for as long as the cookie lived. Sign-in had no
+throttling, answered faster for unknown addresses, and ran as a role that could
+`SELECT` every tenant's password hash. `/activate`, the one endpoint with no
+token in front of it, could be guessed at freely.
+
+**Decision**
+
+1. **Sessions.** The cookie is 256 random bits; `xangarro.portal_sessions`
+   stores only its SHA-256. Every request resolves it through
+   `xangarro.session_resolve`, which joins the member's **current** role: logout
+   (revocation), 30-day absolute expiry, 7-day idleness and removed membership
+   all end a session immediately. The claims keep Supabase's shape, so
+   `withTenant` and RLS are unchanged. `SESSION_SECRET` is gone.
+2. **Throttling in Postgres** (`xangarro.throttle`, keys are SHA-256 of the
+   subject, never an email or IP): sign-in 5 failures per address / 20 per IP in
+   15 min → 15-min lockout; `/activate` 5 guesses per IP and 5 per code → 15-min
+   lockout, checked before anything else; 60 calls/min per device, `429` +
+   `Retry-After`. All limits are in `server/throttle-policy.ts`.
+3. **Sign-in reads one hash.** The app role has column grants on `auth.users`
+   without `encrypted_password`; `xangarro.login_lookup(email)` returns one
+   account's. Unknown addresses are compared against a dummy bcrypt hash so the
+   response time is the same.
+
+All tables live in the `xangarro` schema with no app privileges, reached only
+through SECURITY DEFINER functions with a pinned `search_path` (as 0002).
+
+**Alternatives considered**
+
+- *Keep the signed cookie, add `exp` and a revocation list.* Still needs a table
+  lookup per request to honour revocation and role changes, so it is the same
+  cost with two mechanisms instead of one.
+- *Upstash/Redis for rate limits.* A new vendor for a few hundred rows.
+
+**Consequences**
+
+- One small DB round trip per portal request (cached per request).
+- Per-IP limits trust `x-forwarded-for`'s first entry, which is correct behind
+  Vercel and wrong anywhere without a trusted proxy in front.
+- The throttle table is never pruned yet; expired rows are inert. A nightly
+  delete is B-16's.
+- Hosted Supabase (B-03): the definer functions must be owned by a role that
+  bypasses RLS (audit DB-RLS-03), and the Data API must not accept these
+  tokens (SEC-DATA-01).

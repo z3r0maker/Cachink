@@ -1,5 +1,6 @@
 import postgres from 'postgres';
 
+import { clearLocalThrottles } from '../scripts/local-throttles';
 import { BASE_URL } from './base-url';
 
 /**
@@ -70,5 +71,11 @@ export default async function globalSetup(): Promise<void> {
     throw new Error(`DATABASE_URL is not set. Run:\n  ${RESET}`);
   }
   await assertSeeded(url);
+  const sql = postgres(url, { max: 1, onnotice: () => undefined });
+  try {
+    await clearLocalThrottles(sql);
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
   await assertServerIsServingTheGate(BASE_URL);
 }

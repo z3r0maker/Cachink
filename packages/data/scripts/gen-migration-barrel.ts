@@ -21,6 +21,8 @@ import { readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { format, resolveConfig } from 'prettier';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const MIGRATIONS_DIR = resolve(__dirname, '../drizzle/migrations');
 const JOURNAL_PATH = resolve(MIGRATIONS_DIR, 'meta/_journal.json');
@@ -151,6 +153,10 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
-const barrel = generateBarrel(journal);
+// Prettier owns the layout, not this generator (F-10): the committed barrel is
+// whatever Prettier makes of it, so regenerating an unchanged journal is a
+// no-op instead of an unrelated diff for whoever runs `db:generate` next.
+const options = await resolveConfig(OUTPUT_PATH);
+const barrel = await format(generateBarrel(journal), { ...options, filepath: OUTPUT_PATH });
 writeFileSync(OUTPUT_PATH, barrel, 'utf-8');
 console.log(`✅ Generated ${OUTPUT_PATH} with ${journal.entries.length} migration(s)`);

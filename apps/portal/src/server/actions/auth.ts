@@ -1,83 +1,82 @@
 'use server';
 
+import {
+  loginLookup,
+  throttleClear,
+  throttleFail,
+  throttleKey,
+  throttleWait,
+} from '@xangarro/data-pg';
 import { compare } from 'bcryptjs';
 import { sql } from 'drizzle-orm';
-import { cookies } from 'next/headers';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 
 import type { Role } from '@/session/types';
 
 import { db } from '../db';
-import { SESSION_COOKIE, serializeSession, type SessionClaims } from '../session';
+import { endSession, startSession } from '../session';
+import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '../throttle-policy';
 
 /**
- * Email + password sign-in.
+ * Email + password sign-in (audit SEC-AUTH-02).
  *
- * `auth.users` holds the identity in Supabase's own column shape, and the
- * password is bcrypt at cost 10 on both sides, so this check is identical
- * against either issuer. Adopting GoTrue replaces this function; nothing
- * downstream of the session cookie changes.
+ * - **Throttled** per address and per IP before the password is even checked.
+ * - **Same cost either way**: an unknown address is compared against a dummy
+ *   bcrypt hash, so response time does not reveal which addresses exist.
+ * - **One hash, by email**: the app role cannot read `encrypted_password`;
+ *   `xangarro.login_lookup` returns exactly one account's.
  *
- * The membership lookup runs **outside** any tenant transaction on purpose:
- * it is the query that decides *which* tenant, so it cannot be scoped by one.
- * It is also the only query in the portal that reads across tenants, which is
- * why it selects a single row by user id and returns nothing else.
+ * The membership lookup runs outside any tenant transaction on purpose: it is
+ * the query that decides *which* tenant (see `xangarro.memberships_for_user`).
  */
 export type LoginResult = { ok: true } | { ok: false; message: string };
 
 const WRONG = 'Correo o contraseña incorrectos.';
+/** bcrypt, cost 10, of a random string nobody knows — only ever compared against. */
+const DUMMY_HASH = '$2b$10$8S3S44VqKonb5aKgKp4CQOeYprcpwCtEl/EmGvLTKhk1PcW/tRfcO';
+
+const tooMany = (wait: number): LoginResult => ({
+  ok: false,
+  message: `Demasiados intentos. Vuelve a intentar en ${minutes(wait)} min.`,
+});
+
+async function passwordMatches(email: string, password: string) {
+  const user = await loginLookup(db(), email);
+  const ok = await compare(password, user?.hash ?? DUMMY_HASH);
+  return ok && user?.hash ? user : null;
+}
 
 export async function login(email: string, password: string): Promise<LoginResult> {
-  const trimmed = email.trim().toLowerCase();
-  if (trimmed.length === 0 || password.length === 0) {
+  const address = email.trim().toLowerCase();
+  if (address.length === 0 || password.length === 0) {
     return { ok: false, message: 'Escribe tu correo y tu contraseña.' };
   }
+  const byEmail = throttleKey('login', 'email', address);
+  const byIp = throttleKey('login', 'ip', clientIp(await headers()));
+  const wait = Math.max(await throttleWait(db(), byEmail), await throttleWait(db(), byIp));
+  if (wait > 0) return tooMany(wait);
 
-  const rows = await db().execute<{ id: string; email: string; encrypted_password: string | null }>(
-    sql`SELECT id::text, email, encrypted_password FROM auth.users WHERE email = ${trimmed}`,
-  );
-  const user = rows[0];
+  const user = await passwordMatches(address, password);
+  if (user === null) {
+    const locked = Math.max(
+      await throttleFail(db(), byEmail, LOGIN_PER_EMAIL),
+      await throttleFail(db(), byIp, LOGIN_PER_IP),
+    );
+    return locked > 0 ? tooMany(locked) : { ok: false, message: WRONG };
+  }
+  await throttleClear(db(), byEmail);
 
-  // One message for "no such account" and "wrong password" alike: distinguishing
-  // them tells an attacker which addresses are registered.
-  if (!user?.encrypted_password) return { ok: false, message: WRONG };
-  if (!(await compare(password, user.encrypted_password))) return { ok: false, message: WRONG };
-
-  // Through `xangarro.memberships_for_user`, not a plain SELECT. Sign-in is the
-  // query that decides *which* tenant, so it cannot be scoped to one — and with
-  // no claim set, `tenant_isolation` correctly returns zero rows. The function
-  // is SECURITY DEFINER with a surface of exactly one user id, which is far
-  // narrower than handing the app a BYPASSRLS role for this one lookup.
-  const members = await db().execute<{ business_id: string; role: Role }>(
+  const [member] = await db().execute<{ business_id: string; role: Role }>(
     sql`SELECT business_id, role FROM xangarro.memberships_for_user(${user.id})`,
   );
-  const member = members[0];
+  if (!member) return { ok: false, message: 'Tu cuenta aún no pertenece a ningún negocio.' };
 
-  if (!member) {
-    return { ok: false, message: 'Tu cuenta aún no pertenece a ningún negocio.' };
-  }
-
-  const claims: SessionClaims = {
-    sub: user.id,
-    email: user.email,
-    role: 'authenticated',
-    business_id: member.business_id,
-    member_role: member.role,
-  };
-
-  const jar = await cookies();
-  jar.set(SESSION_COOKIE, serializeSession(claims), {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    path: '/',
-    maxAge: 60 * 60 * 24 * 30,
-  });
+  await startSession(user.id, member.business_id);
   return { ok: true };
 }
 
 export async function logout(): Promise<never> {
-  const jar = await cookies();
-  jar.delete(SESSION_COOKIE);
+  await endSession();
   redirect('/login');
 }

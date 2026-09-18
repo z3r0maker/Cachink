@@ -21,7 +21,7 @@
     "db:generate": "drizzle-kit generate",
     "db:up": "./scripts/db-local.sh up",
     "db:down": "./scripts/db-local.sh down",
-    "test:db": "REQUIRE_DB=1 DATABASE_URL=$(./scripts/db-local.sh url) vitest run",
+    "test:db": "REQUIRE_DB=1 DATABASE_URL=$(./scripts/db-local.sh url) DATABASE_SUPER_URL=$(./scripts/db-local.sh super-url) vitest run",
     "db:seed": "DATABASE_URL=$(./scripts/db-local.sh url) tsx ./scripts/seed.ts",
     "db:apply": "./scripts/db-local.sh apply",
     "db:reset": "./scripts/db-local.sh down && ./scripts/db-local.sh up && pnpm db:seed"
@@ -34,6 +34,7 @@
     "postgres": "^3.4.9"
   },
   "devDependencies": {
+    "@types/node": "^22.19.17",
     "@xangarro/config": "workspace:*",
     "@xangarro/data": "workspace:*",
     "drizzle-kit": "^0.31.10",

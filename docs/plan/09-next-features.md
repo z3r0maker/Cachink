@@ -82,7 +82,7 @@
 
 ### N-02 Server usage metering `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
+- [~] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
 - **What:** a portal-only `usage_counters (business_id, period 'YYYY-MM', transactions, products,
 computed_at)` table (ADR-060 portal-only entity checklist).
 - **How:** `/sync/push` increments `transactions` by accepted UP rows in the counted tables; a nightly
@@ -91,10 +91,19 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   cron share one use case.
 - **Acceptance:** 1 happy + 3 unhappy use-case tests; nightly recompute corrects an injected drift;
   pull payload validates against the contract.
+- Progress: 2026-09-17 · e7741c6 (branch `track-n/n02-usage-engine`, unmerged) · pure core in
+  `@xangarro/domain/usage`: `countsTowardUsage` (OQ-5), `usagePeriod` (America/Mexico_City),
+  `computeUsage`; limits accepted as `UsageLimits` until C-12. Rules settled while building: **every
+  manual movement counts** (incl. muestra / uso en producción / otro), sale-generated and
+  cancellation movements don't; a cancelled/soft-deleted counted row stays counted; rows are
+  attributed to the month of their **capture date** (device `createdAt`, MX time) and the nightly
+  recompute absorbs late pushes; active products are counted as of now. **Still to do:**
+  `usage_counters` + use case in data-pg/application, push hook, nightly cron; `origen` column on
+  inventory movements (C-12 step 7) to replace the motivo/nota heuristic.
 
 ### N-03 Overage warnings and provider alerts `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
 - **What:** thresholds 80 % / 100 % per metric → owner email (once per threshold per month), portal
   banner, app banner (from the pulled `usage`). **App copy is neutral** (ADR-069): "Este negocio está
   cerca de su límite mensual. Avisamos al dueño." — no plan names, prices or upgrade prompts on the
@@ -104,6 +113,11 @@ computed_at)` table (ADR-060 portal-only entity checklist).
 metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 - **Acceptance:** crossing each threshold fires exactly once; a paid tenant at 150 % still syncs
   every row (contract test).
+- Progress: 2026-09-17 · a80a4ef (branch `track-n/n02-usage-engine`) · `crossedThresholds` (80 → owner,
+  100 → owner + provider, 150 → provider; idempotency key `business:period:metric:threshold`),
+  `consecutiveMonthsOver`, `canCreateProduct` (free tier from `FALLBACK_PLAN`, typed result with
+  `excess` for the import dry-run), neutral phone codes `USAGE_NEAR_LIMIT` / `USAGE_AT_LIMIT`. 53 tests.
+  **Still to do:** emails (B-14), inbox items (N-08 ingestion), portal and app banners.
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
@@ -139,13 +153,23 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
 - **What:** tenant list (plan, Stripe status active/trialing/past_due/lapsed, next charge, interval,
   devices, last sync, last login) and detail with a link to the Stripe customer.
 - **How:** Stripe stays the source of truth (webhooks). Overrides, each audited and each with an
   expiry: **extend trial**, **comp plan** (e.g. beta testers, N-30), **re-issue entitlement**
   (forces a fresh signed token on the next pull).
 - **Acceptance:** an override changes the next pulled entitlement; expiry reverts it; audit row.
+- Progress: 2026-09-17 · cb03934…7aec8da (branch `track-n/n06-admin-tenants`, on top of N-08, unmerged)
+  · tenant list (keyset pagination, search by name/owner email/id, "sin sincronizar > 7 días" from
+  `devices.last_push_at`/`last_pull_at`) and detail (members, devices, inbox link); append-only,
+  audited, expiring `PlanOverride` (extend_trial / comp_plan / reissue_entitlement) +
+  `effectivePlan` (13 tests); read-only cross-tenant SQL for `xangarro_admin`, verified on a
+  throwaway PG17. Billing fields come from a `BillingStatusSource` stub ("Sin datos") until B-10. No
+  RFC column exists yet on main, so no RFC search. **Still to do:** B-10 adapter; B-06's
+  `computeEntitlement` (`compute-entitlement.ts:83-99`) must consume `effectivePlan` (comp before the
+  free fallback, trial extension on `currentPeriodEnd`, reissue invalidates older cached tokens) —
+  a Track B change; last-login grant; Playwright.
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
@@ -156,7 +180,7 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
+- [~] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
 - **What:** portal-only `support_items (kind ∈ bug | factura | migracion | escalacion | limite |
 explorador | sistema, status ∈ nuevo | en_curso | resuelto, urgent, owner_staff_id, business_id,
 body, attachments)`.
@@ -164,22 +188,45 @@ body, attachments)`.
   the app's "Reportar problema", "Solicitar factura" (P-10), "Hazlo por mí" (N-18), N-03 alerts, the
   GLM explorer (N-49).
 - **Acceptance:** each source creates an item; assignment and status changes are audited.
+- Progress: 2026-09-17 · 7fd151d…b554e02 (branch `track-n/n08-admin-inbox`, on top of N-05, unmerged) ·
+  `SupportItem` (factura needs a CFDI UUID to resolve), `support_items` (no DELETE grant),
+  create/assign/status/list use cases with tests, inbox list + detail with «Pagos sin CFDI», audited
+  mutations, `POST /api/internal/support-items` (shared secret). 96 admin tests. **Still to do:** wire
+  each source (bug-report, Ayuda, P-10, N-18, N-03, Stripe → factura), move tables to `data-pg`, real
+  DB test for the Postgres adapter.
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
 - **What:** UI over the **platform-availability** level of the three-level flags (ADR-053): global
   on/off per feature, plus a beta allowlist of tenants. Kill switches for the Asesor LLM, receipts
   share, card collection (once built).
 - **Acceptance:** flipping a flag reaches a device on its next pull; audited.
+- **Decision (2026-09-17):** platform availability moves from the `PLATFORM_AVAILABLE` constant to an
+  admin-editable table; a key with no row uses the code default; devices still receive flags only
+  through the signed entitlement (no contract change); the ADR-059 LLM gate becomes the `asesorLlm`
+  kill switch.
+- Progress: 2026-09-17 · 45acd01…7784fe7 (branch `track-n/n09-platform-flags`, on top of N-06, unmerged)
+  · `PlatformFlag` + `isPlatformAvailable` / `resolvePlatformFlags` (domain, TDD); `0005_platform_flags.sql`
+  — append-only `platform_flag_events`, latest-state view, narrow portal view (no reason/author,
+  allowlist cut to the caller's business); `/flags` with allowlist, "afecta a N negocios"
+  confirmation, history; integration note `apps/admin/docs/platform-flags-integration.md`.
+  **Still to do (Track B/A):** `computeEntitlement` (`compute-entitlement.ts:68,83`) and
+  `entitlementFor` (`bootstrap.ts:71`) read the portal view; the app must take platform availability
+  from `entitlement.features`, not the compiled constant (A-10/A-14); a C- task so `comprobanteShare`
+  and `cobrosIntegrados` can reach devices.
 
 ### N-10 Staff alerts `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-08, B-14, B-18
+- [~] Status · **Blocked by:** N-08, B-14, B-18
 - **What:** daily 08:00 (America/Mexico_City) digest to `soporte@xangarro.mx` — new inbox items, over
   limit tenants, dormancy candidates, B-18 rejection summary. Urgent items also POST to a Slack/Discord
   incoming webhook (URL in env).
 - **Acceptance:** digest renders with zero and with many items; urgent items arrive within 1 minute.
+- Progress: 2026-09-17 · ad53bdc, 16ed374 (branch `track-n/n08-admin-inbox`) · `buildDailyDigest`,
+  `GET /api/cron/digest` (CRON_SECRET, Vercel Cron `0 14 * * *` = 08:00 CDMX), Slack/Discord urgent
+  webhook. **Still to do:** real email adapter (B-14; stub logs only), over-limit (N-07), dormancy and
+  B-18 sections.
 
 ### Settings and onboarding
 
@@ -432,7 +479,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-32 Store-compliance sweep `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
+- [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
   (`xangarrito|xangarro plan|xangarrote`), prices, `mejora|upgrade|suscr|plan|precio|pagar` and any
@@ -441,10 +488,20 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   employees (3.1.3(c)); operators sign in with a code issued by their employer; no digital content is
   sold in the app." Demo account `DEMOK7M3` kept live (2.1). Play: declare no in-app purchases.
 - **Acceptance:** the CI check is green; a reviewer checklist is attached to X-05.
+- Progress: 2026-09-17 · 682a48a (branch `track-n/n32-store-compliance`, unmerged) · `pnpm lint:store`
+  (TypeScript-AST string extraction over the app bundle + `es-mx.ts`, 52 tests, one allowlist entry:
+  "Suscripción" as a sale category, 3.1.3(e)). **main: 0 violations. App branch
+  `rename/xangarro-stored-ids`: 20** — mostly `es-mx.ts`: `planBanner.fellBack` / `planLimit.*`
+  (plan names + "Renueva/Cambia tu plan en app.xangarro.mx"), `settings.plans.*`, portal URLs in
+  hints (`productos.editInPortal`, `nuevoProducto.portalHint`, `settings.portalHint`,
+  `login.noOperatorsBody`, `activate.noCode`), "Activar" / "Código de activación" wording, and
+  `activate.errors.noSlots`. **Still to do:** neutralise that copy on the app branch (e.g. "Pídele al
+  dueño del negocio que lo haga desde su cuenta" — no URL, no plan), wire into CI after the branch
+  merges, reviewer checklist for X-05.
 
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 
-- [ ] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
+- [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
 - **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
   an aviso de privacidad (integral on the landing and portal footer, simplified at signup and in the
   app's sign-in) covering purposes, transfers (Supabase, Vercel, Stripe, PAC, Sentry), the ADR-064
@@ -453,6 +510,22 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   capture versioned per aviso version. Text reviewed by counsel.
 - **Acceptance:** aviso reachable from every surface; an ARCO request creates an inbox item with its
   due dates; consent version stored per user.
+- Progress: 2026-09-17 · 8fae254 (branch `track-n/n34-aviso-draft`, unmerged) · Spanish drafts for
+  counsel in `docs/legal/aviso/`: aviso integral, three simplified avisos (signup, device linking,
+  operator NIP), encargado clauses (for the merchant's own customers' data), ARCO procedure plus an
+  internal annex, and a README with 16 questions for counsel and verified citations (LFPDPPP DOF
+  2025-03-20 / reform 2025-11-14; Reglamento 2011; CFF art. 30).
+- **Product requirements the law implies (added to this task's scope; confirm with counsel):**
+  self-service "eliminar mi cuenta / negocio"; a public ARCO form for people without an account;
+  separate blocked-data storage with scheduled deletion; notify the person when a cancellation is
+  complete (art. 24); Configuración → Privacidad to withdraw consent; ARCO deadlines in business days
+  with a holiday calendar; delete overdue-receivable data after 72 months (art. 10); pass requests from
+  a merchant's customers on to the merchant (Xangarro acts as encargado); a data-processing agreement
+  with each provider; a separate, unticked consent for datos patrimoniales (art. 7) pending counsel.
+- **Open with counsel:** whether ADR-064's 6-year archive is _bloqueo_ (the law allows only settling
+  liabilities) or a stated purpose (restore + support for the owner's CFF duty), which is how it's
+  drafted; responsable vs encargado for a persona física owner's books; whether the 2013 Lineamientos
+  still apply.
 
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 

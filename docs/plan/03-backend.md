@@ -236,13 +236,24 @@
 
 ### B-15 Retention acknowledgment support
 
-- [ ] Status · **Blocked by:** B-08, B-09
+- [x] Status · **Blocked by:** B-08, B-09
+  - Done 2026-09-17: `e2e/sync.spec.ts` › "retention" over HTTP — accepted rows are covered by the
+    next pull's `acknowledgedThrough`; a rejected row gets no serverSeq and no receipt, so nothing
+    can cover it until it is fixed and re-pushed; and one phone's pushes never move another's bound
+    (the bound is per device, `devices.acknowledged_through`).
 - **Context:** Q9 — the phone may purge only rows the server has durably stored. `acknowledged_through` in pull (B-09) + `server_seq` per accepted row in push (B-08) already give this. This task adds the **integration test** proving a row acknowledged in push is ≤ `acknowledged_through` on the next pull, and that a row rejected is never acknowledged.
 - **Acceptance:** that test, green.
 
 ### B-16 Back-office: Studio saved queries + support functions
 
-- [ ] Status · **Blocked by:** B-03, B-11
+- [~] Status · **Blocked by:** B-03, B-11
+  - 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today,
+    and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()`
+    (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every
+    saved query on the seed and pins the SQL unlock to the app's throttle key. **Still blocked:**
+    the subscriptions query (B-10's tables), `resend_magic_link` (auth provider undecided), and
+    Studio-callable code issuance, which needs a decision (a SQL copy of the alphabet vs. the
+    portal's «Generar código»).
 - **Steps:** commit `supabase/studio/*.sql` (copied into Studio's saved queries manually): subscriptions by plan/status; businesses with unresolved rejections; devices not seen in 7 days; activation codes expiring today. Functions: `billing.reissue_code(business_id)`, `billing.resend_magic_link(email)` (calls Auth admin API via edge function). README `docs/ops/back-office.md` with the runbook (Q16).
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 
@@ -252,12 +263,33 @@
 > code/QR token **before** any device token exists (5 failures / 15 min → 15-min lockout), with one
 > generic error. See C-14.
 
-- [ ] Status · **Blocked by:** B-05
+- [x] Status · **Blocked by:** B-05
+  - Done 2026-09-17 (ADR-079). Postgres throttle (`xangarro.throttle`, hashed keys): 60 calls/min
+    per device → `429` + `Retry-After`; `/activate` 5 guesses per IP and 5 per code in 15 min →
+    15-min lockout, before any device token; `426` was already there. Folded in from the security
+    audit: **server-side portal sessions** (logout revokes, 30 d absolute / 7 d idle, a removed or
+    demoted member loses access on the next request — SEC-AUTH-01, plus the «Cerrar sesión» menu the
+    portal lacked), and sign-in throttled per address and IP, constant-time on unknown addresses,
+    reading one hash through `xangarro.login_lookup` (SEC-AUTH-02). Proven by
+    `security.integration.test.ts` and E2E (a copied cookie dies at logout, five wrong passwords
+    lock, a phone's 61st call gets 429, a locked IP cannot spend a real code).
+  - **Not here:** the 429 conformance test and C-14's single generic error / QR token are contract
+    changes (C-14, Track C); the mock has no limiter yet.
 - **Steps:** `X-Xangarro-Protocol` check → `426`; per-device token bucket (60/min) in Postgres or Upstash (prefer Postgres `billing.rate_limits` to avoid a new vendor at this size); `429` + `Retry-After`.
 - **Acceptance:** conformance tests for 426 and 429.
 
 ### B-18 Backend observability
 
-- [ ] Status · **Blocked by:** B-07…B-09
+- [x] Status · **Blocked by:** B-07…B-09
+  - Done 2026-09-17. `@sentry/node` in `src/instrumentation.ts` (Node only, off without
+    `SENTRY_DSN`); `onRequestError` catches what nothing else did. Every server failure goes through
+    `reportError` (Sentry tags `business_id`, `device_id`, `endpoint` + one JSON line; a Postgres
+    `detail` is never copied). Every phone call logs one line through `deviceRoute`
+    (`{business_id, device_id, endpoint, status, ms, accepted, rejected, codes}`), and the three
+    device routes share that wrapper instead of three copies of auth/error handling. The digest is
+    `rejectionDigest(tx, since)`. Acceptance: `tests/observability.test.ts` runs the real SDK with
+    an in-memory transport (tagged event; cookies, headers, query and user stripped), and
+    `test:conformance` fails unless the run's server log has the push line and no email.
+  - **Ops, not code:** set `SENTRY_DSN` in production. Browser-side Sentry is not wired.
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.

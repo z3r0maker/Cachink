@@ -173,3 +173,11 @@ export const shortcutHint = style({
   color: colors.ink,
   textWrap: 'pretty',
 });
+
+/** Caja keeps room at the foot for its «Cobrar» bar: 108 px narrow, 172 on the phone. */
+export const mainCaja = style({
+  '@media': {
+    'screen and (max-width: 1239px)': { paddingBottom: 108 },
+    [PHONE]: { paddingBottom: 172 },
+  },
+});

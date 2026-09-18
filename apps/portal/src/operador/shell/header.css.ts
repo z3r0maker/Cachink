@@ -172,22 +172,3 @@ export const action = style([
     selectors: { '&:hover': { background: colors.yellowDeep } },
   },
 ]);
-
-/** A white header action (Avisos' «Marcar todo como leído»): a native button, 44 px. */
-export const plainAction = style([
-  pressable,
-  {
-    height: 44,
-    padding: '0 16px',
-    border: `2px solid ${colors.black}`,
-    borderRadius: radii[3],
-    background: colors.white,
-    boxShadow: shadows.small,
-    fontFamily: 'inherit',
-    fontSize: portalFontSizes.xs,
-    fontWeight: typography.weights.bold,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    color: colors.black,
-  },
-]);

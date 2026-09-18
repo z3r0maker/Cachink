@@ -37,3 +37,10 @@ export function protocolRefusal(request: Request): Response | null {
     ? null
     : fail('PROTOCOL_UNSUPPORTED', `Send ${HEADER_PROTOCOL}: ${PROTOCOL_VERSION}`);
 }
+
+/** 429 with the `Retry-After` the phone backs off by (§1, B-17). */
+export function rateLimited(retryAfter: number): Response {
+  const response = fail('RATE_LIMITED', 'Demasiadas solicitudes. Intenta más tarde.');
+  response.headers.set('Retry-After', String(retryAfter));
+  return response;
+}

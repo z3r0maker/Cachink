@@ -223,11 +223,73 @@ Collected while building fase 10; none is edited in `design-reference/`.
    several cancellations; Inicio «Cerró» for a last turno that did not balance; Turno «Gastos» hint
    with zero or several receipts. Invented and awaiting wording: «Vence en N días» (dues beyond
    tomorrow).
+8. **Detalle de venta:** V-0412 is $160.00 (3 pastor, 1 gringa, 1 horchata) here and $320.00
+   («8 pastor · 2 gringa · 2 horchata») in Ventas; the header's state pill stays on in the empty
+   and error states. «Enviada al portal» has no offline wording (a sale still in the queue).
 
-## 5. Fases 11–13 (tasks written when fase 10 closes)
+## 5. Fase 11 — Caja y captura
 
-- **Fase 11 — Caja y captura:** catalog, ticket, checkout modal (método · efectivo · fiado),
-  producto creado en caja, comprobante, caja bloqueada.
+> **Started before the fase 10 gate closed (owner, «continue», 2026-09-17).** O-12/O-13 wait on the
+> Acceso amendment and the runtime; fase 11 proceeds on fixtures so the screens are not idle.
+
+### O-20 Operador · Caja
+
+- [x] Status · **Blocked by:** O-11 · **Blocks:** fase 11 gate
+  - Done: 2026-09-17 · `src/operador/caja/` (catalogue, ticket column / bottom sheet, Cobrar modal
+    in three steps, post-sale card with its 8 s bar, Compartir comprobante, Producto nuevo en caja),
+    `/operador/caja`; pure ticket maths in `caja/ticket.ts` with unit tests
+    (`tests/operador/ticket.test.ts`); shared `OpModal` (Radix) and `Note`. Harness comparison at
+    1440, 1024 and 375 px, empty ticket, loading/empty/error, each Cobrar step, the post-sale card
+    and both modals: box-for-box except the agreed radius, a design button left in browser-default
+    black (#000; code keeps the token), and harness noise where the runtime splits mixed text.
+    **Gate met** by `e2e/operador-caja.spec.ts` at 1440/1024/768: cash sale with change, credit sale
+    that needs a client, a long ticket whose total and COBRAR stay in view, Deshacer.
+  - Deviations: the lock overlay in this file is O-13's (NIP verification) and not built here;
+    «Guardar imagen» / «Copiar texto» / WhatsApp do real things on the device (PNG, clipboard,
+    `wa.me` text per Track N row 13) instead of the prototype's canned confirmations; «Agregar al
+    ticket» requires a name and a price. `portalFontSizes.total = 38` added.
+  - For the design project (§4b): the WhatsApp confirmation says «enviado» but the app can only open
+    WhatsApp; the owner must know the message still needs sending.
+
+**Open question found while building O-20:** `portalFontSizes` documents «the floor of 12 holds for
+both» surfaces, but the operator design uses 11 px (tab labels, chips, «Sin leer», «Quedan N»), and
+O-11 added `portalFontSizes.tag = 11`. Needs the owner's call: keep 11 (amend the floor) or raise
+those texts to 12 upstream.
+
+## 6. Fase 12 — Turno completo, detalles y cola sin conexión
+
+> **Open for fase 12 (asked when wiring, not blocking the fixture screens):** the five close-out
+> reasons vs the six-value `caja_turnos` enum (Cierre), and where expense receipt photos live
+> (Gastos). The screens are built on fixtures; the questions come back with O-06.
+
+### O-21 Operador · Ventas
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-17 · `src/operador/ventas/`, `/operador/ventas`; figures derived and unit-tested
+    (`tests/operador/ventas.test.ts`: 12 active, $3,280.00, $2,140.00 cash, V-0405 out of every
+    total). Shared `SearchBox`, `FilterChips`, `SinResultados`, `ChoiceChips`, field styles and a
+    `Toast` width. Harness: default, loading, empty, error, 375 px and the cancel modal match
+    (agreed radius aside). The design's `startFilter` control is not wired in the file itself.
+    Cancellations are device-local until O-06. Playwright: `e2e/operador-ventas.spec.ts`.
+
+### O-22 Operador · Detalle de venta
+
+- [x] Status · **Blocked by:** O-21
+  - Done: 2026-09-17 · `src/operador/ventas/detalle/`, `/operador/ventas/[folio]` (Ventas rows now
+    link here; the catch-all no longer 404s them). The ticket card, «Quién y cuándo», «Qué puedes
+    hacer» and the fiado card; the header carries the sale's state pill. Cancel reuses Ventas'
+    modal (`CancelarVenta`, now generic; the list opens `CancelarDeLista`), and sharing reuses
+    Caja's (`Share variant="detalle"`: 420 px, titled with the folio, no preview); the category
+    tints moved to `caja/categorias.ts`. Dev forcing: `dataState`, `venta=efectivo|fiado`,
+    `estado=cancelada`. Harness at 1440, 1000 and 375 px, cancelled, fiado, loading/empty/error,
+    both cancel modals and the share modal: match, the agreed radius and the runtime's split text
+    aside. Playwright: `e2e/operador-detalle-venta.spec.ts`.
+  - Deviations: the state pill shows only when a ticket is on screen (the file keeps «Venta
+    registrada y enviada» above «Esta venta ya no existe»); a folio the fixture does not hold renders
+    the empty state (only V-0412 and V-0409 have designed lines).
+
+## 7. Fase 13 (tasks written when fase 12 closes)
+
 - **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
   de cliente, Registros por enviar, then Cierre de turno last.
 - **Fase 13 — Dueño:** Revisión de caja, Cortes de turno.

@@ -3,6 +3,7 @@ import 'server-only';
 import { shellCounts } from '@xangarro/data-pg';
 
 import { withTenant } from './db';
+import { reportError } from './observability/report';
 
 /**
  * The counts the app shell shows on every page.
@@ -31,7 +32,7 @@ export async function loadShellCounts(businessId: string): Promise<ShellCounts> 
   } catch (error) {
     // Never silent: the screens surface their own error state, but the shell
     // has nowhere to put one, so the log is the only trace.
-    console.error('[shell] counts unavailable, showing zero', error);
+    reportError(error, { endpoint: 'shell:counts', businessId });
     return NONE;
   }
 }

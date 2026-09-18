@@ -292,6 +292,10 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
      enforced client-side only on xangarrito; the server accepts every row.
   5. Stripe lookup keys: `plan_<tier>_monthly`, `plan_<tier>_annual`.
   6. Regenerate the signature test vector; update mock scenarios (`over-limit`).
+  7. Add `origen ∈ manual | venta | cancelacion | conversion` to `inventory_movements` (wire + pg +
+     SQLite, old→new migration defaulting existing rows from the motivo/nota heuristic in
+     `@xangarro/domain/usage`), and add `Conversión` to the motivo enum it is already written with.
+     Usage counts only `origen = manual` (N-02).
 - **Acceptance:** C-10 conformance suite green against the mock; domain tests for the new limits.
 
 ### C-13 Payment intents API

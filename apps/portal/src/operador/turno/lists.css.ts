@@ -108,3 +108,10 @@ export const hoyNo = style([
   pressable,
   { ...rowButton, padding: '0 14px', background: colors.white },
 ]);
+
+export const saldo = style({
+  flex: 'none',
+  fontSize: portalFontSizes.sm,
+  fontWeight: typography.weights.bold,
+  fontVariantNumeric: 'tabular-nums',
+});

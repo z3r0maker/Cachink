@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { deviceHeaders } from '@xangarro/contracts';
 import { newUlid } from '@xangarro/domain';
 
 import {
@@ -11,6 +12,7 @@ import {
   pull,
   push,
   sale,
+  TACO,
   type Phone,
 } from './sync-phone';
 
@@ -133,4 +135,48 @@ test('a backlog longer than a page arrives in order, without skipping', async ({
   expect(first.tables.products).toHaveLength(1);
   const second = await pull(request, b, first.serverSeq);
   expect(second.serverSeq).toBe(from + backlog);
+});
+
+test('retention: a phone may purge exactly what the cloud stored, and only its own', async ({
+  request,
+}) => {
+  const bAck = (await pull(request, b, b.cursor)).acknowledgedThrough;
+  const bad = sale(a, { productoId: newUlid() });
+  const first = await (await push(request, a, [sale(a), bad])).json();
+  const second = await (await push(request, a, [sale(a)])).json();
+  const stored = [...first.accepted, ...second.accepted].map(
+    (x: { serverSeq: number }) => x.serverSeq,
+  );
+
+  expect((await pull(request, a, a.cursor)).acknowledgedThrough).toBeGreaterThanOrEqual(
+    Math.max(...stored),
+  );
+  // A rejected row gets no serverSeq, so no acknowledgedThrough can ever cover it…
+  expect(first.rejected[0].rowId).toBe(bad.rowId);
+  const receipts = await asTenant(
+    BIZ,
+    (sql) => sql`SELECT 1 FROM sync_receipts WHERE row_id = ${bad.rowId}`,
+  );
+  expect(receipts).toHaveLength(0);
+  // …and another phone's bound does not move for pushes that are not its own.
+  expect((await pull(request, b, b.cursor)).acknowledgedThrough).toBe(bAck);
+
+  // Fixed and re-pushed, it is stored — and only now covered.
+  const fixed = await (
+    await push(request, a, [{ ...bad, row: { ...bad.row, productoId: TACO } }])
+  ).json();
+  expect((await pull(request, a, a.cursor)).acknowledgedThrough).toBeGreaterThanOrEqual(
+    fixed.accepted[0].serverSeq,
+  );
+});
+
+test('a phone over 60 calls a minute is told when to come back', async ({ request }) => {
+  let limited = null;
+  for (let i = 0; i < 70 && limited === null; i += 1) {
+    const r = await request.get('/api/v1/entitlement', { headers: deviceHeaders(b.token) });
+    if (r.status() === 429) limited = r;
+  }
+  expect(limited, 'no 429 within 70 calls').not.toBeNull();
+  expect(Number(limited?.headers()['retry-after'])).toBeGreaterThan(0);
+  expect((await limited?.json()).error.code).toBe('RATE_LIMITED');
 });

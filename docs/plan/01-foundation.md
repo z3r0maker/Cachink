@@ -172,7 +172,18 @@
 
 ### F-10 Lint the Deno edge function, and fix the barrel/committed drift
 
-- [ ] Status
+- [x] Status
+  - Done 2026-09-17. **Deno story: step 1's second option.** `deno` is not installed here and the
+    shared ESLint config is not type-aware, so the function now passes the repo's own checks: the
+    rules moved to `validate.ts`, `rows.ts`, `handlers.ts` and `router.ts` (Deno-style `.ts` imports,
+    no `any`, storage behind `IngestStore`); `index.ts` is only the Deno wiring; `deno.d.ts` types its
+    two URL imports and `Deno.env`. The ignore is gone — `pnpm lint:root` lints
+    `supabase/functions`, `pnpm typecheck` runs its `tsconfig.json`, and `ingest.test.ts` (8 tests,
+    the function had none) runs in `pnpm test:scripts`. All 13 findings are paid. **Not verified:**
+    a run under the Deno runtime itself — the modules use only web-standard APIs, but `deno check`
+    should run once before the next deploy.
+  - Barrel: the generator formats its output with Prettier's API (`resolveConfig` + `format`), so
+    `pnpm --filter @xangarro/data db:barrel` on a clean tree leaves it clean.
 - **Blocked by:** F-08 (lint coverage) · **Blocks:** —
 - **Context:** Two things the F-08 coverage fix uncovered but deliberately did **not** fix, because both are outside "make the gate see every file".
   1. **`supabase/functions/bug-report/index.ts` is unlinted.** It is Deno — URL imports (`https://esm.sh/…`, `https://deno.land/…`) and a `deno-lint-ignore-file` pragma — so the repo's ESLint config cannot resolve its modules and its rule set does not apply. It is in `ignores` with a comment pointing here. When it was linted once, it reported **13 errors**: the file is 271 lines (max 200); `validateErrorEvent` is complexity 22 and cognitive 19; `validateBugReport` is 17/15; `handleErrors` is a 49-line function; and there are six `any`. This is the ingest endpoint that validates untrusted input and enforces the per-device rate limits, so complexity there is not cosmetic.

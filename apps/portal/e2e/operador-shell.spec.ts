@@ -8,7 +8,7 @@ const DESTINOS = ['Caja', 'Turno', 'Ventas', 'Gastos', 'Inventario', 'Cobranza',
 
 test('the operator shell stays put while the active item follows the route', async ({ page }) => {
   await page.goto('/operador');
-  const aside = page.locator('aside');
+  const aside = page.locator('aside').filter({ hasText: 'XANGARRO!' });
   const first = await aside.boundingBox();
 
   for (const label of DESTINOS) {
@@ -40,7 +40,7 @@ test.describe('phone', () => {
 
   test('below 760 px the sidebar gives way to a four-tab bar', async ({ page }) => {
     await page.goto('/operador/ventas');
-    await expect(page.locator('aside')).toBeHidden();
+    await expect(page.locator('aside').filter({ hasText: 'XANGARRO!' })).toBeHidden();
     const bar = page.getByRole('navigation', { name: 'Navegación de la caja' }).last();
     await expect(bar.getByRole('link')).toHaveText(['Inicio', 'Caja', 'Ventas', 'Turno']);
     await expect(bar.getByRole('link', { name: 'Ventas' })).toHaveAttribute('aria-current', 'page');

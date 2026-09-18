@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { reportError } from '../observability/report';
 
 /**
  * Mark every unread notice as read.
@@ -40,7 +41,7 @@ export async function marcarAvisosLeidos(): Promise<MarkResult> {
     revalidatePath('/');
     return { ok: true, marked };
   } catch (error) {
-    console.error('[marcarAvisosLeidos]', error);
+    reportError(error, { endpoint: 'marcarAvisosLeidos' });
     const message =
       error instanceof Error ? error.message : 'No pudimos marcar los avisos. Intenta de nuevo.';
     return { ok: false, message };

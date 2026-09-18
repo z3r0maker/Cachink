@@ -48,16 +48,6 @@ export default tseslint.config(
       'design-reference/**',
       // Read-only mirror of the Claude Design project (ADR-058).
       'design-reference/**',
-      // Deno, not Node: `supabase/functions/**` imports from URLs, carries
-      // `deno-lint-ignore-file` pragmas, and is checked by `deno lint` — this
-      // config's module resolution and rule set do not apply to it.
-      //
-      // NOT a clean bill of health. When it was linted once during the
-      // lint-coverage fix, `bug-report/index.ts` reported 13 errors: a 271-line
-      // file, `validateErrorEvent` at complexity 22, `validateBugReport` at 17,
-      // and six `any` on an endpoint that validates untrusted input. Tracked as
-      // F-10; do not treat this ignore as the debt being paid.
-      'supabase/functions/**',
     ],
   },
 
