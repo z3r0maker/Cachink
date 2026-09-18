@@ -5,12 +5,12 @@ the admin console answering on their domains. Nothing here needs a Supabase
 API key — auth is ours (ADR-079/080), the Data API is off (SEC-DATA-01), and
 every app connects to Postgres with its **own restricted login role**.
 
-| Fact             | Value                                                                                                                              |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Supabase project | ref `jijggmddzacwcldwnmzj`, region **us-west-2 (Oregon)**, compute Nano                                                            |
-| Vercel functions | **pdx1** (Portland), both projects — pinned in each app's `vercel.json`                                                            |
-| Vercel projects  | repo `z3r0maker/Cachink`: **portal** (root `apps/web`, `app.xangarro.mx`), **admin** (root `apps/backoffice`, `admin.xangarro.mx`) |
-| Region decision  | Owner decision 2026-09-18: keep Oregon, pin Vercel to pdx1 (README Q17)                                                            |
+| Fact             | Value                                                                                                                                                  |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Supabase project | ref `jijggmddzacwcldwnmzj`, region **us-west-2 (Oregon)**, compute Nano                                                                                |
+| Vercel functions | **pdx1** (Portland), both projects — pinned in each app's `vercel.json`                                                                                |
+| Vercel projects  | repo `z3r0maker/Cachink`: **xangarro-web** (root `apps/web`, `app.xangarro.mx`), **xangarro-backoffice** (root `apps/backoffice`, `admin.xangarro.mx`) |
+| Region decision  | Owner decision 2026-09-18: keep Oregon, pin Vercel to pdx1 (README Q17)                                                                                |
 
 **Rule for every step:** secrets go from the terminal or password manager
 straight into `packages/data-pg/.env.local` (gitignored) or the Vercel
@@ -256,11 +256,11 @@ but a deploy guarantees every function sees them).
 
 At the DNS host of `xangarro.mx`:
 
-| Record                        | Type   | Value                                                                                               |
-| ----------------------------- | ------ | --------------------------------------------------------------------------------------------------- |
-| `app.xangarro.mx`             | CNAME  | `cname.vercel-dns.com` (add the domain to the **portal** project first; use the value Vercel shows) |
-| `admin.xangarro.mx`           | CNAME  | `cname.vercel-dns.com` (**admin** project)                                                          |
-| Resend (`send.`, DKIM, DMARC) | MX/TXT | exactly as `docs/ops/email.md` §1                                                                   |
+| Record                        | Type   | Value                                                                                                     |
+| ----------------------------- | ------ | --------------------------------------------------------------------------------------------------------- |
+| `app.xangarro.mx`             | CNAME  | `cname.vercel-dns.com` (add the domain to the **xangarro-web** project first; use the value Vercel shows) |
+| `admin.xangarro.mx`           | CNAME  | `cname.vercel-dns.com` (**xangarro-backoffice** project)                                                  |
+| Resend (`send.`, DKIM, DMARC) | MX/TXT | exactly as `docs/ops/email.md` §1                                                                         |
 
 ## 9. Smoke checks
 
