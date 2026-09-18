@@ -61,6 +61,10 @@ export default defineConfig({
     // Redundant with env inheritance, and kept anyway: it is the only place a
     // reader learns this server is database-backed.
     env: {
+      // Locally, a build of its own (see next.config.mjs): other sessions'
+      // builds in this directory cannot swap it out mid-run. CI builds `.next`
+      // in its own step and is alone on the runner.
+      ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
       DATABASE_URL: databaseUrl(),
       // /activate signs a device token and an entitlement. The entitlement key
       // is the contract's published TEST key, passed explicitly: the portal has

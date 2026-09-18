@@ -1,5 +1,5 @@
 /**
- * The sidebar's twelve destinations.
+ * The sidebar's thirteen destinations (Revisión de caja joined with Track O, O-30).
  *
  * Order, labels, the "Configuración" divider after Dispositivos, and every
  * icon path are copied verbatim from the design files' `navDefs` — per the
@@ -14,6 +14,8 @@ export interface NavItem {
   /** Lucide-idiom path data, drawn on a 24×24 viewBox at stroke-width 2.2. */
   readonly icon: string;
   readonly dividerAfter?: true;
+  /** Other paths that light this item: Cortes de turno sits under Operadores (O-31). */
+  readonly activeOn?: readonly string[];
 }
 
 export const NAV_ITEMS: readonly NavItem[] = [
@@ -40,8 +42,14 @@ export const NAV_ITEMS: readonly NavItem[] = [
     icon: 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8',
   },
   {
+    label: 'Revisión de caja',
+    href: '/revision-caja',
+    icon: 'M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9',
+  },
+  {
     label: 'Operadores',
     href: '/equipo?tab=operadores',
+    activeOn: ['/cortes'],
     icon: 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3',
   },
   { label: 'Empleados', href: '/empleados', icon: 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4' },

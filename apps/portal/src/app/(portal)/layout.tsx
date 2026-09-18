@@ -3,6 +3,8 @@ import { loadShellCounts } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
 import { Header } from '@/shell/header';
 import { Sidebar } from '@/shell/sidebar';
+
+import { pendientesRevision } from './revision-caja/pendientes';
 import { column, content, frame, main } from '@/shell/shell.css';
 
 /** "Ana Robledo" → "AR"; a single word gives one letter. */
@@ -36,7 +38,7 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <SessionProvider session={session}>
       <div className={frame}>
-        <Sidebar />
+        <Sidebar badges={{ '/revision-caja': pendientesRevision() }} />
         <div className={column}>
           {/* planLabel is still the fixture plan: it rides in the signed
               entitlement (B-06), which has no issuer yet. */}

@@ -13,6 +13,12 @@ const withVanillaExtract = createVanillaExtractPlugin();
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Where the build goes. The E2E suite sets NEXT_DIST_DIR=.next-e2e/<port>:
+  // several sessions build in this directory, and a `next build` that replaces
+  // `.next` under a running `next start` makes the webpack runtime chunk 500,
+  // so the page never renders and every spec fails. A private dir per port
+  // cannot be pulled out from under the server using it.
+  distDir: process.env.NEXT_DIST_DIR || '.next',
   // `@xangarro/tokens` and `@xangarro/domain` ship TypeScript sources, not a
   // build output, so Next must compile them rather than treat them as external.
   transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],

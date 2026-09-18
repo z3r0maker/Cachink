@@ -37,6 +37,7 @@ export default tseslint.config(
       // lints itself with a bare `eslint .`, so anything not named here IS
       // linted; that is what `scripts/lint-coverage.test.ts` enforces.
       '**/.next/**',
+      '**/.next-e2e/**',
       '**/.expo/**',
       'apps/*/ios/**',
       'apps/*/android/**',

@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { brand, colors, fontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { brand, colors, fontSizes, radii, shadows, shapeRadii, typography } from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
 
@@ -107,3 +107,21 @@ export const dividerLabel = style({
 });
 
 export const dividerRule = style({ flex: 1, height: 2, background: colors.gray200 });
+
+/** A pending count on a nav row (Revisión de caja): 22 px yellow pill, as in the handoff. */
+export const badge = style({
+  flex: 'none',
+  marginLeft: 'auto',
+  minWidth: 22,
+  height: 22,
+  padding: '0 6px',
+  display: 'grid',
+  placeItems: 'center',
+  border: `2px solid ${colors.black}`,
+  borderRadius: shapeRadii.pill,
+  background: colors.yellow,
+  fontSize: fontSizes.xs,
+  fontWeight: typography.weights.extraBold,
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.black,
+});
