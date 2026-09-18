@@ -29,9 +29,7 @@ function expected(inventory: Tri, credit: string, personas: number | undefined):
 }
 
 const cases = TRI.flatMap((inventory) =>
-  CREDIT_SOURCES.flatMap((credit) =>
-    PERSONAS.map((personas) => ({ inventory, credit, personas })),
-  ),
+  CREDIT_SOURCES.flatMap((credit) => PERSONAS.map((personas) => ({ inventory, credit, personas }))),
 );
 
 describe('suggested plan — every combination', () => {

@@ -50,7 +50,10 @@ describe('parseWizardAnswers', () => {
   });
 
   it('rejects personasQueCobran below 1 or fractional', () => {
-    expectOnboardingError(() => parseWizardAnswers({ personasQueCobran: 0 }), 'INVALID_WIZARD_ANSWERS');
+    expectOnboardingError(
+      () => parseWizardAnswers({ personasQueCobran: 0 }),
+      'INVALID_WIZARD_ANSWERS',
+    );
     expectOnboardingError(
       () => parseWizardAnswers({ personasQueCobran: 1.5 }),
       'INVALID_WIZARD_ANSWERS',
@@ -75,7 +78,10 @@ describe('parseWizardAnswers', () => {
       () => parseWizardAnswers({ tipoNegocio: 'fábrica' }),
       'INVALID_WIZARD_ANSWERS',
     );
-    expectOnboardingError(() => parseWizardAnswers({ whatsapp: '55-1234' }), 'INVALID_WIZARD_ANSWERS');
+    expectOnboardingError(
+      () => parseWizardAnswers({ whatsapp: '55-1234' }),
+      'INVALID_WIZARD_ANSWERS',
+    );
   });
 
   it('rejects "no vendo a crédito" together with Crédito as a payment method', () => {

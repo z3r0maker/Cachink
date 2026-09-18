@@ -13,6 +13,11 @@ const CURRENT: TenantConfiguration = {
   paymentTypes: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi'],
 };
 
+const clone = (c: TenantConfiguration): TenantConfiguration => ({
+  toggles: { ...c.toggles },
+  paymentTypes: [...c.paymentTypes],
+});
+
 describe('diffConfiguration', () => {
   it('lists every feature and payment-type change in a stable order', () => {
     const next: TenantConfiguration = {
@@ -30,7 +35,7 @@ describe('diffConfiguration', () => {
   });
 
   it('identical configurations are a no-op', () => {
-    assert.deepEqual(diffConfiguration(CURRENT, structuredClone(CURRENT)), []);
+    assert.deepEqual(diffConfiguration(CURRENT, clone(CURRENT)), []);
   });
 
   it('payment types are a set: order and duplicates are not changes', () => {
@@ -75,7 +80,7 @@ describe('applyConfiguration', () => {
   });
 
   it('does not mutate the current configuration', () => {
-    const snapshot = structuredClone(CURRENT);
+    const snapshot = clone(CURRENT);
     applyConfiguration(CURRENT, answersToConfiguration({ manejaInventario: false }, 'xangarro'));
     assert.deepEqual(CURRENT, snapshot);
   });

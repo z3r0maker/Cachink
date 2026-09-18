@@ -92,7 +92,10 @@ describe('answersToConfiguration — "no" answers and deltas', () => {
   });
 
   it('credit and caja answers without step 2 become add/remove deltas', () => {
-    const on = answersToConfiguration({ vendeACredito: true, manejaCajaEfectivo: true }, 'xangarro');
+    const on = answersToConfiguration(
+      { vendeACredito: true, manejaCajaEfectivo: true },
+      'xangarro',
+    );
     assert.deepEqual(on.paymentTypes, { set: null, add: ['Efectivo', 'Crédito'], remove: [] });
     const off = answersToConfiguration({ vendeACredito: false }, 'xangarro');
     assert.deepEqual(off.toggles, { ventasCredito: false });
