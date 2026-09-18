@@ -13,7 +13,7 @@ export const alDia = style({
   textAlign: 'center',
 });
 
-/** 52 px, radius 15 in the file; 16 until the upstream correction (ADR-076). */
+/** 52 px, radius 16. */
 export const alDiaTile = style({
   ...contentBox,
   width: 52,

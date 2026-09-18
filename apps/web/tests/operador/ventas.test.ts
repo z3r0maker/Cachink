@@ -10,8 +10,8 @@ describe('ventas del turno', () => {
   it('agrees with Inicio, Turno and Cierre: cancelled sales stay out of every total', () => {
     const r = resumen(ventas);
     assert.equal(r.activas, 12);
-    assert.equal(r.cobrado, 3280_00n);
-    assert.equal(r.efectivo, 2140_00n);
+    assert.equal(r.cobrado, 3120_00n);
+    assert.equal(r.efectivo, 1980_00n);
   });
 
   it('filters by method and searches folio, concept and client without accents', () => {

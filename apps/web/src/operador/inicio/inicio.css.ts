@@ -167,3 +167,9 @@ export const chip = style({
   fontVariantNumeric: 'tabular-nums',
   whiteSpace: 'nowrap',
 });
+
+/** «Hoy no»: the row's second action, gray, removes the task for today. */
+export const hoyNo = style([
+  rowCta,
+  { padding: '0 14px', background: colors.gray100, cursor: 'pointer', fontFamily: 'inherit' },
+]);

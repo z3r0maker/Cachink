@@ -27,13 +27,15 @@ export function ListaGastos({ gastos }: { readonly gastos: readonly GastoTurno[]
 function Fila({ x }: { readonly x: GastoTurno }) {
   const tint = CAT_TINT[x.categoria];
   return (
-    <div className={v.row}>
-      <span className={g.tile} style={{ background: tint }}>
-        <Icon path={CAT_ICON[x.categoria]} size={20} strokeWidth={2.3} />
-      </span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div className={l.name}>{x.concepto}</div>
-        <div className={l.detail}>{x.detalle}</div>
+    <div className={`${v.row} ${u.rowWrap}`}>
+      <div className={u.rowMain} style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <span className={g.tile} style={{ background: tint }}>
+          <Icon path={CAT_ICON[x.categoria]} size={20} strokeWidth={2.3} />
+        </span>
+        <div style={{ flex: '1 1 0', minWidth: 0 }}>
+          <div className={l.name}>{x.concepto}</div>
+          <div className={l.detail}>{x.detalle}</div>
+        </div>
       </div>
       <span className={v.method} style={{ background: tint }}>
         {x.categoria}
@@ -44,7 +46,7 @@ function Fila({ x }: { readonly x: GastoTurno }) {
       <span className={v.time} style={{ minWidth: 56 }}>
         {x.hora}
       </span>
-      <span className={v.amount} style={{ color: colors.redText }}>
+      <span className={v.amount} style={{ color: colors.redText, marginLeft: 'auto' }}>
         {`−${formatMoney(x.monto)}`}
       </span>
     </div>

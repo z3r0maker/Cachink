@@ -5,15 +5,15 @@ import { formatMoney } from '@xangarro/domain';
 import { Icon } from '../../shell/icon';
 import { enPalabras } from '../inicio/copy';
 import { ICONS, OPERADOR_BASE } from '../shell/nav';
+import { hintCanceladas, hintComprobantes } from '../ui/frases';
 import type { KpiItem } from '../ui/parts';
 import * as u from '../ui/ui.css';
 import type { TurnoData } from './types';
 
-/** The four turno figures. Undesigned counts leave the hint blank (see O-14). */
+/** The four turno figures. */
 export function kpis(d: TurnoData): readonly KpiItem[] {
-  const cancelada =
-    d.canceladas === 1 && d.ultimaCancelada ? `Una cancelada a las ${d.ultimaCancelada}` : '';
-  const comprobantes = d.comprobantes === 1 ? 'Un comprobante' : '';
+  const cancelada = hintCanceladas(d.canceladas, d.ultimaCancelada);
+  const comprobantes = hintComprobantes(d.comprobantes);
   return [
     { label: 'Ventas del turno', value: String(d.ventas), color: colors.black, hint: cancelada },
     {

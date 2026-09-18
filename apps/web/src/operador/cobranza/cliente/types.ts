@@ -51,6 +51,8 @@ export interface CuentaCliente {
 
 export interface DetalleClienteData {
   readonly negocio: string;
+  /** The turno's date (`YYYY-MM-DD`): due dates are said against it. */
+  readonly hoy: string;
   readonly dueno: string;
   readonly cuenta: CuentaCliente | null;
 }

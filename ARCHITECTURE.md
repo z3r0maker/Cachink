@@ -5742,3 +5742,42 @@ launch copy (Track L, N-31) edited next to the prices and plan slugs it must mat
 - Content and branding are untouched (`VITE_SITE_URL` still says cachink.mx); the rebrand
   is Track L (L-01…L-05) and N-31, whose paths are now under `apps/landing/`.
 - Suggested follow-ups: React 19 (drop the override), Vite 8, `@vitejs/plugin-react` 6.
+
+## ADR-085
+
+**Title:** Track O's design amendments landed upstream; the operator code follows the pulled files
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — settles D2, D5 and D7 of ADR-083
+
+**Context**
+
+Plan §4b listed fourteen places where the operator and owner design files disagreed with each
+other, with the README, or with ADR-072/074/075/076/077. The owner applied them in Claude Design
+and the 16 files were pulled into `design-reference/operador/` (a mirror, never hand-edited —
+ADR-058).
+
+**Decision**
+
+1. The pulled files are the specification again, with no standing deviations for the first
+   round: one example day ($3,120.00 cobrado, $1,980.00 in cash, $620.00 of gastos, $2,710.00
+   expected), one account history, one shell, Cierre counting from zero.
+2. ADR-083 **D2** (WhatsApp «abierto», never «enviado»), **D5** (an abono above the balance is
+   saldo a favor, said in the preview, the history and the toast) and **D7** (Cobranza and Detalle
+   de cliente read one history) are now drawn in the files and stop being provisional. D1, D3, D4
+   and D6 stand as written.
+3. Sentences the files build from counts and dates live once, in `src/operador/ui/frases.ts`
+   (cancellations, receipts, due dates «Vence el viernes» / «Se venció ayer»); `HOY` moves to
+   `src/operador/fixtures.ts`.
+4. Owner `DataTable` gains an `empty` slot and `EmptyState` an `inset` form, so a filtered table
+   shows its empty state under its header row (Cortes de turno).
+5. Three residual points go to a second round (plan §4b): lowercase count words, a gray-400
+   «×0» under AA, and three owner-component values that differ from what the files draw. Code
+   keeps the capitalised, AA-safe and owner-component versions until the files answer.
+
+**Consequences**
+
+- O-12 (Acceso) is no longer blocked on design; it waits on O-04 and O-06 only.
+- Unit tests and E2E specs use the new figures; the harness comparison is box-for-box on the
+  operator screens except text the runtime splits and the capitalised hints.

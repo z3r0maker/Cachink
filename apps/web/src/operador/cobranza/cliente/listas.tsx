@@ -10,7 +10,7 @@ import * as u from '../../ui/ui.css';
 import * as v from '../../ventas/ventas.css';
 import * as c from '../cobranza.css';
 import * as s from './cliente.css';
-import { abiertas, historial, type Abierta } from './derive';
+import { abiertas, historial, vence, type Abierta, type Vence } from './derive';
 import type { CuentaCliente } from './types';
 
 const CHEVRON = 'M9 6l6 6-6 6';
@@ -22,9 +22,11 @@ const ABAJO = 'M12 5v14M5 12l7 7 7-7';
 export function Abiertas({
   cuenta,
   e,
+  hoy,
 }: {
   readonly cuenta: CuentaCliente;
   readonly e: EstadoCuenta;
+  readonly hoy: string;
 }) {
   const lista = abiertas(cuenta, e);
   return (
@@ -35,20 +37,23 @@ export function Abiertas({
         <span className={u.headNote}>Lo que abone se aplica a la más antigua primero.</span>
       </div>
       {lista.map((x) => (
-        <FilaAbierta key={x.venta.folio} x={x} />
+        <FilaAbierta key={x.venta.folio} x={x} vence={vence(x.venta.fecha, cuenta.plazo, hoy)} />
       ))}
       {lista.length === 0 ? <NoDebe /> : null}
     </div>
   );
 }
 
-function FilaAbierta({ x }: { readonly x: Abierta }) {
+function FilaAbierta({ x, vence: due }: { readonly x: Abierta; readonly vence: Vence }) {
   return (
     <div className={s.fila} data-hover="">
       <span className={v.folio}>{x.venta.folio}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div className={l.name}>{x.venta.concepto}</div>
         <div className={l.detail}>{`${x.venta.dia} · ${x.orden}`}</div>
+        <div className={s.vence} style={{ color: due.vencido ? colors.redText : colors.gray600 }}>
+          {due.texto}
+        </div>
       </div>
       {x.pagado > 0n ? (
         <span
@@ -86,19 +91,13 @@ function NoDebe() {
 }
 
 /** «Movimientos»: tickets (+) and abonos (−), newest first. */
-export function Movimientos({
-  cuenta,
-  e,
-}: {
-  readonly cuenta: CuentaCliente;
-  readonly e: EstadoCuenta;
-}) {
+export function Movimientos({ cuenta }: { readonly cuenta: CuentaCliente }) {
   return (
     <div className={u.listCard}>
       <div className={c.abonosHead}>
         <span className={u.eyebrow}>Movimientos</span>
       </div>
-      {historial(cuenta, e).map((m) => {
+      {historial(cuenta).map((m) => {
         const abono = m.tipo === 'abono';
         return (
           <div key={`${m.tipo}${m.fecha}`} className={s.fila} data-mov="">

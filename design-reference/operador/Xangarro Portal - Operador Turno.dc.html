@@ -59,6 +59,9 @@ a:hover{color:var(--black);}
             <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
             <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
           </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Acceso.dc.html" title="Bloquear caja" aria-label="Bloquear caja" data-press="1" style="margin-left:auto;flex:none;display:grid;place-items:center;width:42px;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
         </div>
         <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Cerrar turno</a>
       </div>
@@ -85,6 +88,10 @@ a:hover{color:var(--black);}
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
             Nueva venta
           </a>
+          <a href="Xangarro%20Portal%20-%20Operador%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 2 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">2</span>
+          </a>
         </div>
       </div>
     </header>
@@ -104,7 +111,7 @@ a:hover{color:var(--black);}
             <div style="font-size:{{ heroSize }};line-height:1;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.04em;color:var(--black);">{{ esperado }}</div>
             <div style="display:flex;flex-direction:column;gap:9px;">
               <sc-for list="{{ breakdown }}" as="b" hint-placeholder-count="4">
-                <div style="display:flex;align-items:baseline;gap:10px;padding-bottom:8px;border-bottom:2px solid rgba(13,13,13,0.15);">
+                <div style="display:flex;align-items:baseline;gap:10px;padding-bottom:8px;border-bottom:2px solid #DBB80A;">
                   <span style="font-size:13px;font-weight:700;color:var(--black);">{{ b.label }}</span>
                   <span style="margin-left:auto;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ b.value }}</span>
                 </div>
@@ -149,13 +156,13 @@ a:hover{color:var(--black);}
               <span style="font-size:13px;font-weight:600;color:var(--ink);text-wrap:pretty;">Gastos que se repiten y hoy nadie ha capturado.</span>
             </div>
             <sc-for list="{{ pendientes }}" as="p" hint-placeholder-count="3">
-              <div style="display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:{{ p.divider }}">
-                <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;flex-wrap:wrap;row-gap:10px;gap:12px;padding:14px 18px;border-bottom:{{ p.divider }}">
+                <div style="flex:1 1 {{ rowBasis }};min-width:0;">
                   <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);">{{ p.name }}</div>
                   <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;text-wrap:pretty;">{{ p.detail }}</div>
                 </div>
                 <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ p.dueBg }};color:{{ p.dueColor }}">{{ p.due }}</span>
-                <span style="flex:none;min-width:98px;text-align:right;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ p.amount }}</span>
+                <span style="flex:none;margin-left:auto;min-width:98px;text-align:right;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ p.amount }}</span>
                 <div style="flex:none;display:flex;gap:9px;">
                   <a href="Xangarro%20Portal%20-%20Operador%20Gastos.dc.html" data-press="1" data-onyellow="1" style="display:inline-flex;align-items:center;height:44px;padding:0 16px;border:2px solid var(--black);border-radius:12px;background:var(--yellow);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);text-decoration:none;">Registrar</a>
                   <span role="button" tabindex="0" onClick="{{ p.skip }}" data-press="1" style="display:inline-flex;align-items:center;height:44px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Hoy no</span>
@@ -221,6 +228,16 @@ const MOVS = [
   ['Merma · Queso oaxaca', '1 kg · se cayó al piso', '13:04', 0, 'merma']
 ];
 
+const NUM = ['cero', 'una', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+
+// Gastos del turno y cuántos llevan comprobante; el hint se escribe desde aquí.
+const GASTOS_COUNT = 5, GASTOS_CON_COMPROBANTE = 4;
+function hintComprobantes(n) {
+  if (n === 0) return 'Ninguno lleva comprobante';
+  if (n === 1) return 'Un comprobante';
+  return NUM[n] + ' con comprobante';
+}
+
 class Component extends DCLogic {
   state = { vw: 1440, skipped: [] };
 
@@ -239,7 +256,7 @@ class Component extends DCLogic {
     const offline = this.props.connection === 'sin-conexion';
 
     const fondo = 800;
-    const ventasEfectivo = 2140;
+    const ventasEfectivo = 1980;
     const abonosEfectivo = 550;
     const gastosEfectivo = 620;
     const esperado = fondo + ventasEfectivo + abonosEfectivo - gastosEfectivo;
@@ -305,6 +322,7 @@ class Component extends DCLogic {
 
     return {
       isPhone, isDesktop, nav, tabbar, movs, pendientes,
+      rowBasis: st.vw < 1000 ? '100%' : '0',
       hasPendientes: pendientes.length > 0,
       pendientesCount: String(pendientes.length),
       esperado: MXN(esperado),
@@ -316,9 +334,9 @@ class Component extends DCLogic {
       ],
       kpis: [
         { label: 'Ventas del turno', value: '12', color: 'var(--black)', hint: 'Una cancelada a las 12:58' },
-        { label: 'Cobrado', value: MXN(3280), color: 'var(--green-text)', hint: 'Todos los métodos' },
+        { label: 'Cobrado', value: MXN(3120), color: 'var(--green-text)', hint: 'Todos los métodos' },
         { label: 'Fiado', value: MXN(182), color: 'var(--warning-text)', hint: 'Dos clientes' },
-        { label: 'Gastos', value: MXN(620), color: 'var(--red-text)', hint: 'Un comprobante' }
+        { label: 'Gastos', value: MXN(620), color: 'var(--red-text)', hint: hintComprobantes(GASTOS_CON_COMPROBANTE) }
       ],
       shortcuts: [
         { label: 'Registrar gasto', hint: 'Caja chica con comprobante', href: 'Xangarro%20Portal%20-%20Operador%20Gastos.dc.html', bg: 'var(--red-soft)', icon: 'M12 3v14M6 11l6 6 6-6M4 21h16' },

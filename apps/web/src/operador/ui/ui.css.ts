@@ -181,3 +181,15 @@ export const mainCaja = style({
     [PHONE]: { paddingBottom: 172 },
   },
 });
+
+/**
+ * A list row that wraps below 1000 px (the files' `rowBasis`): the name block
+ * takes the whole first line, the chips, amount and actions the second.
+ */
+export const rowWrap = style({ flexWrap: 'wrap' });
+
+export const rowMain = style({
+  flex: '1 1 0',
+  minWidth: 0,
+  '@media': { '(max-width: 999px)': { flexBasis: '100%' } },
+});

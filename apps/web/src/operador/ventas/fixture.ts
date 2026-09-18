@@ -2,7 +2,7 @@ import type { VentasData } from './types';
 
 /**
  * The design's turno (`Operador Ventas.dc.html`), in centavos. The figures agree
- * with Inicio, Turno and Cierre: 12 active sales, $3,280.00 collected, $2,140.00
+ * with Inicio, Turno and Cierre: 12 active sales, $3,120.00 collected, $1,980.00
  * in cash, $182.00 on credit; V-0405 ($60.00) is cancelled and out of every total.
  */
 export const VENTAS_FIXTURE: VentasData = {
@@ -12,8 +12,8 @@ export const VENTAS_FIXTURE: VentasData = {
   ventas: [
     {
       folio: 'V-0412',
-      concepto: '8 pastor · 2 gringa · 2 horchata',
-      monto: 320_00n,
+      concepto: '3 pastor · 1 gringa · 1 horchata',
+      monto: 160_00n,
       metodo: 'Efectivo',
       hora: '14:52',
     },

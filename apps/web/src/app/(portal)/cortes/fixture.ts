@@ -1,19 +1,18 @@
 import { colors } from '@xangarro/tokens';
 
-import type { Corte, Evento } from './types';
+import type { Corte, TurnoCorte } from './types';
 
 /**
- * `Cortes de turno.dc.html`, in centavos. The file shows one count (×1 … ×10,
- * $3,780.00) and one list of events for every corte; here each corte carries a
- * count that adds up to its own «Contado», and the events are the file's.
+ * `Cortes de turno.dc.html`, in centavos. Each corte carries its own count by
+ * denomination, which adds up to its «Contado», and its own turno summary.
  */
-const EVENTOS: readonly Evento[] = [
-  { label: 'Ventas capturadas', value: '12', tone: 'plain' },
-  { label: 'Ventas canceladas', value: '1 · $60.00', tone: 'danger' },
-  { label: 'Ventas fiadas', value: '$182.00', tone: 'warning' },
-  { label: 'Movimientos de inventario', value: '3 entradas · 2 mermas', tone: 'plain' },
-  { label: 'Productos creados en caja', value: '1', tone: 'soft' },
-];
+const t = (
+  ventas: number,
+  [n, monto]: readonly [number, bigint],
+  fiado: bigint,
+  inventario: string,
+  creados: number,
+): TurnoCorte => ({ ventas, canceladas: { n, monto }, fiado, inventario, creados });
 
 const ANA = {
   operador: 'Ana Robledo',
@@ -41,12 +40,12 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     dia: '14 may',
     horario: '08:15 a 21:04',
     fondo: 800_00n,
-    ventasEfectivo: 2140_00n,
+    ventasEfectivo: 1980_00n,
     abonosEfectivo: 550_00n,
     gastosCaja: 620_00n,
-    conteo: { 1000: 2, 500: 1, 200: 1, 100: 1, 50: 1, 20: 1 },
+    conteo: { 1000: 2, 500: 1, 200: 1, 10: 1 },
     estado: 'Cuadró',
-    eventos: EVENTOS,
+    turno: t(12, [1, 60_00n], 182_00n, '3 entradas · 2 mermas', 1),
   },
   {
     id: 'c-0513-luis',
@@ -61,7 +60,7 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     motivo: 'Cambio mal dado',
     nota: 'Le di cambio de 200 a un cliente que pagó con 100, ya no lo alcancé',
     estado: 'Por aclarar',
-    eventos: EVENTOS,
+    turno: t(9, [0, 0n], 0n, '1 entrada', 0),
   },
   {
     id: 'c-0513-ana',
@@ -74,7 +73,7 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     gastosCaja: 180_00n,
     conteo: { 1000: 3, 200: 1, 100: 1, 50: 1, 20: 1 },
     estado: 'Cuadró',
-    eventos: EVENTOS,
+    turno: t(15, [1, 45_00n], 260_00n, '2 entradas · 1 merma', 0),
   },
   {
     id: 'c-0512-sofia',
@@ -89,7 +88,7 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     motivo: 'Venta no registrada',
     nota: 'Creo que cobré unos tacos y no los capturé en la hora de la comida',
     estado: 'Aclarado',
-    eventos: EVENTOS,
+    turno: t(7, [0, 0n], 120_00n, '1 merma', 2),
   },
   {
     id: 'c-0511-luis',
@@ -104,7 +103,7 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     motivo: 'No sé',
     nota: 'Conté tres veces y no encontré de dónde sale',
     estado: 'Por aclarar',
-    eventos: EVENTOS,
+    turno: t(11, [2, 130_00n], 95_00n, '2 entradas', 0),
   },
   {
     id: 'c-0511-ana',
@@ -117,6 +116,6 @@ export const CORTES_FIXTURE: readonly Corte[] = [
     gastosCaja: 150_00n,
     conteo: { 1000: 2, 500: 1, 200: 2, 50: 1, 10: 1 },
     estado: 'Cuadró',
-    eventos: EVENTOS,
+    turno: t(14, [0, 0n], 340_00n, '3 entradas', 1),
   },
 ];

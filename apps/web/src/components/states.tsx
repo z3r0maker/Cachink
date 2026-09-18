@@ -7,6 +7,7 @@ import {
   stateAction,
   stateBody,
   stateCard,
+  stateInset,
   stateTitle,
   tile,
   tileEmpty,
@@ -20,13 +21,15 @@ interface StateProps {
 }
 
 export interface EmptyStateProps extends StateProps {
+  /** Inside another card (a table's body): no border, radius or shadow of its own. */
+  readonly inset?: boolean;
   /** Hidden for read-only roles — pass `undefined` rather than disabling it. */
   readonly action?: { readonly label: string; readonly onClick: () => void };
 }
 
-export function EmptyState({ title, body, glyph, action }: EmptyStateProps) {
+export function EmptyState({ title, body, glyph, action, inset }: EmptyStateProps) {
   return (
-    <div className={stateCard}>
+    <div className={inset ? `${stateCard} ${stateInset}` : stateCard}>
       <div className={`${tile} ${tileEmpty}`} aria-hidden="true">
         {glyph}
       </div>

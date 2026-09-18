@@ -6,8 +6,8 @@ import { expect, test } from '@playwright/test';
  */
 test('the turno figures exclude the cancelled sale', async ({ page }) => {
   await page.goto('/operador/ventas');
-  await expect(page.getByText('$3,280.00')).toBeVisible();
-  await expect(page.getByText('$2,140.00')).toBeVisible();
+  await expect(page.getByText('$3,120.00')).toBeVisible();
+  await expect(page.getByText('$1,980.00')).toBeVisible();
   await expect(page.getByText('Cancelada', { exact: true })).toHaveCount(1);
 });
 
@@ -19,7 +19,7 @@ test('cancelling needs a reason, keeps the sale, and moves the figures', async (
   await modal.getByRole('button', { name: 'Cobro duplicado' }).click();
   await modal.getByRole('button', { name: 'Cancelar la venta' }).click();
 
-  await expect(page.getByRole('status')).toContainText('V-0412 por $320.00 · Cobro duplicado.');
+  await expect(page.getByRole('status')).toContainText('V-0412 por $160.00 · Cobro duplicado.');
   await expect(page.getByText('Cancelada', { exact: true })).toHaveCount(2);
   await expect(page.getByText('$2,960.00')).toBeVisible();
 });

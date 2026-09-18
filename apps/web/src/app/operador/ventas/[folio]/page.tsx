@@ -4,11 +4,12 @@ import type { DetalleScreenProps, VentaDetalle } from '@/operador/ventas/detalle
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
 
-type Query = Readonly<Record<'dataState' | 'venta' | 'estado', string | undefined>>;
+type Query = Readonly<Record<'dataState' | 'venta' | 'estado' | 'enCola', string | undefined>>;
 
 /**
- * Development-only forcing of the design's `dataState`, `?venta=efectivo|fiado`
- * and `?estado=cancelada` (ADR-058 §9); in production the folio alone decides.
+ * Development-only forcing of the design's `dataState`, `?venta=efectivo|fiado`,
+ * `?estado=cancelada` and `?enCola=true` (ADR-058 §9); in production the folio
+ * alone decides.
  */
 function forced(
   q: Query,
@@ -19,10 +20,11 @@ function forced(
   const elegida = q.venta === 'efectivo' || q.venta === 'fiado' ? DETALLE_VENTAS[q.venta] : venta;
   return {
     state: STATES.find((s) => s === q.dataState) ?? 'happy',
-    venta:
-      elegida && q.estado === 'cancelada'
-        ? { ...elegida, cancelada: { motivo: 'Error de captura' } }
-        : elegida,
+    venta: elegida && {
+      ...elegida,
+      ...(q.estado === 'cancelada' ? { cancelada: { motivo: 'Error de captura' } } : {}),
+      ...(q.enCola === 'true' ? { enCola: true } : {}),
+    },
   };
 }
 

@@ -7,10 +7,10 @@ const sinChips = (page: Page) => page.locator('span').filter({ hasText: /^Sin co
  * O-23 (Track O, fase 12): Operador · Gastos. Amount, concept and category are
  * required; the receipt is optional and its absence is counted.
  */
-test('the turno figures: six expenses, $1,530.00 out, two without a receipt', async ({ page }) => {
+test('the turno figures: five expenses, $620.00 out, one without a receipt', async ({ page }) => {
   await page.goto('/operador/gastos');
-  await expect(page.getByText('$1,530.00')).toBeVisible();
-  await expect(sinChips(page)).toHaveCount(2);
+  await expect(page.getByText('$620.00', { exact: true })).toBeVisible();
+  await expect(sinChips(page)).toHaveCount(1);
 });
 
 test('registering needs amount, concept and category, then lands on top', async ({ page }) => {
@@ -27,8 +27,8 @@ test('registering needs amount, concept and category, then lands on top', async 
   await expect(page.getByRole('status')).toContainText(
     '−$120.00 · Hielo · Insumos · sin comprobante.',
   );
-  await expect(page.getByText('$1,650.00')).toBeVisible();
-  await expect(sinChips(page)).toHaveCount(3);
+  await expect(page.getByText('$740.00')).toBeVisible();
+  await expect(sinChips(page)).toHaveCount(2);
 });
 
 test('a receipt photo is attached, and a tap removes it', async ({ page }) => {
@@ -45,15 +45,16 @@ test('a receipt photo is attached, and a tap removes it', async ({ page }) => {
   await expect(page.getByRole('button', { name: /Tomar foto del comprobante/ })).toBeVisible();
 });
 
-/** Presence, not visibility: at 760–1000 px the file's row squeezes the concept to zero (§4b). */
 test('search and category filters narrow the list', async ({ page }) => {
   await page.goto('/operador/gastos');
+  await page.getByRole('button', { name: 'Otros', exact: true }).click();
+  await expect(page.getByText('Hielo para las bebidas')).toBeVisible();
   await page.getByRole('button', { name: 'Transporte', exact: true }).click();
-  await expect(page.getByText('Taxi por insumos')).toBeAttached();
+  await expect(page.getByText('Taxi por insumos')).toBeVisible();
   await expect(page.getByText('Carbón', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Todos', exact: true }).click();
   await page.getByLabel('Buscar gasto').fill('flama');
-  await expect(page.getByText('Carbón', { exact: true })).toBeAttached();
+  await expect(page.getByText('Carbón', { exact: true })).toBeVisible();
   await page.getByLabel('Buscar gasto').fill('nada así');
   await expect(page.getByText('Sin resultados')).toBeVisible();
 });

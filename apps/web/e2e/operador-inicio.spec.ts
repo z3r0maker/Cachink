@@ -13,11 +13,20 @@ test('Inicio leads with one action and lists what is pending today', async ({ pa
   for (const label of ['Ventas de tu turno', 'Cobrado', 'Efectivo esperado', 'Fiado de hoy']) {
     await expect(page.getByText(label, { exact: true })).toBeVisible();
   }
-  await expect(page.getByText('$2,870.00')).toBeVisible();
+  await expect(page.getByText('$2,710.00')).toBeVisible();
+  await expect(page.getByText('Una cancelada a las 12:58')).toBeVisible();
   await expect(page.getByText('Registrar el gas de la semana')).toBeVisible();
 
   await page.getByRole('link', { name: 'Cobrar', exact: true }).click();
   await expect(page).toHaveURL(/\/operador\/caja$/);
+});
+
+test('«Hoy no» takes a task off today’s list', async ({ page }) => {
+  await page.goto('/operador');
+  await expect(page.getByText('Llegó el agua embotellada')).toBeVisible();
+  await page.getByTitle('Quitar de la lista de hoy').last().click();
+  await expect(page.getByText('Llegó el agua embotellada')).toHaveCount(0);
+  await expect(page.getByText('Registrar el gas de la semana')).toBeVisible();
 });
 
 test('the owner messages link through to Avisos', async ({ page }) => {

@@ -57,7 +57,11 @@ a:hover{color:var(--black);}
             <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
             <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
           </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Acceso.dc.html" title="Bloquear caja" aria-label="Bloquear caja" data-press="1" style="margin-left:auto;flex:none;display:grid;place-items:center;width:42px;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
         </div>
+        <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Cerrar turno</a>
       </div>
     </aside>
   </sc-if>
@@ -75,6 +79,10 @@ a:hover{color:var(--black);}
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 3.5A10 10 0 0 0 3.2 15.6L2 22l6.5-1.2A10 10 0 1 0 20.5 3.5"></path></svg>
             Recordarle por WhatsApp
           </button>
+          <a href="Xangarro%20Portal%20-%20Operador%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 2 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">2</span>
+          </a>
         </div>
       </div>
     </header>
@@ -126,6 +134,7 @@ a:hover{color:var(--black);}
               <div style="flex:1;min-width:0;">
                 <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);text-wrap:pretty;">{{ v.concepto }}</div>
                 <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;">{{ v.fecha }} · {{ v.antiguedad }}</div>
+                <div style="font-size:12px;font-weight:700;color:{{ v.venceColor }};margin-top:2px;">{{ v.vence }}</div>
               </div>
               <sc-if value="{{ v.parcial }}" hint-placeholder-val="{{ false }}">
                 <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--blue-soft);color:var(--blue-text);">{{ v.parcial }}</span>
@@ -138,7 +147,7 @@ a:hover{color:var(--black);}
           </sc-for>
           <sc-if value="{{ sinAbiertas }}" hint-placeholder-val="{{ false }}">
             <div style="padding:36px 20px;display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;">
-              <div style="width:52px;height:52px;border:2.5px solid var(--black);border-radius:15px;background:var(--green-soft);display:grid;place-items:center;">
+              <div style="width:52px;height:52px;border:2.5px solid var(--black);border-radius:16px;background:var(--green-soft);display:grid;place-items:center;">
                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
               </div>
               <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">No debe nada</div>
@@ -303,13 +312,11 @@ const CLIENTES = {
     name: 'Taller de Chuy', initials: 'TC', phone: '5533 981 204', desde: 'enero 2026',
     limite: 1500, plazo: '15 días',
     ventas: [
-      ['V-0244', 'Comida para 4', '2026-04-18T13:40', '18 abr', 300, 'Ana Robledo · Caja 1'],
-      ['V-0288', 'Comida para 6 · orden de pastor y refrescos', '2026-04-28T13:10', '28 abr', 520, 'Ana Robledo · Caja 1'],
+      ['V-0288', 'Comida para 6 · orden de pastor y refrescos', '2026-04-28T13:10', '28 abr', 800, 'Ana Robledo · Caja 1'],
       ['V-0310', 'Comida para 8 · gringas y aguas', '2026-05-02T14:20', '2 may', 460, 'Luis Ortega · Caja 2']
     ],
     abonos: [
-      ['2026-04-24T17:05', '24 abr', 300, 'transferencia'],
-      ['2026-05-14T13:52', 'hoy 13:52', 120, 'efectivo']
+      ['2026-05-14T13:52', 'hoy 13:52', 400, 'efectivo']
     ]
   },
   mari: {
@@ -338,18 +345,42 @@ function aplicar(ventas, abonos) {
 }
 
 // El historial se deriva de ventas y abonos, ordenado de lo más nuevo a lo más viejo.
-function historial(ventas, abonos, pagos) {
-  const filas = ventas.map((v, i) => [v[2], 'Venta fiada ' + v[0], 'Capturada por ' + v[5] + ' · ' + v[3], v[4], 'fiado']);
-  for (const a of abonos) {
-    let destino = '';
-    let acumulado = 0;
-    for (let i = 0; i < ventas.length; i++) {
-      acumulado += pagos[i];
-      if (pagos[i] > 0 && acumulado >= a[2]) { destino = ventas[i][0]; break; }
+function historial(ventas, abonos) {
+  const filas = ventas.map(v => [v[2], 'Venta fiada ' + v[0], 'Capturada por ' + v[5] + ' · ' + v[3], v[4], 'fiado']);
+  const pend = ventas.map(v => v[4]);
+  for (const a of abonos.slice().sort((x, y) => (x[0] < y[0] ? -1 : 1))) {
+    const tocadas = [];
+    let resto = a[2];
+    for (let i = 0; i < ventas.length && resto > 0; i++) {
+      if (pend[i] <= 0) continue;
+      const toma = Math.min(resto, pend[i]);
+      pend[i] -= toma;
+      resto -= toma;
+      tocadas.push(ventas[i][0] + (pend[i] === 0 ? ' completa' : ' en parte'));
     }
-    filas.push([a[0], 'Abono de ' + MXN(a[2]), 'Recibido ' + a[1] + ' en ' + a[3] + (destino ? ' · se aplicó hasta ' + destino : ''), a[2], 'abono']);
+    const destino = tocadas.length ? ' · se aplicó a ' + tocadas.join(' y ') : '';
+    const favor = resto > 0 ? ' · ' + MXN(resto) + ' quedó a su favor' : '';
+    filas.push([a[0], 'Abono de ' + MXN(a[2]), 'Recibido ' + a[1] + ' en ' + a[3] + destino + favor, a[2], 'abono']);
   }
   return filas.sort((x, y) => (x[0] < y[0] ? 1 : (x[0] > y[0] ? -1 : 0)));
+}
+
+const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+const HOY = '2026-05-14';
+
+// Hoy y mañana se dicen con palabras; dentro de la semana, con el día; más lejos, con la fecha.
+function vencimiento(ts, plazo) {
+  const dias = parseInt(plazo, 10) || 0;
+  const d = new Date(ts.slice(0, 10) + 'T00:00:00');
+  d.setDate(d.getDate() + dias);
+  const dif = Math.round((d - new Date(HOY + 'T00:00:00')) / 86400000);
+  if (dif < -1) return { texto: 'Se venció hace ' + (-dif) + ' días', vencido: true };
+  if (dif === -1) return { texto: 'Se venció ayer', vencido: true };
+  if (dif === 0) return { texto: 'Vence hoy', vencido: false };
+  if (dif === 1) return { texto: 'Vence mañana', vencido: false };
+  if (dif <= 6) return { texto: 'Vence el ' + DIAS[d.getDay()], vencido: false };
+  return { texto: 'Vence el ' + d.getDate() + ' de ' + MESES[d.getMonth()], vencido: false };
 }
 
 class Component extends DCLogic {
@@ -378,13 +409,14 @@ class Component extends DCLogic {
 
     const abonos = (st.abonos && st.abonosKey === key) ? st.abonos : c.abonos;
     const pagos = aplicar(c.ventas, abonos);
-    const movs = historial(c.ventas, abonos, pagos);
+    const movs = historial(c.ventas, abonos);
     const ultimoAbono = abonos.slice().sort((a, b) => (a[0] < b[0] ? 1 : -1))[0] ?? null;
     const base = c.ventas.map((v, i) => [v[0], v[1], v[2], v[3], v[4], pagos[i], v[5]]);
     const saldo = base.reduce((s, v) => s + (v[4] - v[5]), 0);
     const monto = st.monto === '' ? null : parseFloat(st.monto);
     const valid = monto != null && !isNaN(monto) && monto > 0 && saldo > 0;
     const aplicado = valid ? Math.min(monto, saldo) : 0;
+    const favor = valid ? Math.max(0, monto - saldo) : 0;
     const restante = saldo - aplicado;
 
     let aplica = 'Elige un monto';
@@ -398,7 +430,7 @@ class Component extends DCLogic {
         cubre.push(resto >= pend ? v[0] + ' completa' : v[0] + ' parcial');
         resto -= pend;
       }
-      aplica = cubre.join(' · ');
+      aplica = cubre.join(' · ') + (favor > 0 ? ' · ' + MXN(favor) + ' a su favor' : '');
     }
 
     const navDefs = [
@@ -427,6 +459,8 @@ class Component extends DCLogic {
 
     const abiertas = pendientes.map((v, i) => ({
       folio: v[0], concepto: v[1], fecha: v[3],
+      vence: vencimiento(v[2], c.plazo).texto,
+      venceColor: vencimiento(v[2], c.plazo).vencido ? 'var(--red-text)' : 'var(--gray-600)',
       antiguedad: i === 0 ? 'la más antigua' : 'después de ' + pendientes[i - 1][0],
       parcial: v[5] > 0 ? 'Ya abonó ' + MXN(v[5]) : '',
       resta: MXN(v[4] - v[5]),
@@ -488,7 +522,7 @@ class Component extends DCLogic {
       recSent: st.recSent,
       sendRecordar: () => {
         if ((st.recTel ?? c.phone).replace(/\D/g, '').length < 10) return;
-        this.setState({ recSent: 'Recordatorio enviado al ' + (st.recTel ?? c.phone) + ' por WhatsApp.' });
+        this.setState({ recSent: 'WhatsApp abierto con el recordatorio para el ' + (st.recTel ?? c.phone) + '.' });
       },
       ctaLabel: saldo > 0 ? 'Recibir abono' : 'Sin saldo por cobrar',
       ctaBg: saldo > 0 ? 'var(--yellow)' : 'var(--gray-100)',
@@ -516,10 +550,12 @@ class Component extends DCLogic {
         const ahora = new Date();
         const dosDigitos = n => (n < 10 ? '0' : '') + n;
         const hora = dosDigitos(ahora.getHours()) + ':' + dosDigitos(ahora.getMinutes());
-        const next = abonos.concat([['2026-05-14T' + hora, 'hoy ' + hora, aplicado, st.method.toLowerCase()]]);
+        const next = abonos.concat([['2026-05-14T' + hora, 'hoy ' + hora, aplicado + favor, st.method.toLowerCase()]]);
         this.setState({
           open: false, abonos: next, abonosKey: key, monto: '',
-          toast: MXN(aplicado) + ' por ' + st.method.toLowerCase() + '. Se aplicó a lo más antiguo; queda ' + MXN(restante) + '.'
+          toast: favor > 0
+            ? MXN(aplicado + favor) + ' por ' + st.method.toLowerCase() + '. Liquidó lo que debía y ' + MXN(favor) + ' quedan a su favor para su próxima compra.'
+            : MXN(aplicado) + ' por ' + st.method.toLowerCase() + '. Se aplicó a lo más antiguo; queda ' + MXN(restante) + '.'
         });
       },
       toast: st.toast,

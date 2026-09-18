@@ -8,7 +8,7 @@ import * as inv from '../inventario/inventario.css';
 import * as u from '../ui/ui.css';
 import * as s from './cierre.css';
 import * as h from './hecho.css';
-import { conSigno, DIF, lineaCerrado } from './copy';
+import { bandaCuerpo, conSigno, DIF, lineaCerrado } from './copy';
 import type { CierreData } from './types';
 import type { Cierre } from './use-cierre';
 
@@ -25,8 +25,7 @@ export function Banda({ x }: { readonly x: Cierre }) {
       <div style={{ flex: 1, minWidth: 220 }}>
         <div className={h.bandaTitulo}>{`Tienes ${x.pendientes} registros sin enviar.`}</div>
         <div className={s.texto} style={{ marginTop: 2 }}>
-          No puedes cerrar el turno todavía: el efectivo esperado se calcula con esas ventas.
-          Conéctate y espera a que suban.
+          {bandaCuerpo(x.connection)}
         </div>
       </div>
       <button type="button" className={h.bandaBoton} aria-busy={x.enviando} onClick={x.enviar}>

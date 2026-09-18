@@ -1,9 +1,8 @@
 import type { DetalleData, VentaDetalle } from './types';
 
 /**
- * The two tickets of `Operador Detalle de venta.dc.html`, in centavos. The file's
- * V-0412 ($160.00) disagrees with the Ventas list ($320.00); each screen follows
- * its own file until real data arrives (O-06), and the gap is flagged in §4b.
+ * The two tickets of `Operador Detalle de venta.dc.html`, in centavos. V-0412
+ * ($160.00) is the same ticket as in the Ventas list.
  */
 export const DETALLE_VENTAS: Readonly<Record<'efectivo' | 'fiado', VentaDetalle>> = {
   efectivo: {

@@ -10,11 +10,17 @@ const SITUACIONES: readonly Situacion[] = [
   'corte-por-aclarar',
 ];
 
-type Query = Readonly<Record<'dataState' | 'situacion' | 'connection', string | undefined>>;
+type Query = Readonly<
+  Record<'dataState' | 'situacion' | 'connection' | 'ultimoCorte', string | undefined>
+>;
+
+/** The file's «Con faltante» last turno (`ultimoCorte: faltante`). */
+const FALTANTE = { tipo: 'falto', monto: 6_000n, motivo: 'cambio mal dado' } as const;
 
 /**
  * Development-only forcing of the design's control-panel props
- * (`?dataState=…&situacion=…&connection=sin-conexion`, ADR-058 §9).
+ * (`?dataState=…&situacion=…&connection=sin-conexion&ultimoCorte=faltante`,
+ * ADR-058 §9).
  */
 function forced(q: Query): { state: InicioScreenProps['state']; data: InicioData } {
   if (process.env.NODE_ENV === 'production') return { state: 'happy', data: INICIO_FIXTURE };
@@ -24,6 +30,10 @@ function forced(q: Query): { state: InicioScreenProps['state']; data: InicioData
       ...INICIO_FIXTURE,
       situacion: SITUACIONES.find((s) => s === q.situacion) ?? INICIO_FIXTURE.situacion,
       offline: q.connection === 'sin-conexion',
+      ultimoTurno:
+        q.ultimoCorte === 'faltante'
+          ? { ...INICIO_FIXTURE.ultimoTurno, resultado: FALTANTE }
+          : INICIO_FIXTURE.ultimoTurno,
     },
   };
 }

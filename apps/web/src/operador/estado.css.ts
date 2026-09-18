@@ -7,8 +7,6 @@ import { pressable } from '../styles/press.css';
  * `Operador Estado` — the operator's three non-happy states, one card shape.
  *
  * Every value is read from `design-reference/operador/Operador Estado.dc.html`.
- * The one deviation is the 62 px tile's radius: 17 in the file, 16 here until
- * the upstream correction lands (ADR-076).
  *
  * The design sizes fixed boxes content-box (a 62 px tile with a 2.5 px border
  * renders 67 px), while the portal's reset is border-box. `contentBox` restores

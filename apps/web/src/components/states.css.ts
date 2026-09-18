@@ -20,6 +20,13 @@ export const stateCard = style({
   textAlign: 'center',
 });
 
+export const stateInset = style({
+  border: 'none',
+  borderRadius: 0,
+  boxShadow: 'none',
+  background: 'transparent',
+});
+
 export const tile = style({
   width: 76,
   height: 76,

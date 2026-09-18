@@ -90,19 +90,19 @@ a:hover{color:var(--black);}
           <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;text-wrap:pretty;">Lo que tus operadores crearon en el mostrador para no detener la venta. Apruébalo, corrígelo o fusiónalo con lo que ya existe.</div>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
           <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
-            <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+            <div data-card="1" style="box-sizing:border-box;padding:20px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
               <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
-              <div style="font-size:32px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:{{ k.color }};margin-top:6px;">{{ k.value }}</div>
-              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ k.hint }}</div>
+              <div style="font-size:34px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.04em;color:{{ k.color }};margin:10px 0 4px;">{{ k.value }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ k.hint }}</div>
             </div>
           </sc-for>
         </div>
 
         <div style="display:inline-flex;align-self:flex-start;border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);overflow:hidden;">
           <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2">
-            <div role="tab" tabindex="0" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 22px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
+            <div role="tab" tabindex="0" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 24px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
               {{ t.label }}
               <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:{{ t.countBg }}">{{ t.count }}</span>
             </div>
@@ -120,7 +120,7 @@ a:hover{color:var(--black);}
                   <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
                     <span style="font-size:16px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">{{ it.name }}</span>
                     <sc-if value="{{ it.dupe }}" hint-placeholder-val="{{ false }}">
-                      <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--warning-soft);color:var(--warning-text);">Se parece a {{ it.dupe }}</span>
+                      <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 9px;font-size:11px;font-weight:700;white-space:nowrap;background:var(--warning-soft);color:var(--warning-text);">{{ it.dupeLabel }}</span>
                     </sc-if>
                   </div>
                   <div style="font-size:13px;font-weight:600;color:var(--gray-600);margin-top:3px;text-wrap:pretty;">{{ it.detail }}</div>
@@ -130,8 +130,8 @@ a:hover{color:var(--black);}
                   <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:2px;">{{ it.figureLabel }}</div>
                 </div>
                 <div style="flex:none;display:flex;gap:9px;">
-                  <button type="button" onClick="{{ it.open }}" data-press="1" data-onyellow="1" style="height:46px;padding:0 17px;border:2.5px solid var(--black);border-radius:13px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;" style-hover="background:var(--yellow-deep);">Revisar</button>
-                  <span role="button" tabindex="0" onClick="{{ it.reject }}" data-press="1" title="Rechazar" style="width:46px;height:46px;display:grid;place-items:center;border:2px solid var(--black);border-radius:13px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;">
+                  <button type="button" onClick="{{ it.open }}" data-press="1" data-onyellow="1" style="height:46px;padding:0 17px;border:2px solid var(--black);border-radius:12px;background:var(--yellow);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;" style-hover="background:var(--yellow-deep);">Revisar</button>
+                  <span role="button" tabindex="0" onClick="{{ it.reject }}" data-press="1" title="Rechazar" style="width:46px;height:46px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
                   </span>
                 </div>
@@ -141,12 +141,12 @@ a:hover{color:var(--black);}
         </sc-if>
 
         <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
-          <div style="padding:52px 24px;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
-            <div style="width:62px;height:62px;border:2.5px solid var(--black);border-radius:17px;background:var(--green-soft);display:grid;place-items:center;">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--green-text)" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
+          <div style="padding:64px 24px;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--green-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--green-text);margin-bottom:20px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg>
             </div>
-            <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ emptyTitle }}</div>
-            <div style="font-size:15px;font-weight:600;color:var(--gray-600);max-width:460px;text-wrap:pretty;">{{ emptyBody }}</div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">{{ emptyTitle }}</div>
+            <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ emptyBody }}</p>
           </div>
         </sc-if>
 
@@ -254,13 +254,13 @@ a:hover{color:var(--black);}
           <sc-if value="{{ form.dupe }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border:2.5px solid var(--black);border-radius:14px;background:var(--warning-soft);flex-wrap:wrap;">
               <div style="flex:1;min-width:180px;font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">Ya existe <strong>{{ form.dupe }}</strong>. Si es lo mismo, fusiónalos: las ventas capturadas se mueven al registro existente.</div>
-              <button type="button" onClick="{{ form.merge }}" data-press="1" style="flex:none;height:46px;padding:0 17px;border:2.5px solid var(--black);border-radius:13px;background:var(--white);box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Fusionar</button>
+              <button type="button" onClick="{{ form.merge }}" data-press="1" style="flex:none;height:46px;padding:0 17px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Fusionar</button>
             </div>
           </sc-if>
 
           <div style="display:flex;gap:10px;flex-wrap:wrap;">
             <button type="button" onClick="{{ closeForm }}" data-press="1" style="flex:none;height:52px;padding:0 18px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">Cancelar</button>
-            <button type="button" onClick="{{ form.approve }}" data-press="1" data-onyellow="1" style="flex:1;min-width:180px;height:52px;border:2.5px solid var(--black);border-radius:12px;background:{{ form.approveBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ form.approveOpacity }}" style-hover="background:var(--yellow-deep);">{{ form.cta }}</button>
+            <button type="button" onClick="{{ form.approve }}" data-press="1" data-onyellow="1" style="flex:1;min-width:180px;height:52px;border:2px solid var(--black);border-radius:12px;background:{{ form.approveBg }};box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ form.approveOpacity }}" style-hover="background:var(--yellow-deep);">{{ form.cta }}</button>
           </div>
         </div>
       </div>
@@ -378,6 +378,7 @@ class Component extends DCLogic {
       tint: r[3],
       icon: isProd ? ICON_PROD : ICON_CLI,
       dupe: r[isProd ? 4 : 5] ?? '',
+      dupeLabel: 'Se parece a ' + (r[isProd ? 4 : 5] ?? ''),
       figure: isProd ? MXN(r[1]) : MXN(r[4]),
       figureLabel: isProd ? 'Precio en caja' : 'Fiado acumulado',
       divider: i === visibles.length - 1 ? 'none' : '2px solid var(--gray-100)',
@@ -470,7 +471,7 @@ class Component extends DCLogic {
         label: l, count: c, selected: tab === k,
         bg: tab === k ? 'var(--yellow)' : 'var(--white)',
         countBg: tab === k ? 'var(--white)' : 'var(--gray-100)',
-        divider: i === 0 ? 'none' : '2px solid var(--black)',
+        divider: i === 0 ? 'none' : '2.5px solid var(--black)',
         pick: () => this.setState({ tab: k, sel: null })
       })),
       kpis: [

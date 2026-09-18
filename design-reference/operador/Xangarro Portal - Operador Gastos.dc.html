@@ -57,6 +57,9 @@ a:hover{color:var(--black);}
             <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
             <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
           </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Acceso.dc.html" title="Bloquear caja" aria-label="Bloquear caja" data-press="1" style="margin-left:auto;flex:none;display:grid;place-items:center;width:42px;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
         </div>
         <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Cerrar turno</a>
       </div>
@@ -83,6 +86,10 @@ a:hover{color:var(--black);}
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
             Registrar gasto
           </button>
+          <a href="Xangarro%20Portal%20-%20Operador%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 2 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">2</span>
+          </a>
         </div>
       </div>
     </header>
@@ -124,18 +131,20 @@ a:hover{color:var(--black);}
         <sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
         <div style="border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:5px 5px 0 var(--black);overflow:hidden;">
           <sc-for list="{{ gastos }}" as="e" hint-placeholder-count="6">
-            <div data-row="1" style="display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:{{ e.divider }}">
+            <div data-row="1" style="display:flex;align-items:center;flex-wrap:wrap;row-gap:9px;gap:14px;padding:14px 18px;border-bottom:{{ e.divider }}">
+              <div style="flex:1 1 {{ rowBasis }};display:flex;align-items:center;gap:14px;min-width:0;">
               <span style="flex:none;width:44px;height:44px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:{{ e.tint }};color:var(--black);">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ e.icon }}"></path></svg>
               </span>
-              <div style="flex:1;min-width:0;">
+              <div style="flex:1 1 0;min-width:0;">
                 <div style="font-size:15px;font-weight:800;letter-spacing:-0.015em;color:var(--black);text-wrap:pretty;">{{ e.concept }}</div>
                 <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;text-wrap:pretty;">{{ e.detail }}</div>
+              </div>
               </div>
               <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ e.tint }};color:var(--black);">{{ e.category }}</span>
               <span style="flex:none;display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;font-size:11px;font-weight:700;white-space:nowrap;background:{{ e.proofBg }};color:{{ e.proofColor }}">{{ e.proof }}</span>
               <span style="flex:none;min-width:56px;text-align:right;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--gray-600);">{{ e.time }}</span>
-              <span style="flex:none;min-width:100px;text-align:right;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--red-text);">{{ e.amount }}</span>
+              <span style="flex:none;margin-left:auto;min-width:100px;text-align:right;font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--red-text);">{{ e.amount }}</span>
             </div>
           </sc-for>
           <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
@@ -247,13 +256,13 @@ const CAT_ICON = {
   'Otros': 'M12 3v18M3 12h18'
 };
 
+// Suman 620: el mismo total que Turno, Inicio y Cierre restan del efectivo esperado.
 const EGRESOS = [
-  ['Cilindro de gas 30 kg', 'Gas Express · con foto', 620, 'Servicios', '14:10', true],
+  ['Carbón', 'Carbonería La Flama · con foto', 240, 'Insumos', '09:18', true],
   ['Bolsas y servilletas', 'Abarrotes Don Beto · con foto', 180, 'Insumos', '11:22', true],
   ['Taxi por insumos', 'Sin comprobante · autorizado por Pedro', 95, 'Transporte', '10:05', false],
-  ['Carbón', 'Carbonería La Flama · con foto', 240, 'Insumos', '09:18', true],
-  ['Cambio de tanque de agua', 'Aguas Puras · con foto', 45, 'Servicios', '08:46', true],
-  ['Reparación de parrilla', 'Herrero de la esquina · sin comprobante', 350, 'Mantenimiento', '08:30', false]
+  ['Hielo para las bebidas', 'Hielera del mercado · con foto', 60, 'Otros', '12:40', true],
+  ['Cambio de tanque de agua', 'Aguas Puras · con foto', 45, 'Servicios', '08:46', true]
 ];
 
 class Component extends DCLogic {
@@ -341,9 +350,10 @@ class Component extends DCLogic {
       estadoIcon: 'M12 3v14M6 11l6 6 6-6M4 21h16',
       retry: () => this.setState({ dataState: 'happy' }),
       noResults: gastos.length === 0,
+      rowBasis: st.vw < 1000 ? '100%' : '0',
       query: st.query,
       typeQuery: e => this.setState({ query: e.target.value }),
-      filters: ['Todos', 'Insumos', 'Servicios', 'Transporte', 'Mantenimiento'].map(label => ({
+      filters: ['Todos', 'Insumos', 'Servicios', 'Transporte', 'Mantenimiento', 'Otros'].map(label => ({
         label,
         bg: st.filter === label ? 'var(--yellow)' : 'var(--white)',
         shadow: st.filter === label ? '3px 3px 0 var(--black)' : 'none',

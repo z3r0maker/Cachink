@@ -24,9 +24,18 @@ export const DIF = {
 } as const;
 
 export function cerrarHint(pendientes: number, faltaNota: boolean): string {
-  if (pendientes > 0) return `Primero se tienen que enviar los ${pendientes} registros pendientes.`;
+  if (pendientes > 0) return 'Primero se tienen que enviar los registros pendientes.';
   if (faltaNota) return 'Elige un motivo y escribe la nota para poder cerrar.';
   return 'Al cerrar se guarda el conteo con tu nombre y ya no puedes capturar en esta caja.';
+}
+
+/** The band's second line: offline it asks to reconnect, online to wait. */
+export function bandaCuerpo(connection: 'en-linea' | 'sin-conexion'): string {
+  const base =
+    'No puedes cerrar el turno todavía: el efectivo esperado se calcula con esas ventas.';
+  return connection === 'sin-conexion'
+    ? `${base} Conéctate y espera a que suban.`
+    : `${base} Espera a que terminen de subir.`;
 }
 
 export function lineaCerrado(d: DiferenciaCorte, motivo: string | null, dueno: string): string {

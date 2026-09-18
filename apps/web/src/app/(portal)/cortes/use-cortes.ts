@@ -36,6 +36,11 @@ export function useCortes(cortes: readonly Corte[], filtroInicial: FiltroCortes)
     setAviso({ tint: colors.blueSoft, title: 'Aclaración pedida', body: aclaracion(c) });
   };
   const cerrarAviso = useCallback(() => setAviso(null), []);
+  /** «Ver todos los cortes»: back to every corte, no search. */
+  const limpiar = () => {
+    setFiltro('Todos');
+    setQuery('');
+  };
   return {
     filtro,
     setFiltro,
@@ -48,6 +53,7 @@ export function useCortes(cortes: readonly Corte[], filtroInicial: FiltroCortes)
     pedir,
     aviso,
     cerrarAviso,
+    limpiar,
   };
 }
 

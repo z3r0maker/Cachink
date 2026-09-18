@@ -1,4 +1,5 @@
-import { CUENTAS, HOY } from '@/operador/cobranza/cuentas';
+import { CUENTAS } from '@/operador/cobranza/cuentas';
+import { HOY } from '@/operador/fixtures';
 import { CobranzaScreen } from '@/operador/cobranza/screen';
 import type { CobranzaScreenProps } from '@/operador/cobranza/types';
 

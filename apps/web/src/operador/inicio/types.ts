@@ -25,7 +25,9 @@ export interface MensajeDueno {
 
 export type ResultadoCorte =
   | { readonly tipo: 'cuadro' }
-  | { readonly tipo: 'sobro' | 'falto'; readonly monto: Money };
+  | { readonly tipo: 'sobro'; readonly monto: Money }
+  /** `motivo` is the operator's reason, lowercase, quoted in Inicio's «Cerró». */
+  | { readonly tipo: 'falto'; readonly monto: Money; readonly motivo?: string };
 
 export interface CorteReciente {
   readonly etiqueta: string;

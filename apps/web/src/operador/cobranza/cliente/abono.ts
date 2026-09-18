@@ -73,6 +73,8 @@ export function toastAbono(
   nombre?: string,
 ): string {
   const quien = nombre ? ` de ${nombre}` : '';
-  const favor = v.aFavor > 0n ? ` ${formatMoney(v.aFavor)} quedan a su favor.` : '';
-  return `${formatMoney(monto)}${quien} por ${metodo.toLowerCase()}. Se aplicó a lo más antiguo; queda ${formatMoney(v.restante)}.${favor}`;
+  const inicio = `${formatMoney(monto)}${quien} por ${metodo.toLowerCase()}.`;
+  return v.aFavor > 0n
+    ? `${inicio} Liquidó lo que debía y ${formatMoney(v.aFavor)} quedan a su favor para su próxima compra.`
+    : `${inicio} Se aplicó a lo más antiguo; queda ${formatMoney(v.restante)}.`;
 }

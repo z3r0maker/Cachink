@@ -22,8 +22,18 @@ export interface Corte {
   readonly motivo?: string;
   readonly nota?: string;
   readonly estado: EstadoCorte;
-  /** «Qué más pasó en el turno». */
-  readonly eventos: readonly Evento[];
+  /** What else happened in the turno; «Qué más pasó» derives from it. */
+  readonly turno: TurnoCorte;
+}
+
+export interface TurnoCorte {
+  readonly ventas: number;
+  readonly canceladas: { readonly n: number; readonly monto: Money };
+  readonly fiado: Money;
+  /** «3 entradas · 2 mermas». */
+  readonly inventario: string;
+  /** Products created at the register during the turno. */
+  readonly creados: number;
 }
 
 export interface Evento {

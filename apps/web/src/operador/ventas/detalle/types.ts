@@ -25,6 +25,8 @@ export interface VentaDetalle {
   /** The client and the balance this sale left them with; only on fiado sales. */
   readonly fiado?: { readonly cliente: string; readonly saldo: Money };
   readonly cancelada?: { readonly motivo: string };
+  /** Still in this register's send queue (captured offline). */
+  readonly enCola?: boolean;
 }
 
 export interface DetalleData {

@@ -86,22 +86,31 @@ a:hover{color:var(--black);}
 
         <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
           <div>
-            <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);"><a href="Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html">Tu equipo</a> · Cortes</div>
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);"><a href="Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html" style="color:var(--ink);text-decoration:underline;text-underline-offset:2px;">Tu equipo</a> · Cortes</div>
             <h1 style="margin:8px 0 0;font-size:{{ h1Size }};line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Cortes de turno</h1>
             <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;text-wrap:pretty;">Lo que cada quien contó al cerrar, contra lo que el sistema esperaba.</div>
           </div>
-          <button type="button" data-press="1" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">
+          <button type="button" data-press="1" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
             Exportar mes
           </button>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;">
+        <div style="display:inline-flex;align-self:flex-start;border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);overflow:hidden;flex-wrap:wrap;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <div role="tab" tabindex="0" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 24px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
+              {{ t.label }}
+              <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:{{ t.countBg }}">{{ t.count }}</span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
           <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
-            <div style="box-sizing:border-box;padding:16px 18px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
+            <div data-card="1" style="box-sizing:border-box;padding:20px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);">
               <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
-              <div style="font-size:30px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;color:{{ k.color }};margin-top:6px;">{{ k.value }}</div>
-              <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ k.hint }}</div>
+              <div style="font-size:34px;line-height:1.05;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.04em;color:{{ k.color }};margin:10px 0 4px;">{{ k.value }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ k.hint }}</div>
             </div>
           </sc-for>
         </div>
@@ -109,7 +118,7 @@ a:hover{color:var(--black);}
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
           <div style="display:flex;gap:8px;flex-wrap:wrap;">
             <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
-              <div role="button" tabindex="0" onClick="{{ f.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:44px;padding:0 17px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:14px;font-weight:800;color:var(--black);background:{{ f.bg }};box-shadow:{{ f.shadow }}">{{ f.label }}</div>
+              <div role="button" tabindex="0" onClick="{{ f.pick }}" data-press="1" style="display:inline-flex;align-items:center;height:40px;padding:0 16px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:13px;font-weight:700;color:var(--black);background:{{ f.bg }};box-shadow:{{ f.shadow }}">{{ f.label }}</div>
             </sc-for>
           </div>
           <div style="margin-left:auto;display:flex;align-items:center;gap:10px;height:48px;padding:0 15px;border:2px solid var(--black);border-radius:14px;background:var(--white);min-width:240px;">
@@ -144,12 +153,11 @@ a:hover{color:var(--black);}
             </div>
           </sc-for>
           <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
-            <div style="padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;">
-              <div style="width:58px;height:58px;border:2.5px solid var(--black);border-radius:16px;background:var(--yellow-soft);display:grid;place-items:center;">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.3" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
-              </div>
-              <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Sin resultados</div>
-              <div style="font-size:14px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">Ningún corte coincide con ese filtro.</div>
+            <div style="padding:64px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+              <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;font-size:34px;margin-bottom:20px;">📭</div>
+              <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Sin cortes que mostrar</div>
+              <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Ningún corte coincide con lo que estás filtrando. Quita un filtro o busca por otro operador.</p>
+              <button type="button" onClick="{{ clearFilters }}" data-press="1" style="margin-top:22px;height:52px;padding:0 24px;background:var(--yellow);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);cursor:pointer;">Ver todos los cortes</button>
             </div>
           </sc-if>
         </div>
@@ -206,9 +214,9 @@ a:hover{color:var(--black);}
             <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Conteo que capturó</div>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;">
               <sc-for list="{{ detail.denoms }}" as="d" hint-placeholder-count="8">
-                <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:2px solid var(--black);border-radius:12px;background:var(--white);">
+                <div style="display:flex;align-items:center;gap:9px;padding:9px 11px;border:2px solid var(--black);border-radius:12px;background:{{ d.bg }}">
                   <span style="flex:none;font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ d.label }}</span>
-                  <span style="margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gray-600);">×{{ d.count }}</span>
+                  <span style="margin-left:auto;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ d.color }}">×{{ d.count }}</span>
                 </div>
               </sc-for>
             </div>
@@ -229,8 +237,8 @@ a:hover{color:var(--black);}
         </div>
 
         <div style="flex:none;padding:16px 20px;border-top:2.5px solid var(--black);background:var(--white);display:flex;gap:10px;flex-wrap:wrap;">
-          <button type="button" onClick="{{ detail.ask }}" data-press="1" style="flex:1;min-width:150px;height:52px;border:2px solid var(--black);border-radius:13px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Pedir aclaración</button>
-          <button type="button" onClick="{{ detail.clear }}" data-press="1" data-onyellow="1" style="flex:1;min-width:150px;height:52px;border:2.5px solid var(--black);border-radius:13px;background:{{ detail.clearBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ detail.clearOpacity }}" style-hover="background:var(--yellow-deep);">{{ detail.clearLabel }}</button>
+          <button type="button" onClick="{{ detail.ask }}" data-press="1" style="flex:1;min-width:150px;height:52px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;">Pedir aclaración</button>
+          <button type="button" onClick="{{ detail.clear }}" data-press="1" data-onyellow="1" style="flex:1;min-width:150px;height:52px;border:2px solid var(--black);border-radius:12px;background:{{ detail.clearBg }};box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ detail.clearOpacity }}" style-hover="background:var(--yellow-deep);">{{ detail.clearLabel }}</button>
         </div>
       </div>
     </div>
@@ -256,19 +264,37 @@ a:hover{color:var(--black);}
 const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 
 // nombre, iniciales, tinte, caja, fecha y horario, fondo, ventas ef., abonos ef., gastos ef., contado, motivo, nota, estado
+// [0] nombre [1] iniciales [2] tinte [3] caja [4] fecha y horario [5] fondo [6] ventas ef. [7] abonos ef.
+// [8] gastos ef. [9] contado [10] motivo [11] nota [12] estado [13] lo que más pasó en el turno
 const CORTES = [
-  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '14 may · 08:15 a 21:04', 800, 2140, 550, 620, 2870, null, null, 'Cuadró'],
-  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '13 may · 12:00 a 22:10', 600, 1880, 0, 240, 2180, 'Cambio mal dado', 'Le di cambio de 200 a un cliente que pagó con 100, ya no lo alcancé', 'Por aclarar'],
-  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '13 may · 08:00 a 20:40', 800, 2450, 300, 180, 3370, null, null, 'Cuadró'],
-  ['Sofía Márquez', 'SM', 'var(--purple-soft)', 'Caja 2', '12 may · 08:10 a 15:30', 600, 1240, 150, 95, 1935, 'Venta no registrada', 'Creo que cobré unos tacos y no los capturé en la hora de la comida', 'Aclarado'],
-  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '11 may · 12:00 a 22:00', 600, 1720, 200, 310, 2150, 'No sé', 'Conté tres veces y no encontré de dónde sale', 'Por aclarar'],
-  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '11 may · 08:05 a 20:55', 800, 2310, 0, 150, 2960, null, null, 'Cuadró']
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '14 may · 08:15 a 21:04', 800, 1980, 550, 620, 2710, null, null, 'Cuadró',
+    { ventas: 12, canceladas: [1, 60], fiado: 182, inventario: '3 entradas · 2 mermas', creados: 1 }],
+  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '13 may · 12:00 a 22:10', 600, 1880, 0, 240, 2180, 'Cambio mal dado', 'Le di cambio de 200 a un cliente que pagó con 100, ya no lo alcancé', 'Por aclarar',
+    { ventas: 9, canceladas: [0, 0], fiado: 0, inventario: '1 entrada', creados: 0 }],
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '13 may · 08:00 a 20:40', 800, 2450, 300, 180, 3370, null, null, 'Cuadró',
+    { ventas: 15, canceladas: [1, 45], fiado: 260, inventario: '2 entradas · 1 merma', creados: 0 }],
+  ['Sofía Márquez', 'SM', 'var(--purple-soft)', 'Caja 2', '12 may · 08:10 a 15:30', 600, 1240, 150, 95, 1935, 'Venta no registrada', 'Creo que cobré unos tacos y no los capturé en la hora de la comida', 'Aclarado',
+    { ventas: 7, canceladas: [0, 0], fiado: 120, inventario: '1 merma', creados: 2 }],
+  ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Caja 2', '11 may · 12:00 a 22:00', 600, 1720, 200, 310, 2150, 'No sé', 'Conté tres veces y no encontré de dónde sale', 'Por aclarar',
+    { ventas: 11, canceladas: [2, 130], fiado: 95, inventario: '2 entradas', creados: 0 }],
+  ['Ana Robledo', 'AR', 'var(--yellow)', 'Caja 1', '11 may · 08:05 a 20:55', 800, 2310, 0, 150, 2960, null, null, 'Cuadró',
+    { ventas: 14, canceladas: [0, 0], fiado: 340, inventario: '3 entradas', creados: 1 }]
 ];
 
-const DENOMS = [[1000, 1], [500, 2], [200, 4], [100, 6], [50, 3], [20, 5], [10, 8], [5, 6], [2, 5], [1, 10]];
+const DENOMS = [1000, 500, 200, 100, 50, 20, 10, 5, 2, 1];
+
+// El conteo de cada corte se reparte sobre su propio «Contado», así que siempre suma exacto.
+function conteo(total) {
+  let resto = total;
+  return DENOMS.map(v => {
+    const n = Math.floor(resto / v);
+    resto -= v * n;
+    return [v, n];
+  });
+}
 
 class Component extends DCLogic {
-  state = { filter: 'Todos', query: '', sel: null, cleared: [], toast: null, vw: 1440 };
+  state = { filter: null, query: '', sel: null, cleared: [], toast: null, vw: 1440 };
 
   componentDidMount() {
     this.onResize = () => this.setState({ vw: window.innerWidth });
@@ -285,7 +311,7 @@ class Component extends DCLogic {
   esperado(c) { return c[5] + c[6] + c[7] - c[8]; }
 
   renderVals() {
-    const st = this.state;
+    const st = { ...this.state, filter: this.state.filter ?? this.props.startFilter ?? 'Todos' };
     const isPhone = st.vw < 900;
     const isDesktop = !isPhone;
     const norm = s => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -385,14 +411,30 @@ class Component extends DCLogic {
         { label: 'Gastos de caja chica', value: '−' + MXN(rec[8]), color: 'var(--red-text)' },
         { label: 'Esperado', value: MXN(esp), color: 'var(--black)' }
       ].map((b, i, a) => ({ ...b, divider: i === a.length - 1 ? 'none' : '2px solid var(--gray-100)' })) : [],
-      denoms: DENOMS.map(([v, n]) => ({ label: '$' + v, count: String(n) })),
-      eventos: [
-        { label: 'Ventas capturadas', value: '12', bg: 'var(--white)' },
-        { label: 'Ventas canceladas', value: '1 · ' + MXN(60), bg: 'var(--red-soft)' },
-        { label: 'Ventas fiadas', value: MXN(182), bg: 'var(--warning-soft)' },
-        { label: 'Movimientos de inventario', value: '3 entradas · 2 mermas', bg: 'var(--white)' },
-        { label: 'Productos creados en caja', value: '1', bg: 'var(--yellow-soft)' }
-      ],
+      denoms: conteo(rec ? rec[9] : 0).map(([v, n]) => ({
+        label: '$' + v, count: String(n),
+        bg: n === 0 ? 'var(--gray-100)' : 'var(--white)',
+        color: n === 0 ? 'var(--gray-400)' : 'var(--gray-600)'
+      })),
+      eventos: rec ? [
+        { label: 'Ventas capturadas', value: String(rec[13].ventas), bg: 'var(--white)' },
+        {
+          label: 'Ventas canceladas',
+          value: rec[13].canceladas[0] === 0 ? 'Ninguna' : rec[13].canceladas[0] + ' · ' + MXN(rec[13].canceladas[1]),
+          bg: rec[13].canceladas[0] === 0 ? 'var(--white)' : 'var(--red-soft)'
+        },
+        {
+          label: 'Ventas fiadas',
+          value: rec[13].fiado === 0 ? 'Ninguna' : MXN(rec[13].fiado),
+          bg: rec[13].fiado === 0 ? 'var(--white)' : 'var(--warning-soft)'
+        },
+        { label: 'Movimientos de inventario', value: rec[13].inventario, bg: 'var(--white)' },
+        {
+          label: 'Productos creados en caja',
+          value: rec[13].creados === 0 ? 'Ninguno' : String(rec[13].creados),
+          bg: rec[13].creados === 0 ? 'var(--white)' : 'var(--yellow-soft)'
+        }
+      ] : [],
       clearLabel: estado === 'Cuadró' ? 'Sin nada que aclarar' : (estado === 'Aclarado' ? 'Ya está aclarado' : 'Marcar como aclarado'),
       clearBg: estado === 'Por aclarar' ? 'var(--yellow)' : 'var(--gray-100)',
       clearOpacity: estado === 'Por aclarar' ? '1' : '0.5',
@@ -407,7 +449,7 @@ class Component extends DCLogic {
         if (!rec) return;
         this.setState({
           sel: null,
-          toast: { bg: 'var(--blue-soft)', title: 'Aclaración pedida', body: 'Se le mandó a ' + rec[0].split(' ')[0] + ' el detalle del corte por WhatsApp. Verás su respuesta en Avisos.' }
+          toast: { bg: 'var(--blue-soft)', title: 'Aclaración pedida', body: 'A ' + rec[0].split(' ')[0] + ' le llega el detalle del corte en sus Avisos. Cuando responda, su respuesta aparece en los tuyos.' }
         });
       }
     };
@@ -420,7 +462,16 @@ class Component extends DCLogic {
       noResults: cortes.length === 0,
       query: st.query,
       typeQuery: e => this.setState({ query: e.target.value }),
-      filters: ['Todos', 'Por aclarar', 'Con diferencia', 'Caja 1', 'Caja 2'].map(label => ({
+      tabs: [['Todos', CORTES.length], ['Por aclarar', porAclarar], ['Con diferencia', CORTES.filter(c => c[9] !== this.esperado(c)).length]].map(([label, count], i) => ({
+        label, count: String(count),
+        selected: st.filter === label,
+        bg: st.filter === label ? 'var(--yellow)' : 'var(--white)',
+        countBg: st.filter === label ? 'var(--white)' : 'var(--gray-100)',
+        divider: i === 0 ? 'none' : '2.5px solid var(--black)',
+        pick: () => this.setState({ filter: label })
+      })),
+      clearFilters: () => this.setState({ filter: 'Todos', query: '' }),
+      filters: ['Caja 1', 'Caja 2'].map(label => ({
         label,
         bg: st.filter === label ? 'var(--yellow)' : 'var(--white)',
         shadow: st.filter === label ? '3px 3px 0 var(--black)' : 'none',

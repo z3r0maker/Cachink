@@ -11,6 +11,9 @@ test('from Cobranza to the account: balance, open tickets, history', async ({ pa
   await expect(page.getByText('$860.00')).toBeVisible();
   await expect(page.getByText('Ya abonó $400.00')).toBeVisible();
   await expect(page.getByText('Venta fiada V-0288')).toBeAttached();
+  await expect(page.getByText('Se venció ayer')).toBeVisible();
+  await expect(page.getByText('Vence el domingo')).toBeVisible();
+  await expect(page.getByText(/se aplicó a V-0288 en parte$/)).toBeAttached();
 });
 
 test('an abono settles the oldest ticket and lowers the balance', async ({ page }) => {

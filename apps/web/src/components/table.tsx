@@ -30,6 +30,8 @@ export interface DataTableProps<Row> {
   /** Minimum width before the table scrolls inside its card, never the page. */
   readonly minWidth?: number;
   readonly footer?: ReactNode;
+  /** Shown under the header row when `rows` is empty (an inset `EmptyState`). */
+  readonly empty?: ReactNode;
   readonly caption: string;
 }
 
@@ -82,6 +84,7 @@ export function DataTable<Row>({
   selectedKey,
   minWidth = 960,
   footer,
+  empty,
   caption,
 }: DataTableProps<Row>) {
   return (
@@ -107,6 +110,7 @@ export function DataTable<Row>({
           </tbody>
         </table>
       </div>
+      {rows.length === 0 ? empty : null}
       {footer ? <div className={tableFooter}>{footer}</div> : null}
     </div>
   );

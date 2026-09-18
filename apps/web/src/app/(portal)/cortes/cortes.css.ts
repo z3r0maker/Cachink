@@ -19,10 +19,7 @@ export const miga = style({
   color: colors.gray600,
 });
 
-/**
- * The file draws this link blue on the page's gray (4.19:1, under AA's 4.5:1);
- * ink with its underline keeps it a link and readable.
- */
+/** Ink with its underline: blue on the page's gray would be 4.19:1, under AA. */
 export const enlace = style({
   color: colors.ink,
   textDecoration: 'underline',

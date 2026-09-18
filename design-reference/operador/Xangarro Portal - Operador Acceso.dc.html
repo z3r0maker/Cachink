@@ -55,16 +55,16 @@ a:hover{color:var(--black);}
           </div>
           <div>
             <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:9px;">Código de vinculación</div>
-            <div style="display:flex;gap:9px;flex-wrap:wrap;">
-              <sc-for list="{{ codeBoxes }}" as="c" hint-placeholder-count="6">
-                <span style="width:54px;height:66px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:13px;background:{{ c.bg }};font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ c.ch }}</span>
+            <div style="display:flex;gap:7px;flex-wrap:wrap;">
+              <sc-for list="{{ codeBoxes }}" as="c" hint-placeholder-count="8">
+                <span style="width:46px;height:62px;margin-right:{{ c.gap }};display:grid;place-items:center;border:2.5px solid var(--black);border-radius:12px;background:{{ c.bg }};font-size:26px;font-weight:800;color:var(--black);">{{ c.ch }}</span>
               </sc-for>
             </div>
           </div>
-          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;max-width:330px;">
-            <sc-for list="{{ codeKeys }}" as="k" hint-placeholder-count="12">
-              <div role="button" tabindex="0" onClick="{{ k.press }}" data-press="1" style="height:56px;display:grid;place-items:center;border:2px solid var(--black);border-radius:13px;background:{{ k.bg }};box-shadow:3px 3px 0 var(--black);cursor:pointer;font-size:21px;font-weight:800;color:var(--black);">{{ k.label }}</div>
-            </sc-for>
+          <div>
+            <label for="ac-code" style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:6px;">Escríbelo aquí</label>
+            <input id="ac-code" type="text" autocomplete="off" spellcheck="false" placeholder="K7M3 DQ9P" value="{{ code }}" onChange="{{ typeCode }}" style="box-sizing:border-box;width:100%;max-width:400px;height:64px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);padding:0 16px;font-family:inherit;font-size:28px;font-weight:800;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink);outline:none;">
+            <div style="font-size:13px;font-weight:600;color:var(--gray-600);margin-top:7px;">Ocho caracteres. No distingue mayúsculas y puedes escribir el espacio o el guion: se ignoran.</div>
           </div>
           <button type="button" onClick="{{ vincular }}" data-press="1" style="height:58px;border:2.5px solid var(--black);border-radius:14px;background:{{ vincularBg }};box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);cursor:pointer;opacity:{{ vincularOpacity }}">Vincular caja</button>
         </div>
@@ -193,7 +193,7 @@ class Component extends DCLogic {
     const fondoVal = st.fondo === '' ? null : parseFloat(st.fondo);
     const fondoOk = fondoVal != null && !isNaN(fondoVal) && fondoVal >= 0 && st.fondo !== '';
 
-    const codeStr = (st.code + '      ').slice(0, 6);
+    const codeStr = (st.code + '        ').slice(0, 8);
     const nipStr = st.nip;
 
     const stepsMeta = [
@@ -212,15 +212,20 @@ class Component extends DCLogic {
       isNip: step === 'nip',
       isFondo: step === 'fondo',
       stateDot: step === 'vincular' ? 'var(--warning)' : 'var(--green)',
-      stateLabel: step === 'vincular' ? 'Caja sin vincular' : 'Caja vinculada · TD4 91K',
-      codeBoxes: codeStr.split('').map(ch => ({
+      stateLabel: step === 'vincular' ? 'Caja sin vincular' : 'Caja vinculada · K7M3 DQ9P',
+      codeBoxes: codeStr.split('').map((ch, i) => ({
         ch: ch.trim() === '' ? '' : ch,
+        gap: i === 3 ? '13px' : '0px',
         bg: ch.trim() === '' ? 'var(--gray-100)' : 'var(--yellow-soft)'
       })),
-      codeKeys: this.keypad('code', 6, 'C'),
-      vincular: () => { if (st.code.length === 6) this.setState({ step: 'nip', code: st.code }); },
-      vincularBg: st.code.length === 6 ? 'var(--yellow)' : 'var(--gray-100)',
-      vincularOpacity: st.code.length === 6 ? '1' : '0.5',
+      code: st.code,
+      typeCode: e => this.setState({
+        code: String(e.target.value).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8),
+        error: false
+      }),
+      vincular: () => { if (st.code.length === 8) this.setState({ step: 'nip', code: st.code }); },
+      vincularBg: st.code.length === 8 ? 'var(--yellow)' : 'var(--gray-100)',
+      vincularOpacity: st.code.length === 8 ? '1' : '0.5',
       operadores: OPERADORES.map(([name, initials, tint]) => ({
         name, initials, tint,
         bg: st.op === name ? 'var(--yellow-soft)' : 'var(--white)',

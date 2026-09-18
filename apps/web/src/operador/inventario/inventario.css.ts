@@ -163,3 +163,16 @@ export const cantidad = style({
   color: colors.ink,
   selectors: { '&:focus': { borderWidth: 2.5 } },
 });
+
+/**
+ * State chip, count and quick actions. On a phone (under 760 px) they take the
+ * second line, under the name and threshold (`groupBasis` in the file).
+ */
+export const grupo = style({
+  flex: '0 1 auto',
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  minWidth: 0,
+  '@media': { '(max-width: 759px)': { flexBasis: '100%' } },
+});

@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 
 import { toastAbono, vistaAbono } from '../../src/operador/cobranza/cliente/abono';
 import { estadoCuenta } from '../../src/operador/cobranza/cliente/derive';
-import { CUENTAS, HOY } from '../../src/operador/cobranza/cuentas';
+import { CUENTAS } from '../../src/operador/cobranza/cuentas';
+import { HOY } from '../../src/operador/fixtures';
 import {
   abonosDeHoy,
   estado,
@@ -58,7 +59,7 @@ describe('cobranza: one account history (D7)', () => {
     assert.match(sobra.texto, /\$160\.00 a su favor$/);
     assert.equal(
       toastAbono(sobra, 500_00n, 'Efectivo', 'Doña Mari de la tienda'),
-      '$500.00 de Doña Mari de la tienda por efectivo. Se aplicó a lo más antiguo; queda $0.00. $160.00 quedan a su favor.',
+      '$500.00 de Doña Mari de la tienda por efectivo. Liquidó lo que debía y $160.00 quedan a su favor para su próxima compra.',
     );
   });
 

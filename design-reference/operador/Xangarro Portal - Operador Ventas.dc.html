@@ -58,6 +58,9 @@ a:hover{color:var(--black);}
             <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
             <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
           </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Acceso.dc.html" title="Bloquear caja" aria-label="Bloquear caja" data-press="1" style="margin-left:auto;flex:none;display:grid;place-items:center;width:42px;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
         </div>
         <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Cerrar turno</a>
       </div>
@@ -83,6 +86,10 @@ a:hover{color:var(--black);}
           <a href="Xangarro%20Portal%20-%20Operador%20Caja.dc.html" data-press="1" data-onyellow="1" style="display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 16px;border:2.5px solid var(--black);border-radius:14px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;" style-hover="background:var(--yellow-deep);">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
             Nueva venta
+          </a>
+          <a href="Xangarro%20Portal%20-%20Operador%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 2 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">2</span>
           </a>
         </div>
       </div>
@@ -242,9 +249,9 @@ a:hover{color:var(--black);}
 const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 const METHOD_BG = { 'Efectivo': 'var(--green-soft)', 'Transferencia': 'var(--blue-soft)', 'Tarjeta': 'var(--purple-soft)', 'QR / CoDi': 'var(--peach-soft)', 'Fiado': 'var(--warning-soft)' };
 
-// Los montos cuadran con Inicio, Turno y Cierre: 12 ventas activas · 3,280 cobrado · 2,140 en efectivo · 182 fiado
+// Los montos cuadran con Inicio, Turno y Cierre: 12 ventas activas · 3,120 cobrado · 1,980 en efectivo · 182 fiado
 const VENTAS = [
-  ['V-0412', '8 pastor · 2 gringa · 2 horchata', 320, 'Efectivo', '14:52', ''],
+  ['V-0412', '3 pastor · 1 gringa · 1 horchata', 160, 'Efectivo', '14:52', ''],
   ['V-0411', '3 orden de pastor · 4 refresco', 396, 'Tarjeta', '14:38', ''],
   ['V-0410', '7 suadero · 3 agua · 1 consomé', 285, 'Efectivo', '14:21', ''],
   ['V-0409', '1 volcán · 1 consomé', 90, 'Fiado', '14:04', 'Doña Mari de la tienda'],

@@ -56,7 +56,11 @@ a:hover{color:var(--black);}
             <div style="font-size:14px;font-weight:800;color:var(--black);white-space:nowrap;">Ana Robledo</div>
             <div style="font-size:12px;font-weight:600;color:var(--gray-600);">Desde 08:15 · Caja 1</div>
           </div>
+          <a href="Xangarro%20Portal%20-%20Operador%20Acceso.dc.html" title="Bloquear caja" aria-label="Bloquear caja" data-press="1" style="margin-left:auto;flex:none;display:grid;place-items:center;width:42px;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="11" width="15" height="10" rx="2.5"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+          </a>
         </div>
+        <a href="Xangarro%20Portal%20-%20Operador%20Cierre%20de%20turno.dc.html" data-press="1" style="display:flex;align-items:center;justify-content:center;height:42px;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;">Cerrar turno</a>
       </div>
     </aside>
   </sc-if>
@@ -70,10 +74,16 @@ a:hover{color:var(--black);}
           Ventas del turno
         </a>
         <div style="margin-left:auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
           <span style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:{{ estadoBg }}">
             <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:{{ estadoDot }}"></span>
             <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">{{ estadoLabel }}</span>
           </span>
+          </sc-if>
+          <a href="Xangarro%20Portal%20-%20Operador%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 2 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">2</span>
+          </a>
         </div>
       </div>
     </header>
@@ -247,7 +257,7 @@ a:hover{color:var(--black);}
 </div>
 
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;venta&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;efectivo&quot;,&quot;fiado&quot;],&quot;default&quot;:&quot;efectivo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;registrada&quot;,&quot;cancelada&quot;],&quot;default&quot;:&quot;registrada&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;venta&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;efectivo&quot;,&quot;fiado&quot;],&quot;default&quot;:&quot;efectivo&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;registrada&quot;,&quot;cancelada&quot;],&quot;default&quot;:&quot;registrada&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;enCola&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;forcePhone&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
 const MXN = n => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(n);
 const ICON = {
   inicio: 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10',
@@ -308,6 +318,7 @@ class Component extends DCLogic {
     const total = v.lineas.reduce((s, l) => s + l[1] * l[2], 0);
     const cambio = v.recibido != null ? v.recibido - total : null;
     const telOk = st.tel.replace(/\D/g, '').length >= 10;
+    const enCola = this.props.enCola === true && !cancelada;
 
     const navDefs = [
       ['Inicio', ICON.inicio, 'Xangarro%20Portal%20-%20Operador%20Inicio.dc.html'],
@@ -361,9 +372,10 @@ class Component extends DCLogic {
       totalSize: isPhone ? '40px' : '52px',
       strike: cancelada ? 'line-through' : 'none',
       headBg: cancelada ? 'var(--gray-100)' : (esFiado ? 'var(--warning-soft)' : 'var(--green-soft)'),
-      estadoBg: cancelada ? 'var(--red-soft)' : 'var(--green-soft)',
-      estadoDot: cancelada ? 'var(--red)' : 'var(--green)',
-      estadoLabel: cancelada ? 'Venta cancelada' : 'Venta registrada y enviada',
+      isHappy: (st.dataState ?? this.props.dataState ?? 'happy') === 'happy',
+      estadoBg: cancelada ? 'var(--red-soft)' : (enCola ? 'var(--warning-soft)' : 'var(--green-soft)'),
+      estadoDot: cancelada ? 'var(--red)' : (enCola ? 'var(--warning)' : 'var(--green)'),
+      estadoLabel: cancelada ? 'Venta cancelada' : (enCola ? 'Registrada · en espera de enviarse' : 'Venta registrada y enviada'),
       lineas: v.lineas.map(([name, price, qty, tint], i) => ({
         name, qty: String(qty) + '×', each: MXN(price), amount: MXN(price * qty), tint,
         divider: i === v.lineas.length - 1 ? 'none' : '2px solid var(--gray-100)'
@@ -373,7 +385,12 @@ class Component extends DCLogic {
         { label: 'Capturó', value: 'Ana Robledo' },
         { label: 'Caja', value: 'Caja 1' },
         { label: 'Turno', value: 'Hoy, abierto 08:15' },
-        { label: 'Enviada al portal', value: cancelada ? 'Sí, con su cancelación' : 'Sí, hace un momento' }
+        {
+          label: 'Enviada al portal',
+          value: cancelada
+            ? 'Sí, con su cancelación'
+            : (enCola ? 'Todavía no · está en la cola y se envía sola al volver la conexión' : 'Sí, hace un momento')
+        }
       ],
       cancelada,
       cancelMotivo: st.motivo ?? 'Error de captura',
@@ -421,7 +438,7 @@ class Component extends DCLogic {
           if (needsTel && !telOk) return;
           this.setState({
             shareSent: needsTel
-              ? 'Comprobante enviado al ' + st.tel + ' por WhatsApp.'
+              ? 'WhatsApp abierto con el comprobante para el ' + st.tel + '.'
               : (label === 'Copiar texto' ? 'Texto del comprobante copiado.' : 'Imagen guardada como comprobante-' + v.folio + '.png.')
           });
         }

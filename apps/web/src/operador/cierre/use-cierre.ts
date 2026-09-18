@@ -43,6 +43,7 @@ export function useCierre(data: CierreData) {
     faltaNota,
     puede,
     pendientes: cola.pendientes,
+    connection: cola.connection,
     enviando: cola.enviando,
     enviar: cola.enviar,
     cerrado,

@@ -157,7 +157,7 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-12 Operador · Acceso (vincular → NIP → fondo)
 
-- [!] Status · **Blocked by:** O-04, O-06, **the ADR-072 design amendment landing upstream**
+- [ ] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
 - **Gate contribution:** the turno does not open without a captured fondo.
 
 ### O-13 Register lock and operator switch
@@ -209,60 +209,36 @@ turno does not open without a fondo.
 
 ## 4b. Upstream design amendments (Claude Design first, then pull — ADR-058)
 
-Collected while building fases 10–13; none is edited in `design-reference/`. The same list,
-written as requests to paste into Claude Design, is in
-[10-operador-design-changes.md](10-operador-design-changes.md).
+Collected while building fases 10–13; none is edited in `design-reference/`.
 
-1. **Acceso** (ADR-072): 8 code boxes instead of 6; a text input (uppercased, spaces/hyphens
-   ignored) instead of the numeric keypad; an example code from the contract alphabet
-   (`K7M3 DQ9P`), not `TD4 91K`. Blocks O-12.
-2. **Radii 15 and 17 → 16** (ADR-076): `Operador Estado` (62 px tile), Inicio and Detalle de
-   cliente (52 px tiles), Revisión de caja.
-3. **Turno / Cierre** divider: document `yellowRule` (#DBB80A) instead of `rgba(13,13,13,0.15)`
-   (ADR-077).
-4. **Shell consistency:** the files disagree on the sidebar footer (lock + «Cerrar turno» only in
-   Caja) and on the bell (only Inicio). Code follows the README on main screens; the files should
-   match it.
-5. **Inicio «Para hoy»:** the README promises «Hoy no» on each row; the file has none.
-6. **Turno «Pendientes de registrar» at 760–1000 px:** the row squeezes the expense name to zero
-   width (same in the file). Needs a wrap rule.
-7. **Undesigned copy** (left blank in code, never invented): Inicio/Turno first KPI with zero or
-   several cancellations; Inicio «Cerró» for a last turno that did not balance; Turno «Gastos» hint
-   with zero or several receipts. Invented and awaiting wording: «Vence en N días» (dues beyond
-   tomorrow).
-8. **Detalle de venta:** V-0412 is $160.00 (3 pastor, 1 gringa, 1 horchata) here and $320.00
-   («8 pastor · 2 gringa · 2 horchata») in Ventas; the header's state pill stays on in the empty
-   and error states. «Enviada al portal» has no offline wording (a sale still in the queue).
-9. **Gastos:** the list totals $1,530.00 while Turno's breakdown shows «gastos −$620.00»; the
-   category filters omit «Otros» although the form offers it; at 760–1000 px the row squeezes
-   the concept to zero width (as in Turno, item 6).
-10. **Inventario at phone width:** the stock row keeps every element on one line, so at 375 px the
-    name and «Umbral · unidad» wrap word by word and the «Registrar merma» button is cut off at the
-    right edge (same in the file). The row needs a phone layout.
-11. **Cobranza vs Detalle de cliente:** Chuy's abono today is $400.00 «contra saldo de
-    $1,260.00» in Cobranza (itself inconsistent: after it V-0288 is still open) and $120.00 in
-    Detalle, whose tickets and abonos also give $860.00. Cobranza's figure is the one Inicio, Turno
-    and Cierre use ($550.00 cash abonos). The files need one history. Detalle's «se aplicó hasta»
-    loop names the wrong ticket (see O-26).
-12. **Cierre:** the sidebar footer here says «08:15 – 21:04 · Caja 1» and «Turno cerrado» after
-    closing, while every other file says «Desde 08:15 · Caja 1»; the shell keeps one footer until
-    the files agree. The band in the file only appears offline; the README ties it to unsent
-    records (built that way). The count starts pre-filled ($3,780.00, «Sobra $910.00»).
-13. **Owner screens vs the owner vocabulary** (owner decision: the components win): the new files
-    draw tabs at 22 px padding with a 2 px divider and 0.04em tracking, KPI figures 6 px under the
-    label with a 13 px ink hint and a 230 px grid, 13 px-radius buttons with a 4 px shadow, and a
-    green-check empty state; the owner portal's `SegmentedTabs`, `KpiCard`, `Button` and
-    `EmptyState` differ. The files should follow the owner components.
-14. **Cortes de turno:** every corte shows the same count (×1 … ×10 = $3,780.00) and the same
-    «qué más pasó», whatever its «Contado» (code stores a count per corte and derives «Contado»
-    from it); the breadcrumb link is blue on gray at 4.19:1 (under AA — code uses ink); «Pedir
-    aclaración» says WhatsApp while ADR-075 routes owner→operator messages through
-    `mensajes_operador` (Avisos); the owner Drawer's header has no avatar or meta line.
+**Applied upstream and pulled on 2026-09-18 (ADR-085).** All fourteen requests of the first round
+landed in Claude Design and the 16 files were pulled into `design-reference/operador/`: Acceso's
+8-character text input (`K7M3 DQ9P`), radii 16, `#DBB80A` dividers, one shell (lock + «Cerrar
+turno», bell on every main screen), «Hoy no» in Inicio, wrapping rows in Turno/Gastos/Inventario,
+the missing sentences, one V-0412 ($160.00) and one $620.00 of gastos (so $3,120.00 cobrado,
+$1,980.00 in cash and $2,710.00 expected everywhere), the queued-sale wording in Detalle de venta,
+one account history with «a su favor», Cierre counting from zero with the band tied to unsent
+records, and the owner screens drawn with owner components (Cortes: tabs, per-corte count and
+events, Avisos instead of WhatsApp, ink breadcrumb). The code follows every one of them; D2, D5 and
+D7 of ADR-083 are therefore no longer provisional.
+
+**Open (second round)** — in [10-operador-design-changes.md](10-operador-design-changes.md):
+
+1. **Lowercase count words.** Inicio's «dos canceladas, la última a las …» and Turno's «cuatro con
+   comprobante» start a hint in lowercase (the singular cases are capitalised). Code capitalises
+   them (`src/operador/ui/frases.ts`).
+2. **Cortes «×0».** The file grays an uncounted denomination's «×0» with gray-400 (2.4:1 on
+   gray-100, under AA); code keeps gray-600 and lets the gray tile mark the zero.
+3. **Owner components vs the files' values.** Following the owner decision, `/cortes` and
+   `/revision-caja` render with `KpiCard`, `SegmentedTabs` and `Button`, which differ slightly
+   from what the files now draw: KPI figure 32 px (`fontSizes.xl5`) vs 34 px, tab tracking 0.05em
+   vs 0.04em and count weight 800 vs 700, «Exportar mes» 16 px radius / 4 px shadow vs 12 / 3.
+   Either the files or the components move; nothing else differs.
 
 ## 5. Fase 11 — Caja y captura
 
 > **Started before the fase 10 gate closed (owner, «continue», 2026-09-17).** O-12/O-13 wait on the
-> Acceso amendment and the runtime; fase 11 proceeds on fixtures so the screens are not idle.
+> runtime (the Acceso amendment landed 2026-09-18); fase 11 proceeds on fixtures so the screens are not idle.
 
 ### O-20 Operador · Caja
 
@@ -427,7 +403,7 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
     operator paths still 404.
   - Deviations: the band shows whenever the queue holds records (README: «si hay registros sin
     enviar»), not only offline as in the file. «Abrir otro turno» goes to Inicio until Acceso
-    (O-12) exists. The close is device-local until O-06; the count starts where the file's does.
+    (O-12) exists. The close is device-local until O-06; the count starts at zero (file amended).
   - Open with O-06: the five reasons vs the six-value `caja_turnos` enum (asked above).
 
 **Fase 12 screens are complete** (O-21 to O-28). Its real data waits on the groundwork (O-02 to
@@ -480,12 +456,13 @@ O-06); fase 13 is next.
     sweep; a11y clean after darkening the breadcrumb link.
 
 **Fase 13 screens are complete.** Every screen of the handoff except Acceso (O-12, blocked on the
-Access amendment and O-04/O-06) and the lock (O-13) is built on fixtures; real data follows the
+O-04/O-06; its design amendment has landed) and the lock (O-13) is built on fixtures; real data follows the
 groundwork (O-02 to O-06) and C-18.
 
 - **Steps:** `/cortes` (the design marks «Operadores» active). Four KPIs including the month's
   accumulated difference; state and register filters and search; the list with expected, counted
   and difference per turno; the 560 px side panel (owner `Drawer`) with how the expected cash was
   formed, the operator's count by denomination, their note and reason, and the rest of the turno;
-  two actions: ask for clarification by WhatsApp, or mark as clarified.
+  two actions: ask for clarification (a message the operator reads in Avisos, ADR-075), or mark
+  as clarified.
 - **Acceptance:** harness match for the list, filters, panel and actions; Playwright spec.

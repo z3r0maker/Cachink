@@ -30,9 +30,25 @@ test('the panel explains a shortfall and marks it clarified', async ({ page }) =
   );
 });
 
-test('filters narrow the list', async ({ page }) => {
+test('asking for a clarification goes to the operator’s Avisos', async ({ page }) => {
   await page.goto('/cortes');
-  await page.getByRole('button', { name: 'Por aclarar', exact: true }).click();
+  await page.getByRole('row', { name: /Luis Ortega.*13 may/ }).click();
+  await page.getByRole('button', { name: 'Pedir aclaración' }).click();
+  await expect(page.getByRole('status')).toContainText(
+    'A Luis le llega el detalle del corte en sus Avisos.',
+  );
+});
+
+test('tabs and chips narrow the list; nothing left offers every corte', async ({ page }) => {
+  await page.goto('/cortes');
+  await page.getByRole('button', { name: /^Por aclarar/ }).click();
   await expect(page.getByRole('row', { name: /Luis Ortega/ })).toHaveCount(2);
   await expect(page.getByRole('row', { name: /Ana Robledo/ })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Caja 1', exact: true }).click();
+  await expect(page.getByRole('row', { name: /Ana Robledo/ })).toHaveCount(3);
+  await page.getByLabel('Buscar corte').fill('nadie');
+  await expect(page.getByText('Sin cortes que mostrar')).toBeVisible();
+  await page.getByRole('button', { name: 'Ver todos los cortes' }).click();
+  await expect(page.getByRole('row', { name: /Luis Ortega/ })).toHaveCount(2);
+  await expect(page.getByRole('row', { name: /Ana Robledo/ })).toHaveCount(3);
 });

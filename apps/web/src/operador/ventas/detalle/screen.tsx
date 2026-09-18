@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { colors } from '@xangarro/tokens';
 
 import { total as totalDe } from '../../caja/ticket';
 import { Share } from '../../caja/share';
@@ -11,7 +10,7 @@ import { OPERADOR_BASE } from '../../shell/nav';
 import { HeaderAction } from '../../shell/shell';
 import { OpMain } from '../../ui/parts';
 import { CancelarVenta } from '../cancelar';
-import { cancelAviso, cancelIntro } from './copy';
+import { cancelAviso, cancelIntro, ESTADO_ENVIO, type EstadoEnvio } from './copy';
 import * as d from './detalle.css';
 import { Acciones, FiadoCard, Traza } from './side';
 import * as s from './side.css';
@@ -49,13 +48,14 @@ function Detalle({ data, venta }: { readonly data: DetalleData; readonly venta: 
   const [modal, setModal] = useState<'cancel' | 'share' | null>(null);
   const total = totalDe(venta.lineas);
   const close = () => setModal(null);
+  const envio: EstadoEnvio = motivo !== null ? 'cancelada' : venta.enCola ? 'en-cola' : 'enviada';
   return (
     <>
-      <EstadoPill cancelada={motivo !== null} />
+      <EstadoPill envio={envio} />
       <div className={d.grid}>
         <TicketCard venta={venta} total={total} cancelada={motivo} />
         <div className={s.column}>
-          <Traza data={data} cancelada={motivo !== null} />
+          <Traza data={data} envio={envio} />
           <Acciones
             venta={venta}
             cancelada={motivo !== null}
@@ -66,15 +66,7 @@ function Detalle({ data, venta }: { readonly data: DetalleData; readonly venta: 
         </div>
       </div>
       {modal === 'cancel' ? (
-        <Cancelar
-          venta={venta}
-          total={total}
-          onClose={close}
-          onConfirm={(m) => {
-            setMotivo(m);
-            close();
-          }}
-        />
+        <Cancelar venta={venta} total={total} onClose={close} onConfirm={setMotivo} />
       ) : null}
       <Share
         variant="detalle"
@@ -85,6 +77,7 @@ function Detalle({ data, venta }: { readonly data: DetalleData; readonly venta: 
   );
 }
 
+/** Confirming records the reason and closes the modal. */
 function Cancelar(p: {
   readonly venta: VentaDetalle;
   readonly total: bigint;
@@ -97,7 +90,10 @@ function Cancelar(p: {
       intro={<div className={s.intro}>{cancelIntro(p.venta, p.total)}</div>}
       aviso={cancelAviso(p.venta)}
       onClose={p.onClose}
-      onConfirm={p.onConfirm}
+      onConfirm={(m) => {
+        p.onConfirm(m);
+        p.onClose();
+      }}
     />
   );
 }
@@ -112,17 +108,13 @@ function comprobante(data: DetalleData, v: VentaDetalle, total: bigint) {
 }
 
 /** The header's right side on this screen: the sale's state instead of the sync pill. */
-function EstadoPill({ cancelada }: { readonly cancelada: boolean }) {
+function EstadoPill({ envio }: { readonly envio: EstadoEnvio }) {
+  const e = ESTADO_ENVIO[envio];
   return (
     <HeaderAction>
-      <span
-        className={h.syncStatic}
-        style={{ background: cancelada ? colors.redSoft : colors.greenSoft }}
-      >
-        <span className={h.syncDot} style={{ background: cancelada ? colors.red : colors.green }} />
-        <span className={h.syncLabel}>
-          {cancelada ? 'Venta cancelada' : 'Venta registrada y enviada'}
-        </span>
+      <span className={h.syncStatic} style={{ background: e.bg }}>
+        <span className={h.syncDot} style={{ background: e.dot }} />
+        <span className={h.syncLabel}>{e.pill}</span>
       </span>
     </HeaderAction>
   );

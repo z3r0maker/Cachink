@@ -3,7 +3,15 @@
 import Link from 'next/link';
 import { colors } from '@xangarro/tokens';
 
-import { Button, DataTable, FilterChip, KpiCard, kpiGrid } from '@/components';
+import {
+  Button,
+  DataTable,
+  EmptyState,
+  FilterChip,
+  KpiCard,
+  kpiGrid,
+  SegmentedTabs,
+} from '@/components';
 import { SearchBox } from '@/operador/ui/filters';
 import { Toast } from '@/operador/ui/toast';
 import { Icon } from '@/shell/icon';
@@ -16,13 +24,8 @@ import { Panel } from './panel';
 import type { Corte, FiltroCortes } from './types';
 import { useCortes, type Cortes } from './use-cortes';
 
-const FILTROS: readonly FiltroCortes[] = [
-  'Todos',
-  'Por aclarar',
-  'Con diferencia',
-  'Caja 1',
-  'Caja 2',
-];
+const PESTANAS = ['Todos', 'Por aclarar', 'Con diferencia'] as const;
+const CAJAS = ['Caja 1', 'Caja 2'] as const;
 const DESCARGAR = 'M12 3v12M7 11l5 5 5-5M4 20h16';
 
 /** Dueño · Cortes de turno: what each operator counted at close against what the system expected. */
@@ -34,6 +37,7 @@ export function CortesScreen(p: {
   return (
     <>
       <Encabezado onExportar={() => exportarCortes(p.cortes, x.estado)} />
+      <Pestanas cortes={p.cortes} x={x} />
       <Kpis cortes={p.cortes} x={x} />
       <Filtros x={x} />
       <DataTable
@@ -42,6 +46,7 @@ export function CortesScreen(p: {
         rows={filtrar(p.cortes, x.filtro, x.estado, x.query)}
         rowKey={(c) => c.id}
         onRowClick={(c) => x.setSel(c.id)}
+        empty={<SinCortes onClear={x.limpiar} />}
       />
       <Capas x={x} />
     </>
@@ -106,11 +111,42 @@ function Kpis({ cortes, x }: { readonly cortes: readonly Corte[]; readonly x: Co
   );
 }
 
+/** Todos / Por aclarar / Con diferencia, with their counts. */
+function Pestanas({ cortes, x }: { readonly cortes: readonly Corte[]; readonly x: Cortes }) {
+  const tabs = PESTANAS.map((f) => ({
+    value: f,
+    label: f,
+    count: filtrar(cortes, f, x.estado, '').length,
+  }));
+  return (
+    <div style={{ alignSelf: 'flex-start' }}>
+      <SegmentedTabs
+        tabs={tabs}
+        value={x.filtro}
+        onValueChange={(v) => x.setFiltro(PESTANAS.find((f) => f === v) ?? 'Todos')}
+        ariaLabel="Cortes por estado"
+      />
+    </div>
+  );
+}
+
+function SinCortes({ onClear }: { readonly onClear: () => void }) {
+  return (
+    <EmptyState
+      inset
+      glyph={<span style={{ fontSize: 34 }}>📭</span>}
+      title="Sin cortes que mostrar"
+      body="Ningún corte coincide con lo que estás filtrando. Quita un filtro o busca por otro operador."
+      action={{ label: 'Ver todos los cortes', onClick: onClear }}
+    />
+  );
+}
+
 function Filtros({ x }: { readonly x: Cortes }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        {FILTROS.map((f) => (
+        {CAJAS.map((f) => (
           <FilterChip key={f} label={f} selected={x.filtro === f} onSelect={() => x.setFiltro(f)} />
         ))}
       </div>

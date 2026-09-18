@@ -7,17 +7,19 @@ import { formatMoney } from '@xangarro/domain';
 
 import { Icon } from '../../shell/icon';
 import { OPERADOR_BASE } from '../shell/nav';
+import { HOY } from '../fixtures';
+import { sumarDias, textoVence } from '../ui/frases';
 import * as u from '../ui/ui.css';
 import * as l from './lists.css';
 import type { PendienteRecurrente } from './types';
 
 const CLOCK = 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2';
 
-/** «Vence hoy» / «Vence mañana» / «Atrasado 1 día», with the design's tints. */
+/** «Vence hoy» / «Vence mañana» / «Vence el viernes» / «Atrasado 1 día», with the design's tints. */
 function dueChip(vence: number): { label: string; bg: string; color: string } {
   if (vence === 0) return { label: 'Vence hoy', bg: colors.warningSoft, color: colors.warningText };
   if (vence > 0) {
-    const label = vence === 1 ? 'Vence mañana' : `Vence en ${vence} días`;
+    const label = textoVence(HOY, sumarDias(HOY, vence));
     return { label, bg: colors.gray100, color: colors.gray600 };
   }
   const dias = -vence;
@@ -60,15 +62,15 @@ export function PendientesRecurrentes({
 function Row({ p, onSkip }: { readonly p: PendienteRecurrente; readonly onSkip: () => void }) {
   const chip = dueChip(p.vence);
   return (
-    <div className={u.row} style={{ gap: 12, padding: '14px 18px' }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
+    <div className={`${u.row} ${u.rowWrap}`} style={{ gap: 12, padding: '14px 18px' }}>
+      <div className={u.rowMain}>
         <div className={l.name}>{p.nombre}</div>
         <div className={l.detail}>{p.detalle}</div>
       </div>
       <span className={l.due} style={{ background: chip.bg, color: chip.color }}>
         {chip.label}
       </span>
-      <span className={l.amount} style={{ color: colors.black }}>
+      <span className={l.amount} style={{ color: colors.black, marginLeft: 'auto' }}>
         {formatMoney(p.monto)}
       </span>
       <div className={l.actions}>

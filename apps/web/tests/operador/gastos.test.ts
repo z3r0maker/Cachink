@@ -7,11 +7,11 @@ import { filtrar, resumen } from '../../src/operador/gastos/derive';
 const gastos = GASTOS_FIXTURE.gastos;
 
 describe('gastos del turno', () => {
-  it('counts the expenses, what left the drawer and what lacks a receipt', () => {
+  it('counts the expenses: $620.00, the total Turno subtracts', () => {
     const r = resumen(gastos);
-    assert.equal(r.cuantos, 6);
-    assert.equal(r.total, 1530_00n);
-    assert.equal(r.sinComprobante, 2);
+    assert.equal(r.cuantos, 5);
+    assert.equal(r.total, 620_00n);
+    assert.equal(r.sinComprobante, 1);
   });
 
   it('filters by category and searches concept and supplier without accents', () => {
@@ -21,8 +21,8 @@ describe('gastos del turno', () => {
       ['Carbón'],
     );
     assert.deepEqual(
-      filtrar(gastos, 'Todos', 'reparacion').map((g) => g.concepto),
-      ['Reparación de parrilla'],
+      filtrar(gastos, 'Otros', '').map((g) => g.concepto),
+      ['Hielo para las bebidas'],
     );
     assert.equal(filtrar(gastos, 'Transporte', 'gas').length, 0);
   });

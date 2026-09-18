@@ -16,12 +16,12 @@ import { filtrar, resumen } from './derive';
 import * as g from './gastos.css';
 import { ListaGastos } from './lista';
 import { RegistrarGasto } from './registrar';
-import type { GastosScreenProps } from './types';
+import { CATEGORIAS, type GastosScreenProps } from './types';
 import { useGastos, type Gastos } from './use-gastos';
 
 const PLUS = 'M12 5v14M5 12h14';
 const FLECHA = 'M12 3v14M6 11l6 6 6-6M4 21h16';
-const FILTROS = ['Todos', 'Insumos', 'Servicios', 'Transporte', 'Mantenimiento'] as const;
+const FILTROS = ['Todos', ...CATEGORIAS] as const;
 
 /** Operador · Gastos: petty cash out of the drawer, each with its category and receipt. */
 export function GastosScreen({ state, data }: GastosScreenProps) {

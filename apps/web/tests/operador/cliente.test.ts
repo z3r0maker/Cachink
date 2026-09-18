@@ -11,7 +11,9 @@ import {
   limiteNota,
   recordatorio,
   ultimoAbono,
+  vence,
 } from '../../src/operador/cobranza/cliente/derive';
+import { HOY } from '../../src/operador/fixtures';
 
 const chuy = cuentaPorId('chuy')!;
 const mari = cuentaPorId('mari')!;
@@ -37,11 +39,36 @@ describe('detalle de cliente: everything from tickets and abonos', () => {
     assert.equal(abiertas(mari, e)[0]?.venta.folio, 'V-0361');
   });
 
-  it('lists tickets and abonos newest first, each abono with the last ticket it reached', () => {
-    const h = historial(chuy, estadoCuenta(chuy));
+  it('lists tickets and abonos newest first, each abono with the tickets it reached', () => {
+    const h = historial(chuy);
     assert.equal(h[0]?.titulo, 'Abono de $400.00');
-    assert.equal(h[0]?.detalle, 'Recibido hoy 13:52 en efectivo · se aplicó hasta V-0288');
+    assert.equal(h[0]?.detalle, 'Recibido hoy 13:52 en efectivo · se aplicó a V-0288 en parte');
     assert.equal(h.at(-1)?.titulo, 'Venta fiada V-0288');
+  });
+
+  it('names every ticket an abono settles, and what is left as saldo a favor', () => {
+    const grande = {
+      ...chuy,
+      abonos: [{ ...chuy.abonos[0]!, id: 'ab-x', monto: 1_300_00n }],
+    };
+    assert.equal(
+      historial(grande)[0]?.detalle,
+      'Recibido hoy 13:52 en efectivo · se aplicó a V-0288 completa y V-0310 completa · $40.00 quedó a su favor',
+    );
+  });
+
+  it('says each open ticket’s due date against today', () => {
+    assert.deepEqual(vence('2026-04-28T13:10', '15 días', HOY), {
+      texto: 'Se venció ayer',
+      vencido: true,
+    });
+    assert.deepEqual(vence('2026-05-02T14:20', '15 días', HOY), {
+      texto: 'Vence el domingo',
+      vencido: false,
+    });
+    assert.equal(vence('2026-04-20T10:00', '15 días', HOY).texto, 'Se venció hace 9 días');
+    assert.equal(vence('2026-05-14T10:00', '30 días', HOY).texto, 'Vence el 13 de junio');
+    assert.equal(vence('2026-05-13T10:00', '1 día', HOY).texto, 'Vence hoy');
   });
 
   it('previews an abono by folio and words the limit and the reminder', () => {

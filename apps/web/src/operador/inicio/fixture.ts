@@ -1,8 +1,9 @@
+import { TURNO_FIXTURE } from '../turno/fixture';
 import type { InicioData } from './types';
 
 /**
  * The design's example day (`Operador Inicio.dc.html`), in centavos. The figures
- * agree with Turno, Ventas and Cierre: 12 sales, $3,280.00 collected, $2,870.00
+ * agree with Turno, Ventas and Cierre: 12 sales, $3,120.00 collected, $2,710.00
  * expected cash, $182.00 on credit. Replaced by live data in O-06.
  */
 export const INICIO_FIXTURE: InicioData = {
@@ -16,8 +17,8 @@ export const INICIO_FIXTURE: InicioData = {
     ventas: 12,
     canceladas: 1,
     ultimaCancelada: '12:58',
-    cobrado: 328_000n,
-    esperado: 287_000n,
+    cobrado: TURNO_FIXTURE.cobrado,
+    esperado: TURNO_FIXTURE.esperado,
     fiado: 18_200n,
     clientesFiados: 2,
     ultimaVentaHace: '6 minutos',

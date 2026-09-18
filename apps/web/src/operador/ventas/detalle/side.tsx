@@ -2,23 +2,23 @@ import Link from 'next/link';
 
 import { OPERADOR_BASE } from '../../shell/nav';
 import * as u from '../../ui/ui.css';
-import { cancelHint, fiadoDetalle } from './copy';
+import { cancelHint, ESTADO_ENVIO, fiadoDetalle, type EstadoEnvio } from './copy';
 import * as s from './side.css';
 import type { DetalleData, VentaDetalle } from './types';
 
 /** «Quién y cuándo»: who captured it, where, in which turno, and whether it reached the portal. */
 export function Traza({
   data,
-  cancelada,
+  envio,
 }: {
   readonly data: DetalleData;
-  readonly cancelada: boolean;
+  readonly envio: EstadoEnvio;
 }) {
   const rows: readonly [string, string][] = [
     ['Capturó', data.operador],
     ['Caja', data.caja],
     ['Turno', data.turno],
-    ['Enviada al portal', cancelada ? 'Sí, con su cancelación' : 'Sí, hace un momento'],
+    ['Enviada al portal', ESTADO_ENVIO[envio].traza],
   ];
   return (
     <div className={u.listCard}>

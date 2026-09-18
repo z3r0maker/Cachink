@@ -10,7 +10,7 @@ import {
 
 import { enPalabras } from '../../../operador/inicio/copy';
 import { matches } from '../../../operador/ui/search';
-import type { Corte, EstadoCorte, FiltroCortes } from './types';
+import type { Corte, EstadoCorte, Evento, FiltroCortes } from './types';
 
 /** The domain's calculator over the corte's four parts (O-03). */
 export const esperado = (c: Corte): Money =>
@@ -72,5 +72,25 @@ export const netoTexto = (neto: Money): string =>
 export const aclarado = (c: Corte) =>
   `El corte de ${c.operador} del ${c.dia} queda cerrado. La diferencia se registra como ajuste de caja.`;
 
+/** «Pedir aclaración» sends the operator a message they read in Avisos (ADR-075). */
 export const aclaracion = (c: Corte) =>
-  `Se le mandó a ${c.operador.split(' ')[0] ?? c.operador} el detalle del corte por WhatsApp. Verás su respuesta en Avisos.`;
+  `A ${c.operador.split(' ')[0] ?? c.operador} le llega el detalle del corte en sus Avisos. Cuando responda, su respuesta aparece en los tuyos.`;
+
+/** «Qué más pasó en el turno»: a zero reads «Ninguna» / «Ninguno» on white. */
+export function eventos(c: Corte): readonly Evento[] {
+  const t = c.turno;
+  const { n, monto } = t.canceladas;
+  return [
+    { label: 'Ventas capturadas', value: String(t.ventas), tone: 'plain' },
+    n === 0
+      ? { label: 'Ventas canceladas', value: 'Ninguna', tone: 'plain' }
+      : { label: 'Ventas canceladas', value: `${n} · ${formatMoney(monto)}`, tone: 'danger' },
+    t.fiado === 0n
+      ? { label: 'Ventas fiadas', value: 'Ninguna', tone: 'plain' }
+      : { label: 'Ventas fiadas', value: formatMoney(t.fiado), tone: 'warning' },
+    { label: 'Movimientos de inventario', value: t.inventario, tone: 'plain' },
+    t.creados === 0
+      ? { label: 'Productos creados en caja', value: 'Ninguno', tone: 'plain' }
+      : { label: 'Productos creados en caja', value: String(t.creados), tone: 'soft' },
+  ];
+}

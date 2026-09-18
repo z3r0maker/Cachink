@@ -6,6 +6,7 @@ import {
   type Money,
 } from '@xangarro/domain';
 
+import { diasEntre, sumarDias, textoVence } from '../../ui/frases';
 import type { EstadoCliente } from '../derive';
 import type { AbonoCuenta, CuentaCliente, VentaCuenta } from './types';
 
@@ -27,6 +28,20 @@ export interface Abierta {
   readonly pendiente: Money;
   /** «la más antigua», «después de V-0288». */
   readonly orden: string;
+}
+
+export interface Vence {
+  readonly texto: string;
+  readonly vencido: boolean;
+}
+
+/** «Se venció hace 2 días» (red), «Vence el viernes»: a ticket's due date: its day plus the client's plazo («15 días»), said against `hoy`. */
+export function vence(fecha: string, plazo: string, hoy: string): Vence {
+  const due = sumarDias(fecha.slice(0, 10), Number.parseInt(plazo, 10) || 0);
+  const dif = diasEntre(hoy, due);
+  if (dif < -1) return { texto: `Se venció hace ${-dif} días`, vencido: true };
+  if (dif === -1) return { texto: 'Se venció ayer', vencido: true };
+  return { texto: textoVence(hoy, due), vencido: false };
 }
 
 /** Open tickets, oldest first, with what was already paid on each. */
@@ -57,8 +72,35 @@ export interface Movimiento {
   readonly monto: Money;
 }
 
-/** Tickets and abonos, newest first; each abono says the last ticket it reached. */
-export function historial(c: CuentaCliente, e: EstadoCuenta): readonly Movimiento[] {
+/**
+ * Where each abono landed, in the order they were received: «V-0288 completa y
+ * V-0310 en parte», plus what was left over as saldo a favor.
+ */
+function destinos(c: CuentaCliente): ReadonlyMap<string, string> {
+  const tickets = [...c.ventas].sort((a, b) => a.fecha.localeCompare(b.fecha));
+  const pend = tickets.map((v) => v.monto);
+  const out = new Map<string, string>();
+  for (const a of [...c.abonos].sort((x, y) => x.fecha.localeCompare(y.fecha))) {
+    const tocadas: string[] = [];
+    let resto = a.monto;
+    tickets.forEach((v, i) => {
+      const p = pend[i] ?? 0n;
+      if (resto <= 0n || p <= 0n) return;
+      const toma = resto < p ? resto : p;
+      pend[i] = p - toma;
+      resto -= toma;
+      tocadas.push(`${v.folio} ${pend[i] === 0n ? 'completa' : 'en parte'}`);
+    });
+    const destino = tocadas.length ? ` · se aplicó a ${tocadas.join(' y ')}` : '';
+    const favor = resto > 0n ? ` · ${formatMoney(resto)} quedó a su favor` : '';
+    out.set(a.id, `${destino}${favor}`);
+  }
+  return out;
+}
+
+/** Tickets and abonos, newest first; each abono says which tickets it reached. */
+export function historial(c: CuentaCliente): readonly Movimiento[] {
+  const destino = destinos(c);
   const ventas: Movimiento[] = c.ventas.map((v) => ({
     fecha: v.fecha,
     tipo: 'fiado',
@@ -66,16 +108,13 @@ export function historial(c: CuentaCliente, e: EstadoCuenta): readonly Movimient
     detalle: `Capturada por ${v.capturo} · ${v.dia}`,
     monto: v.monto,
   }));
-  const abonos: Movimiento[] = c.abonos.map((a) => {
-    const hasta = e.hasta[a.id];
-    return {
-      fecha: a.fecha,
-      tipo: 'abono',
-      titulo: `Abono de ${formatMoney(a.monto)}`,
-      detalle: `Recibido ${a.dia} en ${a.metodo.toLowerCase()}${hasta ? ` · se aplicó hasta ${hasta}` : ''}`,
-      monto: a.monto,
-    };
-  });
+  const abonos: Movimiento[] = c.abonos.map((a) => ({
+    fecha: a.fecha,
+    tipo: 'abono',
+    titulo: `Abono de ${formatMoney(a.monto)}`,
+    detalle: `Recibido ${a.dia} en ${a.metodo.toLowerCase()}${destino.get(a.id) ?? ''}`,
+    monto: a.monto,
+  }));
   return [...ventas, ...abonos].sort((a, b) => b.fecha.localeCompare(a.fecha));
 }
 

@@ -38,7 +38,7 @@ function datos(): CierreData {
       entradas: inv.entradas,
       mermas: inv.mermas,
     },
-    conteo: { 1000: 1, 500: 2, 200: 4, 100: 6, 50: 3, 20: 5, 10: 8, 5: 6, 2: 5, 1: 10 },
+    conteo: { 1000: 0, 500: 0, 200: 0, 100: 0, 50: 0, 20: 0, 10: 0, 5: 0, 2: 0, 1: 0 },
   };
 }
 

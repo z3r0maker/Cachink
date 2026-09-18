@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { colors, portalFontSizes } from '@xangarro/tokens';
 
@@ -32,37 +35,59 @@ const TAREA: Record<TareaTipo, { icon: string; tint: string; cta: string; slug: 
   },
 };
 
-/** «Para hoy»: what nobody on this register has done yet. */
+/** «Para hoy»: what nobody on this register has done yet; «Hoy no» hides a row for today. */
 export function ParaHoy({ tareas }: { readonly tareas: readonly Tarea[] }) {
+  const [hechas, setHechas] = useState<readonly string[]>([]);
+  const shown = tareas.filter((t) => !hechas.includes(t.id));
   return (
     <ListCard
       label="Para hoy"
       headBg={colors.gray100}
-      count={tareas.length}
+      count={shown.length}
       note="Lo que nadie ha hecho todavía en tu caja."
     >
-      {tareas.map((t) => {
-        const k = TAREA[t.tipo];
-        return (
-          <div key={t.id} className={u.row} data-hover="" style={{ gap: 13, padding: '14px 18px' }}>
-            <TintBox icon={k.icon} tint={k.tint} size={40} glyph={19} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div
-                className={s.rowTitle}
-                style={{ fontSize: portalFontSizes.body, letterSpacing: '-0.015em' }}
-              >
-                {t.titulo}
-              </div>
-              <div className={s.rowDetail}>{t.detalle}</div>
-            </div>
-            <Link href={`${OPERADOR_BASE}/${k.slug}`} className={s.rowCta}>
-              {k.cta}
-            </Link>
-          </div>
-        );
-      })}
-      {tareas.length === 0 ? <TodoAlDia /> : null}
+      {shown.map((t) => (
+        <TareaRow key={t.id} t={t} onSkip={() => setHechas((h) => [...h, t.id])} />
+      ))}
+      {shown.length === 0 ? <TodoAlDia /> : null}
     </ListCard>
+  );
+}
+
+function TareaRow({ t, onSkip }: { readonly t: Tarea; readonly onSkip: () => void }) {
+  const k = TAREA[t.tipo];
+  return (
+    <div
+      className={`${u.row} ${u.rowWrap}`}
+      data-hover=""
+      style={{ gap: 13, padding: '14px 18px' }}
+    >
+      <div className={u.rowMain} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+        <TintBox icon={k.icon} tint={k.tint} size={40} glyph={19} />
+        <div style={{ flex: '1 1 0', minWidth: 0 }}>
+          <div
+            className={s.rowTitle}
+            style={{ fontSize: portalFontSizes.body, letterSpacing: '-0.015em' }}
+          >
+            {t.titulo}
+          </div>
+          <div className={s.rowDetail}>{t.detalle}</div>
+        </div>
+      </div>
+      <div style={{ flex: 'none', display: 'flex', gap: 9 }}>
+        <Link href={`${OPERADOR_BASE}/${k.slug}`} className={s.rowCta}>
+          {k.cta}
+        </Link>
+        <button
+          type="button"
+          className={s.hoyNo}
+          title="Quitar de la lista de hoy"
+          onClick={onSkip}
+        >
+          Hoy no
+        </button>
+      </div>
+    </div>
   );
 }
 

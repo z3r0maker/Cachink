@@ -7,7 +7,7 @@ import { desglose } from '@/operador/turno/desglose';
 import { eyebrow } from '@/styles/text.css';
 
 import * as s from './cortes.css';
-import { contado, diferencia, esperado } from './derive';
+import { contado, diferencia, esperado, eventos } from './derive';
 import type { Corte, EstadoCorte, Evento } from './types';
 
 const PASADO = { cuadra: 'Cuadró', falta: 'Faltó', sobra: 'Sobró' } as const;
@@ -67,7 +67,7 @@ function Cuerpo({ c }: { readonly c: Corte }) {
       ) : null}
       <Formacion c={c} />
       <Conteo c={c} />
-      <Eventos eventos={c.eventos} />
+      <Eventos eventos={eventos(c)} />
     </div>
   );
 }
@@ -97,20 +97,29 @@ function Formacion({ c }: { readonly c: Corte }) {
   );
 }
 
-/** Only the denominations the operator counted. */
+/**
+ * Every denomination; the ones not counted sit on gray. The file also grays
+ * their «×0» (gray-400, 2.4:1 on gray-100, under AA), so the count keeps
+ * gray-600 and the tile alone marks the zero (plan §4b).
+ */
 function Conteo({ c }: { readonly c: Corte }) {
   return (
     <div className={s.seccion}>
       <div className={eyebrow}>Conteo que capturó</div>
       <div className={s.denoms}>
-        {DENOMINACIONES_MXN.filter((d) => (c.conteo[d.pesos] ?? 0) > 0).map((d) => (
-          <div key={d.pesos} className={s.denom}>
-            {`$${d.pesos}`}
-            <span
-              style={{ marginLeft: 'auto', color: colors.gray600 }}
-            >{`×${c.conteo[d.pesos] ?? 0}`}</span>
-          </div>
-        ))}
+        {DENOMINACIONES_MXN.map((d) => {
+          const n = c.conteo[d.pesos] ?? 0;
+          return (
+            <div
+              key={d.pesos}
+              className={s.denom}
+              style={{ background: n === 0 ? colors.gray100 : colors.white }}
+            >
+              {`$${d.pesos}`}
+              <span style={{ marginLeft: 'auto', color: colors.gray600 }}>{`×${n}`}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

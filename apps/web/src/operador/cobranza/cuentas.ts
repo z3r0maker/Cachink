@@ -2,9 +2,6 @@ import { colors } from '@xangarro/tokens';
 
 import type { CuentaCliente } from './cliente/types';
 
-/** The handoff's «hoy»: every file is drawn on 14 May 2026. */
-export const HOY = '2026-05-14';
-
 const ANA = 'Ana Robledo · Caja 1';
 const LUIS = 'Luis Ortega · Caja 2';
 
@@ -106,7 +103,7 @@ export const CUENTAS: readonly CuentaCliente[] = [
         dia: 'hoy 13:52',
         monto: 400_00n,
         metodo: 'Efectivo',
-        nota: 'Efectivo contra saldo de $1,260.00 · se aplicó a V-0288 y parte de V-0310',
+        nota: 'Efectivo contra saldo de $1,260.00 · se aplicó a parte de V-0288, la venta más antigua',
       },
     ],
   },

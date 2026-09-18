@@ -22,21 +22,25 @@ export function ListaExistencias(p: {
   return (
     <div className={u.listCard}>
       {p.items.map((it) => (
-        <div key={it.id} className={v.row}>
+        <div key={it.id} className={`${v.row} ${u.rowWrap}`}>
           <span className={s.tile} style={{ background: it.tint }}>
             <Glyph paths={PRODUCT_ICONS[it.icono]} size={21} stroke={2.3} />
           </span>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: '1 1 0', minWidth: 120 }}>
             <div className={l.name}>{it.nombre}</div>
             <div className={l.detail}>
               Umbral {it.umbral} · {it.unidad}
             </div>
           </div>
-          <Estado bajo={porReponer(it)} />
-          <div className={s.qty}>{it.existencias}</div>
-          <div style={{ flex: 'none', display: 'flex', gap: 8 }}>
-            <Rapido tipo="Entrada" onClick={() => p.onMover('Entrada', it.id)} />
-            <Rapido tipo="Merma" onClick={() => p.onMover('Merma', it.id)} />
+          <div className={s.grupo}>
+            <Estado bajo={porReponer(it)} />
+            <div className={s.qty} style={{ marginLeft: 'auto' }}>
+              {it.existencias}
+            </div>
+            <div style={{ flex: 'none', display: 'flex', gap: 8 }}>
+              <Rapido tipo="Entrada" onClick={() => p.onMover('Entrada', it.id)} />
+              <Rapido tipo="Merma" onClick={() => p.onMover('Merma', it.id)} />
+            </div>
           </div>
         </div>
       ))}

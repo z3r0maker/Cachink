@@ -210,3 +210,10 @@ export const nadaTile = style({
   background: colors.greenSoft,
   color: colors.greenText,
 });
+
+/** The due line under an open ticket: gray, red once past due. */
+export const vence = style({
+  marginTop: 2,
+  fontSize: portalFontSizes.xs,
+  fontWeight: typography.weights.bold,
+});

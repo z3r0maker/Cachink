@@ -1,21 +1,32 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
-import { cerrarHint, conSigno, DIF, lineaCerrado } from '../../src/operador/cierre/copy';
+import {
+  bandaCuerpo,
+  cerrarHint,
+  conSigno,
+  DIF,
+  lineaCerrado,
+} from '../../src/operador/cierre/copy';
 import { desglose, esperadoDe } from '../../src/operador/turno/desglose';
 import { TURNO_FIXTURE } from '../../src/operador/turno/fixture';
 
 describe('cierre de turno', () => {
-  it('computes the expected cash with the domain calculator: $2,870.00', () => {
-    assert.equal(esperadoDe(TURNO_FIXTURE), 2_870_00n);
-    assert.equal(TURNO_FIXTURE.esperado, 2_870_00n);
+  it('computes the expected cash with the domain calculator: $2,710.00', () => {
+    assert.equal(esperadoDe(TURNO_FIXTURE), 2_710_00n);
+    assert.equal(TURNO_FIXTURE.esperado, 2_710_00n);
     assert.deepEqual(desglose(TURNO_FIXTURE).at(-1), ['Gastos de caja chica', '−$620.00']);
   });
 
   it('blocks the close first on the queue, then on the missing note', () => {
-    assert.equal(cerrarHint(3, true), 'Primero se tienen que enviar los 3 registros pendientes.');
+    assert.equal(cerrarHint(3, true), 'Primero se tienen que enviar los registros pendientes.');
     assert.equal(cerrarHint(0, true), 'Elige un motivo y escribe la nota para poder cerrar.');
     assert.match(cerrarHint(0, false), /^Al cerrar se guarda el conteo/);
+  });
+
+  it('asks to reconnect offline and to wait online while records are unsent', () => {
+    assert.match(bandaCuerpo('sin-conexion'), /Conéctate y espera a que suban\.$/);
+    assert.match(bandaCuerpo('en-linea'), /Espera a que terminen de subir\.$/);
   });
 
   it('words the difference and the closed line', () => {

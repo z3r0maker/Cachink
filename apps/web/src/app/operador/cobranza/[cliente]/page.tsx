@@ -1,4 +1,5 @@
 import { cuentaPorId } from '@/operador/cobranza/cuentas';
+import { HOY } from '@/operador/fixtures';
 import { DetalleClienteScreen } from '@/operador/cobranza/cliente/screen';
 import type { DetalleClienteProps } from '@/operador/cobranza/cliente/types';
 
@@ -27,7 +28,7 @@ export default async function OperadorDetalleClientePage({
   return (
     <DetalleClienteScreen
       state={forced(dataState)}
-      data={{ negocio: 'Taquería Don Pedro', dueno: 'Pedro', cuenta }}
+      data={{ negocio: 'Taquería Don Pedro', hoy: HOY, dueno: 'Pedro', cuenta }}
     />
   );
 }

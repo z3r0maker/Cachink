@@ -1,3 +1,4 @@
+import { colors } from '@xangarro/tokens';
 import { formatMoney, type Money } from '@xangarro/domain';
 
 import type { VentaDetalle } from './types';
@@ -26,3 +27,29 @@ export function cancelAviso(v: VentaDetalle): string {
 
 export const fiadoDetalle = (saldo: Money) =>
   `Se sumó a su saldo, que quedó en ${formatMoney(saldo)}. No entró efectivo a la caja.`;
+
+/** Where the sale stands: cancelled, waiting in the queue, or sent. */
+export type EstadoEnvio = 'cancelada' | 'en-cola' | 'enviada';
+
+export const ESTADO_ENVIO: Readonly<
+  Record<EstadoEnvio, { pill: string; traza: string; bg: string; dot: string }>
+> = {
+  cancelada: {
+    pill: 'Venta cancelada',
+    traza: 'Sí, con su cancelación',
+    bg: colors.redSoft,
+    dot: colors.red,
+  },
+  'en-cola': {
+    pill: 'Registrada · en espera de enviarse',
+    traza: 'Todavía no · está en la cola y se envía sola al volver la conexión',
+    bg: colors.warningSoft,
+    dot: colors.warning,
+  },
+  enviada: {
+    pill: 'Venta registrada y enviada',
+    traza: 'Sí, hace un momento',
+    bg: colors.greenSoft,
+    dot: colors.green,
+  },
+};

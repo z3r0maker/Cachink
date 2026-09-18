@@ -7,7 +7,8 @@ import { expect, test } from '@playwright/test';
 test('Turno shows the expected cash built from its four parts', async ({ page }) => {
   await page.goto('/operador/turno');
   await expect(page.getByRole('heading', { level: 1, name: 'Tu turno' })).toBeVisible();
-  await expect(page.getByText('$2,870.00')).toBeVisible();
+  await expect(page.getByText('$2,710.00')).toBeVisible();
+  await expect(page.getByText('Cuatro con comprobante')).toBeVisible();
   for (const part of [
     'Fondo de caja',
     'Ventas en efectivo',
