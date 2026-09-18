@@ -5690,3 +5690,55 @@ here with the option Track O recommended, and marked provisional.
 - Track A: the phone's BusinessForm should write the code too (via
   `regimenPatch`), not the bucket.
 - The CFDI port should read `regimen_sat` instead of mapping the bucket.
+
+## ADR-084
+
+**Title:** The marketing site joins the monorepo as `apps/landing`
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; supersedes the repo half of README Q18
+("Landing stays a separate Vite repo"). Q18's other half — marketing only, CTAs link to
+`app.xangarro.mx/signup?plan=…` — stands.
+
+**Context**
+
+The landing lived in its own repo (`CachinkLanding`, Vite + React, prerendered by
+`scripts/prerender.mjs`). The owner wants one repo: one CI, one dependency policy, and the
+launch copy (Track L, N-31) edited next to the prices and plan slugs it must match.
+
+**Decision**
+
+1. **Import with history.** `git subtree add --prefix=apps/landing <CachinkLanding> main`
+   (972952c, three commits, not squashed), so `git log -- apps/landing` keeps its past.
+   The history carries no `.env`, `dist/` or `node_modules/`.
+2. **A pnpm workspace member,** `@xangarro/landing`. `package-lock.json` is gone; the root
+   lockfile covers it. Scripts match the turbo tasks: `dev`, `build`, `preview`, `lint`,
+   `typecheck`, `test`, `clean`.
+   - `typecheck` is a no-op: the site is plain JS, and adding `checkJs` would mean typing
+     every component first — a port, not an import.
+   - `test` is the production build, whose prerender asserts each route's H1 is in its
+     HTML. That makes `pnpm test` (and so CI) the landing's build gate without a new job.
+   - A scoped `pnpm.overrides` entry (`@xangarro/landing>react`, `>react-dom` → 18.3.1)
+     keeps it on React 18: the repo-wide pin is 19.2.6, and the import upgrades no major.
+     Upgrading means deleting those two lines.
+3. **Lint scope.** The root ESLint config gains one `apps/landing/**/*.{js,jsx,mjs}` block:
+   JSX parsing on, and the size/shape rules (`max-lines`, `max-lines-per-function`,
+   `complexity`, `sonarjs/cognitive-complexity`, `sonarjs/no-duplicate-string`,
+   `unicorn/filename-case`) off. CLAUDE.md §2.6's limits are for the product's layered
+   code; the brochure's components are PascalCase `.jsx` with long declarative sections,
+   and splitting them belongs to Track L, not to the import. Every correctness rule stays
+   on, and no `eslint-disable` is added (one was removed). Its `lint` script runs from the
+   repo root because flat-config `files` globs resolve from the cwd. `design-lint` and
+   `store-compliance` scan fixed roots that do not include it; Prettier now formats it.
+4. **Deploy.** Its own Vercel project, `xangarro-landing` (root directory `apps/landing`),
+   served at `xangarro.mx`; `apps/landing/vercel.json` sets framework `vite`, build
+   `pnpm run build`, output `dist`. CTAs still point at `app.xangarro.mx/signup?plan=…`.
+
+**Consequences**
+
+- Shared CI: every PR lints, and builds and prerenders the landing.
+- The old GitHub repo is to be **archived** by the owner, not deleted.
+- Content and branding are untouched (`VITE_SITE_URL` still says cachink.mx); the rebrand
+  is Track L (L-01…L-05) and N-31, whose paths are now under `apps/landing/`.
+- Suggested follow-ups: React 19 (drop the override), Vite 8, `@vitejs/plugin-react` 6.
