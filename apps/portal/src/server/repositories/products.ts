@@ -1,11 +1,12 @@
 import 'server-only';
 
 import { and, eq, isNull, count as sqlCount } from 'drizzle-orm';
-import { products, syncLog } from '@xangarro/data-pg';
+import { products } from '@xangarro/data-pg';
 import type { ProductPatch, ProductsRepository } from '@xangarro/data';
 import type { BusinessId, Product, ProductId } from '@xangarro/domain';
 
 import type { Tx } from '../db';
+import { recordChange } from './sync-log';
 
 /**
  * A Postgres `ProductsRepository`, bound to one tenant transaction.
@@ -95,14 +96,7 @@ function writes(tx: Tx, businessId: BusinessId) {
       // Same transaction as the update, deliberately: a row must never change
       // without the record the device pulls, nor be announced as changed when
       // the update rolled back.
-      await tx.insert(syncLog).values({
-        tableName: 'products',
-        rowId: id,
-        op: 'update',
-        businessId,
-        createdAt: now(),
-        updatedAt: now(),
-      });
+      await recordChange(tx, businessId, 'products', id, 'update');
       return toDomain(row);
     },
   };

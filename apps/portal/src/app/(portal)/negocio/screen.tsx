@@ -1,14 +1,21 @@
 'use client';
 
-import { Banner, Button, ScreenBody } from '@/components';
+import { Banner, ScreenBody } from '@/components';
 import { useSession } from '@/session/provider';
 import type { NegocioData } from '@/server/screens';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
 import { CapabilitiesCard, FuncionesCard, SectionCard } from './parts';
+import { EditNegocioDialog } from './edit-dialog';
 import { pageSubtitle, pageTitle, sectionGrid } from './negocio.css';
 
-function Heading({ owner }: { readonly owner: boolean }) {
+function Heading({
+  owner,
+  current,
+}: {
+  readonly owner: boolean;
+  readonly current: { nombre: string; regimenFiscal: string };
+}) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
@@ -18,7 +25,7 @@ function Heading({ owner }: { readonly owner: boolean }) {
       {/* Editing the business is owner-only (design handoff, "Roles"). */}
       {owner ? (
         <div style={{ marginLeft: 'auto' }}>
-          <Button variant="secondary">Editar datos</Button>
+          <EditNegocioDialog current={current} />
         </div>
       ) : null}
     </div>
@@ -66,7 +73,10 @@ export function NegocioScreen({ business }: { readonly business: NegocioData | n
 
   return (
     <>
-      <Heading owner={owner} />
+      <Heading
+        owner={owner}
+        current={{ nombre: business?.nombre ?? '', regimenFiscal: business?.regimenFiscal ?? '' }}
+      />
 
       {incomplete ? (
         <Banner

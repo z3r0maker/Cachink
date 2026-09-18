@@ -100,11 +100,11 @@ export const USERS = [
 
 /** `[id, nombre, puesto, salarioSemanal, periodo]` */
 export const EMPLOYEES = [
-  [id('EMP01'), 'Ana Robledo', 'Cajera', peso(2100), 'Semanal'],
-  [id('EMP02'), 'Luis Ortega', 'Parrillero', peso(2400), 'Semanal'],
-  [id('EMP03'), 'Rosa Medina', 'Cocina', peso(1650), 'Semanal'],
-  [id('EMP04'), 'Jorge Lara', 'Repartidor', peso(1200), 'Quincenal'],
-  [id('EMP05'), 'Carmen Ruiz', 'Limpieza', peso(800), 'Semanal'],
+  [id('EMP01'), 'Ana Robledo', 'Cajera', peso(2100), 'semanal'],
+  [id('EMP02'), 'Luis Ortega', 'Parrillero', peso(2400), 'semanal'],
+  [id('EMP03'), 'Rosa Medina', 'Cocina', peso(1650), 'semanal'],
+  [id('EMP04'), 'Jorge Lara', 'Repartidor', peso(1200), 'quincenal'],
+  [id('EMP05'), 'Carmen Ruiz', 'Limpieza', peso(800), 'semanal'],
 ] as const;
 
 /** `[id, nombre, plataforma, modelo, lastPush]` */

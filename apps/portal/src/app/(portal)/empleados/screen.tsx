@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
 import {
-  Button,
   DataTable,
   KpiCard,
   ScreenBody,
@@ -18,6 +17,7 @@ import type { EmpleadosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 import { eyebrow } from '@/styles/text.css';
 
+import { NuevoEmpleadoDialog } from './new-dialog';
 import { pageSubtitle, pageTitle } from './empleados.css';
 
 type Empleado = EmpleadosData[number];
@@ -51,7 +51,7 @@ function Heading() {
       </div>
       {canWrite(session.role) ? (
         <div style={{ marginLeft: 'auto' }}>
-          <Button>Nuevo empleado</Button>
+          <NuevoEmpleadoDialog />
         </div>
       ) : null}
     </div>

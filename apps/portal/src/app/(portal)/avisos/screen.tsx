@@ -2,11 +2,12 @@
 
 import { useMemo, useState } from 'react';
 
-import { Button, Card, FilterChip, ScreenBody, SegmentedTabs } from '@/components';
+import { Card, FilterChip, ScreenBody, SegmentedTabs } from '@/components';
 import type { AvisosData } from '@/server/screens';
 import { resolveScreenState } from '@/session/gating';
 
 import { ConfigurarCard, NoticeLine } from './parts';
+import { MarcarLeidosButton } from './marcar-leidos';
 import { pageSubtitle, pageTitle } from './avisos.css';
 
 function Heading({ isConfigurar }: { readonly isConfigurar: boolean }) {
@@ -18,7 +19,7 @@ function Heading({ isConfigurar }: { readonly isConfigurar: boolean }) {
       </div>
       {!isConfigurar ? (
         <div style={{ marginLeft: 'auto' }}>
-          <Button variant="secondary">Marcar todo como leído</Button>
+          <MarcarLeidosButton />
         </div>
       ) : null}
     </div>

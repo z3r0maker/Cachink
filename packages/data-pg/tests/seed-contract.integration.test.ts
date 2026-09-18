@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import { afterAll, beforeAll, it } from 'vitest';
-import { ProductSchema } from '@xangarro/domain';
+import { EmployeeSchema, ProductSchema } from '@xangarro/domain';
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { listProductos } from '../src/queries/lists.js';
 import { products } from '../src/schema/catalog.js';
+import { employees } from '../src/schema/tenant.js';
 import { integrationSuite } from './support/db';
 
 /**
@@ -66,6 +67,30 @@ describe('the seed satisfies the domain schemas', () => {
         'Seed data that the domain rejects is not a fixture, it is a trap: every ' +
         'read renders it happily and the first write fails.',
     );
+  });
+
+  it('every seeded employee parses as a domain Employee', async () => {
+    // Added after `periodo` turned out to be `'Semanal'` against an enum of
+    // `'semanal'` — the same defect as `tipo`, in a table the products check
+    // did not cover. A guard that only watches the table where the bug was
+    // first found is not a guard.
+    const rows = await withBusiness(db, BIZ, (tx) => tx.select().from(employees));
+    assert.ok(rows.length > 0, 'the seed must have run');
+
+    const failures = rows
+      .map((row) => ({
+        id: row.id,
+        parsed: EmployeeSchema.safeParse({
+          ...row,
+          createdAt: new Date(row.createdAt).toISOString(),
+          updatedAt: new Date(row.updatedAt).toISOString(),
+          deletedAt: row.deletedAt === null ? null : new Date(row.deletedAt).toISOString(),
+        }),
+      }))
+      .filter((r) => !r.parsed.success)
+      .map((r) => `${r.id}: ${r.parsed.error?.issues.map((i) => i.path.join('.')).join(', ')}`);
+
+    assert.deepEqual(failures, []);
   });
 
   it('ids are ULIDs, not readable shorthand', async () => {

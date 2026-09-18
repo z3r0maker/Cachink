@@ -259,6 +259,9 @@ importers:
       '@xangarro/application':
         specifier: workspace:*
         version: link:../../packages/application
+      '@xangarro/contracts':
+        specifier: workspace:*
+        version: link:../../packages/contracts
       '@xangarro/data':
         specifier: workspace:*
         version: link:../../packages/data
