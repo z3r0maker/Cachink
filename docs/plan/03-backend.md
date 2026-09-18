@@ -236,7 +236,17 @@
 > **Amended 2026-09-18 (ADR-080):** also carries the portal's sign-in link and password-reset
 > templates — single-use, short-lived tokens stored hashed, like sessions (ADR-079).
 
-- [ ] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
+- [~] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
+  - 2026-09-18 · branch `track-n/b14-email` · Resend (resend 6.28.1, @react-email/components
+    1.0.12, @react-email/render 2.1.0). Port + use cases in `@xangarro/application/email`;
+    templates and adapters in the new `@xangarro/email` (Resend with Idempotency-Key and
+    429/5xx backoff; dev outbox `.email-outbox/` without a key). Templates: trial-ending (day
+    11/14), usage-threshold, staff-digest, password-reset, magic-link, generic-notice —
+    snapshot-tested. Wired: admin digest (N-10), portal trial cron (N-01). Seams:
+    `sendPasswordReset`/`sendMagicLink` (ADR-080 flows not on main yet),
+    `notifyUsageThreshold` (N-03, for the N-02 wiring). Runbook `docs/ops/email.md`.
+    **Still to do:** `activation-code`, `welcome`, `payment-failed`, `factura-issued`; DNS
+    verification of xangarro.mx (owner); owner address for businesses with no Stripe customer.
 - **Steps:** Resend (or Supabase SMTP) with templates: `activation-code` (code, expiry, 3-step how-to), `welcome`, `payment-failed` (grace explanation), `factura-issued`. Spanish (es-MX). From `hola@xangarro.mx` (domain verification in L-04).
 - **Acceptance:** dev sends land in Resend test inbox; templates snapshot-tested.
 
