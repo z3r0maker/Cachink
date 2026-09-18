@@ -20,18 +20,23 @@ export interface AuditedIntent {
   readonly payload?: Readonly<Record<string, unknown>>;
 }
 
+/**
+ * `intent` may be a function of the mutation's result, for audit rows that
+ * record what changed (before → after) or a tenant only known after loading.
+ */
 export async function auditedMutation<T>(
-  intent: AuditedIntent,
+  intent: AuditedIntent | ((result: NoInfer<T>) => AuditedIntent),
   mutate: (tx: Tx, ctx: StaffContext) => Promise<T>,
 ): Promise<{ result: T; audit: StaffAuditEntry }> {
   const ctx = await requireStaff();
   return db().transaction(async (tx) => {
     const result = await mutate(tx, ctx);
+    const { action, businessId, payload } = typeof intent === 'function' ? intent(result) : intent;
     const audit = await recordStaffAction(auditSink(tx), {
       staffId: ctx.staff.id,
-      action: intent.action,
-      businessId: intent.businessId ?? null,
-      payload: intent.payload ?? {},
+      action,
+      businessId: businessId ?? null,
+      payload: payload ?? {},
     });
     return { result, audit };
   });
