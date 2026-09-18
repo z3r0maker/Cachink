@@ -21,6 +21,7 @@ export { KpiCard, Delta, Verdict, type KpiCardProps, type FigureTone } from './k
 export { kpiGrid } from './kpi.css';
 export { SegmentedTabs, FilterChip, type TabDef, type SegmentedTabsProps } from './tabs';
 export { DataTable, type ColumnDef, type DataTableProps } from './table';
+export { Pager, usePagina, type Pagina } from './pager';
 export { Banner, type BannerProps } from './banner';
 export { Drawer, type DrawerProps } from './drawer';
 export { ScreenBody, type ScreenBodyProps } from './screen';

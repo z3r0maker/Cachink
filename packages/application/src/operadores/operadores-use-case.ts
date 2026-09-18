@@ -34,8 +34,8 @@ async function activeOperators(users: UsersRepository, businessId: BusinessId): 
 }
 
 /** Found, and in this business — another business's operator is "not found", not "forbidden". */
-async function ownOperator(
-  users: UsersRepository,
+export async function ownOperator(
+  users: Pick<UsersRepository, 'findById'>,
   businessId: BusinessId,
   id: UserId,
 ): Promise<User> {

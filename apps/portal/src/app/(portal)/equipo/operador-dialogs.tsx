@@ -13,6 +13,8 @@ import {
   type OperadorResult,
 } from '@/server/actions/operadores';
 
+import { NipInput } from './nip-input';
+
 /**
  * Operator dialogs (B-13 / P-05).
  *
@@ -21,6 +23,11 @@ import {
  * server refuses it regardless, because a browser check is a courtesy.
  */
 const PIN_HINT = 'El NIP debe tener 4 números.';
+const MISMATCH = 'Los dos NIP no coinciden.';
+
+/** The one NIP check both dialogs run before a round trip. */
+const nipProblem = (pin: string, confirm: string): string | null =>
+  !isValidPin(pin) ? PIN_HINT : pin !== confirm ? MISMATCH : null;
 
 function useAction(onDone: (r: OperadorResult & { ok: true }) => void) {
   const [error, setError] = useState<string | null>(null);
@@ -42,19 +49,22 @@ function useAction(onDone: (r: OperadorResult & { ok: true }) => void) {
 function useNuevoOperador(onClose: () => void) {
   const [nombre, setNombre] = useState('');
   const [pin, setPin] = useState('');
+  const [confirm, setConfirm] = useState('');
   const action = useAction(() => {
     onClose();
     setNombre('');
     setPin('');
+    setConfirm('');
   });
 
   function save(): void {
     if (nombre.trim().length === 0) return action.setError('Escribe el nombre.');
-    if (!isValidPin(pin)) return action.setError(PIN_HINT);
+    const problem = nipProblem(pin, confirm);
+    if (problem !== null) return action.setError(problem);
     action.run(() => crearOperador(nombre, pin));
   }
 
-  return { nombre, setNombre, pin, setPin, save, ...action };
+  return { nombre, setNombre, pin, setPin, confirm, setConfirm, save, ...action };
 }
 
 function NuevoFields({ f }: { readonly f: ReturnType<typeof useNuevoOperador> }) {
@@ -66,14 +76,13 @@ function NuevoFields({ f }: { readonly f: ReturnType<typeof useNuevoOperador> })
         onChange={(e) => f.setNombre(e.target.value)}
         data-testid="operador-nombre"
       />
-      <Input
-        labelText="NIP"
-        hintText="4 números"
-        numeric
-        value={f.pin}
-        onChange={(e) => f.setPin(e.target.value)}
+      <NipInput label="NIP" value={f.pin} onChange={f.setPin} testId="operador-pin" />
+      <NipInput
+        label="Confirma el NIP"
+        value={f.confirm}
+        onChange={f.setConfirm}
         error={f.error ?? undefined}
-        data-testid="operador-pin"
+        testId="operador-pin-confirmar"
       />
     </>
   );
@@ -123,10 +132,16 @@ interface DialogProps {
 
 export function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
   const [pin, setPin] = useState('');
+  const [confirm, setConfirm] = useState('');
   const { error, setError, pending, run } = useAction((r) => {
     setPin('');
+    setConfirm('');
     onDone(r);
   });
+  const save = () => {
+    const problem = nipProblem(pin, confirm);
+    return problem === null ? run(() => restablecerPin(id, pin)) : setError(problem);
+  };
   return (
     <ConfirmDialog
       open={open}
@@ -134,15 +149,15 @@ export function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProp
       title={`Nuevo NIP para ${nombre}`}
       body="Díselo en persona. El NIP anterior deja de funcionar al guardar."
       confirmLabel={pending ? 'Guardando…' : 'Guardar'}
-      onConfirm={() => (isValidPin(pin) ? run(() => restablecerPin(id, pin)) : setError(PIN_HINT))}
+      onConfirm={save}
     >
-      <Input
-        labelText="NIP nuevo"
-        numeric
-        value={pin}
-        onChange={(e) => setPin(e.target.value)}
+      <NipInput label="NIP nuevo" value={pin} onChange={setPin} testId="operador-nuevo-pin" />
+      <NipInput
+        label="Confirma el NIP nuevo"
+        value={confirm}
+        onChange={setConfirm}
         error={error ?? undefined}
-        data-testid="operador-nuevo-pin"
+        testId="operador-nuevo-pin-confirmar"
       />
     </ConfirmDialog>
   );

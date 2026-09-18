@@ -1,4 +1,7 @@
+import { rangoDelMes } from '@xangarro/domain';
+
 import { requireSession } from '@/server/auth';
+import { hoy } from '@/server/clock';
 import { loadInicio } from '@/server/inicio';
 
 import { InicioScreen } from './_inicio/screen';
@@ -16,14 +19,13 @@ import { InicioScreen } from './_inicio/screen';
  */
 export const dynamic = 'force-dynamic';
 
-const TODAY = '2026-05-12';
-const MONTH_FROM = '2026-05-01';
-const MONTH_TO = '2026-05-31';
-
 export default async function InicioPage() {
   const session = await requireSession();
   try {
-    const data = await loadInicio(session.business_id, TODAY, MONTH_FROM, MONTH_TO);
+    // The business's today and its month — never a date pinned in code.
+    const today = hoy();
+    const mes = rangoDelMes(today);
+    const data = await loadInicio(session.business_id, today, mes.desde, mes.hasta);
     return <InicioScreen data={data} role={session.member_role} />;
   } catch {
     // The screen owns the error state; the container only decides which one.

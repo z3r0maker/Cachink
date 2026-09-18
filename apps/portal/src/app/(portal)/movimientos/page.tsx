@@ -1,4 +1,5 @@
 import { requireSession } from '@/server/auth';
+import { hoy } from '@/server/clock';
 import { loadMovimientos } from '@/server/screens';
 
 import { MovimientosScreen } from './screen';
@@ -25,8 +26,10 @@ export default async function MovimientosPage({
       loadMovimientos(session.business_id, 'venta'),
       loadMovimientos(session.business_id, 'gasto'),
     ]);
-    return <MovimientosScreen initialTab={initialTab} ventas={ventas} gastos={gastos} />;
+    return (
+      <MovimientosScreen initialTab={initialTab} hoy={hoy()} ventas={ventas} gastos={gastos} />
+    );
   } catch {
-    return <MovimientosScreen initialTab={initialTab} ventas={null} gastos={null} />;
+    return <MovimientosScreen initialTab={initialTab} hoy={hoy()} ventas={null} gastos={null} />;
   }
 }

@@ -28,9 +28,50 @@ function canCancel(permissions: unknown): boolean {
   }
 }
 
+type Operador = EquipoData['operadores'][number];
+
+function OperadorCard(props: {
+  readonly o: Operador;
+  readonly mayWrite: boolean;
+  readonly showPerms: boolean;
+  readonly onWarning: (w: string | null) => void;
+}) {
+  const { o, showPerms } = props;
+  return (
+    <Card>
+      <div className={cardHead}>
+        <span className={avatar} aria-hidden="true">
+          {initials(o.nombre ?? '')}
+        </span>
+        <strong className={cardName}>{o.nombre}</strong>
+        {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
+      </div>
+      {showPerms && canCancel(o.permissions) ? (
+        <div style={{ marginTop: 14 }}>
+          <Tag tone="success">Puede cancelar ventas</Tag>
+        </div>
+      ) : null}
+      <p className={cardFoot}>
+        {o.active
+          ? 'Entra con su nombre y su NIP. No necesita correo.'
+          : 'Desactivado: no puede entrar a los teléfonos.'}
+      </p>
+      {props.mayWrite && o.active ? (
+        <OperadorActions
+          id={o.id}
+          nombre={o.nombre ?? ''}
+          onWarning={props.onWarning}
+          permisos={showPerms ? { canCancelSales: canCancel(o.permissions) } : null}
+        />
+      ) : null}
+    </Card>
+  );
+}
+
 export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }) {
   const session = useSession();
-  const showPerms = session.capabilities.permisosPorUsuario && canWrite(session.role);
+  const mayWrite = canWrite(session.role);
+  const showPerms = session.capabilities.permisosPorUsuario && mayWrite;
   const [warning, setWarning] = useState<string | null>(null);
   return (
     <>
@@ -41,28 +82,13 @@ export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }
       )}
       <div className={cardGrid}>
         {rows.map((o) => (
-          <Card key={o.id}>
-            <div className={cardHead}>
-              <span className={avatar} aria-hidden="true">
-                {initials(o.nombre ?? '')}
-              </span>
-              <strong className={cardName}>{o.nombre}</strong>
-              {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
-            </div>
-            {showPerms && canCancel(o.permissions) ? (
-              <div style={{ marginTop: 14 }}>
-                <Tag tone="success">Puede cancelar ventas</Tag>
-              </div>
-            ) : null}
-            <p className={cardFoot}>
-              {o.active
-                ? 'Entra con su nombre y su NIP. No necesita correo.'
-                : 'Desactivado: no puede entrar a los teléfonos.'}
-            </p>
-            {canWrite(session.role) && o.active ? (
-              <OperadorActions id={o.id} nombre={o.nombre ?? ''} onWarning={setWarning} />
-            ) : null}
-          </Card>
+          <OperadorCard
+            key={o.id}
+            o={o}
+            mayWrite={mayWrite}
+            showPerms={showPerms}
+            onWarning={setWarning}
+          />
         ))}
       </div>
     </>

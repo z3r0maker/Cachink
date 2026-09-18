@@ -91,6 +91,7 @@ export class DrizzleUsersRepository implements UsersRepository {
     if (patch.mustChangePin !== undefined) {
       set['mustChangePin'] = patch.mustChangePin;
     }
+    if (patch.permissions !== undefined) set['permissions'] = JSON.stringify(patch.permissions);
     if (patch.active !== undefined) {
       // Portal-managed (Q2); the SQLite column arrives with the A-17 migration.
       // Failing loudly beats silently dropping a deactivation.

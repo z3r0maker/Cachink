@@ -54,3 +54,13 @@ export class DuplicateOperatorError extends Error {
  */
 export const PIN_PATTERN = /^\d{4}$/;
 export const isValidPin = (pin: string): boolean => PIN_PATTERN.test(pin);
+
+/** Per-operator permissions are a plan capability (`permisosPorUsuario`, ADR-059). */
+export class PermisosNoIncluidosError extends Error {
+  readonly code = 'PERMISOS_NO_INCLUIDOS' as const;
+
+  constructor() {
+    super('Los permisos por operador vienen con el plan Xangarrote.');
+    this.name = 'PermisosNoIncluidosError';
+  }
+}

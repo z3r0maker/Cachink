@@ -69,9 +69,15 @@ function writes(tx: Tx, businessId: BusinessId) {
       return toDomain(row);
     },
     async update(id: UserId, patch: UserPatch): Promise<User> {
+      // Permissions are stored as the JSON the phones parse.
+      const { permissions, ...rest } = patch;
       const [row] = await tx
         .update(users)
-        .set({ ...patch, updatedAt: new Date().toISOString() })
+        .set({
+          ...rest,
+          ...(permissions === undefined ? {} : { permissions: JSON.stringify(permissions) }),
+          updatedAt: new Date().toISOString(),
+        })
         .where(and(eq(users.id, id)))
         .returning();
       if (!row) throw new Error('El operador no existe.');

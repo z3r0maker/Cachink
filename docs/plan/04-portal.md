@@ -500,8 +500,16 @@ without touching code.
     bug". Switching tabs resets the filter because the keys are not shared.
   - Cancelled rows strike the amount and carry a red "Cancelada · {motivo}" tag; queued rows carry
     "Sin enviar"; the drawer's sync block says "nada se pierde" rather than implying loss.
-  - **Still to do:** pagination (10 per page), the Personalizado range picker, folio and turno
-    fields (they need real records), and the real container at B-03.
+  - 2026-09-18 · **Range chips filter now, and pagination.** The chips were decoration («Mayo 2026»
+    hard-coded, rows unfiltered). Now Hoy / Semana (Mon–Sun) / {current month by name} /
+    Personalizado (Desde–Hasta) each narrow the rows, relative to the business's today; the table
+    pages at 10 with «Mostrando 11–20 de 23» and Anterior/Siguiente (`Pager`/`usePagina` in the
+    component barrel), and any filter returns to page 1.
+  - 2026-09-18 · **One business clock.** Inicio, Estados and Movimientos had `2026-05-12` pinned in
+    code, so production would always show May 2026. `server/clock.ts` `hoy()` is today in
+    America/Mexico_City (`hoyEn`, `rangoDelMes`, `rangoDeSemana`, `nombreDelMes`, `enRango` in
+    `@xangarro/domain`, 5 tests); `PORTAL_TODAY` pins it for the E2E suite to the seed's day.
+  - **Still to do:** folio and turno fields (they need real records).
 - **Amended 2026-09-17 (ADR-058 §2):** **read-only.** No "Nueva venta", no "Nuevo gasto", no
   "Cancelar" in the drawer. One screen, two tabs.
 - **Steps:** Title "Movimientos" / "Todas las ventas y gastos capturados en tus dispositivos".
@@ -703,8 +711,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     per card, the counter counting **active** operators against `PLAN_LIMITS` (no local constant),
     an «Inactivo» pill, and the last-active warning. `e2e/operators.spec.ts` frees a full allowance
     by deactivating, creates into the slot, and checks the bcrypt hash and `sync_log` in Postgres.
-  - **Still to do:** masking the NIP field, the permissions editor itself, and the operator drawer
-    with recent shifts.
+  - 2026-09-18 · **NIP masked** (`type=password`, numeric keypad, 4 digits, non-digits dropped) with
+    a **confirm field** on create and reset. **Permissions editor:** «Editar permisos» → «Puede
+    cancelar ventas», only where `capabilities.permisosPorUsuario` (Xangarrote);
+    `CambiarPermisosOperadorUseCase` refuses below that plan and for another business's operator (4
+    tests); stored as the JSON phones parse (`UserPatch.permissions`, SQLite and Postgres repos), and
+    logged. e2e: mismatch refused and field masked; on a throwaway Xangarrote tenant the permission
+    saves and is logged; absent on Xangarro.
+  - **Still to do:** the operator drawer with recent shifts.
 - **Amended 2026-09-17 (ADR-058 §4):** no role label, no "Escritorio" state pill; **permissions are
   kept** and gated by `capabilities.permisosPorUsuario`.
 - **Amended 2026-09-17 (ADR-072):** the NIP is **exactly four digits**, set and reset only here; where
