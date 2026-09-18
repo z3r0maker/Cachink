@@ -57,8 +57,8 @@ describe('CrearOperadorUseCase', () => {
     assert.equal(luis.active, true);
   });
 
-  it('rejects a PIN that is not 4 to 6 digits', async () => {
-    for (const pin of ['123', '1234567', '12ab', '', ' 1234']) {
+  it('rejects a NIP that is not exactly 4 digits (ADR-072)', async () => {
+    for (const pin of ['123', '12345', '123456', '12ab', '', ' 1234']) {
       await assert.rejects(
         () => crear.execute({ businessId: BIZ, nombre: `Op ${pin}`, pin, operatorLimit: 5 }),
         InvalidPinError,
@@ -79,10 +79,10 @@ describe('RestablecerPinOperadorUseCase', () => {
     await new RestablecerPinOperadorUseCase(users).execute({
       businessId: BIZ,
       operatorId: ana.id,
-      pin: '987654',
+      pin: '9876',
     });
     const after = await users.findById(ana.id);
-    assert.equal(await compare('987654', after?.pinHash ?? ''), true);
+    assert.equal(await compare('9876', after?.pinHash ?? ''), true);
     assert.equal(await compare('1234', after?.pinHash ?? ''), false);
   });
 

@@ -3,6 +3,7 @@ import { defineConfig, devices } from '@playwright/test';
 import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { type: 'json' };
 
 import { OWNER_STORAGE } from './e2e/auth-state';
+import { BASE_URL, E2E_PORT } from './e2e/base-url';
 
 /** The contract's published test key — never a production fallback. */
 const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
@@ -51,8 +52,10 @@ export default defineConfig({
   webServer: {
     // CI builds in its own step, so a build failure reads as a build failure
     // rather than as "webServer timed out".
-    command: process.env.CI ? 'pnpm start' : 'pnpm build && pnpm start',
-    url: 'http://localhost:3100',
+    command: process.env.CI
+      ? `pnpm exec next start -p ${E2E_PORT}`
+      : `pnpm build && pnpm exec next start -p ${E2E_PORT}`,
+    url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 60_000 : 240_000,
     // Redundant with env inheritance, and kept anyway: it is the only place a
@@ -71,7 +74,7 @@ export default defineConfig({
     },
   },
   use: {
-    baseURL: 'http://localhost:3100',
+    baseURL: BASE_URL,
     // No retries locally, so `retain-on-failure`: the first failure is the one
     // that has to be debuggable.
     trace: 'retain-on-failure',

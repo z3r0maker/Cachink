@@ -16,11 +16,11 @@ import {
 /**
  * Operator dialogs (B-13 / P-05).
  *
- * PIN format is checked here with the **same** `isValidPin` the use case uses,
- * so the shopkeeper hears about a 3-digit PIN before a round trip — and the
+ * NIP format is checked here with the **same** `isValidPin` the use case uses,
+ * so the shopkeeper hears about a 3-digit NIP before a round trip — and the
  * server refuses it regardless, because a browser check is a courtesy.
  */
-const PIN_HINT = 'El PIN debe tener de 4 a 6 números.';
+const PIN_HINT = 'El NIP debe tener 4 números.';
 
 function useAction(onDone: (r: OperadorResult & { ok: true }) => void) {
   const [error, setError] = useState<string | null>(null);
@@ -67,8 +67,8 @@ function NuevoFields({ f }: { readonly f: ReturnType<typeof useNuevoOperador> })
         data-testid="operador-nombre"
       />
       <Input
-        labelText="PIN"
-        hintText="De 4 a 6 números"
+        labelText="NIP"
+        hintText="4 números"
         numeric
         value={f.pin}
         onChange={(e) => f.setPin(e.target.value)}
@@ -103,7 +103,7 @@ export function NuevoOperadorDialog({
         open={open}
         onOpenChange={setOpen}
         title="Nuevo operador"
-        body="Entra al teléfono con su nombre y su PIN. No necesita correo."
+        body="Entra al teléfono con su nombre y su NIP. No necesita correo."
         confirmLabel={f.pending ? 'Guardando…' : 'Guardar'}
         onConfirm={f.save}
       >
@@ -121,7 +121,7 @@ interface DialogProps {
   readonly onDone: (r: OperadorResult & { ok: true }) => void;
 }
 
-function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
+export function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
   const [pin, setPin] = useState('');
   const { error, setError, pending, run } = useAction((r) => {
     setPin('');
@@ -131,13 +131,13 @@ function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={`Nuevo PIN para ${nombre}`}
-      body="Díselo en persona. El PIN anterior deja de funcionar al guardar."
+      title={`Nuevo NIP para ${nombre}`}
+      body="Díselo en persona. El NIP anterior deja de funcionar al guardar."
       confirmLabel={pending ? 'Guardando…' : 'Guardar'}
       onConfirm={() => (isValidPin(pin) ? run(() => restablecerPin(id, pin)) : setError(PIN_HINT))}
     >
       <Input
-        labelText="PIN nuevo"
+        labelText="NIP nuevo"
         numeric
         value={pin}
         onChange={(e) => setPin(e.target.value)}
@@ -148,7 +148,7 @@ function PinDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
   );
 }
 
-function DesactivarDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
+export function DesactivarDialog({ id, nombre, open, onOpenChange, onDone }: DialogProps) {
   const { pending, run } = useAction(onDone);
   return (
     <ConfirmDialog
@@ -160,44 +160,5 @@ function DesactivarDialog({ id, nombre, open, onOpenChange, onDone }: DialogProp
       destructive
       onConfirm={() => run(() => desactivarOperador(id))}
     />
-  );
-}
-
-export function OperadorActions({ id, nombre }: { readonly id: string; readonly nombre: string }) {
-  const [mode, setMode] = useState<'pin' | 'off' | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const done = (r: OperadorResult & { ok: true }): void => {
-    setMode(null);
-    setNotice(r.warning ?? null);
-  };
-
-  return (
-    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-      <Button size="sm" variant="secondary" onClick={() => setMode('pin')}>
-        Restablecer PIN
-      </Button>
-      <Button size="sm" variant="secondary" onClick={() => setMode('off')}>
-        Desactivar
-      </Button>
-      {notice === null ? null : (
-        <p role="status" data-testid="operador-warning">
-          {notice}
-        </p>
-      )}
-      <PinDialog
-        id={id}
-        nombre={nombre}
-        open={mode === 'pin'}
-        onOpenChange={(o) => setMode(o ? 'pin' : null)}
-        onDone={done}
-      />
-      <DesactivarDialog
-        id={id}
-        nombre={nombre}
-        open={mode === 'off'}
-        onOpenChange={(o) => setMode(o ? 'off' : null)}
-        onDone={done}
-      />
-    </div>
   );
 }

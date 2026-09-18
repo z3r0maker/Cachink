@@ -50,7 +50,7 @@ function Body({
       onRetry={() => window.location.reload()}
       empty={{
         title: 'Crea tu primer operador',
-        body: 'Tus operadores entran a la app con su nombre y su PIN. No necesitan correo.',
+        body: 'Tus operadores entran a la app con su nombre y su NIP. No necesitan correo.',
       }}
     >
       {data === null ? null : isOperadores ? (

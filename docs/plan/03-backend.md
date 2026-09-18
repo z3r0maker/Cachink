@@ -189,7 +189,12 @@
 
 ### B-13 Operator management writes (users) + plan limit
 
-- [ ] Status · **Blocked by:** F-07, B-03 · **Blocks:** P-05
+- [x] Status · **Blocked by:** F-07, B-03 · **Blocks:** P-05
+  - Done 2026-09-17: `CrearOperador` / `RestablecerPinOperador` / `DesactivarOperador` in
+    `@xangarro/application` (13 tests), `users.active` via `0001_users_active.sql` with its
+    old → new test, `pgUsersRepository` appending to `sync_log`, and the `/equipo` dialogs.
+    `operatorLimit` still comes from `PLAN_FIXTURE` until B-10 gives each business its plan.
+  - **Amended (ADR-072):** the NIP is exactly 4 digits, not 4–6.
 - **Steps:** server actions `createOperator(businessId, {nombre, pin})` → bcrypt (cost 10) server-side, `active=true`, bumps `server_seq` (insert into `sync_log`); `setOperatorPin`; `deactivateOperator`; enforce `count(active) < plan.operators` → typed error `OPERATOR_LIMIT`. Every write appends to `sync_log` so devices pull it.
 - **Acceptance:** application tests: happy; limit reached; PIN not 4–6 digits; deactivating the last active operator is allowed but returns a warning flag (portal shows it).
 

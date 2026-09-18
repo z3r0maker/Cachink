@@ -18,12 +18,12 @@ export class OperatorLimitError extends Error {
   }
 }
 
-/** A PIN must be 4 to 6 digits — short enough to type at a counter. */
+/** A NIP is four digits (ADR-072) — short enough to type at a counter. */
 export class InvalidPinError extends Error {
   readonly code = 'INVALID_PIN' as const;
 
   constructor() {
-    super('El PIN debe tener de 4 a 6 números.');
+    super('El NIP debe tener 4 números.');
     this.name = 'InvalidPinError';
   }
 }
@@ -48,6 +48,9 @@ export class DuplicateOperatorError extends Error {
   }
 }
 
-/** 4–6 ASCII digits, nothing else. Exported so the UI validates with the same rule. */
-export const PIN_PATTERN = /^\d{4,6}$/;
+/**
+ * Exactly four ASCII digits (ADR-072). Exported so the UI validates with the
+ * same rule.
+ */
+export const PIN_PATTERN = /^\d{4}$/;
 export const isValidPin = (pin: string): boolean => PIN_PATTERN.test(pin);

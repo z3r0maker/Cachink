@@ -79,16 +79,16 @@ test('a full allowance is freed by deactivating, and a new operator takes the sl
   expect(await usersLogged()).toBe(before + 2);
 });
 
-test('a PIN reset replaces the old one', async ({ page }, testInfo) => {
+test('a NIP reset replaces the old one', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'mutates shared operators');
 
   await page.goto('/equipo');
-  await card(page, 'Rosa Medina').getByRole('button', { name: 'Restablecer PIN' }).click();
+  await card(page, 'Rosa Medina').getByRole('button', { name: 'Reiniciar NIP' }).click();
   await page.getByTestId('operador-nuevo-pin').fill('12');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
-  await expect(page.getByText('El PIN debe tener de 4 a 6 números.')).toBeVisible();
+  await expect(page.getByText('El NIP debe tener 4 números.')).toBeVisible();
 
-  await page.getByTestId('operador-nuevo-pin').fill('909090');
+  await page.getByTestId('operador-nuevo-pin').fill('9090');
   await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
   await expect(page.getByRole('dialog')).toHaveCount(0);
 
@@ -98,7 +98,7 @@ test('a PIN reset replaces the old one', async ({ page }, testInfo) => {
     >`SELECT pin_hash FROM users WHERE nombre = 'Rosa Medina'`;
     return r?.pin_hash ?? '';
   });
-  expect(await compare('909090', hashValue)).toBe(true);
+  expect(await compare('9090', hashValue)).toBe(true);
   expect(await compare('4321', hashValue)).toBe(false);
 });
 

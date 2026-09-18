@@ -1,5 +1,7 @@
 import postgres from 'postgres';
 
+import { BASE_URL } from './base-url';
+
 /**
  * Pre-flight. Fails the whole run in one sentence rather than in N red specs.
  *
@@ -68,5 +70,5 @@ export default async function globalSetup(): Promise<void> {
     throw new Error(`DATABASE_URL is not set. Run:\n  ${RESET}`);
   }
   await assertSeeded(url);
-  await assertServerIsServingTheGate(process.env.E2E_BASE_URL ?? 'http://localhost:3100');
+  await assertServerIsServingTheGate(BASE_URL);
 }
