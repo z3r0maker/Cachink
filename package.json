@@ -18,6 +18,7 @@
     "lint": "turbo run lint && pnpm lint:root",
     "lint:fix": "turbo run lint:fix && pnpm lint:root --fix",
     "lint:design": "tsx scripts/design-lint/index.ts",
+    "lint:store": "tsx scripts/store-compliance/index.ts",
     "storybook:smoke": "tsx scripts/storybook-smoke.ts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "typecheck": "turbo run typecheck && tsc -p supabase/functions/bug-report/tsconfig.json",

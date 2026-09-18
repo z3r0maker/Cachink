@@ -1,0 +1,11 @@
+{
+  "$comment": "Reviewed exemptions for pnpm lint:store (N-32, ADR-069). Each entry needs file + exact extracted text + reason; `rule` narrows it to one rule. Adding an entry is a review decision — say why the string is not in-app selling.",
+  "entries": [
+    {
+      "file": "packages/ui/src/screens/Ventas/editar-venta-modal.tsx",
+      "text": "Suscripción",
+      "rule": "store/purchase-cta",
+      "reason": "Sale category (SaleCategory enum) for what the shop sells to its own customers, e.g. a gym membership. A physical-world sale by the business, not a purchase inside the app (Guideline 3.1.3(e))."
+    }
+  ]
+}
