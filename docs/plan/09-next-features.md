@@ -275,30 +275,43 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   `@xangarro/domain/onboarding`; plan = cheapest `PLAN_IDS` entry whose `PLAN_LIMITS` satisfy
   stock / ventasCredito / operators; paid-only answers returned as pending; 102 tests incl. a 72-case
   plan table. **Still to do:** portal wizard UI, persistence in `businesses.onboarding`.
+- Progress: 2026-09-18 · b063d4b (branch `track-n/n13-signup-wizard`, unmerged; also delivers P-03/P-04)
+  · 8-step wizard at `/bienvenida`, saved per step to a **portal-only `business_onboarding` table**
+  (migration `0003_business_onboarding`; deviation from `businesses.onboarding` — keeps it off the
+  DOWN wire), contradictory answers prevented in the UI; Playwright happy path green. Answers with no
+  write path yet: tipoNegocio (no field), WhatsApp (C-15), logo (N-19); crédito stays off (platform).
 
 ### N-13 Plan recommendation + signup reorder `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-12, N-01 · **Blocks:** N-30, L-03
+- [~] Status · **Blocked by:** N-12, N-01 · **Blocks:** N-30, L-03
 - **What:** signup (`?plan=` preselects) → wizard → **"Tu plan ideal: Xangarro — porque manejas
   inventario y vendes a crédito"** → [Probar 14 días] (Checkout) or [Seguir gratis].
 - **How:** paid-only answers show an "Incluido en Xangarro" badge; if the tenant stays free they are
   stored as **pending** and applied automatically by the subscription webhook on upgrade.
 - **Acceptance:** free path never touches Stripe; upgrade applies pending answers exactly once.
+- Progress: 2026-09-18 · 8d430e6, ad8c3c0 (branch `track-n/n13-signup-wizard`) · `/signup` (ADR-080: in-house
+  bcrypt cost 10 + `startSession`, throttled per email + IP) → wizard → "Tu plan ideal" with reasons,
+  prices + IVA, pending paid answers stored. **Still to do:** B-10 replaces the stub
+  `startTrialCheckout()` (`server/onboarding/checkout.ts`); the webhook applies pending answers.
 
 ### N-14 "¿Cómo empiezo?" checklist update `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-12
+- [~] Status · **Blocked by:** N-12
 - **What:** P-04's checklist keeps its items (operator, products/import, code, device activated,
   first sale synced) and adds "Sube tu logo". "Conecta Mercado Pago / Clip" appears only when
   `cobrosIntegrados` is platform-available (N-44).
+- Progress: 2026-09-18 · b063d4b · `/como-empiezo` checklist detected from data; MP/Clip item waits on N-44.
 
 ### N-15 Re-run the wizard `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-12
+- [~] Status · **Blocked by:** N-12
 - **What:** Configuración → "Volver a configurar mi negocio": pre-filled with current values; before
   applying, a summary "esto cambiará" (e.g. "Se desactivará Inventario — tus productos no se
   borran").
 - **Acceptance:** applying with no changes is a no-op; every change is listed.
+- Progress: 2026-09-18 · b063d4b · `/bienvenida/revisar` with the "esto cambiará" summary; no change → no
+  write. **Still to do:** a "Volver a configurar mi negocio" link on the Negocio screen (portal session);
+  until then it lives on the checklist page.
 
 ### Import
 
