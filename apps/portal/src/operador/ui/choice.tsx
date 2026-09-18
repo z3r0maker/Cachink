@@ -2,13 +2,13 @@
 
 import * as f from './field.css';
 
-/** A row of mutually exclusive chips (motivo, categoría); 42 px or 40 px in the files. */
+/** A row of mutually exclusive chips (motivo, categoría, método): 40, 42 or 44 px in the files. */
 export function ChoiceChips<T extends string>(p: {
   readonly label: string;
   readonly options: readonly T[];
   readonly value: T | null;
   readonly onChange: (v: T) => void;
-  readonly height?: 40 | 42;
+  readonly height?: 40 | 42 | 44;
 }) {
   return (
     <div>

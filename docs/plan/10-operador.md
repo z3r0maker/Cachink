@@ -323,6 +323,22 @@ those texts to 12 upstream.
     radius, the runtime's split text and the design's default-black buttons aside.
     Playwright: `e2e/operador-inventario.spec.ts`.
 
+### O-25 Operador · Cobranza
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/cobranza/`, `/operador/cobranza`. The abono allocation of
+    ADR-074 lands in the domain, test-first: `aplicarAbono` (`packages/domain/src/financials/
+abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInvalidoError` on
+    zero or less; 6 tests). The screen derives balances, state, card text, quick amounts and the
+    «se aplica a» line from it (`tests/operador/cobranza.test.ts`: $1,780.00 owed, $760.00 in
+    abonos, $550.00 cash — Turno's figures). An abono settles tickets and joins today's list,
+    device-local until O-06. Harness at 1440 and 375 px, loading/empty/error, the abono modal empty
+    and filled, and the toast: match (agreed radius and default-black button aside).
+    Playwright: `e2e/operador-cobranza.spec.ts`. The card's arrow leads to Detalle de cliente
+    (O-26).
+  - The file caps an abono at the balance and says nothing about the excess; the domain returns it
+    as `excedente` so the use case can decide (saldo a favor or change) with O-06.
+
 ## 7. Fase 13 (tasks written when fase 12 closes)
 
 - **Fase 12 — Turno completo:** Ventas + Detalle de venta, Gastos, Inventario, Cobranza + Detalle
