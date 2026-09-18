@@ -1,5 +1,8 @@
 # Track N — Next features (admin console, billing, limits, onboarding, payments, quality)
 
+> **Handoff 2026-09-18:** pending/partial work → `12-glm-handoff.md`; owner pre-launch actions and
+> trigger-gated deferred items → `11-pre-launch-and-deferred.md`.
+
 > **Origin:** the 2026-09-17 feature interview (the owner's "pendientes" list for Xangarro). Every
 > decision below was asked one at a time with a recommendation and settled by the owner; the
 > reasoning lives in **ADR-063 … ADR-068**. Read those before touching a task here.
