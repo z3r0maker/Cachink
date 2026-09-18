@@ -8,7 +8,8 @@
  *    by `nextStatus` and written whole — never patched from a possibly stale
  *    payload.
  * 3. **The entitlement is recomputed** by `computeEntitlement` over the
- *    business's rows and returned; phones receive it on their next pull.
+ *    business's rows and returned; phones receive it on their next pull. The
+ *    `EntitlementListener` hears it (N-13 applies pending paid answers).
  * 4. **`invoice.paid` is told to the CFDI port** (ADR-070).
  *
  * Events that cannot be tied to a business or a known price are recorded as
@@ -21,6 +22,7 @@ import type {
   BillingGateway,
   BillingRepository,
   BillingStatus,
+  EntitlementListener,
   InvoicePaidListener,
   StripeEventLedger,
 } from './ports.js';
@@ -42,6 +44,7 @@ export interface ApplyStripeEventDeps {
   readonly ledger: StripeEventLedger;
   readonly gateway: BillingGateway;
   readonly invoices: InvoicePaidListener;
+  readonly entitlements: EntitlementListener;
   readonly now: () => Date;
 }
 
@@ -98,7 +101,7 @@ export class ApplyStripeEventUseCase {
     trigger: BillingTrigger,
     hint: string | null,
   ): Promise<Handled> {
-    const { repo, gateway, now } = this.#deps;
+    const { repo, gateway, entitlements, now } = this.#deps;
     const facts = await gateway.retrieveSubscription(subscriptionId);
     const businessId =
       facts.businessId ?? hint ?? (await repo.businessOfCustomer(facts.customerId));
@@ -111,6 +114,7 @@ export class ApplyStripeEventUseCase {
       await repo.subscriptionsOf(businessId),
       now(),
     );
+    await entitlements.onEntitlementChanged(businessId, entitlement);
     return { outcome: 'applied', businessId, status: record.status, entitlement };
   }
 

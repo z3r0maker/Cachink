@@ -77,6 +77,30 @@ describe('current subscription and its entitlement', () => {
     assert.equal(currentSubscription([trial, spei])?.stripeSubscriptionId, 'sub_s');
   });
 
+  it('between equals, the later period wins; a missing trial end falls back to the period', () => {
+    const older = record({
+      stripeSubscriptionId: 'sub_o',
+      status: 'lapsed',
+      currentPeriodEnd: null,
+    });
+    const newer = record({
+      stripeSubscriptionId: 'sub_n',
+      status: 'lapsed',
+      currentPeriodEnd: at(1),
+    });
+    assert.equal(currentSubscription([older, newer])?.stripeSubscriptionId, 'sub_n');
+    assert.equal(currentSubscription([newer, older])?.stripeSubscriptionId, 'sub_n');
+    const trial = record({ status: 'trialing', trialEnd: null, currentPeriodEnd: at(2) });
+    assert.equal(toSnapshot(trial)?.currentPeriodEnd, at(2));
+    assert.equal(billingStatusSnapshot([trial])?.currentPeriodEnd, at(2));
+    const unpaid = record({
+      status: 'past_due',
+      currentPeriodStart: null,
+      currentPeriodEnd: at(3),
+    });
+    assert.equal(toSnapshot(unpaid)?.currentPeriodEnd, at(3));
+  });
+
   it('a trial is entitled until its end, then 7 days of grace', () => {
     const rows = [record({ status: 'trialing', trialEnd: at(4), currentPeriodEnd: at(4) })];
     const e = entitlementFromBilling(BIZ, rows, NOW);

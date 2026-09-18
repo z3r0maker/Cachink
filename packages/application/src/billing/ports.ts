@@ -7,6 +7,7 @@
  * All times are ISO-8601 strings; `null` means Stripe had none.
  */
 
+import type { Entitlement } from '@xangarro/domain';
 import type { BillingInterval, PaidPlanId } from './plans.js';
 
 /** Our reading of Stripe's status: `SubscriptionStatus` minus `grace`/`free`. */
@@ -117,10 +118,12 @@ export interface PaidInvoice {
 }
 
 /**
- * Told about every paid invoice, once. N-08's ingestion will implement it by
- * filing a "pago sin CFDI" item in the admin inbox (ADR-070, `CFDI_MODE=off`);
- * until then the default does nothing — the event itself stays recorded in
- * `stripe_events`, so no payment is lost for the backfill.
+ * Told about every paid invoice. N-08's ingestion will implement it by filing a
+ * "pago sin CFDI" item in the admin inbox (ADR-070, `CFDI_MODE=off`); until
+ * then the portal logs one `pago_sin_cfdi` line — the event itself stays in
+ * `stripe_events`, so no payment is lost for the backfill. Implementations
+ * must be idempotent per `stripeInvoiceId`: the ledger stops redelivery once
+ * an event is processed, but two concurrent deliveries can both run.
  */
 export interface InvoicePaidListener {
   onInvoicePaid(invoice: PaidInvoice): Promise<void>;
@@ -128,4 +131,18 @@ export interface InvoicePaidListener {
 
 export const noopInvoicePaid: InvoicePaidListener = {
   onInvoicePaid: () => Promise.resolve(),
+};
+
+/**
+ * Told whenever an event changed a business's subscription, with the
+ * entitlement it now has. N-13 implements it to apply the wizard's pending
+ * paid answers on upgrade (`AplicarConfiguracionUseCase` — idempotent — in a
+ * tenant transaction); the default does nothing.
+ */
+export interface EntitlementListener {
+  onEntitlementChanged(businessId: string, entitlement: Entitlement): Promise<void>;
+}
+
+export const noopEntitlementListener: EntitlementListener = {
+  onEntitlementChanged: () => Promise.resolve(),
 };

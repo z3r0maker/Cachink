@@ -9,6 +9,7 @@
 
 import type { PaidInvoice } from './ports.js';
 
+/** The events to enable on the endpoint (`stripe listen --events …`, Dashboard). */
 export const HANDLED_EVENT_TYPES = [
   'checkout.session.completed',
   'customer.subscription.created',
@@ -49,7 +50,3 @@ export interface InvoiceEvent extends EventBase {
 }
 
 export type BillingEvent = CheckoutCompleted | SubscriptionChanged | InvoiceEvent;
-
-export function isHandledEventType(type: string): type is HandledEventType {
-  return (HANDLED_EVENT_TYPES as readonly string[]).includes(type);
-}
