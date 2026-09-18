@@ -14,7 +14,7 @@ sign-in and reset links) and the **admin console** (the 08:00 staff digest).
 ## 1. Domain setup in Resend (once, owner)
 
 1. Resend → **Domains → Add domain** → `xangarro.mx`, region **us-east-1**
-   (next to Vercel `iad1`).
+   (Resend's nearest to Vercel `pdx1`; it has no us-west region — B-01).
 2. Add the DNS records Resend shows at the DNS host of `xangarro.mx`. They
    have this shape; **copy the exact values from the dashboard** (the DKIM key
    is unique to the account):

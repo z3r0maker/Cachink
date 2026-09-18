@@ -7,6 +7,7 @@ import { validateTenantFiscal } from '@xangarro/application/cfdi';
 import { createDb, type Db } from '../src/client';
 import { tenantFiscalOf } from '../src/queries/fiscal';
 import { integrationSuite } from './support/db';
+import { ABSENT_ID, testId } from './support/test-ids';
 
 /**
  * `xangarro.tenant_fiscal()` (0014): the billing role reads one business's
@@ -15,9 +16,8 @@ import { integrationSuite } from './support/db';
  * the global one. The tenant role cannot call it.
  */
 const { url, describe } = integrationSuite();
-const run = Date.now().toString(36).toUpperCase();
-const COMPLETE = `01HZ8XQN9GZJXV8AKQ5XF${run.slice(-5)}`;
-const NO_RFC = `${COMPLETE.slice(0, -1)}R`;
+const COMPLETE = testId('F');
+const NO_RFC = testId('R');
 const NOW = '2026-09-18T12:00:00.000Z';
 
 function roleUrl(appUrl: string, role: string): string {
@@ -82,7 +82,7 @@ describe('xangarro.tenant_fiscal(): the CFDI receptor, for the billing role only
   });
 
   it('an unknown business reads as null', async () => {
-    assert.equal(await tenantFiscalOf(billing, `${COMPLETE.slice(0, -1)}Z`), null);
+    assert.equal(await tenantFiscalOf(billing, ABSENT_ID), null);
   });
 
   it('is not callable by the tenant role', async () => {
