@@ -60,6 +60,8 @@ jobs:
       - name: Typecheck (builds referenced packages first)
         run: pnpm typecheck
 
+      # Includes apps/landing, whose `test` is its production build + prerender
+      # smoke assertions (ADR-084) — the marketing site's build gate.
       - name: Unit tests
         run: pnpm test
 
