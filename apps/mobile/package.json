@@ -17,7 +17,7 @@
     "web": "expo start --web",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "maestro test maestro/flows --config maestro/.maestro-config.yaml",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --config ../../eslint.config.js --no-error-on-unmatched-pattern",
+    "lint": "eslint . --config ../../eslint.config.js",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf .expo .turbo node_modules",
     "eas-build-post-install": "cd ../.. && npx install-skia || node node_modules/@shopify/react-native-skia/scripts/install-libs.js"

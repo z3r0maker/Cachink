@@ -15,8 +15,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js",
-    "lint:fix": "eslint 'src/**/*.ts' 'tests/**/*.ts' --config ../../eslint.config.js --fix",
+    "lint": "eslint . --config ../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "clean": "rm -rf dist .turbo"
   },
   "dependencies": {

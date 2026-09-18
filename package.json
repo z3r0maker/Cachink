@@ -15,8 +15,8 @@
     "test": "turbo run test",
     "test:watch": "turbo run test:watch",
     "test:coverage": "turbo run test:coverage --continue",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
+    "lint": "turbo run lint && pnpm lint:root",
+    "lint:fix": "turbo run lint:fix && pnpm lint:root --fix",
     "lint:design": "tsx scripts/design-lint/index.ts",
     "storybook:smoke": "tsx scripts/storybook-smoke.ts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
@@ -32,7 +32,8 @@
     "deps:update": "taze -r --write --maturity-period 7d && pnpm install",
     "e2e:report": "open e2e-reports/index.html",
     "mock:api": "pnpm --filter @xangarro/contracts mock:api",
-    "design:contract": "tsx scripts/design-contract/index.ts"
+    "design:contract": "tsx scripts/design-contract/index.ts",
+    "lint:root": "eslint scripts '*.config.ts' --config eslint.config.js"
   },
   "devDependencies": {
     "@xangarro/config": "workspace:*",

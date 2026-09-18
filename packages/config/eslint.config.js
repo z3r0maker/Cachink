@@ -33,9 +33,29 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       '**/*.d.ts',
-      '**/*.config.js',
-      '**/*.config.ts',
-      '**/vitest.config.*',
+      // Build output and generated artefacts — not ours to lint. Every package
+      // lints itself with a bare `eslint .`, so anything not named here IS
+      // linted; that is what `scripts/lint-coverage.test.ts` enforces.
+      '**/.next/**',
+      '**/.expo/**',
+      'apps/*/ios/**',
+      'apps/*/android/**',
+      '**/test-results/**',
+      '**/playwright-report/**',
+      'e2e-reports/**',
+      'audit-screenshots/**',
+      // Read-only mirror of the Claude Design project (ADR-058).
+      'design-reference/**',
+      // Deno, not Node: `supabase/functions/**` imports from URLs, carries
+      // `deno-lint-ignore-file` pragmas, and is checked by `deno lint` — this
+      // config's module resolution and rule set do not apply to it.
+      //
+      // NOT a clean bill of health. When it was linted once during the
+      // lint-coverage fix, `bug-report/index.ts` reported 13 errors: a 271-line
+      // file, `validateErrorEvent` at complexity 22, `validateBugReport` at 17,
+      // and six `any` on an endpoint that validates untrusted input. Tracked as
+      // F-10; do not treat this ignore as the debt being paid.
+      'supabase/functions/**',
     ],
   },
 
@@ -164,11 +184,17 @@ export default tseslint.config(
     },
   },
 
-  // Allow config files to use require / any
+  // Allow config files to use require / any.
+  //
+  // This block was dead until the lint-coverage fix: `**/*.config.*` sat in the
+  // global ignores above, so the files it relaxes were never linted at all.
+  // `metro.config.js` is CommonJS because Metro `require()`s it — that is the
+  // tool's contract, not a style choice.
   {
-    files: ['**/*.config.{js,ts,mjs}', '**/eslint.config.js'],
+    files: ['**/*.config.{js,cjs,ts,mjs}', '**/eslint.config.js'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 );

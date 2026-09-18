@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint 'src/**/*.{ts,tsx}' --config ../../eslint.config.js --no-error-on-unmatched-pattern",
-    "lint:fix": "eslint 'src/**/*.{ts,tsx}' --config ../../eslint.config.js --fix --no-error-on-unmatched-pattern",
+    "lint": "eslint . --config ../../eslint.config.js",
+    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "clean": "rm -rf .next dist .turbo",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui"

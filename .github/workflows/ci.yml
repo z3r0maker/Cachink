@@ -3,6 +3,12 @@
 # Blocking: typecheck (turbo builds referenced packages first), unit tests,
 # root script tests, lint, and prettier's format:check (F-09 cleared the
 # pre-existing debt on 2026-09-11).
+#
+# "Lint" is two things, and both matter. `pnpm lint` runs the per-package tasks
+# plus `lint:root` for what is not a workspace. "Root script tests" includes
+# `scripts/lint-coverage.test.ts`, which asserts that every tracked TypeScript
+# file is actually reachable by one of those tasks — a green lint over a
+# partial file set is what this workflow shipped until 2026-09-17 (F-08).
 # The schema-drift job is added by B-02 together with packages/data-pg.
 #
 # Branch protection: require the check named "ci".
