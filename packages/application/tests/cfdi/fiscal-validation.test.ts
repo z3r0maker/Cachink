@@ -57,8 +57,15 @@ describe('validateTenantFiscal', () => {
       'razon_social_missing',
       'regimen_missing',
       'rfc_missing',
-      'uso_cfdi_missing',
     ]);
+  });
+
+  it('defaults a missing uso CFDI to G03 (gastos en general)', () => {
+    for (const usoCfdi of [undefined, null, '', '  ']) {
+      const result = validateTenantFiscal(makeTenantFiscal({ usoCfdi }));
+      assert.ok(result.ok);
+      assert.equal(result.receptor.usoCfdi, 'G03');
+    }
   });
 
   it('rejects the generic RFCs (they mean "público en general")', () => {

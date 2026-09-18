@@ -19,6 +19,8 @@ import type { CfdiReceptor, TenantFiscalData } from './types.js';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NOMBRE = 254;
+/** Uso CFDI when the tenant hasn't chosen one: G03, gastos en general. */
+export const USO_CFDI_DEFAULT = 'G03';
 
 export type FiscalIssue =
   | 'rfc_missing'
@@ -29,7 +31,6 @@ export type FiscalIssue =
   | 'regimen_missing'
   | 'regimen_invalid'
   | 'regimen_rfc_mismatch'
-  | 'uso_cfdi_missing'
   | 'uso_cfdi_invalid'
   | 'uso_cfdi_regimen_mismatch'
   | 'codigo_postal_missing'
@@ -60,7 +61,6 @@ function regimenIssue(regimen: string, persona: TipoPersona | null): FiscalIssue
 }
 
 function usoIssue(uso: string, persona: TipoPersona | null): FiscalIssue | null {
-  if (!uso) return 'uso_cfdi_missing';
   if (!(USO_CFDI_INGRESO as readonly string[]).includes(uso)) return 'uso_cfdi_invalid';
   return uso.startsWith('D') && persona === 'moral' ? 'uso_cfdi_regimen_mismatch' : null;
 }
@@ -80,7 +80,7 @@ export function validateTenantFiscal(data: TenantFiscalData): FiscalValidation {
   const rfc = normalizeRfc(clean(data.rfc));
   const nombre = clean(data.razonSocial);
   const regimenFiscal = clean(data.regimenFiscal);
-  const usoCfdi = clean(data.usoCfdi).toUpperCase();
+  const usoCfdi = clean(data.usoCfdi).toUpperCase() || USO_CFDI_DEFAULT;
   const codigoPostal = clean(data.codigoPostal);
   const rfcProblem = rfcIssue(rfc);
   const persona = rfcProblem ? null : tipoPersona(rfc);
