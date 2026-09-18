@@ -183,6 +183,7 @@ describe('cloud ↔ device schema drift', () => {
       'cfdi_payments',
       'devices',
       'metas',
+      'notice_preferences',
       'notices',
       'stripe_events',
       'subscriptions',
