@@ -3,9 +3,10 @@
  * under ADR-060: it lives only in Postgres, is absent from `scope.ts`, and no
  * device ever reads it.
  *
- * - `StaffMember` is the allowlist. Signing in to Supabase Auth proves who
- *   someone is; a live row here is what makes them staff. `userId` is the
- *   `auth.users` uuid — a different id space from our ULIDs.
+ * - `StaffMember` is the allowlist and, since ADR-080, the identity too: the
+ *   console's own password + TOTP sign-in (N-05) proves who someone is, and a
+ *   live row here is what makes them staff. `userId` is the legacy
+ *   `auth.users` uuid (a different id space from our ULIDs), null for new rows.
  * - `StaffAuditEntry` is one row per mutation a staff member performs. It is
  *   append-only; `businessId` is null for actions that touch no tenant.
  *
@@ -25,8 +26,8 @@ const isoInstant = z.iso.datetime({ offset: true });
 
 export const StaffMemberSchema = z.object({
   id: ulidField<StaffMemberId>(),
-  /** `auth.users.id` (uuid). */
-  userId: z.uuid(),
+  /** `auth.users.id` (uuid) for staff created before in-house auth; null since (ADR-080). */
+  userId: z.uuid().nullable(),
   email: z.email(),
   nombre: z.string().min(1),
   createdAt: isoInstant,

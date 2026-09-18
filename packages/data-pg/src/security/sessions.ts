@@ -1,5 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
-
+import { hashToken as hash, mintToken } from '@xangarro/auth-core';
 import { sql } from 'drizzle-orm';
 
 import type { Db } from '../client.js';
@@ -18,15 +17,13 @@ export interface ResolvedSession {
   readonly role: 'owner' | 'admin' | 'viewer';
 }
 
-const hash = (token: string) => createHash('sha256').update(token).digest('hex');
-
 export async function openSession(
   db: Db,
   userId: string,
   businessId: string,
   ttlSeconds: number,
 ): Promise<string> {
-  const token = randomBytes(32).toString('base64url');
+  const token = mintToken();
   await db.execute(
     sql`SELECT xangarro.session_open(${hash(token)}, ${userId}::uuid, ${businessId}, ${ttlSeconds}::int)`,
   );

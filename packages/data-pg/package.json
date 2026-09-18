@@ -27,6 +27,7 @@
     "db:reset": "./scripts/db-local.sh down && ./scripts/db-local.sh up && pnpm db:seed"
   },
   "dependencies": {
+    "@xangarro/auth-core": "workspace:*",
     "@xangarro/contracts": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "bcryptjs": "3.0.3",

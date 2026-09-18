@@ -4,5 +4,5 @@
   "compilerOptions": { "outDir": "dist", "rootDir": "src", "lib": ["ES2022"], "types": ["node"] },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist", "tests"],
-  "references": [{ "path": "../domain" }, { "path": "../contracts" }]
+  "references": [{ "path": "../auth-core" }, { "path": "../domain" }, { "path": "../contracts" }]
 }

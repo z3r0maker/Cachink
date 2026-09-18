@@ -54,15 +54,12 @@ importers:
 
   apps/admin:
     dependencies:
-      '@supabase/ssr':
-        specifier: ^0.12.7
-        version: 0.12.7(@supabase/supabase-js@2.116.0(@opentelemetry/api@1.9.1))
-      '@supabase/supabase-js':
-        specifier: ^2.116.0
-        version: 2.116.0(@opentelemetry/api@1.9.1)
       '@vanilla-extract/css':
         specifier: ^1.21.2
         version: 1.21.2
+      '@xangarro/auth-core':
+        specifier: workspace:*
+        version: link:../../packages/auth-core
       '@xangarro/data-pg':
         specifier: workspace:*
         version: link:../../packages/data-pg
@@ -87,6 +84,9 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
+      uqr:
+        specifier: 0.1.3
+        version: 0.1.3
       zod:
         specifier: ^4.6.5
         version: 4.6.5
@@ -431,6 +431,28 @@ importers:
         specifier: ^4.1.6
         version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
 
+  packages/auth-core:
+    dependencies:
+      bcryptjs:
+        specifier: 3.0.3
+        version: 3.0.3
+    devDependencies:
+      '@types/node':
+        specifier: ^22.19.17
+        version: 22.19.17
+      '@vitest/coverage-v8':
+        specifier: ^4.1.6
+        version: 4.1.6(vitest@4.1.6)
+      '@xangarro/config':
+        specifier: workspace:*
+        version: link:../config
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vitest:
+        specifier: ^4.1.6
+        version: 4.1.6(@opentelemetry/api@1.9.1)(@types/node@22.19.17)(@vitest/coverage-v8@4.1.6)(jsdom@29.1.1(@noble/hashes@1.8.0))(msw@2.15.0(@types/node@22.19.17)(typescript@6.0.3))(vite@8.0.13(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1))
+
   packages/config:
     dependencies:
       eslint:
@@ -528,6 +550,9 @@ importers:
 
   packages/data-pg:
     dependencies:
+      '@xangarro/auth-core':
+        specifier: workspace:*
+        version: link:../auth-core
       '@xangarro/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -5147,6 +5172,7 @@ packages:
   '@xmldom/xmldom@0.8.13':
     resolution: {integrity: sha512-KRYzxepc14G/CEpEGc3Yn+JKaAeT63smlDr+vjB8jRfgTBBI9wRj/nkQEO+ucV8p8I9bfKLWp37uHgFrbntPvw==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xtuc/ieee754@1.2.0':
     resolution: {integrity: sha512-DX8nKgqcGwsc0eJSqYt5lwP4DH5FlHnmuWWBRy7X0NcaGR0ZtuyeESgMwTYVEtxmsNGY+qit4QYT/MIYTOTPeA==}
@@ -9210,6 +9236,9 @@ packages:
     hasBin: true
     peerDependencies:
       browserslist: '>= 4.21.0'
+
+  uqr@0.1.3:
+    resolution: {integrity: sha512-0rjE8iEJe4YmT9TOhwsZtqCMRLc5DXZUI2UEYUUg63ikBkqqE5EYWaI0etFe/5KUcmcYwLih2RND1kq+hrUJXA==}
 
   uri-js@4.4.1:
     resolution: {integrity: sha512-7rKUyy33Q1yc98pQ1DAmLtwX109F7TIfWlW1Ydo8Wl1ii1SeHieeh0HHfPeL2fMXK6z0s8ecKs9frCuLJvndBg==}
@@ -17845,7 +17874,7 @@ snapshots:
       metro-cache: 0.83.7
       metro-core: 0.83.7
       metro-runtime: 0.83.7
-      yaml: 2.9.0
+      yaml: 2.9.1
     transitivePeerDependencies:
       - bufferutil
       - supports-color
@@ -17934,7 +17963,7 @@ snapshots:
   metro-minify-terser@0.83.7:
     dependencies:
       flow-enums-runtime: 0.0.6
-      terser: 5.46.2
+      terser: 5.51.2
 
   metro-minify-terser@0.84.4:
     dependencies:
@@ -20171,6 +20200,8 @@ snapshots:
       browserslist: 4.28.2
       escalade: 3.2.0
       picocolors: 1.1.1
+
+  uqr@0.1.3: {}
 
   uri-js@4.4.1:
     dependencies:
