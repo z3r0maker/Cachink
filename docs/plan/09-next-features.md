@@ -318,6 +318,10 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-16 Import engine + Clientes template `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
+- **Note (ADR-081, 2026-09-18):** portal-created products start at zero stock and the import template has
+  no `stock_inicial` column. Opening stock is written as portal inventory movements with
+  `origen = apertura` (C-12 step 7), which don't count toward usage; `inventory_movements` is HYBRID,
+  so phones receive them.
 - **What:** generalise P-07's three steps (template → dry-run with row-level errors → one-transaction
   commit, ≤ 5 000 rows, .xlsx and .csv) into a template registry; add **Clientes** (nombre, teléfono,
   RFC optional).
