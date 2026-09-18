@@ -9,10 +9,13 @@ import type {
   UsoProducto,
 } from '@xangarro/domain';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { pesosToCentavos } from '@/lib/money';
 import { crearProducto } from '@/server/actions/crear-producto';
+import { editarProducto } from '@/server/actions/editar-producto';
+
+import type { Producto } from '../parts';
 
 /**
  * «Nuevo producto» form state (P-07). Money stays text until submit and is
@@ -60,11 +63,50 @@ function validate(d: Draft) {
   return { costoUnitCentavos, precioVentaCentavos, umbralStockBajo: umbral };
 }
 
-export function useNuevoProducto(onDone: () => void) {
+const pesos = (centavos: bigint): string =>
+  `${centavos / 100n}.${String(centavos % 100n).padStart(2, '0')}`;
+
+/** A catalogue row as the sheet's draft, for editing. */
+export function draftOf(p: Producto): Draft {
+  return {
+    nombre: p.nombre,
+    sku: p.sku,
+    categoria: p.categoria as InventoryCategory,
+    tipo: p.tipo as ProductoTipo,
+    usoProducto: p.usoProducto as UsoProducto,
+    costo: pesos(p.costo),
+    precio: pesos(p.precio),
+    unidad: p.unidad as InventoryUnit,
+    seguirStock: p.sigueStock,
+    umbral: String(p.umbral),
+    colorFondo: p.colorFondo as ProductColor,
+    icono: p.icono as ProductIcon | null,
+  };
+}
+
+type Valid = Exclude<ReturnType<typeof validate>, string>;
+
+/**
+ * Create, or edit through `EditarProductoUseCase`: cost and stock tracking are
+ * not in the patch (ADR-023; `ProductPatch`), so the sheet shows them read-only.
+ */
+function submit(d: Draft, ok: Valid, editing: Producto | null) {
+  const { costo: _c, precio: _p, umbral: _u, sku, nombre, seguirStock, tipo, ...rest } = d;
+  const common = { ...rest, nombre: nombre.trim(), sku: sku.trim() || undefined };
+  if (editing === null) return crearProducto({ ...common, ...ok, seguirStock, tipo });
+  const { costoUnitCentavos: _cost, ...patch } = ok;
+  return editarProducto(editing.id, { ...common, ...patch });
+}
+
+export function useProductoForm(editing: Producto | null, onDone: () => void) {
   const [draft, setDraft] = useState<Draft>(EMPTY);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  useEffect(() => {
+    setDraft(editing === null ? EMPTY : draftOf(editing));
+    setError(null);
+  }, [editing]);
   const set = (patch: Partial<Draft>): void => {
     setDraft((d) => ({ ...d, ...patch }));
     setError(null);
@@ -73,19 +115,13 @@ export function useNuevoProducto(onDone: () => void) {
   function save(): void {
     const ok = validate(draft);
     if (typeof ok === 'string') return setError(ok);
-    const { costo: _c, precio: _p, umbral: _u, sku, nombre, ...rest } = draft;
     startTransition(async () => {
-      const result = await crearProducto({
-        ...rest,
-        ...ok,
-        nombre: nombre.trim(),
-        sku: sku.trim() || undefined,
-      });
+      const result = await submit(draft, ok, editing);
       if (!result.ok) return setError(result.message);
       setDraft(EMPTY);
       onDone();
       router.refresh();
     });
   }
-  return { draft, set, error, pending, save };
+  return { draft, set, error, pending, save, editing: editing !== null };
 }

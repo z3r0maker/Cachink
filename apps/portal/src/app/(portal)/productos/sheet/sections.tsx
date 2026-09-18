@@ -13,8 +13,8 @@ import { FilterChip, Input, OptionCards, Switch, Tag } from '@/components';
 import { marginPercent } from '@/lib/money';
 import { eyebrow } from '@/styles/text.css';
 
-import { chipRow, section, toggleRow, twoCol } from './nuevo.css';
-import type { Draft } from './use-nuevo-producto';
+import { chipRow, section, toggleRow, twoCol } from './sheet.css';
+import type { Draft } from './use-producto-form';
 
 /**
  * The first four sections of «Nuevo producto» (P-07). Choices of five or fewer
@@ -23,6 +23,8 @@ import type { Draft } from './use-nuevo-producto';
 export interface SectionProps {
   readonly draft: Draft;
   readonly set: (patch: Partial<Draft>) => void;
+  /** Editing an existing product: tipo, cost and stock tracking are read-only. */
+  readonly editing?: boolean;
 }
 
 const TIPOS = [
@@ -39,7 +41,7 @@ const USOS = [
   { value: 'ambos', title: 'Ambos', description: 'Se vende y también se usa para producir.' },
 ];
 
-export function Basico({ draft, set }: SectionProps) {
+export function Basico({ draft, set, editing }: SectionProps) {
   return (
     <div className={section}>
       <span className={eyebrow}>Básico</span>
@@ -47,21 +49,25 @@ export function Basico({ draft, set }: SectionProps) {
         labelText="Nombre"
         value={draft.nombre}
         onChange={(e) => set({ nombre: e.target.value })}
-        data-testid="nuevo-nombre"
+        data-testid="producto-nombre"
       />
       <Input
         labelText="SKU"
         hintText="Opcional; el código que usas para buscarlo"
         value={draft.sku}
         onChange={(e) => set({ sku: e.target.value })}
-        data-testid="nuevo-sku"
+        data-testid="producto-sku"
       />
-      <OptionCards
-        ariaLabel="Tipo"
-        options={TIPOS}
-        value={draft.tipo}
-        onValueChange={(v) => set({ tipo: v as ProductoTipo })}
-      />
+      {editing ? (
+        <Tag tone="neutral">{draft.tipo === 'servicio' ? 'Servicio' : 'Producto'}</Tag>
+      ) : (
+        <OptionCards
+          ariaLabel="Tipo"
+          options={TIPOS}
+          value={draft.tipo}
+          onValueChange={(v) => set({ tipo: v as ProductoTipo })}
+        />
+      )}
       <div className={chipRow} role="group" aria-label="Categoría">
         {InventoryCategoryEnum.options.map((c) => (
           <FilterChip
@@ -90,7 +96,7 @@ export function Uso({ draft, set }: SectionProps) {
   );
 }
 
-export function Precio({ draft, set }: SectionProps) {
+export function Precio({ draft, set, editing }: SectionProps) {
   const margin = marginPercent(draft.costo, draft.precio);
   return (
     <div className={section}>
@@ -98,11 +104,12 @@ export function Precio({ draft, set }: SectionProps) {
       <div className={twoCol}>
         <Input
           labelText="Costo"
-          hintText="En pesos"
+          hintText={editing ? 'No cambia aquí: ya costeó ventas pasadas' : 'En pesos'}
           numeric
+          disabled={editing}
           value={draft.costo}
           onChange={(e) => set({ costo: e.target.value })}
-          data-testid="nuevo-costo"
+          data-testid="producto-costo"
         />
         <Input
           labelText="Precio de venta"
@@ -110,11 +117,11 @@ export function Precio({ draft, set }: SectionProps) {
           numeric
           value={draft.precio}
           onChange={(e) => set({ precio: e.target.value })}
-          data-testid="nuevo-precio"
+          data-testid="producto-precio"
         />
       </div>
       {margin === null ? null : (
-        <span data-testid="nuevo-margen">
+        <span data-testid="producto-margen">
           <Tag tone={margin > 0 ? 'success' : 'danger'}>Margen {margin}%</Tag>
         </span>
       )}
@@ -122,7 +129,7 @@ export function Precio({ draft, set }: SectionProps) {
   );
 }
 
-export function Inventario({ draft, set }: SectionProps) {
+export function Inventario({ draft, set, editing }: SectionProps) {
   return (
     <div className={section}>
       <span className={eyebrow}>Inventario</span>
@@ -138,6 +145,7 @@ export function Inventario({ draft, set }: SectionProps) {
       </div>
       <label className={toggleRow}>
         <Switch
+          disabled={editing}
           checked={draft.seguirStock}
           label="Llevar existencias"
           onCheckedChange={(on) => set({ seguirStock: on })}

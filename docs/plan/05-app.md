@@ -127,6 +127,10 @@
 
 > **Amended 2026-09-18 (ADR-080):** feature flags are portal-only. Remove the phone's flag toggle
 > (`use-toggle-feature-flag`); show the pulled flags read-only.
+>
+> **Amended 2026-09-18 (owner decision):** archiving a product is portal-only too — a phone's soft
+> delete is an update to a HYBRID row and never leaves the phone. Remove the phone's delete action
+> (`use-eliminar-producto`, now a thin wrapper over `ArchivarProductoUseCase`).
 
 - [ ] Status · **Blocked by:** A-01, A-04, A-07
 - **Files:** `packages/ui/src/screens/Settings/*`.

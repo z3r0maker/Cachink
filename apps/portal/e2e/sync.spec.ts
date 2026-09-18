@@ -73,7 +73,7 @@ test('a portal edit reaches the next pull, and only it', async ({ page, request 
     .locator('tr', { hasText: 'TAC-001' })
     .getByRole('button', { name: 'Editar' })
     .click();
-  await page.getByTestId('edit-producto-nombre').fill(renamed);
+  await page.getByTestId('producto-nombre').fill(renamed);
   await page.getByRole('button', { name: 'Guardar' }).click();
   await expect(page.locator('main').getByText(renamed)).toBeVisible();
 

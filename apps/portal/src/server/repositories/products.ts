@@ -90,7 +90,7 @@ function reads(tx: Tx) {
   };
 }
 
-function writes(tx: Tx, businessId: BusinessId) {
+function creates(tx: Tx, businessId: BusinessId) {
   return {
     /** HYBRID insert from the portal (ADR-080): logged, so every phone gets it. */
     async create(input: NewProduct): Promise<Product> {
@@ -116,6 +116,24 @@ function writes(tx: Tx, businessId: BusinessId) {
       await recordChange(tx, businessId, 'products', row.id, 'insert');
       return toDomain(row);
     },
+  };
+}
+
+function writes(tx: Tx, businessId: BusinessId) {
+  return {
+    /**
+     * Archive = soft delete, from the portal only (owner decision 2026-09-18):
+     * the row stays for past sales, and the logged update removes it from
+     * every phone's catalogue.
+     */
+    async delete(id: ProductId): Promise<void> {
+      const [row] = await tx
+        .update(products)
+        .set({ deletedAt: now(), updatedAt: now() })
+        .where(alive(eq(products.id, id)))
+        .returning({ id: products.id });
+      if (row) await recordChange(tx, businessId, 'products', row.id, 'update');
+    },
     async update(id: ProductId, patch: ProductPatch): Promise<Product | null> {
       const [row] = await tx
         .update(products)
@@ -133,19 +151,10 @@ function writes(tx: Tx, businessId: BusinessId) {
   };
 }
 
-/**
- * `products` is HYBRID: phones and the portal insert (ADR-080), the portal
- * edits, every write flows down. Deleting stays on the phone: a product that
- * vanished from the portal would take its sales history's meaning with it.
- */
-const deviceOnly = (verb: string) => (): never => {
-  throw new TypeError(`Los productos se ${verb} en el dispositivo, no en el portal.`);
-};
-
 export function pgProductsRepository(tx: Tx, businessId: BusinessId): ProductsRepository {
   return {
     ...reads(tx),
+    ...creates(tx, businessId),
     ...writes(tx, businessId),
-    delete: deviceOnly('eliminan'),
   };
 }

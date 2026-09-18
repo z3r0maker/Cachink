@@ -10,18 +10,15 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { ArchivarProductoUseCase } from '@xangarro/application';
 import type { ProductId } from '@xangarro/domain';
-import { useProductsRepository } from '../app/index';
+import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_ELIMINAR_PRODUCTO } from '../observability/audit-configs';
 
-export class StockNotEmptyError extends Error {
-  constructor(public readonly currentStock: number) {
-    super(`Producto has ${currentStock} unidades en stock — reduce to 0 first.`);
-    this.name = 'StockNotEmptyError';
-  }
-}
+/** The domain's error, re-exported so existing imports keep working. */
+export { StockNotEmptyError } from '@xangarro/domain';
 
 export interface EliminarProductoInput {
   readonly id: ProductId;
@@ -33,15 +30,19 @@ export type EliminarProductoResult = UseMutationResult<void, Error, EliminarProd
 
 export function useEliminarProducto(): EliminarProductoResult {
   const products = useProductsRepository();
+  const movements = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
   return useAuditedMutation(MUTATION_ELIMINAR_PRODUCTO, {
     async mutationFn(input) {
-      if (input.currentStock > 0 && input.force !== true) {
-        throw new StockNotEmptyError(input.currentStock);
-      }
-      await products.delete(input.id);
+      // The rule (units left → confirm first) is the shared use case's; the
+      // portal archives through the same one. `currentStock` stays in the
+      // input for the audit record.
+      await new ArchivarProductoUseCase(products, movements).execute({
+        id: input.id,
+        force: input.force,
+      });
     },
     async onSuccess() {
       await Promise.all([

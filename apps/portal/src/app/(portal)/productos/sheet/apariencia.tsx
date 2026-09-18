@@ -8,7 +8,7 @@ import { SegmentedTabs } from '@/components';
 import { ProductGlyph } from '@/components/product-glyph';
 import { eyebrow } from '@/styles/text.css';
 
-import { chipRow, iconButton, iconGrid, preview, section, swatch } from './nuevo.css';
+import { chipRow, iconButton, iconGrid, preview, section, swatch } from './sheet.css';
 import type { SectionProps } from './sections';
 
 /**
@@ -78,7 +78,7 @@ export function Apariencia(props: SectionProps) {
       <div
         className={preview}
         style={{ background: TINTS[draft.colorFondo].hex }}
-        data-testid="nuevo-preview"
+        data-testid="producto-preview"
       >
         {draft.icono === null ? null : <ProductGlyph icon={draft.icono} size={32} />}
         <span>{draft.nombre.trim() || 'Tu producto'}</span>

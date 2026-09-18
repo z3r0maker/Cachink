@@ -42,7 +42,7 @@ test('editing a product saves it and tells the devices', async ({ page }, testIn
   const row = page.locator('main').locator('tr', { hasText: 'TAC-001' });
   await row.getByRole('button', { name: 'Editar' }).click();
 
-  const field = page.getByTestId('edit-producto-nombre');
+  const field = page.getByTestId('producto-nombre');
   await field.fill(renamed);
   await page.getByRole('button', { name: 'Guardar' }).click();
 
@@ -63,10 +63,10 @@ test('a rejected edit shows the reason instead of a blank dialog', async ({ page
   const row = page.locator('main').locator('tr', { hasText: 'TAC-001' });
   await row.getByRole('button', { name: 'Editar' }).click();
 
-  await page.getByTestId('edit-producto-nombre').fill('   ');
+  await page.getByTestId('producto-nombre').fill('   ');
   await page.getByRole('button', { name: 'Guardar' }).click();
 
-  await expect(page.getByText('Escribe un nombre.')).toBeVisible();
+  await expect(page.getByText('Escribe el nombre del producto.')).toBeVisible();
 });
 
 test('marking avisos read clears the bell, and says how many', async ({ page }, testInfo) => {

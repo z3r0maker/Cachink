@@ -537,7 +537,7 @@ without touching code.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+- [x] Status · **Blocked by:** P-25 · **Blocks:** X-02
   - 2026-09-17 · Product **edit** works end to end through the reused `EditarProductoUseCase` (ADR-062), appending `sync_log`. "Nuevo producto" is labelled «próximamente»: `products` is HYBRID and the button contradicts the contract — **needs a product decision**. Excel import not started.
   - In progress: 2026-09-17 · `/productos` serves HTTP 200.
   - Catálogo / Movimientos tabs with counts; the low-stock banner whose "Ver stock bajo"
@@ -561,7 +561,13 @@ without touching code.
     are pure and unit-tested (valid, missing header, bad number, duplicate SKU, > 5 000 rows,
     unchanged row); e2e imports 3 → 3 products, a one-price re-import previews exactly 1 update, and
     the contador (viewer) sees no create, import, edit or movement control.
-  - **Still to do:** the full edit sheet (edit is name-only) and the archive confirm.
+  - 2026-09-18 · **Edit and archive**: «Editar» opens the same five-section sheet, prefilled, with
+    tipo, cost (ADR-023) and stock tracking read-only — the fields `EditarProductoUseCase` does not
+    change. «Archivar» is a logged soft delete, portal-only (owner decision); the rule that used to
+    live in the phone's UI hook — units left → confirm, naming how many — is now
+    `ArchivarProductoUseCase`, shared by both clients. e2e: an archived product with stock asks
+    again, then drops off every phone.
+  - Nothing left in P-07 itself; the phone's delete button goes with A-12.
 - **Amended 2026-09-17 (ADR-058 §2):** tabs are **Catálogo / Movimientos**; no "Ajustar inventario",
   no "Registrar movimiento". Movimientos is read-only.
 - **Steps:** Low-stock banner (`--red-soft`) whose "Ver stock bajo" **applies the filter**. KPIs —

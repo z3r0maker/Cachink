@@ -12,7 +12,7 @@ import { isLow, type Movimiento, type Producto } from './parts';
  * than disables (`session/gating.ts`), and the server rejects regardless.
  */
 /** What a row can ask for; the screen owns the dialogs. */
-export type RowAction = 'editar' | 'movimiento';
+export type RowAction = 'editar' | 'movimiento' | 'archivar';
 export type OnRowAction = ((p: Producto, action: RowAction) => void) | null;
 
 export function catalogoColumns(onAction: OnRowAction): readonly ColumnDef<Producto>[] {
@@ -29,6 +29,9 @@ export function catalogoColumns(onAction: OnRowAction): readonly ColumnDef<Produ
           </Button>
           <Button size="sm" variant="secondary" onClick={() => onAction(p, 'movimiento')}>
             Movimiento
+          </Button>
+          <Button size="sm" variant="secondary" onClick={() => onAction(p, 'archivar')}>
+            Archivar
           </Button>
         </span>
       ),

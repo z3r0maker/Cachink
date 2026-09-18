@@ -16,7 +16,7 @@ import type { ProductosData } from '@/server/screens';
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
 import { ImportarSheet } from './importar/sheet';
-import { NuevoProductoSheet } from './nuevo/sheet';
+import { NuevoProductoSheet } from './sheet/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
 export type Movimiento = ProductosData['movimientos'][number];
@@ -109,7 +109,7 @@ export function CatalogoTable({
       columns={catalogoColumns(onAction)}
       rows={rows}
       rowKey={(p) => p.id}
-      minWidth={onAction === null ? 860 : 1060}
+      minWidth={onAction === null ? 860 : 1160}
       footer={<span>Mostrando {rows.length} productos</span>}
     />
   );

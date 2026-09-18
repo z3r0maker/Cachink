@@ -18,3 +18,22 @@ export class InitialStockNotAllowedError extends Error {
     this.name = 'InitialStockNotAllowedError';
   }
 }
+
+export class ProductNotFoundError extends Error {
+  readonly code = 'PRODUCT_NOT_FOUND' as const;
+
+  constructor(readonly id: string) {
+    super('Ese producto ya no existe.');
+    this.name = 'ProductNotFoundError';
+  }
+}
+
+/** Archiving hides units that are still on the shelf; the owner confirms it. */
+export class StockNotEmptyError extends Error {
+  readonly code = 'STOCK_NOT_EMPTY' as const;
+
+  constructor(readonly stock: number) {
+    super(`Aún hay ${stock} unidades en existencia.`);
+    this.name = 'StockNotEmptyError';
+  }
+}

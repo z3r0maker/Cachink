@@ -91,18 +91,21 @@ test('a movement pushed by one phone reaches the other', async ({ request }) => 
   expect(ids(await pull(request, b, cursor))).toContain(row.id);
 });
 
+let createdName = '';
+
 test('a product created in the portal reaches the phones, at zero stock', async ({
   page,
   request,
 }) => {
   const cursor = (await pull(request, b, b.cursor)).serverSeq;
   const nombre = `Agua de jamaica ${Date.now()}`;
+  createdName = nombre;
   await page.goto('/productos');
   await page.getByRole('button', { name: 'Nuevo producto' }).click();
-  await page.getByTestId('nuevo-nombre').fill(nombre);
-  await page.getByTestId('nuevo-costo').fill('6.10');
-  await page.getByTestId('nuevo-precio').fill('20');
-  await expect(page.getByTestId('nuevo-margen')).toContainText('Margen 69%');
+  await page.getByTestId('producto-nombre').fill(nombre);
+  await page.getByTestId('producto-costo').fill('6.10');
+  await page.getByTestId('producto-precio').fill('20');
+  await expect(page.getByTestId('producto-margen')).toContainText('Margen 69%');
   await page.getByRole('radio', { name: 'Verde' }).click();
   await page.getByRole('button', { name: 'Crear producto' }).click();
   await expect(page.locator('main').getByText(nombre)).toBeVisible();
@@ -118,4 +121,27 @@ test('a product created in the portal reaches the phones, at zero stock', async 
   expect(
     got.tables.inventory_movements.filter((m: { productoId: string }) => m.productoId === p.id),
   ).toEqual([]);
+});
+
+test('archiving asks again while units remain, and the phones drop the product', async ({
+  page,
+  request,
+}) => {
+  const row = () => page.locator('main').locator('tr', { hasText: createdName });
+  await page.goto('/productos');
+  await row().getByRole('button', { name: 'Movimiento' }).click();
+  await page.getByTestId('movimiento-cantidad').fill('3');
+  await page.getByRole('dialog').getByRole('button', { name: 'Registrar' }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
+
+  const cursor = (await pull(request, b, b.cursor)).serverSeq;
+  await row().getByRole('button', { name: 'Archivar' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Archivar', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('Aún hay 3 unidades');
+  await page.getByRole('button', { name: 'Archivar de todos modos' }).click();
+  await expect(row()).toHaveCount(0);
+
+  const got = await pull(request, b, cursor);
+  const archived = got.tables.products.find((p: { nombre: string }) => p.nombre === createdName);
+  expect(archived?.deletedAt).toBeTruthy();
 });

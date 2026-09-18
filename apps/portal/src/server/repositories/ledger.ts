@@ -8,14 +8,16 @@ import {
   type InventoryMovement,
   type NewExpense,
   type NewInventoryMovement,
+  type ProductId,
 } from '@xangarro/domain';
+import { and, eq, isNull, sql } from 'drizzle-orm';
 
 import type { Tx } from '../db';
 import { PORTAL_DEVICE_ID } from './portal-device';
 
 /**
- * The two writes `RegistrarMovimientoInventarioUseCase` makes, over Postgres
- * (ADR-081). Only `create` — the use case needs nothing else.
+ * What the movement and archive use cases need, over Postgres (ADR-081):
+ * creating a movement, creating the entrada's expense, and a product's stock.
  *
  * - A **movement** is HYBRID: logged, so every phone pulls it and its stock
  *   agrees with the portal's.
@@ -38,8 +40,20 @@ function stamps(businessId: string) {
 export function pgMovementsCreator(
   tx: Tx,
   businessId: string,
-): Pick<InventoryMovementsRepository, 'create'> {
+): Pick<InventoryMovementsRepository, 'create' | 'sumStock'> {
   return {
+    /** Entradas minus salidas — the same sum the phones and the catalogue make. */
+    async sumStock(productoId: ProductId): Promise<number> {
+      const [row] = await tx
+        .select({
+          stock: sql<string>`COALESCE(SUM(CASE WHEN ${inventoryMovements.tipo} = 'salida' THEN -${inventoryMovements.cantidad} ELSE ${inventoryMovements.cantidad} END), 0)::text`,
+        })
+        .from(inventoryMovements)
+        .where(
+          and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
+        );
+      return Number(row?.stock ?? 0);
+    },
     async create(input: NewInventoryMovement): Promise<InventoryMovement> {
       const row = { ...input, nota: input.nota ?? null, ...stamps(businessId) };
       await tx.insert(inventoryMovements).values(row);

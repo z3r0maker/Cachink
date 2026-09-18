@@ -7,9 +7,10 @@ import { useSession } from '@/session/provider';
 import type { ProductosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
-import type { OnRowAction } from './columns';
-import { EditProductDialog } from './edit-dialog';
+import type { OnRowAction, RowAction } from './columns';
+import { ArchivarDialog } from './archivar-dialog';
 import { MovimientoDialog } from './movimiento-dialog';
+import { EditarProductoSheet } from './sheet/sheet';
 import {
   CatalogoTable,
   Chips,
@@ -113,13 +114,30 @@ function Body({
   );
 }
 
+/** One open dialog per row action; the screen only routes the click. */
+function useRowDialogs() {
+  const [open, setOpen] = useState<{ action: RowAction; producto: Producto } | null>(null);
+  const close = () => setOpen(null);
+  const target = (a: RowAction) => (open?.action === a ? open.producto : null);
+  const dialogs = (
+    <>
+      <EditarProductoSheet producto={target('editar')} onClose={close} />
+      <MovimientoDialog producto={target('movimiento')} onClose={close} />
+      <ArchivarDialog producto={target('archivar')} onClose={close} />
+    </>
+  );
+  return {
+    onAction: (producto: Producto, action: RowAction) => setOpen({ action, producto }),
+    dialogs,
+  };
+}
+
 export function ProductosScreen({ data }: { readonly data: ProductosData | null }) {
   const session = useSession();
   const [tab, setTab] = useState('catalogo');
   const [filter, setFilter] = useState('Todos');
-  const [editing, setEditing] = useState<Producto | null>(null);
-  const [moving, setMoving] = useState<Producto | null>(null);
   const mayWrite = canWrite(session.role);
+  const rowDialogs = useRowDialogs();
 
   const catalogo = data?.catalogo ?? [];
   const rows = useMemo(
@@ -146,10 +164,9 @@ export function ProductosScreen({ data }: { readonly data: ProductosData | null 
         rows={rows}
         movimientos={data?.movimientos ?? []}
         error={data === null}
-        onAction={mayWrite ? (p, a) => (a === 'editar' ? setEditing(p) : setMoving(p)) : null}
+        onAction={mayWrite ? rowDialogs.onAction : null}
       />
-      <EditProductDialog producto={editing} onClose={() => setEditing(null)} />
-      <MovimientoDialog producto={moving} onClose={() => setMoving(null)} />
+      {rowDialogs.dialogs}
     </>
   );
 }

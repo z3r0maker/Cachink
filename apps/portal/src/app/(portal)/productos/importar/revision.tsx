@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Button, FilterChip, Tag, type Tone } from '@/components';
 import type { PreviewRow } from '@/server/actions/importar-productos';
 
-import { chipRow } from '../nuevo/nuevo.css';
+import { chipRow } from '../sheet/sheet.css';
 
 /** Step 2 (P-07): what the file will do, row by row, before anything is written. */
 const LABEL: Record<PreviewRow['kind'], [string, Tone]> = {
