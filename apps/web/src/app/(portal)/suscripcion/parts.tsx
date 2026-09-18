@@ -1,5 +1,8 @@
 'use client';
 
+import { administrarSuscripcion } from '@/server/billing/actions';
+
+import { BotonStripe } from './acciones';
 import { colors } from '@xangarro/tokens';
 
 import { Button, Card, Tag } from '@/components';
@@ -103,9 +106,13 @@ export function PauseRow() {
           </div>
         </div>
         <span style={{ marginLeft: 'auto' }}>
-          <Button variant="danger" size="sm">
-            Cambiar a Xangarrito
-          </Button>
+          {/* Pausing is a cancel in Stripe's Customer Portal; the plan ends at period end. */}
+          <BotonStripe
+            variant="danger"
+            size="sm"
+            label="Cambiar a Xangarrito"
+            accion={() => administrarSuscripcion()}
+          />
         </span>
       </div>
     </Card>
