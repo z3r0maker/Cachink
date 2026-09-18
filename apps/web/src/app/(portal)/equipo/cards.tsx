@@ -10,6 +10,7 @@ import { canWrite } from '@/session/gating';
 
 import { OperadorActions } from './operador-actions';
 import { DispositivoDetalle } from './dispositivo-drawer';
+import { OperadorDetalle } from './operador-drawer';
 import { RevokeButton } from './revoke-button';
 import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
@@ -58,6 +59,7 @@ function OperadorCard(props: {
           ? 'Entra con su nombre y su NIP. No necesita correo.'
           : 'Desactivado: no puede entrar a los teléfonos.'}
       </p>
+      <OperadorDetalle id={o.id} nombre={o.nombre ?? ''} />
       {props.mayWrite && o.active ? (
         <OperadorActions
           id={o.id}

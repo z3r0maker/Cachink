@@ -4,7 +4,7 @@ import { formatFechaHora, formatMoney } from '@xangarro/domain';
 import { useState, useTransition } from 'react';
 
 import { Button, Drawer } from '@/components';
-import { cortesDelDispositivo, type CortesResult } from '@/server/actions/dispositivos';
+import { cortesDelDispositivo, type CortesResult } from '@/server/actions/equipo-detalle';
 import type { EquipoData } from '@/server/screens';
 
 import { RevokeButton } from './revoke-button';
@@ -22,10 +22,10 @@ const signo = (d: bigint) =>
 function Cortes({ r }: { readonly r: CortesResult | null }) {
   if (r === null) return <p>Cargando cortes…</p>;
   if (!r.ok) return <p role="alert">{r.message}</p>;
-  if (r.cortes.length === 0) return <p>Este dispositivo aún no tiene cortes.</p>;
+  if (r.rows.length === 0) return <p>Este dispositivo aún no tiene cortes.</p>;
   return (
     <ul aria-label="Cortes recientes" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-      {r.cortes.map((c) => (
+      {r.rows.map((c) => (
         <li key={c.id} style={{ padding: '8px 0' }}>
           <strong>{c.fecha}</strong> · esperado {formatMoney(c.esperado)}, contado{' '}
           {formatMoney(c.contado)} · {signo(c.diferencia)}

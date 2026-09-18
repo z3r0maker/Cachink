@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull } from 'drizzle-orm';
 
-import { dayCloses } from '../schema/caja.js';
+import { cajaTurnos, dayCloses } from '../schema/caja.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -35,4 +35,35 @@ export async function cortesDeDispositivo(
     .orderBy(desc(dayCloses.fecha))
     .limit(limit);
   return rows;
+}
+
+/**
+ * An operator's recent shifts (P-05's drawer): when each opened and closed,
+ * and how the count came out — newest first. An open shift has no close yet.
+ */
+export interface TurnoDeOperador {
+  readonly id: string;
+  readonly fecha: string;
+  readonly aperturaAt: string;
+  readonly cierreAt: string | null;
+  readonly diferencia: bigint | null;
+}
+
+export async function turnosDeOperador(
+  tx: Tx,
+  userId: string,
+  limit = 5,
+): Promise<readonly TurnoDeOperador[]> {
+  return tx
+    .select({
+      id: cajaTurnos.id,
+      fecha: cajaTurnos.fecha,
+      aperturaAt: cajaTurnos.aperturaAt,
+      cierreAt: cajaTurnos.cierreAt,
+      diferencia: cajaTurnos.diferenciaCentavos,
+    })
+    .from(cajaTurnos)
+    .where(and(eq(cajaTurnos.userId, userId), isNull(cajaTurnos.deletedAt)))
+    .orderBy(desc(cajaTurnos.aperturaAt))
+    .limit(limit);
 }

@@ -687,7 +687,10 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     `@xangarro/domain` (one copy). **Fixed:** «Nómina de la semana» summed salaries regardless of
     period — it now uses each one's weekly equivalent (`salarioSemanal`, integer maths). e2e:
     create → edit → baja, stored centavos, periodo and `sync_log` checked in Postgres.
-  - **Still to do:** the employee drawer with recent payments, and a contrato field (needs a column).
+  - **Still to do:** the employee drawer with recent payments — **blocked on a data link**: the
+    phone records a payroll payment as an `expenses` row whose only tie to the employee is the text
+    «Nómina {nombre}», which a rename breaks. It needs an `empleado_id` on `expenses` (a synced UP
+    table, so a phone + cloud migration, Track A with B). Also a contrato field (needs a column).
 - **Amended 2026-09-17 (ADR-058 §3, §5):** **two tabs — Personas and Nómina.** Asistencia is cut.
   Nómina is a read-only grouping; no "Registrar nómina".
 - **Steps:** Title "Empleados" / "Quién trabaja contigo y cuánto le pagas". Header chip "Nómina de la
@@ -730,7 +733,9 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     tests); stored as the JSON phones parse (`UserPatch.permissions`, SQLite and Postgres repos), and
     logged. e2e: mismatch refused and field masked; on a throwaway Xangarrote tenant the permission
     saves and is logged; absent on Xangarro.
-  - **Still to do:** the operator drawer with recent shifts.
+  - 2026-09-18 · **Operator drawer**: «Ver detalle» shows their last five shifts on the business
+    clock — «Turno abierto», or when it closed and whether the count cuadró, sobró or faltó
+    (`turnosDeOperador`, DB test). Any member may look. e2e on a throwaway tenant.
 - **Amended 2026-09-17 (ADR-058 §4):** no role label, no "Escritorio" state pill; **permissions are
   kept** and gated by `capabilities.permisosPorUsuario`.
 - **Amended 2026-09-17 (ADR-072):** the NIP is **exactly four digits**, set and reset only here; where

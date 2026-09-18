@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
@@ -6,16 +6,20 @@ import { randomUUID } from 'node:crypto';
 import { asTenant } from './sync-phone';
 
 /**
- * P-06 on a throwaway free-plan tenant (one device slot): full, the pairing
+ * The Equipo drawers on a throwaway free-plan tenant. P-05: an operator's
+ * shifts, the open one first. P-06 (one device slot): full, the pairing
  * panel warns that a new code waits for a revoke; the drawer shows the device's
  * cortes; «Desvincular» frees the slot.
  */
 test.use({ storageState: { cookies: [], origins: [] } });
+// One tenant for both tests; the second revokes the device the first reads.
+test.describe.configure({ mode: 'serial' });
 
 const stamp = Date.now();
-const email = `disp-${stamp}@test.mx`;
+const email = `disp-${randomUUID()}@test.mx`;
 const biz = newUlid();
 const dev = newUlid();
+const op = newUlid();
 
 test.beforeAll(async () => {
   const userId = randomUUID();
@@ -31,6 +35,18 @@ test.beforeAll(async () => {
     await sql`
       INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
       VALUES (${dev}, 'Caja única', 'android', 'Moto G', ${biz}, now(), now())`;
+    await sql`
+      INSERT INTO users (id, nombre, pin_hash, recovery_password_hash, must_change_pin, avatar_color,
+                         permissions, role, business_id, device_id, created_at, updated_at)
+      VALUES (${op}, 'Rosa Turnos', 'x', 'x', false, 'blue', '{}', 'operativo', ${biz}, ${dev}, now(), now())`;
+    await sql`
+      INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, cierre_at, monto_apertura_centavos,
+                               efectivo_adicional_centavos, diferencia_centavos, business_id, device_id,
+                               created_at, updated_at)
+      VALUES (${newUlid()}, ${op}, '2026-05-11', '2026-05-11T15:00:00Z', '2026-05-12T03:00:00Z', 50000, 0,
+              -2000, ${biz}, ${dev}, now(), now()),
+             (${newUlid()}, ${op}, '2026-05-12', '2026-05-12T15:00:00Z', NULL, 50000, 0, NULL, ${biz},
+              ${dev}, now(), now())`;
     for (const [fecha, contado] of [
       ['2026-05-11', 150000],
       ['2026-05-12', 148000],
@@ -43,14 +59,31 @@ test.beforeAll(async () => {
   });
 });
 
-test('a full plan says so, the drawer shows cortes, and Desvincular frees the slot', async ({
-  page,
-}) => {
+async function signIn(page: Page) {
   await page.goto('/login');
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('disp-1234');
   await page.getByRole('button', { name: 'Entrar' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+}
+
+test('the operator drawer lists their shifts, the open one first', async ({ page }) => {
+  await signIn(page);
+  await page.goto('/equipo');
+  await page.locator('main').getByRole('button', { name: 'Ver detalle de Rosa Turnos' }).click();
+  const turnos = page
+    .getByRole('dialog', { name: 'Rosa Turnos' })
+    .getByRole('list', { name: 'Turnos recientes' })
+    .getByRole('listitem');
+  await expect(turnos).toHaveCount(2);
+  await expect(turnos.first()).toContainText('12 may 2026, 09:00 · Turno abierto');
+  await expect(turnos.last()).toContainText('cerró 11 may 2026, 21:00, faltó $20.00');
+});
+
+test('a full plan says so, the drawer shows cortes, and Desvincular frees the slot', async ({
+  page,
+}) => {
+  await signIn(page);
   await page.goto('/equipo?tab=dispositivos');
 
   const main = page.locator('main');

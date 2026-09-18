@@ -3,15 +3,19 @@ import { afterAll, beforeAll, it } from 'vitest';
 import { sql } from 'drizzle-orm';
 
 import { createDb, withBusiness, type Db } from '../src/client';
-import { cortesDeDispositivo } from '../src/queries';
+import { cortesDeDispositivo, turnosDeOperador } from '../src/queries';
 import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
-/** P-06's drawer: one device's cortes only, newest first, capped, no deleted ones. */
+/**
+ * The Equipo drawers: one device's cortes (P-06) and one operator's shifts
+ * (P-05) — only theirs, newest first, capped, no deleted rows.
+ */
 const { url, describe } = integrationSuite();
 const BIZ = testId('K');
 const A = testId('A');
 const B = testId('B');
+const OP = testId('U');
 
 describe('cortesDeDispositivo', () => {
   let db: Db;
@@ -38,6 +42,17 @@ describe('cortesDeDispositivo', () => {
       }
       await corte(A, '2026-05-14', true);
       await corte(B, '2026-05-15');
+      const turno = (user: string, dia: string, cerrado: boolean) =>
+        tx.execute(sql`
+          INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, cierre_at, monto_apertura_centavos,
+                                   efectivo_adicional_centavos, diferencia_centavos, business_id,
+                                   device_id, created_at, updated_at)
+          VALUES (${testId('T')}, ${user}, ${dia}, ${`${dia}T09:00:00Z`},
+                  ${cerrado ? `${dia}T21:00:00Z` : null}, 50000, 0, ${cerrado ? -500 : null},
+                  ${BIZ}, ${A}, now(), now())`);
+      await turno(OP, '2026-05-11', true);
+      await turno(OP, '2026-05-12', false);
+      await turno(testId('V'), '2026-05-12', true);
     });
   });
 
@@ -59,5 +74,16 @@ describe('cortesDeDispositivo', () => {
 
   it('a device with no cortes has none', async () => {
     assert.deepEqual(await withBusiness(db, BIZ, (tx) => cortesDeDispositivo(tx, testId('N'))), []);
+  });
+
+  it("returns only this operator's shifts, the open one first", async () => {
+    const t = await withBusiness(db, BIZ, (tx) => turnosDeOperador(tx, OP));
+    assert.deepEqual(
+      t.map((x) => ({ fecha: x.fecha, abierto: x.cierreAt === null, diferencia: x.diferencia })),
+      [
+        { fecha: '2026-05-12', abierto: true, diferencia: null },
+        { fecha: '2026-05-11', abierto: false, diferencia: -500n },
+      ],
+    );
   });
 });
