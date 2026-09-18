@@ -27,8 +27,20 @@ const PATTERNS = [
   new RegExp(`\\benvValue\\(\\s*\\w+\\s*,\\s*['"]${KEY}['"]`, 'g'),
 ];
 
-/** Set by the platform or the test harness, never by the operator. */
-const PLATFORM = new Set(['NODE_ENV', 'NEXT_RUNTIME', 'VERCEL_ENV', 'NEXT_DIST_DIR', 'CI', 'PORT']);
+/**
+ * Set by the platform or the test harness, never by the operator.
+ * `PORTAL_TODAY` pins the business clock for the E2E suite (server/clock.ts);
+ * it must never be set in production, so it stays out of the example.
+ */
+const PLATFORM = new Set([
+  'NODE_ENV',
+  'NEXT_RUNTIME',
+  'VERCEL_ENV',
+  'NEXT_DIST_DIR',
+  'CI',
+  'PORT',
+  'PORTAL_TODAY',
+]);
 
 /** Package functions that read the environment for the app that calls them. */
 const HELPERS: Readonly<Record<string, string>> = {
