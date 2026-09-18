@@ -12,6 +12,7 @@
 #                                 # `up`, it aborts against an already-migrated
 #                                 # database; locally you want `db:reset`.
 #   ./scripts/db-local.sh url     # print the app-role DATABASE_URL
+#   ./scripts/db-local.sh billing-url  # the Stripe webhook's BILLING_DATABASE_URL
 #
 # `up` is NOT idempotent: `drizzle/0000_*.sql` has 25 bare `CREATE TABLE`s, so
 # re-applying to a migrated database aborts under `ON_ERROR_STOP=1`. Use
@@ -25,6 +26,7 @@ PORT=55432
 DB=xangarro
 SUPER_URL="postgres://postgres:xangarro@localhost:${PORT}/${DB}"
 APP_URL="postgres://xangarro_app:xangarro_app@localhost:${PORT}/${DB}"
+BILLING_URL="postgres://xangarro_billing:xangarro_billing@localhost:${PORT}/${DB}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # `local/` before `drizzle/`: the compat layer creates the roles the migrations
@@ -64,5 +66,6 @@ case "${1:-up}" in
   down) docker rm -f -v "$NAME" >/dev/null 2>&1 || true; echo "removed $NAME" ;;
   url)  echo "$APP_URL" ;;
   super-url) echo "$SUPER_URL" ;;
-  *) echo "usage: $0 {up|apply|down|url|super-url}" >&2; exit 1 ;;
+  billing-url) echo "$BILLING_URL" ;;
+  *) echo "usage: $0 {up|apply|down|url|super-url|billing-url}" >&2; exit 1 ;;
 esac

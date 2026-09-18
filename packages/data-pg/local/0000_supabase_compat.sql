@@ -44,6 +44,13 @@ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_app') THEN
     CREATE ROLE xangarro_app LOGIN PASSWORD 'xangarro_app';
   END IF;
+
+  -- The Stripe webhook's writer (B-10, ADR-063). Its grants are in
+  -- drizzle/0007_billing_grants.sql, which creates it NOLOGIN where this file
+  -- has not run.
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_billing') THEN
+    CREATE ROLE xangarro_billing LOGIN PASSWORD 'xangarro_billing';
+  END IF;
 END
 $$;
 
