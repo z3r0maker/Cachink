@@ -8,6 +8,7 @@ import type { BusinessId, ProductId } from '@xangarro/domain';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { pgProductsRepository } from '../repositories/products';
+import { reportError } from '../observability/report';
 
 /**
  * Edit a product from the portal.
@@ -46,7 +47,7 @@ export async function editarProducto(id: string, patch: ProductPatch): Promise<E
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'No pudimos guardar el producto. Intenta de nuevo.';
-    console.error('[editarProducto]', error);
+    reportError(error, { endpoint: 'editarProducto' });
     return { ok: false, message };
   }
 

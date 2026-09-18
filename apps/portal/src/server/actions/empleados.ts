@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { recordChange } from '../repositories/sync-log';
+import { reportError } from '../observability/report';
 
 /**
  * Add an employee to the payroll roster.
@@ -75,7 +76,7 @@ export async function crearEmpleado(input: NuevoEmpleado): Promise<CreateResult>
     revalidatePath('/empleados');
     return { ok: true, id };
   } catch (error) {
-    console.error('[crearEmpleado]', error);
+    reportError(error, { endpoint: 'crearEmpleado' });
     const message =
       error instanceof Error ? error.message : 'No pudimos guardar al empleado. Intenta de nuevo.';
     return { ok: false, message };

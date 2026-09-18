@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { lastCortes, lowStock, recentActivity, totalsForRange } from '../src/queries/dashboard.js';
+import { rejectionDigest } from '../src/queries/digest.js';
 import { integrationSuite } from './support/db';
 
 /**
@@ -75,5 +76,16 @@ describe('dashboard queries against real Postgres', () => {
     );
     assert.equal(t.ventas, 0n, 'RLS must hide another tenant, not merely filter it');
     assert.equal(t.ventasCount, 0);
+  });
+
+  it('digests unresolved rejections by code, most frequent first, and nothing from the future', async () => {
+    const all = await withBusiness(db, BIZ, (tx) => rejectionDigest(tx, '2000-01-01'));
+    const codes = all.map((r) => r.code);
+    assert.ok(codes.includes('FK_PRODUCT_MISSING') && codes.includes('HYBRID_UPDATE_FORBIDDEN'));
+    assert.deepEqual(
+      all.map((r) => r.n),
+      [...all.map((r) => r.n)].sort((a, b) => b - a),
+    );
+    assert.deepEqual(await withBusiness(db, BIZ, (tx) => rejectionDigest(tx, '2999-01-01')), []);
   });
 });

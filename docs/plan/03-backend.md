@@ -273,6 +273,16 @@
 
 ### B-18 Backend observability
 
-- [ ] Status · **Blocked by:** B-07…B-09
+- [x] Status · **Blocked by:** B-07…B-09
+  - Done 2026-09-17. `@sentry/node` in `src/instrumentation.ts` (Node only, off without
+    `SENTRY_DSN`); `onRequestError` catches what nothing else did. Every server failure goes through
+    `reportError` (Sentry tags `business_id`, `device_id`, `endpoint` + one JSON line; a Postgres
+    `detail` is never copied). Every phone call logs one line through `deviceRoute`
+    (`{business_id, device_id, endpoint, status, ms, accepted, rejected, codes}`), and the three
+    device routes share that wrapper instead of three copies of auth/error handling. The digest is
+    `rejectionDigest(tx, since)`. Acceptance: `tests/observability.test.ts` runs the real SDK with
+    an in-memory transport (tagged event; cookies, headers, query and user stripped), and
+    `test:conformance` fails unless the run's server log has the push line and no email.
+  - **Ops, not code:** set `SENTRY_DSN` in production. Browser-side Sentry is not wired.
 - **Steps:** Sentry (already used by the app via `EXPO_PUBLIC_SENTRY_DSN`) for the portal + API; structured logs per request `{device_id, business_id, endpoint, ms, accepted, rejected}`; a daily digest query for rejection codes. No PII in logs (no emails, no PINs).
 - **Acceptance:** a forced error appears in Sentry with `business_id` tag; a push logs one line.

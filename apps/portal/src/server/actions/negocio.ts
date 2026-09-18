@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { recordChange } from '../repositories/sync-log';
+import { reportError } from '../observability/report';
 
 /**
  * Edit the business's own record.
@@ -54,7 +55,7 @@ export async function editarNegocio(patch: NegocioPatch): Promise<SaveResult> {
     revalidatePath('/negocio');
     return { ok: true };
   } catch (error) {
-    console.error('[editarNegocio]', error);
+    reportError(error, { endpoint: 'editarNegocio' });
     const message =
       error instanceof Error ? error.message : 'No pudimos guardar los datos. Intenta de nuevo.';
     return { ok: false, message };

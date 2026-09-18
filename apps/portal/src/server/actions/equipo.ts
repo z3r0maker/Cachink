@@ -7,6 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { CODE_TTL_MS, mintActivationCode } from '../activation';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { reportError } from '../observability/report';
 
 /**
  * "Generar otro" — replace the live activation code with a fresh one.
@@ -69,7 +70,7 @@ export async function generarCodigo(): Promise<CodeResult> {
     revalidatePath('/equipo');
     return { ok: true, code, expiresAt };
   } catch (error) {
-    console.error('[generarCodigo]', error);
+    reportError(error, { endpoint: 'generarCodigo' });
     const message =
       error instanceof Error ? error.message : 'No pudimos generar el código. Intenta de nuevo.';
     return { ok: false, message };

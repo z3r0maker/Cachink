@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { reportError } from '../observability/report';
 
 /**
  * Revoke a device (B-12).
@@ -48,7 +49,7 @@ export async function revocarDispositivo(deviceId: string): Promise<RevokeResult
     revalidatePath('/equipo');
     return { ok: true };
   } catch (error) {
-    console.error('[revocarDispositivo]', error);
+    reportError(error, { endpoint: 'revocarDispositivo' });
     const message =
       error instanceof Error
         ? error.message

@@ -12,6 +12,7 @@ import { PLAN_FIXTURE } from '@/fixtures/business';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
+import { reportError } from '../observability/report';
 import { pgUsersRepository } from '../repositories/users';
 
 /**
@@ -41,7 +42,7 @@ function fail(error: unknown, where: string): OperadorResult {
   if (error instanceof Error && code !== undefined && KNOWN.has(code)) {
     return { ok: false, message: error.message };
   }
-  console.error(`[${where}]`, error);
+  reportError(error, { endpoint: where });
   return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
 }
 

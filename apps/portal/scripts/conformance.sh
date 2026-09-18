@@ -53,3 +53,13 @@ suite() {
 
 suite tests/conformance/activate.test.ts
 suite tests/conformance/sync.test.ts
+
+# B-18's other acceptance, on the log this very run produced: every push wrote
+# one structured line with its counts, and no email reached the log at all.
+LOG=/tmp/xangarro-conformance-server.log
+grep -Eq '"evt":"api".*"endpoint":"sync/push".*"accepted":[0-9]+' "$LOG" ||
+  { echo "conformance: no structured sync/push log line in $LOG" >&2; exit 1; }
+if grep -q 'conformance@xangarro.mx' "$LOG"; then
+  echo "conformance: an email reached the server log ($LOG)" >&2
+  exit 1
+fi

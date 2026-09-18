@@ -3,6 +3,7 @@ import { ActivateRequestSchema } from '@xangarro/contracts';
 import { fail, ok, protocolRefusal, rateLimited } from '@/server/api/respond';
 import { activate, Refusal } from '@/server/device/activate';
 import { activateThrottle } from '@/server/device/activate-throttle';
+import { logApi, reportError } from '@/server/observability/report';
 
 /**
  * `POST /api/v1/activate` — a phone joins a business (contract §3).
@@ -27,7 +28,7 @@ function codeOf(body: unknown): string | null {
   return typeof code === 'string' ? code : null;
 }
 
-export async function POST(request: Request): Promise<Response> {
+async function handle(request: Request): Promise<Response> {
   const refusal = protocolRefusal(request);
   if (refusal !== null) return refusal;
 
@@ -46,10 +47,22 @@ export async function POST(request: Request): Promise<Response> {
     return ok(await activate(parsed.data));
   } catch (error) {
     if (!(error instanceof Refusal)) {
-      console.error('[activate]', error);
+      reportError(error, { endpoint: 'activate' });
       return fail('INTERNAL', 'No pudimos activar el dispositivo. Intenta de nuevo.');
     }
     const locked = await throttle.failed(error.code);
     return locked > 0 ? rateLimited(locked) : fail(error.code, error.code);
   }
+}
+
+/** One log line per attempt: status and timing, no email and no code (B-18). */
+export async function POST(request: Request): Promise<Response> {
+  const started = performance.now();
+  const response = await handle(request);
+  logApi({
+    endpoint: 'activate',
+    status: response.status,
+    ms: Math.round(performance.now() - started),
+  });
+  return response;
 }
