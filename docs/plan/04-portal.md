@@ -653,8 +653,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     first. `desgloseDeResultados` in the domain classifies with the statement's own
     `esCostoDeVentas` (now exported, the one copy of the rule); a test holds every breakdown equal
     to its line. e2e expands Gastos operativos against the seed.
-  - **Still to do:** the waterfall and donuts, the print stylesheet, and "Informe mensual PDF"
-    gated by `capabilities.informeMensual` (P-34).
+  - **Still to do:** the waterfall and donuts, and "Informe mensual PDF" gated by
+    `capabilities.informeMensual` (P-34). The print stylesheet is done (P-34).
 - **Amended 2026-09-17 (ADR-059):** adds the fifth `locked` state; Xangarrito has no NIF statements.
 - **Steps:** Period switcher (Mensual / Trimestral / Anual / Personalizado, `height 44`,
   `radius 14`, `3px 3px 0`) and statement tabs (Resultados / Posición / Flujo / Indicadores,
@@ -1243,7 +1243,8 @@ critical avisos cannot be switched off.
 ### P-34 Print, PDF and exports
 
 - [~] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
-  - 2026-09-17 · Exports: `GET /api/export/<dataset>` returns real .xlsx for ventas, gastos, productos, movimientos and empleados — authenticated, dataset checked against a closed union, RLS-scoped. E2E asserts the `PK` zip magic number. **Still to do:** print stylesheets, the PDF informe mensual.
+  - 2026-09-17 · Exports: `GET /api/export/<dataset>` returns real .xlsx for ventas, gastos, productos, movimientos and empleados — authenticated, dataset checked against a closed union, RLS-scoped. E2E asserts the `PK` zip magic number.
+  - 2026-09-18 · **Print stylesheet**: under `@media print` the sidebar, header, every button and anything marked `data-no-print` drop out, shadows go, black on white — a statement prints as the document. Estados gets «Imprimir» (the period in the URL is what prints). e2e emulates print. **Still to do:** the PDF informe mensual.
 - **Steps:** Print stylesheets for the statements (one page each) and the Diagnóstico; the "Informe
   mensual PDF" gated by `capabilities.informeMensual`; CSV and XLSX exports on Movimientos and
   Estados for every plan and role.

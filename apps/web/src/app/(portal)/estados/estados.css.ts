@@ -79,7 +79,7 @@ export const disclosure = style({
   placeItems: 'center',
   padding: 0,
   border: `2px solid ${colors.black}`,
-  borderRadius: 6,
+  borderRadius: radii[0],
   background: colors.white,
   fontWeight: typography.weights.extraBold,
   lineHeight: 1,
@@ -94,5 +94,5 @@ export const subLine = style({
   fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
   color: colors.textMuted,
-  borderBottom: `1px solid ${colors.gray200}`,
+  borderBottom: `2px solid ${colors.gray200}`,
 });

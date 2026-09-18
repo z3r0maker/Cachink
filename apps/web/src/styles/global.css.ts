@@ -50,3 +50,18 @@ export const srOnly = style({
   whiteSpace: 'nowrap',
   border: 0,
 });
+
+/**
+ * Print (P-34): a statement or a list prints as the document, not the app —
+ * no sidebar, no header, no buttons, no shadows, black on white. Anything
+ * else interactive opts out with `data-no-print`.
+ */
+globalStyle('aside, header, button, [data-no-print]', {
+  '@media': { print: { display: 'none !important' } },
+});
+globalStyle('html, body, main', {
+  '@media': { print: { background: 'white', color: 'black' } },
+});
+globalStyle('main *', {
+  '@media': { print: { boxShadow: 'none !important' } },
+});

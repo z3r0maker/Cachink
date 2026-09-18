@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
-import { ScreenBody, SegmentedTabs, ExportButton } from '@/components';
+import { Button, ScreenBody, SegmentedTabs, ExportButton } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EstadosModel } from '@/server/estados';
 import { hasStatements, resolveScreenState } from '@/session/gating';
@@ -80,6 +80,10 @@ function Heading() {
             they are computed from, which is what the contador actually wants. */}
         <ExportButton dataset="ventas" label="Exportar ventas" />
         <ExportButton dataset="gastos" label="Exportar gastos" />
+        {/* Prints the statement for the chosen period; the app chrome drops out (P-34). */}
+        <Button variant="secondary" onClick={() => window.print()}>
+          Imprimir
+        </Button>
       </div>
     </div>
   );
