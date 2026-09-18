@@ -587,6 +587,9 @@ importers:
       '@types/node':
         specifier: ^22.19.17
         version: 22.19.17
+      '@xangarro/application':
+        specifier: workspace:*
+        version: link:../application
       '@xangarro/config':
         specifier: workspace:*
         version: link:../config

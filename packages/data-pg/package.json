@@ -36,6 +36,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.19.17",
+    "@xangarro/application": "workspace:*",
     "@xangarro/config": "workspace:*",
     "@xangarro/data": "workspace:*",
     "drizzle-kit": "^0.31.10",

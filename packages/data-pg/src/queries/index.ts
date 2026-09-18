@@ -5,3 +5,4 @@ export * from './digest.js';
 export * from './billing.js';
 export * from './metering.js';
 export * from './cfdi.js';
+export * from './fiscal.js';

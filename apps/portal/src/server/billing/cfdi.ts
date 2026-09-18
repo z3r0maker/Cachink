@@ -14,13 +14,13 @@ import {
   type HttpFetch,
   type IssuedCfdiRepository,
   type PacProvider,
-  type TenantFiscalSource,
 } from '@xangarro/application/cfdi';
 import { cfdiInvoicePaidListener, type InvoicePaidListener } from '@xangarro/application/billing';
 
 import { supportInboxFromEnv } from '../support-inbox';
 import { pgIssuedCfdiRepository } from './cfdi-repository';
 import { billingDb } from './config';
+import { pgTenantFiscalSource } from './fiscal-source';
 
 /**
  * The CFDI composition root (N-33, ADR-070).
@@ -30,11 +30,10 @@ import { billingDb } from './config';
  *   `sk_live_`, matching the mode) and `CFDI_LUGAR_EXPEDICION`.
  * - Records go to `cfdi_payments` on `BILLING_DATABASE_URL`; items to the
  *   admin inbox (`ADMIN_INGEST_URL`, `ADMIN_INGEST_SECRET`).
- *
- * Fiscal data: the portal has no RFC / régimen / uso / CP fields on main yet
- * (P-10), so every payment routes to the monthly global CFDI until it does.
+ * - Fiscal data: the business's own (P-08), read through
+ *   `xangarro.tenant_fiscal()` on the same connection; incomplete data routes
+ *   the payment to the monthly global CFDI.
  */
-export const noFiscalDataYet: TenantFiscalSource = { fiscalOf: () => Promise.resolve(null) };
 
 interface CfdiParts {
   readonly mode: ReturnType<typeof readCfdiMode>;
@@ -65,7 +64,7 @@ export function liveCfdiInvoiceListener(): InvoicePaidListener {
     repo,
     inbox,
     issue,
-    fiscal: noFiscalDataYet,
+    fiscal: pgTenantFiscalSource(billingDb()),
   });
   return cfdiInvoicePaidListener(useCase);
 }
