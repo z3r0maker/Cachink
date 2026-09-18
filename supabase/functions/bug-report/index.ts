@@ -14,11 +14,11 @@
  *
  * This file is only the Deno wiring: URL imports, the environment, the
  * service-role client. The rules are in `router.ts`, `handlers.ts` and
- * `validate.ts`, which the repo's ESLint and Vitest check (F-10); `deno.d.ts`
- * types the two URL imports for `tsc`.
+ * `validate.ts`. Checked twice (F-10, ADR-080): `deno check`/`deno lint` with
+ * `deno.json`'s import map, and the repo's ESLint, `tsc` (through `deno.d.ts`)
+ * and Vitest.
  */
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { serve } from 'https://deno.land/std@0.177.0/http/server.ts';
+import { createClient } from '@supabase/supabase-js';
 
 import type { IngestStore } from './handlers.ts';
 import { route } from './router.ts';
@@ -45,4 +45,4 @@ function serviceStore(): IngestStore {
   };
 }
 
-serve((req) => route(req, serviceStore));
+Deno.serve((req) => route(req, serviceStore));

@@ -205,6 +205,9 @@
 
 ### B-11 Activation code issuance (portal + Studio-callable)
 
+> **Amended 2026-09-18 (ADR-080):** portal-only. The Studio/SQL issuer is dropped; codes come from
+> «Generar código», so the alphabet has one source. What remains is B-07/B-12, already done.
+
 - [~] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-06
   - 2026-09-17 · **Portal half:** `generarCodigo` mints from `crypto.randomInt` with the alphabet derived from `ACTIVATION_CODE_REGEX`; regenerating expires every other unredeemed code (E2E asserts exactly one live code — verified it fails with two). **Still to do:** Studio-callable issuance, redemption (B-07).
 - **Steps:** Postgres function `billing.issue_activation_code(business_id, email, issued_by)` → generates 8 chars from alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, `expires_at = now() + 48 h`, returns the code; security definer, executable by members with role ≠ viewer and by service role. Server action wrapper + email (B-14). Also `billing.revoke_device(device_id)` (sets status, `revoked_at`; frees the slot).
@@ -230,6 +233,9 @@
 
 ### B-14 Transactional email
 
+> **Amended 2026-09-18 (ADR-080):** also carries the portal's sign-in link and password-reset
+> templates — single-use, short-lived tokens stored hashed, like sessions (ADR-079).
+
 - [ ] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
 - **Steps:** Resend (or Supabase SMTP) with templates: `activation-code` (code, expiry, 3-step how-to), `welcome`, `payment-failed` (grace explanation), `factura-issued`. Spanish (es-MX). From `hola@xangarro.mx` (domain verification in L-04).
 - **Acceptance:** dev sends land in Resend test inbox; templates snapshot-tested.
@@ -251,9 +257,8 @@
     and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()`
     (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every
     saved query on the seed and pins the SQL unlock to the app's throttle key. **Still blocked:**
-    the subscriptions query (B-10's tables), `resend_magic_link` (auth provider undecided), and
-    Studio-callable code issuance, which needs a decision (a SQL copy of the alphabet vs. the
-    portal's «Generar código»).
+    the subscriptions query (B-10's tables) and resending a sign-in link (B-14's email). Studio
+    code issuance is dropped (ADR-080).
 - **Steps:** commit `supabase/studio/*.sql` (copied into Studio's saved queries manually): subscriptions by plan/status; businesses with unresolved rejections; devices not seen in 7 days; activation codes expiring today. Functions: `billing.reissue_code(business_id)`, `billing.resend_magic_link(email)` (calls Auth admin API via edge function). README `docs/ops/back-office.md` with the runbook (Q16).
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 
