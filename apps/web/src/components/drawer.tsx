@@ -15,8 +15,8 @@ export interface DrawerProps {
   readonly description?: string;
   readonly children: ReactNode;
   readonly actions?: ReactNode;
-  /** 460 px by default (Movimientos); Cortes de turno's handoff asks for 560. */
-  readonly width?: 460 | 560;
+  /** 460 px by default (Movimientos); the bell panel is 400, Cortes de turno 560. */
+  readonly width?: 400 | 460 | 560;
 }
 
 /**

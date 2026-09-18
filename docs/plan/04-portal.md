@@ -1075,8 +1075,13 @@ critical avisos cannot be switched off.
     `operacion`, and **never an Asesor insight however unread**.
   - Severity always pairs a tone with a glyph — `!`, `△`, `i`, `✓` — so colour never carries the
     meaning alone.
-  - **Still to do:** the bell side panel (the page exists; the 400 px drawer does not), marking
-    read/resolved against real rows, and the Postgres table with its RLS policy at B-02.
+  - 2026-09-18 · **Bell panel and real state.** The bell opens a 400 px drawer with the ten newest
+    open avisos (fetched on open, never the Asesor's); «Ver todos» goes to the page. Each aviso's CTA
+    navigates to its `cta_href` and marks it read; «Listo» closes it (`resolved_at`). The lifecycle is
+    the domain's `transicionAviso` (closed is final, reading twice is harmless; 5 tests); admins
+    act, Solo lectura reads. One `AvisoLinea` for the page and the panel. The CTA used to be an inert
+    button. e2e on a throwaway tenant: Asesor excluded, Listo, CTA → read, badge follows.
+  - **Still to do:** the Postgres `notices` generators (who writes the avisos) at B-02.
 - **Context:** ADR-060 — **one** table for Avisos and the Asesor feed. Portal-only entity: follow the
   shortened §11 checklist.
 - **Steps:** `notices` in `@xangarro/data-pg` — `source ∈ sistema | operacion | asesor`, severity,

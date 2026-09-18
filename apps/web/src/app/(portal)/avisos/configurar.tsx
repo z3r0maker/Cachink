@@ -7,7 +7,9 @@ import { Card, Switch, Tag } from '@/components';
 import { cambiarCanalAviso } from '@/server/actions/avisos-preferencias';
 import { eyebrow } from '@/styles/text.css';
 
-import { cell, channelHead, channelRow, colLabel, noticeWhen } from './avisos.css';
+import { noticeWhen } from '@/avisos/linea.css';
+
+import { cell, channelHead, channelRow, colLabel } from './avisos.css';
 
 /**
  * «Configurar» (P-32): the member's own delivery matrix, saved on each switch.

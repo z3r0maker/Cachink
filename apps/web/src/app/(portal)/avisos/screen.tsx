@@ -5,10 +5,12 @@ import { useMemo, useState } from 'react';
 
 import { Card, FilterChip, ScreenBody, SegmentedTabs } from '@/components';
 import type { AvisosData } from '@/server/screens';
-import { resolveScreenState } from '@/session/gating';
+import { canWrite, resolveScreenState } from '@/session/gating';
+import { useSession } from '@/session/provider';
+
+import { AvisoLinea } from '@/avisos/linea';
 
 import { ConfigurarCard } from './configurar';
-import { NoticeLine } from './parts';
 import { MarcarLeidosButton } from './marcar-leidos';
 import { pageSubtitle, pageTitle } from './avisos.css';
 
@@ -79,6 +81,7 @@ function Controls(p: ControlsProps) {
 }
 
 function Inbox(props: {
+  readonly mayWrite: boolean;
   readonly rows: AvisosData | null;
   readonly visible: NonNullable<AvisosData>;
 }) {
@@ -93,7 +96,7 @@ function Inbox(props: {
     >
       <Card>
         {props.visible.map((n) => (
-          <NoticeLine key={n.id} n={n} />
+          <AvisoLinea key={n.id} n={n} mayWrite={props.mayWrite} />
         ))}
       </Card>
     </ScreenBody>
@@ -110,6 +113,7 @@ export function AvisosScreen({
 }) {
   const [tab, setTab] = useState('operacion');
   const [onlyUnread, setOnlyUnread] = useState(false);
+  const mayWrite = canWrite(useSession().role);
 
   const all = rows ?? [];
   const isConfigurar = tab === 'configurar';
@@ -138,7 +142,7 @@ export function AvisosScreen({
       {isConfigurar ? (
         <ConfigurarCard inicial={preferencias} />
       ) : (
-        <Inbox rows={rows} visible={visible} />
+        <Inbox rows={rows} visible={visible} mayWrite={mayWrite} />
       )}
     </>
   );

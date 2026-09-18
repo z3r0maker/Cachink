@@ -1,16 +1,12 @@
 'use client';
 
-import Link from 'next/link';
-
 import { Tag } from '@/components';
 
-import { Icon } from './icon';
+import { Bell } from './bell';
 import { SyncPill } from './sync-pill';
 import { UserMenu } from './user-menu';
 import { BusinessSwitcher, type NegocioOption } from './business-switcher';
-import { badge, bell, header, inner, right } from './header.css';
-
-const BELL_PATH = 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9';
+import { header, inner, right } from './header.css';
 
 export interface HeaderProps {
   /** The business this session is on, and every one the account can switch to. */
@@ -29,14 +25,7 @@ export function Header(props: HeaderProps) {
       <div className={inner}>
         <BusinessSwitcher current={props.current} negocios={props.negocios} />
         <div className={right}>
-          <Link
-            href="/avisos"
-            className={bell}
-            aria-label={`Avisos · ${props.unreadNotices} sin leer`}
-          >
-            <Icon path={BELL_PATH} size={21} strokeWidth={2.3} />
-            {props.unreadNotices > 0 ? <span className={badge}>{props.unreadNotices}</span> : null}
-          </Link>
+          <Bell unread={props.unreadNotices} />
           <Tag tone="brand">Plan {props.planLabel}</Tag>
           <SyncPill pending={props.pendingRows} />
           <UserMenu initials={props.userInitials} />
