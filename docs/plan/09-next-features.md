@@ -456,7 +456,7 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-32 Store-compliance sweep `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
+- [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
   (`xangarrito|xangarro plan|xangarrote`), prices, `mejora|upgrade|suscr|plan|precio|pagar` and any
@@ -465,6 +465,16 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   employees (3.1.3(c)); operators sign in with a code issued by their employer; no digital content is
   sold in the app." Demo account `DEMOK7M3` kept live (2.1). Play: declare no in-app purchases.
 - **Acceptance:** the CI check is green; a reviewer checklist is attached to X-05.
+- Progress: 2026-09-17 · 682a48a (branch `track-n/n32-store-compliance`, unmerged) · `pnpm lint:store`
+  (TypeScript-AST string extraction over the app bundle + `es-mx.ts`, 52 tests, one allowlist entry:
+  "Suscripción" as a sale category, 3.1.3(e)). **main: 0 violations. App branch
+  `rename/xangarro-stored-ids`: 20** — mostly `es-mx.ts`: `planBanner.fellBack` / `planLimit.*`
+  (plan names + "Renueva/Cambia tu plan en app.xangarro.mx"), `settings.plans.*`, portal URLs in
+  hints (`productos.editInPortal`, `nuevoProducto.portalHint`, `settings.portalHint`,
+  `login.noOperatorsBody`, `activate.noCode`), "Activar" / "Código de activación" wording, and
+  `activate.errors.noSlots`. **Still to do:** neutralise that copy on the app branch (e.g. "Pídele al
+  dueño del negocio que lo haga desde su cuenta" — no URL, no plan), wire into CI after the branch
+  merges, reviewer checklist for X-05.
 
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 
