@@ -1,7 +1,14 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { decideAccess, isPublicPath, mfaStep, toAal, type GateInput } from '@/server/gate';
+import {
+  decideAccess,
+  isMachinePath,
+  isPublicPath,
+  mfaStep,
+  toAal,
+  type GateInput,
+} from '@/server/gate';
 
 const STAFF_AT_AAL2: GateInput = {
   path: '/tenants',
@@ -82,5 +89,22 @@ describe('toAal', () => {
     assert.equal(toAal('aal1'), 'aal1');
     assert.equal(toAal('aal3'), null);
     assert.equal(toAal(undefined), null);
+  });
+});
+
+describe('isMachinePath', () => {
+  it('matches the ingestion and cron API routes only', () => {
+    assert.equal(isMachinePath('/api/internal/support-items'), true);
+    assert.equal(isMachinePath('/api/cron/digest'), true);
+  });
+
+  it('does not match console pages or look-alike prefixes', () => {
+    for (const p of ['/inbox', '/api/internal', '/api/cronx/digest', '/apis/cron/digest', '/']) {
+      assert.equal(isMachinePath(p), false, p);
+    }
+  });
+
+  it('does not match a traversal out of the prefix', () => {
+    assert.equal(isMachinePath('/api/cron/../../inbox'), false);
   });
 });

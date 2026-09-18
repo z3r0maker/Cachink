@@ -43,6 +43,18 @@ export function isPublicPath(path: string): boolean {
   return PUBLIC_PATHS.has(path);
 }
 
+/**
+ * Machine-to-machine routes (N-08 ingestion, N-10 cron). They carry no staff
+ * session and authenticate themselves with a shared secret, so the proxy lets
+ * them through untouched. Only these two prefixes, and only API routes: a page
+ * can never be made reachable by naming it under one of them.
+ */
+const MACHINE_PREFIXES = ['/api/internal/', '/api/cron/'] as const;
+
+export function isMachinePath(path: string): boolean {
+  return MACHINE_PREFIXES.some((p) => path.startsWith(p)) && !path.includes('..');
+}
+
 const ALLOW: GateDecision = { kind: 'allow' };
 
 export function decideAccess(input: GateInput): GateDecision {

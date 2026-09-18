@@ -1,7 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-import { FORBIDDEN_PATH, isPublicPath, type GateDecision } from './server/gate';
+import { FORBIDDEN_PATH, isMachinePath, isPublicPath, type GateDecision } from './server/gate';
 import { resolveGate } from './server/resolve-gate';
 import { buildCsp, newNonce } from './server/security/csp';
 import { supabaseEnv } from './server/supabase/env';
@@ -16,7 +16,7 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 async function gate(request: NextRequest, cookiesOut: CookieToSet[]): Promise<GateDecision> {
   const path = request.nextUrl.pathname;
-  if (isPublicPath(path)) return { kind: 'allow' };
+  if (isPublicPath(path) || isMachinePath(path)) return { kind: 'allow' };
 
   const { url, anonKey } = supabaseEnv();
   const client = createServerClient(url, anonKey, {
