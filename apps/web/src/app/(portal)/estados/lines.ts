@@ -10,13 +10,25 @@ import type { StatementLine } from './statement';
  * from the design brief: the explanation beneath each number is the brand trait
  * that makes these statements usable by someone who is not finance-literate.
  */
-export const resultadosLines = (ER: EstadosModel['resultados']): readonly StatementLine[] => [
-  { label: 'Ingresos', subtitle: 'Todo el dinero que entró por ventas', amount: ER.ingresos },
+const partidas = (ps: EstadosModel['desglose']['ingresos']) =>
+  ps.map((p) => ({ label: p.clave, amount: p.monto }));
+
+const hastaUtilidadBruta = (
+  ER: EstadosModel['resultados'],
+  D: EstadosModel['desglose'],
+): readonly StatementLine[] => [
+  {
+    label: 'Ingresos',
+    subtitle: 'Todo el dinero que entró por ventas',
+    amount: ER.ingresos,
+    detalle: partidas(D.ingresos),
+  },
   {
     label: 'Costo de ventas',
     subtitle: 'Lo que gastaste para producir lo que vendiste',
     amount: ER.costoDeVentas,
     negative: true,
+    detalle: partidas(D.costoDeVentas),
   },
   {
     label: 'Utilidad bruta',
@@ -24,11 +36,18 @@ export const resultadosLines = (ER: EstadosModel['resultados']): readonly Statem
     amount: ER.utilidadBruta,
     total: true,
   },
+];
+
+const desdeGastos = (
+  ER: EstadosModel['resultados'],
+  D: EstadosModel['desglose'],
+): readonly StatementLine[] => [
   {
     label: 'Gastos operativos',
     subtitle: 'Gastos para mantener el negocio andando',
     amount: ER.gastosOperativos,
     negative: true,
+    detalle: partidas(D.gastosOperativos),
   },
   {
     label: 'Utilidad operativa',
@@ -49,6 +68,12 @@ export const resultadosLines = (ER: EstadosModel['resultados']): readonly Statem
     total: true,
   },
 ];
+
+/** NIF B-3 top to bottom: the gross half, then expenses down to utilidad neta. */
+export const resultadosLines = (
+  ER: EstadosModel['resultados'],
+  D: EstadosModel['desglose'],
+): readonly StatementLine[] => [...hastaUtilidadBruta(ER, D), ...desdeGastos(ER, D)];
 
 export const activoLines = (BALANCE: EstadosModel['balance']): readonly StatementLine[] => [
   { label: 'Efectivo', subtitle: 'Dinero en caja y banco', amount: BALANCE.activo.efectivo },

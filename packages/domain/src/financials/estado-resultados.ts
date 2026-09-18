@@ -23,6 +23,10 @@ import { ZERO, sum } from '../money/index.js';
 
 const COSTO_DE_VENTAS_CATS = new Set<Expense['categoria']>(['Materia Prima', 'Inventario']);
 
+/** Whether an egreso category is costo de ventas (else a gasto operativo) — the one rule. */
+export const esCostoDeVentas = (categoria: Expense['categoria']): boolean =>
+  COSTO_DE_VENTAS_CATS.has(categoria);
+
 export interface EstadoDeResultados {
   ingresos: Money;
   costoDeVentas: Money;
@@ -53,10 +57,10 @@ export function calculateEstadoDeResultados(input: EstadoDeResultadosInput): Est
   const ingresos = sum(ventas.map((v) => v.monto));
 
   const costoDeVentas = sum(
-    egresos.filter((e) => COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
+    egresos.filter((e) => esCostoDeVentas(e.categoria)).map((e) => e.monto),
   );
   const gastosOperativos = sum(
-    egresos.filter((e) => !COSTO_DE_VENTAS_CATS.has(e.categoria)).map((e) => e.monto),
+    egresos.filter((e) => !esCostoDeVentas(e.categoria)).map((e) => e.monto),
   );
 
   const merma = calculateMermaTotal(input.mermaMovements ?? []);

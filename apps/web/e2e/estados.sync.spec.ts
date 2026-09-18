@@ -38,3 +38,17 @@ test("the ISR notice uses the owner's rate, and says when there is no utilidad",
   // May's gastos exceed its ventas in the seed: no utilidad, no estimate.
   await expect(main(page).getByText(/no hubo utilidad, así que no hay ISR estimado/)).toBeVisible();
 });
+
+test('an expandable line lists what it is made of, largest first', async ({ page }) => {
+  await page.goto('/estados');
+  const toggle = main(page).getByRole('button', { name: 'Ver el detalle de Gastos operativos' });
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await toggle.click();
+  await expect(
+    main(page).getByRole('button', { name: 'Ocultar el detalle de Gastos operativos' }),
+  ).toHaveAttribute('aria-expanded', 'true');
+  // May's seeded gastos operativos: Nómina 8,150 · Renta 6,000 · Servicios 340.
+  await expect(main(page).getByText('($8,150.00)')).toBeVisible();
+  await expect(main(page).getByText('($6,000.00)')).toBeVisible();
+  await expect(main(page).getByText('($340.00)')).toBeVisible();
+});

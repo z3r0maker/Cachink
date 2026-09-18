@@ -69,3 +69,30 @@ export const summaryFigure = style({
   letterSpacing: typography.letterSpacing.tightest,
   fontVariantNumeric: 'tabular-nums',
 });
+
+/** The 23×23 disclosure toggle on an expandable line (design handoff). */
+export const disclosure = style({
+  width: 23,
+  height: 23,
+  flex: 'none',
+  display: 'grid',
+  placeItems: 'center',
+  padding: 0,
+  border: `2px solid ${colors.black}`,
+  borderRadius: 6,
+  background: colors.white,
+  fontWeight: typography.weights.extraBold,
+  lineHeight: 1,
+  cursor: 'pointer',
+});
+
+/** A breakdown row under an expanded line: indented and lighter. */
+export const subLine = style({
+  display: 'flex',
+  gap: 12,
+  padding: '8px 0 8px 35px',
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.semibold,
+  color: colors.textMuted,
+  borderBottom: `1px solid ${colors.gray200}`,
+});

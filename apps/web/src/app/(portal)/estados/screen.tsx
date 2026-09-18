@@ -33,7 +33,7 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         label="Utilidad neta"
       />
       <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} />
-      <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER)} />
+      <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER, m.desglose)} />
     </>
   );
 }
