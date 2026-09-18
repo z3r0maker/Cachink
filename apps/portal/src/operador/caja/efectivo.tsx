@@ -6,6 +6,7 @@ import { colors } from '@xangarro/tokens';
 
 import { Icon } from '../../shell/icon';
 import * as c from './cobro.css';
+import { MontoInput } from '../ui/monto';
 import * as e from './efectivo.css';
 import { cambio as calcCambio, parseRecibido } from './ticket';
 import type { Caja } from './use-caja';
@@ -66,27 +67,18 @@ export function Efectivo({ caja }: { readonly caja: Caja }) {
 
 function Monto({ raw, setRaw }: { readonly raw: string; readonly setRaw: (v: string) => void }) {
   return (
-    <div>
-      <label htmlFor="cx-recibido" className={e.label}>
-        Con cuánto paga
-      </label>
-      <div className={e.amountBox}>
-        <span className={e.peso}>$</span>
-        <input
-          id="cx-recibido"
-          className={e.amountInput}
-          type="text"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0.00"
-          value={raw}
-          onChange={(ev) => setRaw(ev.target.value.replace(/[^0-9.]/g, ''))}
-        />
+    <MontoInput
+      id="cx-recibido"
+      label="Con cuánto paga"
+      value={raw}
+      onChange={setRaw}
+      size="caja"
+      trailing={
         <button type="button" className={e.clear} title="Borrar" onClick={() => setRaw('')}>
           <Icon path={CLEAR} size={17} strokeWidth={2.5} />
         </button>
-      </div>
-    </div>
+      }
+    />
   );
 }
 

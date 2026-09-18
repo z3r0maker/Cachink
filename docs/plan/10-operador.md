@@ -226,6 +226,9 @@ Collected while building fase 10; none is edited in `design-reference/`.
 8. **Detalle de venta:** V-0412 is $160.00 (3 pastor, 1 gringa, 1 horchata) here and $320.00
    («8 pastor · 2 gringa · 2 horchata») in Ventas; the header's state pill stays on in the empty
    and error states. «Enviada al portal» has no offline wording (a sale still in the queue).
+9. **Gastos:** the list totals $1,530.00 while Turno's breakdown shows «gastos −$620.00»; the
+   category filters omit «Otros» although the form offers it; at 760–1000 px the row squeezes
+   the concept to zero width (as in Turno, item 6).
 
 ## 5. Fase 11 — Caja y captura
 
@@ -287,6 +290,21 @@ those texts to 12 upstream.
   - Deviations: the state pill shows only when a ticket is on screen (the file keeps «Venta
     registrada y enviada» above «Esta venta ya no existe»); a folio the fixture does not hold renders
     the empty state (only V-0412 and V-0409 have designed lines).
+
+### O-23 Operador · Gastos
+
+- [x] Status · **Blocked by:** O-11
+  - Done: 2026-09-18 · `src/operador/gastos/`, `/operador/gastos` (out of the catch-all, with
+    Ventas); figures and filters unit-tested (`tests/operador/gastos.test.ts`: 6 expenses,
+    $1,530.00, 2 without a receipt). «Registrar gasto» is a header button that opens the form; a new
+    expense goes on top of the list, device-local until O-06. Shared pieces: `MontoInput` (now also
+    Cobrar · efectivo), `ModalBotones` (now also Ventas' cancel). The receipt card opens the camera
+    (`capture="environment"`, the file picker on desktop) and shows the file's name; tapping it
+    again removes it. Harness at 1440, 768 and 375 px, loading/empty/error, the form empty, filled
+    and with a receipt, and the toast: match, the agreed radius, the README's bell and a design
+    button in browser-default black aside. Playwright: `e2e/operador-gastos.spec.ts`.
+  - Open with O-06 (already listed above): where the receipt photo is stored, and how these five
+    categories map to the domain's expense categories.
 
 ## 7. Fase 13 (tasks written when fase 12 closes)
 

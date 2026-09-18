@@ -4,7 +4,7 @@ import { PendingScreen } from '@/operador/pending-screen';
 
 /** Every operator destination whose screen task has not run yet. A real
  *  `operador/<name>/page.tsx` outranks this catch-all as each one lands. */
-const PENDING = new Set(['ventas', 'gastos', 'inventario', 'cobranza', 'pendientes', 'cierre']);
+const PENDING = new Set(['inventario', 'cobranza', 'pendientes', 'cierre']);
 
 export default async function PendingOperadorPage({
   params,
