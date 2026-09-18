@@ -70,3 +70,7 @@ __pycache__/
 .next/
 next-env.d.ts
 .vercel/
+
+# Playwright storage state: a signed session cookie. Never commit it, and
+# keep prettier out of it (format:check reads this file, not apps/portal/.gitignore).
+**/e2e/.auth/

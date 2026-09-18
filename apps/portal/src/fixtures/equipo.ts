@@ -101,10 +101,6 @@ export const DISPOSITIVOS: readonly Dispositivo[] = [
   },
 ];
 
-/** Codes never contain 0, O, 1 or I (ADR-053 Q5). */
-export const ACTIVATION_CODE = 'K7M3DQ9P';
-export const CODE_EXPIRES_IN = '09:42';
-
 export interface RejectedRow {
   readonly id: string;
   readonly tipo: string;

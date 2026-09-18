@@ -1,44 +1,11 @@
 'use client';
 
-import { Card, PendingButton, StatusPill, Tag } from '@/components';
+import { Card, StatusPill, Tag } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
-import { ACTIVATION_CODE, CODE_EXPIRES_IN } from '@/fixtures/equipo';
 
-import {
-  avatar,
-  cardFoot,
-  cardGrid,
-  cardHead,
-  cardName,
-  codeBox,
-  codeRow,
-  panelTitle,
-} from './equipo.css';
-
-/** The pairing panel. Codes never contain 0, O, 1 or I. */
-export function PairingPanel() {
-  return (
-    <Card tone="hero" emphasis="hero">
-      <strong className={panelTitle}>Código de vinculación activo</strong>
-      <p style={{ margin: '8px 0 0', fontWeight: 600 }}>
-        Escríbelo en el teléfono del operador. Vence en {CODE_EXPIRES_IN}.
-      </p>
-      <div className={codeRow}>
-        {ACTIVATION_CODE.split('').map((c, i) => (
-          <span key={`${c}-${i}`} className={codeBox}>
-            {c}
-          </span>
-        ))}
-      </div>
-      <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <PendingButton reason="Falta el alta de dispositivos (B-11).">Generar otro</PendingButton>
-        <PendingButton reason="Falta el envío de correo (B-14).">Enviar por correo</PendingButton>
-      </div>
-    </Card>
-  );
-}
+import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
 const initials = (n: string) =>
   n

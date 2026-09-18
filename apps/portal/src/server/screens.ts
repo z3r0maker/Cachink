@@ -3,6 +3,7 @@ import 'server-only';
 import {
   getBusiness,
   listDispositivos,
+  liveActivationCode,
   listEmpleados,
   listMovimientos,
   listMovimientosInventario,
@@ -39,6 +40,7 @@ export const loadEquipo = (biz: string) =>
   withTenant(biz, async (tx) => ({
     operadores: await listOperadores(tx),
     dispositivos: await listDispositivos(tx),
+    codigo: await liveActivationCode(tx),
   }));
 
 export const loadEmpleados = (biz: string) => withTenant(biz, (tx) => listEmpleados(tx));

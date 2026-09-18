@@ -7,7 +7,8 @@ import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
-import { Dispositivos, Operadores, PairingPanel } from './cards';
+import { Dispositivos, Operadores } from './cards';
+import { PairingPanel } from './pairing-panel';
 import { pageSubtitle, pageTitle } from './equipo.css';
 
 export type EquipoTab = 'operadores' | 'dispositivos';
@@ -88,7 +89,7 @@ export function EquipoScreen({
           { value: 'dispositivos', label: 'Dispositivos', count: data?.dispositivos.length ?? 0 },
         ]}
       />
-      {!isOperadores && mayWrite ? <PairingPanel /> : null}
+      {!isOperadores && mayWrite ? <PairingPanel initial={data?.codigo ?? null} /> : null}
       <Body data={data} isOperadores={isOperadores} />
     </>
   );

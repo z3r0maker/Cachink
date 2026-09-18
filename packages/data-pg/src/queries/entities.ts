@@ -1,8 +1,8 @@
-import { and, asc, count, desc, eq, isNull, ne } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, isNull, ne, sql } from 'drizzle-orm';
 
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { expenses, sales } from '../schema/ledger.js';
-import { devices, notices, syncRejections } from '../schema/portal.js';
+import { activationCodes, devices, notices, syncRejections } from '../schema/portal.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -133,4 +133,25 @@ export async function shellCounts(tx: Tx): Promise<{ pendingRows: number; unread
     );
 
   return { pendingRows: pending?.n ?? 0, unreadNotices: unread?.n ?? 0 };
+}
+
+/**
+ * The code a shopkeeper can hand to a phone right now, if any.
+ *
+ * "Live" means unredeemed **and** unexpired — both, because either one alone
+ * would show a code that `/activate` is about to refuse. `generarCodigo`
+ * expires every other unredeemed code when it mints one, so there is at most
+ * one, but the ordering makes that a property of the query rather than an
+ * assumption about the writer.
+ */
+export async function liveActivationCode(
+  tx: Tx,
+): Promise<{ code: string; expiresAt: string } | null> {
+  const [row] = await tx
+    .select({ code: activationCodes.code, expiresAt: activationCodes.expiresAt })
+    .from(activationCodes)
+    .where(and(isNull(activationCodes.redeemedAt), gt(activationCodes.expiresAt, sql`now()`)))
+    .orderBy(desc(activationCodes.createdAt))
+    .limit(1);
+  return row ?? null;
 }
