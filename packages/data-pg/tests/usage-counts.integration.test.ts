@@ -11,6 +11,7 @@ import {
 import { createDb, type Db } from '../src/client';
 import { usageCounts } from '../src/queries/metering';
 import { integrationSuite } from './support/db';
+import { testId } from './support/test-ids';
 
 /**
  * `xangarro.usage_counts()` (0010) — the single SQL definition of usage — is
@@ -21,8 +22,8 @@ import { integrationSuite } from './support/db';
  * as `xangarro_metering`, the role the nightly recompute uses.
  */
 const { url, describe } = integrationSuite();
-const BIZ = `01HZ8XQN9GZJXV8AKQ5X0C${Date.now().toString(36).slice(-4).toUpperCase()}`;
-const OTHER = `${BIZ.slice(0, -1)}Z`;
+const BIZ = testId('C');
+const OTHER = testId('D');
 
 function roleUrl(appUrl: string, role: string): string {
   const u = new URL(appUrl);

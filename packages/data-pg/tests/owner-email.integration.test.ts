@@ -6,6 +6,7 @@ import postgres from 'postgres';
 import { createDb, type Db } from '../src/client';
 import { ownerEmailOf } from '../src/queries/metering';
 import { integrationSuite } from './support/db';
+import { testId } from './support/test-ids';
 
 /**
  * `xangarro.owner_email()` (0011): the usage cron's role gets exactly one
@@ -14,8 +15,8 @@ import { integrationSuite } from './support/db';
  */
 const { url, describe } = integrationSuite();
 const run = Date.now().toString(36).toUpperCase();
-const BIZ = `01HZ8XQN9GZJXV8AKQ5X0O${run.slice(-4)}`;
-const EMPTY = `${BIZ.slice(0, -1)}Y`;
+const BIZ = testId('O');
+const EMPTY = testId('Y');
 
 function roleUrl(appUrl: string, role: string): string {
   const u = new URL(appUrl);
