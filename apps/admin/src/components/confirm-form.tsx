@@ -14,6 +14,25 @@ interface Props {
   /** What will happen, built from the filled-in form when the dialog opens. */
   readonly describe: (form: FormData) => string;
   readonly children: React.ReactNode;
+  /**
+   * Posted by «Confirmar» only, so the server can tell a confirmed submit
+   * from a direct one (e.g. `confirmacion=apagar` for a global switch-off).
+   */
+  readonly confirmField?: { readonly name: string; readonly value: string };
+}
+
+function ConfirmButton(p: { readonly pending: boolean; readonly field: Props['confirmField'] }) {
+  return (
+    <button
+      className={button}
+      type="submit"
+      disabled={p.pending}
+      name={p.field?.name}
+      value={p.field?.value}
+    >
+      {p.pending ? 'Guardando…' : 'Confirmar'}
+    </button>
+  );
 }
 
 /**
@@ -51,9 +70,7 @@ export function ConfirmForm(props: Props) {
         </h2>
         <p className={body}>{summary}</p>
         <div className={dialogActions}>
-          <button className={button} type="submit" disabled={pending}>
-            {pending ? 'Guardando…' : 'Confirmar'}
-          </button>
+          <ConfirmButton pending={pending} field={props.confirmField} />
           <button className={buttonQuiet} type="button" onClick={() => dialogRef.current?.close()}>
             Cancelar
           </button>
