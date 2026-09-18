@@ -82,7 +82,7 @@
 
 ### N-02 Server usage metering `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
+- [~] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
 - **What:** a portal-only `usage_counters (business_id, period 'YYYY-MM', transactions, products,
 computed_at)` table (ADR-060 portal-only entity checklist).
 - **How:** `/sync/push` increments `transactions` by accepted UP rows in the counted tables; a nightly
@@ -91,10 +91,19 @@ computed_at)` table (ADR-060 portal-only entity checklist).
   cron share one use case.
 - **Acceptance:** 1 happy + 3 unhappy use-case tests; nightly recompute corrects an injected drift;
   pull payload validates against the contract.
+- Progress: 2026-09-17 · e7741c6 (branch `track-n/n02-usage-engine`, unmerged) · pure core in
+  `@xangarro/domain/usage`: `countsTowardUsage` (OQ-5), `usagePeriod` (America/Mexico_City),
+  `computeUsage`; limits accepted as `UsageLimits` until C-12. Rules settled while building: **every
+  manual movement counts** (incl. muestra / uso en producción / otro), sale-generated and
+  cancellation movements don't; a cancelled/soft-deleted counted row stays counted; rows are
+  attributed to the month of their **capture date** (device `createdAt`, MX time) and the nightly
+  recompute absorbs late pushes; active products are counted as of now. **Still to do:**
+  `usage_counters` + use case in data-pg/application, push hook, nightly cron; `origen` column on
+  inventory movements (C-12 step 7) to replace the motivo/nota heuristic.
 
 ### N-03 Overage warnings and provider alerts `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
+- [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
 - **What:** thresholds 80 % / 100 % per metric → owner email (once per threshold per month), portal
   banner, app banner (from the pulled `usage`). **App copy is neutral** (ADR-069): "Este negocio está
   cerca de su límite mensual. Avisamos al dueño." — no plan names, prices or upgrade prompts on the
@@ -104,6 +113,11 @@ computed_at)` table (ADR-060 portal-only entity checklist).
 metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 - **Acceptance:** crossing each threshold fires exactly once; a paid tenant at 150 % still syncs
   every row (contract test).
+- Progress: 2026-09-17 · a80a4ef (branch `track-n/n02-usage-engine`) · `crossedThresholds` (80 → owner,
+  100 → owner + provider, 150 → provider; idempotency key `business:period:metric:threshold`),
+  `consecutiveMonthsOver`, `canCreateProduct` (free tier from `FALLBACK_PLAN`, typed result with
+  `excess` for the import dry-run), neutral phone codes `USAGE_NEAR_LIMIT` / `USAGE_AT_LIMIT`. 53 tests.
+  **Still to do:** emails (B-14), inbox items (N-08 ingestion), portal and app banners.
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
