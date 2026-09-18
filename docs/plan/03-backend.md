@@ -246,7 +246,14 @@
 
 ### B-16 Back-office: Studio saved queries + support functions
 
-- [ ] Status · **Blocked by:** B-03, B-11
+- [~] Status · **Blocked by:** B-03, B-11
+  - 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today,
+    and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()`
+    (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every
+    saved query on the seed and pins the SQL unlock to the app's throttle key. **Still blocked:**
+    the subscriptions query (B-10's tables), `resend_magic_link` (auth provider undecided), and
+    Studio-callable code issuance, which needs a decision (a SQL copy of the alphabet vs. the
+    portal's «Generar código»).
 - **Steps:** commit `supabase/studio/*.sql` (copied into Studio's saved queries manually): subscriptions by plan/status; businesses with unresolved rejections; devices not seen in 7 days; activation codes expiring today. Functions: `billing.reissue_code(business_id)`, `billing.resend_magic_link(email)` (calls Auth admin API via edge function). README `docs/ops/back-office.md` with the runbook (Q16).
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 
