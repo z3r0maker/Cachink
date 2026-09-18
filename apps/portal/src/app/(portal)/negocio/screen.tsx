@@ -8,6 +8,7 @@ import { useSession } from '@/session/provider';
 import type { NegocioData } from '@/server/screens';
 import { isOwner, resolveScreenState } from '@/session/gating';
 
+import { ArchivarNegocio } from './archivar';
 import { AtributosCard } from './edicion/atributos';
 import type { Business } from './edicion/draft';
 import { FiscalesEdit } from './edicion/fiscales';
@@ -117,6 +118,7 @@ function Loaded({ business, owner }: { readonly business: Business; readonly own
       <SaveBar e={e} />
       <FuncionesCard flags={parseFeatureFlags(business.featureFlags ?? '{}')} />
       <CapabilitiesCard />
+      {owner && e.draft === null ? <ArchivarNegocio nombre={business.nombre} /> : null}
     </>
   );
 }

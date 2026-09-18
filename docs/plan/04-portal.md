@@ -812,7 +812,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     `GuardarNegocioUseCase` validates everything and writes **one** patch (one `sync_log` entry); a
     bad field saves nothing. Replaces the two dialogs. e2e: RFC, viewer, régimen, pagos + atributos
     reach the phone, last method locked.
-  - **Still to do:** the archive row; «Contacto y comprobantes» needs columns first.
+  - 2026-09-18 · **Archive row** (owner): the name typed to confirm; refused while a subscription
+    will keep charging (cancel first); then `xangarro.business_archive()` (data-pg 0016) soft-deletes
+    the business, revokes its devices and ends every portal session — for the transaction's tenant
+    only, never an id passed in — and `memberships_for_user` skips archived businesses, so no
+    password or emailed link signs in to it. Reactivation is a support action (clear `deleted_at`).
+    Tests: `ArchivarNegocioUseCase` (5), 4 DB integration (only this tenant, sessions end, no
+    sign-in, no tenant → refused), e2e on a throwaway tenant.
+  - **Still to do:** «Contacto y comprobantes» needs columns first.
 - **Steps:** Four section cards (`minmax(420px, 1fr)`), each with a 38×38 icon tile: **Datos
   generales** (`--yellow`), **Datos fiscales** (`--blue-soft`), **Contacto y comprobantes**
   (`--peach-soft`), **Preferencias** (`--purple-soft`). Read mode shows values at 16px/700 and
