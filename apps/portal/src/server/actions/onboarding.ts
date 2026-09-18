@@ -13,15 +13,17 @@ import {
   type PlanId,
   type WizardAnswers,
 } from '@xangarro/domain';
+import { getBusiness } from '@xangarro/data-pg';
 import { revalidatePath } from 'next/cache';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
 import { allowedFor } from '@/onboarding/plan-copy';
 import { reconcile, skipKeys } from '@/onboarding/wizard-steps';
 
 import { requireMember } from '../auth';
+import { portalOrigin } from '../billing/origin';
+import { tenantEntitlement } from '../billing/plan';
 import { withTenant, type Tx } from '../db';
-import { trialCheckout } from '../onboarding/checkout';
+import { trialCheckoutFor } from '../onboarding/checkout';
 import { failure, type Failure } from '../onboarding/errors';
 import { pgOnboardingStore } from '../onboarding/store';
 import { pgBusinessesRepository } from '../repositories/businesses';
@@ -82,16 +84,14 @@ export async function seguirGratis(): Promise<OkOr<object>> {
   }
 }
 
-/**
- * N-15: apply a re-run against the plan the business is on. The plan is still
- * the fixture's until B-06 issues real entitlements — the same seam
- * `cambiarFuncion` reads.
- */
+/** N-15: apply a re-run against the plan the business is on (its subscription, B-10). */
 export async function aplicarCambios(): Promise<OkOr<object>> {
   let businessId: BusinessId | undefined;
   try {
     const id = (businessId = await owner());
-    await withTenant(id, (tx) => aplicar(tx, id, PLAN_FIXTURE.planId, false));
+    await withTenant(id, async (tx) =>
+      aplicar(tx, id, (await tenantEntitlement(tx, id, new Date())).plan, false),
+    );
     revalidatePath('/negocio');
     return { ok: true };
   } catch (error) {
@@ -99,21 +99,25 @@ export async function aplicarCambios(): Promise<OkOr<object>> {
   }
 }
 
-/** [Probar 14 días]: record the intent; Checkout is B-10's (stubbed `unavailable`). */
+/** [Probar 14 días]: record the intent, then B-10's Stripe Checkout (card-less trial). */
 export async function probarGratis(
   plan: PlanId,
   interval: BillingInterval,
 ): Promise<OkOr<{ redirect: string | null }>> {
   let businessId: BusinessId | undefined;
   try {
-    const id = (businessId = await owner());
-    const result = await withTenant(id, (tx) =>
-      new SolicitarPruebaUseCase(pgOnboardingStore(tx, id), trialCheckout).execute({
+    const session = await requireMember('owner');
+    const id = (businessId = session.business_id as BusinessId);
+    const origin = await portalOrigin();
+    const result = await withTenant(id, async (tx) => {
+      const name = (await getBusiness(tx))?.nombre ?? 'Mi negocio';
+      const checkout = trialCheckoutFor({ id, name, email: session.email }, origin);
+      return new SolicitarPruebaUseCase(pgOnboardingStore(tx, id), checkout).execute({
         businessId: id,
         plan,
         interval,
-      }),
-    );
+      });
+    });
     return { ok: true, redirect: result.status === 'redirect' ? result.url : null };
   } catch (error) {
     return failure(error, 'probarGratis', businessId);

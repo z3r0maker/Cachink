@@ -1,19 +1,35 @@
 import 'server-only';
 
-import type { TrialCheckout, TrialCheckoutResult } from '@xangarro/application';
+import type { TrialCheckout } from '@xangarro/application';
+import type { BillingBusiness } from '@xangarro/application/billing';
+
+import { liveBillingUseCases } from '../billing/live';
+import { trialCheckoutWith } from '../billing/trial-seam';
+import { reportError } from '../observability/report';
 
 /**
- * **Stub** for [Probar 14 días] (N-13). B-10 is not built: there is no Stripe
- * account, price or webhook yet. This is the seam — B-10 replaces
- * `startTrialCheckout` with a Checkout Session (`mode: 'subscription'`,
- * `subscription_data.trial_period_days: 14`,
- * `payment_method_collection: 'if_required'`, the `plan_`-prefixed lookup key
- * for the interval; ADR-059, ADR-067) and returns `{ status: 'redirect', url }`.
- * Nothing else changes: `SolicitarPruebaUseCase` already records the intent
- * and the screen already follows a redirect.
+ * [Probar 14 días] (N-13) through B-10's Stripe Checkout: a subscription
+ * session with a card-less 14-day trial on the plan and interval chosen
+ * (ADR-059, ADR-067). `SolicitarPruebaUseCase` records the intent first, so
+ * the tap is kept even when Checkout fails.
+ *
+ * Billing is built only when the owner taps: a portal without Stripe
+ * configured, a refusal (already subscribed) or a Stripe error is reported and
+ * answers `unavailable`, which the wizard already renders.
  */
-export const trialCheckout: TrialCheckout = {
-  startTrialCheckout(): Promise<TrialCheckoutResult> {
-    return Promise.resolve({ status: 'unavailable' });
-  },
-};
+export function trialCheckoutFor(business: BillingBusiness, origin: string): TrialCheckout {
+  const trial = {
+    execute: (input: Parameters<ReturnType<typeof liveBillingUseCases>['trial']['execute']>[0]) =>
+      liveBillingUseCases().trial.execute(input),
+  };
+  return trialCheckoutWith(
+    trial,
+    business,
+    {
+      successUrl: `${origin}/suscripcion?pago=listo&session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${origin}/bienvenida/plan`,
+    },
+    (error) =>
+      reportError(error, { endpoint: 'onboarding/trial-checkout', businessId: business.id }),
+  );
+}

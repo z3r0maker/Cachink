@@ -17,7 +17,8 @@
     "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test",
     "test:e2e:ui": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test --ui",
     "test:e2e:db": "pnpm --filter @xangarro/data-pg db:reset && pnpm test:e2e",
-    "test:conformance": "./scripts/conformance.sh"
+    "test:conformance": "./scripts/conformance.sh",
+    "stripe:seed": "tsx scripts/stripe-seed.ts"
   },
   "dependencies": {
     "@noble/ed25519": "3.2.0",
@@ -47,6 +48,7 @@
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
+    "stripe": "^22.6.2",
     "zod": "^4.6.5"
   },
   "devDependencies": {

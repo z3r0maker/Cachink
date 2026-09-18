@@ -3,9 +3,9 @@ import 'server-only';
 import { AplicarConfiguracionUseCase } from '@xangarro/application';
 import type { BusinessId, ConfigurationChange } from '@xangarro/domain';
 
-import { PLAN_FIXTURE } from '@/fixtures/business';
 import { allowedFor } from '@/onboarding/plan-copy';
 
+import { tenantEntitlement } from '../billing/plan';
 import { withTenant } from '../db';
 import { pgBusinessesRepository } from '../repositories/businesses';
 import { pgOnboardingStore } from './store';
@@ -15,8 +15,8 @@ import { pgOnboardingStore } from './store';
  * computed by exactly the code that will apply it — nothing is written.
  */
 export function previewChanges(businessId: BusinessId): Promise<readonly ConfigurationChange[]> {
-  const plan = PLAN_FIXTURE.planId;
   return withTenant(businessId, async (tx) => {
+    const { plan } = await tenantEntitlement(tx, businessId, new Date());
     const useCase = new AplicarConfiguracionUseCase(
       pgBusinessesRepository(tx, businessId),
       pgOnboardingStore(tx, businessId),

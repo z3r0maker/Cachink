@@ -1,0 +1,40 @@
+{
+  "id": "sub_1TestTrial00000000000000",
+  "object": "subscription",
+  "cancel_at": null,
+  "cancel_at_period_end": false,
+  "collection_method": "charge_automatically",
+  "created": 1789646400,
+  "currency": "mxn",
+  "customer": "cus_TestDonPedro0001",
+  "items": {
+    "object": "list",
+    "data": [
+      {
+        "id": "si_TestItem0001",
+        "object": "subscription_item",
+        "current_period_end": 1790856000,
+        "current_period_start": 1789646400,
+        "price": {
+          "id": "price_TestXangarroMonthly",
+          "object": "price",
+          "currency": "mxn",
+          "lookup_key": "plan_xangarro_monthly",
+          "product": "xg_plan_xangarro",
+          "recurring": { "interval": "month", "interval_count": 1 },
+          "tax_behavior": "exclusive",
+          "unit_amount": 19900
+        },
+        "quantity": 1
+      }
+    ],
+    "has_more": false
+  },
+  "latest_invoice": "in_TestTrialZero0001",
+  "livemode": false,
+  "metadata": { "business_id": "01HZ8XQN9GZJXV8AKQ5X0C7BJZ" },
+  "status": "trialing",
+  "trial_end": 1790856000,
+  "trial_settings": { "end_behavior": { "missing_payment_method": "cancel" } },
+  "trial_start": 1789646400
+}

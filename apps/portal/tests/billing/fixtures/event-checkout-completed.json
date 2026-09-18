@@ -1,0 +1,24 @@
+{
+  "id": "evt_TestCheckoutDone0001",
+  "object": "event",
+  "api_version": "2026-08-26.dahlia",
+  "created": 1789646410,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "checkout.session.completed",
+  "data": {
+    "object": {
+      "id": "cs_test_TestSession0001",
+      "object": "checkout.session",
+      "client_reference_id": "01HZ8XQN9GZJXV8AKQ5X0C7BJZ",
+      "customer": "cus_TestDonPedro0001",
+      "livemode": false,
+      "mode": "subscription",
+      "payment_method_collection": "if_required",
+      "payment_status": "no_payment_required",
+      "status": "complete",
+      "subscription": "sub_1TestTrial00000000000000"
+    }
+  }
+}

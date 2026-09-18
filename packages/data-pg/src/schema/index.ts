@@ -13,3 +13,4 @@ export * from './caja';
 export * from './portal';
 export * from './onboarding';
 export * from './sync';
+export * from './billing';

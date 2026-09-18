@@ -8,7 +8,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./cfdi": "./src/cfdi/index.ts"
+    "./cfdi": "./src/cfdi/index.ts",
+    "./billing": "./src/billing/index.ts"
   },
   "scripts": {
     "build": "tsc --build",
