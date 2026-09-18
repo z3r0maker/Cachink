@@ -1,0 +1,50 @@
+{
+  "id": "evt_TestInvoicePaid0001",
+  "object": "event",
+  "api_version": "2026-08-26.dahlia",
+  "created": 1790856100,
+  "livemode": false,
+  "pending_webhooks": 1,
+  "request": { "id": null, "idempotency_key": null },
+  "type": "invoice.paid",
+  "data": {
+    "object": {
+      "id": "in_TestFirstMonth0001",
+      "object": "invoice",
+      "amount_due": 23084,
+      "amount_paid": 23084,
+      "collection_method": "charge_automatically",
+      "created": 1790856000,
+      "currency": "mxn",
+      "customer": "cus_TestDonPedro0001",
+      "hosted_invoice_url": "https://invoice.stripe.com/i/acct_test/test_inv",
+      "parent": {
+        "type": "subscription_details",
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": { "business_id": "01HZ8XQN9GZJXV8AKQ5X0C7BJZ" },
+          "subscription": "sub_1TestTrial00000000000000"
+        }
+      },
+      "status": "paid",
+      "status_transitions": {
+        "finalized_at": 1790856000,
+        "marked_uncollectible_at": null,
+        "paid_at": 1790856090,
+        "voided_at": null
+      },
+      "subtotal": 19900,
+      "total": 23084,
+      "total_taxes": [
+        {
+          "amount": 3184,
+          "tax_behavior": "exclusive",
+          "tax_rate_details": { "tax_rate": "txr_TestIva16" },
+          "taxability_reason": "standard_rated",
+          "taxable_amount": 19900,
+          "type": "tax_rate_details"
+        }
+      ]
+    }
+  }
+}
