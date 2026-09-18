@@ -53,3 +53,38 @@ export function isActive(href: string, pathname: string): boolean {
   if (href === OPERADOR_BASE) return pathname === OPERADOR_BASE;
   return pathname === href || pathname.startsWith(`${href}/`);
 }
+
+/**
+ * The header differs per screen in the design files: detail screens trade the
+ * business pill for a back link, and some show the sync state as a plain pill
+ * (Pendientes, Cierre) or not at all. Decided from the route, so the server
+ * renders the right header with no flicker.
+ */
+export interface HeaderMode {
+  readonly back?: { readonly label: string; readonly title: string; readonly href: string };
+  /** `full`: sync link + bell · `static`: sync pill only, not a link · `none`. */
+  readonly status: 'full' | 'static' | 'none';
+}
+
+const back = (label: string, title: string, slug: string) => ({
+  label,
+  title,
+  href: slug ? `${OPERADOR_BASE}/${slug}` : OPERADOR_BASE,
+});
+
+export function headerFor(pathname: string): HeaderMode {
+  const rest = pathname.slice(OPERADOR_BASE.length + 1).split('/');
+  const [first = '', second] = rest;
+  if (first === 'avisos') return { back: back('Inicio', 'Volver al inicio', ''), status: 'none' };
+  if (first === 'pendientes') {
+    return { back: back('Volver a la caja', 'Volver a la caja', 'caja'), status: 'static' };
+  }
+  if (first === 'ventas' && second) {
+    return { back: back('Ventas del turno', 'Volver a ventas', 'ventas'), status: 'none' };
+  }
+  if (first === 'cobranza' && second) {
+    return { back: back('Cobranza', 'Volver a cobranza', 'cobranza'), status: 'none' };
+  }
+  if (first === 'cierre') return { status: 'static' };
+  return { status: 'full' };
+}

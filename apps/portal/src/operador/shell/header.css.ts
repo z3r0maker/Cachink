@@ -77,21 +77,22 @@ export const right = style({
   flexWrap: 'wrap',
 });
 
-export const syncPill = style([
-  pressable,
-  {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: 9,
-    padding: '7px 14px',
-    border: `2px solid ${colors.black}`,
-    borderRadius: shapeRadii.pill,
-    color: colors.black,
-    textDecoration: 'none',
-    background: colors.greenSoft,
-    selectors: { '&[data-offline]': { background: colors.warningSoft } },
-  },
-]);
+/** Shared by the linked pill (main screens) and the static one (Pendientes, Cierre). */
+export const syncBase = {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: 9,
+  padding: '7px 14px',
+  border: `2px solid ${colors.black}`,
+  borderRadius: shapeRadii.pill,
+  color: colors.black,
+  textDecoration: 'none',
+  background: colors.greenSoft,
+  selectors: { '&[data-offline]': { background: colors.warningSoft } },
+} as const;
+
+export const syncPill = style([pressable, syncBase]);
+export const syncStatic = style(syncBase);
 
 export const syncDot = style({
   ...contentBox,
@@ -169,5 +170,24 @@ export const action = style([
     color: colors.black,
     textDecoration: 'none',
     selectors: { '&:hover': { background: colors.yellowDeep } },
+  },
+]);
+
+/** A white header action (Avisos' «Marcar todo como leído»): a native button, 44 px. */
+export const plainAction = style([
+  pressable,
+  {
+    height: 44,
+    padding: '0 16px',
+    border: `2px solid ${colors.black}`,
+    borderRadius: radii[3],
+    background: colors.white,
+    boxShadow: shadows.small,
+    fontFamily: 'inherit',
+    fontSize: portalFontSizes.xs,
+    fontWeight: typography.weights.bold,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: colors.black,
   },
 ]);

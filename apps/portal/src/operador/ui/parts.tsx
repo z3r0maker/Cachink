@@ -5,11 +5,24 @@ import Link from 'next/link';
 import { Icon } from '../../shell/icon';
 import * as u from './ui.css';
 
-/** The screen's `<main>` and its 1760 px column. `top` is the file's top padding. */
-export function OpMain({ top, children }: { readonly top: 22 | 24; readonly children: ReactNode }) {
+/**
+ * The screen's `<main>` and its column: 1760 px on list screens, 1100 on the
+ * reading screens (Avisos, Pendientes, details). `top` is the file's top padding.
+ */
+export function OpMain({
+  top,
+  narrow = false,
+  children,
+}: {
+  readonly top: 22 | 24;
+  readonly narrow?: boolean;
+  readonly children: ReactNode;
+}) {
   return (
     <main className={`${u.main[top === 22 ? 'top22' : 'top24']} ${u.mainPhone}`}>
-      <div className={u.stack}>{children}</div>
+      <div className={u.stack} style={narrow ? { maxWidth: 1100 } : undefined}>
+        {children}
+      </div>
     </main>
   );
 }

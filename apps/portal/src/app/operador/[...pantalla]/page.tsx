@@ -10,7 +10,6 @@ const PENDING = new Set([
   'gastos',
   'inventario',
   'cobranza',
-  'avisos',
   'pendientes',
   'cierre',
 ]);

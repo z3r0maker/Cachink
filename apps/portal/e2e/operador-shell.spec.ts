@@ -25,6 +25,7 @@ test('the header links the sync pill and the bell to their screens', async ({ pa
   await page.goto('/operador/turno');
   await page.getByTitle('Ver registros pendientes').click();
   await expect(page).toHaveURL(/\/operador\/pendientes$/);
+  await page.goto('/operador/turno');
   await page.getByRole('link', { name: /^Avisos · \d+ sin leer$/ }).click();
   await expect(page).toHaveURL(/\/operador\/avisos$/);
 });

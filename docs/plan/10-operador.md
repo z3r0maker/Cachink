@@ -188,13 +188,41 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-16 Operador · Avisos
 
-- [ ] Status · **Blocked by:** O-11, C-19
+- [x] Status · **Blocked by:** O-11, C-19
+  - Done: 2026-09-17 · `src/operador/avisos/`, `/operador/avisos`. Harness comparison — both tabs,
+    loading, empty, error, 375 px and the header — 0 differences but the agreed radius. The shell
+    header now takes its per-route variant from `headerFor()` (back link on detail screens; sync
+    pill static on Pendientes/Cierre; no status on Avisos and the details), server-rendered.
+    Read marks and replies are device-local until C-19. Shared `Toast` in `src/operador/ui`.
+    Playwright: `e2e/operador-avisos.spec.ts`.
 - **States:** De Pedro · De tu caja · respuesta al corte · leído · four data states.
 
 **Fase 10 gate:** two operators alternate on the same register without losing the ticket, and the
 turno does not open without a fondo.
 
 ---
+
+## 4b. Upstream design amendments (Claude Design first, then pull — ADR-058)
+
+Collected while building fase 10; none is edited in `design-reference/`.
+
+1. **Acceso** (ADR-072): 8 code boxes instead of 6; a text input (uppercased, spaces/hyphens
+   ignored) instead of the numeric keypad; an example code from the contract alphabet
+   (`K7M3 DQ9P`), not `TD4 91K`. Blocks O-12.
+2. **Radii 15 and 17 → 16** (ADR-076): `Operador Estado` (62 px tile), Inicio and Detalle de
+   cliente (52 px tiles), Revisión de caja.
+3. **Turno / Cierre** divider: document `yellowRule` (#DBB80A) instead of `rgba(13,13,13,0.15)`
+   (ADR-077).
+4. **Shell consistency:** the files disagree on the sidebar footer (lock + «Cerrar turno» only in
+   Caja) and on the bell (only Inicio). Code follows the README on main screens; the files should
+   match it.
+5. **Inicio «Para hoy»:** the README promises «Hoy no» on each row; the file has none.
+6. **Turno «Pendientes de registrar» at 760–1000 px:** the row squeezes the expense name to zero
+   width (same in the file). Needs a wrap rule.
+7. **Undesigned copy** (left blank in code, never invented): Inicio/Turno first KPI with zero or
+   several cancellations; Inicio «Cerró» for a last turno that did not balance; Turno «Gastos» hint
+   with zero or several receipts. Invented and awaiting wording: «Vence en N días» (dues beyond
+   tomorrow).
 
 ## 5. Fases 11–13 (tasks written when fase 10 closes)
 
