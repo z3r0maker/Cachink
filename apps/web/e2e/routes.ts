@@ -89,6 +89,7 @@ export const ROUTES: readonly Route[] = [
   {
     path: '/suscripcion',
     heading: 'Suscripción',
-    data: { kind: 'fixture', reason: 'reads no database — suscripcion/page.tsx' },
+    // The seeded Xangarro subscription (seed-billing.ts), as the phones receive it.
+    data: { kind: 'db', sentinel: 'Tus teléfonos reciben el plan Xangarro' },
   },
 ];

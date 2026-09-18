@@ -906,8 +906,17 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     The limits come from `PLAN_LIMITS`, not from a second copy in the portal.
   - The "Asesor en cada plan" block renders as its own section, separate from the plan feature
     lists, exactly as the design does — which is the distinction ADR-059's `capabilities` encodes.
-  - **Still to do:** Stripe Customer Portal links (B-10), "Solicitar factura" → `factura_requests`,
-    the grace/past-due status copy, and the entitlement debug line.
+  - 2026-09-18 · **Wired to billing.** The status line comes from the stored Stripe subscription
+    (`estadoCopy`: free / trialing / active / past_due with its 7-day grace / lapsed, 4 tests;
+    problems render as a warning banner). Owner only: «Administrar pago» and «Cambiar a Xangarrito»
+    open the Customer Portal, a plan card's CTA opens Checkout (`iniciarPrueba`), «Cambiar plan»
+    jumps to the cards; admins and viewers see no billing buttons. **Consumo was fixture numbers**
+    (2 / 340 / 2) — now active operators, linked devices and the metering counter («—» until
+    computed). The entitlement debug line names the plan the phones receive and until when. e2e:
+    owner view against the seed; a past-due throwaway tenant seen by a viewer.
+  - **Still to do:** the «Facturas» list replacing «Solicitar factura» (`factura_requests` is dropped
+    — N-33 invoices every payment): Timbrada → PDF/XML, En factura global → «Solicitar factura a mi
+    nombre», Pendiente → emailed; waits on the billing track's `facturasDelNegocio` (0019).
 - **Amended 2026-09-17 (ADR-059):** plan names and the Asesor block.
 - **Steps:** **Tu plan** on flat `--yellow` (name at 44 px, price, "Siguiente cobro", owner-only
   "Cambiar plan" / "Administrar pago"). **Tu consumo este mes** — **only capped allowances render a

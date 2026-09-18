@@ -3,6 +3,9 @@ import { colors } from '@xangarro/tokens';
 import { Button } from '@/components';
 import { eyebrow, planLabel } from '@/styles/text.css';
 import type { PlanCard as PlanCardData } from '@/fixtures/planes';
+import type { BillingActionResult } from '@/server/billing/actions';
+
+import { BotonStripe } from './acciones';
 
 import {
   featureMark,
@@ -67,12 +70,35 @@ function Price({
   );
 }
 
+type Accion = (() => Promise<BillingActionResult>) | null;
+
+/** The current plan is inert and not sold back; others open Stripe for the owner only. */
+function Cta(props: {
+  readonly plan: PlanCardData;
+  readonly current: boolean;
+  readonly accion: Accion;
+}) {
+  const variant = props.plan.emphasis ? 'primary' : 'secondary';
+  if (props.current) {
+    return (
+      <Button full variant={variant} disabled style={{ opacity: 0.55, cursor: 'default' }}>
+        Este es tu plan
+      </Button>
+    );
+  }
+  if (props.accion === null) return null;
+  return <BotonStripe full label={props.plan.cta} variant={variant} accion={props.accion} />;
+}
+
 export function PlanCard({
   plan,
   current,
+  accion,
 }: {
   readonly plan: PlanCardData;
   readonly current: boolean;
+  /** The owner's way to switch to this plan; null for the current plan and for non-owners. */
+  readonly accion: Accion;
 }) {
   const dark = plan.emphasis;
   const body = dark ? colors.gray200 : colors.textMuted;
@@ -89,14 +115,7 @@ export function PlanCard({
       </p>
       <Price plan={plan} dark={dark} body={body} />
       <div style={{ marginTop: 22 }}>
-        <Button
-          full
-          variant={dark ? 'primary' : 'secondary'}
-          disabled={current}
-          style={current ? { opacity: 0.55, cursor: 'default' } : undefined}
-        >
-          {current ? 'Este es tu plan' : plan.cta}
-        </Button>
+        <Cta plan={plan} current={current} accion={accion} />
       </div>
       <div
         className={eyebrow}
