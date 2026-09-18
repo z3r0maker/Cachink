@@ -46,3 +46,5 @@ export * from './retirar-caja/index.js';
 export * from './cancelar-venta/index.js';
 // Phase 18 — Conversion
 export * from './ejecutar-conversion/index.js';
+// Track N — signup + "Platícanos de ti" (P-03, N-12 … N-15)
+export * from './onboarding/index.js';

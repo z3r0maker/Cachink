@@ -177,6 +177,7 @@ describe('cloud ↔ device schema drift', () => {
     assert.deepEqual(portalOnly.sort(), [
       'activation_codes',
       'business_members',
+      'business_onboarding',
       'devices',
       'metas',
       'notices',
