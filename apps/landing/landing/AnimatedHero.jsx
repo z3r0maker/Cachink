@@ -8,7 +8,6 @@
    Times in ms; each step handled by a tiny scheduler. */
 
 import { useState, useEffect, useRef } from 'react';
-import { LandingPhoneFrame } from './PhoneScreens.jsx';
 
 const initialRows = [
   { t: 'Pan dulce × 6', h: '07:42', tg: 'Producto', m: 'Efectivo', a: 186.0, pos: true },

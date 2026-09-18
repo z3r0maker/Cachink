@@ -1,5 +1,3 @@
-import { buildArticleSchema } from '../structured-data.js';
-
 const articles = [
   {
     slug: 'sin-excel',

@@ -7,7 +7,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { LandingPhoneFrame } from './PhoneScreens.jsx';
 import { AnimatedOperativo } from './AnimatedHero.jsx';
-import { Parallax, useMotionOn } from './Motion.jsx';
+import { Parallax } from './Motion.jsx';
 import { useViewport } from './Viewport.jsx';
 import { TONE_COPY, Eyebrow, HardBtn, HardCard, StoreBadge } from './copy.jsx';
 
@@ -152,7 +152,7 @@ function MobileMenu({ links, onClose, onWaitlist, triggerRef }) {
             size="lg"
             onClick={() => {
               onClose();
-              onWaitlist && onWaitlist();
+              onWaitlist?.();
             }}
           >
             Unirme a la lista →
