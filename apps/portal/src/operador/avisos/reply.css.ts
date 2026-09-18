@@ -11,52 +11,7 @@ import {
 
 import { pressable } from '../../styles/press.css';
 
-/** The tabs, the in-place reply to the corte, and the in-list empty card. */
-export const tabs = style({
-  display: 'inline-flex',
-  alignSelf: 'flex-start',
-  overflow: 'hidden',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[4],
-  background: colors.white,
-  boxShadow: shadows.card,
-});
-
-export const tab = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: 10,
-  height: 50,
-  padding: '0 20px',
-  border: 'none',
-  borderLeft: `2px solid ${colors.black}`,
-  background: colors.white,
-  cursor: 'pointer',
-  fontFamily: 'inherit',
-  fontSize: portalFontSizes.sm,
-  fontWeight: typography.weights.extraBold,
-  letterSpacing: typography.letterSpacing.wide,
-  textTransform: 'uppercase',
-  color: colors.black,
-  selectors: {
-    '&:first-child': { borderLeft: 'none' },
-    '&[aria-selected="true"]': { background: colors.yellow },
-  },
-});
-
-export const tabCount = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  padding: '1px 9px',
-  border: `2px solid ${colors.black}`,
-  borderRadius: shapeRadii.pill,
-  background: colors.gray100,
-  fontSize: portalFontSizes.xs,
-  fontWeight: typography.weights.bold,
-  fontVariantNumeric: 'tabular-nums',
-  selectors: { '[aria-selected="true"] &': { background: colors.white } },
-});
-
+/** The in-place reply to the corte, and the in-list empty card. */
 export const replied = style({
   padding: '14px 16px',
   border: `2px solid ${colors.black}`,

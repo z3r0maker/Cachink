@@ -12,9 +12,11 @@ export function SearchBox(p: {
   readonly placeholder: string;
   readonly value: string;
   readonly onChange: (v: string) => void;
+  /** 240 px in most files; Inventario's shares its row with tabs and buttons (220). */
+  readonly minWidth?: 220 | 240;
 }) {
   return (
-    <div className={f.search}>
+    <div className={f.search} style={p.minWidth ? { minWidth: p.minWidth } : undefined}>
       <span style={{ color: colors.gray600, display: 'grid' }}>
         <Icon path={SEARCH} size={18} strokeWidth={2.4} />
       </span>

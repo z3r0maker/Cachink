@@ -72,6 +72,24 @@ jobs:
       - name: Format check
         run: pnpm format:check
 
+  # The Supabase edge functions run on Deno, so Deno checks them (ADR-080). The
+  # repo's ESLint, tsc and Vitest also cover them (F-10); this is the runtime's
+  # own view — its real Supabase types and its lint rules.
+  edge-functions:
+    name: edge-functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: deno check + lint (bug-report)
+        working-directory: supabase/functions/bug-report
+        run: deno check index.ts && deno lint
+
   # Integration tests against a real Postgres.
   #
   # The service container owns the lifecycle (its `pg_isready` health gate

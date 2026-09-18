@@ -5515,3 +5515,41 @@ through SECURITY DEFINER functions with a pinned `search_path` (as 0002).
 - Hosted Supabase (B-03): the definer functions must be owned by a role that
   bypasses RLS (audit DB-RLS-03), and the Data API must not accept these
   tokens (SEC-DATA-01).
+
+---
+
+## ADR-080
+
+**Title:** Five owner decisions: own auth with emailed links, portal-only code issuance, portal-only feature flags, Deno in CI, portal creates products
+
+**Date:** 2026-09-18
+
+**Status:** Accepted — decided by the owner; amends B-11, B-16, P-02, P-07, P-15, F-10 and the phone's flag toggle (A-12)
+
+**Decision**
+
+1. **Auth stays ours.** The portal keeps its own password login and
+   server-side sessions (ADR-079). Magic links and password resets are
+   one-time, single-use, short-lived tokens sent by email (B-14), stored hashed
+   like sessions. Supabase Auth (GoTrue) is not adopted, which retires the
+   "provider undecided" note in P-02 and ADR-061. This unblocks B-16's
+   "resend magic link".
+2. **Activation codes come only from the portal** («Generar código»). No SQL or
+   Studio issuer (B-11's Studio item is dropped), so the alphabet has one
+   source: `ACTIVATION_CODE_REGEX` in the contract.
+3. **Feature flags are set only in the portal** (Negocio → Funciones, P-15).
+   `businesses` is DOWN; a phone-side toggle changed that one phone and nothing
+   else. The phone shows flags read-only; its toggle is removed (Track A, with
+   A-12), as ADR-072 did for PINs.
+4. **The edge function is checked by Deno itself.** `deno check` runs in CI (the
+   official setup-deno action) alongside the ESLint/tsc/Vitest checks F-10 added.
+5. **The portal may create products** (P-07's «Nuevo producto» and Excel
+   import). Products stay HYBRID for phones — insert up, edits down — and a
+   product created in the portal reaches every phone through `sync_log`. ULIDs
+   make portal/phone ids collision-free.
+
+**Consequences**
+
+- B-14 (transactional email) now carries the sign-in link and reset templates.
+- ADR-061's provider-neutrality note is settled in favour of our own issuer; the
+  Supabase claim shape stays, because RLS reads it.

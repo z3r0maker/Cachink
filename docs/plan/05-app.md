@@ -121,6 +121,9 @@
 
 ### A-12 Settings becomes device-only + "Cuenta"
 
+> **Amended 2026-09-18 (ADR-080):** feature flags are portal-only. Remove the phone's flag toggle
+> (`use-toggle-feature-flag`); show the pulled flags read-only.
+
 - [ ] Status · **Blocked by:** A-01, A-04, A-07
 - **Files:** `packages/ui/src/screens/Settings/*`.
 - **Steps:** sections: **Cuenta** (business name read-only, plan badge, "Administra tu negocio en app.xangarro.mx" text, device name, "Desvincular este dispositivo" → clears identity, keeps data, back to activation), **Sincronización** (status, Actualizar, No enviados), **Dispositivo** (sonido, notificaciones, crash reporting, reportar un problema), **Datos** (Exportar datos — keep `exportar-datos-action.tsx`; note it covers the last 90 days). Remove everything else (already archived in A-01).

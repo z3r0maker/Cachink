@@ -319,6 +319,9 @@ not move a pixel between routes.
 
 ### P-02 Auth pages + membership guard + business switcher wiring
 
+> **Amended 2026-09-18 (ADR-080):** the provider is decided — our own login (ADR-079) plus emailed
+> sign-in/reset links (B-14). No GoTrue.
+
 - [~] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
   - 2026-09-17 · Sign-in/out, signed session, membership guard, 11 routes gated, forged cookie refused, identical message for wrong password and unknown address. `SESSION` fixture replaced in 19 files by a provider seeded from the server. **Still to do:** magic link, business switcher, the four-scene login animation, and the provider decision (ADR-061).
 - **Amended 2026-09-17:** copy and layout now come from _Acceso y onboarding_.
@@ -511,6 +514,9 @@ without touching code.
   correct types; viewer can export; drawer closes on backdrop, button and **Escape**; four states.
 
 ### P-07 Productos + Excel import
+
+> **Amended 2026-09-18 (ADR-080):** the portal may create products («Nuevo producto» and the Excel
+> import); they reach phones through `sync_log`. Phones still only insert them (HYBRID).
 
 > **Amended 2026-09-17 by Track N:** the import steps are generalised into a template registry with Clientes and Saldos iniciales (N-16, N-17) and a free-tier 50-product cap (N-04).
 
