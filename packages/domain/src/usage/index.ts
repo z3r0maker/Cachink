@@ -20,7 +20,7 @@ export {
 } from './usage-period.js';
 export { usageLimitsOf } from './plan-limits.js';
 export { computeUsage } from './compute-usage.js';
-export { assertUsageLimits } from './limits.js';
+export { assertUsageLimits, limitFor } from './limits.js';
 export {
   USAGE_MESSAGE_CODES,
   THRESHOLD_MESSAGE_CODE,
