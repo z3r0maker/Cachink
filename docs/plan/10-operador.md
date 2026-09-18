@@ -222,7 +222,9 @@ records, and the owner screens drawn with owner components (Cortes: tabs, per-co
 events, Avisos instead of WhatsApp, ink breadcrumb). The code follows every one of them; D2, D5 and
 D7 of ADR-083 are therefore no longer provisional.
 
-**Open (second round)** — in [10-operador-design-changes.md](10-operador-design-changes.md):
+**Second round — owner decision 2026-09-18: keep the code's versions** (capitalised hints,
+AA-safe «×0», owner-component values) until a later UX audit; the requests stay in
+[10-operador-design-changes.md](10-operador-design-changes.md) for that audit:
 
 1. **Lowercase count words.** Inicio's «dos canceladas, la última a las …» and Turno's «cuatro con
    comprobante» start a hint in lowercase (the singular cases are capitalised). Code capitalises
