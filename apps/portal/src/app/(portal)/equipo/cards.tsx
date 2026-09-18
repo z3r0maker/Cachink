@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Card, StatusPill, Tag } from '@/components';
+import { Card, PendingButton, StatusPill, Tag } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
@@ -33,8 +33,8 @@ export function PairingPanel() {
         ))}
       </div>
       <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <Button variant="dark">Generar otro</Button>
-        <Button variant="secondary">Enviar por correo</Button>
+        <PendingButton reason="Falta el alta de dispositivos (B-11).">Generar otro</PendingButton>
+        <PendingButton reason="Falta el envío de correo (B-14).">Enviar por correo</PendingButton>
       </div>
     </Card>
   );

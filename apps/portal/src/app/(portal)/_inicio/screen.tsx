@@ -1,6 +1,6 @@
 'use client';
 
-import { Banner, Button, ScreenBody } from '@/components';
+import { Banner, Button, ScreenBody, ExportButton } from '@/components';
 import type { InicioData } from '@/server/inicio';
 import { canWrite, resolveScreenState } from '@/session/gating';
 import type { Role } from '@/session/types';
@@ -24,7 +24,7 @@ function PageHeading({ mayWrite }: { readonly mayWrite: boolean }) {
       </div>
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
-          <Button variant="secondary">Exportar</Button>
+          <ExportButton dataset="ventas" />
         </div>
       ) : null}
     </div>

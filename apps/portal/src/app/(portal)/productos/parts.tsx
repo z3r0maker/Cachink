@@ -2,7 +2,16 @@
 
 import { formatMoney } from '@xangarro/domain';
 
-import { Banner, Button, DataTable, FilterChip, KpiCard, kpiGrid } from '@/components';
+import {
+  Banner,
+  Button,
+  DataTable,
+  ExportButton,
+  FilterChip,
+  KpiCard,
+  PendingButton,
+  kpiGrid,
+} from '@/components';
 import type { ProductosData } from '@/server/screens';
 
 import { catalogoColumns, MOV_COLUMNS } from './columns';
@@ -23,8 +32,13 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
       </div>
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
-          <Button variant="secondary">Importar desde Excel</Button>
-          <Button>Nuevo producto</Button>
+          <ExportButton dataset="productos" />
+          <PendingButton
+            variant="primary"
+            reason="Los productos se crean en el dispositivo; el portal los corrige (ADR-058 §2)."
+          >
+            Nuevo producto
+          </PendingButton>
         </div>
       ) : null}
     </div>

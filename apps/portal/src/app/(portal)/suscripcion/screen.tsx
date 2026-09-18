@@ -2,7 +2,7 @@
 
 import { PLAN_LIMITS } from '@xangarro/domain';
 
-import { Button, Card, ScreenBody, UsageBar } from '@/components';
+import { Card, PendingButton, ScreenBody, UsageBar } from '@/components';
 import { useSession } from '@/session/provider';
 import { ASESOR_TIERS, INVOICES, PLAN_CARDS } from '@/fixtures/planes';
 import { isOwner, resolveScreenState } from '@/session/gating';
@@ -28,8 +28,8 @@ function CurrentPlan({ owner }: { readonly owner: boolean }) {
       <div style={{ marginTop: 14, fontWeight: 700 }}>Siguiente cobro: 01/jun/2026</div>
       {owner ? (
         <div style={{ marginTop: 20, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-          <Button variant="dark">Cambiar plan</Button>
-          <Button variant="secondary">Administrar pago</Button>
+          <PendingButton reason="Falta conectar los pagos (B-10).">Cambiar plan</PendingButton>
+          <PendingButton reason="Falta conectar los pagos (B-10).">Administrar pago</PendingButton>
         </div>
       ) : null}
     </Card>

@@ -2,7 +2,7 @@
 
 import { formatMoney } from '@xangarro/domain';
 
-import { Button, FilterChip, StatusPill, Tag, type ColumnDef } from '@/components';
+import { ExportButton, FilterChip, StatusPill, Tag, type ColumnDef } from '@/components';
 import type { MovimientosData } from '@/server/screens';
 
 import {
@@ -17,7 +17,7 @@ import {
 
 export type Row = MovimientosData[number];
 
-export function Heading() {
+export function Heading({ kind }: { readonly kind: 'ventas' | 'gastos' }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
@@ -26,7 +26,7 @@ export function Heading() {
       </div>
       <div style={{ marginLeft: 'auto' }}>
         {/* Export is open to every plan and every role, including the contador. */}
-        <Button variant="secondary">Exportar</Button>
+        <ExportButton dataset={kind} />
       </div>
     </div>
   );

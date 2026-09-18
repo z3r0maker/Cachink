@@ -124,7 +124,7 @@ export function MovimientosScreen({ initialTab, ventas, gastos }: MovimientosScr
 
   return (
     <>
-      <Heading />
+      <Heading kind={tab === 'gastos' ? 'gastos' : 'ventas'} />
       <SegmentedTabs
         ariaLabel="Movimientos"
         value={tab}

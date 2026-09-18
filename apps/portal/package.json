@@ -37,6 +37,7 @@
     "@xangarro/data-pg": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/tokens": "workspace:*",
+    "exceljs": "^4.4.0",
     "next": "^16.3.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

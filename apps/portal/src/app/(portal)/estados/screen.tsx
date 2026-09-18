@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
-import { Button, ScreenBody, SegmentedTabs } from '@/components';
+import { ScreenBody, SegmentedTabs, ExportButton } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EstadosModel } from '@/server/estados';
 import { hasStatements, resolveScreenState } from '@/session/gating';
@@ -74,7 +74,10 @@ function Heading() {
       </div>
       <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
         {/* Export is open to every plan and every role, including the contador. */}
-        <Button variant="secondary">Exportar Excel</Button>
+        {/* The statements are computed; what is exportable is the ledger
+            they are computed from, which is what the contador actually wants. */}
+        <ExportButton dataset="ventas" label="Exportar ventas" />
+        <ExportButton dataset="gastos" label="Exportar gastos" />
       </div>
     </div>
   );

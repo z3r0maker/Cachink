@@ -12,6 +12,7 @@ import {
   StatusPill,
   kpiGrid,
   type ColumnDef,
+  PendingButton,
 } from '@/components';
 import { useSession } from '@/session/provider';
 import type { SincronizacionData } from '@/server/screens';
@@ -49,7 +50,9 @@ function Heading() {
       </div>
       {isOwner(session.role) ? (
         <div style={{ marginLeft: 'auto' }}>
-          <Button>Sincronizar ahora</Button>
+          <PendingButton reason="La sincronización la inicia el dispositivo; el portal la observa.">
+            Sincronizar ahora
+          </PendingButton>
         </div>
       ) : null}
     </div>
