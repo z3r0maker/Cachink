@@ -1,7 +1,8 @@
 {
-  "name": "cachink-landing",
+  "name": "@xangarro/landing",
   "version": "1.0.0",
   "private": true,
+  "description": "Xangarro! marketing site (xangarro.mx): Vite + React, prerendered to static HTML (ADR-084).",
   "type": "module",
   "scripts": {
     "dev": "vite",
