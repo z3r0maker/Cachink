@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 
 import { ACTIVATION_CODE_REGEX } from '@xangarro/contracts';
 
-import { ALPHABET, CODE_LENGTH, mintActivationCode } from '../src/server/activation';
+import { ALPHABET, CODE_LENGTH, mintActivationCode } from '../src/lib/activation-code';
 
 /**
  * The alphabet is derived from the contract's regex rather than typed, because

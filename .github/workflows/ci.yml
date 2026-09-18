@@ -200,6 +200,14 @@ jobs:
       - name: E2E (data, a11y and shell, three viewports)
         run: pnpm --filter @xangarro/portal run test:e2e
 
+      # The contract's own conformance suite, pointed at this portal instead of
+      # the mock. It is the acceptance for `/activate`: identical assertions pass
+      # against both, or the portal does not implement the phone's contract. The
+      # concurrent-redemption test is the one that matters most — a
+      # check-then-write implementation lets one single-use code bind two phones.
+      - name: Contract conformance (/activate against the real portal)
+        run: pnpm --filter @xangarro/portal run test:conformance
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

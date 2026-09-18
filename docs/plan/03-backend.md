@@ -140,7 +140,8 @@
 
 ### B-07 `POST /api/v1/activate`
 
-- [ ] Status · **Blocked by:** C-02, C-10, B-04, B-05, B-06, B-11 · **Blocks:** A-04 (real), X-02
+- [~] Status · **Blocked by:** C-02, C-10, B-04, B-05, B-06, B-11 · **Blocks:** A-04 (real), X-02
+  - 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/portal test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. **Still to do:** device-slot enforcement (`NO_DEVICE_SLOTS`, with B-12), `BUSINESS_SUSPENDED`, and the plan comes from the fixture until B-10.
 - **Files:** `apps/portal/src/app/api/v1/activate/route.ts` (adapter) → `packages/application/src/use-cases/activate-device.ts` (logic, testable with in-memory repos in `packages/testing`).
 - **Steps:** validate with `ActivateRequest`; in one transaction with `SELECT … FOR UPDATE` on the code: check exists/not expired/not redeemed/email matches (case-insensitive) → count active devices vs plan `devices` → insert `tenant.devices` → set `redeemed_at`, `redeemed_device_id` → mint token → compute+sign entitlement → bootstrap payload (`/sync/pull?since=0` internals, reuse B-09's query). Error mapping per §3.
 - **Acceptance:** application tests: happy; expired; used; slots full; email mismatch. Conformance suite (C-10) green against the dev server incl. the **concurrent redemption** test (exactly one 200).
