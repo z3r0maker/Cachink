@@ -9,7 +9,8 @@ import {
   recurringExpenses,
   users,
 } from '@xangarro/data-pg';
-import { PLAN_LIMITS, type Entitlement } from '@xangarro/domain';
+import { computeEntitlement } from '@xangarro/application';
+import type { Entitlement } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
 
 import { PLAN_FIXTURE } from '@/fixtures/business';
@@ -98,31 +99,18 @@ export async function referenceTables(tx: Tx) {
 }
 
 /**
- * The entitlement for this business.
+ * The entitlement for this business: `computeEntitlement` over its subscription.
  *
- * The plan is still the fixture plan: plans ride in `billing.subscriptions`,
- * which has no writer until payments land (B-10). This is the one place that
- * changes when it does. Validity windows mirror the contract's reference mock.
+ * The subscription is still the fixture plan: plans ride in
+ * `billing.subscriptions`, which has no writer until payments land (B-10). This
+ * is the one place that changes when it does — the rules (grace, Q14's lapse to
+ * the free plan) are already the application's.
  */
 export function entitlementFor(businessId: string, now: Date): Entitlement {
-  const DAY = 86_400_000;
-  const plan = PLAN_FIXTURE.planId;
-  const limits = PLAN_LIMITS[plan];
-  const validUntil = now.getTime() + 30 * DAY;
-  return {
+  const periodEnd = new Date(now.getTime() + 30 * 86_400_000).toISOString();
+  return computeEntitlement(
     businessId,
-    plan,
-    limits: {
-      operators: limits.operators,
-      devices: limits.devices,
-      recordsPerMonth: limits.recordsPerMonth,
-    },
-    features: [...limits.features],
-    capabilities: { ...limits.capabilities },
-    validUntil: new Date(validUntil).toISOString(),
-    graceUntil: new Date(validUntil + 7 * DAY).toISOString(),
-    issuedAt: now.toISOString(),
-    serverTime: now.toISOString(),
-    version: 1,
-  };
+    { planId: PLAN_FIXTURE.planId, status: 'active', currentPeriodEnd: periodEnd },
+    now,
+  );
 }

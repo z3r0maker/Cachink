@@ -1,6 +1,8 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { deviceHeaders } from '@xangarro/contracts';
 import postgres from 'postgres';
+
+import { activate, freshCode } from './device-helpers';
 
 /**
  * Device slots (B-12), end to end — the task's own acceptance:
@@ -58,44 +60,6 @@ test('generating a code replaces the old one rather than adding to it', async ({
     await sql.end({ timeout: 5 });
   }
 });
-
-/**
- * Mint a code through the portal and return it — the NEW one.
- *
- * Reading the panel straight after the click returned the *previous* code
- * whenever one was already live: the element exists before the click, so
- * `getAttribute` answers immediately, before React re-renders. And that previous
- * code is exactly the one the click just expired, so activating it came back
- * 410 CODE_EXPIRED. Waiting for the label to change is what makes this return
- * the code the click produced.
- */
-async function freshCode(page: Page): Promise<string> {
-  await page.goto('/equipo');
-  await page
-    .getByRole('group', { name: 'Tu equipo' })
-    .getByRole('button', { name: /Dispositivos/ })
-    .click();
-  const panel = page.getByTestId('activation-code');
-  const before = (await panel.count()) > 0 ? await panel.getAttribute('aria-label') : null;
-
-  await page.getByRole('button', { name: /Generar (código|otro)/ }).click();
-  if (before === null) await expect(panel).toBeVisible();
-  else await expect(panel).not.toHaveAttribute('aria-label', before);
-
-  const label = await panel.getAttribute('aria-label');
-  return (label ?? '').replace('Código ', '');
-}
-
-async function activate(page: Page, code: string) {
-  return page.request.post('/api/v1/activate', {
-    headers: deviceHeaders(),
-    data: {
-      email: 'pedro@taqueria.mx',
-      code,
-      device: { name: 'Teléfono nuevo', platform: 'android', appVersion: '0.1.0', osVersion: '15' },
-    },
-  });
-}
 
 test('a full plan refuses a new phone until one is revoked', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'revokes and activates on shared rows');
@@ -172,4 +136,52 @@ test('two phones racing for the last slot: exactly one gets it', async ({ page }
 
   const [a, b] = await Promise.all([go(codes[1] as string), go(codes[2] as string)]);
   expect([a.status(), b.status()].sort()).toEqual([200, 402]);
+});
+
+/**
+ * `GET /entitlement` (B-06) for a real device, then for the same device revoked.
+ *
+ * The conformance suite covers the happy path against this server; revocation
+ * it can only check on the mock (a header scenario). Here it is the real
+ * thing: the token stays validly signed, and the `devices` row says no.
+ */
+test('the entitlement refresh honours revocation, not just the signature', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'activates on shared rows');
+
+  const CNF = '01HZ8XQN9GZJXV8AKQ5X0CNF01';
+  const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
+  const expires = new Date(Date.now() + 3_600_000).toISOString();
+  try {
+    await sql`SELECT set_config('xangarro.business_id', ${CNF}, false)`;
+    await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
+    await sql`DELETE FROM activation_codes WHERE code = 'ENTTLMN2'`;
+    await sql`
+      INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
+      VALUES ('ENTTLMN2', 'conformance@xangarro.mx', ${expires}, ${CNF}, now(), now())`;
+
+    const act = await activate(page, 'ENTTLMN2', 'conformance@xangarro.mx');
+    expect(act.status()).toBe(200);
+    const { deviceToken, deviceId } = await act.json();
+    const refresh = (token: string) =>
+      page.request.get('/api/v1/entitlement', { headers: deviceHeaders(token) });
+
+    const live = await refresh(deviceToken);
+    expect(live.status()).toBe(200);
+    expect((await live.json()).entitlement.payload.businessId).toBe(CNF);
+
+    expect((await refresh(`${deviceToken}x`)).status()).toBe(401);
+    const noProtocol = await page.request.get('/api/v1/entitlement', {
+      headers: { authorization: `Bearer ${deviceToken}` },
+    });
+    expect(noProtocol.status()).toBe(426);
+
+    await sql`UPDATE devices SET revoked_at = now() WHERE id = ${deviceId}`;
+    const revoked = await refresh(deviceToken);
+    expect(revoked.status()).toBe(401);
+    expect((await revoked.json()).error.code).toBe('DEVICE_REVOKED');
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
 });

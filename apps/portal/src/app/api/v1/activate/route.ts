@@ -1,12 +1,7 @@
-import {
-  ActivateRequestSchema,
-  encodeJson,
-  ERROR_CATALOG,
-  HEADER_PROTOCOL,
-  PROTOCOL_VERSION,
-} from '@xangarro/contracts';
+import { ActivateRequestSchema } from '@xangarro/contracts';
 
-import { activate, Refusal, type ActivateErrorCode } from '@/server/device/activate';
+import { fail, ok, protocolRefusal } from '@/server/api/respond';
+import { activate, Refusal } from '@/server/device/activate';
 
 /**
  * `POST /api/v1/activate` — a phone joins a business (contract §3).
@@ -22,17 +17,9 @@ import { activate, Refusal, type ActivateErrorCode } from '@/server/device/activ
  * phone's contract.
  */
 
-function fail(code: ActivateErrorCode, message: string): Response {
-  return new Response(encodeJson({ error: { code, message } }), {
-    status: ERROR_CATALOG[code].httpStatus,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-
 export async function POST(request: Request): Promise<Response> {
-  if (request.headers.get(HEADER_PROTOCOL) !== String(PROTOCOL_VERSION)) {
-    return fail('PROTOCOL_UNSUPPORTED', `Send ${HEADER_PROTOCOL}: ${PROTOCOL_VERSION}`);
-  }
+  const refusal = protocolRefusal(request);
+  if (refusal !== null) return refusal;
 
   const parsed = ActivateRequestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {
@@ -40,11 +27,7 @@ export async function POST(request: Request): Promise<Response> {
   }
 
   try {
-    const body = await activate(parsed.data);
-    return new Response(encodeJson(body), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' },
-    });
+    return ok(await activate(parsed.data));
   } catch (error) {
     if (error instanceof Refusal) return fail(error.code, error.code);
     console.error('[activate]', error);

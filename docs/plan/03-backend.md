@@ -131,7 +131,16 @@
 
 ### B-06 Entitlement signer + computation
 
-- [ ] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+- [~] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+  - 2026-09-17 · `computeEntitlement(businessId, subscription, now)` in `@xangarro/application`
+    (8 tests: active, trialing, past_due inside and past grace, lapsed/none → free plan, unknown
+    plan → `UNKNOWN_PLAN`, paid status without a period end → `MISSING_PERIOD_END`). The signer is
+    `signEntitlement` in `server/device/credentials.ts`; `tests/entitlement-signer.test.ts` pins it
+    byte-for-byte to the contract vector (shown to fail when it signs `JSON.stringify`).
+    `GET /api/v1/entitlement` passes the contract's `GET /entitlement` conformance block against
+    the real portal, and `devices.spec.ts` shows a validly signed token for a **revoked** device
+    gets `401 DEVICE_REVOKED`. **Still to do:** step 1's production keypair (an ops step, with
+    B-03), and the subscription is the fixture until B-10 writes `billing.subscriptions`.
 - **Steps:**
   1. Generate Ed25519 keypair (`node -e` with `crypto.generateKeyPairSync('ed25519')`); private → `ENTITLEMENT_PRIVATE_KEY` env; public → `apps/mobile` env `EXPO_PUBLIC_ENTITLEMENT_PUBKEY` (hand to Track A via `02-contracts.md` — append the prod public key under a "Keys" note; dev key is the mock's).
   2. `computeEntitlement(subscription, plans, now)` in `packages/application` (pure): status `active|trialing` → plan limits; `past_due|grace` → same plan with `grace_until`; `lapsed|free` → **freelancer** (Q14). `valid_until = current_period_end`, `grace_until = valid_until + 7 d`.

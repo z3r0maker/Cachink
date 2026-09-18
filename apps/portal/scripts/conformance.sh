@@ -39,11 +39,20 @@ for _ in $(seq 1 60); do
   sleep 1
 done
 
-CODES="$(DATABASE_URL="$DATABASE_URL" npx tsx scripts/conformance-codes.ts 8)"
+# One minting per suite: vitest isolates each file, so two files would both
+# start from the top of a shared list and the second would redeem spent codes.
+suite() {
+  local codes
+  codes="$(cd "$HERE" && DATABASE_URL="$DATABASE_URL" npx tsx scripts/conformance-codes.ts 8)"
+  (cd "$REPO/packages/contracts" &&
+    API_BASE="http://localhost:$PORT" \
+      CONFORMANCE_EMAIL="conformance@xangarro.mx" \
+      CONFORMANCE_CODES="$codes" \
+      ENTITLEMENT_PUBKEY="$PUB" \
+      npx vitest run "$@")
+}
 
-cd "$REPO/packages/contracts"
-API_BASE="http://localhost:$PORT" \
-  CONFORMANCE_EMAIL="conformance@xangarro.mx" \
-  CONFORMANCE_CODES="$CODES" \
-  ENTITLEMENT_PUBKEY="$PUB" \
-  npx vitest run tests/conformance/activate.test.ts
+suite tests/conformance/activate.test.ts
+# Only the /entitlement block of sync.test.ts until /sync/push and /sync/pull
+# land (B-08, B-09); then this becomes the whole file.
+suite tests/conformance/sync.test.ts -t 'GET /entitlement'

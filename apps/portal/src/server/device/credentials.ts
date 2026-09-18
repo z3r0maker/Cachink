@@ -25,6 +25,11 @@ function required(name: string): string {
   return value;
 }
 
+/** The HS256 key device tokens are signed and verified with. */
+export function deviceTokenSecret(): Uint8Array {
+  return new TextEncoder().encode(required('DEVICE_TOKEN_SECRET'));
+}
+
 /**
  * The device token (contract §2).
  *
@@ -34,7 +39,7 @@ function required(name: string): string {
  * be a year — the token is not the thing that gets revoked.
  */
 export async function mintDeviceToken(businessId: string, deviceId: string): Promise<string> {
-  const secret = new TextEncoder().encode(required('DEVICE_TOKEN_SECRET'));
+  const secret = deviceTokenSecret();
   const now = Math.floor(Date.now() / 1000);
   return new SignJWT({ business_id: businessId, device_id: deviceId, kind: 'device' })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
