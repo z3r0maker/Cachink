@@ -6,7 +6,6 @@ import { PendingScreen } from '@/operador/pending-screen';
  *  `operador/<name>/page.tsx` outranks this catch-all as each one lands. */
 const PENDING = new Set([
   'caja',
-  'turno',
   'ventas',
   'gastos',
   'inventario',

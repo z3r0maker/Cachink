@@ -177,7 +177,13 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-15 Operador · Turno
 
-- [ ] Status · **Blocked by:** O-11, O-03
+- [x] Status · **Blocked by:** O-11, O-03
+  - Done: 2026-09-17 · `src/operador/turno/`, `/operador/turno`. Harness comparison at 1440 (happy,
+    loading, empty, error) and 375 px: 115/115 elements, 0 differences but the agreed 16-vs-17
+    radius. The hero's translucent row rule became the solid `colors.yellowRule` (ADR-077,
+    question 11 — recommended option taken on «continue»). «Hoy no» is device-local state.
+    «Nueva venta» renders through the shell's `HeaderAction`. Invented copy flagged for the design
+    project: «Vence en N días» for dues beyond tomorrow. Playwright: `e2e/operador-turno.spec.ts`.
 - **States:** con datos · pendientes recurrentes · sin conexión.
 
 ### O-16 Operador · Avisos

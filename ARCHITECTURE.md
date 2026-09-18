@@ -5366,3 +5366,33 @@ uses 15 px twice and 17 px three times, values neither list contains.
 
 - The dense steps are for the operator's density; the owner portal keeps the
   original ladder unless a design file asks for 11 or 13.
+
+---
+
+## ADR-077
+
+**Title:** `yellowRule` (#DBB80A) replaces the design's translucent divider on yellow cards
+
+**Date:** 2026-09-17
+
+**Status:** Accepted — Track O (O-15, and Cierre in fase 12)
+
+**Context**
+
+The Turno and Cierre hero cards separate their breakdown rows with
+`2px solid rgba(13,13,13,0.15)`. The handoff README forbids transparency except
+the modal veil, `design-lint` rejects `rgba()` in components, and no existing
+token matches (`yellowDeep` is nearly invisible on `yellow`).
+
+**Decision**
+
+`colors.yellowRule = '#DBB80A'`: 15 % of `#0D0D0D` over `#FFD60A`, flattened.
+Pixel-identical to the design on yellow, opaque, and documented as valid only
+there.
+
+**Alternatives considered**
+
+- *A second translucent token beside `scrim`.* Faithful, but breaks the rule
+  outright and invites more.
+- *Amend the design to `yellowDeep` or black.* Changes the look; the designer's
+  call, not ours.

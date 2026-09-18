@@ -61,6 +61,10 @@ describe('rootCss', () => {
     assert.deepEqual([...radii], [8, 10, 12, 14, 16, 18, 20, 22]);
   });
 
+  it("flattens the design's 15% rule on yellow into a solid token (ADR-077)", () => {
+    assert.ok(css.includes('--yellow-rule: #DBB80A;'));
+  });
+
   it('emits only hard shadows — no blur, no rgba', () => {
     for (const [name, value] of Object.entries(shadows)) {
       assert.ok(css.includes(`${cssVarName(`shadow-${name}`)}: ${value};`));
