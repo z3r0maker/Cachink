@@ -8,9 +8,9 @@
  */
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
+import { CrearProductoUseCase } from '@xangarro/application';
 import type {
   BusinessId,
-  IsoDate,
   NewProduct,
   Product,
   ProductColor,
@@ -45,14 +45,6 @@ export interface CrearProductoInput {
 
 export type CrearProductoResult = UseMutationResult<Product, Error, CrearProductoInput, unknown>;
 
-function currentIsoDate(): IsoDate {
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}` as IsoDate;
-}
-
 function buildNewProduct(input: CrearProductoInput, biz: BusinessId): NewProduct {
   return {
     nombre: input.nombre,
@@ -81,18 +73,12 @@ export function useCrearProducto(): CrearProductoResult {
   return useAuditedMutation(MUTATION_CREAR_PRODUCTO, {
     async mutationFn(input) {
       if (!businessId) throw new Error('useCrearProducto: no current business');
-      const product = await products.create(buildNewProduct(input, businessId as BusinessId));
-      if (input.stockInicial !== undefined && input.stockInicial > 0) {
-        await movements.create({
-          productoId: product.id,
-          fecha: currentIsoDate(),
-          tipo: 'entrada',
-          cantidad: input.stockInicial,
-          costoUnitCentavos: input.costoUnit,
-          motivo: 'Ajuste de inventario',
-          businessId: businessId as BusinessId,
-        });
-      }
+      // The rules — defaults, validation, the initial-stock entrada — are the
+      // use case's, shared with the portal (P-07).
+      const product = await new CrearProductoUseCase(products, movements).execute({
+        product: buildNewProduct(input, businessId as BusinessId),
+        stockInicial: input.stockInicial,
+      });
       return product;
     },
     async onSuccess() {

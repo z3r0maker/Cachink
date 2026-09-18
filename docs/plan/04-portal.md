@@ -540,9 +540,22 @@ without touching code.
     below) and "{stock} · umbral {n}"; the movements table with type pills and signed changes.
   - **Movimientos is read-only** — "Ajustar inventario" and "Registrar movimiento" are gone,
     because `inventory_movements` is an UP table with no down path (ADR-058 §2).
-  - **Still to do:** the create/edit sheet with its five sections and the 66-icon picker, the
-    three-step Excel import, and moving `ICON_CATEGORIES` into `@xangarro/domain` so both clients
-    consume one list.
+  - 2026-09-18 · **«Nuevo producto» works end to end**: the sheet's five sections (Básico, Uso,
+    Precio with a live margin chip, Inventario, Apariencia with 8 tints, the 66-icon picker in 7 tabs
+    and a live tile preview) run `CrearProductoUseCase` — lifted out of the phone's UI hook so both
+    clients share it. The product reaches every phone at zero stock (e2e). `ICON_CATEGORIES` moved to
+    `@xangarro/domain` (a test pins 66 icons / 7 tabs / each once) and the tints to
+    `@xangarro/tokens`, each checked against the domain enum at compile time.
+  - 2026-09-18 · **Excel import works end to end**: template download (headers are the parser's
+    own `TEMPLATE_HEADERS`; no `stock_inicial`), dry-run preview (Nuevo / Actualizar / Sin cambios /
+    Error with reasons, "Mostrar solo errores", "Descargar errores" as CSV), and a commit that
+    re-reads the file on the server and applies every valid row in one transaction through the same
+    create/edit use cases. An update may not change cost (ADR-023) or stock tracking
+    (`ProductPatch`), so those differences are row errors, never silently dropped. Parser and planner
+    are pure and unit-tested (valid, missing header, bad number, duplicate SKU, > 5 000 rows,
+    unchanged row); e2e imports 3 → 3 products, a one-price re-import previews exactly 1 update, and
+    the contador (viewer) sees no create, import, edit or movement control.
+  - **Still to do:** the full edit sheet (edit is name-only) and the archive confirm.
 - **Amended 2026-09-17 (ADR-058 §2):** tabs are **Catálogo / Movimientos**; no "Ajustar inventario",
   no "Registrar movimiento". Movimientos is read-only.
 - **Steps:** Low-stock banner (`--red-soft`) whose "Ver stock bajo" **applies the filter**. KPIs —

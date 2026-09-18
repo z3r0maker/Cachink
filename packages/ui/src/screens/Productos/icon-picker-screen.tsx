@@ -13,7 +13,7 @@ import { Btn, Icon } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import type { IconName } from '../../components/Icon/icon.shared';
 import { colors, fontSizes, typography } from '../../theme';
-import { ICON_CATEGORIES, type IconCategory } from './icon-picker-data';
+import { ICON_CATEGORIES, type IconCategory } from '@xangarro/domain';
 
 export interface IconPickerScreenProps {
   readonly selectedIcon: ProductIcon | null;

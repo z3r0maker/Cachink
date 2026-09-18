@@ -90,3 +90,32 @@ test('a movement pushed by one phone reaches the other', async ({ request }) => 
   expect(pushed.accepted).toHaveLength(1);
   expect(ids(await pull(request, b, cursor))).toContain(row.id);
 });
+
+test('a product created in the portal reaches the phones, at zero stock', async ({
+  page,
+  request,
+}) => {
+  const cursor = (await pull(request, b, b.cursor)).serverSeq;
+  const nombre = `Agua de jamaica ${Date.now()}`;
+  await page.goto('/productos');
+  await page.getByRole('button', { name: 'Nuevo producto' }).click();
+  await page.getByTestId('nuevo-nombre').fill(nombre);
+  await page.getByTestId('nuevo-costo').fill('6.10');
+  await page.getByTestId('nuevo-precio').fill('20');
+  await expect(page.getByTestId('nuevo-margen')).toContainText('Margen 69%');
+  await page.getByRole('radio', { name: 'Verde' }).click();
+  await page.getByRole('button', { name: 'Crear producto' }).click();
+  await expect(page.locator('main').getByText(nombre)).toBeVisible();
+
+  const got = await pull(request, b, cursor);
+  const [p] = got.tables.products;
+  expect(p).toMatchObject({
+    nombre,
+    costoUnitCentavos: '610',
+    precioVentaCentavos: '2000',
+    colorFondo: 'green',
+  });
+  expect(
+    got.tables.inventory_movements.filter((m: { productoId: string }) => m.productoId === p.id),
+  ).toEqual([]);
+});

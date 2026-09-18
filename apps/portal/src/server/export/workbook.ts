@@ -22,7 +22,7 @@ export interface Column<T> {
   readonly width?: number;
 }
 
-async function loadExcelJs(): Promise<typeof ExcelJS> {
+export async function loadExcelJs(): Promise<typeof ExcelJS> {
   const mod = await import('exceljs');
   const candidate = (mod as unknown as { default?: typeof ExcelJS }).default ?? mod;
   return candidate as typeof ExcelJS;
