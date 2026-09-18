@@ -10,8 +10,7 @@
  * operators and do not spend the plan's operator allowance.
  */
 
-import { randomBytes } from 'node:crypto';
-import { hash } from 'bcryptjs';
+import { genSalt, hash } from 'bcryptjs';
 import {
   DuplicateOperatorError,
   InvalidPinError,
@@ -71,9 +70,11 @@ export class CrearOperadorUseCase implements UseCase<CrearOperadorInput, User> {
     // Operators never use password recovery — the portal resets their PIN
     // instead — but the column is NOT NULL until ADR-058 §4 drops it. A hash of
     // random bytes nobody knows is honestly unusable, unlike a guessable default.
+    // `genSalt` supplies those bytes from the platform's CSPRNG; `node:crypto`
+    // would tie this shared package to Node (it also runs on phone and browser).
     const [pinHash, recoveryPasswordHash] = await Promise.all([
       hash(input.pin, BCRYPT_ROUNDS),
-      hash(randomBytes(32).toString('hex'), BCRYPT_ROUNDS),
+      genSalt(BCRYPT_ROUNDS).then((secret) => hash(secret, BCRYPT_ROUNDS)),
     ]);
     return this.#users.create({
       nombre,
