@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import type { Route } from 'next';
 import { notFound } from 'next/navigation';
 import type { StaffMemberId, SupportItem } from '@xangarro/domain';
 
@@ -36,8 +37,13 @@ function Facts({ item, me }: { readonly item: SupportItem; readonly me: StaffMem
   return (
     <dl className={facts}>
       <dt className={label}>Negocio</dt>
-      {/* The tenant page arrives with N-06; until then, the id to search for. */}
-      <dd>{item.businessId ?? '—'}</dd>
+      <dd>
+        {item.businessId ? (
+          <Link href={`/tenants/${item.businessId}` as Route}>{item.businessId}</Link>
+        ) : (
+          '—'
+        )}
+      </dd>
       <dt className={label}>Responsable</dt>
       <dd>{owner}</dd>
       <dt className={label}>Origen</dt>

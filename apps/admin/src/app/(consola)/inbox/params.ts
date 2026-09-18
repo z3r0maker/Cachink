@@ -8,12 +8,10 @@ import {
 
 import { SAVED_FILTERS, type ListInput, type SavedFilter } from '@/server/inbox/list';
 
-/**
- * The inbox's URL is its state: `?tipo=&estado=&urgente=1&mias=1&negocio=&filtro=&cursor=`.
- * Unknown values are ignored rather than rejected — a hand-edited URL shows
- * the unfiltered inbox, not an error.
- */
-export type SearchParams = Readonly<Record<string, string | string[] | undefined>>;
+import { one, oneOf, type SearchParams } from '../search-params';
+
+/** The inbox's URL is its state: `?tipo=&estado=&urgente=1&mias=1&negocio=&filtro=&cursor=`. */
+export type { SearchParams };
 
 export interface InboxView {
   readonly tipo: SupportKind | null;
@@ -22,16 +20,6 @@ export interface InboxView {
   readonly mias: boolean;
   readonly negocio: string | null;
   readonly filtro: SavedFilter | null;
-}
-
-function one(sp: SearchParams, key: string): string | null {
-  const v = sp[key];
-  const s = Array.isArray(v) ? v[0] : v;
-  return s === undefined || s === '' ? null : s;
-}
-
-function oneOf<T extends string>(value: string | null, allowed: readonly T[]): T | null {
-  return allowed.find((a) => a === value) ?? null;
 }
 
 export function parseView(sp: SearchParams): InboxView {
