@@ -162,7 +162,16 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-14 Operador · Inicio
 
-- [ ] Status · **Blocked by:** O-11, O-03
+- [x] Status · **Blocked by:** O-11, O-03
+  - Done: 2026-09-17 · presentational `InicioScreen` over the design fixture (`src/operador/inicio/`),
+    shared pieces in `src/operador/ui/` (OpMain, KpiRow, ListCard, TintBox). Compared with the
+    same-origin harness (dev symlink `public/__design` + `public/__cmp.js`, both gitignored) in every
+    control-panel state — four situaciones, sin-conexion, loading, empty, error — at 1440 and
+    375 px: 96/96 elements, 0 differences except the agreed 16-vs-17 radius (ADR-076). Playwright:
+    `e2e/operador-inicio.spec.ts`. **For the design project:** (a) the README says each «Para hoy»
+    row has «Hoy no», the file has none — built as the file; (b) undesigned copy is left blank
+    rather than invented: no cancellation / several cancellations in the first KPI, and a last
+    turno that did not balance (shows the signed amount). Live data waits for O-03/O-06.
 - **States:** vendiendo · turno-cerrado · hora-de-cerrar · corte-por-aclarar · sin-conexion · four
   data states.
 

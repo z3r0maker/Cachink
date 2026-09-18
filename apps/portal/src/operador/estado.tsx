@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import { Icon } from '../shell/icon';
 import * as s from './estado.css';
@@ -22,6 +23,7 @@ export interface OperadorEstadoProps {
   /** Empty-state action; shown only when both are present. */
   readonly cta?: string;
   readonly href?: string;
+  /** Defaults to re-running the page's loader (`router.refresh()`). */
   readonly onRetry?: () => void;
 }
 
@@ -85,6 +87,7 @@ function ErrorBlock({
   readonly title?: string;
   readonly onRetry?: () => void;
 }) {
+  const router = useRouter();
   return (
     <div className={s.errorCard} role="alert">
       <div className={s.tileError} aria-hidden="true">
@@ -107,7 +110,7 @@ function ErrorBlock({
         Lo que capturaste no se pierde: sigue guardado en este dispositivo. Vuelve a intentar en un
         momento.
       </div>
-      <button type="button" className={s.actionWhite} onClick={onRetry}>
+      <button type="button" className={s.actionWhite} onClick={onRetry ?? (() => router.refresh())}>
         Reintentar
       </button>
     </div>
