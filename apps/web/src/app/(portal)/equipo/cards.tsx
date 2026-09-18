@@ -1,5 +1,6 @@
 'use client';
 
+import { formatFechaHora } from '@xangarro/domain';
 import { useState } from 'react';
 
 import { Card, StatusPill, Tag } from '@/components';
@@ -8,6 +9,7 @@ import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
 import { OperadorActions } from './operador-actions';
+import { DispositivoDetalle } from './dispositivo-drawer';
 import { RevokeButton } from './revoke-button';
 import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
 
@@ -119,10 +121,13 @@ export function Dispositivos({
           <p className={cardFoot}>
             {d.plataforma === 'ios' ? 'iOS' : 'Android'} · {d.modelo}
           </p>
-          <p className={cardFoot}>Última sincronización: {d.lastPushAt ?? '—'}</p>
-          {mayWrite && d.revokedAt === null ? (
-            <RevokeButton deviceId={d.id} nombre={d.nombre} />
-          ) : null}
+          <p className={cardFoot}>Última sincronización: {formatFechaHora(d.lastPushAt)}</p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+            {mayWrite && d.revokedAt === null ? (
+              <RevokeButton deviceId={d.id} nombre={d.nombre} />
+            ) : null}
+            <DispositivoDetalle d={d} mayWrite={mayWrite} />
+          </div>
         </Card>
       ))}
     </div>

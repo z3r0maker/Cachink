@@ -1,3 +1,5 @@
+import { PLAN_NOMBRE } from '@xangarro/domain';
+
 import { currentSession } from '@/server/current-session';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
@@ -40,12 +42,11 @@ export default async function PortalLayout({ children }: { children: React.React
       <div className={frame}>
         <Sidebar badges={{ '/revision-caja': pendientesRevision() }} />
         <div className={column}>
-          {/* planLabel is still the fixture plan: it rides in the signed
-              entitlement (B-06), which has no issuer yet. */}
+          {/* The plan from the business's entitlement (B-10), as people name it. */}
           <Header
             current={current}
             negocios={negocios}
-            planLabel="Xangarro"
+            planLabel={PLAN_NOMBRE[session.planId]}
             pendingRows={counts.pendingRows}
             unreadNotices={counts.unreadNotices}
             userInitials={initials(session.businessName)}

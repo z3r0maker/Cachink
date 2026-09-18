@@ -13,6 +13,13 @@ export const PLAN_IDS = ['xangarrito', 'xangarro', 'xangarrote'] as const;
 export const PlanIdSchema = z.enum(PLAN_IDS);
 export type PlanId = z.infer<typeof PlanIdSchema>;
 
+/** How a plan is named to people — the header tag, receipts, upsells. */
+export const PLAN_NOMBRE: Readonly<Record<PlanId, string>> = {
+  xangarrito: 'Xangarrito',
+  xangarro: 'Xangarro',
+  xangarrote: 'Xangarrote',
+};
+
 /**
  * Plan-level capabilities that a tenant cannot toggle (ADR-059).
  *

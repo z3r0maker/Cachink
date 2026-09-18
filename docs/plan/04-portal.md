@@ -765,8 +765,14 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
   - **Platform is a text label, never an Apple or Android logo** (design handoff).
   - Revoke confirm carries the consequence, not just the question: "Revocar borra el acceso, no
     los datos ya sincronizados."
-  - **Still to do:** wiring revoke to a real device, the slots-full state, and the device drawer
-    with recent cortes.
+  - 2026-09-18 · **Slots and drawer.** «X de Y dispositivos» from `PLAN_LIMITS`; when full, the
+    pairing panel warns that a new code only works after a revoke (generation stays open: replacing
+    a phone is «code first, then revoke», and a refused activation does not burn the code, B-12).
+    «Ver detalle» opens the device drawer — platform as text, last sync on the business clock, its
+    last five cortes (`cortesDeDispositivo`, 2 DB tests) and «Desvincular» for admins. Revoke was
+    already wired to real rows. **Fixed:** the header said «Plan Xangarro» for every tenant; it now
+    names the business's plan (`PLAN_NOMBRE`). e2e on a throwaway free-plan tenant.
+  - **Still to do:** «Enviar por correo» for the code (needs B-14's `activation-code` template).
 - **Steps:** Device cards with a 44×44 platform tile, name, model, state pill, Operador, Última
   sincronización, Turno, and a `--warning-soft` strip "{n} registros esperando conexión" when queued.
   Slot counter. **Pairing panel** on flat `--yellow` (owner/admin): "Código de vinculación activo",

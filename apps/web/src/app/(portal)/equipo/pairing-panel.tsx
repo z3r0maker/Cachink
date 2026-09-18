@@ -42,7 +42,29 @@ function CodeBoxes({ code }: { readonly code: string }) {
  * Codes never contain 0, O, 1 or I — the alphabet is derived from the
  * contract's own regex, so the portal cannot mint one `/activate` would refuse.
  */
-export function PairingPanel({ initial }: { readonly initial: LiveCode | null }) {
+/**
+ * What the panel says: full, no code yet, or where to type the live one. Full
+ * still lets you generate — replacing a phone is «new code, then revoke the
+ * old one», and the refused activation does not burn the code (B-12).
+ */
+function mensaje(lleno: boolean, limit: number, live: LiveCode | null): string {
+  if (lleno) {
+    return `Tu plan incluye ${limit} dispositivos y todos están vinculados. Un código nuevo solo funcionará cuando revoques uno.`;
+  }
+  if (live === null) return 'No hay un código activo. Genera uno para vincular un teléfono.';
+  return `Escríbelo en el teléfono del operador. Vence ${remaining(live.expiresAt)}.`;
+}
+
+export function PairingPanel({
+  initial,
+  lleno,
+  limit,
+}: {
+  readonly initial: LiveCode | null;
+  /** Every device slot is in use: activation would refuse (NO_DEVICE_SLOTS). */
+  readonly lleno: boolean;
+  readonly limit: number;
+}) {
   const [live, setLive] = useState<LiveCode | null>(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -59,11 +81,7 @@ export function PairingPanel({ initial }: { readonly initial: LiveCode | null })
   return (
     <Card tone="hero" emphasis="hero">
       <strong className={panelTitle}>Código de vinculación activo</strong>
-      <p style={{ margin: '8px 0 0', fontWeight: 600 }}>
-        {live === null
-          ? 'No hay un código activo. Genera uno para vincular un teléfono.'
-          : `Escríbelo en el teléfono del operador. Vence ${remaining(live.expiresAt)}.`}
-      </p>
+      <p style={{ margin: '8px 0 0', fontWeight: 600 }}>{mensaje(lleno, limit, live)}</p>
       {live === null ? null : <CodeBoxes code={live.code} />}
       {error === null ? null : <p role="alert">{error}</p>}
       <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>

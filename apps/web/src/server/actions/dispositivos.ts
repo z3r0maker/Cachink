@@ -1,12 +1,13 @@
 'use server';
 
-import { devices } from '@xangarro/data-pg';
+import { cortesDeDispositivo, devices } from '@xangarro/data-pg';
 import { and, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
+import { readSession } from '../session';
 
 /**
  * Revoke a device (B-12).
@@ -55,5 +56,25 @@ export async function revocarDispositivo(deviceId: string): Promise<RevokeResult
         ? error.message
         : 'No pudimos revocar el dispositivo. Intenta de nuevo.';
     return { ok: false, message };
+  }
+}
+
+/**
+ * The device drawer's history (P-06): its last five cortes, read when the
+ * drawer opens. Any member may look; only admins revoke.
+ */
+export type CortesResult =
+  | { ok: true; cortes: Awaited<ReturnType<typeof cortesDeDispositivo>> }
+  | { ok: false; message: string };
+
+export async function cortesDelDispositivo(deviceId: string): Promise<CortesResult> {
+  try {
+    const session = await readSession();
+    if (session === null) return { ok: false, message: 'Inicia sesión para continuar.' };
+    const cortes = await withTenant(session.business_id, (tx) => cortesDeDispositivo(tx, deviceId));
+    return { ok: true, cortes };
+  } catch (error) {
+    reportError(error, { endpoint: 'cortesDelDispositivo' });
+    return { ok: false, message: 'No pudimos cargar sus cortes.' };
   }
 }

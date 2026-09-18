@@ -17,9 +17,12 @@ import { revocarDispositivo } from '@/server/actions/dispositivos';
 export function RevokeButton({
   deviceId,
   nombre,
+  label = 'Revocar',
 }: {
   readonly deviceId: string;
   readonly nombre: string;
+  /** «Desvincular» in the drawer, as the design names it there. */
+  readonly label?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +41,7 @@ export function RevokeButton({
   return (
     <>
       <Button size="sm" variant="secondary" onClick={() => setOpen(true)}>
-        Revocar
+        {label}
       </Button>
       <ConfirmDialog
         open={open}
