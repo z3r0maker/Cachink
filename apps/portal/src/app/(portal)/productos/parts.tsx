@@ -9,13 +9,13 @@ import {
   ExportButton,
   FilterChip,
   KpiCard,
-  PendingButton,
   kpiGrid,
 } from '@/components';
 import type { ProductosData } from '@/server/screens';
 
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
+import { NuevoProductoSheet } from './nuevo/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
 export type Movimiento = ProductosData['movimientos'][number];
@@ -33,12 +33,7 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
           <ExportButton dataset="productos" />
-          <PendingButton
-            variant="primary"
-            reason="Los productos se crean en el dispositivo; el portal los corrige (ADR-058 §2)."
-          >
-            Nuevo producto
-          </PendingButton>
+          <NuevoProductoSheet />
         </div>
       ) : null}
     </div>

@@ -1,7 +1,7 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
-import { pesosToCentavos } from '../src/lib/money';
+import { marginPercent, pesosToCentavos } from '../src/lib/money';
 
 describe('pesosToCentavos', () => {
   it('turns what a shopkeeper types into integer centavos, with no float on the way', () => {
@@ -17,5 +17,19 @@ describe('pesosToCentavos', () => {
     for (const bad of ['', 'abc', '-5', '1.234', '1e3', '.5', '5.']) {
       assert.equal(pesosToCentavos(bad), null, `"${bad}"`);
     }
+  });
+});
+
+describe('marginPercent', () => {
+  it('is the margin on the sale price, never rounded up', () => {
+    assert.equal(marginPercent('9.80', '25.00'), 60);
+    assert.equal(marginPercent('2', '3'), 33);
+    assert.equal(marginPercent('30', '25'), -20);
+  });
+
+  it('is null until both amounts parse, or when the price is zero', () => {
+    assert.equal(marginPercent('', '25'), null);
+    assert.equal(marginPercent('10', 'abc'), null);
+    assert.equal(marginPercent('10', '0'), null);
   });
 });

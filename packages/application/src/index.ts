@@ -25,6 +25,7 @@ export * from './exportar-datos/index.js';
 export * from './editar-venta/index.js';
 export * from './editar-egreso/index.js';
 export * from './editar-producto/index.js';
+export * from './crear-producto/index.js';
 export * from './find-frequent-productos/index.js';
 // Phase 1 — User Management + Auth
 export * from './crear-usuario/index.js';

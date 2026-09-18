@@ -3,9 +3,16 @@ import 'server-only';
 import { and, eq, isNull, count as sqlCount } from 'drizzle-orm';
 import { products } from '@xangarro/data-pg';
 import type { ProductPatch, ProductsRepository } from '@xangarro/data';
-import type { BusinessId, Product, ProductId } from '@xangarro/domain';
+import {
+  newUlid,
+  type BusinessId,
+  type NewProduct,
+  type Product,
+  type ProductId,
+} from '@xangarro/domain';
 
 import type { Tx } from '../db';
+import { PORTAL_DEVICE_ID } from './portal-device';
 import { recordChange } from './sync-log';
 
 /**
@@ -85,6 +92,30 @@ function reads(tx: Tx) {
 
 function writes(tx: Tx, businessId: BusinessId) {
   return {
+    /** HYBRID insert from the portal (ADR-080): logged, so every phone gets it. */
+    async create(input: NewProduct): Promise<Product> {
+      const stamp = now();
+      const [row] = await tx
+        .insert(products)
+        .values({
+          ...input,
+          sku: input.sku ?? null,
+          icono: input.icono ?? null,
+          umbralStockBajo: input.umbralStockBajo ?? 3,
+          atributos: JSON.stringify(input.atributos),
+          id: newUlid(),
+          businessId,
+          deviceId: PORTAL_DEVICE_ID,
+          createdByUserId: null,
+          createdAt: stamp,
+          updatedAt: stamp,
+          deletedAt: null,
+        })
+        .returning();
+      if (!row) throw new Error('product insert returned no row');
+      await recordChange(tx, businessId, 'products', row.id, 'insert');
+      return toDomain(row);
+    },
     async update(id: ProductId, patch: ProductPatch): Promise<Product | null> {
       const [row] = await tx
         .update(products)
@@ -103,11 +134,9 @@ function writes(tx: Tx, businessId: BusinessId) {
 }
 
 /**
- * `products` is a HYBRID table: devices insert, the portal edits, and the edit
- * flows back down (contract §8, ADR-058 §2). A product is born at the counter
- * mid-sale, so creating or deleting one here would invent a change the device
- * never agreed to. `isPushable('products', 'update')` is false for the same
- * reason, read from the other direction.
+ * `products` is HYBRID: phones and the portal insert (ADR-080), the portal
+ * edits, every write flows down. Deleting stays on the phone: a product that
+ * vanished from the portal would take its sales history's meaning with it.
  */
 const deviceOnly = (verb: string) => (): never => {
   throw new TypeError(`Los productos se ${verb} en el dispositivo, no en el portal.`);
@@ -117,7 +146,6 @@ export function pgProductsRepository(tx: Tx, businessId: BusinessId): ProductsRe
   return {
     ...reads(tx),
     ...writes(tx, businessId),
-    create: deviceOnly('crean'),
     delete: deviceOnly('eliminan'),
   };
 }

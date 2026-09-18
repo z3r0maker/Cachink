@@ -10,6 +10,7 @@
  */
 
 export { colors, type ColorToken } from './colors.js';
+export { productTints, type ProductTintKey } from './product-tints.js';
 export {
   fontSizes,
   emojiSizes,

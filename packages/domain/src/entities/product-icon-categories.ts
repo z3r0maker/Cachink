@@ -1,9 +1,9 @@
 /**
- * Icon picker constants — categories and their icons for the product
- * icon selection screen.
+ * The product icons grouped for a picker — the phone's and the portal's one
+ * list (P-07, CLAUDE.md §2.3). Moved here from `packages/ui`.
  */
 
-import type { ProductIcon } from '@xangarro/domain';
+import type { ProductIcon } from './product.js';
 
 export interface IconCategory {
   readonly key: string;
