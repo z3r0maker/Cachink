@@ -1085,8 +1085,12 @@ critical avisos cannot be switched off.
     not delivered (design plan §7).
   - **Critical avisos cannot be switched off**: those rows render an "Obligatorio" tag and
     "Siempre activo" instead of a control, rather than a switch that refuses to move.
-  - **Still to do:** persisting the channel choices, and the Compartir por WhatsApp dialog in its
-    three variants.
+  - 2026-09-18 · **Channel choices persist**, per member (the matrix is personal, so the contador
+    sets theirs too): each switch saves through `CambiarCanalAvisoUseCase` into
+    `notice_preferences` (data-pg 0017, tenant RLS). The catalogue, defaults and the
+    critical-is-always-on rule live in `@xangarro/domain/avisos`; critical rows show «Obligatorio» /
+    «Sí», never a switch, and the server refuses regardless. e2e: a switch survives a reload.
+  - **Still to do:** the Compartir por WhatsApp dialog in its three variants.
 - **Steps:** Three-column delivery matrix per notice type; the WhatsApp channel card sits in
   **«Próximamente»** (design plan §7). **Critical avisos cannot be disabled.** The Compartir dialog
   in its three variants (diagnóstico, cobranza, logro), closing on Escape.

@@ -1,12 +1,14 @@
 'use client';
 
+import type { FilaPreferencia } from '@xangarro/domain';
 import { useMemo, useState } from 'react';
 
 import { Card, FilterChip, ScreenBody, SegmentedTabs } from '@/components';
 import type { AvisosData } from '@/server/screens';
 import { resolveScreenState } from '@/session/gating';
 
-import { ConfigurarCard, NoticeLine } from './parts';
+import { ConfigurarCard } from './configurar';
+import { NoticeLine } from './parts';
 import { MarcarLeidosButton } from './marcar-leidos';
 import { pageSubtitle, pageTitle } from './avisos.css';
 
@@ -76,7 +78,36 @@ function Controls(p: ControlsProps) {
   );
 }
 
-export function AvisosScreen({ rows }: { readonly rows: AvisosData | null }) {
+function Inbox(props: {
+  readonly rows: AvisosData | null;
+  readonly visible: NonNullable<AvisosData>;
+}) {
+  return (
+    <ScreenBody
+      state={resolveScreenState({
+        error: props.rows === null,
+        isEmpty: props.visible.length === 0,
+      })}
+      onRetry={() => window.location.reload()}
+      empty={{ title: 'Sin avisos', body: 'Cuando algo requiera tu atención, aparecerá aquí.' }}
+    >
+      <Card>
+        {props.visible.map((n) => (
+          <NoticeLine key={n.id} n={n} />
+        ))}
+      </Card>
+    </ScreenBody>
+  );
+}
+
+export function AvisosScreen({
+  rows,
+  preferencias,
+}: {
+  readonly rows: AvisosData | null;
+  /** The member's delivery matrix, already resolved by the domain. */
+  readonly preferencias: readonly FilaPreferencia[];
+}) {
   const [tab, setTab] = useState('operacion');
   const [onlyUnread, setOnlyUnread] = useState(false);
 
@@ -105,19 +136,9 @@ export function AvisosScreen({ rows }: { readonly rows: AvisosData | null }) {
         isConfigurar={isConfigurar}
       />
       {isConfigurar ? (
-        <ConfigurarCard />
+        <ConfigurarCard inicial={preferencias} />
       ) : (
-        <ScreenBody
-          state={resolveScreenState({ error: rows === null, isEmpty: visible.length === 0 })}
-          onRetry={() => window.location.reload()}
-          empty={{ title: 'Sin avisos', body: 'Cuando algo requiera tu atención, aparecerá aquí.' }}
-        >
-          <Card>
-            {visible.map((n) => (
-              <NoticeLine key={n.id} n={n} />
-            ))}
-          </Card>
-        </ScreenBody>
+        <Inbox rows={rows} visible={visible} />
       )}
     </>
   );

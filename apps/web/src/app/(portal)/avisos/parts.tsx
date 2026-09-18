@@ -2,22 +2,11 @@
 
 import { colors } from '@xangarro/tokens';
 
-import { Button, Card, Tag } from '@/components';
-import { CHANNELS, type NoticeSeverity } from '@/fixtures/notices';
+import { Button } from '@/components';
+import type { NoticeSeverity } from '@/fixtures/notices';
 import type { AvisosData } from '@/server/screens';
-import { eyebrow } from '@/styles/text.css';
 
-import {
-  cell,
-  channelHead,
-  channelRow,
-  colLabel,
-  noticeBody,
-  noticeRow,
-  noticeTitle,
-  noticeWhen,
-  severityTile,
-} from './avisos.css';
+import { noticeBody, noticeRow, noticeTitle, noticeWhen, severityTile } from './avisos.css';
 
 /** Severity always pairs a tone with a glyph — never colour alone. */
 const SEVERITY: Record<NoticeSeverity, { readonly bg: string; readonly glyph: string }> = {
@@ -45,45 +34,5 @@ export function NoticeLine({ n }: { readonly n: AvisosData[number] }) {
         </Button>
       </span>
     </div>
-  );
-}
-
-/**
- * «Configurar» — the delivery matrix.
- *
- * WhatsApp is designed but not delivered, so it sits in «Próximamente»
- * (design plan §7). **A critical aviso cannot be switched off**, which is why
- * those rows render a locked tag rather than a control.
- */
-export function ConfigurarCard() {
-  return (
-    <Card>
-      <div className={eyebrow} style={{ marginBottom: 14 }}>
-        Cómo quieres enterarte
-      </div>
-      <div className={channelHead}>
-        <span className={eyebrow}>Aviso</span>
-        <span className={colLabel}>En el portal</span>
-        <span className={colLabel}>Por correo</span>
-        <span className={colLabel}>Por WhatsApp</span>
-      </div>
-      {CHANNELS.map((c) => (
-        <div key={c.label} className={channelRow}>
-          <span>
-            <span style={{ fontWeight: 800, display: 'block' }}>{c.label}</span>
-            {c.critical ? <span className={noticeWhen}>Siempre activo</span> : null}
-          </span>
-          <span className={cell}>
-            {c.critical ? <Tag tone="danger">Obligatorio</Tag> : <Tag tone="success">Sí</Tag>}
-          </span>
-          <span className={cell}>
-            {c.porCorreo ? <Tag tone="success">Sí</Tag> : <Tag tone="neutral">No</Tag>}
-          </span>
-          <span className={cell}>
-            <Tag tone="soft">Próximamente</Tag>
-          </span>
-        </div>
-      ))}
-    </Card>
   );
 }
