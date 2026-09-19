@@ -42,6 +42,8 @@ export interface NewOwner {
   readonly userId: string;
   readonly email: string;
   readonly passwordHash: string;
+  /** The account's display name (O-24); null when the person skipped it. */
+  readonly nombre: string | null;
   readonly businessId: BusinessId;
   /** `business_members.id`. */
   readonly memberId: string;

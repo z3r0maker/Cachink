@@ -179,6 +179,7 @@ describe('cloud ↔ device schema drift', () => {
       'billing_customers',
       'business_members',
       'business_onboarding',
+      'celebraciones',
       'cfdi_globals',
       'cfdi_payments',
       'devices',

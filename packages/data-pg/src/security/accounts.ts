@@ -23,11 +23,13 @@ export async function createAccount(
     readonly id: string;
     readonly email: string;
     readonly passwordHash: string;
+    /** The account's display name (O-24); empty means none. */
+    readonly nombre: string;
     readonly at: string;
   },
 ): Promise<boolean> {
   const [row] = await db.execute<{ created: boolean }>(
-    sql`SELECT xangarro.account_create(${a.id}::uuid, ${a.email}, ${a.passwordHash}, ${a.at}::timestamptz) AS created`,
+    sql`SELECT xangarro.account_create(${a.id}::uuid, ${a.email}, ${a.passwordHash}, ${a.nombre}, ${a.at}::timestamptz) AS created`,
   );
   return row?.created === true;
 }

@@ -81,6 +81,20 @@ export const metas = pgTable('metas', {
   ...tenantStamps,
 });
 
+/**
+ * `celebraciones` — shown-once markers (P-33): the goal-achieved takeover and
+ * each streak milestone write one row with a deterministic key («meta:{id}»,
+ * «racha:3»). Write-once; the portal never updates or deletes one.
+ */
+export const celebraciones = pgTable(
+  'celebraciones',
+  {
+    clave: text('clave').notNull(),
+    ...tenantStamps,
+  },
+  (t) => [primaryKey({ name: 'celebraciones_pk', columns: [t.businessId, t.clave] })],
+);
+
 /** Portal members. Many-to-many; the contador is a `viewer` (ADR-053 Q11). */
 export const businessMembers = pgTable('business_members', {
   id: text('id').primaryKey(),

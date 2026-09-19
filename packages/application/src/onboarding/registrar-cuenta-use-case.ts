@@ -19,7 +19,10 @@ const BCRYPT_ROUNDS = 10;
 const REGIMEN_INICIAL = 'RESICO' as const;
 
 export const SignupInputSchema = z.object({
+  /** The business's name — the wizard's first question is about the negocio. */
   nombre: z.string().trim().min(1).max(120),
+  /** The person's own name (O-24), optional: an empty one is stored as null. */
+  tuNombre: z.string().trim().max(120).optional(),
   email: z.string().trim().toLowerCase().pipe(z.email()),
   /** bcrypt reads at most 72 bytes; longer would silently truncate. */
   password: z.string().min(8).max(72),
@@ -51,7 +54,7 @@ export class RegistrarCuentaUseCase implements UseCase<SignupInput, SignupResult
         parsed.error.issues.map((i) => i.path.join('.')),
       );
     }
-    const { nombre, email, password } = parsed.data;
+    const { nombre, tuNombre, email, password } = parsed.data;
     if (await this.#store.emailTaken(email)) {
       throw new SignupError('EMAIL_TAKEN', 'Ya existe una cuenta con ese correo.');
     }
@@ -59,6 +62,7 @@ export class RegistrarCuentaUseCase implements UseCase<SignupInput, SignupResult
       userId: this.#newUserId(),
       email,
       passwordHash: await hash(password, BCRYPT_ROUNDS),
+      nombre: tuNombre && tuNombre.length > 0 ? tuNombre : null,
       businessId: newUlid() as BusinessId,
       memberId: newUlid(),
       nombreNegocio: nombre,

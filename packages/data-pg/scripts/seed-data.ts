@@ -176,6 +176,7 @@ export const OWNER = {
   id: '3f1c0e2a-0000-4000-8000-000000000001',
   email: 'pedro@taqueria.mx',
   password: 'donpedro123',
+  nombre: 'Pedro',
   memberId: id('MEMB1'),
   role: 'owner',
 } as const;
@@ -185,6 +186,7 @@ export const VIEWER = {
   id: '3f1c0e2a-0000-4000-8000-000000000002',
   email: 'contador@taqueria.mx',
   password: 'contador123',
+  nombre: 'Laura',
   memberId: id('MEMB2'),
   role: 'viewer',
 } as const;

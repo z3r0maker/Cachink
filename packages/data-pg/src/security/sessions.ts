@@ -13,6 +13,8 @@ import type { Db } from '../client.js';
 export interface ResolvedSession {
   readonly userId: string;
   readonly email: string;
+  /** The account's display name (O-24); null when the account never set one. */
+  readonly nombre: string | null;
   readonly businessId: string;
   readonly role: 'owner' | 'admin' | 'viewer';
 }
@@ -38,6 +40,7 @@ export async function resolveSession(
   const [row] = await db.execute<{
     user_id: string;
     email: string;
+    nombre: string | null;
     business_id: string;
     role: string;
   }>(sql`SELECT * FROM xangarro.session_resolve(${hash(token)}, ${idleSeconds}::int)`);
@@ -45,6 +48,7 @@ export async function resolveSession(
   return {
     userId: row.user_id,
     email: row.email,
+    nombre: row.nombre,
     businessId: row.business_id,
     role: row.role as ResolvedSession['role'],
   };

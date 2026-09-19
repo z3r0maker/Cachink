@@ -92,7 +92,7 @@ async function appAuthWarnings(sql: Sql): Promise<string[]> {
   const rows = await sql<{ fn: string; ok: boolean }[]>`
     SELECT f.fn, COALESCE(has_function_privilege(r.oid, f.fn, 'EXECUTE'), false) AS ok
     FROM (VALUES ('xangarro.account_email_taken(text)'),
-                 ('xangarro.account_create(uuid, text, text, timestamptz)')) AS f(fn)
+                 ('xangarro.account_create(uuid, text, text, text, timestamptz)')) AS f(fn)
     JOIN pg_roles r ON r.rolname = 'xangarro_app'
     WHERE to_regprocedure(f.fn) IS NOT NULL`;
   return rows

@@ -5781,3 +5781,49 @@ ADR-058).
 - O-12 (Acceso) is no longer blocked on design; it waits on O-04 and O-06 only.
 - Unit tests and E2E specs use the new figures; the harness comparison is box-for-box on the
   operator screens except text the runtime splits and the capitalised hints.
+
+---
+
+## ADR-086
+
+### The account's display name lives on `auth.users`; celebrations are marked in a write-once table
+
+**Date:** 2026-09-19
+**Status:** Accepted (decides owner action O-24; P-13, P-27, P-33)
+
+#### Context
+
+Inicio's greeting is «Hola, {nombre}», but accounts carried no display name — the greeting was the
+hardcoded «Pedro». Signup collects a *business* name (its `nombre` field and the wizard's first
+question are both the negocio's); no screen ever asked the person's name. O-24 asked where the name
+should live once collected: `auth.users` metadata, a `business_members` column, or an
+`auth.users` JSONB blob. P-33 separately needed a cross-device «shown once per achievement» record
+for the takeover and streak-milestone toasts.
+
+#### Decision
+
+1. **`auth.users.nombre` — a text column (migration 0020).** The name belongs to the person, not to
+   a membership: one account has one name in every business it belongs to, and a per-membership
+   column would give the same person a different greeting per business and force signup to write it
+   on every future membership. JSONB was rejected — one known field does not justify unstructured
+   storage every reader must parse.
+2. **No new grant on `auth.*`** (the standing rule): `account_create` (0018) gains the name as a
+   parameter — the old four-argument form is dropped, not overloaded, so no caller can mint a
+   nameless identity by accident — and `session_resolve` (0005) returns it with the rest of the
+   session. A blank name is stored as `NULL` (`NULLIF(btrim(…), '')`); the greeting renders bare
+   «Hola» rather than «Hola, » for accounts without one.
+3. **Collection point: signup**, an optional «Tu nombre» field (autoComplete="name") beside email
+   and password. Optional, because the product principle is fewer required fields; an unnamed
+   account degrades gracefully.
+4. **`celebraciones`** — one portal-only table marking what has been shown: `(business_id, clave)`
+   with deterministic keys («meta:{id}», «racha:3»). Write-once: the app role holds SELECT and
+   INSERT only (0001's default privileges grant all four DML rights, so the migration revokes
+   UPDATE and DELETE back). Client-side state (localStorage) was rejected — once-per-achievement
+   must hold across devices, and the viewer-hiding is enforced server-side anyway.
+
+#### Consequences
+
+- The seeded owner is «Pedro» / the contador «Laura», so the greeting renders from real data.
+- `session_resolve`'s return changed shape (nombre added): every portal session now carries it.
+- Goals close lazily (`CerrarMetaUseCase`, P-27) and the takeover/toast read these markers, so
+  P-33's «shown once» is a property of the data, not of a browser.

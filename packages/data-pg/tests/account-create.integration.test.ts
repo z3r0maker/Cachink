@@ -28,7 +28,10 @@ describe('account_create / account_email_taken', () => {
     assert.equal(await accountEmailTaken(db, email), false);
     const id = randomUUID();
     const at = new Date().toISOString();
-    assert.equal(await createAccount(db, { id, email, passwordHash: 'hash-1', at }), true);
+    assert.equal(
+      await createAccount(db, { id, email, passwordHash: 'hash-1', nombre: 'Pedro', at }),
+      true,
+    );
     assert.deepEqual(await loginLookup(db, email), { id, email, hash: 'hash-1' });
   });
 
@@ -39,7 +42,7 @@ describe('account_create / account_email_taken', () => {
   it('a second account with the same address is refused, not an error', async () => {
     const at = new Date().toISOString();
     assert.equal(
-      await createAccount(db, { id: randomUUID(), email, passwordHash: 'hash-2', at }),
+      await createAccount(db, { id: randomUUID(), email, passwordHash: 'hash-2', nombre: '', at }),
       false,
     );
     assert.equal((await loginLookup(db, email))?.hash, 'hash-1');
@@ -49,12 +52,16 @@ describe('account_create / account_email_taken', () => {
     const id = randomUUID();
     const at = new Date().toISOString();
     const other = `otro-${randomUUID()}@test.mx`;
-    assert.equal(await createAccount(db, { id, email: other, passwordHash: 'x', at }), true);
+    assert.equal(
+      await createAccount(db, { id, email: other, passwordHash: 'x', nombre: '   ', at }),
+      true,
+    );
     assert.equal(
       await createAccount(db, {
         id,
         email: `tercero-${randomUUID()}@test.mx`,
         passwordHash: 'x',
+        nombre: 'Tercero',
         at,
       }),
       false,
