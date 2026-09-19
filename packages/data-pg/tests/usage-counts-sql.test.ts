@@ -2,28 +2,36 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { describe, it } from 'vitest';
 import {
+  APERTURA_MOTIVO,
   classifyMovementOrigin,
   DEFAULT_USAGE_TIME_ZONE,
   PORTAL_DEVICE_ID,
 } from '@xangarro/domain/usage';
 
 /**
- * `0010_usage_counts.sql` as text, for the hermetic run: the rules it encodes
- * are the domain's. `usage-counts.integration.test.ts` proves the same on real
+ * `0010_usage_counts.sql` carries the grants and the original body; 0025
+ * replaces the body (apertura never counts, N-17). Rules are asserted over
+ * the pair; `usage-counts.integration.test.ts` proves the same on real
  * Postgres against `computeUsage`.
  */
-const code = readFileSync(
-  new URL('../drizzle/0010_usage_counts.sql', import.meta.url),
-  'utf8',
+const code = (
+  readFileSync(new URL('../drizzle/0010_usage_counts.sql', import.meta.url), 'utf8') +
+  readFileSync(new URL('../drizzle/0025_opening_balances.sql', import.meta.url), 'utf8')
 ).replace(/--.*$/gm, '');
 
-describe('0010_usage_counts.sql', () => {
+describe('usage_counts SQL (0010, body replaced by 0025)', () => {
   it('places rows in months by the domain’s time zone', () => {
     assert.ok(code.includes(`AT TIME ZONE '${DEFAULT_USAGE_TIME_ZONE}'`));
   });
 
   it('excludes exactly the movements classifyMovementOrigin does not count', () => {
     assert.ok(code.includes(`im.device_id = '${PORTAL_DEVICE_ID}'`));
+    // 0025: apertura movements never count (N-17) — same rule as the domain.
+    assert.match(code, /im\.motivo <> 'Apertura de inventario'/);
+    assert.equal(
+      classifyMovementOrigin({ motivo: APERTURA_MOTIVO, deviceId: PORTAL_DEVICE_ID }),
+      'apertura',
+    );
     assert.equal(classifyMovementOrigin({ motivo: 'Venta', deviceId: PORTAL_DEVICE_ID }), 'portal');
     assert.match(code, /im\.motivo NOT IN \('Venta', 'Conversión'\)/);
     assert.match(code, /im\.motivo = 'Devolución de cliente'/);

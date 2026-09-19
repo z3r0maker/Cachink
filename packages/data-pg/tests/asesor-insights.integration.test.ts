@@ -38,20 +38,20 @@ describe('asesor insights', () => {
         VALUES (${testId('M')}, ${pan}, '2026-03-01', 'entrada', 10, 500, 'Compra a proveedor', ${BIZ}, ${BIZ}, now(), now()),
                (${testId('M')}, ${pan}, '2026-05-01', 'entrada', 10, 750, 'Compra a proveedor', ${BIZ}, ${BIZ}, now(), now())`);
       // Last month's ventas all in the first quincena → quincena insight.
-      let folio = 0;
-      for (const f of ['2026-04-02', '2026-04-03', '2026-04-05']) {
-        folio += 1;
-        // One id per row: testId() is fresh per call, so capture it.
-        const tid = testId('T');
+      const dias = ['2026-04-02', '2026-04-03', '2026-04-05'];
+      for (const [i, f] of dias.entries()) {
+        // C-17: the header (metodo, estado) lives in tickets; one id for both
+        // rows (`testId` is run-unique per call, so it is bound once here).
+        const sid = testId('S');
         await tx.execute(sql`
           INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
                                business_id, device_id, created_at, updated_at)
-          VALUES (${tid}, ${folio}, ${f}, 'Pan', 'Efectivo', 'pagado',
+          VALUES (${sid}, ${i + 1}, ${f}, 'Pan', 'Efectivo', 'pagado',
                   ${BIZ}, ${BIZ}, now(), now())`);
         await tx.execute(sql`
           INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at)
-          VALUES (${testId('S')}, ${tid}, ${f}, 'Pan', 'Producto', 30_000,
+          VALUES (${sid}, ${sid}, ${f}, 'Pan', 'Producto', 30_000,
                   ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
       }
       // Two identical gastos in a row → gasto-duplicado.

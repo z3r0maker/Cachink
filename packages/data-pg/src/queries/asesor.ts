@@ -136,11 +136,15 @@ async function conteosAsesor(tx: Tx) {
     meses_con_gasto: number;
   }>(sql`
     SELECT (SELECT count(DISTINCT left(s.fecha, 10)) FROM sales s
-             WHERE s.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM tickets tk
-               WHERE tk.id = s.ticket_id AND tk.cancelled_at IS NOT NULL)) AS dias_con_venta,
+             WHERE s.deleted_at IS NULL
+               AND NOT EXISTS (SELECT 1 FROM tickets t
+                                WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL))
+             AS dias_con_venta,
            (SELECT min(d) FROM (
-              SELECT min(left(s.fecha, 10)) AS d FROM sales s WHERE s.deleted_at IS NULL AND NOT EXISTS
-                (SELECT 1 FROM tickets tk WHERE tk.id = s.ticket_id AND tk.cancelled_at IS NOT NULL)
+              SELECT min(left(s.fecha, 10)) AS d FROM sales s
+               WHERE s.deleted_at IS NULL
+                 AND NOT EXISTS (SELECT 1 FROM tickets t
+                                  WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)
               UNION ALL
               SELECT min(left(fecha, 10)) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
            (SELECT count(*) FROM inventory_movements

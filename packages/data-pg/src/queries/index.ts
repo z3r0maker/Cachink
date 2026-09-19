@@ -15,3 +15,5 @@ export * from './equipo.js';
 export * from './asesor.js';
 export * from './metas.js';
 export * from './logos.js';
+export * from './opening-balances.js';
+export * from './estados-facts.js';

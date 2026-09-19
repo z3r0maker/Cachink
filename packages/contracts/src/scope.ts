@@ -37,6 +37,9 @@ export const DOWN_TABLES = [
   'recurring_expenses',
   'conversion_recetas',
   'mensajes_operador',
+  // Day-one facts (C-20); default [] below until every server sends them.
+  'opening_balances',
+  'opening_balance_clients',
 ] as const;
 
 /** Local-only tables that never cross the wire (sync bookkeeping included). */

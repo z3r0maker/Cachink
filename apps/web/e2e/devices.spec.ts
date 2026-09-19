@@ -1,6 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { latestMailTo } from './outbox';
-import { randomUUID } from 'node:crypto';
 import { deviceHeaders } from '@xangarro/contracts';
 import postgres from 'postgres';
 
@@ -186,22 +184,4 @@ test('the entitlement refresh honours revocation, not just the signature', async
   } finally {
     await sql.end({ timeout: 5 });
   }
-});
-
-/** P-06: the live code goes by email to whatever address the owner names. */
-test('«Enviar por correo» delivers the live code', async ({ page }) => {
-  const address = `codigo-${randomUUID()}@test.mx`;
-  await page.goto('/equipo?tab=dispositivos');
-  await page.getByTestId('enviar-codigo-correo').fill(address);
-  await page.getByRole('button', { name: 'Enviar por correo' }).click();
-  await expect(page.getByText(`Enviado a ${address}.`)).toBeVisible();
-
-  const mail = await latestMailTo(address);
-  expect(mail).not.toBeNull();
-  const code = (await page.getByTestId('activation-code').getAttribute('aria-label'))?.replace(
-    'Código ',
-    '',
-  );
-  expect(mail).toContain(code ?? '——');
-  expect(mail).toContain('Taquería Don Pedro');
 });

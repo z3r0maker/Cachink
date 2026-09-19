@@ -27,6 +27,9 @@ export function countsTowardUsage(record: UsageRecord): boolean {
 /** Prefix `CancelarVentaUseCase` writes on the stock it returns. */
 const CANCELLATION_NOTE_PREFIX = 'Cancelación de venta:';
 
+/** Motivo `CapturarInventarioInicialUseCase` writes (N-17; C-12's `origen = apertura`). */
+export const APERTURA_MOTIVO = 'Apertura de inventario';
+
 /**
  * The `device_id` of every row created in the portal rather than on a phone
  * (a fixed, valid ULID). `inventory_movements` is HYBRID (ADR-081), so a
@@ -40,14 +43,17 @@ export const PORTAL_DEVICE_ID = '01HZ8XQN9GZJXV8AKQ5X0WEB01';
  * mirrors what the application use cases write today: `RegistrarVenta` →
  * motivo `Venta`; `CancelarVenta` → motivo `Devolución de cliente` with a
  * `Cancelación de venta:` note; `EjecutarConversion` → motivo `Conversión`.
- * Everything else was entered by a person. `xangarro.usage_counts()`
- * (data-pg 0010) applies the same rules in SQL.
+ * Everything else was entered by a person. A movement with the apertura
+ * motivo (N-17's opening stock, written only by the portal) is `apertura` —
+ * never counted toward the limit (owner decision 2026-09-18).
+ * `xangarro.usage_counts()` (data-pg 0010 + 0024) applies the same rules in SQL.
  */
 export function classifyMovementOrigin(movement: {
   readonly motivo: string;
   readonly nota?: string | null;
   readonly deviceId?: string;
 }): MovementOrigin {
+  if (movement.motivo === APERTURA_MOTIVO) return 'apertura';
   if (movement.deviceId === PORTAL_DEVICE_ID) return 'portal';
   if (movement.motivo === 'Venta') return 'venta';
   if (movement.motivo === 'Conversión') return 'conversion';

@@ -28,7 +28,16 @@ import {
 
 type RefTableName = Exclude<keyof ReferenceTables, 'feature_flags'>;
 
-const TABLES: Record<RefTableName, SQLiteTable> = {
+/**
+ * Reference tables the cloud serves but the device schema does not carry
+ * yet (C-20's saldos iniciales arrive on the device with the C-15 wave).
+ * Exhaustive by construction: adding a DOWN table here without a device
+ * home is a compile error again the day the list is wrong.
+ */
+type CloudAheadRefTable = 'opening_balances' | 'opening_balance_clients';
+type DeviceRefTableName = Exclude<RefTableName, CloudAheadRefTable>;
+
+const TABLES: Record<DeviceRefTableName, SQLiteTable> = {
   businesses,
   inventory_movements: inventoryMovements,
   mensajes_operador: mensajesOperador,
@@ -41,7 +50,7 @@ const TABLES: Record<RefTableName, SQLiteTable> = {
 };
 
 /** Order matters for foreign keys: parents before children. */
-const APPLY_ORDER: readonly RefTableName[] = [
+const APPLY_ORDER: readonly DeviceRefTableName[] = [
   'businesses',
   'users',
   'employees',
@@ -49,10 +58,12 @@ const APPLY_ORDER: readonly RefTableName[] = [
   'clients',
   'recurring_expenses',
   'conversion_recetas',
+  'inventory_movements',
+  'mensajes_operador',
 ];
 
 export interface ApplyReferenceResult {
-  readonly applied: Readonly<Record<RefTableName, number>>;
+  readonly applied: Readonly<Record<DeviceRefTableName, number>>;
 }
 
 /** Keep only the table's columns; JSON-encode structured values. */
@@ -92,10 +103,10 @@ export async function applyReferenceTables(
   tables: ReferenceTables,
   businessId: string,
 ): Promise<ApplyReferenceResult> {
-  const applied = {} as Record<RefTableName, number>;
+  const applied = {} as Record<DeviceRefTableName, number>;
   const floor = await changeLogHighWater(db);
   for (const name of APPLY_ORDER) {
-    const rows = tables[name] as readonly Record<string, unknown>[];
+    const rows = (tables[name] ?? []) as readonly Record<string, unknown>[];
     for (const row of rows) await upsertRow(db, TABLES[name], row);
     await forgetEchoes(db, TABLES[name], rows, floor);
     applied[name] = rows.length;

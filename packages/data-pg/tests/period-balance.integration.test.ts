@@ -74,17 +74,16 @@ describe('periodBalanceInputs', () => {
       await tx.execute(sql`
         INSERT INTO clients (id, nombre, business_id, device_id, created_at, updated_at)
         VALUES (${cliente}, 'Doña Mary', ${BIZ}, ${BIZ}, now(), now())`);
-      const ticket = testId('K');
+      // C-17: the header (metodo, cliente, estado) lives in tickets.
       await tx.execute(sql`
         INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, cliente_id,
                              business_id, device_id, created_at, updated_at)
-        VALUES (${ticket}, 1, '2026-05-02', 'Fiesta', 'Crédito', 'parcial', ${cliente},
-                ${BIZ}, ${BIZ}, now(), now())`);
+        VALUES (${testId('V')}, 1, '2026-05-02', 'Fiesta', 'Crédito', 'parcial',
+                ${cliente}, ${BIZ}, ${BIZ}, now(), now())`);
       await tx.execute(sql`
         INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
-                           producto_id, cantidad, business_id, device_id,
-                           created_at, updated_at)
-        VALUES (${testId('V')}, ${ticket}, '2026-05-02', 'Fiesta', 'Producto', 80_000,
+                           producto_id, cantidad, business_id, device_id, created_at, updated_at)
+        VALUES (${testId('V')}, ${testId('V')}, '2026-05-02', 'Fiesta', 'Producto', 80_000,
                 ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
       const pago = (id: string, fecha: string, monto: number, deleted = false) =>
         tx.execute(sql`

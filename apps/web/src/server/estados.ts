@@ -17,14 +17,17 @@ import {
 
 import {
   getBusiness,
+  openingBalanceClientsOf,
+  openingBalanceOf,
   periodBalanceInputs,
   periodLedger,
   tickets as ticketsTable,
+  valuacionApertura,
 } from '@xangarro/data-pg';
 
 import { between } from 'drizzle-orm';
 import type { Ticket, TicketConTotal } from '@xangarro/domain';
-import { withTenant } from './db';
+import { withTenant, type Tx } from './db';
 
 /**
  * The NIF statements, computed from **real ledger rows** by the existing
@@ -88,6 +91,47 @@ async function ticketsConTotal(
   });
 }
 
+type AperturaFacts = {
+  readonly header: {
+    readonly cajaCentavos: bigint;
+    readonly bancosCentavos: bigint;
+  };
+  readonly lines: readonly { clienteId: string; saldoCentavos: bigint }[];
+  readonly valuacionInventario: bigint;
+};
+
+async function loadApertura(tx: Tx, businessId: string): Promise<AperturaFacts | null> {
+  const header = await openingBalanceOf(tx, businessId);
+  if (header === null) return null;
+  return {
+    header,
+    lines: await openingBalanceClientsOf(tx, businessId),
+    valuacionInventario: await valuacionApertura(tx, businessId),
+  };
+}
+
+/**
+ * N-17: the day-one facts as the calculator wants them — efectivo = caja +
+ * bancos, the CxC lines, and capitalInicial = everything the owner imported
+ * (cash + CxC + the apertura movements' inventory valuation), so
+ * Activo = Pasivo + Capital holds from statement one.
+ */
+function aperturaDe(apertura: AperturaFacts | null) {
+  if (apertura === null) return undefined;
+  return {
+    efectivoInicial: apertura.header.cajaCentavos + apertura.header.bancosCentavos,
+    cuentasPorCobrar: apertura.lines.map((l) => ({
+      clienteId: l.clienteId,
+      saldoCentavos: l.saldoCentavos,
+    })),
+    capitalInicial:
+      apertura.header.cajaCentavos +
+      apertura.header.bancosCentavos +
+      apertura.lines.reduce((t, l) => t + l.saldoCentavos, 0n) +
+      apertura.valuacionInventario,
+  };
+}
+
 export async function loadEstadosModel(
   businessId: string,
   from: string,
@@ -95,10 +139,11 @@ export async function loadEstadosModel(
 ): Promise<EstadosModel> {
   // One tenant transaction: the period's ledger, the balance's real inputs
   // (F-1) and the rate the owner set.
-  const { rows, inputs, isrTasa } = await withTenant(businessId, async (tx) => ({
+  const { rows, inputs, isrTasa, apertura } = await withTenant(businessId, async (tx) => ({
     rows: await periodLedger(tx, from, to),
     inputs: await periodBalanceInputs(tx, from, to),
     isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
+    apertura: await loadApertura(tx, businessId),
   }));
 
   // The cloud schema now keys `monto_centavos` as `monto`, like the device
@@ -125,9 +170,9 @@ export async function loadEstadosModel(
     inventarioStock: inputs.stock,
     ventasConCredito: conCredito(tickets),
     pagosClientes,
-    // Opening liabilities arrive with N-17 (saldos iniciales); none exist yet.
     pasivosManuales: 0n,
     utilidadDelPeriodo: resultados.utilidadNeta,
+    apertura: aperturaDe(apertura),
   });
   const flujo = calculateFlujoDeEfectivo({ ventas: tickets, egresos, pagosClientes });
   const indicadores = indicadoresDe(resultados, balance, tickets, from, to);

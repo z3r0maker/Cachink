@@ -391,7 +391,25 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-16, C-20
+- [~] Status · **Blocked by:** N-16, C-20
+- Progress: 2026-09-19 · `track-n/c20-n17-apertura` · **pg/web halves done.** **Saldos
+  iniciales** — `/saldos-iniciales`: fecha de apertura, caja, bancos, and the per-cliente CxC
+  lines (hand-edited or prefilled from a .csv of the Clientes-import shape + saldo column; a
+  row whose cliente does not exist is reported, never invented), saved through
+  `GuardarSaldosInicialesUseCase` (replace-style; refuses once locked), with the explicit
+  **«Bloquear saldos iniciales»** typed confirm — `locked_at`, one-way, the v1 stand-in for the
+  first period close (owner decision 2026-09-18). **Inventario inicial** —
+  `/inventario-inicial`: an editable grid of the catalogue (cantidad + costo, live valuation
+  total) prefillable from .csv (producto, cantidad, costo); `CapturarInventarioInicialUseCase`
+  writes apertura movements in one transaction — **no egreso** (day-one stock is not a
+  purchase) and **never counted** toward the monthly limit: `classifyMovementOrigin` and
+  `xangarro.usage_counts()` (0025's body) both classify motivo `Apertura de inventario` as
+  `apertura`, excluded (equality test seeds both). A second capture is refused, not merged.
+  **Estados**: `loadEstadosModel` feeds the Balance the real apertura facts (efectivo =
+  caja + bancos, CxC lines, capitalInicial = cash + CxC + Σ apertura movements' valuation) so
+  Activo = Pasivo + Capital holds from statement one; a business without apertura is
+  bit-identical to before. Entry points from Negocio. **Still to do:** the saldos iniciales
+  row on the «¿Cómo empiezo?» checklist, and the SQLite half with the app branch.
 - **Inventario inicial (owner decision 2026-09-18):** an explicit one-time step, "Captura tu inventario
   inicial" (grid or Excel: producto + cantidad + costo), writing portal inventory movements with
   `origen = apertura` (C-12 step 7). They are **not** counted toward the monthly limit, they feed the
