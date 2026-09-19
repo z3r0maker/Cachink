@@ -1,4 +1,5 @@
 import { describe, it } from 'vitest';
+import type { ZodTypeAny } from 'zod';
 import assert from 'node:assert/strict';
 import { getTableColumns, getTableName, is, Table } from 'drizzle-orm';
 import { getTableConfig as pgConfig } from 'drizzle-orm/pg-core';
@@ -6,6 +7,7 @@ import { getTableConfig as sqliteConfig } from 'drizzle-orm/sqlite-core';
 
 import * as sqliteSchema from '@xangarro/data/schema';
 import { DOWN_TABLES, HYBRID_TABLES, NEVER_SYNCED_TABLES, UP_TABLES } from '@xangarro/contracts';
+import { ClientSchema } from '@xangarro/domain';
 
 import * as pgSchema from '../src/schema/index.js';
 
@@ -71,6 +73,20 @@ const SYNCED = [...UP_TABLES, ...HYBRID_TABLES, ...DOWN_TABLES];
 const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
   // B-13 stores it; the device column arrives with A-17.
   users: ['active'],
+  // N-16 stores it; the device column arrives with the app branch's C-15
+  // wave. `clients` is HYBRID (insert-only up), and the wire field is
+  // optional — a phone row without it is a valid client with `rfc = NULL`,
+  // never a sale arriving without its money.
+  clients: ['rfc'],
+};
+
+/**
+ * Wire schemas for HYBRID tables with cloud-ahead columns: the test below
+ * proves each such column is optional on the wire, so a device that cannot
+ * know it still pushes a valid row.
+ */
+const HYBRID_WIRE: Readonly<Record<string, Record<string, ZodTypeAny>>> = {
+  clients: { rfc: ClientSchema.shape.rfc },
 };
 
 /** SQL column name → the Drizzle property key it is read and written by. */
@@ -130,13 +146,31 @@ describe('cloud ↔ device schema drift', () => {
     });
   }
 
-  it('allows cloud-ahead columns only on DOWN tables', () => {
+  it('allows cloud-ahead columns only on DOWN tables, or HYBRID ones where the wire tolerates their absence', () => {
     const down = new Set<string>(DOWN_TABLES);
-    const misplaced = Object.keys(CLOUD_AHEAD).filter((t) => !down.has(t));
+    const hybrid = new Set<string>(HYBRID_TABLES);
+    const misplaced: string[] = [];
+    const notOptional: string[] = [];
+    for (const [table, cols] of Object.entries(CLOUD_AHEAD)) {
+      if (down.has(table)) continue;
+      if (!hybrid.has(table)) {
+        misplaced.push(table);
+        continue;
+      }
+      const wire = HYBRID_WIRE[table];
+      for (const c of cols) {
+        if (wire?.[c]?.safeParse(undefined).success !== true) notOptional.push(`${table}.${c}`);
+      }
+    }
     assert.deepEqual(
       misplaced,
       [],
-      'a cloud-only column on an UP or HYBRID table means the device can send a row missing it',
+      'a cloud-only column on an UP table means the device can send a row missing it',
+    );
+    assert.deepEqual(
+      notOptional,
+      [],
+      'a cloud-ahead column on a HYBRID table must be optional on the wire, or device inserts arrive invalid',
     );
   });
 

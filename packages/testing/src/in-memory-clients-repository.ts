@@ -30,6 +30,7 @@ export class InMemoryClientsRepository implements ClientsRepository {
       telefono: input.telefono ?? null,
       email: input.email ?? null,
       nota: input.nota ?? null,
+      rfc: input.rfc ?? null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -69,6 +70,7 @@ export class InMemoryClientsRepository implements ClientsRepository {
       telefono: patch.telefono ?? existing.telefono,
       email: patch.email ?? existing.email,
       nota: patch.nota ?? existing.nota,
+      rfc: patch.rfc !== undefined ? patch.rfc : existing.rfc,
       updatedAt: ts,
     };
     this.rows.set(id, next);

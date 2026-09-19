@@ -362,7 +362,26 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-16 Import engine + Clientes template `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
+- [x] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
+- Progress/Done: 2026-09-18 · `track-n/n16-import` · P-07's three steps generalised into a template
+  registry (`apps/web/src/server/import/templates.ts`) with the products flow byte-identical (same
+  plan/apply path, 5 000-row cap, duplicate-SKU rule); actions renamed
+  `previsualizarImportacion`/`importarDatos` around a `plantilla` form field that defaults to
+  Productos. **Clientes template:** nombre/teléfono/RFC (RFC validated with
+  `packages/domain/src/fiscal/rfc.ts`), matching by teléfono digits with a normalised-nombre
+  fallback (Ñ is a letter, not an accent), matches become «actualizar» that overwrite telefono/rfc,
+  an empty optional cell keeps what is stored, in-file duplicates are errors on both rows. **.csv
+  support** beside .xlsx (`lib/csv.ts`). New `Client.rfc` (optional, normalised) on the domain
+  schema → the wire; data-pg **0020** `clients.rfc` + integration test; the drift test's
+  cloud-ahead rule now allows HYBRID tables whose wire field is optional (proven per column).
+  `CrearClienteUseCase`/`EditarClienteUseCase` (+tests; application suite 459 green), pg
+  `clients` repository (sync-log on every write). UI: unified **`/importar`** screen (template
+  cards → the three steps; ADR-086 code-first) replacing the Productos drawer — the Productos
+  button navigates to `?plantilla=productos`; the sidebar nav is untouched. Template download
+  `/api/import/clientes`. E2E: the P-07 spec re-pointed at the page + a new
+  `importar-clientes.sync.spec.ts` (3 rows → round-trip «3 sin cambios», one changed RFC → one
+  update, malformed row skipped with error) — full web e2e 448 green. SQLite half of `rfc` waits
+  for the app branch (C-15-style split, `CLOUD_AHEAD: clients: ['rfc']`).
 - **Note (ADR-081, 2026-09-18):** portal-created products start at zero stock, the import template has no
   `stock_inicial` column, and **the import writes no movements**. Opening stock is N-17's job.
 - **What:** generalise P-07's three steps (template → dry-run with row-level errors → one-transaction
@@ -567,14 +586,14 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   tier, "Multi-sucursal (próximamente)" on xangarrote. Payment line "Tarjeta de crédito o débito, o
   por transferencia SPEI en plan anual" (no OXXO); offline line "Tu negocio sigue aunque se vaya el
   internet" in the Precios intro, hero FAQ and llms files. All CTAs →
-  `app.xangarro.mx/signup?plan=xangarrito|xangarro|xangarrote` with utm_* passthrough; the waitlist
+  `app.xangarro.mx/signup?plan=xangarrito|xangarro|xangarrote` with utm\_\* passthrough; the waitlist
   form and `VITE_WAITLIST_ENDPOINT` are gone. FAQ (14 answers), JSON-LD offers, `llms.txt` and
   `llms-full.txt` rewritten to the decided product facts (web portal today, apps próximamente,
   per-negocio accounts, CFDI answer now covers the subscription CFDI). Canonical domain switched to
   `xangarro.mx` everywhere (`.env.example`, vite.config, prerender, structured-data, robots,
   sitemap); brand assets are sharp-generated text-wordmark placeholders (`generate-og.mjs` now also
   emits favicon / apple-touch-icon / `site.webmanifest`). Verified: `grep -rni cachink apps/landing
-  docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), screenshots at 360 px
+docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), screenshots at 360 px
   and 1440 px, annual toggle prices/cadence/aria-pressed/CTA params asserted in-DOM. **Deviation:**
   shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
   contract; if C-12 ever changes them, `planes.js` is the one place to update.

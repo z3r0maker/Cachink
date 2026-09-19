@@ -1,6 +1,7 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
+import { useRouter } from 'next/navigation';
 
 import {
   Banner,
@@ -15,7 +16,6 @@ import type { ProductosData } from '@/server/screens';
 
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
-import { ImportarSheet } from './importar/sheet';
 import { NuevoProductoSheet } from './sheet/sheet';
 
 export type Producto = ProductosData['catalogo'][number];
@@ -25,6 +25,7 @@ export type Movimiento = ProductosData['movimientos'][number];
 export const isLow = (p: Producto): boolean => p.sigueStock && p.stock <= p.umbral;
 
 export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
+  const router = useRouter();
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
@@ -34,7 +35,9 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
       {mayWrite ? (
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
           <ExportButton dataset="productos" />
-          <ImportarSheet />
+          <Button variant="secondary" onClick={() => router.push('/importar?plantilla=productos')}>
+            Importar desde Excel
+          </Button>
           <NuevoProductoSheet />
         </div>
       ) : null}

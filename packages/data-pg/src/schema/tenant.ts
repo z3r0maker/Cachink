@@ -57,6 +57,8 @@ export const clients = pgTable('clients', {
   telefono: text('telefono'),
   email: text('email'),
   nota: text('nota'),
+  /** Optional, set by the Clientes import (N-16); migration 0020. */
+  rfc: text('rfc'),
   ...auditColumns,
 });
 

@@ -12,8 +12,12 @@ export type { Client, NewClient };
  * Partial-patch shape for `update()` per ADR-023. Immutable audit
  * fields (id, businessId, deviceId, createdAt) are excluded; the impl
  * bumps `updatedAt` internally.
+ *
+ * `rfc` is portal-side only for now: the SQLite column lands with the app
+ * branch (C-15-style split, N-16), so this implementation deliberately
+ * ignores it — only the Postgres repository persists it.
  */
-export type ClientPatch = Partial<Pick<Client, 'nombre' | 'telefono' | 'email' | 'nota'>>;
+export type ClientPatch = Partial<Pick<Client, 'nombre' | 'telefono' | 'email' | 'nota' | 'rfc'>>;
 
 export interface ClientsRepository {
   create(input: NewClient): Promise<Client>;

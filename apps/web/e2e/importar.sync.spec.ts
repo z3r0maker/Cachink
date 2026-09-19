@@ -37,6 +37,7 @@ async function xlsx(data: unknown[][]): Promise<Buffer> {
 async function preview(page: Page, price2: number) {
   await page.goto('/productos');
   await page.getByRole('button', { name: 'Importar desde Excel' }).click();
+  await page.waitForURL((u) => u.pathname === '/importar');
   await page.getByTestId('import-archivo').setInputFiles({
     name: 'productos.xlsx',
     mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -50,7 +51,7 @@ test('three rows become three products', async ({ page }) => {
   await expect(page.getByTestId('import-resumen')).toContainText('3 nuevos · 0 actualizados');
   await page.getByRole('button', { name: 'Importar 3 productos' }).click();
   await expect(page.getByTestId('import-listo')).toContainText('3 nuevos');
-  await page.keyboard.press('Escape');
+  await page.goto('/productos');
   for (const name of [`Tamal verde ${RUN}`, `Atole ${RUN}`, `Masa ${RUN}`]) {
     await expect(page.locator('main').getByText(name)).toBeVisible();
   }

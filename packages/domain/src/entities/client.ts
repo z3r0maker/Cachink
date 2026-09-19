@@ -12,6 +12,18 @@ import { z } from 'zod';
 import type { BusinessId, ClientId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
+import { isValidRfc, normalizeRfc } from '../fiscal/rfc.js';
+
+/**
+ * RFC for a cliente (N-16): optional, normalised to upper case and validated
+ * with the fiscal check (`fiscal/rfc.ts`). Nullish — absent means "unknown",
+ * which is every pre-0020 row and every row the phone writes (the SQLite half
+ * of the column lands with the app branch, C-15-style).
+ */
+const rfcField = z
+  .string()
+  .transform((v) => normalizeRfc(v))
+  .refine((v) => isValidRfc(v), { message: 'RFC inválido' });
 
 export const ClientSchema = z
   .object({
@@ -23,6 +35,7 @@ export const ClientSchema = z
       .nullable(),
     email: z.string().email().nullable(),
     nota: z.string().max(500).nullable(),
+    rfc: rfcField.nullish(),
   })
   .merge(auditSchema);
 
@@ -36,6 +49,7 @@ export const NewClientSchema = z.object({
     .optional(),
   email: z.string().email().optional(),
   nota: z.string().max(500).optional(),
+  rfc: rfcField.optional(),
   businessId: ulidField<BusinessId>(),
 });
 

@@ -3,9 +3,9 @@
 import { useState } from 'react';
 
 import { Button, FilterChip, Tag, type Tone } from '@/components';
-import type { PreviewRow } from '@/server/actions/importar-productos';
+import type { PreviewRow } from '@/server/import/templates';
 
-import { chipRow } from '../sheet/sheet.css';
+import { chipRow } from '../productos/sheet/sheet.css';
 
 /** Step 2 (P-07): what the file will do, row by row, before anything is written. */
 const LABEL: Record<PreviewRow['kind'], [string, Tone]> = {
@@ -30,13 +30,19 @@ function descargarErrores(rows: readonly PreviewRow[]): void {
   URL.revokeObjectURL(url);
 }
 
-function RevisionTable({ rows }: { readonly rows: readonly PreviewRow[] }) {
+function RevisionTable({
+  rows,
+  entidad,
+}: {
+  readonly rows: readonly PreviewRow[];
+  readonly entidad: string;
+}) {
   return (
     <table>
       <thead>
         <tr>
           <th>Fila</th>
-          <th>Producto</th>
+          <th>{entidad.charAt(0).toUpperCase() + entidad.slice(1)}</th>
           <th>Estado</th>
         </tr>
       </thead>
@@ -55,7 +61,13 @@ function RevisionTable({ rows }: { readonly rows: readonly PreviewRow[] }) {
   );
 }
 
-export function Revision({ rows }: { readonly rows: readonly PreviewRow[] }) {
+export function Revision({
+  rows,
+  entidad,
+}: {
+  readonly rows: readonly PreviewRow[];
+  readonly entidad: string;
+}) {
   const [soloErrores, setSoloErrores] = useState(false);
   const count = (k: PreviewRow['kind']) => rows.filter((r) => r.kind === k).length;
   const shown = soloErrores ? rows.filter((r) => r.kind === 'error') : rows;
@@ -77,7 +89,7 @@ export function Revision({ rows }: { readonly rows: readonly PreviewRow[] }) {
           </Button>
         ) : null}
       </div>
-      <RevisionTable rows={shown} />
+      <RevisionTable rows={shown} entidad={entidad} />
     </>
   );
 }
