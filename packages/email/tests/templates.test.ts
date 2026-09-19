@@ -8,6 +8,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   pesos,
+  renderActivationCodeEmail,
   renderGenericNoticeEmail,
   renderMagicLinkEmail,
   renderPasswordResetEmail,
@@ -146,5 +147,20 @@ describe('pesos', () => {
     assert.equal(pesos(19_900), '$199');
     assert.equal(pesos(199_000), '$1,990');
     assert.equal(pesos(23_084), '$230.84');
+  });
+});
+
+describe('activation code email (P-06)', () => {
+  it('carries the code, the business and the single-use window', async () => {
+    const e = await renderActivationCodeEmail({
+      code: 'K7M3DQ9P',
+      negocio: 'Taquería Don Pedro',
+      expiresInHours: 47,
+    });
+    assert.equal(e.subject, 'Tu código para vincular un teléfono a Taquería Don Pedro');
+    assert.match(e.text, /K7M3DQ9P/);
+    assert.match(e.text, /vence en 47 horas/);
+    assert.match(e.text, /una sola vez/);
+    expect(e).toMatchSnapshot();
   });
 });

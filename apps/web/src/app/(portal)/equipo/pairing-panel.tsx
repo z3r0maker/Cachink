@@ -2,10 +2,10 @@
 
 import { useState, useTransition } from 'react';
 
-import { Button, Card, PendingButton } from '@/components';
-import { generarCodigo } from '@/server/actions/equipo';
+import { Button, Card, Input } from '@/components';
+import { enviarCodigoPorCorreo, generarCodigo } from '@/server/actions/equipo';
 
-import { codeBox, codeRow, panelTitle } from './equipo.css';
+import { codeBox, codeRow, enviadoLine, panelTitle } from './equipo.css';
 
 export interface LiveCode {
   readonly code: string;
@@ -55,6 +55,32 @@ function mensaje(lleno: boolean, limit: number, live: LiveCode | null): string {
   return `Escríbelo en el teléfono del operador. Vence ${remaining(live.expiresAt)}.`;
 }
 
+/** The address field and the send, with its own pending state. */
+function EnviarCorreo({ onEnviado }: { readonly onEnviado: (to: string) => void }) {
+  const [correo, setCorreo] = useState('');
+  const [enviando, startEnvio] = useTransition();
+  const enviar = () => {
+    startEnvio(async () => {
+      const result = await enviarCodigoPorCorreo(correo);
+      if (result.ok) onEnviado(result.sentTo);
+    });
+  };
+  return (
+    <div style={{ marginTop: 12, display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+      <Input
+        labelText="Enviar el código por correo"
+        type="email"
+        value={correo}
+        onChange={(e) => setCorreo(e.target.value)}
+        data-testid="enviar-codigo-correo"
+      />
+      <Button variant="secondary" onClick={enviar} disabled={enviando}>
+        {enviando ? 'Enviando…' : 'Enviar por correo'}
+      </Button>
+    </div>
+  );
+}
+
 export function PairingPanel({
   initial,
   lleno,
@@ -68,15 +94,15 @@ export function PairingPanel({
   const [live, setLive] = useState<LiveCode | null>(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [enviado, setEnviado] = useState<string | null>(null);
 
-  function generate(): void {
+  const generate = () =>
     startTransition(async () => {
       const result = await generarCodigo();
       if (!result.ok) return setError(result.message);
       setError(null);
       setLive({ code: result.code, expiresAt: result.expiresAt });
     });
-  }
 
   return (
     <Card tone="hero" emphasis="hero">
@@ -88,8 +114,13 @@ export function PairingPanel({
         <Button variant="dark" onClick={generate} disabled={pending}>
           {pending ? 'Generando…' : live === null ? 'Generar código' : 'Generar otro'}
         </Button>
-        <PendingButton reason="Falta el envío de correo (B-14).">Enviar por correo</PendingButton>
       </div>
+      {live === null ? null : <EnviarCorreo onEnviado={setEnviado} />}
+      {enviado === null ? null : (
+        <p role="status" className={enviadoLine}>
+          Enviado a {enviado}.
+        </p>
+      )}
     </Card>
   );
 }

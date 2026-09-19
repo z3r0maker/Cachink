@@ -100,3 +100,8 @@ export const panelTitle = style({
   letterSpacing: typography.letterSpacing.tight,
   color: colors.black,
 });
+
+export const enviadoLine = style({
+  margin: '10px 0 0',
+  fontWeight: 600,
+});

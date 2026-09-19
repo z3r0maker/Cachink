@@ -10,6 +10,10 @@
  * Server-only: nothing here belongs in a client bundle.
  */
 export { renderEmail, fechaLarga, pesos, entero } from './render.js';
+export {
+  renderActivationCodeEmail,
+  type ActivationCodeEmailProps,
+} from './templates/activation-code.js';
 export { planName, priceLine } from './templates/plans.js';
 export { renderTrialEmail, type TrialEmailProps } from './templates/trial.js';
 export {

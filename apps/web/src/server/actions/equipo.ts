@@ -1,6 +1,6 @@
 'use server';
 
-import { activationCodes } from '@xangarro/data-pg';
+import { activationCodes, getBusiness, liveActivationCode } from '@xangarro/data-pg';
 import { isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -8,6 +8,7 @@ import { CODE_TTL_MS, mintActivationCode } from '../activation';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
+import { sendActivationCode } from '../email/activation-code';
 
 /**
  * "Generar otro" — replace the live activation code with a fresh one.
@@ -74,5 +75,35 @@ export async function generarCodigo(): Promise<CodeResult> {
     const message =
       error instanceof Error ? error.message : 'No pudimos generar el código. Intenta de nuevo.';
     return { ok: false, message };
+  }
+}
+
+/**
+ * «Enviar por correo» (P-06): the live code to whatever address the owner
+ * names. No new code is minted — sending the existing one cannot invalidate a
+ * phone mid-pairing — and there is nothing to send when no code is live.
+ */
+export type EnviarCodigoResult = { ok: true; sentTo: string } | { ok: false; message: string };
+
+export async function enviarCodigoPorCorreo(address: string): Promise<EnviarCodigoResult> {
+  try {
+    const session = await requireMember('admin');
+    const to = address.trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) {
+      return { ok: false, message: 'Escribe un correo válido.' };
+    }
+    const { live, negocio } = await withTenant(session.business_id, async (tx) => ({
+      live: await liveActivationCode(tx),
+      negocio: (await getBusiness(tx))?.nombre ?? 'tu negocio',
+    }));
+    if (live === null) {
+      return { ok: false, message: 'Genera un código primero.' };
+    }
+    const r = await sendActivationCode(to, { code: live.code, negocio, expiresAt: live.expiresAt });
+    if (!r.ok) return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
+    return { ok: true, sentTo: to };
+  } catch (error) {
+    reportError(error, { endpoint: 'enviarCodigoPorCorreo' });
+    return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
   }
 }
