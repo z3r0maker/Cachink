@@ -26,6 +26,7 @@ export * from './issuer-config.js';
 export * from './cfdi-mode.js';
 export * from './cfdi-inbox-items.js';
 export * from './record-payment-for-cfdi.js';
+export * from './record-refund-for-cfdi.js';
 export * from './close-cfdi-period.js';
 export * from './facturas-del-negocio.js';
 export * from './factura-acciones.js';

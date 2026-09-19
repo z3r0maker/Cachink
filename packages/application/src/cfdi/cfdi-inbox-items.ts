@@ -87,3 +87,29 @@ export function closeFailureItem(period: string, error: unknown): InboxItemReque
     paymentRef: `cfdi-global:${period}`,
   };
 }
+
+/** A Stripe refund arrived; the CFDI it hit needs cancelling by hand (N-33). */
+export function refundItem(
+  record: IssuedCfdiRecord,
+  refund: { readonly refundId: string; readonly amountRefundedCentavos: number },
+): InboxItemRequest {
+  const uuid = record.invoice?.uuid;
+  const motivo =
+    record.status === 'cancel_requested'
+      ? 'Tiene CFDI: cancelarlo en el portal del SAT (parcial → CFDI de egreso, pendiente de contador, O-14).'
+      : 'No llegó a timbrarse; solo se da de baja del periodo.';
+  return {
+    kind: 'factura',
+    urgent: false,
+    businessId: record.tenantId,
+    title: 'Reembolso recibido — dar de baja su CFDI',
+    body: [
+      `Reembolo ${formatMoney(BigInt(refund.amountRefundedCentavos))} (IVA incluido) del pago ${record.externalPaymentId}.`,
+      uuid !== undefined ? `CFDI afectado: ${uuid}.` : 'El pago no tenía CFDI individual.',
+      motivo,
+    ].join('\n'),
+    source: 'stripe-webhook',
+    sourceRef: `refund:${refund.refundId}`,
+    paymentRef: record.externalPaymentId,
+  };
+}

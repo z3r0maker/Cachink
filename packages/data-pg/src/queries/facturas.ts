@@ -14,8 +14,8 @@ import type { Db } from '../client.js';
 
 type Conn = Db | Parameters<Parameters<Db['transaction']>[0]>[0];
 
-/** The customer states 0019 maps to; the application checks them on the way in. */
-type FacturaEstado = 'timbrada' | 'en_global' | 'pendiente' | 'error';
+/** The customer states 0019/0021 map to; the application checks them on the way in. */
+type FacturaEstado = 'timbrada' | 'en_global' | 'pendiente' | 'reembolso';
 type FacturaRuta = 'individual' | 'global';
 
 /** One subscription payment as the database maps it for the customer. */
@@ -87,4 +87,20 @@ export async function marcarCfdiEmitido(
     sql`SELECT xangarro.cfdi_marcar_emitido(${input.paymentId}, ${input.businessId}, ${input.uuid}) AS marked`,
   );
   return rows[0]?.marked === true;
+}
+
+/**
+ * Resolve the monthly close's own item (0021): the period's `pending_global`
+ * payments become `in_global` under one global row stamped by hand with the
+ * folio fiscal. Returns how many payments changed — zero for an unknown
+ * period or one whose globals are already stamped.
+ */
+export async function marcarCfdiGlobal(
+  db: Conn,
+  input: { readonly period: string; readonly uuid: string },
+): Promise<number> {
+  const rows = await db.execute<{ marked: number }>(
+    sql`SELECT xangarro.cfdi_marcar_global(${input.period}, ${input.uuid}) AS marked`,
+  );
+  return Number(rows[0]?.marked ?? 0);
 }

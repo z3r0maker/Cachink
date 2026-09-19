@@ -716,6 +716,17 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   with `CFDI_MODE=off`), `solicitarFacturaNominal(paymentId)` (owner; `en_global` + valid fiscal data →
   one inbox item per payment, else `NO_APLICA` / `DATOS_FISCALES_INCOMPLETOS`). Result types in
   `facturas-core.ts`. **Still to do:** the monthly close's own item (`cfdi-global:<period>`) marks nothing.
+- Progress: 2026-09-18 · `track-n/n33-gaps` · the four handoff gaps closed (owner interview
+  2026-09-18): data-pg **0021** — `claimed` shows as `pendiente` (still owed, not "error"), refunded
+  payments (`excluded_from_global`/`cancel_requested`/`cancelled`) listed as **`reembolso`**, and
+  `xangarro.cfdi_marcar_global(period, uuid)` so resolving the monthly-close item marks its
+  `pending_global` payments `in_global` under one hand-stamped global (backoffice resolver wired);
+  `charge.refunded` → `RecordRefundForCfdiUseCase` (status bookkeeping + `factura` inbox item
+  «Reembolso recibido — dar de baja su CFDI», idempotent per refund id — **no PAC cancellation**,
+  that waits for O-14); `local/0000` provisions `xangarro_admin` so "marcar UUID" and the grants
+  tests run locally. Facturas estado union: `error` → `reembolso` (application + P-10's label).
+  Remaining: sandbox stamps (owner Facturapi test keys, O-15) and the fiscal refund automation
+  (O-14 contador sign-off).
 
 ---
 

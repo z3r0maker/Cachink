@@ -13,7 +13,7 @@ import type { Money } from '@xangarro/domain';
 
 import type { CfdiMode } from './cfdi-mode.js';
 
-export const FACTURA_ESTADOS = ['timbrada', 'en_global', 'pendiente', 'error'] as const;
+export const FACTURA_ESTADOS = ['timbrada', 'en_global', 'pendiente', 'reembolso'] as const;
 export type FacturaEstado = (typeof FACTURA_ESTADOS)[number];
 export type FacturaRuta = 'individual' | 'global';
 export type FacturaFormato = 'pdf' | 'xml';

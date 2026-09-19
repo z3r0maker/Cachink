@@ -54,6 +54,13 @@ BEGIN
 
   -- The nightly usage recompute (N-02/N-03). Its grants are in
   -- drizzle/0009_metering_cfdi_grants.sql, which creates it NOLOGIN.
+  -- The backoffice reads cross-tenant and marks CFDIs (0019/0021). Hosted
+  -- provisions it from env before any migration (docs/ops/provisioning.md);
+  -- locally it belongs here with its siblings so "marcar UUID" and the
+  -- monthly global close work against db-local (N-33).
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_admin') THEN
+    CREATE ROLE xangarro_admin LOGIN PASSWORD 'xangarro_admin';
+  END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'xangarro_metering') THEN
     CREATE ROLE xangarro_metering LOGIN PASSWORD 'xangarro_metering';
   END IF;

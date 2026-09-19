@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { marcarCfdiEmitido } from '@xangarro/data-pg';
+import { marcarCfdiEmitido, marcarCfdiGlobal } from '@xangarro/data-pg';
 
 import { auditedMutation } from '../audited';
 import { drizzleSupportItems } from '../db/support-items';
@@ -81,7 +81,11 @@ export async function cambiarEstado(_prev: FormState, form: FormData): Promise<F
       async (tx) => {
         const clock = { now: () => new Date() };
         const result = await changeSupportItemStatus(drizzleSupportItems(tx), input, clock);
-        await markPaymentInvoiced((mark) => marcarCfdiEmitido(tx, mark), result);
+        await markPaymentInvoiced(
+          (mark) => marcarCfdiEmitido(tx, mark),
+          result,
+          (mark) => marcarCfdiGlobal(tx, mark),
+        );
         return result;
       },
     );

@@ -3,8 +3,17 @@ import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
 
 import { createDb, withBusiness, type Db } from '../src/client';
-import { claimCfdiPayment, cfdiPaymentOf, type CfdiPaymentRow } from '../src/queries/cfdi';
-import { facturasDelNegocioRows, marcarCfdiEmitido } from '../src/queries/facturas';
+import {
+  claimCfdiPayment,
+  cfdiGlobalsOfPeriod,
+  cfdiPaymentOf,
+  type CfdiPaymentRow,
+} from '../src/queries/cfdi';
+import {
+  facturasDelNegocioRows,
+  marcarCfdiEmitido,
+  marcarCfdiGlobal,
+} from '../src/queries/facturas';
 import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
@@ -91,7 +100,8 @@ describe('xangarro.facturas_del_negocio(): a tenant reads only its own payments'
         [pid('stamped'), 'timbrada', 'individual'],
         [pid('global'), 'en_global', 'global'],
         [pid('manual'), 'pendiente', 'individual'],
-        [pid('claimed'), 'error', 'individual'],
+        [pid('claimed'), 'pendiente', 'individual'],
+        [pid('refunded'), 'reembolso', 'individual'],
       ],
     );
     const [stamped] = rows;
@@ -126,11 +136,15 @@ describe('xangarro.facturas_del_negocio(): a tenant reads only its own payments'
     );
   });
 
-  it('grants the marking function to the backoffice role, where one exists', async () => {
-    const [r] = await owner<{ ok: boolean | null }[]>`
+  it('grants the marking functions to the backoffice role, where one exists', async () => {
+    const rows = await owner<{ ok: boolean | null }[]>`
       SELECT has_function_privilege(oid, 'xangarro.cfdi_marcar_emitido(text, text, text)', 'EXECUTE') AS ok
         FROM pg_roles WHERE rolname = 'xangarro_admin'`;
-    assert.notEqual(r?.ok, false);
+    assert.notEqual(rows[0]?.ok, false);
+    const global = await owner<{ ok: boolean | null }[]>`
+      SELECT has_function_privilege(oid, 'xangarro.cfdi_marcar_global(text, text)', 'EXECUTE') AS ok
+        FROM pg_roles WHERE rolname = 'xangarro_admin'`;
+    assert.notEqual(global[0]?.ok, false);
   });
 
   it('marking a manual payment with its UUID makes it timbrada, by hand, without download', async () => {
@@ -150,5 +164,44 @@ describe('xangarro.facturas_del_negocio(): a tenant reads only its own payments'
     assert.equal(row?.pdfDisponible, false);
     assert.equal(row?.cfdiUuid, UUID.toUpperCase());
     assert.equal((await cfdiPaymentOf(billing, pid('global')))?.status, 'in_global');
+  });
+
+  it('cfdi_marcar_global marks a period as one hand-stamped global CFDI (0021)', async () => {
+    const g1 = payment(pid('gclose1'), {
+      route: 'global',
+      status: 'pending_global',
+      period: '2026-08',
+    });
+    const g2 = payment(pid('gclose2'), {
+      route: 'global',
+      status: 'pending_global',
+      period: '2026-08',
+    });
+    const mine = payment(pid('gkeep'), {
+      route: 'global',
+      status: 'pending_global',
+      period: '2026-07',
+    });
+    assert.equal(await claimCfdiPayment(billing, g1), true);
+    assert.equal(await claimCfdiPayment(billing, g2), true);
+    assert.equal(await claimCfdiPayment(billing, mine), true);
+
+    const admin = createDb(roleUrl(url as string, 'xangarro_admin'));
+    try {
+      assert.equal(await marcarCfdiGlobal(admin, { period: '2026-08', uuid: UUID }), 2);
+      assert.equal(
+        await marcarCfdiGlobal(admin, { period: '2026-08', uuid: UUID }),
+        0,
+        'idempotent',
+      );
+      assert.equal((await cfdiPaymentOf(billing, pid('gclose1')))?.status, 'in_global');
+      assert.equal((await cfdiPaymentOf(billing, pid('gkeep')))?.status, 'pending_global');
+      const [global] = (await cfdiGlobalsOfPeriod(billing, '2026-08')).slice(-1);
+      assert.equal(global?.status, 'stamped');
+      assert.equal(global?.invoiceUuid, UUID.toUpperCase());
+      assert.deepEqual(global?.paymentIds, [pid('gclose1'), pid('gclose2')]);
+    } finally {
+      await admin.$client.end({ timeout: 5 });
+    }
   });
 });

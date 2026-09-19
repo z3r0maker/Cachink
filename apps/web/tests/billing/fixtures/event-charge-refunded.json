@@ -1,0 +1,14 @@
+{
+  "id": "evt_TestChargeRefunded001",
+  "type": "charge.refunded",
+  "data": {
+    "object": {
+      "id": "ch_TestCharge00000000001",
+      "customer": "cus_TestDonPedro0001",
+      "amount_refunded": 23084,
+      "refunds": {
+        "data": [{ "id": "re_TestRefund000000001" }]
+      }
+    }
+  }
+}
