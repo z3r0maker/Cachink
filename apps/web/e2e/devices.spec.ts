@@ -198,7 +198,10 @@ test('«Enviar por correo» delivers the live code', async ({ page }) => {
 
   const mail = await latestMailTo(address);
   expect(mail).not.toBeNull();
-  const code = await page.getByTestId('activation-code').getAttribute('aria-label');
-  expect(mail).toContain(`Código ${code}`.replace('Código ', '') ?? '');
+  const code = (await page.getByTestId('activation-code').getAttribute('aria-label'))?.replace(
+    'Código ',
+    '',
+  );
+  expect(mail).toContain(code ?? '——');
   expect(mail).toContain('Taquería Don Pedro');
 });
