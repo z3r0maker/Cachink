@@ -90,7 +90,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
 config.serializer = config.serializer ?? {};
 config.serializer.processModuleFilter = (mod) => {
   if (
-    /[\\/](@cachink[\\/](sync-lan|sync-cloud)|@powersync[\\/](react-native|common))[\\/]/.test(
+    /[\\/](@xangarro[\\/](sync-lan|sync-cloud)|@powersync[\\/](react-native|common))[\\/]/.test(
       mod.path,
     )
   ) {

@@ -6,33 +6,33 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 8000
 
 # Add a product to the cart and check out (Efectivo, $50 tendered).
 - tapOn:
-    text: "Taco al Pastor.*"
+    text: 'Taco al Pastor.*'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 8000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 8000
 - tapOn: "\\$50"
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 8000

@@ -41,96 +41,96 @@ appId: mx.xangarro.mobile
 # authenticate.yaml lands on Director Home. Assert the structural
 # layout containers that Tamagui may reflow at $gtMd.
 - assertVisible:
-    id: "director-home-route"
+    id: 'director-home-route'
 - assertVisible:
-    id: "director-home-grid"
+    id: 'director-home-grid'
 - assertVisible:
-    id: "director-home-hero-slot"
+    id: 'director-home-hero-slot'
 - assertVisible:
-    id: "utilidad-hero"
+    id: 'utilidad-hero'
 - assertVisible:
-    id: "hoy-kpi-strip"
+    id: 'hoy-kpi-strip'
 
 # ── 2. All tab bar items reachable ───────────────────────────────
 # On iPad the tab bar remains at the bottom (Expo Router default).
 # Assert every tab target is in the accessibility tree.
 - assertVisible:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - assertVisible:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - assertVisible:
-    id: "tab-productos"
+    id: 'tab-productos'
 - assertVisible:
-    id: "tab-estados"
+    id: 'tab-estados'
 
 # ── 3. Ventas tab (Operativo context) ────────────────────────────
 # Switch to Operativo to exercise the POS grid on iPad.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # The ventas screen renders — even on empty state the screen shell
 # is visible. We do not assert the product grid here (it requires
 # data); that is covered by ipad-form-factor-audit.yaml.
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: 'tab-ventas'
     timeout: 5000
 
 # ── 4. Egresos tab ───────────────────────────────────────────────
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - extendedWaitUntil:
     visible:
-      id: "tab-gastos"
+      id: 'tab-gastos'
     timeout: 5000
 
 # ── 5. Productos tab ─────────────────────────────────────────────
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - extendedWaitUntil:
     visible:
-      id: "tab-productos"
+      id: 'tab-productos'
     timeout: 5000
 
 # ── 6. Switch back to Director for Estados + Otros ───────────────
 - tapOn:
-    id: "top-bar-role-chip"
+    id: 'top-bar-role-chip'
     optional: true
 - tapOn:
-    id: "role-director-select"
+    id: 'role-director-select'
     optional: true
 
 # ── 7. Estados Financieros subtabs ───────────────────────────────
 - tapOn:
-    id: "tab-estados"
+    id: 'tab-estados'
 - assertVisible:
-    id: "estados-shell"
+    id: 'estados-shell'
 
 # Cycle all four subtabs to confirm none are hidden at $gtMd.
 - assertVisible:
-    id: "estados-tab-resultados"
+    id: 'estados-tab-resultados'
 - tapOn:
-    id: "estados-tab-balance"
+    id: 'estados-tab-balance'
 - extendedWaitUntil:
     visible:
-      id: "estados-tab-balance"
+      id: 'estados-tab-balance'
     timeout: 4000
 - tapOn:
-    id: "estados-tab-flujo"
+    id: 'estados-tab-flujo'
 - extendedWaitUntil:
     visible:
-      id: "estados-tab-flujo"
+      id: 'estados-tab-flujo'
     timeout: 4000
 - tapOn:
-    id: "estados-tab-indicadores"
+    id: 'estados-tab-indicadores'
 - extendedWaitUntil:
     visible:
-      id: "estados-tab-indicadores"
+      id: 'estados-tab-indicadores'
     timeout: 4000
 - tapOn:
-    id: "estados-tab-resultados"
+    id: 'estados-tab-resultados'
 - assertVisible:
-    id: "estados-tab-resultados"
+    id: 'estados-tab-resultados'
 
 # ── 8. Otros tab grid ────────────────────────────────────────────
 # Review item #7: the Director bar is Inicio | Ventas | Gastos |
@@ -138,6 +138,6 @@ appId: mx.xangarro.mobile
 # This subflow opens it for whichever role is logged in.
 - runFlow: shared/open-director-tools.yaml
 - assertVisible:
-    id: "otros-usuarios"
+    id: 'otros-usuarios'
 - assertVisible:
-    id: "otros-funciones"
+    id: 'otros-funciones'

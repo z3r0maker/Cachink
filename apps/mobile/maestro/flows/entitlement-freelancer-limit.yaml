@@ -1,0 +1,51 @@
+# Plan limits (A-10): on a Freelancer entitlement whose monthly records are
+# used up, the next sale is refused with the informational limit sheet (no
+# purchase link) and nothing is saved.
+#
+# Precondition: device activated against the mock (activation.yaml) with at
+# least one capture this month. The mock serves a Freelancer entitlement
+# limited to 1 record; the flow restores the default scenario at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runFlow: shared/login-operator.yaml
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: freelancer
+      RECORDS_PER_MONTH: '1'
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 20000
+- runFlow: shared/ensure-caja-open.yaml
+- tapOn:
+    id: 'tab-ventas'
+- tapOn: 'Agua de jamaica'
+- tapOn:
+    id: 'cart-checkout-btn'
+- tapOn: 'Transferencia'
+- tapOn: 'CONTINUAR'
+- tapOn: 'TRANSFERENCIA RECIBIDA'
+- extendedWaitUntil:
+    visible:
+      id: 'plan-limit-sheet'
+    timeout: 15000
+- assertVisible: '.*app.xangarro.mx.*'
+- tapOn:
+    id: 'plan-limit-dismiss'
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: emprendedor
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 20000

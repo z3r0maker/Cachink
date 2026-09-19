@@ -63,7 +63,7 @@ const ERROR_ENTRY: TimelineEntry = {
 describe('formatTimelineAsText', () => {
   it('returns a report with header and footer', () => {
     const output = formatTimelineAsText([]);
-    expect(output).toContain('=== Cachink! Timeline Report ===');
+    expect(output).toContain('=== Xangarro! Timeline Report ===');
     expect(output).toContain('Total entries: 0');
     expect(output).toContain('=== End of Report ===');
   });
@@ -120,6 +120,6 @@ describe('formatTimelineAsText', () => {
     };
     // Should not throw — falls back to slice
     const output = formatTimelineAsText([badEntry]);
-    expect(output).toContain('=== Cachink! Timeline Report ===');
+    expect(output).toContain('=== Xangarro! Timeline Report ===');
   });
 });

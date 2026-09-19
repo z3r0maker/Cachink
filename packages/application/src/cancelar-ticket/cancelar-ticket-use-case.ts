@@ -106,9 +106,11 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
     const pinOk = await compare(pin, user.pinHash);
     if (!pinOk) throw new TypeError('PIN incorrecto');
 
+    // The row carries permissions parsed (drizzle) or as JSON text (pg).
     const raw = (user as Record<string, unknown>).permissions;
-    const perms = parseUserPermissions(typeof raw === 'string' ? raw : '{}');
-    if (!canUserCancelSales(user.role, perms)) {
+    const perms =
+      typeof raw === 'string' ? parseUserPermissions(raw) : parseUserPermissions(JSON.stringify(raw ?? {}));
+    if (!canUserCancelSales(perms)) {
       throw new TypeError('No tienes permiso para cancelar ventas');
     }
   }

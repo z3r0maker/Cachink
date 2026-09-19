@@ -7,7 +7,7 @@
  * ## Audit 2026-09 — brought onto the design system
  *
  * This component was written against Tamagui's default tokens (`$red3`,
- * `$yellow11`, `$3`, `$mono`) rather than the Cachink palette, so the surface
+ * `$yellow11`, `$3`, `$mono`) rather than the Xangarro palette, so the surface
  * every error in the app passes through did not look like the app. It now uses
  * the §8.3 language: hard 2px black border, hard drop shadow, no blur.
  *

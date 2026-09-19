@@ -1,5 +1,5 @@
 /**
- * Typed helpers for the `__cachink_sync_state` key/value table (ADR-029,
+ * Typed helpers for the `__xangarro_sync_state` key/value table (ADR-029,
  * ADR-030). Every sync-client component — the LAN client's push queue,
  * the pull loop, the pairing flow — stores its cursors and auth material
  * here rather than in `app_config` so Phase 1C's existing AppConfigRepository
@@ -7,7 +7,7 @@
  *
  * Scopes used today:
  *
- *   - `localPushHwm`            — highest `__cachink_change_log.id`
+ *   - `localPushHwm`            — highest `__xangarro_change_log.id`
  *                                 already pushed to the LAN server
  *                                 (ADR-029 push path).
  *   - `serverPullHwm`           — highest `serverSeq` this client has
@@ -27,8 +27,8 @@
  *   - `lanHostReady`            — boolean. Stamped `true` once the
  *                                 bundled Tauri LAN server reports ready
  *                                 (Slice 8 A2 revision). Replaces the
- *                                 pre-revision `auth.accessToken =
- *                                 'cachink-host'` sentinel: hosts don't
+ *                                 pre-revision host sentinel stored in
+ *                                 `auth.accessToken`: hosts don't
  *                                 pair, so they have no real bearer
  *                                 token — the gate uses this scope
  *                                 instead to decide "host is past the
@@ -43,13 +43,13 @@
  * `text` column. Reading a scope that doesn't exist returns `null` — no
  * thrown error, because "never synced before" is a first-class state.
  *
- * The helpers purposely accept the driver-agnostic `CachinkDatabase`
+ * The helpers purposely accept the driver-agnostic `XangarroDatabase`
  * alias so they run identically on `better-sqlite3` (tests),
  * `expo-sqlite` (mobile), and `@tauri-apps/plugin-sql` (desktop).
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from './repositories/drizzle/_db.js';
+import type { XangarroDatabase } from './repositories/drizzle/_db.js';
 
 /** All supported sync-state scope keys. Extending is cheap — add a literal. */
 export type SyncStateScope =
@@ -71,11 +71,11 @@ export type SyncStateScope =
  * with Zod or uses the returned value via a narrower wrapper in this file.
  */
 export async function readSyncState(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   scope: SyncStateScope,
 ): Promise<unknown | null> {
   const rows = (await db.all(
-    sql`SELECT "value" FROM "__cachink_sync_state" WHERE "scope" = ${scope} LIMIT 1`,
+    sql`SELECT "value" FROM "__xangarro_sync_state" WHERE "scope" = ${scope} LIMIT 1`,
   )) as Array<{ value: string }>;
   const first = rows[0];
   if (!first) return null;
@@ -93,13 +93,13 @@ export async function readSyncState(
  * callers never touch raw SQL quoting.
  */
 export async function writeSyncState(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   scope: SyncStateScope,
   value: unknown,
 ): Promise<void> {
   const serialised = JSON.stringify(value);
   await db.run(
-    sql`INSERT INTO "__cachink_sync_state" ("scope", "value") VALUES (${scope}, ${serialised})
+    sql`INSERT INTO "__xangarro_sync_state" ("scope", "value") VALUES (${scope}, ${serialised})
         ON CONFLICT ("scope") DO UPDATE SET "value" = excluded."value"`,
   );
 }
@@ -108,8 +108,8 @@ export async function writeSyncState(
  * Clear every sync-state row. Used by "Desemparejar este dispositivo" in
  * Settings (Slice 5 C19) to return the device to the unpaired state.
  */
-export async function clearSyncState(db: CachinkDatabase): Promise<void> {
-  await db.run(sql`DELETE FROM "__cachink_sync_state"`);
+export async function clearSyncState(db: XangarroDatabase): Promise<void> {
+  await db.run(sql`DELETE FROM "__xangarro_sync_state"`);
 }
 
 /**
@@ -118,7 +118,7 @@ export async function clearSyncState(db: CachinkDatabase): Promise<void> {
  * beginning".
  */
 export async function readHwm(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   scope: 'localPushHwm' | 'serverPullHwm',
 ): Promise<number> {
   const raw = await readSyncState(db, scope);
@@ -129,7 +129,7 @@ export async function readHwm(
 
 /** Typed sibling of {@link writeSyncState} for the two HWM scopes. */
 export async function writeHwm(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   scope: 'localPushHwm' | 'serverPullHwm',
   value: number,
 ): Promise<void> {

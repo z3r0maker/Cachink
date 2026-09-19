@@ -26,11 +26,11 @@ import {
   splitStatements,
   useDatabase,
 } from '../../src/database/index';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { renderWithProviders, screen, waitFor } from '../test-utils';
 
 /** Tiny placeholder — we never touch any SQL method in these tests. */
-const fakeDb = { __kind: 'fake-cachink-db' } as unknown as CachinkDatabase;
+const fakeDb = { __kind: 'fake-xangarro-db' } as unknown as XangarroDatabase;
 
 function DbConsumer({ testID }: { readonly testID: string }): ReactElement {
   const db = useDatabase();
@@ -58,7 +58,7 @@ describe('TestDatabaseProvider', () => {
         <DbConsumer testID="with-test-provider" />
       </TestDatabaseProvider>,
     );
-    expect(screen.getByTestId('with-test-provider').textContent).toBe('fake-cachink-db');
+    expect(screen.getByTestId('with-test-provider').textContent).toBe('fake-xangarro-db');
   });
 });
 
@@ -71,12 +71,12 @@ describe('AsyncDatabaseProvider', () => {
       </AsyncDatabaseProvider>,
     );
     await waitFor(() => expect(screen.queryByTestId('async-resolved')).not.toBeNull());
-    expect(screen.getByTestId('async-resolved').textContent).toBe('fake-cachink-db');
+    expect(screen.getByTestId('async-resolved').textContent).toBe('fake-xangarro-db');
     expect(create).toHaveBeenCalledTimes(1);
   });
 
   it('renders null while the factory is pending', () => {
-    const create = vi.fn(() => new Promise<CachinkDatabase>(() => {}));
+    const create = vi.fn(() => new Promise<XangarroDatabase>(() => {}));
     renderWithProviders(
       <AsyncDatabaseProvider create={create}>
         <DbConsumer testID="async-pending" />
@@ -92,7 +92,7 @@ describe('AsyncDatabaseProvider', () => {
         <DbConsumer testID="async-injected" />
       </AsyncDatabaseProvider>,
     );
-    expect(screen.getByTestId('async-injected').textContent).toBe('fake-cachink-db');
+    expect(screen.getByTestId('async-injected').textContent).toBe('fake-xangarro-db');
     expect(create).not.toHaveBeenCalled();
   });
 });

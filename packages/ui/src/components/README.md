@@ -12,7 +12,7 @@
 
 | Primitive          | One-liner                                                                                                                                         | Storybook                             |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
-| **`<Btn>`**        | The Cachink button. 7 variants (`primary` / `dark` / `ghost` / `green` / `danger` / `soft` / `outline`), 3 sizes, optional leading icon.          | `Phase 1A / Primitives / Btn`         |
+| **`<Btn>`**        | The Xangarro button. 7 variants (`primary` / `dark` / `ghost` / `green` / `danger` / `soft` / `outline`), 3 sizes, optional leading icon.         | `Phase 1A / Primitives / Btn`         |
 | **`<Card>`**       | Hard-bordered, hard-shadow surface. 3 variants (`white` / `yellow` / `black`), 4 padding scales, optional `onPress` press transform.              | `Phase 1A / Primitives / Card`        |
 | **`<Tag>`**        | Decorative chip. ADR-043: not tappable — use `<SegmentedToggle>` for radio chips.                                                                 | `Phase 1A / Primitives / Tag`         |
 | **`<EmptyState>`** | Title + body + optional emoji + optional action. The "we have nothing to show" surface for every list screen.                                     | `Phase 1A / Primitives / Empty State` |

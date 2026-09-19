@@ -14,24 +14,24 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 
 # Gasto tab is the default — fill concepto + monto.
 - assertVisible:
-    id: "nuevo-egreso-modal"
+    id: 'nuevo-egreso-modal'
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Renta del local"
+    id: 'gasto-concepto'
+- inputText: 'Renta del local'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "8000"
+    id: 'gasto-monto'
+- inputText: '8000'
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal closes + Total de egresos reflects the new amount.
 - assertNotVisible:
-    id: "nuevo-egreso-modal"
-- assertVisible: "−$8,000.00"
-- assertVisible: "Renta del local"
+    id: 'nuevo-egreso-modal'
+- assertVisible: '−$8,000.00'
+- assertVisible: 'Renta del local'

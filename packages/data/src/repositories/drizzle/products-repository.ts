@@ -20,16 +20,16 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { Product, ProductPatch, ProductsRepository } from '../products-repository.js';
 import { products } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type ProductRow = typeof products.$inferSelect;
 
 export class DrizzleProductsRepository implements ProductsRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

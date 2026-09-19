@@ -25,30 +25,30 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos → open new egreso → switch to Nómina tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "egreso-tab-nomina"
+    id: 'egreso-tab-nomina'
 
 # With empleado "Ana Pérez" already existing, the combobox renders.
 # Assert the nomina-empleado combobox is visible.
 - assertVisible:
-    id: "nomina-empleado"
+    id: 'nomina-empleado'
 
 # Tap the empleado combobox and select Ana Pérez.
 - tapOn:
-    id: "nomina-empleado"
-- tapOn: "Ana Pérez"
+    id: 'nomina-empleado'
+- tapOn: 'Ana Pérez'
 
 # Assert nomina-monto is visible and auto-filled from salario.
 - assertVisible:
-    id: "nomina-monto"
+    id: 'nomina-monto'
 
 # Submit the nómina egreso.
 - tapOn:
-    id: "nomina-submit"
+    id: 'nomina-submit'
 
 # Modal closes + egreso visible.
-- assertNotVisible: "Nuevo egreso"
-- assertVisible: "Nómina Ana Pérez"
+- assertNotVisible: 'Nuevo egreso'
+- assertVisible: 'Nómina Ana Pérez'

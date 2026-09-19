@@ -5,7 +5,7 @@ import { renderWithProviders, screen } from './test-utils';
 describe('HelloBadge', () => {
   it('renders the default label and greeting text', () => {
     renderWithProviders(<HelloBadge />);
-    expect(screen.getByText('CACHINK!')).toBeDefined();
+    expect(screen.getByText('XANGARRO!')).toBeDefined();
     expect(screen.getByText('Hola, emprendedor.')).toBeDefined();
   });
 

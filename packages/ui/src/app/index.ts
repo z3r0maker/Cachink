@@ -36,8 +36,9 @@ export {
 // test-only code inside a runtime package. Test suites that need it now
 // import from `@xangarro/testing`.
 
-export { AppProviders, type AppProvidersProps, type AppProvidersHooks } from './app-providers';
-export { GatedNavigation, type GatedNavigationProps, type LanBridges } from './gated-navigation';
-export { LanGate, type LanGateProps } from './lan-gate';
+export { AppProviders, type AppProvidersProps } from './app-providers';
+export { GatedNavigation, type GatedNavigationProps } from './gated-navigation';
 export { AppErrorBoundary, type AppErrorBoundaryProps } from './error-boundary';
 export { AppLoadingSkeleton, type AppLoadingSkeletonProps } from './app-loading-skeleton';
+export { CloudSyncBridge, useCloudSync, type CloudSyncContextValue } from './cloud-sync-bridge';
+export { StockLowScheduleHost } from './stock-low-schedule-host';

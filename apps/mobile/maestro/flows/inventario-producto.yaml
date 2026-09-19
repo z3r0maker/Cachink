@@ -17,57 +17,57 @@ appId: mx.xangarro.mobile
 - runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-productos"
+      id: 'otros-productos'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-productos"
+    id: 'otros-productos'
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 # Fill the product form. Use the "Next" toolbar button to advance
 # between fields, or press back to dismiss the keyboard before
 # tapping the next field.
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Tortilla"
+    id: 'producto-nombre'
+- inputText: 'Tortilla'
 - pressKey: enter
 
 - tapOn:
-    id: "producto-costo"
+    id: 'producto-costo'
 - eraseText
-- inputText: "2"
+- inputText: '2'
 - pressKey: enter
 
 - tapOn:
-    id: "producto-precio-venta"
+    id: 'producto-precio-venta'
 - eraseText
-- inputText: "15"
+- inputText: '15'
 - pressKey: enter
 
 - tapOn:
-    id: "producto-umbral"
+    id: 'producto-umbral'
 - eraseText
-- inputText: "10"
+- inputText: '10'
 - pressKey: enter
 
 # Submit — the last pressKey:enter may have already submitted
 # the form via onSubmitEditing. Try tapping submit, but if the
 # modal already closed, that's fine too.
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
     optional: true
 
 - extendedWaitUntil:
     notVisible:
-      id: "nuevo-producto-modal"
+      id: 'nuevo-producto-modal'
     timeout: 5000
 
 # Wait for the stock list to render the new product.
 - extendedWaitUntil:
     visible:
-      id: "stock-list"
+      id: 'stock-list'
     timeout: 5000
 - assertVisible:
-    text: ".*Tortilla.*"
+    text: '.*Tortilla.*'

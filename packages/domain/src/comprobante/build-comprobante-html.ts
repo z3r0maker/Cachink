@@ -8,7 +8,7 @@
  * deterministic and trivially testable without a renderer.
  *
  * The output is a self-contained HTML document with inline CSS that
- * mirrors the Cachink brand: Plus Jakarta Sans, black hard border,
+ * mirrors the Xangarro brand: Plus Jakarta Sans, black hard border,
  * 4px hard drop shadow, yellow emphasis. The consumer embeds it into
  * an offscreen iframe / WebView to rasterize.
  *

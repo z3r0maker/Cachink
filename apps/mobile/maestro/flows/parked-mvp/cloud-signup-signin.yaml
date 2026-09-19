@@ -1,11 +1,11 @@
 # Cloud mode: signup on tablet A, sign in on tablet B — verify the
 # newly-recorded venta shows up within 5 s (P1E-M4 C15).
 #
-# Requires a live Cachink-hosted Supabase + PowerSync instance. See
+# Requires a live Xangarro-hosted Supabase + PowerSync instance. See
 # supabase/README.md for provisioning. Expected env vars:
 #
-#   MAESTRO_CLOUD_EMAIL_A=alice+devA@cachink.mx
-#   MAESTRO_CLOUD_EMAIL_B=alice+devB@cachink.mx  # same user, two devices
+#   MAESTRO_CLOUD_EMAIL_A=alice+devA@xangarro.mx
+#   MAESTRO_CLOUD_EMAIL_B=alice+devB@xangarro.mx  # same user, two devices
 #   MAESTRO_CLOUD_PASSWORD=...
 #
 # Run from two separate device sessions — tablet A first (signup), then
@@ -25,23 +25,23 @@ env:
 
 # Reach the wizard via Settings → Sistema → Re-run.
 - runFlow: ../shared/navigate-to-settings.yaml
-- tapOn: { id: "settings-hub-sistema" }
-- tapOn: { id: "settings-re-run-wizard" }
-- assertVisible: { id: "wizard" }
+- tapOn: { id: 'settings-hub-sistema' }
+- tapOn: { id: 'settings-re-run-wizard' }
+- assertVisible: { id: 'wizard' }
 # Step 1 → "En varios dispositivos" → Step 2B → "La nube guarda los datos".
-- tapOn: { id: "wizard-step1-multi-card" }
-- tapOn: { id: "wizard-step2b-cloud-card" }
-- assertVisible: { id: "cloud-onboarding-screen" }
+- tapOn: { id: 'wizard-step1-multi-card' }
+- tapOn: { id: 'wizard-step2b-cloud-card' }
+- assertVisible: { id: 'cloud-onboarding-screen' }
 
 # Tablet A: sign up.
-- tapOn: { id: "cloud-tab-signup" }
-- tapOn: { id: "cloud-email-input" }
+- tapOn: { id: 'cloud-tab-signup' }
+- tapOn: { id: 'cloud-email-input' }
 - inputText: ${EMAIL_A}
-- tapOn: { id: "cloud-password-input" }
+- tapOn: { id: 'cloud-password-input' }
 - inputText: ${PASSWORD}
-- tapOn: { id: "cloud-business-input" }
-- inputText: "Tortillería Maestro"
-- tapOn: { id: "cloud-submit" }
+- tapOn: { id: 'cloud-business-input' }
+- inputText: 'Tortillería Maestro'
+- tapOn: { id: 'cloud-submit' }
 
 # Fresh cloud signup → no users → DirectorSetup gate fires.
 - runFlow: ../shared/director-setup.yaml
@@ -49,33 +49,33 @@ env:
 # Create a product first — fresh cloud signup has an empty catalogue.
 # Director accesses Productos via Otros grid.
 - runFlow: ../shared/open-director-tools.yaml
-- tapOn: { id: "otros-productos" }
-- tapOn: { id: "stock-nuevo-producto" }
-- tapOn: { id: "producto-nombre" }
-- inputText: "Taco al pastor"
-- tapOn: { id: "producto-precio-venta" }
-- inputText: "450"
-- tapOn: { id: "producto-submit" }
-- assertVisible: "Taco al pastor"
+- tapOn: { id: 'otros-productos' }
+- tapOn: { id: 'stock-nuevo-producto' }
+- tapOn: { id: 'producto-nombre' }
+- inputText: 'Taco al pastor'
+- tapOn: { id: 'producto-precio-venta' }
+- inputText: '450'
+- tapOn: { id: 'producto-submit' }
+- assertVisible: 'Taco al pastor'
 
 # Record a venta via the cart checkout flow.
-- tapOn: { id: "tab-ventas" }
+- tapOn: { id: 'tab-ventas' }
 - extendedWaitUntil:
-    visible: { id: "ventas-product-grid" }
+    visible: { id: 'ventas-product-grid' }
     timeout: 5000
-- tapOn: "Taco al pastor"
-- assertVisible: { id: "cart-strip" }
-- tapOn: { id: "cart-checkout-btn" }
+- tapOn: 'Taco al pastor'
+- assertVisible: { id: 'cart-strip' }
+- tapOn: { id: 'cart-checkout-btn' }
 - extendedWaitUntil:
-    visible: { id: "checkout-method-picker" }
+    visible: { id: 'checkout-method-picker' }
     timeout: 5000
-- tapOn: { id: "checkout-method-continue" }
+- tapOn: { id: 'checkout-method-continue' }
 - extendedWaitUntil:
-    visible: { id: "checkout-efectivo" }
+    visible: { id: 'checkout-efectivo' }
     timeout: 5000
 - tapOn: "\\$50"
-- tapOn: { id: "checkout-efectivo-submit" }
+- tapOn: { id: 'checkout-efectivo-submit' }
 - extendedWaitUntil:
-    visible: { id: "ventas-product-grid" }
+    visible: { id: 'ventas-product-grid' }
     timeout: 10000
-- assertVisible: "Taco al pastor"
+- assertVisible: 'Taco al pastor'

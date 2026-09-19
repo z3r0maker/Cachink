@@ -19,50 +19,50 @@ tags:
 
 # Navigate to Ventas.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Tap a product and set high quantity (exceeding stock).
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Set cantidad to a large number by tapping the quantity control.
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 
 # Checkout — should succeed even with high qty.
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 5000
 - tapOn: "\\$500"
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 
 # Returns to Ventas — sale completed (negative stock allowed).
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000

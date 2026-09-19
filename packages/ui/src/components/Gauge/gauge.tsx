@@ -1,5 +1,5 @@
 /**
- * Gauge — the Cachink horizontal progress meter primitive.
+ * Gauge — the Xangarro horizontal progress meter primitive.
  *
  * A slim, hard-bordered, hard-shadowless horizontal bar used on the
  * Indicadores screen for margins, liquidity, rotation, and any other 0..max

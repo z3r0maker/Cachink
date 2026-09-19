@@ -21,33 +21,33 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Sistema sub-screen.
 - tapOn:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'
 - extendedWaitUntil:
-    visible: "Sistema"
+    visible: 'Sistema'
     timeout: 5000
 
 # Assert the language card is visible.
 - assertVisible:
-    id: "settings-language-card"
+    id: 'settings-language-card'
 
 # Assert the notifications toggle is visible.
 - assertVisible:
-    id: "settings-notifications-toggle"
+    id: 'settings-notifications-toggle'
 
 # Scroll to and assert export datos card.
 - scrollUntilVisible:
     element:
-      id: "export-datos-card"
+      id: 'export-datos-card'
     direction: DOWN
     timeout: 5000
 - assertVisible:
-    id: "export-datos-card"
+    id: 'export-datos-card'
 
 # Scroll to and assert check for updates button.
 - scrollUntilVisible:
     element:
-      id: "settings-check-for-updates"
+      id: 'settings-check-for-updates'
     direction: DOWN
     timeout: 5000
 - assertVisible:
-    id: "settings-check-for-updates"
+    id: 'settings-check-for-updates'

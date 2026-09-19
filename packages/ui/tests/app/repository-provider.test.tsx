@@ -18,7 +18,7 @@ import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { InMemorySalesRepository } from '@xangarro/testing';
 import type { DeviceId } from '@xangarro/domain';
-import type { CachinkDatabase, SalesRepository } from '@xangarro/data';
+import type { XangarroDatabase, SalesRepository } from '@xangarro/data';
 import Sqlite from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/sqlite-proxy';
 import * as schema from '@xangarro/data/schema';
@@ -58,13 +58,13 @@ describe('useRepositories', () => {
     }
   });
 
-  it('exposes all 20 repositories through the context record', () => {
+  it('exposes all 22 repositories (20 entity + referenceData + recordUsage) through the context record', () => {
     renderWithProviders(
       <MockRepositoryProvider>
         <RepoProbe />
       </MockRepositoryProvider>,
     );
-    expect(screen.getByTestId('count').textContent).toBe('21');
+    expect(screen.getByTestId('count').textContent).toBe('23');
   });
 });
 
@@ -136,7 +136,7 @@ describe('MockRepositoryProvider overrides', () => {
 });
 
 describe('buildDrizzleRepositories', () => {
-  it('returns 20 non-null repository instances wired onto one db + deviceId', () => {
+  it('returns 22 non-null repository instances wired onto one db + deviceId', () => {
     const sqlite = new Sqlite(':memory:');
     const shim = {
       path: ':memory:',
@@ -157,11 +157,12 @@ describe('buildDrizzleRepositories', () => {
       {
         schema,
       },
-    ) as unknown as CachinkDatabase;
+    ) as unknown as XangarroDatabase;
     const deviceId = '01JPHK00000000000000000007' as DeviceId;
     const repos = buildDrizzleRepositories(db, deviceId);
     const count = Object.keys(repos).length;
-    expect(count).toBe(21);
+    expect(count).toBe(23);
+    expect('referenceData' in repos).toBe(true);
     expect(Object.values(repos).every((r) => r !== null && typeof r === 'object')).toBe(true);
   });
 });

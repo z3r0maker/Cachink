@@ -1,6 +1,6 @@
 /**
  * Pull loop tests (Slice 5 C13) — verifies LWW apply behaviour and the
- * batches-then-stops progression through `__cachink_sync_state`.
+ * batches-then-stops progression through `__xangarro_sync_state`.
  */
 
 import { sql } from 'drizzle-orm';
@@ -19,13 +19,11 @@ const TS_NEW = '2026-04-23T15:05:00.000Z';
 function remoteSaleRow(id: string, deviceId: string, updatedAt: string, monto: number) {
   return {
     id,
+    ticket_id: id.replace('S0', 'K0'),
     fecha: '2026-04-23',
     concepto: 'Taco',
     categoria: 'Producto',
     monto_centavos: BigInt(monto),
-    metodo: 'Efectivo',
-    cliente_id: null,
-    estado_pago: 'pagado',
     producto_id: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
     cantidad: 1,
     business_id: BIZ,
@@ -73,9 +71,13 @@ describe('pull loop — runPullCycle', () => {
     const db = makeFreshDb();
     // Seed a local row with the older timestamp.
     await db.run(
-      sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
+      sql`INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, business_id, device_id, created_at, updated_at)
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7K02', 1, '2026-04-23', 'Old', 'Efectivo', 'pagado', ${BIZ}, ${DEV_A}, ${TS_OLD}, ${TS_OLD})`,
+    );
+    await db.run(
+      sql`INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
-          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S02', '2026-04-23', 'Old', 'Producto', '10000', 'Efectivo', NULL, 'pagado',
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S02', '01HZ8XQN9GZJXV8AKQ5X0C7K02', '2026-04-23', 'Old', 'Producto', '10000',
                   '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_A}, ${TS_OLD}, ${TS_OLD}, NULL)`,
     );
     const server = createFakeLanServer({
@@ -102,9 +104,13 @@ describe('pull loop — runPullCycle', () => {
   it('LWW — older remote update is rejected and recorded as a conflict', async () => {
     const db = makeFreshDb();
     await db.run(
-      sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
+      sql`INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, business_id, device_id, created_at, updated_at)
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7K03', 1, '2026-04-23', 'Newer', 'Efectivo', 'pagado', ${BIZ}, ${DEV_A}, ${TS_NEW}, ${TS_NEW})`,
+    );
+    await db.run(
+      sql`INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
-          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S03', '2026-04-23', 'Newer', 'Producto', '30000', 'Efectivo', NULL, 'pagado',
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S03', '01HZ8XQN9GZJXV8AKQ5X0C7K03', '2026-04-23', 'Newer', 'Producto', '30000',
                   '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_A}, ${TS_NEW}, ${TS_NEW}, NULL)`,
     );
     const server = createFakeLanServer({
@@ -126,7 +132,7 @@ describe('pull loop — runPullCycle', () => {
     expect(res.deltasRejected).toBe(1);
 
     const conflicts = (await db.all(
-      sql`SELECT direction, reason FROM __cachink_conflicts WHERE row_id = '01HZ8XQN9GZJXV8AKQ5X0C7S03'`,
+      sql`SELECT direction, reason FROM __xangarro_conflicts WHERE row_id = '01HZ8XQN9GZJXV8AKQ5X0C7S03'`,
     )) as Array<{ direction: string; reason: string }>;
     expect(conflicts).toEqual([{ direction: 'inbound', reason: 'stale' }]);
   });
@@ -135,9 +141,13 @@ describe('pull loop — runPullCycle', () => {
     const db = makeFreshDb();
     // Local row: DEV_B (larger lex)
     await db.run(
-      sql`INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, cliente_id, estado_pago,
+      sql`INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, business_id, device_id, created_at, updated_at)
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7K04', 1, '2026-04-23', 'Local', 'Efectivo', 'pagado', ${BIZ}, ${DEV_B}, ${TS_OLD}, ${TS_OLD})`,
+    );
+    await db.run(
+      sql`INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at, deleted_at)
-          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S04', '2026-04-23', 'Local', 'Producto', '10000', 'Efectivo', NULL, 'pagado',
+          VALUES ('01HZ8XQN9GZJXV8AKQ5X0C7S04', '01HZ8XQN9GZJXV8AKQ5X0C7K04', '2026-04-23', 'Local', 'Producto', '10000',
                   '01HZ8XQN9GZJXV8AKQ5X0C7P01', 1, ${BIZ}, ${DEV_B}, ${TS_OLD}, ${TS_OLD}, NULL)`,
     );
     // Remote row: same updated_at, DEV_A (smaller lex) — must win.

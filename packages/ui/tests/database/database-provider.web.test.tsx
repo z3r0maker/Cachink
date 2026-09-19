@@ -24,7 +24,7 @@ import { describe, expect, it } from 'vitest';
 import { buildTauriCallback } from '../../src/database/database-provider.web';
 import { runMigrations } from '../../src/database/run-migrations';
 import * as schema from '@xangarro/data/schema';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { journal } from '@xangarro/data/migrations';
 
 type TauriLikeDatabase = Parameters<typeof buildTauriCallback>[0];
@@ -116,7 +116,7 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const sqlite = new Sqlite(':memory:');
     const db = drizzle(buildTauriCallback(makeTauriShim(sqlite)), {
       schema,
-    }) as unknown as CachinkDatabase;
+    }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -147,10 +147,10 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
       'director_alerts',
       'caja_movimientos',
       'cancelacion_logs',
-      '__cachink_migrations',
-      '__cachink_change_log',
-      '__cachink_sync_state',
-      '__cachink_conflicts',
+      '__xangarro_migrations',
+      '__xangarro_change_log',
+      '__xangarro_sync_state',
+      '__xangarro_conflicts',
     ]) {
       expect(names, `expected ${expected} to exist`).toContain(expected);
     }
@@ -160,17 +160,16 @@ describe('runMigrations via the desktop sqlite-proxy adapter', () => {
     const sqlite = new Sqlite(':memory:');
     const db = drizzle(buildTauriCallback(makeTauriShim(sqlite)), {
       schema,
-    }) as unknown as CachinkDatabase;
+    }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
     // Second call must not throw (tables already exist) nor re-insert.
     await runMigrations(db);
 
-    const rows = sqlite.prepare('SELECT tag FROM __cachink_migrations').all() as Array<{
+    const rows = sqlite.prepare('SELECT tag FROM __xangarro_migrations').all() as Array<{
       tag: string;
     }>;
-    // Each journal migration recorded exactly once — not "only 0000", which
-    // broke the day a second migration shipped (P-08's fiscal columns).
+    // Exactly one row per journal entry — none applied twice.
     expect(rows).toEqual(journal.entries.map((e) => ({ tag: e.tag })));
   });
 });

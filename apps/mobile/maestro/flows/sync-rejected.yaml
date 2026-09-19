@@ -1,0 +1,55 @@
+# "No enviados" (A-08): a sale the server refuses stays on the device, the
+# pill reports it, and the screen shows the reason and the hint. Once the
+# portal restores the product, "Reintentar" gets the sale accepted.
+#
+# Precondition: device activated against the mock on MOCK_API (activation.yaml).
+# The mock forgets "Agua de horchata" (as if purged in the portal), so the
+# sale is rejected with FK_PRODUCT_MISSING; the flow restores it before retrying.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runFlow: shared/login-operator.yaml
+- runFlow: shared/ensure-caja-open.yaml
+- tapOn:
+    id: 'tab-ventas'
+- runScript:
+    file: shared/mock-row.js
+    env:
+      ACTION: forget
+      TABLE: products
+      ROW_ID: 01JPRD00000000000000000007
+- tapOn: 'Agua de horchata'
+- tapOn:
+    id: 'cart-checkout-btn'
+- tapOn: 'Transferencia'
+- tapOn: 'CONTINUAR'
+- tapOn: 'TRANSFERENCIA RECIBIDA'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-rejected'
+    timeout: 30000
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'no-enviados-screen'
+    timeout: 10000
+- assertVisible: '.*Agua de horchata.*'
+- assertVisible: 'El producto de este registro ya no existe en el portal.'
+- assertVisible: '.*regístrala con otro producto.*'
+- runScript:
+    file: shared/mock-row.js
+    env:
+      ACTION: restore
+      TABLE: products
+      ROW_ID: 01JPRD00000000000000000007
+- tapOn:
+    id: 'no-enviados-retry-all'
+- extendedWaitUntil:
+    visible:
+      id: 'no-enviados-empty'
+    timeout: 30000
+- assertVisible:
+    id: 'cloud-sync-pill-synced'

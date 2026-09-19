@@ -9,11 +9,11 @@
  * orchestrator just wires them together.
  */
 import { useEffect, useRef, useState } from 'react';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import type { ResetDatabaseFn } from './database-reset';
 
 export interface DatabaseLifecycleState {
-  readonly db: CachinkDatabase | null;
+  readonly db: XangarroDatabase | null;
   readonly error: Error | null;
   readonly copied: boolean;
   readonly resetOpen: boolean;
@@ -26,9 +26,9 @@ export interface DatabaseLifecycleState {
 }
 
 interface DatabaseLifecycleArgs {
-  readonly create: () => Promise<CachinkDatabase>;
+  readonly create: () => Promise<XangarroDatabase>;
   readonly reset?: ResetDatabaseFn;
-  readonly preInitialised?: CachinkDatabase;
+  readonly preInitialised?: XangarroDatabase;
 }
 
 function normalizeError(err: unknown): Error {
@@ -36,20 +36,20 @@ function normalizeError(err: unknown): Error {
 }
 
 interface OpenerArgs {
-  readonly create: () => Promise<CachinkDatabase>;
-  readonly preInitialised?: CachinkDatabase;
+  readonly create: () => Promise<XangarroDatabase>;
+  readonly preInitialised?: XangarroDatabase;
   readonly retryToken: number;
   readonly setCopied: (v: boolean) => void;
 }
 
 interface OpenerSetters {
-  readonly setDb: (db: CachinkDatabase | null) => void;
+  readonly setDb: (db: XangarroDatabase | null) => void;
   readonly setError: (e: Error | null) => void;
   readonly setLoading: (v: boolean) => void;
   readonly setCopied: (v: boolean) => void;
 }
 
-function runCreate(create: () => Promise<CachinkDatabase>, setters: OpenerSetters): () => void {
+function runCreate(create: () => Promise<XangarroDatabase>, setters: OpenerSetters): () => void {
   let mounted = true;
   setters.setDb(null);
   setters.setError(null);
@@ -75,12 +75,12 @@ function runCreate(create: () => Promise<CachinkDatabase>, setters: OpenerSetter
 
 /** Owns the open / retry effect that produces the resolved database. */
 function useDatabaseOpener(args: OpenerArgs): {
-  readonly db: CachinkDatabase | null;
+  readonly db: XangarroDatabase | null;
   readonly error: Error | null;
   readonly loading: boolean;
   readonly setError: (e: Error | null) => void;
 } {
-  const [db, setDb] = useState<CachinkDatabase | null>(args.preInitialised ?? null);
+  const [db, setDb] = useState<XangarroDatabase | null>(args.preInitialised ?? null);
   const [error, setError] = useState<Error | null>(null);
   const [loading, setLoading] = useState(args.preInitialised == null);
   useEffect(() => {

@@ -5,10 +5,12 @@
  * (CLAUDE.md 2.6).
  */
 
-import { useCallback, useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactElement, type ReactNode } from 'react';
 import { QueryClient } from '@tanstack/react-query';
-import { DrizzleAppConfigRepository, readSyncState } from '@xangarro/data';
+import { DrizzleAppConfigRepository } from '@xangarro/data';
+import { PlanLimitError } from '@xangarro/domain';
 import type { LogStore } from '@xangarro/observability';
+import { usePlanLimitStore } from '../entitlement/plan-limit-store';
 import { useDatabase } from '../database/index';
 import {
   AppConfigProvider,
@@ -28,19 +30,7 @@ export function DrizzleAppConfigBridge({
 }): ReactElement {
   const db = useDatabase();
   const repo = useMemo(() => new DrizzleAppConfigRepository(db), [db]);
-  const resolveLegacyLan = useCallback(async (): Promise<'lan-server' | 'lan-client'> => {
-    try {
-      const role = await readSyncState(db, 'lanRole');
-      return role === 'host' ? 'lan-server' : 'lan-client';
-    } catch {
-      return 'lan-client';
-    }
-  }, [db]);
-  return (
-    <AppConfigProvider appConfig={repo} resolveLegacyLan={resolveLegacyLan}>
-      {children}
-    </AppConfigProvider>
-  );
+  return <AppConfigProvider appConfig={repo}>{children}</AppConfigProvider>;
 }
 
 export function DrizzleRepositoryBridge({
@@ -92,6 +82,11 @@ export function buildQueryClient(logStoreRef: { current: LogStore | null }): Que
                 businessId: null,
               })
               .catch(() => {});
+          }
+          // A plan limit is not a failure: explain it instead of toasting (A-10).
+          if (error instanceof PlanLimitError) {
+            usePlanLimitStore.getState().show(error);
+            return;
           }
           useErrorToastStore.getState().push({
             message: error instanceof Error ? error.message : 'Algo salió mal',

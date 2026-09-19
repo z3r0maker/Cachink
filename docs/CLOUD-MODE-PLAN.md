@@ -1,4 +1,4 @@
-# Cachink! Cloud Mode — Implementation Plan
+# Xangarro Cloud Mode — Implementation Plan
 
 > **Status:** DRAFT — Pending approval
 > **Created:** 2026-05-16
@@ -24,14 +24,14 @@
 
 ## 1. Executive Summary
 
-Cloud mode enables Cachink! businesses to sync data across 1-5 devices via the cloud. The architecture **reuses the existing LAN sync protocol** (push/pull/LWW) but points it at a serverless cloud endpoint instead of a local network peer.
+Cloud mode enables Xangarro businesses to sync data across 1-5 devices via the cloud. The architecture **reuses the existing LAN sync protocol** (push/pull/LWW) but points it at a serverless cloud endpoint instead of a local network peer.
 
 **Key decisions:**
 
 - **Drop PowerSync** ($49/mo saved) — overkill for 1-5 users per business
 - **Use Turso** (SQLite in the cloud) — same format as local DB, $0-25/mo for thousands of businesses
 - **Use Cloudflare Workers** (stateless sync API) — $0/mo on free tier, zero ops
-- **Reuse `@cachink/sync-lan` protocol** — proven push/pull/LWW, already tested
+- **Reuse `@xangarro/sync-lan` protocol** — proven push/pull/LWW, already tested
 - **Per-business isolated database** — you own and manage all DBs from your Turso account
 
 **Total new code:** ~200 lines (Cloudflare Worker) + ~100 lines (app activation screen)
@@ -129,7 +129,7 @@ flowchart TB
 
 ### Why NOT PowerSync
 
-PowerSync is designed for apps with thousands of concurrent users, complex partial sync, and real-time collaboration. Cachink! Cloud needs:
+PowerSync is designed for apps with thousands of concurrent users, complex partial sync, and real-time collaboration. Xangarro Cloud needs:
 
 - 1-5 devices per business
 - Total data per business: 5-50MB
@@ -153,7 +153,7 @@ Your existing LAN sync protocol (push/pull/LWW with conflict surfacing) is **per
 
 ### Free Tier Limits (what you get for $0)
 
-| Service            | Free limit                          | Cachink! usage per business | Businesses supported |
+| Service            | Free limit                          | Xangarro usage per business | Businesses supported |
 | ------------------ | ----------------------------------- | --------------------------- | -------------------- |
 | Turso              | 100 DBs, 5GB storage, 500M reads/mo | ~10-50MB, ~10K reads/mo     | **100**              |
 | Cloudflare Workers | 100K requests/day                   | ~20-50 req/day per business | **2,000+**           |
@@ -212,7 +212,7 @@ graph LR
 
 ### Data volume estimates
 
-A typical Cachink! business generates:
+A typical Xangarro business generates:
 
 - ~30 ventas/month × ~200 bytes = 6KB
 - ~20 egresos/month × ~200 bytes = 4KB
@@ -259,11 +259,11 @@ flowchart TB
 
 | Operation                | How                                                           | When                           |
 | ------------------------ | ------------------------------------------------------------- | ------------------------------ |
-| **View customer data**   | Turso CLI: `turso db shell cachink-biz-{id}`                  | Customer support request       |
+| **View customer data**   | Turso CLI: `turso db shell xangarro-biz-{id}`                 | Customer support request       |
 | **Fix corrupted data**   | Direct SQL against their Turso DB                             | Bug report                     |
 | **Run schema migration** | Script that iterates all DBs via Turso API + runs ALTER TABLE | App update with schema change  |
 | **Revoke access**        | Delete the activation record in master DB                     | Subscription cancelled / abuse |
-| **Export customer data** | `turso db dump cachink-biz-{id} > backup.sql`                 | GDPR request / customer export |
+| **Export customer data** | `turso db dump xangarro-biz-{id} > backup.sql`                | GDPR request / customer export |
 | **Monitor health**       | Turso dashboard shows per-DB metrics                          | Daily ops check                |
 | **Suspend a business**   | Invalidate their auth token in master DB                      | Payment failed                 |
 | **Transfer data**        | Export from one DB, import to another                         | Business merges                |
@@ -290,7 +290,7 @@ This is ~500 lines of code but NOT required for launch. The Turso CLI + dashboar
 ```mermaid
 sequenceDiagram
     participant U as 👤 User
-    participant App as 📱 Cachink! App
+    participant App as 📱 Xangarro App
     participant Browser as 🌐 Browser
     participant Stripe as 💳 Stripe
     participant CF as ⚡ Cloudflare Worker
@@ -308,7 +308,7 @@ sequenceDiagram
     Stripe->>CF: Webhook: checkout.session.completed
 
     Note over CF,Turso: Provisioning (~1 second)
-    CF->>Turso: POST /v2/organizations/{org}/databases<br/>(Create DB: "cachink-biz-{ulid}")
+    CF->>Turso: POST /v2/organizations/{org}/databases<br/>(Create DB: "xangarro-biz-{ulid}")
     Turso-->>CF: { dbUrl, authToken }
     CF->>Turso: Run schema.sql against new DB
     CF->>CF: Generate activation key: "CK-A7F9-X2B4"
@@ -321,7 +321,7 @@ sequenceDiagram
     App->>CF: POST /api/v1/activate { code: "CK-A7F9-X2B4" }
     CF->>Turso: Look up key in master DB
     CF-->>App: { serverUrl, accessToken, businessId }
-    App->>App: Writes to __cachink_sync_state
+    App->>App: Writes to __xangarro_sync_state
     App->>App: Starts push/pull sync cycle
     App-->>U: ✅ "¡Sincronización en la nube activada!"
 
@@ -370,11 +370,11 @@ sequenceDiagram
 │  maria@correo.com                       │
 │                                         │
 │  Instrucciones:                         │
-│  1. Abre Cachink! en tu dispositivo     │
+│  1. Abre Xangarro en tu dispositivo     │
 │  2. Ve a Ajustes → Activar Cloud        │
 │  3. Ingresa tu clave                    │
 │                                         │
-│  [ Abrir Cachink! ]  ← deep link        │
+│  [ Abrir Xangarro ]  ← deep link        │
 └─────────────────────────────────────────┘
 ```
 
@@ -449,7 +449,7 @@ graph TB
 - Response shapes (`PushResponse`, `PullResponse`)
 - HWM tracking (localPushHwm, serverPullHwm)
 - LWW conflict resolution (updated_at + device_id tiebreaker)
-- Conflict surfacing (`__cachink_conflicts` table)
+- Conflict surfacing (`__xangarro_conflicts` table)
 - Auth header (`Authorization: Bearer {token}`)
 
 **What's different:**
@@ -538,8 +538,8 @@ CREATE TABLE activations (
   business_id TEXT NOT NULL,     -- ULID
   business_name TEXT NOT NULL,
   email TEXT NOT NULL,
-  turso_db_name TEXT NOT NULL,   -- "cachink-biz-{ulid}"
-  turso_db_url TEXT NOT NULL,    -- "libsql://cachink-biz-xxx.turso.io"
+  turso_db_name TEXT NOT NULL,   -- "xangarro-biz-{ulid}"
+  turso_db_url TEXT NOT NULL,    -- "libsql://xangarro-biz-xxx.turso.io"
   turso_auth_token TEXT NOT NULL,
   stripe_customer_id TEXT,
   stripe_subscription_id TEXT,
@@ -701,13 +701,13 @@ workers/
 
 - [ ] **Pricing:** $49 MXN, $79 MXN, or $99 MXN per month? Or offer both monthly and annual?
 - [ ] **OXXO support:** Include OXXO as payment method? (adds 24-48h provisioning delay)
-- [ ] **Deep links:** Should "Abrir Cachink!" button on success page auto-fill the key via deep link?
+- [ ] **Deep links:** Should "Abrir Xangarro" button on success page auto-fill the key via deep link?
 - [ ] **Device limit:** 5 devices per business, or make it configurable per plan?
 - [ ] **Grace period:** 7 days or 14 days after payment failure?
 - [ ] **Data retention:** 30 days or 90 days after cancellation before archiving?
 - [ ] **Domain:** `sync.cachink.mx` for the Worker, or `api.cachink.mx`?
 - [ ] **Admin dashboard:** Build for launch, or use Turso CLI initially?
-- [ ] **Existing sync-cloud package:** Deprecate the PowerSync-based `@cachink/sync-cloud`, or keep it as a "premium" BYO option?
+- [ ] **Existing sync-cloud package:** Deprecate the PowerSync-based `@xangarro/sync-cloud`, or keep it as a "premium" BYO option?
 
 ---
 

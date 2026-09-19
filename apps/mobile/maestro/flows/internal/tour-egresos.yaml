@@ -6,6 +6,6 @@ tags: [internal]
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - assertVisible:
-    id: "egresos-screen"
+    id: 'egresos-screen'

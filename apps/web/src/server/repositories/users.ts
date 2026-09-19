@@ -1,6 +1,6 @@
 import 'server-only';
 
-import { and, count, eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { users } from '@xangarro/data-pg';
 import { newUlid, type BusinessId, type User, type UserId } from '@xangarro/domain';
 import type { CreateUserInput, UserPatch, UsersRepository } from '@xangarro/data';
@@ -44,8 +44,9 @@ function reads(tx: Tx) {
       return (await tx.select().from(users)).map(toDomain);
     },
     async countDirectors(): Promise<number> {
-      const [row] = await tx.select({ n: count() }).from(users).where(eq(users.role, 'director'));
-      return row?.n ?? 0;
+      // No roles on the device model (A-05); the owner is an account, not a
+      // users row. Kept for interface compatibility.
+      return 0;
     },
   };
 }
@@ -58,6 +59,7 @@ function writes(tx: Tx, businessId: BusinessId) {
         .insert(users)
         .values({
           ...input,
+          permissions: JSON.stringify(input.permissions ?? { canCancelSales: false }),
           id: newUlid(),
           deviceId: PORTAL_DEVICE_ID,
           createdAt: now,

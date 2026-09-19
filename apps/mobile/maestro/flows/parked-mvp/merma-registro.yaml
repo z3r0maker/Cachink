@@ -15,37 +15,37 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Merma tab (direct tab in Operativo layout).
 - tapOn:
-    id: "tab-merma"
+    id: 'tab-merma'
 
 # Merma screen renders with the product grid.
 - extendedWaitUntil:
     visible:
-      id: "merma-screen"
+      id: 'merma-screen'
     timeout: 5000
 - assertVisible:
-    id: "merma-grid"
+    id: 'merma-grid'
 
 # Tap a demo product to add to cart.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 
 # Cart strip should appear with the item.
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Tap checkout to open the confirm sheet.
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # Merma checkout sheet appears.
 - extendedWaitUntil:
     visible:
-      id: "merma-checkout-sheet"
+      id: 'merma-checkout-sheet'
     timeout: 5000
 
 # Submit the merma registration.
 - tapOn:
-    id: "merma-checkout-submit"
+    id: 'merma-checkout-submit'
 
 # Sheet closes on success.
 - assertNotVisible:
-    id: "merma-checkout-sheet"
+    id: 'merma-checkout-sheet'

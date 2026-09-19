@@ -39,8 +39,13 @@ export const DOWN_TABLES = [
   'mensajes_operador',
 ] as const;
 
-/** Local-only tables that never cross the wire. */
-export const NEVER_SYNCED_TABLES = ['app_config', 'director_alerts'] as const;
+/** Local-only tables that never cross the wire (sync bookkeeping included). */
+export const NEVER_SYNCED_TABLES = [
+  'app_config',
+  'director_alerts',
+  '__sync_row_status',
+  '__stock_baseline',
+] as const;
 
 export type UpTable = (typeof UP_TABLES)[number];
 export type HybridTable = (typeof HYBRID_TABLES)[number];

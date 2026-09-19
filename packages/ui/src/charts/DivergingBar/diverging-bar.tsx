@@ -124,7 +124,7 @@ export function DivergingBar(props: DivergingBarProps): ReactElement | null {
       <ReactEChartsCore
         echarts={echarts}
         option={option}
-        theme="cachink"
+        theme="xangarro"
         style={{ height: totalHeight, width: 280 }}
         notMerge
       />

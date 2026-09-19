@@ -1,5 +1,5 @@
 /**
- * Tag — the Cachink pill/label primitive.
+ * Tag — the Xangarro pill/label primitive.
  *
  * A small classification chip used across the mock for `categoria`, `metodo`,
  * and other short status labels (see `VentaCard`, egresos list, inventario
@@ -84,7 +84,7 @@ function TagText({ text, color }: { text: string; color: string }): ReactElement
 }
 
 /**
- * Renders a Cachink-branded classification pill. See `tag.stories.tsx` for
+ * Renders a Xangarro-branded classification pill. See `tag.stories.tsx` for
  * the full variant matrix.
  */
 export function Tag(props: TagProps): ReactElement {

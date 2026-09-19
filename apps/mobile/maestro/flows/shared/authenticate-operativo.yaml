@@ -1,4 +1,4 @@
-# Reusable subflow: authenticate as Operativo (Ana Operativa, PIN 0000).
+# Reusable subflow: authenticate as Operativo (Ana Operativa, PIN 000000).
 #
 # Deterministic: selects by the stable role testID `user-avatar-role-operativo`
 # (added in user-avatar.tsx) instead of a brittle composite accessibility label,
@@ -12,21 +12,23 @@
 appId: mx.xangarro.mobile
 ---
 - assertVisible:
-    id: "quick-switch"
+    id: 'quick-switch'
 - tapOn:
-    id: "user-avatar-role-operativo"
+    id: 'user-avatar-role-operativo'
 - assertVisible:
-    id: "pin-numpad"
+    id: 'pin-numpad'
 - waitForAnimationToEnd
 
-# Enter PIN 0000 (auto-submits after 4 digits; ADR-072).
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
+# Enter PIN 000000 (auto-submits after 6 digits).
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 
 # Operativo lands on the ventas tab.
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: 'tab-ventas'
     timeout: 10000

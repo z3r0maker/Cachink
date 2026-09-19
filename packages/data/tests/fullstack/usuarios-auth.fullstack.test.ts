@@ -1,228 +1,80 @@
 /**
- * Fullstack scenario 7 — User management and authentication.
+ * Usuarios + Auth (fullstack) — the operator-only model (A-05, ADR-072).
  *
- * Business narrative:
- *   1. Create Director → authenticate → change PIN → recover PIN
- *   2. Create Operativo with duplicate name → rejected
- *   3. Delete last Director → blocked
- *   4. Create second Director → delete first → succeeds
- *
- * Covers: USR-01 through USR-12
+ * The device authenticates operators; it never creates, changes or
+ * recovers a NIP (the owner does, from the portal). What remains
+ * device-side: authenticate, lockout-free wrong-NIP, duplicate names.
  */
 
-import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, UserId } from '@xangarro/domain';
-import { newEntityId } from '@xangarro/domain';
-import { makeNewBusiness } from '../../../testing/src/index.js';
-import { buildHarness, type FullstackHarness } from './fullstack-harness.js';
+import { describe, expect, it, beforeAll } from 'vitest';
+import { hashSync } from 'bcryptjs';
+import type { BusinessId } from '@xangarro/domain';
+import { InMemoryUsersRepository, TEST_DEVICE_ID } from '../../../testing/src/index.js';
+import { AutenticarUsuarioUseCase, CrearOperadorUseCase } from '../../../application/src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
-const USER_ID = newEntityId<UserId>();
 
 describe('Usuarios + Auth [fullstack]', () => {
-  let h: FullstackHarness;
+  let users: InMemoryUsersRepository;
+  let crear: CrearOperadorUseCase;
+  let autenticar: AutenticarUsuarioUseCase;
 
-  beforeEach(async () => {
-    h = buildHarness({ userId: USER_ID });
-    await h.repos.businesses.create(makeNewBusiness({ businessId: BIZ }));
+  beforeAll(() => {
+    users = new InMemoryUsersRepository(TEST_DEVICE_ID);
+    crear = new CrearOperadorUseCase(users);
+    autenticar = new AutenticarUsuarioUseCase(users);
   });
 
-  it('creates a Director, authenticates, changes PIN, recovers PIN', async () => {
-    // 1. Create Director
-    const user = await h.useCases.crearUsuario.execute({
-      nombre: 'Juan Director',
+  it('creates an operator and authenticates with its 4-digit NIP', async () => {
+    const op = await crear.execute({
+      businessId: BIZ,
+      nombre: 'Juan Operador',
       pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: true,
-      businessId: BIZ,
+      operatorLimit: 5,
     });
-    expect(user.role).toBe('director');
-    expect(user.mustChangePin).toBe(true);
+    expect(op.active).toBe(true);
 
-    // 2. Authenticate with correct PIN
-    const authOk = await h.useCases.autenticarUsuario.execute({
-      nombre: 'Juan Director',
-      pin: '1234',
-      businessId: BIZ,
-    });
-    expect(authOk.success).toBe(true);
-    expect(authOk.userId).toBe(user.id);
-    expect(authOk.mustChangePin).toBe(true);
-
-    // 3. Authenticate with wrong PIN → failure
-    const authFail = await h.useCases.autenticarUsuario.execute({
-      nombre: 'Juan Director',
-      pin: '000000',
-      businessId: BIZ,
-    });
-    expect(authFail.success).toBe(false);
-
-    // 4. Change PIN (clears mustChangePin)
-    await h.useCases.cambiarPin.execute({
-      userId: user.id,
-      currentPin: '1234',
-      newPin: '4321',
-    });
-
-    // Verify new PIN works
-    const authNew = await h.useCases.autenticarUsuario.execute({
-      nombre: 'Juan Director',
-      pin: '4321',
-      businessId: BIZ,
-    });
-    expect(authNew.success).toBe(true);
-    expect(authNew.mustChangePin).toBe(false);
-
-    // Old PIN no longer works
-    const authOld = await h.useCases.autenticarUsuario.execute({
-      nombre: 'Juan Director',
-      pin: '1234',
-      businessId: BIZ,
-    });
-    expect(authOld.success).toBe(false);
-
-    // 5. Recover PIN via recovery password
-    await h.useCases.recuperarPin.execute({
-      userId: user.id,
-      recoveryPassword: 'Recover1',
-      newPin: '1111',
-    });
-
-    const authRecovered = await h.useCases.autenticarUsuario.execute({
-      nombre: 'Juan Director',
-      pin: '1111',
-      businessId: BIZ,
-    });
-    expect(authRecovered.success).toBe(true);
+    const ok = await autenticar.execute({ nombre: 'Juan Operador', pin: '1234', businessId: BIZ });
+    expect(ok.success).toBe(true);
   });
 
-  it('change PIN with wrong current PIN is rejected', async () => {
-    const user = await h.useCases.crearUsuario.execute({
-      nombre: 'Director Test',
-      pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
+  it('rejects a wrong NIP', async () => {
+    const bad = await autenticar.execute({ nombre: 'Juan Operador', pin: '9999', businessId: BIZ });
+    expect(bad.success).toBe(false);
+  });
 
+  it('rejects a duplicate operator name in the same business', async () => {
     await expect(
-      h.useCases.cambiarPin.execute({
-        userId: user.id,
-        currentPin: '000000',
-        newPin: '4321',
-      }),
-    ).rejects.toThrow(/PIN actual incorrecto/i);
+      crear.execute({ businessId: BIZ, nombre: 'Juan Operador', pin: '4321', operatorLimit: 5 }),
+    ).rejects.toThrow(/ya existe/i);
   });
 
-  it('recovery with wrong password is rejected', async () => {
-    const user = await h.useCases.crearUsuario.execute({
-      nombre: 'Director Test',
-      pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
-
+  it('enforces the plan operator allowance', async () => {
     await expect(
-      h.useCases.recuperarPin.execute({
-        userId: user.id,
-        recoveryPassword: 'WrongPass',
-        newPin: '4321',
-      }),
-    ).rejects.toThrow(/contraseña de recuperación/i);
+      crear.execute({ businessId: BIZ, nombre: 'Segundo', pin: '2222', operatorLimit: 1 }),
+    ).rejects.toThrow(/límite|plan/i);
   });
 
-  it('rejects duplicate username in same business', async () => {
-    await h.useCases.crearUsuario.execute({
-      nombre: 'Ana Operativa',
-      pin: '1111',
-      recoveryPassword: 'RecoverA',
-      role: 'operativo',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
-
+  it('rejects a NIP that is not four digits (ADR-072)', async () => {
     await expect(
-      h.useCases.crearUsuario.execute({
-        nombre: 'Ana Operativa', // duplicate
-        pin: '2222',
-        recoveryPassword: 'RecoverB',
-        role: 'operativo',
-        mustChangePin: false,
-        businessId: BIZ,
-      }),
-    ).rejects.toThrow(/ya existe.*usuario/i);
+      crear.execute({ businessId: BIZ, nombre: 'Tercer', pin: '12345', operatorLimit: 5 }),
+    ).rejects.toThrow();
   });
 
-  it('cannot delete the last Director', async () => {
-    const director = await h.useCases.crearUsuario.execute({
-      nombre: 'Solo Director',
-      pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: false,
+  it('a deactivated operator cannot authenticate (portal-managed active)', async () => {
+    const op = await crear.execute({
+      businessId: BIZ,
+      nombre: 'Baja',
+      pin: '3333',
+      operatorLimit: 5,
+    });
+    await users.update(op.id, { active: false });
+    const result = await autenticar.execute({
+      nombre: 'Baja',
+      pin: '3333',
       businessId: BIZ,
     });
-
-    await expect(h.useCases.eliminarUsuario.execute({ userId: director.id })).rejects.toThrow(
-      /último Director/i,
-    );
-  });
-
-  it('can delete a Director when another exists', async () => {
-    const dir1 = await h.useCases.crearUsuario.execute({
-      nombre: 'Director Uno',
-      pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
-
-    await h.useCases.crearUsuario.execute({
-      nombre: 'Director Dos',
-      pin: '4321',
-      recoveryPassword: 'Recover2',
-      role: 'director',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
-
-    // Now deleting dir1 should succeed
-    await h.useCases.eliminarUsuario.execute({ userId: dir1.id });
-
-    // Verify deleted
-    const found = await h.repos.users.findById(dir1.id);
-    expect(found).toBeNull();
-  });
-
-  it('rejects a new PIN that is not 4 digits (ADR-072)', async () => {
-    const user = await h.useCases.crearUsuario.execute({
-      nombre: 'Director Test',
-      pin: '1234',
-      recoveryPassword: 'Recover1',
-      role: 'director',
-      mustChangePin: false,
-      businessId: BIZ,
-    });
-
-    await expect(
-      h.useCases.cambiarPin.execute({
-        userId: user.id,
-        currentPin: '1234',
-        newPin: '12345', // 5 digits
-      }),
-    ).rejects.toThrow(/4 dígitos/i);
-
-    await expect(
-      h.useCases.cambiarPin.execute({
-        userId: user.id,
-        currentPin: '1234',
-        newPin: 'abcdef', // letters
-      }),
-    ).rejects.toThrow(/4 dígitos/i);
+    expect(result.success).toBe(false);
+    void hashSync; // bcrypt stays on the NIP hash path
   });
 });

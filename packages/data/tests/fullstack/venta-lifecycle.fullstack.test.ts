@@ -33,13 +33,15 @@ describe('Venta Lifecycle [fullstack]', () => {
     await h.repos.businesses.create(makeNewBusiness({ businessId: BIZ }));
 
     // Seed a Director user (needed for cancel PIN verification)
-    await h.useCases.crearUsuario.execute({
+    const director = await h.useCases.crearOperador.execute({
       nombre: 'Director Test',
       pin: '1234',
-      recoveryPassword: 'Test1234',
-      role: 'director',
-      mustChangePin: false,
+      operatorLimit: 10,
       businessId: BIZ,
+    });
+    // Everyone is an operator (A-05); cancel rights are a granted permission.
+    await h.repos.users.update(director.id, {
+      permissions: { canCancelSales: true },
     });
 
     // Seed a stock-tracked product

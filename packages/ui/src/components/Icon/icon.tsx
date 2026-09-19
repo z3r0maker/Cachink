@@ -1,5 +1,5 @@
 /**
- * Icon — the Cachink line-icon primitive (ADR-040).
+ * Icon — the Xangarro line-icon primitive (ADR-040).
  *
  * Wraps `lucide-react` (web/Tauri) and `lucide-react-native` (mobile) behind
  * a single curated `IconName` union so consumers can't import arbitrary

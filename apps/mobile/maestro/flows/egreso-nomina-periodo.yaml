@@ -21,44 +21,44 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos → Nuevo → Nómina tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "egreso-tab-nomina"
+    id: 'egreso-tab-nomina'
 
 # No empleados yet — Crear empleado Btn appears.
-- assertVisible: "Crear empleado"
+- assertVisible: 'Crear empleado'
 - tapOn:
-    id: "nomina-crear-empleado"
+    id: 'nomina-crear-empleado'
 
 # Fill empleado form with all fields.
 - tapOn:
-    id: "empleado-nombre"
-- inputText: "Luis García"
+    id: 'empleado-nombre'
+- inputText: 'Luis García'
 - tapOn:
-    id: "empleado-puesto"
-- inputText: "Mesero"
+    id: 'empleado-puesto'
+- inputText: 'Mesero'
 - tapOn:
-    id: "empleado-salario"
-- inputText: "4000"
+    id: 'empleado-salario'
+- inputText: '4000'
 
 # Change periodo from default to Quincenal.
 - assertVisible:
-    id: "empleado-periodo"
+    id: 'empleado-periodo'
 - tapOn:
-    id: "empleado-periodo"
-- tapOn: "Quincenal"
+    id: 'empleado-periodo'
+- tapOn: 'Quincenal'
 
 # Submit the empleado.
 - tapOn:
-    id: "empleado-submit"
+    id: 'empleado-submit'
 
 # Back on Nómina tab; empleado auto-selected + monto auto-filled.
-- assertVisible: "Nuevo egreso"
+- assertVisible: 'Nuevo egreso'
 - tapOn:
-    id: "nomina-submit"
+    id: 'nomina-submit'
 
 # Modal closes + egreso visible.
-- assertNotVisible: "Nuevo egreso"
-- assertVisible: "Nómina Luis García"
+- assertNotVisible: 'Nuevo egreso'
+- assertVisible: 'Nómina Luis García'

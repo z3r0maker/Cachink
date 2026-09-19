@@ -23,40 +23,40 @@ tags:
 - runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-conversion"
+      id: 'otros-conversion'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-conversion"
+    id: 'otros-conversion'
 - extendedWaitUntil:
     visible:
-      id: "conversion-screen"
+      id: 'conversion-screen'
     timeout: 5000
 
 # Tap the convert button on the first recipe.
 - tapOn:
-    id: "receta-convertir-btn"
+    id: 'receta-convertir-btn'
 - extendedWaitUntil:
     visible:
-      id: "convertir-sheet"
+      id: 'convertir-sheet'
     timeout: 3000
 
 # Set a very high multiplier to exceed stock.
 - tapOn:
-    id: "convertir-multiplicador"
+    id: 'convertir-multiplicador'
 - eraseText:
     charactersToErase: 10
 - inputText:
-    id: "convertir-multiplicador"
-    text: "9999"
+    id: 'convertir-multiplicador'
+    text: '9999'
 
 # Try to confirm conversion.
 - tapOn:
-    id: "convertir-confirm"
+    id: 'convertir-confirm'
 
 # Expect stock-insufficient error toast or inline message.
 - extendedWaitUntil:
     visible:
-      text: "Stock insuficiente"
+      text: 'Stock insuficiente'
     timeout: 5000

@@ -18,14 +18,14 @@ appId: mx.xangarro.mobile
 # Director Home — scroll to the low-stock card and follow its "ver" link.
 - scrollUntilVisible:
     element:
-      id: "stock-bajo-summary-ver"
+      id: 'stock-bajo-summary-ver'
     direction: DOWN
     timeout: 10000
 - tapOn:
-    id: "stock-bajo-summary-ver"
+    id: 'stock-bajo-summary-ver'
 
 # Routed to the Inventario tab (stock list) filtered to low-stock items.
 - extendedWaitUntil:
     visible:
-      id: "stock-buscar"
+      id: 'stock-buscar'
     timeout: 8000

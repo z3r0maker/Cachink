@@ -16,6 +16,7 @@ import {
   StockScreen,
   SwipeableTabView,
   filterProductos,
+  useFeatureFlag,
   useProductosConStock,
   type InventarioSubTab,
   type ProductoConStock,
@@ -47,6 +48,8 @@ export default function ProductosRoute(): ReactElement {
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<InventarioSubTab>('stock');
   const itemsQ = useProductosConStock();
+  // Without stock on the plan (A-14) Productos is a catalog: no stock, no Movimientos.
+  const stockOn = useFeatureFlag('stock');
   const items = itemsQ.data ?? [];
   const filtered = useMemo(() => filterProductos(items, query), [items, query]);
 
@@ -61,6 +64,7 @@ export default function ProductosRoute(): ReactElement {
       items={filtered}
       onNuevoProducto={() => router.push('/nuevo-producto' as never)}
       onProductoPress={handleProductoPress}
+      showStock={stockOn}
       loading={itemsQ.isLoading}
       error={itemsQ.error as Error | null}
     />
@@ -68,9 +72,9 @@ export default function ProductosRoute(): ReactElement {
 
   return (
     <>
-      <InventarioTabBar active={tab} onChange={setTab} />
+      {stockOn && <InventarioTabBar active={tab} onChange={setTab} />}
       <ProductosBody
-        tab={tab}
+        tab={stockOn ? tab : 'stock'}
         stockSlot={stockSlot}
         onNext={() => setTab(toggleNext(tab))}
         onPrev={() => setTab(togglePrev(tab))}

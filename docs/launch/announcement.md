@@ -1,8 +1,8 @@
-# Cachink! — launch announcement drafts
+# Xangarro — launch announcement drafts
 
 ## Short (Twitter / X / LinkedIn teaser — 280 chars)
 
-Cachink! ya vive en el App Store y Google Play.
+Xangarro ya vive en el App Store y Google Play.
 
 La app más simple para llevar las finanzas de tu negocio en México.
 Ventas, egresos, inventario y estados NIF — sin internet obligatorio.
@@ -11,7 +11,7 @@ Descárgala: https://cachink.mx · Hecho en 🇲🇽
 
 ## Medium (LinkedIn post, ~800 chars)
 
-Hoy lanzamos **Cachink!** en México 🇲🇽
+Hoy lanzamos **Xangarro** en México 🇲🇽
 
 Es una app para emprendedoras y pequeños negocios que necesitan llevar
 sus ventas, egresos e inventario **sin aprender contabilidad y sin
@@ -33,10 +33,10 @@ https://cachink.mx
 
 ## Long (blog post outline)
 
-### Por qué Cachink!
+### Por qué Xangarro
 
 ...las apps de contabilidad grandes son un martillo demasiado pesado
-para quien apenas está empezando. Cachink se limita a lo esencial:
+para quien apenas está empezando. Xangarro se limita a lo esencial:
 si no captura más clics, no pertenece.
 
 ### Las decisiones que nos importaron

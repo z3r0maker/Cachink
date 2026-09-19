@@ -22,7 +22,7 @@
 import type { UserId } from '@xangarro/domain';
 import { makeFreshDb } from '../helpers/fresh-db.js';
 import { TEST_DEVICE_ID } from '../../../testing/src/index.js';
-import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../../src/repositories/drizzle/_db.js';
 
 // Drizzle repositories
 import {
@@ -50,6 +50,7 @@ import {
   RegistrarTicketUseCase,
   CancelarVentaUseCase,
   CancelarTicketUseCase,
+  CrearOperadorUseCase,
   EditarVentaUseCase,
   AbrirCajaUseCase,
   CerrarCajaUseCase,
@@ -62,17 +63,13 @@ import {
   ProcesarGastoRecurrenteUseCase,
   DescartarGastoRecurrenteUseCase,
   GenerarInformeMensualUseCase,
-  CrearUsuarioUseCase,
   AutenticarUsuarioUseCase,
-  CambiarPinUseCase,
-  RecuperarPinUseCase,
-  EliminarUsuarioUseCase,
   ToggleFeatureFlagUseCase,
   EjecutarConversionUseCase,
 } from '../../../application/src/index.js';
 
 export interface FullstackHarness {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly repos: FullstackRepos;
   readonly useCases: FullstackUseCases;
 }
@@ -111,11 +108,7 @@ export interface FullstackUseCases {
   readonly procesarGastoRecurrente: ProcesarGastoRecurrenteUseCase;
   readonly descartarGastoRecurrente: DescartarGastoRecurrenteUseCase;
   readonly generarInforme: GenerarInformeMensualUseCase;
-  readonly crearUsuario: CrearUsuarioUseCase;
   readonly autenticarUsuario: AutenticarUsuarioUseCase;
-  readonly cambiarPin: CambiarPinUseCase;
-  readonly recuperarPin: RecuperarPinUseCase;
-  readonly eliminarUsuario: EliminarUsuarioUseCase;
   readonly toggleFeatureFlag: ToggleFeatureFlagUseCase;
   readonly ejecutarConversion: EjecutarConversionUseCase;
 }
@@ -159,6 +152,7 @@ export function buildHarness(opts?: {
 
   // --- Use-Cases ---------------------------------------------------
   const useCases: FullstackUseCases = {
+    crearOperador: new CrearOperadorUseCase(repos.users),
     registrarVenta: new RegistrarVentaUseCase(
       new RegistrarTicketUseCase(
         repos.tickets,
@@ -204,11 +198,7 @@ export function buildHarness(opts?: {
     procesarGastoRecurrente: new ProcesarGastoRecurrenteUseCase(repos.expenses, repos.recurring),
     descartarGastoRecurrente: new DescartarGastoRecurrenteUseCase(repos.recurring),
     generarInforme: new GenerarInformeMensualUseCase(repos.sales, repos.expenses, repos.businesses),
-    crearUsuario: new CrearUsuarioUseCase(repos.users),
     autenticarUsuario: new AutenticarUsuarioUseCase(repos.users),
-    cambiarPin: new CambiarPinUseCase(repos.users),
-    recuperarPin: new RecuperarPinUseCase(repos.users),
-    eliminarUsuario: new EliminarUsuarioUseCase(repos.users),
     toggleFeatureFlag: new ToggleFeatureFlagUseCase(repos.businesses),
     ejecutarConversion: new EjecutarConversionUseCase(
       repos.recetas,

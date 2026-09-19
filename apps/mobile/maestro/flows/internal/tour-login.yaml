@@ -5,8 +5,8 @@ tags: [internal]
 - launchApp
 - runFlow: ../shared/dismiss-modals.yaml
 - assertVisible:
-    id: "quick-switch"
+    id: 'quick-switch'
 - tapOn:
-    text: ".*Juan Director.*"
+    text: '.*Juan Director.*'
 - assertVisible:
-    id: "pin-numpad"
+    id: 'pin-numpad'

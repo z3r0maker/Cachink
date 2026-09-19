@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<EmptyState>` primitive.
  *
- * Each story uses real es-MX Cachink copy so the catalog doubles as a UX
+ * Each story uses real es-MX Xangarro copy so the catalog doubles as a UX
  * reference for designers — mirroring the precedent set by Btn / Input /
  * Tag / Modal. The canonical happy-path (VentasVacio) exercises every
  * prop; the remaining four cover alternate real contexts plus two edge

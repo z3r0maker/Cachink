@@ -1,6 +1,6 @@
 /**
- * StockActionCard + helpers — extracted from producto-detail-fields
- * to keep that file under 200 lines.
+ * StockActionCard — stock level + Entrada/Salida on the read-only product
+ * detail (A-09): stock movements are the one product change the device makes.
  */
 
 import type { ReactElement } from 'react';
@@ -78,15 +78,12 @@ function StockQuantityRow(props: {
   );
 }
 
-type T = (key: string) => string;
-
 /** Stock + Entrada / Salida card. */
 export function StockActionCard(props: {
   stock: number;
   umbral: number;
   onEntrada: () => void;
   onSalida: () => void;
-  t: T;
 }): ReactElement {
   const s = stockStatus(props.stock, props.umbral);
   return (

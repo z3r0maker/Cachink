@@ -4,9 +4,6 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/tokens"
-    },
-    {
       "path": "./packages/domain"
     },
     {
@@ -31,10 +28,7 @@
       "path": "./packages/observability"
     },
     {
-      "path": "./packages/auth-core"
-    },
-    {
-      "path": "./packages/data-pg"
+      "path": "./packages/sync"
     }
   ]
 }

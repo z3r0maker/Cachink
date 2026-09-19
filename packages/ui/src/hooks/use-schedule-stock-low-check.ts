@@ -1,24 +1,19 @@
 /**
- * `useScheduleStockLowCheck` — schedules a daily 19:00 local trigger
- * for Director users that fires a stock-low notification when any
- * producto has `stock ≤ umbralStockBajo` (P1C-M11-T02, S4-C11).
- *
- * Behaviour:
- *   - Only active when `role === 'director'` + `enabled === true`.
- *   - Scheduler id is `'stock-low-check'`; re-schedules are idempotent.
- *   - Unmount cancels the scheduled trigger.
- *
- * The notification payload uses i18n keys so callers can re-render the
- * scheduled body after locale changes (rare — Phase 1 ships es-MX only,
- * but we respect CLAUDE.md §8.5 from the start).
+ * `useScheduleStockLowCheck` — schedules a daily 19:00 local reminder on
+ * this device when products that track stock are at or below their
+ * threshold (A-13). No role gate: any device with the Dispositivo
+ * notifications toggle on and stock on for its plan gets it; the copy
+ * speaks to the operator. `stock-low-check` re-schedules idempotently and
+ * is cancelled when there is nothing to remind about.
  */
 
 import { useEffect } from 'react';
+import { useNotificationsEnabled } from '../app-config/index';
 import type { NotificationScheduler } from '../notifications/index';
 import { useNotificationScheduler } from '../notifications/index';
-import { countBajoStock } from '../screens/Inventario/stock-bajo-banner';
+import { stockLowCount } from '../notifications/stock-low';
 import { useTranslation } from '../i18n/index';
-import { useRole } from '../app-config/index';
+import { useFeatureFlag } from './use-feature-flags';
 import { useProductosConStock } from './use-productos-con-stock';
 
 export const STOCK_LOW_NOTIFICATION_ID = 'stock-low-check' as const;
@@ -31,21 +26,14 @@ export interface UseScheduleStockLowCheckOptions {
 
 export function useScheduleStockLowCheck(options: UseScheduleStockLowCheckOptions = {}): void {
   const { t } = useTranslation();
-  const role = useRole();
   const scheduler = useNotificationScheduler(options.testScheduler);
   const productosQ = useProductosConStock();
-  const enabled = options.enabled ?? true;
+  const notificationsEnabled = useNotificationsEnabled() && (options.enabled ?? true);
+  const stockEnabled = useFeatureFlag('stock');
 
   useEffect(() => {
-    const active = enabled && role === 'director';
-    if (!active) {
-      void scheduler.cancelById(STOCK_LOW_NOTIFICATION_ID);
-      return;
-    }
-    const count = countBajoStock(productosQ.data ?? []);
+    const count = stockLowCount(productosQ.data ?? [], { notificationsEnabled, stockEnabled });
     if (count === 0) {
-      // Cancel any prior schedule so the Director doesn't get a stale
-      // notification on a day where stock is healthy.
       void scheduler.cancelById(STOCK_LOW_NOTIFICATION_ID);
       return;
     }
@@ -59,10 +47,7 @@ export function useScheduleStockLowCheck(options: UseScheduleStockLowCheckOption
       minute: 0,
       title: t('notifications.stockLowTitle'),
       body,
-      payload: { count },
+      payload: { count, actionRoute: '/productos' },
     });
-    return () => {
-      void scheduler.cancelById(STOCK_LOW_NOTIFICATION_ID);
-    };
-  }, [enabled, role, scheduler, productosQ.data, t]);
+  }, [notificationsEnabled, stockEnabled, scheduler, productosQ.data, t]);
 }

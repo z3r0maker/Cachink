@@ -28,28 +28,28 @@ appId: mx.xangarro.mobile
 
 # Tap the product row → navigates to the product detail route.
 - tapOn:
-    id: "producto-card-.*"
+    id: 'producto-card-.*'
 
 # Detail screen — open the "Entrada" movimiento.
 - assertVisible:
-    text: "Entrada.*"
+    text: 'Entrada.*'
 - tapOn:
-    text: "Entrada.*"
+    text: 'Entrada.*'
 
 # MovimientoModal (tipo pre-set to "entrada"): CANTIDAD / MOTIVO / NOTA.
 - assertVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'
 
 # Enter quantity for the stock entrada.
 - tapOn:
-    id: "movimiento-cantidad"
+    id: 'movimiento-cantidad'
 - eraseText
-- inputText: "50"
+- inputText: '50'
 
 # Submit the movement — the "REGISTRAR" button (NOT the "Registrar entrada" title).
 - tapOn:
-    text: "REGISTRAR"
+    text: 'REGISTRAR'
 
 # Modal closes — the CANTIDAD field is gone.
 - assertNotVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'

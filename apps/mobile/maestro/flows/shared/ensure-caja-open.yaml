@@ -11,29 +11,29 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: "tab-caja"
+    id: 'tab-caja'
 
 # State 2: Director already opened — confirm prompt visible.
 - tapOn:
-    text: "CONFIRMAR MONTO"
+    text: 'CONFIRMAR MONTO'
     optional: true
 
 # State 1: No turno — abrir-caja-modal. Enter 500 and submit.
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
     optional: true
 
 # All states should now show the active turn.
 - extendedWaitUntil:
     visible:
-      id: "caja-status-card"
+      id: 'caja-status-card'
     timeout: 10000

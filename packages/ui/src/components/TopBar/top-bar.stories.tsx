@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<TopBar>` primitive.
  *
- * Stories use real es-MX Cachink copy drawn from CLAUDE.md §1 and the
+ * Stories use real es-MX Xangarro copy drawn from CLAUDE.md §1 and the
  * Director Home / Operativo screen specs in P1C. Slots are filled with
  * `<Btn>` and `<Tag>` to demonstrate the canonical patterns: back arrow on
  * the left, role/sync chips, settings cog on the right.

@@ -3,12 +3,12 @@
  *
  * Reads the cart total from useCheckoutStore. On confirm, records
  * all cart items as sales with efectivoRecibidoCentavos, clears
- * the cart, pops back, and shows the Cachink burst.
+ * the cart, pops back, and shows the Xangarro burst.
  */
 
 import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
-import { CachinkBurst, CheckoutEfectivo } from '@xangarro/ui';
+import { SaleBurst, CheckoutEfectivo } from '@xangarro/ui';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
 import { useEfectivoState } from './_efectivo-hooks';
 
@@ -24,10 +24,10 @@ export default function CheckoutEfectivoRoute(): ReactElement {
         submitting={s.submitting}
         efectivoEnCaja={s.efectivoEnCaja}
       />
-      <CachinkBurst
-        visible={s.showCachink}
-        onComplete={() => s.setShowCachink(false)}
-        testID="cachink-burst-efectivo"
+      <SaleBurst
+        visible={s.showSaleBurst}
+        onComplete={() => s.setShowSaleBurst(false)}
+        testID="sale-burst-efectivo"
       />
     </AppShellWrapper>
   );

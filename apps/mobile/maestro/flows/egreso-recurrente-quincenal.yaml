@@ -19,34 +19,34 @@ tags:
 
 # Navigate to Egresos via Operativo tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Create a new gasto with recurrente toggle.
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Quincena Empleados"
+    id: 'gasto-concepto'
+- inputText: 'Quincena Empleados'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "5000"
+    id: 'gasto-monto'
+- inputText: '5000'
 
 # Enable recurrente toggle.
 - tapOn:
-    id: "gasto-recurrente-toggle"
-- assertVisible: "Frecuencia"
+    id: 'gasto-recurrente-toggle'
+- assertVisible: 'Frecuencia'
 
 # Select Quincenal frequency.
 - tapOn:
-    id: "recurrente-frecuencia"
-- tapOn: "Quincenal"
+    id: 'recurrente-frecuencia'
+- tapOn: 'Quincenal'
 
 # Submit.
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Verify the egreso was created.
 - extendedWaitUntil:
     visible:
-      text: "Quincena Empleados"
+      text: 'Quincena Empleados'
     timeout: 5000

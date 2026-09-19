@@ -1,5 +1,5 @@
 /**
- * Spinner — branded Cachink loading indicator (web/desktop variant).
+ * Spinner — branded Xangarro loading indicator (web/desktop variant).
  *
  * Uses a CSS-animated rotating dollar-sign icon as a lightweight
  * fallback (no Lottie dependency on web builds).

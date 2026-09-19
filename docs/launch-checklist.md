@@ -1,8 +1,8 @@
-# Cachink! — launch checklist
+# Xangarro — launch checklist
 
 _Last updated 2026-07-09 (MVP iOS prep)._
 
-This is the human-execution checklist for launching Cachink to the public.
+This is the human-execution checklist for launching Xangarro to the public.
 The agent has delivered every prerequisite (configs, scripts, docs); the
 steps below are the gated actions that need a real account, a physical
 certificate, or a submission to a human-operated review queue.
@@ -32,7 +32,7 @@ certificate, or a submission to a human-operated review queue.
 
 ### ☐ 3. Apple Developer account
 
-- [ ] **Apple Developer** — $99/year. Enrol `mx.cachink` team.
+- [ ] **Apple Developer** — $99/year. Enrol `mx.xangarro` team.
 - [ ] Run `eas credentials` once per team to set up provisioning.
 
 ### ☐ 4. Supabase bug database
@@ -44,7 +44,7 @@ a Supabase project to receive crash reports and bug submissions.
 2. [ ] Export your PAT: `export SUPABASE_ACCESS_TOKEN="sbp_…"`
 3. [ ] Link: `cd supabase && supabase link --project-ref <ref>`
 4. [ ] Push schema: `supabase db push`
-       — runs `0001_schema.sql` (required — defines `cachink_generate_ulid()`)
+       — runs `0001_schema.sql` (required — defines `xangarro_generate_ulid()`)
        and `0002_bug_database.sql` (error_events + bug_reports tables,
        deny-by-default RLS, pg_cron nightly prune).
 5. [ ] Deploy the Edge Function:
@@ -131,18 +131,18 @@ cross-platform; these steps unlock additional distribution channels.
 
 ### Desktop (macOS + Windows)
 
-- [ ] **macOS:** Developer ID cert, set `CACHINK_APPLE_SIGNING_IDENTITY`.
+- [ ] **macOS:** Developer ID cert, set `XANGARRO_APPLE_SIGNING_IDENTITY`.
 - [ ] **Windows:** code-signing cert (DigiCert/Sectigo OV/EV),
-      set `CACHINK_WINDOWS_CERT_THUMBPRINT`.
+      set `XANGARRO_WINDOWS_CERT_THUMBPRINT`.
 - [ ] **Tauri updater keypair:**
-      `cargo install tauri-cli && tauri signer generate -w ~/.cachink/updater.key`.
+      `cargo install tauri-cli && tauri signer generate -w ~/.xangarro/updater.key`.
       Copy public key into `tauri.conf.json`'s `plugins.updater.pubkey`.
-      Private key → `CACHINK_UPDATER_PRIVATE_KEY` env.
+      Private key → `XANGARRO_UPDATER_PRIVATE_KEY` env.
 - [ ] `./scripts/build-all.sh` — produces signed `.dmg` + `.msi`.
 
 ### Cloud sync (PowerSync)
 
-- [ ] **PowerSync** — create the Cachink tenant; point at Supabase Postgres.
+- [ ] **PowerSync** — create the Xangarro tenant; point at Supabase Postgres.
 - [ ] Set `PRODUCTION_POWERSYNC_URL` to a real endpoint.
 - [ ] Push `0001_schema.sql` tables + RLS + publication if not already done.
 

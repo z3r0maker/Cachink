@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="assets/brand/icon-padded.png" alt="Cachink!" width="120" height="120" />
+  <img src="assets/brand/icon-padded.png" alt="Xangarro!" width="120" height="120" />
 </p>
 
-<h1 align="center">Cachink! 💰</h1>
+<h1 align="center">Xangarro! 💰</h1>
 
 <p align="center">
   <em>Finanzas para emprendedores.</em>
@@ -208,7 +208,7 @@ Full principles in CLAUDE.md §2.
 ## Repository Layout
 
 ```
-cachink/
+xangarro/
 ├── apps/
 │   ├── mobile/           Expo app (iOS / Android tablets)
 │   └── desktop/          Tauri app (Windows / macOS)

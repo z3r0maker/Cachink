@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-26
 **Scope:** Toolchain + first-launch flow as exposed by `pnpm --filter
-@cachink/mobile test:e2e` on the iPad Pro 11" simulator (iOS 26.4).
+@xangarro/mobile test:e2e` on the iPad Pro 11" simulator (iOS 26.4).
 **Acceptance gate met:** `apps/mobile/maestro/flows/smoke-launch.yaml`
 exits 0 against the freshly-built dev client.
 
@@ -136,7 +136,7 @@ without actually running the bundle on a real iOS simulator.
 ### F0-T06 (UX — High) — `ConsentModal` blocks the wizard on first launch
 
 - **Severity:** High. Bad UX even after F0-T05 lands.
-- **Symptom:** A user opening Cachink for the first time sees a
+- **Symptom:** A user opening Xangarro for the first time sees a
   Sentry crash-reporting consent prompt **before** they have done
   anything. They have not yet picked a setup mode, given any data,
   or signed up. We are asking for a consent decision in a
@@ -302,6 +302,6 @@ the app cleanly.
 ✅ `apps/mobile/SETUP.md` updated with the toolchain prerequisites.
 
 The Step-0 acceptance line in the approved plan is met. The full
-suite (`pnpm --filter @cachink/mobile test:e2e`) is still gated on
+suite (`pnpm --filter @xangarro/mobile test:e2e`) is still gated on
 F0-T04 — the Btn-tap blocker — and is the recommended Step 4
 re-entry point once PR-FIX-1 lands.

@@ -69,7 +69,7 @@ export function fireListeners(): void {
  * Evaluate a `(min-width: …px)` / `(max-width: …px)` media query
  * against a width. Tamagui's `mediaObjectToString` produces queries
  * with at most one `min-width` and one `max-width` clause joined by
- * ` and `, so this string-parser is sufficient for every Cachink
+ * ` and `, so this string-parser is sufficient for every Xangarro
  * breakpoint.
  */
 export function evaluateQuery(query: string, width: number): boolean {

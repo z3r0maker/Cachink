@@ -1,0 +1,44 @@
+# Device-only Configuración (A-12): Cuenta / Sincronización / Dispositivo /
+# Datos, and "Desvincular este dispositivo" sends the device back to
+# activation. The flow then resets the mock and re-activates, so it leaves
+# the device as it found it.
+#
+# Precondition: device activated against the mock (activation.yaml).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runFlow: shared/login-operator.yaml
+- tapOn:
+    id: 'top-bar-open-settings'
+- extendedWaitUntil:
+    visible:
+      id: 'settings-screen'
+    timeout: 10000
+- assertVisible:
+    id: 'settings-account'
+- assertVisible: '.*Tacos La Esquina.*'
+- assertVisible:
+    id: 'settings-sync'
+- tapOn:
+    id: 'settings-sync-now'
+- scrollUntilVisible:
+    element:
+      id: 'settings-data'
+    direction: DOWN
+- scrollUntilVisible:
+    element:
+      id: 'settings-unlink'
+    direction: UP
+- tapOn:
+    id: 'settings-unlink'
+- tapOn:
+    id: 'confirm-dialog-confirm'
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 15000
+- runScript:
+    file: shared/mock-reset.js
+- runFlow: activation.yaml

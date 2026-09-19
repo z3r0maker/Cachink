@@ -1,5 +1,5 @@
 /**
- * SectionTitle — the Cachink section eyebrow.
+ * SectionTitle — the Xangarro section eyebrow.
  *
  * The typographic marker that announces any grouped block on a screen:
  * "VENTAS HOY", "ACTIVIDAD RECIENTE", "STOCK BAJO", "CUENTAS POR COBRAR".
@@ -69,7 +69,7 @@ function Title({ text }: { text: string }): ReactElement {
 }
 
 /**
- * Renders the canonical Cachink section eyebrow. See
+ * Renders the canonical Xangarro section eyebrow. See
  * `section-title.stories.tsx` for the full variant catalog.
  */
 export function SectionTitle(props: SectionTitleProps): ReactElement {

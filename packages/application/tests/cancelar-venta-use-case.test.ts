@@ -16,9 +16,8 @@ import {
   makeNewProduct,
   makeNewSale,
   makeNewTicket,
-  makeNewUser,
 } from '../../testing/src/index.js';
-import { CrearUsuarioUseCase } from '../src/index.js';
+import { CrearOperadorUseCase } from '../src/index.js';
 import { CancelarTicketUseCase } from '../src/cancelar-ticket/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -30,7 +29,7 @@ describe('CancelarTicketUseCase', () => {
   let products: InMemoryProductsRepository;
   let movements: InMemoryInventoryMovementsRepository;
   let logs: InMemoryCancelacionLogsRepository;
-  let crearUsuario: CrearUsuarioUseCase;
+  let crearOperador: CrearOperadorUseCase;
   let useCase: CancelarTicketUseCase;
 
   let directorId: UserId;
@@ -43,17 +42,17 @@ describe('CancelarTicketUseCase', () => {
     movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
     logs = new InMemoryCancelacionLogsRepository(TEST_DEVICE_ID);
 
-    crearUsuario = new CrearUsuarioUseCase(users);
+    crearOperador = new CrearOperadorUseCase(users);
     useCase = new CancelarTicketUseCase(tickets, sales, users, products, movements, logs);
 
-    const director = await crearUsuario.execute(
-      makeNewUser({
-        businessId: BIZ,
-        nombre: 'Director Test',
-        pin: '1234',
-        role: 'director',
-      }),
-    );
+    const director = await crearOperador.execute({
+      businessId: BIZ,
+      nombre: 'Director Test',
+      pin: '1234',
+      operatorLimit: 10,
+    });
+    // A-05: one role; cancel rights are a granted permission.
+    await users.update(director.id, { permissions: { canCancelSales: true } });
     directorId = director.id;
   });
 
@@ -188,9 +187,12 @@ describe('CancelarTicketUseCase', () => {
   });
 
   it('rejects an operativo without canCancelSales', async () => {
-    const operativo = await crearUsuario.execute(
-      makeNewUser({ businessId: BIZ, nombre: 'Op', pin: '1234', role: 'operativo' }),
-    );
+    const operativo = await crearOperador.execute({
+      businessId: BIZ,
+      nombre: 'Op',
+      pin: '1234',
+      operatorLimit: 10,
+    });
     const { ticket } = await seedTicket();
     await expect(
       useCase.execute({

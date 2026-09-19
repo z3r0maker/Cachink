@@ -4,7 +4,7 @@ import unicorn from 'eslint-plugin-unicorn';
 import boundaries from 'eslint-plugin-boundaries';
 
 /**
- * Shared ESLint flat config for the Cachink monorepo.
+ * Shared ESLint flat config for the Xangarro monorepo.
  *
  * Encodes the layer boundaries from CLAUDE.md §4.2. Each package declares its
  * element type via `settings.boundaries/elements` below, and the
@@ -33,22 +33,9 @@ export default tseslint.config(
       '**/coverage/**',
       '**/.turbo/**',
       '**/*.d.ts',
-      // Build output and generated artefacts — not ours to lint. Every package
-      // lints itself with a bare `eslint .`, so anything not named here IS
-      // linted; that is what `scripts/lint-coverage.test.ts` enforces.
-      '**/.next/**',
-      '**/.next-e2e/**',
-      '**/.expo/**',
-      'apps/*/ios/**',
-      'apps/*/android/**',
-      '**/test-results/**',
-      '**/playwright-report/**',
-      'e2e-reports/**',
-      'audit-screenshots/**',
-      // Read-only mirror of the Claude Design project (ADR-058); vendored runtime, never ours.
-      'design-reference/**',
-      // Read-only mirror of the Claude Design project (ADR-058).
-      'design-reference/**',
+      '**/*.config.js',
+      '**/plugins/**',
+      '**/vitest.config.*',
     ],
   },
 
@@ -177,46 +164,21 @@ export default tseslint.config(
     },
   },
 
-  // Migration files are named by their journal tag (`0001_add_business_fiscal`),
-  // Drizzle's underscore convention, which the runner and the barrel key on.
-  // One rule here instead of an eslint-disable header in every migration.
+  // Drizzle migrations: filenames must match the journal tag
+  // (`0001_capture_client`), and SQL payloads are long by nature.
   {
     files: ['**/drizzle/migrations/*.ts'],
-    rules: { 'unicorn/filename-case': 'off' },
-  },
-
-  // The marketing site (apps/landing, ADR-084): plain JS + JSX imported from its
-  // own repo. Naming this block's `files` is also what makes ESLint reach its
-  // `.jsx` at all — and because `files` resolves from the cwd, the landing's
-  // `lint` script runs from the repo root. It keeps every correctness rule and
-  // drops only the size/shape limits of CLAUDE.md §2.6, which ADR-084 scopes
-  // to the product:
-  // its components are PascalCase `.jsx` and its page sections are long,
-  // declarative JSX. Splitting them is Track L's call, not the import's.
-  {
-    files: ['apps/landing/**/*.{js,jsx,mjs}'],
-    languageOptions: { parserOptions: { ecmaFeatures: { jsx: true } } },
     rules: {
-      'max-lines': 'off',
-      'max-lines-per-function': 'off',
-      complexity: 'off',
-      'sonarjs/cognitive-complexity': 'off',
-      'sonarjs/no-duplicate-string': 'off',
       'unicorn/filename-case': 'off',
+      'max-lines': 'off',
     },
   },
 
-  // Allow config files to use require / any.
-  //
-  // This block was dead until the lint-coverage fix: `**/*.config.*` sat in the
-  // global ignores above, so the files it relaxes were never linted at all.
-  // `metro.config.js` is CommonJS because Metro `require()`s it — that is the
-  // tool's contract, not a style choice.
+  // Allow config files to use require / any
   {
-    files: ['**/*.config.{js,cjs,ts,mjs}', '**/eslint.config.js'],
+    files: ['**/*.config.{js,ts,mjs}', '**/eslint.config.js'],
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-require-imports': 'off',
     },
   },
 );

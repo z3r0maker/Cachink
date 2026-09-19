@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 One-shot script: convert Director.webp / Operador.webp DALL·E silhouettes
-into transparent PNG role avatars for the Cachink! app.
+into transparent PNG role avatars for the Xangarro app.
 
 Each source image is a 1024×1024 RGB with DALL·E's checkerboard "transparency"
 baked in. We:

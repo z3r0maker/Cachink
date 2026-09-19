@@ -22,18 +22,18 @@ appId: mx.xangarro.mobile
 
 # Today's sale now shows in the ventas list — tap it to open the detail popover.
 - assertVisible:
-    id: "ventas-list"
+    id: 'ventas-list'
 - tapOn:
-    text: "Taco al Pastor.*"
+    text: 'Taco al Pastor.*'
 - assertVisible:
-    id: "venta-detail-popover"
+    id: 'venta-detail-popover'
 - assertVisible:
-    id: "venta-detail-share"
+    id: 'venta-detail-share'
 - assertVisible:
-    id: "venta-detail-delete"
+    id: 'venta-detail-delete'
 
 # Close via the Modal backdrop.
 - tapOn:
-    id: "modal-backdrop"
+    id: 'modal-backdrop'
 - assertNotVisible:
-    id: "venta-detail-popover"
+    id: 'venta-detail-popover'

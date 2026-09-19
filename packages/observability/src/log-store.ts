@@ -2,7 +2,7 @@
  * LogStore — abstract interface for reading/writing observability entries.
  *
  * Two implementations ship:
- *   - `SqliteLogStore` — writes to `__cachink_observability_log` table.
+ *   - `SqliteLogStore` — writes to `__xangarro_observability_log` table.
  *   - `DualLogStore` — writes to both local SQLite and a remote backend.
  *
  * The interface is kept small: write + query + prune + export. Consumers

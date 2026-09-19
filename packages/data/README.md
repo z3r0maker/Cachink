@@ -1,7 +1,7 @@
 # @xangarro/data
 
 Repository interfaces, Drizzle/SQLite schema, and hardware abstraction
-interfaces for Cachink.
+interfaces for Xangarro.
 
 ## Schema & migrations
 

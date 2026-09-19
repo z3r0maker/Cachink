@@ -23,3 +23,4 @@ export * from './nomina/index.js';
 export * from './avisos/index.js';
 export * from './asesor/index.js';
 export * from './metas/index.js';
+export * from './errors/plan-limit-errors.js';

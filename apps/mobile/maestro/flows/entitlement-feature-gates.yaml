@@ -1,0 +1,50 @@
+# Feature flags from the verified plan (A-14): on Freelancer, stock is off —
+# Productos is a plain catalog (no Stock/Movimientos tabs, no stock counts);
+# on Emprendedor the stock UI is back.
+#
+# Precondition: device activated against the mock (activation.yaml). The flow
+# restores the default scenario at the end.
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+env:
+  MOCK_API: http://127.0.0.1:3100
+---
+- runFlow: shared/login-operator.yaml
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: freelancer
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 20000
+- tapOn:
+    id: 'tab-productos'
+- extendedWaitUntil:
+    visible:
+      id: 'stock-nuevo-producto'
+    timeout: 10000
+- assertNotVisible: 'Movimientos'
+- assertNotVisible: '.*Stock bajo.*'
+- tapOn:
+    id: 'tab-ventas'
+- assertNotVisible: 'Stock 0'
+- runScript:
+    file: shared/mock-scenario.js
+    env:
+      SCENARIO: emprendedor
+      RECORDS_PER_MONTH: ''
+- tapOn:
+    id: 'cloud-sync-pill'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 20000
+- tapOn:
+    id: 'tab-productos'
+- extendedWaitUntil:
+    visible: 'Movimientos'
+    timeout: 10000

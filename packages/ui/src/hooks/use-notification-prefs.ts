@@ -31,8 +31,10 @@ export function useNotificationPrefs() {
   const flags = useFeatureFlags();
   const defaults = deriveDefaultPrefs(flags);
 
+  // Defaults depend on the effective flags, which change when the verified
+  // plan loads (A-14); keying by them keeps a stale default from sticking.
   return useQuery({
-    queryKey: notificationPrefsKey,
+    queryKey: [...notificationPrefsKey, JSON.stringify(flags)],
     async queryFn(): Promise<NotificationPreferences> {
       const raw = await appConfig.get(APP_CONFIG_KEYS.notificationPrefs);
       if (!raw) return defaults;

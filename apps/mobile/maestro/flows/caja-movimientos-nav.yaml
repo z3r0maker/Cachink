@@ -19,16 +19,16 @@ tags:
 
 - scrollUntilVisible:
     element:
-      id: "otros-caja-movimientos"
+      id: 'otros-caja-movimientos'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-caja-movimientos"
+    id: 'otros-caja-movimientos'
 - extendedWaitUntil:
     visible:
-      text: "Movimientos de Caja"
+      text: 'Movimientos de Caja'
     timeout: 5000
 
 # Verify empty state renders (no movements today)
-- assertVisible: "Sin movimientos registrados hoy"
+- assertVisible: 'Sin movimientos registrados hoy'

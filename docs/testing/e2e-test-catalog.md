@@ -1,6 +1,6 @@
 # E2E Test Case Catalog
 
-> Cachink! test-case reference — every operation, its edge cases, assigned layer, and current coverage status.
+> Xangarro! test-case reference — every operation, its edge cases, assigned layer, and current coverage status.
 >
 > **Legend**: ✅ covered | ⚠️ partial | ❌ missing
 >

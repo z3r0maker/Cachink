@@ -3,7 +3,7 @@
 > The breakpoint contract that governs every responsive decision in
 > `packages/ui`. Read this before adding any width-conditional layout.
 
-This document is the source of truth for **how Cachink decides between
+This document is the source of truth for **how Xangarro decides between
 phone, tablet, and desktop layouts**. Every responsive primitive
 (`<SplitPane>`, the Director Home grid, future split-list-detail screens)
 routes through these rules.
@@ -93,7 +93,7 @@ return <PhonePortraitLayout />;
 
 - ✅ **Do** call `useMedia()` once near the top of the component and
   destructure the keys you need.
-- ✅ **Do** always provide a phone-portrait fallback. Cachink ships
+- ✅ **Do** always provide a phone-portrait fallback. Xangarro ships
   on phones; the `else`-branch must work.
 - ✅ **Do** test responsive components at every breakpoint in
   Storybook (`<Story args={{ width: 480 }} />`, etc).

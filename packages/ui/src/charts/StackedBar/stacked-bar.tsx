@@ -130,7 +130,7 @@ export function StackedBar(props: StackedBarProps): ReactElement | null {
         <ReactEChartsCore
           echarts={echarts}
           option={option}
-          theme="cachink"
+          theme="xangarro"
           style={{ height: height + 4, width: 280 }}
           notMerge
         />

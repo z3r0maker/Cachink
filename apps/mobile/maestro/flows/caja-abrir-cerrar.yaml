@@ -17,31 +17,31 @@ appId: mx.xangarro.mobile
 
 # Status card should be visible showing the turn is open.
 - assertVisible:
-    id: "caja-status-card"
+    id: 'caja-status-card'
 - assertVisible:
-    id: "caja-balance-card"
+    id: 'caja-balance-card'
 
 # --- Happy path: Close caja ---
 - tapOn:
-    id: "caja-cerrar-btn"
+    id: 'caja-cerrar-btn'
 
 # Step 1: BlindCountStep — enter count without seeing expected.
 - extendedWaitUntil:
     visible:
-      id: "cerrar-caja-step-1"
+      id: 'cerrar-caja-step-1'
     timeout: 5000
 
 # Enter 500 via numpad (matching amount).
-- tapOn: { id: "numpad-5" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
+- tapOn: { id: 'numpad-5' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 - tapOn:
-    id: "blind-count-continue"
+    id: 'blind-count-continue'
 
 # Step 2: CountResultStep — comparison + close.
 - extendedWaitUntil:
     visible:
-      id: "cerrar-caja-step-2"
+      id: 'cerrar-caja-step-2'
     timeout: 5000
 - tapOn:
-    id: "count-result-close"
+    id: 'count-result-close'

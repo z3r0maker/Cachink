@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<BottomTabBar>` primitive.
  *
- * Stories use real es-MX Cachink tab labels drawn from CLAUDE.md §1
+ * Stories use real es-MX Xangarro tab labels drawn from CLAUDE.md §1
  * (Operativo: 3 tabs / Director: 6 tabs). Icons are emoji placeholders —
  * the real icon library decision lands in Phase 1C.
  */

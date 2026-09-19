@@ -21,7 +21,7 @@ import { Text, View } from '@tamagui/core';
 import { colors, fontSizes, radii, shadows, typography } from '../../theme';
 
 export interface HelloBadgeProps {
-  /** Text shown in the small uppercase label row. Defaults to "CACHINK!". */
+  /** Text shown in the small uppercase label row. Defaults to "XANGARRO!". */
   readonly label?: string;
   /** Text shown in the large body row. Defaults to "Hola, emprendedor.". */
   readonly greeting?: string;
@@ -68,7 +68,7 @@ function GreetingText({ children }: { children: string }): ReactElement {
  * border (2px solid black), shadow (4px 4px hard), radius (16).
  */
 export function HelloBadge(props: HelloBadgeProps): ReactElement {
-  const label = props.label ?? 'CACHINK!';
+  const label = props.label ?? 'XANGARRO!';
   const greeting = props.greeting ?? 'Hola, emprendedor.';
   return (
     <View

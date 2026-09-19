@@ -62,7 +62,7 @@ export function Sparkline(props: SparklineProps): ReactElement | null {
       <ReactEChartsCore
         echarts={echarts}
         option={option}
-        theme="cachink"
+        theme="xangarro"
         style={{ height, width }}
         notMerge
       />

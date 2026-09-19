@@ -42,8 +42,8 @@ export const ActivateRequestSchema = z.object({
 });
 export type ActivateRequest = z.infer<typeof ActivateRequestSchema>;
 
-/** Operators never carry an email over the wire (§5). */
-export const WireUserSchema = wireSchema(UserSchema.omit({ email: true }));
+/** Operators: name, PIN hash, avatar, permissions, active — no email, no role (§5, C-11). */
+export const WireUserSchema = wireSchema(UserSchema);
 
 /** Reference tables a device receives (bootstrap and pull share this shape). */
 export const ReferenceTablesSchema = z.object({

@@ -87,7 +87,7 @@ export const tamaguiConfig = createTamagui({
        *
        * Tamagui's `placeholderTextColor` prop accepts a theme token, not a raw
        * value, so the fields were reaching for Tamagui's built-in `$gray400` —
-       * a colour outside this palette that measures 2.4:1 on every Cachink
+       * a colour outside this palette that measures 2.4:1 on every Xangarro
        * surface and fails WCAG AA. Naming it here lets the fields ask for the
        * brand's accessible muted ink instead. Audit 2026-09.
        */

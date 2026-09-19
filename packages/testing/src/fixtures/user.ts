@@ -1,40 +1,25 @@
 /**
  * User fixture builders for tests.
  *
- * Phase 1 of the Feature Flags plan: user management + auth.
- * ADR-049: PIN for login, Password for recovery.
+ * Operators only (A-05): no role, no recovery password, no email. The NIP
+ * is four digits (ADR-072 / C-16).
  */
 
-import type { BusinessId, DeviceId, IsoTimestamp, NewUser, User, UserId } from '@xangarro/domain';
+import type { BusinessId, DeviceId, IsoTimestamp, User, UserId } from '@xangarro/domain';
 import { newEntityId } from '@xangarro/domain';
 
 const DEFAULT_BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
 
-export function makeNewUser(overrides: Partial<NewUser> = {}): NewUser {
-  return {
-    nombre: 'Juan Director',
-    pin: '1234',
-    recoveryPassword: 'test123',
-    role: 'director',
-    mustChangePin: true,
-    businessId: DEFAULT_BIZ,
-    ...overrides,
-  };
-}
-
 export function makeUser(overrides: Partial<User> = {}): User {
   const id = (overrides.id ?? newEntityId<UserId>()) as UserId;
   return {
     id,
-    nombre: 'Juan Director',
-    email: null,
+    nombre: 'Juan Operador',
     pinHash: '$2a$10$fakehashfortest',
-    recoveryPasswordHash: '$2a$10$fakepinhashfortest',
-    role: 'director',
-    mustChangePin: false,
     avatarColor: 'blue',
+    permissions: { canCancelSales: false },
     active: true,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,

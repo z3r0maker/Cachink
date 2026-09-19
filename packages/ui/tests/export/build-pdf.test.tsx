@@ -94,5 +94,7 @@ describe('buildInformeMensualPdf', () => {
       // view-model tests above cover the pure surface. Skip gracefully.
       expect(true).toBe(true);
     }
-  });
+    // The first render boots @react-pdf's layout engine; under the full parallel
+    // suite that alone can pass the default 5 s.
+  }, 30_000);
 });

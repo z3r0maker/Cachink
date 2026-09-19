@@ -1,5 +1,6 @@
 import { ulid } from 'ulid';
 import type { AuditEvent } from './audit-event.js';
+import { adoptLegacyLogTable } from './legacy-log-table.js';
 import type { ErrorLogEntry } from './error-log.js';
 import type { LogStats } from './log-stats.js';
 import type { LogStore, LogQueryOptions, LogSnapshot, TimelineEntry } from './log-store.js';
@@ -48,6 +49,7 @@ export class SqliteLogStore implements LogStore {
   }
 
   async initialize(): Promise<void> {
+    await adoptLegacyLogTable(this.#db);
     await this.#db.execAsync(CREATE_TABLE_SQL);
     await this.#db.execAsync(CREATE_INDEXES_SQL);
     try {

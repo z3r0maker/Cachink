@@ -29,16 +29,16 @@ appId: mx.xangarro.mobile
 
 # Navigate to Sistema sub-screen.
 - tapOn:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'
 
 # Verify the export datos card is visible.
 - assertVisible:
-    id: "export-datos-card"
+    id: 'export-datos-card'
 
 # Trigger the export.
 - tapOn:
-    id: "export-datos-btn"
+    id: 'export-datos-btn'
 
 # Verify export status shows progress or success.
 - assertVisible:
-    id: "export-datos-status"
+    id: 'export-datos-status'

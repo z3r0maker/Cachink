@@ -23,55 +23,55 @@ tags:
 # This subflow opens it for whichever role is logged in.
 - runFlow: shared/open-director-tools.yaml
 - extendedWaitUntil:
-    visible: "Otros"
+    visible: 'Otros'
     timeout: 5000
 - scrollUntilVisible:
     element:
-      id: "otros-configuracion"
+      id: 'otros-configuracion'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-configuracion"
+    id: 'otros-configuracion'
 - extendedWaitUntil:
     visible:
-      id: "settings-hub-screen"
+      id: 'settings-hub-screen'
     timeout: 5000
 
 - tapOn:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'
 - extendedWaitUntil:
     visible:
-      id: "settings-sistema-screen"
+      id: 'settings-sistema-screen'
     timeout: 5000
 
 # Scroll to and tap the "Reportar un problema" button.
 - scrollUntilVisible:
     element:
-      id: "settings-open-bug-report"
+      id: 'settings-open-bug-report'
     direction: DOWN
     timeout: 5000
 - tapOn:
-    id: "settings-open-bug-report"
+    id: 'settings-open-bug-report'
 
 # Verify the bug report sheet content appears.
 - extendedWaitUntil:
     visible:
-      id: "bug-report-sheet"
+      id: 'bug-report-sheet'
     timeout: 5000
 
 # Assert description input is visible.
 - assertVisible:
-    id: "bug-report-description-input"
+    id: 'bug-report-description-input'
 
 # Type a description.
 - tapOn:
-    id: "bug-report-description-input"
-- inputText: "La app se cerró al editar un producto"
+    id: 'bug-report-description-input'
+- inputText: 'La app se cerró al editar un producto'
 
 # Assert share button is visible (fallback path when consent is off).
 - assertVisible:
-    id: "bug-report-share-btn"
+    id: 'bug-report-share-btn'
 
 # Close the sheet.
-- tapOn: "Cancelar"
+- tapOn: 'Cancelar'

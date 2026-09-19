@@ -5,12 +5,13 @@
 
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Alert } from 'react-native';
+import { PlanLimitError } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
   impactLight,
   totalDelDia,
   useCart,
-  useCachinkSound,
+  useSaleSound,
   useCheckoutStore,
   useCurrentBusiness,
   useEliminarVenta,
@@ -18,19 +19,18 @@ import {
   useProductosParaVenta,
   useProductosConStock,
   useRegistrarVenta,
-  useRole,
   useStockMap,
   useVentasByDate,
   type CartAction,
   type CartState,
 } from '@xangarro/ui';
 import type { Business, IsoDate, PaymentMethod, Product, Sale } from '@xangarro/domain';
-import { useCachinkPlayer } from '../../shell/use-cachink-player';
+import { useSaleSoundPlayer } from '../../shell/use-sale-sound-player';
 import { useSwipeState } from '../../shell/use-swipe-state';
 import { useShareComprobante } from '../../shell/ventas-slots';
 
 export type { CartAction, CartState };
-export { useRole, useOpenCajaTurno };
+export { useOpenCajaTurno };
 
 function useCheckoutReturnClear(dispatch: React.Dispatch<CartAction>): void {
   const checkoutCart = useCheckoutStore((s) => s.cart);
@@ -44,19 +44,19 @@ function useCheckoutReturnClear(dispatch: React.Dispatch<CartAction>): void {
   }, [checkoutCart, dispatch]);
 }
 
-export function useCachinkTrigger(): {
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
-  triggerCachink: () => void;
+export function useSaleConfirmation(): {
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
+  triggerSaleConfirmation: () => void;
 } {
-  const [showCachink, setShowCachink] = useState(false);
-  const cachinkPlayer = useCachinkPlayer();
-  const { play: playCachink } = useCachinkSound(cachinkPlayer);
-  const triggerCachink = useCallback(() => {
-    setShowCachink(true);
-    playCachink();
-  }, [playCachink]);
-  return { showCachink, setShowCachink, triggerCachink };
+  const [showSaleBurst, setShowSaleBurst] = useState(false);
+  const saleSoundPlayer = useSaleSoundPlayer();
+  const { play: playSaleSound } = useSaleSound(saleSoundPlayer);
+  const triggerSaleConfirmation = useCallback(() => {
+    setShowSaleBurst(true);
+    playSaleSound();
+  }, [playSaleSound]);
+  return { showSaleBurst, setShowSaleBurst, triggerSaleConfirmation };
 }
 
 export function useVentasQueries(fecha: IsoDate): {
@@ -68,7 +68,6 @@ export function useVentasQueries(fecha: IsoDate): {
   eliminar: ReturnType<typeof useEliminarVenta>;
   ventas: readonly Sale[];
   total: bigint;
-  role: ReturnType<typeof useRole>;
 } {
   const ventasQ = useVentasByDate(fecha);
   const productosQ = useProductosParaVenta();
@@ -77,7 +76,6 @@ export function useVentasQueries(fecha: IsoDate): {
   const registrar = useRegistrarVenta();
   const eliminar = useEliminarVenta();
   const stockMap = useStockMap(stockQ);
-  const role = useRole();
   const ventas = ventasQ.data ?? [];
   return {
     productos: productosQ.data ?? [],
@@ -88,7 +86,6 @@ export function useVentasQueries(fecha: IsoDate): {
     eliminar,
     ventas,
     total: totalDelDia(ventas),
-    role,
   };
 }
 
@@ -151,7 +148,9 @@ export function useVentasCheckout(
             cantidad: item.cantidad,
           });
         } catch (err) {
-          Alert.alert('Error parcial', (err as Error).message);
+          // The plan-limit sheet already explains a PlanLimitError (A-10).
+          if (!(err instanceof PlanLimitError))
+            Alert.alert('Error parcial', (err as Error).message);
           return;
         }
       }

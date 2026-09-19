@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reproducible build script for Cachink (ADR-036).
+# Reproducible build script for Xangarro (ADR-036).
 #
 # Produces:
 #   1. EAS production build (iOS + Android) via `eas build -p all`.
@@ -9,8 +9,8 @@
 #
 # Signing material comes from env:
 #   - Mobile: EAS secrets (set via `eas secret:create`).
-#   - Desktop macOS: CACHINK_APPLE_SIGNING_IDENTITY
-#   - Desktop Windows: CACHINK_WINDOWS_CERT_THUMBPRINT
+#   - Desktop macOS: XANGARRO_APPLE_SIGNING_IDENTITY
+#   - Desktop Windows: XANGARRO_WINDOWS_CERT_THUMBPRINT
 # Never commit these.
 #
 # Usage:
@@ -26,7 +26,7 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DIST="$ROOT/dist"
 mkdir -p "$DIST"
 
-echo "→ Cachink reproducible build"
+echo "→ Xangarro reproducible build"
 echo "  Root: $ROOT"
 echo "  Dist: $DIST"
 echo "  Dry-run: $DRY_RUN"
@@ -70,7 +70,7 @@ fi
 # --------------------------------------------------------------------
 echo "→ SBOM (CycloneDX)"
 if (( DRY_RUN == 0 )); then
-  pnpm dlx @cyclonedx/cdxgen -o "$DIST/sbom.json" --project-name cachink --project-version "$(node -p "require('./package.json').version")"
+  pnpm dlx @cyclonedx/cdxgen -o "$DIST/sbom.json" --project-name xangarro --project-version "$(node -p "require('./package.json').version")"
 else
   echo "   [dry-run] would call: cdxgen -o $DIST/sbom.json"
 fi

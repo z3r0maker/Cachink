@@ -14,73 +14,73 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # --- Sale 1: Transferencia ---
 
 # Tap a product to add to cart.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # Method picker — select Transferencia.
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "option-card-Transferencia"
+    id: 'option-card-Transferencia'
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # Confirm screen for Transferencia — submit.
 - extendedWaitUntil:
     visible:
-      id: "checkout-confirm-Transferencia"
+      id: 'checkout-confirm-Transferencia'
     timeout: 5000
 - tapOn:
-    id: "checkout-confirm-Transferencia-submit"
+    id: 'checkout-confirm-Transferencia-submit'
 
 # Returns to Ventas.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # --- Sale 2: Tarjeta ---
 
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # Method picker — select Tarjeta.
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "option-card-Tarjeta"
+    id: 'option-card-Tarjeta'
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # Confirm screen for Tarjeta — submit.
 - extendedWaitUntil:
     visible:
-      id: "checkout-confirm-Tarjeta"
+      id: 'checkout-confirm-Tarjeta'
     timeout: 5000
 - tapOn:
-    id: "checkout-confirm-Tarjeta-submit"
+    id: 'checkout-confirm-Tarjeta-submit'
 
 # Returns to Ventas — both sales exist.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000

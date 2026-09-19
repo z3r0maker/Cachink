@@ -32,67 +32,67 @@ appId: mx.xangarro.mobile
 - runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-funciones"
+      id: 'otros-funciones'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-funciones"
+    id: 'otros-funciones'
 - tapOn:
-    id: "flag-merma-switch"
+    id: 'flag-merma-switch'
     optional: true
 
 # Switch to Operativo — merma appears as a bottom tab.
 
 # Navigate to the Merma tab.
 - tapOn:
-    id: "tab-merma"
+    id: 'tab-merma'
 
 # Merma screen renders with the product grid.
 - extendedWaitUntil:
     visible:
-      id: "merma-screen"
+      id: 'merma-screen'
     timeout: 5000
 
 # Tap a product to open the confirm sheet.
-- tapOn: "Tortilla"
+- tapOn: 'Tortilla'
 - extendedWaitUntil:
     visible:
-      id: "merma-confirm-sheet"
+      id: 'merma-confirm-sheet'
     timeout: 5000
 
 # --- Test 1: Fill nota then cancel ---
 - tapOn:
-    id: "merma-nota"
-- inputText: "Nota de prueba cancelada"
+    id: 'merma-nota'
+- inputText: 'Nota de prueba cancelada'
 
 # Tap cancel — sheet should close without submitting.
 - tapOn:
-    id: "merma-cancel"
+    id: 'merma-cancel'
 - assertNotVisible:
-    id: "merma-confirm-sheet"
+    id: 'merma-confirm-sheet'
 
 # --- Test 2: Re-open → fill all fields including nota → submit ---
-- tapOn: "Tortilla"
+- tapOn: 'Tortilla'
 - extendedWaitUntil:
     visible:
-      id: "merma-confirm-sheet"
+      id: 'merma-confirm-sheet'
     timeout: 5000
 
 - tapOn:
-    id: "merma-cantidad"
-- inputText: "2"
+    id: 'merma-cantidad'
+- inputText: '2'
 
 - tapOn:
-    id: "merma-reason"
-- inputText: "Producto dañado"
+    id: 'merma-reason'
+- inputText: 'Producto dañado'
 
 - tapOn:
-    id: "merma-nota"
-- inputText: "Revisado por supervisor"
+    id: 'merma-nota'
+- inputText: 'Revisado por supervisor'
 
 # Submit successfully.
 - tapOn:
-    id: "merma-submit"
+    id: 'merma-submit'
 - assertNotVisible:
-    id: "merma-confirm-sheet"
+    id: 'merma-confirm-sheet'

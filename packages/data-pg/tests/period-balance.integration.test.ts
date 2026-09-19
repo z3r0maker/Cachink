@@ -74,12 +74,18 @@ describe('periodBalanceInputs', () => {
       await tx.execute(sql`
         INSERT INTO clients (id, nombre, business_id, device_id, created_at, updated_at)
         VALUES (${cliente}, 'Doña Mary', ${BIZ}, ${BIZ}, now(), now())`);
+      const ticket = testId('K');
       await tx.execute(sql`
-        INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
-                           cliente_id, producto_id, cantidad, business_id, device_id,
+        INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago, cliente_id,
+                             business_id, device_id, created_at, updated_at)
+        VALUES (${ticket}, 1, '2026-05-02', 'Fiesta', 'Crédito', 'parcial', ${cliente},
+                ${BIZ}, ${BIZ}, now(), now())`);
+      await tx.execute(sql`
+        INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
+                           producto_id, cantidad, business_id, device_id,
                            created_at, updated_at)
-        VALUES (${testId('V')}, '2026-05-02', 'Fiesta', 'Producto', 80_000, 'Crédito', 'parcial',
-                ${cliente}, ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
+        VALUES (${testId('V')}, ${ticket}, '2026-05-02', 'Fiesta', 'Producto', 80_000,
+                ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
       const pago = (id: string, fecha: string, monto: number, deleted = false) =>
         tx.execute(sql`
           INSERT INTO client_payments (id, cliente_id, fecha, monto_centavos, metodo, business_id,

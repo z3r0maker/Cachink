@@ -15,18 +15,18 @@ import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import { describe, expect, it } from 'vitest';
 import * as schema from '../../src/schema/index.js';
-import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../../src/repositories/drizzle/_db.js';
 import journal from '../../drizzle/migrations/meta/_journal.json';
 import { migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { runMigrations } from '../../src/migrator/run-migrations.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
-function _freshAsyncDb(): CachinkDatabase {
+function _freshAsyncDb(): XangarroDatabase {
   const sqlite = new Database(':memory:');
-  return drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+  return drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 }
 
-function _getSqliteHandle(_db: CachinkDatabase): Database.Database {
+function _getSqliteHandle(_db: XangarroDatabase): Database.Database {
   // drizzle-orm/better-sqlite3 stores the raw db internally;
   // we can create a fresh one for direct queries.
   const sqlite = new Database(':memory:');
@@ -59,7 +59,7 @@ describe('Migration integrity', () => {
 
   it('migrations produce a valid schema on a fresh DB', async () => {
     const sqlite = new Database(':memory:');
-    const db = drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -89,10 +89,10 @@ describe('Migration integrity', () => {
       'director_alerts',
       'caja_movimientos',
       'cancelacion_logs',
-      '__cachink_migrations',
-      '__cachink_change_log',
-      '__cachink_sync_state',
-      '__cachink_conflicts',
+      '__xangarro_migrations',
+      '__xangarro_change_log',
+      '__xangarro_sync_state',
+      '__xangarro_conflicts',
     ];
 
     for (const table of expectedTables) {
@@ -102,13 +102,13 @@ describe('Migration integrity', () => {
 
   it('migrations are idempotent — second run applies nothing', async () => {
     const sqlite = new Database(':memory:');
-    const db = drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
     await runMigrations(db); // Must not throw
 
     const rows = sqlite
-      .prepare('SELECT tag FROM __cachink_migrations ORDER BY tag')
+      .prepare('SELECT tag FROM __xangarro_migrations ORDER BY tag')
       .all() as Array<{ tag: string }>;
 
     // Each tag appears exactly once
@@ -119,7 +119,7 @@ describe('Migration integrity', () => {
 
   it('PRAGMA user_version equals SCHEMA_VERSION after migration', async () => {
     const sqlite = new Database(':memory:');
-    const db = drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -135,7 +135,7 @@ describe('Migration integrity', () => {
 
   it('change-log triggers are installed for synced tables', async () => {
     const sqlite = new Database(':memory:');
-    const db = drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -165,7 +165,7 @@ describe('Migration integrity', () => {
 
   it('partial indexes are created', async () => {
     const sqlite = new Database(':memory:');
-    const db = drizzle(sqlite, { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(sqlite, { schema }) as unknown as XangarroDatabase;
 
     await runMigrations(db);
 
@@ -188,7 +188,7 @@ describe('Migration integrity', () => {
       'idx_clients_biz',
       'idx_recurring_expenses_biz',
       'idx_changelog_table_row',
-      'idx_cachink_conflicts_detected_at',
+      'idx_xangarro_conflicts_detected_at',
     ];
 
     for (const idx of expectedIndexes) {

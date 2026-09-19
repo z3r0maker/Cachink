@@ -1,8 +1,8 @@
-# Cachink! — Play Store listing (es-MX)
+# Xangarro — Play Store listing (es-MX)
 
 ## Título (30 caracteres)
 
-**Cachink! Finanzas**
+**Xangarro Finanzas**
 
 ## Descripción corta (80 caracteres)
 
@@ -10,7 +10,7 @@ POS y finanzas para emprendedoras. Funciona sin internet. Sin complicaciones.
 
 ## Descripción completa (4000 caracteres)
 
-Cachink! es la app más simple para llevar las finanzas de un negocio
+Xangarro es la app más simple para llevar las finanzas de un negocio
 pequeño en México. Registra ventas y egresos, controla inventario, y
 ve tus estados financieros al día — todo en tu dispositivo, sin
 necesidad de internet.
