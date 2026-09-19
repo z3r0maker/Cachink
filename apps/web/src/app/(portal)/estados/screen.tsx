@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 
 import { Button, ScreenBody, SegmentedTabs, ExportButton } from '@/components';
+import { button } from '@/components/button.css';
 import { useSession } from '@/session/provider';
 import type { EstadosModel } from '@/server/estados';
 import { hasStatements, resolveScreenState } from '@/session/gating';
@@ -67,7 +68,16 @@ function Flujo({ m }: { readonly m: EstadosModel }) {
   );
 }
 
-function Heading() {
+function Heading({
+  mayInforme,
+  mes,
+}: {
+  /** `capabilities.informeMensual` — Xangarrote; below it the button is hidden
+   *  (the Suscripción cards carry the upsell, not this header). */
+  readonly mayInforme: boolean;
+  /** The period's month, `YYYY-MM` — the informe is monthly by definition. */
+  readonly mes: string;
+}) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
@@ -84,6 +94,16 @@ function Heading() {
         <Button variant="secondary" onClick={() => window.print()}>
           Imprimir
         </Button>
+        {/* The contador's PDF — the same document the phone renders (P-34). */}
+        {mayInforme ? (
+          <a
+            className={button({ variant: 'secondary' })}
+            href={`/api/export/informe-mensual?mes=${mes}`}
+            data-no-print
+          >
+            Informe mensual
+          </a>
+        ) : null}
       </div>
     </div>
   );
@@ -94,6 +114,35 @@ function Tab({ tab, m }: { readonly tab: string; readonly m: EstadosModel }) {
   if (tab === 'flujo') return <Flujo m={m} />;
   if (tab === 'indicadores') return <Indicadores indicadores={m.indicadores} />;
   return <Resultados m={m} />;
+}
+
+/** The content area: plan entitlement, load failure and the tab's statement. */
+function Statements({
+  maySeeStatements,
+  model,
+  tab,
+}: {
+  readonly maySeeStatements: boolean;
+  readonly model: EstadosModel | null;
+  readonly tab: string;
+}) {
+  return (
+    <ScreenBody
+      state={resolveScreenState({ entitled: maySeeStatements, error: model === null })}
+      onRetry={() => window.location.reload()}
+      empty={{
+        title: 'Sin datos en el periodo',
+        body: 'Registra movimientos en esta ventana de tiempo.',
+      }}
+      locked={{
+        title: 'Los estados financieros llegan con Xangarro',
+        body: 'Tu plan Xangarrito registra ventas y gastos. Los estados NIF — resultados, balance y flujo — vienen incluidos desde Xangarro.',
+        plan: 'Xangarro',
+      }}
+    >
+      {model === null ? null : <Tab tab={tab} m={model} />}
+    </ScreenBody>
+  );
 }
 
 export function EstadosScreen({
@@ -108,7 +157,10 @@ export function EstadosScreen({
 
   return (
     <>
-      <Heading />
+      <Heading
+        mayInforme={session.capabilities.informeMensual}
+        mes={periodo.rango.desde.slice(0, 7)}
+      />
       <PeriodoSwitcher periodo={periodo} />
       <SegmentedTabs
         ariaLabel="Estados financieros"
@@ -116,24 +168,7 @@ export function EstadosScreen({
         onValueChange={setTab}
         tabs={TABS}
       />
-      <ScreenBody
-        state={resolveScreenState({
-          entitled: hasStatements(session.capabilities),
-          error: model === null,
-        })}
-        onRetry={() => window.location.reload()}
-        empty={{
-          title: 'Sin datos en el periodo',
-          body: 'Registra movimientos en esta ventana de tiempo.',
-        }}
-        locked={{
-          title: 'Los estados financieros llegan con Xangarro',
-          body: 'Tu plan Xangarrito registra ventas y gastos. Los estados NIF — resultados, balance y flujo — vienen incluidos desde Xangarro.',
-          plan: 'Xangarro',
-        }}
-      >
-        {model === null ? null : <Tab tab={tab} m={model} />}
-      </ScreenBody>
+      <Statements maySeeStatements={hasStatements(session.capabilities)} model={model} tab={tab} />
     </>
   );
 }

@@ -441,6 +441,9 @@ importers:
 
   packages/application:
     dependencies:
+      '@react-pdf/renderer':
+        specifier: ^4.5.1
+        version: 4.5.1(react@19.2.6)
       '@xangarro/contracts':
         specifier: workspace:*
         version: link:../contracts
@@ -450,13 +453,22 @@ importers:
       '@xangarro/domain':
         specifier: workspace:*
         version: link:../domain
+      '@xangarro/tokens':
+        specifier: workspace:*
+        version: link:../tokens
       bcryptjs:
         specifier: 3.0.3
         version: 3.0.3
+      react:
+        specifier: 19.2.6
+        version: 19.2.6
       zod:
         specifier: ^4.6.2
         version: 4.6.2
     devDependencies:
+      '@types/react':
+        specifier: ^19.3.0
+        version: 19.3.0
       '@vitest/coverage-v8':
         specifier: ^4.1.6
         version: 4.1.6(vitest@4.1.6)

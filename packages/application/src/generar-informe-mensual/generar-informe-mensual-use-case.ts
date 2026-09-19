@@ -3,25 +3,27 @@
  *
  * Pulls a month's data from the repositories and returns a structured
  * `InformeMensual` — ventas + egresos + NIF Estado de Resultados +
- * per-categoría breakdowns. The UI serialises to PDF in P1C-M9; this
- * use-case stays format-agnostic.
+ * per-categoría breakdowns. The rules live in `construirInforme` (same
+ * folder), which is also what the portal feeds from `periodLedger`, so the
+ * informe is computed in exactly one place for both stores.
  *
- * `yearMonth` is a `YYYY-MM` string. The use-case derives the first
- * and last day of the month so the Estado de Resultados ISR tasa can
- * be scoped via the Business record (future extension).
+ * `yearMonth` is a `YYYY-MM` string. The use-case derives the first and last
+ * day of the month so the Estado de Resultados ISR tasa can be scoped via the
+ * Business record (future extension).
  */
 
-import {
-  calculateEstadoDeResultados,
-  type BusinessId,
-  type EstadoDeResultados,
-  type Expense,
-  type ExpenseCategory,
-  type Money,
-  type Sale,
-  type SaleCategory,
+import type {
+  BusinessId,
+  EstadoDeResultados,
+  Expense,
+  ExpenseCategory,
+  Money,
+  Sale,
+  SaleCategory,
 } from '@xangarro/domain';
 import type { BusinessesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
+
+import { construirInforme } from './construir-informe.js';
 import type { UseCase } from '../_use-case.js';
 
 export interface GenerarInformeMensualInput {
@@ -72,29 +74,13 @@ export class GenerarInformeMensualUseCase implements UseCase<
       this.#expenses.findByMonth(input.yearMonth, input.businessId),
     ]);
 
-    const estadoResultados = calculateEstadoDeResultados({
-      ventas,
-      egresos,
-      isrTasa: business.isrTasa,
-    });
-
-    return {
+    return construirInforme({
       businessId: input.businessId,
       yearMonth: input.yearMonth,
       ventas,
       egresos,
-      estadoResultados,
-      ventasPorCategoria: groupByCategory(
-        ventas,
-        (v) => v.categoria,
-        (v) => v.monto,
-      ),
-      egresosPorCategoria: groupByCategory(
-        egresos,
-        (e) => e.categoria,
-        (e) => e.monto,
-      ),
-    };
+      isrTasa: business.isrTasa,
+    });
   }
 
   /**
@@ -119,17 +105,4 @@ export class GenerarInformeMensualUseCase implements UseCase<
     );
     return results.flat();
   }
-}
-
-function groupByCategory<T, K extends string>(
-  rows: readonly T[],
-  keyOf: (r: T) => K,
-  montoOf: (r: T) => Money,
-): Record<K, Money> {
-  const acc = {} as Record<K, Money>;
-  for (const row of rows) {
-    const key = keyOf(row);
-    acc[key] = (acc[key] ?? 0n) + montoOf(row);
-  }
-  return acc;
 }
