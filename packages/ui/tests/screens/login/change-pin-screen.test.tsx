@@ -1,7 +1,7 @@
 /**
  * ChangePinScreen tests — Login/change-pin-screen.tsx coverage.
  *
- * Covers form rendering, 6-digit validation, mismatch hints,
+ * Covers form rendering, 4-digit validation (ADR-072), mismatch hints,
  * submit gating, and callback wiring.
  */
 
@@ -67,30 +67,30 @@ describe('ChangePinScreen', () => {
     expect(defaultProps.onSubmit).not.toHaveBeenCalled();
   });
 
-  it('enables submit when all fields are valid 6-digit PINs that match', () => {
+  it('enables submit when all fields are valid 4-digit PINs that match', () => {
     const onSubmit = vi.fn();
     renderChangePin({ onSubmit });
-    fillInput('current-pin', '111111');
-    fillInput('new-pin', '222222');
-    fillInput('confirm-pin', '222222');
+    fillInput('current-pin', '1111');
+    fillInput('new-pin', '2222');
+    fillInput('confirm-pin', '2222');
     fireEvent.click(screen.getByTestId('change-pin-submit'));
-    expect(onSubmit).toHaveBeenCalledWith('111111', '222222');
+    expect(onSubmit).toHaveBeenCalledWith('1111', '2222');
   });
 
   it('does not submit when new PIN and confirm do not match', () => {
     const onSubmit = vi.fn();
     renderChangePin({ onSubmit });
-    fillInput('current-pin', '111111');
-    fillInput('new-pin', '222222');
-    fillInput('confirm-pin', '333333');
+    fillInput('current-pin', '1111');
+    fillInput('new-pin', '2222');
+    fillInput('confirm-pin', '3333');
     fireEvent.click(screen.getByTestId('change-pin-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('does not submit when new PIN is fewer than 6 digits', () => {
+  it('does not submit when new PIN is fewer than 4 digits', () => {
     const onSubmit = vi.fn();
     renderChangePin({ onSubmit });
-    fillInput('current-pin', '111111');
+    fillInput('current-pin', '1111');
     fillInput('new-pin', '222');
     fillInput('confirm-pin', '222');
     fireEvent.click(screen.getByTestId('change-pin-submit'));
@@ -105,9 +105,9 @@ describe('ChangePinScreen', () => {
   it('disables submit when submitting is true', () => {
     const onSubmit = vi.fn();
     renderChangePin({ onSubmit, submitting: true });
-    fillInput('current-pin', '111111');
-    fillInput('new-pin', '222222');
-    fillInput('confirm-pin', '222222');
+    fillInput('current-pin', '1111');
+    fillInput('new-pin', '2222');
+    fillInput('confirm-pin', '2222');
     fireEvent.click(screen.getByTestId('change-pin-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });

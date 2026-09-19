@@ -39,6 +39,9 @@ export type EntregaCreditoId = Ulid & { readonly __entity: 'EntregaCredito' };
 export type DirectorAlertId = Ulid & { readonly __entity: 'DirectorAlert' };
 export type CajaMovimientoId = Ulid & { readonly __entity: 'CajaMovimiento' };
 export type CancelacionLogId = Ulid & { readonly __entity: 'CancelacionLog' };
+export type TicketId = Ulid & { readonly __entity: 'Ticket' };
+export type MensajeOperadorId = Ulid & { readonly __entity: 'MensajeOperador' };
+export type RespuestaOperadorId = Ulid & { readonly __entity: 'RespuestaOperador' };
 
 /** Convenience factory for any branded entity id. */
 export function newEntityId<T extends Ulid>(): T {

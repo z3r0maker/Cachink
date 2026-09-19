@@ -35,7 +35,7 @@ describe('Venta Lifecycle [fullstack]', () => {
     // Seed a Director user (needed for cancel PIN verification)
     await h.useCases.crearUsuario.execute({
       nombre: 'Director Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Test1234',
       role: 'director',
       mustChangePin: false,
@@ -126,7 +126,7 @@ describe('Venta Lifecycle [fullstack]', () => {
     const result = await h.useCases.cancelarVenta.execute({
       saleId: sale.id,
       userId: director.id,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Cliente no quiso',
       businessId: BIZ,
       stockEnabled: true,

@@ -1,4 +1,4 @@
-/* Viewport — responsive hook for the Cachink landing page.
+/* Viewport — responsive hook for the Xangarro landing page.
    Exposes isMobile (<768px), isTablet (768–1023px), isDesktop (>=1024px).
    SSR-safe: defaults to desktop (1280px) on server, updates after mount. */
 

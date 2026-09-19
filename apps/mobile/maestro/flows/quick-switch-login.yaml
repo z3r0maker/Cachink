@@ -33,10 +33,6 @@ appId: mx.xangarro.mobile
     id: "numpad-9"
 - tapOn:
     id: "numpad-9"
-- tapOn:
-    id: "numpad-9"
-- tapOn:
-    id: "numpad-9"
 
 # Error message should appear (shake + haptic fire too, visual-only).
 - assertVisible: "PIN incorrecto"
@@ -50,10 +46,6 @@ appId: mx.xangarro.mobile
     id: "numpad-3"
 - tapOn:
     id: "numpad-4"
-- tapOn:
-    id: "numpad-5"
-- tapOn:
-    id: "numpad-6"
 
 # Tabs mount — Director Home renders.
 - extendedWaitUntil:

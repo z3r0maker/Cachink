@@ -1,5 +1,5 @@
 /**
- * JSON-LD structured data for Cachink landing page.
+ * JSON-LD structured data for the Xangarro landing page.
  *
  * @graph blocks:
  *   1. Organization       — the company
@@ -14,14 +14,16 @@
 
 // FAQ_ITEMS is the single source of truth — also consumed by FAQAccordion
 import { FAQ_ITEMS } from '../landing/copy.jsx';
+// Plan prices/limits — same source as the visible pricing table (L-02)
+import { PLANES } from '../landing/planes.js';
 
 const SITE_URL =
-  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://cachink.mx';
+  (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://xangarro.mx';
 
 const organization = {
   '@type': 'Organization',
   '@id': `${SITE_URL}/#organization`,
-  name: 'Cachink',
+  name: 'Xangarro',
   url: SITE_URL,
   logo: {
     '@type': 'ImageObject',
@@ -30,7 +32,7 @@ const organization = {
     height: 180,
   },
   description:
-    'Cachink es la app mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador. Hecho en México para emprendedores mexicanos.',
+    'Xangarro es la plataforma mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador. Hecho en México para emprendedores mexicanos.',
   foundingLocation: {
     '@type': 'Place',
     addressCountry: 'MX',
@@ -43,47 +45,26 @@ const organization = {
 const softwareApplication = {
   '@type': 'SoftwareApplication',
   '@id': `${SITE_URL}/#app`,
-  name: 'Cachink',
+  name: 'Xangarro',
   applicationCategory: 'BusinessApplication',
-  operatingSystem: 'iOS, Android',
+  operatingSystem: 'Web, iOS, Android',
   url: SITE_URL,
   description:
-    'App de finanzas para pequeños negocios mexicanos: panaderías, cafeterías, tiendas de barrio y talleres. Registra ventas y egresos, ve el estado de tu caja en tiempo real, y exporta estados financieros en formato NIF para tu contador.',
+    'Plataforma de finanzas para pequeños negocios mexicanos: panaderías, cafeterías, tiendas de barrio y talleres. Registra ventas y egresos desde la web o la app, ve el estado de tu caja en tiempo real, y exporta estados financieros en formato NIF para tu contador.',
   inLanguage: 'es-MX',
-  offers: [
-    {
-      '@type': 'Offer',
-      name: 'Plan Gratis',
-      price: '0',
-      priceCurrency: 'MXN',
-      description: 'Ventas + egresos ilimitados, 1 dispositivo, corte de día, exportar a CSV.',
-      availability: 'https://schema.org/InStock',
-    },
-    {
-      '@type': 'Offer',
-      name: 'Plan Pro',
-      price: '149',
-      priceCurrency: 'MXN',
-      description:
-        'Todo lo de Gratis más multi-dispositivo sincronizado, Panel Director, estados financieros NIF y soporte por WhatsApp.',
-      availability: 'https://schema.org/InStock',
-      billingIncrement: 'P1M',
-    },
-    {
-      '@type': 'Offer',
-      name: 'Plan Contador',
-      price: '299',
-      priceCurrency: 'MXN',
-      description:
-        'Todo lo de Pro más hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
-      availability: 'https://schema.org/InStock',
-      billingIncrement: 'P1M',
-    },
-  ],
+  offers: PLANES.map((p) => ({
+    '@type': 'Offer',
+    name: p.nombre,
+    price: String(p.mensual),
+    priceCurrency: 'MXN',
+    description: `${p.features.join('. ')}. Precios más IVA.`,
+    availability: 'https://schema.org/InStock',
+    ...(p.mensual > 0 ? { billingIncrement: 'P1M' } : {}),
+  })),
   publisher: { '@id': `${SITE_URL}/#organization` },
 };
 
-// Service schema: positions Cachink as a cash-management service for Mexican SMBs.
+// Service schema: positions Xangarro as a cash-management service for Mexican SMBs.
 // This phrasing matches voice-search and LLM intent better than "BusinessApplication".
 const service = {
   '@type': 'Service',
@@ -91,7 +72,7 @@ const service = {
   name: 'Gestión de caja para pequeños negocios',
   serviceType: 'Software de control de caja y finanzas para emprendedores',
   description:
-    'Cachink es un servicio de gestión de caja para pequeños negocios mexicanos. Permite registrar ventas y egresos en segundos, llevar el control financiero diario y generar estados financieros para contadores, sin necesidad de hojas de Excel ni conocimientos contables.',
+    'Xangarro es un servicio de gestión de caja para pequeños negocios mexicanos. Permite registrar ventas y egresos en segundos, llevar el control financiero diario y generar estados financieros para contadores, sin necesidad de hojas de Excel ni conocimientos contables.',
   provider: { '@id': `${SITE_URL}/#organization` },
   areaServed: { '@type': 'Country', name: 'México' },
   availableChannel: {
@@ -101,12 +82,13 @@ const service = {
   },
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Planes Cachink',
-    itemListElement: [
-      { '@type': 'Offer', name: 'Plan Gratis', price: '0', priceCurrency: 'MXN' },
-      { '@type': 'Offer', name: 'Plan Pro', price: '149', priceCurrency: 'MXN' },
-      { '@type': 'Offer', name: 'Plan Contador', price: '299', priceCurrency: 'MXN' },
-    ],
+    name: 'Planes Xangarro',
+    itemListElement: PLANES.map((p) => ({
+      '@type': 'Offer',
+      name: p.nombre,
+      price: String(p.mensual),
+      priceCurrency: 'MXN',
+    })),
   },
 };
 

@@ -20,8 +20,8 @@ import { buildTestRepos } from '../build-test-repos';
 
 initI18n();
 
-const USER_PIN = '000000';
-const WRONG_PIN = '999999';
+const USER_PIN = '0000';
+const WRONG_PIN = '9999';
 const PIN_HASH = hashSync(USER_PIN, 10);
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 

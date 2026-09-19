@@ -97,7 +97,7 @@ export interface InicioScreenProps {
   /** `null` when the read failed — the screen renders its error state. */
   readonly data: InicioData | null;
   readonly role: Role;
-  /** The account's display name, from the session (ADR-086). */
+  /** The account's display name, from the session (ADR-087). */
   readonly nombre: string | null;
   /** The business's today (`server/clock`), for the heading's date. */
   readonly hoy: string;

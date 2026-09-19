@@ -95,6 +95,12 @@ export const ERROR_CATALOG = {
   },
   FK_USER_MISSING: { httpStatus: 200, retryable: false, userMessageKey: 'sync.errors.fkUser' },
   FK_CLIENT_MISSING: { httpStatus: 200, retryable: false, userMessageKey: 'sync.errors.fkClient' },
+  /** A reply to a message this business does not hold (C-19, ADR-075). */
+  FK_MENSAJE_MISSING: {
+    httpStatus: 200,
+    retryable: false,
+    userMessageKey: 'sync.errors.fkClient',
+  },
   DUPLICATE_CONFLICT: {
     httpStatus: 200,
     retryable: false,

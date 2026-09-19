@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
 
-  const siteUrl = env.VITE_SITE_URL || 'https://cachink.mx';
+  const siteUrl = env.VITE_SITE_URL || 'https://xangarro.mx';
   const plausibleDomain = env.VITE_PLAUSIBLE_DOMAIN || '';
 
   const plausibleSnippet = plausibleDomain

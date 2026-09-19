@@ -25,7 +25,7 @@ export interface SessionClaims {
   /** `auth.users.id`. */
   readonly sub: string;
   readonly email: string;
-  /** The account's display name (O-24, ADR-086); null when it never set one. */
+  /** The account's display name (O-24, ADR-087); null when it never set one. */
   readonly nombre: string | null;
   /** Always `authenticated` — the shape PostgREST expects. */
   readonly role: 'authenticated';

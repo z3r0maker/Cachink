@@ -2,12 +2,16 @@ import 'server-only';
 
 import { loadExcelJs } from '../export/workbook';
 
+import { parseCsv } from '@/lib/csv';
+
 /**
- * The first worksheet of an uploaded .xlsx as plain rows of plain values (P-07).
+ * The first worksheet of an uploaded .xlsx or .csv as plain rows of plain
+ * values (P-07; .csv since N-16).
  *
  * ExcelJS hands back rich text, formulas and hyperlinks as objects; the parser
  * wants what the cell *shows*. Numbers stay numbers — `pesosToCentavos` reads
- * `9.8` exactly — and anything else becomes its text.
+ * `9.8` exactly — and anything else becomes its text. CSV cells arrive as
+ * text already; `pesosToCentavos` parses text the same way.
  */
 export const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
 
@@ -28,12 +32,17 @@ function plain(value: unknown): unknown {
 export async function readSheet(file: File): Promise<unknown[][]> {
   if (file.size === 0) throw new SheetError('El archivo está vacío.');
   if (file.size > MAX_IMPORT_BYTES) throw new SheetError('El archivo pesa más de 2 MB.');
+  if (/\.(csv|txt)$/i.test(file.name) || file.type === 'text/csv') {
+    const text = await file.text();
+    if (text.trim() === '') throw new SheetError('El archivo no tiene filas.');
+    return parseCsv(text);
+  }
   const ExcelJs = await loadExcelJs();
   const wb = new ExcelJs.Workbook();
   try {
     await wb.xlsx.load(await file.arrayBuffer());
   } catch {
-    throw new SheetError('No pudimos leer el archivo. Usa la plantilla en formato .xlsx.');
+    throw new SheetError('No pudimos leer el archivo. Usa la plantilla en formato .xlsx o .csv.');
   }
   const sheet = wb.worksheets[0];
   if (sheet === undefined) throw new SheetError('El archivo no tiene hojas.');

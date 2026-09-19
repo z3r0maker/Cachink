@@ -2,7 +2,7 @@ import { buildArticleSchema } from '../../structured-data.js';
 
 const schema = buildArticleSchema({
   slug: 'vs-excel',
-  title: 'Cachink vs hojas de cálculo: comparativa honesta para pequeños negocios',
+  title: 'Xangarro vs hojas de cálculo: comparativa honesta para pequeños negocios',
   description:
     'Comparación directa entre usar Excel o Google Sheets y una app de caja especializada para el control financiero de pequeños negocios en México.',
   datePublished: '2026-05-09',
@@ -123,7 +123,7 @@ export default function VsExcel() {
           color: 'var(--black)',
         }}
       >
-        Cachink vs hojas de cálculo: comparativa honesta para pequeños negocios
+        Xangarro vs hojas de cálculo: comparativa honesta para pequeños negocios
       </h1>
 
       <p
@@ -319,7 +319,7 @@ export default function VsExcel() {
             marginBottom: 10,
           }}
         >
-          Prueba Cachink cuando lance — gratis
+          Prueba Xangarro hoy — gratis
         </div>
         <p
           style={{
@@ -330,10 +330,10 @@ export default function VsExcel() {
             lineHeight: 1.5,
           }}
         >
-          Verano 2026. Lista de espera abierta — 3 meses gratis para los primeros.
+          Cuenta gratis para siempre. Importa tu catálogo de Excel en unos clics.
         </p>
         <a
-          href="/#top"
+          href="https://app.xangarro.mx/signup?plan=xangarrito"
           style={{
             display: 'inline-block',
             background: 'var(--black)',

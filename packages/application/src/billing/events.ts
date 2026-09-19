@@ -49,4 +49,16 @@ export interface InvoiceEvent extends EventBase {
   readonly invoice: Omit<PaidInvoice, 'businessId'>;
 }
 
-export type BillingEvent = CheckoutCompleted | SubscriptionChanged | InvoiceEvent;
+export interface ChargeRefunded extends EventBase {
+  readonly type: 'charge.refunded';
+  readonly customerId: string | null;
+  readonly refund: {
+    /** The refunded charge — its payment_intent names the invoice (API 2026-08-26). */
+    readonly chargeId: string | null;
+    readonly refundId: string | null;
+    /** IVA included, in centavos. */
+    readonly amountRefundedCentavos: number;
+  };
+}
+
+export type BillingEvent = CheckoutCompleted | SubscriptionChanged | InvoiceEvent | ChargeRefunded;

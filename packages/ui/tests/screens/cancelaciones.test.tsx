@@ -246,9 +246,9 @@ describe('CancellationFlow (orchestrator)', () => {
     expect(screen.getByTestId('cancel-pin-input')).toBeInTheDocument();
     expect(screen.queryByTestId('cancel-reason-input')).toBeNull();
 
-    // Enter 6-digit PIN via the hidden input field.
+    // Enter 4-digit PIN via the hidden input field.
     const pinField = screen.getByTestId('cancel-pin-input-field');
-    fireEvent.change(pinField, { target: { value: '123456' } });
+    fireEvent.change(pinField, { target: { value: '1234' } });
 
     // Step 2: Reason step should now be visible.
     await waitFor(() => {

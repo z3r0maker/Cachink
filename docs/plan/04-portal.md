@@ -477,7 +477,7 @@ without touching code.
     to 12 May 2026). `sumarDias` / `ultimosDias` in the domain. e2e: date, totals, two lines, axe.
   - 2026-09-19 · **Done**: the «¿Cómo empiezo?» card joins the hero row (every item detected
     from `business_onboarding`'s signals, the same items `/como-empiezo` renders); «Hola,
-    {nombre}» reads `auth.users.nombre` through the session (0020 / ADR-086 — signup collects
+    {nombre}» reads `auth.users.nombre` through the session (0020 / ADR-087 — signup collects
     an optional «Tu nombre»; a nameless account greets bare «Hola»); the hero's range is the
     business clock's month, no longer the pinned May literal; the low-stock banner's «Ver
     productos» links to `/productos?filtro=bajo`, where the catalogue preselects «Stock
@@ -1016,7 +1016,7 @@ never invented text.
     baselines, staleness windows, duplicate detection (ADR-059).
   - 2026-09-19 · **Done**: five deterministic detectors in `@xangarro/domain/asesor` (cost
     deltas, quincena seasonality, expense anomalies vs the 3-month baseline, stale inventory
-    at 45 days, duplicate gastos) materialise **on read** into `notices` (ADR-087): the
+    at 45 days, duplicate gastos) materialise **on read** into `notices` (ADR-088): the
     upsert never touches `state`/`resolved_at`, so dismissals survive recomputes and
     vanished insights auto-close as `listo`. The plan's cadence gates the set («semanal»
     keeps the two most urgent); the capacidades panel reports the tenant's real counts;
@@ -1204,7 +1204,7 @@ critical avisos cannot be switched off.
     The reasoning is in the component's docblock so it survives a future refactor.
   - 2026-09-19 · **Done**: a goal achieved closes lazily on load and takes the takeover
     exactly once — the `celebraciones` marker (0020) is written the moment it renders
-    (ADR-086), so no reload or other device sees it again; a viewer never sees the wizard
+    (ADR-087), so no reload or other device sees it again; a viewer never sees the wizard
     or the takeover (call-site check). e2e covers the celebration and its once-ness.
 - **Context:** ADR-058 §6 — this supersedes the design system's "no gamification, no streaks" rule.
 - **Steps:** Goal-achieved takeover with the confetti (10 pieces, `xg-fall`, staggered 90 ms) and a

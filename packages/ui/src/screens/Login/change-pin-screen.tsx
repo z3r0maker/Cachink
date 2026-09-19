@@ -2,13 +2,14 @@
  * ChangePinScreen — forced PIN change on first login.
  *
  * Shown when `mustChangePin: true` after login. The user must
- * set a new 6-digit PIN before they can use the app.
+ * set a new 4-digit PIN (ADR-072) before they can use the app.
  *
  * ADR-049: PIN for daily login.
  */
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
+import { isValidPin } from '@xangarro/domain';
 import { Btn } from '../../components/index';
 import { Input } from '../../components/Input/input';
 import { FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
@@ -81,14 +82,14 @@ function ChangePinFormFields(props: ChangePinFieldsProps): ReactElement {
       <Input
         type="number"
         value={props.current}
-        onChange={(v) => props.setCurrent(v.slice(0, 6))}
+        onChange={(v) => props.setCurrent(v.slice(0, 4))}
         label={props.t('changePin.current')}
         testID="current-pin"
       />
       <Input
         type="number"
         value={props.newPin}
-        onChange={(v) => props.setNewPin(v.slice(0, 6))}
+        onChange={(v) => props.setNewPin(v.slice(0, 4))}
         label={props.t('changePin.newPin')}
         testID="new-pin"
       />
@@ -96,7 +97,7 @@ function ChangePinFormFields(props: ChangePinFieldsProps): ReactElement {
       <Input
         type="number"
         value={props.confirm}
-        onChange={(v) => props.setConfirm(v.slice(0, 6))}
+        onChange={(v) => props.setConfirm(v.slice(0, 4))}
         label={props.t('changePin.confirm')}
         testID="confirm-pin"
       />
@@ -115,9 +116,8 @@ function useChangePinForm(submitting: boolean) {
   const [newPin, setNewPin] = useState('');
   const [confirm, setConfirm] = useState('');
   const mismatch = confirm.length > 0 && newPin !== confirm;
-  const tooShort = newPin.length > 0 && !/^\d{6}$/.test(newPin);
-  const canSubmit =
-    /^\d{6}$/.test(current) && /^\d{6}$/.test(newPin) && newPin === confirm && !submitting;
+  const tooShort = newPin.length > 0 && !isValidPin(newPin);
+  const canSubmit = isValidPin(current) && isValidPin(newPin) && newPin === confirm && !submitting;
   return {
     current,
     setCurrent,

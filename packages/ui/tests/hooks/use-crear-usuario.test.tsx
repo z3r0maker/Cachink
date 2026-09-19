@@ -44,7 +44,7 @@ describe('useCrearUsuario', () => {
     await act(async () => {
       result.current.mutate({
         nombre: 'María',
-        pin: '123456',
+        pin: '1234',
         recoveryPassword: 'recovery123',
         role: 'operativo',
       });
@@ -65,7 +65,7 @@ describe('useCrearUsuario', () => {
     await act(async () => {
       result.current.mutate({
         nombre: 'X',
-        pin: '000000',
+        pin: '0000',
         recoveryPassword: 'password',
         role: 'operativo',
       });

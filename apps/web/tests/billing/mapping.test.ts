@@ -50,6 +50,20 @@ describe('Stripe → billing shapes (API 2026-08-26.dahlia)', () => {
     });
   });
 
+  it('a refund carries the charge, the refund id and the amount (N-33)', () => {
+    const e = event('event-charge-refunded');
+    assert.deepEqual(toBillingEvent(e), {
+      id: 'evt_TestChargeRefunded001',
+      type: 'charge.refunded',
+      customerId: 'cus_TestDonPedro0001',
+      refund: {
+        chargeId: 'ch_TestCharge00000000001',
+        refundId: 're_TestRefund000000001',
+        amountRefundedCentavos: 23084,
+      },
+    });
+  });
+
   it('a payment-mode Checkout is not billing’s', () => {
     const e = event('event-checkout-completed', (x) => void (x.data.object.mode = 'payment'));
     assert.equal(toBillingEvent(e), null);

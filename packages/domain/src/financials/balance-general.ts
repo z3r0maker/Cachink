@@ -20,6 +20,7 @@
 import type { ClientPayment } from '../entities/client-payment.js';
 import type { DayClose } from '../entities/day-close.js';
 import type { Sale } from '../entities/sale.js';
+import { estadoDeCuenta, type CargoFiado, type PagoCliente } from './estado-cuenta.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
 
@@ -96,24 +97,33 @@ function latestCorteCash(cortes: readonly DayClose[]): Money {
 }
 
 /**
- * Σ(venta.monto − pagos.monto) per pending/parcial venta, clamped ≥ 0
- * per venta (overpayment doesn't become negative CxC).
+ * Σ of every client's derived balance (ADR-074): per client, the open fiado
+ * tickets minus their abonos, oldest-first — `estadoDeCuenta` is the one
+ * calculator, so the balance sheet cannot disagree with Cobranza. An excess
+ * abono (saldo a favor) is not an asset, so only `saldo` counts.
  */
 function calcCuentasPorCobrar(
   ventasConCredito: readonly Sale[],
   pagosClientes: readonly ClientPayment[],
 ): Money {
-  const pagosPorVenta = new Map<string, Money>();
+  const ventasPorCliente = new Map<string, CargoFiado[]>();
+  for (const venta of ventasConCredito) {
+    if (venta.estadoPago !== 'pendiente' && venta.estadoPago !== 'parcial') continue;
+    const key = venta.clienteId ?? venta.id; // defensive: fiado without a client
+    const bucket = ventasPorCliente.get(key) ?? [];
+    bucket.push({ id: venta.id, fecha: venta.createdAt, monto: venta.monto });
+    ventasPorCliente.set(key, bucket);
+  }
+  const abonosPorCliente = new Map<string, PagoCliente[]>();
   for (const p of pagosClientes) {
-    pagosPorVenta.set(p.ventaId, (pagosPorVenta.get(p.ventaId) ?? ZERO) + p.montoCentavos);
+    const bucket = abonosPorCliente.get(p.clienteId) ?? [];
+    bucket.push({ id: p.id, fecha: p.createdAt, monto: p.montoCentavos });
+    abonosPorCliente.set(p.clienteId, bucket);
   }
 
   let total: Money = ZERO;
-  for (const venta of ventasConCredito) {
-    if (venta.estadoPago !== 'pendiente' && venta.estadoPago !== 'parcial') continue;
-    const pagado = pagosPorVenta.get(venta.id) ?? ZERO;
-    const pendiente = venta.monto - pagado;
-    if (pendiente > ZERO) total += pendiente;
+  for (const [cliente, ventas] of ventasPorCliente) {
+    total += estadoDeCuenta(ventas, abonosPorCliente.get(cliente) ?? []).saldo;
   }
   return total;
 }

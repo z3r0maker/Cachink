@@ -25,7 +25,7 @@ describe('RecuperarPinUseCase', () => {
       makeNewUser({
         businessId: BIZ,
         nombre: 'Test User',
-        pin: '111111',
+        pin: '1111',
         recoveryPassword: 'recovery123',
       }),
     );
@@ -36,12 +36,12 @@ describe('RecuperarPinUseCase', () => {
     await recuperar.execute({
       userId,
       recoveryPassword: 'recovery123',
-      newPin: '222222',
+      newPin: '2222',
     });
 
     const result = await auth.execute({
       nombre: 'Test User',
-      pin: '222222',
+      pin: '2222',
       businessId: BIZ,
     });
     expect(result.success).toBe(true);
@@ -52,19 +52,19 @@ describe('RecuperarPinUseCase', () => {
       recuperar.execute({
         userId,
         recoveryPassword: 'wrongpassword',
-        newPin: '222222',
+        newPin: '2222',
       }),
     ).rejects.toThrow(/contraseña de recuperación.*incorrecta/i);
   });
 
-  it('rejects non-6-digit new PIN', async () => {
+  it('rejects a PIN that is not 4 digits (ADR-072)', async () => {
     await expect(
       recuperar.execute({
         userId,
         recoveryPassword: 'recovery123',
         newPin: '12345',
       }),
-    ).rejects.toThrow(/6 dígitos/);
+    ).rejects.toThrow(/4 dígitos/);
   });
 
   it('rejects non-existent user', async () => {
@@ -72,7 +72,7 @@ describe('RecuperarPinUseCase', () => {
       recuperar.execute({
         userId: '01HZ8XQN9GZJXV8AKQ5XGHOST' as UserId,
         recoveryPassword: 'recovery123',
-        newPin: '222222',
+        newPin: '2222',
       }),
     ).rejects.toThrow(/no encontrado/);
   });

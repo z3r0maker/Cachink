@@ -22,7 +22,7 @@ const ESTADO: Record<Factura['estado'], string> = {
   timbrada: 'Timbrada',
   en_global: 'En la factura global del mes',
   pendiente: 'Pendiente · Tu factura se enviará a tu correo',
-  error: 'Con un problema · Lo estamos revisando',
+  reembolso: 'Reembolsado',
 };
 
 function descargar(url: string, filename: string) {

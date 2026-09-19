@@ -16,6 +16,7 @@ import {
   sales,
 } from '../schema/ledger.js';
 import { businesses, clients, employees, users } from '../schema/tenant.js';
+import { mensajesOperador, respuestasOperador } from '../schema/mensajes.js';
 
 /**
  * Every synced table by its wire name (contract §8) — the one map from the
@@ -42,4 +43,6 @@ export const SYNCED_TABLES = {
   employees,
   recurring_expenses: recurringExpenses,
   conversion_recetas: conversionRecetas,
+  mensajes_operador: mensajesOperador,
+  respuestas_operador: respuestasOperador,
 } as const satisfies Record<SyncedTable, unknown>;

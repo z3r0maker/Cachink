@@ -26,6 +26,8 @@ export * from './editar-venta/index.js';
 export * from './editar-egreso/index.js';
 export * from './editar-producto/index.js';
 export * from './crear-producto/index.js';
+export * from './crear-cliente/index.js';
+export * from './editar-cliente/index.js';
 export * from './archivar-producto/index.js';
 export * from './guardar-negocio/index.js';
 export * from './archivar-negocio/index.js';

@@ -38,6 +38,10 @@ export class DrizzleClientsRepository implements ClientsRepository {
       telefono: input.telefono ?? null,
       email: input.email ?? null,
       nota: input.nota ?? null,
+      limiteCentavos: input.limiteCentavos ?? null,
+      plazoDias: input.plazoDias ?? null,
+      estadoRevision: input.estadoRevision ?? 'aprobado',
+      fusionadoConId: input.fusionadoConId ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
       createdByUserId: (this.#userId ?? null) as string | null,
@@ -118,6 +122,10 @@ export class DrizzleClientsRepository implements ClientsRepository {
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+      limiteCentavos: (row.limiteCentavos ?? null) as Client['limiteCentavos'],
+      plazoDias: row.plazoDias ?? null,
+      estadoRevision: row.estadoRevision,
+      fusionadoConId: (row.fusionadoConId ?? null) as Client['fusionadoConId'],
     };
   }
 }

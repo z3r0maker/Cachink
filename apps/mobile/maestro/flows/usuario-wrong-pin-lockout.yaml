@@ -25,11 +25,7 @@ appId: mx.xangarro.mobile
       id: "quick-switch"
     timeout: 10000
 
-# --- Attempt 1: Wrong PIN (999991) via numpad ---
-- tapOn:
-    id: "numpad-9"
-- tapOn:
-    id: "numpad-9"
+# --- Attempt 1: Wrong PIN (9991) via numpad ---
 - tapOn:
     id: "numpad-9"
 - tapOn:
@@ -42,11 +38,7 @@ appId: mx.xangarro.mobile
 # Error message should appear.
 - assertVisible: "PIN incorrecto"
 
-# --- Attempt 2: Wrong PIN (999992) via numpad ---
-- tapOn:
-    id: "numpad-9"
-- tapOn:
-    id: "numpad-9"
+# --- Attempt 2: Wrong PIN (9992) via numpad ---
 - tapOn:
     id: "numpad-9"
 - tapOn:
@@ -59,11 +51,7 @@ appId: mx.xangarro.mobile
 # Error message still visible.
 - assertVisible: "PIN incorrecto"
 
-# --- Attempt 3: Wrong PIN (999993) via numpad ---
-- tapOn:
-    id: "numpad-9"
-- tapOn:
-    id: "numpad-9"
+# --- Attempt 3: Wrong PIN (9993) via numpad ---
 - tapOn:
     id: "numpad-9"
 - tapOn:

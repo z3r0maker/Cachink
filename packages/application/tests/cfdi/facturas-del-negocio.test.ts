@@ -57,7 +57,7 @@ describe('facturaParaCliente: the CFDI_MODE rules', () => {
       true,
     );
     assert.equal(
-      facturaParaCliente(registrada({ estado: 'error' }), 'test').puedeSolicitarNominal,
+      facturaParaCliente(registrada({ estado: 'reembolso' }), 'test').puedeSolicitarNominal,
       false,
     );
   });

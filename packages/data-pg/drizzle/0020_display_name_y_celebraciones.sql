@@ -1,4 +1,4 @@
--- The account's display name (O-24, ADR-086) and the celebrations marker
+-- The account's display name (O-24, ADR-087) and the celebrations marker
 -- table (P-33).
 --
 -- The name belongs to the person, not to any one membership: one account has

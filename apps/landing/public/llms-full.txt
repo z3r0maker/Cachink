@@ -1,16 +1,16 @@
-# Cachink — Especificación completa del producto
+# Xangarro — Especificación completa del producto
 
-> Aplicación móvil de gestión de caja para pequeños negocios mexicanos.
-> Sitio web: https://cachink.mx · Lanzamiento: verano 2026
-> Idioma: Español (México) · Disponible en iOS y Android
+> Plataforma de gestión de caja para pequeños negocios mexicanos.
+> Sitio web: https://xangarro.mx · Crear cuenta: https://app.xangarro.mx/signup
+> Idioma: Español (México) · Portal web hoy; apps iOS y Android próximamente
 
 ---
 
 ## Descripción
 
-Cachink es una aplicación móvil de finanzas diseñada específicamente para dueños de pequeños negocios en México. Resuelve el problema del control de caja diario: saber exactamente cuánto se vendió, cuánto se gastó y cuánto queda en efectivo, sin necesidad de hojas de Excel, software contable complejo ni conocimientos financieros avanzados.
+Xangarro es una plataforma de finanzas diseñada específicamente para dueños de pequeños negocios en México. Resuelve el problema del control de caja diario: saber exactamente cuánto se vendió, cuánto se gastó y cuánto queda en efectivo, sin necesidad de hojas de Excel, software contable complejo ni conocimientos financieros avanzados.
 
-El nombre "Cachink" es onomatopéyico — evoca el sonido de una caja registradora, símbolo de que el negocio va bien.
+El dueño administra su negocio desde el portal web (app.xangarro.mx) y su equipo captura las ventas desde el navegador o desde la app del teléfono.
 
 ---
 
@@ -26,13 +26,13 @@ La mayoría de los pequeños negocios en México (panaderías, cafeterías, tien
 
 ## Usuarios objetivo
 
-Cachink está diseñado para tres perfiles principales:
+Xangarro está diseñado para dos roles dentro de cada negocio:
 
-**Dueño operativo**: maneja personalmente la caja todos los días. Necesita registrar cada venta en segundos, ver el corte del día de un toque y exportar la información a su contador al fin de mes. Prioriza velocidad y simplicidad sobre funcionalidades avanzadas.
+**Dueño (Director)**: administra el negocio desde el portal web. Configura su catálogo de productos e impórtalo desde Excel, invita a su equipo, ve KPIs financieros — utilidad del mes, liquidez, cuentas por cobrar —, consulta estados financieros NIF y exporta el informe mensual en PDF para su contador. Accede desde cualquier navegador.
 
-**Dueño director**: tiene empleados que capturan ventas. Necesita un panel de supervisión (Panel Director) que le muestre KPIs financieros — utilidad del mes, liquidez, cuentas por cobrar — sin poder modificar registros. Accede desde su teléfono en cualquier momento.
+**Operador (equipo)**: captura ventas, gastos y movimientos de inventario desde la app del teléfono o el navegador de la caja, con su propio NIP. Captura sin conexión: todo se sincroniza cuando vuelve internet.
 
-**Contador o administrador multi-negocio**: gestiona las finanzas de varios establecimientos. Necesita exportar estados financieros en formato NIF, ver comparativas entre negocios y gestionar permisos de acceso por usuario.
+Cada negocio tiene su propia cuenta, con su caja, su inventario y su equipo separados.
 
 ---
 
@@ -52,92 +52,94 @@ Cachink está diseñado para tres perfiles principales:
 ## Funcionalidades principales
 
 ### Registro de ventas e ingresos
-- Formulario de 3 campos: monto, concepto, método de pago
+- Captura rápida: monto, concepto, método de pago
 - Registro en menos de 3 segundos
-- Métodos de pago: efectivo, tarjeta, transferencia (SPEI), CoDi, QR y métodos personalizados
-- Funcionamiento completamente offline — sin internet, sin interrupciones
+- Métodos de pago: efectivo, tarjeta, transferencia (SPEI), QR y crédito para clientes frecuentes
+- Captura sin internet — el negocio sigue aunque se vaya el internet; todo se sincroniza al reconectarse
 
 ### Registro de egresos
 - Categorías personalizables (insumos, nómina, servicios, renta, etc.)
 - Asociación a proveedor opcional
-- Comprobante fotográfico adjuntable
 
-### Vista de caja (módulo Operativo)
+### Vista de caja (Operador)
 - Ventas del día y del mes en tiempo real
 - Efectivo disponible en caja
 - Movimientos del día con hora y método de pago
-- Corte de día con un toque — genera resumen imprimible o compartible
+- Corte de día con un toque — resumen imprimible o compartible
 
-### Panel Director
+### Panel del Dueño (portal web)
 - KPIs financieros: ventas, utilidad bruta, liquidez, meta de mes
 - Cuentas por cobrar con días de vencimiento
 - Comparativa semana a semana y mes a mes
-- Acceso de solo lectura — no puede modificar registros
+- Importación de productos y clientes desde Excel/CSV con vista previa
 
 ### Estados financieros
 - Estado de resultados mensual en formato NIF
-- Balance de caja
-- Exportación en PDF y CSV
-- Compatible con los formatos que solicitan los contadores en México
+- Balance general y flujo de efectivo
+- Informe mensual en PDF para el contador
+- Exportación de datos en todos los planes
 
-### Multi-dispositivo y multi-usuario (Plan Pro y Contador)
-- Sincronización en tiempo real entre dispositivos
-- Roles: dueño, capturista, contador (solo lectura)
-- Hasta 10 negocios en una sola cuenta (Plan Contador)
+### Equipo y permisos
+- Operadores con NIP, creados y administrados por el dueño
+- El dueño puede revocar accesos en cualquier momento
 
 ---
 
 ## Precios
 
-| Plan      | Precio          | Dispositivos | Negocios | Características clave                              |
-|-----------|-----------------|--------------|----------|----------------------------------------------------|
-| Gratis    | $0 / siempre    | 1            | 1        | Ventas + egresos ilimitados, corte de día, CSV     |
-| Pro       | $149 MXN / mes  | ilimitados   | 1        | Multi-dispositivo, Panel Director, NIF, WhatsApp   |
-| Contador  | $299 MXN / mes  | ilimitados   | hasta 10 | Todo Pro + exportación fiscal, multi-usuario       |
+| Plan        | Precio (+ IVA)      | Movimientos/mes | Productos | Operadores | Características clave                          |
+|-------------|---------------------|-----------------|-----------|------------|-------------------------------------------------|
+| Xangarrito  | $0 / siempre        | 300             | 50        | 1          | Corte de día, exportación de datos               |
+| Xangarro    | $199 MXN / mes      | 10,000          | 1,000     | 2          | Estados financieros NIF, informe PDF, WhatsApp   |
+| Xangarrote  | $399 MXN / mes      | 30,000          | 5,000     | 5          | Reportes avanzados, soporte prioritario          |
 
-Los primeros suscriptores de la lista de espera reciben 3 meses gratis en cualquier plan de pago.
+- Los precios son más IVA (16 %). Plan anual: 10 meses al precio de 12 (2 meses gratis).
+- 14 días de prueba gratis en los dos planes de pago, sin tarjeta.
+- Pago con tarjeta de crédito o débito; transferencia SPEI en plan anual.
+- Ninguna venta se bloquea por límites: avisamos al dueño con tiempo.
 
 ---
 
 ## Especificaciones técnicas
 
-- **Plataformas**: iOS (iPhone, iPad) y Android
-- **Modo offline**: almacenamiento local en el dispositivo; sincronización automática al recuperar conexión
-- **Seguridad**: cifrado en tránsito (TLS 1.3) y en reposo (AES-256)
+- **Plataformas**: portal web en cualquier navegador; apps para iOS y Android próximamente
+- **Modo offline**: los dispositivos del equipo capturan sin conexión y sincronizan automáticamente al recuperarla
+- **Seguridad**: cifrado en tránsito y en reposo
 - **Idioma**: Español (México) — sin traducciones al inglés en la interfaz
-- **Privacidad**: los datos del negocio son del usuario; Cachink no los vende ni los comparte con terceros
+- **Privacidad**: los datos del negocio son del usuario; Xangarro no los vende ni los comparte con terceros; exportación y eliminación de cuenta disponibles
 
 ---
 
 ## Preguntas frecuentes
 
 **¿Es una alternativa a Excel?**
-Sí. Cachink elimina la necesidad de hojas de cálculo para el control de caja diario. No requiere fórmulas, no se corrompe y genera reportes automáticamente.
+Sí. Xangarro elimina la necesidad de hojas de cálculo para el control de caja diario. No requiere fórmulas, no se corrompe y genera reportes automáticamente. Y el catálogo que ya tienes en Excel se importa en unos clics.
 
 **¿Funciona sin internet?**
-Sí, completamente. Es offline-first: los datos viven en el dispositivo y se sincronizan cuando hay conexión disponible.
+Sí. Tu negocio sigue aunque se vaya el internet: los dispositivos del equipo registran ventas y gastos sin conexión y todo se sincroniza cuando la red vuelve. Ningún registro se pierde.
 
 **¿Maneja CFDI o facturación electrónica?**
-No directamente. Cachink se enfoca en el control de caja interno. Puede convivir con sistemas de facturación existentes — el ingreso o egreso se registra en Cachink independientemente de si se emite factura.
+Xangarro se enfoca en el control de caja interno. Puede convivir con sistemas de facturación existentes — el ingreso o egreso se registra en Xangarro independientemente de si se emite factura. La propia suscripción a Xangarro sí se factura automáticamente con CFDI.
 
 **¿Reemplaza a un contador?**
-No. Cachink genera la información financiera que el contador necesita, facilitando y agilizando su trabajo, pero no sustituye el asesoramiento fiscal profesional.
+No. Xangarro genera la información financiera que el contador necesita, facilitando y agilizando su trabajo, pero no sustituye el asesoramiento fiscal profesional.
 
 **¿Cuánto tiempo toma aprender a usarlo?**
 Menos de 5 minutos. El diseño está pensado para personas sin experiencia tecnológica o contable.
 
 **¿Mis datos están seguros?**
-Sí. Los datos son del usuario y solo del usuario. Sin publicidad, sin venta de datos, sin acceso de terceros.
+Sí. Los datos son del usuario y solo del usuario. Cada negocio ve únicamente su propia información. Sin publicidad, sin venta de datos, sin acceso de terceros.
 
 ---
 
 ## Información de contacto y presencia digital
 
-- **Sitio web**: https://cachink.mx
-- **Correo**: hola@cachink.mx
+- **Sitio web**: https://xangarro.mx
+- **Crear cuenta**: https://app.xangarro.mx/signup
+- **Correo**: hola@xangarro.mx
 - **País de operación**: México
 - **Idioma**: Español (México)
-- **Redes sociales**: Instagram, TikTok, X (Twitter), YouTube — @cachink
+- **Redes sociales**: Instagram, TikTok, X (Twitter), YouTube — @xangarro
 
 ---
 

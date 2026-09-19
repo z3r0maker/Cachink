@@ -86,14 +86,15 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
 - [ ] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
   - Calculator done 2026-09-18 (with O-28): `efectivoEsperado`, `totalContado`, `diferenciaCorte`
     and `DENOMINACIONES_MXN` in `packages/domain/src/financials/cierre-turno.ts`, 7 tests, the
-    handoff's $2,870.00 reproduced; Turno's fixture now computes its figure with it. **Open:**
+    handoff's figure reproduced ($2,710.00 since the 2026-09-18 pull, ADR-085); Turno's fixture
+    computes its figure with it. **Open:**
     scoping by `cajaTurnoId` and `CerrarCajaUseCase` using it wait on C-18 (expenses gain
     `cajaTurnoId`).
 - **Steps:** TDD in `packages/domain`: `fondo + ventas en efectivo + abonos en efectivo −
 gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` uses it instead of its
   date-range sum. Happy path + 3 unhappy.
-- **Acceptance:** the handoff's figures reproduce exactly: fondo $800.00 + $2,140.00 + $550.00 −
-  $620.00 = **$2,870.00**.
+- **Acceptance:** the handoff's figures reproduce exactly: fondo $800.00 + $1,980.00 + $550.00 −
+  $620.00 = **$2,710.00** (amended files, ADR-085; was $2,870.00).
 
 ### O-04 Owner creates operators and resets NIPs (completes P-05)
 
@@ -177,6 +178,8 @@ before reporting, Maestro/Playwright flow for the happy path.
     row has «Hoy no», the file has none — built as the file; (b) undesigned copy is left blank
     rather than invented: no cancellation / several cancellations in the first KPI, and a last
     turno that did not balance (shows the signed amount). Live data waits for O-03/O-06.
+  - **Superseded 2026-09-18 (ADR-085):** the amended file has «Hoy no» (built), the cancellation
+    sentences and «Con faltante» (built, `src/operador/ui/frases.ts` and `inicio/kpis.ts`).
 - **States:** vendiendo · turno-cerrado · hora-de-cerrar · corte-por-aclarar · sin-conexion · four
   data states.
 
@@ -299,7 +302,8 @@ DESIGN_CONTRACT updated).
     aside. Playwright: `e2e/operador-detalle-venta.spec.ts`.
   - Deviations: the state pill shows only when a ticket is on screen (the file keeps «Venta
     registrada y enviada» above «Esta venta ya no existe»); a folio the fixture does not hold renders
-    the empty state (only V-0412 and V-0409 have designed lines).
+    the empty state (only V-0412 and V-0409 have designed lines). The amended file agrees on the
+    pill and adds the queued-sale state (built, dev-forced with `?enCola=true`).
 
 ### O-23 Operador · Gastos
 
@@ -363,7 +367,9 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
     `e2e/operador-cliente.spec.ts`.
   - Deviations: «se aplicó hasta» comes from the domain, so Chuy's $120.00 abono reads V-0288
     (the file's loop says V-0244, which the earlier $300.00 had already settled). A new abono is
-    dated now, not on the file's frozen «hoy».
+    dated now, not on the file's frozen «hoy». **Superseded 2026-09-18 (ADR-085):** the history now
+    names every ticket an abono reached («V-0288 en parte», «… completa y …») plus saldo a favor, as
+    the amended file does; new abonos are dated on the turno's `HOY`.
   - **Resolved (ADR-083 D7):** Cobranza and Detalle de cliente read one set of accounts
     (`cobranza/cuentas.ts`, tickets + abonos only) through `estadoDeCuenta`; Cobranza's history
     wins, so Detalle's Chuy now has V-0288 $800.00 with a $400.00 abono today (Cobranza still
@@ -403,8 +409,8 @@ abonos.ts`, oldest ticket first, the excess returned as `excedente`, `AbonoInval
     (agreed radius aside). `tests/operador/cierre.test.ts`, `e2e/operador-cierre.spec.ts`. With
     every operator screen routed, the placeholder catch-all and `PendingScreen` are gone; unknown
     operator paths still 404.
-  - Deviations: the band shows whenever the queue holds records (README: «si hay registros sin
-    enviar»), not only offline as in the file. «Abrir otro turno» goes to Inicio until Acceso
+  - Deviations: none left for the band — the amended file also shows it whenever records are
+    unsent (ADR-085). «Abrir otro turno» goes to Inicio until Acceso
     (O-12) exists. The close is device-local until O-06; the count starts at zero (file amended).
   - Open with O-06: the five reasons vs the six-value `caja_turnos` enum (asked above).
 

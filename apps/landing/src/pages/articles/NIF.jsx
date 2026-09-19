@@ -241,7 +241,7 @@ export default function NIF() {
           fontWeight: 500,
         }}
       >
-        Con Cachink, el estado de resultados mensual en formato NIF se genera automáticamente a
+        Con Xangarro, el estado de resultados mensual en formato NIF se genera automáticamente a
         partir de tus registros diarios. No tienes que aprender contabilidad — solo registrar cada
         venta y egreso como siempre, y la app hace el resto.
       </p>
@@ -276,10 +276,10 @@ export default function NIF() {
             lineHeight: 1.5,
           }}
         >
-          Cachink lanza en verano 2026. Únete a la lista de espera.
+          La beta de Xangarro ya está abierta: crea tu cuenta gratis.
         </p>
         <a
-          href="/#top"
+          href="https://app.xangarro.mx/signup?plan=xangarrito"
           style={{
             display: 'inline-block',
             background: 'var(--black)',

@@ -29,6 +29,17 @@ export const businesses = pgTable('businesses', {
   usoCfdi: text('uso_cfdi'),
   isrTasa: integer('isr_tasa').notNull(),
   logoUrl: text('logo_url'),
+  /** Branding and receipts (C-15, N-19/N-20; migration 0023). */
+  brandColor: text('brand_color'),
+  receiptTemplate: text('receipt_template', {
+    enum: ['clasico', 'moderno', 'ticket', 'minimal'],
+  })
+    .notNull()
+    .default('clasico'),
+  receiptLeyenda: text('receipt_leyenda'),
+  addressPrint: boolean('address_print').notNull().default(false),
+  whatsapp: text('whatsapp'),
+  socialLinks: text('social_links').notNull().default('{}'),
   tipoNegocio: text('tipo_negocio', {
     enum: ['producto-con-stock', 'producto-sin-stock', 'servicio', 'mixto'],
   })
@@ -57,6 +68,18 @@ export const clients = pgTable('clients', {
   telefono: text('telefono'),
   email: text('email'),
   nota: text('nota'),
+  /** Optional, set by the Clientes import (N-16); migration 0020. */
+  rfc: text('rfc'),
+  /** Owner-set credit line and term (ADR-074, C-18). */
+  limiteCentavos: centavos('limite_centavos'),
+  plazoDias: integer('plazo_dias'),
+  /** «Creado en caja» review (ADR-074); portal-written rows are `aprobado`. */
+  estadoRevision: text('estado_revision', {
+    enum: ['pendiente', 'aprobado', 'fusionado', 'rechazado'],
+  })
+    .notNull()
+    .default('aprobado'),
+  fusionadoConId: text('fusionado_con_id'),
   ...auditColumns,
 });
 

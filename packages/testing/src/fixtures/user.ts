@@ -15,7 +15,7 @@ const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
 export function makeNewUser(overrides: Partial<NewUser> = {}): NewUser {
   return {
     nombre: 'Juan Director',
-    pin: '123456',
+    pin: '1234',
     recoveryPassword: 'test123',
     role: 'director',
     mustChangePin: true,

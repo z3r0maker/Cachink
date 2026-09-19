@@ -84,6 +84,21 @@ describe('ApplyPushUseCase', () => {
     assert.equal(r.accepted.length, 1);
   });
 
+  it('accepts an operator reply to a message this business holds (C-19)', async () => {
+    store.seed('mensajes_operador', { id: 'M1', updatedAt: T1 });
+    const r = await push([
+      delta('respuestas_operador', 'R1', { mensajeId: 'M1', texto: 'Faltó cambio, ya lo tengo' }),
+    ]);
+    assert.equal(r.accepted.length, 1);
+    assert.equal(r.rejected.length, 0);
+  });
+
+  it('rejects a reply to a message nobody sent, without retry (C-19)', async () => {
+    const r = await push([delta('respuestas_operador', 'R1', { mensajeId: 'GONE' })]);
+    assert.equal(r.rejected[0]?.code, 'FK_MENSAJE_MISSING');
+    assert.equal(r.rejected[0]?.retryable, false);
+  });
+
   it('turns an unexpected failure into a retryable INTERNAL for that row alone, and logs it', async () => {
     store.failOn = 'S1';
     const r = await push([delta('sales', 'S1'), delta('expenses', 'E1')]);

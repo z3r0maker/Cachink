@@ -90,7 +90,7 @@ describe('NewUserSchema', () => {
   it('validates valid input', () => {
     const result = NewUserSchema.safeParse({
       nombre: 'Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'test123',
       role: 'operativo',
       businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
@@ -98,7 +98,7 @@ describe('NewUserSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('rejects non-6-digit PIN', () => {
+  it('rejects a PIN that is not 4 digits (ADR-072)', () => {
     const result = NewUserSchema.safeParse({
       nombre: 'Test',
       pin: '12345',
@@ -112,7 +112,7 @@ describe('NewUserSchema', () => {
   it('rejects short recovery password', () => {
     const result = NewUserSchema.safeParse({
       nombre: 'Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: '12345',
       role: 'operativo',
       businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
@@ -121,7 +121,7 @@ describe('NewUserSchema', () => {
   });
 
   it('exports correct constants', () => {
-    expect(PIN_LENGTH).toBe(6);
+    expect(PIN_LENGTH).toBe(4);
     expect(RECOVERY_PASSWORD_MIN_LENGTH).toBe(6);
   });
 });

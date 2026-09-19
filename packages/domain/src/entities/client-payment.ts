@@ -1,15 +1,16 @@
 /**
- * ClientPayment (PagoCliente) — a partial or full payment against a Crédito
- * Sale. Summing these against the Sale's `monto` drives the `estadoPago`
- * transition (pendiente → parcial → pagado) and the "Cuentas por cobrar"
- * view (CLAUDE.md §9).
+ * ClientPayment (Abono) — a payment from a client against their fiado
+ * (ADR-074). An abono belongs to the **client**, not to one sale: how it
+ * settles their tickets (oldest first) and their balance are derived by
+ * `estadoDeCuenta` in `packages/domain/financials` — nothing stores a
+ * balance.
  *
  * Re-uses `PaymentMethodEnum` from `sale.ts` — the same five methods are
  * valid for a client payment.
  */
 
 import { z } from 'zod';
-import type { BusinessId, ClientPaymentId, SaleId } from '../ids/index.js';
+import type { BusinessId, ClientId, ClientPaymentId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { isoDateField, moneyField } from './_fields.js';
@@ -18,7 +19,7 @@ import { PaymentMethodEnum } from './sale.js';
 export const ClientPaymentSchema = z
   .object({
     id: ulidField<ClientPaymentId>(),
-    ventaId: ulidField<SaleId>(),
+    clienteId: ulidField<ClientId>(),
     fecha: isoDateField,
     montoCentavos: moneyField,
     metodo: PaymentMethodEnum,
@@ -29,7 +30,7 @@ export const ClientPaymentSchema = z
 export type ClientPayment = z.infer<typeof ClientPaymentSchema>;
 
 export const NewClientPaymentSchema = z.object({
-  ventaId: ulidField<SaleId>(),
+  clienteId: ulidField<ClientId>(),
   fecha: isoDateField,
   montoCentavos: moneyField,
   metodo: PaymentMethodEnum,

@@ -45,6 +45,7 @@ function p(
   return {
     nombre,
     sku,
+    estadoRevision: 'aprobado' as const,
     categoria: 'Producto Terminado',
     costoUnitCentavos,
     unidad,
@@ -70,6 +71,7 @@ function mp(
   return {
     nombre,
     sku,
+    estadoRevision: 'aprobado' as const,
     categoria: 'Materia Prima',
     costoUnitCentavos,
     unidad,
@@ -90,10 +92,25 @@ function mp(
 
 export function demoClients(biz: BusinessId): NewClient[] {
   return [
-    { nombre: 'Laura Hernández', telefono: '3312345678', businessId: biz },
-    { nombre: 'Roberto Sánchez', telefono: '3398765432', businessId: biz },
-    { nombre: 'María del Carmen Ríos', businessId: biz },
-    { nombre: 'Taller Mecánico El Güero', telefono: '3356781234', businessId: biz },
+    {
+      nombre: 'Laura Hernández',
+      telefono: '3312345678',
+      estadoRevision: 'aprobado' as const,
+      businessId: biz,
+    },
+    {
+      nombre: 'Roberto Sánchez',
+      telefono: '3398765432',
+      estadoRevision: 'aprobado' as const,
+      businessId: biz,
+    },
+    { nombre: 'María del Carmen Ríos', estadoRevision: 'aprobado' as const, businessId: biz },
+    {
+      nombre: 'Taller Mecánico El Güero',
+      telefono: '3356781234',
+      estadoRevision: 'aprobado' as const,
+      businessId: biz,
+    },
   ];
 }
 

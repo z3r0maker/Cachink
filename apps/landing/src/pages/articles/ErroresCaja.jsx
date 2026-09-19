@@ -234,7 +234,7 @@ export default function ErroresCaja() {
             marginBottom: 10,
           }}
         >
-          Registra cada venta en 3 segundos con Cachink
+          Registra cada venta en 3 segundos con Xangarro
         </div>
         <p
           style={{
@@ -245,10 +245,10 @@ export default function ErroresCaja() {
             lineHeight: 1.5,
           }}
         >
-          Lanzamiento en verano 2026. Únete a la lista y obtén 3 meses gratis.
+          Crea tu cuenta gratis hoy — sin tarjeta, sin compromisos.
         </p>
         <a
-          href="/#top"
+          href="https://app.xangarro.mx/signup?plan=xangarrito"
           style={{
             display: 'inline-block',
             background: 'var(--black)',

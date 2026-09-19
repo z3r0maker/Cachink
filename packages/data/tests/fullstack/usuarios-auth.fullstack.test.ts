@@ -31,7 +31,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     // 1. Create Director
     const user = await h.useCases.crearUsuario.execute({
       nombre: 'Juan Director',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: true,
@@ -43,7 +43,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     // 2. Authenticate with correct PIN
     const authOk = await h.useCases.autenticarUsuario.execute({
       nombre: 'Juan Director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
     expect(authOk.success).toBe(true);
@@ -61,14 +61,14 @@ describe('Usuarios + Auth [fullstack]', () => {
     // 4. Change PIN (clears mustChangePin)
     await h.useCases.cambiarPin.execute({
       userId: user.id,
-      currentPin: '123456',
-      newPin: '654321',
+      currentPin: '1234',
+      newPin: '4321',
     });
 
     // Verify new PIN works
     const authNew = await h.useCases.autenticarUsuario.execute({
       nombre: 'Juan Director',
-      pin: '654321',
+      pin: '4321',
       businessId: BIZ,
     });
     expect(authNew.success).toBe(true);
@@ -77,7 +77,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     // Old PIN no longer works
     const authOld = await h.useCases.autenticarUsuario.execute({
       nombre: 'Juan Director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
     expect(authOld.success).toBe(false);
@@ -86,12 +86,12 @@ describe('Usuarios + Auth [fullstack]', () => {
     await h.useCases.recuperarPin.execute({
       userId: user.id,
       recoveryPassword: 'Recover1',
-      newPin: '111111',
+      newPin: '1111',
     });
 
     const authRecovered = await h.useCases.autenticarUsuario.execute({
       nombre: 'Juan Director',
-      pin: '111111',
+      pin: '1111',
       businessId: BIZ,
     });
     expect(authRecovered.success).toBe(true);
@@ -100,7 +100,7 @@ describe('Usuarios + Auth [fullstack]', () => {
   it('change PIN with wrong current PIN is rejected', async () => {
     const user = await h.useCases.crearUsuario.execute({
       nombre: 'Director Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: false,
@@ -111,7 +111,7 @@ describe('Usuarios + Auth [fullstack]', () => {
       h.useCases.cambiarPin.execute({
         userId: user.id,
         currentPin: '000000',
-        newPin: '654321',
+        newPin: '4321',
       }),
     ).rejects.toThrow(/PIN actual incorrecto/i);
   });
@@ -119,7 +119,7 @@ describe('Usuarios + Auth [fullstack]', () => {
   it('recovery with wrong password is rejected', async () => {
     const user = await h.useCases.crearUsuario.execute({
       nombre: 'Director Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: false,
@@ -130,7 +130,7 @@ describe('Usuarios + Auth [fullstack]', () => {
       h.useCases.recuperarPin.execute({
         userId: user.id,
         recoveryPassword: 'WrongPass',
-        newPin: '654321',
+        newPin: '4321',
       }),
     ).rejects.toThrow(/contraseña de recuperación/i);
   });
@@ -138,7 +138,7 @@ describe('Usuarios + Auth [fullstack]', () => {
   it('rejects duplicate username in same business', async () => {
     await h.useCases.crearUsuario.execute({
       nombre: 'Ana Operativa',
-      pin: '111111',
+      pin: '1111',
       recoveryPassword: 'RecoverA',
       role: 'operativo',
       mustChangePin: false,
@@ -148,7 +148,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     await expect(
       h.useCases.crearUsuario.execute({
         nombre: 'Ana Operativa', // duplicate
-        pin: '222222',
+        pin: '2222',
         recoveryPassword: 'RecoverB',
         role: 'operativo',
         mustChangePin: false,
@@ -160,7 +160,7 @@ describe('Usuarios + Auth [fullstack]', () => {
   it('cannot delete the last Director', async () => {
     const director = await h.useCases.crearUsuario.execute({
       nombre: 'Solo Director',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: false,
@@ -175,7 +175,7 @@ describe('Usuarios + Auth [fullstack]', () => {
   it('can delete a Director when another exists', async () => {
     const dir1 = await h.useCases.crearUsuario.execute({
       nombre: 'Director Uno',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: false,
@@ -184,7 +184,7 @@ describe('Usuarios + Auth [fullstack]', () => {
 
     await h.useCases.crearUsuario.execute({
       nombre: 'Director Dos',
-      pin: '654321',
+      pin: '4321',
       recoveryPassword: 'Recover2',
       role: 'director',
       mustChangePin: false,
@@ -199,10 +199,10 @@ describe('Usuarios + Auth [fullstack]', () => {
     expect(found).toBeNull();
   });
 
-  it('rejects new PIN that is not 6 digits', async () => {
+  it('rejects a new PIN that is not 4 digits (ADR-072)', async () => {
     const user = await h.useCases.crearUsuario.execute({
       nombre: 'Director Test',
-      pin: '123456',
+      pin: '1234',
       recoveryPassword: 'Recover1',
       role: 'director',
       mustChangePin: false,
@@ -212,17 +212,17 @@ describe('Usuarios + Auth [fullstack]', () => {
     await expect(
       h.useCases.cambiarPin.execute({
         userId: user.id,
-        currentPin: '123456',
+        currentPin: '1234',
         newPin: '12345', // 5 digits
       }),
-    ).rejects.toThrow(/6 dígitos/i);
+    ).rejects.toThrow(/4 dígitos/i);
 
     await expect(
       h.useCases.cambiarPin.execute({
         userId: user.id,
-        currentPin: '123456',
+        currentPin: '1234',
         newPin: 'abcdef', // letters
       }),
-    ).rejects.toThrow(/6 dígitos/i);
+    ).rejects.toThrow(/4 dígitos/i);
   });
 });

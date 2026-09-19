@@ -11,7 +11,7 @@ import { testId } from './support/test-ids';
 
 /**
  * 0020: the account's display name rides the identity row and the session
- * (O-24, ADR-086) — never a grant on `auth.users` — and celebraciones are
+ * (O-24, ADR-087) — never a grant on `auth.users` — and celebraciones are
  * write-once, tenant-isolated markers (P-33).
  */
 const { url, describe } = integrationSuite();

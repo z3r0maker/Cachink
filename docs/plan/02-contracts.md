@@ -41,7 +41,7 @@ Request:
   "code": "K7M3P9RW",
   "device": {
     "name": "iPhone de Toni",
-    "platform": "ios|android",
+    "platform": "ios|android|web",
     "app_version": "1.0.0",
     "os_version": "18.1"
   }
@@ -332,7 +332,13 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-15 Business branding and contact columns on the `businesses` DOWN table
 
-- [ ] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+- [~] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+  - Progress: 2026-09-18 · `track-n/c15-n19-branding` · wire + pg halves done: `brandColor`,
+    `receiptTemplate (clasico|moderno|ticket|minimal)`, `receiptLeyenda`, `addressPrint`,
+    `whatsapp`, `socialLinks` (JSON string, the entity's `featureFlags` precedent) on
+    `BusinessSchema` with defaults (old payloads parse unchanged) + data-pg **0023**.
+    Drift: `businesses` is cloud-ahead until the app branch (allowed for DOWN tables whose
+    wire fields exist — the six are on the wire). **SQLite half waits for the app branch.**
 - **Steps:** add `brand_color`, `receipt_template ∈ clasico|moderno|ticket|minimal`,
   `receipt_leyenda`, `address_print`, `whatsapp`, `social_links` (JSON) to the wire schema, pg-core and
   SQLite (`logo_url` already exists). SQLite migration with an old→new test (CLAUDE.md §2.9).
@@ -340,7 +346,19 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-16 Browser devices and the four-digit NIP
 
-- [ ] Status · **Surfaced by:** Track O (ADR-071, ADR-072) · **Blocks:** O-04, O-05
+- [x] Status · **Surfaced by:** Track O (ADR-071, ADR-072) · **Blocks:** O-04, O-05
+  - Done: 2026-09-18 · `DevicePlatformSchema` + `devices.plataforma` gain `web` (plain text column —
+    no DDL, drift test unchanged and green against the local tenant DB). The NIP is four digits
+    everywhere `isValidPin`/`PIN_PATTERN` already reach (the portal's `/equipo` use cases were there)
+    **and** the last 6-digit holdouts: `NewUserSchema` (+`PIN_LENGTH`), `RecuperarPin`/`CambiarPin`
+    use cases (both slated for removal by O-04), `PinCodeInput` (auto-submit at 4), the Director
+    setup / recovery / change-PIN / create-user screens and their i18n hints, the demo seed
+    (`0000`), the user fixture, and the 12 Maestro flows + shared subflows that type a PIN
+    (amount-taps in `caja-*.yaml` untouched). `recoveryPasswordHash`/`recoveryPassword` carry
+    `@deprecated ADR-072` JSDoc — column kept; DirectorSetup submits a doubled NIP (`12341234`)
+    until the column's removal migration. `endpoints.test.ts` now asserts `plataforma: 'web'`
+    activates and an unknown platform still rejects.
+  - Amended at protocol version 1 (additive enum value; PIN length is not on the wire).
 - **Steps:** `DevicePlatformSchema` gains `web` (wire, pg-core `devices.plataforma`); NIP becomes
   `/^\d{4}$/` in `UserSchema` and every PIN use case; `recoveryPasswordHash` marked deprecated
   (column kept). Protocol version 1, no bump (additive enum value; PIN length is not on the wire).
@@ -356,7 +374,22 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-18 Receivables, expected cash and review status
 
-- [ ] Status · **Surfaced by:** Track O (ADR-074) · **Blocks:** O-03, O-05
+- [x] Status · **Surfaced by:** Track O (ADR-074) · **Blocks:** O-03, O-05
+  - Done: 2026-09-18 · `client_payments` become per-client (`clienteId`, no `ventaId`; SQLite 0004
+    rebuilds the table, backfills each abono from its sale and re-creates the change-log triggers —
+    3 old→new tests; pg 0023 does the same additively and drops `venta_id`, applied to the local
+    DB). `clients` + `limite_centavos`/`plazo_dias`/`estado_revision`/`fusionado_con_id`,
+    `products` + review status + `fusionado_con_id`, `expenses` + `caja_turno_id`,
+    `caja_turnos` + `denominaciones` (JSON text), everywhere defaulting existing rows to
+    `aprobado`. `RegistrarPagoClienteUseCase` rewritten to ADR-074/D5: per-client abono, the whole
+    amount recorded (excess = saldo a favor), fused/rejected clients refused, no estadoPago
+    mutation; `balance-general`'s CxC now derives through `estadoDeCuenta` (one calculator);
+    repos (drizzle + in-memory + contract tests), fixtures, exports and the old UI hook/modal
+    follow. Drift 27 green (0022 re-applied after another session reset the shared DB); domain
+    773, data 269, application 460, contracts 49, testing 147, UI 1859 green (the one red is the
+    documented `use-lan-handle` flake, green in isolation); typecheck clean. Owner decision
+    applied: `fusionar` records `estado_revision='fusionado'` + `fusionado_con_id`; stock moves
+    via an `inventory_movements` row at wiring time (O-30); history never rewritten.
 - **Steps:** `client_payments` per client (`clienteId`, no `ventaId`); `clients` + `limiteCentavos`,
   `plazoDias`, review status; `products` + review status; `expenses` + `cajaTurnoId`; `caja_turnos`
   - denomination JSON. Migrations with old → new tests.
@@ -364,7 +397,21 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-19 Operator messages and replies
 
-- [ ] Status · **Surfaced by:** Track O (ADR-075) · **Blocks:** O-16, fase 13
+- [x] Status · **Surfaced by:** Track O (ADR-075) · **Blocks:** O-16, fase 13
+  - Done: 2026-09-18 · `mensajes_operador` (DOWN) and `respuestas_operador` (UP) across every
+    layer: domain entities (`MensajeOperador` with severidad `info | aclaracion` — the reply
+    affordance keys on `aclaracion`, matching the built Avisos screen's `responder` model — and
+    `RespuestaOperador`; 11 entity tests), SQLite migration 0003 (tables + change-log triggers +
+    indexes; SCHEMA_VERSION 4) and repositories (drizzle + in-memory), pg `0021` (idempotent DDL +
+    RLS tenant isolation + grants — SELECT-only for the app role on mensajes; applied to the local
+    DB), `SYNCED_TABLES`, wire (`ReferenceTablesSchema.mensajes_operador` with `.default([])`,
+    `respuestas_operador` delta, `PUSH_REFERENCES` + `FK_MENSAJE_MISSING`), the server's codec /
+    bootstrap (pull serves mensajes; push accepts replies generically), and the mock (two fixture
+    mensajes served by pull; replies push; the mock's operator NIPs also became four digits — a
+    C-16 leftover). Acceptance proven: a message pulls (contracts test + mock) and a reply pushes
+    (ApplyPushUseCase 14 tests incl. the FK_MENSAJE_MISSING unhappy path). Domain 773, data 266,
+    application 453, contracts 49, testing 147, drift 27 green; typecheck clean everywhere.
+    UI-layer checklist items land with O-16/O-31 wiring, per the plan.
 - **Steps:** `mensajes_operador` (DOWN) and `respuestas_operador` (UP) in `scope.ts`, wire schemas,
   pg-core and SQLite.
 - **Acceptance:** CLAUDE.md §11 checklist; a message pulled, a reply pushed.

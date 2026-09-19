@@ -3,7 +3,7 @@
 #
 # Test credentials (hardcoded for E2E):
 #   Name:              Director Test
-#   PIN (login):       123456
+#   PIN (login):       1234
 #
 # Note: Email and recovery password fields are hidden (email recovery
 # not yet available). Recovery password is auto-set to PIN at UI layer.
@@ -22,11 +22,11 @@ appId: mx.xangarro.mobile
 
 - tapOn:
     id: "director-pin"
-- inputText: "123456"
+- inputText: "1234"
 
 - tapOn:
     id: "director-confirm-pin"
-- inputText: "123456"
+- inputText: "1234"
 
 # Scroll to submit button.
 - scrollUntilVisible:

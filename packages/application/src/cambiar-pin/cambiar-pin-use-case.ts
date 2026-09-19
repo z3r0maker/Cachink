@@ -4,11 +4,12 @@
  * Verifies the current PIN before accepting the new one.
  * Clears the `mustChangePin` flag on success.
  *
- * ADR-049: PIN for daily login, Password for recovery.
+ * ADR-049: PIN for daily login, Password for recovery. Removed with the
+ * phone's change-PIN flow by O-04 (ADR-072: only the owner resets a NIP).
  */
 
 import { compare, hash } from 'bcryptjs';
-import type { UserId } from '@xangarro/domain';
+import { isValidPin, type UserId } from '@xangarro/domain';
 import type { UsersRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
@@ -28,8 +29,8 @@ export class CambiarPinUseCase implements UseCase<CambiarPinInput, void> {
   }
 
   async execute(input: CambiarPinInput): Promise<void> {
-    if (!/^\d{6}$/.test(input.newPin)) {
-      throw new TypeError('El nuevo PIN debe ser de 6 dígitos');
+    if (!isValidPin(input.newPin)) {
+      throw new TypeError('El nuevo PIN debe ser de 4 dígitos');
     }
 
     const user = await this.#users.findById(input.userId);

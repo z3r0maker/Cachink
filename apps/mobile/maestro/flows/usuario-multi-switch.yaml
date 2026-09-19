@@ -32,11 +32,7 @@ appId: mx.xangarro.mobile
 # not a numeric index, so we match by displayed text instead).
 - tapOn: "Operativo Test"
 
-# Enter the Operativo PIN (111111) via inline numpad.
-- tapOn:
-    id: "numpad-1"
-- tapOn:
-    id: "numpad-1"
+# Enter the Operativo PIN (1111) via inline numpad.
 - tapOn:
     id: "numpad-1"
 - tapOn:

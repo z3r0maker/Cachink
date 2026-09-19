@@ -3,7 +3,7 @@ import { PLAN_NOMBRE } from '@xangarro/domain';
 import { currentSession } from '@/server/current-session';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
-import { loadShellCounts } from '@/server/shell';
+import { loadShellCounts, loadShellLogo } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
 import { initials } from '@/shell/initials';
 import { Header } from '@/shell/header';
@@ -29,6 +29,7 @@ export default async function PortalLayout({ children }: { children: React.React
   // so nothing below this line renders for a signed-out visitor.
   const session = await currentSession();
   const counts = await loadShellCounts(session.businessId);
+  const logoUrl = await loadShellLogo(session.businessId);
   const claims = await readSession();
   const negocios = claims === null ? [] : await negociosOf(claims.sub);
   const current = {
@@ -40,7 +41,7 @@ export default async function PortalLayout({ children }: { children: React.React
   return (
     <SessionProvider session={session}>
       <div className={frame}>
-        <Sidebar badges={{ '/revision-caja': pendientesRevision() }} />
+        <Sidebar logoUrl={logoUrl} badges={{ '/revision-caja': pendientesRevision() }} />
         <div className={column}>
           {/* The plan from the business's entitlement (B-10), as people name it. */}
           <Header

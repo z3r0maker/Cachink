@@ -11,7 +11,7 @@ import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
 /**
- * P-26's materialise-on-read (ADR-087): insights upsert into `notices` under
+ * P-26's materialise-on-read (ADR-088): insights upsert into `notices` under
  * deterministic ids, a member's dismissal survives the recompute, and an
  * insight that fixed itself closes as `listo`.
  */

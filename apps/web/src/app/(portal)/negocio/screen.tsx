@@ -36,6 +36,8 @@ function Heading({ owner, e }: { readonly owner: boolean; readonly e: Edicion | 
         <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, alignItems: 'center' }}>
           {/* Re-run the onboarding wizard (N-15): answers change, features follow. */}
           <Link href="/bienvenida/revisar">Volver a configurar mi negocio</Link>
+          {/* N-19: logo, colour and the receipt fields. */}
+          <Link href="/negocio/comprobantes">Comprobantes</Link>
           <Button variant="secondary" onClick={e.start}>
             Editar negocio
           </Button>

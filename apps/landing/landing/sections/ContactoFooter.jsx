@@ -171,7 +171,7 @@ function Contacto({ darkSection }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <Reveal delay={80} from={isMobile ? 'up' : 'right'}>
-              <a href="mailto:hola@cachink.mx" style={{ textDecoration: 'none' }}>
+              <a href="mailto:hola@xangarro.mx" style={{ textDecoration: 'none' }}>
                 <TiltCard max={6} lift={6}>
                   <HardCard padding={20}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
@@ -211,7 +211,7 @@ function Contacto({ darkSection }) {
                             marginTop: 2,
                           }}
                         >
-                          hola@cachink.mx
+                          hola@xangarro.mx
                         </div>
                       </div>
                       <div style={{ fontSize: 20, fontWeight: 900 }}>→</div>
@@ -322,10 +322,10 @@ const SocialYouTube = () => (
 );
 
 const SOCIALS = [
-  { k: 'ig', Icon: SocialIG, label: 'Instagram', href: 'https://instagram.com/cachink' },
-  { k: 'tt', Icon: SocialTikTok, label: 'TikTok', href: 'https://tiktok.com/@cachink' },
-  { k: 'x', Icon: SocialX, label: 'X', href: 'https://x.com/cachink' },
-  { k: 'yt', Icon: SocialYouTube, label: 'YouTube', href: 'https://youtube.com/@cachink' },
+  { k: 'ig', Icon: SocialIG, label: 'Instagram', href: 'https://instagram.com/xangarro' },
+  { k: 'tt', Icon: SocialTikTok, label: 'TikTok', href: 'https://tiktok.com/@xangarro' },
+  { k: 'x', Icon: SocialX, label: 'X', href: 'https://x.com/xangarro' },
+  { k: 'yt', Icon: SocialYouTube, label: 'YouTube', href: 'https://youtube.com/@xangarro' },
 ];
 
 function SocialButton({ Icon, label, href }) {
@@ -391,7 +391,7 @@ function Footer() {
             {/* Use apple-touch-icon — logo.png is a 2 MB file, never ship it */}
             <img
               src="/assets/apple-touch-icon.png"
-              alt="Cachink"
+              alt="Xangarro!"
               width="56"
               height="56"
               style={{ height: 56, width: 'auto', alignSelf: 'flex-start' }}
@@ -450,7 +450,7 @@ function Footer() {
           }}
         >
           <div style={{ fontSize: 13, color: 'var(--gray-600)', fontWeight: 500 }}>
-            © 2026 Cachink · Todos los derechos reservados
+            © 2026 Xangarro · Todos los derechos reservados
           </div>
           <div style={{ flex: 1 }} />
           <div

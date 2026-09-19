@@ -4,7 +4,7 @@ import { asTenant } from './sync-phone';
 
 /**
  * P-26 on the seeded tenant: the deterministic layer materialises on read
- * (ADR-087), so visiting /asesor writes insights derived from May's rows —
+ * (ADR-088), so visiting /asesor writes insights derived from May's rows —
  * this spec is in the `sync` project because it mutates the seeded tenant's
  * `notices` (upserts only; the rows it asserts are computed from seed data).
  *

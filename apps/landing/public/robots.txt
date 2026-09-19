@@ -19,4 +19,4 @@ Allow: /
 User-agent: bingbot
 Allow: /
 
-Sitemap: https://cachink.mx/sitemap.xml
+Sitemap: https://xangarro.mx/sitemap.xml

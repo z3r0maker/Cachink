@@ -11,7 +11,7 @@ import { asTenant } from './sync-phone';
 /**
  * P-27/P-33 on a throwaway tenant (the `sync` project: it writes rows). April
  * has ventas to anchor a base; a May-loaded goal for April closes lazily on
- * the Metas tab — achieved, so the takeover appears **once** (ADR-086's
+ * the Metas tab — achieved, so the takeover appears **once** (ADR-087's
  * marker), the month-end dialog answers in its lograda variant, and the next
  * wizard run anchors to April's real ventas.
  */

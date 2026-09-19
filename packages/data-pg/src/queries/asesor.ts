@@ -185,7 +185,7 @@ function upsertInsight(tx: Tx, businessId: string, i: Insight, now: string) {
 }
 
 /**
- * Materialise-on-read (ADR-087): upsert the current insights into `notices`
+ * Materialise-on-read (ADR-088): upsert the current insights into `notices`
  * with deterministic ids, then auto-close the ones that vanished. A member's
  * dismissal survives a recompute — `state` and `resolved_at` are never touched
  * by the upsert — and an insight that fixed itself closes as `listo`, which is

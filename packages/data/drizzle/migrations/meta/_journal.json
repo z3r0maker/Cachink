@@ -22,6 +22,20 @@
       "when": 1789751421835,
       "tag": "0002_add_business_regimen_sat",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1789778828216,
+      "tag": "0003_mensajes_respuestas_operador",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1789780331565,
+      "tag": "0004_c18_receivables_expected_cash",
+      "breakpoints": true
     }
   ]
 }

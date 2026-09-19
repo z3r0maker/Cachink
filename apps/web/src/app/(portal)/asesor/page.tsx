@@ -18,7 +18,7 @@ export const dynamic = 'force-dynamic';
 export default async function AsesorPage() {
   try {
     // The session carries the plan's Asesor cadencia; the loader materialises
-    // only what that tier receives (ADR-059, ADR-087).
+    // only what that tier receives (ADR-059, ADR-088).
     const session = await currentSession();
     const [data, metas] = await Promise.all([
       loadAsesorPage(session.businessId, session.capabilities.asesor),

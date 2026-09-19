@@ -13,7 +13,7 @@
 #   maestro test apps/mobile/maestro/flows/usuario-crear.yaml
 #   maestro test apps/mobile/maestro/flows/change-pin.yaml
 #
-# Note: usuario-crear.yaml creates "Operativo Test" with PIN "111111".
+# Note: usuario-crear.yaml creates "Operativo Test" with PIN "1111".
 # If mustChangePin is set during creation, this flow tests the gate.
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
@@ -35,11 +35,7 @@ appId: mx.xangarro.mobile
     text: "Operativo Test"
     optional: true
 
-# Enter the operativo's initial PIN (111111) via inline numpad.
-- tapOn:
-    id: "numpad-1"
-- tapOn:
-    id: "numpad-1"
+# Enter the operativo's initial PIN (1111) via inline numpad.
 - tapOn:
     id: "numpad-1"
 - tapOn:
@@ -58,10 +54,10 @@ appId: mx.xangarro.mobile
 # Fill new PIN (change-pin screen uses system keyboard, not numpad).
 - tapOn:
     id: "new-pin"
-- inputText: "222222"
+- inputText: "2222"
 - tapOn:
     id: "confirm-pin"
-- inputText: "222222"
+- inputText: "2222"
 - tapOn:
     id: "change-pin-submit"
 

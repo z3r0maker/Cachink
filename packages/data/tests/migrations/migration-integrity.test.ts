@@ -180,7 +180,7 @@ describe('Migration integrity', () => {
       'idx_expenses_biz_fecha',
       'idx_expenses_recurrente_fecha',
       'idx_invmov_producto',
-      'idx_client_payments_venta',
+      'idx_client_payments_cliente',
       'idx_day_closes_biz_fecha',
       'idx_products_biz',
       'idx_employees_biz',

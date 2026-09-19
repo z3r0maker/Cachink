@@ -3,12 +3,12 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, IsoDate, SaleId } from '@xangarro/domain';
+import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
 import type { ClientPaymentsRepository } from '@xangarro/data';
 import { makeNewClientPayment } from '../fixtures/client.js';
 
-const VENTA_X = '01HZ8XQN9GZJXV8AKQ5X0C7V01' as SaleId;
-const VENTA_Y = '01HZ8XQN9GZJXV8AKQ5X0C7V02' as SaleId;
+const CLIENTE_X = '01HZ8XQN9GZJXV8AKQ5X0C7V01' as ClientId;
+const CLIENTE_Y = '01HZ8XQN9GZJXV8AKQ5X0C7V02' as ClientId;
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const BIZ_B = '01HZ8XQN9GZJXV8AKQ5X0C7BJW' as BusinessId;
 
@@ -24,44 +24,45 @@ export function describeClientPaymentsRepositoryContract(
     });
 
     it('stamps audit on create', async () => {
-      const row = await repo.create(makeNewClientPayment({ ventaId: VENTA_X }));
+      const row = await repo.create(makeNewClientPayment({ clienteId: CLIENTE_X }));
       expect(row.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
       expect(row.deletedAt).toBeNull();
     });
 
     it('findById returns row, null for missing or deleted', async () => {
-      const row = await repo.create(makeNewClientPayment({ ventaId: VENTA_X }));
+      const row = await repo.create(makeNewClientPayment({ clienteId: CLIENTE_X }));
       expect(await repo.findById(row.id)).toEqual(row);
       await repo.delete(row.id);
       expect(await repo.findById(row.id)).toBeNull();
     });
 
-    it('findByVenta scopes to a single sale', async () => {
-      await repo.create(makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 1_000n }));
-      await repo.create(makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 2_000n }));
-      await repo.create(makeNewClientPayment({ ventaId: VENTA_Y, montoCentavos: 9_999n }));
-      const rows = await repo.findByVenta(VENTA_X);
+    it('findByCliente scopes to one client, oldest first', async () => {
+      await repo.create(makeNewClientPayment({ clienteId: CLIENTE_X, montoCentavos: 1_000n }));
+      await repo.create(makeNewClientPayment({ clienteId: CLIENTE_X, montoCentavos: 2_000n }));
+      await repo.create(makeNewClientPayment({ clienteId: CLIENTE_Y, montoCentavos: 9_999n }));
+      const rows = await repo.findByCliente(CLIENTE_X);
       expect(rows).toHaveLength(2);
-      expect(rows.every((r) => r.ventaId === VENTA_X)).toBe(true);
+      expect(rows.every((r) => r.clienteId === CLIENTE_X)).toBe(true);
+      expect(rows.map((r) => r.montoCentavos)).toEqual([1_000n, 2_000n]);
     });
 
-    it('sumByVenta returns the total of non-deleted pagos', async () => {
-      await repo.create(makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 30_000n }));
+    it('findByCliente skips deleted abonos', async () => {
+      await repo.create(makeNewClientPayment({ clienteId: CLIENTE_X, montoCentavos: 30_000n }));
       const drop = await repo.create(
-        makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 1_000_000n }),
+        makeNewClientPayment({ clienteId: CLIENTE_X, montoCentavos: 1_000_000n }),
       );
-      await repo.create(makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 70_000n }));
       await repo.delete(drop.id);
-      expect(await repo.sumByVenta(VENTA_X)).toBe(100_000n);
+      const rows = await repo.findByCliente(CLIENTE_X);
+      expect(rows.map((r) => r.montoCentavos)).toEqual([30_000n]);
     });
 
-    it('sumByVenta returns 0n when no pagos exist', async () => {
-      expect(await repo.sumByVenta('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as SaleId)).toBe(0n);
+    it('findByCliente is empty for an unknown client', async () => {
+      expect(await repo.findByCliente('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as ClientId)).toEqual([]);
     });
 
     it('preserves montoCentavos as bigint', async () => {
       const row = await repo.create(
-        makeNewClientPayment({ ventaId: VENTA_X, montoCentavos: 123_456_789n }),
+        makeNewClientPayment({ clienteId: CLIENTE_X, montoCentavos: 123_456_789n }),
       );
       expect(typeof row.montoCentavos).toBe('bigint');
       expect((await repo.findById(row.id))?.montoCentavos).toBe(123_456_789n);
@@ -74,7 +75,7 @@ export function describeClientPaymentsRepositoryContract(
     it('findByDateRange returns an empty array when no pagos fall in the window', async () => {
       await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_X,
+          clienteId: CLIENTE_X,
           businessId: BIZ_A,
           fecha: '2026-01-01' as IsoDate,
         }),
@@ -90,28 +91,28 @@ export function describeClientPaymentsRepositoryContract(
     it('findByDateRange includes rows on both boundary dates and scopes by business', async () => {
       const start = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_X,
+          clienteId: CLIENTE_X,
           businessId: BIZ_A,
           fecha: '2026-04-20' as IsoDate,
         }),
       );
       const end = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_Y,
+          clienteId: CLIENTE_Y,
           businessId: BIZ_A,
           fecha: '2026-04-24' as IsoDate,
         }),
       );
       const outside = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_Y,
+          clienteId: CLIENTE_Y,
           businessId: BIZ_A,
           fecha: '2026-04-19' as IsoDate,
         }),
       );
       const otherBiz = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_X,
+          clienteId: CLIENTE_X,
           businessId: BIZ_B,
           fecha: '2026-04-22' as IsoDate,
         }),
@@ -130,14 +131,14 @@ export function describeClientPaymentsRepositoryContract(
     it('findByDateRange returns rows sorted by fecha desc', async () => {
       const oldest = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_X,
+          clienteId: CLIENTE_X,
           businessId: BIZ_A,
           fecha: '2026-04-20' as IsoDate,
         }),
       );
       const newest = await repo.create(
         makeNewClientPayment({
-          ventaId: VENTA_X,
+          clienteId: CLIENTE_X,
           businessId: BIZ_A,
           fecha: '2026-04-24' as IsoDate,
         }),

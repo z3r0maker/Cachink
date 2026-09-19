@@ -1,50 +1,46 @@
-# Cachink Landing
+# Xangarro Landing
 
-Marketing landing page for **Cachink** — la app mexicana para llevar la caja de tu negocio. Hecho para emprendedores: panaderías, cafés, tiendas de barrio, talleres, consultorios.
+Marketing site for **Xangarro!** — la plataforma mexicana para llevar la caja de tu negocio.
+Hecho para emprendedores: panaderías, cafés, tiendas de barrio, talleres, consultorios.
+Marketing only (Q18/ADR-084); its only product contract is the signup URL
+`https://app.xangarro.mx/signup?plan=<xangarrito|xangarro|xangarrote>`.
 
-## Run it
-
-It's a static site. Open `index.html` in any browser, or serve the folder with any static file server:
+## Commands
 
 ```bash
-# Python
-python3 -m http.server 8000
-
-# Node
-npx serve .
+pnpm --filter @xangarro/landing dev      # Vite dev server
+pnpm --filter @xangarro/landing build    # client build + SSR prerender + smoke tests (also the `test` task)
+pnpm --filter @xangarro/landing preview  # serve dist/ on :4173
+node scripts/generate-og.mjs             # regenerate og-image + favicon + apple-touch-icon + site.webmanifest
 ```
-
-Then visit `http://localhost:8000`.
 
 ## Structure
 
-- `index.html` — entry point. Loads the CSS, the React + Babel-standalone runtime, and the JSX components.
-- `colors_and_type.css` — design tokens (yellow trio, hard borders/shadows, Plus Jakarta Sans, full type scale).
-- `landing/` — the React components that compose the page:
-  - `Motion.jsx` — `Reveal`, `Parallax`, `TiltCard`, `Wiggle`, `SpinCoin` motion utilities
-  - `PhoneScreens.jsx` — static Operativo / Director / NuevaVenta phone mockups
-  - `AnimatedHero.jsx` — looping hero phone (capture → ¡CACHINK! burst → row slide-in → total count-up)
-  - `Sections.jsx` — Nav, Hero, ParaQuienEs, ComoFunciona, Recorrido, Precios, Contacto, Footer
-- `assets/logo.png` — brand logo.
+- `index.html` — HTML template; `__SITE_URL__` / `__PLAUSIBLE_SNIPPET__` placeholders are
+  substituted at build time (`vite.config.js`).
+- `src/` — `App.jsx` (client shell, lazy below-fold sections), `AppSSR.jsx` (eager render for
+  prerender), the tiny hand-rolled router, `structured-data.js` (JSON-LD) and the
+  `/recursos` content pages.
+- `landing/` — the section components: `Sections.jsx` (Nav + Hero), `copy.jsx`
+  (TONE_COPY decks + FAQ single source of truth), `planes.js` (**plan data single source** —
+  pricing table, FAQs, JSON-LD offers and CTAs all read from here), `AnimatedHero.jsx`,
+  `PhoneScreens.jsx`, `sections/` (ParaQuienEs, ComoFunciona, Recorrido, Precios,
+  ContactoFooter).
+- `scripts/` — `build.mjs` (client build), `prerender.mjs` (SSR prerender of the 6 routes,
+  per-route title/description/canonical, domain substitution into robots/sitemap, smoke
+  tests), `generate-og.mjs` (social + icon assets, sharp).
+- `public/` — static assets copied verbatim; `robots.txt` / `sitemap.xml` are hand-written
+  (keep the route list in sync with `ROUTES` in `prerender.mjs`), `llms.txt` / `llms-full.txt`
+  are the LLM-facing product summaries.
 
-## Design defaults
+## Brand
 
-The page renders with the defaults the design conversation landed on:
+Text wordmark `XANGARRO!` (no image logo exists yet — real artwork lands with X-07); yellow
+`#FFD60A` / black kept. Prices are **+ IVA** everywhere (N-01); plan data lives in
+`landing/planes.js` — never hard-code a price in a section.
 
-- `tone: educational`
-- `yellowIntensity: medium`
-- Cómo funciona / Contacto sections light (yellow), not dark
-- Pricing section visible
-- Motion enabled
+## Placeholders to verify before launch
 
-To change them, edit the `TWEAK_DEFAULTS` object near the bottom of `index.html`.
-
-## Placeholders to replace before launch
-
-- `hola@cachink.mx` (in `landing/Sections.jsx`)
-- `+52 55 5555 5555` (in `landing/Sections.jsx`)
-- Social media URLs (`landing/Sections.jsx` `SOCIALS` array)
-
-## Going to production
-
-The current setup uses [Babel-standalone](https://babeljs.io/docs/babel-standalone) to compile JSX in the browser at runtime. That's fine for prototyping or low-traffic launches, but for a real production deploy you'll want to bundle and pre-compile (Vite, esbuild, or similar) so visitors don't pay the Babel-standalone download/compile cost on every load.
+- `hola@xangarro.mx` and `+52 55 5555 5555` (`landing/sections/ContactoFooter.jsx`)
+- Social media URLs (`SOCIALS` array, same file) — `@xangarro` handles assumed, owner to confirm
+- Store badges stay "Próximamente en" until X-05

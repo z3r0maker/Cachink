@@ -42,7 +42,7 @@ function makeCreditSale(overrides: Partial<Sale> = {}): Sale {
 function makePago(overrides: Partial<ClientPayment> = {}): ClientPayment {
   return {
     id: '01HZ8XQN9GZJXV8AKQ5X0C7PAG',
-    ventaId: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
+    clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7CKJ',
     fecha: '2026-04-24',
     montoCentavos: 0n,
     metodo: 'Transferencia',
@@ -115,9 +115,9 @@ describe('calculateBalanceGeneral', () => {
       makeCreditSale({ id: 'C' as never, monto: 30_000n, estadoPago: 'pagado' }),
     ];
     const pagos = [
-      makePago({ ventaId: 'A' as never, montoCentavos: 2_000n }),
-      makePago({ ventaId: 'B' as never, montoCentavos: 5_000n }),
-      makePago({ ventaId: 'B' as never, montoCentavos: 5_000n }),
+      makePago({ id: 'P1' as never, montoCentavos: 2_000n }),
+      makePago({ id: 'P2' as never, montoCentavos: 5_000n }),
+      makePago({ id: 'P2' as never, montoCentavos: 5_000n }),
     ];
     const result = calculateBalanceGeneral({
       cortesDelDia: [],
@@ -133,7 +133,7 @@ describe('calculateBalanceGeneral', () => {
 
   it('clamps cuentasPorCobrar ≥ 0 per venta on overpayment', () => {
     const ventas = [makeCreditSale({ id: 'A' as never, monto: 10_000n, estadoPago: 'parcial' })];
-    const pagos = [makePago({ ventaId: 'A' as never, montoCentavos: 15_000n })];
+    const pagos = [makePago({ id: 'P4' as never, montoCentavos: 15_000n })];
     const result = calculateBalanceGeneral({
       cortesDelDia: [],
       inventarioStock: [],

@@ -19,7 +19,7 @@ import { hoy } from './clock';
  * The Asesor page's read model (P-26): compute the deterministic insights from
  * the tenant's own rows, keep only what the plan's cadence receives
  * («semanal» sees the two most urgent; ADR-059), materialise them into
- * `notices` (ADR-087 — the feed still reads the table; dismissals are state
+ * `notices` (ADR-088 — the feed still reads the table; dismissals are state
  * transitions on real rows) and read the feed plus its history back.
  */
 export interface AsesorPageData {

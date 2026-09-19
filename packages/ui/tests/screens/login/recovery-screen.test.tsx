@@ -117,11 +117,11 @@ describe('RecoveryScreen', () => {
     const pwInput = pwField.querySelector('input')!;
     fireEvent.change(pwInput, { target: { value: 'test123' } });
 
-    fillInput('recovery-new-pin', '222222');
-    fillInput('recovery-confirm-pin', '222222');
+    fillInput('recovery-new-pin', '2222');
+    fillInput('recovery-confirm-pin', '2222');
 
     fireEvent.click(screen.getByTestId('recovery-submit'));
-    expect(onRecoverWithPassword).toHaveBeenCalledWith('test123', '222222');
+    expect(onRecoverWithPassword).toHaveBeenCalledWith('test123', '2222');
   });
 
   it('does not submit when PIN fields do not match', () => {
@@ -132,7 +132,7 @@ describe('RecoveryScreen', () => {
     const pwInput = pwField.querySelector('input')!;
     fireEvent.change(pwInput, { target: { value: 'test123' } });
 
-    fillInput('recovery-new-pin', '222222');
+    fillInput('recovery-new-pin', '2222');
     fillInput('recovery-confirm-pin', '333333');
 
     fireEvent.click(screen.getByTestId('recovery-submit'));
@@ -147,8 +147,8 @@ describe('RecoveryScreen', () => {
     const pwInput = pwField.querySelector('input')!;
     fireEvent.change(pwInput, { target: { value: 'ab' } });
 
-    fillInput('recovery-new-pin', '222222');
-    fillInput('recovery-confirm-pin', '222222');
+    fillInput('recovery-new-pin', '2222');
+    fillInput('recovery-confirm-pin', '2222');
 
     fireEvent.click(screen.getByTestId('recovery-submit'));
     expect(onRecoverWithPassword).not.toHaveBeenCalled();

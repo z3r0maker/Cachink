@@ -17,13 +17,14 @@
  */
 
 import type { Entitlement } from '@xangarro/domain';
-import type { BillingEvent, InvoiceEvent } from './events.js';
+import type { BillingEvent, ChargeRefunded, InvoiceEvent } from './events.js';
 import type {
   BillingGateway,
   BillingRepository,
   BillingStatus,
   EntitlementListener,
   InvoicePaidListener,
+  RefundListener,
   StripeEventLedger,
 } from './ports.js';
 import { recordFrom } from './record.js';
@@ -37,6 +38,12 @@ export type ApplyStripeEventResult =
       readonly businessId: string;
       readonly status: BillingStatus | null;
       readonly entitlement: Entitlement;
+    }
+  /** A refund was booked for the CFDI side (N-33); no entitlement changes. */
+  | {
+      readonly outcome: 'applied';
+      readonly businessId: string;
+      readonly refund: 'recorded' | 'unknown_payment' | 'already_refunded' | 'unresolved';
     };
 
 export interface ApplyStripeEventDeps {
@@ -44,11 +51,15 @@ export interface ApplyStripeEventDeps {
   readonly ledger: StripeEventLedger;
   readonly gateway: BillingGateway;
   readonly invoices: InvoicePaidListener;
+  /** The CFDI side of refunds (N-33); optional so unrelated tests skip it. */
+  readonly refunds?: RefundListener;
   readonly entitlements: EntitlementListener;
   readonly now: () => Date;
 }
 
-const TRIGGER: Readonly<Record<BillingEvent['type'], BillingTrigger>> = {
+type TriggeredEvent = Exclude<BillingEvent['type'], 'charge.refunded'>;
+
+const TRIGGER: Readonly<Record<TriggeredEvent, BillingTrigger>> = {
   'checkout.session.completed': 'sync',
   'customer.subscription.created': 'sync',
   'customer.subscription.updated': 'sync',
@@ -86,8 +97,28 @@ export class ApplyStripeEventUseCase {
       if (event.subscriptionId === null) return { outcome: 'ignored', reason: 'NO_SUBSCRIPTION' };
       return this.#sync(event.subscriptionId, 'sync', event.businessId);
     }
+    if (event.type === 'charge.refunded') return this.#refund(event);
     if ('invoice' in event) return this.#invoice(event);
     return this.#sync(event.subscriptionId, TRIGGER[event.type], null);
+  }
+
+  async #refund(event: ChargeRefunded): Promise<Handled> {
+    const { repo, refunds } = this.#deps;
+    const { chargeId, refundId, amountRefundedCentavos } = event.refund;
+    if (chargeId === null || refundId === null) {
+      return { outcome: 'ignored', reason: 'NO_CHARGE' };
+    }
+    if (event.customerId === null) return { outcome: 'ignored', reason: 'UNKNOWN_BUSINESS' };
+    const businessId = await repo.businessOfCustomer(event.customerId);
+    if (businessId === null) return { outcome: 'ignored', reason: 'UNKNOWN_BUSINESS' };
+    if (refunds === undefined) return { outcome: 'ignored', reason: 'NO_REFUND_LISTENER' };
+    return refunds.onChargeRefunded({
+      chargeId,
+      businessId,
+      customerId: event.customerId,
+      refundId,
+      amountRefundedCentavos,
+    });
   }
 
   async #rememberCustomer(businessId: string, customerId: string): Promise<void> {

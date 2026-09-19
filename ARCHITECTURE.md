@@ -5782,9 +5782,51 @@ ADR-058).
 - Unit tests and E2E specs use the new figures; the harness comparison is box-for-box on the
   operator screens except text the runtime splits and the capitalised hints.
 
+## ADR-086
+
+**Track N utility screens are code-first under the token contract; receipts stay design-first**
+
+Date: 2026-09-18 · Supersedes: none · Amends: ADR-058 (design governance scope, for the screens named below)
+
+**Context**
+
+ADR-058 makes the Claude Design project the specification for every portal screen: visual changes
+land there first, mirrored read-only into `design-reference/`. Track N's pending work
+(`09-next-features.md` N-16…N-20) adds several portal surfaces, but the repo's design mirror only
+covers the operator handoff — the Director-portal mirror (P-18) never landed — and no designs exist
+for the unified `/importar` screen, the Comprobantes section, the inventario-inicial step, or the
+N-18 backoffice flows. Waiting on owner-authored designs for every one of them would stall most of
+Track N, while the backoffice has always been built code-first under `design-lint` (its ROOTS
+include `apps/backoffice/src`) with the `negocio/edicion` tabbed-form pattern as precedent on the
+web side.
+
+**Decision** (owner interview 2026-09-18)
+
+1. **Receipt templates (N-20) stay design-first**, exactly as ADR-058 requires: the four templates
+   land in the Claude Design project and are mirrored into `design-reference/` before the renderer
+   is built. Receipts are the most merchant-visible surface in the epic and the spec's language
+   ("designed templates", contrast check) points at a real design pass.
+2. **The Track N utility screens are code-first** under `DESIGN_CONTRACT.md`'s eight replication
+   conditions, the `@xangarro/tokens` contract and `design-lint`: the unified `/importar` screen
+   (N-16), the saldos iniciales review + inventario inicial (N-17), the Comprobantes section inside
+   `negocio/edicion` (N-19), the `/ayuda` page and the N-18 assisted-import flows. They compose
+   existing, already-designed primitives (option cards, tabbed forms, tables, drawers); no new
+   visual language is invented.
+3. This is a scoped exception, not a general relaxation: any Track N screen whose design judgment
+   matters beyond composition gets the same design-first treatment as the receipts. The sidebar
+   nav stays exactly as the design files define it (no "Importar" item was added for N-16).
+
+**Consequences**
+
+- Track N's UI work is unblocked without pretending a design review happened.
+- `pnpm lint:design` remains the enforced floor for every screen named in (2).
+- When P-18's Director mirror finally lands, these screens are candidates for a design pass; any
+  visual change then follows ADR-058's design-first rule again.
+
+---
 ---
 
-## ADR-086
+## ADR-087
 
 ### The account's display name lives on `auth.users`; celebrations are marked in a write-once table
 
@@ -5830,7 +5872,7 @@ for the takeover and streak-milestone toasts.
 
 ---
 
-## ADR-087
+## ADR-088
 
 ### The Asesor's deterministic layer materialises on read, ahead of P-30's cron
 

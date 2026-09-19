@@ -9,11 +9,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
 import {
   InMemoryClientPaymentsRepository,
+  InMemoryClientsRepository,
   InMemoryProductsRepository,
-  InMemorySalesRepository,
   TEST_DEVICE_ID,
+  makeNewClient,
   makeNewProduct,
-  makeNewSale,
 } from '@xangarro/testing';
 import type { BusinessId, IsoDate } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -38,29 +38,28 @@ function wrapper(overrides?: Record<string, unknown>) {
 
 describe('useRegistrarPago', () => {
   let clientPayments: InMemoryClientPaymentsRepository;
-  let sales: InMemorySalesRepository;
+  let clients: InMemoryClientsRepository;
   let products: InMemoryProductsRepository;
+  let clienteId: ClientId;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     clientPayments = new InMemoryClientPaymentsRepository(TEST_DEVICE_ID);
-    sales = new InMemorySalesRepository(TEST_DEVICE_ID);
+    clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
+    clienteId = (await clients.create(makeNewClient({ businessId: BIZ }))).id;
     useAppConfigStore.setState({ currentBusinessId: BIZ, hydrated: true });
   });
 
   it('registers a client payment via the mutation', async () => {
-    const product = await products.create(makeNewProduct({ businessId: BIZ }));
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ, productoId: product.id, metodo: 'Crédito', monto: 5000n }),
-    );
+    await products.create(makeNewProduct({ businessId: BIZ }));
 
     const { result } = renderHook(() => useRegistrarPago(), {
-      wrapper: wrapper({ clientPayments, sales }),
+      wrapper: wrapper({ clientPayments, clients }),
     });
 
     await act(async () => {
       result.current.mutate({
-        ventaId: sale.id,
+        clienteId,
         fecha: '2026-05-09' as IsoDate,
         montoCentavos: 5000n,
         metodo: 'Efectivo',

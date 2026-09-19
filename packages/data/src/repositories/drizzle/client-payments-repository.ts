@@ -2,18 +2,17 @@
  * Drizzle-backed {@link ClientPaymentsRepository}.
  */
 
-import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
+  ClientId,
   ClientPaymentId,
   DeviceId,
   UserId,
   IsoDate,
   IsoTimestamp,
-  Money,
   NewClientPayment,
   PaymentMethod,
-  SaleId,
 } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { ClientPayment, ClientPaymentsRepository } from '../client-payments-repository.js';
@@ -38,7 +37,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
     const ts = now();
     const row = {
       id,
-      ventaId: input.ventaId,
+      clienteId: input.clienteId,
       fecha: input.fecha,
       montoCentavos: input.montoCentavos,
       metodo: input.metodo,
@@ -63,23 +62,14 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
     return row ? this.#mapRow(row) : null;
   }
 
-  async findByVenta(ventaId: SaleId): Promise<readonly ClientPayment[]> {
+  async findByCliente(clienteId: ClientId): Promise<readonly ClientPayment[]> {
     const rows = await this.#db
       .select()
       .from(clientPayments)
-      .where(and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)))
-      .orderBy(desc(clientPayments.createdAt))
+      .where(and(eq(clientPayments.clienteId, clienteId), isNull(clientPayments.deletedAt)))
+      .orderBy(asc(clientPayments.fecha), asc(clientPayments.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));
-  }
-
-  async sumByVenta(ventaId: SaleId): Promise<Money> {
-    const result = await this.#db
-      .select({ total: sql<bigint>`coalesce(sum(${clientPayments.montoCentavos}), 0)` })
-      .from(clientPayments)
-      .where(and(eq(clientPayments.ventaId, ventaId), isNull(clientPayments.deletedAt)))
-      .get();
-    return BigInt(result?.total ?? 0) as Money;
   }
 
   async findByDateRange(
@@ -115,7 +105,7 @@ export class DrizzleClientPaymentsRepository implements ClientPaymentsRepository
   #mapRow(row: PaymentRow): ClientPayment {
     return {
       id: row.id as ClientPaymentId,
-      ventaId: row.ventaId as SaleId,
+      clienteId: row.clienteId as ClientId,
       fecha: row.fecha as IsoDate,
       montoCentavos: row.montoCentavos,
       metodo: row.metodo as PaymentMethod,

@@ -362,7 +362,26 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-16 Import engine + Clientes template `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
+- [x] Status · **Blocked by:** P-07 · **Blocks:** N-17, N-18
+- Progress/Done: 2026-09-18 · `track-n/n16-import` · P-07's three steps generalised into a template
+  registry (`apps/web/src/server/import/templates.ts`) with the products flow byte-identical (same
+  plan/apply path, 5 000-row cap, duplicate-SKU rule); actions renamed
+  `previsualizarImportacion`/`importarDatos` around a `plantilla` form field that defaults to
+  Productos. **Clientes template:** nombre/teléfono/RFC (RFC validated with
+  `packages/domain/src/fiscal/rfc.ts`), matching by teléfono digits with a normalised-nombre
+  fallback (Ñ is a letter, not an accent), matches become «actualizar» that overwrite telefono/rfc,
+  an empty optional cell keeps what is stored, in-file duplicates are errors on both rows. **.csv
+  support** beside .xlsx (`lib/csv.ts`). New `Client.rfc` (optional, normalised) on the domain
+  schema → the wire; data-pg **0020** `clients.rfc` + integration test; the drift test's
+  cloud-ahead rule now allows HYBRID tables whose wire field is optional (proven per column).
+  `CrearClienteUseCase`/`EditarClienteUseCase` (+tests; application suite 459 green), pg
+  `clients` repository (sync-log on every write). UI: unified **`/importar`** screen (template
+  cards → the three steps; ADR-086 code-first) replacing the Productos drawer — the Productos
+  button navigates to `?plantilla=productos`; the sidebar nav is untouched. Template download
+  `/api/import/clientes`. E2E: the P-07 spec re-pointed at the page + a new
+  `importar-clientes.sync.spec.ts` (3 rows → round-trip «3 sin cambios», one changed RFC → one
+  update, malformed row skipped with error) — full web e2e 448 green. SQLite half of `rfc` waits
+  for the app branch (C-15-style split, `CLOUD_AHEAD: clients: ['rfc']`).
 - **Note (ADR-081, 2026-09-18):** portal-created products start at zero stock, the import template has no
   `stock_inicial` column, and **the import writes no movements**. Opening stock is N-17's job.
 - **What:** generalise P-07's three steps (template → dry-run with row-level errors → one-transaction
@@ -397,7 +416,23 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-19 Logo + brand colour `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+- [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+- Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
+  portal-only `business_logos` table (0023) — **deviation from the interview's bucket, ratified
+  by the owner 2026-09-18**: Supabase Storage's REST upload needs a Supabase JWT the in-house
+  auth never mints and the service role is forbidden in apps/web (N-05); bytes in the DB, served
+  publicly by `/api/logos/<businessId>` (ETag = bytes' hash) through SECURITY DEFINER
+  `xangarro.logo_publico()` — public read, authed write, one stable **absolute** URL on the wire
+  (phones fetch it). Upload (owner/admin, PNG/JPG/SVG ≤ 2 MB): SVG sanitised
+  (`domain/comprobante/brand.ts`: script/foreignObject/handlers/js-URLs stripped, gate-checked —
+  malicious-SVG tests green); raster decoded with sharp (0.35.4) and the brand colour extracted
+  by a saturation-weighted histogram (`dominantColor`, SVG by `dominantSvgFill`); extraction
+  never overwrites a chosen colour. UI: **Negocio → Comprobantes** (`/negocio/comprobantes`,
+  ADR-086 code-first) — logo upload with preview, colour picker + hex, template cards, leyenda,
+  WhatsApp, address switch; viewer reads without controls; link from Negocio. The sidebar brand
+  block renders the logo when set (wordmark otherwise). e2e `comprobantes.spec.ts` (owner flow +
+  viewer) green; full suite 454. **Still to do:** the monthly PDF's logo (with N-20's renderer)
+  and the phone's download-and-cache half (app branch).
 - **What:** upload PNG/JPG/SVG ≤ 2 MB to a Supabase Storage bucket (RLS by `business_id`; SVG
   sanitised); `businesses.logo_url` (exists, always null today) set; brand colour auto-extracted
   (dominant non-neutral colour) and editable. Logo shown in the portal sidebar/header, on receipts and
@@ -407,7 +442,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-20 Receipt templates `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-19, app design (N-24)
+- [ ] Status · **Blocked by:** N-19, app design (N-24) · **waiting on the owner to land the four
+      template designs in the Claude Design project and mirror them to `design-reference/` (ADR-086
+      keeps receipts design-first)**
 - **What:** four designed templates — Clásico, Moderno, Ticket, Minimal — in
   `packages/domain/src/comprobante/` (one renderer, used by the portal live preview and the app).
   Fields: logo, colour, leyenda, dirección, WhatsApp, redes. PNG and PDF.
@@ -552,12 +589,32 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-31 Landing copy for this track `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
+- [x] Status · **Blocked by:** N-01, C-12 · **Blocks:** X-10
 - **Where:** `apps/landing/` in this repo (ADR-084), not the old `CachinkLanding` repo.
 - **What:** pricing table with the new limits and annual toggle, every price marked **"+ IVA"** with the
   total on hover/footnote; "Tu negocio sigue aunque se vaya el
   internet" (decision 20); fix L-03's stale `freelancer/emprendedor/mipyme_pro` slugs (ADR-059).
   Payment-method line: "Tarjeta de crédito o débito · Transferencia SPEI en plan anual" (no OXXO).
+- Progress/Done: 2026-09-18 · `track-n/n31-landing` · full rebrand to Xangarro! plus the pricing
+  rebuild — this **also delivers L-01, L-02 and L-03** (Done lines there). Pricing card from a new
+  single source `apps/landing/landing/planes.js`: xangarrito $0 / xangarro $199 / xangarrote $399
+  MXN·mes ("Recomendado" on xangarro), monthly/annual toggle (annual 10× monthly = "2 meses gratis"),
+  **"+ IVA"** badge on paid prices with IVA-inclusive totals in the footnote (230.84 / 462.84 /
+  2,308.40 / 4,628.40), limits 300/50 · 10k/1k · 30k/5k + operadores 1/2/5, exportación on every
+  tier, "Multi-sucursal (próximamente)" on xangarrote. Payment line "Tarjeta de crédito o débito, o
+  por transferencia SPEI en plan anual" (no OXXO); offline line "Tu negocio sigue aunque se vaya el
+  internet" in the Precios intro, hero FAQ and llms files. All CTAs →
+  `app.xangarro.mx/signup?plan=xangarrito|xangarro|xangarrote` with utm\_\* passthrough; the waitlist
+  form and `VITE_WAITLIST_ENDPOINT` are gone. FAQ (14 answers), JSON-LD offers, `llms.txt` and
+  `llms-full.txt` rewritten to the decided product facts (web portal today, apps próximamente,
+  per-negocio accounts, CFDI answer now covers the subscription CFDI). Canonical domain switched to
+  `xangarro.mx` everywhere (`.env.example`, vite.config, prerender, structured-data, robots,
+  sitemap); brand assets are sharp-generated text-wordmark placeholders (`generate-og.mjs` now also
+  emits favicon / apple-touch-icon / `site.webmanifest`). Verified: `grep -rni cachink apps/landing
+docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), screenshots at 360 px
+  and 1440 px, annual toggle prices/cadence/aria-pressed/CTA params asserted in-DOM. **Deviation:**
+  shipped without C-12 — the limit numbers are the decided constants (ADR-065), not read from any
+  contract; if C-12 ever changes them, `planes.js` is the one place to update.
 
 ### N-32 Store-compliance sweep `[LAUNCH]`
 
@@ -677,6 +734,17 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
   with `CFDI_MODE=off`), `solicitarFacturaNominal(paymentId)` (owner; `en_global` + valid fiscal data →
   one inbox item per payment, else `NO_APLICA` / `DATOS_FISCALES_INCOMPLETOS`). Result types in
   `facturas-core.ts`. **Still to do:** the monthly close's own item (`cfdi-global:<period>`) marks nothing.
+- Progress: 2026-09-18 · `track-n/n33-gaps` · the four handoff gaps closed (owner interview
+  2026-09-18): data-pg **0022** — `claimed` shows as `pendiente` (still owed, not "error"), refunded
+  payments (`excluded_from_global`/`cancel_requested`/`cancelled`) listed as **`reembolso`**, and
+  `xangarro.cfdi_marcar_global(period, uuid)` so resolving the monthly-close item marks its
+  `pending_global` payments `in_global` under one hand-stamped global (backoffice resolver wired);
+  `charge.refunded` → `RecordRefundForCfdiUseCase` (status bookkeeping + `factura` inbox item
+  «Reembolso recibido — dar de baja su CFDI», idempotent per refund id — **no PAC cancellation**,
+  that waits for O-14); `local/0000` provisions `xangarro_admin` so "marcar UUID" and the grants
+  tests run locally. Facturas estado union: `error` → `reembolso` (application + P-10's label).
+  Remaining: sandbox stamps (owner Facturapi test keys, O-15) and the fiscal refund automation
+  (O-14 contador sign-off).
 
 ---
 

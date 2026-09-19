@@ -24,12 +24,12 @@ describe('useRequirePin', () => {
 
     // Submit a PIN
     act(() => {
-      result.current.submitPin('123456');
+      result.current.submitPin('1234');
     });
 
     expect(result.current.isOpen).toBe(false);
     const pin = await pinPromise!;
-    expect(pin).toBe('123456');
+    expect(pin).toBe('1234');
   });
 
   it('returns null when dismissed', async () => {

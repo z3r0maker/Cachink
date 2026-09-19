@@ -4,7 +4,7 @@
  * Inserts records through the existing repository interfaces (same code
  * path as production). Idempotent: checks `appConfig.__demo_seeded`.
  *
- * All PINs default to "000000" (both Director and Operativo).
+ * All PINs default to "0000" (both Director and Operativo; ADR-072).
  */
 
 import { hash } from 'bcryptjs';
@@ -15,7 +15,7 @@ import { seedSales, seedExpenses, seedRecurringExpenses } from './seed-transacti
 import { seedInventory, seedDayCloses, seedCajaTurnos } from './seed-operations';
 
 const BCRYPT_ROUNDS = 10;
-const DEFAULT_PIN = '000000';
+const DEFAULT_PIN = '0000';
 const DEFAULT_RECOVERY = 'cachink123';
 const DEMO_KEY = '__demo_seeded';
 

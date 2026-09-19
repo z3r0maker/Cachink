@@ -16,7 +16,7 @@ test('Inicio dates itself from the business clock and draws the last 30 days', a
   await expect(main.locator('.recharts-line')).toHaveCount(2);
 });
 
-/** O-24/ADR-086: the greeting names the account from `auth.users.nombre` (seeded: Pedro). */
+/** O-24/ADR-087: the greeting names the account from `auth.users.nombre` (seeded: Pedro). */
 test('the greeting names the account and the checklist card reads real data', async ({ page }) => {
   await page.goto('/');
   const main = page.locator('main');

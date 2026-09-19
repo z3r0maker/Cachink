@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { UserId } from '@xangarro/domain';
+import { isValidPin, type UserId } from '@xangarro/domain';
 import { Btn, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
@@ -31,7 +31,7 @@ function useRecoveryForm(): RecoveryFormState {
   const [newPin, setNewPin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const mismatch = confirmPin.length > 0 && newPin !== confirmPin;
-  const valid = recoveryPassword.length >= 6 && /^\d{6}$/.test(newPin) && newPin === confirmPin;
+  const valid = recoveryPassword.length >= 6 && isValidPin(newPin) && newPin === confirmPin;
   return {
     recoveryPassword,
     setRecoveryPassword,

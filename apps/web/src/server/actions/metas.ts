@@ -34,7 +34,7 @@ export async function fijarMetaAction(input: {
 }
 
 /**
- * The shown-once marker (P-33, ADR-086): writing the marker **is** the check —
+ * The shown-once marker (P-33, ADR-087): writing the marker **is** the check —
  * the insert conflicts when the celebration already happened, and the caller
  * learns which it was.
  */

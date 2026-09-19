@@ -19,10 +19,6 @@ appId: mx.xangarro.mobile
     id: "numpad-0"
 - tapOn:
     id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
-- tapOn:
-    id: "numpad-0"
 - extendedWaitUntil:
     visible:
       id: "tab-ventas"

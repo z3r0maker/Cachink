@@ -107,7 +107,8 @@ export const businessMembers = pgTable('business_members', {
 export const devices = pgTable('devices', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
-  plataforma: text('plataforma', { enum: ['ios', 'android'] }).notNull(),
+  /** `web` = the browser register, a device like a phone (ADR-071; C-16). */
+  plataforma: text('plataforma', { enum: ['ios', 'android', 'web'] }).notNull(),
   modelo: text('modelo'),
   lastPushAt: timestamp('last_push_at', { withTimezone: true, mode: 'string' }),
   lastPullAt: timestamp('last_pull_at', { withTimezone: true, mode: 'string' }),

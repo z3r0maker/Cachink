@@ -145,3 +145,20 @@ export interface EntitlementListener {
 export const noopEntitlementListener: EntitlementListener = {
   onEntitlementChanged: () => Promise.resolve(),
 };
+
+/** The CFDI side of `charge.refunded` (N-33): a refund arrived for a payment.
+ * The Stripe API no longer names the invoice on a charge or refund, so the
+ * listener resolves it (charge → payment_intent → the customer's invoice). */
+export interface RefundListener {
+  onChargeRefunded(refund: {
+    readonly chargeId: string;
+    readonly businessId: string;
+    readonly customerId: string;
+    readonly refundId: string;
+    readonly amountRefundedCentavos: number;
+  }): Promise<{
+    readonly outcome: 'applied';
+    readonly businessId: string;
+    readonly refund: 'recorded' | 'unknown_payment' | 'already_refunded' | 'unresolved';
+  }>;
+}

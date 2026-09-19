@@ -35,6 +35,7 @@ export function useCrearCliente(): CrearClienteResult {
         telefono: input.telefono?.trim() || undefined,
         email: input.email?.trim() || undefined,
         nota: input.nota?.trim() || undefined,
+        estadoRevision: 'aprobado' as const,
         businessId: businessId as BusinessId,
       };
       return clients.create(payload);

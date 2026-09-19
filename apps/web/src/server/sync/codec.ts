@@ -61,6 +61,7 @@ const OUT: Record<PullableTable, (row: Row) => Row> = {
   recurring_expenses: toWire,
   conversion_recetas: toWire,
   inventory_movements: toWire,
+  mensajes_operador: toWire,
 };
 
 /** A Postgres row of `table`, as a device receives it. */

@@ -8,16 +8,16 @@ import { useState } from 'react';
 /* ─────────────── Copy decks for the 3 tones ─────────────── */
 export const TONE_COPY = {
   punchy: {
-    eyebrow: '¡CACHINK! · FINANZAS CLARAS',
+    eyebrow: '¡XANGARRO! · FINANZAS CLARAS',
     h1a: 'Tu caja, clara.',
     h1b: 'Cada día.',
     sub: 'Registra ventas y egresos en 3 segundos. Ve lo que ganas hoy, sin hojas de Excel ni contadores.',
-    cta1: 'Entrar a la lista',
+    cta1: 'Crear cuenta gratis',
     cta2: 'Ver cómo funciona',
     why: [
       { t: 'Tres segundos por venta', d: 'Abres, anotas, listo. Sin menús anidados.' },
-      { t: 'Offline siempre', d: 'Aunque se caiga el internet, tu caja no para.' },
-      { t: 'Sin suscripciones infinitas', d: 'Un plan gratis generoso, un plan pro honesto.' },
+      { t: 'Offline siempre', d: 'Aunque se caiga el internet, tu negocio no para.' },
+      { t: 'Sin suscripciones infinitas', d: 'Un plan gratis generoso, un plan de pago honesto.' },
     ],
     howTitle: 'Así funciona',
     how: [
@@ -31,21 +31,24 @@ export const TONE_COPY = {
     ],
   },
   educational: {
-    eyebrow: 'CACHINK · CONTROL FINANCIERO PARA NEGOCIOS PEQUEÑOS',
+    eyebrow: 'XANGARRO · CONTROL FINANCIERO PARA NEGOCIOS PEQUEÑOS',
     h1a: 'Deja de adivinar',
     h1b: 'cuánto ganaste hoy.',
-    sub: 'Cachink es una app mexicana pensada para dueños de negocios pequeños. Registras lo que entra y lo que sale, y ella te dice — en español y en pesos — cómo va tu negocio de verdad.',
-    cta1: 'Quiero probarla cuando salga',
+    sub: 'Xangarro es una plataforma mexicana pensada para dueños de negocios pequeños. Registras lo que entra y lo que sale — desde la app o el navegador — y ella te dice, en español y en pesos, cómo va tu negocio de verdad.',
+    cta1: 'Crear cuenta gratis',
     cta2: 'Conocer los módulos',
     why: [
       {
         t: 'Pensada en español, para México',
         d: 'IVA, NIF, CFDI, MXN. No traducimos software gringo.',
       },
-      { t: 'Tu información es tuya', d: 'Los datos viven en tu dispositivo. La nube es opcional.' },
+      {
+        t: 'Tu negocio sigue aunque se vaya el internet',
+        d: 'Captura sin conexión en tus dispositivos; todo se sincroniza solo.',
+      },
       {
         t: 'Tan simple como una libreta',
-        d: 'Si sabes anotar en una libreta, sabes usar Cachink.',
+        d: 'Si sabes anotar en una libreta, sabes usar Xangarro.',
       },
     ],
     howTitle: 'Así te ayuda, paso a paso',
@@ -57,7 +60,7 @@ export const TONE_COPY = {
       },
       {
         n: '02',
-        t: 'Cachink hace las cuentas',
+        t: 'Xangarro hace las cuentas',
         d: 'Corte del día, utilidad del mes, cuentas por cobrar — automático.',
       },
       {
@@ -68,14 +71,14 @@ export const TONE_COPY = {
     ],
   },
   playful: {
-    eyebrow: '¡CACHINK! · EL SONIDO DE QUE TU NEGOCIO VA BIEN',
-    h1a: '¡Cachink!',
+    eyebrow: '¡XANGARRO! · TU NEGOCIO, CON NÚMEROS CLAROS',
+    h1a: '¡Xangarro!',
     h1b: 'Sonó otra venta.',
-    sub: 'La app más honesta para llevar la caja de tu negocio. Sin Excel, sin drama, sin inglés de software caro.',
-    cta1: 'Avísame cuando salga',
+    sub: 'La plataforma más honesta para llevar la caja de tu negocio. Sin Excel, sin drama, sin inglés de software caro.',
+    cta1: 'Crear cuenta gratis',
     cta2: 'Ver la demo',
     why: [
-      { t: 'Rápida como la caja registradora', d: 'Un toque. ¡Cachink! Venta guardada.' },
+      { t: 'Rápida como la caja registradora', d: 'Un toque y la venta queda guardada.' },
       { t: 'Clara como un recibo', d: 'Lo que entró, lo que salió, lo que queda. Sin adornos.' },
       { t: 'Para quienes hacen, no para quienes reportan', d: 'Menos botones. Más negocio.' },
     ],
@@ -187,60 +190,60 @@ export const HardCard = ({ children, variant = 'white', padding = 24, style }) =
  * Keep answers factual and specific — LLMs cite verbatim phrasing. */
 export const FAQ_ITEMS = [
   {
-    q: '¿Para quién es Cachink?',
-    a: 'Cachink es para dueños de pequeños negocios en México: panaderías, cafeterías, tiendas de barrio, talleres mecánicos, consultorios y cualquier negocio que maneje caja diaria. Si llevas el control de ventas en una libreta o en tu cabeza, Cachink está hecho para ti.',
+    q: '¿Para quién es Xangarro?',
+    a: 'Xangarro es para dueños de pequeños negocios en México: panaderías, cafeterías, tiendas de barrio, talleres mecánicos, consultorios y cualquier negocio que maneje caja diaria. Si llevas el control de ventas en una libreta o en tu cabeza, Xangarro está hecho para ti.',
   },
   {
-    q: '¿Cómo funciona Cachink?',
-    a: 'Registras cada venta o egreso en menos de 3 segundos: monto, concepto y método de pago. La app calcula automáticamente tus ventas del día, del mes y el efectivo disponible en caja. Al final del mes puedes exportar un estado financiero completo para tu contador, sin necesidad de capturar nada extra.',
+    q: '¿Cómo funciona Xangarro?',
+    a: 'Registras cada venta o egreso en menos de 3 segundos: monto, concepto y método de pago, desde el navegador o desde la app de tu equipo. Xangarro calcula automáticamente tus ventas del día, del mes y el efectivo disponible en caja. Al final del mes puedes exportar un estado financiero completo para tu contador, sin necesidad de capturar nada extra.',
   },
   {
     q: '¿Funciona sin internet?',
-    a: 'Sí. Cachink es offline-first: todos tus datos se guardan en tu dispositivo y la app funciona aunque no tengas señal. Cuando vuelve la conexión, la información se sincroniza automáticamente con tus otros dispositivos si tienes el Plan Pro o Contador.',
+    a: 'Sí. Tu negocio sigue aunque se vaya el internet: los dispositivos de tu equipo registran ventas y gastos sin conexión y todo se sincroniza automáticamente cuando la red vuelve. Ningún registro se pierde en el camino.',
   },
   {
-    q: '¿Cuánto cuesta Cachink?',
-    a: 'El Plan Gratis es $0 para siempre e incluye ventas y egresos ilimitados en 1 dispositivo, corte de día y exportación a CSV. El Plan Pro cuesta $149 MXN al mes e incluye multi-dispositivo sincronizado, Panel Director y estados financieros NIF. El Plan Contador cuesta $299 MXN al mes e incluye hasta 10 negocios, exportación fiscal y multi-usuario con permisos.',
+    q: '¿Cuánto cuesta Xangarro?',
+    a: 'Xangarrito es $0 para siempre: 300 movimientos al mes, 50 productos y 1 operador. Xangarro cuesta $199 MXN al mes (10,000 movimientos, 1,000 productos, 2 operadores y estados financieros NIF). Xangarrote cuesta $399 MXN al mes (30,000 movimientos, 5,000 productos y 5 operadores). Los precios son más IVA y los dos planes de pago incluyen 14 días de prueba gratis, sin tarjeta.',
   },
   {
     q: '¿En qué dispositivos está disponible?',
-    a: 'Cachink está disponible en iOS (iPhone) y Android. Puedes usarlo en tu teléfono principal y, con el Plan Pro o Contador, sincronizarlo con tablets y otros teléfonos del negocio en tiempo real.',
+    a: 'El portal web funciona hoy en cualquier navegador: computadora, tableta o teléfono, sin instalar nada. Las apps para iOS y Android, para que tu equipo capture ventas desde el teléfono, llegan próximamente. Puedes crear tu cuenta desde ya en app.xangarro.mx.',
   },
   {
     q: '¿Es una alternativa a Excel para llevar las cuentas del negocio?',
-    a: 'Sí, y mucho más simple. Con Excel necesitas crear fórmulas, mantener hojas actualizadas y calcular totales a mano. Cachink registra cada venta en segundos, calcula los totales automáticamente y genera reportes listos para tu contador, sin que tengas que saber de hojas de cálculo.',
+    a: 'Sí, y mucho más simple. Con Excel necesitas crear fórmulas, mantener hojas actualizadas y calcular totales a mano. Xangarro registra cada venta en segundos, calcula los totales automáticamente y genera reportes listos para tu contador, sin que tengas que saber de hojas de cálculo. Y si ya tienes tu catálogo en Excel, lo importas en unos clics.',
   },
   {
     q: '¿Puedo compartir los estados financieros con mi contador?',
-    a: 'Sí. Con el Plan Pro y Contador puedes exportar estados financieros en formato NIF (Normas de Información Financiera), el estándar que usan los contadores en México. El archivo se genera con un toque y puedes enviarlo por correo o WhatsApp directamente desde la app.',
+    a: 'Sí. Con los planes de pago puedes exportar estados financieros en formato NIF (Normas de Información Financiera), el estándar que usan los contadores en México, y el informe mensual en PDF se genera con un toque. Puedes enviarlo por correo o WhatsApp directamente.',
   },
   {
-    q: '¿Cachink maneja CFDI o facturación electrónica?',
-    a: 'Cachink está enfocado en el control de caja y estados financieros internos, no en la emisión de CFDI. Si necesitas facturar, puedes usar tu herramienta de facturación actual y registrar el egreso o ingreso correspondiente en Cachink para mantener tu caja cuadrada.',
+    q: '¿Xangarro maneja CFDI o facturación electrónica?',
+    a: 'Xangarro se enfoca en el control de tu caja y tus estados financieros internos, no en emitir CFDI de tus ventas: si facturas, usa tu herramienta habitual y registra el movimiento en Xangarro para mantener tu caja cuadrada. Tu propia suscripción a Xangarro, en cambio, sí se factura automáticamente con CFDI.',
   },
   {
     q: '¿Qué métodos de pago puedo registrar?',
-    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI), pago con CoDi, pago con QR, y cualquier método personalizado que definas. El formulario se adapta al giro de tu negocio — si solo cobras efectivo, los demás métodos no estorban.',
+    a: 'Puedes registrar ventas en efectivo, tarjeta de débito o crédito, transferencia bancaria (SPEI), pago con CoDi, pago con QR, y crédito para tus clientes frecuentes. El formulario se adapta al giro de tu negocio — si solo cobras efectivo, los demás métodos no estorban.',
   },
   {
     q: '¿Mis datos están seguros? ¿Quién puede verlos?',
-    a: 'Tus datos son tuyos y solo tuyos. Cachink es offline-first: la información vive en tu dispositivo y nunca se vende ni se comparte con terceros. La sincronización en la nube (Plan Pro y Contador) usa cifrado en tránsito y en reposo. Ningún empleado de Cachink puede ver tus números.',
+    a: 'Tus datos son tuyos y solo tuyos. Cada negocio ve únicamente su propia información, la sincronización viaja cifrada y los datos se guardan cifrados. Nunca se venden ni se comparten con terceros, y puedes exportarlos o eliminar tu cuenta cuando quieras.',
   },
   {
-    q: '¿Cuánto tiempo toma aprender a usar Cachink?',
-    a: 'Menos de 5 minutos. Si sabes anotar en una libreta, sabes usar Cachink. No necesitas conocimientos de contabilidad ni de tecnología. La mayoría de usuarios registran su primera venta en los primeros 2 minutos de abrir la app.',
+    q: '¿Cuánto tiempo toma aprender a usar Xangarro?',
+    a: 'Menos de 5 minutos. Si sabes anotar en una libreta, sabes usar Xangarro. No necesitas conocimientos de contabilidad ni de tecnología. La mayoría de los usuarios registran su primera venta en los primeros 2 minutos.',
   },
   {
     q: '¿Puedo usarlo para varios negocios?',
-    a: 'Sí. Con el Plan Contador puedes gestionar hasta 10 negocios desde una sola cuenta, con cajas completamente separadas para cada uno. Es ideal para contadores, administradores o emprendedores que tienen más de un punto de venta.',
+    a: 'Cada negocio tiene su propia cuenta de Xangarro, con su caja, su inventario y su equipo separados, para que los números nunca se mezclen. Si administras varios negocios, creas una cuenta para cada uno.',
   },
   {
-    q: '¿Cachink reemplaza a un contador?',
-    a: 'No, y tampoco pretende hacerlo. Cachink te da visibilidad sobre tu caja diaria y te genera los estados financieros que tu contador necesita, pero no sustituye el asesoramiento fiscal profesional. Piénsalo como la herramienta que hace que las visitas a tu contador sean más rápidas y productivas.',
+    q: '¿Xangarro reemplaza a un contador?',
+    a: 'No, y tampoco pretende hacerlo. Xangarro te da visibilidad sobre tu caja diaria y te genera los estados financieros que tu contador necesita, pero no sustituye el asesoramiento fiscal profesional. Piénsalo como la herramienta que hace que las visitas a tu contador sean más rápidas y productivas.',
   },
   {
-    q: '¿Cuándo estará disponible Cachink?',
-    a: 'Cachink lanza en verano de 2026 para iOS y Android. Únete a la lista de espera y te avisamos el día del lanzamiento. Los primeros en registrarse tendrán 3 meses gratis en cualquier plan de pago.',
+    q: '¿Cuándo estará disponible Xangarro?',
+    a: 'Ya puedes crear tu cuenta gratis en app.xangarro.mx. Estamos abriendo la beta con los primeros negocios: entra, captura y exporta desde hoy; las apps móviles llegan próximamente.',
   },
 ];
 

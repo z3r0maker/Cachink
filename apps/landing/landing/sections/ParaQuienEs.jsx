@@ -101,7 +101,7 @@ export default function ParaQuienEs({ tone }) {
           }}
         >
           <div>
-            <Eyebrow>Para quién es Cachink</Eyebrow>
+            <Eyebrow>Para quién es Xangarro</Eyebrow>
             <h2
               style={{
                 margin: '10px 0 0',
@@ -126,7 +126,7 @@ export default function ParaQuienEs({ tone }) {
               maxWidth: 460,
             }}
           >
-            Cachink está hecho para dueños de negocios pequeños que capturan cada venta a mano.
+            Xangarro está hecho para dueños de negocios pequeños que capturan cada venta a mano.
             Panaderías, cafés, tiendas de barrio, talleres, consultorios.
           </p>
         </div>
@@ -142,7 +142,7 @@ export default function ParaQuienEs({ tone }) {
             {
               Icon: IconBakery,
               t: 'Panaderías y cafés',
-              d: 'Decenas de ventas chicas al día. Cachink te lleva el corte del día sin hacer cuentas a mano.',
+              d: 'Decenas de ventas chicas al día. Xangarro te lleva el corte del día sin hacer cuentas a mano.',
             },
             {
               Icon: IconShop,
@@ -152,7 +152,7 @@ export default function ParaQuienEs({ tone }) {
             {
               Icon: IconToolbox,
               t: 'Talleres y servicios',
-              d: 'Trabajos chicos con insumos. Cachink separa ingresos de costos y te da la utilidad real.',
+              d: 'Trabajos chicos con insumos. Xangarro separa ingresos de costos y te da la utilidad real.',
             },
           ].map((x, i) => (
             <Reveal key={i} delay={i * 120} from="up">

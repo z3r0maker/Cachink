@@ -6,7 +6,7 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Client, ClientId, ClientPayment, Money, Sale } from '@xangarro/domain';
-import { ZERO } from '@xangarro/domain';
+import { estadoDeCuenta } from '@xangarro/domain';
 import {
   useClientPaymentsRepository,
   useClientsRepository,
@@ -37,13 +37,25 @@ export function useClienteDetail(
       const cliente = await clients.findById(id);
       if (!cliente) return null;
       const pendingSales = await sales.findPendingByClient(id);
+      // One abono list per client (ADR-074); the per-venta split shown in the
+      // detail is the FIFO application estadoDeCuenta computes.
+      const abonos = await pagos.findByCliente(id);
       const byVenta = new Map<string, readonly ClientPayment[]>();
-      let saldoPendiente = ZERO;
-      for (const venta of pendingSales) {
-        const rows = await pagos.findByVenta(venta.id);
-        byVenta.set(venta.id, rows);
-        const paid = rows.reduce((acc, p) => acc + (p.montoCentavos as bigint), 0n);
-        saldoPendiente = ((saldoPendiente as bigint) + (venta.monto as bigint) - paid) as Money;
+      const cuenta = estadoDeCuenta(
+        pendingSales.map((v) => ({ id: v.id, fecha: v.createdAt, monto: v.monto })),
+        abonos.map((a) => ({ id: a.id, fecha: a.createdAt, monto: a.montoCentavos })),
+      );
+      let saldoPendiente = 0n as Money;
+      for (const v of cuenta.ventas) {
+        byVenta.set(v.id, []);
+        saldoPendiente = (saldoPendiente + v.pendiente) as Money;
+      }
+      for (const a of abonos) {
+        const hasta = cuenta.hasta[a.id];
+        if (hasta) {
+          const rows = byVenta.get(hasta) ?? [];
+          byVenta.set(hasta, [...rows, a]);
+        }
       }
       return { cliente, pendingSales, pagosByVenta: byVenta, saldoPendiente };
     },

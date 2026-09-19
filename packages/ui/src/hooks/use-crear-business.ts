@@ -49,6 +49,12 @@ export function useCrearBusiness(): CrearBusinessResult {
       const placeholder = {
         ...input,
         logoUrl: null,
+        brandColor: null,
+        receiptTemplate: 'clasico' as const,
+        receiptLeyenda: null,
+        addressPrint: false as const,
+        whatsapp: null,
+        socialLinks: '{}',
         tipoNegocio: 'mixto' as const,
         categoriaVentaPredeterminada: 'Producto' as const,
         atributosProducto: [],

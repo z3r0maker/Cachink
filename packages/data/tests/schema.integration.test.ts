@@ -207,7 +207,7 @@ describe('Drizzle schema — round-trip every entity', () => {
     db.insert(schema.clientPayments)
       .values({
         id,
-        ventaId: '01HZ8XQN9GZJXV8AKQ5X0C7TE1',
+        clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7TE1',
         fecha: '2026-04-23',
         montoCentavos: 50_000n,
         metodo: 'Transferencia',

@@ -26,7 +26,7 @@ const articles = [
   {
     slug: 'vs-excel',
     badge: 'Comparativa',
-    title: 'Cachink vs hojas de cálculo: comparativa honesta para pequeños negocios',
+    title: 'Xangarro vs hojas de cálculo: comparativa honesta para pequeños negocios',
     description:
       'Comparación directa en 9 criterios: velocidad, offline, multi-dispositivo, costo, curva de aprendizaje, estados NIF, resistencia a errores y más.',
     readTime: '4 min',
@@ -70,7 +70,7 @@ export default function Recursos() {
           >
             <img
               src="/assets/apple-touch-icon.png"
-              alt="Cachink"
+              alt="Xangarro!"
               width={28}
               height={28}
               style={{ borderRadius: 6, border: '1.5px solid var(--black)' }}
@@ -83,11 +83,11 @@ export default function Recursos() {
                 letterSpacing: '-0.02em',
               }}
             >
-              Cachink
+              Xangarro!
             </span>
           </a>
           <a
-            href="/#top"
+            href="https://app.xangarro.mx/signup?plan=xangarrito"
             style={{
               fontSize: 13,
               fontWeight: 700,
@@ -125,7 +125,7 @@ export default function Recursos() {
               marginBottom: 12,
             }}
           >
-            Recursos · Cachink
+            Recursos · Xangarro
           </div>
           <h1
             style={{
@@ -268,7 +268,7 @@ export default function Recursos() {
               marginBottom: 10,
             }}
           >
-            Cachink lanza en verano 2026
+            Xangarro · crea tu cuenta hoy
           </div>
           <p
             style={{
@@ -279,10 +279,10 @@ export default function Recursos() {
               lineHeight: 1.5,
             }}
           >
-            Únete a la lista de espera — 3 meses gratis para los primeros usuarios.
+            Cuenta gratis para siempre en Xangarrito, sin tarjeta.
           </p>
           <a
-            href="/#top"
+            href="https://app.xangarro.mx/signup?plan=xangarrito"
             style={{
               display: 'inline-block',
               background: 'var(--yellow)',

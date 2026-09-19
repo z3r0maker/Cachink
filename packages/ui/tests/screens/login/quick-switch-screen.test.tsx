@@ -75,15 +75,13 @@ describe('QuickSwitchScreen', () => {
     const onAuthenticate = vi.fn();
     renderScreen({ onAuthenticate });
     fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    // PinCodeInput uses numpad mode in PinPrompt — press 6 digit buttons
+    // PinCodeInput uses numpad mode in PinPrompt — press 4 digit buttons
     fireEvent.click(screen.getByTestId('numpad-1'));
     fireEvent.click(screen.getByTestId('numpad-2'));
     fireEvent.click(screen.getByTestId('numpad-3'));
     fireEvent.click(screen.getByTestId('numpad-4'));
-    fireEvent.click(screen.getByTestId('numpad-5'));
-    fireEvent.click(screen.getByTestId('numpad-6'));
     // onComplete triggers auto-submit via handleComplete
-    expect(onAuthenticate).toHaveBeenCalledWith(USER_A.id, '123456');
+    expect(onAuthenticate).toHaveBeenCalledWith(USER_A.id, '1234');
   });
 
   it('shows forgot-pin link when onForgotPin is provided', () => {

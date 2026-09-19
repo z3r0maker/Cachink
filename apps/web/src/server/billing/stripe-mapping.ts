@@ -73,6 +73,21 @@ function invoiceEvent(
   };
 }
 
+/** A refund event's shape (N-33): the charge, the refund and the amount. */
+function refundEvent(id: string, charge: Stripe.Charge): BillingEvent {
+  const refund = charge.refunds?.data[0];
+  return {
+    id,
+    type: 'charge.refunded',
+    customerId: idOf(charge.customer),
+    refund: {
+      chargeId: charge.id ?? null,
+      refundId: refund?.id ?? null,
+      amountRefundedCentavos: charge.amount_refunded,
+    },
+  };
+}
+
 /** The event billing acts on, or `null` for any other type — acknowledged and dropped. */
 export function toBillingEvent(event: Stripe.Event): BillingEvent | null {
   switch (event.type) {
@@ -94,6 +109,8 @@ export function toBillingEvent(event: Stripe.Event): BillingEvent | null {
     case 'invoice.paid':
     case 'invoice.payment_failed':
       return invoiceEvent(event.id, event.type, event.data.object);
+    case 'charge.refunded':
+      return refundEvent(event.id, event.data.object);
     default:
       return null;
   }

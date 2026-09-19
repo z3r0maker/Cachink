@@ -26,6 +26,10 @@ export const TipoNegocioEnum = z.enum([
 ]);
 export type TipoNegocio = z.infer<typeof TipoNegocioEnum>;
 
+/** The four receipt templates (N-20); the default matches a fresh business. */
+export const ReceiptTemplateEnum = z.enum(['clasico', 'moderno', 'ticket', 'minimal']);
+export type ReceiptTemplate = z.infer<typeof ReceiptTemplateEnum>;
+
 /** Definition of a custom attribute attached to products for this business. */
 export const AttrDefSchema = z.object({
   clave: z
@@ -64,6 +68,25 @@ export const BusinessSchema = z
     /** ISR rate in basis points (3000 = 30%). */
     isrTasa: z.number().int().min(0).max(10_000),
     logoUrl: z.string().url().nullable(),
+    /**
+     * Branding and receipts (C-15, N-19/N-20). All optional with defaults so
+     * every pre-0023 row and old device payload parses unchanged; `socialLinks`
+     * is a JSON string per this entity's own precedent (`featureFlags`).
+     */
+    brandColor: z
+      .string()
+      .regex(/^#[0-9a-fA-F]{6}$/)
+      .nullable()
+      .default(null),
+    receiptTemplate: ReceiptTemplateEnum.default('clasico'),
+    receiptLeyenda: z.string().max(280).nullable().default(null),
+    addressPrint: z.boolean().default(false),
+    whatsapp: z
+      .string()
+      .regex(/^[\d\s+\-()]{7,20}$/)
+      .nullable()
+      .default(null),
+    socialLinks: z.string().default('{}'),
     tipoNegocio: TipoNegocioEnum.default('mixto'),
     categoriaVentaPredeterminada: SaleCategoryEnum.default('Producto'),
     atributosProducto: z.array(AttrDefSchema).default([]),

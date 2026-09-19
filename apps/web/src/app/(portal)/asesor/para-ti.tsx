@@ -62,7 +62,7 @@ function FeedRow({ n, mayAct }: { readonly n: Aviso; readonly mayAct: boolean })
 
 /**
  * "Para ti" — the insight feed. Reads `notices` where `source='asesor'`
- * (ADR-060): the deterministic layer materialises them on read (ADR-087), so
+ * (ADR-060): the deterministic layer materialises them on read (ADR-088), so
  * every card here is **computed from this tenant's rows**, never written by a
  * model, and the footer says so.
  */

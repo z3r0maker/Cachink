@@ -9,7 +9,7 @@ import { auditColumns } from './_audit';
 
 export const clientPayments = sqliteTable('client_payments', {
   id: text('id').primaryKey(),
-  ventaId: text('venta_id').notNull(),
+  clienteId: text('cliente_id').notNull(),
   fecha: text('fecha').notNull(),
   montoCentavos: numeric('monto_centavos', { mode: 'bigint' }).notNull(),
   metodo: text('metodo', {

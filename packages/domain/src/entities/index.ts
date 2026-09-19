@@ -7,6 +7,7 @@
  */
 
 export * from './_audit.js';
+export * from './_revision.js';
 export * from './_fields.js';
 export * from './_ulid-field.js';
 export * from './business.js';
@@ -37,6 +38,9 @@ export * from './entrega-credito.js';
 export * from './director-alert.js';
 export * from './caja-movimiento.js';
 export * from './cancelacion-log.js';
+export * from './ticket.js';
+export * from './mensaje-operador.js';
+export * from './respuesta-operador.js';
 export * from './notification-preferences.js';
 export * from './staff.js';
 export * from './support-item.js';

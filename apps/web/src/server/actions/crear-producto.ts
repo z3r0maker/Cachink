@@ -15,7 +15,10 @@ import { pgProductsRepository } from '../repositories/products';
  * here starts at zero stock, and stock is added with a movement (ADR-081).
  * The insert is logged, so every phone gets the product on its next pull.
  */
-export type NuevoProductoForm = Omit<NewProduct, 'businessId' | 'atributos'>;
+export type NuevoProductoForm = Omit<
+  NewProduct,
+  'businessId' | 'atributos' | 'estadoRevision' | 'fusionadoConId'
+>;
 export type CrearProductoResult = { ok: true; id: string } | { ok: false; message: string };
 
 const KNOWN = new Set(['PRODUCT_INVALID', 'INITIAL_STOCK_NOT_ALLOWED', 'NOT_PERMITTED']);
