@@ -21,11 +21,12 @@ const NOUN: Record<PushableTable, string> = {
   entregas_credito: 'Entrega a crédito',
   conversions: 'Conversión',
   auditorias_inventario: 'Auditoría de inventario',
+  respuestas_operador: 'Respuesta a Pedro',
   products: 'Producto',
   clients: 'Cliente',
 };
 
 export function rejectionPayload(table: PushableTable, row: Row): string {
-  const what = row['concepto'] ?? row['nombre'] ?? row['id'];
+  const what = row['concepto'] ?? row['nombre'] ?? row['texto'] ?? row['id'];
   return encodeJson({ preview: `${NOUN[table]} · ${String(what)}`, row });
 }

@@ -39,3 +39,5 @@ export * from './entregas-credito';
 export * from './director-alerts';
 export * from './caja-movimientos';
 export * from './cancelacion-logs';
+export * from './mensajes-operador';
+export * from './respuestas-operador';

@@ -9,6 +9,7 @@ import {
   ConversionRecetaSchema,
   EmployeeSchema,
   InventoryMovementSchema,
+  MensajeOperadorSchema,
   ProductSchema,
   RecurringExpenseSchema,
   UserSchema,
@@ -53,6 +54,8 @@ export const ReferenceTablesSchema = z.object({
   employees: z.array(wireSchema(EmployeeSchema)),
   recurring_expenses: z.array(wireSchema(RecurringExpenseSchema)),
   conversion_recetas: z.array(wireSchema(ConversionRecetaSchema)).default([]),
+  /** Owner→operator messages (ADR-075); default [] for old servers. */
+  mensajes_operador: z.array(wireSchema(MensajeOperadorSchema)).default([]),
   /** Every phone's and the portal's movements: stock is their sum (ADR-081). */
   inventory_movements: z.array(wireSchema(InventoryMovementSchema)).default([]),
   /** Tenant layer only; the device resolves platform × plan itself. */

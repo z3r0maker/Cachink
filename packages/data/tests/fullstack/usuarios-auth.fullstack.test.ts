@@ -53,7 +53,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     // 3. Authenticate with wrong PIN → failure
     const authFail = await h.useCases.autenticarUsuario.execute({
       nombre: 'Juan Director',
-      pin: '0000',
+      pin: '000000',
       businessId: BIZ,
     });
     expect(authFail.success).toBe(false);
@@ -110,7 +110,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     await expect(
       h.useCases.cambiarPin.execute({
         userId: user.id,
-        currentPin: '0000',
+        currentPin: '000000',
         newPin: '4321',
       }),
     ).rejects.toThrow(/PIN actual incorrecto/i);
@@ -199,7 +199,7 @@ describe('Usuarios + Auth [fullstack]', () => {
     expect(found).toBeNull();
   });
 
-  it('rejects new PIN that is not 4 digits', async () => {
+  it('rejects a new PIN that is not 4 digits (ADR-072)', async () => {
     const user = await h.useCases.crearUsuario.execute({
       nombre: 'Director Test',
       pin: '1234',

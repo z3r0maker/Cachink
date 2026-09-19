@@ -24,4 +24,6 @@ export * from './entregas-credito-repository.js';
 export * from './director-alerts-repository.js';
 export * from './caja-movimientos-repository.js';
 export * from './cancelacion-logs-repository.js';
+export * from './mensajes-operador-repository.js';
+export * from './respuestas-operador-repository.js';
 export * from './drizzle/index.js';

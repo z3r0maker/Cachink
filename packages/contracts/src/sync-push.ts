@@ -17,6 +17,7 @@ import {
   ExpenseSchema,
   InventoryMovementSchema,
   ProductSchema,
+  RespuestaOperadorSchema,
   SaleSchema,
 } from '@xangarro/domain';
 import { ErrorCodeSchema, type ErrorCode } from './errors.js';
@@ -49,6 +50,7 @@ export const PUSH_ROW_SCHEMAS = {
   entregas_credito: EntregaCreditoSchema,
   conversions: ConversionSchema,
   auditorias_inventario: AuditoriaInventarioSchema,
+  respuestas_operador: RespuestaOperadorSchema,
   products: ProductSchema,
   clients: ClientSchema,
 } as const satisfies Record<PushableTable, z.ZodType>;
@@ -65,6 +67,7 @@ export const DeltaSchema = z.discriminatedUnion('table', [
   delta('entregas_credito', EntregaCreditoSchema),
   delta('conversions', ConversionSchema),
   delta('auditorias_inventario', AuditoriaInventarioSchema),
+  delta('respuestas_operador', RespuestaOperadorSchema),
   delta('products', ProductSchema),
   delta('clients', ClientSchema),
 ]);
@@ -105,5 +108,6 @@ export const PUSH_REFERENCES = [
   ['productoId', 'products', 'FK_PRODUCT_MISSING'],
   ['clienteId', 'clients', 'FK_CLIENT_MISSING'],
   ['createdByUserId', 'users', 'FK_USER_MISSING'],
+  ['mensajeId', 'mensajes_operador', 'FK_MENSAJE_MISSING'],
 ] as const satisfies ReadonlyArray<readonly [string, PullableTable, ErrorCode]>;
 export type ReferencedTable = (typeof PUSH_REFERENCES)[number][1];

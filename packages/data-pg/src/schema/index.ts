@@ -10,6 +10,7 @@ export * from './tenant';
 export * from './catalog';
 export * from './ledger';
 export * from './caja';
+export * from './mensajes';
 export * from './portal';
 export * from './onboarding';
 export * from './sync';

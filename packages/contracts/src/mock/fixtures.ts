@@ -1,6 +1,6 @@
 /**
  * Fixture business for the mock: "Tacos La Esquina" with two Operators
- * (PINs 123456 / 567890), 20 products, 3 clients, 1 employee, 1 recurring
+ * (NIPs 1234 / 5678 — four digits, ADR-072), 20 products, 3 clients, 1 employee, 1 recurring
  * expense. Every row is parsed through the domain schema, so a fixture that
  * drifts from the entity shape fails at startup, not in a test.
  */
@@ -10,12 +10,14 @@ import {
   BusinessSchema,
   ClientSchema,
   EmployeeSchema,
+  MensajeOperadorSchema,
   ProductSchema,
   RecurringExpenseSchema,
   UserSchema,
   type Business,
   type Client,
   type Employee,
+  type MensajeOperador,
   type Product,
   type RecurringExpense,
   type User,
@@ -25,7 +27,7 @@ import { ulidOf } from './ids.js';
 export const FIXTURE_BUSINESS_ID = ulidOf('BZN', 1);
 export const FIXTURE_DEVICE_ID_SEED = ulidOf('DEV', 1);
 export const FIXTURE_EMAIL = 'dueno@tacoslaesquina.mx';
-export const OPERATOR_PINS = { Toni: '123456', Ana: '567890' } as const;
+export const OPERATOR_PINS = { Toni: '1234', Ana: '5678' } as const;
 const T0 = '2026-09-01T12:00:00.000Z';
 
 function audit(seq: number, deviceId = FIXTURE_DEVICE_ID_SEED) {
@@ -47,6 +49,7 @@ export interface FixtureRows {
   readonly clients: readonly Client[];
   readonly employees: readonly Employee[];
   readonly recurring_expenses: readonly RecurringExpense[];
+  readonly mensajes_operador: readonly MensajeOperador[];
 }
 
 const PRODUCT_NAMES = [
@@ -127,6 +130,28 @@ function client(nombre: string, i: number): Client {
   });
 }
 
+function mensajes(): readonly MensajeOperador[] {
+  return [
+    // The aclaración Avisos answers in place, and a plain notice (ADR-075).
+    MensajeOperadorSchema.parse({
+      id: ulidOf('MSG', 1),
+      operadorId: ulidOf('PRS', 1),
+      cajaTurnoId: ulidOf('TRN', 1),
+      severidad: 'aclaracion',
+      cuerpo: 'Aclara el corte del 13 de mayo',
+      ...audit(70),
+    }),
+    MensajeOperadorSchema.parse({
+      id: ulidOf('MSG', 2),
+      operadorId: ulidOf('PRS', 1),
+      cajaTurnoId: null,
+      severidad: 'info',
+      cuerpo: 'La gringa sube a $65 desde mañana',
+      ...audit(71),
+    }),
+  ];
+}
+
 export function buildFixtures(): FixtureRows {
   return {
     businesses: [business()],
@@ -158,5 +183,6 @@ export function buildFixtures(): FixtureRows {
         ...audit(60),
       }),
     ],
+    mensajes_operador: mensajes(),
   };
 }

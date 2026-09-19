@@ -1,6 +1,10 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
-import { ActivateRequestSchema, ActivationCodeSchema } from '../src/activate.js';
+import {
+  ActivateRequestSchema,
+  ActivationCodeSchema,
+  ReferenceTablesSchema,
+} from '../src/activate.js';
 import { DeltaSchema, PushRequestSchema, PushResponseSchema } from '../src/sync-push.js';
 import { PullQuerySchema, PullResponseSchema } from '../src/sync-pull.js';
 import { MAX_PUSH_DELTAS } from '../src/transport.js';
@@ -78,6 +82,37 @@ describe('sync push', () => {
   it('rejects a down-only table at the schema level, so it can never be sent', () => {
     assert.throws(() => DeltaSchema.parse(delta({ table: 'users' })));
   });
+  it('carries an operator reply as one UP delta (C-19, ADR-075)', () => {
+    const d = DeltaSchema.parse({
+      table: 'respuestas_operador',
+      rowId: '01HZ8XQN9GZJXV8AKQ5X0C7RS1',
+      op: 'insert',
+      clientSeq: 9,
+      row: {
+        id: '01HZ8XQN9GZJXV8AKQ5X0C7RS1',
+        mensajeId: '01HZ8XQN9GZJXV8AKQ5X0C7MS1',
+        texto: 'Faltó cambio del billete de $500',
+        businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
+        deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
+        createdByUserId: '01HZ8XQN9GZJXV8AKQ5X0C7TA1',
+        createdAt: '2026-09-11T18:30:00.000Z',
+        updatedAt: '2026-09-11T18:30:00.000Z',
+        deletedAt: null,
+      },
+    });
+    assert.equal(d.table, 'respuestas_operador');
+  });
+  it('never lets a message itself be pushed — it is DOWN (C-19)', () => {
+    assert.throws(() =>
+      DeltaSchema.parse({
+        table: 'mensajes_operador',
+        rowId: '01HZ8XQN9GZJXV8AKQ5X0C7MS1',
+        op: 'insert',
+        clientSeq: 1,
+        row: { id: '01HZ8XQN9GZJXV8AKQ5X0C7MS1' },
+      }),
+    );
+  });
   it('rejects an empty batch and a batch over the cap', () => {
     assert.throws(() => PushRequestSchema.parse({ deltas: [] }));
     assert.throws(() =>
@@ -126,5 +161,32 @@ describe('sync pull', () => {
         tables: {},
       }),
     );
+  });
+  it('serves owner messages in the tables, defaulting to none for old servers (C-19)', () => {
+    const mensaje = {
+      id: '01HZ8XQN9GZJXV8AKQ5X0C7MS1',
+      operadorId: '01HZ8XQN9GZJXV8AKQ5X0C7TA1',
+      cajaTurnoId: null,
+      severidad: 'info',
+      cuerpo: 'La gringa sube a $65 desde mañana',
+      businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
+      deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
+      createdByUserId: null,
+      createdAt: '2026-09-11T18:30:00.000Z',
+      updatedAt: '2026-09-11T18:30:00.000Z',
+      deletedAt: null,
+    };
+    const base = {
+      businesses: [],
+      products: [],
+      clients: [],
+      users: [],
+      employees: [],
+      recurring_expenses: [],
+      feature_flags: {},
+    };
+    const tables = ReferenceTablesSchema.parse({ ...base, mensajes_operador: [mensaje] });
+    assert.equal(tables.mensajes_operador?.length, 1);
+    assert.deepEqual(ReferenceTablesSchema.parse(base).mensajes_operador, []);
   });
 });
