@@ -69,17 +69,22 @@ describe('periodBalanceInputs', () => {
       await corte(testId('D'), '2026-05-11', 'dev-2', 50_000);
       await corte(testId('D'), '2026-06-01', 'dev-1', 999_999);
 
-      const venta = testId('V');
+      // ADR-074: abonos belong to the client; the credit sale names them.
+      const cliente = testId('L');
+      await tx.execute(sql`
+        INSERT INTO clients (id, nombre, business_id, device_id, created_at, updated_at)
+        VALUES (${cliente}, 'Doña Mary', ${BIZ}, ${BIZ}, now(), now())`);
       await tx.execute(sql`
         INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
-                           producto_id, cantidad, business_id, device_id, created_at, updated_at)
-        VALUES (${venta}, '2026-05-02', 'Fiesta', 'Producto', 80_000, 'Crédito', 'parcial',
-                ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
+                           cliente_id, producto_id, cantidad, business_id, device_id,
+                           created_at, updated_at)
+        VALUES (${testId('V')}, '2026-05-02', 'Fiesta', 'Producto', 80_000, 'Crédito', 'parcial',
+                ${cliente}, ${pan}, 1, ${BIZ}, ${BIZ}, now(), now())`);
       const pago = (id: string, fecha: string, monto: number, deleted = false) =>
         tx.execute(sql`
-          INSERT INTO client_payments (id, venta_id, fecha, monto_centavos, metodo, business_id,
+          INSERT INTO client_payments (id, cliente_id, fecha, monto_centavos, metodo, business_id,
                                        device_id, created_at, updated_at, deleted_at)
-          VALUES (${id}, ${venta}, ${fecha}, ${monto}, 'Efectivo', ${BIZ}, ${BIZ},
+          VALUES (${id}, ${cliente}, ${fecha}, ${monto}, 'Efectivo', ${BIZ}, ${BIZ},
                   now(), now(), ${deleted ? sql`now()` : null})`);
       await pago(testId('P'), '2026-05-12', 40_000);
       await pago(testId('P'), '2026-04-30', 10_000);
@@ -101,12 +106,13 @@ describe('periodBalanceInputs', () => {
     );
   });
 
-  it('returns only the period live client payments', async () => {
+  it('returns only the period live client payments, with their client', async () => {
     const { pagos } = await withBusiness(db, BIZ, (tx) =>
       periodBalanceInputs(tx, '2026-05-01', '2026-05-31'),
     );
     assert.equal(pagos.length, 1);
     assert.equal(pagos[0]?.montoCentavos, 40_000n);
+    assert.ok(pagos[0]?.clienteId !== undefined, 'the balance nets abonos per client (ADR-074)');
   });
 
   it('nets stock per product at cost — entradas minus every salida, merma included', async () => {

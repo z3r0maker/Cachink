@@ -28,10 +28,16 @@ function cortesDelPeriodo(tx: Tx, from: string, to: string) {
     .where(and(isNull(dayCloses.deletedAt), enRango(dayCloses.fecha, from, to)));
 }
 
-/** Payments received against credit sales inside the period. */
+/** Abonos received inside the period — client-level since ADR-074 (C-18). */
 function pagosDelPeriodo(tx: Tx, from: string, to: string) {
   return tx
-    .select({ ventaId: clientPayments.ventaId, montoCentavos: clientPayments.montoCentavos })
+    .select({
+      id: clientPayments.id,
+      clienteId: clientPayments.clienteId,
+      fecha: clientPayments.fecha,
+      montoCentavos: clientPayments.montoCentavos,
+      createdAt: clientPayments.createdAt,
+    })
     .from(clientPayments)
     .where(and(isNull(clientPayments.deletedAt), enRango(clientPayments.fecha, from, to)));
 }
