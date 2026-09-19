@@ -2,6 +2,7 @@ import { Buttons, Cards, Fields, States, Tags } from './sections';
 import { Banners, Kpis } from './sections-data';
 import { Interactive } from './sections-interactive';
 import { Forms } from './sections-forms';
+import { Recientes } from './sections-new';
 import { h1, page, subtitle } from './page.css';
 
 /**
@@ -27,6 +28,7 @@ export default function InventarioPage() {
       <Fields />
       <Forms />
       <States />
+      <Recientes />
     </main>
   );
 }
