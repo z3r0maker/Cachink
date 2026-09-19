@@ -10,6 +10,8 @@ import {
   products,
   recurringExpenses,
   users,
+  openingBalanceClients,
+  openingBalances,
 } from '@xangarro/data-pg';
 import { parseFeatureFlags, type Entitlement, type FeatureFlags } from '@xangarro/domain';
 import { isNull } from 'drizzle-orm';
@@ -44,7 +46,7 @@ export async function tenantFeatureFlags(tx: Tx): Promise<FeatureFlags> {
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
 
-  const [b, p, c, u, e, r, cr, m, mo] = await Promise.all([
+  const [b, p, c, u, e, r, cr, m, mo, ob, obc] = await Promise.all([
     tx.select().from(businesses),
     tx.select().from(products).where(live(products)),
     tx.select().from(clients).where(live(clients)),
@@ -55,6 +57,9 @@ export async function referenceTables(tx: Tx) {
     // Every movement, not a stock snapshot: the phone's stock is their sum (ADR-081).
     tx.select().from(inventoryMovements).where(live(inventoryMovements)),
     tx.select().from(mensajesOperador).where(live(mensajesOperador)),
+    // Day-one facts (C-20); an empty list is the common case.
+    tx.select().from(openingBalances).where(live(openingBalances)),
+    tx.select().from(openingBalanceClients).where(live(openingBalanceClients)),
   ]);
 
   return {
@@ -67,6 +72,8 @@ export async function referenceTables(tx: Tx) {
     conversion_recetas: cr.map((row) => rowToWire('conversion_recetas', row)),
     inventory_movements: m.map((row) => rowToWire('inventory_movements', row)),
     mensajes_operador: mo.map((row) => rowToWire('mensajes_operador', row)),
+    opening_balances: ob.map((row) => rowToWire('opening_balances', row)),
+    opening_balance_clients: obc.map((row) => rowToWire('opening_balance_clients', row)),
     feature_flags: await tenantFeatureFlags(tx),
   };
 }

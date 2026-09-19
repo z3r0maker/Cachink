@@ -18,10 +18,12 @@ const SECCIONES = [
   { nombre: 'Switch · OptionCards · UsageBar · Diálogos · Sellos · Avisos', slug: 'recientes' },
 ] as const;
 
-test.skip(
-  ({ project }) => process.env.CI !== undefined || project.name !== 'desktop',
-  'visual baselines are a local, desktop review',
-);
+// `project` is a worker fixture, unavailable to modifier callbacks in
+// Playwright 1.63 — skip from the hook, where test.info() knows the project.
+test.beforeEach(() => {
+  test.skip(process.env.CI !== undefined, 'visual baselines are a local review');
+  test.skip(test.info().project.name !== 'desktop', 'visual baselines are a local, desktop review');
+});
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/inventario');

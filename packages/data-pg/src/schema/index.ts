@@ -18,3 +18,4 @@ export * from './billing';
 export * from './metering';
 export * from './cfdi';
 export * from './logos.js';
+export * from './opening-balances.js';

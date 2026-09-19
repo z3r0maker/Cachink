@@ -418,7 +418,16 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-20 `opening_balances` DOWN table (saldos iniciales)
 
-- [ ] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+- [~] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+  - Progress: 2026-09-19 · `track-n/c20-n17-apertura` · wire + pg halves done: both entities on
+    `BusinessSchema`-style zod with defaults (old payloads parse unchanged), `DOWN_TABLES` +
+    `ReferenceTablesSchema` arrays (`.default([])`), codec OUT, `SYNCED_TABLES`, bootstrap +
+    mock fixtures. data-pg **0025** (tables + RLS + grants) with old→new, replace-save and
+    one-way-lock integration tests. The SQLite half waits for the app branch —
+    `PENDING_DEVICE_TABLES` allowances in the drift and scope tests make that explicit and
+    self-expiring. The ADR-074 receivables calculator takes the opening saldo as
+    `estadoDeCuenta`'s third fact (domain, tested), and `calculateBalanceGeneral` gains
+    `apertura` (efectivo inicial, CxC lines, caller-computed capitalInicial).
 - **Steps:** new DOWN entities `opening_balances` (id, business_id, fecha_apertura, caja_centavos,
   bancos_centavos, locked_at nullable, updated_at) and `opening_balance_clients` (id, business_id,
   cliente_id, saldo_centavos, updated_at); add both to `DOWN_TABLES` in `scope.ts`; pg-core + SQLite

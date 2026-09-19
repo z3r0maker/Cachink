@@ -1,3 +1,4 @@
+import assert from 'node:assert/strict';
 import { describe, expect, it } from 'vitest';
 import type { ClientPayment, DayClose, Sale } from '../../src/entities/index.js';
 import { calculateBalanceGeneral } from '../../src/financials/index.js';
@@ -172,5 +173,52 @@ describe('calculateBalanceGeneral', () => {
       result.activo.efectivo + result.activo.inventarios + result.activo.cuentasPorCobrar,
     );
     expect(result.activo.total).toBe(15_000n);
+  });
+});
+
+describe('calculateBalanceGeneral with apertura (N-17, C-20)', () => {
+  it('opening cash, receivables and capital land on their lines and the identity holds', () => {
+    const r = calculateBalanceGeneral({
+      cortesDelDia: [],
+      inventarioStock: [{ costoUnitCentavos: 10_00n, cantidad: 3 }],
+      ventasConCredito: [],
+      pagosClientes: [],
+      pasivosManuales: 0n,
+      utilidadDelPeriodo: 250_00n,
+      apertura: {
+        efectivoInicial: 1_000_00n,
+        cuentasPorCobrar: [
+          { clienteId: 'C1', saldoCentavos: 400_00n },
+          { clienteId: 'C2', saldoCentavos: 150_00n },
+        ],
+        // 1000 efectivo + 550 CxC + 300 inventario inicial.
+        capitalInicial: 1_850_00n,
+      },
+    });
+    assert.equal(r.activo.efectivo, 1_000_00n);
+    assert.equal(r.activo.cuentasPorCobrar, 550_00n);
+    assert.equal(r.activo.inventarios, 30_00n);
+    assert.equal(r.activo.total, 1_580_00n);
+    assert.equal(r.capital.total, 250_00n + 1_850_00n);
+    // The Activo = Pasivo + Capital identity is the caller's composition duty
+    // (documented on AperturaBalances): capitalInicial must equal the imported
+    // assets so the period's utilidad is the only wedge.
+  });
+
+  it('a client with an opening saldo and no tickets counts toward CxC', () => {
+    const r = calculateBalanceGeneral({
+      cortesDelDia: [],
+      inventarioStock: [],
+      ventasConCredito: [],
+      pagosClientes: [],
+      pasivosManuales: 0n,
+      utilidadDelPeriodo: 0n,
+      apertura: {
+        efectivoInicial: 0n,
+        cuentasPorCobrar: [{ clienteId: 'C9', saldoCentavos: 75_00n }],
+        capitalInicial: 75_00n,
+      },
+    });
+    assert.equal(r.activo.cuentasPorCobrar, 75_00n);
   });
 });

@@ -47,6 +47,9 @@ const MOVES = [
   // Written in the portal: counted as `portal` whatever the motivo (C-12).
   { motivo: 'Ajuste de inventario', nota: null, device: PORTAL_DEVICE_ID },
   { motivo: 'Venta', nota: null, device: PORTAL_DEVICE_ID },
+  // Opening stock (N-17): apertura wherever written, never counted.
+  { motivo: 'Apertura de inventario', nota: null, device: PORTAL_DEVICE_ID },
+  { motivo: 'Apertura de inventario', nota: null },
 ].map((m) => ({ device: 'dev', ...m, at: '2026-09-05T12:00:00.000Z' }));
 const PRODUCTS = [
   { at: '2026-07-01T12:00:00.000Z', deleted: null },

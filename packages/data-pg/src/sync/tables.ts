@@ -1,5 +1,7 @@
 import type { SyncedTable } from '@xangarro/contracts';
 
+import { openingBalanceClients, openingBalances } from '../schema/opening-balances.js';
+
 import {
   conversionRecetas,
   conversions,
@@ -45,4 +47,6 @@ export const SYNCED_TABLES = {
   conversion_recetas: conversionRecetas,
   mensajes_operador: mensajesOperador,
   respuestas_operador: respuestasOperador,
+  opening_balances: openingBalances,
+  opening_balance_clients: openingBalanceClients,
 } as const satisfies Record<SyncedTable, unknown>;

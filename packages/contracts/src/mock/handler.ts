@@ -65,6 +65,8 @@ function referenceTables(state: MockState, since: number): PullResponse['tables'
     conversion_recetas: pick('conversion_recetas'),
     inventory_movements: pick('inventory_movements'),
     mensajes_operador: pick('mensajes_operador'),
+    opening_balances: pick('opening_balances'),
+    opening_balance_clients: pick('opening_balance_clients'),
     feature_flags: { stock: true },
   } as unknown as PullResponse['tables'];
 }
