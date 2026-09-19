@@ -7,6 +7,8 @@ import { useSession } from '@/session/provider';
 import { asesorShowsDiagnostico, resolveScreenState } from '@/session/gating';
 
 import type { AsesorPageData } from '@/server/asesor';
+import type { MetasPageData } from '@/server/metas';
+import type { Role } from '@/session/types';
 
 import { Metas } from './metas';
 import { Anteriores, Capacidades, ParaTi } from './para-ti';
@@ -69,7 +71,15 @@ function Diagnostico() {
   );
 }
 
-export function AsesorScreen({ data }: { readonly data: AsesorPageData | null }) {
+export function AsesorScreen({
+  data,
+  metas,
+  role,
+}: {
+  readonly data: AsesorPageData | null;
+  readonly metas: MetasPageData | null;
+  readonly role: Role;
+}) {
   const [tab, setTab] = useState('parati');
 
   return (
@@ -83,7 +93,7 @@ export function AsesorScreen({ data }: { readonly data: AsesorPageData | null })
           <Anteriores anteriores={data?.anteriores ?? []} />
         </>
       ) : null}
-      {tab === 'metas' ? <Metas /> : null}
+      {tab === 'metas' ? <Metas data={metas} role={role} /> : null}
       {tab === 'diagnostico' ? <Diagnostico /> : null}
     </>
   );

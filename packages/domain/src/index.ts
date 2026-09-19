@@ -21,3 +21,4 @@ export * from './negocio/index.js';
 export * from './nomina/index.js';
 export * from './avisos/index.js';
 export * from './asesor/index.js';
+export * from './metas/index.js';

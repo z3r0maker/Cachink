@@ -54,3 +54,4 @@ export * from './cancelar-venta/index.js';
 export * from './ejecutar-conversion/index.js';
 // Track N — signup + "Platícanos de ti" (P-03, N-12 … N-15)
 export * from './onboarding/index.js';
+export * from './metas/index.js';

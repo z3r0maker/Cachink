@@ -1,5 +1,6 @@
 import { currentSession } from '@/server/current-session';
 import { loadAsesorPage } from '@/server/asesor';
+import { loadMetasPage } from '@/server/metas';
 
 import { AsesorScreen } from './screen';
 
@@ -19,9 +20,12 @@ export default async function AsesorPage() {
     // The session carries the plan's Asesor cadencia; the loader materialises
     // only what that tier receives (ADR-059, ADR-087).
     const session = await currentSession();
-    const data = await loadAsesorPage(session.businessId, session.capabilities.asesor);
-    return <AsesorScreen data={data} />;
+    const [data, metas] = await Promise.all([
+      loadAsesorPage(session.businessId, session.capabilities.asesor),
+      loadMetasPage(session.businessId),
+    ]);
+    return <AsesorScreen data={data} metas={metas} role={session.role} />;
   } catch {
-    return <AsesorScreen data={null} />;
+    return <AsesorScreen data={null} metas={null} role="viewer" />;
   }
 }
