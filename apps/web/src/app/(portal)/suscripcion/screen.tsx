@@ -3,7 +3,7 @@
 import { formatFechaHora, PLAN_LIMITS, PLAN_NOMBRE } from '@xangarro/domain';
 
 import { Banner, Card, ScreenBody, UsageBar } from '@/components';
-import { ASESOR_TIERS, PLAN_CARDS } from '@/fixtures/planes';
+import { ASESOR_TIERS, PLAN_CARDS } from '@/data/planes';
 import type { ListarFacturasResult } from '@/server/billing/facturas-core';
 import { administrarSuscripcion } from '@/server/billing/actions';
 import type { SuscripcionData } from '@/server/suscripcion';

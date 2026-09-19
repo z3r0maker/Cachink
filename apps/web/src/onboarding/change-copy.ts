@@ -7,7 +7,7 @@
 
 import type { ConfigurationChange, FeatureFlagKey } from '@xangarro/domain';
 
-import { FLAG_LABEL } from '../fixtures/negocio';
+import { FLAG_LABEL } from '../data/negocio';
 
 const KEEPS_DATA: Partial<Record<FeatureFlagKey, string>> = {
   stock: 'tus productos no se borran',

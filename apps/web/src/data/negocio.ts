@@ -7,7 +7,7 @@ import {
   type PlanId,
 } from '@xangarro/domain';
 
-import { SESSION } from './business';
+import { SESSION } from '../fixtures/business';
 
 export interface Field {
   readonly label: string;

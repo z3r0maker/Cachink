@@ -3,7 +3,7 @@
 import { colors } from '@xangarro/tokens';
 
 import { Card } from '@/components';
-import { CAPABILITY_ROWS, type Section } from '@/fixtures/negocio';
+import { CAPABILITY_ROWS, type Section } from '@/data/negocio';
 
 import {
   fieldLabel,

@@ -6,7 +6,7 @@ import { useState, useTransition } from 'react';
 import { resolveDisableCascade, type FeatureFlagKey, type FeatureFlags } from '@xangarro/domain';
 
 import { Card, ConfirmDialog, Switch, Tag } from '@/components';
-import { FLAG_DESC, FLAG_LABEL, flagRows, type FlagRow } from '@/fixtures/negocio';
+import { FLAG_DESC, FLAG_LABEL, flagRows, type FlagRow } from '@/data/negocio';
 import { cambiarFuncion } from '@/server/actions/funciones';
 import { useSession } from '@/session/provider';
 import { eyebrow } from '@/styles/text.css';

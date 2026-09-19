@@ -2,7 +2,7 @@ import { colors } from '@xangarro/tokens';
 
 import { Button } from '@/components';
 import { eyebrow, planLabel } from '@/styles/text.css';
-import type { PlanCard as PlanCardData } from '@/fixtures/planes';
+import type { PlanCard as PlanCardData } from '@/data/planes';
 import type { BillingActionResult } from '@/server/billing/actions';
 
 import { BotonStripe } from './acciones';

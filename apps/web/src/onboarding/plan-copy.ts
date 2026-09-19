@@ -17,7 +17,7 @@ import {
   type ReasonCode,
 } from '@xangarro/domain';
 
-import { PLAN_CARDS } from '../fixtures/planes';
+import { PLAN_CARDS } from '../data/planes';
 
 export type Interval = 'mensual' | 'anual';
 

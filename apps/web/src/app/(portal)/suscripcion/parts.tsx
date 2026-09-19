@@ -4,7 +4,7 @@ import { colors } from '@xangarro/tokens';
 
 import { Card, Tag } from '@/components';
 import { eyebrow, planLabel } from '@/styles/text.css';
-import type { AsesorTier } from '@/fixtures/planes';
+import type { AsesorTier } from '@/data/planes';
 import { administrarSuscripcion } from '@/server/billing/actions';
 
 import { BotonStripe } from './acciones';
