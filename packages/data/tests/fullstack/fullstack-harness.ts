@@ -183,7 +183,13 @@ export function buildHarness(opts?: {
     ),
     editarVenta: new EditarVentaUseCase(repos.sales),
     abrirCaja: new AbrirCajaUseCase(repos.cajaTurnos),
-    cerrarCaja: new CerrarCajaUseCase(repos.cajaTurnos, repos.tickets, repos.sales, repos.expenses),
+    cerrarCaja: new CerrarCajaUseCase(
+      repos.cajaTurnos,
+      repos.tickets,
+      repos.sales,
+      repos.expenses,
+      repos.clientPayments,
+    ),
     retirarCaja: new RetirarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     depositarCaja: new DepositarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     cerrarCorte: new CerrarCorteDeDiaUseCase(

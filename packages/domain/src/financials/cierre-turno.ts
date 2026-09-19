@@ -29,6 +29,84 @@ export function efectivoEsperado(i: EsperadoTurnoInput): Money {
   return i.fondo + sum(i.ventasEfectivo) + sum(i.abonosEfectivo) - sum(i.gastosCaja);
 }
 
+/**
+ * The turno's expected cash from its own rows (O-03): fondo + adicional +
+ * this turno's standing Efectivo tickets + Efectivo abonos − this turno's
+ * gastos. Fiado, other turnos and cancelled tickets are excluded by the
+ * scoping itself — `cajaTurnoId` decides, never a date range.
+ */
+export function esperadoDelTurno(
+  turno: {
+    readonly id: string;
+    readonly montoAperturaCentavos: Money;
+    readonly efectivoAdicionalCentavos: Money;
+  },
+  tickets: readonly {
+    readonly id: string;
+    readonly cajaTurnoId: string | null;
+    readonly metodo: string;
+    readonly estadoPago: string;
+    readonly cancelledAt: string | null;
+    readonly deletedAt: string | null;
+  }[],
+  lineas: readonly {
+    readonly ticketId: string;
+    readonly monto: Money;
+    readonly deletedAt: string | null;
+  }[],
+  abonos: readonly {
+    readonly metodo: string;
+    readonly montoCentavos: Money;
+    readonly deletedAt: string | null;
+  }[],
+  gastos: readonly {
+    readonly cajaTurnoId: string | null;
+    readonly monto: Money;
+    readonly deletedAt: string | null;
+  }[],
+): Money {
+  if (!turno.id) throw new CorteInvalidoError('turno sin id');
+  return efectivoEsperado({
+    fondo: turno.montoAperturaCentavos + turno.efectivoAdicionalCentavos,
+    ventasEfectivo: ventasEfectivoDelTurno(turno, tickets, lineas),
+    abonosEfectivo: abonos
+      .filter((a) => a.deletedAt === null && a.metodo === 'Efectivo')
+      .map((a) => a.montoCentavos),
+    gastosCaja: delTurno(turno, gastos).map((g) => g.monto),
+  });
+}
+
+/** Rows that belong to `turno` and are still alive. */
+function delTurno<
+  T extends { readonly cajaTurnoId: string | null; readonly deletedAt: string | null },
+>(turno: { readonly id: string }, rows: readonly T[]): readonly T[] {
+  return rows.filter((r) => r.cajaTurnoId === turno.id && r.deletedAt === null);
+}
+
+/** This turno's standing Efectivo tickets' line amounts. */
+function ventasEfectivoDelTurno(
+  turno: { readonly id: string },
+  tickets: readonly {
+    readonly id: string;
+    readonly cajaTurnoId: string | null;
+    readonly metodo: string;
+    readonly cancelledAt: string | null;
+    readonly deletedAt: string | null;
+  }[],
+  lineas: readonly {
+    readonly ticketId: string;
+    readonly monto: Money;
+    readonly deletedAt: string | null;
+  }[],
+): readonly Money[] {
+  const ids = new Set(
+    delTurno(turno, tickets)
+      .filter((t) => t.cancelledAt === null && t.metodo === 'Efectivo')
+      .map((t) => t.id),
+  );
+  return lineas.filter((l) => ids.has(l.ticketId) && l.deletedAt === null).map((l) => l.monto);
+}
+
 export const DENOMINACIONES_MXN = [
   { pesos: 1000, valor: 1000_00n, tipo: 'billete' },
   { pesos: 500, valor: 500_00n, tipo: 'billete' },
