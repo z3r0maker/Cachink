@@ -241,10 +241,14 @@ including the press stamp.
     (static grey blocks, never a shimmer); `srOnly`. Barrel at `components/index.ts`.
   - `/inventario` renders every one of them in every variant and is the artifact the Fase 1
     compuerta compares against the design system. Verified at HTTP 200 in dev.
-  - **Still to do before the gate closes:** Dialog (confirm/destructive), Toast, option cards,
-    progress/usage bar, gauge, sidebar nav item, business switcher, user menu, «Asesor» strip,
-    locked row, aviso row, money input; the Storybook inventory; and the visual-regression
-    baselines reusing the ADR-017 harness.
+  - 2026-09-19 · **Inventory extended + baselines committed** (deviation from the letter:
+    the ADR-017 _harness_ — Playwright `toHaveScreenshot`, `maxDiffPixelRatio: 0.01` — runs
+    against the in-app `/inventario` page, not Storybook; vanilla-extract requires the
+    `--webpack` Next build Storybook would fight). New section: Switch, OptionCards,
+    UsageBar, ConfirmDialog, Seal/Celebration, aviso row, money field. Like
+    `design:compare`, the baselines are a local review (darwin), skipped in CI. **Still
+    open:** the `design:compare` acceptance clause, which waits on O-23; Toast, gauge and
+    the shell-only pieces (nav item, switcher, user menu) remain unharnessed.
   - Two of my own violations were caught by the repo's own gates and fixed rather than
     suppressed: `design-lint` flagged a hardcoded `#FFD60A` in `layout.tsx` (now `colors.yellow`),
     and ESLint's 40-line function budget rejected three components until they were split.
@@ -410,8 +414,9 @@ without touching code.
   - `LockedState` reuses the empty-state card shape deliberately: nothing is broken and nothing
     is missing, the feature simply is not included yet. `ProximamenteState` has **no** call to
     action, because it is not something a customer can unlock.
-  - **Still to do:** the fixture layer the screens read from, and `@xangarro/data-pg` wiring when
-    B-02 lands.
+  - 2026-09-19 · The screen fixtures are gone: the Asesor fixtures left with P-26/P-27, and
+    `planes.ts` / `negocio.ts` moved to `src/data/` — verbatim design copy in a home whose
+    name says what it is. What remains under `src/fixtures` is test input only.
 - **Context:** ADR-058 §9. The prototype's state-switching FAB and `panelOpen` are deleted; forcing
   happens through props instead.
 - **Steps:** Establish the pattern once: a server component resolves the request lifecycle and
@@ -470,9 +475,13 @@ without touching code.
     integer centavos and formatted back through `formatMoney`; the SVG is labelled and the totals
     are also stated in text. The heading's date now comes from the business clock (it was pinned
     to 12 May 2026). `sumarDias` / `ultimosDias` in the domain. e2e: date, totals, two lines, axe.
-  - **Still to do:** the ¿Cómo empiezo? checklist card (needs P-04), and «Hola, {nombre}» (the
-    greeting is still «Pedro»: accounts carry no display name yet). The component tree is already the shape the real container
-    will render, so wiring is a data swap rather than a rewrite.
+  - 2026-09-19 · **Done**: the «¿Cómo empiezo?» card joins the hero row (every item detected
+    from `business_onboarding`'s signals, the same items `/como-empiezo` renders); «Hola,
+    {nombre}» reads `auth.users.nombre` through the session (0020 / ADR-086 — signup collects
+    an optional «Tu nombre»; a nameless account greets bare «Hola»); the hero's range is the
+    business clock's month, no longer the pinned May literal; the low-stock banner's «Ver
+    productos» links to `/productos?filtro=bajo`, where the catalogue preselects «Stock
+    bajo». e2e: greeting, 5 de 6, the deep link.
 - **Amended 2026-09-17:** built from _Inicio_, not ported from `DirectorHome`.
 - **Steps:** Rejection banner (`--red-soft`, happy only) → title "Hola, {nombre}" with the full
   es-MX date → hero row `minmax(340px, 1fr)`: **Utilidad del mes** on flat `--yellow`
@@ -653,8 +662,15 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     first. `desgloseDeResultados` in the domain classifies with the statement's own
     `esCostoDeVentas` (now exported, the one copy of the rule); a test holds every breakdown equal
     to its line. e2e expands Gastos operativos against the seed.
-  - **Still to do:** the waterfall and donuts, and "Informe mensual PDF" gated by
-    `capabilities.informeMensual` (P-34). The print stylesheet is done (P-34).
+  - 2026-09-19 · **F-1 fixed**: Balance, Flujo and Indicadores read real rows —
+    `periodBalanceInputs` (data-pg) supplies the period's cortes, client payments, the
+    stock snapshot at cost and the merma salidas, mirroring the phone's composition; 4 DB
+    tests. `pasivosManuales` stays 0 until N-17's saldos iniciales.
+  - 2026-09-19 · **Waterfall and donuts** (provisional — the Estados design file is not
+    mirrored, O-23, so the shapes come from the statement's own numbers; `design:compare`
+    reconciles when it lands): `charts-data.ts` is pure and unit-tested against the B-3
+    identities; zero steps are omitted, so a no-merma month draws no merma bar.
+  - **Still to do:** nothing in P-14 itself beyond the O-23 reconciliation.
 - **Amended 2026-09-17 (ADR-059):** adds the fifth `locked` state; Xangarrito has no NIF statements.
 - **Steps:** Period switcher (Mensual / Trimestral / Anual / Personalizado, `height 44`,
   `radius 14`, `3px 3px 0`) and statement tabs (Resultados / Posición / Flujo / Indicadores,
@@ -784,7 +800,10 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     last five cortes (`cortesDeDispositivo`, 2 DB tests) and «Desvincular» for admins. Revoke was
     already wired to real rows. **Fixed:** the header said «Plan Xangarro» for every tenant; it now
     names the business's plan (`PLAN_NOMBRE`). e2e on a throwaway free-plan tenant.
-  - **Still to do:** «Enviar por correo» for the code (needs B-14's `activation-code` template).
+  - 2026-09-19 · **Done**: an `activation-code` template in packages/email (cross-area,
+    coordinated with the owner) and `enviarCodigoPorCorreo` — the panel sends the code that
+    is live to whatever address the owner names; sending never mints or burns anything.
+    e2e asserts the dev outbox against the panel's own code.
 - **Steps:** Device cards with a 44×44 platform tile, name, model, state pill, Operador, Última
   sincronización, Turno, and a `--warning-soft` strip "{n} registros esperando conexión" when queued.
   Slot counter. **Pairing panel** on flat `--yellow` (owner/admin): "Código de vinculación activo",
@@ -995,8 +1014,13 @@ never invented text.
     appears**. Claiming AI authorship for a SQL result would be as false as the reverse.
   - **Ships live in production**, because every insight here is computed — cost deltas, category
     baselines, staleness windows, duplicate detection (ADR-059).
-  - **Still to do:** computing the insights from real rows rather than fixtures (needs B-02), and
-    the dismiss/resolve actions.
+  - 2026-09-19 · **Done**: five deterministic detectors in `@xangarro/domain/asesor` (cost
+    deltas, quincena seasonality, expense anomalies vs the 3-month baseline, stale inventory
+    at 45 days, duplicate gastos) materialise **on read** into `notices` (ADR-087): the
+    upsert never touches `state`/`resolved_at`, so dismissals survive recomputes and
+    vanished insights auto-close as `listo`. The plan's cadence gates the set («semanal»
+    keeps the two most urgent); the capacidades panel reports the tenant's real counts;
+    Descartar/Listo write through `cerrarAvisoAsesor`. 18 tests + e2e on the seed.
 - **Steps:** Three tabs — Para ti / Metas / Diagnóstico. The feed reads `notices` where
   `source='asesor'` (ADR-060): a category tile, icon, title, body and an action link per card.
   **Every insight here is deterministic** — cost deltas, quincena seasonality, expense anomalies
@@ -1020,8 +1044,12 @@ never invented text.
     Radix supplies the arrow-key navigation and `aria-checked` the prototypes faked.
   - Active goal with the pace verdict and the next-step line, plus the trophy history.
   - **Deterministic arithmetic, so it ships live in production** alongside Para ti.
-  - **Still to do:** the month-end dialog in both variants, the out-of-range callout, the "negocio
-    nuevo" state, and persisting a goal (needs the `metas` table at B-02).
+  - 2026-09-19 · **Done**: the rules live in `@xangarro/domain/metas` (objetivoDe anchors
+    ±10/20/30% to the last complete month — down for `gastar`; ritmoDeMeta paces a straight
+    line; rachaDe counts consecutive wins; fueraDeRango draws the callout's line),
+    `FijarMetaUseCase` / `CerrarMetasVencidasUseCase` orchestrate them over the pg `metas`
+    table, and the tab renders its four states — negocio nuevo, the wizard on real figures,
+    the running goal with its pace, and the month-end dialog in both variants.
 - **Steps:** Three-step wizard — qué lograr (Ganar más / Vender más / Gastar menos) → para qué
   (Comprar algo / Tener un colchón / Pagar deudas) → qué tanto (Un empujón +10% / Un reto +20% /
   Ambicioso +30%, with the computed monthly and daily figures). Out-of-range amounts show the
@@ -1174,8 +1202,10 @@ critical avisos cannot be switched off.
     rewards recording something, which corrupts the data the product exists to keep true. A streak
     on goals met cannot be farmed, because the goal is measured from ventas that already happened.
     The reasoning is in the component's docblock so it survives a future refactor.
-  - **Still to do:** showing it once per achievement (needs persistence), hiding it from `viewer`
-    at the call site, and the milestone toast.
+  - 2026-09-19 · **Done**: a goal achieved closes lazily on load and takes the takeover
+    exactly once — the `celebraciones` marker (0020) is written the moment it renders
+    (ADR-086), so no reload or other device sees it again; a viewer never sees the wizard
+    or the takeover (call-site check). e2e covers the celebration and its once-ness.
 - **Context:** ADR-058 §6 — this supersedes the design system's "no gamification, no streaks" rule.
 - **Steps:** Goal-achieved takeover with the confetti (10 pieces, `xg-fall`, staggered 90 ms) and a
   6 s auto-close; the seal set by type and level, drawn with the polygon `sealPath()` so it reads as
@@ -1233,7 +1263,11 @@ critical avisos cannot be switched off.
 ### P-17 Portal smoke E2E (Playwright)
 
 - [~] Status · **Blocked by:** P-03…P-07, P-11, P-16 · **Blocks:** X-02
-  - 2026-09-17 · The `portal-e2e` CI job exists and runs the full suite (170 tests) against a seeded Postgres — against a plain Postgres + compat layer, not "local Supabase" as written above. **Still to do:** the flow this task actually names (signup → onboarding → activate → pushed sale), which needs P-03, P-04 and B-07.
+  - 2026-09-17 · The `portal-e2e` CI job exists and runs the full suite (170 tests) against a seeded Postgres — against a plain Postgres + compat layer, not "local Supabase" as written above.
+  - 2026-09-19 · **Done**: `e2e/smoke.sync.spec.ts` runs the named flow end to end — free
+    signup → wizard → operator → 3-product import → device code → `/activate` against the
+    real endpoint → one pushed sale → Movimientos — through the UI the owner touches, on a
+    tenant the run creates.
 - **Steps:** One flow — free signup → onboarding → create operator → import 3 products → issue a
   device code → call `/activate` via the C-10 conformance helper → device appears → push one sale
   via the helper → it appears in Movimientos. Runs against local Supabase and the dev server in CI
@@ -1244,7 +1278,13 @@ critical avisos cannot be switched off.
 
 - [~] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
   - 2026-09-17 · Exports: `GET /api/export/<dataset>` returns real .xlsx for ventas, gastos, productos, movimientos and empleados — authenticated, dataset checked against a closed union, RLS-scoped. E2E asserts the `PK` zip magic number.
-  - 2026-09-18 · **Print stylesheet**: under `@media print` the sidebar, header, every button and anything marked `data-no-print` drop out, shadows go, black on white — a statement prints as the document. Estados gets «Imprimir» (the period in the URL is what prints). e2e emulates print. **Still to do:** the PDF informe mensual.
+  - 2026-09-18 · **Print stylesheet**: under `@media print` the sidebar, header, every button and anything marked `data-no-print` drop out, shadows go, black on white — a statement prints as the document. Estados gets «Imprimir» (the period in the URL is what prints). e2e emulates print.
+  - 2026-09-19 · **Informe mensual PDF done**: the phone's PDF layout moved to
+    `@xangarro/application` beside its use case (ui keeps a re-export shim), the informe's
+    rules extract into `construirInforme` so the portal feeds the same computation from
+    `periodLedger`, and `GET /api/export/informe-mensual?mes=YYYY-MM` streams the file —
+    capability-gated **on the server**, open to every role. e2e: Xangarrote downloads %PDF;
+    seeded Xangarro sees no button and a direct fetch gets 403.
 - **Steps:** Print stylesheets for the statements (one page each) and the Diagnóstico; the "Informe
   mensual PDF" gated by `capabilities.informeMensual`; CSV and XLSX exports on Movimientos and
   Estados for every plan and role.
