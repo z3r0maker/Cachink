@@ -11,6 +11,7 @@
  *
  *   pnpm --filter @xangarro/data-pg db:seed
  */
+import { seedDayClose, seedMovements } from './seed-extra.js';
 import { hash } from 'bcryptjs';
 import postgres from 'postgres';
 
@@ -20,13 +21,11 @@ import {
   COST,
   CREATED,
   DEV,
-  DAY_CLOSE_ID,
   DEVICES,
   OWNER,
   VIEWER,
   EMPLOYEES,
   EXPENSES,
-  MOVEMENTS,
   movementIdFor,
   NOTICES,
   PRODUCTS,
@@ -36,7 +35,6 @@ import {
   TODAY,
   TS,
   USERS,
-  peso,
 } from './seed-data';
 
 const URL = process.env.DATABASE_URL;
@@ -71,20 +69,39 @@ async function seedProducts(sql: Sql): Promise<void> {
  * carried by `tipo`, per the schema's own rule.
  */
 async function seedSales(sql: Sql): Promise<void> {
+  let folio = 0;
   for (const [id, fecha, concepto, productoId, cantidad, monto, metodo] of SALES) {
+    folio += 1;
+    // C-17 (ADR-073): the header lives in tickets; sales is the line.
     await sql`
-      INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
+      INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                           business_id, device_id, created_at, updated_at)
+      VALUES (${id}, ${folio}, ${fecha}, ${concepto}, ${metodo}, 'pagado',
+              ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
+      ON CONFLICT (id) DO NOTHING`;
+    await sql`
+      INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                          producto_id, cantidad, business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${fecha}, ${concepto}, 'Producto', ${monto}, ${metodo}, 'pagado',
+      VALUES (${id}, ${id}, ${fecha}, ${concepto}, 'Producto', ${monto},
               ${productoId}, ${cantidad}, ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
-    await sql`
-      INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
-                                       costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-      VALUES (${movementIdFor(id)}, ${productoId}, ${fecha}, 'salida', ${cantidad},
-              ${COST[productoId] ?? 0}, 'Venta', ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
-      ON CONFLICT (id) DO NOTHING`;
+    await saleMovement(sql, id, fecha, productoId, cantidad);
   }
+}
+
+async function saleMovement(
+  sql: Sql,
+  id: string,
+  fecha: string,
+  productoId: string,
+  cantidad: number,
+): Promise<void> {
+  await sql`
+    INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
+                                     costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
+    VALUES (${movementIdFor(id)}, ${productoId}, ${fecha}, 'salida', ${cantidad},
+            ${COST[productoId] ?? 0}, 'Venta', ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
+    ON CONFLICT (id) DO NOTHING`;
 }
 
 async function seedExpenses(sql: Sql): Promise<void> {
@@ -96,26 +113,6 @@ async function seedExpenses(sql: Sql): Promise<void> {
               ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
   }
-}
-
-async function seedMovements(sql: Sql): Promise<void> {
-  for (const [id, productoId, fecha, tipo, cantidad, costo] of MOVEMENTS) {
-    await sql`
-      INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
-                                       costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${productoId}, ${fecha}, ${tipo}, ${cantidad}, ${costo}, 'Compra a proveedor',
-              ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
-      ON CONFLICT (id) DO NOTHING`;
-  }
-}
-
-async function seedDayClose(sql: Sql): Promise<void> {
-  await sql`
-    INSERT INTO day_closes (id, fecha, efectivo_esperado_centavos, efectivo_contado_centavos,
-                            diferencia_centavos, cerrado_por, business_id, device_id, created_at, updated_at)
-    VALUES (${DAY_CLOSE_ID}, '2026-05-11', ${peso(2118)}, ${peso(2112)}, ${-peso(6)}, 'Director',
-            ${BIZ}, ${DEV}, ${TS('2026-05-11')}, ${TS('2026-05-11')})
-    ON CONFLICT (id) DO NOTHING`;
 }
 
 async function seedPeople(sql: Sql): Promise<void> {
