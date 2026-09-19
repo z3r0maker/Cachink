@@ -12,11 +12,18 @@ import { ProductosScreen } from './screen';
  */
 export const dynamic = 'force-dynamic';
 
-export default async function ProductosPage() {
+export default async function ProductosPage({
+  searchParams,
+}: {
+  readonly searchParams: Promise<{ readonly filtro?: string }>;
+}) {
   const session = await requireSession();
+  const filtro = (await searchParams).filtro === 'bajo' ? 'bajo' : 'todos';
   try {
-    return <ProductosScreen data={await loadProductos(session.business_id)} />;
+    return (
+      <ProductosScreen data={await loadProductos(session.business_id)} filtroInicial={filtro} />
+    );
   } catch {
-    return <ProductosScreen data={null} />;
+    return <ProductosScreen data={null} filtroInicial={filtro} />;
   }
 }

@@ -9,9 +9,14 @@ import { OnboardingFrame } from '@/onboarding/ui/frame';
 import { link, note, stack } from '@/onboarding/ui/onboarding.css';
 import { registrarse, type SignupFields } from '@/server/actions/signup';
 
-/** Three fields, one button. Everything else is asked by the wizard. */
+/** Four fields, one button. Everything else is asked by the wizard. */
 function useSignup(plan: PlanId | null) {
-  const [fields, setFields] = useState<SignupFields>({ nombre: '', email: '', password: '' });
+  const [fields, setFields] = useState<SignupFields>({
+    nombre: '',
+    tuNombre: '',
+    email: '',
+    password: '',
+  });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -34,6 +39,14 @@ function useSignup(plan: PlanId | null) {
 function Fields({ s }: { readonly s: ReturnType<typeof useSignup> }) {
   return (
     <>
+      <Input
+        labelText="Tu nombre"
+        autoComplete="name"
+        hintText="Opcional. Así te saludaremos en tu portal."
+        value={s.fields.tuNombre}
+        onChange={(e) => s.set({ tuNombre: e.target.value })}
+        data-testid="signup-tu-nombre"
+      />
       <Input
         labelText="Nombre de tu negocio"
         autoComplete="organization"

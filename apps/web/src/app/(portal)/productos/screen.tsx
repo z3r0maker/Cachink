@@ -132,19 +132,33 @@ function useRowDialogs() {
   };
 }
 
-export function ProductosScreen({ data }: { readonly data: ProductosData | null }) {
-  const session = useSession();
+/** Tab + filter state and the rows they produce; `?filtro=bajo` preselects «Stock bajo». */
+function useCatalogo(data: ProductosData | null, filtroInicial: 'todos' | 'bajo') {
   const [tab, setTab] = useState('catalogo');
-  const [filter, setFilter] = useState('Todos');
-  const mayWrite = canWrite(session.role);
-  const rowDialogs = useRowDialogs();
-
+  const [filter, setFilter] = useState(filtroInicial === 'bajo' ? 'Stock bajo' : 'Todos');
   const catalogo = data?.catalogo ?? [];
   const rows = useMemo(
     () => (filter === 'Stock bajo' ? catalogo.filter(isLow) : catalogo),
     [catalogo, filter],
   );
-  const isCatalogo = tab === 'catalogo';
+  return { tab, setTab, filter, setFilter, catalogo, rows, isCatalogo: tab === 'catalogo' };
+}
+
+export function ProductosScreen({
+  data,
+  filtroInicial = 'todos',
+}: {
+  readonly data: ProductosData | null;
+  /** `?filtro=bajo` — the Inicio banner and the sidebar chip land here. */
+  readonly filtroInicial?: 'todos' | 'bajo';
+}) {
+  const session = useSession();
+  const { tab, setTab, filter, setFilter, catalogo, rows, isCatalogo } = useCatalogo(
+    data,
+    filtroInicial,
+  );
+  const mayWrite = canWrite(session.role);
+  const rowDialogs = useRowDialogs();
 
   return (
     <>

@@ -28,7 +28,10 @@ import { startSession } from '../session';
 export type SignupResult = { ok: true } | { ok: false; message: string };
 
 export interface SignupFields {
+  /** The business's name. */
   readonly nombre: string;
+  /** The person's own name (O-24); optional — empty is stored as null. */
+  readonly tuNombre?: string;
   readonly email: string;
   readonly password: string;
 }

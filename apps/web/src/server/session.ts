@@ -25,6 +25,8 @@ export interface SessionClaims {
   /** `auth.users.id`. */
   readonly sub: string;
   readonly email: string;
+  /** The account's display name (O-24, ADR-086); null when it never set one. */
+  readonly nombre: string | null;
   /** Always `authenticated` — the shape PostgREST expects. */
   readonly role: 'authenticated';
   readonly business_id: string;
@@ -48,6 +50,7 @@ export const readSession = cache(async (): Promise<SessionClaims | null> => {
   return {
     sub: s.userId,
     email: s.email,
+    nombre: s.nombre,
     role: 'authenticated',
     business_id: s.businessId,
     member_role: s.role,

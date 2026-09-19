@@ -9,6 +9,9 @@ import {
 } from '@xangarro/data-pg';
 import { parseIsoDate, ultimosDias } from '@xangarro/domain';
 
+import { buildChecklist, type Checklist } from '@/onboarding/checklist';
+
+import { loadChecklistSignals } from './onboarding/load';
 import { withTenant } from './db';
 
 /**
@@ -27,6 +30,11 @@ export interface InicioData {
   readonly cortes: Awaited<ReturnType<typeof lastCortes>>;
   /** «Últimos 30 días»: one point per day ending today, zeros included. */
   readonly serie: Awaited<ReturnType<typeof serieDiaria>>;
+  /** «¿Cómo empiezo?» (P-04/N-14) — every item detected from data. */
+  readonly checklist: Checklist;
+  /** The month's bounds, so the hero never prints a date literal. */
+  readonly mesDesde: string;
+  readonly mesHasta: string;
 }
 
 export async function loadInicio(
@@ -35,7 +43,7 @@ export async function loadInicio(
   monthFrom: string,
   monthTo: string,
 ): Promise<InicioData> {
-  return withTenant(businessId, async (tx) => ({
+  const rows = await withTenant(businessId, async (tx) => ({
     today: await totalsForRange(tx, today, today),
     month: await totalsForRange(tx, monthFrom, monthTo),
     activity: await recentActivity(tx, 6),
@@ -46,4 +54,8 @@ export async function loadInicio(
       return serieDiaria(tx, r.desde, r.hasta);
     })(),
   }));
+  // The checklist reads its own signals outside the tenant transaction above;
+  // both are reads, so there is no window worth closing between them.
+  const signals = await loadChecklistSignals(businessId);
+  return { ...rows, checklist: buildChecklist(signals), mesDesde: monthFrom, mesHasta: monthTo };
 }

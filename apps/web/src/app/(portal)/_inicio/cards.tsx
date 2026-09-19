@@ -28,13 +28,20 @@ import {
  * The verdict uses its on-yellow form: `greenText` on `yellow` is 3.58:1, below
  * AA, so the dot carries the colour and the text stays black.
  */
-export function UtilidadHero({ month }: { readonly month: InicioData['month'] }) {
+export function UtilidadHero({
+  month,
+  rango,
+}: {
+  readonly month: InicioData['month'];
+  /** «01/may/2026 – 31/may/2026» — the period, from the business clock. */
+  readonly rango: string;
+}) {
   const positive = month.utilidad >= 0n;
   return (
     <Card tone="hero" emphasis="hero">
       <span className={heroEyebrow}>Utilidad del mes</span>
       <p className={heroFigure}>{formatMoney(month.utilidad)}</p>
-      <div className={heroRange}>01/may/2026 – 31/may/2026</div>
+      <div className={heroRange}>{rango}</div>
       <Verdict onYellow tone={positive ? 'healthy' : 'critical'}>
         {positive
           ? 'Tu negocio fue rentable este periodo.'

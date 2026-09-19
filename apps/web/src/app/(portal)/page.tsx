@@ -26,9 +26,13 @@ export default async function InicioPage() {
   try {
     const mes = rangoDelMes(today);
     const data = await loadInicio(session.business_id, today, mes.desde, mes.hasta);
-    return <InicioScreen data={data} role={session.member_role} hoy={today} />;
+    return (
+      <InicioScreen data={data} role={session.member_role} nombre={session.nombre} hoy={today} />
+    );
   } catch {
     // The screen owns the error state; the container only decides which one.
-    return <InicioScreen data={null} role={session.member_role} hoy={today} />;
+    return (
+      <InicioScreen data={null} role={session.member_role} nombre={session.nombre} hoy={today} />
+    );
   }
 }
