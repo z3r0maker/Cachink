@@ -446,9 +446,6 @@ run a specific phase or `--dry-run` to see the full flow list.
 | `quick-switch-login.yaml`              | QuickSwitch correct/wrong password |
 | `role-switch.yaml`                     | Director ↔ Operativo switch        |
 | `change-password.yaml`                 | Forced password change             |
-| `change-pin.yaml`                      | PIN change flow                    |
-| `change-pin-wrong-current.yaml`        | Wrong current PIN error            |
-| `recovery-password.yaml`               | Forgot password recovery           |
 | `recovery-back-and-factory-reset.yaml` | Recovery + factory reset           |
 | `recovery-pin.yaml`                    | PIN recovery                       |
 | `funciones-toggle.yaml`                | Toggle feature flags               |

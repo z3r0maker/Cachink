@@ -1,10 +1,8 @@
 /**
  * useQuickSwitchAuth — authentication logic for the QuickSwitchGate.
  *
- * Manages user lookup, PIN authentication, and recovery state.
- * Extracted from QuickSwitchGate per CLAUDE.md §6 (40-line budget).
- *
- * ADR-049: PIN for daily login, Password for recovery.
+ * Manages user lookup and NIP authentication. A forgotten NIP is reset
+ * by the owner from the portal (ADR-072) — no recovery state here.
  */
 
 import { useState } from 'react';
@@ -18,29 +16,14 @@ import {
   useSetUserRole,
   useSetMustChangePin,
 } from '../app-config/use-app-config';
-import { AutenticarUsuarioUseCase, RecuperarPinUseCase } from '@xangarro/application';
+import { AutenticarUsuarioUseCase } from '@xangarro/application';
 import { USERS_KEY } from './query-keys-auth';
-
-/** Mask an email: "a***@g***.com" */
-export function maskEmail(email: string): string {
-  const [local, domain] = email.split('@');
-  if (!local || !domain) return '***';
-  const localMask = local.charAt(0) + '***';
-  const [domainName, ...ext] = domain.split('.');
-  const domainMask = (domainName?.charAt(0) ?? '') + '***';
-  return `${localMask}@${domainMask}.${ext.join('.')}`;
-}
 
 export interface QuickSwitchAuthResult {
   readonly users: readonly User[];
   readonly error: string | null;
   readonly submitting: boolean;
-  readonly recoveryUserId: UserId | null;
-  readonly maskedRecoveryEmail: string | null;
   readonly handleAuth: (userId: UserId, pin: string) => void;
-  readonly handleRecover: (recoveryPassword: string, newPin: string) => void;
-  readonly startRecovery: (userId: UserId) => void;
-  readonly cancelRecovery: () => void;
 }
 
 type SetState<T> = (v: T) => void;
@@ -93,32 +76,6 @@ async function runAuth(
   }
 }
 
-async function runRecover(
-  recoveryUserId: UserId,
-  recoveryPassword: string,
-  newPin: string,
-  usersRepo: UsersRepo,
-  setters: Pick<SettersBundle, 'setSubmitting' | 'setError'>,
-  clearRecovery: () => void,
-): Promise<void> {
-  setters.setSubmitting(true);
-  setters.setError(null);
-  // Yield one frame so React paints the loading spinner before bcrypt blocks
-  await new Promise<void>((r) => requestAnimationFrame(() => r()));
-  try {
-    await new RecuperarPinUseCase(usersRepo).execute({
-      userId: recoveryUserId,
-      recoveryPassword,
-      newPin,
-    });
-    clearRecovery();
-  } catch (e) {
-    setters.setError(e instanceof Error ? e.message : 'Error de recuperación');
-  } finally {
-    setters.setSubmitting(false);
-  }
-}
-
 export function useQuickSwitchAuth(businessId: BusinessId): QuickSwitchAuthResult {
   const usersRepo = useUsersRepository();
   const setUserId = useSetUserId();
@@ -127,28 +84,12 @@ export function useQuickSwitchAuth(businessId: BusinessId): QuickSwitchAuthResul
   const setMustChangePin = useSetMustChangePin();
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [recoveryUserId, setRecoveryUserId] = useState<UserId | null>(null);
   const query = useQuery({
     queryKey: [...USERS_KEY, businessId],
     queryFn: () => usersRepo.findAllByBusiness(businessId),
   });
   const setters = { setSubmitting, setError, setUserId, setUserRole, setRole, setMustChangePin };
-  const recUser = query.data?.find((u) => u.id === recoveryUserId);
-  const maskedRecoveryEmail = recUser?.email ? maskEmail(recUser.email) : null;
   const handleAuth = (uid: UserId, pin: string) =>
     void runAuth(uid, pin, businessId, usersRepo, setters);
-  const handleRecover = (pw: string, pin: string) =>
-    recoveryUserId
-      ? void runRecover(recoveryUserId, pw, pin, usersRepo, setters, () => setRecoveryUserId(null))
-      : undefined;
-  const startRecovery = (uid: UserId) => {
-    setRecoveryUserId(uid);
-    setError(null);
-  };
-  const cancelRecovery = () => {
-    setRecoveryUserId(null);
-    setError(null);
-  };
-  const fixed = { users: query.data ?? [], error, submitting, recoveryUserId, maskedRecoveryEmail };
-  return { ...fixed, handleAuth, handleRecover, startRecovery, cancelRecovery };
+  return { users: query.data ?? [], error, submitting, handleAuth };
 }

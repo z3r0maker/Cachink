@@ -18,7 +18,6 @@ export interface PinPromptProps {
   readonly userId: UserId;
   readonly userName: string;
   readonly onSubmit: (pin: string) => void;
-  readonly onForgotPin?: () => void;
   readonly error: string | null;
   readonly submitting: boolean;
 }
@@ -46,7 +45,6 @@ function usePinState(error: string | null): {
 
 function PinButtons(props: {
   readonly onSubmit: () => void;
-  readonly onForgotPin?: () => void;
   readonly submitting: boolean;
   readonly pinEmpty: boolean;
 }): ReactElement {
@@ -63,11 +61,6 @@ function PinButtons(props: {
       >
         {t('login.submit')}
       </Btn>
-      {props.onForgotPin !== undefined && (
-        <Btn variant="ghost" onPress={props.onForgotPin} fullWidth testID="forgot-pin-link">
-          {t('login.forgotPin')}
-        </Btn>
-      )}
     </>
   );
 }
@@ -122,12 +115,7 @@ export function PinPrompt(props: PinPromptProps): ReactElement {
         testID="pin-input"
       />
       <PinError error={props.error} />
-      <PinButtons
-        onSubmit={handleSubmit}
-        onForgotPin={props.onForgotPin}
-        submitting={showOverlay}
-        pinEmpty={pin.length === 0}
-      />
+      <PinButtons onSubmit={handleSubmit} submitting={showOverlay} pinEmpty={pin.length === 0} />
       <LoadingOverlay
         visible={showOverlay}
         message={t('login.verifying')}

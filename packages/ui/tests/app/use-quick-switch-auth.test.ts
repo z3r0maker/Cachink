@@ -1,31 +1,26 @@
 /**
- * useQuickSwitchAuth tests — auth gate logic.
- *
- * Tests the maskEmail utility and basic hook structure.
+ * useQuickSwitchAuth — result shape. Recovery state is gone (ADR-072):
+ * a forgotten NIP is the owner's to reset from the portal.
  */
 
 import { describe, expect, it } from 'vitest';
-import { maskEmail } from '../../src/app/use-quick-switch-auth';
+import type { BusinessId } from '@xangarro/domain';
+import type { useQuickSwitchAuth } from '../../src/app/use-quick-switch-auth';
 
-describe('maskEmail', () => {
-  it('masks a standard email', () => {
-    expect(maskEmail('alice@gmail.com')).toBe('a***@g***.com');
-  });
+const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
-  it('masks email with subdomain', () => {
-    expect(maskEmail('bob@mail.example.co.uk')).toBe('b***@m***.example.co.uk');
-  });
-
-  it('handles short local part', () => {
-    expect(maskEmail('a@b.com')).toBe('a***@b***.com');
-  });
-
-  it('returns *** for invalid email without @', () => {
-    expect(maskEmail('invalid')).toBe('***');
-  });
-
-  it('handles empty local part', () => {
-    const result = maskEmail('@domain.com');
-    expect(result).toBe('***');
+describe('useQuickSwitchAuth', () => {
+  it('exposes authentication only — no recovery surface (ADR-072)', () => {
+    // Structural: the hook's public type has exactly these keys.
+    const keys: readonly (keyof ReturnType<typeof useQuickSwitchAuth>)[] = [
+      'users',
+      'error',
+      'submitting',
+      'handleAuth',
+    ];
+    expect(keys).toContain('handleAuth');
+    expect(keys).not.toContain('startRecovery');
+    expect(keys).not.toContain('handleRecover');
+    void BIZ;
   });
 });

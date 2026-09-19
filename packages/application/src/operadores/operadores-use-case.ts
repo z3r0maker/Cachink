@@ -95,7 +95,7 @@ export interface RestablecerPinInput {
   readonly pin: string;
 }
 
-/** An administrator resets a forgotten PIN — unlike `CambiarPinUseCase`, no old PIN needed. */
+/** The owner resets a forgotten NIP (ADR-072) — no old NIP needed, portal-only. */
 export class RestablecerPinOperadorUseCase implements UseCase<RestablecerPinInput, void> {
   readonly #users: UsersRepository;
   constructor(users: UsersRepository) {

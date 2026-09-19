@@ -10,7 +10,7 @@
     "area": "Director & Reportes"
   },
   {
-    "pattern": "usuario|pin|recovery|quick-switch|auto-lock|role-switch|change-pin",
+    "pattern": "usuario|pin|quick-switch|auto-lock|role-switch",
     "area": "Auth & Usuarios"
   },
   { "pattern": "funciones|flag", "area": "Feature Flags" },
