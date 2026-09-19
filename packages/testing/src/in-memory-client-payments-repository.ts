@@ -4,16 +4,15 @@
 
 import type {
   BusinessId,
+  ClientId,
   ClientPayment,
   ClientPaymentId,
   DeviceId,
   IsoDate,
   IsoTimestamp,
-  Money,
   NewClientPayment,
-  SaleId,
 } from '@xangarro/domain';
-import { ZERO, newEntityId, now, sum } from '@xangarro/domain';
+import { newEntityId, now } from '@xangarro/domain';
 import type { ClientPaymentsRepository } from '@xangarro/data';
 
 export class InMemoryClientPaymentsRepository implements ClientPaymentsRepository {
@@ -29,7 +28,7 @@ export class InMemoryClientPaymentsRepository implements ClientPaymentsRepositor
     const ts = now();
     const row: ClientPayment = {
       id,
-      ventaId: input.ventaId,
+      clienteId: input.clienteId,
       fecha: input.fecha,
       montoCentavos: input.montoCentavos,
       metodo: input.metodo,
@@ -51,15 +50,10 @@ export class InMemoryClientPaymentsRepository implements ClientPaymentsRepositor
     return row;
   }
 
-  async findByVenta(ventaId: SaleId): Promise<readonly ClientPayment[]> {
+  async findByCliente(clienteId: ClientId): Promise<readonly ClientPayment[]> {
     return [...this.rows.values()]
-      .filter((r) => r.ventaId === ventaId && r.deletedAt === null)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
-  }
-
-  async sumByVenta(ventaId: SaleId): Promise<Money> {
-    const rows = await this.findByVenta(ventaId);
-    return rows.length === 0 ? ZERO : sum(rows.map((r) => r.montoCentavos));
+      .filter((r) => r.clienteId === clienteId && r.deletedAt === null)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
   async findByDateRange(

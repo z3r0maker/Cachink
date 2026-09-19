@@ -4,11 +4,11 @@ import { ClientPaymentSchema, NewClientPaymentSchema } from '../../src/entities/
 const BIZ_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEP';
 const PAY_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TF3';
-const VEN_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TF4';
+const CLI_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TF4';
 
 const validPayment = {
   id: PAY_ID,
-  ventaId: VEN_ID,
+  clienteId: CLI_ID,
   fecha: '2026-04-23',
   montoCentavos: 50_000n,
   metodo: 'Efectivo' as const,
@@ -45,7 +45,7 @@ describe('ClientPaymentSchema', () => {
   });
 
   it('rejects a malformed ventaId', () => {
-    expect(() => ClientPaymentSchema.parse({ ...validPayment, ventaId: 'nope' })).toThrow();
+    expect(() => ClientPaymentSchema.parse({ ...validPayment, clienteId: 'nope' })).toThrow();
   });
 
   it('rejects a monto as a plain number', () => {
@@ -62,7 +62,7 @@ describe('NewClientPaymentSchema', () => {
   it('accepts a minimal input', () => {
     expect(() =>
       NewClientPaymentSchema.parse({
-        ventaId: VEN_ID,
+        clienteId: CLI_ID,
         fecha: '2026-04-23',
         montoCentavos: 50_000n,
         metodo: 'Efectivo',

@@ -89,7 +89,7 @@ export class ExportarDatosUseCase implements UseCase<ExportarDatosInput, ExportD
     const [expenses, inventoryMovements, clientPayments, dayCloses] = await Promise.all([
       collectExpenses(this.#repos.expenses, businessId),
       collectInventoryMovements(this.#repos.inventoryMovements, businessId),
-      collectClientPayments(this.#repos.clientPayments, sales),
+      collectClientPayments(this.#repos.clientPayments, businessId),
       collectDayCloses(this.#repos.dayCloses, businessId),
     ]);
 
@@ -168,14 +168,10 @@ async function collectInventoryMovements(
 
 async function collectClientPayments(
   repo: ClientPaymentsRepository,
-  sales: readonly Sale[],
+  businessId: BusinessId,
 ): Promise<readonly ClientPayment[]> {
-  const out: ClientPayment[] = [];
-  for (const sale of sales) {
-    const pagos = await repo.findByVenta(sale.id);
-    out.push(...pagos);
-  }
-  return out;
+  // Abonos belong to clients (ADR-074); the export lists them all by date.
+  return repo.findByDateRange('0000-01-01' as never, '9999-12-31' as never, businessId);
 }
 
 async function collectDayCloses(

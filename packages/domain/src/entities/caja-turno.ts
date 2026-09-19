@@ -47,6 +47,11 @@ export const CajaTurnoSchema = z
     conteoCentavos: moneyField.nullable().default(null),
     /** ISO timestamp when the blind count was submitted. */
     conteoAt: isoTimestampField.nullable().default(null),
+    /**
+     * The count by denomination at close ("$1000": 3, …), written once and
+     * immutable after (ADR-074). Null before C-18 rows and while open.
+     */
+    denominaciones: z.record(z.string(), z.number().int().min(0)).nullable().default(null),
   })
   .merge(auditSchema);
 

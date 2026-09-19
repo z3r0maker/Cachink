@@ -30,6 +30,8 @@ export function makeNewProduct(overrides: Partial<NewProduct> = {}): NewProduct 
     atributos: {},
     colorFondo: 'white',
     usoProducto: 'venta',
+    estadoRevision: 'aprobado',
+    fusionadoConId: null,
     businessId: DEFAULT_BIZ,
     ...overrides,
   };
@@ -51,6 +53,8 @@ export function makeProduct(overrides: Partial<Product> = {}): Product {
     atributos: {},
     colorFondo: 'white',
     usoProducto: 'venta',
+    estadoRevision: 'aprobado',
+    fusionadoConId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdByUserId: null,

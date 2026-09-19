@@ -43,6 +43,7 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       categoria: input.categoria,
       monto: input.monto,
       proveedor: input.proveedor ?? null,
+      cajaTurnoId: input.cajaTurnoId ?? null,
       gastoRecurrenteId: input.gastoRecurrenteId ?? null,
       businessId: input.businessId,
       deviceId: this.#deviceId,
@@ -197,6 +198,7 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+      cajaTurnoId: (row.cajaTurnoId ?? null) as Expense['cajaTurnoId'],
     };
   }
 }

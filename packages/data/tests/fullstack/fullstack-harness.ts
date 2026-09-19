@@ -175,7 +175,7 @@ export function buildHarness(opts?: {
     retirarCaja: new RetirarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     depositarCaja: new DepositarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     cerrarCorte: new CerrarCorteDeDiaUseCase(repos.sales, repos.expenses, repos.dayCloses),
-    registrarPago: new RegistrarPagoClienteUseCase(repos.clientPayments, repos.sales),
+    registrarPago: new RegistrarPagoClienteUseCase(repos.clientPayments, repos.clients),
     registrarMovimiento: new RegistrarMovimientoInventarioUseCase(repos.movements, repos.expenses),
     registrarEgreso: new RegistrarEgresoUseCase(repos.expenses, repos.recurring),
     procesarGastoRecurrente: new ProcesarGastoRecurrenteUseCase(repos.expenses, repos.recurring),

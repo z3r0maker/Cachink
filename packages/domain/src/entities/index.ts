@@ -7,6 +7,7 @@
  */
 
 export * from './_audit.js';
+export * from './_revision.js';
 export * from './_fields.js';
 export * from './_ulid-field.js';
 export * from './business.js';

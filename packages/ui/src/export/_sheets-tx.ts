@@ -78,14 +78,14 @@ export function addPagosSheet(wb: ExcelJS.Workbook, ds: ExportDataset): void {
   const sheet = wb.addWorksheet('Pagos');
   sheet.columns = [
     { header: 'Fecha', key: 'fecha', width: 12 },
-    { header: 'Venta', key: 'ventaId', width: 28 },
+    { header: 'Cliente', key: 'clienteId', width: 28 },
     { header: 'Monto (MXN)', key: 'monto', width: 14, style: { numFmt: MONEY_FORMAT } },
     { header: 'Método', key: 'metodo', width: 12 },
   ];
   for (const p of ds.clientPayments) {
     sheet.addRow({
       fecha: p.fecha,
-      ventaId: p.ventaId,
+      clienteId: p.clienteId,
       monto: centavosToPesos(p.montoCentavos),
       metodo: p.metodo,
     });

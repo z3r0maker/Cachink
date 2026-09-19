@@ -13,7 +13,7 @@ import {
   makeNewDayClose,
   makeNewSale,
 } from '@xangarro/testing';
-import type { BusinessId, DeviceId, IsoDate, ProductId, SaleId } from '@xangarro/domain';
+import type { ClientId, BusinessId, DeviceId, IsoDate, ProductId } from '@xangarro/domain';
 import { composeBalanceGeneral } from '../../src/hooks/use-balance-general';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
@@ -70,17 +70,19 @@ describe('composeBalanceGeneral', () => {
 
   it('computes cuentasPorCobrar from pending Crédito ventas minus pagos', async () => {
     const deps = buildDeps();
-    const venta = await deps.sales.create(
+    const CLIENTE = '01HZ8XQN9GZJXV8AKQ5X0C7CKJ' as ClientId;
+    await deps.sales.create(
       makeNewSale({
         fecha: APR_01,
         businessId: BIZ,
         metodo: 'Crédito',
+        clienteId: CLIENTE,
         monto: 100_000n,
       }),
     );
     await deps.clientPayments.create(
       makeNewClientPayment({
-        ventaId: venta.id as SaleId,
+        clienteId: CLIENTE,
         businessId: BIZ,
         fecha: APR_01,
         montoCentavos: 30_000n,

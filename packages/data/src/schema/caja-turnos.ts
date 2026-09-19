@@ -27,5 +27,6 @@ export const cajaTurnos = sqliteTable('caja_turnos', {
   egresoAutoId: text('egreso_auto_id'),
   conteoCentavos: numeric('conteo_centavos', { mode: 'bigint' }),
   conteoAt: text('conteo_at'),
+  denominaciones: text('denominaciones'),
   ...auditColumns,
 });

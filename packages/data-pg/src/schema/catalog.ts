@@ -89,5 +89,11 @@ export const products = pgTable('products', {
     .notNull()
     .default('venta'),
   icono: text('icono'),
+  estadoRevision: text('estado_revision', {
+    enum: ['pendiente', 'aprobado', 'fusionado', 'rechazado'],
+  })
+    .notNull()
+    .default('aprobado'),
+  fusionadoConId: text('fusionado_con_id'),
   ...auditColumns,
 });

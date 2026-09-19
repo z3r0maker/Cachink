@@ -59,6 +59,16 @@ export const clients = pgTable('clients', {
   nota: text('nota'),
   /** Optional, set by the Clientes import (N-16); migration 0020. */
   rfc: text('rfc'),
+  /** Owner-set credit line and term (ADR-074, C-18). */
+  limiteCentavos: centavos('limite_centavos'),
+  plazoDias: integer('plazo_dias'),
+  /** «Creado en caja» review (ADR-074); portal-written rows are `aprobado`. */
+  estadoRevision: text('estado_revision', {
+    enum: ['pendiente', 'aprobado', 'fusionado', 'rechazado'],
+  })
+    .notNull()
+    .default('aprobado'),
+  fusionadoConId: text('fusionado_con_id'),
   ...auditColumns,
 });
 
