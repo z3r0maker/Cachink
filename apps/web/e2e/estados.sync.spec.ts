@@ -52,3 +52,17 @@ test('an expandable line lists what it is made of, largest first', async ({ page
   await expect(main(page).getByText('($6,000.00)')).toBeVisible();
   await expect(main(page).getByText('($340.00)')).toBeVisible();
 });
+
+/** P-14's charts (provisional until the design mirror, O-23): the waterfall walks the B-3 identities and the donuts state their totals in text. */
+test('the Resultados waterfall and donuts render from the same numbers', async ({ page }) => {
+  await page.goto('/estados');
+  const main = (p: Page) => p.locator('main');
+  await expect(
+    main(page).getByRole('img', { name: /Cascada del Estado de Resultados/ }),
+  ).toBeVisible();
+  // May's seed: ingresos 645, costo (Materia Prima 9,000) and gastos — five non-zero steps.
+  await expect(page.locator('.recharts-bar-rectangle')).toHaveCount(10);
+  await expect(main(page).getByRole('img', { name: /Ingresos por método/ })).toBeVisible();
+  await expect(main(page).getByRole('img', { name: /Egresos por categoría/ })).toBeVisible();
+  await expect(main(page).getByText('Total: $645.00.')).toBeVisible();
+});

@@ -14,6 +14,7 @@ import { Indicadores, IsrNotice, Resumen } from './parts';
 import { pageSubtitle, pageTitle } from './estados.css';
 import type { Periodo } from './periodo';
 import { PeriodoSwitcher } from './periodo-switcher';
+import { Donuts, Waterfall } from './charts';
 import { Statement } from './statement';
 
 const TABS = [
@@ -34,7 +35,9 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         label="Utilidad neta"
       />
       <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} />
+      <Waterfall er={ER} />
       <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER, m.desglose)} />
+      <Donuts desglose={m.desglose} />
     </>
   );
 }

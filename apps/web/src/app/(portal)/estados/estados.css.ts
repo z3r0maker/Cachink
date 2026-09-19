@@ -96,3 +96,22 @@ export const subLine = style({
   color: colors.textMuted,
   borderBottom: `2px solid ${colors.gray200}`,
 });
+
+export const chartTitle = style({
+  fontSize: 15,
+  fontWeight: 800,
+  margin: '0 0 12px',
+});
+
+export const chartNote = style({
+  fontSize: 12,
+  color: colors.gray600,
+  margin: '8px 0 0',
+});
+
+export const donutGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+  gap: 20,
+  alignItems: 'start',
+});
