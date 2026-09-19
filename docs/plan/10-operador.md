@@ -70,8 +70,23 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
 
 ### O-02 Recover `packages/sync/src`; SQLite-WASM spike
 
-> **Reordered 2026-09-17 (owner, question 9):** O-10 and O-11 run first on fixtures; O-02 waits for
-> `track/app` to land on `main`, because `packages/sync/src` exists only on that unmerged track.
+- [x] Status · **Blocked by:** — · **Blocks:** O-05, O-06
+  - Done: 2026-09-19 · `packages/sync/src` returned with the merge of `rename/xangarro-stored-ids`
+    (52824588): api-client, sync-engine, outbox drain, retention purge, entitlement verify,
+    reference applier, legacy tracker — extended for tickets + per-client abonos (see the merge
+    commit). **Spike green in both engines:** `apps/web/e2e/spike-sqlite-wasm.spec.ts` +
+    `e2e/spikes/sqlite-wasm-opfs/` bundle the real stack (sql.js WASM inlined, esbuild) and
+    drive it through Playwright — the merged journal (0000–0009) applies on WASM, a
+    `DrizzleTicketsRepository`+`DrizzleSalesRepository` round-trip writes and reads back, the
+    change-log triggers fire (`__xangarro_change_log` rows), and OPFS persists across a reload —
+    **Chromium ✓ and WebKit ✓** (WebKit needs a persistent context: headless WebKit's OPFS
+    storage process refuses an ephemeral profile — the spec launches
+    `webkit.launchPersistentContext`). **The Drizzle driver runs on WASM** — the hard stop does
+    not apply. **Bundle cost: 2,069 KiB self-contained** (sql.js JS+WASM ≈ 1.5 MB of it; drizzle +
+    domain + data + migrations ≈ 0.5 MB; gzip roughly halves it). Runner: `pnpm --filter
+@xangarro/web test:spike` (no database, no server). O-06 will load the WASM only on register
+    routes and move persistence into a Worker with the real `@sqlite.org/sqlite-wasm` OPFS VFS
+    where feasible.
 
 - [ ] Status · **Blocked by:** — · **Blocks:** O-05, O-06
 - **Steps:** restore `packages/sync/src` from the branch that has it (see `git log --all -- packages/sync/src`), make

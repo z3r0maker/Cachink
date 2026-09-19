@@ -14,6 +14,7 @@
     "lint": "eslint . --config ../../eslint.config.js",
     "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "clean": "rm -rf .next dist .turbo",
+    "test:spike": "playwright test -c playwright.spike.config.ts --no-deps --output /tmp/pw-spike-out",
     "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test",
     "test:e2e:ui": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test --ui",
     "test:e2e:db": "pnpm --filter @xangarro/data-pg db:reset && pnpm test:e2e",
@@ -44,7 +45,6 @@
     "@xangarro/domain": "workspace:*",
     "@xangarro/email": "workspace:*",
     "@xangarro/tokens": "workspace:*",
-    "sharp": "^0.35.4",
     "exceljs": "^4.4.0",
     "jose": "6.2.12",
     "lucide-react": "^1.47.0",
@@ -53,6 +53,7 @@
     "react-dom": "^19.3.0",
     "recharts": "^3.10.1",
     "server-only": "^0.0.1",
+    "sharp": "^0.35.4",
     "stripe": "^22.6.2",
     "zod": "^4.6.5"
   },
@@ -64,6 +65,7 @@
     "@types/react-dom": "^19.3.0",
     "@vanilla-extract/next-plugin": "^2.5.2",
     "@xangarro/config": "workspace:*",
+    "sql.js": "^1.14.2",
     "typescript": "^6.0.3",
     "vitest": "^4.1.6"
   }
