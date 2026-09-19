@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, expect, it } from 'vitest';
-import type { ClientPayment, DayClose, Sale } from '../../src/entities/index.js';
+import type { ClientPayment, DayClose } from '../../src/entities/index.js';
 import { calculateBalanceGeneral } from '../../src/financials/index.js';
 
 const AUDIT = {
@@ -25,19 +25,19 @@ function makeCorte(overrides: Partial<DayClose> = {}): DayClose {
   } as DayClose;
 }
 
-function makeCreditSale(overrides: Partial<Sale> = {}): Sale {
+function makeCreditSale(
+  overrides: { id?: string; monto?: bigint; estadoPago?: string } = {},
+): never {
   return {
-    id: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
-    fecha: '2026-04-23',
-    concepto: 'Taco Crédito',
-    categoria: 'Producto',
-    monto: 10_000n,
-    metodo: 'Crédito',
-    clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7CKJ',
-    estadoPago: 'pendiente',
-    ...AUDIT,
-    ...overrides,
-  } as Sale;
+    ticket: {
+      id: overrides.id ?? '01HZ8XQN9GZJXV8AKQ5X0C7S01',
+      fecha: '2026-04-23',
+      createdAt: '2026-04-23T15:00:00.000Z',
+      clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7CKJ',
+      estadoPago: overrides.estadoPago ?? 'pendiente',
+    },
+    total: overrides.monto ?? 10_000n,
+  } as never;
 }
 
 function makePago(overrides: Partial<ClientPayment> = {}): ClientPayment {

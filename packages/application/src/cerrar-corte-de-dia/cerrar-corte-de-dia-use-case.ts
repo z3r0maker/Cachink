@@ -10,13 +10,20 @@
 
 import {
   calculateCorteDeDia,
+  conTotales,
+  vigentes,
   type BusinessId,
   type DayClose,
   type DayCloseRole,
   type IsoDate,
   type Money,
 } from '@xangarro/domain';
-import type { DayClosesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
+import type {
+  DayClosesRepository,
+  ExpensesRepository,
+  SalesRepository,
+  TicketsRepository,
+} from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface CerrarCorteDeDiaInput {
@@ -29,11 +36,18 @@ export interface CerrarCorteDeDiaInput {
 }
 
 export class CerrarCorteDeDiaUseCase implements UseCase<CerrarCorteDeDiaInput, DayClose> {
+  readonly #tickets: TicketsRepository;
   readonly #sales: SalesRepository;
   readonly #expenses: ExpensesRepository;
   readonly #closes: DayClosesRepository;
 
-  constructor(sales: SalesRepository, expenses: ExpensesRepository, closes: DayClosesRepository) {
+  constructor(
+    tickets: TicketsRepository,
+    sales: SalesRepository,
+    expenses: ExpensesRepository,
+    closes: DayClosesRepository,
+  ) {
+    this.#tickets = tickets;
     this.#sales = sales;
     this.#expenses = expenses;
     this.#closes = closes;
@@ -45,11 +59,13 @@ export class CerrarCorteDeDiaUseCase implements UseCase<CerrarCorteDeDiaInput, D
       throw new TypeError(`Ya existe un corte para ${input.fecha} en este dispositivo`);
     }
 
-    const [ventasHoy, egresosHoy, corteAnterior] = await Promise.all([
+    const [ticketsHoy, lineasHoy, egresosHoy, corteAnterior] = await Promise.all([
+      this.#tickets.findByDate(input.fecha, input.businessId),
       this.#sales.findByDate(input.fecha, input.businessId),
       this.#expenses.findByDate(input.fecha, input.businessId),
       this.#closes.findLatest(input.businessId),
     ]);
+    const ventasHoy = conTotales(vigentes(ticketsHoy), lineasHoy);
 
     const { esperado } = calculateCorteDeDia({
       ventasHoy,

@@ -10,7 +10,7 @@
 
 import { useMemo, useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { IsoDate, Sale } from '@xangarro/domain';
+import type { IsoDate, Ticket } from '@xangarro/domain';
 import { Card, Kpi, SectionTitle } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, radii, typography } from '../../theme';
@@ -26,7 +26,7 @@ export interface CuentasPorCobrarScreenProps {
   readonly testID?: string;
 }
 
-function allPendingSales(rows: readonly CuentaPorCobrarRow[]): readonly Sale[] {
+function allPendingSales(rows: readonly CuentaPorCobrarRow[]): readonly Ticket[] {
   return rows.flatMap((row) => row.ventas);
 }
 

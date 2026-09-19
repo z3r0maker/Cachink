@@ -9,6 +9,7 @@ import {
   useClientPaymentsRepository,
   useExpensesRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeFlujoEfectivo } from './use-flujo-efectivo';
@@ -21,6 +22,7 @@ export interface UseFlujoEfectivoDeltaOptions {
 export function useFlujoEfectivoDelta(
   options: UseFlujoEfectivoDeltaOptions,
 ): UseQueryResult<FlujoDeEfectivo | null, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const clientPayments = useClientPaymentsRepository();
@@ -33,7 +35,7 @@ export function useFlujoEfectivoDelta(
     staleTime: 5 * 60 * 1000,
     async queryFn() {
       if (!businessId) throw new Error('No business selected');
-      return composeFlujoEfectivo(sales, expenses, clientPayments, businessId, prior);
+      return composeFlujoEfectivo(tickets, sales, expenses, clientPayments, businessId, prior);
     },
   });
 }

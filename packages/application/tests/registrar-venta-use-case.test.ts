@@ -7,17 +7,19 @@ import {
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeClient,
   makeNewProduct,
   makeNewSale,
 } from '../../testing/src/index.js';
-import { RegistrarVentaUseCase } from '../src/index.js';
+import { RegistrarTicketUseCase, RegistrarVentaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER_ID = '01HZ8XQN9GZJXV8AKQ5X0CUSR1' as UserId;
 
 describe('RegistrarVentaUseCase', () => {
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let clients: InMemoryClientsRepository;
   let products: InMemoryProductsRepository;
@@ -44,9 +46,12 @@ describe('RegistrarVentaUseCase', () => {
       businessId: BIZ,
     });
 
-    useCase = new RegistrarVentaUseCase(sales, clients, products, movements, cajaTurnos, {
-      userId: USER_ID,
-    });
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
+    useCase = new RegistrarVentaUseCase(
+      new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {
+        userId: USER_ID,
+      }),
+    );
 
     // Seed a default product so makeNewSale() fixtures resolve
     const defaultProduct = await products.create(makeNewProduct({ businessId: BIZ }));
@@ -57,7 +62,8 @@ describe('RegistrarVentaUseCase', () => {
     const sale = await useCase.execute(
       makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
     );
-    expect(sale.estadoPago).toBe('pagado');
+    const ticket = await tickets.findById(sale.ticketId);
+    expect(ticket?.estadoPago).toBe('pagado');
   });
 
   it('creates a Crédito sale as pendiente when the cliente exists', async () => {
@@ -75,8 +81,9 @@ describe('RegistrarVentaUseCase', () => {
         productoId: defaultProductId,
       }),
     );
-    expect(sale.estadoPago).toBe('pendiente');
-    expect(sale.clienteId).toBe(persisted.id);
+    const ticket = await tickets.findById(sale.ticketId);
+    expect(ticket?.estadoPago).toBe('pendiente');
+    expect(ticket?.clienteId).toBe(persisted.id);
   });
 
   it('rejects a Crédito sale without a clienteId', async () => {
@@ -204,12 +211,10 @@ describe('RegistrarVentaUseCase', () => {
 
   it('does NOT create a movement when stockEnabled=false even if product seguirStock=true', async () => {
     const stockOffUseCase = new RegistrarVentaUseCase(
-      sales,
-      clients,
-      products,
-      movements,
-      cajaTurnos,
-      { stockEnabled: false, userId: USER_ID },
+      new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {
+        stockEnabled: false,
+        userId: USER_ID,
+      }),
     );
     const producto = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: true }));
     await movements.create({
@@ -237,12 +242,9 @@ describe('RegistrarVentaUseCase', () => {
       const freshCajaTurnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
       // No turno seeded
       const gatedUseCase = new RegistrarVentaUseCase(
-        sales,
-        clients,
-        products,
-        movements,
-        freshCajaTurnos,
-        { userId: USER_ID },
+        new RegistrarTicketUseCase(tickets, sales, clients, products, movements, freshCajaTurnos, {
+          userId: USER_ID,
+        }),
       );
       await expect(
         gatedUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),
@@ -253,18 +255,15 @@ describe('RegistrarVentaUseCase', () => {
       const sale = await useCase.execute(
         makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
       );
-      expect(sale.cajaTurnoId).not.toBeNull();
-      expect(typeof sale.cajaTurnoId).toBe('string');
+      const ticket = await tickets.findById(sale.ticketId);
+      expect(ticket?.cajaTurnoId).not.toBeNull();
     });
 
     it('throws CajaNoAbiertaError when userId is null', async () => {
       const noUserUseCase = new RegistrarVentaUseCase(
-        sales,
-        clients,
-        products,
-        movements,
-        cajaTurnos,
-        { userId: null },
+        new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {
+          userId: null,
+        }),
       );
       await expect(
         noUserUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),
@@ -287,12 +286,9 @@ describe('RegistrarVentaUseCase', () => {
         montoCierreCentavos: 500_00n,
       });
       const closedUseCase = new RegistrarVentaUseCase(
-        sales,
-        clients,
-        products,
-        movements,
-        freshCajaTurnos,
-        { userId: USER_ID },
+        new RegistrarTicketUseCase(tickets, sales, clients, products, movements, freshCajaTurnos, {
+          userId: USER_ID,
+        }),
       );
       await expect(
         closedUseCase.execute(makeNewSale({ businessId: BIZ, productoId: defaultProductId })),

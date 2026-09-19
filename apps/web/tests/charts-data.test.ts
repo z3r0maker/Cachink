@@ -1,12 +1,7 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 
-import {
-  calculateEstadoDeResultados,
-  desgloseDeResultados,
-  type Sale,
-  type Expense,
-} from '@xangarro/domain';
+import { calculateEstadoDeResultados, desgloseDeResultados, type Expense } from '@xangarro/domain';
 
 import {
   donutEgresos,
@@ -14,29 +9,18 @@ import {
   waterfallDeResultados,
 } from '../src/app/(portal)/estados/charts-data';
 
-const venta = (
-  metodo: Sale['metodo'],
-  monto: bigint,
-  categoria: Sale['categoria'] = 'Producto',
-): Sale =>
+/** A ticket projection (ADR-073): method on the header, total derived. */
+const venta = (metodo: string, monto: bigint, _categoria: string = 'Producto'): never =>
   ({
-    id: '01J-V',
-    productoId: '01J-P',
-    fecha: '2026-05-01',
-    hora: null,
-    concepto: 'x',
-    categoria,
-    monto,
-    metodo,
-    estadoPago: 'pagado',
-    cantidad: 1,
-  }) as unknown as Sale;
+    ticket: { id: '01J-V', metodo, fecha: '2026-05-01' },
+    total: monto,
+  }) as never;
 
 const gasto = (categoria: Expense['categoria'], monto: bigint): Expense =>
   ({ id: '01J-E', fecha: '2026-05-01', concepto: 'x', categoria, monto }) as unknown as Expense;
 
 const ER = calculateEstadoDeResultados({
-  ventas: [venta('Efectivo', 100_000n), venta('Crédito', 40_000n)],
+  ventas: [{ monto: 100_000n }, { monto: 40_000n }] as never,
   egresos: [gasto('Materia Prima', 30_000n), gasto('Renta', 20_000n)],
   isrTasa: 125,
 });
@@ -70,7 +54,7 @@ describe('waterfallDeResultados', () => {
   it('omits zero steps — no merma month draws no merma bar', () => {
     assert.ok(waterfallDeResultados(ER).every((s) => s.delta !== 0));
     const sinGastos = calculateEstadoDeResultados({
-      ventas: [venta('Efectivo', 100n)],
+      ventas: [{ monto: 100n }] as never,
       egresos: [],
       isrTasa: 0,
     });

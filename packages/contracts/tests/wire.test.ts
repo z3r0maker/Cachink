@@ -1,25 +1,17 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
-import { SaleSchema } from '@xangarro/domain';
+import { SaleSchema, TicketSchema } from '@xangarro/domain';
 import { bigintKeys, decodeJson, encodeJson, wireSchema } from '../src/wire.js';
 
 const SALE = {
   id: '01HZ8XQN9GZJXV8AKQ5X0C7SA0',
+  ticketId: '01HZ8XQN9GZJXV8AKQ5X0C7TK1',
   fecha: '2026-09-11',
-  hora: '12:30',
-  concepto: 'Tacos x3',
+  concepto: 'x',
   categoria: 'Producto',
   monto: 4500n,
-  metodo: 'Efectivo',
-  clienteId: null,
-  estadoPago: 'pagado',
   productoId: '01HZ8XQN9GZJXV8AKQ5X0C7PRD',
   cantidad: 3,
-  efectivoRecibidoCentavos: 5000n,
-  cancelledByUserId: null,
-  cancelMotivo: null,
-  cancelledAt: null,
-  cajaTurnoId: null,
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
   createdByUserId: null,
@@ -30,7 +22,12 @@ const SALE = {
 
 describe('wire codec', () => {
   it('finds the bigint keys from the schema, including nullable/default wrappers', () => {
-    assert.deepEqual([...bigintKeys(SaleSchema)].sort(), ['efectivoRecibidoCentavos', 'monto']);
+    assert.deepEqual([...bigintKeys(SaleSchema)].sort(), ['monto']);
+    // the ticket carries the other money fields (ADR-073)
+    assert.deepEqual([...bigintKeys(TicketSchema)].sort(), [
+      'cambioCentavos',
+      'efectivoRecibidoCentavos',
+    ]);
   });
 
   it('round-trips a sale through JSON with bigints as decimal strings', () => {
@@ -38,7 +35,7 @@ describe('wire codec', () => {
     assert.match(text, /"monto":"4500"/);
     const back = wireSchema(SaleSchema).parse(decodeJson(text));
     assert.equal(back.monto, 4500n);
-    assert.equal(back.efectivoRecibidoCentavos, 5000n);
+    assert.equal(back.ticketId, SALE.ticketId);
   });
 
   it('accepts real bigints in-process and still validates the rest', () => {

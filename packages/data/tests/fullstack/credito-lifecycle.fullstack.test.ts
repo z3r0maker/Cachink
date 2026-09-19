@@ -72,9 +72,10 @@ describe('Crédito Lifecycle [fullstack]', () => {
       }),
     );
 
-    expect(sale.estadoPago).toBe('pendiente');
-    expect(sale.metodo).toBe('Crédito');
-    expect(sale.clienteId).toBe(clientId);
+    const ticket = await h.repos.tickets.findById(sale.ticketId);
+    expect(ticket?.estadoPago).toBe('pendiente');
+    expect(ticket?.metodo).toBe('Crédito');
+    expect(ticket?.clienteId).toBe(clientId);
   });
 
   it('records a client abono without touching the sale (ADR-074)', async () => {

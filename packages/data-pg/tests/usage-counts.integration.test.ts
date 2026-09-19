@@ -68,7 +68,7 @@ async function seed(owner: postgres.Sql): Promise<void> {
   });
   await owner`INSERT INTO businesses ${owner({ ...audit(BIZ, SALES[0]!.at, null), nombre: 'Uso', regimen_fiscal: 'RESICO', isr_tasa: 125 })}`;
   for (const [i, s] of SALES.entries()) {
-    await owner`INSERT INTO sales ${owner({ ...audit(`${BIZ}-s${i}`, s.at, s.deleted), fecha: s.at.slice(0, 10), concepto: 'x', categoria: 'Producto', monto_centavos: 100, metodo: 'Efectivo', estado_pago: 'pagado', producto_id: 'p' })}`;
+    await owner`INSERT INTO sales ${owner({ ...audit(`${BIZ}-s${i}`, s.at, s.deleted), ticket_id: `${BIZ}-t${i}`, fecha: s.at.slice(0, 10), concepto: 'x', categoria: 'Producto', monto_centavos: 100, producto_id: 'p' })}`;
   }
   for (const [i, at] of EXPENSES.entries()) {
     await owner`INSERT INTO expenses ${owner({ ...audit(`${BIZ}-e${i}`, at, null), fecha: at.slice(0, 10), concepto: 'x', categoria: 'Otro', monto_centavos: 100 })}`;

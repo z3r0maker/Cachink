@@ -10,6 +10,7 @@ export {
   useAppConfigRepository,
   useBusinessesRepository,
   useSalesRepository,
+  useTicketsRepository,
   useExpensesRepository,
   useProductsRepository,
   useInventoryMovementsRepository,

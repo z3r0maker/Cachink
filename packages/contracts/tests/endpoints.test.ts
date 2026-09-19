@@ -11,21 +11,13 @@ import { MAX_PUSH_DELTAS } from '../src/transport.js';
 
 const ROW = {
   id: '01HZ8XQN9GZJXV8AKQ5X0C7SA0',
+  ticketId: '01HZ8XQN9GZJXV8AKQ5X0C7TK1',
   fecha: '2026-09-11',
-  hora: null,
   concepto: 'x',
   categoria: 'Producto',
   monto: '100',
-  metodo: 'Efectivo',
-  clienteId: null,
-  estadoPago: 'pagado',
   productoId: '01HZ8XQN9GZJXV8AKQ5X0C7PRD',
   cantidad: 1,
-  efectivoRecibidoCentavos: null,
-  cancelledByUserId: null,
-  cancelMotivo: null,
-  cancelledAt: null,
-  cajaTurnoId: null,
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
   createdByUserId: null,
@@ -102,6 +94,41 @@ describe('sync push', () => {
     });
     assert.equal(d.table, 'respuestas_operador');
   });
+  it('carries a ticket and its lines in one push batch (C-17, ADR-073)', () => {
+    const ticket = DeltaSchema.parse({
+      table: 'tickets',
+      rowId: '01HZ8XQN9GZJXV8AKQ5X0C7TK1',
+      op: 'insert',
+      clientSeq: 10,
+      row: {
+        id: '01HZ8XQN9GZJXV8AKQ5X0C7TK1',
+        folio: 405,
+        fecha: '2026-09-11',
+        hora: '13:45',
+        concepto: 'Venta mostrador',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        efectivoRecibidoCentavos: '20000',
+        cambioCentavos: '4000',
+        cajaTurnoId: null,
+        cancelMotivo: null,
+        cancelledByUserId: null,
+        cancelledAt: null,
+        businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
+        deviceId: '01HZ8XQN9GZJXV8AKQ5X0C7DEV',
+        createdByUserId: null,
+        createdAt: '2026-09-11T18:30:00.000Z',
+        updatedAt: '2026-09-11T18:30:00.000Z',
+        deletedAt: null,
+      },
+    });
+    assert.equal(ticket.table, 'tickets');
+    const batch = PushRequestSchema.parse({ deltas: [ticket, delta()] });
+    assert.equal(batch.deltas.length, 2);
+    assert.equal(batch.deltas[0]?.table, 'tickets');
+  });
+
   it('never lets a message itself be pushed — it is DOWN (C-19)', () => {
     assert.throws(() =>
       DeltaSchema.parse({

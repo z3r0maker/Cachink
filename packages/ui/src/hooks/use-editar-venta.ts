@@ -13,7 +13,7 @@ import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/r
 import type { Sale, SaleId } from '@xangarro/domain';
 import type { SalePatch } from '@xangarro/data';
 import { EditarVentaUseCase } from '@xangarro/application';
-import { useClientsRepository, useSalesRepository } from '../app/index';
+import { useSalesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { clienteKeys, estadosKeys, ventaKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
@@ -28,13 +28,12 @@ export type EditarVentaResult = UseMutationResult<Sale, Error, EditarVentaInput,
 
 export function useEditarVenta(): EditarVentaResult {
   const sales = useSalesRepository();
-  const clients = useClientsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
   // Construct the use-case once per repository swap; identity is
   // stable across renders so consumers can tap the mutation safely.
-  const rawUseCase = useMemo(() => new EditarVentaUseCase(sales, clients), [sales, clients]);
+  const rawUseCase = useMemo(() => new EditarVentaUseCase(sales), [sales]);
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_EDITAR_VENTA);
 
   return useMutation<Sale, Error, EditarVentaInput>({

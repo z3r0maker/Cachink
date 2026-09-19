@@ -6,7 +6,7 @@
  * sales exist.
  */
 
-import type { IsoDate, Sale } from '@xangarro/domain';
+import type { IsoDate, Ticket } from '@xangarro/domain';
 
 export function daysBetween(from: IsoDate | string, to: IsoDate | string): number {
   const a = new Date(`${from}T00:00:00.000Z`).getTime();
@@ -16,10 +16,10 @@ export function daysBetween(from: IsoDate | string, to: IsoDate | string): numbe
 }
 
 export function diasPromedioCobranza(
-  pendingSales: readonly Sale[],
+  pendingTickets: readonly Ticket[],
   today: IsoDate | string,
 ): number {
-  if (pendingSales.length === 0) return 0;
-  const total = pendingSales.reduce((acc, v) => acc + daysBetween(v.fecha, today), 0);
-  return Math.round(total / pendingSales.length);
+  if (pendingTickets.length === 0) return 0;
+  const total = pendingTickets.reduce((acc, v) => acc + daysBetween(v.fecha, today), 0);
+  return Math.round(total / pendingTickets.length);
 }

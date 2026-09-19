@@ -176,7 +176,8 @@ describe('Migration integrity', () => {
 
     const expectedIndexes = [
       'idx_sales_biz_fecha',
-      'idx_sales_cliente',
+      'idx_sales_ticket',
+      'idx_tickets_biz_fecha',
       'idx_expenses_biz_fecha',
       'idx_expenses_recurrente_fecha',
       'idx_invmov_producto',

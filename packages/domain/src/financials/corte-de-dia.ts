@@ -17,7 +17,7 @@
  */
 
 import type { Expense } from '../entities/expense.js';
-import type { Sale } from '../entities/sale.js';
+import type { TicketConTotal } from './tickets.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
 
@@ -27,7 +27,8 @@ export interface CorteDeDiaResult {
 }
 
 export interface CorteDeDiaInput {
-  ventasHoy: readonly Sale[];
+  /** Today's standing tickets with their derived totals (ADR-073). */
+  ventasHoy: readonly TicketConTotal[];
   egresosHoy: readonly Expense[];
   /** Saldo de cierre del corte anterior; 0 when no prior corte exists. */
   saldoCierreAnterior: Money;
@@ -37,7 +38,7 @@ export interface CorteDeDiaInput {
 
 export function calculateCorteDeDia(input: CorteDeDiaInput): CorteDeDiaResult {
   const ventasEfectivo = sum(
-    input.ventasHoy.filter((v) => v.metodo === 'Efectivo').map((v) => v.monto),
+    input.ventasHoy.filter((v) => v.ticket.metodo === 'Efectivo').map((v) => v.total),
   );
   // Heuristic: in Phase 1 we don't capture "metodo" on egresos, so every
   // egreso is treated as paid in efectivo. This matches the CLAUDE.md §10

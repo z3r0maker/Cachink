@@ -11,10 +11,12 @@ import {
   InMemoryClientPaymentsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeNewClient,
   makeNewProduct,
   makeNewSale,
+  makeNewTicket,
 } from '@xangarro/testing';
 import type { BusinessId, ClientId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -37,12 +39,14 @@ function wrapper(overrides?: Record<string, unknown>) {
 
 describe('useClienteDetail', () => {
   let clients: InMemoryClientsRepository;
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let clientPayments: InMemoryClientPaymentsRepository;
   let products: InMemoryProductsRepository;
 
   beforeEach(() => {
     clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     clientPayments = new InMemoryClientPaymentsRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
@@ -52,30 +56,37 @@ describe('useClienteDetail', () => {
   it('returns client detail with pending sales', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ }));
     const client = await clients.create(makeNewClient({ businessId: BIZ, nombre: 'Laura' }));
+    const ticket = await tickets.create(
+      makeNewTicket({
+        businessId: BIZ,
+        metodo: 'Crédito',
+        clienteId: client.id,
+        estadoPago: 'pendiente',
+      }),
+    );
     await sales.create(
       makeNewSale({
         businessId: BIZ,
         productoId: product.id,
-        metodo: 'Crédito',
-        clienteId: client.id,
         monto: 5000n,
+        ticketId: ticket.id,
       }),
     );
 
     const { result } = renderHook(() => useClienteDetail(client.id), {
-      wrapper: wrapper({ clients, sales, clientPayments }),
+      wrapper: wrapper({ clients, tickets, sales, clientPayments }),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(result.current.data?.cliente.nombre).toBe('Laura');
-    expect(result.current.data?.pendingSales).toHaveLength(1);
+    expect(result.current.data?.pendingTickets).toHaveLength(1);
     expect(result.current.data?.saldoPendiente).toBe(5000n);
   });
 
   it('returns null for non-existent client', async () => {
     const { result } = renderHook(
       () => useClienteDetail('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as ClientId),
-      { wrapper: wrapper({ clients, sales, clientPayments }) },
+      { wrapper: wrapper({ clients, tickets, sales, clientPayments }) },
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -84,7 +95,7 @@ describe('useClienteDetail', () => {
 
   it('is disabled when id is null', () => {
     const { result } = renderHook(() => useClienteDetail(null), {
-      wrapper: wrapper({ clients, sales, clientPayments }),
+      wrapper: wrapper({ clients, tickets, sales, clientPayments }),
     });
     expect(result.current.fetchStatus).toBe('idle');
   });

@@ -13,6 +13,7 @@ import {
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeEstadoResultados } from './use-estado-resultados';
@@ -26,6 +27,7 @@ export interface UseBalanceGeneralDeltaOptions {
 export function useBalanceGeneralDelta(
   options: UseBalanceGeneralDeltaOptions,
 ): UseQueryResult<BalanceGeneral | null, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const businesses = useBusinessesRepository();
@@ -44,7 +46,7 @@ export function useBalanceGeneralDelta(
       if (!businessId) throw new Error('No business selected');
       const estado = await composeEstadoResultados(sales, expenses, businesses, businessId, prior);
       return composeBalanceGeneral(
-        { sales, clientPayments, dayCloses, products, movements },
+        { tickets, sales, clientPayments, dayCloses, products, movements },
         businessId,
         prior,
         estado.utilidadNeta,

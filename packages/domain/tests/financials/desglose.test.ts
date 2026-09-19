@@ -5,10 +5,9 @@ import {
   calculateEstadoDeResultados,
   desgloseDeResultados,
   type Expense,
-  type Sale,
 } from '../../src/index.js';
 
-const venta = (metodo: string, monto: bigint) => ({ metodo, monto }) as unknown as Sale;
+const venta = (metodo: string, monto: bigint) => ({ ticket: { metodo }, total: monto }) as never;
 const gasto = (categoria: string, monto: bigint) => ({ categoria, monto }) as unknown as Expense;
 
 const ventas = [venta('Efectivo', 7500n), venta('Tarjeta', 12000n), venta('Efectivo', 25000n)];
@@ -39,7 +38,8 @@ describe('desgloseDeResultados', () => {
 
   it('each breakdown adds up to its statement line exactly', () => {
     const d = desgloseDeResultados({ ventas, egresos });
-    const er = calculateEstadoDeResultados({ ventas, egresos, isrTasa: 125 });
+    const lineas = ventas.map((v) => ({ monto: (v as never as { total: bigint }).total }));
+    const er = calculateEstadoDeResultados({ ventas: lineas, egresos, isrTasa: 125 });
     const total = (ps: readonly { monto: bigint }[]) => ps.reduce((t, p) => t + p.monto, 0n);
     assert.equal(total(d.ingresos), er.ingresos);
     assert.equal(total(d.costoDeVentas), er.costoDeVentas);

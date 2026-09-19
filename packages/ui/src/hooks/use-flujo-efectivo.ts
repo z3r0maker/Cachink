@@ -12,12 +12,20 @@ import {
   type BusinessId,
   type FlujoDeEfectivo,
   type PeriodRange,
+  conTotales,
+  vigentes,
 } from '@xangarro/domain';
-import type { ClientPaymentsRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
+import type {
+  ClientPaymentsRepository,
+  ExpensesRepository,
+  SalesRepository,
+  TicketsRepository,
+} from '@xangarro/data';
 import {
   useClientPaymentsRepository,
   useExpensesRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { collectExpensesInRange } from './use-estado-resultados';
@@ -32,17 +40,20 @@ export interface UseFlujoEfectivoOptions {
  * NIF B-2 view.
  */
 export async function composeFlujoEfectivo(
+  ticketsRepo: TicketsRepository,
   sales: SalesRepository,
   expenses: ExpensesRepository,
   clientPayments: ClientPaymentsRepository,
   businessId: BusinessId,
   periodo: PeriodRange,
 ): Promise<FlujoDeEfectivo> {
-  const [ventas, egresos, pagos] = await Promise.all([
+  const [tickets, lineas, egresos, pagos] = await Promise.all([
+    ticketsRepo.findByDateRange(periodo.from, periodo.to, businessId),
     sales.findByDateRange(periodo.from, periodo.to, businessId),
     collectExpensesInRange(expenses, businessId, periodo),
     clientPayments.findByDateRange(periodo.from, periodo.to, businessId),
   ]);
+  const ventas = conTotales(vigentes(tickets), lineas);
   // calculateFlujoDeEfectivo already filters out Crédito via the
   // CASH_METHODS set; we pass raw ventas in.
   return calculateFlujoDeEfectivo({
@@ -55,6 +66,7 @@ export async function composeFlujoEfectivo(
 export function useFlujoEfectivo(
   options: UseFlujoEfectivoOptions,
 ): UseQueryResult<FlujoDeEfectivo, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const clientPayments = useClientPaymentsRepository();
@@ -65,7 +77,14 @@ export function useFlujoEfectivo(
     enabled: businessId !== null,
     async queryFn() {
       if (!businessId) throw new Error('No business selected');
-      return composeFlujoEfectivo(sales, expenses, clientPayments, businessId, options.periodo);
+      return composeFlujoEfectivo(
+        tickets,
+        sales,
+        expenses,
+        clientPayments,
+        businessId,
+        options.periodo,
+      );
     },
   });
 }

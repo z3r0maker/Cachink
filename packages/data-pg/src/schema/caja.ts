@@ -61,7 +61,7 @@ export const cajaTurnos = pgTable('caja_turnos', {
 
 export const cancelacionLogs = pgTable('cancelacion_logs', {
   id: text('id').primaryKey(),
-  saleId: text('sale_id').notNull(),
+  ticketId: text('ticket_id').notNull(),
   cancelledByUserId: text('cancelled_by_user_id').notNull(),
   motivo: text('motivo').notNull(),
   montoOriginalCentavos: centavos('monto_original_centavos').notNull(),

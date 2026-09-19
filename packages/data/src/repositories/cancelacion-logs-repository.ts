@@ -5,7 +5,7 @@
  */
 
 import type { CancelacionLog, NewCancelacionLog } from '@xangarro/domain';
-import type { CancelacionLogId, BusinessId, SaleId } from '@xangarro/domain';
+import type { CancelacionLogId, BusinessId, TicketId } from '@xangarro/domain';
 
 export type { CancelacionLog, NewCancelacionLog };
 
@@ -17,7 +17,7 @@ export interface CancelacionLogsRepository {
   findById(id: CancelacionLogId): Promise<CancelacionLog | null>;
 
   /** Find log entry by sale ID. */
-  findBySaleId(saleId: SaleId): Promise<CancelacionLog | null>;
+  findByTicketId(ticketId: TicketId): Promise<CancelacionLog | null>;
 
   /** List all cancellation logs for a business in a date range. */
   findByDateRange(

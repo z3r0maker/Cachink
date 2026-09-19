@@ -10,9 +10,12 @@ import { today } from '@xangarro/domain';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryExpensesRepository,
+  InMemoryClientPaymentsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeNewSale,
+  makeNewTicket,
 } from '../../testing/src/index.js';
 import { AbrirCajaUseCase, CerrarCajaUseCase } from '../src/index.js';
 
@@ -21,17 +24,21 @@ const USER = '01HZ8XQN9GZJXV8AKQ5X0C7SR1' as UserId;
 
 describe('CerrarCajaUseCase', () => {
   let turnos: InMemoryCajaTurnosRepository;
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let expenses: InMemoryExpensesRepository;
+  let clientPayments: InMemoryClientPaymentsRepository;
   let abrirCaja: AbrirCajaUseCase;
   let useCase: CerrarCajaUseCase;
 
   beforeEach(() => {
     turnos = new InMemoryCajaTurnosRepository(TEST_DEVICE_ID);
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
+    clientPayments = new InMemoryClientPaymentsRepository(TEST_DEVICE_ID);
     expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
     abrirCaja = new AbrirCajaUseCase(turnos);
-    useCase = new CerrarCajaUseCase(turnos, sales, expenses);
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
+    useCase = new CerrarCajaUseCase(turnos, tickets, sales, expenses, clientPayments);
   });
 
   /** Open a turn and return its id. */
@@ -142,13 +149,16 @@ describe('CerrarCajaUseCase', () => {
   it('accounts for sales in the expected cash computation', async () => {
     const turnoId = await openTurn();
     // Add an Efectivo sale of $30
-    await sales.create(
-      makeNewSale({
+    const __t = await tickets.create(
+      makeNewTicket({
+        cajaTurnoId: turnoId as never,
         businessId: BIZ,
         metodo: 'Efectivo',
-        monto: 3000n,
         fecha: '2026-05-09',
       }),
+    );
+    await sales.create(
+      makeNewSale({ businessId: BIZ, monto: 3000n, fecha: '2026-05-09', ticketId: __t.id }),
     );
     // Expected = apertura (5000) + efectivo ventas (3000) = 8000
     const closed = await useCase.execute({
@@ -216,30 +226,39 @@ describe('CerrarCajaUseCase', () => {
       businessId: BIZ,
     });
     // 2 cash sales: 3000 + 1500 = 4500
-    await sales.create(
-      makeNewSale({
+    const __t = await tickets.create(
+      makeNewTicket({
+        cajaTurnoId: turno.id as never,
         businessId: BIZ,
         metodo: 'Efectivo',
-        monto: 3000n,
         fecha: '2026-05-09',
       }),
     );
     await sales.create(
-      makeNewSale({
+      makeNewSale({ businessId: BIZ, monto: 3000n, fecha: '2026-05-09', ticketId: __t.id }),
+    );
+    const __t2 = await tickets.create(
+      makeNewTicket({
+        cajaTurnoId: turno.id as never,
         businessId: BIZ,
         metodo: 'Efectivo',
-        monto: 1500n,
         fecha: '2026-05-09',
       }),
     );
-    // 1 non-cash sale (should NOT affect esperado)
     await sales.create(
-      makeNewSale({
+      makeNewSale({ businessId: BIZ, monto: 1500n, fecha: '2026-05-09', ticketId: __t2.id }),
+    );
+    // 1 non-cash ticket (should NOT affect esperado)
+    const __t3 = await tickets.create(
+      makeNewTicket({
+        cajaTurnoId: turno.id as never,
         businessId: BIZ,
         metodo: 'Transferencia',
-        monto: 9000n,
         fecha: '2026-05-09',
       }),
+    );
+    await sales.create(
+      makeNewSale({ businessId: BIZ, monto: 9000n, fecha: '2026-05-09', ticketId: __t3.id }),
     );
     // 1 expense: 1000
     await expenses.create({
@@ -247,8 +266,9 @@ describe('CerrarCajaUseCase', () => {
       concepto: 'Compra de servilletas',
       categoria: 'Insumo',
       monto: 1000n,
+      cajaTurnoId: turno.id,
       businessId: BIZ,
-    });
+    } as never);
     // Expected = 5000 + 2000 + 4500 - 1000 = 10500
     const closed = await useCase.execute({
       turnoId: turno.id,

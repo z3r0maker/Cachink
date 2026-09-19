@@ -19,6 +19,39 @@ function pickMetodo(i: number): 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR/C
   return 'QR/CoDi';
 }
 
+/** One demo ticket with its single line (ADR-073). */
+async function seedTicket(
+  r: Repositories,
+  biz: BusinessId,
+  product: Product,
+  tpl: (typeof DEMO_SALE_TEMPLATES)[number],
+  saleDate: Date,
+  metodo: string,
+  clienteId: ClientId | null,
+  isCredito: boolean,
+): Promise<void> {
+  const ticket = await r.tickets.create({
+    folio: await r.tickets.nextFolio(biz),
+    fecha: toIsoDate(saleDate),
+    hora: toHora(saleDate),
+    concepto: tpl.concepto,
+    metodo: metodo as never,
+    clienteId,
+    estadoPago: isCredito ? 'pendiente' : 'pagado',
+    businessId: biz,
+  });
+  await r.sales.create({
+    ticketId: ticket.id,
+    fecha: toIsoDate(saleDate),
+    concepto: tpl.concepto,
+    categoria: 'Producto',
+    monto: tpl.montoCentavos,
+    productoId: product.id,
+    cantidad: tpl.cantidad,
+    businessId: biz,
+  });
+}
+
 export async function seedSales(
   r: Repositories,
   biz: BusinessId,
@@ -36,24 +69,19 @@ export async function seedSales(
     for (let s = 0; s < salesPerDay; s++) {
       const tpl = templates[count % templates.length]!;
       const product = products[tpl.productIndex]!;
-      const saleDate = daysAgo(day);
-
       // Sprinkle Crédito sales for cuentas por cobrar testing
       const isCredito = count === 8 || count === 25 || count === 60;
-      const client = clients[count % clients.length]!;
-
-      await r.sales.create({
-        fecha: toIsoDate(saleDate),
-        hora: toHora(saleDate),
-        concepto: tpl.concepto,
-        categoria: 'Producto',
-        monto: tpl.montoCentavos,
-        metodo: isCredito ? 'Crédito' : pickMetodo(count),
-        clienteId: isCredito ? (client.id as ClientId) : undefined,
-        productoId: product.id,
-        cantidad: tpl.cantidad,
-        businessId: biz,
-      });
+      const clienteId = isCredito ? (clients[count % clients.length]!.id as ClientId) : null;
+      await seedTicket(
+        r,
+        biz,
+        product,
+        tpl,
+        daysAgo(day),
+        isCredito ? 'Crédito' : pickMetodo(count),
+        clienteId,
+        isCredito,
+      );
       count += 1;
     }
   }

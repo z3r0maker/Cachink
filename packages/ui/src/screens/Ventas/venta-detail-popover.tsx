@@ -29,7 +29,6 @@ function DetailBody({ venta }: { venta: Sale }): ReactElement {
     <View gap={10}>
       <View flexDirection="row" gap={6}>
         <Tag>{venta.categoria}</Tag>
-        <Tag variant={venta.metodo === 'Crédito' ? 'warning' : 'neutral'}>{venta.metodo}</Tag>
       </View>
       <Text
         fontFamily={typography.fontFamily}

@@ -14,6 +14,7 @@ interface AuditContext {
   readonly businessId: BusinessId | string;
   readonly motivo: string;
   readonly isCashSale: boolean;
+  readonly metodoOriginal?: string;
 }
 
 export function logSuccessAudit(ctx: AuditContext, logStore: LogStore | null): void {
@@ -29,7 +30,7 @@ export function logSuccessAudit(ctx: AuditContext, logStore: LogStore | null): v
     metadata: {
       motivo: ctx.motivo,
       montoOriginalCentavos: String(ctx.sale.monto),
-      metodoOriginal: ctx.sale.metodo,
+      metodoOriginal: ctx.metodoOriginal ?? '',
       isCashSale: ctx.isCashSale,
     },
     status: 'success' as const,

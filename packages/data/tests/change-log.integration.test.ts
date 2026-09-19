@@ -72,26 +72,44 @@ describe('migration 0001 — change-log triggers capture every row change', () =
   it('fires exactly one insert row per business-table insert', async () => {
     const id = '01HZ8XQN9GZJXV8AKQ5X0C7TE1';
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id,
+        folio: 1,
+        fecha: '2026-04-23',
+        concepto: 'Taco al pastor',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        ...audit(),
+      })
+      .run();
+    await db
+      .insert(schema.sales)
+      .values({
+        id: `${id}L`,
+        ticketId: id,
         fecha: '2026-04-23',
         concepto: 'Taco al pastor',
         categoria: 'Producto',
         monto: 450_00n,
-        metodo: 'Efectivo',
-        clienteId: null,
-        estadoPago: 'pagado',
         productoId: '01HZ8XQN9GZJXV8AKQ5X0C7TE3',
         ...audit(),
       })
       .run();
 
     const log = await readChangeLog(db);
-    expect(log).toHaveLength(1);
+    // A ticket and its line each log exactly one insert.
+    expect(log).toHaveLength(2);
     expect(log[0]).toMatchObject({
-      table_name: 'sales',
+      table_name: 'tickets',
       row_id: id,
+      row_device_id: DEV_A,
+      op: 'insert',
+    });
+    expect(log[1]).toMatchObject({
+      table_name: 'sales',
+      row_id: `${id}L`,
       row_device_id: DEV_A,
       op: 'insert',
     });
@@ -229,16 +247,27 @@ describe('migration 0001 — change-log triggers capture every row change', () =
       })
       .run();
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
+        folio: 1,
+        fecha: '2026-04-23',
+        concepto: 'x',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        ...audit(),
+      })
+      .run();
+    await db
+      .insert(schema.sales)
+      .values({
+        id: '01HZ8XQN9GZJXV8AKQ5X0C7S01L',
+        ticketId: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
         fecha: '2026-04-23',
         concepto: 'x',
         categoria: 'Producto',
         monto: 1n,
-        metodo: 'Efectivo',
-        clienteId: null,
-        estadoPago: 'pagado',
         productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(),
       })
@@ -356,17 +385,15 @@ describe('migration 0001 — change-log triggers capture every row change', () =
 
   it('preserves the distinct device_id on the log row (tiebreak input)', async () => {
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id: '01HZ8XQN9GZJXV8AKQ5X0C7TE7',
+        folio: 1,
         fecha: '2026-04-23',
         concepto: 'a',
-        categoria: 'Producto',
-        monto: 1n,
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
-        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(DEV_B),
       })
       .run();

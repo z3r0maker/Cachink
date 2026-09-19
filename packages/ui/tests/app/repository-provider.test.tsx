@@ -64,7 +64,7 @@ describe('useRepositories', () => {
         <RepoProbe />
       </MockRepositoryProvider>,
     );
-    expect(screen.getByTestId('count').textContent).toBe('20');
+    expect(screen.getByTestId('count').textContent).toBe('21');
   });
 });
 
@@ -161,7 +161,7 @@ describe('buildDrizzleRepositories', () => {
     const deviceId = '01JPHK00000000000000000007' as DeviceId;
     const repos = buildDrizzleRepositories(db, deviceId);
     const count = Object.keys(repos).length;
-    expect(count).toBe(20);
+    expect(count).toBe(21);
     expect(Object.values(repos).every((r) => r !== null && typeof r === 'object')).toBe(true);
   });
 });

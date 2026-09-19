@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
-import type { Client, ClientPayment, Money, Sale } from '@xangarro/domain';
+import type { Client, ClientPayment, Money, TicketConTotal } from '@xangarro/domain';
 import { formatDate, formatMoney } from '@xangarro/domain';
 import { Btn, Card, EmptyState, List, SectionTitle, Tag } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
@@ -16,10 +16,10 @@ import { colors, fontSizes, typography } from '../../theme';
 
 export interface ClienteDetailScreenProps {
   readonly cliente: Client;
-  readonly pendingSales: readonly Sale[];
+  readonly pendingTickets: readonly TicketConTotal[];
   readonly pagosByVenta: ReadonlyMap<string, readonly ClientPayment[]>;
   readonly saldoPendiente: Money;
-  readonly onRegistrarPago: (venta: Sale) => void;
+  readonly onRegistrarPago: (venta: TicketConTotal) => void;
   readonly onEditar?: () => void;
   readonly testID?: string;
 }
@@ -57,17 +57,17 @@ function SaldoCard({
   );
 }
 
-function VentaInfo({ venta }: { venta: Sale }): ReactElement {
+function VentaInfo({ venta }: { venta: TicketConTotal }): ReactElement {
   return (
     <View flex={1} paddingRight={12}>
       <Text fontWeight={typography.weights.bold} fontSize={fontSizes.lg} color={colors.black}>
-        {venta.concepto}
+        {venta.ticket.concepto}
       </Text>
       <Text fontWeight={typography.weights.medium} fontSize={fontSizes.xs} color={colors.gray600}>
-        {formatDate(venta.fecha)}
+        {formatDate(venta.ticket.fecha)}
       </Text>
       <View flexDirection="row" gap={6} marginTop={4}>
-        <Tag variant="warning">{venta.estadoPago}</Tag>
+        <Tag variant="warning">{venta.ticket.estadoPago}</Tag>
       </View>
     </View>
   );
@@ -101,19 +101,19 @@ function VentaActions({
 }
 
 function VentaPendienteRow(props: {
-  venta: Sale;
+  venta: TicketConTotal;
   pagos: readonly ClientPayment[];
   onRegistrarPago: () => void;
   t: ReturnType<typeof useTranslation>['t'];
 }): ReactElement {
   const paid = props.pagos.reduce((acc, p) => acc + (p.montoCentavos as bigint), 0n);
-  const saldo = ((props.venta.monto as bigint) - paid) as Money;
+  const saldo = (props.venta.total - paid) as Money;
   return (
-    <Card testID={`pending-venta-${props.venta.id}`} padding="md" fullWidth>
+    <Card testID={`pending-venta-${props.venta.ticket.id}`} padding="md" fullWidth>
       <View flexDirection="row" justifyContent="space-between" alignItems="center">
         <VentaInfo venta={props.venta} />
         <VentaActions
-          ventaId={props.venta.id}
+          ventaId={props.venta.ticket.id}
           saldo={saldo}
           onRegistrarPago={props.onRegistrarPago}
           t={props.t}
@@ -131,14 +131,14 @@ function PendingVentasList({
   t: ReturnType<typeof useTranslation>['t'];
 }): ReactElement {
   return (
-    <List<Sale>
-      data={props.pendingSales}
-      keyExtractor={(venta) => venta.id}
+    <List<TicketConTotal>
+      data={props.pendingTickets}
+      keyExtractor={(venta) => venta.ticket.id}
       renderItem={(venta) => (
         <View marginBottom={10}>
           <VentaPendienteRow
             venta={venta}
-            pagos={props.pagosByVenta.get(venta.id) ?? []}
+            pagos={props.pagosByVenta.get(venta.ticket.id) ?? []}
             onRegistrarPago={() => props.onRegistrarPago(venta)}
             t={t}
           />

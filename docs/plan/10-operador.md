@@ -83,7 +83,14 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
 
 ### O-03 Expected-cash calculator, one per turno
 
-- [ ] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+- [x] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+  - Done: 2026-09-19 · `esperadoDelTurno` joins the calculator (TDD, 5 new tests: scoping by
+    `cajaTurnoId`, fiado/cancelled/other-turno/non-cash-abono exclusion by construction, fondo +
+    adicional base, turno without id rejected). `CerrarCajaUseCase` now computes its esperado through
+    it — fetching the turno's abonos (clientPayments) and passing tickets/lines/abonos/expenses
+    scoped by the turno — replacing its own date-range sum; `#computeExpected` is gone. The use
+    case's caja tests seed `cajaTurnoId` on their tickets and the gasto, which is exactly the C-18
+    column doing its job. Application 469, data 270 green.
   - Calculator done 2026-09-18 (with O-28): `efectivoEsperado`, `totalContado`, `diferenciaCorte`
     and `DENOMINACIONES_MXN` in `packages/domain/src/financials/cierre-turno.ts`, 7 tests, the
     handoff's figure reproduced ($2,710.00 since the 2026-09-18 pull, ADR-085); Turno's fixture

@@ -15,6 +15,7 @@ import {
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeIndicadores, type IndicadoresComposeDeps } from './use-indicadores';
@@ -82,6 +83,7 @@ export interface UseIndicadoresTrendOptions {
 export function useIndicadoresTrend(
   options: UseIndicadoresTrendOptions,
 ): UseQueryResult<MarginTrend, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const businesses = useBusinessesRepository();
@@ -98,7 +100,7 @@ export function useIndicadoresTrend(
     async queryFn() {
       if (!businessId) throw new Error('No business selected');
       return composeIndicadoresTrend(
-        { sales, expenses, businesses, clientPayments, dayCloses, products, movements },
+        { tickets, sales, expenses, businesses, clientPayments, dayCloses, products, movements },
         businessId,
         options.periodo,
       );

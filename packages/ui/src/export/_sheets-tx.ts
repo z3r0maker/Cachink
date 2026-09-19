@@ -15,19 +15,15 @@ export function addVentasSheet(wb: ExcelJS.Workbook, ds: ExportDataset): void {
     { header: 'Concepto', key: 'concepto', width: 32 },
     { header: 'Categoría', key: 'categoria', width: 14 },
     { header: 'Monto (MXN)', key: 'monto', width: 14, style: { numFmt: MONEY_FORMAT } },
-    { header: 'Método', key: 'metodo', width: 12 },
-    { header: 'Cliente', key: 'clienteId', width: 28 },
-    { header: 'Estado', key: 'estadoPago', width: 12 },
+    { header: 'Ticket', key: 'ticketId', width: 28 },
   ];
   for (const v of ds.sales) {
     sheet.addRow({
       fecha: v.fecha,
       concepto: v.concepto,
+      ticketId: v.ticketId,
       categoria: v.categoria,
       monto: centavosToPesos(v.monto),
-      metodo: v.metodo,
-      clienteId: v.clienteId ?? '',
-      estadoPago: v.estadoPago,
     });
   }
 }

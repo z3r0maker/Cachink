@@ -53,7 +53,7 @@ function SalesList(props: { sales: readonly Sale[]; onCancel: (s: Sale) => void 
         <SaleCancelCard
           key={sale.id}
           sale={sale}
-          onCancel={sale.cancelledAt || sale.deletedAt ? undefined : () => props.onCancel(sale)}
+          onCancel={sale.deletedAt ? undefined : () => props.onCancel(sale)}
           testID={`sale-card-${sale.id}`}
         />
       ))}

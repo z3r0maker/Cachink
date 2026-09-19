@@ -16,7 +16,8 @@
 
 import type { ClientPayment } from '../entities/client-payment.js';
 import type { Expense } from '../entities/expense.js';
-import type { PaymentMethod, Sale } from '../entities/sale.js';
+import type { PaymentMethod } from '../entities/sale.js';
+import type { TicketConTotal } from './tickets.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
 
@@ -37,14 +38,15 @@ export interface FlujoDeEfectivo {
 }
 
 export interface FlujoDeEfectivoInput {
-  ventas: readonly Sale[];
+  /** Standing tickets with their derived totals (ADR-073). */
+  ventas: readonly TicketConTotal[];
   egresos: readonly Expense[];
   pagosClientes: readonly ClientPayment[];
 }
 
 export function calculateFlujoDeEfectivo(input: FlujoDeEfectivoInput): FlujoDeEfectivo {
   const cashInFromSales = sum(
-    input.ventas.filter((v) => CASH_METHODS.has(v.metodo)).map((v) => v.monto),
+    input.ventas.filter((v) => CASH_METHODS.has(v.ticket.metodo)).map((v) => v.total),
   );
   const cashInFromPagos = sum(input.pagosClientes.map((p) => p.montoCentavos));
 

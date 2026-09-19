@@ -4,9 +4,11 @@ import {
   InMemoryDayClosesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeNewExpense,
   makeNewSale,
+  makeNewTicket,
 } from '../../testing/src/index.js';
 import { CerrarCorteDeDiaUseCase } from '../src/index.js';
 
@@ -14,6 +16,7 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const TODAY = '2026-04-23' as IsoDate;
 
 describe('CerrarCorteDeDiaUseCase', () => {
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let expenses: InMemoryExpensesRepository;
   let closes: InMemoryDayClosesRepository;
@@ -23,12 +26,16 @@ describe('CerrarCorteDeDiaUseCase', () => {
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
     closes = new InMemoryDayClosesRepository(TEST_DEVICE_ID);
-    useCase = new CerrarCorteDeDiaUseCase(sales, expenses, closes);
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
+    useCase = new CerrarCorteDeDiaUseCase(tickets, sales, expenses, closes);
   });
 
   it('computes esperado from today ventas/egresos and persists the corte', async () => {
+    const __t = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Efectivo', fecha: TODAY }),
+    );
     await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 30_000n, fecha: TODAY }),
+      makeNewSale({ businessId: BIZ, monto: 30_000n, fecha: TODAY, ticketId: __t.id }),
     );
     await expenses.create(makeNewExpense({ businessId: BIZ, monto: 5_000n, fecha: TODAY }));
     const corte = await useCase.execute({
@@ -50,8 +57,11 @@ describe('CerrarCorteDeDiaUseCase', () => {
       cerradoPor: 'Operativo',
       businessId: BIZ,
     });
+    const __t = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Efectivo', fecha: TODAY }),
+    );
     await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 20_000n, fecha: TODAY }),
+      makeNewSale({ businessId: BIZ, monto: 20_000n, fecha: TODAY, ticketId: __t.id }),
     );
     const corte = await useCase.execute({
       fecha: TODAY,
@@ -65,8 +75,11 @@ describe('CerrarCorteDeDiaUseCase', () => {
   });
 
   it('ignores non-Efectivo ventas in esperado', async () => {
+    const __t = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Transferencia', fecha: TODAY }),
+    );
     await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Transferencia', monto: 999_999n, fecha: TODAY }),
+      makeNewSale({ businessId: BIZ, monto: 999_999n, fecha: TODAY, ticketId: __t.id }),
     );
     const corte = await useCase.execute({
       fecha: TODAY,
@@ -98,8 +111,11 @@ describe('CerrarCorteDeDiaUseCase', () => {
   });
 
   it('surfaces a negative diferencia when contado < esperado', async () => {
+    const __t = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Efectivo', fecha: TODAY }),
+    );
     await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 10_000n, fecha: TODAY }),
+      makeNewSale({ businessId: BIZ, monto: 10_000n, fecha: TODAY, ticketId: __t.id }),
     );
     const corte = await useCase.execute({
       fecha: TODAY,

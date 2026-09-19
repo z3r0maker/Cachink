@@ -10,7 +10,7 @@
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import type { ClientId } from '@xangarro/domain';
-import { useClientsRepository, useSalesRepository } from '../app/index';
+import { useClientsRepository, useTicketsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_ELIMINAR_CLIENTE } from '../observability/audit-configs';
@@ -31,14 +31,14 @@ export type EliminarClienteResult = UseMutationResult<void, Error, EliminarClien
 
 export function useEliminarCliente(): EliminarClienteResult {
   const clients = useClientsRepository();
-  const sales = useSalesRepository();
+  const tickets = useTicketsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
   return useAuditedMutation(MUTATION_ELIMINAR_CLIENTE, {
     async mutationFn(input) {
       if (input.force !== true) {
-        const pending = await sales.findPendingByClient(input.id);
+        const pending = await tickets.findPendingByClient(input.id);
         if (pending.length > 0) throw new ClientPendingSalesError(pending.length);
       }
       await clients.delete(input.id);

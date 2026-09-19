@@ -24,7 +24,7 @@ import type {
   IsoDate,
   Money,
   NewClientPayment,
-  Sale,
+  TicketConTotal,
 } from '@xangarro/domain';
 import { ZERO } from '@xangarro/domain';
 import { Modal } from '../../components/index';
@@ -50,12 +50,12 @@ export interface ClienteDetailRouteProps {
 }
 
 function usePagoSelection(): {
-  venta: Sale | null;
+  venta: TicketConTotal | null;
   saldo: bigint;
-  select: (venta: Sale, saldo: bigint) => void;
+  select: (venta: TicketConTotal, saldo: bigint) => void;
   clear: () => void;
 } {
-  const [selection, setSelection] = useState<{ venta: Sale; saldo: bigint } | null>(null);
+  const [selection, setSelection] = useState<{ venta: TicketConTotal; saldo: bigint } | null>(null);
   return {
     venta: selection?.venta ?? null,
     saldo: selection?.saldo ?? 0n,
@@ -99,12 +99,12 @@ export function ClienteDetailRoute(props: ClienteDetailRouteProps): ReactElement
   if (!cliente) return null;
   const data = detailQ.data;
   const pagosByVenta = data?.pagosByVenta ?? EMPTY_PAGOS;
-  const handleRegistrarPago = (v: Sale): void => {
-    const paid = (pagosByVenta.get(v.id) ?? []).reduce(
+  const handleRegistrarPago = (v: TicketConTotal): void => {
+    const paid = (pagosByVenta.get(v.ticket.id) ?? []).reduce(
       (acc, p) => acc + (p.montoCentavos as bigint),
       0n,
     );
-    pago.select(v, (v.monto as bigint) - paid);
+    pago.select(v, v.total - paid);
   };
   return (
     <Modal
@@ -115,7 +115,7 @@ export function ClienteDetailRoute(props: ClienteDetailRouteProps): ReactElement
     >
       <ClienteDetailScreen
         cliente={cliente}
-        pendingSales={data?.pendingSales ?? []}
+        pendingTickets={data?.pendingTickets ?? []}
         pagosByVenta={pagosByVenta}
         saldoPendiente={data?.saldoPendiente ?? ZERO}
         onRegistrarPago={handleRegistrarPago}

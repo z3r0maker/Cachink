@@ -22,7 +22,7 @@ import {
   type Money,
   type NewClientPayment,
   type PaymentMethod,
-  type Sale,
+  type TicketConTotal,
   type ClientId,
 } from '@xangarro/domain';
 import { Btn, Input, Modal } from '../../components/index';
@@ -54,7 +54,7 @@ export interface RegistrarPagoModalProps {
   readonly open: boolean;
   readonly onClose: () => void;
   readonly onSubmit: (input: NewClientPayment) => void;
-  readonly venta: Sale | null;
+  readonly venta: TicketConTotal | null;
   readonly saldoPendiente: Money;
   readonly businessId: BusinessId;
   readonly fecha: IsoDate;
@@ -71,14 +71,14 @@ function defaults(saldo: Money): RegistrarPagoFormValues {
 
 function buildPayload(
   values: RegistrarPagoFormValues,
-  venta: Sale,
+  venta: TicketConTotal,
   businessId: BusinessId,
   fecha: IsoDate,
 ): NewClientPayment {
   // The abono belongs to the venta's client (ADR-074); the fiado venta only
   // names whose account it lands on.
   return NewClientPaymentSchema.parse({
-    clienteId: (venta.clienteId ?? venta.id) as ClientId,
+    clienteId: venta.ticket.clienteId as ClientId,
     fecha,
     montoCentavos: fromPesos(values.montoPesos),
     metodo: values.metodo,
@@ -139,7 +139,7 @@ export function RegistrarPagoModal(props: RegistrarPagoModalProps): ReactElement
   });
   useEffect(() => {
     form.reset(defaults(props.saldoPendiente));
-  }, [props.saldoPendiente, props.venta?.id, form]);
+  }, [props.saldoPendiente, props.venta?.ticket.id, form]);
   const submit = form.handleSubmit((values) => {
     if (!props.venta) return;
     props.onSubmit(buildPayload(values, props.venta, props.businessId, props.fecha));

@@ -8,6 +8,7 @@
  * Phase 6 of the Feature Flags plan: Caja.
  */
 
+import { conTotales, esperadoDelTurno, vigentes } from '@xangarro/domain';
 import {
   now,
   today,
@@ -15,7 +16,13 @@ import {
   type CerrarCajaInput,
   CerrarCajaSchema,
 } from '@xangarro/domain';
-import type { CajaTurnosRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
+import type {
+  CajaTurnosRepository,
+  ClientPaymentsRepository,
+  ExpensesRepository,
+  SalesRepository,
+  TicketsRepository,
+} from '@xangarro/data';
 import type { BusinessId, ExpenseId } from '@xangarro/domain';
 import { sum, ZERO, type Money } from '@xangarro/domain';
 import type { UseCase } from '../_use-case.js';
@@ -26,13 +33,38 @@ export interface CerrarCajaFullInput extends CerrarCajaInput {
 
 export class CerrarCajaUseCase implements UseCase<CerrarCajaFullInput, CajaTurno> {
   readonly #turnos: CajaTurnosRepository;
+  readonly #tickets: TicketsRepository;
   readonly #sales: SalesRepository;
   readonly #expenses: ExpensesRepository;
+  readonly #clientPayments: ClientPaymentsRepository;
 
-  constructor(turnos: CajaTurnosRepository, sales: SalesRepository, expenses: ExpensesRepository) {
+  constructor(
+    turnos: CajaTurnosRepository,
+    tickets: TicketsRepository,
+    sales: SalesRepository,
+    expenses: ExpensesRepository,
+    clientPayments: ClientPaymentsRepository,
+  ) {
     this.#turnos = turnos;
+    this.#tickets = tickets;
     this.#sales = sales;
     this.#expenses = expenses;
+    this.#clientPayments = clientPayments;
+  }
+
+  /** The day's raw rows, from the turno's fecha to today (broad on purpose). */
+  async #rowsDelDia(turno: CajaTurno, businessId: BusinessId) {
+    const [tickets, lines, expenses, abonos] = await Promise.all([
+      this.#tickets.findByDateRange(turno.fecha, today(), businessId),
+      this.#sales.findByDateRange(turno.fecha, today(), businessId),
+      this.#expenses.findByDateRange(turno.fecha, today(), businessId),
+      this.#clientPayments.findByDateRange(turno.fecha, today(), businessId),
+    ]);
+    const ventas = conTotales(vigentes(tickets), lines).map((t) => ({
+      metodo: t.ticket.metodo as string,
+      monto: t.total,
+    }));
+    return { tickets, lines, expenses, abonos, ventas };
   }
 
   async execute(input: CerrarCajaFullInput): Promise<CajaTurno> {
@@ -41,12 +73,10 @@ export class CerrarCajaUseCase implements UseCase<CerrarCajaFullInput, CajaTurno
     if (!turno) throw new TypeError('Turno no encontrado');
     if (turno.cierreAt !== null) throw new TypeError('Este turno ya fue cerrado');
 
-    const [salesDuringTurn, expensesDuringTurn] = await Promise.all([
-      this.#sales.findByDateRange(turno.fecha, today(), input.businessId),
-      this.#expenses.findByDateRange(turno.fecha, today(), input.businessId),
-    ]);
-    const totals = this.#computeTotals(salesDuringTurn, expensesDuringTurn);
-    const esperado = this.#computeExpected(turno, totals);
+    const rows = await this.#rowsDelDia(turno, input.businessId);
+    const totals = this.#computeTotals(rows.ventas, rows.expenses);
+    // O-03: the one calculator, scoped by cajaTurnoId — never a date sum.
+    const esperado = esperadoDelTurno(turno, rows.tickets, rows.lines, rows.abonos, rows.expenses);
     const diferencia = parsed.montoCierreCentavos - esperado;
 
     if (diferencia !== ZERO && !parsed.discrepancyReason) {
@@ -66,18 +96,6 @@ export class CerrarCajaUseCase implements UseCase<CerrarCajaFullInput, CajaTurno
       totalCredito: totals.credito,
       egresoAutoId,
     });
-  }
-
-  #computeExpected(
-    turno: CajaTurno,
-    totals: { efectivoVentas: Money; efectivoEgresos: Money },
-  ): Money {
-    return (
-      turno.montoAperturaCentavos +
-      turno.efectivoAdicionalCentavos +
-      totals.efectivoVentas -
-      totals.efectivoEgresos
-    );
   }
 
   async #maybeCreateAutoEgreso(
