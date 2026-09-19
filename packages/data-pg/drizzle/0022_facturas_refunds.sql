@@ -1,5 +1,5 @@
 -- Three N-33 gaps in the customer Facturas list and the backoffice's reach
--- (owner interview 2026-09-18):
+-- (owner interview 2026-09-18; renumbered from 0021 after a Track O collision, before anything applied it):
 --
 -- 1. A payment stuck in `claimed` (a stamp started and never finished) is
 --    still OWED a CFDI; showing it as `error` told the customer something

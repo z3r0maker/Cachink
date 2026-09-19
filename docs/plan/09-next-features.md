@@ -717,7 +717,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   one inbox item per payment, else `NO_APLICA` / `DATOS_FISCALES_INCOMPLETOS`). Result types in
   `facturas-core.ts`. **Still to do:** the monthly close's own item (`cfdi-global:<period>`) marks nothing.
 - Progress: 2026-09-18 · `track-n/n33-gaps` · the four handoff gaps closed (owner interview
-  2026-09-18): data-pg **0021** — `claimed` shows as `pendiente` (still owed, not "error"), refunded
+  2026-09-18): data-pg **0022** — `claimed` shows as `pendiente` (still owed, not "error"), refunded
   payments (`excluded_from_global`/`cancel_requested`/`cancelled`) listed as **`reembolso`**, and
   `xangarro.cfdi_marcar_global(period, uuid)` so resolving the monthly-close item marks its
   `pending_global` payments `in_global` under one hand-stamped global (backoffice resolver wired);
