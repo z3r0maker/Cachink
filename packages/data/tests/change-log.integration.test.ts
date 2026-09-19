@@ -309,7 +309,7 @@ describe('migration 0001 — change-log triggers capture every row change', () =
       .insert(schema.clientPayments)
       .values({
         id: '01HZ8XQN9GZJXV8AKQ5X0C7Y01',
-        ventaId: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
+        clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
         fecha: '2026-04-23',
         montoCentavos: 1n,
         metodo: 'Efectivo',

@@ -54,6 +54,8 @@ export const cajaTurnos = pgTable('caja_turnos', {
   egresoAutoId: text('egreso_auto_id'),
   conteoCentavos: centavos('conteo_centavos'),
   conteoAt: timestamp('conteo_at', { withTimezone: true, mode: 'string' }),
+  /** Count by denomination at close, JSON text; written once (ADR-074). */
+  denominaciones: text('denominaciones'),
   ...auditColumns,
 });
 

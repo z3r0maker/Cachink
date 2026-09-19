@@ -57,6 +57,7 @@ export class InMemoryCajaTurnosRepository implements CajaTurnosRepository {
       egresoAutoId: null,
       conteoCentavos: null,
       conteoAt: null,
+      denominaciones: null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,

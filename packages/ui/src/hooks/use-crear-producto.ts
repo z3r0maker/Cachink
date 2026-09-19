@@ -60,6 +60,7 @@ function buildNewProduct(input: CrearProductoInput, biz: BusinessId): NewProduct
     colorFondo: input.colorFondo ?? 'white',
     usoProducto: input.usoProducto ?? 'venta',
     icono: input.icono ?? null,
+    estadoRevision: 'aprobado' as const,
     businessId: biz,
   };
 }

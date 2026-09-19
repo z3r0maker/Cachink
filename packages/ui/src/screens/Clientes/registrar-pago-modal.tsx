@@ -23,7 +23,7 @@ import {
   type NewClientPayment,
   type PaymentMethod,
   type Sale,
-  type SaleId,
+  type ClientId,
 } from '@xangarro/domain';
 import { Btn, Input, Modal } from '../../components/index';
 import { RhfMoneyField, RhfTextField } from '../../components/fields/index';
@@ -75,8 +75,10 @@ function buildPayload(
   businessId: BusinessId,
   fecha: IsoDate,
 ): NewClientPayment {
+  // The abono belongs to the venta's client (ADR-074); the fiado venta only
+  // names whose account it lands on.
   return NewClientPaymentSchema.parse({
-    ventaId: venta.id as SaleId,
+    clienteId: (venta.clienteId ?? venta.id) as ClientId,
     fecha,
     montoCentavos: fromPesos(values.montoPesos),
     metodo: values.metodo,

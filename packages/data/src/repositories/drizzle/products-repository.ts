@@ -49,6 +49,8 @@ export class DrizzleProductsRepository implements ProductsRepository {
       tipo: input.tipo ?? 'producto',
       seguirStock: input.seguirStock ?? true,
       precioVentaCentavos: input.precioVentaCentavos,
+      estadoRevision: input.estadoRevision ?? 'aprobado',
+      fusionadoConId: input.fusionadoConId ?? null,
       atributos: JSON.stringify(input.atributos ?? {}),
       colorFondo: input.colorFondo ?? 'white',
       usoProducto: input.usoProducto ?? 'venta',
@@ -148,12 +150,7 @@ export class DrizzleProductsRepository implements ProductsRepository {
       colorFondo: (row.colorFondo ?? 'white') as ProductColor,
       usoProducto: (row.usoProducto ?? 'venta') as UsoProducto,
       icono: (row.icono ?? null) as ProductIcon | null,
-      businessId: row.businessId as BusinessId,
-      deviceId: row.deviceId as DeviceId,
-      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
-      createdAt: row.createdAt as IsoTimestamp,
-      updatedAt: row.updatedAt as IsoTimestamp,
-      deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+      ...stampsOf(row),
     };
   }
 
@@ -164,4 +161,18 @@ export class DrizzleProductsRepository implements ProductsRepository {
       return {};
     }
   }
+}
+
+/** Audit + review stamps shared by every product row mapping. */
+function stampsOf(row: ProductRow) {
+  return {
+    businessId: row.businessId as BusinessId,
+    deviceId: row.deviceId as DeviceId,
+    createdByUserId: (row.createdByUserId ?? null) as UserId | null,
+    createdAt: row.createdAt as IsoTimestamp,
+    updatedAt: row.updatedAt as IsoTimestamp,
+    deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+    estadoRevision: row.estadoRevision,
+    fusionadoConId: (row.fusionadoConId ?? null) as Product['fusionadoConId'],
+  };
 }

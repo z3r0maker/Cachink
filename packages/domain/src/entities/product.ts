@@ -18,6 +18,7 @@ import { z } from 'zod';
 import type { BusinessId, ProductId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
+import { estadoRevisionField } from './_revision.js';
 import { moneyField } from './_fields.js';
 
 export const InventoryCategoryEnum = z.enum([
@@ -160,6 +161,10 @@ export const ProductSchema = z
     usoProducto: UsoProductoEnum.default('venta'),
     /** Optional product icon for visual identification. */
     icono: ProductIconEnum.nullable().default(null),
+    /** «Creado en caja» review (ADR-074); defaults to `aprobado`. */
+    estadoRevision: estadoRevisionField,
+    /** When merged, the product this row fused into (ADR-074). */
+    fusionadoConId: ulidField<ProductId>().nullable().default(null),
   })
   .merge(auditSchema)
   .refine((v) => v.tipo === 'producto' || v.seguirStock === false, {
@@ -183,6 +188,9 @@ export const NewProductSchema = z.object({
   colorFondo: ProductColorEnum.default('white'),
   usoProducto: UsoProductoEnum.default('venta'),
   icono: ProductIconEnum.nullable().optional(),
+  /** A product created at the register arrives `pendiente` (ADR-074). */
+  estadoRevision: estadoRevisionField,
+  fusionadoConId: ulidField<ProductId>().nullish(),
   businessId: ulidField<BusinessId>(),
 });
 

@@ -17,7 +17,8 @@ import { auditColumns, centavos } from './_columns';
 
 export const clientPayments = pgTable('client_payments', {
   id: text('id').primaryKey(),
-  ventaId: text('venta_id').notNull(),
+  /** The abono belongs to the client (ADR-074); balances are derived. */
+  clienteId: text('cliente_id').notNull(),
   fecha: text('fecha').notNull(),
   montoCentavos: centavos('monto_centavos').notNull(),
   metodo: text('metodo', {
@@ -59,6 +60,8 @@ export const expenses = pgTable('expenses', {
   monto: centavos('monto_centavos').notNull(),
   proveedor: text('proveedor'),
   gastoRecurrenteId: text('gasto_recurrente_id'),
+  /** The turno the gasto came out of (ADR-074). */
+  cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,
 });
 

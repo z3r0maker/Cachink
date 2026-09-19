@@ -45,6 +45,8 @@ export class InMemoryProductsRepository implements ProductsRepository {
       tipo: input.tipo ?? 'producto',
       seguirStock: input.seguirStock ?? true,
       precioVentaCentavos: input.precioVentaCentavos,
+      estadoRevision: input.estadoRevision ?? 'aprobado',
+      fusionadoConId: null,
       atributos: input.atributos ?? {},
       colorFondo: input.colorFondo ?? 'white',
       usoProducto: input.usoProducto ?? 'venta',

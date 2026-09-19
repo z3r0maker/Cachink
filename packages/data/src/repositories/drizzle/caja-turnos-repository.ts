@@ -193,12 +193,20 @@ export class DrizzleCajaTurnosRepository implements CajaTurnosRepository {
       egresoAutoId: (row.egresoAutoId ?? null) as ExpenseId | null,
       conteoCentavos: row.conteoCentavos ?? null,
       conteoAt: (row.conteoAt ?? null) as IsoTimestamp | null,
-      businessId: row.businessId as BusinessId,
-      deviceId: row.deviceId as DeviceId,
-      createdByUserId: (row.createdByUserId ?? null) as UserId | null,
-      createdAt: row.createdAt as IsoTimestamp,
-      updatedAt: row.updatedAt as IsoTimestamp,
-      deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+      ...stampsOf(row),
     };
   }
+}
+
+/** Audit + close stamps shared by every turno row mapping. */
+function stampsOf(row: TurnoRow) {
+  return {
+    businessId: row.businessId as BusinessId,
+    deviceId: row.deviceId as DeviceId,
+    createdByUserId: (row.createdByUserId ?? null) as UserId | null,
+    createdAt: row.createdAt as IsoTimestamp,
+    updatedAt: row.updatedAt as IsoTimestamp,
+    deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+    denominaciones: (row.denominaciones ?? null) as CajaTurno['denominaciones'],
+  };
 }

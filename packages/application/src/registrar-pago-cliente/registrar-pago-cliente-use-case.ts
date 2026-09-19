@@ -1,57 +1,48 @@
 /**
- * RegistrarPagoClienteUseCase (P1B-M6-T04).
+ * RegistrarPagoClienteUseCase — record a client's abono (ADR-074).
  *
- * 1. Validates the NewClientPayment via Zod.
- * 2. Loads the target Venta; rejects if:
- *    - venta doesn't exist,
- *    - venta is not Crédito,
- *    - venta is already in `pagado` state.
- * 3. Rejects overpayments (sum of existing pagos + new monto > venta.monto).
- * 4. Persists the PagoCliente.
- * 5. Recomputes estadoPago (parcial vs pagado) based on the new running
- *    total and updates the Venta via SalesRepository.updatePaymentState.
+ * An abono belongs to the client, not to a sale: how it settles their
+ * tickets (oldest first) and their balance are derived by `estadoDeCuenta`
+ * — nothing here stores or mutates a balance or a sale's estadoPago. The
+ * whole amount is recorded even above the balance (ADR-083 D5): the cash is
+ * in the drawer, and the excess is the client's saldo a favor.
  */
 
 import {
+  AbonoInvalidoError,
   NewClientPaymentSchema,
   type ClientPayment,
   type NewClientPayment,
-  type PaymentState,
 } from '@xangarro/domain';
-import type { ClientPaymentsRepository, SalesRepository } from '@xangarro/data';
+import type { ClientPaymentsRepository, ClientsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export class RegistrarPagoClienteUseCase implements UseCase<NewClientPayment, ClientPayment> {
   readonly #payments: ClientPaymentsRepository;
-  readonly #sales: SalesRepository;
+  readonly #clients: ClientsRepository;
 
-  constructor(payments: ClientPaymentsRepository, sales: SalesRepository) {
+  constructor(payments: ClientPaymentsRepository, clients: ClientsRepository) {
     this.#payments = payments;
-    this.#sales = sales;
+    this.#clients = clients;
   }
 
   async execute(input: NewClientPayment): Promise<ClientPayment> {
     const parsed = NewClientPaymentSchema.parse(input);
-    const venta = await this.#sales.findById(parsed.ventaId);
-    if (!venta) {
-      throw new TypeError(`Venta ${parsed.ventaId} no existe`);
+    if (parsed.montoCentavos <= 0n) {
+      throw new AbonoInvalidoError();
     }
-    if (venta.metodo !== 'Crédito') {
-      throw new TypeError('Solo ventas en Crédito aceptan pagos');
+    const cliente = await this.#clients.findById(parsed.clienteId);
+    if (!cliente) {
+      throw new TypeError(`Cliente ${parsed.clienteId} no existe`);
     }
-    if (venta.estadoPago === 'pagado') {
-      throw new TypeError('Venta ya está pagada');
-    }
-
-    const previo = await this.#payments.sumByVenta(parsed.ventaId);
-    const nuevoTotal = previo + parsed.montoCentavos;
-    if (nuevoTotal > venta.monto) {
-      throw new TypeError('El pago excede el monto restante de la venta');
+    if (cliente.estadoRevision === 'fusionado' || cliente.estadoRevision === 'rechazado') {
+      throw new TypeError(
+        cliente.estadoRevision === 'fusionado'
+          ? 'Cliente fusionado en revisión: cobra a la ficha vigente'
+          : 'Cliente rechazado en revisión: no acepta abonos',
+      );
     }
 
-    const pago = await this.#payments.create(parsed);
-    const nextState: PaymentState = nuevoTotal === venta.monto ? 'pagado' : 'parcial';
-    await this.#sales.updatePaymentState(parsed.ventaId, nextState);
-    return pago;
+    return this.#payments.create(parsed);
   }
 }

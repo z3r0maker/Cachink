@@ -374,7 +374,22 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-18 Receivables, expected cash and review status
 
-- [ ] Status · **Surfaced by:** Track O (ADR-074) · **Blocks:** O-03, O-05
+- [x] Status · **Surfaced by:** Track O (ADR-074) · **Blocks:** O-03, O-05
+  - Done: 2026-09-18 · `client_payments` become per-client (`clienteId`, no `ventaId`; SQLite 0004
+    rebuilds the table, backfills each abono from its sale and re-creates the change-log triggers —
+    3 old→new tests; pg 0023 does the same additively and drops `venta_id`, applied to the local
+    DB). `clients` + `limite_centavos`/`plazo_dias`/`estado_revision`/`fusionado_con_id`,
+    `products` + review status + `fusionado_con_id`, `expenses` + `caja_turno_id`,
+    `caja_turnos` + `denominaciones` (JSON text), everywhere defaulting existing rows to
+    `aprobado`. `RegistrarPagoClienteUseCase` rewritten to ADR-074/D5: per-client abono, the whole
+    amount recorded (excess = saldo a favor), fused/rejected clients refused, no estadoPago
+    mutation; `balance-general`'s CxC now derives through `estadoDeCuenta` (one calculator);
+    repos (drizzle + in-memory + contract tests), fixtures, exports and the old UI hook/modal
+    follow. Drift 27 green (0022 re-applied after another session reset the shared DB); domain
+    773, data 269, application 460, contracts 49, testing 147, UI 1859 green (the one red is the
+    documented `use-lan-handle` flake, green in isolation); typecheck clean. Owner decision
+    applied: `fusionar` records `estado_revision='fusionado'` + `fusionado_con_id`; stock moves
+    via an `inventory_movements` row at wiring time (O-30); history never rewritten.
 - **Steps:** `client_payments` per client (`clienteId`, no `ventaId`); `clients` + `limiteCentavos`,
   `plazoDias`, review status; `products` + review status; `expenses` + `cajaTurnoId`; `caja_turnos`
   - denomination JSON. Migrations with old → new tests.

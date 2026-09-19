@@ -4,7 +4,8 @@
  * Business narrative:
  *   1. Create a client
  *   2. Register a credit sale → estadoPago=pendiente
- *   3. Make a partial payment → estadoPago=parcial
+ *   3. Record a client abono (ADR-074: per client; the sale's estadoPago no
+ *      longer flips here — balances are derived by estadoDeCuenta)
  *   4. Overpayment → rejected
  *   5. Complete payment → estadoPago=pagado
  *   6. Payment on non-credit sale → rejected
@@ -76,7 +77,7 @@ describe('Crédito Lifecycle [fullstack]', () => {
     expect(sale.clienteId).toBe(clientId);
   });
 
-  it('partial payment updates estadoPago to parcial', async () => {
+  it('records a client abono without touching the sale (ADR-074)', async () => {
     const sale = await h.useCases.registrarVenta.execute(
       makeNewSale({
         businessId: BIZ,
@@ -87,9 +88,9 @@ describe('Crédito Lifecycle [fullstack]', () => {
       }),
     );
 
-    // Pay 60 of 100
+    // Abono 60 of 100 — it belongs to the client, not the sale
     const pago = await h.useCases.registrarPago.execute({
-      ventaId: sale.id,
+      clienteId: clientId,
       fecha: '2026-04-23',
       montoCentavos: 60_00n,
       metodo: 'Efectivo',
@@ -97,14 +98,15 @@ describe('Crédito Lifecycle [fullstack]', () => {
     });
 
     expect(pago.montoCentavos).toBe(60_00n);
+    expect(pago.clienteId).toBe(clientId);
 
-    // Verify venta is now parcial
-    const updated = await h.repos.sales.findById(sale.id);
-    expect(updated!.estadoPago).toBe('parcial');
+    const abonos = await h.repos.clientPayments.findByCliente(clientId);
+    expect(abonos.map((a) => a.montoCentavos)).toEqual([60_00n]);
+    void sale;
   });
 
-  it('overpayment is rejected', async () => {
-    const sale = await h.useCases.registrarVenta.execute(
+  it('an abono above the balance is recorded whole — the excess is saldo a favor (ADR-083 D5)', async () => {
+    await h.useCases.registrarVenta.execute(
       makeNewSale({
         businessId: BIZ,
         productoId: productId,
@@ -114,29 +116,27 @@ describe('Crédito Lifecycle [fullstack]', () => {
       }),
     );
 
-    // Pay 60 first
     await h.useCases.registrarPago.execute({
-      ventaId: sale.id,
+      clienteId: clientId,
       fecha: '2026-04-23',
       montoCentavos: 60_00n,
       metodo: 'Efectivo',
       businessId: BIZ,
     });
 
-    // Try to pay 50 more — total would be 110 > 100
-    await expect(
-      h.useCases.registrarPago.execute({
-        ventaId: sale.id,
-        fecha: '2026-04-24',
-        montoCentavos: 50_00n,
-        metodo: 'Efectivo',
-        businessId: BIZ,
-      }),
-    ).rejects.toThrow(/excede.*monto/i);
+    // 50 more: 110 against a 100 balance — the cash is in the drawer
+    const pago = await h.useCases.registrarPago.execute({
+      clienteId: clientId,
+      fecha: '2026-04-24',
+      montoCentavos: 50_00n,
+      metodo: 'Efectivo',
+      businessId: BIZ,
+    });
+    expect(pago.montoCentavos).toBe(50_00n);
   });
 
-  it('complete payment marks sale as pagado', async () => {
-    const sale = await h.useCases.registrarVenta.execute(
+  it('abonos accumulate on the client account (ADR-074)', async () => {
+    await h.useCases.registrarVenta.execute(
       makeNewSale({
         businessId: BIZ,
         productoId: productId,
@@ -146,9 +146,9 @@ describe('Crédito Lifecycle [fullstack]', () => {
       }),
     );
 
-    // Pay 60 + 40 = 100
+    // 60 + 40 = 100 — the derived balance is zero, nothing stored flipped
     await h.useCases.registrarPago.execute({
-      ventaId: sale.id,
+      clienteId: clientId,
       fecha: '2026-04-23',
       montoCentavos: 60_00n,
       metodo: 'Efectivo',
@@ -156,68 +156,38 @@ describe('Crédito Lifecycle [fullstack]', () => {
     });
 
     await h.useCases.registrarPago.execute({
-      ventaId: sale.id,
+      clienteId: clientId,
       fecha: '2026-04-24',
       montoCentavos: 40_00n,
       metodo: 'Transferencia',
       businessId: BIZ,
     });
 
-    const final = await h.repos.sales.findById(sale.id);
-    expect(final!.estadoPago).toBe('pagado');
+    const abonos = await h.repos.clientPayments.findByCliente(clientId);
+    expect(abonos.map((a) => a.montoCentavos)).toEqual([60_00n, 40_00n]);
   });
 
-  it('payment on non-credit sale is rejected', async () => {
-    // Cash sale
-    const cashSale = await h.useCases.registrarVenta.execute(
-      makeNewSale({
-        businessId: BIZ,
-        productoId: productId,
-        monto: 50_00n,
-        metodo: 'Efectivo',
-      }),
-    );
-
+  it('an abono for an unknown client is rejected', async () => {
     await expect(
       h.useCases.registrarPago.execute({
-        ventaId: cashSale.id,
+        clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never,
         fecha: '2026-04-23',
         montoCentavos: 50_00n,
         metodo: 'Efectivo',
         businessId: BIZ,
       }),
-    ).rejects.toThrow(/solo ventas en crédito/i);
+    ).rejects.toThrow(/no existe/i);
   });
 
-  it('payment on already-paid sale is rejected', async () => {
-    const sale = await h.useCases.registrarVenta.execute(
-      makeNewSale({
-        businessId: BIZ,
-        productoId: productId,
-        monto: 100_00n,
-        metodo: 'Crédito',
-        clienteId: clientId,
-      }),
-    );
-
-    // Pay in full
-    await h.useCases.registrarPago.execute({
-      ventaId: sale.id,
-      fecha: '2026-04-23',
-      montoCentavos: 100_00n,
-      metodo: 'Efectivo',
-      businessId: BIZ,
-    });
-
-    // Try another payment
+  it('a zero abono is rejected', async () => {
     await expect(
       h.useCases.registrarPago.execute({
-        ventaId: sale.id,
-        fecha: '2026-04-24',
-        montoCentavos: 10_00n,
+        clienteId: clientId,
+        fecha: '2026-04-23',
+        montoCentavos: 0n,
         metodo: 'Efectivo',
         businessId: BIZ,
       }),
-    ).rejects.toThrow(/ya está pagada/i);
+    ).rejects.toThrow();
   });
 });

@@ -28,5 +28,6 @@ export const expenses = sqliteTable('expenses', {
   monto: numeric('monto_centavos', { mode: 'bigint' }).notNull(),
   proveedor: text('proveedor'),
   gastoRecurrenteId: text('gasto_recurrente_id'),
+  cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,
 });
