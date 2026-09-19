@@ -20,7 +20,7 @@
 import type { ReactElement } from 'react';
 import { Text } from '@tamagui/core';
 import { View } from '@tamagui/core';
-import type { Business, Sale } from '@xangarro/domain';
+import type { Business, Money, Ticket } from '@xangarro/domain';
 import { Btn, Modal } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { useComprobanteHtml } from '../../hooks/use-comprobante-html';
@@ -30,7 +30,9 @@ import { PreviewFrame } from './comprobante-preview-frame';
 export interface ComprobantePreviewProps {
   readonly open: boolean;
   readonly onClose: () => void;
-  readonly sale: Sale | null;
+  readonly ticket: Ticket | null;
+  /** The ticket's lines' total. */
+  readonly total: Money;
   readonly business: Business | null;
   readonly onShare?: (html: string) => void;
   readonly sharing?: boolean;
@@ -38,7 +40,7 @@ export interface ComprobantePreviewProps {
 
 export function ComprobantePreview(props: ComprobantePreviewProps): ReactElement {
   const { t } = useTranslation();
-  const html = useComprobanteHtml(props.sale, props.business);
+  const html = useComprobanteHtml(props.ticket, props.total, props.business);
 
   if (!html) {
     return (

@@ -10,8 +10,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import type { BusinessId, Sale } from '@xangarro/domain';
-import { useSalesRepository } from '../app/index';
+import type { BusinessId, Ticket } from '@xangarro/domain';
+import { useTicketsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { useRole } from '../app-config/index';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
@@ -21,7 +21,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 export function useCheckCreditosVencidos(): void {
   const role = useRole();
   const businessId = useCurrentBusinessId();
-  const salesRepo = useSalesRepository();
+  const ticketsRepo = useTicketsRepository();
   const emitAlert = useEmitDirectorAlert();
   // Stable ref to avoid stale-closure on the mutation object which changes every render
   const emitRef = useRef(emitAlert.mutate);
@@ -43,12 +43,12 @@ export function useCheckCreditosVencidos(): void {
       const from = ninetyDaysAgo.toISOString().slice(0, 10);
       const to = now.toISOString().slice(0, 10);
 
-      const allSales = await salesRepo.findByDateRange(from, to, bid);
+      const allTickets = await ticketsRepo.findByDateRange(from, to, bid);
 
-      const overdue = allSales.filter((s: Sale) => {
-        if (s.metodo !== 'Crédito') return false;
-        if (s.estadoPago === 'pagado') return false;
-        const saleDate = new Date(s.fecha).getTime();
+      const overdue = allTickets.filter((t: Ticket) => {
+        if (t.metodo !== 'Crédito') return false;
+        if (t.estadoPago === 'pagado') return false;
+        const saleDate = new Date(t.fecha).getTime();
         return now.getTime() - saleDate > THIRTY_DAYS_MS;
       });
 
@@ -64,5 +64,5 @@ export function useCheckCreditosVencidos(): void {
         });
       }
     }
-  }, [role, businessId, salesRepo]);
+  }, [role, businessId, ticketsRepo]);
 }

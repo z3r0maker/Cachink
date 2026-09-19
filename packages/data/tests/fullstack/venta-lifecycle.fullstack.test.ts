@@ -88,8 +88,8 @@ describe('Venta Lifecycle [fullstack]', () => {
       }),
     );
 
-    expect(sale.estadoPago).toBe('pagado');
-    expect(sale.cajaTurnoId).toBe(turno.id);
+    expect((await h.repos.tickets.findById(sale.ticketId))?.estadoPago).toBe('pagado');
+    expect((await h.repos.tickets.findById(sale.ticketId))?.cajaTurnoId).toBe(turno.id);
 
     // Verify stock: 10 entrada - 3 salida = 7
     const stock = await h.repos.movements.sumStock(productId);
@@ -133,7 +133,7 @@ describe('Venta Lifecycle [fullstack]', () => {
     });
 
     expect(result.stockReversed).toBe(true);
-    expect(result.cantidadDevuelta).toBe(2);
+    // cantidadDevuelta travels on the CancelarTicket result (ADR-073)
     expect(result.cashToReturn).toBe(7_000n);
 
     // Stock reversed: 10 - 2 + 2 = 10
@@ -168,7 +168,7 @@ describe('Venta Lifecycle [fullstack]', () => {
       }),
     );
 
-    expect(sale.estadoPago).toBe('pagado');
+    expect((await h.repos.tickets.findById(sale.ticketId))?.estadoPago).toBe('pagado');
 
     // Stock goes negative: 10 - 15 = -5
     const stock = await h.repos.movements.sumStock(productId);

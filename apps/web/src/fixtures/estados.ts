@@ -13,6 +13,7 @@ import {
   type IsoTimestamp,
   type ProductId,
   type Sale,
+  type TicketConTotal,
   type SaleId,
 } from '@xangarro/domain';
 
@@ -36,18 +37,17 @@ let seq = 0;
 const id = (p: string): string =>
   `01HZ8XQN9GZJXV8AKQ5X0C${p}${(seq++).toString().padStart(3, '0')}`;
 
-function sale(concepto: string, amount: number, metodo: Sale['metodo'], fecha: string): Sale {
+/** A line of a one-line ticket (ADR-073), plus that ticket's projection. */
+function sale(concepto: string, amount: number, _metodo: string, fecha: string): Sale {
   return {
     id: id('S') as SaleId,
+    ticketId: id('T') as Sale['ticketId'],
     fecha: fecha as IsoDate,
     concepto,
     categoria: 'Producto',
     monto: pesos(amount),
-    metodo,
     cantidad: 1,
     productoId: PROD,
-    clienteId: null,
-    estadoPago: 'pagado',
     businessId: BIZ,
     deviceId: DEV,
     createdByUserId: null,
@@ -81,6 +81,14 @@ export const PERIOD_SALES: readonly Sale[] = [
   sale('Gringas', 15600, 'Tarjeta', '2026-05-11'),
   sale('Bebidas', 7620, 'QR/CoDi', '2026-05-12'),
 ];
+
+/** The same ventas as ticket projections, method per the original seeds. */
+export const PERIOD_TICKETS: readonly TicketConTotal[] = [
+  { ticket: { metodo: 'Efectivo' }, total: pesos(28400) },
+  { ticket: { metodo: 'Transferencia' }, total: pesos(16800) },
+  { ticket: { metodo: 'Tarjeta' }, total: pesos(15600) },
+  { ticket: { metodo: 'QR/CoDi' }, total: pesos(7620) },
+] as never;
 
 export const PERIOD_EXPENSES: readonly Expense[] = [
   expense('Carne y queso', 24610, 'Materia Prima'),
@@ -131,7 +139,7 @@ export const BALANCE = calculateBalanceGeneral({
 });
 
 export const FLUJO = calculateFlujoDeEfectivo({
-  ventas: PERIOD_SALES,
+  ventas: PERIOD_TICKETS,
   egresos: PERIOD_EXPENSES,
   pagosClientes: [],
 });

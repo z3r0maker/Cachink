@@ -3,10 +3,15 @@
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import type { BusinessId, Sale, UserId } from '@xangarro/domain';
 import { Modal } from '../../components/index';
-import { useSalesRepository, useCancelacionLogsRepository } from '../../app/repository-provider';
+import {
+  useSalesRepository,
+  useCancelacionLogsRepository,
+  useTicketsRepository,
+} from '../../app/repository-provider';
 import { useCurrentBusinessId, useUserId, useDeviceId } from '../../app-config/use-app-config';
 import { useLogStore } from '../../observability/observability-provider';
 import { logSuccessAudit, logErrorAudit } from './cancellation-audit';
@@ -20,23 +25,39 @@ export interface CancellationFlowProps {
   readonly onSuccess: () => void;
 }
 
+/**
+ * The ticket carries the method and the cancellation (ADR-073); this flow's
+ * `sale` prop is one of its lines.
+ */
+function useTicketDeLinea(ticketId: string) {
+  const ticketsRepo = useTicketsRepository();
+  return (
+    useQuery({
+      queryKey: ['ticket', ticketId],
+      queryFn: () => ticketsRepo.findById(ticketId as never),
+      enabled: true,
+    }).data ?? null
+  );
+}
+
 function useAuditContext(sale: Sale) {
   const userId = useUserId() as UserId;
   const businessId = useCurrentBusinessId() as BusinessId;
   const deviceId = useDeviceId();
   const logStore = useLogStore();
-  const isCashSale = sale.metodo === 'Efectivo';
+  const ticket = useTicketDeLinea(sale.ticketId);
+  const isCashSale = ticket?.metodo === 'Efectivo';
 
-  return { userId, businessId, deviceId, logStore, isCashSale };
+  return { userId, businessId, deviceId, logStore, isCashSale, ticket };
 }
 
 function buildLogPayload(sale: Sale, motivo: string, ctx: ReturnType<typeof useAuditContext>) {
   return {
-    saleId: sale.id,
+    ticketId: sale.ticketId,
     cancelledByUserId: ctx.userId,
     motivo: motivo.trim(),
     montoOriginalCentavos: sale.monto,
-    metodoOriginal: sale.metodo,
+    metodoOriginal: (ctx.ticket?.metodo ?? 'Efectivo') as never,
     cashReturnedCentavos: ctx.isCashSale ? sale.monto : null,
     stockReversed: false,
     cantidadDevuelta: null,

@@ -92,27 +92,39 @@ export const recurringExpenses = pgTable('recurring_expenses', {
   ...auditColumns,
 });
 
-export const sales = pgTable('sales', {
+/** The sale header (ADR-073): folio, method, client, cash, cancellation. */
+export const tickets = pgTable('tickets', {
   id: text('id').primaryKey(),
+  folio: integer('folio').notNull(),
   fecha: text('fecha').notNull(),
   hora: text('hora'),
+  concepto: text('concepto').notNull(),
+  metodo: text('metodo', {
+    enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'],
+  }).notNull(),
+  clienteId: text('cliente_id'),
+  estadoPago: text('estado_pago', { enum: ['pagado', 'pendiente', 'parcial'] }).notNull(),
+  efectivoRecibidoCentavos: centavos('efectivo_recibido_centavos'),
+  cambioCentavos: centavos('cambio_centavos'),
+  cajaTurnoId: text('caja_turno_id'),
+  cancelMotivo: text('cancel_motivo'),
+  cancelledByUserId: text('cancelled_by_user_id'),
+  cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'string' }),
+  ...auditColumns,
+});
+
+/** A ticket's lines (ADR-073): product, quantity, amount. */
+export const sales = pgTable('sales', {
+  id: text('id').primaryKey(),
+  ticketId: text('ticket_id').notNull(),
+  fecha: text('fecha').notNull(),
   concepto: text('concepto').notNull(),
   categoria: text('categoria', {
     enum: ['Producto', 'Servicio', 'Anticipo', 'Suscripción', 'Otro'],
   }).notNull(),
   /** Same key as the device (`monto`); the column is `monto_centavos`. */
   monto: centavos('monto_centavos').notNull(),
-  metodo: text('metodo', {
-    enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'QR/CoDi', 'Crédito'],
-  }).notNull(),
-  clienteId: text('cliente_id'),
-  estadoPago: text('estado_pago', { enum: ['pagado', 'pendiente', 'parcial'] }).notNull(),
   productoId: text('producto_id').notNull(),
   cantidad: integer('cantidad').notNull().default(1),
-  efectivoRecibidoCentavos: centavos('efectivo_recibido_centavos'),
-  cancelledByUserId: text('cancelled_by_user_id'),
-  cancelMotivo: text('cancel_motivo'),
-  cancelledAt: timestamp('cancelled_at', { withTimezone: true, mode: 'string' }),
-  cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,
 });

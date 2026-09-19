@@ -4,7 +4,7 @@ import type { Insight } from '@xangarro/domain';
 import { mesAnterior, type IsoDate } from '@xangarro/domain';
 
 import { inventoryMovements, products } from '../schema/catalog.js';
-import { expenses, sales } from '../schema/ledger.js';
+import { expenses, sales, tickets } from '../schema/ledger.js';
 import { notices } from '../schema/portal.js';
 import type { Db } from '../client.js';
 
@@ -34,12 +34,13 @@ export async function asesorInputs(tx: Tx, hoy: IsoDate) {
 /** Ventas of the window the quincena detector reads. */
 function ventasRecientes(tx: Tx, desde: string) {
   return tx
-    .select({ fecha: sales.fecha, monto: sales.monto, metodo: sales.metodo })
+    .select({ fecha: sales.fecha, monto: sales.monto, metodo: tickets.metodo })
     .from(sales)
+    .innerJoin(tickets, eq(sales.ticketId, tickets.id))
     .where(
       and(
         isNull(sales.deletedAt),
-        isNull(sales.cancelledAt),
+        isNull(tickets.cancelledAt),
         sql`left(${sales.fecha}, 10) >= ${desde}`,
       ),
     );

@@ -12,26 +12,29 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Client, Money, Sale } from '@xangarro/domain';
-import { useClientsRepository, useSalesRepository } from '../app/index';
+import type { Client, Money, Ticket } from '@xangarro/domain';
+import { useClientsRepository, useSalesRepository, useTicketsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 
 export interface CuentaPorCobrar {
   readonly cliente: Client;
-  readonly ventas: readonly Sale[];
+  /** Open fiado tickets of this client (ADR-073). */
+  readonly ventas: readonly Ticket[];
   readonly total: Money;
 }
 
-function sumAmounts(ventas: readonly Sale[]): Money {
+/** A ticket's balance is its lines' sum — derived, never stored (ADR-073). */
+function sumAmounts(ventas: readonly Ticket[], montos: ReadonlyMap<string, Money>): Money {
   let total = 0n as Money;
   for (const venta of ventas) {
-    total = ((total as bigint) + (venta.monto as bigint)) as Money;
+    total = ((total as bigint) + (montos.get(venta.id) ?? 0n)) as Money;
   }
   return total;
 }
 
 export function useCuentasPorCobrar(): UseQueryResult<readonly CuentaPorCobrar[], Error> {
   const clients = useClientsRepository();
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const businessId = useCurrentBusinessId();
 
@@ -40,12 +43,19 @@ export function useCuentasPorCobrar(): UseQueryResult<readonly CuentaPorCobrar[]
     enabled: businessId !== null,
     async queryFn() {
       if (!businessId) return [];
-      const allClients = await clients.findByName('', businessId);
+      const [allClients, allLines] = await Promise.all([
+        clients.findByName('', businessId),
+        sales.findByDateRange('0000-01-01', '9999-12-31', businessId),
+      ]);
+      const montos = new Map<string, Money>();
+      for (const line of allLines) {
+        montos.set(line.ticketId, ((montos.get(line.ticketId) ?? 0n) + line.monto) as Money);
+      }
       const rows: CuentaPorCobrar[] = [];
       for (const cliente of allClients) {
-        const pending = await sales.findPendingByClient(cliente.id);
+        const pending = await tickets.findPendingByClient(cliente.id);
         if (pending.length === 0) continue;
-        rows.push({ cliente, ventas: pending, total: sumAmounts(pending) });
+        rows.push({ cliente, ventas: pending, total: sumAmounts(pending, montos) });
       }
       return rows;
     },

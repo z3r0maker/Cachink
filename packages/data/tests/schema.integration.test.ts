@@ -91,21 +91,35 @@ describe('Drizzle schema — round-trip every entity', () => {
 
   it('round-trips a Sale preserving bigint money', () => {
     const id = '01HZ8XQN9GZJXV8AKQ5X0C7TE1';
-    db.insert(schema.sales)
+    db.insert(schema.tickets)
       .values({
         id,
+        folio: 1,
+        fecha: '2026-04-23',
+        concepto: 'Taco al pastor',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        ...audit,
+      })
+      .run();
+    db.insert(schema.sales)
+      .values({
+        id: `${id}L`,
+        ticketId: id,
         fecha: '2026-04-23',
         concepto: 'Taco al pastor',
         categoria: 'Producto',
         monto: 450_00n,
-        metodo: 'Efectivo',
-        clienteId: null,
-        estadoPago: 'pagado',
         productoId: '01HZ8XQN9GZJXV8AKQ5X0C7TE3',
         ...audit,
       })
       .run();
-    const [row] = db.select().from(schema.sales).where(eq(schema.sales.id, id)).all();
+    const [row] = db
+      .select()
+      .from(schema.sales)
+      .where(eq(schema.sales.id, `${id}L`))
+      .all();
     expect(row?.monto).toBe(450_00n);
     expect(typeof row?.monto).toBe('bigint');
     expect(row?.categoria).toBe('Producto');

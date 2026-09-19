@@ -19,7 +19,7 @@
 
 import type { ClientPayment } from '../entities/client-payment.js';
 import type { DayClose } from '../entities/day-close.js';
-import type { Sale } from '../entities/sale.js';
+import type { TicketConTotal } from './tickets.js';
 import { estadoDeCuenta, type CargoFiado, type PagoCliente } from './estado-cuenta.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
@@ -44,7 +44,8 @@ export interface BalanceGeneralInput {
   /** Current stock per productoId × costoUnit gives the inventory valuation. */
   inventarioStock: readonly { costoUnitCentavos: Money; cantidad: number }[];
   /** Ventas still in pendiente/parcial status. */
-  ventasConCredito: readonly Sale[];
+  /** Open fiado tickets with their derived totals (ADR-073). */
+  ventasConCredito: readonly TicketConTotal[];
   /** All pagos received against any venta in `ventasConCredito`. */
   pagosClientes: readonly ClientPayment[];
   /** Manually tracked liabilities (vendors, loans). Zero when none. */
@@ -103,15 +104,15 @@ function latestCorteCash(cortes: readonly DayClose[]): Money {
  * abono (saldo a favor) is not an asset, so only `saldo` counts.
  */
 function calcCuentasPorCobrar(
-  ventasConCredito: readonly Sale[],
+  ticketsConCredito: readonly TicketConTotal[],
   pagosClientes: readonly ClientPayment[],
 ): Money {
   const ventasPorCliente = new Map<string, CargoFiado[]>();
-  for (const venta of ventasConCredito) {
-    if (venta.estadoPago !== 'pendiente' && venta.estadoPago !== 'parcial') continue;
-    const key = venta.clienteId ?? venta.id; // defensive: fiado without a client
+  for (const { ticket, total } of ticketsConCredito) {
+    if (ticket.estadoPago !== 'pendiente' && ticket.estadoPago !== 'parcial') continue;
+    const key = ticket.clienteId ?? ticket.id; // defensive: fiado without a client
     const bucket = ventasPorCliente.get(key) ?? [];
-    bucket.push({ id: venta.id, fecha: venta.createdAt, monto: venta.monto });
+    bucket.push({ id: ticket.id, fecha: ticket.createdAt, monto: total });
     ventasPorCliente.set(key, bucket);
   }
   const abonosPorCliente = new Map<string, PagoCliente[]>();

@@ -9,7 +9,7 @@
 import { useState, type ReactElement } from 'react';
 import { ScrollView, View as RNView } from 'react-native';
 import { View } from '@tamagui/core';
-import { formatMoney, today, type Sale } from '@xangarro/domain';
+import { formatMoney, today, type Ticket } from '@xangarro/domain';
 import { ErrorState, Kpi, PeriodPicker, SectionTitle, Skeleton } from '../../components/index';
 import type { PeriodoState } from '../../components/PeriodPicker/period-picker';
 import { useTranslation } from '../../i18n/index';
@@ -33,7 +33,7 @@ function useCreditoState() {
   const query = useVentasCredito(range.from, range.to);
   const registrarPago = useRegistrarPago();
   const businessId = useCurrentBusinessId();
-  const [selectedVenta, setSelectedVenta] = useState<Sale | null>(null);
+  const [selectedVenta, setSelectedVenta] = useState<Ticket | null>(null);
   const [expandedClient, setExpandedClient] = useState<string | null>(null);
   const totalPendiente = query.data?.reduce((acc, r) => acc + r.totalPendienteCentavos, 0n) ?? 0n;
   return {
@@ -83,7 +83,7 @@ function CreditoBody(props: {
   query: ReturnType<typeof useVentasCredito>;
   expandedClient: string | null;
   onToggle: (key: string) => void;
-  onPagar: (v: Sale) => void;
+  onPagar: (v: Ticket) => void;
 }): ReactElement {
   const { t } = useTranslation();
   const { data: rows, isLoading, error } = props.query;
@@ -122,13 +122,13 @@ function CreditoPagoModal(props: {
   if (selectedVenta === null || businessId === null) return null;
   return (
     <RegistrarPagoModal
-      venta={selectedVenta}
+      venta={{ ticket: selectedVenta, total: 0n }}
       open
       onClose={() => setSelectedVenta(null)}
       onSubmit={(input) => {
         registrarPago.mutate(input, { onSuccess: () => setSelectedVenta(null) });
       }}
-      saldoPendiente={selectedVenta.monto}
+      saldoPendiente={0n}
       businessId={businessId}
       fecha={today()}
       submitting={registrarPago.isPending}

@@ -9,7 +9,7 @@ import { auditColumns } from './_audit';
 
 export const cancelacionLogs = sqliteTable('cancelacion_logs', {
   id: text('id').primaryKey(),
-  saleId: text('sale_id').notNull(),
+  ticketId: text('ticket_id').notNull(),
   cancelledByUserId: text('cancelled_by_user_id').notNull(),
   motivo: text('motivo').notNull(),
   montoOriginalCentavos: numeric('monto_original_centavos', { mode: 'bigint' }).notNull(),

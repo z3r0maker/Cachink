@@ -121,7 +121,13 @@ export async function periodLedger(tx: Tx, from: string, to: string) {
     tx
       .select()
       .from(sales)
-      .where(and(isNull(sales.deletedAt), isNull(sales.cancelledAt), inRange(sales.fecha))),
+      .where(
+        and(
+          isNull(sales.deletedAt),
+          sql`NOT EXISTS (SELECT 1 FROM tickets t WHERE t.id = ${sales.ticketId} AND t.cancelled_at IS NOT NULL)`,
+          inRange(sales.fecha),
+        ),
+      ),
     tx
       .select()
       .from(expenses)

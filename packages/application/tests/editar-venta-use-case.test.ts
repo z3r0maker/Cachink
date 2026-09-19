@@ -1,21 +1,23 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, ProductId, SaleId, UserId } from '@xangarro/domain';
+import type { BusinessId, ProductId, SaleId, UserId } from '@xangarro/domain';
 import {
   InMemoryCajaTurnosRepository,
   InMemoryClientsRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeNewProduct,
   makeNewSale,
 } from '../../testing/src/index.js';
-import { EditarVentaUseCase, RegistrarVentaUseCase } from '../src/index.js';
+import { EditarVentaUseCase, RegistrarTicketUseCase, RegistrarVentaUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 const USER_ID = '01HZ8XQN9GZJXV8AKQ5X0CUSR1' as UserId;
 
 describe('EditarVentaUseCase', () => {
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let clients: InMemoryClientsRepository;
   let products: InMemoryProductsRepository;
@@ -40,10 +42,13 @@ describe('EditarVentaUseCase', () => {
       efectivoAdicionalCentavos: 0n,
       businessId: BIZ,
     });
-    registrar = new RegistrarVentaUseCase(sales, clients, products, movements, cajaTurnos, {
-      userId: USER_ID,
-    });
-    editar = new EditarVentaUseCase(sales, clients);
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
+    registrar = new RegistrarVentaUseCase(
+      new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {
+        userId: USER_ID,
+      }),
+    );
+    editar = new EditarVentaUseCase(sales);
 
     // Seed a default product for use-case product validation
     const defaultProduct = await products.create(makeNewProduct({ businessId: BIZ }));
@@ -63,7 +68,7 @@ describe('EditarVentaUseCase', () => {
     expect(updated.id).toBe(sale.id);
   });
 
-  it('preserves untouched fields (fecha, metodo, categoria)', async () => {
+  it('preserves untouched fields (fecha, categoria)', async () => {
     const sale = await registrar.execute(
       makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
     );
@@ -72,7 +77,6 @@ describe('EditarVentaUseCase', () => {
       patch: { monto: 9999n },
     });
     expect(updated.fecha).toBe(sale.fecha);
-    expect(updated.metodo).toBe(sale.metodo);
     expect(updated.categoria).toBe(sale.categoria);
   });
 
@@ -83,48 +87,6 @@ describe('EditarVentaUseCase', () => {
         patch: { monto: 1n },
       }),
     ).rejects.toThrow(/no existe/);
-  });
-
-  it('rejects a Crédito patch without a clienteId on the merged row', async () => {
-    const sale = await registrar.execute(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', productoId: defaultProductId }),
-    );
-    // Trying to flip metodo to Crédito while clienteId is null.
-    await expect(editar.execute({ id: sale.id, patch: { metodo: 'Crédito' } })).rejects.toThrow(
-      /clienteId/,
-    );
-  });
-
-  it('rejects a Crédito patch when the clienteId points at a missing cliente', async () => {
-    const sale = await registrar.execute(
-      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
-    );
-    await expect(
-      editar.execute({
-        id: sale.id,
-        patch: {
-          metodo: 'Crédito',
-          clienteId: '01HZ8XQN9GZJXV8AKQ5X0C7CCC' as ClientId,
-        },
-      }),
-    ).rejects.toThrow(/no existe/);
-  });
-
-  it('accepts a Crédito patch with an existing cliente', async () => {
-    const cliente = await clients.create({
-      nombre: 'María',
-      telefono: '5512345678',
-      businessId: BIZ,
-    });
-    const sale = await registrar.execute(
-      makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
-    );
-    const updated = await editar.execute({
-      id: sale.id,
-      patch: { metodo: 'Crédito', clienteId: cliente.id },
-    });
-    expect(updated.metodo).toBe('Crédito');
-    expect(updated.clienteId).toBe(cliente.id);
   });
 
   it('Zod rejects an empty concepto', async () => {

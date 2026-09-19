@@ -22,7 +22,7 @@ export function useShareComprobante(
   business: Business | null,
   onDone: () => void,
 ): () => void {
-  const html = useComprobanteHtml(selected, business);
+  const html = useComprobanteHtml(null, 0n, business);
   return () => {
     if (!selected || !business || !html) {
       onDone();

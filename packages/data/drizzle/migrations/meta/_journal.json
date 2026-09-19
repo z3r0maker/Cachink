@@ -36,6 +36,13 @@
       "when": 1789780331565,
       "tag": "0004_c18_receivables_expected_cash",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1789785297603,
+      "tag": "0005_c17_tickets_sales_lines",
+      "breakpoints": true
     }
   ]
 }

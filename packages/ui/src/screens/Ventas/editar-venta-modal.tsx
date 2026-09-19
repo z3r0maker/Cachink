@@ -12,13 +12,7 @@
  */
 
 import { useEffect, useState, type ReactElement } from 'react';
-import {
-  fromPesos,
-  toPesosString,
-  type Sale,
-  type SaleCategory,
-  type PaymentMethod,
-} from '@xangarro/domain';
+import { fromPesos, toPesosString, type Sale, type SaleCategory } from '@xangarro/domain';
 import type { SalePatch } from '@xangarro/data';
 import { Btn, Modal } from '../../components/index';
 import { Input } from '../../components/Input/index';
@@ -30,13 +24,6 @@ const CATEGORIAS: readonly SaleCategory[] = [
   'Anticipo',
   'Suscripción',
   'Otro',
-];
-const METODOS: readonly PaymentMethod[] = [
-  'Efectivo',
-  'Transferencia',
-  'Tarjeta',
-  'QR/CoDi',
-  'Crédito',
 ];
 import { useEditarVenta } from '../../hooks/use-editar-venta';
 
@@ -51,18 +38,16 @@ interface FormState {
   concepto: string;
   categoria: SaleCategory;
   montoPesos: string;
-  metodo: PaymentMethod;
 }
 
 function fromSale(sale: Sale | null): FormState {
   if (!sale) {
-    return { concepto: '', categoria: 'Producto', montoPesos: '', metodo: 'Efectivo' };
+    return { concepto: '', categoria: 'Producto', montoPesos: '' };
   }
   return {
     concepto: sale.concepto,
     categoria: sale.categoria,
     montoPesos: toPesosString(sale.monto),
-    metodo: sale.metodo,
   };
 }
 
@@ -100,14 +85,6 @@ function CoreFields({ state, patch, t }: FieldsProps): ReactElement {
         testID="editar-venta-monto"
         returnKeyType="next"
       />
-      <Input
-        type="select"
-        label={t('nuevaVenta.metodoLabel')}
-        value={state.metodo}
-        onChange={(v) => patch({ metodo: v as PaymentMethod })}
-        options={METODOS}
-        testID="editar-venta-metodo"
-      />
     </>
   );
 }
@@ -117,7 +94,6 @@ function buildPatch(state: FormState): SalePatch {
     concepto: state.concepto.trim(),
     categoria: state.categoria,
     monto: fromPesos(state.montoPesos),
-    metodo: state.metodo,
   };
 }
 

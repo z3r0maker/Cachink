@@ -16,7 +16,12 @@ import type {
   DiscrepancyReason,
   Money,
 } from '@xangarro/domain';
-import { useCajaTurnosRepository, useExpensesRepository, useSalesRepository } from '../app/index';
+import {
+  useCajaTurnosRepository,
+  useExpensesRepository,
+  useSalesRepository,
+  useTicketsRepository,
+} from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { cajaKeys, estadosKeys } from './query-keys';
 import { useEmitDirectorAlert } from './use-emit-director-alert';
@@ -74,13 +79,14 @@ function emitCajaAlerts(
 
 export function useCerrarCaja(): CerrarCajaResult {
   const turnos = useCajaTurnosRepository();
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
 
   const rawUseCase = useMemo(
-    () => new CerrarCajaUseCase(turnos, sales, expenses),
+    () => new CerrarCajaUseCase(turnos, tickets, sales, expenses),
     [turnos, sales, expenses],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_CERRAR_CAJA);

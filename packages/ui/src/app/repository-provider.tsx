@@ -36,6 +36,7 @@ import type {
   ProductsRepository,
   RecurringExpensesRepository,
   SalesRepository,
+  TicketsRepository,
   UsersRepository,
   CajaTurnosRepository,
   ConversionRecetasRepository,
@@ -56,6 +57,7 @@ import {
   DrizzleProductsRepository,
   DrizzleRecurringExpensesRepository,
   DrizzleSalesRepository,
+  DrizzleTicketsRepository,
   DrizzleUsersRepository,
   DrizzleCajaTurnosRepository,
   DrizzleConversionRecetasRepository,
@@ -76,6 +78,7 @@ export interface Repositories {
   readonly appConfig: AppConfigRepository;
   readonly businesses: BusinessesRepository;
   readonly sales: SalesRepository;
+  readonly tickets: TicketsRepository;
   readonly expenses: ExpensesRepository;
   readonly products: ProductsRepository;
   readonly inventoryMovements: InventoryMovementsRepository;
@@ -111,6 +114,7 @@ export function buildDrizzleRepositories(
     appConfig: new DrizzleAppConfigRepository(db),
     businesses: new DrizzleBusinessesRepository(db, deviceId, uid),
     sales: new DrizzleSalesRepository(db, deviceId, uid),
+    tickets: new DrizzleTicketsRepository(db, deviceId, uid),
     expenses: new DrizzleExpensesRepository(db, deviceId, uid),
     products: new DrizzleProductsRepository(db, deviceId, uid),
     inventoryMovements: new DrizzleInventoryMovementsRepository(db, deviceId, uid),
@@ -164,6 +168,7 @@ export function useRepositories(): Repositories {
 export const useAppConfigRepository = (): AppConfigRepository => useRepositories().appConfig;
 export const useBusinessesRepository = (): BusinessesRepository => useRepositories().businesses;
 export const useSalesRepository = (): SalesRepository => useRepositories().sales;
+export const useTicketsRepository = (): TicketsRepository => useRepositories().tickets;
 export const useExpensesRepository = (): ExpensesRepository => useRepositories().expenses;
 export const useProductsRepository = (): ProductsRepository => useRepositories().products;
 export const useInventoryMovementsRepository = (): InventoryMovementsRepository =>

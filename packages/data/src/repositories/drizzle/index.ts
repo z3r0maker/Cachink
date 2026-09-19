@@ -30,3 +30,4 @@ export * from './caja-movimientos-repository.js';
 export * from './cancelacion-logs-repository.js';
 export * from './mensajes-operador-repository.js';
 export * from './respuestas-operador-repository.js';
+export * from './tickets-repository.js';

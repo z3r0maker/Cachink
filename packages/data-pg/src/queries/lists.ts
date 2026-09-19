@@ -1,7 +1,7 @@
 import { desc, eq, isNull, sql } from 'drizzle-orm';
 
 import { inventoryMovements, products } from '../schema/catalog.js';
-import { expenses, sales } from '../schema/ledger.js';
+import { expenses, sales, tickets } from '../schema/ledger.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
@@ -26,11 +26,12 @@ async function listVentas(tx: Tx): Promise<readonly MovimientoRow[]> {
       id: sales.id,
       fecha: sales.fecha,
       concepto: sales.concepto,
-      clasificacion: sales.metodo,
+      clasificacion: tickets.metodo,
       amount: sales.monto,
-      cancelledAt: sales.cancelledAt,
+      cancelledAt: tickets.cancelledAt,
     })
     .from(sales)
+    .innerJoin(tickets, eq(sales.ticketId, tickets.id))
     .where(isNull(sales.deletedAt))
     .orderBy(desc(sales.fecha), desc(sales.id));
 

@@ -27,6 +27,7 @@ import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
 // Drizzle repositories
 import {
   DrizzleSalesRepository,
+  DrizzleTicketsRepository,
   DrizzleBusinessesRepository,
   DrizzleProductsRepository,
   DrizzleClientsRepository,
@@ -46,7 +47,9 @@ import {
 // Use-cases (relative path to sibling package — vitest resolves TS)
 import {
   RegistrarVentaUseCase,
+  RegistrarTicketUseCase,
   CancelarVentaUseCase,
+  CancelarTicketUseCase,
   EditarVentaUseCase,
   AbrirCajaUseCase,
   CerrarCajaUseCase,
@@ -75,6 +78,7 @@ export interface FullstackHarness {
 }
 
 export interface FullstackRepos {
+  readonly tickets: DrizzleTicketsRepository;
   readonly sales: DrizzleSalesRepository;
   readonly businesses: DrizzleBusinessesRepository;
   readonly products: DrizzleProductsRepository;
@@ -135,6 +139,7 @@ export function buildHarness(opts?: {
 
   // --- Repositories ------------------------------------------------
   const repos: FullstackRepos = {
+    tickets: new DrizzleTicketsRepository(db, TEST_DEVICE_ID, userId),
     sales: new DrizzleSalesRepository(db, TEST_DEVICE_ID, userId),
     businesses: new DrizzleBusinessesRepository(db, TEST_DEVICE_ID, userId),
     products: new DrizzleProductsRepository(db, TEST_DEVICE_ID, userId),
@@ -155,26 +160,38 @@ export function buildHarness(opts?: {
   // --- Use-Cases ---------------------------------------------------
   const useCases: FullstackUseCases = {
     registrarVenta: new RegistrarVentaUseCase(
-      repos.sales,
-      repos.clients,
-      repos.products,
-      repos.movements,
-      repos.cajaTurnos,
-      { userId, stockEnabled },
+      new RegistrarTicketUseCase(
+        repos.tickets,
+        repos.sales,
+        repos.clients,
+        repos.products,
+        repos.movements,
+        repos.cajaTurnos,
+        { userId, stockEnabled },
+      ),
     ),
     cancelarVenta: new CancelarVentaUseCase(
       repos.sales,
-      repos.users,
-      repos.products,
-      repos.movements,
-      repos.cancelacionLogs,
+      new CancelarTicketUseCase(
+        repos.tickets,
+        repos.sales,
+        repos.users,
+        repos.products,
+        repos.movements,
+        repos.cancelacionLogs,
+      ),
     ),
-    editarVenta: new EditarVentaUseCase(repos.sales, repos.clients),
+    editarVenta: new EditarVentaUseCase(repos.sales),
     abrirCaja: new AbrirCajaUseCase(repos.cajaTurnos),
-    cerrarCaja: new CerrarCajaUseCase(repos.cajaTurnos, repos.sales, repos.expenses),
+    cerrarCaja: new CerrarCajaUseCase(repos.cajaTurnos, repos.tickets, repos.sales, repos.expenses),
     retirarCaja: new RetirarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     depositarCaja: new DepositarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
-    cerrarCorte: new CerrarCorteDeDiaUseCase(repos.sales, repos.expenses, repos.dayCloses),
+    cerrarCorte: new CerrarCorteDeDiaUseCase(
+      repos.tickets,
+      repos.sales,
+      repos.expenses,
+      repos.dayCloses,
+    ),
     registrarPago: new RegistrarPagoClienteUseCase(repos.clientPayments, repos.clients),
     registrarMovimiento: new RegistrarMovimientoInventarioUseCase(repos.movements, repos.expenses),
     registrarEgreso: new RegistrarEgresoUseCase(repos.expenses, repos.recurring),

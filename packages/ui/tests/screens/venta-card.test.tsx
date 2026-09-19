@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type { Sale, SaleId } from '@xangarro/domain';
+import type { SaleId } from '@xangarro/domain';
 import { makeSale } from '@xangarro/testing';
 import { VentaCard } from '../../src/screens/Ventas/venta-card';
 import { initI18n } from '../../src/i18n/index';
@@ -39,19 +39,9 @@ describe('VentaCard', () => {
     expect(screen.getByText('$45.00')).toBeInTheDocument();
   });
 
-  it('displays the hora when present', () => {
-    renderWithProviders(<VentaCard venta={SALE} />);
-    expect(screen.getByText('10:30')).toBeInTheDocument();
-  });
-
   it('displays the categoria tag', () => {
     renderWithProviders(<VentaCard venta={SALE} />);
     expect(screen.getByText('Producto')).toBeInTheDocument();
-  });
-
-  it('displays the metodo tag', () => {
-    renderWithProviders(<VentaCard venta={SALE} />);
-    expect(screen.getByText('Efectivo')).toBeInTheDocument();
   });
 
   it('shows client name chip when clienteName is provided', () => {
@@ -74,11 +64,5 @@ describe('VentaCard', () => {
   it('renders with custom testID', () => {
     renderWithProviders(<VentaCard venta={SALE} testID="my-card" />);
     expect(screen.getByTestId('my-card')).toBeInTheDocument();
-  });
-
-  it('renders credito metodo as warning tag', () => {
-    const creditoSale = makeSale({ ...SALE, metodo: 'Crédito' as Sale['metodo'] });
-    renderWithProviders(<VentaCard venta={creditoSale} />);
-    expect(screen.getByText('Crédito')).toBeInTheDocument();
   });
 });

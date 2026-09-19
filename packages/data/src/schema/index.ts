@@ -22,6 +22,7 @@ export * from './_audit';
 export * from './businesses';
 export * from './app-config';
 export * from './sales';
+export * from './tickets';
 export * from './expenses';
 export * from './products';
 export * from './inventory-movements';

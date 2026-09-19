@@ -119,7 +119,7 @@ function EntryRow({
     <RowBody
       kind="venta"
       titulo={entry.item.concepto}
-      tag={(entry.item as Sale).metodo}
+      tag="venta"
       amountText={`+${formatMoney(entry.item.monto)}`}
       amountColor={colors.green}
     />

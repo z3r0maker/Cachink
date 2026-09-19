@@ -225,15 +225,7 @@ describe('buildExcelWorkbook', () => {
     const wb = await readBack(buffer);
     const ventas = wb.getWorksheet('Ventas')!;
     const header = (ventas.getRow(1).values as string[]).slice(1);
-    expect(header).toEqual([
-      'Fecha',
-      'Concepto',
-      'Categoría',
-      'Monto (MXN)',
-      'Método',
-      'Cliente',
-      'Estado',
-    ]);
+    expect(header).toEqual(['Fecha', 'Concepto', 'Categoría', 'Monto (MXN)', 'Ticket']);
     expect(ventas.rowCount).toBe(2); // header + 1 data row
   });
 

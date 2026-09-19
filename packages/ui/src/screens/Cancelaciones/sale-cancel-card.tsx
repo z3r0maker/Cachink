@@ -13,6 +13,8 @@ import { colors, fontSizes, radii, typography } from '../../theme';
 import { useTranslation } from '../../i18n/index';
 
 export interface SaleCancelCardProps {
+  /** Why it was cancelled — the ticket carries it (ADR-073). */
+  readonly motivoCancelacion?: string;
   readonly sale: Sale;
   readonly onCancel?: () => void;
   readonly testID?: string;
@@ -31,7 +33,7 @@ function SaleHeader(props: { sale: Sale; isCancelled: boolean }): ReactElement {
           {props.sale.concepto}
         </Text>
         <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
-          {`${props.sale.hora ?? ''} · ${props.sale.metodo}`}
+          {props.sale.fecha}
         </Text>
       </View>
       <Text
@@ -87,7 +89,7 @@ function CancelButton(props: { saleId: string; onCancel: () => void }): ReactEle
 
 export function SaleCancelCard(props: SaleCancelCardProps): ReactElement {
   const { sale } = props;
-  const isCancelled = sale.cancelledAt !== null || sale.deletedAt !== null;
+  const isCancelled = sale.deletedAt !== null;
 
   return (
     <View
@@ -101,7 +103,7 @@ export function SaleCancelCard(props: SaleCancelCardProps): ReactElement {
       testID={props.testID}
     >
       <SaleHeader sale={sale} isCancelled={isCancelled} />
-      {isCancelled && sale.cancelMotivo && <CancelBadge motivo={sale.cancelMotivo} />}
+      {isCancelled && props.motivoCancelacion && <CancelBadge motivo={props.motivoCancelacion} />}
       {!isCancelled && props.onCancel && (
         <CancelButton saleId={sale.id} onCancel={props.onCancel} />
       )}

@@ -5,6 +5,7 @@
 
 /** Device → cloud, insert + update. */
 export const UP_TABLES = [
+  'tickets',
   'sales',
   'expenses',
   'caja_turnos',

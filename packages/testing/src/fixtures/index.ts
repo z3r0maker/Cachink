@@ -15,3 +15,4 @@ export * from './client.js';
 export * from './day-close.js';
 export * from './recurring-expense.js';
 export * from './user.js';
+export * from './ticket.js';

@@ -9,7 +9,9 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { Sale, SaleId, BusinessId, DeviceId, UserId, IsoTimestamp } from '@xangarro/domain';
 import {
   makeSale,
+  makeNewTicket,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   InMemoryCancelacionLogsRepository,
 } from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
@@ -41,10 +43,7 @@ const CANCELLED_SALE = makeSale({
   id: '01JPHK000000000000SALE0002' as SaleId,
   concepto: 'Quesadilla',
   monto: 3000n,
-  metodo: 'Efectivo',
-  hora: '11:00',
-  cancelledAt: '2026-06-15T12:00:00.000Z' as IsoTimestamp,
-  cancelMotivo: 'Cliente no pagó',
+  deletedAt: '2026-06-15T12:00:00.000Z' as IsoTimestamp,
 });
 
 describe('SaleCancelCard', () => {
@@ -82,7 +81,13 @@ describe('SaleCancelCard', () => {
   });
 
   it('shows cancellation badge for cancelled sales', () => {
-    renderWithProviders(<SaleCancelCard sale={CANCELLED_SALE} testID="test-card" />);
+    renderWithProviders(
+      <SaleCancelCard
+        sale={CANCELLED_SALE}
+        motivoCancelacion="Cliente no pagó"
+        testID="test-card"
+      />,
+    );
     expect(screen.getByText(/Cliente no pagó/)).toBeInTheDocument();
   });
 
@@ -187,7 +192,11 @@ function getInput(testId: string): HTMLInputElement {
 
 function renderFlow(
   sale: Sale,
-  overrides: { sales: InMemorySalesRepository; cancelacionLogs: InMemoryCancelacionLogsRepository },
+  overrides: {
+    tickets?: InMemoryTicketsRepository;
+    sales: InMemorySalesRepository;
+    cancelacionLogs: InMemoryCancelacionLogsRepository;
+  },
   callbacks: { onClose: () => void; onSuccess: () => void },
 ) {
   const qc = new QueryClient({ defaultOptions: { queries: { retry: 0 } } });
@@ -212,35 +221,34 @@ describe('CancellationFlow (orchestrator)', () => {
   });
 
   it('walks PIN → reason → cash-confirm for a cash sale and calls onSuccess', async () => {
+    const tickets = new InMemoryTicketsRepository(TEST_DEV);
     const sales = new InMemorySalesRepository(TEST_DEV);
     const cancelacionLogs = new InMemoryCancelacionLogsRepository(TEST_DEV);
+    const ticket = await tickets.create(
+      makeNewTicket({ businessId: TEST_BIZ, metodo: 'Efectivo', concepto: 'Taco al pastor' }),
+    );
     const sale = makeSale({
       monto: 4500n,
-      metodo: 'Efectivo',
       hora: '10:30',
-      cancelledAt: null,
-      cancelMotivo: null,
       businessId: TEST_BIZ,
     });
-    // Persist the sale so the repo.delete() call succeeds.
+    // Persist the line under its ticket so the flow finds the header.
     await sales.create({
+      ticketId: ticket.id,
       fecha: sale.fecha,
       concepto: sale.concepto,
       categoria: sale.categoria,
       monto: sale.monto,
-      metodo: sale.metodo,
-      clienteId: sale.clienteId,
-      estadoPago: sale.estadoPago,
       productoId: sale.productoId,
       cantidad: sale.cantidad,
       businessId: sale.businessId,
-      cajaTurnoId: sale.cajaTurnoId,
     });
+    const saleUnderTest = { ...sale, ticketId: ticket.id };
 
     const onClose = vi.fn();
     const onSuccess = vi.fn();
 
-    renderFlow(sale, { sales, cancelacionLogs }, { onClose, onSuccess });
+    renderFlow(saleUnderTest, { tickets, sales, cancelacionLogs }, { onClose, onSuccess });
 
     // Step 1: PIN step visible.
     expect(screen.getByTestId('cancel-pin-input')).toBeInTheDocument();
@@ -280,34 +288,33 @@ describe('CancellationFlow (orchestrator)', () => {
   });
 
   it('skips cash-confirm for non-cash sales and executes immediately after reason', async () => {
+    const tickets = new InMemoryTicketsRepository(TEST_DEV);
     const sales = new InMemorySalesRepository(TEST_DEV);
     const cancelacionLogs = new InMemoryCancelacionLogsRepository(TEST_DEV);
     const sale = makeSale({
       monto: 3000n,
-      metodo: 'Tarjeta',
       hora: '14:00',
-      cancelledAt: null,
-      cancelMotivo: null,
       businessId: TEST_BIZ,
     });
+    const ticket = await tickets.create(
+      makeNewTicket({ businessId: TEST_BIZ, metodo: 'Tarjeta', concepto: sale.concepto }),
+    );
     await sales.create({
+      ticketId: ticket.id,
       fecha: sale.fecha,
       concepto: sale.concepto,
       categoria: sale.categoria,
       monto: sale.monto,
-      metodo: sale.metodo,
-      clienteId: sale.clienteId,
-      estadoPago: sale.estadoPago,
       productoId: sale.productoId,
       cantidad: sale.cantidad,
       businessId: sale.businessId,
-      cajaTurnoId: sale.cajaTurnoId,
     });
+    const saleUnderTest = { ...sale, ticketId: ticket.id };
 
     const onClose = vi.fn();
     const onSuccess = vi.fn();
 
-    renderFlow(sale, { sales, cancelacionLogs }, { onClose, onSuccess });
+    renderFlow(saleUnderTest, { tickets, sales, cancelacionLogs }, { onClose, onSuccess });
 
     // Step 1: PIN.
     const pinField = screen.getByTestId('cancel-pin-input-field');

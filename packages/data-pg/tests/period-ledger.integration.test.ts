@@ -26,13 +26,26 @@ describe('periodLedger', () => {
         INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
                               seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
         VALUES (${prod}, 'Pan', 'Producto Terminado', 500, 'pza', 3, 'producto', false, 1000, ${BIZ}, ${BIZ}, now(), now())`);
-      const venta = (fecha: string, cancelada = false) =>
-        tx.execute(sql`
-          INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
-                             producto_id, cantidad, business_id, device_id, created_at, updated_at,
-                             cancelled_at)
-          VALUES (${testId('S')}, ${fecha}, 'Pan', 'Producto', 1000, 'Efectivo', 'pagado', ${prod}, 1,
-                  ${BIZ}, ${BIZ}, now(), now(), ${cancelada ? sql`now()` : null})`);
+      let folio = 0;
+      const venta = (fecha: string, cancelada = false) => {
+        const tid = testId('S');
+        folio += 1;
+        return tx
+          .execute(
+            sql`
+            INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                                 business_id, device_id, created_at, updated_at, cancelled_at)
+            VALUES (${tid}, ${folio}, ${fecha}, 'Pan', 'Efectivo', 'pagado',
+                    ${BIZ}, ${BIZ}, now(), now(), ${cancelada ? sql`now()` : null})`,
+          )
+          .then(() =>
+            tx.execute(sql`
+              INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
+                                 producto_id, cantidad, business_id, device_id, created_at, updated_at)
+              VALUES (${'L' + tid.slice(1)}, ${tid}, ${fecha}, 'Pan', 'Producto', 1000,
+                      ${prod}, 1, ${BIZ}, ${BIZ}, now(), now())`),
+          );
+      };
       await venta('2026-04-30');
       await venta('2026-05-01');
       await venta('2026-05-31T23:40:00-06:00');

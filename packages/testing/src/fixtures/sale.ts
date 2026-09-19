@@ -8,8 +8,8 @@
  */
 
 import type {
+  TicketId,
   BusinessId,
-  ClientId,
   DeviceId,
   IsoDate,
   IsoTimestamp,
@@ -25,37 +25,34 @@ const DEFAULT_DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 const DEFAULT_TS = '2026-04-23T15:00:00.000Z' as IsoTimestamp;
 /** Default productoId used by fixtures — required since ADR-048. */
 const DEFAULT_PRODUCT = '01HZ8XQN9GZJXV8AKQ5X0CPR0D' as ProductId;
+const DEFAULT_TICKET = '01HZ8XQN9GZJXV8AKQ5X0CTCKT' as TicketId;
 
 export function makeNewSale(overrides: Partial<NewSale> = {}): NewSale {
   return {
+    ticketId: DEFAULT_TICKET,
     fecha: '2026-04-23' as IsoDate,
     concepto: 'Taco al pastor',
     categoria: 'Producto',
     monto: 450n,
-    metodo: 'Efectivo',
     cantidad: 1,
     productoId: DEFAULT_PRODUCT,
     businessId: DEFAULT_BIZ,
     ...overrides,
-  };
+  } as NewSale;
 }
 
 export function makeSale(overrides: Partial<Sale> = {}): Sale {
   const id = (overrides.id ?? newEntityId<SaleId>()) as SaleId;
-  const clienteId = (overrides.clienteId ?? null) as ClientId | null;
   const productoId = (overrides.productoId ?? DEFAULT_PRODUCT) as ProductId;
   return {
     id,
+    ticketId: DEFAULT_TICKET,
     fecha: '2026-04-23' as IsoDate,
     concepto: 'Taco al pastor',
     categoria: 'Producto',
     monto: 450n,
-    metodo: 'Efectivo',
-    clienteId,
-    estadoPago: 'pagado',
     productoId,
     cantidad: 1,
-    cajaTurnoId: null,
     businessId: DEFAULT_BIZ,
     deviceId: DEFAULT_DEV,
     createdByUserId: null,

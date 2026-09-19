@@ -11,7 +11,7 @@ import type {
   DeviceId,
   NewCancelacionLog,
   ProductId,
-  SaleId,
+  TicketId,
 } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { CancelacionLogsRepository } from '@xangarro/data';
@@ -29,7 +29,7 @@ export class InMemoryCancelacionLogsRepository implements CancelacionLogsReposit
     const ts = now();
     const row: CancelacionLog = {
       id,
-      saleId: input.saleId,
+      ticketId: input.ticketId,
       cancelledByUserId: input.cancelledByUserId,
       motivo: input.motivo,
       montoOriginalCentavos: input.montoOriginalCentavos,
@@ -53,9 +53,9 @@ export class InMemoryCancelacionLogsRepository implements CancelacionLogsReposit
     return this.rows.get(id) ?? null;
   }
 
-  async findBySaleId(saleId: SaleId): Promise<CancelacionLog | null> {
+  async findByTicketId(ticketId: TicketId): Promise<CancelacionLog | null> {
     for (const row of this.rows.values()) {
-      if (row.saleId === saleId) return row;
+      if (row.ticketId === ticketId) return row;
     }
     return null;
   }

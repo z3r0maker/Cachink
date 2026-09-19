@@ -11,10 +11,12 @@ import {
   InMemoryClientsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   TEST_DEVICE_ID,
   makeNewClient,
   makeNewProduct,
   makeNewSale,
+  makeNewTicket,
 } from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
@@ -41,11 +43,13 @@ function wrapper(
 
 describe('useCuentasPorCobrar', () => {
   let clients: InMemoryClientsRepository;
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let products: InMemoryProductsRepository;
 
   beforeEach(() => {
     clients = new InMemoryClientsRepository(TEST_DEVICE_ID);
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
     useAppConfigStore.setState({ currentBusinessId: BIZ, hydrated: true });
@@ -53,7 +57,7 @@ describe('useCuentasPorCobrar', () => {
 
   it('returns empty when no clients have pending sales', async () => {
     const { result } = renderHook(() => useCuentasPorCobrar(), {
-      wrapper: wrapper({ clients, sales }),
+      wrapper: wrapper({ clients, tickets, sales }),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -63,18 +67,25 @@ describe('useCuentasPorCobrar', () => {
   it('returns cuentas with pending Crédito sales', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ }));
     const client = await clients.create(makeNewClient({ businessId: BIZ, nombre: 'Laura' }));
-    await sales.create(
-      makeNewSale({
+    const ticket = await tickets.create(
+      makeNewTicket({
         businessId: BIZ,
         metodo: 'Crédito',
         clienteId: client.id,
+        estadoPago: 'pendiente',
+      }),
+    );
+    await sales.create(
+      makeNewSale({
+        businessId: BIZ,
         productoId: product.id,
         monto: 5000n,
+        ticketId: ticket.id,
       }),
     );
 
     const { result } = renderHook(() => useCuentasPorCobrar(), {
-      wrapper: wrapper({ clients, sales }),
+      wrapper: wrapper({ clients, tickets, sales }),
     });
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
@@ -86,7 +97,7 @@ describe('useCuentasPorCobrar', () => {
   it('is disabled when no businessId is configured', async () => {
     useAppConfigStore.setState({ currentBusinessId: null });
     const { result } = renderHook(() => useCuentasPorCobrar(), {
-      wrapper: wrapper({ clients, sales }),
+      wrapper: wrapper({ clients, tickets, sales }),
     });
     // Query should not fire
     expect(result.current.fetchStatus).toBe('idle');

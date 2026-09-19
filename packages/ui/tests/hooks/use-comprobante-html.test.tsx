@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { makeSale } from '@xangarro/testing';
+import { makeTicket } from '@xangarro/testing';
 import type { Business, BusinessId, DeviceId, IsoTimestamp } from '@xangarro/domain';
 import { DEFAULT_FEATURE_FLAGS } from '@xangarro/domain';
 import { useComprobanteHtml } from '../../src/hooks/use-comprobante-html';
@@ -39,19 +39,18 @@ function wrapper({ children }: { children: ReactNode }) {
 
 describe('useComprobanteHtml', () => {
   it('returns null when sale is null', () => {
-    const { result } = renderHook(() => useComprobanteHtml(null, BUSINESS), { wrapper });
+    const { result } = renderHook(() => useComprobanteHtml(null, 0n, BUSINESS), { wrapper });
     expect(result.current).toBeNull();
   });
 
   it('returns null when business is null', () => {
-    const sale = makeSale({ monto: 5000n });
-    const { result } = renderHook(() => useComprobanteHtml(sale, null), { wrapper });
+    const { result } = renderHook(() => useComprobanteHtml(makeTicket(), 0n, null), { wrapper });
     expect(result.current).toBeNull();
   });
 
   it('returns HTML string when both sale and business are provided', () => {
-    const sale = makeSale({ monto: 5000n, concepto: 'Taco al pastor' });
-    const { result } = renderHook(() => useComprobanteHtml(sale, BUSINESS), { wrapper });
+    const ticket = makeTicket({ concepto: 'Taco al pastor' });
+    const { result } = renderHook(() => useComprobanteHtml(ticket, 5000n, BUSINESS), { wrapper });
     expect(result.current).toContain('Taquería Don Pedro');
     expect(typeof result.current).toBe('string');
   });

@@ -9,6 +9,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { conTotales, type TicketConTotal } from '@xangarro/domain';
 import {
   ZERO,
   calculateIndicadores,
@@ -18,7 +19,6 @@ import {
   type IsoDate,
   type Money,
   type PeriodRange,
-  type Sale,
 } from '@xangarro/domain';
 import type {
   BusinessesRepository,
@@ -28,6 +28,7 @@ import type {
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
+  TicketsRepository,
 } from '@xangarro/data';
 import {
   useBusinessesRepository,
@@ -37,6 +38,7 @@ import {
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeEstadoResultados } from './use-estado-resultados';
@@ -47,6 +49,7 @@ export interface UseIndicadoresOptions {
 }
 
 export interface IndicadoresComposeDeps {
+  readonly tickets: TicketsRepository;
   readonly sales: SalesRepository;
   readonly expenses: ExpensesRepository;
   readonly businesses: BusinessesRepository;
@@ -70,6 +73,7 @@ export async function composeIndicadores(
   );
   const balance = await composeBalanceGeneral(
     {
+      tickets: deps.tickets,
       sales: deps.sales,
       clientPayments: deps.clientPayments,
       dayCloses: deps.dayCloses,
@@ -85,8 +89,11 @@ export async function composeIndicadores(
   // treated as both start and end for Phase 1C (risk #3 in the plan).
   const inventarioPromedio = balance.activo.inventarios;
 
-  const ventasPeriodo = await deps.sales.findByDateRange(periodo.from, periodo.to, businessId);
-  const ventasCreditoPeriodoCentavos = sumVentasCredito(ventasPeriodo);
+  const [ticketsPeriodo, lineasPeriodo] = await Promise.all([
+    deps.tickets.findByDateRange(periodo.from, periodo.to, businessId),
+    deps.sales.findByDateRange(periodo.from, periodo.to, businessId),
+  ]);
+  const ventasCreditoPeriodoCentavos = sumVentasCredito(conTotales(ticketsPeriodo, lineasPeriodo));
   const periodoDiasVenta = diasInPeriodo(periodo.from, periodo.to);
 
   return calculateIndicadores({
@@ -98,10 +105,10 @@ export async function composeIndicadores(
   });
 }
 
-export function sumVentasCredito(ventas: readonly Sale[]): Money {
+export function sumVentasCredito(ventas: readonly TicketConTotal[]): Money {
   return ventas.length === 0
     ? ZERO
-    : sum(ventas.filter((v) => v.metodo === 'Crédito').map((v) => v.monto));
+    : sum(ventas.filter((v) => v.ticket.metodo === 'Crédito').map((v) => v.total));
 }
 
 /** Days from→to inclusive (min 1). */
@@ -114,6 +121,7 @@ export function diasInPeriodo(from: IsoDate, to: IsoDate): number {
 }
 
 export function useIndicadores(options: UseIndicadoresOptions): UseQueryResult<Indicadores, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const businesses = useBusinessesRepository();
@@ -130,6 +138,7 @@ export function useIndicadores(options: UseIndicadoresOptions): UseQueryResult<I
       if (!businessId) throw new Error('No business selected');
       return composeIndicadores(
         {
+          tickets,
           sales,
           expenses,
           businesses,

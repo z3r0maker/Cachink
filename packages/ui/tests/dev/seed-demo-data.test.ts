@@ -10,6 +10,7 @@ import {
   InMemoryAppConfigRepository,
   InMemoryBusinessesRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   InMemoryExpensesRepository,
   InMemoryProductsRepository,
   InMemoryInventoryMovementsRepository,
@@ -37,6 +38,7 @@ function buildRepos(): Repositories {
   return {
     appConfig: new InMemoryAppConfigRepository(),
     businesses: new InMemoryBusinessesRepository(DEV),
+    tickets: new InMemoryTicketsRepository(DEV),
     sales: new InMemorySalesRepository(DEV),
     expenses: new InMemoryExpensesRepository(DEV),
     products: new InMemoryProductsRepository(DEV),

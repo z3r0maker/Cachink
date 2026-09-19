@@ -10,6 +10,7 @@ import type { Row } from './codec';
  * Sincronización (`preview`), and the row itself for whoever fixes it.
  */
 const NOUN: Record<PushableTable, string> = {
+  tickets: 'Venta',
   sales: 'Venta',
   expenses: 'Gasto',
   inventory_movements: 'Movimiento de inventario',

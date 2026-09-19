@@ -15,7 +15,7 @@ import type {
   NewCancelacionLog,
   PaymentMethod,
   ProductId,
-  SaleId,
+  TicketId,
   UserId,
 } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
@@ -41,7 +41,7 @@ export class DrizzleCancelacionLogsRepository implements CancelacionLogsReposito
     const ts = now();
     const row = {
       id,
-      saleId: input.saleId,
+      ticketId: input.ticketId,
       cancelledByUserId: input.cancelledByUserId,
       motivo: input.motivo,
       montoOriginalCentavos: input.montoOriginalCentavos,
@@ -70,11 +70,11 @@ export class DrizzleCancelacionLogsRepository implements CancelacionLogsReposito
     return row ? this.#mapRow(row) : null;
   }
 
-  async findBySaleId(saleId: SaleId): Promise<CancelacionLog | null> {
+  async findByTicketId(ticketId: TicketId): Promise<CancelacionLog | null> {
     const row = await this.#db
       .select()
       .from(cancelacionLogs)
-      .where(eq(cancelacionLogs.saleId, saleId))
+      .where(eq(cancelacionLogs.ticketId, ticketId))
       .get();
     return row ? this.#mapRow(row) : null;
   }
@@ -102,7 +102,7 @@ export class DrizzleCancelacionLogsRepository implements CancelacionLogsReposito
   #mapRow(row: LogRow): CancelacionLog {
     return {
       id: row.id as CancelacionLogId,
-      saleId: row.saleId as SaleId,
+      ticketId: row.ticketId as TicketId,
       cancelledByUserId: row.cancelledByUserId as UserId,
       motivo: row.motivo,
       montoOriginalCentavos: row.montoOriginalCentavos as Money,

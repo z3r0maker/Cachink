@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Expense, Sale } from '../../src/entities/index.js';
+import type { Expense } from '../../src/entities/index.js';
 import { CORTE_ZERO, calculateCorteDeDia } from '../../src/financials/index.js';
 
 const AUDIT = {
@@ -10,19 +10,11 @@ const AUDIT = {
   deletedAt: null,
 } as const;
 
-function makeSale(overrides: Partial<Sale> = {}): Sale {
+function makeVenta(overrides: { metodo?: string; monto?: bigint } = {}): never {
   return {
-    id: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
-    fecha: '2026-04-23',
-    concepto: 'Taco',
-    categoria: 'Producto',
-    monto: 0n,
-    metodo: 'Efectivo',
-    clienteId: null,
-    estadoPago: 'pagado',
-    ...AUDIT,
-    ...overrides,
-  } as Sale;
+    ticket: { metodo: overrides.metodo ?? 'Efectivo' },
+    total: overrides.monto ?? 100n,
+  } as never;
 }
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
@@ -56,10 +48,10 @@ describe('calculateCorteDeDia', () => {
 
   it('ventas efectivo accumulate into esperado; non-Efectivo ignored', () => {
     const ventasHoy = [
-      makeSale({ metodo: 'Efectivo', monto: 10_000n }),
-      makeSale({ metodo: 'Efectivo', monto: 5_000n }),
-      makeSale({ metodo: 'Transferencia', monto: 99_999n }),
-      makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 99_999n }),
+      makeVenta({ metodo: 'Efectivo', monto: 10_000n }),
+      makeVenta({ metodo: 'Efectivo', monto: 5_000n }),
+      makeVenta({ metodo: 'Transferencia', monto: 99_999n }),
+      makeVenta({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 99_999n }),
     ];
     const result = calculateCorteDeDia({
       ventasHoy,
@@ -73,7 +65,7 @@ describe('calculateCorteDeDia', () => {
 
   it('saldoCierreAnterior adds to esperado', () => {
     const result = calculateCorteDeDia({
-      ventasHoy: [makeSale({ metodo: 'Efectivo', monto: 5_000n })],
+      ventasHoy: [makeVenta({ metodo: 'Efectivo', monto: 5_000n })],
       egresosHoy: [],
       saldoCierreAnterior: 2_000n,
       efectivoContado: 7_000n,
@@ -84,7 +76,7 @@ describe('calculateCorteDeDia', () => {
 
   it('egresos (all categorias) reduce esperado', () => {
     const result = calculateCorteDeDia({
-      ventasHoy: [makeSale({ metodo: 'Efectivo', monto: 10_000n })],
+      ventasHoy: [makeVenta({ metodo: 'Efectivo', monto: 10_000n })],
       egresosHoy: [
         makeExpense({ categoria: 'Renta', monto: 2_000n }),
         makeExpense({ categoria: 'Nómina', monto: 1_500n }),
@@ -98,7 +90,7 @@ describe('calculateCorteDeDia', () => {
 
   it('diferencia is positive when contado > esperado', () => {
     const result = calculateCorteDeDia({
-      ventasHoy: [makeSale({ metodo: 'Efectivo', monto: 1_000n })],
+      ventasHoy: [makeVenta({ metodo: 'Efectivo', monto: 1_000n })],
       egresosHoy: [],
       saldoCierreAnterior: 0n,
       efectivoContado: 1_100n,
@@ -108,7 +100,7 @@ describe('calculateCorteDeDia', () => {
 
   it('diferencia is negative when contado < esperado', () => {
     const result = calculateCorteDeDia({
-      ventasHoy: [makeSale({ metodo: 'Efectivo', monto: 1_000n })],
+      ventasHoy: [makeVenta({ metodo: 'Efectivo', monto: 1_000n })],
       egresosHoy: [],
       saldoCierreAnterior: 0n,
       efectivoContado: 900n,

@@ -7,17 +7,9 @@
  * test suite (to be added in Phase 1B-M4).
  */
 
-import type {
-  BusinessId,
-  CajaTurnoId,
-  ClientId,
-  DeviceId,
-  IsoTimestamp,
-  ProductId,
-  SaleId,
-} from '@xangarro/domain';
+import type { BusinessId, DeviceId, IsoTimestamp, ProductId, SaleId } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
-import type { NewSale, PaymentState, Sale, SalePatch, SalesRepository } from '@xangarro/data';
+import type { NewSale, Sale, SalePatch, SalesRepository } from '@xangarro/data';
 
 export class InMemorySalesRepository implements SalesRepository {
   private readonly sales = new Map<SaleId, Sale>();
@@ -30,24 +22,15 @@ export class InMemorySalesRepository implements SalesRepository {
   async create(input: NewSale): Promise<Sale> {
     const id = newEntityId<SaleId>();
     const timestamp = now();
-    const estadoPago: PaymentState = input.metodo === 'Crédito' ? 'pendiente' : 'pagado';
     const sale: Sale = {
       id,
+      ticketId: input.ticketId,
       fecha: input.fecha,
-      hora: input.hora ?? null,
       concepto: input.concepto,
       categoria: input.categoria,
       monto: input.monto,
-      metodo: input.metodo,
-      clienteId: input.clienteId ?? null,
-      estadoPago,
       productoId: input.productoId as ProductId,
       cantidad: input.cantidad ?? 1,
-      efectivoRecibidoCentavos: input.efectivoRecibidoCentavos ?? null,
-      cancelledByUserId: null,
-      cancelMotivo: null,
-      cancelledAt: null,
-      cajaTurnoId: (input.cajaTurnoId ?? null) as CajaTurnoId | null,
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,
@@ -87,19 +70,10 @@ export class InMemorySalesRepository implements SalesRepository {
       });
   }
 
-  async findPendingByClient(clientId: ClientId): Promise<readonly Sale[]> {
-    return [...this.sales.values()].filter(
-      (s) =>
-        s.clienteId === clientId &&
-        (s.estadoPago === 'pendiente' || s.estadoPago === 'parcial') &&
-        s.deletedAt === null,
-    );
-  }
-
-  async updatePaymentState(id: SaleId, state: PaymentState): Promise<void> {
-    const existing = this.sales.get(id);
-    if (!existing) return;
-    this.sales.set(id, { ...existing, estadoPago: state, updatedAt: now() });
+  async findByTicket(ticketId: Sale['ticketId']): Promise<readonly Sale[]> {
+    return [...this.sales.values()]
+      .filter((s) => s.ticketId === ticketId && s.deletedAt === null)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
   async update(id: SaleId, patch: SalePatch): Promise<Sale | null> {
@@ -112,8 +86,6 @@ export class InMemorySalesRepository implements SalesRepository {
       concepto: patch.concepto ?? existing.concepto,
       categoria: patch.categoria ?? existing.categoria,
       monto: patch.monto ?? existing.monto,
-      metodo: patch.metodo ?? existing.metodo,
-      clienteId: patch.clienteId ?? existing.clienteId,
       updatedAt: ts,
     };
     this.sales.set(id, next);

@@ -34,6 +34,7 @@ import { InMemoryInventoryMovementsRepository } from './in-memory-inventory-move
 import { InMemoryProductsRepository } from './in-memory-products-repository.js';
 import { InMemoryRecurringExpensesRepository } from './in-memory-recurring-expenses-repository.js';
 import { InMemorySalesRepository } from './in-memory-sales-repository.js';
+import { InMemoryTicketsRepository } from './in-memory-tickets-repository.js';
 import { InMemoryUsersRepository } from './in-memory-users-repository.js';
 import { InMemoryCajaTurnosRepository } from './in-memory-caja-turnos-repository.js';
 import { InMemoryConversionRecetasRepository } from './in-memory-conversion-recetas-repository.js';
@@ -60,6 +61,7 @@ function buildInMemoryRepositories(): Repositories {
     appConfig: new InMemoryAppConfigRepository(),
     businesses: new InMemoryBusinessesRepository(),
     sales: new InMemorySalesRepository(),
+    tickets: new InMemoryTicketsRepository(),
     expenses: new InMemoryExpensesRepository(),
     products: new InMemoryProductsRepository(),
     inventoryMovements: new InMemoryInventoryMovementsRepository(),

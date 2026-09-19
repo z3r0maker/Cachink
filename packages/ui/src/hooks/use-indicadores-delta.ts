@@ -13,6 +13,7 @@ import {
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeIndicadores } from './use-indicadores';
@@ -25,6 +26,7 @@ export interface UseIndicadoresDeltaOptions {
 export function useIndicadoresDelta(
   options: UseIndicadoresDeltaOptions,
 ): UseQueryResult<Indicadores | null, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const businesses = useBusinessesRepository();
@@ -42,7 +44,7 @@ export function useIndicadoresDelta(
     async queryFn() {
       if (!businessId) throw new Error('No business selected');
       return composeIndicadores(
-        { sales, expenses, businesses, clientPayments, dayCloses, products, movements },
+        { tickets, sales, expenses, businesses, clientPayments, dayCloses, products, movements },
         businessId,
         prior,
       );

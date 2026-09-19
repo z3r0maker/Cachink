@@ -10,7 +10,7 @@ const PROD_ID = '01HZ8XQN9GZJXV8AKQ5X0C7TEZ';
 
 const validLog = {
   id: LOG_ID,
-  saleId: SALE_ID,
+  ticketId: SALE_ID,
   cancelledByUserId: USER_ID,
   motivo: 'Cliente cambió de opinión',
   montoOriginalCentavos: 6500n,
@@ -88,7 +88,7 @@ describe('NewCancelacionLogSchema', () => {
   it('accepts valid input', () => {
     expect(() =>
       NewCancelacionLogSchema.parse({
-        saleId: SALE_ID,
+        ticketId: SALE_ID,
         cancelledByUserId: USER_ID,
         motivo: 'Test',
         montoOriginalCentavos: 5000n,
@@ -100,7 +100,7 @@ describe('NewCancelacionLogSchema', () => {
 
   it('defaults optional fields', () => {
     const parsed = NewCancelacionLogSchema.parse({
-      saleId: SALE_ID,
+      ticketId: SALE_ID,
       cancelledByUserId: USER_ID,
       motivo: 'Test',
       montoOriginalCentavos: 5000n,
