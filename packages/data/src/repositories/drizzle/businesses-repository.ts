@@ -77,8 +77,19 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
 
   async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
     const ts = now();
-    // Every patchable column maps 1:1; only the attribute list is stored as JSON.
-    const { atributosProducto, ...rest } = patch;
+    // Every patchable column maps 1:1; only the attribute list is stored as
+    // JSON. The C-15 branding columns have no SQLite home yet (the app branch
+    // adds them); they are dropped here, not written as unknown columns.
+    const {
+      atributosProducto,
+      brandColor: _bc,
+      receiptTemplate: _rt,
+      receiptLeyenda: _rl,
+      addressPrint: _ap,
+      whatsapp: _wa,
+      socialLinks: _sl,
+      ...rest
+    } = patch;
     const set: Record<string, unknown> = {
       ...rest,
       ...(atributosProducto === undefined
@@ -113,6 +124,13 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       usoCfdi: row.usoCfdi ?? null,
       isrTasa: row.isrTasa,
       logoUrl: row.logoUrl,
+      // C-15 defaults until the device columns land (app branch).
+      brandColor: null,
+      receiptTemplate: 'clasico',
+      receiptLeyenda: null,
+      addressPrint: false,
+      whatsapp: null,
+      socialLinks: '{}',
       tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
       categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ??
         'Producto') as SaleCategory,

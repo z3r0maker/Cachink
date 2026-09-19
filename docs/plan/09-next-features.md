@@ -416,7 +416,23 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-19 Logo + brand colour `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+- [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+- Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
+  portal-only `business_logos` table (0023) — **deviation from the interview's bucket, ratified
+  by the owner 2026-09-18**: Supabase Storage's REST upload needs a Supabase JWT the in-house
+  auth never mints and the service role is forbidden in apps/web (N-05); bytes in the DB, served
+  publicly by `/api/logos/<businessId>` (ETag = bytes' hash) through SECURITY DEFINER
+  `xangarro.logo_publico()` — public read, authed write, one stable **absolute** URL on the wire
+  (phones fetch it). Upload (owner/admin, PNG/JPG/SVG ≤ 2 MB): SVG sanitised
+  (`domain/comprobante/brand.ts`: script/foreignObject/handlers/js-URLs stripped, gate-checked —
+  malicious-SVG tests green); raster decoded with sharp (0.35.4) and the brand colour extracted
+  by a saturation-weighted histogram (`dominantColor`, SVG by `dominantSvgFill`); extraction
+  never overwrites a chosen colour. UI: **Negocio → Comprobantes** (`/negocio/comprobantes`,
+  ADR-086 code-first) — logo upload with preview, colour picker + hex, template cards, leyenda,
+  WhatsApp, address switch; viewer reads without controls; link from Negocio. The sidebar brand
+  block renders the logo when set (wordmark otherwise). e2e `comprobantes.spec.ts` (owner flow +
+  viewer) green; full suite 454. **Still to do:** the monthly PDF's logo (with N-20's renderer)
+  and the phone's download-and-cache half (app branch).
 - **What:** upload PNG/JPG/SVG ≤ 2 MB to a Supabase Storage bucket (RLS by `business_id`; SVG
   sanitised); `businesses.logo_url` (exists, always null today) set; brand colour auto-extracted
   (dominant non-neutral colour) and editable. Logo shown in the portal sidebar/header, on receipts and
@@ -426,7 +442,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-20 Receipt templates `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-19, app design (N-24)
+- [ ] Status · **Blocked by:** N-19, app design (N-24) · **waiting on the owner to land the four
+      template designs in the Claude Design project and mirror them to `design-reference/` (ADR-086
+      keeps receipts design-first)**
 - **What:** four designed templates — Clásico, Moderno, Ticket, Minimal — in
   `packages/domain/src/comprobante/` (one renderer, used by the portal live preview and the app).
   Fields: logo, colour, leyenda, dirección, WhatsApp, redes. PNG and PDF.

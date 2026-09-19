@@ -24,6 +24,15 @@ export type BusinessPatch = Partial<
     | 'razonSocial'
     | 'codigoPostal'
     | 'usoCfdi'
+    // C-15 branding (0023). The SQLite half waits for the app branch, like
+    // clients.rfc: the phone has no UI for these yet and drops them.
+    | 'logoUrl'
+    | 'brandColor'
+    | 'receiptTemplate'
+    | 'receiptLeyenda'
+    | 'addressPrint'
+    | 'whatsapp'
+    | 'socialLinks'
   >
 >;
 

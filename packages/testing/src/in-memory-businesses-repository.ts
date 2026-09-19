@@ -7,6 +7,23 @@ import type { BusinessId, DeviceId, IsoTimestamp } from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { Business, BusinessesRepository, BusinessPatch, NewBusiness } from '@xangarro/data';
 
+/** The C-15 branding fields' storage defaults, mirrored from the schema. */
+function brandDefaults(
+  input: NewBusiness,
+): Pick<
+  Business,
+  'brandColor' | 'receiptTemplate' | 'receiptLeyenda' | 'addressPrint' | 'whatsapp' | 'socialLinks'
+> {
+  return {
+    brandColor: input.brandColor ?? null,
+    receiptTemplate: input.receiptTemplate ?? 'clasico',
+    receiptLeyenda: input.receiptLeyenda ?? null,
+    addressPrint: input.addressPrint ?? false,
+    whatsapp: input.whatsapp ?? null,
+    socialLinks: input.socialLinks ?? '{}',
+  };
+}
+
 export class InMemoryBusinessesRepository implements BusinessesRepository {
   private readonly rows = new Map<BusinessId, Business>();
   private readonly deviceId: DeviceId;
@@ -29,6 +46,7 @@ export class InMemoryBusinessesRepository implements BusinessesRepository {
       usoCfdi: input.usoCfdi ?? null,
       isrTasa: input.isrTasa,
       logoUrl: input.logoUrl ?? null,
+      ...brandDefaults(input),
       tipoNegocio: input.tipoNegocio ?? 'mixto',
       categoriaVentaPredeterminada: input.categoriaVentaPredeterminada ?? 'Producto',
       atributosProducto: input.atributosProducto ?? [],

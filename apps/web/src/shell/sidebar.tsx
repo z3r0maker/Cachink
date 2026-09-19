@@ -77,15 +77,37 @@ function useRail() {
   return { rail, toggle };
 }
 
-export function Sidebar({ badges = {} }: { readonly badges?: NavBadges }) {
+/** The owner's logo when there is one (N-19), the wordmark otherwise. */
+function BrandBlock({ logoUrl }: { readonly logoUrl: string | null }) {
+  if (logoUrl !== null) {
+    return (
+      <div className={brandBlock}>
+        {/* Alt empty on purpose: decorative navigation branding. */}
+        <img src={logoUrl} alt="" style={{ maxHeight: 44, maxWidth: 148, objectFit: 'contain' }} />
+      </div>
+    );
+  }
+  return (
+    <div className={brandBlock}>
+      <Coin />
+      <span className={wordmark}>XANGARRO!</span>
+    </div>
+  );
+}
+
+export function Sidebar({
+  badges = {},
+  logoUrl = null,
+}: {
+  readonly badges?: NavBadges;
+  /** The owner's logo (N-19); null renders the XANGARRO! wordmark. */
+  readonly logoUrl?: string | null;
+}) {
   const pathname = usePathname();
   const { rail, toggle } = useRail();
   return (
     <aside className={aside} data-rail={rail}>
-      <div className={brandBlock}>
-        <Coin />
-        <span className={wordmark}>XANGARRO!</span>
-      </div>
+      <BrandBlock logoUrl={logoUrl} />
       <nav className={nav} aria-label="Navegación principal">
         {NAV_ITEMS.map((item) => (
           <div key={item.href} style={{ display: 'contents' }}>

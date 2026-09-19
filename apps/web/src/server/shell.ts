@@ -1,6 +1,7 @@
 import 'server-only';
 
-import { shellCounts } from '@xangarro/data-pg';
+import { eq } from 'drizzle-orm';
+import { businesses, shellCounts } from '@xangarro/data-pg';
 
 import { withTenant } from './db';
 import { reportError } from './observability/report';
@@ -34,5 +35,25 @@ export async function loadShellCounts(businessId: string): Promise<ShellCounts> 
     // has nowhere to put one, so the log is the only trace.
     reportError(error, { endpoint: 'shell:counts', businessId });
     return NONE;
+  }
+}
+
+/**
+ * The business's logo for the sidebar brand block (N-19); null when none —
+ * the wordmark renders instead. Same degradation rule as the counts: a
+ * database blip must not take the shell down.
+ */
+export async function loadShellLogo(businessId: string): Promise<string | null> {
+  try {
+    return await withTenant(businessId, async (tx) => {
+      const [row] = await tx
+        .select({ logoUrl: businesses.logoUrl })
+        .from(businesses)
+        .where(eq(businesses.id, businessId));
+      return row?.logoUrl ?? null;
+    });
+  } catch (error) {
+    reportError(error, { endpoint: 'shell:logo', businessId });
+    return null;
   }
 }

@@ -44,6 +44,7 @@
     "@xangarro/domain": "workspace:*",
     "@xangarro/email": "workspace:*",
     "@xangarro/tokens": "workspace:*",
+    "sharp": "^0.35.4",
     "exceljs": "^4.4.0",
     "jose": "6.2.12",
     "lucide-react": "^1.47.0",

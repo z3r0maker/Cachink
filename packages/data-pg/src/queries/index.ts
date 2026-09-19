@@ -11,3 +11,4 @@ export * from './avisos.js';
 export * from './historial.js';
 export * from './serie.js';
 export * from './equipo.js';
+export * from './logos.js';

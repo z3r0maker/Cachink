@@ -78,6 +78,17 @@ const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
   // optional — a phone row without it is a valid client with `rfc = NULL`,
   // never a sale arriving without its money.
   clients: ['rfc'],
+  // C-15 stores them (0023); the device columns arrive with the app branch.
+  // `businesses` is DOWN-only, so the device never sends; the wire carries
+  // every field, defaulted, so old payloads parse and new ones arrive.
+  businesses: [
+    'brand_color',
+    'receipt_template',
+    'receipt_leyenda',
+    'address_print',
+    'whatsapp',
+    'social_links',
+  ],
 };
 
 /**
@@ -211,6 +222,7 @@ describe('cloud ↔ device schema drift', () => {
     assert.deepEqual(portalOnly.sort(), [
       'activation_codes',
       'billing_customers',
+      'business_logos',
       'business_members',
       'business_onboarding',
       'cfdi_globals',

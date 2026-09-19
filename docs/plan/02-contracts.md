@@ -332,7 +332,13 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-15 Business branding and contact columns on the `businesses` DOWN table
 
-- [ ] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+- [~] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+  - Progress: 2026-09-18 · `track-n/c15-n19-branding` · wire + pg halves done: `brandColor`,
+    `receiptTemplate (clasico|moderno|ticket|minimal)`, `receiptLeyenda`, `addressPrint`,
+    `whatsapp`, `socialLinks` (JSON string, the entity's `featureFlags` precedent) on
+    `BusinessSchema` with defaults (old payloads parse unchanged) + data-pg **0023**.
+    Drift: `businesses` is cloud-ahead until the app branch (allowed for DOWN tables whose
+    wire fields exist — the six are on the wire). **SQLite half waits for the app branch.**
 - **Steps:** add `brand_color`, `receipt_template ∈ clasico|moderno|ticket|minimal`,
   `receipt_leyenda`, `address_print`, `whatsapp`, `social_links` (JSON) to the wire schema, pg-core and
   SQLite (`logo_url` already exists). SQLite migration with an old→new test (CLAUDE.md §2.9).
