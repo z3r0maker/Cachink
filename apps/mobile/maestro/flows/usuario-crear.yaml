@@ -59,7 +59,7 @@ appId: mx.xangarro.mobile
 
 - tapOn:
     id: "new-user-pin"
-- inputText: "111111"
+- inputText: "1111"
 
 - tapOn:
     id: "new-user-recovery-password"

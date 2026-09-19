@@ -48,6 +48,12 @@ export const UserSchema = z
     nombre: z.string().min(1).max(120),
     email: z.string().email().nullable(),
     pinHash: z.string().min(1),
+    /**
+     * @deprecated ADR-072: only the owner sets or resets a NIP, from the
+     * portal; recovery never happens on a device. Column kept (NOT NULL) until
+     * its own removal migration — new rows hold an unguessable hash nobody
+     * knows (see CrearOperadorUseCase).
+     */
     recoveryPasswordHash: z.string().min(1),
     /** @deprecated see file header — always 'operativo' in new data. */
     role: UserRoleEnum,
@@ -70,7 +76,9 @@ export type User = z.infer<typeof UserSchema>;
 export const NewUserSchema = z.object({
   nombre: z.string().min(1).max(120),
   email: z.string().email().optional(),
-  pin: z.string().regex(/^\d{6}$/),
+  /** Four digits, everywhere (ADR-072). Same rule as `isValidPin`. */
+  pin: z.string().regex(/^\d{4}$/),
+  /** @deprecated ADR-072 — see `recoveryPasswordHash`; kept for the old UI. */
   recoveryPassword: z.string().min(6).max(128),
   /** @deprecated defaults to 'operativo'; removed in A-03. */
   role: UserRoleEnum.default('operativo'),
@@ -81,8 +89,8 @@ export const NewUserSchema = z.object({
 
 export type NewUser = z.infer<typeof NewUserSchema>;
 
-/** Login PIN must be exactly 6 digits. */
-export const PIN_LENGTH = 6;
+/** Login PIN is exactly four digits (ADR-072). */
+export const PIN_LENGTH = 4;
 
 /** Minimum recovery password length for validation. */
 export const RECOVERY_PASSWORD_MIN_LENGTH = 6;

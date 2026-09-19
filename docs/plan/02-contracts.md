@@ -41,7 +41,7 @@ Request:
   "code": "K7M3P9RW",
   "device": {
     "name": "iPhone de Toni",
-    "platform": "ios|android",
+    "platform": "ios|android|web",
     "app_version": "1.0.0",
     "os_version": "18.1"
   }
@@ -340,7 +340,19 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-16 Browser devices and the four-digit NIP
 
-- [ ] Status · **Surfaced by:** Track O (ADR-071, ADR-072) · **Blocks:** O-04, O-05
+- [x] Status · **Surfaced by:** Track O (ADR-071, ADR-072) · **Blocks:** O-04, O-05
+  - Done: 2026-09-18 · `DevicePlatformSchema` + `devices.plataforma` gain `web` (plain text column —
+    no DDL, drift test unchanged and green against the local tenant DB). The NIP is four digits
+    everywhere `isValidPin`/`PIN_PATTERN` already reach (the portal's `/equipo` use cases were there)
+    **and** the last 6-digit holdouts: `NewUserSchema` (+`PIN_LENGTH`), `RecuperarPin`/`CambiarPin`
+    use cases (both slated for removal by O-04), `PinCodeInput` (auto-submit at 4), the Director
+    setup / recovery / change-PIN / create-user screens and their i18n hints, the demo seed
+    (`0000`), the user fixture, and the 12 Maestro flows + shared subflows that type a PIN
+    (amount-taps in `caja-*.yaml` untouched). `recoveryPasswordHash`/`recoveryPassword` carry
+    `@deprecated ADR-072` JSDoc — column kept; DirectorSetup submits a doubled NIP (`12341234`)
+    until the column's removal migration. `endpoints.test.ts` now asserts `plataforma: 'web'`
+    activates and an unknown platform still rejects.
+  - Amended at protocol version 1 (additive enum value; PIN length is not on the wire).
 - **Steps:** `DevicePlatformSchema` gains `web` (wire, pg-core `devices.plataforma`); NIP becomes
   `/^\d{4}$/` in `UserSchema` and every PIN use case; `recoveryPasswordHash` marked deprecated
   (column kept). Protocol version 1, no bump (additive enum value; PIN length is not on the wire).

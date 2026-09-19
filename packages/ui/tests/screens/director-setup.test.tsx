@@ -62,13 +62,14 @@ describe('DirectorSetupScreen', () => {
     const onSubmit = vi.fn();
     renderSetup({ onSubmit });
     fillInput('director-nombre', 'Ana Director');
-    fillInput('director-pin', '123456');
-    fillInput('director-confirm-pin', '123456');
+    fillInput('director-pin', '1234');
+    fillInput('director-confirm-pin', '1234');
     fireEvent.click(screen.getByTestId('director-setup-submit'));
     expect(onSubmit).toHaveBeenCalledWith({
       nombre: 'Ana Director',
-      pin: '123456',
-      recoveryPassword: '123456',
+      pin: '1234',
+      // Deprecated recovery column: the doubled NIP stands in (ADR-072).
+      recoveryPassword: '12341234',
     });
   });
 
@@ -76,8 +77,8 @@ describe('DirectorSetupScreen', () => {
     const onSubmit = vi.fn();
     renderSetup({ onSubmit });
     fillInput('director-nombre', 'Ana Director');
-    fillInput('director-pin', '123456');
-    fillInput('director-confirm-pin', '654321');
+    fillInput('director-pin', '1234');
+    fillInput('director-confirm-pin', '4321');
     fireEvent.click(screen.getByTestId('director-setup-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -95,8 +96,8 @@ describe('DirectorSetupScreen', () => {
   it('does not submit when nombre is empty', () => {
     const onSubmit = vi.fn();
     renderSetup({ onSubmit });
-    fillInput('director-pin', '123456');
-    fillInput('director-confirm-pin', '123456');
+    fillInput('director-pin', '1234');
+    fillInput('director-confirm-pin', '1234');
     fireEvent.click(screen.getByTestId('director-setup-submit'));
     expect(onSubmit).not.toHaveBeenCalled();
   });

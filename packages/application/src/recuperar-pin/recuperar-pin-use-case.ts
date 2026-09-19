@@ -4,11 +4,12 @@
  * Verifies the recovery password hash, then resets the PIN.
  * Sets `mustChangePin: false` since the user just chose a new one.
  *
- * ADR-049: PIN for daily login, Password for recovery.
+ * ADR-049: PIN for daily login, Password for recovery. Removed with the
+ * phone's recovery screen by O-04 (ADR-072: only the owner resets a NIP).
  */
 
 import { compare, hash } from 'bcryptjs';
-import type { UserId } from '@xangarro/domain';
+import { isValidPin, type UserId } from '@xangarro/domain';
 import type { UsersRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
@@ -28,8 +29,8 @@ export class RecuperarPinUseCase implements UseCase<RecuperarPinInput, void> {
   }
 
   async execute(input: RecuperarPinInput): Promise<void> {
-    if (!/^\d{6}$/.test(input.newPin)) {
-      throw new TypeError('El nuevo PIN debe ser de 6 dígitos');
+    if (!isValidPin(input.newPin)) {
+      throw new TypeError('El nuevo PIN debe ser de 4 dígitos');
     }
 
     const user = await this.#users.findById(input.userId);

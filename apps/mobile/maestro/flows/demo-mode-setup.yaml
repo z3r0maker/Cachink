@@ -11,9 +11,9 @@
 #
 # Demo data now comes from SeedDemoAction, the __DEV__-only card in
 # Configuración. It seeds the SAME users the demo flows expect:
-# Juan Director + Ana Operativa, both PIN 000000, plus ~130 records.
+# Juan Director + Ana Operativa, both PIN 0000, plus ~130 records.
 #
-# NOTE: this leaves a THIRD user, "Director Test" (PIN 123456), created by
+# NOTE: this leaves a THIRD user, "Director Test" (PIN 1234), created by
 # the first-run wizard. Demo flows authenticate via
 # shared/authenticate*.yaml, which select by `user-avatar-role-director` —
 # ambiguous with two directors present.

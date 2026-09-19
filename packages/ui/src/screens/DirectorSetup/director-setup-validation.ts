@@ -10,6 +10,8 @@
  * restore those fields and their validation.
  */
 
+import { isValidPin } from '@xangarro/domain';
+
 export interface DirectorSetupFormState {
   readonly nombre: string;
   readonly pin: string;
@@ -36,7 +38,7 @@ export const DirectorSetupValidation = {
 
     const valid =
       state.nombre.length > 0 &&
-      /^\d{6}$/.test(state.pin) &&
+      isValidPin(state.pin) &&
       state.confirmPin === state.pin &&
       errors.confirmPin === undefined;
 

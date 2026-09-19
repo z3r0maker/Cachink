@@ -50,7 +50,10 @@ function useDirectorSetupForm(props: DirectorSetupScreenProps) {
   });
   const handleSubmit = (): void => {
     if (!validation.valid) return;
-    props.onSubmit({ nombre, pin, recoveryPassword: pin });
+    // Recovery is deprecated (ADR-072: the owner resets a NIP); the column
+    // still requires 6+ chars, so a doubled NIP stands in — never used to
+    // recover anything.
+    props.onSubmit({ nombre, pin, recoveryPassword: pin.repeat(2) });
   };
   return {
     t,
@@ -95,16 +98,16 @@ function DirectorSetupHeader({ t }: { t: T }): ReactElement {
 }
 
 function handlePin(form: Form, v: string): void {
-  const trimmed = v.slice(0, 6);
+  const trimmed = v.slice(0, 4);
   form.setPin(trimmed);
-  // iOS number-pad has no return key — auto-advance to confirmPin on 6 digits
-  if (trimmed.length === 6) (form.confirmPinRef.current as TextInput | null)?.focus();
+  // iOS number-pad has no return key — auto-advance to confirmPin on 4 digits
+  if (trimmed.length === 4) (form.confirmPinRef.current as TextInput | null)?.focus();
 }
 
 function handleConfirmPin(form: Form, v: string): void {
-  const trimmed = v.slice(0, 6);
+  const trimmed = v.slice(0, 4);
   form.setConfirmPin(trimmed);
-  if (trimmed.length === 6) Keyboard.dismiss();
+  if (trimmed.length === 4) Keyboard.dismiss();
 }
 
 function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
@@ -116,7 +119,7 @@ function DirectorCredentialFields({ form }: { form: Form }): ReactElement {
         onChange={(v) => handlePin(form, v)}
         label={form.t('directorSetup.pin')}
         testID="director-pin"
-        placeholder="000000"
+        placeholder="0000"
         inputRef={form.pinRef}
       />
       <Input

@@ -21,7 +21,7 @@ describe('CambiarPinUseCase', () => {
       makeNewUser({
         businessId: BIZ,
         nombre: 'Test User',
-        pin: '111111',
+        pin: '1111',
       }),
     );
     userId = user.id;
@@ -30,8 +30,8 @@ describe('CambiarPinUseCase', () => {
   it('changes PIN and clears mustChangePin', async () => {
     await cambiar.execute({
       userId,
-      currentPin: '111111',
-      newPin: '222222',
+      currentPin: '1111',
+      newPin: '2222',
     });
 
     const user = await users.findById(userId);
@@ -40,7 +40,7 @@ describe('CambiarPinUseCase', () => {
     // New PIN works
     const result = await auth.execute({
       nombre: 'Test User',
-      pin: '222222',
+      pin: '2222',
       businessId: BIZ,
     });
     expect(result.success).toBe(true);
@@ -50,28 +50,28 @@ describe('CambiarPinUseCase', () => {
     await expect(
       cambiar.execute({
         userId,
-        currentPin: '999999',
-        newPin: '222222',
+        currentPin: '9999',
+        newPin: '2222',
       }),
     ).rejects.toThrow(/incorrecto/);
   });
 
-  it('rejects non-6-digit new PIN', async () => {
+  it('rejects a PIN that is not 4 digits (ADR-072)', async () => {
     await expect(
       cambiar.execute({
         userId,
-        currentPin: '111111',
+        currentPin: '1111',
         newPin: '12345',
       }),
-    ).rejects.toThrow(/6 dígitos/);
+    ).rejects.toThrow(/4 dígitos/);
   });
 
   it('rejects non-existent user', async () => {
     await expect(
       cambiar.execute({
         userId: '01HZ8XQN9GZJXV8AKQ5XGHOST' as UserId,
-        currentPin: '111111',
-        newPin: '222222',
+        currentPin: '1111',
+        newPin: '2222',
       }),
     ).rejects.toThrow(/no encontrado/);
   });

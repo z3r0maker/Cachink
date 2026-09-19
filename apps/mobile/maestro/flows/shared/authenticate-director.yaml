@@ -1,7 +1,7 @@
 # Reusable subflow: authenticate as Director (deterministic, both entry points).
 #
-#   - Demo mode  → Juan Director   (PIN 000000)  — an Operativo avatar is present
-#   - Wizard mode → Director Test   (PIN 123456)  — no Operativo avatar
+#   - Demo mode  → Juan Director   (PIN 0000)  — an Operativo avatar is present
+#   - Wizard mode → Director Test   (PIN 1234)  — no Operativo avatar
 #
 # Selects by the stable role testID `user-avatar-role-director` and branches on
 # whether the Operativo avatar exists to pick the right PIN. Every step inside the
@@ -16,14 +16,14 @@ appId: mx.xangarro.mobile
 - assertVisible:
     id: "quick-switch"
 
-# Demo mode: an Operativo avatar is present → Juan Director, PIN 000000.
+# Demo mode: an Operativo avatar is present → Juan Director, PIN 0000.
 #
 # Select by NAME here, not by `user-avatar-role-director`. Since
 # 2026-09-07 demo-mode-setup.yaml seeds via SeedDemoAction, which runs
 # AFTER the first-run wizard, so the demo DB holds TWO directors:
-# "Director Test" (PIN 123456, from the wizard) and "Juan Director"
-# (PIN 000000, from the seed). The role testID matches both and Maestro
-# taps the first, which would enter 000000 against Director Test's PIN.
+# "Director Test" (PIN 1234, from the wizard) and "Juan Director"
+# (PIN 0000, from the seed). The role testID matches both and Maestro
+# taps the first, which would enter 0000 against Director Test's PIN.
 # `text:` is an anchored regex, hence the trailing `.*`.
 - runFlow:
     when:
@@ -62,10 +62,8 @@ appId: mx.xangarro.mobile
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
       - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
-      - tapOn: { id: "numpad-0" }
 
-# Wizard mode: no Operativo avatar → Director Test, PIN 123456.
+# Wizard mode: no Operativo avatar → Director Test, PIN 1234.
 # Guard on `quick-switch` still being visible so this branch does NOT fire after
 # the demo branch above already logged in (which removes the operativo avatar and
 # would otherwise make `notVisible operativo` true here).
@@ -105,8 +103,6 @@ appId: mx.xangarro.mobile
       - tapOn: { id: "numpad-2" }
       - tapOn: { id: "numpad-3" }
       - tapOn: { id: "numpad-4" }
-      - tapOn: { id: "numpad-5" }
-      - tapOn: { id: "numpad-6" }
 
 # Director lands on the estados tab (both paths).
 - extendedWaitUntil:

@@ -8,6 +8,7 @@
 import { useState, type ReactElement } from 'react';
 import { Text, View } from '@tamagui/core';
 import type { UserRole } from '@xangarro/domain';
+import { isValidPin } from '@xangarro/domain';
 import { Btn, PasswordField, TextField } from '../../components/index';
 import { OptionCardGroup, type OptionCardItem } from '../../components/OptionCardGroup/index';
 import { useTranslation } from '../../i18n/index';
@@ -45,7 +46,7 @@ function useCreateUserForm() {
   const [role, setRole] = useState<UserRole>('operativo');
   const [pin, setPin] = useState('');
   const [recoveryPassword, setRecoveryPassword] = useState('');
-  const valid = nombre.length > 0 && /^\d{6}$/.test(pin) && recoveryPassword.length >= 6;
+  const valid = nombre.length > 0 && isValidPin(pin) && recoveryPassword.length >= 6;
   return {
     nombre,
     setNombre,

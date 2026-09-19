@@ -49,7 +49,7 @@ describe('CancelarVentaUseCase', () => {
       makeNewUser({
         businessId: BIZ,
         nombre: 'Director Test',
-        pin: '123456',
+        pin: '1234',
         role: 'director',
       }),
     );
@@ -64,7 +64,7 @@ describe('CancelarVentaUseCase', () => {
     const result = await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Cliente cambió de opinión',
       businessId: BIZ,
       stockEnabled: false,
@@ -84,7 +84,7 @@ describe('CancelarVentaUseCase', () => {
     const result = await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Error en cobro',
       businessId: BIZ,
       stockEnabled: false,
@@ -108,7 +108,7 @@ describe('CancelarVentaUseCase', () => {
     const result = await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Devolución',
       businessId: BIZ,
       stockEnabled: true,
@@ -133,7 +133,7 @@ describe('CancelarVentaUseCase', () => {
     const result = await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Devolución',
       businessId: BIZ,
       stockEnabled: true,
@@ -151,7 +151,7 @@ describe('CancelarVentaUseCase', () => {
     await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Producto defectuoso',
       businessId: BIZ,
       stockEnabled: false,
@@ -171,7 +171,7 @@ describe('CancelarVentaUseCase', () => {
       useCase.execute({
         saleId: sale.id,
         userId: directorId,
-        pin: '999999',
+        pin: '9999',
         motivo: 'Test',
         businessId: BIZ,
       }),
@@ -186,7 +186,7 @@ describe('CancelarVentaUseCase', () => {
       useCase.execute({
         saleId: sale.id,
         userId: fakeUserId,
-        pin: '123456',
+        pin: '1234',
         motivo: 'Test',
         businessId: BIZ,
       }),
@@ -198,7 +198,7 @@ describe('CancelarVentaUseCase', () => {
       makeNewUser({
         businessId: BIZ,
         nombre: 'Operativo Test',
-        pin: '654321',
+        pin: '4321',
         role: 'operativo',
       }),
     );
@@ -208,7 +208,7 @@ describe('CancelarVentaUseCase', () => {
       useCase.execute({
         saleId: sale.id,
         userId: operativo.id,
-        pin: '654321',
+        pin: '4321',
         motivo: 'Test',
         businessId: BIZ,
       }),
@@ -222,7 +222,7 @@ describe('CancelarVentaUseCase', () => {
       useCase.execute({
         saleId: fakeSaleId,
         userId: directorId,
-        pin: '123456',
+        pin: '1234',
         motivo: 'Test',
         businessId: BIZ,
       }),
@@ -235,7 +235,7 @@ describe('CancelarVentaUseCase', () => {
     await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'First cancel',
       businessId: BIZ,
       stockEnabled: false,
@@ -246,7 +246,7 @@ describe('CancelarVentaUseCase', () => {
       useCase.execute({
         saleId: sale.id,
         userId: directorId,
-        pin: '123456',
+        pin: '1234',
         motivo: 'Double cancel',
         businessId: BIZ,
         stockEnabled: false,
@@ -267,7 +267,7 @@ describe('CancelarVentaUseCase', () => {
     const result = await useCase.execute({
       saleId: sale.id,
       userId: directorId,
-      pin: '123456',
+      pin: '1234',
       motivo: 'Devolución',
       businessId: BIZ,
       stockEnabled: false,

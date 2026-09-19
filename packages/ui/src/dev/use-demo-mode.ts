@@ -5,7 +5,7 @@
  * Returns `undefined` in production builds so the wizard link is
  * never rendered (tree-shaken out). In dev, returns an async callback.
  *
- * All PINs default to "000000" (Director + Operativo).
+ * All PINs default to "0000" (Director + Operativo; ADR-072).
  */
 
 import { useCallback, useState } from 'react';

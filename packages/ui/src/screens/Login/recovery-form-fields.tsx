@@ -53,18 +53,18 @@ export function RecoveryPinFields({ form, t }: { form: RecoveryFormState; t: T }
       <Input
         type="number"
         value={form.newPin}
-        onChange={(v) => form.setNewPin(v.slice(0, 6))}
+        onChange={(v) => form.setNewPin(v.slice(0, 4))}
         label={t('recovery.newPin')}
         testID="recovery-new-pin"
-        placeholder="000000"
+        placeholder="0000"
       />
       <Input
         type="number"
         value={form.confirmPin}
-        onChange={(v) => form.setConfirmPin(v.slice(0, 6))}
+        onChange={(v) => form.setConfirmPin(v.slice(0, 4))}
         label={t('recovery.confirmPin')}
         testID="recovery-confirm-pin"
-        placeholder="000000"
+        placeholder="0000"
       />
       {form.mismatch && (
         <Text fontSize={fontSizes.xs} color={colors.redText}>

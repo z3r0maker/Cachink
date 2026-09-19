@@ -1,7 +1,7 @@
-# Reusable subflow: authenticate as Director Test (wizard-created user, PIN 123456).
+# Reusable subflow: authenticate as Director Test (wizard-created user, PIN 1234).
 #
 # Use this in regression-path flows that start from the wizard setup
-# (director-setup.yaml creates "Director Test" with PIN 123456).
+# (director-setup.yaml creates "Director Test" with PIN 1234).
 # For demo-mode flows, use shared/authenticate.yaml instead.
 #
 # Deterministic: selects by the stable role testID `user-avatar-role-director`
@@ -22,13 +22,11 @@ appId: mx.xangarro.mobile
     id: "pin-numpad"
 - waitForAnimationToEnd
 
-# Enter PIN 123456 (auto-submits after 6 digits).
+# Enter PIN 1234 (auto-submits after 4 digits; ADR-072).
 - tapOn: { id: "numpad-1" }
 - tapOn: { id: "numpad-2" }
 - tapOn: { id: "numpad-3" }
 - tapOn: { id: "numpad-4" }
-- tapOn: { id: "numpad-5" }
-- tapOn: { id: "numpad-6" }
 
 # Director lands on the estados tab.
 - extendedWaitUntil:

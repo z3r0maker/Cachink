@@ -46,10 +46,10 @@ describe('PinCodeInput', () => {
     expect(dots).toHaveLength(3);
   });
 
-  it('renders 6 dots when fully filled', () => {
-    renderWithProviders(<PinCodeInput value="123456" onChange={vi.fn()} testID="pin" />);
+  it('renders 4 dots when fully filled', () => {
+    renderWithProviders(<PinCodeInput value="1234" onChange={vi.fn()} testID="pin" />);
     const dots = screen.getAllByText('●');
-    expect(dots).toHaveLength(6);
+    expect(dots).toHaveLength(4);
   });
 
   it('rejects non-digit characters via onChange', () => {
@@ -60,27 +60,27 @@ describe('PinCodeInput', () => {
     expect(onChange).toHaveBeenCalledWith('123');
   });
 
-  it('clamps to 6 characters max', () => {
+  it('clamps to 4 characters max', () => {
     const onChange = vi.fn();
     renderWithProviders(<PinCodeInput value="" onChange={onChange} testID="pin" />);
     const input = screen.getByTestId('pin-field');
     fireEvent.change(input, { target: { value: '12345678' } });
-    expect(onChange).toHaveBeenCalledWith('123456');
+    expect(onChange).toHaveBeenCalledWith('1234');
   });
 
-  it('fires onComplete when 6th digit is entered', () => {
+  it('fires onComplete when 4th digit is entered', () => {
     const onComplete = vi.fn();
-    renderWithProviders(<Wrapper onComplete={onComplete} initial="12345" />);
+    renderWithProviders(<Wrapper onComplete={onComplete} initial="123" />);
     const input = screen.getByTestId('pin-input-field');
-    fireEvent.change(input, { target: { value: '123456' } });
-    expect(onComplete).toHaveBeenCalledWith('123456');
+    fireEvent.change(input, { target: { value: '1234' } });
+    expect(onComplete).toHaveBeenCalledWith('1234');
   });
 
-  it('does NOT fire onComplete with fewer than 6 digits', () => {
+  it('does NOT fire onComplete with fewer than 4 digits', () => {
     const onComplete = vi.fn();
     renderWithProviders(<Wrapper onComplete={onComplete} />);
     const input = screen.getByTestId('pin-input-field');
-    fireEvent.change(input, { target: { value: '12345' } });
+    fireEvent.change(input, { target: { value: '123' } });
     expect(onComplete).not.toHaveBeenCalled();
   });
 

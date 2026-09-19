@@ -23,7 +23,8 @@ export const ActivationCodeSchema = z
   .transform((s) => s.trim().toUpperCase())
   .pipe(z.string().regex(ACTIVATION_CODE_REGEX, 'activation code'));
 
-export const DevicePlatformSchema = z.enum(['ios', 'android']);
+/** `web` = the browser register, a device like a phone (ADR-071; C-16). */
+export const DevicePlatformSchema = z.enum(['ios', 'android', 'web']);
 
 export const ActivateRequestSchema = z.object({
   email: z

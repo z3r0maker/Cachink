@@ -1,5 +1,5 @@
 /**
- * PinCodeInput — OTP-style 6-digit masked PIN entry.
+ * PinCodeInput — OTP-style 4-digit masked PIN entry (ADR-072).
  *
  * Two modes: hidden-input (system keyboard) or inline numpad (`useNumpad`).
  * Error feedback: shake animation + notificationError haptic.
@@ -25,7 +25,7 @@ export interface PinCodeInputProps {
   readonly testID?: string;
 }
 
-const PIN_LENGTH = 6;
+const PIN_LENGTH = 4;
 const BOX_GAP = 8;
 const FOCUS_DELAY_MS = 100;
 const DISABLED_OPACITY = 0.6;

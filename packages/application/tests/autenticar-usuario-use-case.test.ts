@@ -20,7 +20,7 @@ describe('AutenticarUsuarioUseCase', () => {
       makeNewUser({
         businessId: BIZ,
         nombre: 'Test Director',
-        pin: '123456',
+        pin: '1234',
       }),
     );
   });
@@ -28,7 +28,7 @@ describe('AutenticarUsuarioUseCase', () => {
   it('returns success with correct credentials', async () => {
     const result = await auth.execute({
       nombre: 'Test Director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
 
@@ -45,7 +45,7 @@ describe('AutenticarUsuarioUseCase', () => {
 
     const result = await auth.execute({
       nombre: 'Test Director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
 
@@ -56,7 +56,7 @@ describe('AutenticarUsuarioUseCase', () => {
   it('returns failure for wrong PIN', async () => {
     const result = await auth.execute({
       nombre: 'Test Director',
-      pin: '999999',
+      pin: '9999',
       businessId: BIZ,
     });
 
@@ -67,7 +67,7 @@ describe('AutenticarUsuarioUseCase', () => {
   it('returns failure for non-existent user', async () => {
     const result = await auth.execute({
       nombre: 'NonExistent',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
 
@@ -78,7 +78,7 @@ describe('AutenticarUsuarioUseCase', () => {
   it('is case-insensitive for nombre lookup', async () => {
     const result = await auth.execute({
       nombre: 'test director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
 
@@ -88,7 +88,7 @@ describe('AutenticarUsuarioUseCase', () => {
   it('returns mustChangePin from user record', async () => {
     const result = await auth.execute({
       nombre: 'Test Director',
-      pin: '123456',
+      pin: '1234',
       businessId: BIZ,
     });
 

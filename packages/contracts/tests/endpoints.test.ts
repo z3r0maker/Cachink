@@ -48,6 +48,14 @@ describe('activate', () => {
     assert.equal(r.code, 'K7M3P9RW');
     assert.equal(r.email, 'dueno@negocio.mx');
   });
+  it('accepts the browser register as a platform (C-16, ADR-071)', () => {
+    const r = ActivateRequestSchema.parse({
+      email: 'a@b.mx',
+      code: 'K7M3P9RW',
+      device: { name: 'Caja 1', platform: 'web', appVersion: '1.0.0', osVersion: 'Mac OS 15' },
+    });
+    assert.equal(r.device.platform, 'web');
+  });
   it('rejects ambiguous glyphs, wrong length and unknown platforms', () => {
     assert.throws(() => ActivationCodeSchema.parse('K7M3P9R0'));
     assert.throws(() => ActivationCodeSchema.parse('K7M3P9R'));
@@ -55,7 +63,7 @@ describe('activate', () => {
       ActivateRequestSchema.parse({
         email: 'a@b.mx',
         code: 'K7M3P9RW',
-        device: { name: 'x', platform: 'web', appVersion: '1', osVersion: '1' },
+        device: { name: 'x', platform: 'windows', appVersion: '1', osVersion: '1' },
       }),
     );
   });

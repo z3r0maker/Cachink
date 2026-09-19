@@ -216,7 +216,7 @@ appId: mx.xangarro.mobile
     timeout: 5000
 - assertVisible:
     id: "cancel-pin-input"
-# Enter PIN 123456 (Director Test PIN).
+# Enter PIN 1234 (Director Test PIN).
 - tapOn:
     id: "numpad-1"
 - tapOn:
@@ -225,10 +225,6 @@ appId: mx.xangarro.mobile
     id: "numpad-3"
 - tapOn:
     id: "numpad-4"
-- tapOn:
-    id: "numpad-5"
-- tapOn:
-    id: "numpad-6"
 
 # ── Reason step ──
 - extendedWaitUntil:
