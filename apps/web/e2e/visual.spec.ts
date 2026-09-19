@@ -18,7 +18,10 @@ const SECCIONES = [
   { nombre: 'Switch · OptionCards · UsageBar · Diálogos · Sellos · Avisos', slug: 'recientes' },
 ] as const;
 
-test.skip(() => process.env.CI !== undefined, 'visual baselines are a local review');
+test.skip(
+  ({ project }) => process.env.CI !== undefined || project.name !== 'desktop',
+  'visual baselines are a local, desktop review',
+);
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/inventario');
