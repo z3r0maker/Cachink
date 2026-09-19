@@ -1,5 +1,5 @@
-import { requireSession } from '@/server/auth';
-import { loadAsesor } from '@/server/screens';
+import { currentSession } from '@/server/current-session';
+import { loadAsesorPage } from '@/server/asesor';
 
 import { AsesorScreen } from './screen';
 
@@ -15,10 +15,13 @@ import { AsesorScreen } from './screen';
 export const dynamic = 'force-dynamic';
 
 export default async function AsesorPage() {
-  const session = await requireSession();
   try {
-    return <AsesorScreen insights={await loadAsesor(session.business_id)} />;
+    // The session carries the plan's Asesor cadencia; the loader materialises
+    // only what that tier receives (ADR-059, ADR-087).
+    const session = await currentSession();
+    const data = await loadAsesorPage(session.businessId, session.capabilities.asesor);
+    return <AsesorScreen data={data} />;
   } catch {
-    return <AsesorScreen insights={null} />;
+    return <AsesorScreen data={null} />;
   }
 }

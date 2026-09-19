@@ -6,7 +6,7 @@ import { ScreenBody, SegmentedTabs, Tag } from '@/components';
 import { useSession } from '@/session/provider';
 import { asesorShowsDiagnostico, resolveScreenState } from '@/session/gating';
 
-import type { AvisosData } from '@/server/screens';
+import type { AsesorPageData } from '@/server/asesor';
 
 import { Metas } from './metas';
 import { Anteriores, Capacidades, ParaTi } from './para-ti';
@@ -19,8 +19,6 @@ import { pageSubtitle, pageTitle } from './asesor.css';
  * «Próximamente»** (ADR-059). One flag, checked at one boundary.
  */
 const LLM_ENABLED = process.env.NODE_ENV !== 'production';
-
-type AsesorInsights = AvisosData;
 
 const TABS = [
   { value: 'parati', label: 'Para ti' },
@@ -71,7 +69,7 @@ function Diagnostico() {
   );
 }
 
-export function AsesorScreen({ insights }: { readonly insights: AsesorInsights | null }) {
+export function AsesorScreen({ data }: { readonly data: AsesorPageData | null }) {
   const [tab, setTab] = useState('parati');
 
   return (
@@ -80,9 +78,9 @@ export function AsesorScreen({ insights }: { readonly insights: AsesorInsights |
       <SegmentedTabs ariaLabel="Asesor" value={tab} onValueChange={setTab} tabs={TABS} />
       {tab === 'parati' ? (
         <>
-          <ParaTi insights={insights} />
-          <Capacidades />
-          <Anteriores />
+          <ParaTi insights={data?.feed ?? null} />
+          <Capacidades capacidades={data?.capacidades ?? []} />
+          <Anteriores anteriores={data?.anteriores ?? []} />
         </>
       ) : null}
       {tab === 'metas' ? <Metas /> : null}

@@ -5827,3 +5827,44 @@ for the takeover and streak-milestone toasts.
 - `session_resolve`'s return changed shape (nombre added): every portal session now carries it.
 - Goals close lazily (`CerrarMetaUseCase`, P-27) and the takeover/toast read these markers, so
   P-33's «shown once» is a property of the data, not of a browser.
+
+---
+
+## ADR-087
+
+### The Asesor's deterministic layer materialises on read, ahead of P-30's cron
+
+**Date:** 2026-09-19
+**Status:** Accepted (P-26; amends ADR-056's timing, not its shape)
+
+#### Context
+
+ADR-056 puts Asesor generation on Vercel Cron — one business per invocation, the deterministic
+layer first, the model call last. But P-30 is gated behind the model credential, and nothing
+writes `source='asesor'` rows: the feed read an empty table while the deterministic insights were
+already computable. A fourth web cron (a fifth account-wide) would also spend the Vercel cron
+budget O-7 has not confirmed, for content that needs no scheduler.
+
+#### Decision
+
+1. **Materialise-on-read.** When the Asesor page loads, the server computes the deterministic
+   insights (`@xangarro/domain/asesor`: cost deltas, quincena seasonality, expense anomalies,
+   stale inventory, duplicate gastos), filters them by the plan's cadence, and **upserts them
+   into `notices`** under deterministic ids (`{businessId}:{clave}`). The feed still *reads*
+   `notices`, exactly as ADR-060 designed — the table is the contract; only the writer moved.
+2. **Dismissals survive recomputes.** The upsert never touches `state` or `resolved_at`; an
+   insight that fixed itself (the duplicate was cancelled, the stock moved) auto-closes as
+   `listo`, which is what «Anteriores» shows for dealt-with rows.
+3. **The cadence gates the set, not the freshness** (owner decision, 2026-09-19): `semanal`
+   (Xangarrito) receives the two most urgent insights by a deterministic ranking; `diario`
+   (Xangarro) and `completo` (Xangarrote) receive all — always recomputed at read, never a stale
+   weekly snapshot.
+4. P-30 lifts the same `calcularInsights` functions into its cron + model step unchanged when
+   the credential lands; this ADR describes the interim writer, not a second generator.
+
+#### Consequences
+
+- The Asesor ships with real content on every tier with no new infrastructure.
+- A page load may write rows (upserts of a handful of notices) — an acceptable side effect of a
+  read path, and the reason the seed's `/asesor` visits in e2e are covered by the routes sweep.
+- «Próximamente» still gates only the model-backed Diagnóstico/catálogo paths (ADR-059).

@@ -35,6 +35,7 @@ async function insertIdentity(tx: Tx, o: NewOwner): Promise<void> {
     id: o.userId,
     email: o.email,
     passwordHash: o.passwordHash,
+    nombre: o.nombre ?? '',
     at: o.at,
   });
   if (!created) throw new SignupError('EMAIL_TAKEN', 'Ya existe una cuenta con ese correo.');

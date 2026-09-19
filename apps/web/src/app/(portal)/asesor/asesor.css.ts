@@ -101,3 +101,8 @@ export const goalFigure = style({
   fontVariantNumeric: 'tabular-nums',
   color: colors.black,
 });
+
+export const feedLink = style({
+  color: 'inherit',
+  textDecoration: 'none',
+});
