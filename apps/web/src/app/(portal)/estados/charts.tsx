@@ -1,7 +1,7 @@
 'use client';
 
 import { formatMoney, formatMoneyCompact } from '@xangarro/domain';
-import { colors } from '@xangarro/tokens';
+import { colors, portalFontSizes } from '@xangarro/tokens';
 import {
   Bar,
   BarChart,
@@ -59,7 +59,7 @@ export function Waterfall({ er }: { readonly er: EstadoDeResultados }) {
             margin={{ top: 8, right: 16, bottom: 0, left: 8 }}
           >
             <CartesianGrid stroke={colors.gray200} vertical={false} />
-            <XAxis dataKey="label" interval={0} tick={{ fontSize: 11 }} />
+            <XAxis dataKey="label" interval={0} tick={{ fontSize: portalFontSizes.xs }} />
             <YAxis
               tickFormatter={(v) => formatMoneyCompact(BigInt(Math.round(Number(v))))}
               width={72}

@@ -1,6 +1,7 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
+import { portalFontSizes } from '@xangarro/tokens';
 
 import { Button, Card } from '@/components';
 import { fijarMetaAction } from '@/server/actions/metas';
@@ -42,7 +43,7 @@ export function CierreDialog({
   return (
     <Card>
       <div className={eyebrow}>Se cerró tu meta de {meta.periodo}</div>
-      <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 800 }}>
+      <h3 style={{ margin: '0 0 6px', fontSize: portalFontSizes.cardTitle, fontWeight: 800 }}>
         {meta.lograda
           ? `¡La lograste! ${formatMoney(meta.resultadoCentavos ?? 0n)}`
           : `Quedaste en ${formatMoney(meta.resultadoCentavos ?? 0n)} de ${formatMoney(meta.objetivoCentavos)}`}

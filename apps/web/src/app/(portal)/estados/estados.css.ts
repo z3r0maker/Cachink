@@ -98,13 +98,13 @@ export const subLine = style({
 });
 
 export const chartTitle = style({
-  fontSize: 15,
+  fontSize: portalFontSizes.body,
   fontWeight: 800,
   margin: '0 0 12px',
 });
 
 export const chartNote = style({
-  fontSize: 12,
+  fontSize: portalFontSizes.xs,
   color: colors.gray600,
   margin: '8px 0 0',
 });

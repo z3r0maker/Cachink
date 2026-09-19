@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
+import { portalFontSizes } from '@xangarro/tokens';
 
 import { Banner, Button, Card, Tag, Verdict } from '@/components';
 import type { MetasPageData } from '@/server/metas';
@@ -118,7 +119,7 @@ function NegocioNuevo() {
   return (
     <Card>
       <div className={eyebrow}>Tu primera meta</div>
-      <h3 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 800 }}>
+      <h3 style={{ margin: '0 0 8px', fontSize: portalFontSizes.cardTitle, fontWeight: 800 }}>
         Aún no hay un mes que comparar
       </h3>
       <p style={{ margin: 0 }}>
