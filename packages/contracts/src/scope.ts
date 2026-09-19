@@ -15,6 +15,7 @@ export const UP_TABLES = [
   'entregas_credito',
   'conversions',
   'auditorias_inventario',
+  'respuestas_operador',
 ] as const;
 
 /**
@@ -34,6 +35,7 @@ export const DOWN_TABLES = [
   'employees',
   'recurring_expenses',
   'conversion_recetas',
+  'mensajes_operador',
 ] as const;
 
 /** Local-only tables that never cross the wire. */

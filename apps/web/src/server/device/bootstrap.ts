@@ -6,6 +6,7 @@ import {
   conversionRecetas,
   employees,
   inventoryMovements,
+  mensajesOperador,
   products,
   recurringExpenses,
   users,
@@ -43,7 +44,7 @@ export async function tenantFeatureFlags(tx: Tx): Promise<FeatureFlags> {
 export async function referenceTables(tx: Tx) {
   const live = <T extends { deletedAt: unknown }>(t: T) => isNull(t.deletedAt as never);
 
-  const [b, p, c, u, e, r, cr, m] = await Promise.all([
+  const [b, p, c, u, e, r, cr, m, mo] = await Promise.all([
     tx.select().from(businesses),
     tx.select().from(products).where(live(products)),
     tx.select().from(clients).where(live(clients)),
@@ -53,6 +54,7 @@ export async function referenceTables(tx: Tx) {
     tx.select().from(conversionRecetas).where(live(conversionRecetas)),
     // Every movement, not a stock snapshot: the phone's stock is their sum (ADR-081).
     tx.select().from(inventoryMovements).where(live(inventoryMovements)),
+    tx.select().from(mensajesOperador).where(live(mensajesOperador)),
   ]);
 
   return {
@@ -64,6 +66,7 @@ export async function referenceTables(tx: Tx) {
     recurring_expenses: r.map((row) => rowToWire('recurring_expenses', row)),
     conversion_recetas: cr.map((row) => rowToWire('conversion_recetas', row)),
     inventory_movements: m.map((row) => rowToWire('inventory_movements', row)),
+    mensajes_operador: mo.map((row) => rowToWire('mensajes_operador', row)),
     feature_flags: await tenantFeatureFlags(tx),
   };
 }

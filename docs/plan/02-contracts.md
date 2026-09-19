@@ -376,7 +376,21 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-19 Operator messages and replies
 
-- [ ] Status · **Surfaced by:** Track O (ADR-075) · **Blocks:** O-16, fase 13
+- [x] Status · **Surfaced by:** Track O (ADR-075) · **Blocks:** O-16, fase 13
+  - Done: 2026-09-18 · `mensajes_operador` (DOWN) and `respuestas_operador` (UP) across every
+    layer: domain entities (`MensajeOperador` with severidad `info | aclaracion` — the reply
+    affordance keys on `aclaracion`, matching the built Avisos screen's `responder` model — and
+    `RespuestaOperador`; 11 entity tests), SQLite migration 0003 (tables + change-log triggers +
+    indexes; SCHEMA_VERSION 4) and repositories (drizzle + in-memory), pg `0021` (idempotent DDL +
+    RLS tenant isolation + grants — SELECT-only for the app role on mensajes; applied to the local
+    DB), `SYNCED_TABLES`, wire (`ReferenceTablesSchema.mensajes_operador` with `.default([])`,
+    `respuestas_operador` delta, `PUSH_REFERENCES` + `FK_MENSAJE_MISSING`), the server's codec /
+    bootstrap (pull serves mensajes; push accepts replies generically), and the mock (two fixture
+    mensajes served by pull; replies push; the mock's operator NIPs also became four digits — a
+    C-16 leftover). Acceptance proven: a message pulls (contracts test + mock) and a reply pushes
+    (ApplyPushUseCase 14 tests incl. the FK_MENSAJE_MISSING unhappy path). Domain 773, data 266,
+    application 453, contracts 49, testing 147, drift 27 green; typecheck clean everywhere.
+    UI-layer checklist items land with O-16/O-31 wiring, per the plan.
 - **Steps:** `mensajes_operador` (DOWN) and `respuestas_operador` (UP) in `scope.ts`, wire schemas,
   pg-core and SQLite.
 - **Acceptance:** CLAUDE.md §11 checklist; a message pulled, a reply pushed.
