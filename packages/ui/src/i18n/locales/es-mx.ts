@@ -1015,7 +1015,6 @@ export const esMX = {
     submit: 'Entrar',
     verifying: 'Verificando…',
     error: 'PIN incorrecto',
-    forgotPin: '¿Olvidaste tu PIN?',
   },
   directorSetup: {
     title: 'Crear cuenta Director',
@@ -1028,17 +1027,6 @@ export const esMX = {
     recoveryPassword: 'Contraseña de recuperación',
     confirmRecoveryPassword: 'Confirmar contraseña de recuperación',
     submit: 'Crear cuenta',
-  },
-  changePin: {
-    title: 'Cambiar PIN',
-    subtitle: '{{name}}, debes cambiar tu PIN temporal',
-    current: 'PIN actual',
-    newPin: 'Nuevo PIN (4 dígitos)',
-    confirm: 'Confirmar nuevo PIN',
-    tooShort: 'El PIN debe ser de 4 dígitos',
-    mismatch: 'Los PINs no coinciden',
-    submit: 'Cambiar PIN',
-    error: 'PIN actual incorrecto',
   },
   otros: {
     notificaciones: 'Notificaciones',
@@ -1077,17 +1065,6 @@ export const esMX = {
     cajaMovimientos: 'Movimientos Caja',
     cancelaciones: 'Cancelaciones',
     telemetria: 'Telemetría',
-  },
-  recovery: {
-    title: 'Recuperar acceso',
-    passwordTitle: 'Usar contraseña de recuperación',
-    password: 'Contraseña de recuperación',
-    newPin: 'Nuevo PIN (4 dígitos)',
-    confirmPin: 'Confirmar nuevo PIN',
-    submit: 'Restablecer PIN',
-    emailHint: 'Tu correo registrado es {{email}} — contacta soporte',
-    back: 'Volver',
-    factoryReset: 'Restablecer aplicación',
   },
   discovery: {
     // Review items #1/#2: this is now the FIRST screen on a fresh

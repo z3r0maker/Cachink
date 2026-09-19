@@ -532,12 +532,9 @@ if should_run "B"; then
 fi
 
 if should_run "C"; then
-  run_flow "$FLOWS_DIR/recovery-password.yaml"
   run_flow "$FLOWS_DIR/recovery-back-and-factory-reset.yaml" # Gap 20 — Phase 16
   run_flow "$FLOWS_DIR/funciones-stock-disabled.yaml"
   # change-password.yaml DELETED — ChangePassword screen removed by ADR-049.
-  run_flow "$FLOWS_DIR/change-pin.yaml"                     # Audit — previously excluded
-  run_flow "$FLOWS_DIR/change-pin-wrong-current.yaml"       # Audit — previously excluded
 fi
 
 # ──────────────── Phase 13: Coverage gap — flag cascades ──────

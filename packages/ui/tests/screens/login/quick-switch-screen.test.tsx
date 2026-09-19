@@ -2,7 +2,7 @@
  * QuickSwitchScreen tests — Login/quick-switch-screen.tsx coverage.
  *
  * Verifies avatar grid rendering, user selection → PIN prompt slide-in,
- * onAuthenticate + onForgotPin callback wiring.
+ * onAuthenticate callback wiring.
  */
 
 import type { ComponentProps } from 'react';
@@ -82,27 +82,6 @@ describe('QuickSwitchScreen', () => {
     fireEvent.click(screen.getByTestId('numpad-4'));
     // onComplete triggers auto-submit via handleComplete
     expect(onAuthenticate).toHaveBeenCalledWith(USER_A.id, '1234');
-  });
-
-  it('shows forgot-pin link when onForgotPin is provided', () => {
-    const onForgotPin = vi.fn();
-    renderScreen({ onForgotPin });
-    fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    expect(screen.getByTestId('forgot-pin-link')).toBeInTheDocument();
-  });
-
-  it('does not show forgot-pin link when onForgotPin is not provided', () => {
-    renderScreen();
-    fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    expect(screen.queryByTestId('forgot-pin-link')).toBeNull();
-  });
-
-  it('fires onForgotPin with the selected userId', () => {
-    const onForgotPin = vi.fn();
-    renderScreen({ onForgotPin });
-    fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    fireEvent.click(screen.getByTestId('forgot-pin-link'));
-    expect(onForgotPin).toHaveBeenCalledWith(USER_A.id);
   });
 
   it('shows error text from the error prop', () => {

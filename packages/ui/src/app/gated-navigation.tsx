@@ -16,7 +16,6 @@
  *   currentBusinessId === null    → <BusinessForm />
  *   no users exist               → <DirectorSetupGate /> (NEW)
  *   userId === null               → <QuickSwitchGate /> (replaces RolePicker)
- *   mustChangePin === true        → <ChangePinGate /> (ADR-049)
  *   otherwise                    → children (the app's router / tabs)
  */
 
@@ -39,7 +38,7 @@ import { useIsrDefaults } from '../hooks/use-isr-defaults';
 import type { AppMode } from '../app-config/index';
 import type { BusinessId } from '@xangarro/domain';
 import { LanGate, type LanBridges } from './lan-gate';
-import { useAuthGateState, DirectorSetupGate, QuickSwitchGate, ChangePinGate } from './auth-gates';
+import { useAuthGateState, DirectorSetupGate, QuickSwitchGate } from './auth-gates';
 import { FeatureDiscoveryGate } from './feature-discovery-gate';
 import { useDemoMode, type DemoModeState } from '../dev/index';
 import { DemoSeedingScreen } from '../screens/DemoSeeding/index';
@@ -135,9 +134,7 @@ function AuthInner(props: {
   if (userId === null) {
     return <QuickSwitchGate businessId={businessId} />;
   }
-  if (mustChange) {
-    return <ChangePinGate />;
-  }
+  void mustChange; // ADR-072: forced NIP change is gone; the flag stays dormant.
   return <ActivityTracker onActivity={resetActivity}>{props.children}</ActivityTracker>;
 }
 

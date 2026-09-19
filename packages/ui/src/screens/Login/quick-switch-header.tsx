@@ -58,7 +58,7 @@ export function QuickSwitchHeader({
    * Set once a user is selected: at that point the PIN pad is on screen and the
    * welcome copy is dead weight. Measured on an iPhone 17 (874pt), the full
    * screen is 1087pt of content — 213pt of overflow — which pushed
-   * `login-submit`, `numpad-0`, `numpad-backspace` and `forgot-pin-link`
+   * `login-submit`, `numpad-0` and `numpad-backspace`
    * entirely below the fold, where XCUITest cannot even see them.
    */
   compact?: boolean;

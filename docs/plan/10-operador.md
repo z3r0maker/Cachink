@@ -105,7 +105,17 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 
 ### O-04 Owner creates operators and resets NIPs (completes P-05)
 
-- [ ] Status · **Blocked by:** C-16 · **Blocks:** O-12
+- [x] Status · **Blocked by:** C-16 · **Blocks:** O-12
+  - Done: 2026-09-19 · The portal half already existed (`/equipo` → `crearOperador` /
+    `restablecerPin` server actions through the application use cases, 4-digit `isValidPin`,
+    `sync_log` append inside `withTenant`; verified server-action tests in the web suite and
+    `endpoints.test.ts` asserting `plataforma: 'web'` activates). This task removed the phone's
+    flows (ADR-072): `RecuperarPinUseCase`, `CambiarPinUseCase` and their tests; the recovery and
+    change-PIN screens + `ChangePinGate` (the `mustChangePin` flag stays dormant — no migration,
+    pre-launch); the `onForgotPin` prop chain (pin-prompt, quick-switch screen/gate) and
+    `maskEmail`; the recovery/changePin i18n blocks; the three Maestro flows +
+    `full-regression.sh`/README/feature-areas entries. Application 461, UI 1821 green; mobile and
+    application typecheck clean.
 - **Steps:** «Nuevo operador» (nombre, NIP 4 masked + confirm) and «Reiniciar NIP» in `/equipo`,
   writing `users` through the application use case with its `sync_log` append (ADR-062). Remove the
   phone's recovery screen and change-PIN flow (ADR-072).

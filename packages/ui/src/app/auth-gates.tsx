@@ -5,7 +5,7 @@
  * These gates handle the post-business, pre-app authentication:
  *   1. DirectorSetupGate — first user account creation
  *   2. QuickSwitchGate — user avatar selection + login
- *   3. ChangePinGate — forced PIN change
+ *   3. (removed) ChangePinGate — ADR-072 killed forced PIN change
  *
  * ADR-049: PIN for login, Password for recovery.
  */
@@ -84,4 +84,3 @@ export function DirectorSetupGate(props: AuthGatesProps): ReactElement {
 
 export { USERS_KEY } from './query-keys-auth';
 export { QuickSwitchGate } from './quick-switch-gate';
-export { ChangePinGate } from './change-pin-gate';
