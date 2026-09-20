@@ -580,3 +580,73 @@ groundwork (O-02 to O-06) and C-18.
   two actions: ask for clarification (a message the operator reads in Avisos, ADR-075), or mark
   as clarified.
 - **Acceptance:** harness match for the list, filters, panel and actions; Playwright spec.
+
+## 8. Fase 14 — Datos reales en las pantallas del operador
+
+> Started 2026-09-19 (owner offered no answer; recommended path taken): the groundwork
+> (O-02–O-06, O-12, O-13) is closed, and the handoff §2 list of "what O-06 must replace"
+> becomes one task per screen family. The fixture paths stay green behind the demo flag
+> until the last task removes it.
+
+### O-32 Ventas on the register's own data
+
+- [x] Status · **Blocked by:** O-06, O-13
+  - Done: 2026-09-19 · `TicketsRepository.findByCajaTurno` (interface, Drizzle, in-memory;
+    fullstack test: only that turno's tickets, newest first). Worker protocol gains `ventas`
+    (the turno's tickets with line totals, client names, cancellation; plus the turno's `desde`)
+    and `cancelar` (`CancelarTicketUseCase`: PIN, permission, stock reversal, audit log —
+    stock off until the flags wiring, as capture). `runtime/tickets.ts` also hosts `registrar`,
+    extracted from db.worker to keep files under the line budget; `client.ts`'s `Call` is now
+    derived from `WorkerRequest` (it had drifted — the new methods exposed the duplication).
+    Screen: `use-ventas.ts` — fixture until linked, then the register's own list, KPIs from
+    real lines, and cancellation through the use case with the queue flushed after.
+    **Design amendment (this entry): the cancel dialog asks for the operator's NIP on a linked
+    register** — the files show motivo + nota only, but the domain's rule (PIN + permission,
+    ADR-073) is also the control against cancelling cash sales on an unlocked caja; the fixture
+    dialog renders the file unchanged. The nota is now wired (it composes with the motivo).
+    Acceptance `e2e/ventas.sync.spec.ts`: two real tickets, wrong NIP refused, the right one
+    cancels («Devuelve $25.00»), the row stays marked, and `cancelacion_logs` + the cancelled
+    ticket reach Postgres. Matrix 528 green.
+- **Gate:** a linked register's Ventas list and cancellations are the device's own data, end to end.
+
+### O-33 Cobranza on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** accounts and abonos from the register's database (`RegistrarPagoClienteUseCase`),
+  the saldo a favor rule (ADR-083 D5) included.
+- **Acceptance:** a sync spec covers balance, oldest-first abono, and the account history.
+
+### O-34 Detalle de venta on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** any folio of the turno renders from `tickets` + lines; cancellation shared with
+  O-32's dialog (NIP included); the comprobante shares the real ticket.
+- **Acceptance:** sync spec walks folio → lines → cancel → share.
+
+### O-35 Gastos on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** `RegistrarEgresoUseCase` in the worker; receipt photos wait for the storage bucket
+  (ADR-083 D3, still provisional).
+- **Acceptance:** sync spec registers a gasto and it reaches Postgres.
+
+### O-36 Cierre de turno on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** `CerrarCajaUseCase` with the expected-cash calculator (O-03); reason mapping via
+  `operador/vocabulario.ts` (ADR-083 D6).
+- **Acceptance:** sync spec closes a turno whose expected cash matches the screen's figures.
+
+### O-37 Owner-side actions on real data
+
+- [ ] Status · **Blocked by:** C-18, C-19 status
+- **Steps:** cortes' «Marcar como aclarado» and «Pedir aclaración», revision-caja's
+  approve / merge / reject — the owner portal writing, not local state.
+- **Acceptance:** portal specs against Postgres.
+
+### O-38 Remove the fixture demo flag
+
+- [ ] Status · **Blocked by:** O-33, O-34, O-35, O-36
+- **Steps:** delete `xangarro.caja.demo` from the gate and `auth.setup.ts`; every operador
+  screen runs on the runtime or its design-forced states.
+- **Acceptance:** full matrix green with no demo flag anywhere.

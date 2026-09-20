@@ -5,6 +5,7 @@
 import { and, asc, desc, eq, gte, inArray, isNull, lte, max } from 'drizzle-orm';
 import type {
   BusinessId,
+  CajaTurnoId,
   ClientId,
   DeviceId,
   IsoDate,
@@ -87,6 +88,16 @@ export class DrizzleTicketsRepository implements TicketsRepository {
       .where(
         and(eq(tickets.fecha, date), eq(tickets.businessId, businessId), isNull(tickets.deletedAt)),
       )
+      .orderBy(desc(tickets.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Ticket[]> {
+    const rows = await this.#db
+      .select()
+      .from(tickets)
+      .where(and(eq(tickets.cajaTurnoId, cajaTurnoId), isNull(tickets.deletedAt)))
       .orderBy(desc(tickets.createdAt))
       .all();
     return rows.map((r) => this.#mapRow(r));

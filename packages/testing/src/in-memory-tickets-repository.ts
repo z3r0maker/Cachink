@@ -2,7 +2,15 @@
  * In-memory {@link TicketsRepository}.
  */
 
-import type { BusinessId, ClientId, DeviceId, NewTicket, Ticket, TicketId } from '@xangarro/domain';
+import type {
+  BusinessId,
+  CajaTurnoId,
+  ClientId,
+  DeviceId,
+  NewTicket,
+  Ticket,
+  TicketId,
+} from '@xangarro/domain';
 import { newEntityId, now } from '@xangarro/domain';
 import type { TicketsRepository } from '@xangarro/data';
 
@@ -59,6 +67,12 @@ export class InMemoryTicketsRepository implements TicketsRepository {
   async findByDate(date: string, businessId: BusinessId): Promise<readonly Ticket[]> {
     return [...this.rows.values()]
       .filter((r) => r.fecha === date && r.businessId === businessId && r.deletedAt === null)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Ticket[]> {
+    return [...this.rows.values()]
+      .filter((r) => r.cajaTurnoId === cajaTurnoId && r.deletedAt === null)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 

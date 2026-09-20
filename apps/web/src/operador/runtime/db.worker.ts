@@ -8,21 +8,14 @@
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
 import { drizzle } from 'drizzle-orm/sql-js';
 import * as schema from '@xangarro/data';
-import { runMigrations, DrizzleTicketsRepository } from '@xangarro/data';
-import {
-  DrizzleSalesRepository,
-  DrizzleClientsRepository,
-  DrizzleProductsRepository,
-  DrizzleInventoryMovementsRepository,
-  DrizzleCajaTurnosRepository,
-} from '@xangarro/data';
-import { RegistrarTicketUseCase, type RegistrarTicketInput } from '@xangarro/application';
+import { runMigrations } from '@xangarro/data';
 import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
 import * as access from './access';
 import { catalogo } from './catalogo';
 import { opfsRead, opfsWrite } from './opfs';
-import type { RegistrarContext, WorkerRequest, WorkerResponse } from './protocol';
+import { cancelarTicket, registrarTicket, ventasDelTurno } from './tickets';
+import type { WorkerRequest, WorkerResponse } from './protocol';
 
 export type { BootInfo, OperadorPara, SesionAbierta } from './protocol';
 
@@ -70,28 +63,13 @@ async function persist(): Promise<void> {
   if (runtime !== null) await opfsWrite(runtime.sql.export());
 }
 
-/** Record a sale exactly as the phone does — the atomic use case (ADR-073). */
+/** Record a sale (O-06); every access-shaped op persists afterwards. */
 async function registrar(
-  input: RegistrarTicketInput,
-  ctx: RegistrarContext,
+  input: Parameters<typeof registrarTicket>[1],
+  ctx: Parameters<typeof registrarTicket>[2],
 ): Promise<{ folio: number }> {
   if (runtime === null) throw new Error('runtime not booted');
-  const { db } = runtime;
-  const useCase = new RegistrarTicketUseCase(
-    new DrizzleTicketsRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
-    new DrizzleSalesRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
-    new DrizzleClientsRepository(db as never, ctx.deviceId as never),
-    new DrizzleProductsRepository(db as never, ctx.deviceId as never),
-    new DrizzleInventoryMovementsRepository(db as never, ctx.deviceId as never),
-    new DrizzleCajaTurnosRepository(db as never, ctx.deviceId as never),
-    { stockEnabled: ctx.stockEnabled, userId: (ctx.userId as never) ?? null },
-  );
-  try {
-    const result = await useCase.execute(input);
-    return { folio: result.ticket.folio };
-  } finally {
-    await persist();
-  }
+  return runAccess((rt) => registrarTicket(rt.db, input, ctx));
 }
 
 async function sync(token: string | null): Promise<SyncRunResult> {
@@ -137,7 +115,7 @@ async function handle(request: WorkerRequest): Promise<unknown> {
   }
 }
 
-/** O-12's door: every op needs the booted runtime and persists afterwards. */
+/** O-12's door and O-32's Ventas: every op needs the booted runtime and persists afterwards. */
 async function handleAccess(request: WorkerRequest): Promise<unknown> {
   if (request.method === 'vincular') {
     return runAccess(async (rt) => {
@@ -169,10 +147,37 @@ async function handleAccess(request: WorkerRequest): Promise<unknown> {
   if (request.method === 'operadores' || request.method === 'turnoAbierto') {
     return runAccess((rt) => leerOperadores(request, rt));
   }
-  if (request.method === 'productos') {
-    return runAccess((rt) => catalogo(rt.db, request.businessId as never, request.deviceId));
+  if (
+    request.method === 'productos' ||
+    request.method === 'ventas' ||
+    request.method === 'cancelar'
+  ) {
+    return runAccess((rt) => leerOCancelar(request, rt));
   }
   throw new Error('unknown method');
+}
+
+/** The register's catalogue read and ticket cancellation (O-06/O-32). */
+type TicketsRequest = Extract<
+  WorkerRequest,
+  { readonly method: 'productos' | 'ventas' | 'cancelar' }
+>;
+
+function leerOCancelar(request: TicketsRequest, rt: Runtime): Promise<unknown> {
+  if (request.method === 'productos') {
+    return catalogo(rt.db, request.businessId as never, request.deviceId);
+  }
+  if (request.method === 'ventas') {
+    return ventasDelTurno(rt.db, request.businessId as never, request.deviceId, request.turnoId);
+  }
+  return cancelarTicket(rt.db, {
+    businessId: request.businessId as never,
+    deviceId: request.deviceId,
+    userId: request.userId as never,
+    ticketId: request.ticketId as never,
+    pin: request.pin,
+    motivo: request.motivo,
+  });
 }
 
 function leerOperadores(

@@ -18,45 +18,14 @@ import type {
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
+  VentaPara,
   WorkerRequest,
   WorkerResponse,
 } from './protocol';
 
-type Call =
-  | { readonly method: 'boot' }
-  | {
-      readonly method: 'registrar';
-      readonly input: RegistrarTicketInput;
-      readonly ctx: RegistrarContext;
-    }
-  | { readonly method: 'sync'; readonly token: string | null }
-  | { readonly method: 'counts' }
-  | {
-      readonly method: 'vincular';
-      readonly tables: ReferenceTables;
-      readonly businessId: string;
-    }
-  | { readonly method: 'operadores'; readonly businessId: string; readonly deviceId: string }
-  | {
-      readonly method: 'autenticar';
-      readonly businessId: string;
-      readonly deviceId: string;
-      readonly nombre: string;
-      readonly nip: string;
-    }
-  | {
-      readonly method: 'abrirCaja';
-      readonly businessId: string;
-      readonly deviceId: string;
-      readonly userId: string;
-      readonly fondoCentavos: string;
-    }
-  | { readonly method: 'turnoAbierto'; readonly businessId: string; readonly deviceId: string }
-  | {
-      readonly method: 'productos';
-      readonly businessId: string;
-      readonly deviceId: string;
-    };
+/** A request minus its RPC id — kept derived so it can never drift from the protocol. */
+type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
+type Call = DistributiveOmit<WorkerRequest, 'id'>;
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -165,6 +134,35 @@ export class RegisterRuntime {
       method: 'productos',
       businessId,
       deviceId,
+    });
+  }
+
+  /** O-32 · Ventas: the open turno's tickets from the register's database. */
+  ventas(
+    businessId: string,
+    deviceId: string,
+    turnoId: string,
+  ): Promise<{ readonly desde: string; readonly ventas: readonly VentaPara[] }> {
+    return this.#call<{ readonly desde: string; readonly ventas: readonly VentaPara[] }>({
+      method: 'ventas',
+      businessId,
+      deviceId,
+      turnoId,
+    });
+  }
+
+  /** O-32: cancel through the real use case — PIN and permission included. */
+  cancelar(p: {
+    readonly businessId: string;
+    readonly deviceId: string;
+    readonly userId: string;
+    readonly ticketId: string;
+    readonly pin: string;
+    readonly motivo: string;
+  }): Promise<{ folio: number; cashToReturnCentavos: string | null }> {
+    return this.#call<{ folio: number; cashToReturnCentavos: string | null }>({
+      method: 'cancelar',
+      ...p,
     });
   }
 

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { formatMoney } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
@@ -13,9 +12,10 @@ import { Note } from '../ui/note';
 import { KpiRow, OpMain } from '../ui/parts';
 import * as t from '../ui/title.css';
 import { Toast } from '../ui/toast';
-import { CancelarDeLista, type Motivo } from './cancelar';
+import { CancelarDeLista } from './cancelar';
 import { filtrar, resumen } from './derive';
 import { ListaVentas } from './lista';
+import { useVentas } from './use-ventas';
 import type { MetodoVenta, VentaTurno, VentasScreenProps } from './types';
 
 const FILTROS: readonly ('Todos' | MetodoVenta)[] = [
@@ -29,7 +29,8 @@ const FILTROS: readonly ('Todos' | MetodoVenta)[] = [
 
 /** Operador · Ventas: the turno's sales, searchable, each cancellable with a reason. */
 export function VentasScreen({ state, data, filtro: filtroInicial }: VentasScreenProps) {
-  const v = useVentas(data.ventas, filtroInicial);
+  const v = useVentas(data, filtroInicial);
+  const vivo = v.state === 'happy' ? state : v.state;
   return (
     <OpMain top={22}>
       <NuevaVenta />
@@ -37,9 +38,9 @@ export function VentasScreen({ state, data, filtro: filtroInicial }: VentasScree
         <h1 className={t.pageTitle}>Ventas</h1>
         <span className={t.pageSub}>Lo que cobraste en este turno</span>
       </div>
-      <VentasKpis ventas={v.ventas} desde={data.desde} />
+      <VentasKpis ventas={v.data.ventas} desde={v.data.desde} />
       <Filtros v={v} />
-      <Cuerpo state={state} v={v} firma={`${data.operador} · ${data.caja}`} />
+      <Cuerpo state={vivo} v={v} firma={`${v.data.operador} · ${v.data.caja}`} />
       <Note bg={colors.yellowSoft} padding="14px 16px" textColor={colors.ink}>
         Puedes cancelar ventas de este turno con un motivo. La venta no se borra: queda marcada como
         cancelada y Pedro la ve en su portal y en tu corte.
@@ -47,6 +48,7 @@ export function VentasScreen({ state, data, filtro: filtroInicial }: VentasScree
       {v.cancelando ? (
         <CancelarDeLista
           venta={v.cancelando}
+          conNip={v.conNip}
           onClose={() => v.setCancelando(null)}
           onConfirm={v.cancelar}
         />
@@ -124,7 +126,7 @@ function Cuerpo(p: {
   const { state, v } = p;
   return state === 'happy' ? (
     <ListaVentas
-      ventas={filtrar(v.ventas, v.filtro, v.query)}
+      ventas={filtrar(v.data.ventas, v.filtro, v.query)}
       firma={p.firma}
       onCancel={v.setCancelando}
     />
@@ -139,34 +141,4 @@ function Cuerpo(p: {
       href={`${OPERADOR_BASE}/caja`}
     />
   );
-}
-
-/** Device-local until the cancellation use case is wired (O-06): the sale stays, marked. */
-function useVentas(inicial: readonly VentaTurno[], filtroInicial: VentasScreenProps['filtro']) {
-  const [ventas, setVentas] = useState(inicial);
-  const [filtro, setFiltro] = useState(filtroInicial);
-  const [query, setQuery] = useState('');
-  const [cancelando, setCancelando] = useState<VentaTurno | null>(null);
-  const [toast, setToast] = useState<string | null>(null);
-  const cancelar = (motivo: Motivo) => {
-    if (!cancelando) return;
-    const folio = cancelando.folio;
-    setVentas((all) => all.map((x) => (x.folio === folio ? { ...x, cancelada: { motivo } } : x)));
-    setToast(
-      `${folio} por ${formatMoney(cancelando.monto)} · ${motivo}. Queda visible en tu turno y en el corte.`,
-    );
-    setCancelando(null);
-  };
-  return {
-    ventas,
-    filtro,
-    setFiltro,
-    query,
-    setQuery,
-    cancelando,
-    setCancelando,
-    cancelar,
-    toast,
-    closeToast: () => setToast(null),
-  };
 }

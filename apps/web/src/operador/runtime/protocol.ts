@@ -29,6 +29,18 @@ export interface SesionAbierta {
   readonly turnoId: string;
 }
 
+/** One ticket of the open turno, as Operador · Ventas lists it (money as centavos string). */
+export interface VentaPara {
+  readonly id: string;
+  readonly folio: number;
+  readonly concepto: string;
+  readonly montoCentavos: string;
+  readonly metodo: string;
+  readonly hora: string;
+  readonly cliente: string | null;
+  readonly cancelada: string | null;
+}
+
 export type WorkerRequest =
   | { readonly id: number; readonly method: 'boot' }
   | {
@@ -78,6 +90,23 @@ export type WorkerRequest =
       readonly method: 'productos';
       readonly businessId: string;
       readonly deviceId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'ventas';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly turnoId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'cancelar';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly userId: string;
+      readonly ticketId: string;
+      readonly pin: string;
+      readonly motivo: string;
     };
 
 export type WorkerResponse =
