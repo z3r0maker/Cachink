@@ -50,7 +50,10 @@ export default defineConfig({
     env: {
       DATABASE_URL: databaseUrl(),
       E2E_PORT: String(E2E_PORT),
-      NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}`,
+      // Locally, a build of its own (see next.config): other sessions' builds
+      // in this directory cannot swap it out mid-run. CI builds `.next` in
+      // its own step and is alone on the runner — next start must find it.
+      ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
       // Sign-in seals TOTP seeds with this key; a fixed test value is fine
       // because the whole run is local/CI throwaway data.
       ADMIN_TOTP_KEY: process.env.ADMIN_TOTP_KEY ?? 'MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=',

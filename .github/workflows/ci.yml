@@ -175,6 +175,10 @@ jobs:
       # `postgres` URL in DATABASE_SUPER_URL.
       DATABASE_URL: postgres://xangarro_admin:xangarro_admin@localhost:55432/xangarro
       DATABASE_SUPER_URL: postgres://postgres:xangarro@localhost:55432/xangarro
+      # Sign-in seals TOTP seeds with this key; the suite's throwaway value
+      # (32 bytes base64), set at the job level so it cannot be lost between
+      # the webServer env and the server process.
+      ADMIN_TOTP_KEY: MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=
     steps:
       - uses: actions/checkout@v4
 
@@ -273,8 +277,8 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
 
-      - name: Install Chromium
-        run: pnpm --filter @xangarro/web exec playwright install --with-deps chromium
+      - name: Install Chromium and WebKit
+        run: pnpm --filter @xangarro/web exec playwright install --with-deps chromium webkit
 
       - run: pnpm --filter @xangarro/data-pg db:apply
       - run: pnpm --filter @xangarro/data-pg db:seed

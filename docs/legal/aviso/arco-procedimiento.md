@@ -11,13 +11,13 @@
 
 ### A.1 Qué puedes pedir
 
-| Derecho | Qué significa | Lo puedes hacer tú mismo |
-| --- | --- | --- |
-| **Acceso** (art. 22) | Saber qué datos tuyos tenemos y cómo los tratamos. | Configuración → Exportar (Excel + JSON) descarga todos los registros del negocio. |
-| **Rectificación** (art. 23) | Corregir datos inexactos, incompletos o desactualizados. | Configuración → Cuenta / Negocio. |
-| **Cancelación** (art. 24) | Que dejemos de tener tus datos. Pasan por un periodo de bloqueo y después se suprimen. | No; requiere solicitud (ver A.5). |
-| **Oposición** (art. 26) | Que dejemos de tratarlos por una causa legítima, o si un tratamiento automatizado te afecta. | Configuración → Privacidad para las finalidades secundarias. |
-| **Revocación del consentimiento** (art. 7) | Retirar tu consentimiento, sin efectos hacia atrás. | Configuración → Privacidad (finalidades secundarias). |
+| Derecho                                    | Qué significa                                                                                | Lo puedes hacer tú mismo                                                          |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Acceso** (art. 22)                       | Saber qué datos tuyos tenemos y cómo los tratamos.                                           | Configuración → Exportar (Excel + JSON) descarga todos los registros del negocio. |
+| **Rectificación** (art. 23)                | Corregir datos inexactos, incompletos o desactualizados.                                     | Configuración → Cuenta / Negocio.                                                 |
+| **Cancelación** (art. 24)                  | Que dejemos de tener tus datos. Pasan por un periodo de bloqueo y después se suprimen.       | No; requiere solicitud (ver A.5).                                                 |
+| **Oposición** (art. 26)                    | Que dejemos de tratarlos por una causa legítima, o si un tratamiento automatizado te afecta. | Configuración → Privacidad para las finalidades secundarias.                      |
+| **Revocación del consentimiento** (art. 7) | Retirar tu consentimiento, sin efectos hacia atrás.                                          | Configuración → Privacidad (finalidades secundarias).                             |
 
 ### A.2 Quién la presenta
 
@@ -53,12 +53,12 @@ lo que falta (art. 96 del Reglamento).
 
 ### A.5 Plazos
 
-| Paso | Plazo máximo |
-| --- | --- |
-| Pedirte información faltante | 5 días desde la recepción |
-| **Comunicarte la determinación** (procede, procede en parte o no procede, y por qué) | **20 días** desde la recepción (art. 31) |
-| **Hacerla efectiva** si procede | **15 días** desde que te comunicamos la determinación (art. 31) |
-| Ampliación | Cada plazo, una sola vez, por un periodo igual, si se justifica; te avisaremos antes de que venza |
+| Paso                                                                                 | Plazo máximo                                                                                      |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Pedirte información faltante                                                         | 5 días desde la recepción                                                                         |
+| **Comunicarte la determinación** (procede, procede en parte o no procede, y por qué) | **20 días** desde la recepción (art. 31)                                                          |
+| **Hacerla efectiva** si procede                                                      | **15 días** desde que te comunicamos la determinación (art. 31)                                   |
+| Ampliación                                                                           | Cada plazo, una sola vez, por un periodo igual, si se justifica; te avisaremos antes de que venza |
 
 En **acceso**, te entregamos los datos después de acreditar tu identidad, en archivo electrónico
 (Excel, JSON o PDF) por el portal o por correo (art. 32).
@@ -118,11 +118,11 @@ venza el plazo sin respuesta (art. 40).
 
 ### B.1 Entrada
 
-| Canal | Qué crea |
-| --- | --- |
-| Formulario del portal (sesión iniciada) | `support_items` con `kind = 'arco'`, `business_id` y `user_id` del solicitante, identidad `verificada_sesion`. |
+| Canal                                             | Qué crea                                                                                                                                                                           |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Formulario del portal (sesión iniciada)           | `support_items` con `kind = 'arco'`, `business_id` y `user_id` del solicitante, identidad `verificada_sesion`.                                                                     |
 | Formulario público / correo a [CORREO PRIVACIDAD] | `kind = 'arco'`, `business_id = null` hasta vincularlo, identidad `pendiente`. Los correos se capturan a mano el mismo día en que llegan (la fecha de recepción es la del correo). |
-| Solicitud de un cliente u operador de un negocio | `kind = 'arco'`, `subtipo = 'encargado'` (ver B.6). |
+| Solicitud de un cliente u operador de un negocio  | `kind = 'arco'`, `subtipo = 'encargado'` (ver B.6).                                                                                                                                |
 
 Campos mínimos del item: folio, derecho (A/R/C/O/revocación), titular, medio de notificación,
 fecha de recepción, identidad (estado + método), descripción, adjuntos, `due_respuesta`,
@@ -154,12 +154,12 @@ fecha de recepción, identidad (estado + método), descripción, adjuntos, `due_
 
 ### B.4 Ejecución por derecho
 
-| Derecho | Acciones |
-| --- | --- |
-| Acceso | Exportación P-34 (Excel + JSON) del negocio + ficha de la cuenta (datos de perfil, consentimientos con versión, dispositivos, pagos, CFDI, items de soporte) + texto del aviso vigente. Si el negocio está archivado, entregar el archivo. |
-| Rectificación | Editar en la consola con bitácora (`staff_audit_log`); los cambios de referencia bajan a los dispositivos por `sync_log`. |
-| Cancelación | Ver B.5. |
-| Oposición / revocación | Desactivar la finalidad (marca en la cuenta) o, si es una finalidad necesaria, tratar como cancelación y avisar que el servicio termina. |
+| Derecho                | Acciones                                                                                                                                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Acceso                 | Exportación P-34 (Excel + JSON) del negocio + ficha de la cuenta (datos de perfil, consentimientos con versión, dispositivos, pagos, CFDI, items de soporte) + texto del aviso vigente. Si el negocio está archivado, entregar el archivo. |
+| Rectificación          | Editar en la consola con bitácora (`staff_audit_log`); los cambios de referencia bajan a los dispositivos por `sync_log`.                                                                                                                  |
+| Cancelación            | Ver B.5.                                                                                                                                                                                                                                   |
+| Oposición / revocación | Desactivar la finalidad (marca en la cuenta) o, si es una finalidad necesaria, tratar como cancelación y avisar que el servicio termina.                                                                                                   |
 
 ### B.5 Cancelación, bloqueo y supresión
 
@@ -188,14 +188,14 @@ fecha de recepción, identidad (estado + método), descripción, adjuntos, `due_
 
 ### B.7 Interacción con el archivo de inactividad (ADR-064, N-48)
 
-| Situación | Qué hacer |
-| --- | --- |
-| Acceso de un dueño archivado | Entregar el archivo (Excel + JSON) o restaurarlo si lo pide; restaurar reactiva la cuenta y reinicia el reloj de inactividad. |
-| Rectificación de un dueño archivado | Restaurar, corregir, y el reloj se reinicia; o corregir la ficha de la cuenta sin restaurar. |
-| Cancelación de un dueño archivado | Suprimir el archivo completo (no hay obligación propia de conservarlo) salvo el bloqueo de B.5 paso 5. Advertir la obligación fiscal del dueño. |
-| Solicitud de un cliente de un negocio archivado | Remitir al dueño (B.6); los datos solo se tocan con su instrucción o si restaura. |
-| Autoridad pide datos archivados | Única otra consulta permitida del archivo; registrar en la bitácora. |
-| Fin de los 6 años | Supresión automática; la bitácora conserva solo el hecho (negocio, fecha), sin contenido. |
+| Situación                                       | Qué hacer                                                                                                                                       |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Acceso de un dueño archivado                    | Entregar el archivo (Excel + JSON) o restaurarlo si lo pide; restaurar reactiva la cuenta y reinicia el reloj de inactividad.                   |
+| Rectificación de un dueño archivado             | Restaurar, corregir, y el reloj se reinicia; o corregir la ficha de la cuenta sin restaurar.                                                    |
+| Cancelación de un dueño archivado               | Suprimir el archivo completo (no hay obligación propia de conservarlo) salvo el bloqueo de B.5 paso 5. Advertir la obligación fiscal del dueño. |
+| Solicitud de un cliente de un negocio archivado | Remitir al dueño (B.6); los datos solo se tocan con su instrucción o si restaura.                                                               |
+| Autoridad pide datos archivados                 | Única otra consulta permitida del archivo; registrar en la bitácora.                                                                            |
+| Fin de los 6 años                               | Supresión automática; la bitácora conserva solo el hecho (negocio, fecha), sin contenido.                                                       |
 
 ### B.8 Registro
 

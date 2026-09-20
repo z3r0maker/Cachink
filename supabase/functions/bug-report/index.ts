@@ -42,7 +42,7 @@ function serviceStore(): IngestStore {
       if (error) console.error(`Insert ${table} failed:`, error);
       return !error;
     },
-    async fileInboxItem(item) {
+    fileInboxItem(item) {
       return fileInboxItem(item);
     },
   };

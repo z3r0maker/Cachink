@@ -1,5 +1,9 @@
 # Parked code, generated reports, and files agents must not rewrite are never formatted.
 archive/
+# Local agent worktrees and tool state — never tracked, never formatted.
+.claude/worktrees/
+.codex/
+.zcode/
 e2e-reports/
 audit-screenshots/
 CLAUDE.md
@@ -10,11 +14,18 @@ ROADMAP-archive.md
 apps/*/ios/
 apps/*/android/
 
-# Next.js build output and generated types are not ours to format.
+# Next.js build output, esbuild bundles and generated types are not ours to format.
 .next/
+.next-e2e/
+**/.out/
 next-env.d.ts
 test-results/
 playwright-report/
+
+# The aviso README's legal tables have ~1000-char cells; prettier's table
+# formatter does not converge on them (write pads, check disagrees). The file
+# is counsel-facing prose, not code style.
+docs/legal/aviso/README.md
 
 # The design reference is a read-only mirror of the Claude Design project
 # (ADR-058); it is refreshed by `pnpm design:pull`, never hand-edited.

@@ -728,6 +728,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
   four states.
 
 ### P-05 Operadores
+
 - [ ] Status · **Blocked by:** P-02, P-09
 - **Steps:** port `DirectorHome` intent, not code (reference: `archive/ui-screens/DirectorHome/`, `archive/ui-screens/CajaReportes/compute-report-kpis.ts`): today's ventas/gastos/utilidad tiles, 30-day sparkline (Recharts), caja status per device (open turno?), stock bajo list, cuentas por cobrar placeholder (hidden until Z-01), unresolved rejections banner, onboarding progress if incomplete. Read via `@xangarro/domain` KPI functions where they exist (`packages/domain/src/**/kpi*`).
 - **Acceptance:** numbers match P-09 totals for "hoy"; renders at 768 px width without horizontal scroll.

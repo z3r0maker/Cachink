@@ -79,7 +79,7 @@ test('webkit: sqlite-wasm + OPFS + drizzle migrations + repository + change-log'
 
 test('bundle cost is measured and recorded', () => {
   const bytes = statSync(bundlePath).size;
-   
+
   console.log(`[O-02 spike] self-contained bundle: ${(bytes / 1024).toFixed(0)} KiB`);
   expect(bytes).toBeGreaterThan(0);
 });

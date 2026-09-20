@@ -72,7 +72,7 @@ describe('QuickSwitchScreen', () => {
     fireEvent.click(screen.getByTestId('numpad-2'));
     fireEvent.click(screen.getByTestId('numpad-3'));
     fireEvent.click(screen.getByTestId('numpad-4'));
-        // onComplete triggers auto-submit via handleComplete
+    // onComplete triggers auto-submit via handleComplete
     expect(onAuthenticate).toHaveBeenCalledWith(USER_A.id, '1234');
   });
 

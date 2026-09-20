@@ -109,7 +109,9 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
     // The row carries permissions parsed (drizzle) or as JSON text (pg).
     const raw = (user as Record<string, unknown>).permissions;
     const perms =
-      typeof raw === 'string' ? parseUserPermissions(raw) : parseUserPermissions(JSON.stringify(raw ?? {}));
+      typeof raw === 'string'
+        ? parseUserPermissions(raw)
+        : parseUserPermissions(JSON.stringify(raw ?? {}));
     if (!canUserCancelSales(perms)) {
       throw new TypeError('No tienes permiso para cancelar ventas');
     }
