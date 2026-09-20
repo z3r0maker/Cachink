@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-import { asTenant, BIZ } from './sync-phone';
+import { mintCode } from './acceso-flow';
 
 /**
  * O-12 — Operador · Acceso, the real door: an unlinked browser sees only the
@@ -10,20 +10,7 @@ import { asTenant, BIZ } from './sync-phone';
  */
 
 const EMAIL = 'pedro@taqueria.mx';
-
-async function mintCode(): Promise<string> {
-  const code = 'AC2SWX9K';
-  await asTenant(BIZ, async (sql) => {
-    // The sync project's contract: this file's activation owns Taquería's
-    // slots — revoke the previous file's phones before minting.
-    await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
-    await sql`DELETE FROM activation_codes WHERE code = ${code}`;
-    await sql`
-      INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-      VALUES (${code}, ${EMAIL}, now() + interval '1 hour', ${BIZ}, now(), now())`;
-  });
-  return code;
-}
+const CODE = 'AC2SWX9K';
 
 test.describe('Operador · Acceso (O-12)', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
@@ -31,7 +18,7 @@ test.describe('Operador · Acceso (O-12)', () => {
   test('an unlinked browser is gated, links, NIPs, opens the turno with a fondo', async ({
     page,
   }) => {
-    const code = await mintCode();
+    await mintCode(CODE);
     await page.goto('/operador/caja');
 
     // The gate: Acceso, never the register.
@@ -41,7 +28,7 @@ test.describe('Operador · Acceso (O-12)', () => {
 
     // Paso 1 · correo + código (the code ignores case, spaces and hyphens).
     await page.getByTestId('vincular-correo').fill(EMAIL);
-    await page.getByTestId('vincular-codigo').fill(` ${code.slice(0, 4)}-${code.slice(4)}`);
+    await page.getByTestId('vincular-codigo').fill(` ${CODE.slice(0, 4)}-${CODE.slice(4)}`);
     await page.getByTestId('vincular-continuar').click();
 
     // Paso 2 · the operator picker came from the activation bootstrap.

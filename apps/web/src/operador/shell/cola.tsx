@@ -30,6 +30,14 @@ export interface Cola {
 
 const ColaContext = createContext<Cola | null>(null);
 
+/** The linked queue's flush, when a provider mounted; the capture path calls
+ *  it after recording a sale, so an online register uploads at once. */
+let desencolarAhora: (() => Promise<void>) | null = null;
+
+export function desencolar(): Promise<void> {
+  return desencolarAhora?.() ?? Promise.resolve();
+}
+
 /** The linked register's queue (O-06): the Worker's SyncEngine and the wire. */
 function useFlusher(linked: boolean): {
   readonly reales: { pendientes: number; enLinea: boolean } | null;
@@ -54,7 +62,30 @@ function useFlusher(linked: boolean): {
     }
   }, []);
 
-  // Online/offline moves the pill; coming back online flushes what queued.
+  useEffect(() => {
+    if (!linked) return;
+    desencolarAhora = flush;
+    return () => {
+      desencolarAhora = null;
+    };
+  }, [linked, flush]);
+
+  useConexion(linked, flush, setReales);
+
+  return { reales, enviando, flush };
+}
+
+/** Online/offline moves the pill; coming back online flushes what queued. */
+function useConexion(
+  linked: boolean,
+  flush: () => Promise<void>,
+  setReales: (
+    fn: (r: { pendientes: number; enLinea: boolean } | null) => {
+      pendientes: number;
+      enLinea: boolean;
+    },
+  ) => void,
+): void {
   useEffect(() => {
     if (!linked) return;
     const mark = (enLinea: boolean): void =>
@@ -70,9 +101,7 @@ function useFlusher(linked: boolean): {
       removeEventListener('online', onLine);
       removeEventListener('offline', offline);
     };
-  }, [linked, flush]);
-
-  return { reales, enviando, flush };
+  }, [linked, flush, setReales]);
 }
 
 /** The design-file queue: a retry succeeds after the file's 1.4 s. */

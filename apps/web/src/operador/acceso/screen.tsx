@@ -8,6 +8,7 @@ import { Vincular, type Vinculo } from './vincular';
 import * as a from './acceso.css';
 import { registerRuntime } from '../runtime/client';
 import { readDevice, writeDevice } from '../runtime/device-store';
+import { writeSesion } from '../runtime/session-store';
 import type { OperadorPara } from '../runtime/protocol';
 
 type Paso =
@@ -51,6 +52,7 @@ function useReentrada(onListo: () => void): {
 
 async function abrirTurno(
   userId: string,
+  nombre: string,
   fondoCentavos: bigint,
   onListo: () => void,
   onError: (e: string) => void,
@@ -58,7 +60,13 @@ async function abrirTurno(
   const device = readDevice();
   if (device === null) return;
   try {
-    await registerRuntime().abrirCaja(device.businessId, device.deviceId, userId, fondoCentavos);
+    const { turnoId } = await registerRuntime().abrirCaja(
+      device.businessId,
+      device.deviceId,
+      userId,
+      fondoCentavos,
+    );
+    writeSesion({ userId, nombre, turnoId });
     onListo();
   } catch (e) {
     onError(String(e));
@@ -150,7 +158,9 @@ export function AccesoScreen(p: { readonly onListo: () => void }) {
           <Fondo
             operador={paso.nombre}
             negocio={paso.negocio}
-            onAbierto={(fondo) => void abrirTurno(paso.userId, fondo, p.onListo, setError)}
+            onAbierto={(fondo) =>
+              void abrirTurno(paso.userId, paso.nombre, fondo, p.onListo, setError)
+            }
           />
         )}
         <ErrorAcceso error={error ?? reentrada.error} />

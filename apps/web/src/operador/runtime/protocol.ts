@@ -72,6 +72,12 @@ export type WorkerRequest =
       readonly method: 'turnoAbierto';
       readonly businessId: string;
       readonly deviceId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'productos';
+      readonly businessId: string;
+      readonly deviceId: string;
     };
 
 export type WorkerResponse =

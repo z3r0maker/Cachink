@@ -181,17 +181,21 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 
 ### O-06 Register runtime: device token, Worker, outbox flusher
 
-- [ ] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
-  - Progress: 2026-09-19 · Slice 1 (cdfc57a4): `apps/web/src/operador/runtime/` — the Worker
-    (sql.js on OPFS, the real `runMigrations`, Drizzle, the phone's own `SyncEngine`+`ApiClient`
-    inside it, `RegistrarTicketUseCase` over the same repositories), the typed main-thread client
-    (`storage.persist()` at boot, one Worker per tab), `/sql-wasm.wasm` as a static asset. Slice 2:
-    `device-store` (localStorage credentials for O-12's linking screen to write), and `ColaProvider`
-    drives from the engine when a device is linked — real counts, `online`/`offline` connection
-    state, reconnect flushes — while keeping the fixture queue for an unlinked register (the
-    screens and the 523-test matrix unchanged). Remaining: `vender()` through the runtime and the
-    offline-exactly-once acceptance — both need the linked device context that O-12's linking
-    screen creates, so they land with (or right after) O-12.
+- [x] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
+  - Done: 2026-09-19 · Slices 1–2 (cdfc57a4, 8e21b4c8): `apps/web/src/operador/runtime/` — the
+    Worker (sql.js on OPFS, the real `runMigrations`, Drizzle, the phone's own `SyncEngine`+
+    `ApiClient` inside it), the typed main-thread client (`storage.persist()` at boot, one Worker
+    per tab, protocol shared by both ends in `protocol.ts`), `device-store`, and `ColaProvider`
+    driven by the engine when linked — real counts, `online`/`offline` state, reconnect flushes,
+    and `desencolar()` so a capture uploads at once while online. Slice 3: `vender()` records the
+    sale through `RegistrarTicketUseCase` in the Worker (the session store O-12 wrote stamps the
+    operator and turno), and a linked register sells its **own** catalogue (`CajaViva`: the
+    bootstrap's products, ticket empty — the fixture's pre-seeded ticket never enters a real
+    register; an unlinked one keeps the design fixture untouched). **Acceptance met**
+    (`e2e/captura.sync.spec.ts`): through the real door (link → NIP → fondo), the wire is cut
+    (`context.setOffline`), a Taco al pastor sells with its change, Postgres sees nothing while
+    offline, and the reconnect flush lands **exactly one** ticket — folio 1, $25.00, the line's
+    concepto — and a re-flush of the same row is idempotent by row id. Matrix: 526 passed.
 - **Steps:** register route group in `apps/web` (device-token auth, no owner cookie), the SQLite
   Worker, `navigator.storage.persist()`, push/pull loop with retry, connection state for the header.
 - **Acceptance:** a sale captured offline is pushed on reconnect exactly once.

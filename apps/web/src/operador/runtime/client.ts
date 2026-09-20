@@ -51,7 +51,12 @@ type Call =
       readonly userId: string;
       readonly fondoCentavos: string;
     }
-  | { readonly method: 'turnoAbierto'; readonly businessId: string; readonly deviceId: string };
+  | { readonly method: 'turnoAbierto'; readonly businessId: string; readonly deviceId: string }
+  | {
+      readonly method: 'productos';
+      readonly businessId: string;
+      readonly deviceId: string;
+    };
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -150,6 +155,17 @@ export class RegisterRuntime {
 
   turnoAbierto(businessId: string, deviceId: string): Promise<SesionAbierta | null> {
     return this.#call<SesionAbierta | null>({ method: 'turnoAbierto', businessId, deviceId });
+  }
+
+  productos(
+    businessId: string,
+    deviceId: string,
+  ): Promise<readonly { id: string; nombre: string; precio: string; categoria: string }[]> {
+    return this.#call<{ id: string; nombre: string; precio: string; categoria: string }[]>({
+      method: 'productos',
+      businessId,
+      deviceId,
+    });
   }
 
   terminate(): void {

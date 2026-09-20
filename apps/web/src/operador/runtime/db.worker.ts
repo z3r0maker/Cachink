@@ -20,6 +20,7 @@ import { RegistrarTicketUseCase, type RegistrarTicketInput } from '@xangarro/app
 import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
 import * as access from './access';
+import { catalogo } from './catalogo';
 import { opfsRead, opfsWrite } from './opfs';
 import type { RegistrarContext, WorkerRequest, WorkerResponse } from './protocol';
 
@@ -165,17 +166,27 @@ async function handleAccess(request: WorkerRequest): Promise<unknown> {
       ),
     );
   }
-  if (request.method === 'operadores') {
-    return runAccess((rt) =>
-      access.operadores(rt.db, request.businessId as never, request.deviceId),
-    );
+  if (request.method === 'operadores' || request.method === 'turnoAbierto') {
+    return runAccess((rt) => leerOperadores(request, rt));
   }
-  if (request.method === 'turnoAbierto') {
-    return runAccess((rt) =>
-      access.turnoAbierto(rt.db, request.businessId as never, request.deviceId),
-    );
+  if (request.method === 'productos') {
+    return runAccess((rt) => catalogo(rt.db, request.businessId as never, request.deviceId));
   }
   throw new Error('unknown method');
+}
+
+function leerOperadores(
+  request: {
+    readonly method: 'operadores' | 'turnoAbierto';
+    readonly businessId: string;
+    readonly deviceId: string;
+  },
+  rt: Runtime,
+): Promise<unknown> {
+  const args = [rt.db, request.businessId as never, request.deviceId] as const;
+  return request.method === 'operadores'
+    ? access.operadores(...args)
+    : access.turnoAbierto(...args);
 }
 
 async function runAccess<T>(fn: (rt: Runtime) => Promise<T>): Promise<T> {
