@@ -71,7 +71,7 @@ export async function abrirCaja(
   fondoCentavos: bigint,
 ): Promise<{ turnoId: string }> {
   const useCase = new AbrirCajaUseCase(
-    new DrizzleCajaTurnosRepository(db as never, deviceId as never),
+    new DrizzleCajaTurnosRepository(db as never, deviceId as never, userId as never),
   );
   const turno = await useCase.execute({
     userId: userId as never,

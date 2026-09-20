@@ -78,8 +78,8 @@ async function registrar(
   if (runtime === null) throw new Error('runtime not booted');
   const { db } = runtime;
   const useCase = new RegistrarTicketUseCase(
-    new DrizzleTicketsRepository(db as never, ctx.deviceId as never),
-    new DrizzleSalesRepository(db as never, ctx.deviceId as never),
+    new DrizzleTicketsRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
+    new DrizzleSalesRepository(db as never, ctx.deviceId as never, (ctx.userId as never) ?? null),
     new DrizzleClientsRepository(db as never, ctx.deviceId as never),
     new DrizzleProductsRepository(db as never, ctx.deviceId as never),
     new DrizzleInventoryMovementsRepository(db as never, ctx.deviceId as never),

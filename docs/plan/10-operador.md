@@ -262,7 +262,22 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-13 Register lock and operator switch
 
-- [ ] Status · **Blocked by:** O-12
+- [x] Status · **Blocked by:** O-12
+  - Done: 2026-09-19 · the ticket in progress left `useCaja`'s useState for a module store
+    (`src/operador/caja/ticket-store.ts`, `useSyncExternalStore`) with the lock flag beside it, so
+    both survive navigation and the lock; the shell renders `BloqueoCaja` (`caja/bloqueo.tsx` +
+    `caja/bloqueo-nip.tsx`) over any register route: the design's note (with and without a ticket),
+    «Quién sigue en la caja» picker, NIP pad with the attempts line, and «Entrar como X» /
+    «Desbloquear caja» when the same operator returns; «Cerrar el turno…» links to Cierre. Entering
+    re-authenticates on the device and rewrites the session — same turno, next tickets are the new
+    operator's. Two fixes the flow forced: (a) the lock dialog's scrim now scrolls with
+    `minHeight`-centering — a tall card on a short viewport had its Entrar button outside the
+    viewport, unreachable; (b) `RegistrarTicketUseCase` resolves the open turno per caja
+    (`findOpenByBusiness`, ADR-071 §3) instead of per seller, and the worker passes the session
+    operator to the tickets/sales repos so `created_by_user_id` is whoever sold — the turno stays
+    the opener's. Acceptance `e2e/bloqueo.sync.spec.ts`: Ana opens with a two-line ticket, lock,
+    wrong NIP refused, Luis enters, the ticket survives intact, the sale that reaches Postgres is
+    Luis's. Unit: the turno-whosever test in `registrar-venta-use-case.test.ts`. Matrix 527 green.
 - **Gate:** two operators alternate on one register without losing the ticket in progress.
 
 ### O-14 Operador · Inicio

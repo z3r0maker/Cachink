@@ -3,10 +3,11 @@
 import { useRef, useState } from 'react';
 
 import { matches } from '../ui/search';
-import { addProducto, bump, contar, total } from './ticket';
-import type { CajaData, Categoria, CobroPaso, LineaTicket, Producto } from './types';
+import { contar, total } from './ticket';
+import type { CajaData, Categoria, CobroPaso, LineaTicket } from './types';
 import { useSaleToast, type VentaHecha } from './use-sale-toast';
 import { desencolar } from '../shell/cola';
+import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './ticket-store';
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 import { readSesion } from '../runtime/session-store';
@@ -32,27 +33,32 @@ function useCatalogo(catalogo: CajaData['catalogo']) {
  * ticket, the catalogue filter, the checkout step and the corner card.
  */
 export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
-  const [lines, setLines] = useState<readonly LineaTicket[]>(data.ticket);
+  // The ticket lives in the store (O-13): it survives the lock and switching
+  // operators. The fixture's seed fills the store once per mount — after a
+  // sale the empty ticket is the new one, not the demo's come back.
+  useState(() => sembrarTicket(data.ticket));
+  const lines = useTicketEnCurso();
   const [paso, setPaso] = useState<CobroPaso>(pasoInicial);
   const [sheetOpen, setSheetOpen] = useState(false);
   const toast = useSaleToast();
   const count = contar(lines);
   const vendida = useRef<readonly LineaTicket[] | null>(null);
+  const cobrar = (): void => {
+    if (count === 0) return;
+    setPaso('metodo');
+    setSheetOpen(false);
+  };
   return {
     ...useCatalogo(data.catalogo),
     lines,
-    setLines,
+    setLines: reemplazar,
     count,
     total: total(lines),
-    add: (p: Producto) => setLines((l) => addProducto(l, p)),
-    bump: (id: string, delta: number) => setLines((l) => bump(l, id, delta)),
+    add,
+    bump: bumpLinea,
     paso,
     setPaso,
-    cobrar: () => {
-      if (count === 0) return;
-      setPaso('metodo');
-      setSheetOpen(false);
-    },
+    cobrar,
     sheetOpen,
     setSheetOpen,
     toast,
@@ -65,17 +71,19 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
       if (vendida.current === lines) return;
       vendida.current = lines;
       toast.show({ ...v, lines, total: total(lines) });
-      setLines([]);
+      reemplazar([]);
       setPaso('catalogo');
       setSheetOpen(false);
       void registrarSiVinculado(lines, v);
     },
-    /** «Deshacer»: the just-sold lines come back as the ticket in progress. */
-    deshacer: () => {
-      if (toast.venta) setLines(toast.venta.lines);
-      toast.dismiss();
-    },
+    deshacer: () => deshacer(toast),
   };
+}
+
+/** «Deshacer»: the just-sold lines come back as the ticket in progress. */
+function deshacer(toast: ReturnType<typeof useSaleToast>): void {
+  if (toast.venta) reemplazar(toast.venta.lines);
+  toast.dismiss();
 }
 
 export type Caja = ReturnType<typeof useCaja>;

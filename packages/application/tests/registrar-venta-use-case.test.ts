@@ -259,6 +259,26 @@ describe('RegistrarVentaUseCase', () => {
       expect(ticket?.cajaTurnoId).not.toBeNull();
     });
 
+    it("sells under the caja's turno whoever the seller is (O-13)", async () => {
+      // Ana opened the turno; the register locks and Luis comes in — the
+      // turno stays hers, the ticket is his.
+      const open = await cajaTurnos.findOpenByUser(USER_ID);
+      const luis = '01HZ8XQN9GZJXV8AKQ5X0USR2' as UserId;
+      const luisUseCase = new RegistrarVentaUseCase(
+        new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {
+          userId: luis,
+        }),
+      );
+      const sale = await luisUseCase.execute(
+        makeNewSale({ businessId: BIZ, productoId: defaultProductId }),
+      );
+      const ticket = await tickets.findById(sale.ticketId);
+      // The turno is still Ana's; the seller attribution is the repos' audit
+      // stamping (the register passes the session user) — covered by the
+      // bloqueo e2e against Postgres.
+      expect(ticket?.cajaTurnoId).toBe(open?.id);
+    });
+
     it('throws CajaNoAbiertaError when userId is null', async () => {
       const noUserUseCase = new RegistrarVentaUseCase(
         new RegistrarTicketUseCase(tickets, sales, clients, products, movements, cajaTurnos, {

@@ -15,6 +15,9 @@ const CODE = 'AC2SWX9K';
 test.describe('Operador · Acceso (O-12)', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
+  // The real door is heavy: WASM boot, the bootstrap apply, bcrypt verifies.
+  test.setTimeout(90_000);
+
   test('an unlinked browser is gated, links, NIPs, opens the turno with a fondo', async ({
     page,
   }) => {

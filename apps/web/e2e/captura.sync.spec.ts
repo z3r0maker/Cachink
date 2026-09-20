@@ -13,6 +13,9 @@ import { asTenant, BIZ } from './sync-phone';
 
 test.use({ storageState: { cookies: [], origins: [] } });
 
+// The real door is heavy: WASM boot, the bootstrap apply, bcrypt verifies.
+test.setTimeout(90_000);
+
 test('an offline sale lands exactly once when the wire comes back', async ({ page, context }) => {
   const code = 'CAPTURA7';
   await mintCode(code);
