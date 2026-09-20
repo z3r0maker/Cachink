@@ -17,3 +17,4 @@ export * from './metas.js';
 export * from './logos.js';
 export * from './opening-balances.js';
 export * from './estados-facts.js';
+export * from './device-last-seen.js';

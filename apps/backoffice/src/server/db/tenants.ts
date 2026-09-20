@@ -1,5 +1,5 @@
 import { asc, desc, eq, sql } from 'drizzle-orm';
-import { businesses, businessMembers, devices } from '@xangarro/data-pg';
+import { businesses, businessMembers, deviceLastSeen, devices } from '@xangarro/data-pg';
 import type { BusinessId } from '@xangarro/domain';
 
 import type {
@@ -23,6 +23,7 @@ type Conn = Db | Tx;
 async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
   const ds = deviceStats(conn);
   const ow = ownerEmails(conn);
+  const li = ownerLastLogin(conn);
   const rows = await conn
     .select({
       id: businesses.id,
@@ -32,10 +33,12 @@ async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
       devicesTotal: sql<number>`coalesce(${ds.total}, 0)`,
       devicesActive: sql<number>`coalesce(${ds.active}, 0)`,
       lastSyncAt: isoText(ds.lastSync),
+      lastOwnerLoginAt: isoText(li.lastLogin),
     })
     .from(businesses)
     .leftJoin(ds, eq(ds.businessId, businesses.id))
     .leftJoin(ow, eq(ow.businessId, businesses.id))
+    .leftJoin(li, eq(li.businessId, businesses.id))
     .where(tenantWhere(q, ds, ow))
     .orderBy(desc(businesses.createdAt), desc(businesses.id))
     .limit(q.limit);
@@ -45,8 +48,21 @@ async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
     createdAt: r.createdAt ?? '',
     devicesTotal: Number(r.devicesTotal),
     devicesActive: Number(r.devicesActive),
-    lastOwnerLoginAt: null,
+    lastOwnerLoginAt: r.lastOwnerLoginAt ?? null,
   }));
+}
+
+/** N-06: `xangarro.owner_last_login()` (admin migration 0013) as a joinable
+ * subquery — one (business_id, last_login) row, live sessions only. The
+ * connection is the caller's (`conn`), never a singleton. */
+function ownerLastLogin(conn: Conn) {
+  return conn
+    .select({
+      businessId: sql<string>`business_id`,
+      lastLogin: sql<string | null>`last_login`,
+    })
+    .from(sql`xangarro.owner_last_login()`)
+    .as('li');
 }
 
 async function members(conn: Conn, id: BusinessId): Promise<TenantMember[]> {
@@ -67,7 +83,7 @@ async function deviceList(conn: Conn, id: BusinessId): Promise<TenantDevice[]> {
       id: devices.id,
       nombre: devices.nombre,
       plataforma: devices.plataforma,
-      lastSeenAt: isoText(sql`GREATEST(${devices.lastPushAt}, ${devices.lastPullAt})`),
+      lastSeenAt: isoText(deviceLastSeen),
       revokedAt: isoText(devices.revokedAt),
     })
     .from(devices)

@@ -42,7 +42,47 @@ function serviceStore(): IngestStore {
       if (error) console.error(`Insert ${table} failed:`, error);
       return !error;
     },
+    async fileInboxItem(item) {
+      return fileInboxItem(item);
+    },
   };
+}
+
+/**
+ * N-08: bug reports land in the staff console's inbox (`kind = 'bug'`).
+ * Without both env vars the filing fails loudly — a report staff cannot see
+ * is a report lost, so the route answers 502 and the device retries.
+ */
+async function fileInboxItem(item: {
+  readonly title: string;
+  readonly body: string;
+  readonly sourceRef: string;
+}): Promise<boolean> {
+  const ingestUrl = Deno.env.get('ADMIN_INGEST_URL');
+  const ingestSecret = Deno.env.get('ADMIN_INGEST_SECRET');
+  if (!ingestUrl || !ingestSecret) {
+    console.error('Missing ADMIN_INGEST_URL or ADMIN_INGEST_SECRET');
+    return false;
+  }
+  const res = await fetch(ingestUrl, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-admin-ingest-secret': ingestSecret },
+    body: JSON.stringify({
+      kind: 'bug',
+      urgent: false,
+      businessId: null,
+      title: item.title,
+      body: item.body,
+      source: 'bug-report',
+      sourceRef: item.sourceRef,
+      paymentRef: null,
+    }),
+  });
+  if (!res.ok) {
+    console.error(`Inbox filing failed: ${res.status} ${await res.text()}`);
+    return false;
+  }
+  return true;
 }
 
 Deno.serve((req) => route(req, serviceStore));

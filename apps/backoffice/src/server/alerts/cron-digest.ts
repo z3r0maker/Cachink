@@ -25,6 +25,9 @@ export interface DigestCronDeps {
   readonly secret: string | undefined;
   readonly now: () => Date;
   readonly repo: SupportItemRepository;
+  /** N-05's follow-up: expired-session pruning, run after the mail so a
+   * prune failure never costs the digest. Its count goes to the log only. */
+  readonly pruneSessions?: () => Promise<number>;
   /** B-18's rejection digest; a failed read renders «no disponible», it does not stop the email. */
   readonly rejections: RejectionSource;
   readonly mailer: Mailer;
@@ -70,6 +73,15 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
 
   const rejections = await readRejections(deps, now, log);
   const digest = buildDailyDigest(items, now, { consoleUrl: deps.consoleUrl, rejections });
+  let prunedSessions: number | null = null;
+  if (deps.pruneSessions !== undefined) {
+    try {
+      prunedSessions = await deps.pruneSessions();
+    } catch (error) {
+      // Housekeeping never costs the digest; the log carries why.
+      log('digest: pruning staff sessions failed', error);
+    }
+  }
   try {
     await deps.mailer.send({
       to: deps.to,
@@ -83,5 +95,5 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
     log('digest: sending failed', error);
     return reply(502, { error: 'mail_failed' });
   }
-  return reply(200, { ok: true, subject: digest.subject, counts: digest.counts });
+  return reply(200, { ok: true, subject: digest.subject, counts: digest.counts, prunedSessions });
 }

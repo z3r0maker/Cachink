@@ -187,6 +187,16 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   `recordStaffAction` in one tx; nonce CSP; noindex ×3; service-role guard in admin `lint`. 31 tests.
   **Still to do:** Playwright against a real Supabase (403, forced MFA, audit row); move staff SQL from
   `apps/backoffice/src/server/db/` into `data-pg` + `db-local.sh`; provision the `xangarro_admin` role.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · the browser suite exists and is green:
+  `apps/backoffice/e2e/` (7 specs — no session → /login, revoked-mid-session loses the console,
+  first sign-in forces TOTP enrolment with the seed read off the page the way a human without a
+  camera reads it, sign-out ends the session, five wrong passwords lock 15 min, an inbox
+  assignment writes its audit row) + a playwright config that refuses to run without a DB and a
+  global-setup staff fixture (superuser INSERT; TOTP deliberately enrolled through the page).
+  CI job **`backoffice-e2e`** added to `ci.yml` (pg service, db:apply + db:seed + the admin
+  migrations psql'd, build, e2e, report artifact) — **the owner must add `backoffice-e2e` to
+  branch protection** alongside ci/db/portal-e2e. Local: `pnpm --filter @xangarro/backoffice
+test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
@@ -207,6 +217,14 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   `computeEntitlement` (`compute-entitlement.ts:83-99`) must consume `effectivePlan` (comp before the
   free fallback, trial extension on `currentPeriodEnd`, reissue invalidates older cached tokens) —
   a Track B change; last-login grant; Playwright.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · **"Último acceso del dueño" is real
+  data**: `xangarro.owner_last_login()` (admin **migration 0013**, SECURITY DEFINER over the
+  portal's own `portal_sessions` — live rows only, returns nothing but business_id + timestamp)
+  joined into the tenants summary. **The "last seen" rule now lives once**: data-pg's
+  `deviceLastSeen` / `deviceStaleBefore` (`src/queries/device-last-seen.ts`) feed both N-06
+  readers (tenants list aggregate, tenant detail per-device); the Studio doc query carries a
+  pointer comment. Playwright: the console suite above (auth + audit) — the tenants/usage
+  surfaces remain unit-covered.
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
@@ -285,6 +303,10 @@ body, attachments)`.
   digest section "Rechazos de sincronización (24 h)" reuses B-18's `rejectionDigest` from data-pg
   unchanged; admin migration 0007 grants the admin role four columns of `sync_rejections`
   (payload/message stay unreadable). Degrades to "No disponible". **Still to do:** B-14 mailer.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · the digest also prunes expired
+  `staff_sessions` (30-day horizon; grant in admin **migration 0012**; the count rides the 200
+  reply as `prunedSessions`, a failure logs and never costs the email; integration test pins the
+  rule).
 - Progress: 2026-09-18 · branch `track-n/b14-email` · the digest cron sends through B-14's
   `transactionalMailer` (React Email staff-digest from the same sections; Resend with
   `RESEND_API_KEY`, dev outbox without), keyed per window so a re-run sends once.

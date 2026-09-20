@@ -14,7 +14,9 @@
     "lint": "eslint . --config ../../eslint.config.js && tsx scripts/guard-service-role.ts",
     "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "staff": "tsx scripts/staff.ts",
-    "clean": "rm -rf .next dist .turbo"
+    "clean": "rm -rf .next dist .turbo",
+    "test:e2e": "DATABASE_URL=xangarro_admin:xangarro_admin@localhost:55432/xangarro DATABASE_SUPER_URL=$(../../packages/data-pg/scripts/db-local.sh super-url) playwright test",
+    "test:e2e:db": "./scripts/e2e-db-setup.sh && pnpm test:e2e"
   },
   "dependencies": {
     "@vanilla-extract/css": "^1.21.2",
@@ -40,6 +42,8 @@
     "@xangarro/config": "workspace:*",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "@playwright/test": "^1.63.0",
+    "postgres": "^3.4.7"
   }
 }

@@ -2,6 +2,7 @@ import type { SupportKind, SupportStatus } from '@xangarro/domain';
 
 /** Spanish copy for the inbox's enums — one place, shared by list, detail and digest. */
 export const KIND_LABELS: Record<SupportKind, string> = {
+  ayuda: 'Ayuda',
   bug: 'Error',
   factura: 'Factura',
   migracion: 'Migración',

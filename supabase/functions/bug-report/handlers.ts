@@ -16,6 +16,18 @@ export interface IngestStore {
   countSince(table: string, deviceId: string, sinceIso: string): Promise<number>;
   /** `false` when the insert failed; the store logs why. */
   insert(table: string, rows: readonly Json[]): Promise<boolean>;
+  /**
+   * N-08's wiring: the report also lands in the staff inbox
+   * (`kind = 'bug'`) through the console's ingestion endpoint. `false` when
+   * the endpoint refused it; the store logs why.
+   */
+  fileInboxItem(item: {
+    readonly title: string;
+    readonly body: string;
+    readonly sourceRef: string;
+    readonly deviceId: string;
+    readonly appVersion?: string;
+  }): Promise<boolean>;
 }
 
 export const MAX_BATCH = 50;
@@ -80,7 +92,26 @@ export async function handleBugReport(
     new Date(now - DAY_MS).toISOString(),
   );
   if (sent >= MAX_REPORTS_PER_DAY) return json({ error: 'Rate limit exceeded' }, 429);
-  if (!(await store.insert('bug_reports', [toRow(report)])))
-    return json({ error: 'Insert failed' }, 500);
+
+  // Staff visibility first (N-08): the inbox item is the product surface; the
+  // raw row below stays as the rate-limit counter and the untouched archive.
+  const filed = await store.fileInboxItem({
+    title: `Reporte del teléfono ${report.deviceId.slice(0, 8)}…`,
+    body: [
+      report.description,
+      report.appVersion ? `Versión de la app: ${report.appVersion}` : '',
+      report.snapshot === undefined ? '' : `Contexto: ${JSON.stringify(report.snapshot)}`,
+      report.submittedAt,
+    ]
+      .filter((line) => line !== '')
+      .join('\n'),
+    sourceRef: `bug-report:${report.deviceId}:${report.submittedAt}`,
+    deviceId: report.deviceId,
+    appVersion: report.appVersion,
+  });
+  if (!filed) return json({ error: 'Inbox filing failed' }, 502);
+  if (!(await store.insert('bug_reports', [toRow(report)]))) {
+    console.error('bug report row insert failed; the inbox item was filed');
+  }
   return json({ accepted: 1 }, 201);
 }

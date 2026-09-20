@@ -18,7 +18,8 @@
 # database to prove another job has one) asserts from this file that every
 # integration suite really runs against Postgres.
 #
-# Branch protection: require the checks named "ci", "db" and "portal-e2e".
+# Branch protection: require the checks named "ci", "db", "portal-e2e" and
+# "backoffice-e2e".
 
 name: ci
 
@@ -148,6 +149,79 @@ jobs:
       # protecting nothing.
       - name: Integration tests (RLS, claims, compat, queries)
         run: pnpm --filter @xangarro/data-pg test:db
+
+  # The staff console's own browser suite (N-05's follow-up): sign-in, forced
+  # TOTP enrolment, session end, lockout and an audit row per mutation,
+  # against a real Postgres with the admin migrations applied.
+  backoffice-e2e:
+    name: backoffice-e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: xangarro
+          POSTGRES_DB: xangarro
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d xangarro"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      # The console's own role; the suite's superuser fixture uses the
+      # `postgres` URL in DATABASE_SUPER_URL.
+      DATABASE_URL: postgres://xangarro_admin:xangarro_admin@localhost:55432/xangarro
+      DATABASE_SUPER_URL: postgres://postgres:xangarro@localhost:55432/xangarro
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Chromium
+        run: pnpm --filter @xangarro/backoffice exec playwright install --with-deps chromium
+
+      - run: pnpm --filter @xangarro/data-pg db:apply
+      - run: pnpm --filter @xangarro/data-pg db:seed
+
+      # db-local/db:apply never runs the console's own migrations; psql them
+      # in idempotent order (the N-05 local pattern).
+      - name: Apply the admin migrations
+        run: |
+          for f in apps/backoffice/src/server/db/migrations/*.sql; do
+            psql "$DATABASE_SUPER_URL" -q -f "$f"
+          done
+
+      # See portal-e2e for why this is not `turbo run build`.
+      - name: Build the console (production, webpack)
+        run: pnpm --filter @xangarro/backoffice run build
+
+      - name: E2E (auth, MFA, lockout, audit)
+        run: pnpm --filter @xangarro/backoffice run test:e2e
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: backoffice-playwright-report
+          path: |
+            apps/backoffice/playwright-report/
+            apps/backoffice/test-results/
 
   # The portal, rendered, against a seeded database.
   #
