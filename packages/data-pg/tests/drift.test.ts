@@ -231,6 +231,8 @@ describe('cloud ↔ device schema drift', () => {
     // promotes it to a synced entity and the full §11 checklist applies.
     assert.deepEqual(portalOnly.sort(), [
       'activation_codes',
+      'assisted_import_files',
+      'assisted_imports',
       'billing_customers',
       'business_logos',
       'business_members',

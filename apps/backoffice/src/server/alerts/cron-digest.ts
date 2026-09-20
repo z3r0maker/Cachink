@@ -28,6 +28,11 @@ export interface DigestCronDeps {
   /** N-05's follow-up: expired-session pruning, run after the mail so a
    * prune failure never costs the digest. Its count goes to the log only. */
   readonly pruneSessions?: () => Promise<number>;
+  /** N-18: expire approvals the tenant ignored for 14 days, and purge the
+   * files of rows resolved 30+ days ago (LFPDPPP). Same rule as the
+   * sessions: housekeeping never costs the digest. */
+  readonly expireAssisted?: () => Promise<number>;
+  readonly purgeAssistedFiles?: () => Promise<number>;
   /** B-18's rejection digest; a failed read renders «no disponible», it does not stop the email. */
   readonly rejections: RejectionSource;
   readonly mailer: Mailer;
@@ -73,15 +78,8 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
 
   const rejections = await readRejections(deps, now, log);
   const digest = buildDailyDigest(items, now, { consoleUrl: deps.consoleUrl, rejections });
-  let prunedSessions: number | null = null;
-  if (deps.pruneSessions !== undefined) {
-    try {
-      prunedSessions = await deps.pruneSessions();
-    } catch (error) {
-      // Housekeeping never costs the digest; the log carries why.
-      log('digest: pruning staff sessions failed', error);
-    }
-  }
+  const prunedSessions = await pruneSessions(deps, log);
+  const assisted = await assistedSweeps(deps, log);
   try {
     await deps.mailer.send({
       to: deps.to,
@@ -95,5 +93,42 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
     log('digest: sending failed', error);
     return reply(502, { error: 'mail_failed' });
   }
-  return reply(200, { ok: true, subject: digest.subject, counts: digest.counts, prunedSessions });
+  return reply(200, {
+    ok: true,
+    subject: digest.subject,
+    counts: digest.counts,
+    prunedSessions,
+    expiredAssisted: assisted.expired,
+    purgedAssistedFiles: assisted.purgedFiles,
+  });
+}
+
+/** N-05's prune; null when the step is not wired, failures only log. */
+async function pruneSessions(
+  deps: DigestCronDeps,
+  log: NonNullable<DigestCronDeps['log']>,
+): Promise<number | null> {
+  if (deps.pruneSessions === undefined) return null;
+  try {
+    return await deps.pruneSessions();
+  } catch (error) {
+    log('digest: pruning staff sessions failed', error);
+    return null;
+  }
+}
+
+/** N-18's housekeeping pair; failures log, never cost the digest. */
+async function assistedSweeps(
+  deps: DigestCronDeps,
+  log: NonNullable<DigestCronDeps['log']>,
+): Promise<{ readonly expired: number; readonly purgedFiles: number }> {
+  try {
+    return {
+      expired: deps.expireAssisted ? await deps.expireAssisted() : 0,
+      purgedFiles: deps.purgeAssistedFiles ? await deps.purgeAssistedFiles() : 0,
+    };
+  } catch (error) {
+    log('digest: assisted-import sweeps failed', error);
+    return { expired: 0, purgedFiles: 0 };
+  }
 }

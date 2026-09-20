@@ -443,7 +443,30 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-18 "Hazlo por mí" migration service `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-08, N-16
+- [x] Status · **Blocked by:** N-08, N-16
+- Progress: 2026-09-20 · `track-n/n18-hazlo-por-mi` · **Done.** data-pg **0026**:
+  `assisted_imports` + `assisted_import_files` — files as `bytea` in the tenant DB
+  (the N-19 owner-ratified deviation from buckets; Supabase Storage REST needs a
+  JWT the in-house auth never mints), tenant RLS, admin grants via backoffice
+  migration **0014**. The state machine is guarded SQL, split across
+  `queries/assisted-imports{,-files,-resolution}.ts`: `revision →
+esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
+  (`markForApproval` guarded on `revision`, audited `migracion.enviar` from
+  /migraciones with the mapped .xlsx/.csv); **applying is the tenant's claim
+  alone** — `claimForApproval` atomically flips `esperando_aprobacion` and
+  returns the mapped file, and the claim + registry apply + row-count check run
+  in ONE transaction (a failed apply rolls the claim back). Tenant side:
+  `/importar` card — xangarrito sees the upsell, never the form; the request
+  (sistema 1–120, notas ≤ 2000, 1–5 files ≤ 20 MB .xlsx/.csv, use case with
+  plan gate + one-in-flight) lands in the inbox as `kind=migracion`
+  (`sourceRef hazlo-por-mi:<id>`, idempotent); Aprobar/Rechazar buttons at
+  `esperando_aprobacion`; a resolved request reopens the form. Sweeps ride the
+  digest cron: 14-day expiry of unanswered requests, 30-day LFPDPPP purge
+  (DELETE + `files_purged_at` stamp, idempotent, logged in the digest).
+  Downloads staff-gated at `/api/staff/migraciones/archivos/<id>` (410 once
+  purged). Tests: data-pg integration 6/6 (claim guards, isolation, sweeps),
+  application 4/4, web e2e `hazlo-por-mi.spec.ts` 10 green ×2 runs,
+  drift test lists both tables portal-only.
 - **What:** a card on the import screen → form (sistema actual, qué datos, archivos o respaldo) →
   inbox item `kind=migracion`, SLA 3 business days. Free (one migration) on xangarro / xangarrote;
   xangarrito sees "disponible en planes de pago".
