@@ -4,6 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { ColaProvider, useCola } from './cola';
+import { useRegisterRuntime } from '../runtime/client';
 import { OperadorHeader, HEADER_ACTION_ID } from './header';
 import { OperadorSidebar } from './sidebar';
 import { OperadorTabbar } from './tabbar';
@@ -34,6 +35,11 @@ export function OperadorShell({
   readonly data: OperadorShellData;
   readonly children: ReactNode;
 }) {
+  // Boot the register's data runtime once per tab (O-06): the Worker, its
+  // OPFS database and the migrations. Nothing reads it until a device is
+  // linked — booting here just means the WASM cost is paid with the shell,
+  // not with the first sale.
+  useRegisterRuntime();
   return (
     <ColaProvider connection={useForcedConnection(data.connection)} pendientes={data.pendientes}>
       <Frame data={data}>{children}</Frame>

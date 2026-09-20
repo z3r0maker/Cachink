@@ -21,7 +21,14 @@ type Call =
       readonly input: RegistrarTicketInput;
       readonly ctx: RegistrarContext;
     }
-  | { readonly method: 'sync'; readonly token: string | null };
+  | { readonly method: 'sync'; readonly token: string | null }
+  | { readonly method: 'counts' };
+
+export interface RuntimeCounts {
+  readonly pending: number;
+  readonly rejected: number;
+  readonly retrying: number;
+}
 
 interface Pending {
   readonly resolve: (v: unknown) => void;
@@ -67,6 +74,10 @@ export class RegisterRuntime {
 
   sync(token: string | null): Promise<SyncRunResult> {
     return this.#call<SyncRunResult>({ method: 'sync', token });
+  }
+
+  counts(): Promise<RuntimeCounts> {
+    return this.#call<RuntimeCounts>({ method: 'counts' });
   }
 
   terminate(): void {

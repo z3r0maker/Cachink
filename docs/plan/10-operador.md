@@ -182,6 +182,16 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 ### O-06 Register runtime: device token, Worker, outbox flusher
 
 - [ ] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
+  - Progress: 2026-09-19 · Slice 1 (cdfc57a4): `apps/web/src/operador/runtime/` — the Worker
+    (sql.js on OPFS, the real `runMigrations`, Drizzle, the phone's own `SyncEngine`+`ApiClient`
+    inside it, `RegistrarTicketUseCase` over the same repositories), the typed main-thread client
+    (`storage.persist()` at boot, one Worker per tab), `/sql-wasm.wasm` as a static asset. Slice 2:
+    `device-store` (localStorage credentials for O-12's linking screen to write), and `ColaProvider`
+    drives from the engine when a device is linked — real counts, `online`/`offline` connection
+    state, reconnect flushes — while keeping the fixture queue for an unlinked register (the
+    screens and the 523-test matrix unchanged). Remaining: `vender()` through the runtime and the
+    offline-exactly-once acceptance — both need the linked device context that O-12's linking
+    screen creates, so they land with (or right after) O-12.
 - **Steps:** register route group in `apps/web` (device-token auth, no owner cookie), the SQLite
   Worker, `navigator.storage.persist()`, push/pull loop with retry, connection state for the header.
 - **Acceptance:** a sale captured offline is pushed on reconnect exactly once.

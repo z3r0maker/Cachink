@@ -109,7 +109,8 @@ export type WorkerRequest =
       readonly input: RegistrarTicketInput;
       readonly ctx: RegistrarContext;
     }
-  | { readonly id: number; readonly method: 'sync'; readonly token: string | null };
+  | { readonly id: number; readonly method: 'sync'; readonly token: string | null }
+  | { readonly id: number; readonly method: 'counts' };
 
 export type WorkerResponse =
   | { readonly id: number; readonly ok: true; readonly data: unknown }
@@ -123,7 +124,9 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>): Promise<void> => {
         ? await boot()
         : method === 'registrar'
           ? await registrar(event.data.input, event.data.ctx)
-          : await sync(event.data.token);
+          : method === 'sync'
+            ? await sync(event.data.token)
+            : await counts();
     const response: WorkerResponse = { id, ok: true, data };
     self.postMessage(response);
   } catch (e) {
@@ -140,4 +143,10 @@ async function sync(token: string | null): Promise<SyncRunResult> {
   } finally {
     await persist();
   }
+}
+
+/** The queue's counters, as Registros por enviar and the header pill show them. */
+async function counts(): Promise<{ pending: number; rejected: number; retrying: number }> {
+  if (runtime === null) throw new Error('runtime not booted');
+  return runtime.engine.counts();
 }
