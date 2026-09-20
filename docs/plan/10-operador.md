@@ -88,14 +88,6 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
     routes and move persistence into a Worker with the real `@sqlite.org/sqlite-wasm` OPFS VFS
     where feasible.
 
-- [ ] Status · **Blocked by:** — · **Blocks:** O-05, O-06
-- **Steps:** restore `packages/sync/src` from the branch that has it (see `git log --all -- packages/sync/src`), make
-  it build and pass its tests on this checkout. Spike: a Worker running
-  SQLite-WASM on OPFS, the `@xangarro/data` migrations applied, one repository round-trip and one
-  change-log row, in Chromium and WebKit via Playwright.
-- **Acceptance:** spike green in both engines, bundle cost measured and recorded here. **If the
-  Drizzle driver does not run on WASM, stop and ask the owner** (ADR-071 §4).
-
 ### O-03 Expected-cash calculator, one per turno
 
 - [x] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
@@ -241,7 +233,7 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-12 Operador · Acceso (vincular → NIP → fondo)
 
-- [ ] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
+- [x] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
   - Done: 2026-09-19 · `src/operador/acceso/` — the gate stands before every register route: an
     unlinked browser sees only Acceso (device-token state, never the owner cookie — ADR-071 §1).
     Vincular (correo + the panel's 8-char code, spaces/hyphens/case ignored — the correo is
