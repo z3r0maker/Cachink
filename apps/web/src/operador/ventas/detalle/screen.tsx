@@ -5,14 +5,13 @@ import { useState } from 'react';
 import { total as totalDe } from '../../caja/ticket';
 import { Share } from '../../caja/share';
 import { OperadorEstado } from '../../estado';
-import * as h from '../../shell/header.css';
 import { OPERADOR_BASE } from '../../shell/nav';
-import { HeaderAction } from '../../shell/shell';
 import { OpMain } from '../../ui/parts';
 import { CancelarVenta } from '../cancelar';
-import { cancelAviso, cancelIntro, ESTADO_ENVIO, type EstadoEnvio } from './copy';
+import { cancelarEnVivo, comprobante } from './acciones';
+import { cancelAviso, cancelIntro, type EstadoEnvio } from './copy';
 import * as d from './detalle.css';
-import { Acciones, FiadoCard, Traza } from './side';
+import { Acciones, EstadoPill, FiadoCard, Traza } from './side';
 import * as s from './side.css';
 import { TicketCard } from './ticket-card';
 import type { DetalleData, DetalleScreenProps, VentaDetalle } from './types';
@@ -21,12 +20,17 @@ import type { DetalleData, DetalleScreenProps, VentaDetalle } from './types';
 const RECIBO = 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6';
 
 /** Operador · Detalle de venta: the full ticket, who captured it, and what can still be done. */
-export function DetalleScreen({ state, data }: DetalleScreenProps) {
+export function DetalleScreen({ state, data, recargar }: DetalleScreenProps) {
   const venta = data.venta;
   return (
     <OpMain top={24} narrow>
       {state === 'happy' && venta ? (
-        <Detalle key={`${venta.folio}${venta.cancelada ? 'x' : ''}`} data={data} venta={venta} />
+        <Detalle
+          key={`${venta.folio}${venta.cancelada ? 'x' : ''}`}
+          data={data}
+          venta={venta}
+          recargar={recargar}
+        />
       ) : (
         <OperadorEstado
           mode={state === 'happy' ? 'empty' : state}
@@ -42,36 +46,115 @@ export function DetalleScreen({ state, data }: DetalleScreenProps) {
   );
 }
 
-/** Cancelling is device-local until the use case is wired (O-06), as on Ventas. */
-function Detalle({ data, venta }: { readonly data: DetalleData; readonly venta: VentaDetalle }) {
+/** On a linked register the cancel goes through the use case (O-34), NIP included. */
+function Detalle({
+  data,
+  venta,
+  recargar,
+}: {
+  readonly data: DetalleData;
+  readonly venta: VentaDetalle;
+  readonly recargar?: () => void;
+}) {
   const [motivo, setMotivo] = useState<string | null>(venta.cancelada?.motivo ?? null);
   const [modal, setModal] = useState<'cancel' | 'share' | null>(null);
   const total = totalDe(venta.lineas);
   const close = () => setModal(null);
   const envio: EstadoEnvio = motivo !== null ? 'cancelada' : venta.enCola ? 'en-cola' : 'enviada';
+  const confirmar = (motivo: string, nip: string, nota: string) =>
+    alConfirmar({ venta, data, recargar, setMotivo, motivo, nip, nota });
   return (
     <>
       <EstadoPill envio={envio} />
-      <div className={d.grid}>
-        <TicketCard venta={venta} total={total} cancelada={motivo} />
-        <div className={s.column}>
-          <Traza data={data} envio={envio} />
-          <Acciones
-            venta={venta}
-            cancelada={motivo !== null}
-            onShare={() => setModal('share')}
-            onCancel={() => setModal('cancel')}
-          />
-          {venta.fiado ? <FiadoCard fiado={venta.fiado} /> : null}
-        </div>
+      <Cuerpo
+        data={data}
+        venta={venta}
+        total={total}
+        motivo={motivo}
+        envio={envio}
+        onShare={() => setModal('share')}
+        onCancel={() => setModal('cancel')}
+      />
+      <Capas
+        data={data}
+        venta={venta}
+        total={total}
+        modal={modal}
+        close={close}
+        confirmar={confirmar}
+      />
+    </>
+  );
+}
+
+/** Record the reason — and on a linked register, write it through the use case. */
+function alConfirmar(p: {
+  readonly venta: VentaDetalle;
+  readonly data: DetalleData;
+  readonly recargar?: () => void;
+  readonly setMotivo: (m: string) => void;
+  readonly motivo: string;
+  readonly nip: string;
+  readonly nota: string;
+}): void {
+  const completo = p.nota === '' ? p.motivo : `${p.motivo} — ${p.nota}`;
+  p.setMotivo(completo);
+  if (p.data.vinculado === true && p.venta.id !== undefined) {
+    void cancelarEnVivo(p.venta.id, completo, p.nip).then(() => p.recargar?.());
+  }
+}
+
+/** The ticket card beside its two side cards. */
+function Cuerpo(p: {
+  readonly data: DetalleData;
+  readonly venta: VentaDetalle;
+  readonly total: bigint;
+  readonly motivo: string | null;
+  readonly envio: EstadoEnvio;
+  readonly onShare: () => void;
+  readonly onCancel: () => void;
+}) {
+  return (
+    <div className={d.grid}>
+      <TicketCard venta={p.venta} total={p.total} cancelada={p.motivo} />
+      <div className={s.column}>
+        <Traza data={p.data} envio={p.envio} />
+        <Acciones
+          venta={p.venta}
+          cancelada={p.motivo !== null}
+          onShare={p.onShare}
+          onCancel={p.onCancel}
+        />
+        {p.venta.fiado ? <FiadoCard fiado={p.venta.fiado} /> : null}
       </div>
-      {modal === 'cancel' ? (
-        <Cancelar venta={venta} total={total} onClose={close} onConfirm={setMotivo} />
+    </div>
+  );
+}
+
+/** The modal layer: cancel (with its NIP on a linked register) and share. */
+function Capas(p: {
+  readonly data: DetalleData;
+  readonly venta: VentaDetalle;
+  readonly total: bigint;
+  readonly modal: 'cancel' | 'share' | null;
+  readonly close: () => void;
+  readonly confirmar: (motivo: string, nip: string, nota: string) => void;
+}) {
+  return (
+    <>
+      {p.modal === 'cancel' ? (
+        <Cancelar
+          venta={p.venta}
+          total={p.total}
+          conNip={p.data.vinculado === true}
+          onClose={p.close}
+          onConfirm={p.confirmar}
+        />
       ) : null}
       <Share
         variant="detalle"
-        comprobante={modal === 'share' ? comprobante(data, venta, total) : null}
-        onClose={close}
+        comprobante={p.modal === 'share' ? comprobante(p.data, p.venta, p.total) : null}
+        onClose={p.close}
       />
     </>
   );
@@ -81,41 +164,21 @@ function Detalle({ data, venta }: { readonly data: DetalleData; readonly venta: 
 function Cancelar(p: {
   readonly venta: VentaDetalle;
   readonly total: bigint;
+  readonly conNip: boolean;
   readonly onClose: () => void;
-  readonly onConfirm: (motivo: string) => void;
+  readonly onConfirm: (motivo: string, nip: string, nota: string) => void;
 }) {
   return (
     <CancelarVenta
       titulo={`Cancelar ${p.venta.folio}`}
       intro={<div className={s.intro}>{cancelIntro(p.venta, p.total)}</div>}
       aviso={cancelAviso(p.venta)}
+      conNip={p.conNip}
       onClose={p.onClose}
-      onConfirm={(m) => {
-        p.onConfirm(m);
+      onConfirm={(m, nip, nota) => {
+        p.onConfirm(m, nip, nota);
         p.onClose();
       }}
     />
-  );
-}
-
-function comprobante(data: DetalleData, v: VentaDetalle, total: bigint) {
-  const cambio = v.recibido === undefined ? null : v.recibido - total;
-  return {
-    negocio: data.negocio,
-    folio: v.folio,
-    venta: { lines: v.lineas, total, metodo: v.metodo, cambio, nota: '' },
-  };
-}
-
-/** The header's right side on this screen: the sale's state instead of the sync pill. */
-function EstadoPill({ envio }: { readonly envio: EstadoEnvio }) {
-  const e = ESTADO_ENVIO[envio];
-  return (
-    <HeaderAction>
-      <span className={h.syncStatic} style={{ background: e.bg }}>
-        <span className={h.syncDot} style={{ background: e.dot }} />
-        <span className={h.syncLabel}>{e.pill}</span>
-      </span>
-    </HeaderAction>
   );
 }

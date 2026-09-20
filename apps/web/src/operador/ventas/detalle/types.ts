@@ -15,6 +15,8 @@ export interface LineaDetalle {
 
 /** One ticket of the open turno, as the register stored it (ADR-073). */
 export interface VentaDetalle {
+  /** The ticket's id — present on a linked register (O-34). */
+  readonly id?: string;
   readonly folio: string;
   /** «Hoy 14:52». */
   readonly cuando: string;
@@ -30,6 +32,8 @@ export interface VentaDetalle {
 }
 
 export interface DetalleData {
+  /** True on a linked register: cancellation goes through the use case (O-34). */
+  readonly vinculado?: boolean;
   readonly negocio: string;
   readonly operador: string;
   readonly caja: string;
@@ -42,4 +46,6 @@ export interface DetalleData {
 export interface DetalleScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly data: DetalleData;
+  /** Linked: reload the ticket after a real cancellation (O-34). */
+  readonly recargar?: () => void;
 }

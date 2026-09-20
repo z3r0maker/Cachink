@@ -633,10 +633,23 @@ groundwork (O-02 to O-06) and C-18.
 
 ### O-34 Detalle de venta on real data
 
-- [ ] Status · **Blocked by:** O-32
-- **Steps:** any folio of the turno renders from `tickets` + lines; cancellation shared with
-  O-32's dialog (NIP included); the comprobante shares the real ticket.
-- **Acceptance:** sync spec walks folio → lines → cancel → share.
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · Worker protocol gains `ticket` (`ticketPorFolio`: the open turno's ticket
+    by folio with its lines — name from the sale, category from the product, unit price derived
+    from the line's amount ÷ quantity — cash and change, the fiado client with their current
+    saldo via the cuentas read, the cancellation, who captured it, and the turno's apertura).
+    `DetalleVentaViva` renders it — «Hoy HH:MM» or the date, 'Crédito' said as «Fiado» through the
+    now-shared `comoMetodo` (ventas' private map promoted to `derive.ts`), `categoriaDe` exported
+    from the caja — while the unlinked path keeps the design fixtures and their `?venta=` forcing.
+    Cancelling reuses O-32's modal with its NIP amendment and writes through the same use case
+    (PIN, permission, audit log), then reloads the ticket: the pill flips to «Venta cancelada»
+    with the motivo beside the struck-through total. The comprobante shares the real lines.
+    `EstadoPill` moved to `side.tsx` (the screen had grown past the line budget). Acceptance
+    `e2e/detalle.sync.spec.ts`: sell 2 tacos cash ($50, paid 60) → the list's folio opens the
+    ticket with its lines, $60 recibido, $10 cambio, Ana as capturó → share dialog titled with
+    the folio → cancel with NIP 2580 → pill and motivo → Postgres holds the cancelación with
+    motivo «Cobro duplicado». Matrix 539 green.
+- **Gate:** any folio of the turno opens as the register's own ticket, cancellable end to end.
 
 ### O-35 Gastos on real data
 

@@ -1,6 +1,8 @@
 import Link from 'next/link';
 
+import * as h from '../../shell/header.css';
 import { OPERADOR_BASE } from '../../shell/nav';
+import { HeaderAction } from '../../shell/shell';
 import * as u from '../../ui/ui.css';
 import { cancelHint, ESTADO_ENVIO, fiadoDetalle, type EstadoEnvio } from './copy';
 import * as s from './side.css';
@@ -69,5 +71,18 @@ export function FiadoCard({ fiado }: { readonly fiado: NonNullable<VentaDetalle[
         Recibir un abono
       </Link>
     </div>
+  );
+}
+
+/** The header's right side on this screen: the sale's state instead of the sync pill. */
+export function EstadoPill({ envio }: { readonly envio: EstadoEnvio }) {
+  const e = ESTADO_ENVIO[envio];
+  return (
+    <HeaderAction>
+      <span className={h.syncStatic} style={{ background: e.bg }}>
+        <span className={h.syncDot} style={{ background: e.dot }} />
+        <span className={h.syncLabel}>{e.pill}</span>
+      </span>
+    </HeaderAction>
   );
 }

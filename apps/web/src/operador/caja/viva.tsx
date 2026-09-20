@@ -15,7 +15,7 @@ import { readDevice } from '../runtime/device-store';
  */
 
 /** The register's four chips, from whatever the business calls the product. */
-function categoriaDe(esta: string): Producto['categoria'] {
+export function categoriaDe(esta: string): Producto['categoria'] {
   const t = esta.toLowerCase();
   if (t.includes('bebida') || t.includes('agua') || t.includes('refresco')) return 'Bebidas';
   if (t.includes('taco')) return 'Tacos';

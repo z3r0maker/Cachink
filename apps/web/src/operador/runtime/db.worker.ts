@@ -15,7 +15,7 @@ import * as access from './access';
 import { catalogo } from './catalogo';
 import { abonar, cuentasDelNegocio } from './cuentas';
 import { opfsRead, opfsWrite } from './opfs';
-import { cancelarTicket, registrarTicket, ventasDelTurno } from './tickets';
+import { cancelarTicket, registrarTicket, ticketPorFolio, ventasDelTurno } from './tickets';
 import type { WorkerRequest, WorkerResponse } from './protocol';
 
 export type { BootInfo, OperadorPara, SesionAbierta } from './protocol';
@@ -131,6 +131,7 @@ async function handleAccess(request: WorkerRequest): Promise<unknown> {
   if (
     request.method === 'productos' ||
     request.method === 'ventas' ||
+    request.method === 'ticket' ||
     request.method === 'cancelar'
   ) {
     return runAccess((rt) => leerOCancelar(request, rt));
@@ -189,7 +190,7 @@ function leerCuentas(request: CuentasRequest, rt: Runtime): Promise<unknown> {
 /** The register's catalogue read and ticket cancellation (O-06/O-32). */
 type TicketsRequest = Extract<
   WorkerRequest,
-  { readonly method: 'productos' | 'ventas' | 'cancelar' }
+  { readonly method: 'productos' | 'ventas' | 'ticket' | 'cancelar' }
 >;
 
 function leerOCancelar(request: TicketsRequest, rt: Runtime): Promise<unknown> {
@@ -198,6 +199,9 @@ function leerOCancelar(request: TicketsRequest, rt: Runtime): Promise<unknown> {
   }
   if (request.method === 'ventas') {
     return ventasDelTurno(rt.db, request.businessId as never, request.deviceId, request.turnoId);
+  }
+  if (request.method === 'ticket') {
+    return ticketPorFolio(rt.db, request.businessId as never, request.deviceId, request.folio);
   }
   return cancelarTicket(rt.db, {
     businessId: request.businessId as never,
