@@ -1,5 +1,5 @@
 import { DETALLE_VENTAS, detalleFixture, ventaPorFolio } from '@/operador/ventas/detalle/fixture';
-import { DetalleScreen } from '@/operador/ventas/detalle/screen';
+import { DetalleVentaViva } from '@/operador/ventas/detalle/viva';
 import type { DetalleScreenProps, VentaDetalle } from '@/operador/ventas/detalle/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -28,7 +28,10 @@ function forced(
   };
 }
 
-/** Operador · Detalle de venta (O-22). Fixture data until the register runtime (O-06). */
+/**
+ * Operador · Detalle de venta (O-22, real data O-34). Fixtures for an
+ * unlinked browser; a linked register reads the turno's ticket by folio.
+ */
 export default async function OperadorDetalleVentaPage({
   params,
   searchParams,
@@ -38,5 +41,11 @@ export default async function OperadorDetalleVentaPage({
 }) {
   const { folio } = await params;
   const { state, venta } = forced(await searchParams, decodeURIComponent(folio));
-  return <DetalleScreen state={state} data={detalleFixture(venta)} />;
+  return (
+    <DetalleVentaViva
+      folio={decodeURIComponent(folio)}
+      forzado={state}
+      fixture={{ state, data: detalleFixture(venta) }}
+    />
+  );
 }

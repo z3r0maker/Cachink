@@ -16,6 +16,7 @@ import { registerRuntime } from '../runtime/client';
 import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import type { VentaPara } from '../runtime/protocol';
 import type { Motivo } from './cancelar';
+import { comoMetodo } from './derive';
 import type { MetodoVenta, VentasData, VentaTurno } from './types';
 
 export type FiltroVenta = 'Todos' | MetodoVenta;
@@ -23,11 +24,6 @@ export type FiltroVenta = 'Todos' | MetodoVenta;
 interface Vivo {
   readonly state: 'happy' | EstadoMode;
   readonly data: VentasData;
-}
-
-/** «Crédito» is the wire's word; the operator's screen says «Fiado». */
-function comoMetodo(metodo: string): MetodoVenta {
-  return metodo === 'Crédito' ? 'Fiado' : (metodo as MetodoVenta);
 }
 
 function comoVenta(v: VentaPara): VentaTurno {

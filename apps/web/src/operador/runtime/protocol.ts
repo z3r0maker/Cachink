@@ -73,6 +73,30 @@ export interface CuentaPara {
   readonly abonos: readonly AbonoCuentaPara[];
 }
 
+/** One line of a ticket, as Detalle de venta shows it (O-34). */
+export interface LineaPara {
+  readonly productoId: string;
+  readonly nombre: string;
+  readonly precioCentavos: string;
+  readonly cantidad: number;
+  readonly categoria: string;
+}
+
+/** The open turno's ticket by folio, with everything the detail screen needs. */
+export interface TicketPara {
+  readonly id: string;
+  readonly folio: number;
+  readonly fecha: string;
+  readonly hora: string;
+  readonly metodo: string;
+  readonly lineas: readonly LineaPara[];
+  readonly recibidoCentavos: string | null;
+  readonly cambioCentavos: string | null;
+  readonly cliente: string | null;
+  readonly clienteSaldoCentavos: string | null;
+  readonly cancelada: string | null;
+}
+
 export type WorkerRequest =
   | { readonly id: number; readonly method: 'boot' }
   | {
@@ -129,6 +153,13 @@ export type WorkerRequest =
       readonly businessId: string;
       readonly deviceId: string;
       readonly turnoId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'ticket';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly folio: number;
     }
   | {
       readonly id: number;

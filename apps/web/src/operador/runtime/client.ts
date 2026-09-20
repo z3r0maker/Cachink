@@ -19,14 +19,18 @@ import type {
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
-  VentaPara,
   WorkerRequest,
   WorkerResponse,
 } from './protocol';
-
-/** A request minus its RPC id — kept derived so it can never drift from the protocol. */
-type DistributiveOmit<T, K extends keyof never> = T extends unknown ? Omit<T, K> : never;
-type Call = DistributiveOmit<WorkerRequest, 'id'>;
+import * as calls from './calls';
+import type {
+  AbonoInput,
+  Call,
+  CancelarInput,
+  ProductoPara,
+  TicketVivo,
+  VentasTurno,
+} from './calls';
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -86,11 +90,11 @@ export class RegisterRuntime {
 
   /** O-12 · Vincular: the activation bootstrap becomes the local database. */
   vincular(tables: ReferenceTables, businessId: string): Promise<void> {
-    return this.#call<void>({ method: 'vincular', tables, businessId });
+    return this.#call(calls.vincular(tables, businessId));
   }
 
   operadores(businessId: string, deviceId: string): Promise<readonly OperadorPara[]> {
-    return this.#call<readonly OperadorPara[]>({ method: 'operadores', businessId, deviceId });
+    return this.#call(calls.operadores(businessId, deviceId));
   }
 
   autenticar(
@@ -99,13 +103,7 @@ export class RegisterRuntime {
     nombre: string,
     nip: string,
   ): Promise<{ success: boolean; userId: string | null }> {
-    return this.#call<{ success: boolean; userId: string | null }>({
-      method: 'autenticar',
-      businessId,
-      deviceId,
-      nombre,
-      nip,
-    });
+    return this.#call(calls.autenticar(businessId, deviceId, nombre, nip));
   }
 
   abrirCaja(
@@ -114,82 +112,40 @@ export class RegisterRuntime {
     userId: string,
     fondoCentavos: bigint,
   ): Promise<{ turnoId: string }> {
-    return this.#call<{ turnoId: string }>({
-      method: 'abrirCaja',
-      businessId,
-      deviceId,
-      userId,
-      fondoCentavos: fondoCentavos.toString(),
-    });
+    return this.#call(calls.abrirCaja(businessId, deviceId, userId, fondoCentavos));
   }
 
   turnoAbierto(businessId: string, deviceId: string): Promise<SesionAbierta | null> {
-    return this.#call<SesionAbierta | null>({ method: 'turnoAbierto', businessId, deviceId });
+    return this.#call(calls.turnoAbierto(businessId, deviceId));
   }
 
-  productos(
-    businessId: string,
-    deviceId: string,
-  ): Promise<readonly { id: string; nombre: string; precio: string; categoria: string }[]> {
-    return this.#call<{ id: string; nombre: string; precio: string; categoria: string }[]>({
-      method: 'productos',
-      businessId,
-      deviceId,
-    });
+  productos(businessId: string, deviceId: string): Promise<readonly ProductoPara[]> {
+    return this.#call(calls.productos(businessId, deviceId));
   }
 
   /** O-32 · Ventas: the open turno's tickets from the register's database. */
-  ventas(
-    businessId: string,
-    deviceId: string,
-    turnoId: string,
-  ): Promise<{ readonly desde: string; readonly ventas: readonly VentaPara[] }> {
-    return this.#call<{ readonly desde: string; readonly ventas: readonly VentaPara[] }>({
-      method: 'ventas',
-      businessId,
-      deviceId,
-      turnoId,
-    });
+  ventas(businessId: string, deviceId: string, turnoId: string): Promise<VentasTurno> {
+    return this.#call(calls.ventas(businessId, deviceId, turnoId));
+  }
+
+  /** O-34 · Detalle de venta: the open turno's ticket by folio. */
+  ticket(businessId: string, deviceId: string, folio: number): Promise<TicketVivo> {
+    return this.#call(calls.ticket(businessId, deviceId, folio));
   }
 
   /** O-32: cancel through the real use case — PIN and permission included. */
-  cancelar(p: {
-    readonly businessId: string;
-    readonly deviceId: string;
-    readonly userId: string;
-    readonly ticketId: string;
-    readonly pin: string;
-    readonly motivo: string;
-  }): Promise<{ folio: number; cashToReturnCentavos: string | null }> {
-    return this.#call<{ folio: number; cashToReturnCentavos: string | null }>({
-      method: 'cancelar',
-      ...p,
-    });
+  cancelar(p: CancelarInput): Promise<{ folio: number; cashToReturnCentavos: string | null }> {
+    return this.#call(calls.cancelar(p));
   }
 
   /** O-33 · Cobranza: every credit account from the register's database. */
   cuentas(businessId: string, deviceId: string): Promise<readonly CuentaPara[]> {
-    return this.#call<readonly CuentaPara[]>({ method: 'cuentas', businessId, deviceId });
+    return this.#call(calls.cuentas(businessId, deviceId));
   }
 
   /** O-33: record an abono through the real use case (whole; D5 a favor). */
-  abonar(p: {
-    readonly businessId: string;
-    readonly deviceId: string;
-    readonly clienteId: string;
-    readonly montoCentavos: bigint;
-    readonly metodo: string;
-    readonly fecha: string;
-  }): Promise<{ id: string; fecha: string }> {
-    return this.#call<{ id: string; fecha: string }>({
-      method: 'abonar',
-      businessId: p.businessId,
-      deviceId: p.deviceId,
-      clienteId: p.clienteId,
-      montoCentavos: p.montoCentavos.toString(),
-      metodo: p.metodo,
-      fecha: p.fecha,
-    });
+  abonar(p: AbonoInput): Promise<{ id: string; fecha: string }> {
+    return this.#call(calls.abonar(p));
   }
 
   terminate(): void {
