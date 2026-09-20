@@ -18,12 +18,11 @@ const SECCIONES = [
   { nombre: 'Switch · OptionCards · UsageBar · Diálogos · Sellos · Avisos', slug: 'recientes' },
 ] as const;
 
-test.skip(
-  ({ project }) => process.env.CI !== undefined || project.name !== 'desktop',
-  'visual baselines are a local, desktop review',
-);
-
-test.beforeEach(async ({ page }) => {
+test.beforeEach(async ({ page }, testInfo) => {
+  testInfo.skip(
+    process.env.CI !== undefined || testInfo.project.name !== 'desktop',
+    'visual baselines are a local, desktop review',
+  );
   await page.goto('/inventario');
 });
 

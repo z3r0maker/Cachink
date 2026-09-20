@@ -13,7 +13,7 @@
 1. **Shared checkout, push from a clean worktree.** Same rules as `12-glm-handoff.md` §0.1–0.2.
    Stage only your own paths at commit time; `ARCHITECTURE.md` and `docs/plan/*.md` very often
    hold another session's uncommitted hunks — check `git diff <file>` before staging them.
-2. **Numbers.** data-pg next free migration **0020**; ADR next free **ADR-087**; backoffice
+2. **Numbers.** data-pg next free migration **0025**; ADR next free **ADR-089**; backoffice
    migrations **0011** (not this track's). Never GRANT on `auth.*` — use a pinned SECURITY
    DEFINER function (this track's examples: `0015_auth_links`, `0016_business_archive`,
    `0018_account_create`).

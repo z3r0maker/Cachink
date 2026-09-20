@@ -4,7 +4,7 @@ import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 import { API_PATHS, deviceHeaders, encodeJson } from '@xangarro/contracts';
 
-import { asTenant } from './sync-phone';
+import { resetIpThrottles } from './throttles';
 
 /**
  * P-17's named smoke flow, end to end and through the UI wherever the owner
@@ -15,6 +15,12 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 test.describe.configure({ mode: 'serial' });
+
+test.beforeAll(async () => {
+  // This file signs up and signs in; the serial chain after it shares the IP
+  // throttle budget, so it starts clean rather than spending everyone's.
+  await resetIpThrottles();
+});
 
 const stamp = randomUUID().slice(0, 8);
 const email = `humo-${stamp}@test.mx`;
@@ -58,11 +64,18 @@ async function wizardMinimo(page: Page): Promise<void> {
   await next(page, 'Terminar');
 }
 
-/** The tenant this signup created, from the signed cookie the app set. */
-async function bizDel(page: Page): Promise<string> {
-  const biz = (await page.context().cookies()).find((c) => c.name === 'xg_business')?.value;
-  expect(biz, 'signup set the business cookie').toBeDefined();
-  return biz as string;
+/** The tenant and the imported product, straight from the activation's own
+ * bootstrap — the same facts a real phone acts on, no test backdoor. */
+function telefonoDel(
+  body: {
+    businessId: string;
+    bootstrap: { tables: { products: readonly { id: string; sku: string | null }[] } };
+  },
+  sku: string,
+) {
+  const producto = body.bootstrap.tables.products.find((p) => p.sku === sku);
+  expect(producto?.id, `the bootstrap carried ${sku}`).toBeDefined();
+  return { biz: body.businessId, producto: producto!.id };
 }
 
 test('signup → wizard → operator → import → code → activate → push → Movimientos', async ({
@@ -78,12 +91,16 @@ test('signup → wizard → operator → import → code → activate → push �
   await page.getByRole('button', { name: 'Crear cuenta' }).click();
   await wizardMinimo(page);
 
-  // Free plan: no checkout — the plan screen only confirms, then the checklist.
-  const gratis = page.getByRole('button', { name: 'Seguir gratis' });
+  // Free plan: no checkout — «Empezar gratis» on the Xangarrito screen (or
+  // «Seguir gratis» falling back from a paid recommendation), then the portal.
+  const gratis = page
+    .getByRole('button', { name: 'Empezar gratis' })
+    .or(page.getByRole('button', { name: 'Seguir gratis' }));
+  const alPortal = page.getByRole('link', { name: 'Ir a mi portal' });
+  await expect(gratis.or(alPortal)).toBeVisible({ timeout: 20_000 });
   if (await gratis.isVisible().catch(() => false)) await gratis.click();
-  await page.getByRole('link', { name: 'Ir a mi portal' }).click();
+  await alPortal.click();
   await expect(page.getByRole('heading', { name: 'Hola, Humo' })).toBeVisible();
-  const biz = await bizDel(page);
 
   // 2 · An operator for the counter phone.
   await page.goto('/equipo');
@@ -131,13 +148,14 @@ test('signup → wizard → operator → import → code → activate → push �
     },
   });
   expect(r.status(), await r.text()).toBe(200);
-  const { deviceToken, deviceId } = await r.json();
+  const body = await r.json();
+  const { deviceToken, deviceId } = body;
+  await page.reload();
   await expect(page.getByText(`Teléfono ${stamp}`)).toBeVisible();
 
-  // 6 · The phone pushes one sale of an imported product.
-  const [producto] = await asTenant(biz, async (sql) => {
-    return sql<{ id: string }[]>`SELECT id FROM products WHERE sku = ${`HUMO-${stamp}-1`}`;
-  });
+  // 6 · The phone pushes one sale of an imported product, on the facts its
+  // own activation taught it.
+  const { biz, producto } = telefonoDel(body, `HUMO-${stamp}-1`);
   const idVenta = newUlid();
   const ahora = new Date().toISOString();
   const push = await request.post(API_PATHS.syncPush, {
@@ -146,18 +164,22 @@ test('signup → wizard → operator → import → code → activate → push �
       deltas: [
         {
           table: 'sales',
+          rowId: idVenta,
           op: 'insert',
+          clientSeq: 1,
           row: {
             id: idVenta,
-            fecha: ahora.slice(0, 10),
-            hora: ahora.slice(11, 16),
+            // The business clock is pinned to 2026-05-12 in e2e; Movimientos
+            // filters by it, so the sale rides that day, not the wall clock.
+            fecha: '2026-05-12',
+            hora: '13:30',
             concepto: `Venta de humo ${idVenta.slice(-4)}`,
             categoria: 'Producto',
             monto: 2500n,
             metodo: 'Efectivo',
             clienteId: null,
             estadoPago: 'pagado',
-            productoId: producto?.id,
+            productoId: producto,
             cantidad: 1,
             efectivoRecibidoCentavos: 3000n,
             cancelledByUserId: null,

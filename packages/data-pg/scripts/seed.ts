@@ -179,8 +179,8 @@ async function seedMembers(sql: Sql): Promise<void> {
   for (const m of [OWNER, VIEWER]) {
     const encrypted = await hash(m.password, 10);
     await sql`
-      INSERT INTO auth.users (id, email, encrypted_password, nombre, email_confirmed_at)
-      VALUES (${m.id}::uuid, ${m.email}, ${encrypted}, ${m.nombre}, now())
+      INSERT INTO auth.users (id, email, encrypted_password, raw_user_meta_data, email_confirmed_at)
+      VALUES (${m.id}::uuid, ${m.email}, ${encrypted}, jsonb_build_object('nombre', ${m.nombre}::text), now())
       ON CONFLICT (id) DO NOTHING`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)

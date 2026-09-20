@@ -188,8 +188,11 @@ test('the entitlement refresh honours revocation, not just the signature', async
   }
 });
 
-/** P-06: the live code goes by email to whatever address the owner names. */
-test('«Enviar por correo» delivers the live code', async ({ page }) => {
+/** P-06: the live code goes by email to whatever address the owner names.
+ * Desktop only: the outbox keys a send by the code (idempotency), so a second
+ * viewport sending the same live code is — correctly — deduped. */
+test('«Enviar por correo» delivers the live code', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'one outbox per live code');
   const address = `codigo-${randomUUID()}@test.mx`;
   await page.goto('/equipo?tab=dispositivos');
   await page.getByTestId('enviar-codigo-correo').fill(address);

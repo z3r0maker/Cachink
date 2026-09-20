@@ -206,6 +206,9 @@ export async function materializarInsights(
       and(
         eq(notices.source, 'asesor'),
         isNull(notices.resolvedAt),
+        // Only rows this mechanism wrote: a manually created or fixture
+        // asesor notice is not ours to close, even when no insight computes.
+        sql`${notices.id} LIKE ${`${businessId}:%`}`,
         vivos.length > 0 ? notInArray(notices.id, vivos) : sql`true`,
       ),
     )

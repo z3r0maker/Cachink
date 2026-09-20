@@ -2,11 +2,12 @@ import { expect, test, type Page } from '@playwright/test';
 import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { execFileSync } from 'node:child_process';
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 
 import postgres from 'postgres';
 
 import { asTenant } from './sync-phone';
+import { resetIpThrottles } from './throttles';
 
 /**
  * P-27/P-33 on a throwaway tenant (the `sync` project: it writes rows). April
@@ -20,24 +21,30 @@ test.use({ storageState: { cookies: [], origins: [] } });
 const stamp = randomUUID();
 const email = `metas-${stamp}@test.mx`;
 const password = 'metas-1234';
-const biz = newUlid();
+// Deterministic ids: a worker restart mid-file re-runs beforeAll, and every
+// insert must land on the same rows rather than collide on the email.
+const idDe = (tag: string): string =>
+  `00000000-0000-4000-8000-${createHash('md5').update(`${tag}:${stamp}`).digest('hex').slice(0, 12)}`;
+const ownerId = idDe('owner');
+const viewerId = idDe('viewr');
+const biz = `01META${stamp.replace(/-/g, '').toUpperCase().slice(0, 20)}`;
 
 const billingUrl = (): string =>
   process.env.BILLING_DATABASE_URL ??
   execFileSync('../../packages/data-pg/scripts/db-local.sh', ['billing-url']).toString().trim();
 
 test.beforeAll(async () => {
-  const ownerId = randomUUID();
-  const viewerId = randomUUID();
+  await resetIpThrottles();
   const ownerHash = await hashPassword(password);
   const viewerHash = await hashPassword(password);
-  const producto = newUlid();
+  const producto = `01METAP${stamp.replace(/-/g, '').toUpperCase().slice(0, 18)}`;
   await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${ownerId}::uuid, ${email}, ${ownerHash})`;
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${viewerId}::uuid, ${`lectura-${stamp}@test.mx`}, ${viewerHash})`;
+    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${ownerId}::uuid, ${email}, ${ownerHash}) ON CONFLICT (id) DO NOTHING`;
+    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${viewerId}::uuid, ${`lectura-${stamp}@test.mx`}, ${viewerHash}) ON CONFLICT (id) DO NOTHING`;
     await sql`
       INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, 'Carnitas Chela', 'RESICO', '626', 125, ${biz}, ${newUlid()}, now(), now())`;
+      VALUES (${biz}, 'Carnitas Chela', 'RESICO', '626', 125, ${biz}, ${newUlid()}, now(), now())
+      ON CONFLICT (id) DO NOTHING`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${ownerId}, 'owner', ${biz}, now(), now()),
@@ -46,7 +53,7 @@ test.beforeAll(async () => {
       INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
                             seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
       VALUES (${producto}, 'Torta', 'Producto Terminado', 100, 'pza', 3, 'producto', false, 500,
-              ${biz}, ${biz}, now(), now())`;
+              ${biz}, ${biz}, now(), now()) ON CONFLICT (id) DO NOTHING`;
     for (const f of ['2026-04-05', '2026-04-18', '2026-04-27']) {
       await sql`
         INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
@@ -65,7 +72,8 @@ test.beforeAll(async () => {
       INSERT INTO subscriptions (stripe_subscription_id, business_id, stripe_customer_id, plan_id, interval,
         status, stripe_status, current_period_start, current_period_end, collection_method)
       VALUES (${`sub_met_${stamp}`.slice(0, 40)}, ${biz}, ${`cus_met_${stamp}`.slice(0, 40)}, 'xangarro', 'month',
-        'active', 'active', now(), '2099-01-01', 'charge_automatically')`;
+        'active', 'active', now(), '2099-01-01', 'charge_automatically')
+      ON CONFLICT (stripe_subscription_id) DO NOTHING`;
   } finally {
     await billing.end({ timeout: 5 });
   }
@@ -107,7 +115,7 @@ test('an achieved goal celebrates once, then the month-end dialog answers in its
   await expect(page.getByText('$3,600.00 al mes · $120.00 al día')).toBeVisible();
   await page.getByRole('button', { name: 'Empezar mi meta' }).click();
   await expect(page.getByText('Tu meta de 2026-05')).toBeVisible();
-  await expect(page.getByText('$3,600.00')).toBeVisible();
+  await expect(page.getByText('$3,600.00', { exact: true })).toBeVisible();
 });
 
 test('a viewer never sees the wizard', async ({ page }) => {

@@ -106,6 +106,29 @@ describe('asesor insights', () => {
     assert.ok(cerrada.some((r) => r.state === 'descartado' && r.resolvedAt !== null));
   });
 
+  it('a foreign asesor notice survives a compute that finds nothing', async () => {
+    const manual = testId('X');
+    await withBusiness(db, BIZ, (tx) =>
+      tx.insert(notices).values({
+        id: manual,
+        source: 'asesor',
+        severity: 'info',
+        title: 'Una fila escrita a mano',
+        body: 'No es de este mecanismo.',
+        state: 'nuevo',
+        businessId: BIZ,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }),
+    );
+    // Earlier tests in this file left computed rows open; a compute that finds
+    // nothing may close those — but only those, never the manual row.
+    const sobrevive = await withBusiness(db, BIZ, (tx) =>
+      tx.select({ id: notices.id }).from(notices).where(eq(notices.id, manual)),
+    );
+    assert.equal(sobrevive.length, 1, 'the manual row is not ours to close');
+  });
+
   it('an insight that fixed itself closes as listo, not as a new row', async () => {
     // Remove one duplicate gasto; the insight vanishes on the next compute.
     await withBusiness(db, BIZ, (tx) =>
@@ -122,7 +145,7 @@ describe('asesor insights', () => {
         .from(notices)
         .where(sql`${notices.source} = 'asesor' AND ${notices.resolvedAt} IS NULL`),
     );
-    // 3 materialised − 1 dismissed by the member − 1 vanished = 1 open.
-    assert.equal(abiertos.length, 1);
+    // 3 materialised − 1 dismissed − 1 vanished + the manual row = 2 open.
+    assert.equal(abiertos.length, 2);
   });
 });

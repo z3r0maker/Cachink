@@ -5865,6 +5865,10 @@ for the takeover and streak-milestone toasts.
 
 #### Consequences
 
+- **Amended 2026-09-19 (migration 0024):** hosted Supabase refuses DDL on `auth.users`
+  (`supabase_auth_admin` owns it), so the name lives in `raw_user_meta_data` — the platform's
+  own custom-data column — not a `nombre` column. The JSONB objection in the decision above
+  loses to a platform constraint; one known field in one key («nombre») is the whole surface.
 - The seeded owner is «Pedro» / the contador «Laura», so the greeting renders from real data.
 - `session_resolve`'s return changed shape (nombre added): every portal session now carries it.
 - Goals close lazily (`CerrarMetaUseCase`, P-27) and the takeover/toast read these markers, so
