@@ -13,7 +13,7 @@
 1. **Shared checkout, push from a clean worktree.** Same rules as `12-glm-handoff.md` §0.1–0.2.
    Stage only your own paths at commit time; `ARCHITECTURE.md` and `docs/plan/*.md` very often
    hold another session's uncommitted hunks — check `git diff <file>` before staging them.
-2. **Numbers.** data-pg next free migration **0025**; ADR next free **ADR-089**; backoffice
+2. **Numbers.** data-pg next free migration **0027** (0024–0026 are other tracks'); backoffice admin migrations next free **0015**; ADR next free **ADR-089**; backoffice
    migrations **0011** (not this track's). Never GRANT on `auth.*` — use a pinned SECURITY
    DEFINER function (this track's examples: `0015_auth_links`, `0016_business_archive`,
    `0018_account_create`).
@@ -66,7 +66,10 @@ lazy close, both month-end dialogs, celebrate-once, viewer hiding); P-06 finishe
 in `src/data/`); P-17 finished (`e2e/smoke.sync.spec.ts`); P-23's inventory extended with
 visual baselines (in-app `/inventario`, not Storybook — documented deviation; the
 `design:compare` clause waits on O-23). The `activation-code` email template is now in
-`packages/email` — Track N's B-14 list should not re-add it.
+`packages/email` — Track N's B-14 list should not re-add it. Hosted was brought current
+through data-pg **0026 / admin 0014** on 2026-09-19; 0020's ledger checksum was corrected to
+the committed file after an intermediate edit between apply and commit (0024 recreates every
+function 0020 defines, so the end state is the committed one).
 
 P-08 edit mode + tipos de pago + atributos + archive row · régimen by SAT code (ADR-082) ·
 emailed reset / magic links (ADR-080, data-pg 0015) · business switcher · P-05 masked NIP +
