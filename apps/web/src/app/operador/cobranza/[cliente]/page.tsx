@@ -1,6 +1,6 @@
 import { cuentaPorId } from '@/operador/cobranza/cuentas';
 import { HOY } from '@/operador/fixtures';
-import { DetalleClienteScreen } from '@/operador/cobranza/cliente/screen';
+import { DetalleClienteViva } from '@/operador/cobranza/cliente/viva';
 import type { DetalleClienteProps } from '@/operador/cobranza/cliente/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -12,8 +12,8 @@ function forced(dataState: string | undefined): DetalleClienteProps['state'] {
 }
 
 /**
- * Operador · Detalle de cliente (O-26). Fixture accounts until the register
- * runtime (O-06); a client without one gets the empty state.
+ * Operador · Detalle de cliente (O-26, real data O-33). Fixture accounts for
+ * an unlinked browser; a linked register reads its own database.
  */
 export default async function OperadorDetalleClientePage({
   params,
@@ -24,11 +24,16 @@ export default async function OperadorDetalleClientePage({
 }) {
   const { cliente } = await params;
   const { dataState } = await searchParams;
-  const cuenta = cuentaPorId(cliente);
   return (
-    <DetalleClienteScreen
-      state={forced(dataState)}
-      data={{ negocio: 'Taquería Don Pedro', hoy: HOY, dueno: 'Pedro', cuenta }}
+    <DetalleClienteViva
+      clienteId={cliente}
+      forzado={forced(dataState)}
+      fixture={{
+        negocio: 'Taquería Don Pedro',
+        hoy: HOY,
+        dueno: 'Pedro',
+        cuenta: cuentaPorId(cliente),
+      }}
     />
   );
 }

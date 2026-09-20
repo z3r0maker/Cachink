@@ -12,6 +12,8 @@ export interface VentaHecha {
   /** Shown in 40 px when the sale was cash. */
   readonly cambio: Money | null;
   readonly nota: string;
+  /** The fiado client's id, when the sale is on credit (O-33). */
+  readonly clienteId?: string;
 }
 
 const DURATION_MS = 8000;

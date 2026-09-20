@@ -23,7 +23,7 @@ import { VentaHechaCard } from './venta-hecha';
  * first, the ticket always in reach, checkout in a modal, and the change due
  * left in the corner after the sale.
  */
-export function CajaScreen({ state, data, paso }: CajaScreenProps) {
+export function CajaScreen({ state, data, paso, nuevoCliente = true }: CajaScreenProps) {
   const caja = useCaja(data, paso);
   const [nuevoOpen, setNuevoOpen] = useState(false);
   const [compartir, setCompartir] = useState<Comprobante | null>(null);
@@ -44,7 +44,7 @@ export function CajaScreen({ state, data, paso }: CajaScreenProps) {
         <TicketPanel caja={caja} />
       </div>
       <TicketBar caja={caja} />
-      <Cobro caja={caja} data={data} />
+      <Cobro caja={caja} data={data} permitirNuevo={nuevoCliente} />
       <NuevoProducto open={nuevoOpen} onClose={() => setNuevoOpen(false)} onAdd={agregar} />
       <VentaHechaCard caja={caja} onComprobante={comprobante} />
       <Share

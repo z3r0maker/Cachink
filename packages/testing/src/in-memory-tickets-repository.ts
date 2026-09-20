@@ -100,6 +100,12 @@ export class InMemoryTicketsRepository implements TicketsRepository {
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
   }
 
+  async findCreditoByClient(clientId: ClientId): Promise<readonly Ticket[]> {
+    return [...this.rows.values()]
+      .filter((r) => r.clienteId === clientId && r.metodo === 'Crédito' && r.deletedAt === null)
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
   async updatePaymentState(id: TicketId, state: Ticket['estadoPago']): Promise<void> {
     const existing = this.rows.get(id);
     if (!existing) return;

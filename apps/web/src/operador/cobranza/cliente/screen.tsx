@@ -22,7 +22,7 @@ export function DetalleClienteScreen({ state, data }: DetalleClienteProps) {
   return (
     <OpMain top={24} narrow>
       {state === 'happy' && cuenta ? (
-        <Cuenta key={cuenta.id} data={data} inicial={cuenta} />
+        <Cuenta key={cuenta.id} data={data} inicial={cuenta} vinculado={data.vinculado === true} />
       ) : (
         <OperadorEstado
           mode={state === 'happy' ? 'empty' : state}
@@ -41,11 +41,13 @@ export function DetalleClienteScreen({ state, data }: DetalleClienteProps) {
 function Cuenta({
   data,
   inicial,
+  vinculado,
 }: {
   readonly data: DetalleClienteData;
   readonly inicial: CuentaCliente;
+  readonly vinculado: boolean;
 }) {
-  const x = useCliente(inicial);
+  const x = useCliente(inicial, vinculado);
   const c = x.cuenta;
   return (
     <>

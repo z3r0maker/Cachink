@@ -78,6 +78,48 @@ describe('Crédito Lifecycle [fullstack]', () => {
     expect(ticket?.clienteId).toBe(clientId);
   });
 
+  it('findCreditoByClient keeps the whole fiado history, oldest first', async () => {
+    const primera = await h.useCases.registrarVenta.execute(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: productId,
+        monto: 100_00n,
+        metodo: 'Crédito',
+        clienteId: clientId,
+      }),
+    );
+    await new Promise((r) => setTimeout(r, 3));
+    const segunda = await h.useCases.registrarVenta.execute(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: productId,
+        monto: 100_00n,
+        metodo: 'Crédito',
+        clienteId: clientId,
+      }),
+    );
+    // A cash sale and another client's fiado must not leak into the account.
+    await h.useCases.registrarVenta.execute(
+      makeNewSale({ businessId: BIZ, productoId: productId, monto: 50_00n }),
+    );
+    const otro = await h.repos.clients.create({ nombre: 'Otro', telefono: '1', businessId: BIZ });
+    await h.useCases.registrarVenta.execute(
+      makeNewSale({
+        businessId: BIZ,
+        productoId: productId,
+        monto: 70_00n,
+        metodo: 'Crédito',
+        clienteId: otro.id,
+      }),
+    );
+
+    const historial = await h.repos.tickets.findCreditoByClient(clientId);
+    expect(historial.map((t) => t.id)).toEqual([primera.ticketId, segunda.ticketId]);
+    // Even fully settled tickets stay in the history (ADR-074).
+    await h.repos.tickets.updatePaymentState(primera.ticketId, 'pagado');
+    expect(await h.repos.tickets.findCreditoByClient(clientId)).toHaveLength(2);
+  });
+
   it('records a client abono without touching the sale (ADR-074)', async () => {
     const sale = await h.useCases.registrarVenta.execute(
       makeNewSale({

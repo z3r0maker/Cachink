@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 import { asTenant, BIZ } from './sync-phone';
 
@@ -31,7 +31,19 @@ export async function pasarAcceso(
   await page.getByTestId('vincular-codigo').fill(code);
   await page.getByTestId('vincular-continuar').click();
   await page.getByTestId('acceso-operador').filter({ hasText: operador }).click();
-  for (const k of '2580') await page.getByTestId(`nip-tecla-${k}`).click();
+  // A cold build can drop a keypad tap to hydration; the boxes say what
+  // actually landed — re-tap until the digit we meant is there.
+  for (const k of '2580') {
+    await expect
+      .poll(
+        async () => {
+          await page.getByTestId(`nip-tecla-${k}`).click();
+          return (await page.getByTestId('nip-cajas').textContent()) ?? '';
+        },
+        { timeout: 3000 },
+      )
+      .toContain(k);
+  }
   await page.getByTestId('nip-tecla-→').click();
   await page.getByTestId('fondo-input').fill('500');
   await page.getByTestId('fondo-abrir').click();

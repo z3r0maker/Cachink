@@ -140,6 +140,22 @@ export class DrizzleTicketsRepository implements TicketsRepository {
     return rows.map((r) => this.#mapRow(r));
   }
 
+  async findCreditoByClient(clientId: ClientId): Promise<readonly Ticket[]> {
+    const rows = await this.#db
+      .select()
+      .from(tickets)
+      .where(
+        and(
+          eq(tickets.clienteId, clientId),
+          eq(tickets.metodo, 'Crédito'),
+          isNull(tickets.deletedAt),
+        ),
+      )
+      .orderBy(asc(tickets.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
+  }
+
   async updatePaymentState(id: TicketId, state: PaymentState): Promise<void> {
     await this.#db
       .update(tickets)

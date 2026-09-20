@@ -41,6 +41,38 @@ export interface VentaPara {
   readonly cancelada: string | null;
 }
 
+/** A fiado ticket of an account, and an abono on it (O-33; money as centavos string). */
+export interface VentaCuentaPara {
+  readonly folio: number;
+  readonly concepto: string;
+  /** Naive local "YYYY-MM-DDTHH:MM". */
+  readonly fecha: string;
+  readonly montoCentavos: string;
+  readonly capturo: string;
+}
+
+export interface AbonoCuentaPara {
+  readonly id: string;
+  /** IsoDate — abonos are day-granular. */
+  readonly fecha: string;
+  readonly montoCentavos: string;
+  readonly metodo: string;
+  readonly nota: string | null;
+}
+
+export interface CuentaPara {
+  readonly id: string;
+  readonly nombre: string;
+  readonly telefono: string | null;
+  readonly creado: string;
+  readonly limiteCentavos: string | null;
+  readonly plazoDias: number | null;
+  /** The domain's derivation over the account's two facts (ADR-074). */
+  readonly saldoCentavos: string;
+  readonly ventas: readonly VentaCuentaPara[];
+  readonly abonos: readonly AbonoCuentaPara[];
+}
+
 export type WorkerRequest =
   | { readonly id: number; readonly method: 'boot' }
   | {
@@ -107,6 +139,22 @@ export type WorkerRequest =
       readonly ticketId: string;
       readonly pin: string;
       readonly motivo: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'cuentas';
+      readonly businessId: string;
+      readonly deviceId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'abonar';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly clienteId: string;
+      readonly montoCentavos: string;
+      readonly metodo: string;
+      readonly fecha: string;
     };
 
 export type WorkerResponse =

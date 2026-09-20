@@ -15,6 +15,7 @@ import type { SyncRunResult } from '@xangarro/sync';
 
 import type {
   BootInfo,
+  CuentaPara,
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
@@ -163,6 +164,31 @@ export class RegisterRuntime {
     return this.#call<{ folio: number; cashToReturnCentavos: string | null }>({
       method: 'cancelar',
       ...p,
+    });
+  }
+
+  /** O-33 · Cobranza: every credit account from the register's database. */
+  cuentas(businessId: string, deviceId: string): Promise<readonly CuentaPara[]> {
+    return this.#call<readonly CuentaPara[]>({ method: 'cuentas', businessId, deviceId });
+  }
+
+  /** O-33: record an abono through the real use case (whole; D5 a favor). */
+  abonar(p: {
+    readonly businessId: string;
+    readonly deviceId: string;
+    readonly clienteId: string;
+    readonly montoCentavos: bigint;
+    readonly metodo: string;
+    readonly fecha: string;
+  }): Promise<{ id: string; fecha: string }> {
+    return this.#call<{ id: string; fecha: string }>({
+      method: 'abonar',
+      businessId: p.businessId,
+      deviceId: p.deviceId,
+      clienteId: p.clienteId,
+      montoCentavos: p.montoCentavos.toString(),
+      metodo: p.metodo,
+      fecha: p.fecha,
     });
   }
 

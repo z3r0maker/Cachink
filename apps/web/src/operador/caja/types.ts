@@ -47,4 +47,6 @@ export interface CajaScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly data: CajaData;
   readonly paso: CobroPaso;
+  /** False on a linked register: fiado needs an existing client (O-33). */
+  readonly nuevoCliente?: boolean;
 }

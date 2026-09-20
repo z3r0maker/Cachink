@@ -13,8 +13,7 @@ import { formatMoney } from '@xangarro/domain';
 import type { EstadoMode } from '../estado';
 import { desencolar } from '../shell/cola';
 import { registerRuntime } from '../runtime/client';
-import { readDevice, type DeviceCredentials } from '../runtime/device-store';
-import { readSesion, type SesionCaja } from '../runtime/session-store';
+import { useCredenciales, type Credenciales } from '../runtime/use-credenciales';
 import type { VentaPara } from '../runtime/protocol';
 import type { Motivo } from './cancelar';
 import type { MetodoVenta, VentasData, VentaTurno } from './types';
@@ -25,8 +24,6 @@ interface Vivo {
   readonly state: 'happy' | EstadoMode;
   readonly data: VentasData;
 }
-
-type Cred = { readonly device: DeviceCredentials | null; readonly sesion: SesionCaja | null };
 
 /** «Crédito» is the wire's word; the operator's screen says «Fiado». */
 function comoMetodo(metodo: string): MetodoVenta {
@@ -47,7 +44,7 @@ function comoVenta(v: VentaPara): VentaTurno {
 }
 
 /** Read the turno's tickets from the register's own database. */
-async function leerVentas(cred: Cred): Promise<Vivo> {
+async function leerVentas(cred: Credenciales): Promise<Vivo> {
   const { device, sesion } = cred;
   if (device === null || sesion === null) throw new Error('sin sesión');
   const r = await registerRuntime().ventas(device.businessId, device.deviceId, sesion.turnoId);
@@ -64,7 +61,7 @@ async function leerVentas(cred: Cred): Promise<Vivo> {
 
 /** Cancel through the use case; the toast text is ours to build. */
 async function cancelarEnVivo(
-  cred: Cred,
+  cred: Credenciales,
   venta: VentaTurno,
   nip: string,
   motivo: string,
@@ -88,7 +85,7 @@ async function cancelarEnVivo(
 
 /** Cancel through the use case, refresh, flush the queue; the toast tells it. */
 async function cancelarYRefrescar(
-  cred: Cred,
+  cred: Credenciales,
   venta: VentaTurno,
   nip: string,
   motivo: string,
@@ -115,14 +112,11 @@ function marcarCancelada(v: Vivo, folio: string, motivo: string): Vivo {
   };
 }
 
-/** The register's credentials, read once per mount — stable identities below. */
-function useCredenciales(): Cred {
-  const [cred] = useState<Cred>(() => ({ device: readDevice(), sesion: readSesion() }));
-  return cred;
-}
-
 /** A linked register loads its Ventas on mount and can be told to reload. */
-function useCargaVivas(cred: Cred, setVivo: Dispatch<SetStateAction<Vivo>>): () => Promise<void> {
+function useCargaVivas(
+  cred: Credenciales,
+  setVivo: Dispatch<SetStateAction<Vivo>>,
+): () => Promise<void> {
   const linked = cred.device !== null && cred.sesion !== null;
   const recargar = useCallback(async (): Promise<void> => {
     if (linked) setVivo(await leerVentas(cred));

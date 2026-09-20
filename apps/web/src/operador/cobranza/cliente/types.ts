@@ -50,6 +50,8 @@ export interface CuentaCliente {
 }
 
 export interface DetalleClienteData {
+  /** True on a linked register: the abono write goes through the use case (O-33). */
+  readonly vinculado?: boolean;
   readonly negocio: string;
   /** The turno's date (`YYYY-MM-DD`): due dates are said against it. */
   readonly hoy: string;

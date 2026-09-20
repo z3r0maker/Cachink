@@ -611,10 +611,25 @@ groundwork (O-02 to O-06) and C-18.
 
 ### O-33 Cobranza on real data
 
-- [ ] Status · **Blocked by:** O-32
-- **Steps:** accounts and abonos from the register's database (`RegistrarPagoClienteUseCase`),
-  the saldo a favor rule (ADR-083 D5) included.
-- **Acceptance:** a sync spec covers balance, oldest-first abono, and the account history.
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · `TicketsRepository.findCreditoByClient` (the whole fiado history, oldest
+    first — fullstack test: settled tickets stay, cash sales and other clients' never leak in).
+    Worker protocol gains `cuentas` (every client with their fiado tickets — line totals, who
+    captured — their abonos, and the domain-derived saldo) and `abonar` (`RegistrarPagoClienteUseCase`:
+    whole amount, D5's saldo a favor included) in `runtime/cuentas.ts`. The caja's fiado capture now
+    travels with its client (`VentaHecha.clienteId`; 'Fiado' maps to the wire's 'Crédito') and the
+    linked picker reads the register's own accounts — «Cliente nuevo» hides there until client
+    creation exists (C-18's form). Screens: `use-cobranza` linked path (optimistic append, then the
+    use case and the queue; F-4's frozen `HOY` stays fixture-only — linked uses the real date),
+    `DetalleClienteViva` for the account's route; `useCliente`'s abono writes the same way. Shared
+    `runtime/use-credenciales` (ventas' private hook promoted). Seed: two fiado clients (Doña Mari,
+    Raúl Contreras) with real ULID mnemonics — the first attempt used 'CLIM1', whose I and L broke
+    the bootstrap's Crockford ULID schema. `acceso-flow` now re-taps a NIP digit that a cold build's
+    hydration dropped (the boxes say what landed). Acceptance `e2e/cobranza.sync.spec.ts`: a fiado
+    sale opens Doña Mari's account ($50, V-0001, due in 7 days), a $20 cash abono applies oldest
+    first («queda $30.00»), the history shows both movements, and Postgres holds the pendiente
+    ticket and the 2000-centavo payment. Matrix 529 green.
+- **Gate:** a linked register's accounts and abonos are the device's own data, end to end.
 
 ### O-34 Detalle de venta on real data
 

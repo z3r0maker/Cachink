@@ -11,6 +11,7 @@
  *
  *   pnpm --filter @xangarro/data-pg db:seed
  */
+import { seedClients } from './seed-clients.js';
 import { seedDayClose, seedMovements } from './seed-extra.js';
 import { hash } from 'bcryptjs';
 import postgres from 'postgres';
@@ -129,6 +130,7 @@ async function seedPeople(sql: Sql): Promise<void> {
               ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
       ON CONFLICT (id) DO NOTHING`;
   }
+  await seedClients(sql);
   for (const [id, nombre, puesto, salario, periodo] of EMPLOYEES) {
     await sql`
       INSERT INTO employees (id, nombre, puesto, salario_centavos, periodo,
