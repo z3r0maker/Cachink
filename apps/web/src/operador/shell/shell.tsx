@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
 import { ColaProvider, useCola } from './cola';
-import { useRegisterRuntime } from '../runtime/client';
+import { useRegisterRuntime } from '../runtime/hooks';
 import { OperadorHeader, HEADER_ACTION_ID } from './header';
 import { OperadorSidebar } from './sidebar';
 import { BloqueoCaja } from '../caja/bloqueo';

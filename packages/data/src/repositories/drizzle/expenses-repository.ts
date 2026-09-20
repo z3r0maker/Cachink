@@ -6,6 +6,7 @@
 import { and, desc, eq, gte, isNull, lte } from 'drizzle-orm';
 import type {
   BusinessId,
+  CajaTurnoId,
   DeviceId,
   UserId,
   ExpenseCategory,
@@ -63,6 +64,16 @@ export class DrizzleExpensesRepository implements ExpensesRepository {
       .where(and(eq(expenses.id, id), isNull(expenses.deletedAt)))
       .get();
     return row ? this.#mapRow(row) : null;
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Expense[]> {
+    const rows = await this.#db
+      .select()
+      .from(expenses)
+      .where(and(eq(expenses.cajaTurnoId, cajaTurnoId), isNull(expenses.deletedAt)))
+      .orderBy(desc(expenses.createdAt))
+      .all();
+    return rows.map((r) => this.#mapRow(r));
   }
 
   async findByDate(date: IsoDate, businessId: BusinessId): Promise<readonly Expense[]> {

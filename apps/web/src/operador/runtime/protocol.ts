@@ -82,6 +82,17 @@ export interface LineaPara {
   readonly categoria: string;
 }
 
+/** One petty-cash expense of the open turno, as Gastos lists it (O-35). */
+export interface GastoPara {
+  readonly id: string;
+  readonly concepto: string;
+  readonly montoCentavos: string;
+  /** The domain's stored category; the screen says its own word. */
+  readonly categoria: string;
+  readonly hora: string;
+  readonly proveedor: string | null;
+}
+
 /** The open turno's ticket by folio, with everything the detail screen needs. */
 export interface TicketPara {
   readonly id: string;
@@ -170,6 +181,26 @@ export type WorkerRequest =
       readonly ticketId: string;
       readonly pin: string;
       readonly motivo: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'gastos';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly turnoId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'gastar';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly userId: string;
+      readonly turnoId: string;
+      readonly concepto: string;
+      /** The operator's category word; the worker maps it to the domain's. */
+      readonly categoria: string;
+      readonly montoCentavos: string;
+      readonly proveedor: string | null;
     }
   | {
       readonly id: number;

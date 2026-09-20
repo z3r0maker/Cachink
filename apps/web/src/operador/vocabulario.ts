@@ -19,6 +19,23 @@ const CATEGORIA: Record<CategoriaGasto, ExpenseCategory> = {
 
 export const categoriaDominio = (c: CategoriaGasto): ExpenseCategory => CATEGORIA[c];
 
+/** The inverse, for reads: what the operator's screen calls a stored category.
+ *  Total for the register's own rows — it writes through `categoriaDominio`. */
+const ETIQUETA: Record<ExpenseCategory, CategoriaGasto> = {
+  'Materia Prima': 'Insumos',
+  Servicios: 'Servicios',
+  Logística: 'Transporte',
+  Mantenimiento: 'Mantenimiento',
+  Otro: 'Otros',
+  // Categories the register never writes; the screen says «Otros» for them.
+  Inventario: 'Otros',
+  Nómina: 'Otros',
+  Renta: 'Otros',
+  Publicidad: 'Otros',
+  Impuestos: 'Otros',
+};
+export const categoriaOperador = (c: ExpenseCategory): CategoriaGasto => ETIQUETA[c];
+
 /**
  * Five close-out reasons onto six stored values. `gasto-no-registrado` has no
  * reason on the close (the expense screen captures those); the enum mixes cause
