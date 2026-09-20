@@ -238,6 +238,22 @@ before reporting, Maestro/Playwright flow for the happy path.
 ### O-12 Operador · Acceso (vincular → NIP → fondo)
 
 - [ ] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
+  - Done: 2026-09-19 · `src/operador/acceso/` — the gate stands before every register route: an
+    unlinked browser sees only Acceso (device-token state, never the owner cookie — ADR-071 §1).
+    Vincular (correo + the panel's 8-char code, spaces/hyphens/case ignored — the correo is
+    /activate's second factor; the design file shows only the code, the upstream amendment is
+    this entry) redeems for real, and the bootstrap becomes the register's local database
+    (`applyReferenceTables`). ¿Quién abre turno? lists the operators from that database; the NIP
+    is verified on the device (bcryptjs in the Worker, three tries then back to the picker,
+    «Te quedan N intentos.»). The fondo opens the turno through `AbrirCajaUseCase` — the gate this
+    task owes — and a reload with an open turno walks straight back in. `e2e/acceso.sync.spec.ts`
+    walks the real door in a fresh context (gated → link → wrong NIP → NIP 2580 → fondo → register
+    → reload stays in) and the wrong-code refusal reads the contract's codes as Spanish copy. The
+    pg seed's operators now carry a real bcrypt hash of a documented PIN (2580) — the old constant
+    was a truncated hash no compare() could match; operators.spec reactivates what its last test
+    deactivates (acceso's picker and permisos' grant read them). The fixture-era screens pass
+    behind a demo flag the suite's storageState sets (`xangarro.caja.demo`) — removed when
+    O-14+ wires real data. Matrix: 525 passed, 0 failed.
 - **Gate contribution:** the turno does not open without a captured fondo.
 
 ### O-13 Register lock and operator switch

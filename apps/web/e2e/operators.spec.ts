@@ -127,3 +127,11 @@ test('deactivating the last active operator is allowed, and warned about', async
     'Ya no queda ningún operador activo',
   );
 });
+
+test.afterAll(async () => {
+  // The last test deactivates every operator to see the warning; later files
+  // (acceso's picker, permisos' grant) read them active. Leave the seed whole.
+  await db(
+    (sql) => sql`UPDATE users SET active = true, updated_at = now() WHERE business_id = ${BIZ}`,
+  );
+});

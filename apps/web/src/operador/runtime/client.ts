@@ -10,9 +10,17 @@
 import { useEffect, useState } from 'react';
 
 import type { RegistrarTicketInput } from '@xangarro/application';
+import type { ReferenceTables } from '@xangarro/contracts';
 import type { SyncRunResult } from '@xangarro/sync';
 
-import type { BootInfo, RegistrarContext, WorkerRequest, WorkerResponse } from './db.worker';
+import type {
+  BootInfo,
+  OperadorPara,
+  RegistrarContext,
+  SesionAbierta,
+  WorkerRequest,
+  WorkerResponse,
+} from './protocol';
 
 type Call =
   | { readonly method: 'boot' }
@@ -22,7 +30,28 @@ type Call =
       readonly ctx: RegistrarContext;
     }
   | { readonly method: 'sync'; readonly token: string | null }
-  | { readonly method: 'counts' };
+  | { readonly method: 'counts' }
+  | {
+      readonly method: 'vincular';
+      readonly tables: ReferenceTables;
+      readonly businessId: string;
+    }
+  | { readonly method: 'operadores'; readonly businessId: string; readonly deviceId: string }
+  | {
+      readonly method: 'autenticar';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly nombre: string;
+      readonly nip: string;
+    }
+  | {
+      readonly method: 'abrirCaja';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly userId: string;
+      readonly fondoCentavos: string;
+    }
+  | { readonly method: 'turnoAbierto'; readonly businessId: string; readonly deviceId: string };
 
 export interface RuntimeCounts {
   readonly pending: number;
@@ -78,6 +107,49 @@ export class RegisterRuntime {
 
   counts(): Promise<RuntimeCounts> {
     return this.#call<RuntimeCounts>({ method: 'counts' });
+  }
+
+  /** O-12 · Vincular: the activation bootstrap becomes the local database. */
+  vincular(tables: ReferenceTables, businessId: string): Promise<void> {
+    return this.#call<void>({ method: 'vincular', tables, businessId });
+  }
+
+  operadores(businessId: string, deviceId: string): Promise<readonly OperadorPara[]> {
+    return this.#call<readonly OperadorPara[]>({ method: 'operadores', businessId, deviceId });
+  }
+
+  autenticar(
+    businessId: string,
+    deviceId: string,
+    nombre: string,
+    nip: string,
+  ): Promise<{ success: boolean; userId: string | null }> {
+    return this.#call<{ success: boolean; userId: string | null }>({
+      method: 'autenticar',
+      businessId,
+      deviceId,
+      nombre,
+      nip,
+    });
+  }
+
+  abrirCaja(
+    businessId: string,
+    deviceId: string,
+    userId: string,
+    fondoCentavos: bigint,
+  ): Promise<{ turnoId: string }> {
+    return this.#call<{ turnoId: string }>({
+      method: 'abrirCaja',
+      businessId,
+      deviceId,
+      userId,
+      fondoCentavos: fondoCentavos.toString(),
+    });
+  }
+
+  turnoAbierto(businessId: string, deviceId: string): Promise<SesionAbierta | null> {
+    return this.#call<SesionAbierta | null>({ method: 'turnoAbierto', businessId, deviceId });
   }
 
   terminate(): void {

@@ -116,7 +116,10 @@ async function seedExpenses(sql: Sql): Promise<void> {
 }
 
 async function seedPeople(sql: Sql): Promise<void> {
-  const PIN = '$2b$10$seedseedseedseedseedse';
+  // A real hash of a documented PIN (ADR-072: four digits, owner-reset only):
+  // a register linked to the demo tenant authenticates with 2580. The old
+  // constant was a truncated bcrypt string no compare() could ever match.
+  const PIN = await hash('2580', 10);
   for (const [id, nombre, color, puedeCancelar] of USERS) {
     await sql`
       INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,

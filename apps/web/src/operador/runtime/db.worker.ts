@@ -8,9 +8,8 @@
 import initSqlJs, { type Database as SqlJsDatabase } from 'sql.js';
 import { drizzle } from 'drizzle-orm/sql-js';
 import * as schema from '@xangarro/data';
+import { runMigrations, DrizzleTicketsRepository } from '@xangarro/data';
 import {
-  runMigrations,
-  DrizzleTicketsRepository,
   DrizzleSalesRepository,
   DrizzleClientsRepository,
   DrizzleProductsRepository,
@@ -20,21 +19,14 @@ import {
 import { RegistrarTicketUseCase, type RegistrarTicketInput } from '@xangarro/application';
 import { ApiClient, SyncEngine, type SyncRunResult } from '@xangarro/sync';
 
+import * as access from './access';
 import { opfsRead, opfsWrite } from './opfs';
+import type { RegistrarContext, WorkerRequest, WorkerResponse } from './protocol';
+
+export type { BootInfo, OperadorPara, SesionAbierta } from './protocol';
 
 /** The WASM binary ships as a static asset the Worker fetches by URL. */
 const WASM_URL = '/sql-wasm.wasm';
-
-export interface BootInfo {
-  /** True when no OPFS database existed and the journal just applied. */
-  readonly fresh: boolean;
-}
-
-export interface RegistrarContext {
-  readonly deviceId: string;
-  readonly userId: string | null;
-  readonly stockEnabled: boolean;
-}
 
 type Db = ReturnType<typeof drizzle>;
 
@@ -64,7 +56,7 @@ async function openRuntime(): Promise<Runtime> {
   return { sql, db, engine };
 }
 
-async function boot(): Promise<BootInfo> {
+async function boot(): Promise<{ fresh: boolean }> {
   if (runtime === null) {
     const hadDb = (await opfsRead()) !== null;
     runtime = await openRuntime();
@@ -101,40 +93,6 @@ async function registrar(
   }
 }
 
-export type WorkerRequest =
-  | { readonly id: number; readonly method: 'boot' }
-  | {
-      readonly id: number;
-      readonly method: 'registrar';
-      readonly input: RegistrarTicketInput;
-      readonly ctx: RegistrarContext;
-    }
-  | { readonly id: number; readonly method: 'sync'; readonly token: string | null }
-  | { readonly id: number; readonly method: 'counts' };
-
-export type WorkerResponse =
-  | { readonly id: number; readonly ok: true; readonly data: unknown }
-  | { readonly id: number; readonly ok: false; readonly error: string };
-
-self.onmessage = async (event: MessageEvent<WorkerRequest>): Promise<void> => {
-  const { id, method } = event.data;
-  try {
-    const data =
-      method === 'boot'
-        ? await boot()
-        : method === 'registrar'
-          ? await registrar(event.data.input, event.data.ctx)
-          : method === 'sync'
-            ? await sync(event.data.token)
-            : await counts();
-    const response: WorkerResponse = { id, ok: true, data };
-    self.postMessage(response);
-  } catch (e) {
-    const response: WorkerResponse = { id, ok: false, error: String(e) };
-    self.postMessage(response);
-  }
-};
-
 async function sync(token: string | null): Promise<SyncRunResult> {
   if (runtime === null) throw new Error('runtime not booted');
   deviceToken = token;
@@ -149,4 +107,82 @@ async function sync(token: string | null): Promise<SyncRunResult> {
 async function counts(): Promise<{ pending: number; rejected: number; retrying: number }> {
   if (runtime === null) throw new Error('runtime not booted');
   return runtime.engine.counts();
+}
+
+self.onmessage = async (event: MessageEvent<WorkerRequest>): Promise<void> => {
+  const { id } = event.data;
+  try {
+    const data = await handle(event.data);
+    const response: WorkerResponse = { id, ok: true, data };
+    self.postMessage(response);
+  } catch (e) {
+    const response: WorkerResponse = { id, ok: false, error: String(e) };
+    self.postMessage(response);
+  }
+};
+
+async function handle(request: WorkerRequest): Promise<unknown> {
+  switch (request.method) {
+    case 'boot':
+      return boot();
+    case 'registrar':
+      return registrar(request.input, request.ctx);
+    case 'sync':
+      return sync(request.token);
+    case 'counts':
+      return counts();
+    default:
+      return handleAccess(request);
+  }
+}
+
+/** O-12's door: every op needs the booted runtime and persists afterwards. */
+async function handleAccess(request: WorkerRequest): Promise<unknown> {
+  if (request.method === 'vincular') {
+    return runAccess(async (rt) => {
+      await access.vincularBootstrap(rt.db, request.tables, request.businessId as never);
+    });
+  }
+  if (request.method === 'autenticar') {
+    return runAccess((rt) =>
+      access.autenticar(
+        rt.db,
+        request.businessId as never,
+        request.deviceId,
+        request.nombre,
+        request.nip,
+      ),
+    );
+  }
+  if (request.method === 'abrirCaja') {
+    return runAccess((rt) =>
+      access.abrirCaja(
+        rt.db,
+        request.businessId as never,
+        request.deviceId,
+        request.userId,
+        BigInt(request.fondoCentavos),
+      ),
+    );
+  }
+  if (request.method === 'operadores') {
+    return runAccess((rt) =>
+      access.operadores(rt.db, request.businessId as never, request.deviceId),
+    );
+  }
+  if (request.method === 'turnoAbierto') {
+    return runAccess((rt) =>
+      access.turnoAbierto(rt.db, request.businessId as never, request.deviceId),
+    );
+  }
+  throw new Error('unknown method');
+}
+
+async function runAccess<T>(fn: (rt: Runtime) => Promise<T>): Promise<T> {
+  if (runtime === null) throw new Error('runtime not booted');
+  try {
+    return await fn(runtime);
+  } finally {
+    await persist();
+  }
 }
