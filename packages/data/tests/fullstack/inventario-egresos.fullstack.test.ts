@@ -40,6 +40,45 @@ describe('Inventario + Egresos [fullstack]', () => {
     productId = product.id;
   });
 
+  it('findByCajaTurno scopes to the turno, newest first (O-35)', async () => {
+    const turno = await h.useCases.abrirCaja.execute({
+      userId: USER_ID,
+      fecha: '2026-04-23',
+      montoAperturaCentavos: 500_00n,
+      efectivoAdicionalCentavos: 0n,
+      businessId: BIZ,
+    });
+    await h.useCases.registrarEgreso.execute({
+      fecha: '2026-04-23',
+      concepto: 'Gas para la parrilla',
+      categoria: 'Materia Prima',
+      monto: 150_00n,
+      cajaTurnoId: turno.id,
+      businessId: BIZ,
+    });
+    await new Promise((r) => setTimeout(r, 3));
+    await h.useCases.registrarEgreso.execute({
+      fecha: '2026-04-23',
+      concepto: 'Papel aluminio',
+      categoria: 'Materia Prima',
+      monto: 40_00n,
+      cajaTurnoId: turno.id,
+      businessId: BIZ,
+    });
+    // Outside any turno — must not leak into the register's list.
+    await h.useCases.registrarEgreso.execute({
+      fecha: '2026-04-23',
+      concepto: 'Renta del local',
+      categoria: 'Renta',
+      monto: 3000_00n,
+      businessId: BIZ,
+    });
+
+    const delTurno = await h.repos.expenses.findByCajaTurno(turno.id);
+    expect(delTurno.map((g) => g.concepto)).toEqual(['Papel aluminio', 'Gas para la parrilla']);
+    expect(delTurno.every((g) => g.cajaTurnoId === turno.id)).toBe(true);
+  });
+
   it('entrada creates both movement and linked Egreso', async () => {
     const movement = await h.useCases.registrarMovimiento.execute({
       productoId: productId,

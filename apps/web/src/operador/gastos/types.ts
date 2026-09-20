@@ -1,5 +1,7 @@
 import type { Money } from '@xangarro/domain';
 
+import type { NuevoGasto } from './registrar';
+
 import type { EstadoMode } from '../estado';
 
 /** The five petty-cash categories of `Operador Gastos.dc.html`. */
@@ -28,4 +30,6 @@ export interface GastosData {
 export interface GastosScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly data: GastosData;
+  /** Linked register: the write goes through the use case (O-35). */
+  readonly registrarVivo?: (n: NuevoGasto) => void;
 }

@@ -24,8 +24,8 @@ const FLECHA = 'M12 3v14M6 11l6 6 6-6M4 21h16';
 const FILTROS = ['Todos', ...CATEGORIAS] as const;
 
 /** Operador · Gastos: petty cash out of the drawer, each with its category and receipt. */
-export function GastosScreen({ state, data }: GastosScreenProps) {
-  const x = useGastos(data.gastos);
+export function GastosScreen({ state, data, registrarVivo }: GastosScreenProps) {
+  const x = useGastos(data.gastos, registrarVivo);
   const firma = `${data.operador}, ${data.caja}`;
   return (
     <OpMain top={22}>

@@ -7,8 +7,6 @@
  * the browser not evict its database (ADR-071 §4).
  */
 
-import { useEffect, useState } from 'react';
-
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { ReferenceTables } from '@xangarro/contracts';
 import type { SyncRunResult } from '@xangarro/sync';
@@ -16,6 +14,7 @@ import type { SyncRunResult } from '@xangarro/sync';
 import type {
   BootInfo,
   CuentaPara,
+  GastoPara,
   OperadorPara,
   RegistrarContext,
   SesionAbierta,
@@ -27,6 +26,7 @@ import type {
   AbonoInput,
   Call,
   CancelarInput,
+  GastoInput,
   ProductoPara,
   TicketVivo,
   VentasTurno,
@@ -133,6 +133,20 @@ export class RegisterRuntime {
     return this.#call(calls.ticket(businessId, deviceId, folio));
   }
 
+  /** O-35 · Gastos: the open turno's petty-cash expenses. */
+  gastos(
+    businessId: string,
+    deviceId: string,
+    turnoId: string,
+  ): Promise<{ readonly desde: string; readonly gastos: readonly GastoPara[] }> {
+    return this.#call(calls.gastos(businessId, deviceId, turnoId));
+  }
+
+  /** O-35: record a gasto of the open turno through the real use case. */
+  gastar(p: GastoInput): Promise<{ readonly id: string }> {
+    return this.#call(calls.gastar(p));
+  }
+
   /** O-32: cancel through the real use case — PIN and permission included. */
   cancelar(p: CancelarInput): Promise<{ folio: number; cashToReturnCentavos: string | null }> {
     return this.#call(calls.cancelar(p));
@@ -161,26 +175,4 @@ let singleton: RegisterRuntime | null = null;
 export function registerRuntime(): RegisterRuntime {
   singleton ??= new RegisterRuntime();
   return singleton;
-}
-
-export interface RuntimeStatus {
-  readonly booted: boolean;
-  readonly error: string | null;
-}
-
-/** For the register's screens: boot once when the shell mounts (O-11 gate). */
-export function useRegisterRuntime(): RuntimeStatus {
-  const [status, setStatus] = useState<RuntimeStatus>({ booted: false, error: null });
-  useEffect(() => {
-    const runtime = registerRuntime();
-    let alive = true;
-    runtime
-      .boot()
-      .then(() => alive && setStatus({ booted: true, error: null }))
-      .catch((e: unknown) => alive && setStatus({ booted: false, error: String(e) }));
-    return () => {
-      alive = false;
-    };
-  }, []);
-  return status;
 }

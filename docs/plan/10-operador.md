@@ -653,10 +653,22 @@ groundwork (O-02 to O-06) and C-18.
 
 ### O-35 Gastos on real data
 
-- [ ] Status · **Blocked by:** O-32
-- **Steps:** `RegistrarEgresoUseCase` in the worker; receipt photos wait for the storage bucket
-  (ADR-083 D3, still provisional).
-- **Acceptance:** sync spec registers a gasto and it reaches Postgres.
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · `ExpensesRepository.findByCajaTurno` (interface, Drizzle, in-memory;
+    fullstack test: the turno's own only, newest first, rent outside any turno never leaks in).
+    Worker protocol gains `gastos` (the open turno's expenses — the domain's stored category said
+    back in the operator's word via the new `categoriaOperador` inverse of `vocabulario.ts`'s D4
+    map — plus the turno's apertura) and `gastar` (`RegistrarEgresoUseCase` scoped to the open
+    turno with `cajaTurnoId`, the category written as the domain's enum; receipt photos stay a
+    `Sin comprobante` row until the bucket lands, ADR-083 D3). Screens: `GastosViva` loads the
+    register's own list and routes the write through the use case — the optimistic prepend and
+    toast the fixture path always had stay; the hook takes an optional `registrarVivo` delegate.
+    db.worker's method dispatch became a table in `runtime/router.ts` (one handler per method, the
+    complexity budget said no to an eleventh `if`), and the client's React bindings moved to
+    `runtime/hooks.ts`. Acceptance `e2e/gastos.sync.spec.ts`: the turno starts empty, $150 of
+    «Gas para la parrilla» in Insumos lands on top with the figures re-derived, and Postgres holds
+    the row tied to the open turno, stored as «Materia Prima». Matrix 549 green.
+- **Gate:** the register's petty cash is its own data, scoped to its turno, end to end.
 
 ### O-36 Cierre de turno on real data
 

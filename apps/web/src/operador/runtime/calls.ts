@@ -121,3 +121,33 @@ export const abonar = (p: AbonoInput): Call => ({
 });
 
 export const cancelar = (p: CancelarInput): Call => ({ method: 'cancelar', ...p });
+
+export interface GastoInput {
+  readonly businessId: string;
+  readonly deviceId: string;
+  readonly userId: string;
+  readonly turnoId: string;
+  readonly concepto: string;
+  readonly categoria: string;
+  readonly montoCentavos: bigint;
+  readonly proveedor: string | null;
+}
+
+export const gastos = (businessId: string, deviceId: string, turnoId: string): Call => ({
+  method: 'gastos',
+  businessId,
+  deviceId,
+  turnoId,
+});
+
+export const gastar = (p: GastoInput): Call => ({
+  method: 'gastar',
+  businessId: p.businessId,
+  deviceId: p.deviceId,
+  userId: p.userId,
+  turnoId: p.turnoId,
+  concepto: p.concepto,
+  categoria: p.categoria,
+  montoCentavos: p.montoCentavos.toString(),
+  proveedor: p.proveedor,
+});

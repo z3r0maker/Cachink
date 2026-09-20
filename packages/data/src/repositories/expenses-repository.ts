@@ -8,6 +8,7 @@
  */
 
 import type {
+  CajaTurnoId,
   BusinessId,
   Expense,
   ExpenseCategory,
@@ -34,6 +35,9 @@ export interface ExpensesRepository {
   create(input: NewExpense): Promise<Expense>;
   findById(id: ExpenseId): Promise<Expense | null>;
   findByDate(date: IsoDate, businessId: BusinessId): Promise<readonly Expense[]>;
+
+  /** The turno's non-deleted expenses, newest first — the register's Gastos list. */
+  findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Expense[]>;
   /** List expenses in an inclusive date range, newest first. */
   findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Expense[]>;
   /** `yearMonth` is a `YYYY-MM` string, e.g. `"2026-04"`. */

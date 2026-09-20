@@ -4,6 +4,7 @@
  */
 
 import type {
+  CajaTurnoId,
   BusinessId,
   DeviceId,
   Expense,
@@ -51,6 +52,12 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
     const row = this.rows.get(id);
     if (!row || row.deletedAt !== null) return null;
     return row;
+  }
+
+  async findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Expense[]> {
+    return this.#live()
+      .filter((r) => r.cajaTurnoId === cajaTurnoId)
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
 
   async findByDate(date: IsoDate, businessId: BusinessId): Promise<readonly Expense[]> {

@@ -13,7 +13,7 @@ const hhmm = (d: Date) =>
  * The list, its filters, the form and the toast. A new expense goes on top of
  * this device's list until the capture use case is wired (O-06).
  */
-export function useGastos(inicial: readonly GastoTurno[]) {
+export function useGastos(inicial: readonly GastoTurno[], registrarVivo?: (n: NuevoGasto) => void) {
   const [gastos, setGastos] = useState(inicial);
   const [filtro, setFiltro] = useState<'Todos' | CategoriaGasto>('Todos');
   const [query, setQuery] = useState('');
@@ -33,6 +33,8 @@ export function useGastos(inicial: readonly GastoTurno[]) {
     const prueba = n.foto ? 'con comprobante' : 'sin comprobante';
     setToast(`−${formatMoney(n.monto)} · ${n.concepto} · ${n.categoria} · ${prueba}.`);
     setOpen(false);
+    // Linked (O-35): the optimistic row stands in for the use case's write.
+    registrarVivo?.(n);
   };
   const closeToast = useCallback(() => setToast(null), []);
   return {
