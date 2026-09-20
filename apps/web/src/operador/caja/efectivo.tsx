@@ -34,6 +34,10 @@ function quickAmounts(total: Money): readonly Money[] {
 /** Pago en efectivo: typed or tapped, with the change (or what is missing) in 38 px. */
 export function Efectivo({ caja }: { readonly caja: Caja }) {
   const [raw, setRaw] = useState('');
+  // Set on the first «Registrar venta» and never reset here: React flushes
+  // discrete clicks synchronously, so the rest of a button smash lands on a
+  // disabled button instead of the catalogue behind the closing sheet.
+  const [registrando, setRegistrando] = useState(false);
   const diff = calcCambio(parseRecibido(raw), caja.total);
   const ok = diff !== null && diff >= 0n && caja.total > 0n;
   return (
@@ -56,8 +60,12 @@ export function Efectivo({ caja }: { readonly caja: Caja }) {
       <button
         type="button"
         className={c.confirm}
-        disabled={!ok}
-        onClick={() => caja.vender({ metodo: 'Efectivo', cambio: diff, nota: '' })}
+        disabled={!ok || registrando}
+        onClick={() => {
+          if (registrando) return;
+          setRegistrando(true);
+          caja.vender({ metodo: 'Efectivo', cambio: diff, nota: '' });
+        }}
       >
         Registrar venta
       </button>

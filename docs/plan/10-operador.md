@@ -138,7 +138,44 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 
 ### O-05 Real `/sync/push` and `/sync/pull` (B-08, B-09)
 
-- [ ] Status · **Blocked by:** O-02, C-16 … C-19 · **Blocks:** O-06
+- [x] Status · **Blocked by:** O-02, C-16 … C-19 · **Blocks:** O-06
+  - Done: 2026-09-19 · `pnpm --filter @xangarro/web test:conformance` is green against the real
+    portal (activate 4/4, sync 10 passed + 1 mock-only skip), with two new cases in
+    `packages/contracts/tests/conformance/sync.test.ts`: a `plataforma = web` device activates
+    (now a hard assert — C-16 is in the contract, so a current portal must accept it) and shares
+    the pull surface (`mensajes_operador`); a ticket and its line push in one batch and a reply
+    to a missing mensaje rejects `FK_MENSAJE_MISSING`. The run found and fixed a real portal bug:
+    `users.permissions` travelled as its JSON-text string since A-05 gave `UserSchema` the field —
+    `codec.ts` decodes it now. Rerun flake fixed too: `clearLocalThrottles` also clears the
+    suite's bad code (`activate:code:ZZZZZZZZ`), which locked the second run inside 15 minutes.
+    The browser round-trip is `apps/web/e2e/dispositivo-web.sync.spec.ts`: from a real page,
+    activate a web device, push a ticket + its line, pull — acknowledgment ≥ push, rows verified
+    in Postgres. Alongside it the C-17/A-05 fallout in the e2e fixtures: `sync-phone.ts` builds
+    tickets + lines (not header-laden sales), three specs' raw `INSERT INTO sales` lost the
+    dropped columns and gained their ticket headers, and the pg seed's two `INSERT INTO users`
+    lost `role`/`recovery_password_hash`/`must_change_pin` (it broke `db:reset` outright).
+    Fixing `db:reset` un-hid that the whole Playwright matrix had not run since A-05; also
+    repaired to green: the e2e webServer now passes `BILLING_DATABASE_URL` (suscripción/facturas/
+    data/a11y were sweeping error cards), `loadSuscripcion` counts operators without the dropped
+    `users.role`, the Movimiento dialog keeps a synchronous in-flight guard (a 5-click smash
+    wrote 5 movements and poisoned the shared DB for later specs), chaos-4's mocked 500 bodies
+    declare `charset=utf-8` (Latin-1 mojibake broke the text match), chaos-1/chaos-2 point at
+    SKUs the current seed actually has (TAC-002…006 died with the old demo seeder) and the
+    register smash pays enough for the $185 fixture ticket, chaos-3's "no alert" assertions are
+    scoped to non-empty alerts (Next's `#__next-route-announcer__` is a 1×1 role="alert" on
+    every page), and eslint ignores generated dirs (`.next*`, `.out`). The last three failures
+    needed product fixes, not spec fixes: the operator modal now has a close animation (Radix
+    keeps the portal mounted while it plays, so a smashed «Registrar venta» cannot leak clicks
+    onto the catalogue behind the closing card — the smash left "Orden de pastor ×4" on the next
+    ticket) and `useCaja.vender` sells one ticket once (same-lines guard); the sync project's
+    smoke signs up in its own cleared context (/signup bounces signed-in visitors), reads its
+    tenant from the activation bootstrap (no `xg_business` cookie exists anymore), pushes a
+    ticket + line dated inside the pinned business month, and clicks Xangarrito's real
+    «Empezar gratis»; asesor's dismiss test arms a real detector (materialise-on-read reaps any
+    seeded notice no detector backs — three April ventas fire the quincena insight), and
+    asesor-metas' seed is idempotent (fullyParallel re-runs the file-level beforeAll per test
+    group). **The full matrix is green: 523 passed, 0 failed** — first time since A-05 broke
+    `db:reset` outright.
 - **Steps:** as specified in B-08/B-09, now also serving `plataforma = web` devices.
 - **Acceptance:** B-08/B-09 acceptance, plus a browser device round-trip in Playwright.
 

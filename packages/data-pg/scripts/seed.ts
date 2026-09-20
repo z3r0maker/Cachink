@@ -119,10 +119,10 @@ async function seedPeople(sql: Sql): Promise<void> {
   const PIN = '$2b$10$seedseedseedseedseedse';
   for (const [id, nombre, color, puedeCancelar] of USERS) {
     await sql`
-      INSERT INTO users (id, nombre, pin_hash, recovery_password_hash, must_change_pin, avatar_color, permissions, role,
+      INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
                          business_id, device_id, created_at, updated_at)
-      VALUES (${id}, ${nombre}, ${PIN}, ${PIN}, false, ${color},
-              ${JSON.stringify({ canCancelSales: puedeCancelar })}, 'operativo',
+      VALUES (${id}, ${nombre}, ${PIN}, ${color},
+              ${JSON.stringify({ canCancelSales: puedeCancelar })}, true,
               ${BIZ}, ${DEV}, ${CREATED}, ${CREATED})
       ON CONFLICT (id) DO NOTHING`;
   }
@@ -202,9 +202,9 @@ async function seedConformance(sql: Sql): Promise<void> {
     ON CONFLICT (id) DO NOTHING`;
   const pin = await hash('0000', 10);
   await sql`
-    INSERT INTO users (id, nombre, pin_hash, recovery_password_hash, must_change_pin, avatar_color, permissions, role,
+    INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
                        business_id, device_id, created_at, updated_at)
-    VALUES (${c.userId}, 'Operador de prueba', ${pin}, ${pin}, false, '#3B6FFF', '{}', 'operativo',
+    VALUES (${c.userId}, 'Operador de prueba', ${pin}, '#3B6FFF', '{}', true,
             ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
     ON CONFLICT (id) DO NOTHING`;
   await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;

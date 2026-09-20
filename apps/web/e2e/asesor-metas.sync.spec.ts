@@ -26,38 +26,61 @@ const billingUrl = (): string =>
   process.env.BILLING_DATABASE_URL ??
   execFileSync('../../packages/data-pg/scripts/db-local.sh', ['billing-url']).toString().trim();
 
+// fullyParallel re-runs the file-level beforeAll once per test group: every id
+// is module-stable and every insert idempotent, so a re-run is a no-op.
+const ownerId = randomUUID();
+const viewerId = randomUUID();
+const producto = newUlid();
+const memberOwner = newUlid();
+const memberViewer = newUlid();
+const ticketIds = [newUlid(), newUlid(), newUlid()] as const;
+const metaId = newUlid();
+
 test.beforeAll(async () => {
-  const ownerId = randomUUID();
-  const viewerId = randomUUID();
   const ownerHash = await hashPassword(password);
   const viewerHash = await hashPassword(password);
-  const producto = newUlid();
   await asTenant(biz, async (sql) => {
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${ownerId}::uuid, ${email}, ${ownerHash})`;
-    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${viewerId}::uuid, ${`lectura-${stamp}@test.mx`}, ${viewerHash})`;
+    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${ownerId}::uuid, ${email}, ${ownerHash}) ON CONFLICT DO NOTHING`;
+    await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${viewerId}::uuid, ${`lectura-${stamp}@test.mx`}, ${viewerHash}) ON CONFLICT DO NOTHING`;
     await sql`
       INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, 'Carnitas Chela', 'RESICO', '626', 125, ${biz}, ${newUlid()}, now(), now())`;
+      VALUES (${biz}, 'Carnitas Chela', 'RESICO', '626', 125, ${biz}, ${newUlid()}, now(), now())
+      ON CONFLICT DO NOTHING`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, ${ownerId}, 'owner', ${biz}, now(), now()),
-             (${newUlid()}, ${viewerId}, 'viewer', ${biz}, now(), now())`;
+      VALUES (${memberOwner}, ${ownerId}, 'owner', ${biz}, now(), now()),
+             (${memberViewer}, ${viewerId}, 'viewer', ${biz}, now(), now())
+      ON CONFLICT DO NOTHING`;
     await sql`
       INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
                             seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
       VALUES (${producto}, 'Torta', 'Producto Terminado', 100, 'pza', 3, 'producto', false, 500,
-              ${biz}, ${biz}, now(), now())`;
-    for (const f of ['2026-04-05', '2026-04-18', '2026-04-27']) {
+              ${biz}, ${biz}, now(), now())
+      ON CONFLICT DO NOTHING`;
+    // C-17 (ADR-073): a sale is a ticket line — seed the header it joins to.
+    let folio = 0;
+    for (const [i, f] of ['2026-04-05', '2026-04-18', '2026-04-27'].entries()) {
+      folio += 1;
+      const saleId = ticketIds[i];
+      if (saleId === undefined) throw new Error('missing ticket id');
       await sql`
-        INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
+        INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                             business_id, device_id, created_at, updated_at)
+        VALUES (${saleId}, ${folio}, ${f}, 'Torta', 'Efectivo', 'pagado',
+                ${biz}, ${biz}, now(), now())
+        ON CONFLICT DO NOTHING`;
+      await sql`
+        INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                            producto_id, cantidad, business_id, device_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${f}, 'Torta', 'Producto', 100_000, 'Efectivo', 'pagado',
-                ${producto}, 2, ${biz}, ${biz}, now(), now())`;
+        VALUES (${saleId}, ${saleId}, ${f}, 'Torta', 'Producto', 100_000,
+                ${producto}, 2, ${biz}, ${biz}, now(), now())
+        ON CONFLICT DO NOTHING`;
     }
     // A goal for April that April's 300,000 beats: lograda on the lazy close.
     await sql`
       INSERT INTO metas (id, objetivo, motivo, nivel, objetivo_centavos, periodo, business_id, created_at, updated_at)
-      VALUES (${newUlid()}, 'vender', 'comprar', 'reto', 280_000, '2026-04', ${biz}, now(), now())`;
+      VALUES (${metaId}, 'vender', 'comprar', 'reto', 280_000, '2026-04', ${biz}, now(), now())
+      ON CONFLICT DO NOTHING`;
   });
   const billing = postgres(billingUrl(), { max: 1, onnotice: () => undefined });
   try {
@@ -65,7 +88,8 @@ test.beforeAll(async () => {
       INSERT INTO subscriptions (stripe_subscription_id, business_id, stripe_customer_id, plan_id, interval,
         status, stripe_status, current_period_start, current_period_end, collection_method)
       VALUES (${`sub_met_${stamp}`.slice(0, 40)}, ${biz}, ${`cus_met_${stamp}`.slice(0, 40)}, 'xangarro', 'month',
-        'active', 'active', now(), '2099-01-01', 'charge_automatically')`;
+        'active', 'active', now(), '2099-01-01', 'charge_automatically')
+      ON CONFLICT DO NOTHING`;
   } finally {
     await billing.end({ timeout: 5 });
   }
@@ -107,7 +131,8 @@ test('an achieved goal celebrates once, then the month-end dialog answers in its
   await expect(page.getByText('$3,600.00 al mes · $120.00 al día')).toBeVisible();
   await page.getByRole('button', { name: 'Empezar mi meta' }).click();
   await expect(page.getByText('Tu meta de 2026-05')).toBeVisible();
-  await expect(page.getByText('$3,600.00')).toBeVisible();
+  // Exact: the screen also says «Te faltan $3,600.00 para llegar.»
+  await expect(page.getByText('$3,600.00', { exact: true })).toBeVisible();
 });
 
 test('a viewer never sees the wizard', async ({ page }) => {

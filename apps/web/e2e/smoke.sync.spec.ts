@@ -58,17 +58,14 @@ async function wizardMinimo(page: Page): Promise<void> {
   await next(page, 'Terminar');
 }
 
-/** The tenant this signup created, from the signed cookie the app set. */
-async function bizDel(page: Page): Promise<string> {
-  const biz = (await page.context().cookies()).find((c) => c.name === 'xg_business')?.value;
-  expect(biz, 'signup set the business cookie').toBeDefined();
-  return biz as string;
-}
-
 test('signup → wizard → operator → import → code → activate → push → Movimientos', async ({
   page,
   request,
-}) => {
+}, testInfo) => {
+  // The whole point is a brand-new owner: /signup bounces signed-in visitors
+  // to the portal, so drop the sync project's owner cookie for this one.
+  test.skip(testInfo.project.name !== 'sync', 'lives in the sync project');
+  await page.context().clearCookies();
   // 1 · Signup and the wizard.
   await page.goto('/signup?plan=xangarrito');
   await page.getByTestId('signup-tu-nombre').fill('Humo');
@@ -79,11 +76,17 @@ test('signup → wizard → operator → import → code → activate → push �
   await wizardMinimo(page);
 
   // Free plan: no checkout — the plan screen only confirms, then the checklist.
-  const gratis = page.getByRole('button', { name: 'Seguir gratis' });
-  if (await gratis.isVisible().catch(() => false)) await gratis.click();
+  // Xangarrito's button reads «Empezar gratis»; the paid tiers' reads «Seguir
+  // gratis». The plan screen renders after the wizard's last step, so a
+  // one-shot isVisible() races it and loses; wait for either button to exist.
+  const gratis = page.getByRole('button', { name: /^(Empezar|Seguir) gratis$/ });
+  const hayPlan = await gratis
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  if (hayPlan) await gratis.click();
   await page.getByRole('link', { name: 'Ir a mi portal' }).click();
   await expect(page.getByRole('heading', { name: 'Hola, Humo' })).toBeVisible();
-  const biz = await bizDel(page);
 
   // 2 · An operator for the counter phone.
   await page.goto('/equipo');
@@ -131,45 +134,76 @@ test('signup → wizard → operator → import → code → activate → push �
     },
   });
   expect(r.status(), await r.text()).toBe(200);
-  const { deviceToken, deviceId } = await r.json();
+  const activated = await r.json();
+  const { deviceToken, deviceId } = activated;
+  // The panel predates the activation — reload to see the phone listed.
+  await page.reload();
   await expect(page.getByText(`Teléfono ${stamp}`)).toBeVisible();
 
-  // 6 · The phone pushes one sale of an imported product.
+  // The session is server-resolved (xg_session only — no xg_business cookie
+  // anymore), so the tenant this signup created is read from the activation's
+  // own bootstrap.
+  const biz = activated.bootstrap.tables.businesses[0]?.id as string;
+  expect(biz).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
+
+  // 6 · The phone pushes one ticket with its sale line (ADR-073), of an
+  // imported product.
   const [producto] = await asTenant(biz, async (sql) => {
     return sql<{ id: string }[]>`SELECT id FROM products WHERE sku = ${`HUMO-${stamp}-1`}`;
   });
+  const idTicket = newUlid();
   const idVenta = newUlid();
   const ahora = new Date().toISOString();
+  const audit = {
+    businessId: biz,
+    deviceId,
+    createdByUserId: null,
+    createdAt: ahora,
+    updatedAt: ahora,
+    deletedAt: null,
+  };
   const push = await request.post(API_PATHS.syncPush, {
     headers: deviceHeaders(deviceToken),
     data: encodeJson({
       deltas: [
         {
-          table: 'sales',
+          table: 'tickets',
+          rowId: idTicket,
           op: 'insert',
+          clientSeq: 1,
           row: {
-            id: idVenta,
-            fecha: ahora.slice(0, 10),
+            id: idTicket,
+            folio: 1,
+            fecha: '2026-05-10',
             hora: ahora.slice(11, 16),
             concepto: `Venta de humo ${idVenta.slice(-4)}`,
-            categoria: 'Producto',
-            monto: 2500n,
             metodo: 'Efectivo',
             clienteId: null,
             estadoPago: 'pagado',
+            efectivoRecibidoCentavos: 3000n,
+            cambioCentavos: 500n,
+            cajaTurnoId: null,
+            cancelMotivo: null,
+            cancelledByUserId: null,
+            cancelledAt: null,
+            ...audit,
+          },
+        },
+        {
+          table: 'sales',
+          rowId: idVenta,
+          op: 'insert',
+          clientSeq: 2,
+          row: {
+            id: idVenta,
+            ticketId: idTicket,
+            fecha: '2026-05-10',
+            concepto: `Venta de humo ${idVenta.slice(-4)}`,
+            categoria: 'Producto',
+            monto: 2500n,
             productoId: producto?.id,
             cantidad: 1,
-            efectivoRecibidoCentavos: 3000n,
-            cancelledByUserId: null,
-            cancelMotivo: null,
-            cancelledAt: null,
-            cajaTurnoId: null,
-            businessId: biz,
-            deviceId,
-            createdByUserId: null,
-            createdAt: ahora,
-            updatedAt: ahora,
-            deletedAt: null,
+            ...audit,
           },
         },
       ],

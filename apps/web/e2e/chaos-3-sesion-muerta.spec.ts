@@ -100,8 +100,10 @@ test('duplicate tabs: a stale editor silently overwrites, no conflict surfaced',
   await expect(pageB.locator('header').getByText(nameB)).toBeVisible();
 
   // Finding F-3: both saves succeed silently and NEITHER tab surfaces a conflict
-  // warning — last-write-wins with no inline notice.
-  await expect(pageB.getByRole('alert')).toHaveCount(0);
+  // warning — last-write-wins with no inline notice. (Non-empty only: Next's
+  // `#__next-route-announcer__` is a 1×1 role="alert" on every page — it has a
+  // bounding box, so a `visible` filter still counts it.)
+  await expect(pageB.getByRole('alert').filter({ hasText: /\S/ })).toHaveCount(0);
   await expect(pageB.getByText('Algo salió mal')).toHaveCount(0);
 
   await pageB.close();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 import { matches } from '../ui/search';
 import { addProducto, bump, contar, total } from './ticket';
@@ -33,6 +33,7 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const toast = useSaleToast();
   const count = contar(lines);
+  const vendida = useRef<readonly LineaTicket[] | null>(null);
   return {
     ...useCatalogo(data.catalogo),
     lines,
@@ -51,8 +52,12 @@ export function useCaja(data: CajaData, pasoInicial: CobroPaso) {
     sheetOpen,
     setSheetOpen,
     toast,
-    /** The sale is recorded (O-06 wires the ticket use case); the ticket starts over. */
+    /** The sale is recorded (O-06 wires the ticket use case); the ticket starts over.
+     *  A button smash fires this several times with the same render's `lines` —
+     *  one ticket, one sale; a new ticket is always a different array. */
     vender: (v: Omit<VentaHecha, 'lines' | 'total'>) => {
+      if (vendida.current === lines) return;
+      vendida.current = lines;
       toast.show({ ...v, lines, total: total(lines) });
       setLines([]);
       setPaso('catalogo');

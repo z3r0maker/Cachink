@@ -51,11 +51,19 @@ test.describe('pagination', () => {
                               created_at, updated_at)
         VALUES (${producto}, 'Pan', 'Producto Terminado', 500, 'pza', 3, 'producto', false, 1000,
                 ${biz}, ${dev}, now(), now())`;
+      // C-17 (ADR-073): every sale is a line of a ticket — listVentas joins
+      // the header, so seeding lines without one would show nothing.
       for (let i = 1; i <= 23; i += 1) {
+        const saleId = newUlid();
         await sql`
-          INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
+          INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                               business_id, device_id, created_at, updated_at)
+          VALUES (${saleId}, ${i}, '2026-05-10', ${`Venta ${i}`}, 'Efectivo', 'pagado',
+                  ${biz}, ${dev}, now(), now())`;
+        await sql`
+          INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                              producto_id, cantidad, business_id, device_id, created_at, updated_at)
-          VALUES (${newUlid()}, '2026-05-10', ${`Venta ${i}`}, 'Producto', 1000, 'Efectivo', 'pagado',
+          VALUES (${saleId}, ${saleId}, '2026-05-10', ${`Venta ${i}`}, 'Producto', 1000,
                   ${producto}, 1, ${biz}, ${dev}, now(), now())`;
       }
     });

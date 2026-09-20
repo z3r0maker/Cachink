@@ -30,6 +30,11 @@ export default tseslint.config(
       '**/node_modules/**',
       '**/dist/**',
       '**/build/**',
+      // Next build output, including Playwright's per-port NEXT_DIST_DIRs
+      // (.next, .next-e2e/<port>): generated, like dist/.
+      '**/.next*/**',
+      // Bundled spike output (e.g. apps/web/e2e/spikes/*/.out): esbuild, not source.
+      '**/.out/**',
       '**/coverage/**',
       '**/.turbo/**',
       '**/*.d.ts',

@@ -13,6 +13,7 @@ import {
   push,
   sale,
   TACO,
+  ticket,
   type Phone,
 } from './sync-phone';
 
@@ -38,10 +39,11 @@ test('a push is stored with its money, acknowledged, and its bad row shows on Si
   page,
   request,
 }) => {
-  const good = sale(a);
-  const bad = sale(a, { productoId: newUlid(), concepto: 'Venta sin producto' });
-  const r = await (await push(request, a, [good, bad])).json();
-  expect(r.accepted.map((x: { rowId: string }) => x.rowId)).toEqual([good.rowId]);
+  const t = ticket(a);
+  const good = sale(a, t.rowId);
+  const bad = sale(a, t.rowId, { productoId: newUlid(), concepto: 'Venta sin producto' });
+  const r = await (await push(request, a, [t, good, bad])).json();
+  expect(r.accepted.map((x: { rowId: string }) => x.rowId)).toEqual([t.rowId, good.rowId]);
   expect(r.rejected[0].code).toBe('FK_PRODUCT_MISSING');
 
   const [stored] = await asTenant(
@@ -105,10 +107,10 @@ test('an id owned by another business is a conflict, and that business is untouc
   await asTenant(
     CNF,
     (sql) => sql`
-      INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
+      INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                          producto_id, cantidad, business_id, device_id, created_at, updated_at)
-      VALUES (${foreignSale}, '2026-09-17', 'De otro negocio', 'Producto', 100, 'Efectivo',
-              'pagado', ${CNF_PRODUCT}, 1, ${CNF}, 'cnf-device',
+      VALUES (${foreignSale}, NULL, '2026-09-17', 'De otro negocio', 'Producto', 100,
+              ${CNF_PRODUCT}, 1, ${CNF}, 'cnf-device',
               now() - interval '1 day', now() - interval '1 day')`,
   );
   // Both write paths: an UP upsert (DO UPDATE → RLS 42501) and a HYBRID
@@ -121,7 +123,10 @@ test('an id owned by another business is a conflict, and that business is untouc
     clientSeq: 2,
     row: { ...template, id: CNF_PRODUCT, deviceId: a.deviceId },
   };
-  const r = await (await push(request, a, [sale(a, { id: foreignSale }), product])).json();
+  const t = ticket(a);
+  const r = await (
+    await push(request, a, [t, sale(a, t.rowId, { id: foreignSale }), product])
+  ).json();
   expect(r.rejected.map((x: { code: string }) => x.code)).toEqual([
     'DUPLICATE_CONFLICT',
     'DUPLICATE_CONFLICT',
@@ -157,9 +162,12 @@ test('retention: a phone may purge exactly what the cloud stored, and only its o
   request,
 }) => {
   const bAck = (await pull(request, b, b.cursor)).acknowledgedThrough;
-  const bad = sale(a, { productoId: newUlid() });
-  const first = await (await push(request, a, [sale(a), bad])).json();
-  const second = await (await push(request, a, [sale(a)])).json();
+  const t1 = ticket(a);
+  const t2 = ticket(a);
+  const bad = sale(a, t2.rowId, { productoId: newUlid() });
+  const first = await (await push(request, a, [t1, sale(a, t1.rowId), t2, bad])).json();
+  const t3 = ticket(a);
+  const second = await (await push(request, a, [t3, sale(a, t3.rowId)])).json();
   const stored = [...first.accepted, ...second.accepted].map(
     (x: { serverSeq: number }) => x.serverSeq,
   );
