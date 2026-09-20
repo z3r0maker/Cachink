@@ -24,27 +24,27 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Verify the product grid is visible.
 - assertVisible:
-    id: "ventas-product-grid"
+    id: 'ventas-product-grid'
 
 # Tap the search input.
 - tapOn:
-    id: "ventas-product-search"
+    id: 'ventas-product-search'
 
 # Type a product name to filter.
-- inputText: "Tortilla"
+- inputText: 'Tortilla'
 
 # The filtered grid should still show the matching product.
-- assertVisible: "Tortilla"
+- assertVisible: 'Tortilla'
 
 # Clear the search to restore full grid.
 - tapOn:
-    id: "ventas-product-search"
+    id: 'ventas-product-search'
 - eraseText
 
 # Full grid should be visible again.
 - assertVisible:
-    id: "ventas-product-grid"
+    id: 'ventas-product-grid'

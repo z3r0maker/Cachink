@@ -14,14 +14,14 @@ appId: mx.xangarro.mobile
 - runFlow: shared/navigate-to-settings.yaml
 
 - assertVisible:
-    id: "settings-notifications-toggle"
+    id: 'settings-notifications-toggle'
 
 # Toggle off.
 - tapOn:
-    id: "settings-notifications-btn"
-- assertVisible: "No"
+    id: 'settings-notifications-btn'
+- assertVisible: 'No'
 
 # Toggle on again.
 - tapOn:
-    id: "settings-notifications-btn"
-- assertVisible: "Sí"
+    id: 'settings-notifications-btn'
+- assertVisible: 'Sí'

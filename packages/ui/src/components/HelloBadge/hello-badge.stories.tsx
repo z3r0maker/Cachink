@@ -18,5 +18,5 @@ type Story = StoryObj<typeof HelloBadge>;
 export const Default: Story = {};
 
 export const CustomText: Story = {
-  args: { label: 'CACHINK!', greeting: '¡Bienvenido, emprendedor!' },
+  args: { label: 'XANGARRO!', greeting: '¡Bienvenido, emprendedor!' },
 };

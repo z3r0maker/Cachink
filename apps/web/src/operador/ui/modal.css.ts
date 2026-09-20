@@ -6,10 +6,19 @@ const pop = keyframes({
   to: { opacity: 1, transform: 'none' },
 });
 
+const fade = keyframes({
+  from: { opacity: 1 },
+  to: { opacity: 0 },
+});
+
 /**
  * Every operator modal (README «Modales»): the scrim, the card pinned to the
  * top with 16 px around it and a scrolling body — centring would leave the
  * header unreachable on short screens.
+ *
+ * The close animation is not decoration: Radix keeps the portal mounted while
+ * it plays, so the scrim still covers the screen — a smashed confirm button
+ * cannot leak clicks onto the catalogue behind the closing card.
  */
 export const overlay = style({
   position: 'fixed',
@@ -20,6 +29,9 @@ export const overlay = style({
   padding: 16,
   overflowY: 'auto',
   background: colors.scrim,
+  selectors: {
+    '&[data-state="closed"]': { animation: `${fade} 160ms ease-out forwards` },
+  },
 });
 
 export const card = style({

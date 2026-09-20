@@ -20,5 +20,8 @@
 import type { BaseSQLiteDatabase } from 'drizzle-orm/sqlite-core';
 import type * as schema from '../../schema/index.js';
 
-export type CachinkSchema = typeof schema;
-export type CachinkDatabase = BaseSQLiteDatabase<'sync' | 'async', unknown, CachinkSchema>;
+export type XangarroSchema = typeof schema;
+export type XangarroDatabase = BaseSQLiteDatabase<'sync' | 'async', unknown, XangarroSchema>;
+
+/** Legacy alias — the rebrand (ADR-056) renamed the type; newer files use it directly. */
+export type CachinkDatabase = XangarroDatabase;

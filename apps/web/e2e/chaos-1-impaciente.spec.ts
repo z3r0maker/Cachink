@@ -132,7 +132,7 @@ test('reloading mid-save leaves DB and UI reconciled, no phantom state', async (
     query(async (sql) => {
       const [row] = await sql<
         { nombre: string }[]
-      >`SELECT nombre FROM products WHERE sku = 'TAC-003'`;
+      >`SELECT nombre FROM products WHERE sku = 'BEB-002'`;
       return row?.nombre ?? '';
     });
   const oldName = await readName();
@@ -141,7 +141,7 @@ test('reloading mid-save leaves DB and UI reconciled, no phantom state', async (
   await page.goto('/productos');
   await page
     .locator('main')
-    .locator('tr', { hasText: 'TAC-003' })
+    .locator('tr', { hasText: 'BEB-002' })
     .getByRole('button', { name: 'Editar' })
     .click();
   await page.getByTestId('producto-nombre').fill(newName);
@@ -167,6 +167,11 @@ test('operador: smashing Cobrar and Registrar venta yields ONE registered sale',
     .getByRole('button', { name: /Taco de pastor/ })
     .first()
     .click();
+  // Under 1240 px the ticket collapses behind its «3Cobrar» toggle (same rule
+  // as operador-caja.spec's `ticket()` helper) — expand it to reach Cobrar.
+  if ((page.viewportSize()?.width ?? 1440) < 1240) {
+    await page.locator('button', { hasText: /^\d+Cobrar/ }).click();
+  }
   const cobrar = page
     .getByRole('button', { name: 'Cobrar', exact: true })
     .filter({ visible: true })
@@ -179,12 +184,17 @@ test('operador: smashing Cobrar and Registrar venta yields ONE registered sale',
   await expect(modal).toBeVisible();
   await expect(page.getByRole('dialog')).toHaveCount(1);
   await modal.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  await modal.getByLabel('Con cuánto paga').fill('100');
+  // The fixture opens with a $160 ticket and the added taco makes it $185 —
+  // pay enough that «Registrar venta» is enabled, or the smash clicks a
+  // disabled button and proves nothing.
+  await modal.getByLabel('Con cuánto paga').fill('200');
 
   await smash(modal.getByRole('button', { name: /^Registrar venta$/ }));
 
   // Recovery state: exactly one success toast (toast replacement absorbs the
-  // smash), the ticket is cleared, and Cobrar is gated again.
+  // smash), and the ticket is empty — which is what gates Cobrar (count 0).
+  // Asserted as attachment: under 1240 px the cleared ticket collapses its
+  // panel, so the Cobrar button itself is not on screen to check.
   await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
-  await expect(cobrar).toBeDisabled();
+  await expect(page.locator('aside[aria-label=Ticket]').getByText('Ticket vacío')).toBeAttached();
 });

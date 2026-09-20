@@ -24,46 +24,46 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 
 # Fill the concepto and monto.
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Renta mensual oficina"
+    id: 'gasto-concepto'
+- inputText: 'Renta mensual oficina'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "12000"
+    id: 'gasto-monto'
+- inputText: '12000'
 
 # Toggle recurrente ON.
 - tapOn:
-    id: "gasto-recurrente-toggle"
+    id: 'gasto-recurrente-toggle'
 
 # Frecuencia field should now be visible.
-- assertVisible: "Frecuencia"
+- assertVisible: 'Frecuencia'
 
 # Select "Mensual" frequency.
 - tapOn:
-    id: "recurrente-frecuencia"
-- tapOn: "Mensual"
+    id: 'recurrente-frecuencia'
+- tapOn: 'Mensual'
 
 # The day-of-month picker should appear.
 - assertVisible:
-    id: "recurrente-dia-mes"
+    id: 'recurrente-dia-mes'
 
 # Enter day 15 for monthly billing.
 - tapOn:
-    id: "recurrente-dia-mes"
+    id: 'recurrente-dia-mes'
 - eraseText
-- inputText: "15"
+- inputText: '15'
 
 # Submit the egreso.
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal closes.
-- assertNotVisible: "Nuevo egreso"
+- assertNotVisible: 'Nuevo egreso'
 
 # Verify the egreso was created in the list.
-- assertVisible: "Renta mensual oficina"
+- assertVisible: 'Renta mensual oficina'

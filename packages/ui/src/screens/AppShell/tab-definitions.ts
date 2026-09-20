@@ -1,22 +1,16 @@
 /**
- * Tab definitions for the bottom tab bar.
+ * Tab definitions for the bottom tab bar. The app is single-role (ADR-053):
+ * every Operator sees the same bar.
  *
- * Operativo always has 5 tabs — Caja is permanently present (not gated).
- * The 4th tab swaps between Merma/Productos based on feature flags.
+ *   merma OFF (v1):  Ventas | Caja | Gastos | Productos
+ *   merma ON:        Ventas | Caja | Gastos | Merma
  *
- * Operativo (merma ON):  Ventas | Caja | Gastos | Merma     | Otros
- * Operativo (merma OFF): Ventas | Caja | Gastos | Productos | Otros
- * Director (always):     Inicio | Ventas | Gastos | Estados
+ * Merma is dark in PLATFORM_AVAILABLE (F-06), so v1 always renders the first
+ * row; releasing the flag needs no change here. Caja hosts the shift tools
+ * that used to live in "Otros" (ADR-052).
  *
- * "Gastos" is the UI label for the Egresos tab in BOTH roles (code
- * identifiers stay `expense`/`egreso` — purely a label change).
- *
- * Review item #7: the Operativo tab used to read "Pagos", which
- * collided with the app's own vocabulary — a "pago" here is money
- * coming IN from a client (`useRegistrarPago`, the `Pagos` sheet in the
- * Excel export is `clientPayments`), while this tab is money going OUT.
- * Toni's word is Gastos, and both roles now say the same thing about
- * the same module.
+ * "Gastos" is the UI label for the Egresos module (code identifiers stay
+ * `expense`/`egreso` — review item #7).
  */
 
 import type { FeatureFlags } from '@xangarro/domain';
@@ -33,80 +27,33 @@ export interface TabDefinition {
   readonly path: string;
 }
 
-/** Operativo tabs — dynamic based on merma flag. Always 4 tabs.
- *  Note: merma is dark in PLATFORM_AVAILABLE (F-06), so the merma branch
- *  below is effectively dead and tabs always render as:
- *  Ventas | Caja | Gastos | Productos. Releasing the flag needs no change here. */
-export function operativoTabs(flags: FeatureFlags): readonly TabDefinition[] {
-  const tabs: TabDefinition[] = [
-    { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
-    { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
-    { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
-  ];
-  if (flags.merma) {
-    tabs.push({ key: 'merma', labelKey: 'tabs.merma', icon: 'trending-down', path: '/merma' });
-  } else {
-    tabs.push({
-      key: 'productos',
-      labelKey: 'tabs.productos',
-      icon: 'package',
-      path: '/productos',
-    });
-  }
-  // Review item #7: "Otros" is gone from BOTH bars now. Toni's note was
-  // unqualified — a label that says nothing does not earn a slot in
-  // either role. The Operativo's three tools moved into Caja (see
-  // `operativoCajaToolItems`), not into Configuración, because they are
-  // shift-floor work and the cog would have cost them a tap.
-  return tabs;
+const VENTAS: TabDefinition = {
+  key: 'ventas',
+  labelKey: 'tabs.ventas',
+  icon: 'dollar-sign',
+  path: '/ventas',
+};
+const CAJA: TabDefinition = { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' };
+const GASTOS: TabDefinition = {
+  key: 'gastos',
+  labelKey: 'tabs.gastos',
+  icon: 'file-text',
+  path: '/egresos',
+};
+const PRODUCTOS: TabDefinition = {
+  key: 'productos',
+  labelKey: 'tabs.productos',
+  icon: 'package',
+  path: '/productos',
+};
+const MERMA: TabDefinition = {
+  key: 'merma',
+  labelKey: 'tabs.merma',
+  icon: 'trending-down',
+  path: '/merma',
+};
+
+/** The bottom tabs for the current effective flags. Omitting flags yields the v1 bar. */
+export function appTabs(flags?: FeatureFlags): readonly TabDefinition[] {
+  return [VENTAS, CAJA, GASTOS, flags?.merma ? MERMA : PRODUCTOS];
 }
-
-/**
- * Director tabs — always the same 4 tabs (review item #7).
- *
- * "Otros" was a junk drawer: its label said nothing and it hid the two
- * numbers a Director actually opens the app for. Gastos takes its slot
- * so the bar reads as the money story — what came in, what went out,
- * what it adds up to. Everything that lived under Otros moved into
- * Configuración, reachable from the cog in the top bar.
- */
-export const DIRECTOR_TABS: readonly TabDefinition[] = [
-  { key: 'home', labelKey: 'tabs.home', icon: 'home', path: '/' },
-  { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
-  { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
-  { key: 'estados', labelKey: 'tabs.estados', icon: 'chart-bar', path: '/estados' },
-] as const;
-
-/**
- * Pick the right tab list for the current role + flags.
- *
- * @deprecated old 2-arg signature — use `tabsForRole(role, flags)` instead.
- * Backward-compatible: when `flags` is omitted, returns the default set.
- */
-export function tabsForRole(
-  role: 'operativo' | 'director',
-  flags?: FeatureFlags,
-): readonly TabDefinition[] {
-  if (role === 'director') return DIRECTOR_TABS;
-  if (!flags) {
-    // Fallback for callers that haven't been updated to pass flags yet
-    return operativoTabs({
-      stock: true,
-      barcode: true,
-      conversionMateriaPrima: false,
-      conversionAutomatica: false,
-      auditoriaInventario: false,
-      merma: false,
-      ventasCredito: false,
-    });
-  }
-  return operativoTabs(flags);
-}
-
-// Legacy exports preserved for backward compatibility
-export const OPERATIVO_TABS: readonly TabDefinition[] = [
-  { key: 'ventas', labelKey: 'tabs.ventas', icon: 'dollar-sign', path: '/ventas' },
-  { key: 'caja', labelKey: 'tabs.caja', icon: 'landmark', path: '/caja' },
-  { key: 'gastos', labelKey: 'tabs.gastos', icon: 'file-text', path: '/egresos' },
-  { key: 'productos', labelKey: 'tabs.productos', icon: 'package', path: '/productos' },
-] as const;

@@ -21,12 +21,12 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos → Nuevo → Inventario tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "egreso-tab-inventario"
+    id: 'egreso-tab-inventario'
 
 # No products exist — the "Crear producto" empty-state button should render.
 - assertVisible:
-    id: "inventario-crear-producto"
+    id: 'inventario-crear-producto'

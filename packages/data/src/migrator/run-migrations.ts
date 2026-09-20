@@ -4,7 +4,8 @@
  * Executes the SQL from `@xangarro/data/migrations` on any Drizzle-wrapped
  * SQLite connection — expo-sqlite (mobile), Tauri sqlite-proxy (desktop),
  * or better-sqlite3 (tests). Tracks applied migrations in a bookkeeping
- * table `__cachink_migrations` so re-runs are idempotent.
+ * table `__xangarro_migrations` so re-runs are idempotent. Pre-rebrand
+ * installs are adopted by {@link adoptLegacyTracker} (ADR-056).
  *
  * Moved from `packages/ui/src/database/run-migrations.ts` to eliminate
  * the dual-runner problem (tests used Drizzle's filesystem-based migrator
@@ -12,7 +13,7 @@
  *
  * Key design choices:
  *   - Each migration is wrapped in a transaction (`BEGIN IMMEDIATE` /
- *     `COMMIT` / `ROLLBACK`) so the `__cachink_migrations` INSERT is
+ *     `COMMIT` / `ROLLBACK`) so the tracker INSERT is
  *     atomic with the DDL. If a migration crashes mid-way, the tag is
  *     NOT recorded and retry is safe.
  *   - `PRAGMA user_version` is set to {@link SCHEMA_VERSION} after all
@@ -26,41 +27,27 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '../repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
 import migrationsBundle, { migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from './split-statements.js';
 import { MigrationError } from './errors.js';
+import { adoptLegacyTracker } from './legacy-tracker.js';
+import { readStringColumn, type RawRow } from './raw-row.js';
 import { SCHEMA_VERSION, setSchemaVersion } from './schema-version.js';
 
-const MIGRATIONS_TABLE = '__cachink_migrations';
+const MIGRATIONS_TABLE = '__xangarro_migrations';
 
 const CREATE_TRACKER_SQL = `CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
   tag TEXT PRIMARY KEY NOT NULL,
   applied_at TEXT NOT NULL
 )`;
 
-/**
- * Row shape returned by `db.all(sql.raw(...))` — varies by driver.
- * `better-sqlite3` gives named objects; `sqlite-proxy` gives column-value
- * arrays. We normalize both in {@link loadAppliedTags}.
- */
-type RawRow = Readonly<Record<string, unknown>> | readonly unknown[];
-
-function readTag(row: RawRow): string | null {
-  if (Array.isArray(row)) {
-    return typeof row[0] === 'string' ? row[0] : null;
-  }
-  const record = row as Readonly<Record<string, unknown>>;
-  const tag = record['tag'];
-  return typeof tag === 'string' ? tag : null;
-}
-
 /** Read applied-migration tags. Returns an empty set on a fresh database. */
-async function loadAppliedTags(db: CachinkDatabase): Promise<ReadonlySet<string>> {
+async function loadAppliedTags(db: XangarroDatabase): Promise<ReadonlySet<string>> {
   const rows = (await db.all(sql.raw(`SELECT tag FROM ${MIGRATIONS_TABLE}`))) as RawRow[];
   const tags = new Set<string>();
   for (const row of rows) {
-    const tag = readTag(row);
+    const tag = readStringColumn(row, 'tag');
     if (tag !== null) tags.add(tag);
   }
   return tags;
@@ -108,7 +95,7 @@ let migrationPromise: Promise<void> | null = null;
  * {@link SCHEMA_VERSION} for the version gate.
  */
 export async function runMigrations(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   options: RunMigrationsOptions = {},
 ): Promise<void> {
   if (migrationPromise) return migrationPromise;
@@ -138,7 +125,7 @@ function resolveMigrationSql(tag: string): string {
 
 /** Apply a single migration, optionally inside a transaction. */
 async function applySingleMigration(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   tag: string,
   migrationSql: string,
   skipTx: boolean,
@@ -180,9 +167,10 @@ async function runBackupIfNeeded(options: RunMigrationsOptions, firstTag: string
 }
 
 async function runMigrationsInternal(
-  db: CachinkDatabase,
+  db: XangarroDatabase,
   options: RunMigrationsOptions,
 ): Promise<void> {
+  await adoptLegacyTracker(db, MIGRATIONS_TABLE);
   await db.run(sql.raw(CREATE_TRACKER_SQL));
   const applied = await loadAppliedTags(db);
 

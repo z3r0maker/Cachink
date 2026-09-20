@@ -12,7 +12,7 @@ before any change that touches the wizard, tabs, or onboarding flows.
 - [Maestro CLI](https://maestro.mobile.dev) ≥ 1.40 installed locally
   (`curl -Ls "https://get.maestro.mobile.dev" | bash`).
 - An iOS simulator (Xcode-provided) OR an Android emulator running,
-  with the Cachink dev client installed:
+  with the Xangarro dev client installed:
   ```sh
   pnpm --filter @xangarro/mobile ios   # or `android`
   ```
@@ -28,7 +28,7 @@ before any change that touches the wizard, tabs, or onboarding flows.
 | `MAESTRO_CLOUD_PASSWORD_B` | same                                                    | Password for `*_EMAIL_B`.                                                   |
 
 The cloud-mode tests need a live Supabase project — point them at the
-hosted Cachink dev instance documented in `supabase/README.md`.
+hosted Xangarro dev instance documented in `supabase/README.md`.
 
 ## Running the suite
 
@@ -157,12 +157,12 @@ The **demo mode** path is for standalone flows that test demo-specific features.
 
 **Wizard path** (created by `shared/director-setup.yaml`):
 
-| Field             | Value             |
-| ----------------- | ----------------- |
-| Name              | Director Test     |
-| Email             | test@cachink.test |
-| Recovery Password | Test1234          |
-| PIN               | 123456            |
+| Field             | Value              |
+| ----------------- | ------------------ |
+| Name              | Director Test      |
+| Email             | test@xangarro.test |
+| Recovery Password | Test1234           |
+| PIN               | 123456             |
 
 **Demo path** (created by `demo-mode-setup.yaml`):
 

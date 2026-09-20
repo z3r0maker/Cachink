@@ -7,24 +7,24 @@ import { useCallback, useState } from 'react';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Alert } from 'react-native';
 import type { Business, IsoDate, PaymentMethod, Product } from '@xangarro/domain';
-import { today } from '@xangarro/domain';
+import { PlanLimitError, today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
-  useCachinkSound,
+  useSaleSound,
   useCheckoutStore,
   useCurrentBusiness,
   useProductosParaVenta,
   useRegistrarVenta,
   type CartState,
 } from '@xangarro/ui';
-import { useCachinkPlayer } from '../../shell/use-cachink-player';
+import { useSaleSoundPlayer } from '../../shell/use-sale-sound-player';
 
 export interface ConfirmState {
   metodo: PaymentMethod;
   totalCentavos: bigint;
   submitting: boolean;
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
   handleConfirm: () => Promise<void>;
 }
 
@@ -37,7 +37,7 @@ function useConfirmDeps(): {
   business: Business | null;
   productos: readonly Product[] | undefined;
   fecha: IsoDate;
-  playCachink: () => void;
+  playSaleSound: () => void;
 } {
   const router = useRouter();
   const { metodo } = useLocalSearchParams<{ metodo: string }>();
@@ -46,8 +46,8 @@ function useConfirmDeps(): {
   const registrar = useRegistrarVenta();
   const business = useCurrentBusiness().data ?? null;
   const productos = useProductosParaVenta().data;
-  const cachinkPlayer = useCachinkPlayer();
-  const { play: playCachink } = useCachinkSound(cachinkPlayer);
+  const saleSoundPlayer = useSaleSoundPlayer();
+  const { play: playSaleSound } = useSaleSound(saleSoundPlayer);
   return {
     router,
     metodo: (metodo ?? 'Tarjeta') as PaymentMethod,
@@ -57,13 +57,13 @@ function useConfirmDeps(): {
     business,
     productos,
     fecha: today() as IsoDate,
-    playCachink,
+    playSaleSound,
   };
 }
 
 export function useConfirmState(): ConfirmState {
   const d = useConfirmDeps();
-  const [showCachink, setShowCachink] = useState(false);
+  const [showSaleBurst, setShowSaleBurst] = useState(false);
 
   const handleConfirm = useCallback(async () => {
     if (!d.business || !d.cart) {
@@ -84,13 +84,14 @@ export function useConfirmState(): ConfirmState {
           cantidad: item.cantidad,
         });
       } catch (err) {
-        Alert.alert('Error', (err as Error).message);
+        // The plan-limit sheet already explains a PlanLimitError (A-10).
+        if (!(err instanceof PlanLimitError)) Alert.alert('Error', (err as Error).message);
         return;
       }
     }
     d.clearCheckout();
-    setShowCachink(true);
-    d.playCachink();
+    setShowSaleBurst(true);
+    d.playSaleSound();
     setTimeout(() => d.router.dismissAll(), 600);
   }, [d]);
 
@@ -98,8 +99,8 @@ export function useConfirmState(): ConfirmState {
     metodo: d.metodo,
     totalCentavos: d.cart?.totalCentavos ?? 0n,
     submitting: d.registrar.isPending,
-    showCachink,
-    setShowCachink,
+    showSaleBurst,
+    setShowSaleBurst,
     handleConfirm,
   };
 }

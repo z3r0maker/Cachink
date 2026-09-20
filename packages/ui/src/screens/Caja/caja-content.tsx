@@ -20,8 +20,8 @@ import { CerrarCajaModal } from './cerrar-caja-modal';
 import { useCerrarCaja } from '../../hooks/use-cerrar-caja';
 import { useOpenCajaTurno } from '../../hooks/use-open-caja-turno';
 import { useTranslation } from '../../i18n/index';
-import { SettingsNavSection } from '../Settings/settings-nav-section';
-import type { OtrosItem } from '../Otros/otros-items';
+import { ToolGridSection } from './tool-grid-section';
+import type { OtrosItem } from './tool-items';
 
 export interface CajaContentProps {
   readonly testID?: string;
@@ -51,7 +51,7 @@ function CajaToolsSection(props: {
   const { t } = useTranslation();
   if (!props.items || !props.onNavigate) return null;
   return (
-    <SettingsNavSection
+    <ToolGridSection
       items={props.items}
       onNavigate={props.onNavigate}
       title={t('settings.herramientas')}
@@ -68,7 +68,7 @@ export function CajaContent(props: CajaContentProps): ReactElement {
   const shouldShowCerrar = showCerrar || hasBlindCountPending(openTurno);
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+    <ScrollView testID={props.testID} contentContainerStyle={{ padding: 16, gap: 16 }}>
       {openTurno === null && !shouldShowCerrar && (
         <CajaOpenTurnView userId={userId as UserId | null} />
       )}

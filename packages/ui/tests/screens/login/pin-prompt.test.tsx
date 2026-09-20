@@ -63,6 +63,11 @@ describe('PinPrompt', () => {
     expect(screen.getByText('PIN incorrecto')).toBeInTheDocument();
   });
 
+  it('never offers PIN recovery on the device (A-05)', () => {
+    renderPrompt();
+    expect(screen.queryByTestId('forgot-pin-link')).toBeNull();
+  });
+
   it('shows loading overlay when submitting is true', () => {
     renderPrompt({ submitting: true });
     expect(screen.getByTestId('pin-loading-overlay')).toBeInTheDocument();

@@ -13,18 +13,17 @@ type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 export async function listOperadores(tx: Tx) {
   return (
     tx
-      // `role` and `active` so the screen can count *active operators* — the
+      // `active` so the screen can count *active operators* — the
       // plan's allowance — rather than every row, which would keep charging a
       // slot for someone already deactivated.
       .select({
         id: users.id,
         nombre: users.nombre,
         permissions: users.permissions,
-        role: users.role,
         active: users.active,
       })
       .from(users)
-      .where(and(isNull(users.deletedAt), eq(users.role, 'operativo')))
+      .where(isNull(users.deletedAt))
       .orderBy(asc(users.nombre))
   );
 }

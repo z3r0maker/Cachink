@@ -28,3 +28,4 @@ export * from './mensajes-operador-repository.js';
 export * from './respuestas-operador-repository.js';
 export * from './tickets-repository.js';
 export * from './drizzle/index.js';
+export * from './record-usage-repository.js';

@@ -6,7 +6,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { InventarioTabBar } from '../../src/screens/Inventario/inventario-tab-bar';
+import { InventarioTabBar } from '../../src/screens/Productos/inventario-tab-bar';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 

@@ -60,6 +60,11 @@ vi.mock('../../src/app/app-provider-bridges', async (importOriginal) => ({
   TelemetryBridge: passthrough,
 }));
 
+vi.mock('../../src/app/cloud-sync-bridge', async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  CloudSyncBridge: passthrough,
+}));
+
 import { AppProviders } from '../../src/app/index';
 import { initI18n } from '../../src/i18n/index';
 

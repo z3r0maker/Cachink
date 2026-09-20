@@ -17,47 +17,47 @@ tags:
 
 # Navigate to the Merma tab.
 - tapOn:
-    id: "tab-merma"
+    id: 'tab-merma'
 - extendedWaitUntil:
     visible:
-      id: "merma-grid"
+      id: 'merma-grid'
     timeout: 10000
 
 # Tap a product and increase quantity to exceed stock.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Increase quantity beyond available stock.
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 - tapOn:
-    id: "cart-qty-increase"
+    id: 'cart-qty-increase'
     optional: true
 
 # Tap checkout.
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # The confirm sheet should appear.
 - extendedWaitUntil:
     visible:
-      id: "merma-checkout-sheet"
+      id: 'merma-checkout-sheet'
     timeout: 5000
 
 # Submit — the app may show a warning or proceed.
 - tapOn:
-    id: "merma-checkout-submit"
+    id: 'merma-checkout-submit'
 
 # Verify we return to the merma screen (not stuck).
 - extendedWaitUntil:
     visible:
-      id: "merma-grid"
+      id: 'merma-grid'
     timeout: 5000

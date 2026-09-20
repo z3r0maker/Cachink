@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ReactElement } from 'react';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { AsyncDatabaseProvider, useDatabase } from '../../src/database/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen, waitFor } from '../test-utils';
 
 initI18n();
 
-const fakeDb = { __kind: 'fake-cachink-db' } as unknown as CachinkDatabase;
+const fakeDb = { __kind: 'fake-xangarro-db' } as unknown as XangarroDatabase;
 
 function DbConsumer({ testID }: { readonly testID: string }): ReactElement {
   const db = useDatabase();
@@ -43,7 +43,7 @@ describe('AsyncDatabaseProvider error state', () => {
 
   it('retries initialization from the fallback state', async () => {
     const create = vi
-      .fn<() => Promise<CachinkDatabase>>()
+      .fn<() => Promise<XangarroDatabase>>()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce(fakeDb);
 
@@ -56,7 +56,9 @@ describe('AsyncDatabaseProvider error state', () => {
     await waitFor(() => expect(screen.getByTestId('database-error-state')).toBeInTheDocument());
     fireEvent.click(screen.getByTestId('database-error-state-retry'));
 
-    await waitFor(() => expect(screen.getByTestId('db-ready').textContent).toBe('fake-cachink-db'));
+    await waitFor(() =>
+      expect(screen.getByTestId('db-ready').textContent).toBe('fake-xangarro-db'),
+    );
     expect(create).toHaveBeenCalledTimes(2);
   });
 
@@ -86,7 +88,7 @@ describe('AsyncDatabaseProvider error state', () => {
 
   it('resets the database after confirmation and retries initialization', async () => {
     const create = vi
-      .fn<() => Promise<CachinkDatabase>>()
+      .fn<() => Promise<XangarroDatabase>>()
       .mockRejectedValueOnce(new Error('boom'))
       .mockResolvedValueOnce(fakeDb);
     const reset = vi.fn(async () => {});
@@ -106,7 +108,9 @@ describe('AsyncDatabaseProvider error state', () => {
     fireEvent.click(screen.getByText('Sí, restablecer'));
 
     await waitFor(() => expect(reset).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(screen.getByTestId('db-ready').textContent).toBe('fake-cachink-db'));
+    await waitFor(() =>
+      expect(screen.getByTestId('db-ready').textContent).toBe('fake-xangarro-db'),
+    );
     expect(create).toHaveBeenCalledTimes(2);
   });
 });

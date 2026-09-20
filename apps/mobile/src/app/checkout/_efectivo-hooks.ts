@@ -7,10 +7,10 @@ import { useCallback, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { Alert } from 'react-native';
 import type { Business, Money, PaymentMethod, Product, IsoDate } from '@xangarro/domain';
-import { today } from '@xangarro/domain';
+import { PlanLimitError, today } from '@xangarro/domain';
 import {
   buildQuickSellPayload,
-  useCachinkSound,
+  useSaleSound,
   useCheckoutStore,
   useCurrentBusiness,
   useEfectivoEsperado,
@@ -18,9 +18,11 @@ import {
   useRegistrarVenta,
   type CartState,
 } from '@xangarro/ui';
-import { useCachinkPlayer } from '../../shell/use-cachink-player';
+import { useSaleSoundPlayer } from '../../shell/use-sale-sound-player';
 
 function handleMutationError(err: unknown): void {
+  // The plan-limit sheet already explains this one (A-10).
+  if (err instanceof PlanLimitError) return;
   const msg = (err as Error).message;
   if (msg.includes('no column named')) {
     Alert.alert(
@@ -36,8 +38,8 @@ export interface EfectivoState {
   totalCentavos: bigint;
   submitting: boolean;
   efectivoEnCaja: bigint | null;
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
   handleConfirm: (efectivoRecibido: Money) => Promise<void>;
 }
 
@@ -50,7 +52,7 @@ function useEfectivoDeps(): {
   productos: readonly Product[] | undefined;
   fecha: IsoDate;
   efectivoEnCaja: bigint | null;
-  playCachink: () => void;
+  playSaleSound: () => void;
 } {
   const router = useRouter();
   const cart = useCheckoutStore((s) => s.cart);
@@ -60,8 +62,8 @@ function useEfectivoDeps(): {
   const productos = useProductosParaVenta().data;
   const fecha = today() as IsoDate;
   const efectivoQ = useEfectivoEsperado({ fecha });
-  const cachinkPlayer = useCachinkPlayer();
-  const { play: playCachink } = useCachinkSound(cachinkPlayer);
+  const saleSoundPlayer = useSaleSoundPlayer();
+  const { play: playSaleSound } = useSaleSound(saleSoundPlayer);
   return {
     router,
     cart,
@@ -71,7 +73,7 @@ function useEfectivoDeps(): {
     productos,
     fecha,
     efectivoEnCaja: efectivoQ.data?.esperado ?? null,
-    playCachink,
+    playSaleSound,
   };
 }
 
@@ -107,15 +109,15 @@ async function submitEfectivoItems(
 
 export function useEfectivoState(): EfectivoState {
   const d = useEfectivoDeps();
-  const [showCachink, setShowCachink] = useState(false);
+  const [showSaleBurst, setShowSaleBurst] = useState(false);
 
   const handleConfirm = useCallback(
     async (efectivoRecibido: Money) => {
       const ok = await submitEfectivoItems(d, efectivoRecibido);
       if (!ok) return;
       d.clearCheckout();
-      setShowCachink(true);
-      d.playCachink();
+      setShowSaleBurst(true);
+      d.playSaleSound();
       setTimeout(() => d.router.dismissAll(), 600);
     },
     [d],
@@ -125,8 +127,8 @@ export function useEfectivoState(): EfectivoState {
     totalCentavos: d.cart?.totalCentavos ?? 0n,
     submitting: d.registrar.isPending,
     efectivoEnCaja: d.efectivoEnCaja,
-    showCachink,
-    setShowCachink,
+    showSaleBurst,
+    setShowSaleBurst,
     handleConfirm,
   };
 }

@@ -63,6 +63,97 @@ function productUpdate(): Record<string, unknown> {
   return { ...product, precioVentaCentavos: 99_999n, updatedAt: ts };
 }
 
+describe('O-05 — web devices and the new tables', () => {
+  it('activates a plataforma=web device (C-16) and it shares the sync surface', async () => {
+    const r = await call(h.base, 'POST', API_PATHS.activate, {
+      body: {
+        email: h.email,
+        code: await h.freshCode(),
+        device: {
+          name: 'Caja 1 (web)',
+          platform: 'web',
+          appVersion: '0.1.0',
+          osVersion: 'macOS 15',
+        },
+      },
+    });
+    if (r.status !== 200) {
+      assert.fail(`web activation refused: ${JSON.stringify(r.body)}`);
+    }
+    const web = ActivateResponseSchema.parse(r.body);
+    const pr = await call(h.base, 'GET', `${API_PATHS.syncPull}?since=0`, {
+      token: web.deviceToken,
+    });
+    assert.equal(pr.status, 200);
+    const body = PullResponseSchema.parse(pr.body);
+    assert.ok(Array.isArray(body.tables.mensajes_operador));
+  });
+
+  it('accepts a ticket and its line in one batch and rejects a reply to a missing mensaje (C-17/C-19)', async () => {
+    const tid = '01JTK0000000000000000000T1';
+    const ticket = {
+      id: tid,
+      folio: 405,
+      fecha: '2026-09-19',
+      hora: '13:45',
+      concepto: 'Venta mostrador',
+      metodo: 'Efectivo',
+      clienteId: null,
+      estadoPago: 'pagado',
+      efectivoRecibidoCentavos: 20_000n,
+      cambioCentavos: 4_000n,
+      cajaTurnoId: null,
+      cancelMotivo: null,
+      cancelledByUserId: null,
+      cancelledAt: null,
+      businessId: act.businessId,
+      deviceId: act.deviceId,
+      createdByUserId: null,
+      createdAt: ts,
+      updatedAt: ts,
+      deletedAt: null,
+    };
+    const line = sale('01JSA0000000000000000000W1', { ticketId: tid });
+    const r = await push([
+      { table: 'tickets', rowId: tid, op: 'insert', clientSeq: 10, row: ticket },
+      delta(line, 11),
+    ]);
+    assert.equal(r.status, 200, JSON.stringify(r.body));
+    const body = PushResponseSchema.parse(r.body);
+    assert.deepEqual(
+      body.accepted.map((a) => a.rowId),
+      [tid, line.id],
+    );
+
+    const respuesta = {
+      id: '01JRS0000000000000000000R1',
+      mensajeId: '01JMSG0000000000000000ZZZZ',
+      texto: 'Faltó cambio',
+      businessId: act.businessId,
+      deviceId: act.deviceId,
+      createdByUserId: null,
+      createdAt: ts,
+      updatedAt: ts,
+      deletedAt: null,
+    };
+    const rr = await push([
+      {
+        table: 'respuestas_operador',
+        rowId: respuesta.id,
+        op: 'insert',
+        clientSeq: 12,
+        row: respuesta,
+      },
+    ]);
+    assert.equal(rr.status, 200, JSON.stringify(rr.body));
+    const rb = PushResponseSchema.parse(rr.body);
+    assert.deepEqual(
+      rb.rejected.map((x) => x.code),
+      ['FK_MENSAJE_MISSING'],
+    );
+  });
+});
+
 describe('POST /sync/push', () => {
   it('accepts valid rows, rejects per row, and never fails the batch for one bad row', async () => {
     const good = sale('01JSA0000000000000000000A1');

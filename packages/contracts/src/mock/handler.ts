@@ -18,6 +18,7 @@ import devKeys from './dev-keys.json' with { type: 'json' };
 import { FIXTURE_BUSINESS_ID } from './fixtures.js';
 import { applyPush } from './push-handler.js';
 import { entitlementFor, scenarioOf, type Scenario } from './scenarios.js';
+import { controlRoute } from './control-routes.js';
 import { MockState, MOCK_CODES, type Device } from './state.js';
 
 export interface MockRequest {
@@ -81,28 +82,17 @@ export class MockApi {
   }
 
   async handle(req: MockRequest): Promise<MockResponse> {
-    const control = this.controlRoute(req);
+    const control = controlRoute(this.state, req);
     if (control) return control;
     if (req.headers[HEADER_PROTOCOL.toLowerCase()] !== String(PROTOCOL_VERSION)) {
       return err('PROTOCOL_UNSUPPORTED', 'send X-Xangarro-Protocol: 1');
     }
-    const scenario = scenarioOf(req.headers);
+    const scenario = scenarioOf(req.headers, this.state.defaultScenario);
     if (req.path === API_PATHS.activate && req.method === 'POST')
       return this.activate(req, scenario);
     const device = this.authenticate(req, scenario);
     if (!device) return err(req.headers['authorization'] ? 'DEVICE_REVOKED' : 'UNAUTHENTICATED');
     return this.deviceRoute(req, device, scenario);
-  }
-
-  /** Mock-only control endpoints (not part of the contract). */
-  private controlRoute(req: MockRequest): MockResponse | null {
-    if (req.method !== 'POST') return null;
-    if (req.path === '/__mock/reset') {
-      this.state.reset();
-      return { status: 200, body: { ok: true } };
-    }
-    if (req.path === '/__mock/code') return { status: 200, body: { code: this.state.issueCode() } };
-    return null;
   }
 
   private async deviceRoute(
@@ -118,7 +108,9 @@ export class MockApi {
       return {
         status: 200,
         body: {
-          entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, new Date())),
+          entitlement: await sign(
+            entitlementFor(scenario, FIXTURE_BUSINESS_ID, new Date(), this.state.recordsPerMonth),
+          ),
         },
       };
     }
@@ -159,7 +151,9 @@ export class MockApi {
       deviceToken: `mock-device:${device.id}`,
       deviceId: device.id,
       businessId: FIXTURE_BUSINESS_ID,
-      entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, now)),
+      entitlement: await sign(
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+      ),
       bootstrap: {
         serverSeq: this.state.serverSeq,
         serverTime: now.toISOString(),
@@ -180,7 +174,9 @@ export class MockApi {
     const body: PullResponse = {
       serverSeq: this.state.serverSeq,
       serverTime: now.toISOString(),
-      entitlement: await sign(entitlementFor(scenario, FIXTURE_BUSINESS_ID, now)),
+      entitlement: await sign(
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+      ),
       tables: referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,
     };

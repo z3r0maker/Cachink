@@ -9,7 +9,7 @@ import { useRouter } from 'expo-router';
 import type { IsoDate } from '@xangarro/domain';
 import { todayIso } from './_ventas-helpers';
 import {
-  useCachinkTrigger,
+  useSaleConfirmation,
   useCartHelpers,
   useOpenCajaTurno,
   useVentasCartState,
@@ -59,11 +59,11 @@ function useVentasActions(
   cart: ReturnType<typeof useVentasCartState>,
 ) {
   const router = useRouter();
-  const { showCachink, setShowCachink, triggerCachink } = useCachinkTrigger();
+  const { showSaleBurst, setShowSaleBurst, triggerSaleConfirmation } = useSaleConfirmation();
   const onDone = useCallback(() => {
     ls.setCheckoutOpen(false);
-    triggerCachink();
-  }, [triggerCachink, ls]);
+    triggerSaleConfirmation();
+  }, [triggerSaleConfirmation, ls]);
   const checkout = useVentasCheckout(
     q.business,
     q.productos,
@@ -77,7 +77,7 @@ function useVentasActions(
     cart.setCheckoutCart(cart.cart);
     router.push('/checkout' as never);
   }, [cart, router]);
-  return { showCachink, setShowCachink, checkout, onCheckout };
+  return { showSaleBurst, setShowSaleBurst, checkout, onCheckout };
 }
 
 function useVentasRouteState() {
@@ -121,7 +121,6 @@ function VentasMainSection(props: ReturnType<typeof useVentasRouteState>): React
         onCheckout,
         total: q.total,
         ventaCount: q.ventas.length,
-        role: q.role,
         showCorte: ls.showCorte,
         onCorteOpen: () => ls.setCorteOpen(true),
       }}
@@ -130,11 +129,10 @@ function VentasMainSection(props: ReturnType<typeof useVentasRouteState>): React
 }
 
 function VentasOverlaySection(props: ReturnType<typeof useVentasRouteState>): ReactElement {
-  const { ls, q, cart, showCachink, setShowCachink, detail, checkout } = props;
+  const { ls, q, cart, showSaleBurst, setShowSaleBurst, detail, checkout } = props;
   return (
     <VentasOverlays
       {...{
-        role: q.role,
         showCorte: ls.showCorte,
         setShowCorte: ls.setShowCorte,
         corteOpen: ls.corteOpen,
@@ -148,8 +146,8 @@ function VentasOverlaySection(props: ReturnType<typeof useVentasRouteState>): Re
         checkoutError: q.registrar.error ?? null,
         ...detail,
         eliminar: q.eliminar,
-        showCachink,
-        setShowCachink,
+        showSaleBurst,
+        setShowSaleBurst,
       }}
     />
   );
@@ -162,7 +160,7 @@ export default function VentasRoute(): ReactElement {
     if (state.q.productosData !== undefined && state.q.productos.length === 0) {
       return <VentasProductosGate />;
     }
-    return <VentasCajaGate role={state.q.role} setShowCorte={state.ls.setShowCorte} />;
+    return <VentasCajaGate setShowCorte={state.ls.setShowCorte} />;
   }
   return (
     <>

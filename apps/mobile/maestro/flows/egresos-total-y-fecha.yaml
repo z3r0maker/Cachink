@@ -23,12 +23,12 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Verify the total card is visible with a formatted negative amount.
 - assertVisible:
-    id: "egresos-total-card"
+    id: 'egresos-total-card'
 
 # Verify the date display shows today.
 - assertVisible:
-    id: "egresos-fecha"
+    id: 'egresos-fecha'

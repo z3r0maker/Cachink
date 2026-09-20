@@ -21,23 +21,23 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Open the nuevo egreso form.
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 
 # Fill a partial concepto (to verify cancel discards it).
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Egreso cancelado"
+    id: 'gasto-concepto'
+- inputText: 'Egreso cancelado'
 
 # Tap cancel — modal should close without creating.
 - tapOn:
-    id: "nuevo-egreso-cancel"
+    id: 'nuevo-egreso-cancel'
 
 # Verify the modal is closed.
-- assertNotVisible: "Nuevo egreso"
+- assertNotVisible: 'Nuevo egreso'
 
 # Verify the cancelled egreso does not appear in the list.
-- assertNotVisible: "Egreso cancelado"
+- assertNotVisible: 'Egreso cancelado'

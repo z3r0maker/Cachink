@@ -5,11 +5,18 @@
  * the protocol import the same source of truth.
  */
 
-/** Protocol version transmitted in the `X-Cachink-Protocol` header. */
+/** Protocol version transmitted in the `X-Xangarro-Protocol` header. */
 export const PROTOCOL_VERSION = 1 as const;
 
 /** Header name used for the version negotiation. */
-export const PROTOCOL_HEADER = 'X-Cachink-Protocol' as const;
+export const PROTOCOL_HEADER = 'X-Xangarro-Protocol' as const;
+
+/**
+ * Pre-rebrand header name (ADR-056). Clients no longer send it. Servers must
+ * accept either name while older clients are in the field; a request with
+ * neither header is treated as compatible, as the archived Rust server does.
+ */
+export const LEGACY_PROTOCOL_HEADER = 'X-Cachink-Protocol' as const;
 
 /** Base path prefix for every LAN sync endpoint. */
 export const API_PREFIX = '/api/v1' as const;
@@ -35,7 +42,7 @@ export type DeltaOp = (typeof DELTA_OPS)[number];
 
 /**
  * The 10 synced tables. Order matters for tests but not at runtime —
- * receivers apply deltas in `__cachink_change_log.id` order.
+ * receivers apply deltas in `__xangarro_change_log.id` order.
  *
  * `app_config` is intentionally excluded — it holds device-local settings
  * (current mode, role, notification preferences) that must never propagate

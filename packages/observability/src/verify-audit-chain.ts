@@ -11,7 +11,7 @@
 
 import type { SqliteDatabase } from './sqlite-log-store.js';
 
-const TABLE = '__cachink_observability_log';
+const TABLE = '__xangarro_observability_log';
 
 export interface AuditChainResult {
   readonly valid: boolean;

@@ -136,8 +136,8 @@ describe('buildQuery', () => {
 // ─── SQL constant exports ──────────────────────────────────────────
 
 describe('SQL constants', () => {
-  it('TABLE is __cachink_observability_log', () => {
-    expect(TABLE).toBe('__cachink_observability_log');
+  it('TABLE is __xangarro_observability_log', () => {
+    expect(TABLE).toBe('__xangarro_observability_log');
   });
 
   it('CREATE_TABLE_SQL creates the table', () => {

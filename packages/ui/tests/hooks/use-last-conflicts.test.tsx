@@ -3,7 +3,7 @@
  *
  * Covers the three observable branches: empty result, mapped rows, and
  * the swallow-on-missing-table fallback. The hook reads
- * `__cachink_conflicts` via `db.all(sql\`...\`)` so we stub the
+ * `__xangarro_conflicts` via `db.all(sql\`...\`)` so we stub the
  * `useDatabase()` return value with a controllable `all` method.
  */
 
@@ -11,16 +11,16 @@ import type { ReactElement, ReactNode } from 'react';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 
 let MOCK_ROWS: ReadonlyArray<unknown> = [];
 let SHOULD_THROW = false;
 const allMock = vi.fn(async () => {
-  if (SHOULD_THROW) throw new Error('no such table: __cachink_conflicts');
+  if (SHOULD_THROW) throw new Error('no such table: __xangarro_conflicts');
   return MOCK_ROWS;
 });
 
-const STUB_DB = { all: allMock } as unknown as CachinkDatabase;
+const STUB_DB = { all: allMock } as unknown as XangarroDatabase;
 vi.mock('../../src/database/_internal', () => ({
   useDatabase: () => STUB_DB,
 }));

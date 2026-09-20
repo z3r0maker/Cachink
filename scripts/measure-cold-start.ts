@@ -1,5 +1,5 @@
 /**
- * measure-cold-start.ts — record cold-start timings for both Cachink
+ * measure-cold-start.ts — record cold-start timings for both Xangarro
  * apps (P1C-M12-T05, S4-C20).
  *
  * Baseline artefact for performance tracking: mid-range Android tablet

@@ -5,6 +5,6 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 - runFlow: shared/authenticate-operativo.yaml
 - assertVisible:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - assertVisible:
-    id: "tab-ventas"
+    id: 'tab-ventas'

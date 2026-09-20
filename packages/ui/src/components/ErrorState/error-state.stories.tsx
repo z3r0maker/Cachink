@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<ErrorState>` primitive.
  *
- * Mirrors the EmptyState catalog: real es-MX Cachink copy so the
+ * Mirrors the EmptyState catalog: real es-MX Xangarro copy so the
  * stories double as a UX reference. Audit Round 2 G2 — closes the
  * Storybook coverage gap for ErrorState.
  */
@@ -56,7 +56,7 @@ export const EgresosFetchFailed: Story = {
 export const Unrecoverable: Story = {
   args: {
     title: 'Versión no compatible',
-    body: 'Esta versión de Cachink no es compatible con tu base de datos. Actualiza la app desde la tienda.',
+    body: 'Esta versión de Xangarro no es compatible con tu base de datos. Actualiza la app desde la tienda.',
     retryLabel: undefined,
     onRetry: undefined,
   },

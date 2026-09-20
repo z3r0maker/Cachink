@@ -9,7 +9,7 @@
  *
  * Users with vestibular disorders can be made nauseated or dizzy by movement
  * they did not ask for; WCAG 2.1 SC 2.3.3 (Animation from Interactions) makes
- * honouring the setting a requirement, not a nicety. Cachink animated in ten
+ * honouring the setting a requirement, not a nicety. Xangarro animated in ten
  * components and read the setting in none of them until the 2026-09 audit.
  *
  * The contract is *reduce*, not *remove*: a transition that communicates

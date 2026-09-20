@@ -10,14 +10,28 @@ export const SCENARIOS = ['xangarro', 'xangarrito', 'grace', 'lapsed', 'revoked'
 export type Scenario = (typeof SCENARIOS)[number];
 export const SCENARIO_HEADER = 'x-mock-scenario';
 
-export function scenarioOf(headers: Record<string, string>): Scenario {
+/** The request header wins; otherwise the server-wide default (`/__mock/scenario`). */
+export function scenarioOf(
+  headers: Record<string, string>,
+  fallback: Scenario = 'xangarro',
+): Scenario {
   const v = headers[SCENARIO_HEADER];
-  return (SCENARIOS as readonly string[]).includes(v ?? '') ? (v as Scenario) : 'xangarro';
+  return isScenario(v) ? v : fallback;
+}
+
+export function isScenario(v: unknown): v is Scenario {
+  return typeof v === 'string' && (SCENARIOS as readonly string[]).includes(v);
 }
 
 const DAY = 86_400_000;
 
-export function entitlementFor(scenario: Scenario, businessId: string, now: Date): Entitlement {
+/** `recordsPerMonth` overrides the plan's limit so E2E can hit it in a few captures. */
+export function entitlementFor(
+  scenario: Scenario,
+  businessId: string,
+  now: Date,
+  recordsPerMonth?: number | null,
+): Entitlement {
   const plan: PlanId = scenario === 'xangarrito' ? 'xangarrito' : 'xangarro';
   const limits = PLAN_LIMITS[plan];
   const t = now.getTime();
@@ -29,7 +43,7 @@ export function entitlementFor(scenario: Scenario, businessId: string, now: Date
     limits: {
       operators: limits.operators,
       devices: limits.devices,
-      recordsPerMonth: limits.recordsPerMonth,
+      recordsPerMonth: recordsPerMonth === undefined ? limits.recordsPerMonth : recordsPerMonth,
     },
     features: [...limits.features],
     capabilities: { ...limits.capabilities },

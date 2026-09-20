@@ -1,148 +1,37 @@
 /**
- * ProductoDetailScreen — inline-editable full-page product form.
+ * ProductoDetailScreen — read-only product detail (A-09).
  *
- * DetailFormBody lives in producto-detail-form-body.tsx.
+ * Products are created on the device but edited in the portal, so this page
+ * shows what the operator needs at the counter — ícono, precio, código,
+ * categoría — plus the stock card with Entrada/Salida, the only product
+ * change the device records. No save, no delete.
  */
 
-import { useEffect, useState, type ReactElement } from 'react';
-import { Pressable } from 'react-native';
+import type { ReactElement } from 'react';
+import { Pressable, ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import type { Product, ProductIcon } from '@xangarro/domain';
-import { fromPesos, toPesosString } from '@xangarro/domain';
-import type { ProductPatch } from '@xangarro/data';
-import { Icon } from '../../components/index';
+import { formatMoney, resolveProductIcon, type Product } from '@xangarro/domain';
+import { Card, Icon } from '../../components/index';
+import type { IconName } from '../../components/Icon/icon.shared';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
-import { type DetailFormState, type DetailFormErrors } from './producto-detail-fields';
-import { DetailFormBody } from './producto-detail-form-body';
+import { StockActionCard } from './producto-stock-card';
 
 export interface ProductoDetailScreenProps {
   readonly producto: Product;
   readonly stock: number;
-  readonly conversionEnabled: boolean;
-  readonly onSave: (patch: ProductPatch) => void;
-  readonly saving: boolean;
   readonly onEntrada: () => void;
   readonly onSalida: () => void;
-  readonly onDelete: () => void;
-  readonly deleting: boolean;
-  readonly onSelectIcon: () => void;
   readonly onBack: () => void;
-  readonly iconOverride?: ProductIcon | null;
+  /** False when the plan has no stock (A-14). Defaults to true. */
+  readonly showStock?: boolean;
   readonly testID?: string;
 }
 
-function fromProduct(p: Product): DetailFormState {
-  return {
-    nombre: p.nombre,
-    sku: p.sku ?? '',
-    categoria: p.categoria,
-    usoProducto: p.usoProducto ?? 'venta',
-    costoPesos: toPesosString(p.costoUnitCentavos),
-    precioVentaPesos: toPesosString(p.precioVentaCentavos),
-    unidad: p.unidad,
-    umbral: String(p.umbralStockBajo),
-    colorFondo: p.colorFondo ?? 'white',
-    icono: p.icono ?? null,
-  };
-}
-
-function buildPatch(state: DetailFormState): ProductPatch {
-  return {
-    nombre: state.nombre.trim(),
-    sku: state.sku.trim() === '' ? null : state.sku.trim(),
-    categoria: state.categoria,
-    usoProducto: state.usoProducto,
-    unidad: state.unidad,
-    umbralStockBajo: Math.max(0, Number(state.umbral) || 0),
-    colorFondo: state.colorFondo as Product['colorFondo'],
-    icono: state.icono,
-    costoUnitCentavos: fromPesos(state.costoPesos || '0'),
-    precioVentaCentavos: fromPesos(state.precioVentaPesos || '0'),
-  };
-}
-
-function validate(state: DetailFormState): DetailFormErrors {
-  const e: DetailFormErrors = {};
-  if (!state.nombre.trim()) e.nombre = 'Requerido';
-  // Costo is optional (review item #5) — mirrors `validateProducto`
-  // on the create path. Blank means "unknown", not "invalid".
-  if (state.costoPesos.trim() !== '') {
-    const c = Number(state.costoPesos);
-    if (!Number.isFinite(c) || c < 0) e.costo = 'Monto inválido';
-  }
-  if (state.usoProducto !== 'materia-prima') {
-    const pv = Number(state.precioVentaPesos);
-    if (!Number.isFinite(pv) || pv <= 0) e.precioVenta = 'Mayor a 0';
-  }
-  return e;
-}
-
-/*
-  Save action is a raw <Pressable>, NOT the shared <Btn>, on purpose.
-  <Btn> sets accessibilityRole="button" + accessibilityLabel, so RN collapses it into
-  a single merged a11y element. In THIS header (form ScrollView sibling rendered over
-  the header row) that merged element was not reliably tappable — <Btn> here never
-  fired its onPress under Maestro/XCUITest across many runs, while the adjacent raw
-  <Pressable> `detail-back` always did. A raw <Pressable> (native coordinate touch,
-  not merged) fires reliably and was verified green end-to-end. Same <Btn> works fine
-  elsewhere (e.g. MovimientoModal), so this is context-specific.
-  Full investigation + evidence: docs/e2e-productos-row-accessibility-scope.md.
-*/
-function DetailSaveButton(props: {
-  dirty: boolean;
-  saving: boolean;
-  onSave: () => void;
-}): ReactElement {
-  const disabled = !props.dirty || props.saving;
-  return (
-    <Pressable
-      onPress={props.onSave}
-      disabled={disabled}
-      testID="detail-save"
-      style={({ pressed }) => [
-        {
-          backgroundColor: props.dirty ? colors.yellow : 'transparent',
-          borderColor: colors.black,
-          borderWidth: 2,
-          borderRadius: 10,
-          height: 44,
-          paddingHorizontal: 18,
-          alignItems: 'center',
-          justifyContent: 'center',
-          opacity: disabled ? 0.5 : 1,
-        },
-        pressed ? { transform: [{ translateX: 2 }, { translateY: 2 }] } : null,
-      ]}
-    >
-      <Text
-        fontFamily={typography.fontFamily}
-        fontWeight={typography.weights.bold}
-        fontSize={fontSizes.md}
-        color={colors.black}
-      >
-        Guardar
-      </Text>
-    </Pressable>
-  );
-}
-
-function DetailTopBar(props: {
-  nombre: string;
-  dirty: boolean;
-  saving: boolean;
-  onBack: () => void;
-  onSave: () => void;
-}): ReactElement {
+function DetailHeader(props: { nombre: string; onBack: () => void }): ReactElement {
   const { t } = useTranslation();
   return (
-    <View
-      flexDirection="row"
-      alignItems="center"
-      justifyContent="space-between"
-      paddingHorizontal={16}
-      paddingVertical={12}
-    >
+    <View flexDirection="row" alignItems="center" paddingHorizontal={16} paddingVertical={12}>
       <Pressable
         onPress={props.onBack}
         testID="detail-back"
@@ -159,72 +48,87 @@ function DetailTopBar(props: {
         numberOfLines={1}
         flex={1}
         textAlign="center"
+        marginRight={24}
       >
         {props.nombre}
       </Text>
-      <DetailSaveButton dirty={props.dirty} saving={props.saving} onSave={props.onSave} />
     </View>
   );
 }
 
-function useDetailForm(producto: Product, iconOverride?: ProductIcon | null) {
-  const [state, setState] = useState<DetailFormState>(fromProduct(producto));
-  const [errors, setErrors] = useState<DetailFormErrors>({});
-  const [dirty, setDirty] = useState(false);
-
-  useEffect(() => {
-    if (iconOverride !== undefined) {
-      setState((s) => ({ ...s, icono: iconOverride ?? null }));
-      setDirty(true);
-    }
-  }, [iconOverride]);
-
-  const update = (p: Partial<DetailFormState>): void => {
-    setState((s) => ({ ...s, ...p }));
-    setDirty(true);
-  };
-  return { state, errors, setErrors, dirty, update };
+function InfoRow(props: { label: string; value: string; testID: string }): ReactElement {
+  return (
+    <View flexDirection="row" justifyContent="space-between" paddingVertical={6}>
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.md} color={colors.gray600}>
+        {props.label}
+      </Text>
+      <Text
+        fontFamily={typography.fontFamily}
+        fontWeight={typography.weights.semibold}
+        fontSize={fontSizes.md}
+        color={colors.black}
+        testID={props.testID}
+      >
+        {props.value}
+      </Text>
+    </View>
+  );
 }
 
-function useDetailSave(
-  state: DetailFormState,
-  setErrors: (e: DetailFormErrors) => void,
-  onSave: (patch: ProductPatch) => void,
-) {
-  return (): void => {
-    const v = validate(state);
-    if (Object.keys(v).length > 0) {
-      setErrors(v);
-      return;
-    }
-    setErrors({});
-    onSave(buildPatch(state));
-  };
+function ProductInfo(props: { producto: Product }): ReactElement {
+  const { t } = useTranslation();
+  const p = props.producto;
+  return (
+    <Card padding="md">
+      <InfoRow
+        label={t('nuevoProducto.precioVentaLabel')}
+        value={formatMoney(p.precioVentaCentavos)}
+        testID="detail-precio"
+      />
+      <InfoRow
+        label={t('nuevoProducto.categoriaLabel')}
+        value={p.categoria}
+        testID="detail-categoria"
+      />
+      <InfoRow label={t('nuevoProducto.skuLabel')} value={p.sku ?? '—'} testID="detail-sku" />
+    </Card>
+  );
 }
 
 export function ProductoDetailScreen(props: ProductoDetailScreenProps): ReactElement {
-  const form = useDetailForm(props.producto, props.iconOverride);
-  const handleSave = useDetailSave(form.state, form.setErrors, props.onSave);
-
+  const { t } = useTranslation();
+  const p = props.producto;
+  const icon = resolveProductIcon(p.icono ?? null, p.categoria) as IconName;
   return (
     <View
       testID={props.testID ?? 'producto-detail-screen'}
       flex={1}
       backgroundColor={colors.offwhite}
     >
-      <DetailTopBar
-        nombre={props.producto.nombre}
-        dirty={form.dirty}
-        saving={props.saving}
-        onBack={props.onBack}
-        onSave={handleSave}
-      />
-      <DetailFormBody
-        state={form.state}
-        errors={form.errors}
-        update={form.update}
-        screenProps={props}
-      />
+      <DetailHeader nombre={p.nombre} onBack={props.onBack} />
+      <ScrollView contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 80 }}>
+        <View alignItems="center" testID="detail-icon">
+          <Icon name={icon} size={48} color={colors.black} />
+        </View>
+        {props.showStock !== false && p.seguirStock !== false && (
+          <StockActionCard
+            stock={props.stock}
+            umbral={p.umbralStockBajo}
+            onEntrada={props.onEntrada}
+            onSalida={props.onSalida}
+          />
+        )}
+        <ProductInfo producto={p} />
+        <Text
+          fontFamily={typography.fontFamily}
+          fontSize={fontSizes.sm}
+          color={colors.gray600}
+          textAlign="center"
+          testID="detail-portal-hint"
+        >
+          {t('productos.editInPortal')}
+        </Text>
+      </ScrollView>
     </View>
   );
 }

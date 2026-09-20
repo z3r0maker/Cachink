@@ -2,20 +2,17 @@
  * AppShell — the sticky chrome wrapping every post-wizard screen
  * (P1C-M1-T02, T03).
  *
- * Layout: TopBar (role chip + title + settings cog + sync badge) →
- * children → BottomTabBar (3 tabs for Operativo, 6 for Director). The
- * tab list is picked via `tabsForRole` per CLAUDE.md §1.
+ * Layout: TopBar (operator avatar + title + settings cog + sync badge) →
+ * children → BottomTabBar (`appTabs`, single role — ADR-053).
  *
- * Consumers (both app-shell route wrappers) pass:
- *   - role + activeTabKey — drive which tab set is rendered + which is
- *     active.
- *   - onNavigate(path) — called when a tab is tapped. The app-shell
- *     route wrapper plugs Expo Router / wouter here.
- *   - onChangeRole — called when "Cambiar" is tapped. Typically clears
- *     the role in Zustand and routes to `/role-picker`.
+ * Consumers pass:
+ *   - activeTabKey — which tab is highlighted.
+ *   - onNavigate(path) — called when a tab is tapped.
+ *   - onSwitchOperator — called when the avatar is tapped; locks the
+ *     screen so another Operator signs in with their PIN.
  *   - onOpenSettings — called when the settings cog is tapped.
  *   - title / subtitle — current screen's title.
- *   - mode — drives the sync-state badge; local-standalone renders none.
+ *   - mode — kept for callers; the top bar always shows the cloud sync pill.
  */
 
 import type { ReactElement, ReactNode } from 'react';
@@ -26,17 +23,16 @@ import { BottomTabBar, Btn, Icon, TopBar } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors } from '../../theme';
 import type { FeatureFlags } from '@xangarro/domain';
-import type { AppMode, Role } from '../../app-config/index';
-import { tabsForRole } from './tab-definitions';
-import { SyncStatusBadge } from './sync-status-badge';
-import { useLanSync } from '../../hooks/use-lan-sync';
+import type { AppMode } from '../../app-config/index';
+import { appTabs } from './tab-definitions';
+import { CloudSyncPill } from './cloud-sync-pill';
+import { EntitlementBanner } from '../../entitlement/entitlement-banner';
 import { BackButton, RoleAvatar } from './app-shell-left-slot';
 
 export interface AppShellProps {
-  readonly role: Role;
   readonly activeTabKey: string;
   readonly onNavigate: (path: string) => void;
-  readonly onChangeRole: () => void;
+  readonly onSwitchOperator: () => void;
   readonly onOpenSettings: () => void;
   readonly title?: string;
   readonly subtitle?: string;
@@ -73,25 +69,15 @@ export interface AppShellProps {
 }
 
 interface RightSlotProps {
-  readonly mode: AppMode | null;
   readonly onOpenSettings: () => void;
+  readonly onNavigate: (path: string) => void;
 }
 
 function RightSlot(props: RightSlotProps): ReactElement {
   const { t } = useTranslation();
-  const lan = useLanSync();
   return (
     <View flexDirection="row" alignItems="center" gap={8}>
-      <SyncStatusBadge
-        mode={props.mode}
-        lanStatus={lan.status}
-        connectedDevices={lan.connectedDevices}
-        onRetry={
-          props.mode === 'lan-server' || props.mode === 'lan-client'
-            ? () => void lan.retryNow()
-            : undefined
-        }
-      />
+      <CloudSyncPill onOpenRejected={() => props.onNavigate('/no-enviados')} />
       {/*
        * Audit 3.11 + 3.12 — Btn now accepts an icon-only configuration
        * (children optional when icon is set, see PR 2.5). The ariaLabel
@@ -119,18 +105,12 @@ function useLeftSlot(
   if (props.onBack !== undefined) {
     return <BackButton onPress={props.onBack} ariaLabel={backLabel} />;
   }
-  return (
-    <RoleAvatar
-      role={props.role}
-      onChange={props.onChangeRole}
-      ariaLabel={t('topBar.cambiarRol')}
-    />
-  );
+  return <RoleAvatar onChange={props.onSwitchOperator} ariaLabel={t('topBar.cambiarRol')} />;
 }
 
 export function AppShell(props: AppShellProps): ReactElement {
   const { t } = useTranslation();
-  const tabs = tabsForRole(props.role, props.flags);
+  const tabs = appTabs(props.flags);
   const items = tabs.map((tab) => ({
     key: tab.key,
     label: t(tab.labelKey as 'tabs.ventas'),
@@ -146,8 +126,9 @@ export function AppShell(props: AppShellProps): ReactElement {
         title={props.title}
         subtitle={props.subtitle}
         left={leftSlot}
-        right={<RightSlot mode={props.mode} onOpenSettings={props.onOpenSettings} />}
+        right={<RightSlot onOpenSettings={props.onOpenSettings} onNavigate={props.onNavigate} />}
       />
+      <EntitlementBanner />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}

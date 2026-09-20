@@ -23,14 +23,29 @@ interface Executable<TInput, TOutput> {
   execute(input: TInput): Promise<TOutput>;
 }
 
-/** Wrapper that intercepts writeAudit to add Sentry breadcrumbs. */
-function withBreadcrumbs(store: LogStore): LogStore {
+/**
+ * Wrapper that intercepts writeAudit to add Sentry breadcrumbs.
+ *
+ * Delegates every method explicitly. An object spread (`{ ...store }`) copies
+ * no methods from a class-based store — they live on the prototype and use
+ * private fields — so a failing use case used to throw
+ * "writeError is not a function", hiding its real error from the UI.
+ */
+export function withBreadcrumbs(store: LogStore): LogStore {
   return {
-    ...store,
-    async writeAudit(event: AuditEvent): Promise<void> {
+    writeAudit: async (event: AuditEvent) => {
       addAuditBreadcrumb(event);
       return store.writeAudit(event);
     },
+    writeError: (entry) => store.writeError(entry),
+    queryAudit: (opts) => store.queryAudit(opts),
+    queryErrors: (opts) => store.queryErrors(opts),
+    queryTimeline: (opts) => store.queryTimeline(opts),
+    stats: (since) => store.stats(since),
+    prune: (days) => store.prune(days),
+    exportSnapshot: (opts) => store.exportSnapshot(opts),
+    queryUnshippedErrors: store.queryUnshippedErrors?.bind(store),
+    markShipped: store.markShipped?.bind(store),
   };
 }
 

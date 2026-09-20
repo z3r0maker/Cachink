@@ -50,7 +50,10 @@ describe('service-role guard', () => {
     assert.deepEqual(scanTree(root), []);
   });
 
-  it('holds for the real apps/web today', () => {
+  // Walks every file under apps/web — under turbo's parallel load that can
+  // outlast vitest's 5s default (it timed out two gates in a row while the
+  // finding was empty). The scan itself is unchanged.
+  it('holds for the real apps/web today', { timeout: 60_000 }, () => {
     const portal = resolve(import.meta.dirname, '..', '..', 'web');
     assert.deepEqual(scanTree(portal), []);
   });

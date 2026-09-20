@@ -1,61 +1,43 @@
 /**
- * NuevoProductoScreen — full-page form for creating a new product.
- *
- * Replaces the modal approach because the form is growing with
- * usoProducto + future recipe linking. ScrollView with sections.
- *
- * Phase 18: new product form as a full page.
+ * NuevoProductoScreen — quick-add a product from the counter (A-09).
+ * Products are create-only on the device; editing happens in the portal.
  */
 
-import { useEffect, type ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { ScrollView } from 'react-native';
+import { Text } from '@tamagui/core';
+import { Btn } from '../../components/index';
 import type { CrearProductoInput } from '../../hooks/use-crear-producto';
 import { useTranslation } from '../../i18n/index';
+import { colors, fontSizes, typography } from '../../theme';
 import {
   buildProductoPayload,
   useProductoForm,
   validateProducto,
   validationMessages,
-  type ProductoFormState,
 } from './nuevo-producto-form';
+import { QuickAddFields } from './quick-add-fields';
 import { SectionHeader } from './section-header';
-import { ProductoFormBody } from './producto-form-body';
 
 export interface NuevoProductoScreenProps {
   readonly onSubmit: (input: CrearProductoInput) => void;
   readonly onBack: () => void;
   readonly submitting?: boolean;
-  readonly conversionEnabled?: boolean;
-  /** Navigate to icon picker screen. */
-  readonly onPickIcon?: () => void;
-  /** Fires on every form update — used to persist state before navigation. */
-  readonly onFormChange?: (state: ProductoFormState) => void;
+  /** False when the plan has no stock (A-14). Defaults to true. */
+  readonly stockEnabled?: boolean;
   readonly testID?: string;
-}
-
-function useScreenSubmit(
-  form: ReturnType<typeof useProductoForm>,
-  onSubmit: (input: CrearProductoInput) => void,
-  t: ReturnType<typeof useTranslation>['t'],
-) {
-  return (): void => {
-    const v = validateProducto(form.state, validationMessages(t));
-    if (Object.keys(v).length > 0) {
-      form.setErrors(v);
-      return;
-    }
-    form.setErrors({});
-    onSubmit(buildProductoPayload(form.state));
-    form.reset();
-  };
 }
 
 export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactElement {
   const { t } = useTranslation();
   const form = useProductoForm();
-  const handleSubmit = useScreenSubmit(form, props.onSubmit, t);
-  useEffect(() => props.onFormChange?.(form.state), [form.state]);
-
+  const handleSubmit = (): void => {
+    const errors = validateProducto(form.state, validationMessages(t));
+    form.setErrors(errors);
+    if (Object.keys(errors).length > 0) return;
+    props.onSubmit(buildProductoPayload(form.state));
+    form.reset();
+  };
   return (
     <ScrollView
       contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 48 }}
@@ -63,13 +45,19 @@ export function NuevoProductoScreen(props: NuevoProductoScreenProps): ReactEleme
       testID={props.testID ?? 'nuevo-producto-screen'}
     >
       <SectionHeader label={t('nuevoProducto.title')} />
-      <ProductoFormBody
-        form={form}
-        onSubmit={handleSubmit}
-        submitting={props.submitting === true}
-        conversionEnabled={props.conversionEnabled === true}
-        onPickIcon={props.onPickIcon}
-      />
+      <QuickAddFields form={form} stockEnabled={props.stockEnabled} />
+      <Text fontFamily={typography.fontFamily} fontSize={fontSizes.sm} color={colors.gray600}>
+        {t('nuevoProducto.portalHint')}
+      </Text>
+      <Btn
+        variant="primary"
+        onPress={handleSubmit}
+        loading={props.submitting === true}
+        fullWidth
+        testID="producto-submit"
+      >
+        {t('nuevoProducto.save')}
+      </Btn>
     </ScrollView>
   );
 }

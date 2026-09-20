@@ -15,7 +15,7 @@ describe('formatBackupFilename', () => {
     const name = formatBackupFilename('0005_add_pagos', new Date('2026-04-24T18:00:00Z'));
     expect(name).toContain('2026-04-24T18-00-00-000Z');
     expect(name).toContain('0005_add_pagos');
-    expect(name).toMatch(/^cachink\.db\.backup-/);
+    expect(name).toMatch(/^xangarro\.db\.backup-/);
     expect(name).toMatch(/\.bak$/);
   });
 
@@ -42,7 +42,7 @@ describe('runMigrations + backupBefore', () => {
   });
 
   it('calls backup exactly once when pending migrations exist', async () => {
-    const backup = vi.fn().mockResolvedValue('/tmp/cachink.db.backup');
+    const backup = vi.fn().mockResolvedValue('/tmp/xangarro.db.backup');
     const fakeDb = {
       run: vi.fn().mockResolvedValue(undefined),
       all: vi.fn().mockResolvedValue([]),

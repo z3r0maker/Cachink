@@ -36,9 +36,9 @@ test.beforeAll(async () => {
       INSERT INTO devices (id, nombre, plataforma, modelo, business_id, created_at, updated_at)
       VALUES (${dev}, 'Caja única', 'android', 'Moto G', ${biz}, now(), now())`;
     await sql`
-      INSERT INTO users (id, nombre, pin_hash, recovery_password_hash, must_change_pin, avatar_color,
-                         permissions, role, business_id, device_id, created_at, updated_at)
-      VALUES (${op}, 'Rosa Turnos', 'x', 'x', false, 'blue', '{}', 'operativo', ${biz}, ${dev}, now(), now())`;
+      INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
+                         business_id, device_id, created_at, updated_at)
+      VALUES (${op}, 'Rosa Turnos', 'x', 'blue', '{}', true, ${biz}, ${dev}, now(), now())`;
     await sql`
       INSERT INTO caja_turnos (id, user_id, fecha, apertura_at, cierre_at, monto_apertura_centavos,
                                efectivo_adicional_centavos, diferencia_centavos, business_id, device_id,

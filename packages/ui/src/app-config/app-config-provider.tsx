@@ -1,11 +1,7 @@
 /**
  * AppConfigProvider — hydrates the Zustand store from the
- * {@link AppConfigRepository} on mount. Pre-ADR-039 legacy mode values
- * (`'local-standalone'`, `'tablet-only'`, `'lan'`) are migrated
- * in-place; the `'lan'` sentinel resolves via the optional
- * `resolveLegacyLan` callback that reads
- * `__cachink_sync_state.lanRole`. When the callback is omitted the
- * fallback is `'lan-client'` (safer than `'lan-server'`).
+ * {@link AppConfigRepository} on mount. Retired mode values (including
+ * the LAN modes, A-18) are rewritten to `'local'` in place.
  *
  * Returns `null` while hydrating so the splash stays visible; children
  * mount once `hydrated === true`.
@@ -16,6 +12,7 @@ import { newEntityId, ISR_DEFAULTS_SEED, type BusinessId, type DeviceId } from '
 import type { AppConfigRepository } from '@xangarro/data';
 import { useAppConfigStore } from './use-app-config';
 import { APP_CONFIG_KEYS, parseMode, type AppMode } from './types';
+import { readSaleSoundSetting } from './legacy-keys';
 
 export interface AppConfigProviderProps {
   readonly children: ReactNode;
@@ -35,14 +32,6 @@ export interface AppConfigProviderProps {
    * seed the store directly.
    */
   readonly skipHydration?: boolean;
-  /**
-   * Resolver for the pre-ADR-039 `'lan'` mode value. Reads
-   * `__cachink_sync_state.lanRole` and returns `'lan-server'` when role
-   * was `'host'`, otherwise `'lan-client'`. Provided by the
-   * `DrizzleAppConfigBridge` (which has the SQLite handle); omit in
-   * tests that don't exercise the legacy-lan migration.
-   */
-  readonly resolveLegacyLan?: () => Promise<'lan-server' | 'lan-client'>;
 }
 
 interface HydratedConfig {
@@ -51,7 +40,7 @@ interface HydratedConfig {
   readonly currentBusinessId: BusinessId | null;
   readonly notificationsEnabled: boolean;
   readonly crashReportingEnabled: boolean | null;
-  readonly cachinkSoundEnabled: boolean;
+  readonly saleSoundEnabled: boolean;
 }
 
 function parseBool(raw: string | null, fallback: boolean): boolean {
@@ -70,10 +59,7 @@ function parseNullableBool(raw: string | null): boolean | null {
  * Read AppConfig.mode and migrate legacy values per ADR-039. Idempotent
  * — running on a fresh DB or on already-migrated data is a no-op.
  */
-async function readAndMigrateMode(
-  repo: AppConfigRepository,
-  resolveLegacyLan: AppConfigProviderProps['resolveLegacyLan'],
-): Promise<AppMode | null> {
+async function readAndMigrateMode(repo: AppConfigRepository): Promise<AppMode | null> {
   const raw = await repo.get(APP_CONFIG_KEYS.mode);
   if (raw === null) {
     // Fresh install (review items #1/#2). A first-time user should not
@@ -92,11 +78,6 @@ async function readAndMigrateMode(
   }
   const parsed = parseMode(raw);
   if (parsed === null) return null;
-  if (parsed === 'legacy-lan') {
-    const resolved = resolveLegacyLan ? await resolveLegacyLan() : 'lan-client';
-    await repo.set(APP_CONFIG_KEYS.mode, resolved);
-    return resolved;
-  }
   // If parseMode normalised a legacy non-lan value, persist the new one
   // so subsequent reads skip the migration branch.
   if (parsed !== raw) {
@@ -113,7 +94,6 @@ async function readAndMigrateMode(
 async function hydrateAppConfig(
   repo: AppConfigRepository,
   generateDeviceId: (() => DeviceId) | undefined,
-  resolveLegacyLan: AppConfigProviderProps['resolveLegacyLan'],
 ): Promise<HydratedConfig> {
   const existingDeviceId = (await repo.get(APP_CONFIG_KEYS.deviceId)) as DeviceId | null;
   const deviceId = existingDeviceId ?? generateDeviceId?.() ?? newEntityId<DeviceId>();
@@ -126,7 +106,7 @@ async function hydrateAppConfig(
     await repo.set(APP_CONFIG_KEYS.isrDefaults, JSON.stringify(ISR_DEFAULTS_SEED));
   }
 
-  const mode = await readAndMigrateMode(repo, resolveLegacyLan);
+  const mode = await readAndMigrateMode(repo);
   const rawBusinessId = await repo.get(APP_CONFIG_KEYS.currentBusinessId);
   const notificationsEnabled = parseBool(
     await repo.get(APP_CONFIG_KEYS.notificationsEnabled),
@@ -135,14 +115,14 @@ async function hydrateAppConfig(
   const crashReportingEnabled = parseNullableBool(
     await repo.get(APP_CONFIG_KEYS.crashReportingEnabled),
   );
-  const cachinkSoundEnabled = parseBool(await repo.get(APP_CONFIG_KEYS.cachinkSoundEnabled), true);
+  const saleSoundEnabled = parseBool(await readSaleSoundSetting(repo), true);
   return {
     deviceId,
     mode,
     currentBusinessId: rawBusinessId as BusinessId | null,
     notificationsEnabled,
     crashReportingEnabled,
-    cachinkSoundEnabled,
+    saleSoundEnabled,
   };
 }
 
@@ -152,7 +132,7 @@ interface Setters {
   readonly setCurrentBusinessId: (v: BusinessId | null) => void;
   readonly setNotificationsEnabled: (v: boolean) => void;
   readonly setCrashReportingEnabled: (v: boolean | null) => void;
-  readonly setCachinkSoundEnabled: (v: boolean) => void;
+  readonly setSaleSoundEnabled: (v: boolean) => void;
   readonly setHydrated: (v: boolean) => void;
 }
 
@@ -162,7 +142,7 @@ function applyHydrated(c: HydratedConfig, s: Setters): void {
   s.setCurrentBusinessId(c.currentBusinessId);
   s.setNotificationsEnabled(c.notificationsEnabled);
   s.setCrashReportingEnabled(c.crashReportingEnabled);
-  s.setCachinkSoundEnabled(c.cachinkSoundEnabled);
+  s.setSaleSoundEnabled(c.saleSoundEnabled);
   s.setHydrated(true);
 }
 
@@ -173,7 +153,7 @@ function useStoreSetters(): Setters {
     setCurrentBusinessId: useAppConfigStore((s) => s.setCurrentBusinessId),
     setNotificationsEnabled: useAppConfigStore((s) => s.setNotificationsEnabled),
     setCrashReportingEnabled: useAppConfigStore((s) => s.setCrashReportingEnabled),
-    setCachinkSoundEnabled: useAppConfigStore((s) => s.setCachinkSoundEnabled),
+    setSaleSoundEnabled: useAppConfigStore((s) => s.setSaleSoundEnabled),
     setHydrated: useAppConfigStore((s) => s.setHydrated),
   };
 }
@@ -189,7 +169,7 @@ function useHydrateAppConfig(props: AppConfigProviderProps): boolean {
       return;
     }
     let mounted = true;
-    void hydrateAppConfig(props.appConfig, props.generateDeviceId, props.resolveLegacyLan)
+    void hydrateAppConfig(props.appConfig, props.generateDeviceId)
       .then((config) => {
         if (mounted) applyHydrated(config, setters);
       })
@@ -199,13 +179,7 @@ function useHydrateAppConfig(props: AppConfigProviderProps): boolean {
     return () => {
       mounted = false;
     };
-  }, [
-    props.appConfig,
-    props.generateDeviceId,
-    props.skipHydration,
-    props.resolveLegacyLan,
-    setters,
-  ]);
+  }, [props.appConfig, props.generateDeviceId, props.skipHydration, setters]);
 
   return initializing;
 }

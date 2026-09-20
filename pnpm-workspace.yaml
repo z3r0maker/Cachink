@@ -2,3 +2,7 @@ packages:
   - 'apps/*'
   - 'packages/*'
   - '!archive/**'
+
+patchedDependencies:
+  # Xcode 27 SDK: guard iOS 16-only UIMenuElement.subtitle (app supports 15.1). Drop once expo-router ships the guard.
+  expo-router@55.0.14: patches/expo-router@55.0.14.patch

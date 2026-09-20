@@ -20,7 +20,7 @@ export function formatTimelineAsText(
   locale: string = 'es-MX',
 ): string {
   const lines: string[] = [
-    '=== Cachink! Timeline Report ===',
+    '=== Xangarro! Timeline Report ===',
     `Generated: ${new Date().toLocaleString(locale)}`,
     `Total entries: ${entries.length}`,
     '',

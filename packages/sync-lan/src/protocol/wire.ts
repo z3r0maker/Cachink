@@ -2,7 +2,7 @@
  * Zod schemas for everything that crosses the LAN wire (ADR-029).
  *
  * These are the single source of truth the Rust server and the JS client
- * validate against. Every response carries `X-Cachink-Protocol: 1`; unknown
+ * validate against. Every response carries `X-Xangarro-Protocol: 1`; unknown
  * versions get `426 Upgrade Required` at the HTTP layer (not modelled
  * here — see `protocol/constants.ts`).
  *

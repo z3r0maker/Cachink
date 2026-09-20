@@ -14,26 +14,26 @@ appId: mx.xangarro.mobile
 - runFlow: shared/authenticate.yaml
 
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "egreso-tab-inventario"
+    id: 'egreso-tab-inventario'
 
 # Inventario tab — fill producto + cantidad + costo_unit.
 - tapOn:
-    id: "inventario-producto"
+    id: 'inventario-producto'
 - tapOn:
     index: 0
 - tapOn:
-    id: "inventario-cantidad"
-- inputText: "50"
+    id: 'inventario-cantidad'
+- inputText: '50'
 - tapOn:
-    id: "inventario-costo"
-- inputText: "12"
+    id: 'inventario-costo'
+- inputText: '12'
 - tapOn:
-    id: "inventario-submit"
+    id: 'inventario-submit'
 
 # Modal closes + egreso visible (50 × 12 = $600.00).
-- assertNotVisible: "Nuevo egreso"
-- assertVisible: "−$600.00"
+- assertNotVisible: 'Nuevo egreso'
+- assertVisible: '−$600.00'

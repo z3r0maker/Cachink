@@ -1,5 +1,5 @@
 /**
- * Card — the Cachink container primitive.
+ * Card — the Xangarro container primitive.
  *
  * Three variants from CLAUDE.md §8.4 (`white` / `yellow` / `black`) wrap any
  * child content with the brand's hard 2px / 2.5px black border, hard drop
@@ -141,7 +141,7 @@ function buildTappableStyle(
 }
 
 /**
- * Renders the canonical Cachink card surface. See `card.stories.tsx` for the
+ * Renders the canonical Xangarro card surface. See `card.stories.tsx` for the
  * full variant catalog.
  */
 function TappableCard(

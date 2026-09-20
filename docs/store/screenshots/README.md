@@ -1,4 +1,4 @@
-# Cachink store screenshots
+# Xangarro store screenshots
 
 Produced by `pnpm store:screenshots` from the Tauri dev build and the Expo
 web bundle using Playwright. Six flows × four device sizes = 24 images.

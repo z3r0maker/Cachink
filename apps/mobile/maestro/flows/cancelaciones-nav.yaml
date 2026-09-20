@@ -19,18 +19,18 @@ tags:
 
 - scrollUntilVisible:
     element:
-      id: "otros-cancelaciones"
+      id: 'otros-cancelaciones'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-cancelaciones"
+    id: 'otros-cancelaciones'
 - extendedWaitUntil:
     visible:
-      id: "mobile-cancelaciones"
+      id: 'mobile-cancelaciones'
     timeout: 5000
 
 # Verify the screen title renders
-- assertVisible: "Cancelaciones"
+- assertVisible: 'Cancelaciones'
 # Empty state (no sales today expected at test start)
-- assertVisible: "No hay ventas registradas hoy"
+- assertVisible: 'No hay ventas registradas hoy'

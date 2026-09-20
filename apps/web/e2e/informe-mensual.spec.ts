@@ -39,10 +39,17 @@ test.beforeAll(async () => {
                             seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
       VALUES (${producto}, 'Despensa', 'Producto Terminado', 100, 'pza', 3, 'producto', false, 500,
               ${biz}, ${biz}, now(), now())`;
+    // C-17 (ADR-073): a sale is a ticket line — seed the header it joins to.
+    const saleId = newUlid();
     await sql`
-      INSERT INTO sales (id, fecha, concepto, categoria, monto_centavos, metodo, estado_pago,
+      INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                           business_id, device_id, created_at, updated_at)
+      VALUES (${saleId}, 1, '2026-04-10', 'Despensa', 'Efectivo', 'pagado',
+              ${biz}, ${biz}, now(), now())`;
+    await sql`
+      INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                          producto_id, cantidad, business_id, device_id, created_at, updated_at)
-      VALUES (${newUlid()}, '2026-04-10', 'Despensa', 'Producto', 50_000, 'Efectivo', 'pagado',
+      VALUES (${saleId}, ${saleId}, '2026-04-10', 'Despensa', 'Producto', 50_000,
               ${producto}, 1, ${biz}, ${biz}, now(), now())`;
   });
   const billing = postgres(billingUrl(), { max: 1, onnotice: () => undefined });

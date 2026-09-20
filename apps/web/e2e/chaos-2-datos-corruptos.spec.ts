@@ -11,7 +11,7 @@ import postgres from 'postgres';
  * and rendered inert, never executed.
  *
  * `fullyParallel` runs against one Postgres, so each mutating test owns a
- * distinct seeded product (TAC-002 … TAC-006) to avoid cross-test writes.
+ * distinct seeded product (TAC-001, QUE-001, GRI-001, MP-001) to avoid cross-test writes.
  */
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 
@@ -52,7 +52,7 @@ test('script tag in a product name is stored verbatim and rendered as text', asy
   const dialogs = failOnJsDialog(page);
 
   const payload = `<script>alert('cachink')</script>`;
-  await openEditor(page, 'TAC-002');
+  await openEditor(page, 'TAC-001');
   await page.getByTestId('producto-nombre').fill(payload);
   await page.getByRole('button', { name: 'Guardar' }).click();
 
@@ -63,7 +63,7 @@ test('script tag in a product name is stored verbatim and rendered as text', asy
   expect(dialogs.fired(), 'no alert()/confirm() may ever fire from stored data').toBe(false);
 
   const [row] = await query(
-    async (sql) => sql<{ nombre: string }[]>`SELECT nombre FROM products WHERE sku = 'TAC-002'`,
+    async (sql) => sql<{ nombre: string }[]>`SELECT nombre FROM products WHERE sku = 'TAC-001'`,
   );
   expect(row?.nombre).toBe(payload);
 });
@@ -77,12 +77,12 @@ test('a 10,000-character name is refused by the server, row untouched', async ({
     query(async (sql) => {
       const [row] = await sql<
         { nombre: string }[]
-      >`SELECT nombre FROM products WHERE sku = 'TAC-004'`;
+      >`SELECT nombre FROM products WHERE sku = 'QUE-001'`;
       return row?.nombre ?? '';
     });
   const before = await readName();
 
-  await openEditor(page, 'TAC-004');
+  await openEditor(page, 'QUE-001');
   await page.getByTestId('producto-nombre').fill('A'.repeat(10_000));
   await page.getByRole('button', { name: 'Guardar' }).click();
 
@@ -101,7 +101,7 @@ test('SQL fragments in name and SKU are inert end to end', async ({ page }, test
 
   const nombre = `🌮 peor caso'); DROP TABLE products; --`;
   const sku = `x'; DELETE FROM products WHERE '1'='1`;
-  await openEditor(page, 'TAC-005');
+  await openEditor(page, 'GRI-001');
   await page.getByTestId('producto-nombre').fill(nombre);
   await page.getByTestId('producto-sku').fill(sku);
   await page.getByRole('button', { name: 'Guardar' }).click();
@@ -127,7 +127,7 @@ test('movimiento cantidad launders exponents/hex through Number()', async ({ pag
   await page.goto('/productos');
   await page
     .locator('main')
-    .locator('tr', { hasText: 'TAC-006' })
+    .locator('tr', { hasText: 'MP-001' })
     .getByRole('button', { name: 'Movimiento' })
     .click();
   const dialog = page.getByRole('dialog');
@@ -151,11 +151,11 @@ test('movimiento cantidad launders exponents/hex through Number()', async ({ pag
 
   const [row] = await query(
     async (sql) => sql<{ cantidad: number; costo: number }[]>`
-    SELECT cantidad::int, costo_unit_centavos::int AS costo
+    SELECT im.cantidad::int, im.costo_unit_centavos::int AS costo
     FROM inventory_movements im
     JOIN products p ON p.id = im.producto_id
-    WHERE p.sku = 'TAC-006' AND im.costo_unit_centavos = 333
-    ORDER BY created_at DESC
+    WHERE p.sku = 'MP-001' AND im.costo_unit_centavos = 333
+    ORDER BY im.created_at DESC
     LIMIT 1`,
   );
   expect(row?.cantidad, '"1e2" is coerced to 100 before the server sees the string').toBe(100);

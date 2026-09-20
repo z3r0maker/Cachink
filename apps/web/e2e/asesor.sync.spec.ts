@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { newUlid } from '@xangarro/domain';
 
 import { asTenant } from './sync-phone';
 
@@ -28,6 +29,34 @@ test('visiting Para ti materialises insights and real capacidades', async ({ pag
 });
 
 test('a member can dismiss an Asesor insight, and it stays dismissed', async ({ page }) => {
+  // The feed is materialised-on-read, which also CLOSES any open asesor row
+  // no detector currently backs — so seeding a notice is reaped on the first
+  // load. Arm a real detector instead: three ventas bunched in one quincena
+  // (the same dates asesor-metas uses) makes the quincena insight materialise,
+  // open and dismissable. The afterAll deletes the notices; the rows go too.
+  const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
+  const TACO = '01HZ8XQN9GZJXV8AKQ5X0PTAC1';
+  const seeded: string[] = [];
+  await asTenant(BIZ, async (sql) => {
+    let folio = 100;
+    for (const f of ['2026-04-05', '2026-04-18', '2026-04-27']) {
+      folio += 1;
+      const saleId = newUlid();
+      seeded.push(saleId);
+      await sql`
+        INSERT INTO tickets (id, folio, fecha, concepto, metodo, estado_pago,
+                             business_id, device_id, created_at, updated_at)
+        VALUES (${saleId}, ${folio}, ${f}, 'Venta para el Asesor', 'Efectivo', 'pagado',
+                ${BIZ}, 'e2e-asesor', ${`${f}T12:00:00Z`}, ${`${f}T12:00:00Z`})
+        ON CONFLICT DO NOTHING`;
+      await sql`
+        INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
+                           producto_id, cantidad, business_id, device_id, created_at, updated_at)
+        VALUES (${saleId}, ${saleId}, ${f}, 'Venta para el Asesor', 'Producto', 10_000,
+                ${TACO}, 2, ${BIZ}, 'e2e-asesor', ${`${f}T12:00:00Z`}, ${`${f}T12:00:00Z`})
+        ON CONFLICT DO NOTHING`;
+    }
+  });
   await page.goto('/asesor');
   const row = page.getByTestId('asesor-feed-row').first();
   const texto = (await row.textContent()) ?? '';
@@ -38,6 +67,12 @@ test('a member can dismiss an Asesor insight, and it stays dismissed', async ({ 
   await expect(fuera).toHaveCount(0);
   // And it appears under Anteriores as dismissed.
   await expect(page.locator('main').getByText('Anteriores')).toBeVisible();
+  // Leave the tenant as the seed had it.
+  await asTenant(BIZ, async (sql) => {
+    await sql`DELETE FROM sales WHERE id = ANY(${seeded})`;
+    await sql`DELETE FROM tickets WHERE id = ANY(${seeded})`;
+    await sql`DELETE FROM notices WHERE source = 'asesor' AND id LIKE ${`${BIZ}:%`}`;
+  });
 });
 
 test.afterAll(async () => {

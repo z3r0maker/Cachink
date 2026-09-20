@@ -10,12 +10,12 @@ import { fireEvent, renderWithProviders, screen } from '../test-utils';
 initI18n();
 
 describe('NuevoClienteModal', () => {
-  it('renders name + phone + email + note fields when open', () => {
+  it('renders only nombre + teléfono (quick-create, A-09)', () => {
     renderWithProviders(<NuevoClienteModal open onClose={vi.fn()} onSubmit={vi.fn()} />);
     expect(screen.getByTestId('nuevo-cliente-nombre')).toBeInTheDocument();
     expect(screen.getByTestId('nuevo-cliente-telefono')).toBeInTheDocument();
-    expect(screen.getByTestId('nuevo-cliente-email')).toBeInTheDocument();
-    expect(screen.getByTestId('nuevo-cliente-nota')).toBeInTheDocument();
+    expect(screen.queryByTestId('nuevo-cliente-email')).toBeNull();
+    expect(screen.queryByTestId('nuevo-cliente-nota')).toBeNull();
   });
 
   it('blocks submit with an empty nombre', () => {

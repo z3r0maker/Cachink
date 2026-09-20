@@ -4,7 +4,7 @@
  * Renders a centered dialog over a tinted backdrop. Built on
  * `@tamagui/dialog`, which provides focus trap, ESC-to-close, ARIA roles,
  * scroll lock, and a portal host for free — we only write the visual
- * shell that expresses the Cachink brand.
+ * shell that expresses the Xangarro brand.
  *
  * Vite-based tools (Vitest, Storybook, Tauri) resolve this file via the
  * default import chain `./modal.tsx → ./modal.web.tsx`. Metro ignores it

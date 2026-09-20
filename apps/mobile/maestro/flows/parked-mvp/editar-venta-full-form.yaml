@@ -27,14 +27,14 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Verify the existing sale is visible.
-- assertVisible: "Tortilla"
+- assertVisible: 'Tortilla'
 
 # Swipe the venta row left to reveal the edit action.
 - swipe:
-    id: "ventas-list"
+    id: 'ventas-list'
     direction: LEFT
     startX: 300
     endX: 50
@@ -42,29 +42,29 @@ appId: mx.xangarro.mobile
 # Wait for the EditarVentaModal to appear.
 - extendedWaitUntil:
     visible:
-      id: "editar-venta-modal"
+      id: 'editar-venta-modal'
     timeout: 5000
 
 # --- Change categoría to "Servicio" ---
 - tapOn:
-    id: "editar-venta-categoria"
-- tapOn: "Servicio"
+    id: 'editar-venta-categoria'
+- tapOn: 'Servicio'
 
 # --- Change monto ---
 - tapOn:
-    id: "editar-venta-monto"
+    id: 'editar-venta-monto'
 - eraseText
-- inputText: "250"
+- inputText: '250'
 
 # --- Change método de pago to "Transferencia" ---
 - tapOn:
-    id: "editar-venta-metodo"
-- tapOn: "Transferencia"
+    id: 'editar-venta-metodo'
+- tapOn: 'Transferencia'
 
 # Submit the edit.
 - tapOn:
-    id: "editar-venta-submit"
+    id: 'editar-venta-submit'
 
 # Modal closes and the updated sale appears in the list.
 - assertNotVisible:
-    id: "editar-venta-modal"
+    id: 'editar-venta-modal'

@@ -6,11 +6,11 @@ appId: mx.xangarro.mobile
 ---
 - launchApp:
     arguments:
-      CACHINK_FORCE_CRASH: "true"
+      XANGARRO_FORCE_CRASH: 'true'
 
 - assertVisible:
-    id: "app-error-boundary"
+    id: 'app-error-boundary'
 - assertVisible:
-    id: "app-error-boundary-reset"
+    id: 'app-error-boundary-reset'
 - tapOn:
-    id: "app-error-boundary-reset"
+    id: 'app-error-boundary-reset'

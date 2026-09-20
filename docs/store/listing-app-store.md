@@ -1,8 +1,8 @@
-# Cachink! — App Store listing (es-MX)
+# Xangarro — App Store listing (es-MX)
 
 ## Nombre
 
-**Cachink! — Finanzas para emprendedores**
+**Xangarro — Finanzas para emprendedores**
 
 ## Subtítulo (30 caracteres)
 
@@ -14,12 +14,12 @@ POS y finanzas para emprendedoras mexicanas. Funciona sin internet.
 
 ## Descripción larga
 
-Cachink! es la app más simple para llevar las finanzas de tu negocio en
+Xangarro es la app más simple para llevar las finanzas de tu negocio en
 México. Registra ventas y egresos, controla inventario y ve tus
 estados financieros al día — todo en tu dispositivo, sin conexión
 obligatoria.
 
-**Para quién es Cachink!**
+**Para quién es Xangarro**
 
 - Emprendedoras y emprendedores que quieren llevar su negocio en orden
   sin aprender contabilidad.
@@ -52,7 +52,7 @@ obligatoria.
 
 **Sin suscripciones obligatorias**
 
-Cachink! funciona en modo local sin costo recurrente. La sincronización
+Xangarro funciona en modo local sin costo recurrente. La sincronización
 LAN entre equipos en tu negocio no cuesta nada. Solo la sincronización
 en la nube requiere una cuenta — y puedes usar la nuestra o la tuya.
 

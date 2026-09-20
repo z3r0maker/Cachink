@@ -1,38 +1,32 @@
 /**
- * useFeatureFlags / useFeatureFlag — read feature flags from the
- * current business record.
+ * useFeatureFlags / useFeatureFlag — effective feature flags (A-14):
+ * platform availability × the verified entitlement's plan × the tenant
+ * toggles the portal synced onto the business row.
  *
- * Parses the JSON `featureFlags` field from the Business entity.
- * Returns defaults when the business is not loaded yet.
- *
- * Phase 3 of the Feature Flags plan.
+ * Until the entitlement has loaded, or when nothing verifies, the plan is
+ * the Freelancer fallback — a feature is never on because of a missing or
+ * forged entitlement.
  */
 
 import {
   DEFAULT_FEATURE_FLAGS,
+  FALLBACK_PLAN,
   PLATFORM_AVAILABLE,
   parseFeatureFlags,
   resolveEffectiveFlags,
   type FeatureFlagKey,
   type FeatureFlags,
-  type PlanId,
 } from '@xangarro/domain';
+import { useEntitlement } from '../entitlement/use-entitlement';
 import { useCurrentBusiness } from './use-current-business';
 
-/**
- * Until A-10 wires the signed entitlement, the device assumes the most
- * permissive plan so that platform availability is the only clamp — which
- * is exactly the pre-pivot MVP behaviour (stock + barcode on, the rest dark).
- */
-const DEVICE_PLAN_UNTIL_ENTITLEMENT: PlanId = 'xangarrote';
-
-/** Effective flags (platform × plan × tenant) for the current business. */
 export function useFeatureFlags(): FeatureFlags {
   const { data: business } = useCurrentBusiness();
+  const entitlement = useEntitlement();
   const tenant = business ? parseFeatureFlags(business.featureFlags) : DEFAULT_FEATURE_FLAGS;
   return resolveEffectiveFlags({
     platform: PLATFORM_AVAILABLE,
-    plan: DEVICE_PLAN_UNTIL_ENTITLEMENT,
+    plan: entitlement?.plan ?? FALLBACK_PLAN,
     tenant,
   });
 }

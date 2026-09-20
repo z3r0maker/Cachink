@@ -1,7 +1,6 @@
 /**
- * Settings group layout — a headerless Stack so the settings hub
- * and its sub-screens (negocio, tasas-isr, empleados, sistema)
- * push/pop naturally via `router.push` / `router.back()`.
+ * Settings group layout — a headerless Stack for the single device-only
+ * Configuración screen (A-12).
  */
 
 import type { ReactElement } from 'react';

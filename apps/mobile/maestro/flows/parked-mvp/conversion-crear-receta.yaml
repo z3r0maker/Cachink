@@ -19,51 +19,51 @@ appId: mx.xangarro.mobile
 
 # Create a materia-prima product first via /nuevo-producto.
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    text: "Nuevo"
+    text: 'Nuevo'
 - extendedWaitUntil:
     visible:
-      id: "nuevo-producto-screen"
+      id: 'nuevo-producto-screen'
     timeout: 5000
 - inputText:
-    id: "producto-nombre"
-    text: "Café 1kg"
+    id: 'producto-nombre'
+    text: 'Café 1kg'
 - tapOn:
-    id: "producto-uso"
+    id: 'producto-uso'
 - tapOn:
-    text: "Materia prima (para convertir)"
+    text: 'Materia prima (para convertir)'
 - inputText:
-    id: "producto-costo"
-    text: "100"
+    id: 'producto-costo'
+    text: '100'
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 - extendedWaitUntil:
     notVisible:
-      id: "nuevo-producto-screen"
+      id: 'nuevo-producto-screen'
     timeout: 5000
 
 # Create a venta product.
 - tapOn:
-    text: "Nuevo"
+    text: 'Nuevo'
 - extendedWaitUntil:
     visible:
-      id: "nuevo-producto-screen"
+      id: 'nuevo-producto-screen'
     timeout: 5000
 - inputText:
-    id: "producto-nombre"
-    text: "Taza de Café"
+    id: 'producto-nombre'
+    text: 'Taza de Café'
 - inputText:
-    id: "producto-costo"
-    text: "15"
+    id: 'producto-costo'
+    text: '15'
 - inputText:
-    id: "producto-precio-venta"
-    text: "50"
+    id: 'producto-precio-venta'
+    text: '50'
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 - extendedWaitUntil:
     notVisible:
-      id: "nuevo-producto-screen"
+      id: 'nuevo-producto-screen'
     timeout: 5000
 
 # Navigate to conversion screen.
@@ -73,55 +73,55 @@ appId: mx.xangarro.mobile
 - runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-conversion"
+      id: 'otros-conversion'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-conversion"
+    id: 'otros-conversion'
 - extendedWaitUntil:
     visible:
-      id: "conversion-screen"
+      id: 'conversion-screen'
     timeout: 5000
 
 # Create a recipe.
 - tapOn:
-    id: "conversion-nueva-receta-btn"
+    id: 'conversion-nueva-receta-btn'
 - extendedWaitUntil:
     visible:
-      id: "nueva-receta-modal"
+      id: 'nueva-receta-modal'
     timeout: 3000
 
 # Select materia prima.
 - tapOn:
-    id: "receta-mp-picker"
+    id: 'receta-mp-picker'
 - tapOn:
-    text: "Café 1kg"
+    text: 'Café 1kg'
 
 # Select producto resultante.
 - tapOn:
-    id: "receta-prod-picker"
+    id: 'receta-prod-picker'
 - tapOn:
-    text: "Taza de Café"
+    text: 'Taza de Café'
 
 # Set quantities.
 - inputText:
-    id: "receta-cant-origen"
-    text: "1"
+    id: 'receta-cant-origen'
+    text: '1'
 - inputText:
-    id: "receta-cant-resultante"
-    text: "10"
+    id: 'receta-cant-resultante'
+    text: '10'
 
 # Submit.
 - tapOn:
-    id: "receta-submit"
+    id: 'receta-submit'
 
 # Verify recipe appears in list.
 - extendedWaitUntil:
     visible:
-      id: "receta-list"
+      id: 'receta-list'
     timeout: 5000
 - assertVisible:
-    text: "Café 1kg"
+    text: 'Café 1kg'
 - assertVisible:
-    text: "Taza de Café"
+    text: 'Taza de Café'

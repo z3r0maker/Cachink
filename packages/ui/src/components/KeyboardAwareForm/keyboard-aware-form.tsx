@@ -1,6 +1,6 @@
 /**
  * `KeyboardAwareForm` — the standard scroll shell for any full-screen
- * form in Cachink (review item #3).
+ * form in Xangarro (review item #3).
  *
  * The bug it fixes: a centered `flex: 1` column has nowhere to go when
  * the soft keyboard opens, so the primary action (GUARDAR) gets pushed

@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { Product, ProductId, BusinessId, DeviceId, IsoTimestamp } from '@xangarro/domain';
-import { filterProductos } from '../../src/screens/Inventario/stock-screen';
+import { filterProductos } from '../../src/screens/Productos/stock-screen';
 import type { ProductoConStock } from '../../src/hooks/use-productos-con-stock';
 
 function makeProducto(nombre: string, sku?: string): ProductoConStock {

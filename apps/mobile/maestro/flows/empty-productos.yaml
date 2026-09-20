@@ -21,12 +21,12 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Productos tab.
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 
 # No products registered yet — EmptyProductos renders.
 - assertVisible:
-    id: "empty-productos"
+    id: 'empty-productos'
 
 # The CTA button to create the first product should be visible.
 - assertVisible:
-    id: "empty-productos-cta"
+    id: 'empty-productos-cta'

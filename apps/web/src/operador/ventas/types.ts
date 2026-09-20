@@ -6,6 +6,8 @@ import type { EstadoMode } from '../estado';
 export type MetodoVenta = 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'QR / CoDi' | 'Fiado';
 
 export interface VentaTurno {
+  /** The ticket's id — present on a linked register, where cancel goes through the use case. */
+  readonly id?: string;
   readonly folio: string;
   readonly concepto: string;
   readonly monto: Money;

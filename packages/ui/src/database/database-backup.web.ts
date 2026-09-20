@@ -8,6 +8,7 @@
 
 import type * as TauriFsModule from '@tauri-apps/plugin-fs';
 import { formatBackupFilename, type BackupFn } from './database-backup.shared';
+import { DB_FILE_NAME } from './database-file.shared';
 
 type TauriFs = typeof TauriFsModule;
 
@@ -24,7 +25,7 @@ export const webBackup: BackupFn = async (tag) => {
   if (!fs) return 'unavailable';
   const filename = formatBackupFilename(tag);
   // Tauri's `copyFile` runs against the app's data-dir by default.
-  await fs.copyFile('cachink.db', `backups/${filename}`, {
+  await fs.copyFile(DB_FILE_NAME, `backups/${filename}`, {
     fromPathBaseDir: fs.BaseDirectory.AppData,
     toPathBaseDir: fs.BaseDirectory.AppData,
   } as never);

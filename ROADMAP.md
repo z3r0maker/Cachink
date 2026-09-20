@@ -1,4 +1,4 @@
-# ROADMAP.md — Cachink! Implementation Plan
+# ROADMAP.md — Xangarro Implementation Plan
 
 > **How to use this file:** At session start, read this file after CLAUDE.md to see what phase you're in and what's next. When you complete a task, check its box. When a full phase completes, collapse it using the archive pattern described in CLAUDE.md §12. Do **not** remove rules or principles — those live in CLAUDE.md only.
 
@@ -203,7 +203,7 @@ clientes,inventario}.tsx`) wire the new handlers to the edit modal +
 
 Slice 8 closes the audit gaps Slice 9.5/9.6 left open:
 
-- **A2 design revision** — replaced the `'cachink-host'` access-token
+- **A2 design revision** — replaced the pre-revision host access-token
   sentinel with an explicit `lanHostReady` sync-state scope (no more
   magic strings polluting `auth.accessToken`).
 - **M2-C9/C10/C11** — PowerSync deps installed, Vite/Metro chunk-split
@@ -256,7 +256,7 @@ domain tests, all green; lint 9/9, typecheck 13/13. Full detail in
 ## ✅ Phase 1B — Domain & Data Layer (Completed 2026-04-23)
 
 11 entity schemas (Zod) + 11 Drizzle tables + 11 repositories (Drizzle +
-InMemory) wired behind a driver-agnostic `CachinkDatabase` alias, 5 pure
+InMemory) wired behind a driver-agnostic `XangarroDatabase` alias, 5 pure
 NIF financial calculators, and 8 application use-cases with Zod-validated
 boundaries. 570 tests total; domain + application 100% coverage, data
 100%, testing 99.28%. Full detail in `ROADMAP-archive.md`.
@@ -284,7 +284,7 @@ Indicadores, Director Home (utilidad-hero + hoy KPI + CxC + actividad
 LAN sync with no external vendor: Rust axum server inside Tauri, JS
 client in `@xangarro/sync-lan`, wizard + UI wiring in `@xangarro/ui`.
 ADR-029 pins the HTTP push/pull + WebSocket wire protocol; ADR-030
-pins the `__cachink_change_log` trigger strategy. Playwright + Maestro
+pins the `__xangarro_change_log` trigger strategy. Playwright + Maestro
 E2E specs scaffolded for real-hardware runs. Full detail in
 `ROADMAP-archive.md`.
 
@@ -303,7 +303,7 @@ Carry-overs (environmental, not blockers):
 ## ✅ Phase 1E — Cloud Mode (Completed 2026-04-24)
 
 14/14 tasks shipped via Slice 6 (~18 commits). Hybrid cloud backend:
-Cachink-hosted Supabase is the wizard default, Settings → Avanzado
+Xangarro-hosted Supabase is the wizard default, Settings → Avanzado
 lets power users bring their own Postgres without a fork. PowerSync
 Sync Streams replicate per-business rows with a 90-day window for
 Operativos and full rows for Directors. ADR-035 formalises the
@@ -518,7 +518,7 @@ deferred to Phase 2 — see `ARCHITECTURE.md` "Deferred Decisions".
       (`'local-standalone'` / `'tablet-only'` → `'local'`; `'lan'`
       flagged for caller resolution via sync-state).
 - [x] **WUX-M1-T02** Extend `hydrateAppConfig` to resolve legacy
-      `'lan'` via `__cachink_sync_state.lanRole` (host →
+      `'lan'` via `__xangarro_sync_state.lanRole` (host →
       `'lan-server'`, client/unset → `'lan-client'`) and rewrite the
       stored value so subsequent reads see the new enum. Idempotent.
 - [x] **WUX-M1-T03** Build `<Callout>` primitive in
@@ -587,7 +587,7 @@ string` for the mobile lan-server card explanation.
       `@react-native-community/netinfo`). Adds netinfo dep to
       `apps/mobile/package.json`.
 - [x] **WUX-M3-T02** New hook `use-pending-changes.ts` reading
-      `MAX(__cachink_change_log.id)` vs `localPushHwm`.
+      `MAX(__xangarro_change_log.id)` vs `localPushHwm`.
 - [x] **WUX-M3-T03** Add `count(businessId)` to
       `SalesRepository`, `ProductsRepository`,
       `ClientsRepository` (interface + Drizzle + in-memory + contract
@@ -636,7 +636,7 @@ string` for the mobile lan-server card explanation.
   with the explanation copy.
 - The "¿No estás seguro?" help modal exists and pre-selects cards
   correctly on close.
-- The "Ya tengo Cachink en otro dispositivo" link on Step 1 leads to
+- The "Ya tengo Xangarro en otro dispositivo" link on Step 1 leads to
   the Step 3 screen with both lan-client and cloud-sign-in paths.
 - All copy lives in `es-mx.ts`; no hardcoded user-facing strings.
 - Wizard component lives entirely in `packages/ui` and is imported
@@ -1421,7 +1421,7 @@ and navigation decisions.
       "Sincronización y dispositivos". (ADR-051)
 - [x] **#2 Primera pantalla es un formulario fiscal** —
       `FeatureDiscoveryGate` moved ahead of `BusinessGate`; the welcome
-      carousel carries "¡Bienvenido a Cachink!".
+      carousel carries "¡Bienvenido a Xangarro!".
 - [x] **#3 El teclado atrapa la pantalla en RESICO** — new shared
       `<KeyboardAwareForm>` (KeyboardAvoidingView + ScrollView +
       `keyboardShouldPersistTaps`); BusinessForm adopts it and dismisses

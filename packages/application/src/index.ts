@@ -39,12 +39,10 @@ export * from './empleados/index.js';
 export * from './avisos/index.js';
 export * from './find-frequent-productos/index.js';
 // Phase 1 — User Management + Auth
-export * from './crear-usuario/index.js';
 export * from './autenticar-usuario/index.js';
 export * from './operadores/index.js';
 export * from './compute-entitlement/index.js';
 export * from './apply-push/index.js';
-export * from './eliminar-usuario/index.js';
 // Phase 3 — Feature Flags
 export * from './toggle-feature-flag/index.js';
 // Phase 6 — Caja
@@ -59,3 +57,4 @@ export * from './ejecutar-conversion/index.js';
 // Track N — signup + "Platícanos de ti" (P-03, N-12 … N-15)
 export * from './onboarding/index.js';
 export * from './metas/index.js';
+export * from './record-quota/index.js';

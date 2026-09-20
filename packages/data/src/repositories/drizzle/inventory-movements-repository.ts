@@ -19,17 +19,17 @@ import type {
   InventoryMovement,
   InventoryMovementsRepository,
 } from '../inventory-movements-repository.js';
-import { inventoryMovements } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import { inventoryMovements, stockBaseline } from '../../schema/index.js';
+import type { XangarroDatabase } from './_db.js';
 
 type MovementRow = typeof inventoryMovements.$inferSelect;
 
 export class DrizzleInventoryMovementsRepository implements InventoryMovementsRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;
@@ -100,6 +100,7 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
     return rows.map((r) => this.#mapRow(r));
   }
 
+  /** Remaining movements plus the baseline folded in by the retention purge (A-11). */
   async sumStock(productoId: ProductId): Promise<number> {
     const result = await this.#db
       .select({
@@ -110,7 +111,12 @@ export class DrizzleInventoryMovementsRepository implements InventoryMovementsRe
         and(eq(inventoryMovements.productoId, productoId), isNull(inventoryMovements.deletedAt)),
       )
       .get();
-    return result?.total ?? 0;
+    const baseline = await this.#db
+      .select({ cantidad: stockBaseline.cantidad })
+      .from(stockBaseline)
+      .where(eq(stockBaseline.productoId, productoId))
+      .get();
+    return (result?.total ?? 0) + (baseline?.cantidad ?? 0);
   }
 
   async delete(id: InventoryMovementId): Promise<void> {

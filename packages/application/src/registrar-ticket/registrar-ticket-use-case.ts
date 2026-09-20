@@ -61,7 +61,7 @@ export interface RegistrarTicketInput {
 export interface RegistrarTicketConfig {
   /** Business-level stock feature flag. When false, no stock movements. */
   readonly stockEnabled?: boolean;
-  /** Current user — needed to look up their open turno. */
+  /** The seller the ticket is attributed to; the turno is the caja's, not theirs. */
   readonly userId: UserId | null;
 }
 
@@ -108,7 +108,7 @@ export class RegistrarTicketUseCase implements UseCase<
     if (lineas.length === 0) throw new TypeError('Un ticket necesita al menos una línea');
 
     const productos = await this.#loadProductos(lineas);
-    const cajaTurnoId = await this.#requireOpenTurno();
+    const cajaTurnoId = await this.#requireOpenTurno(ticket.businessId);
     await this.#validateCredito(ticket);
 
     const fecha = ticket.fecha ?? (today() as never);
@@ -185,9 +185,11 @@ export class RegistrarTicketUseCase implements UseCase<
     }
   }
 
-  async #requireOpenTurno(): Promise<CajaTurnoId> {
+  async #requireOpenTurno(businessId: BusinessId): Promise<CajaTurnoId> {
     if (!this.#userId) throw new CajaNoAbiertaError();
-    const turno = await this.#cajaTurnos.findOpenByUser(this.#userId);
+    // One open turno per caja (ADR-071 §3): whoever opened it, the operator
+    // currently authenticated on the device sells under it (O-13).
+    const turno = await this.#cajaTurnos.findOpenByBusiness(businessId);
     if (!turno) throw new CajaNoAbiertaError();
     return turno.id;
   }

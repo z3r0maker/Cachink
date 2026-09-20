@@ -20,16 +20,16 @@ import type {
 import { newEntityId, now } from '@xangarro/domain';
 import type { CajaMovimientosRepository } from '../caja-movimientos-repository.js';
 import { cajaMovimientos } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type MovRow = typeof cajaMovimientos.$inferSelect;
 
 export class DrizzleCajaMovimientosRepository implements CajaMovimientosRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

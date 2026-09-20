@@ -8,12 +8,10 @@
  *   2. Load Plus Jakarta Sans (the brand font — CLAUDE.md §8.2).
  *   3. Mount the Tamagui provider (required by every `@xangarro/ui`
  *      component).
- *   4. Pass the mobile LAN + Cloud bridge factories into
- *      `<AppProviders>` so `LanGate` + `CloudGate` render end-to-end
- *      (Slice 9.5 T05 + 9.6 T06).
- *   5. Mount `<MobileScannerHost />` inside the provider tree so the
- *      LAN bridge's `onOpenScanner()` promise has a `<Scanner>` to
- *      show (expo-camera-backed).
+ *   4. Pass the activation config (API base, secure token store) into
+ *      `<AppProviders>`; cloud sync mounts there (A-04, A-07).
+ *   5. Mount `<MobileScannerHost />` inside the provider tree so
+ *      `openScannerForResult()` has a `<Scanner>` to show.
  *   6. Mount `` for Cloud overlay sub-screens
  *      (Advanced Backend, Password Reset).
  *   7. Wrap the tree in `<GestureHandlerRootView>` (Phase C1) so
@@ -54,22 +52,16 @@ import {
   PlusJakartaSans_700Bold,
   PlusJakartaSans_800ExtraBold,
 } from '@expo-google-fonts/plus-jakarta-sans';
-import { AppProviders, type AppProvidersHooks } from '@xangarro/ui';
-import { useLanHandle } from '@xangarro/ui/sync';
+import { AppProviders, StockLowScheduleHost } from '@xangarro/ui';
 import { bootstrapI18n } from '../shell/i18n';
-import { useMobileLanBridges } from '../shell/use-lan-bridges';
 import { MobileScannerHost } from '../shell/scanner-host';
 import { NotificationTapHost } from '../shell/notification-tap-host';
 import { useMobileDeviceContext } from '../shell/use-device-context';
+import { mobileActivationConfig } from '../shell/activation-config';
 
 // Initialize i18n once at module load — initI18n is idempotent so Fast
 // Refresh re-evaluations are safe.
 bootstrapI18n();
-
-const mobileHooks: AppProvidersHooks = {
-  useLan: useMobileLanBridges,
-  useLanHandle,
-};
 
 // Plus Jakarta Sans ships weights 200–800 on Google Fonts. CLAUDE.md
 // §8.2 mentions 900 as the heading weight; when the CSS requests 900
@@ -81,19 +73,13 @@ function MobileStack(): ReactElement {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="wizard" />
-      <Stack.Screen name="role-picker" />
       <Stack.Screen name="settings" />
-      <Stack.Screen name="clientes" />
       <Stack.Screen name="cuentas-por-cobrar" />
       <Stack.Screen name="inventario" />
-      <Stack.Screen name="funciones" />
-      <Stack.Screen name="usuarios" />
       <Stack.Screen name="caja" />
       <Stack.Screen name="conversion" />
       <Stack.Screen name="auditoria" />
       <Stack.Screen name="ventas-credito" />
-      <Stack.Screen name="caja-reportes" />
-      <Stack.Screen name="merma-reportes" />
     </Stack>
   );
 }
@@ -114,12 +100,13 @@ export default function RootLayout(): ReactElement | null {
         <SafeAreaProvider>
           <AppProviders
             platform="mobile"
-            hooks={mobileHooks}
             deviceContext={deviceContext}
+            activation={mobileActivationConfig}
             overlays={
               <>
                 <MobileScannerHost />
                 <NotificationTapHost />
+                <StockLowScheduleHost />
               </>
             }
           >

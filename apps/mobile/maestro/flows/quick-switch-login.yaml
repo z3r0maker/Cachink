@@ -21,34 +21,42 @@ appId: mx.xangarro.mobile
 # QuickSwitchScreen should be showing (subsequent launch after setup).
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 10000
 
 # --- Edge case: wrong PIN (via inline numpad) ---
 - tapOn:
-    id: "numpad-9"
+    id: 'numpad-9'
 - tapOn:
-    id: "numpad-9"
+    id: 'numpad-9'
 - tapOn:
-    id: "numpad-9"
+    id: 'numpad-9'
 - tapOn:
-    id: "numpad-9"
+    id: 'numpad-9'
+- tapOn:
+    id: 'numpad-9'
+- tapOn:
+    id: 'numpad-9'
 
 # Error message should appear (shake + haptic fire too, visual-only).
-- assertVisible: "PIN incorrecto"
+- assertVisible: 'PIN incorrecto'
 
 # --- Happy path: correct PIN (via inline numpad) ---
 - tapOn:
-    id: "numpad-1"
+    id: 'numpad-1'
 - tapOn:
-    id: "numpad-2"
+    id: 'numpad-2'
 - tapOn:
-    id: "numpad-3"
+    id: 'numpad-3'
 - tapOn:
-    id: "numpad-4"
+    id: 'numpad-4'
+- tapOn:
+    id: 'numpad-5'
+- tapOn:
+    id: 'numpad-6'
 
 # Tabs mount — Director Home renders.
 - extendedWaitUntil:
     visible:
-      id: "tab-estados"
+      id: 'tab-estados'
     timeout: 10000

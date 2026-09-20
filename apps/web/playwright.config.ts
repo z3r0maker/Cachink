@@ -1,3 +1,6 @@
+import { execSync } from 'node:child_process';
+import path from 'node:path';
+
 import { defineConfig, devices } from '@playwright/test';
 
 import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { type: 'json' };
@@ -7,6 +10,24 @@ import { BASE_URL, E2E_PORT } from './e2e/base-url';
 
 /** The contract's published test key — never a production fallback. */
 const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
+
+/**
+ * The billing DB, where `seed-billing.ts` put the subscriptions the
+ * Suscripción/Facturas/data specs assert. The server has no default for it —
+ * without this, those pages render their error state and half the suite
+ * sweeps error cards (the exact rot the seeded-DB check exists to prevent).
+ * CI provides its own; locally it is the same docker Postgres, other role.
+ */
+function billingDatabaseUrl(): string {
+  return (
+    process.env.BILLING_DATABASE_URL ??
+    execSync('./db-local.sh billing-url', {
+      cwd: path.resolve(import.meta.dirname, '../../packages/data-pg/scripts'),
+    })
+      .toString()
+      .trim()
+  );
+}
 
 /**
  * Portal accessibility and state/role sweep (P-16).
@@ -73,6 +94,7 @@ export default defineConfig({
       // no default for it on purpose (server/device/credentials.ts).
       DEVICE_TOKEN_SECRET: process.env.DEVICE_TOKEN_SECRET ?? 'e2e-only-not-a-real-secret',
       ENTITLEMENT_PRIVATE_KEY: process.env.ENTITLEMENT_PRIVATE_KEY ?? TEST_ENTITLEMENT_KEY,
+      BILLING_DATABASE_URL: billingDatabaseUrl(),
     },
   },
   use: {

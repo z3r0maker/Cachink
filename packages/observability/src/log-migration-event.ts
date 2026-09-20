@@ -11,8 +11,9 @@
 
 import { ulid } from 'ulid';
 import type { SqliteDatabase } from './sqlite-log-store.js';
+import { adoptLegacyLogTable } from './legacy-log-table.js';
 
-const TABLE = '__cachink_observability_log';
+const TABLE = '__xangarro_observability_log';
 
 const ENSURE_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS ${TABLE} (
@@ -57,6 +58,7 @@ export async function logMigrationEvent(
   metadata: MigrationEventMetadata,
 ): Promise<void> {
   try {
+    await adoptLegacyLogTable(db);
     await db.execAsync(ENSURE_TABLE_SQL);
     await db.runAsync(
       `INSERT OR REPLACE INTO ${TABLE}

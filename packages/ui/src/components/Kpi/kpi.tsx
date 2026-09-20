@@ -1,5 +1,5 @@
 /**
- * Kpi — the Cachink "hero big number" primitive.
+ * Kpi — the Xangarro "hero big number" primitive.
  *
  * The §8.4 KPI display voice: weight 900, tight letter-spacing, tabular
  * numerals, with a §8.2 uppercase label above and an optional muted hint
@@ -140,7 +140,7 @@ function Hint({ text }: { text: string }): ReactElement {
 }
 
 /**
- * Renders the canonical Cachink KPI block. See `kpi.stories.tsx` for the
+ * Renders the canonical Xangarro KPI block. See `kpi.stories.tsx` for the
  * full variant catalog.
  *
  * Audit Round 2 G1: the root `<View>` exposes a combined

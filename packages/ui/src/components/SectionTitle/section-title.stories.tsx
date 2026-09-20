@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<SectionTitle>` primitive.
  *
- * Each story uses real es-MX Cachink copy drawn from ROADMAP.md P1C-M10
+ * Each story uses real es-MX Xangarro copy drawn from ROADMAP.md P1C-M10
  * (Director Home) so the catalog doubles as a UX reference. The canonical
  * minimal shape (VentasHoy) is the shortest render; the remaining four
  * exercise alternate real contexts, count-in-title composition, and the

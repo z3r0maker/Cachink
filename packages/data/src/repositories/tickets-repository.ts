@@ -7,7 +7,7 @@
  */
 
 import type { NewTicket, PaymentState, Ticket } from '@xangarro/domain';
-import type { BusinessId, ClientId, TicketId } from '@xangarro/domain';
+import type { BusinessId, CajaTurnoId, ClientId, TicketId } from '@xangarro/domain';
 
 export type { Ticket, NewTicket, PaymentState };
 
@@ -27,6 +27,9 @@ export interface TicketsRepository {
 
   /** List non-deleted tickets for a given date, newest first. */
   findByDate(date: string, businessId: BusinessId): Promise<readonly Ticket[]>;
+
+  /** The turno's non-deleted tickets, newest first — the register's Ventas list. */
+  findByCajaTurno(cajaTurnoId: CajaTurnoId): Promise<readonly Ticket[]>;
 
   /** List non-deleted tickets in `[from, to]` (inclusive) for a business. */
   findByDateRange(from: string, to: string, businessId: BusinessId): Promise<readonly Ticket[]>;

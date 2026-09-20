@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "main": "expo-router/entry",
-  "description": "Cachink mobile app (iOS and Android tablets). See ./SETUP.md.",
+  "description": "Xangarro mobile app (iOS and Android tablets). See ./SETUP.md.",
   "scripts": {
     "bundle:check": "bash scripts/bundle-check.sh",
     "start": "expo run:ios",
@@ -23,10 +23,6 @@
     "eas-build-post-install": "cd ../.. && npx install-skia || node node_modules/@shopify/react-native-skia/scripts/install-libs.js"
   },
   "dependencies": {
-    "@xangarro/application": "workspace:^",
-    "@xangarro/data": "workspace:^",
-    "@xangarro/domain": "workspace:^",
-    "@xangarro/ui": "workspace:^",
     "@expo-google-fonts/plus-jakarta-sans": "^0.4.2",
     "@expo/log-box": "^55.0.12",
     "@expo/metro-runtime": "~55.0.11",
@@ -39,6 +35,12 @@
     "@tamagui/core": "2.0.0-rc.42",
     "@tamagui/web": "2.0.0-rc.42",
     "@tanstack/react-query": "^5.100.10",
+    "@xangarro/application": "workspace:^",
+    "@xangarro/contracts": "workspace:*",
+    "@xangarro/data": "workspace:^",
+    "@xangarro/domain": "workspace:^",
+    "@xangarro/sync": "workspace:*",
+    "@xangarro/ui": "workspace:^",
     "dinero.js": "^2.0.2",
     "expo": "~55.0.24",
     "expo-application": "~55.0.3",
@@ -51,6 +53,7 @@
     "expo-localization": "~55.0.14",
     "expo-notifications": "~55.0.23",
     "expo-router": "~55.0.14",
+    "expo-secure-store": "~55.0.18",
     "expo-sqlite": "~55.0.16",
     "expo-status-bar": "~55.0.6",
     "expo-updates": "~55.0.22",
@@ -73,8 +76,7 @@
     "ulid": "^3.0.2",
     "victory-native": "~41.20.3",
     "zod": "^4.6.2",
-    "zustand": "^5.0.13",
-    "@xangarro/contracts": "workspace:*"
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@types/react": "~19.2.14",

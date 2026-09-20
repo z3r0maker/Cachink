@@ -33,13 +33,15 @@ describe('Venta Lifecycle [fullstack]', () => {
     await h.repos.businesses.create(makeNewBusiness({ businessId: BIZ }));
 
     // Seed a Director user (needed for cancel PIN verification)
-    await h.useCases.crearUsuario.execute({
+    const director = await h.useCases.crearOperador.execute({
       nombre: 'Director Test',
       pin: '1234',
-      recoveryPassword: 'Test1234',
-      role: 'director',
-      mustChangePin: false,
+      operatorLimit: 10,
       businessId: BIZ,
+    });
+    // Everyone is an operator (A-05); cancel rights are a granted permission.
+    await h.repos.users.update(director.id, {
+      permissions: { canCancelSales: true },
     });
 
     // Seed a stock-tracked product
@@ -139,6 +141,42 @@ describe('Venta Lifecycle [fullstack]', () => {
     // Stock reversed: 10 - 2 + 2 = 10
     const stock = await h.repos.movements.sumStock(productId);
     expect(stock).toBe(10);
+  });
+
+  it('findByCajaTurno lists only that turno, newest first', async () => {
+    const abrir = {
+      userId: USER_ID,
+      fecha: '2026-04-23',
+      montoAperturaCentavos: 500_00n,
+      efectivoAdicionalCentavos: 0n,
+      businessId: BIZ,
+    };
+    const turno = await h.useCases.abrirCaja.execute(abrir);
+    const primera = await h.useCases.registrarVenta.execute(
+      makeNewSale({ businessId: BIZ, productoId: productId, cantidad: 1, monto: 3_500n }),
+    );
+    // createdAt has ms precision — keep the two sales' stamps distinct.
+    await new Promise((r) => setTimeout(r, 3));
+    const segunda = await h.useCases.registrarVenta.execute(
+      makeNewSale({ businessId: BIZ, productoId: productId, cantidad: 2, monto: 7_000n }),
+    );
+
+    // Another operator's turno on the same data — its ticket must not leak in.
+    const otra = await h.useCases.crearOperador.execute({
+      nombre: 'Cajera Turno B',
+      pin: '4321',
+      operatorLimit: 10,
+      businessId: BIZ,
+    });
+    const turnoB = await h.useCases.abrirCaja.execute({ ...abrir, userId: otra.id });
+    await h.useCases.registrarVenta.execute(
+      makeNewSale({ businessId: BIZ, productoId: productId, cantidad: 1, monto: 3_500n }),
+    );
+
+    const delTurno = await h.repos.tickets.findByCajaTurno(turno.id);
+    expect(delTurno.map((t) => t.id)).toEqual([segunda.ticketId, primera.ticketId]);
+    const delB = await h.repos.tickets.findByCajaTurno(turnoB.id);
+    expect(delB).toHaveLength(1);
   });
 
   it('sale without caja throws CajaNoAbiertaError', async () => {

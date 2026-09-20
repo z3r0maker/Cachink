@@ -1,0 +1,37 @@
+# Activation — happy path (A-04): email + valid code → operator sign-in
+# with the operators the portal created (mock: Toni, Ana).
+#
+# Precondition: same as activation-errors.yaml. VALDK7M3 is single-use;
+# reset the mock before every run.
+# x-entrypoint: fresh
+appId: mx.xangarro.mobile
+---
+- extendedWaitUntil:
+    visible:
+      id: 'activation-screen'
+    timeout: 60000
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
+- tapOn:
+    id: 'activation-email'
+    point: '95%,50%'
+- eraseText: 60
+- inputText: 'dueno@tacoslaesquina.mx'
+# Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
+- tapOn:
+    id: 'activation-code'
+    point: '95%,50%'
+- eraseText: 20
+- inputText: 'valdk7m3'
+- hideKeyboard
+- tapOn:
+    id: 'activation-submit'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 20000
+- assertNotVisible:
+    id: 'activation-screen'
+- assertVisible:
+    text: '.*Toni.*'
+- assertVisible:
+    text: '.*Ana.*'

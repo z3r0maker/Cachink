@@ -28,23 +28,23 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Estados tab (Director role).
 - tapOn:
-    id: "tab-estados"
+    id: 'tab-estados'
 
 # Verify EstadosShell renders.
 - assertVisible:
-    id: "estados-shell"
+    id: 'estados-shell'
 
 # Resultados is the default sub-tab.
 - assertVisible:
-    id: "estados-tab-resultados"
+    id: 'estados-tab-resultados'
 
 # Scroll down to find the egresos-por-categoria card.
 - scrollUntilVisible:
     element:
-      id: "egresos-por-categoria-card"
+      id: 'egresos-por-categoria-card'
     direction: DOWN
     timeout: 5000
 
 # Verify the donut chart renders.
 - assertVisible:
-    id: "egresos-donut"
+    id: 'egresos-donut'

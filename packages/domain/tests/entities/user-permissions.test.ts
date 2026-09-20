@@ -40,15 +40,15 @@ describe('parseUserPermissions', () => {
 });
 
 describe('canUserCancelSales', () => {
-  it('director always can cancel', () => {
-    expect(canUserCancelSales('director', { canCancelSales: false })).toBe(true);
+  it('allows an operator the portal granted the permission', () => {
+    expect(canUserCancelSales({ canCancelSales: true })).toBe(true);
   });
 
-  it('operativo with permission can cancel', () => {
-    expect(canUserCancelSales('operativo', { canCancelSales: true })).toBe(true);
+  it('refuses an operator without the permission', () => {
+    expect(canUserCancelSales({ canCancelSales: false })).toBe(false);
   });
 
-  it('operativo without permission cannot cancel', () => {
-    expect(canUserCancelSales('operativo', { canCancelSales: false })).toBe(false);
+  it('refuses by default when permissions are missing or corrupt', () => {
+    expect(canUserCancelSales(parseUserPermissions('not json'))).toBe(false);
   });
 });

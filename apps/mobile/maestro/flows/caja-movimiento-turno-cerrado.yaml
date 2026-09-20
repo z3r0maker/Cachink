@@ -16,47 +16,47 @@ tags:
 
 # Open caja.
 - tapOn:
-    id: "tab-caja"
+    id: 'tab-caja'
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
     optional: true
 - extendedWaitUntil:
     visible:
-      id: "caja-status-card"
+      id: 'caja-status-card'
     timeout: 10000
 
 # Close the turno immediately.
 - tapOn:
-    id: "caja-cerrar-btn"
+    id: 'caja-cerrar-btn'
 - extendedWaitUntil:
     visible:
-      id: "caja-cerrar-sheet"
+      id: 'caja-cerrar-sheet'
     timeout: 5000
 # Enter counted amount.
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "caja-cerrar-submit"
+    id: 'caja-cerrar-submit'
 - extendedWaitUntil:
     visible:
-      id: "caja-cerrado-banner"
+      id: 'caja-cerrado-banner'
     timeout: 5000
 
 # Now verify retiro/depósito buttons are disabled or not visible.
 - assertNotVisible:
-    id: "caja-retiro-btn"
+    id: 'caja-retiro-btn'
 - assertNotVisible:
-    id: "caja-deposito-btn"
+    id: 'caja-deposito-btn'

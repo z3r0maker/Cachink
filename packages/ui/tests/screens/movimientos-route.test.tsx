@@ -16,7 +16,7 @@ import {
   InMemoryInventoryMovementsRepository,
 } from '@xangarro/testing';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import { MovimientosRoute } from '../../src/screens/Inventario/movimientos-route';
+import { MovimientosRoute } from '../../src/screens/Productos/movimientos-route';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { initI18n } from '../../src/i18n/index';
 import { renderWithProviders, screen } from '../test-utils';

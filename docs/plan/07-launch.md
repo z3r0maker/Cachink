@@ -64,7 +64,7 @@
 ### X-08 Repo + directory rename (optional, coordinate)
 
 - [ ] Status · **Blocked by:** A-15
-- **Steps:** GitHub rename `z3r0maker/Cachink` → `Xangarro` (GitHub redirects the old URL); local `mv ~/Downloads/Cachink ~/Downloads/Xangarro` **without `!`**; update `~/.claude/projects/*` memory pointers if any; same for `CachinkLanding` → `XangarroLanding`. Do it when no track branch is mid-flight.
+- **Steps:** GitHub rename `z3r0maker/Cachink` → `Xangarro` (GitHub redirects the old URL); local `mv ~/Downloads/Cachink ~/Downloads/Cachink` **without `!`**; update `~/.claude/projects/*` memory pointers if any; same for `CachinkLanding` → `XangarroLanding`. Do it when no track branch is mid-flight.
 - **Acceptance:** `git remote -v` shows the new name; CI still runs.
 
 ### X-09 ROADMAP.md reset

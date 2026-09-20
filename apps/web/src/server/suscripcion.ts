@@ -32,8 +32,10 @@ type Counts = { operadores: number; dispositivos: number };
 export async function loadSuscripcion(businessId: string): Promise<SuscripcionData> {
   const now = new Date();
   const base = await withTenant(businessId, async (tx) => {
+    // A-05: `users` holds operators only (no role column) — every active,
+    // non-deleted row is one.
     const [c] = await tx.execute<Counts>(sql`
-      SELECT (SELECT count(*)::int FROM users WHERE role = 'operativo' AND active AND deleted_at IS NULL) AS operadores,
+      SELECT (SELECT count(*)::int FROM users WHERE active AND deleted_at IS NULL) AS operadores,
              (SELECT count(*)::int FROM devices WHERE revoked_at IS NULL) AS dispositivos`);
     const ent = await tenantEntitlement(tx, businessId, now);
     const b = await getBusiness(tx);

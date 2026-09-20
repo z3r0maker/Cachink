@@ -1,11 +1,10 @@
 /**
- * UserAvatar — animated avatar circle with role badge for QuickSwitch.
+ * UserAvatar — animated operator avatar circle for QuickSwitch.
  *
  * Visual features:
  *   - Fade unselected avatars to 45% opacity
  *   - Spring-scale selected avatar to 1.1×
  *   - Hero mode: selected circle grows from 72px → 88px
- *   - Role badge (Tag pill) below the name
  *   - 2-line name support (100px width)
  */
 
@@ -13,7 +12,6 @@ import type { ReactElement } from 'react';
 import { Animated, Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
 import type { User, UserId } from '@xangarro/domain';
-import { Tag } from '../../components/index';
 import { colors, fontSizes, typography } from '../../theme';
 import { useAvatarFade, useAvatarScale } from './login-animations';
 import { useTranslation } from '../../i18n/index';
@@ -92,15 +90,10 @@ function AvatarRing({
 
 function AvatarContent(props: { user: User; selected: boolean }): ReactElement {
   const initial = props.user.nombre.charAt(0).toUpperCase();
-  const isDirector = props.user.role === 'director';
 
   return (
-    // Role-keyed testID for deterministic E2E selection. The Pressable's testID
-    // is `user-avatar-${id}` (dynamic ULID, unusable from flows), so we expose a
-    // stable `user-avatar-role-{director|operativo}` here. Test data has one user
-    // per role, so it is unambiguous; tapping this child's center still triggers
-    // the parent Pressable's onPress.
-    <View alignItems="center" gap={4} testID={`user-avatar-role-${props.user.role}`}>
+    // Flows select operators by visible name; the Pressable carries `user-avatar-${id}`.
+    <View alignItems="center" gap={4}>
       <AvatarRing selected={props.selected}>
         <AvatarCircle initial={initial} bg={props.user.avatarColor} large={props.selected} />
       </AvatarRing>
@@ -115,11 +108,6 @@ function AvatarContent(props: { user: User; selected: boolean }): ReactElement {
       >
         {props.user.nombre}
       </Text>
-      <View alignItems="center">
-        <Tag variant={isDirector ? 'info' : 'neutral'} testID={`user-role-${props.user.id}`}>
-          {isDirector ? 'Director' : 'Operativo'}
-        </Tag>
-      </View>
     </View>
   );
 }

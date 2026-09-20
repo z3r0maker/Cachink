@@ -19,26 +19,26 @@ appId: mx.xangarro.mobile
 
 # The CorteDeDia card surfaces on the Operativo home after 18:00.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 # Gap I (Phase 17): assert the route-level wrapper testID.
 - assertVisible:
-    id: "corte-home-card-ventas"
+    id: 'corte-home-card-ventas'
 - assertVisible:
-    id: "corte-de-dia-card"
+    id: 'corte-de-dia-card'
 
 # Open the modal.
 - tapOn:
-    id: "corte-de-dia-cta"
-- assertVisible: "Corte de día"
+    id: 'corte-de-dia-cta'
+- assertVisible: 'Corte de día'
 
 # Type contado equal to esperado — zero diferencia, no explicación required.
 - tapOn:
-    id: "corte-contado-input"
-- inputText: "150"
+    id: 'corte-contado-input'
+- inputText: '150'
 - tapOn:
-    id: "corte-submit"
+    id: 'corte-submit'
 
 # After success the modal closes and the card is no longer visible.
-- assertNotVisible: "Corte de día"
+- assertNotVisible: 'Corte de día'
 - assertNotVisible:
-    id: "corte-de-dia-card"
+    id: 'corte-de-dia-card'

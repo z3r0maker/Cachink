@@ -24,17 +24,17 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # No egresos yet → empty state should render.
 - assertVisible:
-    id: "empty-egresos"
+    id: 'empty-egresos'
 
 # CTA button to create first egreso should be visible.
 - assertVisible:
-    id: "empty-egresos-cta"
+    id: 'empty-egresos-cta'
 
 # Tap the CTA to verify it opens the NuevoEgreso modal.
 - tapOn:
-    id: "empty-egresos-cta"
-- assertVisible: "Nuevo egreso"
+    id: 'empty-egresos-cta'
+- assertVisible: 'Nuevo egreso'

@@ -71,9 +71,8 @@ const SYNCED = [...UP_TABLES, ...HYBRID_TABLES, ...DOWN_TABLES];
  *    column (A-17), so this list has to be emptied rather than left to rot.
  */
 const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
-  // B-13 stores it; the device column arrives with A-17.
-  users: ['active'],
-  // N-16 stores it; the device column arrives with the app branch's C-15
+  // users.active arrived with the branch merge (0006_capture_client).
+  // clients.rfc — N-16 stores it; the device column arrives with the C-15
   // wave. `clients` is HYBRID (insert-only up), and the wire field is
   // optional — a phone row without it is a valid client with `rfc = NULL`,
   // never a sale arriving without its money.

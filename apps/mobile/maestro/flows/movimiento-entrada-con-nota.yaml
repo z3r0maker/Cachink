@@ -25,38 +25,38 @@ appId: mx.xangarro.mobile
 # Open the product's detail via search (onPress cards match by text-regex).
 - runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "producto-card-.*"
+    id: 'producto-card-.*'
 
 # Detail screen — open the "Entrada" movimiento.
 - assertVisible:
-    text: "Entrada.*"
+    text: 'Entrada.*'
 - tapOn:
-    text: "Entrada.*"
+    text: 'Entrada.*'
 
 # MovimientoModal (tipo pre-set to "entrada"): CANTIDAD / MOTIVO / NOTA.
 - assertVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'
 
 # Enter quantity (CANTIDAD is a wheel picker; inputText commits the value).
 - tapOn:
-    id: "movimiento-cantidad"
+    id: 'movimiento-cantidad'
 - eraseText
-- inputText: "25"
+- inputText: '25'
 
 # Fill the optional nota (delivery reference) — a text input.
 - tapOn:
-    id: "movimiento-nota"
-- inputText: "Recibo entrega 4521 Proveedor ABC"
+    id: 'movimiento-nota'
+- inputText: 'Recibo entrega 4521 Proveedor ABC'
 
 # Tapping the CANTIDAD wheel blurs the nota field and dismisses its keyboard
 # (hideKeyboard is flaky inside this modal) so the REGISTRAR button is reachable.
 - tapOn:
-    id: "movimiento-cantidad"
+    id: 'movimiento-cantidad'
 
 # Submit the movement — the "REGISTRAR" button.
 - tapOn:
-    text: "REGISTRAR"
+    text: 'REGISTRAR'
 
 # Modal closes — CANTIDAD gone, stock increased.
 - assertNotVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'

@@ -47,8 +47,12 @@ test('a 500 on the negocio action surfaces an error state and writes nothing', a
   await page.getByRole('button', { name: 'Guardar cambios' }).click();
 
   // Recovery state: an error surface renders — the root boundary's "Algo salió
-  // mal" or an inline alert — never a blank, never silence.
-  const failure = page.getByText('Algo salió mal').or(page.getByRole('alert')).first();
+  // mal" or an inline alert — never a blank, never silence. (Non-empty only:
+  // Next's route announcer is a 1×1 role="alert" on every page.)
+  const failure = page
+    .getByText('Algo salió mal')
+    .or(page.getByRole('alert').filter({ hasText: /\S/ }))
+    .first();
   await expect(failure).toBeVisible({ timeout: 10_000 });
 
   // The 500'd write must not land, even partially.
@@ -64,7 +68,11 @@ test('a 500 on the negocio action surfaces an error state and writes nothing', a
 
 test('a 500 on initial navigation is observable, not a blank tab', async ({ page }) => {
   await page.route('**/estados', async (route) => {
-    await route.fulfill({ status: 500, contentType: 'text/html', body: '<h1>Algo salió mal</h1>' });
+    await route.fulfill({
+      status: 500,
+      contentType: 'text/html; charset=utf-8',
+      body: '<h1>Algo salió mal</h1>',
+    });
   });
 
   const response = await page.goto('/estados');
@@ -76,7 +84,11 @@ test('a 500 on initial navigation is observable, not a blank tab', async ({ page
 test('a 500 on export produces no download and a visible error page', async ({ page }) => {
   await page.goto('/estados');
   await page.route('**/api/export/ventas', async (route) => {
-    await route.fulfill({ status: 500, contentType: 'text/html', body: '<h1>Algo salió mal</h1>' });
+    await route.fulfill({
+      status: 500,
+      contentType: 'text/html; charset=utf-8',
+      body: '<h1>Algo salió mal</h1>',
+    });
   });
 
   const download = page.waitForEvent('download', { timeout: 3_000 });

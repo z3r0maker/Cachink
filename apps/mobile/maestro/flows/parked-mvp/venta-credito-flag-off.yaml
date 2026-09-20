@@ -20,25 +20,25 @@ tags:
 
 # Navigate to Ventas and start checkout.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Add product to cart.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Open checkout.
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 
 # Verify Crédito is NOT visible in the method picker.
 - assertNotVisible:
-    text: "Crédito"
+    text: 'Crédito'

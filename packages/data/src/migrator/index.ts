@@ -18,3 +18,4 @@ export {
   checkSchemaCompatibility,
   type VersionCheckResult,
 } from './schema-version.js';
+export { migrationSqlByTag, migrationsBundle } from '../../drizzle/migrations/index.js';

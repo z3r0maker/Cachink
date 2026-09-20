@@ -25,30 +25,30 @@ appId: mx.xangarro.mobile
 
 # Create a recurrente gasto.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Internet del local"
+    id: 'gasto-concepto'
+- inputText: 'Internet del local'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "500"
+    id: 'gasto-monto'
+- inputText: '500'
 - tapOn:
-    id: "gasto-recurrente-toggle"
-- assertVisible: "Frecuencia"
+    id: 'gasto-recurrente-toggle'
+- assertVisible: 'Frecuencia'
 - tapOn:
-    id: "gasto-submit"
-- assertNotVisible: "Nuevo egreso"
+    id: 'gasto-submit'
+- assertNotVisible: 'Nuevo egreso'
 
 # The PendientesCard appears on the Egresos screen (since proximoDisparo=today).
-- assertVisible: "Pendientes de registrar"
-- assertVisible: "Internet del local"
+- assertVisible: 'Pendientes de registrar'
+- assertVisible: 'Internet del local'
 
 # Tap Descartar instead of Confirmar — row should disappear.
 # The dynamic testID uses the template's ULID. We use a text-based
 # tap to find the Descartar button near the pendiente row.
-- tapOn: "Descartar"
+- tapOn: 'Descartar'
 
 # After descartar, the pendiente row is optimistically removed.
-- assertNotVisible: "Internet del local"
+- assertNotVisible: 'Internet del local'

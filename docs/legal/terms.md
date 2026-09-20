@@ -1,13 +1,13 @@
-# Términos y Condiciones — Cachink!
+# Términos y Condiciones — Xangarro
 
 _Vigentes desde: 2026-04-24_
 
-Al instalar y usar Cachink! aceptas estos términos. Si no los aceptas,
+Al instalar y usar Xangarro aceptas estos términos. Si no los aceptas,
 no uses la app.
 
-## 1. Qué es Cachink!
+## 1. Qué es Xangarro
 
-Cachink! es una aplicación de finanzas y punto de venta ligero para
+Xangarro es una aplicación de finanzas y punto de venta ligero para
 negocios pequeños en México. La app funciona por defecto en modo
 local, y opcionalmente puede sincronizarse entre dispositivos.
 
@@ -26,7 +26,7 @@ local, y opcionalmente puede sincronizarse entre dispositivos.
 
 ## 4. Sin garantía de exactitud contable
 
-Cachink! calcula estados financieros bajo las NIF (B-2, B-3, B-6) como
+Xangarro calcula estados financieros bajo las NIF (B-2, B-3, B-6) como
 herramienta de apoyo. **No sustituye a un contador público certificado.**
 El cálculo de ISR usa una tasa configurable (30% por defecto) y **no
 constituye asesoría fiscal**. Tu contador sigue siendo la fuente de
@@ -39,13 +39,13 @@ Si activas el modo "En la nube":
 - La sincronización depende del proveedor de base de datos que
   configures. No somos responsables de interrupciones ni pérdida de
   datos en el proveedor que tú elijas.
-- Si usas la instancia gratuita alojada por Cachink, aplican los
+- Si usas la instancia gratuita alojada por Xangarro, aplican los
   límites de uso razonable. Nos reservamos el derecho a suspender
   cuentas que abusen del recurso compartido.
 
 ## 6. Responsabilidad
 
-Usas Cachink! bajo tu propio riesgo. No somos responsables de:
+Usas Xangarro bajo tu propio riesgo. No somos responsables de:
 
 - Daños indirectos, lucro cesante, o pérdida de datos que tú no hayas
   respaldado.

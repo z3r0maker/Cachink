@@ -11,8 +11,8 @@ appId: mx.xangarro.mobile
 
 # Director is already on Home after authenticate.yaml.
 - assertVisible:
-    id: "hoy-kpi-ventas"
+    id: 'hoy-kpi-ventas'
 - tapOn:
-    id: "hoy-kpi-ventas-ver"
+    id: 'hoy-kpi-ventas-ver'
 - assertVisible:
-    id: "ventas-screen"
+    id: 'ventas-screen'

@@ -12,24 +12,24 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Tortilla"
+    id: 'producto-nombre'
+- inputText: 'Tortilla'
 
 - tapOn:
-    id: "producto-precio-venta"
+    id: 'producto-precio-venta'
 - eraseText
-- inputText: "1500"
+- inputText: '1500'
 
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 
 # Wait for the modal to close.
 - extendedWaitUntil:
     notVisible:
-      id: "nuevo-producto-modal"
+      id: 'nuevo-producto-modal'
     timeout: 10000

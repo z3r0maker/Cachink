@@ -1,5 +1,5 @@
 /**
- * Modal — the Cachink bottom-sheet / centered-dialog primitive.
+ * Modal — the Xangarro bottom-sheet / centered-dialog primitive.
  *
  * First primitive using the platform-extension pattern from CLAUDE.md §5.3.
  * This file is the source of truth for props and types; platform-specific

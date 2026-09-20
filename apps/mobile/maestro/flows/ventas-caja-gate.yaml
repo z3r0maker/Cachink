@@ -15,12 +15,12 @@ tags:
 
 # Navigate to Ventas tab — should show caja gate (product exists, no turno).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - assertVisible:
-    id: "caja-gate-banner"
+    id: 'caja-gate-banner'
 - assertVisible:
-    text: "Abre tu caja para empezar a vender"
+    text: 'Abre tu caja para empezar a vender'
 - tapOn:
-    id: "caja-gate-go-to-caja"
+    id: 'caja-gate-go-to-caja'
 - assertVisible:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'

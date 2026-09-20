@@ -11,12 +11,8 @@ const BIZ_B = '01HZ8XQN9GZJXV8AKQ5X0C7A02' as BusinessId;
 
 function input(overrides: Partial<CreateUserInput> = {}): CreateUserInput {
   return {
-    nombre: 'Juan Director',
-    email: null,
+    nombre: 'Juan Operador',
     pinHash: '$2a$10$hash',
-    recoveryPasswordHash: '$2a$10$pin',
-    role: 'director',
-    mustChangePin: false,
     avatarColor: 'blue',
     businessId: BIZ,
     ...overrides,
@@ -37,8 +33,9 @@ export function describeUsersRepositoryContract(
     it('create stamps id + audit fields', async () => {
       const row = await repo.create(input());
       expect(row.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
-      expect(row.nombre).toBe('Juan Director');
-      expect(row.role).toBe('director');
+      expect(row.nombre).toBe('Juan Operador');
+      expect(row.active).toBe(true);
+      expect(row.permissions).toEqual({ canCancelSales: false });
       expect(row.deletedAt).toBeNull();
     });
 
@@ -79,11 +76,16 @@ export function describeUsersRepositoryContract(
       expect(await repo.findAllByBusiness(BIZ)).toHaveLength(0);
     });
 
-    it('countDirectors counts only directors for the business', async () => {
-      await repo.create(input({ role: 'director' }));
-      await repo.create(input({ role: 'operativo' }));
-      await repo.create(input({ role: 'director', businessId: BIZ_B }));
-      expect(await repo.countDirectors(BIZ)).toBe(1);
+    it('stores and patches portal-granted permissions', async () => {
+      const row = await repo.create(input({ permissions: { canCancelSales: true } }));
+      expect((await repo.findById(row.id))?.permissions).toEqual({ canCancelSales: true });
+      const updated = await repo.update(row.id, { permissions: { canCancelSales: false } });
+      expect(updated.permissions).toEqual({ canCancelSales: false });
+    });
+
+    it('patches active (portal deactivation)', async () => {
+      const row = await repo.create(input());
+      expect((await repo.update(row.id, { active: false })).active).toBe(false);
     });
   });
 }

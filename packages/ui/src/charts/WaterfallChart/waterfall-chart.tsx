@@ -139,7 +139,7 @@ export function WaterfallChart(props: WaterfallChartProps): ReactElement | null 
       <ReactEChartsCore
         echarts={echarts}
         option={option}
-        theme="cachink"
+        theme="xangarro"
         style={{ height, width: '100%' }}
         notMerge
       />

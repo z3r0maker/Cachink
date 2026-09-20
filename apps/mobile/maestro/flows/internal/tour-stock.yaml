@@ -6,8 +6,8 @@ tags: [internal]
 - runFlow: ../shared/dismiss-modals.yaml
 - runFlow: ../shared/authenticate.yaml
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    id: "inventario-tab-stock"
+    id: 'inventario-tab-stock'
 - assertVisible:
-    id: "stock-buscar"
+    id: 'stock-buscar'

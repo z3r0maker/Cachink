@@ -24,21 +24,21 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Verify the existing sale is visible.
-- assertVisible: "Tortilla"
+- assertVisible: 'Tortilla'
 
 # Tap the venta card to open the detail popover.
-- tapOn: "Tortilla"
+- tapOn: 'Tortilla'
 - assertVisible:
-    id: "venta-detail-popover"
+    id: 'venta-detail-popover'
 
 # Close the popover — we use swipe-to-edit instead.
 - tapOn:
-    id: "venta-detail-popover"
+    id: 'venta-detail-popover'
 - tapOn:
-    id: "top-bar-back"
+    id: 'top-bar-back'
 
 # Swipe the venta row left to reveal the edit action. On iOS
 # simulators, SwipeableRow renders the brand-yellow edit panel.
@@ -58,7 +58,7 @@ appId: mx.xangarro.mobile
 # an "Edit" button (only Share + Delete), so swipe is the path.
 # Use Maestro's swipe command on the first venta in the list.
 - swipe:
-    id: "ventas-list"
+    id: 'ventas-list'
     direction: LEFT
     startX: 300
     endX: 50
@@ -66,20 +66,20 @@ appId: mx.xangarro.mobile
 # Wait for the edit action to complete — the EditarVentaModal opens.
 - extendedWaitUntil:
     visible:
-      id: "editar-venta-modal"
+      id: 'editar-venta-modal'
     timeout: 5000
 
 # Clear and update the concepto field.
 - tapOn:
-    id: "editar-venta-concepto"
+    id: 'editar-venta-concepto'
 - eraseText
-- inputText: "Tortilla editada"
+- inputText: 'Tortilla editada'
 
 # Submit the edit.
 - tapOn:
-    id: "editar-venta-submit"
+    id: 'editar-venta-submit'
 
 # Modal closes and the updated sale appears in the list.
 - assertNotVisible:
-    id: "editar-venta-modal"
-- assertVisible: "Tortilla editada"
+    id: 'editar-venta-modal'
+- assertVisible: 'Tortilla editada'

@@ -168,7 +168,7 @@ function useShareSubmit(
       const report = toSharedReport(description, data, deviceContext, featureFlags);
       onShare(
         JSON.stringify(report, null, 2),
-        `cachink-bug-report-${Date.now()}.json`,
+        `xangarro-bug-report-${Date.now()}.json`,
         data.readableTimeline,
       );
       setDescription('');

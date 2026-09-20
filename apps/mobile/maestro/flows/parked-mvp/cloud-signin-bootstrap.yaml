@@ -14,27 +14,26 @@
 # x-entrypoint: wizard
 appId: mx.xangarro.mobile
 ---
-
 # Navigate to wizard via Settings → Sistema → Re-run.
 - runFlow: ../shared/navigate-to-settings.yaml
-- tapOn: { id: "settings-hub-sistema" }
-- tapOn: { id: "settings-re-run-wizard" }
-- assertVisible: { id: "wizard" }
+- tapOn: { id: 'settings-hub-sistema' }
+- tapOn: { id: 'settings-re-run-wizard' }
+- assertVisible: { id: 'wizard' }
 
-# Step 1 → "Ya tengo Cachink en otro dispositivo" → Step 3.
-- tapOn: { id: "wizard-step1-join-existing-link" }
+# Step 1 → "Ya tengo Xangarro en otro dispositivo" → Step 3.
+- tapOn: { id: 'wizard-step1-join-existing-link' }
 
 # Step 3 → Cloud sign-in card (WizardCard testID + Card's -card suffix).
-- tapOn: { id: "wizard-step3-cloud-card" }
+- tapOn: { id: 'wizard-step3-cloud-card' }
 
 # Shell takes over after mode='cloud' — CloudOnboardingScreen mounts.
-- assertVisible: { id: "cloud-onboarding-screen" }
-- tapOn: { id: "cloud-tab-signin" }
-- tapOn: { id: "cloud-email-input" }
+- assertVisible: { id: 'cloud-onboarding-screen' }
+- tapOn: { id: 'cloud-tab-signin' }
+- tapOn: { id: 'cloud-email-input' }
 - inputText: ${EMAIL}
-- tapOn: { id: "cloud-password-input" }
+- tapOn: { id: 'cloud-password-input' }
 - inputText: ${PASSWORD}
-- tapOn: { id: "cloud-submit" }
+- tapOn: { id: 'cloud-submit' }
 
 # After cloud sign-in with existing business+users, QuickSwitch fires.
 - runFlow: ../shared/authenticate.yaml

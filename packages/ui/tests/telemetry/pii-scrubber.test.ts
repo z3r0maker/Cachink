@@ -52,7 +52,7 @@ describe('scrubPii', () => {
     expect(out.extra).toEqual({ id: 'abc', count: 3 });
   });
 
-  it('PII_FIELDS includes the Cachink-specific field list', () => {
+  it('PII_FIELDS includes the Xangarro-specific field list', () => {
     for (const field of ['concepto', 'nombre', 'telefono', 'email', 'nota']) {
       expect(PII_FIELDS).toContain(field);
     }

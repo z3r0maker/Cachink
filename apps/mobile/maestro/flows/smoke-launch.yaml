@@ -12,7 +12,7 @@
 #   - Consent step appears inline within the wizard after mode
 #     selection (Audit M-1 PR 6 moved consent into the wizard).
 #
-# Precondition: cachink.db does NOT exist (fresh install). Run via
+# Precondition: xangarro.db does NOT exist (fresh install). Run via
 # the wrapper script to get a clean slate without breaking Metro:
 #
 #   ./apps/mobile/maestro/scripts/fresh-install.sh \
@@ -30,6 +30,6 @@ appId: mx.xangarro.mobile
 - runFlow: shared/dismiss-modals.yaml
 
 # Wizard renders directly on fresh launch.
-- assertVisible: "¡Bienvenido a Cachink!"
+- assertVisible: '¡Bienvenido a Xangarro!'
 - assertVisible:
-    id: "wizard-step1-solo"
+    id: 'wizard-step1-solo'

@@ -23,15 +23,15 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Egresos tab.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 
 # Verify the existing egreso is visible.
-- assertVisible: "Renta del local"
+- assertVisible: 'Renta del local'
 
 # Swipe the egreso row left to reveal the edit action.
 # SwipeableRow on the first egreso triggers onSwipeLeft → setEditing.
 - swipe:
-    id: "egresos-list"
+    id: 'egresos-list'
     direction: LEFT
     startX: 300
     endX: 50
@@ -39,20 +39,20 @@ appId: mx.xangarro.mobile
 # Wait for the EditarEgresoModal to appear.
 - extendedWaitUntil:
     visible:
-      id: "editar-egreso-modal"
+      id: 'editar-egreso-modal'
     timeout: 5000
 
 # Update the concepto field.
 - tapOn:
-    id: "editar-egreso-concepto"
+    id: 'editar-egreso-concepto'
 - eraseText
-- inputText: "Renta actualizada"
+- inputText: 'Renta actualizada'
 
 # Submit the edit.
 - tapOn:
-    id: "editar-egreso-submit"
+    id: 'editar-egreso-submit'
 
 # Modal closes and the updated egreso appears in the list.
 - assertNotVisible:
-    id: "editar-egreso-modal"
-- assertVisible: "Renta actualizada"
+    id: 'editar-egreso-modal'
+- assertVisible: 'Renta actualizada'

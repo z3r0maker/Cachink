@@ -58,7 +58,7 @@ function useNotificationTapHandler(userId: string | null): TapHandler {
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
   const [pendingAlertId, setPendingAlertId] = useState<string | null>(null);
   const handleTap = (payload: NotificationPayload): void => {
-    const route = payload.actionRoute ?? '/notificaciones';
+    const route = payload.actionRoute ?? '/productos';
     const alertId = payload.alertId ?? null;
     if (userId !== null) {
       if (alertId) markRead.mutate(alertId as DirectorAlertId);

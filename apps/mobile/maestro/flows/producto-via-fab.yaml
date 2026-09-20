@@ -15,44 +15,44 @@ appId: mx.xangarro.mobile
 
 # Productos tab -> add product (header button; FAB is iPhone-only).
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 # Full-page create form.
 - assertVisible:
-    id: "producto-nombre"
+    id: 'producto-nombre'
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Refresco Cola"
+    id: 'producto-nombre'
+- inputText: 'Refresco Cola'
 - tapOn:
-    id: "producto-precio-venta"
+    id: 'producto-precio-venta'
 - eraseText
-- inputText: "25"
+- inputText: '25'
 - tapOn:
-    id: "producto-costo"
+    id: 'producto-costo'
 - eraseText
-- inputText: "10"
+- inputText: '10'
 - hideKeyboard
 
 # Submit (fullWidth Btn inside the scroll — scroll to it if needed).
 - scrollUntilVisible:
     element:
-      id: "producto-submit"
+      id: 'producto-submit'
     direction: DOWN
     timeout: 8000
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 
 # Back on the stock list — verify the new product via search.
 - extendedWaitUntil:
     visible:
-      id: "stock-buscar"
+      id: 'stock-buscar'
     timeout: 8000
 - tapOn:
-    id: "stock-buscar"
+    id: 'stock-buscar'
 - eraseText
-- inputText: "Refresco Cola"
+- inputText: 'Refresco Cola'
 - assertVisible:
-    text: ".*Refresco Cola.*"
+    text: '.*Refresco Cola.*'
 - hideKeyboard

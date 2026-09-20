@@ -50,18 +50,16 @@ function PinButtons(props: {
 }): ReactElement {
   const { t } = useTranslation();
   return (
-    <>
-      <Btn
-        variant="dark"
-        onPress={props.onSubmit}
-        fullWidth
-        disabled={props.pinEmpty || props.submitting}
-        loading={props.submitting}
-        testID="login-submit"
-      >
-        {t('login.submit')}
-      </Btn>
-    </>
+    <Btn
+      variant="dark"
+      onPress={props.onSubmit}
+      fullWidth
+      disabled={props.pinEmpty || props.submitting}
+      loading={props.submitting}
+      testID="login-submit"
+    >
+      {t('login.submit')}
+    </Btn>
   );
 }
 

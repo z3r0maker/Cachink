@@ -14,7 +14,7 @@ dev laptop with iPad / Android sim / Tauri webview to validate.
 **Severity legend.**
 
 - **Blocker** — a user can't complete a core flow because of this.
-- **High** — degrades the Cachink "fewer clicks, more value" promise
+- **High** — degrades the Xangarro "fewer clicks, more value" promise
   for a meaningful slice of users.
 - **Medium** — improvement that pays off in the audit's specific
   user contexts (cashier behind counter, market vendor, food truck).
@@ -71,7 +71,7 @@ dev laptop with iPad / Android sim / Tauri webview to validate.
    Phases A–E ships with Vitest unit tests but no Playwright visual
    snapshot. A future Tamagui/RN bump can quietly shift pixels with no
    gate. Recommended: dedicate 1 day to running
-   `pnpm --filter @cachink/ui test:visual` once the dev laptop is
+   `pnpm --filter @xangarro/ui test:visual` once the dev laptop is
    available, then commit baselines.
 
 ---
@@ -208,7 +208,7 @@ Clean. Specifically verified:
 - Zero `lodash` / `moment` / `date-fns` imports across `packages/`
   and `apps/` (the Round 1 audit's quick-win list).
 - Heavy deps (`exceljs`, `@react-pdf/renderer`, `html2canvas`, `jspdf`,
-  `@sentry/browser`, `@cachink/sync-lan`, `@cachink/sync-cloud`,
+  `@sentry/browser`, `@xangarro/sync-lan`, `@xangarro/sync-cloud`,
   `react-native-view-shot`, `expo-file-system`, `@tauri-apps/plugin-fs`)
   all dynamic-imported per Slice 4 C20's cold-start budget.
 - The cold-start performance test (`tests/perf/cold-start-artefact.test.ts`)
@@ -355,7 +355,7 @@ Closes Section 1:
   field primitives)
 
 Each gets a `*.stories.tsx` with the canonical 3–5 variant stories.
-Once stories ship, run `pnpm --filter @cachink/ui test:visual` to
+Once stories ship, run `pnpm --filter @xangarro/ui test:visual` to
 generate Playwright baselines. Effort: **M** total.
 
 ### PR-R2-3 — Test Edge Cases for Money/Date/Integer (½ day, **High** impact for finance trust)

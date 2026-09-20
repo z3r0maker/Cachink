@@ -6,13 +6,13 @@
  * push-queue / pull-loop internals.
  */
 
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 
 export type LanSyncStatus = 'idle' | 'connecting' | 'syncing' | 'online' | 'offline' | 'error';
 
 export interface LanSyncConfig {
   /** Handle to the local SQLite database. Must already be migrated. */
-  db: CachinkDatabase;
+  db: XangarroDatabase;
   /** ULID identifying this device — written onto every delta we push. */
   deviceId: string;
   /** LAN server URL, e.g. `http://192.168.1.5:43812`. */

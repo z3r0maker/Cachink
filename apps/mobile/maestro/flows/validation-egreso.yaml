@@ -24,50 +24,50 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 
 # NuevoEgreso modal should be visible.
-- assertVisible: "Nuevo egreso"
+- assertVisible: 'Nuevo egreso'
 
 # --- Test 1: Empty concepto + valid monto ---
 - tapOn:
-    id: "gasto-monto"
-- inputText: "500"
+    id: 'gasto-monto'
+- inputText: '500'
 
 # Tap submit — should fail because concepto is empty.
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal still visible — validation prevented submission.
-- assertVisible: "Nuevo egreso"
+- assertVisible: 'Nuevo egreso'
 
 # --- Test 2: Valid concepto + $0 monto ---
 - tapOn:
-    id: "gasto-monto"
+    id: 'gasto-monto'
 - eraseText
-- inputText: "0"
+- inputText: '0'
 
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Test gasto"
+    id: 'gasto-concepto'
+- inputText: 'Test gasto'
 
 # Submit — should fail because monto is 0.
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal still visible.
-- assertVisible: "Nuevo egreso"
+- assertVisible: 'Nuevo egreso'
 
 # --- Test 3: Valid data → submit succeeds ---
 - tapOn:
-    id: "gasto-monto"
+    id: 'gasto-monto'
 - eraseText
-- inputText: "250"
+- inputText: '250'
 
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal closes on successful submission.
-- assertNotVisible: "Nuevo egreso"
+- assertNotVisible: 'Nuevo egreso'

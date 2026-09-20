@@ -6,11 +6,10 @@
  * live here, in the layer every client shares, rather than in the portal that
  * happens to call them first.
  *
- * "Active operator" means `role === 'operativo' && active`. Directors are not
- * operators and do not spend the plan's operator allowance.
+ * "Active operator" means `active` — every user is an operator (A-05).
  */
 
-import { genSalt, hash } from 'bcryptjs';
+import { hash } from 'bcryptjs';
 import {
   DuplicateOperatorError,
   InvalidPinError,
@@ -27,7 +26,7 @@ import type { UseCase } from '../_use-case.js';
 const BCRYPT_ROUNDS = 10;
 const AVATAR_COLORS = ['#3B6FFF', '#00C896', '#FF6B35', '#9B59B6', '#E91E63', '#F5A623'] as const;
 
-const isActiveOperator = (u: User): boolean => u.role === 'operativo' && u.active;
+const isActiveOperator = (u: User): boolean => u.active;
 
 async function activeOperators(users: UsersRepository, businessId: BusinessId): Promise<number> {
   return (await users.findAllByBusiness(businessId)).filter(isActiveOperator).length;
@@ -67,22 +66,12 @@ export class CrearOperadorUseCase implements UseCase<CrearOperadorInput, User> {
     if (await this.#users.findByNombre(nombre, input.businessId)) {
       throw new DuplicateOperatorError(nombre);
     }
-    // Operators never use password recovery — the portal resets their PIN
-    // instead — but the column is NOT NULL until ADR-058 §4 drops it. A hash of
-    // random bytes nobody knows is honestly unusable, unlike a guessable default.
-    // `genSalt` supplies those bytes from the platform's CSPRNG; `node:crypto`
-    // would tie this shared package to Node (it also runs on phone and browser).
-    const [pinHash, recoveryPasswordHash] = await Promise.all([
-      hash(input.pin, BCRYPT_ROUNDS),
-      genSalt(BCRYPT_ROUNDS).then((secret) => hash(secret, BCRYPT_ROUNDS)),
-    ]);
+    // Operators never use password recovery (ADR-072) — and the columns are
+    // gone (0007); the hash is the NIP alone.
+    const pinHash = await hash(input.pin, BCRYPT_ROUNDS);
     return this.#users.create({
       nombre,
-      email: null,
       pinHash,
-      recoveryPasswordHash,
-      role: 'operativo',
-      mustChangePin: false,
       avatarColor: AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)] ?? '#3B6FFF',
       businessId: input.businessId,
     });

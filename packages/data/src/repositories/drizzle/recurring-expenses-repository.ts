@@ -19,16 +19,16 @@ import type {
   RecurringExpensesRepository,
 } from '../recurring-expenses-repository.js';
 import { recurringExpenses } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type RecurringExpenseRow = typeof recurringExpenses.$inferSelect;
 
 export class DrizzleRecurringExpensesRepository implements RecurringExpensesRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

@@ -16,30 +16,30 @@ appId: mx.xangarro.mobile
 # Open the product's detail via search, then the Salida movimiento.
 - runFlow: shared/find-producto-stock.yaml
 - tapOn:
-    id: "producto-card-.*"
+    id: 'producto-card-.*'
 - assertVisible:
-    text: "Salida.*"
+    text: 'Salida.*'
 - tapOn:
-    text: "Salida.*"
+    text: 'Salida.*'
 - assertVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'
 
 # Pick the MOTIVO first (dropdown) — selecting it re-renders the form.
 - tapOn:
-    id: "movimiento-motivo"
+    id: 'movimiento-motivo'
 - tapOn:
-    text: "Merma.*"
+    text: 'Merma.*'
 
 # Commit CANTIDAD last so the value survives the motivo re-render.
 - tapOn:
-    id: "movimiento-cantidad"
+    id: 'movimiento-cantidad'
 - eraseText
-- inputText: "2"
+- inputText: '2'
 
 # Submit the movement.
 - tapOn:
-    text: "REGISTRAR"
+    text: 'REGISTRAR'
 
 # Modal closes — CANTIDAD gone, stock decremented.
 - assertNotVisible:
-    text: "CANTIDAD.*"
+    text: 'CANTIDAD.*'

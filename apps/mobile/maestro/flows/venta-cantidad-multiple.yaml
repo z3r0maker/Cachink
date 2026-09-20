@@ -15,42 +15,42 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Tap the same product 3 times to set qty=3.
-- tapOn: "Quesadilla"
-- tapOn: "Quesadilla"
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
+- tapOn: 'Quesadilla'
+- tapOn: 'Quesadilla'
 
 # Cart strip should show the item.
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Checkout with Efectivo (default).
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # Cash entry screen — tap a quick amount and submit.
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 5000
 - tapOn: "\\$100"
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 
 # Returns to Ventas — sale appears.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000

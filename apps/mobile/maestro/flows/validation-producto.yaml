@@ -23,44 +23,44 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Productos tab.
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 
 # Open the NuevoProducto modal.
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 # The modal should be open.
-- assertVisible: "Nuevo producto"
+- assertVisible: 'Nuevo producto'
 
 # ── Case 1: empty nombre blocks submission ──────────────────────
 - tapOn:
-    id: "producto-costo"
-- inputText: "5"
+    id: 'producto-costo'
+- inputText: '5'
 - tapOn:
-    id: "producto-precio-venta"
-- inputText: "15"
+    id: 'producto-precio-venta'
+- inputText: '15'
 
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 
 # Modal should still be open — validation prevents submission
 # when nombre is empty.
-- assertVisible: "Nuevo producto"
+- assertVisible: 'Nuevo producto'
 
 # ── Case 2: costo may be left empty ─────────────────────────────
 # Clear the cost we just typed and give the product a name. The
 # product must save: costo is optional, so the modal closes.
 - tapOn:
-    id: "producto-costo"
+    id: 'producto-costo'
 - eraseText
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Servicio de asesoría"
+    id: 'producto-nombre'
+- inputText: 'Servicio de asesoría'
 - hideKeyboard
 
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
 
 # Modal closed → the save went through with no costo.
-- assertNotVisible: "Nuevo producto"
-- assertVisible: "Servicio de asesoría"
+- assertNotVisible: 'Nuevo producto'
+- assertVisible: 'Servicio de asesoría'

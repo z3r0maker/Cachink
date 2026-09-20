@@ -13,12 +13,12 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 - tapOn:
-    id: "stock-buscar"
-- inputText: "Tortilla"
+    id: 'stock-buscar'
+- inputText: 'Tortilla'
 - assertVisible:
-    id: "producto-card-.*"
+    id: 'producto-card-.*'
 # Dismiss the keyboard so the caller's tap opens the row detail (the stock list is
 # keyboardShouldPersistTaps="never", so with the keyboard up the first tap would
 # only dismiss it). Assert the row first — it's visible above the keyboard — then

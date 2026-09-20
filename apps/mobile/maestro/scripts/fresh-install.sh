@@ -98,10 +98,15 @@ fi
 
 # ──────────────────── Delete the SQLite database ────────────────
 DB_DIR="$APP_DATA/Documents/SQLite"
-DB_FILE="$DB_DIR/cachink.db"
+DB_FILE="$DB_DIR/xangarro.db"
+# Pre-rebrand name (ADR-056): the app adopts it on launch, so a leftover
+# copy would turn a "fresh install" back into existing data.
+LEGACY_DB_FILE="$DB_DIR/cachink.db"
 
 echo "🗑️  Deleting database: $DB_FILE"
-rm -f "$DB_FILE" "${DB_FILE}-wal" "${DB_FILE}-shm" 2>/dev/null || true
+for f in "$DB_FILE" "$LEGACY_DB_FILE"; do
+  rm -f "$f" "${f}-wal" "${f}-shm" 2>/dev/null || true
+done
 
 # Also clean any stale migration marker or app_config cache that
 # expo-sqlite may leave outside the WAL files.

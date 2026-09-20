@@ -9,18 +9,26 @@
 import { NewExpenseSchema, type Expense, type NewExpense } from '@xangarro/domain';
 import type { ExpensesRepository, RecurringExpensesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { UNLIMITED_QUOTA, type RecordQuota } from '../record-quota/record-quota.js';
 
 export class RegistrarEgresoUseCase implements UseCase<NewExpense, Expense> {
   readonly #expenses: ExpensesRepository;
   readonly #recurring: RecurringExpensesRepository;
+  readonly #quota: RecordQuota;
 
-  constructor(expenses: ExpensesRepository, recurring: RecurringExpensesRepository) {
+  constructor(
+    expenses: ExpensesRepository,
+    recurring: RecurringExpensesRepository,
+    quota: RecordQuota = UNLIMITED_QUOTA,
+  ) {
     this.#expenses = expenses;
     this.#recurring = recurring;
+    this.#quota = quota;
   }
 
   async execute(input: NewExpense): Promise<Expense> {
     const parsed = NewExpenseSchema.parse(input);
+    await this.#quota.assertCanCreate();
     if (parsed.gastoRecurrenteId) {
       const template = await this.#recurring.findById(parsed.gastoRecurrenteId);
       if (!template) {

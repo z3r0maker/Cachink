@@ -11,12 +11,12 @@
  *   - Every row goes through the same LWW SQL the server uses: the
  *     local row wins if its `updated_at` is strictly greater, or equal
  *     and its `device_id` is lexicographically smaller.
- *   - Rejected rows go into `__cachink_conflicts` so the UI can surface
+ *   - Rejected rows go into `__xangarro_conflicts` so the UI can surface
  *     them (Slice 5 C20).
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { readHwm, writeHwm } from '@xangarro/data';
 import {
   API_PATHS,
@@ -30,7 +30,7 @@ import { pullResponseSchema, type Delta } from '../protocol/wire.js';
 import { buildUpsertLww, rowsAffectedFrom } from './upsert-lww.js';
 
 export interface PullDeps {
-  db: CachinkDatabase;
+  db: XangarroDatabase;
   serverUrl: string;
   accessToken: string;
   fetchImpl?: typeof fetch;
@@ -88,7 +88,7 @@ interface ApplyResult {
   rejected: number;
 }
 
-async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promise<ApplyResult> {
+async function applyDeltas(db: XangarroDatabase, deltas: readonly Delta[]): Promise<ApplyResult> {
   const decoded = deltas.filter((d) => isSyncedTable(d.table)).map((d) => decodeDelta(d));
   if (decoded.length === 0) return { applied: 0, rejected: 0 };
 
@@ -119,10 +119,10 @@ async function applyDeltas(db: CachinkDatabase, deltas: readonly Delta[]): Promi
   return { applied, rejected };
 }
 
-async function recordInboundConflict(db: CachinkDatabase, delta: Delta): Promise<void> {
+async function recordInboundConflict(db: XangarroDatabase, delta: Delta): Promise<void> {
   const tableQuoted = sql.raw(`"${delta.table}"`);
   await db.run(sql`
-    INSERT INTO __cachink_conflicts
+    INSERT INTO __xangarro_conflicts
       (direction, table_name, row_id, loser_updated_at, loser_device_id,
        winner_updated_at, winner_device_id, reason)
     VALUES (

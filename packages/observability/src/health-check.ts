@@ -1,7 +1,7 @@
 import { ulid } from 'ulid';
 import type { SqliteDatabase } from './sqlite-log-store.js';
 
-const TABLE = '__cachink_observability_log';
+const TABLE = '__xangarro_observability_log';
 
 export interface ObservabilityHealth {
   readonly status: 'healthy' | 'degraded' | 'broken';

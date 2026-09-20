@@ -6,7 +6,8 @@
  * mobile and never loads this file.
  *
  * Wiring:
- *   1. `@tauri-apps/plugin-sql`'s `Database.load('sqlite:cachink.db')`
+ *   1. `@tauri-apps/plugin-sql`'s `Database.load('sqlite:xangarro.db')`, after
+ *      {@link resolveDatabaseFileName} adopts a pre-rebrand file (ADR-056)
  *      opens the SQLite file under the app's sandboxed data directory
  *      (resolved by Tauri from `BaseDirectory::App`).
  *   2. Drizzle's `sqlite-proxy` driver adapts the plugin's
@@ -30,13 +31,15 @@ import Database from '@tauri-apps/plugin-sql';
 import { drizzle, type AsyncRemoteCallback } from 'drizzle-orm/sqlite-proxy';
 import type { SqliteDatabase } from '@xangarro/observability';
 import * as schema from '@xangarro/data/schema';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import {
   AsyncDatabaseProvider,
   type DatabaseProviderProps,
   type AsyncDatabaseProviderProps,
 } from './_internal';
 import { webResetDatabase } from './database-reset.web';
+import { resolveDatabaseFileName } from './database-file.shared';
+import { loadWebDatabaseFileOps } from './database-file.web';
 import { runMigrations } from './run-migrations';
 import {
   getSchemaVersion,
@@ -47,7 +50,6 @@ import {
 } from '@xangarro/data/migrator';
 
 /** Tauri-plugin-sql path prefix — mandatory per the plugin docs. */
-const DB_PATH = 'sqlite:cachink.db';
 
 /** Adapt Tauri's Database to the SqliteDatabase interface for observability. */
 function wrapTauriAsSqliteDatabase(tauriDb: Database): SqliteDatabase {
@@ -98,14 +100,15 @@ export function buildTauriCallback(tauriDb: Database): AsyncRemoteCallback {
   };
 }
 
-async function createDesktopDatabase(): Promise<CachinkDatabase> {
-  const tauriDb = await Database.load(DB_PATH);
+async function createDesktopDatabase(): Promise<XangarroDatabase> {
+  const fileName = await resolveDatabaseFileName(await loadWebDatabaseFileOps());
+  const tauriDb = await Database.load(`sqlite:${fileName}`);
   try {
     // Enable FK enforcement before migrations run.
     // Must happen outside any transaction — pragma is a no-op inside one.
     await tauriDb.execute('PRAGMA foreign_keys = ON');
     await tauriDb.execute('PRAGMA journal_mode = WAL');
-    const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as CachinkDatabase;
+    const db = drizzle(buildTauriCallback(tauriDb), { schema }) as unknown as XangarroDatabase;
     // Attach a SqliteDatabase-compatible handle so the observability bridge
     // (which reads `db.$client`) can use it for its log store.
     (db as unknown as { $client: SqliteDatabase }).$client = wrapTauriAsSqliteDatabase(tauriDb);
