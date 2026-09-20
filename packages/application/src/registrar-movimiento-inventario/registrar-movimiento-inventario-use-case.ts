@@ -1,16 +1,7 @@
 /**
- * RegistrarMovimientoInventarioUseCase (P1B-M6-T03).
- *
- * Per CLAUDE.md §10 an `entrada` movement also creates an Egreso with
- * `categoria='Inventario'` and `monto = cantidad × costoUnit`. The
- * two writes happen in sequence — contract tests verify both rows
- * land — but not inside a transaction (the InMemory and Drizzle
- * backends have different tx surfaces; the UI will refresh both
- * lists from the same repositories).
- *
- * Salida movements don't touch egresos — they model stock leaving the
- * business (sale, merma, producción) which the caller has already
- * accounted for via a Venta or a different Egreso.
+ * RegistrarMovimientoInventarioUseCase — one movement, plus the purchase
+ * egreso an `entrada` implies. The optional quota (A-10) lets the phone
+ * gate creations against the plan; the portal passes none (ADR-081).
  */
 
 import {
@@ -21,6 +12,7 @@ import {
 } from '@xangarro/domain';
 import type { ExpensesRepository, InventoryMovementsRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
+import { UNLIMITED_QUOTA, type RecordQuota } from '../record-quota/record-quota.js';
 
 export class RegistrarMovimientoInventarioUseCase implements UseCase<
   NewInventoryMovement,
@@ -28,18 +20,22 @@ export class RegistrarMovimientoInventarioUseCase implements UseCase<
 > {
   readonly #movements: Pick<InventoryMovementsRepository, 'create'>;
   readonly #expenses: Pick<ExpensesRepository, 'create'>;
+  readonly #quota: RecordQuota;
 
   /** Only `create` of each: the portal (ADR-081) implements no more than it uses. */
   constructor(
     movements: Pick<InventoryMovementsRepository, 'create'>,
     expenses: Pick<ExpensesRepository, 'create'>,
+    quota: RecordQuota = UNLIMITED_QUOTA,
   ) {
     this.#movements = movements;
     this.#expenses = expenses;
+    this.#quota = quota;
   }
 
   async execute(input: NewInventoryMovement): Promise<InventoryMovement> {
     const parsed = NewInventoryMovementSchema.parse(input);
+    await this.#quota.assertCanCreate();
     const movement = await this.#movements.create(parsed);
     if (parsed.tipo === 'entrada') {
       await this.#expenses.create({

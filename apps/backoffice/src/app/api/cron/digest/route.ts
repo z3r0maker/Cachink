@@ -5,6 +5,8 @@ import { DEFAULT_DIGEST_TO, transactionalMailer } from '@/server/alerts/email';
 import { DEFAULT_CONSOLE_URL } from '@/server/alerts/webhook-notifier';
 import { db } from '@/server/db/client';
 import { drizzleRejectionSource } from '@/server/db/rejections';
+import { expireStaleAssistedImports, purgeResolvedAssistedImportFiles } from '@xangarro/data-pg';
+import { pruneStaffSessions } from '@/server/db/staff-sessions-prune';
 import { drizzleSupportItems } from '@/server/db/support-items';
 
 /** The daily staff digest (N-10); see `src/server/alerts/cron-digest.ts`. */
@@ -16,6 +18,9 @@ export async function GET(request: Request): Promise<Response> {
     now: () => new Date(),
     repo: drizzleSupportItems(db()),
     rejections: drizzleRejectionSource(db()),
+    pruneSessions: () => pruneStaffSessions(db()),
+    expireAssisted: () => expireStaleAssistedImports(db()),
+    purgeAssistedFiles: () => purgeResolvedAssistedImportFiles(db()),
     // B-14: Resend with RESEND_API_KEY; the dev outbox (.email-outbox/) without it.
     mailer: transactionalMailer(emailSenderFromEnv(process.env)),
     to: process.env.DIGEST_TO ?? DEFAULT_DIGEST_TO,

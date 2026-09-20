@@ -1,6 +1,6 @@
 # Third-Party Licenses
 
-This file documents third-party assets bundled with Cachink! that are
+This file documents third-party assets bundled with Xangarro that are
 not covered by the project's own license. It exists as a provenance
 record — none of the licenses below require attribution, but we credit
 contributors voluntarily.
@@ -9,11 +9,11 @@ contributors voluntarily.
 
 ## Sound Effects
 
-### Cash Register "Cachink" Sound
+### Cash Register Sale Sound
 
 - **Files:**
-  - `apps/mobile/assets/sounds/cachink.mp3`
-  - `packages/ui/src/assets/sounds/cachink.mp3`
+  - `apps/mobile/assets/sounds/sale-confirm.mp3`
+  - `packages/ui/src/assets/sounds/sale-confirm.mp3`
 - **Author:** DRAGON-STUDIO
 - **Source:** https://pixabay.com/sound-effects/cash-register-kaching-376867/
 - **License:** [Pixabay Content License](https://pixabay.com/service/license-summary/)

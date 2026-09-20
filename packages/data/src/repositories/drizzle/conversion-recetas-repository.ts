@@ -17,16 +17,16 @@ import type {
   CreateConversionRecetaInput,
 } from '../conversion-recetas-repository.js';
 import { conversionRecetas } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 type Row = typeof conversionRecetas.$inferSelect;
 
 export class DrizzleConversionRecetasRepository implements ConversionRecetasRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
   readonly #deviceId: DeviceId;
   readonly #userId: UserId | null;
 
-  constructor(db: CachinkDatabase, deviceId: DeviceId, userId: UserId | null = null) {
+  constructor(db: XangarroDatabase, deviceId: DeviceId, userId: UserId | null = null) {
     this.#db = db;
     this.#deviceId = deviceId;
     this.#userId = userId;

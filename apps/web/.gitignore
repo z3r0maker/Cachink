@@ -7,3 +7,6 @@ e2e/.auth/
 public/__design
 public/__cmp.txt
 .next-e2e/
+
+# O-02 spike build output (esbuild)
+e2e/spikes/sqlite-wasm-opfs/.out/

@@ -23,46 +23,46 @@ appId: mx.xangarro.mobile
 
 # Navigate to Egresos.
 - tapOn:
-    id: "tab-gastos"
+    id: 'tab-gastos'
 - tapOn:
-    id: "egresos-nuevo"
+    id: 'egresos-nuevo'
 
 # Fill the concepto and monto.
 - tapOn:
-    id: "gasto-concepto"
-- inputText: "Limpieza semanal"
+    id: 'gasto-concepto'
+- inputText: 'Limpieza semanal'
 - tapOn:
-    id: "gasto-monto"
-- inputText: "350"
+    id: 'gasto-monto'
+- inputText: '350'
 
 # Toggle recurrente ON.
 - tapOn:
-    id: "gasto-recurrente-toggle"
+    id: 'gasto-recurrente-toggle'
 
 # Frecuencia field should now be visible.
-- assertVisible: "Frecuencia"
+- assertVisible: 'Frecuencia'
 
 # Select "Semanal" frequency.
 - tapOn:
-    id: "recurrente-frecuencia"
-- tapOn: "Semanal"
+    id: 'recurrente-frecuencia'
+- tapOn: 'Semanal'
 
 # The day-of-week picker should appear.
 - assertVisible:
-    id: "recurrente-dia-semana"
+    id: 'recurrente-dia-semana'
 
 # Select a day (e.g., Lunes — first option).
 - tapOn:
-    id: "recurrente-dia-semana"
+    id: 'recurrente-dia-semana'
 - tapOn:
     index: 0
 
 # Submit the egreso.
 - tapOn:
-    id: "gasto-submit"
+    id: 'gasto-submit'
 
 # Modal closes.
-- assertNotVisible: "Nuevo egreso"
+- assertNotVisible: 'Nuevo egreso'
 
 # Verify pendiente appears (since proximoDisparo=today for weekly).
-- assertVisible: "Pendientes de registrar"
+- assertVisible: 'Pendientes de registrar'

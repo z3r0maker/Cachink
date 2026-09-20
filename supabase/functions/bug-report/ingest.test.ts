@@ -12,8 +12,10 @@ import type { Json } from './validate.ts';
  */
 class MemoryStore implements IngestStore {
   rows: { table: string; row: Json }[] = [];
+  inbox: Parameters<IngestStore['fileInboxItem']>[0][] = [];
   already = 0;
   failInsert = false;
+  failInbox = false;
 
   async countSince(): Promise<number> {
     return this.already;
@@ -22,6 +24,12 @@ class MemoryStore implements IngestStore {
   async insert(table: string, rows: readonly Json[]): Promise<boolean> {
     if (this.failInsert) return false;
     this.rows.push(...rows.map((row) => ({ table, row })));
+    return true;
+  }
+
+  async fileInboxItem(item: Parameters<IngestStore['fileInboxItem']>[0]): Promise<boolean> {
+    if (this.failInbox) return false;
+    this.inbox.push(item);
     return true;
   }
 }
@@ -95,6 +103,20 @@ describe('POST /bug-reports', () => {
     const { status, store } = await send('bug-reports', report({ description: 'a'.repeat(6000) }));
     assert.equal(status, 201);
     assert.equal(String(store.rows[0]?.row['description']).length, 5000);
+  });
+
+  it('files every stored report in the staff inbox too (N-08), and 502s when the console refuses', async () => {
+    const { store } = await send('bug-reports', report());
+    assert.equal(store.inbox.length, 1);
+    assert.match(store.inbox[0]?.title ?? '', /^Reporte del teléfono dev-1/);
+    assert.match(store.inbox[0]?.body ?? '', /No me deja cobrar/);
+    assert.equal(store.inbox[0]?.sourceRef, 'bug-report:dev-1:2026-09-17T11:59:00.000Z');
+
+    const failing = new MemoryStore();
+    failing.failInbox = true;
+    const refused = await send('bug-reports', report(), failing);
+    assert.equal(refused.status, 502);
+    assert.equal(failing.rows.length, 0, 'nothing archived when staff cannot see it');
   });
 
   it('refuses a report without a description, device or date, and past the daily limit', async () => {

@@ -7,12 +7,12 @@
 import { eq } from 'drizzle-orm';
 import type { AppConfig, AppConfigRepository } from '../app-config-repository.js';
 import { appConfig } from '../../schema/index.js';
-import type { CachinkDatabase } from './_db.js';
+import type { XangarroDatabase } from './_db.js';
 
 export class DrizzleAppConfigRepository implements AppConfigRepository {
-  readonly #db: CachinkDatabase;
+  readonly #db: XangarroDatabase;
 
-  constructor(db: CachinkDatabase) {
+  constructor(db: XangarroDatabase) {
     this.#db = db;
   }
 

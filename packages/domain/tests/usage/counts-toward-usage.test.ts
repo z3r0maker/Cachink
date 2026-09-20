@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 import {
+  APERTURA_MOTIVO,
   classifyMovementOrigin,
   countsTowardUsage,
   PORTAL_DEVICE_ID,
@@ -51,6 +52,17 @@ describe('countsTowardUsage (OQ-5)', () => {
 describe('classifyMovementOrigin', () => {
   it('classifies a user-entered entrada, ajuste or merma as manual', () => {
     assert.equal(classifyMovementOrigin({ motivo: 'Compra a proveedor', nota: null }), 'manual');
+    // N-17: opening stock is apertura wherever it was written, and never counts.
+    assert.equal(classifyMovementOrigin({ motivo: APERTURA_MOTIVO }), 'apertura');
+    assert.equal(classifyMovementOrigin({ motivo: APERTURA_MOTIVO, deviceId: 'dev' }), 'apertura');
+    assert.equal(
+      countsTowardUsage({
+        kind: 'movimientoInventario',
+        at: '2026-09-18T12:00:00Z',
+        origen: 'apertura',
+      }),
+      false,
+    );
     assert.equal(classifyMovementOrigin({ motivo: 'Ajuste de inventario', nota: 'x' }), 'manual');
     assert.equal(classifyMovementOrigin({ motivo: 'Merma / daño', nota: null }), 'manual');
   });

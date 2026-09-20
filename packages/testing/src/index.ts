@@ -14,7 +14,9 @@
  * See ADR-033.
  */
 
+export { InMemoryReferenceDataRepository } from './in-memory-reference-data-repository.js';
 export * from './in-memory-sales-repository.js';
+export * from './in-memory-tickets-repository.js';
 export * from './in-memory-businesses-repository.js';
 export * from './in-memory-app-config-repository.js';
 export * from './in-memory-expenses-repository.js';
@@ -43,3 +45,5 @@ export * from './fixtures/index.js';
 // test helpers — contract factories still live under
 // `@xangarro/testing/contract` (see `./contract/index.ts`).
 export { TEST_DEVICE_ID } from './contract/_shared.js';
+export * from './in-memory-record-usage-repository.js';
+export * from './entitlement.js';

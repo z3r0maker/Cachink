@@ -12,10 +12,17 @@ import { supportItems } from '@/server/db/support-schema';
  * the Drizzle table and the domain as text: the two descriptions of
  * `support_items` cannot drift apart, and the grants stay as ADR-063 wants.
  */
-const sql = readFileSync(
-  new URL('../src/server/db/migrations/0002_support_items.sql', import.meta.url),
-  'utf8',
-);
+// 0002 created the table; 0011 widened the kinds CHECK for `ayuda`. The
+// rules are asserted over the pair, like data-pg's usage-counts-sql test.
+const sql =
+  readFileSync(
+    new URL('../src/server/db/migrations/0002_support_items.sql', import.meta.url),
+    'utf8',
+  ) +
+  readFileSync(
+    new URL('../src/server/db/migrations/0011_support_ayuda.sql', import.meta.url),
+    'utf8',
+  );
 /** The statements only: comments may say "no DELETE" without granting it. */
 const code = sql.replace(/--.*$/gm, '');
 const createTable = sql.slice(sql.indexOf('CREATE TABLE'), sql.indexOf(');') + 2);

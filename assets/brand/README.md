@@ -1,19 +1,19 @@
 # assets/brand — Canonical Brand Masters
 
-This directory holds the **single source of truth** for Cachink's brand
+This directory holds the **single source of truth** for Xangarro's brand
 artwork. Nothing in this directory should ever be edited in place — to update
 a master, replace the PNG wholesale and bump a version note in
 `ARCHITECTURE.md` (see ADR-016).
 
 ## Files
 
-| File                 | What it is                                                                                                            | Consumed by                                                                                                                                                                   |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `icon.png`           | Full-bleed app-icon artwork (1254×1254, no alpha)                                                                     | **Copied** into `apps/mobile/assets/icon.png` — the iOS App Store requires a full-bleed, no-alpha 1024×1024 icon; iOS adds the squircle mask at render time.                  |
-| `icon-padded.png`    | Dock/Launchpad-ready icon (1024×1024 RGBA, ~82% artwork + 9% transparent safe-area padding per side — Apple HIG grid) | Fed to `pnpm tauri icon` for `apps/desktop/src-tauri/icons/*`. Matches the neighbouring macOS dock icons (Adobe, Preview, etc.) so Cachink doesn't render visually oversized. |
-| `logo.png`           | In-app brand logo (~1536×1024)                                                                                        | **Copied once** into `packages/ui/src/assets/logo.png`, then used by `<BrandLogo />` (Phase 1A-M2). Never copied into an app.                                                 |
-| `splash-mobile.png`  | Mobile launch splash (~852×1846, portrait, no alpha)                                                                  | **Copied** into `apps/mobile/assets/splash.png`. Expo renders full-screen on iOS / Android tablets.                                                                           |
-| `splash-desktop.png` | Desktop launch splash (~1568×1003, landscape, no alpha)                                                               | **Copied** into `apps/desktop/src/shell/splash/splash.png`. Shown by the Tauri two-window splash pattern.                                                                     |
+| File                 | What it is                                                                                                            | Consumed by                                                                                                                                                                    |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `icon.png`           | Full-bleed app-icon artwork (1254×1254, no alpha)                                                                     | **Copied** into `apps/mobile/assets/icon.png` — the iOS App Store requires a full-bleed, no-alpha 1024×1024 icon; iOS adds the squircle mask at render time.                   |
+| `icon-padded.png`    | Dock/Launchpad-ready icon (1024×1024 RGBA, ~82% artwork + 9% transparent safe-area padding per side — Apple HIG grid) | Fed to `pnpm tauri icon` for `apps/desktop/src-tauri/icons/*`. Matches the neighbouring macOS dock icons (Adobe, Preview, etc.) so Xangarro doesn't render visually oversized. |
+| `logo.png`           | In-app brand logo (~1536×1024)                                                                                        | **Copied once** into `packages/ui/src/assets/logo.png`, then used by `<BrandLogo />` (Phase 1A-M2). Never copied into an app.                                                  |
+| `splash-mobile.png`  | Mobile launch splash (~852×1846, portrait, no alpha)                                                                  | **Copied** into `apps/mobile/assets/splash.png`. Expo renders full-screen on iOS / Android tablets.                                                                            |
+| `splash-desktop.png` | Desktop launch splash (~1568×1003, landscape, no alpha)                                                               | **Copied** into `apps/desktop/src/shell/splash/splash.png`. Shown by the Tauri two-window splash pattern.                                                                      |
 
 ## Regenerating `icon-padded.png`
 

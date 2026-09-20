@@ -22,38 +22,38 @@ appId: mx.xangarro.mobile
 - runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-conversion"
+      id: 'otros-conversion'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-conversion"
+    id: 'otros-conversion'
 - extendedWaitUntil:
     visible:
-      id: "conversion-screen"
+      id: 'conversion-screen'
     timeout: 5000
 
 # Tap the convert button on the first recipe.
 - tapOn:
-    id: "receta-convertir-btn"
+    id: 'receta-convertir-btn'
 
 # Verify the convertir sheet opens.
 - extendedWaitUntil:
     visible:
-      id: "convertir-sheet"
+      id: 'convertir-sheet'
     timeout: 3000
 
 # Set multiplier.
 - inputText:
-    id: "convertir-multiplicador"
-    text: "1"
+    id: 'convertir-multiplicador'
+    text: '1'
 
 # Confirm conversion.
 - tapOn:
-    id: "convertir-confirm"
+    id: 'convertir-confirm'
 
 # Verify sheet closes (conversion successful).
 - extendedWaitUntil:
     notVisible:
-      id: "convertir-sheet"
+      id: 'convertir-sheet'
     timeout: 5000

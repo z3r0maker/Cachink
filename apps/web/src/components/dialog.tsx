@@ -16,6 +16,8 @@ export interface ConfirmDialogProps {
   readonly cancelLabel?: string;
   /** A destructive confirm renders its action in the danger fill. */
   readonly destructive?: boolean;
+  /** Disables the confirm action — an in-flight save must ignore a smash. */
+  readonly confirmDisabled?: boolean;
   readonly onConfirm: () => void;
   readonly children?: ReactNode;
 }
@@ -35,6 +37,7 @@ export function ConfirmDialog({
   confirmLabel,
   cancelLabel = 'Cancelar',
   destructive,
+  confirmDisabled,
   onConfirm,
   children,
 }: ConfirmDialogProps) {
@@ -50,7 +53,11 @@ export function ConfirmDialog({
             <RadixDialog.Close asChild>
               <Button variant="ghost">{cancelLabel}</Button>
             </RadixDialog.Close>
-            <Button variant={destructive ? 'danger' : 'primary'} onClick={onConfirm}>
+            <Button
+              variant={destructive ? 'danger' : 'primary'}
+              onClick={onConfirm}
+              disabled={confirmDisabled}
+            >
               {confirmLabel}
             </Button>
           </div>

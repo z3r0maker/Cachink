@@ -28,12 +28,8 @@ export function toWire(row: Row): Row {
  * Columns stored as JSON text for device parity, which the **domain** types as
  * structures. They must be decoded or `wireSchema(DomainSchema)` rejects them.
  *
- * Deliberately absent: `users.permissions`. It is also JSON text, but
- * `UserSchema` does not declare it — the phone decodes it itself with
- * `parsePermissions` — so it travels as the string it is. Decoding it here
- * would send a shape the phone does not expect.
- *
- * Found by the conformance suite, which failed on `atributosProducto` alone.
+ * Found by the conformance suite, which failed on `atributosProducto` alone,
+ * then again on `users.permissions` once A-05 gave `UserSchema` that field.
  */
 function decodeJson(row: Row, columns: readonly string[]): Row {
   const out: Row = { ...row };
@@ -49,7 +45,7 @@ const businessToWire = (row: Row): Row => toWire(decodeJson(row, ['atributosProd
 /** Operators never carry an email over the wire (contract §5). */
 function userToWire(row: Row): Row {
   const { email: _email, ...rest } = row;
-  return toWire(rest);
+  return toWire(decodeJson(rest, ['permissions']));
 }
 
 const OUT: Record<PullableTable, (row: Row) => Row> = {
@@ -62,6 +58,8 @@ const OUT: Record<PullableTable, (row: Row) => Row> = {
   conversion_recetas: toWire,
   inventory_movements: toWire,
   mensajes_operador: toWire,
+  opening_balances: toWire,
+  opening_balance_clients: toWire,
 };
 
 /** A Postgres row of `table`, as a device receives it. */

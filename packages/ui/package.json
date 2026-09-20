@@ -28,30 +28,30 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "lint": "eslint . --config ../../eslint.config.js",
-    "lint:fix": "eslint . --config ../../eslint.config.js --fix",
+    "lint": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' --config ../../eslint.config.js",
+    "lint:fix": "eslint 'src/**/*.{ts,tsx}' 'tests/**/*.{ts,tsx}' --config ../../eslint.config.js --fix",
     "clean": "rm -rf dist .turbo storybook-static playwright-report test-results",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build --output-dir storybook-static",
     "test:visual": "playwright test --config=playwright.config.ts"
   },
   "dependencies": {
-    "@react-pdf/renderer": "^4.5.1",
-    "@sentry/browser": "^10.53.1",
     "@xangarro/application": "workspace:*",
-    "@xangarro/contracts": "workspace:*",
     "@xangarro/data": "workspace:*",
     "@xangarro/domain": "workspace:*",
     "@xangarro/observability": "workspace:*",
-    "@xangarro/tokens": "workspace:*",
     "bcryptjs": "3.0.3",
+    "@react-pdf/renderer": "^4.5.1",
+    "@sentry/browser": "^10.53.1",
     "drizzle-orm": "^0.45.2",
     "exceljs": "^4.4.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^4.2.1"
+    "jspdf": "^4.2.1",
+    "@xangarro/contracts": "workspace:*",
+    "@xangarro/sync": "workspace:*",
+    "@xangarro/tokens": "workspace:*"
   },
   "peerDependencies": {
-    "@xangarro/sync-lan": "workspace:*",
     "@hookform/resolvers": "^5.2",
     "@sentry/react-native": "^8",
     "@shopify/react-native-skia": ">=2",
@@ -85,9 +85,6 @@
     "zustand": "^5"
   },
   "peerDependenciesMeta": {
-    "@xangarro/sync-lan": {
-      "optional": true
-    },
     "echarts": {
       "optional": true
     },
@@ -136,7 +133,6 @@
   },
   "devDependencies": {
     "@xangarro/config": "workspace:*",
-    "@xangarro/sync-lan": "workspace:*",
     "@xangarro/testing": "workspace:*",
     "@hookform/resolvers": "^5.2.2",
     "@playwright/test": "^1.60.0",

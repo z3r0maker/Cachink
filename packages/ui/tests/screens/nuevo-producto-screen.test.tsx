@@ -1,49 +1,63 @@
 /**
- * NuevoProductoScreen tests — Phase 18.
- *
- * Verifies:
- *   - Renders all expected fields.
- *   - usoProducto field shown only when conversionEnabled=true.
- *   - Submit button is present.
+ * NuevoProductoScreen — quick-add (A-09): only the fields an operator knows
+ * at the counter; costo, unidad, umbral and ícono default and live in the portal.
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import { renderWithProviders, screen } from '../test-utils';
+import { fireEvent, renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
 import { NuevoProductoScreen } from '../../src/screens/Productos/nuevo-producto-screen';
+import {
+  buildProductoPayload,
+  initialProductoState,
+} from '../../src/screens/Productos/nuevo-producto-form';
 
 initI18n();
 
-describe('NuevoProductoScreen', () => {
-  const noop = vi.fn();
-
-  it('renders core fields', () => {
-    renderWithProviders(<NuevoProductoScreen onSubmit={noop} onBack={noop} />);
-    expect(screen.getByTestId('producto-nombre')).toBeTruthy();
-    expect(screen.getByTestId('producto-sku')).toBeTruthy();
-    expect(screen.getByTestId('producto-categoria')).toBeTruthy();
-    expect(screen.getByTestId('producto-costo')).toBeTruthy();
-    expect(screen.getByTestId('producto-precio-venta')).toBeTruthy();
-    expect(screen.getByTestId('producto-submit')).toBeTruthy();
+describe('NuevoProductoScreen (quick-add)', () => {
+  it('asks only nombre, código, categoría, precio and stock tracking', () => {
+    renderWithProviders(<NuevoProductoScreen onSubmit={vi.fn()} onBack={vi.fn()} />);
+    for (const id of [
+      'producto-nombre',
+      'producto-sku',
+      'producto-scan',
+      'producto-categoria',
+      'producto-precio-venta',
+      'producto-stock-tracking',
+      'producto-submit',
+    ]) {
+      expect(screen.getByTestId(id)).toBeTruthy();
+    }
+    for (const id of ['producto-costo', 'producto-unidad', 'producto-umbral', 'producto-uso']) {
+      expect(screen.queryByTestId(id)).toBeNull();
+    }
   });
 
-  it('hides usoProducto field when conversionEnabled is false', () => {
-    renderWithProviders(
-      <NuevoProductoScreen onSubmit={noop} onBack={noop} conversionEnabled={false} />,
-    );
-    expect(screen.queryByTestId('producto-uso')).toBeNull();
+  it('does not submit without nombre and a positive price', () => {
+    const onSubmit = vi.fn();
+    renderWithProviders(<NuevoProductoScreen onSubmit={onSubmit} onBack={vi.fn()} />);
+    fireEvent.click(screen.getByTestId('producto-submit'));
+    expect(onSubmit).not.toHaveBeenCalled();
   });
+});
 
-  it('shows usoProducto field when conversionEnabled is true', () => {
-    renderWithProviders(
-      <NuevoProductoScreen onSubmit={noop} onBack={noop} conversionEnabled={true} />,
-    );
-    expect(screen.getByTestId('producto-uso')).toBeTruthy();
-  });
-
-  it('shows precio de venta by default (uso = venta)', () => {
-    renderWithProviders(<NuevoProductoScreen onSubmit={noop} onBack={noop} />);
-    // Default usoProducto is 'venta', so precio should be visible.
-    expect(screen.getByTestId('producto-precio-venta')).toBeTruthy();
+describe('buildProductoPayload', () => {
+  it('fills the portal-owned fields with defaults', () => {
+    const payload = buildProductoPayload({
+      ...initialProductoState(),
+      nombre: ' Taco ',
+      precioVentaPesos: '25.50',
+      stock: 'sin-stock',
+    });
+    expect(payload).toMatchObject({
+      nombre: 'Taco',
+      precioVenta: 2550n,
+      costoUnit: 0n,
+      unidad: 'pza',
+      umbralStockBajo: 3,
+      usoProducto: 'venta',
+      seguirStock: false,
+    });
+    expect(payload.sku).toBeUndefined();
   });
 });

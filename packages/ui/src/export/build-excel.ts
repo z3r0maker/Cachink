@@ -41,8 +41,8 @@ export async function buildExcelWorkbook(
 ): Promise<ArrayBuffer> {
   const ExcelJsNs = await loadExcelJs();
   const wb = new ExcelJsNs.Workbook();
-  wb.creator = 'Cachink!';
-  wb.lastModifiedBy = 'Cachink!';
+  wb.creator = 'Xangarro!';
+  wb.lastModifiedBy = 'Xangarro!';
   wb.created = exportedAt;
   wb.modified = exportedAt;
 

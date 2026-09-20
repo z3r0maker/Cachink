@@ -18,6 +18,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarMovimientoInventarioUseCase } from '@xangarro/application';
+import { useRecordQuota } from '../entitlement/use-record-quota';
 import type { InventoryMovement, NewInventoryMovement } from '@xangarro/domain';
 import { useExpensesRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -62,9 +63,10 @@ export function useRegistrarMovimiento(): RegistrarMovimientoResult {
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
   const emitAlert = useEmitDirectorAlert();
+  const quota = useRecordQuota();
   const rawUseCase = useMemo(
-    () => new RegistrarMovimientoInventarioUseCase(movements, expenses),
-    [movements, expenses],
+    () => new RegistrarMovimientoInventarioUseCase(movements, expenses, quota),
+    [movements, expenses, quota],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_MOVIMIENTO_INVENTARIO);
 

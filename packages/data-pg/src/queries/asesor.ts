@@ -4,7 +4,7 @@ import type { Insight } from '@xangarro/domain';
 import { mesAnterior, type IsoDate } from '@xangarro/domain';
 
 import { inventoryMovements, products } from '../schema/catalog.js';
-import { expenses, sales } from '../schema/ledger.js';
+import { expenses, sales, tickets } from '../schema/ledger.js';
 import { notices } from '../schema/portal.js';
 import type { Db } from '../client.js';
 
@@ -34,12 +34,13 @@ export async function asesorInputs(tx: Tx, hoy: IsoDate) {
 /** Ventas of the window the quincena detector reads. */
 function ventasRecientes(tx: Tx, desde: string) {
   return tx
-    .select({ fecha: sales.fecha, monto: sales.monto, metodo: sales.metodo })
+    .select({ fecha: sales.fecha, monto: sales.monto, metodo: tickets.metodo })
     .from(sales)
+    .innerJoin(tickets, eq(sales.ticketId, tickets.id))
     .where(
       and(
         isNull(sales.deletedAt),
-        isNull(sales.cancelledAt),
+        isNull(tickets.cancelledAt),
         sql`left(${sales.fecha}, 10) >= ${desde}`,
       ),
     );
@@ -134,10 +135,16 @@ async function conteosAsesor(tx: Tx) {
     cortes: number;
     meses_con_gasto: number;
   }>(sql`
-    SELECT (SELECT count(DISTINCT left(fecha, 10)) FROM sales
-             WHERE deleted_at IS NULL AND cancelled_at IS NULL) AS dias_con_venta,
+    SELECT (SELECT count(DISTINCT left(s.fecha, 10)) FROM sales s
+             WHERE s.deleted_at IS NULL
+               AND NOT EXISTS (SELECT 1 FROM tickets t
+                                WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL))
+             AS dias_con_venta,
            (SELECT min(d) FROM (
-              SELECT min(left(fecha, 10)) AS d FROM sales WHERE deleted_at IS NULL AND cancelled_at IS NULL
+              SELECT min(left(s.fecha, 10)) AS d FROM sales s
+               WHERE s.deleted_at IS NULL
+                 AND NOT EXISTS (SELECT 1 FROM tickets t
+                                  WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)
               UNION ALL
               SELECT min(left(fecha, 10)) FROM expenses WHERE deleted_at IS NULL) t) AS primer_dia,
            (SELECT count(*) FROM inventory_movements

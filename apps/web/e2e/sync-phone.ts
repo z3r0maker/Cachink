@@ -73,25 +73,45 @@ const audit = (phone: Phone) => ({
   deletedAt: null,
 });
 
-export function sale(phone: Phone, over: Record<string, unknown> = {}) {
-  const id = newUlid();
+/** Folios are unique per device (ADR-073); one counter per run keeps them apart. */
+let folio = 0;
+
+/** A ticket header (ADR-073): method, cash received and change live here now. */
+export function ticket(phone: Phone, over: Record<string, unknown> = {}) {
+  folio += 1;
   const row = {
-    id,
+    id: newUlid(),
+    folio,
     fecha: '2026-09-17',
     hora: '12:30',
-    concepto: `Venta E2E ${id.slice(-4)}`,
-    categoria: 'Producto',
-    monto: 4500n,
+    concepto: 'Venta E2E',
     metodo: 'Efectivo',
     clienteId: null,
     estadoPago: 'pagado',
+    efectivoRecibidoCentavos: 5000n,
+    cambioCentavos: 500n,
+    cajaTurnoId: null,
+    cancelMotivo: null,
+    cancelledByUserId: null,
+    cancelledAt: null,
+    ...audit(phone),
+    ...over,
+  };
+  return { table: 'tickets', rowId: row.id, op: 'insert', clientSeq: 1, row };
+}
+
+/** A sale line (ADR-073): it belongs to a ticket pushed in the same batch. */
+export function sale(phone: Phone, ticketId: string, over: Record<string, unknown> = {}) {
+  const id = newUlid();
+  const row = {
+    id,
+    ticketId,
+    fecha: '2026-09-17',
+    concepto: `Venta E2E ${id.slice(-4)}`,
+    categoria: 'Producto',
+    monto: 4500n,
     productoId: TACO,
     cantidad: 3,
-    efectivoRecibidoCentavos: 5000n,
-    cancelledByUserId: null,
-    cancelMotivo: null,
-    cancelledAt: null,
-    cajaTurnoId: null,
     ...audit(phone),
     ...over,
   };

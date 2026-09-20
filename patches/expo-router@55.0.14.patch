@@ -1,0 +1,23 @@
+diff --git a/ios/LinkPreview/LinkPreviewNativeActionView.swift b/ios/LinkPreview/LinkPreviewNativeActionView.swift
+--- a/ios/LinkPreview/LinkPreviewNativeActionView.swift
++++ b/ios/LinkPreview/LinkPreviewNativeActionView.swift
+@@ -107,7 +107,8 @@
+       children: subActions
+     )
+ 
+-    if let subtitle = subtitle {
++    // Xcode 27 SDK marks UIMenuElement.subtitle iOS 16+; the app still supports 15.1.
++    if #available(iOS 16.0, *), let subtitle = subtitle {
+       menuAction.subtitle = subtitle
+     }
+ 
+@@ -137,7 +138,8 @@
+     baseUiAction.attributes = attributes
+     baseUiAction.state = isOn == true ? .on : .off
+ 
+-    if let subtitle = subtitle {
++    // Xcode 27 SDK marks UIMenuElement.subtitle iOS 16+; the app still supports 15.1.
++    if #available(iOS 16.0, *), let subtitle = subtitle {
+       baseUiAction.subtitle = subtitle
+     }
+     if let label = discoverabilityLabel {

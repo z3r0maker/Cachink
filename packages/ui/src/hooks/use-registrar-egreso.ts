@@ -7,6 +7,7 @@
 import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarEgresoUseCase } from '@xangarro/application';
+import { useRecordQuota } from '../entitlement/use-record-quota';
 import type { Expense, NewExpense } from '@xangarro/domain';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -21,9 +22,10 @@ export function useRegistrarEgreso(): RegistrarEgresoResult {
   const recurring = useRecurringExpensesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const quota = useRecordQuota();
   const rawUseCase = useMemo(
-    () => new RegistrarEgresoUseCase(expenses, recurring),
-    [expenses, recurring],
+    () => new RegistrarEgresoUseCase(expenses, recurring, quota),
+    [expenses, recurring, quota],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_REGISTRAR_EGRESO);
 

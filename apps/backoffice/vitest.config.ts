@@ -15,6 +15,9 @@ export default mergeConfig(
     },
     test: {
       include: ['tests/**/*.test.ts'],
+      // The auth suites hash bcrypt at cost 10 in loops (lockout spray, TOTP
+      // enrolment); a 2-core CI runner crosses the 5 s default there.
+      testTimeout: 30_000,
     },
   }),
 );

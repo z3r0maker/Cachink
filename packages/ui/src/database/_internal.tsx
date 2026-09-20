@@ -15,7 +15,7 @@
  */
 
 import { createContext, useContext, type ReactElement, type ReactNode } from 'react';
-import type { CachinkDatabase } from '@xangarro/data';
+import type { XangarroDatabase } from '@xangarro/data';
 import { DatabaseErrorState } from './database-error-state';
 import type { ResetDatabaseFn } from './database-reset';
 import { useDatabaseLifecycle } from './use-database-lifecycle';
@@ -25,14 +25,14 @@ import { useDatabaseLifecycle } from './use-database-lifecycle';
  * mounted or still loading. Consumers must call {@link useDatabase} which
  * throws a descriptive error if read outside the provider tree.
  */
-export const DatabaseContext = createContext<CachinkDatabase | null>(null);
+export const DatabaseContext = createContext<XangarroDatabase | null>(null);
 
 /**
  * Hook: read the current database. Throws if called outside a
  * {@link DatabaseProvider}. Prefer this over reading the Context directly
  * so the error message surfaces at the call site, not inside Drizzle.
  */
-export function useDatabase(): CachinkDatabase {
+export function useDatabase(): XangarroDatabase {
   const db = useContext(DatabaseContext);
   if (!db) {
     throw new Error(
@@ -51,7 +51,7 @@ export interface DatabaseProviderProps {
    * shell mounts <DatabaseProvider> with no prop so the platform-specific
    * factory kicks in.
    */
-  readonly database?: CachinkDatabase;
+  readonly database?: XangarroDatabase;
 }
 
 export interface AsyncDatabaseProviderProps extends DatabaseProviderProps {
@@ -59,7 +59,7 @@ export interface AsyncDatabaseProviderProps extends DatabaseProviderProps {
    * Platform-specific factory that opens SQLite, wraps it with Drizzle,
    * and runs pending migrations. Called exactly once per mount.
    */
-  readonly create: () => Promise<CachinkDatabase>;
+  readonly create: () => Promise<XangarroDatabase>;
   /** Optional platform reset hook that recreates the SQLite file from scratch. */
   readonly reset?: ResetDatabaseFn;
 }
@@ -117,7 +117,7 @@ export function AsyncDatabaseProvider(props: AsyncDatabaseProviderProps): ReactE
  */
 export function TestDatabaseProvider(props: {
   readonly children: ReactNode;
-  readonly database: CachinkDatabase;
+  readonly database: XangarroDatabase;
 }): ReactElement {
   return (
     <DatabaseContext.Provider value={props.database}>{props.children}</DatabaseContext.Provider>

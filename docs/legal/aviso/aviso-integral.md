@@ -32,11 +32,11 @@ tratamos los mismos datos descritos aquí, con las mismas finalidades.
 Xangarro es una herramienta que usan los negocios para registrar sus ventas, gastos, inventario,
 clientes y equipo. Por eso tratamos datos personales en dos calidades:
 
-| Somos **responsables** (este aviso aplica) | Somos **encargados** (aplica el aviso del negocio) |
-| --- | --- |
-| Datos de la persona que crea la cuenta del negocio (el "dueño") y de las personas a quienes el dueño da acceso al portal. | Datos de los **clientes del negocio** que el negocio registra (nombre, teléfono, RFC, saldos, compras). |
-| Datos de facturación de la suscripción y CFDI que emitimos al negocio. | Datos de los **operadores** (empleados) que el negocio da de alta: nombre, NIP, turnos, cortes, mensajes. |
-| Datos técnicos de dispositivos, uso del servicio, soporte y seguridad. | Cualquier otro dato personal que el negocio capture en sus registros (conceptos, notas). |
+| Somos **responsables** (este aviso aplica)                                                                                | Somos **encargados** (aplica el aviso del negocio)                                                        |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Datos de la persona que crea la cuenta del negocio (el "dueño") y de las personas a quienes el dueño da acceso al portal. | Datos de los **clientes del negocio** que el negocio registra (nombre, teléfono, RFC, saldos, compras).   |
+| Datos de facturación de la suscripción y CFDI que emitimos al negocio.                                                    | Datos de los **operadores** (empleados) que el negocio da de alta: nombre, NIP, turnos, cortes, mensajes. |
+| Datos técnicos de dispositivos, uso del servicio, soporte y seguridad.                                                    | Cualquier otro dato personal que el negocio capture en sus registros (conceptos, notas).                  |
 
 Cuando somos **encargados**, tratamos esos datos **solo por cuenta y bajo las instrucciones del
 negocio**, que es el responsable frente a sus clientes y empleados, y no los usamos para fines
@@ -49,17 +49,17 @@ negocio; si nos llegan a nosotros, se las haremos llegar (ver sección 9).
 
 ## 3. Datos personales que tratamos (como responsables)
 
-| Categoría | Datos | De dónde |
-| --- | --- | --- |
-| Identificación y contacto | Nombre, correo electrónico, teléfono (opcional), contraseña (guardada solo como hash; nunca la vemos). | Te registras en el portal. |
-| Datos del negocio y fiscales | Nombre comercial, tipo de negocio, RFC, razón social, régimen fiscal, uso de CFDI, código postal fiscal, domicilio y WhatsApp del negocio para comprobantes, logotipo. | Los capturas en el portal. |
-| Datos patrimoniales o financieros | Plan contratado, historial de pagos y estado de la suscripción, CFDI emitidos. Del medio de pago solo recibimos **marca, últimos 4 dígitos y vigencia**: los datos completos de la tarjeta los recibe y guarda Stripe, nunca Xangarro. En la transferencia SPEI, la CLABE de referencia asignada por Stripe. | Stripe y tú. |
-| Registros del negocio | Ventas, gastos, movimientos de inventario, caja, cortes, saldos iniciales, reportes y estados financieros. Si eres persona física con actividad empresarial, estos registros pueden revelar tu situación patrimonial. | Los capturan tú y tu equipo en la app, la caja web y el portal. |
-| Datos técnicos del dispositivo | Identificador del dispositivo generado por Xangarro, nombre que le das ("Caja 1"), plataforma (iOS, Android, web), modelo, versión del sistema operativo y de la app, fecha de la última sincronización. | La app y la caja web al vincularse y sincronizar. |
-| Datos de uso y seguridad | Dirección IP, fecha y hora de acceso, navegador, registros de errores (logs), eventos de inicio de sesión y segundo factor, conteo de uso contra los límites del plan. | Automáticamente al usar el servicio. |
-| Reportes de fallas | Información técnica del error (versión, sistema, traza). En la app solo si lo autorizas; no incluye lo que escribes (conceptos, notas, nombres de clientes, teléfonos ni montos). | App (opcional), portal y servidor. |
-| Soporte | Lo que nos escribes en "Ayuda", "Reportar problema", "Solicitar factura" o "Lo hacemos por ti", y los archivos que nos envíes para importar. | Tú. |
-| Onboarding | Respuestas del cuestionario "Platícanos de ti" (cómo cobras, si manejas inventario, etc.). | Tú. |
+| Categoría                         | Datos                                                                                                                                                                                                                                                                                                        | De dónde                                                        |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------- |
+| Identificación y contacto         | Nombre, correo electrónico, teléfono (opcional), contraseña (guardada solo como hash; nunca la vemos).                                                                                                                                                                                                       | Te registras en el portal.                                      |
+| Datos del negocio y fiscales      | Nombre comercial, tipo de negocio, RFC, razón social, régimen fiscal, uso de CFDI, código postal fiscal, domicilio y WhatsApp del negocio para comprobantes, logotipo.                                                                                                                                       | Los capturas en el portal.                                      |
+| Datos patrimoniales o financieros | Plan contratado, historial de pagos y estado de la suscripción, CFDI emitidos. Del medio de pago solo recibimos **marca, últimos 4 dígitos y vigencia**: los datos completos de la tarjeta los recibe y guarda Stripe, nunca Xangarro. En la transferencia SPEI, la CLABE de referencia asignada por Stripe. | Stripe y tú.                                                    |
+| Registros del negocio             | Ventas, gastos, movimientos de inventario, caja, cortes, saldos iniciales, reportes y estados financieros. Si eres persona física con actividad empresarial, estos registros pueden revelar tu situación patrimonial.                                                                                        | Los capturan tú y tu equipo en la app, la caja web y el portal. |
+| Datos técnicos del dispositivo    | Identificador del dispositivo generado por Xangarro, nombre que le das ("Caja 1"), plataforma (iOS, Android, web), modelo, versión del sistema operativo y de la app, fecha de la última sincronización.                                                                                                     | La app y la caja web al vincularse y sincronizar.               |
+| Datos de uso y seguridad          | Dirección IP, fecha y hora de acceso, navegador, registros de errores (logs), eventos de inicio de sesión y segundo factor, conteo de uso contra los límites del plan.                                                                                                                                       | Automáticamente al usar el servicio.                            |
+| Reportes de fallas                | Información técnica del error (versión, sistema, traza). En la app solo si lo autorizas; no incluye lo que escribes (conceptos, notas, nombres de clientes, teléfonos ni montos).                                                                                                                            | App (opcional), portal y servidor.                              |
+| Soporte                           | Lo que nos escribes en "Ayuda", "Reportar problema", "Solicitar factura" o "Lo hacemos por ti", y los archivos que nos envíes para importar.                                                                                                                                                                 | Tú.                                                             |
+| Onboarding                        | Respuestas del cuestionario "Platícanos de ti" (cómo cobras, si manejas inventario, etc.).                                                                                                                                                                                                                   | Tú.                                                             |
 
 **Datos sensibles.** No te pedimos datos personales sensibles (art. 2, fracción VI de la Ley: origen
 étnico, salud, creencias, opiniones políticas, preferencia sexual, etc.). Te pedimos **no escribirlos**
@@ -97,7 +97,7 @@ vía, no los usamos para ninguna finalidad y los suprimimos cuando los detectemo
 
 a) Enviarte novedades del producto, consejos, invitaciones a encuestas y ofertas de Xangarro.
 b) Analizar cómo se usa el producto para mejorarlo, con datos **disociados o agregados** siempre que
-   sea posible.
+sea posible.
 c) Pedirte un testimonio o caso de éxito (solo con tu aceptación en cada caso).
 
 Si no quieres que usemos tus datos para estas finalidades, desmarca la casilla correspondiente al
@@ -130,16 +130,16 @@ servicio; comunicarles datos no es una transferencia (art. 2, fracción XX de la
 consentimiento. Varios están en **Estados Unidos**, por lo que tus datos se almacenan o procesan
 fuera de México.
 
-| Proveedor | Para qué | Dónde |
-| --- | --- | --- |
-| Supabase, Inc. | Base de datos, autenticación y almacenamiento de archivos (incluido el archivo de negocios inactivos). | EE. UU. (us-east-1) |
-| Vercel Inc. | Alojamiento del sitio, el portal y la API; registros técnicos. | EE. UU. (iad1) |
-| Stripe, Inc. / Stripe Payments México | Cobro de la suscripción con tarjeta o SPEI. | EE. UU. y México |
-| [PAC — p. ej. Facturapi] | Timbrado de los CFDI de tu suscripción. | [PAÍS] |
-| Functional Software, Inc. (Sentry) | Reportes de fallas. | [PAÍS / REGIÓN] |
-| [PROVEEDOR DE CORREO — p. ej. Resend] | Envío de correos del servicio. | [PAÍS] |
-| [SLACK / DISCORD] | Alertas internas urgentes al personal de Xangarro. | [PAÍS] |
-| Mercado Pago / Clip _(cuando se habilite el cobro con tarjeta para negocios)_ | Solo si el negocio conecta su cuenta: crear y confirmar cobros. El dinero va directo a la cuenta del negocio. | [PAÍS] |
+| Proveedor                                                                     | Para qué                                                                                                      | Dónde               |
+| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------------------- |
+| Supabase, Inc.                                                                | Base de datos, autenticación y almacenamiento de archivos (incluido el archivo de negocios inactivos).        | EE. UU. (us-east-1) |
+| Vercel Inc.                                                                   | Alojamiento del sitio, el portal y la API; registros técnicos.                                                | EE. UU. (iad1)      |
+| Stripe, Inc. / Stripe Payments México                                         | Cobro de la suscripción con tarjeta o SPEI.                                                                   | EE. UU. y México    |
+| [PAC — p. ej. Facturapi]                                                      | Timbrado de los CFDI de tu suscripción.                                                                       | [PAÍS]              |
+| Functional Software, Inc. (Sentry)                                            | Reportes de fallas.                                                                                           | [PAÍS / REGIÓN]     |
+| [PROVEEDOR DE CORREO — p. ej. Resend]                                         | Envío de correos del servicio.                                                                                | [PAÍS]              |
+| [SLACK / DISCORD]                                                             | Alertas internas urgentes al personal de Xangarro.                                                            | [PAÍS]              |
+| Mercado Pago / Clip _(cuando se habilite el cobro con tarjeta para negocios)_ | Solo si el negocio conecta su cuenta: crear y confirmar cobros. El dinero va directo a la cuenta del negocio. | [PAÍS]              |
 
 La lista vigente, con sus actualizaciones, está en **xangarro.mx/privacidad/proveedores**.
 
@@ -148,11 +148,11 @@ La lista vigente, con sus actualizaciones, está en **xangarro.mx/privacidad/pro
 Solo transferimos tus datos personales a terceros sin tu consentimiento en los casos del artículo 36
 de la Ley, en particular:
 
-| Destinatario | Finalidad | Fundamento |
-| --- | --- | --- |
-| Servicio de Administración Tributaria (SAT), a través del PAC | Validar y registrar los CFDI de tu suscripción. | Art. 36, fracción I (obligación legal). |
-| Autoridades competentes | Atender requerimientos fundados y motivados, o defender nuestros derechos en juicio. | Art. 36, fracciones I, V y VI; art. 9, fracción VII. |
-| Sociedades del mismo grupo o quien adquiera el negocio de Xangarro | Continuidad del servicio bajo las mismas políticas. | Art. 36, fracción III. |
+| Destinatario                                                       | Finalidad                                                                            | Fundamento                                           |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Servicio de Administración Tributaria (SAT), a través del PAC      | Validar y registrar los CFDI de tu suscripción.                                      | Art. 36, fracción I (obligación legal).              |
+| Autoridades competentes                                            | Atender requerimientos fundados y motivados, o defender nuestros derechos en juicio. | Art. 36, fracciones I, V y VI; art. 9, fracción VII. |
+| Sociedades del mismo grupo o quien adquiera el negocio de Xangarro | Continuidad del servicio bajo las mismas políticas.                                  | Art. 36, fracción III.                               |
 
 **No vendemos ni rentamos tus datos**, y no los transferimos a terceros para sus propios fines
 publicitarios. Si en el futuro quisiéramos hacer una transferencia que requiera tu consentimiento, te
@@ -166,19 +166,19 @@ este aviso._ → **Hoy no existe ninguna; esta casilla no se muestra.**
 
 ## 7. Cuánto tiempo guardamos tus datos
 
-| Datos | Plazo |
-| --- | --- |
-| Cuenta y registros del negocio (plan de pago) | Mientras la cuenta esté activa. Si la suscripción termina, el negocio pasa al plan gratuito y aplica la regla de inactividad. |
-| Registros del negocio en el plan gratuito | Si no hay acceso al portal **ni** sincronización de ningún dispositivo durante **90 días**, te avisamos por correo a los 90 y a los 150 días, con la opción "Descarga tus datos". A los **180 días** exportamos todo (Excel + JSON) a un almacenamiento privado y cifrado, verificamos la copia y borramos los registros de la base de datos activa. Ese archivo se conserva **6 años**, bloqueado: solo se usa para restaurarlo si vuelves ("Restaurar mis datos") o para atender a una autoridad. Después se suprime. |
-| Datos de facturación y CFDI de la suscripción | 5 años, contados como lo dispone el artículo 30 del Código Fiscal de la Federación. |
-| Datos sobre incumplimiento de pago | Se eliminan a más tardar 72 meses después del incumplimiento (art. 10 de la Ley). |
-| Datos en el teléfono o navegador | La app guarda en el dispositivo los movimientos de los últimos **90 días**. La caja web guarda sus registros en el almacenamiento del navegador hasta enviarlos. Desvincular un dispositivo no borra lo que ya está en él: para borrarlo, desinstala la app o borra los datos del sitio. |
-| Reportes de fallas y eventos de error | 90 días. |
-| Solicitudes de soporte | [PLAZO] después de resueltas. |
-| Archivos para importación ("Lo hacemos por ti") | 30 días después de terminar la importación. |
-| Solicitudes ARCO y su expediente | [PLAZO] después de resueltas, para acreditar su atención. |
-| Registros de acceso y seguridad | [PLAZO]. |
-| Respaldos de la base de datos | Se sobrescriben en un máximo de [N] días; un dato suprimido puede permanecer en un respaldo hasta entonces, sin usarse. |
+| Datos                                           | Plazo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cuenta y registros del negocio (plan de pago)   | Mientras la cuenta esté activa. Si la suscripción termina, el negocio pasa al plan gratuito y aplica la regla de inactividad.                                                                                                                                                                                                                                                                                                                                                                                           |
+| Registros del negocio en el plan gratuito       | Si no hay acceso al portal **ni** sincronización de ningún dispositivo durante **90 días**, te avisamos por correo a los 90 y a los 150 días, con la opción "Descarga tus datos". A los **180 días** exportamos todo (Excel + JSON) a un almacenamiento privado y cifrado, verificamos la copia y borramos los registros de la base de datos activa. Ese archivo se conserva **6 años**, bloqueado: solo se usa para restaurarlo si vuelves ("Restaurar mis datos") o para atender a una autoridad. Después se suprime. |
+| Datos de facturación y CFDI de la suscripción   | 5 años, contados como lo dispone el artículo 30 del Código Fiscal de la Federación.                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Datos sobre incumplimiento de pago              | Se eliminan a más tardar 72 meses después del incumplimiento (art. 10 de la Ley).                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| Datos en el teléfono o navegador                | La app guarda en el dispositivo los movimientos de los últimos **90 días**. La caja web guarda sus registros en el almacenamiento del navegador hasta enviarlos. Desvincular un dispositivo no borra lo que ya está en él: para borrarlo, desinstala la app o borra los datos del sitio.                                                                                                                                                                                                                                |
+| Reportes de fallas y eventos de error           | 90 días.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Solicitudes de soporte                          | [PLAZO] después de resueltas.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| Archivos para importación ("Lo hacemos por ti") | 30 días después de terminar la importación.                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| Solicitudes ARCO y su expediente                | [PLAZO] después de resueltas, para acreditar su atención.                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| Registros de acceso y seguridad                 | [PLAZO].                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Respaldos de la base de datos                   | Se sobrescriben en un máximo de [N] días; un dato suprimido puede permanecer en un respaldo hasta entonces, sin usarse.                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 Cuando un dato deja de ser necesario, primero lo **bloqueamos** —lo conservamos solo para determinar
 posibles responsabilidades, sin tratarlo para ninguna otra finalidad— y al terminar el plazo lo

@@ -1,6 +1,6 @@
 import { and, desc, eq, gte, isNull, lte, sql } from 'drizzle-orm';
 
-import { expenses, sales } from '../schema/ledger.js';
+import { expenses, sales, tickets } from '../schema/ledger.js';
 import { dayCloses } from '../schema/caja.js';
 import { products, inventoryMovements } from '../schema/catalog.js';
 import type { Db } from '../client.js';
@@ -40,7 +40,7 @@ export async function totalsForRange(tx: Tx, from: string, to: string): Promise<
         gte(sales.fecha, from),
         lte(sales.fecha, to),
         isNull(sales.deletedAt),
-        isNull(sales.cancelledAt),
+        sql`NOT EXISTS (SELECT 1 FROM tickets t WHERE t.id = ${sales.ticketId} AND t.cancelled_at IS NOT NULL)`,
       ),
     );
 
@@ -82,8 +82,9 @@ export async function recentActivity(tx: Tx, limit = 6): Promise<readonly Activi
     amount: string;
     at: string;
   }>(sql`
-    SELECT id, 'venta' AS kind, concepto, metodo AS tag, monto_centavos::text AS amount, created_at::text AS at
-      FROM ${sales} WHERE deleted_at IS NULL
+    SELECT s.id, 'venta' AS kind, s.concepto, t.metodo AS tag, s.monto_centavos::text AS amount, s.created_at::text AS at
+      FROM ${sales} s JOIN ${tickets} t ON t.id = s.ticket_id
+     WHERE s.deleted_at IS NULL
     UNION ALL
     SELECT id, 'gasto' AS kind, concepto, categoria AS tag, monto_centavos::text AS amount, created_at::text AS at
       FROM ${expenses} WHERE deleted_at IS NULL

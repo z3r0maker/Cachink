@@ -12,6 +12,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { conTotales } from '@xangarro/domain';
 import {
   ZERO,
   calculateBalanceGeneral,
@@ -25,6 +26,7 @@ import type {
   InventoryMovementsRepository,
   ProductsRepository,
   SalesRepository,
+  TicketsRepository,
 } from '@xangarro/data';
 import {
   useClientPaymentsRepository,
@@ -32,6 +34,7 @@ import {
   useInventoryMovementsRepository,
   useProductsRepository,
   useSalesRepository,
+  useTicketsRepository,
 } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { composeEstadoResultados } from './use-estado-resultados';
@@ -43,6 +46,7 @@ export interface UseBalanceGeneralOptions {
 }
 
 export interface BalanceGeneralComposeDeps {
+  readonly tickets: TicketsRepository;
   readonly sales: SalesRepository;
   readonly clientPayments: ClientPaymentsRepository;
   readonly dayCloses: DayClosesRepository;
@@ -61,12 +65,14 @@ export async function composeBalanceGeneral(
   periodo: PeriodRange,
   utilidadDelPeriodo: bigint,
 ): Promise<BalanceGeneral> {
-  const [cortesDelPeriodo, ventasDelPeriodo, pagosDelPeriodo, productos] = await Promise.all([
-    deps.dayCloses.findByDateRange(periodo.from, periodo.to, businessId),
-    deps.sales.findByDateRange(periodo.from, periodo.to, businessId),
-    deps.clientPayments.findByDateRange(periodo.from, periodo.to, businessId),
-    deps.products.listForBusiness(businessId),
-  ]);
+  const [cortesDelPeriodo, ticketsDelPeriodo, lineasDelPeriodo, pagosDelPeriodo, productos] =
+    await Promise.all([
+      deps.dayCloses.findByDateRange(periodo.from, periodo.to, businessId),
+      deps.tickets.findByDateRange(periodo.from, periodo.to, businessId),
+      deps.sales.findByDateRange(periodo.from, periodo.to, businessId),
+      deps.clientPayments.findByDateRange(periodo.from, periodo.to, businessId),
+      deps.products.listForBusiness(businessId),
+    ]);
 
   // Current-stock snapshot of inventory (see plan risk #3).
   const inventarioStock = await Promise.all(
@@ -76,8 +82,9 @@ export async function composeBalanceGeneral(
     })),
   );
 
-  const ventasConCredito = ventasDelPeriodo.filter(
-    (v) => v.metodo === 'Crédito' || v.estadoPago !== 'pagado',
+  const ventasConCredito = conTotales(
+    ticketsDelPeriodo.filter((t) => t.metodo === 'Crédito' || t.estadoPago !== 'pagado'),
+    lineasDelPeriodo,
   );
 
   return calculateBalanceGeneral({
@@ -93,6 +100,7 @@ export async function composeBalanceGeneral(
 export function useBalanceGeneral(
   options: UseBalanceGeneralOptions,
 ): UseQueryResult<BalanceGeneral, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const businesses = useBusinessesRepository();
@@ -115,7 +123,7 @@ export function useBalanceGeneral(
         options.periodo,
       );
       return composeBalanceGeneral(
-        { sales, clientPayments, dayCloses, products, movements },
+        { tickets, sales, clientPayments, dayCloses, products, movements },
         businessId,
         options.periodo,
         estado.utilidadNeta,

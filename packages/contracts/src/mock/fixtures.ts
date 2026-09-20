@@ -15,6 +15,8 @@ import {
   RecurringExpenseSchema,
   UserSchema,
   type Business,
+  type OpeningBalance,
+  type OpeningBalanceClient,
   type Client,
   type Employee,
   type MensajeOperador,
@@ -50,6 +52,9 @@ export interface FixtureRows {
   readonly employees: readonly Employee[];
   readonly recurring_expenses: readonly RecurringExpense[];
   readonly mensajes_operador: readonly MensajeOperador[];
+  /** Day-one facts (C-20); the demo business starts without them. */
+  readonly opening_balances: readonly OpeningBalance[];
+  readonly opening_balance_clients: readonly OpeningBalanceClient[];
 }
 
 const PRODUCT_NAMES = [
@@ -93,12 +98,10 @@ function operator(n: number, nombre: keyof typeof OPERATOR_PINS, avatarColor: st
   return UserSchema.parse({
     id: ulidOf('PRS', n),
     nombre,
-    email: null,
     pinHash: pinHash(OPERATOR_PINS[nombre]),
-    recoveryPasswordHash: pinHash('recovery'),
-    role: 'operativo',
-    mustChangePin: false,
     avatarColor,
+    // Ana may cancel sales, Toni may not — both permission paths are testable.
+    permissions: { canCancelSales: nombre === 'Ana' },
     active: true,
     ...audit(1 + n),
   });
@@ -184,5 +187,7 @@ export function buildFixtures(): FixtureRows {
       }),
     ],
     mensajes_operador: mensajes(),
+    opening_balances: [],
+    opening_balance_clients: [],
   };
 }

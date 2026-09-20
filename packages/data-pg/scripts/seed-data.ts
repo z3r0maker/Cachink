@@ -98,6 +98,12 @@ export const USERS = [
   [id('EGA01'), 'Luis Ortega', '#00C896', false],
 ] as const;
 
+/** `[id, nombre, telefono, limiteCentavos, plazoDias]` — the fiado clients (O-33). */
+export const CLIENTS = [
+  [id('CDMAR'), 'Doña Mari de la tienda', '5512 447 903', peso(800), 7],
+  [id('CRCZA'), 'Raúl Contreras', '5521 836 441', peso(500), 15],
+] as const;
+
 /** `[id, nombre, puesto, salarioSemanal, periodo]` */
 export const EMPLOYEES = [
   [id('EMP01'), 'Ana Robledo', 'Cajera', peso(2100), 'semanal'],

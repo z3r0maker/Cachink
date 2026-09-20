@@ -9,9 +9,11 @@ import {
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   makeNewClientPayment,
   makeNewDayClose,
   makeNewSale,
+  makeNewTicket,
 } from '@xangarro/testing';
 import type { ClientId, BusinessId, DeviceId, IsoDate, ProductId } from '@xangarro/domain';
 import { composeBalanceGeneral } from '../../src/hooks/use-balance-general';
@@ -22,6 +24,7 @@ const APR_01 = '2026-04-01' as IsoDate;
 const APR_30 = '2026-04-30' as IsoDate;
 
 function buildDeps(): {
+  tickets: InMemoryTicketsRepository;
   sales: InMemorySalesRepository;
   clientPayments: InMemoryClientPaymentsRepository;
   dayCloses: InMemoryDayClosesRepository;
@@ -29,6 +32,7 @@ function buildDeps(): {
   movements: InMemoryInventoryMovementsRepository;
 } {
   return {
+    tickets: new InMemoryTicketsRepository(DEV),
     sales: new InMemorySalesRepository(DEV),
     clientPayments: new InMemoryClientPaymentsRepository(DEV),
     dayCloses: new InMemoryDayClosesRepository(DEV),
@@ -71,14 +75,17 @@ describe('composeBalanceGeneral', () => {
   it('computes cuentasPorCobrar from pending Crédito ventas minus pagos', async () => {
     const deps = buildDeps();
     const CLIENTE = '01HZ8XQN9GZJXV8AKQ5X0C7CKJ' as ClientId;
-    await deps.sales.create(
-      makeNewSale({
+    const ticket = await deps.tickets.create(
+      makeNewTicket({
         fecha: APR_01,
         businessId: BIZ,
         metodo: 'Crédito',
         clienteId: CLIENTE,
-        monto: 100_000n,
+        estadoPago: 'pendiente',
       }),
+    );
+    await deps.sales.create(
+      makeNewSale({ fecha: APR_01, businessId: BIZ, monto: 100_000n, ticketId: ticket.id }),
     );
     await deps.clientPayments.create(
       makeNewClientPayment({

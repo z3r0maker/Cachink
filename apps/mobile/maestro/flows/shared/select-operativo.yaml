@@ -18,13 +18,13 @@ appId: mx.xangarro.mobile
 # If the role picker is showing (navigated via top-bar chip or
 # initial launch), select Operativo.
 - tapOn:
-    id: "role-operativo-select"
+    id: 'role-operativo-select'
     optional: true
 
 # If we're on Director Home and need to switch, tap the role chip first.
 - tapOn:
-    id: "top-bar-role-chip"
+    id: 'top-bar-role-chip'
     optional: true
 - tapOn:
-    id: "role-operativo-select"
+    id: 'role-operativo-select'
     optional: true

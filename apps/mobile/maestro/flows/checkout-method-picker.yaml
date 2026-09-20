@@ -14,33 +14,33 @@ tags:
 
 # Navigate to Ventas tab and tap a product to add to cart.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 
 # Cart strip appears — tap checkout.
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # The checkout method picker screen should appear.
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 
 # Verify payment method options are visible.
 - assertVisible:
-    id: "checkout-payment-method"
+    id: 'checkout-payment-method'
 
 # Verify the continue button exists.
 - assertVisible:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # ── MVP: Crédito must NOT appear in the payment picker ──
 - assertNotVisible:
-    id: "option-card-Crédito"
+    id: 'option-card-Crédito'

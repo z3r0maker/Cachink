@@ -6,7 +6,7 @@
  */
 
 import type { Expense } from '../entities/expense.js';
-import type { Sale } from '../entities/sale.js';
+import type { TicketConTotal } from './tickets.js';
 import type { Money } from '../money/index.js';
 import { esCostoDeVentas } from './estado-resultados.js';
 
@@ -36,7 +36,8 @@ function agrupar<T>(
 }
 
 export function desgloseDeResultados(input: {
-  readonly ventas: readonly Sale[];
+  /** Standing tickets with their derived totals, grouped by method (ADR-073). */
+  readonly ventas: readonly TicketConTotal[];
   readonly egresos: readonly Expense[];
 }): Desglose {
   const costo = input.egresos.filter((e) => esCostoDeVentas(e.categoria));
@@ -44,8 +45,8 @@ export function desgloseDeResultados(input: {
   return {
     ingresos: agrupar(
       input.ventas,
-      (v) => v.metodo,
-      (v) => v.monto,
+      (v) => v.ticket.metodo,
+      (v) => v.total,
     ),
     costoDeVentas: agrupar(
       costo,

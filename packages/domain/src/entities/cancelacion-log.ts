@@ -7,7 +7,7 @@
  */
 
 import { z } from 'zod';
-import type { CancelacionLogId, ProductId, SaleId, UserId, BusinessId } from '../ids/index.js';
+import type { CancelacionLogId, ProductId, TicketId, UserId, BusinessId } from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { moneyField } from './_fields.js';
@@ -16,7 +16,7 @@ import { PaymentMethodEnum } from './sale.js';
 export const CancelacionLogSchema = z
   .object({
     id: ulidField<CancelacionLogId>(),
-    saleId: ulidField<SaleId>(),
+    ticketId: ulidField<TicketId>(),
     cancelledByUserId: ulidField<UserId>(),
     motivo: z.string().min(1).max(500),
     montoOriginalCentavos: moneyField,
@@ -36,7 +36,7 @@ export type CancelacionLog = z.infer<typeof CancelacionLogSchema>;
 
 /** Input for creating a cancellation log entry. */
 export const NewCancelacionLogSchema = z.object({
-  saleId: ulidField<SaleId>(),
+  ticketId: ulidField<TicketId>(),
   cancelledByUserId: ulidField<UserId>(),
   motivo: z.string().min(1).max(500),
   montoOriginalCentavos: moneyField,

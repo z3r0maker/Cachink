@@ -1,4 +1,4 @@
--- RLS tests for the Cachink Supabase schema (ADR-035).
+-- RLS tests for the Xangarro Supabase schema (ADR-035).
 --
 -- Runs via the Supabase pg_prove harness: `supabase test db`. Each
 -- assertion sets the authenticated JWT via `set_config` and verifies

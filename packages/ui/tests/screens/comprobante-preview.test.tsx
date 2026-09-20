@@ -3,15 +3,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest';
-import type {
-  Business,
-  BusinessId,
-  DeviceId,
-  IsoDate,
-  IsoTimestamp,
-  Sale,
-  SaleId,
-} from '@xangarro/domain';
+import type { Business, BusinessId, DeviceId, IsoDate, IsoTimestamp } from '@xangarro/domain';
 import { ComprobantePreview } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
@@ -31,21 +23,27 @@ const business: Business = {
   deletedAt: null,
 };
 
-const sale: Sale = {
-  id: '01JPHK0000000000000000S001' as SaleId,
+const ticket = {
+  id: '01JPHK0000000000000000S001' as never,
+  folio: 405,
   fecha: '2026-04-24' as IsoDate,
-  concepto: 'Taco',
-  categoria: 'Producto',
-  monto: 15000n,
+  hora: '10:30',
+  concepto: 'Taco al pastor',
   metodo: 'Efectivo',
   clienteId: null,
   estadoPago: 'pagado',
+  efectivoRecibidoCentavos: null,
+  cambioCentavos: null,
+  cajaTurnoId: null,
+  cancelMotivo: null,
+  cancelledByUserId: null,
+  cancelledAt: null,
   businessId: '01JPHK00000000000000000008' as BusinessId,
   deviceId: '01JPHK00000000000000000007' as DeviceId,
   createdAt: '2026-04-24T00:00:00Z' as IsoTimestamp,
   updatedAt: '2026-04-24T00:00:00Z' as IsoTimestamp,
   deletedAt: null,
-};
+} as never;
 
 describe('ComprobantePreview', () => {
   it('renders the preview frame when open with valid data', () => {
@@ -53,7 +51,8 @@ describe('ComprobantePreview', () => {
       <ComprobantePreview
         open
         onClose={vi.fn()}
-        sale={sale}
+        ticket={ticket}
+        total={5000n}
         business={business}
         onShare={vi.fn()}
       />,
@@ -67,7 +66,8 @@ describe('ComprobantePreview', () => {
       <ComprobantePreview
         open
         onClose={vi.fn()}
-        sale={sale}
+        ticket={ticket}
+        total={5000n}
         business={business}
         onShare={onShare}
       />,
@@ -84,7 +84,8 @@ describe('ComprobantePreview', () => {
       <ComprobantePreview
         open
         onClose={onClose}
-        sale={sale}
+        ticket={ticket}
+        total={5000n}
         business={business}
         onShare={vi.fn()}
       />,
@@ -104,7 +105,8 @@ describe('ComprobantePreview', () => {
       <ComprobantePreview
         open
         onClose={vi.fn()}
-        sale={sale}
+        ticket={ticket}
+        total={5000n}
         business={business}
         onShare={vi.fn()}
       />,

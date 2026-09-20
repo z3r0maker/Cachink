@@ -4,6 +4,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import type { BusinessId, DeviceId, IsoTimestamp, Product, ProductId } from '@xangarro/domain';
+import { formatMoney } from '@xangarro/domain';
 import { StockScreen, filterProductos } from '../../src/screens/index';
 import { initI18n } from '../../src/i18n/index';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
@@ -93,29 +94,31 @@ describe('StockScreen', () => {
     expect(onNuevoProducto).toHaveBeenCalled();
   });
 
-  // Audit Round 2 K3: per-row swipe wiring.
-  it('wraps each row in `<SwipeableRow>` when swipe handlers are supplied', () => {
-    const items = [row(producto({ id: '01JPHK0000000000000000R099' as ProductId }), 5)];
-    renderWithProviders(
-      <StockScreen
-        query=""
-        onChangeQuery={vi.fn()}
-        items={items}
-        onNuevoProducto={vi.fn()}
-        onEditProducto={vi.fn()}
-        onEliminarProducto={vi.fn()}
-      />,
-    );
-    expect(
-      screen.getAllByTestId('producto-swipe-01JPHK0000000000000000R099').length,
-    ).toBeGreaterThan(0);
-  });
-
-  it('does NOT wrap rows when swipe handlers are unset', () => {
+  it('offers no swipe-to-edit or delete on rows (create-only, A-09)', () => {
     const items = [row(producto({ id: '01JPHK0000000000000000R098' as ProductId }), 5)];
     renderWithProviders(
       <StockScreen query="" onChangeQuery={vi.fn()} items={items} onNuevoProducto={vi.fn()} />,
     );
     expect(screen.queryByTestId('producto-swipe-01JPHK0000000000000000R098')).toBeNull();
+  });
+});
+
+describe('StockScreen without stock on the plan (A-14)', () => {
+  it('lists products as a catalog: price instead of stock, no low-stock tag', () => {
+    const item = row(
+      producto({ id: '01JPHK0000000000000000R097' as ProductId, precioVentaCentavos: 2500n }),
+      0,
+    );
+    renderWithProviders(
+      <StockScreen
+        query=""
+        onChangeQuery={vi.fn()}
+        items={[item]}
+        onNuevoProducto={vi.fn()}
+        showStock={false}
+      />,
+    );
+    expect(screen.queryByText('Stock bajo')).toBeNull();
+    expect(screen.getByText(formatMoney(item.producto.precioVentaCentavos))).toBeInTheDocument();
   });
 });

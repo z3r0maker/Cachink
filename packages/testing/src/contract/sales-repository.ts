@@ -12,15 +12,13 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, ClientId, IsoDate } from '@xangarro/domain';
+import type { BusinessId, IsoDate } from '@xangarro/domain';
 import type { SalesRepository } from '@xangarro/data';
 import { makeNewSale } from '../fixtures/sale.js';
 import { TEST_DEVICE_ID } from './_shared.js';
 
 const BIZ_A = '01HZ8XQN9GZJXV8AKQ5X0C7A01' as BusinessId;
 const BIZ_B = '01HZ8XQN9GZJXV8AKQ5X0C7A02' as BusinessId;
-const CLIENT_X = '01HZ8XQN9GZJXV8AKQ5X0C7C01' as ClientId;
-const CLIENT_Y = '01HZ8XQN9GZJXV8AKQ5X0C7C02' as ClientId;
 const TODAY = '2026-04-23' as IsoDate;
 const YESTERDAY = '2026-04-22' as IsoDate;
 
@@ -35,22 +33,30 @@ export function describeSalesRepositoryContract(
       repo = makeRepo();
     });
 
-    it('stamps id, audit columns, and default estadoPago on cash sales', async () => {
+    it('stamps id and audit columns on a line of a ticket', async () => {
       const sale = await repo.create(makeNewSale({ businessId: BIZ_A }));
       expect(sale.id).toMatch(/^[0-9A-HJKMNP-TV-Z]{26}$/);
       expect(sale.deviceId).toBe(TEST_DEVICE_ID);
       expect(sale.createdAt).toBe(sale.updatedAt);
       expect(sale.deletedAt).toBeNull();
-      expect(sale.estadoPago).toBe('pagado');
-      expect(sale.clienteId).toBeNull();
     });
 
-    it('marks Crédito sales as pendiente and preserves clienteId', async () => {
-      const sale = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
+    it('findByTicket scopes to one ticket, oldest first', async () => {
+      const first = await repo.create(makeNewSale({ businessId: BIZ_A, concepto: 'first' }));
+      await new Promise((r) => setTimeout(r, 5));
+      const second = await repo.create(
+        makeNewSale({ businessId: BIZ_A, concepto: 'second', ticketId: first.ticketId }),
       );
-      expect(sale.estadoPago).toBe('pendiente');
-      expect(sale.clienteId).toBe(CLIENT_X);
+      const other = await repo.create(
+        makeNewSale({
+          businessId: BIZ_A,
+          concepto: 'other',
+          ticketId: '01HZ8XQN9GZJXV8AKQ5X0CTZZ' as never,
+        }),
+      );
+      const rows = await repo.findByTicket(first.ticketId);
+      expect(rows.map((r) => r.id)).toEqual([first.id, second.id]);
+      expect(rows.map((r) => r.id)).not.toContain(other.id);
     });
 
     it('findById returns the row when it exists, null when soft-deleted or missing', async () => {
@@ -83,47 +89,6 @@ export function describeSalesRepositoryContract(
       const rows = await repo.findByDate(TODAY, BIZ_A);
       const ids = rows.map((r) => r.id);
       expect(ids.indexOf(newer.id)).toBeLessThan(ids.indexOf(older.id));
-    });
-
-    it('findPendingByClient returns only pendiente/parcial credit sales', async () => {
-      const pendiente = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
-      );
-      const parcial = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
-      );
-      await repo.updatePaymentState(parcial.id, 'parcial');
-      const pagado = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
-      );
-      await repo.updatePaymentState(pagado.id, 'pagado');
-      const otroCliente = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_Y }),
-      );
-
-      const rows = await repo.findPendingByClient(CLIENT_X);
-      const ids = rows.map((r) => r.id);
-      expect(ids).toEqual(expect.arrayContaining([pendiente.id, parcial.id]));
-      expect(ids).not.toContain(pagado.id);
-      expect(ids).not.toContain(otroCliente.id);
-    });
-
-    it('updatePaymentState mutates estadoPago and bumps updatedAt', async () => {
-      const sale = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
-      );
-      const originalUpdatedAt = sale.updatedAt;
-      await new Promise((r) => setTimeout(r, 5));
-      await repo.updatePaymentState(sale.id, 'parcial');
-      const after = await repo.findById(sale.id);
-      expect(after?.estadoPago).toBe('parcial');
-      expect(after && after.updatedAt.localeCompare(originalUpdatedAt)).toBeGreaterThanOrEqual(0);
-    });
-
-    it('updatePaymentState on a missing id is a no-op', async () => {
-      await expect(
-        repo.updatePaymentState('01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never, 'pagado'),
-      ).resolves.toBeUndefined();
     });
 
     it('delete on a missing id is a no-op', async () => {
@@ -197,7 +162,6 @@ export function describeSalesRepositoryContract(
       expect(updated && updated.updatedAt.localeCompare(originalUpdatedAt)).toBeGreaterThan(0);
       // Untouched fields stay untouched.
       expect(updated?.fecha).toBe(sale.fecha);
-      expect(updated?.metodo).toBe(sale.metodo);
     });
 
     it('update returns null for a missing or soft-deleted sale', async () => {
@@ -208,12 +172,10 @@ export function describeSalesRepositoryContract(
       expect(await repo.update(sale.id, { monto: 999n })).toBeNull();
     });
 
-    it('update preserves clienteId when the patch omits it', async () => {
-      const sale = await repo.create(
-        makeNewSale({ businessId: BIZ_A, metodo: 'Crédito', clienteId: CLIENT_X }),
-      );
+    it('update preserves ticketId when the patch omits it', async () => {
+      const sale = await repo.create(makeNewSale({ businessId: BIZ_A }));
       const updated = await repo.update(sale.id, { concepto: 'Sólo concepto' });
-      expect(updated?.clienteId).toBe(CLIENT_X);
+      expect(updated?.ticketId).toBe(sale.ticketId);
     });
   });
 }

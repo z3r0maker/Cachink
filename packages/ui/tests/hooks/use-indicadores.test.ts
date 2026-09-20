@@ -11,10 +11,11 @@ import {
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   makeNewSale,
-  makeSale,
+  makeTicket,
 } from '@xangarro/testing';
-import type { BusinessId, DeviceId, IsoDate, SaleId } from '@xangarro/domain';
+import type { BusinessId, DeviceId, IsoDate } from '@xangarro/domain';
 import {
   composeIndicadores,
   diasInPeriodo,
@@ -24,6 +25,7 @@ import {
 const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV' as DeviceId;
 
 function makeDeps(): {
+  tickets: InMemoryTicketsRepository;
   sales: InMemorySalesRepository;
   expenses: InMemoryExpensesRepository;
   businesses: InMemoryBusinessesRepository;
@@ -33,6 +35,7 @@ function makeDeps(): {
   movements: InMemoryInventoryMovementsRepository;
 } {
   return {
+    tickets: new InMemoryTicketsRepository(DEV),
     sales: new InMemorySalesRepository(DEV),
     expenses: new InMemoryExpensesRepository(DEV),
     businesses: new InMemoryBusinessesRepository(DEV),
@@ -60,10 +63,10 @@ describe('sumVentasCredito', () => {
 
   it('sums only Crédito ventas', () => {
     const ventas = [
-      makeSale({ id: '01JPHKA000000000000000S001' as SaleId, metodo: 'Crédito', monto: 10_000n }),
-      makeSale({ id: '01JPHKA000000000000000S002' as SaleId, metodo: 'Efectivo', monto: 50_000n }),
-      makeSale({ id: '01JPHKA000000000000000S003' as SaleId, metodo: 'Crédito', monto: 20_000n }),
-    ];
+      { ticket: makeTicket({ metodo: 'Crédito' }), total: 10_000n },
+      { ticket: makeTicket({ metodo: 'Efectivo' }), total: 50_000n },
+      { ticket: makeTicket({ metodo: 'Crédito' }), total: 20_000n },
+    ] as const;
     expect(sumVentasCredito(ventas)).toBe(30_000n);
   });
 });

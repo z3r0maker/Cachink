@@ -55,11 +55,11 @@ export function describeBusinessesRepositoryContract(
       const a = await repo.create(makeNewBusiness({ logoUrl: null }));
       const b = await repo.create(
         makeNewBusiness({
-          logoUrl: 'https://cachink.mx/logo.png',
+          logoUrl: 'https://xangarro.mx/logo.png',
         }),
       );
       expect((await repo.findById(a.id))?.logoUrl).toBeNull();
-      expect((await repo.findById(b.id))?.logoUrl).toBe('https://cachink.mx/logo.png');
+      expect((await repo.findById(b.id))?.logoUrl).toBe('https://xangarro.mx/logo.png');
     });
 
     // --- update method ---

@@ -9,6 +9,7 @@ import type { BusinessId, CajaBalanceResult, CajaTurno } from '@xangarro/domain'
 import { computeCajaBalance } from '@xangarro/domain';
 import {
   useSalesRepository,
+  useTicketsRepository,
   useExpensesRepository,
   useCajaMovimientosRepository,
 } from '../../app/repository-provider';
@@ -17,10 +18,16 @@ import { buildBalanceInput } from './build-balance-input';
 
 export function useTurnBalance(turno: CajaTurno): CajaBalanceResult {
   const businessId = useCurrentBusinessId() as BusinessId | null;
+  const ticketsRepo = useTicketsRepository();
   const salesRepo = useSalesRepository();
   const expensesRepo = useExpensesRepository();
   const movRepo = useCajaMovimientosRepository();
 
+  const ticketsQ = useQuery({
+    queryKey: ['caja-balance-tickets', turno.id],
+    queryFn: () =>
+      businessId ? ticketsRepo.findByDateRange(turno.fecha, turno.fecha, businessId) : [],
+  });
   const salesQ = useQuery({
     queryKey: ['caja-balance-sales', turno.id],
     queryFn: () =>
@@ -39,6 +46,12 @@ export function useTurnBalance(turno: CajaTurno): CajaBalanceResult {
   });
 
   return computeCajaBalance(
-    buildBalanceInput(turno, salesQ.data ?? [], expensesQ.data ?? [], movQ.data ?? []),
+    buildBalanceInput(
+      turno,
+      ticketsQ.data ?? [],
+      salesQ.data ?? [],
+      expensesQ.data ?? [],
+      movQ.data ?? [],
+    ),
   );
 }

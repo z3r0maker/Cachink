@@ -1,7 +1,7 @@
 /**
  * UserAvatar + UserAvatarGrid tests — Login/user-avatar.tsx coverage.
  *
- * Covers initial rendering, role badge text, avatar grid layout,
+ * * Covers initial rendering, avatar grid layout,
  * and user selection callbacks.
  */
 
@@ -17,14 +17,12 @@ initI18n();
 const DIRECTOR = makeUser({
   id: '01JPHK0000000000000000USR1' as UserId,
   nombre: 'Ana Director',
-  role: 'director',
   avatarColor: 'blue',
 });
 
 const OPERATIVO = makeUser({
   id: '01JPHK0000000000000000USR2' as UserId,
   nombre: 'Beto Operativo',
-  role: 'operativo',
   avatarColor: 'green',
 });
 
@@ -43,19 +41,12 @@ describe('UserAvatar', () => {
     expect(screen.getByText('A')).toBeInTheDocument();
   });
 
-  it('shows Director role badge for director', () => {
+  it('shows no role badge — operators have no role on the device (A-05)', () => {
     renderWithProviders(
       <UserAvatar user={DIRECTOR} onPress={vi.fn()} selected={false} anySelected={false} />,
     );
-    expect(screen.getByTestId(`user-role-${DIRECTOR.id}`)).toBeInTheDocument();
-    expect(screen.getByText('Director')).toBeInTheDocument();
-  });
-
-  it('shows Operativo role badge for operativo', () => {
-    renderWithProviders(
-      <UserAvatar user={OPERATIVO} onPress={vi.fn()} selected={false} anySelected={false} />,
-    );
-    expect(screen.getByText('Operativo')).toBeInTheDocument();
+    expect(screen.queryByTestId(`user-role-${DIRECTOR.id}`)).toBeNull();
+    expect(screen.queryByText('Director')).toBeNull();
   });
 
   it('displays the user name', () => {

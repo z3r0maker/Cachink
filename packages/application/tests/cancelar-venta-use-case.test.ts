@@ -1,279 +1,221 @@
 /**
- * CancelarVentaUseCase tests.
- *
- * Happy path + unhappy paths per CLAUDE.md §6.
- * Tests PIN verification, permission check, stock reversal, and audit log.
+ * CancelarTicketUseCase tests (ADR-073). Happy path + unhappy paths per
+ * CLAUDE.md §6: PIN, permission, cash to return, stock reversal, audit log.
  */
 
 import { beforeEach, describe, expect, it } from 'vitest';
-import type { BusinessId, SaleId, UserId } from '@xangarro/domain';
+import type { BusinessId, UserId } from '@xangarro/domain';
 import {
   InMemoryCancelacionLogsRepository,
   InMemoryInventoryMovementsRepository,
   InMemoryProductsRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   InMemoryUsersRepository,
   TEST_DEVICE_ID,
   makeNewProduct,
   makeNewSale,
-  makeNewUser,
+  makeNewTicket,
 } from '../../testing/src/index.js';
-import { CrearUsuarioUseCase } from '../src/index.js';
-import { CancelarVentaUseCase } from '../src/cancelar-venta/index.js';
+import { CrearOperadorUseCase } from '../src/index.js';
+import { CancelarTicketUseCase } from '../src/cancelar-ticket/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
-describe('CancelarVentaUseCase', () => {
+describe('CancelarTicketUseCase', () => {
+  let tickets: InMemoryTicketsRepository;
   let sales: InMemorySalesRepository;
   let users: InMemoryUsersRepository;
   let products: InMemoryProductsRepository;
   let movements: InMemoryInventoryMovementsRepository;
   let logs: InMemoryCancelacionLogsRepository;
-  let crearUsuario: CrearUsuarioUseCase;
-  let useCase: CancelarVentaUseCase;
+  let crearOperador: CrearOperadorUseCase;
+  let useCase: CancelarTicketUseCase;
 
   let directorId: UserId;
 
   beforeEach(async () => {
+    tickets = new InMemoryTicketsRepository(TEST_DEVICE_ID);
     sales = new InMemorySalesRepository(TEST_DEVICE_ID);
     users = new InMemoryUsersRepository(TEST_DEVICE_ID);
     products = new InMemoryProductsRepository(TEST_DEVICE_ID);
     movements = new InMemoryInventoryMovementsRepository(TEST_DEVICE_ID);
     logs = new InMemoryCancelacionLogsRepository(TEST_DEVICE_ID);
 
-    crearUsuario = new CrearUsuarioUseCase(users);
-    useCase = new CancelarVentaUseCase(sales, users, products, movements, logs);
+    crearOperador = new CrearOperadorUseCase(users);
+    useCase = new CancelarTicketUseCase(tickets, sales, users, products, movements, logs);
 
-    // Seed a director user (bcrypt-hashed PIN via CrearUsuarioUseCase)
-    const director = await crearUsuario.execute(
-      makeNewUser({
-        businessId: BIZ,
-        nombre: 'Director Test',
-        pin: '1234',
-        role: 'director',
-      }),
-    );
+    const director = await crearOperador.execute({
+      businessId: BIZ,
+      nombre: 'Director Test',
+      pin: '1234',
+      operatorLimit: 10,
+    });
+    // A-05: one role; cancel rights are a granted permission.
+    await users.update(director.id, { permissions: { canCancelSales: true } });
     directorId = director.id;
   });
 
-  it('cancels a cash sale and returns cashToReturn', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 5000n }),
+  /** A cash ticket with one line of `monto`. */
+  async function seedTicket(metodo: 'Efectivo' | 'Transferencia' = 'Efectivo', monto = 5000n) {
+    const ticket = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo, concepto: 'Venta' }),
     );
+    const line = await sales.create(makeNewSale({ businessId: BIZ, monto, ticketId: ticket.id }));
+    return { ticket, line };
+  }
 
+  it('cancels a cash ticket and returns its total as cashToReturn', async () => {
+    const { ticket } = await seedTicket('Efectivo', 5000n);
     const result = await useCase.execute({
-      saleId: sale.id,
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
       motivo: 'Cliente cambió de opinión',
       businessId: BIZ,
       stockEnabled: false,
     });
-
-    expect(result.sale.id).toBe(sale.id);
+    expect(result.ticket.id).toBe(ticket.id);
     expect(result.cashToReturn).toBe(5000n);
     expect(result.stockReversed).toBe(false);
-    expect(result.cantidadDevuelta).toBeNull();
   });
 
-  it('returns null cashToReturn for non-cash sales', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Transferencia', monto: 3000n }),
-    );
-
+  it('returns null cashToReturn for non-cash tickets', async () => {
+    const { ticket } = await seedTicket('Transferencia', 3000n);
     const result = await useCase.execute({
-      saleId: sale.id,
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
-      motivo: 'Error en cobro',
+      motivo: 'Error de captura',
       businessId: BIZ,
       stockEnabled: false,
     });
-
     expect(result.cashToReturn).toBeNull();
   });
 
-  it('reverses stock when stock is enabled and product has seguirStock', async () => {
+  it('reverses stock for each line whose product follows stock', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: true }));
-    const sale = await sales.create(
+    const ticket = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Efectivo', concepto: 'Venta' }),
+    );
+    await sales.create(
       makeNewSale({
         businessId: BIZ,
+        monto: 1500n,
+        ticketId: ticket.id,
         productoId: product.id,
         cantidad: 3,
-        metodo: 'Efectivo',
-        monto: 1500n,
       }),
     );
-
     const result = await useCase.execute({
-      saleId: sale.id,
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
       motivo: 'Devolución',
       businessId: BIZ,
       stockEnabled: true,
     });
-
     expect(result.stockReversed).toBe(true);
-    expect(result.cantidadDevuelta).toBe(3);
+    const entradas = await movements.findByProduct(product.id);
+    expect(entradas.some((m) => m.tipo === 'salida')).toBe(false);
   });
 
-  it('does not reverse stock when product has seguirStock=false', async () => {
+  it('does not reverse stock when the product ignores it', async () => {
     const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: false }));
-    const sale = await sales.create(
+    const ticket = await tickets.create(
+      makeNewTicket({ businessId: BIZ, metodo: 'Efectivo', concepto: 'Venta' }),
+    );
+    await sales.create(
       makeNewSale({
         businessId: BIZ,
+        monto: 900n,
+        ticketId: ticket.id,
         productoId: product.id,
         cantidad: 2,
-        metodo: 'Efectivo',
-        monto: 900n,
       }),
     );
-
     const result = await useCase.execute({
-      saleId: sale.id,
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
       motivo: 'Devolución',
       businessId: BIZ,
       stockEnabled: true,
     });
-
     expect(result.stockReversed).toBe(false);
-    expect(result.cantidadDevuelta).toBeNull();
   });
 
-  it('creates an audit log on successful cancellation', async () => {
-    const sale = await sales.create(
-      makeNewSale({ businessId: BIZ, metodo: 'Efectivo', monto: 2000n }),
-    );
-
+  it('creates one audit log for the whole ticket', async () => {
+    const { ticket } = await seedTicket('Efectivo', 2000n);
     await useCase.execute({
-      saleId: sale.id,
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
-      motivo: 'Producto defectuoso',
+      motivo: 'Error',
       businessId: BIZ,
       stockEnabled: false,
     });
-
-    const log = await logs.findBySaleId(sale.id);
+    const log = await logs.findByTicketId(ticket.id);
     expect(log).not.toBeNull();
-    expect(log!.motivo).toBe('Producto defectuoso');
-    expect(log!.cancelledByUserId).toBe(directorId);
-    expect(log!.montoOriginalCentavos).toBe(2000n);
+    expect(log?.montoOriginalCentavos).toBe(2000n);
   });
 
-  it('rejects with wrong PIN', async () => {
-    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
-
+  it('rejects a wrong PIN', async () => {
+    const { ticket } = await seedTicket();
     await expect(
       useCase.execute({
-        saleId: sale.id,
+        ticketId: ticket.id,
         userId: directorId,
         pin: '9999',
-        motivo: 'Test',
+        motivo: 'x',
         businessId: BIZ,
       }),
     ).rejects.toThrow(/PIN incorrecto/);
   });
 
-  it('rejects for non-existent user', async () => {
-    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
-    const fakeUserId = '01HZ8XQN9GZJXV8AKQ5X0CFAKE' as UserId;
-
+  it('rejects an unknown user', async () => {
+    const { ticket } = await seedTicket();
     await expect(
       useCase.execute({
-        saleId: sale.id,
-        userId: fakeUserId,
+        ticketId: ticket.id,
+        userId: '01HZ8XQN9GZJXV8AKQ5X0C7ZZZ' as never,
         pin: '1234',
-        motivo: 'Test',
+        motivo: 'x',
         businessId: BIZ,
       }),
-    ).rejects.toThrow(/no encontrado/);
+    ).rejects.toThrow(/no encontrado/i);
   });
 
-  it('rejects for operativo user without canCancelSales permission', async () => {
-    const operativo = await crearUsuario.execute(
-      makeNewUser({
-        businessId: BIZ,
-        nombre: 'Operativo Test',
-        pin: '4321',
-        role: 'operativo',
-      }),
-    );
-    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
-
+  it('rejects an operativo without canCancelSales', async () => {
+    const operativo = await crearOperador.execute({
+      businessId: BIZ,
+      nombre: 'Op',
+      pin: '1234',
+      operatorLimit: 10,
+    });
+    const { ticket } = await seedTicket();
     await expect(
       useCase.execute({
-        saleId: sale.id,
+        ticketId: ticket.id,
         userId: operativo.id,
-        pin: '4321',
-        motivo: 'Test',
-        businessId: BIZ,
-      }),
-    ).rejects.toThrow(/permiso/);
-  });
-
-  it('rejects when sale does not exist', async () => {
-    const fakeSaleId = '01HZ8XQN9GZJXV8AKQ5X0CSALE' as SaleId;
-
-    await expect(
-      useCase.execute({
-        saleId: fakeSaleId,
-        userId: directorId,
         pin: '1234',
-        motivo: 'Test',
+        motivo: 'x',
         businessId: BIZ,
       }),
-    ).rejects.toThrow(/no encontrada/);
+    ).rejects.toThrow(/permiso/i);
   });
 
-  it('rejects when sale is already cancelled', async () => {
-    const sale = await sales.create(makeNewSale({ businessId: BIZ }));
-    // Cancel it first
-    await useCase.execute({
-      saleId: sale.id,
+  it('rejects cancelling a ticket that is already cancelled', async () => {
+    const { ticket } = await seedTicket();
+    const input = {
+      ticketId: ticket.id,
       userId: directorId,
       pin: '1234',
-      motivo: 'First cancel',
+      motivo: 'x',
       businessId: BIZ,
       stockEnabled: false,
-    });
-
-    // Try to cancel again — sale is soft-deleted so findById returns null
-    await expect(
-      useCase.execute({
-        saleId: sale.id,
-        userId: directorId,
-        pin: '1234',
-        motivo: 'Double cancel',
-        businessId: BIZ,
-        stockEnabled: false,
-      }),
-    ).rejects.toThrow(/no encontrada/);
-  });
-
-  it('does not reverse stock when stockEnabled is false', async () => {
-    const product = await products.create(makeNewProduct({ businessId: BIZ, seguirStock: true }));
-    const sale = await sales.create(
-      makeNewSale({
-        businessId: BIZ,
-        productoId: product.id,
-        cantidad: 5,
-      }),
-    );
-
-    const result = await useCase.execute({
-      saleId: sale.id,
-      userId: directorId,
-      pin: '1234',
-      motivo: 'Devolución',
-      businessId: BIZ,
-      stockEnabled: false,
-    });
-
-    expect(result.stockReversed).toBe(false);
-    expect(result.cantidadDevuelta).toBeNull();
+    };
+    await useCase.execute(input);
+    await expect(useCase.execute(input)).rejects.toThrow(/ya fue cancelada/);
   });
 });

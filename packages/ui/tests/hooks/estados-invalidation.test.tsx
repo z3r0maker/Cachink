@@ -37,7 +37,6 @@ import { useRegistrarEgreso } from '../../src/hooks/use-registrar-egreso';
 import { useRegistrarMovimiento } from '../../src/hooks/use-registrar-movimiento';
 import { useCerrarCorteDeDia } from '../../src/hooks/use-cerrar-corte-de-dia';
 import { useCrearProducto } from '../../src/hooks/use-crear-producto';
-import { useEditarProducto } from '../../src/hooks/use-editar-producto';
 import { tamaguiConfig } from '../../src/tamagui.config';
 
 /**
@@ -221,25 +220,6 @@ describe('estados invalidation after money mutations', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
     const swept = harness.invalidated();
-    for (const prefix of ESTADOS_PREFIXES) {
-      expect(swept).toContain(prefix);
-    }
-  });
-
-  it('editar producto invalidates the real productos key, not the dead English one', async () => {
-    const producto = await products.create(makeNewProduct({ businessId: BIZ }));
-    const harness = makeHarness({ products });
-
-    const { result } = renderHook(() => useEditarProducto(), { wrapper: harness.wrapper });
-    await act(async () => {
-      result.current.mutate({ id: producto.id, patch: { nombre: 'Renombrado' } });
-    });
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    const swept = harness.invalidated();
-    // The bug: it used to invalidate ['products', …], which nothing queries.
-    expect(swept).toContain('productos');
-    expect(swept).not.toContain('products');
     for (const prefix of ESTADOS_PREFIXES) {
       expect(swept).toContain(prefix);
     }

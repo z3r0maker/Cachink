@@ -25,19 +25,19 @@ appId: mx.xangarro.mobile
 # Wait for it briefly.
 - extendedWaitUntil:
     visible:
-      id: "consent-modal"
+      id: 'consent-modal'
     timeout: 5000
     optional: true
 
 # --- Test: Tap "Más tarde" → modal dismisses ---
 - tapOn:
-    id: "consent-modal-later"
+    id: 'consent-modal-later'
     optional: true
 
 # App continues normally — tabs should be visible.
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 10000
     optional: true
 
@@ -50,13 +50,13 @@ appId: mx.xangarro.mobile
 # Dismiss consent if it reappears.
 - extendedWaitUntil:
     visible:
-      id: "consent-modal"
+      id: 'consent-modal'
     timeout: 5000
     optional: true
 
 # Tap "No" to dismiss permanently.
 - tapOn:
-    id: "consent-modal-no"
+    id: 'consent-modal-no'
     optional: true
 
 # App should continue.

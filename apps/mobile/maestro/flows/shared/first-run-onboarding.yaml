@@ -10,7 +10,7 @@
 # the right to ask anything. Now a fresh install hydrates
 # AppConfig.mode to 'local' and the boot flow is:
 #
-#   launch → ¡Bienvenido a Cachink! → Comenzar → negocio
+#   launch → ¡Bienvenido a Xangarro! → Comenzar → negocio
 #
 # The device/cloud questions still exist — they moved to
 # Configuración → Sistema → "Sincronización y dispositivos", which is
@@ -26,24 +26,24 @@ appId: mx.xangarro.mobile
 # The welcome carousel is the first screen now.
 - extendedWaitUntil:
     visible:
-      id: "feature-discovery"
+      id: 'feature-discovery'
     timeout: 8000
-- assertVisible: "¡Bienvenido a Cachink!"
+- assertVisible: '¡Bienvenido a Xangarro!'
 - tapOn:
-    id: "discovery-continue"
+    id: 'discovery-continue'
 
 # Consent step (may or may not fire depending on build config).
 - extendedWaitUntil:
     visible:
-      id: "consent-no"
+      id: 'consent-no'
     timeout: 5000
     optional: true
 - tapOn:
-    id: "consent-no"
+    id: 'consent-no'
     optional: true
 
 # BusinessForm — one tap after the welcome, no device question in between.
 - extendedWaitUntil:
     visible:
-      id: "business-nombre"
+      id: 'business-nombre'
     timeout: 8000

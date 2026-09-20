@@ -11,56 +11,56 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Review item #8: the screen must read as "make a sale", not "list of
 # sales". Assert the unmistakable CTA and the hint before touching the
 # grid — if either regresses, this fails here rather than silently.
 - extendedWaitUntil:
     visible:
-      id: "ventas-nueva-venta-cta"
+      id: 'ventas-nueva-venta-cta'
     timeout: 5000
-- assertVisible: "Nueva venta"
-- assertVisible: "Toca un producto para agregarlo a la venta"
+- assertVisible: 'Nueva venta'
+- assertVisible: 'Toca un producto para agregarlo a la venta'
 
 # The product grid should show demo products.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Tap a demo product to add to cart.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 
 # Cart strip should appear.
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 
 # Tap checkout.
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # Checkout screen appears — confirm with Efectivo (default).
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # Cash entry screen — tap a quick amount to fill the received field.
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 5000
 - tapOn: "\\$50"
 
 # Submit the sale.
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 
 # Returns to Ventas after sale is registered.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000

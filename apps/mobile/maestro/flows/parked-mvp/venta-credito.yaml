@@ -12,57 +12,57 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab (Operativo role).
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Tap a product to add to cart.
-- tapOn: "Quesadilla"
+- tapOn: 'Quesadilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 # Method picker — select Crédito.
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "option-card-Crédito"
+    id: 'option-card-Crédito'
 
 # The client picker appears when Crédito is selected.
 # Pick the first available client.
 - tapOn:
-    id: "venta-confirm-cliente"
+    id: 'venta-confirm-cliente'
     optional: true
 - tapOn:
     index: 0
     optional: true
 
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 # Confirm screen for Crédito — submit.
 - extendedWaitUntil:
     visible:
-      id: "checkout-confirm-Crédito"
+      id: 'checkout-confirm-Crédito'
     timeout: 5000
 - tapOn:
-    id: "checkout-confirm-Crédito-submit"
+    id: 'checkout-confirm-Crédito-submit'
 
 # Returns to Ventas.
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # Switch to Director role via TopBar and verify the sale shows
 # under Cuentas por Cobrar.
 - tapOn:
-    id: "top-bar-role-chip"
+    id: 'top-bar-role-chip'
 - tapOn:
-    id: "role-director-select"
-- assertVisible: "Cuentas por cobrar"
+    id: 'role-director-select'
+- assertVisible: 'Cuentas por cobrar'

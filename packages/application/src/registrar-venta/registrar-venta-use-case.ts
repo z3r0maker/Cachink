@@ -1,133 +1,73 @@
 /**
- * RegistrarVentaUseCase — records a Venta.
- *
- * Responsibilities:
- *   1. Re-validate the NewSale input with Zod at the boundary.
- *   2. Enforce the Crédito invariant: clienteId is required AND the
- *      cliente must exist.
- *   3. Validate that the referenced producto exists (ADR-048).
- *   4. Delegate persistence to SalesRepository.create().
- *   5. When stock flag is ON AND the producto has `seguirStock=true`,
- *      auto-create a salida MovimientoInventario with `cantidad` units.
- *
- * Phase 5: `stockEnabled` flag supersedes `tipoNegocio` for stock decisions.
+ * RegistrarVentaUseCase — the one-line ticket (ADR-073). The old UI's
+ * single-product venta is `RegistrarTicketUseCase` with one line; this
+ * wrapper keeps that surface while the checkout moves to full tickets.
  */
 
-import {
-  NewSaleSchema,
-  today,
-  type CajaTurnoId,
-  type NewSale,
-  type Sale,
-  type UserId,
-} from '@xangarro/domain';
-import { CajaNoAbiertaError } from '@xangarro/domain';
+import type { Sale } from '@xangarro/domain';
 import type {
-  CajaTurnosRepository,
-  ClientsRepository,
-  InventoryMovementsRepository,
-  ProductsRepository,
-  SalesRepository,
-} from '@xangarro/data';
+  BusinessId,
+  ClientId,
+  Money,
+  PaymentMethod,
+  ProductId,
+  SaleCategory,
+  UserId,
+  IsoDate,
+} from '@xangarro/domain';
+import type { RegistrarTicketUseCase } from '../registrar-ticket/index.js';
 import type { UseCase } from '../_use-case.js';
 
-function currentHHMM(): string {
-  const d = new Date();
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${hh}:${mm}`;
+/** The old single-product venta shape: line facts + the ticket's method/client. */
+export interface RegistrarVentaInput {
+  readonly fecha: IsoDate;
+  readonly concepto: string;
+  readonly categoria: SaleCategory;
+  readonly monto: Money;
+  /** Default Efectivo — the line fixtures no longer carry it (ADR-073). */
+  readonly metodo?: PaymentMethod;
+  readonly clienteId?: ClientId;
+  readonly productoId: ProductId;
+  readonly cantidad?: number;
+  readonly efectivoRecibidoCentavos?: Money;
+  readonly businessId: BusinessId;
 }
 
 export interface RegistrarVentaConfig {
-  /** Business-level stock feature flag. When false, no stock movements. */
   readonly stockEnabled?: boolean;
-  /** Current user — needed to look up their open turno. */
   readonly userId: UserId | null;
 }
 
-export class RegistrarVentaUseCase implements UseCase<NewSale, Sale> {
-  readonly #sales: SalesRepository;
-  readonly #clients: ClientsRepository;
-  readonly #products: ProductsRepository;
-  readonly #movements: InventoryMovementsRepository;
-  readonly #cajaTurnos: CajaTurnosRepository;
-  readonly #stockEnabled: boolean;
-  readonly #userId: UserId | null;
+export class RegistrarVentaUseCase implements UseCase<RegistrarVentaInput, Sale> {
+  readonly #tickets: RegistrarTicketUseCase;
 
-  constructor(
-    sales: SalesRepository,
-    clients: ClientsRepository,
-    products: ProductsRepository,
-    movements: InventoryMovementsRepository,
-    cajaTurnos: CajaTurnosRepository,
-    config: RegistrarVentaConfig,
-  ) {
-    this.#sales = sales;
-    this.#clients = clients;
-    this.#products = products;
-    this.#movements = movements;
-    this.#cajaTurnos = cajaTurnos;
-    this.#stockEnabled = config.stockEnabled ?? true;
-    this.#userId = config.userId;
+  constructor(tickets: RegistrarTicketUseCase) {
+    this.#tickets = tickets;
   }
 
-  async execute(input: NewSale): Promise<Sale> {
-    const parsed = NewSaleSchema.parse(input);
-    const cajaTurnoId = await this.#requireOpenTurno();
-
-    const producto = await this.#products.findById(parsed.productoId);
-    if (!producto) {
-      throw new TypeError(`Producto ${parsed.productoId} no existe`);
-    }
-
-    await this.#validateCredito(parsed);
-
-    const hora = parsed.hora ?? currentHHMM();
-    const sale = await this.#sales.create({
-      ...parsed,
-      hora,
-      cajaTurnoId,
-      efectivoRecibidoCentavos: parsed.efectivoRecibidoCentavos,
+  async execute(input: RegistrarVentaInput): Promise<Sale> {
+    const { ticket, lineas } = await this.#tickets.execute({
+      ticket: {
+        fecha: input.fecha,
+        concepto: input.concepto,
+        metodo: input.metodo ?? 'Efectivo',
+        clienteId: input.clienteId ?? null,
+        efectivoRecibidoCentavos: input.efectivoRecibidoCentavos ?? null,
+        businessId: input.businessId,
+      },
+      lineas: [
+        {
+          concepto: input.concepto,
+          categoria: input.categoria,
+          monto: input.monto,
+          productoId: input.productoId,
+          cantidad: input.cantidad ?? 1,
+        },
+      ],
     });
-
-    if (this.#stockEnabled && producto.seguirStock) {
-      await this.#createStockMovement(parsed, producto);
-    }
-
-    return sale;
-  }
-
-  async #requireOpenTurno(): Promise<CajaTurnoId> {
-    if (!this.#userId) throw new CajaNoAbiertaError();
-    const turno = await this.#cajaTurnos.findOpenByUser(this.#userId);
-    if (!turno) throw new CajaNoAbiertaError();
-    return turno.id;
-  }
-
-  async #validateCredito(parsed: NewSale): Promise<void> {
-    if (parsed.metodo !== 'Crédito') return;
-    if (!parsed.clienteId) {
-      throw new TypeError('Venta en Crédito requiere clienteId');
-    }
-    const cliente = await this.#clients.findById(parsed.clienteId);
-    if (!cliente) {
-      throw new TypeError(`Cliente ${parsed.clienteId} no existe`);
-    }
-  }
-
-  async #createStockMovement(
-    parsed: NewSale,
-    producto: { costoUnitCentavos: bigint },
-  ): Promise<void> {
-    await this.#movements.create({
-      productoId: parsed.productoId,
-      fecha: parsed.fecha ?? today(),
-      tipo: 'salida',
-      cantidad: parsed.cantidad ?? 1,
-      costoUnitCentavos: producto.costoUnitCentavos,
-      motivo: 'Venta',
-      nota: undefined,
-      businessId: parsed.businessId,
-    });
+    void ticket;
+    const linea = lineas[0];
+    if (!linea) throw new TypeError('La línea no se registró');
+    return linea;
   }
 }

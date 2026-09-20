@@ -1,5 +1,5 @@
 import { CAJA_FIXTURE } from '@/operador/caja/fixture';
-import { CajaScreen } from '@/operador/caja/screen';
+import { CajaViva } from '@/operador/caja/viva';
 import type { CajaData, CajaScreenProps, CobroPaso } from '@/operador/caja/types';
 
 const STATES = ['happy', 'loading', 'empty', 'error'] as const;
@@ -19,12 +19,13 @@ function forced(q: Query): Omit<CajaScreenProps, 'data'> & { data: CajaData } {
   };
 }
 
-/** Operador · Caja (O-20, fase 11). Fixture data until the register runtime (O-06). */
+/** Operador · Caja (O-20, fase 11). A linked register sells its own catalogue
+ *  (O-06); an unlinked one renders the design fixture. */
 export default async function OperadorCajaPage({
   searchParams,
 }: {
   readonly searchParams: Promise<Query>;
 }) {
   const props = forced(await searchParams);
-  return <CajaScreen {...props} />;
+  return <CajaViva {...props} />;
 }

@@ -24,13 +24,13 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # Verify the total card is visible with a formatted amount.
 - assertVisible:
-    id: "ventas-total-card"
+    id: 'ventas-total-card'
 
 # Verify the sales list is visible (ventas-fecha testID was removed;
 # the date is shown inline in the total card).
 - assertVisible:
-    id: "ventas-list"
+    id: 'ventas-list'

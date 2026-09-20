@@ -1,7 +1,7 @@
 /**
  * Storybook catalog for the `<Card>` primitive.
  *
- * Stories use real es-MX Cachink copy drawn from ROADMAP.md P1C-M10
+ * Stories use real es-MX Xangarro copy drawn from ROADMAP.md P1C-M10
  * (Director Home) so the catalog doubles as a UX reference. The
  * `all-variants` story renders the three surfaces side-by-side for designer
  * visual-parity review.

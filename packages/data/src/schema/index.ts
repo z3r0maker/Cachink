@@ -1,5 +1,5 @@
 /**
- * Drizzle SQLite schema for Cachink — one file per Phase 1 entity from
+ * Drizzle SQLite schema for Xangarro — one file per Phase 1 entity from
  * CLAUDE.md §9. Each table mirrors its Zod schema in
  * `@xangarro/domain/entities` 1:1; the Zod schemas remain the canonical
  * source and validate every write at the app layer.
@@ -41,3 +41,6 @@ export * from './caja-movimientos';
 export * from './cancelacion-logs';
 export * from './mensajes-operador';
 export * from './respuestas-operador';
+export * from './tickets';
+export * from './sync-row-status';
+export * from './stock-baseline';

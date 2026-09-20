@@ -1,5 +1,7 @@
 import type { SyncedTable } from '@xangarro/contracts';
 
+import { openingBalanceClients, openingBalances } from '../schema/opening-balances.js';
+
 import {
   conversionRecetas,
   conversions,
@@ -14,6 +16,7 @@ import {
   expenses,
   recurringExpenses,
   sales,
+  tickets,
 } from '../schema/ledger.js';
 import { businesses, clients, employees, users } from '../schema/tenant.js';
 import { mensajesOperador, respuestasOperador } from '../schema/mensajes.js';
@@ -25,6 +28,7 @@ import { mensajesOperador, respuestasOperador } from '../schema/mensajes.js';
  * compile error rather than a push that fails at run time.
  */
 export const SYNCED_TABLES = {
+  tickets,
   sales,
   expenses,
   inventory_movements: inventoryMovements,
@@ -45,4 +49,6 @@ export const SYNCED_TABLES = {
   conversion_recetas: conversionRecetas,
   mensajes_operador: mensajesOperador,
   respuestas_operador: respuestasOperador,
+  opening_balances: openingBalances,
+  opening_balance_clients: openingBalanceClients,
 } as const satisfies Record<SyncedTable, unknown>;

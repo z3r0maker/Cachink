@@ -1,6 +1,6 @@
 /**
  * `useLastConflicts` — reads the N newest rows from the
- * `__cachink_conflicts` audit table populated by the LAN sync applier
+ * `__xangarro_conflicts` audit table populated by the LAN sync applier
  * (ADR-029 / P1D-M4 C20).
  *
  * CLAUDE.md §1 mandates: "Conflicts surface inline, never silently."
@@ -79,7 +79,7 @@ async function fetchConflicts(
       sql`SELECT id, detected_at, direction, table_name, row_id,
                  loser_updated_at, loser_device_id,
                  winner_updated_at, winner_device_id, reason
-          FROM __cachink_conflicts
+          FROM __xangarro_conflicts
           ORDER BY id DESC
           LIMIT ${limit}`,
     )) as ConflictRowRaw[];

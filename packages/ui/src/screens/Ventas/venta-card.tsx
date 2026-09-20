@@ -2,7 +2,7 @@
  * VentaCard — one row in the Ventas list.
  *
  * Displays concepto + categoria Tag + cliente chip (if set) + monto + metodo
- * in the canonical Cachink Card look. Tapping (if `onPress` is provided)
+ * in the canonical Xangarro Card look. Tapping (if `onPress` is provided)
  * fires the parent's detail-popover / share flow.
  */
 
@@ -23,11 +23,6 @@ export interface VentaCardProps {
   readonly testID?: string;
 }
 
-function MetodoTag({ metodo }: { metodo: Sale['metodo'] }): ReactElement {
-  const variant = metodo === 'Crédito' ? 'warning' : 'info';
-  return <Tag variant={variant}>{metodo}</Tag>;
-}
-
 function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }): ReactElement {
   return (
     <View flex={1} paddingRight={12}>
@@ -40,20 +35,10 @@ function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }
         >
           {venta.concepto}
         </Text>
-        {venta.hora !== undefined && venta.hora !== null && (
-          <Text
-            fontFamily={typography.fontFamily}
-            fontWeight={typography.weights.medium}
-            fontSize={fontSizes.xs}
-            color={colors.gray600}
-          >
-            {venta.hora}
-          </Text>
-        )}
       </View>
       <View flexDirection="row" gap={6} marginTop={6}>
         <Tag variant="soft">{venta.categoria}</Tag>
-        <MetodoTag metodo={venta.metodo} />
+
         {clienteName !== undefined && <Tag variant="info">{clienteName}</Tag>}
       </View>
     </View>
@@ -61,7 +46,7 @@ function VentaInfo({ venta, clienteName }: { venta: Sale; clienteName?: string }
 }
 
 export function VentaCard(props: VentaCardProps): ReactElement {
-  const montoColor = props.venta.estadoPago === 'pendiente' ? colors.warningText : colors.black;
+  const montoColor = colors.black;
   return (
     <Card
       testID={props.testID ?? `venta-card-${props.venta.id}`}

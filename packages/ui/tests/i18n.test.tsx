@@ -25,9 +25,8 @@ describe('i18n.t (raw)', () => {
     expect(i18n.t('actions.save')).toBe('Guardar');
   });
 
-  it('translates a role key', () => {
-    expect(i18n.t('roles.operativo')).toBe('Operativo');
-    expect(i18n.t('roles.director')).toBe('Director');
+  it('translates a nested key', () => {
+    expect(i18n.t('syncPill.update')).toBe('Actualizar');
   });
 
   it('returns the key (not undefined / null) for an unknown lookup', () => {

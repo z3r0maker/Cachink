@@ -20,7 +20,7 @@ import {
   validateEmpleadoForm,
   type EmpleadoFormErrors,
   type EmpleadoFormState,
-} from '../../Settings/empleado-form-fields';
+} from './empleado-form-fields';
 
 export interface NuevoEmpleadoModalProps {
   readonly open: boolean;

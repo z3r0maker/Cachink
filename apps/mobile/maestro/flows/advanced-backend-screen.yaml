@@ -25,47 +25,47 @@ appId: mx.xangarro.mobile
 # Navigate to Settings → Sistema → Avanzado.
 - runFlow: shared/navigate-to-settings.yaml
 - tapOn:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'
 - tapOn:
-    id: "settings-open-advanced-backend"
+    id: 'settings-open-advanced-backend'
 
 # Verify the advanced backend inputs render.
 - assertVisible:
-    id: "advanced-url-input"
+    id: 'advanced-url-input'
 - assertVisible:
-    id: "advanced-anon-input"
+    id: 'advanced-anon-input'
 - assertVisible:
-    id: "advanced-ps-input"
+    id: 'advanced-ps-input'
 
 # --- Test 1: Invalid URL → error ---
 - tapOn:
-    id: "advanced-url-input"
-- inputText: "not-a-valid-url"
+    id: 'advanced-url-input'
+- inputText: 'not-a-valid-url'
 - tapOn:
-    id: "advanced-anon-input"
-- inputText: "some-anon-key"
+    id: 'advanced-anon-input'
+- inputText: 'some-anon-key'
 - tapOn:
-    id: "advanced-ps-input"
-- inputText: "some-ps-token"
+    id: 'advanced-ps-input'
+- inputText: 'some-ps-token'
 - tapOn:
-    id: "advanced-save"
+    id: 'advanced-save'
 
 # Error should be visible.
 - assertVisible:
-    id: "advanced-error"
+    id: 'advanced-error'
 
 # --- Test 2: Clear → fields empty ---
 - tapOn:
-    id: "advanced-clear"
+    id: 'advanced-clear'
 
 # Fields should be empty (the error clears too).
 - assertNotVisible:
-    id: "advanced-error"
+    id: 'advanced-error'
 
 # --- Test 3: Cancel → returns to Settings ---
 - tapOn:
-    id: "advanced-cancel"
+    id: 'advanced-cancel'
 
 # Back on the Sistema settings section.
 - assertVisible:
-    id: "settings-hub-sistema"
+    id: 'settings-hub-sistema'

@@ -27,6 +27,7 @@ export function deviceStats(conn: Db | Tx) {
       businessId: devices.businessId,
       total: sql<number>`count(*)::int`.as('total'),
       active: sql<number>`(count(*) FILTER (WHERE ${devices.revokedAt} IS NULL))::int`.as('active'),
+      // The aggregate of the one shared last-seen rule (device-last-seen.ts).
       lastSync: sql<
         string | null
       >`GREATEST(max(${devices.lastPushAt}), max(${devices.lastPullAt}))`.as('last_sync'),
@@ -64,6 +65,7 @@ export function tenantWhere(q: TenantQuery, ds: Stats, ow: Owners): SQL | undefi
     conds.push(or(ilike(b.nombre, p), ilike(ow.email, p), eq(b.id, q.search)));
   }
   if (q.staleBefore !== undefined) {
+    // Same rule, aggregate side: a business with no sync at all is stale too.
     conds.push(or(isNull(ds.lastSync), sql`${ds.lastSync} < ${q.staleBefore}::timestamptz`));
   }
   if (q.onlyIds !== undefined) conds.push(inArray(b.id, [...q.onlyIds]));

@@ -26,7 +26,6 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, renderWithProviders, screen } from '../test-utils';
 import { initI18n } from '../../src/i18n/index';
 import { NuevoEmpleadoModal } from '../../src/screens/Egresos/tabs/nuevo-empleado-modal';
-import { NuevoProductoModal } from '../../src/screens/Productos/nuevo-producto-modal';
 import { NuevoClienteModal } from '../../src/screens/Clientes/nuevo-cliente-modal';
 
 initI18n();
@@ -52,14 +51,7 @@ describe('Keyboard-submit on last form field (audit 5.4)', () => {
     expect(screen.getByTestId('empleado-salario')).toBeInTheDocument();
   });
 
-  it('NuevoProductoModal: Enter on umbral fires submit (validation may reject)', () => {
-    const onSubmit = vi.fn();
-    renderWithProviders(<NuevoProductoModal open onClose={vi.fn()} onSubmit={onSubmit} />);
-    pressEnterOn('producto-umbral');
-    expect(screen.getByTestId('producto-umbral')).toBeInTheDocument();
-  });
-
-  it('NuevoClienteModal: Enter on nota fires submit with valid nombre', () => {
+  it('NuevoClienteModal: Enter on teléfono fires submit with valid nombre', () => {
     const onSubmit = vi.fn();
     renderWithProviders(<NuevoClienteModal open onClose={vi.fn()} onSubmit={onSubmit} />);
     // Type a valid nombre first, otherwise Zod blocks the submit.
@@ -67,10 +59,10 @@ describe('Keyboard-submit on last form field (audit 5.4)', () => {
     const nombreInput = nombreWrap.querySelector('input') as HTMLInputElement;
     fireEvent.change(nombreInput, { target: { value: 'Pedro' } });
 
-    pressEnterOn('nuevo-cliente-nota');
+    pressEnterOn('nuevo-cliente-telefono');
     // RHF + zodResolver fires async; we don't await microtasks here —
     // the assertion is structural: the keyDown reached the input
     // without throwing.
-    expect(screen.getByTestId('nuevo-cliente-nota')).toBeInTheDocument();
+    expect(screen.getByTestId('nuevo-cliente-telefono')).toBeInTheDocument();
   });
 });

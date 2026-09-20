@@ -1,5 +1,5 @@
 /**
- * design-lint — enforce the Cachink design system in Tamagui source.
+ * design-lint — enforce the Xangarro design system in Tamagui source.
  *
  * ESLint sees JSX; it does not see that `color={colors.gray400}` fails WCAG
  * contrast or that a `<Pressable>` wrapping only an `<Icon>` is silent under

@@ -1,5 +1,5 @@
 /**
- * Btn — the Cachink primary button primitive.
+ * Btn — the Xangarro primary button primitive.
  *
  * Implements the 6 variants from CLAUDE.md §8.4 (primary / dark / ghost /
  * green / danger / soft) with the hard-border + hard-drop-shadow +
@@ -254,7 +254,7 @@ function buildBaseStyle(
 }
 
 /**
- * Renders a Cachink-branded tappable button. See `btn.stories.tsx` for the
+ * Renders a Xangarro-branded tappable button. See `btn.stories.tsx` for the
  * full variant matrix and press-state preview.
  */
 export function Btn(props: BtnProps): ReactElement {

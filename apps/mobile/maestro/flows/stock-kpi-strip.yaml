@@ -25,16 +25,16 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Productos tab.
 - tapOn:
-    id: "tab-productos"
+    id: 'tab-productos'
 
 # Switch to Stock sub-tab.
 - tapOn:
-    id: "inventario-tab-stock"
+    id: 'inventario-tab-stock'
 
 # Verify the 3 KPI cards render.
 - assertVisible:
-    id: "stock-kpi-productos"
+    id: 'stock-kpi-productos'
 - assertVisible:
-    id: "stock-kpi-valor"
+    id: 'stock-kpi-valor'
 - assertVisible:
-    id: "stock-kpi-bajo"
+    id: 'stock-kpi-bajo'

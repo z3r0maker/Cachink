@@ -19,6 +19,7 @@ import {
   ProductSchema,
   RespuestaOperadorSchema,
   SaleSchema,
+  TicketSchema,
 } from '@xangarro/domain';
 import { ErrorCodeSchema, type ErrorCode } from './errors.js';
 import { MAX_PUSH_DELTAS } from './transport.js';
@@ -39,6 +40,7 @@ function delta<T extends PushableTable, S extends z.ZodType>(table: T, row: S) {
 
 /** Every pushable table with its row schema — the single place this mapping lives. */
 export const PUSH_ROW_SCHEMAS = {
+  tickets: TicketSchema,
   sales: SaleSchema,
   expenses: ExpenseSchema,
   inventory_movements: InventoryMovementSchema,
@@ -56,6 +58,7 @@ export const PUSH_ROW_SCHEMAS = {
 } as const satisfies Record<PushableTable, z.ZodType>;
 
 export const DeltaSchema = z.discriminatedUnion('table', [
+  delta('tickets', TicketSchema),
   delta('sales', SaleSchema),
   delta('expenses', ExpenseSchema),
   delta('inventory_movements', InventoryMovementSchema),

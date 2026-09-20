@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 import { useRouter } from 'expo-router';
 import type { PaymentMethod, Product, Sale } from '@xangarro/domain';
 import {
-  CachinkBurst,
+  SaleBurst,
   CajaGateBanner,
   CorteHomeCard,
   ProductosGateBanner,
@@ -24,17 +24,12 @@ export function VentasProductosGate(): ReactElement {
   return <ProductosGateBanner onGoToProductos={() => router.replace('/productos' as never)} />;
 }
 
-export function VentasCajaGate(props: {
-  role: string | null;
-  setShowCorte: (v: boolean) => void;
-}): ReactElement {
+export function VentasCajaGate(props: { setShowCorte: (v: boolean) => void }): ReactElement {
   const router = useRouter();
   return (
     <>
       <CajaGateBanner onGoToCaja={() => router.replace('/caja' as never)} />
-      {props.role === 'operativo' && (
-        <CorteHomeCard hideCard onShowChange={props.setShowCorte} testID="corte-hidden" />
-      )}
+      <CorteHomeCard hideCard onShowChange={props.setShowCorte} testID="corte-hidden" />
     </>
   );
 }
@@ -51,7 +46,6 @@ interface MainViewProps {
   onCheckout: () => void;
   total: bigint;
   ventaCount: number;
-  role: string | null;
   showCorte: boolean;
   onCorteOpen: () => void;
 }
@@ -74,7 +68,7 @@ export function VentasMainView(props: MainViewProps): ReactElement {
       onCheckout={props.onCheckout}
       total={props.total}
       ventaCount={props.ventaCount}
-      showCorte={props.role === 'operativo' && props.showCorte}
+      showCorte={props.showCorte}
       onCorteOpen={props.onCorteOpen}
     />
   );
@@ -88,7 +82,6 @@ interface SwipeData {
 }
 
 interface OverlayProps {
-  role: string | null;
   showCorte: boolean;
   setShowCorte: (v: boolean) => void;
   corteOpen: boolean;
@@ -105,15 +98,14 @@ interface OverlayProps {
   handleShare: () => void;
   eliminar: EliminarVentaResult;
   swipe: SwipeData;
-  showCachink: boolean;
-  setShowCachink: (v: boolean) => void;
+  showSaleBurst: boolean;
+  setShowSaleBurst: (v: boolean) => void;
 }
 
 export function VentasOverlays(p: OverlayProps): ReactElement {
   return (
     <>
       <VentasCorteSlot
-        role={p.role}
         showCorte={p.showCorte}
         setShowCorte={p.setShowCorte}
         corteOpen={p.corteOpen}
@@ -141,23 +133,21 @@ export function VentasOverlays(p: OverlayProps): ReactElement {
         setConfirmDelete={p.swipe.setConfirmDelete}
         eliminar={p.eliminar}
       />
-      <CachinkBurst
-        visible={p.showCachink}
-        onComplete={() => p.setShowCachink(false)}
-        testID="cachink-burst"
+      <SaleBurst
+        visible={p.showSaleBurst}
+        onComplete={() => p.setShowSaleBurst(false)}
+        testID="sale-burst"
       />
     </>
   );
 }
 
 function VentasCorteSlot(props: {
-  role: string | null;
   showCorte: boolean;
   setShowCorte: (v: boolean) => void;
   corteOpen: boolean;
   setCorteOpen: (v: boolean) => void;
-}): ReactElement | null {
-  if (props.role !== 'operativo') return null;
+}): ReactElement {
   return (
     <CorteHomeCard
       hideCard

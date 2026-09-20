@@ -9,6 +9,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   PROTOCOL_HEADER,
+  LEGACY_PROTOCOL_HEADER,
   PROTOCOL_VERSION,
   SYNCED_TABLES,
   decodeDelta,
@@ -146,7 +147,12 @@ const rowFixtures: Record<(typeof SYNCED_TABLES)[number], Record<string, unknown
 describe('protocol constants', () => {
   it('pins protocol version 1 and the canonical header name', () => {
     expect(PROTOCOL_VERSION).toBe(1);
-    expect(PROTOCOL_HEADER).toBe('X-Cachink-Protocol');
+    expect(PROTOCOL_HEADER).toBe('X-Xangarro-Protocol');
+  });
+
+  it('keeps the pre-rebrand header name for servers to accept (ADR-056)', () => {
+    expect(LEGACY_PROTOCOL_HEADER).toBe('X-Cachink-Protocol');
+    expect(LEGACY_PROTOCOL_HEADER).not.toBe(PROTOCOL_HEADER);
   });
 
   it('lists exactly 10 synced tables (app_config excluded)', () => {

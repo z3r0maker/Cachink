@@ -23,7 +23,7 @@
 # actually offers. The previous defaults ("iPhone 16", "iPad (10th
 # generation)") do not exist under the iOS 26.x runtimes and made
 # --device-class fail outright.
-MAESTRO_SE_DEVICE="${MAESTRO_SE_DEVICE:-Cachink-SE}"
+MAESTRO_SE_DEVICE="${MAESTRO_SE_DEVICE:-Xangarro-SE}"
 MAESTRO_IPHONE_DEVICE="${MAESTRO_IPHONE_DEVICE:-iPhone 17}"
 MAESTRO_IPAD_DEVICE="${MAESTRO_IPAD_DEVICE:-iPad (A16)}"
 
@@ -183,7 +183,7 @@ resolve_device() {
 # does not fail — it PROMPTS:
 #
 #   [1] iPhone 17 - iOS 26.5 - ...
-#   [2] Cachink-SE - iOS 26.5 - ...
+#   [2] Xangarro-SE - iOS 26.5 - ...
 #   Multiple running devices detected. Choose a device to run on.
 #   Enter a number from the list above:
 #

@@ -14,8 +14,8 @@ import { resolve } from 'node:path';
 
 const ROOT = resolve(__dirname, '..');
 const OUT = resolve(ROOT, 'docs/store/screenshots');
-const DESKTOP_URL = process.env.CACHINK_DESKTOP_URL ?? 'http://localhost:1420';
-const MOBILE_WEB_URL = process.env.CACHINK_MOBILE_WEB_URL ?? 'http://localhost:8081';
+const DESKTOP_URL = process.env.XANGARRO_DESKTOP_URL ?? 'http://localhost:1420';
+const MOBILE_WEB_URL = process.env.XANGARRO_MOBILE_WEB_URL ?? 'http://localhost:8081';
 
 type Size = { name: string; options: BrowserContextOptions };
 

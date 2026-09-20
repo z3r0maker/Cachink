@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { conTotales } from '@xangarro/domain';
 import {
   calculateBalanceGeneral,
   calculateEstadoDeResultados,
@@ -14,9 +15,19 @@ import {
   type Sale,
 } from '@xangarro/domain';
 
-import { getBusiness, periodBalanceInputs, periodLedger } from '@xangarro/data-pg';
+import {
+  getBusiness,
+  openingBalanceClientsOf,
+  openingBalanceOf,
+  periodBalanceInputs,
+  periodLedger,
+  tickets as ticketsTable,
+  valuacionApertura,
+} from '@xangarro/data-pg';
 
-import { withTenant } from './db';
+import { between } from 'drizzle-orm';
+import type { Ticket, TicketConTotal } from '@xangarro/domain';
+import { withTenant, type Tx } from './db';
 
 /**
  * The NIF statements, computed from **real ledger rows** by the existing
@@ -42,13 +53,13 @@ const diasEntre = (from: string, to: string) =>
   Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / DIA_MS) + 1);
 
 /** The phone's own filter (`use-balance-general`): Crédito or not fully paid. */
-const conCredito = (ventas: readonly Sale[]) =>
-  ventas.filter((v) => v.metodo === 'Crédito' || v.estadoPago !== 'pagado');
+const conCredito = (tickets: readonly TicketConTotal[]) =>
+  tickets.filter((v) => v.ticket.metodo === 'Crédito' || v.ticket.estadoPago !== 'pagado');
 
 function indicadoresDe(
   resultados: EstadosModel['resultados'],
   balance: EstadosModel['balance'],
-  ventas: readonly Sale[],
+  tickets: readonly TicketConTotal[],
   from: string,
   to: string,
 ): EstadosModel['indicadores'] {
@@ -58,10 +69,67 @@ function indicadoresDe(
     // The phone's choice: the current snapshot serves as the average too.
     inventarioPromedio: balance.activo.inventarios,
     ventasCreditoPeriodoCentavos: sum(
-      ventas.filter((v) => v.metodo === 'Crédito').map((v) => v.monto),
+      tickets.filter((v) => v.ticket.metodo === 'Crédito').map((v) => v.total),
     ),
     periodoDiasVenta: diasEntre(from, to),
   });
+}
+
+/** The period's tickets with derived totals (ADR-073), for method-level views. */
+async function ticketsConTotal(
+  businessId: string,
+  from: string,
+  to: string,
+  ventas: readonly Sale[],
+): Promise<readonly TicketConTotal[]> {
+  return withTenant(businessId, async (tx) => {
+    const tk = await tx
+      .select()
+      .from(ticketsTable)
+      .where(between(ticketsTable.fecha, from, to));
+    return conTotales(tk as unknown as readonly Ticket[], ventas);
+  });
+}
+
+type AperturaFacts = {
+  readonly header: {
+    readonly cajaCentavos: bigint;
+    readonly bancosCentavos: bigint;
+  };
+  readonly lines: readonly { clienteId: string; saldoCentavos: bigint }[];
+  readonly valuacionInventario: bigint;
+};
+
+async function loadApertura(tx: Tx, businessId: string): Promise<AperturaFacts | null> {
+  const header = await openingBalanceOf(tx, businessId);
+  if (header === null) return null;
+  return {
+    header,
+    lines: await openingBalanceClientsOf(tx, businessId),
+    valuacionInventario: await valuacionApertura(tx, businessId),
+  };
+}
+
+/**
+ * N-17: the day-one facts as the calculator wants them — efectivo = caja +
+ * bancos, the CxC lines, and capitalInicial = everything the owner imported
+ * (cash + CxC + the apertura movements' inventory valuation), so
+ * Activo = Pasivo + Capital holds from statement one.
+ */
+function aperturaDe(apertura: AperturaFacts | null) {
+  if (apertura === null) return undefined;
+  return {
+    efectivoInicial: apertura.header.cajaCentavos + apertura.header.bancosCentavos,
+    cuentasPorCobrar: apertura.lines.map((l) => ({
+      clienteId: l.clienteId,
+      saldoCentavos: l.saldoCentavos,
+    })),
+    capitalInicial:
+      apertura.header.cajaCentavos +
+      apertura.header.bancosCentavos +
+      apertura.lines.reduce((t, l) => t + l.saldoCentavos, 0n) +
+      apertura.valuacionInventario,
+  };
 }
 
 export async function loadEstadosModel(
@@ -71,10 +139,11 @@ export async function loadEstadosModel(
 ): Promise<EstadosModel> {
   // One tenant transaction: the period's ledger, the balance's real inputs
   // (F-1) and the rate the owner set.
-  const { rows, inputs, isrTasa } = await withTenant(businessId, async (tx) => ({
+  const { rows, inputs, isrTasa, apertura } = await withTenant(businessId, async (tx) => ({
     rows: await periodLedger(tx, from, to),
     inputs: await periodBalanceInputs(tx, from, to),
     isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
+    apertura: await loadApertura(tx, businessId),
   }));
 
   // The cloud schema now keys `monto_centavos` as `monto`, like the device
@@ -95,18 +164,19 @@ export async function loadEstadosModel(
     isrTasa,
   });
   const pagosClientes = inputs.pagos as unknown as readonly ClientPayment[];
+  const tickets = await ticketsConTotal(businessId, from, to, ventas);
   const balance = calculateBalanceGeneral({
     cortesDelDia: inputs.cortes as unknown as readonly DayClose[],
     inventarioStock: inputs.stock,
-    ventasConCredito: conCredito(ventas),
+    ventasConCredito: conCredito(tickets),
     pagosClientes,
-    // Opening liabilities arrive with N-17 (saldos iniciales); none exist yet.
     pasivosManuales: 0n,
     utilidadDelPeriodo: resultados.utilidadNeta,
+    apertura: aperturaDe(apertura),
   });
-  const flujo = calculateFlujoDeEfectivo({ ventas, egresos, pagosClientes });
-  const indicadores = indicadoresDe(resultados, balance, ventas, from, to);
+  const flujo = calculateFlujoDeEfectivo({ ventas: tickets, egresos, pagosClientes });
+  const indicadores = indicadoresDe(resultados, balance, tickets, from, to);
 
-  const desglose = desgloseDeResultados({ ventas, egresos });
+  const desglose = desgloseDeResultados({ ventas: tickets, egresos });
   return { resultados, balance, flujo, indicadores, isrTasa, desglose };
 }

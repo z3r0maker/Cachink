@@ -61,7 +61,7 @@ domain (e.g., pay.cachink.mx). After payment, the app detects the active
 subscription and unlocks full features.
 
 ```
-User downloads Cachink! (FREE)
+User downloads Xangarro (FREE)
         |
         v
 Uses the app with freemium limits (30 ventas/month)
@@ -98,7 +98,7 @@ Full access unlocked. Works offline.
 ### On a new device (cross-platform restore)
 
 ```
-User installs Cachink! on a second device
+User installs Xangarro on a second device
         |
         v
 "Ya tienes suscripcion? Ingresa tu email"
@@ -346,9 +346,9 @@ each billing cycle. The app fetches the new token when it comes online.
 
 Identical to Plan A. See billing-and-licensing-plan.md Section 6.
 
-The .cachink backup file works the same regardless of billing provider:
+The .xangarro backup file works the same regardless of billing provider:
 
-- Export: Settings -> "Exportar respaldo completo" -> .cachink file
+- Export: Settings -> "Exportar respaldo completo" -> .xangarro file
 - Import: First-run wizard or Settings -> "Importar respaldo"
 - Always available in all states (free, subscribed, read_only)
 
@@ -410,7 +410,7 @@ Wire up the subscription flow in the app.
 4. Auto-updater via Tauri's built-in updater (checks your server)
 5. Test: download from website -> subscribe via Stripe -> full access
 
-### Phase S5 — Data Portability (.cachink backup)
+### Phase S5 — Data Portability (.xangarro backup)
 
 Same as Plan A Phase E5:
 

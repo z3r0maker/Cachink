@@ -33,157 +33,157 @@ appId: mx.xangarro.mobile
 - runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-caja"
+      id: 'otros-caja'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-caja"
+    id: 'otros-caja'
 
 # Handle caja opening — may need numpad entry or confirm.
 - tapOn:
-    text: "CONFIRMAR MONTO"
+    text: 'CONFIRMAR MONTO'
     optional: true
 - tapOn:
-    id: "numpad-5"
+    id: 'numpad-5'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
     optional: true
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
     optional: true
 
 - extendedWaitUntil:
     visible:
-      id: "caja-status-card"
+      id: 'caja-status-card'
     timeout: 10000
 
 # ══════════════════════════════════════════════════════════════════
 # Step 1: Create 2nd product — Taco ($20)
 # ══════════════════════════════════════════════════════════════════
 - tapOn:
-    id: "top-bar-back"
+    id: 'top-bar-back'
 
 # Now on Otros grid — navigate to Productos.
 - scrollUntilVisible:
     element:
-      id: "otros-productos"
+      id: 'otros-productos'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-productos"
+    id: 'otros-productos'
 
 - tapOn:
-    id: "stock-nuevo-producto"
+    id: 'stock-nuevo-producto'
 
 - tapOn:
-    id: "producto-nombre"
-- inputText: "Taco"
+    id: 'producto-nombre'
+- inputText: 'Taco'
 - pressKey: enter
 
 - tapOn:
-    id: "producto-precio-venta"
+    id: 'producto-precio-venta'
 - eraseText
-- inputText: "20"
+- inputText: '20'
 - pressKey: enter
 
 - tapOn:
-    id: "producto-submit"
+    id: 'producto-submit'
     optional: true
 
 - extendedWaitUntil:
     notVisible:
-      id: "nuevo-producto-modal"
+      id: 'nuevo-producto-modal'
     timeout: 5000
 
 # Verify Taco appears in the stock list.
 - extendedWaitUntil:
     visible:
-      id: "stock-list"
+      id: 'stock-list'
     timeout: 5000
 - assertVisible:
-    text: ".*Taco.*"
+    text: '.*Taco.*'
 
 # ══════════════════════════════════════════════════════════════════
 # Step 2: Sell Tortilla ($15, Efectivo)
 # ══════════════════════════════════════════════════════════════════
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
-- tapOn: "Tortilla"
+- tapOn: 'Tortilla'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 5000
 - tapOn: "\\$50"
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # ══════════════════════════════════════════════════════════════════
 # Step 3: Sell Taco ($20, Efectivo)
 # ══════════════════════════════════════════════════════════════════
-- tapOn: "Taco"
+- tapOn: 'Taco'
 - assertVisible:
-    id: "cart-strip"
+    id: 'cart-strip'
 - tapOn:
-    id: "cart-checkout-btn"
+    id: 'cart-checkout-btn'
 
 - extendedWaitUntil:
     visible:
-      id: "checkout-method-picker"
+      id: 'checkout-method-picker'
     timeout: 5000
 - tapOn:
-    id: "checkout-method-continue"
+    id: 'checkout-method-continue'
 
 - extendedWaitUntil:
     visible:
-      id: "checkout-efectivo"
+      id: 'checkout-efectivo'
     timeout: 5000
 - tapOn: "\\$50"
 - tapOn:
-    id: "checkout-efectivo-submit"
+    id: 'checkout-efectivo-submit'
 
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 # ══════════════════════════════════════════════════════════════════
 # Step 4: Assert aggregate KPI — $35.00 (both sales)
 # ══════════════════════════════════════════════════════════════════
 - assertVisible:
-    id: "ventas-total-card"
+    id: 'ventas-total-card'
 - assertVisible:
     text: ".*\\$35\\.00.*"
 
 - assertVisible:
-    id: "ventas-list"
+    id: 'ventas-list'
 
 # ══════════════════════════════════════════════════════════════════
 # Step 5: Cancel one sale — navigate to Cancelaciones via Otros
@@ -194,80 +194,84 @@ appId: mx.xangarro.mobile
 - runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-cancelaciones"
+      id: 'otros-cancelaciones'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-cancelaciones"
+    id: 'otros-cancelaciones'
 
 - extendedWaitUntil:
     visible:
-      id: "cancelaciones-screen"
+      id: 'cancelaciones-screen'
     timeout: 5000
 
 # Tap the first "Cancelar" button (newest sale = Taco, $20).
-- tapOn: "Cancelar"
+- tapOn: 'Cancelar'
 
 # ── PIN step ──
 - extendedWaitUntil:
     visible:
-      id: "cancellation-flow"
+      id: 'cancellation-flow'
     timeout: 5000
 - assertVisible:
-    id: "cancel-pin-input"
-# Enter PIN 1234 (Director Test PIN).
+    id: 'cancel-pin-input'
+# Enter PIN 123456 (Director Test PIN).
 - tapOn:
-    id: "numpad-1"
+    id: 'numpad-1'
 - tapOn:
-    id: "numpad-2"
+    id: 'numpad-2'
 - tapOn:
-    id: "numpad-3"
+    id: 'numpad-3'
 - tapOn:
-    id: "numpad-4"
+    id: 'numpad-4'
+- tapOn:
+    id: 'numpad-5'
+- tapOn:
+    id: 'numpad-6'
 
 # ── Reason step ──
 - extendedWaitUntil:
     visible:
-      id: "cancel-reason-input"
+      id: 'cancel-reason-input'
     timeout: 5000
 - tapOn:
-    id: "cancel-reason-input"
-- inputText: "Prueba E2E"
+    id: 'cancel-reason-input'
+- inputText: 'Prueba E2E'
 - tapOn:
-    id: "cancel-reason-submit"
+    id: 'cancel-reason-submit'
 
 # ── Cash confirm step (Taco was cash/Efectivo) ──
 - extendedWaitUntil:
     visible:
-      id: "cancel-cash-confirm"
+      id: 'cancel-cash-confirm'
     timeout: 5000
 - tapOn:
-    id: "cancel-cash-confirm"
+    id: 'cancel-cash-confirm'
 
 # ══════════════════════════════════════════════════════════════════
 # Step 6: Verify cancellation — badge visible on cancelled sale
 # ══════════════════════════════════════════════════════════════════
 - extendedWaitUntil:
     notVisible:
-      id: "cancellation-flow"
+      id: 'cancellation-flow'
     timeout: 5000
 
 # The cancelled sale should show the badge text.
 - assertVisible:
-    text: ".*Cancelada.*Prueba E2E.*"
+    text: '.*Cancelada.*Prueba E2E.*'
 
 # ══════════════════════════════════════════════════════════════════
 # Step 7: Verify KPI adjusts — back to Ventas, total = $15.00
 # ══════════════════════════════════════════════════════════════════
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 - extendedWaitUntil:
     visible:
-      id: "ventas-product-grid"
+      id: 'ventas-product-grid'
     timeout: 5000
 
 - assertVisible:
-    id: "ventas-total-card"
+    id: 'ventas-total-card'
 - assertVisible:
     text: ".*\\$15\\.00.*"

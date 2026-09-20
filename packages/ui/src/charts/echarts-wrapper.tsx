@@ -1,5 +1,5 @@
 /**
- * echarts-wrapper.tsx — Tree-shaken ECharts core + Cachink neobrutalist theme.
+ * echarts-wrapper.tsx — Tree-shaken ECharts core + Xangarro neobrutalist theme.
  *
  * Only imports the chart types we actually use to keep the bundle ~150KB.
  * Desktop only — Metro resolves .native.tsx files and never touches this.
@@ -37,8 +37,8 @@ echarts.use([
   CanvasRenderer,
 ]);
 
-// Cachink neobrutalist theme
-echarts.registerTheme('cachink', {
+// Xangarro neobrutalist theme
+echarts.registerTheme('xangarro', {
   color: [colors.green, colors.red, colors.blue, colors.warning, colors.purple, colors.cyan],
   backgroundColor: 'transparent',
   textStyle: {

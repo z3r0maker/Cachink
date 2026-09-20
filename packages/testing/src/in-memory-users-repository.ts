@@ -2,8 +2,6 @@
  * In-memory implementation of {@link UsersRepository}. Used by
  * use-case tests and the shared contract suite.
  *
- * Phase 1 of the Feature Flags plan: user management + auth.
- * ADR-049: PIN for login, Password for recovery.
  */
 
 import type { BusinessId, DeviceId, IsoTimestamp, User, UserId } from '@xangarro/domain';
@@ -24,12 +22,9 @@ export class InMemoryUsersRepository implements UsersRepository {
     const row: User = {
       id,
       nombre: input.nombre,
-      email: input.email,
       pinHash: input.pinHash,
-      recoveryPasswordHash: input.recoveryPasswordHash,
-      role: input.role,
-      mustChangePin: input.mustChangePin,
       avatarColor: input.avatarColor,
+      permissions: input.permissions ?? { canCancelSales: false },
       active: true,
       businessId: input.businessId,
       deviceId: this.deviceId,
@@ -76,16 +71,10 @@ export class InMemoryUsersRepository implements UsersRepository {
     const updated: User = {
       ...existing,
       ...(patch.nombre !== undefined && { nombre: patch.nombre }),
-      ...(patch.email !== undefined && { email: patch.email }),
       ...(patch.pinHash !== undefined && {
         pinHash: patch.pinHash,
       }),
-      ...(patch.recoveryPasswordHash !== undefined && {
-        recoveryPasswordHash: patch.recoveryPasswordHash,
-      }),
-      ...(patch.mustChangePin !== undefined && {
-        mustChangePin: patch.mustChangePin,
-      }),
+      ...(patch.permissions !== undefined && { permissions: patch.permissions }),
       ...(patch.active !== undefined && { active: patch.active }),
       ...(patch.avatarColor !== undefined && {
         avatarColor: patch.avatarColor,
@@ -105,16 +94,6 @@ export class InMemoryUsersRepository implements UsersRepository {
       deletedAt: ts,
       updatedAt: ts,
     });
-  }
-
-  async countDirectors(businessId: BusinessId): Promise<number> {
-    let count = 0;
-    for (const row of this.rows.values()) {
-      if (row.businessId === businessId && row.role === 'director' && row.deletedAt === null) {
-        count++;
-      }
-    }
-    return count;
   }
 
   /** Test helper: wipe all users. Not part of UsersRepository. */

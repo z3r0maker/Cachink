@@ -8,13 +8,8 @@
  * branch has been removed.
  */
 
-import {
-  type IsoDate,
-  type NewSale,
-  type PaymentMethod,
-  type SaleCategory,
-} from '@xangarro/domain';
-import type { Business, Product } from '@xangarro/domain';
+import type { Business, IsoDate, PaymentMethod, Product, SaleCategory } from '@xangarro/domain';
+import type { RegistrarVentaInput } from '@xangarro/application';
 
 /** Derive SaleCategory from a Product's tipo. */
 export function deriveVentaCategoria(producto: Product, _business: Business): SaleCategory {
@@ -29,7 +24,7 @@ export interface QuickSellInput {
 }
 
 /** Build a NewSale payload from a quick-sell tap on a product card. */
-export function buildQuickSellPayload(input: QuickSellInput): NewSale {
+export function buildQuickSellPayload(input: QuickSellInput): RegistrarVentaInput {
   const { producto, business, fecha, metodo } = input;
   return {
     fecha,
@@ -40,5 +35,5 @@ export function buildQuickSellPayload(input: QuickSellInput): NewSale {
     productoId: producto.id,
     cantidad: 1,
     businessId: business.id,
-  } as NewSale;
+  };
 }

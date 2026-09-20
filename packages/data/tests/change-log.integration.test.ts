@@ -1,6 +1,6 @@
 /**
- * Integration tests for the `__cachink_change_log` triggers and the
- * `__cachink_sync_state` helpers added in migration 0001 (ADR-029,
+ * Integration tests for the `__xangarro_change_log` triggers and the
+ * `__xangarro_sync_state` helpers added in migration 0001 (ADR-029,
  * ADR-030).
  *
  * The tests run against a freshly-migrated `:memory:` `better-sqlite3`
@@ -12,11 +12,11 @@
  *     exactly one `insert` change-log row with matching id + device_id.
  *   - Updating a row (including soft-delete via `deleted_at`) produces an
  *     `update` change-log row.
- *   - The `__cachink_change_log.id` column is monotonically increasing so
+ *   - The `__xangarro_change_log.id` column is monotonically increasing so
  *     sync clients can paginate without losing rows.
  *   - `app_config` writes never appear in the change log (only business
  *     tables are synced).
- *   - The `__cachink_sync_state` round-trips JSON values of every
+ *   - The `__xangarro_sync_state` round-trips JSON values of every
  *     useful shape.
  */
 
@@ -31,7 +31,7 @@ import {
   writeHwm,
   writeSyncState,
 } from '../src/sync-state.js';
-import type { CachinkDatabase } from '../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../src/repositories/drizzle/_db.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7TEN';
 const DEV_A = '01HZ8XQN9GZJXV8AKQ5X0C7TEA';
@@ -55,15 +55,15 @@ type ChangeLogRow = {
   captured_at: string;
 };
 
-async function readChangeLog(db: CachinkDatabase): Promise<ChangeLogRow[]> {
+async function readChangeLog(db: XangarroDatabase): Promise<ChangeLogRow[]> {
   return (await db.all(
     sql`SELECT "id", "table_name", "row_id", "row_updated_at", "row_device_id", "op", "captured_at"
-        FROM "__cachink_change_log" ORDER BY "id" ASC`,
+        FROM "__xangarro_change_log" ORDER BY "id" ASC`,
   )) as ChangeLogRow[];
 }
 
 describe('migration 0001 — change-log triggers capture every row change', () => {
-  let db: CachinkDatabase;
+  let db: XangarroDatabase;
 
   beforeEach(() => {
     db = makeFreshDb();
@@ -72,26 +72,44 @@ describe('migration 0001 — change-log triggers capture every row change', () =
   it('fires exactly one insert row per business-table insert', async () => {
     const id = '01HZ8XQN9GZJXV8AKQ5X0C7TE1';
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id,
+        folio: 1,
+        fecha: '2026-04-23',
+        concepto: 'Taco al pastor',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        ...audit(),
+      })
+      .run();
+    await db
+      .insert(schema.sales)
+      .values({
+        id: `${id}L`,
+        ticketId: id,
         fecha: '2026-04-23',
         concepto: 'Taco al pastor',
         categoria: 'Producto',
         monto: 450_00n,
-        metodo: 'Efectivo',
-        clienteId: null,
-        estadoPago: 'pagado',
         productoId: '01HZ8XQN9GZJXV8AKQ5X0C7TE3',
         ...audit(),
       })
       .run();
 
     const log = await readChangeLog(db);
-    expect(log).toHaveLength(1);
+    // A ticket and its line each log exactly one insert.
+    expect(log).toHaveLength(2);
     expect(log[0]).toMatchObject({
-      table_name: 'sales',
+      table_name: 'tickets',
       row_id: id,
+      row_device_id: DEV_A,
+      op: 'insert',
+    });
+    expect(log[1]).toMatchObject({
+      table_name: 'sales',
+      row_id: `${id}L`,
       row_device_id: DEV_A,
       op: 'insert',
     });
@@ -229,16 +247,27 @@ describe('migration 0001 — change-log triggers capture every row change', () =
       })
       .run();
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
+        folio: 1,
+        fecha: '2026-04-23',
+        concepto: 'x',
+        metodo: 'Efectivo',
+        clienteId: null,
+        estadoPago: 'pagado',
+        ...audit(),
+      })
+      .run();
+    await db
+      .insert(schema.sales)
+      .values({
+        id: '01HZ8XQN9GZJXV8AKQ5X0C7S01L',
+        ticketId: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
         fecha: '2026-04-23',
         concepto: 'x',
         categoria: 'Producto',
         monto: 1n,
-        metodo: 'Efectivo',
-        clienteId: null,
-        estadoPago: 'pagado',
         productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(),
       })
@@ -356,17 +385,15 @@ describe('migration 0001 — change-log triggers capture every row change', () =
 
   it('preserves the distinct device_id on the log row (tiebreak input)', async () => {
     await db
-      .insert(schema.sales)
+      .insert(schema.tickets)
       .values({
         id: '01HZ8XQN9GZJXV8AKQ5X0C7TE7',
+        folio: 1,
         fecha: '2026-04-23',
         concepto: 'a',
-        categoria: 'Producto',
-        monto: 1n,
         metodo: 'Efectivo',
         clienteId: null,
         estadoPago: 'pagado',
-        productoId: '01HZ8XQN9GZJXV8AKQ5X0C7P01',
         ...audit(DEV_B),
       })
       .run();
@@ -376,8 +403,8 @@ describe('migration 0001 — change-log triggers capture every row change', () =
   });
 });
 
-describe('__cachink_sync_state helpers — readSyncState / writeSyncState', () => {
-  let db: CachinkDatabase;
+describe('__xangarro_sync_state helpers — readSyncState / writeSyncState', () => {
+  let db: XangarroDatabase;
 
   beforeEach(() => {
     db = makeFreshDb();

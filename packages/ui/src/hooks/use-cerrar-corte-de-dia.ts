@@ -18,7 +18,12 @@ import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { CerrarCorteDeDiaUseCase, type CerrarCorteDeDiaInput } from '@xangarro/application';
 import type { DayClose } from '@xangarro/domain';
-import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
+import {
+  useDayClosesRepository,
+  useExpensesRepository,
+  useSalesRepository,
+  useTicketsRepository,
+} from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 import { estadosKeys } from './query-keys';
 import { useAuditedUseCase } from '../observability/index';
@@ -32,13 +37,14 @@ export type CerrarCorteDeDiaResult = UseMutationResult<
 >;
 
 export function useCerrarCorteDeDia(): CerrarCorteDeDiaResult {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const closes = useDayClosesRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
   const rawUseCase = useMemo(
-    () => new CerrarCorteDeDiaUseCase(sales, expenses, closes),
+    () => new CerrarCorteDeDiaUseCase(tickets, sales, expenses, closes),
     [sales, expenses, closes],
   );
   const useCase = useAuditedUseCase(rawUseCase, AUDIT_CERRAR_CORTE);

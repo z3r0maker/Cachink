@@ -43,8 +43,15 @@ const TITLES = {
 } as const;
 const BACK = 'M15 6l-6 6 6 6';
 
+export interface CobroProps {
+  readonly caja: Caja;
+  readonly data: CajaData;
+  /** False on a linked register: fiado needs an existing client (O-33). */
+  readonly permitirNuevo?: boolean;
+}
+
 /** Cobrar: the method, then cash with change or credit with a client. */
-export function Cobro({ caja, data }: { readonly caja: Caja; readonly data: CajaData }) {
+export function Cobro({ caja, data, permitirNuevo = true }: CobroProps) {
   const paso = caja.paso === 'catalogo' ? null : caja.paso;
   return (
     <OpModal
@@ -71,7 +78,9 @@ export function Cobro({ caja, data }: { readonly caja: Caja; readonly data: Caja
         <div className={c.step}>
           {paso === 'metodo' ? <Metodos caja={caja} /> : null}
           {paso === 'efectivo' ? <Efectivo caja={caja} /> : null}
-          {paso === 'credito' ? <Credito caja={caja} clientes={data.clientes} /> : null}
+          {paso === 'credito' ? (
+            <Credito caja={caja} clientes={data.clientes} permitirNuevo={permitirNuevo} />
+          ) : null}
         </div>
       </div>
     </OpModal>

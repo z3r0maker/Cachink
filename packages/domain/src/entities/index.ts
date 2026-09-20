@@ -21,6 +21,7 @@ export * from './inventory-movement.js';
 export * from './employee.js';
 export * from './client.js';
 export * from './client-payment.js';
+export * from './opening-balance.js';
 export * from './day-close.js';
 export * from './recurring-expense.js';
 export * from './regimen-fiscal.js';

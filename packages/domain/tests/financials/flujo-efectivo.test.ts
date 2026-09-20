@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { ClientPayment, Expense, Sale } from '../../src/entities/index.js';
+import type { ClientPayment, Expense } from '../../src/entities/index.js';
 import { calculateFlujoDeEfectivo } from '../../src/financials/index.js';
 
 const AUDIT = {
@@ -10,19 +10,11 @@ const AUDIT = {
   deletedAt: null,
 } as const;
 
-function makeSale(overrides: Partial<Sale> = {}): Sale {
+function makeVenta(overrides: { metodo?: string; monto?: bigint } = {}): never {
   return {
-    id: '01HZ8XQN9GZJXV8AKQ5X0C7S01',
-    fecha: '2026-04-23',
-    concepto: 'Taco',
-    categoria: 'Producto',
-    monto: 100n,
-    metodo: 'Efectivo',
-    clienteId: null,
-    estadoPago: 'pagado',
-    ...AUDIT,
-    ...overrides,
-  } as Sale;
+    ticket: { metodo: overrides.metodo ?? 'Efectivo' },
+    total: overrides.monto ?? 100n,
+  } as never;
 }
 
 function makeExpense(overrides: Partial<Expense> = {}): Expense {
@@ -66,17 +58,17 @@ describe('calculateFlujoDeEfectivo', () => {
 
   it('cash-method ventas feed operacion directly', () => {
     const ventas = [
-      makeSale({ metodo: 'Efectivo', monto: 10_000n }),
-      makeSale({ metodo: 'Transferencia', monto: 5_000n }),
-      makeSale({ metodo: 'Tarjeta', monto: 2_500n }),
-      makeSale({ metodo: 'QR/CoDi', monto: 1_500n }),
+      makeVenta({ metodo: 'Efectivo', monto: 10_000n }),
+      makeVenta({ metodo: 'Transferencia', monto: 5_000n }),
+      makeVenta({ metodo: 'Tarjeta', monto: 2_500n }),
+      makeVenta({ metodo: 'QR/CoDi', monto: 1_500n }),
     ];
     const result = calculateFlujoDeEfectivo({ ventas, egresos: [], pagosClientes: [] });
     expect(result.operacion).toBe(19_000n);
   });
 
   it('Crédito ventas do NOT count as cash-in', () => {
-    const ventas = [makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n })];
+    const ventas = [makeVenta({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n })];
     const result = calculateFlujoDeEfectivo({ ventas, egresos: [], pagosClientes: [] });
     expect(result.operacion).toBe(0n);
   });
@@ -112,8 +104,8 @@ describe('calculateFlujoDeEfectivo', () => {
 
   it('mixed realistic day', () => {
     const ventas = [
-      makeSale({ metodo: 'Efectivo', monto: 20_000n }),
-      makeSale({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n }),
+      makeVenta({ metodo: 'Efectivo', monto: 20_000n }),
+      makeVenta({ metodo: 'Crédito', estadoPago: 'pendiente', monto: 10_000n }),
     ];
     const pagos = [makePago({ montoCentavos: 5_000n })];
     const egresos = [
@@ -130,8 +122,8 @@ describe('calculateFlujoDeEfectivo', () => {
 
   it('handles refund ventas (negative monto) correctly', () => {
     const ventas = [
-      makeSale({ metodo: 'Efectivo', monto: 10_000n }),
-      makeSale({ metodo: 'Efectivo', monto: -3_000n }),
+      makeVenta({ metodo: 'Efectivo', monto: 10_000n }),
+      makeVenta({ metodo: 'Efectivo', monto: -3_000n }),
     ];
     const result = calculateFlujoDeEfectivo({ ventas, egresos: [], pagosClientes: [] });
     expect(result.operacion).toBe(7_000n);
@@ -140,7 +132,7 @@ describe('calculateFlujoDeEfectivo', () => {
   // ── Sub-component field tests ──
 
   it('exposes cobroVentasContado and cobroCreditoClientes separately', () => {
-    const ventas = [makeSale({ metodo: 'Efectivo', monto: 10_000n })];
+    const ventas = [makeVenta({ metodo: 'Efectivo', monto: 10_000n })];
     const pagos = [makePago({ montoCentavos: 3_000n })];
     const result = calculateFlujoDeEfectivo({ ventas, egresos: [], pagosClientes: pagos });
     expect(result.cobroVentasContado).toBe(10_000n);
@@ -159,7 +151,7 @@ describe('calculateFlujoDeEfectivo', () => {
   });
 
   it('sub-components sum to aggregates: contado + credito - egresoOp = operacion', () => {
-    const ventas = [makeSale({ metodo: 'Efectivo', monto: 20_000n })];
+    const ventas = [makeVenta({ metodo: 'Efectivo', monto: 20_000n })];
     const pagos = [makePago({ montoCentavos: 5_000n })];
     const egresos = [makeExpense({ categoria: 'Renta', monto: 3_000n })];
     const result = calculateFlujoDeEfectivo({ ventas, egresos, pagosClientes: pagos });

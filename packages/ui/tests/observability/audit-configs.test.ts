@@ -64,7 +64,6 @@ describe('Audit configs (AuditedUseCaseConfig)', () => {
     } as never);
     expect(meta).toEqual({
       monto: '5000',
-      metodo: 'Efectivo',
       categoria: 'Producto',
       productoId: 'p1',
     });

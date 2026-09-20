@@ -12,6 +12,7 @@
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { conTotales, vigentes } from '@xangarro/domain';
 import {
   calculateCorteDeDia,
   ZERO,
@@ -19,8 +20,18 @@ import {
   type IsoDate,
   type Money,
 } from '@xangarro/domain';
-import type { DayClosesRepository, ExpensesRepository, SalesRepository } from '@xangarro/data';
-import { useDayClosesRepository, useExpensesRepository, useSalesRepository } from '../app/index';
+import type {
+  DayClosesRepository,
+  ExpensesRepository,
+  SalesRepository,
+  TicketsRepository,
+} from '@xangarro/data';
+import {
+  useDayClosesRepository,
+  useExpensesRepository,
+  useSalesRepository,
+  useTicketsRepository,
+} from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
 
 export interface UseEfectivoEsperadoOptions {
@@ -36,17 +47,20 @@ export interface EfectivoEsperadoResult {
  * mounting a QueryClient. The hook wraps this in `useQuery`.
  */
 export async function composeEfectivoEsperado(
+  ticketsRepo: TicketsRepository,
   sales: SalesRepository,
   expenses: ExpensesRepository,
   closes: DayClosesRepository,
   businessId: BusinessId,
   fecha: IsoDate,
 ): Promise<EfectivoEsperadoResult> {
-  const [ventasHoy, egresosHoy, corteAnterior] = await Promise.all([
+  const [ticketsHoy, lineasHoy, egresosHoy, corteAnterior] = await Promise.all([
+    ticketsRepo.findByDate(fecha, businessId),
     sales.findByDate(fecha, businessId),
     expenses.findByDate(fecha, businessId),
     closes.findLatest(businessId),
   ]);
+  const ventasHoy = conTotales(vigentes(ticketsHoy), lineasHoy);
   const { esperado } = calculateCorteDeDia({
     ventasHoy,
     egresosHoy,
@@ -59,6 +73,7 @@ export async function composeEfectivoEsperado(
 export function useEfectivoEsperado(
   options: UseEfectivoEsperadoOptions,
 ): UseQueryResult<EfectivoEsperadoResult, Error> {
+  const tickets = useTicketsRepository();
   const sales = useSalesRepository();
   const expenses = useExpensesRepository();
   const closes = useDayClosesRepository();
@@ -69,7 +84,7 @@ export function useEfectivoEsperado(
     enabled: businessId !== null,
     async queryFn() {
       if (!businessId) return { esperado: ZERO };
-      return composeEfectivoEsperado(sales, expenses, closes, businessId, options.fecha);
+      return composeEfectivoEsperado(tickets, sales, expenses, closes, businessId, options.fecha);
     },
   });
 }

@@ -40,7 +40,13 @@ export interface UsageSnapshot extends PeriodUsage {
  * owner, in the portal) count (OQ-5, C-12); the others are stock changes
  * another use case wrote on the user's behalf.
  */
-export type MovementOrigin = 'manual' | 'portal' | 'venta' | 'cancelacion' | 'conversion';
+export type MovementOrigin =
+  | 'manual'
+  | 'portal'
+  | 'apertura'
+  | 'venta'
+  | 'cancelacion'
+  | 'conversion';
 
 /** Review status of a product created at the register (ADR-074). */
 export type ProductReviewStatus = 'pendiente' | 'aprobado' | 'fusionado' | 'rechazado';

@@ -12,20 +12,20 @@
  */
 
 import { sql } from 'drizzle-orm';
-import type { CachinkDatabase } from '../repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
 
 /**
  * Current schema version. Must match the number of entries in
  * `_journal.json`. After consolidation this starts at 1.
  */
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 10;
 
-export async function getSchemaVersion(db: CachinkDatabase): Promise<number> {
+export async function getSchemaVersion(db: XangarroDatabase): Promise<number> {
   const result = await db.get(sql.raw('PRAGMA user_version'));
   return (result as { user_version: number } | undefined)?.user_version ?? 0;
 }
 
-export async function setSchemaVersion(db: CachinkDatabase, version: number): Promise<void> {
+export async function setSchemaVersion(db: XangarroDatabase, version: number): Promise<void> {
   await db.run(sql.raw(`PRAGMA user_version = ${version}`));
 }
 

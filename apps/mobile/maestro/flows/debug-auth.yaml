@@ -3,23 +3,27 @@
 appId: mx.xangarro.mobile
 ---
 - launchApp
-- assertVisible: "Selecciona tu usuario"
-- tapOn: "J, Juan Director, Director"
+- assertVisible: 'Selecciona tu usuario'
+- tapOn: 'J, Juan Director, Director'
 - extendedWaitUntil:
     visible:
-      id: "pin-numpad"
+      id: 'pin-numpad'
     timeout: 5000
 # Small pause to let the numpad animation settle
 - waitForAnimationToEnd
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
 - tapOn:
-    id: "numpad-0"
+    id: 'numpad-0'
+- tapOn:
+    id: 'numpad-0'
+- tapOn:
+    id: 'numpad-0'
 - extendedWaitUntil:
     visible:
-      id: "tab-ventas"
+      id: 'tab-ventas'
     timeout: 5000

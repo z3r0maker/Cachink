@@ -19,7 +19,7 @@
 
 import type { ClientPayment } from '../entities/client-payment.js';
 import type { DayClose } from '../entities/day-close.js';
-import type { Sale } from '../entities/sale.js';
+import type { TicketConTotal } from './tickets.js';
 import { estadoDeCuenta, type CargoFiado, type PagoCliente } from './estado-cuenta.js';
 import type { Money } from '../money/index.js';
 import { ZERO, sum } from '../money/index.js';
@@ -35,6 +35,26 @@ export interface BalanceGeneral {
   capital: { utilidadDelPeriodo: Money; total: Money };
 }
 
+/**
+ * Day-one facts (N-17, C-20). Additive by design: the caller composes them
+ * with the period's own facts and is responsible for not counting the same
+ * peso twice — today the portal passes no cortes, so the opening cash is the
+ * whole cash line; the day cortes feed this calculator too, the caller passes
+ * the opening plus the period's cash movement, not the drawer totals again.
+ */
+export interface AperturaBalances {
+  /** Caja + bancos at fecha de apertura. */
+  readonly efectivoInicial: Money;
+  /** One saldo per cliente (≥ 0); feeds `estadoDeCuenta` as its third fact. */
+  readonly cuentasPorCobrar: readonly { clienteId: string; saldoCentavos: Money }[];
+  /**
+   * The owner's day-one equity: what the imported assets sum to (efectivo +
+   * CxC + the opening inventory valuation), caller-computed so the identity
+   * Activo = Pasivo + Capital holds from statement one.
+   */
+  readonly capitalInicial: Money;
+}
+
 export interface BalanceGeneralInput {
   /**
    * Nightly cortes to aggregate. We use the **latest** corte per (date,
@@ -44,24 +64,32 @@ export interface BalanceGeneralInput {
   /** Current stock per productoId × costoUnit gives the inventory valuation. */
   inventarioStock: readonly { costoUnitCentavos: Money; cantidad: number }[];
   /** Ventas still in pendiente/parcial status. */
-  ventasConCredito: readonly Sale[];
+  /** Open fiado tickets with their derived totals (ADR-073). */
+  ventasConCredito: readonly TicketConTotal[];
   /** All pagos received against any venta in `ventasConCredito`. */
   pagosClientes: readonly ClientPayment[];
   /** Manually tracked liabilities (vendors, loans). Zero when none. */
   pasivosManuales: Money;
   /** Utilidad del periodo from calculateEstadoDeResultados. */
   utilidadDelPeriodo: Money;
+  /** Day-one facts; omitted by callers without opening balances. */
+  readonly apertura?: AperturaBalances;
 }
 
 export function calculateBalanceGeneral(input: BalanceGeneralInput): BalanceGeneral {
-  const efectivo = latestCorteCash(input.cortesDelDia);
+  const apertura = input.apertura;
+  const efectivo = latestCorteCash(input.cortesDelDia) + (apertura?.efectivoInicial ?? ZERO);
   const inventarios = sum(
     input.inventarioStock.map((s) => s.costoUnitCentavos * BigInt(s.cantidad)),
   );
-  const cuentasPorCobrar = calcCuentasPorCobrar(input.ventasConCredito, input.pagosClientes);
+  const cuentasPorCobrar = calcCuentasPorCobrar(
+    input.ventasConCredito,
+    input.pagosClientes,
+    apertura?.cuentasPorCobrar ?? [],
+  );
 
   const activoTotal = efectivo + inventarios + cuentasPorCobrar;
-  const capitalTotal = input.utilidadDelPeriodo;
+  const capitalTotal = input.utilidadDelPeriodo + (apertura?.capitalInicial ?? ZERO);
 
   return {
     activo: {
@@ -103,15 +131,16 @@ function latestCorteCash(cortes: readonly DayClose[]): Money {
  * abono (saldo a favor) is not an asset, so only `saldo` counts.
  */
 function calcCuentasPorCobrar(
-  ventasConCredito: readonly Sale[],
+  ticketsConCredito: readonly TicketConTotal[],
   pagosClientes: readonly ClientPayment[],
+  saldosIniciales: readonly { clienteId: string; saldoCentavos: Money }[],
 ): Money {
   const ventasPorCliente = new Map<string, CargoFiado[]>();
-  for (const venta of ventasConCredito) {
-    if (venta.estadoPago !== 'pendiente' && venta.estadoPago !== 'parcial') continue;
-    const key = venta.clienteId ?? venta.id; // defensive: fiado without a client
+  for (const { ticket, total } of ticketsConCredito) {
+    if (ticket.estadoPago !== 'pendiente' && ticket.estadoPago !== 'parcial') continue;
+    const key = ticket.clienteId ?? ticket.id; // defensive: fiado without a client
     const bucket = ventasPorCliente.get(key) ?? [];
-    bucket.push({ id: venta.id, fecha: venta.createdAt, monto: venta.monto });
+    bucket.push({ id: ticket.id, fecha: ticket.createdAt, monto: total });
     ventasPorCliente.set(key, bucket);
   }
   const abonosPorCliente = new Map<string, PagoCliente[]>();
@@ -120,10 +149,17 @@ function calcCuentasPorCobrar(
     bucket.push({ id: p.id, fecha: p.createdAt, monto: p.montoCentavos });
     abonosPorCliente.set(p.clienteId, bucket);
   }
+  const aperturaPorCliente = new Map(saldosIniciales.map((s) => [s.clienteId, s.saldoCentavos]));
 
+  // A client can arrive with an opening saldo and no tickets yet (C-20).
+  const clientes = new Set([...ventasPorCliente.keys(), ...aperturaPorCliente.keys()]);
   let total: Money = ZERO;
-  for (const [cliente, ventas] of ventasPorCliente) {
-    total += estadoDeCuenta(ventas, abonosPorCliente.get(cliente) ?? []).saldo;
+  for (const cliente of clientes) {
+    total += estadoDeCuenta(
+      ventasPorCliente.get(cliente) ?? [],
+      abonosPorCliente.get(cliente) ?? [],
+      aperturaPorCliente.get(cliente) ?? ZERO,
+    ).saldo;
   }
   return total;
 }

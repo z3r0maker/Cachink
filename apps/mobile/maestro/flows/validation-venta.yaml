@@ -25,43 +25,43 @@ appId: mx.xangarro.mobile
 
 # Navigate to the Ventas tab.
 - tapOn:
-    id: "tab-ventas"
+    id: 'tab-ventas'
 
 # --- Test 1: Empty concepto + valid monto ---
 # The manual venta form's submit button should be disabled when
 # concepto is empty.
 - assertVisible:
-    id: "manual-venta-form"
+    id: 'manual-venta-form'
 
 # Enter a valid monto but leave concepto blank.
 - tapOn:
-    id: "manual-venta-monto"
-- inputText: "100"
+    id: 'manual-venta-monto'
+- inputText: '100'
 
 # The submit button should be disabled (validation: concepto is
 # required and monto > 0). Tap it — nothing should happen.
 - tapOn:
-    id: "manual-venta-submit"
+    id: 'manual-venta-submit'
 
 # The form should still be visible (not submitted).
 - assertVisible:
-    id: "manual-venta-form"
+    id: 'manual-venta-form'
 
 # --- Test 2: Valid concepto + $0 monto ---
 # Clear the monto and enter a concepto.
 - tapOn:
-    id: "manual-venta-monto"
+    id: 'manual-venta-monto'
 - eraseText
-- inputText: "0"
+- inputText: '0'
 
 - tapOn:
-    id: "manual-venta-concepto"
-- inputText: "Test producto"
+    id: 'manual-venta-concepto'
+- inputText: 'Test producto'
 
 # Submit button should still be disabled (monto = 0).
 - tapOn:
-    id: "manual-venta-submit"
+    id: 'manual-venta-submit'
 
 # Form still visible — validation prevented submission.
 - assertVisible:
-    id: "manual-venta-form"
+    id: 'manual-venta-form'

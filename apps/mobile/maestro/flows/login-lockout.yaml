@@ -1,0 +1,45 @@
+# Operator sign-in guard (A-05): no PIN recovery on the device, and five
+# wrong PINs lock PIN entry for 30 s.
+#
+# Precondition: device activated against the mock (activation.yaml); starts
+# on the operator list or signed in (it locks the screen first).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow:
+    when:
+      visible:
+        id: 'tab-caja'
+    commands:
+      - tapOn:
+          id: 'top-bar-left'
+- extendedWaitUntil:
+    visible:
+      id: 'quick-switch'
+    timeout: 20000
+- tapOn:
+    text: '.*Toni.*'
+- extendedWaitUntil:
+    visible:
+      id: 'numpad-1'
+    timeout: 8000
+- assertNotVisible:
+    id: 'forgot-pin-link'
+- repeat:
+    times: 5
+    commands:
+      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'numpad-9' }
+      - tapOn: { id: 'numpad-9' }
+      - extendedWaitUntil:
+          visible:
+            text: '.*(PIN incorrecto|Demasiados intentos).*'
+          timeout: 10000
+# The previous error text can satisfy the in-loop wait early, so wait here.
+- extendedWaitUntil:
+    visible:
+      text: '.*Demasiados intentos.*'
+    timeout: 15000

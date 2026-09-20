@@ -366,7 +366,22 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-17 Ticket header entity; `sales` become lines
 
-- [ ] Status · **Surfaced by:** Track O (ADR-073) · **Blocks:** O-05, fase 11
+- [x] Status · **Surfaced by:** Track O (ADR-073) · **Blocks:** O-05, fase 11
+  - Done: 2026-09-19 · `tickets` UP table (folio per-device via `nextFolio`, metodo, clienteId,
+    efectivoRecibido/cambio, cajaTurnoId, cancellation triple) and `sales` as its lines
+    (ticketId + product/quantity/amount; fecha copied from the ticket, immutable). SQLite 0005
+    (one-line-ticket backfill with per-device folio numbering, sales rebuild re-creating the partial
+    indexes, cancelacion_logs → ticket_id, triggers for both tables — 4 old→new tests) and pg 0024
+    (additive: tickets, sales ticket_id + dropped header columns, cancelacion_logs ticket_id,
+    RLS + grants; applied to the local DB). `RegistrarTicketUseCase`/`CancelarTicketUseCase` are the
+    atomic use cases (TDD: 9 + 15 tests); `RegistrarVenta`/`CancelarVenta` are thin one-line
+    wrappers so the phone UI keeps compiling. `conTotales`/`vigentes` join headers to lines once;
+    flujo-efectivo, balance-general (via estadoDeCuenta), desglose, corte-de-dia, comprobante and
+    the NIF feeds read ticket projections. Repos (drizzle + in-memory + contract tests), the old
+    app's hooks/screens, the portal's estados/serie/dashboard queries and the conformance seed
+    follow. Wire: tickets in UP_TABLES + PUSH_ROW_SCHEMAS; a ticket and its lines travel as
+    per-row deltas in one push (per the owner's decision). Domain 761, data 270, application 460,
+    contracts 50, testing 144, UI 1857, data-pg 157 green; typecheck clean across the workspace.
 - **Steps:** new UP table (folio, metodo, clienteId, efectivoRecibido, cambio, cajaTurnoId,
   cancellation fields); `sales` gain `ticketId` and lose the ticket-level fields; unique
   (device, folio). SQLite + pg migrations with old → new tests (each sale → one-line ticket).
@@ -418,7 +433,16 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-20 `opening_balances` DOWN table (saldos iniciales)
 
-- [ ] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+- [~] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+  - Progress: 2026-09-19 · `track-n/c20-n17-apertura` · wire + pg halves done: both entities on
+    `BusinessSchema`-style zod with defaults (old payloads parse unchanged), `DOWN_TABLES` +
+    `ReferenceTablesSchema` arrays (`.default([])`), codec OUT, `SYNCED_TABLES`, bootstrap +
+    mock fixtures. data-pg **0025** (tables + RLS + grants) with old→new, replace-save and
+    one-way-lock integration tests. The SQLite half waits for the app branch —
+    `PENDING_DEVICE_TABLES` allowances in the drift and scope tests make that explicit and
+    self-expiring. The ADR-074 receivables calculator takes the opening saldo as
+    `estadoDeCuenta`'s third fact (domain, tested), and `calculateBalanceGeneral` gains
+    `apertura` (efectivo inicial, CxC lines, caller-computed capitalInicial).
 - **Steps:** new DOWN entities `opening_balances` (id, business_id, fecha_apertura, caja_centavos,
   bancos_centavos, locked_at nullable, updated_at) and `opening_balance_clients` (id, business_id,
   cliente_id, saldo_centavos, updated_at); add both to `DOWN_TABLES` in `scope.ts`; pg-core + SQLite

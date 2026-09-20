@@ -2,7 +2,7 @@
  * QuickSwitchScreen tests — Login/quick-switch-screen.tsx coverage.
  *
  * Verifies avatar grid rendering, user selection → PIN prompt slide-in,
- * onAuthenticate + onForgotPin callback wiring.
+ * onAuthenticate callback wiring.
  */
 
 import type { ComponentProps } from 'react';
@@ -18,13 +18,11 @@ initI18n();
 const USER_A = makeUser({
   id: '01JPHK0000000000000000USR1' as UserId,
   nombre: 'Ana Director',
-  role: 'director',
   avatarColor: 'blue',
 });
 const USER_B = makeUser({
   id: '01JPHK0000000000000000USR2' as UserId,
   nombre: 'Beto Operativo',
-  role: 'operativo',
   avatarColor: 'green',
 });
 
@@ -50,12 +48,6 @@ describe('QuickSwitchScreen', () => {
     expect(screen.getByTestId(`user-avatar-${USER_B.id}`)).toBeInTheDocument();
   });
 
-  it('renders role badges for each user', () => {
-    renderScreen();
-    expect(screen.getByTestId(`user-role-${USER_A.id}`)).toBeInTheDocument();
-    expect(screen.getByTestId(`user-role-${USER_B.id}`)).toBeInTheDocument();
-  });
-
   it('shows the PIN prompt when a user avatar is tapped', () => {
     renderScreen();
     // After selecting a user, the prompt should appear
@@ -75,7 +67,7 @@ describe('QuickSwitchScreen', () => {
     const onAuthenticate = vi.fn();
     renderScreen({ onAuthenticate });
     fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    // PinCodeInput uses numpad mode in PinPrompt — press 4 digit buttons
+    // PinCodeInput uses numpad mode in PinPrompt — press 6 digit buttons
     fireEvent.click(screen.getByTestId('numpad-1'));
     fireEvent.click(screen.getByTestId('numpad-2'));
     fireEvent.click(screen.getByTestId('numpad-3'));
@@ -84,25 +76,10 @@ describe('QuickSwitchScreen', () => {
     expect(onAuthenticate).toHaveBeenCalledWith(USER_A.id, '1234');
   });
 
-  it('shows forgot-pin link when onForgotPin is provided', () => {
-    const onForgotPin = vi.fn();
-    renderScreen({ onForgotPin });
-    fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    expect(screen.getByTestId('forgot-pin-link')).toBeInTheDocument();
-  });
-
-  it('does not show forgot-pin link when onForgotPin is not provided', () => {
+  it('never offers PIN recovery on the device (A-05)', () => {
     renderScreen();
     fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
     expect(screen.queryByTestId('forgot-pin-link')).toBeNull();
-  });
-
-  it('fires onForgotPin with the selected userId', () => {
-    const onForgotPin = vi.fn();
-    renderScreen({ onForgotPin });
-    fireEvent.click(screen.getByTestId(`user-avatar-${USER_A.id}`));
-    fireEvent.click(screen.getByTestId('forgot-pin-link'));
-    expect(onForgotPin).toHaveBeenCalledWith(USER_A.id);
   });
 
   it('shows error text from the error prop', () => {

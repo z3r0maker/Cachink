@@ -70,20 +70,34 @@ reasons vs the existing six-value `caja_turnos` enum (fase 12); expense receipt 
 
 ### O-02 Recover `packages/sync/src`; SQLite-WASM spike
 
-> **Reordered 2026-09-17 (owner, question 9):** O-10 and O-11 run first on fixtures; O-02 waits for
-> `track/app` to land on `main`, because `packages/sync/src` exists only on that unmerged track.
-
-- [ ] Status · **Blocked by:** — · **Blocks:** O-05, O-06
-- **Steps:** restore `packages/sync/src` from the branch that has it (see `git log --all -- packages/sync/src`), make
-  it build and pass its tests on this checkout. Spike: a Worker running
-  SQLite-WASM on OPFS, the `@xangarro/data` migrations applied, one repository round-trip and one
-  change-log row, in Chromium and WebKit via Playwright.
-- **Acceptance:** spike green in both engines, bundle cost measured and recorded here. **If the
-  Drizzle driver does not run on WASM, stop and ask the owner** (ADR-071 §4).
+- [x] Status · **Blocked by:** — · **Blocks:** O-05, O-06
+  - Done: 2026-09-19 · `packages/sync/src` returned with the merge of `rename/xangarro-stored-ids`
+    (52824588): api-client, sync-engine, outbox drain, retention purge, entitlement verify,
+    reference applier, legacy tracker — extended for tickets + per-client abonos (see the merge
+    commit). **Spike green in both engines:** `apps/web/e2e/spike-sqlite-wasm.spec.ts` +
+    `e2e/spikes/sqlite-wasm-opfs/` bundle the real stack (sql.js WASM inlined, esbuild) and
+    drive it through Playwright — the merged journal (0000–0009) applies on WASM, a
+    `DrizzleTicketsRepository`+`DrizzleSalesRepository` round-trip writes and reads back, the
+    change-log triggers fire (`__xangarro_change_log` rows), and OPFS persists across a reload —
+    **Chromium ✓ and WebKit ✓** (WebKit needs a persistent context: headless WebKit's OPFS
+    storage process refuses an ephemeral profile — the spec launches
+    `webkit.launchPersistentContext`). **The Drizzle driver runs on WASM** — the hard stop does
+    not apply. **Bundle cost: 2,069 KiB self-contained** (sql.js JS+WASM ≈ 1.5 MB of it; drizzle +
+    domain + data + migrations ≈ 0.5 MB; gzip roughly halves it). Runner: `pnpm --filter
+@xangarro/web test:spike` (no database, no server). O-06 will load the WASM only on register
+    routes and move persistence into a Worker with the real `@sqlite.org/sqlite-wasm` OPFS VFS
+    where feasible.
 
 ### O-03 Expected-cash calculator, one per turno
 
-- [ ] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+- [x] Status · **Blocked by:** C-18 · **Blocks:** O-15, fase 12 Cierre
+  - Done: 2026-09-19 · `esperadoDelTurno` joins the calculator (TDD, 5 new tests: scoping by
+    `cajaTurnoId`, fiado/cancelled/other-turno/non-cash-abono exclusion by construction, fondo +
+    adicional base, turno without id rejected). `CerrarCajaUseCase` now computes its esperado through
+    it — fetching the turno's abonos (clientPayments) and passing tickets/lines/abonos/expenses
+    scoped by the turno — replacing its own date-range sum; `#computeExpected` is gone. The use
+    case's caja tests seed `cajaTurnoId` on their tickets and the gasto, which is exactly the C-18
+    column doing its job. Application 469, data 270 green.
   - Calculator done 2026-09-18 (with O-28): `efectivoEsperado`, `totalContado`, `diferenciaCorte`
     and `DENOMINACIONES_MXN` in `packages/domain/src/financials/cierre-turno.ts`, 7 tests, the
     handoff's figure reproduced ($2,710.00 since the 2026-09-18 pull, ADR-085); Turno's fixture
@@ -98,7 +112,17 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 
 ### O-04 Owner creates operators and resets NIPs (completes P-05)
 
-- [ ] Status · **Blocked by:** C-16 · **Blocks:** O-12
+- [x] Status · **Blocked by:** C-16 · **Blocks:** O-12
+  - Done: 2026-09-19 · The portal half already existed (`/equipo` → `crearOperador` /
+    `restablecerPin` server actions through the application use cases, 4-digit `isValidPin`,
+    `sync_log` append inside `withTenant`; verified server-action tests in the web suite and
+    `endpoints.test.ts` asserting `plataforma: 'web'` activates). This task removed the phone's
+    flows (ADR-072): `RecuperarPinUseCase`, `CambiarPinUseCase` and their tests; the recovery and
+    change-PIN screens + `ChangePinGate` (the `mustChangePin` flag stays dormant — no migration,
+    pre-launch); the `onForgotPin` prop chain (pin-prompt, quick-switch screen/gate) and
+    `maskEmail`; the recovery/changePin i18n blocks; the three Maestro flows +
+    `full-regression.sh`/README/feature-areas entries. Application 461, UI 1821 green; mobile and
+    application typecheck clean.
 - **Steps:** «Nuevo operador» (nombre, NIP 4 masked + confirm) and «Reiniciar NIP» in `/equipo`,
   writing `users` through the application use case with its `sync_log` append (ADR-062). Remove the
   phone's recovery screen and change-PIN flow (ADR-072).
@@ -106,13 +130,64 @@ gastos de caja`, scoped by `cajaTurnoId`, fiado excluded. `CerrarCajaUseCase` us
 
 ### O-05 Real `/sync/push` and `/sync/pull` (B-08, B-09)
 
-- [ ] Status · **Blocked by:** O-02, C-16 … C-19 · **Blocks:** O-06
+- [x] Status · **Blocked by:** O-02, C-16 … C-19 · **Blocks:** O-06
+  - Done: 2026-09-19 · `pnpm --filter @xangarro/web test:conformance` is green against the real
+    portal (activate 4/4, sync 10 passed + 1 mock-only skip), with two new cases in
+    `packages/contracts/tests/conformance/sync.test.ts`: a `plataforma = web` device activates
+    (now a hard assert — C-16 is in the contract, so a current portal must accept it) and shares
+    the pull surface (`mensajes_operador`); a ticket and its line push in one batch and a reply
+    to a missing mensaje rejects `FK_MENSAJE_MISSING`. The run found and fixed a real portal bug:
+    `users.permissions` travelled as its JSON-text string since A-05 gave `UserSchema` the field —
+    `codec.ts` decodes it now. Rerun flake fixed too: `clearLocalThrottles` also clears the
+    suite's bad code (`activate:code:ZZZZZZZZ`), which locked the second run inside 15 minutes.
+    The browser round-trip is `apps/web/e2e/dispositivo-web.sync.spec.ts`: from a real page,
+    activate a web device, push a ticket + its line, pull — acknowledgment ≥ push, rows verified
+    in Postgres. Alongside it the C-17/A-05 fallout in the e2e fixtures: `sync-phone.ts` builds
+    tickets + lines (not header-laden sales), three specs' raw `INSERT INTO sales` lost the
+    dropped columns and gained their ticket headers, and the pg seed's two `INSERT INTO users`
+    lost `role`/`recovery_password_hash`/`must_change_pin` (it broke `db:reset` outright).
+    Fixing `db:reset` un-hid that the whole Playwright matrix had not run since A-05; also
+    repaired to green: the e2e webServer now passes `BILLING_DATABASE_URL` (suscripción/facturas/
+    data/a11y were sweeping error cards), `loadSuscripcion` counts operators without the dropped
+    `users.role`, the Movimiento dialog keeps a synchronous in-flight guard (a 5-click smash
+    wrote 5 movements and poisoned the shared DB for later specs), chaos-4's mocked 500 bodies
+    declare `charset=utf-8` (Latin-1 mojibake broke the text match), chaos-1/chaos-2 point at
+    SKUs the current seed actually has (TAC-002…006 died with the old demo seeder) and the
+    register smash pays enough for the $185 fixture ticket, chaos-3's "no alert" assertions are
+    scoped to non-empty alerts (Next's `#__next-route-announcer__` is a 1×1 role="alert" on
+    every page), and eslint ignores generated dirs (`.next*`, `.out`). The last three failures
+    needed product fixes, not spec fixes: the operator modal now has a close animation (Radix
+    keeps the portal mounted while it plays, so a smashed «Registrar venta» cannot leak clicks
+    onto the catalogue behind the closing card — the smash left "Orden de pastor ×4" on the next
+    ticket) and `useCaja.vender` sells one ticket once (same-lines guard); the sync project's
+    smoke signs up in its own cleared context (/signup bounces signed-in visitors), reads its
+    tenant from the activation bootstrap (no `xg_business` cookie exists anymore), pushes a
+    ticket + line dated inside the pinned business month, and clicks Xangarrito's real
+    «Empezar gratis»; asesor's dismiss test arms a real detector (materialise-on-read reaps any
+    seeded notice no detector backs — three April ventas fire the quincena insight), and
+    asesor-metas' seed is idempotent (fullyParallel re-runs the file-level beforeAll per test
+    group). **The full matrix is green: 523 passed, 0 failed** — first time since A-05 broke
+    `db:reset` outright.
 - **Steps:** as specified in B-08/B-09, now also serving `plataforma = web` devices.
 - **Acceptance:** B-08/B-09 acceptance, plus a browser device round-trip in Playwright.
 
 ### O-06 Register runtime: device token, Worker, outbox flusher
 
-- [ ] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
+- [x] Status · **Blocked by:** O-02, O-05 · **Blocks:** O-12 … O-16
+  - Done: 2026-09-19 · Slices 1–2 (cdfc57a4, 8e21b4c8): `apps/web/src/operador/runtime/` — the
+    Worker (sql.js on OPFS, the real `runMigrations`, Drizzle, the phone's own `SyncEngine`+
+    `ApiClient` inside it), the typed main-thread client (`storage.persist()` at boot, one Worker
+    per tab, protocol shared by both ends in `protocol.ts`), `device-store`, and `ColaProvider`
+    driven by the engine when linked — real counts, `online`/`offline` state, reconnect flushes,
+    and `desencolar()` so a capture uploads at once while online. Slice 3: `vender()` records the
+    sale through `RegistrarTicketUseCase` in the Worker (the session store O-12 wrote stamps the
+    operator and turno), and a linked register sells its **own** catalogue (`CajaViva`: the
+    bootstrap's products, ticket empty — the fixture's pre-seeded ticket never enters a real
+    register; an unlinked one keeps the design fixture untouched). **Acceptance met**
+    (`e2e/captura.sync.spec.ts`): through the real door (link → NIP → fondo), the wire is cut
+    (`context.setOffline`), a Taco al pastor sells with its change, Postgres sees nothing while
+    offline, and the reconnect flush lands **exactly one** ticket — folio 1, $25.00, the line's
+    concepto — and a re-flush of the same row is idempotent by row id. Matrix: 526 passed.
 - **Steps:** register route group in `apps/web` (device-token auth, no owner cookie), the SQLite
   Worker, `navigator.storage.persist()`, push/pull loop with retry, connection state for the header.
 - **Acceptance:** a sale captured offline is pushed on reconnect exactly once.
@@ -158,12 +233,43 @@ before reporting, Maestro/Playwright flow for the happy path.
 
 ### O-12 Operador · Acceso (vincular → NIP → fondo)
 
-- [ ] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
+- [x] Status · **Blocked by:** O-04, O-06 (the ADR-072 design amendment landed on 2026-09-18)
+  - Done: 2026-09-19 · `src/operador/acceso/` — the gate stands before every register route: an
+    unlinked browser sees only Acceso (device-token state, never the owner cookie — ADR-071 §1).
+    Vincular (correo + the panel's 8-char code, spaces/hyphens/case ignored — the correo is
+    /activate's second factor; the design file shows only the code, the upstream amendment is
+    this entry) redeems for real, and the bootstrap becomes the register's local database
+    (`applyReferenceTables`). ¿Quién abre turno? lists the operators from that database; the NIP
+    is verified on the device (bcryptjs in the Worker, three tries then back to the picker,
+    «Te quedan N intentos.»). The fondo opens the turno through `AbrirCajaUseCase` — the gate this
+    task owes — and a reload with an open turno walks straight back in. `e2e/acceso.sync.spec.ts`
+    walks the real door in a fresh context (gated → link → wrong NIP → NIP 2580 → fondo → register
+    → reload stays in) and the wrong-code refusal reads the contract's codes as Spanish copy. The
+    pg seed's operators now carry a real bcrypt hash of a documented PIN (2580) — the old constant
+    was a truncated hash no compare() could match; operators.spec reactivates what its last test
+    deactivates (acceso's picker and permisos' grant read them). The fixture-era screens pass
+    behind a demo flag the suite's storageState sets (`xangarro.caja.demo`) — removed when
+    O-14+ wires real data. Matrix: 525 passed, 0 failed.
 - **Gate contribution:** the turno does not open without a captured fondo.
 
 ### O-13 Register lock and operator switch
 
-- [ ] Status · **Blocked by:** O-12
+- [x] Status · **Blocked by:** O-12
+  - Done: 2026-09-19 · the ticket in progress left `useCaja`'s useState for a module store
+    (`src/operador/caja/ticket-store.ts`, `useSyncExternalStore`) with the lock flag beside it, so
+    both survive navigation and the lock; the shell renders `BloqueoCaja` (`caja/bloqueo.tsx` +
+    `caja/bloqueo-nip.tsx`) over any register route: the design's note (with and without a ticket),
+    «Quién sigue en la caja» picker, NIP pad with the attempts line, and «Entrar como X» /
+    «Desbloquear caja» when the same operator returns; «Cerrar el turno…» links to Cierre. Entering
+    re-authenticates on the device and rewrites the session — same turno, next tickets are the new
+    operator's. Two fixes the flow forced: (a) the lock dialog's scrim now scrolls with
+    `minHeight`-centering — a tall card on a short viewport had its Entrar button outside the
+    viewport, unreachable; (b) `RegistrarTicketUseCase` resolves the open turno per caja
+    (`findOpenByBusiness`, ADR-071 §3) instead of per seller, and the worker passes the session
+    operator to the tickets/sales repos so `created_by_user_id` is whoever sold — the turno stays
+    the opener's. Acceptance `e2e/bloqueo.sync.spec.ts`: Ana opens with a two-line ticket, lock,
+    wrong NIP refused, Luis enters, the ticket survives intact, the sale that reaches Postgres is
+    Luis's. Unit: the turno-whosever test in `registrar-venta-use-case.test.ts`. Matrix 527 green.
 - **Gate:** two operators alternate on one register without losing the ticket in progress.
 
 ### O-14 Operador · Inicio
@@ -474,3 +580,101 @@ groundwork (O-02 to O-06) and C-18.
   two actions: ask for clarification (a message the operator reads in Avisos, ADR-075), or mark
   as clarified.
 - **Acceptance:** harness match for the list, filters, panel and actions; Playwright spec.
+
+## 8. Fase 14 — Datos reales en las pantallas del operador
+
+> Started 2026-09-19 (owner offered no answer; recommended path taken): the groundwork
+> (O-02–O-06, O-12, O-13) is closed, and the handoff §2 list of "what O-06 must replace"
+> becomes one task per screen family. The fixture paths stay green behind the demo flag
+> until the last task removes it.
+
+### O-32 Ventas on the register's own data
+
+- [x] Status · **Blocked by:** O-06, O-13
+  - Done: 2026-09-19 · `TicketsRepository.findByCajaTurno` (interface, Drizzle, in-memory;
+    fullstack test: only that turno's tickets, newest first). Worker protocol gains `ventas`
+    (the turno's tickets with line totals, client names, cancellation; plus the turno's `desde`)
+    and `cancelar` (`CancelarTicketUseCase`: PIN, permission, stock reversal, audit log —
+    stock off until the flags wiring, as capture). `runtime/tickets.ts` also hosts `registrar`,
+    extracted from db.worker to keep files under the line budget; `client.ts`'s `Call` is now
+    derived from `WorkerRequest` (it had drifted — the new methods exposed the duplication).
+    Screen: `use-ventas.ts` — fixture until linked, then the register's own list, KPIs from
+    real lines, and cancellation through the use case with the queue flushed after.
+    **Design amendment (this entry): the cancel dialog asks for the operator's NIP on a linked
+    register** — the files show motivo + nota only, but the domain's rule (PIN + permission,
+    ADR-073) is also the control against cancelling cash sales on an unlocked caja; the fixture
+    dialog renders the file unchanged. The nota is now wired (it composes with the motivo).
+    Acceptance `e2e/ventas.sync.spec.ts`: two real tickets, wrong NIP refused, the right one
+    cancels («Devuelve $25.00»), the row stays marked, and `cancelacion_logs` + the cancelled
+    ticket reach Postgres. Matrix 528 green.
+- **Gate:** a linked register's Ventas list and cancellations are the device's own data, end to end.
+
+### O-33 Cobranza on real data
+
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · `TicketsRepository.findCreditoByClient` (the whole fiado history, oldest
+    first — fullstack test: settled tickets stay, cash sales and other clients' never leak in).
+    Worker protocol gains `cuentas` (every client with their fiado tickets — line totals, who
+    captured — their abonos, and the domain-derived saldo) and `abonar` (`RegistrarPagoClienteUseCase`:
+    whole amount, D5's saldo a favor included) in `runtime/cuentas.ts`. The caja's fiado capture now
+    travels with its client (`VentaHecha.clienteId`; 'Fiado' maps to the wire's 'Crédito') and the
+    linked picker reads the register's own accounts — «Cliente nuevo» hides there until client
+    creation exists (C-18's form). Screens: `use-cobranza` linked path (optimistic append, then the
+    use case and the queue; F-4's frozen `HOY` stays fixture-only — linked uses the real date),
+    `DetalleClienteViva` for the account's route; `useCliente`'s abono writes the same way. Shared
+    `runtime/use-credenciales` (ventas' private hook promoted). Seed: two fiado clients (Doña Mari,
+    Raúl Contreras) with real ULID mnemonics — the first attempt used 'CLIM1', whose I and L broke
+    the bootstrap's Crockford ULID schema. `acceso-flow` now re-taps a NIP digit that a cold build's
+    hydration dropped (the boxes say what landed). Acceptance `e2e/cobranza.sync.spec.ts`: a fiado
+    sale opens Doña Mari's account ($50, V-0001, due in 7 days), a $20 cash abono applies oldest
+    first («queda $30.00»), the history shows both movements, and Postgres holds the pendiente
+    ticket and the 2000-centavo payment. Matrix 529 green.
+- **Gate:** a linked register's accounts and abonos are the device's own data, end to end.
+
+### O-34 Detalle de venta on real data
+
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · Worker protocol gains `ticket` (`ticketPorFolio`: the open turno's ticket
+    by folio with its lines — name from the sale, category from the product, unit price derived
+    from the line's amount ÷ quantity — cash and change, the fiado client with their current
+    saldo via the cuentas read, the cancellation, who captured it, and the turno's apertura).
+    `DetalleVentaViva` renders it — «Hoy HH:MM» or the date, 'Crédito' said as «Fiado» through the
+    now-shared `comoMetodo` (ventas' private map promoted to `derive.ts`), `categoriaDe` exported
+    from the caja — while the unlinked path keeps the design fixtures and their `?venta=` forcing.
+    Cancelling reuses O-32's modal with its NIP amendment and writes through the same use case
+    (PIN, permission, audit log), then reloads the ticket: the pill flips to «Venta cancelada»
+    with the motivo beside the struck-through total. The comprobante shares the real lines.
+    `EstadoPill` moved to `side.tsx` (the screen had grown past the line budget). Acceptance
+    `e2e/detalle.sync.spec.ts`: sell 2 tacos cash ($50, paid 60) → the list's folio opens the
+    ticket with its lines, $60 recibido, $10 cambio, Ana as capturó → share dialog titled with
+    the folio → cancel with NIP 2580 → pill and motivo → Postgres holds the cancelación with
+    motivo «Cobro duplicado». Matrix 539 green.
+- **Gate:** any folio of the turno opens as the register's own ticket, cancellable end to end.
+
+### O-35 Gastos on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** `RegistrarEgresoUseCase` in the worker; receipt photos wait for the storage bucket
+  (ADR-083 D3, still provisional).
+- **Acceptance:** sync spec registers a gasto and it reaches Postgres.
+
+### O-36 Cierre de turno on real data
+
+- [ ] Status · **Blocked by:** O-32
+- **Steps:** `CerrarCajaUseCase` with the expected-cash calculator (O-03); reason mapping via
+  `operador/vocabulario.ts` (ADR-083 D6).
+- **Acceptance:** sync spec closes a turno whose expected cash matches the screen's figures.
+
+### O-37 Owner-side actions on real data
+
+- [ ] Status · **Blocked by:** C-18, C-19 status
+- **Steps:** cortes' «Marcar como aclarado» and «Pedir aclaración», revision-caja's
+  approve / merge / reject — the owner portal writing, not local state.
+- **Acceptance:** portal specs against Postgres.
+
+### O-38 Remove the fixture demo flag
+
+- [ ] Status · **Blocked by:** O-33, O-34, O-35, O-36
+- **Steps:** delete `xangarro.caja.demo` from the gate and `auth.setup.ts`; every operador
+  screen runs on the runtime or its design-forced states.
+- **Acceptance:** full matrix green with no demo flag anywhere.

@@ -41,14 +41,14 @@ aplica su Aviso de Privacidad Integral.
 3.1 El Negocio instruye a Xangarro a tratar los Datos del Negocio **solo** para:
 
 a) almacenarlos, sincronizarlos entre la app, la caja web y el portal, y mostrarlos a los usuarios que
-   el Negocio autorice;
+el Negocio autorice;
 b) calcular reportes, cuentas por cobrar, estados financieros e indicadores del Negocio;
 c) generar exportaciones y comprobantes que el Negocio decida compartir; **Xangarro no envía
-   comprobantes a los clientes**: el envío por WhatsApp u otro medio lo hace el Negocio desde su
-   dispositivo;
+comprobantes a los clientes**: el envío por WhatsApp u otro medio lo hace el Negocio desde su
+dispositivo;
 d) importar los archivos que el Negocio suba o nos encargue importar;
 e) si el Negocio lo activa, crear y confirmar cobros con el proveedor de pagos que el Negocio conecte
-   (Mercado Pago, Clip u otro);
+(Mercado Pago, Clip u otro);
 f) dar soporte cuando el Negocio lo solicite, y
 g) conservar, archivar, restaurar y suprimir los datos según la cláusula 9.
 
@@ -88,27 +88,27 @@ dispositivos, de las contraseñas y NIP de su equipo, y de revocar los dispositi
 El Negocio declara y se obliga a:
 
 a) dar a sus clientes y operadores su propio aviso de privacidad, que informe que usa un proveedor
-   tecnológico para registrar sus datos, y obtener el consentimiento que corresponda; Xangarro pone
-   a su disposición una plantilla orientativa [ENLACE], que no sustituye la asesoría legal del
-   Negocio;
+tecnológico para registrar sus datos, y obtener el consentimiento que corresponda; Xangarro pone
+a su disposición una plantilla orientativa [ENLACE], que no sustituye la asesoría legal del
+Negocio;
 b) capturar solo los datos necesarios y **no capturar datos personales sensibles** de clientes u
-   operadores (salud, origen, creencias, etc.) en conceptos, notas o mensajes;
+operadores (salud, origen, creencias, etc.) en conceptos, notas o mensajes;
 c) atender las solicitudes ARCO de sus clientes y operadores, con el apoyo de la cláusula 8, y
 d) cumplir sus propias obligaciones de conservación, incluidas las fiscales (art. 30 del Código
-   Fiscal de la Federación). **Xangarro no asume las obligaciones fiscales del Negocio.**
+Fiscal de la Federación). **Xangarro no asume las obligaciones fiscales del Negocio.**
 
 ### 7. Subencargados
 
 7.1 El Negocio **autoriza de forma general** a Xangarro a subcontratar a los Subencargados publicados
 en **xangarro.mx/privacidad/proveedores** (arts. 54 y 55 del Reglamento). A la fecha:
 
-| Subencargado | Servicio | Ubicación |
-| --- | --- | --- |
-| Supabase, Inc. | Base de datos, autenticación, almacenamiento (incluido el archivo de inactividad) | EE. UU. (us-east-1) |
-| Vercel Inc. | Alojamiento del portal y de la API | EE. UU. (iad1) |
-| Functional Software, Inc. (Sentry) | Reportes de fallas (sin contenido capturado por el usuario en la app) | [REGIÓN] |
-| [PROVEEDOR DE CORREO] | Correos del servicio | [PAÍS] |
-| Mercado Pago / Clip | Solo si el Negocio conecta su cuenta, para cobros | [PAÍS] |
+| Subencargado                       | Servicio                                                                          | Ubicación           |
+| ---------------------------------- | --------------------------------------------------------------------------------- | ------------------- |
+| Supabase, Inc.                     | Base de datos, autenticación, almacenamiento (incluido el archivo de inactividad) | EE. UU. (us-east-1) |
+| Vercel Inc.                        | Alojamiento del portal y de la API                                                | EE. UU. (iad1)      |
+| Functional Software, Inc. (Sentry) | Reportes de fallas (sin contenido capturado por el usuario en la app)             | [REGIÓN]            |
+| [PROVEEDOR DE CORREO]              | Correos del servicio                                                              | [PAÍS]              |
+| Mercado Pago / Clip                | Solo si el Negocio conecta su cuenta, para cobros                                 | [PAÍS]              |
 
 > Nota: Stripe y el PAC tratan datos de la cuenta y facturación del Negocio (Xangarro responsable), no
 > Datos del Negocio; por eso no aparecen aquí. Mercado Pago y Clip son, en rigor, proveedores **del

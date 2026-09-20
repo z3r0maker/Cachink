@@ -11,7 +11,7 @@
  * may push 4 000+ ventas through one list (audit "tech debt #1").
  *
  * `@shopify/flash-list` was rejected per the user's "fewer deps"
- * decision; FlatList is sufficient for the row counts Cachink ships
+ * decision; FlatList is sufficient for the row counts Xangarro ships
  * and ships free with React Native.
  */
 import type { ReactElement, ReactNode } from 'react';

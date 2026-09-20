@@ -17,7 +17,9 @@ import {
   InMemoryDayClosesRepository,
   InMemoryExpensesRepository,
   InMemorySalesRepository,
+  InMemoryTicketsRepository,
   makeNewSale,
+  makeNewTicket,
 } from '@xangarro/testing';
 import type { BusinessId, DeviceId, IsoDate, Money } from '@xangarro/domain';
 import { corteKeys } from '../../src/hooks/query-keys';
@@ -28,13 +30,17 @@ const TODAY = '2026-04-24' as IsoDate;
 
 describe('CerrarCorteDeDiaUseCase (wrapped by useCerrarCorteDeDia)', () => {
   it('persists a DayClose with diferencia derived from contado - esperado', async () => {
+    const tickets = new InMemoryTicketsRepository();
     const sales = new InMemorySalesRepository();
+    const ticket = await tickets.create(
+      makeNewTicket({ fecha: TODAY, businessId: BIZ, metodo: 'Efectivo' }),
+    );
     await sales.create(
-      makeNewSale({ fecha: TODAY, businessId: BIZ, metodo: 'Efectivo', monto: 45000n as Money }),
+      makeNewSale({ fecha: TODAY, businessId: BIZ, monto: 45000n as Money, ticketId: ticket.id }),
     );
     const expenses = new InMemoryExpensesRepository();
     const closes = new InMemoryDayClosesRepository(DEV);
-    const useCase = new CerrarCorteDeDiaUseCase(sales, expenses, closes);
+    const useCase = new CerrarCorteDeDiaUseCase(tickets, sales, expenses, closes);
 
     const saved = await useCase.execute({
       fecha: TODAY,
@@ -52,10 +58,11 @@ describe('CerrarCorteDeDiaUseCase (wrapped by useCerrarCorteDeDia)', () => {
   });
 
   it('refuses to create a second corte for the same fecha + device', async () => {
+    const tickets = new InMemoryTicketsRepository();
     const sales = new InMemorySalesRepository();
     const expenses = new InMemoryExpensesRepository();
     const closes = new InMemoryDayClosesRepository(DEV);
-    const useCase = new CerrarCorteDeDiaUseCase(sales, expenses, closes);
+    const useCase = new CerrarCorteDeDiaUseCase(tickets, sales, expenses, closes);
 
     await useCase.execute({
       fecha: TODAY,

@@ -89,27 +89,34 @@ function covers(root: string, file: string): boolean {
 }
 
 describe('lint coverage', () => {
-  it('lints every tracked TypeScript file, or ignores it on purpose', async () => {
-    const eslint = new ESLint({ cwd: REPO, overrideConfigFile: join(REPO, 'eslint.config.js') });
-    const roots = lintRoots();
+  // ESLint's config engine spins up per file; cold runs cross the 5 s default
+  // (CI runners are slower still) — the coverage answer is what matters, not
+  // the stopwatch.
+  it(
+    'lints every tracked TypeScript file, or ignores it on purpose',
+    { timeout: 90_000 },
+    async () => {
+      const eslint = new ESLint({ cwd: REPO, overrideConfigFile: join(REPO, 'eslint.config.js') });
+      const roots = lintRoots();
 
-    const uncovered: string[] = [];
-    for (const file of trackedSources()) {
-      if (await eslint.isPathIgnored(file)) continue;
-      if (roots.some((root) => covers(root, file))) continue;
-      uncovered.push(file);
-    }
+      const uncovered: string[] = [];
+      for (const file of trackedSources()) {
+        if (await eslint.isPathIgnored(file)) continue;
+        if (roots.some((root) => covers(root, file))) continue;
+        uncovered.push(file);
+      }
 
-    assert.deepEqual(
-      uncovered,
-      [],
-      `${uncovered.length} tracked file(s) are linted by nothing:\n` +
-        `${uncovered.map((f) => `  ${f}`).join('\n')}\n\n` +
-        'Either add the directory to the root `lint:root` script, give its ' +
-        'package a `lint` script, or add it to `ignores` in ' +
-        'packages/config/eslint.config.js with a comment saying why.',
-    );
-  });
+      assert.deepEqual(
+        uncovered,
+        [],
+        `${uncovered.length} tracked file(s) are linted by nothing:\n` +
+          `${uncovered.map((f) => `  ${f}`).join('\n')}\n\n` +
+          'Either add the directory to the root `lint:root` script, give its ' +
+          'package a `lint` script, or add it to `ignores` in ' +
+          'packages/config/eslint.config.js with a comment saying why.',
+      );
+    },
+  );
 
   it('does not ignore its way to a green result', async () => {
     // The cheap way to satisfy the test above is to widen `ignores` until the

@@ -10,6 +10,8 @@ import {
   EmployeeSchema,
   InventoryMovementSchema,
   MensajeOperadorSchema,
+  OpeningBalanceClientSchema,
+  OpeningBalanceSchema,
   ProductSchema,
   RecurringExpenseSchema,
   UserSchema,
@@ -42,8 +44,8 @@ export const ActivateRequestSchema = z.object({
 });
 export type ActivateRequest = z.infer<typeof ActivateRequestSchema>;
 
-/** Operators never carry an email over the wire (§5). */
-export const WireUserSchema = wireSchema(UserSchema.omit({ email: true }));
+/** Operators: name, PIN hash, avatar, permissions, active — no email, no role (§5, C-11). */
+export const WireUserSchema = wireSchema(UserSchema);
 
 /** Reference tables a device receives (bootstrap and pull share this shape). */
 export const ReferenceTablesSchema = z.object({
@@ -56,6 +58,9 @@ export const ReferenceTablesSchema = z.object({
   conversion_recetas: z.array(wireSchema(ConversionRecetaSchema)).default([]),
   /** Owner→operator messages (ADR-075); default [] for old servers. */
   mensajes_operador: z.array(wireSchema(MensajeOperadorSchema)).default([]),
+  /** Day-one facts (C-20); default [] — old servers never send them. */
+  opening_balances: z.array(wireSchema(OpeningBalanceSchema)).default([]),
+  opening_balance_clients: z.array(wireSchema(OpeningBalanceClientSchema)).default([]),
   /** Every phone's and the portal's movements: stock is their sum (ADR-081). */
   inventory_movements: z.array(wireSchema(InventoryMovementSchema)).default([]),
   /** Tenant layer only; the device resolves platform × plan itself. */

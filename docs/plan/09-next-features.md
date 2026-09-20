@@ -187,6 +187,16 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   `recordStaffAction` in one tx; nonce CSP; noindex ×3; service-role guard in admin `lint`. 31 tests.
   **Still to do:** Playwright against a real Supabase (403, forced MFA, audit row); move staff SQL from
   `apps/backoffice/src/server/db/` into `data-pg` + `db-local.sh`; provision the `xangarro_admin` role.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · the browser suite exists and is green:
+  `apps/backoffice/e2e/` (7 specs — no session → /login, revoked-mid-session loses the console,
+  first sign-in forces TOTP enrolment with the seed read off the page the way a human without a
+  camera reads it, sign-out ends the session, five wrong passwords lock 15 min, an inbox
+  assignment writes its audit row) + a playwright config that refuses to run without a DB and a
+  global-setup staff fixture (superuser INSERT; TOTP deliberately enrolled through the page).
+  CI job **`backoffice-e2e`** added to `ci.yml` (pg service, db:apply + db:seed + the admin
+  migrations psql'd, build, e2e, report artifact) — **the owner must add `backoffice-e2e` to
+  branch protection** alongside ci/db/portal-e2e. Local: `pnpm --filter @xangarro/backoffice
+test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
@@ -207,6 +217,14 @@ at)`; `robots: noindex`; strict CSP. The service-role key is an env var of this 
   `computeEntitlement` (`compute-entitlement.ts:83-99`) must consume `effectivePlan` (comp before the
   free fallback, trial extension on `currentPeriodEnd`, reissue invalidates older cached tokens) —
   a Track B change; last-login grant; Playwright.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · **"Último acceso del dueño" is real
+  data**: `xangarro.owner_last_login()` (admin **migration 0013**, SECURITY DEFINER over the
+  portal's own `portal_sessions` — live rows only, returns nothing but business_id + timestamp)
+  joined into the tenants summary. **The "last seen" rule now lives once**: data-pg's
+  `deviceLastSeen` / `deviceStaleBefore` (`src/queries/device-last-seen.ts`) feed both N-06
+  readers (tenants list aggregate, tenant detail per-device); the Studio doc query carries a
+  pointer comment. Playwright: the console suite above (auth + audit) — the tenants/usage
+  surfaces remain unit-covered.
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
@@ -285,6 +303,10 @@ body, attachments)`.
   digest section "Rechazos de sincronización (24 h)" reuses B-18's `rejectionDigest` from data-pg
   unchanged; admin migration 0007 grants the admin role four columns of `sync_rejections`
   (payload/message stay unreadable). Degrades to "No disponible". **Still to do:** B-14 mailer.
+- Progress: 2026-09-20 · `track-n/backoffice-followups` · the digest also prunes expired
+  `staff_sessions` (30-day horizon; grant in admin **migration 0012**; the count rides the 200
+  reply as `prunedSessions`, a failure logs and never costs the email; integration test pins the
+  rule).
 - Progress: 2026-09-18 · branch `track-n/b14-email` · the digest cron sends through B-14's
   `transactionalMailer` (React Email staff-digest from the same sections; Resend with
   `RESEND_API_KEY`, dev outbox without), keyed per window so a re-run sends once.
@@ -391,7 +413,25 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-16, C-20
+- [~] Status · **Blocked by:** N-16, C-20
+- Progress: 2026-09-19 · `track-n/c20-n17-apertura` · **pg/web halves done.** **Saldos
+  iniciales** — `/saldos-iniciales`: fecha de apertura, caja, bancos, and the per-cliente CxC
+  lines (hand-edited or prefilled from a .csv of the Clientes-import shape + saldo column; a
+  row whose cliente does not exist is reported, never invented), saved through
+  `GuardarSaldosInicialesUseCase` (replace-style; refuses once locked), with the explicit
+  **«Bloquear saldos iniciales»** typed confirm — `locked_at`, one-way, the v1 stand-in for the
+  first period close (owner decision 2026-09-18). **Inventario inicial** —
+  `/inventario-inicial`: an editable grid of the catalogue (cantidad + costo, live valuation
+  total) prefillable from .csv (producto, cantidad, costo); `CapturarInventarioInicialUseCase`
+  writes apertura movements in one transaction — **no egreso** (day-one stock is not a
+  purchase) and **never counted** toward the monthly limit: `classifyMovementOrigin` and
+  `xangarro.usage_counts()` (0025's body) both classify motivo `Apertura de inventario` as
+  `apertura`, excluded (equality test seeds both). A second capture is refused, not merged.
+  **Estados**: `loadEstadosModel` feeds the Balance the real apertura facts (efectivo =
+  caja + bancos, CxC lines, capitalInicial = cash + CxC + Σ apertura movements' valuation) so
+  Activo = Pasivo + Capital holds from statement one; a business without apertura is
+  bit-identical to before. Entry points from Negocio. **Still to do:** the saldos iniciales
+  row on the «¿Cómo empiezo?» checklist, and the SQLite half with the app branch.
 - **Inventario inicial (owner decision 2026-09-18):** an explicit one-time step, "Captura tu inventario
   inicial" (grid or Excel: producto + cantidad + costo), writing portal inventory movements with
   `origen = apertura` (C-12 step 7). They are **not** counted toward the monthly limit, they feed the
@@ -403,7 +443,30 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-18 "Hazlo por mí" migration service `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-08, N-16
+- [x] Status · **Blocked by:** N-08, N-16
+- Progress: 2026-09-20 · `track-n/n18-hazlo-por-mi` · **Done.** data-pg **0026**:
+  `assisted_imports` + `assisted_import_files` — files as `bytea` in the tenant DB
+  (the N-19 owner-ratified deviation from buckets; Supabase Storage REST needs a
+  JWT the in-house auth never mints), tenant RLS, admin grants via backoffice
+  migration **0014**. The state machine is guarded SQL, split across
+  `queries/assisted-imports{,-files,-resolution}.ts`: `revision →
+esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
+  (`markForApproval` guarded on `revision`, audited `migracion.enviar` from
+  /migraciones with the mapped .xlsx/.csv); **applying is the tenant's claim
+  alone** — `claimForApproval` atomically flips `esperando_aprobacion` and
+  returns the mapped file, and the claim + registry apply + row-count check run
+  in ONE transaction (a failed apply rolls the claim back). Tenant side:
+  `/importar` card — xangarrito sees the upsell, never the form; the request
+  (sistema 1–120, notas ≤ 2000, 1–5 files ≤ 20 MB .xlsx/.csv, use case with
+  plan gate + one-in-flight) lands in the inbox as `kind=migracion`
+  (`sourceRef hazlo-por-mi:<id>`, idempotent); Aprobar/Rechazar buttons at
+  `esperando_aprobacion`; a resolved request reopens the form. Sweeps ride the
+  digest cron: 14-day expiry of unanswered requests, 30-day LFPDPPP purge
+  (DELETE + `files_purged_at` stamp, idempotent, logged in the digest).
+  Downloads staff-gated at `/api/staff/migraciones/archivos/<id>` (410 once
+  purged). Tests: data-pg integration 6/6 (claim guards, isolation, sweeps),
+  application 4/4, web e2e `hazlo-por-mi.spec.ts` 10 green ×2 runs,
+  drift test lists both tables portal-only.
 - **What:** a card on the import screen → form (sistema actual, qué datos, archivos o respaldo) →
   inbox item `kind=migracion`, SLA 3 business days. Free (one migration) on xangarro / xangarrote;
   xangarrito sees "disponible en planes de pago".

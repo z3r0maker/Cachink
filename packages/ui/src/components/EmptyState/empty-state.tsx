@@ -1,5 +1,5 @@
 /**
- * EmptyState — the Cachink "there's nothing here yet" primitive.
+ * EmptyState — the Xangarro "there's nothing here yet" primitive.
  *
  * Rendered inside list views (Ventas, Egresos, Movimientos, Cuentas por
  * Cobrar, Inventario) when the list is empty OR when a search yields no
@@ -132,7 +132,7 @@ function Description({ text }: { text: string }): ReactElement {
 }
 
 /**
- * Renders the canonical Cachink empty-state block. See
+ * Renders the canonical Xangarro empty-state block. See
  * `empty-state.stories.tsx` for the full variant catalog.
  */
 export function EmptyState(props: EmptyStateProps): ReactElement {

@@ -17,7 +17,7 @@
  */
 
 import { SaleSchema, type Sale, type SaleId } from '@xangarro/domain';
-import type { ClientsRepository, SalePatch, SalesRepository } from '@xangarro/data';
+import type { SalePatch, SalesRepository } from '@xangarro/data';
 import type { UseCase } from '../_use-case.js';
 
 export interface EditarVentaInput {
@@ -27,11 +27,9 @@ export interface EditarVentaInput {
 
 export class EditarVentaUseCase implements UseCase<EditarVentaInput, Sale> {
   readonly #sales: SalesRepository;
-  readonly #clients: ClientsRepository;
 
-  constructor(sales: SalesRepository, clients: ClientsRepository) {
+  constructor(sales: SalesRepository) {
     this.#sales = sales;
-    this.#clients = clients;
   }
 
   async execute(input: EditarVentaInput): Promise<Sale> {
@@ -43,15 +41,8 @@ export class EditarVentaUseCase implements UseCase<EditarVentaInput, Sale> {
     // Re-validate the merged shape — guards against patches that
     // would push the row into an invalid state (e.g. `concepto: ""`).
     SaleSchema.parse(merged);
-    if (merged.metodo === 'Crédito') {
-      if (!merged.clienteId) {
-        throw new TypeError('Venta en Crédito requiere clienteId');
-      }
-      const cliente = await this.#clients.findById(merged.clienteId);
-      if (!cliente) {
-        throw new TypeError(`Cliente ${merged.clienteId} no existe`);
-      }
-    }
+    // A line carries no ticket-level facts (ADR-073) — the Crédito/cliente
+    // invariant lives on the ticket, checked when it is registered.
     const updated = await this.#sales.update(input.id, input.patch);
     if (!updated) {
       throw new TypeError(`Venta ${input.id} desapareció durante la actualización`);

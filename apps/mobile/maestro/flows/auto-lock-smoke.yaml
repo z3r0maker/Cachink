@@ -28,19 +28,19 @@ appId: mx.xangarro.mobile
 
 # Verify we're logged in and tabs are visible.
 - assertVisible:
-    id: "tab-estados"
+    id: 'tab-estados'
 
 # Wait for the inactivity timeout to fire.
 # Default is 5min (300s). If E2E reduces it to 10s, this works faster.
 # Using a conservative wait of 15 seconds (assumes reduced E2E timeout).
 - swipe:
-    direction: "DOWN"
+    direction: 'DOWN'
     duration: 100
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 320000
 
 # QuickSwitch re-appeared — auto-lock fired.
 - assertVisible:
-    id: "quick-switch"
+    id: 'quick-switch'

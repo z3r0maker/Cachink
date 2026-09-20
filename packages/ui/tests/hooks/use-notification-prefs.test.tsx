@@ -14,6 +14,7 @@ import {
   InMemoryAppConfigRepository,
   InMemoryBusinessesRepository,
   TEST_DEVICE_ID,
+  seedTestEntitlement,
 } from '@xangarro/testing';
 import {
   deriveDefaultPrefs,
@@ -60,20 +61,22 @@ function wrapper(repos: Partial<Repositories>) {
 describe('useNotificationPrefs', () => {
   let appConfig: InMemoryAppConfigRepository;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     appConfig = new InMemoryAppConfigRepository();
+    // Default prefs derive from effective flags, which need a verified plan (A-14).
+    await seedTestEntitlement(appConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,
     });
   });
 
-  it('returns default prefs derived from feature flags when no config exists', () => {
+  it('returns default prefs derived from feature flags when no config exists', async () => {
     const { result } = renderHook(() => useNotificationPrefs(), {
       wrapper: wrapper({ appConfig }),
     });
     const defaults = deriveDefaultPrefs(DEFAULT_FEATURE_FLAGS);
-    expect(result.current.data).toEqual(defaults);
+    await waitFor(() => expect(result.current.data).toEqual(defaults));
   });
 
   it('reads stored prefs from AppConfig when they exist', async () => {
@@ -126,8 +129,10 @@ describe('useNotificationPrefs', () => {
 describe('useUpdateNotificationPrefs', () => {
   let appConfig: InMemoryAppConfigRepository;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     appConfig = new InMemoryAppConfigRepository();
+    // Default prefs derive from effective flags, which need a verified plan (A-14).
+    await seedTestEntitlement(appConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,
@@ -173,7 +178,7 @@ describe('useUpdateNotificationPrefs', () => {
     const { result: readResult } = renderHook(() => useNotificationPrefs(), {
       wrapper: Wrapper,
     });
-    expect(readResult.current.data?.['stock-bajo']).toBe(true);
+    await waitFor(() => expect(readResult.current.data?.['stock-bajo']).toBe(true));
 
     // Now write an update
     const { result: writeResult } = renderHook(() => useUpdateNotificationPrefs(), {

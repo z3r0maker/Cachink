@@ -27,24 +27,24 @@ appId: mx.xangarro.mobile
 - runFlow:
     when:
       visible:
-        id: "tab-caja"
+        id: 'tab-caja'
     commands:
       - tapOn:
-          id: "tab-caja"
+          id: 'tab-caja'
       - extendedWaitUntil:
           visible:
-            id: "settings-nav-section"
+            id: 'settings-nav-section'
           timeout: 5000
 
 # Director: no Caja tab → the cog opens Configuración, which hosts the grid.
 - runFlow:
     when:
       notVisible:
-        id: "tab-caja"
+        id: 'tab-caja'
     commands:
       - tapOn:
-          id: "top-bar-open-settings"
+          id: 'top-bar-open-settings'
       - extendedWaitUntil:
           visible:
-            id: "settings-nav-section"
+            id: 'settings-nav-section'
           timeout: 5000

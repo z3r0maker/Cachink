@@ -22,16 +22,25 @@ function localTables(): string[] {
   for (const f of readdirSync(SCHEMA_DIR)) {
     if (!f.endsWith('.ts')) continue;
     const src = readFileSync(resolve(SCHEMA_DIR, f), 'utf8');
-    for (const m of src.matchAll(/sqliteTable\('([a-z_]+)'/g)) names.push(m[1] as string);
+    for (const m of src.matchAll(/sqliteTable\(\s*'([a-z_]+)'/g)) names.push(m[1] as string);
   }
   return names.sort();
 }
+
+/** Whole tables whose device half is pending (C-20/0025; app branch), as in
+ * data-pg's drift test — remove when the SQLite tables land. */
+const PENDING_DEVICE_TABLES = new Set(['opening_balances', 'opening_balance_clients']);
 
 describe('table scope', () => {
   it('classifies every local table exactly once', () => {
     const all = [...UP_TABLES, ...HYBRID_TABLES, ...DOWN_TABLES, ...NEVER_SYNCED_TABLES];
     assert.equal(new Set(all).size, all.length, 'a table appears in two lists');
-    assert.deepEqual([...all].sort(), localTables());
+    assert.deepEqual([...all].filter((t) => !PENDING_DEVICE_TABLES.has(t)).sort(), localTables());
+    // Self-expiring: once the device tables land, the filter above is a lie.
+    assert.deepEqual(
+      [...PENDING_DEVICE_TABLES].filter((t) => !localTables().includes(t)).sort(),
+      [...PENDING_DEVICE_TABLES].sort(),
+    );
   });
 
   it('hybrid tables accept inserts but not updates', () => {

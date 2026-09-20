@@ -9,7 +9,7 @@ import { describe, expect, it, vi, afterEach } from 'vitest';
 import type { UserId } from '@xangarro/domain';
 import { PinPrompt } from '../../../src/screens/Login/index';
 import { initI18n } from '../../../src/i18n/index';
-import { fireEvent, renderWithProviders, screen } from '../../test-utils';
+import { renderWithProviders, screen } from '../../test-utils';
 
 initI18n();
 
@@ -63,21 +63,9 @@ describe('PinPrompt', () => {
     expect(screen.getByText('PIN incorrecto')).toBeInTheDocument();
   });
 
-  it('shows forgot-pin link when onForgotPin is provided', () => {
-    renderPrompt({ onForgotPin: vi.fn() });
-    expect(screen.getByTestId('forgot-pin-link')).toBeInTheDocument();
-  });
-
-  it('hides forgot-pin link when onForgotPin is undefined', () => {
+  it('never offers PIN recovery on the device (A-05)', () => {
     renderPrompt();
     expect(screen.queryByTestId('forgot-pin-link')).toBeNull();
-  });
-
-  it('calls onForgotPin when forgot-pin link is clicked', () => {
-    const onForgotPin = vi.fn();
-    renderPrompt({ onForgotPin });
-    fireEvent.click(screen.getByTestId('forgot-pin-link'));
-    expect(onForgotPin).toHaveBeenCalled();
   });
 
   it('shows loading overlay when submitting is true', () => {

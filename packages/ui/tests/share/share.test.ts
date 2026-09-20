@@ -5,7 +5,7 @@
  * not resolvable in jsdom; its behaviour is tested via the Maestro
  * E2E flow in Commit 17. Desktop paths are the high-leverage ones to
  * exercise here since every fallback branch (file / text / download /
- * failure) matters for the real Cachink user.
+ * failure) matters for the real Xangarro user.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';

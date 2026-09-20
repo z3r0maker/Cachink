@@ -1,11 +1,9 @@
 /**
- * Users table — local user accounts with hashed credentials.
+ * Users table — operators synced down from the portal (A-05).
  *
- * PINs (6-digit login) and recovery passwords are stored as bcrypt
- * hashes. The `must_change_pin` flag forces a PIN reset on next login
- * (set when a Director creates a user with a temporary PIN).
- *
- * ADR-049: PIN for login, Password for recovery.
+ * PINs are bcrypt hashes set in the portal. `active` is the portal's
+ * deactivation switch; `permissions` is a JSON object parsed with
+ * `UserPermissionsSchema`. The device never creates or edits operators.
  */
 
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
@@ -14,12 +12,10 @@ import { auditColumns } from './_audit';
 export const users = sqliteTable('users', {
   id: text('id').primaryKey(),
   nombre: text('nombre').notNull(),
-  email: text('email'),
   pinHash: text('pin_hash').notNull(),
-  recoveryPasswordHash: text('recovery_password_hash').notNull(),
-  role: text('role', { enum: ['operativo', 'director'] }).notNull(),
-  mustChangePin: integer('must_change_pin', { mode: 'boolean' }).notNull().default(false),
   avatarColor: text('avatar_color').notNull().default('blue'),
+  /** Portal-managed deactivation (migration 0001). */
+  active: integer('active', { mode: 'boolean' }).notNull().default(true),
   /** JSON permissions object, parsed with UserPermissionsSchema. */
   permissions: text('permissions').notNull().default('{}'),
   ...auditColumns,

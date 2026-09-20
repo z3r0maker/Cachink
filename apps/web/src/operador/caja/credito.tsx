@@ -14,19 +14,33 @@ import type { Caja } from './use-caja';
 
 const PLUS = 'M12 5v14M5 12h14';
 /** The design picks a placeholder; the client form (name + phone) lands with C-18. */
-const NUEVO = 'Cliente nuevo (por revisar)';
+const NUEVO: ClienteFiado = {
+  id: 'nuevo',
+  nombre: 'Cliente nuevo (por revisar)',
+  telefono: '',
+  saldo: 0n,
+};
 
-/** Venta fiada: no client, no sale (rule 5). */
+/** Venta fiada: no client, no sale (rule 5). On a linked register the client
+ *  must exist in the database — the sale travels with its id (O-33). */
 export function Credito({
   caja,
   clientes,
+  permitirNuevo = true,
 }: {
   readonly caja: Caja;
   readonly clientes: readonly ClienteFiado[];
+  readonly permitirNuevo?: boolean;
 }) {
-  const [cliente, setCliente] = useState<string | null>(null);
+  const [cliente, setCliente] = useState<ClienteFiado | null>(null);
   const registrar = () =>
-    caja.vender({ metodo: 'Fiado', cambio: null, nota: `Se sumó al saldo de ${cliente}.` });
+    cliente !== null &&
+    caja.vender({
+      metodo: 'Fiado',
+      cambio: null,
+      nota: `Se sumó al saldo de ${cliente.nombre}.`,
+      ...(cliente.id === 'nuevo' ? {} : { clienteId: cliente.id }),
+    });
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Note bg={colors.warningSoft} weight="bold">
@@ -34,18 +48,15 @@ export function Credito({
       </Note>
       <div className={e.clientes}>
         {clientes.map((k) => (
-          <Cliente
-            key={k.id}
-            k={k}
-            picked={cliente === k.nombre}
-            onPick={() => setCliente(k.nombre)}
-          />
+          <Cliente key={k.id} k={k} picked={cliente?.id === k.id} onPick={() => setCliente(k)} />
         ))}
       </div>
-      <button type="button" className={e.nuevoCliente} onClick={() => setCliente(NUEVO)}>
-        <Icon path={PLUS} size={17} strokeWidth={2.4} />
-        Cliente nuevo
-      </button>
+      {permitirNuevo ? (
+        <button type="button" className={e.nuevoCliente} onClick={() => setCliente(NUEVO)}>
+          <Icon path={PLUS} size={17} strokeWidth={2.4} />
+          Cliente nuevo
+        </button>
+      ) : null}
       <button type="button" className={c.confirm} disabled={!cliente} onClick={registrar}>
         {cliente ? 'Registrar fiado' : 'Elige un cliente'}
       </button>

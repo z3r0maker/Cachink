@@ -33,30 +33,30 @@ tags:
 - runFlow: shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-caja"
+      id: 'otros-caja'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-caja"
+    id: 'otros-caja'
 
 # Abrir caja modal should appear.
 - extendedWaitUntil:
     visible:
-      id: "abrir-caja-modal"
+      id: 'abrir-caja-modal'
     timeout: 5000
 
 # Enter 1000 via numpad (Caja Overhaul — replaces text input).
-- tapOn: { id: "numpad-1" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
-- tapOn: { id: "numpad-0" }
+- tapOn: { id: 'numpad-1' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
+- tapOn: { id: 'numpad-0' }
 - tapOn:
-    id: "caja-abrir-submit"
+    id: 'caja-abrir-submit'
 
 # Status card shows open turn.
 - assertVisible:
-    id: "caja-status-card"
+    id: 'caja-status-card'
 
 # --- Step 2: Switch to Operativo ---
 # Go back to home and switch user
@@ -65,13 +65,13 @@ tags:
 # This subflow opens it for whichever role is logged in.
 - runFlow: shared/open-director-tools.yaml
 - tapOn:
-    id: "otros-cerrar-sesion"
+    id: 'otros-cerrar-sesion'
     optional: true
 
 # Wait for QuickSwitch to appear.
 - extendedWaitUntil:
     visible:
-      id: "quick-switch"
+      id: 'quick-switch'
     timeout: 5000
     optional: true
 
@@ -83,25 +83,25 @@ tags:
 # This subflow opens it for whichever role is logged in.
 - runFlow: shared/open-director-tools.yaml
 - tapOn:
-    id: "otros-caja"
+    id: 'otros-caja'
 
 # Handoff banner should be visible.
 - extendedWaitUntil:
     visible:
-      id: "caja-handoff-banner"
+      id: 'caja-handoff-banner'
     timeout: 5000
 
 - assertVisible:
-    id: "caja-handoff-confirm"
+    id: 'caja-handoff-confirm'
 - assertVisible:
-    id: "caja-handoff-different"
+    id: 'caja-handoff-different'
 
 # --- Step 4: Confirm monto (same amount) ---
 - tapOn:
-    id: "caja-handoff-confirm"
+    id: 'caja-handoff-confirm'
 
 # After confirmation, the status card should appear for Operativo.
 - extendedWaitUntil:
     visible:
-      id: "caja-status-card"
+      id: 'caja-status-card'
     timeout: 5000

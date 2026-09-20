@@ -23,9 +23,7 @@ function makeSaleRow(i: number) {
     concepto: `Venta ${i}`,
     categoria: 'Producto' as const,
     monto: BigInt(100 * i),
-    metodo: 'Efectivo' as const,
-    clienteId: null,
-    estadoPago: 'pagado' as const,
+    ticketId: `01HZ8XQN9GZJXV8AKQ5X0CK${pad}` as string,
     productoId: `01HZ8XQN9GZJXV8AKQ5X0C7P${pad}`,
     businessId: BIZ,
     deviceId: DEV,
@@ -110,7 +108,7 @@ describe('push queue — drainPushQueue', () => {
     // Insert a change-log row for a made-up table. The queue should skip
     // it, advance the HWM past it, and keep going.
     await db.run(
-      sql`INSERT INTO __cachink_change_log
+      sql`INSERT INTO __xangarro_change_log
           (table_name, row_id, row_updated_at, row_device_id, op)
           VALUES ('app_config', '01HZ8XQN9GZJXV8AKQ5X0C7SX1', ${TS}, ${DEV}, 'insert')`,
     );

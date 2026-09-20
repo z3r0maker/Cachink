@@ -14,7 +14,7 @@ export interface SqliteLogStoreConfig {
   readonly dedupWindowMs?: number;
 }
 
-const TABLE = '__cachink_observability_log';
+const TABLE = '__xangarro_observability_log';
 
 export { TABLE };
 

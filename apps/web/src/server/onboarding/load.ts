@@ -8,7 +8,7 @@ import {
   type WizardAnswers,
   type WizardConfiguration,
 } from '@xangarro/domain';
-import { count, eq, isNull } from 'drizzle-orm';
+import { count, isNull } from 'drizzle-orm';
 
 import type { ChecklistSignals } from '@/onboarding/checklist';
 
@@ -66,7 +66,7 @@ export function loadChecklistSignals(businessId: string): Promise<ChecklistSigna
     const c = { n: count() };
     const [biz] = await tx.select({ logo: businesses.logoUrl }).from(businesses);
     return {
-      operadores: n(await tx.select(c).from(users).where(eq(users.role, 'operativo'))),
+      operadores: n(await tx.select(c).from(users)),
       productos: n(await tx.select(c).from(products).where(isNull(products.deletedAt))),
       codigoGenerado: n(await tx.select(c).from(activationCodes)) > 0,
       dispositivosActivos: n(await tx.select(c).from(devices).where(isNull(devices.revokedAt))),

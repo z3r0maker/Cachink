@@ -35,7 +35,6 @@ export const AUDIT_REGISTRAR_VENTA: AuditedUseCaseConfig<NewSale, Sale> = {
   extractEntityId: (result) => result.id,
   extractMetadata: (input) => ({
     monto: String(input.monto),
-    metodo: input.metodo,
     categoria: input.categoria,
     productoId: input.productoId,
   }),
@@ -201,8 +200,6 @@ export {
   MUTATION_CREAR_EMPLEADO,
   MUTATION_EDITAR_EMPLEADO,
   MUTATION_ELIMINAR_EMPLEADO,
-  MUTATION_CREAR_USUARIO,
-  MUTATION_ELIMINAR_USUARIO,
   MUTATION_TOGGLE_FLAG,
   MUTATION_PROCESAR_RECURRENTE,
   MUTATION_DESCARTAR_RECURRENTE,

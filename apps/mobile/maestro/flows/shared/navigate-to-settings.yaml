@@ -19,8 +19,8 @@
 appId: mx.xangarro.mobile
 ---
 - tapOn:
-    id: "top-bar-open-settings"
+    id: 'top-bar-open-settings'
 
 - extendedWaitUntil:
-    visible: "Ajustes"
+    visible: 'Ajustes'
     timeout: 5000

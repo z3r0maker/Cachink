@@ -5,6 +5,7 @@
 
 /** Device → cloud, insert + update. */
 export const UP_TABLES = [
+  'tickets',
   'sales',
   'expenses',
   'caja_turnos',
@@ -36,10 +37,18 @@ export const DOWN_TABLES = [
   'recurring_expenses',
   'conversion_recetas',
   'mensajes_operador',
+  // Day-one facts (C-20); default [] below until every server sends them.
+  'opening_balances',
+  'opening_balance_clients',
 ] as const;
 
-/** Local-only tables that never cross the wire. */
-export const NEVER_SYNCED_TABLES = ['app_config', 'director_alerts'] as const;
+/** Local-only tables that never cross the wire (sync bookkeeping included). */
+export const NEVER_SYNCED_TABLES = [
+  'app_config',
+  'director_alerts',
+  '__sync_row_status',
+  '__stock_baseline',
+] as const;
 
 export type UpTable = (typeof UP_TABLES)[number];
 export type HybridTable = (typeof HYBRID_TABLES)[number];

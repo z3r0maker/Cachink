@@ -23,23 +23,23 @@ tags:
 - runFlow: ../shared/open-director-tools.yaml
 - scrollUntilVisible:
     element:
-      id: "otros-funciones"
+      id: 'otros-funciones'
     direction: DOWN
     timeout: 5000
     centerElement: true
 - tapOn:
-    id: "otros-funciones"
+    id: 'otros-funciones'
 - assertVisible:
-    id: "funciones-route"
+    id: 'funciones-route'
 - tapOn:
-    id: "flag-merma-switch"
+    id: 'flag-merma-switch'
 
 # Go back to Otros — merma nav item should be hidden.
 - tapOn:
-    id: "top-bar-back"
+    id: 'top-bar-back'
 - assertNotVisible:
-    id: "otros-merma-reportes"
+    id: 'otros-merma-reportes'
 
 # Also verify the Merma tab is hidden from bottom bar.
 - assertNotVisible:
-    id: "tab-merma"
+    id: 'tab-merma'

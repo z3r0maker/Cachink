@@ -6,6 +6,7 @@
 export * from './types.js';
 export * from './errors.js';
 export {
+  APERTURA_MOTIVO,
   countsTowardUsage,
   classifyMovementOrigin,
   PORTAL_DEVICE_ID,

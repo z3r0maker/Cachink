@@ -74,3 +74,48 @@ describe('estadoDeCuenta (ADR-074: two facts, everything else derived)', () => {
     assert.equal(disponible(800_00n, 900_00n), 0n);
   });
 });
+
+describe('estadoDeCuenta with an opening saldo (C-20: the third fact)', () => {
+  it('an opening saldo with no tickets is the saldo', () => {
+    const e = estadoDeCuenta([], [], 500_00n);
+    assert.equal(e.saldo, 500_00n);
+    assert.equal(e.saldoAFavor, 0n);
+  });
+
+  it('abonos pay the opening saldo before any ticket', () => {
+    const e = estadoDeCuenta(
+      [{ id: 'V-1', fecha: '2026-05-01', monto: 300_00n }],
+      [{ id: 'a1', fecha: '2026-05-02', monto: 200_00n }],
+      500_00n,
+    );
+    // 200 pays apertura only: apertura 300 + ticket 300.
+    assert.equal(e.saldo, 600_00n);
+    assert.equal(e.ventas[0]?.pendiente, 300_00n);
+    assert.equal(e.hasta.a1, null, 'the abono reached no ticket, only the opening');
+  });
+
+  it('an abono that covers the opening spills into the oldest ticket', () => {
+    const e = estadoDeCuenta(
+      [
+        { id: 'V-1', fecha: '2026-05-01', monto: 300_00n },
+        { id: 'V-2', fecha: '2026-05-03', monto: 200_00n },
+      ],
+      [{ id: 'a1', fecha: '2026-05-04', monto: 600_00n }],
+      100_00n,
+    );
+    // 100 → apertura; 500 → V-1 (300) + V-2 (200); 0 pendiente.
+    assert.equal(e.saldo, 0n);
+    assert.equal(e.saldoAFavor, 0n);
+    assert.equal(e.hasta.a1, 'V-2');
+  });
+
+  it('an abono beyond opening and every ticket is saldo a favor', () => {
+    const e = estadoDeCuenta(
+      [{ id: 'V-1', fecha: '2026-05-01', monto: 100_00n }],
+      [{ id: 'a1', fecha: '2026-05-02', monto: 400_00n }],
+      100_00n,
+    );
+    assert.equal(e.saldoAFavor, 200_00n);
+    assert.equal(e.saldo, 0n);
+  });
+});

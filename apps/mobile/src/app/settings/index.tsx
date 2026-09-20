@@ -1,28 +1,32 @@
 /**
- * Expo Router entry for /settings (hub).
- *
- * Shows the 3-card SettingsHub. Each card navigates to a sub-route
- * under /settings/negocio, /settings/tasas-isr, or /settings/sistema.
- *
- * Empleados moved to top-level /empleados route (Otros grid).
+ * Expo Router entry for /settings — device-only Configuración (A-12):
+ * Cuenta, Sincronización, Dispositivo, Datos. Business settings live in the
+ * portal. This route wires the persisted device toggles, the update check,
+ * the bug-report sheet and the dev-only database reset.
  */
 
-import type { ReactElement } from 'react';
-import { View } from 'react-native';
+import { useState, type ReactElement } from 'react';
+import { Share, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import {
-  SettingsHub,
+  APP_CONFIG_KEYS,
+  BugReportSheet,
   ResetDemoAction,
-  SeedDemoAction,
-  directorSettingsNavItems,
-  useCurrentBusiness,
-  useFeatureFlags,
-  useRole,
+  SettingsScreen,
+  useAppConfigRepository,
+  useSaleSoundEnabled,
+  useCheckForUpdates,
+  useCrashReportingEnabled,
+  useNotificationsEnabled,
+  useSetSaleSoundEnabled,
+  useSetCrashReportingEnabled,
+  useSetNotificationsEnabled,
   useTranslation,
-  type SettingsSection,
+  type DeviceSettings,
 } from '@xangarro/ui';
 import { nativeResetDatabase } from '@xangarro/ui/database/reset-native';
 import { AppShellWrapper } from '../../shell/app-shell-wrapper';
+import { useMobileUpdateAdapter } from '../../shell/use-update-adapter';
 
 function reloadApp(): void {
   // In dev, DevSettings.reload() restarts the JS bundle
@@ -31,58 +35,92 @@ function reloadApp(): void {
   DevSettings.reload();
 }
 
-function useBackToParent(): () => void {
-  const router = useRouter();
-  return () => {
-    if (router.canGoBack()) {
-      router.back();
-      return;
-    }
-    router.replace('/' as never);
+/** Persist a device toggle, then update the in-memory store. */
+function usePersistedToggle(
+  key: string,
+  value: boolean,
+  apply: (next: boolean) => void,
+): [boolean, (next: boolean) => void] {
+  const appConfig = useAppConfigRepository();
+  return [
+    value,
+    (next) => void appConfig.set(key, next ? 'true' : 'false').then(() => apply(next)),
+  ];
+}
+
+function useUpdateCheck(): { check: () => void; status: string | undefined } {
+  const updates = useCheckForUpdates(useMobileUpdateAdapter());
+  const [status, setStatus] = useState<string | undefined>();
+  return {
+    check: () => {
+      setStatus('Buscando…');
+      void updates.check().then(() => setStatus(updates.status));
+    },
+    status,
   };
 }
 
-export default function SettingsHubRoute(): ReactElement {
-  const router = useRouter();
-  const business = useCurrentBusiness().data ?? null;
-  const handleBack = useBackToParent();
-  const { t } = useTranslation();
-  const role = useRole();
-  const flags = useFeatureFlags();
-
-  const handleNavigate = (section: SettingsSection): void => {
-    router.push(`/settings/${section}` as never);
+function useDeviceSettings(onReportProblem: () => void): DeviceSettings {
+  const K = APP_CONFIG_KEYS;
+  const [sound, onSound] = usePersistedToggle(
+    K.saleSoundEnabled,
+    useSaleSoundEnabled(),
+    useSetSaleSoundEnabled(),
+  );
+  const [notif, onNotif] = usePersistedToggle(
+    K.notificationsEnabled,
+    useNotificationsEnabled(),
+    useSetNotificationsEnabled(),
+  );
+  const [crash, onCrash] = usePersistedToggle(
+    K.crashReportingEnabled,
+    useCrashReportingEnabled() === true,
+    useSetCrashReportingEnabled(),
+  );
+  const updates = useUpdateCheck();
+  return {
+    soundEnabled: sound,
+    onSoundChange: onSound,
+    notificationsEnabled: notif,
+    onNotificationsChange: onNotif,
+    crashReportingEnabled: crash,
+    onCrashReportingChange: onCrash,
+    onReportProblem,
+    onCheckForUpdates: updates.check,
+    checkForUpdatesStatus: updates.status,
   };
+}
 
-  // Director dropped the "Otros" tab (review item #7) so Gastos could
-  // take its slot; the grid lives here now. Operativo still has the
-  // tab, so it is not duplicated for them.
-  const navItems = role === 'director' ? directorSettingsNavItems(flags) : undefined;
+const devFooter =
+  typeof __DEV__ !== 'undefined' && __DEV__ ? (
+    <View style={{ gap: 16 }}>
+      <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={reloadApp} />
+    </View>
+  ) : null;
 
-  // Dev-only actions. These used to hang off `(tabs)/otros.tsx`, but review
-  // item #7 removed the Otros tab from both bars, leaving that route — and
-  // `ResetDemoAction` with it — unreachable, while `SeedDemoAction` was never
-  // mounted at all. Configuración is the place both roles can still reach.
-  //
-  // `SeedDemoAction` is the only demo-seed entry point since the prebeta
-  // refactor moved Step1Welcome (owner of `wizard-step1-demo-mode`) out of the
-  // first-run path; the ~29 demo E2E flows enter through it.
-  const devFooter =
-    typeof __DEV__ !== 'undefined' && __DEV__ ? (
-      <View style={{ gap: 16 }}>
-        <SeedDemoAction />
-        <ResetDemoAction resetDatabase={nativeResetDatabase} onReload={reloadApp} />
-      </View>
-    ) : null;
-
+export default function SettingsRoute(): ReactElement {
+  const router = useRouter();
+  const { t } = useTranslation();
+  const [bugReportVisible, setBugReportVisible] = useState(false);
+  const device = useDeviceSettings(() => setBugReportVisible(true));
   return (
-    <AppShellWrapper activeTabKey="ajustes" title={t('settings.hubTitle')} onBack={handleBack}>
-      <SettingsHub
-        business={business}
-        onNavigate={handleNavigate}
-        navItems={navItems}
-        onNavigateTool={(path) => router.push(path as never)}
+    <AppShellWrapper
+      activeTabKey="ajustes"
+      title={t('settings.hubTitle')}
+      onBack={() => router.back()}
+    >
+      <SettingsScreen
+        device={device}
+        onOpenRejected={() => router.push('/no-enviados' as never)}
         footer={devFooter}
+      />
+      <BugReportSheet
+        visible={bugReportVisible}
+        onClose={() => setBugReportVisible(false)}
+        onShare={(json, filename) => {
+          void Share.share({ message: json, title: filename });
+        }}
+        consentEnabled={device.crashReportingEnabled}
       />
     </AppShellWrapper>
   );

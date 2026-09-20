@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 
 import { ConfirmDialog, Input, OptionCards } from '@/components';
 import { pesosToCentavos } from '@/lib/money';
@@ -80,15 +80,19 @@ type Fields = ReturnType<typeof useFields>;
 function useSave(producto: Producto | null, f: Fields, onClose: () => void) {
   const [pending, startTransition] = useTransition();
   const router = useRouter();
+  // Synchronous, so a button smash cannot slip past it between render and
+  // `pending` flipping true — five rapid clicks yield one movement.
+  const saving = useRef(false);
 
   function save(): void {
-    if (producto === null) return;
+    if (producto === null || saving.current) return;
     const cantidad = Number(f.cantidad);
     const costoUnitCentavos = pesosToCentavos(f.costo);
     if (!Number.isInteger(cantidad) || cantidad <= 0) {
       return f.setError('La cantidad es un número entero mayor que 0.');
     }
     if (costoUnitCentavos === null) return f.setError('Escribe el costo, por ejemplo 12.50');
+    saving.current = true;
     startTransition(async () => {
       const result = await registrarMovimiento({
         productoId: producto.id,
@@ -97,7 +101,10 @@ function useSave(producto: Producto | null, f: Fields, onClose: () => void) {
         costoUnitCentavos,
         motivo: f.motivo,
       });
-      if (!result.ok) return f.setError(result.message);
+      if (!result.ok) {
+        saving.current = false; // a real error must be retryable
+        return f.setError(result.message);
+      }
       onClose();
       router.refresh();
     });
@@ -152,6 +159,7 @@ export function MovimientoDialog(props: {
       title={`Movimiento · ${props.producto?.nombre ?? ''}`}
       body="Llega a todos los teléfonos en su siguiente sincronización."
       confirmLabel={pending ? 'Guardando…' : 'Registrar'}
+      confirmDisabled={pending}
       onConfirm={save}
     >
       <MovimientoFields f={f} />

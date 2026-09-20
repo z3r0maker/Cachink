@@ -8,6 +8,7 @@
  */
 
 import { formatBackupFilename, type BackupFn } from './database-backup.shared';
+import { DB_FILE_NAME } from './database-file.shared';
 
 /**
  * The expo-file-system API surface changes between SDK minor
@@ -39,7 +40,7 @@ export const nativeBackup: BackupFn = async (tag) => {
   const dir = `${fs.documentDirectory ?? ''}backups/`;
   await fs.makeDirectoryAsync(dir, { intermediates: true }).catch(() => {});
   const path = `${dir}${formatBackupFilename(tag)}`;
-  const source = `${fs.documentDirectory ?? ''}SQLite/cachink.db`;
+  const source = `${fs.documentDirectory ?? ''}SQLite/${DB_FILE_NAME}`;
   await fs.copyAsync({ from: source, to: path });
   await pruneOldBackups(fs, dir, 3);
   return path;

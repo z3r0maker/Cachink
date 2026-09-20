@@ -25,6 +25,7 @@ export type SupportItemId = Ulid & { readonly __entity: 'SupportItem' };
 export const SupportItemIdSchema = ulidField<SupportItemId>();
 
 export const SUPPORT_KINDS = [
+  'ayuda',
   'bug',
   'factura',
   'migracion',

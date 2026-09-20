@@ -121,6 +121,7 @@ export function Sidebar({
           </div>
         ))}
       </nav>
+      <AyudaFooter />
       <button
         type="button"
         className={railToggle}
@@ -131,5 +132,18 @@ export function Sidebar({
         {rail ? '»' : '« Contraer menú'}
       </button>
     </aside>
+  );
+}
+
+/** The footer's «Ayuda» link (N-08): help is never more than one tap away. */
+function AyudaFooter() {
+  return (
+    <a
+      href="/ayuda"
+      className={navLabel}
+      style={{ display: 'block', padding: '0 16px 8px', color: 'var(--gray-600)' }}
+    >
+      Ayuda
+    </a>
   );
 }

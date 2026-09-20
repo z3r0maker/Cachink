@@ -3,6 +3,11 @@ import { sum, type Money } from '@xangarro/domain';
 import { matches } from '../ui/search';
 import type { MetodoVenta, VentaTurno } from './types';
 
+/** «Crédito» is the wire's word; the operator's screens say «Fiado». */
+export function comoMetodo(metodo: string): MetodoVenta {
+  return metodo === 'Crédito' ? 'Fiado' : (metodo as MetodoVenta);
+}
+
 export interface ResumenVentas {
   readonly activas: number;
   readonly cobrado: Money;

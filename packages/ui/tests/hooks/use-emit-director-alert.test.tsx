@@ -8,10 +8,16 @@ import type { ReactNode } from 'react';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MockRepositoryProvider } from '@xangarro/testing/ui';
-import { InMemoryDirectorAlertsRepository, TEST_DEVICE_ID } from '@xangarro/testing';
+import {
+  InMemoryAppConfigRepository,
+  InMemoryDirectorAlertsRepository,
+  TEST_DEVICE_ID,
+  seedTestEntitlement,
+} from '@xangarro/testing';
 import type { BusinessId } from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useEmitDirectorAlert } from '../../src/hooks/use-emit-director-alert';
+import { useEntitlement } from '../../src/entitlement/use-entitlement';
 import { InMemoryNotificationScheduler } from '../../src/notifications/notification-scheduler.shared';
 import { initI18n } from '../../src/i18n/index';
 import { TamaguiProvider } from '@tamagui/core';
@@ -21,6 +27,8 @@ initI18n();
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
+let planConfig = new InMemoryAppConfigRepository();
+
 function wrapper(
   overrides?: Record<string, unknown>,
 ): (props: { children: ReactNode }) => ReactNode {
@@ -29,7 +37,9 @@ function wrapper(
     return (
       <TamaguiProvider config={tamaguiConfig} defaultTheme="light">
         <QueryClientProvider client={qc}>
-          <MockRepositoryProvider overrides={overrides}>{children}</MockRepositoryProvider>
+          <MockRepositoryProvider overrides={{ appConfig: planConfig, ...overrides }}>
+            {children}
+          </MockRepositoryProvider>
         </QueryClientProvider>
       </TamaguiProvider>
     );
@@ -44,7 +54,10 @@ function grantedScheduler(): InMemoryNotificationScheduler {
 }
 
 describe('useEmitDirectorAlert', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    // Alerts are filtered by effective feature flags, which need a verified plan (A-14).
+    planConfig = new InMemoryAppConfigRepository();
+    await seedTestEntitlement(planConfig);
     useAppConfigStore.setState({
       currentBusinessId: BIZ,
       hydrated: true,
@@ -53,12 +66,14 @@ describe('useEmitDirectorAlert', () => {
 
   it('creates an alert via the repository', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
-    const { result } = renderHook(() => useEmitDirectorAlert(), {
+    const { result } = renderHook(() => ({ emit: useEmitDirectorAlert(), ent: useEntitlement() }), {
       wrapper: wrapper({ directorAlerts: repo }),
     });
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'stock-bajo',
         severity: 'warning',
         titleKey: 'notificaciones.stockBajo',
@@ -67,7 +82,7 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     const alerts = await repo.findAll(BIZ);
     expect(alerts).toHaveLength(1);
     expect(alerts[0]!.source).toBe('stock-bajo');
@@ -87,12 +102,14 @@ describe('useEmitDirectorAlert', () => {
       businessId: BIZ,
     });
 
-    const { result } = renderHook(() => useEmitDirectorAlert(), {
+    const { result } = renderHook(() => ({ emit: useEmitDirectorAlert(), ent: useEntitlement() }), {
       wrapper: wrapper({ directorAlerts: repo }),
     });
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'stock-bajo',
         severity: 'warning',
         titleKey: 'notificaciones.stockBajo',
@@ -102,7 +119,7 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     const alerts = await repo.findAll(BIZ);
     // Should still be 1, not 2
     expect(alerts).toHaveLength(1);
@@ -133,12 +150,17 @@ describe('useEmitDirectorAlert', () => {
   it('fires presentNow for critical severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
-      wrapper: wrapper({ directorAlerts: repo }),
-    });
+    const { result } = renderHook(
+      () => ({ emit: useEmitDirectorAlert({ testScheduler: scheduler }), ent: useEntitlement() }),
+      {
+        wrapper: wrapper({ directorAlerts: repo }),
+      },
+    );
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'discrepancia-caja',
         severity: 'critical',
         titleKey: 'notificaciones.discrepanciaCaja',
@@ -147,7 +169,7 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     expect(scheduler.presented).toHaveLength(1);
     expect(scheduler.presented[0]!.body).toBe('Faltaron $50');
     expect(scheduler.presented[0]!.payload).toMatchObject({
@@ -158,12 +180,17 @@ describe('useEmitDirectorAlert', () => {
   it('fires presentNow for warning severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
-      wrapper: wrapper({ directorAlerts: repo }),
-    });
+    const { result } = renderHook(
+      () => ({ emit: useEmitDirectorAlert({ testScheduler: scheduler }), ent: useEntitlement() }),
+      {
+        wrapper: wrapper({ directorAlerts: repo }),
+      },
+    );
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'stock-bajo',
         severity: 'warning',
         titleKey: 'notificaciones.stockBajo',
@@ -172,19 +199,24 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     expect(scheduler.presented).toHaveLength(1);
   });
 
   it('does NOT fire presentNow for info severity', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
-      wrapper: wrapper({ directorAlerts: repo }),
-    });
+    const { result } = renderHook(
+      () => ({ emit: useEmitDirectorAlert({ testScheduler: scheduler }), ent: useEntitlement() }),
+      {
+        wrapper: wrapper({ directorAlerts: repo }),
+      },
+    );
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'usuario-creado',
         severity: 'info',
         titleKey: 'notificaciones.usuarioCreado',
@@ -193,19 +225,24 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     expect(scheduler.presented).toHaveLength(0);
   });
 
   it('carries actionRoute in payload, defaulting to /notificaciones', async () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = grantedScheduler();
-    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
-      wrapper: wrapper({ directorAlerts: repo }),
-    });
+    const { result } = renderHook(
+      () => ({ emit: useEmitDirectorAlert({ testScheduler: scheduler }), ent: useEntitlement() }),
+      {
+        wrapper: wrapper({ directorAlerts: repo }),
+      },
+    );
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'discrepancia-caja',
         severity: 'critical',
         titleKey: 'notificaciones.discrepanciaCaja',
@@ -214,7 +251,7 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     expect(scheduler.presented[0]!.payload).toMatchObject({
       actionRoute: '/notificaciones',
     });
@@ -224,12 +261,17 @@ describe('useEmitDirectorAlert', () => {
     const repo = new InMemoryDirectorAlertsRepository(TEST_DEVICE_ID);
     const scheduler = new InMemoryNotificationScheduler();
     scheduler.setPermission('denied');
-    const { result } = renderHook(() => useEmitDirectorAlert({ testScheduler: scheduler }), {
-      wrapper: wrapper({ directorAlerts: repo }),
-    });
+    const { result } = renderHook(
+      () => ({ emit: useEmitDirectorAlert({ testScheduler: scheduler }), ent: useEntitlement() }),
+      {
+        wrapper: wrapper({ directorAlerts: repo }),
+      },
+    );
+    // Prefs gate alerts on effective flags: wait for the plan to load (A-14).
+    await waitFor(() => expect(result.current.ent).toBeDefined());
 
     await act(async () => {
-      result.current.mutate({
+      result.current.emit.mutate({
         source: 'discrepancia-caja',
         severity: 'critical',
         titleKey: 'notificaciones.discrepanciaCaja',
@@ -238,7 +280,7 @@ describe('useEmitDirectorAlert', () => {
       });
     });
 
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    await waitFor(() => expect(result.current.emit.isSuccess).toBe(true));
     // Alert still created in repo
     const alerts = await repo.findAll(BIZ);
     expect(alerts).toHaveLength(1);

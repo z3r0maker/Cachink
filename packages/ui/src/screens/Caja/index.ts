@@ -13,3 +13,5 @@ export {
 export { MovimientoSheetWired, type MovimientoSheetWiredProps } from './movimiento-sheet-wired';
 export { BlindCountStep, type BlindCountStepProps } from './blind-count-step';
 export { CountResultStep, type CountResultStepProps } from './count-result-step';
+export { OtrosCard, type OtrosCardProps } from './tool-card';
+export { operativoCajaToolItems, type OtrosItem } from './tool-items';

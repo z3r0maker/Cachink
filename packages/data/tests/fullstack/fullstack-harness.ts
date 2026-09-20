@@ -22,11 +22,12 @@
 import type { UserId } from '@xangarro/domain';
 import { makeFreshDb } from '../helpers/fresh-db.js';
 import { TEST_DEVICE_ID } from '../../../testing/src/index.js';
-import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../../src/repositories/drizzle/_db.js';
 
 // Drizzle repositories
 import {
   DrizzleSalesRepository,
+  DrizzleTicketsRepository,
   DrizzleBusinessesRepository,
   DrizzleProductsRepository,
   DrizzleClientsRepository,
@@ -46,7 +47,10 @@ import {
 // Use-cases (relative path to sibling package — vitest resolves TS)
 import {
   RegistrarVentaUseCase,
+  RegistrarTicketUseCase,
   CancelarVentaUseCase,
+  CancelarTicketUseCase,
+  CrearOperadorUseCase,
   EditarVentaUseCase,
   AbrirCajaUseCase,
   CerrarCajaUseCase,
@@ -59,22 +63,19 @@ import {
   ProcesarGastoRecurrenteUseCase,
   DescartarGastoRecurrenteUseCase,
   GenerarInformeMensualUseCase,
-  CrearUsuarioUseCase,
   AutenticarUsuarioUseCase,
-  CambiarPinUseCase,
-  RecuperarPinUseCase,
-  EliminarUsuarioUseCase,
   ToggleFeatureFlagUseCase,
   EjecutarConversionUseCase,
 } from '../../../application/src/index.js';
 
 export interface FullstackHarness {
-  readonly db: CachinkDatabase;
+  readonly db: XangarroDatabase;
   readonly repos: FullstackRepos;
   readonly useCases: FullstackUseCases;
 }
 
 export interface FullstackRepos {
+  readonly tickets: DrizzleTicketsRepository;
   readonly sales: DrizzleSalesRepository;
   readonly businesses: DrizzleBusinessesRepository;
   readonly products: DrizzleProductsRepository;
@@ -107,11 +108,7 @@ export interface FullstackUseCases {
   readonly procesarGastoRecurrente: ProcesarGastoRecurrenteUseCase;
   readonly descartarGastoRecurrente: DescartarGastoRecurrenteUseCase;
   readonly generarInforme: GenerarInformeMensualUseCase;
-  readonly crearUsuario: CrearUsuarioUseCase;
   readonly autenticarUsuario: AutenticarUsuarioUseCase;
-  readonly cambiarPin: CambiarPinUseCase;
-  readonly recuperarPin: RecuperarPinUseCase;
-  readonly eliminarUsuario: EliminarUsuarioUseCase;
   readonly toggleFeatureFlag: ToggleFeatureFlagUseCase;
   readonly ejecutarConversion: EjecutarConversionUseCase;
 }
@@ -135,6 +132,7 @@ export function buildHarness(opts?: {
 
   // --- Repositories ------------------------------------------------
   const repos: FullstackRepos = {
+    tickets: new DrizzleTicketsRepository(db, TEST_DEVICE_ID, userId),
     sales: new DrizzleSalesRepository(db, TEST_DEVICE_ID, userId),
     businesses: new DrizzleBusinessesRepository(db, TEST_DEVICE_ID, userId),
     products: new DrizzleProductsRepository(db, TEST_DEVICE_ID, userId),
@@ -154,38 +152,53 @@ export function buildHarness(opts?: {
 
   // --- Use-Cases ---------------------------------------------------
   const useCases: FullstackUseCases = {
+    crearOperador: new CrearOperadorUseCase(repos.users),
     registrarVenta: new RegistrarVentaUseCase(
-      repos.sales,
-      repos.clients,
-      repos.products,
-      repos.movements,
-      repos.cajaTurnos,
-      { userId, stockEnabled },
+      new RegistrarTicketUseCase(
+        repos.tickets,
+        repos.sales,
+        repos.clients,
+        repos.products,
+        repos.movements,
+        repos.cajaTurnos,
+        { userId, stockEnabled },
+      ),
     ),
     cancelarVenta: new CancelarVentaUseCase(
       repos.sales,
-      repos.users,
-      repos.products,
-      repos.movements,
-      repos.cancelacionLogs,
+      new CancelarTicketUseCase(
+        repos.tickets,
+        repos.sales,
+        repos.users,
+        repos.products,
+        repos.movements,
+        repos.cancelacionLogs,
+      ),
     ),
-    editarVenta: new EditarVentaUseCase(repos.sales, repos.clients),
+    editarVenta: new EditarVentaUseCase(repos.sales),
     abrirCaja: new AbrirCajaUseCase(repos.cajaTurnos),
-    cerrarCaja: new CerrarCajaUseCase(repos.cajaTurnos, repos.sales, repos.expenses),
+    cerrarCaja: new CerrarCajaUseCase(
+      repos.cajaTurnos,
+      repos.tickets,
+      repos.sales,
+      repos.expenses,
+      repos.clientPayments,
+    ),
     retirarCaja: new RetirarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
     depositarCaja: new DepositarCajaUseCase(repos.cajaMovimientos, repos.cajaTurnos),
-    cerrarCorte: new CerrarCorteDeDiaUseCase(repos.sales, repos.expenses, repos.dayCloses),
+    cerrarCorte: new CerrarCorteDeDiaUseCase(
+      repos.tickets,
+      repos.sales,
+      repos.expenses,
+      repos.dayCloses,
+    ),
     registrarPago: new RegistrarPagoClienteUseCase(repos.clientPayments, repos.clients),
     registrarMovimiento: new RegistrarMovimientoInventarioUseCase(repos.movements, repos.expenses),
     registrarEgreso: new RegistrarEgresoUseCase(repos.expenses, repos.recurring),
     procesarGastoRecurrente: new ProcesarGastoRecurrenteUseCase(repos.expenses, repos.recurring),
     descartarGastoRecurrente: new DescartarGastoRecurrenteUseCase(repos.recurring),
     generarInforme: new GenerarInformeMensualUseCase(repos.sales, repos.expenses, repos.businesses),
-    crearUsuario: new CrearUsuarioUseCase(repos.users),
     autenticarUsuario: new AutenticarUsuarioUseCase(repos.users),
-    cambiarPin: new CambiarPinUseCase(repos.users),
-    recuperarPin: new RecuperarPinUseCase(repos.users),
-    eliminarUsuario: new EliminarUsuarioUseCase(repos.users),
     toggleFeatureFlag: new ToggleFeatureFlagUseCase(repos.businesses),
     ejecutarConversion: new EjecutarConversionUseCase(
       repos.recetas,

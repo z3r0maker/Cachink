@@ -1,14 +1,14 @@
 import type { ReactElement } from 'react';
 import { Pressable } from 'react-native';
 import { Text, View } from '@tamagui/core';
-import { formatMoney, type Sale } from '@xangarro/domain';
+import { formatMoney, type Ticket } from '@xangarro/domain';
 import { Btn, Card } from '../../components/index';
 import { useTranslation } from '../../i18n/index';
 import { colors, fontSizes, typography } from '../../theme';
 
 interface CreditoVentaRowProps {
-  readonly venta: Sale;
-  readonly onPagar: (v: Sale) => void;
+  readonly venta: Ticket;
+  readonly onPagar: (v: Ticket) => void;
 }
 
 function CreditoVentaRow(props: CreditoVentaRowProps): ReactElement {
@@ -34,7 +34,7 @@ function CreditoVentaRow(props: CreditoVentaRowProps): ReactElement {
           {props.venta.concepto}
         </Text>
         <Text fontFamily={typography.fontFamily} fontSize={fontSizes.xs} color={colors.textMuted}>
-          {props.venta.fecha} · {formatMoney(props.venta.monto)}
+          {props.venta.fecha} · {props.venta.folio}
         </Text>
       </View>
       <Btn
@@ -53,14 +53,14 @@ export interface CreditoClientRow {
   readonly clienteId: string | null;
   readonly clienteNombre: string;
   readonly totalPendienteCentavos: bigint;
-  readonly ventas: readonly Sale[];
+  readonly ventas: readonly Ticket[];
 }
 
 export interface CreditoClientCardProps {
   readonly row: CreditoClientRow;
   readonly isExpanded: boolean;
   readonly onToggle: () => void;
-  readonly onPagar: (v: Sale) => void;
+  readonly onPagar: (v: Ticket) => void;
 }
 
 export function CreditoClientCard(props: CreditoClientCardProps): ReactElement {

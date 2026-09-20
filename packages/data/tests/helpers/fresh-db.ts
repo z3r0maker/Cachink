@@ -1,7 +1,7 @@
 /**
  * makeFreshDb() — spin up an in-memory SQLite via `better-sqlite3`, apply
  * the committed migrations, and return a Drizzle handle typed as the
- * driver-agnostic {@link CachinkDatabase} so test files can share the same
+ * driver-agnostic {@link XangarroDatabase} so test files can share the same
  * repo impls they'd use in production.
  *
  * Every call returns a brand-new database, isolated from every other
@@ -16,12 +16,12 @@
 import Database from 'better-sqlite3';
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import * as schema from '../../src/schema/index.js';
-import type { CachinkDatabase } from '../../src/repositories/drizzle/_db.js';
+import type { XangarroDatabase } from '../../src/repositories/drizzle/_db.js';
 import { journal, migrationSqlByTag } from '../../drizzle/migrations/index.js';
 import { splitStatements } from '../../src/migrator/split-statements.js';
 import { SCHEMA_VERSION } from '../../src/migrator/schema-version.js';
 
-export function makeFreshDb(): CachinkDatabase {
+export function makeFreshDb(): XangarroDatabase {
   const sqlite = new Database(':memory:');
 
   // Disable FK enforcement in contract tests — repositories test CRUD
@@ -36,24 +36,27 @@ export function makeFreshDb(): CachinkDatabase {
   // async runner uses, via better-sqlite3's synchronous exec() to keep test
   // factories sync. (This used to apply 0000 alone; it went unnoticed until
   // the first new migration, P-08's fiscal columns.)
-  const tags = journal.entries.map((e) => e.tag);
-  for (const tag of tags) {
-    for (const stmt of splitStatements(migrationSqlByTag[tag] ?? '')) sqlite.exec(stmt);
+  // Apply the same migration SQL the async runner uses, but via
+  // better-sqlite3's synchronous exec() to keep test factories sync.
+  for (const entry of journal.entries) {
+    for (const stmt of splitStatements(migrationSqlByTag[entry.tag] ?? '')) {
+      sqlite.exec(stmt);
+    }
   }
 
-  // Bookkeeping: match what runMigrations() would create.
+  // Bookkeeping: match what runMigrations() would create, in one batch.
   sqlite.exec(
     `CREATE TABLE IF NOT EXISTS __cachink_migrations (
       tag TEXT PRIMARY KEY NOT NULL,
       applied_at TEXT NOT NULL
     )`,
   );
-  const record = sqlite.prepare(
-    `INSERT INTO __cachink_migrations (tag, applied_at) VALUES (?, datetime('now'))`,
+  sqlite.exec(
+    `INSERT INTO __cachink_migrations (tag, applied_at)
+     SELECT value, datetime('now') FROM json_each('${JSON.stringify(journal.entries.map((e) => e.tag))}')`,
   );
-  for (const tag of tags) record.run(tag);
   sqlite.exec(`PRAGMA user_version = ${SCHEMA_VERSION}`);
 
   const db = drizzle(sqlite, { schema });
-  return db as unknown as CachinkDatabase;
+  return db as unknown as XangarroDatabase;
 }

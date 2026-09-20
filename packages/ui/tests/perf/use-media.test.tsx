@@ -1,7 +1,7 @@
 /**
  * useMedia tests — Phase B1 (audit M-1 PR 5.5-T01).
  *
- * Verifies that the Tamagui `useMedia()` hook resolves Cachink's
+ * Verifies that the Tamagui `useMedia()` hook resolves Xangarro's
  * `breakpoints` scale correctly at three viewport widths. Width is
  * driven by `setMockViewport(w)` from `../responsive/match-media-mock`,
  * which fires every registered Tamagui media listener so the
@@ -25,7 +25,7 @@ interface MediaProbeProps {
 
 function MediaProbe({ testID }: MediaProbeProps): ReactElement {
   const media = useMedia();
-  // Stringify only the four Cachink keys so unrelated Tamagui-internal
+  // Stringify only the four Xangarro keys so unrelated Tamagui-internal
   // keys don't leak into the assertion.
   const snapshot = JSON.stringify({
     sm: Boolean(media.sm),
@@ -40,7 +40,7 @@ afterEach(() => {
   resetMockViewport();
 });
 
-describe('useMedia — Cachink breakpoint contract', () => {
+describe('useMedia — Xangarro breakpoint contract', () => {
   it('phone portrait (360 px) sets only `sm`', () => {
     setMockViewport(360);
     renderWithProviders(<MediaProbe testID="media-phone" />);

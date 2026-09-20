@@ -57,11 +57,9 @@ describe('parseMode', () => {
     expect(parseMode(null)).toBeNull();
   });
 
-  it('accepts all four documented mode names (ADR-039)', () => {
+  it('accepts the two current mode names', () => {
     expect(parseMode('local')).toBe('local');
     expect(parseMode('cloud')).toBe('cloud');
-    expect(parseMode('lan-server')).toBe('lan-server');
-    expect(parseMode('lan-client')).toBe('lan-client');
   });
 
   it('migrates legacy local-standalone and tablet-only values to "local"', () => {
@@ -69,8 +67,10 @@ describe('parseMode', () => {
     expect(parseMode('tablet-only')).toBe('local');
   });
 
-  it('returns the legacy-lan sentinel for the pre-ADR-039 "lan" value', () => {
-    expect(parseMode('lan')).toBe('legacy-lan');
+  it('maps every retired LAN mode to "local" (A-18)', () => {
+    expect(parseMode('lan')).toBe('local');
+    expect(parseMode('lan-server')).toBe('local');
+    expect(parseMode('lan-client')).toBe('local');
   });
 });
 
@@ -157,29 +157,11 @@ describe('AppConfigProvider — returning user', () => {
     expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('local');
   });
 
-  it('migrates legacy "lan" via resolveLegacyLan callback (ADR-039)', async () => {
+  it('rewrites a stored LAN mode to "local" on hydration (A-18)', async () => {
     resetStore();
     const repo = new InMemoryAppConfigRepository();
     await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000011');
-    await repo.set(APP_CONFIG_KEYS.mode, 'lan');
-    const resolver = vi.fn(async (): Promise<'lan-server' | 'lan-client'> => 'lan-server');
-
-    renderWithProviders(
-      <AppConfigProvider appConfig={repo} resolveLegacyLan={resolver}>
-        <Probe />
-      </AppConfigProvider>,
-    );
-
-    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('lan-server'));
-    expect(resolver).toHaveBeenCalled();
-    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('lan-server');
-  });
-
-  it('defaults legacy "lan" to "lan-client" when no resolver is provided', async () => {
-    resetStore();
-    const repo = new InMemoryAppConfigRepository();
-    await repo.set(APP_CONFIG_KEYS.deviceId, '01JPHK00000000000000000012');
-    await repo.set(APP_CONFIG_KEYS.mode, 'lan');
+    await repo.set(APP_CONFIG_KEYS.mode, 'lan-server');
 
     renderWithProviders(
       <AppConfigProvider appConfig={repo}>
@@ -187,7 +169,8 @@ describe('AppConfigProvider — returning user', () => {
       </AppConfigProvider>,
     );
 
-    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('lan-client'));
+    await waitFor(() => expect(screen.getByTestId('mode').textContent).toBe('local'));
+    expect(await repo.get(APP_CONFIG_KEYS.mode)).toBe('local');
   });
 
   it('narrows a rogue mode value to null so the wizard re-runs', async () => {

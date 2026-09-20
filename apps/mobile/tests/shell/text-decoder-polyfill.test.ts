@@ -34,7 +34,7 @@ describe('TextDecoder polyfill', () => {
   it('new TextDecoder() defaults to utf-8', () => {
     const decoder = new TextDecoder();
     expect(decoder.encoding).toBe('utf-8');
-    const result = decoder.decode(new Uint8Array([67, 97, 99, 104, 105, 110, 107]));
-    expect(result).toBe('Cachink');
+    const result = decoder.decode(new Uint8Array([88, 97, 110, 103, 97, 114, 114, 111]));
+    expect(result).toBe('Xangarro');
   });
 });

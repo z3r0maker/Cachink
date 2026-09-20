@@ -8,7 +8,7 @@
  * deterministic and trivially testable without a renderer.
  *
  * The output is a self-contained HTML document with inline CSS that
- * mirrors the Cachink brand: Plus Jakarta Sans, black hard border,
+ * mirrors the Xangarro brand: Plus Jakarta Sans, black hard border,
  * 4px hard drop shadow, yellow emphasis. The consumer embeds it into
  * an offscreen iframe / WebView to rasterize.
  *
@@ -17,7 +17,8 @@
  */
 
 import type { Business } from '../entities/business.js';
-import type { Sale } from '../entities/sale.js';
+import type { Ticket } from '../entities/ticket.js';
+import type { Money } from '../money/index.js';
 import { formatMoney } from '../format/money.js';
 import { formatDate } from '../format/date.js';
 
@@ -38,7 +39,9 @@ export function escapeHtml(value: string): string {
 }
 
 export interface BuildComprobanteOptions {
-  readonly sale: Sale;
+  /** The ticket this comprobante receipts; `total` is its lines' sum (ADR-073). */
+  readonly ticket: Ticket;
+  readonly total: Money;
   readonly business: Business;
   /** Override the default "¡Gracias por su compra!" footer. */
   readonly thankYou?: string;
@@ -66,11 +69,13 @@ const DEFAULT_THANK_YOU = '¡Gracias por su compra!';
  * WebView without extra wrapping.
  */
 export function buildComprobanteHtml(options: BuildComprobanteOptions): string {
-  const { sale, business } = options;
+  const { ticket, total, business } = options;
   const labels = options.labels ?? DEFAULT_LABELS;
   const thankYou = options.thankYou ?? DEFAULT_THANK_YOU;
   const creditoBadge =
-    sale.estadoPago === 'pendiente' ? `<div class="badge">${escapeHtml(labels.credito)}</div>` : '';
+    ticket.estadoPago === 'pendiente'
+      ? `<div class="badge">${escapeHtml(labels.credito)}</div>`
+      : '';
   return `<!doctype html>
 <html lang="es-MX"><head><meta charset="utf-8"/><title>${escapeHtml(labels.comprobante)}</title>
 <style>
@@ -93,10 +98,10 @@ export function buildComprobanteHtml(options: BuildComprobanteOptions): string {
 </style></head>
 <body><section class="card">
   <div class="brand">${escapeHtml(business.nombre)}</div>
-  <div class="title">${escapeHtml(sale.concepto)}</div>
-  <div class="muted">${escapeHtml(labels.fecha)} · ${escapeHtml(formatDate(sale.fecha))}</div>
-  <div class="row"><span class="muted">${escapeHtml(labels.metodo)}</span><span class="muted">${escapeHtml(sale.metodo)}</span></div>
-  <div class="row"><span class="monto">${escapeHtml(formatMoney(sale.monto))}</span></div>
+  <div class="title">${escapeHtml(ticket.concepto)}</div>
+  <div class="muted">${escapeHtml(labels.fecha)} · ${escapeHtml(formatDate(ticket.fecha))}</div>
+  <div class="row"><span class="muted">${escapeHtml(labels.metodo)}</span><span class="muted">${escapeHtml(ticket.metodo)}</span></div>
+  <div class="row"><span class="monto">${escapeHtml(formatMoney(total))}</span></div>
   ${creditoBadge}
   <div class="foot">${escapeHtml(thankYou)}</div>
 </section></body></html>`;

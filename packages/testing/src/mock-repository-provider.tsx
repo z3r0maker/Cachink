@@ -24,16 +24,19 @@
 import { useMemo, type ReactElement, type ReactNode } from 'react';
 import { RepositoryProvider, type Repositories } from '@xangarro/ui';
 import { InMemoryAppConfigRepository } from './in-memory-app-config-repository.js';
+import { InMemoryReferenceDataRepository } from './in-memory-reference-data-repository.js';
 import { InMemoryBusinessesRepository } from './in-memory-businesses-repository.js';
 import { InMemoryClientPaymentsRepository } from './in-memory-client-payments-repository.js';
 import { InMemoryClientsRepository } from './in-memory-clients-repository.js';
 import { InMemoryDayClosesRepository } from './in-memory-day-closes-repository.js';
+import { InMemoryRecordUsageRepository } from './in-memory-record-usage-repository.js';
 import { InMemoryEmployeesRepository } from './in-memory-employees-repository.js';
 import { InMemoryExpensesRepository } from './in-memory-expenses-repository.js';
 import { InMemoryInventoryMovementsRepository } from './in-memory-inventory-movements-repository.js';
 import { InMemoryProductsRepository } from './in-memory-products-repository.js';
 import { InMemoryRecurringExpensesRepository } from './in-memory-recurring-expenses-repository.js';
 import { InMemorySalesRepository } from './in-memory-sales-repository.js';
+import { InMemoryTicketsRepository } from './in-memory-tickets-repository.js';
 import { InMemoryUsersRepository } from './in-memory-users-repository.js';
 import { InMemoryCajaTurnosRepository } from './in-memory-caja-turnos-repository.js';
 import { InMemoryConversionRecetasRepository } from './in-memory-conversion-recetas-repository.js';
@@ -58,8 +61,11 @@ export interface MockRepositoryProviderProps {
 function buildInMemoryRepositories(): Repositories {
   return {
     appConfig: new InMemoryAppConfigRepository(),
+    referenceData: new InMemoryReferenceDataRepository(),
+    recordUsage: new InMemoryRecordUsageRepository(),
     businesses: new InMemoryBusinessesRepository(),
     sales: new InMemorySalesRepository(),
+    tickets: new InMemoryTicketsRepository(),
     expenses: new InMemoryExpensesRepository(),
     products: new InMemoryProductsRepository(),
     inventoryMovements: new InMemoryInventoryMovementsRepository(),

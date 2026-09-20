@@ -31,7 +31,7 @@ pnpm add @xangarro/domain@workspace:* @xangarro/application@workspace:* @xangarr
 
 3. **Folder structure** — create `src/app/` (Expo Router root) and `src/shell/` (platform bootstrap) per CLAUDE.md §4.1 and §5.6. **Do not** create a `src/components/` directory — all reusable components live in `@xangarro/ui`.
 
-4. **App shell** (`src/app/_layout.tsx`) — set up the Expo Router root, load Plus Jakarta Sans, render a "Hello Cachink" screen that imports a component from `@xangarro/ui` to validate the cross-platform pipeline (ROADMAP P0-M4-T05).
+4. **App shell** (`src/app/_layout.tsx`) — set up the Expo Router root, load Plus Jakarta Sans, render a "Hello Xangarro" screen that imports a component from `@xangarro/ui` to validate the cross-platform pipeline (ROADMAP P0-M4-T05).
 
 5. **Metro config** — enable symlinks and add the monorepo workspace roots so Metro resolves `@xangarro/*` packages correctly. Create `metro.config.js`:
 
@@ -70,7 +70,7 @@ into `app.json`:
 ```json
 {
   "expo": {
-    "name": "Cachink!",
+    "name": "Xangarro!",
     "slug": "xangarro",
     "icon": "./assets/icon.png",
     "splash": {
@@ -133,7 +133,7 @@ These build a Release binary with the JS bundle **embedded inside the
 app**. Tap the icon any time — it just works, no terminal needed.
 Build takes ~5–8 min (Hermes bytecode compilation). No hot reload.
 
-> **⚠️ Do NOT use `expo start` (Expo Go).** Cachink! requires native
+> **⚠️ Do NOT use `expo start` (Expo Go).** Xangarro! requires native
 > modules (reanimated worklets, gesture-handler, expo-sqlite,
 > expo-camera) and New Architecture — none of which Expo Go bundles.
 > The app will crash on launch.
@@ -186,11 +186,11 @@ The Cloud onboarding card (`<CloudOnboardingScreen>`) only activates
 when the build has a usable Supabase backend. Three EAS Build secrets
 need to be set before any Cloud-mode dev client or production build:
 
-| Secret                       | Purpose                                                               |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `EXPO_PUBLIC_CLOUD_API_URL`  | Cachink-hosted Supabase project URL (e.g. `https://abc.supabase.co`). |
-| `EXPO_PUBLIC_CLOUD_ANON_KEY` | Anonymous JWT for the same project — safe to bake into the binary.    |
-| `EXPO_PUBLIC_POWERSYNC_URL`  | PowerSync instance the app should connect to once signed in.          |
+| Secret                       | Purpose                                                                |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `EXPO_PUBLIC_CLOUD_API_URL`  | Xangarro-hosted Supabase project URL (e.g. `https://abc.supabase.co`). |
+| `EXPO_PUBLIC_CLOUD_ANON_KEY` | Anonymous JWT for the same project — safe to bake into the binary.     |
+| `EXPO_PUBLIC_POWERSYNC_URL`  | PowerSync instance the app should connect to once signed in.           |
 
 Set them via `eas secret:create` (one-time per environment) or as
 plain env vars in `app.config.ts` for local dev. Without them, the
@@ -212,9 +212,9 @@ The mobile app is always a LAN **client** — it never hosts. To pair:
 2. The app surfaces `<LanJoinScreen>` with a **Escanear QR** CTA
    (powered by `expo-camera`).
 3. Scan the QR shown by the desktop host (or paste the
-   `cachink-lan://...?token=...` URL into the fallback input).
+   `xangarro-lan://...?token=...` URL into the fallback input).
 4. `useLanBridgeCallbacks.onPaired` writes the bearer token into
-   `__cachink_sync_state` and the gate flips to the role picker.
+   `__xangarro_sync_state` and the gate flips to the role picker.
 
 The pairing UI is documented end-to-end in
 `packages/ui/src/screens/LanPairing/` and tested via
@@ -226,7 +226,7 @@ Power users (and developers running their own Supabase project) can
 override the baked-in defaults from **Settings → Avanzado** without
 forking. The screen lives at `<AdvancedBackendRoute>` (mounted on
 mobile via `<CloudInnerScreenHost />`) and persists the URL +
-anon-key to `__cachink_sync_state` under `cloud.byoBackend`. ADR-035
+anon-key to `__xangarro_sync_state` under `cloud.byoBackend`. ADR-035
 formalises the precedence: BYO config wins over the build-baked
 defaults whenever it's present.
 
@@ -238,7 +238,7 @@ Tick these on ROADMAP.md once the init runs clean:
 - [ ] P0-M4-T02 — Wire Expo Router, TypeScript, Plus Jakarta Sans
 - [ ] P0-M4-T03 — Create apps/mobile/src/app/\_layout.tsx app-shell only
 - [ ] P0-M4-T04 — Verify dev server launches in simulator
-- [ ] P0-M4-T05 — Placeholder "Hello Cachink" screen imports from @xangarro/ui
+- [ ] P0-M4-T05 — Placeholder "Hello Xangarro" screen imports from @xangarro/ui
 
 ## Maestro local-dev setup (Audit M-1 Step 0 — added 2026-04-26)
 

@@ -87,7 +87,7 @@ export function ExportarDatosAction(props: ExportarDatosActionProps): ReactEleme
 
   const filename = useMemo(() => {
     const stamp = new Date().toISOString().slice(0, 10);
-    const stem = (props.businessName ?? 'cachink').toLowerCase().replaceAll(/\s+/g, '-');
+    const stem = (props.businessName ?? 'xangarro').toLowerCase().replaceAll(/\s+/g, '-');
     return `${stem}-export-${stamp}.xlsx`;
   }, [props.businessName]);
 

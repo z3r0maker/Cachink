@@ -28,7 +28,7 @@ export async function serieDiaria(
   const rows = await tx.execute<Raw>(sql`
     SELECT to_char(d, 'YYYY-MM-DD') AS fecha,
            coalesce((SELECT sum(s.monto_centavos) FROM sales s
-                      WHERE left(s.fecha, 10) = to_char(d, 'YYYY-MM-DD') AND s.deleted_at IS NULL AND s.cancelled_at IS NULL), 0)::text AS ventas,
+                      WHERE left(s.fecha, 10) = to_char(d, 'YYYY-MM-DD') AND s.deleted_at IS NULL AND NOT EXISTS (SELECT 1 FROM tickets t WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)), 0)::text AS ventas,
            coalesce((SELECT sum(e.monto_centavos) FROM expenses e
                       WHERE left(e.fecha, 10) = to_char(d, 'YYYY-MM-DD') AND e.deleted_at IS NULL), 0)::text AS gastos
       FROM generate_series(${desde}::date, ${hasta}::date, interval '1 day') AS d

@@ -1,0 +1,50 @@
+# Products are create-only on the device (A-09): quick-add asks nombre,
+# código, categoría, precio and stock tracking; the detail page is read-only
+# (no Guardar, no Eliminar) with Entrada/Salida and a pointer to the portal.
+#
+# Precondition: device activated against the mock (activation.yaml).
+# x-entrypoint: activated
+appId: mx.xangarro.mobile
+---
+- runFlow: shared/login-operator.yaml
+- tapOn:
+    id: 'tab-productos'
+- tapOn:
+    id: 'stock-nuevo-producto'
+- extendedWaitUntil:
+    visible:
+      id: 'nuevo-producto-screen'
+    timeout: 10000
+- assertNotVisible:
+    id: 'producto-costo'
+- tapOn:
+    id: 'producto-nombre'
+- inputText: 'Agua mineral'
+- tapOn:
+    id: 'producto-precio-venta'
+- inputText: '18'
+- hideKeyboard
+- tapOn:
+    id: 'producto-submit'
+- extendedWaitUntil:
+    visible: '.*Agua mineral.*'
+    timeout: 10000
+- tapOn: '.*Agua mineral.*'
+- extendedWaitUntil:
+    visible:
+      id: 'producto-detail-screen'
+    timeout: 10000
+- assertVisible:
+    id: 'detail-entrada'
+- assertVisible:
+    id: 'detail-portal-hint'
+- assertNotVisible:
+    id: 'detail-save'
+- assertNotVisible:
+    id: 'detail-delete'
+- tapOn:
+    id: 'detail-back'
+- extendedWaitUntil:
+    visible:
+      id: 'cloud-sync-pill-synced'
+    timeout: 30000

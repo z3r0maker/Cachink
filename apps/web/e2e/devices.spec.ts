@@ -1,10 +1,10 @@
 import { expect, test } from '@playwright/test';
-import { latestMailTo } from './outbox';
 import { randomUUID } from 'node:crypto';
 import { deviceHeaders } from '@xangarro/contracts';
 import postgres from 'postgres';
 
 import { activate, freshCode } from './device-helpers';
+import { latestMailTo } from './outbox';
 
 /**
  * Device slots (B-12), end to end — the task's own acceptance:
