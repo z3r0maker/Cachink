@@ -135,6 +135,7 @@ export class CancelarTicketUseCase implements UseCase<CancelarTicketInput, Cance
         costoUnitCentavos: producto.costoUnitCentavos,
         motivo: 'Devolución de cliente',
         nota: `Cancelación de venta: ${input.motivo}`,
+        origen: 'cancelacion',
         businessId: input.businessId,
       });
       reversed = true;

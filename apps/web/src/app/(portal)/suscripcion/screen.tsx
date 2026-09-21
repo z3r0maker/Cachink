@@ -53,40 +53,69 @@ function CurrentPlan({ owner, data }: { readonly owner: boolean; readonly data: 
  */
 function Consumo({ uso }: { readonly uso: SuscripcionData['uso'] }) {
   const limits = PLAN_LIMITS[useSession().planId];
-  const registros = uso.registros === null ? '—' : String(uso.registros);
   return (
     <Card>
       <div className={eyebrow} style={{ marginBottom: 16 }}>
         Tu consumo este mes
       </div>
-      <div className={usageLabel}>
-        <span>Operadores</span>
-        <span>
-          {uso.operadores} de {limits.operators}
-        </span>
-      </div>
-      <UsageBar used={uso.operadores} limit={limits.operators} label="Operadores activos" />
-      <div className={usageLabel} style={{ marginTop: 16 }}>
-        <span>Registros del mes</span>
-        <span>
-          {limits.recordsPerMonth === null
-            ? `${registros} · sin límite`
-            : `${registros} de ${limits.recordsPerMonth}`}
-        </span>
-      </div>
-      <UsageBar
-        used={uso.registros ?? 0}
-        limit={limits.recordsPerMonth}
-        label="Registros del mes"
+      <Metrica
+        nombre="Operadores"
+        usados={uso.operadores}
+        label="Operadores activos"
+        limite={limits.operators}
+        primera
       />
-      <div className={usageLabel} style={{ marginTop: 16 }}>
-        <span>Dispositivos vinculados</span>
+      <Metrica
+        nombre="Transacciones del mes"
+        usados={uso.registros ?? 0}
+        texto={uso.registros === null ? '—' : undefined}
+        label="Transacciones del mes"
+        limite={limits.transactionsPerMonth}
+      />
+      <Metrica
+        nombre="Productos activos"
+        usados={uso.productos ?? 0}
+        texto={uso.productos === null ? '—' : undefined}
+        label="Productos activos"
+        limite={limits.activeProducts}
+      />
+      <Metrica
+        nombre="Dispositivos vinculados"
+        usados={uso.dispositivos}
+        label="Dispositivos vinculados"
+        limite={limits.devices}
+      />
+    </Card>
+  );
+}
+
+/** One label + bar row of the consumption card (C-12's two new metrics ride here). */
+function Metrica({
+  nombre,
+  usados,
+  texto,
+  label,
+  limite,
+  primera = false,
+}: {
+  readonly nombre: string;
+  readonly usados: number;
+  /** Shown instead of the count when no recompute has landed ('—'). */
+  readonly texto?: string;
+  readonly label: string;
+  readonly limite: number;
+  readonly primera?: boolean;
+}) {
+  return (
+    <>
+      <div className={usageLabel} style={primera ? undefined : { marginTop: 16 }}>
+        <span>{nombre}</span>
         <span>
-          {uso.dispositivos} de {limits.devices}
+          {texto ?? `${usados}`} de {limite}
         </span>
       </div>
-      <UsageBar used={uso.dispositivos} limit={limits.devices} label="Dispositivos vinculados" />
-    </Card>
+      <UsageBar used={usados} limit={limite} label={label} />
+    </>
   );
 }
 

@@ -107,23 +107,25 @@ describe('Movement enums', () => {
     expect(MovementTypeEnum.options).toEqual(['entrada', 'salida']);
   });
 
-  it('EntryReasonEnum enumerates the five MOV_MOTIVO_ENT values', () => {
+  it('EntryReasonEnum enumerates the six MOV_MOTIVO_ENT values (Conversión, C-12)', () => {
     expect(EntryReasonEnum.options).toEqual([
       'Compra a proveedor',
       'Devolución de cliente',
       'Ajuste de inventario',
       'Producción',
+      'Conversión',
       'Otro',
     ]);
   });
 
-  it('ExitReasonEnum enumerates the six MOV_MOTIVO_SAL values', () => {
+  it('ExitReasonEnum enumerates the seven MOV_MOTIVO_SAL values (Conversión, C-12)', () => {
     expect(ExitReasonEnum.options).toEqual([
       'Venta',
       'Uso en producción',
       'Merma / daño',
       'Muestra',
       'Ajuste de inventario',
+      'Conversión',
       'Otro',
     ]);
   });

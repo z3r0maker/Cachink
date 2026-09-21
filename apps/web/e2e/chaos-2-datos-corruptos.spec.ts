@@ -168,6 +168,7 @@ test.describe('login gate (signed out)', () => {
     const dialogs = failOnJsDialog(page);
 
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(`<script>alert(1)</script>@x.com`);
     await page.getByTestId('login-password').fill('loquesea123');
     await page.getByRole('button', { name: 'Entrar' }).click();

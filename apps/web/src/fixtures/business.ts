@@ -26,6 +26,7 @@ export const SESSION: Session = {
     informeMensual: false,
     permisosPorUsuario: false,
     asesor: 'diario',
+    cobrosIntegrados: true,
   },
   features: {
     stock: true,

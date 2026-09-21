@@ -27,7 +27,7 @@ export function useRecordQuota(): RecordQuota {
       usage,
       businessId,
       plan: entitlement.plan,
-      recordsPerMonth: entitlement.recordsPerMonth,
+      transactionsPerMonth: entitlement.transactionsPerMonth,
       yearMonth: localYearMonth(entitlement.nowAnchored),
     });
   }, [usage, businessId, entitlement]);

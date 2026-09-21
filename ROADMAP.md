@@ -1508,6 +1508,15 @@ These are parked per CLAUDE.md §14. When Phase 1 ships and we have real user da
   The "Más…" tab is the chosen Phase 2 affordance for everything
   the design mocks suggest belongs on the bottom bar that doesn't
   fit the §1 contract.
+- **Cold-start offline + PWA for the caja** — the register boots with no
+  network (service-worker app shell) and installs as a PC app.
+  Design ready in `docs/plan/14-caja-offline-pwa.md`; not scheduled.
+- **Director notification when a device links.** The moment a register
+  redeems an activation code (or a linked one goes away), the owner should
+  hear about it: "Se vinculó la caja de la recepción." Email through the
+  existing B-14 sender and the alerts webhook rail are the MVP-cheap
+  carriers; WhatsApp (Twilio/Meta provider) is the desired end state and
+  stays parked until there's a reason to pay for it.
 - CoDi QR payment flow
 - Clip / Mercado Pago Point integration
 - WhatsApp as a first-class share target

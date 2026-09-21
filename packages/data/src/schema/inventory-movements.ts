@@ -17,5 +17,10 @@ export const inventoryMovements = sqliteTable('inventory_movements', {
   costoUnitCentavos: numeric('costo_unit_centavos', { mode: 'bigint' }).notNull(),
   motivo: text('motivo').notNull(),
   nota: text('nota'),
+  origen: text('origen', {
+    enum: ['manual', 'portal', 'apertura', 'venta', 'cancelacion', 'conversion'],
+  })
+    .notNull()
+    .default('manual'),
   ...auditColumns,
 });

@@ -7,6 +7,17 @@
 import type { RegistrarTicketInput } from '@xangarro/application';
 import type { ReferenceTables } from '@xangarro/contracts';
 
+export type {
+  AbonoCuentaPara,
+  CierrePara,
+  CuentaPara,
+  GastoPara,
+  LineaPara,
+  TicketPara,
+  VentaCuentaPara,
+  VentaPara,
+} from './shapes';
+
 export interface RegistrarContext {
   readonly deviceId: string;
   readonly userId: string | null;
@@ -30,83 +41,16 @@ export interface SesionAbierta {
 }
 
 /** One ticket of the open turno, as Operador · Ventas lists it (money as centavos string). */
-export interface VentaPara {
-  readonly id: string;
-  readonly folio: number;
-  readonly concepto: string;
-  readonly montoCentavos: string;
-  readonly metodo: string;
-  readonly hora: string;
-  readonly cliente: string | null;
-  readonly cancelada: string | null;
-}
 
 /** A fiado ticket of an account, and an abono on it (O-33; money as centavos string). */
-export interface VentaCuentaPara {
-  readonly folio: number;
-  readonly concepto: string;
-  /** Naive local "YYYY-MM-DDTHH:MM". */
-  readonly fecha: string;
-  readonly montoCentavos: string;
-  readonly capturo: string;
-}
-
-export interface AbonoCuentaPara {
-  readonly id: string;
-  /** IsoDate — abonos are day-granular. */
-  readonly fecha: string;
-  readonly montoCentavos: string;
-  readonly metodo: string;
-  readonly nota: string | null;
-}
-
-export interface CuentaPara {
-  readonly id: string;
-  readonly nombre: string;
-  readonly telefono: string | null;
-  readonly creado: string;
-  readonly limiteCentavos: string | null;
-  readonly plazoDias: number | null;
-  /** The domain's derivation over the account's two facts (ADR-074). */
-  readonly saldoCentavos: string;
-  readonly ventas: readonly VentaCuentaPara[];
-  readonly abonos: readonly AbonoCuentaPara[];
-}
 
 /** One line of a ticket, as Detalle de venta shows it (O-34). */
-export interface LineaPara {
-  readonly productoId: string;
-  readonly nombre: string;
-  readonly precioCentavos: string;
-  readonly cantidad: number;
-  readonly categoria: string;
-}
+
+/** The open turno's close figures (O-36): the four parts and the resumen. */
 
 /** One petty-cash expense of the open turno, as Gastos lists it (O-35). */
-export interface GastoPara {
-  readonly id: string;
-  readonly concepto: string;
-  readonly montoCentavos: string;
-  /** The domain's stored category; the screen says its own word. */
-  readonly categoria: string;
-  readonly hora: string;
-  readonly proveedor: string | null;
-}
 
 /** The open turno's ticket by folio, with everything the detail screen needs. */
-export interface TicketPara {
-  readonly id: string;
-  readonly folio: number;
-  readonly fecha: string;
-  readonly hora: string;
-  readonly metodo: string;
-  readonly lineas: readonly LineaPara[];
-  readonly recibidoCentavos: string | null;
-  readonly cambioCentavos: string | null;
-  readonly cliente: string | null;
-  readonly clienteSaldoCentavos: string | null;
-  readonly cancelada: string | null;
-}
 
 export type WorkerRequest =
   | { readonly id: number; readonly method: 'boot' }
@@ -201,6 +145,26 @@ export type WorkerRequest =
       readonly categoria: string;
       readonly montoCentavos: string;
       readonly proveedor: string | null;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'cierre';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly turnoId: string;
+    }
+  | {
+      readonly id: number;
+      readonly method: 'cerrar';
+      readonly businessId: string;
+      readonly deviceId: string;
+      readonly turnoId: string;
+      readonly montoCierreCentavos: string;
+      /** The domain's six-value enum, already mapped from the screen's word. */
+      readonly discrepancyReason: string | null;
+      readonly explicacion: string | null;
+      /** The count by denomination ("200": 2), written once at close. */
+      readonly denominaciones: Readonly<Record<string, number>> | null;
     }
   | {
       readonly id: number;

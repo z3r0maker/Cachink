@@ -40,7 +40,8 @@ export function signedTestEntitlement(
     limits: {
       operators: limits.operators,
       devices: limits.devices,
-      recordsPerMonth: limits.recordsPerMonth,
+      transactionsPerMonth: limits.transactionsPerMonth,
+      activeProducts: limits.activeProducts,
     },
     features: [...limits.features],
     capabilities: { ...limits.capabilities },

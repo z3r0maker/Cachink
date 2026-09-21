@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import { withTenant } from '../db';
 import type { DeviceCaller } from '../device/authenticate';
 import { entitlementFor, referenceTables } from '../device/bootstrap';
+import { usageFor } from '../usage/live.js';
 import { signEntitlement } from '../device/credentials';
 import { changesSince } from './changes';
 
@@ -34,7 +35,9 @@ export async function pull(caller: DeviceCaller, since: number): Promise<PullRes
       .returning({ acknowledgedThrough: devices.acknowledgedThrough });
 
     // Parsed, not cast: the server checks its own response against the contract.
+    const uso = await usageFor(caller.businessId, now).catch(() => null);
     return PullResponseSchema.parse({
+      ...(uso === null ? {} : { usage: uso }),
       serverSeq: page.serverSeq,
       serverTime: now.toISOString(),
       entitlement: await signEntitlement(await entitlementFor(tx, caller.businessId, now)),

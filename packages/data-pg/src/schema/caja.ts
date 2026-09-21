@@ -56,6 +56,9 @@ export const cajaTurnos = pgTable('caja_turnos', {
   conteoAt: timestamp('conteo_at', { withTimezone: true, mode: 'string' }),
   /** Count by denomination at close, JSON text; written once (ADR-074). */
   denominaciones: text('denominaciones'),
+  /** The owner resolved the difference's explanation (O-37); null while open. */
+  aclaradoAt: timestamp('aclarado_at', { withTimezone: true, mode: 'string' }),
+  aclaradoPor: text('aclarado_por'),
   ...auditColumns,
 });
 

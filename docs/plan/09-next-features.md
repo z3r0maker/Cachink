@@ -158,7 +158,12 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-02, P-07 · **Blocks:** N-30
+- [x] Status
+- Progress: 2026-09-21 · `track-n/c12-n04-uso` · **Done with C-12.** Transactions are
+  advisory on every tier — `PlanRecordQuota.assertCanCreate` never throws
+  and `warning()` feeds the neutral PlanLimitSheet after a successful capture
+  (egreso, movimiento); the xangarrito quick-add enforces the 50-active-products
+  cap client-side via `PlanLimitError` → the same sheet. · **Blocked by:** N-02, P-07 · **Blocks:** N-30
 - **What:** xangarrito cannot create the 51st **active** product.
 - **How:** enforced in the portal (create, import dry-run shows "excede tu plan por N") and in the
   app's quick-add using the last-known count (app copy: "Este negocio alcanzó su máximo de productos.
@@ -537,7 +542,19 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-21 WhatsApp share `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-20
+- [~] Status · **Blocked by:** N-20 (done) · web half landed 2026-09-20
+- Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
+  register's share dialog (Track O's) now saves the **branded** comprobante: a
+  device-token route `GET /api/v1/comprobante?ticketId=` renders the N-20
+  pipeline in the business's chosen template (the register has no portal
+  session, hence /api/v1); «Guardar imagen» fetches it when linked and online
+  and falls back to the local canvas offline or pre-push (404). The client's
+  phone is remembered per cliente (localStorage keyed by cliente, last-used
+  fallback) and prefills the dialog. Caja keeps the canvas right after a sale
+  — `registrar` returns no ticket id and changing the register-runtime
+  protocol is Track O's call. **Left:** the phone half (ACTION_SEND with jid,
+  iOS share sheet) on the app side. Also here: the informe mensual PDF now
+  prints the business's logo beside the title (E3's noted tail).
 - **What:** "Enviar comprobante" after a sale. Customer phone optional, remembered per cliente.
   Wires the existing, unused `shareComprobanteAsImage` path.
 - **How (verified 2026-09-17, §6):** `wa.me` / `whatsapp://send` carry **text only**.

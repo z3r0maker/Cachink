@@ -17,13 +17,7 @@ import type { AbonoCuenta, CuentaCliente, VentaCuenta } from './cliente/types';
 import type { MetodoAbono } from './types';
 
 const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;
-const dos = (n: number) => String(n).padStart(2, '0');
-
-/** The register's local date — «hoy» for the account screens. */
-export function hoyLocal(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${dos(d.getMonth() + 1)}-${dos(d.getDate())}`;
-}
+export { hoyLocal } from '../runtime/fechas';
 
 function iniciales(nombre: string): string {
   const parts = nombre.trim().split(/\s+/);

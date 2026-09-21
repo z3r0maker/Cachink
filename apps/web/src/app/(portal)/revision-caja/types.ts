@@ -9,6 +9,8 @@ interface CreadoEnCaja {
   readonly tint: string;
   /** The existing record it looks like, offered for a merge. */
   readonly pareceA?: string;
+  /** The duplicate's id — where a merge's facts move. */
+  readonly pareceAId?: string;
 }
 
 export interface ProductoCaja extends CreadoEnCaja {

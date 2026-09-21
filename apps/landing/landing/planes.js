@@ -11,6 +11,9 @@ export const IVA = 0.16;
 
 export const SIGNUP_BASE = 'https://app.xangarro.mx/signup';
 
+/** The portal's front door, for those who already have an account. */
+export const LOGIN_URL = 'https://app.xangarro.mx/login';
+
 /** Signup URL for a plan; utm_* params are appended client-side (App.jsx). */
 export const signupUrl = (plan) => `${SIGNUP_BASE}?plan=${plan}`;
 

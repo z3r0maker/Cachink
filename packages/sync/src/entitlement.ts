@@ -61,7 +61,9 @@ export function verifyEntitlement(raw: unknown, publicKeyHex: string): Entitleme
 export interface ResolvedEntitlement {
   /** The plan whose limits apply right now. */
   readonly plan: PlanId;
-  readonly recordsPerMonth: number | null;
+  /** C-12: both ADR-065 metrics, resolved for the plan in force right now. */
+  readonly transactionsPerMonth: number;
+  readonly activeProducts: number;
   readonly state: EntitlementState;
   /** False when nothing verifiable is stored (never synced, bad signature). */
   readonly verified: boolean;
@@ -101,7 +103,8 @@ export function resolveEntitlement(input: ResolveEntitlementInput): ResolvedEnti
     const limits = PLAN_LIMITS[FALLBACK_PLAN];
     return {
       plan: FALLBACK_PLAN,
-      recordsPerMonth: limits.recordsPerMonth,
+      transactionsPerMonth: limits.transactionsPerMonth,
+      activeProducts: limits.activeProducts,
       state: 'lapsed',
       verified: false,
       grantedPlan: null,
@@ -113,9 +116,12 @@ export function resolveEntitlement(input: ResolveEntitlementInput): ResolvedEnti
   const lapsed = state === 'lapsed';
   return {
     plan: lapsed ? FALLBACK_PLAN : payload.plan,
-    recordsPerMonth: lapsed
-      ? PLAN_LIMITS[FALLBACK_PLAN].recordsPerMonth
-      : payload.limits.recordsPerMonth,
+    transactionsPerMonth: lapsed
+      ? PLAN_LIMITS[FALLBACK_PLAN].transactionsPerMonth
+      : payload.limits.transactionsPerMonth,
+    activeProducts: lapsed
+      ? PLAN_LIMITS[FALLBACK_PLAN].activeProducts
+      : payload.limits.activeProducts,
     state,
     verified: true,
     grantedPlan: payload.plan,

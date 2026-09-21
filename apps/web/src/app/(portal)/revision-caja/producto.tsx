@@ -9,7 +9,7 @@ import { ChoiceChips } from '@/operador/ui/choice';
 import { eyebrow } from '@/styles/text.css';
 
 import { Par, Revisar, type CampoDef } from './comun';
-import { aprobadoProducto, margen, semaforo } from './derive';
+import { margen, semaforo } from './derive';
 import * as s from './form.css';
 import type { ProductoCaja } from './types';
 
@@ -18,13 +18,22 @@ const dinero = (v: string) => v.replace(/[^0-9.]/g, '');
 const entero = (v: string) => v.replace(/\D/g, '');
 
 /** Price, **cost** with the live margin, category, stock and threshold; cost + category + stock approve. */
+type RevisarProductoProps = Parameters<typeof RevisarProducto>[0];
+
 export function RevisarProducto(p: {
   readonly x: ProductoCaja;
   readonly onClose: () => void;
   readonly onFusionar: () => void;
-  readonly onAprobar: (body: string) => void;
+  readonly onAprobar: (f: {
+    readonly precioCentavos: bigint;
+    readonly costoCentavos: bigint;
+    readonly categoria: string;
+    readonly existencias: number;
+    readonly umbral: number;
+  }) => void;
 }) {
   const f = useProducto(p.x);
+  const aprobar = () => f.listo && p.onAprobar(camposDe(f, p.x.precio));
   return (
     <Revisar
       titulo={`Revisar ${p.x.nombre}`}
@@ -34,7 +43,7 @@ export function RevisarProducto(p: {
       listo={f.listo}
       onClose={p.onClose}
       onFusionar={p.onFusionar}
-      onAprobar={() => f.listo && p.onAprobar(aprobadoProducto(p.x.nombre, f.costo ?? 0n, f.m))}
+      onAprobar={aprobar}
     >
       <Par campos={f.precios} />
       <div className={s.fila} data-fuerte="" style={{ background: semaforo(f.m) }}>
@@ -81,6 +90,20 @@ const enteroDef = (id: string, label: string, value: string, set: Set): CampoDef
   placeholder: '0',
 });
 
+/** The approved fields, from the form's raw strings. */
+function camposDe(
+  f: ReturnType<typeof useProducto>,
+  precio: ProductoCaja['precio'],
+): Parameters<RevisarProductoProps['onAprobar']>[0] {
+  return {
+    precioCentavos: parseRecibido(f.precioRaw) ?? precio,
+    costoCentavos: f.costo ?? 0n,
+    categoria: f.cat ?? 'Extras',
+    existencias: Number.parseInt(f.existenciasRaw || '0', 10),
+    umbral: Number.parseInt(f.umbralRaw || '0', 10),
+  };
+}
+
 function useProducto(x: ProductoCaja) {
   const [precio, setPrecio] = useState(toPesosString(x.precio).replace(/\.00$/, ''));
   const [costoRaw, setCosto] = useState('');
@@ -97,5 +120,16 @@ function useProducto(x: ProductoCaja) {
     enteroDef('rv-umbral', 'Umbral para reponer', umbral, setUmbral),
   ];
   const listo = cat !== null && costo !== null && costo > 0n && existencias !== '';
-  return { precios, stock, costo, m: margen(parseRecibido(precio), costo), cat, setCat, listo };
+  return {
+    precios,
+    stock,
+    costo,
+    m: margen(parseRecibido(precio), costo),
+    cat,
+    setCat,
+    listo,
+    existenciasRaw: existencias,
+    umbralRaw: umbral,
+    precioRaw: precio,
+  };
 }

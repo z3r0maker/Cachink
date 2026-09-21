@@ -131,7 +131,7 @@ function Capas({ r }: { readonly r: Revision }) {
           x={producto}
           onClose={cerrar}
           onFusionar={() => r.fusionar(producto)}
-          onAprobar={(b) => r.aprobar(producto.id, b, 'Producto aprobado')}
+          onAprobar={(f) => r.aprobarProducto(producto, f, `${producto.nombre} entra al catálogo.`)}
         />
       ) : null}
       {cliente ? (
@@ -139,7 +139,7 @@ function Capas({ r }: { readonly r: Revision }) {
           x={cliente}
           onClose={cerrar}
           onFusionar={() => r.fusionar(cliente)}
-          onAprobar={(b) => r.aprobar(cliente.id, b, 'Cliente aprobado')}
+          onAprobar={(f) => r.aprobarCliente(cliente, f, `${cliente.nombre} queda con límite.`)}
         />
       ) : null}
       {r.aviso ? (

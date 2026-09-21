@@ -74,6 +74,8 @@ export const CerrarCajaSchema = z.object({
   montoCierreCentavos: moneyField,
   discrepancyReason: DiscrepancyReasonEnum.nullable(),
   explicacion: z.string().max(500).nullable(),
+  /** The count by denomination, written once at close (ADR-074 §4). */
+  denominaciones: z.record(z.string(), z.number().int().min(0)).nullish(),
 });
 
 export type CerrarCajaInput = z.infer<typeof CerrarCajaSchema>;

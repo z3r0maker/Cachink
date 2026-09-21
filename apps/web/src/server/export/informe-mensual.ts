@@ -1,7 +1,7 @@
 import 'server-only';
 
 import { buildInformeMensualPdf, construirInforme } from '@xangarro/application';
-import { getBusiness, periodLedger } from '@xangarro/data-pg';
+import { getBusiness, logoPublico, periodLedger } from '@xangarro/data-pg';
 import type { BusinessId, Expense, Sale } from '@xangarro/domain';
 
 import { withTenant } from '../db';
@@ -18,9 +18,10 @@ export async function informeMensualPdf(
 ): Promise<{ readonly bytes: Uint8Array<ArrayBuffer>; readonly filename: string }> {
   const from = `${yearMonth}-01`;
   const to = lastDayOf(yearMonth);
-  const { rows, business } = await withTenant(businessId, async (tx) => ({
+  const { rows, business, logo } = await withTenant(businessId, async (tx) => ({
     rows: await periodLedger(tx, from, to),
     business: await getBusiness(tx),
+    logo: await logoPublico(tx, businessId),
   }));
 
   const ventas = rows.ventas.map((r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Sale);
@@ -33,7 +34,9 @@ export async function informeMensualPdf(
     isrTasa: business?.isrTasa ?? 0,
   });
   const name = (business?.nombre ?? 'negocio').replace(/[^\p{L}\p{N}]+/gu, '-');
-  const blob = await buildInformeMensualPdf(informe, business?.nombre ?? 'Tu negocio');
+  const logoDataUrl =
+    logo === null ? undefined : `data:${logo.mime};base64,${logo.bytes.toString('base64')}`;
+  const blob = await buildInformeMensualPdf(informe, business?.nombre ?? 'Tu negocio', logoDataUrl);
   const bytes = new Uint8Array(await blob.arrayBuffer());
   return { bytes, filename: `informe-${name}-${yearMonth}.pdf` };
 }

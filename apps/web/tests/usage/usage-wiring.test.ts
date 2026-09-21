@@ -92,14 +92,14 @@ describe('usage adapters', () => {
 
   it('meters a business with no subscription as the free plan, a paid one by its plan', () => {
     const limits = limitsFromSubscriptions(['b-free', 'b-paid'], [sub({})], NOW);
-    assert.deepEqual(limits.get('b-free'), { transactionsPerMonth: 50, activeProducts: null });
-    assert.deepEqual(limits.get('b-paid'), { transactionsPerMonth: null, activeProducts: null });
+    assert.deepEqual(limits.get('b-free'), { transactionsPerMonth: 300, activeProducts: 50 });
+    assert.deepEqual(limits.get('b-paid'), { transactionsPerMonth: 10_000, activeProducts: 1_000 });
   });
 
   it('meters a long-lapsed subscription as the free plan', () => {
     const lapsed = sub({ status: 'lapsed', currentPeriodEnd: '2026-01-01T00:00:00.000Z' });
     const limits = limitsFromSubscriptions(['b-paid'], [lapsed], NOW);
-    assert.equal(limits.get('b-paid')?.transactionsPerMonth, 50);
+    assert.equal(limits.get('b-paid')?.transactionsPerMonth, 300);
   });
 
   const notice: UsageThresholdNotice = {

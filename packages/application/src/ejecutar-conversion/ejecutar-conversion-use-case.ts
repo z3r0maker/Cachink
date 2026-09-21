@@ -146,6 +146,7 @@ export class EjecutarConversionUseCase implements UseCase<
       cantidad,
       costoUnitCentavos,
       motivo: 'Conversión',
+      origen: 'conversion',
       nota: undefined,
       businessId,
     });
@@ -165,6 +166,7 @@ export class EjecutarConversionUseCase implements UseCase<
       cantidad,
       costoUnitCentavos: producto?.costoUnitCentavos ?? 0n,
       motivo: 'Conversión',
+      origen: 'conversion',
       nota: undefined,
       businessId,
     });

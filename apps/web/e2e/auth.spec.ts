@@ -22,12 +22,33 @@ for (const route of ROUTES) {
   test(`${route.path} redirects a signed-out visitor to /login`, async ({ page }) => {
     await page.goto(route.path);
     await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
   });
 }
 
+test('the owner door reveals the member form', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
+  await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+  await expect(page.getByTestId('login-email')).toBeVisible();
+  // And the way back to the chooser, for whoever picked the wrong door.
+  await page.getByRole('link', { name: '‹ Volver' }).click();
+  await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
+});
+
+test('the caja door leads to the register, never to the member form', async ({ page }) => {
+  await page.goto('/login');
+  await page.getByTestId('login-door-caja').click();
+  // An unlinked browser lands on the register's own gate: the linking
+  // ceremony, not a password form.
+  await expect(page).toHaveURL(/\/operador$/);
+  await expect(page.getByRole('heading', { name: 'Vincula esta caja' })).toBeVisible();
+  await expect(page.getByTestId('login-email')).toHaveCount(0);
+});
+
 test('a wrong password does not say which half was wrong', async ({ page }) => {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('not-the-password');
   await page.getByRole('button', { name: 'Entrar' }).click();
@@ -40,6 +61,7 @@ test('a wrong password does not say which half was wrong', async ({ page }) => {
 
 test('an unknown address gets the identical message', async ({ page }) => {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('nobody@example.com');
   await page.getByTestId('login-password').fill('whatever');
   await page.getByRole('button', { name: 'Entrar' }).click();
@@ -79,6 +101,7 @@ test('signing out ends the session on the server: a copied cookie stops working'
   const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
   const page = await context.newPage();
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('donpedro123');
   await page.getByRole('button', { name: 'Entrar' }).click();
@@ -106,6 +129,7 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
   await page.setExtraHTTPHeaders({ 'x-forwarded-for': `203.0.113.${Date.now() % 250}` });
   const email = `nadie-${Date.now()}@example.com`;
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   for (let i = 1; i <= 5; i += 1) {
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill(`intento-${i}`);

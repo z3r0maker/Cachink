@@ -1,12 +1,7 @@
 import assert from 'node:assert/strict';
 import { afterAll, beforeAll, it } from 'vitest';
 import postgres from 'postgres';
-import {
-  classifyMovementOrigin,
-  computeUsage,
-  PORTAL_DEVICE_ID,
-  type UsageRecord,
-} from '@xangarro/domain/usage';
+import { computeUsage, PORTAL_DEVICE_ID, type UsageRecord } from '@xangarro/domain/usage';
 
 import { createDb, type Db } from '../src/client';
 import { usageCounts } from '../src/queries/metering';
@@ -39,17 +34,18 @@ const SALES = [
 ];
 const EXPENSES = ['2026-08-20T12:00:00.000Z', '2026-09-02T12:00:00.000Z'];
 const MOVES = [
-  { motivo: 'Venta', nota: null },
-  { motivo: 'Conversión', nota: null },
-  { motivo: 'Devolución de cliente', nota: 'Cancelación de venta: V-1' },
-  { motivo: 'Devolución de cliente', nota: null },
-  { motivo: 'Merma', nota: null },
+  // Since C-12 the writers state the origen; the column is what counts.
+  { motivo: 'Venta', nota: null, origen: 'venta' },
+  { motivo: 'Conversión', nota: null, origen: 'conversion' },
+  { motivo: 'Devolución de cliente', nota: 'Cancelación de venta: V-1', origen: 'cancelacion' },
+  { motivo: 'Devolución de cliente', nota: null, origen: 'manual' },
+  { motivo: 'Merma', nota: null, origen: 'manual' },
   // Written in the portal: counted as `portal` whatever the motivo (C-12).
-  { motivo: 'Ajuste de inventario', nota: null, device: PORTAL_DEVICE_ID },
-  { motivo: 'Venta', nota: null, device: PORTAL_DEVICE_ID },
+  { motivo: 'Ajuste de inventario', nota: null, device: PORTAL_DEVICE_ID, origen: 'portal' },
+  { motivo: 'Venta', nota: null, device: PORTAL_DEVICE_ID, origen: 'portal' },
   // Opening stock (N-17): apertura wherever written, never counted.
-  { motivo: 'Apertura de inventario', nota: null, device: PORTAL_DEVICE_ID },
-  { motivo: 'Apertura de inventario', nota: null },
+  { motivo: 'Apertura de inventario', nota: null, device: PORTAL_DEVICE_ID, origen: 'apertura' },
+  { motivo: 'Apertura de inventario', nota: null, origen: 'apertura' },
 ].map((m) => ({ device: 'dev', ...m, at: '2026-09-05T12:00:00.000Z' }));
 const PRODUCTS = [
   { at: '2026-07-01T12:00:00.000Z', deleted: null },
@@ -74,7 +70,7 @@ async function seed(owner: postgres.Sql): Promise<void> {
     await owner`INSERT INTO expenses ${owner({ ...audit(`${BIZ}-e${i}`, at, null), fecha: at.slice(0, 10), concepto: 'x', categoria: 'Otro', monto_centavos: 100 })}`;
   }
   for (const [i, m] of MOVES.entries()) {
-    await owner`INSERT INTO inventory_movements ${owner({ ...audit(`${BIZ}-m${i}`, m.at, null), device_id: m.device, producto_id: 'p', fecha: m.at.slice(0, 10), tipo: 'entrada', cantidad: 1, costo_unit_centavos: 1, motivo: m.motivo, nota: m.nota })}`;
+    await owner`INSERT INTO inventory_movements ${owner({ ...audit(`${BIZ}-m${i}`, m.at, null), device_id: m.device, producto_id: 'p', fecha: m.at.slice(0, 10), tipo: 'entrada', cantidad: 1, costo_unit_centavos: 1, motivo: m.motivo, nota: m.nota, origen: m.origen })}`;
   }
   for (const [i, p] of PRODUCTS.entries()) {
     await owner`INSERT INTO products ${owner({ ...audit(`${BIZ}-p${i}`, p.at, p.deleted), nombre: 'x', categoria: 'Otro', costo_unit_centavos: 1, unidad: 'pza', precio_venta_centavos: 1 })}`;
@@ -88,7 +84,7 @@ function domainRecords(): UsageRecord[] {
     ...MOVES.map((m) => ({
       kind: 'movimientoInventario' as const,
       at: m.at,
-      origen: classifyMovementOrigin({ motivo: m.motivo, nota: m.nota, deviceId: m.device }),
+      origen: m.origen,
     })),
     ...PRODUCTS.map((p) => ({ kind: 'producto' as const, deletedAt: p.deleted })),
   ];

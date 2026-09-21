@@ -8,7 +8,7 @@
  *                                  portal — pushes referencing it are
  *                                  rejected with an FK code (A-08)
  *   POST /__mock/restore {table,id} put a forgotten row back
- *   POST /__mock/scenario {scenario, recordsPerMonth?} default scenario for
+ *   POST /__mock/scenario {scenario, transactionsPerMonth?} default scenario for
  *                                  requests without the header, and an
  *                                  optional record-limit override (A-10)
  */
@@ -45,17 +45,19 @@ function restore(state: MockState, body: unknown): MockResponse {
 }
 
 function setScenario(state: MockState, body: unknown): MockResponse {
-  const { scenario, recordsPerMonth } = (body ?? {}) as Record<string, unknown>;
+  const { scenario, transactionsPerMonth } = (body ?? {}) as Record<string, unknown>;
   const limitOk =
-    recordsPerMonth === undefined ||
-    recordsPerMonth === null ||
-    (typeof recordsPerMonth === 'number' &&
-      Number.isInteger(recordsPerMonth) &&
-      recordsPerMonth > 0);
+    transactionsPerMonth === undefined ||
+    (typeof transactionsPerMonth === 'number' &&
+      Number.isInteger(transactionsPerMonth) &&
+      transactionsPerMonth > 0);
   if (!isScenario(scenario) || !limitOk) return BAD_BODY;
   state.defaultScenario = scenario;
-  state.recordsPerMonth = recordsPerMonth as number | null | undefined;
-  return { status: 200, body: { scenario, recordsPerMonth: recordsPerMonth ?? 'plan default' } };
+  state.transactionsPerMonth = transactionsPerMonth as number | undefined;
+  return {
+    status: 200,
+    body: { scenario, transactionsPerMonth: transactionsPerMonth ?? 'plan default' },
+  };
 }
 
 export function controlRoute(state: MockState, req: MockRequest): MockResponse | null {

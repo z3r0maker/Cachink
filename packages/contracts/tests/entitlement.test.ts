@@ -6,13 +6,14 @@ import { SignedEntitlementSchema, canonicalize } from '../src/entitlement.js';
 const PAYLOAD = {
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   plan: 'xangarro',
-  limits: { operators: 2, devices: 2, recordsPerMonth: null },
+  limits: { operators: 2, devices: 2, transactionsPerMonth: 10_000, activeProducts: 1_000 },
   features: ['stock', 'barcode'],
   capabilities: {
     estadosFinancieros: true,
     informeMensual: false,
     permisosPorUsuario: false,
     asesor: 'diario',
+    cobrosIntegrados: true,
   },
   validUntil: '2026-10-11T00:00:00.000Z',
   graceUntil: '2026-10-18T00:00:00.000Z',
@@ -52,7 +53,10 @@ describe('signed entitlement', () => {
     assert.equal(parsed.payload.plan, 'xangarro');
     assert.equal(await ed.verifyAsync(sig, msg, pub), true);
     // A reordered-but-equal payload verifies too — that is the point of canonicalize.
-    const reordered = { ...PAYLOAD, limits: { recordsPerMonth: null, devices: 2, operators: 2 } };
+    const reordered = {
+      ...PAYLOAD,
+      limits: { activeProducts: 1_000, transactionsPerMonth: 10_000, devices: 2, operators: 2 },
+    };
     assert.equal(
       await ed.verifyAsync(sig, new TextEncoder().encode(canonicalize(reordered)), pub),
       true,

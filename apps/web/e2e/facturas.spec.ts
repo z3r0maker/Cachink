@@ -54,6 +54,7 @@ test.beforeAll(async () => {
 
 test('each payment shows the state of its factura', async ({ page }) => {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('facturas-1');
   await page.getByRole('button', { name: 'Entrar' }).click();

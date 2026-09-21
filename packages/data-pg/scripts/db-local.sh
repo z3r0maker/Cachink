@@ -22,8 +22,11 @@
 # added migrations, which is a worse bug in a script four suites depend on.
 set -euo pipefail
 
-NAME=xangarro-pg
-PORT=55432
+# Overridable so concurrent sessions can run isolated stacks (two agents
+# sharing the default container corrupt each other's e2e resets — found
+# 2026-09-20). Defaults unchanged.
+NAME="${XG_PG_NAME:-xangarro-pg}"
+PORT="${XG_PG_PORT:-55432}"
 DB=xangarro
 SUPER_URL="postgres://postgres:xangarro@localhost:${PORT}/${DB}"
 APP_URL="postgres://xangarro_app:xangarro_app@localhost:${PORT}/${DB}"

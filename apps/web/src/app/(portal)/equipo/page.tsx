@@ -1,4 +1,5 @@
 import { requireSession } from '@/server/auth';
+import { portalOrigin } from '@/server/billing/origin';
 import { loadEquipo } from '@/server/screens';
 
 import { EquipoScreen } from './screen';
@@ -13,10 +14,12 @@ export default async function EquipoPage({
 }) {
   const session = await requireSession();
   const { tab } = await searchParams;
+  const registerUrl = `${await portalOrigin()}/operador`;
   const initialTab = tab === 'dispositivos' ? 'dispositivos' : 'operadores';
   try {
-    return <EquipoScreen initialTab={initialTab} data={await loadEquipo(session.business_id)} />;
+    const data = await loadEquipo(session.business_id);
+    return <EquipoScreen initialTab={initialTab} data={data} registerUrl={registerUrl} />;
   } catch {
-    return <EquipoScreen initialTab={initialTab} data={null} />;
+    return <EquipoScreen initialTab={initialTab} data={null} registerUrl={registerUrl} />;
   }
 }

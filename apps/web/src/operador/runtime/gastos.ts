@@ -14,6 +14,7 @@ import {
 import type { BusinessId, CajaTurnoId, ExpenseCategory, UserId } from '@xangarro/domain';
 
 import { categoriaDominio, categoriaOperador } from '../vocabulario';
+import { hoyLocal } from './fechas';
 import type { Db } from './db-types';
 import type { GastoPara } from './protocol';
 
@@ -61,7 +62,7 @@ export async function registrarGasto(
     new DrizzleRecurringExpensesRepository(db as never, p.deviceId as never),
   );
   const gasto = await useCase.execute({
-    fecha: new Date().toISOString().slice(0, 10) as never,
+    fecha: hoyLocal() as never,
     concepto: p.concepto,
     categoria: categoriaDominio(p.categoria as never),
     monto: p.monto,

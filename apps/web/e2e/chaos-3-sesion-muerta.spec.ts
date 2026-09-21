@@ -48,7 +48,7 @@ test('session death mid-edit returns the inline message, then the gate redirects
   // Recovery state 2: the next navigation hard-redirects to the gate.
   await page.goto('/productos');
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
 
   // Recovery state 3: the dead session wrote nothing.
   const leaked = await query(async (sql) => {
@@ -72,7 +72,7 @@ test.describe('malformed session', () => {
 
     await page.goto('/negocio');
     await expect(page).toHaveURL(/\/login$/);
-    await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
   });
 });
 

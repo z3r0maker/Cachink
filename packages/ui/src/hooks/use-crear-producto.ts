@@ -9,6 +9,7 @@
 
 import { useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { CrearProductoUseCase } from '@xangarro/application';
+import { PlanLimitError } from '@xangarro/domain';
 import type {
   BusinessId,
   NewProduct,
@@ -20,6 +21,7 @@ import type {
 import type { Money } from '@xangarro/domain';
 import { useInventoryMovementsRepository, useProductsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
+import { useEntitlement } from '../entitlement/use-entitlement';
 import { estadosKeys } from './query-keys';
 import { useAuditedMutation } from '../observability/use-audited-mutation';
 import { MUTATION_CREAR_PRODUCTO } from '../observability/audit-configs';
@@ -70,10 +72,20 @@ export function useCrearProducto(): CrearProductoResult {
   const movements = useInventoryMovementsRepository();
   const queryClient = useQueryClient();
   const businessId = useCurrentBusinessId();
+  const entitlement = useEntitlement();
 
   return useAuditedMutation(MUTATION_CREAR_PRODUCTO, {
     async mutationFn(input) {
       if (!businessId) throw new Error('useCrearProducto: no current business');
+      // C-12/N-04: xangarrito's catalog is the one hard client-side cap —
+      // 50 active products. The sheet the error handler opens is the
+      // upgrade nudge; paid tiers never see this.
+      if (entitlement?.plan === 'xangarrito') {
+        const activos = await products.count(businessId);
+        if (activos >= entitlement.activeProducts) {
+          throw new PlanLimitError('xangarrito', entitlement.activeProducts);
+        }
+      }
       // The rules — defaults, validation, the initial-stock entrada — are the
       // use case's, shared with the portal (P-07).
       const product = await new CrearProductoUseCase(products, movements).execute({

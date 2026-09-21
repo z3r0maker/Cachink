@@ -25,12 +25,12 @@ export function isScenario(v: unknown): v is Scenario {
 
 const DAY = 86_400_000;
 
-/** `recordsPerMonth` overrides the plan's limit so E2E can hit it in a few captures. */
+/** `transactionsPerMonth` overrides the plan's limit so E2E can hit it in a few captures. */
 export function entitlementFor(
   scenario: Scenario,
   businessId: string,
   now: Date,
-  recordsPerMonth?: number | null,
+  transactionsPerMonth?: number,
 ): Entitlement {
   const plan: PlanId = scenario === 'xangarrito' ? 'xangarrito' : 'xangarro';
   const limits = PLAN_LIMITS[plan];
@@ -43,7 +43,9 @@ export function entitlementFor(
     limits: {
       operators: limits.operators,
       devices: limits.devices,
-      recordsPerMonth: recordsPerMonth === undefined ? limits.recordsPerMonth : recordsPerMonth,
+      transactionsPerMonth:
+        transactionsPerMonth === undefined ? limits.transactionsPerMonth : transactionsPerMonth,
+      activeProducts: limits.activeProducts,
     },
     features: [...limits.features],
     capabilities: { ...limits.capabilities },

@@ -672,17 +672,56 @@ groundwork (O-02 to O-06) and C-18.
 
 ### O-36 Cierre de turno on real data
 
-- [ ] Status · **Blocked by:** O-32
-- **Steps:** `CerrarCajaUseCase` with the expected-cash calculator (O-03); reason mapping via
-  `operador/vocabulario.ts` (ADR-083 D6).
-- **Acceptance:** sync spec closes a turno whose expected cash matches the screen's figures.
+- [x] Status · **Blocked by:** O-32
+  - Done: 2026-09-20 · Worker protocol gains `cierre` (the open turno's close figures: the O-03
+    calculator's answer as the esperado, its four parts for the desglose — fondo, this turno's
+    standing Efectivo tickets by line amounts, Efectivo abonos, its gastos — and the Resumen's
+    counts) and `cerrar` (`CerrarCajaUseCase`: the reason required when the difference isn't zero,
+    the auto-egreso, all six totals). Screens: `CierreViva` loads the register's own figures (the
+    count starts at zero — no fixture mid-count), and `useCierre`'s close delegates to the use case
+    through `alCerrar`, mapping the screen's five reasons onto the enum's six by direction (D6)
+    before it goes; the queue gate (`pendientes === 0`) was already the engine's real counts.
+    `protocol.ts`'s payload shapes moved to `runtime/shapes.ts` (the unions file had outgrown its
+    budget). **The bug this acceptance caught: the register wrote dates on two bases.** Apertura,
+    tickets and gastos dated with `toISOString()` (UTC) while abonos used the local date — after
+    18:00 in Mexico the two days split and the abono fell outside the close's `[turno.fecha,
+hoy]` window: esperado short by every abono, only reproducible at night. `runtime/fechas.ts`
+    is now the one basis — `hoyLocal`/`horaLocal`/`hhmmLocal` — used by apertura, capture, gastos,
+    the cuentas' day labels and both turn-time reads (the «desde» was showing UTC o'clock too);
+    `cobranza.sync`'s `venceEn` moved with it, exactly as its comment asked. Acceptance
+    `e2e/cierre.sync.spec.ts`: a $50 cash sale, a $25 fiado, a $150 gasto and a $20 cash abono →
+    the screen says fondo $500 + efectivo $50 + abonos $20 − gastos $150 = **$420 esperado**, the
+    count lands on it, and Postgres holds the closed turno with esperado/cierre/diferencia
+    42000/42000/0. Matrix 554 green.
+- **Gate:** the register closes its own turno against its own expected cash, end to end.
 
 ### O-37 Owner-side actions on real data
 
-- [ ] Status · **Blocked by:** C-18, C-19 status
-- **Steps:** cortes' «Marcar como aclarado» and «Pedir aclaración», revision-caja's
-  approve / merge / reject — the owner portal writing, not local state.
-- **Acceptance:** portal specs against Postgres.
+- [x] Status · **Blocked by:** C-18, C-19 status
+  - Done: 2026-09-20 · **Cortes** — data-pg 0029 adds `caja_turnos.aclarado_at/por` (cloud-ahead on
+    an UP table with nullable columns — the drift rule now allows exactly that: a pushed row that
+    omits them inserts NULL, their meaning while the difference stands); `server/cortes.ts` reads the
+    closed turnos (the stored esperado with its four parts, the resumen's stats, the count by
+    denomination — the close now persists it, ADR-074 §4, written once, never over a blind count);
+    «Marcar como aclarado» stamps the corte, «Pedir aclaración» files the owner→operator message
+    (`mensajes_operador`, severidad aclaración — the operator reads it in Avisos, ADR-075) with the
+    corte's own figures worded into the body. **Revisión de caja** — `server/revision.ts` reads the
+    `estado_revision = 'pendiente'` rows with their facts (sales of each unreviewed product, each
+    client's standing fiado, the same-name approved duplicate offered for a merge); approve
+    completes the record — a product also writes the owner's counted stock as an entrada (stock is
+    the sum of movements, ADR-081), a client takes its limit and term — merge re-points the
+    duplicate's facts to the surviving record (`fusionado_con_id`, sales/tickets/abonos moved),
+    reject closes it. Seed: two closed cortes (one cuadró, one −$60 with its count, reason and
+    note) and three counter-created records (Michelada with two sales, a Refresco duplicate, Doña
+    Chelo with a $90 fiado minus a $20 abono); the portal's period figures moved with them and
+    estados/inicio/movimientos assertions follow the new truth. Acceptance:
+    `e2e/dueno-cortes.spec.ts` (the panel explains the −$60 shortfall, the stamp and the message
+    land in Postgres) and `e2e/dueno-revision-caja.spec.ts` (approve writes costo 3000 + entrada
+    24; the client's limit 100000/plazo 15; the duplicate merges with its facts re-pointed) — 25
+    green across the three viewports. Known residual, other track's base (f75ce235): the login
+    two-doors specs, chaos-1's smash tests, devices' full-plan and informe-mensual race among
+    themselves; they fail on that base alone, not with this change.
+- **Gate:** the owner's two screens write for real; the operator sees the ask in Avisos.
 
 ### O-38 Remove the fixture demo flag
 

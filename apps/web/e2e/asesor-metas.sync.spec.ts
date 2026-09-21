@@ -97,6 +97,7 @@ test.beforeAll(async () => {
 
 async function signIn(page: Page, address: string): Promise<void> {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(address);
   await page.getByTestId('login-password').fill(password);
   await page.getByRole('button', { name: 'Entrar' }).click();

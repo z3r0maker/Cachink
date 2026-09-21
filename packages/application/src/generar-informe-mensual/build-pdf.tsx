@@ -32,6 +32,7 @@ type RowEntry = { label: string; value: string };
 
 interface InformeViewModel {
   businessName: string;
+  logoDataUrl?: string;
   periodLabel: string;
   estadoRows: RowEntry[];
   ventasRows: RowEntry[];
@@ -39,9 +40,14 @@ interface InformeViewModel {
   disclaimer: string;
 }
 
-function buildViewModel(informe: InformeMensual, businessName: string): InformeViewModel {
+function buildViewModel(
+  informe: InformeMensual,
+  businessName: string,
+  logoDataUrl?: string,
+): InformeViewModel {
   return {
     businessName,
+    logoDataUrl,
     periodLabel: informe.yearMonth,
     estadoRows: estadoRowsOf(informe.estadoResultados),
     ventasRows: categoryRowsOf(informe.ventasPorCategoria),
@@ -70,10 +76,34 @@ function categoryRowsOf<K extends SaleCategory | ExpenseCategory>(
     .filter((r) => r.value !== '$0.00');
 }
 
+/** The title, with the business's logo beside it when it has one. */
+function Encabezado({
+  ns,
+  styles,
+  vm,
+}: {
+  readonly ns: PdfNs;
+  readonly styles: ReturnType<PdfNs['StyleSheet']['create']>;
+  readonly vm: InformeViewModel;
+}): React.ReactElement {
+  const { Image, Text, View } = ns;
+  if (vm.logoDataUrl === undefined) {
+    return <Text style={styles.h1}>{vm.businessName}</Text>;
+  }
+  return (
+    <View style={styles.headerRow}>
+      <Image style={styles.logo} src={vm.logoDataUrl} />
+      <Text style={styles.h1}>{vm.businessName}</Text>
+    </View>
+  );
+}
+
 function makeStyles(ns: PdfNs): ReturnType<PdfNs['StyleSheet']['create']> {
   return ns.StyleSheet.create({
     page: { padding: 32, fontSize: fontSizes.xs, fontFamily: 'Helvetica' },
     h1: { fontSize: fontSizes.xl, fontWeight: 700, marginBottom: 6 },
+    headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
+    logo: { width: 34, height: 34, objectFit: 'contain' },
     subtitle: { fontSize: fontSizes.xs, marginBottom: 16 },
     section: { marginBottom: 14 },
     sectionTitle: { fontSize: fontSizes.sm, fontWeight: 700, marginBottom: 6 },
@@ -122,7 +152,7 @@ function renderDocument(
   return (
     <Document>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.h1}>{vm.businessName}</Text>
+        <Encabezado ns={ns} styles={styles} vm={vm} />
         <Text style={styles.subtitle}>Informe mensual — {vm.periodLabel}</Text>
         <Section title="Estado de Resultados" rows={vm.estadoRows} />
         <Section title="Ventas por categoría" rows={vm.ventasRows} />
@@ -138,10 +168,11 @@ function renderDocument(
 export async function buildInformeMensualPdf(
   informe: InformeMensual,
   businessName: string,
+  logoDataUrl?: string,
 ): Promise<Blob> {
   const ns = await import('@react-pdf/renderer');
   const styles = makeStyles(ns);
-  const vm = buildViewModel(informe, businessName);
+  const vm = buildViewModel(informe, businessName, logoDataUrl);
   return ns.pdf(renderDocument(ns, styles, vm)).toBlob();
 }
 

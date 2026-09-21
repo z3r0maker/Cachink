@@ -140,6 +140,7 @@ function movimientosPort(tx: Tx, businessId: BusinessId): AperturaMovementsPort 
         costoUnitCentavos: input.costoUnitCentavos,
         motivo: APERTURA_MOTIVO,
         nota: null,
+        origen: 'apertura',
         deviceId: PORTAL_DEVICE_ID,
         createdByUserId: null,
         createdAt: stamp,

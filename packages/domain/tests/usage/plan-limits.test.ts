@@ -13,14 +13,14 @@ import {
  * so both read a plan's limits and step months the same way.
  */
 describe('usageLimitsOf', () => {
-  it('maps today’s recordsPerMonth to the transaction limit, products unlimited', () => {
+  it('reads both ADR-065 metrics straight off the plan (C-12)', () => {
     assert.deepEqual(usageLimitsOf(PLAN_LIMITS.xangarrito), {
-      transactionsPerMonth: 50,
-      activeProducts: null,
+      transactionsPerMonth: 300,
+      activeProducts: 50,
     });
     assert.deepEqual(usageLimitsOf(PLAN_LIMITS.xangarrote), {
-      transactionsPerMonth: null,
-      activeProducts: null,
+      transactionsPerMonth: 30_000,
+      activeProducts: 5_000,
     });
   });
 });

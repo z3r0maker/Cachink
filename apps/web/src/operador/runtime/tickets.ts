@@ -19,6 +19,7 @@ import type { RegistrarTicketInput } from '@xangarro/application';
 import type { BusinessId, TicketId, UserId } from '@xangarro/domain';
 
 import { cuentasDelNegocio } from './cuentas';
+import { hhmmLocal } from './fechas';
 import type { Db } from './db-types';
 import type { LineaPara, RegistrarContext, TicketPara, VentaPara } from './protocol';
 
@@ -73,7 +74,7 @@ export async function ventasDelTurno(
       };
     }),
   );
-  return { desde: (turno?.aperturaAt ?? '').slice(11, 16), ventas };
+  return { desde: hhmmLocal(turno?.aperturaAt ?? ''), ventas };
 }
 
 /** The open turno's ticket by folio, as Detalle de venta shows it (O-34). */
@@ -90,7 +91,7 @@ export async function ticketPorFolio(
   const turnos = new DrizzleCajaTurnosRepository(db as never, deviceId as never);
   const tickets = new DrizzleTicketsRepository(db as never, deviceId as never);
   const turno = await turnos.findOpenByBusiness(businessId);
-  const desde = (turno?.aperturaAt ?? '').slice(11, 16);
+  const desde = hhmmLocal(turno?.aperturaAt ?? '');
   const base = { turnoDesde: desde, capturo: 'Caja 1' } as const;
   if (turno === null) return { ...base, ticket: null };
   const delTurno = await tickets.findByCajaTurno(turno.id);

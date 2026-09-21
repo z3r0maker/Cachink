@@ -8,7 +8,7 @@ import * as l from '../turno/lists.css';
 import { OpModal } from '../ui/modal';
 import * as u from '../ui/ui.css';
 import * as e from './efectivo.css';
-import type { Comprobante } from './receipt';
+import { leerTelefono, type Comprobante } from './receipt';
 import * as s from './share.css';
 import { opciones, VARIANTS, type Opcion, type ShareVariant, type Variant } from './share-options';
 import { Preview } from './preview';
@@ -23,12 +23,15 @@ export function Share({
   comprobante,
   onClose,
   variant = 'caja',
+  cliente,
 }: {
   readonly comprobante: Comprobante | null;
   readonly onClose: () => void;
   readonly variant?: ShareVariant;
+  /** The cliente this venta went to — their phone is the one remembered. */
+  readonly cliente?: string;
 }) {
-  const [tel, setTel] = useState('');
+  const [tel, setTel] = useState(() => (comprobante === null ? '' : leerTelefono(cliente)));
   const [sent, setSent] = useState<string | null>(null);
   if (!comprobante) return null;
   const v = VARIANTS[variant];
@@ -45,7 +48,7 @@ export function Share({
       {v.preview ? <Preview c={comprobante} /> : null}
       <Telefono tel={tel} setTel={setTel} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {opciones(comprobante, tel).map((o) => (
+        {opciones(comprobante, tel, cliente).map((o) => (
           <OpcionButton key={o.label} o={o} v={v} onDone={setSent} />
         ))}
       </div>
@@ -69,7 +72,7 @@ function OpcionButton({
       className={s.option}
       style={{ background: o.bg, minHeight: v.option }}
       disabled={o.disabled}
-      onClick={() => onDone(o.run())}
+      onClick={() => void Promise.resolve(o.run()).then(onDone)}
     >
       <span
         className={u.tintBox}

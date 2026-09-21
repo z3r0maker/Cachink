@@ -68,11 +68,16 @@ function useLogin() {
   return { email, setEmail, password, setPassword, error, setError, pending, submit };
 }
 
-export function LoginForm() {
+export function LoginForm({
+  backTo,
+}: {
+  /** Where the door chooser sends the member back to. */
+  readonly backTo?: { readonly href: string; readonly label: string };
+}) {
   const { email, setEmail, password, setPassword, error, setError, pending, submit } = useLogin();
 
   return (
-    <AuthCard title="Entra a tu portal">
+    <AuthCard title="Entra a tu portal" back={backTo}>
       <form onSubmit={submit} noValidate>
         <Fields
           email={email}

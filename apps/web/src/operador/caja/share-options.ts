@@ -1,6 +1,13 @@
 import { colors } from '@xangarro/tokens';
 
-import { digits, downloadReceiptPng, receiptText, whatsappUrl, type Comprobante } from './receipt';
+import {
+  digits,
+  guardarImagen,
+  receiptText,
+  recordarTelefono,
+  whatsappUrl,
+  type Comprobante,
+} from './receipt';
 
 const WA =
   'M20.5 3.5A10 10 0 0 0 3.2 15.6L2 22l6.5-1.2A10 10 0 1 0 20.5 3.5M8.5 8.5c.3 1.5 1 2.8 2 3.8s2.3 1.7 3.8 2c.6-.6 1-1.3 1.4-1.2l2 .8c.2 1.3-.6 2.2-1.8 2.3-3 .2-7.7-4.4-7.9-7.5-.1-1.2.8-2 2.1-1.8l.8 2c.1.4-.6.9-1.2 1.4';
@@ -13,11 +20,11 @@ export interface Opcion {
   readonly icon: string;
   readonly bg: string;
   readonly disabled: boolean;
-  readonly run: () => string;
+  readonly run: () => string | Promise<string>;
 }
 
 /** The three ways out; each returns the confirmation the design shows. */
-export function opciones(c: Comprobante, tel: string): readonly Opcion[] {
+export function opciones(c: Comprobante, tel: string, cliente?: string): readonly Opcion[] {
   return [
     {
       label: 'Enviar por WhatsApp',
@@ -27,6 +34,7 @@ export function opciones(c: Comprobante, tel: string): readonly Opcion[] {
       disabled: digits(tel).length < 10,
       run: () => {
         window.open(whatsappUrl(tel, c), '_blank', 'noopener');
+        recordarTelefono(tel, cliente);
         // D2 (ADR-083): WhatsApp opens with the text; the person still presses send.
         return `WhatsApp abierto con el comprobante para el ${tel}.`;
       },
@@ -37,10 +45,7 @@ export function opciones(c: Comprobante, tel: string): readonly Opcion[] {
       icon: DOWNLOAD,
       bg: colors.white,
       disabled: false,
-      run: () => {
-        downloadReceiptPng(c);
-        return `Imagen guardada como comprobante-${c.folio}.png.`;
-      },
+      run: () => guardarImagen(c),
     },
     {
       label: 'Copiar texto',

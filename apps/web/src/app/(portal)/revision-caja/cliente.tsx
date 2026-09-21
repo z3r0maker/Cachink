@@ -10,7 +10,6 @@ import { ChoiceChips } from '@/operador/ui/choice';
 import { MontoInput } from '@/operador/ui/monto';
 
 import { Par, Revisar, type CampoDef } from './comun';
-import { aprobadoCliente } from './derive';
 import * as s from './form.css';
 import type { ClienteCaja } from './types';
 
@@ -22,11 +21,13 @@ export function RevisarCliente(p: {
   readonly x: ClienteCaja;
   readonly onClose: () => void;
   readonly onFusionar: () => void;
-  readonly onAprobar: (body: string) => void;
+  readonly onAprobar: (f: { readonly limiteCentavos: bigint; readonly plazoDias: number }) => void;
 }) {
   const f = useCliente(p.x);
-  const aprobar = () =>
-    f.listo && p.onAprobar(aprobadoCliente(f.nombre || p.x.nombre, f.limite ?? 0n, f.plazo ?? ''));
+  const campos = (): { limiteCentavos: bigint; plazoDias: number } => ({
+    limiteCentavos: f.limite ?? 0n,
+    plazoDias: dias(f.plazo),
+  });
   return (
     <Revisar
       titulo={`Revisar cliente ${p.x.nombre}`}
@@ -36,7 +37,7 @@ export function RevisarCliente(p: {
       listo={f.listo}
       onClose={p.onClose}
       onFusionar={p.onFusionar}
-      onAprobar={aprobar}
+      onAprobar={() => f.listo && p.onAprobar(campos())}
     >
       <Par campos={f.contacto} min={200} />
       <Limite raw={f.limiteRaw} setRaw={f.setLimite} />
@@ -101,4 +102,9 @@ function useCliente(x: ClienteCaja) {
   ];
   const listo = limite !== null && plazo !== null;
   return { nombre, contacto, limiteRaw, setLimite, limite, plazo, setPlazo, listo };
+}
+
+/** «15 días» → 15. */
+function dias(plazo: string | null): number {
+  return Number.parseInt((plazo ?? '0').replace(/\D/g, '') || '0', 10);
 }

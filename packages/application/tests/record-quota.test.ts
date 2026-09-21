@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PlanLimitError, type BusinessId } from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecordUsageRepository,
@@ -11,45 +11,44 @@ import { PlanRecordQuota, RegistrarEgresoUseCase } from '../src/index.js';
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ' as BusinessId;
 
-function quota(used: number, recordsPerMonth: number | null) {
+function quota(used: number, transactionsPerMonth: number) {
   const usage = new InMemoryRecordUsageRepository();
   usage.setCount(used);
   return new PlanRecordQuota({
     usage,
     businessId: BIZ,
-    plan: 'freelancer',
-    recordsPerMonth,
+    plan: 'xangarrito',
+    transactionsPerMonth,
     yearMonth: '2026-09',
   });
 }
 
-describe('PlanRecordQuota (A-10)', () => {
-  it('allows the 50th record of a 50-record plan', async () => {
-    await expect(quota(49, 50).assertCanCreate()).resolves.toBeUndefined();
+describe('PlanRecordQuota (A-10 → N-04: advisory)', () => {
+  it('never blocks, even past the limit', async () => {
+    await expect(quota(301, 300).assertCanCreate()).resolves.toBeUndefined();
   });
 
-  it('blocks the 51st with PLAN_LIMIT_RECORDS', async () => {
-    const err = await quota(50, 50)
-      .assertCanCreate()
-      .catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(PlanLimitError);
-    expect(err).toMatchObject({ code: 'PLAN_LIMIT_RECORDS', limit: 50, plan: 'freelancer' });
+  it('warns at and past the limit, not below it', async () => {
+    await expect(quota(299, 300).warning()).resolves.toBeNull();
+    await expect(quota(300, 300).warning()).resolves.toEqual({
+      plan: 'xangarrito',
+      limit: 300,
+      used: 300,
+    });
   });
 
-  it('never blocks an unlimited plan', async () => {
-    await expect(quota(10_000, null).assertCanCreate()).resolves.toBeUndefined();
+  it('a high tier breathes far beyond xangarrito', async () => {
+    await expect(quota(10_000, 30_000).assertCanCreate()).resolves.toBeUndefined();
   });
 
-  it('stops a capture use case before it writes anything', async () => {
+  it('a capture over the limit still writes — the sheet warns after (N-04)', async () => {
     const expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
     const useCase = new RegistrarEgresoUseCase(
       expenses,
       new InMemoryRecurringExpensesRepository(TEST_DEVICE_ID),
-      quota(50, 50),
+      quota(300, 300),
     );
-    await expect(useCase.execute(makeNewExpense({ businessId: BIZ }))).rejects.toBeInstanceOf(
-      PlanLimitError,
-    );
-    expect(await expenses.findByDate('2026-04-23' as never, BIZ)).toEqual([]);
+    await expect(useCase.execute(makeNewExpense({ businessId: BIZ }))).resolves.toBeDefined();
+    expect(await expenses.findByDate('2026-04-23' as never, BIZ)).toHaveLength(1);
   });
 });

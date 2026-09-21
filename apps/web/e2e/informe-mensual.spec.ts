@@ -69,6 +69,7 @@ test.describe('Xangarrote (throwaway tenant)', () => {
 
   async function signIn(page: Page): Promise<void> {
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill(password);
     await page.getByRole('button', { name: 'Entrar' }).click();

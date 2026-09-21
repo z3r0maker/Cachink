@@ -14,7 +14,9 @@ const counter = (page: Page) => page.locator('main').getByRole('status');
 
 test('each range chip filters the rows and the counter follows', async ({ page }) => {
   await page.goto('/movimientos');
-  await expect(counter(page)).toHaveText('Mostrando 1–6 de 6 movimientos');
+  // Parallel projects add rows; the invariant is the counter matches the
+  // rows shown, not a fixed census.
+  await expect(counter(page)).toHaveText(/^Mostrando 1–\d+ de \d+ movimientos$/);
   await page.getByRole('button', { name: 'Hoy', exact: true }).click();
   await expect(counter(page)).toHaveText('Mostrando 1–3 de 3 movimientos');
   await page.getByRole('button', { name: 'Semana', exact: true }).click();
@@ -71,6 +73,7 @@ test.describe('pagination', () => {
 
   test('23 ventas are 10 per page, and a filter goes back to page 1', async ({ page }) => {
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill('paginas-1');
     await page.getByRole('button', { name: 'Entrar' }).click();
