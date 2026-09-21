@@ -13,6 +13,7 @@ import type { SyncRunResult } from '@xangarro/sync';
 
 import type {
   BootInfo,
+  CierrePara,
   CuentaPara,
   GastoPara,
   OperadorPara,
@@ -26,6 +27,7 @@ import type {
   AbonoInput,
   Call,
   CancelarInput,
+  CerrarCallInput,
   GastoInput,
   ProductoPara,
   TicketVivo,
@@ -145,6 +147,16 @@ export class RegisterRuntime {
   /** O-35: record a gasto of the open turno through the real use case. */
   gastar(p: GastoInput): Promise<{ readonly id: string }> {
     return this.#call(calls.gastar(p));
+  }
+
+  /** O-36 · Cierre: the open turno's expected cash and figures. */
+  cierre(businessId: string, deviceId: string, turnoId: string): Promise<CierrePara> {
+    return this.#call(calls.cierre(businessId, deviceId, turnoId));
+  }
+
+  /** O-36: close the turno through the real use case. */
+  cerrar(p: CerrarCallInput): Promise<{ readonly cierreAt: string }> {
+    return this.#call(calls.cerrar(p));
   }
 
   /** O-32: cancel through the real use case — PIN and permission included. */

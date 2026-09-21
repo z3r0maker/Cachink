@@ -12,6 +12,7 @@ import type { BusinessId } from '@xangarro/domain';
 import { applyReferenceTables } from '@xangarro/sync';
 import type { ReferenceTables } from '@xangarro/contracts';
 
+import { hoyLocal } from './fechas';
 import type { Db } from './db-types';
 
 export interface OperadorPara {
@@ -75,7 +76,7 @@ export async function abrirCaja(
   );
   const turno = await useCase.execute({
     userId: userId as never,
-    fecha: new Date().toISOString().slice(0, 10) as never,
+    fecha: hoyLocal() as never,
     montoAperturaCentavos: fondoCentavos,
     efectivoAdicionalCentavos: 0n,
     businessId,

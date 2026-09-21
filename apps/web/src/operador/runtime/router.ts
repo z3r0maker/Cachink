@@ -7,6 +7,7 @@
 import * as access from './access';
 import { catalogo } from './catalogo';
 import { abonar, cuentasDelNegocio } from './cuentas';
+import { cierreDelTurno, cerrarCaja } from './cierre';
 import { gastosDelTurno, registrarGasto } from './gastos';
 import { cancelarTicket, ticketPorFolio, ventasDelTurno } from './tickets';
 import type { Db } from './db-types';
@@ -118,6 +119,23 @@ function leerOperadores(
     : access.turnoAbierto(...args);
 }
 
+/** The turno's close figures and the close itself (O-36). */
+type CierreRequest = Extract<WorkerRequest, { readonly method: 'cierre' | 'cerrar' }>;
+
+function leerCierre(request: CierreRequest, rt: Rt): Promise<unknown> {
+  if (request.method === 'cierre') {
+    return cierreDelTurno(rt.db, request.businessId as never, request.deviceId, request.turnoId);
+  }
+  return cerrarCaja(rt.db, {
+    businessId: request.businessId as never,
+    deviceId: request.deviceId,
+    turnoId: request.turnoId as never,
+    montoCierreCentavos: BigInt(request.montoCierreCentavos),
+    discrepancyReason: request.discrepancyReason as never,
+    explicacion: request.explicacion,
+  });
+}
+
 /** Method → handler; every op needs the booted runtime and persists after. */
 const POR_METODO: Readonly<Record<string, Handler>> = {
   vincular: estrecho(accesoBasico),
@@ -133,6 +151,8 @@ const POR_METODO: Readonly<Record<string, Handler>> = {
   cancelar: estrecho(leerDato),
   gastos: estrecho(leerDato),
   gastar: estrecho(leerDato),
+  cierre: estrecho(leerCierre),
+  cerrar: estrecho(leerCierre),
 };
 
 export { POR_METODO };

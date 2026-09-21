@@ -18,14 +18,14 @@ test.setTimeout(90_000);
 
 const CLIENTE = 'Doña Mari de la tienda';
 
-/** The register dates its fiado sales with the wall clock (America/Mexico_City),
- * so the vence line moves with the real day — compute it the same way. */
+/** The register dates its fiado sales with the device's local clock
+ * (runtime/fechas.ts, O-36), so the vence line moves with the real day —
+ * compute it the same way. */
 const venceEn = (dias: number): string => {
-  // Anchor on the register's own day. Its datetimes are UTC-effective today
-  // (F-4's owner action will move them to the business clock; move this with
-  // it), then add days on a noon-UTC date so nothing rolls the result.
-  const hoyCdmx = new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC' }).format(new Date());
-  const d = new Date(`${hoyCdmx}T12:00:00Z`);
+  // Anchor on the register's own local day, then add days on a noon-UTC date
+  // so nothing rolls the result.
+  const hoy = new Intl.DateTimeFormat('en-CA').format(new Date());
+  const d = new Date(`${hoy}T12:00:00Z`);
   d.setUTCDate(d.getUTCDate() + dias);
   return new Intl.DateTimeFormat('es-MX', {
     day: 'numeric',

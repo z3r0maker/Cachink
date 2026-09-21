@@ -140,6 +140,34 @@ export const gastos = (businessId: string, deviceId: string, turnoId: string): C
   turnoId,
 });
 
+export const cierre = (businessId: string, deviceId: string, turnoId: string): Call => ({
+  method: 'cierre',
+  businessId,
+  deviceId,
+  turnoId,
+});
+
+export interface CerrarInput {
+  readonly businessId: string;
+  readonly deviceId: string;
+  readonly turnoId: string;
+  readonly montoCierreCentavos: bigint;
+  readonly discrepancyReason: string | null;
+  readonly explicacion: string | null;
+}
+
+export type CerrarCallInput = CerrarInput;
+
+export const cerrar = (p: CerrarInput): Call => ({
+  method: 'cerrar',
+  businessId: p.businessId,
+  deviceId: p.deviceId,
+  turnoId: p.turnoId,
+  montoCierreCentavos: p.montoCierreCentavos.toString(),
+  discrepancyReason: p.discrepancyReason,
+  explicacion: p.explicacion,
+});
+
 export const gastar = (p: GastoInput): Call => ({
   method: 'gastar',
   businessId: p.businessId,

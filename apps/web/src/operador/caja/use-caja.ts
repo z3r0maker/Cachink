@@ -11,6 +11,7 @@ import { add, bumpLinea, reemplazar, sembrarTicket, useTicketEnCurso } from './t
 import { registerRuntime } from '../runtime/client';
 import { readDevice } from '../runtime/device-store';
 import { readSesion } from '../runtime/session-store';
+import { hoyLocal, horaLocal } from '../runtime/fechas';
 
 export type Filtro = 'Todos' | Categoria;
 
@@ -100,13 +101,12 @@ async function registrarSiVinculado(
   const device = readDevice();
   const sesion = readSesion();
   if (device === null || sesion === null || lines.length === 0) return;
-  const ahora = new Date();
   try {
     await registerRuntime().registrar(
       {
         ticket: {
-          fecha: ahora.toISOString().slice(0, 10) as never,
-          hora: `${String(ahora.getHours()).padStart(2, '0')}:${String(ahora.getMinutes()).padStart(2, '0')}`,
+          fecha: hoyLocal() as never,
+          hora: horaLocal(),
           concepto: lines[0]?.nombre ?? 'Venta',
           metodo: (v.metodo === 'Fiado' ? 'Crédito' : v.metodo) as never,
           clienteId: (v.clienteId ?? null) as never,
