@@ -47,9 +47,16 @@ test("the turno's folio opens the real ticket, shares it, and cancels it", async
   await expect(page.getByRole('main').getByText('Ana Robledo')).toBeVisible();
   await expect(page.getByText('Venta registrada y enviada')).toBeVisible();
 
-  // The comprobante carries the real ticket.
+  // The comprobante carries the real ticket — and its image is the branded
+  // N-20 render: the register is linked and online, so «Guardar imagen»
+  // fetches /api/v1/comprobante and downloads the business's template.
   await page.getByRole('button', { name: 'Compartir comprobante' }).click();
-  await expect(page.getByRole('dialog', { name: 'Compartir V-0001' })).toBeVisible();
+  const dialogo = page.getByRole('dialog', { name: 'Compartir V-0001' });
+  await expect(dialogo).toBeVisible();
+  const descarga = page.waitForEvent('download');
+  await dialogo.getByRole('button', { name: 'Guardar imagen' }).click();
+  const imagen = await descarga;
+  expect(imagen.suggestedFilename()).toBe('comprobante-V-0001.png');
   await page.keyboard.press('Escape');
 
   // Cancelling asks for the NIP (the domain's rule) and marks the ticket.

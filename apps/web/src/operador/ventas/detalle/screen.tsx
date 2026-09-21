@@ -152,8 +152,10 @@ function Capas(p: {
         />
       ) : null}
       <Share
+        key={p.modal}
         variant="detalle"
         comprobante={p.modal === 'share' ? comprobante(p.data, p.venta, p.total) : null}
+        cliente={p.venta.fiado?.cliente}
         onClose={p.close}
       />
     </>

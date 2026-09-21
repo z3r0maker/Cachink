@@ -33,5 +33,7 @@ export function comprobante(data: DetalleData, v: VentaDetalle, total: bigint) {
     negocio: data.negocio,
     folio: v.folio,
     venta: { lines: v.lineas, total, metodo: v.metodo, cambio, nota: '' },
+    // On a linked register this id fetches the branded N-20 PNG (N-21).
+    ticketId: v.id,
   };
 }
