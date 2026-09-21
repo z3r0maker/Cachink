@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+[data-ondark]:focus-visible{outline:3px solid var(--yellow);outline-offset:2px;box-shadow:none;}
+@keyframes xg-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">{{ roleLabel }}</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:{{ planChipBg }}">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:{{ planChipDot }}"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">{{ planChipLabel }}</span>
+          </div>
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);box-shadow:3px 3px 0 var(--black);">PR</div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div>
+          <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Suscripción</h1>
+          <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Tu plan, tu consumo y tus comprobantes de pago</div>
+        </div>
+
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:72px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos cargar tu suscripción</div>
+            <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Tu plan sigue activo. Revisa tu conexión e inténtalo otra vez.</p>
+            <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-ondark="1">Reintentar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="height:196px;border:2.5px solid var(--black);border-radius:18px;background:var(--gray-100);box-shadow:5px 5px 0 var(--black);"></div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+              <sc-for list="{{ three }}" as="k" hint-placeholder-count="3">
+                <div style="height:460px;border:2px solid var(--black);border-radius:16px;background:var(--gray-100);box-shadow:4px 4px 0 var(--black);"></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:64px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:20px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h18v11H3V7Zm0 4h18M7 15h4"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Todavía no hay cobros</div>
+            <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Estás en el plan Freelancer, que es gratis para siempre. Cuando cambies de plan verás aquí tus comprobantes.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showContent }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:20px;align-items:start;">
+              <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:28px;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Tu plan</div>
+                <div style="display:flex;align-items:flex-end;gap:10px;margin:12px 0 8px;">
+                  <span style="font-size:44px;line-height:1;font-weight:800;letter-spacing:-0.04em;color:var(--black);">Emprendedor</span>
+                </div>
+                <div style="display:flex;align-items:baseline;gap:8px;">
+                  <span style="font-size:22px;font-weight:800;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;color:var(--black);">$199.00</span>
+                  <span style="font-size:14px;font-weight:700;color:var(--black);">MXN / mes</span>
+                </div>
+                <div style="font-size:14px;font-weight:700;color:var(--black);margin-top:14px;font-variant-numeric:tabular-nums;">Siguiente cobro: 01/jun/2026</div>
+                <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;">
+                    <button type="button" style="height:48px;padding:0 20px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-ondark="1">Cambiar plan</button>
+                    <button type="button" style="height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Administrar pago</button>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:16px;">Tu consumo este mes</div>
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                  <sc-for list="{{ usage }}" as="u" hint-placeholder-count="3">
+                    <div>
+                      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:7px;">
+                        <span style="font-size:14px;font-weight:700;color:var(--black);">{{ u.label }}</span>
+                        <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ u.color }}">{{ u.value }}</span>
+                      </div>
+                      <sc-if value="{{ u.metered }}" hint-placeholder-val="{{ true }}">
+                        <div style="height:12px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;"><span style="display:block;height:100%;width:{{ u.pct }};background:{{ u.bar }}"></span></div>
+                      </sc-if>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Planes</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start;">
+                <sc-for list="{{ plans }}" as="p" hint-placeholder-count="3">
+                  <div data-card="1" style="position:relative;display:flex;flex-direction:column;border:{{ p.border }};border-radius:18px;box-shadow:{{ p.shadow }};padding:26px;background:{{ p.bg }}">
+                    <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
+                      <span style="position:absolute;top:-16px;left:26px;display:inline-flex;align-items:center;height:30px;padding:0 14px;border:2.5px solid var(--black);border-radius:9999px;background:var(--yellow);box-shadow:3px 3px 0 var(--black);font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);white-space:nowrap;">{{ p.badge }}</span>
+                    </sc-if>
+                    <div style="font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:{{ p.nameColor }}">{{ p.name }}</div>
+                    <p style="margin:10px 0 0;font-size:15px;font-weight:600;color:{{ p.bodyColor }};text-wrap:pretty;min-height:3em;">{{ p.pitch }}</p>
+                    <div style="display:flex;align-items:flex-start;gap:4px;margin-top:18px;">
+                      <span style="font-size:22px;font-weight:800;line-height:1.3;color:{{ p.priceColor }}">$</span>
+                      <span style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:{{ p.priceColor }}">{{ p.price }}</span>
+                    </div>
+                    <div style="font-size:14px;font-weight:600;color:{{ p.bodyColor }};margin-top:8px;">{{ p.period }}</div>
+                    <button type="button" style="margin-top:22px;width:100%;height:52px;background:{{ p.ctaBg }};color:{{ p.ctaFg }};border:2.5px solid {{ p.ctaBorder }};border-radius:14px;box-shadow:4px 4px 0 {{ p.ctaShadow }};font-family:inherit;font-size:14px;font-weight:700;cursor:{{ p.ctaCursor }};opacity:{{ p.ctaOpacity }};" style-active="transform:translate(2px,2px);" data-onyellow="{{ p.onYellow }}" data-ondark="{{ p.onDark }}">{{ p.cta }}</button>
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:{{ p.eyebrowColor }};margin:24px 0 14px;">{{ p.includesLabel }}</div>
+                    <div style="display:flex;flex-direction:column;gap:11px;">
+                      <sc-for list="{{ p.features }}" as="ft" hint-placeholder-count="6">
+                        <div style="display:flex;align-items:flex-start;gap:10px;">
+                          <span style="flex:none;width:18px;display:grid;place-items:center;margin-top:2px;color:{{ ft.markColor }}">
+                            <sc-if value="{{ ft.included }}" hint-placeholder-val="{{ true }}">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            </sc-if>
+                            <sc-if value="{{ ft.excluded }}" hint-placeholder-val="{{ false }}">
+                              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 12h12"></path></svg>
+                            </sc-if>
+                          </span>
+                          <span style="font-size:15px;font-weight:600;color:{{ ft.color }};text-wrap:pretty;">{{ ft.label }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;align-items:start;">
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:16px;">Método de pago</div>
+                <div style="display:flex;align-items:center;gap:14px;border:2px solid var(--black);border-radius:14px;padding:16px;background:var(--offwhite);">
+                  <span style="width:46px;height:32px;flex:none;border:2px solid var(--black);border-radius:8px;background:var(--white);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:0.04em;color:var(--black);">VISA</span>
+                  <div style="min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:var(--black);font-variant-numeric:tabular-nums;">•••• •••• •••• 4821</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;">Vence 08/28 · Pedro Ramírez</div>
+                  </div>
+                </div>
+                <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" style="margin-top:16px;width:100%;height:46px;background:var(--yellow-soft);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Cambiar tarjeta</button>
+                </sc-if>
+                <div style="display:flex;align-items:center;gap:11px;margin-top:16px;border:2px solid var(--black);border-radius:12px;padding:12px 14px;background:var(--green-soft);">
+                  <span style="width:11px;height:11px;flex:none;border-radius:9999px;border:2px solid var(--black);background:var(--green);"></span>
+                  <span style="font-size:13px;font-weight:700;color:var(--black);">Tu método de pago está al día.</span>
+                </div>
+              </div>
+
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:16px;">Comprobantes</div>
+                <div style="display:flex;flex-direction:column;gap:0;">
+                  <sc-for list="{{ invoices }}" as="i" hint-placeholder-count="5">
+                    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:2px solid var(--gray-200);">
+                      <div style="min-width:0;">
+                        <div style="font-size:15px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;">{{ i.date }}</div>
+                        <div style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ i.folio }}</div>
+                      </div>
+                      <span style="margin-left:auto;flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;background:{{ i.stateBg }};color:var(--black);white-space:nowrap;">{{ i.state }}</span>
+                      <span style="flex:none;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ i.amount }}</span>
+                      <span role="link" tabindex="0" title="Descargar" style="flex:none;width:36px;height:36px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--white);cursor:pointer;color:var(--black);" style-hover="background:var(--yellow-soft);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
+                      </span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+
+            <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);flex-wrap:wrap;">
+                <div style="min-width:0;">
+                  <div style="font-size:15px;font-weight:800;color:var(--black);">¿Quieres pausar tu suscripción?</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;">Bajas al plan Freelancer y conservas tus registros. Puedes volver cuando quieras.</div>
+                </div>
+                <button type="button" style="margin-left:auto;flex:none;height:46px;padding:0 18px;background:var(--red-soft);color:var(--red-text);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Cambiar a Freelancer</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:90;width:244px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado de datos</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ stateOptions }}" as="s" hint-placeholder-count="4">
+              <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Rol</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ r.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ r.bg }}">{{ r.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Ancho</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ widthOptions }}" as="w" hint-placeholder-count="2">
+              <div role="button" tabindex="0" onClick="{{ w.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ w.bg }}">{{ w.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { dataState: null, role: null, panelOpen: false, rail: null, vw: 1440 };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._r); }
+
+  renderVals() {
+    const st = this.state;
+    const dataState = st.dataState ?? this.props.startState ?? 'happy';
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const rail = st.rail ?? (st.vw < 1024);
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, dividerAfter]) => {
+      const active = label === 'Suscripción';
+      return {
+        label, icon, href: pages[label] || '#', dividerAfter: !!dividerAfter,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const feat = (label, included) => ({
+      label, included, excluded: !included,
+      markColor: included ? 'var(--green-text)' : 'var(--gray-400)',
+      color: included ? 'var(--ink)' : 'var(--text-muted)'
+    });
+    const featDark = (label) => ({
+      label, included: true, excluded: false,
+      markColor: 'var(--yellow)', color: 'var(--white)'
+    });
+
+    const currentPlan = 'Emprendedor';
+    const plans = [
+      {
+        name: 'Freelancer', badge: null, current: false,
+        pitch: 'Para empezar a ordenar tu negocio desde cero.',
+        price: '0', period: 'para siempre gratis',
+        cta: 'Crear cuenta gratis',
+        includesLabel: 'Incluye',
+        bg: 'var(--white)', border: '2px solid var(--black)', shadow: '4px 4px 0 var(--black)',
+        nameColor: 'var(--gray-600)', bodyColor: 'var(--text-muted)', priceColor: 'var(--black)', eyebrowColor: 'var(--gray-600)',
+        ctaBg: 'var(--white)', ctaFg: 'var(--black)', ctaBorder: 'var(--black)', ctaShadow: 'var(--black)',
+        onYellow: null, onDark: null,
+        features: [
+          feat('1 usuario', true),
+          feat('Registro de ventas y gastos', true),
+          feat('Hasta 50 registros al mes', true),
+          feat('Dashboard básico', true),
+          feat('Sin inventario', false),
+          feat('Sin estados financieros NIF', false),
+          feat('Sin escaneo de código de barras', false)
+        ]
+      },
+      {
+        name: 'Emprendedor', badge: 'Tu plan actual', current: true,
+        pitch: 'Para el negocio que ya vende y quiere crecer con control.',
+        price: '199', period: 'MXN / mes',
+        cta: 'Este es tu plan',
+        includesLabel: 'Todo en Freelancer, más:',
+        bg: 'var(--black)', border: '2.5px solid var(--black)', shadow: '5px 5px 0 var(--yellow)',
+        nameColor: 'var(--yellow)', bodyColor: 'var(--gray-200)', priceColor: 'var(--white)', eyebrowColor: 'var(--gray-400)',
+        ctaBg: 'var(--yellow)', ctaFg: 'var(--black)', ctaBorder: 'var(--black)', ctaShadow: 'var(--white)',
+        onYellow: '1', onDark: null,
+        features: [
+          featDark('2 usuarios (dueño + empleado)'),
+          featDark('Inventario ilimitado'),
+          featDark('Escaneo de código de barras'),
+          featDark('Estados financieros NIF (B-2, B-3, B-6)'),
+          featDark('Roles Director / Equipo Operativo'),
+          featDark('Registros ilimitados'),
+          featDark('Reportes de ventas y gastos')
+        ]
+      },
+      {
+        name: 'MiPyme Pro', badge: null, current: false,
+        pitch: 'Para el negocio con equipo, múltiples roles y crecimiento acelerado.',
+        price: '399', period: 'MXN / mes',
+        cta: 'Probar 14 días gratis',
+        includesLabel: 'Todo en Emprendedor, más:',
+        bg: 'var(--white)', border: '2px solid var(--black)', shadow: '4px 4px 0 var(--black)',
+        nameColor: 'var(--gray-600)', bodyColor: 'var(--text-muted)', priceColor: 'var(--black)', eyebrowColor: 'var(--gray-600)',
+        ctaBg: 'var(--white)', ctaFg: 'var(--black)', ctaBorder: 'var(--black)', ctaShadow: 'var(--black)',
+        onYellow: null, onDark: null,
+        features: [
+          feat('5 usuarios', true),
+          feat('Multi-sucursal (próximamente)', true),
+          feat('Reportes avanzados y comparativos', true),
+          feat('Exportación a PDF y Excel', true),
+          feat('Soporte prioritario por WhatsApp', true),
+          feat('Configuración de permisos por usuario', true),
+          feat('Historial de auditoría completo', true)
+        ]
+      }
+    ];
+
+    const usage = [
+      { label: 'Usuarios', value: '2 de 2', metered: true, pct: '100%', bar: 'var(--warning)', color: 'var(--warning-text)' },
+      { label: 'Registros del mes', value: '340 · sin límite', metered: false, pct: '0%', bar: 'transparent', color: 'var(--green-text)' },
+      { label: 'Dispositivos vinculados', value: '3 · sin límite', metered: false, pct: '0%', bar: 'transparent', color: 'var(--black)' }
+    ];
+
+    const invoices = [
+      ['01/may/2026', 'XG-2026-0512', 'Pagado', 199],
+      ['01/abr/2026', 'XG-2026-0411', 'Pagado', 199],
+      ['01/mar/2026', 'XG-2026-0308', 'Pagado', 199],
+      ['01/feb/2026', 'XG-2026-0204', 'Pagado', 199],
+      ['01/ene/2026', 'XG-2026-0101', 'Pagado', 199]
+    ].map(([date, folio, state, amt]) => ({
+      date, folio, state,
+      stateBg: state === 'Pagado' ? 'var(--green-soft)' : 'var(--warning-soft)',
+      amount: '$' + amt.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    }));
+
+    return {
+      nav,
+      plans: plans.map(p => ({ ...p, cta: p.current ? 'Este es tu plan' : p.cta, ctaCursor: p.current ? 'default' : 'pointer', ctaOpacity: p.current ? '0.55' : '1' })),
+      usage, invoices, currentPlan,
+      three: [1, 2, 3],
+      wide: !rail,
+      sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' }[role],
+      canEdit: role === 'owner',
+      planChipLabel: 'Plan Emprendedor',
+      planChipBg: 'var(--yellow)', planChipDot: 'var(--green)',
+      isLoading: dataState === 'loading', isEmpty: dataState === 'empty', isError: dataState === 'error',
+      showContent: dataState === 'happy',
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen }),
+      stateOptions: [['happy', 'Con datos'], ['loading', 'Cargando'], ['empty', 'Sin cobros'], ['error', 'Error']]
+        .map(([k, l]) => ({ label: l, bg: on(dataState === k), pick: set('dataState', k) })),
+      roleOptions: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']]
+        .map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })),
+      widthOptions: [[false, 'Escritorio · menú completo'], [true, 'Tablet · riel de iconos']]
+        .map(([k, l]) => ({ label: l, bg: on(rail === k), pick: set('rail', k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

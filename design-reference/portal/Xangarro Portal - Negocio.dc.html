@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+input{font-family:inherit;}
+input::placeholder{color:var(--gray-600);font-weight:600;}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">{{ roleLabel }}</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);box-shadow:3px 3px 0 var(--black);">PR</div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Negocio</h1>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Los datos con los que armamos tus estados y tus comprobantes</div>
+          </div>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <button type="button" onClick="{{ toggleEdit }}" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:{{ editBtnBg }};border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">{{ editBtnLabel }}</button>
+            </div>
+          </sc-if>
+        </div>
+
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:72px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos cargar los datos de tu negocio</div>
+            <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Revisa tu conexión e inténtalo otra vez.</p>
+            <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;">
+            <sc-for list="{{ four }}" as="k" hint-placeholder-count="4">
+              <div style="height:280px;border:2px solid var(--black);border-radius:16px;background:var(--gray-100);box-shadow:4px 4px 0 var(--black);"></div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showContent }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <sc-if value="{{ incomplete }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);background:var(--warning-soft);">
+                <div style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--warning-text);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-size:15px;font-weight:800;color:var(--black);">Falta tu domicilio fiscal.</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;">Sin él no podemos poner tus datos completos en los comprobantes.</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:16px;align-items:start;">
+              <sc-for list="{{ sections }}" as="sec" hint-placeholder-count="4">
+                <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                  <div style="display:flex;align-items:center;gap:11px;margin-bottom:20px;">
+                    <span style="width:38px;height:38px;flex:none;border:2px solid var(--black);border-radius:11px;background:{{ sec.tile }};display:grid;place-items:center;color:var(--black);">
+                      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ sec.icon }}"></path></svg>
+                    </span>
+                    <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ sec.title }}</span>
+                  </div>
+                  <div style="display:flex;flex-direction:column;gap:14px;">
+                    <sc-for list="{{ sec.fields }}" as="f" hint-placeholder-count="4">
+                      <div>
+                        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">{{ f.label }}</div>
+                        <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+                          <input type="text" value="{{ f.value }}" placeholder="{{ f.placeholder }}" style="width:100%;box-sizing:border-box;height:48px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);outline:none;font-size:15px;font-weight:600;color:var(--ink);">
+                        </sc-if>
+                        <sc-if value="{{ reading }}" hint-placeholder-val="{{ true }}">
+                          <div style="font-size:16px;font-weight:700;color:{{ f.color }};">{{ f.display }}</div>
+                        </sc-if>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border:2.5px solid var(--black);border-radius:16px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);flex-wrap:wrap;">
+                <span style="font-size:15px;font-weight:800;color:var(--black);">Estás editando los datos de tu negocio.</span>
+                <div style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;">
+                  <button type="button" onClick="{{ toggleEdit }}" style="height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Cancelar</button>
+                  <button type="button" onClick="{{ toggleEdit }}" style="height:48px;padding:0 20px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--white);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--white);">Guardar cambios</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:14px;padding:18px 20px;border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);flex-wrap:wrap;">
+                <div style="min-width:0;">
+                  <div style="font-size:15px;font-weight:800;color:var(--black);">Cerrar este negocio</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;">Se archivan tus registros y se desvinculan todos los dispositivos. No se borra nada.</div>
+                </div>
+                <button type="button" style="margin-left:auto;flex:none;height:46px;padding:0 18px;background:var(--red-soft);color:var(--red-text);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Archivar negocio</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:90;width:244px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado de datos</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ stateOptions }}" as="s" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Rol</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ r.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ r.bg }}">{{ r.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Ancho</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ widthOptions }}" as="w" hint-placeholder-count="2">
+              <div role="button" tabindex="0" onClick="{{ w.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ w.bg }}">{{ w.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { dataState: null, role: null, editing: false, panelOpen: false, rail: null, vw: 1440 };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._r); }
+
+  renderVals() {
+    const st = this.state;
+    const dataState = st.dataState ?? this.props.startState ?? 'happy';
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const rail = st.rail ?? (st.vw < 1024);
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+    const canEdit = role === 'owner';
+    const editing = canEdit && st.editing && dataState === 'happy';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, dividerAfter]) => {
+      const active = label === 'Negocio';
+      return {
+        label, icon, href: pages[label] || '#', dividerAfter: !!dividerAfter,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const mk = (label, value, placeholder) => ({
+      label, value: value || '', placeholder: placeholder || '',
+      display: value || 'Falta por completar',
+      color: value ? 'var(--black)' : 'var(--warning-text)'
+    });
+
+    const sections = [
+      {
+        title: 'Datos generales', tile: 'var(--yellow)',
+        icon: 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6',
+        fields: [
+          mk('Nombre del negocio', 'Taquería Don Pedro'),
+          mk('Giro', 'Alimentos y bebidas'),
+          mk('Ciudad', 'Guadalajara, Jalisco'),
+          mk('Teléfono', '33 1234 5678')
+        ]
+      },
+      {
+        title: 'Datos fiscales', tile: 'var(--blue-soft)',
+        icon: 'M6 3h12v18l-3-2-3 2-3-2-3 2V3Zm3 5h6M9 12h6',
+        fields: [
+          mk('RFC', 'RAPP850312H4A'),
+          mk('Régimen', 'RESICO · Persona física'),
+          mk('Domicilio fiscal', '', 'Calle, número, colonia, CP'),
+          mk('Inicio del ejercicio', '01/ene/2026')
+        ]
+      },
+      {
+        title: 'Contacto y comprobantes', tile: 'var(--peach-soft)',
+        icon: 'M4 5h16v14H4V5Zm0 0 8 7 8-7',
+        fields: [
+          mk('Correo de contacto', 'pedro@taqueriadonpedro.mx'),
+          mk('WhatsApp para comprobantes', '33 1234 5678'),
+          mk('Leyenda en el ticket', 'Gracias por su compra'),
+          mk('Dirección que se imprime', 'Av. Vallarta 1234, Guadalajara')
+        ]
+      },
+      {
+        title: 'Preferencias', tile: 'var(--purple-soft)',
+        icon: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7.4 7.4 0 0 0-2-1.2L14.5 3h-4l-.4 2.6a7.4 7.4 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5A7.4 7.4 0 0 0 5.6 12',
+        fields: [
+          mk('Moneda', 'Peso mexicano (MXN)'),
+          mk('Zona horaria', 'Centro de México (GMT-6)'),
+          mk('Formato de fecha', 'dd/mmm/aaaa'),
+          mk('Cierre de día', '23:00')
+        ]
+      }
+    ];
+
+    return {
+      nav, sections,
+      four: [1, 2, 3, 4],
+      editing, reading: !editing,
+      incomplete: true,
+      toggleEdit: () => this.setState({ editing: !st.editing }),
+      editBtnLabel: st.editing ? 'Dejar de editar' : 'Editar datos',
+      editBtnBg: st.editing ? 'var(--white)' : 'var(--yellow)',
+      wide: !rail,
+      sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' }[role],
+      canEdit,
+      isLoading: dataState === 'loading', isError: dataState === 'error',
+      showContent: dataState === 'happy',
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen }),
+      stateOptions: [['happy', 'Con datos'], ['loading', 'Cargando'], ['error', 'Error']]
+        .map(([k, l]) => ({ label: l, bg: on(dataState === k), pick: set('dataState', k) })),
+      roleOptions: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']]
+        .map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })),
+      widthOptions: [[false, 'Escritorio · menú completo'], [true, 'Tablet · riel de iconos']]
+        .map(([k, l]) => ({ label: l, bg: on(rail === k), pick: set('rail', k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -24,6 +24,7 @@ import {
   DEV,
   DEVICES,
   OWNER,
+  OPERADOR,
   VIEWER,
   EMPLOYEES,
   EXPENSES,
@@ -173,17 +174,21 @@ async function seedPortal(sql: Sql): Promise<void> {
  * Portal members: an identity in `auth.users` plus a row in
  * `business_members` giving it a role on this business.
  *
- * Two of them, because role gating needs something real to gate: an owner who
- * may write and a viewer who may not. Passwords are bcrypt at cost 10, the same
+ * Three of them, because role gating needs something real to gate: an owner
+ * who may write, an admin who works but hits the owner-only gates, and a
+ * viewer who may not. Passwords are bcrypt at cost 10, the same
  * as GoTrue, so the login check is identical against either issuer.
  */
 async function seedMembers(sql: Sql): Promise<void> {
-  for (const m of [OWNER, VIEWER]) {
+  for (const m of [OWNER, OPERADOR, VIEWER]) {
     const encrypted = await hash(m.password, 10);
-    await sql`
-      INSERT INTO auth.users (id, email, encrypted_password, raw_user_meta_data, email_confirmed_at)
-      VALUES (${m.id}::uuid, ${m.email}, ${encrypted}, jsonb_build_object('nombre', ${m.nombre}::text), now())
-      ON CONFLICT (id) DO NOTHING`;
+    // Hosted Supabase does not let the app role write `auth.users` (B-01):
+    // identities go through the security-definer `xangarro.account_create`,
+    // which carries the nombre (raw_user_meta_data hosted, a column locally).
+    // Its "address taken" false doubles as this seed's re-run case, so the
+    // member row decides: ON CONFLICT absorbs our own prior row, while an
+    // address owned by a real account fails the member insert's FK loudly.
+    await sql`SELECT xangarro.account_create(${m.id}::uuid, ${m.email}, ${encrypted}, ${m.nombre}, ${CREATED})`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${m.memberId}, ${m.id}, ${m.role}, ${BIZ}, ${CREATED}, ${CREATED})
@@ -234,7 +239,7 @@ async function main(): Promise<void> {
     console.log(
       `seeded Taquería Don Pedro — ${count} ventas, ${PRODUCTS.length} productos, ` +
         `${USERS.length} operadores, ${EMPLOYEES.length} empleados, ${DEVICES.length} dispositivos, ` +
-        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos, 2 miembros`,
+        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos, 3 miembros`,
     );
   } finally {
     await sql.end({ timeout: 5 });

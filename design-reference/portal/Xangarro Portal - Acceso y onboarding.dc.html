@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<script src="./image-slot.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+input{font-family:inherit;}
+input::placeholder{color:var(--gray-600);font-weight:600;}
+@keyframes xg-reveal{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes xg-scenein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes xg-sceneout{to{opacity:0;transform:translateY(-8px)}}
+@keyframes xg-press{0%,14%{transform:none;box-shadow:3px 3px 0 var(--black)}20%,30%{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black)}38%,100%{transform:none;box-shadow:3px 3px 0 var(--black)}}
+[data-stage="paused"] *{animation-play-state:paused!important;}
+@keyframes xg-fly{0%,26%{opacity:0;transform:translate(calc(-100% - 60px),-74px) scale(.7)}33%{opacity:1;transform:translate(calc(-100% - 60px),-82px) scale(1.06)}66%{opacity:1;transform:translate(0,0) scale(1)}74%,100%{opacity:0;transform:translate(0,5px) scale(.9)}}
+@keyframes xg-landrow{0%,64%{opacity:0;transform:translateY(8px)}72%{opacity:1;transform:translateY(0) scale(1.03)}80%,100%{opacity:1;transform:none}}
+@keyframes xg-coindrop{0%{opacity:0;transform:translateY(-150px) rotate(-40deg) scale(.8)}22%{opacity:1}42%{transform:translateY(0) rotate(0) scale(1)}50%{transform:translateY(-14px) rotate(4deg)}58%{transform:translateY(0) rotate(0)}64%{transform:translateY(-5px)}70%,100%{opacity:1;transform:translateY(0) rotate(0)}}
+@keyframes xg-sparkle{0%,30%{opacity:0;transform:scale(.4) rotate(0)}44%{opacity:1;transform:scale(1.15) rotate(25deg)}70%,100%{opacity:0;transform:scale(.6) rotate(45deg)}}
+@keyframes xg-printline{0%{opacity:0;transform:scaleX(0)}100%{opacity:1;transform:scaleX(1)}}
+@keyframes xg-ticketdown{0%{transform:translateY(-102%)}34%,100%{transform:translateY(0)}}
+@keyframes xg-fold{0%,66%{opacity:0;transform:scale(.7) rotate(-6deg)}76%{opacity:1;transform:scale(1.04) rotate(1deg)}86%,100%{opacity:1;transform:scale(1) rotate(0)}}
+@keyframes xg-bargrow{0%{transform:scaleY(0)}100%{transform:scaleY(1)}}
+@keyframes xg-badgepop{0%,42%{opacity:0;transform:scale(.6)}52%{opacity:1;transform:scale(1.08)}62%,100%{opacity:1;transform:scale(1)}}
+@keyframes xg-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+[data-press]{transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-press]:active{transform:translate(2px,2px);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));font-family:var(--font-sans);color:var(--ink);background:var(--offwhite);">
+
+  <div style="background:var(--yellow);border-right:2.5px solid var(--black);padding:clamp(22px,4.5vh,56px) 48px;display:flex;flex-direction:column;gap:clamp(14px,3vh,40px);height:100vh;position:sticky;top:0;align-self:start;overflow:hidden;box-sizing:border-box;">
+    <div style="order:0;flex:none;width:100%;display:flex;align-items:center;gap:14px;">
+      <span style="font-family:'Anton',var(--font-sans);font-size:clamp(34px,4.6vw,54px);line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      <span style="width:clamp(38px,4.4vw,50px);height:clamp(38px,4.4vw,50px);flex:none;border-radius:9999px;background:var(--yellow);border:3px solid var(--black);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </span>
+    </div>
+
+    <div data-hero="1" style="flex:none;order:1;position:relative;width:100%;aspect-ratio:1983/793;box-sizing:border-box;border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);overflow:hidden;background:var(--yellow);">
+      <image-slot id="xg-auth-hero" shape="rect" fit="cover" src="uploads/pasted-1789659371997-0.png" placeholder="Arrastra aquí la imagen hero" style="height:100%;"></image-slot>
+    </div>
+
+    <div style="order:3;flex:none;width:100%;margin-top:auto;">
+      <h1 style="margin:0;font-size:clamp(30px,4.2vw,48px);line-height:1.04;font-weight:800;letter-spacing:-0.04em;color:var(--black);text-wrap:pretty;">Finanzas para emprendedores.</h1>
+      <p style="margin:clamp(10px,1.8vh,18px) 0 0;max-width:38ch;font-size:clamp(15px,1.6vw,17px);font-weight:600;color:var(--black);text-wrap:pretty;">Registra tus ventas y gastos desde el mostrador. Nosotros armamos tus estados financieros.</p>
+    </div>
+
+    <div data-stage="{{ stageState }}" style="order:2;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;justify-content:center;width:100%;">
+      <div ref="{{ stageRef }}" style="position:relative;flex:1 1 auto;min-height:120px;">
+      <div style="position:absolute;top:50%;width:460px;height:170px;left:50%;transform-origin:center center;transform:translate(-50%,-50%) scale({{ stageScale }})">
+
+        <sc-if value="{{ scene1 }}" hint-placeholder-val="{{ true }}">
+          <div style="animation:xg-scenein 360ms cubic-bezier(0.2,0.8,0.2,1) both, xg-sceneout 360ms linear 5640ms both;position:absolute;inset:0;display:flex;align-items:center;gap:26px;">
+            <div style="flex:none;width:136px;height:156px;border:2.5px solid var(--black);border-radius:22px;background:var(--white);box-shadow:5px 5px 0 var(--black);padding:14px;box-sizing:border-box;display:flex;flex-direction:column;">
+              <div style="height:5px;width:38px;border-radius:9999px;background:var(--gray-200);margin:0 auto 12px;"></div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Nueva venta</div>
+              <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:5px;font-variant-numeric:tabular-nums;">$145</div>
+              <div style="display:flex;align-items:center;gap:7px;margin-top:10px;border:2px solid var(--black);border-radius:8px;padding:5px 7px;background:var(--offwhite);">
+                <span style="width:7px;height:7px;flex:none;border-radius:9999px;background:var(--black);"></span>
+                <span style="font-size:10px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Gringa ×2 + Refresco</span>
+              </div>
+              <div style="margin-top:auto;height:34px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;background:var(--yellow);font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);animation:xg-press 6s cubic-bezier(0.2,0.8,0.2,1) infinite;">Cobrar</div>
+            </div>
+
+            <div style="position:absolute;right:96px;top:calc(50% + 4px);z-index:2;display:inline-flex;align-items:center;border:2.5px solid var(--black);border-radius:9999px;padding:6px 13px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-size:14px;font-weight:800;color:var(--green-text);white-space:nowrap;font-variant-numeric:tabular-nums;animation:xg-fly 6s cubic-bezier(0.2,0.8,0.2,1) infinite;">+$145.00</div>
+
+            <div style="flex:1;min-width:0;align-self:center;border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:5px 5px 0 var(--black);padding:14px;">
+              <div style="font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Ventas de hoy</div>
+              <div style="display:flex;flex-direction:column;gap:0;margin-top:9px;">
+                <sc-for list="{{ stmtRows }}" as="sr" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:2px solid var(--gray-200);">
+                    <span style="font-size:12px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ sr.label }}</span>
+                    <span style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ sr.value }}</span>
+                  </div>
+                </sc-for>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:2px solid var(--gray-200);animation:xg-landrow 6s cubic-bezier(0.2,0.8,0.2,1) infinite;">
+                  <span style="font-size:12px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Gringa ×2 + Refresco</span>
+                  <span style="font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--green-text);">$145.00</span>
+                </div>
+              </div>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:9px;">
+                <span style="font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Total</span>
+                <span ref="{{ ref1 }}" style="font-size:22px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--black);">$4,705.00</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scene2 }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:xg-scenein 360ms cubic-bezier(0.2,0.8,0.2,1) both, xg-sceneout 360ms linear 3140ms both;position:absolute;inset:0;display:flex;align-items:center;gap:30px;">
+            <div style="flex:none;position:relative;width:170px;height:156px;">
+              <sc-for list="{{ coins }}" as="c" hint-placeholder-count="3">
+                <div style="position:absolute;left:{{ c.left }};bottom:{{ c.bottom }};width:{{ c.size }};height:{{ c.size }};border:2.5px solid var(--black);border-radius:9999px;background:{{ c.bg }};box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;font-size:{{ c.font }};font-weight:800;color:var(--black);animation:xg-coindrop 3.5s cubic-bezier(0.2,0.8,0.2,1) {{ c.delay }} infinite;">$</div>
+              </sc-for>
+              <sc-for list="{{ sparkles }}" as="s" hint-placeholder-count="3">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round" style="position:absolute;left:{{ s.left }};bottom:{{ s.bottom }};animation:xg-sparkle 3.5s cubic-bezier(0.2,0.8,0.2,1) {{ s.delay }} infinite;"><path d="M12 3v6M12 15v6M3 12h6M15 12h6"></path></svg>
+              </sc-for>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);">Cobrado hoy</div>
+              <div ref="{{ ref2 }}" style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-0.045em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:8px;">$0.00</div>
+              <div style="display:inline-flex;align-items:center;gap:9px;margin-top:16px;border:2.5px solid var(--black);border-radius:9999px;padding:7px 15px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+                <span style="width:10px;height:10px;flex:none;border-radius:9999px;border:2px solid var(--black);background:var(--green);"></span>
+                <span style="font-size:13px;font-weight:800;color:var(--black);white-space:nowrap;">18 ventas · 3 operadores</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scene3 }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:xg-scenein 360ms cubic-bezier(0.2,0.8,0.2,1) both, xg-sceneout 360ms linear 4640ms both;position:absolute;inset:0;display:flex;align-items:center;gap:30px;">
+            <div style="flex:none;width:158px;height:156px;overflow:hidden;">
+              <div style="width:100%;height:100%;box-sizing:border-box;border:2.5px solid var(--black);border-radius:6px;background:var(--white);box-shadow:5px 5px 0 var(--black);padding:12px 14px;animation:xg-ticketdown 5s cubic-bezier(0.2,0.8,0.2,1) infinite;">
+                <div style="font-size:11px;font-weight:800;letter-spacing:-0.01em;color:var(--black);text-align:center;">Taquería Don Pedro</div>
+                <div style="height:2px;background:var(--gray-200);margin:8px 0;"></div>
+                <div style="display:flex;flex-direction:column;gap:7px;">
+                  <sc-for list="{{ ticketLines }}" as="tl" hint-placeholder-count="3">
+                    <div style="height:8px;border-radius:4px;background:{{ tl.color }};width:{{ tl.width }};transform-origin:left center;animation:xg-printline 420ms cubic-bezier(0.2,0.8,0.2,1) {{ tl.delay }} both;"></div>
+                  </sc-for>
+                </div>
+                <div style="height:2px;background:var(--gray-200);margin:10px 0 8px;"></div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;">
+                  <span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">Total</span>
+                  <span style="font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">$310.00</span>
+                </div>
+              </div>
+            </div>
+            <div style="flex:1;min-width:0;animation:xg-fold 5s cubic-bezier(0.2,0.8,0.2,1) infinite;transform-origin:left center;">
+              <div style="border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:5px 5px 0 var(--black);padding:18px;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Estado de resultados</div>
+                <div style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-top:4px;">Mayo 2026</div>
+                <div style="display:flex;flex-direction:column;gap:0;margin-top:12px;">
+                  <sc-for list="{{ foldRows }}" as="fr" hint-placeholder-count="3">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:2px solid var(--gray-200);">
+                      <span style="font-size:12px;font-weight:700;color:var(--black);">{{ fr.label }}</span>
+                      <span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;color:{{ fr.color }};white-space:nowrap;">{{ fr.value }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ scene4 }}" hint-placeholder-val="{{ false }}">
+          <div style="animation:xg-scenein 360ms cubic-bezier(0.2,0.8,0.2,1) both, xg-sceneout 360ms linear 5140ms both;position:absolute;inset:0;display:flex;align-items:flex-end;gap:30px;">
+            <div style="flex:1;min-width:0;height:156px;display:flex;align-items:flex-end;gap:14px;border-bottom:2.5px solid var(--black);padding-bottom:0;">
+              <sc-for list="{{ bars }}" as="b" hint-placeholder-count="4">
+                <div style="flex:1;min-width:0;display:flex;align-items:flex-end;gap:5px;height:100%;">
+                  <span style="flex:1;height:{{ b.ventas }};border:2.5px solid var(--black);border-bottom:none;border-radius:8px 8px 0 0;background:var(--green);transform-origin:bottom center;animation:xg-bargrow 480ms cubic-bezier(0.2,0.8,0.2,1) {{ b.delay }} both;"></span>
+                  <span style="flex:1;height:{{ b.gastos }};border:2.5px solid var(--black);border-bottom:none;border-radius:8px 8px 0 0;background:var(--red);transform-origin:bottom center;animation:xg-bargrow 480ms cubic-bezier(0.2,0.8,0.2,1) {{ b.delay2 }} both;"></span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="flex:none;width:168px;animation:xg-badgepop 5.5s cubic-bezier(0.2,0.8,0.2,1) infinite;">
+              <div style="border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:5px 5px 0 var(--black);padding:18px;">
+                <div style="font-size:10px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Utilidad de hoy</div>
+                <div ref="{{ ref4 }}" style="font-size:28px;font-weight:800;letter-spacing:-0.035em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:6px;">$0.00</div>
+                <div style="display:flex;flex-direction:column;gap:7px;margin-top:14px;">
+                  <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--black);"><span style="width:14px;height:10px;flex:none;border:2px solid var(--black);border-radius:3px;background:var(--green);"></span>Ventas</span>
+                  <span style="display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--black);"><span style="width:14px;height:10px;flex:none;border:2px solid var(--black);border-radius:3px;background:var(--red);"></span>Gastos</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div style="padding:56px 48px;display:flex;align-items:center;justify-content:center;min-height:100vh;box-sizing:border-box;">
+    <div style="width:100%;max-width:460px;">
+
+      <sc-if value="{{ isLogin }}" hint-placeholder-val="{{ true }}">
+        <div style="animation:xg-reveal 160ms cubic-bezier(0.2,0.8,0.2,1) both;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:36px;">
+          <h2 style="margin:0;font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Entra a tu portal</h2>
+          <p style="margin:8px 0 28px;font-size:15px;font-weight:600;color:var(--text-muted);">Aquí ves lo que capturan tus operadores.</p>
+
+          <div style="margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Correo</div>
+            <input type="email" value="pedro@taqueriadonpedro.mx" style="width:100%;box-sizing:border-box;height:52px;padding:0 16px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);outline:none;font-size:16px;font-weight:600;color:var(--ink);">
+          </div>
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:5px;">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Contraseña</span>
+              <span role="link" tabindex="0" onClick="{{ goRecover }}" style="font-size:13px;font-weight:700;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:2px;">Olvidé mi contraseña</span>
+            </div>
+            <input type="password" value="············" style="width:100%;box-sizing:border-box;height:52px;padding:0 16px;border:{{ pwBorder }};border-radius:12px;background:var(--offwhite);outline:none;font-size:16px;font-weight:600;color:var(--ink);">
+          </div>
+
+          <sc-if value="{{ showAuthError }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:11px;border:2px solid var(--black);border-radius:12px;padding:12px 14px;background:var(--red-soft);margin-bottom:16px;">
+              <span style="flex:none;color:var(--red-text);display:grid;place-items:center;">
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+              </span>
+              <span style="font-size:14px;font-weight:700;color:var(--black);">Tu correo o contraseña no coinciden. Inténtalo otra vez.</span>
+            </div>
+          </sc-if>
+
+          <button type="button" data-press="1" onClick="{{ goOnboarding }}" style="width:100%;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">{{ loginCta }}</button>
+
+          <div style="display:flex;align-items:center;gap:12px;margin:22px 0;">
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">O</span>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+
+          <button type="button" data-press="1" style="width:100%;height:52px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;color:var(--black);cursor:pointer;" style-active="box-shadow:1px 1px 0 var(--black);">Entrar con un código de dispositivo</button>
+
+          <div style="margin-top:24px;padding-top:20px;border-top:2px solid var(--gray-200);font-size:15px;font-weight:600;color:var(--text-muted);">
+            ¿Todavía no tienes cuenta?
+            <span role="link" tabindex="0" onClick="{{ goSignup }}" style="font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Crea tu negocio</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSignup }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:xg-reveal 160ms cubic-bezier(0.2,0.8,0.2,1) both;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:36px;">
+          <h2 style="margin:0;font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Crea tu negocio</h2>
+          <p style="margin:8px 0 28px;font-size:15px;font-weight:600;color:var(--text-muted);">Tres datos y empiezas a registrar hoy mismo.</p>
+          <sc-for list="{{ signupFields }}" as="f" hint-placeholder-count="4">
+            <div style="margin-bottom:14px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">{{ f.label }}</div>
+              <input type="{{ f.type }}" placeholder="{{ f.placeholder }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 16px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);outline:none;font-size:16px;font-weight:600;color:var(--ink);">
+            </div>
+          </sc-for>
+          <div style="display:flex;align-items:flex-start;gap:11px;margin:18px 0 22px;">
+            <span role="checkbox" tabindex="0" aria-checked="true" style="width:26px;height:26px;flex:none;border:2px solid var(--black);border-radius:8px;background:var(--yellow);display:grid;place-items:center;cursor:pointer;color:var(--black);">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            <span style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">Acepto el aviso de privacidad y los términos de uso de Xangarro.</span>
+          </div>
+          <button type="button" data-press="1" onClick="{{ goOnboarding }}" style="width:100%;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Crear mi negocio</button>
+          <div style="margin-top:24px;padding-top:20px;border-top:2px solid var(--gray-200);font-size:15px;font-weight:600;color:var(--text-muted);">
+            ¿Ya tienes cuenta?
+            <span role="link" tabindex="0" onClick="{{ goLogin }}" style="font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Entra aquí</span>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRecover }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:xg-reveal 160ms cubic-bezier(0.2,0.8,0.2,1) both;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:36px;">
+          <div role="link" tabindex="0" onClick="{{ goLogin }}" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--black);cursor:pointer;margin-bottom:20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+            Volver
+          </div>
+          <h2 style="margin:0;font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Recupera tu acceso</h2>
+          <p style="margin:8px 0 28px;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Te enviamos un código de 6 dígitos al correo con el que creaste tu negocio.</p>
+          <div style="margin-bottom:22px;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Correo</div>
+            <input type="email" placeholder="tucorreo@ejemplo.mx" style="width:100%;box-sizing:border-box;height:52px;padding:0 16px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);outline:none;font-size:16px;font-weight:600;color:var(--ink);">
+          </div>
+          <button type="button" data-press="1" onClick="{{ goCode }}" style="width:100%;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Enviar código</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isCode }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:xg-reveal 160ms cubic-bezier(0.2,0.8,0.2,1) both;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:36px;">
+          <h2 style="margin:0;font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Escribe tu código</h2>
+          <p style="margin:8px 0 28px;font-size:15px;font-weight:600;color:var(--text-muted);">Lo enviamos a pedro@taqueriadonpedro.mx hace un momento.</p>
+          <div style="display:flex;gap:10px;margin-bottom:22px;">
+            <sc-for list="{{ codeBoxes }}" as="c" hint-placeholder-count="6">
+              <span style="flex:1;height:64px;display:grid;place-items:center;border:{{ c.border }};border-radius:12px;background:{{ c.bg }};box-shadow:3px 3px 0 var(--black);font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ c.ch }}</span>
+            </sc-for>
+          </div>
+          <button type="button" data-press="1" onClick="{{ goOnboarding }}" style="width:100%;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Confirmar</button>
+          <div style="margin-top:20px;font-size:14px;font-weight:600;color:var(--text-muted);">Puedes pedir otro código en 00:48.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isOnboarding }}" hint-placeholder-val="{{ false }}">
+        <div style="animation:xg-reveal 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px;">
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Paso {{ stepNum }} de 4</span>
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ stepName }}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:22px;">
+            <sc-for list="{{ stepBars }}" as="s" hint-placeholder-count="4">
+              <span style="flex:1;height:14px;border:2px solid var(--black);border-radius:8px;background:{{ s.bg }}"></span>
+            </sc-for>
+          </div>
+
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:36px;">
+            <h2 style="margin:0;font-size:28px;line-height:1.12;font-weight:800;letter-spacing:-0.03em;color:var(--black);text-wrap:pretty;">{{ stepTitle }}</h2>
+            <p style="margin:8px 0 26px;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ stepBody }}</p>
+
+            <sc-if value="{{ stepFields }}" hint-placeholder-val="{{ true }}">
+              <div>
+                <sc-for list="{{ stepFields }}" as="f" hint-placeholder-count="3">
+                  <div style="margin-bottom:14px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">{{ f.label }}</div>
+                    <input type="text" placeholder="{{ f.placeholder }}" style="width:100%;box-sizing:border-box;height:52px;padding:0 16px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);outline:none;font-size:16px;font-weight:600;color:var(--ink);">
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ stepCards }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <sc-for list="{{ stepCards }}" as="c" hint-placeholder-count="4">
+                  <div role="radio" tabindex="0" aria-checked="{{ c.picked }}" onClick="{{ c.pick }}" data-press="1" style="display:flex;align-items:flex-start;gap:13px;border:2px solid var(--black);border-radius:14px;padding:16px;cursor:pointer;background:{{ c.bg }};box-shadow:{{ c.shadow }}" style-active="box-shadow:1px 1px 0 var(--black);">
+                    <span style="width:26px;height:26px;flex:none;margin-top:1px;border:2px solid var(--black);border-radius:9999px;background:{{ c.dotBg }};display:grid;place-items:center;color:var(--black);">
+                      <sc-if value="{{ c.picked }}" hint-placeholder-val="{{ false }}">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                      </sc-if>
+                    </span>
+                    <div style="min-width:0;">
+                      <div style="font-size:16px;font-weight:800;color:var(--black);">{{ c.title }}</div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;text-wrap:pretty;">{{ c.body }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ stepPair }}" hint-placeholder-val="{{ false }}">
+              <div>
+                <div style="display:flex;gap:8px;justify-content:center;margin-bottom:18px;">
+                  <sc-for list="{{ pairCode }}" as="d" hint-placeholder-count="6">
+                    <span style="width:52px;height:66px;display:grid;place-items:center;border:2.5px solid var(--black);border-radius:12px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ d.ch }}</span>
+                  </sc-for>
+                </div>
+                <div style="border:2px solid var(--black);border-radius:14px;padding:16px;background:var(--offwhite);">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Cómo se usa</div>
+                  <div style="display:flex;flex-direction:column;gap:9px;">
+                    <sc-for list="{{ pairSteps }}" as="ps" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:flex-start;gap:11px;">
+                        <span style="width:24px;height:24px;flex:none;border:2px solid var(--black);border-radius:8px;background:var(--white);display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--black);">{{ ps.n }}</span>
+                        <span style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ ps.label }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ stepDone }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px;">
+                <sc-for list="{{ doneChecks }}" as="d" hint-placeholder-count="4">
+                  <div style="display:flex;align-items:center;gap:12px;border:2px solid var(--black);border-radius:12px;padding:13px 15px;background:var(--green-soft);">
+                    <span style="width:26px;height:26px;flex:none;border:2px solid var(--black);border-radius:8px;background:var(--white);display:grid;place-items:center;color:var(--green-text);">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                    </span>
+                    <span style="font-size:15px;font-weight:700;color:var(--black);">{{ d.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="display:flex;gap:10px;margin-top:26px;flex-wrap:wrap;">
+              <sc-if value="{{ canGoBack }}" hint-placeholder-val="{{ false }}">
+                <button type="button" data-press="1" onClick="{{ prevStep }}" style="flex:none;height:56px;padding:0 22px;background:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);">Atrás</button>
+              </sc-if>
+              <sc-if value="{{ isLastStep }}" hint-placeholder-val="{{ false }}">
+                <a href="Xangarro%20Portal%20-%20Inicio.dc.html" data-press="1" style="flex:1;min-width:180px;height:56px;display:grid;place-items:center;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--black);text-decoration:none;cursor:pointer;" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Ir a mi portal</a>
+              </sc-if>
+              <sc-if value="{{ showNext }}" hint-placeholder-val="{{ true }}">
+                <button type="button" data-press="1" onClick="{{ nextStep }}" style="flex:1;min-width:180px;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;color:var(--black);" style-active="box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">{{ nextLabel }}</button>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="margin-top:18px;text-align:center;">
+            <span role="link" tabindex="0" onClick="{{ goLogin }}" style="font-size:14px;font-weight:700;color:var(--text-muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Configurar después</span>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:90;width:250px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Pantalla</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ screenOptions }}" as="s" hint-placeholder-count="5">
+              <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado del formulario</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ formOptions }}" as="f" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ f.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ f.bg }}">{{ f.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;login&quot;,&quot;signup&quot;,&quot;recover&quot;,&quot;code&quot;,&quot;onboarding&quot;],&quot;default&quot;:&quot;login&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startForm&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;error&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { screen: null, formState: null, step: 0, mode: 'local', panelOpen: false, scene: 0, paused: false, stageScale: 1 };
+
+  constructor(props) {
+    super(props);
+    this.ref1 = React.createRef();
+    this.ref2 = React.createRef();
+    this.ref4 = React.createRef();
+    this.stageRef = React.createRef();
+  }
+
+  componentDidMount() {
+    this._ro = new ResizeObserver(() => {
+      const el = this.stageRef.current;
+      if (!el) return;
+      const scale = Math.max(0.45, Math.min(1.7, el.clientWidth / 460, el.clientHeight / 170));
+      if (Math.abs(scale - this.state.stageScale) > 0.005) this.setState({ stageScale: scale });
+    });
+    if (this.stageRef.current) this._ro.observe(this.stageRef.current);
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const write = (ref, v) => { if (ref.current) ref.current.textContent = this.money(v); };
+    this._focus = (e) => {
+      if (!e.target || e.target.tagName !== 'INPUT') return;
+      this.setState({ paused: e.type === 'focusin' });
+    };
+    document.addEventListener('focusin', this._focus);
+    document.addEventListener('focusout', this._focus);
+    if (reduce) {
+      this.setState({ scene: 3 });
+      write(this.ref1, 4850); write(this.ref2, 4850); write(this.ref4, 3610);
+      return;
+    }
+    const DURS = [6000, 3500, 5000, 5500];
+    const TOTAL = 20000;
+    let last = performance.now();
+    let el = 0;
+    const tick = (now) => {
+      const dt = now - last;
+      last = now;
+      if (!this.state.paused) el = (el + dt) % TOTAL;
+      let t = el, scene = 0;
+      while (scene < 3 && t >= DURS[scene]) { t -= DURS[scene]; scene++; }
+      if (scene !== this.state.scene) this.setState({ scene });
+      const p = t / DURS[scene];
+      const ramp = (a, b) => Math.max(0, Math.min(1, (p - a) / (b - a)));
+      const ease = (x) => 1 - Math.pow(1 - x, 3);
+      if (scene === 0) write(this.ref1, 4705 + 145 * ramp(0.66, 0.86));
+      if (scene === 1) write(this.ref2, 4850 * ease(ramp(0.14, 0.82)));
+      if (scene === 3) write(this.ref4, 3610 * ease(ramp(0.42, 0.9)));
+      this._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+  }
+  componentWillUnmount() {
+    if (this._ro) this._ro.disconnect();
+    if (this._raf) cancelAnimationFrame(this._raf);
+    document.removeEventListener('focusin', this._focus);
+    document.removeEventListener('focusout', this._focus);
+  }
+
+  money(n) {
+    return '$' + Math.round(n).toLocaleString('es-MX') + '.00';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const screen = st.screen ?? this.props.startScreen ?? 'login';
+    const formState = st.formState ?? this.props.startForm ?? 'normal';
+    const step = st.step;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+
+    const steps = [
+      {
+        name: 'Negocio',
+        title: '¿Cómo se llama tu negocio?',
+        body: 'Así lo verás en tus estados financieros y en los comprobantes que compartas.',
+        fields: [
+          { label: 'Nombre del negocio', placeholder: 'Taquería Don Pedro' },
+          { label: 'Giro', placeholder: 'Alimentos y bebidas' },
+          { label: 'Ciudad', placeholder: 'Guadalajara, Jalisco' }
+        ]
+      },
+      {
+        name: 'Datos fiscales',
+        title: 'Tus datos fiscales',
+        body: 'Los usamos para armar tus estados conforme a NIF. Puedes completarlos después.',
+        fields: [
+          { label: 'RFC', placeholder: 'XAXX010101000' },
+          { label: 'Régimen', placeholder: 'RESICO · Persona física' },
+          { label: 'Inicio de tu ejercicio', placeholder: '01/ene/2026' }
+        ]
+      },
+      {
+        name: 'Sincronización',
+        title: '¿Dónde quieres guardar tus datos?',
+        body: 'Todo funciona sin internet. Esto solo define a dónde se copia lo que capturas.',
+        cards: [
+          { key: 'local', title: 'Solo este dispositivo', body: 'Nada sale de aquí. Ideal si trabajas tú solo.' },
+          { key: 'nube', title: 'En la nube', body: 'Tus operadores y tú comparten los mismos números al instante.' },
+          { key: 'servidor', title: 'Conectar a un servidor local', body: 'Si alguien de tu equipo ya es el servidor de la red.' },
+          { key: 'ser', title: 'Ser el servidor local', body: 'Este equipo guarda todo y los teléfonos se conectan a él.' }
+        ]
+      },
+      {
+        name: 'Dispositivo',
+        title: 'Vincula el primer teléfono',
+        body: 'Escribe este código en la app del operador. Vence en 10 minutos.',
+        pair: true
+      },
+      {
+        name: 'Listo',
+        title: '¡Cachink! Tu negocio ya está listo',
+        body: 'En cuanto llegue la primera venta verás tu resumen y tus estados financieros armados.',
+        done: true
+      }
+    ];
+    const cur = steps[Math.min(step, steps.length - 1)];
+    const isLast = step >= steps.length - 1;
+
+    return {
+      ref1: this.ref1, ref2: this.ref2, ref4: this.ref4,
+      stageRef: this.stageRef, stageScale: this.state.stageScale,
+      scene1: st.scene === 0, scene2: st.scene === 1, scene3: st.scene === 2, scene4: st.scene === 3,
+      sceneCaption: ['Captura en el mostrador', 'Cada venta, al instante', 'Del ticket al estado', 'Tus números del día'][st.scene],
+      stageState: st.paused ? 'paused' : 'running',
+      phoneRows: [{ label: 'Gringa ×2' }, { label: 'Refresco ×1' }],
+      stmtRows: [
+        { label: 'Taco al pastor ×3', value: '$75.00' },
+        { label: 'Combo familiar', value: '$620.00' }
+      ],
+      coins: [
+        { left: '14px', bottom: '0px', size: '70px', font: '29px', delay: '0ms', bg: 'var(--yellow-soft)' },
+        { left: '70px', bottom: '50px', size: '52px', font: '22px', delay: '420ms', bg: 'var(--yellow-soft)' },
+        { left: '42px', bottom: '92px', size: '40px', font: '17px', delay: '840ms', bg: 'var(--yellow-soft)' }
+      ],
+      sparkles: [
+        { left: '106px', bottom: '30px', delay: '300ms' },
+        { left: '2px', bottom: '86px', delay: '620ms' },
+        { left: '120px', bottom: '126px', delay: '900ms' }
+      ],
+      ticketLines: [
+        { width: '100%', color: 'var(--gray-200)', delay: '300ms' },
+        { width: '78%', color: 'var(--gray-200)', delay: '620ms' },
+        { width: '92%', color: 'var(--gray-200)', delay: '940ms' }
+      ],
+      foldRows: [
+        { label: 'Ingresos', value: '$68,420.00', color: 'var(--green-text)' },
+        { label: 'Egresos', value: '$53,222.38', color: 'var(--red-text)' },
+        { label: 'Utilidad', value: '$15,197.62', color: 'var(--black)' }
+      ],
+      bars: [
+        { ventas: '58%', gastos: '34%', delay: '260ms', delay2: '360ms' },
+        { ventas: '74%', gastos: '42%', delay: '460ms', delay2: '560ms' },
+        { ventas: '46%', gastos: '30%', delay: '660ms', delay2: '760ms' },
+        { ventas: '88%', gastos: '38%', delay: '860ms', delay2: '960ms' }
+      ],
+      signupFields: [
+        { label: 'Tu nombre', placeholder: 'Pedro Ramírez', type: 'text' },
+        { label: 'Nombre del negocio', placeholder: 'Taquería Don Pedro', type: 'text' },
+        { label: 'Correo', placeholder: 'tucorreo@ejemplo.mx', type: 'email' },
+        { label: 'Contraseña', placeholder: 'Mínimo 8 caracteres', type: 'password' }
+      ],
+      codeBoxes: '418'.padEnd(6, ' ').split('').map((ch, i) => ({
+        ch: ch.trim() === '' ? '' : ch,
+        bg: i < 3 ? 'var(--white)' : 'var(--offwhite)',
+        border: i === 3 ? '2.5px solid var(--black)' : '2px solid var(--black)'
+      })),
+      pairCode: 'TD491K'.split('').map(ch => ({ ch })),
+      pairSteps: [
+        { n: '1', label: 'Pide a tu operador que abra Xangarro en su teléfono.' },
+        { n: '2', label: 'En la pantalla de inicio elige "Tengo un código".' },
+        { n: '3', label: 'Escribe estos 6 caracteres y listo: ya puede cobrar.' }
+      ],
+      doneChecks: [
+        { label: 'Negocio creado' },
+        { label: 'Datos fiscales guardados' },
+        { label: 'Modo de sincronización elegido' },
+        { label: 'Primer dispositivo vinculado' }
+      ],
+      stepNum: String(Math.min(step + 1, 4)),
+      stepName: cur.name,
+      stepTitle: cur.title,
+      stepBody: cur.body,
+      stepFields: cur.fields || null,
+      stepCards: cur.cards ? cur.cards.map(c => {
+        const picked = (st.mode || 'local') === c.key;
+        return {
+          title: c.title, body: c.body, picked,
+          bg: picked ? 'var(--yellow-soft)' : 'var(--white)',
+          dotBg: picked ? 'var(--yellow)' : 'var(--white)',
+          shadow: picked ? '3px 3px 0 var(--black)' : 'none',
+          pick: set('mode', c.key)
+        };
+      }) : null,
+      stepPair: !!cur.pair,
+      stepDone: !!cur.done,
+      stepBars: [0, 1, 2, 3].map(i => ({ bg: i <= Math.min(step, 3) ? 'var(--yellow)' : 'var(--gray-100)' })),
+      canGoBack: step > 0 && !isLast,
+      isLastStep: isLast,
+      showNext: !isLast,
+      nextLabel: step === 3 ? 'Ya lo vinculé' : 'Continuar',
+      nextStep: () => this.setState({ step: Math.min(step + 1, steps.length - 1) }),
+      prevStep: () => this.setState({ step: Math.max(step - 1, 0) }),
+      isLogin: screen === 'login', isSignup: screen === 'signup',
+      isRecover: screen === 'recover', isCode: screen === 'code',
+      isOnboarding: screen === 'onboarding',
+      goLogin: () => this.setState({ screen: 'login', formState: 'normal' }),
+      goSignup: set('screen', 'signup'),
+      goRecover: set('screen', 'recover'),
+      goCode: set('screen', 'code'),
+      goOnboarding: () => this.setState({ screen: 'onboarding', step: 0 }),
+      showAuthError: formState === 'error',
+      pwBorder: formState === 'error' ? '2.5px solid var(--red)' : '2px solid var(--black)',
+      loginCta: formState === 'loading' ? 'Entrando…' : 'Entrar',
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen }),
+      screenOptions: [['login', 'Entrar'], ['signup', 'Crear negocio'], ['recover', 'Recuperar acceso'], ['code', 'Código de 6 dígitos'], ['onboarding', 'Onboarding']]
+        .map(([k, l]) => ({ label: l, bg: on(screen === k), pick: set('screen', k) })),
+      formOptions: [['normal', 'Normal'], ['loading', 'Enviando'], ['error', 'Credenciales inválidas']]
+        .map(([k, l]) => ({ label: l, bg: on(formState === k), pick: set('formState', k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>
