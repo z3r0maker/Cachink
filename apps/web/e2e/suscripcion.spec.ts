@@ -60,6 +60,7 @@ test.describe('past due, seen by a viewer', () => {
     page,
   }) => {
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill('pago-1234');
     await page.getByRole('button', { name: 'Entrar' }).click();

@@ -71,6 +71,7 @@ test.describe('pagination', () => {
 
   test('23 ventas are 10 per page, and a filter goes back to page 1', async ({ page }) => {
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(email);
     await page.getByTestId('login-password').fill('paginas-1');
     await page.getByRole('button', { name: 'Entrar' }).click();

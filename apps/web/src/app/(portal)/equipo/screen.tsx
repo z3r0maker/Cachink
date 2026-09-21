@@ -114,9 +114,11 @@ function Encabezado(props: {
 export function EquipoScreen({
   initialTab,
   data,
+  registerUrl,
 }: {
   readonly initialTab: EquipoTab;
   readonly data: EquipoData | null;
+  readonly registerUrl: string;
 }) {
   const [tab, setTab] = useState<string>(initialTab);
   const isOperadores = tab === 'operadores';
@@ -140,6 +142,7 @@ export function EquipoScreen({
           initial={data?.codigo ?? null}
           lleno={vinculados >= deviceLimit}
           limit={deviceLimit}
+          registerUrl={registerUrl}
         />
       ) : null}
       <Body data={data} isOperadores={isOperadores} mayWrite={mayWrite} />

@@ -55,6 +55,15 @@ function mensaje(lleno: boolean, limit: number, live: LiveCode | null): string {
   return `Escríbelo en el teléfono del operador. Vence ${remaining(live.expiresAt)}.`;
 }
 
+/** The handoff the code alone never had: where the person at the counter types it. */
+function DondeCapturar({ url }: { readonly url: string }) {
+  return (
+    <p style={{ margin: '10px 0 0' }} data-testid="pairing-register-url">
+      En la caja: abre <strong>{url}</strong> y captura el código con el correo del dueño.
+    </p>
+  );
+}
+
 /** The address field and the send, with its own pending state. */
 function EnviarCorreo({ onEnviado }: { readonly onEnviado: (to: string) => void }) {
   const [correo, setCorreo] = useState('');
@@ -81,20 +90,50 @@ function EnviarCorreo({ onEnviado }: { readonly onEnviado: (to: string) => void 
   );
 }
 
+/** Generate + send-by-mail, with the send's own pending and sent states. */
+function Acciones({
+  live,
+  pending,
+  onGenerar,
+}: {
+  readonly live: LiveCode | null;
+  readonly pending: boolean;
+  readonly onGenerar: () => void;
+}) {
+  const [enviado, setEnviado] = useState<string | null>(null);
+  return (
+    <>
+      <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+        <Button variant="dark" onClick={onGenerar} disabled={pending}>
+          {pending ? 'Generando…' : live === null ? 'Generar código' : 'Generar otro'}
+        </Button>
+      </div>
+      {live === null ? null : <EnviarCorreo onEnviado={setEnviado} />}
+      {enviado === null ? null : (
+        <p role="status" className={enviadoLine}>
+          Enviado a {enviado}.
+        </p>
+      )}
+    </>
+  );
+}
+
 export function PairingPanel({
   initial,
   lleno,
   limit,
+  registerUrl,
 }: {
   readonly initial: LiveCode | null;
   /** Every device slot is in use: activation would refuse (NO_DEVICE_SLOTS). */
   readonly lleno: boolean;
   readonly limit: number;
+  /** Where the code is typed: the register's own door, so the handoff is complete. */
+  readonly registerUrl: string;
 }) {
   const [live, setLive] = useState<LiveCode | null>(initial);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
-  const [enviado, setEnviado] = useState<string | null>(null);
 
   const generate = () =>
     startTransition(async () => {
@@ -109,18 +148,9 @@ export function PairingPanel({
       <strong className={panelTitle}>Código de vinculación activo</strong>
       <p style={{ margin: '8px 0 0', fontWeight: 600 }}>{mensaje(lleno, limit, live)}</p>
       {live === null ? null : <CodeBoxes code={live.code} />}
+      {live === null ? null : <DondeCapturar url={registerUrl} />}
       {error === null ? null : <p role="alert">{error}</p>}
-      <div style={{ marginTop: 18, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-        <Button variant="dark" onClick={generate} disabled={pending}>
-          {pending ? 'Generando…' : live === null ? 'Generar código' : 'Generar otro'}
-        </Button>
-      </div>
-      {live === null ? null : <EnviarCorreo onEnviado={setEnviado} />}
-      {enviado === null ? null : (
-        <p role="status" className={enviadoLine}>
-          Enviado a {enviado}.
-        </p>
-      )}
+      <Acciones live={live} pending={pending} onGenerar={generate} />
     </Card>
   );
 }
