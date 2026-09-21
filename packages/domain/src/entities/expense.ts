@@ -8,7 +8,13 @@
  */
 
 import { z } from 'zod';
-import type { BusinessId, CajaTurnoId, ExpenseId, RecurringExpenseId } from '../ids/index.js';
+import type {
+  BusinessId,
+  CajaTurnoId,
+  EmployeeId,
+  ExpenseId,
+  RecurringExpenseId,
+} from '../ids/index.js';
 import { ulidField } from './_ulid-field.js';
 import { auditSchema } from './_audit.js';
 import { isoDateField, moneyField } from './_fields.js';
@@ -35,6 +41,8 @@ export const ExpenseSchema = z
     categoria: ExpenseCategoryEnum,
     monto: moneyField,
     proveedor: z.string().min(1).max(120).nullable(),
+    /** Payroll payments name their employee (O-26); null otherwise. */
+    empleadoId: ulidField<EmployeeId>().nullable().default(null),
     gastoRecurrenteId: ulidField<RecurringExpenseId>().nullable(),
     /** The turno the gasto came out of (ADR-074); null = outside any turno. */
     cajaTurnoId: ulidField<CajaTurnoId>().nullable().default(null),
@@ -50,6 +58,8 @@ export const NewExpenseSchema = z.object({
   monto: moneyField,
   /** The turno the gasto came out of (ADR-074). */
   cajaTurnoId: ulidField<CajaTurnoId>().nullish(),
+  /** Payroll payments name their employee (O-26). */
+  empleadoId: ulidField<EmployeeId>().nullish(),
   proveedor: z.string().min(1).max(120).optional(),
   gastoRecurrenteId: ulidField<RecurringExpenseId>().optional(),
   businessId: ulidField<BusinessId>(),

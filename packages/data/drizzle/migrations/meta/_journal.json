@@ -71,6 +71,13 @@
       "when": 1789751421845,
       "tag": "0009_xangarro_sync_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1789955974522,
+      "tag": "0010_expenses_empleado",
+      "breakpoints": true
     }
   ]
 }

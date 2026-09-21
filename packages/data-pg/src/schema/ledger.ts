@@ -59,6 +59,8 @@ export const expenses = pgTable('expenses', {
   /** Same key as the device (`monto`); the column is `monto_centavos`. */
   monto: centavos('monto_centavos').notNull(),
   proveedor: text('proveedor'),
+  /** Payroll payments name their employee (O-26); null otherwise. */
+  empleadoId: text('empleado_id'),
   gastoRecurrenteId: text('gasto_recurrente_id'),
   /** The turno the gasto came out of (ADR-074). */
   cajaTurnoId: text('caja_turno_id'),

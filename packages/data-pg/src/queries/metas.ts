@@ -1,4 +1,4 @@
-import { desc, eq, isNotNull, isNull } from 'drizzle-orm';
+import { desc, eq, isNotNull, isNull, sql } from 'drizzle-orm';
 
 import type { Meta, MotivoMeta, NivelMeta, ObjetivoMeta } from '@xangarro/domain';
 
@@ -90,4 +90,20 @@ export async function celebrada(tx: Tx, businessId: string, clave: string): Prom
 export async function clavesCelebradas(tx: Tx): Promise<readonly string[]> {
   const rows = await tx.select({ clave: celebraciones.clave }).from(celebraciones);
   return rows.map((r) => r.clave);
+}
+
+/** An employee's recent payroll payments, by the `empleado_id` link (P-12). */
+export async function pagosDeEmpleado(
+  tx: Tx,
+  empleadoId: string,
+  limite = 5,
+): Promise<readonly { id: string; fecha: string; concepto: string; monto: bigint }[]> {
+  const rows = await tx.execute<{ id: string; fecha: string; concepto: string; monto: bigint }>(
+    sql`SELECT id, left(fecha, 10) AS fecha, concepto, monto_centavos AS monto
+          FROM expenses
+         WHERE empleado_id = ${empleadoId} AND deleted_at IS NULL
+         ORDER BY fecha DESC, created_at DESC
+         LIMIT ${limite}`,
+  );
+  return rows.map((r) => ({ ...r, fecha: r.fecha.slice(0, 10), monto: BigInt(r.monto) }));
 }

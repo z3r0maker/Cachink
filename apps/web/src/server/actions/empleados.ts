@@ -11,11 +11,13 @@ import {
   type BusinessId,
   type EmployeeId,
 } from '@xangarro/domain';
+import { pagosDeEmpleado } from '@xangarro/data-pg';
 import { revalidatePath } from 'next/cache';
 
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
+import { readSession } from '../session';
 import { pgEmployeesRepository } from '../repositories/employees';
 
 /**
@@ -73,5 +75,28 @@ export async function darDeBajaEmpleado(id: string): Promise<EmpleadoResult> {
     return { ok: true };
   } catch (error) {
     return failure(error, 'darDeBajaEmpleado');
+  }
+}
+
+/**
+ * P-12's employee drawer: the recent payroll payments, by the `empleado_id`
+ * link (O-26) — never by matching «Nómina {nombre}», which a rename breaks.
+ */
+export type PagosEmpleadoResult =
+  | {
+      ok: true;
+      pagos: readonly { id: string; fecha: string; concepto: string; monto: bigint }[];
+    }
+  | { ok: false; message: string };
+
+export async function pagosDelEmpleado(empleadoId: string): Promise<PagosEmpleadoResult> {
+  try {
+    const session = await readSession();
+    if (session === null) return { ok: false, message: 'Inicia sesión para continuar.' };
+    const pagos = await withTenant(session.business_id, (tx) => pagosDeEmpleado(tx, empleadoId));
+    return { ok: true, pagos };
+  } catch (error) {
+    reportError(error, { endpoint: 'pagosDelEmpleado' });
+    return { ok: false, message: 'No pudimos leer los pagos. Intenta de nuevo.' };
   }
 }

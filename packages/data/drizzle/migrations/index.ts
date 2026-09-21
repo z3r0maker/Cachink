@@ -21,6 +21,7 @@ import { migration0006Sql } from './0006_capture_client.js';
 import { migration0007Sql } from './0007_operator_only.js';
 import { migration0008Sql } from './0008_stock_baseline.js';
 import { migration0009Sql } from './0009_xangarro_sync_tables.js';
+import { migration0010Sql } from './0010_expenses_empleado.js';
 
 export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze({
   '0000_initial': migration0000Sql,
@@ -33,6 +34,7 @@ export const migrationSqlByTag: Readonly<Record<string, string>> = Object.freeze
   '0007_operator_only': migration0007Sql,
   '0008_stock_baseline': migration0008Sql,
   '0009_xangarro_sync_tables': migration0009Sql,
+  '0010_expenses_empleado': migration0010Sql,
 });
 
 export const migrationsBundle = Object.freeze({
@@ -48,6 +50,7 @@ export const migrationsBundle = Object.freeze({
     m0007: migration0007Sql,
     m0008: migration0008Sql,
     m0009: migration0009Sql,
+    m0010: migration0010Sql,
   }),
 });
 

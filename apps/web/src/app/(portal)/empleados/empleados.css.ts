@@ -16,3 +16,23 @@ export const pageSubtitle = style({
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
 });
+
+export const pagoRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  padding: '10px 0',
+  borderBottom: `1px solid ${colors.gray100}`,
+});
+
+export const pagoFecha = style({
+  display: 'block',
+  fontSize: portalFontSizes.xs,
+  color: colors.gray600,
+});
+
+export const pagoMonto = style({
+  marginLeft: 'auto',
+  fontWeight: 700,
+  fontVariantNumeric: 'tabular-nums',
+});

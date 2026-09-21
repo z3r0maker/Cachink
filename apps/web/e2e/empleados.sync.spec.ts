@@ -48,3 +48,14 @@ test('an employee is created, edited and dado de baja, each change logged', asyn
   await expect(page.locator('main').getByText(nombre)).toHaveCount(0);
   expect(await row()).toMatchObject({ baja: true, logged: 3 });
 });
+
+/** O-26/P-12: an employee's payments, found through the empleado_id link. */
+test('«Ver pagos» lists the payroll payments linked to the employee', async ({ page }) => {
+  await page.goto('/empleados');
+  await page.getByRole('button', { name: 'Ver los pagos de Rosa Medina' }).click();
+  const drawer = page.getByRole('dialog');
+  await expect(drawer.getByText('Pagos a Rosa Medina')).toBeVisible();
+  // The seed's payroll gastos carry no empleado_id yet — the empty state is
+  // the honest one until the phone writes the link.
+  await expect(drawer.getByText(/Todavía no hay pagos ligados a Rosa Medina/)).toBeVisible();
+});

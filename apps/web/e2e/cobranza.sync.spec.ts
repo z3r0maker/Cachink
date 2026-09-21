@@ -18,28 +18,21 @@ test.setTimeout(90_000);
 
 const CLIENTE = 'Doña Mari de la tienda';
 
-// The register stamps its dates on the UTC clock, so after 18:00 in Mexico
-// City its "today" is already tomorrow — a hardcoded «27 de septiembre»
-// failed evenings only (found 2026-09-20). Expect what the app computes.
-const MESES = [
-  'enero',
-  'febrero',
-  'marzo',
-  'abril',
-  'mayo',
-  'junio',
-  'julio',
-  'agosto',
-  'septiembre',
-  'octubre',
-  'noviembre',
-  'diciembre',
-] as const;
-function venceMasSiete(): string {
-  const d = new Date();
-  d.setUTCDate(d.getUTCDate() + 7);
-  return `Vence el ${d.getUTCDate()} de ${MESES[d.getUTCMonth()]}`;
-}
+/** The register dates its fiado sales with the wall clock (America/Mexico_City),
+ * so the vence line moves with the real day — compute it the same way. */
+const venceEn = (dias: number): string => {
+  // Anchor on the register's own day. Its datetimes are UTC-effective today
+  // (F-4's owner action will move them to the business clock; move this with
+  // it), then add days on a noon-UTC date so nothing rolls the result.
+  const hoyCdmx = new Intl.DateTimeFormat('en-CA', { timeZone: 'UTC' }).format(new Date());
+  const d = new Date(`${hoyCdmx}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return new Intl.DateTimeFormat('es-MX', {
+    day: 'numeric',
+    month: 'long',
+    timeZone: 'UTC',
+  }).format(d);
+};
 
 test('a fiado sale opens an account, and an abono settles it oldest first', async ({ page }) => {
   const code = 'CBRANZA2';
@@ -77,7 +70,7 @@ test('a fiado sale opens an account, and an abono settles it oldest first', asyn
   // The account's history: the open ticket and today's abono.
   await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
   await expect(page.getByText('Ya abonó $20.00')).toBeVisible();
-  await expect(page.getByText(venceMasSiete())).toBeVisible();
+  await expect(page.getByText(`Vence el ${venceEn(7)}`)).toBeVisible();
   await expect(page.getByText('Venta fiada V-0001')).toBeVisible();
 
   // The queue carries it up: the fiado ticket pendiente, the abono recorded.
