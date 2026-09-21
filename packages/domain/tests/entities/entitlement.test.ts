@@ -16,7 +16,7 @@ const base: Entitlement = {
   features: ['stock', 'barcode'],
   capabilities: {
     estadosFinancieros: true,
-    informeMensual: false,
+    informeMensual: true,
     permisosPorUsuario: false,
     asesor: 'diario',
     cobrosIntegrados: true,

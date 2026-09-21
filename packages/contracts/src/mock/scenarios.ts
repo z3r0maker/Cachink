@@ -6,7 +6,15 @@
 import type { Entitlement, PlanId } from '@xangarro/domain';
 import { PLAN_LIMITS } from '@xangarro/domain';
 
-export const SCENARIOS = ['xangarro', 'xangarrito', 'grace', 'lapsed', 'revoked', 'flaky'] as const;
+export const SCENARIOS = [
+  'xangarro',
+  'xangarrito',
+  'over-limit',
+  'grace',
+  'lapsed',
+  'revoked',
+  'flaky',
+] as const;
 export type Scenario = (typeof SCENARIOS)[number];
 export const SCENARIO_HEADER = 'x-mock-scenario';
 
@@ -44,7 +52,7 @@ export function entitlementFor(
       operators: limits.operators,
       devices: limits.devices,
       transactionsPerMonth:
-        transactionsPerMonth === undefined ? limits.transactionsPerMonth : transactionsPerMonth,
+        scenario === 'over-limit' ? 5 : (transactionsPerMonth ?? limits.transactionsPerMonth),
       activeProducts: limits.activeProducts,
     },
     features: [...limits.features],

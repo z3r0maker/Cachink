@@ -73,6 +73,18 @@ describe('plan capabilities', () => {
     assert.equal(hasStatements(XANGARRITO), false);
   });
 
+  it('gives Xangarro the contador informe (ADR-090)', () => {
+    const XANGARRO: Capabilities = {
+      estadosFinancieros: true,
+      informeMensual: true,
+      permisosPorUsuario: false,
+      asesor: 'diario',
+      cobrosIntegrados: true,
+    };
+    assert.equal(XANGARRO.informeMensual, true);
+    assert.equal(XANGARRITO.informeMensual, false);
+  });
+
   it('gives Xangarrote statements and the full Asesor', () => {
     assert.equal(hasStatements(XANGARROTE), true);
     assert.equal(asesorShowsDiagnostico(XANGARROTE), true);

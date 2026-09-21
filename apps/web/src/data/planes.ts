@@ -41,7 +41,8 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     features: [
       on('1 usuario'),
       on('Registro de ventas y gastos'),
-      on('Hasta 50 registros al mes'),
+      on('Hasta 300 transacciones al mes'),
+      on('Catálogo de hasta 50 productos'),
       on('Dashboard básico'),
       off('Sin inventario'),
       off('Sin estados financieros NIF'),
@@ -59,10 +60,11 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     emphasis: true,
     features: [
       on('2 usuarios (dueño + empleado)'),
-      on('Inventario ilimitado'),
+      on('Catálogo de hasta 1 000 productos'),
       on('Escaneo de código de barras'),
       on('Estados financieros NIF (B-2, B-3, B-6)'),
-      on('Registros ilimitados'),
+      on('Informe mensual para tu contador'),
+      on('Hasta 10 000 transacciones al mes'),
       on('Reportes de ventas y gastos'),
     ],
   },
@@ -77,6 +79,8 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     emphasis: false,
     features: [
       on('5 usuarios'),
+      on('Hasta 30 000 transacciones al mes'),
+      on('Catálogo de hasta 5 000 productos'),
       on('Multi-sucursal (próximamente)'),
       on('Reportes avanzados y comparativos'),
       on('Exportación a PDF y Excel'),

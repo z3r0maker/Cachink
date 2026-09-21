@@ -589,9 +589,18 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > **Note (ADR-071):** the offline page applies to the Director surface only; the operator register
 > (Track O) has its own offline outbox and must never be replaced by this page.
 
-- [ ] Status · **Blocked by:** P-24
+- [~] Status · **Blocked by:** P-24 (shell landed; nothing in its remainder blocks this)
 - **What:** a minimal service worker that serves a branded "Sin conexión — tus ventas siguen
   guardándose en tus dispositivos" page when navigation fails. No data caching, no writes.
+- Progress: 2026-09-21 · `public/sw.js` (a **module** worker so its one rule,
+  `replaceableNavigation`, is exported and unit-tested from the file itself — the guard
+  keeps a Node import inert) precaches exactly `/sin-conexion.html` and answers failed
+  navigations with it; `/operador` and `/api/*` are never replaced (ADR-071). The page is
+  self-contained inline CSS/SVG — no fonts, no network. Registration lives on the portal
+  layout (`src/shell/offline-register.tsx`), production only; the register never installs
+  it. Unit tests `tests/offline/sw-rule.test.ts` (3 green); e2e
+  `offline-page.spec.ts` (offline → branded page, register not replaced) joins the seeded
+  suite — **not yet run against the seeded DB**, which is all that keeps this `[~]`.
 
 ### App phase 2
 
