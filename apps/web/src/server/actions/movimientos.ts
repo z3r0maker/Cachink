@@ -42,6 +42,7 @@ export async function registrarMovimiento(form: MovimientoForm): Promise<Movimie
       costoUnitCentavos: form.costoUnitCentavos as NewInventoryMovement['costoUnitCentavos'],
       motivo: form.motivo,
       ...(form.nota ? { nota: form.nota } : {}),
+      origen: 'portal',
       businessId,
     };
     await withTenant(businessId, (tx) =>

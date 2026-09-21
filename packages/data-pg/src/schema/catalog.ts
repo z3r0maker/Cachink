@@ -57,6 +57,11 @@ export const inventoryMovements = pgTable('inventory_movements', {
   costoUnitCentavos: centavos('costo_unit_centavos').notNull(),
   motivo: text('motivo').notNull(),
   nota: text('nota'),
+  origen: text('origen', {
+    enum: ['manual', 'portal', 'apertura', 'venta', 'cancelacion', 'conversion'],
+  })
+    .notNull()
+    .default('manual'),
   ...auditColumns,
 });
 

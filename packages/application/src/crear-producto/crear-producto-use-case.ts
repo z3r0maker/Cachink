@@ -18,6 +18,7 @@ import {
   type Product,
 } from '@xangarro/domain';
 import type { InventoryMovementsRepository, ProductsRepository } from '@xangarro/data';
+import type { InventoryMovement } from '@xangarro/domain';
 import type { z } from 'zod';
 
 import type { UseCase } from '../_use-case.js';
@@ -40,6 +41,8 @@ export class CrearProductoUseCase implements UseCase<CrearProductoInput, Product
   constructor(
     private readonly products: Pick<ProductsRepository, 'create'>,
     private readonly movements?: Pick<InventoryMovementsRepository, 'create'>,
+    /** Whose opening stock this is: the portal's (owner) or a phone's (C-12). */
+    private readonly origen: InventoryMovement['origen'] = 'manual',
   ) {}
 
   async execute(input: CrearProductoInput): Promise<Product> {
@@ -60,6 +63,7 @@ export class CrearProductoUseCase implements UseCase<CrearProductoInput, Product
         tipo: 'entrada',
         cantidad: stock,
         costoUnitCentavos: parsed.data.costoUnitCentavos,
+        origen: this.origen,
         motivo: 'Ajuste de inventario',
         businessId: parsed.data.businessId,
       });

@@ -35,6 +35,7 @@ export class InMemoryInventoryMovementsRepository implements InventoryMovementsR
       costoUnitCentavos: input.costoUnitCentavos,
       motivo: input.motivo,
       nota: input.nota ?? null,
+      origen: input.origen ?? 'manual',
       businessId: input.businessId,
       deviceId: this.deviceId,
       createdByUserId: null,

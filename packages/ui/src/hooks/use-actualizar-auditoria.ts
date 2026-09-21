@@ -78,6 +78,7 @@ async function createAdjustmentMovements(
       cantidad: Math.abs(linea.diferencia),
       costoUnitCentavos: 0n,
       motivo: 'Ajuste de inventario',
+      origen: 'manual',
       businessId,
     });
   }

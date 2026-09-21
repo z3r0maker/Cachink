@@ -42,6 +42,7 @@ async function submitMermaItems(
         cantidad: item.cantidad,
         costoUnitCentavos: 0n,
         motivo: 'Merma / daño',
+        origen: 'manual',
         nota: nota ? `${reason}: ${nota}` : reason,
         businessId: businessId as BusinessId,
       });

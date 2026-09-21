@@ -16,11 +16,27 @@ import { isoDateField, moneyField } from './_fields.js';
 export const MovementTypeEnum = z.enum(['entrada', 'salida']);
 export type MovementType = z.infer<typeof MovementTypeEnum>;
 
+/**
+ * Where a movement came from (C-12): who or what wrote it. Defaults to
+ * `manual` so pre-0029 rows and old device payloads parse unchanged;
+ * `usage_counts()` counts only `manual` and `portal` (OQ-5).
+ */
+export const MovementOriginEnum = z.enum([
+  'manual',
+  'portal',
+  'apertura',
+  'venta',
+  'cancelacion',
+  'conversion',
+]);
+export type MovementOriginValue = z.infer<typeof MovementOriginEnum>;
+
 export const EntryReasonEnum = z.enum([
   'Compra a proveedor',
   'Devolución de cliente',
   'Ajuste de inventario',
   'Producción',
+  'Conversión',
   'Otro',
 ]);
 export type EntryReason = z.infer<typeof EntryReasonEnum>;
@@ -31,6 +47,7 @@ export const ExitReasonEnum = z.enum([
   'Merma / daño',
   'Muestra',
   'Ajuste de inventario',
+  'Conversión',
   'Otro',
 ]);
 export type ExitReason = z.infer<typeof ExitReasonEnum>;
@@ -48,6 +65,7 @@ export const InventoryMovementSchema = z
     costoUnitCentavos: moneyField,
     motivo: z.string().min(1).max(80),
     nota: z.string().max(500).nullable(),
+    origen: MovementOriginEnum.default('manual'),
   })
   .merge(auditSchema)
   .refine(
@@ -70,6 +88,8 @@ export const NewInventoryMovementSchema = z.object({
   costoUnitCentavos: moneyField,
   motivo: z.string().min(1).max(80),
   nota: z.string().max(500).optional(),
+  /** The caller states its origin: `portal` from the owner's web, `manual` from a phone. */
+  origen: MovementOriginEnum.default('manual'),
   businessId: ulidField<BusinessId>(),
 });
 

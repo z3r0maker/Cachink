@@ -179,6 +179,7 @@ export class RegistrarTicketUseCase implements UseCase<
         cantidad: linea.cantidad ?? 1,
         costoUnitCentavos: producto.costoUnitCentavos,
         motivo: 'Venta',
+        origen: 'venta',
         nota: undefined,
         businessId,
       });

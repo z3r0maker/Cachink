@@ -78,6 +78,13 @@
       "when": 1789955974522,
       "tag": "0010_expenses_empleado",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1789957000000,
+      "tag": "0011_movimiento_origen",
+      "breakpoints": true
     }
   ]
 }

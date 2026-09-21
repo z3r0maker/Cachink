@@ -29,6 +29,7 @@ export function makeNewInventoryMovement(
     cantidad: 10,
     costoUnitCentavos: 3_500n,
     motivo: 'Compra a proveedor',
+    origen: 'manual',
     businessId: DEFAULT_BIZ,
     ...overrides,
   };
