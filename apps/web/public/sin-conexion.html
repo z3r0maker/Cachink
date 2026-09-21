@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#ffd83d" />
+    <title>Sin conexión — Xangarro!</title>
+    <style>
+      /*
+       * The offline page (N-23). Served by the service worker from cache, so
+       * everything it needs is inline: no fonts, no CSS files, no network.
+       * The coin mirrors the shell's brand block (yellow, black border, the
+       * offset shadow, the black X) drawn as plain SVG.
+       */
+      :root {
+        color-scheme: light;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: #fff;
+        color: #111;
+        font-family:
+          system-ui,
+          -apple-system,
+          'Segoe UI',
+          Roboto,
+          'Helvetica Neue',
+          Arial,
+          sans-serif;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 480px;
+        text-align: center;
+      }
+      .coin {
+        width: 76px;
+        height: 76px;
+        border: 5px solid #111;
+        border-radius: 50%;
+        background: #ffd83d;
+        box-shadow: 6px 6px 0 #111;
+        display: grid;
+        place-items: center;
+        margin: 0 auto 28px;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0 0 10px;
+      }
+      p {
+        font-size: 16px;
+        margin: 0 0 12px;
+      }
+      .marca {
+        font-weight: 800;
+        letter-spacing: 0.02em;
+      }
+      .nota {
+        color: #555;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="coin" aria-hidden="true">
+        <svg width="44" height="44" viewBox="0 0 44 44" role="presentation">
+          <path
+            d="M10 10 L34 34 M34 10 L10 34"
+            stroke="#111"
+            stroke-width="5.4"
+            stroke-linecap="round"
+            fill="none"
+          />
+        </svg>
+      </div>
+      <h1>Sin conexión</h1>
+      <p class="marca">Tus ventas siguen guardándose en tus dispositivos.</p>
+      <p>
+        No se perdió nada. El registro de tu negocio trabaja sin internet y todo lo capturado se
+        envía solo cuando vuelva la conexión.
+      </p>
+      <p class="nota">
+        Esta pantalla sí necesita internet. Vuelve a cargar cuando te reconectes.
+      </p>
+    </main>
+  </body>
+</html>

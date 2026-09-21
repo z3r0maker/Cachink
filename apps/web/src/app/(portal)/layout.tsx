@@ -7,6 +7,7 @@ import { loadShellCounts, loadShellLogo } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
 import { initials } from '@/shell/initials';
 import { Header } from '@/shell/header';
+import { OfflineRegister } from '@/shell/offline-register';
 import { Sidebar } from '@/shell/sidebar';
 
 import { pendientesRevision } from './revision-caja/pendientes';
@@ -40,6 +41,8 @@ export default async function PortalLayout({ children }: { children: React.React
 
   return (
     <SessionProvider session={session}>
+      {/* N-23: the offline page's service worker, on the Director surface only. */}
+      <OfflineRegister />
       <div className={frame}>
         <Sidebar logoUrl={logoUrl} badges={{ '/revision-caja': pendientesRevision() }} />
         <div className={column}>
