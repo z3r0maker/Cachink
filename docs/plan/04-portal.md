@@ -53,7 +53,14 @@ réplica in its own words.
 
 ### P-18 Land the ADR-058 amendments upstream, then mirror `/design-reference/`
 
-- [~] Status · **Blocked by:** — · **Blocks:** P-19, P-21, every screen task
+- [x] Status · **Blocked by:** — · **Blocks:** P-19, P-21, every screen task
+  - Done (the mirror half): 2026-09-20 · `design-reference/portal/` (13 Director screens +
+    the design-system pages + runtime) and `design-reference/comprobantes/` landed from the
+    owner's export, every file verified serving 200. **Open remainder, tracked here:** the
+    ADR-058 amendments inside the design project itself (step 1), the design-system README
+    refresh (step 2), and `scripts/design-pull.ts` (step 3) so future refreshes are a
+    reviewable diff — the 2026-09-20 mirror was a hand copy because the design MCP
+    authorisation (O-23's original blocker) still does not exist.
   - 2026-09-20 · **The mirror is complete:** `design-reference/portal/` (13 Director screens,
     the design-system pages, `_ds/` runtime, `assets/hero-taqueria.png`) and
     `design-reference/comprobantes/` (the four receipt templates N-20 waits on) landed from the
@@ -1188,7 +1195,10 @@ critical avisos cannot be switched off.
 
 ### P-32 Configurar — delivery matrix, and Compartir por WhatsApp
 
-- [~] Status · **Blocked by:** P-31 · **Blocks:** —
+- [x] Status · **Blocked by:** P-31 · **Blocks:** —
+  - Done: 2026-09-21 · the matrix persisted (0017) and the Compartir dialog landed in its
+    three variants — see the Progress line above. The cobranza variant's per-client trigger
+    waits for a portal cobranza surface; the body is built and tested.
   - In progress: 2026-09-17 · the «Configurar» tab renders the three-column delivery matrix.
   - **WhatsApp sits in «Próximamente»** on every row, as the design specifies — it is designed but
     not delivered (design plan §7).

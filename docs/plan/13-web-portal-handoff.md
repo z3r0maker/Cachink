@@ -85,6 +85,11 @@ persisted delivery matrix (0017) · P-34 print stylesheet · signup through `acc
 
 ## 3. Pending and partial work
 
+> **Authoritative status lives in this section's tables (§3.1/§3.2), kept current as of
+> 2026-09-21.** `04-portal.md`'s per-task checkboxes trail reality in places — earlier
+> sessions recorded completion in Progress lines without flipping the boxes. When the two
+> disagree, this table wins.
+
 ### 3.1 Workable now
 
 | Task                  | Status | What's left                                                                                                                                                                                                                        | Where                                                                                                                                                                                                                                                                                                                                                      |
@@ -103,14 +108,14 @@ persisted delivery matrix (0017) · P-34 print stylesheet · signup through `acc
 
 ### 3.2 Blocked
 
-| Task / item                                                  | Blocked on                                                                                                                                                                                                                                                 |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **P-02** four-scene login animation                          | The «Acceso y onboarding» design file is not mirrored (`design-reference/` has only `operador/`) — **P-18 / owner action O-23**. The project rule: the design file is the spec; don't invent the scenes. Timings/behaviour are in 04-portal.md P-02 Steps. |
-| **P-18 / P-21** design mirror + compare harness              | Needs the Claude Design MCP authorisation (owner). Blocks P-21 and pixel checks for every screen.                                                                                                                                                          |
-| **P-12** employee drawer with recent payments                | **Done 2026-09-20** (O-26 approved): `empleado_id` on `expenses` (pg 0027 + SQLite 0010), «Ver pagos» drawer reads the link. Phone writer follow-up is Track A's.                                                                                          |
-| **P-12** contrato field · **P-08** «Contacto y comprobantes» | Need columns. Contacto/comprobantes overlaps Track N's **C-15** (branding columns on `businesses`) — do them together.                                                                                                                                     |
-| **P-28 / P-29 / P-30** Asesor LLM                            | ADR-059 production gate («Próximamente»); P-30 runtime needs the credential. Locally fully live.                                                                                                                                                           |
-| **P-11** real rejection rows                                 | B-08 (phones producing them against hosted).                                                                                                                                                                                                               |
+| Task / item                                                  | Blocked on                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **P-02** four-scene login animation                          | **Done 2026-09-21**: built from the mirrored `Acceso y onboarding.dc.html` (see 04-portal P-02's Progress line).                                                                                                                                                                                                           |
+| **P-18 / P-21** design mirror + compare harness              | **Mirror done 2026-09-20** (O-23: the owner's export landed by hand copy — `design-reference/portal/` + `comprobantes/`); **P-21 done 2026-09-21** (`pnpm design:compare`). P-18's remaining half is the `design:pull` script (refreshes as reviewable diffs) and the ADR-058 amendments inside the design project itself. |
+| **P-12** employee drawer with recent payments                | **Done 2026-09-20** (O-26 approved): `empleado_id` on `expenses` (pg 0027 + SQLite 0010), «Ver pagos» drawer reads the link. Phone writer follow-up is Track A's.                                                                                                                                                          |
+| **P-12** contrato field · **P-08** «Contacto y comprobantes» | Need columns. Contacto/comprobantes overlaps Track N's **C-15** (branding columns on `businesses`) — do them together.                                                                                                                                                                                                     |
+| **P-28 / P-29 / P-30** Asesor LLM                            | ADR-059 production gate («Próximamente»); P-30 runtime needs the credential. Locally fully live.                                                                                                                                                                                                                           |
+| **P-11** real rejection rows                                 | B-08 (phones producing them against hosted).                                                                                                                                                                                                                                                                               |
 
 ---
 
