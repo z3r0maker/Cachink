@@ -18,6 +18,7 @@ import {
 } from '@xangarro/domain';
 import {
   cerrarMeta,
+  getBusiness,
   clavesCelebradas,
   insertarMeta,
   metaActiva,
@@ -57,7 +58,14 @@ export interface MetasPageData {
   readonly trophies: readonly Meta[];
   readonly racha: number;
   /** The takeover to render once (never for a viewer — the call site decides). */
-  readonly celebrar: { readonly clave: string; readonly racha: number } | null;
+  readonly celebrar: {
+    readonly clave: string;
+    readonly racha: number;
+    /** P-32's share: the closed goal's month and what it earned. */
+    readonly mes: string;
+    readonly vendido: bigint;
+    readonly negocio: string;
+  } | null;
 }
 
 const mesDe = (ym: string): { readonly desde: string; readonly hasta: string } => {
@@ -83,6 +91,25 @@ function storeDe(businessId: string) {
   };
 }
 
+/** The takeover to render once: an achieved goal whose marker is missing. */
+function celebracionPendiente(
+  recienCerrada: Meta | null,
+  claves: readonly string[],
+  racha: number,
+  negocio: string,
+): MetasPageData['celebrar'] {
+  if (recienCerrada?.lograda !== true) return null;
+  const clave = `meta:${recienCerrada.id}`;
+  if (claves.includes(clave)) return null;
+  return {
+    clave,
+    racha,
+    mes: recienCerrada.periodo,
+    vendido: recienCerrada.resultadoCentavos ?? 0n,
+    negocio,
+  };
+}
+
 export async function loadMetasPage(businessId: string): Promise<MetasPageData> {
   const today = hoy();
   const ym = today.slice(0, 7);
@@ -93,24 +120,22 @@ export async function loadMetasPage(businessId: string): Promise<MetasPageData> 
     (await new CerrarMetasVencidasUseCase(store, totales).execute(businessId as never, today))[0] ??
     null;
 
-  const [activa, cerradas, previo, mesActual, claves] = await Promise.all([
+  const [activa, cerradas, previo, mesActual, claves, nombre] = await Promise.all([
     store.activa(),
     store.cerradas(),
     totales(businessId, mesPrevioA(ym)),
     totales(businessId, ym),
     withTenant(businessId, (tx) => clavesCelebradas(tx)),
+    withTenant(businessId, (tx) => getBusiness(tx)),
   ]);
+  const negocio = nombre?.nombre ?? 'tu negocio';
 
   const racha = rachaDe(cerradas);
   const objetivoDelWizard: ObjetivoMeta = 'vender';
   const base = figuraDelMes(objetivoDelWizard, previo);
   const estado = estadoDe(recienCerrada, activa, base, previo);
 
-  let celebrar: MetasPageData['celebrar'] = null;
-  if (recienCerrada?.lograda === true) {
-    const clave = `meta:${recienCerrada.id}`;
-    if (!claves.includes(clave)) celebrar = { clave, racha };
-  }
+  const celebrar = celebracionPendiente(recienCerrada, claves, racha, negocio);
 
   return {
     estado,

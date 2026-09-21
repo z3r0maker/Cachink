@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import assert from 'node:assert/strict';
 
 import { BASE_URL } from './base-url';
 import { ROUTES } from './routes';
@@ -116,4 +117,45 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
     const expected = i < 5 ? 'Correo o contraseña incorrectos.' : /Demasiados intentos/;
     await expect(page.getByText(expected)).toBeVisible();
   }
+});
+
+/** P-02: the login animation — four scenes on one clock, held under reduced motion.
+ * Desktop-only: below 1024 px the yellow panel folds away by design. */
+test('the login panel carries the four-scene animation', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'the panel exists at ≥1024 px');
+  await page.goto('/login');
+  const stage = page.getByTestId('animacion-acceso');
+  await expect(stage).toBeVisible();
+
+  // The scene index rides the stage; over 20 s it must pass through all four.
+  const vistas = new Set<string>();
+  for (let i = 0; i < 40; i += 1) {
+    vistas.add(await stage.getAttribute('data-escena'));
+    await page.waitForTimeout(550);
+    if (vistas.size === 4) break;
+  }
+  assert(vistas.size === 4, `expected 4 scenes, saw ${[...vistas].join(',')}`);
+
+  // Focus pauses the clock: with the email input focused the scene holds.
+  await page.getByTestId('login-email').focus();
+  const alFoco = await stage.getAttribute('data-escena');
+  await page.waitForTimeout(1400);
+  assert.equal(await stage.getAttribute('data-escena'), alFoco, 'focus pauses the stage');
+});
+
+test('below 1024 px the panel folds away and the card stands alone', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 768, height: 900 } });
+  const page = await context.newPage();
+  await page.goto('/login');
+  await expect(page.getByTestId('animacion-acceso')).toBeHidden();
+  await expect(page.getByTestId('login-email')).toBeVisible();
+  await context.close();
+});
+
+test('with reduced motion the animation holds scene four', async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: 'reduce' });
+  const page = await context.newPage();
+  await page.goto('/login');
+  await expect(page.getByTestId('animacion-acceso')).toHaveAttribute('data-escena', '3');
+  await context.close();
 });

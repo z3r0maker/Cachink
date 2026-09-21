@@ -177,7 +177,7 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
 
 ### P-21 `pnpm design:compare` capture harness
 
-- [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
+- [x] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
 - **Context:** ADR-058. Check 1 is a review, not an assertion — the design plan itself lists browser
   width, text reflow and real-vs-sample data as acceptable differences, and the `.dc.html` files
   render through a vendored runtime that fetches fonts over the network. This never runs in CI.
@@ -330,6 +330,17 @@ not move a pixel between routes.
   between routes moves nothing; rail engages below 1024 px; `design:compare` at 1440 and 768 matches.
 
 ### P-02 Auth pages + membership guard + business switcher wiring
+
+- 2026-09-21 · **The four-scene login animation landed** (its spec, `Acceso y
+onboarding.dc.html`, entered `design-reference/portal/` with the O-23 mirror).
+  Transcribed from the file: the 460×170 stage (ResizeObserver uniform scale,
+  0.45–1.7), scenes of 6/3.5/5/5.5 s over 20 s with 360 ms cross-fades, the three
+  money counters written from **one rAF loop** straight to the DOM (`animation-clock.ts`
+  is the pure arithmetic, unit-tested; the loop pauses while any input is focused, and
+  under reduced motion scene four holds). Every keyframe is the design file's own.
+  The two-column login layout (yellow sticky panel, headline pinned at the bottom) folds
+  below 1024 px. e2e: four scenes seen, focus pauses the clock, reduced motion holds
+  scene 4, the panel folds at 768.
 
 > **Amended 2026-09-18 (ADR-080):** the provider is decided — our own login (ADR-079) plus emailed
 > sign-in/reset links (B-14). No GoTrue.
@@ -1188,7 +1199,16 @@ critical avisos cannot be switched off.
     `notice_preferences` (data-pg 0017, tenant RLS). The catalogue, defaults and the
     critical-is-always-on rule live in `@xangarro/domain/avisos`; critical rows show «Obligatorio» /
     «Sí», never a switch, and the server refuses regardless. e2e: a switch survives a reload.
-  - **Still to do:** the Compartir por WhatsApp dialog in its three variants.
+  - 2026-09-21 · **The Compartir dialog landed** in its three variants (diagnóstico,
+    cobranza, logro): the message bodies are the design file's own copy built by pure,
+    tested builders (`compartir-mensajes.ts`); the send is a **deep link only** (`wa.me`,
+    no number — the owner picks the recipient) plus copy-to-clipboard, closing on Escape
+    and backdrop. The **logro** trigger rides the celebration with the closed goal's own
+    figures; the **diagnóstico** trigger sits beside the «Próximamente» gate (sharing the
+    month's real figures is arithmetic, not the model's report) fed by
+    `resumenParaCompartir()`; the **cobranza** body exists and is tested — its per-client
+    trigger waits for a portal cobranza surface (the Diagnóstico's section 7 is LLM-gated).
+    e2e covers both live variants end to end.
 - **Steps:** Three-column delivery matrix per notice type; the WhatsApp channel card sits in
   **«Próximamente»** (design plan §7). **Critical avisos cannot be disabled.** The Compartir dialog
   in its three variants (diagnóstico, cobranza, logro), closing on Escape.

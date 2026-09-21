@@ -83,3 +83,19 @@ test.afterAll(async () => {
     DELETE FROM notices WHERE source = 'asesor' AND id LIKE '01HZ8XQN9GZJXV8AKQ5X0C7BJZ:%'`,
   );
 });
+
+/** P-32: the diagnóstico share carries the month's real figures. */
+test('«Compartir diagnóstico» opens with the real month figures', async ({ page }) => {
+  await page.goto('/asesor');
+  await page.getByRole('button', { name: 'Diagnóstico' }).click();
+  await page.getByRole('button', { name: 'Compartir diagnóstico' }).click();
+  const compartir = page.getByRole('dialog', { name: 'Compartir por WhatsApp' });
+  await expect(compartir).toBeVisible();
+  // The seed's May (clock-pinned): $645.00 vendido — readable in the box and
+  // carried by the deep link.
+  const caja = compartir.getByRole('textbox', { name: 'Mensaje' });
+  await expect(caja).toHaveText(/vendimos \$645\.00/);
+  await expect(compartir.getByText('Diagnóstico-2026-05.pdf')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(compartir).toBeHidden();
+});

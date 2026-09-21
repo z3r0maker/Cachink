@@ -13,7 +13,7 @@ export function AuthCard({
   readonly children: React.ReactNode;
 }) {
   return (
-    <main style={{ maxWidth: 460, margin: '10vh auto', padding: '0 16px' }}>
+    <div style={{ width: '100%', maxWidth: 460 }}>
       <Card>
         <h1 style={{ marginTop: 0 }}>{title}</h1>
         {children}
@@ -23,6 +23,6 @@ export function AuthCard({
           </p>
         )}
       </Card>
-    </main>
+    </div>
   );
 }

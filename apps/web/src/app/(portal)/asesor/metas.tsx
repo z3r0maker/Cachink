@@ -104,7 +104,13 @@ function ActiveGoal({
 function ConCelebracion({ data }: { readonly data: MetasPageData }) {
   return (
     <>
-      <CelebracionMeta clave={data.celebrar!.clave} racha={data.celebrar!.racha} />
+      <CelebracionMeta
+        clave={data.celebrar!.clave}
+        racha={data.celebrar!.racha}
+        mes={data.celebrar!.mes}
+        vendido={data.celebrar!.vendido}
+        negocio={data.celebrar!.negocio}
+      />
       <Banner
         tone="success"
         title="¡Lograste tu meta!"

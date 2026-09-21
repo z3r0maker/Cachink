@@ -10,6 +10,8 @@ import { ComprobantesScreen, type ComprobantesView } from './parts';
  * Negocio → Comprobantes (N-19). Owner and admin edit; a viewer reads the
  * fields without the controls.
  */
+export const dynamic = 'force-dynamic';
+
 export default async function ComprobantesPage() {
   const session = await requireMember('viewer');
   const businessId = session.business_id as BusinessId;

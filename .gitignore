@@ -77,3 +77,6 @@ next-env.d.ts
 
 # Dev email outbox (B-14): .eml/.html written when RESEND_API_KEY is unset
 .email-outbox/
+
+# design:compare output — a local review, never committed
+design-compare/

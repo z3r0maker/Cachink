@@ -114,10 +114,21 @@ test('an achieved goal celebrates once, then the month-end dialog answers in its
   await signIn(page, email);
   await abrirMetas(page);
 
-  // The takeover, once (P-33)…
+  // The takeover, once (P-33)… and its share carries the goal's own numbers (P-32).
   const takeover = page.getByRole('dialog');
   await expect(takeover.getByRole('heading', { name: '¡Lograste tu meta!' })).toBeVisible();
-  await takeover.getByRole('button').first().click();
+  await takeover.getByRole('button', { name: 'Compartir logro' }).click();
+  const compartir = page.getByRole('dialog', { name: 'Compartir por WhatsApp' });
+  const caja = compartir.getByRole('textbox', { name: 'Mensaje' });
+  await expect(caja).toHaveText(/En abril 2026 vendimos \$3,000\.00 en Carnitas Chela/);
+  await expect(compartir.getByText('Meta-2026-04.png')).toBeVisible();
+  await expect(compartir.getByRole('link', { name: 'Abrir WhatsApp' })).toHaveAttribute(
+    'href',
+    /wa\.me\/\?text=/,
+  );
+  await compartir.getByRole('button', { name: 'Cerrar' }).click();
+  await expect(compartir).toBeHidden();
+  await takeover.getByRole('button', { name: 'Seguir' }).click();
   await expect(takeover).toBeHidden();
 
   // …and never again: the marker was written the moment it rendered.

@@ -21,6 +21,8 @@ export interface CelebrationProps {
   readonly level?: SealLevel;
   /** Consecutive months with the goal met. Not days with a record — see below. */
   readonly streak?: number;
+  /** «Compartir logro» (P-32): opens the WhatsApp dialog beside the takeover. */
+  readonly onShare?: () => void;
 }
 
 /**
@@ -55,7 +57,49 @@ function Confetti() {
   );
 }
 
-export function Celebration({ open, onClose, title, body, level, streak }: CelebrationProps) {
+/** The takeover's actions: Seguir always, Compartir logro when there is one. */
+function Acciones({ onShare }: { readonly onShare?: () => void }) {
+  return (
+    <div
+      style={{
+        marginTop: 22,
+        display: 'flex',
+        gap: 12,
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      }}
+    >
+      <Dialog.Close asChild>
+        <Button variant="dark">Seguir</Button>
+      </Dialog.Close>
+      {onShare === undefined ? null : (
+        <Button variant="secondary" onClick={onShare}>
+          Compartir logro
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** The racha pill, when there is one worth showing. */
+function Racha({ streak }: { readonly streak: number }) {
+  if (streak <= 1) return null;
+  return (
+    <div className={streakRow}>
+      <Tag tone="soft">{streak} meses seguidos</Tag>
+    </div>
+  );
+}
+
+export function Celebration({
+  open,
+  onClose,
+  title,
+  body,
+  level,
+  streak,
+  onShare,
+}: CelebrationProps) {
   useEffect(() => {
     if (!open) return undefined;
     const t = setTimeout(onClose, 6000);
@@ -71,16 +115,8 @@ export function Celebration({ open, onClose, title, body, level, streak }: Celeb
           <Seal level={level} label={title} />
           <Dialog.Title className={takeoverTitle}>{title}</Dialog.Title>
           <Dialog.Description className={takeoverBody}>{body}</Dialog.Description>
-          {streak !== undefined && streak > 1 ? (
-            <div className={streakRow}>
-              <Tag tone="soft">{streak} meses seguidos</Tag>
-            </div>
-          ) : null}
-          <div style={{ marginTop: 22 }}>
-            <Dialog.Close asChild>
-              <Button variant="dark">Seguir</Button>
-            </Dialog.Close>
-          </div>
+          <Racha streak={streak ?? 0} />
+          <Acciones onShare={onShare} />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

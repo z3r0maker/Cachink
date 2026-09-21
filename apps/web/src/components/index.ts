@@ -38,5 +38,6 @@ export { ConfirmDialog, type ConfirmDialogProps } from './dialog';
 export { Seal, type SealLevel, type SealProps } from './seal';
 export { sealPath } from './seal-path';
 export { Celebration, type CelebrationProps } from './celebration';
+export { WhatsAppDialog } from './whatsapp-dialog';
 export * from './export-button';
 export * from './pending-button';

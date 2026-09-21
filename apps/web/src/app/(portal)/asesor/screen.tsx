@@ -12,6 +12,7 @@ import type { Role } from '@/session/types';
 
 import { Metas } from './metas';
 import { Anteriores, Capacidades, ParaTi } from './para-ti';
+import { CompartirDiagnostico } from './compartir-diagnostico';
 import { pageSubtitle, pageTitle } from './asesor.css';
 
 /**
@@ -45,29 +46,34 @@ function Heading() {
 function Diagnostico() {
   const session = useSession();
   return (
-    <ScreenBody
-      state={resolveScreenState({
-        entitled: asesorShowsDiagnostico(session.capabilities),
-        llmBacked: true,
-        llmEnabled: LLM_ENABLED,
-      })}
-      onRetry={() => undefined}
-      empty={{
-        title: 'Sin datos suficientes',
-        body: 'Tu Diagnóstico necesita 90 días de registros.',
-      }}
-      locked={{
-        title: 'El Diagnóstico llega con Xangarrote',
-        body: 'Cada mes, una lectura completa de tu negocio y un plan para tu meta.',
-        plan: 'Xangarrote',
-      }}
-      proximamente={{
-        title: 'El Diagnóstico llega pronto',
-        body: 'Estamos afinando la lectura mensual de tu negocio. Mientras tanto, tu Asesor sigue avisándote cada día en «Para ti».',
-      }}
-    >
-      <p>Reporte completo del mes.</p>
-    </ScreenBody>
+    <>
+      <ScreenBody
+        state={resolveScreenState({
+          entitled: asesorShowsDiagnostico(session.capabilities),
+          llmBacked: true,
+          llmEnabled: LLM_ENABLED,
+        })}
+        onRetry={() => undefined}
+        empty={{
+          title: 'Sin datos suficientes',
+          body: 'Tu Diagnóstico necesita 90 días de registros.',
+        }}
+        locked={{
+          title: 'El Diagnóstico llega con Xangarrote',
+          body: 'Cada mes, una lectura completa de tu negocio y un plan para tu meta.',
+          plan: 'Xangarrote',
+        }}
+        proximamente={{
+          title: 'El Diagnóstico llega pronto',
+          body: 'Estamos afinando la lectura mensual de tu negocio. Mientras tanto, tu Asesor sigue avisándote cada día en «Para ti».',
+        }}
+      >
+        <p>Reporte completo del mes.</p>
+      </ScreenBody>
+      {/* Sharing the month's real figures is arithmetic, not the model's
+        report, so the trigger stands outside the «Próximamente» gate. */}
+      <CompartirDiagnostico />
+    </>
   );
 }
 

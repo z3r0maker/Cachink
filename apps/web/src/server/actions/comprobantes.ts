@@ -47,6 +47,7 @@ export async function subirLogo(form: FormData): Promise<SubirLogoResult> {
       await repo.update(businessId, patch);
     });
     revalidatePath('/negocio');
+    revalidatePath('/negocio/comprobantes');
     return { ok: true, brandColor: processed.brandColor };
   } catch (error) {
     if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
@@ -104,6 +105,7 @@ export async function guardarComprobantes(
       }),
     );
     revalidatePath('/negocio');
+    revalidatePath('/negocio/comprobantes');
     return { ok: true };
   } catch (error) {
     if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
