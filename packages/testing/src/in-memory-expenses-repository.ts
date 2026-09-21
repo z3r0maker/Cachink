@@ -35,6 +35,7 @@ export class InMemoryExpensesRepository implements ExpensesRepository {
       categoria: input.categoria,
       monto: input.monto,
       proveedor: input.proveedor ?? null,
+      empleadoId: input.empleadoId ?? null,
       cajaTurnoId: input.cajaTurnoId ?? null,
       gastoRecurrenteId: input.gastoRecurrenteId ?? null,
       businessId: input.businessId,
