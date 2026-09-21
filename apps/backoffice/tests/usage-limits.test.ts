@@ -12,27 +12,29 @@ const tx = (transactions: number) => ({ transactions, activeProducts: 3 });
 describe('usageByMetric', () => {
   it('bands at 80 / 100 / 150 % exactly where the N-03 notices fire', () => {
     const band = (n: number) => usageByMetric(tx(n), FREE, '2026-09').transactions.band;
-    assert.equal(band(39), null);
-    assert.equal(band(40), 80);
-    assert.equal(band(49), 80);
-    assert.equal(band(50), 100);
-    assert.equal(band(74), 100);
-    assert.equal(band(75), 150);
+    assert.equal(band(239), null);
+    assert.equal(band(240), 80);
+    assert.equal(band(299), 80);
+    assert.equal(band(300), 100);
+    assert.equal(band(449), 100);
+    assert.equal(band(450), 150);
     assert.equal(band(5_000), 150);
   });
 
-  it('reports whole percent, rounded down, and no percent for unlimited', () => {
-    const m = usageByMetric(tx(39), FREE, '2026-09');
-    assert.equal(m.transactions.percent, 78);
-    assert.equal(m.transactions.limit, 50);
-    assert.equal(m.activeProducts.percent, null);
-    assert.equal(m.activeProducts.band, null);
-    assert.equal(m.activeProducts.value, 3);
+  it('reports whole percent, rounded down; both metrics limited since C-12', () => {
+    const m = usageByMetric(tx(239), FREE, '2026-09');
+    assert.equal(m.transactions.percent, 79);
+    assert.equal(m.transactions.limit, 300);
+    const productos = usageByMetric({ transactions: 1, activeProducts: 40 }, FREE, '2026-09');
+    assert.equal(productos.activeProducts.percent, 80);
+    assert.equal(productos.activeProducts.band, 80);
+    assert.equal(productos.activeProducts.value, 40);
   });
 
-  it('never bands an unlimited metric, however large', () => {
+  it('a high tier still bands, far above xangarrito', () => {
     const paid = usageLimitsOf(PLAN_LIMITS.xangarro);
-    assert.equal(usageByMetric(tx(1_000_000), paid, '2026-09').transactions.band, null);
+    assert.equal(usageByMetric(tx(7_999), paid, '2026-09').transactions.band, null);
+    assert.equal(usageByMetric(tx(10_000), paid, '2026-09').transactions.band, 100);
   });
 
   it('rejects a malformed period', () => {

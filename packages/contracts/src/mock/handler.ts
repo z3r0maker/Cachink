@@ -109,7 +109,12 @@ export class MockApi {
         status: 200,
         body: {
           entitlement: await sign(
-            entitlementFor(scenario, FIXTURE_BUSINESS_ID, new Date(), this.state.recordsPerMonth),
+            entitlementFor(
+              scenario,
+              FIXTURE_BUSINESS_ID,
+              new Date(),
+              this.state.transactionsPerMonth,
+            ),
           ),
         },
       };
@@ -152,7 +157,7 @@ export class MockApi {
       deviceId: device.id,
       businessId: FIXTURE_BUSINESS_ID,
       entitlement: await sign(
-        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
       bootstrap: {
         serverSeq: this.state.serverSeq,
@@ -175,7 +180,7 @@ export class MockApi {
       serverSeq: this.state.serverSeq,
       serverTime: now.toISOString(),
       entitlement: await sign(
-        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.recordsPerMonth),
+        entitlementFor(scenario, FIXTURE_BUSINESS_ID, now, this.state.transactionsPerMonth),
       ),
       tables: referenceTables(this.state, q.data.since),
       acknowledgedThrough: device.acknowledgedThrough,

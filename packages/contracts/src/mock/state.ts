@@ -43,7 +43,7 @@ export class MockState {
   /** Scenario for requests without `X-Mock-Scenario` (`/__mock/scenario`). */
   defaultScenario: Scenario = 'xangarro';
   /** Overrides the entitlement's records-per-month; `undefined` = plan default. */
-  recordsPerMonth: number | null | undefined = undefined;
+  transactionsPerMonth: number | undefined = undefined;
   devices = new Map<string, Device>();
   codes = new Map<string, ActivationCode>();
   serverSeq = 0;
@@ -58,7 +58,7 @@ export class MockState {
     this.rows.clear();
     this.forgotten.clear();
     this.defaultScenario = 'xangarro';
-    this.recordsPerMonth = undefined;
+    this.transactionsPerMonth = undefined;
     this.devices.clear();
     this.codes.clear();
     this.serverSeq = 0;

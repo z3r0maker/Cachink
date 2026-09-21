@@ -9,10 +9,13 @@ describe('plan', () => {
     }
   });
 
-  it('xangarrito is capped at 50 records/month; paid plans are unlimited', () => {
-    expect(PLAN_LIMITS.xangarrito.recordsPerMonth).toBe(50);
-    expect(PLAN_LIMITS.xangarro.recordsPerMonth).toBeNull();
-    expect(PLAN_LIMITS.xangarrote.recordsPerMonth).toBeNull();
+  it('the tiers carry the two ADR-065 metrics: 300/50 · 10k/1k · 30k/5k', () => {
+    expect(PLAN_LIMITS.xangarrito.transactionsPerMonth).toBe(300);
+    expect(PLAN_LIMITS.xangarrito.activeProducts).toBe(50);
+    expect(PLAN_LIMITS.xangarro.transactionsPerMonth).toBe(10_000);
+    expect(PLAN_LIMITS.xangarro.activeProducts).toBe(1_000);
+    expect(PLAN_LIMITS.xangarrote.transactionsPerMonth).toBe(30_000);
+    expect(PLAN_LIMITS.xangarrote.activeProducts).toBe(5_000);
   });
 
   it('every plan feature is a known flag key and higher plans are supersets', () => {

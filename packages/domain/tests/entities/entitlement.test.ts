@@ -12,13 +12,14 @@ const iso = (ms: number): string => new Date(ms).toISOString();
 const base: Entitlement = {
   businessId: '01JBUSINESS',
   plan: 'xangarro',
-  limits: { operators: 2, devices: 2, recordsPerMonth: null },
+  limits: { operators: 2, devices: 2, transactionsPerMonth: 10_000, activeProducts: 1_000 },
   features: ['stock', 'barcode'],
   capabilities: {
     estadosFinancieros: true,
     informeMensual: false,
     permisosPorUsuario: false,
     asesor: 'diario',
+    cobrosIntegrados: true,
   },
   validUntil: iso(T0 + 10 * DAY),
   graceUntil: iso(T0 + 17 * DAY),

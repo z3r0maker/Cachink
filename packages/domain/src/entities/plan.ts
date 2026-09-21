@@ -38,6 +38,8 @@ export interface PlanCapabilities {
   readonly permisosPorUsuario: boolean;
   /** How much of the Asesor this plan receives. */
   readonly asesor: 'semanal' | 'diario' | 'completo';
+  /** Integrated collections (C-12): QR/CoDi cobros on the paid tiers. */
+  readonly cobrosIntegrados: boolean;
 }
 
 export interface PlanLimits {
@@ -45,8 +47,10 @@ export interface PlanLimits {
   readonly operators: number;
   /** Max active devices — equals `operators` by decision. */
   readonly devices: number;
-  /** Records (ventas + gastos + movimientos) per server-anchored month; `null` = unlimited. */
-  readonly recordsPerMonth: number | null;
+  /** Transactions (tickets + gastos + manual/portal movements) per month (C-12, ADR-065). */
+  readonly transactionsPerMonth: number;
+  /** Active products the catalog may hold; enforced client-side on xangarrito only. */
+  readonly activeProducts: number;
   /** Feature keys the plan includes. Platform availability still gates them. */
   readonly features: readonly FeatureFlagKey[];
   /** Plan-level gates with no tenant switch. */
@@ -57,31 +61,36 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
   xangarrito: {
     operators: 1,
     devices: 1,
-    recordsPerMonth: 50,
+    transactionsPerMonth: 300,
+    activeProducts: 50,
     features: [],
     capabilities: {
       estadosFinancieros: false,
       informeMensual: false,
       permisosPorUsuario: false,
       asesor: 'semanal',
+      cobrosIntegrados: false,
     },
   },
   xangarro: {
     operators: 2,
     devices: 2,
-    recordsPerMonth: null,
+    transactionsPerMonth: 10_000,
+    activeProducts: 1_000,
     features: ['stock', 'barcode', 'ventasCredito'],
     capabilities: {
       estadosFinancieros: true,
       informeMensual: false,
       permisosPorUsuario: false,
       asesor: 'diario',
+      cobrosIntegrados: true,
     },
   },
   xangarrote: {
     operators: 5,
     devices: 5,
-    recordsPerMonth: null,
+    transactionsPerMonth: 30_000,
+    activeProducts: 5_000,
     features: [
       'stock',
       'barcode',
@@ -94,6 +103,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     capabilities: {
       estadosFinancieros: true,
       informeMensual: true,
+      cobrosIntegrados: true,
       permisosPorUsuario: true,
       asesor: 'completo',
     },

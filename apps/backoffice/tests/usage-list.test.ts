@@ -36,7 +36,7 @@ describe('listUsage', () => {
     const row = res.rows[0];
     assert.equal(res.period, '2026-09');
     assert.equal(row?.current.transactions.value, 32);
-    assert.equal(row?.current.transactions.percent, 64);
+    assert.equal(row?.current.transactions.percent, 10);
     assert.equal(row?.current.transactions.band, null);
     assert.equal(row?.current.activeProducts.value, 1);
     assert.equal(row?.previous?.transactions, 1);
@@ -46,9 +46,9 @@ describe('listUsage', () => {
 
   it('"sobre el límite" keeps tenants at or over 100 % this month', async () => {
     const f = usageFixture();
-    f.add(1, sales(40, SEP));
-    f.add(2, sales(50, SEP));
-    f.add(3, sales(80, SEP));
+    f.add(1, sales(240, SEP));
+    f.add(2, sales(300, SEP));
+    f.add(3, sales(450, SEP));
     const res = await listUsage(f.deps, { filtro: 'sobre' }, NOW);
     assert.deepEqual(ids(res), [bid(3), bid(2)]);
     assert.deepEqual(
@@ -59,21 +59,21 @@ describe('listUsage', () => {
 
   it('"2 meses seguidos" needs both closed months over, not this one', async () => {
     const f = usageFixture();
-    f.add(1, [...sales(50, JUL), ...sales(60, AUG)]);
-    f.add(2, sales(60, AUG));
-    f.add(3, [...sales(10, JUL), ...sales(10, AUG), ...sales(500, SEP)]);
+    f.add(1, [...sales(300, JUL), ...sales(360, AUG)]);
+    f.add(2, sales(360, AUG));
+    f.add(3, [...sales(60, JUL), ...sales(60, AUG), ...sales(3_000, SEP)]);
     const res = await listUsage(f.deps, { filtro: 'dos_meses' }, NOW);
     assert.deepEqual(ids(res), [bid(1)]);
   });
 
-  it('a comped paid plan is unlimited, so it is not over', async () => {
+  it('a comped paid plan breathes far from its 10k, so it is not over', async () => {
     const f = usageFixture();
     const id = f.add(1, sales(500, SEP));
     await f.overrides.insert(comp(id));
     const res = await listUsage(f.deps, { filtro: 'sobre' }, NOW);
     assert.deepEqual(ids(res), []);
     const all = await listUsage(f.deps, {}, NOW);
-    assert.equal(all.rows[0]?.current.transactions.percent, null);
+    assert.equal(all.rows[0]?.current.transactions.percent, 5);
   });
 
   it('pages newest first with a keyset cursor', async () => {

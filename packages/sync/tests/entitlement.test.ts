@@ -20,13 +20,14 @@ const OTHER_PUB = '3d4017c3e843895a92b70aa74d1b7ebc9c982ccf2ec4968cc0cd55f12af46
 const PAYLOAD: Entitlement = {
   businessId: 'BIZ',
   plan: 'xangarro',
-  limits: { operators: 2, devices: 2, recordsPerMonth: null },
+  limits: { operators: 2, devices: 2, transactionsPerMonth: 10_000, activeProducts: 1_000 },
   features: ['stock', 'barcode'],
   capabilities: {
     estadosFinancieros: true,
     informeMensual: true,
     permisosPorUsuario: true,
     asesor: 'diario',
+    cobrosIntegrados: true,
   },
   validUntil: '2026-10-16T00:00:00.000Z',
   graceUntil: '2026-10-23T00:00:00.000Z',
@@ -82,14 +83,16 @@ describe('resolveEntitlement', () => {
     expect(resolve()).toMatchObject({
       plan: 'xangarro',
       state: 'active',
-      recordsPerMonth: null,
+      transactionsPerMonth: 10_000,
+      activeProducts: 1_000,
     });
   });
 
   it('falls back to Xangarrito when nothing verifiable is stored', () => {
     expect(resolve({ storedJson: null })).toMatchObject({
       plan: 'xangarrito',
-      recordsPerMonth: 50,
+      transactionsPerMonth: 300,
+      activeProducts: 50,
       verified: false,
     });
     expect(resolve({ publicKeyHex: OTHER_PUB }).plan).toBe('xangarrito');

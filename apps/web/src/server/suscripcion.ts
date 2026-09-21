@@ -21,6 +21,7 @@ export interface SuscripcionData {
     readonly operadores: number;
     readonly dispositivos: number;
     readonly registros: number | null;
+    readonly productos: number | null;
   };
   readonly recibe: { readonly plan: PlanId; readonly validUntil: string };
   /** Whether a payment can be invoiced by name now (RFC, razón social, CP, régimen). */
@@ -49,7 +50,7 @@ export async function loadSuscripcion(businessId: string): Promise<SuscripcionDa
   const uso = await usageFor(businessId, now).catch(() => null);
   return {
     estado: base.estado,
-    uso: { ...base.counts, registros: uso?.transactions ?? null },
+    uso: { ...base.counts, registros: uso?.transactions ?? null, productos: uso?.products ?? null },
     recibe: base.recibe,
     fiscalCompleto: base.fiscalCompleto,
   };

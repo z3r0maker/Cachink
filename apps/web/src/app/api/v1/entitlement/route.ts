@@ -1,6 +1,7 @@
 import { ok } from '@/server/api/respond';
 import { deviceRoute } from '@/server/api/device-route';
 import { entitlementFor } from '@/server/device/bootstrap';
+import { usageFor } from '@/server/usage/live';
 import { signEntitlement } from '@/server/device/credentials';
 import { withTenant } from '@/server/db';
 
@@ -19,7 +20,13 @@ export const GET = (request: Request): Promise<Response> =>
       const entitlement = await withTenant(businessId, (tx) =>
         entitlementFor(tx, businessId, new Date()),
       );
-      return { response: ok({ entitlement: await signEntitlement(entitlement) }) };
+      const usage = await usageFor(businessId).catch(() => null);
+      return {
+        response: ok({
+          entitlement: await signEntitlement(entitlement),
+          ...(usage === null ? {} : { usage }),
+        }),
+      };
     },
     'No pudimos revisar tu plan. Intenta de nuevo.',
   );

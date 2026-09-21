@@ -20,8 +20,8 @@ export interface PlanRecordQuotaInput {
   readonly usage: RecordUsageRepository;
   readonly businessId: BusinessId;
   readonly plan: PlanId;
-  /** `null` = unlimited. */
-  readonly recordsPerMonth: number | null;
+  /** Transactions the plan allows per month (C-12). */
+  readonly transactionsPerMonth: number;
   /** `YYYY-MM` of the server-anchored now. */
   readonly yearMonth: string;
 }
@@ -34,9 +34,8 @@ export class PlanRecordQuota implements RecordQuota {
   }
 
   async assertCanCreate(): Promise<void> {
-    const { usage, businessId, plan, recordsPerMonth, yearMonth } = this.#input;
-    if (recordsPerMonth === null) return;
+    const { usage, businessId, plan, transactionsPerMonth, yearMonth } = this.#input;
     const used = await usage.countRecordsInMonth(businessId, yearMonth);
-    if (used >= recordsPerMonth) throw new PlanLimitError(plan, recordsPerMonth);
+    if (used >= transactionsPerMonth) throw new PlanLimitError(plan, transactionsPerMonth);
   }
 }
