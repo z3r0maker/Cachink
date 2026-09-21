@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarEgresoUseCase } from '@xangarro/application';
 import { useRecordQuota } from '../entitlement/use-record-quota';
+import { usePlanLimitStore } from '../entitlement/plan-limit-store';
 import type { Expense, NewExpense } from '@xangarro/domain';
 import { useExpensesRepository, useRecurringExpensesRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -34,6 +35,9 @@ export function useRegistrarEgreso(): RegistrarEgresoResult {
       return useCase.execute(input);
     },
     async onSuccess(egreso) {
+      // N-04: the limit never blocks; it surfaces as the neutral sheet after.
+      const warning = await quota.warning();
+      if (warning !== null) usePlanLimitStore.getState().show(warning);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['egresos', businessId, egreso.fecha] }),
         ...estadosKeys

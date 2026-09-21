@@ -283,7 +283,7 @@ Returns `{ entitlement }` only. Used by the app when it wants a cheap refresh (e
 
 ### C-12 Limits rework: transactions + products, `usage` in the payload, `cobrosIntegrados`, annual lookup keys
 
-- [ ] Status · **Surfaced by:** Track N (ADR-065, ADR-066, ADR-067) · **Blocks:** N-01, N-02, N-31, A-10
+- [x] Status · **Done 2026-09-21 (`track-n/c12-n04-uso`)** · **Surfaced by:** Track N (ADR-065, ADR-066, ADR-067) · **Blocks:** N-01, N-02, N-31, A-10
 - **Steps:**
   1. `PlanLimits`: replace `recordsPerMonth` with `transactionsPerMonth` and add `activeProducts`.
      Values: xangarrito 300 / 50 · xangarro 10 000 / 1 000 · xangarrote 30 000 / 5 000.

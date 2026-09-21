@@ -19,6 +19,7 @@ import { useMemo } from 'react';
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
 import { RegistrarMovimientoInventarioUseCase } from '@xangarro/application';
 import { useRecordQuota } from '../entitlement/use-record-quota';
+import { usePlanLimitStore } from '../entitlement/plan-limit-store';
 import type { InventoryMovement, NewInventoryMovement } from '@xangarro/domain';
 import { useExpensesRepository, useInventoryMovementsRepository } from '../app/index';
 import { useCurrentBusinessId } from '../app-config/index';
@@ -75,6 +76,9 @@ export function useRegistrarMovimiento(): RegistrarMovimientoResult {
       return useCase.execute(input);
     },
     async onSuccess(movement) {
+      // N-04: the limit never blocks; it surfaces as the neutral sheet after.
+      const warning = await quota.warning();
+      if (warning !== null) usePlanLimitStore.getState().show(warning);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['movimientos', businessId] }),
         queryClient.invalidateQueries({ queryKey: ['productos', businessId] }),

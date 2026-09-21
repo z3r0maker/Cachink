@@ -158,7 +158,12 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 
 ### N-04 Free-tier product cap `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-02, P-07 · **Blocks:** N-30
+- [x] Status
+- Progress: 2026-09-21 · `track-n/c12-n04-uso` · **Done with C-12.** Transactions are
+  advisory on every tier — `PlanRecordQuota.assertCanCreate` never throws
+  and `warning()` feeds the neutral PlanLimitSheet after a successful capture
+  (egreso, movimiento); the xangarrito quick-add enforces the 50-active-products
+  cap client-side via `PlanLimitError` → the same sheet. · **Blocked by:** N-02, P-07 · **Blocks:** N-30
 - **What:** xangarrito cannot create the 51st **active** product.
 - **How:** enforced in the portal (create, import dry-run shows "excede tu plan por N") and in the
   app's quick-add using the last-known count (app copy: "Este negocio alcanzó su máximo de productos.

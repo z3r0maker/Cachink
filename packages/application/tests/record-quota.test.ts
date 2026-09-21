@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PlanLimitError, type BusinessId } from '@xangarro/domain';
+import type { BusinessId } from '@xangarro/domain';
 import {
   InMemoryExpensesRepository,
   InMemoryRecordUsageRepository,
@@ -23,33 +23,32 @@ function quota(used: number, transactionsPerMonth: number) {
   });
 }
 
-describe('PlanRecordQuota (A-10)', () => {
-  it('allows the 50th record of a 50-record plan', async () => {
-    await expect(quota(299, 300).assertCanCreate()).resolves.toBeUndefined();
+describe('PlanRecordQuota (A-10 → N-04: advisory)', () => {
+  it('never blocks, even past the limit', async () => {
+    await expect(quota(301, 300).assertCanCreate()).resolves.toBeUndefined();
   });
 
-  it('blocks past the limit with PLAN_LIMIT_RECORDS', async () => {
-    const err = await quota(300, 300)
-      .assertCanCreate()
-      .catch((e: unknown) => e);
-    expect(err).toBeInstanceOf(PlanLimitError);
-    expect(err).toMatchObject({ code: 'PLAN_LIMIT_RECORDS', limit: 300, plan: 'xangarrito' });
+  it('warns at and past the limit, not below it', async () => {
+    await expect(quota(299, 300).warning()).resolves.toBeNull();
+    await expect(quota(300, 300).warning()).resolves.toEqual({
+      plan: 'xangarrito',
+      limit: 300,
+      used: 300,
+    });
   });
 
   it('a high tier breathes far beyond xangarrito', async () => {
     await expect(quota(10_000, 30_000).assertCanCreate()).resolves.toBeUndefined();
   });
 
-  it('stops a capture use case before it writes anything', async () => {
+  it('a capture over the limit still writes — the sheet warns after (N-04)', async () => {
     const expenses = new InMemoryExpensesRepository(TEST_DEVICE_ID);
     const useCase = new RegistrarEgresoUseCase(
       expenses,
       new InMemoryRecurringExpensesRepository(TEST_DEVICE_ID),
       quota(300, 300),
     );
-    await expect(useCase.execute(makeNewExpense({ businessId: BIZ }))).rejects.toBeInstanceOf(
-      PlanLimitError,
-    );
-    expect(await expenses.findByDate('2026-04-23' as never, BIZ)).toEqual([]);
+    await expect(useCase.execute(makeNewExpense({ businessId: BIZ }))).resolves.toBeDefined();
+    expect(await expenses.findByDate('2026-04-23' as never, BIZ)).toHaveLength(1);
   });
 });
