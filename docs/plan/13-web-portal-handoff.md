@@ -116,6 +116,18 @@ persisted delivery matrix (0017) · P-34 print stylesheet · signup through `acc
 
 ## 4. Findings (known issues, not yet fixed)
 
+**For Track N — order-dependent flake in `comprobantes.sync.spec.ts` (2026-09-21, evidence
+from the portal session).** The owner-brands test fails at full-suite position ~580 with the
+dirección input rendering empty after save+reload, roughly every other fresh-DB run; it
+**passes in isolation** on the same tree. The write is committed (the DB row has
+`direccion`/`receipt_leyenda` after the failing run) and an identical diagnostic flow
+(upload → extract → fill → save → read) passed in the same full-suite slot. Tried and kept as
+principled hardening: `revalidatePath('/negocio/comprobantes')` alongside `/negocio` in both
+comprobantes actions, and `force-dynamic` on the page. Tried and reverted: replacing the
+spec's `page.reload()` with a fresh `goto` (same failure). Suspects: Next client-router cache
+serving the pre-save RSC payload, or a hydration race on the controlled inputs under
+end-of-suite load. The portal session's P-02/P-32/P-21 tests are green in every run.
+
 | #    | Finding                                                                                                                                                                                                                                                                                                                                                                                                                                             | Suggested action                                                                                                                                      |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
 | F-1  | **Fixed 2026-09-19** (`periodBalanceInputs`; `pasivosManuales` stays 0 until N-17). The original: **Balance and Flujo are incomplete.** `server/estados.ts` calls `calculateBalanceGeneral` with `cortesDelDia: []`, `inventarioStock: []`, `ventasConCredito: []`, `pagosClientes: []`, and `calculateFlujoDeEfectivo` with `pagosClientes: []`; indicators get `inventarioPromedio: 0n`; `mermaMovements` are never passed, so merma is always 0. | Feed the real rows (day_closes, stock at cost, credit sales + client_payments, merma movements) for the period — data-pg queries + integration tests. |
