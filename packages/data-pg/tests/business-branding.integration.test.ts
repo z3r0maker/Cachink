@@ -60,6 +60,27 @@ describe('0023 business branding + logos', () => {
     assert.equal(row?.social_links, '{}');
   });
 
+  it('a pre-0028 row reads direccion as null, and 0028 fills it (old → new)', async () => {
+    const antes = await withBusiness(app, FRESH, (tx) =>
+      tx.execute<{ direccion: string | null }[]>(
+        sql`SELECT direccion FROM businesses WHERE id = ${FRESH}`,
+      ),
+    );
+    assert.equal(antes[0]?.direccion, null);
+
+    await withBusiness(app, BIZ_A, (tx) =>
+      tx.execute(
+        sql`UPDATE businesses SET direccion = 'Av. Hidalgo 214, Col. Centro' WHERE id = ${BIZ_A}`,
+      ),
+    );
+    const despues = await withBusiness(app, BIZ_A, (tx) =>
+      tx.execute<{ direccion: string | null }[]>(
+        sql`SELECT direccion FROM businesses WHERE id = ${BIZ_A}`,
+      ),
+    );
+    assert.equal(despues[0]?.direccion, 'Av. Hidalgo 214, Col. Centro');
+  });
+
   it('a tenant writes its branding row; another tenant never sees it', async () => {
     await withBusiness(app, BIZ_A, (tx) =>
       tx.execute(

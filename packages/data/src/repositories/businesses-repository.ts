@@ -28,6 +28,7 @@ export type BusinessPatch = Partial<
     // clients.rfc: the phone has no UI for these yet and drops them.
     | 'logoUrl'
     | 'brandColor'
+    | 'direccion'
     | 'receiptTemplate'
     | 'receiptLeyenda'
     | 'addressPrint'

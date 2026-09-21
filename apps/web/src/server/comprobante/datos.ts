@@ -19,8 +19,8 @@ import {
 /**
  * Venta + branding → the renderer's contract (N-20). Everything optional
  * is passed only when the business actually set it — a block that is off
- * never reaches the SVG. The direccion block waits for an address field
- * to exist (address_print is stored, but nothing feeds it yet).
+ * never reaches the SVG. The direccion prints only when address_print is
+ * on AND a line exists (0028).
  */
 
 const ACENTO_POR_OMISION = '#FFD60A';
@@ -51,7 +51,16 @@ export async function negocioParaComprobante(tx: Tx): Promise<NegocioComprobante
     redes: primeraRed(b?.socialLinks),
     leyenda: b?.receiptLeyenda ?? undefined,
     acento: b?.brandColor ?? ACENTO_POR_OMISION,
+    direccion: direccionImprimible(b),
   };
+}
+
+/** The address prints only when the toggle is on AND a line exists (0028). */
+function direccionImprimible(
+  b: { addressPrint: boolean | null; direccion: string | null } | undefined,
+): string | undefined {
+  if (b?.addressPrint !== true || b.direccion === null) return undefined;
+  return b.direccion;
 }
 
 function primeraRed(json: string | null | undefined): string | undefined {

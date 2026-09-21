@@ -64,6 +64,7 @@ export interface ComprobantesForm {
   readonly receiptTemplate: 'clasico' | 'moderno' | 'ticket' | 'minimal';
   readonly receiptLeyenda: string;
   readonly addressPrint: boolean;
+  readonly direccion: string;
   readonly whatsapp: string;
   readonly brandColor: string;
 }
@@ -81,8 +82,11 @@ export async function guardarComprobantes(
     const businessId = session.business_id as BusinessId;
     const leyenda = form.receiptLeyenda.trim();
     const whatsapp = form.whatsapp.trim();
+    const direccion = form.direccion.trim();
     if (leyenda.length > 280)
       return { ok: false, message: 'La leyenda no pasa de 280 caracteres.' };
+    if (direccion.length > 140)
+      return { ok: false, message: 'La dirección no pasa de 140 caracteres.' };
     if (whatsapp !== '' && !TELEFONO.test(whatsapp)) {
       return { ok: false, message: 'El WhatsApp no parece un teléfono.' };
     }
@@ -94,6 +98,7 @@ export async function guardarComprobantes(
         receiptTemplate: form.receiptTemplate,
         receiptLeyenda: leyenda === '' ? null : leyenda,
         addressPrint: form.addressPrint,
+        direccion: direccion === '' ? null : direccion,
         whatsapp: whatsapp === '' ? null : whatsapp,
         brandColor: form.brandColor.toLowerCase(),
       }),

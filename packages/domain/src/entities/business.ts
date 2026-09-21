@@ -86,6 +86,12 @@ export const BusinessSchema = z
       .regex(/^[\d\s+\-()]{7,20}$/)
       .nullable()
       .default(null),
+    /**
+     * The address that prints on comprobantes (C-15's `address_print` finally
+     * has a source, 0028). One free line — the fichas wrap it at ~40 chars and
+     * two renglones.
+     */
+    direccion: z.string().max(140).nullable().default(null),
     socialLinks: z.string().default('{}'),
     tipoNegocio: TipoNegocioEnum.default('mixto'),
     categoriaVentaPredeterminada: SaleCategoryEnum.default('Producto'),

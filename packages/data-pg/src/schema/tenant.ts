@@ -39,6 +39,8 @@ export const businesses = pgTable('businesses', {
   receiptLeyenda: text('receipt_leyenda'),
   addressPrint: boolean('address_print').notNull().default(false),
   whatsapp: text('whatsapp'),
+  /** What `address_print` prints (C-15; migration 0028). */
+  direccion: text('direccion'),
   socialLinks: text('social_links').notNull().default('{}'),
   tipoNegocio: text('tipo_negocio', {
     enum: ['producto-con-stock', 'producto-sin-stock', 'servicio', 'mixto'],

@@ -35,6 +35,7 @@ const SIN_MARCA = {
   receiptTemplate: 'clasico',
   receiptLeyenda: '',
   addressPrint: false,
+  direccion: '',
   whatsapp: '',
   brandColor: '#d4a017',
 } as const satisfies ComprobantesView['form'];
@@ -45,6 +46,7 @@ function formOf(business: Business | null): ComprobantesView['form'] {
     receiptTemplate: business.receiptTemplate ?? SIN_MARCA.receiptTemplate,
     receiptLeyenda: business.receiptLeyenda ?? SIN_MARCA.receiptLeyenda,
     addressPrint: business.addressPrint ?? SIN_MARCA.addressPrint,
+    direccion: business.direccion ?? SIN_MARCA.direccion,
     whatsapp: business.whatsapp ?? SIN_MARCA.whatsapp,
     brandColor: business.brandColor ?? SIN_MARCA.brandColor,
   };

@@ -32,8 +32,17 @@ test('the owner brands the business: logo, colour, fields, sidebar', async ({ pa
   await expect(page.locator('input[type="color"]')).toHaveValue(/^#d42/, { timeout: 8000 });
 
   await page.getByPlaceholder('¡Gracias por tu compra!').fill('¡Gracias por tu compra!');
+
+  // The address that prints (0028): written, saved, and back after a reload.
+  await page
+    .getByPlaceholder('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.')
+    .fill('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.');
   await page.getByRole('button', { name: 'Guardar comprobantes' }).click();
   await expect(page.getByText('Guardado.')).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByPlaceholder('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.'),
+  ).toHaveValue('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.');
 
   // The sidebar brand block now renders the logo, not the wordmark.
   await page.goto('/');

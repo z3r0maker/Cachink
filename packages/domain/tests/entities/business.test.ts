@@ -49,6 +49,23 @@ describe('BusinessSchema', () => {
     expect(() => BusinessSchema.parse({ ...validBusiness, isrTasa: -100 })).toThrow();
   });
 
+  it('defaults direccion to null for pre-0028 payloads and rows', () => {
+    const parsed = BusinessSchema.parse(validBusiness);
+    expect(parsed.direccion).toBeNull();
+  });
+
+  it('accepts a printable address line up to 140 characters', () => {
+    const parsed = BusinessSchema.parse({
+      ...validBusiness,
+      direccion: 'Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.',
+    });
+    expect(parsed.direccion).toContain('Hidalgo');
+  });
+
+  it('rejects a direccion longer than 140 characters', () => {
+    expect(() => BusinessSchema.parse({ ...validBusiness, direccion: 'x'.repeat(141) })).toThrow();
+  });
+
   it('rejects a malformed ULID for id', () => {
     expect(() => BusinessSchema.parse({ ...validBusiness, id: 'not-a-ulid' })).toThrow();
   });
