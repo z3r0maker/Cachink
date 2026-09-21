@@ -126,18 +126,26 @@ Do not start these until the owner gets that branch pushed and merged with `main
 
 ## 3. Suggested order for the next session
 
-> Refreshed 2026-09-21 — several rows below were stale: N-31 (landing copy,
-> limits, +IVA, offline line) and N-16 (import engine) are `[x]`, the backoffice
-> row's Ayuda/prune/last-login items are done, C-12 + N-04 landed on main
-> (2a70b7f3), and ADR-090 moved `informeMensual` to Xangarro (the landing
-> already promised it there). N-23's offline page landed 2026-09-21 pending its
-> seeded-suite e2e run.
+> Refreshed 2026-09-21 (evening) — the seeded web e2e suite ran: N-23's
+> offline-page and ADR-090's informe specs are green. The intermittent
+> "empty main" on `/` (shell + badges render, main blank, server logs
+> "destination stream closed early") is **pre-existing upstream**: it
+> reproduces identically at 9ae75031, before any of the day's commits, and
+> matches the flake noted in 2a70b7f3. It concentrates in a11y/data/inicio
+> home-screen assertions and varies run to run. Always `db:reset` before a
+> full run — consecutive runs on one seed pollute it (446 false failures
+> observed). The backoffice Playwright suite exists and passes 7/7 after one
+> real fix: its `test:e2e` hardcoded a scheme-less `DATABASE_URL`
+> (`db-local.sh` now exports `admin-url`).
 
-1. Run the seeded web e2e suite (offline-page.spec included); fix what it finds.
-2. N-16 → N-18 import follow-through if anything remains (engine is `[x]`).
+1. The home-screen flake above — root-cause when it repeats on hosted.
+2. N-28 performance audit: k6 (not installed locally) at 10× beta load against
+   the seeded stack; the LCP-on-4G and low-end-Android halves need hosted +
+   devices, so decide where it runs first.
 3. C-15 → N-19 → N-20 branding and receipts (phone halves after the app branch).
 4. C-20 → N-17 opening balances and inventario inicial (SQLite half pending).
-5. Backoffice leftovers: Playwright E2E against a real DB, mobile bug-report
-   inbox source, the last-seen consolidation if still triplicated.
+5. Backoffice leftovers: the mobile bug-report inbox source (app branch), the
+   last-seen consolidation if still triplicated — the Playwright E2E is done
+   (7/7 green 2026-09-21, see above).
 6. When the app branch lands: N-32 copy fixes, N-22, N-21 (phone half), N-25,
    N-24, then N-29.

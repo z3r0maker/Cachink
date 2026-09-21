@@ -32,6 +32,7 @@ SUPER_URL="postgres://postgres:xangarro@localhost:${PORT}/${DB}"
 APP_URL="postgres://xangarro_app:xangarro_app@localhost:${PORT}/${DB}"
 BILLING_URL="postgres://xangarro_billing:xangarro_billing@localhost:${PORT}/${DB}"
 METERING_URL="postgres://xangarro_metering:xangarro_metering@localhost:${PORT}/${DB}"
+ADMIN_URL="postgres://xangarro_admin:xangarro_admin@localhost:${PORT}/${DB}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # `local/` before `drizzle/`: the compat layer creates the roles the migrations
@@ -73,5 +74,6 @@ case "${1:-up}" in
   super-url) echo "$SUPER_URL" ;;
   billing-url) echo "$BILLING_URL" ;;
   metering-url) echo "$METERING_URL" ;;
-  *) echo "usage: $0 {up|apply|down|url|super-url|billing-url|metering-url}" >&2; exit 1 ;;
+  admin-url) echo "$ADMIN_URL" ;;
+  *) echo "usage: $0 {up|apply|down|url|super-url|billing-url|metering-url|admin-url}" >&2; exit 1 ;;
 esac
