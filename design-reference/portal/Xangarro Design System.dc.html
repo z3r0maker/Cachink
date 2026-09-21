@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --cyan:#06B6D4; --peach-soft:#FFE8D6;
+  --scrim:rgba(13,13,13,0.45);
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+@keyframes xg-spin{to{transform:rotate(360deg)}}
+@keyframes xg-scrim{from{opacity:0}to{opacity:1}}
+@keyframes xg-drawer{from{transform:translateX(28px)}to{transform:none}}
+@keyframes xg-pop{from{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--black)}to{transform:none;box-shadow:5px 5px 0 var(--black)}}
+@keyframes xg-toast{from{transform:translate(-50%,16px)}to{transform:translate(-50%,0)}}
+@keyframes xg-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@keyframes xg-draw{from{stroke-dashoffset:1200}to{stroke-dashoffset:0}}
+@keyframes xg-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes xg-growx{from{scale:0 1}to{scale:1 1}}
+@keyframes xg-sweep{from{opacity:0;transform:rotate(-24deg)}to{opacity:1;transform:none}}
+@keyframes xg-needle{from{transform:rotate(-80deg)}to{transform:rotate(0)}}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+</style>
+</helmet>
+
+<div style="min-height:100vh;background:var(--offwhite);font-family:var(--font-sans);color:var(--ink);padding:40px 48px 120px;">
+<div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:56px;">
+
+  <header style="border:2.5px solid var(--black);border-radius:22px;box-shadow:5px 5px 0 var(--black);overflow:hidden;background:var(--yellow);">
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 28px;border-bottom:2.5px solid var(--black);background:var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--yellow);display:grid;place-items:center;font-weight:800;font-size:20px;color:var(--black);">$</div>
+      <span style="font-size:22px;font-weight:800;letter-spacing:-0.04em;color:var(--white);">Xangarro!</span>
+      <span style="margin-left:auto;display:flex;gap:10px;flex-wrap:wrap;">
+        <span style="display:inline-flex;align-items:center;background:var(--yellow);color:var(--black);border:2px solid var(--yellow);border-radius:9999px;padding:5px 13px;font-size:12px;font-weight:700;letter-spacing:0.07em;">DESKTOP 1440</span>
+        <span style="display:inline-flex;align-items:center;background:transparent;color:var(--white);border:2px solid var(--white);border-radius:9999px;padding:5px 13px;font-size:12px;font-weight:700;letter-spacing:0.07em;">ES-MX</span>
+      </span>
+    </div>
+    <div style="padding:34px 28px 36px;">
+      <h1 style="margin:0;font-size:56px;line-height:0.98;font-weight:800;letter-spacing:-0.04em;color:var(--black);">Sistema de diseño</h1>
+      <p style="margin:14px 0 0;font-size:17px;font-weight:600;color:var(--black);max-width:62ch;text-wrap:pretty;">Tokens y componentes del portal web. Todo es interactivo: presiona, escribe y cambia de estado.</p>
+    </div>
+  </header>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">01</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Tokens</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Color</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+      <sc-for list="{{ swatches }}" as="s" hint-placeholder-count="12">
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+          <div style="height:72px;border-bottom:2px solid var(--black);background:{{ s.hex }}"></div>
+          <div style="padding:12px 14px;">
+            <div style="font-size:14px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ s.name }}</div>
+            <div style="font-size:12px;font-weight:700;color:var(--text-muted);font-variant-numeric:tabular-nums;margin-top:2px;">{{ s.hex }}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-top:6px;line-height:1.35;">{{ s.use }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:20px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:18px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Semántico: relleno vs. texto</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div style="display:flex;align-items:center;gap:12px;"><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--green);"></span><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--green-soft);"></span><span style="font-size:15px;font-weight:800;color:var(--green-text);">Saludable · +$4,850.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;"><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--red);"></span><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--red-soft);"></span><span style="font-size:15px;font-weight:800;color:var(--red-text);">Crítico · −$1,240.00</span></div>
+          <div style="display:flex;align-items:center;gap:12px;"><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--blue);"></span><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--blue-soft);"></span><span style="font-size:15px;font-weight:800;color:var(--blue-text);">Director · informativo</span></div>
+          <div style="display:flex;align-items:center;gap:12px;"><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--warning);"></span><span style="width:28px;height:28px;border:2px solid var(--black);border-radius:8px;background:var(--warning-soft);"></span><span style="font-size:15px;font-weight:800;color:var(--warning-text);">Pago pendiente</span></div>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Los colores base son rellenos. Cuando pintan texto se usa la variante <em>Text</em> para pasar AA. <strong>gray400 nunca es texto.</strong></p>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:18px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Series de gráficas · en orden</div>
+        <div style="display:flex;gap:0;border:2px solid var(--black);border-radius:10px;overflow:hidden;height:44px;">
+          <div style="flex:1;background:var(--green);"></div>
+          <div style="flex:1;background:var(--blue);"></div>
+          <div style="flex:1;background:var(--warning);"></div>
+          <div style="flex:1;background:var(--purple);"></div>
+          <div style="flex:1;background:var(--cyan);"></div>
+          <div style="flex:1;background:var(--red);"></div>
+          <div style="flex:1;background:var(--gray-400);"></div>
+        </div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin:18px 0 12px;">Fondos de producto</div>
+        <div style="display:flex;gap:10px;">
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--white);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--yellow);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--green-soft);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--blue-soft);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--red-soft);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--purple-soft);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--peach-soft);"></span>
+          <span style="width:40px;height:40px;border:2px solid var(--black);border-radius:10px;background:var(--gray-200);"></span>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Sin degradados. Sin modo oscuro. El único valor translúcido es el scrim de los modales.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">02</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Tokens</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Tipografía</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:24px;display:flex;flex-direction:column;gap:18px;">
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">48 / 800 / −0.04em</div><div style="font-size:48px;line-height:1;font-weight:800;letter-spacing:-0.04em;color:var(--black);">Tus finanzas hoy</div></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">32 / 800 / −0.03em · título de página</div><div style="font-size:32px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Estados financieros</div></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">56 / 800 / tabular · número héroe</div><div style="font-size:56px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);">$15,197.62</div></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">20 / 800 · título de tarjeta</div><div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Últimos 30 días</div></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">16 / 500 · cuerpo</div><p style="margin:0;font-size:16px;font-weight:500;line-height:1.5;color:var(--ink);max-width:56ch;text-wrap:pretty;">Es la suma de todas tus ventas en este periodo, sin importar el método de pago. Si vendiste 50 pasteles a $100, tus ingresos son $5,000.</p></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">14 / 600 · secundario</div><p style="margin:0;font-size:14px;font-weight:600;color:var(--text-muted);">Todo el dinero que entró por ventas</p></div>
+        <div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;color:var(--gray-600);margin-bottom:4px;">12 / 700 / 0.07em · micro-etiqueta</div><div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">VENTAS HOY · 24 ABR</div></div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Escala · 12 es el piso</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ typeScale }}" as="t" hint-placeholder-count="11">
+            <div style="display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--gray-200);padding-bottom:7px;">
+              <span style="width:46px;flex:none;font-size:12px;font-weight:700;color:var(--gray-600);font-variant-numeric:tabular-nums;">{{ t.px }}</span>
+              <span style="font-weight:800;letter-spacing:-0.03em;color:var(--black);font-size:{{ t.px }}px">Aa</span>
+              <span style="margin-left:auto;font-size:12px;font-weight:600;color:var(--text-muted);text-align:right;">{{ t.use }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin:16px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Plus Jakarta Sans 400–800. Los números grandes siempre <code style="font-family:inherit;font-weight:800;">tabular-nums</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">03</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Tokens</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Forma, bordes y sombras</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Radios</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <sc-for list="{{ radii }}" as="r" hint-placeholder-count="8">
+            <div style="width:56px;height:56px;display:grid;place-items:center;background:var(--yellow-soft);border:2px solid var(--black);font-size:13px;font-weight:800;color:var(--black);border-radius:{{ r }}px">{{ r }}</div>
+          </sc-for>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Tarjetas 16–18 · botones 14–16 · inputs 12–14 · pills 9999.</p>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Sombras duras</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:12px;padding:10px 14px;box-shadow:3px 3px 0 var(--black);font-size:13px;font-weight:700;">3px · chip / input</div>
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:14px;padding:10px 14px;box-shadow:4px 4px 0 var(--black);font-size:13px;font-weight:700;">4px · tarjeta</div>
+          <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;padding:10px 14px;box-shadow:5px 5px 0 var(--black);font-size:13px;font-weight:700;">5px · héroe</div>
+          <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:12px;padding:10px 14px;box-shadow:1px 1px 0 var(--black);transform:translate(2px,2px);font-size:13px;font-weight:700;">1px · presionado</div>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">El “sello” · presiónalo</div>
+        <div role="button" tabindex="0" style="background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:5px 5px 0 var(--black);padding:22px;cursor:pointer;user-select:none;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Utilidad del mes</div>
+          <div style="font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:6px;">$15,197.62</div>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Al presionar: <strong>translate(2px, 2px)</strong> y la sombra baja a 1px, 100 ms. El hover no mueve nada — solo oscurece el amarillo.</p>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+          <div style="width:72px;height:36px;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:0.05em;">NORMAL</div>
+          <div style="width:72px;height:36px;border:2px solid var(--black);border-radius:10px;background:var(--yellow-deep);display:grid;place-items:center;font-size:12px;font-weight:700;letter-spacing:0.05em;">HOVER</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:16px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Anillo de foco · tabula por aquí</div>
+      <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+        <button type="button" style="height:44px;padding:0 20px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" data-onyellow="1">Botón amarillo</button>
+        <button type="button" style="height:44px;padding:0 20px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;">Botón oscuro</button>
+        <input type="text" placeholder="Campo de texto" style="height:44px;padding:0 14px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:15px;font-weight:500;background:var(--white);">
+        <p style="margin:0;font-size:13px;font-weight:600;color:var(--text-muted);max-width:34ch;">3px amarillo + 2px negro interior. Sobre amarillo el anillo es negro.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">04</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Botones</div>
+      </div>
+    </div>
+    <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;display:flex;flex-direction:column;gap:22px;">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Variantes · tamaño lg</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <sc-for list="{{ btnVariants }}" as="b" hint-placeholder-count="4">
+            <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 24px;border-radius:16px;font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1),background 100ms linear;background:{{ b.bg }};color:{{ b.fg }};border:{{ b.border }};box-shadow:{{ b.shadow }}" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:{{ b.hover }}">{{ b.label }}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div style="border-top:2px solid var(--gray-200);padding-top:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Tamaños md / lg, con ícono, cargando, deshabilitado</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <button type="button" style="height:44px;padding:0 18px;background:var(--yellow);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">md · exportar</button>
+          <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>Nuevo producto</button>
+          <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:wait;"><span style="width:16px;height:16px;border:2.5px solid var(--black);border-right-color:transparent;border-radius:9999px;display:inline-block;animation:xg-spin 700ms linear infinite;"></span>Guardando</button>
+          <button type="button" disabled style="height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;opacity:0.5;cursor:not-allowed;">Nuevo operador</button>
+          <span style="font-size:13px;font-weight:600;color:var(--text-muted);">Tu plan incluye 2 operadores · <a href="#suscripcion">Mejorar plan</a></span>
+        </div>
+      </div>
+      <div style="border-top:2px solid var(--gray-200);padding-top:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Primitiva del sistema · <code style="font-family:inherit;font-weight:800;">Btn</code> del kit móvil</div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <x-import component-from-global-scope="Btn" variant="primary" size="lg" hint-size="180px,52px">Registrar venta</x-import>
+          <x-import component-from-global-scope="Btn" variant="dark" size="lg" hint-size="150px,52px">Ver estados</x-import>
+          <x-import component-from-global-scope="Btn" variant="ghost" size="lg" hint-size="120px,52px">Cancelar</x-import>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">05</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Campos y elección</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:16px;">Inputs</div>
+        <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Nombre</label>
+        <input type="text" value="{{ nombre }}" onChange="{{ setNombre }}" placeholder="Tortilla" style="width:100%;box-sizing:border-box;height:46px;padding:0 14px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:15px;font-weight:500;background:var(--white);color:var(--ink);">
+        <div style="height:14px;"></div>
+        <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Precio de venta</label>
+        <div style="display:flex;align-items:center;border:2px solid var(--black);border-radius:12px;background:var(--white);overflow:hidden;">
+          <span style="width:44px;flex:none;height:46px;display:grid;place-items:center;background:var(--gray-100);border-right:2px solid var(--black);font-size:16px;font-weight:800;color:var(--black);">$</span>
+          <input type="text" value="{{ precio }}" onChange="{{ setPrecio }}" style="flex:1;min-width:0;height:46px;padding:0 14px;border:0;outline:none;font-family:inherit;font-size:16px;font-weight:700;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--white);">
+        </div>
+        <div style="height:14px;"></div>
+        <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Categoría</label>
+        <select value="{{ categoria }}" onChange="{{ setCategoria }}" style="width:100%;box-sizing:border-box;height:46px;padding:0 12px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:15px;font-weight:600;background:var(--white);color:var(--ink);">
+          <option>Materia Prima</option>
+          <option>Producto Terminado</option>
+          <option>Empaque</option>
+          <option>Herramienta</option>
+          <option>Insumo</option>
+          <option>Otro</option>
+        </select>
+        <div style="height:14px;"></div>
+        <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">RFC</label>
+        <input type="text" value="XAXX01010" style="width:100%;box-sizing:border-box;height:46px;padding:0 14px;border:2.5px solid var(--red);border-radius:12px;font-family:inherit;font-size:15px;font-weight:700;background:var(--red-soft);color:var(--ink);text-transform:uppercase;">
+        <div style="display:flex;align-items:center;gap:7px;margin-top:6px;font-size:13px;font-weight:700;color:var(--red-text);">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          RFC no válido
+        </div>
+        <div style="height:18px;"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;border-top:2px solid var(--gray-200);padding-top:16px;">
+          <div>
+            <div style="font-size:15px;font-weight:800;color:var(--black);">Inventario / Stock</div>
+            <div style="font-size:13px;font-weight:600;color:var(--text-muted);">Controla las cantidades de tus productos</div>
+          </div>
+          <div role="switch" aria-checked="{{ switchOn }}" onClick="{{ toggleSwitch }}" tabindex="0" style="width:62px;height:34px;flex:none;border:2.5px solid var(--black);border-radius:9999px;cursor:pointer;display:flex;align-items:center;padding:2px;transition:background 120ms linear;background:{{ switchBg }}">
+            <span style="width:24px;height:24px;border-radius:9999px;background:var(--white);border:2px solid var(--black);transition:transform 130ms cubic-bezier(0.2,0.8,0.2,1);transform:translateX({{ switchKnob }})"></span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:6px;">Option cards</div>
+          <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:14px;">¿Qué tipo de negocio tienes?</div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <sc-for list="{{ bizTypes }}" as="o" hint-placeholder-count="4">
+              <div role="radio" tabindex="0" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border:2px solid var(--black);border-radius:14px;cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1);background:{{ o.bg }};box-shadow:{{ o.shadow }}" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                <div style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{ o.icon }}"></path></svg>
+                </div>
+                <div style="min-width:0;">
+                  <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);">{{ o.title }}</div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text-muted);line-height:1.35;margin-top:2px;text-wrap:pretty;">{{ o.desc }}</div>
+                </div>
+                <div style="width:22px;height:22px;flex:none;margin-left:auto;border:2.5px solid var(--black);border-radius:9999px;display:grid;place-items:center;background:{{ o.dotBg }}">
+                  <span style="width:8px;height:8px;border-radius:9999px;background:{{ o.dotInner }}"></span>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Para 5 opciones o menos: tarjetas, nunca un dropdown.</p>
+        </div>
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Periodo · toggle segmentado</div>
+          <div style="display:inline-flex;border:2.5px solid var(--black);border-radius:14px;overflow:hidden;box-shadow:3px 3px 0 var(--black);">
+            <sc-for list="{{ periods }}" as="p" hint-placeholder-count="4">
+              <div role="tab" tabindex="0" aria-selected="{{ p.on }}" onClick="{{ p.pick }}" style="height:44px;padding:0 18px;display:grid;place-items:center;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.05em;color:var(--black);border-left:{{ p.divider }};background:{{ p.bg }}">{{ p.label }}</div>
+            </sc-for>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <span style="display:inline-flex;align-items:center;gap:8px;background:var(--yellow-soft);border:2px solid var(--black);border-radius:9999px;padding:7px 14px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--black);">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 11h18"></path></svg>
+              {{ periodLabel }}
+            </span>
+            <span style="font-size:13px;font-weight:600;color:var(--text-muted);">Siempre se muestra el rango resuelto.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">06</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Chips, tarjetas y lenguaje llano</div>
+      </div>
+    </div>
+    <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;margin-bottom:16px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Tags · el estado nunca se dice solo con color</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <sc-for list="{{ tags }}" as="t" hint-placeholder-count="8">
+          <span style="display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:0.04em;background:{{ t.bg }};color:{{ t.fg }}">{{ t.label }}</span>
+        </sc-for>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start;">
+      <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:24px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Utilidad del mes</div>
+        <div style="font-size:56px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:10px 0 6px;">$15,197.62</div>
+        <div style="font-size:13px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;">01/MAY/2026 – 31/MAY/2026</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:12px;font-size:14px;font-weight:800;color:var(--black);">
+          <span style="width:11px;height:11px;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>
+          Tu negocio fue rentable este periodo.
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+          <button type="button" style="height:44px;padding:0 18px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Ver estados</button>
+          <span style="display:inline-flex;align-items:center;gap:5px;font-size:14px;font-weight:800;color:var(--black);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+            12% vs mes anterior
+          </span>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Ventas hoy</div>
+        <div style="font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--green-text);margin:8px 0 4px;">$4,850.00</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text-muted);">18 ventas · ticket promedio $269.44</div>
+        <div style="display:flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:800;color:var(--green-text);">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+          12% vs mes anterior
+        </div>
+        <div style="border-top:2px solid var(--gray-200);margin-top:16px;padding-top:14px;display:flex;flex-direction:column;gap:9px;">
+          <div style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:var(--green-text);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>Saludable — buen control de costos.</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:var(--warning-text);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--warning);border:2px solid var(--black);"></span>Bajo — tus costos consumen casi todo.</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:800;color:var(--red-text);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--red);border:2px solid var(--black);"></span>Crítico — vendes casi al costo o por debajo.</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:14px;font-weight:700;color:var(--text-muted);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--gray-400);border:2px solid var(--black);"></span>= sin cambio vs mes anterior</div>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Ayuda en lenguaje llano</div>
+        <sc-for list="{{ helpItems }}" as="h" hint-placeholder-count="2">
+          <div style="border-bottom:2px solid var(--gray-200);padding-bottom:14px;margin-bottom:14px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;">
+              <div style="min-width:0;">
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <span style="font-size:16px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ h.label }}</span>
+                  <span role="button" tabindex="0" onClick="{{ h.toggle }}" aria-expanded="{{ h.open }}" style="width:22px;height:22px;flex:none;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;font-size:12px;font-weight:800;cursor:pointer;color:var(--black);background:{{ h.qBg }}">?</span>
+                </div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:3px;text-wrap:pretty;">{{ h.subtitle }}</div>
+              </div>
+              <div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:var(--black);white-space:nowrap;">{{ h.amount }}</div>
+            </div>
+            <sc-if value="{{ h.open }}" hint-placeholder-val="{{ false }}">
+              <p style="animation:xg-reveal 150ms cubic-bezier(0.2,0.8,0.2,1) both;margin:12px 0 0;background:var(--yellow-soft);border:2px solid var(--black);border-radius:12px;padding:12px 14px;font-size:14px;font-weight:600;line-height:1.45;color:var(--ink);text-wrap:pretty;">{{ h.body }}</p>
+            </sc-if>
+          </div>
+        </sc-for>
+        <p style="margin:0;font-size:13px;font-weight:600;color:var(--text-muted);">Cada número tiene subtítulo siempre visible y un (?) que se expande debajo.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">07</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Tabla</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);">Ordena por encabezado, pasa el cursor por una fila, y ábrela para ver el detalle. Cambia de estado y de rol en el panel de abajo.</p>
+    <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:2.5px solid var(--black);background:var(--offwhite);flex-wrap:wrap;position:relative;z-index:1;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Ventas</span>
+          <span style="display:inline-flex;align-items:center;background:var(--gray-100);border:2px solid var(--black);border-radius:9999px;padding:4px 11px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;">{{ rowCountLabel }}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="display:flex;align-items:center;gap:8px;height:42px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4.5-4.5"></path></svg>
+            <input type="text" placeholder="Buscar concepto" style="border:0;outline:none;font-family:inherit;font-size:14px;font-weight:600;width:150px;background:transparent;color:var(--ink);">
+          </div>
+          <button type="button" style="display:inline-flex;align-items:center;gap:8px;height:42px;padding:0 16px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
+            Exportar
+          </button>
+        </div>
+      </div>
+
+      <sc-if value="{{ isHappy }}" hint-placeholder-val="{{ true }}">
+        <div style="overflow-x:auto;">
+          <div style="min-width:1040px;display:grid;grid-template-columns:150px minmax(320px,1.6fr) 80px 120px 130px 110px 130px;gap:0;background:var(--gray-100);border-bottom:2px solid var(--black);">
+            <sc-for list="{{ columns }}" as="c" hint-placeholder-count="7">
+              <div role="columnheader" tabindex="0" onClick="{{ c.sort }}" style="display:flex;align-items:center;gap:6px;padding:12px 14px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);user-select:none;justify-content:{{ c.align }}">
+                <span>{{ c.label }}</span>
+                <span style="font-size:12px;font-weight:800;color:{{ c.arrowColor }}">{{ c.arrow }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+            <div role="row" tabindex="0" onClick="{{ r.open }}" style="min-width:1040px;display:grid;grid-template-columns:150px minmax(320px,1.6fr) 80px 120px 130px 110px 130px;gap:0;align-items:center;min-height:56px;border-bottom:2px solid var(--gray-200);cursor:pointer;background:{{ r.bg }}" style-hover="background:var(--yellow-soft);">
+              <div style="padding:0 14px;font-size:13px;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums;">{{ r.fecha }}</div>
+              <div style="padding:0 14px;min-width:0;display:flex;align-items:center;gap:8px;">
+                <span style="font-size:15px;font-weight:700;color:var(--black);white-space:nowrap;text-decoration:{{ r.strike }}">{{ r.concepto }}</span>
+                <sc-if value="{{ r.cancelada }}" hint-placeholder-val="{{ false }}">
+                  <span style="display:inline-flex;align-items:center;background:var(--red-soft);color:var(--red-text);border:2px solid var(--black);border-radius:9999px;padding:2px 9px;font-size:12px;font-weight:700;white-space:nowrap;">Cancelada · Error al capturar</span>
+                </sc-if>
+              </div>
+              <div style="padding:0 14px;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);">{{ r.cantidad }}</div>
+              <div style="padding:0 14px;font-size:13px;font-weight:600;color:var(--ink);">{{ r.categoria }}</div>
+              <div style="padding:0 14px;"><span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;font-size:12px;font-weight:700;background:{{ r.metodoBg }};color:{{ r.metodoFg }}">{{ r.metodo }}</span></div>
+              <div style="padding:0 14px;font-size:13px;font-weight:600;color:var(--ink);">{{ r.operador }}</div>
+              <div style="padding:0 14px;text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.02em;color:{{ r.montoColor }};text-decoration:{{ r.strike }}">{{ r.monto }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:0;">
+          <sc-for list="{{ skeletonRows }}" as="s" hint-placeholder-count="6">
+            <div style="display:grid;grid-template-columns:150px minmax(0,1.4fr) 110px 130px 130px;gap:16px;align-items:center;height:56px;padding:0 14px;border-bottom:2px solid var(--gray-200);">
+              <div style="height:14px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+              <div style="height:14px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+              <div style="height:14px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+              <div style="height:14px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+              <div style="height:14px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+            </div>
+          </sc-for>
+          <div style="padding:14px 20px;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">Cargando…</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+          <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:18px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-1.5 12.5a2 2 0 0 1-2 1.5H7.5a2 2 0 0 1-2-1.5L4 7Z"></path><path d="M9 7V5a3 3 0 0 1 6 0v2"></path></svg>
+          </div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Aún no hay ventas en este periodo</div>
+          <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Las ventas que registren tus operadores en el teléfono aparecerán aquí.</p>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <div style="margin-top:20px;">
+              <button type="button" style="height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">Ver dispositivos</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+        <div style="padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+          <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+          </div>
+          <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Algo salió mal</div>
+          <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);">No pudimos cargar tus ventas. Revisa tu conexión e inténtalo otra vez.</p>
+          <div style="margin-top:20px;">
+            <button type="button" style="height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">08</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Avisos y progreso</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px;">
+      <sc-for list="{{ banners }}" as="b" hint-placeholder-count="3">
+        <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);background:{{ b.bg }}">
+          <div style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:{{ b.fg }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+          </div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;color:var(--black);">{{ b.title }}</div>
+            <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;text-wrap:pretty;">{{ b.body }}</div>
+          </div>
+          <button type="button" style="margin-left:auto;flex:none;height:42px;padding:0 16px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">{{ b.cta }}</button>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Barras de uso</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;"><span>Operadores</span><span style="font-variant-numeric:tabular-nums;color:var(--gray-600);">2 de 2</span></div>
+            <div style="height:14px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;"><div style="height:100%;width:100%;background:var(--warning);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;"><span>Dispositivos</span><span style="font-variant-numeric:tabular-nums;color:var(--gray-600);">1 de 2</span></div>
+            <div style="height:14px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;"><div style="height:100%;width:50%;background:var(--green);"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px;"><span>Registros este mes</span><span style="font-variant-numeric:tabular-nums;color:var(--gray-600);">38 de 50</span></div>
+            <div style="height:14px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;"><div style="height:100%;width:76%;background:var(--blue);"></div></div>
+          </div>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Pestañas</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;row-gap:8px;border-bottom:2.5px solid var(--black);">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <div role="tab" tabindex="0" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="padding:10px 16px;border:2px solid var(--black);border-bottom:0;border-radius:12px 12px 0 0;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--black);margin-bottom:-2px;background:{{ t.bg }}">{{ t.label }}</div>
+          </sc-for>
+        </div>
+        <div style="padding-top:16px;font-size:14px;font-weight:600;color:var(--text-muted);">Contenido de <strong style="color:var(--black);">{{ activeTab }}</strong>.</div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin:20px 0 12px;">Estado de sincronización</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <span style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--green-soft);border:2px solid var(--black);border-radius:9999px;padding:6px 13px;font-size:13px;font-weight:700;color:var(--black);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>Todo sincronizado</span>
+          <span style="display:inline-flex;align-items:center;gap:8px;align-self:flex-start;background:var(--warning-soft);border:2px solid var(--black);border-radius:9999px;padding:6px 13px;font-size:13px;font-weight:700;color:var(--black);"><span style="width:10px;height:10px;border-radius:9999px;background:var(--warning);border:2px solid var(--black);"></span>3 registros no enviados</span>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Navegación y cuenta</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:2px solid var(--black);border-radius:14px;background:var(--yellow);box-shadow:3px 3px 0 var(--black);font-size:15px;font-weight:800;color:var(--black);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="3" width="8" height="8" rx="1.5"></rect><rect x="13" y="3" width="8" height="5" rx="1.5"></rect><rect x="13" y="10" width="8" height="11" rx="1.5"></rect><rect x="3" y="13" width="8" height="8" rx="1.5"></rect></svg>
+            Inicio
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:11px 14px;border:2px solid transparent;border-radius:14px;font-size:15px;font-weight:700;color:var(--ink);" style-hover="background:var(--gray-100);border-color:var(--black);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3Z"></path><path d="M9 8h6M9 12h6"></path></svg>
+            Ventas
+          </div>
+        </div>
+        <div style="margin-top:16px;display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:14px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">Emprendedor</div>
+          </div>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto;flex:none;"><path d="M6 9l6 6 6-6"></path></svg>
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid var(--black);border-radius:14px;background:var(--white);">
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);">PR</div>
+          <div style="min-width:0;">
+            <div style="font-size:14px;font-weight:800;color:var(--black);">Pedro Ramírez</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">pedro@dondpedro.mx</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">09</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Capas</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);">Cajón lateral, diálogo de confirmación destructiva y toast.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <button type="button" onClick="{{ openDrawer }}" style="height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">Abrir cajón</button>
+      <button type="button" onClick="{{ openDialog }}" style="height:52px;padding:0 24px;background:var(--red);color:var(--black);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Revocar dispositivo</button>
+      <button type="button" onClick="{{ fireToast }}" style="height:52px;padding:0 24px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Mostrar toast</button>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">10</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Gráficas</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);">Rellenos planos, ejes negros de 2px, sin cuadrícula de fondo, sin brillos.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(520px,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Últimos 30 días · ventas vs gastos</div>
+        <svg viewBox="0 0 520 160" style="width:100%;height:auto;margin-top:12px;display:block;">
+          <path d="M40 130 L500 130" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M40 12 L40 130" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+          <polyline points="40,96 79,84 118,90 157,62 196,70 235,44 274,52 313,34 352,48 391,26 430,38 469,20 500,28" fill="none" stroke="#00C896" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:1200;animation:xg-draw 900ms cubic-bezier(0.2,0.8,0.2,1) both"></polyline>
+          <polyline points="40,118 79,112 118,120 157,106 196,114 235,100 274,110 313,96 352,104 391,92 430,102 469,88 500,94" fill="none" stroke="#FF4757" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:1200;animation:xg-draw 900ms cubic-bezier(0.2,0.8,0.2,1) 120ms both"></polyline>
+          <text x="6" y="20" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$8k</text>
+          <text x="6" y="134" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$0</text>
+          <text x="40" y="152" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">01 may</text>
+          <text x="455" y="152" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">31 may</text>
+        </svg>
+        <div style="display:flex;gap:16px;margin-top:8px;">
+          <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--black);"><span style="width:14px;height:4px;border-radius:2px;background:var(--green);"></span>Ventas</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;color:var(--black);"><span style="width:14px;height:4px;border-radius:2px;background:var(--red);"></span>Gastos</span>
+        </div>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Cascada de resultados</div>
+        <svg viewBox="0 0 560 214" style="width:100%;height:auto;margin-top:12px;display:block;">
+          <path d="M20 168 L544 168" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+          <path d="M72 38 L92 38 M138 118 L158 118 M204 118 L224 118 M270 119 L290 119 M336 152 L356 152 M402 152 L422 152 M468 153 L488 153" stroke="#0D0D0D" stroke-width="1.5" stroke-linecap="round"></path>
+          <rect x="26" y="38" width="46" height="130" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) both"></rect>
+          <rect x="92" y="38" width="46" height="80" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 60ms both"></rect>
+          <rect x="158" y="118" width="46" height="50" rx="3" fill="#3B6FFF" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 120ms both"></rect>
+          <rect x="224" y="115" width="46" height="4" rx="2" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 180ms both"></rect>
+          <rect x="290" y="119" width="46" height="33" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 240ms both"></rect>
+          <rect x="356" y="152" width="46" height="16" rx="3" fill="#3B6FFF" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 300ms both"></rect>
+          <rect x="422" y="150" width="46" height="3" rx="1.5" fill="#FFB800" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 360ms both"></rect>
+          <rect x="488" y="153" width="46" height="15" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 420ms both"></rect>
+          <text x="49" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$128,450</text>
+          <text x="115" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$79,240</text>
+          <text x="181" y="110" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$49,210</text>
+          <text x="247" y="107" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$1,180</text>
+          <text x="313" y="111" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$32,640</text>
+          <text x="379" y="144" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$15,390</text>
+          <text x="445" y="142" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#8E6600">−$192</text>
+          <text x="511" y="145" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$15,198</text>
+          <text x="49" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ingresos</text>
+          <text x="115" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Costo vtas</text>
+          <text x="181" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. bruta</text>
+          <text x="247" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Merma</text>
+          <text x="313" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Gastos op.</text>
+          <text x="379" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. operativa</text>
+          <text x="445" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">ISR</text>
+          <text x="511" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. neta</text>
+        </svg>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;display:flex;gap:20px;align-items:center;">
+        <svg viewBox="0 0 120 120" style="width:150px;height:150px;flex:none;display:block;">
+          <g style="transform-box:view-box;transform-origin:60px 60px;animation:xg-sweep 420ms cubic-bezier(0.2,0.8,0.2,1) both"><circle cx="60" cy="60" r="44" fill="none" stroke="#0D0D0D" stroke-width="26"></circle>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#00C896" stroke-width="22" stroke-dasharray="152 124" transform="rotate(-90 60 60)"></circle>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#3B6FFF" stroke-width="22" stroke-dasharray="0 152 69 60" transform="rotate(-90 60 60)"></circle>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#FFB800" stroke-width="22" stroke-dasharray="0 221 35 20" transform="rotate(-90 60 60)"></circle>
+          <circle cx="60" cy="60" r="44" fill="none" stroke="#8B5CF6" stroke-width="22" stroke-dasharray="0 256 20 10" transform="rotate(-90 60 60)"></circle>
+          </g><circle cx="60" cy="60" r="33" fill="#FFFFFF" stroke="#0D0D0D" stroke-width="2"></circle>
+          <text x="60" y="56" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10" font-weight="700" fill="#5A5A56">TOTAL</text>
+          <text x="60" y="70" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="14" font-weight="800" fill="#0D0D0D">$128,450</text>
+        </svg>
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">¿De dónde vienen tus ingresos?</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;"><span style="width:14px;height:14px;border:2px solid var(--black);border-radius:4px;background:var(--green);"></span>Producto<span style="margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gray-600);">55%</span></div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;"><span style="width:14px;height:14px;border:2px solid var(--black);border-radius:4px;background:var(--blue);"></span>Servicio<span style="margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gray-600);">25%</span></div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;"><span style="width:14px;height:14px;border:2px solid var(--black);border-radius:4px;background:var(--warning);"></span>Anticipo<span style="margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gray-600);">13%</span></div>
+            <div style="display:flex;align-items:center;gap:9px;font-size:14px;font-weight:700;"><span style="width:14px;height:14px;border:2px solid var(--black);border-radius:4px;background:var(--purple);"></span>Otro<span style="margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gray-600);">7%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Flujo · barra divergente</div>
+        <svg viewBox="0 0 700 180" style="width:100%;height:auto;margin-top:12px;display:block;">
+          <path d="M330 8 L330 164" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+          <text x="330" y="176" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$0</text>
+          <text x="186" y="36" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Cobros de ventas de contado</text>
+          <text x="186" y="72" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Cobros de crédito a clientes</text>
+          <text x="186" y="108" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Gastos operativos</text>
+          <text x="186" y="144" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Compras de inventario</text>
+          <rect x="330" y="18" width="200" height="26" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:left;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) both"></rect>
+          <rect x="330" y="54" width="62" height="26" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:left;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 80ms both"></rect>
+          <rect x="198" y="90" width="132" height="26" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:right;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 160ms both"></rect>
+          <rect x="246" y="126" width="84" height="26" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:right;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 240ms both"></rect>
+          <text x="538" y="36" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$96,200</text>
+          <text x="400" y="72" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$12,400</text>
+          <text x="208" y="108" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">−$32,640</text>
+          <text x="256" y="144" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">−$18,900</text>
+        </svg>
+        <div style="border-top:2px solid var(--gray-200);margin-top:8px;padding-top:14px;display:flex;align-items:baseline;justify-content:space-between;">
+          <span style="font-size:14px;font-weight:800;color:var(--black);">Incremento neto en efectivo</span>
+          <span style="font-size:24px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--green-text);">$57,060.00</span>
+        </div>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Activo · barra 100% apilada</div>
+        <div style="display:flex;height:40px;border:2.5px solid var(--black);border-radius:10px;overflow:hidden;">
+          <div style="width:58%;background:var(--green);border-right:2px solid var(--black);"></div>
+          <div style="width:29%;background:var(--blue);border-right:2px solid var(--black);"></div>
+          <div style="width:13%;background:var(--warning);"></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--green);"></span>Efectivo 58%</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--blue);"></span>Inventarios 29%</span>
+          <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--warning);"></span>Por cobrar 13%</span>
+        </div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin:20px 0 8px;">Sparkline · 6 meses</div>
+        <svg viewBox="0 0 240 48" style="width:100%;max-width:240px;height:auto;display:block;">
+          <polyline points="4,40 44,32 84,36 124,22 164,26 204,12 236,8" fill="none" stroke="#00C896" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:1200;animation:xg-draw 700ms cubic-bezier(0.2,0.8,0.2,1) both"></polyline>
+        </svg>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:6px;">Medidor de medio círculo</div>
+        <div style="display:flex;gap:16px;align-items:flex-end;">
+          <sc-for list="{{ gauges }}" as="g" hint-placeholder-count="2">
+            <div style="flex:1;min-width:0;text-align:center;">
+              <svg viewBox="0 0 180 106" style="width:100%;height:auto;display:block;">
+                <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#FF4757" stroke-width="16" stroke-dasharray="44 400"></path>
+                <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#FFB800" stroke-width="16" stroke-dasharray="0 44 44 400"></path>
+                <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#00C896" stroke-width="16" stroke-dasharray="0 88 132 400"></path>
+                <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#0D0D0D" stroke-width="2"></path>
+                <path d="M20 106 A70 70 0 0 0 20 90" fill="none" stroke="none"></path>
+                <line x1="90" y1="90" x2="{{ g.nx }}" y2="{{ g.ny }}" stroke="#0D0D0D" stroke-width="4" stroke-linecap="round" style="transform-box:view-box;transform-origin:90px 90px;animation:xg-needle 760ms cubic-bezier(0.2,0.8,0.2,1) both"></line>
+                <circle cx="90" cy="90" r="7" fill="#FFD60A" stroke="#0D0D0D" stroke-width="2.5"></circle>
+              </svg>
+              <div style="font-size:28px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:2px;">{{ g.value }}</div>
+              <div style="font-size:13px;font-weight:800;color:{{ g.tone }};margin-top:4px;text-wrap:pretty;">{{ g.verdict }}</div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-top:6px;">{{ g.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">11</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Fundamentos</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Movimiento</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);max-width:74ch;text-wrap:pretty;">El movimiento es funcional: confirma un toque, revela contenido o dibuja un dato que acaba de llegar. Nada se mueve solo porque se vea bien — sin brillos, sin parallax, sin entradas escalonadas al hacer scroll.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:4px;">Sello</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:14px;">100 ms · al presionar</div>
+        <div role="button" tabindex="0" style="height:76px;border:2.5px solid var(--black);border-radius:14px;background:var(--yellow);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;cursor:pointer;user-select:none;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">Presióname</div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:4px;">Elevación</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:14px;">120 ms · solo en escritorio</div>
+        <div style="height:76px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1)" style-hover="transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);">Pasa el cursor</div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:4px;">Revelar</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:14px;">150 ms · ayuda y acordeones</div>
+        <div role="button" tabindex="0" onClick="{{ toggleMotionDemo }}" style="height:34px;padding:0 14px;border:2px solid var(--black);border-radius:10px;background:var(--white);box-shadow:3px 3px 0 var(--black);display:inline-flex;align-items:center;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">{{ motionDemoLabel }}</div>
+        <sc-if value="{{ motionDemoOpen }}" hint-placeholder-val="{{ false }}">
+          <p style="animation:xg-reveal 150ms cubic-bezier(0.2,0.8,0.2,1) both;margin:12px 0 0;background:var(--yellow-soft);border:2px solid var(--black);border-radius:12px;padding:10px 12px;font-size:13px;font-weight:600;color:var(--ink);">Aparece hacia abajo, 5 px, sin rebote.</p>
+        </sc-if>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:4px;">Dibujo de datos</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-bottom:14px;">520–900 ms · una sola vez</div>
+        <svg viewBox="0 0 200 76" style="width:100%;height:auto;display:block;">
+          <path d="M6 70 L194 70" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+          <rect x="14" y="34" width="26" height="36" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) both"></rect>
+          <rect x="54" y="22" width="26" height="48" rx="3" fill="#3B6FFF" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 60ms both"></rect>
+          <rect x="94" y="44" width="26" height="26" rx="3" fill="#FFB800" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 120ms both"></rect>
+          <rect x="134" y="12" width="26" height="58" rx="3" fill="#8B5CF6" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 180ms both"></rect>
+        </svg>
+      </div>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Duraciones</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <sc-for list="{{ motionTokens }}" as="m" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:11px 0;border-bottom:2px solid var(--gray-200);">
+              <span style="font-size:14px;font-weight:700;color:var(--black);">{{ m.what }}</span>
+              <span style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--gray-600);white-space:nowrap;">{{ m.dur }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Curva única: <strong style="color:var(--black);">cubic-bezier(0.2, 0.8, 0.2, 1)</strong>. Corta y seca, como sellar un papel.</p>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Lo que no se anima</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ motionNever }}" as="n" hint-placeholder-count="5">
+            <div style="display:flex;align-items:flex-start;gap:10px;">
+              <span style="width:22px;height:22px;flex:none;border:2px solid var(--black);border-radius:6px;background:var(--red-soft);display:grid;place-items:center;color:var(--red-text);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+              </span>
+              <span style="font-size:14px;font-weight:600;color:var(--ink);line-height:1.35;text-wrap:pretty;">{{ n }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="margin-top:16px;background:var(--yellow-soft);border:2px solid var(--black);border-radius:12px;padding:12px 14px;font-size:13px;font-weight:600;color:var(--ink);">Con <strong>prefers-reduced-motion</strong> todo se apaga: el portal sigue funcionando igual, solo sin movimiento.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">12</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Asesor y avisos</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);max-width:74ch;text-wrap:pretty;">El Asesor no es un chat: aparece como tarjetas, conclusiones cortas y un reporte mensual. Todo texto escrito por la IA lleva el marcador <strong>Asesor</strong> con el icono sparkles, nunca robots, morados ni brillos. Cada bloque de IA cierra con su pie: «Generado con IA a partir de tus registros. Revisa antes de decidir.»</p>
+
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Marcador de Asesor</div>
+        <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:3px 10px;background:var(--yellow-soft);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+            Asesor
+          </span>
+          <span style="font-size:13px;font-weight:600;color:var(--text-muted);">12 px · 700 · sparkles 13 px</span>
+        </div>
+        <div style="display:flex;gap:14px;align-items:flex-start;padding:16px;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);margin-top:16px;">
+          <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+          </span>
+          <div style="min-width:0;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Asesor</div>
+            <p style="margin:6px 0 0;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">Tu utilidad bajó 12% porque la nómina creció, no porque vendiste menos.</p>
+            <p style="margin:8px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+          </div>
+        </div>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Tarjeta del feed</div>
+        <div style="border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);background:var(--white);padding:18px;display:flex;gap:14px;align-items:flex-start;">
+          <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--peach-soft);display:grid;place-items:center;color:var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V4h9l8.6 8.6a1.4 1.4 0 0 1 0 2M7.5 7.5h.01"></path></svg>
+          </span>
+          <div style="min-width:0;flex:1;">
+            <div style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">El queso te cuesta 18% más que en junio</div>
+            <p style="margin:6px 0 0;font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">Tu margen bajó de 35% a 22%.</p>
+            <div style="display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap;">
+              <button type="button" style="height:42px;padding:0 16px;background:var(--yellow);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">Ver precio sugerido</button>
+              <span role="button" tabindex="0" style="font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Ahora no</span>
+            </div>
+          </div>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Un hallazgo, una explicación con el número real, una sola acción. Máximo 3 en Inicio, 5 en Asesor.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+      <sc-for list="{{ paceCards }}" as="p" hint-placeholder-count="3">
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Meta · {{ p.state }}</div>
+          <div style="display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;">
+            <span style="font-size:40px;line-height:0.9;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);">{{ p.pct }}</span>
+            <span style="font-size:14px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;padding-bottom:4px;">{{ p.amounts }}</span>
+          </div>
+          <div style="height:18px;border:2.5px solid var(--black);border-radius:10px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);overflow:hidden;margin-top:14px;">
+            <div style="height:100%;background:var(--green);width:{{ p.bar }}"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:9px;margin-top:16px;">
+            <span style="width:13px;height:13px;flex:none;border-radius:9999px;border:2px solid var(--black);background:{{ p.dot }}"></span>
+            <span style="font-size:15px;font-weight:800;color:{{ p.fg }}">{{ p.text }}</span>
+          </div>
+          <div style="font-size:13px;font-weight:700;color:var(--black);margin-top:12px;font-variant-numeric:tabular-nums;">{{ p.daily }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">
+      <sc-for list="{{ levelCards }}" as="l" hint-placeholder-count="3">
+        <div style="display:flex;gap:14px;align-items:center;padding:18px;border:2px solid var(--black);border-radius:16px;background:{{ l.bg }};box-shadow:{{ l.shadow }}">
+          <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ l.icon }}"></path></svg>
+          </span>
+          <div style="min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <span style="font-size:17px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ l.title }}</span>
+              <sc-if value="{{ l.rec }}" hint-placeholder-val="{{ false }}">
+                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;background:var(--green-soft);color:var(--green-text);">Recomendado</span>
+              </sc-if>
+            </div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-top:4px;font-variant-numeric:tabular-nums;">{{ l.amounts }}</div>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Fila bloqueada y de progreso</div>
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:32px;height:32px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--green-soft);display:grid;place-items:center;color:var(--green-text);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+            </span>
+            <span style="font-size:15px;font-weight:800;color:var(--black);">Resumen del mes</span>
+            <span style="margin-left:auto;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--green-soft);color:var(--green-text);">Activo</span>
+          </div>
+          <div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="width:32px;height:32px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--gray-600);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              </span>
+              <span style="font-size:15px;font-weight:800;color:var(--black);">¿Me alcanza? (pronóstico)</span>
+              <span style="margin-left:auto;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--gray-100);color:var(--text-muted);font-variant-numeric:tabular-nums;">67 de 90 días</span>
+            </div>
+            <div style="margin:10px 0 0 42px;">
+              <div style="height:12px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;"><div style="height:100%;width:74%;background:var(--yellow);"></div></div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink);margin-top:7px;">Disponible en 23 días</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:14px;">Campana y toast de hito</div>
+        <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+          <div style="position:relative;display:grid;place-items:center;width:44px;height:44px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">4</span>
+          </div>
+          <div style="position:relative;display:grid;place-items:center;width:44px;height:44px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">9+</span>
+          </div>
+          <span style="font-size:13px;font-weight:600;color:var(--text-muted);">Contador amarillo, borde negro 2 px, tope «9+»</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:5px 5px 0 var(--black);padding:14px 18px;margin-top:18px;">
+          <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;color:var(--black);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4ZM9 19h6M12 14v5"></path></svg>
+          </span>
+          <span style="font-size:15px;font-weight:800;color:var(--black);">¡Llegaste al 75% de tu meta!</span>
+          <span style="margin-left:auto;font-size:18px;font-weight:800;color:var(--gray-600);">×</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Renglón de aviso · 4 severidades · leído y sin leer</div>
+      <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+        <sc-for list="{{ inboxSamples }}" as="i" hint-placeholder-count="5">
+          <div style="display:flex;gap:14px;align-items:flex-start;padding:16px 20px;border-top:{{ i.divider }};background:{{ i.rowBg }}">
+            <span style="width:10px;height:10px;flex:none;margin-top:8px;border-radius:9999px;border:2px solid var(--black);background:{{ i.dot }}"></span>
+            <span style="width:42px;height:42px;flex:none;border:2px solid var(--black);border-radius:11px;display:grid;place-items:center;background:{{ i.tile }};color:{{ i.tileFg }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ i.icon }}"></path></svg>
+            </span>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:16px;color:var(--black);font-weight:{{ i.weight }};text-wrap:pretty;">{{ i.title }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ i.message }}</div>
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:var(--gray-600);margin-top:6px;">{{ i.meta }}</div>
+              <sc-if value="{{ i.button }}" hint-placeholder-val="{{ false }}">
+                <button type="button" style="margin-top:14px;height:42px;padding:0 16px;background:var(--yellow);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">{{ i.button }}</button>
+              </sc-if>
+            </div>
+            <span style="flex:none;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--blue-text);white-space:nowrap;">
+              Ver
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+            </span>
+          </div>
+        </sc-for>
+      </div>
+      <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);max-width:74ch;text-wrap:pretty;">La severidad siempre viaja con su icono, nunca solo con color. Los avisos de Operación muestran dispositivo y operador en la línea de meta; los de Sistema muestran «Xangarro!».</p>
+    </div>
+  </section>
+
+  <section>
+    <div style="display:flex;align-items:stretch;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);background:var(--white);margin-bottom:22px;">
+      <div style="width:88px;flex:none;background:var(--black);color:var(--yellow);display:grid;place-items:center;font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;">13</div>
+      <div style="padding:14px 22px;display:flex;flex-direction:column;justify-content:center;min-width:0;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);">Componentes</div>
+        <div style="font-size:30px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Sellos de meta lograda</div>
+      </div>
+    </div>
+    <p style="margin:0 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);max-width:74ch;text-wrap:pretty;">Roseta de bordes festoneados, contorno negro 2.5 px, sombra dura y dos colas de listón. Relleno plano — sin degradados, sin brillo metálico. El nivel elegido define el color: un empujón en durazno, un reto en gris, ambicioso en amarillo; las metas de «¿para qué?» van en verde con el nombre de la compra debajo. El sello del 100% lleva un trofeo arriba; a los 3, 6 y 12 meses seguidos gana una pestaña numerada. El estado bloqueado es la única excepción al borde negro.</p>
+    <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">
+      <sc-for list="{{ badgeSet }}" as="b" hint-placeholder-count="16">
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:18px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+          <svg viewBox="0 0 200 226" width="124" height="140" style="display:block;">
+            <path d="{{ b.seal }}" fill="{{ b.fill }}" stroke="{{ b.stroke }}" stroke-width="2.5"></path>
+            <circle cx="100" cy="100" r="50" fill="none" stroke="{{ b.stroke }}" stroke-width="2.5"></circle>
+            <g transform="translate(78 78)" fill="none" stroke="{{ b.iconStroke }}" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="{{ b.icon }}"></path>
+            </g>
+            <sc-if value="{{ b.trophy }}" hint-placeholder-val="{{ true }}">
+              <g transform="translate(88 8)" fill="var(--white)" stroke="{{ b.stroke }}" stroke-width="2.5" stroke-linejoin="round">
+                <path d="M4 2h16v7a8 8 0 0 1-16 0V2Z"></path>
+                <path d="M10 19h4v6h-4z"></path>
+              </g>
+            </sc-if>
+            <sc-if value="{{ b.streak }}" hint-placeholder-val="{{ false }}">
+              <g transform="translate(132 134)">
+                <rect x="0" y="0" width="52" height="34" rx="10" fill="var(--white)" stroke="{{ b.stroke }}" stroke-width="2.5"></rect>
+                <text x="26" y="24" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="18" font-weight="800" fill="#0D0D0D">{{ b.streak }}</text>
+              </g>
+            </sc-if>
+            <path d="M72 172 L60 220 L88 204 L94 174 Z" fill="{{ b.fill }}" stroke="{{ b.stroke }}" stroke-width="2.5" stroke-linejoin="round"></path>
+            <path d="M128 172 L140 220 L112 204 L106 174 Z" fill="{{ b.fill }}" stroke="{{ b.stroke }}" stroke-width="2.5" stroke-linejoin="round"></path>
+          </svg>
+          <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:{{ b.titleColor }};margin-top:12px;">{{ b.title }}</div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text-muted);margin-top:3px;">{{ b.tier }}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div style="margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;">
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Cuándo se usa el takeover</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ celebrationRules }}" as="r" hint-placeholder-count="5">
+            <div style="display:flex;gap:10px;align-items:flex-start;">
+              <span style="width:7px;height:7px;flex:none;margin-top:8px;border-radius:9999px;border:2px solid var(--black);background:var(--yellow);"></span>
+              <span style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ r.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+      <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">Movimiento del sello</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <sc-for list="{{ celebrationMotion }}" as="m" hint-placeholder-count="4">
+            <div style="display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--gray-200);padding-bottom:9px;">
+              <span style="font-size:14px;font-weight:800;color:var(--black);min-width:96px;font-variant-numeric:tabular-nums;">{{ m.time }}</span>
+              <span style="font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ m.text }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin:12px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Con <strong>prefers-reduced-motion</strong> el sello y el texto simplemente aparecen: sin confeti, sin sello que caiga.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer style="border-top:2.5px solid var(--black);padding-top:24px;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+    <p style="margin:0;font-size:14px;font-weight:600;color:var(--text-muted);max-width:60ch;">Estos componentes son la base de las pantallas del portal. Lo que sigue: shell de la app e Inicio.</p>
+    <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Xangarro! · Portal · app.xangarro.mx</span>
+  </footer>
+</div>
+
+<sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(13,13,13,0.45);z-index:60;animation:xg-scrim 120ms linear both;" onClick="{{ closeAll }}"></div>
+  <aside style="position:fixed;top:0;right:0;bottom:0;width:480px;max-width:92vw;background:var(--white);border-left:2.5px solid var(--black);z-index:61;overflow-y:auto;font-family:var(--font-sans);animation:xg-drawer 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px 24px;border-bottom:2.5px solid var(--black);background:var(--offwhite);position:sticky;top:0;">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Venta · 12/MAY/2026 14:32</div>
+        <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:2px;">Taco al pastor ×3</div>
+      </div>
+      <button type="button" onClick="{{ closeAll }}" style="width:42px;height:42px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+    </div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:20px;">
+      <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Monto</div>
+        <div style="font-size:40px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:4px;">$75.00</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0;">
+        <sc-for list="{{ drawerRows }}" as="d" hint-placeholder-count="7">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:2px solid var(--gray-200);">
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">{{ d.k }}</span>
+            <span style="font-size:15px;font-weight:700;color:var(--black);text-align:right;">{{ d.v }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="background:var(--blue-soft);border:2.5px solid var(--blue);border-radius:16px;padding:16px 18px;">
+        <div style="font-size:15px;font-weight:800;color:var(--black);">Este registro se capturó en el teléfono</div>
+        <p style="margin:6px 0 0;font-size:14px;font-weight:600;color:var(--ink);">Las ventas no se editan en el portal. Si algo está mal, tu operador la cancela desde la app.</p>
+      </div>
+    </div>
+  </aside>
+</sc-if>
+
+<sc-if value="{{ dialogOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;inset:0;background:rgba(13,13,13,0.45);z-index:70;display:grid;place-items:center;padding:24px;animation:xg-scrim 120ms linear both;" onClick="{{ closeAll }}">
+    <div style="width:480px;max-width:100%;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:28px;font-family:var(--font-sans);animation:xg-pop 140ms cubic-bezier(0.2,0.8,0.2,1) both;">
+      <div style="width:52px;height:52px;border:2.5px solid var(--black);border-radius:14px;background:var(--red-soft);display:grid;place-items:center;color:var(--red-text);margin-bottom:16px;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+      </div>
+      <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Revocar iPhone de caja?</div>
+      <p style="margin:10px 0 0;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Revocar borra el acceso, no los datos ya sincronizados.</p>
+      <div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+        <button type="button" onClick="{{ closeAll }}" style="height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Cancelar</button>
+        <button type="button" onClick="{{ confirmRevoke }}" style="height:48px;padding:0 20px;background:var(--red);color:var(--black);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Revocar</button>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+  <div style="position:fixed;bottom:28px;left:50%;transform:translateX(-50%);z-index:80;display:flex;align-items:center;gap:12px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:5px 5px 0 var(--yellow);padding:16px 22px;font-family:var(--font-sans);animation:xg-toast 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+    <span style="width:26px;height:26px;flex:none;border-radius:9999px;background:var(--green);border:2px solid var(--white);display:grid;place-items:center;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" stroke-width="3.2" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+    </span>
+    <span style="font-size:15px;font-weight:700;">{{ toastMsg }}</span>
+  </div>
+</sc-if>
+
+<sc-if value="{{ panelVisible }}" hint-placeholder-val="{{ true }}">
+<div style="position:fixed;right:24px;bottom:24px;z-index:90;width:244px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);overflow:hidden;">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+    <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles del prototipo</span>
+    <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:16px;font-weight:800;cursor:pointer;line-height:1;">{{ panelChevron }}</span>
+  </div>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ true }}">
+    <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado de datos</div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+          <sc-for list="{{ stateOptions }}" as="s" hint-placeholder-count="4">
+            <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Rol</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+            <div role="button" tabindex="0" onClick="{{ r.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ r.bg }}">{{ r.label }}</div>
+          </sc-for>
+        </div>
+      </div>
+      <p style="margin:0;font-size:12px;font-weight:600;color:var(--text-muted);line-height:1.4;">Solo lectura oculta los botones de crear y editar — no los muestra deshabilitados.</p>
+    </div>
+  </sc-if>
+</div>
+</sc-if>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;showPanel&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = {
+    dataState: null, role: null, panelOpen: false,
+    nombre: 'Taco al pastor', precio: '25.00', categoria: 'Producto Terminado',
+    switchOn: true, bizType: 3, period: 'Mes', tab: 'Resultados',
+    sortKey: 'fecha', sortDir: 'desc', help: {},
+    drawerOpen: false, dialogOpen: false, toastOpen: false, toastMsg: ''
+  };
+
+  money(n) {
+    return '$' + n.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  renderVals() {
+    const s = {
+      ...this.state,
+      dataState: this.state.dataState ?? this.props.startState ?? 'happy',
+      role: this.state.role ?? this.props.startRole ?? 'owner'
+    };
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+
+    const swatches = [
+      { name: 'yellow', hex: '#FFD60A', use: 'Botones primarios, tarjetas héroe, nav activo' },
+      { name: 'yellowDeep', hex: '#F5C800', use: 'Hover sobre amarillo' },
+      { name: 'yellowSoft', hex: '#FFFBCC', use: 'Superficies suaves, fila seleccionada' },
+      { name: 'black', hex: '#0D0D0D', use: 'Todos los bordes y el texto principal' },
+      { name: 'ink', hex: '#1A1A18', use: 'Texto de cuerpo' },
+      { name: 'offwhite', hex: '#F7F7F5', use: 'Fondo de la app' },
+      { name: 'gray100', hex: '#F2F2F0', use: 'Rellenos suaves, encabezado de tabla' },
+      { name: 'gray200', hex: '#E4E4E0', use: 'Divisores y rayado de filas' },
+      { name: 'gray400', hex: '#9E9E9A', use: 'Rellenos y series — nunca texto' },
+      { name: 'gray600', hex: '#5A5A56', use: 'Etiquetas' },
+      { name: 'textMuted', hex: '#6F6F6B', use: 'Texto secundario (AA)' },
+      { name: 'scrim', hex: 'rgba(13,13,13,0.45)', use: 'Fondo de modales y cajones' }
+    ];
+
+    const typeScale = [
+      { px: 12, use: 'micro-etiqueta' }, { px: 13, use: 'ayuda' }, { px: 14, use: 'secundario' },
+      { px: 16, use: 'cuerpo' }, { px: 18, use: 'subtítulo' }, { px: 20, use: 'título de tarjeta' },
+      { px: 24, use: 'diálogo' }, { px: 28, use: 'número medio' }, { px: 32, use: 'título de página' },
+      { px: 36, use: 'KPI' }, { px: 48, use: 'héroe' }
+    ];
+
+    const btnVariants = [
+      { label: 'Nuevo producto', bg: 'var(--yellow)', hover: 'var(--yellow-deep)', fg: 'var(--black)', border: '2.5px solid var(--black)', shadow: '4px 4px 0 var(--black)' },
+      { label: 'Ver estados', bg: 'var(--black)', hover: '#000', fg: 'var(--white)', border: '2.5px solid var(--black)', shadow: '4px 4px 0 var(--black)' },
+      { label: 'Importar desde Excel', bg: 'var(--white)', hover: 'var(--gray-100)', fg: 'var(--black)', border: '2.5px solid var(--black)', shadow: '4px 4px 0 var(--black)' },
+      { label: 'Revocar', bg: 'var(--red)', hover: '#F03A4B', fg: 'var(--black)', border: '2.5px solid var(--black)', shadow: '4px 4px 0 var(--black)' }
+    ];
+
+    const tags = [
+      { label: 'Producto', bg: 'var(--gray-100)', fg: 'var(--black)' },
+      { label: 'Activo', bg: 'var(--green-soft)', fg: 'var(--green-text)' },
+      { label: 'Turno abierto · desde 08:14', bg: 'var(--green-soft)', fg: 'var(--green-text)' },
+      { label: 'Pago pendiente', bg: 'var(--warning-soft)', fg: 'var(--warning-text)' },
+      { label: 'Cancelada · Error al capturar', bg: 'var(--red-soft)', fg: 'var(--red-text)' },
+      { label: 'Director', bg: 'var(--blue-soft)', fg: 'var(--blue-text)' },
+      { label: 'Emprendedor', bg: 'var(--yellow)', fg: 'var(--black)' },
+      { label: 'Próximamente', bg: 'var(--yellow-soft)', fg: 'var(--black)' },
+      { label: 'Stock bajo', bg: 'var(--red-soft)', fg: 'var(--red-text)' },
+      { label: 'Cuadra', bg: 'var(--gray-100)', fg: 'var(--black)' }
+    ];
+
+    const bizDefs = [
+      { title: 'Productos físicos con inventario', desc: 'Vendes cosas que compras, produces o almacenas. Xangarro! lleva tu stock.', icon: 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8' },
+      { title: 'Productos sin inventario', desc: 'Vendes café, comida u otro producto que no necesita conteo de piezas.', icon: 'M4 8h14a3 3 0 0 1 0 6h-1M4 8v8a3 3 0 0 0 3 3h7a3 3 0 0 0 3-3V8M2 22h18' },
+      { title: 'Servicios', desc: 'Ofreces cortes, consultas, clases u otro servicio sin producto físico.', icon: 'M12 15a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-13v3m0 14v3M4.2 4.2l2.1 2.1m11.4 11.4 2.1 2.1M2 12h3m14 0h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1' },
+      { title: 'Mezcla de productos y servicios', desc: 'Vendes un poco de todo. Puedes configurar qué sigue stock y qué no.', icon: 'M3 6h18M3 12h18M3 18h12' }
+    ];
+    const bizTypes = bizDefs.map((b, i) => ({
+      ...b, on: s.bizType === i, pick: set('bizType', i),
+      bg: s.bizType === i ? 'var(--yellow-soft)' : 'var(--white)',
+      shadow: s.bizType === i ? '4px 4px 0 var(--black)' : 'none',
+      dotBg: s.bizType === i ? 'var(--black)' : 'var(--white)',
+      dotInner: s.bizType === i ? 'var(--yellow)' : 'transparent'
+    }));
+
+    const periodNames = ['Hoy', 'Semana', 'Mes', 'Personalizado'];
+    const periods = periodNames.map((p, i) => ({
+      label: p, on: s.period === p, pick: set('period', p),
+      bg: s.period === p ? 'var(--yellow)' : 'var(--white)',
+      divider: i === 0 ? '0' : '2.5px solid var(--black)'
+    }));
+    const periodLabels = { Hoy: '12/MAY/2026', Semana: '11/MAY/2026 – 17/MAY/2026', Mes: '01/MAY/2026 – 31/MAY/2026', Personalizado: 'Desde 01/ENE/2026 · Hasta 12/MAY/2026' };
+
+    const tabNames = ['Resultados', 'Balance', 'Flujo', 'Indicadores'];
+    const tabs = tabNames.map(t => ({ label: t, on: s.tab === t, pick: set('tab', t), bg: s.tab === t ? 'var(--yellow)' : 'var(--gray-100)' }));
+
+    const helpDefs = [
+      { key: 'ing', label: 'Ingresos', amount: this.money(128450), subtitle: 'Todo el dinero que entró por ventas', body: 'Es la suma de todas tus ventas en este periodo, sin importar el método de pago. Si vendiste 50 pasteles a $100, tus ingresos son $5,000.' },
+      { key: 'cv', label: 'Costo de ventas', amount: this.money(79240), subtitle: 'Lo que gastaste para producir lo que vendiste', body: 'Incluye materia prima e inventario. Si compraste harina, azúcar y cajas para hacer los pasteles que vendiste, eso es tu costo de ventas.' }
+    ];
+    const helpItems = helpDefs.map(h => ({
+      ...h, open: !!s.help[h.key],
+      qBg: s.help[h.key] ? 'var(--yellow)' : 'var(--white)',
+      toggle: () => this.setState(p => ({ help: { ...p.help, [h.key]: !p.help[h.key] } }))
+    }));
+
+    const colDefs = [
+      { key: 'fecha', label: 'Fecha / hora' }, { key: 'concepto', label: 'Concepto' },
+      { key: 'cantidad', label: 'Cant.' }, { key: 'categoria', label: 'Categoría' },
+      { key: 'metodo', label: 'Método' }, { key: 'operador', label: 'Operador' },
+      { key: 'monto', label: 'Monto', align: 'flex-end' }
+    ];
+    const columns = colDefs.map(c => ({
+      label: c.label, align: c.align || 'flex-start',
+      arrow: s.sortKey === c.key ? (s.sortDir === 'asc' ? '▲' : '▼') : '',
+      arrowColor: 'var(--black)',
+      sort: () => this.setState(p => ({ sortKey: c.key, sortDir: p.sortKey === c.key && p.sortDir === 'desc' ? 'asc' : 'desc' }))
+    }));
+
+    const metodoStyle = {
+      Efectivo: { bg: 'var(--yellow)', fg: 'var(--black)' },
+      Transferencia: { bg: 'var(--blue-soft)', fg: 'var(--blue-text)' },
+      Tarjeta: { bg: 'var(--purple-soft)', fg: 'var(--black)' },
+      'QR/CoDi': { bg: 'var(--green-soft)', fg: 'var(--green-text)' },
+      Crédito: { bg: 'var(--warning-soft)', fg: 'var(--warning-text)' }
+    };
+    const raw = [
+      ['12/MAY 14:32', 'Taco al pastor ×3', 3, 'Producto', 'Efectivo', 'Ana', 75, false],
+      ['12/MAY 14:18', 'Gringa ×2 + Refresco', 3, 'Producto', 'Tarjeta', 'Luis', 145, false],
+      ['12/MAY 13:55', 'Quesadilla ×4', 4, 'Producto', 'Transferencia', 'Ana', 160, false],
+      ['12/MAY 13:40', 'Agua de horchata ×6', 6, 'Producto', 'Efectivo', 'Luis', 180, false],
+      ['12/MAY 13:12', 'Gringa ×1', 1, 'Producto', 'QR/CoDi', 'Ana', 60, true],
+      ['12/MAY 12:48', 'Taco al pastor ×10', 10, 'Producto', 'Efectivo', 'Luis', 250, false],
+      ['12/MAY 12:20', 'Servicio de banquete', 1, 'Servicio', 'Transferencia', 'Ana', 2400, false],
+      ['12/MAY 11:58', 'Refresco ×4', 4, 'Producto', 'Efectivo', 'Luis', 100, false],
+      ['12/MAY 11:30', 'Anticipo evento sábado', 1, 'Anticipo', 'Crédito', 'Ana', 1200, false],
+      ['12/MAY 11:02', 'Quesadilla ×2', 2, 'Producto', 'Efectivo', 'Luis', 80, false],
+      ['12/MAY 10:44', 'Taco al pastor ×6', 6, 'Producto', 'Tarjeta', 'Ana', 150, false],
+      ['12/MAY 10:10', 'Agua de horchata ×3', 3, 'Producto', 'Efectivo', 'Luis', 90, false]
+    ];
+    const dir = s.sortDir === 'asc' ? 1 : -1;
+    const idx = { fecha: 0, concepto: 1, cantidad: 2, categoria: 3, metodo: 4, operador: 5, monto: 6 }[s.sortKey];
+    const sorted = raw.slice().sort((a, b) => {
+      const x = a[idx], y = b[idx];
+      return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * dir;
+    });
+    const rows = sorted.map((r, i) => ({
+      fecha: r[0], concepto: r[1], cantidad: r[2], categoria: r[3], metodo: r[4], operador: r[5],
+      monto: this.money(r[6]),
+      cancelada: r[7],
+      strike: r[7] ? 'line-through' : 'none',
+      montoColor: r[7] ? 'var(--text-muted)' : 'var(--black)',
+      metodoBg: metodoStyle[r[4]].bg, metodoFg: metodoStyle[r[4]].fg,
+      bg: r[7] ? 'var(--gray-100)' : (i % 2 ? 'var(--offwhite)' : 'var(--white)'),
+      open: () => this.setState({ drawerOpen: true })
+    }));
+
+    const banners = [
+      { bg: 'var(--warning-soft)', fg: 'var(--warning-text)', title: 'Tu pago está pendiente', body: 'Tienes hasta el 19 de mayo de 2026.', cta: 'Actualizar pago' },
+      { bg: 'var(--red-soft)', fg: 'var(--red-text)', title: '3 registros no se pudieron sincronizar.', body: 'Revísalos para que tus estados financieros cuadren.', cta: 'Revisar' },
+      { bg: 'var(--blue-soft)', fg: 'var(--blue-text)', title: 'Llegaste a 50 registros este mes', body: 'Tu plan Freelancer incluye 50 registros al mes. Con Emprendedor tus registros son ilimitados.', cta: 'Mejorar plan' }
+    ];
+
+    const gaugeAt = (frac) => {
+      const a = (180 - 180 * Math.min(1, Math.max(0, frac))) * Math.PI / 180;
+      return { nx: (90 + 62 * Math.cos(a)).toFixed(1), ny: (90 - 62 * Math.sin(a)).toFixed(1) };
+    };
+    const gauges = [
+      { label: 'Margen bruto', value: '38.3%', verdict: 'Saludable — buen control de costos.', tone: 'var(--green-text)', ...gaugeAt(38.3 / 50) },
+      { label: 'Margen operativo', value: '4.1%', verdict: 'Crítico — la operación consume toda tu ganancia.', tone: 'var(--red-text)', ...gaugeAt(4.1 / 50) }
+    ];
+
+    const drawerRows = [
+      { k: 'Concepto', v: 'Taco al pastor ×3' }, { k: 'Categoría', v: 'Producto' },
+      { k: 'Método de pago', v: 'Efectivo' }, { k: 'Estado de pago', v: 'Pagado' },
+      { k: 'Operador', v: 'Ana' }, { k: 'Dispositivo', v: 'iPhone de caja' },
+      { k: 'Impacto en stock', v: '−3 pza · Taco al pastor' },
+      { k: 'Sincronizado', v: '12/MAY/2026 14:33' }
+    ];
+
+    const motionTokens = [
+      { what: 'Sello al presionar', dur: '100 ms' },
+      { what: 'Elevación al pasar el cursor', dur: '120 ms' },
+      { what: 'Fondo del modal', dur: '120 ms' },
+      { what: 'Diálogo y toast', dur: '140–160 ms' },
+      { what: 'Cajón lateral', dur: '160 ms' },
+      { what: 'Dibujo de gráficas', dur: '520–900 ms' }
+    ];
+    const motionNever = [
+      'Esqueletos de carga con brillo — bloque gris estático.',
+      'Entradas escalonadas o apariciones al hacer scroll.',
+      'Parallax, rebotes y giros decorativos.',
+      'Movimiento en el hover: solo eleva o oscurece el amarillo.',
+      'Transiciones entre páginas — el portal cambia de golpe.'
+    ];
+
+    const stateNames = [['happy', 'Con datos'], ['loading', 'Cargando'], ['empty', 'Vacío'], ['error', 'Error']];
+    const roleNames = [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']];
+
+    const sealPath = (cx, cy, r, n) => {
+      const pts = [];
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+        pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+      }
+      const rr = (r * Math.sin(Math.PI / n) * 1.08).toFixed(1);
+      let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+      for (let i = 1; i <= n; i++) {
+        const p = pts[i % n];
+        d += ' A' + rr + ' ' + rr + ' 0 0 1 ' + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+      }
+      return d + ' Z';
+    };
+    const seal = sealPath(100, 100, 64, 14);
+    const badgeIcons = {
+      ganar: 'M2 6h40v26H2V6Zm0 10h40M10 24h8',
+      vender: 'M4 34l14-14 9 9 19-19M36 10h14v14',
+      gastar: 'M8 6v12a6 6 0 0 0 6 6h22M8 40V28a6 6 0 0 1 6-6h22M4 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 28a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+      comprar: 'M2 4h6l5 22h22l4-16H12M18 38h.1M34 38h.1',
+      colchon: 'M22 40a18 18 0 0 0 18-18h-8a10 10 0 0 1-20 0H4a18 18 0 0 0 18 18ZM4 22a18 18 0 0 1 36 0',
+      deudas: 'M2 8h40v26H2V8Zm0 10h40M10 26h8'
+    };
+    const badgeDefs = [
+      ['Vender más', 'Un empujón · +10%', 'vender', 'var(--peach-soft)', true, null],
+      ['Vender más', 'Un reto · +20%', 'vender', 'var(--gray-200)', true, null],
+      ['Vender más', 'Ambicioso · +30%', 'vender', 'var(--yellow)', true, null],
+      ['Ganar más', 'Un empujón · +10%', 'ganar', 'var(--peach-soft)', true, null],
+      ['Ganar más', 'Un reto · +20%', 'ganar', 'var(--gray-200)', true, null],
+      ['Ganar más', 'Ambicioso · +30%', 'ganar', 'var(--yellow)', true, null],
+      ['Gastar menos', 'Un empujón · −10%', 'gastar', 'var(--peach-soft)', true, null],
+      ['Gastar menos', 'Un reto · −20%', 'gastar', 'var(--gray-200)', true, null],
+      ['Gastar menos', 'Ambicioso · −30%', 'gastar', 'var(--yellow)', true, null],
+      ['Comprar algo', 'Refrigerador', 'comprar', 'var(--green-soft)', true, null],
+      ['Tener un colchón', 'Un mes de gastos', 'colchon', 'var(--green-soft)', true, null],
+      ['Pagar deudas', 'Nota del proveedor', 'deudas', 'var(--green-soft)', true, null],
+      ['Racha', '3 meses seguidos', 'vender', 'var(--yellow)', true, '×3'],
+      ['Racha', '6 meses seguidos', 'vender', 'var(--yellow)', true, '×6'],
+      ['Racha', '12 meses seguidos', 'vender', 'var(--yellow)', true, '×12'],
+      ['Bloqueado', 'Sin lograr todavía', 'vender', 'var(--gray-200)', false, null]
+    ];
+    const badgeSet = badgeDefs.map(([title, tier, iconKey, fill, trophy, streak]) => {
+      const locked = title === 'Bloqueado';
+      return {
+        title, tier, fill, trophy, streak, seal,
+        icon: badgeIcons[iconKey],
+        stroke: locked ? 'var(--gray-600)' : '#0D0D0D',
+        iconStroke: locked ? 'var(--gray-600)' : '#0D0D0D',
+        titleColor: locked ? 'var(--text-muted)' : 'var(--black)'
+      };
+    });
+
+    const paceCards = [
+      { state: 'Adelantado', pct: '74%', amounts: '$41,700.00 de $56,400.00', bar: '74%', dot: 'var(--green)', fg: 'var(--green-text)', text: 'Vas 2 días adelantado', daily: 'Hoy: $1,900.00 de $1,880.00' },
+      { state: 'Al ritmo', pct: '68%', amounts: '$38,350.00 de $56,400.00', bar: '68%', dot: 'var(--gray-400)', fg: 'var(--text-muted)', text: 'Vas al ritmo', daily: 'Hoy: $1,880.00 de $1,880.00' },
+      { state: 'Atrasado', pct: '61%', amounts: '$34,400.00 de $56,400.00', bar: '61%', dot: 'var(--warning)', fg: 'var(--warning-text)', text: 'Vas 3 días atrasado', daily: 'Hoy: $1,200.00 de $1,880.00' }
+    ];
+    const levelCards = [
+      { title: 'Un empujón · +10%', amounts: '$51,700.00 al mes · $1,720.00 al día', rec: false, icon: 'M4 20l4-2 2-6 4 3 2-5 4 2M7 6h.01', bg: 'var(--white)', shadow: '3px 3px 0 var(--black)' },
+      { title: 'Un reto · +20%', amounts: '$56,400.00 al mes · $1,880.00 al día', rec: true, icon: 'M4 18h4l3-9 3 13 3-8h3', bg: 'var(--yellow-soft)', shadow: '4px 4px 0 var(--black)' },
+      { title: 'Ambicioso · +30%', amounts: '$61,100.00 al mes · $2,040.00 al día', rec: false, icon: 'M5 15c0-5 3-9 7-11 4 2 7 6 7 11l-3 2-4-2-4 2-3-2Zm7-6h.01', bg: 'var(--white)', shadow: '3px 3px 0 var(--black)' }
+    ];
+    const inboxSamples = [
+      ['critical', 'var(--red-soft)', 'var(--red-text)', 'M3 7h18v11H3V7Zm0 4h18M7 15h4', 'Falta $150.00 en el corte de Ana', 'El corte de la tarde cerró con diferencia.', 'Hace 40 min · iPhone de caja · Ana', true, null],
+      ['warning', 'var(--warning-soft)', 'var(--warning-text)', 'M21 8 12 3 3 8v8l9 5 9-5V8Z', 'Stock bajo: refresco', 'Quedan 1 · tu umbral es 4.', 'Hace 2 h · Android de la barra · Luis', true, null],
+      ['info', 'var(--blue-soft)', 'var(--blue-text)', 'M6 3h9l4 4v14H6V3Zm3 8h7M9 15h7', 'Tu Diagnóstico de septiembre está listo', '10 secciones y un plan de 3 acciones.', 'Hace 3 h · Xangarro!', false, null],
+      ['success', 'var(--green-soft)', 'var(--green-text)', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z', '¡Llegaste al 75% de tu meta!', 'Vas 2 días adelantado en septiembre.', 'Hace 5 h · Xangarro!', false, null],
+      ['info', 'var(--blue-soft)', 'var(--blue-text)', 'M3 7h18v11H3V7Zm0 4h18', 'Tu negocio califica para revisar opciones', 'Con 6 meses de historial puedes comparar alternativas.', '8 sep · Xangarro!', false, 'Ver opciones']
+    ].map(([_sev, tile, tileFg, icon, title, message, meta, unread, button], idx) => ({
+      tile, tileFg, icon, title, message, meta, button,
+      dot: unread ? 'var(--yellow)' : 'transparent',
+      rowBg: unread ? 'var(--white)' : 'var(--offwhite)',
+      weight: unread ? 800 : 600,
+      divider: idx === 0 ? 'none' : '2px solid var(--gray-200)'
+    }));
+
+    return {
+      paceCards, levelCards, inboxSamples, badgeSet,
+      celebrationRules: [
+        { text: 'Solo cuando la meta se logró desde la última visita, una vez por logro.' },
+        { text: 'Meta completa al 100% → takeover. Los hitos de 25 / 50 / 75% y el número del día se quedan en el toast.' },
+        { text: 'Si se lograron dos metas, un solo takeover con las dos insignias lado a lado.' },
+        { text: 'Solo Dueño y Administrador. «Solo lectura» nunca lo ve.' },
+        { text: 'Siempre se puede saltar: clic fuera, Esc o botón; se cierra solo a los ~6 s.' }
+      ],
+      celebrationMotion: [
+        { time: '0 – 220 ms', text: 'El velo entra plano y la tarjeta aparece al 96% de escala, sin rebote.' },
+        { time: '220 – 520 ms', text: 'El sello cae 2 px y asienta la sombra dura, como un sello sobre el ticket.' },
+        { time: '520 – 1,400 ms', text: 'Confeti plano de bordes negros cae una sola vez; nada se repite en bucle.' },
+        { time: '1,400 – 2,400 ms', text: 'El número cuenta hasta su valor final y los botones quedan en reposo.' }
+      ],
+      swatches, typeScale, radii: [8, 10, 12, 14, 16, 18, 20, 22],
+      motionTokens, motionNever,
+      motionDemoOpen: !!s.motionDemo,
+      motionDemoLabel: s.motionDemo ? 'Ocultar' : 'Mostrar ayuda',
+      toggleMotionDemo: () => this.setState(p => ({ motionDemo: !p.motionDemo })),
+      btnVariants, tags, bizTypes, periods, tabs, columns, rows, banners, gauges, drawerRows, helpItems,
+      periodLabel: periodLabels[s.period], activeTab: s.tab,
+      nombre: s.nombre, setNombre: e => this.setState({ nombre: e.target.value }),
+      precio: s.precio, setPrecio: e => this.setState({ precio: e.target.value }),
+      categoria: s.categoria, setCategoria: e => this.setState({ categoria: e.target.value }),
+      switchOn: s.switchOn, toggleSwitch: () => this.setState({ switchOn: !s.switchOn }),
+      switchBg: s.switchOn ? 'var(--green)' : 'var(--gray-200)',
+      switchKnob: s.switchOn ? '28px' : '0px',
+      isHappy: s.dataState === 'happy', isLoading: s.dataState === 'loading',
+      isEmpty: s.dataState === 'empty', isError: s.dataState === 'error',
+      skeletonRows: [1, 2, 3, 4, 5, 6],
+      rowCountLabel: rows.length + ' registros',
+      canEdit: s.role !== 'viewer',
+      drawerOpen: s.drawerOpen, dialogOpen: s.dialogOpen, toastOpen: s.toastOpen, toastMsg: s.toastMsg,
+      openDrawer: () => this.setState({ drawerOpen: true }),
+      openDialog: () => this.setState({ dialogOpen: true }),
+      closeAll: () => this.setState({ drawerOpen: false, dialogOpen: false }),
+      confirmRevoke: () => { this.setState({ dialogOpen: false }); this.toast('iPhone de caja revocado'); },
+      fireToast: () => this.toast('Listo: 15 productos importados.'),
+      panelVisible: (this.props.showPanel ?? true),
+      panelOpen: s.panelOpen, panelChevron: s.panelOpen ? '−' : '+',
+      togglePanel: () => this.setState({ panelOpen: !s.panelOpen }),
+      stateOptions: stateNames.map(([k, l]) => ({ label: l, bg: on(s.dataState === k), pick: set('dataState', k) })),
+      roleOptions: roleNames.map(([k, l]) => ({ label: l, bg: on(s.role === k), pick: set('role', k) }))
+    };
+  }
+
+  toast(msg) {
+    if (this._t) clearTimeout(this._t);
+    this.setState({ toastOpen: true, toastMsg: msg });
+    this._t = setTimeout(() => this.setState({ toastOpen: false }), 2600);
+  }
+
+  componentWillUnmount() { if (this._t) clearTimeout(this._t); }
+}
+</script>
+</body>
+</html>

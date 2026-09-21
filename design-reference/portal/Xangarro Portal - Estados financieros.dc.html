@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --cyan:#06B6D4; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-draw{from{stroke-dashoffset:1200}to{stroke-dashoffset:0}}
+@keyframes xg-grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes xg-growx{from{scale:0 1}to{scale:1 1}}
+@keyframes xg-needle{from{transform:rotate(-80deg)}to{transform:rotate(0)}}
+@keyframes xg-sweep{from{opacity:0;transform:rotate(-24deg)}to{opacity:1;transform:none}}
+@keyframes xg-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" title="{{ n.label }}" onClick="{{ n.go }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+      <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+        <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+        <div style="min-width:0;">
+          <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+          <div style="display:flex;align-items:center;gap:7px;margin-top:1px;">
+            <span style="display:inline-flex;align-items:center;background:var(--yellow);border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;letter-spacing:0.04em;">Emprendedor</span>
+            <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ roleLabel }}</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:var(--green-soft);">
+          <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:var(--green);"></span>
+          <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">Todo sincronizado</span>
+        </div>
+        <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);">PR</div>
+      </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Estados financieros</h1>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Cómo le fue a tu negocio, en números y en palabras</div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
+              Exportar Excel
+            </button>
+            <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--gray-100);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:not-allowed;opacity:0.85;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+              Informe mensual PDF
+            </button>
+            <span style="align-self:center;display:inline-flex;align-items:center;background:var(--blue-soft);border:2px solid var(--black);border-radius:9999px;padding:6px 13px;font-size:12px;font-weight:700;color:var(--blue-text);white-space:nowrap;">Disponible en MiPyME Pro</span>
+          </div>
+        </div>
+
+        <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:18px 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+          <div style="display:inline-flex;border:2.5px solid var(--black);border-radius:14px;overflow:hidden;box-shadow:3px 3px 0 var(--black);">
+            <sc-for list="{{ periods }}" as="p" hint-placeholder-count="4">
+              <div role="tab" tabindex="0" aria-selected="{{ p.on }}" onClick="{{ p.pick }}" style="height:44px;padding:0 18px;display:grid;place-items:center;cursor:pointer;font-size:13px;font-weight:700;letter-spacing:0.05em;color:var(--black);border-left:{{ p.divider }};background:{{ p.bg }}">{{ p.label }}</div>
+            </sc-for>
+          </div>
+          <sc-if value="{{ isMensual }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;gap:10px;align-items:center;">
+              <select style="height:44px;padding:0 12px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;background:var(--white);color:var(--ink);">
+                <option>2026</option>
+                <option>2025</option>
+              </select>
+              <select style="height:44px;padding:0 12px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;background:var(--white);color:var(--ink);">
+                <option>mayo</option>
+                <option>abril</option>
+                <option>marzo</option>
+              </select>
+            </div>
+          </sc-if>
+          <sc-if value="{{ isRango }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Desde</label>
+                <input type="text" value="01/01/2026" style="height:44px;width:140px;padding:0 12px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--white);color:var(--ink);">
+              </div>
+              <div>
+                <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Hasta</label>
+                <input type="text" value="12/05/2026" style="height:44px;width:140px;padding:0 12px;border:2px solid var(--black);border-radius:12px;font-family:inherit;font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;background:var(--white);color:var(--ink);">
+              </div>
+            </div>
+          </sc-if>
+          <span style="margin-left:auto;display:inline-flex;align-items:center;gap:9px;background:var(--yellow-soft);border:2px solid var(--black);border-radius:9999px;padding:8px 15px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M8 3v4M16 3v4M3 11h18"></path></svg>
+            {{ periodLabel }}
+          </span>
+        </div>
+
+        <div style="display:inline-flex;border:2.5px solid var(--black);border-radius:16px;overflow:hidden;box-shadow:4px 4px 0 var(--black);align-self:flex-start;max-width:100%;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="4">
+            <div role="tab" tabindex="0" aria-selected="{{ t.on }}" onClick="{{ t.pick }}" style="padding:0 26px;height:52px;display:grid;place-items:center;cursor:pointer;font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;border-left:{{ t.divider }};background:{{ t.bg }}">{{ t.label }}</div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div style="height:210px;border:2.5px solid var(--black);border-radius:18px;background:var(--gray-100);box-shadow:5px 5px 0 var(--black);"></div>
+            <div style="border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);padding:20px;">
+              <sc-for list="{{ eight }}" as="k" hint-placeholder-count="8">
+                <div style="display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:2px solid var(--gray-200);">
+                  <div style="height:14px;flex:1;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+                  <div style="height:14px;width:120px;border-radius:8px;background:var(--gray-100);border:2px solid var(--gray-200);"></div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">Cargando el periodo…</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:72px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:20px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4m0 16h16M8 16v-3m4 3V9m4 7v-5"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Sin datos en el periodo</div>
+            <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Registra movimientos en esta ventana de tiempo.</p>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:72px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:20px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Algo salió mal</div>
+            <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);">No pudimos calcular tus estados financieros. Inténtalo otra vez.</p>
+            <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showResultados }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px;align-items:start;">
+              <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:28px;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Resumen del periodo</div>
+                <p style="margin:12px 0 0;font-size:19px;font-weight:700;line-height:1.35;color:var(--black);text-wrap:pretty;">Vendiste $128,450.00, gastaste $113,252.38, y te quedaron $15,197.62.</p>
+                <div style="margin-top:20px;background:var(--green-soft);border:2.5px solid var(--green);border-radius:16px;padding:18px 20px;">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Utilidad neta</div>
+                  <div style="font-size:44px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:8px 0 10px;">$15,197.62</div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;color:var(--green-text);">
+                    <span style="width:11px;height:11px;flex:none;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>
+                    Tu negocio fue rentable este periodo.
+                  </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;margin-top:16px;font-size:15px;font-weight:800;color:var(--black);">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 19V5M5 12l7-7 7 7"></path></svg>
+                  12% vs mes anterior
+                </div>
+              </div>
+
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Utilidad neta · últimos 6 meses</div>
+                <svg viewBox="0 0 300 96" style="width:100%;height:auto;margin-top:14px;display:block;">
+                  <path d="M6 88 L294 88" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+                  <polyline points="18,74 72,62 126,68 180,44 234,50 288,22" fill="none" stroke="#00C896" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" style="stroke-dasharray:1200;animation:xg-draw 800ms cubic-bezier(0.2,0.8,0.2,1) both"></polyline>
+                </svg>
+                <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;font-weight:700;color:var(--gray-600);">
+                  <span>dic</span><span>ene</span><span>feb</span><span>mar</span><span>abr</span><span>may</span>
+                </div>
+                <div style="margin-top:20px;background:var(--yellow-soft);border:2.5px solid var(--black);border-radius:16px;padding:16px 18px;">
+                  <div style="font-size:15px;font-weight:800;color:var(--black);">ISR referencial (1.25%)</div>
+                  <p style="margin:6px 0 0;font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.</p>
+                  <button type="button" style="margin-top:14px;height:42px;padding:0 16px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Ajustar tasa (1.25%)</button>
+                </div>
+              </div>
+            </div>
+
+            <div data-card="1" style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:8px 24px 24px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);padding:18px 0 6px;">Estado de resultados · NIF B-3</div>
+              <sc-for list="{{ lineItems }}" as="l" hint-placeholder-count="8">
+                <div style="border-bottom:2px solid var(--gray-200);padding:16px 0;background:{{ l.rowBg }}">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:20px;">
+                    <div style="min-width:0;">
+                      <div style="display:flex;align-items:center;gap:9px;">
+                        <span style="letter-spacing:-0.02em;color:var(--black);font-size:{{ l.size }};font-weight:{{ l.weight }}">{{ l.label }}</span>
+                        <span role="button" tabindex="0" onClick="{{ l.toggle }}" aria-expanded="{{ l.open }}" style="width:23px;height:23px;flex:none;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;font-size:12px;font-weight:800;cursor:pointer;color:var(--black);background:{{ l.qBg }}">?</span>
+                      </div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:4px;text-wrap:pretty;">{{ l.subtitle }}</div>
+                    </div>
+                    <div style="font-variant-numeric:tabular-nums;letter-spacing:-0.02em;white-space:nowrap;font-size:{{ l.size }};font-weight:800;color:{{ l.color }}">{{ l.amount }}</div>
+                  </div>
+                  <sc-if value="{{ l.open }}" hint-placeholder-val="{{ false }}">
+                    <p style="animation:xg-reveal 150ms cubic-bezier(0.2,0.8,0.2,1) both;margin:14px 0 0;background:var(--yellow-soft);border:2px solid var(--black);border-radius:12px;padding:14px 16px;font-size:15px;font-weight:600;line-height:1.45;color:var(--ink);max-width:80ch;text-wrap:pretty;">{{ l.body }}</p>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+
+            <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+              <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:4px;">Cascada de resultados</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-muted);">De lo que vendiste a lo que te quedó</div>
+              <svg viewBox="0 0 560 214" style="width:100%;height:auto;margin-top:16px;display:block;">
+                <path d="M20 168 L544 168" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+                <path d="M72 38 L92 38 M138 118 L158 118 M204 118 L224 118 M270 119 L290 119 M336 152 L356 152 M402 152 L422 152 M468 153 L488 153" stroke="#0D0D0D" stroke-width="1.5" stroke-linecap="round"></path>
+                <rect x="26" y="38" width="46" height="130" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) both"></rect>
+                <rect x="92" y="38" width="46" height="80" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 60ms both"></rect>
+                <rect x="158" y="118" width="46" height="50" rx="3" fill="#3B6FFF" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 120ms both"></rect>
+                <rect x="224" y="115" width="46" height="4" rx="2" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 180ms both"></rect>
+                <rect x="290" y="119" width="46" height="33" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 240ms both"></rect>
+                <rect x="356" y="152" width="46" height="16" rx="3" fill="#3B6FFF" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 300ms both"></rect>
+                <rect x="422" y="150" width="46" height="3" rx="1.5" fill="#FFB800" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:top;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 360ms both"></rect>
+                <rect x="488" y="153" width="46" height="15" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:bottom;animation:xg-grow 520ms cubic-bezier(0.2,0.8,0.2,1) 420ms both"></rect>
+                <text x="49" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$128,450</text>
+                <text x="115" y="30" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$79,240</text>
+                <text x="181" y="110" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$49,210</text>
+                <text x="247" y="107" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$1,180</text>
+                <text x="313" y="111" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#DA0013">−$32,640</text>
+                <text x="379" y="144" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$15,390</text>
+                <text x="445" y="142" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#8E6600">−$192</text>
+                <text x="511" y="145" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$15,198</text>
+                <text x="49" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ingresos</text>
+                <text x="115" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Costo vtas</text>
+                <text x="181" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. bruta</text>
+                <text x="247" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Merma</text>
+                <text x="313" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Gastos op.</text>
+                <text x="379" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. operativa</text>
+                <text x="445" y="186" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">ISR</text>
+                <text x="511" y="204" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Ut. neta</text>
+              </svg>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;">
+              <sc-for list="{{ donuts }}" as="d" hint-placeholder-count="2">
+                <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;">
+                  <svg viewBox="0 0 120 120" style="width:164px;height:164px;flex:none;display:block;">
+                    <g style="transform-box:view-box;transform-origin:60px 60px;animation:xg-sweep 420ms cubic-bezier(0.2,0.8,0.2,1) both">
+                      <circle cx="60" cy="60" r="44" fill="none" stroke="#0D0D0D" stroke-width="26"></circle>
+                      <circle cx="60" cy="60" r="44" fill="none" stroke="{{ d.c1 }}" stroke-width="22" stroke-dasharray="{{ d.d1 }}" transform="rotate(-90 60 60)"></circle>
+                      <circle cx="60" cy="60" r="44" fill="none" stroke="{{ d.c2 }}" stroke-width="22" stroke-dasharray="{{ d.d2 }}" transform="rotate(-90 60 60)"></circle>
+                      <circle cx="60" cy="60" r="44" fill="none" stroke="{{ d.c3 }}" stroke-width="22" stroke-dasharray="{{ d.d3 }}" transform="rotate(-90 60 60)"></circle>
+                      <circle cx="60" cy="60" r="44" fill="none" stroke="{{ d.c4 }}" stroke-width="22" stroke-dasharray="{{ d.d4 }}" transform="rotate(-90 60 60)"></circle>
+                    </g>
+                    <circle cx="60" cy="60" r="33" fill="#FFFFFF" stroke="#0D0D0D" stroke-width="2"></circle>
+                    <text x="60" y="55" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="10" font-weight="700" fill="#5A5A56">{{ d.centerLabel }}</text>
+                    <text x="60" y="70" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="14" font-weight="800" fill="#0D0D0D">{{ d.centerValue }}</text>
+                  </svg>
+                  <div style="min-width:0;flex:1;">
+                    <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:14px;text-wrap:pretty;">{{ d.title }}</div>
+                    <div style="display:flex;flex-direction:column;gap:9px;">
+                      <sc-for list="{{ d.legend }}" as="g" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--black);">
+                          <span style="width:14px;height:14px;flex:none;border:2px solid var(--black);border-radius:4px;background:{{ g.color }}"></span>
+                          {{ g.label }}
+                          <span style="margin-left:auto;font-variant-numeric:tabular-nums;color:var(--gray-600);white-space:nowrap;">{{ g.value }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showBalance }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:28px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Balance general · NIF B-6</div>
+              <p style="margin:12px 0 0;font-size:19px;font-weight:700;line-height:1.35;color:var(--black);text-wrap:pretty;">Tienes $107,580.00 en activos. Tu patrimonio neto es $107,580.00.</p>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:15px;font-weight:800;color:var(--black);">
+                <span style="width:11px;height:11px;flex:none;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>
+                Tu patrimonio es positivo.
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:16px;align-items:start;">
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:16px;">Activo</div>
+                <sc-for list="{{ activo }}" as="a" hint-placeholder-count="3">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:2px solid var(--gray-200);">
+                    <div style="min-width:0;">
+                      <div style="font-size:16px;font-weight:800;letter-spacing:-0.01em;color:var(--black);">{{ a.label }}</div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;">{{ a.subtitle }}</div>
+                    </div>
+                    <div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ a.amount }}</div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;height:40px;border:2.5px solid var(--black);border-radius:10px;overflow:hidden;margin-top:20px;">
+                  <div style="width:58%;background:var(--green);border-right:2px solid var(--black);"></div>
+                  <div style="width:29%;background:var(--blue);border-right:2px solid var(--black);"></div>
+                  <div style="width:13%;background:var(--warning);"></div>
+                </div>
+                <div style="display:flex;gap:16px;margin-top:12px;flex-wrap:wrap;">
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--green);"></span>Efectivo 58%</span>
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--blue);"></span>Inventarios 29%</span>
+                  <span style="display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;"><span style="width:12px;height:12px;border:2px solid var(--black);border-radius:4px;background:var(--warning);"></span>Por cobrar 13%</span>
+                </div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:20px;padding-top:18px;border-top:2.5px solid var(--black);">
+                  <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Total activo</span>
+                  <span style="font-size:28px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--black);">$107,580.00</span>
+                </div>
+              </div>
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-bottom:16px;">Pasivo y Capital</div>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:2px solid var(--gray-200);">
+                  <div style="min-width:0;">
+                    <div style="font-size:16px;font-weight:800;letter-spacing:-0.01em;color:var(--black);">Pasivo</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;">Lo que tu negocio le debe a otros</div>
+                  </div>
+                  <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:4px 12px;font-size:12px;font-weight:700;background:var(--gray-100);color:var(--black);white-space:nowrap;">Sin pasivos registrados</span>
+                </div>
+                <sc-for list="{{ capital }}" as="c" hint-placeholder-count="2">
+                  <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:2px solid var(--gray-200);">
+                    <div style="min-width:0;">
+                      <div style="font-size:16px;font-weight:800;letter-spacing:-0.01em;color:var(--black);">{{ c.label }}</div>
+                      <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;">{{ c.subtitle }}</div>
+                    </div>
+                    <div style="font-size:17px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ c.amount }}</div>
+                  </div>
+                </sc-for>
+                <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:20px;padding-top:18px;border-top:2.5px solid var(--black);">
+                  <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Total capital</span>
+                  <span style="font-size:28px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--black);">$107,580.00</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showFlujo }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+            <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:28px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Flujo de efectivo · NIF B-2</div>
+              <p style="margin:12px 0 0;font-size:19px;font-weight:700;color:var(--black);">Flujo neto del periodo: $57,060.00.</p>
+              <div style="display:flex;align-items:center;gap:8px;margin-top:14px;font-size:15px;font-weight:800;color:var(--black);">
+                <span style="width:11px;height:11px;flex:none;border-radius:9999px;background:var(--green);border:2px solid var(--black);"></span>
+                Este mes entró más dinero del que salió.
+              </div>
+            </div>
+            <sc-for list="{{ flujoGroups }}" as="g" hint-placeholder-count="2">
+              <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                <div role="button" tabindex="0" onClick="{{ g.toggle }}" aria-expanded="{{ g.open }}" style="display:flex;align-items:center;gap:14px;cursor:pointer;">
+                  <div style="min-width:0;">
+                    <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ g.title }}</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;text-wrap:pretty;">{{ g.subtitle }}</div>
+                  </div>
+                  <span style="margin-left:auto;flex:none;font-size:20px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-0.03em;white-space:nowrap;color:{{ g.totalColor }}">{{ g.total }}</span>
+                  <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;font-size:16px;font-weight:800;">{{ g.chevron }}</span>
+                </div>
+                <sc-if value="{{ g.open }}" hint-placeholder-val="{{ true }}">
+                  <div style="animation:xg-reveal 150ms cubic-bezier(0.2,0.8,0.2,1) both;margin-top:16px;border-top:2px solid var(--gray-200);">
+                    <sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:2px solid var(--gray-200);">
+                        <span style="font-size:15px;font-weight:700;color:var(--black);">{{ r.label }}</span>
+                        <span style="font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;color:{{ r.color }}">{{ r.amount }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-for>
+            <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Entradas y salidas del periodo</div>
+              <svg viewBox="0 0 700 180" style="width:100%;height:auto;margin-top:16px;display:block;">
+                <path d="M330 8 L330 164" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+                <text x="330" y="176" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$0</text>
+                <text x="186" y="36" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Cobros de ventas de contado</text>
+                <text x="186" y="72" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Cobros de crédito a clientes</text>
+                <text x="186" y="108" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Gastos operativos</text>
+                <text x="186" y="144" text-anchor="end" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">Compras de inventario</text>
+                <rect x="330" y="18" width="200" height="26" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:left;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) both"></rect>
+                <rect x="330" y="54" width="62" height="26" rx="3" fill="#00C896" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:left;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 80ms both"></rect>
+                <rect x="198" y="90" width="132" height="26" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:right;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 160ms both"></rect>
+                <rect x="246" y="126" width="84" height="26" rx="3" fill="#FF4757" stroke="#0D0D0D" stroke-width="2" style="transform-box:fill-box;transform-origin:right;animation:xg-growx 520ms cubic-bezier(0.2,0.8,0.2,1) 240ms both"></rect>
+                <text x="538" y="36" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$96,200</text>
+                <text x="400" y="72" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">$12,400</text>
+                <text x="208" y="108" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">−$32,640</text>
+                <text x="256" y="144" font-family="Plus Jakarta Sans" font-size="12" font-weight="800" fill="#0D0D0D">−$18,900</text>
+              </svg>
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-top:16px;padding-top:18px;border-top:2.5px solid var(--black);flex-wrap:wrap;">
+                <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Incremento neto en efectivo</span>
+                <span style="font-size:32px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:var(--green-text);">$57,060.00</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showIndicadores }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:24px;">
+            <div>
+              <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Qué tan rentable es tu negocio?</div>
+              <p style="margin:6px 0 16px;font-size:15px;font-weight:600;color:var(--gray-600);">Qué porcentaje de cada peso de venta se queda como ganancia.</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+                <sc-for list="{{ gauges }}" as="g" hint-placeholder-count="3">
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;text-align:center;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ g.label }}</div>
+                    <svg viewBox="0 0 180 106" style="width:100%;max-width:220px;height:auto;margin:10px auto 0;display:block;">
+                      <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#FF4757" stroke-width="16" stroke-dasharray="{{ g.band1 }}"></path>
+                      <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#FFB800" stroke-width="16" stroke-dasharray="{{ g.band2 }}"></path>
+                      <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#00C896" stroke-width="16" stroke-dasharray="{{ g.band3 }}"></path>
+                      <path d="M20 90 A70 70 0 0 1 160 90" fill="none" stroke="#0D0D0D" stroke-width="2"></path>
+                      <line x1="90" y1="90" x2="{{ g.nx }}" y2="{{ g.ny }}" stroke="#0D0D0D" stroke-width="4" stroke-linecap="round" style="transform-box:view-box;transform-origin:90px 90px;animation:xg-needle 760ms cubic-bezier(0.2,0.8,0.2,1) both"></line>
+                      <circle cx="90" cy="90" r="7" fill="#FFD60A" stroke="#0D0D0D" stroke-width="2.5"></circle>
+                    </svg>
+                    <div style="font-size:36px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);">{{ g.value }}</div>
+                    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-size:14px;font-weight:800;color:{{ g.tone }};text-wrap:pretty;">
+                      <span style="width:10px;height:10px;flex:none;border-radius:9999px;border:2px solid var(--black);background:{{ g.dot }}"></span>
+                      {{ g.verdict }}
+                    </div>
+                    <p style="margin:12px 0 0;font-size:14px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ g.subtitle }}</p>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;padding-top:14px;border-top:2px solid var(--gray-200);">
+                      <span style="font-size:13px;font-weight:800;color:{{ g.deltaColor }};">{{ g.delta }}</span>
+                      <svg viewBox="0 0 120 34" style="width:120px;height:34px;flex:none;display:block;">
+                        <polyline points="{{ g.spark }}" fill="none" stroke="{{ g.sparkColor }}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                      </svg>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Qué tan sano opera tu negocio?</div>
+              <p style="margin:6px 0 16px;font-size:15px;font-weight:600;color:var(--gray-600);">Eficiencia operativa — qué tan rápido cobras, vendes y cumples.</p>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;">
+                <sc-for list="{{ ratios }}" as="r" hint-placeholder-count="3">
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ r.label }}</div>
+                    <div style="font-size:44px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:8px 0 6px;">{{ r.value }}</div>
+                    <div style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:{{ r.tone }};text-wrap:pretty;">
+                      <span style="width:10px;height:10px;flex:none;border-radius:9999px;border:2px solid var(--black);background:{{ r.dot }}"></span>
+                      {{ r.verdict }}
+                    </div>
+                    <p style="margin:12px 0 0;font-size:14px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ r.subtitle }}</p>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="background:var(--yellow-soft);border:2.5px solid var(--black);border-radius:16px;padding:16px 20px;">
+              <div style="font-size:15px;font-weight:800;color:var(--black);">ISR referencial (1.25%)</div>
+              <p style="margin:6px 0 0;font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.</p>
+            </div>
+            <p style="margin:0;font-size:14px;font-weight:600;color:var(--gray-600);">Estos indicadores usan rangos generales para pequeños negocios.</p>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:90;width:244px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+      <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+      <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+    </div>
+    <div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado de datos</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ stateOptions }}" as="s" hint-placeholder-count="4">
+              <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Rol</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ r.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ r.bg }}">{{ r.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Ancho</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ widthOptions }}" as="w" hint-placeholder-count="2">
+              <div role="button" tabindex="0" onClick="{{ w.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ w.bg }}">{{ w.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = {
+    dataState: null, role: null, panelOpen: false, rail: null, vw: 1440,
+    tab: 'Resultados', period: 'Mensual', help: {}, groups: { op: true, inv: true }
+  };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._r); }
+
+  renderVals() {
+    const st = this.state;
+    const dataState = st.dataState ?? this.props.startState ?? 'happy';
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const rail = st.rail ?? (st.vw < 1024);
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+    const happy = dataState === 'happy';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const activeNav = st.active ?? 'Estados financieros';
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, dividerAfter]) => {
+      const active = label === activeNav;
+      return {
+        label, icon, dividerAfter: !!dividerAfter,
+        href: pages[label] || '#',
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700,
+        go: () => this.setState({ active: label })
+      };
+    });
+
+    const periodNames = ['Mensual', 'Trimestral', 'Anual', 'Rango'];
+    const periods = periodNames.map((p, i) => ({
+      label: p, on: st.period === p, pick: set('period', p),
+      bg: st.period === p ? 'var(--yellow)' : 'var(--white)',
+      divider: i === 0 ? '0' : '2.5px solid var(--black)'
+    }));
+    const periodLabels = {
+      Mensual: '01/MAY/2026 – 31/MAY/2026',
+      Trimestral: '01/ABR/2026 – 30/JUN/2026',
+      Anual: '01/ENE/2026 – 31/DIC/2026',
+      Rango: '01/ENE/2026 – 12/MAY/2026'
+    };
+
+    const tabNames = ['Resultados', 'Balance', 'Flujo', 'Indicadores'];
+    const tabs = tabNames.map((t, i) => ({
+      label: t, on: st.tab === t, pick: set('tab', t),
+      bg: st.tab === t ? 'var(--yellow)' : 'var(--white)',
+      divider: i === 0 ? '0' : '2.5px solid var(--black)'
+    }));
+
+    const itemDefs = [
+      ['ing', 'Ingresos', '$128,450.00', 'Todo el dinero que entró por ventas', 'Es la suma de todas tus ventas en este periodo, sin importar el método de pago. Si vendiste 50 pasteles a $100, tus ingresos son $5,000.', 0],
+      ['cv', 'Costo de ventas', '−$79,240.00', 'Lo que gastaste para producir lo que vendiste', 'Incluye materia prima e inventario. Si compraste harina, azúcar y cajas para hacer los pasteles que vendiste, eso es tu costo de ventas.', 0],
+      ['ub', 'Utilidad bruta', '$49,210.00', 'Lo que te queda después del costo del producto', 'Ingresos menos costo de ventas. Un número negativo significa que estás vendiendo por debajo de tu costo.', 1],
+      ['mer', 'Merma', '−$1,180.00', 'Producto perdido por daño, caducidad o robo', 'Cuando se echa a perder un producto o se daña, ese costo se resta de tu utilidad.', 0],
+      ['go', 'Gastos operativos', '−$32,640.00', 'Gastos para mantener el negocio andando', 'Renta, nómina, luz, publicidad, servicios — todo lo que pagas aunque no vendas nada ese día.', 0],
+      ['uo', 'Utilidad operativa', '$15,390.00', 'Lo que queda después de TODOS los gastos', 'Es la utilidad bruta menos la merma y los gastos operativos.', 1],
+      ['isr', 'ISR', '−$192.38', 'Impuesto sobre la renta (estimado)', 'Es un cálculo aproximado. Solo aplica cuando hay utilidad operativa positiva.', 0],
+      ['un', 'Utilidad neta', '$15,197.62', 'Lo que realmente te queda al final', 'La ganancia final después de todos los costos, gastos e impuestos.', 1]
+    ];
+    const lineItems = itemDefs.map(([key, label, amount, subtitle, body, bold]) => ({
+      label, amount, subtitle, body,
+      open: !!st.help[key],
+      qBg: st.help[key] ? 'var(--yellow)' : 'var(--white)',
+      size: bold ? '20px' : '17px',
+      weight: bold ? 800 : 700,
+      rowBg: bold ? 'var(--yellow-soft)' : 'transparent',
+      color: amount.startsWith('−') ? 'var(--red-text)' : 'var(--black)',
+      toggle: () => this.setState(p => ({ help: { ...p.help, [key]: !p.help[key] } }))
+    }));
+
+    const donuts = [
+      {
+        title: '¿De dónde vienen tus ingresos?', centerLabel: 'TOTAL INGRESOS', centerValue: '$128,450',
+        c1: '#00C896', d1: '152 124', c2: '#3B6FFF', d2: '0 152 69 60', c3: '#FFB800', d3: '0 221 35 20', c4: '#8B5CF6', d4: '0 256 20 10',
+        legend: [
+          { label: 'Producto', value: '$70,647 · 55%', color: 'var(--green)' },
+          { label: 'Servicio', value: '$32,112 · 25%', color: 'var(--blue)' },
+          { label: 'Anticipo', value: '$16,699 · 13%', color: 'var(--warning)' },
+          { label: 'Otro', value: '$8,992 · 7%', color: 'var(--purple)' }
+        ]
+      },
+      {
+        title: '¿En qué se gasta?', centerLabel: 'TOTAL EGRESOS', centerValue: '$113,060',
+        c1: '#FF4757', d1: '190 86', c2: '#3B6FFF', d2: '0 190 58 28', c3: '#FFB800', d3: '0 248 20 8', c4: '#06B6D4', d4: '0 268 8 4',
+        legend: [
+          { label: 'Materia Prima', value: '$79,240 · 70%', color: 'var(--red)' },
+          { label: 'Nómina', value: '$21,480 · 19%', color: 'var(--blue)' },
+          { label: 'Renta', value: '$9,100 · 8%', color: 'var(--warning)' },
+          { label: 'Servicios', value: '$3,240 · 3%', color: 'var(--cyan)' }
+        ]
+      }
+    ];
+
+    const activo = [
+      { label: 'Efectivo', subtitle: 'Dinero en caja y banco', amount: '$62,400.00' },
+      { label: 'Inventarios', subtitle: 'Valor del producto que tienes para vender', amount: '$31,200.00' },
+      { label: 'Cuentas por cobrar', subtitle: 'Lo que te deben los clientes', amount: '$13,980.00' }
+    ];
+    const capital = [
+      { label: 'Capital', subtitle: 'Lo que vale tu negocio como tal', amount: '$92,382.38' },
+      { label: 'Utilidad del periodo', subtitle: 'Lo que ganaste en este periodo', amount: '$15,197.62' }
+    ];
+
+    const flujoGroups = [
+      {
+        key: 'op', title: 'Flujo de operación', subtitle: 'Dinero que entra y sale por el día a día',
+        total: '$75,960.00', totalColor: 'var(--green-text)',
+        rows: [
+          { label: 'Cobros de ventas de contado', amount: '$96,200.00', color: 'var(--green-text)' },
+          { label: 'Cobros de crédito a clientes', amount: '$12,400.00', color: 'var(--green-text)' },
+          { label: 'Gastos operativos', amount: '−$32,640.00', color: 'var(--red-text)' }
+        ]
+      },
+      {
+        key: 'inv', title: 'Flujo de inversión', subtitle: 'Dinero gastado en comprar inventario — es normal que sea negativo.',
+        total: '−$18,900.00', totalColor: 'var(--red-text)',
+        rows: [{ label: 'Compras de inventario', amount: '−$18,900.00', color: 'var(--red-text)' }]
+      }
+    ].map(g => ({
+      ...g,
+      open: !!st.groups[g.key],
+      chevron: st.groups[g.key] ? '−' : '+',
+      toggle: () => this.setState(p => ({ groups: { ...p.groups, [g.key]: !p.groups[g.key] } }))
+    }));
+
+    const needle = (frac) => {
+      const a = (180 - 180 * Math.min(1, Math.max(0, frac))) * Math.PI / 180;
+      return { nx: (90 + 62 * Math.cos(a)).toFixed(1), ny: (90 - 62 * Math.sin(a)).toFixed(1) };
+    };
+    const bands = (lo, hi, max) => {
+      const L = 219.9;
+      const a = (lo / max) * L, b = ((hi - lo) / max) * L;
+      return { band1: a.toFixed(1) + ' 400', band2: '0 ' + a.toFixed(1) + ' ' + b.toFixed(1) + ' 400', band3: '0 ' + (a + b).toFixed(1) + ' ' + (L - a - b).toFixed(1) + ' 400' };
+    };
+    const gauges = [
+      { label: 'Margen bruto', value: '38.3%', max: 50, lo: 10, hi: 20, tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Saludable — buen control de costos.', subtitle: 'De cada peso vendido, ¿cuánto te queda después del costo?', delta: '↑ 2.1 pts vs mes anterior', deltaColor: 'var(--green-text)', spark: '4,28 24,24 44,26 64,18 84,20 116,10', sparkColor: '#00C896', frac: 38.3 / 50 },
+      { label: 'Margen operativo', value: '12.0%', max: 30, lo: 5, hi: 10, tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Saludable — tu operación genera ganancia.', subtitle: 'De cada peso vendido, ¿cuánto queda después de TODOS los gastos?', delta: '↑ 1.4 pts vs mes anterior', deltaColor: 'var(--green-text)', spark: '4,30 24,26 44,28 64,20 84,22 116,14', sparkColor: '#00C896', frac: 12 / 30 },
+      { label: 'Margen neto', value: '11.8%', max: 24, lo: 3, hi: 8, tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Saludable — tu negocio es rentable.', subtitle: 'Tu ganancia real por cada peso vendido', delta: '= sin cambio vs mes anterior', deltaColor: 'var(--text-muted)', spark: '4,22 24,20 44,24 64,16 84,18 116,16', sparkColor: '#00C896', frac: 11.8 / 24 }
+    ].map(g => ({ ...g, ...needle(g.frac), ...bands(g.lo, g.hi, g.max) }));
+
+    const ratios = [
+      { label: 'Razón de liquidez', value: '1.52×', tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Saludable — puedes cubrir tus obligaciones.', subtitle: '¿Puedes pagar lo que debes con lo que tienes?' },
+      { label: 'Rotación de inventario', value: '4.00 veces/mes', tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Buena — tu producto se mueve rápido.', subtitle: '¿Cuántas veces renovaste tu inventario?' },
+      { label: 'Días promedio de cobranza', value: '30 días', tone: 'var(--green-text)', dot: 'var(--green)', verdict: 'Rápido — tus clientes pagan pronto.', subtitle: '¿Cuántos días tardan tus clientes en pagarte?' }
+    ];
+
+    const roleLabels = { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' };
+
+    return {
+      nav, periods, tabs, lineItems, donuts, activo, capital, flujoGroups, gauges, ratios,
+      eight: [1, 2, 3, 4, 5, 6, 7, 8],
+      wide: !rail,
+      sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: roleLabels[role],
+      periodLabel: periodLabels[st.period],
+      isMensual: st.period === 'Mensual',
+      isRango: st.period === 'Rango',
+      isLoading: dataState === 'loading', isEmpty: dataState === 'empty', isError: dataState === 'error',
+      showResultados: happy && st.tab === 'Resultados',
+      showBalance: happy && st.tab === 'Balance',
+      showFlujo: happy && st.tab === 'Flujo',
+      showIndicadores: happy && st.tab === 'Indicadores',
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen }),
+      stateOptions: [['happy', 'Con datos'], ['loading', 'Cargando'], ['empty', 'Vacío'], ['error', 'Error']]
+        .map(([k, l]) => ({ label: l, bg: on(dataState === k), pick: set('dataState', k) })),
+      roleOptions: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']]
+        .map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })),
+      widthOptions: [[false, 'Escritorio · menú completo'], [true, 'Tablet · riel de iconos']]
+        .map(([k, l]) => ({ label: l, bg: on(rail === k), pick: set('rail', k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

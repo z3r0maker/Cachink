@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+[data-row]{transition:background 100ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-row]:hover{background:var(--yellow-soft);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="12">
+        <a href="{{ n.href }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:2px solid transparent;font-weight:700;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:1px;">
+              <span style="display:inline-flex;align-items:center;background:var(--yellow);border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;letter-spacing:0.04em;">Xangarro</span>
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ roleLabel }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:var(--green-soft);">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:var(--green);"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">Sincronizado · 3 dispositivos</span>
+          </div>
+          <div role="button" tabindex="0" onClick="{{ toggleSheet }}" title="Avisos" aria-expanded="{{ sheetOpen }}" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:{{ bellBg }};box-shadow:3px 3px 0 var(--black);color:var(--black);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ true }}">
+              <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ unreadBadge }}</span>
+            </sc-if>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:2px solid var(--black);border-radius:9999px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+            <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);">PR</div>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div>
+          <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Avisos</h1>
+          <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Lo que pasó en tu negocio y lo que Xangarro! te quiere contar.</div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <div role="tab" tabindex="0" onClick="{{ t.pick }}" aria-selected="{{ t.active }}" style="display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:2px solid var(--black);border-radius:14px;cursor:pointer;font-size:14px;font-weight:800;color:var(--black);background:{{ t.bg }};box-shadow:{{ t.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+              {{ t.label }}
+              <sc-if value="{{ t.count }}" hint-placeholder-val="{{ true }}">
+                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:0 7px;font-size:12px;font-weight:800;background:var(--white);font-variant-numeric:tabular-nums;">{{ t.count }}</span>
+              </sc-if>
+            </div>
+          </sc-for>
+          <div role="button" tabindex="0" onClick="{{ openConfig }}" title="Configurar avisos" style="margin-left:auto;display:inline-flex;align-items:center;gap:9px;height:44px;padding:0 16px;border:2px solid var(--black);border-radius:14px;cursor:pointer;background:{{ configBg }};box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7L4.5 7a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 3V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.7 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0 1.2 2.9H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"></path></svg>
+            Configurar
+          </div>
+        </div>
+
+        <sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="2">
+              <div role="button" tabindex="0" onClick="{{ f.pick }}" style="display:inline-flex;align-items:center;height:38px;padding:0 14px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:13px;font-weight:700;color:var(--black);background:{{ f.bg }}">{{ f.label }}</div>
+            </sc-for>
+            <div role="button" tabindex="0" onClick="{{ markAll }}" style="margin-left:auto;font-size:13px;font-weight:800;letter-spacing:0.03em;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Marcar todo como leído</div>
+          </div>
+
+          <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <sc-for list="{{ five }}" as="k" hint-placeholder-count="5">
+                <div style="height:86px;border:2px solid var(--black);border-radius:16px;background:var(--gray-100);box-shadow:4px 4px 0 var(--black);"></div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+              <div style="width:68px;height:68px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+              </div>
+              <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos cargar tus avisos</div>
+              <p style="margin:8px 0 0;max-width:42ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Revisa tu conexión e inténtalo otra vez.</p>
+              <button type="button" style="margin-top:20px;height:50px;padding:0 22px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:64px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+              <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:18px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+              </div>
+              <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Sin avisos</div>
+              <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Cuando algo requiera tu atención, aparecerá aquí.</p>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:22px;">
+              <sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+                <div>
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">{{ g.label }}</div>
+                  <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+                    <sc-for list="{{ g.items }}" as="i" hint-placeholder-count="4">
+                      <div data-row="1" role="link" tabindex="0" style="display:flex;gap:14px;align-items:flex-start;padding:18px 20px;border-top:{{ i.divider }};background:{{ i.rowBg }};cursor:pointer;">
+                        <span style="width:10px;height:10px;flex:none;margin-top:8px;border-radius:9999px;border:2px solid var(--black);background:{{ i.dot }}"></span>
+                        <span style="width:42px;height:42px;flex:none;border:2px solid var(--black);border-radius:11px;display:grid;place-items:center;background:{{ i.tile }};color:{{ i.tileFg }}">
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ i.icon }}"></path></svg>
+                        </span>
+                        <div style="min-width:0;flex:1;">
+                          <div style="font-size:16px;letter-spacing:-0.01em;color:var(--black);font-weight:{{ i.weight }};text-wrap:pretty;">{{ i.title }}</div>
+                          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ i.message }}</div>
+                          <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:var(--gray-600);margin-top:6px;">{{ i.meta }}</div>
+                          <sc-if value="{{ i.button }}" hint-placeholder-val="{{ false }}">
+                            <button type="button" style="margin-top:14px;height:42px;padding:0 16px;background:var(--yellow);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">{{ i.button }}</button>
+                          </sc-if>
+                        </div>
+                        <span style="flex:none;display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--blue-text);white-space:nowrap;">
+                          Ver
+                          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+                        </span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-for>
+              <div style="font-size:13px;font-weight:600;color:var(--gray-600);">Los avisos se guardan 90 días. Después se borran solos.</div>
+            </div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ showConfig }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div role="button" tabindex="0" onClick="{{ closeConfig }}" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;width:fit-content;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M19 12H5M11 6l-6 6 6 6"></path></svg>
+              Regresar a mis avisos
+            </div>
+            <sc-if value="{{ waPending }}" hint-placeholder-val="{{ true }}">
+              <div style="border:2px solid var(--black);border-radius:18px;background:var(--white);box-shadow:4px 4px 0 var(--black);padding:22px;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;">
+                <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--yellow-soft);display:grid;place-items:center;color:var(--black);">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z"></path></svg>
+                </span>
+                <div style="min-width:260px;flex:1;">
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Recibe tus avisos por WhatsApp</span>
+                    <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--gray-100);color:var(--text-muted);">Próximamente</span>
+                  </div>
+                  <p style="margin:8px 0 16px;max-width:60ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Te escribimos solo lo importante, máximo un mensaje al día.</p>
+                  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;border:2px solid var(--black);border-radius:12px;background:var(--gray-100);height:52px;opacity:0.6;">
+                      <span style="padding:0 12px;font-size:15px;font-weight:800;color:var(--black);border-right:2px solid var(--black);height:100%;display:grid;place-items:center;font-variant-numeric:tabular-nums;">+52</span>
+                      <input type="text" value="" placeholder="55 1234 5678" disabled="disabled" style="width:180px;box-sizing:border-box;height:100%;border:none;background:transparent;padding:0 12px;font-family:inherit;font-size:15px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;">
+                    </div>
+                    <button type="button" disabled="disabled" style="height:52px;padding:0 22px;background:var(--gray-100);color:var(--text-muted);border:2px solid var(--black);border-radius:14px;font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:not-allowed;opacity:0.5;">Activar</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ waActive }}" hint-placeholder-val="{{ false }}">
+              <div style="border:2px solid var(--black);border-radius:18px;background:var(--white);box-shadow:4px 4px 0 var(--black);padding:22px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;">
+                <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--green-soft);display:grid;place-items:center;color:var(--green-text);">
+                  <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z"></path></svg>
+                </span>
+                <div style="min-width:240px;flex:1;">
+                  <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Recibe tus avisos por WhatsApp</div>
+                  <div style="display:flex;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap;">
+                    <span style="display:inline-flex;align-items:center;gap:8px;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:13px;font-weight:700;background:var(--green-soft);color:var(--green-text);font-variant-numeric:tabular-nums;">
+                      <span style="width:10px;height:10px;flex:none;border-radius:9999px;border:2px solid var(--black);background:var(--green);"></span>
+                      Activo en +52 55 •••• 1234
+                    </span>
+                    <span role="link" tabindex="0" style="font-size:13px;font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Cambiar número</span>
+                    <span role="link" tabindex="0" style="font-size:13px;font-weight:800;color:var(--red-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Desactivar</span>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+            <div style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+              <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 104px 136px;gap:12px;padding:16px 20px;background:var(--gray-100);border-bottom:2px solid var(--black);">
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Tipo de aviso</span>
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);text-align:center;">En avisos</span>
+                <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);text-align:center;">Por correo</span>
+                <span style="display:flex;flex-direction:column;align-items:center;gap:5px;">
+                  <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);text-align:center;">Por WhatsApp</span>
+                  <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 8px;font-size:11px;font-weight:700;background:var(--white);color:var(--text-muted);white-space:nowrap;">Próximamente</span>
+                </span>
+              </div>
+              <sc-for list="{{ configRows }}" as="c" hint-placeholder-count="9">
+                <div style="display:grid;grid-template-columns:minmax(0,1fr) 104px 104px 136px;gap:12px;align-items:center;padding:16px 20px;border-top:{{ c.divider }};background:{{ c.bg }}">
+                  <div style="min-width:0;">
+                    <div style="font-size:15px;font-weight:800;color:var(--black);">{{ c.label }}</div>
+                    <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;text-wrap:pretty;">{{ c.hint }}</div>
+                  </div>
+                  <div style="display:grid;place-items:center;">
+                    <span role="switch" aria-checked="{{ c.inApp }}" tabindex="0" style="width:52px;height:30px;border:2px solid var(--black);border-radius:9999px;display:flex;align-items:center;padding:0 3px;box-sizing:border-box;cursor:{{ c.cursor }};background:{{ c.inAppBg }};justify-content:{{ c.inAppPos }}">
+                      <span style="width:22px;height:22px;border-radius:9999px;border:2px solid var(--black);background:var(--white);"></span>
+                    </span>
+                  </div>
+                  <div style="display:grid;place-items:center;">
+                    <span role="switch" aria-checked="{{ c.mail }}" tabindex="0" style="width:52px;height:30px;border:2px solid var(--black);border-radius:9999px;display:flex;align-items:center;padding:0 3px;box-sizing:border-box;cursor:pointer;background:{{ c.mailBg }};justify-content:{{ c.mailPos }}">
+                      <span style="width:22px;height:22px;border-radius:9999px;border:2px solid var(--black);background:var(--white);"></span>
+                    </span>
+                  </div>
+                  <div style="display:grid;place-items:center;">
+                    <span role="switch" aria-checked="false" aria-disabled="true" title="Próximamente" style="width:52px;height:30px;border:2px solid var(--black);border-radius:9999px;display:flex;align-items:center;justify-content:flex-start;padding:0 3px;box-sizing:border-box;background:var(--white);opacity:0.4;cursor:not-allowed;">
+                      <span style="width:22px;height:22px;border-radius:9999px;border:2px solid var(--black);background:var(--white);"></span>
+                    </span>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border:2px solid var(--black);border-radius:18px;background:var(--gray-100);padding:22px;">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div style="min-width:0;flex:1;">
+                  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                    <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Ofertas y novedades</span>
+                    <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--white);color:var(--text-muted);">Próximamente</span>
+                  </div>
+                  <p style="margin:8px 0 0;max-width:62ch;font-size:14px;font-weight:600;color:var(--ink);text-wrap:pretty;">Una sola llave para todo lo que no es de tu operación. Podrás encenderla cuando esté lista.</p>
+                </div>
+                <span role="switch" aria-checked="false" aria-disabled="true" style="flex:none;width:52px;height:30px;border:2px solid var(--black);border-radius:9999px;display:flex;align-items:center;justify-content:flex-start;padding:0 3px;box-sizing:border-box;background:var(--white);opacity:0.5;cursor:not-allowed;">
+                  <span style="width:22px;height:22px;border-radius:9999px;border:2px solid var(--black);background:var(--white);"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:95;background:rgba(13,13,13,0.45);display:flex;justify-content:flex-end;">
+      <div style="width:min(420px,100%);height:100%;box-sizing:border-box;background:var(--white);border-left:2.5px solid var(--black);display:flex;flex-direction:column;animation:xg-slide 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+        <div style="display:flex;align-items:center;gap:12px;padding:18px 20px;border-bottom:2.5px solid var(--black);background:var(--yellow);">
+          <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Avisos</span>
+          <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:800;background:var(--white);font-variant-numeric:tabular-nums;">4 sin leer</span>
+          <span role="button" tabindex="0" onClick="{{ toggleSheet }}" style="margin-left:auto;font-size:22px;font-weight:800;line-height:1;cursor:pointer;color:var(--black);">×</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:14px 20px;border-bottom:2px solid var(--gray-200);flex-wrap:wrap;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <div role="tab" tabindex="0" onClick="{{ t.pick }}" aria-selected="{{ t.active }}" style="display:inline-flex;align-items:center;height:36px;padding:0 12px;border:2px solid var(--black);border-radius:9999px;cursor:pointer;font-size:13px;font-weight:700;color:var(--black);background:{{ t.bg }}">{{ t.label }}</div>
+          </sc-for>
+          <div role="button" tabindex="0" onClick="{{ openConfig }}" title="Configurar" style="margin-left:auto;display:grid;place-items:center;width:36px;height:36px;border:2px solid var(--black);border-radius:11px;background:var(--white);cursor:pointer;color:var(--black);">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M20 12h1M3 12h1M12 3v1M12 20v1M17.7 6.3l.7-.7M5.6 18.4l.7-.7M17.7 17.7l.7.7M5.6 5.6l.7.7"></path></svg>
+          </div>
+        </div>
+        <div style="flex:1;min-height:0;overflow-y:auto;">
+          <sc-for list="{{ sheetItems }}" as="i" hint-placeholder-count="6">
+            <div data-row="1" role="link" tabindex="0" style="display:flex;gap:12px;align-items:flex-start;padding:16px 20px;border-bottom:2px solid var(--gray-200);background:{{ i.rowBg }};cursor:pointer;">
+              <span style="width:9px;height:9px;flex:none;margin-top:7px;border-radius:9999px;border:2px solid var(--black);background:{{ i.dot }}"></span>
+              <span style="width:38px;height:38px;flex:none;border:2px solid var(--black);border-radius:11px;display:grid;place-items:center;background:{{ i.tile }};color:{{ i.tileFg }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ i.icon }}"></path></svg>
+              </span>
+              <div style="min-width:0;flex:1;">
+                <div style="font-size:15px;color:var(--black);font-weight:{{ i.weight }};text-wrap:pretty;">{{ i.title }}</div>
+                <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ i.message }}</div>
+                <div style="font-size:12px;font-weight:700;color:var(--gray-600);margin-top:5px;">{{ i.meta }}</div>
+                <sc-if value="{{ i.button }}" hint-placeholder-val="{{ false }}">
+                  <button type="button" style="margin-top:12px;height:40px;padding:0 14px;background:var(--yellow);border:2px solid var(--black);border-radius:11px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">{{ i.button }}</button>
+                </sc-if>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="padding:16px 20px;border-top:2.5px solid var(--black);display:flex;align-items:center;gap:12px;">
+          <span role="button" tabindex="0" onClick="{{ markAll }}" style="font-size:13px;font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Marcar todo como leído</span>
+          <span role="button" tabindex="0" onClick="{{ toggleSheet }}" style="margin-left:auto;font-size:13px;font-weight:800;color:var(--black);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Ver todos</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:96;width:256px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <sc-for list="{{ controlGroups }}" as="g" hint-placeholder-count="4">
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">{{ g.label }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ g.options }}" as="o" hint-placeholder-count="3">
+                <div role="button" tabindex="0" onClick="{{ o.pick }}" style="min-height:38px;display:flex;align-items:center;padding:8px 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ o.bg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { tab: 'todos', filter: 'todos', view: 'list', dataState: 'ready', role: null, sheet: false, panelOpen: false, vw: 1440 };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+  }
+  componentWillUnmount() { window.removeEventListener('resize', this._r); }
+
+  renderVals() {
+    const st = this.state;
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const rail = st.vw < 1024;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Asesor', 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3ZM18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Asesor': 'Xangarro%20Portal%20-%20Asesor.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, dividerAfter]) => ({ label, icon, href: pages[label] || '#', dividerAfter: !!dividerAfter }));
+
+    const sev = {
+      critical: ['var(--red-soft)', 'var(--red-text)'],
+      warning: ['var(--warning-soft)', 'var(--warning-text)'],
+      info: ['var(--blue-soft)', 'var(--blue-text)'],
+      success: ['var(--green-soft)', 'var(--green-text)']
+    };
+    const icons = {
+      caja: 'M3 7h18v11H3V7Zm0 4h18M7 15h4',
+      stock: 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8',
+      cancel: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18ZM8 8l8 8M16 8l-8 8',
+      recurring: 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5',
+      turno: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 4v5l4 2',
+      reject: 'M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01',
+      diag: 'M6 3h9l4 4v14H6V3Zm3 8h7M9 15h7',
+      meta: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z',
+      pago: 'M3 7h18v11H3V7Zm0 4h18',
+      device: 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2',
+      operador: 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
+      news: 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z',
+      credit: 'M3 7h18v11H3V7Zm0 4h18M7 15h4'
+    };
+
+    const all = [
+      ['Hoy', 'operacion', 'critical', icons.caja, 'Falta $150.00 en el corte de Ana', 'El corte de la tarde cerró con diferencia.', 'Hace 40 min · iPhone de caja · Ana', true, null],
+      ['Hoy', 'operacion', 'warning', icons.stock, 'Stock bajo: refresco', 'Quedan 1 · tu umbral es 4.', 'Hace 2 h · Android de la barra · Luis', true, null],
+      ['Hoy', 'sistema', 'info', icons.diag, 'Tu Diagnóstico de septiembre está listo', '10 secciones y un plan de 3 acciones.', 'Hace 3 h · Xangarro!', true, null],
+      ['Hoy', 'sistema', 'success', icons.meta, '¡Llegaste al 75% de tu meta!', 'Vas 2 días adelantado en septiembre.', 'Hace 5 h · Xangarro!', true, null],
+      ['Ayer', 'operacion', 'critical', icons.reject, '2 registros rechazados en la sincronización', 'Una venta y un gasto quedaron fuera de tus números.', 'Ayer 19:12 · Android de la barra · Luis', false, null],
+      ['Ayer', 'operacion', 'warning', icons.turno, 'Turno abierto hace más de 12 h', 'Ana abrió a las 08:14 y no ha cerrado.', 'Ayer 20:30 · iPhone de caja · Ana', false, null],
+      ['Ayer', 'operacion', 'info', icons.cancel, 'Venta cancelada por $340.00', 'Gringa ×4 y dos refrescos.', 'Ayer 15:02 · iPhone de caja · Ana', false, null],
+      ['Esta semana', 'operacion', 'success', icons.recurring, 'Gasto recurrente confirmado: renta', '$6,000.00 registrados el día 1.', 'Lunes 09:00 · Escritorio · Pedro', false, null],
+      ['Esta semana', 'sistema', 'info', icons.pago, 'Tu pago de Xangarro se aplicó', '$499.00 MXN · próximo cargo el 1 de octubre.', 'Lunes 07:15 · Xangarro!', false, null],
+      ['Esta semana', 'sistema', 'warning', icons.device, 'Dispositivo revocado: iPad viejo', 'Ya no puede registrar ventas ni ver tus números.', 'Domingo 18:40 · Xangarro!', false, null],
+      ['Anteriores', 'sistema', 'info', icons.operador, 'Luis cambió de operador a administrador', 'Ahora puede ver reportes de caja.', '12 sep · Xangarro!', false, null],
+      ['Anteriores', 'sistema', 'info', icons.credit, 'Tu negocio califica para revisar opciones', 'Con 6 meses de historial puedes comparar alternativas de financiamiento.', '8 sep · Xangarro!', false, 'Ver opciones']
+    ];
+
+    const filtered = all.filter(([, cat, , , , , , unread]) =>
+      (st.tab === 'todos' || st.tab === cat) && (st.filter === 'todos' || unread));
+
+    const mk = ([day, cat, severity, icon, title, message, meta, unread, button], idx) => {
+      const [tile, tileFg] = sev[severity];
+      return {
+        day, icon, title, message, meta, button, tile, tileFg,
+        dot: unread ? 'var(--yellow)' : 'transparent',
+        rowBg: unread ? 'var(--white)' : 'var(--offwhite)',
+        weight: unread ? 800 : 600,
+        divider: idx === 0 ? 'none' : '2px solid var(--gray-200)'
+      };
+    };
+
+    const dayOrder = ['Hoy', 'Ayer', 'Esta semana', 'Anteriores'];
+    const groups = dayOrder.map(label => ({
+      label,
+      items: filtered.filter(r => r[0] === label).map(mk)
+    })).filter(g => g.items.length);
+
+    const counts = {
+      todos: all.length,
+      operacion: all.filter(r => r[1] === 'operacion').length,
+      sistema: all.filter(r => r[1] === 'sistema').length
+    };
+    const tabs = [['todos', 'Todos'], ['operacion', 'Operación'], ['sistema', 'Sistema']].map(([k, label]) => ({
+      label, active: st.tab === k, count: String(counts[k]),
+      bg: st.tab === k ? 'var(--yellow)' : 'var(--white)',
+      shadow: st.tab === k ? '4px 4px 0 var(--black)' : '3px 3px 0 var(--black)',
+      pick: set('tab', k)
+    }));
+
+    const configDefs = [
+      ['Discrepancia en caja', 'Cuando un corte cierra con faltante o sobrante.', true, true, false],
+      ['Stock bajo', 'Cuando un producto baja de su umbral.', true, false, false],
+      ['Venta cancelada', 'Cuando un operador cancela una venta ya registrada.', true, false, false],
+      ['Gasto recurrente pendiente', 'Cuando toca registrar un gasto fijo.', true, true, false],
+      ['Turno abierto más de 12 h', 'Cuando alguien olvida cerrar su turno.', true, false, false],
+      ['Registros rechazados', 'Este aviso no se puede apagar.', true, true, true],
+      ['Pago y suscripción', 'Este aviso no se puede apagar.', true, true, true],
+      ['Diagnóstico y metas', 'Tu reporte mensual y los hitos de tu meta.', true, true, false],
+      ['Operadores y dispositivos', 'Altas, bajas y cambios de permisos.', true, false, false]
+    ];
+    const configRows = configDefs.map(([label, hint, inApp, mail, locked], i) => ({
+      label, hint, inApp, mail,
+      divider: i === 0 ? 'none' : '2px solid var(--gray-200)',
+      bg: locked ? 'var(--gray-100)' : 'var(--white)',
+      cursor: locked ? 'not-allowed' : 'pointer',
+      inAppBg: inApp ? 'var(--green)' : 'var(--white)',
+      inAppPos: inApp ? 'flex-end' : 'flex-start',
+      mailBg: mail ? 'var(--green)' : 'var(--white)',
+      mailPos: mail ? 'flex-end' : 'flex-start'
+    }));
+
+    const controlGroups = [
+      { label: 'Vista', options: [['list', 'Página completa'], ['config', 'Configurar']].map(([k, l]) => ({ label: l, bg: on(st.view === k), pick: set('view', k) })) },
+      { label: 'Panel lateral', options: [[true, 'Abierto'], [false, 'Cerrado']].map(([k, l]) => ({ label: l, bg: on(st.sheet === k), pick: set('sheet', k) })) },
+      { label: 'Estado de datos', options: [['ready', 'Con avisos'], ['loading', 'Cargando'], ['empty', 'Sin avisos'], ['error', 'Error']].map(([k, l]) => ({ label: l, bg: on(st.dataState === k), pick: set('dataState', k) })) },
+      { label: 'WhatsApp · canal', options: [['pending', 'Próximamente'], ['active', 'Activo (futuro)']].map(([k, l]) => ({ label: l, bg: on((st.wa ?? 'pending') === k), pick: set('wa', k) })) },
+      { label: 'Rol', options: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']].map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })) }
+    ];
+
+    const unread = all.filter(r => r[7]).length;
+
+    return {
+      nav, tabs, groups, configRows, controlGroups,
+      five: [1, 2, 3, 4, 5],
+      wide: !rail, sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' }[role],
+      hasUnread: unread > 0, unreadBadge: unread > 9 ? '9+' : String(unread),
+      bellBg: st.sheet ? 'var(--yellow)' : 'var(--white)',
+      sheetOpen: st.sheet, toggleSheet: () => this.setState({ sheet: !st.sheet }),
+      sheetItems: all.slice(0, 7).map(mk),
+      waPending: (st.wa ?? 'pending') === 'pending',
+      waActive: st.wa === 'active',
+      showList: st.view === 'list', showConfig: st.view === 'config',
+      configBg: st.view === 'config' ? 'var(--yellow)' : 'var(--white)',
+      openConfig: () => this.setState({ view: 'config', sheet: false }),
+      closeConfig: set('view', 'list'),
+      isReady: st.dataState === 'ready' && groups.length > 0,
+      isEmpty: st.dataState === 'empty' || (st.dataState === 'ready' && groups.length === 0),
+      isLoading: st.dataState === 'loading', isError: st.dataState === 'error',
+      filters: [['todos', 'Todos'], ['unread', 'Sin leer']].map(([k, l]) => ({ label: l, bg: on(st.filter === k), pick: set('filter', k) })),
+      markAll: set('filter', 'todos'),
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

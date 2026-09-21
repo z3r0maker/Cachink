@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple-soft:#F0E5FF; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-slide{from{transform:translateX(24px);opacity:0}to{transform:none;opacity:1}}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+[data-row]{transition:background 90ms linear;}
+[data-row]:hover{background:var(--yellow-soft);}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="11">
+        <a href="{{ n.href }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:1px;">{{ roleLabel }}</div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);box-shadow:3px 3px 0 var(--black);">PR</div>
+        </div>
+      </div>
+    </header>
+
+    <main style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Empleados</h1>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Quién trabaja contigo, cuánto le pagas y cuándo asistió</div>
+          </div>
+          <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+            <button type="button" style="display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 20px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+              {{ newLabel }}
+            </button>
+          </sc-if>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+          <div style="display:inline-flex;border:2.5px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+            <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+              <div role="tab" tabindex="0" aria-selected="{{ t.selected }}" onClick="{{ t.pick }}" style="display:flex;align-items:center;gap:10px;height:52px;padding:0 22px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:0.04em;text-transform:uppercase;color:var(--black);background:{{ t.bg }};border-left:{{ t.divider }}">
+                {{ t.label }}
+                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:{{ t.countBg }}">{{ t.count }}</span>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:var(--white);">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:var(--warning);"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">Nómina de la semana por pagar</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4">
+            <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+              <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ k.label }}</div>
+              <div style="font-size:34px;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;margin:8px 0 4px;color:{{ k.color }}">{{ k.value }}</div>
+              <div style="font-size:14px;font-weight:600;color:var(--text-muted);">{{ k.hint }}</div>
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:72px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos cargar tu equipo</div>
+            <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Revisa tu conexión e inténtalo otra vez.</p>
+            <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+            <div style="height:52px;background:var(--gray-100);border-bottom:2px solid var(--black);"></div>
+            <sc-for list="{{ skeletonRows }}" as="s" hint-placeholder-count="6">
+              <div style="display:flex;align-items:center;gap:16px;height:56px;padding:0 20px;border-bottom:2px solid var(--gray-200);">
+                <div style="width:36px;height:36px;border-radius:9999px;background:var(--gray-100);"></div>
+                <div style="flex:1;height:14px;border-radius:8px;background:var(--gray-100);"></div>
+                <div style="width:90px;height:14px;border-radius:8px;background:var(--gray-100);"></div>
+                <div style="width:110px;height:14px;border-radius:8px;background:var(--gray-100);"></div>
+              </div>
+            </sc-for>
+            <div style="padding:16px 20px;font-size:13px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">Cargando…</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:64px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+            <div style="width:76px;height:76px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:20px;">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4"></path></svg>
+            </div>
+            <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">{{ emptyTitle }}</div>
+            <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">{{ emptyBody }}</p>
+            <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+              <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" data-onyellow="1">{{ newLabel }}</button>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showPeople }}" hint-placeholder-val="{{ true }}">
+          <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <div style="min-width:1060px;">
+                <div style="display:grid;grid-template-columns:minmax(240px,1fr) 160px 140px 190px 150px 150px;align-items:center;gap:16px;height:52px;padding:0 20px;background:var(--gray-100);border-bottom:2.5px solid var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">
+                  <span>Empleado</span>
+                  <span>Contrato</span>
+                  <span>Ingreso</span>
+                  <span>Acceso a la app</span>
+                  <span style="text-align:right;">Sueldo semanal</span>
+                  <span>Estado</span>
+                </div>
+                <sc-for list="{{ people }}" as="p" hint-placeholder-count="6">
+                  <div data-row="1" role="button" tabindex="0" onClick="{{ p.open }}" style="display:grid;grid-template-columns:minmax(240px,1fr) 160px 140px 190px 150px 150px;align-items:center;gap:16px;min-height:56px;padding:0 20px;border-bottom:2px solid var(--gray-200);cursor:pointer;background:{{ p.rowBg }}">
+                    <div style="display:flex;align-items:center;gap:11px;min-width:0;">
+                      <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--black);background:{{ p.avatarBg }}">{{ p.initials }}</span>
+                      <div style="min-width:0;">
+                        <div style="font-size:15px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.name }}</div>
+                        <div style="font-size:12px;font-weight:600;color:var(--text-muted);">{{ p.puesto }}</div>
+                      </div>
+                    </div>
+                    <div>
+                      <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;color:var(--black);background:{{ p.contratoBg }}">{{ p.contrato }}</span>
+                    </div>
+                    <div style="font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ p.ingreso }}</div>
+                    <div style="font-size:14px;font-weight:600;color:{{ p.accesoColor }};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ p.acceso }}</div>
+                    <div style="text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ p.sueldo }}</div>
+                    <div>
+                      <span style="display:inline-flex;align-items:center;gap:7px;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;color:var(--black);background:{{ p.estadoBg }}">
+                        <span style="width:9px;height:9px;flex:none;border-radius:9999px;border:2px solid var(--black);background:{{ p.estadoDot }}"></span>
+                        {{ p.estado }}
+                      </span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showNomina }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+            <div style="overflow-x:auto;">
+              <div style="min-width:940px;">
+                <div style="display:grid;grid-template-columns:minmax(220px,1fr) 160px 170px 160px 150px;align-items:center;gap:16px;height:52px;padding:0 20px;background:var(--gray-100);border-bottom:2.5px solid var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">
+                  <span>Periodo</span>
+                  <span>Empleados</span>
+                  <span>Registrado por</span>
+                  <span style="text-align:right;">Total</span>
+                  <span>Estado</span>
+                </div>
+                <sc-for list="{{ payruns }}" as="r" hint-placeholder-count="6">
+                  <div data-row="1" style="display:grid;grid-template-columns:minmax(220px,1fr) 160px 170px 160px 150px;align-items:center;gap:16px;min-height:56px;padding:0 20px;border-bottom:2px solid var(--gray-200);background:{{ r.rowBg }}">
+                    <div style="font-size:15px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ r.periodo }}</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;">{{ r.empleados }}</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ r.por }}</div>
+                    <div style="text-align:right;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--red-text);white-space:nowrap;">{{ r.total }}</div>
+                    <div>
+                      <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;color:var(--black);background:{{ r.stateBg }}">{{ r.estado }}</span>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;flex-wrap:wrap;">
+              <span style="font-size:13px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">Cada pago de nómina se registra también como gasto</span>
+              <a href="Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html" style="margin-left:auto;font-size:13px;font-weight:800;">Ver en gastos</a>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ showAsistencia }}" hint-placeholder-val="{{ false }}">
+          <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+            <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;">
+              <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Semana del 06 al 12 de mayo</span>
+              <span style="font-size:13px;font-weight:600;color:var(--text-muted);">Turnos capturados desde los dispositivos</span>
+            </div>
+            <div style="overflow-x:auto;">
+              <div style="min-width:820px;">
+                <div style="display:grid;grid-template-columns:minmax(200px,1fr) repeat(7,minmax(64px,1fr)) 110px;align-items:center;gap:10px;padding-bottom:12px;border-bottom:2.5px solid var(--black);font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">
+                  <span>Empleado</span>
+                  <sc-for list="{{ weekDays }}" as="d" hint-placeholder-count="7">
+                    <span style="text-align:center;">{{ d.label }}</span>
+                  </sc-for>
+                  <span style="text-align:right;">Horas</span>
+                </div>
+                <sc-for list="{{ asistencia }}" as="a" hint-placeholder-count="4">
+                  <div style="display:grid;grid-template-columns:minmax(200px,1fr) repeat(7,minmax(64px,1fr)) 110px;align-items:center;gap:10px;padding:12px 0;border-bottom:2px solid var(--gray-200);">
+                    <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+                      <span style="width:32px;height:32px;flex:none;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;font-size:12px;font-weight:800;color:var(--black);background:{{ a.avatarBg }}">{{ a.initials }}</span>
+                      <span style="font-size:15px;font-weight:700;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ a.name }}</span>
+                    </div>
+                    <sc-for list="{{ a.days }}" as="dd" hint-placeholder-count="7">
+                      <span title="{{ dd.title }}" style="height:34px;border:2px solid var(--black);border-radius:10px;background:{{ dd.bg }};display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--black);">{{ dd.mark }}</span>
+                    </sc-for>
+                    <span style="text-align:right;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ a.horas }}</span>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;gap:18px;margin-top:16px;flex-wrap:wrap;">
+              <sc-for list="{{ legend }}" as="l" hint-placeholder-count="3">
+                <span style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--black);">
+                  <span style="width:18px;height:14px;flex:none;border:2px solid var(--black);border-radius:5px;background:{{ l.bg }}"></span>
+                  {{ l.label }}
+                </span>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;inset:0;z-index:80;background:rgba(13,13,13,0.45);" onClick="{{ closeDrawer }}"></div>
+  </sc-if>
+  <sc-if value="{{ drawerOpen }}" hint-placeholder-val="{{ false }}">
+    <aside style="animation:xg-slide 160ms cubic-bezier(0.2,0.8,0.2,1) both;position:fixed;top:0;right:0;bottom:0;z-index:81;width:min(460px,100vw);background:var(--white);border-left:2.5px solid var(--black);display:flex;flex-direction:column;font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;gap:14px;min-height:76px;box-sizing:border-box;padding:0 22px;border-bottom:2.5px solid var(--black);background:{{ detail.headerBg }}">
+        <div style="min-width:0;">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">{{ detail.puesto }}</div>
+          <div style="font-size:19px;font-weight:800;letter-spacing:-0.02em;color:var(--black);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ detail.name }}</div>
+        </div>
+        <div role="button" tabindex="0" onClick="{{ closeDrawer }}" title="Cerrar" style="margin-left:auto;flex:none;width:40px;height:40px;display:grid;place-items:center;border:2px solid var(--black);border-radius:12px;background:var(--white);box-shadow:3px 3px 0 var(--black);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>
+        </div>
+      </div>
+      <div style="flex:1;min-height:0;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:20px;">
+        <div style="border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;background:var(--offwhite);">
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Sueldo semanal</div>
+          <div style="font-size:34px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:8px 0 6px;">{{ detail.sueldo }}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--text-muted);">{{ detail.sueldoNota }}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <sc-for list="{{ detail.fields }}" as="f" hint-placeholder-count="6">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:2px solid var(--gray-200);">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ f.label }}</span>
+              <span style="font-size:15px;font-weight:700;color:var(--black);text-align:right;">{{ f.value }}</span>
+            </div>
+          </sc-for>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:10px;">Pagos recientes</div>
+          <div style="border:2px solid var(--black);border-radius:14px;overflow:hidden;">
+            <sc-for list="{{ detail.pagos }}" as="pg" hint-placeholder-count="4">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:2px solid var(--gray-200);background:var(--offwhite);">
+                <span style="font-size:13px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ pg.date }}</span>
+                <span style="font-size:13px;font-weight:600;color:var(--text-muted);min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ pg.label }}</span>
+                <span style="margin-left:auto;flex:none;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ pg.amount }}</span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:none;padding:18px 22px;border-top:2.5px solid var(--black);display:flex;gap:10px;flex-wrap:wrap;">
+          <button type="button" style="flex:1;min-width:150px;height:50px;background:var(--white);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Editar datos</button>
+          <button type="button" style="flex:none;height:50px;padding:0 18px;background:var(--red-soft);color:var(--red-text);border:2.5px solid var(--black);border-radius:14px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Dar de baja</button>
+        </div>
+      </sc-if>
+    </aside>
+  </sc-if>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed;right:24px;bottom:24px;z-index:90;width:244px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Estado de datos</div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+            <sc-for list="{{ stateOptions }}" as="s" hint-placeholder-count="4">
+              <div role="button" tabindex="0" onClick="{{ s.pick }}" style="height:38px;display:grid;place-items:center;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ s.bg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Rol</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="3">
+              <div role="button" tabindex="0" onClick="{{ r.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ r.bg }}">{{ r.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">Ancho</div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <sc-for list="{{ widthOptions }}" as="w" hint-placeholder-count="2">
+              <div role="button" tabindex="0" onClick="{{ w.pick }}" style="height:38px;display:flex;align-items:center;padding:0 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ w.bg }}">{{ w.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;happy&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;happy&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;personas&quot;,&quot;nomina&quot;,&quot;asistencia&quot;],&quot;default&quot;:&quot;personas&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = { dataState: null, role: null, tab: null, panelOpen: false, selected: null, rail: null, vw: 1440 };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+    this._esc = (e) => { if (e.key === 'Escape') this.setState({ selected: null }); };
+    document.addEventListener('keydown', this._esc);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._r);
+    document.removeEventListener('keydown', this._esc);
+  }
+
+  money(n) { return '$' + Math.abs(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+  renderVals() {
+    const st = this.state;
+    const dataState = st.dataState ?? this.props.startState ?? 'happy';
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const tab = st.tab ?? this.props.startTab ?? 'personas';
+    const rail = st.rail ?? (st.vw < 1024);
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, dividerAfter]) => {
+      const active = label === 'Empleados';
+      return {
+        label, icon, href: pages[label] || '#', dividerAfter: !!dividerAfter,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const staff = [
+      ['Ana Robledo', 'AR', 'var(--yellow)', 'Cajera', 'Fijo', '02/abr/2025', 'Sí · operadora', 1800, 'Activa', 'var(--green-soft)', 'var(--green)'],
+      ['Luis Ortega', 'LO', 'var(--blue-soft)', 'Parrillero', 'Fijo', '15/ene/2025', 'Sí · operador', 2100, 'Activo', 'var(--green-soft)', 'var(--green)'],
+      ['Sofía Márquez', 'SM', 'var(--purple-soft)', 'Cajera de fin de semana', 'Por horas', '09/may/2026', 'Invitada', 900, 'Alta reciente', 'var(--warning-soft)', 'var(--warning)'],
+      ['Miguel Ángel Cruz', 'MC', 'var(--peach-soft)', 'Repartidor', 'Por horas', '20/feb/2026', 'No', 1200, 'Activo', 'var(--green-soft)', 'var(--green)'],
+      ['Carmen Díaz', 'CD', 'var(--green-soft)', 'Cocina', 'Fijo', '11/nov/2025', 'No', 1950, 'Activa', 'var(--green-soft)', 'var(--green)'],
+      ['Jorge Peña', 'JP', 'var(--gray-100)', 'Ayudante general', 'Temporal', '01/mar/2026', 'No', 1100, 'Baja', 'var(--gray-100)', 'var(--gray-400)']
+    ];
+
+    const people = staff.map((p, i) => ({
+      name: p[0], initials: p[1], avatarBg: p[2], puesto: p[3],
+      contrato: p[4],
+      contratoBg: p[4] === 'Fijo' ? 'var(--green-soft)' : p[4] === 'Por horas' ? 'var(--yellow-soft)' : 'var(--gray-100)',
+      ingreso: p[5],
+      acceso: p[6],
+      accesoColor: p[6] === 'No' ? 'var(--text-muted)' : 'var(--ink)',
+      sueldo: this.money(p[7]),
+      estado: p[8], estadoBg: p[9], estadoDot: p[10],
+      rowBg: st.selected === i ? 'var(--yellow-soft)' : 'var(--white)',
+      open: () => this.setState({ selected: i })
+    }));
+
+    const payruns = [
+      ['13 – 19 may 2026', '5 por pagar', '—', -8150, 'Pendiente', 'var(--warning-soft)'],
+      ['06 – 12 may 2026', '5 pagados', 'Pedro Ramírez', -8150, 'Pagada', 'var(--green-soft)'],
+      ['29 abr – 05 may 2026', '5 pagados', 'Pedro Ramírez', -8150, 'Pagada', 'var(--green-soft)'],
+      ['22 – 28 abr 2026', '5 pagados', 'Pedro Ramírez', -7950, 'Pagada', 'var(--green-soft)'],
+      ['15 – 21 abr 2026', '4 pagados', 'Pedro Ramírez', -6750, 'Pagada', 'var(--green-soft)'],
+      ['08 – 14 abr 2026', '4 pagados', 'Pedro Ramírez', -6750, 'Pagada', 'var(--green-soft)']
+    ].map(([periodo, empleados, por, total, estado, stateBg]) => ({
+      periodo, empleados, por, estado, stateBg,
+      total: this.money(total),
+      rowBg: estado === 'Pendiente' ? 'var(--yellow-soft)' : 'var(--white)'
+    }));
+
+    const dayState = (k) => ({
+      completo: { mark: '8h', bg: 'var(--green-soft)', title: 'Turno completo' },
+      medio: { mark: '4h', bg: 'var(--yellow-soft)', title: 'Medio turno' },
+      falta: { mark: '—', bg: 'var(--gray-100)', title: 'Sin turno' }
+    }[k]);
+
+    const asistencia = [
+      ['Ana Robledo', 'AR', 'var(--yellow)', ['completo', 'completo', 'completo', 'completo', 'completo', 'medio', 'falta'], '44 h'],
+      ['Luis Ortega', 'LO', 'var(--blue-soft)', ['completo', 'completo', 'medio', 'completo', 'completo', 'completo', 'falta'], '44 h'],
+      ['Carmen Díaz', 'CD', 'var(--green-soft)', ['completo', 'falta', 'completo', 'completo', 'completo', 'completo', 'medio'], '44 h'],
+      ['Miguel Ángel Cruz', 'MC', 'var(--peach-soft)', ['medio', 'medio', 'falta', 'medio', 'completo', 'completo', 'completo'], '36 h']
+    ].map(([name, initials, avatarBg, days, horas]) => ({
+      name, initials, avatarBg, horas, days: days.map(dayState)
+    }));
+
+    const sel = st.selected != null && staff[st.selected] ? staff[st.selected] : null;
+    const detail = sel ? {
+      name: sel[0], puesto: sel[3], headerBg: sel[2],
+      sueldo: this.money(sel[7]),
+      sueldoNota: sel[4] === 'Por horas' ? 'Calculado por horas trabajadas' : 'Pago fijo cada semana',
+      fields: [
+        { label: 'Contrato', value: sel[4] },
+        { label: 'Fecha de ingreso', value: sel[5] },
+        { label: 'Acceso a la app', value: sel[6] },
+        { label: 'Estado', value: sel[8] },
+        { label: 'Horas de la semana', value: sel[4] === 'Por horas' ? '36 h' : '44 h' },
+        { label: 'Último pago', value: '12/may/2026' }
+      ],
+      pagos: [
+        { date: '12 may', label: 'Nómina semanal', amount: this.money(sel[7]) },
+        { date: '05 may', label: 'Nómina semanal', amount: this.money(sel[7]) },
+        { date: '28 abr', label: 'Nómina semanal', amount: this.money(sel[7]) },
+        { date: '21 abr', label: 'Nómina semanal', amount: this.money(sel[7]) }
+      ]
+    } : null;
+
+    const hasDrawer = dataState === 'happy' && tab === 'personas' && sel != null;
+
+    return {
+      nav, people, payruns, asistencia, detail,
+      weekDays: [['Mié', '06'], ['Jue', '07'], ['Vie', '08'], ['Sáb', '09'], ['Dom', '10'], ['Lun', '11'], ['Mar', '12']]
+        .map(([d, n]) => ({ label: d + ' ' + n })),
+      legend: [
+        { label: 'Turno completo', bg: 'var(--green-soft)' },
+        { label: 'Medio turno', bg: 'var(--yellow-soft)' },
+        { label: 'Sin turno', bg: 'var(--gray-100)' }
+      ],
+      skeletonRows: [1, 2, 3, 4, 5, 6],
+      newLabel: tab === 'nomina' ? 'Registrar nómina' : 'Nuevo empleado',
+      tabs: [['personas', 'Personas', '6'], ['nomina', 'Nómina', '6'], ['asistencia', 'Asistencia', '4']].map(([k, l, c], i) => ({
+        label: l, count: c, selected: tab === k,
+        bg: tab === k ? 'var(--yellow)' : 'var(--white)',
+        countBg: tab === k ? 'var(--white)' : 'var(--gray-100)',
+        divider: i === 0 ? 'none' : '2.5px solid var(--black)',
+        pick: () => this.setState({ tab: k, selected: null })
+      })),
+      kpis: tab === 'nomina' ? [
+        { label: 'Nómina de la semana', value: '$8,150.00', color: 'var(--red-text)', hint: '5 empleados por pagar' },
+        { label: 'Pagado en mayo', value: '$16,300.00', color: 'var(--black)', hint: '2 nóminas cerradas' },
+        { label: 'Promedio semanal', value: '$7,750.00', color: 'var(--black)', hint: 'Últimas 5 semanas' },
+        { label: 'Peso sobre tus ventas', value: '12%', color: 'var(--warning-text)', hint: 'Nómina contra ingresos del mes' }
+      ] : [
+        { label: 'Empleados activos', value: '5', color: 'var(--black)', hint: '1 baja este mes' },
+        { label: 'Con acceso a la app', value: '2', color: 'var(--black)', hint: '3 sin acceso · solo nómina' },
+        { label: 'Nómina de la semana', value: '$8,150.00', color: 'var(--red-text)', hint: 'Se registra como gasto' },
+        { label: 'Horas de la semana', value: '168 h', color: 'var(--black)', hint: 'Capturadas en los dispositivos' }
+      ],
+      emptyTitle: 'Todavía no tienes empleados',
+      emptyBody: 'Registra a quien trabaja contigo para llevar su sueldo y sus horas, aunque no use la app.',
+      showPeople: dataState === 'happy' && tab === 'personas',
+      showNomina: dataState === 'happy' && tab === 'nomina',
+      showAsistencia: dataState === 'happy' && tab === 'asistencia',
+      wide: !rail,
+      sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' }[role],
+      canEdit: role !== 'viewer',
+      isLoading: dataState === 'loading', isEmpty: dataState === 'empty', isError: dataState === 'error',
+      drawerOpen: hasDrawer,
+      closeDrawer: () => this.setState({ selected: null }),
+      panelOpen: st.panelOpen && !hasDrawer,
+      panelClosed: !st.panelOpen && !hasDrawer,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen }),
+      stateOptions: [['happy', 'Con datos'], ['loading', 'Cargando'], ['empty', 'Vacío'], ['error', 'Error']]
+        .map(([k, l]) => ({ label: l, bg: on(dataState === k), pick: set('dataState', k) })),
+      roleOptions: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']]
+        .map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })),
+      widthOptions: [[false, 'Escritorio · menú completo'], [true, 'Tablet · riel de iconos']]
+        .map(([k, l]) => ({ label: l, bg: on(rail === k), pick: set('rail', k) }))
+    };
+  }
+}
+</script>
+</body>
+</html>

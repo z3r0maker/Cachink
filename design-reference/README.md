@@ -21,3 +21,14 @@ does not have.
 ```bash
 npx serve design-reference/operador -l 4300
 ```
+
+## `portal/` — the Director screens (added 2026-09-20, closes O-23)
+
+Mirrored from the owner's export (`~/Downloads/XangarroDedign`, the
+`design_handoff_xangarro_portal` set plus the root's Asesor/Avisos/Cortes).
+Thirteen screens + the design-system pages + the runtime, same rules as
+`operador/`: read-only, refreshed by re-exporting from the Claude Design
+project (a `design:pull` script that automates this is still P-18's open
+half). `comprobantes/` carries the four receipt-template designs N-20 waits
+on. Every `.dc.html` and its `_ds/` runtime were verified serving 200 from a
+plain static server after landing.

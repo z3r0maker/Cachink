@@ -53,7 +53,13 @@ réplica in its own words.
 
 ### P-18 Land the ADR-058 amendments upstream, then mirror `/design-reference/`
 
-- [ ] Status · **Blocked by:** — · **Blocks:** P-19, P-21, every screen task
+- [~] Status · **Blocked by:** — · **Blocks:** P-19, P-21, every screen task
+  - 2026-09-20 · **The mirror is complete:** `design-reference/portal/` (13 Director screens,
+    the design-system pages, `_ds/` runtime, `assets/hero-taqueria.png`) and
+    `design-reference/comprobantes/` (the four receipt templates N-20 waits on) landed from the
+    owner's export — every file verified serving 200 from a static server. **Still open:** the
+    ADR-058 amendments in the design project itself (step 1), the design-system README refresh
+    (step 2), and `scripts/design-pull.ts` so refreshes are a reviewable diff (step 3).
 - **Context:** ADR-058 resolves nine design/architecture conflicts. The plan's rule is «cualquier
   cambio visual se hace primero en el archivo de diseño y después en el código», so all of them
   land in the Claude Design project **before** any screen is built.

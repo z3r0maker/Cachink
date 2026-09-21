@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<script src="image-slot.js"></script>
+<style>
+  body { margin: 0; background: #F7F7F5; }
+  a { color: #14532D; }
+  a:hover { color: #0D0D0D; }
+</style>
+</helmet>
+
+<div style="font-family: 'Plus Jakarta Sans', sans-serif; padding: 48px 40px 80px; background: #F7F7F5; min-height: 100%;">
+
+  <div style="max-width: 1240px; margin: 0 0 40px;">
+    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Comprobantes Xangarro · plantilla 2 de 4</div>
+    <div style="font-size: 40px; font-weight: 800; letter-spacing: -0.04em; color: #0D0D0D; margin-top: 8px;">Moderno</div>
+    <p style="max-width: 640px; color: #1A1A18; margin: 10px 0 0;">Banda de color arriba, todo alineado a la izquierda y aire entre bloques. El total ocupa una banda completa para que se lea aunque el PNG llegue chiquito al chat.</p>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start;">
+
+    <!-- A · acento claro, con logo -->
+    <div style="display: flex; flex-direction: column; gap: 14px; width: 540px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">A · Acento claro · con logo · completa</div>
+        <div style="font-size: 13px; color: #5A5A56;">Banda #FFD60A con tinta negra · 3 conceptos</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 2.5px solid #0D0D0D; box-shadow: 5px 5px 0 #0D0D0D;">
+
+        <div style="background: #FFD60A; border-bottom: 2.5px solid #0D0D0D; padding: 28px 32px; display: flex; gap: 18px; align-items: center;">
+          <div style="width: 68px; height: 68px; flex: none; border: 2px solid #0D0D0D; border-radius: 14px; overflow: hidden; background: #FFFFFF;">
+            <image-slot id="moderno-logo-a" shape="rect" placeholder="Logo del negocio"></image-slot>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+            <div style="font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: #0D0D0D;">Taquería Doña Cuca</div>
+            <div style="font-size: 13px; font-weight: 600; color: #0D0D0D;">Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.</div>
+          </div>
+        </div>
+
+        <div style="padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 26px;">
+
+          <div style="display: flex; gap: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Comprobante</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #0D0D0D;">V-000128</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Fecha</div>
+              <div style="font-size: 15px; font-weight: 600; color: #1A1A18;">14 sep 2026 · 14:32 h</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Orden de tacos al pastor</div>
+                <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">3 × $60.00</div>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$180.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Refresco 600 ml</div>
+                <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">2 × $30.00</div>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$60.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Consomé chico</div>
+                <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">1 × $45.00</div>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$45.00</div>
+            </div>
+          </div>
+
+          <div style="border: 2.5px solid #0D0D0D; border-radius: 14px; background: #FFD60A; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Total MXN</div>
+            <div style="font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: #0D0D0D; font-variant-numeric: tabular-nums;">$285.00</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Pago</div>
+            <div style="border: 2px solid #0D0D0D; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 700; color: #0D0D0D; background: #FFFBCC;">Efectivo</div>
+          </div>
+
+          <div style="border-top: 2px solid #E4E4E0; padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 18px; font-weight: 800; letter-spacing: -0.02em; color: #0D0D0D;">¡Gracias por tu compra!</div>
+            <div style="font-size: 14px; font-weight: 600; color: #1A1A18;">WhatsApp 33 1245 8890 · @tacosdonacuca</div>
+            <div style="font-size: 11px; font-weight: 500; color: #9E9E9A; line-height: 1.5; margin-top: 6px;">Este documento no es un comprobante fiscal (CFDI). · Hecho con Xangarro</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- B · acento oscuro, sin logo, un concepto -->
+    <div style="display: flex; flex-direction: column; gap: 14px; width: 540px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">B · Acento oscuro · sin logo · un concepto</div>
+        <div style="font-size: 13px; color: #5A5A56;">Banda #14532D con tinta blanca · logotipo tipográfico de respaldo</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 2.5px solid #0D0D0D; box-shadow: 5px 5px 0 #0D0D0D;">
+
+        <div style="background: #14532D; border-bottom: 2.5px solid #0D0D0D; padding: 28px 32px; display: flex; flex-direction: column; gap: 6px;">
+          <div style="font-size: 30px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; color: #FFFFFF;">Plomería Lozano</div>
+          <div style="font-size: 13px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #FFFFFF;">Servicio a domicilio</div>
+        </div>
+
+        <div style="padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 26px;">
+
+          <div style="display: flex; gap: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Comprobante</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #0D0D0D;">V-000129</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Fecha</div>
+              <div style="font-size: 15px; font-weight: 600; color: #1A1A18;">14 sep 2026 · 17:05 h</div>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+            <div style="display: flex; flex-direction: column; gap: 2px;">
+              <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Reparación de fuga y cambio de mezcladora</div>
+              <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">1 servicio</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$1,250.00</div>
+          </div>
+
+          <div style="border: 2.5px solid #0D0D0D; border-radius: 14px; background: #14532D; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #FFFFFF;">Total MXN</div>
+            <div style="font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: #FFFFFF; font-variant-numeric: tabular-nums;">$1,250.00</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Pago</div>
+            <div style="border: 2px solid #0D0D0D; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 700; color: #0D0D0D; background: #E5ECFF;">Transferencia</div>
+          </div>
+
+          <div style="border-top: 2px solid #E4E4E0; padding-top: 20px; display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 14px; font-weight: 600; color: #1A1A18;">WhatsApp 33 2210 7744</div>
+            <div style="font-size: 11px; font-weight: 500; color: #9E9E9A; line-height: 1.5;">Este documento no es un comprobante fiscal (CFDI). · Hecho con Xangarro</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- C · nombre largo -->
+    <div style="display: flex; flex-direction: column; gap: 14px; width: 540px;">
+      <div style="display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">C · Nombre largo · QR·CoDi</div>
+        <div style="font-size: 13px; color: #5A5A56;">La banda crece en alto; el logo mantiene su ancla a la izquierda</div>
+      </div>
+
+      <div style="background: #FFFFFF; border: 2.5px solid #0D0D0D; box-shadow: 5px 5px 0 #0D0D0D;">
+
+        <div style="background: #FFD60A; border-bottom: 2.5px solid #0D0D0D; padding: 28px 32px; display: flex; gap: 18px; align-items: center;">
+          <div style="width: 68px; height: 68px; flex: none; border: 2px solid #0D0D0D; border-radius: 14px; background: #FFFFFF; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 800; letter-spacing: -0.03em; color: #0D0D0D;">AM</div>
+          <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; color: #0D0D0D; min-width: 0;">Abarrotes y Cremería La Michoacana de Don Rubén</div>
+        </div>
+
+        <div style="padding: 28px 32px 32px; display: flex; flex-direction: column; gap: 26px;">
+
+          <div style="display: flex; gap: 40px;">
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Comprobante</div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #0D0D0D;">V-000130</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 5px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Fecha</div>
+              <div style="font-size: 15px; font-weight: 600; color: #1A1A18;">15 sep 2026 · 09:18 h</div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Queso Cotija por kilo</div>
+                <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">2 × $170.00</div>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$340.00</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 20px;">
+              <div style="display: flex; flex-direction: column; gap: 2px;">
+                <div style="font-size: 16px; font-weight: 700; color: #0D0D0D;">Crema natural 1 L</div>
+                <div style="font-size: 13px; font-weight: 500; color: #5A5A56;">1 × $78.00</div>
+              </div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; color: #0D0D0D;">$78.00</div>
+            </div>
+          </div>
+
+          <div style="border: 2.5px solid #0D0D0D; border-radius: 14px; background: #FFD60A; padding: 20px 22px; display: flex; flex-direction: column; gap: 4px;">
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Total MXN</div>
+            <div style="font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; color: #0D0D0D; font-variant-numeric: tabular-nums;">$418.00</div>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Pago</div>
+            <div style="border: 2px solid #0D0D0D; border-radius: 20px; padding: 5px 14px; font-size: 13px; font-weight: 700; color: #0D0D0D; background: #D6FFF4;">QR · CoDi</div>
+          </div>
+
+          <div style="border-top: 2px solid #E4E4E0; padding-top: 20px;">
+            <div style="font-size: 11px; font-weight: 500; color: #9E9E9A; line-height: 1.5;">Este documento no es un comprobante fiscal (CFDI). · Hecho con Xangarro</div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 64px; max-width: 1128px; background: #FFFFFF; border: 2.5px solid #0D0D0D; box-shadow: 5px 5px 0 #0D0D0D; padding: 32px 34px;">
+    <div style="font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #5A5A56;">Especificación para desarrollo</div>
+    <div style="font-size: 24px; font-weight: 800; letter-spacing: -0.03em; color: #0D0D0D; margin: 6px 0 22px;">Moderno</div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 26px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Formato</div>
+        <p style="margin: 0; font-size: 14px;">Media carta 140 × 216 mm para PDF. PNG de 1080 px @2x (lienzo 540 px). Banda superior 28 px de padding; cuerpo 32 px laterales; separación entre bloques 26 px.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Tipografía</div>
+        <p style="margin: 0; font-size: 14px;">Plus Jakarta Sans en todo; JetBrains Mono solo en folio e importes de renglón. Nombre 28–30 px/800 (24 px con nombres largos). Concepto 16 px/700 con subtexto 13 px/500. Total 44 px/800/-0.04em con cifras tabulares.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Color y contraste</div>
+        <p style="margin: 0; font-size: 14px;">El acento llena banda superior y caja de total. Luminancia relativa mayor a 0.45: tinta #0D0D0D; menor: #FFFFFF. La regla es la misma para los dos bloques, así nunca quedan desparejos.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Bordes y radios</div>
+        <p style="margin: 0; font-size: 14px;">Marco 2.5 px con sombra dura 5 px, sin radio. Banda separada por 2.5 px negro. Caja de total y logo radio 14 px; píldora de pago radio 20 px. Separador del pie 2 px #E4E4E0.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Logo</div>
+        <p style="margin: 0; font-size: 14px;">68 × 68 px pegado a la izquierda de la banda, centrado en vertical. Sin logo el nombre pasa a 30 px y toma toda la banda, con una línea de oficio en mayúsculas debajo; el monograma solo aparece cuando hay nombre largo y se quiere conservar la forma.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div style="font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0D0D0D;">Bloques opcionales</div>
+        <p style="margin: 0; font-size: 14px;">Dirección dentro de la banda; leyenda, WhatsApp y redes en el pie. Sin ninguno, el pie queda solo con la línea legal y la marca a 11 px #9E9E9A.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</x-dc>
+</body>
+</html>

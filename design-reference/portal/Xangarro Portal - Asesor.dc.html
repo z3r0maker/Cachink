@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/colors_and_type.css">
+<script src="_ds/cachink-design-system-890cd1ee-0432-48be-9c4c-478a6b781e00/_ds_bundle.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+<style>
+:root{
+  --text-muted:#6F6F6B;
+  --green-text:#007E5E; --red-text:#DA0013; --blue-text:#1D59FF; --warning-text:#8E6600;
+  --purple:#8B5CF6; --purple-soft:#F0E5FF; --cyan:#06B6D4; --peach-soft:#FFE8D6;
+}
+body{margin:0;background:var(--offwhite);}
+a{color:var(--blue-text);text-decoration:underline;text-underline-offset:2px;font-weight:700;}
+a:hover{color:var(--black);}
+*:focus-visible{outline:3px solid var(--yellow);outline-offset:1px;box-shadow:inset 0 0 0 2px var(--black);}
+[data-onyellow]:focus-visible{outline:3px solid var(--black);outline-offset:2px;box-shadow:none;}
+@keyframes xg-reveal{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+@keyframes xg-pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+@keyframes xg-fall{to{transform:translateY(240px) rotate(220deg);opacity:0}}
+[data-card]{transition:transform 120ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 120ms cubic-bezier(0.2,0.8,0.2,1);}
+[data-card]:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--black);}
+@media print{[data-noprint]{display:none!important}[data-print-main]{padding:0!important}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;background:var(--gray-200);font-family:var(--font-sans);color:var(--ink);">
+
+  <aside data-noprint="1" style="flex:none;background:var(--white);border-right:2.5px solid var(--black);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;width:{{ sidebarWidth }}">
+    <div style="display:flex;align-items:center;gap:11px;min-height:76px;box-sizing:border-box;padding:0 16px;border-bottom:2.5px solid var(--black);">
+      <div style="width:38px;height:38px;flex:none;border-radius:9999px;background:var(--yellow);border:2.5px solid var(--black);box-shadow:3px 3px 0 var(--black);display:grid;place-items:center;">
+        <svg viewBox="0 0 24 24" width="60%" height="60%" fill="none" stroke="var(--black)" stroke-width="4.6" stroke-linecap="butt"><path d="M5 5l14 14M19 5 5 19"></path></svg>
+      </div>
+      <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+        <span style="font-family:'Anton',var(--font-sans);font-size:23px;line-height:0.92;letter-spacing:-0.005em;color:var(--black);white-space:nowrap;">XANGARRO!</span>
+      </sc-if>
+    </div>
+    <nav style="flex:1;min-height:0;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:5px;">
+      <sc-for list="{{ nav }}" as="n" hint-placeholder-count="12">
+        <a href="{{ n.href }}" title="{{ n.label }}" style="display:flex;align-items:center;gap:12px;padding:0 12px;height:46px;border-radius:14px;cursor:pointer;color:var(--black);text-decoration:none;border:{{ n.border }};background:{{ n.bg }};box-shadow:{{ n.shadow }};font-weight:{{ n.weight }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ n.icon }}"></path></svg>
+          <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+            <span style="font-size:15px;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ n.label }}</span>
+          </sc-if>
+        </a>
+        <sc-if value="{{ n.dividerAfter }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:10px;padding:14px 4px 6px;">
+            <sc-if value="{{ wide }}" hint-placeholder-val="{{ true }}">
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;padding-left:8px;">Configuración</span>
+            </sc-if>
+            <span style="flex:1;height:2px;background:var(--gray-200);"></span>
+          </div>
+        </sc-if>
+      </sc-for>
+    </nav>
+  </aside>
+
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column;">
+
+    <header data-noprint="1" style="position:sticky;top:0;z-index:30;background:var(--gray-200);border-bottom:2.5px solid var(--black);height:76px;box-sizing:border-box;padding:0 32px;">
+      <div style="max-width:1760px;height:100%;margin:0 auto;display:flex;align-items:center;gap:16px;">
+        <div style="display:flex;align-items:center;gap:11px;padding:6px 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+          <div style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;font-size:13px;font-weight:800;">TP</div>
+          <div style="min-width:0;">
+            <div style="font-size:15px;font-weight:800;letter-spacing:-0.01em;color:var(--black);white-space:nowrap;line-height:1.15;">Taquería Don Pedro</div>
+            <div style="display:flex;align-items:center;gap:7px;margin-top:1px;">
+              <span style="display:inline-flex;align-items:center;background:var(--yellow);border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;letter-spacing:0.04em;">{{ planLabel }}</span>
+              <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ roleLabel }}</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <div style="display:inline-flex;align-items:center;gap:9px;border:2px solid var(--black);border-radius:9999px;padding:7px 14px;background:var(--green-soft);">
+            <span style="width:11px;height:11px;border-radius:9999px;border:2px solid var(--black);flex:none;background:var(--green);"></span>
+            <span style="font-size:13px;font-weight:700;color:var(--black);white-space:nowrap;">Sincronizado · 3 dispositivos</span>
+          </div>
+          <a href="Xangarro%20Portal%20-%20Avisos.dc.html" title="Avisos" aria-label="Avisos · 4 sin leer" style="position:relative;display:grid;place-items:center;width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);color:var(--black);text-decoration:none;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.7 21a2 2 0 0 1-3.4 0"></path></svg>
+            <span style="position:absolute;top:-7px;right:-7px;min-width:22px;height:22px;padding:0 5px;box-sizing:border-box;display:grid;place-items:center;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);font-size:12px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">4</span>
+          </a>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 12px 6px 6px;border:2px solid var(--black);border-radius:9999px;background:var(--white);box-shadow:3px 3px 0 var(--black);">
+            <div style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--blue-soft);display:grid;place-items:center;font-size:13px;font-weight:800;color:var(--blue-text);">PR</div>
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main data-print-main="1" style="flex:1;padding:28px 32px 96px;">
+      <div style="max-width:1760px;margin:0 auto;display:flex;flex-direction:column;gap:20px;">
+
+        <div data-noprint="1" style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+          <div>
+            <div style="display:inline-flex;align-items:center;gap:7px;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;background:var(--yellow-soft);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);margin-bottom:10px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path><path d="M18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z"></path></svg>
+              Asesor
+            </div>
+            <h1 style="margin:0;font-size:36px;line-height:1.05;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Tu Asesor</h1>
+            <div style="font-size:15px;font-weight:600;color:var(--gray-600);margin-top:6px;">Te cobra, te cuadra la caja, te dice cuánto puedes sacar.</div>
+          </div>
+        </div>
+
+        <div data-noprint="1" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="3">
+            <div role="tab" tabindex="0" onClick="{{ t.pick }}" aria-selected="{{ t.active }}" style="display:inline-flex;align-items:center;gap:9px;height:46px;padding:0 18px;border:2px solid var(--black);border-radius:14px;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:-0.01em;color:var(--black);background:{{ t.bg }};box-shadow:{{ t.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex:none;"><path d="{{ t.icon }}"></path></svg>
+              {{ t.label }}
+            </div>
+          </sc-for>
+        </div>
+
+        <sc-if value="{{ isParaTi }}" hint-placeholder-val="{{ true }}">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px;align-items:start;">
+
+            <div style="display:flex;flex-direction:column;gap:16px;min-width:0;">
+              <sc-if value="{{ feedLoading }}" hint-placeholder-val="{{ false }}">
+                <sc-for list="{{ three }}" as="k" hint-placeholder-count="3">
+                  <div style="height:150px;border:2px solid var(--black);border-radius:16px;background:var(--gray-100);box-shadow:4px 4px 0 var(--black);"></div>
+                </sc-for>
+              </sc-if>
+
+              <sc-if value="{{ feedError }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                  <div style="width:68px;height:68px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+                    <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                  </div>
+                  <div style="font-size:22px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos cargar tus avisos del Asesor</div>
+                  <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Revisa tu conexión e inténtalo otra vez.</p>
+                  <button type="button" style="margin-top:20px;height:50px;padding:0 22px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ feedEmpty }}" hint-placeholder-val="{{ false }}">
+                <div style="background:var(--green-soft);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                  <div style="width:68px;height:68px;border:2.5px solid var(--black);border-radius:18px;background:var(--white);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--green-text);margin-bottom:18px;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                  </div>
+                  <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Todo en orden por hoy.</div>
+                  <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Cuando algo necesite tu atención, aparecerá aquí.</p>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ feedReady }}" hint-placeholder-val="{{ true }}">
+                <sc-for list="{{ feed }}" as="f" hint-placeholder-count="5">
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:20px;">
+                    <div style="display:flex;gap:14px;align-items:flex-start;">
+                      <span style="width:46px;height:46px;flex:none;border:2px solid var(--black);border-radius:12px;display:grid;place-items:center;color:var(--black);background:{{ f.tile }}">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ f.icon }}"></path></svg>
+                      </span>
+                      <div style="min-width:0;flex:1;">
+                        <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px;">
+                          <span style="display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:2px 9px;background:var(--yellow-soft);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+                            Asesor
+                          </span>
+                          <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ f.categoria }}</span>
+                        </div>
+                        <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);text-wrap:pretty;">{{ f.title }}</div>
+                        <p style="margin:6px 0 0;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ f.body }}</p>
+                        <div style="display:flex;align-items:center;gap:12px;margin-top:16px;flex-wrap:wrap;">
+                          <button type="button" style="height:44px;padding:0 18px;background:var(--yellow);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">{{ f.action }}</button>
+                          <span role="button" tabindex="0" style="font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text-muted);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Ahora no</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+
+                <sc-if value="{{ isXangarrito }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ lockedFeed }}" as="l" hint-placeholder-count="2">
+                    <div style="display:flex;align-items:center;gap:14px;border:2px solid var(--black);border-radius:16px;background:var(--gray-100);padding:16px 18px;">
+                      <span style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:11px;background:var(--white);display:grid;place-items:center;color:var(--gray-600);">
+                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+                      </span>
+                      <div style="min-width:0;">
+                        <div style="font-size:15px;font-weight:800;color:var(--black);">{{ l.title }}</div>
+                        <div style="font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text-muted);margin-top:3px;">Disponible en Xangarro</div>
+                      </div>
+                      <a href="Xangarro%20Portal%20-%20Suscripcion.dc.html" style="margin-left:auto;flex:none;display:inline-flex;align-items:center;height:42px;padding:0 16px;background:var(--white);border:2px solid var(--black);border-radius:12px;box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Ver planes</a>
+                    </div>
+                  </sc-for>
+                </sc-if>
+
+                <div style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:18px 20px;">
+                  <div role="button" tabindex="0" onClick="{{ togglePrev }}" aria-expanded="{{ prevOpen }}" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+                    <span style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Anteriores · 6</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gray-600)" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto;transform:{{ prevChevron }}"><path d="M6 9l6 6 6-6"></path></svg>
+                  </div>
+                  <sc-if value="{{ prevOpen }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;flex-direction:column;margin-top:8px;">
+                      <sc-for list="{{ previous }}" as="p" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-top:2px solid var(--gray-200);">
+                          <div style="min-width:0;">
+                            <div style="font-size:14px;font-weight:700;color:var(--text-muted);text-wrap:pretty;">{{ p.title }}</div>
+                            <div style="font-size:12px;font-weight:600;color:var(--gray-600);margin-top:2px;">{{ p.meta }}</div>
+                          </div>
+                          <span style="margin-left:auto;flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:{{ p.tagBg }};color:{{ p.tagFg }}">{{ p.tag }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </div>
+
+            <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px;min-width:0;">
+              <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">¿Qué puede hacer tu Asesor hoy?</div>
+              <p style="margin:6px 0 18px;font-size:14px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Cada capacidad se activa cuando tienes suficientes registros. Sigue capturando y se abren solas.</p>
+              <div style="display:flex;flex-direction:column;">
+                <sc-for list="{{ readiness }}" as="r" hint-placeholder-count="6">
+                  <div style="padding:14px 0;border-top:2px solid var(--gray-200);">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                      <span style="width:32px;height:32px;flex:none;border:2px solid var(--black);border-radius:10px;display:grid;place-items:center;background:{{ r.tile }};color:{{ r.tileFg }}">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.glyph }}"></path></svg>
+                      </span>
+                      <div style="min-width:0;">
+                        <div style="font-size:15px;font-weight:800;color:var(--black);">{{ r.name }}</div>
+                        <div style="font-size:12px;font-weight:700;letter-spacing:0.04em;color:var(--gray-600);margin-top:2px;">{{ r.req }}</div>
+                      </div>
+                      <span style="margin-left:auto;flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;white-space:nowrap;background:{{ r.tagBg }};color:{{ r.tagFg }}">{{ r.tag }}</span>
+                    </div>
+                    <sc-if value="{{ r.locked }}" hint-placeholder-val="{{ false }}">
+                      <div style="margin:10px 0 0 42px;">
+                        <div style="height:12px;border:2px solid var(--black);border-radius:8px;background:var(--gray-100);overflow:hidden;">
+                          <div style="height:100%;background:var(--yellow);width:{{ r.pct }}"></div>
+                        </div>
+                        <div style="font-size:13px;font-weight:700;color:var(--ink);margin-top:7px;text-wrap:pretty;">{{ r.lockedCopy }}</div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isMetas }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <sc-if value="{{ metasStep1 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:18px;">
+                <div>
+                  <h2 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Qué quieres lograr?</h2>
+                  <p style="margin:8px 0 0;font-size:15px;font-weight:600;color:var(--text-muted);">Elige una de cada lado, o solo una. Menos metas, mejores resultados.</p>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px;align-items:start;">
+                  <div>
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">¿Cómo quieres mejorar?</div>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <sc-for list="{{ groupA }}" as="g" hint-placeholder-count="3">
+                        <div role="radio" tabindex="0" aria-checked="{{ g.on }}" onClick="{{ g.pick }}" style="display:flex;gap:14px;align-items:flex-start;padding:18px;border:2px solid var(--black);border-radius:16px;cursor:pointer;background:{{ g.bg }};box-shadow:{{ g.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                          <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ g.icon }}"></path></svg>
+                          </span>
+                          <div style="min-width:0;">
+                            <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ g.title }}</div>
+                            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:4px;text-wrap:pretty;">{{ g.body }}</div>
+                          </div>
+                          <span style="margin-left:auto;flex:none;width:26px;height:26px;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;background:{{ g.dotBg }}">
+                            <sc-if value="{{ g.on }}" hint-placeholder-val="{{ false }}">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            </sc-if>
+                          </span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                  <div>
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:12px;">¿Para qué?</div>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <sc-for list="{{ groupB }}" as="g" hint-placeholder-count="3">
+                        <div role="radio" tabindex="0" aria-checked="{{ g.on }}" onClick="{{ g.pick }}" style="display:flex;gap:14px;align-items:flex-start;padding:18px;border:2px solid var(--black);border-radius:16px;cursor:pointer;background:{{ g.bg }};box-shadow:{{ g.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                          <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+                            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ g.icon }}"></path></svg>
+                          </span>
+                          <div style="min-width:0;">
+                            <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ g.title }}</div>
+                            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:4px;text-wrap:pretty;">{{ g.body }}</div>
+                          </div>
+                          <span style="margin-left:auto;flex:none;width:26px;height:26px;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;background:{{ g.dotBg }}">
+                            <sc-if value="{{ g.on }}" hint-placeholder-val="{{ false }}">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            </sc-if>
+                          </span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+                <sc-if value="{{ hasPreview }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:var(--yellow-soft);border:2.5px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px 24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                    <div style="min-width:0;">
+                      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Tu meta</div>
+                      <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:6px;text-wrap:pretty;">{{ previewSentence }}</div>
+                    </div>
+                    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                      <button type="button" onClick="{{ goStep2 }}" style="margin-left:auto;flex:none;height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Continuar</button>
+                    </sc-if>
+                  </div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ metasStep2 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:20px;align-items:start;">
+                <div style="min-width:0;">
+                  <h2 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">¿Qué tanto?</h2>
+                  <p style="margin:8px 0 18px;font-size:15px;font-weight:700;color:var(--ink);">Hoy vendes alrededor de $47,000.00 al mes.</p>
+                  <div style="display:flex;flex-direction:column;gap:12px;">
+                    <sc-for list="{{ levels }}" as="l" hint-placeholder-count="3">
+                      <div role="radio" tabindex="0" aria-checked="{{ l.on }}" onClick="{{ l.pick }}" style="display:flex;gap:14px;align-items:center;padding:18px;border:2px solid var(--black);border-radius:16px;cursor:pointer;background:{{ l.bg }};box-shadow:{{ l.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                        <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+                          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ l.icon }}"></path></svg>
+                        </span>
+                        <div style="min-width:0;">
+                          <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;">
+                            <span style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ l.title }}</span>
+                            <sc-if value="{{ l.rec }}" hint-placeholder-val="{{ false }}">
+                              <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:1px 9px;font-size:12px;font-weight:700;background:var(--green-soft);color:var(--green-text);">Recomendado</span>
+                            </sc-if>
+                          </div>
+                          <div style="font-size:15px;font-weight:700;color:var(--ink);margin-top:5px;font-variant-numeric:tabular-nums;">{{ l.amounts }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Si lo logras, el próximo mes subimos el reto desde tu nuevo promedio.</p>
+                </div>
+
+                <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px;min-width:0;">
+                  <h3 style="margin:0;font-size:22px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">¿Qué quieres comprar?</h3>
+                  <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px;">
+                    <div>
+                      <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">Qué quieres comprar</label>
+                      <input type="text" value="Refrigerador" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:16px;font-weight:700;color:var(--black);">
+                    </div>
+                    <div>
+                      <label style="display:block;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:5px;">¿Cuánto cuesta?</label>
+                      <input type="text" value="$18,000.00" style="width:100%;box-sizing:border-box;height:52px;padding:0 14px;border:2px solid var(--black);border-radius:12px;background:var(--white);font-family:inherit;font-size:16px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;">
+                    </div>
+                  </div>
+                  <div style="margin-top:16px;display:flex;gap:12px;align-items:flex-start;border:2px solid var(--black);border-radius:14px;background:{{ calloutBg }};padding:16px;">
+                    <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:{{ calloutFg }}">
+                      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="{{ calloutIcon }}"></path></svg>
+                    </span>
+                    <p style="margin:0;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ calloutText }}</p>
+                  </div>
+                  <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
+                    <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                      <button type="button" onClick="{{ goStep3 }}" style="height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">{{ step2Cta }}</button>
+                    </sc-if>
+                    <button type="button" onClick="{{ goStep1 }}" style="height:52px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Regresar</button>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ metasStep3 }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:18px;max-width:760px;">
+                <h2 style="margin:0;font-size:28px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Así queda tu meta</h2>
+                <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:26px;">
+                  <div style="display:flex;flex-direction:column;gap:14px;">
+                    <sc-for list="{{ summary }}" as="s" hint-placeholder-count="2">
+                      <div style="display:flex;gap:14px;align-items:center;">
+                        <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:{{ s.tile }};display:grid;place-items:center;color:var(--black);">
+                          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="{{ s.icon }}"></path></svg>
+                        </span>
+                        <div style="min-width:0;">
+                          <div style="font-size:18px;font-weight:800;color:var(--black);">{{ s.title }}</div>
+                          <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:3px;font-variant-numeric:tabular-nums;">{{ s.detail }}</div>
+                        </div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <div style="margin-top:22px;padding-top:22px;border-top:2px solid var(--gray-200);">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Tu número de cada día</div>
+                    <div style="font-size:56px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin-top:10px;">$1,880.00</div>
+                    <div style="font-size:15px;font-weight:700;color:var(--ink);margin-top:8px;">Vender más para comprar mi refrigerador · Septiembre 2026</div>
+                  </div>
+                  <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" onClick="{{ goActive }}" style="margin-top:22px;width:100%;height:56px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Empezar mi meta</button>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ metasActive }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:20px;align-items:start;">
+
+                <div style="display:flex;flex-direction:column;gap:20px;min-width:0;">
+                  <sc-if value="{{ goalDone }}" hint-placeholder-val="{{ false }}">
+                    <div style="position:relative;overflow:hidden;background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:32px;animation:xg-pop 180ms cubic-bezier(0.2,0.8,0.2,1) both;">
+                      <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="10">
+                        <span style="position:absolute;top:-14px;width:10px;height:14px;border:2px solid var(--black);left:{{ c.left }};background:{{ c.bg }};animation:xg-fall 1400ms linear {{ c.delay }} both"></span>
+                      </sc-for>
+                      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">Septiembre 2026</div>
+                      <div style="font-size:40px;line-height:1.05;font-weight:800;letter-spacing:-0.035em;color:var(--black);margin:10px 0 6px;">¡Meta lograda!</div>
+                      <div style="font-size:56px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:14px 0 8px;">$57,120.00</div>
+                      <div style="font-size:16px;font-weight:700;color:var(--black);">Vendiste $720.00 más de tu meta de $56,400.00.</div>
+                      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                        <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--white);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--white);">Subir el reto</button>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ goalRunning }}" hint-placeholder-val="{{ true }}">
+                    <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:26px;">
+                      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <span style="width:44px;height:44px;flex:none;border:2px solid var(--black);border-radius:12px;background:var(--yellow);display:grid;place-items:center;color:var(--black);">
+                          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"></path></svg>
+                        </span>
+                        <div style="min-width:0;">
+                          <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Vender más · Septiembre</div>
+                          <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;">Para comprar mi refrigerador</div>
+                        </div>
+                      </div>
+                      <div style="display:flex;align-items:flex-end;gap:14px;margin:22px 0 10px;flex-wrap:wrap;">
+                        <span style="font-size:64px;line-height:0.9;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);">68%</span>
+                        <span style="font-size:17px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;padding-bottom:6px;">$38,350.00 de $56,400.00</span>
+                      </div>
+                      <div style="height:22px;border:2.5px solid var(--black);border-radius:10px;background:var(--gray-100);box-shadow:4px 4px 0 var(--black);overflow:hidden;">
+                        <div style="height:100%;background:var(--green);width:68%;"></div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px;margin-top:20px;">
+                        <span style="width:14px;height:14px;flex:none;border-radius:9999px;border:2px solid var(--black);background:{{ paceDot }}"></span>
+                        <span style="font-size:18px;font-weight:800;letter-spacing:-0.01em;color:{{ paceFg }}">{{ paceText }}</span>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:16px;border-top:2px solid var(--gray-200);flex-wrap:wrap;">
+                        <span style="font-size:15px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;">Hoy: $1,200.00 de $1,880.00</span>
+                        <sc-if value="{{ dailyDone }}" hint-placeholder-val="{{ false }}">
+                          <span style="display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:var(--green-soft);color:var(--green-text);">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                            Listo
+                          </span>
+                        </sc-if>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--offwhite);flex-wrap:wrap;">
+                        <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow-soft);display:grid;place-items:center;color:var(--black);">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+                        </span>
+                        <div style="min-width:0;flex:1;">
+                          <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Asesor</div>
+                          <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">{{ nextStep }}</p>
+                        </div>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border:2px solid var(--black);border-radius:14px;background:var(--white);flex-wrap:wrap;">
+                        <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--blue-soft);display:grid;place-items:center;color:var(--blue-text);">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M2 3h3l2.5 11h11l2-8H6"></path></svg>
+                        </span>
+                        <span style="font-size:15px;font-weight:700;color:var(--black);font-variant-numeric:tabular-nums;min-width:0;">Refrigerador · $6,200.00 de $18,000.00 · lo logras en marzo</span>
+                      </div>
+                      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+                          <button type="button" onClick="{{ goStep1 }}" style="height:48px;padding:0 20px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Cambiar meta</button>
+                          <button type="button" style="height:48px;padding:0 20px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Quitar meta</button>
+                        </div>
+                        <p style="margin:10px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);">Tu meta actual se guarda en tu historial. ¿Cambiar?</p>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ metasEmpty }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:56px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                      <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--yellow-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--black);margin-bottom:18px;">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 12h.01"></path></svg>
+                      </div>
+                      <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Ponle una meta a tu mes</div>
+                      <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Elige qué quieres lograr y te decimos cómo vas cada día.</p>
+                      <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                        <button type="button" onClick="{{ goStep1 }}" style="margin-top:22px;height:52px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Elegir mi meta</button>
+                      </sc-if>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ metasStarter }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:26px;display:flex;gap:22px;align-items:center;flex-wrap:wrap;">
+                      <svg viewBox="0 0 120 120" width="120" height="120" style="flex:none;">
+                        <circle cx="60" cy="60" r="48" fill="none" stroke="#E8E8E4" stroke-width="16"></circle>
+                        <circle cx="60" cy="60" r="48" fill="none" stroke="#FFD60A" stroke-width="16" stroke-linecap="butt" stroke-dasharray="120.6 301.6" transform="rotate(-90 60 60)"></circle>
+                        <circle cx="60" cy="60" r="56" fill="none" stroke="#0D0D0D" stroke-width="2.5"></circle>
+                        <circle cx="60" cy="60" r="40" fill="none" stroke="#0D0D0D" stroke-width="2.5"></circle>
+                        <text x="60" y="66" text-anchor="middle" font-family="Plus Jakarta Sans" font-size="22" font-weight="800" fill="#0D0D0D">12/30</text>
+                      </svg>
+                      <div style="min-width:0;">
+                        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Tu primera meta</div>
+                        <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:6px;">Registra tus ventas 30 días seguidos</div>
+                        <p style="margin:8px 0 0;max-width:46ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Llevas 12 de 30 días. Cuando completes el mes podrás elegir una meta de dinero y tu Asesor te dirá cómo lograrla.</p>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                      <span style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Metas logradas</span>
+                      <span style="display:inline-flex;align-items:center;gap:7px;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;background:var(--yellow);color:var(--black);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4ZM4 6h3M17 6h3M9 19h6M12 14v5"></path></svg>
+                        3 meses seguidos
+                      </span>
+                    </div>
+                    <div style="display:flex;flex-direction:column;">
+                      <sc-for list="{{ trophies }}" as="t" hint-placeholder-count="4">
+                        <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:2px solid var(--gray-200);">
+                          <div style="min-width:0;">
+                            <div style="font-size:15px;font-weight:800;color:var(--black);">{{ t.goal }}</div>
+                            <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);margin-top:3px;">{{ t.month }}</div>
+                          </div>
+                          <span style="margin-left:auto;flex:none;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);white-space:nowrap;">{{ t.result }}</span>
+                          <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:{{ t.tagBg }};color:{{ t.tagFg }}">{{ t.tag }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display:flex;flex-direction:column;gap:20px;min-width:0;">
+                  <sc-if value="{{ isPro }}" hint-placeholder-val="{{ false }}">
+                    <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:18px;box-shadow:4px 4px 0 var(--black);padding:22px;">
+                      <div style="display:inline-flex;align-items:center;gap:6px;border:2px solid var(--black);border-radius:9999px;padding:2px 9px;background:var(--yellow-soft);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+                        Asesor
+                      </div>
+                      <div style="font-size:20px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-top:12px;">Estrategia para tu meta</div>
+                      <p style="margin:6px 0 16px;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Te faltan $18,050.00. Con estos tres movimientos llegas sin vender más horas.</p>
+                      <div style="display:flex;flex-direction:column;gap:12px;">
+                        <sc-for list="{{ strategy }}" as="s" hint-placeholder-count="3">
+                          <div style="display:flex;align-items:center;gap:12px;border:2px solid var(--black);border-radius:14px;background:var(--offwhite);padding:14px 16px;flex-wrap:wrap;">
+                            <span style="font-size:15px;font-weight:700;color:var(--black);min-width:0;flex:1;text-wrap:pretty;">{{ s.move }}</span>
+                            <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:13px;font-weight:800;background:var(--green-soft);color:var(--green-text);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ s.impact }}</span>
+                          </div>
+                        </sc-for>
+                      </div>
+                      <p style="margin:14px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);text-wrap:pretty;">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ strategyLocked }}" hint-placeholder-val="{{ true }}">
+                    <div style="border:2px solid var(--black);border-radius:18px;background:var(--gray-100);padding:22px;">
+                      <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:11px;background:var(--white);display:grid;place-items:center;color:var(--gray-600);">
+                          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+                        </span>
+                        <div style="min-width:0;">
+                          <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">Estrategia personalizada</div>
+                          <div style="font-size:13px;font-weight:700;letter-spacing:0.04em;color:var(--text-muted);margin-top:3px;">Disponible en Xangarrote</div>
+                        </div>
+                      </div>
+                      <p style="margin:14px 0 16px;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Tu Asesor calcula 2 o 3 movimientos concretos, cada uno con los pesos que te acerca a tu meta.</p>
+                      <a href="Xangarro%20Portal%20-%20Suscripcion.dc.html" style="display:inline-flex;align-items:center;height:46px;padding:0 18px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);text-decoration:none;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Ver Xangarrote</a>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ isViewer }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex;gap:12px;align-items:center;border:2px solid var(--black);border-radius:16px;background:var(--blue-soft);padding:16px 18px;">
+                      <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--blue-text);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                      </span>
+                      <span style="font-size:14px;font-weight:700;color:var(--black);text-wrap:pretty;">Estás en modo solo lectura: puedes seguir la meta, pero no cambiarla.</span>
+                    </div>
+                  </sc-if>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ isDiag }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:20px;">
+
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+              <div>
+                <h2 style="margin:0;font-size:30px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Diagnóstico de septiembre 2026</h2>
+                <div style="font-size:14px;font-weight:600;color:var(--gray-600);margin-top:6px;">Generado el 1 de octubre de 2026 · 07:10</div>
+              </div>
+              <div data-noprint="1" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                <select style="height:48px;padding:0 12px;border:2px solid var(--black);border-radius:14px;background:var(--white);box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;color:var(--black);">
+                  <option>Septiembre 2026</option>
+                  <option>Agosto 2026</option>
+                  <option>Julio 2026</option>
+                </select>
+                <button type="button" style="display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 18px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"></path></svg>
+                  Descargar PDF
+                </button>
+                <button type="button" onClick="{{ openShareDiag }}" style="display:inline-flex;align-items:center;gap:9px;height:48px;padding:0 18px;background:var(--white);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z"></path></svg>
+                  Compartir por WhatsApp
+                </button>
+                <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                  <div style="display:flex;align-items:center;gap:10px;">
+                    <button type="button" style="height:48px;padding:0 18px;background:var(--yellow);border:2px solid var(--black);border-radius:14px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Volver a generar</button>
+                    <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;color:var(--gray-600);">Te quedan 2 este mes</span>
+                  </div>
+                </sc-if>
+              </div>
+            </div>
+
+            <sc-if value="{{ diagGenerating }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:16px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  <span style="font-size:15px;font-weight:800;color:var(--black);">Estamos preparando tu diagnóstico…</span>
+                  <span style="font-size:13px;font-weight:600;color:var(--text-muted);">Suele tardar menos de un minuto.</span>
+                </div>
+                <sc-for list="{{ three }}" as="k" hint-placeholder-count="3">
+                  <div style="border:2px solid var(--black);border-radius:16px;background:var(--white);box-shadow:4px 4px 0 var(--black);padding:22px;">
+                    <div style="height:16px;width:30%;border-radius:8px;background:var(--gray-200);"></div>
+                    <div style="height:12px;width:92%;border-radius:8px;background:var(--gray-100);margin-top:16px;"></div>
+                    <div style="height:12px;width:78%;border-radius:8px;background:var(--gray-100);margin-top:10px;"></div>
+                    <div style="height:104px;border-radius:12px;background:var(--gray-100);margin-top:18px;border:2px solid var(--gray-200);"></div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ diagNotEnough }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:32px;max-width:720px;">
+                <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Tu diagnóstico estará listo en 23 días</div>
+                <p style="margin:8px 0 20px;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Necesitamos un mes completo de registros para no darte números a medias. Esto es lo que falta:</p>
+                <div style="display:flex;flex-direction:column;">
+                  <sc-for list="{{ readiness }}" as="r" hint-placeholder-count="6">
+                    <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:2px solid var(--gray-200);">
+                      <span style="width:30px;height:30px;flex:none;border:2px solid var(--black);border-radius:9px;display:grid;place-items:center;background:{{ r.tile }};color:{{ r.tileFg }}">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="{{ r.glyph }}"></path></svg>
+                      </span>
+                      <span style="font-size:15px;font-weight:800;color:var(--black);min-width:0;">{{ r.name }}</span>
+                      <span style="margin-left:auto;flex:none;font-size:13px;font-weight:700;color:var(--ink);text-align:right;">{{ r.shortStatus }}</span>
+                    </div>
+                  </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ diagFreeOffer }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:32px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">90 días registrados</div>
+                  <div style="font-size:30px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:8px;text-wrap:pretty;">Ya tienes suficientes datos. Genera tu Diagnóstico gratis (una vez).</div>
+                  <p style="margin:10px 0 0;max-width:60ch;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">Tu Asesor revisa tus precios, tu inventario y tu caja, y te deja un plan de tres acciones.</p>
+                </div>
+                <sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+                  <button type="button" style="flex:none;height:56px;padding:0 26px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--white);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--white);">Generar mi diagnóstico</button>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ diagError }}" hint-placeholder-val="{{ false }}">
+              <div style="background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:64px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;">
+                <div style="width:72px;height:72px;border:2.5px solid var(--black);border-radius:18px;background:var(--red-soft);box-shadow:4px 4px 0 var(--black);display:grid;place-items:center;color:var(--red-text);margin-bottom:18px;">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path><path d="M12 9v4M12 17h.01"></path></svg>
+                </div>
+                <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">No pudimos generar tu diagnóstico</div>
+                <p style="margin:8px 0 0;max-width:44ch;font-size:15px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Tus registros están a salvo. Vuelve a intentarlo cuando tengas conexión.</p>
+                <button type="button" style="margin-top:22px;height:52px;padding:0 24px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Reintentar</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ diagReport }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;flex-direction:column;gap:16px;max-width:1080px;">
+
+                <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">1 · Tu meta</div>
+                  <div style="font-size:22px;font-weight:800;letter-spacing:-0.02em;color:var(--black);margin-top:8px;">Llegaste al 86% de tu meta de septiembre</div>
+                  <p style="margin:10px 0 0;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Vendiste $48,500.00 de los $56,400.00 que te propusiste. Las dos quincenas te fueron bien; lo que te frenó fueron los martes, tus días más flojos del mes. Si nivelas los martes al promedio de la semana, la meta de octubre te queda a la mano.</p>
+                  <div style="height:20px;border:2.5px solid var(--black);border-radius:10px;background:var(--gray-100);box-shadow:3px 3px 0 var(--black);overflow:hidden;margin-top:18px;"><div style="height:100%;width:86%;background:var(--green);"></div></div>
+                  <p style="margin:14px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                </div>
+
+                <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">2 · Resumen del mes</div>
+                  <p style="margin:10px 0 0;max-width:72ch;font-size:16px;font-weight:700;color:var(--black);text-wrap:pretty;">Vendiste $47,200.00, 12% más que en agosto. Tu utilidad bajó porque la nómina creció, no porque vendiste menos.</p>
+                  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:20px;">
+                    <sc-for list="{{ monthTiles }}" as="m" hint-placeholder-count="4">
+                      <div style="border:2px solid var(--black);border-radius:14px;background:var(--offwhite);padding:16px;">
+                        <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">{{ m.label }}</div>
+                        <div style="font-size:26px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;margin-top:6px;color:{{ m.color }}">{{ m.value }}</div>
+                        <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:3px;">{{ m.delta }}</div>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <p style="margin:16px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                </div>
+
+                <sc-if value="{{ diagFull }}" hint-placeholder-val="{{ true }}">
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">3 · Precios y márgenes</div>
+                    <p style="margin:10px 0 18px;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">El queso y la tortilla subieron y tus precios siguen iguales. Tres productos ya trabajan por debajo del 25% de margen.</p>
+                    <div style="overflow-x:auto;">
+                      <table style="width:100%;border-collapse:collapse;min-width:680px;">
+                        <thead>
+                          <tr>
+                            <sc-for list="{{ priceCols }}" as="c" hint-placeholder-count="5">
+                              <th style="text-align:{{ c.align }};padding:0 12px 10px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);white-space:nowrap;">{{ c.label }}</th>
+                            </sc-for>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <sc-for list="{{ priceRows }}" as="p" hint-placeholder-count="4">
+                            <tr>
+                              <td style="padding:13px 12px;border-top:2px solid var(--gray-200);font-size:15px;font-weight:700;color:var(--black);white-space:nowrap;">{{ p.name }}</td>
+                              <td style="padding:13px 12px;border-top:2px solid var(--gray-200);font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;">{{ p.cost }}</td>
+                              <td style="padding:13px 12px;border-top:2px solid var(--gray-200);font-size:15px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;">{{ p.price }}</td>
+                              <td style="padding:13px 12px;border-top:2px solid var(--gray-200);text-align:right;white-space:nowrap;">
+                                <span style="display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;background:{{ p.marginBg }};color:{{ p.marginFg }}">{{ p.margin }}</span>
+                              </td>
+                              <td style="padding:13px 12px;border-top:2px solid var(--gray-200);font-size:16px;font-weight:800;color:var(--black);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap;">{{ p.suggested }}</td>
+                            </tr>
+                          </sc-for>
+                        </tbody>
+                      </table>
+                    </div>
+                    <p style="margin:16px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                  </div>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">4 · ¿Me alcanza?</div>
+                    <p style="margin:10px 0 0;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Con tu ritmo actual llegas al 30 de octubre con $12,400.00 en caja. El punto más apretado es el día 15, cuando cae la nómina.</p>
+                    <svg viewBox="0 0 640 220" style="width:100%;height:auto;margin-top:18px;display:block;">
+                      <path d="M56 186 L620 186" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+                      <path d="M56 18 L56 186" stroke="#0D0D0D" stroke-width="2" stroke-linecap="round"></path>
+                      <path d="M56 96 L620 62 L620 140 L56 150 Z" fill="#FFF4C2" stroke="none"></path>
+                      <polyline points="56,122 104,112 152,126 200,104 248,116 296,150 344,132 392,120 440,104 488,96 536,84 584,74 620,66" fill="none" stroke="#00C896" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round"></polyline>
+                      <path d="M296 40 L296 186" stroke="#0D0D0D" stroke-width="2" stroke-dasharray="6 6"></path>
+                      <text x="302" y="36" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#0D0D0D">Nómina · día 15</text>
+                      <text x="8" y="24" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$20,000</text>
+                      <text x="16" y="190" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">$0</text>
+                      <text x="56" y="210" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">1 oct</text>
+                      <text x="580" y="210" font-family="Plus Jakarta Sans" font-size="12" font-weight="700" fill="#5A5A56">30 oct</text>
+                    </svg>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:18px;">
+                      <sc-for list="{{ scenarios }}" as="s" hint-placeholder-count="2">
+                        <div style="border:2px solid var(--black);border-radius:14px;background:{{ s.bg }};padding:16px;">
+                          <div style="font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gray-600);">{{ s.label }}</div>
+                          <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;font-variant-numeric:tabular-nums;color:{{ s.color }};margin-top:6px;">{{ s.value }}</div>
+                          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:4px;text-wrap:pretty;">{{ s.note }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                    <p style="margin:16px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                  </div>
+
+                  <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:26px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">5 · ¿Cuánto puedo sacar?</div>
+                    <div style="font-size:52px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:14px 0 10px;">$8,400.00</div>
+                    <div style="font-size:18px;font-weight:800;color:var(--black);">Puedes retirar hasta $8,400.00 este mes.</div>
+                    <p style="margin:8px 0 0;max-width:64ch;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">Si sacas más, no alcanzas la nómina del día 15.</p>
+                  </div>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">6 · Inventario</div>
+                    <p style="margin:10px 0 18px;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Cuatro insumos se te acaban antes del viernes de quincena y tres productos llevan 45 días sin moverse.</p>
+                    <div style="display:flex;flex-direction:column;">
+                      <sc-for list="{{ inventory }}" as="i" hint-placeholder-count="5">
+                        <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:2px solid var(--gray-200);">
+                          <span style="font-size:15px;font-weight:700;color:var(--black);min-width:0;">{{ i.name }}</span>
+                          <span style="margin-left:auto;flex:none;font-size:14px;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ i.detail }}</span>
+                          <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:2px 10px;font-size:12px;font-weight:700;background:{{ i.tagBg }};color:{{ i.tagFg }}">{{ i.tag }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">7 · Cobranza</div>
+                    <p style="margin:10px 0 18px;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Te deben $9,350.00. Tres clientes concentran el 78% y dos ya pasaron los 30 días.</p>
+                    <div style="display:flex;flex-direction:column;">
+                      <sc-for list="{{ cobranza }}" as="c" hint-placeholder-count="3">
+                        <div style="display:flex;align-items:center;gap:12px;padding:13px 0;border-top:2px solid var(--gray-200);flex-wrap:wrap;">
+                          <div style="min-width:0;">
+                            <div style="font-size:15px;font-weight:800;color:var(--black);">{{ c.client }}</div>
+                            <div style="font-size:13px;font-weight:600;color:var(--text-muted);margin-top:2px;">{{ c.days }}</div>
+                          </div>
+                          <span style="margin-left:auto;flex:none;font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--black);">{{ c.amount }}</span>
+                          <button type="button" data-noprint="1" onClick="{{ openShareCobranza }}" style="flex:none;height:40px;padding:0 14px;background:var(--white);border:2px solid var(--black);border-radius:11px;box-shadow:3px 3px 0 var(--black);font-family:inherit;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Copiar mensaje de WhatsApp</button>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">8 · Gastos fuera de lo normal</div>
+                    <p style="margin:10px 0 18px;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Dos categorías salieron de su rango de los últimos tres meses.</p>
+                    <div style="display:flex;flex-direction:column;gap:12px;">
+                      <sc-for list="{{ anomalies }}" as="a" hint-placeholder-count="2">
+                        <div style="display:flex;align-items:center;gap:14px;border:2px solid var(--black);border-radius:14px;background:{{ a.bg }};padding:14px 16px;flex-wrap:wrap;">
+                          <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="{{ a.icon }}"></path></svg>
+                          </span>
+                          <div style="min-width:0;flex:1;">
+                            <div style="font-size:15px;font-weight:800;color:var(--black);">{{ a.title }}</div>
+                            <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ a.body }}</div>
+                          </div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+
+                  <div data-card="1" style="background:var(--white);border:2px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);padding:24px;">
+                    <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">9 · Corte de caja</div>
+                    <p style="margin:10px 0 0;max-width:72ch;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">Hubo un faltante de $150.00 el 24 de septiembre. Es el 3er faltante del mes, todos en martes y todos en el turno de la tarde.</p>
+                    <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap;">
+                      <sc-for list="{{ cortes }}" as="c" hint-placeholder-count="3">
+                        <div style="border:2px solid var(--black);border-radius:12px;background:var(--red-soft);padding:12px 14px;">
+                          <div style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;color:var(--gray-600);">{{ c.date }}</div>
+                          <div style="font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--red-text);margin-top:4px;">{{ c.amount }}</div>
+                          <div style="font-size:13px;font-weight:600;color:var(--ink);margin-top:2px;">{{ c.operator }}</div>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+
+                <sc-if value="{{ diagTeaser }}" hint-placeholder-val="{{ false }}">
+                  <sc-for list="{{ lockedSections }}" as="s" hint-placeholder-count="6">
+                    <div style="border:2px solid var(--black);border-radius:16px;background:var(--gray-100);padding:22px;">
+                      <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">{{ s.num }}</div>
+                      <div style="display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap;">
+                        <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--gray-600);">
+                          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><rect x="4" y="10" width="16" height="11" rx="2.5"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+                        </span>
+                        <div style="min-width:0;flex:1;">
+                          <div style="font-size:18px;font-weight:800;letter-spacing:-0.02em;color:var(--black);">{{ s.title }}</div>
+                          <div style="font-size:14px;font-weight:600;color:var(--ink);margin-top:3px;text-wrap:pretty;">{{ s.teaser }}</div>
+                        </div>
+                        <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:12px;font-weight:700;background:var(--white);color:var(--text-muted);white-space:nowrap;">Disponible en Xangarrote</span>
+                      </div>
+                    </div>
+                  </sc-for>
+                </sc-if>
+
+                <div style="background:var(--yellow);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);padding:26px;">
+                  <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--black);">10 · Plan de acción</div>
+                  <div style="font-size:28px;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:8px;">Tres cosas para octubre</div>
+                  <div style="display:flex;flex-direction:column;gap:12px;margin-top:18px;">
+                    <sc-for list="{{ plan }}" as="p" hint-placeholder-count="3">
+                      <div style="display:flex;align-items:center;gap:14px;border:2.5px solid var(--black);border-radius:14px;background:var(--white);padding:16px;flex-wrap:wrap;">
+                        <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:9999px;background:var(--yellow);display:grid;place-items:center;font-size:16px;font-weight:800;color:var(--black);">{{ p.n }}</span>
+                        <span style="font-size:16px;font-weight:700;color:var(--black);min-width:0;flex:1;text-wrap:pretty;">{{ p.move }}</span>
+                        <span style="flex:none;display:inline-flex;align-items:center;border:2px solid var(--black);border-radius:9999px;padding:3px 11px;font-size:13px;font-weight:800;background:var(--green-soft);color:var(--green-text);font-variant-numeric:tabular-nums;white-space:nowrap;">{{ p.impact }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                  <p style="margin:16px 0 0;font-size:12px;font-weight:700;color:var(--black);text-wrap:pretty;">Generado con IA a partir de tus registros. Revisa antes de decidir.</p>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </main>
+  </div>
+
+  <sc-if value="{{ showToast }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="position:fixed;left:24px;bottom:24px;z-index:80;display:flex;align-items:center;gap:12px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:5px 5px 0 var(--black);padding:14px 18px;animation:xg-pop 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+      <span style="width:36px;height:36px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--yellow);display:grid;place-items:center;color:var(--black);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4h10v5a5 5 0 0 1-10 0V4ZM9 19h6M12 14v5"></path></svg>
+      </span>
+      <span style="font-size:15px;font-weight:800;color:var(--black);">¡Llegaste al 75% de tu meta!</span>
+      <span role="button" tabindex="0" onClick="{{ hideToast }}" style="font-size:18px;font-weight:800;cursor:pointer;line-height:1;color:var(--gray-600);">×</span>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showDialog }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="position:fixed;inset:0;z-index:95;background:rgba(13,13,13,0.45);display:grid;place-items:center;padding:24px;">
+      <div style="width:min(560px,100%);background:var(--white);border:2.5px solid var(--black);border-radius:20px;box-shadow:6px 6px 0 var(--black);padding:28px;animation:xg-pop 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Cerró septiembre</div>
+        <div style="font-size:28px;line-height:1.1;font-weight:800;letter-spacing:-0.03em;color:var(--black);margin-top:10px;text-wrap:pretty;">{{ dialogTitle }}</div>
+        <p style="margin:10px 0 20px;font-size:15px;font-weight:600;color:var(--ink);text-wrap:pretty;">{{ dialogBody }}</p>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <sc-for list="{{ dialogOptions }}" as="o" hint-placeholder-count="3">
+            <div role="radio" tabindex="0" aria-checked="{{ o.on }}" style="display:flex;align-items:center;gap:14px;padding:16px;border:2px solid var(--black);border-radius:14px;cursor:pointer;background:{{ o.bg }};box-shadow:{{ o.shadow }};transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+              <span style="width:24px;height:24px;flex:none;border:2px solid var(--black);border-radius:9999px;display:grid;place-items:center;background:{{ o.dotBg }}">
+                <sc-if value="{{ o.on }}" hint-placeholder-val="{{ false }}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--black)" stroke-width="3.4" stroke-linecap="round"><path d="M5 13l4 4L19 7"></path></svg>
+                </sc-if>
+              </span>
+              <div style="min-width:0;">
+                <div style="font-size:17px;font-weight:800;color:var(--black);">{{ o.title }}</div>
+                <div style="font-size:14px;font-weight:600;color:var(--text-muted);margin-top:2px;">{{ o.detail }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:22px;flex-wrap:wrap;">
+          <button type="button" onClick="{{ closeDialog }}" style="flex:1;min-width:160px;height:54px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Continuar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ shareOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="position:fixed;inset:0;z-index:97;background:rgba(13,13,13,0.45);display:grid;place-items:center;padding:24px;">
+      <div style="width:min(520px,100%);background:var(--white);border:2.5px solid var(--black);border-radius:20px;box-shadow:6px 6px 0 var(--black);padding:26px;animation:xg-pop 160ms cubic-bezier(0.2,0.8,0.2,1) both;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <span style="width:40px;height:40px;flex:none;border:2px solid var(--black);border-radius:11px;background:var(--yellow-soft);display:grid;place-items:center;color:var(--black);">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z"></path></svg>
+          </span>
+          <div style="font-size:24px;font-weight:800;letter-spacing:-0.03em;color:var(--black);">Compartir por WhatsApp</div>
+          <span role="button" tabindex="0" onClick="{{ closeShare }}" style="margin-left:auto;font-size:22px;font-weight:800;line-height:1;cursor:pointer;color:var(--gray-600);">×</span>
+        </div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin:20px 0 6px;">Mensaje</div>
+        <div contenteditable="true" style="background:var(--white);border:2px solid var(--black);border-radius:14px;padding:16px;font-size:16px;font-weight:600;color:var(--black);line-height:1.45;min-height:96px;text-wrap:pretty;">{{ shareMessage }}</div>
+        <sc-if value="{{ shareFile }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;align-items:center;gap:12px;margin-top:12px;border:2px solid var(--black);border-radius:12px;background:var(--offwhite);padding:12px 14px;">
+            <span style="width:32px;height:32px;flex:none;border:2px solid var(--black);border-radius:9px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6V3Zm3 9h7M9 16h7"></path></svg>
+            </span>
+            <span style="font-size:14px;font-weight:700;color:var(--black);min-width:0;overflow-wrap:anywhere;">{{ shareFile }}</span>
+          </div>
+        </sc-if>
+        <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+          <button type="button" style="flex:1;min-width:180px;display:inline-flex;align-items:center;justify-content:center;gap:10px;height:54px;padding:0 20px;background:var(--black);color:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z"></path></svg>
+            Abrir WhatsApp
+          </button>
+          <button type="button" style="flex:none;height:54px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Copiar mensaje</button>
+        </div>
+        <p style="margin:14px 0 0;font-size:13px;font-weight:600;color:var(--text-muted);text-wrap:pretty;">Se envía desde tu WhatsApp. Tú eliges a quién.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ celebrationOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" role="button" tabindex="0" onClick="{{ closeCelebration }}" style="position:fixed;inset:0;z-index:98;background:rgba(13,13,13,0.45);display:grid;place-items:center;padding:24px;overflow-y:auto;">
+      <div style="width:min(620px,100%);background:var(--white);border:2.5px solid var(--black);border-radius:22px;box-shadow:5px 5px 0 var(--black);padding:34px 30px;text-align:center;animation:xg-pop 200ms cubic-bezier(0.2,0.8,0.2,1) both;position:relative;overflow:hidden;">
+        <sc-for list="{{ confetti }}" as="c" hint-placeholder-count="10">
+          <span style="position:absolute;top:-14px;width:10px;height:14px;border:2px solid var(--black);left:{{ c.left }};background:{{ c.bg }};animation:xg-fall 1600ms linear {{ c.delay }} both"></span>
+        </sc-for>
+        <svg viewBox="0 0 200 220" width="180" height="198" style="display:block;margin:0 auto;">
+          <path d="{{ sealPath }}" fill="var(--yellow)" stroke="#0D0D0D" stroke-width="2.5"></path>
+          <circle cx="100" cy="96" r="52" fill="none" stroke="#0D0D0D" stroke-width="2.5"></circle>
+          <g transform="translate(76 72)" fill="none" stroke="#0D0D0D" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 34l14-14 9 9 19-19M36 10h14v14"></path>
+          </g>
+          <g transform="translate(88 6)" fill="var(--white)" stroke="#0D0D0D" stroke-width="2.5" stroke-linejoin="round">
+            <path d="M4 2h16v7a8 8 0 0 1-16 0V2Z"></path>
+            <path d="M10 19h4v6h-4z"></path>
+          </g>
+          <path d="M70 168 L58 212 L86 198 L92 170 Z" fill="var(--yellow)" stroke="#0D0D0D" stroke-width="2.5" stroke-linejoin="round"></path>
+          <path d="M130 168 L142 212 L114 198 L108 170 Z" fill="var(--yellow)" stroke="#0D0D0D" stroke-width="2.5" stroke-linejoin="round"></path>
+        </svg>
+        <div style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--gray-600);margin-top:18px;">Meta lograda · Septiembre 2026</div>
+        <div style="font-size:38px;line-height:1.05;font-weight:800;letter-spacing:-0.035em;color:var(--black);margin-top:10px;">¡Lo lograste, Pedro!</div>
+        <div style="font-size:60px;line-height:1;font-weight:800;letter-spacing:-0.04em;font-variant-numeric:tabular-nums;color:var(--black);margin:18px 0 8px;">$57,120.00</div>
+        <div style="font-size:16px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;">Tu meta era $56,400.00 · Vender más</div>
+        <div style="display:flex;gap:12px;align-items:flex-start;text-align:left;border:2px solid var(--black);border-radius:14px;background:var(--yellow-soft);padding:14px 16px;margin-top:22px;">
+          <span style="width:34px;height:34px;flex:none;border:2px solid var(--black);border-radius:10px;background:var(--white);display:grid;place-items:center;color:var(--black);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z"></path></svg>
+          </span>
+          <div style="min-width:0;">
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);">Asesor</div>
+            <p style="margin:4px 0 0;font-size:15px;font-weight:700;color:var(--black);text-wrap:pretty;">Tu mejor semana fue la del 14: vendiste $15,300.00.</p>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center;margin-top:18px;">
+          <span style="display:inline-flex;align-items:center;gap:8px;border:2px solid var(--black);border-radius:9999px;padding:4px 13px;font-size:13px;font-weight:800;background:var(--yellow);color:var(--black);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c4 0 6-2.6 6-6 0-4-3-5-3-9-3 1.5-4 4-4 6 0-1-1-2.5-2-3-1 1.5-3 3.5-3 6 0 3.4 2 6 6 6Z"></path></svg>
+            3 meses seguidos
+          </span>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;justify-content:center;">
+          <button type="button" onClick="{{ celebrationToDialog }}" style="height:54px;padding:0 24px;background:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:14px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);" style-hover="background:var(--yellow-deep);" data-onyellow="1">Subir el reto</button>
+          <button type="button" onClick="{{ openShareLogro }}" style="height:54px;padding:0 20px;background:var(--white);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--black);font-family:inherit;font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--black);">Compartir logro</button>
+        </div>
+        <div role="button" tabindex="0" onClick="{{ closeCelebration }}" style="margin-top:16px;font-size:13px;font-weight:800;color:var(--blue-text);cursor:pointer;text-decoration:underline;text-underline-offset:3px;">Seguir a Inicio</div>
+        <p style="margin:14px 0 0;font-size:12px;font-weight:600;color:var(--gray-600);">Toca fuera o presiona Esc para cerrar. Se cierra solo en unos segundos.</p>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ panelClosed }}" hint-placeholder-val="{{ true }}">
+    <div data-noprint="1" role="button" tabindex="0" title="Controles del prototipo" onClick="{{ togglePanel }}" style="position:fixed;right:24px;bottom:24px;z-index:90;width:52px;height:52px;display:grid;place-items:center;background:var(--black);color:var(--yellow);border:2.5px solid var(--black);border-radius:16px;box-shadow:4px 4px 0 var(--yellow);cursor:pointer;transition:transform 100ms cubic-bezier(0.2,0.8,0.2,1),box-shadow 100ms cubic-bezier(0.2,0.8,0.2,1)" style-active="transform:translate(2px,2px);box-shadow:1px 1px 0 var(--yellow);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M5 7h14M5 12h14M5 17h14M9 5v4M15 10v4M11 15v4"></path></svg>
+    </div>
+  </sc-if>
+  <sc-if value="{{ panelOpen }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="position:fixed;right:24px;bottom:24px;z-index:90;width:256px;max-height:calc(100vh - 48px);overflow-y:auto;background:var(--white);border:2.5px solid var(--black);border-radius:18px;box-shadow:5px 5px 0 var(--black);font-family:var(--font-sans);">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;background:var(--black);color:var(--white);">
+        <span style="font-size:12px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">Controles</span>
+        <span role="button" tabindex="0" onClick="{{ togglePanel }}" style="font-size:17px;font-weight:800;cursor:pointer;line-height:1;">×</span>
+      </div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:16px;">
+        <sc-for list="{{ controlGroups }}" as="g" hint-placeholder-count="5">
+          <div>
+            <div style="font-size:12px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--gray-600);margin-bottom:8px;">{{ g.label }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <sc-for list="{{ g.options }}" as="o" hint-placeholder-count="3">
+                <div role="button" tabindex="0" onClick="{{ o.pick }}" style="min-height:38px;display:flex;align-items:center;padding:8px 12px;border:2px solid var(--black);border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:var(--black);background:{{ o.bg }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;},&quot;startPlan&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;freelancer&quot;,&quot;emprendedor&quot;,&quot;pro&quot;],&quot;default&quot;:&quot;emprendedor&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Prototipo&quot;}}">
+class Component extends DCLogic {
+  state = {
+    tab: 'parati', role: null, plan: null, vw: 1440,
+    feedState: 'ready', goalState: 'running', pace: 'behind',
+    metaStep: 'active', diagState: 'report', groupA: 'vender', groupB: 'comprar',
+    level: 'reto', dialog: 'off', toast: true, prevOpen: false, panelOpen: false, amountOk: true
+  };
+
+  componentDidMount() {
+    this._r = () => this.setState({ vw: window.innerWidth });
+    window.addEventListener('resize', this._r);
+    this._r();
+    this._esc = (e) => {
+      if (e.key !== 'Escape') return;
+      if (this.state.share) this.setState({ share: null });
+      else if (this.state.celebrate) this.setState({ celebrate: false });
+    };
+    document.addEventListener('keydown', this._esc);
+  }
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._r);
+    document.removeEventListener('keydown', this._esc);
+    clearTimeout(this._auto);
+  }
+
+  scheduleAutoClose() {
+    clearTimeout(this._auto);
+    this._auto = setTimeout(() => { if (this.state.celebrate && !this.state.share) this.setState({ celebrate: false }); }, 6000);
+  }
+
+  sealPath(cx, cy, r, n) {
+    const pts = [];
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+      pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+    }
+    const rr = (r * Math.sin(Math.PI / n) * 1.08).toFixed(1);
+    let d = 'M' + pts[0][0].toFixed(1) + ' ' + pts[0][1].toFixed(1);
+    for (let i = 1; i <= n; i++) {
+      const p = pts[i % n];
+      d += ' A' + rr + ' ' + rr + ' 0 0 1 ' + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+    }
+    return d + ' Z';
+  }
+
+  renderVals() {
+    const st = this.state;
+    const role = st.role ?? this.props.startRole ?? 'owner';
+    const plan = st.plan ?? this.props.startPlan ?? 'emprendedor';
+    const rail = st.vw < 1024;
+    const set = (k, v) => () => this.setState({ [k]: v });
+    const on = (c) => c ? 'var(--yellow)' : 'var(--white)';
+    const canEdit = role !== 'viewer';
+
+    const navDefs = [
+      ['Inicio', 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10'],
+      ['Asesor', 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3ZM18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z'],
+      ['Ventas', 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6'],
+      ['Gastos', 'M3 8h18v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8Zm0 0 2.5-4h13L21 8M16 14h2'],
+      ['Estados financieros', 'M4 20V4m0 16h16M8 16V11m4 5V7m4 9v-3'],
+      ['Productos', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8'],
+      ['Operadores', 'M16 20v-2a4 4 0 0 0-8 0v2M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M20 20v-1.5a3 3 0 0 0-2.5-3'],
+      ['Empleados', 'M3 6h18v13H3V6Zm4 4h3v3H7v-3Zm7 0h4M14 14h4'],
+      ['Dispositivos', 'M8 2h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm3 17h2', 0, 1],
+      ['Sincronización', 'M21 11a9 9 0 0 0-15-5.5L3 8m0-5v5h5m-5 3a9 9 0 0 0 15 5.5l3-2.5m0 5v-5h-5'],
+      ['Negocio', 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6'],
+      ['Suscripción', 'M3 7h18v11H3V7Zm0 4h18M7 15h4']
+    ];
+    const pages = {
+      'Inicio': 'Xangarro%20Portal%20-%20Inicio.dc.html',
+      'Asesor': 'Xangarro%20Portal%20-%20Asesor.dc.html',
+      'Ventas': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Gastos': 'Xangarro%20Portal%20-%20Ventas%20y%20gastos.dc.html',
+      'Estados financieros': 'Xangarro%20Portal%20-%20Estados%20financieros.dc.html',
+      'Productos': 'Xangarro%20Portal%20-%20Productos.dc.html',
+      'Operadores': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Dispositivos': 'Xangarro%20Portal%20-%20Operadores%20y%20dispositivos.dc.html',
+      'Empleados': 'Xangarro%20Portal%20-%20Empleados.dc.html',
+      'Sincronización': 'Xangarro%20Portal%20-%20Sincronizacion.dc.html',
+      'Negocio': 'Xangarro%20Portal%20-%20Negocio.dc.html',
+      'Suscripción': 'Xangarro%20Portal%20-%20Suscripcion.dc.html'
+    };
+    const nav = navDefs.map(([label, icon, _a, dividerAfter]) => {
+      const active = label === 'Asesor';
+      return {
+        label, icon, href: pages[label] || '#', dividerAfter: !!dividerAfter,
+        bg: active ? 'var(--yellow)' : 'transparent',
+        border: active ? '2px solid var(--black)' : '2px solid transparent',
+        shadow: active ? '3px 3px 0 var(--black)' : 'none',
+        weight: active ? 800 : 700
+      };
+    });
+
+    const tabs = [
+      ['parati', 'Para ti', 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3Z'],
+      ['metas', 'Metas', 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 3.5h.01'],
+      ['diag', 'Diagnóstico', 'M6 3h9l4 4v14H6V3Zm3 8h7M9 15h7']
+    ].map(([k, label, icon]) => ({
+      label, icon, active: st.tab === k,
+      bg: st.tab === k ? 'var(--yellow)' : 'var(--white)',
+      shadow: st.tab === k ? '4px 4px 0 var(--black)' : '3px 3px 0 var(--black)',
+      pick: set('tab', k)
+    }));
+
+    const feed = [
+      ['tag', 'Precios', 'M20.6 13.4 12 22l-9-9V4h9l8.6 8.6a1.4 1.4 0 0 1 0 2M7.5 7.5h.01', 'var(--peach-soft)',
+        'El queso te cuesta 18% más que en junio', 'Sigues vendiendo la quesadilla a $40.00. Tu margen bajó de 35% a 22%.', 'Ver precio sugerido'],
+      ['calendar', 'Inventario', 'M4 5h16v16H4V5Zm0 5h16M8 3v4m8-4v4', 'var(--blue-soft)',
+        'El viernes es quincena', 'En las últimas 4 quincenas vendiste 38% más refresco. Tienes 12, necesitas unos 30.', 'Ver producto'],
+      ['zap', 'Gastos', 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z', 'var(--yellow-soft)',
+        'La luz salió en $2,400.00', 'Normalmente pagas alrededor de $900.00.', 'Ver gasto'],
+      ['package', 'Inventario', 'M21 8 12 3 3 8v8l9 5 9-5V8Zm-9 5L3 8m9 5 9-5m-9 5v8', 'var(--green-soft)',
+        '3 productos no se han vendido en 45 días', 'Tienes $1,850.00 detenidos en inventario.', 'Ver productos'],
+      ['copy', 'Revisión', 'M9 9h10v10H9V9Zm-4 6H3V3h12v2', 'var(--gray-100)',
+        'Parece que un gasto se registró dos veces', 'Renta · $6,000.00 · el mismo día.', 'Revisar']
+    ].map(([_k, categoria, icon, tile, title, body, action]) => ({ categoria, icon, tile, title, body, action }));
+
+    const readinessDefs = [
+      ['Resumen del mes', '1 mes completo', false, '100%', '', 'Activo'],
+      ['Precios y márgenes', '60 días de ventas + 2 compras del producto', true, '55%', 'Registra el costo de tus productos para activarlo', '33 de 60 días'],
+      ['Inventario', '60 días de movimientos', false, '100%', '', 'Activo'],
+      ['Gastos fuera de lo normal', '3 meses por categoría', true, '66%', 'Disponible en 31 días', '2 de 3 meses'],
+      ['¿Me alcanza? (pronóstico)', '90 días de registros', true, '74%', 'Disponible en 23 días', '67 de 90 días'],
+      ['Corte de caja', '20 cortes', true, '40%', 'Llevas 8 de 20 cortes', '8 de 20 cortes']
+    ];
+    const readiness = readinessDefs.map(([name, req, locked, pct, lockedCopy, shortStatus]) => ({
+      name, req, locked, pct, lockedCopy, shortStatus: locked ? shortStatus : 'Activo',
+      tile: locked ? 'var(--white)' : 'var(--green-soft)',
+      tileFg: locked ? 'var(--gray-600)' : 'var(--green-text)',
+      glyph: locked ? 'M4 10h16v11H4V10Zm4 0V7a4 4 0 0 1 8 0v3' : 'M5 13l4 4L19 7',
+      tag: locked ? shortStatus : 'Activo',
+      tagBg: locked ? 'var(--gray-100)' : 'var(--green-soft)',
+      tagFg: locked ? 'var(--text-muted)' : 'var(--green-text)'
+    }));
+
+    const previous = [
+      ['Tu ticket promedio subió a $269.44', 'Hace 3 días', 'Listo', 'var(--green-soft)', 'var(--green-text)'],
+      ['El gasto de empaques se repitió 4 veces', 'Hace 5 días', 'Descartado', 'var(--gray-100)', 'var(--text-muted)'],
+      ['Ana cerró turno sin corte', 'Hace 6 días', 'Listo', 'var(--green-soft)', 'var(--green-text)'],
+      ['Sube el precio de la gringa a $65.00', 'Hace 9 días', 'Descartado', 'var(--gray-100)', 'var(--text-muted)']
+    ].map(([title, meta, tag, tagBg, tagFg]) => ({ title, meta, tag, tagBg, tagFg }));
+
+    const groupADefs = [
+      ['ganar', 'Ganar más', 'Que te quede más dinero a ti al final del mes.', 'M3 7h18v10H3V7Zm0 4h18M7 13h3'],
+      ['vender', 'Vender más', 'Subir tus ventas del mes.', 'M3 17l6-6 4 4 8-8M15 7h6v6'],
+      ['gastar', 'Gastar menos', 'Bajar lo que se te va en gastos.', 'M6 4v6a3 3 0 0 0 3 3h9M6 20v-6a3 3 0 0 1 3-3h9M4 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4Z']
+    ];
+    const groupBDefs = [
+      ['comprar', 'Comprar algo para mi local', 'Un equipo, mueble o mejora para tu negocio.', 'M2 3h3l2.5 11h11l2-8H6M9 20h.01M18 20h.01'],
+      ['colchon', 'Tener un colchón', 'Ahorro para las semanas flojas.', 'M12 21a9 9 0 0 0 9-9h-4a5 5 0 0 1-10 0H3a9 9 0 0 0 9 9ZM3 12a9 9 0 0 1 18 0'],
+      ['deudas', 'Pagar deudas', 'Liquidar lo que debe tu negocio.', 'M3 7h18v11H3V7Zm0 4h18']
+    ];
+    const opt = (k, key) => ([id, title, body, icon]) => ({
+      title, body, icon, on: st[key] === id,
+      bg: st[key] === id ? 'var(--yellow-soft)' : 'var(--white)',
+      shadow: st[key] === id ? '4px 4px 0 var(--black)' : '3px 3px 0 var(--black)',
+      dotBg: st[key] === id ? 'var(--yellow)' : 'var(--white)',
+      pick: set(key, st[key] === id ? null : id)
+    });
+    const groupA = groupADefs.map(opt(0, 'groupA'));
+    const groupB = groupBDefs.map(opt(0, 'groupB'));
+    const aName = { ganar: 'Ganar más', vender: 'Vender más', gastar: 'Gastar menos' }[st.groupA];
+    const bName = { comprar: 'comprar mi refrigerador', colchon: 'tener un colchón', deudas: 'pagar mis deudas' }[st.groupB];
+
+    const levels = [
+      ['empujon', 'Un empujón · +10%', '$51,700.00 al mes · $1,720.00 al día', false, 'M4 20l4-2 2-6 4 3 2-5 4 2M7 6h.01'],
+      ['reto', 'Un reto · +20%', '$56,400.00 al mes · $1,880.00 al día', true, 'M4 18h4l3-9 3 13 3-8h3'],
+      ['ambicioso', 'Ambicioso · +30%', '$61,100.00 al mes · $2,040.00 al día', false, 'M5 15c0-5 3-9 7-11 4 2 7 6 7 11l-3 2-4-2-4 2-3-2Zm7-6h.01']
+    ].map(([id, title, amounts, rec, icon]) => ({
+      title, amounts, rec, icon, on: st.level === id,
+      bg: st.level === id ? 'var(--yellow-soft)' : 'var(--white)',
+      shadow: st.level === id ? '4px 4px 0 var(--black)' : '3px 3px 0 var(--black)',
+      pick: set('level', id)
+    }));
+
+    const paceMap = {
+      ahead: ['var(--green)', 'var(--green-text)', 'Vas 2 días adelantado'],
+      onpace: ['var(--gray-400)', 'var(--text-muted)', 'Vas al ritmo'],
+      behind: ['var(--warning)', 'var(--warning-text)', 'Vas 3 días atrasado']
+    };
+    const [paceDot, paceFg, paceText] = paceMap[st.pace];
+
+    const dialogReached = st.dialog === 'reached';
+    const dialogOptionDefs = dialogReached
+      ? [['Subir el reto', 'Nueva meta: $67,680.00 · +20% desde tu nuevo promedio', true],
+         ['Repetir', 'La misma meta de $56,400.00', false],
+         ['Cambiar de meta', 'Elegir otra cosa que quieras lograr', false]]
+      : [['Repetir', 'La misma meta de $56,400.00', true],
+         ['Bajar un nivel', 'Un empujón · $51,700.00 al mes', false],
+         ['Cambiar de meta', 'Elegir otra cosa que quieras lograr', false]];
+
+    const controlGroups = [
+      { label: 'Pestaña', options: [['parati', 'Para ti'], ['metas', 'Metas'], ['diag', 'Diagnóstico']].map(([k, l]) => ({ label: l, bg: on(st.tab === k), pick: set('tab', k) })) },
+      { label: 'Plan', options: [['freelancer', 'Xangarrito'], ['emprendedor', 'Xangarro'], ['pro', 'Xangarrote']].map(([k, l]) => ({ label: l, bg: on(plan === k), pick: set('plan', k) })) },
+      { label: 'Rol', options: [['owner', 'Dueño'], ['admin', 'Administrador'], ['viewer', 'Solo lectura']].map(([k, l]) => ({ label: l, bg: on(role === k), pick: set('role', k) })) },
+      { label: 'Para ti · estado', options: [['ready', 'Con avisos'], ['loading', 'Cargando'], ['empty', 'Al día'], ['error', 'Error']].map(([k, l]) => ({ label: l, bg: on(st.feedState === k), pick: set('feedState', k) })) },
+      { label: 'Metas · vista', options: [['step1', 'Paso 1 · qué lograr'], ['step2', 'Paso 2 · qué tanto'], ['step3', 'Paso 3 · confirmar'], ['active', 'Meta activa'], ['done', 'Meta lograda'], ['empty', 'Sin meta'], ['starter', 'Negocio nuevo']].map(([k, l]) => ({ label: l, bg: on(st.metaStep === k), pick: set('metaStep', k) })) },
+      { label: 'Metas · ritmo', options: [['ahead', 'Adelantado'], ['onpace', 'Al ritmo'], ['behind', 'Atrasado']].map(([k, l]) => ({ label: l, bg: on(st.pace === k), pick: set('pace', k) })) },
+      { label: 'Fin de mes · diálogo', options: [['off', 'Oculto'], ['reached', 'Meta lograda'], ['missed', 'Al 86%']].map(([k, l]) => ({ label: l, bg: on(st.dialog === k), pick: set('dialog', k) })) },
+      { label: 'Monto de la meta', options: [[true, 'Alcanzable'], [false, 'Fuera de rango']].map(([k, l]) => ({ label: l, bg: on(st.amountOk === k), pick: set('amountOk', k) })) },
+      { label: 'Diagnóstico', options: [['report', 'Reporte completo'], ['generating', 'Generando'], ['notenough', 'Sin datos'], ['free', 'Oferta gratis'], ['teaser', 'Xangarro · bloqueado'], ['error', 'Error']].map(([k, l]) => ({ label: l, bg: on(st.diagState === k), pick: set('diagState', k) })) },
+      { label: 'Toast de hito', options: [[true, 'Visible'], [false, 'Oculto']].map(([k, l]) => ({ label: l, bg: on(st.toast === k), pick: set('toast', k) })) },
+      { label: 'Celebración al entrar', options: [[true, 'Mostrar takeover'], [false, 'Oculta']].map(([k, l]) => ({ label: l, bg: on(!!st.celebrate === k), pick: () => { this.setState({ celebrate: k }); if (k) this.scheduleAutoClose(); } })) },
+      { label: 'Compartir por WhatsApp', options: [['diagnostico', 'Diagnóstico'], ['cobranza', 'Cobranza'], ['logro', 'Logro'], [null, 'Cerrado']].map(([k, l]) => ({ label: l, bg: on((st.share ?? null) === k), pick: set('share', k) })) }
+    ];
+
+    return {
+      nav, tabs, feed, readiness, previous, groupA, groupB, levels, controlGroups,
+      three: [1, 2, 3],
+      confetti: Array.from({ length: 10 }, (_, i) => ({
+        left: (6 + i * 9.4) + '%',
+        bg: ['var(--white)', 'var(--green-soft)', 'var(--blue-soft)', 'var(--red-soft)'][i % 4],
+        delay: (i * 90) + 'ms'
+      })),
+      wide: !rail, sidebarWidth: rail ? '84px' : '248px',
+      roleLabel: { owner: 'Dueño', admin: 'Administrador', viewer: 'Solo lectura' }[role],
+      planLabel: { freelancer: 'Xangarrito', emprendedor: 'Xangarro', pro: 'Xangarrote' }[plan],
+      canEdit, isViewer: role === 'viewer',
+      isPro: plan === 'pro', isXangarrito: plan === 'freelancer',
+      strategyLocked: plan !== 'pro',
+
+      isParaTi: st.tab === 'parati', isMetas: st.tab === 'metas', isDiag: st.tab === 'diag',
+      feedReady: st.feedState === 'ready', feedLoading: st.feedState === 'loading',
+      feedEmpty: st.feedState === 'empty', feedError: st.feedState === 'error',
+      lockedFeed: [{ title: '2 avisos más de tu Asesor' }, { title: 'Conclusión de tus estados financieros' }],
+      prevOpen: st.prevOpen, prevChevron: st.prevOpen ? 'rotate(180deg)' : 'none',
+      togglePrev: () => this.setState({ prevOpen: !st.prevOpen }),
+
+      metasStep1: st.metaStep === 'step1', metasStep2: st.metaStep === 'step2',
+      metasStep3: st.metaStep === 'step3',
+      metasActive: ['active', 'done', 'empty', 'starter'].includes(st.metaStep),
+      goalRunning: st.metaStep === 'active', goalDone: st.metaStep === 'done',
+      metasEmpty: st.metaStep === 'empty', metasStarter: st.metaStep === 'starter',
+      hasPreview: !!(st.groupA && st.groupB),
+      previewSentence: (aName || '') + ' para ' + (bName || ''),
+      goStep1: set('metaStep', 'step1'), goStep2: set('metaStep', 'step2'),
+      goStep3: set('metaStep', 'step3'), goActive: set('metaStep', 'active'),
+      step2Cta: st.amountOk ? 'Continuar' : 'Ajustar monto',
+      calloutBg: st.amountOk ? 'var(--green-soft)' : 'var(--warning-soft)',
+      calloutFg: st.amountOk ? 'var(--green-text)' : 'var(--warning-text)',
+      calloutIcon: st.amountOk ? 'M5 13l4 4L19 7' : 'M12 8v5M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z',
+      calloutText: st.amountOk
+        ? 'A tu ritmo lo logras en marzo 2027 apartando $3,000.00 al mes.'
+        : 'Esto tomaría más de 3 años. ¿Empezamos con algo más cercano?',
+      paceDot, paceFg, paceText,
+      dailyDone: st.pace === 'ahead',
+      nextStep: st.pace === 'behind'
+        ? 'Te faltan $4,100.00. Tu mejor día es el sábado — una promo de quesadillas ahí te acerca.'
+        : 'Vas bien: mantén el sábado con promo de quesadillas y cierras el mes con holgura.',
+      summary: [
+        { title: aName || 'Vender más', detail: 'Un reto · +20% · $56,400.00 al mes', tile: 'var(--yellow)', icon: 'M3 17l6-6 4 4 8-8M15 7h6v6' },
+        { title: 'Refrigerador', detail: '$18,000.00 · apartando $3,000.00 al mes', tile: 'var(--blue-soft)', icon: 'M2 3h3l2.5 11h11l2-8H6M9 20h.01M18 20h.01' }
+      ],
+      strategy: [
+        { move: 'Sube la gringa de $60.00 a $65.00', impact: '+$1,900.00 al mes' },
+        { move: 'Vende 10 aguas de horchata más por semana', impact: '+$1,200.00 al mes' },
+        { move: 'Recorta el gasto en empaques', impact: '+$800.00 al mes' }
+      ],
+      trophies: [
+        { month: 'Agosto 2026', goal: 'Vender más · +20%', result: '$52,900.00', tag: 'Lograda', tagBg: 'var(--green-soft)', tagFg: 'var(--green-text)' },
+        { month: 'Julio 2026', goal: 'Gastar menos · −8%', result: '−$4,120.00', tag: 'Lograda', tagBg: 'var(--green-soft)', tagFg: 'var(--green-text)' },
+        { month: 'Junio 2026', goal: 'Vender más · +10%', result: '$45,300.00', tag: 'Lograda', tagBg: 'var(--green-soft)', tagFg: 'var(--green-text)' },
+        { month: 'Mayo 2026', goal: 'Ganar más · +15%', result: '86%', tag: '86%', tagBg: 'var(--gray-100)', tagFg: 'var(--text-muted)' }
+      ],
+
+      diagReport: ['report', 'teaser'].includes(st.diagState),
+      diagFull: st.diagState === 'report',
+      diagTeaser: st.diagState === 'teaser',
+      diagGenerating: st.diagState === 'generating',
+      diagNotEnough: st.diagState === 'notenough',
+      diagFreeOffer: st.diagState === 'free',
+      diagError: st.diagState === 'error',
+      monthTiles: [
+        { label: 'Ventas', value: '$47,200.00', delta: '+12% vs agosto', color: 'var(--green-text)' },
+        { label: 'Gastos', value: '$32,003.00', delta: '+19% vs agosto', color: 'var(--red-text)' },
+        { label: 'Utilidad', value: '$15,197.00', delta: '−6% vs agosto', color: 'var(--black)' },
+        { label: 'Margen bruto', value: '41%', delta: 'Sin cambio', color: 'var(--black)' }
+      ],
+      priceCols: [
+        { label: 'Producto', align: 'left' }, { label: 'Costo antes → ahora', align: 'right' },
+        { label: 'Precio actual', align: 'right' }, { label: 'Margen', align: 'right' },
+        { label: 'Precio sugerido', align: 'right' }
+      ],
+      priceRows: [
+        { name: 'Quesadilla', cost: '$26.00 → $31.20', price: '$40.00', margin: '22%', suggested: '$46.00', marginBg: 'var(--red-soft)', marginFg: 'var(--red-text)' },
+        { name: 'Gringa', cost: '$34.00 → $38.50', price: '$60.00', margin: '36%', suggested: '$65.00', marginBg: 'var(--warning-soft)', marginFg: 'var(--warning-text)' },
+        { name: 'Taco al pastor', cost: '$9.50 → $9.80', price: '$25.00', margin: '61%', suggested: '$25.00', marginBg: 'var(--green-soft)', marginFg: 'var(--green-text)' },
+        { name: 'Agua de horchata', cost: '$6.00 → $6.10', price: '$20.00', margin: '70%', suggested: '$20.00', marginBg: 'var(--green-soft)', marginFg: 'var(--green-text)' }
+      ],
+      scenarios: [
+        { label: 'Si vendes 20% menos', value: '$2,100.00', note: 'Cierras el mes apretado, pero sin números rojos.', bg: 'var(--warning-soft)', color: 'var(--warning-text)' },
+        { label: 'Si cobras lo que te deben', value: '$21,750.00', note: 'Los $9,350.00 de cuentas por cobrar te dan holgura.', bg: 'var(--green-soft)', color: 'var(--green-text)' }
+      ],
+      inventory: [
+        { name: 'Refresco', detail: 'Tienes 12 · necesitas 30', tag: 'Pide hoy', tagBg: 'var(--red-soft)', tagFg: 'var(--red-text)' },
+        { name: 'Tortilla (kg)', detail: 'Tienes 2 · umbral 5', tag: 'Pide hoy', tagBg: 'var(--red-soft)', tagFg: 'var(--red-text)' },
+        { name: 'Queso (kg)', detail: 'Tienes 4 · umbral 6', tag: 'Esta semana', tagBg: 'var(--warning-soft)', tagFg: 'var(--warning-text)' },
+        { name: 'Salsa de la casa', detail: '45 días sin venderse', tag: 'No se mueve', tagBg: 'var(--gray-100)', tagFg: 'var(--text-muted)' },
+        { name: 'Michelada preparada', detail: '52 días sin venderse', tag: 'No se mueve', tagBg: 'var(--gray-100)', tagFg: 'var(--text-muted)' }
+      ],
+      cobranza: [
+        { client: 'Oficina Contreras', amount: '$4,200.00', days: '38 días · 3 notas' },
+        { client: 'Taller El Pulpo', amount: '$2,100.00', days: '31 días · 2 notas' },
+        { client: 'Doña Mary', amount: '$1,000.00', days: '12 días · 1 nota' }
+      ],
+      anomalies: [
+        { title: 'Luz · $2,400.00', body: 'Normalmente pagas alrededor de $900.00. Revisa si entró un recibo de dos periodos.', bg: 'var(--warning-soft)', icon: 'M13 2 4 14h6l-1 8 9-12h-6l1-8Z' },
+        { title: 'Empaques · $3,180.00', body: 'Es 2.4 veces tu promedio de los últimos tres meses.', bg: 'var(--warning-soft)', icon: 'M21 8 12 3 3 8v8l9 5 9-5V8Z' }
+      ],
+      cortes: [
+        { date: '24 sep · martes', amount: '−$150.00', operator: 'Ana · turno tarde' },
+        { date: '17 sep · martes', amount: '−$90.00', operator: 'Ana · turno tarde' },
+        { date: '10 sep · martes', amount: '−$120.00', operator: 'Luis · turno tarde' }
+      ],
+      lockedSections: [
+        { num: '3 · Precios y márgenes', title: 'Precios y márgenes', teaser: 'Detectamos 3 productos con margen en riesgo.' },
+        { num: '4 · ¿Me alcanza?', title: '¿Me alcanza?', teaser: 'Tu pronóstico de caja a 30 días está calculado.' },
+        { num: '5 · ¿Cuánto puedo sacar?', title: '¿Cuánto puedo sacar?', teaser: 'Hay un monto seguro de retiro para este mes.' },
+        { num: '6 · Inventario', title: 'Inventario', teaser: '4 insumos se acaban antes de la quincena.' },
+        { num: '8 · Gastos fuera de lo normal', title: 'Gastos fuera de lo normal', teaser: '2 categorías salieron de su rango normal.' },
+        { num: '9 · Corte de caja', title: 'Corte de caja', teaser: '3 faltantes del mes tienen un patrón.' }
+      ],
+      plan: [
+        { n: '1', move: 'Sube la quesadilla a $46.00 y la gringa a $65.00', impact: '+$3,100.00' },
+        { n: '2', move: 'Pide 30 refrescos antes del viernes de quincena', impact: '+$1,450.00' },
+        { n: '3', move: 'Cobra las tres notas con más de 30 días', impact: '+$6,300.00' }
+      ],
+
+      showToast: st.toast && st.tab === 'metas' && st.metaStep === 'active',
+      hideToast: set('toast', false),
+      showDialog: st.dialog !== 'off' && st.tab === 'metas',
+      dialogTitle: dialogReached ? '¡Lograste tu meta de septiembre!' : 'Llegaste al 86% — tu mejor mes del año.',
+      dialogBody: dialogReached
+        ? 'Vendiste $57,120.00 contra los $56,400.00 que te propusiste. ¿Qué sigue en octubre?'
+        : 'Vendiste $48,500.00 de $56,400.00 y superaste todos tus meses anteriores. ¿Qué sigue en octubre?',
+      dialogOptions: dialogOptionDefs.map(([title, detail, pre]) => ({
+        title, detail, on: pre,
+        bg: pre ? 'var(--yellow-soft)' : 'var(--white)',
+        shadow: pre ? '4px 4px 0 var(--black)' : '3px 3px 0 var(--black)',
+        dotBg: pre ? 'var(--yellow)' : 'var(--white)'
+      })),
+      closeDialog: set('dialog', 'off'),
+
+      sealPath: this.sealPath(100, 96, 66, 14),
+      shareOpen: !!st.share,
+      shareMessage: st.share === 'cobranza'
+        ? 'Hola Doña Lupe, le recuerdo su saldo pendiente de $350.00 en Taquería Don Pedro. ¡Gracias!'
+        : (st.share === 'logro'
+          ? 'En septiembre vendimos $57,120.00 en Taquería Don Pedro y llegamos a nuestra meta del mes. ¡Gracias por venir!'
+          : 'Le comparto el Diagnóstico de septiembre 2026 de Taquería Don Pedro: vendimos $47,200.00 y la utilidad fue de $15,197.00.'),
+      shareFile: st.share === 'diagnostico' ? 'Diagnóstico-septiembre-2026.pdf' : (st.share === 'logro' ? 'Meta-septiembre-2026.png' : null),
+      openShareDiag: set('share', 'diagnostico'),
+      openShareCobranza: set('share', 'cobranza'),
+      openShareLogro: set('share', 'logro'),
+      closeShare: set('share', null),
+      celebrationOpen: !!st.celebrate && canEdit,
+      closeCelebration: () => this.setState({ celebrate: false }),
+      celebrationToDialog: () => this.setState({ celebrate: false, tab: 'metas', dialog: 'reached' }),
+      panelOpen: st.panelOpen, panelClosed: !st.panelOpen,
+      togglePanel: () => this.setState({ panelOpen: !st.panelOpen })
+    };
+  }
+}
+
+</script>
+</body>
+</html>
