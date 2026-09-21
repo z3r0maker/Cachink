@@ -10,7 +10,7 @@ import { AnimatedOperativo } from './AnimatedHero.jsx';
 import { Parallax } from './Motion.jsx';
 import { useViewport } from './Viewport.jsx';
 import { TONE_COPY, Eyebrow, HardBtn, HardCard, StoreBadge } from './copy.jsx';
-import { signupUrl } from './planes.js';
+import { LOGIN_URL, signupUrl } from './planes.js';
 
 /* ─────────────── MOBILE MENU ─────────────── */
 function MobileMenu({ links, onClose, triggerRef }) {
@@ -238,6 +238,9 @@ export function Nav() {
             gap: 10,
           }}
         >
+          <HardBtn size="sm" variant="ghost" href={LOGIN_URL}>
+            Entrar
+          </HardBtn>
           <HardBtn size="sm" href={signupUrl('xangarrito')}>
             Crear cuenta
           </HardBtn>
