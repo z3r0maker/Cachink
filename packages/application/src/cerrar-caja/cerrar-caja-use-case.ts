@@ -83,8 +83,19 @@ export class CerrarCajaUseCase implements UseCase<CerrarCajaFullInput, CajaTurno
       throw new TypeError('Se requiere una razón para la diferencia en el cierre');
     }
     const egresoAutoId = await this.#maybeCreateAutoEgreso(parsed, diferencia, input.businessId);
+    // The count is written once (ADR-074 §4): at close when it carries one,
+    // never over a blind count saved before.
+    const conteo =
+      parsed.denominaciones === undefined
+        ? {}
+        : {
+            conteoCentavos: parsed.montoCierreCentavos,
+            conteoAt: now(),
+            denominaciones: parsed.denominaciones,
+          };
     return this.#turnos.update(parsed.turnoId, {
       cierreAt: now(),
+      ...conteo,
       montoCierreCentavos: parsed.montoCierreCentavos,
       efectivoEsperadoCentavos: esperado,
       diferenciaCentavos: diferencia,

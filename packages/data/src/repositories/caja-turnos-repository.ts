@@ -26,6 +26,7 @@ export type CajaTurnoPatch = Partial<
     | 'egresoAutoId'
     | 'conteoCentavos'
     | 'conteoAt'
+    | 'denominaciones'
   >
 >;
 

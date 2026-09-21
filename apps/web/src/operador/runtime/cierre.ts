@@ -104,6 +104,7 @@ export async function cerrarCaja(
     readonly montoCierreCentavos: bigint;
     readonly discrepancyReason: DiscrepancyReason | null;
     readonly explicacion: string | null;
+    readonly denominaciones: Readonly<Record<string, number>> | null;
   },
 ): Promise<{ readonly cierreAt: string }> {
   const useCase = new CerrarCajaUseCase(
@@ -113,6 +114,10 @@ export async function cerrarCaja(
     new DrizzleExpensesRepository(db as never, p.deviceId as never),
     new DrizzleClientPaymentsRepository(db as never, p.deviceId as never),
   );
-  const turno = await useCase.execute({ ...p, turnoId: p.turnoId });
+  const turno = await useCase.execute({
+    ...p,
+    turnoId: p.turnoId,
+    ...(p.denominaciones === null ? {} : { denominaciones: { ...p.denominaciones } }),
+  });
   return { cierreAt: turno.cierreAt ?? '' };
 }

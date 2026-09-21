@@ -163,6 +163,8 @@ export type WorkerRequest =
       /** The domain's six-value enum, already mapped from the screen's word. */
       readonly discrepancyReason: string | null;
       readonly explicacion: string | null;
+      /** The count by denomination ("200": 2), written once at close. */
+      readonly denominaciones: Readonly<Record<string, number>> | null;
     }
   | {
       readonly id: number;

@@ -19,7 +19,7 @@ const main = (page: Page) => page.locator('main');
 test('each period recomputes the statements from its own rows', async ({ page }) => {
   await page.goto('/estados');
   await expect(main(page).getByRole('status')).toHaveText('01/MAY/2026 – 31/MAY/2026');
-  await expect(main(page).getByText(/^Vendiste \$645\.00,/)).toBeVisible();
+  await expect(main(page).getByText(/^Vendiste \$885\.00,/)).toBeVisible();
 
   await page.getByRole('button', { name: 'Trimestral', exact: true }).click();
   await expect(main(page).getByRole('status')).toHaveText('01/ABR/2026 – 30/JUN/2026');
@@ -50,8 +50,8 @@ test('the seeded RESICO estimates on gross income — even in a loss month', asy
   await page.goto('/estados');
   await expect(main(page).getByText('ISR referencial (RESICO, sobre tus ingresos)')).toBeVisible();
   await expect(main(page).getByText(/tablas publicadas del SAT/)).toBeVisible();
-  // May's $645.00 of ventas at 1.00%: the ISR line itself.
-  await expect(main(page).getByText('$6.45')).toBeVisible();
+  // May's $885.00 of ventas at 1.00%: the ISR line itself.
+  await expect(main(page).getByText('$8.85')).toBeVisible();
 });
 
 test('an expandable line lists what it is made of, largest first', async ({ page }) => {
@@ -81,5 +81,5 @@ test('the Resultados waterfall and donuts render from the same numbers', async (
   expect(bars).toBeGreaterThanOrEqual(6);
   await expect(main(page).getByRole('img', { name: /Ingresos por método/ })).toBeVisible();
   await expect(main(page).getByRole('img', { name: /Egresos por categoría/ })).toBeVisible();
-  await expect(main(page).getByText('Total: $645.00.')).toBeVisible();
+  await expect(main(page).getByText('Total: $885.00.')).toBeVisible();
 });

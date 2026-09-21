@@ -162,9 +162,12 @@ export class DrizzleCajaTurnosRepository implements CajaTurnosRepository {
       'egresoAutoId',
       'conteoCentavos',
       'conteoAt',
+      'denominaciones',
     ];
     for (const k of keys) {
-      if (patch[k] !== undefined) set[k] = patch[k];
+      if (patch[k] === undefined) continue;
+      // The column is JSON text; the entity carries the parsed record.
+      set[k] = k === 'denominaciones' ? JSON.stringify(patch[k]) : patch[k];
     }
     await this.#db.update(cajaTurnos).set(set).where(eq(cajaTurnos.id, id)).run();
     const row = await this.#db.select().from(cajaTurnos).where(eq(cajaTurnos.id, id)).get();

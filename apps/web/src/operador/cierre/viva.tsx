@@ -65,6 +65,7 @@ async function cerrarEnVivo(cred: Credenciales, p: Parameters<CerrarVivo>[0]): P
     montoCierreCentavos: p.montoCierreCentavos,
     discrepancyReason: p.discrepancyReason,
     explicacion: p.explicacion,
+    denominaciones: p.denominaciones,
   });
   if (navigator.onLine) await desencolar();
 }

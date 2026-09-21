@@ -1,8 +1,8 @@
 import { requireSession } from '@/server/auth';
+import { listarPendientes } from '@/server/revision';
 
-import { REVISION_FIXTURE } from './fixture';
 import { RevisionScreen } from './screen';
-import type { Pestana } from './types';
+import type { Pestana, RevisionData } from './types';
 
 /**
  * Revisión de caja (O-30). Owner-only, like every portal screen. Fixture data
@@ -16,9 +16,27 @@ export default async function RevisionCajaPage({
 }: {
   readonly searchParams: Promise<{ readonly startTab?: string }>;
 }) {
-  await requireSession();
+  const session = await requireSession();
   const { startTab } = await searchParams;
   const tab: Pestana =
     process.env.NODE_ENV !== 'production' && startTab === 'clientes' ? 'clientes' : 'productos';
-  return <RevisionScreen data={REVISION_FIXTURE} tab={tab} />;
+  const pendientes = await listarPendientes(session.business_id);
+  const sinNull = <
+    T extends { readonly pareceA: string | null; readonly pareceAId: string | null },
+  >(
+    x: T,
+  ) => {
+    const { pareceA, pareceAId, ...rest } = x;
+    return {
+      ...rest,
+      ...(pareceA === null ? {} : { pareceA }),
+      ...(pareceAId === null ? {} : { pareceAId }),
+    };
+  };
+  const data: RevisionData = {
+    vendidoSinCosto: pendientes.vendidoSinCosto,
+    productos: pendientes.productos.map(sinNull),
+    clientes: pendientes.clientes.map(sinNull),
+  };
+  return <RevisionScreen data={data} tab={tab} />;
 }

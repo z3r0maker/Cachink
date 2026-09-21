@@ -133,6 +133,7 @@ function leerCierre(request: CierreRequest, rt: Rt): Promise<unknown> {
     montoCierreCentavos: BigInt(request.montoCierreCentavos),
     discrepancyReason: request.discrepancyReason as never,
     explicacion: request.explicacion,
+    denominaciones: request.denominaciones === null ? null : { ...request.denominaciones },
   });
 }
 

@@ -154,6 +154,7 @@ export interface CerrarInput {
   readonly montoCierreCentavos: bigint;
   readonly discrepancyReason: string | null;
   readonly explicacion: string | null;
+  readonly denominaciones: Readonly<Record<string, number>> | null;
 }
 
 export type CerrarCallInput = CerrarInput;
@@ -166,6 +167,7 @@ export const cerrar = (p: CerrarInput): Call => ({
   montoCierreCentavos: p.montoCierreCentavos.toString(),
   discrepancyReason: p.discrepancyReason,
   explicacion: p.explicacion,
+  denominaciones: p.denominaciones === null ? null : { ...p.denominaciones },
 });
 
 export const gastar = (p: GastoInput): Call => ({

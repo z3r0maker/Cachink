@@ -697,10 +697,31 @@ hoy]` window: esperado short by every abono, only reproducible at night. `runtim
 
 ### O-37 Owner-side actions on real data
 
-- [ ] Status · **Blocked by:** C-18, C-19 status
-- **Steps:** cortes' «Marcar como aclarado» and «Pedir aclaración», revision-caja's
-  approve / merge / reject — the owner portal writing, not local state.
-- **Acceptance:** portal specs against Postgres.
+- [x] Status · **Blocked by:** C-18, C-19 status
+  - Done: 2026-09-20 · **Cortes** — data-pg 0029 adds `caja_turnos.aclarado_at/por` (cloud-ahead on
+    an UP table with nullable columns — the drift rule now allows exactly that: a pushed row that
+    omits them inserts NULL, their meaning while the difference stands); `server/cortes.ts` reads the
+    closed turnos (the stored esperado with its four parts, the resumen's stats, the count by
+    denomination — the close now persists it, ADR-074 §4, written once, never over a blind count);
+    «Marcar como aclarado» stamps the corte, «Pedir aclaración» files the owner→operator message
+    (`mensajes_operador`, severidad aclaración — the operator reads it in Avisos, ADR-075) with the
+    corte's own figures worded into the body. **Revisión de caja** — `server/revision.ts` reads the
+    `estado_revision = 'pendiente'` rows with their facts (sales of each unreviewed product, each
+    client's standing fiado, the same-name approved duplicate offered for a merge); approve
+    completes the record — a product also writes the owner's counted stock as an entrada (stock is
+    the sum of movements, ADR-081), a client takes its limit and term — merge re-points the
+    duplicate's facts to the surviving record (`fusionado_con_id`, sales/tickets/abonos moved),
+    reject closes it. Seed: two closed cortes (one cuadró, one −$60 with its count, reason and
+    note) and three counter-created records (Michelada with two sales, a Refresco duplicate, Doña
+    Chelo with a $90 fiado minus a $20 abono); the portal's period figures moved with them and
+    estados/inicio/movimientos assertions follow the new truth. Acceptance:
+    `e2e/dueno-cortes.spec.ts` (the panel explains the −$60 shortfall, the stamp and the message
+    land in Postgres) and `e2e/dueno-revision-caja.spec.ts` (approve writes costo 3000 + entrada
+    24; the client's limit 100000/plazo 15; the duplicate merges with its facts re-pointed) — 25
+    green across the three viewports. Known residual, other track's base (f75ce235): the login
+    two-doors specs, chaos-1's smash tests, devices' full-plan and informe-mensual race among
+    themselves; they fail on that base alone, not with this change.
+- **Gate:** the owner's two screens write for real; the operator sees the ask in Avisos.
 
 ### O-38 Remove the fixture demo flag
 

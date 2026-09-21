@@ -12,6 +12,10 @@
  *   pnpm --filter @xangarro/data-pg db:seed
  */
 import { seedClients } from './seed-clients.js';
+import { seedCortes } from './seed-cortes.js';
+import { seedConformance } from './seed-conformance.js';
+import { seedPortal } from './seed-portal.js';
+import { seedRevision } from './seed-revision.js';
 import { seedDayClose, seedMovements } from './seed-extra.js';
 import { seedFinanzas } from './seed-finanzas.js';
 import { hash } from 'bcryptjs';
@@ -19,7 +23,6 @@ import postgres from 'postgres';
 
 import {
   BIZ,
-  CONFORMANCE,
   COST,
   CREATED,
   DEV,
@@ -32,10 +35,8 @@ import {
   movementIdFor,
   NOTICES,
   PRODUCTS,
-  REJECTING_DEVICE,
   REJECTIONS,
   SALES,
-  TODAY,
   TS,
   USERS,
 } from './seed-data';
@@ -143,34 +144,6 @@ async function seedPeople(sql: Sql): Promise<void> {
   }
 }
 
-async function seedPortal(sql: Sql): Promise<void> {
-  const now = TS(TODAY);
-  for (const [id, nombre, plataforma, modelo, lastPush] of DEVICES) {
-    await sql`
-      INSERT INTO devices (id, nombre, plataforma, modelo, last_push_at, last_pull_at,
-                           business_id, created_at, updated_at)
-      VALUES (${id}, ${nombre}, ${plataforma}, ${modelo}, ${TS(lastPush)}, ${TS(lastPush)},
-              ${BIZ}, ${CREATED}, ${CREATED})
-      ON CONFLICT (id) DO NOTHING`;
-  }
-  for (const [id, source, severity, title, body, cta, href] of NOTICES) {
-    await sql`
-      INSERT INTO notices (id, source, severity, title, body, cta_label, cta_href, state,
-                           business_id, created_at, updated_at)
-      VALUES (${id}, ${source}, ${severity}, ${title}, ${body}, ${cta}, ${href}, 'nuevo',
-              ${BIZ}, ${now}, ${now})
-      ON CONFLICT (id) DO NOTHING`;
-  }
-  for (const [id, table, rowId, code, preview] of REJECTIONS) {
-    await sql`
-      INSERT INTO sync_rejections (id, device_id, table_name, row_id, code, payload, received_at,
-                                   business_id, created_at, updated_at)
-      VALUES (${id}, ${REJECTING_DEVICE}, ${table}, ${rowId}, ${code},
-              ${JSON.stringify({ preview })}, ${now}, ${BIZ}, ${now}, ${now})
-      ON CONFLICT (id) DO NOTHING`;
-  }
-}
-
 /**
  * Portal members: an identity in `auth.users` plus a row in
  * `business_members` giving it a role on this business.
@@ -197,30 +170,6 @@ async function seedMembers(sql: Sql): Promise<void> {
   }
 }
 
-/** See `CONFORMANCE` in seed-data.ts: an isolated tenant with free device slots. */
-async function seedConformance(sql: Sql): Promise<void> {
-  const c = CONFORMANCE;
-  await sql`SELECT set_config('xangarro.business_id', ${c.businessId}, false)`;
-  await sql`
-    INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
-    VALUES (${c.businessId}, 'Conformance', 'RESICO', '626', 125, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
-    ON CONFLICT (id) DO NOTHING`;
-  await sql`
-    INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
-                          seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
-    VALUES (${c.productId}, 'Producto de prueba', 'CNF-001', 'Producto Terminado', 100, 'pza', 3, 'producto',
-            true, 200, ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
-    ON CONFLICT (id) DO NOTHING`;
-  const pin = await hash('0000', 10);
-  await sql`
-    INSERT INTO users (id, nombre, pin_hash, avatar_color, permissions, active,
-                       business_id, device_id, created_at, updated_at)
-    VALUES (${c.userId}, 'Operador de prueba', ${pin}, '#3B6FFF', '{}', true,
-            ${c.businessId}, ${DEV}, ${CREATED}, ${CREATED})
-    ON CONFLICT (id) DO NOTHING`;
-  await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
-}
-
 async function main(): Promise<void> {
   const sql = postgres(URL as string, { max: 1, onnotice: () => undefined });
   try {
@@ -235,6 +184,8 @@ async function main(): Promise<void> {
     await seedPortal(sql);
     await seedFinanzas(sql);
     await seedMembers(sql);
+    await seedCortes(sql);
+    await seedRevision(sql);
     await seedConformance(sql);
 
     const [{ count }] = await sql<{ count: string }[]>`SELECT count(*)::text FROM sales`;
