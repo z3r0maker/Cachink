@@ -18,6 +18,7 @@ import type { EmpleadosData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 import { eyebrow } from '@/styles/text.css';
 
+import { PagosEmpleadoDrawer } from './pagos-drawer';
 import { EditarEmpleadoSheet, NuevoEmpleadoSheet } from './sheet';
 import type { Empleado as Row } from './use-empleado-form';
 import { pageSubtitle, pageTitle } from './empleados.css';
@@ -26,7 +27,46 @@ type Empleado = EmpleadosData[number];
 
 const PERIODO_LABEL = { semanal: 'Semanal', quincenal: 'Quincenal', mensual: 'Mensual' } as const;
 
-const columns = (onEdit: ((e: Row) => void) | null): readonly ColumnDef<Empleado>[] => [
+/** The trailing action columns: pagos for everyone, edit for writers only. */
+function acciones(
+  onEdit: ((e: Row) => void) | null,
+  onPagos: ((e: Row) => void) | null,
+): readonly ColumnDef<Empleado>[] {
+  return [
+    {
+      key: 'pagos',
+      header: '',
+      render: (e: Row) => (
+        <Button
+          variant="ghost"
+          onClick={() => onPagos?.(e)}
+          aria-label={`Ver los pagos de ${e.nombre}`}
+          data-testid={`ver-pagos-${e.id}`}
+        >
+          Ver pagos
+        </Button>
+      ),
+    },
+    ...(onEdit === null
+      ? []
+      : [
+          {
+            key: 'acciones',
+            header: '',
+            render: (e: Row) => (
+              <Button variant="ghost" onClick={() => onEdit(e)} aria-label={`Editar a ${e.nombre}`}>
+                Editar
+              </Button>
+            ),
+          },
+        ]),
+  ];
+}
+
+const columns = (
+  onEdit: ((e: Row) => void) | null,
+  onPagos: ((e: Row) => void) | null,
+): readonly ColumnDef<Empleado>[] => [
   {
     key: 'empleado',
     header: 'Empleado',
@@ -43,19 +83,7 @@ const columns = (onEdit: ((e: Row) => void) | null): readonly ColumnDef<Empleado
     render: (e) => <StatusPill tone="soft">{PERIODO_LABEL[e.periodo]}</StatusPill>,
   },
   { key: 'salario', header: 'Salario', numeric: true, render: (e) => formatMoney(e.salario ?? 0n) },
-  ...(onEdit === null
-    ? []
-    : [
-        {
-          key: 'acciones',
-          header: '',
-          render: (e: Row) => (
-            <Button variant="ghost" onClick={() => onEdit(e)} aria-label={`Editar a ${e.nombre}`}>
-              Editar
-            </Button>
-          ),
-        },
-      ]),
+  ...acciones(onEdit, onPagos),
 ];
 
 function Heading() {
@@ -79,10 +107,12 @@ function Body({
   rows,
   list,
   onEdit,
+  onPagos,
 }: {
   readonly rows: EmpleadosData | null;
   readonly list: EmpleadosData;
   readonly onEdit: ((e: Row) => void) | null;
+  readonly onPagos: (e: Row) => void;
 }) {
   return (
     <ScreenBody
@@ -95,7 +125,7 @@ function Body({
     >
       <DataTable
         caption="Personas"
-        columns={columns(onEdit)}
+        columns={columns(onEdit, onPagos)}
         rows={list}
         rowKey={(e) => e.id}
         minWidth={620}
@@ -112,6 +142,7 @@ function Body({
 export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null }) {
   const [tab, setTab] = useState('personas');
   const [editing, setEditing] = useState<Row | null>(null);
+  const [enPagos, setEnPagos] = useState<Row | null>(null);
   const mayWrite = canWrite(useSession().role);
   const list = rows ?? [];
   // Weekly equivalent: a quincenal or mensual salary is not a week's pay.
@@ -133,8 +164,9 @@ export function EmpleadosScreen({ rows }: { readonly rows: EmpleadosData | null 
         <KpiCard label="Empleados activos" value={`${list.length}`} />
         <KpiCard label="Nómina de la semana" value={formatMoney(semana)} tone="negative" />
       </div>
-      <Body rows={rows} list={list} onEdit={mayWrite ? setEditing : null} />
+      <Body rows={rows} list={list} onEdit={mayWrite ? setEditing : null} onPagos={setEnPagos} />
       <EditarEmpleadoSheet empleado={editing} onClose={() => setEditing(null)} />
+      <PagosEmpleadoDrawer empleado={enPagos} onClose={() => setEnPagos(null)} />
     </>
   );
 }

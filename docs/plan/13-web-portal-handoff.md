@@ -13,7 +13,7 @@
 1. **Shared checkout, push from a clean worktree.** Same rules as `12-glm-handoff.md` §0.1–0.2.
    Stage only your own paths at commit time; `ARCHITECTURE.md` and `docs/plan/*.md` very often
    hold another session's uncommitted hunks — check `git diff <file>` before staging them.
-2. **Numbers.** data-pg next free migration **0027** (0024–0026 are other tracks'); backoffice admin migrations next free **0015**; ADR next free **ADR-089**; backoffice
+2. **Numbers.** data-pg next free migration **0028** (0027 is `empleado_id`) (0024–0026 are other tracks'); backoffice admin migrations next free **0015**; ADR next free **ADR-089**; backoffice
    migrations **0011** (not this track's). Never GRANT on `auth.*` — use a pinned SECURITY
    DEFINER function (this track's examples: `0015_auth_links`, `0016_business_archive`,
    `0018_account_create`).
@@ -107,7 +107,7 @@ persisted delivery matrix (0017) · P-34 print stylesheet · signup through `acc
 | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **P-02** four-scene login animation                          | The «Acceso y onboarding» design file is not mirrored (`design-reference/` has only `operador/`) — **P-18 / owner action O-23**. The project rule: the design file is the spec; don't invent the scenes. Timings/behaviour are in 04-portal.md P-02 Steps. |
 | **P-18 / P-21** design mirror + compare harness              | Needs the Claude Design MCP authorisation (owner). Blocks P-21 and pixel checks for every screen.                                                                                                                                                          |
-| **P-12** employee drawer with recent payments                | No data link: the phone writes a payroll payment as `expenses` with only `concepto = "Nómina {nombre}"`. Needs `empleado_id` on `expenses` (synced UP table → phone + cloud migration, Track A with B). Don't match by name.                               |
+| **P-12** employee drawer with recent payments                | **Done 2026-09-20** (O-26 approved): `empleado_id` on `expenses` (pg 0027 + SQLite 0010), «Ver pagos» drawer reads the link. Phone writer follow-up is Track A's.                                                                                          |
 | **P-12** contrato field · **P-08** «Contacto y comprobantes» | Need columns. Contacto/comprobantes overlaps Track N's **C-15** (branding columns on `businesses`) — do them together.                                                                                                                                     |
 | **P-28 / P-29 / P-30** Asesor LLM                            | ADR-059 production gate («Próximamente»); P-30 runtime needs the credential. Locally fully live.                                                                                                                                                           |
 | **P-11** real rejection rows                                 | B-08 (phones producing them against hosted).                                                                                                                                                                                                               |

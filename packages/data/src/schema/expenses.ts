@@ -27,6 +27,8 @@ export const expenses = sqliteTable('expenses', {
   }).notNull(),
   monto: numeric('monto_centavos', { mode: 'bigint' }).notNull(),
   proveedor: text('proveedor'),
+  /** Payroll payments name their employee (O-26); null for every other expense. */
+  empleadoId: text('empleado_id'),
   gastoRecurrenteId: text('gasto_recurrente_id'),
   cajaTurnoId: text('caja_turno_id'),
   ...auditColumns,

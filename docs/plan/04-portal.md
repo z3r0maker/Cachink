@@ -710,10 +710,13 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     `@xangarro/domain` (one copy). **Fixed:** «Nómina de la semana» summed salaries regardless of
     period — it now uses each one's weekly equivalent (`salarioSemanal`, integer maths). e2e:
     create → edit → baja, stored centavos, periodo and `sync_log` checked in Postgres.
-  - **Still to do:** the employee drawer with recent payments — **blocked on a data link**: the
-    phone records a payroll payment as an `expenses` row whose only tie to the employee is the text
-    «Nómina {nombre}», which a rename breaks. It needs an `empleado_id` on `expenses` (a synced UP
-    table, so a phone + cloud migration, Track A with B). Also a contrato field (needs a column).
+  - 2026-09-20 · **The drawer landed (O-26 approved):** `expenses.empleado_id` (data-pg 0027,
+    SQLite 0010, SCHEMA_VERSION 11 — drift green) is the data link, and «Ver pagos» on each
+    Personas row opens the drawer with the payments found **through the link**, never by
+    matching «Nómina {nombre}». Historical gastos carry no link, so the drawer's empty state is
+    the honest one until the phone writes it (Track A's writer follow-up). The phone's
+    «Tipos de pago» editor is already gone from main — the read-only half of F-3 resolved
+    itself in Track A's teardown. **Still to do:** a contrato field (needs a column).
 - **Amended 2026-09-17 (ADR-058 §3, §5):** **two tabs — Personas and Nómina.** Asistencia is cut.
   Nómina is a read-only grouping; no "Registrar nómina".
 - **Steps:** Title "Empleados" / "Quién trabaja contigo y cuánto le pagas". Header chip "Nómina de la
