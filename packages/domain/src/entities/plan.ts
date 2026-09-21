@@ -1,5 +1,6 @@
 /**
- * Subscription plans and what each one entitles (ADR-053 §5, docs/plan Q14).
+ * Subscription plans and what each one entitles (ADR-053 §5; the informe cell
+ * per ADR-090; limits and cobros per C-12 / ADR-065).
  *
  * "Usuario" on the pricing card means Operator; device slots equal the
  * operator count; portal members are unlimited on every plan. Prices are
@@ -80,7 +81,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     features: ['stock', 'barcode', 'ventasCredito'],
     capabilities: {
       estadosFinancieros: true,
-      informeMensual: false,
+      informeMensual: true,
       permisosPorUsuario: false,
       asesor: 'diario',
       cobrosIntegrados: true,

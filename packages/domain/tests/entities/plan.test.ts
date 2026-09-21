@@ -18,6 +18,12 @@ describe('plan', () => {
     expect(PLAN_LIMITS.xangarrote.activeProducts).toBe(5_000);
   });
 
+  it('includes the contador informe on both paid tiers (ADR-090)', () => {
+    expect(PLAN_LIMITS.xangarrito.capabilities.informeMensual).toBe(false);
+    expect(PLAN_LIMITS.xangarro.capabilities.informeMensual).toBe(true);
+    expect(PLAN_LIMITS.xangarrote.capabilities.informeMensual).toBe(true);
+  });
+
   it('every plan feature is a known flag key and higher plans are supersets', () => {
     for (const id of PLAN_IDS) {
       for (const f of PLAN_LIMITS[id].features) expect(FEATURE_FLAG_KEYS).toContain(f);

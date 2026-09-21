@@ -10,10 +10,10 @@ import { hoy } from '@/server/clock';
  * `GET /api/export/informe-mensual?mes=YYYY-MM` → the contador's PDF (P-34).
  *
  * A route handler for the same reason the .xlsx exports are one: the response
- * is a file. Gated by `capabilities.informeMensual` (Xangarrote) **on the
- * server** — the button on Estados is hidden below the plan, and a direct
- * fetch without the plan is refused here, never by the UI. Open to every
- * role: the contador is exactly who this document is for.
+ * is a file. Gated by `capabilities.informeMensual` (Xangarro and above,
+ * ADR-090) **on the server** — the button on Estados is hidden below the
+ * plan, and a direct fetch without the plan is refused here, never by the
+ * UI. Open to every role: the contador is exactly who this document is for.
  */
 export async function GET(request: Request): Promise<NextResponse> {
   const session = await readSession();

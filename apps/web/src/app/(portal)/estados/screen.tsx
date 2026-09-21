@@ -75,8 +75,9 @@ function Heading({
   mayInforme,
   mes,
 }: {
-  /** `capabilities.informeMensual` — Xangarrote; below it the button is hidden
-   *  (the Suscripción cards carry the upsell, not this header). */
+  /** `capabilities.informeMensual` — Xangarro and above (ADR-090); below it
+   *  the button is hidden (the Suscripción cards carry the upsell, not this
+   *  header). */
   readonly mayInforme: boolean;
   /** The period's month, `YYYY-MM` — the informe is monthly by definition. */
   readonly mes: string;

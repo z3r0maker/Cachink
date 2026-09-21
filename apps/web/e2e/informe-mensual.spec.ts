@@ -9,14 +9,17 @@ import { asTenant } from './sync-phone';
 
 /**
  * P-34's «Informe mensual PDF»: on a throwaway **Xangarrote** tenant the button
- * downloads a real PDF (magic %PDF) for the chosen month; on the seeded
- * Xangarro tenant the button is hidden and a direct fetch of the route is
- * refused server-side — the capability is checked twice, once per side.
+ * downloads a real PDF (magic %PDF) for the chosen month; the seeded **Xangarro**
+ * tenant shows the button (ADR-090 moved the informe down from Xangarrote); on a
+ * throwaway **free-plan** tenant the button is hidden and a direct fetch of the
+ * route is refused server-side — the capability is checked twice, once per side.
  */
 const stamp = randomUUID();
 const email = `informe-${stamp}@test.mx`;
 const password = 'informe-123';
 const biz = newUlid();
+const freeEmail = `informe-free-${stamp}@test.mx`;
+const freeBiz = newUlid();
 
 const billingUrl = (): string =>
   process.env.BILLING_DATABASE_URL ??
@@ -62,22 +65,35 @@ test.beforeAll(async () => {
   } finally {
     await billing.end({ timeout: 5 });
   }
+  // The free-plan tenant: same shape, no subscription row — the free plan is
+  // the absence of billing (B-10).
+  const freeUserId = randomUUID();
+  const freeHash = await hashPassword(password);
+  await asTenant(freeBiz, async (sql) => {
+    await sql`INSERT INTO auth.users (id, email, encrypted_password, nombre) VALUES (${freeUserId}::uuid, ${freeEmail}, ${freeHash}, 'Gratuito')`;
+    await sql`
+      INSERT INTO businesses (id, nombre, regimen_fiscal, regimen_sat, isr_tasa, business_id, device_id, created_at, updated_at)
+      VALUES (${freeBiz}, 'Abarrotes Sin Plan', 'RESICO', '626', 125, ${freeBiz}, ${newUlid()}, now(), now())`;
+    await sql`
+      INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
+      VALUES (${newUlid()}, ${freeUserId}, 'owner', ${freeBiz}, now(), now())`;
+  });
 });
+
+async function signInAs(page: Page, userEmail: string): Promise<void> {
+  await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
+  await page.getByTestId('login-email').fill(userEmail);
+  await page.getByTestId('login-password').fill(password);
+  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.waitForURL((u) => !u.pathname.startsWith('/login'));
+}
 
 test.describe('Xangarrote (throwaway tenant)', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  async function signIn(page: Page): Promise<void> {
-    await page.goto('/login');
-    await page.getByTestId('login-door-owner').click();
-    await page.getByTestId('login-email').fill(email);
-    await page.getByTestId('login-password').fill(password);
-    await page.getByRole('button', { name: 'Entrar' }).click();
-    await page.waitForURL((u) => !u.pathname.startsWith('/login'));
-  }
-
   test('the button downloads the contador PDF for the chosen month', async ({ page }) => {
-    await signIn(page);
+    await signInAs(page, email);
     await page.goto('/estados?p=mensual');
     const [download] = await Promise.all([
       page.waitForEvent('download'),
@@ -93,7 +109,7 @@ test.describe('Xangarrote (throwaway tenant)', () => {
   });
 
   test('the route accepts a named month', async ({ page }) => {
-    await signIn(page);
+    await signInAs(page, email);
     const response = await page.request.get('/api/export/informe-mensual?mes=2026-04');
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toBe('application/pdf');
@@ -101,7 +117,17 @@ test.describe('Xangarrote (throwaway tenant)', () => {
 });
 
 test.describe('Xangarro (the seeded tenant)', () => {
+  test('shows the informe button since ADR-090', async ({ page }) => {
+    await page.goto('/estados');
+    await expect(page.getByRole('link', { name: 'Informe mensual' })).toBeVisible();
+  });
+});
+
+test.describe('Free plan (throwaway tenant)', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('no button on Estados, and the route refuses the capability', async ({ page }) => {
+    await signInAs(page, freeEmail);
     await page.goto('/estados');
     await expect(page.getByRole('link', { name: 'Informe mensual' })).toHaveCount(0);
     const response = await page.request.get('/api/export/informe-mensual?mes=2026-05');

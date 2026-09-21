@@ -6012,3 +6012,75 @@ and let O-14's sign-off refine later.
   stays open for the nuances.
 - The seeded business (626) now shows a small ISR even in May's loss month — correct under
   RESICO, and covered by e2e.
+
+---
+
+## ADR-090
+
+**Title:** `informeMensual` moves down to Xangarro; the mock gains `over-limit`; the PAC contracted for subscription CFDIs must serve a future tenant-facing facturación add-on
+
+**Date:** 2026-09-21
+
+**Status:** Accepted — amends ADR-059's matrix values; rides on the C-12 limits rework landed in 2a70b7f3
+
+**Context**
+
+The owner reviewed the plan matrix on 2026-09-21 after C-12's limits landed
+(300/50 · 10 000/1 000 · 30 000/5 000, advisory transactions, the advisory
+quota). One cell was wrong: `informeMensual` sat on Xangarrote alone, yet
+Xangarro already renders the LLM-written conclusiones on the estados
+financieros — the fancier artifact was cheaper than the simple one being gated
+higher. The deterministic contador PDF is the retention hook at the tier where
+retention is won; the SAT-facing reality of an RCC/RESICO emprendedor makes
+monthly reporting near-mandatory, not a luxury. A $199 payer told "no PDF for
+your contador" feels nickeled at the moment of maximum loyalty, while
+Xangarrote's value stands on permisos, the production-inventory set and Asesor
+completo.
+
+The owner also set a constraint for the future: the PAC contracted to stamp
+Xangarro's own subscription CFDIs should be chosen so the same integration can
+serve a post-launch facturación add-on for tenants.
+
+**Decision**
+
+1. `informeMensual` is true on xangarro and xangarrote, amending ADR-059's
+   values. The pricing cards say so («Informe mensual para tu contador» on
+   Xangarro), and the estados header/route comments follow.
+2. The mock gains the `over-limit` scenario (xangarro with
+   `transactionsPerMonth: 5`), the C-12 step-6 affordance for E2E to hit the
+   advisory warnings in a few captures.
+3. **PAC selection constraint (CFDI reuse):** when Xangarro contracts a PAC to
+   invoice its own subscriptions, it must be an API-first, **multi-emisor**
+   PAC, because the same stamping wiring — auth, CFDI JSON in, XML + QR out,
+   storage — is the intended foundation for a post-launch tenant-facing
+   facturación add-on. The part that does not transfer is per-tenant emitter
+   onboarding: each business's own CSD (certificado de sello digital) and
+   fiscal data. That gap, not the PAC call, is the add-on's real cost. The
+   fiado model maps to CFDI 4.0's Complemento de Recepción de Pagos (abonos →
+   pagos parciales), and stamping is a server-side external call exactly like
+   ADR-066's payment intents — the phone keeps writing the venta.
+4. Pricing-card copy follows the table the handoff froze: «Hasta 300
+   transacciones al mes / Catálogo de hasta 50 productos» (Xangarrito),
+   «Informe mensual… Hasta 10 000 transacciones… 1 000 productos» (Xangarro),
+   «30 000… 5 000» (Xangarrote). No line promises "ilimitado" any more —
+   every tier's numbers are now real.
+
+**Alternatives considered**
+
+- *Leave `informeMensual` on Xangarrote.* Rejected: the conclusiones/PDF
+  inconsistency, and the retention argument above.
+- *Bundle a WhatsApp-sending or Asesor add-on into this change.* Rejected:
+  those remain separate decisions (the manual `wa.me` share stays free on
+  every tier; the Asesor stays bundled and tiered by cadence).
+
+**Consequences**
+
+- `apps/web`'s informe-mensual e2e moves its negative case (hidden button,
+  403 route) from the seeded Xangarro tenant to a throwaway free-plan tenant,
+  and gains a seeded-tenant assertion that the button now shows.
+- Xangarrote's card loses no bullet it can't spare; the wizard (ADR-067) has
+  nothing new to badge — the move widens Xangarro, it does not narrow
+  Xangarrito.
+- The values may change again by owner intent ("we might change it again
+  later"); after this ADR they change in one place (`plan.ts`) plus the
+  pricing copy.
