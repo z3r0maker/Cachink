@@ -11,6 +11,7 @@ import { OWNER_STORAGE } from './auth-state';
  */
 setup('authenticate as the owner', async ({ page }) => {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('donpedro123');
   await page.getByRole('button', { name: 'Entrar' }).click();

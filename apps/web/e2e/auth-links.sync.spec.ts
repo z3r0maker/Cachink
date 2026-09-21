@@ -30,6 +30,7 @@ test.beforeAll(async () => {
 
 async function requestLink(page: Page, from: string, to: string) {
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByRole('link', { name: from }).click();
   await page.getByTestId('link-email').fill(to);
   await page.getByRole('button', { name: 'Mandar enlace' }).click();
@@ -58,6 +59,7 @@ test('a reset link sets a new password and signs in', async ({ page }) => {
 
   // …and the new password is the one that works.
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('nueva-clave-1');
   await page.getByRole('button', { name: 'Entrar' }).click();

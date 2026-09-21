@@ -97,6 +97,7 @@ test.describe('login gate (signed out)', () => {
     });
 
     await page.goto('/login');
+    await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(`nadie-${Date.now()}@example.com`);
     await page.getByTestId('login-password').fill('incorrecta');
 
@@ -111,7 +112,7 @@ test.describe('login gate (signed out)', () => {
     await expect(
       page.getByText(/Correo o contraseña incorrectos\.|Demasiados intentos\./),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
     expect(page.url()).toContain('/login');
     expect(actionPosts).toBeGreaterThanOrEqual(1);
   });

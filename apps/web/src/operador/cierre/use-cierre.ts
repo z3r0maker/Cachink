@@ -19,6 +19,7 @@ export interface CerrarVivo {
     readonly montoCierreCentavos: bigint;
     readonly discrepancyReason: string | null;
     readonly explicacion: string | null;
+    readonly denominaciones: Readonly<Record<string, number>> | null;
   }): Promise<void>;
 }
 
@@ -33,13 +34,8 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
   const [motivo, setMotivo] = useState<MotivoDiferencia | null>(null);
   const [nota, setNota] = useState('');
   const [cerrado, setCerrado] = useState(false);
-  const contado = totalContado(conteo);
-  const esperado = esperadoDe(data.partes);
-  const dif = diferenciaCorte(contado, esperado);
-  const faltaNota = dif.tipo !== 'cuadra' && (motivo === null || nota.trim() === '');
-  const puede = cola.pendientes === 0 && !faltaNota;
-  const poner = (pesos: PesosDenominacion, n: number) =>
-    setConteo((c) => ({ ...c, [pesos]: Math.max(0, Math.trunc(n)) }));
+  const { contado, esperado, dif, faltaNota, puede } = derivados(conteo, data, motivo, nota, cola);
+  const poner = ponerEn(setConteo);
   return {
     conteo,
     poner,
@@ -58,12 +54,57 @@ export function useCierre(data: CierreData, cerrarVivo?: CerrarVivo) {
     enviar: cola.enviar,
     cerrado,
     cerrar: () =>
-      alCerrar({ puede, cerrarVivo, motivo, tipo: dif.tipo, contado, nota, ok: setCerrado }),
+      alCerrar({
+        puede,
+        cerrarVivo,
+        motivo,
+        tipo: dif.tipo,
+        contado,
+        nota,
+        conteo,
+        ok: setCerrado,
+      }),
     reabrir: () => setCerrado(false),
   };
 }
 
 export type Cierre = ReturnType<typeof useCierre>;
+
+/** Everything the screen derives from the count, in one place. */
+function derivados(
+  conteo: ConteoDenominaciones,
+  data: CierreData,
+  motivo: MotivoDiferencia | null,
+  nota: string,
+  cola: ReturnType<typeof useCola>,
+) {
+  const contado = totalContado(conteo);
+  const dif = diferenciaCorte(contado, esperadoDe(data.partes));
+  const faltaNota = faltaNota_(dif.tipo, motivo, nota);
+  return {
+    contado,
+    esperado: esperadoDe(data.partes),
+    dif,
+    faltaNota,
+    puede: cola.pendientes === 0 && !faltaNota,
+  };
+}
+
+/** A stepper writes whole pieces, never below zero. */
+function ponerEn(
+  setConteo: React.Dispatch<React.SetStateAction<ConteoDenominaciones>>,
+): (pesos: PesosDenominacion, n: number) => void {
+  return (pesos, n) => setConteo((c) => ({ ...c, [pesos]: Math.max(0, Math.trunc(n)) }));
+}
+
+/** A difference needs both a reason and a note before the close unlocks. */
+function faltaNota_(
+  tipo: 'cuadra' | 'falta' | 'sobra',
+  motivo: MotivoDiferencia | null,
+  nota: string,
+): boolean {
+  return tipo !== 'cuadra' && (motivo === null || nota.trim() === '');
+}
 
 /** Close locally, and on a linked register through the use case (O-36). */
 function alCerrar(p: {
@@ -73,6 +114,7 @@ function alCerrar(p: {
   readonly tipo: 'cuadra' | 'falta' | 'sobra';
   readonly contado: bigint;
   readonly nota: string;
+  readonly conteo: ConteoDenominaciones;
   readonly ok: (v: boolean) => void;
 }): void {
   if (!p.puede) return;
@@ -86,6 +128,7 @@ function alCerrar(p: {
       montoCierreCentavos: p.contado,
       discrepancyReason: reason,
       explicacion: p.nota.trim() === '' ? null : p.nota.trim(),
+      denominaciones: { ...p.conteo },
     })
     .catch(() => p.ok(false));
 }

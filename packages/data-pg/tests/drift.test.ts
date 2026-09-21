@@ -77,6 +77,10 @@ const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
   // optional — a phone row without it is a valid client with `rfc = NULL`,
   // never a sale arriving without its money.
   clients: ['rfc'],
+  // caja_turnos.aclarado_* — the owner's «Marcar como aclarado» (O-37,
+  // 0029). UP table: the device never sends these; when the app branch
+  // mirrors the columns the list empties itself.
+  caja_turnos: ['aclarado_at', 'aclarado_por'],
   // C-15 stores them (0023); the device columns arrive with the app branch.
   // `businesses` is DOWN-only, so the device never sends; the wire carries
   // every field, defaulted, so old payloads parse and new ones arrive.
@@ -120,6 +124,8 @@ const PENDING_DEVICE_TABLES: ReadonlySet<string> = new Set([
   'opening_balances',
   'opening_balance_clients',
 ]);
+
+const pgSchemaValues = Object.values(pgSchema);
 
 describe('cloud ↔ device schema drift', () => {
   /**
@@ -168,7 +174,7 @@ describe('cloud ↔ device schema drift', () => {
     });
   }
 
-  it('allows cloud-ahead columns only on DOWN tables, or HYBRID ones where the wire tolerates their absence', () => {
+  it('allows cloud-ahead columns only on DOWN tables, HYBRID ones the wire tolerates, or nullable columns on UP tables', () => {
     const down = new Set<string>(DOWN_TABLES);
     const hybrid = new Set<string>(HYBRID_TABLES);
     const misplaced: string[] = [];
@@ -176,7 +182,25 @@ describe('cloud ↔ device schema drift', () => {
     for (const [table, cols] of Object.entries(CLOUD_AHEAD)) {
       if (down.has(table)) continue;
       if (!hybrid.has(table)) {
-        misplaced.push(table);
+        // An UP table may still carry a cloud-ahead column when the cloud
+        // half is nullable: a pushed row that omits it inserts NULL, which
+        // is exactly the column's meaning before the owner acts (0029's
+        // aclarado_*: null while the difference stands unexplained).
+        const colsOf = [...pgSchemaValues].find((t) => is(t, Table) && getTableName(t) === table);
+        const byColumn = new Map(
+          Object.entries(colsOf === undefined ? {} : getTableColumns(colsOf)).map(([, col]) => [
+            col.name,
+            col,
+          ]),
+        );
+        const nullable = cols.every((c) => {
+          const col = byColumn.get(c) as { notNull?: boolean } | undefined;
+          return col?.notNull === false;
+        });
+        if (!nullable) {
+          misplaced.push(table);
+        }
+        // Nullable-and-UP needs no wire proof: a row that omits it is valid.
         continue;
       }
       const wire = HYBRID_WIRE[table];

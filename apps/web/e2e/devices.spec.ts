@@ -47,6 +47,10 @@ test('generating a code replaces the old one rather than adding to it', async ({
   await generate.click();
   await expect(page.getByTestId('activation-code')).not.toHaveAttribute('aria-label', first ?? '');
 
+  // The handoff the code alone never had: the panel must say where it is
+  // typed — the register's own door — or the director is guessing.
+  await expect(page.getByTestId('pairing-register-url')).toContainText('/operador');
+
   // The security property, asserted on the rows rather than the screen: an
   // activation code is a bearer credential, so "Generar otro" must leave
   // exactly ONE redeemable code, not two. A panel that simply showed the newest

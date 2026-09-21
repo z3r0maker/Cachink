@@ -18,7 +18,7 @@ import { BASE_URL } from './base-url';
  */
 
 const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-const SEEDED_PRODUCTS = 6;
+const SEEDED_PRODUCTS = 8;
 const RESET = 'pnpm --filter @xangarro/web test:e2e:db';
 
 async function assertSeeded(url: string): Promise<void> {
@@ -55,7 +55,7 @@ async function assertSeeded(url: string): Promise<void> {
 async function assertServerIsServingTheGate(baseURL: string): Promise<void> {
   const res = await fetch(`${baseURL}/login`, { redirect: 'follow' });
   const body = await res.text();
-  if (!res.ok || !body.includes('Entra a tu portal')) {
+  if (!res.ok || !body.includes('¿Cómo vas a entrar?')) {
     throw new Error(
       `The server at ${baseURL} did not serve the login page (HTTP ${res.status}).\n` +
         'Most likely something else is already listening on that port, or the ' +

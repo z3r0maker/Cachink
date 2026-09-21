@@ -68,6 +68,7 @@ test('a viewer sees no way to create, import or change products', async ({ brows
   const context = await browser.newContext({ storageState: { cookies: [], origins: [] } });
   const page = await context.newPage();
   await page.goto('/login');
+  await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('contador@taqueria.mx');
   await page.getByTestId('login-password').fill('contador123');
   await page.getByRole('button', { name: 'Entrar' }).click();

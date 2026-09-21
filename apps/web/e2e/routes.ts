@@ -50,7 +50,7 @@ export const ROUTES: readonly Route[] = [
   // Ingresos for May 2026 = 75+60+60+80+250+120. A regex, not a string: every
   // label on this screen is static, so the only real-data signal is a figure,
   // and `formatMoney` goes through `Intl.NumberFormat` — ICU-version sensitive.
-  { path: '/estados', heading: 'Estados financieros', data: { kind: 'db', sentinel: /645/ } },
+  { path: '/estados', heading: 'Estados financieros', data: { kind: 'db', sentinel: /885/ } },
   // PRODUCTS p-tac sku → `productos/columns.tsx`.
   { path: '/productos', heading: 'Productos', data: { kind: 'db', sentinel: 'TAC-001' } },
   {
