@@ -20,11 +20,19 @@ import type { AuthDeps, LoginRecord } from './ports';
  * address and per IP *before* the password is checked, and an unknown address
  * costs the same bcrypt comparison as a known one. The throttle rows are the
  * portal's own table, under `admin:`-prefixed keys.
+ *
+ * `reason` says which of the three refusals happened — no login-able account
+ * with that address, an account whose password was never set, or a set
+ * password that did not match. It is for logs and dev-phase diagnostics only:
+ * what the user sees stays one generic sentence (SEC-AUTH-02).
  */
 export type SignInResult =
   | { readonly kind: 'ok'; readonly token: string }
-  | { readonly kind: 'invalid' }
-  | { readonly kind: 'failed' }
+  | { readonly kind: 'invalid'; readonly reason: 'empty-input' }
+  | {
+      readonly kind: 'failed';
+      readonly reason: 'no-account' | 'no-password-set' | 'wrong-password';
+    }
   | { readonly kind: 'locked'; readonly wait: number };
 
 export interface SignInInput {
@@ -42,9 +50,20 @@ export const loginSubjects = (email: string, ip: string): ThrottleSubject[] => [
   { key: throttleKey('admin', 'login', 'ip', ip), policy: LOGIN_PER_IP, clearOnSuccess: false },
 ];
 
+/** Which of the three credential refusals happened, from what the lookup saw. */
+function failureReason(
+  staff: LoginRecord | null,
+): 'no-account' | 'no-password-set' | 'wrong-password' {
+  if (staff === null) return 'no-account';
+  if (staff.passwordHash === null) return 'no-password-set';
+  return 'wrong-password';
+}
+
 export async function signIn(deps: AuthDeps, input: SignInInput): Promise<SignInResult> {
   const email = input.email.trim().toLowerCase();
-  if (email === '' || input.password === '') return { kind: 'invalid' };
+  if (email === '' || input.password === '') {
+    return { kind: 'invalid', reason: 'empty-input' };
+  }
 
   const seen: { staff: LoginRecord | null } = { staff: null };
   const result = await guardAttempt(deps.throttle, loginSubjects(email, input.ip), async () => {
@@ -56,6 +75,9 @@ export async function signIn(deps: AuthDeps, input: SignInInput): Promise<SignIn
   if (result.kind !== 'ok') {
     if (seen.staff) {
       await deps.audit(seen.staff.id, 'auth.inicio_fallido', { bloqueo: result.kind === 'locked' });
+    }
+    if (result.kind === 'failed') {
+      return { kind: 'failed', reason: failureReason(seen.staff) };
     }
     return result;
   }
