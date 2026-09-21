@@ -15,8 +15,8 @@ import { useCierre, type Cierre } from './use-cierre';
 const CARTERA = 'M3 7h18v10H3V7Zm9 2.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5';
 
 /** Operador · Cierre de turno: count by denomination against the expected cash, explain, close. */
-export function CierreScreen({ state, data }: CierreScreenProps) {
-  const x = useCierre(data);
+export function CierreScreen({ state, data, cerrarVivo }: CierreScreenProps) {
+  const x = useCierre(data, cerrarVivo);
   return (
     <OpMain top={22}>
       <div className={t.titleRow}>

@@ -2,6 +2,7 @@ import type { ConteoDenominaciones, Money } from '@xangarro/domain';
 
 import type { EstadoMode } from '../estado';
 import type { PartesEsperado } from '../turno/desglose';
+import type { CerrarVivo } from './use-cierre';
 
 /** Close-out reasons in the file; the `caja_turnos` enum has six (open for O-06). */
 export const MOTIVOS_DIFERENCIA = [
@@ -38,4 +39,6 @@ export interface CierreData {
 export interface CierreScreenProps {
   readonly state: 'happy' | EstadoMode;
   readonly data: CierreData;
+  /** Linked register: the close goes through the use case (O-36). */
+  readonly cerrarVivo?: CerrarVivo;
 }

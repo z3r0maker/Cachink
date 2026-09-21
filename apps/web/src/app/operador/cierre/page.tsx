@@ -1,6 +1,6 @@
 import { resumen as resumenInventario } from '@/operador/inventario/derive';
 import { INVENTARIO_FIXTURE } from '@/operador/inventario/fixture';
-import { CierreScreen } from '@/operador/cierre/screen';
+import { CierreViva } from '@/operador/cierre/viva';
 import type { CierreData, CierreScreenProps } from '@/operador/cierre/types';
 import { TURNO_FIXTURE as T } from '@/operador/turno/fixture';
 import { VENTAS_FIXTURE } from '@/operador/ventas/fixture';
@@ -42,12 +42,14 @@ function datos(): CierreData {
   };
 }
 
-/** Operador · Cierre de turno (O-28). */
+/** Operador · Cierre de turno (O-28, real data O-36). */
 export default async function OperadorCierrePage({
   searchParams,
 }: {
   readonly searchParams: Promise<{ readonly dataState?: string }>;
 }) {
   const { dataState } = await searchParams;
-  return <CierreScreen state={forced(dataState)} data={datos()} />;
+  return (
+    <CierreViva fixture={{ state: forced(dataState), data: datos() }} forzado={forced(dataState)} />
+  );
 }

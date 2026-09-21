@@ -6,6 +6,51 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**", "build/**"]
     },
+    "@xangarro/web#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "BILLING_DATABASE_URL",
+        "METERING_DATABASE_URL",
+        "DEVICE_TOKEN_SECRET",
+        "ENTITLEMENT_PRIVATE_KEY",
+        "PORTAL_URL",
+        "CRON_SECRET",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "STRIPE_PUBLISHABLE_KEY",
+        "ADMIN_INGEST_URL",
+        "ADMIN_INGEST_SECRET",
+        "FACTURAPI_API_KEY",
+        "FACTURAPI_BASE_URL",
+        "CFDI_MODE",
+        "CFDI_LUGAR_EXPEDICION",
+        "CFDI_PRODUCT_KEY",
+        "CFDI_UNIT_KEY",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "EMAIL_REPLY_TO",
+        "SENTRY_DSN"
+      ]
+    },
+    "@xangarro/backoffice#build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "DATABASE_URL",
+        "ADMIN_TOTP_KEY",
+        "ADMIN_BASE_URL",
+        "ADMIN_DIAGNOSTICS",
+        "ADMIN_INGEST_SECRET",
+        "ALERT_WEBHOOK_URL",
+        "CRON_SECRET",
+        "DIGEST_TO",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "EMAIL_REPLY_TO"
+      ]
+    },
     "test": {
       "outputs": ["coverage/**"],
       "dependsOn": ["^build"]
