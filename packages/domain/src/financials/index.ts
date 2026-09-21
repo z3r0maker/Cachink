@@ -6,6 +6,7 @@
 
 export * from './_periodo.js';
 export * from './estado-resultados.js';
+export * from './isr-regimen.js';
 export * from './balance-general.js';
 export * from './flujo-efectivo.js';
 export * from './corte-de-dia.js';

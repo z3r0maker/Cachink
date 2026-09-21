@@ -5964,3 +5964,51 @@ the two outputs would drift.
   value in the transcription (no artboard shows it).
 - The `direccion` block renders only when an address source exists; C-15's
   `address_print` is stored but nothing feeds it yet.
+
+---
+
+## ADR-089
+
+### Régimen-aware ISR from the published SAT tables, with a reference disclaimer
+
+**Date:** 2026-09-20
+**Status:** Accepted (resolves finding F-2; owner asked for tables-from-the-web + disclaimer instead of waiting on O-25's contador)
+
+#### Context
+
+The statements computed `ISR = utilidad operativa × isr_tasa` whatever the régime. RESICO
+(626) — the most common régime among the target users — is levied on **gross income**, so the
+number was structurally wrong for exactly those users (F-2). O-25 asked the contador which base
+per régime; the owner chose to ship from the SAT's own published tables now, with a disclaimer,
+and let O-14's sign-off refine later.
+
+#### Decision
+
+1. **The tables are code** (`@xangarro/domain/financials/isr-regimen.ts`), integer centavos,
+   sourced from the Anexo 8 RMF 2026 (DOF 28/12/2025) and Art. 113-E LISR:
+   - **626 RESICO:** flat rate over the whole month's gross income by bracket — 1.00 % ≤ $25 K
+     rising to 2.50 % > $350 K. (Note: the seed comment's old sketch said 2.5 % from $291 K —
+     the published table has a 2.25 % bracket to $350 K first.)
+   - **612 PF Empresarial y Profesional:** the Art. 96 monthly tariff (quota + marginal,
+     1.92 %–35 %) on utilidad operativa as the proxy for the base gravable.
+   - **Anything else** (621 RIF, 605, morals, none): the owner's own rate on utilidad — the
+     exact pre-ADR behavior.
+2. **`calculateEstadoDeResultados` takes an optional `regimenSat` (+ `mesesEnPeriodo`).**
+   Without it — the phone's case — behavior is byte-identical to before; no phone release is
+   required. Multi-month periods spread across the monthly tables (per-month base = total ÷
+   months, ISR × months).
+3. **The disclaimer travels with every ISR figure** (owner wording): «Es una referencia
+   calculada con las tablas publicadas del SAT. Para tus cifras y deducciones reales, consulta
+   a tu contador.» The notice also names the base used («sobre tus ingresos» vs «sobre tu
+   utilidad»), and the loss variant («no hubo utilidad…») applies only to profit-based
+   régimes — a RESICO loss month still owes its estimate on gross.
+4. The tables are year-keyed in spirit: if SAT updates them, the module is the one place to
+   change, with the tests' published examples as the guard.
+
+#### Consequences
+
+- F-2 closes structurally for 626/612; the estimate remains an estimate (no personal
+  deductions, PTU, ajustes) — the disclaimer says exactly that, and O-14's contador sign-off
+  stays open for the nuances.
+- The seeded business (626) now shows a small ISR even in May's loss month — correct under
+  RESICO, and covered by e2e.

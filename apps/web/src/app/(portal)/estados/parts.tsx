@@ -46,16 +46,34 @@ export function Resumen({
  * set in Negocio, not a constant; a period without utilidad says why there is
  * no estimate rather than showing a zero that looks like a calculation.
  */
-export function IsrNotice({ isrTasa, isr }: { readonly isrTasa: number; readonly isr: bigint }) {
+export interface IsrNoticeModel {
+  readonly isrTasa: number;
+  readonly isr: bigint;
+  /** ADR-089: 626 estimates on gross, 612 on the Art. 96 tariff, else the owner's rate. */
+  readonly regimenSat: string | null;
+}
+
+const DISCLAIMER =
+  'Es una referencia calculada con las tablas publicadas del SAT. Para tus cifras y deducciones reales, consulta a tu contador.';
+
+export function IsrNotice({ isrTasa, isr, regimenSat }: IsrNoticeModel) {
+  const titulo =
+    regimenSat === '626'
+      ? 'ISR referencial (RESICO, sobre tus ingresos)'
+      : regimenSat === '612'
+        ? 'ISR referencial (tarifa del SAT, sobre tu utilidad)'
+        : `ISR referencial (${isrTasa / 100}%)`;
+  const linea =
+    regimenSat === '626'
+      ? DISCLAIMER
+      : isr > 0n
+        ? DISCLAIMER
+        : `En este periodo no hubo utilidad, así que no hay ISR estimado. ${DISCLAIMER}`;
   return (
     <div className={isrNotice}>
       <div>
-        <strong>ISR referencial ({isrTasa / 100}%)</strong>
-        <p style={{ margin: '6px 0 0', fontWeight: 600 }}>
-          {isr > 0n
-            ? 'La cifra de ISR es orientativa. Consulta a tu contador antes de declarar.'
-            : 'En este periodo no hubo utilidad, así que no hay ISR estimado. Consulta a tu contador antes de declarar.'}
-        </p>
+        <strong>{titulo}</strong>
+        <p style={{ margin: '6px 0 0', fontWeight: 600 }}>{linea}</p>
       </div>
     </div>
   );

@@ -44,6 +44,8 @@ export interface EstadosModel {
   readonly indicadores: ReturnType<typeof calculateIndicadores>;
   /** The business's own ISR rate (Negocio, P-08), in basis points. */
   readonly isrTasa: number;
+  /** The SAT régime code — names the base the estimate used (ADR-089). */
+  readonly regimenSat: string | null;
   /** What each expandable line is made of — sums to the line (domain test). */
   readonly desglose: ReturnType<typeof desgloseDeResultados>;
 }
@@ -51,6 +53,18 @@ export interface EstadosModel {
 const DIA_MS = 86_400_000;
 const diasEntre = (from: string, to: string) =>
   Math.max(1, Math.round((Date.parse(to) - Date.parse(from)) / DIA_MS) + 1);
+
+/** Distinct YYYY-MM in [from, to] — the SAT tables are monthly (ADR-089). */
+const mesesEntre = (from: string, to: string): number => {
+  const meses = new Set<string>();
+  const cursor = new Date(`${from}T12:00:00Z`);
+  const end = new Date(`${to}T12:00:00Z`);
+  while (cursor <= end) {
+    meses.add(cursor.toISOString().slice(0, 7));
+    cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+  }
+  return Math.max(1, meses.size);
+};
 
 /** The phone's own filter (`use-balance-general`): Crédito or not fully paid. */
 const conCredito = (tickets: readonly TicketConTotal[]) =>
@@ -132,36 +146,42 @@ function aperturaDe(apertura: AperturaFacts | null) {
   };
 }
 
+/** The cloud schema keys `monto_centavos` as `monto`, like the device and the
+ * domain (drift.test.ts holds the keys equal). */
+function aDominio(rows: Awaited<ReturnType<typeof periodLedger>>) {
+  return {
+    ventas: rows.ventas.map((r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Sale),
+    egresos: rows.egresos.map((r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Expense),
+  };
+}
+
 export async function loadEstadosModel(
   businessId: string,
   from: string,
   to: string,
 ): Promise<EstadosModel> {
   // One tenant transaction: the period's ledger, the balance's real inputs
-  // (F-1) and the rate the owner set.
-  const { rows, inputs, isrTasa, apertura } = await withTenant(businessId, async (tx) => ({
-    rows: await periodLedger(tx, from, to),
-    inputs: await periodBalanceInputs(tx, from, to),
-    isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
-    apertura: await loadApertura(tx, businessId),
-  }));
-
-  // The cloud schema now keys `monto_centavos` as `monto`, like the device
-  // and the domain (drift.test.ts holds the keys equal). Before, it said
-  // `montoCentavos`, and an `as unknown as Sale[]` compiled fine and produced
-  // `undefined` money, which surfaced as the error state.
-  const ventas: readonly Sale[] = rows.ventas.map(
-    (r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Sale,
-  );
-  const egresos: readonly Expense[] = rows.egresos.map(
-    (r) => ({ ...r, monto: r.monto ?? 0n }) as unknown as Expense,
+  // (F-1), the apertura facts, and the régime + rate that decide the ISR
+  // estimate (ADR-089).
+  const { rows, inputs, isrTasa, regimenSat, apertura } = await withTenant(
+    businessId,
+    async (tx) => ({
+      rows: await periodLedger(tx, from, to),
+      inputs: await periodBalanceInputs(tx, from, to),
+      isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
+      regimenSat: (await getBusiness(tx))?.regimenSat ?? null,
+      apertura: await loadApertura(tx, businessId),
+    }),
   );
 
+  const { ventas, egresos } = aDominio(rows);
   const resultados = calculateEstadoDeResultados({
     ventas,
     egresos,
     mermaMovements: inputs.merma as unknown as readonly InventoryMovement[],
     isrTasa,
+    regimenSat: regimenSat ?? null,
+    mesesEnPeriodo: mesesEntre(from, to),
   });
   const pagosClientes = inputs.pagos as unknown as readonly ClientPayment[];
   const tickets = await ticketsConTotal(businessId, from, to, ventas);
@@ -178,5 +198,5 @@ export async function loadEstadosModel(
   const indicadores = indicadoresDe(resultados, balance, tickets, from, to);
 
   const desglose = desgloseDeResultados({ ventas: tickets, egresos });
-  return { resultados, balance, flujo, indicadores, isrTasa, desglose };
+  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose };
 }

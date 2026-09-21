@@ -34,7 +34,7 @@ function Resultados({ m }: { readonly m: EstadosModel }) {
         figure={ER.utilidadNeta}
         label="Utilidad neta"
       />
-      <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} />
+      <IsrNotice isrTasa={m.isrTasa} isr={ER.isr} regimenSat={m.regimenSat} />
       <Waterfall er={ER} />
       <Statement title="Estado de Resultados (NIF B-3)" lines={resultadosLines(ER, m.desglose)} />
       <Donuts desglose={m.desglose} />

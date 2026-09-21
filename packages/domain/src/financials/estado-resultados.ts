@@ -16,6 +16,8 @@
  */
 
 import type { Expense } from '../entities/expense.js';
+
+import { calcularIsrPorRegimen } from './isr-regimen.js';
 import type { InventoryMovement } from '../entities/inventory-movement.js';
 import type { Sale } from '../entities/sale.js';
 import type { Money } from '../money/index.js';
@@ -44,8 +46,14 @@ export interface EstadoDeResultadosInput {
   egresos: readonly Expense[];
   /** Inventory movements with motivo 'Merma / daño'. Phase 7. */
   mermaMovements?: readonly InventoryMovement[];
-  /** ISR rate in basis points (3000 = 30%). */
+  /** ISR rate in basis points (3000 = 30%). The owner's rate, from Negocio. */
   isrTasa: number;
+  /** SAT régime code (ADR-089): 626 estimates on gross, 612 on the Art. 96
+   * tariff, anything else (or absent) uses `isrTasa` — the phone passes
+   * nothing, so it keeps today's behavior exactly. */
+  regimenSat?: string | null;
+  /** Months the period spans, for the SAT monthly tables. Default 1. */
+  mesesEnPeriodo?: number;
 }
 
 export function calculateEstadoDeResultados(input: EstadoDeResultadosInput): EstadoDeResultados {
@@ -68,7 +76,18 @@ export function calculateEstadoDeResultados(input: EstadoDeResultadosInput): Est
   const utilidadBruta = ingresos - costoDeVentas;
   const utilidadOperativa = utilidadBruta - merma - gastosOperativos;
 
-  const isr = calculateIsr(utilidadOperativa, isrTasa);
+  // A provided régime routes through the SAT tables (ADR-089); without one —
+  // the phone's case — the owner's rate on utilidad stands, as always.
+  const isr =
+    input.regimenSat === undefined
+      ? calculateIsr(utilidadOperativa, isrTasa)
+      : calcularIsrPorRegimen({
+          regimenSat: input.regimenSat,
+          ingresos,
+          utilidad: utilidadOperativa,
+          isrTasa,
+          meses: input.mesesEnPeriodo,
+        }).isr;
   const utilidadNeta = utilidadOperativa - isr;
 
   return {

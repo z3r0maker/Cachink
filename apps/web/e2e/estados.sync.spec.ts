@@ -8,7 +8,10 @@ import { asTenant, BIZ } from './sync-phone';
  * seeded tenant's ISR rate — and puts it back.
  */
 test.afterAll(async () => {
-  await asTenant(BIZ, (sql) => sql`UPDATE businesses SET isr_tasa = 125 WHERE id = ${BIZ}`);
+  await asTenant(
+    BIZ,
+    (sql) => sql`UPDATE businesses SET isr_tasa = 125, regimen_sat = '626' WHERE id = ${BIZ}`,
+  );
 });
 
 const main = (page: Page) => page.locator('main');
@@ -29,14 +32,26 @@ test('each period recomputes the statements from its own rows', async ({ page })
   await expect(main(page).getByText(/^Vendiste \$330\.00,/)).toBeVisible();
 });
 
-test("the ISR notice uses the owner's rate, and says when there is no utilidad", async ({
+test("the ISR notice follows the régime, and the owner's rate only for the rest", async ({
   page,
 }) => {
-  await asTenant(BIZ, (sql) => sql`UPDATE businesses SET isr_tasa = 3000 WHERE id = ${BIZ}`);
+  await asTenant(
+    BIZ,
+    (sql) => sql`UPDATE businesses SET isr_tasa = 3000, regimen_sat = '616' WHERE id = ${BIZ}`,
+  );
   await page.goto('/estados');
   await expect(main(page).getByText('ISR referencial (30%)')).toBeVisible();
   // May's gastos exceed its ventas in the seed: no utilidad, no estimate.
   await expect(main(page).getByText(/no hubo utilidad, así que no hay ISR estimado/)).toBeVisible();
+  await expect(main(page).getByText(/consulta a tu contador/)).toBeVisible();
+});
+
+test('the seeded RESICO estimates on gross income — even in a loss month', async ({ page }) => {
+  await page.goto('/estados');
+  await expect(main(page).getByText('ISR referencial (RESICO, sobre tus ingresos)')).toBeVisible();
+  await expect(main(page).getByText(/tablas publicadas del SAT/)).toBeVisible();
+  // May's $645.00 of ventas at 1.00%: the ISR line itself.
+  await expect(main(page).getByText('$6.45')).toBeVisible();
 });
 
 test('an expandable line lists what it is made of, largest first', async ({ page }) => {
