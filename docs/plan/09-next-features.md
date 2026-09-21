@@ -505,9 +505,24 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 
 ### N-20 Receipt templates `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** N-19, app design (N-24) · **waiting on the owner to land the four
-      template designs in the Claude Design project and mirror them to `design-reference/` (ADR-086
-      keeps receipts design-first)**
+- [x] Status · **Blocked by:** N-19, app design (N-24) · **designs mirrored 2026-09-20**
+- Progress: 2026-09-20 · `track-n/n20-comprobantes` · **Done (pg/web halves).** The four
+  templates live in `packages/domain/src/comprobante/svg/` as one SVG renderer
+  per template behind `comprobanteSvg` (ADR-087): the `Comprobante` contract
+  transcribed from `design-reference/comprobantes/*.dc.html` (artboards A/B/C
+  - spec sheets), character-count wrapping, the 0.45-luminance contrast rule
+    as one decision per receipt, per-template paper for print. PNG via sharp
+    (1080 px WhatsApp; fonts vendored OFL — fontconfig conf generated at render
+    time on Linux, `scripts/fuentes-comprobantes.sh` for macOS dev), PDF via
+    `buildComprobantePdf` (application, page-of-raster, the informe pattern).
+    Portal: live preview on `/negocio/comprobantes` through
+    `/api/comprobantes/muestra` (branding over the business's last venta, or a
+    demo one) with PNG/PDF downloads; per-venta salida at
+    `/api/comprobantes/<ticketId>?formato=` (N-21's WhatsApp link target).
+    Tests: 12 artboard snapshots + contrast/truncation/format/no-fiscal units
+    (domain 51), full web e2e 551 green. **Inferred:** Tarjeta pill
+    `#FFF8E1`; **waiting:** the direccion block until an address field exists.
+    The phone renders from the same domain SVG (app branch).
 - **What:** four designed templates — Clásico, Moderno, Ticket, Minimal — in
   `packages/domain/src/comprobante/` (one renderer, used by the portal live preview and the app).
   Fields: logo, colour, leyenda, dirección, WhatsApp, redes. PNG and PDF.

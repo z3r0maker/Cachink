@@ -19,5 +19,6 @@ export * from './opening-balances.js';
 export * from './estados-facts.js';
 export * from './device-last-seen.js';
 export * from './assisted-imports.js';
+export * from './comprobante.js';
 export * from './assisted-imports-files.js';
 export * from './assisted-imports-resolution.js';
