@@ -52,11 +52,11 @@
 
 ### 1.4 Coordination
 
-| #    | Action                                                                                                                                                                                                 | Unblocks                                             |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| O-20 | Get the owner of the **app branch** `rename/xangarro-stored-ids` (A-01…A-18, local only, behind `main`) to push it and merge `main` into it                                                            | N-21, N-22, N-24, N-25, N-29, N-32 fixes, C-12, N-04 |
-| O-21 | Clean the untracked `apps/portal/` leftover folder in the shared checkout (build outputs + `tsconfig.operador.tmp.tsbuildinfo`, `public/__design`, `public/__cmp.txt` — likely the Operador session's) | a clean `git status`                                 |
-| O-22 | Staging (X-01) before the first paying customer                                                                                                                                                        | N-28, N-30, audit re-runs                            |
+| #    | Action                                                                                                                                                                                                 | Unblocks                  |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
+| O-20 | **Done 2026-09-19 (verified):** `rename/xangarro-stored-ids` is fully merged into `main` — the "local only" note was stale. Track N's §2.2 list and the `empleado_id` work are unblocked.              | —                         |
+| O-21 | Clean the untracked `apps/portal/` leftover folder in the shared checkout (build outputs + `tsconfig.operador.tmp.tsbuildinfo`, `public/__design`, `public/__cmp.txt` — likely the Operador session's) | a clean `git status`      |
+| O-22 | Staging (X-01) before the first paying customer                                                                                                                                                        | N-28, N-30, audit re-runs |
 
 ---
 
@@ -88,7 +88,7 @@
 | O-23 | Mirror the Claude Design project into `design-reference/` (P-18) — at least **«Acceso y onboarding»**; today only `operador/` is mirrored. Needs the design MCP authorisation, which a repo script does not have.                        | P-02 four-scene login animation, P-32 WhatsApp dialog copy, P-21    |
 | O-24 | **Done 2026-09-19 (ADR-087):** `auth.users.nombre`, migration 0020; signup collects an optional «Tu nombre».                                                                                                                             | —                                                                   |
 | O-25 | Add to the contador questions (O-14): **ISR by régimen** — the statements apply `isr_tasa` to utilidad operativa, but RESICO (626) is levied on gross income. Which base per régimen, and should the portal estimate at all for 612/601? | a régimen-aware ISR (finding F-2 in `13-…`)                         |
-| O-26 | Agree with the app-branch owner (Track A): `empleado_id` on `expenses` (payroll payments), and making «Tipos de pago» read-only on the phone like the flags (ADR-080) since the portal now owns it.                                      | P-12 employee drawer; one source of truth for payment methods (F-3) |
+| O-26 | **Approved 2026-09-19 (owner):** `empleado_id` on `expenses` + phone's «Tipos de pago» read-only — implementing.                                                                                                                         | P-12 employee drawer; one source of truth for payment methods (F-3) |
 
 ### 3.2 Deferred by decision
 
