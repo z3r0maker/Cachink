@@ -1131,7 +1131,17 @@ never invented text.
 
 ### P-30 Asesor generation runtime
 
-- [ ] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
+- [~] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
+  - 2026-09-21 · **The model boundary landed** — the single module ADR-056 requires
+    (`server/asesor/model.ts`): env-gated, unset → null → fixtures (CI/fresh clones/
+    pre-credential production unchanged), set → an Anthropic SDK client pointed at
+    whichever gateway owns the credential. 5 unit tests (null path, half-credential,
+    live construction, model-id default + override). **Verified live** through the
+    owner's local proxy: seeded-figure prose from `claude-opus-4-6` (ADR-056 names
+    opus-5; `ASESOR_LLM_MODEL` bridges until the gateway catches up). Azure AI Foundry
+    credentials for Vercel will land in the same two env vars — the owner is obtaining
+    them. **Still open:** the cron entry, the one-business-per-invocation route, the
+    deterministic-then-model ordering, prompt caching, the batch API.
 - **Context:** ADR-056.
 - **Steps:** A route handler in `apps/web` invoked by **Vercel Cron** declared in the same
   `vercel.json` as P-01, in `iad1`. **One business per invocation** — the cron entry enqueues, it
