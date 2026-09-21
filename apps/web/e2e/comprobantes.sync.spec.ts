@@ -62,3 +62,31 @@ test('a viewer reads the fields without controls', async ({ browser }) => {
   await expect(page.getByText('Subir logo')).toHaveCount(0);
   await context.close();
 });
+
+test('the live preview follows the template and serves real files (N-20)', async ({ page }) => {
+  await page.goto('/negocio/comprobantes');
+  const previa = page.getByTestId('comprobante-preview-img');
+  await expect(previa).toBeVisible();
+
+  // The route behind it answers with a real PNG of the business's branding.
+  const src = await previa.getAttribute('src');
+  expect(src).toContain('plantilla=');
+  const png = await page.request.get(src as string);
+  expect(png.status()).toBe(200);
+  expect(png.headers()['content-type']).toBe('image/png');
+
+  // Choosing another template retargets the preview to it.
+  await page.getByRole('radio', { name: /Moderno/ }).click();
+  await expect(previa).toHaveAttribute('src', /plantilla=moderno/);
+
+  // And the PDF salida comes out of the same renderer.
+  const pdf = await page.request.get('/api/comprobantes/muestra?plantilla=moderno&formato=pdf');
+  expect(pdf.status()).toBe(200);
+  expect(pdf.headers()['content-type']).toBe('application/pdf');
+  const bytes = await pdf.body();
+  expect(bytes.length).toBeGreaterThan(1000);
+
+  // A made-up ticket gets 404, an authed stranger gets nothing either.
+  const fantasma = await page.request.get('/api/comprobantes/01NOEXISTE?formato=png');
+  expect(fantasma.status()).toBe(404);
+});

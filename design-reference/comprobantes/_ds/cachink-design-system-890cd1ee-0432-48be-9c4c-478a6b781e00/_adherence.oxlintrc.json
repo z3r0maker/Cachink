@@ -1,0 +1,190 @@
+{
+  "plugins": [
+    "react",
+    "import"
+  ],
+  "rules": {
+    "react/forbid-elements": [
+      "warn",
+      {
+        "forbid": []
+      }
+    ],
+    "no-restricted-imports": [
+      "warn",
+      {
+        "patterns": [
+          {
+            "group": [
+              "landing/**",
+              "packages/ui/src/**",
+              "packages/ui/src/components/BottomTabBar/**",
+              "packages/ui/src/components/Btn/**",
+              "packages/ui/src/components/Card/**",
+              "packages/ui/src/components/EmptyState/**",
+              "packages/ui/src/components/Gauge/**",
+              "packages/ui/src/components/Input/**",
+              "packages/ui/src/components/Kpi/**",
+              "packages/ui/src/components/SectionTitle/**",
+              "packages/ui/src/components/Tag/**",
+              "packages/ui/src/components/TopBar/**",
+              "tweaks-panel.jsx",
+              "ui_kits/cachink_mobile/**",
+              "ui_kits/cachink_mobile/components/**"
+            ],
+            "message": "Import design-system components from 'index.js', not component internals."
+          }
+        ]
+      }
+    ],
+    "no-restricted-syntax": [
+      "warn",
+      {
+        "selector": "Literal[value=/#[0-9a-fA-F]{3,8}\\b/]",
+        "message": "Raw hex color — use a design-system color token via var()."
+      },
+      {
+        "selector": "Literal[value=/\\b\\d+px\\b/]",
+        "message": "Raw px value — use a design-system spacing token via var()."
+      },
+      {
+        "selector": "Literal[value=/font-family\\s*:\\s*(?!['\\\"]?(?:Plus Jakarta Sans))/i]",
+        "message": "Font not provided by the design system. Available: Plus Jakarta Sans."
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/index.js"
+      ],
+      "rules": {
+        "no-restricted-imports": "off"
+      }
+    }
+  ],
+  "x-omelette": {
+    "components": {},
+    "tokens": [
+      "--bg",
+      "--black",
+      "--blue",
+      "--blue-soft",
+      "--border-thick",
+      "--border-thin",
+      "--fg-1",
+      "--fg-2",
+      "--fg-faint",
+      "--fg-muted",
+      "--font-sans",
+      "--fw-black",
+      "--fw-bold",
+      "--fw-medium",
+      "--fw-regular",
+      "--fw-semi",
+      "--fw-xbold",
+      "--gray-100",
+      "--gray-200",
+      "--gray-400",
+      "--gray-600",
+      "--green",
+      "--green-soft",
+      "--ink",
+      "--offwhite",
+      "--press-duration",
+      "--press-ease",
+      "--press-shift",
+      "--r-10",
+      "--r-12",
+      "--r-14",
+      "--r-16",
+      "--r-18",
+      "--r-20",
+      "--r-22",
+      "--r-8",
+      "--red",
+      "--red-soft",
+      "--shadow-card",
+      "--shadow-hero",
+      "--shadow-pressed",
+      "--shadow-sm",
+      "--surface",
+      "--surface-hero",
+      "--tracking-normal",
+      "--tracking-tight",
+      "--tracking-tighter",
+      "--tracking-tightest",
+      "--tracking-wide",
+      "--tracking-wider",
+      "--tracking-widest",
+      "--warning",
+      "--warning-soft",
+      "--white",
+      "--yellow",
+      "--yellow-deep",
+      "--yellow-soft"
+    ],
+    "tokenKinds": {
+      "--yellow": "color",
+      "--yellow-deep": "color",
+      "--yellow-soft": "color",
+      "--black": "color",
+      "--ink": "color",
+      "--white": "color",
+      "--offwhite": "color",
+      "--gray-100": "color",
+      "--gray-200": "color",
+      "--gray-400": "color",
+      "--gray-600": "color",
+      "--green": "color",
+      "--green-soft": "color",
+      "--red": "color",
+      "--red-soft": "color",
+      "--blue": "color",
+      "--blue-soft": "color",
+      "--warning": "color",
+      "--warning-soft": "color",
+      "--fg-1": "color",
+      "--fg-2": "color",
+      "--fg-muted": "color",
+      "--fg-faint": "color",
+      "--bg": "color",
+      "--surface": "color",
+      "--surface-hero": "color",
+      "--font-sans": "font",
+      "--fw-regular": "other",
+      "--fw-medium": "other",
+      "--fw-semi": "other",
+      "--fw-bold": "other",
+      "--fw-xbold": "other",
+      "--fw-black": "other",
+      "--tracking-tightest": "font",
+      "--tracking-tighter": "font",
+      "--tracking-tight": "font",
+      "--tracking-normal": "font",
+      "--tracking-wide": "font",
+      "--tracking-wider": "font",
+      "--tracking-widest": "font",
+      "--r-8": "spacing",
+      "--r-10": "spacing",
+      "--r-12": "spacing",
+      "--r-14": "spacing",
+      "--r-16": "spacing",
+      "--r-18": "spacing",
+      "--r-20": "spacing",
+      "--r-22": "spacing",
+      "--border-thin": "color",
+      "--border-thick": "color",
+      "--shadow-sm": "shadow",
+      "--shadow-card": "shadow",
+      "--shadow-hero": "shadow",
+      "--shadow-pressed": "shadow",
+      "--press-duration": "other",
+      "--press-ease": "other",
+      "--press-shift": "spacing"
+    },
+    "fontFamilies": [
+      "Plus Jakarta Sans"
+    ]
+  }
+}

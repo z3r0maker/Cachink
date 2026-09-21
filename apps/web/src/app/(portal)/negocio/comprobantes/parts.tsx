@@ -14,9 +14,9 @@ import { ColorRow, LogoCard } from './brand-widgets';
 import { pageSubtitle, pageTitle } from '../negocio.css';
 
 /**
- * Negocio → Comprobantes (N-19): logo, brand colour and the receipt fields
- * (C-15). The template picker will drive N-20's live preview; today it
- * stores the choice.
+ * Negocio → Comprobantes (N-19/N-20): logo, brand colour, the receipt
+ * fields (C-15) and the live preview of the chosen template, rendered by
+ * the domain renderer through the muestra route.
  */
 
 const TEMPLATES: readonly OptionDef[] = [
@@ -35,6 +35,42 @@ export interface ComprobantesView {
 }
 
 type Set<K extends keyof ComprobantesForm> = (key: K, value: ComprobantesForm[K]) => void;
+
+type Plantilla = ComprobantesForm['receiptTemplate'];
+
+/**
+ * The live preview (N-20): the saved branding over the business's last
+ * venta, rendered by the same domain SVG the share PNG uses. The version
+ * bumps on save and on logo upload, which is exactly when the bytes change.
+ */
+function VistaPrevia({
+  plantilla,
+  version,
+}: {
+  readonly plantilla: Plantilla;
+  readonly version: number;
+}) {
+  const base = `/api/comprobantes/muestra?plantilla=${plantilla}`;
+  return (
+    <section data-testid="comprobante-vista-previa" style={{ margin: '24px 0 8px' }}>
+      <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px' }}>Así se ve</h2>
+      <img
+        data-testid="comprobante-preview-img"
+        src={`${base}&formato=png&v=${version}`}
+        alt="Vista previa del comprobante"
+        style={{ maxWidth: 380, width: '100%', border: '2px solid var(--black)', display: 'block' }}
+      />
+      <p style={{ display: 'flex', gap: 18, margin: '10px 0 0' }}>
+        <a href={`${base}&formato=png&v=${version}`} download>
+          Descargar PNG
+        </a>
+        <a href={`${base}&formato=pdf&v=${version}`} download>
+          Descargar PDF
+        </a>
+      </p>
+    </section>
+  );
+}
 
 /** The receipt fields below the template picker (C-15's columns). */
 function Campos({
@@ -80,6 +116,7 @@ function useComprobantes(view: ComprobantesView) {
   const [form, setForm] = useState<ComprobantesForm>(view.form);
   const [logoUrl, setLogoUrl] = useState<string | null>(view.logoUrl);
   const [banner, setBanner] = useState<{ tone: 'success' | 'critical'; text: string } | null>(null);
+  const [version, setVersion] = useState(0);
   const [pending, start] = useTransition();
   const [subiendo, startSubida] = useTransition();
 
@@ -91,8 +128,10 @@ function useComprobantes(view: ComprobantesView) {
   const guardar = () =>
     start(async () => {
       const r = await guardarComprobantes(form);
-      if (r.ok) ok('Guardado.');
-      else mal(r.message);
+      if (r.ok) {
+        ok('Guardado.');
+        setVersion((v) => v + 1);
+      } else mal(r.message);
     });
 
   const subir = (file: File | null) => {
@@ -103,6 +142,7 @@ function useComprobantes(view: ComprobantesView) {
       const r = await subirLogo(data);
       if (!r.ok) return mal(r.message);
       ok('Logo guardado.');
+      setVersion((v) => v + 1);
       if (r.brandColor !== null) set('brandColor', r.brandColor);
       // The bytes changed under the same URL; the version keeps the <img>
       // honest until the ETag takes over.
@@ -110,11 +150,12 @@ function useComprobantes(view: ComprobantesView) {
     });
   };
 
-  return { form, logoUrl, banner, pending, subiendo, set, guardar, subir };
+  return { form, logoUrl, banner, version, pending, subiendo, set, guardar, subir };
 }
 
 export function ComprobantesScreen(view: ComprobantesView) {
-  const { form, logoUrl, banner, pending, subiendo, set, guardar, subir } = useComprobantes(view);
+  const { form, logoUrl, banner, version, pending, subiendo, set, guardar, subir } =
+    useComprobantes(view);
 
   return (
     <>
@@ -131,6 +172,8 @@ export function ComprobantesScreen(view: ComprobantesView) {
         value={form.receiptTemplate}
         onValueChange={(v) => set('receiptTemplate', v as ComprobantesForm['receiptTemplate'])}
       />
+
+      <VistaPrevia plantilla={form.receiptTemplate} version={version} />
 
       <Campos form={form} mayWrite={view.mayWrite} set={set} />
 

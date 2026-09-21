@@ -5914,3 +5914,53 @@ budget O-7 has not confirmed, for content that needs no scheduler.
 - A page load may write rows (upserts of a handful of notices) — an acceptable side effect of a
   read path, and the reason the seed's `/asesor` visits in e2e are covered by the routes sweep.
 - «Próximamente» still gates only the model-backed Diagnóstico/catálogo paths (ADR-059).
+
+---
+
+## ADR-087
+
+**Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
+
+### One SVG renderer for the receipt templates; PDF is a page of that raster
+
+#### Context
+
+N-20 needs four receipt templates (Clásico, Moderno, Ticket, Minimal) rendered as
+the WhatsApp PNG (1080 px) and as print PDFs (media carta / 58 mm roll / A6),
+from one `Comprobante` contract, for the portal live preview now and the phone
+later. The obvious split — an HTML/CSS layout rasterized for PNG plus a
+`@react-pdf/renderer` tree for PDF — would maintain every template twice, and
+the two outputs would drift.
+
+#### Decision
+
+1. **The layout lives once, in the domain, as SVG** (`domain/src/comprobante/svg/`):
+   pure string builders with no DOM, no measurement — the fichas size by
+   character counts («24 px si pasa de 24 caracteres»), so wrapping and
+   truncation are count-based and deterministic. Snapshots (12 artboards) are
+   the transcription contract.
+2. **Contrast is one function**: relative luminance > 0.45 → `#0D0D0D`, else
+   `#FFFFFF`, decided once per comprobante and applied to every tinted block.
+3. **PNG**: the web rasterizes the SVG with sharp at the target widths. Fonts
+   are vendored OFL TTFs (Plus Jakarta Sans 400–800, JetBrains Mono 400–700);
+   Linux resolves them through a fontconfig conf generated at render time
+   (absolute paths — fontconfig resolves relative `<dir>` against the CWD);
+   darwin rasterizes through CoreText, so dev machines install the same files
+   via `apps/web/scripts/fuentes-comprobantes.sh`.
+4. **PDF is the raster on paper**: `buildComprobantePdf` (application, the
+   informe's Blob pattern) wraps the print-destination PNG in one
+   `@react-pdf/renderer` page sized to the template's paper. One layout, two
+   salidas; the phone can reuse both halves as-is.
+5. Two destinations differ only in scaffold: `whatsapp` floats the card on the
+   off-white with its hard shadow; `impresion` fills the page flat and pads
+   Clásico/Moderno to the media-carta proportion.
+
+#### Consequences
+
+- A design change is one SVG edit; both outputs move together.
+- The PDF is a high-density raster (1500 px wide), not vector text — accepted
+  for receipts; the informe keeps its native-text PDF.
+- `Tarjeta`'s pill colour (`#FFF8E1`, warning-soft) is the single inferred
+  value in the transcription (no artboard shows it).
+- The `direccion` block renders only when an address source exists; C-15's
+  `address_print` is stored but nothing feeds it yet.
