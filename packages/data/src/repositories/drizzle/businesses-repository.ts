@@ -87,6 +87,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       receiptLeyenda: _rl,
       addressPrint: _ap,
       whatsapp: _wa,
+      direccion: _di,
       socialLinks: _sl,
       ...rest
     } = patch;
@@ -130,6 +131,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       receiptLeyenda: null,
       addressPrint: false,
       whatsapp: null,
+      direccion: null,
       socialLinks: '{}',
       tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
       categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ??

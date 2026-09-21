@@ -85,6 +85,7 @@ const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
     'receipt_template',
     'receipt_leyenda',
     'address_print',
+    'direccion',
     'whatsapp',
     'social_links',
   ],

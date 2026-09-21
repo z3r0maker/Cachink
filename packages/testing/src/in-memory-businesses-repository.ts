@@ -12,13 +12,20 @@ function brandDefaults(
   input: NewBusiness,
 ): Pick<
   Business,
-  'brandColor' | 'receiptTemplate' | 'receiptLeyenda' | 'addressPrint' | 'whatsapp' | 'socialLinks'
+  | 'brandColor'
+  | 'receiptTemplate'
+  | 'receiptLeyenda'
+  | 'addressPrint'
+  | 'direccion'
+  | 'whatsapp'
+  | 'socialLinks'
 > {
   return {
     brandColor: input.brandColor ?? null,
     receiptTemplate: input.receiptTemplate ?? 'clasico',
     receiptLeyenda: input.receiptLeyenda ?? null,
     addressPrint: input.addressPrint ?? false,
+    direccion: input.direccion ?? null,
     whatsapp: input.whatsapp ?? null,
     socialLinks: input.socialLinks ?? '{}',
   };

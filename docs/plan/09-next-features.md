@@ -521,8 +521,14 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
     `/api/comprobantes/<ticketId>?formato=` (N-21's WhatsApp link target).
     Tests: 12 artboard snapshots + contrast/truncation/format/no-fiscal units
     (domain 51), full web e2e 551 green. **Inferred:** Tarjeta pill
-    `#FFF8E1`; **waiting:** the direccion block until an address field exists.
-    The phone renders from the same domain SVG (app branch).
+    `#FFF8E1`. The phone renders from the same domain SVG (app branch).
+- Progress: 2026-09-20 · `track-n/c15-direccion` · **the direccion block
+  lives** — data-pg **0028** adds `businesses.direccion` (one free line, ≤
+  140, cloud-ahead in the drift contract until the app branch mirrors it);
+  the Comprobantes screen edits it above the `address_print` toggle, and
+  the renderers print it only when the toggle is on AND a line exists.
+  Old→new covered in `business-branding.integration.test.ts`; e2e rounds
+  the field through save + reload.
 - **What:** four designed templates — Clásico, Moderno, Ticket, Minimal — in
   `packages/domain/src/comprobante/` (one renderer, used by the portal live preview and the app).
   Fields: logo, colour, leyenda, dirección, WhatsApp, redes. PNG and PDF.

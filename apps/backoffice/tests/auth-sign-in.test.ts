@@ -32,10 +32,11 @@ describe('signIn', () => {
     assert.equal((await signIn(deps, { ...input, email: '  ANA@Xangarro.MX ' })).kind, 'ok');
   });
 
-  it('refuses a wrong password, opens nothing, and audits the failure', async () => {
+  it('refuses a wrong password with its reason, opens nothing, and audits the failure', async () => {
     const { deps, sessionRows, audit } = memoryAuth([await newStaff()]);
     assert.deepEqual(await signIn(deps, { ...input, password: 'otra-contraseña' }), {
       kind: 'failed',
+      reason: 'wrong-password',
     });
     assert.equal(sessionRows.size, 0);
     assert.deepEqual(audit, [
@@ -43,25 +44,38 @@ describe('signIn', () => {
     ]);
   });
 
-  it('answers an unknown address exactly like a wrong password', async () => {
+  it('refuses an unknown address as no-account, without auditing it', async () => {
     const { deps, audit } = memoryAuth([await newStaff()]);
     assert.deepEqual(await signIn(deps, { ...input, email: 'nadie@xangarro.mx' }), {
       kind: 'failed',
+      reason: 'no-account',
     });
     assert.equal(audit.length, 0);
   });
 
   it('refuses a revoked staff member and one with no password set yet', async () => {
-    for (const s of [await newStaff({ revoked: true }), await newStaff({ passwordHash: null })]) {
-      const { deps } = memoryAuth([s]);
-      assert.deepEqual(await signIn(deps, input), { kind: 'failed' });
-    }
+    const revoked = await signIn(
+      (await memoryAuth([await newStaff({ revoked: true })])).deps,
+      input,
+    );
+    const unset = await signIn(
+      (await memoryAuth([await newStaff({ passwordHash: null })])).deps,
+      input,
+    );
+    assert.deepEqual(revoked, { kind: 'failed', reason: 'no-account' });
+    assert.deepEqual(unset, { kind: 'failed', reason: 'no-password-set' });
   });
 
   it('refuses empty fields without touching the throttle', async () => {
     const { deps } = memoryAuth([await newStaff()]);
-    assert.deepEqual(await signIn(deps, { ...input, email: ' ' }), { kind: 'invalid' });
-    assert.deepEqual(await signIn(deps, { ...input, password: '' }), { kind: 'invalid' });
+    assert.deepEqual(await signIn(deps, { ...input, email: ' ' }), {
+      kind: 'invalid',
+      reason: 'empty-input',
+    });
+    assert.deepEqual(await signIn(deps, { ...input, password: '' }), {
+      kind: 'invalid',
+      reason: 'empty-input',
+    });
   });
 
   it('locks the address after five wrong passwords, even for the right one', async () => {

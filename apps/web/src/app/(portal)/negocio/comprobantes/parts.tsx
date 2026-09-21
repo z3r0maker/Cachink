@@ -98,6 +98,31 @@ function Campos({
         onChange={(e) => set('whatsapp', e.target.value)}
         placeholder="55 1234 5678"
       />
+      <DireccionYColor form={form} mayWrite={mayWrite} set={set} />
+    </div>
+  );
+}
+
+/** The address that prints (0028), its toggle, and the colour picker. */
+function DireccionYColor({
+  form,
+  mayWrite,
+  set,
+}: {
+  readonly form: ComprobantesForm;
+  readonly mayWrite: boolean;
+  readonly set: Set<keyof ComprobantesForm>;
+}) {
+  return (
+    <>
+      <Input
+        labelText="Dirección que se imprime"
+        value={form.direccion}
+        disabled={!mayWrite}
+        onChange={(e) => set('direccion', e.target.value)}
+        placeholder="Av. Hidalgo 214, Col. Centro · Guadalajara, Jal."
+        maxLength={140}
+      />
       <label style={{ display: 'flex', gap: 10, alignItems: 'center', fontWeight: 600 }}>
         <Switch
           checked={form.addressPrint}
@@ -108,7 +133,7 @@ function Campos({
         Imprimir la dirección
       </label>
       <ColorRow value={form.brandColor} disabled={!mayWrite} onPick={(v) => set('brandColor', v)} />
-    </div>
+    </>
   );
 }
 

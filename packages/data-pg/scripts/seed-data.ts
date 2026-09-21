@@ -198,6 +198,19 @@ export const VIEWER = {
 } as const;
 
 /**
+ * The Equipo Operativo login: an `admin`-role member who can work the
+ * business day to day but hits every owner-only gate (billing, archive).
+ */
+export const OPERADOR = {
+  id: '3f1c0e2a-0000-4000-8000-000000000003',
+  email: 'operador@taqueria.mx',
+  password: 'operador123',
+  nombre: 'Operador',
+  memberId: id('MEMB3'),
+  role: 'admin',
+} as const;
+
+/**
  * A second tenant, used only by the contract conformance suite.
  *
  * Conformance activates real devices, and Taquería Don Pedro is seeded at its

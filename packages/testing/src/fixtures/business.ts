@@ -19,6 +19,7 @@ export function makeNewBusiness(overrides: Partial<NewBusiness> = {}): NewBusine
     receiptTemplate: 'clasico',
     receiptLeyenda: null,
     addressPrint: false,
+    direccion: null,
     whatsapp: null,
     socialLinks: '{}',
     tipoNegocio: 'mixto',
