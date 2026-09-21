@@ -13,6 +13,7 @@
  */
 import { seedClients } from './seed-clients.js';
 import { seedDayClose, seedMovements } from './seed-extra.js';
+import { seedFinanzas } from './seed-finanzas.js';
 import { hash } from 'bcryptjs';
 import postgres from 'postgres';
 
@@ -232,6 +233,7 @@ async function main(): Promise<void> {
     await seedDayClose(sql);
     await seedPeople(sql);
     await seedPortal(sql);
+    await seedFinanzas(sql);
     await seedMembers(sql);
     await seedConformance(sql);
 
@@ -239,7 +241,7 @@ async function main(): Promise<void> {
     console.log(
       `seeded Taquería Don Pedro — ${count} ventas, ${PRODUCTS.length} productos, ` +
         `${USERS.length} operadores, ${EMPLOYEES.length} empleados, ${DEVICES.length} dispositivos, ` +
-        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos, 3 miembros`,
+        `${NOTICES.length} avisos, ${REJECTIONS.length} rechazos, 3 miembros, + apertura y ledger de 2 meses`,
     );
   } finally {
     await sql.end({ timeout: 5 });
