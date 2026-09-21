@@ -22,7 +22,7 @@ export const pagoRow = style({
   alignItems: 'center',
   gap: 12,
   padding: '10px 0',
-  borderBottom: `1px solid ${colors.gray100}`,
+  borderBottom: `2px solid ${colors.gray100}`,
 });
 
 export const pagoFecha = style({
