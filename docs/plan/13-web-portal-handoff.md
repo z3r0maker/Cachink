@@ -161,9 +161,10 @@ Azure AI Foundry credentials in the same two env vars.
    if Foundry, verify Batches + prompt caching first) — P-30's module is on
    main and live locally through the proxy; production stays «Próximamente».
 3. **Facturapi test keys** (O-15) — N-33's CFDI path is wired and idle.
-4. **The app-branch merge** (`rename/xangarro-stored-ids`) — the biggest
-   unblock: N-32 copy fixes, N-22 banners, N-21's phone half, N-25 QR,
-   N-24 phone screens, N-29 gate, phone halves of N-20/N-17, F-3/F-9 (Track A).
+4. ~~**The app-branch merge** (`rename/xangarro-stored-ids`)~~ — **done and
+   verified 2026-09-19 (O-20; `apps/mobile` is on main and typechecks).** Its
+   unblock list moved to "Engineering, workable now" below (Track N's
+   2026-09-21 addendum); F-3/F-9 remain Track A's to schedule.
 5. **N-28 venue** — where the perf audit runs (k6 not installed locally; the
    4G-LCP and low-end-Android targets need hosted + devices).
 6. **Legal counsel's texts** (N-34 aviso/ARCO) — nothing legal ships before.
@@ -185,8 +186,64 @@ Azure AI Foundry credentials in the same two env vars.
 3. F-8 `design-lint` failures and F-4's hard-coded dates (their tracks' owners).
 4. F-2 régimen-aware ISR — needs O-14 contador input first.
 
-**Blocked (merge or hosted):** phone halves and N-29 (item 4 above), P-11
-(B-08), launch gates N-26/N-27 hosted re-runs, N-30 closed beta, O-14 sign-off.
+**Blocked (merge or hosted):** P-11 (B-08), launch gates N-26/N-27 hosted
+re-runs, N-30 closed beta, O-14 sign-off. *(Phone halves and N-29 left this
+list — see the addendum below.)*
+
+**Track N addendum — 2026-09-21 (c12-n04-uso session), the phone-half board:**
+
+With the app branch merged, everything below is engineering-workable on
+`main` right now, in dependency order:
+
+1. **The keystone — C-15 branding columns' SQLite half.** Seven `businesses`
+   columns are cloud-ahead in the drift contract (`brand_color`,
+   `receipt_template`, `receipt_leyenda`, `address_print`, `direccion`,
+   `whatsapp`, `social_links`; plus `clients.rfc` and `caja_turnos`'s two).
+   The wire addresses columns by name, so a phone cannot even *receive* the
+   business's branding until these land (SQLite migration, both schemas,
+   wire). Mechanical; unlocks items 3 and 4.
+2. **N-17's half** — `opening_balances` + `opening_balance_clients` in
+   SQLite (`packages/data` migration + the device table map; the server wire
+   already lists both tables) and the phone's Estados calculators consuming
+   them. Independent of the keystone.
+3. **N-19's half** — the logo cache: on pull, when the logo's version
+   changes, download `/api/logos/<id>` (ETag = bytes' hash) and store the
+   bytes on-device for offline rendering.
+4. **N-21's half** — the phone share: `shareComprobanteAsImage` exists in
+   `packages/ui/src/share/` **unused and wired to the old Phase-1C HTML
+   path** — point it at the N-20 renderer (domain SVG → react-native-svg +
+   ViewShot; bundle Plus Jakarta Sans / JetBrains Mono via expo-font,
+   vendored in `apps/web/assets/comprobante-fonts`), template chosen from
+   the now-syncable branding. Android + known number → `ACTION_SEND` with
+   the WhatsApp `jid` extra (undocumented — auto-fallback to the sheet);
+   iOS or no number → the sheet with the PNG; secondary `wa.me` text path.
+5. **The app-queue** (`11-pre-launch-and-deferred.md` §6): N-32's 20
+   app-branch copy fixes → N-22 sync banners → N-25 QR pairing (C-14) →
+   N-24 phone screens on the Track O design → N-29 the full-stack e2e gate
+   (last — it proves the others).
+6. **Small, newly possible:** the wizard's parked answers (N-12–15) — the
+   `tipo_negocio`, WhatsApp and logo destinations all exist now.
+
+**Ledger debt and next-free numbers (2026-09-21 evening):** hosted is
+behind again — data-pg **0027–0029** (empleado_id, direccion, movimiento
+origen) apply locally only, SQLite **0011** likewise. Next free:
+data-pg **0030**, SQLite **0012**, admin **0015**, ADR **ADR-091**.
+
+**Cross-session e2e isolation now exists — use it.** Two agents' suites
+corrupted each other through the shared container/port on 2026-09-21
+(449-failure cascades, seeded-count drift). `db-local.sh` takes
+`XG_PG_NAME`/`XG_PG_PORT` and the web suite takes `E2E_PORT`
+(landed in 0b64fff7). Any session running e2e while another lives must
+spin its own stack (e.g. `XG_PG_NAME=xangarro-pg-mine XG_PG_PORT=55441
+E2E_PORT=3140`).
+
+**One upstream e2e hazard for whoever owns the run-date-anchored seed
+(c1efcea8):** under the suite's 9 parallel workers, ~21 specs fail in full
+runs and pass solo — a11y's seeded-text checks (`/` expects «Taco al
+pastor ×3»), chaos, the auth doors, operators — on a fully isolated
+stack, on pristine merged main (baseline-verified). Same family as §4's
+flakes; likely needs serialized workers or re-anchored expectations, and
+it will bite CI just as it bit this session.
 
 ---
 
