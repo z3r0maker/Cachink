@@ -137,6 +137,15 @@ Do not start these until the owner gets that branch pushed and merged with `main
 > observed). The backoffice Playwright suite exists and passes 7/7 after one
 > real fix: its `test:e2e` hardcoded a scheme-less `DATABASE_URL`
 > (`db-local.sh` now exports `admin-url`).
+>
+> Later the same evening: **the Stripe sandbox is wired end to end** —
+> `stripe:seed` created the `plan_*` prices + 16 % IVA rate, the webhook
+> destination at `app.xangarro.mx/api/stripe/webhook` carries the 7 handled
+> events, and the three `STRIPE_*` vars are set in Vercel. The one remaining
+> step is the owner's: redeploy so the vars are live, then _Send test event_
+> → 200 (F-7's walkthrough follows). The consolidated cross-track pending
+> list — owner items and engineering items — now lives in
+> `13-web-portal-handoff.md` §3.4.
 
 1. The home-screen flake above — root-cause when it repeats on hosted.
 2. N-28 performance audit: k6 (not installed locally) at 10× beta load against

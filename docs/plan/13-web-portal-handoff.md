@@ -137,6 +137,57 @@ LLM path (P-28/29/30's open half) is documented on P-30's Progress line in `04-p
 — the boundary is wired and live through the owner's local proxy; production waits on the
 Azure AI Foundry credentials in the same two env vars.
 
+### 3.4 Cross-track pending — consolidated 2026-09-21 (evening session)
+
+> Everything below is outside this file's P-track tables, recorded here once
+> so the next session of any track sees the whole board. Status after that
+> session: ADR-090's plan matrix (informe on Xangarro, advisory limits) and
+> N-23's offline page are landed and e2e-green; both seeded e2e suites run
+> (web 490-pass class, backoffice 7/7); **the Stripe sandbox is fully wired**
+> — catalog seeded (`stripe:seed`: `plan_*` prices + 16 % IVA), webhook
+> destination at `app.xangarro.mx/api/stripe/webhook` with the 7 handled
+> events, `STRIPE_SECRET_KEY`/`STRIPE_PUBLISHABLE_KEY`/`STRIPE_WEBHOOK_SECRET`
+> set in Vercel (2026-09-21), and a test Checkout Session proven against the
+> seeded price.
+
+**Owner-dependent (decisions/credentials, nothing for a session to build):**
+
+1. **Vercel redeploy + webhook smoke test** — env vars set 2026-09-21 reach
+   nothing until a redeploy. Then Stripe → destination → _Send test event_ →
+   expect 200; that unblocks F-7's test-mode walkthrough (signup → 14-day
+   trial → 4242 card → active Suscripción). Also set `METERING_DATABASE_URL`
+   in Vercel while there (F-6).
+2. **LLM production credential** (ADR-059: direct Anthropic key vs Foundry;
+   if Foundry, verify Batches + prompt caching first) — P-30's module is on
+   main and live locally through the proxy; production stays «Próximamente».
+3. **Facturapi test keys** (O-15) — N-33's CFDI path is wired and idle.
+4. **The app-branch merge** (`rename/xangarro-stored-ids`) — the biggest
+   unblock: N-32 copy fixes, N-22 banners, N-21's phone half, N-25 QR,
+   N-24 phone screens, N-29 gate, phone halves of N-20/N-17, F-3/F-9 (Track A).
+5. **N-28 venue** — where the perf audit runs (k6 not installed locally; the
+   4G-LCP and low-end-Android targets need hosted + devices).
+6. **Legal counsel's texts** (N-34 aviso/ARCO) — nothing legal ships before.
+7. **Parked growth decisions:** N-40 cobros go/no-go; premium add-ons
+   (one-shot Diagnóstico, «Cobranza por WhatsApp», tenant-facing CFDI reusing
+   the Facturapi wiring — ADR-090 §3 records the multi-emisor constraint).
+8. **Housekeeping:** optionally rotate the `sk_test_` key shared in chat
+   (Dashboard roll → update `.env.local` + Vercel; `stripe:seed` is
+   idempotent); Stripe **live** mode is its own reviewed task (B-10), never
+   a quiet flip. ~~Decide what `apps/portal/` is~~ — resolved by O-21's
+   cleanup (301dd6ec).
+
+**Engineering, workable now on main:**
+
+1. Home-screen empty-`main` flake (pre-existing upstream — baseline-verified
+   at `9ae75031` 2026-09-21; same family as the `comprobantes.sync` flake in
+   §4). Cheapest to root-cause where it reproduces on hosted.
+2. N-28 k6 scripts, once the venue is picked.
+3. F-8 `design-lint` failures and F-4's hard-coded dates (their tracks' owners).
+4. F-2 régimen-aware ISR — needs O-14 contador input first.
+
+**Blocked (merge or hosted):** phone halves and N-29 (item 4 above), P-11
+(B-08), launch gates N-26/N-27 hosted re-runs, N-30 closed beta, O-14 sign-off.
+
 ---
 
 ## 4. Findings (known issues, not yet fixed)
@@ -160,8 +211,8 @@ end-of-suite load. The portal session's P-02/P-32/P-21 tests are green in every 
 | F-3  | Phone still edits DOWN data: `packages/ui/src/screens/Settings/tipos-de-pago-screen.tsx` writes `enabledPaymentMethods` (the portal now owns it, P-08), and the phone's business form should write the régimen via `regimenPatch` (SAT code, ADR-082).                                                                                                                                                                                              | Track A: make tipos de pago read-only on the phone (as ADR-080 did for flags); switch the form to codes.                                              |
 | F-4  | Hard-coded May 2026 dates remain in **Track O** code: `src/operador/cobranza/cuentas.ts` (`HOY = '2026-05-14'`) and `src/app/inventario/sections-interactive.tsx` («Mayo 2026» chip).                                                                                                                                                                                                                                                               | Operador owner: use `server/clock.ts` `hoy()` and the domain period helpers.                                                                          |
 | F-5  | Sync «Historial» is derived from `sync_receipts`, which keeps only each row's **latest** push — re-sent rows move to their newest minute.                                                                                                                                                                                                                                                                                                           | Fine for recent activity; if an audit trail is wanted, persist per-push events (also serves Track N's N-07 p95).                                      |
-| F-6  | «Registros del mes» on Suscripción needs `METERING_DATABASE_URL`; without it (local e2e) it shows «—».                                                                                                                                                                                                                                                                                                                                              | Set it in Vercel (O-8); nothing to fix in code.                                                                                                       |
-| F-7  | Stripe buttons (Checkout / Customer Portal) are verified for presence and role only — no e2e hits Stripe.                                                                                                                                                                                                                                                                                                                                           | Owner test-mode run (O-12).                                                                                                                           |
+| F-6  | «Registros del mes» on Suscripción needs `METERING_DATABASE_URL`; without it (local e2e) it shows «—».                                                                                                                                                                                                                                                                                                                                              | Set it in Vercel (O-8) — the only billing-related var not in the 2026-09-21 env batch (S3.3 item 1); nothing to fix in code.                          |
+| F-7  | Stripe buttons (Checkout / Customer Portal) are verified for presence and role only — no e2e hits Stripe.                                                                                                                                                                                                                                                                                                                                           | Owner test-mode run (O-12) — unblocked 2026-09-21: sandbox wired end to end (S3.3); after the redeploy, walk signup -> trial -> 4242 card.            |
 | F-8  | `design-lint` fails on main from other sessions' code: `(portal)/cortes/screen.tsx:137` (34px literal, Track O), `components/states.css.ts:25` (radius 0), `apps/backoffice/src/styles/dialog.css.ts:13` (rgba).                                                                                                                                                                                                                                    | Owners fix or re-baseline with a justification.                                                                                                       |
 | F-9  | SQLite `DrizzleUsersRepository.update({ active })` throws by design until A-17 adds the column; `permissions` is now written on both sides.                                                                                                                                                                                                                                                                                                         | Track A (A-17).                                                                                                                                       |
 | F-10 | E2E helpers still insert into `auth.users` as the app role (local compat grants). Fine locally; they would fail against hosted.                                                                                                                                                                                                                                                                                                                     | If e2e ever runs against the hosted test project, create users through `xangarro.account_create`.                                                     |
@@ -170,10 +221,16 @@ end-of-suite load. The portal session's P-02/P-32/P-21 tests are green in every 
 
 ## 5. Suggested order
 
-1. F-1 (statements' Balance/Flujo inputs) — correctness of the core financial screen.
-2. P-13 leftovers (checklist, «Ver productos», greeting decision) and P-34 informe mensual PDF.
-3. P-14 waterfall/donuts.
-4. P-26 → P-27 → P-33 Asesor persistence and actions (no LLM needed).
-5. P-17 named smoke flow; P-23 Storybook + baselines.
-6. When the owner mirrors the design (O-23): P-02 animation, P-32 WhatsApp dialog, P-21.
-7. With Track A: `empleado_id` (P-12 drawer), F-3, C-15 columns (P-08 Contacto + N-19).
+> Refreshed 2026-09-21 (evening): the 2026-09-19 order below is historical —
+> §3.1 marks F-1, P-13, P-34, P-14 and P-26/27/33 done. The live order is
+> §3.4's: owner does §3.4 items 1–3 (redeploy+smoke test, LLM credential,
+> Facturapi keys); sessions take §3.4 "Engineering, workable now" in that
+> order, with the app-branch merge (§3.4 item 4) as the big unlock.
+
+1. ~~F-1 (statements' Balance/Flujo inputs) — correctness of the core financial screen.~~ (done 2026-09-19)
+2. ~~P-13 leftovers (checklist, «Ver productos», greeting decision) and P-34 informe mensual PDF.~~ (done 2026-09-19; greeting decision open — see §3.1's P-13 row)
+3. ~~P-14 waterfall/donuts.~~ (done 2026-09-19, provisional until O-23's `design:compare`)
+4. ~~P-26 → P-27 → P-33 Asesor persistence and actions (no LLM needed).~~ (done 2026-09-19)
+5. P-17 named smoke flow; P-23 remaining harness pieces (`design:compare` waits on O-23).
+6. ~~When the owner mirrors the design (O-23): P-02 animation, P-32 WhatsApp dialog, P-21.~~ (mirror done 2026-09-20; P-02 and P-21 done 2026-09-21; P-32's copy mirror remains)
+7. With Track A: `empleado_id` done (pg 0027, 2026-09-20); F-3, and C-15 columns (P-08 Contacto + N-19) remain.
