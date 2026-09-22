@@ -52,11 +52,11 @@
 
 ### 1.4 Coordination
 
-| #    | Action                                                                                                                                                                                                 | Unblocks                  |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------- |
-| O-20 | **Done 2026-09-19 (verified):** `rename/xangarro-stored-ids` is fully merged into `main` — the "local only" note was stale. Track N's §2.2 list and the `empleado_id` work are unblocked.              | —                         |
-| O-21 | Clean the untracked `apps/portal/` leftover folder in the shared checkout (build outputs + `tsconfig.operador.tmp.tsbuildinfo`, `public/__design`, `public/__cmp.txt` — likely the Operador session's) | a clean `git status`      |
-| O-22 | Staging (X-01) before the first paying customer                                                                                                                                                        | N-28, N-30, audit re-runs |
+| #    | Action                                                                                                                                                                                                                                                                                                                                                                                               | Unblocks                  |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| O-20 | **Done 2026-09-19 (verified):** `rename/xangarro-stored-ids` is fully merged into `main` — the "local only" note was stale. Track N's §2.2 list and the `empleado_id` work are unblocked.                                                                                                                                                                                                            | —                         |
+| O-21 | **Done 2026-09-21 (owner requested):** deleted `apps/portal/` (2.1 GB — `.next/`, `node_modules/`, tsbuildinfo, e2e auth; zero source files) and `apps/admin/` (312 KB — turbo logs, vitest cache; the pre-backoffice rename's equivalent leftover). Verified: untracked-only, no running processes, pure regenerable build output. `apps/` now holds exactly `backoffice · landing · mobile · web`. | —                         |
+| O-22 | Staging (X-01) before the first paying customer                                                                                                                                                                                                                                                                                                                                                      | N-28, N-30, audit re-runs |
 
 ---
 
