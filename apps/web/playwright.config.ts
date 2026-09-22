@@ -87,6 +87,11 @@ export default defineConfig({
       // in its own step and is alone on the runner.
       ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
       DATABASE_URL: databaseUrl(),
+      // The throwaway database's owner, for test-only resets (the throttle
+      // table's grants are function-only by design; the backoffice suite
+      // uses the same pattern).
+      DATABASE_SUPER_URL:
+        process.env.DATABASE_SUPER_URL ?? 'postgres://postgres:xangarro@localhost:55432/xangarro',
       // The seed's day (seed-data.ts `TODAY`): its May rows are "this month".
       PORTAL_TODAY: process.env.PORTAL_TODAY ?? '2026-05-12',
       // /activate signs a device token and an entitlement. The entitlement key
@@ -112,7 +117,7 @@ export default defineConfig({
     {
       name: 'desktop',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
@@ -123,7 +128,7 @@ export default defineConfig({
     {
       name: 'laptop',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 800 },
@@ -133,7 +138,7 @@ export default defineConfig({
     {
       name: 'tablet',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
@@ -143,9 +148,25 @@ export default defineConfig({
     // Phones pushing and pulling against the demo business. Last, after every
     // viewport, so activating phones and rewriting Taquería's rows cannot race
     // the specs that read them — devices.spec above all, which counts slots.
+    // O-38: the operator screens behind the real door. Serial like `sync`
+    // because each file's activation takes one of the two device slots; the
+    // fixture-era branch specs still run in the viewport projects behind the
+    // demo flag until each is converted here, and the flag dies with the
+    // last of them.
+    {
+      name: 'operador',
+      dependencies: ['setup'],
+      testMatch: /operador-shell\.spec\.ts|operador-inicio\.spec\.ts/,
+      workers: 1,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        storageState: OWNER_STORAGE,
+      },
+    },
     {
       name: 'sync',
-      dependencies: ['desktop', 'laptop', 'tablet'],
+      dependencies: ['operador', 'desktop', 'laptop', 'tablet'],
       testMatch: /sync\.spec\.ts/,
       // One file at a time: each activates phones on Taquería, which has two
       // device slots, and revokes the previous file's.

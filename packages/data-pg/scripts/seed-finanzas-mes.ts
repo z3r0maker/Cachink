@@ -27,6 +27,9 @@ const METODOS = [
 ] as const;
 
 /** Products a customer buys — `[id, nombre, sku, costo, precio, …]`, precio > 0. */
+let MOV_SEQ = 1;
+let MW_SEQ = 1;
+
 const VENDIBLES = PRODUCTS.filter((p) => Number(p[4]) > 0);
 
 const nominaQuincenal = Math.round(EMPLOYEES.reduce((t, e) => t + Number(e[3]), 0) / 2);
@@ -125,7 +128,7 @@ async function seedTicket(
   });
   await movimiento(
     sql,
-    `FINMS${tag}${st.folio}`,
+    `FM${String(MOV_SEQ++).padStart(3, '0')}`,
     p[0],
     fecha,
     'salida',
@@ -187,7 +190,7 @@ async function seedEgresosMes(sql: Sql, tag: string, days: readonly string[]): P
   // One merma a month: inventory that left without pleasing anyone.
   await movimiento(
     sql,
-    `FINMM${tag}`,
+    `FMW${String(MW_SEQ++).padStart(2, '0')}`,
     PRODUCTS[0][0],
     dia(12),
     'salida',

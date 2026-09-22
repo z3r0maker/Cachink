@@ -10,7 +10,7 @@ import { asTenant, BIZ } from './sync-phone';
 
 const EMAIL = 'pedro@taqueria.mx';
 
-export async function mintCode(code: string): Promise<void> {
+export async function mintCode(code: string): Promise<string> {
   await asTenant(BIZ, async (sql) => {
     // The sync project's contract: this file's activation owns Taquería's
     // slots — revoke the previous file's phones before minting.
@@ -20,6 +20,7 @@ export async function mintCode(code: string): Promise<void> {
       INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
       VALUES (${code}, ${EMAIL}, now() + interval '1 hour', ${BIZ}, now(), now())`;
   });
+  return code;
 }
 
 export async function pasarAcceso(

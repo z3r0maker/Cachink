@@ -25,7 +25,7 @@ export async function marcarAclarado(turnoId: string): Promise<CorteAccionResult
     await withTenant(session.business_id, async (tx) => {
       await tx
         .update(cajaTurnos)
-        .set({ aclaradoAt: new Date().toISOString(), aclaradoPor: session.sub })
+        .set({ aclaradoAt: new Date().toISOString(), aclaradoPor: 'portal' })
         .where(and(eq(cajaTurnos.id, turnoId as CajaTurnoId), isNull(cajaTurnos.aclaradoAt)));
     });
     revalidatePath('/cortes');
@@ -61,7 +61,7 @@ export async function pedirAclaracion(turnoId: string, cuerpo: string): Promise<
         cuerpo: texto,
         businessId: session.business_id,
         deviceId: PORTAL_DEVICE_ID,
-        createdByUserId: session.sub,
+        createdByUserId: null,
         createdAt: now,
         updatedAt: now,
         deletedAt: null,

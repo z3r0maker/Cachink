@@ -11,7 +11,7 @@ import { BIZ, CREATED, DEV, id, TODAY, TS } from './seed-data.js';
 
 export async function seedRevision(sql: Sql): Promise<void> {
   const pendientes: readonly [string, string, number][] = [
-    [id('RVMIC'), 'Michelada preparada', 75_00],
+    [id('RVM3Q'), 'Michelada preparada', 75_00],
     [id('RVREF'), 'Refresco', 25_00],
   ];
   for (const [pid, nombre, precio] of pendientes) {
@@ -44,7 +44,7 @@ async function seedVentasMichelada(sql: Sql): Promise<void> {
       INSERT INTO sales (id, ticket_id, fecha, concepto, categoria, monto_centavos,
                          producto_id, cantidad, business_id, device_id, created_at, updated_at)
       VALUES (${sid}, ${id('RVTIK')}, ${TODAY}, 'Michelada preparada', 'Producto', ${75_00},
-              ${id('RVMIC')}, ${cantidad}, ${BIZ}, ${DEV}, ${TS(TODAY)}, ${TS(TODAY)})
+              ${id('RVM3Q')}, ${cantidad}, ${BIZ}, ${DEV}, ${TS(TODAY)}, ${TS(TODAY)})
       ON CONFLICT (id) DO NOTHING`;
   }
 }

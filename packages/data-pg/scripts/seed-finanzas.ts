@@ -47,23 +47,23 @@ async function seedApertura(sql: Sql, anchor: Date): Promise<void> {
   await sql`
     INSERT INTO opening_balances (id, fecha_apertura, caja_centavos, bancos_centavos,
                                   business_id, device_id, created_at, updated_at)
-    VALUES (${id('FINAPERT')}, ${fecha}, ${peso(3500)}, ${peso(12000)},
+    VALUES (${id('FZB01')}, ${fecha}, ${peso(3500)}, ${peso(12000)},
             ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
     ON CONFLICT (id) DO NOTHING`;
   for (const [i, cliente] of CLIENTS.entries()) {
     await sql`
       INSERT INTO opening_balance_clients (id, cliente_id, saldo_centavos,
                                            business_id, device_id, created_at, updated_at)
-      VALUES (${id(`FINAPC${i}`)}, ${cliente[0]}, ${peso(400 + i * 150)},
+      VALUES (${id(`FPC${String(i).padStart(2, '0')}`)}, ${cliente[0]}, ${peso(400 + i * 150)},
               ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
   }
-  for (const [productoId] of PRODUCTS) {
+  for (const [j, [productoId]] of PRODUCTS.entries()) {
     await sql`
       INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
                                        costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-      VALUES (${id(`FINAPIN${productoId}`)}, ${productoId}, ${fecha}, 'entrada', 40,
-              ${COST[productoId] ?? 0}, 'Apertura de inventario', ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
+      VALUES (${id(`FPN${String(j).padStart(2, '0')}`)}, ${productoId}, ${fecha}, 'entrada', 40,
+              ${COST[productoId] ?? 0}, 'Ajuste de inventario', ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
       ON CONFLICT (id) DO NOTHING`;
   }
 }
@@ -81,7 +81,7 @@ export async function seedFinanzas(sql: Sql, anchor = new Date()): Promise<void>
   await sql`
     INSERT INTO client_payments (id, cliente_id, fecha, monto_centavos, metodo, nota,
                                  business_id, device_id, created_at, updated_at)
-    VALUES (${id(`FINAB${monthTag(anchor)}`)}, ${CLIENTS[0][0]}, ${abonoDia}, ${peso(200)}, 'Efectivo',
+    VALUES (${id('FAB01')}, ${CLIENTS[0][0]}, ${abonoDia}, ${peso(200)}, 'Efectivo',
             'Abono a la cuenta', ${BIZ}, ${DEV}, ${TS(abonoDia)}, ${TS(abonoDia)})
     ON CONFLICT (id) DO NOTHING`;
 }

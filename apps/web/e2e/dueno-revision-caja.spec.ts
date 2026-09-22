@@ -51,7 +51,7 @@ test('approving a product needs cost, category and stock, and writes them', asyn
             SELECT p.estado_revision AS estado, p.costo_unit_centavos::text AS costo,
                    COALESCE(SUM(m.cantidad), 0)::text AS stock
             FROM products p LEFT JOIN inventory_movements m ON m.producto_id = p.id
-            WHERE p.id = ${'01HZ8XQN9GZJXV8AKQ5X0RVMIC'}
+            WHERE p.id = ${'01HZ8XQN9GZJXV8AKQ5X0RVM3Q'}
             GROUP BY p.estado_revision, p.costo_unit_centavos`;
           return `${row?.estado}|${row?.costo}|${row?.stock}`;
         }),
