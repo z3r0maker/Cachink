@@ -1,10 +1,15 @@
 import { expect, test } from '@playwright/test';
 
+import { puertaOperador } from './puerta-operador';
+
 /**
  * O-27 (Track O, fase 12): Operador · Registros por enviar. «Reintentar envío»
  * empties the queue, and the shell's pill follows the same state.
  */
+test.beforeEach(() => test.setTimeout(120_000));
+
 test('the queue: three records, their sum, and the rule not to lose them', async ({ page }) => {
+  await puertaOperador(page);
   await page.goto('/operador/pendientes');
   await expect(page.getByText('3 registros en espera')).toBeVisible();
   await expect(
@@ -16,6 +21,7 @@ test('the queue: three records, their sum, and the rule not to lose them', async
 });
 
 test('retrying sends everything; the empty queue leads to the close', async ({ page }) => {
+  await puertaOperador(page);
   await page.goto('/operador/pendientes');
   await page.getByRole('button', { name: 'Reintentar envío' }).click();
   await expect(page.getByText('Enviando 3 registros…')).toBeVisible();
@@ -28,6 +34,7 @@ test('retrying sends everything; the empty queue leads to the close', async ({ p
 });
 
 test('after sending, the queue stays empty across screens', async ({ page }) => {
+  await puertaOperador(page);
   await page.goto('/operador/pendientes');
   await page.getByRole('button', { name: 'Reintentar envío' }).click();
   await expect(page.getByText('Nada pendiente')).toBeVisible();

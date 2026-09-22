@@ -117,7 +117,8 @@ export default defineConfig({
     {
       name: 'desktop',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
+      testIgnore:
+        /sync\.spec\.ts|operador-(shell|inicio|turno|avisos|inventario|pendientes)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
@@ -128,7 +129,8 @@ export default defineConfig({
     {
       name: 'laptop',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
+      testIgnore:
+        /sync\.spec\.ts|operador-(shell|inicio|turno|avisos|inventario|pendientes)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 800 },
@@ -138,7 +140,8 @@ export default defineConfig({
     {
       name: 'tablet',
       dependencies: ['setup'],
-      testIgnore: /sync\.spec\.ts|operador-(shell|inicio)\.spec\.ts/,
+      testIgnore:
+        /sync\.spec\.ts|operador-(shell|inicio|turno|avisos|inventario|pendientes)\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
@@ -156,7 +159,7 @@ export default defineConfig({
     {
       name: 'operador',
       dependencies: ['setup'],
-      testMatch: /operador-shell\.spec\.ts|operador-inicio\.spec\.ts/,
+      testMatch: /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos)\.spec\.ts/,
       workers: 1,
       use: {
         ...devices['Desktop Chrome'],

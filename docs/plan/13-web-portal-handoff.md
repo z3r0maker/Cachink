@@ -187,8 +187,8 @@ Azure AI Foundry credentials in the same two env vars.
 4. F-2 régimen-aware ISR — needs O-14 contador input first.
 
 **Blocked (merge or hosted):** P-11 (B-08), launch gates N-26/N-27 hosted
-re-runs, N-30 closed beta, O-14 sign-off. *(Phone halves and N-29 left this
-list — see the addendum below.)*
+re-runs, N-30 closed beta, O-14 sign-off. _(Phone halves and N-29 left this
+list — see the addendum below.)_
 
 **Track N addendum — 2026-09-21 (c12-n04-uso session), the phone-half board:**
 
@@ -199,7 +199,7 @@ With the app branch merged, everything below is engineering-workable on
    columns are cloud-ahead in the drift contract (`brand_color`,
    `receipt_template`, `receipt_leyenda`, `address_print`, `direccion`,
    `whatsapp`, `social_links`; plus `clients.rfc` and `caja_turnos`'s two).
-   The wire addresses columns by name, so a phone cannot even *receive* the
+   The wire addresses columns by name, so a phone cannot even _receive_ the
    business's branding until these land (SQLite migration, both schemas,
    wire). Mechanical; unlocks items 3 and 4.
 2. **N-17's half** — `opening_balances` + `opening_balance_clients` in
