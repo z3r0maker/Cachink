@@ -159,7 +159,8 @@ export default defineConfig({
     {
       name: 'operador',
       dependencies: ['setup'],
-      testMatch: /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos|caja)\.spec\.ts/,
+      testMatch:
+        /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos|caja|ventas|cobranza|cliente)\.spec\.ts/,
       workers: 1,
       use: {
         ...devices['Desktop Chrome'],

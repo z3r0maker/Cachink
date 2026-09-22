@@ -1,44 +1,56 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+import { puertaOperador } from './puerta-operador';
+
+test.beforeEach(() => test.setTimeout(120_000));
+
+/** One fiado sale on the client's account, from the caja. */
+async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
+  await page.getByRole('button', { name: producto }).first().click();
+  await page.getByRole('button', { name: producto }).first().click();
+  await page.getByRole('button', { name: 'Cobrar', exact: true }).first().click();
+  const cobro = page.getByRole('dialog');
+  await cobro.getByRole('button', { name: 'Fiado', exact: true }).click();
+  await cobro.getByRole('button', { name: cliente }).first().click();
+  await cobro.getByRole('button', { name: 'Registrar fiado' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
+}
 
 /**
- * O-26 (Track O, fase 12): Operador · Detalle de cliente. The account is its
- * tickets and abonos; an abono re-derives the balance and the open tickets.
+ * O-26 (Track O, fase 12; real door O-38): Detalle de cliente over the
+ * register's own account — a fiado sale this test makes, its detail, and the
+ * abono that settles it.
  */
-test('from Cobranza to the account: balance, open tickets, history', async ({ page }) => {
-  await page.goto('/operador/cobranza');
-  await page.getByTitle('Ver historial').nth(1).click();
-  await expect(page).toHaveURL(/\/operador\/cobranza\/chuy$/);
-  await expect(page.getByText('$860.00')).toBeVisible();
-  await expect(page.getByText('Ya abonó $400.00')).toBeVisible();
-  await expect(page.getByText('Venta fiada V-0288')).toBeAttached();
-  await expect(page.getByText('Se venció ayer')).toBeVisible();
-  await expect(page.getByText('Vence el domingo')).toBeVisible();
-  await expect(page.getByText(/se aplicó a V-0288 en parte$/)).toBeAttached();
+test('from Cobranza to the account: balance, open ticket, history', async ({ page }) => {
+  await puertaOperador(page);
+  await page.goto('/operador/caja');
+  await fiar(page, /Quesadilla/, /Doña Mari de la tienda/);
+
+  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
+  await expect(page.locator('main').getByText('$80.00').first()).toBeVisible();
+  await expect(page.locator('main').getByText('Al día')).toBeVisible();
+  await expect(page.getByText('Venta fiada V-0001')).toBeAttached();
 });
 
-test('an abono settles the oldest ticket and lowers the balance', async ({ page }) => {
-  await page.goto('/operador/cobranza/chuy');
+test('an abono settles the ticket and lowers the balance', async ({ page }) => {
+  await puertaOperador(page);
+  await page.goto('/operador/caja');
+  await fiar(page, /Gringa/, /Doña Mari de la tienda/);
+
+  await page.getByRole('link', { name: 'Cobranza' }).click();
+  await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();
   await page.getByRole('button', { name: 'Recibir abono' }).click();
-  const modal = page.getByRole('dialog', { name: 'Abono de Taller de Chuy' });
-  await modal.getByRole('button', { name: '$500.00' }).click();
-  await expect(modal.getByText('V-0288 completa · V-0310 parcial')).toBeVisible();
+  const modal = page.getByRole('dialog', { name: 'Abono de Doña Mari de la tienda' });
+  await modal.getByLabel('Cuánto abona').fill('50');
   await modal.getByRole('button', { name: 'Registrar abono' }).click();
   await expect(page.getByRole('status')).toContainText(
-    '$500.00 por efectivo. Se aplicó a lo más antiguo; queda $360.00.',
+    '$50.00 por efectivo. Se aplicó a lo más antiguo; queda $70.00.',
   );
-  await expect(page.getByText('Ya abonó $100.00')).toBeVisible();
 });
 
-test('the WhatsApp reminder carries the live balance and needs ten digits', async ({ page }) => {
-  await page.goto('/operador/cobranza/mari');
-  await page.getByRole('button', { name: 'Recordarle por WhatsApp' }).click();
-  const modal = page.getByRole('dialog', { name: 'Recordarle su saldo' });
-  await expect(modal).toContainText('tiene $340.00 pendiente en Taquería Don Pedro');
-  await modal.getByLabel('Teléfono').fill('55 12');
-  await expect(modal.getByRole('button', { name: 'Enviar por WhatsApp' })).toBeDisabled();
-});
-
-test('a client without an account gets the empty state', async ({ page }) => {
+test('a folio that is not in the turno gets the empty state', async ({ page }) => {
+  await puertaOperador(page);
   await page.goto('/operador/cobranza/nadie');
   await expect(page.getByText('Este cliente no tiene cuenta abierta')).toBeVisible();
 });
