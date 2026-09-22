@@ -245,6 +245,60 @@ stack, on pristine merged main (baseline-verified). Same family as §4's
 flakes; likely needs serialized workers or re-anchored expectations, and
 it will bite CI just as it bit this session.
 
+### 3.5 Track O (operador register) pending — consolidated 2026-09-21 (night session)
+
+> Where the register stands: its whole day runs on its own data end to end
+> (fase 14, O-32…O-37 — capture, ventas/cancel, cobranza/abonos, gastos,
+> cierre, and both owner screens writing for real). What remains is the tail
+> of O-38 plus the findings below. Working state lives in
+> `docs/plan/10-operador.md` (all tasks ticked through O-37).
+
+**Engineering, workable now on main:**
+
+1. **O-38's tail: 13 operator spec files still behind the demo flag.** The
+   `operador` Playwright project (serial, real Acceso door via
+   `e2e/puerta-operador.ts`) exists and shell+inicio are converted
+   (`cbea6388`). Remaining: `operador-avisos`, `operador-caja`,
+   `operador-cierre`, `operador-cobranza`, `operador-detalle-venta`,
+   `operador-cliente`, `operador-gastos`, `operador-inventario`,
+   `operador-pendientes`, `operador-turno`, `operador-ventas`, plus the
+   `chaos-1` caja section. Convert file by file (move to the `operador`
+   project's testMatch + add to the viewport projects' testIgnore + one
+   `puertaOperador(page)` per test); each converted file may also need its
+   assertions re-based onto real data, since the register's screens read the
+   runtime when linked. **Last step, only when all 13 are through the real
+   door:** delete `xangarro.caja.demo` from `acceso/gate.tsx`, `auth.setup.ts`,
+   and the removal line in `puerta-operador.ts` — then the acceptance
+   ("matrix green, no demo flag anywhere") runs.
+2. **F-8's Track O entry**: `(portal)/cortes/screen.tsx:137`'s 34 px literal
+   (design-lint). Fold into the O-38 tail.
+3. **F-4's half**: the «Mayo 2026» chip in
+   `src/app/inventario/sections-interactive.tsx` (cobranza's frozen `HOY` is
+   fixture-only since O-33; the inventario chip is not).
+
+**Owner actions (dashboard/credentials, nothing for a session to build):**
+
+1. **Vercel: the admin project's Root Directory still says `apps/admin`** —
+   the app was renamed `apps/backoffice` (N-35); every build fails with
+   "The specified Root Directory does not exist" (diagnosed from the build
+   log, 2026-09-21). Fix: Settings → General → Root Directory →
+   `apps/backoffice`, redeploy. Then check the project's env vars per the
+   runbook (`ADMIN_TOTP_KEY` must be exactly 32 bytes base64 — a 29-byte
+   default broke every sign-in in CI; `DATABASE_URL` via the transaction
+   pooler, port 6543).
+2. **CI green-run confirmation** — the four-job CI repair (`910c5707`) is
+   verified locally in CI mode (portal 535, backoffice 7/7, deno clean,
+   format/scripts green), but the gh token died before the GitHub verdict.
+   One look at the Actions tab; if anything is still red it is new
+   information, not the repaired set.
+
+**Attributed failures (other tracks' base, evidence recorded):** the
+auth login-door specs, chaos-1's smash tests, the a11y/data `/` sentinels
+and informe-mensual's duplicate emails fail on the incoming base
+(`f75ce235`/`c1efcea8`) without any Track O change — control run performed
+2026-09-21 during O-37. They race each other through the shared login
+throttle / duplicate user emails. Their owners' names are on §4's entries.
+
 ---
 
 ## 4. Findings (known issues, not yet fixed)
@@ -281,8 +335,11 @@ end-of-suite load. The portal session's P-02/P-32/P-21 tests are green in every 
 > Refreshed 2026-09-21 (evening): the 2026-09-19 order below is historical —
 > §3.1 marks F-1, P-13, P-34, P-14 and P-26/27/33 done. The live order is
 > §3.4's: owner does §3.4 items 1–3 (redeploy+smoke test, LLM credential,
-> Facturapi keys); sessions take §3.4 "Engineering, workable now" in that
-> order, with the app-branch merge (§3.4 item 4) as the big unlock.
+> Facturapi keys) **plus §3.5's owner items (Vercel admin root-dir, CI
+> verdict)**; sessions take §3.4 "Engineering, workable now" in that order,
+> with the app-branch merge (§3.4 item 4) as the big unlock. The operador
+> track's own tail is §3.5's (O-38's last 13 spec files, then the demo flag
+> dies).
 
 1. ~~F-1 (statements' Balance/Flujo inputs) — correctness of the core financial screen.~~ (done 2026-09-19)
 2. ~~P-13 leftovers (checklist, «Ver productos», greeting decision) and P-34 informe mensual PDF.~~ (done 2026-09-19; greeting decision open — see §3.1's P-13 row)
