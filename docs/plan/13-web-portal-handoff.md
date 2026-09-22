@@ -117,6 +117,26 @@ persisted delivery matrix (0017) · P-34 print stylesheet · signup through `acc
 | **P-28 / P-29 / P-30** Asesor LLM                            | ADR-059 production gate («Próximamente»); P-30 runtime needs the credential. Locally fully live.                                                                                                                                                                                                                           |
 | **P-11** real rejection rows                                 | B-08 (phones producing them against hosted).                                                                                                                                                                                                                                                                               |
 
+### 3.3 Small leftovers (consolidated 2026-09-21 — the track's tail)
+
+Everything the P-track can still do without an owner action, in one table. Items above
+(§3.1/§3.2) cover the task-level state; this is the fine-grained tail that survived.
+
+| Item                         | What's actually missing                                                                                                                                                                                                   | Size                                         | State / blocker                                                                                                    |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **P-23 leftovers**           | Toast and gauge primitives unbuilt; shell-only components (sidebar nav item, business switcher, user menu, «Asesor» strip) unharnessed in `/inventario`                                                                   | ~Half a session                              | **Workable now** — P-21's `design:compare` exists, so the acceptance clause is exercisable                         |
+| **P-33 milestone toast**     | The toast UI for racha milestones (3/6/12 consecutive goals); the racha itself is computed and carried in `MetasPageData`                                                                                                 | Small                                        | **Workable now** — should build on P-23's Toast primitive; `celebraciones` markers make once-per-milestone trivial |
+| **P-12 contrato field**      | A `contrato` column on `employees` + the option in the create/edit sheet                                                                                                                                                  | Small (pg 0029 + SQLite 0011 + both schemas) | **Workable now**                                                                                                   |
+| **P-09 folio/turno fields**  | The Movimientos drawer's Folio/Turno rows render only with real data: `caja_turno_id` exists on `sales` but the seed/spec data rarely sets it, and a folio display needs the phone's V-NNNN convention surfaced           | Small investigation + wiring                 | **Workable now** — no column needed for turno; check what the ledger query already returns                         |
+| **P-18 design-side half**    | (a) the ADR-058 amendments **inside the Claude Design project** (owner/design tool); (b) `scripts/design-pull.ts` so mirror refreshes are a reviewable diff — the 2026-09-20 mirror was a hand copy of the owner's export | (b) is workable; (a) needs the design tool   | **(b) workable now** from a local export directory; (a) is owner-side                                              |
+| **P-11 real rejection rows** | Phones producing rejections against **hosted**                                                                                                                                                                            | —                                            | **Cross-track (B-08)** — not workable from this track                                                              |
+| **comprobantes.sync flake**  | Order-dependent render-stale failure at full-suite position ~580; passes in isolation                                                                                                                                     | —                                            | **Track N's spec** — full evidence in §4 for their owner                                                           |
+
+Owner actions that gate the rest live in `11-pre-launch-and-deferred.md` (§1, §3); the
+LLM path (P-28/29/30's open half) is documented on P-30's Progress line in `04-portal.md`
+— the boundary is wired and live through the owner's local proxy; production waits on the
+Azure AI Foundry credentials in the same two env vars.
+
 ---
 
 ## 4. Findings (known issues, not yet fixed)
