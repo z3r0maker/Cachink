@@ -41,6 +41,7 @@ describe('buildDailyDigest', () => {
       urgentesAbiertos: 0,
       pagosSinCfdi: 0,
       rechazos: null,
+      sobreLimite: null,
     });
     assert.match(d.text, /No llegaron items nuevos/);
     assert.match(d.html, /<html/);
@@ -88,6 +89,7 @@ describe('buildDailyDigest', () => {
       urgentesAbiertos: 1,
       pagosSinCfdi: 1,
       rechazos: null,
+      sobreLimite: null,
     });
     assert.match(d.subject, /1 urgente/);
     assert.match(d.subject, /1 pago sin CFDI/);

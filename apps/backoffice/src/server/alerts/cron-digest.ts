@@ -12,6 +12,7 @@ import { secretMatches } from '../ingest/secret';
 import { buildDailyDigest } from './digest';
 import { digestWindow } from './mx-day';
 import type { Mailer } from './email';
+import { OVER_LIMIT_UNAVAILABLE, type OverLimitSource, type OverLimitSummary } from './over-limit';
 import {
   REJECTIONS_UNAVAILABLE,
   rejectionWindowStart,
@@ -37,6 +38,8 @@ export interface DigestCronDeps {
   readonly purgeAssistedFiles?: () => Promise<number>;
   /** B-18's rejection digest; a failed read renders «no disponible», it does not stop the email. */
   readonly rejections: RejectionSource;
+  /** N-10: tenants over a plan limit; a failed read renders «no disponible». */
+  readonly overLimit?: OverLimitSource;
   readonly mailer: Mailer;
   readonly to: string;
   readonly consoleUrl?: string;
@@ -64,6 +67,20 @@ async function readRejections(
   }
 }
 
+async function readOverLimit(
+  deps: DigestCronDeps,
+  now: Date,
+  log: NonNullable<DigestCronDeps['log']>,
+): Promise<OverLimitSummary> {
+  if (deps.overLimit === undefined) return OVER_LIMIT_UNAVAILABLE;
+  try {
+    return { status: 'ok', ...(await deps.overLimit.list(now)) };
+  } catch (error) {
+    log('digest: reading usage against limits failed', error);
+    return OVER_LIMIT_UNAVAILABLE;
+  }
+}
+
 export async function handleDigestCron(req: Request, deps: DigestCronDeps): Promise<Response> {
   if (!deps.secret) return reply(503, { error: 'cron_disabled' });
   if (!secretMatches(bearer(req), deps.secret)) return reply(401, { error: 'unauthorized' });
@@ -79,10 +96,13 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
   }
 
   const rejections = await readRejections(deps, now, log);
-  const digest = buildDailyDigest(items, now, { consoleUrl: deps.consoleUrl, rejections });
-  const prunedSessions = await pruneSessions(deps, log);
-  const prunedGeo = await pruneGeo(deps, log);
-  const assisted = await assistedSweeps(deps, log);
+  const overLimit = await readOverLimit(deps, now, log);
+  const digest = buildDailyDigest(items, now, {
+    consoleUrl: deps.consoleUrl,
+    rejections,
+    overLimit,
+  });
+  const sweeps = await housekeeping(deps, log);
   try {
     await deps.mailer.send({
       to: deps.to,
@@ -100,11 +120,21 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
     ok: true,
     subject: digest.subject,
     counts: digest.counts,
+    ...sweeps,
+  });
+}
+
+/** Retention and expiry steps; each logs its own failure and never costs the digest. */
+async function housekeeping(deps: DigestCronDeps, log: NonNullable<DigestCronDeps['log']>) {
+  const prunedSessions = await pruneSessions(deps, log);
+  const prunedGeo = await pruneGeo(deps, log);
+  const assisted = await assistedSweeps(deps, log);
+  return {
     prunedSessions,
     prunedGeo,
     expiredAssisted: assisted.expired,
     purgedAssistedFiles: assisted.purgedFiles,
-  });
+  };
 }
 
 /** N-05's prune; null when the step is not wired, failures only log. */

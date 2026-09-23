@@ -28,7 +28,11 @@ export function planView(
   overrides: readonly PlanOverride[],
   now: Date,
 ): PlanView {
-  const effect = effectivePlan(billing.planId ?? FALLBACK_PLAN, overrides, now);
+  // A lapsed subscription entitles the free plan (Q14, `computeEntitlement`),
+  // whatever plan Stripe last billed: `base` keeps Stripe's word for display,
+  // the limits follow what the next entitlement carries. Comps lift from there.
+  const entitled = billing.status === 'lapsed' ? FALLBACK_PLAN : (billing.planId ?? FALLBACK_PLAN);
+  const effect = effectivePlan(entitled, overrides, now);
   const known = billing.planId !== null || effect.compedBy !== null;
   return { base: billing.planId, effective: known ? effect.plan : null, effect };
 }
