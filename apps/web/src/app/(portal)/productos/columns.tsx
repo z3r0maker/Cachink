@@ -2,7 +2,8 @@ import { formatMoney } from '@xangarro/domain';
 
 import { Button, StatusPill, type ColumnDef } from '@/components';
 
-import { isLow, type Movimiento, type Producto } from './parts';
+import { CategoriaPill, ExistenciasCell, ProductoCell } from './celdas';
+import { type Movimiento, type Producto } from './parts';
 
 /**
  * The catalogue, plus an edit action when the viewer may write.
@@ -39,29 +40,42 @@ export function catalogoColumns(onAction: OnRowAction): readonly ColumnDef<Produ
   ];
 }
 
+/**
+ * The SKU has no column of its own any more: the design stacks it under the
+ * name inside the Producto cell, beside the category-coloured tile (B-5).
+ */
 export const CATALOGO_COLUMNS: readonly ColumnDef<Producto>[] = [
-  { key: 'nombre', header: 'Producto', render: (p) => p.nombre },
-  { key: 'sku', header: 'SKU', render: (p) => p.sku },
+  { key: 'nombre', header: 'Producto', render: (p) => <ProductoCell p={p} /> },
   {
     key: 'categoria',
     header: 'Categoría',
-    render: (p) => <StatusPill tone="soft">{p.categoria}</StatusPill>,
+    render: (p) => <CategoriaPill categoria={p.categoria} />,
   },
   { key: 'precio', header: 'Precio', numeric: true, render: (p) => formatMoney(p.precio) },
   {
     key: 'stock',
     header: 'Existencias',
     numeric: true,
-    render: (p) =>
-      p.sigueStock ? (
-        <StatusPill tone={isLow(p) ? 'danger' : 'success'}>
-          {p.stock} · umbral {p.umbral}
-        </StatusPill>
-      ) : (
-        'Sin inventario'
-      ),
+    render: (p) => <ExistenciasCell p={p} />,
   },
 ];
+
+/** Venta yellow, Entrada green, Merma red, Ajuste blue — the design's four. */
+const TONO_MOVIMIENTO: Record<string, 'soft' | 'success' | 'danger' | 'info'> = {
+  Venta: 'soft',
+  Entrada: 'success',
+  Merma: 'danger',
+  Ajuste: 'info',
+};
+
+/** The motivo is free text; match on the word the design keys its tone to. */
+function tonoDeMotivo(m: Movimiento): 'soft' | 'success' | 'danger' | 'info' {
+  const motivo = m.motivo.toLocaleLowerCase('es-MX');
+  if (motivo.includes('merma')) return TONO_MOVIMIENTO.Merma as 'danger';
+  if (motivo.includes('ajuste')) return TONO_MOVIMIENTO.Ajuste as 'info';
+  if (motivo.includes('venta')) return TONO_MOVIMIENTO.Venta as 'soft';
+  return m.tipo === 'entrada' ? 'success' : 'soft';
+}
 
 export const MOV_COLUMNS: readonly ColumnDef<Movimiento>[] = [
   { key: 'fecha', header: 'Fecha', render: (m) => m.fecha },
@@ -69,9 +83,7 @@ export const MOV_COLUMNS: readonly ColumnDef<Movimiento>[] = [
   {
     key: 'tipo',
     header: 'Tipo',
-    render: (m) => (
-      <StatusPill tone={m.tipo === 'entrada' ? 'success' : 'soft'}>{m.motivo}</StatusPill>
-    ),
+    render: (m) => <StatusPill tone={tonoDeMotivo(m)}>{m.motivo}</StatusPill>,
   },
   {
     key: 'cambio',

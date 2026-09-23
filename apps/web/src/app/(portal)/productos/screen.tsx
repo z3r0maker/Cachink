@@ -16,6 +16,7 @@ import {
   Chips,
   Heading,
   Kpis,
+  KpisMovimientos,
   LowStockBanner,
   MovTable,
   isLow,
@@ -53,6 +54,7 @@ function Controls({
   filter,
   setFilter,
   catalogo,
+  movimientos,
   movCount,
   isCatalogo,
   low,
@@ -62,6 +64,7 @@ function Controls({
   readonly filter: string;
   readonly setFilter: (v: string) => void;
   readonly catalogo: readonly Producto[];
+  readonly movimientos: readonly Movimiento[];
   readonly movCount: number;
   readonly isCatalogo: boolean;
   readonly low: number;
@@ -77,7 +80,7 @@ function Controls({
         <LowStockBanner low={low} onShow={() => setFilter('Stock bajo')} />
       ) : null}
       <Tabs tab={tab} onChange={onTab} catalogCount={catalogo.length} movCount={movCount} />
-      {isCatalogo ? <Kpis rows={catalogo} /> : null}
+      {isCatalogo ? <Kpis rows={catalogo} /> : <KpisMovimientos rows={movimientos} />}
       {isCatalogo ? <Chips filter={filter} setFilter={setFilter} /> : null}
     </>
   );
@@ -169,6 +172,7 @@ export function ProductosScreen({
         filter={filter}
         setFilter={setFilter}
         catalogo={catalogo}
+        movimientos={data?.movimientos ?? []}
         movCount={data?.movimientos.length ?? 0}
         isCatalogo={isCatalogo}
         low={catalogo.filter(isLow).length}

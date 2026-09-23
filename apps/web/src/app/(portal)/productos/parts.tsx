@@ -14,6 +14,8 @@ import {
 } from '@/components';
 import type { ProductosData } from '@/server/screens';
 
+import { margenPromedio } from './derive';
+
 import { catalogoColumns, MOV_COLUMNS, type OnRowAction } from './columns';
 import { pageSubtitle, pageTitle, toolbar } from './productos.css';
 import { NuevoProductoSheet } from './sheet/sheet';
@@ -47,6 +49,7 @@ export function Heading({ mayWrite }: { readonly mayWrite: boolean }) {
 
 export function Kpis({ rows }: { readonly rows: readonly Producto[] }) {
   const valor = rows.reduce((t, p) => t + p.costo * BigInt(Math.max(p.stock, 0)), 0n);
+  const margen = margenPromedio(rows);
   return (
     <div className={kpiGrid}>
       <KpiCard label="Productos activos" value={`${rows.length}`} hint="En tu catálogo" />
@@ -56,6 +59,47 @@ export function Kpis({ rows }: { readonly rows: readonly Producto[] }) {
         value={`${rows.filter(isLow).length}`}
         tone="negative"
         hint="Por debajo del umbral"
+      />
+      <KpiCard
+        label="Margen promedio"
+        value={margen === null ? '—' : `${Math.round(margen * 100)}%`}
+        // The design paints it green from 55% up.
+        tone={margen !== null && margen >= 0.55 ? 'positive' : 'neutral'}
+        hint="Sobre el precio de venta"
+      />
+    </div>
+  );
+}
+
+/**
+ * The Movimientos tab had no KPI row at all (B-6). The four the design names
+ * are counted from the movements already on screen, so they answer for
+ * exactly what the table shows — «del periodo», not «del mes», because the
+ * list is the latest 50 rather than a calendar window.
+ */
+export function KpisMovimientos({ rows }: { readonly rows: readonly Movimiento[] }) {
+  const cuenta = (p: (m: Movimiento) => boolean) => `${rows.filter(p).length}`;
+  const es = (m: Movimiento, palabra: string) =>
+    m.motivo.toLocaleLowerCase('es-MX').includes(palabra);
+  return (
+    <div className={kpiGrid}>
+      <KpiCard label="Movimientos del periodo" value={`${rows.length}`} hint="Los más recientes" />
+      <KpiCard
+        label="Entradas"
+        value={cuenta((m) => m.tipo === 'entrada')}
+        tone="positive"
+        hint="Lo que sumó a tus existencias"
+      />
+      <KpiCard
+        label="Mermas"
+        value={cuenta((m) => es(m, 'merma'))}
+        tone="negative"
+        hint="Producto perdido o dañado"
+      />
+      <KpiCard
+        label="Ajustes manuales"
+        value={cuenta((m) => es(m, 'ajuste'))}
+        hint="Correcciones a mano"
       />
     </div>
   );
