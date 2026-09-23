@@ -53,7 +53,9 @@ describe('0015_admin_geo_read.sql', () => {
 
 describe('the mapa route', () => {
   const dir = join(HERE, '..', 'src', 'app', '(consola)', 'mapa');
-  const sources = readdirSync(dir).map((f) => readFileSync(join(dir, f), 'utf8'));
+  /** Comments explain *why* inline styles are banned, so they are stripped first. */
+  const strip = (s: string): string => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  const sources = readdirSync(dir).map((f) => strip(readFileSync(join(dir, f), 'utf8')));
 
   it('uses no inline style attribute, which the CSP would drop', () => {
     // ui.css.ts:86 — style-src has no 'unsafe-inline', so a server-rendered

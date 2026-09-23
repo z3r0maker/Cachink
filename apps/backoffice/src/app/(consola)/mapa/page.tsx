@@ -12,6 +12,7 @@ import { body, errorText, heading, muted } from '@/styles/ui.css';
 import { chip, chipRow } from '../inbox/inbox.css';
 import type { SearchParams } from '../search-params';
 import { wide } from '../tenants/tenants.css';
+import { Choropleth } from './choropleth';
 import { EstadoTable, formatValue } from './estado-table';
 import { legend, swatch } from './mapa.css';
 import { mapaHref, parseMetric, parseRange } from './params';
@@ -137,6 +138,7 @@ export default async function MapaPage(props: { searchParams: Promise<SearchPara
       ) : (
         <>
           <Totals view={result} />
+          <Choropleth metric={result.metric} rows={result.rows} />
           <Legend view={result} />
           <EstadoTable metric={result.metric} rows={result.rows} national={result.national} />
           <p className={muted}>

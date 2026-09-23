@@ -1022,21 +1022,13 @@ the national average, with that average stated as a number.
       Store first-touch on the business at signup. Also move the rewrite out of `App.jsx` into the
       shared client entry: the `/recursos` article pages drop UTMs today, so content marketing is
       entirely unattributed.
-- [ ] **N-58 · Phase 4 — purchases + landing.** ⚠️ **Landing half blocked on legal, not engineering:**
-      the aviso drafts are marked «BORRADOR v0.1 … No publicar», carry nine unfilled placeholders
-      (`[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[CORREO PRIVACIDAD]`, …), and have **no variante for a site
-      visitor** — A is portal signup, B device linking, C operator PIN. A marketing-site visitor is
-      not yet a customer, so none of them reaches one. See OQ Variante D in
-      `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
+- [ ] **N-58 · Phase 4 — purchases + landing.** Checkout hook in `probarGratis`; a portal-served 1×1
       pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
       because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
-- [ ] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
+- [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
-- [~] **N-60 · Phase 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10
-      updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
-      **Remaining and not an engineering task:** variante D for site visitors, the placeholders, and
-      the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
+- [ ] **N-60 · Phase 6 — ADR-092 + aviso.** Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
       and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
       engineering one — the cookie-less aggregate case is weak for one, but confirm.
 - [ ] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.

@@ -48,3 +48,36 @@ export const value = style({
 });
 
 export const faint = style({ color: colors.textMuted });
+
+const pathBase = style({
+  stroke: colors.black,
+  strokeWidth: 1.2,
+  strokeLinejoin: 'round',
+  vectorEffect: 'non-scaling-stroke',
+});
+
+/**
+ * The same bucket keys as `swatch`, applied to SVG paths. `fill` is a CSS
+ * property, so it can be a class — which it must be: `style-src` has no
+ * 'unsafe-inline', so a `style="fill:…"` attribute would be dropped and every
+ * state would render the same colour (ui.css.ts:86).
+ */
+export const region = styleVariants({
+  cero: [pathBase, { fill: colors.white }],
+  b1: [pathBase, { fill: colors.yellowSoft }],
+  b2: [pathBase, { fill: colors.yellow }],
+  b3: [pathBase, { fill: colors.warningSoft }],
+  b4: [pathBase, { fill: colors.redSoft }],
+  insuficiente: [pathBase, { fill: colors.gray200 }],
+  abajo: [pathBase, { fill: colors.redSoft }],
+  igual: [pathBase, { fill: colors.white }],
+  arriba: [pathBase, { fill: colors.greenSoft }],
+});
+
+export const mapFrame = style({
+  display: 'block',
+  width: '100%',
+  maxWidth: 720,
+  height: 'auto',
+  margin: '12px 0',
+});
