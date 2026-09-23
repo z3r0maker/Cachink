@@ -27,6 +27,7 @@ export interface Item {
   readonly section: string;
   readonly trigger: string | null;
   readonly blockedBy: string | null;
+  readonly blocks: string | null;
   /** The `**Remaining (…):**` note a verification pass left under the Status line. */
   readonly remaining: string | null;
 }
@@ -83,6 +84,7 @@ function fromTaskLine(
     section: cursor.section,
     trigger: field(note, 'Trigger'),
     blockedBy: field(note, 'Blocked by'),
+    blocks: field(note, 'Blocks'),
     remaining: field(note, 'Remaining(?: \\([^)]*\\))?'),
   };
 }
@@ -145,6 +147,7 @@ function ownerRow(
     section,
     trigger: null,
     blockedBy: null,
+    blocks: null,
     remaining: null,
   };
 }
