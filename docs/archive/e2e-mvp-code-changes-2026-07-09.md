@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Historical changelog of the 2026-07-09 session. Its fixes landed; its harness findings were superseded by the device-class and bucketing rewrite (`fb6ab1a8`). One nit outlived it and is recorded in `apps/mobile/maestro/E2E-SESSION-NOTES.md`: `BusinessForm` still has no `KeyboardAvoidingView`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Maestro MVP E2E — Code Changes & Findings (2026-07-09)
 
 Run target: booted **iPad Pro 13-inch (M5)** simulator, iOS 26.5. Scope: MVP

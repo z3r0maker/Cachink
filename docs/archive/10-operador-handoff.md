@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Superseded by the work it described. Every pending item in it landed between 2026-09-18 and 2026-09-22 (C-16…C-19, O-02…O-06, O-12, O-13, O-32…O-38). The live Track O record is `docs/plan/10-operador.md`; the cross-track board is `docs/plan/13-web-portal-handoff.md`. Its three open design points survive in `docs/plan/10-operador-design-changes.md`, and the comparison harness it documented is now `scripts/design-compare/`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Track O — handoff (operator register + owner close-out)
 
 **Date:** 2026-09-18 · **Last Track O commits on `main`:** `32768f6f` (amended designs pulled and

@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Superseded by ADR-067 and ADR-069 — kept as the rationale record for choosing Stripe. What shipped differs in every detail: the API lives in `apps/web` on `app.xangarro.mx` (not a Worker on `api.cachink.mx`), the entitlement is an Ed25519-signed contract envelope (not a JWT), identity is a Supabase session plus single-use activation codes (not an email lookup), and OXXO was dropped for SPEI on annual only.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Billing Plan B: Stripe-Only (No Store Billing)
 
 > **Status:** DRAFT — Alternative to `billing-and-licensing-plan.md`.

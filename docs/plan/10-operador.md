@@ -725,7 +725,14 @@ hoy]` window: esperado short by every abono, only reproducible at night. `runtim
 
 ### O-38 Remove the fixture demo flag
 
-- [ ] Status · **Blocked by:** O-33, O-34, O-35, O-36
+- [x] Status · **Blocked by:** O-33, O-34, O-35, O-36
+  - Done: 2026-09-22 · `d0bca546` (after `cbea6388`, `f28c1103`, `5b097e2c`, `7e4dbd3a`) · all
+    fourteen `operador-*` specs walk the real Acceso door through `e2e/puerta-operador.ts` in the
+    serial `operador` project; the viewport projects ignore `operador-*` entirely; chaos-1's caja
+    section moved to `e2e/operador-chaos.spec.ts`. `xangarro.caja.demo` is gone from
+    `acceso/gate.tsx`, `auth.setup.ts` and `puerta-operador.ts` — the flag exists nowhere.
+    Acceptance run: `--project=operador` green, 32 passed. Folded in F-8's Track O entry: Cortes'
+    empty-state glyph uses `portalFontSizes.xl6` instead of a 34 px literal.
 - **Steps:** delete `xangarro.caja.demo` from the gate and `auth.setup.ts`; every operador
   screen runs on the runtime or its design-forced states.
 - **Acceptance:** full matrix green with no demo flag anywhere.

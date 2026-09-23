@@ -1,5 +1,13 @@
 # E2E Test Case Catalog
 
+> **2026-09-22 audit — this catalogue overstates coverage.** Rows citing `editar-venta`,
+> `eliminar-venta`, `venta-comprobante`, `editar-producto` and `eliminar-producto` as ✅ are stale:
+> those flows were either deleted with A-09 (the device captures, it does not edit) or parked in
+> `apps/mobile/maestro/flows/parked-mvp/` because they target a superseded UI. The "fullstack
+> scenarios needed" and "Maestro edge-case flows needed" gap lists are, by contrast, cleared —
+> every scenario exists under `packages/data/tests/fullstack/`. Re-derive the ✅ column from the
+> flows that actually run before trusting it.
+
 > Xangarro! test-case reference — every operation, its edge cases, assigned layer, and current coverage status.
 >
 > **Legend**: ✅ covered | ⚠️ partial | ❌ missing

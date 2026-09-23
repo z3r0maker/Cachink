@@ -22,10 +22,11 @@
    `format:check` fails on 5 pre-existing docs (`docs/audits/db-2026-09-17.md`, 4 files in
    `docs/legal/aviso/`); not a gate.
 4. **Migrations.**
-   - data-pg: next free number **0020** (`packages/data-pg/drizzle/`). Hand-written and
+   - data-pg: next free number **0033** (refreshed 2026-09-22; 0032 is `signup_attribution`); SQLite
+     next free **0012** (`packages/data/drizzle/migrations/`). Hand-written and
      drizzle-generated files share the number space; `db-local.sh` and `db:migrate:hosted` apply
      alphabetically. Tell the portal owner which number you take before pushing.
-   - backoffice: next free **0011** (`apps/backoffice/src/server/db/migrations/`).
+   - backoffice: next free **0015** (refreshed 2026-09-22; `apps/backoffice/src/server/db/migrations/`).
    - **Never GRANT anything on the `auth` schema** (hosted `postgres` has no GRANT OPTION there; a
      static test, `packages/data-pg/tests/hosted-auth-grants.test.ts`, enforces it). Read
      `auth.users` through a pinned `SECURITY DEFINER` function (patterns: `0011_owner_email`,
@@ -35,7 +36,8 @@
    - Apply to the hosted **test** project with `pnpm --filter @xangarro/data-pg
 db:migrate:hosted --dry-run`, then without `--dry-run`. Inputs come from the owner's gitignored
      `packages/data-pg/.env.local` (Session pooler URL + role passwords). **Never print it.**
-5. **ADRs:** next free **ADR-086**. Any decision that overrides an existing ADR/Q needs one.
+5. **ADRs:** next free **ADR-092** (refreshed 2026-09-22). Any decision that overrides an existing
+   ADR/Q needs one.
 6. **Ownership.** The "Xangarro Web Portal" session owns `apps/web` UI outside Track N areas,
    `packages/data-pg` non-billing, sync/auth/session, and P-_ tasks. The "Operador" session owns
    Track O (`docs/plan/10-operador_.md`, `apps/web/src/operador/**`). Track N owns
@@ -83,7 +85,14 @@ Each row: what exists → what's left → blockers → where. Specs and acceptan
 | **N-07** capacity p95                          | `[~]`  | Card live; p95 "sin datos".                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Needs Track B to persist per-call sync timing (endpoint, duration, at) in a queryable table — ask the portal owner; then feed `capacityStatus`.                                                                                                                                                                                                                              | apps/backoffice + data-pg                                                                                                                                                                                                                                                                                                                                            |
 | **N-02** push-time increment                   | `[~]`  | Nightly recompute is authoritative (`xangarro.usage_counts()`, `/api/cron/usage`).                                                                                                                                                                                                                                                                                                                                                                                                                                            | Optional increment on `/sync/push` — portal owner's code; low priority.                                                                                                                                                                                                                                                                                                      | apps/web sync                                                                                                                                                                                                                                                                                                                                                        |
 
-### 2.2 Blocked on the app branch (`rename/xangarro-stored-ids`, local only, behind `main`)
+### 2.2 ~~Blocked on the app branch~~ — unblocked 2026-09-19
+
+> The branch merged into `main` (`52824588`, the phone track A-04…A-18), so nothing below is
+> branch-blocked any more. The live board for these rows is `docs/plan/13-web-portal-handoff.md`
+> §3.4; what remains of each is the SQLite half (C-15, C-20) and the phone-side work (N-22, N-24,
+> N-25).
+
+### 2.2 (historical heading) Blocked on the app branch (`rename/xangarro-stored-ids`)
 
 Do not start these until the owner gets that branch pushed and merged with `main` (O-20).
 

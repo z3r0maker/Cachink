@@ -95,5 +95,17 @@ export EXPO_PUBLIC_E2E=1
 ./scripts/run-flow.sh $(grep -l 'x-entrypoint: demo' flows/*.yaml)   # all demo flows
 ```
 
-See `docs/e2e-mvp-code-changes-2026-07-09.md` for the full findings + fixes from
-the 2026-07-09 session.
+See `docs/archive/e2e-mvp-code-changes-2026-07-09.md` for the full findings + fixes
+from the 2026-07-09 session.
+
+## 6. Two notes rescued from the archived E2E docs (2026-09-22)
+
+- **`BusinessForm` keyboard occlusion — still open.** The 2026-07-09 session found the form's
+  inputs sit under the soft keyboard and never signed the fix off; `screens/BusinessForm/
+business-form.tsx` still has no `KeyboardAvoidingView`. The Modal primitive's wrap does not
+  cover it.
+- **Two selectors that still bite** (they apply to `movimiento-salida-con-motivo.yaml`): the
+  CANTIDAD wheel needs the wheel driver, not a plain `inputText`; and the MOTIVO dropdown only
+  matches with an anchored regex, because its options share prefixes.
+
+The full 2026-07 findings now live in `docs/archive/e2e-mvp-code-changes-2026-07-09.md`.

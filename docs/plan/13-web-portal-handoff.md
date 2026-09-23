@@ -13,7 +13,9 @@
 1. **Shared checkout, push from a clean worktree.** Same rules as `12-glm-handoff.md` §0.1–0.2.
    Stage only your own paths at commit time; `ARCHITECTURE.md` and `docs/plan/*.md` very often
    hold another session's uncommitted hunks — check `git diff <file>` before staging them.
-2. **Numbers.** data-pg next free migration **0028** (0027 is `empleado_id`) (0024–0026 are other tracks'); backoffice admin migrations next free **0015**; ADR next free **ADR-089**; backoffice
+2. **Numbers** (refreshed 2026-09-22 from the tree). data-pg next free migration **0033** (0032 is
+   `signup_attribution`); SQLite next free **0012**; backoffice admin migrations next free **0015**;
+   ADR next free **ADR-092**; backoffice
    migrations **0011** (not this track's). Never GRANT on `auth.*` — use a pinned SECURITY
    DEFINER function (this track's examples: `0015_auth_links`, `0016_business_archive`,
    `0018_account_create`).
@@ -255,7 +257,11 @@ it will bite CI just as it bit this session.
 
 **Engineering, workable now on main:**
 
-1. **O-38's tail: 13 operator spec files still behind the demo flag.** The
+1. ~~**O-38's tail: 13 operator spec files still behind the demo flag.**~~ **Done 2026-09-22
+   (`d0bca546`)** — all fourteen `operador-*` specs walk the real door in the serial `operador`
+   project (32 passed), chaos-1's caja section moved to `operador-chaos.spec.ts`, and
+   `xangarro.caja.demo` is gone from the app and the suite. Original text:
+   The
    `operador` Playwright project (serial, real Acceso door via
    `e2e/puerta-operador.ts`) exists and shell+inicio are converted
    (`cbea6388`). Remaining: `operador-avisos`, `operador-caja`,
@@ -270,8 +276,11 @@ it will bite CI just as it bit this session.
    door:** delete `xangarro.caja.demo` from `acceso/gate.tsx`, `auth.setup.ts`,
    and the removal line in `puerta-operador.ts` — then the acceptance
    ("matrix green, no demo flag anywhere") runs.
-2. **F-8's Track O entry**: `(portal)/cortes/screen.tsx:137`'s 34 px literal
-   (design-lint). Fold into the O-38 tail.
+2. ~~**F-8's Track O entry**: `(portal)/cortes/screen.tsx`'s 34 px literal~~ **Done 2026-09-22
+   (`d0bca546`)** — the empty-state glyph reads `portalFontSizes.xl6`. Note for whoever owns
+   design-lint: it is **not wired into CI**, and the repo now carries 60 findings against a
+   zero baseline recorded 2026-09-08 (34 font-size literals in login animations, the WhatsApp
+   dialogs, comprobantes and saldos screens). Ratchet or re-baseline it deliberately.
 3. **F-4's half**: the «Mayo 2026» chip in
    `src/app/inventario/sections-interactive.tsx` (cobranza's frozen `HOY` is
    fixture-only since O-33; the inventario chip is not).

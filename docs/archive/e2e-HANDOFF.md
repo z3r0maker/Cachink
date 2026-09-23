@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Complete. Its branch merged, both fixes landed, and its one open decision (five ventas flows against a superseded UI) was answered by parking them in `apps/mobile/maestro/flows/parked-mvp/`. The durable selector and driver rules live in `apps/mobile/maestro/scripts/lib/` and `E2E-SESSION-NOTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # E2E Maestro — Handoff (start here)
 
 > **Next LLM: read this first, then the two detail docs it points to.** This is the

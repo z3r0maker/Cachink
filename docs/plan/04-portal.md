@@ -243,6 +243,7 @@ including the press stamp.
 ### P-23 Primitives + Storybook inventory + visual-regression baselines
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
+  - 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance.
   - In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
     `pressTransform`); Button (6 fills × 3 sizes, disabled, hover-to-`yellowDeep`); Card
@@ -291,7 +292,8 @@ not move a pixel between routes.
 
 ### P-24 App shell — sidebar, header, bell, sync pill
 
-- [~] Status · **Blocked by:** P-01, P-23 · **Blocks:** P-02 and every screen task
+- [x] Status · **Blocked by:** P-01, P-23 · **Blocks:** P-02 and every screen task
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/layout.tsx`, `e2e/shell.spec.ts`, `e2e/sidebar-rail.spec.ts`.
   - In progress: 2026-09-17 · the shell renders at `/` with all twelve destinations.
   - **Done:** sidebar (248 px, 84 px rail below 1024 px, 76 px brand block whose bottom border
     lines up with the header's), the brand coin as inline SVG and the wordmark in self-hosted
@@ -352,7 +354,8 @@ onboarding.dc.html`, entered `design-reference/portal/` with the O-23 mirror).
 > **Amended 2026-09-18 (ADR-080):** the provider is decided — our own login (ADR-079) plus emailed
 > sign-in/reset links (B-14). No GoTrue.
 
-- [~] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
+- [x] Status · **Blocked by:** P-01, P-24, B-05 · **Blocks:** all other P
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/login/` (animation + escenas), `e2e/switcher.sync.spec.ts`, `e2e/auth-links.sync.spec.ts`.
   - 2026-09-17 · Sign-in/out, signed session, membership guard, 11 routes gated, forged cookie refused, identical message for wrong password and unknown address. `SESSION` fixture replaced in 19 files by a provider seeded from the server. **Still to do:** magic link, business switcher, the four-scene login animation, and the provider decision (ADR-061).
   - 2026-09-18 · **Emailed links (ADR-080).** «¿Olvidaste tu contraseña?» (`/login/recuperar` → `/login/restablecer`) and «Entrar con un enlace por correo» (`/login/enlace` → `/login/entrar`). Links are 256-bit, stored hashed in `xangarro.auth_links` (data-pg `0015_auth_links.sql`, SECURITY DEFINER only), single-use, 30/15 min, and a new link retires the account's earlier ones. A reset sets the bcrypt hash and ends every portal session in the same function. The request answers the same for unknown addresses and is throttled per address (3) and IP (10) per 15 min; the landing pages spend the token only on a tap, so mail scanners spend nothing. Sign-in after any credential goes through one `signInUser`. Tests: 5 DB integration (single use, expiry, newest wins, kinds don't mix, reset revokes sessions) and 3 e2e via the dev outbox. **Still to do:** the four-scene login animation.
   - 2026-09-18 · **Business switcher.** The header chip lists every business the account belongs to (`memberships_for_user`, archived ones skipped; each name read inside its own tenant) with the role there; picking one ends this session and opens one on the other, after re-checking the membership server-side. One business: a plain label, not a button. e2e on two throwaway tenants (owner in one, viewer in the other).
@@ -420,7 +423,8 @@ without touching code.
 
 ### P-25 Container/presentational split, the four states, role gating
 
-- [~] Status · **Blocked by:** P-24 · **Blocks:** every screen task
+- [x] Status · **Blocked by:** P-24 · **Blocks:** every screen task
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/session/gating.ts`, `src/components/gated-states.tsx`, `tests/gating.test.ts`.
   - In progress: 2026-09-17 · the pattern and the states exist; applying them to screens is the
     remaining half.
   - **Done:** `session/types.ts` (Role, Capabilities, Session, and `ScreenState` as a closed
@@ -480,7 +484,8 @@ without touching code.
 > The remaining screens follow the same shape — container queries, screen stays pure — and are the
 > mechanical half of this work.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** —
+- [x] Status · **Blocked by:** P-25 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/_inicio/`, `e2e/inicio.spec.ts`.
   - In progress: 2026-09-17 · renders at `/` against fixtures; HTTP 200 verified.
   - Rejection banner, greeting with the es-MX long date ("martes, 12 de mayo de 2026"), the yellow
     hero (56 px tabular figure, period range, green-dot verdict, "Ver estados"), Resumen de hoy as
@@ -529,7 +534,8 @@ without touching code.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** P-13, P-14
+- [x] Status · **Blocked by:** P-25 · **Blocks:** P-13, P-14
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/movimientos/`, `e2e/ventas.sync.spec.ts`, `e2e/gastos.sync.spec.ts`.
   - In progress: 2026-09-17 · `/movimientos` and `/movimientos?tab=gastos` both serve HTTP 200.
   - One screen, two tabs, **read-only** as ADR-058 §2 requires — no "Nueva venta", no "Nuevo
     gasto", and the drawer's only footer action is "Compartir comprobante". Four KPIs per tab,
@@ -656,7 +662,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25, C-11 · **Blocks:** P-34
+- [x] Status · **Blocked by:** P-25, C-11 · **Blocks:** P-34
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/estados/statement.tsx`, `e2e/estados.sync.spec.ts`.
   - In progress: 2026-09-17 · `/estados` serves HTTP 200 with four tabs.
   - **The existing domain functions are used, not reimplemented** — the instruction this task
     carries. `calculateEstadoDeResultados`, `calculateBalanceGeneral`, `calculateFlujoDeEfectivo`,
@@ -717,7 +724,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** —
+- [x] Status · **Blocked by:** P-25 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/empleados/`, `e2e/empleados.sync.spec.ts`.
   - 2026-09-17 · "Nuevo empleado" works; salary parsed pesos→centavos at the boundary and the E2E asserts the **stored** value (`187550`), not the rendered one.
   - In progress: 2026-09-17 · `/empleados` serves HTTP 200.
   - **Two tabs, and Asistencia is verified absent from the rendered HTML.** Personas (avatar-less
@@ -756,7 +764,10 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 
 ### P-05 Operadores
 
-- [ ] Status · **Blocked by:** P-02, P-09
+> **Stray from an earlier reorganisation (2026-09-22 audit):** the Steps and Acceptance lines
+> below belong to **P-13 Inicio** (done, see its section); P-05's own status is the `- [~]` line
+> further down. Kept because P-13's section does not carry these Steps anywhere else.
+
 - **Steps:** port `DirectorHome` intent, not code (reference: `archive/ui-screens/DirectorHome/`, `archive/ui-screens/CajaReportes/compute-report-kpis.ts`): today's ventas/gastos/utilidad tiles, 30-day sparkline (Recharts), caja status per device (open turno?), stock bajo list, cuentas por cobrar placeholder (hidden until Z-01), unresolved rejections banner, onboarding progress if incomplete. Read via `@xangarro/domain` KPI functions where they exist (`packages/domain/src/**/kpi*`).
 - **Acceptance:** numbers match P-09 totals for "hoy"; renders at 768 px width without horizontal scroll.
 
@@ -766,7 +777,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+- [x] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/equipo/`, `e2e/operators.spec.ts`, `e2e/permisos.sync.spec.ts`.
   - In progress: 2026-09-17 · `/equipo` serves HTTP 200. One screen with Dispositivos (P-06);
     the sidebar's two entries preselect a tab.
   - Operator cards with a 48 px avatar, turno state pill, two inset stat boxes (Capturó hoy,
@@ -804,7 +816,11 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
   the capability. No email field anywhere.
 - **Acceptance:** server-action tests via B-13; Playwright — create → appears; limit reached → button
   disabled with tooltip; viewer read-only; permissions editor absent below Xangarrote.
-- [ ] Status · **Blocked by:** P-02, P-09
+
+  > **Stray from an earlier reorganisation (2026-09-22 audit):** the Steps and Acceptance lines
+  > below belong to **P-14 Estados financieros** (done, see its section); P-06's own status is the
+  > `- [~]` line further down.
+
 - **Steps:** (the archived app UI in `archive/ui-screens/Estados/` holds `health-verdicts.ts` and `estado-resultados-mappers.ts` — port their logic into `@xangarro/domain` rather than rewriting it) period picker (mes/trimestre/año/custom); NIF B-3 Estado de Resultados, B-6 Balance, B-2 Flujo de Efectivo computed with the **existing** `@xangarro/domain` functions used by `packages/ui/src/screens/Estados` (locate them; do not reimplement); print stylesheet; "Exportar Excel" (all plans). "Informe mensual PDF" button visible but gated to Pro → Z-06.
 - **Acceptance:** a fixture business (seed) produces the same numbers as the domain unit tests' expectations; print preview is one page per statement.
 
@@ -819,6 +835,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > when a read throws.
 
 - [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - 2026-09-22 doc audit: shipped except the QR / app-link pairing panel (N-25, blocked on C-14).
   - In progress: 2026-09-17 · the Dispositivos tab of `/equipo`.
   - Device cards with platform label, model, operator, last sync and a pending-count pill. The
     **pairing panel** on flat yellow renders the eight-character code in 44×56 white boxes with
@@ -857,7 +874,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+- [x] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/sincronizacion/`, `packages/data-pg/tests/historial-sync.integration.test.ts`.
   - In progress: 2026-09-17 · `/sincronizacion` serves HTTP 200.
   - Pending banner ("Están guardados en el Android de la barra. **Nada se pierde.**"), a three-tile
     Resumen, per-device cards, and the "Registros no enviados" table with "Marcar como resuelto".
@@ -894,7 +912,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** —
+- [x] Status · **Blocked by:** P-25 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/negocio/`, `e2e/negocio.sync.spec.ts`.
   - 2026-09-17 · "Editar datos" works, owner-only on the server as well as the screen, appending `sync_log` (`businesses` is DOWN).
   - In progress: 2026-09-17 · `/negocio` serves HTTP 200.
   - Four section cards with their icon tiles — Datos generales (yellow), Datos fiscales (blue),
@@ -946,7 +965,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 
 ### P-10 Suscripción
 
-- [~] Status · **Blocked by:** P-25, C-11 · **Blocks:** —
+- [x] Status · **Blocked by:** P-25, C-11 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/suscripcion/plan-card.tsx`, `e2e/suscripcion.spec.ts`.
   - In progress: 2026-09-17 · `/suscripcion` serves HTTP 200. **C-11 was executed to unblock it.**
   - **The pricing is transcribed verbatim**, not paraphrased: every pitch, price, period, CTA,
     `includesLabel` and feature line comes from `Xangarro Portal - Suscripcion.dc.html`. Verified in
@@ -1038,7 +1058,8 @@ never invented text.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
+- [x] Status · **Blocked by:** P-25, P-31 · **Blocks:** P-27, P-28
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{screen,para-ti}.tsx`, `e2e/asesor.sync.spec.ts`.
   - In progress: 2026-09-17 · `/asesor` serves HTTP 200 in dev **and in a production build**.
   - Three tabs. "Para ti" reads `notices` where `source='asesor'`; the capacidades panel shows
     **progress toward the data each capability needs** — "33 de 60 días", "8 de 20 cortes" — never
@@ -1071,7 +1092,8 @@ never invented text.
 
 ### P-27 Metas
 
-- [~] Status · **Blocked by:** P-26 · **Blocks:** P-33
+- [x] Status · **Blocked by:** P-26 · **Blocks:** P-33
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/(portal)/asesor/{metas,wizard}.tsx`, `src/server/metas.ts`, `e2e/asesor-metas.sync.spec.ts`.
   - In progress: 2026-09-17 · the Metas tab.
   - Three-step wizard — qué lograr (Ganar/Vender/Gastar más) → para qué (Comprar/Colchón/Deudas) →
     qué tanto (+10 / +20 / +30%, with the monthly and daily figures) — built on `OptionCards`, so
@@ -1098,6 +1120,7 @@ never invented text.
 ### P-28 Diagnóstico + estrategia — **«Próximamente» in production**
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
+  - 2026-09-22 doc audit: shipped except the ten report sections and the price table.
   - In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built.
   - Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor ===
 'completo'` renders `locked` with the Xangarrote upsell, and an LLM-backed path with the
@@ -1132,6 +1155,7 @@ never invented text.
 ### P-30 Asesor generation runtime
 
 - [~] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
+  - 2026-09-22 doc audit: shipped except the cron entry, the per-business route and the batch API.
   - 2026-09-21 · **The model boundary landed** — the single module ADR-056 requires
     (`server/asesor/model.ts`): env-gated, unset → null → fixtures (CI/fresh clones/
     pre-credential production unchanged), set → an Anthropic SDK client pointed at
@@ -1173,7 +1197,8 @@ critical avisos cannot be switched off.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** P-26, P-32
+- [x] Status · **Blocked by:** P-25 · **Blocks:** P-26, P-32
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `packages/data-pg/src/schema/portal.ts` (`notices`), `src/app/(portal)/avisos/`, `e2e/bell.spec.ts`.
   - In progress: 2026-09-17 · `/avisos` serves HTTP 200. The entity shape and the counting rule
     are built; the Postgres table lands at B-02.
   - `Notice` carries `source ∈ sistema | operacion | asesor`, severity, title, body, cta target,
@@ -1243,7 +1268,8 @@ critical avisos cannot be switched off.
 
 ### P-33 Takeover, sellos, rachas, milestone toasts
 
-- [~] Status · **Blocked by:** P-27 · **Blocks:** —
+- [x] Status · **Blocked by:** P-27 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/components/{seal-path.ts,celebration.tsx}`, `tests/seal.test.ts`.
   - In progress: 2026-09-17 · the takeover, the seal and the streak render; wiring to a real
     achievement needs the `metas` table at B-02.
   - **The seal is a polygon stamp, ported from the design's own `sealPath` generator** so the
@@ -1318,7 +1344,8 @@ critical avisos cannot be switched off.
 
 ### P-17 Portal smoke E2E (Playwright)
 
-- [~] Status · **Blocked by:** P-03…P-07, P-11, P-16 · **Blocks:** X-02
+- [x] Status · **Blocked by:** P-03…P-07, P-11, P-16 · **Blocks:** X-02
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `e2e/smoke.sync.spec.ts` and the `portal-e2e` CI job.
   - 2026-09-17 · The `portal-e2e` CI job exists and runs the full suite (170 tests) against a seeded Postgres — against a plain Postgres + compat layer, not "local Supabase" as written above.
   - 2026-09-19 · **Done**: `e2e/smoke.sync.spec.ts` runs the named flow end to end — free
     signup → wizard → operator → 3-product import → device code → `/activate` against the
@@ -1332,7 +1359,8 @@ critical avisos cannot be switched off.
 
 ### P-34 Print, PDF and exports
 
-- [~] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
+- [x] Status · **Blocked by:** P-14, P-28 · **Blocks:** —
+  - Verified done by the 2026-09-22 doc audit (evidence, not authorship): `src/app/api/export/{[dataset],informe-mensual}/route.ts`, `src/styles/global.css.ts` (print), `e2e/imprimir.spec.ts`.
   - 2026-09-17 · Exports: `GET /api/export/<dataset>` returns real .xlsx for ventas, gastos, productos, movimientos and empleados — authenticated, dataset checked against a closed union, RLS-scoped. E2E asserts the `PK` zip magic number.
   - 2026-09-18 · **Print stylesheet**: under `@media print` the sidebar, header, every button and anything marked `data-no-print` drop out, shadows go, black on white — a statement prints as the document. Estados gets «Imprimir» (the period in the URL is what prints). e2e emulates print.
   - 2026-09-19 · **Informe mensual PDF done**: the phone's PDF layout moved to

@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Superseded by ADR-053 and ADR-063. The stack it proposes (Turso, Cloudflare Workers, one database provisioned per business) was replaced by a single Supabase/Postgres with row-level tenant isolation, and the admin site by `apps/backoffice`. Its `/activate`, `/sync/push` and `/sync/pull` shapes did survive, as route handlers under `apps/web/src/app/api/v1/`. **Its prices are wrong** — see `packages/application/src/billing/plans.ts`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Xangarro Cloud Mode — Implementation Plan
 
 > **Status:** DRAFT — Pending approval

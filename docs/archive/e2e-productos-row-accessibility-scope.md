@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Self-titled RESOLVED: the detail-save defect and the iPhone auth numpad are fixed, the dead row component is deleted, and the flows it wanted converted were either deleted with A-09 or parked. Its surviving selector gotchas (CANTIDAD wheel, MOTIVO dropdown) moved to `apps/mobile/maestro/E2E-SESSION-NOTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # RESOLVED — productos/ventas item interaction under Maestro
 
 The original "FlatList accessibility" framing was wrong on every count. After a

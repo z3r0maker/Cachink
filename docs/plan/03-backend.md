@@ -195,7 +195,13 @@
 > N-26 SEC-SEC-01; also amends B-01's env list). Annual prices and a 14-day trial on **both** paid tiers
 > with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
 
-- [ ] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
+- [~] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
+  - Built (verified by the 2026-09-22 doc audit, not by its author): Checkout session, signed
+    webhook `apps/web/src/app/api/stripe/webhook/route.ts`, the event → subscription-state mapping
+    (`src/server/billing/stripe-mapping.ts`), the `stripe_events` idempotency ledger
+    (`packages/data-pg/src/schema/billing.ts`), the seeding script `apps/web/scripts/stripe-seed.ts`
+    and tests under `apps/web/tests/billing/`. **Still to do:** `grace_until` is derived rather than
+    stored, and there is no `past_due → lapsed` cron route under `apps/web/src/app/api/cron/`.
 - **Steps:**
   1. Stripe test mode: 1 product "Xangarro" with 2 recurring prices (Emprendedor 19900 MXN, MiPyME Pro 39900 MXN; `trial_period_days: 14` applied at Checkout for Pro only). Enable payment methods: card, **OXXO**, **SPEI** (customer balance / bank transfer for MX). Record price IDs in `billing.plans`.
   2. `createCheckoutSession(businessId, planId)` server action: mode `subscription`, `customer_email`, `client_reference_id = business_id`, `success_url = /onboarding?session_id=…`, `cancel_url = /suscripcion`.

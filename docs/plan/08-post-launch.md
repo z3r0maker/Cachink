@@ -32,7 +32,10 @@
 
 ### Z-06 Informe mensual para el contador (PDF, Pro)
 
-- [ ] Status · **Trigger:** first Pro customer.
+- [x] Status · **Trigger:** first Pro customer.
+  - Done before its trigger (verified by the 2026-09-22 doc audit):
+    `apps/web/src/app/api/export/informe-mensual/route.ts`, gated by the ADR-090 `informeMensual`
+    capability (Xangarrote), not by the old "Pro" bucket. Shipped with P-34.
 - **Scope:** server-rendered PDF (Estado de Resultados + ventas/gastos por categoría + notas), shareable link, WhatsApp share button; gated to Pro via flags.
 
 ### Z-07 Multi-sucursal

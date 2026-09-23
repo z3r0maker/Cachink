@@ -94,9 +94,9 @@
 
 | Item                                                                      | Trigger                                                                   | Decision / spec                                                   |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| P-02 four-scene login animation                                           | O-23 (design mirrored)                                                    | The design file is the spec; not invented from the plan's timings |
+| ~~P-02 four-scene login animation~~ **done 2026-09-21**                   | O-23 (design mirrored)                                                    | The design file is the spec; not invented from the plan's timings |
 | P-28 Diagnóstico + estrategia, P-29 catálogo desde una foto, P-30 runtime | ADR-059 LLM production gate lifted (`asesorLlm` kill switch) + credential | ADR-056, ADR-059 — «Próximamente» in production                   |
-| P-12 employee drawer with recent payments                                 | `empleado_id` on `expenses` (O-26)                                        | Never match payments to employees by name                         |
+| ~~P-12 employee drawer with recent payments~~ **done 2026-09-21**         | `empleado_id` on `expenses` (O-26)                                        | Never match payments to employees by name                         |
 | P-08 «Contacto y comprobantes» card                                       | Track N's C-15 branding columns                                           | Do together with N-19                                             |
 | P-11 real rejection rows                                                  | B-08 against hosted                                                       | The UI already reads and resolves real rows                       |
 | Per-push sync event log (full Historial / audit)                          | an audit need, or N-07 p95 (whichever first)                              | Historial today is derived from latest receipts                   |

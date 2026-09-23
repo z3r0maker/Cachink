@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Superseded by ADR-053, ADR-063, ADR-065, ADR-067 and ADR-069. Billing runs on Stripe directly from the web portal; there is no RevenueCat, no in-app purchase UI, and the free limits are transactions/month + active products, not the ventas/egresos/productos counters described here. Live spec: `docs/plan/09-next-features.md` (N-01, N-09, N-11).
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Billing & Licensing Plan — Xangarro
 
 > **Status:** DRAFT — Pending business model decisions.
