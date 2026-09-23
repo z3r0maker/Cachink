@@ -17,9 +17,17 @@ import { db } from '../db';
  */
 const GUESSES: ReadonlySet<string> = new Set(['CODE_INVALID', 'EMAIL_MISMATCH', 'CODE_EXPIRED']);
 
-export function activateThrottle(request: Request, code: string | null) {
+/** `credential` is the typed code, or `qr:<hash prefix>` for a scanned token (C-14). */
+export function activateThrottle(request: Request, credential: string | null) {
   const byIp = throttleKey('activate', 'ip', clientIp(request.headers));
-  const byCode = code === null ? null : throttleKey('activate', 'code', code.toUpperCase());
+  const byCode =
+    credential === null
+      ? null
+      : throttleKey(
+          'activate',
+          'code',
+          credential.startsWith('qr:') ? credential : credential.toUpperCase(),
+        );
 
   return {
     /** Seconds this caller must wait before trying at all; 0 = go. */

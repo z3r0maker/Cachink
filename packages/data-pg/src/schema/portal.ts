@@ -141,6 +141,10 @@ export const activationCodes = pgTable(
     expiresAt: timestamp('expires_at', { withTimezone: true, mode: 'string' }).notNull(),
     redeemedAt: timestamp('redeemed_at', { withTimezone: true, mode: 'string' }),
     redeemedByDeviceId: text('redeemed_by_device_id'),
+    /** SHA-256 hex of the scannable pairing token (C-14); the token itself is never stored. */
+    qrTokenHash: text('qr_token_hash'),
+    /** 15 minutes from minting, and never later than `expiresAt`. */
+    qrExpiresAt: timestamp('qr_expires_at', { withTimezone: true, mode: 'string' }),
     ...tenantStamps,
   },
   (t) => [index('activation_codes_business_idx').on(t.businessId)],

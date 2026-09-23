@@ -29,10 +29,12 @@ const MENSAJE = 'No se pudo vincular. Inténtalo de nuevo.';
 /** The contract's refusal codes, as the person at the counter reads them. */
 function rechazo(code: string | undefined): string | null {
   switch (code) {
+    // One answer for a wrong code and a wrong email (SEC-DEV-01): the server no
+    // longer says which, so the counter checks both. EMAIL_MISMATCH is an older
+    // server's word for the same thing.
     case 'CODE_INVALID':
-      return 'El código no coincide. Pídele a Pedro uno nuevo.';
     case 'EMAIL_MISMATCH':
-      return 'Ese correo no es con el que se generó el código.';
+      return 'El correo o el código no coinciden. Revisa los dos o pide uno nuevo.';
     case 'CODE_EXPIRED':
       return 'El código expiró. Pide otro desde el portal.';
     case 'CODE_USED':

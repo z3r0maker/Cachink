@@ -667,6 +667,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-25 QR device pairing `[LAUNCH]`
 
 - [ ] Status · **Blocked by:** C-14, B-11, P-06, A-04, N-24
+      **Remaining (2026-09-23, after C-14 and P-06 landed):** the phone side only — verified App Links and Universal Links (`assetlinks.json`, AASA) for `app.xangarro.mx/activar`, reading the token from the fragment, the camera screen, the SEC-MOB-04 confirmation «¿Vincular a _negocio_?» before redeeming (needs a small preview that names the business for a token, not built), and the Maestro deep-link flow. The contract, the token, the portal QR, the WhatsApp share and the `/activar` fallback page exist. Still blocked by N-24.
 - **What:** the portal's "Agregar dispositivo" shows a QR next to the 8-character code. The QR and a
   "Compartir por WhatsApp" button carry an **https universal / app link**
   `https://app.xangarro.mx/activar?t=<qr-token>` (a ≥ 128-bit single-use token, never the typed code — C-14,
@@ -684,7 +685,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-26 Security audit `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** 3 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01); SEC-DEV-01 half (the `EMAIL_MISMATCH` oracle, C-14); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01.
+  **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01.
 
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
   staff token handling; Stripe webhook signature; secrets and service-role isolation (N-05 guard);

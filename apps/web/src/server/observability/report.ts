@@ -56,6 +56,8 @@ export interface ApiLine {
   readonly rejected?: number;
   /** Rejection codes → count, e.g. `{ FK_PRODUCT_MISSING: 1 }`. */
   readonly codes?: Readonly<Record<string, number>>;
+  /** `/activate`'s real refusal, which the response may generalise (SEC-DEV-01). */
+  readonly refusal?: string;
 }
 
 export function logApi(line: ApiLine): void {

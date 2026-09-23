@@ -7,12 +7,16 @@
  * portal uses, so the suite exercises codes the portal could actually issue.
  *
  *   DATABASE_URL=… tsx scripts/conformance-codes.ts 6
+ *   DATABASE_URL=… tsx scripts/conformance-codes.ts 3 --qr   # scan tokens (C-14)
  *
- * Prints the codes comma-separated on stdout and nothing else, for `$(…)`.
+ * Prints the codes (or, with `--qr`, the raw pairing tokens) comma-separated on
+ * stdout and nothing else, for `$(…)`. `--qr` mints each token on its own code
+ * with the portal's own minter and stores only the hash, as «Mostrar QR» does.
  */
 import postgres from 'postgres';
 
 import { CODE_TTL_MS, mintActivationCode } from '../src/lib/activation-code';
+import { hashPairingToken, mintPairingToken, pairingExpiry } from '../src/lib/pairing-token';
 import { clearLocalThrottles } from './local-throttles';
 
 // The conformance tenant, not the demo business (see CONFORMANCE in seed-data):
@@ -24,6 +28,7 @@ async function main(): Promise<void> {
   const url = process.env.DATABASE_URL;
   if (url === undefined || url === '') throw new Error('DATABASE_URL is required.');
   const count = Number(process.argv[2] ?? '6');
+  const qr = process.argv.includes('--qr');
 
   const sql = postgres(url, { max: 1, onnotice: () => undefined });
   try {
@@ -34,17 +39,19 @@ async function main(): Promise<void> {
     await clearLocalThrottles(sql);
     const now = new Date();
     const expires = new Date(now.getTime() + CODE_TTL_MS).toISOString();
-    const codes: string[] = [];
-    while (codes.length < count) {
+    const out: string[] = [];
+    while (out.length < count) {
       const code = mintActivationCode();
+      const token = qr ? mintPairingToken() : null;
       const inserted = await sql`
-        INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-        VALUES (${code}, ${EMAIL}, ${expires}, ${BIZ}, ${now.toISOString()}, ${now.toISOString()})
+        INSERT INTO activation_codes (code, email, expires_at, business_id, qr_token_hash, qr_expires_at, created_at, updated_at)
+        VALUES (${code}, ${EMAIL}, ${expires}, ${BIZ}, ${token === null ? null : hashPairingToken(token)},
+                ${token === null ? null : pairingExpiry(now, expires)}, ${now.toISOString()}, ${now.toISOString()})
         ON CONFLICT (code) DO NOTHING
         RETURNING code`;
-      if (inserted.length > 0) codes.push(code);
+      if (inserted.length > 0) out.push(token ?? code);
     }
-    process.stdout.write(codes.join(','));
+    process.stdout.write(out.join(','));
   } finally {
     await sql.end({ timeout: 5 });
   }

@@ -8,6 +8,7 @@ import * as ed from '@noble/ed25519';
 import { ZodError } from 'zod';
 import { EntitlementSchema, type Entitlement } from '@xangarro/domain';
 import { ActivateRequestSchema, type ActivateResponse } from '../activate.js';
+import { claimable } from './claim.js';
 import { canonicalize, type SignedEntitlement } from '../entitlement.js';
 import { ERROR_CATALOG, type ErrorCode } from '../errors.js';
 import type { PullResponse } from '../sync-pull.js';
@@ -140,12 +141,10 @@ export class MockApi {
           : 'invalid';
       return err('CODE_INVALID', message, 400);
     }
-    const code = this.state.codes.get(parsed.data.code);
-    if (!code) return err('CODE_INVALID');
-    if (code.email !== parsed.data.email) return err('EMAIL_MISMATCH');
-    if (code.expiresAt < Date.now()) return err('CODE_EXPIRED');
-    if (code.redeemedBy) return err('CODE_USED');
-    const slots = parsed.data.code === MOCK_CODES.noSlots ? 0 : this.state.deviceSlots;
+    const found = claimable(this.state, parsed.data);
+    if ('refusal' in found) return err(found.refusal);
+    const { code } = found;
+    const slots = code.code === MOCK_CODES.noSlots ? 0 : this.state.deviceSlots;
     if (this.state.activeDevices() >= slots)
       return err('NO_DEVICE_SLOTS', `plan allows ${slots} devices`);
     // Single-use: burn the code synchronously, before the first await, so a concurrent redeem loses.

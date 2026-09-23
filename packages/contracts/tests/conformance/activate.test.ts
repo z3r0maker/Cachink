@@ -49,7 +49,10 @@ describe('POST /activate', () => {
     const mismatch = await call(h.base, 'POST', API_PATHS.activate, {
       body: { email: 'other@x.mx', code, device: DEVICE },
     });
-    assert.equal(mismatch.status, 403);
+    // SEC-DEV-01: a wrong email is the same public answer as an unknown code —
+    // the response must never confirm that a code exists.
+    assert.equal(mismatch.status, 400, JSON.stringify(mismatch.body));
+    assert.equal((mismatch.body['error'] as { code: string }).code, 'CODE_INVALID');
     const malformed = await call(h.base, 'POST', API_PATHS.activate, {
       body: { email: 'nope', code, device: { name: 'x' } },
     });

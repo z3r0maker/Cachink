@@ -29,20 +29,49 @@ export const ActivationCodeSchema = z
 /** `web` = the browser register, a device like a phone (ADR-071; C-16). */
 export const DevicePlatformSchema = z.enum(['ios', 'android', 'web']);
 
-export const ActivateRequestSchema = z.object({
+const DeviceInfoSchema = z.object({
+  name: z.string().min(1).max(80),
+  platform: DevicePlatformSchema,
+  appVersion: z.string().min(1).max(40),
+  osVersion: z.string().min(1).max(40),
+});
+
+/**
+ * The scannable pairing token (C-14): ≥128 random bits, base64url, single use,
+ * 15 minutes. It travels in the link's fragment (`/activar#c=…`), never in a
+ * query string, and is never the typed code.
+ */
+export const PAIRING_TOKEN_REGEX = /^[A-Za-z0-9_-]{22,64}$/;
+export const PairingTokenSchema = z.string().regex(PAIRING_TOKEN_REGEX, 'pairing token');
+
+/** Typed path: the owner's email and the 8-character code (§3, unchanged). */
+export const TypedActivateRequestSchema = z.object({
   email: z
     .string()
     .transform((s) => s.trim().toLowerCase())
     .pipe(z.email()),
   code: ActivationCodeSchema,
-  device: z.object({
-    name: z.string().min(1).max(80),
-    platform: DevicePlatformSchema,
-    appVersion: z.string().min(1).max(40),
-    osVersion: z.string().min(1).max(40),
-  }),
+  device: DeviceInfoSchema,
 });
+
+/** Scan path (C-14): the token alone — the 128 bits are the credential, no email. */
+export const ScanActivateRequestSchema = z.object({
+  qrToken: PairingTokenSchema,
+  device: DeviceInfoSchema,
+});
+
+/** Either path; additive at protocol version 1 (C-16 precedent). */
+export const ActivateRequestSchema = z.union([
+  TypedActivateRequestSchema,
+  ScanActivateRequestSchema,
+]);
+export type TypedActivateRequest = z.infer<typeof TypedActivateRequestSchema>;
+export type ScanActivateRequest = z.infer<typeof ScanActivateRequestSchema>;
 export type ActivateRequest = z.infer<typeof ActivateRequestSchema>;
+
+export function isScanRequest(r: ActivateRequest): r is ScanActivateRequest {
+  return 'qrToken' in r;
+}
 
 /** Operators: name, PIN hash, avatar, permissions, active — no email, no role (§5, C-11). */
 export const WireUserSchema = wireSchema(UserSchema);
@@ -83,11 +112,17 @@ export const ActivateResponseSchema = z.object({
 });
 export type ActivateResponse = z.infer<typeof ActivateResponseSchema>;
 
+/**
+ * What `/activate` may answer. `EMAIL_MISMATCH` is gone from it (SEC-DEV-01,
+ * owner decision 2026-09-23): a wrong email and an unknown code are one public
+ * `CODE_INVALID`, so the answer never confirms a code exists. The server keeps
+ * the real reason in its log. The catalog still lists `EMAIL_MISMATCH` so an
+ * older server's answer maps to the same message.
+ */
 export const ACTIVATE_ERROR_CODES = [
   'CODE_INVALID',
   'CODE_EXPIRED',
   'CODE_USED',
-  'EMAIL_MISMATCH',
   'NO_DEVICE_SLOTS',
   'BUSINESS_SUSPENDED',
 ] as const;
