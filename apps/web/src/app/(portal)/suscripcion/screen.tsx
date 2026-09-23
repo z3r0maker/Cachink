@@ -191,10 +191,9 @@ export function SuscripcionScreen({
       <ScreenBody
         state={resolveScreenState({ error: data === null })}
         onRetry={() => window.location.reload()}
-        empty={{
-          title: 'Todavía no hay cobros',
-          body: 'Estás en el plan Xangarrito, que es gratis para siempre. Cuando cambies de plan verás aquí tus comprobantes.',
-        }}
+        /* No `empty`: there is always a plan to show, even the free one. The only
+         thing here that can be empty is the invoice list, and that empty state
+         lives inside the Facturas card (S-2). */
       >
         {data === null ? null : <Contenido data={data} facturas={facturas} owner={owner} />}
       </ScreenBody>

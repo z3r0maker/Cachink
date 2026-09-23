@@ -6325,3 +6325,65 @@ a wordmark does not do that.
 - `e2e/auth.spec.ts` asserts the frame renders at 2.5:1 and that the served
   file is the optimised one, so a future swap cannot silently reintroduce the
   1.4 MB source.
+
+---
+
+## ADR-094
+
+**Title:** Money crossing the `@xangarro/data-pg` boundary is parsed, never asserted
+
+**Date:** 2026-09-22
+
+**Status:** Accepted
+
+**Context:**
+
+`valuacionApertura` selected `coalesce(sum(cantidad * costo_unit_centavos), 0)`
+and typed it `sql<bigint>`. Postgres answers `sum()` over `bigint` with a
+`numeric`, and the driver hands a `numeric` back as **text**. The annotation
+was a claim, not a conversion, so TypeScript believed it and every consumer
+did too.
+
+The damage was silent rather than loud. `bigint + string` is legal JavaScript
+— it concatenates — so the Balance's `capitalInicial` became the digits of one
+number glued to the digits of the next, and «Total capital» on Estados
+financieros read **-$640,885,164,500.00** for a real tenant. The Posición tab
+then crashed in `toPesosString`, which is the only reason anyone noticed: had
+the string happened to parse, the statement would simply have been wrong.
+
+`dashboard.ts` already had the rule written in a comment — "`sum()` returns
+text from Postgres, so it is parsed back to `BigInt`, never to a float" — and
+its own `toCentavos` helper. One query did not follow it.
+
+**Decision:**
+
+A `sql<T>` annotation in `packages/data-pg` describes **what the driver
+returns**, not what the caller wants. Aggregates over money are therefore
+typed `sql<string>` and converted explicitly at the boundary:
+
+```ts
+total: sql<string>`coalesce(sum(...), 0)`;
+// …
+return BigInt(String(row.total));
+```
+
+`sql<bigint>` over an aggregate is forbidden. An integer-typed column read
+directly still comes back as the driver's own type and needs no annotation.
+
+Counts and quantities may be typed `sql<number>` **only** with an explicit
+`::int` cast in the SQL, as `balance.ts`'s `stockACosto` already does.
+
+Every money-returning query owes an integration test that asserts `typeof` on
+the way out, not just the value: a seeded zero compares equal whether it is
+`0n` or `'0'`, so the value alone proves nothing.
+`packages/data-pg/tests/estados-facts.integration.test.ts` is the pattern.
+
+**Consequences:**
+
+- The conversion is one call at one boundary; nothing downstream defends
+  itself, and `@xangarro/domain` keeps receiving `bigint` centavos only.
+- A `typeof` assertion is cheap and catches the whole class. The existing
+  money queries were swept; `estados-facts.ts` was the only offender.
+- This does not make the annotation safe — it makes it honest. A future
+  aggregate typed `sql<bigint>` is a defect whether or not it is noticed, and
+  the reviewer's question is "what does the driver actually return?".

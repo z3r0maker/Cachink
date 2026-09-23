@@ -125,14 +125,21 @@ function Loaded({ business, owner }: { readonly business: Business; readonly own
   );
 }
 
-export function NegocioScreen({ business }: { readonly business: NegocioData | null }) {
+export function NegocioScreen({
+  business,
+  failed,
+}: {
+  readonly business: NegocioData | null;
+  /** The read threw — as opposed to returning no row, which is `empty`. */
+  readonly failed: boolean;
+}) {
   const owner = isOwner(useSession().role);
   if (business === null || business === undefined) {
     return (
       <>
         <Heading owner={false} e={null} />
         <ScreenBody
-          state={resolveScreenState({ error: business === null })}
+          state={resolveScreenState({ error: failed, isEmpty: !failed })}
           onRetry={() => window.location.reload()}
           empty={{ title: 'Sin datos del negocio', body: 'Completa tu perfil para empezar.' }}
         >

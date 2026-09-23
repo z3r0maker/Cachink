@@ -132,11 +132,17 @@ function Statements({
 }) {
   return (
     <ScreenBody
-      state={resolveScreenState({ entitled: maySeeStatements, error: model === null })}
+      state={resolveScreenState({
+        entitled: maySeeStatements,
+        error: model === null,
+        // Posición is a snapshot, not a window: an empty period can still
+        // stand on a real opening balance, so it keeps rendering (S-2).
+        isEmpty: model?.vacio === true && tab !== 'posicion',
+      })}
       onRetry={() => window.location.reload()}
       empty={{
         title: 'Sin datos en el periodo',
-        body: 'Registra movimientos en esta ventana de tiempo.',
+        body: 'No registraste ventas ni gastos en esta ventana de tiempo. Cambia el periodo arriba o captura un movimiento.',
       }}
       locked={{
         title: 'Los estados financieros llegan con Xangarro',

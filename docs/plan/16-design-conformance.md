@@ -13,21 +13,39 @@ Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 
 ## W-1 · Los cuatro estados (S-1, S-2) — un arreglo, todas las pantallas
 
-The design requires happy / loading / empty / error on every screen. We have
-the primitives and use two of them.
+**Done 2026-09-22.** What shipped, and what it turned up:
 
-- `(portal)/loading.tsx` so every route gets the design's static gray blocks
-  on navigation — the `LoadingState` primitive is already built and correct.
-- Pass `isEmpty` to `resolveScreenState` on Equipo, Negocio, Estados and
-  Suscripción, whose empty copy is written and unreachable today.
-- Guard: an E2E that visits each route with an empty tenant and asserts the
-  empty copy, so the state cannot silently die again.
+- `(portal)/loading.tsx` — one file, every portal route. The `LoadingState`
+  primitive was already built and correct; nothing rendered it, so a
+  navigation simply froze on the outgoing screen.
+- `isEmpty` wired on Equipo (per tab, with the tab's own copy), Negocio (the
+  page now tells "no row" apart from "the read threw") and Estados (a new
+  `EstadosModel.vacio`, with Posición exempt because a Balance is a snapshot,
+  not a window).
+- Suscripción and Asesor had `empty` copy that **nothing should reach**: the
+  first always has a plan to show, the second is still behind `proximamente`.
+  Both dropped the prop, which is now optional on `ScreenBody`. Suscripción's
+  real emptiness — no invoices yet — moved inside the Facturas card as the
+  design's inset empty state.
+- `tests/screen-states.test.ts` is the ratchet: `empty` copy and the `isEmpty`
+  that reaches it must travel together, in both directions, on every portal
+  screen — and the loading boundary must exist. Shown to fail when broken.
 
-**Why first:** it is one shared change, it needs no data-layer work, and it
-is the difference between "a period with no movements" reading as an empty
-month or as a statement full of zeros.
+**A crash found on the way.** Verifying the empty period in the browser took
+the Posición tab down with "Cannot mix BigInt and other types" — on _every_
+period, not just empty ones. `valuacionApertura` typed a Postgres `sum()` as
+`sql<bigint>` when the driver returns the numeric as text; `bigint + string`
+is legal JavaScript, so the Balance's `capitalInicial` concatenated instead of
+adding and «Total capital» read **-$640,885,164,500.00**. Fixed at the
+boundary, with `packages/data-pg/tests/estados-facts.integration.test.ts`
+asserting the `typeof` and the rule recorded as **ADR-094**: an aggregate over
+money is typed `sql<string>` and converted, never asserted to be a `bigint`.
+`dashboard.ts` had it written down already; one query had not followed it.
 
-**Size:** small. **Touches:** `session/gating.ts`, four screens, one new file.
+**Left open:** the empty states of Equipo and Negocio are wired but not yet
+exercised end to end — both need a tenant with no operators and no business
+row, which the seeded suite has no fixture for. The unit ratchet holds the
+wiring; an E2E against a throwaway tenant would hold the rendering.
 
 ---
 

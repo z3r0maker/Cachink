@@ -12,8 +12,12 @@ export const dynamic = 'force-dynamic';
 export default async function NegocioPage() {
   const session = await requireSession();
   try {
-    return <NegocioScreen business={(await loadNegocio(session.business_id)) ?? null} />;
+    // No row and a failed read are different screens (S-2): the first is a
+    // profile nobody has filled in yet, the second is a database we could not
+    // reach. Collapsing both to `null` made the empty state unreachable.
+    const business = await loadNegocio(session.business_id);
+    return <NegocioScreen business={business ?? null} failed={false} />;
   } catch {
-    return <NegocioScreen business={null} />;
+    return <NegocioScreen business={null} failed />;
   }
 }

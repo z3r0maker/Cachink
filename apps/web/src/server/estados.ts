@@ -48,6 +48,14 @@ export interface EstadosModel {
   readonly regimenSat: string | null;
   /** What each expandable line is made of — sums to the line (domain test). */
   readonly desglose: ReturnType<typeof desgloseDeResultados>;
+  /**
+   * The window holds no movement at all: no venta, no egreso, no pago de
+   * cliente, no corte. Resultados and Flujo for such a period are a column of
+   * zeros, which reads as a statement rather than as "nothing happened" — so
+   * the screen shows its empty state instead (S-2). The Balance is exempt: it
+   * is a snapshot, and an empty window can still sit on a real position.
+   */
+  readonly vacio: boolean;
 }
 
 const DIA_MS = 86_400_000;
@@ -155,25 +163,41 @@ function aDominio(rows: Awaited<ReturnType<typeof periodLedger>>) {
   };
 }
 
+/**
+ * Nothing happened in the window — no venta, no egreso, no pago de cliente, no
+ * corte. Four sources, because any one of them alone moves the statements: a
+ * period with only a client payment is not an empty period.
+ */
+function sinMovimiento(
+  ventas: readonly unknown[],
+  egresos: readonly unknown[],
+  pagos: readonly unknown[],
+  cortes: readonly unknown[],
+): boolean {
+  return ventas.length === 0 && egresos.length === 0 && pagos.length === 0 && cortes.length === 0;
+}
+
+/**
+ * One tenant transaction: the period's ledger, the balance's real inputs (F-1),
+ * the apertura facts, and the régime + rate that decide the ISR estimate
+ * (ADR-089).
+ */
+function leerPeriodo(businessId: string, from: string, to: string) {
+  return withTenant(businessId, async (tx) => ({
+    rows: await periodLedger(tx, from, to),
+    inputs: await periodBalanceInputs(tx, from, to),
+    isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
+    regimenSat: (await getBusiness(tx))?.regimenSat ?? null,
+    apertura: await loadApertura(tx, businessId),
+  }));
+}
+
 export async function loadEstadosModel(
   businessId: string,
   from: string,
   to: string,
 ): Promise<EstadosModel> {
-  // One tenant transaction: the period's ledger, the balance's real inputs
-  // (F-1), the apertura facts, and the régime + rate that decide the ISR
-  // estimate (ADR-089).
-  const { rows, inputs, isrTasa, regimenSat, apertura } = await withTenant(
-    businessId,
-    async (tx) => ({
-      rows: await periodLedger(tx, from, to),
-      inputs: await periodBalanceInputs(tx, from, to),
-      isrTasa: (await getBusiness(tx))?.isrTasa ?? 0,
-      regimenSat: (await getBusiness(tx))?.regimenSat ?? null,
-      apertura: await loadApertura(tx, businessId),
-    }),
-  );
-
+  const { rows, inputs, isrTasa, regimenSat, apertura } = await leerPeriodo(businessId, from, to);
   const { ventas, egresos } = aDominio(rows);
   const resultados = calculateEstadoDeResultados({
     ventas,
@@ -198,5 +222,6 @@ export async function loadEstadosModel(
   const indicadores = indicadoresDe(resultados, balance, tickets, from, to);
 
   const desglose = desgloseDeResultados({ ventas: tickets, egresos });
-  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose };
+  const vacio = sinMovimiento(ventas, egresos, pagosClientes, inputs.cortes);
+  return { resultados, balance, flujo, indicadores, isrTasa, regimenSat, desglose, vacio };
 }

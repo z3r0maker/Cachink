@@ -9,7 +9,13 @@ export interface ScreenBodyProps {
   readonly state: ScreenState;
   /** Rendered only in the `happy` state. */
   readonly children: ReactNode;
-  readonly empty: { readonly title: string; readonly body: string; readonly action?: ReactNode };
+  /**
+   * Omitted by the screens that cannot be empty — Suscripción always has a
+   * plan to show, so its emptiness lives inside the Facturas card instead.
+   * A screen that omits this must never pass `isEmpty`; if the state is
+   * forced anyway, the happy content renders rather than a blank area.
+   */
+  readonly empty?: { readonly title: string; readonly body: string; readonly action?: ReactNode };
   readonly onRetry: () => void;
   readonly loadingBlocks?: readonly number[];
   readonly locked?: { readonly title: string; readonly body: string; readonly plan: string };
@@ -40,7 +46,7 @@ export function ScreenBody({
   if (state === 'proximamente' && proximamente) {
     return <ProximamenteState title={proximamente.title} body={proximamente.body} />;
   }
-  if (state === 'empty') {
+  if (state === 'empty' && empty) {
     return <EmptyState title={empty.title} body={empty.body} />;
   }
   return <>{children}</>;

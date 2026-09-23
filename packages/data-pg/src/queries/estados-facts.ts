@@ -11,10 +11,18 @@ import type { Db } from '../client.js';
 
 type Conn = Db | Parameters<Parameters<Db['transaction']>[0]>[0];
 
+/**
+ * Postgres answers `sum()` over bigint with a **numeric**, which the driver
+ * hands back as text — the same rule `dashboard.ts` writes down. Typing that
+ * text as `bigint` was a lie the compiler could not catch, and the damage was
+ * silent rather than loud: `bigint + string` is legal JavaScript, so the
+ * Balance's `capitalInicial` concatenated instead of adding and «Total
+ * capital» read -$640,885,164,500.00. Parse at the boundary, never past it.
+ */
 export async function valuacionApertura(db: Conn, businessId: string): Promise<bigint> {
   const [row] = await db
     .select({
-      total: sql<bigint>`coalesce(sum(${inventoryMovements.cantidad} * ${inventoryMovements.costoUnitCentavos}), 0)`,
+      total: sql<string>`coalesce(sum(${inventoryMovements.cantidad} * ${inventoryMovements.costoUnitCentavos}), 0)`,
     })
     .from(inventoryMovements)
     .where(
@@ -24,5 +32,5 @@ export async function valuacionApertura(db: Conn, businessId: string): Promise<b
         isNull(inventoryMovements.deletedAt),
       ),
     );
-  return row?.total ?? 0n;
+  return row === undefined ? 0n : BigInt(String(row.total));
 }

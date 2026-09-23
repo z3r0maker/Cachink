@@ -5,7 +5,7 @@ import { formatFechaHora, formatMoney } from '@xangarro/domain';
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 
-import { Button, Card } from '@/components';
+import { Button, Card, EmptyState } from '@/components';
 import { solicitarFacturaNominal, urlDescargaFactura } from '@/server/billing/facturas';
 import type { ListarFacturasResult } from '@/server/billing/facturas-core';
 
@@ -122,7 +122,13 @@ export function Facturas(props: { readonly r: ListarFacturasResult } & Permisos)
       {!props.r.ok ? (
         <p role="alert">{props.r.message}</p>
       ) : props.r.facturas.length === 0 ? (
-        <p>Todavía no hay cobros. Cuando pagues tu plan, aquí aparecerá cada factura.</p>
+        // Inset: the design's empty card without a border, radius or shadow of
+        // its own, because it already stands inside one (S-2).
+        <EmptyState
+          inset
+          title="Todavía no hay cobros"
+          body="Cuando pagues tu plan, aquí aparecerá cada factura con su CFDI."
+        />
       ) : (
         <ul aria-label="Facturas" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
           {props.r.facturas.map((f) => (

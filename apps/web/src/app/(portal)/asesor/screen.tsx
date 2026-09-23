@@ -54,10 +54,9 @@ function Diagnostico() {
           llmEnabled: LLM_ENABLED,
         })}
         onRetry={() => undefined}
-        empty={{
-          title: 'Sin datos suficientes',
-          body: 'Tu Diagnóstico necesita 90 días de registros.',
-        }}
+        /* No `empty` yet: "necesita 90 días de registros" is the model's own
+           precondition, and the model is still behind `proximamente`. The copy
+           ships with the rule that can reach it, not before (S-2). */
         locked={{
           title: 'El Diagnóstico llega con Xangarrote',
           body: 'Cada mes, una lectura completa de tu negocio y un plan para tu meta.',

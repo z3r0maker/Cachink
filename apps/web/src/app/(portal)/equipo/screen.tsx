@@ -51,6 +51,21 @@ function DeviceQuota({ activos, limit }: { readonly activos: number; readonly li
   );
 }
 
+/**
+ * Each tab is empty on its own terms, so the copy is the tab's too (S-2):
+ * a business with three operators and no phone yet is not "sin operadores".
+ */
+const VACIO = {
+  operadores: {
+    title: 'Crea tu primer operador',
+    body: 'Tus operadores entran a la app con su nombre y su NIP. No necesitan correo.',
+  },
+  dispositivos: {
+    title: 'Vincula tu primer dispositivo',
+    body: 'Genera un código aquí arriba y escríbelo en el teléfono de tu operador. En cuanto se vincule, aparecerá en esta lista.',
+  },
+} as const;
+
 function Body({
   data,
   isOperadores,
@@ -60,14 +75,12 @@ function Body({
   readonly isOperadores: boolean;
   readonly mayWrite: boolean;
 }) {
+  const rows = isOperadores ? data?.operadores : data?.dispositivos;
   return (
     <ScreenBody
-      state={resolveScreenState({ error: data === null })}
+      state={resolveScreenState({ error: data === null, isEmpty: rows?.length === 0 })}
       onRetry={() => window.location.reload()}
-      empty={{
-        title: 'Crea tu primer operador',
-        body: 'Tus operadores entran a la app con su nombre y su NIP. No necesitan correo.',
-      }}
+      empty={isOperadores ? VACIO.operadores : VACIO.dispositivos}
     >
       {data === null ? null : isOperadores ? (
         <Operadores rows={data.operadores} />
