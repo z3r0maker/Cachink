@@ -3,7 +3,6 @@
 import { ToggleFeatureFlagUseCase } from '@xangarro/application';
 import {
   FEATURE_FLAG_KEYS,
-  PLATFORM_AVAILABLE,
   type BusinessId,
   type FeatureFlagKey,
   type FeatureFlags,
@@ -35,9 +34,9 @@ const KNOWN = new Set([
   'NOT_PERMITTED',
 ]);
 
-/** Released on the platform ∩ included in the business's plan (B-10). */
-function allowedKeys(inPlan: readonly string[]): ReadonlySet<FeatureFlagKey> {
-  return new Set(FEATURE_FLAG_KEYS.filter((k) => PLATFORM_AVAILABLE[k] && inPlan.includes(k)));
+/** The entitlement's features: already the plan ∩ what the platform released (B-10, N-09). */
+function allowedKeys(features: readonly string[]): ReadonlySet<FeatureFlagKey> {
+  return new Set(FEATURE_FLAG_KEYS.filter((k) => features.includes(k)));
 }
 
 export async function cambiarFuncion(key: FeatureFlagKey, on: boolean): Promise<FuncionResult> {

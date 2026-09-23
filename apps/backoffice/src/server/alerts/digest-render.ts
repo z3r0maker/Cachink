@@ -8,6 +8,7 @@ import type { SupportItem } from '@xangarro/domain';
 import type { DigestLine, DigestSection } from '@xangarro/email';
 
 import type { DailyDigest } from './digest';
+import { overLimitSection } from './over-limit';
 import { rejectionSection } from './rejections';
 
 type DigestData = Omit<DailyDigest, 'text' | 'html' | 'emailSections'>;
@@ -46,11 +47,7 @@ function sections(d: DigestData): Section[] {
       note: `Emítelos en el portal del SAT y registra el UUID: ${d.consoleUrl}/inbox?filtro=pagos_sin_cfdi`,
     },
     { ...rejectionSection(d.rejections), items: [] },
-    {
-      title: 'Negocios sobre su límite',
-      empty: 'Pendiente: esta sección llega con el uso contra límites (N-07).',
-      items: [],
-    },
+    { ...overLimitSection(d.overLimit, d.consoleUrl), items: [] },
   ];
 }
 

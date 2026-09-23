@@ -103,7 +103,7 @@ export function FuncionesCard({ flags }: { readonly flags: FeatureFlags }) {
         <span className={colLabel}>En tu plan</span>
         <span className={colLabel}>Activada</span>
       </div>
-      {flagRows(flags, session.planId).map((r) => (
+      {flagRows(flags, session.planId, session.platform).map((r) => (
         <FlagLine key={r.key} r={r} mayWrite={session.role === 'owner'} onToggle={t.request} />
       ))}
       <ConfirmDialog

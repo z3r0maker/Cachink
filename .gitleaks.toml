@@ -1,0 +1,19 @@
+# Secret scanning (SEC-SUP-01, N-26): gitleaks' default rules, plus the few
+# values this repo publishes on purpose. Each exception says why.
+title = "xangarro"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Published test fixtures, never used outside tests"
+paths = [
+  # RFC 8032 test vector 1 — the contract's published entitlement test key
+  # (SEC-SEC-02 keeps it out of production builds).
+  '''packages/contracts/src/mock/dev-keys\.json''',
+  '''packages/testing/src/entitlement\.ts''',
+]
+regexes = [
+  # Named placeholders for local, CI and conformance runs.
+  '''(dev|e2e|ci|conformance)-only(-not-a-real-secret)?''',
+]

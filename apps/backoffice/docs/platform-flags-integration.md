@@ -1,5 +1,14 @@
 # Platform flags → entitlement: integration note (N-09)
 
+> **Done 2026-09-23.** §1–§4 are implemented, with one change of shape: the
+> portal reads the rows through `xangarro.tenant_platform_flags()` (data-pg
+> `0039_entitlement_inputs.sql`), not the view directly, so a database without
+> the console's migrations answers «code defaults» instead of failing. The
+> rule is `entitlementFromBilling` in `@xangarro/application/billing`; the
+> portal's choke point is `tenantAccess` in `apps/web/src/server/billing/plan.ts`.
+> Kill switches on devices are contract task C-21. The rest of this note is
+> the design as written on 2026-09-17.
+
 N-09 ships the admin half: the `platform_flag_events` table, the
 `platform_flags` view, the portal's narrow `platform_flags_for_entitlement`
 view (`src/server/db/migrations/0005_platform_flags.sql`), the `/flags` page,

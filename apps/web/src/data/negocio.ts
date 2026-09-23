@@ -96,12 +96,17 @@ export interface FlagRow {
   readonly activada: boolean;
 }
 
-export function flagRows(flags: FeatureFlags, planId: PlanId): readonly FlagRow[] {
+/** `released` is the session's platform flags (N-09); the code defaults when omitted. */
+export function flagRows(
+  flags: FeatureFlags,
+  planId: PlanId,
+  released: Readonly<Record<FeatureFlagKey, boolean>> = PLATFORM_AVAILABLE,
+): readonly FlagRow[] {
   return FEATURE_FLAG_KEYS.map((key) => ({
     key,
-    disponible: PLATFORM_AVAILABLE[key],
+    disponible: released[key],
     enTuPlan: PLAN_LIMITS[planId].features.includes(key),
-    activada: flags[key] && PLATFORM_AVAILABLE[key],
+    activada: flags[key] && released[key],
   }));
 }
 

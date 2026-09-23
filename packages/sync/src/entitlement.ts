@@ -19,6 +19,7 @@ import {
   type Entitlement,
   type EntitlementState,
   type PlanId,
+  type FeatureFlagKey,
 } from '@xangarro/domain';
 
 ed.hashes.sha512 = sha512;
@@ -71,6 +72,12 @@ export interface ResolvedEntitlement {
   readonly grantedPlan: PlanId | null;
   /** End of the payment grace window, for the "tienes hasta" banner. */
   readonly graceUntil: string | null;
+  /**
+   * The signed `features` — the granted plan's ∩ what the platform released
+   * to this business (N-09). `null` when nothing verifies; the hook then
+   * falls back to the compiled defaults, never to «everything on».
+   */
+  readonly features: readonly FeatureFlagKey[] | null;
   /** `max(device clock, last server time)`. */
   readonly nowAnchored: string;
 }
@@ -109,6 +116,7 @@ export function resolveEntitlement(input: ResolveEntitlementInput): ResolvedEnti
       verified: false,
       grantedPlan: null,
       graceUntil: null,
+      features: null,
       nowAnchored,
     };
   }
@@ -126,6 +134,7 @@ export function resolveEntitlement(input: ResolveEntitlementInput): ResolvedEnti
     verified: true,
     grantedPlan: payload.plan,
     graceUntil: payload.graceUntil,
+    features: payload.features,
     nowAnchored,
   };
 }

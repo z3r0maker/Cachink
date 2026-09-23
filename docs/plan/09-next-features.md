@@ -217,8 +217,8 @@ test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists.
+- [x] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
+      Done: 2026-09-23 · overrides reach the entitlement through `xangarro.tenant_plan_overrides()` (data-pg 0039, tenant-scoped, no reason or author) and `entitlementFromBilling`: the highest active comp lifts — never lowers — the plan until it expires, **with no grace** (a gift has a date; expiry reverts on the next pull); `extend_trial` moves the trial's end, **even after Stripe lapsed the trial** (staff's word; Stripe's own trial end is N-71's); `reissue_entitlement` needs nothing, since every entitlement is signed per request. Verified on real rows: a comp to Xangarrote shows as `xangarrote` until its expiry. The console's billing columns are real: backoffice migration `0017_admin_billing_read.sql` (column-level SELECT and an admin read policy on `subscriptions`, no write) and `db/billing.ts` over `billingStatusSnapshot`, the portal's own rule; no subscription is now a known «free», not «Sin datos». Tests: application `billing-entitlement-inputs.test.ts` (comp, expiry, never lowers, extension after lapse, no trial), backoffice `billing-snapshot.test.ts`.
 
 - **What:** tenant list (plan, Stripe status active/trialing/past_due/lapsed, next charge, interval,
   devices, last sync, last login) and detail with a link to the Stripe customer.
@@ -248,7 +248,7 @@ test:e2e:db` (db reset + both migration sets + suite).
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
-  **Remaining (2026-09-23, verified against the code):** acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B) and the card shares N-02's ticket over-count.
+  **Remaining (2026-09-23, verified against the code):** acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B). The ticket over-count is fixed (data-pg 0035). **Fixed 2026-09-23:** `/uso` failed with «permission denied for table inventory_movements» on any database past data-pg 0029, because `usage_counts` reads `origen` and the admin role had no grant on it (console migration 0018); and a lapsed tenant is now judged by the free plan it is entitled to, not the paid plan Stripe last billed (`plan-view.ts`).
 
 - **What:** per-tenant usage vs limits with an "over limit" filter; a **capacity card** — DB size,
   largest tables by rows, sync p95 (B-18) — each against its N-51 / N-52 trigger, reviewed monthly.
@@ -292,8 +292,8 @@ body, attachments)`.
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch.
+- [x] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
+      Done: 2026-09-23 · a flag flipped in `/flags` reaches the portal on its next request and a device on its next pull. data-pg `0039_entitlement_inputs.sql` gives the portal `xangarro.tenant_platform_flags()` (tenant-scoped, allowlists cut to the caller, «no rows» where the console's tables are absent); `entitlementFromBilling` (application `billing/entitlement.ts`) makes `features` = plan ∩ platform; the portal's single choke point `tenantAccess` (`server/billing/plan.ts`) reads it for every entitlement, and the session carries the resolved `platform`. The phone takes platform availability from the signed `features` (`use-feature-flags.ts`, `ResolvedEntitlement.features`), the compiled constant only when nothing verifies. Kill switches: `asesorLlm` gates the Asesor's Diagnóstico (off in production until staff switch it on, on locally — ADR-059's env gate is gone); `comprobanteShare` pauses both server-rendered receipt routes (verified live: 200 → 503 → 200). Tests: application `billing-entitlement-inputs.test.ts`, data-pg `entitlement-inputs.integration.test.ts`, ui `use-feature-flags.test.tsx`, web `platform-defaults.test.ts`; conformance green against the built portal. **Left, as its own contract task C-21:** carrying kill switches (`comprobanteShare`, `cobrosIntegrados`) to devices, so the register's local-canvas receipt and the phone honour them too.
 
 - **What:** UI over the **platform-availability** level of the three-level flags (ADR-053): global
   on/off per feature, plus a beta allowlist of tenants. Kill switches for the Asesor LLM, receipts
@@ -315,8 +315,8 @@ body, attachments)`.
 
 ### N-10 Staff alerts `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-08, B-14, B-18
-  **Remaining (2026-09-23, verified against the code):** digest has no over-limit section; the dormancy section belongs to N-48 (post-launch) — amend to defer it rather than build it now; urgent delivery within a minute needs `ALERT_WEBHOOK_URL` set.
+- [x] Status · **Blocked by:** N-08, B-14, B-18
+      Done: 2026-09-23 · the digest's «Negocios sobre su límite» replaces its placeholder: tenants at or past 100 % of a plan limit this month, worst first, «2 meses seguidos» marked, a link to `/uso?filtro=sobre`, counted in the subject, «no disponible» when usage cannot be read (`alerts/over-limit.ts`, source `over-limit-source.ts` over `/uso`'s own `listUsage` filter). Verified on real rows: a lapsed Taquería with 58 products renders «Taquería Don Pedro · Xangarrito · 116 %». **Amended:** the dormancy section moves to N-48 — no tenant can be dormant before launch + 90 days. Urgent webhook delivery is built; it needs `ALERT_WEBHOOK_URL` in the console's Vercel env (owner, with O-5).
 
 - **What:** daily 08:00 (America/Mexico_City) digest to `soporte@xangarro.mx` — new inbox items, over
   limit tenants, dormancy candidates, B-18 rejection summary. Urgent items also POST to a Slack/Discord
@@ -685,7 +685,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-26 Security audit `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01.
+  **Remaining (2026-09-23, verified against the code):** 4 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01, SEC-DEV-01 — the oracle closed and the QR token built by C-14, 2026-09-23); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope, 2026-09-23: **SEC-WEB-01 done** — the portal sends X-Frame-Options, an enforced `frame-ancestors 'none'`, nosniff, HSTS, a strict referrer and Permissions-Policy, `poweredByHeader` off, from one implementation shared with the console (`@xangarro/config/security`); its full nonce CSP (`src/proxy.ts`, with `'wasm-unsafe-eval'` and workers for the register) is served **report-only** to `/api/csp-report`, and the sweep found zero violations on 18 pages and every register/sync e2e flow after two fixes (Zod's eval probe set `jitless` in the head; every route rendered per request so every script gets the nonce). **Left:** flip `Content-Security-Policy-Report-Only` to enforcing in `src/proxy.ts` after a week of clean production logs. **SEC-SUP-01 done** — `permissions: contents: read` on every workflow, every action pinned to a commit SHA, a `supply-chain` job running `pnpm audit:gate` (fails on a high/critical advisory reachable at runtime; build-only routes and a dated allowlist in `security/audit-allowlist.json` are the only excuses; the two that shipped — `tmp`, `brace-expansion` under `exceljs` — are fixed by `pnpm.overrides`) and a gitleaks scan of each run's commits, plus a CodeQL workflow (the repo is public). The gitleaks step is unrun until CI's first pass. The hosted re-run needs X-01.
 
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
   staff token handling; Stripe webhook signature; secrets and service-role isolation (N-05 guard);

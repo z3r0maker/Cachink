@@ -1,6 +1,7 @@
 import { deviceRoute } from '@/server/api/device-route';
 import { responderComprobante } from '@/server/comprobante/archivo';
 import { comprobanteDeTicket, plantillaDelNegocio } from '@/server/comprobante/datos';
+import { COMPROBANTES_PAUSADOS, comprobantesPausados } from '@/server/comprobante/pausa';
 import { withTenant } from '@/server/db';
 
 /**
@@ -18,9 +19,13 @@ export const GET = (request: Request): Promise<Response> =>
     async ({ businessId }) => {
       const ticketId = new URL(request.url).searchParams.get('ticketId') ?? '';
       const hallado = await withTenant(businessId, async (tx) => {
+        if (await comprobantesPausados(tx, businessId)) return 'pausa' as const;
         const c = await comprobanteDeTicket(tx, ticketId);
         return c === null ? null : { c, plantilla: await plantillaDelNegocio(tx) };
       });
+      if (hallado === 'pausa') {
+        return { response: Response.json({ error: COMPROBANTES_PAUSADOS }, { status: 503 }) };
+      }
       if (hallado === null) {
         return { response: Response.json({ error: 'No encontrado' }, { status: 404 }) };
       }

@@ -483,3 +483,15 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
   not stored. Rows become read-only once `locked_at` is set (first period close).
 - **Acceptance:** conformance tests for pull of both tables; receivables calculator tests with an
   opening balance; drift test green.
+
+### C-21 Kill switches on the wire
+
+- [ ] Status · **Surfaced by:** N-09 (2026-09-23) · **Blocks:** kill-switch coverage on devices
+- **What:** `entitlement.features` carries only `FEATURE_FLAG_KEYS`, so the platform's kill switches
+  (`comprobanteShare`, `cobrosIntegrados`, and `asesorLlm` if the phone ever calls a model) never
+  reach a device. The portal enforces them at its server boundaries (N-09), but the register's
+  local-canvas receipt and the phone cannot. Add an optional `killSwitches` object (or widen
+  `features` to `PLATFORM_FLAG_KEYS`) to the signed payload — additive at protocol 1, old devices
+  ignore it — and have the register and the phone read it.
+- **Acceptance:** conformance: the entitlement carries the switches; a switch turned off in the
+  console hides «Compartir comprobante» on the register and the phone after the next pull.

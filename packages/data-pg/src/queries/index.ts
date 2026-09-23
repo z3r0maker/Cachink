@@ -26,3 +26,4 @@ export * from './assisted-imports.js';
 export * from './comprobante.js';
 export * from './assisted-imports-files.js';
 export * from './assisted-imports-resolution.js';
+export * from './entitlement-inputs.js';

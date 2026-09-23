@@ -5,8 +5,9 @@
  *
  * Sections: yesterday's new items by kind; every open urgent item, whenever
  * filed; the «pagos sin CFDI» count (ADR-070); B-18's unresolved sync
- * rejections of the last 24 h by code (`./rejections.ts`); and a placeholder
- * for tenants over their limit until N-07/N-02 exist.
+ * rejections of the last 24 h by code (`./rejections.ts`); and tenants over a
+ * plan limit this month (`./over-limit.ts`). Dormancy candidates are N-48's
+ * (post-launch): no tenant can be dormant before launch + 90 days.
  */
 import { SUPPORT_KINDS, type SupportItem, type SupportKind } from '@xangarro/domain';
 import type { DigestSection } from '@xangarro/email';
@@ -14,6 +15,7 @@ import type { DigestSection } from '@xangarro/email';
 import { KIND_LABELS } from '../inbox/labels';
 import { emailSections, renderHtml, renderText } from './digest-render';
 import { digestWindow, mxDayLabel } from './mx-day';
+import { OVER_LIMIT_UNAVAILABLE, type OverLimitSummary } from './over-limit';
 import { REJECTIONS_UNAVAILABLE, type RejectionSummary } from './rejections';
 import { DEFAULT_CONSOLE_URL } from './webhook-notifier';
 
@@ -37,8 +39,11 @@ export interface DailyDigest {
     readonly pagosSinCfdi: number;
     /** Null when the rejections could not be read. */
     readonly rechazos: number | null;
+    /** Null when usage could not be read. */
+    readonly sobreLimite: number | null;
   };
   readonly rejections: RejectionSummary;
+  readonly overLimit: OverLimitSummary;
   readonly newByKind: readonly KindGroup[];
   readonly urgentOpen: readonly SupportItem[];
   readonly consoleUrl: string;
@@ -66,14 +71,37 @@ function subjectFor(day: string, c: DailyDigest['counts']): string {
     c.urgentesAbiertos > 0 ? plural(c.urgentesAbiertos, 'urgente', 'urgentes') : null,
     c.pagosSinCfdi > 0 ? plural(c.pagosSinCfdi, 'pago sin CFDI', 'pagos sin CFDI') : null,
     (c.rechazos ?? 0) > 0 ? plural(c.rechazos ?? 0, 'rechazo', 'rechazos') : null,
+    (c.sobreLimite ?? 0) > 0
+      ? plural(c.sobreLimite ?? 0, 'sobre su límite', 'sobre su límite')
+      : null,
   ].filter((b) => b !== null);
   return `Xangarro · Resumen del ${day} — ${bits.length > 0 ? bits.join(' · ') : 'sin novedades'}`;
+}
+
+function countsOf(
+  items: readonly SupportItem[],
+  fresh: readonly SupportItem[],
+  urgentOpen: readonly SupportItem[],
+  rejections: RejectionSummary,
+  overLimit: OverLimitSummary,
+): DailyDigest['counts'] {
+  return {
+    nuevos: fresh.length,
+    urgentesAbiertos: urgentOpen.length,
+    pagosSinCfdi: items.filter((i) => i.kind === 'factura' && open(i)).length,
+    rechazos: rejections.status === 'ok' ? rejections.total : null,
+    sobreLimite: overLimit.status === 'ok' ? overLimit.rows.length : null,
+  };
 }
 
 export function buildDailyDigest(
   items: readonly SupportItem[],
   now: Date,
-  options: { readonly consoleUrl?: string; readonly rejections?: RejectionSummary } = {},
+  options: {
+    readonly consoleUrl?: string;
+    readonly rejections?: RejectionSummary;
+    readonly overLimit?: OverLimitSummary;
+  } = {},
 ): DailyDigest {
   const window = digestWindow(now);
   const inWindow = (i: SupportItem) => {
@@ -83,12 +111,8 @@ export function buildDailyDigest(
   const fresh = items.filter(inWindow);
   const urgentOpen = items.filter((i) => i.urgent && open(i)).sort(newestFirst);
   const rejections = options.rejections ?? REJECTIONS_UNAVAILABLE;
-  const counts = {
-    nuevos: fresh.length,
-    urgentesAbiertos: urgentOpen.length,
-    pagosSinCfdi: items.filter((i) => i.kind === 'factura' && open(i)).length,
-    rechazos: rejections.status === 'ok' ? rejections.total : null,
-  };
+  const overLimit = options.overLimit ?? OVER_LIMIT_UNAVAILABLE;
+  const counts = countsOf(items, fresh, urgentOpen, rejections, overLimit);
   const dayLabel = mxDayLabel(window.start);
   const base = {
     subject: subjectFor(dayLabel, counts),
@@ -96,6 +120,7 @@ export function buildDailyDigest(
     window,
     counts,
     rejections,
+    overLimit,
     newByKind: groupByKind(fresh),
     urgentOpen,
     consoleUrl: options.consoleUrl ?? DEFAULT_CONSOLE_URL,

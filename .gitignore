@@ -86,3 +86,7 @@ design-compare/
 # that matter are written under `e2e-reports/` (ADR-100).
 /maestro-*.png
 /sim-screenshot*.png
+
+# `pnpm audit:gate` writes this before scripts/audit-gate.ts reads it.
+# (Arrived from N-26 attached to the design-compare block; given its own.)
+.audit.json

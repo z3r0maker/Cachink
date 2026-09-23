@@ -7,8 +7,7 @@
  * the free plan — are `computeEntitlement`'s, not repeated here.
  */
 
-import { computeEntitlement, type SubscriptionSnapshot } from '../compute-entitlement/index.js';
-import type { Entitlement } from '@xangarro/domain';
+import type { SubscriptionSnapshot } from '../compute-entitlement/index.js';
 import type { BillingInterval, PaidPlanId } from './plans.js';
 import type { BillingStatus, SubscriptionRecord } from './ports.js';
 
@@ -73,15 +72,6 @@ export function toSnapshot(record: SubscriptionRecord | null): SubscriptionSnaps
     lapsed: record.currentPeriodEnd,
   }[record.status];
   return { planId: record.planId, status: record.status, currentPeriodEnd: end };
-}
-
-/** The entitlement a business has from its billing rows — no rows is the free plan. */
-export function entitlementFromBilling(
-  businessId: string,
-  rows: readonly SubscriptionRecord[],
-  now: Date,
-): Entitlement {
-  return computeEntitlement(businessId, toSnapshot(currentSubscription(rows)), now);
 }
 
 /** A live subscription blocks starting another one. */

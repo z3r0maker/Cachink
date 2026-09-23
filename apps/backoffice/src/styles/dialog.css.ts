@@ -10,7 +10,7 @@ export const dialog = style({
   boxShadow: shadows.card,
   background: colors.white,
   color: colors.ink,
-  selectors: { '&::backdrop': { background: '${colors.scrim}' } },
+  selectors: { '&::backdrop': { background: colors.scrim } },
 });
 
 export const dialogActions = style({ display: 'flex', gap: 12, marginTop: 16 });

@@ -33,7 +33,8 @@ import type {
 } from './ports.js';
 import { noopPaymentFailed } from './ports.js';
 import { recordFrom } from './record.js';
-import { entitlementFromBilling, type BillingTrigger } from './status.js';
+import { entitlementFromBilling } from './entitlement.js';
+import type { BillingTrigger } from './status.js';
 
 export type ApplyStripeEventResult =
   | { readonly outcome: 'duplicate' }

@@ -1,4 +1,5 @@
 import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
+import { securityHeaders } from '@xangarro/config/security';
 
 /**
  * Same build shape as `apps/web` (see its next.config.mjs): vanilla-extract
@@ -13,15 +14,12 @@ import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
 const withVanillaExtract = createVanillaExtractPlugin();
 
 /** @type {ReadonlyArray<{ key: string; value: string }>} */
-export const SECURITY_HEADERS = [
-  { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive, nosnippet' },
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'no-referrer' },
-  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
-  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=(), payment=()' },
-  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
-];
+export const SECURITY_HEADERS = securityHeaders({
+  noindex: true,
+  referrer: 'no-referrer',
+  permissions: 'camera=(), microphone=(), geolocation=(), payment=()',
+  hstsPreload: true,
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {

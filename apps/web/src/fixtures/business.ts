@@ -1,4 +1,4 @@
-import { fromCentavos, type Money } from '@xangarro/domain';
+import { fromCentavos, PLATFORM_FLAG_DEFAULTS, type Money } from '@xangarro/domain';
 
 import type { Session } from '@/session/types';
 
@@ -21,6 +21,7 @@ export const SESSION: Session = {
   businessId: '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
   businessName: 'Taquería Don Pedro',
   planId: 'xangarro',
+  platform: { ...PLATFORM_FLAG_DEFAULTS, asesorLlm: true },
   capabilities: {
     estadosFinancieros: true,
     informeMensual: true,
