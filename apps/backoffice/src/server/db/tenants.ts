@@ -20,11 +20,20 @@ import { deviceStats, isoText, ownerEmails, ownerLastLogin, tenantWhere } from '
  */
 type Conn = Db | Tx;
 
-async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
+/**
+ * The tenant-list query, built but not run, so a test can compile it.
+ *
+ * `li`'s columns are referenced with explicit `"li"."…"` rather than through
+ * the subquery object. Drizzle qualifies a *real* column (`"ds"."business_id"`)
+ * but renders an aliased **raw SQL** field as its underlying expression, so
+ * `eq(li.businessId, …)` emitted a bare `business_id` — ambiguous against `ds`
+ * and `ow`, which expose one too (42702, seen in production 2026-09-22).
+ */
+export function tenantSummariesQuery(conn: Conn, q: TenantQuery) {
   const ds = deviceStats(conn);
   const ow = ownerEmails(conn);
   const li = ownerLastLogin(conn);
-  const rows = await conn
+  return conn
     .select({
       id: businesses.id,
       nombre: businesses.nombre,
@@ -33,15 +42,19 @@ async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
       devicesTotal: sql<number>`coalesce(${ds.total}, 0)`,
       devicesActive: sql<number>`coalesce(${ds.active}, 0)`,
       lastSyncAt: isoText(ds.lastSync),
-      lastOwnerLoginAt: isoText(li.lastLogin),
+      lastOwnerLoginAt: isoText(sql`"li"."last_login"`),
     })
     .from(businesses)
     .leftJoin(ds, eq(ds.businessId, businesses.id))
     .leftJoin(ow, eq(ow.businessId, businesses.id))
-    .leftJoin(li, eq(li.businessId, businesses.id))
+    .leftJoin(li, sql`"li"."business_id" = ${businesses.id}`)
     .where(tenantWhere(q, ds, ow))
     .orderBy(desc(businesses.createdAt), desc(businesses.id))
     .limit(q.limit);
+}
+
+async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
+  const rows = await tenantSummariesQuery(conn, q);
   return rows.map((r) => ({
     ...r,
     id: r.id as BusinessId,
