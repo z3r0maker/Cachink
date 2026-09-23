@@ -29,6 +29,7 @@ export * from './employees';
 export * from './clients';
 export * from './client-payments';
 export * from './day-closes';
+export * from './opening-balances';
 export * from './recurring-expenses';
 export * from './users';
 export * from './caja-turnos';

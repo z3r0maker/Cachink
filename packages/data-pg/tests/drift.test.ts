@@ -108,12 +108,9 @@ function propertyKeys(schema: Record<string, unknown>): ReadonlyMap<string, Map<
 
 /** Whole tables whose device half is pending (C-15-style splits). Self-expiring:
  * the SQLite-parity test above fails on names NOT listed here once their
- * device table lands, so entries must be removed, not left to rot. */
-const PENDING_DEVICE_TABLES: ReadonlySet<string> = new Set([
-  // C-20 (0025): the wire sends them; the app branch stores them.
-  'opening_balances',
-  'opening_balance_clients',
-]);
+ * device table lands, so entries must be removed, not left to rot.
+ * Empty since 2026-09-22: C-20's two tables landed in SQLite 0013. */
+const PENDING_DEVICE_TABLES: ReadonlySet<string> = new Set([]);
 
 const pgSchemaValues = Object.values(pgSchema);
 

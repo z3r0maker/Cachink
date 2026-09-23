@@ -84,6 +84,54 @@ describe('applyReferenceTables', () => {
     assert.equal(untouched?.socialLinks, '{}');
   });
 
+  it('stores the saldos iniciales a pull brings down (C-20)', async () => {
+    const db = makeFreshDb();
+    const audit = {
+      businessId: FIXTURE_BUSINESS_ID,
+      deviceId: 'DEV',
+      createdByUserId: null,
+      createdAt: '2026-09-22T12:00:00.000Z',
+      updatedAt: '2026-09-22T12:00:00.000Z',
+      deletedAt: null,
+    };
+    const cliente = buildFixtures().clients[0]!;
+    const header = {
+      id: '01HZ8XQN9GZJXV8AKQ5X0C20AA',
+      fechaApertura: '2026-01-01',
+      cajaCentavos: 150_000n,
+      bancosCentavos: 4_200_000n,
+      lockedAt: null,
+      ...audit,
+    };
+    const line = {
+      id: '01HZ8XQN9GZJXV8AKQ5X0C20CL',
+      clienteId: cliente.id,
+      saldoCentavos: 86_000n,
+      ...audit,
+    };
+    const res = await applyReferenceTables(
+      db,
+      tables({ opening_balances: [header], opening_balance_clients: [line] } as never),
+      FIXTURE_BUSINESS_ID,
+    );
+    assert.equal(res.applied.opening_balances, 1);
+    assert.equal(res.applied.opening_balance_clients, 1);
+
+    const stored = (await db.get(
+      sql`SELECT fecha_apertura, caja_centavos, bancos_centavos, locked_at FROM opening_balances WHERE id = ${header.id}`,
+    )) as Record<string, unknown>;
+    assert.equal(stored.fecha_apertura, '2026-01-01');
+    assert.equal(Number(stored.caja_centavos), 150_000);
+    assert.equal(Number(stored.bancos_centavos), 4_200_000);
+    assert.equal(stored.locked_at, null);
+
+    const saldo = (await db.get(
+      sql`SELECT cliente_id, saldo_centavos FROM opening_balance_clients WHERE id = ${line.id}`,
+    )) as Record<string, unknown>;
+    assert.equal(saldo.cliente_id, cliente.id);
+    assert.equal(Number(saldo.saldo_centavos), 86_000);
+  });
+
   it('is an upsert: re-applying an edited row updates it instead of duplicating', async () => {
     const db = makeFreshDb();
     await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);

@@ -22,6 +22,8 @@ import {
   products,
   inventoryMovements,
   mensajesOperador,
+  openingBalanceClients,
+  openingBalances,
   recurringExpenses,
   users,
 } from '@xangarro/data';
@@ -29,13 +31,11 @@ import {
 type RefTableName = Exclude<keyof ReferenceTables, 'feature_flags'>;
 
 /**
- * Reference tables the cloud serves but the device schema does not carry
- * yet (C-20's saldos iniciales arrive on the device with the C-15 wave).
- * Exhaustive by construction: adding a DOWN table here without a device
- * home is a compile error again the day the list is wrong.
+ * Every reference table now has a device home (C-20's saldos iniciales landed
+ * with SQLite 0013). The alias stays so a new DOWN table without a device
+ * table is a compile error here, not a silently dropped pull.
  */
-type CloudAheadRefTable = 'opening_balances' | 'opening_balance_clients';
-type DeviceRefTableName = Exclude<RefTableName, CloudAheadRefTable>;
+type DeviceRefTableName = RefTableName;
 
 const TABLES: Record<DeviceRefTableName, SQLiteTable> = {
   businesses,
@@ -47,6 +47,8 @@ const TABLES: Record<DeviceRefTableName, SQLiteTable> = {
   employees,
   recurring_expenses: recurringExpenses,
   conversion_recetas: conversionRecetas,
+  opening_balances: openingBalances,
+  opening_balance_clients: openingBalanceClients,
 };
 
 /** Order matters for foreign keys: parents before children. */
@@ -60,6 +62,9 @@ const APPLY_ORDER: readonly DeviceRefTableName[] = [
   'conversion_recetas',
   'inventory_movements',
   'mensajes_operador',
+  // After `clients`: a saldo inicial names one.
+  'opening_balances',
+  'opening_balance_clients',
 ];
 
 export interface ApplyReferenceResult {

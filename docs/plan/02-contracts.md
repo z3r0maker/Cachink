@@ -442,7 +442,17 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-20 `opening_balances` DOWN table (saldos iniciales)
 
-- [~] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+- [x] Status · **Surfaced by:** N-17 (OQ-1, closed 2026-09-17) · **Blocks:** N-17
+  - Done: 2026-09-22 · SQLite half — migration **0013** `0013_opening_balances` creates both DOWN
+    tables with the audit shape and two indexes; `packages/data`'s schema exports them;
+    `SCHEMA_VERSION` 14; the pull applier stores them (`reference-applier.ts`: they follow
+    `clients` in `APPLY_ORDER`, and `CloudAheadRefTable` is gone — every reference table now has a
+    device home, so a new DOWN table without one is a compile error). No change-log triggers: the
+    device reads these, never pushes them, and `locked_at` is carried as the portal set it.
+    Tests: `packages/data/tests/migrations/c20-opening-balances.test.ts` (old → new, 4 cases) and
+    `packages/sync/tests/reference-applier.test.ts` (a pull stores header and per-cliente saldo).
+    **Both `PENDING_DEVICE_TABLES` allowances are deleted** — the drift and scope tests are green
+    without them, as their self-expiring design intended.
   - Progress: 2026-09-19 · `track-n/c20-n17-apertura` · wire + pg halves done: both entities on
     `BusinessSchema`-style zod with defaults (old payloads parse unchanged), `DOWN_TABLES` +
     `ReferenceTablesSchema` arrays (`.default([])`), codec OUT, `SYNCED_TABLES`, bootstrap +

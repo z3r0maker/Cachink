@@ -69,6 +69,7 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
       '0010_expenses_empleado',
       '0011_movimiento_origen',
       '0012_business_branding',
+      '0013_opening_balances',
     ]);
   });
 
@@ -76,14 +77,14 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
     const { sqlite, db } = oldRunnerInstall();
     await runMigrations(db);
     await runMigrations(db);
-    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 7);
+    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 8);
   });
 
   it('does not create or rename a legacy tracker on a fresh install', async () => {
     const sqlite = new Database(':memory:');
     await runMigrations(drizzle(sqlite, { schema }) as unknown as XangarroDatabase);
     expect(hasTable(sqlite, '__cachink_migrations')).toBe(false);
-    expect(tags(sqlite, '__xangarro_migrations')).toContain('0012_business_branding');
+    expect(tags(sqlite, '__xangarro_migrations')).toContain('0013_opening_balances');
   });
 
   it('prefers the new tracker when both exist and leaves the stale legacy table alone', async () => {
@@ -95,7 +96,7 @@ describe('runMigrations — legacy __cachink_migrations tracker', () => {
 
     await expect(runMigrations(db)).resolves.toBeUndefined();
     expect(tags(sqlite, '__cachink_migrations')).toEqual([]);
-    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 7);
+    expect(tags(sqlite, '__xangarro_migrations')).toHaveLength(LEGACY_APPLIED.length + 8);
   });
 
   it('fails loudly when the legacy tracker is unreadable instead of re-running 0000', async () => {

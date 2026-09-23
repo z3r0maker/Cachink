@@ -23,6 +23,8 @@ export class InMemoryReferenceDataRepository implements ReferenceDataRepository 
         mensajes_operador: count(tables.mensajes_operador),
         recurring_expenses: count(tables.recurring_expenses),
         conversion_recetas: count(tables.conversion_recetas),
+        opening_balances: count(tables.opening_balances),
+        opening_balance_clients: count(tables.opening_balance_clients),
       },
     };
   }

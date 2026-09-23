@@ -27,9 +27,9 @@ function localTables(): string[] {
   return names.sort();
 }
 
-/** Whole tables whose device half is pending (C-20/0025; app branch), as in
- * data-pg's drift test — remove when the SQLite tables land. */
-const PENDING_DEVICE_TABLES = new Set(['opening_balances', 'opening_balance_clients']);
+/** Whole tables whose device half is pending, as in data-pg's drift test.
+ * Empty since 2026-09-22: C-20's two tables landed in SQLite 0013. */
+const PENDING_DEVICE_TABLES = new Set<string>([]);
 
 describe('table scope', () => {
   it('classifies every local table exactly once', () => {

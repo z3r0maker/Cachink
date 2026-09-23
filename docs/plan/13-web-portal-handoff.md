@@ -202,10 +202,11 @@ With the app branch merged, everything below is engineering-workable on
    them (`packages/sync/tests/reference-applier.test.ts`) and the drift test's `businesses`
    exception is gone. Items 3 and 4 are unblocked. Still cloud-ahead: `clients.rfc` and
    `caja_turnos`'s two `aclarado_*`.
-2. **N-17's half** — `opening_balances` + `opening_balance_clients` in
-   SQLite (`packages/data` migration + the device table map; the server wire
-   already lists both tables) and the phone's Estados calculators consuming
-   them. Independent of the keystone.
+2. ~~**N-17's half** — `opening_balances` + `opening_balance_clients` in SQLite~~ **Done
+   2026-09-22** — migration 0013, both tables in the pull applier, both
+   `PENDING_DEVICE_TABLES` allowances deleted. The "phone's Estados calculators" clause is moot:
+   A-01 archived the phone's Estados screens, and `calculateBalanceGeneral` already takes
+   `apertura` in the domain. What remains of N-17 is its checklist row.
 3. **N-19's half** — the logo cache: on pull, when the logo's version
    changes, download `/api/logos/<id>` (ETag = bytes' hash) and store the
    bytes on-device for offline rendering.
