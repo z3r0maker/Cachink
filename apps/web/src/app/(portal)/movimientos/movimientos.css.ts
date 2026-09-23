@@ -67,3 +67,20 @@ export const pageSubtitle = style({
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
 });
+
+/**
+ * The circular badge the design puts before a concepto — `$` on green for a
+ * venta, `−` on red for a gasto (B-3). It reads before the colour does, which
+ * is the point: the tint alone would carry the kind.
+ */
+export const conceptBadge = style({
+  width: 36,
+  height: 36,
+  flex: 'none',
+  display: 'grid',
+  placeItems: 'center',
+  borderRadius: 9999,
+  border: `2px solid ${colors.black}`,
+  fontWeight: typography.weights.extraBold,
+  fontSize: portalFontSizes.body,
+});

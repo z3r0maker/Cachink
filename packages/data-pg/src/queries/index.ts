@@ -1,5 +1,6 @@
 export * from './dashboard.js';
 export * from './lists.js';
+export * from './movimientos.js';
 export * from './entities.js';
 export * from './balance.js';
 export * from './digest.js';

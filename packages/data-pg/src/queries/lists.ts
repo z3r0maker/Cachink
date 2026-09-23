@@ -1,82 +1,11 @@
 import { desc, eq, isNull, sql } from 'drizzle-orm';
 
 import { inventoryMovements, products } from '../schema/catalog.js';
-import { expenses, sales, tickets } from '../schema/ledger.js';
 import type { Db } from '../client.js';
 
 type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
 
 const big = (v: unknown): bigint => (v === null || v === undefined ? 0n : BigInt(String(v)));
-
-/* ── Movimientos ─────────────────────────────────────────────────────── */
-
-export interface MovimientoRow {
-  readonly id: string;
-  readonly kind: 'venta' | 'gasto';
-  readonly fecha: string;
-  readonly concepto: string;
-  readonly clasificacion: string;
-  readonly amount: bigint;
-  readonly cancelada: boolean;
-}
-
-async function listVentas(tx: Tx): Promise<readonly MovimientoRow[]> {
-  const rows = await tx
-    .select({
-      id: sales.id,
-      fecha: sales.fecha,
-      concepto: sales.concepto,
-      clasificacion: tickets.metodo,
-      amount: sales.monto,
-      cancelledAt: tickets.cancelledAt,
-    })
-    .from(sales)
-    .innerJoin(tickets, eq(sales.ticketId, tickets.id))
-    .where(isNull(sales.deletedAt))
-    .orderBy(desc(sales.fecha), desc(sales.id));
-
-  return rows.map((r) => ({
-    id: r.id,
-    kind: 'venta' as const,
-    fecha: r.fecha ?? '',
-    concepto: r.concepto ?? '',
-    clasificacion: r.clasificacion ?? '',
-    amount: r.amount ?? 0n,
-    cancelada: r.cancelledAt !== null,
-  }));
-}
-
-async function listGastos(tx: Tx): Promise<readonly MovimientoRow[]> {
-  const rows = await tx
-    .select({
-      id: expenses.id,
-      fecha: expenses.fecha,
-      concepto: expenses.concepto,
-      clasificacion: expenses.categoria,
-      amount: expenses.monto,
-    })
-    .from(expenses)
-    .where(isNull(expenses.deletedAt))
-    .orderBy(desc(expenses.fecha), desc(expenses.id));
-
-  return rows.map((r) => ({
-    id: r.id,
-    kind: 'gasto' as const,
-    fecha: r.fecha ?? '',
-    concepto: r.concepto ?? '',
-    clasificacion: r.clasificacion ?? '',
-    amount: r.amount ?? 0n,
-    cancelada: false,
-  }));
-}
-
-/** One entry point; the two shapes differ enough to keep their queries apart. */
-export async function listMovimientos(
-  tx: Tx,
-  kind: 'venta' | 'gasto',
-): Promise<readonly MovimientoRow[]> {
-  return kind === 'venta' ? listVentas(tx) : listGastos(tx);
-}
 
 /* ── Productos ───────────────────────────────────────────────────────── */
 

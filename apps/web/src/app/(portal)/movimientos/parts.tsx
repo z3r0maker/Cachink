@@ -1,14 +1,18 @@
 'use client';
 
 import { formatMoney } from '@xangarro/domain';
+import { colors } from '@xangarro/tokens';
 
 import { ExportButton, FilterChip, Input, StatusPill, Tag, type ColumnDef } from '@/components';
 import type { MovimientosData } from '@/server/screens';
 
 import {
   amountCell,
+  conceptBadge,
   cancelledAmount,
   conceptCell,
+  stackedDate,
+  stackedTime,
   pageSubtitle,
   pageTitle,
   search,
@@ -115,18 +119,36 @@ export function CategoryChips({
   );
 }
 
-export const COLUMNS: readonly ColumnDef<Row>[] = [
-  { key: 'fecha', header: 'Fecha', render: (m) => m.fecha },
-  {
-    key: 'concepto',
-    header: 'Concepto',
-    render: (m) => (
-      <span className={conceptCell}>
-        {m.concepto}
-        {m.cancelada ? <Tag tone="danger">Cancelada</Tag> : null}
+/** Date over time, as the design stacks it. An egreso carries no time. */
+function FechaCell({ m }: { readonly m: Row }) {
+  return (
+    <span className={stackedDate}>
+      <span>{m.fecha}</span>
+      {m.hora === '' ? null : <span className={stackedTime}>{m.hora}</span>}
+    </span>
+  );
+}
+
+function ConceptoCell({ m }: { readonly m: Row }) {
+  const venta = m.kind === 'venta';
+  return (
+    <span className={conceptCell}>
+      <span
+        className={conceptBadge}
+        style={{ background: venta ? colors.greenSoft : colors.redSoft }}
+        aria-hidden="true"
+      >
+        {venta ? '$' : '−'}
       </span>
-    ),
-  },
+      <span>{m.concepto}</span>
+      {m.cancelada ? <Tag tone="danger">Cancelada</Tag> : null}
+    </span>
+  );
+}
+
+export const COLUMNS: readonly ColumnDef<Row>[] = [
+  { key: 'fecha', header: 'Fecha', render: (m) => <FechaCell m={m} /> },
+  { key: 'concepto', header: 'Concepto', render: (m) => <ConceptoCell m={m} /> },
   {
     key: 'clasificacion',
     header: 'Método / Categoría',
@@ -145,4 +167,8 @@ export const COLUMNS: readonly ColumnDef<Row>[] = [
       </span>
     ),
   },
+  // Who captured it, and from what. Both are «—» for a row the portal
+  // created: it belongs to no shift and no device delivered it (B-3).
+  { key: 'operador', header: 'Operador', render: (m) => m.operador ?? '—' },
+  { key: 'dispositivo', header: 'Dispositivo', render: (m) => m.dispositivo ?? '—' },
 ];

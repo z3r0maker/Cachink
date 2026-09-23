@@ -7,6 +7,7 @@ import type { MovimientosData } from '@/server/screens';
 import { resolveScreenState } from '@/session/gating';
 
 import { COLUMNS, CategoryChips, Heading, SearchAndRange } from './parts';
+import { KpisGastos, KpisVentas } from './kpi-cards';
 import { chips as rangeChips } from './periodo';
 import { useMovimientos, type Movimientos } from './use-movimientos';
 
@@ -58,6 +59,7 @@ export function MovimientosScreen({ initialTab, hoy, ventas, gastos }: Movimient
           { value: 'gastos', label: 'Gastos', count: gastos?.length ?? 0 },
         ]}
       />
+      {m.tab === 'gastos' ? <KpisGastos rows={m.rows} /> : <KpisVentas rows={m.rows} />}
       <SearchAndRange
         query={m.query}
         onQuery={m.setQuery}
