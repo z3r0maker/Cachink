@@ -36,3 +36,17 @@ export const pagoMonto = style({
   fontWeight: 700,
   fontVariantNumeric: 'tabular-nums',
 });
+
+/** The circular avatar before a name in Personas (C-6), as Equipo draws it. */
+export const avatar = style({
+  width: 40,
+  height: 40,
+  flex: 'none',
+  display: 'grid',
+  placeItems: 'center',
+  borderRadius: 9999,
+  border: `2px solid ${colors.black}`,
+  background: colors.blueSoft,
+  fontWeight: typography.weights.extraBold,
+  fontSize: portalFontSizes.md,
+});

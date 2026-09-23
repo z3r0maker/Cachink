@@ -21,7 +21,7 @@ import { eyebrow } from '@/styles/text.css';
 import { PagosEmpleadoDrawer } from './pagos-drawer';
 import { EditarEmpleadoSheet, NuevoEmpleadoSheet } from './sheet';
 import type { Empleado as Row } from './use-empleado-form';
-import { pageSubtitle, pageTitle } from './empleados.css';
+import { avatar, pageSubtitle, pageTitle } from './empleados.css';
 
 type Empleado = EmpleadosData[number];
 
@@ -63,26 +63,59 @@ function acciones(
   ];
 }
 
+/** Two initials, the same rule the operator cards use. */
+const iniciales = (n: string) =>
+  n
+    .split(' ')
+    .slice(0, 2)
+    .map((w) => w.slice(0, 1))
+    .join('')
+    .toLocaleUpperCase('es-MX');
+
+/** The circular avatar the design puts before the name (C-6). */
+function EmpleadoCell({ e }: { readonly e: Empleado }) {
+  return (
+    <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <span className={avatar} aria-hidden="true">
+        {iniciales(e.nombre)}
+      </span>
+      <span style={{ minWidth: 0 }}>
+        <span style={{ fontWeight: 800, display: 'block' }}>{e.nombre}</span>
+        <span className={eyebrow}>{e.puesto}</span>
+      </span>
+    </span>
+  );
+}
+
 const columns = (
   onEdit: ((e: Row) => void) | null,
   onPagos: ((e: Row) => void) | null,
 ): readonly ColumnDef<Empleado>[] => [
-  {
-    key: 'empleado',
-    header: 'Empleado',
-    render: (e) => (
-      <span>
-        <span style={{ fontWeight: 800, display: 'block' }}>{e.nombre}</span>
-        <span className={eyebrow}>{e.puesto}</span>
-      </span>
-    ),
-  },
+  { key: 'empleado', header: 'Empleado', render: (e) => <EmpleadoCell e={e} /> },
   {
     key: 'periodo',
     header: 'Periodo',
     render: (e) => <StatusPill tone="soft">{PERIODO_LABEL[e.periodo]}</StatusPill>,
   },
-  { key: 'salario', header: 'Salario', numeric: true, render: (e) => formatMoney(e.salario ?? 0n) },
+  {
+    // The design's column is weekly whatever the period, so a monthly wage
+    // and a weekly one can be read down one column without converting in
+    // your head — `salarioSemanal` is the same domain rule the KPI above
+    // already uses. The per-period figure keeps its place as the subline.
+    key: 'semanal',
+    header: 'Sueldo semanal',
+    numeric: true,
+    render: (e) => (
+      <span>
+        <span style={{ display: 'block', fontWeight: 800 }}>
+          {formatMoney(salarioSemanal(e.salario ?? 0n, e.periodo))}
+        </span>
+        <span className={eyebrow}>
+          {formatMoney(e.salario ?? 0n)} {PERIODO_LABEL[e.periodo].toLocaleLowerCase('es-MX')}
+        </span>
+      </span>
+    ),
+  },
   ...acciones(onEdit, onPagos),
 ];
 

@@ -144,17 +144,74 @@ too; drawing it would drop the dependency.
 
 ## W-3 · Consultas que no traen lo que el diseño muestra (B-1…B-6, C-2…C-6)
 
-- [ ] Status
+- [ ] Status — **ten of eleven done 2026-09-23**; B-2 left
 
-Grouped because each one is a change in `@xangarro/data-pg` and then upward
-through the action and the screen — the same shape of work eleven times.
+Landing per screen, because each screen is its own query change and its own
+review.
 
-Do them as one batch per repository file, not one per screen, so the
-`withTenant` queries are edited once. Domain/application rules that come with
-them follow TDD per CLAUDE.md §2.4 (1 happy + 3 unhappy).
+### Done
 
-**Size:** the largest batch. Worth splitting into two passes: B (operación)
-then C (dinero), so a review is possible in between.
+- **B-4, B-5, B-6 · Productos.** Pills tinted by the design's four tones; the
+  12px stock bar, the product tile and the SKU line, built from styles that
+  had been written and imported nowhere; «Margen promedio» on Catálogo and a
+  KPI row on Movimientos, which had none.
+- **B-1, B-3 · Movimientos.** Operador and Dispositivo, both **recovered
+  rather than stored** — the operator through the shift the ticket belongs
+  to, the device through the sync receipt that delivered the row. Stacked
+  date over time, the circular `$`/`−` badge, and the missing KPI row.
+- **C-2…C-5 · Equipo.** The shift pill (abierto / cerrado / **sin vincular**),
+  the two stat boxes, a footer naming the phone; device cards with their
+  tile, their operator and an amber strip for refused rows; four KPI tiles
+  per tab beside the plan quota rather than in its place.
+- **C-6 · Empleados.** Personas reads in weeks. The column showed each
+  employee's raw per-period figure while the KPI above showed the weekly
+  total, so the two could not be reconciled by eye. Both go through the
+  domain's `salarioSemanal` — which already existed, and which the screen
+  nearly got a second copy of.
+
+### Left
+
+- **B-2 · the Movimientos detail drawer.** Rows are still inert. The one
+  piece that is a feature rather than a query: the drawer is also where
+  «Compartir comprobante» lives, a read-only action the design keeps for
+  every role.
+
+### What the seed cannot prove
+
+It links no ticket to a shift and writes no sync receipts, so the attribution
+columns read «—» against it and a broken join looks exactly like a correct
+one. Two integration tests build those rows. They earned it immediately: the
+device subquery had been matching the receipt against the **ticket's** id
+instead of the sale's.
+
+### Needs a migration before it can be built
+
+Three Personas columns have **no column to select** — `employees` carries id,
+nombre, puesto, salario and periodo, and nothing else.
+
+- **Contrato** (Fijo / Por horas / Temporal). The pill we draw is `periodo`,
+  which is how often someone is _paid_, not what they are hired as.
+- **Ingreso** — the hire date. `created_at` is when the row was typed in.
+- **Acceso a la app** — the design's own note says this screen is the HR view
+  and Operadores the app-access one, and that a person may appear in one and
+  not the other. That is a link between `employees` and `users`, and matching
+  on name would be a guess.
+
+«Estado» is a fourth: the query filters out `deleted_at`, so the column could
+only ever read «Activo». It needs a real state, not a row that exists.
+
+### Tiles deliberately absent
+
+«Sin factura» (no invoice flag on `expenses`), «Efectivo en caja» and
+«Cuentas por cobrar» (the cash position and the open balance, both other
+screens' numbers). A tile nobody can compute is worse than a tile that is not
+there. The device card's «{n} registros esperando conexión» is a queue on the
+phone the server cannot see, so it counts rows the phone **sent and the
+server refused** instead.
+
+Still waiting here from earlier tracks: the aviso meta's relative time and
+its device/operator half (W-4), and the Indicadores delta and sparkline
+(W-8).
 
 ---
 
@@ -238,7 +295,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (nine of eleven) → W-6 → W-7.
+~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (ten of eleven; B-2 left) → W-6 → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small
