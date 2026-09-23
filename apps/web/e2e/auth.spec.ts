@@ -188,7 +188,8 @@ test('the login panel carries the four-scene animation', async ({ page }, testIn
   // The scene index rides the stage; over 20 s it must pass through all four.
   const vistas = new Set<string>();
   for (let i = 0; i < 40; i += 1) {
-    vistas.add(await stage.getAttribute('data-escena'));
+    const escena = await stage.getAttribute('data-escena');
+    if (escena !== null) vistas.add(escena);
     await page.waitForTimeout(550);
     if (vistas.size === 4) break;
   }
