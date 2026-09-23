@@ -14,9 +14,7 @@ const HEADERS = ['Estado', 'Valor', 'Participación'] as const;
 
 export function formatValue(metric: Metric, value: number | null): string {
   if (value === null) return 'Datos insuficientes';
-  return metric.kind === 'tasa'
-    ? `${(value * 100).toFixed(1)} %`
-    : value.toLocaleString('es-MX');
+  return metric.kind === 'tasa' ? `${(value * 100).toFixed(1)} %` : value.toLocaleString('es-MX');
 }
 
 function share(metric: Metric, row: GeoStateRow, total: number | null): string {

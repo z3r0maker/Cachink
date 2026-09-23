@@ -83,10 +83,7 @@ describe('xangarro.signup_attribution: first touch wins, tenants never see it', 
       () => recordSignupAttribution(db, '  ', utm),
       (error: unknown) => {
         const cause = error instanceof Error ? error.cause : undefined;
-        assert.match(
-          String(cause instanceof Error ? cause.message : cause),
-          /needs a business/,
-        );
+        assert.match(String(cause instanceof Error ? cause.message : cause), /needs a business/);
         return true;
       },
     );

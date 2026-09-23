@@ -45,7 +45,12 @@ describe('MX_STATES', () => {
     // A regenerated file with a different projection or fit would push a
     // coastal state off the edge, and the only symptom on screen would be a
     // state that looks oddly straight along one side.
-    const [, , width, height] = MX_VIEWBOX.split(' ').map(Number) as [number, number, number, number];
+    const [, , width, height] = MX_VIEWBOX.split(' ').map(Number) as [
+      number,
+      number,
+      number,
+      number,
+    ];
     for (const code of MX_STATE_CODES) {
       const numbers = MX_STATES[code].d.match(/-?\d+\.?\d*/g)?.map(Number) ?? [];
       const xs = numbers.filter((_, i) => i % 2 === 0);

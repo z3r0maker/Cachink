@@ -43,5 +43,8 @@ function subdivision(raw: string, country: string): string {
 export function regionFromHeaders(headers: Pick<Headers, 'get'>): RequestRegion {
   const country = clean(headers.get('x-vercel-ip-country'));
   if (!COUNTRY.test(country)) return { country: GEO_UNKNOWN_COUNTRY, region: '' };
-  return { country, region: subdivision(clean(headers.get('x-vercel-ip-country-region')), country) };
+  return {
+    country,
+    region: subdivision(clean(headers.get('x-vercel-ip-country-region')), country),
+  };
 }

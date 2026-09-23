@@ -49,7 +49,10 @@ describe('0030_geo_counters.sql', () => {
 
 describe('0031_geo_grants.sql', () => {
   it('grants no table privilege to anyone — the function is the whole surface', () => {
-    assert.doesNotMatch(grants, /GRANT\s+(SELECT|INSERT|UPDATE|ALL)[^;]*ON\s+xangarro\.geo_counters/i);
+    assert.doesNotMatch(
+      grants,
+      /GRANT\s+(SELECT|INSERT|UPDATE|ALL)[^;]*ON\s+xangarro\.geo_counters/i,
+    );
   });
 
   it('never grants DELETE, to any role, in either file', () => {
@@ -63,7 +66,9 @@ describe('0031_geo_grants.sql', () => {
   });
 
   it('lets only the two writer roles execute geo_record', () => {
-    const grantees = [...grants.matchAll(/GRANT EXECUTE ON FUNCTION xangarro\.geo_record\([^)]*\) TO (\w+)/g)]
+    const grantees = [
+      ...grants.matchAll(/GRANT EXECUTE ON FUNCTION xangarro\.geo_record\([^)]*\) TO (\w+)/g),
+    ]
       .map((m) => m[1])
       .sort();
     assert.deepEqual(grantees, ['xangarro_app', 'xangarro_billing']);

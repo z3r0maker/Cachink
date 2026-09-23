@@ -1004,12 +1004,12 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
       pure `regionFromHeaders`, and the writer hooked into `signInUser` so the password path and both
       magic-link paths are covered by one call. Proved against real Postgres: the app role counts and
       cannot read back, an unknown source raises, an unusable region folds into "unknown".
-**The point is to steer marketing spend**, which sets the order below. Raw counts always favour big
-cities — a population artefact, not an insight — so the console is **metric-first**: the user picks
-what to shade by (accesos · visitas · checkouts · **conversión**), and the source is one input to
-that. Two rules the map must not break: a rate below a denominator floor renders as «datos
-insuficientes», never as a bright 100% from one visit; and a rate uses a diverging scale anchored on
-the national average, with that average stated as a number.
+      **The point is to steer marketing spend**, which sets the order below. Raw counts always favour big
+      cities — a population artefact, not an insight — so the console is **metric-first**: the user picks
+      what to shade by (accesos · visitas · checkouts · **conversión**), and the source is one input to
+      that. Two rules the map must not break: a rate below a denominator floor renders as «datos
+      insuficientes», never as a bright 100% from one visit; and a rate uses a diverging scale anchored on
+      the national average, with that average stated as a number.
 
 - [x] **N-56 · Phase 2 — the console as a sorted table**, plus the metric registry. Ships before the
       map on purpose: a choropleth over three days of data is an empty country. Build the metric
@@ -1023,26 +1023,26 @@ the national average, with that average stated as a number.
       shared client entry: the `/recursos` article pages drop UTMs today, so content marketing is
       entirely unattributed.
 - [~] **N-58 · Phase 4 — purchases + landing.** Checkout hook ✅ shipped; the pixel ✅ **is built but
-      dark** — `VITE_GEO_PIXEL_URL` is empty, so the build emits nothing, exactly like
-      `VITE_PLAUSIBLE_DOMAIN`. Setting that one variable is what turns measurement on, which keeps
-      the decision a config change rather than a code change.
-      ⚠️ **Do not set it until the legal half is done — blocked on legal, not engineering:**
-      the aviso drafts are marked «BORRADOR v0.1 … No publicar», carry nine unfilled placeholders
-      (`[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[CORREO PRIVACIDAD]`, …), and have **no variante for a site
-      visitor** — A is portal signup, B device linking, C operator PIN. A marketing-site visitor is
-      not yet a customer, so none of them reaches one. See OQ Variante D in
-      `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
-      pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
-      because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
+  dark** — `VITE_GEO_PIXEL_URL` is empty, so the build emits nothing, exactly like
+  `VITE_PLAUSIBLE_DOMAIN`. Setting that one variable is what turns measurement on, which keeps
+  the decision a config change rather than a code change.
+  ⚠️ **Do not set it until the legal half is done — blocked on legal, not engineering:**
+  the aviso drafts are marked «BORRADOR v0.1 … No publicar», carry nine unfilled placeholders
+  (`[RAZÓN SOCIAL]`, `[DOMICILIO]`, `[CORREO PRIVACIDAD]`, …), and have **no variante for a site
+  visitor** — A is portal signup, B device linking, C operator PIN. A marketing-site visitor is
+  not yet a customer, so none of them reaches one. See OQ Variante D in
+  `docs/legal/aviso/README.md`. The checkout hook has no such blocker and can ship alone. Checkout hook in `probarGratis`; a portal-served 1×1
+  pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
+  because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
 - [x] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
       SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
       sequential for counts, diverging for rates.
 - [~] **N-60 · Phase 6 — ADR-092 + aviso.** ADR-092 written; `aviso-integral.md` §3, §4.2 and §10
-      updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
-      **Remaining and not an engineering task:** variante D for site visitors, the placeholders, and
-      the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
-      and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
-      engineering one — the cookie-less aggregate case is weak for one, but confirm.
+  updated (the «DESCRIBIR o eliminar» TODO is closed) and `privacy.md` gained its own section.
+  **Remaining and not an engineering task:** variante D for site visitors, the placeholders, and
+  the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
+  and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
+  engineering one — the cookie-less aggregate case is weak for one, but confirm.
 - [ ] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
 - [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best"
       or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
