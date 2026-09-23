@@ -81,3 +81,9 @@ export const mapFrame = style({
   height: 'auto',
   margin: '12px 0',
 });
+
+/** The column the map is currently shaded by; colour is backed by the header text. */
+export const selectedCol = style({
+  background: colors.yellowSoft,
+  fontWeight: typography.weights.bold,
+});

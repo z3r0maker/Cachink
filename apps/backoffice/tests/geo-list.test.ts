@@ -18,6 +18,51 @@ const at = (
 const deps = (tallies: readonly DatedTally[]) => ({ geo: new InMemoryGeoRollup(tallies) });
 
 describe('geoView', () => {
+  it('defaults to TODOS, so the first view is never blank when data exists', async () => {
+    // The map used to open on Accesos. With only landing visits recorded, the
+    // first thing anyone saw was an empty country — data present, nothing
+    // shown. TODOS sums every source, so anything recorded is visible.
+    const view = await geoView(
+      deps([at('2026-09-20', 'landing', 'CHH', 2), at('2026-09-20', 'compra', 'CHH', 1)]),
+      {},
+      NOW,
+    );
+    assert.equal(view.metric.id, 'todos');
+    assert.equal(view.rows[0]?.value, 3);
+  });
+
+  it('carries every metric per state, not only the selected one', async () => {
+    // At low volumes a shade is invisible — two visits and four look the same
+    // — so the grid below the map is where numbers are read, and it must not
+    // require changing the filter to see them.
+    const view = await geoView(
+      deps([
+        at('2026-09-20', 'login', 'JAL', 5),
+        at('2026-09-20', 'landing', 'JAL', 40),
+        at('2026-09-20', 'compra', 'JAL', 4),
+      ]),
+      { metrica: 'accesos' },
+      NOW,
+    );
+    const row = view.rows[0];
+    assert.equal(row?.value, 5, 'the selected metric');
+    assert.equal(row?.detail.accesos, 5);
+    assert.equal(row?.detail.visitas, 40);
+    assert.equal(row?.detail.checkouts, 4);
+    assert.equal(row?.detail.todos, 49);
+    assert.equal(row?.detail.conversion, 0.1);
+  });
+
+  it('leaves a rate null in the detail when its denominator is too small', async () => {
+    const view = await geoView(
+      deps([at('2026-09-20', 'landing', 'BCS', 2), at('2026-09-20', 'compra', 'BCS', 1)]),
+      { metrica: 'todos' },
+      NOW,
+    );
+    assert.equal(view.rows[0]?.detail.conversion, null);
+    assert.equal(view.rows[0]?.detail.todos, 3);
+  });
+
   it('ranks states by the chosen metric, naming each one', async () => {
     const view = await geoView(
       deps([at('2026-09-20', 'login', 'JAL', 34), at('2026-09-21', 'login', 'CMX', 28)]),

@@ -8,7 +8,7 @@ import { METRIC_IDS, type MetricId } from '@/server/geo/metrics';
  * default rather than erroring — a hand-edited URL shows the default view.
  */
 export function parseMetric(sp: SearchParams): MetricId {
-  return oneOf(one(sp, 'metrica'), METRIC_IDS) ?? 'accesos';
+  return oneOf(one(sp, 'metrica'), METRIC_IDS) ?? 'todos';
 }
 
 export function parseRange(sp: SearchParams): GeoRange {

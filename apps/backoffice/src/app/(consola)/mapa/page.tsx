@@ -169,7 +169,7 @@ export default async function MapaPage(props: { searchParams: Promise<SearchPara
           ) : null}
           <Choropleth metric={result.metric} rows={result.rows} />
           <Legend view={result} />
-          <EstadoTable metric={result.metric} rows={result.rows} national={result.national} />
+          <EstadoTable metric={result.metric} rows={result.rows} />
           <p className={muted}>
             Ubicación aproximada, derivada de la conexión. Nunca se guarda la dirección IP ni la
             ciudad: sólo un conteo diario por estado.

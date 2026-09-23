@@ -2,6 +2,7 @@ import { clientIp } from '@xangarro/auth-core';
 import { throttleKey, throttleTake } from '@xangarro/data-pg';
 
 import { db } from '@/server/db';
+import { looksAutomated } from '@/server/geo/bots';
 import { recordGeo } from '@/server/geo/record';
 import { pixelResponse } from '@/server/geo/pixel';
 
@@ -24,6 +25,10 @@ export const dynamic = 'force-dynamic';
 const PER_IP = { max: 60, window: 60 } as const;
 
 export async function GET(request: Request): Promise<Response> {
+  // A crawler or an uptime check is not a visit. Answer the image either way —
+  // refusing one would tell a bot it was spotted, and would break nothing but
+  // our own page.
+  if (looksAutomated(request.headers.get('user-agent'))) return pixelResponse();
   try {
     // The one place this feature touches the IP, and only as a SHA-256 — the
     // same thing every other throttled endpoint already does (ADR-079). The

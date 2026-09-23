@@ -1,7 +1,15 @@
 import { z } from 'zod';
 
 import { invalidTenantInput, tenantStore } from '../tenants/errors';
-import { bucketOf, METRIC_IDS, METRICS, valueOf, type Bucket, type Metric } from './metrics';
+import {
+  bucketOf,
+  METRIC_IDS,
+  METRICS,
+  valueOf,
+  type Bucket,
+  type Metric,
+  type MetricId,
+} from './metrics';
 import { mexicoDay } from './day';
 import { stateName } from './mx-states';
 import type { GeoRollupSource, GeoTally } from './port';
@@ -13,7 +21,7 @@ const DAYS: Readonly<Record<GeoRange, number>> = { '30d': 30, '90d': 90, '12m': 
 
 export const GeoViewInputSchema = z.object({
   rango: z.enum(GEO_RANGES).default('30d'),
-  metrica: z.enum(METRIC_IDS as [string, ...string[]]).default('accesos'),
+  metrica: z.enum(METRIC_IDS as [string, ...string[]]).default('todos'),
 });
 export type GeoViewInput = z.input<typeof GeoViewInputSchema>;
 
@@ -23,6 +31,13 @@ export interface GeoStateRow {
   /** `null` for a rate whose denominator is below the floor. */
   readonly value: number | null;
   readonly bucket: Bucket;
+  /**
+   * Every metric for this state, not only the selected one. At low volumes a
+   * shade is nearly invisible, so the table beneath the map is where the
+   * numbers are actually read — and a reader should not have to change the
+   * filter four times to see four numbers.
+   */
+  readonly detail: Readonly<Record<MetricId, number | null>>;
 }
 
 export interface GeoView {
@@ -62,6 +77,14 @@ function groupByRegion(tallies: readonly GeoTally[]): Map<string, GeoTally[]> {
   return byRegion;
 }
 
+/** Every metric for one state, so the grid beneath the map needs no second query. */
+function detailOf(rows: readonly GeoTally[]): Readonly<Record<MetricId, number | null>> {
+  return Object.fromEntries(METRIC_IDS.map((id) => [id, valueOf(METRICS[id], rows)])) as Record<
+    MetricId,
+    number | null
+  >;
+}
+
 const hitsWhere = (rows: readonly GeoTally[], keep: (t: GeoTally) => boolean): number =>
   rows.reduce((total, t) => (keep(t) ? total + t.hits : total), 0);
 
@@ -89,6 +112,7 @@ export async function geoView(deps: GeoDeps, raw: GeoViewInput, now: Date): Prom
       nombre: stateName(code),
       value,
       bucket: bucketOf(metric, value, scale),
+      detail: detailOf(byRegion.get(code) ?? []),
     }))
     .sort((a, b) => (b.value ?? -1) - (a.value ?? -1) || a.nombre.localeCompare(b.nombre, 'es'));
 

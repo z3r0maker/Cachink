@@ -23,7 +23,15 @@ export type MetricKind = 'conteo' | 'tasa';
 
 /** The shading class for one region; `mapa.css.ts` keys its variants by these. */
 export type Bucket =
-  'cero' | 'b1' | 'b2' | 'b3' | 'b4' | 'insuficiente' | 'abajo' | 'igual' | 'arriba';
+  | 'cero'
+  | 'b1'
+  | 'b2'
+  | 'b3'
+  | 'b4'
+  | 'insuficiente'
+  | 'abajo'
+  | 'igual'
+  | 'arriba';
 
 export interface Scale {
   /** Largest value across regions in the period. */
@@ -38,9 +46,9 @@ export interface Metric {
   /** One line under the selector; says exactly what is being counted. */
   readonly help: string;
   readonly kind: MetricKind;
-  /** Counts: the source to sum. Rates: numerator over denominator. */
-  readonly numerator: GeoSource;
-  readonly denominator?: GeoSource;
+  /** Counts: the sources to sum. Rates: numerator over denominator. */
+  readonly numerator: readonly GeoSource[];
+  readonly denominator?: readonly GeoSource[];
   /** Rates only: the smallest denominator worth dividing by. */
   readonly floor?: number;
 }
@@ -49,34 +57,41 @@ export interface Metric {
 export const RATE_FLOOR = 30;
 
 export const METRICS = {
+  todos: {
+    id: 'todos',
+    label: 'Todos',
+    help: 'Accesos, visitas y checkouts juntos, por estado.',
+    kind: 'conteo',
+    numerator: ['login', 'landing', 'compra'],
+  },
   accesos: {
     id: 'accesos',
     label: 'Accesos',
     help: 'Entradas al portal, contadas por estado.',
     kind: 'conteo',
-    numerator: 'login',
+    numerator: ['login'],
   },
   visitas: {
     id: 'visitas',
     label: 'Visitas al sitio',
     help: 'Visitas a la página pública.',
     kind: 'conteo',
-    numerator: 'landing',
+    numerator: ['landing'],
   },
   checkouts: {
     id: 'checkouts',
     label: 'Checkouts iniciados',
     help: 'Veces que alguien abrió el checkout. Aún no es un pago.',
     kind: 'conteo',
-    numerator: 'compra',
+    numerator: ['compra'],
   },
   conversion: {
     id: 'conversion',
     label: 'Conversión',
     help: `Visita → checkout iniciado (no pago). Se oculta con menos de ${RATE_FLOOR} visitas.`,
     kind: 'tasa',
-    numerator: 'compra',
-    denominator: 'landing',
+    numerator: ['compra'],
+    denominator: ['landing'],
     floor: RATE_FLOOR,
   },
 } as const satisfies Record<string, Metric>;
@@ -84,8 +99,8 @@ export const METRICS = {
 export type MetricId = keyof typeof METRICS;
 export const METRIC_IDS = Object.keys(METRICS) as readonly MetricId[];
 
-const sum = (rows: readonly GeoTally[], source: GeoSource): number =>
-  rows.reduce((total, r) => (r.source === source ? total + r.hits : total), 0);
+const sum = (rows: readonly GeoTally[], sources: readonly GeoSource[]): number =>
+  rows.reduce((total, r) => (sources.includes(r.source) ? total + r.hits : total), 0);
 
 /** `null` means "not enough to say", which is never the same as zero. */
 export function valueOf(metric: Metric, rows: readonly GeoTally[]): number | null {
