@@ -57,11 +57,15 @@
 ### L-04 Domain + DNS + email domain
 
 - [ ] Status · **Blocked by:** — (do early; ADR-054 follow-up)
+      **Remaining (2026-09-23, verified against the code):** owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it.
+
 - **Steps:** register `xangarro.mx`; DNS: apex → landing host, `app` → Vercel (P-01), `hola@xangarro.mx` sending domain verified for Resend (B-14) with SPF/DKIM/DMARC. Keep `cachink.mx` (if owned) redirecting 301 to `xangarro.mx` for a year.
 - **Acceptance:** `dig app.xangarro.mx` resolves to Vercel; a test email from Resend passes DMARC.
 
 ### L-05 Store badges + legal pages
 
 - [ ] Status · **Blocked by:** X-05 (real store URLs)
+      **Remaining (2026-09-23, verified against the code):** no privacidad/términos route on the landing and the legal texts are not linked from it; store badges wait for X-05's real URLs; `docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade.
+
 - **Steps:** replace placeholder store links when listings exist; privacy policy + terms updated for cloud storage of business data and the subscription terms (grace period, downgrade to Freelancer, data export) — source from `docs/legal/` in the app repo and keep one copy (link, don't duplicate).
 - **Acceptance:** badges resolve; legal pages mention data export on every plan and the 7-day grace.

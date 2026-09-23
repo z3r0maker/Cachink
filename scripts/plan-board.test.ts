@@ -10,8 +10,9 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'vitest';
-import { parseTrack } from './plan-board-parse.js';
-import { BOARD, collect, renderBoard } from './plan-board.js';
+import { type Item, parseTrack } from './plan-board-parse.js';
+import { categoryOf, renderBoard } from './plan-board-render.js';
+import { BOARD, collect } from './plan-board.js';
 
 const ROOT = join(import.meta.dirname, '..');
 
@@ -22,12 +23,17 @@ const FIXTURE = `# Track T
 ### T-01 First task \`[LAUNCH]\`
 
 - [~] Status · **Blocked by:** B-10, C-12 · **Blocks:** T-03
+
+  - 2026-09-22 audit: shipped except one clause.
+  - **Remaining (2026-09-23):** the nested-bullet form.
+
 - **What:** irrelevant here.
 
 ### T-02 Second task
 
 - [ ] Status · **Trigger:** launch + 30 days, or the first incident.
   **Blocked by:** T-01
+  **Remaining (2026-09-23, verified):** the cron entry and the fixture tests.
 - **What:** also irrelevant.
 
 ## 3. Post-launch
@@ -55,6 +61,8 @@ describe('parseTrack', () => {
     assert.equal(second?.id, 'T-02');
     assert.equal(second?.trigger, 'launch + 30 days, or the first incident.');
     assert.equal(second?.blockedBy, 'T-01');
+    assert.equal(second?.remaining, 'the cron entry and the fixture tests.');
+    assert.equal(first?.remaining, 'the nested-bullet form.');
   });
 
   it('reads the one-line bold shape and the plain shape', () => {
@@ -74,11 +82,45 @@ describe('parseTrack', () => {
     assert.equal(o1?.status, 'done');
     assert.equal(o2?.status, 'open');
     assert.equal(o2?.title, 'Turn Data API off');
-    assert.equal(o2?.line, 25);
+    assert.equal(o2?.line, 30);
   });
 
   it('never invents items from prose or numbered decision tables', () => {
     assert.equal(items.length, 7);
+  });
+});
+
+describe('categoryOf', () => {
+  const at = (source: string, section: string): Item => ({
+    source,
+    section,
+    line: 1,
+    id: null,
+    title: 't',
+    status: 'open',
+    trigger: null,
+    blockedBy: null,
+    remaining: null,
+  });
+
+  it('splits Track N by section and routes the launch and post-launch files', () => {
+    assert.equal(categoryOf(at('09-next-features.md', '2. Launch blockers')), 'Lanzamiento');
+    assert.equal(categoryOf(at('09-next-features.md', '3. Post-launch')), 'Post-lanzamiento');
+    assert.equal(categoryOf(at('07-launch.md', '')), 'Lanzamiento');
+    assert.equal(
+      categoryOf(at('11-pre-launch-and-deferred.md', '1. Pre-launch actions')),
+      'Lanzamiento',
+    );
+    assert.equal(categoryOf(at('08-post-launch.md', '')), 'Post-lanzamiento');
+    assert.equal(
+      categoryOf(at('../launch/production-readiness.md', '1. Legal texts')),
+      'Lanzamiento',
+    );
+    assert.equal(
+      categoryOf(at('../launch/production-readiness.md', '9. Deferred by decision')),
+      'Post-lanzamiento',
+    );
+    assert.equal(categoryOf(at('03-backend.md', '')), 'Colas de tracks');
   });
 });
 
@@ -89,8 +131,10 @@ describe('the committed board', () => {
     assert.equal(actual, expected);
   });
 
-  it('lists only open work and cites a line per item', () => {
+  it('lists only open work, in the three categories, citing a line per item', () => {
     const board = readFileSync(join(ROOT, BOARD), 'utf8');
+    for (const c of ['## Lanzamiento', '## Post-lanzamiento', '## Colas de tracks'])
+      assert.ok(board.includes(c), c);
     const lines = board.split('\n').filter((l) => /^- \[/.test(l));
     assert.ok(lines.length > 0);
     for (const line of lines) {

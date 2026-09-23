@@ -319,7 +319,10 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 ### C-14 QR activation with a long single-use token
 
 - [ ] Status · **Surfaced by:** N-25; **amended 2026-09-17 by the N-26 security audit (SEC-DEV-01)** ·
+      **Remaining (2026-09-23, verified against the code):** no `qrToken` minted, stored hashed or accepted by `/activate`; no `app.xangarro.mx/activar?t=` link; the `EMAIL_MISMATCH` oracle is still live (`contracts/src/errors.ts`, `activate.ts`, `mock/handler.ts`) against the «one generic error» clause. The limiter (`activate-throttle.ts`) is done.
+
       **Blocks:** N-25, A-04
+
 - **Steps:** "Agregar dispositivo" mints, alongside the 8-character code, a **QR token** of ≥ 128
   random bits (base64url, ~22 chars), single-use, same 48 h expiry, stored hashed. `/activate` accepts
   either `{ email, code }` (typed path, unchanged) or `{ qrToken }` (scan path — no email). The

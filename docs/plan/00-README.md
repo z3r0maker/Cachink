@@ -74,8 +74,8 @@ task ID. The README dependency graph in §5 is the authoritative cross-track lis
 - If you discover a needed task that isn't here, add it at the **end** of the track with the next
   number and note which task surfaced it.
 - Contract changes: update `02-contracts.md` first, then the tasks that depend on it.
-- **The board is generated.** `PENDIENTES.md` is written by `pnpm plan:board` from these checkbox
-  lines (and the `| O-n |` rows of `11-pre-launch-and-deferred.md`). Never edit it by hand: change the
+- **The board is generated.** `PENDIENTES.md` (three lists: Lanzamiento · Post-lanzamiento · Colas
+  de tracks) is written by `pnpm plan:board` from these checkbox lines (and the `| O-n |` rows of `11-pre-launch-and-deferred.md`). Never edit it by hand: change the
   track, regenerate, commit both. `pnpm test:scripts` fails while it is stale.
 
 ---

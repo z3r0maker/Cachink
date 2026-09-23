@@ -12,8 +12,10 @@
 
 ### B-01 Provision Supabase (local + one hosted project) and secrets layout
 
-- [~] Status · **Blocked by:** F-04 · **Blocks:** B-03, P-01
+- [x] Status · **Blocked by:** F-04 · **Blocks:** B-03, P-01
+      Done: 2026-09-18 · 6224f890 · migrate-hosted tooling, preflight/roles/ledger scripts, env-example drift CI, both apps pinned to `pdx1`; the hosted run itself is owner actions O-1 … O-9 in `11-pre-launch-and-deferred.md`.
   - 2026-09-18 · Tooling landed; the owner runs it (`docs/ops/provisioning.md`). `apps/{portal,admin}/.env.example` + CI drift check (`scripts/env-example.test.ts`); `entitlement:keygen`; `db:migrate:hosted` (LOGIN roles from env with SCRAM verifiers and DB-CONN-01 timeouts, ledger `xangarro_ops.migrations` with checksums, `hosted/` → `drizzle/` → admin migrations, `--dry-run`, preflight blockers + DB-RLS-03 posture warnings), proven by `db:migrate:hosted:selftest` on a throwaway container; both `vercel.json` → `pdx1`. **Still to do (owner):** run it on the hosted project, set Vercel env, DNS, smoke checks. **Open:** hosted sign-up has no `auth.users` access for `xangarro_app` (compat grants excluded by owner rule); `createDb` needs `prepare: false` for the Transaction pooler (portal owner); backups/PITR (DB-OPS-01).
+
 - **Context:** Hosted project exists: ref `jijggmddzacwcldwnmzj`, **us-west-2**, Nano, no backups yet. Auth is ours (ADR-079/080, no GoTrue), the Data API is off (SEC-DATA-01), and **no anon/service-role/JWT key is used anywhere** — each app connects to Postgres as its own login role. Q17: one hosted project now; staging is X-01.
 - **Steps:**
   1. Local stays `packages/data-pg/scripts/db-local.sh` (plain Postgres + `local/` compat layer); no `supabase start` needed.
@@ -25,7 +27,8 @@
 
 ### B-02 `packages/data-pg`: Postgres Drizzle schema + drift test
 
-- [~] Status · **Blocked by:** F-04, F-07 · **Blocks:** B-03, B-08, B-09, P-\*
+- [x] Status · **Blocked by:** F-04, F-07 · **Blocks:** B-03, B-08, B-09, P-\*
+      Done: 2026-09-22 · 23c7fd43 · pg schema mirrored from the device (`tenant`, `catalog`, `ledger`, `caja`, `portal`, `billing`); `tests/drift.test.ts` guards column and property names.
   - 2026-09-17 · data-pg is used by the portal for every read and write. Integration suite 48 tests, run in CI by the new `db` job with `REQUIRE_DB=1` so it can no longer silently skip. **Still to do:** point it at a hosted project (B-01).
   - In progress: 2026-09-17 · `packages/data-pg` exists with the schema and the drift test.
     **Needs no Supabase instance** — Drizzle table definitions are ordinary code, which is why this
@@ -48,6 +51,7 @@
     worst failure mode this system has, and one both sides would otherwise compile through.
   - **Still to do:** the migrations themselves and RLS (B-03), which do need a database, plus
     repositories and the `sync_log` write-through the portal screens will call.
+
 - **Context:** All 21 local schema files are `sqlite-core`; the portal needs `pg-core`. Authored once, kept in lockstep by a test. Two Postgres **schemas**: `tenant` (synced tables + `sync_log`, `sync_rejections`, `devices`) and `billing` (`business_members`, `activation_codes`, `subscriptions`, `fiscal_profiles`, `factura_requests`, `plans`). `businesses` lives in `tenant` (it syncs down) but is created by billing code.
 - **Files:** `packages/data-pg/{package.json,drizzle.config.ts,src/schema/tenant/*.ts,src/schema/billing/*.ts,src/index.ts,tests/drift.test.ts}`.
 - **Steps:**
@@ -63,6 +67,7 @@
 ### B-03 Migrations + RLS (replace hand-written SQL)
 
 - [~] Status · **Blocked by:** B-02 · **Blocks:** B-05, B-08, B-09, P-02
+  **Remaining (2026-09-23, verified against the code):** `drizzle/0001_rls.sql` grants directly to `xangarro_app` and its `tenant_isolation` policies carry no `TO` clause (not pushable to hosted as written; `supabase-compat.integration.test.ts` pins that). The reset + hand-minted-JWT recipe in Acceptance is superseded by ADR-061 — local is plain Postgres, the suite is `tests/rls.integration.test.ts`.
   - 2026-09-17 · Local Supabase compat layer (`local/0000_supabase_compat.sql`, ADR-061); `NULLIF` fix for the 22P02 that made an empty `request.jwt.claims` error every RLS query; `CREATE ROLE … PASSWORD` moved out of `drizzle/`; `0002_membership_lookup.sql` SECURITY DEFINER function. **Still to do:** the hosted posture — `0001_rls.sql` is not pushable as written (grants name `xangarro_app`, policies have no `TO` clause), pinned by `supabase-compat.integration.test.ts`.
   - In progress: 2026-09-17 · migrations and RLS are written, **applied to a real Postgres 17, and
     proven**. `pnpm --filter @xangarro/data-pg db:up && pnpm --filter @xangarro/data-pg test:db`
@@ -89,6 +94,7 @@
     them — verified.
   - **Still to do:** the seed (B-04), wiring `DATABASE_URL` into the portal so the screens read
     real rows instead of fixtures, and pointing this at a hosted Supabase project (B-01).
+
 - **Context:** `supabase/migrations/0001_schema.sql` is hand-written (violates CLAUDE.md §6) and PowerSync-specific. Replace with `drizzle-kit generate` output committed into `supabase/migrations/` (so `supabase db push`/`db reset` still drive it) + a hand-written **policies** migration (RLS is not expressible in Drizzle schema).
 - **Steps:**
   1. Delete `0001_schema.sql`'s PowerSync publication; regenerate the schema migration from `data-pg`. Keep `0002_bug_database.sql`.
@@ -105,6 +111,7 @@
 ### B-04 Seed + demo business for local dev and App Review
 
 - [~] Status · **Blocked by:** B-03 · **Blocks:** P-\*, X-05
+  **Remaining (2026-09-23, verified against the code):** no App Review demo tenant distinct from the dev seed (only Taquería Don Pedro + the C-10 conformance tenant); `DEMOK7M3` is seeded nowhere, so «code activates the app» cannot pass. Operators, employees, devices and the three members are seeded.
   - 2026-09-17 · Seed rewritten to satisfy its own domain schemas — ULID ids (was `p-tac`, `s1`), `'producto'`/`'semanal'` casing, two portal members (owner + viewer). `seed-contract.integration.test.ts` enforces it. **Still to do:** App Review data.
   - In progress: 2026-09-17 · `pnpm --filter @xangarro/data-pg db:seed` populates Taquería Don
     Pedro — the business every design file uses — with 6 ventas, 5 gastos, 6 productos, their
@@ -116,13 +123,16 @@
     `motivo` is required. The first mattered — summing `cantidad` raw would have counted every
     sale as a restock, so `lowStock` signs by `tipo`.
   - **Still to do:** an App Review demo tenant distinct from the dev seed, and employees/operators.
+
 - **Steps:** `pnpm --filter @xangarro/data-pg seed` creates: auth user `demo@xangarro.mx` (password from `.env.example`), business "Tacos La Esquina", emprendedor subscription, 2 operators (PINs `1234`, `5678` — bcrypt), 20 products with icons, 3 clients, 1 active activation code `DEMOK7M3` (codes must match `^[A-HJ-NP-Z2-9]{8}$` — no 0/O/1/I; `DEMO0001` would be rejected by `ActivationCodeSchema`), 30 days of sales/expenses. Idempotent (re-run wipes and recreates that business only).
 - **Acceptance:** seed runs in < 10 s; portal login as demo works (after P-02); code `DEMOK7M3` activates the app (after B-07).
 
 ### B-05 Auth: Supabase Auth config, membership claims hook, device-JWT minting
 
-- [~] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-02
+- [x] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-02
+      Done: 2026-09-18 · a64a2756 · HMAC device tokens (`device/credentials.ts`), revocation-checked `authenticateDevice`, `requireMember`; the GoTrue claims hook of step 1 was dropped by ADR-079/080.
   - 2026-09-17 · **Portal slice only**, provider-neutral (ADR-061): HMAC-signed session carrying the Supabase claim shape, `requireSession`/`requireMember`, `withSession` writing `request.jwt.claims`. **Still to do:** device-JWT minting and `requireDevice` (phone-side), and GoTrue if chosen.
+
 - **Steps:**
   1. Custom Access Token Hook (Postgres function) adds `memberships` array from `billing.business_members` to portal JWTs.
   2. `apps/web/src/server/auth/mint-device-token.ts`: signs `02-contracts.md` §2 claims with `SUPABASE_JWT_SECRET`, `exp` 365 d. Unit test: token verifies with the secret and PostgREST accepts it (integration test against local).
@@ -132,7 +142,8 @@
 
 ### B-06 Entitlement signer + computation
 
-- [~] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+- [x] Status · **Blocked by:** F-06, C-05, B-02 · **Blocks:** B-07, B-09, A-10 (public key hand-off)
+      Done: 2026-09-18 · 432094eb · `computeEntitlement` + Ed25519 signer pinned to the C-05 vector, `entitlement:keygen`, `GET /api/v1/entitlement`; the production key is an ops step (O-9).
   - 2026-09-17 · `computeEntitlement(businessId, subscription, now)` in `@xangarro/application`
     (8 tests: active, trialing, past_due inside and past grace, lapsed/none → free plan, unknown
     plan → `UNKNOWN_PLAN`, paid status without a period end → `MISSING_PERIOD_END`). The signer is
@@ -142,6 +153,7 @@
     the real portal, and `devices.spec.ts` shows a validly signed token for a **revoked** device
     gets `401 DEVICE_REVOKED`. **Still to do:** step 1's production keypair (an ops step, with
     B-03), and the subscription is the fixture until B-10 writes `billing.subscriptions`.
+
 - **Steps:**
   1. Generate Ed25519 keypair (`node -e` with `crypto.generateKeyPairSync('ed25519')`); private → `ENTITLEMENT_PRIVATE_KEY` env; public → `apps/mobile` env `EXPO_PUBLIC_ENTITLEMENT_PUBKEY` (hand to Track A via `02-contracts.md` — append the prod public key under a "Keys" note; dev key is the mock's).
   2. `computeEntitlement(subscription, plans, now)` in `packages/application` (pure): status `active|trialing` → plan limits; `past_due|grace` → same plan with `grace_until`; `lapsed|free` → **freelancer** (Q14). `valid_until = current_period_end`, `grace_until = valid_until + 7 d`.
@@ -151,7 +163,9 @@
 ### B-07 `POST /api/v1/activate`
 
 - [~] Status · **Blocked by:** C-02, C-10, B-04, B-05, B-06, B-11 · **Blocks:** A-04 (real), X-02
+  **Remaining (2026-09-23, verified against the code):** `BUSINESS_SUSPENDED` is in the contract but never thrown — archived businesses (`0016_business_archive.sql`) are not checked on activation. Slots (`NO_DEVICE_SLOTS`) and the real plan (`tenantEntitlement`, 2528ca25) are done; conformance against a live server is X-02's run.
   - 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/web test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. **Still to do:** device-slot enforcement (`NO_DEVICE_SLOTS`, with B-12), `BUSINESS_SUSPENDED`, and the plan comes from the fixture until B-10.
+
 - **Files:** `apps/web/src/app/api/v1/activate/route.ts` (adapter) → `packages/application/src/use-cases/activate-device.ts` (logic, testable with in-memory repos in `packages/testing`).
 - **Steps:** validate with `ActivateRequest`; in one transaction with `SELECT … FOR UPDATE` on the code: check exists/not expired/not redeemed/email matches (case-insensitive) → count active devices vs plan `devices` → insert `tenant.devices` → set `redeemed_at`, `redeemed_device_id` → mint token → compute+sign entitlement → bootstrap payload (`/sync/pull?since=0` internals, reuse B-09's query). Error mapping per §3.
 - **Acceptance:** application tests: happy; expired; used; slots full; email mismatch. Conformance suite (C-10) green against the dev server incl. the **concurrent redemption** test (exactly one 200).
@@ -196,12 +210,14 @@
 > with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
 
 - [~] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
+  **Remaining (2026-09-23, verified against the code):** no daily `past_due → lapsed` job (crons are trial-emails, usage, cfdi-close); `grace_until` is derived in `compute-entitlement.ts`, not stored — decide and amend step 3 rather than tick. OXXO in step 1 is superseded by ADR-067 / N-01. `stripe listen` acceptance needs test-mode keys (O-12).
   - Built (verified by the 2026-09-22 doc audit, not by its author): Checkout session, signed
     webhook `apps/web/src/app/api/stripe/webhook/route.ts`, the event → subscription-state mapping
     (`src/server/billing/stripe-mapping.ts`), the `stripe_events` idempotency ledger
     (`packages/data-pg/src/schema/billing.ts`), the seeding script `apps/web/scripts/stripe-seed.ts`
     and tests under `apps/web/tests/billing/`. **Still to do:** `grace_until` is derived rather than
     stored, and there is no `past_due → lapsed` cron route under `apps/web/src/app/api/cron/`.
+
 - **Steps:**
   1. Stripe test mode: 1 product "Xangarro" with 2 recurring prices (Emprendedor 19900 MXN, MiPyME Pro 39900 MXN; `trial_period_days: 14` applied at Checkout for Pro only). Enable payment methods: card, **OXXO**, **SPEI** (customer balance / bank transfer for MX). Record price IDs in `billing.plans`.
   2. `createCheckoutSession(businessId, planId)` server action: mode `subscription`, `customer_email`, `client_reference_id = business_id`, `success_url = /onboarding?session_id=…`, `cancel_url = /suscripcion`.
@@ -215,8 +231,10 @@
 > **Amended 2026-09-18 (ADR-080):** portal-only. The Studio/SQL issuer is dropped; codes come from
 > «Generar código», so the alphabet has one source. What remains is B-07/B-12, already done.
 
-- [~] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-06
+- [x] Status · **Blocked by:** B-03 · **Blocks:** B-07, P-06
+      Done: 2026-09-18 · 1183aa40 · «Generar código» mints and replaces the live code from the contract's alphabet (`actions/equipo.ts`, `lib/activation-code.ts`, `0003_redeem_activation_code.sql`); the Studio/SQL issuer was dropped by ADR-080.
   - 2026-09-17 · **Portal half:** `generarCodigo` mints from `crypto.randomInt` with the alphabet derived from `ACTIVATION_CODE_REGEX`; regenerating expires every other unredeemed code (E2E asserts exactly one live code — verified it fails with two). **Still to do:** Studio-callable issuance, redemption (B-07).
+
 - **Steps:** Postgres function `billing.issue_activation_code(business_id, email, issued_by)` → generates 8 chars from alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`, `expires_at = now() + 48 h`, returns the code; security definer, executable by members with role ≠ viewer and by service role. Server action wrapper + email (B-14). Also `billing.revoke_device(device_id)` (sets status, `revoked_at`; frees the slot).
 - **Acceptance:** SQL tests: alphabet has no `0 O 1 I`; uniqueness under 10 000 generations; viewer call → permission error.
 
@@ -244,6 +262,7 @@
 > templates — single-use, short-lived tokens stored hashed, like sessions (ADR-079).
 
 - [~] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
+  **Remaining (2026-09-23, verified against the code):** templates `welcome`, `payment-failed`, `factura-issued` still missing (`packages/email/src/index.ts` exports activation-code, trial, usage-threshold, staff-digest, auth-links, generic-notice). DNS + Resend inbox check is O-13. `docs/ops/email.md` still lists activation-code as unwritten — stale.
   - 2026-09-18 · branch `track-n/b14-email` · Resend (resend 6.28.1, @react-email/components
     1.0.12, @react-email/render 2.1.0). Port + use cases in `@xangarro/application/email`;
     templates and adapters in the new `@xangarro/email` (Resend with Idempotency-Key and
@@ -254,6 +273,7 @@
     `notifyUsageThreshold` (N-03, for the N-02 wiring). Runbook `docs/ops/email.md`.
     **Still to do:** `activation-code`, `welcome`, `payment-failed`, `factura-issued`; DNS
     verification of xangarro.mx (owner); owner address for businesses with no Stripe customer.
+
 - **Steps:** Resend (or Supabase SMTP) with templates: `activation-code` (code, expiry, 3-step how-to), `welcome`, `payment-failed` (grace explanation), `factura-issued`. Spanish (es-MX). From `hola@xangarro.mx` (domain verification in L-04).
 - **Acceptance:** dev sends land in Resend test inbox; templates snapshot-tested.
 
@@ -270,12 +290,14 @@
 ### B-16 Back-office: Studio saved queries + support functions
 
 - [~] Status · **Blocked by:** B-03, B-11
+  **Remaining (2026-09-23, verified against the code):** no «subscriptions by plan/status» saved query (unblocked now that `billing.subscriptions` exists); `billing.reissue_code` / `billing.resend_magic_link` do not exist. Studio-callable issuance is superseded by ADR-080 — drop that step. Runbook review is a human sign-off.
   - 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today,
     and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()`
     (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every
     saved query on the seed and pins the SQL unlock to the app's throttle key. **Still blocked:**
     the subscriptions query (B-10's tables) and resending a sign-in link (B-14's email). Studio
     code issuance is dropped (ADR-080).
+
 - **Steps:** commit `supabase/studio/*.sql` (copied into Studio's saved queries manually): subscriptions by plan/status; businesses with unresolved rejections; devices not seen in 7 days; activation codes expiring today. Functions: `billing.reissue_code(business_id)`, `billing.resend_magic_link(email)` (calls Auth admin API via edge function). README `docs/ops/back-office.md` with the runbook (Q16).
 - **Acceptance:** each query runs on the seed DB; runbook reviewed.
 

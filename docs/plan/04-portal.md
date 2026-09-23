@@ -243,6 +243,7 @@ including the press stamp.
 ### P-23 Primitives + Storybook inventory + visual-regression baselines
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
+  - **Remaining (2026-09-23, verified against the code):** `pnpm design:compare` cannot run — `package.json` points at `scripts/design-compare/compare.ts`, which is not in the repo because the unanchored `.gitignore` pattern `design-compare/` hides it (this also undercuts P-21's tick). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
   - 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance.
   - In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
@@ -266,6 +267,7 @@ including the press stamp.
   - Two of my own violations were caught by the repo's own gates and fixed rather than
     suppressed: `design-lint` flagged a hardcoded `#FFD60A` in `layout.tsx` (now `colors.yellow`),
     and ESLint's 40-line function budget rejected three components until they were split.
+
 - **Steps:** Build the closed vocabulary the design plan §6 names, in `.css.ts` + Radix:
   button (primary yellow / secondary white / dark / danger / small — `height: 48`, `radius: 16`,
   `border: 2.5px`, `shadow: 4px 4px 0`, label 13px/700/`0.08em`/uppercase, hover to `--yellow-deep`,
@@ -835,6 +837,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > when a read throws.
 
 - [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - **Remaining (2026-09-23, verified against the code):** only the QR / app-link pairing panel is missing, hard-blocked on C-14 minting the token; the panel, drawer and revoke button shipped (9e7c90c1, 1183aa40).
   - 2026-09-22 doc audit: shipped except the QR / app-link pairing panel (N-25, blocked on C-14).
   - In progress: 2026-09-17 · the Dispositivos tab of `/equipo`.
   - Device cards with platform label, model, operator, last sync and a pending-count pill. The
@@ -855,6 +858,7 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
     coordinated with the owner) and `enviarCodigoPorCorreo` — the panel sends the code that
     is live to whatever address the owner names; sending never mints or burns anything.
     e2e asserts the dev outbox against the panel's own code.
+
 - **Steps:** Device cards with a 44×44 platform tile, name, model, state pill, Operador, Última
   sincronización, Turno, and a `--warning-soft` strip "{n} registros esperando conexión" when queued.
   Slot counter. **Pairing panel** on flat `--yellow` (owner/admin): "Código de vinculación activo",
@@ -1120,6 +1124,7 @@ never invented text.
 ### P-28 Diagnóstico + estrategia — **«Próximamente» in production**
 
 - [~] Status · **Blocked by:** P-26, P-30 · **Blocks:** —
+  - **Remaining (2026-09-23, verified against the code):** only the tab and both gates exist (`asesor/screen.tsx`); the ten sections, month tiles, price table, estrategia list, six states, printable variant and the prompt-injection fixture are all unbuilt.
   - 2026-09-22 doc audit: shipped except the ten report sections and the price table.
   - In progress: 2026-09-17 · the tab and **both gates** are wired; the report itself is not built.
   - Two gates compose in the right order via `resolveScreenState`: `capabilities.asesor ===
@@ -1130,6 +1135,7 @@ never invented text.
     model-backed path is** (ADR-059).
   - **Still to do:** everything behind the gate — the ten report sections, the price-suggestion
     table, the estrategia list, and the six diagnostic states. Needs P-30 and the credential.
+
 - **Context:** ADR-056, ADR-059. LLM-backed, so production renders «Próximamente»; **locally it is
   fully live.**
 - **Steps:** The report's ten sections, the month tiles, the price-suggestion table (Producto ·
@@ -1155,6 +1161,7 @@ never invented text.
 ### P-30 Asesor generation runtime
 
 - [~] Status · **Blocked by:** P-26, B-02, B-03 · **Blocks:** P-28, P-29
+  - **Remaining (2026-09-23, verified against the code):** only `server/asesor/model.ts` exists; no cron entry, no one-business route, no `notices` writes with `source='asesor'`, no Batches API / prompt caching, no fixture tests.
   - 2026-09-22 doc audit: shipped except the cron entry, the per-business route and the batch API.
   - 2026-09-21 · **The model boundary landed** — the single module ADR-056 requires
     (`server/asesor/model.ts`): env-gated, unset → null → fixtures (CI/fresh clones/
@@ -1166,6 +1173,7 @@ never invented text.
     credentials for Vercel will land in the same two env vars — the owner is obtaining
     them. **Still open:** the cron entry, the one-business-per-invocation route, the
     deterministic-then-model ordering, prompt caching, the batch API.
+
 - **Context:** ADR-056.
 - **Steps:** A route handler in `apps/web` invoked by **Vercel Cron** declared in the same
   `vercel.json` as P-01, in `iad1`. **One business per invocation** — the cron entry enqueues, it

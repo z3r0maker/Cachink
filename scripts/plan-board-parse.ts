@@ -9,6 +9,9 @@
  *   2. `- [x] **N-55 · Title.** …` (the geo phases, one line each)
  *   3. `- [ ] Any sentence` (production-readiness, no id)
  *
+ * A continuation line `**Remaining (date, …):** …` under a Status line is
+ * what a verification pass found still missing; the board prints it.
+ *
  * plus the owner-action tables in `11-pre-launch-and-deferred.md`
  * (`| O-1 | title | …`, done when the row says `**Done`).
  */
@@ -24,6 +27,8 @@ export interface Item {
   readonly section: string;
   readonly trigger: string | null;
   readonly blockedBy: string | null;
+  /** The `**Remaining (…):**` note a verification pass left under the Status line. */
+  readonly remaining: string | null;
 }
 
 const MARKS: Readonly<Record<string, Status>> = {
@@ -38,9 +43,10 @@ const H2 = /^## (.*)$/;
 const H3 = /^### ([A-Z]{1,2}-\d+)\s+(.*)$/;
 const INLINE = /^\*\*([A-Z]{1,2}-\d+) · ([^*]*?)\*\*/;
 const OWNER_ROW = /^\| (O-\d+)\s*\|([^|]*)\|/;
-const CONTINUATION = /^\s{2,}(?!- )\S/;
+const NESTED = /^\s{2,}\S/;
 const TITLE_MAX = 110;
 
+/** `name` is a regex fragment, so a dated label like `Remaining (2026-09-23)` still matches. */
 function field(text: string, name: string): string | null {
   // Stops at the next bold field (`· **Blocks:**` or a bare `**Blocked by:**` on a continuation line).
   const m = new RegExp(
@@ -64,7 +70,7 @@ function fromTaskLine(
   mark: string,
   text: string,
   note: string,
-): Pick<Item, 'id' | 'title' | 'status' | 'trigger' | 'blockedBy' | 'section'> {
+): Omit<Item, 'source' | 'line'> {
   const status = MARKS[mark] ?? 'open';
   const inline = INLINE.exec(text);
   const head = text.startsWith('Status') ? cursor.heading : null;
@@ -77,15 +83,21 @@ function fromTaskLine(
     section: cursor.section,
     trigger: field(note, 'Trigger'),
     blockedBy: field(note, 'Blocked by'),
+    remaining: field(note, 'Remaining(?: \\([^)]*\\))?'),
   };
 }
 
+/** The Status line plus everything indented under it (continuation lines and nested bullets). */
 function gatherNote(lines: readonly string[], from: number): string {
   let note = lines[from] ?? '';
   for (let i = from + 1; i < lines.length; i += 1) {
     const ln = lines[i] ?? '';
-    if (!CONTINUATION.test(ln)) break;
-    note += ` ${ln.trim()}`;
+    if (ln.trim() === '') {
+      if (!NESTED.test(lines[i + 1] ?? '')) break;
+      continue;
+    }
+    if (!NESTED.test(ln)) break;
+    note += ` ${ln.trim().replace(/^- /, '')}`;
   }
   return note;
 }
@@ -133,5 +145,6 @@ function ownerRow(
     section,
     trigger: null,
     blockedBy: null,
+    remaining: null,
   };
 }
