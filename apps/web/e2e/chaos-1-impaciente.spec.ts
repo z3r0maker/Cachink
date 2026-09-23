@@ -92,7 +92,10 @@ test.describe('login gate (signed out)', () => {
 
   test('smashing "Entrar" recovers to a single error state, no crash', async ({ page }) => {
     let actionPosts = 0;
-    await page.route('**/login', async (route) => {
+    // `**/login*`, not `**/login`: the member form lives at
+    // `/login?puerta=dueno`, and a server action posts to the URL it is on.
+    // The exact-path glob stopped matching and counted zero posts.
+    await page.route('**/login*', async (route) => {
       if (route.request().method() === 'POST') actionPosts += 1;
       await route.continue();
     });
@@ -113,7 +116,10 @@ test.describe('login gate (signed out)', () => {
     await expect(
       page.getByText(/Correo o contraseña incorrectos\.|Demasiados intentos\./),
     ).toBeVisible();
-    await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
+    // The member form, not the chooser: the door was already taken, and the
+    // card behind it is what has to survive six clicks. This asserted the
+    // chooser's heading until the doors replaced it.
+    await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
     expect(page.url()).toContain('/login');
     expect(actionPosts).toBeGreaterThanOrEqual(1);
   });

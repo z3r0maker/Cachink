@@ -26,13 +26,22 @@ for (const route of ROUTES) {
   });
 }
 
-test('the owner door reveals the member form', async ({ page }) => {
+test('the owner door reveals the member form, and the way back works', async ({ page }) => {
   await page.goto('/login');
   await page.getByTestId('login-door-owner').click();
   await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
   await expect(page.getByTestId('login-email')).toBeVisible();
-  // And the way back to the chooser, for whoever picked the wrong door.
+
+  // The way back, for whoever picked the wrong door. It was a dead control
+  // once: the door lived in component state and «Volver» linked to the
+  // address the visitor was already at, so nothing changed.
   await page.getByRole('link', { name: '‹ Volver' }).click();
+  await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
+
+  // And the browser's own Back, which was dead for the same reason.
+  await page.getByTestId('login-door-owner').click();
+  await expect(page.getByTestId('login-email')).toBeVisible();
+  await page.goBack();
   await expect(page.getByRole('heading', { name: '¿Cómo vas a entrar?' })).toBeVisible();
 });
 
@@ -56,7 +65,10 @@ test('a wrong password does not say which half was wrong', async ({ page }) => {
   // The same message as an unknown address: telling them apart reveals which
   // emails are registered.
   await expect(page.getByText('Correo o contraseña incorrectos.')).toBeVisible();
-  await expect(page).toHaveURL(/\/login$/);
+  // Still on the login route, whichever door — the refusal must not navigate.
+  // The redirect assertions elsewhere keep the strict `/login$`: nothing has
+  // chosen a door at that point, so a query string there would be wrong.
+  await expect(page).toHaveURL(/\/login(\?|$)/);
 });
 
 test('an unknown address gets the identical message', async ({ page }) => {
@@ -183,6 +195,9 @@ test('the login panel carries the four-scene animation', async ({ page }, testIn
   assert(vistas.size === 4, `expected 4 scenes, saw ${[...vistas].join(',')}`);
 
   // Focus pauses the clock: with the email input focused the scene holds.
+  // The field lives behind the owner door, and the panel is the same either
+  // side of it — the animation is the layout's, not the card's.
+  await page.goto('/login?puerta=dueno');
   await page.getByTestId('login-email').focus();
   const alFoco = await stage.getAttribute('data-escena');
   await page.waitForTimeout(1400);
@@ -192,7 +207,9 @@ test('the login panel carries the four-scene animation', async ({ page }, testIn
 test('below 1024 px the panel folds away and the card stands alone', async ({ browser }) => {
   const context = await browser.newContext({ viewport: { width: 768, height: 900 } });
   const page = await context.newPage();
-  await page.goto('/login');
+  // Straight to the member form: the point is the panel, and the form is the
+  // widest card the login has to stand alone with.
+  await page.goto('/login?puerta=dueno');
   await expect(page.getByTestId('animacion-acceso')).toBeHidden();
   await expect(page.getByTestId('login-email')).toBeVisible();
   await context.close();

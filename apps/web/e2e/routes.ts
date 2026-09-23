@@ -31,8 +31,13 @@ export interface Route {
 
 /** `/inventario` is dev scaffolding and deliberately absent. */
 export const ROUTES: readonly Route[] = [
-  // `recentActivity` → `_inicio/cards.tsx`; SALES s1.
-  { path: '/', heading: 'Hola, Pedro', data: { kind: 'db', sentinel: 'Taco al pastor ×3' } },
+  // `recentActivity` → `_inicio/cards.tsx`. A **signed amount**, not a
+  // concepto: the feed is the six most recent movements by `created_at`, and
+  // the finanzas seed writes rows dated months after the base seed's, so no
+  // particular concepto can be promised a place in it. A signed figure is
+  // what an activity row renders and nothing else on Inicio does, so it still
+  // proves rows reached the page — and it survives the next seed.
+  { path: '/', heading: 'Hola, Pedro', data: { kind: 'db', sentinel: /[+−]\$[\d,]+\.\d{2}/ } },
   // NOTICES nt-4, the only `source='asesor'` row. `/asesor` opens on the
   // "Para ti" tab, which is db-backed; Diagnóstico's `locked` state is behind a
   // tab click and is not what loads here.
@@ -41,11 +46,13 @@ export const ROUTES: readonly Route[] = [
     heading: 'Asesor',
     data: { kind: 'db', sentinel: 'El queso te cuesta 18% más que en junio' },
   },
-  // Default tab is `ventas`; SALES s1.
+  // Default tab is `ventas`. A signed amount for the same reason as `/`:
+  // the Monto column is the one cell on this screen that can only come from
+  // a row.
   {
     path: '/movimientos',
     heading: 'Ventas y gastos',
-    data: { kind: 'db', sentinel: 'Taco al pastor ×3' },
+    data: { kind: 'db', sentinel: /[+−]\$[\d,]+\.\d{2}/ },
   },
   // Ingresos for May 2026 = 75+60+60+80+250+120. A regex, not a string: every
   // label on this screen is static, so the only real-data signal is a figure,

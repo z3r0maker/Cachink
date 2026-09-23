@@ -1,13 +1,12 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 import { group, option, optionBody, optionTitle } from '@/components/option-card.css';
 import { Icon } from '@/shell/icon';
 
 import { AuthCard } from './auth-card';
-import { LoginForm } from './form';
+import { rutaDeDueno } from './puertas';
 
 /**
  * The login's two doors. Choosing one grants nothing — the owner still types
@@ -23,13 +22,16 @@ const OWNER_ICON = 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6';
 /** The Ventas nav glyph: the receipt the cashier tears off. */
 const CAJA_ICON = 'M5 3h14v18l-3-2-2 2-2-2-2 2-3-2V3M9 8h6M9 12h6';
 
+/**
+ * Which door is open lives in the URL, not in component state.
+ *
+ * It was `useState` once, and «‹ Volver» linked to `/login` — the address the
+ * visitor was already at. Next had nothing to change, so the form stayed up
+ * and the way back was a dead control. The browser's own Back button was dead
+ * for the same reason: choosing a door left no history behind it.
+ */
 export function LoginDoor() {
-  const [owner, setOwner] = useState(false);
   const router = useRouter();
-
-  if (owner) {
-    return <LoginForm backTo={{ href: '/login', label: '‹ Volver' }} />;
-  }
 
   return (
     <AuthCard title="¿Cómo vas a entrar?">
@@ -39,7 +41,7 @@ export function LoginDoor() {
           type="button"
           className={option}
           data-testid="login-door-owner"
-          onClick={() => setOwner(true)}
+          onClick={() => router.push(rutaDeDueno)}
         >
           <Icon path={OWNER_ICON} size={24} />
           <span>
