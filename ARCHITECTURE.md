@@ -6273,3 +6273,55 @@ no EULA.
   the aviso's section 10 TODO is closed by this work, and the marketing site —
   which today publishes no privacy page at all — needs one, because its
   visitors are not yet customers and this aviso does not reach them.
+
+---
+
+## ADR-093
+
+**Title:** The hero illustration ships in v1 as the handoff's own PNG, optimised — reversing ADR-058 §7
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — decided by the owner; reverses ADR-058 §7
+
+**Context**
+
+ADR-058 §7 deferred `hero-taqueria.png`: it was generated from a text
+prompt, the handoff says to "replace with a licensed or commissioned asset
+before shipping", and commissioning one would have added a second external
+dependency to a chain already blocked on logo work. The login panel shipped
+without it and gave the room to the four-scene animation.
+
+The 2026-09-22 design audit recorded the absence as finding A-12, and the
+owner asked for the illustration back now rather than at the post-launch
+date ADR-058 named. The brand panel is the first screen a customer sees and
+the one place the product shows who it is for; an empty yellow column with
+a wordmark does not do that.
+
+**Decision**
+
+1. The illustration **ships in v1**, as block 2 of the auth brand panel —
+   between the wordmark row and the animation — in a `2.5px` black frame,
+   `radius 18`, `5px 5px 0`, at the asset's own 2.5:1 ratio, exactly as the
+   design specifies.
+2. The shipped file is **the handoff's generated PNG**, converted to WebP at
+   1400 px (52 KB, down from 1.4 MB) and served through `next/image`. The
+   repository keeps the source PNG only in `design-reference/`, which is the
+   mirror, not the build.
+3. **Commissioning a licensed replacement stays open** (`11-…` §1, owner
+   action). It is a file swap at the same ratio: nothing in the layout,
+   the frame or the tests depends on which artwork sits inside.
+4. On viewports under 720 px tall the frame is hidden. The panel must fit a
+   wordmark, this, the animation and the pinned headline inside `100vh`, and
+   the headline carries the promise the illustration only illustrates.
+
+**Consequences**
+
+- ADR-058 §7 is superseded; §1–§6 and §8–§9 stand.
+- The generated artwork is now customer-facing, so the licensing question is
+  live rather than deferred: until the commissioned asset lands, the product
+  ships an AI-generated illustration, which is a decision the owner has now
+  taken knowingly.
+- `e2e/auth.spec.ts` asserts the frame renders at 2.5:1 and that the served
+  file is the optimised one, so a future swap cannot silently reintroduce the
+  1.4 MB source.

@@ -143,6 +143,28 @@ test('five wrong passwords lock the address, whether or not it exists', async ({
   }
 });
 
+/**
+ * A-12 / ADR-093: the handoff's hero illustration is block 2 of the brand
+ * panel, in its own framed box at the asset's 2.5:1 ratio.
+ */
+test('the login panel carries the hero illustration at its own ratio', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'the panel exists at ≥1024 px');
+  await page.goto('/login');
+  const hero = page.getByRole('img', {
+    name: 'Una taquera atiende su puesto con el teléfono en la mano',
+  });
+  await expect(hero).toBeVisible();
+  // Served optimised, never the 1.4 MB source PNG.
+  await expect(hero).toHaveAttribute('src', /hero-taqueria\.webp|\/_next\/image/);
+
+  const caja = await hero.boundingBox();
+  const ratio = (caja?.width ?? 0) / (caja?.height ?? 1);
+  expect(ratio).toBeGreaterThan(2.35);
+  expect(ratio).toBeLessThan(2.65);
+});
+
 /** P-02: the login animation — four scenes on one clock, held under reduced motion.
  * Desktop-only: below 1024 px the yellow panel folds away by design. */
 test('the login panel carries the four-scene animation', async ({ page }, testInfo) => {

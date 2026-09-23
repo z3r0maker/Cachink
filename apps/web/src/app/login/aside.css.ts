@@ -1,4 +1,4 @@
-import { colors } from '@xangarro/tokens';
+import { colors, radii, shadows } from '@xangarro/tokens';
 import { style } from '@vanilla-extract/css';
 
 /**
@@ -37,6 +37,37 @@ export const panel = style({
       display: 'none',
     },
   },
+});
+
+/**
+ * The hero illustration's frame (A-12, ADR-093). The box keeps the asset's
+ * own 2.5:1 ratio — any other ratio crops the vendor or leaves the artwork
+ * floating in dead yellow (design handoff, "Acceso y onboarding" block 2).
+ *
+ * It yields before the headline does: on a short viewport the panel has to
+ * fit a wordmark, this, the animation and the pinned headline inside 100vh,
+ * and the headline is the one that carries the product's promise.
+ */
+export const heroMarco = style({
+  flex: '0 1 auto',
+  minHeight: 0,
+  width: '100%',
+  aspectRatio: '1983 / 793',
+  border: `2.5px solid ${colors.black}`,
+  borderRadius: radii[5],
+  boxShadow: shadows.hero,
+  boxSizing: 'border-box',
+  overflow: 'hidden',
+  '@media': {
+    '(max-height: 719px)': { display: 'none' },
+  },
+});
+
+export const heroImagen = style({
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+  display: 'block',
 });
 
 export const marca = style({

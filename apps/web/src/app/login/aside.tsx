@@ -1,14 +1,34 @@
 'use client';
 
+import Image from 'next/image';
+
 import { AnimacionAcceso } from './animation';
-import { marca, monedaMarca, panel, subtitulo, titular } from './aside.css';
+import { heroImagen, heroMarco, marca, monedaMarca, panel, subtitulo, titular } from './aside.css';
 
 /**
  * The login page's left panel (P-02): the wordmark row, the looping
  * animation, and the headline pinned to the bottom with `margin-top: auto`.
- * The design file also places a hero image between the mark and the stage;
- * ADR-058 removed it — the animation gets the room instead.
+ * The hero illustration sits between the mark and the stage, as the design
+ * has it (ADR-093 reverses ADR-058 §7). It is the handoff's own
+ * `hero-taqueria.png`, served as a 52 KB WebP at the asset's 2.5:1.
  */
+/** The handoff's illustration, framed as block 2 of the panel (A-12). */
+function Hero() {
+  return (
+    <div className={heroMarco}>
+      <Image
+        className={heroImagen}
+        src="/hero-taqueria.webp"
+        alt="Una taquera atiende su puesto con el teléfono en la mano"
+        width={1400}
+        height={560}
+        priority
+        sizes="(max-width: 1023px) 0px, 50vw"
+      />
+    </div>
+  );
+}
+
 export function PanelAcceso() {
   return (
     <aside className={panel}>
@@ -29,6 +49,8 @@ export function PanelAcceso() {
           </svg>
         </span>
       </div>
+
+      <Hero />
 
       <AnimacionAcceso data-testid="animacion-acceso" />
 
