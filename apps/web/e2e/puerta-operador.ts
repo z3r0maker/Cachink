@@ -3,6 +3,7 @@ import type { Page } from '@playwright/test';
 
 import { newUlid } from '@xangarro/domain';
 import { mintCode, pasarAcceso } from './acceso-flow';
+import { asTenant, BIZ } from './sync-phone';
 
 const HERE = import.meta.dirname;
 
@@ -56,7 +57,8 @@ export interface ProductoPuerta {
 }
 
 /** Insert before activating: the bootstrap then carries them into the
- *  register's OPFS — chaos-proof (the portal specs own every seeded row). */
+ *  register's OPFS — chaos-proof (the portal specs own every seeded row).
+ *  Once per sku: `products` has no unique sku, so no ON CONFLICT target. */
 async function sembrar(productos: readonly ProductoPuerta[]): Promise<void> {
   if (productos.length === 0) return;
   await asTenant(BIZ, async (sql) => {
@@ -65,10 +67,10 @@ async function sembrar(productos: readonly ProductoPuerta[]): Promise<void> {
         INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad,
                               umbral_stock_bajo, tipo, seguir_stock, precio_venta_centavos,
                               business_id, device_id, created_at, updated_at)
-        VALUES (${newUlid()}, ${p.nombre}, ${p.sku}, 'Producto Terminado', 100, 'pza', 3,
-                'producto', true, ${p.precioCentavos},
-                ${BIZ}, ${DEV}, now(), now())
-        ON CONFLICT (sku) DO NOTHING`;
+        SELECT ${newUlid()}, ${p.nombre}, ${p.sku}, 'Producto Terminado', 100, 'pza', 3,
+               'producto', true, ${p.precioCentavos},
+               ${BIZ}, ${DEV}, now(), now()
+        WHERE NOT EXISTS (SELECT 1 FROM products WHERE business_id = ${BIZ} AND sku = ${p.sku})`;
     }
   });
 }
