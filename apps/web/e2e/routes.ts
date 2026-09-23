@@ -44,7 +44,7 @@ export const ROUTES: readonly Route[] = [
   // Default tab is `ventas`; SALES s1.
   {
     path: '/movimientos',
-    heading: 'Movimientos',
+    heading: 'Ventas y gastos',
     data: { kind: 'db', sentinel: 'Taco al pastor ×3' },
   },
   // Ingresos for May 2026 = 75+60+60+80+250+120. A regex, not a string: every

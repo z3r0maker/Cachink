@@ -22,8 +22,8 @@ export function Heading({ kind }: { readonly kind: 'ventas' | 'gastos' }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
       <div>
-        <h1 className={pageTitle}>Movimientos</h1>
-        <p className={pageSubtitle}>Todas las ventas y gastos capturados en tus dispositivos</p>
+        <h1 className={pageTitle}>Ventas y gastos</h1>
+        <p className={pageSubtitle}>Todo lo que se capturó en tus dispositivos</p>
       </div>
       <div style={{ marginLeft: 'auto' }}>
         {/* Export is open to every plan and every role, including the contador. */}

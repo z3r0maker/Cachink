@@ -47,6 +47,7 @@ UX audit decides. Each block can be pasted into Claude Design as it stands if th
 > both. Merge each pair into one entry: «Ventas y gastos» and «Tu equipo» (eleven entries, and the
 > «Configuración» divider moves after Empleados). The tabs inside each screen keep switching.
 >
-> While you are there: the Ventas y gastos file titles the page «Movimientos» although the file
-> itself is called "Ventas y gastos". Decide which name wins — the sidebar entry now reads «Ventas
-> y gastos», so the `<h1>` is the odd one out.
+> While you are there: the file titles the page «Movimientos» although the file itself is called
+> "Ventas y gastos". The owner chose the file's name (2026-09-22), so the code's `<h1>` now reads
+> **«Ventas y gastos»** with the subtitle «Todo lo que se capturó en tus dispositivos» (the old one
+> repeated the title). Please retitle the page in the design too.
