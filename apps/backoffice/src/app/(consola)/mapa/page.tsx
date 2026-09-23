@@ -1,8 +1,16 @@
 import Link from 'next/link';
 import type { Route } from 'next';
 
+import { classifyInfraFailure, infraFailureMessage } from '@/server/auth/infra-failure';
 import { db } from '@/server/db/client';
-import { geoView, GEO_RANGES, type GeoRange, type GeoView } from '@/server/geo/list';
+import { dbFingerprint } from '@/server/db/fingerprint';
+import {
+  geoView,
+  GEO_RANGES,
+  UNKNOWN_REGION_WARN,
+  type GeoRange,
+  type GeoView,
+} from '@/server/geo/list';
 import { METRICS, METRIC_IDS, type MetricId } from '@/server/geo/metrics';
 import { geoDeps } from '@/server/geo/wiring';
 import { requireStaffPage } from '@/server/staff';
@@ -11,7 +19,7 @@ import { body, errorText, heading, muted } from '@/styles/ui.css';
 
 import { chip, chipRow } from '../inbox/inbox.css';
 import type { SearchParams } from '../search-params';
-import { wide } from '../tenants/tenants.css';
+import { notice, wide } from '../tenants/tenants.css';
 import { Choropleth } from './choropleth';
 import { EstadoTable, formatValue } from './estado-table';
 import { legend, swatch } from './mapa.css';
@@ -33,12 +41,26 @@ const RANGE_LABELS: Record<GeoRange, string> = {
   '12m': '12 meses',
 };
 
-async function load(metrica: MetricId, rango: GeoRange): Promise<GeoView | TenantError> {
+/**
+ * A store failure here is nearly always one thing: the deployment shipped
+ * before `db:migrate:hosted` ran, so `xangarro.admin_geo_rollup` does not
+ * exist yet. Left to the error boundary it reads as «algo salió mal», and the
+ * reader concludes there is no traffic rather than that the feature was never
+ * installed — the single most likely way this feature fails quietly.
+ */
+async function load(metrica: MetricId, rango: GeoRange): Promise<GeoView | string> {
   try {
     return await geoView(geoDeps(db()), { metrica, rango }, new Date());
   } catch (error) {
-    if (error instanceof TenantError && error.code !== 'STORE_FAILED') return error;
-    throw error;
+    if (error instanceof TenantError && error.code !== 'STORE_FAILED') {
+      return 'Esa vista no es válida.';
+    }
+    const failure = classifyInfraFailure(error);
+    console.error(`[mapa] ${failure.cause}/${failure.detail} db=${dbFingerprint()}`, error);
+    return infraFailureMessage(failure, {
+      on: process.env.ADMIN_DIAGNOSTICS === '1',
+      db: dbFingerprint(),
+    });
   }
 }
 
@@ -131,13 +153,20 @@ export default async function MapaPage(props: { searchParams: Promise<SearchPara
       </h1>
       <p className={body}>{METRICS[metrica].help}</p>
       <Picker metrica={metrica} rango={rango} />
-      {result instanceof TenantError ? (
+      {typeof result === 'string' ? (
         <p role="alert" className={errorText}>
-          Esa vista no es válida. <Link href="/mapa">Ver accesos</Link>
+          {result} <Link href="/mapa">Ver accesos</Link>
         </p>
       ) : (
         <>
           <Totals view={result} />
+          {result.sinEstadoShare > UNKNOWN_REGION_WARN ? (
+            <p className={notice} role="note">
+              {(result.sinEstadoShare * 100).toFixed(0)}% de los registros de México no traen
+              estado. Suele significar que el enriquecimiento de ubicación dejó de llegar (un proxy
+              delante del despliegue, o un cambio de plan), no que haya menos tráfico.
+            </p>
+          ) : null}
           <Choropleth metric={result.metric} rows={result.rows} />
           <Legend view={result} />
           <EstadoTable metric={result.metric} rows={result.rows} national={result.national} />

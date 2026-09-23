@@ -40,6 +40,15 @@ describe('classifyInfraFailure', () => {
     assert.equal(classifyInfraFailure(queryError('3D000')).cause, 'db-missing');
   });
 
+  it('names a missing migration, which otherwise reads as an empty screen', () => {
+    // 42883 undefined_function / 42P01 undefined_table are what a deployment
+    // that shipped before `db:migrate:hosted` ran actually throws. Without
+    // this case the console says "algo salió mal" and a reader concludes
+    // there is no data, rather than that the feature was never installed.
+    assert.equal(classifyInfraFailure(queryError('42883')).cause, 'migration-missing');
+    assert.equal(classifyInfraFailure(queryError('42P01')).cause, 'migration-missing');
+  });
+
   it('falls back to unknown without quoting the error message', () => {
     // The message can carry query text and parameters (staff.ts:69-74 makes
     // the same choice), so only the error's name survives into `detail`.
@@ -58,6 +67,7 @@ describe('classifyInfraFailure', () => {
 
 describe('infraFailureMessage', () => {
   const causes: readonly InfraFailure[] = [
+    { cause: 'migration-missing', detail: '42883' },
     { cause: 'totp-key', detail: 'INVALID_KEY' },
     { cause: 'db-credentials', detail: '28P01' },
     { cause: 'db-unreachable', detail: 'ENOTFOUND' },
@@ -81,17 +91,21 @@ describe('infraFailureMessage', () => {
   });
 
   it('names the variable to fix when diagnostics are on', () => {
-    assert.match(infraFailureMessage(causes[0]!, on), /ADMIN_TOTP_KEY/);
-    assert.match(infraFailureMessage(causes[1]!, on), /DATABASE_URL/);
+    assert.match(infraFailureMessage(causes[1]!, on), /ADMIN_TOTP_KEY/);
+    assert.match(infraFailureMessage(causes[2]!, on), /DATABASE_URL/);
+  });
+
+  it('tells you to run the migrations, by name', () => {
+    assert.match(infraFailureMessage(causes[0]!, on), /migraciones/i);
   });
 
   it('names the database consulted, so a wrong deployment is visible', () => {
-    for (const failure of causes.slice(1, 4)) {
+    for (const failure of causes.slice(2, 5)) {
       assert.ok(infraFailureMessage(failure, on).includes(DB));
     }
   });
 
   it('points an unknown failure at the server logs', () => {
-    assert.match(infraFailureMessage(causes[4]!, on), /TypeError/);
+    assert.match(infraFailureMessage(causes[5]!, on), /TypeError/);
   });
 });

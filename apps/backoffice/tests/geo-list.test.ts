@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'vitest';
 
-import { geoView } from '@/server/geo/list';
+import { geoView, UNKNOWN_REGION_WARN } from '@/server/geo/list';
 import { failingGeoRollup, InMemoryGeoRollup, type DatedTally } from '@/server/geo/memory';
 import { TenantError } from '@/server/tenants/errors';
 
@@ -42,9 +42,40 @@ describe('geoView', () => {
       { metrica: 'accesos' },
       NOW,
     );
-    assert.deepEqual(view.rows.map((r) => r.code), ['JAL']);
+    assert.deepEqual(
+      view.rows.map((r) => r.code),
+      ['JAL'],
+    );
     assert.equal(view.sinEstado, 4);
     assert.equal(view.national, 14);
+  });
+
+  it('reports how much of Mexico had no state, as a share', async () => {
+    // The symptom of geo enrichment silently stopping is a map that just looks
+    // emptier. The share is what turns that into something a reader can see.
+    const view = await geoView(
+      deps([at('2026-09-20', 'login', 'JAL', 3), at('2026-09-20', 'login', '', 7)]),
+      { metrica: 'accesos' },
+      NOW,
+    );
+    assert.equal(view.sinEstadoShare, 0.7);
+    assert.ok(view.sinEstadoShare > UNKNOWN_REGION_WARN, 'this one should warn');
+  });
+
+  it('does not divide by zero when nothing was recorded at all', async () => {
+    const view = await geoView(deps([]), { metrica: 'accesos' }, NOW);
+    assert.equal(view.sinEstadoShare, 0);
+  });
+
+  it('counts only Mexican hits in that share, not foreign ones', async () => {
+    // A foreign visitor is not a Mexican hit with a missing state, so folding
+    // them together would raise a false alarm.
+    const view = await geoView(
+      deps([at('2026-09-20', 'login', 'JAL', 5), at('2026-09-20', 'login', 'TX', 95, 'US')]),
+      { metrica: 'accesos' },
+      NOW,
+    );
+    assert.equal(view.sinEstadoShare, 0);
   });
 
   it('separates traffic from outside Mexico rather than mapping it', async () => {
@@ -53,7 +84,10 @@ describe('geoView', () => {
       { metrica: 'accesos' },
       NOW,
     );
-    assert.deepEqual(view.rows.map((r) => r.code), ['JAL']);
+    assert.deepEqual(
+      view.rows.map((r) => r.code),
+      ['JAL'],
+    );
     assert.equal(view.fueraDeMexico, 6);
     // The national figure is Mexico's, so a foreign hit must not inflate it.
     assert.equal(view.national, 10);

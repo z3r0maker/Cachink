@@ -10,6 +10,7 @@ import type { Diagnostics } from './login-message';
  * generic error page (which redacts the cause in production anyway).
  */
 export type InfraCause =
+  | 'migration-missing'
   | 'totp-key'
   | 'db-credentials'
   | 'db-unreachable'
@@ -28,6 +29,10 @@ export interface InfraFailure {
  * broken" from the outside, and the fix for each is a different variable.
  */
 const CODES_BY_CAUSE = {
+  // 42883 undefined_function, 42P01 undefined_table: a deployment that shipped
+  // before `db:migrate:hosted` ran. Worth its own cause because the symptom is
+  // an empty screen, which reads as "no data" rather than "not installed".
+  'migration-missing': ['42883', '42P01'],
   'totp-key': ['INVALID_KEY'],
   'db-credentials': ['28P01', '28000'],
   'db-missing': ['3D000'],
@@ -80,6 +85,8 @@ const GENERIC = 'El servicio no está disponible. Intenta más tarde.';
 export function infraFailureMessage(failure: InfraFailure, diag: Diagnostics): string {
   if (!diag.on) return GENERIC;
   switch (failure.cause) {
+    case 'migration-missing':
+      return `Configuración: faltan migraciones en ${diag.db} — corre \`pnpm --filter @xangarro/data-pg db:migrate:hosted\` (${failure.detail}).`;
     case 'totp-key':
       return 'Configuración: ADMIN_TOTP_KEY falta o no es una llave de 32 bytes en base64.';
     case 'db-credentials':

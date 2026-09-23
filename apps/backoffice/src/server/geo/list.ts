@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { invalidTenantInput, tenantStore } from '../tenants/errors';
 import { bucketOf, METRIC_IDS, METRICS, valueOf, type Bucket, type Metric } from './metrics';
+import { mexicoDay } from './day';
 import { stateName } from './mx-states';
 import type { GeoRollupSource, GeoTally } from './port';
 
@@ -34,29 +35,20 @@ export interface GeoView {
   readonly sinEstado: number;
   /** Hits from outside Mexico, kept off the map and out of the national rate. */
   readonly fueraDeMexico: number;
+  /**
+   * Share of Mexican hits whose state could not be resolved, 0–1. A high
+   * value is the symptom of geo enrichment having quietly stopped — a proxy
+   * in front of the deployment, or a plan change — and without it on screen
+   * the map just looks emptier than it should.
+   */
+  readonly sinEstadoShare: number;
 }
+
+/** Above this, the map is missing enough of Mexico to be worth a warning. */
+export const UNKNOWN_REGION_WARN = 0.3;
 
 export interface GeoDeps {
   readonly geo: GeoRollupSource;
-}
-
-const DAY_FORMAT = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'America/Mexico_City',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
-
-/**
- * CDMX-time day string, the same calendar `geo_record` stamps rows with.
- * Parts are looked up by type, never by position: the order of an
- * `Intl.DateTimeFormat` part list is a locale's business, not ours.
- */
-function mexicoDay(at: Date, minusDays = 0): string {
-  const parts = DAY_FORMAT.formatToParts(new Date(at.getTime() - minusDays * 86_400_000));
-  const of = (type: Intl.DateTimeFormatPartTypes): string =>
-    parts.find((p) => p.type === type)?.value ?? '';
-  return `${of('year')}-${of('month')}-${of('day')}`;
 }
 
 function groupByRegion(tallies: readonly GeoTally[]): Map<string, GeoTally[]> {
@@ -73,11 +65,7 @@ function groupByRegion(tallies: readonly GeoTally[]): Map<string, GeoTally[]> {
 const hitsWhere = (rows: readonly GeoTally[], keep: (t: GeoTally) => boolean): number =>
   rows.reduce((total, t) => (keep(t) ? total + t.hits : total), 0);
 
-export async function geoView(
-  deps: GeoDeps,
-  raw: GeoViewInput,
-  now: Date,
-): Promise<GeoView> {
+export async function geoView(deps: GeoDeps, raw: GeoViewInput, now: Date): Promise<GeoView> {
   const parsed = GeoViewInputSchema.safeParse(raw);
   if (!parsed.success) throw invalidTenantInput('Filtro no válido.');
   const { rango, metrica } = parsed.data;
@@ -86,7 +74,10 @@ export async function geoView(
   const range = { from: mexicoDay(now, DAYS[rango]), to: mexicoDay(now, -1) };
   const tallies = await tenantStore(() => deps.geo.rollup(range));
 
-  const national = valueOf(metric, tallies.filter((t) => t.country === 'MX'));
+  const national = valueOf(
+    metric,
+    tallies.filter((t) => t.country === 'MX'),
+  );
   const byRegion = groupByRegion(tallies);
   const values = [...byRegion].map(([code, rows]) => ({ code, value: valueOf(metric, rows) }));
   const max = values.reduce((m, v) => Math.max(m, v.value ?? 0), 0);
@@ -101,12 +92,15 @@ export async function geoView(
     }))
     .sort((a, b) => (b.value ?? -1) - (a.value ?? -1) || a.nombre.localeCompare(b.nombre, 'es'));
 
+  const sinEstado = hitsWhere(tallies, (t) => t.country === 'MX' && t.region === '');
+  const mexican = hitsWhere(tallies, (t) => t.country === 'MX');
   return {
     metric,
     rango,
     rows,
     national,
-    sinEstado: hitsWhere(tallies, (t) => t.country === 'MX' && t.region === ''),
+    sinEstado,
     fueraDeMexico: hitsWhere(tallies, (t) => t.country !== 'MX'),
+    sinEstadoShare: mexican === 0 ? 0 : sinEstado / mexican,
   };
 }

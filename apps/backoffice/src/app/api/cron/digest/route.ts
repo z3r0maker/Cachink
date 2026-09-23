@@ -4,6 +4,7 @@ import { handleDigestCron } from '@/server/alerts/cron-digest';
 import { DEFAULT_DIGEST_TO, transactionalMailer } from '@/server/alerts/email';
 import { DEFAULT_CONSOLE_URL } from '@/server/alerts/webhook-notifier';
 import { db } from '@/server/db/client';
+import { pruneGeoCounters } from '@/server/db/geo-prune';
 import { drizzleRejectionSource } from '@/server/db/rejections';
 import { expireStaleAssistedImports, purgeResolvedAssistedImportFiles } from '@xangarro/data-pg';
 import { pruneStaffSessions } from '@/server/db/staff-sessions-prune';
@@ -19,6 +20,7 @@ export async function GET(request: Request): Promise<Response> {
     repo: drizzleSupportItems(db()),
     rejections: drizzleRejectionSource(db()),
     pruneSessions: () => pruneStaffSessions(db()),
+    pruneGeo: () => pruneGeoCounters(db()),
     expireAssisted: () => expireStaleAssistedImports(db()),
     purgeAssistedFiles: () => purgeResolvedAssistedImportFiles(db()),
     // B-14: Resend with RESEND_API_KEY; the dev outbox (.email-outbox/) without it.
