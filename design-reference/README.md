@@ -7,7 +7,7 @@ A mirror of the Claude Design project `5dd266f3-42e7-403f-b941-95c8e6551dc6` (AD
   pulled.
 - `operador/` holds the second handoff (`design_handoff_operador/`): thirteen operator screens, two
   owner screens, `Operador Estado` (shared states), the implementation plan, and the handoff README
-  (`HANDOFF-README.md`). Track O, `docs/plan/10-operador.md`.
+  (`HANDOFF-README.md`). Track O, `docs/archive/10-operador.md` (done 2026-09-22).
 - `support.js`, `doc-page.js` and `_ds/` are the design tool's runtime, vendored so each file opens
   directly in a browser. Product code never imports them.
 - Excluded from Prettier, ESLint and `design-lint`.

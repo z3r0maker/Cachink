@@ -6434,3 +6434,70 @@ saw the double highlight and asked for one entry (2026-09-22).
   owner decides which.
 - `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
   the Cortes breadcrumb now carries the same words.
+
+## ADR-096
+
+**Title:** The console measures the business and can look over a tenant's shoulder — two amendments to ADR-063 row 3
+
+**Date:** 2026-09-22
+
+**Status:** Accepted 2026-09-22 (owner decision, same day) — amends ADR-063 ("not built: MRR dashboard, impersonation"); tasks N-63 … N-74, plan `docs/plan/17-consola-crecimiento.md`. The owner also accepted the plan's §4 thresholds as the starting defaults for N-70.
+
+**Context**
+
+ADR-063 scoped the console to what launch needed and explicitly left out an
+MRR dashboard ("Stripe covers it") and impersonation. Five days of building it
+and a research pass (plan §6) show what the launch scope cannot answer: whether
+the business is working (no MRR joined to activation, plan, state or campaign —
+Stripe has the revenue but none of the joins), what happened to one tenant (the
+events sit in seven tables), when a threshold will be crossed (ADR-068 names
+S2/S3 but nothing projects the date), and what a support case looks like from
+the tenant's side. The owner's question of 2026-09-22 — how the console helps
+grow the app, review operations and infra, and see when decisions are due — is
+those four gaps.
+
+**Decision**
+
+1. **Revenue and activation metrics live in the console, read from
+   webhook-derived tables** (`billing_events`, `activated_at`), never from
+   Stripe's API. Stripe stays the source of truth (ADR-063 unchanged); the
+   console is where its numbers meet the platform's own. This reverses the
+   "Stripe covers it" line of row 3.
+2. **Impersonation is built, under four conditions:** read-only, ≤ 30 minutes,
+   a required reason, a banner the tenant sees and a record they can review
+   afterwards. It is a signed short-lived token minted by the console, never a
+   shared session. Every page view during it writes two identities to the
+   audit log. This reverses the "impersonation not built" line of row 3.
+3. **Staff gets roles before either write surface exists:** lector, operador,
+   admin, enforced per server action. ADR-063's binary allowlist stays the
+   authentication rule; roles are authorization on top.
+4. **Decision thresholds are data, not prose.** ADR-068's S2/S3 numbers and
+   the new ones (infra share of MRR, support load, conversion) become rows the
+   admin edits and the console projects. ADR-068's monthly review is kept; the
+   page is what the review reads.
+5. **Nothing here reaches the phone.** ADR-069 (zero upsell in the app) and
+   ADR-053 (flags only through the signed entitlement) are untouched; the NPS
+   survey and referral links are portal and email only.
+
+**Alternatives considered**
+
+- *Keep reading MRR in Stripe.* Rejected: it cannot join to activation,
+  campaign or state, which is the whole question.
+- *A third-party analytics or CS tool (Custify, Userpilot, PostHog).* Rejected
+  for now: the data is already in Postgres, the numbers needed are a dozen
+  queries, and every vendor adds a processor to the aviso de privacidad.
+  Revisit at N-73's trigger if the health score outgrows SQL.
+- *Impersonation as a full write session ("do it for them").* Rejected: the
+  migration path (N-18) already covers acting on a tenant's behalf with their
+  approval; anything else is an unbounded write surface.
+
+**Consequences**
+
+- Four new console routes (`/negocio`, `/decisiones`, `/auditoria`, `/cobros`);
+  everything else lands on existing screens.
+- `staff_members` gains a role column; every existing server action must
+  declare a minimum role (N-66) before N-68 or N-71 merge.
+- The portal gains a read-only mode and a banner (N-68), and a
+  Seguridad entry listing support sessions.
+- The aviso de privacidad gains one line: staff may view an account for
+  support, logged and visible to the tenant.

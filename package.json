@@ -20,6 +20,7 @@
     "lint:design": "tsx scripts/design-lint/index.ts",
     "lint:store": "tsx scripts/store-compliance/index.ts",
     "storybook:smoke": "tsx scripts/storybook-smoke.ts",
+    "plan:board": "tsx scripts/plan-board.ts",
     "test:scripts": "vitest run --config vitest.scripts.config.ts",
     "typecheck": "turbo run typecheck && tsc -p supabase/functions/bug-report/tsconfig.json",
     "clean": "turbo run clean && rm -rf node_modules",

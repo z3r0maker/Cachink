@@ -8,8 +8,9 @@
 > 2. **§2 Deferred by decision** — items that were specified and decided, and deliberately scheduled
 >    after launch. Each has a trigger; do not start one before its trigger is true.
 >
-> Pending or partial **engineering** work is in `12-glm-handoff.md` (Track N) and
-> `13-web-portal-handoff.md` (web portal, P-track), not here. §3 below adds the web portal's owner
+> Pending or partial **engineering** work is on the generated board `PENDIENTES.md` (specs in
+> `09-next-features.md` and `04-portal.md`), not here. The 2026-09-18 handoffs it used to point at
+> are archived under `docs/archive/`. §3 below adds the web portal's owner
 > actions and deferred items.
 
 ---

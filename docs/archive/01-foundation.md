@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Track F is fully done (F-01 … F-10, every task ticked with its Done line). Nothing here is pending; the open board is `docs/plan/PENDIENTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Track F — Foundation (shared, do first, one session)
 
 > Everything here lands on `main` **before** Track A and Track B/P branch. It is sequential.

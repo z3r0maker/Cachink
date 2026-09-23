@@ -1,7 +1,7 @@
 # archive/
 
 Code kept for recoverability but **not built, not in the pnpm workspace, not renamed**.
-See ARCHITECTURE.md ADR-053 (§6, Consequences) and docs/plan/01-foundation.md (F-02, F-03).
+See ARCHITECTURE.md ADR-053 (§6, Consequences) and docs/archive/01-foundation.md (F-02, F-03).
 
 | Path           | What                        | Tagged at                 | Recover with                                                                                                                                                  |
 | -------------- | --------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |

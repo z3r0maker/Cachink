@@ -1,6 +1,9 @@
 # Track N — Next features (admin console, billing, limits, onboarding, payments, quality)
 
-> **Handoff 2026-09-18:** pending/partial work → `12-glm-handoff.md`; owner pre-launch actions and
+> **Console growth pass 2026-09-22:** N-63 … N-74 (§3) — rationale and triggers in
+> `17-consola-crecimiento.md`, amendments in ADR-096.
+
+> **Handoff 2026-09-18** (archived 2026-09-22 → `../archive/12-glm-handoff.md`; the open board is now `PENDIENTES.md`): pending/partial work → `12-glm-handoff.md`; owner pre-launch actions and
 > trigger-gated deferred items → `11-pre-launch-and-deferred.md`.
 
 > **Origin:** the 2026-09-17 feature interview (the owner's "pendientes" list for Xangarro). Every
@@ -607,7 +610,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-24 Phone app adopts the Track O operator design `[LAUNCH]`
 
 > **Re-scoped 2026-09-17 (owner decision):** A-01…A-18 are already built on the unmerged branch
-> `rename/xangarro-stored-ids`, and Track O (`10-operador.md`, ADR-071) already carries a finished
+> `rename/xangarro-stored-ids`, and Track O (`../archive/10-operador.md`, ADR-071) already carries a finished
 > operator design with 375 px layouts. No separate phone design pass: the phone reuses that design.
 
 - [ ] Status · **Blocked by:** merge of `rename/xangarro-stored-ids`; each Track O screen closed
@@ -1056,6 +1059,134 @@ matched-pair holdout test (advertise in one city, keep a comparable one dark) �
 worth testing before geography: segmenting by **business type**, which likely predicts more for a
 micro-POS than location does.
 
+### N-63 … N-74 The console as a growth and operations instrument (2026-09-22)
+
+> Rationale, priority order, the decision-trigger table and the research behind these live in
+> `17-consola-crecimiento.md`; ADR-096 (accepted 2026-09-22) amends ADR-063 row 3 for N-63 and N-68. All post-launch:
+> each has a **Trigger**. Surfaced by the owner's 2026-09-22 question on what the backoffice
+> should do next.
+
+### N-63 Negocio: MRR, churn, trial → paid
+
+- [ ] Status · **Trigger:** B-10 webhooks write `billing.subscriptions` for the first paying tenant
+      (the N-06 stub is retired). **Blocked by:** N-06 · **Blocks:** N-70, N-72
+- **What:** `/negocio`. MRR (plus IVA excluded, centavos), MRR by plan, new / expansion /
+  contraction / churned MRR per month, logo churn, trial → paid per weekly signup cohort, annual vs
+  monthly mix. Read from a webhook-fed `billing_events` table — the console never calls Stripe.
+- **Acceptance:** the four MRR movements reconcile to Stripe's own MRR for the month within one
+  subscription; a cohort with zero trials renders "sin datos", not 0 %.
+- **Amends** ADR-063 row 3 ("MRR dashboard not built — Stripe covers it"): see ADR-096.
+
+### N-64 Activation funnel and weekly cohorts
+
+- [ ] Status · **Trigger:** X-10 launch (real signups). **Blocked by:** N-57 · **Blocks:** N-70, N-74
+- **What:** define **activated** as one product moment — first venta synced from a device or the
+  operator view — and record `activated_at` on the business (server-side, from the first push).
+  Funnel per weekly cohort: signup → wizard done → first venta (≤ 7 d) → active in week 2 → paid.
+  `/campanas` gains the activation and paid columns, so a campaign is judged by what it converts,
+  not by what it signs up. Shares the cohort query layer with N-62.
+- **Acceptance:** a cohort younger than its window shows "aún no vence"; activation is computed
+  from sync data, never from the phone's own estimate.
+
+### N-65 Tenant timeline
+
+- [ ] Status · **Trigger:** now (every source table exists). **Blocked by:** N-08
+- **What:** on `/tenants/[id]`, one chronological feed: signup and wizard answers, devices linked
+  and revoked, plan and override changes, flag allowlist changes, inbox items, B-18 rejections,
+  billing events, migrations. Each entry links to its source screen. Read-only.
+- **Acceptance:** a tenant with 500+ events pages by keyset (reuse `keyset.ts`); the feed is the
+  union of existing tables — no new event table.
+
+### N-66 Staff roles
+
+- [ ] Status · **Trigger:** the second staff member is added, or before N-68 / N-71 start —
+      whichever is first. **Blocked by:** N-05 · **Blocks:** N-68, N-71
+- **What:** `staff_members.role ∈ { lector, operador, admin }`. Lector reads everything, writes
+  nothing. Operador does inbox, migrations, overrides, trial extensions, "ver como". Admin also
+  manages flags, staff and thresholds. Enforced in `requireStaff()` per action, not per page.
+- **Acceptance:** every server action declares its minimum role; a lector calling a write action
+  gets 403 and an audit row; `scripts/staff-cli.ts` sets the role.
+
+### N-67 `/auditoria`
+
+- [ ] Status · **Trigger:** now. **Blocked by:** N-05
+- **What:** a reader over `staff_audit_log`: actor, action, tenant, before/after payload, at,
+  origin. Filters by actor, action kind, tenant, date range; keyset paging; CSV export for an
+  authority or the privacy audit (`docs/audits/privacidad-2026-09-22.md`).
+- **Acceptance:** the log is append-only from this screen (no delete, no edit); an N-68 session
+  shows as one row per action with both identities.
+
+### N-68 "Ver como" — time-boxed, read-only impersonation
+
+- [ ] Status · **Trigger:** X-10 launch and the first inbox item that could not be resolved from
+      `/tenants/[id]` + N-65. **Blocked by:** N-66, N-67
+- **What:** an operador opens the portal as a tenant's dueño in **read-only** mode for ≤ 30 min,
+  with a reason (free text, required). The portal renders a persistent banner («Soporte de
+  Xangarro está viendo tu cuenta»), refuses every write, and the tenant sees the session in
+  Configuración → Seguridad afterwards. Implemented as a short-lived signed token minted by the
+  console, never a shared session or raw credential.
+- **Acceptance:** every page view during the session writes an audit row with both ids; a write
+  attempted through the token is rejected server-side; the token dies at 30 min or on "salir".
+- **Amends** ADR-063 row 3 ("impersonation not built"): see ADR-096.
+
+### N-69 Flag lifecycle and percentage rollout
+
+- [ ] Status · **Trigger:** N-09 `[x]`. **Blocked by:** N-09
+- **What:** per flag: `kind ∈ { release, kill }`, `owner`, `expires_at`. A "flags vencidas" list on
+  `/flags` and a line in the N-10 digest. Percentage rollout: `rollout_pct` evaluated server-side
+  as `hash(business_id, flag_key) % 100 < pct`, so a business always lands on the same side;
+  allowlist wins over percentage. Archived flags keep their history (append-only, as today).
+- **Acceptance:** raising 10 % → 50 % never removes a business already in; a kill flag has no
+  percentage and no expiry; a release flag past expiry is listed but keeps its last state.
+
+### N-70 Decisiones
+
+- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-07, N-63
+- **What:** `/decisiones` renders the table in `17-consola-crecimiento.md` §4: signal, source,
+  threshold, current value, 8-week trend, projected crossing date, and the decision it forces.
+  Thresholds are rows in a `decision_thresholds` table, editable by admin, audited. A crossed or
+  projected-within-30-days row also lands in the N-10 digest.
+- **Acceptance:** the ADR-068 S2/S3 rows read the same numbers as the N-07 card; a signal with
+  fewer than 4 weekly points shows "sin tendencia" instead of a date.
+
+### N-71 Cobros: dunning, expiring trials, extend / credit
+
+- [ ] Status · **Trigger:** first paying tenant. **Blocked by:** N-06, N-66
+- **What:** `/cobros`: `past_due` and `grace` tenants with days remaining and last dunning email;
+  trials ending in ≤ 7 days with activation state (N-64); pagos sin CFDI (N-33, moves here).
+  Actions (operador): extend trial by N days, apply a one-time credit — both through the existing
+  audited override path, both reflected in Stripe by B-10's writer, never by the console directly.
+- **Acceptance:** an extension shows in Stripe within one webhook round-trip; the list is empty
+  and says so when no tenant is past due.
+
+### N-72 Cost per tenant
+
+- [ ] Status · **Trigger:** N-63 `[x]`. **Blocked by:** N-63 · **Blocks:** N-70 infra-share row
+- **What:** a monthly manual entry (admin) of the Vercel, Supabase, Resend and Facturapi invoices
+  in centavos; the console divides by active tenants and by MRR. No vendor APIs in v1 — one form,
+  one table, one line on `/negocio` and one row on `/decisiones`.
+- **Acceptance:** a month with no entry shows "sin captura", never a stale ratio.
+
+### N-73 Account health and NPS micro-survey
+
+- [ ] Status · **Trigger:** 50 active tenants. **Blocked by:** N-64, N-47
+- **What:** health = usage trend (N-07) + payment health (N-63) + support load (N-08) + last sync
+  (N-46), bucketed verde / ámbar / rojo on `/tenants`. One-question NPS in the portal after the
+  third corte de día, at most once per quarter, delivered through the ADR-060 `notices` channel;
+  results and verbatims on `/negocio`, detractors as inbox items.
+- **Acceptance:** the score is explainable — hovering shows the four inputs; the survey never
+  shows on the phone (ADR-069).
+
+### N-74 Promo and referral codes with attribution
+
+- [ ] Status · **Trigger:** X-10 launch. **Blocked by:** N-64, N-01
+- **What:** codes are Stripe promotion codes created from the console (admin), each tagged with a
+  campaign; redemption lands in `/campanas` as its own origin and flows into N-64's funnel. A
+  dueño's "recomienda Xangarro" link is a code with the referrer's business id, one month free for
+  both once the referred tenant pays. Portal and email only — zero upsell in the app (ADR-069).
+- **Acceptance:** a redeemed code shows its campaign, activation and paid state on `/campanas`; a
+  referrer credit is applied through N-71's audited path.
+
 ---
 
 ## 4. Open questions (not decided in the interview)
@@ -1098,6 +1229,8 @@ app-branch merge + Track O screens ──► N-24 ──► N-20, N-22, N-25
 N-26, N-27, N-28, N-29 ──► N-30 beta ──► X-10
 N-24, A-15 ──► N-32 ──► X-05 · B-10 ──► N-33 ──► N-30
 N-30 ──► N-40 ──► N-41 ──► N-42, N-43, N-53 ──► N-45 ──► N-44
+N-06 + B-10 ──► N-63 ──► N-70, N-72 · N-57 ──► N-64 ──► N-73, N-74
+N-05 ──► N-66 ──► N-68, N-71 · N-09 ──► N-69 · N-67 ──► N-68  (17-consola-crecimiento.md)
 ```
 
 ---

@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** A handoff snapshot of 2026-09-18 that mirrored Track N's markers; the markers it copied have moved on. Task specs and status stay in `docs/plan/09-next-features.md`; owner actions in `docs/plan/11-pre-launch-and-deferred.md`; the open board is `docs/plan/PENDIENTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Handoff — Track N pending and partial work
 
 > For the session (GLM) taking over Track N on 2026-09-18. Read this first, then `CLAUDE.md`,

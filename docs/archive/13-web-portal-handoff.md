@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** A handoff snapshot of 2026-09-18 for the web portal (P-track). Task specs and status stay in `docs/plan/04-portal.md`; owner actions in `docs/plan/11-pre-launch-and-deferred.md`; the open board is `docs/plan/PENDIENTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Handoff — Web Portal (P-track) pending and partial work
 
 > For the session (GLM) taking over the **owner web portal** (`apps/web`, P-tasks) on 2026-09-18.

@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-22.** Track O is fully done (O-01 … O-38, every task ticked with its Done line). The three second-round design points it defers live on in `docs/plan/10-operador-design-changes.md`; the open board is `docs/plan/PENDIENTES.md`.
+>
+> Kept for its rationale and history. Do not plan from it.
+
 # Track O — Operator view (the browser register) and its owner-side close
 
 > **Origin:** the second design handoff (`design_handoff_operador/` in Claude Design project
