@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   formatMoney,
   formatMoneyCompact,
+  formatMoneyEntero,
   formatPesos,
   formatDate,
   formatDateLong,
@@ -83,6 +84,28 @@ describe('formatMoneyCompact', () => {
     const out = stripWeirdWhitespace(formatMoneyCompact(1_500_000_00n));
     expect(out).toContain('$');
     expect(out).toContain('1.5');
+  });
+});
+
+describe('formatMoneyEntero', () => {
+  it('drops the cents the chart has no room for', () => {
+    const out = stripWeirdWhitespace(formatMoneyEntero(128_450_00n));
+    expect(out).toBe('$128,450.00'.replace('.00', ''));
+  });
+
+  it('rounds rather than truncating — $0.99 is a peso, not nothing', () => {
+    expect(stripWeirdWhitespace(formatMoneyEntero(99n))).toBe('$1');
+    expect(stripWeirdWhitespace(formatMoneyEntero(49n))).toBe('$0');
+  });
+
+  it('keeps the sign on a loss', () => {
+    // The waterfall's ISR and resta labels are negative amounts.
+    expect(stripWeirdWhitespace(formatMoneyEntero(-32_640_00n))).toContain('32,640');
+    expect(stripWeirdWhitespace(formatMoneyEntero(-32_640_00n))).toMatch(/^-/);
+  });
+
+  it('formats zero as zero, not as an empty string', () => {
+    expect(stripWeirdWhitespace(formatMoneyEntero(0n))).toBe('$0');
   });
 });
 

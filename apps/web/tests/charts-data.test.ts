@@ -40,19 +40,22 @@ describe('waterfallDeResultados', () => {
     ]);
     const neta = steps.at(-1);
     assert.equal(neta?.acumulado, ER.utilidadNeta);
-    assert.equal(neta?.base, 0, 'the final level is anchored to zero');
-    assert.equal(neta?.delta, Number(ER.utilidadNeta));
+    assert.equal(neta?.desde, 0n, 'the final level is anchored to zero');
+    assert.equal(neta?.hasta, ER.utilidadNeta);
   });
 
   it('a resta bar floats between the levels it joins', () => {
     const steps = waterfallDeResultados(ER);
     const costo = steps.find((s) => s.label === 'Costo de ventas');
-    assert.equal(costo?.base, Number(ER.utilidadBruta), 'the drop starts where bruta ends');
-    assert.equal(costo?.delta, Number(ER.costoDeVentas));
+    // It hangs from ingresos down to utilidad bruta — the two levels it joins.
+    assert.equal(costo?.desde, ER.ingresos, 'the drop starts at the level above it');
+    assert.equal(costo?.hasta, ER.utilidadBruta, 'and lands on the level below');
+    assert.equal(costo?.monto, ER.costoDeVentas);
+    assert.equal(costo?.desde - costo?.hasta, costo?.monto, 'the span is the amount');
   });
 
   it('omits zero steps — no merma month draws no merma bar', () => {
-    assert.ok(waterfallDeResultados(ER).every((s) => s.delta !== 0));
+    assert.ok(waterfallDeResultados(ER).every((s) => s.monto !== 0n));
     const sinGastos = calculateEstadoDeResultados({
       ventas: [{ monto: 100n }] as never,
       egresos: [],
@@ -75,8 +78,8 @@ describe('the donuts', () => {
       ['Efectivo', 'Crédito'],
     );
     assert.equal(
-      slices.reduce((a, s) => a + s.value, 0),
-      Number(ER.ingresos),
+      slices.reduce((a, s) => a + s.monto, 0n),
+      ER.ingresos,
     );
   });
 
@@ -87,8 +90,8 @@ describe('the donuts', () => {
       ['Materia Prima', 'Renta'],
     );
     assert.equal(
-      slices.reduce((a, s) => a + s.value, 0),
-      30_000 + 20_000,
+      slices.reduce((a, s) => a + s.monto, 0n),
+      50_000n,
     );
   });
 

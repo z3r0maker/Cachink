@@ -33,6 +33,12 @@ const COMPACT = new Intl.NumberFormat(LOCALE, {
   maximumFractionDigits: 1,
 });
 
+const ENTERO = new Intl.NumberFormat(LOCALE, {
+  style: 'currency',
+  currency: 'MXN',
+  maximumFractionDigits: 0,
+});
+
 const PESOS_BARE = new Intl.NumberFormat(LOCALE, {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
@@ -50,6 +56,15 @@ export function formatMoney(centavos: Money): string {
 /** "$1.2M" / "$8.4 K" — compact KPI form for tight hero cards. */
 export function formatMoneyCompact(centavos: Money): string {
   return COMPACT.format(toFloat(centavos));
+}
+
+/**
+ * "$128,450" — whole pesos, no cents. The charts' own form: a bar label has
+ * room for eight characters, and two decimals of a five-figure total are
+ * noise at that size. The design sets every chart value this way.
+ */
+export function formatMoneyEntero(centavos: Money): string {
+  return ENTERO.format(toFloat(centavos));
 }
 
 /** "1,234.56" — bare numeric form for tables and exports (no symbol). */

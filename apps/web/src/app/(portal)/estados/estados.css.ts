@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
 
 export const pageTitle = style({
@@ -98,9 +98,85 @@ export const subLine = style({
 });
 
 export const chartTitle = style({
-  fontSize: portalFontSizes.body,
+  fontSize: 20,
   fontWeight: 800,
-  margin: '0 0 12px',
+  letterSpacing: typography.letterSpacing.tight,
+  margin: 0,
+});
+
+/** The 14px muted line under a chart's title — «De lo que vendiste a lo que te quedó». */
+export const chartSubtitle = style({
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.semibold,
+  color: colors.textMuted,
+  margin: '4px 0 0',
+});
+
+/**
+ * The design's own chart motion: bars unroll from the level they start at over
+ * 520ms, the donut sweeps over 420ms. Both are held under reduced motion,
+ * where the mark simply appears at full size.
+ */
+const crecer = keyframes({
+  from: { transform: 'scaleY(0)' },
+  to: { transform: 'scaleY(1)' },
+});
+
+const barrer = keyframes({
+  from: { transform: 'rotate(-40deg)', opacity: 0 },
+  to: { transform: 'rotate(0)', opacity: 1 },
+});
+
+export const crece = style({
+  transformBox: 'fill-box',
+  animation: `${crecer} 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const barrido = style({
+  animation: `${barrer} 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both`,
+  '@media': { '(prefers-reduced-motion: reduce)': { animation: 'none' } },
+});
+
+export const donutTitulo = style({
+  fontSize: 18,
+  fontWeight: 800,
+  letterSpacing: typography.letterSpacing.tight,
+  margin: '0 0 14px',
+  textWrap: 'pretty',
+});
+
+export const donutLista = style({
+  listStyle: 'none',
+  margin: 0,
+  padding: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 9,
+});
+
+export const donutFila = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 10,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.bold,
+  color: colors.black,
+});
+
+export const donutSwatch = style({
+  width: 14,
+  height: 14,
+  flex: 'none',
+  border: `2px solid ${colors.black}`,
+  borderRadius: 4,
+});
+
+export const donutMonto = style({
+  marginLeft: 'auto',
+  fontVariantNumeric: 'tabular-nums',
+  color: colors.gray600,
+  whiteSpace: 'nowrap',
 });
 
 export const chartNote = style({

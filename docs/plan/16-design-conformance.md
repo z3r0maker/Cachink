@@ -7,7 +7,8 @@ batches. The audit stays the evidence; this stays the plan.
 Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 `B-n` operación diaria, `C-n` dinero y negocio, `D-n` detalle transversal.
 
-**Done:** A-12 (hero de acceso) — shipped 2026-09-22, ADR-093.
+**Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
+· W-8 en su mitad visible (las gráficas de Resultados) — todo 2026-09-22.
 
 ---
 
@@ -62,6 +63,41 @@ wiring; an E2E against a throwaway tenant would hold the rendering.
 screenshot — better done before anyone reviews the per-screen work.
 
 **Size:** small, but visually wide. Re-baseline any screenshot fixtures.
+
+---
+
+## W-8 · Las gráficas de Estados financieros (C-13)
+
+**Half done 2026-09-22.** The Resultados charts were Recharts with stock
+defaults — an axis, gridlines, tick labels, a tooltip and a legend the design
+has none of; unbordered marks; two colours doing the work of four; no leader
+lines, so the cascade read as a bar chart; and a donut with no centre total
+whose legend fell off the bottom of its card. `charts.tsx` admitted it:
+«Provisional (the design file is not mirrored, O-23)». The mirror landed and
+nobody came back.
+
+Redrawn as SVG on the design's own canvases — `cascada.tsx` (`560×214`) and
+`donut.tsx` (`120×120`), with `charts-data.ts` still the pure, tested shape.
+Every mark carries the house `2px --black`; the colours are the design's
+semantic four (green kept, blue subtotal, red subtracted, amber ISR); the
+leaders are back; the donut's black backing ring gives each slice its border
+and the hole carries the total.
+
+**Still open — the other two charts, which we never built at all:**
+
+- **Flujo** — «Entradas y salidas del periodo»: `700×180` diverging bars
+  around a centre `$0` axis, entradas right in green and salidas left in red,
+  closing on a `2.5px` rule with «Incremento neto en efectivo» at 32px.
+- **Indicadores** — a `180×106` gauge per ratio (three bands, black needle on
+  a yellow hub), the 36px figure, a verdict with a bordered dot, and a
+  `120×34` sparkline under a delta. Ours is text cards with a tone colour.
+
+Both live only in the `.dc.html` — the handoff README's Estados section does
+not mention charts at all, which is how the first audit pass missed them.
+
+**Also freed up:** `recharts` now has one consumer left,
+`_inicio/ultimos-30.tsx`. The design gives that sparkline its own geometry
+too; drawing it would drop the dependency.
 
 ---
 
@@ -129,8 +165,10 @@ into conformance by accident.
 
 ## Orden sugerido
 
-W-1 → W-2 → W-4 → W-5 → W-3 (B, then C) → W-6 → W-7.
+W-1 → W-2 → **W-8** → W-4 → W-5 → W-3 (B, then C) → W-6 → W-7.
 
-W-4 and W-5 move ahead of W-3 because they are small and shippable while the
-data-layer batch is still being reviewed. W-6 goes after W-5 because they
-share the `#d4a017` fix. W-7 can happen at any point and blocks nothing.
+W-8 sits third because the charts are the most visible thing on the screen a
+director actually opens. W-4 and W-5 move ahead of W-3 because they are small
+and shippable while the data-layer batch is still being reviewed. W-6 goes
+after W-5 because they share the `#d4a017` fix. W-7 can happen at any point
+and blocks nothing.
