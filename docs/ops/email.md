@@ -82,7 +82,9 @@ To send for real from a laptop, export a **test** Resend key in your shell
 - **Idempotency.** Every message carries a key, sent as Resend's
   `Idempotency-Key` (kept 24 h): `trial-ending:<business>:<date>`,
   `trial-ended:…`, `usage-threshold:<business>:<period>:<metric>:<threshold>`,
-  `staff-digest:<window>`, `password-reset:<sha256(url)>`. A retried or re-run
+  `staff-digest:<window>`, `password-reset:<sha256(url)>`,
+  `activation-code:<sha256(code)>` (the code itself never reaches a provider
+  log). A retried or re-run
   cron sends once; the trial windows (48–72 h ahead, last 24 h) do not overlap
   between daily runs.
 - **Retries.** 429 and 5xx get up to 3 attempts, waiting 0.5 s then 1.5 s; other
@@ -112,6 +114,8 @@ To send for real from a laptop, export a **test** Resend key in your shell
   Stripe customer, which every trialing business has.
 - **Logo.** The layout shows a text wordmark; swap in the hosted logo when it
   exists (`packages/email/src/templates/layout.tsx`).
-- **B-14's original templates** `activation-code`, `welcome`, `payment-failed`,
-  `factura-issued` are not written yet; the layout and `renderEmail` make each
-  one small.
+- **B-14's original templates.** `activation-code` shipped with P-06
+  (`packages/email/src/templates/activation-code.tsx`, sent from
+  `apps/web/src/server/email/activation-code.ts` by the pairing panel's
+  «Enviar por correo»). `welcome`, `payment-failed` and `factura-issued` are
+  not written yet; the layout and `renderEmail` make each one small.

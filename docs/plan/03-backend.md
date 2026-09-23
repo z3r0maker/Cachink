@@ -262,7 +262,7 @@
 > templates — single-use, short-lived tokens stored hashed, like sessions (ADR-079).
 
 - [~] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
-  **Remaining (2026-09-23, verified against the code):** templates `welcome`, `payment-failed`, `factura-issued` still missing (`packages/email/src/index.ts` exports activation-code, trial, usage-threshold, staff-digest, auth-links, generic-notice). DNS + Resend inbox check is O-13. `docs/ops/email.md` still lists activation-code as unwritten — stale.
+  **Remaining (2026-09-23, verified against the code):** templates `welcome`, `payment-failed`, `factura-issued` still missing (`packages/email/src/index.ts` exports activation-code, trial, usage-threshold, staff-digest, auth-links, generic-notice). DNS + Resend inbox check is O-13. `docs/ops/email.md` updated 2026-09-23: activation-code listed as shipped (P-06).
   - 2026-09-18 · branch `track-n/b14-email` · Resend (resend 6.28.1, @react-email/components
     1.0.12, @react-email/render 2.1.0). Port + use cases in `@xangarro/application/email`;
     templates and adapters in the new `@xangarro/email` (Resend with Idempotency-Key and

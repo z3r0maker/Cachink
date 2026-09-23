@@ -78,5 +78,7 @@ next-env.d.ts
 # Dev email outbox (B-14): .eml/.html written when RESEND_API_KEY is unset
 .email-outbox/
 
-# design:compare output — a local review, never committed
-design-compare/
+# design:compare output (P-21 writes to the repo root) — a local review, never committed.
+# Root-anchored on purpose: the unanchored `design-compare/` also hid the harness
+# sources under scripts/design-compare/, which is how the first harness was lost.
+/design-compare/

@@ -184,7 +184,14 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
 
 ### P-21 `pnpm design:compare` capture harness
 
-- [x] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
+- [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
+  - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
+    `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern
+    `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the
+    `package.json` script and the ignore line. The sources are on no disk (worktree and main
+    checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the
+    dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery.
+    Restore the script entry when the harness lands.
 - **Context:** ADR-058. Check 1 is a review, not an assertion — the design plan itself lists browser
   width, text reflow and real-vs-sample data as acceptable differences, and the `.dc.html` files
   render through a vendored runtime that fetches fonts over the network. This never runs in CI.
@@ -193,7 +200,8 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   screenshots a named screen from both at the same width, and writes a stacked side-by-side PNG to
   `design-compare/`. Support `--width` (default 1440, plus 768) and `--state`.
 - **Acceptance:** `pnpm design:compare inicio` produces a PNG in which bar heights, card paddings,
-  title sizes and button positions are directly comparable. `design-compare/` is gitignored.
+  title sizes and button positions are directly comparable. `/design-compare/` (repo root) is
+  gitignored with that anchored pattern, and `git check-ignore -v scripts/design-compare/*` matches nothing.
 
 ---
 
@@ -243,7 +251,7 @@ including the press stamp.
 ### P-23 Primitives + Storybook inventory + visual-regression baselines
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
-  - **Remaining (2026-09-23, verified against the code):** `pnpm design:compare` cannot run — `package.json` points at `scripts/design-compare/compare.ts`, which is not in the repo because the unanchored `.gitignore` pattern `design-compare/` hides it (this also undercuts P-21's tick). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
+  - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
   - 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance.
   - In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
