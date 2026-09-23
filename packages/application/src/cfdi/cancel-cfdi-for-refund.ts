@@ -8,7 +8,8 @@
  *   REP always needs the receptor's acceptance, so this can end
  *   `cancel_requested`; calling again resumes where it stopped.
  * - Partial refunds and refunds of payments already in a stamped global CFDI
- *   need a CFDI de egreso (nota de crédito) — out of scope, typed error.
+ *   need a CFDI de egreso (nota de crédito): typed error here, handled by
+ *   `IssueCreditNoteForRefundUseCase` (the router is `SettleRefundForCfdiUseCase`).
  */
 
 import type { Money } from '@xangarro/domain';

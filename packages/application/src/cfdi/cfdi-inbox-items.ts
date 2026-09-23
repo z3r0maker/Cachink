@@ -92,24 +92,34 @@ export function closeFailureItem(period: string, error: unknown): InboxItemReque
 export function refundItem(
   record: IssuedCfdiRecord,
   refund: { readonly refundId: string; readonly amountRefundedCentavos: number },
+  error: unknown = null,
 ): InboxItemRequest {
   const uuid = record.invoice?.uuid;
-  const motivo =
-    record.status === 'cancel_requested'
-      ? 'Tiene CFDI: cancelarlo en el portal del SAT (parcial → CFDI de egreso, pendiente de contador, O-14).'
-      : 'No llegó a timbrarse; solo se da de baja del periodo.';
+  const lines = [
+    `Reembolso ${formatMoney(BigInt(refund.amountRefundedCentavos))} (IVA incluido) del pago ${record.externalPaymentId}.`,
+    uuid !== undefined ? `CFDI afectado: ${uuid}.` : 'El pago no tenía CFDI individual.',
+    refundTask(record),
+  ];
+  if (error !== null) lines.push(errorLine(error));
   return {
     kind: 'factura',
-    urgent: false,
+    urgent: error !== null,
     businessId: record.tenantId,
     title: 'Reembolso recibido — dar de baja su CFDI',
-    body: [
-      `Reembolo ${formatMoney(BigInt(refund.amountRefundedCentavos))} (IVA incluido) del pago ${record.externalPaymentId}.`,
-      uuid !== undefined ? `CFDI afectado: ${uuid}.` : 'El pago no tenía CFDI individual.',
-      motivo,
-    ].join('\n'),
+    body: lines.join('\n'),
     source: 'stripe-webhook',
     sourceRef: `refund:${refund.refundId}`,
     paymentRef: record.externalPaymentId,
   };
+}
+
+/** What staff do by hand for a refund, by where the payment's CFDI stands. */
+function refundTask(record: IssuedCfdiRecord): string {
+  if (record.status === 'cancel_requested') {
+    return 'Tiene CFDI: cancelarlo en el portal del SAT, o emitir un CFDI de egreso si el reembolso es parcial.';
+  }
+  if (record.status === 'pending_global') {
+    return 'Reembolso parcial: el pago sigue en el CFDI global del periodo; al timbrarlo, emitir un CFDI de egreso por lo reembolsado.';
+  }
+  return 'No llegó a timbrarse; solo se da de baja del periodo.';
 }

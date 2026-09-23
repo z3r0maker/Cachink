@@ -50,6 +50,25 @@ describe('cfdi_payments mapping', () => {
     assert.deepEqual(fromRow(toRow(STAMPED)), STAMPED);
   });
 
+  it('round-trips credit notes, the bigint amount through JSON as a string', () => {
+    const credited: IssuedCfdiRecord = {
+      ...STAMPED,
+      creditNotes: [
+        { refundId: 're_1', providerId: 'pac_3', uuid: 'U3', totalCentavos: 5_000n },
+        { refundId: 're_2', providerId: 'pac_4', uuid: 'U4', totalCentavos: 12_345_678_901n },
+      ],
+    };
+    const row = toRow(credited);
+    assert.deepEqual(JSON.parse(JSON.stringify(row.creditNotes)), [
+      { refundId: 're_1', providerId: 'pac_3', uuid: 'U3', totalCentavos: '5000' },
+      { refundId: 're_2', providerId: 'pac_4', uuid: 'U4', totalCentavos: '12345678901' },
+    ]);
+    // What Postgres hands back is the JSON, not the objects that went in.
+    const stored = { ...row, creditNotes: JSON.parse(JSON.stringify(row.creditNotes)) };
+    assert.deepEqual(fromRow(stored), credited);
+    assert.equal(toRow(STAMPED).creditNotes, null);
+  });
+
   it('round-trips a global CFDI draft and its stamped form', () => {
     const draft: GlobalCfdiRecord = {
       id: '2026-09#1',

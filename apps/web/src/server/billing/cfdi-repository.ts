@@ -3,6 +3,7 @@ import {
   UNINVOICED_STATUSES,
   type CfdiReceptor,
   type CfdiCancellationState,
+  type CreditNoteRef,
   type FiscalIssue,
   type FormaPago,
   type GlobalCfdiRecord,
@@ -62,7 +63,18 @@ function documentColumns(r: IssuedCfdiRecord) {
     complementUuid,
     globalId: r.globalId ?? null,
     cancellation: r.cancellation ?? null,
+    creditNotes: r.creditNotes ? r.creditNotes.map(noteToJson) : null,
   };
+}
+
+/** JSON has no bigint: the amount is stored as a decimal string of centavos. */
+function noteToJson(n: CreditNoteRef) {
+  return { ...n, totalCentavos: n.totalCentavos.toString() };
+}
+
+function notesFromJson(value: unknown): CreditNoteRef[] {
+  const notes = value as (Omit<CreditNoteRef, 'totalCentavos'> & { totalCentavos: string })[];
+  return notes.map((n) => ({ ...n, totalCentavos: BigInt(n.totalCentavos) }));
 }
 
 export function fromRow(row: CfdiPaymentRow): IssuedCfdiRecord {
@@ -84,6 +96,7 @@ export function fromRow(row: CfdiPaymentRow): IssuedCfdiRecord {
     ...(complement ? { complement } : {}),
     ...(row.globalId ? { globalId: row.globalId } : {}),
     ...(row.cancellation ? { cancellation: row.cancellation as CfdiCancellationState } : {}),
+    ...(row.creditNotes ? { creditNotes: notesFromJson(row.creditNotes) } : {}),
   };
 }
 

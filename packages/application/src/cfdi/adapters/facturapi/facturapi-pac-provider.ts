@@ -11,6 +11,7 @@ import type { PacProvider } from '../../pac-provider.js';
 import type {
   CancelCfdiRequest,
   CancellationStatus,
+  StampCreditNoteRequest,
   StampGlobalInvoiceRequest,
   StampInvoiceRequest,
   StampPaymentComplementRequest,
@@ -20,6 +21,7 @@ import type { FacturapiConfig } from './facturapi-config.js';
 import { send, type HttpFetch, type HttpRequestInit } from './http.js';
 import {
   complementBody,
+  creditNoteBody,
   globalBody,
   invoiceBody,
   toCancellationStatus,
@@ -47,6 +49,10 @@ export class FacturapiPacProvider implements PacProvider {
 
   async stampPaymentComplement(request: StampPaymentComplementRequest): Promise<StampedCfdi> {
     return toStamped(await this.#json('POST', '/invoices', complementBody(request)));
+  }
+
+  async stampCreditNote(request: StampCreditNoteRequest): Promise<StampedCfdi> {
+    return toStamped(await this.#json('POST', '/invoices', creditNoteBody(request)));
   }
 
   async cancel(request: CancelCfdiRequest): Promise<CancellationStatus> {

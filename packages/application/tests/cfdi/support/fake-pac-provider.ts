@@ -7,18 +7,25 @@ import type {
   CancelCfdiRequest,
   CancellationStatus,
   PacProvider,
+  StampCreditNoteRequest,
   StampGlobalInvoiceRequest,
   StampInvoiceRequest,
   StampPaymentComplementRequest,
   StampedCfdi,
 } from '../../../src/cfdi/index.js';
 
-type Method = 'stampInvoice' | 'stampGlobalInvoice' | 'stampPaymentComplement' | 'cancel';
+type Method =
+  | 'stampInvoice'
+  | 'stampGlobalInvoice'
+  | 'stampPaymentComplement'
+  | 'stampCreditNote'
+  | 'cancel';
 
 export class FakePacProvider implements PacProvider {
   readonly invoices: StampInvoiceRequest[] = [];
   readonly globals: StampGlobalInvoiceRequest[] = [];
   readonly complements: StampPaymentComplementRequest[] = [];
+  readonly creditNotes: StampCreditNoteRequest[] = [];
   readonly cancellations: CancelCfdiRequest[] = [];
   /** Cancellation result per providerId; default `cancelled`. */
   readonly cancelStatus = new Map<string, CancellationStatus>();
@@ -75,6 +82,12 @@ export class FakePacProvider implements PacProvider {
     this.complements.push(request);
     this.#maybeFail('stampPaymentComplement');
     return this.#stamp(request.idempotencyKey, 0n);
+  }
+
+  async stampCreditNote(request: StampCreditNoteRequest): Promise<StampedCfdi> {
+    this.creditNotes.push(request);
+    this.#maybeFail('stampCreditNote');
+    return this.#stamp(request.idempotencyKey, request.concepto.totalCentavos);
   }
 
   async cancel(request: CancelCfdiRequest): Promise<CancellationStatus> {

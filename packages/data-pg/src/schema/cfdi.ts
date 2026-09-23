@@ -52,6 +52,8 @@ export const cfdiPayments = pgTable(
     complementUuid: text('complement_uuid'),
     globalId: text('global_id'),
     cancellation: jsonb('cancellation'),
+    /** Credit notes for refunds, `[{ refundId, providerId, uuid, totalCentavos }]` (0040). */
+    creditNotes: jsonb('credit_notes'),
     createdAt: at('created_at').notNull().defaultNow(),
     updatedAt: at('updated_at').notNull().defaultNow(),
   },

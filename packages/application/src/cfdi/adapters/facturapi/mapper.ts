@@ -9,11 +9,12 @@
 
 import { z } from 'zod';
 import { CfdiProviderUnavailableError } from '../../errors.js';
-import { PUBLICO_EN_GENERAL } from '../../sat-catalogs.js';
+import { EGRESO, PUBLICO_EN_GENERAL } from '../../sat-catalogs.js';
 import type {
   CancellationStatus,
   CfdiConcepto,
   CfdiReceptor,
+  StampCreditNoteRequest,
   StampGlobalInvoiceRequest,
   StampInvoiceRequest,
   StampPaymentComplementRequest,
@@ -87,6 +88,21 @@ export function globalBody(req: StampGlobalInvoiceRequest): Record<string, unkno
     payment_form: req.formaPago,
     payment_method: 'PUE',
     global: { periodicity: 'month', months: meses, year: anio },
+    external_id: req.externalId,
+    idempotency_key: req.idempotencyKey,
+  };
+}
+
+/** Tipo E, PUE, related to the income CFDI it reduces (Facturapi's «egreso» guide). */
+export function creditNoteBody(req: StampCreditNoteRequest): Record<string, unknown> {
+  return {
+    type: 'E',
+    customer: customer(req.receptor),
+    items: [item(req.concepto)],
+    use: req.receptor.usoCfdi,
+    payment_form: req.formaPago,
+    payment_method: 'PUE',
+    related_documents: [{ relationship: EGRESO.tipoRelacion, documents: [req.relatedUuid] }],
     external_id: req.externalId,
     idempotency_key: req.idempotencyKey,
   };

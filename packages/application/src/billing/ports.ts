@@ -169,6 +169,20 @@ export const noopPaymentFailed: PaymentFailedListener = {
   onPaymentFailed: () => Promise.resolve(),
 };
 
+/**
+ * What the CFDI side did with a refund: `recorded` is the manual path (an
+ * inbox item); the rest are the PAC's (`CFDI_MODE=test | live`).
+ */
+export type RefundCfdiOutcome =
+  | 'recorded'
+  | 'cancelled'
+  | 'cancel_requested'
+  | 'removed_from_global'
+  | 'credited'
+  | 'unknown_payment'
+  | 'already_refunded'
+  | 'unresolved';
+
 /** The CFDI side of `charge.refunded` (N-33): a refund arrived for a payment.
  * The Stripe API no longer names the invoice on a charge or refund, so the
  * listener resolves it (charge → payment_intent → the customer's invoice). */
@@ -182,6 +196,6 @@ export interface RefundListener {
   }): Promise<{
     readonly outcome: 'applied';
     readonly businessId: string;
-    readonly refund: 'recorded' | 'unknown_payment' | 'already_refunded' | 'unresolved';
+    readonly refund: RefundCfdiOutcome;
   }>;
 }
