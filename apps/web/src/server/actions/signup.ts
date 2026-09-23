@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import { EMPTY_UTM, type Utm } from '../attribution/utm';
 import { db } from '../db';
 import { regionFromHeaders } from '../geo/headers';
+import { avisoVigente, ipHash } from '../legal/aviso';
 import { reportError } from '../observability/report';
 import { failure } from '../onboarding/errors';
 import { pgSignupStore } from '../onboarding/signup-store';
@@ -27,6 +28,8 @@ import { startSession } from '../session';
  * - The transaction is scoped to the business being created by the store
  *   itself (`xangarro.business_id`), so RLS's `WITH CHECK` passes for exactly
  *   that tenant.
+ * - **Consent is part of the transaction** (N-34, PRIV-REG-01): the ledger rows
+ *   proving the aviso was accepted commit with the account or not at all.
  */
 export type SignupResult = { ok: true } | { ok: false; message: string };
 
@@ -39,6 +42,8 @@ export interface SignupFields {
   readonly password: string;
   /** N-57: the campaign that brought them, off the signup URL. */
   readonly utm?: Utm;
+  /** N-34: the aviso act. Missing or `acepto: false` refuses the signup. */
+  readonly consentimiento?: { readonly acepto: boolean; readonly novedades: boolean };
 }
 
 const TAKEN = 'No pudimos crear la cuenta con ese correo. Si ya tienes una, entra con tu correo.';
@@ -77,8 +82,12 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
     };
   }
   try {
+    const h = await headers();
+    const evidence = { ipHash: ipHash(clientIp(h)), userAgent: h.get('user-agent') ?? '' };
     const owner = await db().transaction((tx) =>
-      new RegistrarCuentaUseCase(pgSignupStore(tx), randomUUID).execute(fields),
+      new RegistrarCuentaUseCase(pgSignupStore(tx, evidence), randomUUID, avisoVigente()).execute(
+        fields,
+      ),
     );
     await recordAttribution(owner.businessId, fields.utm);
     await startSession(owner.userId, owner.businessId);

@@ -1,7 +1,13 @@
 import 'server-only';
 
 import { SignupError, type NewOwner, type SignupStore } from '@xangarro/application';
-import { accountEmailTaken, businessMembers, businesses, createAccount } from '@xangarro/data-pg';
+import {
+  accountEmailTaken,
+  businessMembers,
+  businesses,
+  createAccount,
+  recordPrivacyConsent,
+} from '@xangarro/data-pg';
 import { sql } from 'drizzle-orm';
 
 import type { Tx } from '../db';
@@ -20,7 +26,15 @@ import { recordChange } from '../repositories/sync-log';
  *   the same transaction (ADR-062). `business_members` is portal-only.
  * - A unique violation on the email (two signups racing) becomes the same
  *   `EMAIL_TAKEN` the pre-check gives.
+ * - The consent ledger rows (N-34) are the last writes of the same transaction:
+ *   no account can commit without its proof of consent.
  */
+
+/** What the ledger records about the act besides the grant itself. */
+export interface ConsentEvidence {
+  readonly ipHash: string;
+  readonly userAgent: string;
+}
 
 /** Rows created in the portal have no originating phone (as `users.ts`). */
 const PORTAL_DEVICE_ID = '01HZ8XQN9GZJXV8AKQ5X0WEB01';
@@ -41,7 +55,7 @@ async function insertIdentity(tx: Tx, o: NewOwner): Promise<void> {
   if (!created) throw new SignupError('EMAIL_TAKEN', 'Ya existe una cuenta con ese correo.');
 }
 
-export function pgSignupStore(tx: Tx): SignupStore {
+export function pgSignupStore(tx: Tx, evidence: ConsentEvidence): SignupStore {
   return {
     emailTaken: (email: string) => accountEmailTaken(tx, email),
     async createOwner(o: NewOwner): Promise<void> {
@@ -67,6 +81,8 @@ export function pgSignupStore(tx: Tx): SignupStore {
         createdAt: o.at,
         updatedAt: o.at,
       });
+      const ctx = { userId: o.userId, businessId: o.businessId, ...evidence };
+      for (const grant of o.consentimientos) await recordPrivacyConsent(tx, ctx, grant);
     },
   };
 }

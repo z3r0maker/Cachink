@@ -8,7 +8,15 @@
  */
 
 import { hash } from 'bcryptjs';
-import { ISR_DEFAULTS_SEED, newUlid, type BusinessId } from '@xangarro/domain';
+import {
+  AvisoVigenteSchema,
+  ISR_DEFAULTS_SEED,
+  RegistroConsentimientoSchema,
+  consentimientosDeRegistro,
+  newUlid,
+  type AvisoVigente,
+  type BusinessId,
+} from '@xangarro/domain';
 import { z } from 'zod';
 
 import type { UseCase } from '../_use-case.js';
@@ -26,6 +34,8 @@ export const SignupInputSchema = z.object({
   email: z.string().trim().toLowerCase().pipe(z.email()),
   /** bcrypt reads at most 72 bytes; longer would silently truncate. */
   password: z.string().min(8).max(72),
+  /** The aviso act (N-34): checked separately so its refusal has its own code. */
+  consentimiento: RegistroConsentimientoSchema.optional(),
 });
 
 export type SignupInput = z.input<typeof SignupInputSchema>;
@@ -38,11 +48,17 @@ export interface SignupResult {
 export class RegistrarCuentaUseCase implements UseCase<SignupInput, SignupResult> {
   readonly #store: SignupStore;
   readonly #newUserId: () => string;
+  readonly #aviso: AvisoVigente;
 
-  /** `newUserId` mints an `auth.users` UUID; injected so this package stays platform-free. */
-  constructor(store: SignupStore, newUserId: () => string) {
+  /**
+   * `newUserId` mints an `auth.users` UUID; injected so this package stays
+   * platform-free. `aviso` is the version and hash of the text the form shows:
+   * the portal owns the text, the use case only records what was accepted.
+   */
+  constructor(store: SignupStore, newUserId: () => string, aviso: AvisoVigente) {
     this.#store = store;
     this.#newUserId = newUserId;
+    this.#aviso = AvisoVigenteSchema.parse(aviso);
   }
 
   async execute(input: SignupInput): Promise<SignupResult> {
@@ -54,7 +70,13 @@ export class RegistrarCuentaUseCase implements UseCase<SignupInput, SignupResult
         parsed.error.issues.map((i) => i.path.join('.')),
       );
     }
-    const { nombre, tuNombre, email, password } = parsed.data;
+    const { nombre, tuNombre, email, password, consentimiento } = parsed.data;
+    if (consentimiento === undefined || consentimiento.acepto !== true) {
+      throw new SignupError(
+        'CONSENT_REQUIRED',
+        'Para crear tu cuenta necesitas aceptar el aviso de privacidad y los términos.',
+      );
+    }
     if (await this.#store.emailTaken(email)) {
       throw new SignupError('EMAIL_TAKEN', 'Ya existe una cuenta con ese correo.');
     }
@@ -69,6 +91,7 @@ export class RegistrarCuentaUseCase implements UseCase<SignupInput, SignupResult
       regimenFiscal: REGIMEN_INICIAL,
       isrTasa: ISR_DEFAULTS_SEED[REGIMEN_INICIAL],
       at: new Date().toISOString(),
+      consentimientos: consentimientosDeRegistro(this.#aviso, consentimiento),
     };
     await this.#store.createOwner(owner);
     return { userId: owner.userId, businessId: owner.businessId };

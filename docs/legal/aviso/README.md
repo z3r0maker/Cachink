@@ -224,14 +224,3 @@ el plan**.
       `[CORREO PRIVACIDAD]` (p. ej. `privacidad@xangarro.mx`), revisado a diario.
 - [ ] `[nuevo]` Revisar que Sentry del portal/API no capture PII (B-18) antes de declararlo en el aviso.
 - [ ] `[plan]` Revisión del abogado antes de publicar (criterio de aceptación de N-34).
-- [ ] `[nuevo]` **Variante D — visitante del sitio público (xangarro.mx).** N-58 pondrá un pixel
-      propio en la landing, y sus visitantes **no son todavía clientes**: el aviso integral y las
-      variantes A–C no los alcanzan, y el sitio hoy no publica ninguna página de privacidad ni tiene
-      enlace legal en el pie. Hace falta una variante corta para quien sólo navega (medición por
-      estado, sin cookies, sin IP, sin identificador) y una ruta publicada en
-      `apps/landing/scripts/prerender.mjs` enlazada desde `ContactoFooter.jsx`.
-      **Bloquea N-58.** Ver ADR-092.
-- [ ] `[nuevo]` **¿Banner de consentimiento para esa medición?** Es un juicio legal, no de
-      ingeniería. Es de primera parte, sin cookies, sin identificador y sólo agregada por estado, lo
-      que hace mucho más débil el caso para un banner que con cookies; la postura defendible parece
-      ser «declarado en el aviso, sin banner». Confirmarlo con quien revise el aviso (OQ-L17).

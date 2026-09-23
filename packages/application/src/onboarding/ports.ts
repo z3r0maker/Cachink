@@ -7,7 +7,13 @@
  * none of these take a tenant (as `PushStore`).
  */
 
-import type { BusinessId, PendingPaidAnswer, PlanId, WizardAnswers } from '@xangarro/domain';
+import type {
+  BusinessId,
+  ConsentGrant,
+  PendingPaidAnswer,
+  PlanId,
+  WizardAnswers,
+} from '@xangarro/domain';
 
 export const BILLING_INTERVALS = ['mensual', 'anual'] as const;
 export type BillingInterval = (typeof BILLING_INTERVALS)[number];
@@ -53,6 +59,11 @@ export interface NewOwner {
   readonly isrTasa: number;
   /** ISO-8601. */
   readonly at: string;
+  /**
+   * The consent rows for this signup (N-34): written in the same transaction
+   * as the account, so an account without proof of consent cannot exist.
+   */
+  readonly consentimientos: readonly ConsentGrant[];
 }
 
 export interface SignupStore {

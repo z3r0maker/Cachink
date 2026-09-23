@@ -16,7 +16,30 @@ import { createDb, withBusiness, type Db } from '@xangarro/data-pg';
  */
 let cached: Db | undefined;
 
-export function db(): Db {
+/**
+ * **One pool per process, not per module evaluation.**
+ *
+ * `createDb` opens a pool of 5. Under `next dev` every route bundle and RSC
+ * layer evaluates this module again, and a module-level cache is scoped to the
+ * evaluation, so each one got its own pool: after a full Playwright run one
+ * `next-server` held 97 idle connections against a 100-slot local Postgres and
+ * global-setup died on "remaining connection slots are reserved". In
+ * development the handle therefore lives on `globalThis`, which survives
+ * re-evaluation — the standard Next pattern for dev singletons. A production
+ * bundle is evaluated once, so there the module cache is enough and nothing
+ * is hung off the global.
+ */
+const GLOBAL_KEY = '__xangarroDb';
+
+interface DbGlobal {
+  [GLOBAL_KEY]?: Db;
+}
+
+function devGlobal(): DbGlobal {
+  return globalThis as typeof globalThis & DbGlobal;
+}
+
+function requireDatabaseUrl(): string {
   const url = process.env.DATABASE_URL;
   if (url === undefined || url === '') {
     throw new Error(
@@ -24,8 +47,18 @@ export function db(): Db {
         'and seed it with `db:seed`.',
     );
   }
-  cached ??= createDb(url);
-  return cached;
+  return url;
+}
+
+export function db(): Db {
+  const url = requireDatabaseUrl();
+  if (process.env.NODE_ENV === 'production') {
+    cached ??= createDb(url);
+    return cached;
+  }
+  const g = devGlobal();
+  g[GLOBAL_KEY] ??= createDb(url);
+  return g[GLOBAL_KEY];
 }
 
 export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];

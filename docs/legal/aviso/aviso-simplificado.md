@@ -33,21 +33,23 @@ Se muestra completa, arriba del botón "Crear cuenta", sin necesidad de abrir ot
 >
 > Aviso integral y derechos ARCO: **xangarro.mx/privacidad**
 
-Controles (debajo del texto):
+Controles (debajo del texto) — **un solo acto afirmativo, lo demás por defecto**:
 
-- ☐ **Leí el aviso de privacidad y consiento expresamente el tratamiento de mis datos, incluidos mis
-  datos patrimoniales y financieros, para las finalidades necesarias.** _(obligatoria, sin marcar por
-  defecto)_
-- ☐ **Quiero recibir novedades, consejos y ofertas de Xangarro.** _(opcional, sin marcar por defecto)_
-- ☐ **Pueden usar datos de mi uso para mejorar el producto.** _(opcional; ver README OQ-L5 — si la
-  analítica es solo disociada, esta casilla puede eliminarse)_
-- ☐ **Acepto los Términos de servicio**, incluidas las cláusulas de tratamiento de datos de mis
-  clientes y operadores. _(obligatoria; enlace a los términos)_
+- ☐ **Leí el aviso de privacidad y acepto los Términos.** Al marcar consiento expresamente el
+  tratamiento de mis datos, incluidos los patrimoniales y financieros, para las finalidades necesarias.
+  _(obligatoria, **sin marcar por defecto**: el art. 7, párrafo quinto exige consentimiento expreso para
+  datos financieros/patrimoniales y una casilla premarcada no es manifestación del titular)_
+  Alternativa sin casilla: que el propio botón lleve el texto **"Crear cuenta y aceptar el aviso de
+  privacidad y los Términos"** (consentimiento expreso por medios electrónicos, art. 7 ¶2). Confirmar
+  con el abogado cuál de las dos.
+- ☑ **Quiero recibir novedades y consejos de Xangarro.** _(opcional, **marcada por defecto**: finalidad
+  secundaria con consentimiento tácito, art. 7 ¶3–4; baja en un clic en cada correo y en Configuración →
+  Privacidad; 5 días hábiles para negarse antes del primer envío)_. Si se prefiere la redacción en
+  negativo ("☐ No quiero recibir novedades"), el efecto legal es el mismo.
+- La analítica de uso **no lleva casilla**: es disociada y no requiere consentimiento (art. 9 III).
 
-> Nota: la casilla de consentimiento expreso se separa de la de términos para que el consentimiento
-> sea "específico" (art. 2, fracción IV) y para acreditar el expreso del art. 7 sobre datos
-> patrimoniales. Si el abogado concluye que basta el art. 9, fracción IV, la casilla puede reducirse a
-> "Leí el aviso de privacidad", pero se recomienda mantenerla.
+> Nota: se combinan aviso y términos en una casilla para reducir fricción; el abogado puede pedir
+> separarlas si considera que el consentimiento debe ser "específico" (art. 2 IV) por sí solo.
 
 ---
 

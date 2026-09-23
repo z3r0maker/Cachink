@@ -3,7 +3,12 @@
  * to show; `issues` are for logs only.
  */
 
-export const SIGNUP_ERROR_CODES = ['INVALID_SIGNUP', 'EMAIL_TAKEN', 'NOT_A_PAID_PLAN'] as const;
+export const SIGNUP_ERROR_CODES = [
+  'INVALID_SIGNUP',
+  'EMAIL_TAKEN',
+  'NOT_A_PAID_PLAN',
+  'CONSENT_REQUIRED',
+] as const;
 export type SignupErrorCode = (typeof SIGNUP_ERROR_CODES)[number];
 
 export class SignupError extends Error {

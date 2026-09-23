@@ -6388,7 +6388,93 @@ the way out, not just the value: a seeded zero compares equal whether it is
   aggregate typed `sql<bigint>` is a defect whether or not it is noticed, and
   the reviewer's question is "what does the driver actually return?".
 
+---
+
 ## ADR-095
+
+**Title:** A producto with negative stock is valued at zero on the Balance — and the seed may never produce one
+
+**Date:** 2026-09-22
+
+**Status:** Accepted
+
+**Context**
+
+The portal's Estados financieros → Posición showed **Inventarios: −$3,353.90**
+for Taquería Don Pedro. A negative inventory valuation is not a thing a
+balance sheet can say: NIF B-6 has no negative asset line, and a shelf cannot
+hold less than nothing.
+
+Two independent defects met on that one number.
+
+1. **The fixture sold what it never bought.** `seed-finanzas-mes.ts` wrote a
+   `salida` per ticket and no restocking `entrada`. Two months of generated
+   ventas — 207 movements, 631 units — ran against six fixture compras and one
+   day-one ajuste, 479 units in total. Four of six productos netted negative
+   (Gringa −61, Agua de horchata −64, Refresco −50, Quesadilla −33), summing
+   to exactly the −$3,353.90 on screen.
+2. **The calculator had no floor.** `calculateBalanceGeneral` valued each
+   product as `costoUnit × cantidad` and summed, so a product with unrecorded
+   entradas *subtracted* from the value of the products that were counted.
+   That is not the seed's problem: any real operator who captures ventas
+   faster than compras reaches the same state, and the phone shares this
+   calculator through `use-balance-general.ts`.
+
+Two candidates were ruled out. `stockACosto` (`queries/balance.ts`) is
+correct: it keys on `tipo`, so every entrada counts regardless of motivo —
+including the seed's `'Ajuste de inventario'` day-one rows, verified against
+the live database. And it does **not** carry the driver-text defect ADR-094
+records: the `::int` cast on the sum and Drizzle's own bigint column mapper
+hand the domain a real `number` and a real `bigint`. ADR-094 fixed the
+offender; what was missing here is that the stock query's immunity was true
+by luck rather than by assertion.
+
+**Decision**
+
+1. **The domain floors each producto's valuation at zero.**
+   `valuacionDeProducto` in `balance-general.ts` contributes
+   `costoUnit × cantidad` when `cantidad > 0` and `ZERO` otherwise. It is
+   applied per producto, not to the line total: a shelf that is empty is
+   empty, and it must not consume the value of a shelf that is full. This
+   mirrors the clamp `estadoDeCuenta` already applies per cliente to
+   cuentasPorCobrar — the Balance already refuses a negative receivable, and
+   now refuses a negative asset for the same reason.
+2. **Negative stock still surfaces, elsewhere.** Productos · Stock and the
+   stock-low notification are where a data-quality gap belongs. The Balance is
+   not, because the only way it can report one is as a lie.
+3. **The seed restocks.** `seed-finanzas-stock.ts` tallies each week's
+   consumption per producto and writes one `Compra a proveedor` entrada on
+   that week's first operating day, sized to that consumption rounded up to a
+   10-unit lot. Every week brings in at least what it takes out.
+4. **Both halves are asserted independently.** The floor is a domain rule
+   (`domain/tests/financials/balance-general.test.ts`); the fixture's own
+   arithmetic is a seed contract (`seed-contract.integration.test.ts` asserts
+   no seeded producto nets negative, `seed-finanzas-stock.test.ts` asserts the
+   lot arithmetic without a database). A clamp that hides a broken fixture is
+   not a guard, so the fixture is held to the stricter standard: it must be
+   possible on its own, floor or no floor.
+5. **The data layer keeps stating the fact.** `stockACosto` returns the real
+   signed net, unclamped, and `period-balance.integration.test.ts` asserts it
+   does — so the two layers cannot end up clamping the same thing twice. That
+   suite also pins the boundary types (`cantidad` a `number`,
+   `costoUnitCentavos` a `bigint`), which is ADR-094's rule applied to the one
+   money query that already satisfied it by accident.
+
+**Consequences**
+
+- Inventarios can no longer be negative, on either client, for any data.
+- Activo may now read slightly higher than the raw movement arithmetic
+  implies. That is the intended trade: the identity Activo = Pasivo + Capital
+  was already approximate here (utilidad comes from the P&L, inventory from a
+  current-stock snapshot — the phone's documented risk #3), and an inflated
+  asset with a visible stock warning beats an impossible one with none.
+- `calculateIndicadores` receives `balance.activo.inventarios` as
+  `inventarioPromedio`, so rotation KPIs stop dividing by a negative.
+- The seeded demo now carries roughly $12,430 of stock at cost against ~$9,445
+  of monthly ventas — about five weeks on hand, which is what a taquería that
+  buys weekly actually looks like.
+
+## ADR-097
 
 **Title:** One sidebar entry per destination; the duplicated pairs merge
 
@@ -6412,8 +6498,8 @@ saw the double highlight and asked for one entry (2026-09-22).
 
 1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
    **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
-   inside each screen keep doing the switching, and the old `?tab=` links still
-   work — the screens read the parameter.
+   inside each screen keep doing the switching, and the old
+   `?tab=` links still work — the screens read the parameter.
 2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
    place now that Dispositivos is gone as a row.
 3. The design files are **behind** the code on this point until they are
@@ -6422,14 +6508,13 @@ saw the double highlight and asked for one entry (2026-09-22).
 4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
    in normal flow but **stretches** inside a flex column — every tab bar in the
    portal ran the page's width, leaving the last tab short of the right border
-   with a white sliver inside it (806 px on `/movimientos`, measured).
-   `alignSelf: flex-start` and `width: fit-content` on the component fix it
-   everywhere; Cortes' local wrapper is gone.
+   with a white sliver inside it. `alignSelf: flex-start` and `width: fit-content`
+   on the component fix it everywhere; Cortes' local wrapper is gone.
 
 **Consequences**
 
 - One question for the design: the merged entry reads «Ventas y gastos» while
-  the screen's own `<h1>` says «Movimientos» (the file is named "Ventas y
+  the screen's own `<h1>` says «Movimientos» (the design file is named "Ventas y
   gastos" but titles the page "Movimientos"). One of the two should move; the
   owner decides which.
 - `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since

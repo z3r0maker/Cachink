@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { afterAll, beforeAll, it } from 'vitest';
 
+import { sql } from 'drizzle-orm';
+
 import { createDb, withBusiness, type Db } from '../src/client';
 import { valuacionApertura } from '../src/queries/estados-facts';
 import { integrationSuite } from './support/db';
+import { testId } from './support/test-ids';
 
 /**
  * Money leaves this package as `bigint` centavos or it does not leave at all.
@@ -42,6 +45,26 @@ describe('estados facts come back as bigint centavos', () => {
     const v = await withBusiness(db, vacio, (tx) => valuacionApertura(tx, vacio));
     assert.equal(typeof v, 'bigint');
     assert.equal(v, 0n);
+  });
+
+  it('a real apertura sums to its own centavos, not to a joined-up string', async () => {
+    // The two cases above both land on 0 — where `0n` and `'0'` are hard to
+    // tell apart by value, which is why they assert `typeof`. This is the
+    // other half: a non-zero sum, in its own tenant, where concatenation and
+    // addition give visibly different answers. 7 × 1500 adds to 10_500;
+    // glued together it would read 71500 (ADR-095 needed this for the stock
+    // query's twin, and it belongs here too).
+    const biz = testId('J');
+    await withBusiness(db, biz, (tx) =>
+      tx.execute(sql`
+        INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad, costo_unit_centavos,
+                                         motivo, business_id, device_id, created_at, updated_at)
+        VALUES (${testId('K')}, ${testId('P')}, '2026-01-02', 'entrada', 7, 1500,
+                'Apertura de inventario', ${biz}, ${biz}, now(), now())`),
+    );
+    const v = await withBusiness(db, biz, (tx) => valuacionApertura(tx, biz));
+    assert.equal(typeof v, 'bigint');
+    assert.equal(v, 10_500n, '7 × 1500 centavos, added — not concatenated');
   });
 
   it('the value survives arithmetic with other centavos', async () => {

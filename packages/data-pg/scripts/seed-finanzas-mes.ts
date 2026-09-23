@@ -1,6 +1,8 @@
 import type postgres from 'postgres';
 
-import { BIZ, CLIENTS, COST, DEV, EMPLOYEES, PRODUCTS, id, TS } from './seed-data.js';
+import { BIZ, CLIENTS, COST, DEV, PRODUCTS, id, TS } from './seed-data.js';
+import { seedEgresosMes } from './seed-finanzas-egresos.js';
+import { movimiento, reponerStock, semanas, type Consumo } from './seed-finanzas-stock.js';
 
 type Sql = ReturnType<typeof postgres>;
 
@@ -9,13 +11,6 @@ type Sql = ReturnType<typeof postgres>;
  * ticket/day/mes generator. Montos are centavos end to end — the fixture's
  * precios and salarios already are, so no peso() anywhere in here.
  */
-
-export type Egreso = readonly [
-  eid: string,
-  concepto: string,
-  categoria: string,
-  montoCentavos: number,
-];
 
 const METODOS = [
   'Efectivo',
@@ -28,30 +23,8 @@ const METODOS = [
 
 /** Products a customer buys — `[id, nombre, sku, costo, precio, …]`, precio > 0. */
 let MOV_SEQ = 1;
-let MW_SEQ = 1;
 
 const VENDIBLES = PRODUCTS.filter((p) => Number(p[4]) > 0);
-
-const nominaQuincenal = Math.round(EMPLOYEES.reduce((t, e) => t + Number(e[3]), 0) / 2);
-
-/** One inventory movement — a venta's salida, or the month's merma. */
-async function movimiento(
-  sql: Sql,
-  mid: string,
-  productoId: string,
-  fecha: string,
-  tipo: 'entrada' | 'salida',
-  cantidad: number,
-  costo: number,
-  motivo: string,
-): Promise<void> {
-  await sql`
-    INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad,
-                                     costo_unit_centavos, motivo, business_id, device_id, created_at, updated_at)
-    VALUES (${id(mid)}, ${productoId}, ${fecha}, ${tipo}, ${cantidad},
-            ${costo}, ${motivo}, ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
-    ON CONFLICT (id) DO NOTHING`;
-}
 
 /** Writes one ticket: its header and its sale line. */
 async function persistTicket(
@@ -85,6 +58,9 @@ async function persistTicket(
     ON CONFLICT (id) DO NOTHING`;
 }
 
+/** What one month carries across its days: folio, the single crédito, the tally. */
+type EstadoMes = { folio: number; creditoDado: boolean; consumo: Consumo };
+
 /** The ticket's method — at most one Crédito per month, on the calendar's whim. */
 function eligeMetodo(
   r: () => number,
@@ -98,13 +74,34 @@ function eligeMetodo(
   };
 }
 
+/** The stock a ticket moved: the `salida` row, and the week's tally it feeds. */
+async function registraSalida(
+  sql: Sql,
+  st: EstadoMes,
+  productoId: string,
+  fecha: string,
+  cantidad: number,
+): Promise<void> {
+  await movimiento(
+    sql,
+    `FM${String(MOV_SEQ++).padStart(3, '0')}`,
+    productoId,
+    fecha,
+    'salida',
+    cantidad,
+    COST[productoId] ?? 0,
+    'Venta',
+  );
+  st.consumo.set(productoId, (st.consumo.get(productoId) ?? 0) + cantidad);
+}
+
 /** One ticket — header, line, and the stock it moved. Returns its efectivo. */
 async function seedTicket(
   sql: Sql,
   tag: string,
   fecha: string,
   r: () => number,
-  st: { folio: number; creditoDado: boolean },
+  st: EstadoMes,
   folioBase: number,
 ): Promise<number> {
   st.folio += 1;
@@ -126,16 +123,7 @@ async function seedTicket(
     productoId: p[0],
     cantidad,
   });
-  await movimiento(
-    sql,
-    `FM${String(MOV_SEQ++).padStart(3, '0')}`,
-    p[0],
-    fecha,
-    'salida',
-    cantidad,
-    COST[p[0]] ?? 0,
-    'Venta',
-  );
+  await registraSalida(sql, st, p[0], fecha, cantidad);
   if (credito) st.creditoDado = true;
   return metodo === 'Efectivo' ? Number(monto) : 0;
 }
@@ -146,7 +134,7 @@ async function seedDia(
   tag: string,
   fecha: string,
   r: () => number,
-  st: { folio: number; creditoDado: boolean },
+  st: EstadoMes,
   folioBase: number,
 ): Promise<void> {
   const tickets = 3 + Math.floor(r() * 4);
@@ -164,42 +152,6 @@ async function seedDia(
     ON CONFLICT (id) DO NOTHING`;
 }
 
-/** The month's egresos and its one merma. */
-async function seedEgresosMes(sql: Sql, tag: string, days: readonly string[]): Promise<void> {
-  const dia = (i: number): string => days[Math.min(i, days.length - 1)];
-  const egresos: readonly Egreso[] = [
-    [`FINEE${tag}N1`, 'Nómina · primera quincena', 'Nómina', nominaQuincenal],
-    [`FINEE${tag}N2`, 'Nómina · segunda quincena', 'Nómina', nominaQuincenal],
-    [`FINEE${tag}R`, 'Renta del local', 'Renta', 300_000],
-    [`FINEE${tag}L`, 'Luz CFE', 'Servicios', 48_000],
-    [`FINEE${tag}G`, 'Gas (cilindro)', 'Servicios', 34_000],
-    [`FINEE${tag}B`, 'Bolsas y servilletas', 'Inventario', 26_000],
-    [`FINEE${tag}C`, 'Carne al pastor', 'Materia Prima', 240_000],
-    [`FINEE${tag}T`, 'Tortillas de la semana', 'Materia Prima', 68_000],
-    [`FINEE${tag}Q`, 'Queso Oaxaca', 'Materia Prima', 42_000],
-  ];
-  for (const [i, [eid, concepto, categoria, montoCentavos]] of egresos.entries()) {
-    const fecha = i === 0 ? dia(6) : i === 1 ? dia(Math.floor(days.length / 2)) : dia(i);
-    await sql`
-      INSERT INTO expenses (id, fecha, concepto, categoria, monto_centavos,
-                            business_id, device_id, created_at, updated_at)
-      VALUES (${id(eid)}, ${fecha}, ${concepto}, ${categoria}, ${montoCentavos},
-              ${BIZ}, ${DEV}, ${TS(fecha)}, ${TS(fecha)})
-      ON CONFLICT (id) DO NOTHING`;
-  }
-  // One merma a month: inventory that left without pleasing anyone.
-  await movimiento(
-    sql,
-    `FMW${String(MW_SEQ++).padStart(2, '0')}`,
-    PRODUCTS[0][0],
-    dia(12),
-    'salida',
-    3,
-    COST[PRODUCTS[0][0]] ?? 0,
-    'Merma / daño',
-  );
-}
-
 /** Previous or current month of `anchor`, as one seeded ledger. */
 export async function seedMes(
   sql: Sql,
@@ -207,9 +159,15 @@ export async function seedMes(
   days: readonly string[],
   folioBase: number,
 ): Promise<void> {
-  const st = { folio: 0, creditoDado: false };
-  for (const fecha of days) {
-    await seedDia(sql, tag, fecha, rng(fecha), st, folioBase);
+  const st: EstadoMes = { folio: 0, creditoDado: false, consumo: new Map() };
+  for (const semana of semanas(days)) {
+    for (const fecha of semana) {
+      await seedDia(sql, tag, fecha, rng(fecha), st, folioBase);
+    }
+    // Pedro's compra for the week that just sold — the seed may never net a
+    // negative stock, which `seed-contract.integration.test.ts` now asserts.
+    await reponerStock(sql, semana[0] ?? days[0] ?? '', st.consumo);
+    st.consumo.clear();
   }
   await seedEgresosMes(sql, tag, days);
 }

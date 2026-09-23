@@ -1359,6 +1359,13 @@ critical avisos cannot be switched off.
     signup → wizard → operator → 3-product import → device code → `/activate` against the
     real endpoint → one pushed sale → Movimientos — through the UI the owner touches, on a
     tenant the run creates.
+  - 2026-09-22 · **Hardening — one pool per dev process.** A full local run left the single
+    `next-server` holding 97 idle connections to the 100-slot Docker Postgres and global-setup
+    failed with "remaining connection slots are reserved". Cause: `next dev --webpack` evaluates
+    `server/db.ts` once per route bundle / RSC layer, and its module-level cache is per
+    evaluation, so each got its own 5-connection pool. The handle now lives on
+    `globalThis.__xangarroDb` outside production (module cache kept in production, pool size
+    unchanged); `tests/db-singleton.test.ts` proves a fresh module evaluation reuses it.
 - **Steps:** One flow — free signup → onboarding → create operator → import 3 products → issue a
   device code → call `/activate` via the C-10 conformance helper → device appears → push one sale
   via the helper → it appears in Movimientos. Runs against local Supabase and the dev server in CI

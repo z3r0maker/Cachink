@@ -132,6 +132,58 @@ describe('periodBalanceInputs', () => {
     assert.ok(!byCost.has(900n), 'a deleted product is not valued');
   });
 
+  it('hands the domain real numbers and real bigints, not driver text', async () => {
+    // ADR-094's rule, applied to the one money query that already satisfied
+    // it by accident: a Postgres `sum()` comes back from the driver as *text*
+    // (sum over int4 or int8 is numeric either way), and `bigint + string` is
+    // legal JavaScript — it concatenates. `valuacionApertura` shipped that way
+    // into capitalInicial and took the whole Posición tab down.
+    //
+    // The stock query survives it for two reasons that are easy to delete by
+    // accident: the `::int` cast on the sum, and Drizzle's own bigint mapper
+    // on `products.costo_unit_centavos`. Without the cast, `BigInt(cantidad)`
+    // still parses "4" — and then a fractional or malformed value throws at
+    // the calculator instead of at the boundary. So assert the types here.
+    const { stock } = await withBusiness(db, BIZ, (tx) =>
+      periodBalanceInputs(tx, '2026-05-01', '2026-05-31'),
+    );
+    assert.ok(stock.length > 0, 'the fixture products must come back');
+    for (const s of stock) {
+      assert.equal(typeof s.cantidad, 'number', 'cantidad must be a number, not "4"');
+      assert.ok(Number.isInteger(s.cantidad), 'cantidad must be a whole unit count');
+      assert.equal(typeof s.costoUnitCentavos, 'bigint', 'centavos must be a bigint');
+    }
+    // And the valuation the domain computes from them is a bigint too — the
+    // concatenation bug shows up here as a string, not as a wrong number.
+    const inventarios = stock.reduce((t, s) => t + s.costoUnitCentavos * BigInt(s.cantidad), 0n);
+    assert.equal(typeof inventarios, 'bigint');
+  });
+
+  it('reports a product whose salidas exceed its entradas as negative, unclamped', async () => {
+    // The data layer states the fact; flooring it at zero is the domain's
+    // rule (ADR-095), asserted in `domain/tests/financials/balance-general`.
+    // If this ever starts returning 0, the clamp moved and the two layers are
+    // now clamping the same thing twice.
+    const vacio = testId('N');
+    await withBusiness(db, BIZ, async (tx) => {
+      await tx.execute(sql`
+        INSERT INTO products (id, nombre, categoria, costo_unit_centavos, unidad, umbral_stock_bajo, tipo,
+                              seguir_stock, precio_venta_centavos, business_id, device_id, created_at, updated_at)
+        VALUES (${vacio}, ${vacio}, 'Producto Terminado', 1100, 'pza', 3, 'producto', true, 2200,
+                ${BIZ}, ${BIZ}, now(), now())`);
+      await tx.execute(sql`
+        INSERT INTO inventory_movements (id, producto_id, fecha, tipo, cantidad, costo_unit_centavos,
+                                         motivo, business_id, device_id, created_at, updated_at)
+        VALUES (${testId('M')}, ${vacio}, '2026-05-04', 'salida', 7, 1100, 'Venta',
+                ${BIZ}, ${BIZ}, now(), now())`);
+    });
+
+    const { stock } = await withBusiness(db, BIZ, (tx) =>
+      periodBalanceInputs(tx, '2026-05-01', '2026-05-31'),
+    );
+    assert.equal(stock.find((s) => s.costoUnitCentavos === 1_100n)?.cantidad, -7);
+  });
+
   it('returns only in-range merma salidas — not Ventas, not deleted, not out of range', async () => {
     const { merma } = await withBusiness(db, BIZ, (tx) =>
       periodBalanceInputs(tx, '2026-05-01', '2026-05-31'),

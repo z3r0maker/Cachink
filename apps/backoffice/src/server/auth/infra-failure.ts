@@ -10,7 +10,12 @@ import type { Diagnostics } from './login-message';
  * generic error page (which redacts the cause in production anyway).
  */
 export type InfraCause =
-  'migration-missing' | 'totp-key' | 'db-credentials' | 'db-unreachable' | 'db-missing' | 'unknown';
+  | 'migration-missing'
+  | 'totp-key'
+  | 'db-credentials'
+  | 'db-unreachable'
+  | 'db-missing'
+  | 'unknown';
 
 export interface InfraFailure {
   readonly cause: InfraCause;

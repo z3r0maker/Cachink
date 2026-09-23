@@ -4,6 +4,7 @@ import { EmployeeSchema, InventoryMovementSchema, ProductSchema } from '@xangarr
 
 import { createDb, withBusiness, type Db } from '../src/client.js';
 import { listProductos } from '../src/queries/lists.js';
+import { periodBalanceInputs } from '../src/queries/balance.js';
 import { inventoryMovements, products } from '../src/schema/catalog.js';
 import { employees } from '../src/schema/tenant.js';
 import { integrationSuite } from './support/db';
@@ -112,6 +113,28 @@ describe('the seed satisfies the domain schemas', () => {
       .filter((r) => !r.parsed.success)
       .map((r) => `${r.id}: ${r.parsed.error?.issues.map((i) => i.path.join('.')).join(', ')}`);
     assert.deepEqual(failures, []);
+  });
+
+  it('no seeded producto has sold more than it ever stocked', async () => {
+    // The seed's month generator wrote a `salida` per ticket and never a
+    // restocking `entrada`: two months of ventas ran against six fixture
+    // compras, four of six productos netted negative, and the Balance's
+    // Inventarios line read −$3,353.90. The domain now floors the valuation
+    // at zero per producto (ADR-095) — which is exactly why this assertion
+    // has to live here too. A clamp that hides a broken fixture is not a
+    // guard; the fixture must be arithmetically possible on its own.
+    const { stock } = await withBusiness(db, BIZ, (tx) =>
+      periodBalanceInputs(tx, '2026-01-01', '2099-12-31'),
+    );
+    assert.ok(stock.length > 0, 'the seed must have run — start with `pnpm db:reset`');
+
+    const negativos = stock.filter((s) => s.cantidad < 0);
+    assert.deepEqual(
+      negativos.map((s) => `${s.costoUnitCentavos} centavos/u → ${s.cantidad} u`),
+      [],
+      'a producto cannot sell units it never bought — `seed-finanzas-stock.ts` ' +
+        'restocks each week from what that week sold.',
+    );
   });
 
   it('ids are ULIDs, not readable shorthand', async () => {

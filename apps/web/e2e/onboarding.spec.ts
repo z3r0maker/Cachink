@@ -33,6 +33,19 @@ async function answerWizard(page: Page) {
   await next(page, 'Terminar');
 }
 
+test('signup refuses to proceed until the aviso is accepted', async ({ page }) => {
+  await page.goto('/signup');
+  await expect(page.getByTestId('signup-aviso')).toContainText('Aviso de privacidad simplificado');
+  await expect(page.getByTestId('signup-acepto')).not.toBeChecked();
+  await expect(page.getByTestId('signup-novedades')).toBeChecked();
+  await page.getByTestId('signup-nombre').fill('Tortas Lupita');
+  await page.getByTestId('signup-email').fill(`aviso+${Date.now()}@ejemplo.mx`);
+  await page.getByTestId('signup-password').fill('tortas-2026');
+  await page.getByRole('button', { name: 'Crear cuenta' }).click();
+  await expect(page.getByText(/acepta el aviso de privacidad/)).toBeVisible();
+  await expect(page).toHaveURL(/\/signup$/);
+});
+
 test('a new owner signs up, answers the wizard, stays free and lands on the checklist', async ({
   page,
 }, info) => {
@@ -41,6 +54,7 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
   await page.getByTestId('signup-email').fill(email);
   await page.getByTestId('signup-password').fill('tortas-2026');
+  await page.getByTestId('signup-acepto').check();
   await page.getByRole('button', { name: 'Crear cuenta' }).click();
 
   await expect(page.getByRole('heading', { name: 'Platícanos de ti' })).toBeVisible();
@@ -76,6 +90,7 @@ test('signup refuses a short password without creating anything', async ({ page 
   await page.getByTestId('signup-nombre').fill('Tortas Lupita');
   await page.getByTestId('signup-email').fill(`corta+${Date.now()}@ejemplo.mx`);
   await page.getByTestId('signup-password').fill('corta');
+  await page.getByTestId('signup-acepto').check();
   await page.getByRole('button', { name: 'Crear cuenta' }).click();
   await expect(page.getByText(/mínimo 8 caracteres/)).toBeVisible();
   await expect(page).toHaveURL(/\/signup$/);

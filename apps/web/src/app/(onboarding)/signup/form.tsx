@@ -10,7 +10,11 @@ import { link, note, stack } from '@/onboarding/ui/onboarding.css';
 import type { Utm } from '@/server/attribution/utm';
 import { registrarse, type SignupFields } from '@/server/actions/signup';
 
-/** Four fields, one button. Everything else is asked by the wizard. */
+import { Consent, type ConsentState } from './consent';
+
+const SIN_CONSENTIMIENTO = 'Para crear tu cuenta, acepta el aviso de privacidad y los Términos.';
+
+/** Four fields, the aviso, one button. Everything else is asked by the wizard. */
 function useSignup(plan: PlanId | null, utm: Utm) {
   const [fields, setFields] = useState<SignupFields>({
     nombre: '',
@@ -18,6 +22,7 @@ function useSignup(plan: PlanId | null, utm: Utm) {
     email: '',
     password: '',
   });
+  const [consent, setConsent] = useState<ConsentState>({ acepto: false, novedades: true });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -25,16 +30,21 @@ function useSignup(plan: PlanId | null, utm: Utm) {
     setFields((f) => ({ ...f, ...patch }));
     setError(null);
   };
+  const setC = (patch: Partial<ConsentState>) => {
+    setConsent((c) => ({ ...c, ...patch }));
+    setError(null);
+  };
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!consent.acepto) return setError(SIN_CONSENTIMIENTO);
     startTransition(async () => {
-      const r = await registrarse({ ...fields, utm });
+      const r = await registrarse({ ...fields, utm, consentimiento: consent });
       if (!r.ok) return setError(r.message);
       router.replace(plan === null ? '/bienvenida' : `/bienvenida?plan=${plan}`);
       router.refresh();
     });
   };
-  return { fields, set, error, pending, submit };
+  return { fields, set, consent, setC, error, pending, submit };
 }
 
 function Fields({ s }: { readonly s: ReturnType<typeof useSignup> }) {
@@ -90,6 +100,7 @@ export function SignupForm({
       <Card>
         <form onSubmit={s.submit} noValidate className={stack}>
           <Fields s={s} />
+          <Consent value={s.consent} onChange={s.setC} />
           {s.error ? <Banner tone="critical" title={s.error} /> : null}
           <Button type="submit" disabled={s.pending} full>
             {s.pending ? 'Creando tu cuenta…' : 'Crear cuenta'}

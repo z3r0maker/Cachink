@@ -109,6 +109,40 @@ describe('calculateBalanceGeneral', () => {
     expect(result.activo.inventarios).toBe(40_000n); // 35_000 + 5_000
   });
 
+  it('floors a product with negative stock at zero instead of subtracting (ADR-095)', () => {
+    const result = calculateBalanceGeneral({
+      cortesDelDia: [],
+      inventarioStock: [
+        { costoUnitCentavos: 3_850n, cantidad: -61 },
+        { costoUnitCentavos: 2_200n, cantidad: 43 },
+      ],
+      ventasConCredito: [],
+      pagosClientes: [],
+      pasivosManuales: 0n,
+      utilidadDelPeriodo: 0n,
+    });
+    // Unfloored this is 94_600 − 234_850 = −140_250: a negative asset, which
+    // NIF B-6 has no line for. The product whose entradas were never recorded
+    // contributes nothing; it must not consume the value of the one counted.
+    expect(result.activo.inventarios).toBe(94_600n);
+  });
+
+  it('never reports a negative inventarios line, whatever the movements say', () => {
+    const result = calculateBalanceGeneral({
+      cortesDelDia: [],
+      inventarioStock: [
+        { costoUnitCentavos: 610n, cantidad: -64 },
+        { costoUnitCentavos: 1_200n, cantidad: -50 },
+      ],
+      ventasConCredito: [],
+      pagosClientes: [],
+      pasivosManuales: 0n,
+      utilidadDelPeriodo: 0n,
+    });
+    expect(result.activo.inventarios).toBe(0n);
+    expect(result.activo.inventarios >= 0n).toBe(true);
+  });
+
   it('cuentasPorCobrar = Σ(venta.monto − pagos) per pending/parcial venta', () => {
     const ventas = [
       makeCreditSale({ id: 'A' as never, monto: 10_000n, estadoPago: 'pendiente' }),

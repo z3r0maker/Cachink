@@ -61,7 +61,10 @@ export interface BalanceGeneralInput {
    * device) pair as the active cash position; the caller pre-filters.
    */
   cortesDelDia: readonly DayClose[];
-  /** Current stock per productoId × costoUnit gives the inventory valuation. */
+  /**
+   * Current stock per productoId × costoUnit gives the inventory valuation.
+   * A product whose `cantidad` is negative is valued at zero (ADR-095).
+   */
   inventarioStock: readonly { costoUnitCentavos: Money; cantidad: number }[];
   /** Ventas still in pendiente/parcial status. */
   /** Open fiado tickets with their derived totals (ADR-073). */
@@ -79,9 +82,7 @@ export interface BalanceGeneralInput {
 export function calculateBalanceGeneral(input: BalanceGeneralInput): BalanceGeneral {
   const apertura = input.apertura;
   const efectivo = latestCorteCash(input.cortesDelDia) + (apertura?.efectivoInicial ?? ZERO);
-  const inventarios = sum(
-    input.inventarioStock.map((s) => s.costoUnitCentavos * BigInt(s.cantidad)),
-  );
+  const inventarios = sum(input.inventarioStock.map(valuacionDeProducto));
   const cuentasPorCobrar = calcCuentasPorCobrar(
     input.ventasConCredito,
     input.pagosClientes,
@@ -104,6 +105,25 @@ export function calculateBalanceGeneral(input: BalanceGeneralInput): BalanceGene
       total: capitalTotal,
     },
   };
+}
+
+/**
+ * One product's stock at cost, floored at zero (ADR-095).
+ *
+ * `cantidad` is a net movement count — entradas minus salidas — so it goes
+ * negative whenever salidas were captured and the matching entradas never
+ * were. That is a data-quality gap, not a negative asset: a shelf cannot
+ * hold less than nothing, and NIF B-6 has no negative asset line. The
+ * product contributes zero rather than eating the value of the products
+ * that *are* counted, which is the same clamp `estadoDeCuenta` already
+ * applies per cliente to cuentasPorCobrar.
+ *
+ * The negative stock itself still surfaces — it is what Productos · Stock
+ * and the stock-low notification are for. The Balance is not the place to
+ * report it, because it can only report it as a lie.
+ */
+function valuacionDeProducto(s: { costoUnitCentavos: Money; cantidad: number }): Money {
+  return s.cantidad > 0 ? s.costoUnitCentavos * BigInt(s.cantidad) : ZERO;
 }
 
 /**

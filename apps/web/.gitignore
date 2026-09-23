@@ -10,3 +10,5 @@ public/__cmp.txt
 
 # O-02 spike build output (esbuild)
 e2e/spikes/sqlite-wasm-opfs/.out/
+.vercel
+.env*
