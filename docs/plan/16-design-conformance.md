@@ -7,9 +7,16 @@ batches. The audit stays the evidence; this stays the plan.
 Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 `B-n` operación diaria, `C-n` dinero y negocio, `D-n` detalle transversal.
 
-**Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
-· W-8 (las cuatro gráficas de Estados) · W-2 (tipografía y escala)
-· W-4 (detalle transversal) · W-5 (comprobante) — todo 2026-09-22.
+**Track W is complete.** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro
+estados, ADR-094) · W-8 (las gráficas de Estados) · W-2 (tipografía y escala)
+· W-4 (detalle transversal) · W-5 (comprobante) — 2026-09-22; W-3 (las once
+consultas) · W-6 (`design-lint` en 0) · W-7 (el asistente de alta, ADR-098) —
+2026-09-23.
+
+What the audit left standing is recorded in each section: three KPI tiles
+with no data behind them, four Personas columns needing a migration, the
+aviso meta's relative time, the Indicadores delta, and the screens §4 lists
+as never built. None of it is drift — it is work with a name.
 
 ---
 
@@ -263,38 +270,55 @@ need columns `notices` does not have. Both are data, so they belong with W-3.
 
 ## W-6 · `design-lint` de vuelta a 0 (S-7)
 
-- [ ] Status
+- [x] Status — **done 2026-09-23**, baseline re-recorded at **0**
 
-60 violations today, from a 0 baseline. They split in two:
+**Done 2026-09-23: 59 → 0.** They split three ways, not two.
 
-- **Legitimate:** ~28 literals in the login animation, which the design
-  specifies on a fixed 460×200 canvas. These need a _scoped exception_ in
-  `scripts/design-lint`, not a rewrite — rewriting them would break the
-  design's own geometry.
-- **Real defects:** the hardcoded `rgba(13,13,13,0.45)` scrim, `colors.red`
-  used as text colour, and `#d4a017` (shared with W-5).
-
-Fix the defects, add the scoped exception, re-baseline at 0, and keep the
-ratchet: the count may fall, never rise.
-
-**Size:** medium, mostly judgment rather than code.
+- **Fixed canvases (43).** The login animation on its `460×200` stage and the
+  Estados charts on theirs. `fontSize={12}` inside a `560`-wide `viewBox` is
+  not twelve pixels of type — it lands at whatever size the card is, about 27
+  on a wide screen — so snapping it to the ramp would change the drawing's
+  proportions and tell the next reader a lie about what the number is. A
+  `LIENZOS_FIJOS` exception in `scan.ts` names them, with the bar for joining
+  the list written down: the file's numbers must be meaningless outside a
+  `viewBox` or a stage of fixed size. Looking drawn is not enough.
+- **Real defects (14).** `colors.red` as an error line where `redText` is the
+  contrast-checked ink; two dialogs writing their own `rgba()` scrim instead
+  of `colors.scrim`; a `3px` border on the login coin where the house has
+  only 2 and 2.5; `999` and `'50%'` where `shapeRadii.pill` is; a `9` radius
+  off the ladder; thirteen hexes duplicating tokens, five of them the palette
+  retyped as a tint array in `revision-mapear`; and font-size literals with
+  exact steps waiting for them.
+- **A rule that was wrong (1).** `borderRadius: 0` on an inset card is the
+  absence of a radius, not a radius off the scale — a reset every scale
+  implies and none needs a step for. The rule ignores zero now.
 
 ---
 
 ## W-7 · Decidir el asistente de alta (§4 del audit)
 
-- [ ] Status
+- [x] Status — **done 2026-09-23** (ADR-098)
 
-The onboarding wizard diverges from the handoff. It is not obviously wrong —
-it may be a deliberate improvement made after the design was drawn. This is a
-decision to record (ADR), not code to write. Needed before anyone "fixes" it
-into conformance by accident.
+**Done 2026-09-23 — ADR-098.** It was a deliberate improvement, made in N-12
+and never written down where the next person holding the design file would
+find it.
+
+The design's four steps capture data; two of them ask for an RFC and a
+régimen, which is exactly what someone starting out has not sorted yet. The
+eight questions ask how the business works, and every answer **configures**
+it — `answersToConfiguration` turns them into payment types, inventory and
+caja toggles and a plan recommendation. The pairing step moved to Tu equipo,
+where a device is actually paired.
+
+The ADR also settles what the divergence costs: the onboarding `.dc.html`
+stops being the spec for that flow, and the wizard's shape becomes a domain
+decision — a question that configures nothing does not belong in it.
 
 ---
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8 → W-4 → W-5 → W-3~~ → **W-6** → W-7.
+~~W-1 → W-2 → W-8 → W-4 → W-5 → W-3 → W-6 → W-7~~ — **Track W is done.**
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small

@@ -129,7 +129,7 @@ function BarraSubida({
           />
         </label>
       ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: 13 }}>
+      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
         columnas: nombre, teléfono, saldo
       </span>
     </div>

@@ -3,6 +3,7 @@
 import { parseCsv } from '@/lib/csv';
 
 import { TablaFilas } from './tabla';
+import { portalFontSizes } from '@xangarro/tokens';
 
 /** One grid row while the owner edits it. */
 export interface Fila {
@@ -120,7 +121,7 @@ function BarraPrelLenado({
           />
         </label>
       ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: 13 }}>
+      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
         columnas: producto, cantidad, costo
       </span>
     </div>

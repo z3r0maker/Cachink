@@ -1,6 +1,6 @@
 'use client';
 
-import { colors } from '@xangarro/tokens';
+import { colors, portalFontSizes } from '@xangarro/tokens';
 
 import { Input } from '@/components';
 
@@ -29,12 +29,16 @@ export function LogoCard({
           style={{ maxHeight: 72, maxWidth: 220, objectFit: 'contain' }}
         />
       ) : (
-        <span style={{ fontWeight: 800, fontSize: 20 }}>Sin logo todavía</span>
+        <span style={{ fontWeight: 800, fontSize: portalFontSizes.cardTitle }}>
+          Sin logo todavía
+        </span>
       )}
       {mayWrite ? (
         <SubirLogoLabel subiendo={subiendo} hasLogo={logoUrl !== null} onFile={onFile} />
       ) : null}
-      <span style={{ color: 'var(--gray-600)', fontSize: 13 }}>PNG, JPG o SVG · hasta 2 MB</span>
+      <span style={{ color: 'var(--gray-600)', fontSize: portalFontSizes.sm }}>
+        PNG, JPG o SVG · hasta 2 MB
+      </span>
     </div>
   );
 }

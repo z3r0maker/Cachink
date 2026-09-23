@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, type ReactNode } from 'react';
-import { colors } from '@xangarro/tokens';
+import { colors, portalFontSizes } from '@xangarro/tokens';
 
 import { desbloquear, useCajaBloqueada, useTicketEnCurso } from './ticket-store';
 import * as a from '../acceso/acceso.css';
@@ -82,7 +82,7 @@ function Pie(p: {
             ? 'Entrar'
             : `Entrar como ${p.elegido.split(' ')[0]}`}
       </button>
-      <a href="/operador/cierre" style={{ textAlign: 'center', fontSize: 13 }}>
+      <a href="/operador/cierre" style={{ textAlign: 'center', fontSize: portalFontSizes.sm }}>
         Cerrar el turno de {p.deQuien} en lugar de continuar
       </a>
     </>
@@ -185,7 +185,7 @@ function Marco(p: { readonly nota: ReactNode; readonly children: ReactNode }): R
         <div className={a.card} style={{ width: 'min(420px, 100%)', gap: 14 }}>
           <span className={a.paso}>Caja bloqueada · Caja 1</span>
           {p.nota}
-          <h1 className={a.title} style={{ fontSize: 20 }}>
+          <h1 className={a.title} style={{ fontSize: portalFontSizes.cardTitle }}>
             Quién sigue en la caja
           </h1>
           {p.children}

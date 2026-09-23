@@ -17,7 +17,7 @@ const TILE = {
 
 const BOTON_X = {
   marginLeft: 'auto',
-  fontSize: 22,
+  fontSize: portalFontSizes.xl2,
   fontWeight: 800,
   lineHeight: 1,
   cursor: 'pointer',
@@ -44,7 +44,14 @@ export function EncabezadoCompartir() {
           <path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.2-5.4A8.4 8.4 0 1 1 21 11.5Z" />
         </svg>
       </span>
-      <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: '-0.03em', color: colors.black }}>
+      <div
+        style={{
+          fontSize: portalFontSizes.xl3,
+          fontWeight: 800,
+          letterSpacing: '-0.03em',
+          color: colors.black,
+        }}
+      >
         <Dialog.Title>Compartir por WhatsApp</Dialog.Title>
       </div>
       <Dialog.Close asChild>
@@ -61,7 +68,7 @@ const CAJA = {
   border: `2px solid ${colors.black}`,
   borderRadius: 14,
   padding: 16,
-  fontSize: 16,
+  fontSize: portalFontSizes.lg,
   fontWeight: 600,
   color: colors.black,
   lineHeight: 1.45,

@@ -5917,7 +5917,7 @@ budget O-7 has not confirmed, for content that needs no scheduler.
 
 ---
 
-## ADR-087
+## ADR-099
 
 **Date:** 2026-09-20 · **Status:** Accepted · **Track:** N-20 (comprobantes)
 
@@ -6586,3 +6586,67 @@ those four gaps.
   Seguridad entry listing support sessions.
 - The aviso de privacidad gains one line: staff may view an account for
   support, logged and visible to the tenant.
+
+---
+
+## ADR-098
+
+**Title:** The alta wizard asks how you work, not what your papers say — superseding the design's four steps
+
+**Date:** 2026-09-23
+
+**Status:** Accepted
+
+**Context:**
+
+The design's onboarding wizard is four steps of data capture: Negocio,
+Datos fiscales, Sincronización, Dispositivo, then Listo. We ship eight
+skippable questions instead — «Platícanos de ti» — and have since N-12.
+
+The audit of 2026-09-22 flagged the gap as the one divergence it could not
+classify: it looks like a product decision rather than drift, but no ADR
+said so, and an undocumented deviation is indistinguishable from an
+oversight to the next person holding the design file beside the app.
+
+**Decision:**
+
+The eight questions stand. The design's four steps are superseded, not
+pending.
+
+**Why:**
+
+Two of the design's steps ask for things an emprendedor may not have on the
+day they sign up. An RFC and a régimen are exactly what someone starting out
+has not sorted yet, and putting them behind a wizard makes the product's
+first impression a form they cannot fill. Both now live in Negocio, editable
+whenever the papers arrive, and the wizard asks only whether they are to
+hand — one question, skippable, and the answer routes the follow-up.
+
+The pairing step moved to where a device is actually paired: Tu equipo, with
+the code, the quota and the phones it has already linked. A code shown once
+during signup is a code that expires before the second phone exists.
+
+The deeper reason is that the eight answers are not stored and forgotten.
+`answersToConfiguration` turns them into the business's payment types, its
+inventory and caja toggles and a plan recommendation — ¿cómo te pagan? sets
+the tipos de pago the register shows; ¿llevas inventario? decides whether
+stock tracking is on; ¿cuántas personas cobran? picks the plan. The design's
+wizard collects facts about a business. This one configures it.
+
+Every step is skippable and skipping clears the step's keys, which the domain
+reads as «no opinion» rather than as «no». Nothing the wizard learns is
+unavailable later, and nothing it skips is asked twice.
+
+**Consequences:**
+
+- «Xangarro Portal - Acceso y onboarding.dc.html» stops being the spec for
+  this flow. It remains the spec for everything else on those screens — the
+  auth card, the doors, the brand panel — and the audit's §4 entry closes.
+- The wizard's shape is now a domain decision: adding a question means adding
+  an answer key and teaching `answersToConfiguration` what it changes, not
+  drawing a step. A question that configures nothing does not belong.
+- Answers live in the portal-only `business_onboarding` table, off the DOWN
+  wire, as N-12's own deviation records.
+- Three answers still have no write path — tipoNegocio, WhatsApp and logo —
+  and are captured against the day they do. That is a gap in the plumbing,
+  not in this decision.

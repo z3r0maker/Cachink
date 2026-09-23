@@ -15,6 +15,7 @@ import {
   type NegocioComprobante,
   type PlantillaComprobante,
 } from '@xangarro/domain';
+import { colors } from '@xangarro/tokens';
 
 /**
  * Venta + branding → the renderer's contract (N-20). Everything optional
@@ -23,7 +24,7 @@ import {
  * on AND a line exists (0028).
  */
 
-const ACENTO_POR_OMISION = '#FFD60A';
+const ACENTO_POR_OMISION = colors.yellow;
 const METODO_DISPLAY: Record<string, MetodoPagoComprobante> = {
   Efectivo: 'Efectivo',
   Transferencia: 'Transferencia',

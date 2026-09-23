@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, radii, typography } from '@xangarro/tokens';
+import { colors, portalFontSizes, radii, shapeRadii, typography } from '@xangarro/tokens';
 
 /** Operador · Acceso (O-12) — the full-page gate: vincular, NIP, fondo. */
 
@@ -93,7 +93,7 @@ export const initials = style({
   width: 38,
   height: 38,
   flex: 'none',
-  borderRadius: '50%',
+  borderRadius: shapeRadii.pill,
   border: `2px solid ${colors.black}`,
   background: colors.blueSoft,
   fontSize: portalFontSizes.sm,

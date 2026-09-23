@@ -516,7 +516,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - [x] Status · **Blocked by:** N-19, app design (N-24) · **designs mirrored 2026-09-20**
 - Progress: 2026-09-20 · `track-n/n20-comprobantes` · **Done (pg/web halves).** The four
   templates live in `packages/domain/src/comprobante/svg/` as one SVG renderer
-  per template behind `comprobanteSvg` (ADR-087): the `Comprobante` contract
+  per template behind `comprobanteSvg` (ADR-099): the `Comprobante` contract
   transcribed from `design-reference/comprobantes/*.dc.html` (artboards A/B/C
   - spec sheets), character-count wrapping, the 0.45-luminance contrast rule
     as one decision per receipt, per-template paper for print. PNG via sharp

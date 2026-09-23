@@ -1,4 +1,4 @@
-import { colors, radii, shadows } from '@xangarro/tokens';
+import { borders, colors, radii, shadows } from '@xangarro/tokens';
 import { style } from '@vanilla-extract/css';
 
 /**
@@ -85,7 +85,7 @@ export const monedaMarca = style({
   flex: 'none',
   borderRadius: 9999,
   background: colors.yellow,
-  border: `3px solid ${colors.black}`,
+  border: borders.thick,
   boxShadow: `4px 4px 0 ${colors.black}`,
   display: 'grid',
   placeItems: 'center',

@@ -33,11 +33,38 @@ export type { Finding, Severity } from './rules/types';
  */
 const UNGOVERNED = /\/screens\/Telemetria\//;
 
+/**
+ * Drawings on a fixed canvas, where a number is a **coordinate**, not a CSS
+ * pixel.
+ *
+ * `fontSize={12}` inside a `560`-wide `viewBox` is not twelve pixels of type:
+ * the canvas scales to its container, so that glyph lands at whatever size the
+ * card happens to be — around 27px on a wide screen. Snapping it to the type
+ * ramp would change the drawing's proportions and mean nothing, and reaching
+ * for `portalFontSizes.xs` would tell the next reader a lie about what the
+ * number is.
+ *
+ * Both surfaces here are transcribed from the design files coordinate by
+ * coordinate: the login animation on its `460×200` stage, and the Estados
+ * charts on the `560×214`, `700×180`, `180×106` and `120×120` canvases the
+ * handoff draws them on. Their geometry **is** the spec; the token scale
+ * describes the page around them.
+ *
+ * The bar for adding to this list is that the file's numbers are meaningless
+ * outside a `viewBox` or a stage of a fixed size. A component that merely
+ * looks drawn does not qualify. Audit 2026-09.
+ */
+const LIENZOS_FIJOS = [
+  /\/app\/login\/(animation|escena-)/,
+  /\/estados\/(cascada|donut|flujo-barras|gauge)\.tsx$/,
+];
+
 function isExempt(file: string): boolean {
   return (
     /\.(test|spec|stories)\.[jt]sx?$/.test(file) ||
     /\/(tests?|dev)\//.test(file) ||
-    UNGOVERNED.test(file)
+    UNGOVERNED.test(file) ||
+    LIENZOS_FIJOS.some((r) => r.test(file))
   );
 }
 

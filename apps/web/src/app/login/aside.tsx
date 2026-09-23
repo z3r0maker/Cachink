@@ -4,6 +4,7 @@ import Image from 'next/image';
 
 import { AnimacionAcceso } from './animation';
 import { heroImagen, heroMarco, marca, monedaMarca, panel, subtitulo, titular } from './aside.css';
+import { colors } from '@xangarro/tokens';
 
 /**
  * The login page's left panel (P-02): the wordmark row, the looping
@@ -43,7 +44,7 @@ export function PanelAcceso() {
             stroke="currentColor"
             strokeWidth={4.6}
             strokeLinecap="butt"
-            style={{ color: 'var(--xg-ink, #0D0D0D)' }}
+            style={{ color: `var(--xg-ink, ${colors.black})` }}
           >
             <path d="M5 5l14 14M19 5 5 19" />
           </svg>

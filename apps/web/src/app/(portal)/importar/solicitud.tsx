@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 
 import { Button } from '@/components';
 import { solicitarHazloPorMi } from '@/server/actions/hazlo-por-mi';
+import { portalFontSizes } from '@xangarro/tokens';
 
 /** The request form half of «Hazlo por mí» (N-18), split for the size ceiling. */
 export function Solicitud({
@@ -93,7 +94,7 @@ function CampoNotas({
           borderRadius: 10,
           padding: '8px 12px',
           fontFamily: 'inherit',
-          fontSize: 14,
+          fontSize: portalFontSizes.md,
         }}
       />
     </label>

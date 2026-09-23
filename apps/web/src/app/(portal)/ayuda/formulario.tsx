@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 
 import { Banner, Button, Input } from '@/components';
 import { enviarAyuda } from '@/server/actions/ayuda';
+import { portalFontSizes } from '@xangarro/tokens';
 
 /**
  * The form half of «Ayuda» (N-08), split from the screen for the size
@@ -114,7 +115,7 @@ function MensajeTexto({
         borderRadius: 10,
         padding: '10px 12px',
         fontFamily: 'inherit',
-        fontSize: 14,
+        fontSize: portalFontSizes.md,
         resize: 'vertical',
       }}
     />

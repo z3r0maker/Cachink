@@ -49,7 +49,9 @@ const colourLiterals: LineRule = (raw, line, push) => {
 const radiusLiterals: LineRule = (raw, line, push) => {
   for (const m of raw.matchAll(/borderRadius[:=]\s*\{?\s*['"`]?(\d+)(?:px)?/g)) {
     const value = Number(m[1]);
-    if (!RADII.has(value) && !SHAPE_RADII.has(value)) {
+    // Zero is a reset — `borderRadius: 0` on an inset card says «no corner
+    // here», which every scale implies and none needs a step for.
+    if (value !== 0 && !RADII.has(value) && !SHAPE_RADII.has(value)) {
       push({ rule: 'token/radius-offscale', severity: 'P2', line, detail: `${value}` });
     }
   }

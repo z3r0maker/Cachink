@@ -2,7 +2,7 @@
 
 import * as Dialog from '@radix-ui/react-dialog';
 import { useEffect, useState } from 'react';
-import { colors } from '@xangarro/tokens';
+import { colors, portalFontSizes, radii } from '@xangarro/tokens';
 
 import { Button } from './button';
 import { CajaMensaje, EncabezadoCompartir } from './whatsapp-partes';
@@ -18,7 +18,7 @@ const OVERLAY = {
   position: 'fixed',
   inset: 0,
   zIndex: 97,
-  background: 'rgba(13,13,13,0.45)',
+  background: colors.scrim,
   display: 'grid',
   placeItems: 'center',
   padding: 24,
@@ -35,7 +35,7 @@ const TARJETA = {
 
 const NOTA = {
   margin: '14px 0 0',
-  fontSize: 13,
+  fontSize: portalFontSizes.sm,
   fontWeight: 600,
   color: colors.gray600,
   textWrap: 'pretty',
@@ -118,14 +118,14 @@ const CHIP_ICONO = {
   height: 32,
   flex: 'none',
   border: `2px solid ${colors.black}`,
-  borderRadius: 9,
+  borderRadius: radii[0],
   background: colors.white,
   display: 'grid',
   placeItems: 'center',
 } as const;
 
 const CHIP_TXT = {
-  fontSize: 14,
+  fontSize: portalFontSizes.md,
   fontWeight: 700,
   color: colors.black,
   minWidth: 0,
@@ -190,7 +190,7 @@ const ENLACE = {
   border: `2.5px solid ${colors.black}`,
   borderRadius: 16,
   boxShadow: `4px 4px 0 ${colors.black}`,
-  fontSize: 13,
+  fontSize: portalFontSizes.sm,
   fontWeight: 700,
   letterSpacing: '0.08em',
   textTransform: 'uppercase',

@@ -4,8 +4,9 @@
  */
 
 import type { ClientePendiente, ProductoPendiente } from './revision';
+import { colors } from '@xangarro/tokens';
 
-const TINTES = ['#FFD60A', '#3B6FFF', '#00C896', '#8B5CF6', '#06B6D4'] as const;
+const TINTES = [colors.yellow, colors.blue, colors.green, colors.purple, colors.cyan] as const;
 
 const dia = (iso: string): string =>
   new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'short' }).format(new Date(iso));
@@ -29,7 +30,7 @@ export function mapearProductos(
       nombre: p.nombre,
       precio: p.precio,
       detalle: `Creado en caja · ${dia(p.creado)} · vendido ${v.n} ${v.n === 1 ? 'vez' : 'veces'}`,
-      tint: TINTES[i % TINTES.length] ?? '#FFD60A',
+      tint: TINTES[i % TINTES.length] ?? colors.yellow,
       pareceA: dup?.nombre ?? null,
       pareceAId: dup?.id ?? null,
     } satisfies ProductoPendiente;
@@ -54,7 +55,7 @@ export function mapearClientes(
       telefono: c.telefono ?? '',
       fiado: fiado.get(c.id) ?? 0n,
       detalle: `Creado en caja · ${dia(c.creado)}`,
-      tint: TINTES[(i + 2) % TINTES.length] ?? '#FFD60A',
+      tint: TINTES[(i + 2) % TINTES.length] ?? colors.yellow,
       pareceA: dup?.nombre ?? null,
       pareceAId: dup?.id ?? null,
     } satisfies ClientePendiente;

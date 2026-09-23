@@ -59,7 +59,7 @@ function Footnote({ t, errorKey }: { t: T; errorKey?: string | null }): ReactEle
           testID="activation-error"
           fontFamily={typography.fontFamily}
           fontSize={fontSizes.sm}
-          color={colors.red}
+          color={colors.redText}
           textAlign="center"
         >
           {t(errorKey as never)}

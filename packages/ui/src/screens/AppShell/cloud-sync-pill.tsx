@@ -10,7 +10,7 @@ import { Text, View } from '@tamagui/core';
 import { useCloudSync } from '../../app/cloud-sync-bridge';
 import { useTranslation } from '../../i18n/index';
 import { pillView, type PillTone } from '../../sync/cloud-sync-status';
-import { colors, fontSizes, typography } from '../../theme';
+import { colors, fontSizes, shapeRadii, typography } from '../../theme';
 
 const TONE_BG: Record<PillTone, string> = {
   ok: colors.green,
@@ -42,7 +42,7 @@ export function CloudSyncPill(props: { readonly onOpenRejected?: () => void }): 
     >
       <View
         backgroundColor={TONE_BG[view.tone]}
-        borderRadius={999}
+        borderRadius={shapeRadii.pill}
         paddingHorizontal={10}
         paddingVertical={4}
       >

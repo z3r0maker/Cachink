@@ -17,6 +17,7 @@ import {
 
 import { withTenant, type Tx } from './db';
 import type { ConteoDenominaciones } from '@xangarro/domain';
+import { colors } from '@xangarro/tokens';
 
 /** The screen's `Corte`, in centavos, ready to render. */
 export interface CorteRow {
@@ -104,7 +105,7 @@ function aCorte(
     id: t.id,
     operador: nombre,
     iniciales: iniciales(nombre),
-    tint: color ?? '#FFD60A',
+    tint: color ?? colors.yellow,
     caja: 'Caja 1',
     dia: dia(t.cierreAt ?? t.aperturaAt),
     horario: `${hhmm(t.aperturaAt)} a ${hhmm(t.cierreAt ?? t.aperturaAt)}`,
