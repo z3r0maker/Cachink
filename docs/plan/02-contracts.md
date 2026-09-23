@@ -75,7 +75,7 @@ Rows inside `tables` are domain entities in camelCase (`ReferenceTablesSchema`);
 
 ```
 
-Errors: `400 CODE_INVALID` (unknown code **or** wrong email — one public answer since 2026-09-23, SEC-DEV-01 / ADR-100; the server logs the real reason) · `410 CODE_EXPIRED` · `409 CODE_USED` · `402 NO_DEVICE_SLOTS` (plan full; message names the plan) · `423 BUSINESS_SUSPENDED` (the business is archived; the code is not consumed). `403 EMAIL_MISMATCH` stays in the catalog only so an older server's answer maps to the same message. Wrong tries lock the IP and the credential (code or token) for 15 minutes after 5 in 15 (B-17).
+Errors: `400 CODE_INVALID` (unknown code **or** wrong email — one public answer since 2026-09-23, SEC-DEV-01 / ADR-101; the server logs the real reason) · `410 CODE_EXPIRED` · `409 CODE_USED` · `402 NO_DEVICE_SLOTS` (plan full; message names the plan) · `423 BUSINESS_SUSPENDED` (the business is archived; the code is not consumed). `403 EMAIL_MISMATCH` stays in the catalog only so an older server's answer maps to the same message. Wrong tries lock the IP and the credential (code or token) for 15 minutes after 5 in 15 (B-17).
 Rules: code is single-use; on success it is burned atomically with device creation; the same code cannot activate two devices even under a race (unique constraint on `activation_codes.redeemed_device_id` + row lock).
 
 ## §4 `POST /sync/push`
@@ -329,7 +329,7 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 ### C-14 QR activation with a long single-use token
 
 - [x] Status · **Surfaced by:** N-25; **amended 2026-09-17 by the N-26 security audit (SEC-DEV-01)** ·
-      Done: 2026-09-23 · `ActivateRequestSchema` is a union of the typed and scan shapes (additive, protocol 1); data-pg `0038_pairing_token.sql` stores the token's hash beside the code with an atomic `redeem_pairing_token`; the portal answers `CODE_INVALID` for a wrong email and logs the real reason; the mock does the same. Conformance: `activate.test.ts` (generic error) and the new `activate-scan.test.ts` (happy, race, unknown, expired on the mock) — green against the mock **and** the real portal (`conformance.sh`, which now mints scan tokens with `conformance-codes.ts --qr`); `pairing-token.integration.test.ts` covers expiry, archive and «Generar otro» on the server. **Deviations, owner decisions of 2026-09-23 (ADR-100):** the token lives **15 minutes**, not 48 h, and travels in the **fragment** (`/activar#c=`), not a query string, per the audit's SEC-DEV-01 and SEC-MOB-04. The limiter clause was already met (B-17).
+      Done: 2026-09-23 · `ActivateRequestSchema` is a union of the typed and scan shapes (additive, protocol 1); data-pg `0038_pairing_token.sql` stores the token's hash beside the code with an atomic `redeem_pairing_token`; the portal answers `CODE_INVALID` for a wrong email and logs the real reason; the mock does the same. Conformance: `activate.test.ts` (generic error) and the new `activate-scan.test.ts` (happy, race, unknown, expired on the mock) — green against the mock **and** the real portal (`conformance.sh`, which now mints scan tokens with `conformance-codes.ts --qr`); `pairing-token.integration.test.ts` covers expiry, archive and «Generar otro» on the server. **Deviations, owner decisions of 2026-09-23 (ADR-101):** the token lives **15 minutes**, not 48 h, and travels in the **fragment** (`/activar#c=`), not a query string, per the audit's SEC-DEV-01 and SEC-MOB-04. The limiter clause was already met (B-17).
 
       **Blocks:** N-25, A-04
 

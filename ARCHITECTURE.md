@@ -6651,7 +6651,7 @@ unavailable later, and nothing it skips is asked twice.
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
 
-## ADR-100
+## ADR-101
 
 **Title:** Activation answers one generic error, and the QR carries a 15-minute token in the fragment
 
