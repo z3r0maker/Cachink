@@ -9,6 +9,7 @@ export * from './errors.js';
 export * from './ports.js';
 export * from './events.js';
 export * from './status.js';
+export * from './entitlement.js';
 export * from './record.js';
 export * from './customer.js';
 export * from './start-trial-checkout.js';

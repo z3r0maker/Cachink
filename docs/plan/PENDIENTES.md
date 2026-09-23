@@ -18,18 +18,18 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:320`
 - **N-02** Server usage metering `[LAUNCH]` (Lanzamiento) — destraba 5: N-03, N-07, N-30, N-51, N-70 · `09-next-features.md:106`
-- **N-06** Tenants, licences and Stripe `[LAUNCH]` (Lanzamiento) — destraba 5: N-30, N-63, N-71, N-70, N-72 · `09-next-features.md:220`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:921`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1134`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
-- **N-09** Platform flags and kill switches `[LAUNCH]` (Lanzamiento) — destraba 2: N-30, N-69 · `09-next-features.md:295`
+- **N-63** Negocio: MRR, churn, trial → paid (Post-lanzamiento) — destraba 2: N-70, N-72 · `09-next-features.md:1123`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1154`
 - **P-30** Asesor generation runtime (Colas de tracks) — destraba 2: P-28, P-29 · `04-portal.md:1163`
 - **N-01** Stripe: annual prices + trial on both paid tiers `[LAUNCH]` (Lanzamiento) — destraba 1: N-74 · `09-next-features.md:65`
 - **N-11** Portal settings parity `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:345`
 - **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:521`
+- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:687`
 
-## Lanzamiento (99)
+## Lanzamiento (97)
 
 Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueño y la preparación legal.
 
@@ -51,9 +51,7 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [~] **N-01** Stripe: annual prices + trial on both paid tiers `[LAUNCH]` — Blocked by: B-10, C-12 · Falta: the Suscripción screen hard-codes `iniciarPrueba(planId, 'month')` — no annual option, no «Cambiar a anual», nothing calls `pagarAnualPorSpei`, cards show «MXN / mes» without «+ IVA» (`planes.ts`). Gateway, catalog, card-less trial and SPEI `send_invoice` code are done. The four-price Checkout run needs O-12. · `09-next-features.md:65`
 - [~] **N-02** Server usage metering `[LAUNCH]` — Blocked by: C-12, B-08 · Falta: nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. · `09-next-features.md:106`
 - [~] **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:141`
-- [~] **N-06** Tenants, licences and Stripe `[LAUNCH]` — Blocked by: N-05, B-10, B-06 · Falta: overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists. · `09-next-features.md:220`
 - [~] **N-07** Usage, limits and capacity `[LAUNCH]` — Blocked by: N-05, N-02 · Falta: acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B) and the card shares N-02's ticket over-count. · `09-next-features.md:250`
-- [~] **N-09** Platform flags and kill switches `[LAUNCH]` — Blocked by: N-05, A-14 · Falta: `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch. · `09-next-features.md:295`
 - [~] **N-10** Staff alerts `[LAUNCH]` — Blocked by: N-08, B-14, B-18 · Falta: digest has no over-limit section; the dormancy section belongs to N-48 (post-launch) — amend to defer it rather than build it now; urgent delivery within a minute needs `ALERT_WEBHOOK_URL` set. · `09-next-features.md:318`
 - [~] **N-11** Portal settings parity `[LAUNCH]` — Blocked by: P-08, P-15, C-15 · Falta: every setting is built (`negocio.sync.spec.ts`, `comprobantes.sync.spec.ts`, `sync.spec.ts` Funciones, `avisos-configurar.spec.ts`; the ISR confirm became a switch per ADR-082); only the mapping checklist (portal / device A-12 / dropped-why) is missing. A-01 finished 2026-09-16, so «blocks A-01» is moot. · `09-next-features.md:345`
 - [~] **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:359`
@@ -216,13 +214,14 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1224`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1234`
 
-## Colas de tracks (10)
+## Colas de tracks (11)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
 ### `02-contracts.md` · §8 Table scope
 
 - [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:320`
+- [ ] **C-21** Kill switches on the wire · `02-contracts.md:489`
 
 ### `03-backend.md`
 
@@ -253,14 +252,14 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ## Por archivo
 
-- `02-contracts.md` — 1 abiertos (0 en curso, 0 bloqueados, 19 hechos)
+- `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 19 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
 - `04-portal.md` — 4 abiertos (3 en curso, 0 bloqueados, 30 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)
 - `08-post-launch.md` — 8 abiertos (0 en curso, 0 bloqueados, 4 hechos)
-- `09-next-features.md` — 53 abiertos (19 en curso, 0 bloqueados, 17 hechos)
+- `09-next-features.md` — 51 abiertos (17 en curso, 0 bloqueados, 19 hechos)
 - `11-pre-launch-and-deferred.md` — 19 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `16-design-conformance.md` — 1 abiertos (0 en curso, 0 bloqueados, 7 hechos)
 - `../launch/production-readiness.md` — 47 abiertos (5 en curso, 0 bloqueados, 5 hechos)

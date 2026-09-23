@@ -8,7 +8,7 @@ import * as ed from '@noble/ed25519';
 import { sha512 } from '@noble/hashes/sha2.js';
 import { canonicalize } from '@xangarro/contracts';
 import type { AppConfigRepository } from '@xangarro/data';
-import { PLAN_LIMITS, type Entitlement, type PlanId } from '@xangarro/domain';
+import { PLAN_LIMITS, PLATFORM_AVAILABLE, type Entitlement, type PlanId } from '@xangarro/domain';
 
 ed.hashes.sha512 = sha512;
 
@@ -43,7 +43,8 @@ export function signedTestEntitlement(
       transactionsPerMonth: limits.transactionsPerMonth,
       activeProducts: limits.activeProducts,
     },
-    features: [...limits.features],
+    // As the server signs it: the plan's features ∩ the platform defaults (N-09).
+    features: limits.features.filter((k) => PLATFORM_AVAILABLE[k]),
     capabilities: { ...limits.capabilities },
     validUntil: new Date(now.getTime() + 30 * DAY_MS).toISOString(),
     graceUntil: new Date(now.getTime() + 37 * DAY_MS).toISOString(),
@@ -51,6 +52,11 @@ export function signedTestEntitlement(
     serverTime: now.toISOString(),
     version: 1,
   };
+  return signTestPayload(payload);
+}
+
+/** Sign any payload with the contract's published test key — for tests that shape `features`. */
+export function signTestPayload(payload: Entitlement): { payload: Entitlement; signature: string } {
   const message = new TextEncoder().encode(canonicalize(payload));
   const sig = ed.sign(message, ed.etc.hexToBytes(DEV_PRIVATE_HEX));
   return { payload, signature: toBase64(sig) };

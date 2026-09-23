@@ -1,4 +1,4 @@
-import type { FeatureFlagKey, PlanCapabilities, PlanId } from '@xangarro/domain';
+import type { FeatureFlagKey, PlanCapabilities, PlanId, PlatformFlagKey } from '@xangarro/domain';
 
 /**
  * What a screen needs to know about who is looking at it.
@@ -31,6 +31,11 @@ export interface Session {
   readonly capabilities: Capabilities;
   /** Tenant-toggleable business capabilities, already resolved three ways. */
   readonly features: Readonly<Record<FeatureFlagKey, boolean>>;
+  /**
+   * What the platform has released to this business, kill switches included
+   * (N-09) — the console's `/flags`, resolved once per request.
+   */
+  readonly platform: Readonly<Record<PlatformFlagKey, boolean>>;
 }
 
 /**

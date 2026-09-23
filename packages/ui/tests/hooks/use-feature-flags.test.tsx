@@ -12,8 +12,15 @@ import {
   InMemoryBusinessesRepository,
   TEST_DEVICE_ID,
   seedTestEntitlement,
+  signTestPayload,
+  signedTestEntitlement,
 } from '@xangarro/testing';
-import { DEFAULT_FEATURE_FLAGS, type BusinessId, type PlanId } from '@xangarro/domain';
+import {
+  DEFAULT_FEATURE_FLAGS,
+  type BusinessId,
+  type Entitlement,
+  type PlanId,
+} from '@xangarro/domain';
 import { useAppConfigStore } from '../../src/app-config/use-app-config';
 import { useFeatureFlag, useFeatureFlags } from '../../src/hooks/use-feature-flags';
 
@@ -33,6 +40,22 @@ function wrapper(overrides: Record<string, unknown>) {
 async function setup(opts: { plan?: PlanId; tenant?: Partial<typeof DEFAULT_FEATURE_FLAGS> }) {
   const appConfig = new InMemoryAppConfigRepository();
   if (opts.plan) await seedTestEntitlement(appConfig, opts.plan);
+  return setupWith(appConfig, opts.tenant ?? {});
+}
+
+/** Store a signed payload with fresh sync clocks, as a pull would. */
+async function seedSignedPayload(appConfig: InMemoryAppConfigRepository, payload: Entitlement) {
+  const now = new Date().toISOString();
+  await appConfig.set('entitlement', JSON.stringify(signTestPayload(payload)));
+  await appConfig.set('lastServerTime', now);
+  await appConfig.set('lastPullAt', now);
+}
+
+async function setupWith(
+  appConfig: InMemoryAppConfigRepository,
+  tenant: Partial<typeof DEFAULT_FEATURE_FLAGS>,
+) {
+  const opts = { tenant };
   const businesses = new InMemoryBusinessesRepository(TEST_DEVICE_ID);
   const biz = await businesses.create({
     nombre: 'Test',
@@ -92,5 +115,31 @@ describe('useFeatureFlag', () => {
       wrapper: await setup({ plan: 'xangarro' }),
     });
     await waitFor(() => expect(result.current).toBe(true));
+  });
+});
+
+describe('platform availability from the signed entitlement (N-09)', () => {
+  it('lights a feature staff released even though the compiled default is dark', async () => {
+    const appConfig = new InMemoryAppConfigRepository();
+    const { payload } = signedTestEntitlement('xangarrote');
+    await seedSignedPayload(appConfig, { ...payload, features: [...payload.features, 'merma'] });
+    const { result } = renderHook(() => useFeatureFlags(), {
+      wrapper: await setupWith(appConfig, { merma: true }),
+    });
+    await waitFor(() => expect(result.current.merma).toBe(true));
+  });
+
+  it('darkens a feature staff switched off even though the plan includes it', async () => {
+    const appConfig = new InMemoryAppConfigRepository();
+    const { payload } = signedTestEntitlement('xangarro');
+    await seedSignedPayload(appConfig, {
+      ...payload,
+      features: payload.features.filter((k) => k !== 'stock'),
+    });
+    const { result } = renderHook(() => useFeatureFlags(), {
+      wrapper: await setupWith(appConfig, {}),
+    });
+    await waitFor(() => expect(result.current.barcode).toBe(true));
+    expect(result.current.stock).toBe(false);
   });
 });

@@ -217,8 +217,8 @@ test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists.
+- [x] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
+      Done: 2026-09-23 · overrides reach the entitlement through `xangarro.tenant_plan_overrides()` (data-pg 0039, tenant-scoped, no reason or author) and `entitlementFromBilling`: the highest active comp lifts — never lowers — the plan until it expires, **with no grace** (a gift has a date; expiry reverts on the next pull); `extend_trial` moves the trial's end, **even after Stripe lapsed the trial** (staff's word; Stripe's own trial end is N-71's); `reissue_entitlement` needs nothing, since every entitlement is signed per request. Verified on real rows: a comp to Xangarrote shows as `xangarrote` until its expiry. The console's billing columns are real: backoffice migration `0017_admin_billing_read.sql` (column-level SELECT and an admin read policy on `subscriptions`, no write) and `db/billing.ts` over `billingStatusSnapshot`, the portal's own rule; no subscription is now a known «free», not «Sin datos». Tests: application `billing-entitlement-inputs.test.ts` (comp, expiry, never lowers, extension after lapse, no trial), backoffice `billing-snapshot.test.ts`.
 
 - **What:** tenant list (plan, Stripe status active/trialing/past_due/lapsed, next charge, interval,
   devices, last sync, last login) and detail with a link to the Stripe customer.
@@ -292,8 +292,8 @@ body, attachments)`.
 
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch.
+- [x] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
+      Done: 2026-09-23 · a flag flipped in `/flags` reaches the portal on its next request and a device on its next pull. data-pg `0039_entitlement_inputs.sql` gives the portal `xangarro.tenant_platform_flags()` (tenant-scoped, allowlists cut to the caller, «no rows» where the console's tables are absent); `entitlementFromBilling` (application `billing/entitlement.ts`) makes `features` = plan ∩ platform; the portal's single choke point `tenantAccess` (`server/billing/plan.ts`) reads it for every entitlement, and the session carries the resolved `platform`. The phone takes platform availability from the signed `features` (`use-feature-flags.ts`, `ResolvedEntitlement.features`), the compiled constant only when nothing verifies. Kill switches: `asesorLlm` gates the Asesor's Diagnóstico (off in production until staff switch it on, on locally — ADR-059's env gate is gone); `comprobanteShare` pauses both server-rendered receipt routes (verified live: 200 → 503 → 200). Tests: application `billing-entitlement-inputs.test.ts`, data-pg `entitlement-inputs.integration.test.ts`, ui `use-feature-flags.test.tsx`, web `platform-defaults.test.ts`; conformance green against the built portal. **Left, as its own contract task C-21:** carrying kill switches (`comprobanteShare`, `cobrosIntegrados`) to devices, so the register's local-canvas receipt and the phone honour them too.
 
 - **What:** UI over the **platform-availability** level of the three-level flags (ADR-053): global
   on/off per feature, plus a beta allowlist of tenants. Kill switches for the Asesor LLM, receipts

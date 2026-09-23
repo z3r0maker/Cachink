@@ -15,14 +15,6 @@ import { Anteriores, Capacidades, ParaTi } from './para-ti';
 import { CompartirDiagnostico } from './compartir-diagnostico';
 import { pageSubtitle, pageTitle } from './asesor.css';
 
-/**
- * Whether the model-backed surfaces are live.
- *
- * **Locally nothing is gated; in production every LLM-backed path renders
- * «Próximamente»** (ADR-059). One flag, checked at one boundary.
- */
-const LLM_ENABLED = process.env.NODE_ENV !== 'production';
-
 const TABS = [
   { value: 'parati', label: 'Para ti' },
   { value: 'metas', label: 'Metas' },
@@ -51,7 +43,9 @@ function Diagnostico() {
         state={resolveScreenState({
           entitled: asesorShowsDiagnostico(session.capabilities),
           llmBacked: true,
-          llmEnabled: LLM_ENABLED,
+          // The `asesorLlm` kill switch (N-09): off in production until staff turn
+          // it on in the console's /flags; on locally (`platformDefaults`).
+          llmEnabled: session.platform.asesorLlm,
         })}
         onRetry={() => undefined}
         /* No `empty` yet: "necesita 90 días de registros" is the model's own

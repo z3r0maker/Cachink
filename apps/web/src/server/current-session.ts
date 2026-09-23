@@ -3,7 +3,6 @@ import 'server-only';
 import { getBusiness } from '@xangarro/data-pg';
 import {
   FEATURE_FLAG_KEYS,
-  PLATFORM_AVAILABLE,
   parseFeatureFlags,
   type Entitlement,
   type FeatureFlagKey,
@@ -12,7 +11,7 @@ import {
 import type { Role, Session } from '@/session/types';
 
 import { requireSession } from './auth';
-import { tenantEntitlement } from './billing/plan';
+import { tenantAccess } from './billing/plan';
 import { withTenant } from './db';
 
 /**
@@ -33,7 +32,8 @@ function resolveFeatures(
   const tenant = parseFeatureFlags(flagsJson ?? '{}');
   const inPlan = new Set<string>(entitlement.features);
   return Object.fromEntries(
-    FEATURE_FLAG_KEYS.map((k) => [k, PLATFORM_AVAILABLE[k] && inPlan.has(k) && tenant[k]]),
+    // `entitlement.features` is already the plan ∩ what the platform released (N-09).
+    FEATURE_FLAG_KEYS.map((k) => [k, inPlan.has(k) && tenant[k]]),
   ) as Record<FeatureFlagKey, boolean>;
 }
 
@@ -41,10 +41,11 @@ export async function currentSession(): Promise<Session> {
   const claims = await requireSession();
   const businessId = claims.business_id;
 
-  const { business, entitlement } = await withTenant(businessId, async (tx) => ({
+  const { business, access } = await withTenant(businessId, async (tx) => ({
     business: await getBusiness(tx),
-    entitlement: await tenantEntitlement(tx, businessId, new Date()),
+    access: await tenantAccess(tx, businessId, new Date()),
   }));
+  const { entitlement, platform } = access;
 
   return {
     role: claims.member_role as Role,
@@ -53,5 +54,6 @@ export async function currentSession(): Promise<Session> {
     planId: entitlement.plan,
     capabilities: entitlement.capabilities,
     features: resolveFeatures(entitlement, business?.featureFlags),
+    platform,
   };
 }

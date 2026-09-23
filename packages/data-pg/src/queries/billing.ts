@@ -92,6 +92,11 @@ export async function subscriptionsOfBusinesses(
   return rows.map(toRow);
 }
 
+/** Every subscription row — the console's billing filter (admin role, N-06). The table is small. */
+export async function allSubscriptions(db: Conn): Promise<SubscriptionRow[]> {
+  return (await db.select().from(subscriptions)).map(toRow);
+}
+
 /** Insert, or replace every Stripe-owned column of, one subscription. */
 export async function saveSubscriptionRow(db: Conn, row: SubscriptionRow): Promise<void> {
   const { stripeSubscriptionId: _key, ...rest } = row;

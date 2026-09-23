@@ -74,6 +74,18 @@ export const PlanOverrideSchema = z
   });
 export type PlanOverride = z.infer<typeof PlanOverrideSchema>;
 
+/**
+ * An override as the entitlement builder sees it: everything the rule reads,
+ * nothing staff wrote for staff (no author, no reason, no business id — the
+ * portal reads its own tenant's rows only, through `tenant_plan_overrides`).
+ * Every `PlanOverride` is one, so the console passes its rows unchanged.
+ */
+export type PlanOverrideFacts = PlanOverride extends infer O
+  ? O extends PlanOverride
+    ? Omit<O, 'createdBy' | 'reason' | 'businessId'>
+    : never
+  : never;
+
 export interface EffectivePlan {
   /** The base plan, lifted by the highest active comp — never lowered. */
   readonly plan: PlanId;
@@ -88,7 +100,7 @@ export interface EffectivePlan {
 }
 
 /** Active on `[createdAt, expiresAt)`; a null expiry never ends. */
-export function isOverrideActive(o: PlanOverride, now: Date): boolean {
+export function isOverrideActive(o: PlanOverrideFacts, now: Date): boolean {
   const t = now.getTime();
   if (Date.parse(o.createdAt) > t) return false;
   return o.expiresAt === null || t < Date.parse(o.expiresAt);
@@ -98,7 +110,7 @@ const rank = (plan: PlanId): number => PLAN_IDS.indexOf(plan);
 /** Instants compared as numbers: two ISO strings with different offsets do not sort as text. */
 const ms = (iso: string): number => Date.parse(iso);
 
-type Comp = Extract<PlanOverride, { kind: 'comp_plan' }>;
+type Comp = Extract<PlanOverrideFacts, { kind: 'comp_plan' }>;
 
 function bestComp(comps: readonly Comp[]): Comp | null {
   let best: Comp | null = null;
@@ -113,7 +125,7 @@ function bestComp(comps: readonly Comp[]): Comp | null {
 
 export function effectivePlan(
   basePlan: PlanId,
-  overrides: readonly PlanOverride[],
+  overrides: readonly PlanOverrideFacts[],
   now: Date,
 ): EffectivePlan {
   const active = overrides.filter((o) => isOverrideActive(o, now));
