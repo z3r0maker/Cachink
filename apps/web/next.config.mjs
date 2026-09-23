@@ -1,4 +1,5 @@
 import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
+import { securityHeaders } from '@xangarro/config/security';
 
 /**
  * The vanilla-extract plugin is a **webpack** integration, and Next 16 builds
@@ -10,9 +11,29 @@ import { createVanillaExtractPlugin } from '@vanilla-extract/next-plugin';
  */
 const withVanillaExtract = createVanillaExtractPlugin();
 
+/**
+ * Every response, static assets included (SEC-WEB-01, N-26). Enforced from
+ * day one because none of them can break a page: no framing (clickjacking of
+ * «Revocar» and «Generar código»), no MIME sniffing, HSTS, a referrer that
+ * never leaves the origin with a path. `frame-ancestors` is also sent as an
+ * enforced one-directive CSP; the full script policy is `src/proxy.ts`'s,
+ * report-only until its violation log is clean.
+ */
+export const SECURITY_HEADERS = [
+  ...securityHeaders({
+    referrer: 'strict-origin-when-cross-origin',
+    permissions: 'camera=(), microphone=(), geolocation=(), payment=()',
+  }),
+  { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+];
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: '/:path*', headers: [...SECURITY_HEADERS] }];
+  },
   // Where the build goes. The E2E suite sets NEXT_DIST_DIR=.next-e2e/<port>:
   // several sessions build in this directory, and a `next build` that replaces
   // `.next` under a running `next start` makes the webpack runtime chunk 500,

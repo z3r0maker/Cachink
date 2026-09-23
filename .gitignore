@@ -80,3 +80,4 @@ next-env.d.ts
 
 # design:compare output — a local review, never committed
 design-compare/
+.audit.json
