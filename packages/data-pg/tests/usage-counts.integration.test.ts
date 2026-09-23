@@ -9,12 +9,13 @@ import { integrationSuite } from './support/db';
 import { testId } from './support/test-ids';
 
 /**
- * `xangarro.usage_counts()` (0010) — the single SQL definition of usage — is
- * held equal to its TypeScript twin, `computeUsage`, over rows that sit on
- * every OQ-5 edge: the CDMX month boundary, each movement origin (portal
- * rows included), a
- * soft-deleted sale, a product deleted mid-month. Seeded as the owner, read
- * as `xangarro_metering`, the role the nightly recompute uses.
+ * `xangarro.usage_counts()` (0010, body last replaced by 0035) — the single
+ * SQL definition of usage — is held equal to its TypeScript twin,
+ * `computeUsage`, over rows that sit on every OQ-5 edge: the CDMX month
+ * boundary, each movement origin (portal rows included), a soft-deleted
+ * ticket, a multi-line ticket next to a ticketless line (ADR-073), a product
+ * deleted mid-month. Seeded as the owner, read as `xangarro_metering`, the
+ * role the nightly recompute uses.
  */
 const { url, describe } = integrationSuite();
 const BIZ = testId('C');
@@ -27,11 +28,16 @@ function roleUrl(appUrl: string, role: string): string {
   return u.toString();
 }
 
-const SALES = [
-  { at: '2026-09-01T05:59:00.000Z', deleted: null }, // 23:59 on 31 Aug in CDMX
-  { at: '2026-09-01T06:00:00.000Z', deleted: null }, // 00:00 on 1 Sep in CDMX
-  { at: '2026-09-10T12:00:00.000Z', deleted: '2026-09-11T12:00:00.000Z' },
+/** ADR-073 tickets, each with `lines` sale rows: one transaction per ticket. */
+const TICKETS = [
+  { at: '2026-09-01T05:59:00.000Z', deleted: null, lines: 1 }, // 23:59 on 31 Aug in CDMX
+  { at: '2026-09-01T06:00:00.000Z', deleted: null, lines: 1 }, // 00:00 on 1 Sep in CDMX
+  { at: '2026-09-10T12:00:00.000Z', deleted: '2026-09-11T12:00:00.000Z', lines: 1 },
+  // June is otherwise empty: three lines on one ticket, still one transaction.
+  { at: '2026-06-10T12:00:00.000Z', deleted: null, lines: 3 },
 ];
+/** A line pushed by a pre-ADR-073 device: no ticket, so it counts on its own. */
+const LOOSE_LINES = ['2026-06-11T12:00:00.000Z'];
 const EXPENSES = ['2026-08-20T12:00:00.000Z', '2026-09-02T12:00:00.000Z'];
 const MOVES = [
   // Since C-12 the writers state the origen; the column is what counts.
@@ -62,10 +68,16 @@ async function seed(owner: postgres.Sql): Promise<void> {
     updated_at: at,
     deleted_at: deleted,
   });
-  await owner`INSERT INTO businesses ${owner({ ...audit(BIZ, SALES[0]!.at, null), nombre: 'Uso', regimen_fiscal: 'RESICO', isr_tasa: 125 })}`;
-  for (const [i, s] of SALES.entries()) {
-    await owner`INSERT INTO sales ${owner({ ...audit(`${BIZ}-s${i}`, s.at, s.deleted), ticket_id: `${BIZ}-t${i}`, fecha: s.at.slice(0, 10), concepto: 'x', categoria: 'Producto', monto_centavos: 100, producto_id: 'p' })}`;
+  await owner`INSERT INTO businesses ${owner({ ...audit(BIZ, TICKETS[0]!.at, null), nombre: 'Uso', regimen_fiscal: 'RESICO', isr_tasa: 125 })}`;
+  const line = (id: string, at: string, deleted: string | null, ticket: string | null) =>
+    owner`INSERT INTO sales ${owner({ ...audit(id, at, deleted), ticket_id: ticket, fecha: at.slice(0, 10), concepto: 'x', categoria: 'Producto', monto_centavos: 100, producto_id: 'p' })}`;
+  for (const [i, t] of TICKETS.entries()) {
+    const ticket = `${BIZ}-t${i}`;
+    // Folios are unique per device: a run-unique device keeps reruns apart.
+    await owner`INSERT INTO tickets ${owner({ ...audit(ticket, t.at, t.deleted), device_id: BIZ, folio: i + 1, fecha: t.at.slice(0, 10), concepto: 'x', metodo: 'Efectivo', estado_pago: 'pagado' })}`;
+    for (let n = 0; n < t.lines; n++) await line(`${ticket}-l${n}`, t.at, t.deleted, ticket);
   }
+  for (const [i, at] of LOOSE_LINES.entries()) await line(`${BIZ}-loose${i}`, at, null, null);
   for (const [i, at] of EXPENSES.entries()) {
     await owner`INSERT INTO expenses ${owner({ ...audit(`${BIZ}-e${i}`, at, null), fecha: at.slice(0, 10), concepto: 'x', categoria: 'Otro', monto_centavos: 100 })}`;
   }
@@ -79,7 +91,15 @@ async function seed(owner: postgres.Sql): Promise<void> {
 
 function domainRecords(): UsageRecord[] {
   return [
-    ...SALES.map((s) => ({ kind: 'ventaLinea' as const, at: s.at, ticketId: null })),
+    ...TICKETS.map((t) => ({ kind: 'ticket' as const, at: t.at })),
+    ...TICKETS.flatMap((t, i) =>
+      Array.from({ length: t.lines }, () => ({
+        kind: 'ventaLinea' as const,
+        at: t.at,
+        ticketId: `${BIZ}-t${i}`,
+      })),
+    ),
+    ...LOOSE_LINES.map((at) => ({ kind: 'ventaLinea' as const, at, ticketId: null })),
     ...EXPENSES.map((at) => ({ kind: 'gasto' as const, at })),
     ...MOVES.map((m) => ({
       kind: 'movimientoInventario' as const,
@@ -121,6 +141,12 @@ describe('xangarro.usage_counts(): the one SQL count, equal to computeUsage', ()
     // Closed months: active at month end — the deleted one counts in July only.
     assert.deepEqual([mine[0]!.activeProducts, mine[1]!.activeProducts], [2, 1]);
     assert.ok(rows.filter((r) => r.businessId === OTHER).every((r) => r.transactions === 0));
+  });
+
+  it('counts a ticket once whatever its lines, and a ticketless line on its own', async () => {
+    const [june] = await usageCounts(metering, [BIZ], '2026-06', '2026-06');
+    assert.equal(june?.transactions, 2);
+    assert.equal(june?.transactions, computeUsage(domainRecords(), '2026-06').transactions);
   });
 
   it('with no ids, counts every live business', async () => {
