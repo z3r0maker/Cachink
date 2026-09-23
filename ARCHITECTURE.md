@@ -6084,3 +6084,70 @@ serve a post-launch facturación add-on for tenants.
 - The values may change again by owner intent ("we might change it again
   later"); after this ADR they change in one place (`plan.ts`) plus the
   pricing copy.
+
+---
+
+## ADR-091
+
+**Title:** Infrastructure failures in the console's auth flow become form
+state, not an unhandled throw; the console gains error boundaries
+
+**Date:** 2026-09-22
+
+**Status:** Accepted
+
+**Context**
+
+Wiring the hosted admin deployment on 2026-09-22 produced two failures in a
+row at `admin.xangarro.mx/login`, each shown as Next's generic server-error
+page with no usable text: `AuthCoreError/INVALID_KEY` (`ADMIN_TOTP_KEY` was
+never set on the Vercel project) and Postgres `28P01` (the project's
+`DATABASE_URL` carried a stale password for `xangarro_admin`). Both are
+misconfigured deployments, not bad credentials, and both had a one-line fix
+that the screen could not name.
+
+`loginRefusalMessage` (ADR-080's SEC-AUTH-02 work) already handles the other
+half well: a refused *credential* gets one generic sentence in production and
+a diagnostic one under `ADMIN_DIAGNOSTICS=1`. Nothing covered a sign-in that
+never reached a verdict. `server/actions/auth.ts` called `authDeps()` and
+`signIn()` with no try/catch, and `apps/backoffice/src/app` had no `error.tsx`
+at any level.
+
+A Next.js error boundary cannot close this gap on its own: React redacts
+`error.message` in production and passes only `digest`, so a boundary can
+report that something failed but never what.
+
+**Decision**
+
+1. `server/auth/infra-failure.ts` — a pure classifier walking the `cause`
+   chain (drivers wrap: `postgres` puts the SQLSTATE on the cause of its own
+   Error) and mapping known codes to a cause: `INVALID_KEY` → `totp-key`,
+   `28P01`/`28000` → `db-credentials`, `3D000` → `db-missing`,
+   `ECONNREFUSED`/`ENOTFOUND`/`ETIMEDOUT`/`EAI_AGAIN` → `db-unreachable`,
+   everything else → `unknown`.
+2. `infraFailureMessage` reuses `Diagnostics` and the `loginRefusalMessage`
+   rule exactly: one identical sentence for every cause in production; the
+   variable to fix plus `dbFingerprint()` under `ADMIN_DIAGNOSTICS=1`. The
+   full error is logged server-side either way.
+3. `detail` carries the code, or the error's *name* — never its message,
+   which quotes query text and parameters (the choice `scripts/staff.ts`
+   already makes for the same reason).
+4. The three auth actions catch and return `FormState`: `login`
+   (`attemptSignIn`), `confirmTotp` and `verifyCode` (`infraState`). The
+   try/catch never encloses `redirect()`, whose `NEXT_REDIRECT` throw would
+   otherwise be classified as a failure. `logout` becomes best-effort: a
+   database that cannot record the revocation must not strand a staff member
+   in a session they asked to end, so the cookie is cleared and the redirect
+   happens regardless.
+5. `app/error.tsx` and `app/global-error.tsx` are branded catch-alls for
+   everything else. They promise nothing about the cause and surface the
+   `digest`, which matches the deployment's runtime log line.
+
+**Consequences**
+
+- A misconfigured environment is now self-describing to whoever is wiring it,
+  and silent to everyone else — the same trade ADR-080 made for credentials.
+- New infrastructure codes worth naming are one entry in `CODES_BY_CAUSE`
+  plus a case; an unnamed code still degrades to the generic sentence.
+- The boundaries are deliberately thin. The failures worth explaining are
+  caught where the real error still exists, not in the boundary.

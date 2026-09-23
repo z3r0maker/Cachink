@@ -51,6 +51,25 @@ export function ownerEmails(conn: Db | Tx) {
     .as('ow');
 }
 
+/**
+ * N-06: `xangarro.owner_last_login()` (admin migration 0013) as a joinable
+ * subquery — one (business_id, last_login) row, live sessions only. The
+ * connection is the caller's (`conn`), never a singleton.
+ *
+ * Both fields are raw SQL, so both carry `.as(...)`: an unaliased raw field
+ * cannot be referenced from outside the subquery, and Drizzle throws when the
+ * statement is built rather than when it runs.
+ */
+export function ownerLastLogin(conn: Db | Tx) {
+  return conn
+    .select({
+      businessId: sql<string>`business_id`.as('business_id'),
+      lastLogin: sql<string | null>`last_login`.as('last_login'),
+    })
+    .from(sql`xangarro.owner_last_login()`)
+    .as('li');
+}
+
 /** `%`, `_` and `\` are literal in a search, not wildcards. */
 const likePattern = (s: string) => `%${s.replace(/[\\%_]/g, '\\$&')}%`;
 
