@@ -20,7 +20,11 @@ import type { SupportInbox } from '../support-inbox/index.js';
 import { paymentItem } from './cfdi-inbox-items.js';
 import type { CfdiMode } from './cfdi-mode.js';
 import { CfdiError } from './errors.js';
-import { routePayment, type IssueCfdiForPaymentUseCase } from './issue-cfdi-for-payment.js';
+import {
+  routePayment,
+  type IssueCfdiForPaymentResult,
+  type IssueCfdiForPaymentUseCase,
+} from './issue-cfdi-for-payment.js';
 import type { IssuedCfdiRecord, IssuedCfdiRepository } from './issued-cfdi-repository.js';
 import { validatePayment } from './payment-validation.js';
 import type { SubscriptionPayment, TenantFiscalData } from './types.js';
@@ -30,6 +34,15 @@ export interface TenantFiscalSource {
   fiscalOf(tenantId: string): Promise<TenantFiscalData | null>;
 }
 
+/**
+ * Told once a CFDI was stamped for a payment — the customer's `factura-issued`
+ * email (B-14). Never for `accumulated_for_global`: a global CFDI is nobody's
+ * factura. Not called again for a payment an earlier call already finished.
+ */
+export interface IssuedCfdiListener {
+  onIssued(record: IssuedCfdiRecord): Promise<void>;
+}
+
 export interface RecordPaymentForCfdiDeps {
   readonly mode: CfdiMode;
   readonly repo: IssuedCfdiRepository;
@@ -37,6 +50,7 @@ export interface RecordPaymentForCfdiDeps {
   /** Required for `test` and `live`. */
   readonly issue: IssueCfdiForPaymentUseCase | null;
   readonly fiscal: TenantFiscalSource;
+  readonly issued?: IssuedCfdiListener;
 }
 
 export interface RecordPaymentForCfdiResult {
@@ -88,17 +102,21 @@ export class RecordPaymentForCfdiUseCase implements UseCase<
     payment: SubscriptionPayment,
     fiscal: TenantFiscalData | null,
   ): Promise<RecordPaymentForCfdiResult> {
-    const { repo, inbox, issue } = this.#deps;
+    const { repo, inbox, issue, issued } = this.#deps;
+    let result: IssueCfdiForPaymentResult;
     try {
-      const result = await (issue as IssueCfdiForPaymentUseCase).execute({
+      result = await (issue as IssueCfdiForPaymentUseCase).execute({
         payment,
         tenantFiscal: fiscal,
       });
-      return { outcome: result.outcome, record: result.record };
     } catch (error) {
       const record = await repo.findByPaymentId(payment.externalId);
       await inbox.file(paymentItem(payment, record, error));
       return { outcome: 'failed', record };
     }
+    if (result.outcome === 'stamped' && !result.alreadyProcessed && issued) {
+      await issued.onIssued(result.record);
+    }
+    return { outcome: result.outcome, record: result.record };
   }
 }

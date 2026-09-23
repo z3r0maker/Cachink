@@ -9,7 +9,10 @@ import { describe, expect, it } from 'vitest';
 import {
   pesos,
   renderActivationCodeEmail,
+  renderFacturaIssuedEmail,
   renderGenericNoticeEmail,
+  renderPaymentFailedEmail,
+  renderWelcomeEmail,
   renderMagicLinkEmail,
   renderPasswordResetEmail,
   renderStaffDigestEmail,
@@ -161,6 +164,59 @@ describe('activation code email (P-06)', () => {
     assert.match(e.text, /K7M3DQ9P/);
     assert.match(e.text, /vence en 47 horas/);
     assert.match(e.text, /una sola vez/);
+    expect(e).toMatchSnapshot();
+  });
+});
+
+describe('payment failed (B-10 step 3, B-14)', () => {
+  it('names the plan, the grace deadline, both ways to pay, and what a lapse means', async () => {
+    const e = await renderPaymentFailedEmail({
+      plan: 'xangarro',
+      graceUntil: '2026-09-25T03:00:00.000Z', // 24 Sep, 21:00 in Mexico City
+      subscriptionUrl: SUSCRIPCION,
+      name: 'Tacos Don Pepe',
+    });
+    assert.equal(e.subject, 'No pudimos cobrar tu suscripción a Xangarro');
+    assert.match(e.text, /24 de septiembre de 2026/);
+    assert.match(e.text, /SPEI/);
+    assert.match(e.text, /Xangarrito/);
+    assert.match(e.text, /\$199 \+ IVA al mes/);
+    assert.match(e.html, /href="https:\/\/portal\.xangarro\.mx\/suscripcion"/);
+    expect(e).toMatchSnapshot();
+  });
+});
+
+describe('welcome (B-14)', () => {
+  it('greets by name, names the business, lists the three steps, links the checklist', async () => {
+    const e = await renderWelcomeEmail({
+      name: 'Pedro',
+      nombreNegocio: 'Taquería Don Pedro',
+      comoEmpiezoUrl: 'https://portal.xangarro.mx/como-empiezo',
+    });
+    assert.equal(e.subject, 'Taquería Don Pedro ya está en Xangarro');
+    assert.match(e.text, /Hola, Pedro:/);
+    assert.match(e.text, /1\. Agrega tus productos/);
+    assert.match(e.text, /3\. Registra tu primera venta/);
+    assert.doesNotMatch(e.text, /\$\d/, 'no prices: the welcome sells nothing');
+    assert.match(e.html, /href="https:\/\/portal\.xangarro\.mx\/como-empiezo"/);
+    expect(e).toMatchSnapshot();
+  });
+});
+
+describe('factura issued (B-14, N-33)', () => {
+  it('states amount, payment date and folio fiscal, links the facturas page, attaches nothing', async () => {
+    const e = await renderFacturaIssuedEmail({
+      name: null,
+      uuid: '6A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D',
+      totalCentavos: 23_084,
+      paidAt: '2026-09-21T03:00:00.000Z',
+      facturasUrl: SUSCRIPCION,
+    });
+    assert.equal(e.subject, 'Tu factura de Xangarro está lista');
+    assert.match(e.text, /\$230\.84/);
+    assert.match(e.text, /20 de septiembre de 2026/);
+    assert.match(e.text, /6A1B2C3D-4E5F-4A6B-8C7D-9E0F1A2B3C4D/);
+    assert.match(e.text, /^Hola:/m);
     expect(e).toMatchSnapshot();
   });
 });

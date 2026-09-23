@@ -13,21 +13,21 @@
 Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas por cuántas
 tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.
 
-- **B-10** Stripe: products/prices, Checkout session, webhook, subscription state machine (Colas de tracks) — destraba 18: X-02, X-01, N-01, N-06, N-33, X-03, … · `03-backend.md:212`
-- **B-14** Transactional email (Colas de tracks) — destraba 13: P-06, N-03, N-10, X-02, N-25, N-30, … · `03-backend.md:264`
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:653`
 - **B-04** Seed + demo business for local dev and App Review (Colas de tracks) — destraba 11: X-05, B-07, X-01, L-05, X-10, X-02, … · `03-backend.md:113`
 - **C-14** QR activation with a long single-use token (Colas de tracks) — destraba 10: N-25, N-29, N-30, X-02, X-03, X-05, … · `02-contracts.md:321`
+- **P-06** Dispositivos (Colas de tracks) — destraba 10: X-02, N-25, X-03, X-05, X-04, X-09, … · `04-portal.md:839`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:310`
 - **N-02** Server usage metering `[LAUNCH]` (Lanzamiento) — destraba 5: N-03, N-07, N-30, N-51, N-70 · `09-next-features.md:106`
+- **N-06** Tenants, licences and Stripe `[LAUNCH]` (Lanzamiento) — destraba 5: N-30, N-63, N-71, N-70, N-72 · `09-next-features.md:220`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:920`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1133`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
 - **N-09** Platform flags and kill switches `[LAUNCH]` (Lanzamiento) — destraba 2: N-30, N-69 · `09-next-features.md:295`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1153`
 - **P-30** Asesor generation runtime (Colas de tracks) — destraba 2: P-28, P-29 · `04-portal.md:1163`
-- **N-11** Portal settings parity `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:345`
+- **N-01** Stripe: annual prices + trial on both paid tiers `[LAUNCH]` (Lanzamiento) — destraba 1: N-74 · `09-next-features.md:65`
 
 ## Lanzamiento (99)
 
@@ -216,7 +216,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1223`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1233`
 
-## Colas de tracks (16)
+## Colas de tracks (14)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -229,8 +229,6 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 - [~] **B-04** Seed + demo business for local dev and App Review — Blocked by: B-03 · Falta: no App Review demo tenant distinct from the dev seed (only Taquería Don Pedro + the C-10 conformance tenant); `DEMOK7M3` is seeded nowhere, so «code activates the app» cannot pass. Operators, employees, devices and the three members are seeded. 2026-09-17 · Seed rewritten to satisfy its own domain schemas — ULID ids (was `p-tac`, `s1`), `'producto'`/`'semanal'` casing, two portal members (owner + viewer). `seed-contract.integration.test.ts` enforces it. · `03-backend.md:113`
 - [~] **B-07** `POST /api/v1/activate` — Blocked by: C-02, C-10, B-04, B-05, B-06, B-11 · Falta: `BUSINESS_SUSPENDED` is in the contract but never thrown — archived businesses (`0016_business_archive.sql`) are not checked on activation. Slots (`NO_DEVICE_SLOTS`) and the real plan (`tenantEntitlement`, 2528ca25) are done; conformance against a live server is X-02's run. 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/web test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. · `03-backend.md:165`
-- [~] **B-10** Stripe: products/prices, Checkout session, webhook, subscription state machine — Blocked by: B-02, B-03 · Falta: no daily `past_due → lapsed` job (crons are trial-emails, usage, cfdi-close); `grace_until` is derived in `compute-entitlement.ts`, not stored — decide and amend step 3 rather than tick. OXXO in step 1 is superseded by ADR-067 / N-01. `stripe listen` acceptance needs test-mode keys (O-12). Built (verified by the 2026-09-22 doc audit, not by its author): Checkout session, signed webhook `apps/web/src/app/api/stripe/webhook/route.ts`, the event → subscription-state mapping (`src/server/billing/stripe-mapping.ts`), the `stripe_events` idempotency ledger (`packages/data-pg/src/schema/billing.ts`), the seeding script `apps/web/scripts/stripe-seed.ts` and tests under `apps/web/tests/billing/`. · `03-backend.md:212`
-- [~] **B-14** Transactional email — Blocked by: B-01 · Falta: templates `welcome`, `payment-failed`, `factura-issued` still missing (`packages/email/src/index.ts` exports activation-code, trial, usage-threshold, staff-digest, auth-links, generic-notice). DNS + Resend inbox check is O-13. `docs/ops/email.md` still lists activation-code as unwritten — stale. 2026-09-18 · branch `track-n/b14-email` · Resend (resend 6.28.1, @react-email/components 1.0.12, @react-email/render 2.1.0). Port + use cases in `@xangarro/application/email`; templates and adapters in the new `@xangarro/email` (Resend with Idempotency-Key and 429/5xx backoff; dev outbox `.email-outbox/` without a key). Templates: trial-ending (day 11/14), usage-threshold, staff-digest, password-reset, magic-link, generic-notice — snapshot-tested. Wired: admin digest (N-10), portal trial cron (N-01). Seams: `sendPasswordReset`/`sendMagicLink` (wired 2026-09-18 in P-02's emailed links), `notifyUsageThreshold` (N-03, for the N-02 wiring). Runbook `docs/ops/email.md`. · `03-backend.md:264`
 - [~] **B-16** Back-office: Studio saved queries + support functions — Blocked by: B-03, B-11 · Falta: no «subscriptions by plan/status» saved query (unblocked now that `billing.subscriptions` exists); `billing.reissue_code` / `billing.resend_magic_link` do not exist. Studio-callable issuance is superseded by ADR-080 — drop that step. Runbook review is a human sign-off. 2026-09-17 · `supabase/studio/`: unresolved rejections, stale devices, codes expiring today, and a SQL sign-in unlock; `xangarro.security_prune()` and `xangarro.session_revoke_user()` (0006); runbook `docs/ops/back-office.md`. `support-tooling.integration.test.ts` runs every saved query on the seed and pins the SQL unlock to the app's throttle key. · `03-backend.md:292`
 
 ### `04-portal.md` · Fase 1 — Tokens y primitivas
@@ -263,7 +261,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ## Por archivo
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 18 hechos)
-- `03-backend.md` — 5 abiertos (5 en curso, 0 bloqueados, 13 hechos)
+- `03-backend.md` — 3 abiertos (3 en curso, 0 bloqueados, 15 hechos)
 - `04-portal.md` — 5 abiertos (4 en curso, 0 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 3 hechos)

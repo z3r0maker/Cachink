@@ -100,6 +100,12 @@ To send for real from a laptop, export a **test** Resend key in your shell
   `apps/web/src/server/email/usage.ts` for each owner crossing.
 - **N-34 / N-48** (ARCO, dormancy): `renderGenericNoticeEmail` until they get
   their own templates.
+- **B-10 / N-33 listeners** (2026-09-23): `livePaymentFailedListener()`
+  (`apps/web/src/server/email/payment-failed.ts`) is the webhook's
+  `PaymentFailedListener`; `liveFacturaIssuedListener()`
+  (`email/factura-issued.ts`) is the CFDI flow's `IssuedCfdiListener`;
+  `sendWelcome()` (`email/welcome.ts`) is called by the signup action. All
+  three take an `owners`/`sender` override for tests.
 
 ## 6. Open items
 
@@ -112,6 +118,6 @@ To send for real from a laptop, export a **test** Resend key in your shell
   Stripe customer, which every trialing business has.
 - **Logo.** The layout shows a text wordmark; swap in the hosted logo when it
   exists (`packages/email/src/templates/layout.tsx`).
-- **B-14's original templates** `activation-code`, `welcome`, `payment-failed`,
-  `factura-issued` are not written yet; the layout and `renderEmail` make each
-  one small.
+- ~~**B-14's original templates**~~ — all written: `activation-code`
+  (2026-09-18), `welcome`, `payment-failed`, `factura-issued` (2026-09-23).
+  Every template is snapshot-tested in `packages/email/tests/templates.test.ts`.

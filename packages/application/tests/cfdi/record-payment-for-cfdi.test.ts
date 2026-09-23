@@ -8,6 +8,7 @@ import {
   IssueCfdiForPaymentUseCase,
   RecordPaymentForCfdiUseCase,
   type CfdiMode,
+  type IssuedCfdiListener,
   type TenantFiscalSource,
 } from '../../src/cfdi/index.js';
 import {
@@ -29,8 +30,12 @@ function harness(
   const repo = new InMemoryIssuedCfdiRepository();
   const pac = new FakePacProvider();
   const issue = mode === 'off' ? null : new IssueCfdiForPaymentUseCase(repo, pac, ISSUER);
-  const useCase = new RecordPaymentForCfdiUseCase({ mode, repo, inbox, issue, fiscal });
-  return { repo, pac, inbox, useCase };
+  const issuedFor: string[] = [];
+  const issued: IssuedCfdiListener = {
+    onIssued: (record) => Promise.resolve(void issuedFor.push(record.externalPaymentId)),
+  };
+  const useCase = new RecordPaymentForCfdiUseCase({ mode, repo, inbox, issue, fiscal, issued });
+  return { repo, pac, inbox, useCase, issuedFor };
 }
 
 describe('RecordPaymentForCfdiUseCase', () => {
@@ -65,6 +70,31 @@ describe('RecordPaymentForCfdiUseCase', () => {
     assert.equal(result.outcome, 'stamped');
     assert.equal(h.pac.stampedCount, 1);
     assert.equal((h.inbox as RecordingSupportInbox).items.length, 0);
+  });
+
+  it('test: a stamped CFDI is told to the issued listener, once, with its record', async () => {
+    const h = harness('test', withFiscal);
+    const payment = makePayment();
+    await h.useCase.execute({ payment });
+    await h.useCase.execute({ payment });
+    assert.deepEqual(
+      h.issuedFor,
+      [payment.externalId],
+      'a redelivery stamps nothing new and tells nobody',
+    );
+  });
+
+  it('a payment routed to the monthly global CFDI is nobody’s factura: the listener hears nothing', async () => {
+    const h = harness('test', noFiscal);
+    const result = await h.useCase.execute({ payment: makePayment() });
+    assert.equal(result.outcome, 'accumulated_for_global');
+    assert.deepEqual(h.issuedFor, []);
+  });
+
+  it('off: the listener hears nothing — there is no CFDI yet to announce', async () => {
+    const h = harness('off', withFiscal);
+    await h.useCase.execute({ payment: makePayment() });
+    assert.deepEqual(h.issuedFor, []);
   });
 
   it('test: a PAC failure files an urgent item and does not throw', async () => {

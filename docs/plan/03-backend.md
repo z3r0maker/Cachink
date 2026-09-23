@@ -209,8 +209,8 @@
 > N-26 SEC-SEC-01; also amends B-01's env list). Annual prices and a 14-day trial on **both** paid tiers
 > with no card up front; card on both intervals, SPEI on annual only, **no OXXO** (unsupported by Stripe for subscriptions) — see N-01 (ADR-067). CFDI per payment is automated by N-33 (ADR-070).
 
-- [~] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
-  **Remaining (2026-09-23, verified against the code):** no daily `past_due → lapsed` job (crons are trial-emails, usage, cfdi-close); `grace_until` is derived in `compute-entitlement.ts`, not stored — decide and amend step 3 rather than tick. OXXO in step 1 is superseded by ADR-067 / N-01. `stripe listen` acceptance needs test-mode keys (O-12).
+- [x] Status · **Blocked by:** B-02, B-03 · **Blocks:** P-03, P-10, X-02
+      Done: 2026-09-23 · code side complete; the `stripe listen` / `stripe trigger` run of the Acceptance is the owner's O-12 (test-mode keys). Deviations from the Steps, decided this day: **no daily `past_due → lapsed` job and no stored `grace_until`** — lapsing is a read-time rule (`computeEntitlement` issues the free plan past the 7-day grace, `compute-entitlement.test.ts` «past*due beyond grace»), and Stripe's own dunning ends the subscription (`customer.subscription.deleted` → `lapsed`); a stored copy would be a second source of truth for one number. What step 3 was missing was the \_owner's* side: `invoice.payment_failed` now tells a `PaymentFailedListener` once the row is `past_due` (`billing-payment-failed.test.ts`, 1 happy + 3 unhappy), and the portal sends B-14's `payment-failed` email, keyed by period. OXXO in step 1 is superseded by ADR-067 / N-01.
   - Built (verified by the 2026-09-22 doc audit, not by its author): Checkout session, signed
     webhook `apps/web/src/app/api/stripe/webhook/route.ts`, the event → subscription-state mapping
     (`src/server/billing/stripe-mapping.ts`), the `stripe_events` idempotency ledger
@@ -261,8 +261,8 @@
 > **Amended 2026-09-18 (ADR-080):** also carries the portal's sign-in link and password-reset
 > templates — single-use, short-lived tokens stored hashed, like sessions (ADR-079).
 
-- [~] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
-  **Remaining (2026-09-23, verified against the code):** templates `welcome`, `payment-failed`, `factura-issued` still missing (`packages/email/src/index.ts` exports activation-code, trial, usage-threshold, staff-digest, auth-links, generic-notice). DNS + Resend inbox check is O-13. `docs/ops/email.md` still lists activation-code as unwritten — stale.
+- [x] Status · **Blocked by:** B-01 · **Blocks:** P-03, P-06
+      Done: 2026-09-23 · the last three templates, snapshot-tested and wired: `welcome` (sent by the signup action, key `welcome:<business>`), `payment-failed` (the webhook's `PaymentFailedListener`, key per failed period), `factura-issued` (the CFDI flow's `IssuedCfdiListener`, to the receptor's fiscal email, else the Stripe customer; only reachable in `CFDI_MODE` test/live). `activation-code` had landed 2026-09-18 (1183aa40). The Acceptance's «dev sends land in the Resend test inbox» is the owner's O-13 (domain + key); every template has a snapshot and content assertions in `packages/email/tests/templates.test.ts`.
   - 2026-09-18 · branch `track-n/b14-email` · Resend (resend 6.28.1, @react-email/components
     1.0.12, @react-email/render 2.1.0). Port + use cases in `@xangarro/application/email`;
     templates and adapters in the new `@xangarro/email` (Resend with Idempotency-Key and

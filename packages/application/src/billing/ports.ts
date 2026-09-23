@@ -146,6 +146,29 @@ export const noopEntitlementListener: EntitlementListener = {
   onEntitlementChanged: () => Promise.resolve(),
 };
 
+/**
+ * `invoice.payment_failed`, once the row says `past_due`: the owner is told
+ * (B-14's `payment-failed` email, B-10 step 3). Not repeated for a
+ * subscription Stripe already ended — that one is lapsed, and there is no
+ * deadline left to state.
+ */
+export interface PaymentFailedNotice {
+  readonly businessId: string;
+  readonly planId: PaidPlanId;
+  /** When the unpaid period began — the grace counts from it; null when Stripe did not say. */
+  readonly periodStart: string | null;
+  /** As recomputed after the event; `graceUntil` is the deadline the email states. */
+  readonly entitlement: Entitlement;
+}
+
+export interface PaymentFailedListener {
+  onPaymentFailed(notice: PaymentFailedNotice): Promise<void>;
+}
+
+export const noopPaymentFailed: PaymentFailedListener = {
+  onPaymentFailed: () => Promise.resolve(),
+};
+
 /** The CFDI side of `charge.refunded` (N-33): a refund arrived for a payment.
  * The Stripe API no longer names the invoice on a charge or refund, so the
  * listener resolves it (charge → payment_intent → the customer's invoice). */

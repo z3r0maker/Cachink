@@ -7,6 +7,7 @@ import {
   StartTrialCheckoutUseCase,
 } from '@xangarro/application/billing';
 
+import { livePaymentFailedListener } from '../email/payment-failed';
 import { pendingPaidAnswersListener } from '../onboarding/paid-answers';
 import { liveCfdiInvoiceListener, liveCfdiRefundListener } from './cfdi';
 import { billingDb, stripeClient, webhookSecret } from './config';
@@ -34,6 +35,8 @@ export function liveWebhookDeps(): WebhookDeps {
     // N-33: records every paid invoice and, per CFDI_MODE, files it or stamps it.
     invoices: liveCfdiInvoiceListener(),
     refunds: liveCfdiRefundListener(),
+    // B-14: the owner's «no pudimos cobrar» email, once per failed period.
+    paymentFailures: livePaymentFailedListener(),
     entitlements: pendingPaidAnswersListener,
     now: () => new Date(),
   });

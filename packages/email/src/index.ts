@@ -32,6 +32,15 @@ export {
   type AuthLinkEmailProps,
 } from './templates/auth-links.js';
 export { renderGenericNoticeEmail, type GenericNoticeProps } from './templates/generic-notice.js';
+export {
+  renderPaymentFailedEmail,
+  type PaymentFailedEmailProps,
+} from './templates/payment-failed.js';
+export { renderWelcomeEmail, type WelcomeEmailProps } from './templates/welcome.js';
+export {
+  renderFacturaIssuedEmail,
+  type FacturaIssuedEmailProps,
+} from './templates/factura-issued.js';
 export { resendSender, type ResendClient, type ResendSenderOptions } from './adapters/resend.js';
 export { outboxSender, toEml, type OutboxOptions } from './adapters/outbox.js';
 export {

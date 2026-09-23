@@ -23,6 +23,7 @@ import {
   type RefundListener,
 } from '@xangarro/application/billing';
 
+import { liveFacturaIssuedListener } from '../email/factura-issued';
 import { supportInboxFromEnv } from '../support-inbox';
 import { pgIssuedCfdiRepository } from './cfdi-repository';
 import { billingDb, stripeClient } from './config';
@@ -77,6 +78,8 @@ export function liveCfdiInvoiceListener(): InvoicePaidListener {
     inbox,
     issue,
     fiscal: pgTenantFiscalSource(billingDb()),
+    // B-14: «tu factura está lista» to the receptor once a CFDI is stamped.
+    issued: liveFacturaIssuedListener(),
   });
   return cfdiInvoicePaidListener(useCase);
 }

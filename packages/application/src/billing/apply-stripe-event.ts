@@ -10,7 +10,10 @@
  * 3. **The entitlement is recomputed** by `computeEntitlement` over the
  *    business's rows and returned; phones receive it on their next pull. The
  *    `EntitlementListener` hears it (N-13 applies pending paid answers).
- * 4. **`invoice.paid` is told to the CFDI port** (ADR-070).
+ * 4. **`invoice.paid` is told to the CFDI port** (ADR-070); **`invoice.payment_failed`**,
+ *    once the row is `past_due`, **to the payment-failed port** (the owner's email, B-14).
+ *    Lapsing itself needs no job: `computeEntitlement` issues the free plan past
+ *    the grace, and Stripe's own dunning ends the subscription (`deleted`).
  *
  * Events that cannot be tied to a business or a known price are recorded as
  * processed with a note, not failed: retrying would not make them ours.
@@ -24,9 +27,11 @@ import type {
   BillingStatus,
   EntitlementListener,
   InvoicePaidListener,
+  PaymentFailedListener,
   RefundListener,
   StripeEventLedger,
 } from './ports.js';
+import { noopPaymentFailed } from './ports.js';
 import { recordFrom } from './record.js';
 import { entitlementFromBilling, type BillingTrigger } from './status.js';
 
@@ -53,6 +58,8 @@ export interface ApplyStripeEventDeps {
   readonly invoices: InvoicePaidListener;
   /** The CFDI side of refunds (N-33); optional so unrelated tests skip it. */
   readonly refunds?: RefundListener;
+  /** The owner's payment-failed email (B-14); optional so unrelated tests skip it. */
+  readonly paymentFailures?: PaymentFailedListener;
   readonly entitlements: EntitlementListener;
   readonly now: () => Date;
 }
@@ -132,7 +139,7 @@ export class ApplyStripeEventUseCase {
     trigger: BillingTrigger,
     hint: string | null,
   ): Promise<Handled> {
-    const { repo, gateway, entitlements, now } = this.#deps;
+    const { repo, gateway, entitlements, paymentFailures, now } = this.#deps;
     const facts = await gateway.retrieveSubscription(subscriptionId);
     const businessId =
       facts.businessId ?? hint ?? (await repo.businessOfCustomer(facts.customerId));
@@ -146,6 +153,14 @@ export class ApplyStripeEventUseCase {
       now(),
     );
     await entitlements.onEntitlementChanged(businessId, entitlement);
+    if (trigger === 'failed' && record.status === 'past_due') {
+      await (paymentFailures ?? noopPaymentFailed).onPaymentFailed({
+        businessId,
+        planId: record.planId,
+        periodStart: record.currentPeriodStart,
+        entitlement,
+      });
+    }
     return { outcome: 'applied', businessId, status: record.status, entitlement };
   }
 

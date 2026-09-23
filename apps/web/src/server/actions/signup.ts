@@ -11,6 +11,7 @@ import { db } from '../db';
 import { regionFromHeaders } from '../geo/headers';
 import { avisoVigente, ipHash } from '../legal/aviso';
 import { reportError } from '../observability/report';
+import { sendWelcome } from '../email/welcome';
 import { failure } from '../onboarding/errors';
 import { pgSignupStore } from '../onboarding/signup-store';
 import { startSession } from '../session';
@@ -91,6 +92,14 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
     );
     await recordAttribution(owner.businessId, fields.utm);
     await startSession(owner.userId, owner.businessId);
+    // B-14: the welcome; a send failure is reported, never shown — the account exists.
+    await sendWelcome({
+      to: fields.email.trim().toLowerCase(),
+      name: fields.tuNombre?.trim() || null,
+      nombreNegocio: fields.nombre.trim(),
+      businessId: owner.businessId,
+      origin: `https://${h.get('host') ?? 'app.xangarro.mx'}`,
+    });
     return { ok: true };
   } catch (error) {
     if (error instanceof SignupError) {
