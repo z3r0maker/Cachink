@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-23** (ADR-100), moved out of the repository root. Superseded by N-28 (`docs/plan/09-next-features.md`), which replaces this report outright.
+>
+> Kept for its history.
+
 # Workspace Health Report
 
 **Workspace:** Cachink! | **Mode:** Light | **Date:** April 30, 2026 | **Overall Score:** —/100

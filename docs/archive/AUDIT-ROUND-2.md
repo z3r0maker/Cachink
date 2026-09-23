@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-23** (ADR-100), moved out of the repository root. The round-2 audit snapshot; its follow-up plan is tracked in `ROADMAP.md`. Do not plan from it.
+>
+> Kept for its history.
+
 # Audit Round 2 — Findings (2026-04-26)
 
 > Round 2 of the mobile-first UI/UX audit. Round 1 closed the headline
