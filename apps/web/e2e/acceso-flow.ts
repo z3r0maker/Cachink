@@ -15,10 +15,12 @@ export async function mintCode(code: string): Promise<string> {
     // The sync project's contract: this file's activation owns Taquería's
     // slots — revoke the previous file's phones before minting.
     await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
-    await sql`DELETE FROM activation_codes WHERE code = ${code}`;
     await sql`
       INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-      VALUES (${code}, ${EMAIL}, now() + interval '1 hour', ${BIZ}, now(), now())`;
+      VALUES (${code}, ${EMAIL}, now() + interval '1 hour', ${BIZ}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET email = EXCLUDED.email, expires_at = EXCLUDED.expires_at,
+        business_id = EXCLUDED.business_id, redeemed_at = NULL, redeemed_by_device_id = NULL,
+        updated_at = now()`;
   });
   return code;
 }

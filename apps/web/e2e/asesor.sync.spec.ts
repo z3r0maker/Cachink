@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { newUlid } from '@xangarro/domain';
 
-import { asTenant } from './sync-phone';
+import { asOwner, asTenant } from './sync-phone';
 
 /**
  * P-26 on the seeded tenant: the deterministic layer materialises on read
@@ -67,8 +67,8 @@ test('a member can dismiss an Asesor insight, and it stays dismissed', async ({ 
   await expect(fuera).toHaveCount(0);
   // And it appears under Anteriores as dismissed.
   await expect(page.locator('main').getByText('Anteriores')).toBeVisible();
-  // Leave the tenant as the seed had it.
-  await asTenant(BIZ, async (sql) => {
+  // Leave the tenant as the seed had it (as the owner: the app role cannot DELETE, 0036).
+  await asOwner(async (sql) => {
     await sql`DELETE FROM sales WHERE id = ANY(${seeded})`;
     await sql`DELETE FROM tickets WHERE id = ANY(${seeded})`;
     await sql`DELETE FROM notices WHERE source = 'asesor' AND id LIKE ${`${BIZ}:%`}`;
@@ -77,8 +77,7 @@ test('a member can dismiss an Asesor insight, and it stays dismissed', async ({ 
 
 test.afterAll(async () => {
   // Leave the seeded tenant's feed as the seed had it (nt-4 open, no computed rows).
-  await asTenant(
-    '01HZ8XQN9GZJXV8AKQ5X0C7BJZ',
+  await asOwner(
     (sql) => sql`
     DELETE FROM notices WHERE source = 'asesor' AND id LIKE '01HZ8XQN9GZJXV8AKQ5X0C7BJZ:%'`,
   );

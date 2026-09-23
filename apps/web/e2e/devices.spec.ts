@@ -117,10 +117,12 @@ test('two phones racing for the last slot: exactly one gets it', async ({ page }
     await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
     const expires = new Date(Date.now() + 3_600_000).toISOString();
     for (const code of ['RACEAAA2', 'RACEBBB2', 'RACECCC2']) {
-      await sql`DELETE FROM activation_codes WHERE code = ${code}`;
       await sql`
         INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-        VALUES (${code}, 'conformance@xangarro.mx', ${expires}, ${CNF}, now(), now())`;
+        VALUES (${code}, 'conformance@xangarro.mx', ${expires}, ${CNF}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET email = EXCLUDED.email, expires_at = EXCLUDED.expires_at,
+        business_id = EXCLUDED.business_id, redeemed_at = NULL, redeemed_by_device_id = NULL,
+        updated_at = now()`;
       codes.push(code);
     }
   } finally {
@@ -162,10 +164,12 @@ test('the entitlement refresh honours revocation, not just the signature', async
   try {
     await sql`SELECT set_config('xangarro.business_id', ${CNF}, false)`;
     await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
-    await sql`DELETE FROM activation_codes WHERE code = 'ENTTLMN2'`;
     await sql`
       INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-      VALUES ('ENTTLMN2', 'conformance@xangarro.mx', ${expires}, ${CNF}, now(), now())`;
+      VALUES ('ENTTLMN2', 'conformance@xangarro.mx', ${expires}, ${CNF}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET email = EXCLUDED.email, expires_at = EXCLUDED.expires_at,
+        business_id = EXCLUDED.business_id, redeemed_at = NULL, redeemed_by_device_id = NULL,
+        updated_at = now()`;
 
     const act = await activate(page, 'ENTTLMN2', 'conformance@xangarro.mx');
     expect(act.status()).toBe(200);

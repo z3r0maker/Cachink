@@ -22,6 +22,21 @@ export async function asTenant<T>(biz: string, fn: (sql: postgres.Sql) => Promis
   }
 }
 
+/**
+ * The owner connection, for fixture cleanup only: since data-pg 0036 the app
+ * role cannot hard-delete (DB-RLS-01), and a spec that needs rows gone runs
+ * that one statement here, never through `asTenant`.
+ */
+export async function asOwner<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
+  const url = process.env.DATABASE_SUPER_URL ?? (process.env.DATABASE_URL as string);
+  const sql = postgres(url, { max: 1, onnotice: () => undefined });
+  try {
+    return await fn(sql);
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
+}
+
 export interface Phone {
   readonly token: string;
   readonly deviceId: string;
@@ -31,10 +46,13 @@ export interface Phone {
 /** Frees Taquería's slots, then activates a phone with a code minted for it. */
 export async function activatePhone(request: APIRequestContext, code: string): Promise<Phone> {
   await asTenant(BIZ, async (sql) => {
-    await sql`DELETE FROM activation_codes WHERE code = ${code}`;
+    // Re-mint by upsert: the app role cannot DELETE (data-pg 0036).
     await sql`
       INSERT INTO activation_codes (code, email, expires_at, business_id, created_at, updated_at)
-      VALUES (${code}, 'pedro@taqueria.mx', now() + interval '1 hour', ${BIZ}, now(), now())`;
+      VALUES (${code}, 'pedro@taqueria.mx', now() + interval '1 hour', ${BIZ}, now(), now())
+      ON CONFLICT (code) DO UPDATE SET email = EXCLUDED.email, expires_at = EXCLUDED.expires_at,
+        business_id = EXCLUDED.business_id, redeemed_at = NULL, redeemed_by_device_id = NULL,
+        updated_at = now()`;
   });
   const r = await request.post(API_PATHS.activate, {
     headers: deviceHeaders(),

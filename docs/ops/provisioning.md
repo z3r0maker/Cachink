@@ -159,9 +159,9 @@ Added on hosted only: `hosted/0000_revoke_data_api_grants.sql` — revokes
 Supabase's default ALL grants to `anon`/`authenticated`/`service_role` on
 `public` (SEC-DATA-01), before drizzle creates anything.
 
-Also **not** applied: `supabase/migrations/*` (the legacy mobile MVP set —
-DB-MIG-02: `0001_schema.sql` fails to apply and conflicts with data-pg). Do
-not run `supabase db push` against this project.
+`supabase/migrations/*` (the legacy mobile MVP set, DB-MIG-02) was removed
+on 2026-09-23 (B-03); nothing in `supabase/` defines schema any more. Do not
+run `supabase db push` against this project.
 
 `admin/0004` grants `SELECT (id, email) ON auth.users TO xangarro_admin` —
 that is an admin migration, not the compat file, so it runs; it needs the

@@ -59,36 +59,34 @@ describe('the Supabase compatibility layer', () => {
     assert.equal(without?.uid, null, 'no token must mean no subject, never an error');
   });
 
-  it('makes the app role a member of authenticated, so TO-clause policies will bind', async () => {
+  it('makes the app role a member of authenticated, as the hosted project would', async () => {
     // Postgres decides whether a policy's `TO <role>` clause applies by role
-    // *membership*. B-03 will add `CREATE POLICY … TO authenticated`; this is
-    // what lets that policy be developed and tested locally before a hosted
-    // project exists.
+    // *membership*. No policy uses one today (ADR-079/080: the portal connects
+    // as `xangarro_app` and the Data API is off), but the compat layer mirrors
+    // Supabase's role tree so a future `TO` clause behaves locally as hosted.
     const [member] = await sql<{ ok: boolean }[]>`
       SELECT pg_has_role(current_user, 'authenticated', 'MEMBER') AS ok`;
     assert.equal(member?.ok, true);
   });
 
-  it('pins the hosted posture as NOT yet reachable — authenticated has no table grants', async () => {
-    // This is the honest state, and asserting it is the point.
-    //
+  it('gives authenticated no table grants — the Data API stays a closed door', async () => {
     // `SET ROLE authenticated` succeeds (the compat layer created the role and
-    // granted membership), but the role holds no privileges on `public` tables:
-    // `drizzle/0001_rls.sql` grants only to `xangarro_app`, and the policies
-    // carry no `TO` clause. So the migration set is **not pushable to a hosted
-    // Supabase project as written** — PostgREST connects as `authenticated`.
+    // granted membership), but the role holds no privileges on `public` tables.
+    // That is the intended posture, not a gap: since ADR-079/080 the portal
+    // connects as `xangarro_app`, the Data API is off (O-2), and
+    // `hosted/0000_revoke_data_api_grants.sql` strips Supabase's default grants
+    // to `anon`/`authenticated`/`service_role` before anything is created.
     //
-    // Pinning it here means B-03 cannot grant to `authenticated` by accident:
-    // this test fails the moment the posture changes, forcing that to be a
-    // deliberate, reviewed decision about production security rather than a
-    // side effect.
+    // Pinning it here means nobody grants to `authenticated` by accident: this
+    // test fails the moment that changes, forcing a deliberate, reviewed
+    // decision about production security rather than a side effect.
     await sql`SELECT set_config('request.jwt.claims', ${claims(BIZ_A)}, false)`;
     await sql`SET ROLE authenticated`;
     try {
       await assert.rejects(
         () => sql`SELECT id FROM businesses`,
         /permission denied/i,
-        'if this now succeeds, B-03 has granted to `authenticated` — update this test deliberately',
+        'if this now succeeds, something granted to `authenticated` — update this test deliberately',
       );
     } finally {
       await sql`RESET ROLE`;

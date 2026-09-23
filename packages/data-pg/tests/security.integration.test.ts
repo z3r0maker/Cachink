@@ -45,9 +45,11 @@ describe('security primitives', () => {
   });
 
   afterAll(async () => {
-    await withBusiness(db, BIZ, (tx) =>
-      tx.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`),
-    );
+    // Cleanup runs as the owner: since 0036 the app role holds no DELETE
+    // (DB-RLS-01), and that is the point, not an obstacle.
+    const owner = createDb(process.env.DATABASE_SUPER_URL as string);
+    await owner.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`);
+    await owner.$client.end({ timeout: 5 });
     await db?.$client.end({ timeout: 5 });
   });
 
@@ -101,9 +103,11 @@ describe('security primitives', () => {
     assert.equal(await resolveSession(db, idle, 1), null);
 
     const live = await openSession(db, userId, BIZ, 3600);
-    await withBusiness(db, BIZ, (tx) =>
-      tx.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`),
-    );
+    // Removed by the owner: the app role cannot hard-delete a membership
+    // (0036, DB-RLS-01); what matters here is that the session dies with it.
+    const owner = createDb(process.env.DATABASE_SUPER_URL as string);
+    await owner.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`);
+    await owner.$client.end({ timeout: 5 });
     assert.equal(await resolveSession(db, live, 600), null);
     assert.equal(await resolveSession(db, 'not-a-token', 600), null);
   });

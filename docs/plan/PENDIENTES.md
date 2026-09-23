@@ -13,9 +13,10 @@
 Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas por cuántas
 tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.
 
-- **B-03** Migrations + RLS (replace hand-written SQL) (Colas de tracks) — destraba 26: B-04, B-10, B-16, P-30, X-01, N-27, … · `03-backend.md:69`
+- **B-10** Stripe: products/prices, Checkout session, webhook, subscription state machine (Colas de tracks) — destraba 18: X-02, X-01, N-01, N-06, N-33, X-03, … · `03-backend.md:212`
 - **B-14** Transactional email (Colas de tracks) — destraba 13: P-06, N-03, N-10, X-02, N-25, N-30, … · `03-backend.md:264`
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:653`
+- **B-04** Seed + demo business for local dev and App Review (Colas de tracks) — destraba 11: X-05, B-07, X-01, L-05, X-10, X-02, … · `03-backend.md:113`
 - **C-14** QR activation with a long single-use token (Colas de tracks) — destraba 10: N-25, N-29, N-30, X-02, X-03, X-05, … · `02-contracts.md:321`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:310`
@@ -25,9 +26,8 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
 - **N-09** Platform flags and kill switches `[LAUNCH]` (Lanzamiento) — destraba 2: N-30, N-69 · `09-next-features.md:295`
 - **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1153`
+- **P-30** Asesor generation runtime (Colas de tracks) — destraba 2: P-28, P-29 · `04-portal.md:1163`
 - **N-11** Portal settings parity `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:345`
-- **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:521`
-- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:686`
 
 ## Lanzamiento (99)
 
@@ -64,7 +64,7 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 - [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:653`
 - [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · `09-next-features.md:669`
 - [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 3 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01); SEC-DEV-01 half (the `EMAIL_MISMATCH` oracle, C-14); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01. · `09-next-features.md:686`
-- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01. Open: DB-RLS-01 (app-role DELETE revoked only on newer tables, not the ledger), DB-MIG-02 (`supabase/migrations/0001_schema.sql` still in the tree), DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project. · `09-next-features.md:704`
+- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01, DB-RLS-01 and DB-MIG-02 (B-03, 2026-09-23). Open: DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project. · `09-next-features.md:704`
 - [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:718`
 - [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:726`
 - [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:736`
@@ -216,7 +216,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1223`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1233`
 
-## Colas de tracks (17)
+## Colas de tracks (16)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -227,7 +227,6 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `03-backend.md`
 
-- [~] **B-03** Migrations + RLS (replace hand-written SQL) — Blocked by: B-02 · Falta: `drizzle/0001_rls.sql` grants directly to `xangarro_app` and its `tenant_isolation` policies carry no `TO` clause (not pushable to hosted as written; `supabase-compat.integration.test.ts` pins that). The reset + hand-minted-JWT recipe in Acceptance is superseded by ADR-061 — local is plain Postgres, the suite is `tests/rls.integration.test.ts`. 2026-09-17 · Local Supabase compat layer (`local/0000_supabase_compat.sql`, ADR-061); `NULLIF` fix for the 22P02 that made an empty `request.jwt.claims` error every RLS query; `CREATE ROLE … PASSWORD` moved out of `drizzle/`; `0002_membership_lookup.sql` SECURITY DEFINER function. · `03-backend.md:69`
 - [~] **B-04** Seed + demo business for local dev and App Review — Blocked by: B-03 · Falta: no App Review demo tenant distinct from the dev seed (only Taquería Don Pedro + the C-10 conformance tenant); `DEMOK7M3` is seeded nowhere, so «code activates the app» cannot pass. Operators, employees, devices and the three members are seeded. 2026-09-17 · Seed rewritten to satisfy its own domain schemas — ULID ids (was `p-tac`, `s1`), `'producto'`/`'semanal'` casing, two portal members (owner + viewer). `seed-contract.integration.test.ts` enforces it. · `03-backend.md:113`
 - [~] **B-07** `POST /api/v1/activate` — Blocked by: C-02, C-10, B-04, B-05, B-06, B-11 · Falta: `BUSINESS_SUSPENDED` is in the contract but never thrown — archived businesses (`0016_business_archive.sql`) are not checked on activation. Slots (`NO_DEVICE_SLOTS`) and the real plan (`tenantEntitlement`, 2528ca25) are done; conformance against a live server is X-02's run. 2026-09-17 · `POST /api/v1/activate` passes the **contract's own conformance suite run against the real portal** (`pnpm --filter @xangarro/web test:conformance`, and in CI) — the same 4 assertions the mock satisfies. Redemption is one atomic UPDATE in `xangarro.redeem_activation_code` (SECURITY DEFINER, ADR-061 pattern); the concurrent-race test held 15/15, and a deliberate check-then-write version let one code bind two phones, so the test is shown to discriminate. The server parses its own response through `ActivateResponseSchema` rather than casting. · `03-backend.md:165`
 - [~] **B-10** Stripe: products/prices, Checkout session, webhook, subscription state machine — Blocked by: B-02, B-03 · Falta: no daily `past_due → lapsed` job (crons are trial-emails, usage, cfdi-close); `grace_until` is derived in `compute-entitlement.ts`, not stored — decide and amend step 3 rather than tick. OXXO in step 1 is superseded by ADR-067 / N-01. `stripe listen` acceptance needs test-mode keys (O-12). Built (verified by the 2026-09-22 doc audit, not by its author): Checkout session, signed webhook `apps/web/src/app/api/stripe/webhook/route.ts`, the event → subscription-state mapping (`src/server/billing/stripe-mapping.ts`), the `stripe_events` idempotency ledger (`packages/data-pg/src/schema/billing.ts`), the seeding script `apps/web/scripts/stripe-seed.ts` and tests under `apps/web/tests/billing/`. · `03-backend.md:212`
@@ -264,7 +263,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ## Por archivo
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 18 hechos)
-- `03-backend.md` — 6 abiertos (6 en curso, 0 bloqueados, 12 hechos)
+- `03-backend.md` — 5 abiertos (5 en curso, 0 bloqueados, 13 hechos)
 - `04-portal.md` — 5 abiertos (4 en curso, 0 bloqueados, 29 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 3 hechos)

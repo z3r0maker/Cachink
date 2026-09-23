@@ -66,8 +66,8 @@
 
 ### B-03 Migrations + RLS (replace hand-written SQL)
 
-- [~] Status · **Blocked by:** B-02 · **Blocks:** B-05, B-08, B-09, P-02
-  **Remaining (2026-09-23, verified against the code):** `drizzle/0001_rls.sql` grants directly to `xangarro_app` and its `tenant_isolation` policies carry no `TO` clause (not pushable to hosted as written; `supabase-compat.integration.test.ts` pins that). The reset + hand-minted-JWT recipe in Acceptance is superseded by ADR-061 — local is plain Postgres, the suite is `tests/rls.integration.test.ts`.
+- [x] Status · **Blocked by:** B-02 · **Blocks:** B-05, B-08, B-09, P-02
+      Done: 2026-09-23 · `0036_revoke_ledger_delete.sql` revokes DELETE from `xangarro_app` on every public table and from the default privileges (DB-RLS-01), proven by `tests/ledger-delete.integration.test.ts` (no DELETE grant remains, the ledger refuses a DELETE even for the tenant's own rows, a table created afterwards inherits none); the legacy `supabase/migrations/*` and `supabase/tests/*` are removed (DB-MIG-02); `supabase-compat.integration.test.ts` now states the real posture. Deviation from the Steps: 2 and 3 were superseded by ADR-079/080 (own auth, no Supabase Auth, no service role in the portal), and the Acceptance's `supabase db reset` + `supabase-js` recipe by ADR-061 (plain Postgres, `tests/rls.integration.test.ts`, 8 assertions + this suite). The "not pushable to hosted" worry was true for the PostgREST/`authenticated` posture only: `roles.ts` creates `xangarro_app` before `db:migrate:hosted` runs, and O-1 records `0001` applied. Indexes (step 4) landed as `0033_tenant_indexes.sql`; `(business_id, server_seq)` is unnecessary because those primary keys already lead with `business_id`.
   - 2026-09-17 · Local Supabase compat layer (`local/0000_supabase_compat.sql`, ADR-061); `NULLIF` fix for the 22P02 that made an empty `request.jwt.claims` error every RLS query; `CREATE ROLE … PASSWORD` moved out of `drizzle/`; `0002_membership_lookup.sql` SECURITY DEFINER function. **Still to do:** the hosted posture — `0001_rls.sql` is not pushable as written (grants name `xangarro_app`, policies have no `TO` clause), pinned by `supabase-compat.integration.test.ts`.
   - In progress: 2026-09-17 · migrations and RLS are written, **applied to a real Postgres 17, and
     proven**. `pnpm --filter @xangarro/data-pg db:up && pnpm --filter @xangarro/data-pg test:db`
@@ -105,8 +105,8 @@
      - `billing.activation_codes`: no client access at all (service role only).
   3. Service-role bypass is used **only** in server code paths listed in B-07/B-10/B-11/B-13; document each in `apps/web/src/server/README.md`.
   4. Indexes: `(business_id, server_seq)` on every synced table; `(business_id, updated_at)`; `sync_log(business_id, server_seq)`; `activation_codes(expires_at)`.
-- **Acceptance:** `supabase db reset` applies cleanly; RLS tests in `packages/data-pg/tests/rls.test.ts`: device token can read own business rows and not another's; viewer cannot update a product; anon gets nothing. (Use `supabase-js` with hand-minted JWTs signed by the local JWT secret.)
-- **How to test:** `supabase db reset && pnpm --filter @xangarro/data-pg test -- rls`.
+- **Acceptance (amended 2026-09-23 per ADR-061/079):** `pnpm --filter @xangarro/data-pg db:reset && test:db` is green: a tenant reads only its own rows, a write claiming another tenant is refused, an absent claim yields no rows, FORCE is on, every public table is protected (`rls.integration.test.ts`), and the app role cannot DELETE anywhere in `public` (`ledger-delete.integration.test.ts`). `authenticated`/`anon` hold no grants (`supabase-compat.integration.test.ts`). Original wording, superseded: `supabase db reset` applies cleanly; `supabase-js` with hand-minted JWTs; viewer cannot update a product (viewer is now a session role, `requireMember`).
+- **How to test:** `pnpm --filter @xangarro/data-pg db:reset && pnpm --filter @xangarro/data-pg test:db`.
 
 ### B-04 Seed + demo business for local dev and App Review
 

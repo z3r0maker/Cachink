@@ -40,11 +40,11 @@ describe('emailed links', () => {
   });
 
   afterAll(async () => {
-    // The links themselves are unreachable to the app role, by design; they are
-    // all spent or expired by now.
-    await withBusiness(db, BIZ, (tx) =>
-      tx.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`),
-    );
+    // Cleanup runs as the owner: since 0036 the app role holds no DELETE
+    // (DB-RLS-01), and that is the point, not an obstacle.
+    const owner = createDb(process.env.DATABASE_SUPER_URL as string);
+    await owner.execute(sql`DELETE FROM business_members WHERE id = ${memberId}`);
+    await owner.$client.end({ timeout: 5 });
     await db?.$client.end({ timeout: 5 });
   });
 

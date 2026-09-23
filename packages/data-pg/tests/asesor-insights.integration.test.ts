@@ -140,11 +140,12 @@ describe('asesor insights', () => {
 
   it('an insight that fixed itself closes as listo, not as a new row', async () => {
     // Remove one duplicate gasto; the insight vanishes on the next compute.
-    await withBusiness(db, BIZ, (tx) =>
-      tx.execute(
-        sql`DELETE FROM expenses WHERE id = (SELECT id FROM expenses WHERE business_id = ${BIZ} AND concepto = 'Gas' ORDER BY fecha DESC LIMIT 1)`,
-      ),
+    // As the owner: the app role cannot hard-delete since 0036 (DB-RLS-01).
+    const owner = createDb(process.env.DATABASE_SUPER_URL as string);
+    await owner.execute(
+      sql`DELETE FROM expenses WHERE id = (SELECT id FROM expenses WHERE business_id = ${BIZ} AND concepto = 'Gas' ORDER BY fecha DESC LIMIT 1)`,
     );
+    await owner.$client.end({ timeout: 5 });
     const insights = await insightsDe();
     const r = await withBusiness(db, BIZ, (tx) => materializarInsights(tx, BIZ, insights));
     assert.equal(r.cerrados, 1);

@@ -702,7 +702,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-27 Database audit `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01. Open: DB-RLS-01 (app-role DELETE revoked only on newer tables, not the ledger), DB-MIG-02 (`supabase/migrations/0001_schema.sql` still in the tree), DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project.
+  **Remaining (2026-09-23, verified against the code):** fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01, DB-RLS-01 and DB-MIG-02 (B-03, 2026-09-23). Open: DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project.
 
 - **Scope:** Postgres (the 2026-05 reports cover the archived SQLite desktop DB): `pg_stat_statements`
   top queries and plans, `business_id`-leading indexes, RLS predicate cost, enum CHECK constraints

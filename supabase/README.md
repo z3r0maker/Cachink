@@ -1,13 +1,13 @@
 # Xangarro Supabase — provisioning guide
 
-> **MVP scope:** For the iOS-only MVP, only `0002_bug_database.sql`
-> (error_events + bug_reports) and the `bug-report` Edge Function are
-> needed. Skip PowerSync setup and the synced-table RLS policies until
-> cloud sync is re-enabled post-MVP. **However**, `0001_schema.sql` must
-> still be pushed first — it defines the ULID generator `0002` depends on
-> (renamed to `xangarro_generate_ulid()` by `0003`). Run `supabase db push`
-> (which applies all of them in order)
-> rather than cherry-picking individual migrations.
+> **2026-09-23 (B-03, DB-MIG-02):** the legacy `migrations/` and `tests/`
+> directories are gone. The Postgres schema is `packages/data-pg` (Drizzle,
+> `drizzle/*.sql`, applied to the hosted project by `db:migrate:hosted` —
+> see `docs/ops/provisioning.md`), and the `bug-report` Edge Function no
+> longer writes to `bug_reports`: it forwards to the backoffice ingest
+> endpoint (`ADMIN_INGEST_URL`, N-08). Never run `supabase db push` against
+> the hosted project. The steps below that mention `migrations/` are kept
+> for history only.
 
 This directory holds the **developer-laptop-only** assets needed to
 stand up the Xangarro-hosted Supabase backend (ADR-035). None of these
