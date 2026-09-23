@@ -72,6 +72,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      # No plan names, prices, upgrade prompts or portal links in the phone's
+      # copy (ADR-069, N-32): the app is an employee tool, selling happens on
+      # the web.
+      - name: Store compliance
+        run: pnpm lint:store
+
       - name: Format check
         run: pnpm format:check
 

@@ -1,7 +1,8 @@
 /**
- * Cuenta (A-12): which business and plan this device belongs to, where the
- * business is managed, and "Desvincular este dispositivo" — which forgets the
- * device's identity but keeps every record on it.
+ * Cuenta (A-12): which business this device belongs to, and "Desvincular este
+ * dispositivo" — which forgets the device's identity but keeps every record
+ * on it. No plan row: the app never names plans, prices or the portal
+ * (ADR-069).
  */
 
 import { useState, type ReactElement } from 'react';
@@ -10,7 +11,6 @@ import { Btn, ConfirmDialog } from '../../components/index';
 import { useActivationContext } from '../../activation/activation-context';
 import { forgetDevice } from '../../activation/forget-device';
 import { useAppConfigRepository } from '../../app/repository-provider';
-import { useEntitlement } from '../../entitlement/use-entitlement';
 import { useCurrentBusiness } from '../../hooks/use-current-business';
 import { useTranslation } from '../../i18n/index';
 import { SettingsNote, SettingsRow, SettingsSection } from './settings-section';
@@ -34,10 +34,8 @@ function useUnlink(): { open: boolean; ask: () => void; cancel: () => void; conf
 export function SettingsAccountSection(): ReactElement {
   const { t } = useTranslation();
   const business = useCurrentBusiness().data;
-  const entitlement = useEntitlement();
   const { config } = useActivationContext();
   const unlink = useUnlink();
-  const plan = entitlement ? t(`settings.plans.${entitlement.plan}` as never) : '—';
   return (
     <SettingsSection title={t('settings.cuenta')} testID="settings-account">
       <SettingsRow
@@ -45,7 +43,6 @@ export function SettingsAccountSection(): ReactElement {
         value={business?.nombre ?? '—'}
         testID="settings-business-name"
       />
-      <SettingsRow label={t('settings.plan')} value={plan} testID="settings-plan" />
       <SettingsRow label={t('settings.dispositivo')} value={config.deviceInfo.name} />
       <SettingsNote text={t('settings.portalHint')} />
       <Btn variant="ghost" onPress={unlink.ask} fullWidth testID="settings-unlink">

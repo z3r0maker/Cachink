@@ -773,7 +773,7 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 ### N-32 Store-compliance sweep `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
-  **Remaining (2026-09-23, verified against the code):** **`pnpm lint:store` fails on `main` with 20 violations** since the `rename/xangarro-stored-ids` merge (`planLimit.*`, `planBanner.fellBack`, `settings.plans.*`, `activate.*`, `productos.editInPortal` in `es-mx.ts`) — the «main: 0 violations» note is stale; `lint:store` is not in `ci.yml`; no reviewer checklist for X-05 in `docs/store/`.
+  **Remaining (2026-09-23, verified against the code):** reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress).
 
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
@@ -785,14 +785,17 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 - **Acceptance:** the CI check is green; a reviewer checklist is attached to X-05.
 - Progress: 2026-09-17 · 682a48a (branch `track-n/n32-store-compliance`, merged to main 331f784 2026-09-18) · `pnpm lint:store`
   (TypeScript-AST string extraction over the app bundle + `es-mx.ts`, 52 tests, one allowlist entry:
-  "Suscripción" as a sale category, 3.1.3(e)). **main: 0 violations. App branch
-  `rename/xangarro-stored-ids`: 20** — mostly `es-mx.ts`: `planBanner.fellBack` / `planLimit.*`
-  (plan names + "Renueva/Cambia tu plan en app.xangarro.mx"), `settings.plans.*`, portal URLs in
-  hints (`productos.editInPortal`, `nuevoProducto.portalHint`, `settings.portalHint`,
-  `login.noOperatorsBody`, `activate.noCode`), "Activar" / "Código de activación" wording, and
-  `activate.errors.noSlots`. **Still to do:** neutralise that copy on the app branch (e.g. "Pídele al
-  dueño del negocio que lo haga desde su cuenta" — no URL, no plan), wire into CI after the branch
-  merges, reviewer checklist for X-05.
+  "Suscripción" as a sale category, 3.1.3(e)). The `rename/xangarro-stored-ids` merge brought 20
+  violations onto `main` (`planLimit.*`, `planBanner.fellBack`, `settings.plans.*`, `activate.*`,
+  portal URLs in hints).
+- Progress: 2026-09-23 · the 20 strings rewritten to neutral copy in `es-mx.ts` — no plan name, price,
+  "renueva/cambia tu plan" or URL; limits and slots say "Pide al dueño del negocio que revise su cuenta"
+  (not "ya fue avisado": the N-03 owner e-mail is not built yet); pairing is "Vincular" / "Código de
+  vinculación" per ADR-069, and `sync.errors.unauthenticated` says "vincularse de nuevo". The Settings
+  "Plan" row (`settings.plan` / `settings.plans.*`) is gone rather than reworded — its only content was
+  a plan name, and its keys never matched the `PlanId`s anyway. No allowlist entry added.
+  `pnpm lint:store` gates in `ci.yml` (job `ci`, after Lint). `entitlement-freelancer-limit.yaml`
+  asserts the new copy. **main: 0 violations.** Still to do: reviewer checklist for X-05.
 
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 

@@ -82,7 +82,7 @@ function typeInto(testID: string, value: string): void {
 }
 
 describe('ActivationScreen', () => {
-  it('keeps Activar inert until both fields are valid, then submits normalised input', () => {
+  it('keeps Vincular inert until both fields are valid, then submits normalised input', () => {
     const onSubmit = vi.fn();
     renderWithProviders(<ActivationScreen onSubmit={onSubmit} submitting={false} />);
     fireEvent.click(screen.getAllByTestId('activation-submit')[0]!);
