@@ -38,3 +38,15 @@ UX audit decides. Each block can be pasted into Claude Design as it stands if th
 > 0.04em tracking and a 700 count (the portal: 0.05em and 800), and «Exportar mes» has a 12 px
 > radius and a 3 px shadow (the portal's default button: 16 px and 4 px). Draw them with the
 > portal's values, or say which side should move.
+
+## Portal sidebar — one entry per destination (ADR-092)
+
+> In the portal files' `navDefs`, **Ventas** and **Gastos** both point at the
+> Ventas y gastos screen, and **Operadores** and **Dispositivos** both point at Operadores y
+> dispositivos. Two rows for one destination cannot show which one is open — the sidebar lights
+> both. Merge each pair into one entry: «Ventas y gastos» and «Tu equipo» (eleven entries, and the
+> «Configuración» divider moves after Empleados). The tabs inside each screen keep switching.
+>
+> While you are there: the Ventas y gastos file titles the page «Movimientos» although the file
+> itself is called "Ventas y gastos". Decide which name wins — the sidebar entry now reads «Ventas
+> y gastos», so the `<h1>` is the odd one out.

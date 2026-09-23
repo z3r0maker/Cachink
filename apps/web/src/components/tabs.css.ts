@@ -11,6 +11,12 @@ import { pressable } from '../styles/press.css';
  */
 export const tabList = style({
   display: 'inline-flex',
+  // `inline-flex` shrink-wraps in normal flow, but a flex column stretches its
+  // items: the bar then ran the width of the page and the last tab stopped
+  // short of the right border, leaving a white sliver inside it. Both lines
+  // are needed — `alignSelf` for flex parents, `width` for grid ones.
+  alignSelf: 'flex-start',
+  width: 'fit-content',
   border: `2.5px solid ${colors.black}`,
   borderRadius: radii[4],
   background: colors.white,

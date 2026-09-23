@@ -119,14 +119,12 @@ function Pestanas({ cortes, x }: { readonly cortes: readonly Corte[]; readonly x
     count: filtrar(cortes, f, x.estado, '').length,
   }));
   return (
-    <div style={{ alignSelf: 'flex-start' }}>
-      <SegmentedTabs
-        tabs={tabs}
-        value={x.filtro}
-        onValueChange={(v) => x.setFiltro(PESTANAS.find((f) => f === v) ?? 'Todos')}
-        ariaLabel="Cortes por estado"
-      />
-    </div>
+    <SegmentedTabs
+      tabs={tabs}
+      value={x.filtro}
+      onValueChange={(v) => x.setFiltro(PESTANAS.find((f) => f === v) ?? 'Todos')}
+      ariaLabel="Cortes por estado"
+    />
   );
 }
 

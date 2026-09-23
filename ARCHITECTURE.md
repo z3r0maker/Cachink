@@ -6387,3 +6387,50 @@ the way out, not just the value: a seeded zero compares equal whether it is
 - This does not make the annotation safe — it makes it honest. A future
   aggregate typed `sql<bigint>` is a defect whether or not it is noticed, and
   the reviewer's question is "what does the driver actually return?".
+
+## ADR-095
+
+**Title:** One sidebar entry per destination; the duplicated pairs merge
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — owner decision; the design files are to follow
+
+**Context**
+
+The portal's design files draw thirteen sidebar entries, two pairs of which
+point at the same screen with a different tab preselected: Ventas and Gastos
+both open `/movimientos`, Operadores and Dispositivos both open `/equipo`. The
+code copied that verbatim (ADR-058: the files are the specification).
+
+Two rows for one destination cannot answer "where am I". The sidebar's active
+state is a path match, so opening `/movimientos` lit **both** Ventas and
+Gastos, and the screen's own tabs showed the real answer underneath. The owner
+saw the double highlight and asked for one entry (2026-09-22).
+
+**Decision**
+
+1. Each pair becomes a single entry: **«Ventas y gastos»** → `/movimientos` and
+   **«Tu equipo»** → `/equipo`. Eleven destinations, not thirteen. The tabs
+   inside each screen keep doing the switching, and the old `?tab=` links still
+   work — the screens read the parameter.
+2. `dividerAfter` moves to Empleados, so the "Configuración" divider keeps its
+   place now that Dispositivos is gone as a row.
+3. The design files are **behind** the code on this point until they are
+   amended in Claude Design (the §4b process). Recorded in
+   `docs/plan/10-operador-design-changes.md`.
+4. Unrelated defect fixed with it: `tabList` is `inline-flex`, which shrink-wraps
+   in normal flow but **stretches** inside a flex column — every tab bar in the
+   portal ran the page's width, leaving the last tab short of the right border
+   with a white sliver inside it (806 px on `/movimientos`, measured).
+   `alignSelf: flex-start` and `width: fit-content` on the component fix it
+   everywhere; Cortes' local wrapper is gone.
+
+**Consequences**
+
+- One question for the design: the merged entry reads «Ventas y gastos» while
+  the screen's own `<h1>` says «Movimientos» (the file is named "Ventas y
+  gastos" but titles the page "Movimientos"). One of the two should move; the
+  owner decides which.
+- `dueno-cortes.spec.ts` scopes its sidebar assertion to the navigation, since
+  the Cortes breadcrumb now carries the same words.
