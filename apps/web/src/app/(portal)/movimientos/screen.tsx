@@ -1,12 +1,14 @@
 'use client';
 
 import type { IsoDate } from '@xangarro/domain';
+import { useState } from 'react';
 
 import { DataTable, Pager, ScreenBody, SegmentedTabs, usePagina } from '@/components';
 import type { MovimientosData } from '@/server/screens';
 import { resolveScreenState } from '@/session/gating';
 
-import { COLUMNS, CategoryChips, Heading, SearchAndRange } from './parts';
+import { COLUMNS, CategoryChips, Heading, SearchAndRange, type Row } from './parts';
+import { DetalleMovimiento } from './detalle-drawer';
 import { KpisGastos, KpisVentas } from './kpi-cards';
 import { chips as rangeChips } from './periodo';
 import { useMovimientos, type Movimientos } from './use-movimientos';
@@ -24,6 +26,7 @@ export interface MovimientosScreenProps {
 
 function Body({ m }: { readonly m: Movimientos }) {
   const p = usePagina(m.rows, 10);
+  const [abierto, setAbierto] = useState<Row | null>(null);
   return (
     <ScreenBody
       state={resolveScreenState({ error: m.source === null, isEmpty: m.rows.length === 0 })}
@@ -39,8 +42,10 @@ function Body({ m }: { readonly m: Movimientos }) {
         rows={p.visible}
         rowKey={(r) => r.id}
         minWidth={820}
+        onRowClick={setAbierto}
         footer={<Pager p={p} noun="movimientos" />}
       />
+      <DetalleMovimiento row={abierto} rows={m.rows} onClose={() => setAbierto(null)} />
     </ScreenBody>
   );
 }

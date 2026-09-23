@@ -43,6 +43,10 @@ export interface MovimientoRow {
    * apart. Null on an egreso, which has no ticket.
    */
   readonly ticketId: string | null;
+  /** The ticket's folio, for the drawer's field list. Null on an egreso. */
+  readonly folio: number | null;
+  /** The date of the shift it was captured on, when there was one. */
+  readonly turno: string | null;
 }
 
 /**
@@ -71,11 +75,13 @@ type VentaSqlRow = {
   readonly operador: string | null;
   readonly dispositivo: string | null;
   readonly ticket_id: string | null;
+  readonly folio: number | null;
+  readonly turno: string | null;
 };
 
 async function listVentas(tx: Tx): Promise<readonly MovimientoRow[]> {
   const rows = await tx.execute<VentaSqlRow>(sql`
-    SELECT s.id, s.fecha, t.hora, s.concepto, t.id AS ticket_id,
+    SELECT s.id, s.fecha, t.hora, s.concepto, t.id AS ticket_id, t.folio, ct.fecha AS turno,
            t.metodo AS clasificacion,
            s.monto_centavos::text AS amount,
            (t.cancelled_at IS NOT NULL) AS cancelada,
@@ -100,6 +106,8 @@ async function listVentas(tx: Tx): Promise<readonly MovimientoRow[]> {
     operador: r.operador,
     dispositivo: r.dispositivo,
     ticketId: r.ticket_id,
+    folio: r.folio,
+    turno: r.turno,
   }));
 }
 
@@ -111,13 +119,14 @@ type GastoSqlRow = {
   readonly amount: string | null;
   readonly operador: string | null;
   readonly dispositivo: string | null;
+  readonly turno: string | null;
 };
 
 async function listGastos(tx: Tx): Promise<readonly MovimientoRow[]> {
   // An egreso carries no `hora`: the table has a date and nothing finer, so
   // the stacked cell renders the date alone rather than inventing a time.
   const rows = await tx.execute<GastoSqlRow>(sql`
-    SELECT t.id, t.fecha, t.concepto,
+    SELECT t.id, t.fecha, t.concepto, ct.fecha AS turno,
            t.categoria AS clasificacion,
            t.monto_centavos::text AS amount,
            u.nombre AS operador,
@@ -140,6 +149,8 @@ async function listGastos(tx: Tx): Promise<readonly MovimientoRow[]> {
     operador: r.operador,
     dispositivo: r.dispositivo,
     ticketId: null,
+    folio: null,
+    turno: r.turno,
   }));
 }
 

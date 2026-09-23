@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, portalFontSizes, typography } from '@xangarro/tokens';
+import { colors, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
 
 export const stackedDate = style({
   display: 'flex',
@@ -83,4 +83,51 @@ export const conceptBadge = style({
   border: `2px solid ${colors.black}`,
   fontWeight: typography.weights.extraBold,
   fontSize: portalFontSizes.body,
+});
+
+/** The drawer's amount block: a 44px figure over its date stamp (B-2). */
+export const detalleHero = style({
+  border: `2.5px solid ${colors.black}`,
+  borderRadius: radii[5],
+  boxShadow: shadows.card,
+  padding: 20,
+  fontWeight: typography.weights.bold,
+});
+
+export const detalleCifra = style({
+  fontSize: portalFontSizes.displayLg,
+  lineHeight: 1,
+  fontWeight: 800,
+  letterSpacing: typography.letterSpacing.tighter,
+  fontVariantNumeric: 'tabular-nums',
+  marginBottom: 8,
+});
+
+/** One `label · value` row of the field list, ruled off from the next. */
+export const fichaFila = style({
+  display: 'flex',
+  alignItems: 'baseline',
+  justifyContent: 'space-between',
+  gap: 16,
+  padding: '10px 0',
+  borderBottom: `2px solid ${colors.gray200}`,
+  fontSize: portalFontSizes.body,
+  fontWeight: typography.weights.semibold,
+});
+
+export const detalleLinea = style({
+  display: 'inline-block',
+  fontSize: portalFontSizes.md,
+  fontWeight: 800,
+  letterSpacing: typography.letterSpacing.wide,
+  textTransform: 'uppercase',
+  color: colors.gray600,
+});
+
+export const detalleSello = style({
+  border: `2px solid ${colors.black}`,
+  borderRadius: radii[3],
+  padding: 14,
+  fontSize: portalFontSizes.md,
+  fontWeight: typography.weights.semibold,
 });

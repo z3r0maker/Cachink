@@ -144,7 +144,7 @@ too; drawing it would drop the dependency.
 
 ## W-3 · Consultas que no traen lo que el diseño muestra (B-1…B-6, C-2…C-6)
 
-- [ ] Status — **ten of eleven done 2026-09-23**; B-2 left
+- [x] Status — **done 2026-09-23**, all eleven
 
 Landing per screen, because each screen is its own query change and its own
 review.
@@ -163,18 +163,17 @@ review.
   the two stat boxes, a footer naming the phone; device cards with their
   tile, their operator and an amber strip for refused rows; four KPI tiles
   per tab beside the plan quota rather than in its place.
+- **B-2 · the Movimientos drawer.** Rows were inert, and «Compartir
+  comprobante» — a read-only action the design keeps for every role — had
+  nowhere to live in the portal at all. The amount block, the field list,
+  the ticket's other lines (grouped from rows already on screen, not asked
+  for again) and where the row came from. ADR-058 drops the design's second
+  footer action, the danger «Cancelar»: cancelling is the register's job.
 - **C-6 · Empleados.** Personas reads in weeks. The column showed each
   employee's raw per-period figure while the KPI above showed the weekly
   total, so the two could not be reconciled by eye. Both go through the
   domain's `salarioSemanal` — which already existed, and which the screen
   nearly got a second copy of.
-
-### Left
-
-- **B-2 · the Movimientos detail drawer.** Rows are still inert. The one
-  piece that is a feature rather than a query: the drawer is also where
-  «Compartir comprobante» lives, a read-only action the design keeps for
-  every role.
 
 ### What the seed cannot prove
 
@@ -295,7 +294,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (ten of eleven; B-2 left) → W-6 → W-7.
+~~W-1 → W-2 → W-8 → W-4 → W-5 → W-3~~ → **W-6** → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small
