@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { newUlid } from '@xangarro/domain';
+import { formatMoney, newUlid } from '@xangarro/domain';
 
-import { asOwner, asTenant } from './sync-phone';
+import { asOwner, asTenant, BIZ, TACO } from './sync-phone';
 
 /**
  * P-26 on the seeded tenant: the deterministic layer materialises on read
@@ -34,8 +34,6 @@ test('a member can dismiss an Asesor insight, and it stays dismissed', async ({ 
   // load. Arm a real detector instead: three ventas bunched in one quincena
   // (the same dates asesor-metas uses) makes the quincena insight materialise,
   // open and dismissable. The afterAll deletes the notices; the rows go too.
-  const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-  const TACO = '01HZ8XQN9GZJXV8AKQ5X0PTAC1';
   const seeded: string[] = [];
   await asTenant(BIZ, async (sql) => {
     let folio = 100;
@@ -83,18 +81,37 @@ test.afterAll(async () => {
   );
 });
 
+/**
+ * The month's ventas as the share computes them — `resumenParaCompartir` reads
+ * `periodLedger` over `rangoDelMes(hoy())`: live rows, tickets not cancelled.
+ * Read here rather than pinned, so a seed change cannot strand the assertion.
+ */
+async function ventasDelMes(mes: string): Promise<bigint> {
+  const [row] = await asTenant(
+    BIZ,
+    (sql) => sql`
+    SELECT coalesce(sum(s.monto_centavos), 0)::text AS total FROM sales s
+    WHERE s.deleted_at IS NULL AND left(s.fecha, 7) = ${mes}
+      AND NOT EXISTS (SELECT 1 FROM tickets t WHERE t.id = s.ticket_id AND t.cancelled_at IS NOT NULL)`,
+  );
+  return BigInt(String(row?.total));
+}
+
 /** P-32: the diagnóstico share carries the month's real figures. */
 test('«Compartir diagnóstico» opens with the real month figures', async ({ page }) => {
+  // The seed's May (clock-pinned by PORTAL_TODAY).
+  const mes = '2026-05';
+  const vendido = await ventasDelMes(mes);
+  expect(vendido > 0n, 'the seed has no ventas this month').toBe(true);
   await page.goto('/asesor');
   await page.getByRole('button', { name: 'Diagnóstico' }).click();
   await page.getByRole('button', { name: 'Compartir diagnóstico' }).click();
   const compartir = page.getByRole('dialog', { name: 'Compartir por WhatsApp' });
   await expect(compartir).toBeVisible();
-  // The seed's May (clock-pinned): $645.00 vendido — readable in the box and
-  // carried by the deep link.
+  // The month's vendido, readable in the box and carried by the deep link.
   const caja = compartir.getByRole('textbox', { name: 'Mensaje' });
-  await expect(caja).toHaveText(/vendimos \$645\.00/);
-  await expect(compartir.getByText('Diagnóstico-2026-05.pdf')).toBeVisible();
+  await expect(caja).toContainText(`vendimos ${formatMoney(vendido)} `);
+  await expect(compartir.getByText(`Diagnóstico-${mes}.pdf`)).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(compartir).toBeHidden();
 });
