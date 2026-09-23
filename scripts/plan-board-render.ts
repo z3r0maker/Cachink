@@ -7,6 +7,7 @@
  * counted where it belongs.
  */
 
+import { nextUp } from './plan-board-next.js';
 import type { Item, Status } from './plan-board-parse.js';
 
 export const CATEGORIES = ['Lanzamiento', 'Post-lanzamiento', 'Colas de tracks'] as const;
@@ -94,6 +95,31 @@ function renderSummary(items: readonly Item[]): string[] {
   return out;
 }
 
+const NEXT_LIMIT = 15;
+
+/** Ready tasks (no open blocker), ranked by what they unblock. */
+function renderNext(items: readonly Item[]): string[] {
+  const rows = nextUp(items, NEXT_LIMIT);
+  const out = [
+    `## Siguiente (${rows.length})`,
+    '',
+    'Derivado de **Blocked by** / **Blocks**: tareas sin bloqueo abierto, ordenadas por cuántas',
+    'tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:board`.',
+    '',
+  ];
+  for (const { item, unblocks } of rows) {
+    const chain =
+      unblocks.length > 0
+        ? ` — destraba ${unblocks.length}: ${unblocks.slice(0, 6).join(', ')}${unblocks.length > 6 ? ', …' : ''}`
+        : '';
+    out.push(
+      `- **${item.id ?? ''}** ${item.title} (${categoryOf(item)})${chain} · \`${item.source}:${item.line}\``,
+    );
+  }
+  out.push('');
+  return out;
+}
+
 const HEAD = [
   '# Pendientes — tablero generado',
   '',
@@ -102,7 +128,8 @@ const HEAD = [
   '> `11-pre-launch-and-deferred.md`). Para cambiar un estado, edita el track y regenera;',
   '> `pnpm test:scripts` falla cuando este archivo quedó viejo. Las especificaciones, los pasos y las',
   '> líneas Done siguen en cada track: aquí sólo está lo que falta, en tres listas, con su disparador',
-  '> o bloqueo y la línea exacta de donde viene.',
+  '> o bloqueo y la línea exacta de donde viene. «Siguiente» es el orden de trabajo, derivado de las',
+  '> dependencias.',
   '',
 ];
 
@@ -110,5 +137,7 @@ export function renderBoard(items: readonly Item[]): string {
   const byCategory = new Map<Category, Item[]>(CATEGORIES.map((c) => [c, []]));
   for (const item of items) byCategory.get(categoryOf(item))?.push(item);
   const body = CATEGORIES.flatMap((c) => renderCategory(c, byCategory.get(c) ?? []));
-  return [...HEAD, ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n';
+  return (
+    [...HEAD, ...renderNext(items), ...body, ...renderSummary(items)].join('\n').trimEnd() + '\n'
+  );
 }

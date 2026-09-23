@@ -11,6 +11,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, it } from 'vitest';
 import { type Item, parseTrack } from './plan-board-parse.js';
+import { idsIn, nextUp } from './plan-board-next.js';
 import { categoryOf, renderBoard } from './plan-board-render.js';
 import { BOARD, collect } from './plan-board.js';
 
@@ -100,6 +101,7 @@ describe('categoryOf', () => {
     status: 'open',
     trigger: null,
     blockedBy: null,
+    blocks: null,
     remaining: null,
   });
 
@@ -124,6 +126,54 @@ describe('categoryOf', () => {
   });
 });
 
+describe('nextUp', () => {
+  const task = (
+    id: string,
+    status: Item['status'],
+    blockedBy: string | null,
+    blocks: string | null = null,
+  ): Item => ({
+    source: 's.md',
+    section: '',
+    line: 1,
+    id,
+    title: id,
+    status,
+    trigger: null,
+    blockedBy,
+    blocks,
+    remaining: null,
+  });
+
+  it('expands ranges and ignores wildcards and prose', () => {
+    assert.deepEqual(idsIn('B-01…B-03, P-\\*, logo work (external) · X-10'), [
+      'B-01',
+      'B-02',
+      'B-03',
+      'X-10',
+    ]);
+    assert.deepEqual(idsIn('N-26…29'), ['N-26', 'N-27', 'N-28', 'N-29']);
+    assert.deepEqual(idsIn(null), []);
+  });
+
+  it('ranks ready tasks by what they unblock and hides blocked ones', () => {
+    const items = [
+      task('A-1', 'open', null, 'A-2'),
+      task('A-2', 'open', 'A-1', 'A-4'),
+      task('A-3', 'open', 'Z-9 (done long ago)'),
+      task('A-4', 'progress', 'A-2, A-3'),
+      task('Z-9', 'done', null),
+      task('A-5', 'open', 'external logo work'),
+    ];
+    const rows = nextUp(items, 10).map((r) => [r.item.id, r.unblocks]);
+    assert.deepEqual(rows, [
+      ['A-1', ['A-2', 'A-4']],
+      ['A-3', ['A-4']],
+      ['A-5', []],
+    ]);
+  });
+});
+
 describe('the committed board', () => {
   it('matches the tracks (run `pnpm plan:board` when this fails)', () => {
     const expected = renderBoard(collect(ROOT));
@@ -133,7 +183,7 @@ describe('the committed board', () => {
 
   it('lists only open work, in the three categories, citing a line per item', () => {
     const board = readFileSync(join(ROOT, BOARD), 'utf8');
-    for (const c of ['## Lanzamiento', '## Post-lanzamiento', '## Colas de tracks'])
+    for (const c of ['## Siguiente', '## Lanzamiento', '## Post-lanzamiento', '## Colas de tracks'])
       assert.ok(board.includes(c), c);
     const lines = board.split('\n').filter((l) => /^- \[/.test(l));
     assert.ok(lines.length > 0);
