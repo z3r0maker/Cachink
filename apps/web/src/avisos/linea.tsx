@@ -1,6 +1,6 @@
 'use client';
 
-import type { AccionAviso } from '@xangarro/domain';
+import { formatFechaHora, type AccionAviso } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -11,7 +11,17 @@ import type { NoticeSeverity } from '@/fixtures/notices';
 import { cambiarEstadoAviso } from '@/server/actions/avisos';
 import type { AvisosData } from '@/server/screens';
 
-import { noticeBody, noticeRow, noticeTitle, noticeWhen, severityTile } from './linea.css';
+import {
+  noticeBody,
+  noticeMeta,
+  noticeRow,
+  noticeRowLeido,
+  noticeTitle,
+  noticeTitleLeido,
+  severityTile,
+  unreadDot,
+  unreadDotOff,
+} from './linea.css';
 
 /**
  * One aviso (P-31), on the Avisos page and in the bell panel. Severity always
@@ -19,11 +29,23 @@ import { noticeBody, noticeRow, noticeTitle, noticeWhen, severityTile } from './
  * points and marks it read on the way; «Listo» closes it. Admins act; Solo
  * lectura only reads (`mayWrite`), and the server refuses regardless.
  */
-const SEVERITY: Record<NoticeSeverity, { readonly bg: string; readonly glyph: string }> = {
-  critical: { bg: colors.redSoft, glyph: '!' },
-  warning: { bg: colors.warningSoft, glyph: '△' },
-  info: { bg: colors.blueSoft, glyph: 'i' },
-  success: { bg: colors.greenSoft, glyph: '✓' },
+const SEVERITY: Record<
+  NoticeSeverity,
+  { readonly bg: string; readonly fg: string; readonly glyph: string }
+> = {
+  // The design pairs each tone with its own ink (D-3). Ours tinted the tile
+  // and left the glyph at default, so colour alone carried the severity.
+  critical: { bg: colors.redSoft, fg: colors.redText, glyph: '!' },
+  warning: { bg: colors.warningSoft, fg: colors.warningText, glyph: '△' },
+  info: { bg: colors.blueSoft, fg: colors.blueText, glyph: 'i' },
+  success: { bg: colors.greenSoft, fg: colors.greenText, glyph: '✓' },
+};
+
+/** Who the aviso came from — the design's «· Xangarro!» half of the meta. */
+const FUENTE: Record<string, string> = {
+  sistema: 'Xangarro!',
+  operacion: 'Operación',
+  asesor: 'Asesor',
 };
 
 export type Aviso = NonNullable<AvisosData>[number];
@@ -70,6 +92,17 @@ function Acciones(props: {
   );
 }
 
+/**
+ * «12 sep 2026, 18:40 · Xangarro!». The design writes the time relatively for
+ * anything recent («Hace 40 min») and names the device and the operator on an
+ * operación aviso — the first needs a clock this row cannot reach without a
+ * hydration mismatch, the second needs columns `notices` does not have. Both
+ * are recorded with W-4; the absolute time and the source are real today.
+ */
+function meta(n: Aviso): string {
+  return `${formatFechaHora(n.createdAt)} · ${FUENTE[n.source] ?? 'Xangarro!'}`;
+}
+
 export function AvisoLinea(props: {
   readonly n: Aviso;
   readonly mayWrite: boolean;
@@ -78,17 +111,24 @@ export function AvisoLinea(props: {
   const { n, mayWrite } = props;
   const s = SEVERITY[n.severity as NoticeSeverity];
   const e = useEstado(n.id, props.onChanged);
+  const sinLeer = n.state === 'nuevo';
   return (
-    <div className={noticeRow}>
-      <span className={severityTile} style={{ background: s.bg }} aria-hidden="true">
+    <div className={sinLeer ? noticeRow : `${noticeRow} ${noticeRowLeido}`}>
+      <span
+        className={sinLeer ? unreadDot : unreadDotOff}
+        role={sinLeer ? 'img' : undefined}
+        aria-label={sinLeer ? 'Sin leer' : undefined}
+        aria-hidden={sinLeer ? undefined : true}
+      />
+      <span className={severityTile} style={{ background: s.bg, color: s.fg }} aria-hidden="true">
         {s.glyph}
       </span>
       <span style={{ minWidth: 0 }}>
-        <span className={noticeTitle}>{n.title}</span>
-        <span className={noticeBody}>{n.body}</span>
-        <span className={noticeWhen}>
-          {e.error ?? (n.state === 'nuevo' ? 'Sin leer' : 'Leído')}
+        <span className={sinLeer ? noticeTitle : `${noticeTitle} ${noticeTitleLeido}`}>
+          {n.title}
         </span>
+        <span className={noticeBody}>{n.body}</span>
+        <span className={noticeMeta}>{e.error ?? meta(n)}</span>
       </span>
       <Acciones n={n} mayWrite={mayWrite} e={e} />
     </div>

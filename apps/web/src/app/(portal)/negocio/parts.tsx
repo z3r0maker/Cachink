@@ -4,6 +4,7 @@ import { colors } from '@xangarro/tokens';
 
 import { Card } from '@/components';
 import { CAPABILITY_ROWS, type Section } from '@/data/negocio';
+import { Icon } from '@/shell/icon';
 
 import {
   fieldLabel,
@@ -22,6 +23,20 @@ const TILE_BG = {
   purple: colors.purpleSoft,
 } as const;
 
+/**
+ * Each tile carries a 19px stroked glyph — the design draws one per section
+ * and ours were empty coloured squares (D-1). The storefront and the receipt
+ * are the design's own paths; the card and the gear are the nearest reading
+ * of what our two extra sections hold (formas de pago, atributos).
+ */
+const TILE_ICON = {
+  hero: 'M4 9h16v11H4V9Zm0 0 2-5h12l2 5M9 20v-6h6v6',
+  info: 'M6 3h12v18l-3-2-3 2-3-2-3 2V3Zm3 5h6M9 12h6',
+  peach: 'M3 7h18v11H3V7Zm0 4h18M7 15h4',
+  purple:
+    'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm7.4-3a7.4 7.4 0 0 0-.1-1.2l2-1.5-2-3.5-2.4 1a7.4 7.4 0 0 0-2-1.2L14.5 3h-4l-.4 2.6a7.4 7.4 0 0 0-2 1.2l-2.4-1-2 3.5 2 1.5A7.4 7.4 0 0 0 5.6 12',
+} as const;
+
 /** A section's card with its icon tile — read mode fills it with rows, edit mode with inputs. */
 export function SectionShell(props: {
   readonly title: string;
@@ -31,11 +46,9 @@ export function SectionShell(props: {
   return (
     <Card>
       <div className={sectionHead}>
-        <span
-          className={sectionTile}
-          style={{ background: TILE_BG[props.tone] }}
-          aria-hidden="true"
-        />
+        <span className={sectionTile} style={{ background: TILE_BG[props.tone] }}>
+          <Icon path={TILE_ICON[props.tone]} size={19} strokeWidth={2.3} />
+        </span>
         <span className={sectionTitle}>{props.title}</span>
       </div>
       {props.children}

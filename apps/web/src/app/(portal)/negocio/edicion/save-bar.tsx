@@ -15,7 +15,9 @@ export function SaveBar({ e }: { readonly e: Edicion }) {
         <Button variant="secondary" onClick={e.cancel} disabled={e.pending}>
           Cancelar
         </Button>
-        <Button onClick={e.save} disabled={e.pending}>
+        {/* Dark, not yellow: the bar itself is yellow, and a yellow button on
+            it reads as a panel rather than as the action (D-2). */}
+        <Button variant="dark" onClick={e.save} disabled={e.pending}>
           {e.pending ? 'Guardando…' : 'Guardar cambios'}
         </Button>
       </span>

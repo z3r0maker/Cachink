@@ -8,8 +8,8 @@ Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 `B-n` operación diaria, `C-n` dinero y negocio, `D-n` detalle transversal.
 
 **Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
-· W-8 (las cuatro gráficas de Estados) · W-2 (tipografía y escala) — todo
-2026-09-22.
+· W-8 (las cuatro gráficas de Estados) · W-2 (tipografía y escala)
+· W-4 (detalle transversal) — todo 2026-09-22.
 
 ---
 
@@ -152,11 +152,33 @@ then C (dinero), so a review is possible in between.
 
 ## W-4 · Detalle transversal (D-1…D-4)
 
-Blank tiles, the yellow-on-yellow save button (a contrast defect, not a taste
-one), severity ink, aviso meta. Independent of each other; good filler work
-between the bigger batches.
+**Done 2026-09-22.** Four small defects that shared one shape: something the
+design pairs was only half applied.
 
-**Size:** small each.
+- **D-1** — Negocio's four section tiles were coloured squares with a
+  self-closing `<span>` inside. Each carries its 19px stroked glyph now; the
+  storefront and the receipt are the design's own paths, the card and the
+  gear the nearest reading of the two sections we have that it does not.
+- **D-2** — «Guardar cambios» wore yellow on the yellow save bar, so the
+  action read as part of the panel. The dark variant, as the design sets it.
+- **D-3** — severity tinted the tile and left the glyph at default ink, so
+  colour alone carried the meaning. Each tone now pairs with its own
+  contrast-checked `*Text` token.
+- **D-4** — aviso rows printed «Sin leer» / «Leído» where the design puts a
+  meta line. The state moved into the row itself (a 10px yellow dot, a white
+  ground against the read row's offwhite, 800 against 600), and the word
+  survives as the dot's accessible name.
+
+`tests/detalle-transversal.test.ts` holds all four, each as the invariant
+rather than the string — a tone with a fill must have a glyph, a severity
+with a background must have an ink, the state must be encoded in more than
+one channel. Shown to fail when broken.
+
+**Left open on D-4:** the design's meta reads «Hace 40 min · iPhone de caja ·
+Ana». Ours gives the absolute time and the source. The relative form needs a
+clock this row cannot reach without a hydration mismatch — it renders in the
+bell panel too, which loads through an action — and the device and operator
+need columns `notices` does not have. Both are data, so they belong with W-3.
 
 ---
 
@@ -200,7 +222,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8~~ → **W-4** → W-5 → W-3 (B, then C) → W-6 → W-7.
+~~W-1 → W-2 → W-8 → W-4~~ → **W-5** → W-3 (B, then C) → W-6 → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small

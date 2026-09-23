@@ -36,6 +36,10 @@ export const sectionTile = style({
   flex: 'none',
   border: `2px solid ${colors.black}`,
   borderRadius: radii[2],
+  // The glyph inside it (D-1); `currentColor` gives it the tile's ink.
+  display: 'grid',
+  placeItems: 'center',
+  color: colors.black,
 });
 
 export const sectionTitle = style({
