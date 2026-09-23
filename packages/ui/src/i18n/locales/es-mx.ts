@@ -120,7 +120,7 @@ export const esMX = {
     catalogoTab: 'Catálogo',
     stockTab: 'Stock',
     movimientosTab: 'Movs.',
-    editInPortal: 'Para editar o eliminar este producto entra a app.xangarro.mx.',
+    editInPortal: 'Este producto se edita o elimina desde la cuenta del negocio, no desde la app.',
   },
   inventario: {
     title: 'Inventario',
@@ -182,7 +182,7 @@ export const esMX = {
     conStockHint: 'Descuenta existencias con cada venta.',
     sinStock: 'Sin inventario',
     sinStockHint: 'Servicios o productos que no se cuentan.',
-    portalHint: 'Costo, unidad, alerta de stock e ícono se ajustan en app.xangarro.mx.',
+    portalHint: 'Costo, unidad, alerta de stock e ícono se ajustan desde la cuenta del negocio.',
   },
   movimiento: {
     titleEntrada: 'Registrar entrada',
@@ -646,14 +646,12 @@ export const esMX = {
   settings: {
     cuenta: 'Cuenta',
     negocio: 'Negocio',
-    plan: 'Plan',
-    plans: { freelancer: 'Freelancer', emprendedor: 'Emprendedor', mipyme_pro: 'MiPyME Pro' },
     dispositivo: 'Este dispositivo',
-    portalHint: 'Administra tu negocio, operadores y productos en app.xangarro.mx.',
+    portalHint: 'Operadores y productos se administran desde la cuenta del negocio.',
     unlink: 'Desvincular este dispositivo',
     unlinkConfirmTitle: '¿Desvincular este dispositivo?',
     unlinkConfirmBody:
-      'Tus registros se quedan guardados aquí. Para volver a usarlo necesitarás un código de activación nuevo. Libera el lugar del dispositivo desde el portal.',
+      'Tus registros se quedan guardados aquí. Para volver a usarlo necesitarás vincularlo de nuevo con un código nuevo.',
     unlinkConfirm: 'Desvincular',
     sincronizacion: 'Sincronización',
     estado: 'Estado',
@@ -813,13 +811,13 @@ export const esMX = {
     forgotPin: '¿Olvidaste tu PIN?',
     lockedOut: 'Demasiados intentos. Espera {{seconds}} s.',
     noOperatorsTitle: 'Aún no hay operadores',
-    noOperatorsBody: 'Crea un operador en app.xangarro.mx y luego toca Actualizar.',
+    noOperatorsBody: 'Pide al dueño del negocio que cree un operador y luego toca Actualizar.',
     refresh: 'Actualizar',
   },
   sync: {
     errors: {
       protocol: 'Actualiza la app para seguir sincronizando.',
-      unauthenticated: 'Este dispositivo necesita activarse de nuevo.',
+      unauthenticated: 'Este dispositivo necesita vincularse de nuevo.',
       deviceRevoked: 'Este dispositivo fue desvinculado desde el portal.',
       rateLimited: 'El servidor está ocupado. Se reintentará solo.',
       internal: 'Falla temporal del servidor. Se reintentará solo.',
@@ -860,14 +858,13 @@ export const esMX = {
   },
   planLimit: {
     title: 'Llegaste a {{limit}} registros este mes',
-    body: 'Tu plan Freelancer incluye {{limit}} registros al mes. Con Emprendedor tus registros son ilimitados.',
-    where: 'Cambia tu plan en app.xangarro.mx. Lo que ya registraste sigue guardado.',
+    body: 'Tu negocio ya usó los registros incluidos este mes.',
+    where: 'Pide al dueño del negocio que revise su cuenta. Lo que ya registraste sigue guardado.',
     ok: 'Entendido',
   },
   planBanner: {
     grace: 'Tu pago está pendiente — tienes hasta el {{date}}.',
-    fellBack:
-      'Tu negocio está en el plan Freelancer (50 registros al mes). Renueva en app.xangarro.mx.',
+    fellBack: 'La cuenta de tu negocio necesita atención. Pide al dueño del negocio que la revise.',
   },
   syncPill: {
     syncing: 'Sincronizando…',
@@ -880,18 +877,19 @@ export const esMX = {
     update: 'Actualizar',
   },
   activate: {
-    title: 'Activa este dispositivo',
+    title: 'Vincula este dispositivo a tu negocio',
     subtitle: 'Escribe el correo de tu cuenta y el código que te enviamos.',
     emailLabel: 'Correo electrónico',
-    codeLabel: 'Código de activación',
-    codeHint: '8 caracteres. Lo ves en tu portal o en el correo que te llegó.',
-    submit: 'Activar',
-    noCode: '¿No tienes código? Pídelo al dueño del negocio o entra a xangarro.mx.',
+    codeLabel: 'Código de vinculación',
+    codeHint: '8 caracteres. Te lo da el dueño del negocio o te llega por correo.',
+    submit: 'Vincular',
+    noCode: '¿No tienes código? Pídelo al dueño del negocio.',
     errors: {
       codeInvalid: 'El correo o el código no coinciden. Revísalos e intenta de nuevo.',
-      codeExpired: 'Ese código ya venció. Genera uno nuevo en tu portal.',
+      codeExpired: 'Ese código ya venció. Pide uno nuevo al dueño del negocio.',
       codeUsed: 'Ese código ya se usó en otro dispositivo. Genera uno nuevo.',
-      noSlots: 'Tu plan ya no tiene lugar para otro dispositivo.',
+      noSlots:
+        'Este negocio ya no tiene lugar para otro dispositivo. Pide al dueño del negocio que revise su cuenta.',
       suspended: 'La cuenta de este negocio está suspendida.',
       network: 'No hay conexión. Revisa tu internet e intenta de nuevo.',
       unknown: 'Algo salió mal. Intenta de nuevo en un momento.',
