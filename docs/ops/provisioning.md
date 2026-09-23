@@ -163,6 +163,26 @@ Supabase's default ALL grants to `anon`/`authenticated`/`service_role` on
 on 2026-09-23 (B-03); nothing in `supabase/` defines schema any more. Do not
 run `supabase db push` against this project.
 
+## Demo tenant for App Review (B-04, X-05)
+
+Before each store submission, re-run the App Review seed against the hosted
+project so the activation code is live for the next reviewer:
+
+```sh
+DATABASE_URL='postgresql://xangarro_app.<ref>:<pwd>@aws-0-us-west-2.pooler.supabase.com:6543/postgres' \
+BILLING_DATABASE_URL='postgresql://xangarro_billing.<ref>:<pwd>@aws-0-us-west-2.pooler.supabase.com:6543/postgres' \
+DEMO_OWNER_PASSWORD='<the password in the review notes>' \
+pnpm --filter @xangarro/data-pg exec tsx scripts/seed-demo.ts
+```
+
+It creates **Tacos La Esquina** (`demo@xangarro.mx`, operator PINs 1234 and
+5678, activation code `DEMXK7M3`, a month of ventas and gastos, the Xangarro
+plan) and is idempotent by upsert: a re-run adds nothing, re-mints the code if
+a reviewer redeemed it, and keeps the password from the first run (the app
+role cannot rewrite `auth.users`; rotate it with the portal's reset link).
+Locally, `pnpm --filter @xangarro/data-pg db:seed:demo` does the same against
+the dev container with a default password.
+
 `admin/0004` grants `SELECT (id, email) ON auth.users TO xangarro_admin` —
 that is an admin migration, not the compat file, so it runs; it needs the
 grant option preflight checks.

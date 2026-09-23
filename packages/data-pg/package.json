@@ -24,6 +24,7 @@
     "test:db": "REQUIRE_DB=1 DATABASE_URL=$(./scripts/db-local.sh url) DATABASE_SUPER_URL=$(./scripts/db-local.sh super-url) vitest run",
     "db:seed": "DATABASE_URL=$(./scripts/db-local.sh url) tsx ./scripts/seed.ts && BILLING_DATABASE_URL=$(./scripts/db-local.sh billing-url) tsx ./scripts/seed-billing.ts",
     "db:apply": "./scripts/db-local.sh apply",
+    "db:seed:demo": "DATABASE_URL=$(./scripts/db-local.sh url) BILLING_DATABASE_URL=$(./scripts/db-local.sh billing-url) DEMO_OWNER_PASSWORD=${DEMO_OWNER_PASSWORD:-revisor-xangarro-2026} tsx ./scripts/seed-demo.ts",
     "db:reset": "./scripts/db-local.sh down && ./scripts/db-local.sh up && pnpm db:seed",
     "db:migrate:hosted": "tsx ./scripts/migrate-hosted.ts",
     "db:migrate:hosted:selftest": "./scripts/hosted/selftest.sh"
