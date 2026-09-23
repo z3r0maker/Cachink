@@ -1,5 +1,7 @@
 'use server';
 
+import { colors } from '@xangarro/tokens';
+
 import type { BusinessId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
@@ -92,7 +94,9 @@ export async function guardarComprobantes(
       return { ok: false, message: 'El WhatsApp no parece un teléfono.' };
     }
     if (!HEX.test(form.brandColor)) {
-      return { ok: false, message: 'El color debe ser un hexadecimal como #d4a017.' };
+      // The example is the brand colour by definition, so it comes from the
+      // token rather than being typed out beside it.
+      return { ok: false, message: `El color debe ser un hexadecimal como ${colors.yellow}.` };
     }
     await withTenant(businessId, (tx) =>
       pgBusinessesRepository(tx, businessId).update(businessId, {

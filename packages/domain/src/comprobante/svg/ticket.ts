@@ -17,6 +17,7 @@ import {
   INK,
   MARGEN_WHATSAPP,
   NEGRO,
+  SOMBRA_TARJETA,
   cajaLogo,
   envolver,
   fechaNumerica,
@@ -53,7 +54,16 @@ export function comprobanteTicketSvg(c: Comprobante, o: OpcionesRender = {}): st
 function envolverRol(whatsapp: boolean, contenido: string, altoTarjeta: number): string {
   const m = whatsapp ? MARGEN_WHATSAPP : 0;
   const alto = altoTarjeta + 2 * m;
+  // The roll casts the same hard drop as every other card when it is shared
+  // (`4px 4px 0`, the artboards' own). It draws its frame by hand rather than
+  // through `tarjeta()` because of the torn edges, and the shadow had been
+  // left out with it. The teeth are painted **on** the card, not cut out of
+  // it, so a plain rect behind it is the right silhouette.
+  const sombra = whatsapp
+    ? `<rect x="${m + SOMBRA_TARJETA}" y="${m + SOMBRA_TARJETA}" width="${W}" height="${altoTarjeta}" fill="${NEGRO}"/>`
+    : '';
   const marco =
+    sombra +
     `<rect x="${m}" y="${m}" width="${W}" height="${altoTarjeta}" fill="${BLANCO}"/>` +
     `<rect x="${m}" y="${m}" width="2" height="${altoTarjeta}" fill="${NEGRO}"/>` +
     `<rect x="${m + W - 2}" y="${m}" width="2" height="${altoTarjeta}" fill="${NEGRO}"/>` +

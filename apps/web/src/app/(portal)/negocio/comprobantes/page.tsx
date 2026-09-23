@@ -1,4 +1,5 @@
 import type { BusinessId, Business } from '@xangarro/domain';
+import { colors } from '@xangarro/tokens';
 
 import { requireMember } from '@/server/auth';
 import { withTenant } from '@/server/db';
@@ -39,7 +40,9 @@ const SIN_MARCA = {
   addressPrint: false,
   direccion: '',
   whatsapp: '',
-  brandColor: '#d4a017',
+  // On-palette by default: a business that never picks a colour gets the
+  // brand yellow, which is the accent the design's own artboard A uses.
+  brandColor: colors.yellow,
 } as const satisfies ComprobantesView['form'];
 
 function formOf(business: Business | null): ComprobantesView['form'] {

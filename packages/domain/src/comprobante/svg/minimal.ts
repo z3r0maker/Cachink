@@ -16,6 +16,7 @@ import {
   INK,
   LINEA_LEGAL,
   MARGEN_WHATSAPP,
+  SOMBRA_TARJETA,
   NEGRO,
   cajaLogo,
   envolver,
@@ -50,7 +51,8 @@ export function comprobanteMinimalSvg(c: Comprobante, o: OpcionesRender = {}): s
   trozos.push(filaPago(c, cuerpo.y + 24 + 100 + 20));
   trozos.push(pie(c));
   const m = whatsapp ? MARGEN_WHATSAPP : 0;
-  const marco = tarjeta(m, m, W, H, 2, whatsapp);
+  // Minimal's artboards draw the card shadow, not the hero one.
+  const marco = tarjeta(m, m, W, H, 2, whatsapp, SOMBRA_TARJETA);
   return lienzo(
     W + 2 * m,
     H + 2 * m,

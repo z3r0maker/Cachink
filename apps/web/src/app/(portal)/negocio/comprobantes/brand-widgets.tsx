@@ -1,5 +1,7 @@
 'use client';
 
+import { colors } from '@xangarro/tokens';
+
 import { Input } from '@/components';
 
 /** The logo upload row and the colour picker (N-19), split out for size. */
@@ -52,7 +54,7 @@ export function ColorRow({
         type="color"
         aria-label="Color de la marca"
         disabled={disabled}
-        value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : '#d4a017'}
+        value={/^#[0-9a-fA-F]{6}$/.test(value) ? value : colors.yellow}
         onChange={(e) => onPick(e.target.value)}
         style={{
           width: 44,

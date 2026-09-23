@@ -9,11 +9,13 @@ Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 
 **Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
 · W-8 (las cuatro gráficas de Estados) · W-2 (tipografía y escala)
-· W-4 (detalle transversal) — todo 2026-09-22.
+· W-4 (detalle transversal) · W-5 (comprobante) — todo 2026-09-22.
 
 ---
 
 ## W-1 · Los cuatro estados (S-1, S-2) — un arreglo, todas las pantallas
+
+- [x] Status
 
 **Done 2026-09-22.** What shipped, and what it turned up:
 
@@ -53,6 +55,8 @@ wiring; an E2E against a throwaway tenant would hold the rendering.
 
 ## W-2 · Tipografía y escala (S-3, S-4, S-5)
 
+- [x] Status
+
 **Done 2026-09-22.**
 
 - **S-3** — a global `h1…h6` rule at weight 800 with the design's tracking,
@@ -87,6 +91,8 @@ size, so there is nothing to conform to. Worth settling with the owner.
 ---
 
 ## W-8 · Las gráficas de Estados financieros (C-13)
+
+- [x] Status
 
 **Done 2026-09-22.** All four charts now exist and are drawn to the design.
 
@@ -138,6 +144,8 @@ too; drawing it would drop the dependency.
 
 ## W-3 · Consultas que no traen lo que el diseño muestra (B-1…B-6, C-2…C-6)
 
+- [ ] Status
+
 Grouped because each one is a change in `@xangarro/data-pg` and then upward
 through the action and the screen — the same shape of work eleven times.
 
@@ -151,6 +159,8 @@ then C (dinero), so a review is possible in between.
 ---
 
 ## W-4 · Detalle transversal (D-1…D-4)
+
+- [x] Status
 
 **Done 2026-09-22.** Four small defects that shared one shape: something the
 design pairs was only half applied.
@@ -184,6 +194,8 @@ need columns `notices` does not have. Both are data, so they belong with W-3.
 
 ## W-5 · Comprobante (Ticket)
 
+- [ ] Status
+
 - The card shadow the other templates carry via `tarjeta()` (`SOMBRA=5`) and
   the ticket does not.
 - `#d4a017` in `negocio/comprobantes/brand-widgets.tsx` — an off-palette
@@ -194,6 +206,8 @@ need columns `notices` does not have. Both are data, so they belong with W-3.
 ---
 
 ## W-6 · `design-lint` de vuelta a 0 (S-7)
+
+- [ ] Status
 
 60 violations today, from a 0 baseline. They split in two:
 
@@ -213,6 +227,8 @@ ratchet: the count may fall, never rise.
 
 ## W-7 · Decidir el asistente de alta (§4 del audit)
 
+- [ ] Status
+
 The onboarding wizard diverges from the handoff. It is not obviously wrong —
 it may be a deliberate improvement made after the design was drawn. This is a
 decision to record (ADR), not code to write. Needed before anyone "fixes" it
@@ -222,7 +238,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8 → W-4~~ → **W-5** → W-3 (B, then C) → W-6 → W-7.
+~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (B, then C) → W-6 → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small

@@ -153,4 +153,30 @@ describe('comprobanteSvg (N-20): acceptance', () => {
     assert.equal(clasicoPelado.includes('WhatsApp'), false);
     assert.equal(clasicoPelado.includes('Gracias por tu compra'), false);
   });
+
+  /**
+   * Every artboard in «design-reference/comprobantes» casts the house's hard
+   * drop. Ticket drew its frame by hand because of the torn edges and had
+   * been left without one; Minimal cast the 5px hero drop where its artboards
+   * draw the 4px card one (W-5).
+   */
+  it('every template casts the shadow its artboard draws', () => {
+    const sombra = (svg: string, px: number) =>
+      svg.includes(`<rect x="${12 + px}" y="${12 + px}"`) && svg.includes('fill="#0D0D0D"');
+    assert.ok(sombra(comprobanteTicketSvg(A), 4), 'Ticket casts no shadow');
+    assert.ok(sombra(comprobanteMinimalSvg(A), 4), 'Minimal must cast the card drop, not the hero');
+    assert.ok(sombra(comprobanteClasicoSvg(A), 5), 'Clásico casts the hero drop');
+    assert.ok(sombra(comprobanteModernoSvg(A), 5), 'Moderno casts the hero drop');
+  });
+
+  it('a printed comprobante casts none — there is nothing to cast onto', () => {
+    for (const plantilla of ['clasico', 'moderno', 'ticket', 'minimal'] as const) {
+      const svg = comprobanteSvg(plantilla, A, { destino: 'print' });
+      assert.equal(
+        /<rect x="1[67]" y="1[67]"/.test(svg),
+        false,
+        `${plantilla} carries a shadow into print`,
+      );
+    }
+  });
 });

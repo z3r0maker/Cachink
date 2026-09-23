@@ -33,7 +33,14 @@ export const PASTEL_METODO: Record<MetodoPagoComprobante, string> = {
 };
 
 export const MARGEN_WHATSAPP = 12;
+
+/**
+ * The house's two hard drops: `4px 4px 0` for a card, `5px 5px 0` for a hero.
+ * The templates split the same way — Clásico and Moderno are hero-sized,
+ * Ticket and Minimal are cards, which is what their artboards draw.
+ */
 export const SOMBRA = 5;
+export const SOMBRA_TARJETA = 4;
 
 export interface EstiloTexto {
   readonly tamano: number;
@@ -159,7 +166,10 @@ export function lienzo(ancho: number, alto: number, contenido: string, fondo: st
   );
 }
 
-/** The card behind every template: white face, hard black shadow (WhatsApp only). */
+/**
+ * The card behind every template: white face, hard black shadow (WhatsApp
+ * only — a printed comprobante has nothing to cast one onto).
+ */
 export function tarjeta(
   x: number,
   y: number,
@@ -167,9 +177,10 @@ export function tarjeta(
   alto: number,
   borde: number,
   conSombra: boolean,
+  sombraPx: number = SOMBRA,
 ): string {
   const sombra = conSombra
-    ? `<rect x="${x + SOMBRA}" y="${y + SOMBRA}" width="${ancho}" height="${alto}" fill="${NEGRO}"/>`
+    ? `<rect x="${x + sombraPx}" y="${y + sombraPx}" width="${ancho}" height="${alto}" fill="${NEGRO}"/>`
     : '';
   return (
     sombra +
