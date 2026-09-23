@@ -1,5 +1,7 @@
 'use client';
 
+import { portalFontSizes } from '@xangarro/tokens';
+
 import { useState, useTransition } from 'react';
 
 import { Banner, Button, Input, OptionCards, Switch, type OptionDef } from '@/components';
@@ -53,7 +55,9 @@ function VistaPrevia({
   const base = `/api/comprobantes/muestra?plantilla=${plantilla}`;
   return (
     <section data-testid="comprobante-vista-previa" style={{ margin: '24px 0 8px' }}>
-      <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 12px' }}>Así se ve</h2>
+      <h2 style={{ fontSize: portalFontSizes.sectionTitle, fontWeight: 800, margin: '0 0 12px' }}>
+        Así se ve
+      </h2>
       <img
         data-testid="comprobante-preview-img"
         src={`${base}&formato=png&v=${version}`}
@@ -190,7 +194,11 @@ export function ComprobantesScreen(view: ComprobantesView) {
 
       <LogoCard logoUrl={logoUrl} mayWrite={view.mayWrite} subiendo={subiendo} onFile={subir} />
 
-      <h2 style={{ fontSize: 18, fontWeight: 800, margin: '28px 0 12px' }}>Plantilla</h2>
+      <h2
+        style={{ fontSize: portalFontSizes.sectionTitle, fontWeight: 800, margin: '28px 0 12px' }}
+      >
+        Plantilla
+      </h2>
       <OptionCards
         ariaLabel="Plantilla del comprobante"
         options={TEMPLATES}

@@ -8,7 +8,8 @@ Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 `B-n` operación diaria, `C-n` dinero y negocio, `D-n` detalle transversal.
 
 **Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
-· W-8 (las cuatro gráficas de Estados) — todo 2026-09-22.
+· W-8 (las cuatro gráficas de Estados) · W-2 (tipografía y escala) — todo
+2026-09-22.
 
 ---
 
@@ -50,19 +51,38 @@ wiring; an E2E against a throwaway tenant would hold the rendering.
 
 ---
 
-## W-2 · Tipografía y escala (S-3, S-4, S-5) — tres cambios de token
+## W-2 · Tipografía y escala (S-3, S-4, S-5)
 
-- A global `h1/h2/h3` rule: weight 800, tracking `-0.02em`…`-0.04em`. Today
-  headings render at UA defaults wherever a screen emits a bare `<h1>`.
-- Body at 15, not 14: `portalFontSizes.body` exists and is unused. Nav
-  labels, business name, page subtitles, empty-state body.
-- KPI figures at 34 (36 on Inicio's Resumen de hoy): `kpiFigure` reaches for
-  the phone ramp `fontSizes.xl5` instead of `portalFontSizes.xl6`.
+**Done 2026-09-22.**
 
-**Why second:** portal-wide effect for three edits, and it changes every
-screenshot — better done before anyone reviews the per-screen work.
+- **S-3** — a global `h1…h6` rule at weight 800 with the design's tracking,
+  `h1` at the 36 page-title step. Element selectors, so every component that
+  dresses its own heading still wins; this only catches the ones nobody did.
+  The UA margin goes to zero, because the portal spaces itself with `gap` —
+  the three headings that leaned on that margin say what they want now, and
+  the auth card keeps its own **30**, which the design sets apart because the
+  heading lives inside a 460px card.
+- **S-4** — nav label, business name, Inicio's subtitle and the empty-state
+  body move to `portalFontSizes.body` (15). The per-screen `pageSubtitle`
+  styles were already at 15; the audit's list was one entry generous.
+- **S-5** — `kpiFigure` at 34 (`portalFontSizes.xl6`), with a `size="lg"`
+  step at 36 for Inicio's «Resumen de hoy», the only KPI row the design
+  calls out that way. The old value reached for the **phone's** ramp, which
+  has no 34 at all.
 
-**Size:** small, but visually wide. Re-baseline any screenshot fixtures.
+`tests/typography.test.ts` pins all three by reading the stylesheets —
+vanilla-extract class names are opaque at runtime, so the same trick
+`screen-states.test.ts` uses. Shown to fail when broken.
+
+**A missing token, found on the way.** The design files set **18px 21 times**
+— card section headings, a donut's title, a total's label — and the portal
+scale had no step for it, so nine call sites had inlined the number.
+`portalFontSizes.sectionTitle` is that step now, and `design-lint`'s
+`fontsize-literal` count fell from 45 to 36 as a result.
+
+**Table cells deliberately left at 14.** The token file's docblock claims
+«15 (body and table)», but the handoff's own Table section gives no body-cell
+size, so there is nothing to conform to. Worth settling with the owner.
 
 ---
 
@@ -180,7 +200,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-W-1 → W-2 → **W-8** → W-4 → W-5 → W-3 (B, then C) → W-6 → W-7.
+~~W-1 → W-2 → W-8~~ → **W-4** → W-5 → W-3 (B, then C) → W-6 → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small

@@ -98,7 +98,7 @@ export const subLine = style({
 });
 
 export const chartTitle = style({
-  fontSize: 20,
+  fontSize: portalFontSizes.cardTitle,
   fontWeight: 800,
   letterSpacing: typography.letterSpacing.tight,
   margin: 0,

@@ -4,6 +4,7 @@ import { formatFechaHora, formatMoney } from '@xangarro/domain';
 import { useState, useTransition } from 'react';
 
 import { Button, Drawer } from '@/components';
+import { seccionDrawer } from '@/styles/text.css';
 import { cortesDelDispositivo, type CortesResult } from '@/server/actions/equipo-detalle';
 import type { EquipoData } from '@/server/screens';
 
@@ -65,7 +66,7 @@ export function DispositivoDetalle(props: { readonly d: Dispositivo; readonly ma
         </p>
         <p>Última sincronización: {formatFechaHora(d.lastPushAt)}</p>
         <p>{d.revokedAt === null ? 'Vinculado' : `Revocado el ${formatFechaHora(d.revokedAt)}`}</p>
-        <h3>Cortes recientes</h3>
+        <h3 className={seccionDrawer}>Cortes recientes</h3>
         <Cortes r={r} />
       </Drawer>
     </>

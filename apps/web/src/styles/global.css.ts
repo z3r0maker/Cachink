@@ -1,5 +1,5 @@
 import { globalStyle, style } from '@vanilla-extract/css';
-import { colors, typography } from '@xangarro/tokens';
+import { colors, portalFontSizes, typography } from '@xangarro/tokens';
 
 import './tokens.css';
 
@@ -18,6 +18,45 @@ globalStyle('html, body', {
 });
 
 globalStyle('*, *::before, *::after', { boxSizing: 'border-box' });
+
+/**
+ * Headings have a house style, and it is not the browser's (S-3).
+ *
+ * "Headings: weight 800, letter-spacing `-0.02em` → `-0.04em`" — design
+ * handoff, "Typography". The UA default is weight 700 at 2em with no
+ * tracking, which is what the auth card, the onboarding wizard and every
+ * other bare `<h1>` were rendering.
+ *
+ * These are element selectors, so any component that styles its own heading
+ * still wins on specificity — this only catches the ones nobody dressed.
+ * The margin goes to zero because the portal's layouts space themselves with
+ * `gap`, and a UA margin on a flex child is a surprise, not a default.
+ */
+globalStyle('h1, h2, h3, h4, h5, h6', {
+  margin: 0,
+  fontWeight: typography.weights.extraBold,
+  color: colors.black,
+  lineHeight: 1.15,
+  letterSpacing: typography.letterSpacing.tight,
+  textWrap: 'pretty',
+});
+
+/** The page title: 36px/800/`-0.03em`/`line-height: 1.05` ("Main"). */
+globalStyle('h1', {
+  fontSize: portalFontSizes.pageTitle,
+  lineHeight: 1.05,
+  letterSpacing: typography.letterSpacing.tighter,
+});
+
+globalStyle('h2', {
+  fontSize: portalFontSizes.xl3,
+  letterSpacing: typography.letterSpacing.tighter,
+});
+
+/** A card title, the design's smallest heading step ("Standard controls"). */
+globalStyle('h3', { fontSize: portalFontSizes.cardTitle });
+
+globalStyle('h4, h5, h6', { fontSize: portalFontSizes.lgx });
 
 /**
  * Focus is always visible: a yellow ring with a black inner edge so it reads on

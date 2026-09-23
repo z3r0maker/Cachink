@@ -53,3 +53,12 @@ export const muted = style({
   fontWeight: typography.weights.semibold,
   color: colors.textMuted,
 });
+
+/**
+ * A section heading inside a drawer. The global `h1…h6` rule zeroes the UA
+ * margin (S-3), so anything that leaned on it says what it wants instead.
+ */
+export const seccionDrawer = style({
+  margin: '18px 0 10px',
+  fontSize: portalFontSizes.cardTitle,
+});

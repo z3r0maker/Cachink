@@ -1,5 +1,14 @@
 import { style } from '@vanilla-extract/css';
-import { brand, colors, fontSizes, radii, shadows, shapeRadii, typography } from '@xangarro/tokens';
+import {
+  brand,
+  colors,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shadows,
+  shapeRadii,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
 
@@ -73,7 +82,8 @@ export const navItem = style([
     boxShadow: 'none',
     color: colors.black,
     textDecoration: 'none',
-    fontSize: fontSizes.md,
+    // «label 15px/-0.01em» — design handoff, "Sidebar" → Nav item (S-4).
+    fontSize: portalFontSizes.body,
     fontWeight: typography.weights.bold,
     letterSpacing: '-0.01em',
     selectors: {

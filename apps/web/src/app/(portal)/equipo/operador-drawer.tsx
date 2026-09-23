@@ -4,6 +4,7 @@ import { formatFechaHora, formatMoney } from '@xangarro/domain';
 import { useState, useTransition } from 'react';
 
 import { Button, Drawer } from '@/components';
+import { seccionDrawer } from '@/styles/text.css';
 import { turnosDelOperador, type TurnosResult } from '@/server/actions/equipo-detalle';
 
 /**
@@ -57,7 +58,7 @@ export function OperadorDetalle({ id, nombre }: { readonly id: string; readonly 
         description="Sus turnos recientes en la caja."
       >
         <p>Entra con su nombre y su NIP. No necesita correo.</p>
-        <h3>Turnos recientes</h3>
+        <h3 className={seccionDrawer}>Turnos recientes</h3>
         <Turnos r={r} />
       </Drawer>
     </>

@@ -107,6 +107,13 @@ export const portalFontSizes = {
   body: 15,
   lg: 16,
   lgx: 17,
+  /**
+   * The section heading inside a card — a donut's title, a flujo total's
+   * label, «Así se ve». The handoff's prose list of sizes omits it, but the
+   * design files set it **21 times**, and nine call sites had inlined it
+   * before this step existed (C-13).
+   */
+  sectionTitle: 18,
   xl: 19,
   cardTitle: 20,
   xl2: 22,

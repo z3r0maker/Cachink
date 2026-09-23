@@ -1,5 +1,7 @@
 'use client';
 
+import { portalFontSizes } from '@xangarro/tokens';
+
 import { useState, useTransition } from 'react';
 
 import { Banner, Button } from '@/components';
@@ -62,7 +64,9 @@ export function HazloPorMi(view: AsistidaView) {
       data-testid="hazlo-por-mi"
       style={{ marginTop: 36, borderTop: '2px solid var(--black)', paddingTop: 20, maxWidth: 640 }}
     >
-      <h2 style={{ fontSize: 18, fontWeight: 800, margin: '0 0 6px' }}>Hazlo por mí</h2>
+      <h2 style={{ fontSize: portalFontSizes.sectionTitle, fontWeight: 800, margin: '0 0 6px' }}>
+        Hazlo por mí
+      </h2>
       {banner !== null ? <Banner tone={banner.tone} title={banner.text} /> : null}
 
       {!view.paid && view.status === null ? (

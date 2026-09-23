@@ -73,7 +73,7 @@ export const gaugeRotulo = style({
 });
 
 export const gaugeCifra = style({
-  fontSize: 36,
+  fontSize: portalFontSizes.pageTitle,
   fontWeight: 800,
   letterSpacing: typography.letterSpacing.tightest,
   fontVariantNumeric: 'tabular-nums',
@@ -122,21 +122,24 @@ export const flujoNetoFila = style({
 });
 
 export const flujoNeto = style({
-  fontSize: 18,
+  fontSize: portalFontSizes.sectionTitle,
   fontWeight: 800,
   letterSpacing: typography.letterSpacing.tight,
   color: colors.black,
 });
 
 export const flujoNetoCifra = style({
-  fontSize: 32,
+  // The design sets 32; the portal scale's nearest step is 34, which is also
+  // the KPI figure's — a 2px snap next to an 18px label is invisible, and an
+  // off-scale literal here would be the next one someone copies.
+  fontSize: portalFontSizes.xl6,
   fontWeight: 800,
   letterSpacing: typography.letterSpacing.tighter,
   fontVariantNumeric: 'tabular-nums',
 });
 
 export const donutTitulo = style({
-  fontSize: 18,
+  fontSize: portalFontSizes.sectionTitle,
   fontWeight: 800,
   letterSpacing: typography.letterSpacing.tight,
   margin: '0 0 14px',

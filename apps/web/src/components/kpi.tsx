@@ -7,6 +7,7 @@ import {
   deltaTone,
   kpiEyebrow,
   kpiFigure,
+  kpiFigureLg,
   kpiFigureTone,
   kpiHint,
   verdict,
@@ -21,14 +22,24 @@ export interface KpiCardProps {
   readonly value: string;
   readonly tone?: FigureTone;
   readonly hint?: string;
+  /** `lg` is Inicio's «Resumen de hoy» at 36; everything else is 34. */
+  readonly size?: 'md' | 'lg';
   readonly children?: ReactNode;
 }
 
-export function KpiCard({ label, value, tone = 'neutral', hint, children }: KpiCardProps) {
+export function KpiCard({
+  label,
+  value,
+  tone = 'neutral',
+  hint,
+  size = 'md',
+  children,
+}: KpiCardProps) {
+  const figura = size === 'lg' ? `${kpiFigure} ${kpiFigureLg}` : kpiFigure;
   return (
     <Card>
       <span className={kpiEyebrow}>{label}</span>
-      <p className={`${kpiFigure} ${kpiFigureTone[tone]}`}>{value}</p>
+      <p className={`${figura} ${kpiFigureTone[tone]}`}>{value}</p>
       {hint ? <p className={kpiHint}>{hint}</p> : null}
       {children}
     </Card>

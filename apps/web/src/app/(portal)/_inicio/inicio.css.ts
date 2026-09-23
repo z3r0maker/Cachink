@@ -43,8 +43,9 @@ export const pageTitle = style({
 });
 
 export const pageDate = style({
+  // Inicio's page subtitle: «a 15px/600 --gray-600 subtitle 6px below» (S-4).
   marginTop: 6,
-  fontSize: fontSizes.md,
+  fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
   color: colors.gray600,
 });

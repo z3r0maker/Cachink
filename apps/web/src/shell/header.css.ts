@@ -1,5 +1,13 @@
 import { style } from '@vanilla-extract/css';
-import { colors, fontSizes, radii, shapeRadii, shadows, typography } from '@xangarro/tokens';
+import {
+  colors,
+  fontSizes,
+  portalFontSizes,
+  radii,
+  shapeRadii,
+  shadows,
+  typography,
+} from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
 
@@ -57,7 +65,8 @@ export const initialsTile = style({
 });
 
 export const bizName = style({
-  fontSize: fontSizes.md,
+  // «business name 15px/800/-0.01em» — design handoff, "Header" (S-4).
+  fontSize: portalFontSizes.body,
   fontWeight: typography.weights.extraBold,
   letterSpacing: '-0.01em',
   lineHeight: 1.15,

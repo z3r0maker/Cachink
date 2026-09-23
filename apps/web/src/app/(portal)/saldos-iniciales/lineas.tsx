@@ -1,5 +1,7 @@
 'use client';
 
+import { portalFontSizes } from '@xangarro/tokens';
+
 import { parseClientSheet } from '@/lib/import-clientes';
 
 import { TablaLineas } from './tabla-lineas';
@@ -113,7 +115,9 @@ function BarraSubida({
         flexWrap: 'wrap',
       }}
     >
-      <h2 style={{ fontSize: 18, fontWeight: 800, margin: 0 }}>Cuentas por cobrar iniciales</h2>
+      <h2 style={{ fontSize: portalFontSizes.sectionTitle, fontWeight: 800, margin: 0 }}>
+        Cuentas por cobrar iniciales
+      </h2>
       {editable ? (
         <label style={LABEL_CSV}>
           Prellenar desde .csv

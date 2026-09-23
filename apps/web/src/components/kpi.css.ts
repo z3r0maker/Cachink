@@ -1,5 +1,5 @@
 import { style, styleVariants } from '@vanilla-extract/css';
-import { colors, fontSizes, typography } from '@xangarro/tokens';
+import { colors, fontSizes, portalFontSizes, typography } from '@xangarro/tokens';
 
 /**
  * KPI card — uppercase eyebrow, a 34 px tabular figure, then a muted hint.
@@ -23,12 +23,20 @@ export const kpiEyebrow = style({
 
 export const kpiFigure = style({
   margin: '10px 0 0',
-  fontSize: fontSizes.xl5,
+  // 34, as the docblock above has always said and as the design sets it. It
+  // read `fontSizes.xl5` (32) — the phone's ramp, which has no 34 (S-5).
+  fontSize: portalFontSizes.xl6,
   lineHeight: 1,
   fontWeight: typography.weights.extraBold,
   letterSpacing: typography.letterSpacing.tightest,
   fontVariantNumeric: 'tabular-nums',
 });
+
+/**
+ * Inicio's «Resumen de hoy» sets its three figures one step larger, at 36 —
+ * the only KPI row in the portal the design calls out that way.
+ */
+export const kpiFigureLg = style({ fontSize: portalFontSizes.pageTitle });
 
 /** Ingresos read green, egresos red; everything else stays ink-black. */
 export const kpiFigureTone = styleVariants({

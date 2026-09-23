@@ -55,18 +55,21 @@ export function ResumenDeHoy({ today }: { readonly today: InicioData['today'] })
   return (
     <div className={kpiGrid}>
       <KpiCard
+        size="lg"
         label="Ventas hoy"
         value={formatMoney(today.ventas)}
         tone="positive"
         hint={`${today.ventasCount} ventas registradas`}
       />
       <KpiCard
+        size="lg"
         label="Gastos hoy"
         value={formatMoney(today.gastos)}
         tone="negative"
         hint={`${today.gastosCount} egresos registrados`}
       />
       <KpiCard
+        size="lg"
         label="Utilidad hoy"
         value={formatMoney(today.utilidad)}
         hint="Lo que te quedó después de gastos"

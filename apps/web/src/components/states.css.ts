@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, fontSizes, radii, shadows, typography } from '@xangarro/tokens';
+import { colors, fontSizes, portalFontSizes, radii, shadows, typography } from '@xangarro/tokens';
 
 /**
  * The four data states, as one shape.
@@ -50,9 +50,10 @@ export const stateTitle = style({
 });
 
 export const stateBody = style({
+  // «a max-width: 46ch 15px/600 --text-muted body» — the empty state (S-4).
   margin: '8px 0 0',
   maxWidth: '46ch',
-  fontSize: fontSizes.md,
+  fontSize: portalFontSizes.body,
   fontWeight: typography.weights.semibold,
   color: colors.textMuted,
   textWrap: 'pretty',
