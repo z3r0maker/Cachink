@@ -55,7 +55,10 @@ export const cfdiPayments = pgTable(
     createdAt: at('created_at').notNull().defaultNow(),
     updatedAt: at('updated_at').notNull().defaultNow(),
   },
-  (t) => [index('cfdi_payments_period_status_idx').on(t.period, t.status, t.paidAt)],
+  (t) => [
+    index('cfdi_payments_business_idx').on(t.businessId),
+    index('cfdi_payments_period_status_idx').on(t.period, t.status, t.paidAt),
+  ],
 );
 
 export const cfdiGlobals = pgTable(

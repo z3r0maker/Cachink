@@ -29,10 +29,14 @@ const seq = (name: string) => bigint(name, { mode: 'number' });
 const at = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' });
 
 /** One row per tenant: the last seq handed out. */
-export const syncCursors = pgTable('sync_cursors', {
-  businessId: text('business_id').primaryKey(),
-  lastSeq: seq('last_seq').notNull().default(0),
-});
+export const syncCursors = pgTable(
+  'sync_cursors',
+  {
+    businessId: text('business_id').primaryKey(),
+    lastSeq: seq('last_seq').notNull().default(0),
+  },
+  (t) => [index('sync_cursors_business_idx').on(t.businessId)],
+);
 
 /**
  * What devices pull: one row per change to a DOWN or HYBRID row. UP rows are
@@ -67,7 +71,10 @@ export const syncReceipts = pgTable(
     receivedAt: at('received_at').notNull(),
     businessId: text('business_id').notNull(),
   },
-  (t) => [primaryKey({ columns: [t.businessId, t.tableName, t.rowId] })],
+  (t) => [
+    index('sync_receipts_business_idx').on(t.businessId),
+    primaryKey({ columns: [t.businessId, t.tableName, t.rowId] }),
+  ],
 );
 
 /**

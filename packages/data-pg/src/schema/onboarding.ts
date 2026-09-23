@@ -18,16 +18,20 @@
  * `trial_intent` records a [Probar 14 días] tap until Checkout exists (B-10).
  */
 
-import { jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, jsonb, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
-export const businessOnboarding = pgTable('business_onboarding', {
-  businessId: text('business_id').primaryKey(),
-  answers: jsonb('answers').notNull().default({}),
-  /** Items the owner ticked by hand; auto-detected items are computed, not stored. */
-  checklist: jsonb('checklist').notNull().default({}),
-  pendingPaidAnswers: jsonb('pending_paid_answers').notNull().default([]),
-  /** `{ plan, interval, at }` of the last trial request, or null. */
-  trialIntent: jsonb('trial_intent'),
-  completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
-  updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
-});
+export const businessOnboarding = pgTable(
+  'business_onboarding',
+  {
+    businessId: text('business_id').primaryKey(),
+    answers: jsonb('answers').notNull().default({}),
+    /** Items the owner ticked by hand; auto-detected items are computed, not stored. */
+    checklist: jsonb('checklist').notNull().default({}),
+    pendingPaidAnswers: jsonb('pending_paid_answers').notNull().default([]),
+    /** `{ plan, interval, at }` of the last trial request, or null. */
+    trialIntent: jsonb('trial_intent'),
+    completedAt: timestamp('completed_at', { withTimezone: true, mode: 'string' }),
+    updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }).notNull(),
+  },
+  (t) => [index('business_onboarding_business_idx').on(t.businessId)],
+);

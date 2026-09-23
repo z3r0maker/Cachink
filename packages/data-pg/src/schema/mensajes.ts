@@ -7,21 +7,29 @@
  * device's SQLite columns exactly (drift test).
  */
 
-import { pgTable, text } from 'drizzle-orm/pg-core';
+import { index, pgTable, text } from 'drizzle-orm/pg-core';
 import { auditColumns } from './_columns';
 
-export const mensajesOperador = pgTable('mensajes_operador', {
-  id: text('id').primaryKey(),
-  operadorId: text('operador_id').notNull(),
-  cajaTurnoId: text('caja_turno_id'),
-  severidad: text('severidad', { enum: ['info', 'aclaracion'] }).notNull(),
-  cuerpo: text('cuerpo').notNull(),
-  ...auditColumns,
-});
+export const mensajesOperador = pgTable(
+  'mensajes_operador',
+  {
+    id: text('id').primaryKey(),
+    operadorId: text('operador_id').notNull(),
+    cajaTurnoId: text('caja_turno_id'),
+    severidad: text('severidad', { enum: ['info', 'aclaracion'] }).notNull(),
+    cuerpo: text('cuerpo').notNull(),
+    ...auditColumns,
+  },
+  (t) => [index('mensajes_operador_business_idx').on(t.businessId)],
+);
 
-export const respuestasOperador = pgTable('respuestas_operador', {
-  id: text('id').primaryKey(),
-  mensajeId: text('mensaje_id').notNull(),
-  texto: text('texto').notNull(),
-  ...auditColumns,
-});
+export const respuestasOperador = pgTable(
+  'respuestas_operador',
+  {
+    id: text('id').primaryKey(),
+    mensajeId: text('mensaje_id').notNull(),
+    texto: text('texto').notNull(),
+    ...auditColumns,
+  },
+  (t) => [index('respuestas_operador_business_idx').on(t.businessId)],
+);

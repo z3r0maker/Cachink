@@ -1,4 +1,4 @@
-import { customType, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
+import { customType, index, pgTable, text, timestamp } from 'drizzle-orm/pg-core';
 
 /**
  * `business_logos` — portal-only (0023): the uploaded logo bytes behind
@@ -13,9 +13,13 @@ const bytea = customType<{ data: Buffer; driverData: Buffer }>({
   },
 });
 
-export const businessLogos = pgTable('business_logos', {
-  businessId: text('business_id').primaryKey(),
-  mime: text('mime').notNull(),
-  bytes: bytea('bytes').notNull(),
-  updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
-});
+export const businessLogos = pgTable(
+  'business_logos',
+  {
+    businessId: text('business_id').primaryKey(),
+    mime: text('mime').notNull(),
+    bytes: bytea('bytes').notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull(),
+  },
+  (t) => [index('business_logos_business_idx').on(t.businessId)],
+);

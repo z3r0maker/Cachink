@@ -51,7 +51,10 @@ export const assistedImportFiles = pgTable(
     bytes: bytea('bytes').notNull(),
     uploadedAt: timestamp('uploaded_at', { withTimezone: true, mode: 'string' }).notNull(),
   },
-  (t) => [index('assisted_import_files_import_idx').on(t.assistedImportId)],
+  (t) => [
+    index('assisted_import_files_business_idx').on(t.businessId),
+    index('assisted_import_files_import_idx').on(t.assistedImportId),
+  ],
 );
 
 export type AssistedImportStatus =

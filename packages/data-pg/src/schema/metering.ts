@@ -15,7 +15,7 @@
  * (`0009_metering_cfdi_grants.sql`).
  */
 
-import { integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 
 const at = (name: string) => timestamp(name, { withTimezone: true, mode: 'string' });
 
@@ -31,7 +31,10 @@ export const usageCounters = pgTable(
     products: integer('products').notNull(),
     computedAt: at('computed_at').notNull().defaultNow(),
   },
-  (t) => [primaryKey({ columns: [t.businessId, t.period] })],
+  (t) => [
+    index('usage_counters_business_idx').on(t.businessId),
+    primaryKey({ columns: [t.businessId, t.period] }),
+  ],
 );
 
 export const usageNotices = pgTable(
@@ -44,5 +47,8 @@ export const usageNotices = pgTable(
     createdAt: at('created_at').notNull().defaultNow(),
     deliveredAt: at('delivered_at'),
   },
-  (t) => [primaryKey({ columns: [t.idempotencyKey, t.recipient] })],
+  (t) => [
+    index('usage_notices_business_idx').on(t.businessId),
+    primaryKey({ columns: [t.idempotencyKey, t.recipient] }),
+  ],
 );
