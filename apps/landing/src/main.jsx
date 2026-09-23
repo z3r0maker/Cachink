@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client';
 import '../colors_and_type.css';
 import './global.css';
+import { UtmPassthrough } from './utm.jsx';
 
 /**
  * Client-side entry point. Switches on pathname so each article page
@@ -29,7 +30,12 @@ async function mountApp() {
     Component = (await import('./App.jsx')).default;
   }
 
-  createRoot(document.getElementById('root')).render(<Component />);
+  // UtmPassthrough wraps every route, not just the home page (N-57).
+  createRoot(document.getElementById('root')).render(
+    <UtmPassthrough>
+      <Component />
+    </UtmPassthrough>,
+  );
 }
 
 mountApp();
