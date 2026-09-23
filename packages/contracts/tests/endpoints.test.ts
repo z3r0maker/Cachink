@@ -41,6 +41,7 @@ describe('activate', () => {
       code: ' k7m3p9rw ',
       device: { name: 'iPhone', platform: 'ios', appVersion: '1.0.0', osVersion: '18.1' },
     });
+    assert.ok(!('qrToken' in r));
     assert.equal(r.code, 'K7M3P9RW');
     assert.equal(r.email, 'dueno@negocio.mx');
   });
@@ -51,6 +52,13 @@ describe('activate', () => {
       device: { name: 'Caja 1', platform: 'web', appVersion: '1.0.0', osVersion: 'Mac OS 15' },
     });
     assert.equal(r.device.platform, 'web');
+  });
+  it('accepts the scan path with the token alone, and refuses a short token (C-14)', () => {
+    const device = { name: 'iPhone', platform: 'ios', appVersion: '1.0.0', osVersion: '18.1' };
+    const r = ActivateRequestSchema.parse({ qrToken: 'q8Zb3n0pXg2KlV7wR4tY1A', device });
+    assert.equal('qrToken' in r && r.qrToken, 'q8Zb3n0pXg2KlV7wR4tY1A');
+    assert.throws(() => ActivateRequestSchema.parse({ qrToken: 'short', device }));
+    assert.throws(() => ActivateRequestSchema.parse({ device }), 'neither path');
   });
   it('rejects ambiguous glyphs, wrong length and unknown platforms', () => {
     assert.throws(() => ActivationCodeSchema.parse('K7M3P9R0'));

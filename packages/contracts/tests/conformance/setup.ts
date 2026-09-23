@@ -15,6 +15,8 @@ export interface Harness {
   readonly isMock: boolean;
   readonly email: string;
   freshCode(): Promise<string>;
+  /** A fresh scan token (C-14); `expired` only against the mock. */
+  freshQrToken(opts?: { expired?: boolean }): Promise<string>;
   reset(): Promise<void>;
   close(): Promise<void>;
 }
@@ -24,6 +26,7 @@ export async function startHarness(): Promise<Harness> {
   if (external) {
     const email = process.env['CONFORMANCE_EMAIL'] ?? 'demo@xangarro.mx';
     const codes = (process.env['CONFORMANCE_CODES'] ?? '').split(',').filter(Boolean);
+    const tokens = (process.env['CONFORMANCE_QR_TOKENS'] ?? '').split(',').filter(Boolean);
     return {
       base: external,
       isMock: false,
@@ -32,6 +35,11 @@ export async function startHarness(): Promise<Harness> {
         const c = codes.shift();
         if (!c) throw new Error('CONFORMANCE_CODES exhausted');
         return c;
+      },
+      freshQrToken: async () => {
+        const t = tokens.shift();
+        if (!t) throw new Error('CONFORMANCE_QR_TOKENS exhausted');
+        return t;
       },
       reset: async () => {},
       close: async () => {},
@@ -45,6 +53,14 @@ export async function startHarness(): Promise<Harness> {
     freshCode: async () => {
       const r = await fetch(`${running.url}/__mock/code`, { method: 'POST' });
       return ((await r.json()) as { code: string }).code;
+    },
+    freshQrToken: async (opts) => {
+      const r = await fetch(`${running.url}/__mock/qr`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expired: opts?.expired === true }),
+      });
+      return ((await r.json()) as { token: string }).token;
     },
     reset: async () => {
       await fetch(`${running.url}/__mock/reset`, { method: 'POST' });

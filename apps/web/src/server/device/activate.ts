@@ -2,6 +2,7 @@ import 'server-only';
 
 import {
   ActivateResponseSchema,
+  isScanRequest,
   type ActivateRequest,
   type ActivateResponse,
   type ERROR_CATALOG,
@@ -10,6 +11,7 @@ import { committedCursor, devices } from '@xangarro/data-pg';
 import { newUlid } from '@xangarro/domain';
 import { sql } from 'drizzle-orm';
 
+import { hashPairingToken } from '../../lib/pairing-token';
 import { db, type Tx } from '../db';
 import { entitlementFor, referenceTables } from './bootstrap';
 import { mintDeviceToken, signEntitlement } from './credentials';
@@ -33,10 +35,16 @@ export class Refusal extends Error {
   }
 }
 
-async function claim(tx: Tx, code: string, email: string, deviceId: string): Promise<string> {
-  const [row] = await tx.execute<{ outcome: string; business_id: string | null }>(
-    sql`SELECT outcome, business_id FROM xangarro.redeem_activation_code(${code}, ${email}, ${deviceId})`,
-  );
+/**
+ * The atomic claim, by whichever path the phone used: the typed code + email
+ * (`redeem_activation_code`) or the scanned token (`redeem_pairing_token`,
+ * C-14 — hashed here, so the token itself never reaches the database).
+ */
+async function claim(tx: Tx, input: ActivateRequest, deviceId: string): Promise<string> {
+  const query = isScanRequest(input)
+    ? sql`SELECT outcome, business_id FROM xangarro.redeem_pairing_token(${hashPairingToken(input.qrToken)}, ${deviceId})`
+    : sql`SELECT outcome, business_id FROM xangarro.redeem_activation_code(${input.code}, ${input.email}, ${deviceId})`;
+  const [row] = await tx.execute<{ outcome: string; business_id: string | null }>(query);
   if (row?.outcome !== 'OK' || row.business_id === null) {
     throw new Refusal((row?.outcome ?? 'CODE_INVALID') as ActivateErrorCode);
   }
@@ -88,7 +96,7 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
   const now = new Date();
 
   return db().transaction(async (tx) => {
-    const businessId = await claim(tx, input.code, input.email, deviceId);
+    const businessId = await claim(tx, input, deviceId);
     // Only now is there a tenant. Scope the rest by it, exactly as a request is.
     await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
     const entitlement = await entitlementFor(tx as Tx, businessId, now);

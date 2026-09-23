@@ -46,6 +46,8 @@ export class MockState {
   transactionsPerMonth: number | undefined = undefined;
   devices = new Map<string, Device>();
   codes = new Map<string, ActivationCode>();
+  /** Scan-path tokens → the code they redeem (C-14). */
+  pairingTokens = new Map<string, { code: string; expiresAt: number }>();
   serverSeq = 0;
   deviceSlots = 2;
   #deviceCounter = 0;
@@ -61,6 +63,7 @@ export class MockState {
     this.transactionsPerMonth = undefined;
     this.devices.clear();
     this.codes.clear();
+    this.pairingTokens.clear();
     this.serverSeq = 0;
     this.#deviceCounter = 0;
     const fx = buildFixtures();
@@ -103,6 +106,14 @@ export class MockState {
       );
     this.codes.set(code, { code, email, expiresAt: Date.now() + 48 * 3_600_000, redeemedBy: null });
     return code;
+  }
+
+  /** A fresh code plus its scan token (`/__mock/qr`); `minutes` < 0 mints an expired one. */
+  issuePairingToken(minutes = 15): string {
+    const code = this.issueCode();
+    const token = `mockqr${String(this.pairingTokens.size).padStart(4, '0')}${code}xangarro`;
+    this.pairingTokens.set(token, { code, expiresAt: Date.now() + minutes * 60_000 });
+    return token;
   }
 
   key(table: string, id: string): string {

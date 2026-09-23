@@ -4,6 +4,7 @@
  *
  *   POST /__mock/reset             fixtures, codes and devices back to start
  *   POST /__mock/code              issue a fresh activation code
+ *   POST /__mock/qr {expired?}     issue a fresh code plus its scan token (C-14)
  *   POST /__mock/forget  {table,id} hard-remove a row, as if purged in the
  *                                  portal — pushes referencing it are
  *                                  rejected with an FK code (A-08)
@@ -68,6 +69,10 @@ export function controlRoute(state: MockState, req: MockRequest): MockResponse |
       return { status: 200, body: { ok: true } };
     case '/__mock/code':
       return { status: 200, body: { code: state.issueCode() } };
+    case '/__mock/qr': {
+      const expired = (req.body as { expired?: unknown } | null)?.expired === true;
+      return { status: 200, body: { token: state.issuePairingToken(expired ? -1 : 15) } };
+    }
     case '/__mock/forget':
       return forget(state, req.body);
     case '/__mock/restore':

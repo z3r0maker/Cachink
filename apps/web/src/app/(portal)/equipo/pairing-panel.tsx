@@ -6,6 +6,7 @@ import { Button, Card, Input } from '@/components';
 import { enviarCodigoPorCorreo, generarCodigo } from '@/server/actions/equipo';
 
 import { codeBox, codeRow, enviadoLine, panelTitle } from './equipo.css';
+import { PairingQr } from './pairing-qr';
 
 export interface LiveCode {
   readonly code: string;
@@ -149,6 +150,7 @@ export function PairingPanel({
       <p style={{ margin: '8px 0 0', fontWeight: 600 }}>{mensaje(lleno, limit, live)}</p>
       {live === null ? null : <CodeBoxes code={live.code} />}
       {live === null ? null : <DondeCapturar url={registerUrl} />}
+      {live === null ? null : <PairingQr codeKey={live.code} />}
       {error === null ? null : <p role="alert">{error}</p>}
       <Acciones live={live} pending={pending} onGenerar={generate} />
     </Card>

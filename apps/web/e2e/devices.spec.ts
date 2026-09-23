@@ -217,3 +217,43 @@ test('«Enviar por correo» delivers the live code', async ({ page }, testInfo) 
   // The business name is read live; an earlier spec may have renamed it, so
   // the code — the panel's own state — is the assertion that matters.
 });
+
+test('«Mostrar QR» pairs a phone by the scan path, once (C-14, P-06)', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'mutates shared rows');
+  // Last in this serial file: it frees Taquería's slots (seeded at its plan's
+  // limit), which every test above relies on being full.
+  const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
+  try {
+    await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
+    await sql`UPDATE devices SET revoked_at = now() WHERE revoked_at IS NULL`;
+  } finally {
+    await sql.end({ timeout: 5 });
+  }
+  const code = await freshCode(page);
+
+  await page.getByTestId('pairing-qr-button').click();
+  await expect(page.getByTestId('pairing-qr').getByRole('img')).toBeVisible();
+  const href = (await page.getByTestId('pairing-qr-whatsapp').getAttribute('href')) ?? '';
+  const link = decodeURIComponent(href).match(/https?:\/\/\S+\/activar#c=([A-Za-z0-9_-]+)/);
+  expect(link, 'the shared link carries a fragment token').not.toBeNull();
+  expect(decodeURIComponent(href)).not.toContain(code); // never the typed code
+  const qrToken = link?.[1] ?? '';
+
+  const device = { name: 'Teléfono QR', platform: 'android', appVersion: '0.1.0', osVersion: '15' };
+  const first = await page.request.post('/api/v1/activate', {
+    headers: deviceHeaders(),
+    data: { qrToken, device },
+  });
+  expect(first.status(), await first.text()).toBe(200);
+  const again = await page.request.post('/api/v1/activate', {
+    headers: deviceHeaders(),
+    data: { qrToken, device },
+  });
+  expect(again.status()).toBe(409);
+
+  // The landing page never redeems: the token is in the fragment the server never sees.
+  const landing = await page.request.get(link?.[0] ?? '/activar');
+  expect(landing.status()).toBe(200);
+});

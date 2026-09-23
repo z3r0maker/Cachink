@@ -41,17 +41,20 @@ done
 # One minting per suite: vitest isolates each file, so two files would both
 # start from the top of a shared list and the second would redeem spent codes.
 suite() {
-  local codes
+  local codes tokens
   codes="$(cd "$HERE" && DATABASE_URL="$DATABASE_URL" npx tsx scripts/conformance-codes.ts 8)"
+  tokens="$(cd "$HERE" && DATABASE_URL="$DATABASE_URL" npx tsx scripts/conformance-codes.ts 3 --qr)"
   (cd "$REPO/packages/contracts" &&
     API_BASE="http://localhost:$PORT" \
       CONFORMANCE_EMAIL="conformance@xangarro.mx" \
       CONFORMANCE_CODES="$codes" \
+      CONFORMANCE_QR_TOKENS="$tokens" \
       ENTITLEMENT_PUBKEY="$PUB" \
       npx vitest run "$@")
 }
 
 suite tests/conformance/activate.test.ts
+suite tests/conformance/activate-scan.test.ts
 suite tests/conformance/sync.test.ts
 
 # B-18's other acceptance, on the log this very run produced: every push wrote

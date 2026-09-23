@@ -836,8 +836,8 @@ Xangarrito, Xangarro and Xangarrote with their verbatim pitches.
 > state-and-role sweep still works from props, and the error state is what renders
 > when a read throws.
 
-- [~] Status · **Blocked by:** P-25 · **Blocks:** X-02
-  - **Remaining (2026-09-23, verified against the code):** only the QR / app-link pairing panel is missing, hard-blocked on C-14 minting the token; the panel, drawer and revoke button shipped (9e7c90c1, 1183aa40).
+- [x] Status · **Blocked by:** P-25 · **Blocks:** X-02
+  - Done: 2026-09-23 · «Mostrar QR» on the pairing panel (`equipo/pairing-qr.tsx`, action `server/actions/pairing-qr.ts`): mints a 15-minute token on the live code, renders the QR as an SVG data URI on the server (no third-party QR service sees the link), with «Copiar enlace» and «Compartir por WhatsApp»; a new code hides the old QR, since it dies with its code. `/activar` is the public, `noindex`, `no-referrer` landing for anyone who opens the link without the app, and it redeems nothing. e2e: `devices.spec.ts` «Mostrar QR pairs a phone by the scan path, once» (200 then 409, the shared link never contains the typed code) — the whole file green locally against a seeded database. The panel, drawer and revoke button had shipped (9e7c90c1, 1183aa40).
   - 2026-09-22 doc audit: shipped except the QR / app-link pairing panel (N-25, blocked on C-14).
   - In progress: 2026-09-17 · the Dispositivos tab of `/equipo`.
   - Device cards with platform label, model, operator, last sync and a pending-count pill. The

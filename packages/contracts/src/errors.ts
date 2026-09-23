@@ -60,6 +60,7 @@ export const ERROR_CATALOG = {
     userMessageKey: 'activate.errors.codeExpired',
   },
   CODE_USED: { httpStatus: 409, retryable: false, userMessageKey: 'activate.errors.codeUsed' },
+  /** Never sent since SEC-DEV-01 (2026-09-23): servers answer CODE_INVALID. Kept for older servers. */
   EMAIL_MISMATCH: {
     httpStatus: 403,
     retryable: false,

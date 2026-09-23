@@ -6650,3 +6650,55 @@ unavailable later, and nothing it skips is asked twice.
 - Three answers still have no write path — tipoNegocio, WhatsApp and logo —
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
+
+## ADR-100
+
+**Title:** Activation answers one generic error, and the QR carries a 15-minute token in the fragment
+
+**Date:** 2026-09-23
+
+**Status:** Accepted — owner decisions of 2026-09-23; tasks C-14, P-06; closes audit SEC-DEV-01's remaining half
+
+**Context**
+
+`POST /activate` is the one unauthenticated door that hands out a device
+token, the catalog and every operator's NIP hash. Two findings of the
+2026-09-17 security audit were still open against it. `EMAIL_MISMATCH` told a
+caller that a code existed but belonged to someone else, which turns the
+8-character code space into something an attacker can enumerate without the
+email. And C-14 as first written put a 48-hour QR token in a query string,
+where server and CDN logs and Referer headers keep it, and where WhatsApp's
+link preview would fetch it.
+
+**Decision**
+
+1. **One public answer.** A wrong email and an unknown code both return
+   `400 CODE_INVALID`. The server's log line keeps the real reason, and the
+   throttle still counts both as guesses. `CODE_EXPIRED` and `CODE_USED` keep
+   their own answers: they are only reachable with the right email.
+   `EMAIL_MISMATCH` stays in the error catalog so an older server still maps
+   to the same message.
+2. **A separate scan token.** «Mostrar QR» mints 128 random bits on the live
+   code, stores only the SHA-256, and shows it once. It lives 15 minutes, never
+   past its code, and dies when «Generar otro» expires the code. Redeeming it
+   consumes the code's row: one pairing, either path.
+3. **In the fragment.** The link is `https://app.xangarro.mx/activar#c=<token>`.
+   Browsers never send the fragment, so no log or Referer holds it, and
+   `/activar` is a static page that redeems nothing.
+
+**Alternatives considered**
+
+- *Keep `EMAIL_MISMATCH`* for a friendlier mistyped-email message. Rejected:
+  the phone and the register already say «revisa el correo y el código», so
+  the loss is small, and the oracle was rated high.
+- *48-hour token, or the query string.* Rejected: a screenshot of the QR or a
+  logged URL would stay a live credential for two days.
+
+**Consequences**
+
+- The phone (N-25) must read the token from the fragment through a verified
+  app link, and confirm the business before redeeming (SEC-MOB-04), which
+  needs a small preview endpoint that does not exist yet.
+- A shopkeeper who leaves the QR open longer than 15 minutes taps «Generar
+  otro QR»; the typed code keeps its 48 hours as the fallback.
+
