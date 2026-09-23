@@ -15,19 +15,19 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 
 - **B-03** Migrations + RLS (replace hand-written SQL) (Colas de tracks) — destraba 26: B-04, B-10, B-16, P-30, X-01, N-27, … · `03-backend.md:69`
 - **B-14** Transactional email (Colas de tracks) — destraba 13: P-06, N-03, N-10, X-02, N-25, N-30, … · `03-backend.md:264`
-- **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:652`
+- **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:653`
 - **C-14** QR activation with a long single-use token (Colas de tracks) — destraba 10: N-25, N-29, N-30, X-02, X-03, X-05, … · `02-contracts.md:321`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:310`
 - **N-02** Server usage metering `[LAUNCH]` (Lanzamiento) — destraba 5: N-03, N-07, N-30, N-51, N-70 · `09-next-features.md:106`
-- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:919`
-- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1132`
+- **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:920`
+- **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1133`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
-- **N-09** Platform flags and kill switches `[LAUNCH]` (Lanzamiento) — destraba 2: N-30, N-69 · `09-next-features.md:294`
-- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1152`
-- **N-11** Portal settings parity `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:344`
-- **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:520`
-- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:685`
+- **N-09** Platform flags and kill switches `[LAUNCH]` (Lanzamiento) — destraba 2: N-30, N-69 · `09-next-features.md:295`
+- **N-66** Staff roles (Post-lanzamiento) — destraba 2: N-68, N-71 · `09-next-features.md:1153`
+- **N-11** Portal settings parity `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:345`
+- **N-19** Logo + brand colour `[LAUNCH]` (Lanzamiento) — destraba 1: N-12 · `09-next-features.md:521`
+- **N-26** Security audit `[LAUNCH]` (Lanzamiento) — destraba 1: N-30 · `09-next-features.md:686`
 
 ## Lanzamiento (99)
 
