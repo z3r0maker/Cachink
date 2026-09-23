@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-23** (ADR-100), moved out of the repository root. A dated snapshot of the M1 Step 0 audit. Its live follow-ups are cited from `ROADMAP.md`; what it found is in git. Do not plan from it.
+>
+> Kept for its history.
+
 # Audit M-1 Step 0 — Findings From Emulator Exploration
 
 **Date:** 2026-04-26

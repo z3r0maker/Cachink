@@ -80,3 +80,9 @@ next-env.d.ts
 
 # design:compare output — a local review, never committed
 design-compare/
+
+# Loose debugging screenshots dropped at the repository root by Maestro and
+# the Simulator. They are throwaway captures of a single run; the E2E artifacts
+# that matter are written under `e2e-reports/` (ADR-100).
+/maestro-*.png
+/sim-screenshot*.png

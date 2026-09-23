@@ -718,7 +718,7 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 - [ ] Status · **Blocked by:** X-01 · **Blocks:** N-30
 - **Scope:** k6 load test on staging at 10× the beta's projected load (push, pull, portal reports);
   budgets: API p95 < 300 ms, portal LCP < 2.5 s on throttled 4G, sale capture < 1 s on a low-end
-  Android. Replace the broken `health-report-2026-04-30.md` with this report.
+  Android. Replace the broken `docs/archive/health-report-2026-04-30.md` with this report.
 - **Output:** `docs/audits/performance-YYYY-MM-DD.md` + the k6 scripts in the repo.
 
 ### N-29 Deterministic full-stack E2E gate `[LAUNCH]`

@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — Cachink! Decision Log
+# ARCHITECTURE.md — Xangarro! Decision Log
 
 > **Purpose:** This file is the permanent, append-only log of significant architectural decisions. Every ADR (Architecture Decision Record) captures one decision — what was chosen, what was rejected, and why. ADRs are never rewritten or deleted; if a decision is later superseded, a new ADR is added that explicitly supersedes the old one.
 >
@@ -37,56 +37,111 @@ Links to discussion, docs, prior art.
 
 ## Index
 
-| ADR             | Date       | Title                                                                                                                                                  | Status                        |
-| --------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------- |
-| [001](#adr-001) | 2026-04-23 | Tauri 2 over Electron for desktop                                                                                                                      | Accepted                      |
-| [002](#adr-002) | 2026-04-23 | Expo + React Native for mobile (tablets)                                                                                                               | Accepted                      |
-| [003](#adr-003) | 2026-04-23 | Tamagui as the single cross-platform UI library                                                                                                        | Accepted                      |
-| [004](#adr-004) | 2026-04-23 | Turborepo + pnpm workspaces as the monorepo tool                                                                                                       | Accepted                      |
-| [005](#adr-005) | 2026-04-23 | Layered architecture with hard boundaries                                                                                                              | Accepted                      |
-| [006](#adr-006) | 2026-04-23 | Local-first as the default; sync is additive                                                                                                           | Accepted                      |
-| [007](#adr-007) | 2026-04-23 | LAN sync is first-party; Cloud sync uses PowerSync                                                                                                     | Accepted                      |
-| [008](#adr-008) | 2026-04-23 | Supabase is Cloud-mode default, not a core dependency                                                                                                  | Accepted                      |
-| [009](#adr-009) | 2026-04-23 | Money stored as bigint centavos, never float                                                                                                           | Accepted                      |
-| [010](#adr-010) | 2026-04-23 | ULIDs as primary keys for all entities                                                                                                                 | Accepted                      |
-| [011](#adr-011) | 2026-04-23 | Drizzle ORM over raw SQL or Prisma                                                                                                                     | Accepted                      |
-| [012](#adr-012) | 2026-04-23 | Cross-platform components live in `packages/ui`, never duplicated per app                                                                              | Accepted                      |
-| [013](#adr-013) | 2026-04-23 | TDD mandatory for domain and use-case layers                                                                                                           | Accepted                      |
-| [014](#adr-014) | 2026-04-23 | Spanish (es-MX) is the only launch language                                                                                                            | Accepted                      |
-| [015](#adr-015) | 2026-04-23 | Two documents (CLAUDE.md, ROADMAP.md) with distinct roles                                                                                              | Accepted                      |
-| [016](#adr-016) | 2026-04-23 | Brand asset management: single masters at repo root, derivatives per platform                                                                          | Accepted — amended by ADR-019 |
-| [017](#adr-017) | 2026-04-23 | Storybook 10 over Ladle for component docs + visual regression                                                                                         | Accepted                      |
-| [018](#adr-018) | 2026-04-23 | Local Husky pre-push gate replaces GitHub Actions for Phase 0/1                                                                                        | Accepted                      |
-| [019](#adr-019) | 2026-04-23 | Per-platform splash masters (amends ADR-016)                                                                                                           | Accepted                      |
-| [020](#adr-020) | 2026-04-24 | Egresos sub-tab pattern: one modal, three tabs                                                                                                         | Superseded by ADR-042         |
-| [021](#adr-021) | 2026-04-24 | Egreso + MovimientoInventario dual-write via a single use-case                                                                                         | Accepted                      |
-| [022](#adr-022) | 2026-04-24 | Barcode scanning: expo-camera on mobile, BarcodeDetector on desktop                                                                                    | Accepted                      |
-| [023](#adr-023) | 2026-04-24 | Repository interfaces extend in place with update(id, patch)                                                                                           | Accepted                      |
-| [024](#adr-024) | 2026-04-24 | PagoCliente application always goes through RegistrarPagoClienteUseCase                                                                                | Accepted                      |
-| [025](#adr-025) | 2026-04-24 | Export formats: exceljs for Excel, @react-pdf/renderer for PDF                                                                                         | Accepted                      |
-| [026](#adr-026) | 2026-04-24 | Notifications — expo-notifications on mobile, plugin-notification on desktop                                                                           | Accepted                      |
-| [027](#adr-027) | 2026-04-24 | Sentry crash reporting behind explicit local-first consent                                                                                             | Accepted                      |
-| [028](#adr-028) | 2026-04-24 | Vite resolves `.web.*` before `.ts`/`.tsx` on the desktop target                                                                                       | Superseded by ADR-032         |
-| [029](#adr-029) | 2026-04-24 | LAN sync wire protocol — HTTP push/pull + WebSocket events, versioned                                                                                  | Accepted                      |
-| [030](#adr-030) | 2026-04-24 | SQLite triggers + `__cachink_change_log` for driver-agnostic change capture                                                                            | Accepted                      |
-| [032](#adr-032) | 2026-04-24 | Vite dep scanner entries + `react-native` pre-bundle exclusion (supersedes ADR-028)                                                                    | Accepted                      |
-| [033](#adr-033) | 2026-04-24 | Test infrastructure never lives in `@cachink/ui`'s runtime graph: split `@cachink/testing` barrel + move `MockRepositoryProvider`                      | Accepted                      |
-| [034](#adr-034) | 2026-04-24 | UI components use web-standard ARIA props (`role`, `aria-label`, `aria-selected`, `aria-disabled`) — Tamagui 2.x dropped RN-style translation          | Accepted                      |
-| [035](#adr-035) | 2026-04-24 | PowerSync Sync Streams + hybrid Cloud backend (hosted default + BYO)                                                                                   | Accepted                      |
-| [036](#adr-036) | 2026-04-24 | Launch artifacts + versioning (semver floors, EAS profiles, Tauri updater)                                                                             | Accepted                      |
-| [037](#adr-037) | 2026-04-24 | `@supabase/supabase-js` as a mobile dependency for Cloud-mode Auth bridge                                                                              | Accepted                      |
-| [038](#adr-038) | 2026-04-25 | `react-native-get-random-values` polyfill on mobile for Hermes ULID PRNG                                                                               | Accepted                      |
-| [039](#adr-039) | 2026-04-25 | Setup wizard rewrite + AppMode collapse + lan-server/lan-client split                                                                                  | Accepted                      |
-| [040](#adr-040) | 2026-04-25 | Design-mock alignment — keep §1 tab contract, defer extras to Phase 2 "Más…"                                                                           | Accepted                      |
-| [041](#adr-041) | 2026-04-25 | Anchored `<Combobox>` (Tamagui Popover) replaces bottom-sheet select; install icon native modules in apps                                              | Accepted                      |
-| [042](#adr-042) | 2026-04-25 | Multi-step transactional flows are Stack pages, not single modals with internal tabs (supersedes ADR-020); KeyboardAvoidingView at the Modal primitive | Accepted                      |
-| [043](#adr-043) | 2026-04-26 | `<Tag>` is decorative-only; tappable-chip primitive deferred to Phase 2                                                                                | Accepted                      |
-| [044](#adr-044) | 2026-04-26 | Component tests run on Vitest + jsdom + react-native-web alias, not Jest + RNTL (clarifies CLAUDE.md §3)                                               | Accepted                      |
-| [045](#adr-045) | 2026-04-28 | Rename `Inventario` tab → `Productos` with sub-tabs Catálogo / Stock / Movimientos (UXD-R3)                                                            | Accepted                      |
-| [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto schema design (UXD-R3)                                                          | Accepted                      |
-| [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout + activeTabKey resolution + scroll containment (UXD-R3)                                               | Accepted                      |
-| [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS                                                                      | Accepted                      |
-| [049](#adr-049) | 2026-05-10 | PIN for login, Password for recovery                                                                                                                   | Accepted                      |
+<!-- ADR-INDEX -->
+
+| ADR | Date | Title | Status |
+| --- | --- | --- | --- |
+| [001](#adr-001) | 2026-04-23 | Tauri 2 over Electron for desktop | Accepted |
+| [002](#adr-002) | 2026-04-23 | Expo + React Native for mobile (tablets) | Accepted |
+| [003](#adr-003) | 2026-04-23 | Tamagui as the single cross-platform UI library | Accepted |
+| [004](#adr-004) | 2026-04-23 | Turborepo + pnpm workspaces as the monorepo tool | Accepted |
+| [005](#adr-005) | 2026-04-23 | Layered architecture with hard boundaries | Accepted |
+| [006](#adr-006) | 2026-04-23 | Local-first as the default; sync is additive | Accepted |
+| [007](#adr-007) | 2026-04-23 | LAN sync is first-party; Cloud sync uses PowerSync | Accepted |
+| [008](#adr-008) | 2026-04-23 | Supabase is Cloud-mode default, not a core dependency | Accepted |
+| [009](#adr-009) | 2026-04-23 | Money stored as bigint centavos, never float | Accepted |
+| [010](#adr-010) | 2026-04-23 | ULIDs as primary keys for all entities | Accepted |
+| [011](#adr-011) | 2026-04-23 | Drizzle ORM over raw SQL or Prisma | Accepted |
+| [012](#adr-012) | 2026-04-23 | Cross-platform components live in `packages/ui`, never duplicated per app | Accepted |
+| [013](#adr-013) | 2026-04-23 | TDD mandatory for domain and use-case layers | Accepted |
+| [014](#adr-014) | 2026-04-23 | Spanish (es-MX) is the only launch language | Accepted |
+| [015](#adr-015) | 2026-04-23 | Two documents (CLAUDE.md, ROADMAP.md) with distinct roles | Accepted |
+| [016](#adr-016) | 2026-04-23 | Brand asset management: single masters at repo root, derivatives per platform | Accepted |
+| [017](#adr-017) | 2026-04-23 | Storybook 10 over Ladle for component docs + visual regression | Accepted |
+| [018](#adr-018) | 2026-04-23 | Local Husky pre-push gate replaces GitHub Actions for Phase 0/1 | Accepted |
+| [019](#adr-019) | 2026-04-23 | Per-platform splash masters (amends ADR-016) | Accepted |
+| [020](#adr-020) | 2026-04-24 | Egresos sub-tab pattern: one modal with three tabs, not three modals | **Superseded by [ADR-042](#adr-042)** (2026-04-25). The |
+| [021](#adr-021) | 2026-04-24 | Egreso + MovimientoInventario dual-write via a single use-case (no transaction) | Accepted |
+| [022](#adr-022) | 2026-04-24 | Barcode scanning: expo-camera on mobile, `BarcodeDetector` API on desktop web | Accepted |
+| [023](#adr-023) | 2026-04-24 | Repository interfaces extend in place with `update(id, patch)` — no separate UpdateRepository | Accepted |
+| [024](#adr-024) | 2026-04-24 | PagoCliente application always goes through RegistrarPagoClienteUseCase — UI never composes the payment + state-flip pair | Accepted |
+| [025](#adr-025) | 2026-04-24 | Export formats: `exceljs` for Excel workbooks, `@react-pdf/renderer` for PDF reports | Accepted |
+| [026](#adr-026) | 2026-04-24 | Notifications — `expo-notifications` on mobile, `@tauri-apps/plugin-notification` on desktop, unified behind a `NotificationScheduler` interface | Accepted |
+| [027](#adr-027) | 2026-04-24 | Sentry crash reporting behind explicit local-first consent; default opt-out; PII scrubbing always on | Accepted |
+| [028](#adr-028) | 2026-04-24 | Vite resolves `.web.*` before `.ts`/`.tsx` on the desktop target so `.native.*` files never enter the bundle graph | Superseded by ADR-032 |
+| [029](#adr-029) | 2026-04-24 | LAN sync wire protocol — HTTP push/pull + WebSocket events, versioned via `X-Cachink-Protocol` | Accepted |
+| [030](#adr-030) | 2026-04-24 | SQLite triggers + `__cachink_change_log` for driver-agnostic change capture | Accepted |
+| [032](#adr-032) | 2026-04-24 | Vite dep scanner restricted to `index.html`; `react-native` excluded from pre-bundle on the desktop target | Accepted (supersedes ADR-028) |
+| [033](#adr-033) | 2026-04-24 | Test infrastructure never lives in `@cachink/ui`'s runtime graph — split the `@cachink/testing` barrel and move `MockRepositoryProvider` out of `@cachink/ui` | Accepted |
+| [034](#adr-034) | 2026-04-24 | `@cachink/ui` components use web-standard ARIA props — Tamagui 2.x removed the RN-style a11y translation layer | Accepted |
+| [035](#adr-035) | 2026-04-24 | PowerSync Sync Streams as the Cloud sync engine; hybrid backend — Cachink-hosted Supabase is the wizard default, Settings → Avanzado unlocks BYO Supabase/Neon/self-hosted | Accepted |
+| [036](#adr-036) | 2026-04-24 | Launch artifacts and versioning — semver floor, EAS release profiles, Tauri code signing + updater | Accepted |
+| [037](#adr-037) | 2026-04-24 | `@supabase/supabase-js` as a direct dependency of `apps/mobile` for Cloud-mode Auth | Accepted |
+| [038](#adr-038) | 2026-04-25 | `react-native-get-random-values` as a direct mobile dependency to polyfill `crypto.getRandomValues` for Hermes/ULID | Accepted |
+| [039](#adr-039) | 2026-04-25 | Setup wizard rewrite + AppMode collapse + lan-server/lan-client split | Accepted |
+| [040](#adr-040) | 2026-04-25 | Design-mock alignment — keep §1 tab contract, defer extras to Phase 2 "Más…" | Accepted |
+| [041](#adr-041) | 2026-04-25 | Anchored `<Combobox>` (Tamagui Popover) replaces bottom-sheet select; install icon native modules in apps | Accepted |
+| [042](#adr-042) | 2026-04-25 | Multi-step transactional flows are Stack pages, not single modals with internal tabs; KeyboardAvoidingView at the Modal primitive | Accepted (supersedes ADR-020 for the Egreso 3-tab modal in |
+| [043](#adr-043) | 2026-04-26 | `<Tag>` is decorative-only; tappable-chip primitive deferred to Phase 2 | Accepted |
+| [044](#adr-044) | 2026-04-26 | Component tests run on Vitest + jsdom + react-native-web alias, not Jest + React Native Testing Library | Accepted (clarifies CLAUDE.md §3) |
+| [045](#adr-045) | 2026-04-28 | Rename `Inventario` tab → `Productos` with sub-tabs | Accepted |
+| [046](#adr-046) | 2026-04-28 | Producto.tipo + seguirStock + Business.tipoNegocio + atributosProducto | Accepted |
+| [047](#adr-047) | 2026-04-28 | Persistent AppShell via Expo Router group layout | Accepted |
+| [048](#adr-048) | 2026-04-28 | Product-only sales: `Venta.productoId` required, Ventas screen becomes inline POS | Accepted |
+| [049](#adr-049) | 2026-05-10 | PIN for login, Password for recovery | Accepted |
+| [050](#adr-050) | 2026-05-14 | Wheel picker for bounded quantity inputs | Accepted |
+| [051](#adr-051) | 2026-08-18 | First run drops the wizard; the Director bar drops "Otros" | Accepted |
+| [052](#adr-052) | 2026-08-18 | "Otros" leaves the Operativo bar too — into Caja, not Configuración | Accepted |
+| [053](#adr-053) | 2026-09-11 | Cachink becomes a capture client; the web portal owns everything else | Accepted |
+| [054](#adr-054) | 2026-09-11 | Rebrand to Xangarro — `Xangarro` in code, `Xangarro!` in presentation | Accepted, pending IMPI trademark clearance on "Xangarro" |
+| [055](#adr-055) | 2026-09-11 | GitHub Actions returns as the gate for `main`; the pre-push hook becomes its local mirror | Accepted |
+| [056](#adr-056) | 2026-09-17 | The Asesor generates inside `apps/portal` on Vercel Cron; extraction to a dedicated runtime is scheduled for product phase 2 | Accepted |
+| [057](#adr-057) | 2026-09-17 | The portal styles with vanilla-extract over `@xangarro/tokens` and Radix primitives; no Tailwind, no styled component library | Accepted |
+| [058](#adr-058) | 2026-09-17 | The Claude Design project is the portal's specification; where it contradicts ADR-053, the architecture wins and the design is amended upstream | Accepted |
+| [059](#adr-059) | 2026-09-17 | Plans are renamed to Xangarrito / Xangarro / Xangarrote, entitlement gains `capabilities`, and every LLM-backed surface ships «Próximamente» in production | Accepted |
+| [060](#adr-060) | 2026-09-17 | Two entity classes — synced and portal-only — amending CLAUDE.md §11; Avisos and the Asesor feed share one `notices` table | Accepted |
+| [061](#adr-061) | 2026-09-17 | The portal's database is a Supabase-shaped Postgres, and its session carries the Supabase claim shape — so the RLS path production uses is the one we test | Accepted |
+| [062](#adr-062) | 2026-09-17 | Portal writes reuse the application use cases through Postgres repositories, and the table's sync scope — not the author — decides whether a write reaches the devices | Accepted |
+| [063](#adr-063) | 2026-09-17 | An internal admin console, `apps/admin` at `admin.xangarro.mx`, replaces "Supabase Studio + Stripe Dashboard" as the back-office | Accepted |
+| [064](#adr-064) | 2026-09-17 | Dormant free-tier accounts are archived to cold storage after 180 days, amending "the portal keeps everything forever" | Accepted |
+| [065](#adr-065) | 2026-09-17 | Plan limits measure transactions per month and active products, are advisory for transactions on every tier, and are counted by the server | Accepted |
+| [066](#adr-066) | 2026-09-17 | Merchant card collection through a `PaymentProvider` port (Mercado Pago + Clip); the server holds the intent, the device still writes the venta | Accepted |
+| [067](#adr-067) | 2026-09-17 | Onboarding is signup → "Platícanos de ti" wizard → recommended plan; annual billing and a 14-day trial on both paid tiers at launch | Accepted |
+| [068](#adr-068) | 2026-09-17 | Database scaling moves by measured triggers, reviewed monthly, amending ADR-053 §7 | Accepted |
+| [069](#adr-069) | 2026-09-17 | The mobile app is a business-employee sign-in tool with no in-app selling, to satisfy App Store 3.1.1/3.1.3 and Play payments policy in Mexico | Accepted |
+| [070](#adr-070) | 2026-09-17 | Every subscription payment gets a CFDI; the automation is built and wired behind a switch, and production starts with manual issuance in the SAT portal | Accepted (amended the same day after owner review) |
+| [071](#adr-071) | 2026-09-17 | A linked browser is a capture device — the operator's register ("caja") runs in the portal's origin, but it is a device with its own outbox, never a portal writer | Accepted |
+| [072](#adr-072) | 2026-09-17 | The operator NIP is four digits and only the owner sets or resets it; the activation code stays eight characters and the design is amended | Accepted |
+| [073](#adr-073) | 2026-09-17 | A sale is a ticket: a header entity carries folio, method, client, cash tendered and cancellation; `sales` become its lines | Accepted |
+| [074](#adr-074) | 2026-09-17 | Receivables are derived from two facts — fiado tickets and client abonos — and the turno's expected cash has one calculator | Accepted |
+| [075](#adr-075) | 2026-09-17 | Owner-to-operator messages and operator replies are two synced tables; «De tu caja» is derived on the device; `notices` is untouched | Accepted |
+| [076](#adr-076) | 2026-09-17 | The radius scale gains the dense steps 11 and 13; 15 and 17 are corrected upstream to 16 | Accepted |
+| [077](#adr-077) | 2026-09-17 | `yellowRule` (#DBB80A) replaces the design's translucent divider on yellow cards | Accepted |
+| [078](#adr-078) | 2026-09-17 | The sync cursor is a per-tenant counter taken under a row lock; pull pages one ordered stream; UP rows get receipts, not log entries | Accepted |
+| [079](#adr-079) | 2026-09-17 | Portal sessions are server-side; throttling lives in Postgres | Accepted |
+| [080](#adr-080) | 2026-09-18 | Five owner decisions: own auth with emailed links, portal-only code issuance, portal-only feature flags, Deno in CI, portal creates products | Accepted |
+| [081](#adr-081) | 2026-09-18 | Inventory movements flow to every phone (UP → HYBRID); the portal records movements; portal-created products start at zero stock | Accepted |
+| [082](#adr-082) | 2026-09-18 | The business's régimen is stored as its SAT code; the name bucket is derived | Accepted |
+| [083](#adr-083) | 2026-09-18 | Track O's open design questions get provisional answers so the screens can close; each is reversible by the owner | Accepted, provisional |
+| [084](#adr-084) | 2026-09-18 | The marketing site joins the monorepo as `apps/landing` | Accepted |
+| [085](#adr-085) | 2026-09-18 | Track O's design amendments landed upstream; the operator code follows the pulled files | Accepted |
+| [086](#adr-086) | 2026-09-18 | Track N utility screens are code-first under the token contract; receipts stay design-first | — |
+| [087](#adr-087) | 2026-09-19 | The account's display name lives on `auth.users`; celebrations are marked in a write-once table | Accepted (decides owner action O-24; P-13, P-27, P-33) |
+| [088](#adr-088) | 2026-09-19 | The Asesor's deterministic layer materialises on read, ahead of P-30's cron | Accepted (P-26; amends ADR-056's timing, not its shape) |
+| [089](#adr-089) | 2026-09-20 | Régimen-aware ISR from the published SAT tables, with a reference disclaimer | Accepted (resolves finding F-2; owner asked for tables-from-the-web + disclaimer instead of waiting on O-25's contador) |
+| [090](#adr-090) | 2026-09-21 | `informeMensual` moves down to Xangarro; the mock gains `over-limit`; the PAC contracted for subscription CFDIs must serve a future tenant-facing facturación add-on | Accepted |
+| [091](#adr-091) | 2026-09-22 | Infrastructure failures in the console's auth flow become form state, not an unhandled throw; the console gains error boundaries | Accepted |
+| [092](#adr-092) | 2026-09-22 | Analítica geográfica por estado, sin IP — un contador diario, no una bitácora de eventos; y la atribución de campaña que faltaba | Accepted |
+| [093](#adr-093) | 2026-09-22 | The hero illustration ships in v1 as the handoff's own PNG, optimised — reversing ADR-058 §7 | Accepted |
+| [094](#adr-094) | 2026-09-22 | Money crossing the `@xangarro/data-pg` boundary is parsed, never asserted | Accepted |
+| [095](#adr-095) | 2026-09-22 | A producto with negative stock is valued at zero on the Balance — and the seed may never produce one | Accepted |
+| [096](#adr-096) | 2026-09-22 | The console measures the business and can look over a tenant's shoulder — two amendments to ADR-063 row 3 | Accepted 2026-09-22 (owner decision, same day) |
+| [097](#adr-097) | 2026-09-22 | One sidebar entry per destination; the duplicated pairs merge | Accepted |
+| [098](#adr-098) | 2026-09-23 | The alta wizard asks how you work, not what your papers say — superseding the design's four steps | Accepted |
+| [099](#adr-099) | 2026-09-20 | One SVG renderer for the receipt templates; PDF is a page of that raster | Accepted |
+| [100](#adr-100) | 2026-09-23 | The root contract is rewritten against the code it governs, and its table of contents is generated | Accepted |
+
+<!-- END ADR-INDEX -->
 
 ---
 
@@ -6650,3 +6705,114 @@ unavailable later, and nothing it skips is asked twice.
 - Three answers still have no write path — tipoNegocio, WhatsApp and logo —
   and are captured against the day they do. That is a gap in the plumbing,
   not in this decision.
+
+---
+
+## ADR-100
+
+**Title:** The root contract is rewritten against the code it governs, and its table of contents is generated
+
+**Date:** 2026-09-23
+
+**Status:** Accepted — amends CLAUDE.md §1, §2.2, §3, §4, §5, §6, §7, §11 and §12; applies the CLAUDE.md edits ADR-053 and ADR-054 already called for
+
+**Context:**
+
+`CLAUDE.md` was last touched on 2026-07-09. In the ~400 commits since, the
+product was renamed (ADR-054), the phone became a capture client with the
+portal owning everything else (ADR-053), and three Next.js apps and seven
+packages were built. The contract absorbed none of it, and it is the file
+every session is told to read first — so its errors propagate into work.
+
+What it actually said, against the tree of 2026-09-23:
+
+- The project was "Cachink!" and §6 told agents to import `@cachink/domain`,
+  a scope that has not resolved since the rebrand.
+- §3 and §4 listed seven packages and **no `apps/` directory at all**, so
+  `apps/web`, `apps/backoffice` and `apps/landing` — which received nearly
+  every recent commit — were invisible in the map of the repository.
+- `packages/data-pg`, where all portal data access lives, was never mentioned.
+- §7 sent UI testing to "Playwright E2E for desktop (Tauri)"; `apps/desktop`
+  does not exist. §11's New Entity Checklist routed a new route file to
+  `apps/desktop/src/app/routes/`, and its UI steps named Tamagui for a portal
+  that styles with vanilla-extract (ADR-057). Following the checklist produced
+  files in a deleted app.
+- §5's commands were `npm run`; the repo is pnpm, and four enforcement
+  commands (`lint:design`, `design:contract`, `test:scripts`, `plan:board`)
+  had no entry.
+- §2.2 still read "local-first is the default, not an option", which ADR-053
+  superseded on 2026-09-11 — that ADR's Status line says it amends CLAUDE.md
+  §1 and §2.2, and the amendment was never applied.
+
+Separately, `ARCHITECTURE.md`'s own Index listed 48 rows against 98 ADRs.
+Half the decision log was unreachable from its own table of contents.
+
+`AGENTS.md` was a byte-for-byte copy of `CLAUDE.md` (the only diffs: the
+filename, one `.Codex/agents/` path, and trailing whitespace) — the contract
+that states "code lives in exactly one place" existing in two places, where
+the next correction would land in one of them.
+
+**Decision**
+
+1. **`CLAUDE.md` is rewritten against the code.** Every rule is kept — the ten
+   principles, the conventions, the prohibitions, the error-handling contract
+   and the coverage requirements all survive, several of them sharpened by what
+   the last quarter cost us. Only facts changed: the monorepo map, the layer
+   boundaries, the commands and the paths. §2.2 is restated as ADR-053 §5
+   decided it: offline never blocks capture, and the worst case is read-only
+   plus export.
+
+   This is the "add an ADR first" path that §2.10 requires. A contract that
+   describes a repository which no longer exists is not protected by the rule
+   against shrinking it; it is the reason the rule needs an escape hatch, and
+   this is that hatch used once, deliberately, with the diff recorded here.
+
+2. **The New Entity Checklist moves to `docs/new-entity-checklist.md`** and is
+   split by surface, because Postgres and SQLite entities are genuinely
+   different lists and the single list was true for neither. CLAUDE.md §10
+   links to it. The contract holds rules; a procedure that changes with the
+   schema does not belong in a file that may only grow.
+
+3. **`AGENTS.md` becomes a symlink to `CLAUDE.md`.** One contract, one file.
+   §9 names both `.claude/agents/` and `.Codex/agents/` so nothing is lost.
+
+4. **The `ARCHITECTURE.md` index is generated** by `scripts/adr-index.ts`
+   (`pnpm adr:index`), between `<!-- ADR-INDEX -->` markers, with
+   `adr-index.test.ts` failing when the committed index no longer matches the
+   ADRs in the file. Same contract as `plan-board.ts` and `design-contract`.
+   A hand-kept table of contents for an append-only file will always drift;
+   this one drifted by fifty rows before anyone noticed.
+
+5. **Dated snapshots leave the repository root** for `docs/archive/`, and the
+   loose debugging screenshots are untracked and ignored.
+
+**Alternatives considered**
+
+- *Patch CLAUDE.md in place.* Rejected: a third of the file was wrong, and the
+  wrong third was structural — the map, the stack and the checklist. Patching
+  would have left the shape of a two-app SQLite project with corrections
+  stapled on.
+- *Keep the checklist in the contract, corrected.* Rejected: it is ~50 lines of
+  procedure keyed to the schema, in a file whose own rule is that it never
+  shrinks. It would be stale again at the next entity.
+- *Make `AGENTS.md` a short pointer instead of a symlink.* Rejected: Codex
+  would then read three lines of prose instead of the contract.
+- *Delete the ADR index rather than generate it.* Tempting —
+  `grep '^## ADR-'` cannot go stale. Rejected because the index carries the
+  title, date and status of each decision, which is most of why anyone opens
+  the log at all.
+
+**Consequences**
+
+- A session that reads CLAUDE.md now gets a map that matches the tree, and the
+  `data-pg` → `withTenant` → `'use server'` path that nearly all current work
+  follows is written down for the first time.
+- ADR-086 has no `Status:` line at all, so the generated index renders an em
+  dash for it. The generator does not invent one; the log is append-only and
+  the gap is left visible.
+- The index now regenerates on every ADR. Adding one without running
+  `pnpm adr:index` fails `pnpm test:scripts`.
+- `AGENTS.md` is a symlink, which a Windows checkout without symlink support
+  would materialise as a text file containing a path. No contributor is on
+  Windows today; if one arrives, this becomes a generated copy with a check,
+  like the index.

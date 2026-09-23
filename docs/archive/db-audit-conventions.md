@@ -1,3 +1,7 @@
+> **ARCHIVED 2026-09-23** (ADR-100), moved out of the repository root. The conventions the 2026 database audit graded against; `db-audit-report.json` beside it cites this file. The live database audit is `docs/audits/db-2026-09-17.md`.
+>
+> Kept for its history.
+
 # Xangarro Database Conventions
 
 > Source: CLAUDE.md §2, §6, §7. This file codifies the project-specific

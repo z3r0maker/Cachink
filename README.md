@@ -9,226 +9,177 @@
 </p>
 
 <p align="center">
-  A simple, mobile-first financial control and micro-POS app for Mexican emprendedores and small businesses.<br/>
-  Captures sales, expenses, and inventory; produces NIF-compliant financial statements;<br/>
-  works fully offline on a single device or syncs across a LAN or the cloud.
+  Financial control and micro-POS for Mexican emprendedores and small businesses.<br/>
+  A phone captures the day on the shop floor; a web portal owns the books.
 </p>
 
 ---
 
-## Status
+## What this is
 
-🟡 **Pre-release — core features built, UI polish in progress.**
+Two surfaces over one shared domain (ADR-053):
 
-> **MVP release targets iOS (iPhone + iPad) only.** Android + desktop
-> (macOS/Windows) distributions are deferred post-MVP — the codebase
-> remains fully cross-platform.
+- **The app** is the **capture** surface — ventas, egresos, caja y turnos, stock and
+  barcode scanning. Single-role, offline-tolerant, built for a busy counter.
+- **The portal** owns everything else — identity and roles, business configuration,
+  catalogue, dashboards, NIF financial statements, comprobantes and billing.
 
-### ✅ Done
+The NIF (B-2 / B-3 / B-6) and KPI calculations live in `packages/domain` and both
+surfaces import them. That shared domain is what keeps the two halves honest.
 
-- **Point-of-sale (Ventas)** — product catalog, inline quick-sell, barcode scanner, payment methods (Efectivo, Transferencia, Tarjeta, QR/CoDi, Crédito), sale editing/cancellation
-- **Expenses (Egresos)** — Gasto / Nómina / Inventario-purchase sub-tabs, recurring expense templates with auto-reminders
-- **Inventory (Productos)** — stock tracking, movements log, low-stock alerts, merma (shrinkage), materia prima conversions, inventory audits
-- **Clients + Accounts Receivable** — lightweight client directory, crédito tracking, payment registration, overdue alerts
-- **NIF Financial Statements** — Estado de Resultados (B-3), Balance General (B-6), Flujo de Efectivo (B-2)
-- **KPI Dashboard (Indicadores)** — margins, liquidity, rotation, financial health gauges
-- **Director Home** — daily summary, recent activity, stock alerts, CxC, notification inbox
-- **Cash register (Caja)** — open/close shifts, discrepancy tracking, auto-egreso on difference, daily cash reconciliation (Corte de Día)
-- **User management** — Director + Operativo roles with PIN auth, quick-switch, employee management
-- **Export** — Excel workbook + PDF summary of all data; monthly accountant report (Informe para el Contador)
-- **Simple receipts (Comprobantes)** — shareable PNG/PDF per sale (not CFDI)
-- **Director Notification Inbox** — 13 alert sources, per-source preferences, severity indicators, deduplication
-- **Feature flags** — per-business toggles for stock, crédito, merma, auditoría, conversión
-- **Setup wizard** — intent-first onboarding with Local / LAN / Cloud mode selection
-- **Local standalone mode** — fully offline, no account required
-- **LAN sync** — SQLite-to-SQLite sync over local Wi-Fi (desktop server + up to 3 tablets)
-- **Cloud sync** — PowerSync + Supabase backend for multi-location
-- **Observability** — local audit logging, error telemetry, and health checks (`@xangarro/observability`)
-- **Cross-platform UI** — shared Tamagui component library rendering on iOS, Android, macOS, and Windows
+**Not an ERP. Not facturación. Not a CRM.** Spanish (es-MX) only at launch.
 
-### 🟡 In Progress
+**Status:** 🟡 pre-release. The portal is in design-conformance and launch hardening;
+the app is in UI/UX polish. Open work is on `docs/plan/PENDIENTES.md`
+(`pnpm plan:board`); the launch gate is `docs/launch-checklist.md`.
 
-- **Mobile UI/UX audit** — refining tap targets, keyboard flows, list virtualization, tablet landscape layouts, and visual density to match design mocks
-- **Route-stack refactor** — converting modal-based flows to proper page navigation (5 screens remaining)
-- **Split-pane layouts** — list/detail side-by-side on tablet landscape and desktop (6 screens remaining)
-
-### 📋 Not Started (Phase 2 candidates)
-
-- Operativo "Más…" tab (additional bottom-tab affordances)
-- CoDi QR payment flow
-- Clip / Mercado Pago Point integration
-- WhatsApp as a first-class share target
-- Payment reminders for Crédito ventas
-- ESC/POS receipt printer support
-- Cash drawer integration
-- Multi-business support
-
-### Numbers
-
-| Metric                        | Count                                |
-| ----------------------------- | ------------------------------------ |
-| Unit + integration tests      | ~2,100 across 365 test files         |
-| Maestro E2E flows             | 187 (174 flows + 13 shared subflows) |
-| Architecture Decision Records | 50                                   |
-| Monorepo packages             | 9                                    |
-
-Store submission is a human-gated action — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
-Current task tracking in [`ROADMAP.md`](./ROADMAP.md); phase history in [`ROADMAP-archive.md`](./ROADMAP-archive.md).
+|                                        |                                |
+| -------------------------------------- | ------------------------------ |
+| Apps / packages                        | 4 / 14                         |
+| Test files                             | ~665                           |
+| Playwright specs (portal + backoffice) | 72                             |
+| Maestro flows                          | 132 (116 + 16 shared subflows) |
+| ADRs                                   | 98                             |
 
 ---
 
-## Project Documents
+## Project documents
 
-Before touching any code, read these in order:
+Read these before touching code:
 
-1. **[CLAUDE.md](./CLAUDE.md)** — the architectural contract. Rules, principles, tech stack, layer boundaries, brand tokens. **Required reading** for every contributor and AI agent.
-2. **[ROADMAP.md](./ROADMAP.md)** — the implementation plan. Phases, milestones, tasks with checkboxes. Check here to see what's next.
-3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** — the decision log. Every significant architectural decision as an ADR. Consult this when making a decision that would be painful to reverse.
-
-Each file has a specific role and lifecycle (see CLAUDE.md §0).
-
----
-
-## Quick Reference
-
-**What is this?**
-A bilingual-Spanish-first tablet app for tracking a small Mexican business's finances. Simple sales capture, expense tracking, inventory with barcode scanning, NIF-compliant financial statements, all working offline-first.
-
-**Who is it for?**
-Emprendedores and small-business owners in Mexico. Not an ERP. Not facturación. Not a CRM.
-
-**What platforms?**
-
-- **Mobile (tablets):** iOS and Android via Expo + React Native
-- **Desktop:** Windows and macOS via Tauri 2
-
-**What deployment modes?**
-
-1. **Local standalone** — one device, no network, no account (default).
-2. **Tablet-only** — one tablet holds everything.
-3. **LAN distributed** — one PC + up to 3 tablets on the same Wi-Fi, syncing via a first-party SQLite-to-SQLite protocol bundled in the desktop app.
-4. **Cloud** — PowerSync + Supabase (or another Postgres backend) for multi-location.
-
-**Language:** Spanish (es-MX) only at launch.
+1. **[CLAUDE.md](./CLAUDE.md)** — the architectural contract: rules, layer boundaries,
+   monorepo map, conventions. Required reading for every contributor and agent.
+   (`AGENTS.md` is a symlink to it — one contract, one file.)
+2. **[docs/plan/](./docs/plan/)** — the live plan, per track. `PENDIENTES.md` is the
+   generated board of everything still open. `ROADMAP.md` covers the phone.
+3. **[ARCHITECTURE.md](./ARCHITECTURE.md)** — the decision log, append-only. Consult it
+   before any decision that would be painful to reverse.
+4. **[DESIGN_CONTRACT.md](./DESIGN_CONTRACT.md)** — the portal's visual specification.
+   Generated from `@xangarro/tokens`; never edited by hand.
 
 ---
 
-## Getting Started (Contributors)
+## Repository layout
+
+```
+xangarro/
+├── apps/
+│   ├── web/              The portal (Next.js App Router) — app.xangarro.mx
+│   ├── backoffice/       Internal staff console — admin.xangarro.mx
+│   ├── landing/          Marketing site (Vite, prerendered) — xangarro.mx
+│   └── mobile/           The capture app (Expo / React Native)
+├── packages/
+│   ├── domain/           Pure business logic — NIF, KPIs, money, entities
+│   ├── application/      Use cases
+│   ├── data-pg/          Postgres — cloud schema, RLS, queries, migrations
+│   ├── data/             SQLite — repositories for the device
+│   ├── contracts/        Wire contracts shared by phone and cloud (zod)
+│   ├── auth-core/        Passwords, sessions, throttles, TOTP
+│   ├── tokens/           Design tokens — the source of truth for the portal's pixels
+│   ├── ui/               Shared Tamagui components (mobile)
+│   ├── email/            Transactional email templates + senders
+│   ├── observability/    Audit logging, error telemetry, health checks
+│   ├── sync/             Capture sync: outbox push, reference-data pull
+│   ├── sync-lan/         Parked (ADR-053 §6)
+│   ├── testing/          Fixtures, in-memory repositories
+│   └── config/           Shared ESLint / TS / Prettier / Vitest configs
+└── scripts/              Repo tooling: design-lint, plan board, ADR index, releases
+```
+
+`archive/` holds retired code, kept out of the workspace on purpose.
+
+---
+
+## Getting started
 
 ```bash
 pnpm install
-pnpm test                              # full monorepo tests (~2,100 tests)
-pnpm lint                              # enforce layer boundaries + style
-pnpm typecheck                         # strict TS across all packages
-pnpm --filter @xangarro/mobile ios      # dev build (needs Metro running)
-pnpm --filter @xangarro/mobile ios:clean    # nuke Pods + full clean rebuild
-pnpm --filter @xangarro/mobile ios:preview  # preview build (tap icon, no Metro)
-pnpm --filter @xangarro/desktop tauri dev   # launch Tauri desktop app
+pnpm test          # unit + integration across the monorepo
+pnpm lint          # layer boundaries, file/function budgets, style
+pnpm typecheck     # strict TS everywhere
 ```
 
-### iOS Build — encoding note
+### Running a surface
 
-The workspace path contains `!` which requires UTF-8 encoding for CocoaPods.
-If you see `Encoding::CompatibilityError` or `ASCII-8BIT` errors, ensure your
-shell has these exports (added to `~/.zshrc` during setup):
+```bash
+pnpm --filter @xangarro/web dev          # portal        → localhost:3100
+pnpm --filter @xangarro/backoffice dev   # staff console → localhost:3200
+pnpm --filter @xangarro/landing dev      # marketing site
+pnpm --filter @xangarro/mobile ios       # dev build (needs Metro running)
+```
+
+The portal and backoffice need Postgres. It runs in Docker:
+
+```bash
+pnpm --filter @xangarro/data-pg db:reset   # apply migrations + seed
+```
+
+### Tests that need a database
+
+```bash
+pnpm --filter @xangarro/data-pg test:db    # integration tests; fails rather than skips
+pnpm --filter @xangarro/web test:e2e:db    # Playwright against a freshly seeded DB
+```
+
+Both refuse to run without a `DATABASE_URL` rather than passing vacuously — a suite
+that cannot tell you whether it ran against anything is worse than no suite.
+
+### iOS build notes
+
+The workspace path contains `!`, which CocoaPods needs UTF-8 to handle. If you hit
+`Encoding::CompatibilityError` or `ASCII-8BIT`, export these (setup adds them to
+`~/.zshrc`):
 
 ```bash
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 ```
 
-Clean rebuild after encoding or Pods issues:
+Then `pnpm --filter @xangarro/mobile ios:clean` for a full rebuild. Build against an
+iOS 26.4 simulator — the Xcode 26 `SwiftUICore` split breaks older runtimes.
 
-```bash
-pnpm --filter @xangarro/mobile ios:clean
-```
+---
 
-**Xcode 26+ note:** Build for an iOS 26.4 simulator (not 18.x). The
-`SwiftUICore` framework split in Xcode 26 causes linker errors when
-targeting older simulator runtimes.
-
-## Release workflow
+## Release
 
 ```bash
 ./scripts/build-all.sh --dry-run   # validate configs + tests
-./scripts/build-all.sh             # signed iOS / Android / macOS / Windows builds
-                                    # + dist/CHECKSUMS.txt + dist/sbom.json
-pnpm store:screenshots              # regenerate 24 store screenshots
+./scripts/build-all.sh             # signed builds + dist/CHECKSUMS.txt + dist/sbom.json
+pnpm store:screenshots             # regenerate store screenshots
 ```
 
-## Quickstart (Spanish, for end users)
+Store submission is human-gated — see [`docs/launch-checklist.md`](./docs/launch-checklist.md).
 
-1. Descarga la app desde [cachink.mx](https://cachink.mx).
-2. Abre y elige **📱 Solo este dispositivo** — no necesitas cuenta.
-3. Captura una primera venta y un primer egreso desde el tab inferior.
-4. El **Director** puede ver los estados financieros en **Estados**.
-
-Si tienes un equipo, más tarde activas el **servidor local** o la
-sincronización **en la nube** desde Ajustes.
-
-Requirements:
-
-- Node.js ≥ 22 LTS
-- pnpm ≥ 9
-- Xcode (for iOS Simulator on Mac)
-- Android Studio (for Android emulator)
-- Rust toolchain (for Tauri desktop builds)
+Requirements: Node ≥ 22 LTS, pnpm ≥ 9, Docker (for Postgres), Xcode (iOS), Android
+Studio (Android).
 
 ---
 
-## Tech Stack (Summary)
+## Tech stack
 
-- **TypeScript** throughout, strict mode
-- **Expo SDK 55+** (mobile), **Tauri 2.10+** (desktop)
-- **Tamagui** for shared cross-platform components
-- **SQLite** on every device, via **Drizzle ORM**
-- **PowerSync** (Cloud mode), first-party LAN sync (LAN mode)
-- **Zustand** + **TanStack Query** for state
-- **Vitest** + **React Native Testing Library** + **Maestro** + **Playwright** for testing
-- **@xangarro/observability** for local audit logging + error telemetry
-- **Turborepo** + **pnpm workspaces** monorepo
-
-See CLAUDE.md §3 for pinned version floors and full list.
+- **TypeScript** throughout, strict, `noUncheckedIndexedAccess`
+- **Next.js App Router** + Radix primitives + **vanilla-extract** over `@xangarro/tokens`
+  for the portal and console (ADR-057) — no Tailwind, no styled component library
+- **Expo / React Native** + **Tamagui** for the app
+- **Postgres** (Drizzle, RLS-enforced multi-tenancy) in the cloud; **SQLite** (Drizzle)
+  on the device
+- **Vitest** + **Playwright** (web) + **Maestro** (phone) for testing
+- **Turborepo** + **pnpm workspaces**
 
 ---
 
-## Key Principles
+## Key principles
 
 1. **UX simplicity is a feature.** The less clicks, the most value.
-2. **Local-first is the default.** Cloud/LAN sync are additive, never required.
-3. **Code lives in exactly one place.** Components are shared between mobile and desktop via `packages/ui`.
-4. **TDD is mandatory** for domain and use-case layers.
-5. **Money is always centavos (bigint), never floats.**
-6. **Spanish es-MX only** at launch (internationalization-ready from day one).
+2. **Offline never blocks capture, and data is never held hostage.** Worst case is
+   read-only plus export — never deleted, never locked.
+3. **Code lives in exactly one place.** Duplication is a bug.
+4. **TDD is mandatory** for domain and application layers.
+5. **Money is integer centavos, parsed and never asserted** across a driver boundary.
+6. **The design is the specification.** If the code and the design disagree, the code
+   is wrong.
 
-Full principles in CLAUDE.md §2.
-
----
-
-## Repository Layout
-
-```
-xangarro/
-├── apps/
-│   ├── mobile/           Expo app (iOS / Android tablets)
-│   └── desktop/          Tauri app (Windows / macOS)
-├── packages/
-│   ├── domain/           Pure business logic
-│   ├── application/      Use-cases
-│   ├── data/             Repositories + Drizzle + SQLite
-│   ├── ui/               Shared Tamagui components
-│   ├── sync-lan/         First-party LAN sync (LAN mode only)
-│   ├── sync-cloud/       PowerSync integration (Cloud mode only)
-│   ├── observability/    Audit logging, error telemetry, health checks
-│   ├── config/           Shared ESLint, TS, Prettier configs
-│   └── testing/          Shared test utilities, in-memory repos
-├── CLAUDE.md
-├── ROADMAP.md
-├── ARCHITECTURE.md
-└── README.md
-```
-
-See CLAUDE.md §4.1 for full details and layer boundary rules.
+Full contract in [CLAUDE.md](./CLAUDE.md).
 
 ---
 

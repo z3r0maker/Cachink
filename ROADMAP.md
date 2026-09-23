@@ -79,7 +79,7 @@ Three findings identified and fixed:
 Per the approved "Phase L + Phase I + Playwright drift + Maestro
 emulation pass" plan, ran the toolchain end-to-end on the iPad Pro
 11" simulator. Captured findings live in
-[`AUDIT-M1-STEP0-FINDINGS.md`](./AUDIT-M1-STEP0-FINDINGS.md).
+[`docs/archive/AUDIT-M1-STEP0-FINDINGS.md`](./docs/archive/AUDIT-M1-STEP0-FINDINGS.md).
 
 **Step 0 outcomes:**
 
@@ -140,7 +140,7 @@ emulation pass" plan, ran the toolchain end-to-end on the iPad Pro
 
 ### 2026-04-26 — Audit Round 2 closeout (Phases G + H + J + K)
 
-Per `AUDIT-ROUND-2.md` follow-up plan:
+Per `docs/archive/AUDIT-ROUND-2.md` follow-up plan:
 
 - **Phase G — Round 2 audit fixes (~3 dev-days):**
   - **G1 a11y semantics sweep:** added `role="status"` (Skeleton),
@@ -1111,7 +1111,7 @@ in parallel.
 These five items came out of the Maestro emulator pass (Step 0 of
 the "Phase L + Phase I + Playwright drift + Maestro emulation pass"
 plan). Full context in
-[`AUDIT-M1-STEP0-FINDINGS.md`](./AUDIT-M1-STEP0-FINDINGS.md).
+[`docs/archive/AUDIT-M1-STEP0-FINDINGS.md`](./docs/archive/AUDIT-M1-STEP0-FINDINGS.md).
 
 - [ ] **M-1-STEP0-T01 (Blocker, S)** Replace `<View onPress>` in the
       `Btn` primitive with `<Pressable>` so Maestro/iOS synthetic
@@ -1139,7 +1139,7 @@ plan). Full context in
       `<Dialog.Content>`. Every modal-based form benefits.
 - [ ] **M-1-STEP0-T04 (Medium, M)** Break the 10 require-cycle
       warnings logged in `packages/ui`. Inventory in
-      `AUDIT-M1-STEP0-FINDINGS.md` §F0-T08. Most are barrel-export
+      `docs/archive/AUDIT-M1-STEP0-FINDINGS.md` §F0-T08. Most are barrel-export
       cycles fixable by importing from the leaf module instead of
       `index.ts`; three are self-imports in `.native.tsx`
       platform-extension files that look like re-export typos.
