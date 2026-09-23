@@ -1,18 +1,26 @@
 'use client';
 
-import { formatFechaHora } from '@xangarro/domain';
+import { formatFechaHora, formatMoney } from '@xangarro/domain';
 import { useState } from 'react';
 
-import { Card, StatusPill, Tag } from '@/components';
+import { Card, StatusPill, Tag, type Tone as PillTone } from '@/components';
 import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite } from '@/session/gating';
 
 import { OperadorActions } from './operador-actions';
-import { DispositivoDetalle } from './dispositivo-drawer';
 import { OperadorDetalle } from './operador-drawer';
-import { RevokeButton } from './revoke-button';
-import { avatar, cardFoot, cardGrid, cardHead, cardName } from './equipo.css';
+import {
+  avatar,
+  cardFoot,
+  cardGrid,
+  cardHead,
+  cardName,
+  statBox,
+  statBoxes,
+  statLabel,
+  statValue,
+} from './equipo.css';
 
 const initials = (n: string) =>
   n
@@ -33,6 +41,53 @@ function canCancel(permissions: unknown): boolean {
 
 type Operador = EquipoData['operadores'][number];
 
+/**
+ * The shift pill the design puts on every operator card (C-3). Ours drew an
+ * «Inactivo» pill and nothing else, so an operator who had never opened a
+ * shift looked exactly like one mid-turn.
+ */
+const TURNO: Record<Operador['estadoTurno'], { readonly tone: PillTone; readonly label: string }> =
+  {
+    abierto: { tone: 'success', label: 'Turno abierto' },
+    cerrado: { tone: 'neutral', label: 'Turno cerrado' },
+    sin_vincular: { tone: 'warning', label: 'Sin vincular' },
+  };
+
+/** «Capturó hoy» and «Cobrado hoy» — the design's two inset boxes (C-2). */
+function StatBoxes({ o }: { readonly o: Operador }) {
+  return (
+    <div className={statBoxes}>
+      <div className={statBox}>
+        <div className={statLabel}>Capturó hoy</div>
+        <div className={statValue}>{o.capturoHoy}</div>
+      </div>
+      <div className={statBox}>
+        <div className={statLabel}>Cobrado hoy</div>
+        <div className={statValue}>{formatMoney(o.cobradoHoy)}</div>
+      </div>
+    </div>
+  );
+}
+
+function Encabezado({
+  o,
+  turno,
+}: {
+  readonly o: Operador;
+  readonly turno: (typeof TURNO)[keyof typeof TURNO];
+}) {
+  return (
+    <div className={cardHead}>
+      <span className={avatar} aria-hidden="true">
+        {initials(o.nombre ?? '')}
+      </span>
+      <strong className={cardName}>{o.nombre}</strong>
+      <StatusPill tone={turno.tone}>{turno.label}</StatusPill>
+      {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
+    </div>
+  );
+}
+
 function OperadorCard(props: {
   readonly o: Operador;
   readonly mayWrite: boolean;
@@ -40,24 +95,22 @@ function OperadorCard(props: {
   readonly onWarning: (w: string | null) => void;
 }) {
   const { o, showPerms } = props;
+  const turno = TURNO[o.estadoTurno];
   return (
     <Card>
-      <div className={cardHead}>
-        <span className={avatar} aria-hidden="true">
-          {initials(o.nombre ?? '')}
-        </span>
-        <strong className={cardName}>{o.nombre}</strong>
-        {o.active ? null : <StatusPill tone="neutral">Inactivo</StatusPill>}
-      </div>
+      <Encabezado o={o} turno={turno} />
       {showPerms && canCancel(o.permissions) ? (
         <div style={{ marginTop: 14 }}>
           <Tag tone="success">Puede cancelar ventas</Tag>
         </div>
       ) : null}
+      <StatBoxes o={o} />
+      {/* The footer names the device and when it was last seen, which is
+          what an owner asks when an operator's rows stop arriving. */}
       <p className={cardFoot}>
-        {o.active
-          ? 'Entra con su nombre y su NIP. No necesita correo.'
-          : 'Desactivado: no puede entrar a los teléfonos.'}
+        {o.dispositivo === null
+          ? 'Todavía no entra desde ningún teléfono.'
+          : `${o.dispositivo} · último turno ${formatFechaHora(o.ultimoTurnoAt)}`}
       </p>
       <OperadorDetalle id={o.id} nombre={o.nombre ?? ''} />
       {props.mayWrite && o.active ? (
@@ -96,42 +149,5 @@ export function Operadores({ rows }: { readonly rows: EquipoData['operadores'] }
         ))}
       </div>
     </>
-  );
-}
-
-export function Dispositivos({
-  rows,
-  mayWrite,
-}: {
-  readonly rows: EquipoData['dispositivos'];
-  /** A viewer sees no Revocar at all — hidden, not disabled. The action refuses regardless. */
-  readonly mayWrite: boolean;
-}) {
-  return (
-    <div className={cardGrid}>
-      {rows.map((d) => (
-        <Card key={d.id}>
-          <div className={cardHead}>
-            <strong className={cardName}>{d.nombre}</strong>
-            {d.revokedAt === null ? (
-              <StatusPill tone="success">Al día</StatusPill>
-            ) : (
-              <StatusPill tone="neutral">Revocado</StatusPill>
-            )}
-          </div>
-          {/* A text platform label — never an Apple or Android logo. */}
-          <p className={cardFoot}>
-            {d.plataforma === 'ios' ? 'iOS' : 'Android'} · {d.modelo}
-          </p>
-          <p className={cardFoot}>Última sincronización: {formatFechaHora(d.lastPushAt)}</p>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
-            {mayWrite && d.revokedAt === null ? (
-              <RevokeButton deviceId={d.id} nombre={d.nombre} />
-            ) : null}
-            <DispositivoDetalle d={d} mayWrite={mayWrite} />
-          </div>
-        </Card>
-      ))}
-    </div>
   );
 }

@@ -106,20 +106,34 @@ export interface LowStockRow {
  *
  * `cantidad` is always positive and the direction lives in `tipo`, so the sum
  * has to sign it. Summing `cantidad` raw would count every sale as a restock.
+ *
+ * The signed sum is computed once, in a subquery, and only the outer select
+ * casts it to text. Writing it three times — select, HAVING, ORDER BY — is how
+ * the ordering broke: `ORDER BY 2` pointed at the **cast** column, so Postgres
+ * compared '12' against '3' as strings and put the better-stocked product
+ * first. Scarcest-first is the whole point of the list, so the comparison has
+ * to stay numeric. Ties break on the name, so the card does not reshuffle
+ * between reads.
+ *
+ * The inner column is `stock_num`, not `stock`, for the same reason: a bare
+ * `ORDER BY stock` resolves to the **output** alias — the text again — and
+ * quietly restores the bug. A name the select list does not shadow cannot.
  */
 export async function lowStock(tx: Tx): Promise<readonly LowStockRow[]> {
   const rows = await tx.execute<{ producto: string; stock: string; umbral: number }>(sql`
-    SELECT p.nombre AS producto,
-           COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN -m.cantidad ELSE m.cantidad END), 0)::text AS stock,
-           p.umbral_stock_bajo AS umbral
-      FROM ${products} p
-      LEFT JOIN ${inventoryMovements} m
-        ON m.producto_id = p.id AND m.deleted_at IS NULL
-     WHERE p.deleted_at IS NULL AND p.seguir_stock
-     GROUP BY p.id, p.nombre, p.umbral_stock_bajo
-    HAVING COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN -m.cantidad ELSE m.cantidad END), 0)
-             <= p.umbral_stock_bajo
-     ORDER BY 2 ASC`);
+    SELECT producto, stock_num::text AS stock, umbral
+      FROM (
+        SELECT p.nombre AS producto,
+               COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN -m.cantidad ELSE m.cantidad END), 0) AS stock_num,
+               p.umbral_stock_bajo AS umbral
+          FROM ${products} p
+          LEFT JOIN ${inventoryMovements} m
+            ON m.producto_id = p.id AND m.deleted_at IS NULL
+         WHERE p.deleted_at IS NULL AND p.seguir_stock
+         GROUP BY p.id, p.nombre, p.umbral_stock_bajo
+      ) s
+     WHERE stock_num <= umbral
+     ORDER BY stock_num ASC, producto ASC`);
   return [...rows].map((r) => ({ producto: r.producto, stock: Number(r.stock), umbral: r.umbral }));
 }
 

@@ -1,4 +1,6 @@
 export * from './dashboard.js';
+export * from './equipo.js';
+export * from './equipo-listas.js';
 export * from './lists.js';
 export * from './movimientos.js';
 export * from './entities.js';
@@ -13,6 +15,7 @@ export * from './avisos.js';
 export * from './historial.js';
 export * from './serie.js';
 export * from './equipo.js';
+export * from './equipo-listas.js';
 export * from './asesor.js';
 export * from './metas.js';
 export * from './logos.js';

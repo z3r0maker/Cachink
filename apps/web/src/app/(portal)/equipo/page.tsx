@@ -1,3 +1,4 @@
+import { hoy } from '@/server/clock';
 import { requireSession } from '@/server/auth';
 import { portalOrigin } from '@/server/billing/origin';
 import { loadEquipo } from '@/server/screens';
@@ -17,7 +18,7 @@ export default async function EquipoPage({
   const registerUrl = `${await portalOrigin()}/operador`;
   const initialTab = tab === 'dispositivos' ? 'dispositivos' : 'operadores';
   try {
-    const data = await loadEquipo(session.business_id);
+    const data = await loadEquipo(session.business_id, hoy());
     return <EquipoScreen initialTab={initialTab} data={data} registerUrl={registerUrl} />;
   } catch {
     return <EquipoScreen initialTab={initialTab} data={null} registerUrl={registerUrl} />;

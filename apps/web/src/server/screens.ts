@@ -36,9 +36,11 @@ export const loadProductos = (biz: string) =>
     movimientos: await listMovimientosInventario(tx),
   }));
 
-export const loadEquipo = (biz: string) =>
+export const loadEquipo = (biz: string, hoy: string) =>
   withTenant(biz, async (tx) => ({
-    operadores: await listOperadores(tx),
+    // «Capturó hoy» and «Cobrado hoy» are the business's today, not the
+    // server's: the clock belongs to the tenant (server/clock).
+    operadores: await listOperadores(tx, hoy),
     dispositivos: await listDispositivos(tx),
     codigo: await liveActivationCode(tx),
   }));

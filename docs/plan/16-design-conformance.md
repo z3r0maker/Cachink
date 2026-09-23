@@ -238,7 +238,7 @@ into conformance by accident.
 
 ## Orden sugerido
 
-~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (five of eleven) → W-6 → W-7.
+~~W-1 → W-2 → W-8 → W-4 → W-5~~ → **W-3** (nine of eleven) → W-6 → W-7.
 
 W-8 sits third because the charts are the most visible thing on the screen a
 director actually opens. W-4 and W-5 move ahead of W-3 because they are small

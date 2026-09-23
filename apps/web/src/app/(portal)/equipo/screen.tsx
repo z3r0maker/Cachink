@@ -9,8 +9,10 @@ import { useSession } from '@/session/provider';
 import type { EquipoData } from '@/server/screens';
 import { canWrite, resolveScreenState } from '@/session/gating';
 
-import { Dispositivos, Operadores } from './cards';
+import { Operadores } from './cards';
+import { Dispositivos } from './device-cards';
 import { NuevoOperadorDialog } from './operador-dialogs';
+import { KpisDispositivos, KpisOperadores } from './kpis';
 import { PairingPanel } from './pairing-panel';
 import { pageSubtitle, pageTitle } from './equipo.css';
 
@@ -124,6 +126,22 @@ function Encabezado(props: {
   );
 }
 
+/** The tab's four tiles; nothing to count while the read is failing. */
+function Kpis({
+  data,
+  isOperadores,
+}: {
+  readonly data: EquipoData | null;
+  readonly isOperadores: boolean;
+}) {
+  if (data === null) return null;
+  return isOperadores ? (
+    <KpisOperadores rows={data.operadores} />
+  ) : (
+    <KpisDispositivos rows={data.dispositivos} />
+  );
+}
+
 export function EquipoScreen({
   initialTab,
   data,
@@ -141,6 +159,7 @@ export function EquipoScreen({
   return (
     <>
       <Encabezado isOperadores={isOperadores} c={c} />
+      <Kpis data={data} isOperadores={isOperadores} />
       <SegmentedTabs
         ariaLabel="Tu equipo"
         value={tab}
