@@ -6,7 +6,8 @@ import { formatMoneyEntero, type Desglose, type EstadoDeResultados } from '@xang
 import { CascadaSvg } from './cascada';
 import { DonutSvg, PALETA_EGRESOS, PALETA_INGRESOS } from './donut';
 import { donutEgresos, donutIngresos, waterfallDeResultados } from './charts-data';
-import { chartSubtitle, chartTitle, donutGrid } from './estados.css';
+import { donutGrid } from './charts.css';
+import { chartSubtitle, chartTitle } from './estados.css';
 
 /**
  * The Resultados charts (P-14), drawn to the design (C-13).

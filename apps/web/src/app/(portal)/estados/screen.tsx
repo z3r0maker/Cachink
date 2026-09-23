@@ -10,7 +10,9 @@ import type { EstadosModel } from '@/server/estados';
 import { hasStatements, resolveScreenState } from '@/session/gating';
 
 import { activoLines, flujoLines, pasivoLines, resultadosLines } from './lines';
-import { Indicadores, IsrNotice, Resumen } from './parts';
+import { IsrNotice, Resumen } from './parts';
+import { Indicadores } from './indicadores';
+import { FlujoCard } from './flujo-card';
 import { pageSubtitle, pageTitle } from './estados.css';
 import type { Periodo } from './periodo';
 import { PeriodoSwitcher } from './periodo-switcher';
@@ -66,6 +68,7 @@ function Flujo({ m }: { readonly m: EstadosModel }) {
         figure={FLUJO.total}
         label="Incremento neto en efectivo"
       />
+      <FlujoCard flujo={FLUJO} />
       <Statement title="Flujo de Efectivo (NIF B-2)" lines={flujoLines(FLUJO)} />
     </>
   );

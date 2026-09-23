@@ -2,14 +2,7 @@ import { formatMoneyEntero } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import type { DonutSlice } from './charts-data';
-import {
-  barrido,
-  donutFila,
-  donutLista,
-  donutMonto,
-  donutSwatch,
-  donutTitulo,
-} from './estados.css';
+import { barrido, donutFila, donutLista, donutMonto, donutSwatch, donutTitulo } from './charts.css';
 
 /**
  * The composition donut — drawn from the design's own `120×120` canvas (C-13).

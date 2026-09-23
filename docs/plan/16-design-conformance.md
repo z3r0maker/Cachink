@@ -8,7 +8,7 @@ Findings are referenced by their audit ids: `S-n` systemic, `A-n` acceso,
 `B-n` operación diaria, `C-n` dinero y negocio, `D-n` detalle transversal.
 
 **Done:** A-12 (hero de acceso, ADR-093) · W-1 (los cuatro estados, ADR-094)
-· W-8 en su mitad visible (las gráficas de Resultados) — todo 2026-09-22.
+· W-8 (las cuatro gráficas de Estados) — todo 2026-09-22.
 
 ---
 
@@ -68,7 +68,9 @@ screenshot — better done before anyone reviews the per-screen work.
 
 ## W-8 · Las gráficas de Estados financieros (C-13)
 
-**Half done 2026-09-22.** The Resultados charts were Recharts with stock
+**Done 2026-09-22.** All four charts now exist and are drawn to the design.
+
+The Resultados half first: they were Recharts with stock
 defaults — an axis, gridlines, tick labels, a tooltip and a legend the design
 has none of; unbordered marks; two colours doing the work of four; no leader
 lines, so the cascade read as a bar chart; and a donut with no centre total
@@ -83,17 +85,30 @@ semantic four (green kept, blue subtotal, red subtracted, amber ISR); the
 leaders are back; the donut's black backing ring gives each slice its border
 and the hole carries the total.
 
-**Still open — the other two charts, which we never built at all:**
+Then the two that had never been built at all — both live only in the
+`.dc.html`, which is how the first audit pass missed them:
 
-- **Flujo** — «Entradas y salidas del periodo»: `700×180` diverging bars
+- **Flujo** — «Entradas y salidas del periodo», `700×180`: diverging bars
   around a centre `$0` axis, entradas right in green and salidas left in red,
   closing on a `2.5px` rule with «Incremento neto en efectivo» at 32px.
-- **Indicadores** — a `180×106` gauge per ratio (three bands, black needle on
-  a yellow hub), the 36px figure, a verdict with a bordered dot, and a
-  `120×34` sparkline under a delta. Ours is text cards with a tone colour.
+  **One scale serves both sides**, or a gasto would out-run a larger cobro;
+  the shorter runway sets it.
+- **Indicadores** — a `180×106` dial per margin: three bands, a black needle
+  on a yellow hub, the 36px figure and a verdict with a bordered dot. The
+  bands come from the domain's `DEFAULT_HEALTH_THRESHOLDS`, the same numbers
+  `evaluateHealth` judges by, so the needle can never sit in green under a
+  «Crítico». The three ratios that have no natural ceiling — liquidez,
+  rotación, cobranza — stay as cards, as the design has them; two of them
+  were not on the screen at all before.
 
-Both live only in the `.dc.html` — the handoff README's Estados section does
-not mention charts at all, which is how the first audit pass missed them.
+`chart-geo.ts` holds the rules a wrong chart would break quietly — the
+shared scale and the band boundaries — with `tests/chart-geo.test.ts` on
+them.
+
+**Still open:** the design's per-ratio delta and `120×34` sparkline
+(«↑ 2.1 pts vs mes anterior»). Both need the previous period's indicadores,
+which `loadEstadosModel` does not fetch — a data change, so it belongs with
+W-3 rather than here.
 
 **Also freed up:** `recharts` now has one consumer left,
 `_inicio/ultimos-30.tsx`. The design gives that sparkline its own geometry

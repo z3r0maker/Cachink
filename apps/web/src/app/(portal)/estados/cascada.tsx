@@ -2,7 +2,7 @@ import { formatMoneyEntero } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import type { WaterfallStep } from './charts-data';
-import { crece } from './estados.css';
+import { crece } from './charts.css';
 
 /**
  * «Cascada de resultados» — drawn, not charted (C-13).
