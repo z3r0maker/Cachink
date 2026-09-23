@@ -34,9 +34,9 @@ test('from Cobranza to the account: balance, open ticket, history', async ({ pag
 });
 
 test('an abono settles the ticket and lowers the balance', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Orden del día', precioCentavos: 6000, sku: 'OPCLI1' }]);
   await page.goto('/operador/caja');
-  await fiar(page, /Gringa/, /Doña Mari de la tienda/);
+  await fiar(page, /Orden del día/, /Doña Mari de la tienda/);
 
   await page.getByRole('link', { name: 'Cobranza' }).click();
   await page.locator('a[href="/operador/cobranza/01HZ8XQN9GZJXV8AKQ5X0CDMAR"]').click();

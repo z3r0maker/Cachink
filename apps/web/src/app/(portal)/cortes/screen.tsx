@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { colors } from '@xangarro/tokens';
+import { colors, portalFontSizes } from '@xangarro/tokens';
 
 import {
   Button,
@@ -134,7 +134,7 @@ function SinCortes({ onClear }: { readonly onClear: () => void }) {
   return (
     <EmptyState
       inset
-      glyph={<span style={{ fontSize: 34 }}>📭</span>}
+      glyph={<span style={{ fontSize: portalFontSizes.xl6 }}>📭</span>}
       title="Sin cortes que mostrar"
       body="Ningún corte coincide con lo que estás filtrando. Quita un filtro o busca por otro operador."
       action={{ label: 'Ver todos los cortes', onClick: onClear }}

@@ -15,22 +15,10 @@ import { readDevice } from '../runtime/device-store';
 
 type Estado = 'decidiendo' | 'acceso' | 'adentro';
 
-/**
- * Fixture-era bypass: the register's screens still render the design fixtures
- * (real data arrives with O-14+), so the suite's storageState sets this flag
- * and the gate lets the screens through. The O-12 spec runs without it and
- * walks the real door. Removed when the screens read the runtime.
- */
-const DEMO_FLAG = 'xangarro.caja.demo';
-
 export function AccesoGate(p: { readonly children: ReactNode }) {
   const [estado, setEstado] = useState<Estado>('decidiendo');
 
   useEffect(() => {
-    if (localStorage.getItem(DEMO_FLAG) === '1') {
-      setEstado('adentro');
-      return;
-    }
     const device = readDevice();
     if (device === null) {
       setEstado('acceso');

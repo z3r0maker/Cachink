@@ -4,6 +4,12 @@ import { puertaOperador } from './puerta-operador';
 
 test.beforeEach(() => test.setTimeout(120_000));
 
+/** This test's own catalogue (chaos-proof: the portal specs own the seed). */
+const PRODUCTOS = [
+  { nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPVENT1' },
+  { nombre: 'Refresco de la casa', precioCentavos: 2500, sku: 'OPVENT2' },
+] as const;
+
 /** Sell through the register's own catalogue: one product ×2 in cash. */
 async function venderEfectivo(page: Page, nombre: RegExp, efectivo: string): Promise<void> {
   await page.getByRole('button', { name: nombre }).first().click();
@@ -21,10 +27,10 @@ async function venderEfectivo(page: Page, nombre: RegExp, efectivo: string): Pro
  * register's own tickets — this test's two sales, one of them cancelled.
  */
 test('the turno figures exclude the cancelled sale', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
-  await venderEfectivo(page, /Quesadilla/, '100');
-  await venderEfectivo(page, /Taco al pastor/, '60');
+  await venderEfectivo(page, /Orden del día/, '100');
+  await venderEfectivo(page, /Refresco de la casa/, '60');
 
   await page.getByRole('link', { name: 'Ventas' }).click();
   await expect(page.getByText('$130.00').first()).toBeVisible();
@@ -42,16 +48,16 @@ test('the turno figures exclude the cancelled sale', async ({ page }) => {
 });
 
 test('search and method filters narrow the list', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
-  await venderEfectivo(page, /Quesadilla/, '100');
+  await venderEfectivo(page, /Orden del día/, '100');
 
   await page.getByRole('link', { name: 'Ventas' }).click();
   await page.getByRole('button', { name: 'Efectivo', exact: true }).click();
   await expect(page.getByText('V-0001')).toBeVisible();
   await page.getByRole('button', { name: 'Fiado', exact: true }).click();
   await expect(page.getByText('Sin resultados')).toBeVisible();
-  await page.getByLabel('Buscar venta').fill('quesadilla');
+  await page.getByLabel('Buscar venta').fill('orden');
   await page.getByRole('button', { name: 'Todos', exact: true }).click();
   await expect(page.getByText('V-0001')).toBeVisible();
   await page.getByLabel('Buscar venta').fill('nada así');

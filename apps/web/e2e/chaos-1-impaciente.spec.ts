@@ -10,9 +10,10 @@ import postgres from 'postgres';
  * a `page.route` delay so the race is deterministic, then assert the system
  * recovers to a single, consistent state.
  *
- * The login form — which guards with `disabled={pending}` — and the operador
- * caja (local state, toast replacement) are the resilient controls that prove
- * the movimiento double-write is a defect, not a framework limit.
+ * The login form — which guards with `disabled={pending}` — is the resilient
+ * control that proves the movimiento double-write is a defect, not a
+ * framework limit. The operador caja smash moved to operador-chaos.spec.ts
+ * (O-38: the register runs behind the real door, serial, own device).
  *
  * Desktop-only for the mutating tests: `fullyParallel` runs the three viewport
  * projects against one Postgres, so each test owns a distinct seeded product.
@@ -156,46 +157,4 @@ test('reloading mid-save leaves DB and UI reconciled, no phantom state', async (
   const dbName = await readName();
   expect([oldName, newName], 'a killed in-flight write must land atomically').toContain(dbName);
   await expect(page.locator('main').getByText(dbName)).toBeVisible();
-});
-
-test('operador: smashing Cobrar and Registrar venta yields ONE registered sale', async ({
-  page,
-}) => {
-  // /operador/* is fixture-driven and session-free (device-local): pure client chaos.
-  await page.goto('/operador/caja');
-
-  await page
-    .getByRole('button', { name: /Taco de pastor/ })
-    .first()
-    .click();
-  // Under 1240 px the ticket collapses behind its «3Cobrar» toggle (same rule
-  // as operador-caja.spec's `ticket()` helper) — expand it to reach Cobrar.
-  if ((page.viewportSize()?.width ?? 1440) < 1240) {
-    await page.locator('button', { hasText: /^\d+Cobrar/ }).click();
-  }
-  const cobrar = page
-    .getByRole('button', { name: 'Cobrar', exact: true })
-    .filter({ visible: true })
-    .first();
-  await expect(cobrar).toBeEnabled();
-
-  await smash(cobrar);
-
-  const modal = page.getByRole('dialog');
-  await expect(modal).toBeVisible();
-  await expect(page.getByRole('dialog')).toHaveCount(1);
-  await modal.getByRole('button', { name: 'Efectivo', exact: true }).click();
-  // The fixture opens with a $160 ticket and the added taco makes it $185 —
-  // pay enough that «Registrar venta» is enabled, or the smash clicks a
-  // disabled button and proves nothing.
-  await modal.getByLabel('Con cuánto paga').fill('200');
-
-  await smash(modal.getByRole('button', { name: /^Registrar venta$/ }));
-
-  // Recovery state: exactly one success toast (toast replacement absorbs the
-  // smash), and the ticket is empty — which is what gates Cobrar (count 0).
-  // Asserted as attachment: under 1240 px the cleared ticket collapses its
-  // panel, so the Cobrar button itself is not on screen to check.
-  await expect(page.getByRole('status').filter({ hasText: 'Venta registrada' })).toHaveCount(1);
-  await expect(page.locator('aside[aria-label=Ticket]').getByText('Ticket vacío')).toBeAttached();
 });

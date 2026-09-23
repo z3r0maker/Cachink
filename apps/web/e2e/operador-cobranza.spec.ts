@@ -4,6 +4,8 @@ import { puertaOperador } from './puerta-operador';
 
 test.beforeEach(() => test.setTimeout(120_000));
 
+const PRODUCTOS = [{ nombre: 'Orden del día', precioCentavos: 4000, sku: 'OPCOB1' }] as const;
+
 /** One fiado sale: two of the product on the client's account. */
 async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void> {
   await page.getByRole('button', { name: producto }).first().click();
@@ -22,9 +24,9 @@ async function fiar(page: Page, producto: RegExp, cliente: RegExp): Promise<void
  * that settles it oldest-first.
  */
 test('a fiado sale opens the account, and the abono settles it oldest first', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/caja');
-  await fiar(page, /Quesadilla/, /Doña Mari de la tienda/);
+  await fiar(page, /Orden del día/, /Doña Mari de la tienda/);
 
   await page.getByRole('link', { name: 'Cobranza' }).click();
   await expect(page.getByText('1 ventas abiertas').first()).toBeVisible();
@@ -44,7 +46,7 @@ test('a fiado sale opens the account, and the abono settles it oldest first', as
 });
 
 test('a client without saldo says so, and the filters narrow', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, PRODUCTOS);
   await page.goto('/operador/cobranza');
   await expect(page.getByText('Sin saldo por cobrar').first()).toBeAttached();
   await page.getByLabel('Buscar cliente').fill('nadie así');

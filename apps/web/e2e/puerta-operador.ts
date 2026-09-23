@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import type { Page } from '@playwright/test';
 
+import { newUlid } from '@xangarro/domain';
 import { mintCode, pasarAcceso } from './acceso-flow';
 
 const HERE = import.meta.dirname;
@@ -19,6 +20,9 @@ const HERE = import.meta.dirname;
  */
 
 /** Codes come from the activation alphabet (Crockford, no I/L/O/U). */
+/** The seeded device id (seed-data's DEV) — rows the door plants carry it. */
+const DEV = '01HZ8XQN9GZJXV8AKQ5X0C7DEV';
+
 const ALFABETO = 'ABCDEFGHJKMNPQRSTVWXYZ23456789';
 function codigo(): string {
   let out = '';
@@ -44,12 +48,38 @@ async function desatascar(): Promise<void> {
   }
 }
 
-export async function puertaOperador(page: Page): Promise<void> {
+/** A product the door's bootstrap will carry into the register's database. */
+export interface ProductoPuerta {
+  readonly nombre: string;
+  readonly precioCentavos: number;
+  readonly sku: string;
+}
+
+/** Insert before activating: the bootstrap then carries them into the
+ *  register's OPFS — chaos-proof (the portal specs own every seeded row). */
+async function sembrar(productos: readonly ProductoPuerta[]): Promise<void> {
+  if (productos.length === 0) return;
+  await asTenant(BIZ, async (sql) => {
+    for (const p of productos) {
+      await sql`
+        INSERT INTO products (id, nombre, sku, categoria, costo_unit_centavos, unidad,
+                              umbral_stock_bajo, tipo, seguir_stock, precio_venta_centavos,
+                              business_id, device_id, created_at, updated_at)
+        VALUES (${newUlid()}, ${p.nombre}, ${p.sku}, 'Producto Terminado', 100, 'pza', 3,
+                'producto', true, ${p.precioCentavos},
+                ${BIZ}, ${DEV}, now(), now())
+        ON CONFLICT (sku) DO NOTHING`;
+    }
+  });
+}
+
+export async function puertaOperador(
+  page: Page,
+  productos: readonly ProductoPuerta[] = [],
+): Promise<void> {
   await desatascar();
-  // The shared storageState still carries the fixture-era demo flag (it dies
-  // with the last converted file); this door is the real one.
+  await sembrar(productos);
   await page.goto('/');
-  await page.evaluate(() => localStorage.removeItem('xangarro.caja.demo'));
   const code = codigo();
   await mintCode(code);
   await page.goto('/operador/caja');

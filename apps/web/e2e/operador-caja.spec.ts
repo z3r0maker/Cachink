@@ -20,11 +20,11 @@ async function ticket(page: Page) {
  * The register starts empty — every line here was tapped by this test.
  */
 test('a cash sale shows the change and starts a new ticket', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 2500, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
-  const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
-  await taco.click();
-  await taco.click();
+  const suadero = page.getByRole('button', { name: /Suadero del día/ }).first();
+  await suadero.click();
+  await suadero.click();
   const panel = await ticket(page);
   await expect(panel.getByText('$50.00').first()).toBeVisible();
 
@@ -41,7 +41,7 @@ test('a cash sale shows the change and starts a new ticket', async ({ page }) =>
 });
 
 test('short cash keeps «Registrar venta» disabled and says what is missing', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 2500, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
   await page
     .getByRole('button', { name: /Quesadilla/ })
@@ -55,7 +55,7 @@ test('short cash keeps «Registrar venta» disabled and says what is missing', a
 });
 
 test('a credit sale needs a client, then adds to their balance', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 6000, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
   await page
     .getByRole('button', { name: /Gringa/ })
@@ -74,11 +74,11 @@ test('a credit sale needs a client, then adds to their balance', async ({ page }
 });
 
 test('a long ticket never pushes the total or COBRAR out of view', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 2500, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
-  const taco = page.getByRole('button', { name: /Taco al pastor/ }).first();
+  const suadero = page.getByRole('button', { name: /Suadero del día/ }).first();
   for (let i = 0; i < 12; i += 1) {
-    await taco.click();
+    await suadero.click();
   }
   const panel = await ticket(page);
   await expect(panel.getByRole('button', { name: 'Cobrar', exact: true })).toBeInViewport();
@@ -86,7 +86,7 @@ test('a long ticket never pushes the total or COBRAR out of view', async ({ page
 });
 
 test('«Deshacer» brings the sold lines back', async ({ page }) => {
-  await puertaOperador(page);
+  await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 6000, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
   await page
     .getByRole('button', { name: /Gringa/ })
@@ -95,5 +95,7 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
   await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Tarjeta' }).click();
   await page.getByRole('status').getByRole('button', { name: 'Deshacer' }).click();
-  await expect(page.locator('aside[aria-label=Ticket]').getByText('Gringa')).toBeAttached();
+  await expect(
+    page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),
+  ).toBeAttached();
 });
