@@ -11,6 +11,7 @@ import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
 import { publishableKey } from './config';
+import { recordGeo } from '../geo/record';
 import { liveBillingUseCases } from './live';
 import { portalOrigin as origin } from './origin';
 
@@ -57,6 +58,7 @@ export async function iniciarPrueba(plan: string, interval: string): Promise<Bil
       successUrl: `${base}${SUSCRIPCION}?pago=listo&session_id={CHECKOUT_SESSION_ID}`,
       cancelUrl: `${base}${SUSCRIPCION}`,
     });
+    await recordGeo('compra');
     return { ok: true, url };
   } catch (error) {
     return fail(error, 'iniciarPrueba');
@@ -67,6 +69,7 @@ export async function iniciarPrueba(plan: string, interval: string): Promise<Bil
 export async function pagarAnualPorSpei(plan: string): Promise<BillingActionResult> {
   try {
     const url = await liveBillingUseCases().spei.execute({ business: await owner(), plan });
+    await recordGeo('compra');
     return { ok: true, url };
   } catch (error) {
     return fail(error, 'pagarAnualPorSpei');

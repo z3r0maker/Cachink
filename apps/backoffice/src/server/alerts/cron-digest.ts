@@ -28,6 +28,8 @@ export interface DigestCronDeps {
   /** N-05's follow-up: expired-session pruning, run after the mail so a
    * prune failure never costs the digest. Its count goes to the log only. */
   readonly pruneSessions?: () => Promise<number>;
+  /** N-61: drop geographic counters past their retention. */
+  readonly pruneGeo?: () => Promise<number>;
   /** N-18: expire approvals the tenant ignored for 14 days, and purge the
    * files of rows resolved 30+ days ago (LFPDPPP). Same rule as the
    * sessions: housekeeping never costs the digest. */
@@ -79,6 +81,7 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
   const rejections = await readRejections(deps, now, log);
   const digest = buildDailyDigest(items, now, { consoleUrl: deps.consoleUrl, rejections });
   const prunedSessions = await pruneSessions(deps, log);
+  const prunedGeo = await pruneGeo(deps, log);
   const assisted = await assistedSweeps(deps, log);
   try {
     await deps.mailer.send({
@@ -98,6 +101,7 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
     subject: digest.subject,
     counts: digest.counts,
     prunedSessions,
+    prunedGeo,
     expiredAssisted: assisted.expired,
     purgedAssistedFiles: assisted.purgedFiles,
   });
@@ -113,6 +117,20 @@ async function pruneSessions(
     return await deps.pruneSessions();
   } catch (error) {
     log('digest: pruning staff sessions failed', error);
+    return null;
+  }
+}
+
+/** N-61's retention sweep; same contract as the one above. */
+async function pruneGeo(
+  deps: DigestCronDeps,
+  log: NonNullable<DigestCronDeps['log']>,
+): Promise<number | null> {
+  if (deps.pruneGeo === undefined) return null;
+  try {
+    return await deps.pruneGeo();
+  } catch (error) {
+    log('digest: pruning geo counters failed', error);
     return null;
   }
 }

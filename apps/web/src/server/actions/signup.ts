@@ -2,11 +2,14 @@
 
 import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '@xangarro/auth-core';
 import { RegistrarCuentaUseCase, SignupError } from '@xangarro/application';
-import { throttleKey, throttleTake } from '@xangarro/data-pg';
+import { recordSignupAttribution, throttleKey, throttleTake } from '@xangarro/data-pg';
 import { randomUUID } from 'node:crypto';
 import { headers } from 'next/headers';
 
+import { EMPTY_UTM, type Utm } from '../attribution/utm';
 import { db } from '../db';
+import { regionFromHeaders } from '../geo/headers';
+import { reportError } from '../observability/report';
 import { failure } from '../onboarding/errors';
 import { pgSignupStore } from '../onboarding/signup-store';
 import { startSession } from '../session';
@@ -34,6 +37,8 @@ export interface SignupFields {
   readonly tuNombre?: string;
   readonly email: string;
   readonly password: string;
+  /** N-57: the campaign that brought them, off the signup URL. */
+  readonly utm?: Utm;
 }
 
 const TAKEN = 'No pudimos crear la cuenta con ese correo. Si ya tienes una, entra con tu correo.';
@@ -48,6 +53,21 @@ async function throttled(address: string): Promise<number> {
   );
 }
 
+/**
+ * First touch, recorded outside the signup transaction and never allowed to
+ * fail it: an account that exists with no campaign label is a reporting gap,
+ * while a signup rolled back over one would be a lost customer. The writer is
+ * `ON CONFLICT DO NOTHING`, so a retry cannot rewrite the campaign.
+ */
+async function recordAttribution(businessId: string, utm: Utm | undefined): Promise<void> {
+  try {
+    const { country, region } = regionFromHeaders(await headers());
+    await recordSignupAttribution(db(), businessId, { ...(utm ?? EMPTY_UTM), country, region });
+  } catch (error) {
+    reportError(error, { endpoint: 'attribution/signup', businessId });
+  }
+}
+
 export async function registrarse(fields: SignupFields): Promise<SignupResult> {
   const wait = await throttled(fields.email.trim().toLowerCase());
   if (wait > 0) {
@@ -60,6 +80,7 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
     const owner = await db().transaction((tx) =>
       new RegistrarCuentaUseCase(pgSignupStore(tx), randomUUID).execute(fields),
     );
+    await recordAttribution(owner.businessId, fields.utm);
     await startSession(owner.userId, owner.businessId);
     return { ok: true };
   } catch (error) {

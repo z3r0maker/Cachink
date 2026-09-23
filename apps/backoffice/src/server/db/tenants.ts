@@ -10,7 +10,7 @@ import type {
   TenantSummary,
 } from '../tenants/port';
 import type { Db, Tx } from './client';
-import { deviceStats, isoText, ownerEmails, tenantWhere } from './tenant-queries';
+import { deviceStats, isoText, ownerEmails, ownerLastLogin, tenantWhere } from './tenant-queries';
 
 /**
  * Postgres adapter for `TenantDirectory` (N-06). Read-only: it runs as
@@ -50,19 +50,6 @@ async function summaries(conn: Conn, q: TenantQuery): Promise<TenantSummary[]> {
     devicesActive: Number(r.devicesActive),
     lastOwnerLoginAt: r.lastOwnerLoginAt ?? null,
   }));
-}
-
-/** N-06: `xangarro.owner_last_login()` (admin migration 0013) as a joinable
- * subquery — one (business_id, last_login) row, live sessions only. The
- * connection is the caller's (`conn`), never a singleton. */
-function ownerLastLogin(conn: Conn) {
-  return conn
-    .select({
-      businessId: sql<string>`business_id`,
-      lastLogin: sql<string | null>`last_login`,
-    })
-    .from(sql`xangarro.owner_last_login()`)
-    .as('li');
 }
 
 async function members(conn: Conn, id: BusinessId): Promise<TenantMember[]> {

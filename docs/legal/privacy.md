@@ -67,7 +67,29 @@ La app puede mostrarte notificaciones locales (por ejemplo, "Stock
 bajo" al final del día). Estas notificaciones se programan y disparan
 en tu dispositivo; no viajan por la red.
 
-## 5. Tus derechos
+## 5. Medición de uso y origen
+
+Cuando entras al sitio público, inicias sesión o te registras, guardamos **un
+conteo diario por estado** (por ejemplo, «Jalisco: 34 accesos hoy»), a partir
+del país y el estado aproximados que nuestro proveedor de hospedaje deriva de
+la conexión.
+
+Lo que **no** hacemos con esa medición:
+
+- No guardamos tu dirección IP.
+- No guardamos la ciudad ni coordenadas, aunque el proveedor las envíe.
+- No usamos cookies ni creamos un identificador, así que no te seguimos entre
+  visitas ni entre sitios.
+- No usamos Google Analytics, Meta Pixel ni analítica de terceros.
+
+Lo guardado es un número por estado y por día, no un registro por persona: no
+hay un renglón que diga quién entró ni a qué hora. Si llegaste por un anuncio,
+guardamos también las etiquetas de la campaña (`utm_*`) junto con tu negocio,
+para saber qué campañas funcionan.
+
+Sirve para una sola cosa: decidir dónde anunciarnos.
+
+## 6. Tus derechos
 
 Tú puedes en cualquier momento:
 
@@ -76,12 +98,12 @@ Tú puedes en cualquier momento:
 - Cerrar tu cuenta de nube (si aplicas) y pedir la eliminación
   permanente de los datos del servidor.
 
-## 6. Cambios a esta política
+## 7. Cambios a esta política
 
 Si modificamos esta política, te avisaremos dentro de la app antes de
 que entre en vigor la nueva versión.
 
-## 7. Contacto
+## 8. Contacto
 
 Si tienes preguntas sobre tu privacidad en Xangarro, escríbenos a
 **privacidad@cachink.mx**.

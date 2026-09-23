@@ -1,8 +1,7 @@
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy } from 'react';
 import { MotionProvider } from '../landing/Motion.jsx';
 import { Nav, Hero } from '../landing/Sections.jsx';
 import { structuredData } from './structured-data.js';
-import { SIGNUP_BASE } from '../landing/planes.js';
 
 // Below-fold sections: lazy-loaded on the client so the initial JS chunk
 // only includes Nav + Hero + their direct dependencies (AnimatedHero, Motion).
@@ -25,22 +24,8 @@ const T = {
 };
 
 export default function App() {
-  // L-03: utm_* params from the landing URL travel along to every signup CTA.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const utm = new URLSearchParams();
-    for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) {
-      const value = params.get(key);
-      if (value) utm.set(key, value);
-    }
-    if ([...utm.keys()].length === 0) return;
-    for (const a of document.querySelectorAll(`a[href^="${SIGNUP_BASE}"]`)) {
-      const url = new URL(a.href);
-      for (const [k, v] of utm) url.searchParams.set(k, v);
-      a.href = url.toString();
-    }
-  }, []);
-
+  // The utm_* pass-through moved to src/utm.jsx, which main.jsx wraps around
+  // every route — the /recursos articles never reached this effect (N-57).
   return (
     <MotionProvider enabled={T.motion}>
       <div>

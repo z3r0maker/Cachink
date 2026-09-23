@@ -4,7 +4,7 @@
  */
 export interface NavItem {
   readonly label: string;
-  readonly href: '/' | '/tenants' | '/uso' | '/inbox' | '/flags';
+  readonly href: '/' | '/tenants' | '/uso' | '/inbox' | '/flags' | '/mapa' | '/campanas';
   readonly task: string | null;
   readonly summary: string;
 }
@@ -34,5 +34,17 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/flags',
     task: 'N-09',
     summary: 'Disponibilidad de funciones por plataforma, lista beta y kill switches.',
+  },
+  {
+    label: 'Mapa',
+    href: '/mapa',
+    task: 'N-56',
+    summary: 'Accesos, visitas y conversión por estado, para orientar la inversión en anuncios.',
+  },
+  {
+    label: 'Campañas',
+    href: '/campanas',
+    task: 'N-57',
+    summary: 'Qué campaña trajo cada negocio, por primer contacto, y desde qué estado.',
   },
 ] as const;

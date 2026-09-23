@@ -23,6 +23,7 @@ import { requireMember } from '../auth';
 import { portalOrigin } from '../billing/origin';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant, type Tx } from '../db';
+import { recordGeo } from '../geo/record';
 import { trialCheckoutFor } from '../onboarding/checkout';
 import { failure, type Failure } from '../onboarding/errors';
 import { pgOnboardingStore } from '../onboarding/store';
@@ -118,7 +119,14 @@ export async function probarGratis(
         interval,
       });
     });
-    return { ok: true, redirect: result.status === 'redirect' ? result.url : null };
+    const redirect = result.status === 'redirect' ? result.url : null;
+    // N-58: the buyer's region exists only here. The Stripe webhook is a
+    // server-to-server call, so its IP is Stripe's, and Stripe's only
+    // geographic fact would be the card issuer's country — never a Mexican
+    // state. Counted at the redirect, so the metric means "checkout started",
+    // which is what the console's label says.
+    if (redirect !== null) await recordGeo('compra');
+    return { ok: true, redirect };
   } catch (error) {
     return failure(error, 'probarGratis', businessId);
   }
