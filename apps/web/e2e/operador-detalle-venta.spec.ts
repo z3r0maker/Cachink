@@ -67,9 +67,11 @@ test('cancelling needs the NIP and a reason, and never deletes it', async ({ pag
 test('a fiado ticket shows the client, and cancelling explains the saldo a favor', async ({
   page,
 }) => {
-  await puertaOperador(page, [{ nombre: 'Orden del día', precioCentavos: 6000, sku: 'OPDET1' }]);
+  await puertaOperador(page, [
+    { nombre: 'Orden del detalle', precioCentavos: 6000, sku: 'OPDET1' },
+  ]);
   await page.goto('/operador/caja');
-  await fiar(page, /Orden del día/, /Doña Mari de la tienda/);
+  await fiar(page, /Orden del detalle/, /Doña Mari de la tienda/);
   await page.goto('/operador/ventas/V-0001');
   await expect(page.getByText('Esta venta quedó fiada')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Recibir un abono' })).toHaveAttribute(

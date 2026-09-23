@@ -95,7 +95,5 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
   await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Tarjeta' }).click();
   await page.getByRole('status').getByRole('button', { name: 'Deshacer' }).click();
-  await expect(
-    page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),
-  ).toBeAttached();
+  await expect(page.locator('aside[aria-label=Ticket]').getByText('Gringa')).toBeAttached();
 });
