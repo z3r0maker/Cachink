@@ -105,6 +105,7 @@
 
 - [~] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
   **Remaining (2026-09-23, verified against the code):** nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. **Bug:** `xangarro.usage_counts()` (0029) counts every `sales` row, but ADR-073 counts one per ticket (`counts-toward-usage.ts`) — multi-line tickets are over-counted and the integration test (one sale per ticket) never catches it. Built: `usage_counters`, nightly cron, `usage` in pull/entitlement, `origen` column.
+  **Fixed 2026-09-23:** the ticket over-count — `0035_usage_counts_tickets.sql` replaces the body to count one transaction per ticket (distinct `sales.ticket_id`) plus ticketless lines, the rule in `counts-toward-usage.ts`; the integration test now seeds a three-line ticket beside a ticketless line and asserts 2. The nightly recompute corrects stored counters on its next run.
 
 - **What:** a portal-only `usage_counters (business_id, period 'YYYY-MM', transactions, products,
 computed_at)` table (ADR-060 portal-only entity checklist).

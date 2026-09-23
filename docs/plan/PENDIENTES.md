@@ -50,27 +50,27 @@ Lo que la X-10 espera: los `[LAUNCH]` de Track N, las X-, las acciones del dueñ
 
 - [~] **N-01** Stripe: annual prices + trial on both paid tiers `[LAUNCH]` — Blocked by: B-10, C-12 · Falta: the Suscripción screen hard-codes `iniciarPrueba(planId, 'month')` — no annual option, no «Cambiar a anual», nothing calls `pagarAnualPorSpei`, cards show «MXN / mes» without «+ IVA» (`planes.ts`). Gateway, catalog, card-less trial and SPEI `send_invoice` code are done. The four-price Checkout run needs O-12. · `09-next-features.md:65`
 - [~] **N-02** Server usage metering `[LAUNCH]` — Blocked by: C-12, B-08 · Falta: nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. · `09-next-features.md:106`
-- [~] **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:140`
-- [~] **N-06** Tenants, licences and Stripe `[LAUNCH]` — Blocked by: N-05, B-10, B-06 · Falta: overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists. · `09-next-features.md:219`
-- [~] **N-07** Usage, limits and capacity `[LAUNCH]` — Blocked by: N-05, N-02 · Falta: acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B) and the card shares N-02's ticket over-count. · `09-next-features.md:249`
-- [~] **N-09** Platform flags and kill switches `[LAUNCH]` — Blocked by: N-05, A-14 · Falta: `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch. · `09-next-features.md:294`
-- [~] **N-10** Staff alerts `[LAUNCH]` — Blocked by: N-08, B-14, B-18 · Falta: digest has no over-limit section; the dormancy section belongs to N-48 (post-launch) — amend to defer it rather than build it now; urgent delivery within a minute needs `ALERT_WEBHOOK_URL` set. · `09-next-features.md:317`
-- [~] **N-11** Portal settings parity `[LAUNCH]` — Blocked by: P-08, P-15, C-15 · Falta: every setting is built (`negocio.sync.spec.ts`, `comprobantes.sync.spec.ts`, `sync.spec.ts` Funciones, `avisos-configurar.spec.ts`; the ISR confirm became a switch per ADR-082); only the mapping checklist (portal / device A-12 / dropped-why) is missing. A-01 finished 2026-09-16, so «blocks A-01» is moot. · `09-next-features.md:344`
-- [~] **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:358`
-- [~] **N-17** Saldos iniciales template `[LAUNCH]` — Blocked by: N-16, C-20 · Falta: the «¿Cómo empiezo?» checklist has no saldos iniciales row (`onboarding/checklist.ts`); no end-to-end test shows the portal Balance matching the captured figures (only the domain and data-pg unit/integration tests). The SQLite half listed as «still to do» landed in 23c7fd43. · `09-next-features.md:452`
-- [~] **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:520`
-- [~] **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24. · `09-next-features.md:580`
-- [ ] **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:614`
-- [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:652`
-- [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · `09-next-features.md:668`
-- [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 3 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01); SEC-DEV-01 half (the `EMAIL_MISMATCH` oracle, C-14); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01. · `09-next-features.md:685`
-- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01. Open: DB-RLS-01 (app-role DELETE revoked only on newer tables, not the ledger), DB-MIG-02 (`supabase/migrations/0001_schema.sql` still in the tree), DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project. · `09-next-features.md:703`
-- [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:717`
-- [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:725`
-- [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:735`
-- [~] **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:774`
-- [~] **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the aviso integral is reachable from no surface (no route, footer or landing link); no ARCO form or `kind=arco` inbox item or due-date clock; consent captured only at signup (48bca19c, `privacy_consents`, migration 0034 — hosted apply pending), not for device linking or operator NIP; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01 open; self-service deletion and consent withdrawal not built. Counsel review is O-17. · `09-next-features.md:801`
-- [~] **N-33** CFDI automation for Xangarro's own subscriptions `[LAUNCH]` — Blocked by: B-10, P-10, N-08 · Falta: refund → PAC cancellation not wired (`cancel-cfdi-for-refund.ts` exists, nothing calls it; refunds only file an inbox item); egreso for partial refunds not built. Off-mode, duplicate-webhook and monthly-close criteria have unit tests. Sandbox stamps need Facturapi test keys (O-15); fiscal defaults need O-14. · `09-next-features.md:850`
+- [~] **N-03** Overage warnings and provider alerts `[LAUNCH]` — Blocked by: N-02, N-08, B-14 · Falta: no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused). · `09-next-features.md:141`
+- [~] **N-06** Tenants, licences and Stripe `[LAUNCH]` — Blocked by: N-05, B-10, B-06 · Falta: overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists. · `09-next-features.md:220`
+- [~] **N-07** Usage, limits and capacity `[LAUNCH]` — Blocked by: N-05, N-02 · Falta: acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B) and the card shares N-02's ticket over-count. · `09-next-features.md:250`
+- [~] **N-09** Platform flags and kill switches `[LAUNCH]` — Blocked by: N-05, A-14 · Falta: `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch. · `09-next-features.md:295`
+- [~] **N-10** Staff alerts `[LAUNCH]` — Blocked by: N-08, B-14, B-18 · Falta: digest has no over-limit section; the dormancy section belongs to N-48 (post-launch) — amend to defer it rather than build it now; urgent delivery within a minute needs `ALERT_WEBHOOK_URL` set. · `09-next-features.md:318`
+- [~] **N-11** Portal settings parity `[LAUNCH]` — Blocked by: P-08, P-15, C-15 · Falta: every setting is built (`negocio.sync.spec.ts`, `comprobantes.sync.spec.ts`, `sync.spec.ts` Funciones, `avisos-configurar.spec.ts`; the ISR confirm became a switch per ADR-082); only the mapping checklist (portal / device A-12 / dropped-why) is missing. A-01 finished 2026-09-16, so «blocks A-01» is moot. · `09-next-features.md:345`
+- [~] **N-12** "Platícanos de ti" wizard `[LAUNCH]` — Blocked by: N-11, N-19 · Falta: acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR. · `09-next-features.md:359`
+- [~] **N-17** Saldos iniciales template `[LAUNCH]` — Blocked by: N-16, C-20 · Falta: the «¿Cómo empiezo?» checklist has no saldos iniciales row (`onboarding/checklist.ts`); no end-to-end test shows the portal Balance matching the captured figures (only the domain and data-pg unit/integration tests). The SQLite half listed as «still to do» landed in 23c7fd43. · `09-next-features.md:453`
+- [~] **N-19** Logo + brand colour `[LAUNCH]` — Blocked by: C-15 · Falta: the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do». · `09-next-features.md:521`
+- [~] **N-21** WhatsApp share `[LAUNCH]` — Blocked by: N-20 (done) · web half landed 2026-09-20 · Falta: phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24. · `09-next-features.md:581`
+- [ ] **N-22** App sync banners `[LAUNCH]` — Blocked by: A-06, A-07, N-24 · `09-next-features.md:615`
+- [ ] **N-24** Phone app adopts the Track O operator design `[LAUNCH]` — Blocked by: merge of `rename/xangarro-stored-ids`; each Track O screen closed (O-xx) before its phone counterpart starts · `09-next-features.md:653`
+- [ ] **N-25** QR device pairing `[LAUNCH]` — Blocked by: C-14, B-11, P-06, A-04, N-24 · `09-next-features.md:669`
+- [~] **N-26** Security audit `[LAUNCH]` — Blocked by: N-05, B-17 · Falta: 3 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01); SEC-DEV-01 half (the `EMAIL_MISMATCH` oracle, C-14); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01. · `09-next-features.md:686`
+- [~] **N-27** Database audit `[LAUNCH]` — Blocked by: B-03, B-08, B-09 · Falta: fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01. Open: DB-RLS-01 (app-role DELETE revoked only on newer tables, not the ledger), DB-MIG-02 (`supabase/migrations/0001_schema.sql` still in the tree), DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project. · `09-next-features.md:704`
+- [ ] **N-28** Performance audit `[LAUNCH]` — Blocked by: X-01 · `09-next-features.md:718`
+- [ ] **N-29** Deterministic full-stack E2E gate `[LAUNCH]` — Blocked by: P-17, A-16, N-22, N-25 · `09-next-features.md:726`
+- [ ] **N-30** Closed beta `[LAUNCH]` — Blocked by: X-01, N-03, N-04, N-06, N-09, N-13, N-26, N-27, N-28, N-29 · `09-next-features.md:736`
+- [~] **N-32** Store-compliance sweep `[LAUNCH]` — Blocked by: N-24, A-15 · Falta: reviewer checklist for X-05 in `docs/store/`. `pnpm lint:store` is green again and gated in `ci.yml` (see Progress). · `09-next-features.md:775`
+- [~] **N-34** Aviso de privacidad + ARCO requests `[LAUNCH]` — Blocked by: N-08 · Falta: the aviso integral is reachable from no surface (no route, footer or landing link); no ARCO form or `kind=arco` inbox item or due-date clock; consent captured only at signup (48bca19c, `privacy_consents`, migration 0034 — hosted apply pending), not for device linking or operator NIP; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01 open; self-service deletion and consent withdrawal not built. Counsel review is O-17. · `09-next-features.md:802`
+- [~] **N-33** CFDI automation for Xangarro's own subscriptions `[LAUNCH]` — Blocked by: B-10, P-10, N-08 · Falta: refund → PAC cancellation not wired (`cancel-cfdi-for-refund.ts` exists, nothing calls it; refunds only file an inbox item); egreso for partial refunds not built. Off-mode, duplicate-webhook and monthly-close criteria have unit tests. Sandbox stamps need Facturapi test keys (O-15); fiscal defaults need O-14. · `09-next-features.md:851`
 
 ### `11-pre-launch-and-deferred.md` · 1. Pre-launch actions (owner)
 
@@ -185,36 +185,36 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 
 ### `09-next-features.md` · 3. Post-launch
 
-- [ ] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:919`
-- [ ] **N-41** `PaymentProvider` port + Mercado Pago adapter — Blocked by: N-40, C-13 · `09-next-features.md:935`
-- [ ] **N-42** Payment intents backend + reconciliation — Blocked by: N-41, C-13 · `09-next-features.md:943`
-- [ ] **N-43** Merchant account linking in the portal — Blocked by: N-41 · `09-next-features.md:953`
-- [ ] **N-44** App "Cobrar con tarjeta" — Blocked by: N-42, N-43, N-45, N-24, N-53 · `09-next-features.md:963`
-- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:972`
-- [ ] **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:979`
-- [ ] **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:985`
-- [ ] **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:991`
-- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1006`
-- [ ] **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1013`
-- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1019`
-- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1025`
-- [ ] **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1030`
-- [ ] **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go) · `09-next-features.md:1041`
-- [~] **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1077`
-- [~] **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1092`
-- [ ] **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1100`
-- [ ] **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1121`
-- [ ] **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1132`
-- [ ] **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1143`
-- [ ] **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1152`
-- [ ] **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1162`
-- [ ] **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1171`
-- [ ] **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1184`
-- [ ] **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1194`
-- [ ] **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1204`
-- [ ] **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1214`
-- [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1222`
-- [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1232`
+- [ ] **N-40** Provider validation + Clip partnership + legal opinion — Trigger: N-30 exit criteria met. **The Clip conversation starts now** (owner action, not gated by the trigger). · `09-next-features.md:920`
+- [ ] **N-41** `PaymentProvider` port + Mercado Pago adapter — Blocked by: N-40, C-13 · `09-next-features.md:936`
+- [ ] **N-42** Payment intents backend + reconciliation — Blocked by: N-41, C-13 · `09-next-features.md:944`
+- [ ] **N-43** Merchant account linking in the portal — Blocked by: N-41 · `09-next-features.md:954`
+- [ ] **N-44** App "Cobrar con tarjeta" — Blocked by: N-42, N-43, N-45, N-24, N-53 · `09-next-features.md:964`
+- [ ] **N-45** External penetration test — Trigger: N-42 and N-43 on staging. · `09-next-features.md:973`
+- [ ] **N-46** Sync health and devices — Trigger: launch + 30 days, or the first cross-tenant sync incident. · `09-next-features.md:980`
+- [ ] **N-47** Broadcast announcements — Trigger: the first planned maintenance window or feature launch after go-live. · `09-next-features.md:986`
+- [ ] **N-48** Dormancy lifecycle (ADR-064) — Trigger: launch + 90 days (no tenant can be dormant earlier). · `09-next-features.md:992`
+- [ ] **N-49** GLM exploratory tester — Trigger: X-01 staging live and N-29 green. · `09-next-features.md:1007`
+- [ ] **N-50** AI logo generation — Trigger: the ADR-059 production gate on model calls is lifted. · `09-next-features.md:1014`
+- [ ] **N-51** DB scaling — Stage 2 (ADR-068) — Trigger: any of DB > 25 GB · a table > 50 M rows · sync p95 > 800 ms (N-07 card). · `09-next-features.md:1020`
+- [ ] **N-52** DB scaling — Stage 3 (ADR-068) — Trigger: DB > 500 GB or > 10 000 active tenants. · `09-next-features.md:1026`
+- [ ] **N-54** Facturación for merchants (white-label PAC reseller) — Trigger: N-33 `live` for 3 months, and ≥ 5 customers asking to invoice their own clients. · `09-next-features.md:1031`
+- [ ] **N-53** Clip adapter — Blocked by: N-41, N-40 (Clip go) · `09-next-features.md:1042`
+- [~] **N-58** Phase 4 — purchases + landing. · `09-next-features.md:1078`
+- [~] **N-60** Phase 6 — ADR-092 + aviso. · `09-next-features.md:1093`
+- [ ] **N-62** Cohort metrics from the fiscal address, not from IP. · `09-next-features.md:1101`
+- [ ] **N-63** Negocio: MRR, churn, trial → paid — Blocked by: N-06 · Trigger: B-10 webhooks write `billing.subscriptions` for the first paying tenant (the N-06 stub is retired). · `09-next-features.md:1122`
+- [ ] **N-64** Activation funnel and weekly cohorts — Blocked by: N-57 · Trigger: X-10 launch (real signups). · `09-next-features.md:1133`
+- [ ] **N-65** Tenant timeline — Blocked by: N-08 · Trigger: now (every source table exists). · `09-next-features.md:1144`
+- [ ] **N-66** Staff roles — Blocked by: N-05 · Trigger: the second staff member is added, or before N-68 / N-71 start — whichever is first. · `09-next-features.md:1153`
+- [ ] **N-67** `/auditoria` — Blocked by: N-05 · Trigger: now. · `09-next-features.md:1163`
+- [ ] **N-68** "Ver como" — time-boxed, read-only impersonation — Blocked by: N-66, N-67 · Trigger: X-10 launch and the first inbox item that could not be resolved from `/tenants/[id]` + N-65. · `09-next-features.md:1172`
+- [ ] **N-69** Flag lifecycle and percentage rollout — Blocked by: N-09 · Trigger: N-09 `[x]`. · `09-next-features.md:1185`
+- [ ] **N-70** Decisiones — Blocked by: N-07, N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1195`
+- [ ] **N-71** Cobros: dunning, expiring trials, extend / credit — Blocked by: N-06, N-66 · Trigger: first paying tenant. · `09-next-features.md:1205`
+- [ ] **N-72** Cost per tenant — Blocked by: N-63 · Trigger: N-63 `[x]`. · `09-next-features.md:1215`
+- [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1223`
+- [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1233`
 
 ## Colas de tracks (17)
 
