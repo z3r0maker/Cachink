@@ -992,6 +992,29 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   as unsigned signals → fetch to confirm. Passes the shared adapter contract suite. Production-only
   testing with a real device and a low-amount charge + refund script.
 
+### N-55 Analítica geográfica por estado (ADR-092)
+
+Where users log in, where they are when they buy, and where marketing traffic comes from — one
+console view, by Mexican state. **No raw IP is ever stored:** the state comes from Vercel's derived
+`x-vercel-ip-country-region`, and the table is a daily counter, an aggregate from birth. A spike on
+2026-09-22 confirmed the Hobby plan does receive the geo headers, and that the region arrives as the
+bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
+
+- [x] **N-55 · Phase 1 — the pipe.** `xangarro.geo_counters` + `geo_record` (`0030`, `0031`), the
+      pure `regionFromHeaders`, and the writer hooked into `signInUser` so the password path and both
+      magic-link paths are covered by one call. Proved against real Postgres: the app role counts and
+      cannot read back, an unknown source raises, an unusable region folds into "unknown".
+- [ ] **N-56 · Phase 2 — the console as a sorted table.** `/mapa` with range and source filters. Ships
+      before the map on purpose: a choropleth over three days of data is an empty country.
+- [ ] **N-57 · Phase 3 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
+      SVG path strings so no map library, no tiles and no CSP change are needed.
+- [ ] **N-58 · Phase 4 — purchases + landing.** Checkout hook in `probarGratis`; a portal-served 1×1
+      pixel for the landing, so the marketing project needs no database secret. **Blocked by N-59.**
+- [ ] **N-59 · Phase 5 — ADR-092 + aviso.** Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
+      and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
+      engineering one — the cookie-less aggregate case is weak for one, but confirm.
+- [ ] **N-60 · Phase 6 — retention.** `geo_prune(400)` on the existing backoffice cron.
+
 ---
 
 ## 4. Open questions (not decided in the interview)
