@@ -1,10 +1,15 @@
 import 'server-only';
 
-import { RecomputeUsageUseCase, type RecomputeUsageResult } from '@xangarro/application/usage';
+import {
+  RecomputeUsageUseCase,
+  RefreshUsageUseCase,
+  type RecomputeUsageResult,
+} from '@xangarro/application/usage';
 import { createDb, usageCounterOf, type Db } from '@xangarro/data-pg';
 import { usagePeriod } from '@xangarro/domain/usage';
 
 import { billingDb } from '../billing/config';
+import { reportError } from '../observability/report';
 import { notifyUsageThreshold } from '../email/usage';
 import { supportInboxFromEnv } from '../support-inbox';
 import { pgUsageCounters, pgUsageCounts, pgUsageLimits, pgUsageNoticeLedger } from './adapters';
@@ -41,6 +46,30 @@ export function runUsageRecompute(now: Date): Promise<RecomputeUsageResult> {
     now: () => now,
   });
   return useCase.execute();
+}
+
+/**
+ * After a push lands (N-02): recount this business's open month so its next
+ * pull carries a count no older than the push. Runs after the response
+ * (`after()` in the push route); a failure is reported and the nightly job
+ * corrects it — a push is never failed over a counter. Skipped, silently,
+ * where `METERING_DATABASE_URL` is not configured (local runs without it).
+ */
+export async function refreshUsageAfterPush(
+  businessId: string,
+  now: Date = new Date(),
+): Promise<void> {
+  if (!process.env.METERING_DATABASE_URL) return;
+  try {
+    const db = meteringDb();
+    await new RefreshUsageUseCase({
+      counts: pgUsageCounts(db),
+      store: pgUsageCounters(db),
+      now: () => now,
+    }).execute(businessId);
+  } catch (error) {
+    reportError(error, { endpoint: 'sync/push:usage', businessId });
+  }
 }
 
 /** C-12's unsigned `usage` block, as the pull / entitlement payload will carry it. */

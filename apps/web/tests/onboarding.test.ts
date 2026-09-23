@@ -100,24 +100,34 @@ describe('"¿Cómo empiezo?" (N-14)', () => {
   const NOTHING: ChecklistSignals = {
     operadores: 0,
     productos: 0,
+    saldosIniciales: false,
     codigoGenerado: false,
     dispositivosActivos: 0,
     ventasSincronizadas: 0,
     tieneLogo: false,
   };
 
-  it('starts at zero of six and ends complete', () => {
+  it('starts at zero of seven and ends complete', () => {
     assert.equal(buildChecklist(NOTHING).done, 0);
-    assert.equal(buildChecklist(NOTHING).total, 6);
+    assert.equal(buildChecklist(NOTHING).total, 7);
     const all = buildChecklist({
       operadores: 1,
       productos: 3,
+      saldosIniciales: true,
       codigoGenerado: true,
       dispositivosActivos: 1,
       ventasSincronizadas: 1,
       tieneLogo: true,
     });
     assert.equal(all.complete, true);
+  });
+
+  it('marks saldos iniciales from the captured opening, and links to the screen (N-17)', () => {
+    const c = buildChecklist({ ...NOTHING, saldosIniciales: true });
+    const saldos = c.items.find((i) => i.key === 'saldos');
+    assert.equal(saldos?.done, true);
+    assert.equal(saldos?.href, '/saldos-iniciales');
+    assert.equal(buildChecklist(NOTHING).items.find((i) => i.key === 'saldos')?.done, false);
   });
 
   it('counts the code as done once a phone is activated, even after it expired', () => {

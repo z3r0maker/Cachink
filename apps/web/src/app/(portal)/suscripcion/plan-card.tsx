@@ -2,7 +2,8 @@ import { colors } from '@xangarro/tokens';
 
 import { Button } from '@/components';
 import { eyebrow, planLabel } from '@/styles/text.css';
-import type { PlanCard as PlanCardData } from '@/data/planes';
+import { precioDePlan, type PlanCard as PlanCardData } from '@/data/planes';
+import type { BillingInterval } from '@xangarro/application/billing';
 import type { BillingActionResult } from '@/server/billing/actions';
 
 import { BotonStripe } from './acciones';
@@ -54,18 +55,23 @@ function Price({
   plan,
   dark,
   body,
+  interval,
 }: {
   readonly plan: PlanCardData;
   readonly dark: boolean;
   readonly body: string;
+  readonly interval: BillingInterval;
 }) {
+  const { price, period } = precioDePlan(plan.id, interval);
   return (
     <>
       <div className={priceRow} style={{ color: dark ? colors.white : colors.black }}>
         <span className={priceSymbol}>$</span>
-        <span className={priceValue}>{plan.price}</span>
+        <span className={priceValue} data-testid={`precio-${plan.id}`}>
+          {price}
+        </span>
       </div>
-      <div style={{ marginTop: 8, color: body, fontWeight: 600 }}>{plan.period}</div>
+      <div style={{ marginTop: 8, color: body, fontWeight: 600 }}>{period}</div>
     </>
   );
 }
@@ -90,15 +96,37 @@ function Cta(props: {
   return <BotonStripe full label={props.plan.cta} variant={variant} accion={props.accion} />;
 }
 
+/** The card's CTA, and «Pagar por transferencia» under it on annual paid plans (N-01). */
+function Acciones(props: {
+  readonly plan: PlanCardData;
+  readonly current: boolean;
+  readonly accion: Accion;
+  readonly spei: Accion;
+}) {
+  return (
+    <div style={{ marginTop: 22, display: 'grid', gap: 10 }}>
+      <Cta plan={props.plan} current={props.current} accion={props.accion} />
+      {props.spei === null || props.current ? null : (
+        <BotonStripe full label="Pagar por transferencia (SPEI)" accion={props.spei} />
+      )}
+    </div>
+  );
+}
+
 export function PlanCard({
   plan,
   current,
   accion,
+  interval,
+  spei,
 }: {
   readonly plan: PlanCardData;
   readonly current: boolean;
   /** The owner's way to switch to this plan; null for the current plan and for non-owners. */
   readonly accion: Accion;
+  readonly interval: BillingInterval;
+  /** «Pagar por transferencia», on annual paid plans only (N-01). */
+  readonly spei: Accion;
 }) {
   const dark = plan.emphasis;
   const body = dark ? colors.gray200 : colors.textMuted;
@@ -113,10 +141,8 @@ export function PlanCard({
       <p style={{ margin: '10px 0 0', minHeight: '3em', color: body, fontWeight: 600 }}>
         {plan.pitch}
       </p>
-      <Price plan={plan} dark={dark} body={body} />
-      <div style={{ marginTop: 22 }}>
-        <Cta plan={plan} current={current} accion={accion} />
-      </div>
+      <Price plan={plan} dark={dark} body={body} interval={interval} />
+      <Acciones plan={plan} current={current} accion={accion} spei={spei} />
       <div
         className={eyebrow}
         style={{ margin: '24px 0 14px', color: dark ? colors.gray400 : colors.gray600 }}

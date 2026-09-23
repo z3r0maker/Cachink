@@ -1,3 +1,4 @@
+import { PRICE_SUBTOTAL_CENTAVOS, type BillingInterval } from '@xangarro/application/billing';
 import type { PlanId } from '@xangarro/domain';
 
 /**
@@ -17,12 +18,29 @@ export interface PlanCard {
   readonly id: PlanId;
   readonly name: string;
   readonly pitch: string;
-  readonly price: string;
-  readonly period: string;
   readonly cta: string;
   readonly includesLabel: string;
   readonly emphasis: boolean;
   readonly features: readonly PlanFeature[];
+}
+
+/**
+ * A plan's price as the cards show it (N-01): billing's one price table, in
+ * pesos, always «+ IVA» (prices are plus IVA, ADR-067). Annual is 10 × monthly
+ * — «2 meses gratis». The free plan has no interval.
+ */
+export interface Precio {
+  readonly price: string;
+  readonly period: string;
+}
+
+export function precioDePlan(plan: PlanId, interval: BillingInterval): Precio {
+  if (plan === 'xangarrito') return { price: '0', period: 'para siempre gratis' };
+  const pesos = PRICE_SUBTOTAL_CENTAVOS[plan][interval] / 100;
+  return {
+    price: pesos.toLocaleString('es-MX'),
+    period: interval === 'month' ? 'MXN / mes + IVA' : 'MXN / año + IVA',
+  };
 }
 
 const on = (label: string): PlanFeature => ({ label, included: true });
@@ -33,8 +51,6 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     id: 'xangarrito',
     name: 'Xangarrito',
     pitch: 'Para arrancar sin gastar un peso.',
-    price: '0',
-    period: 'para siempre gratis',
     cta: 'Crear cuenta gratis',
     includesLabel: 'Incluye',
     emphasis: false,
@@ -53,8 +69,6 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     id: 'xangarro',
     name: 'Xangarro',
     pitch: 'Para el negocio que ya vende y quiere crecer.',
-    price: '199',
-    period: 'MXN / mes',
     cta: 'Empezar ahora',
     includesLabel: 'Todo en Xangarrito, más:',
     emphasis: true,
@@ -72,8 +86,6 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     id: 'xangarrote',
     name: 'Xangarrote',
     pitch: 'Para cuando el negocio ya te quedó chico.',
-    price: '399',
-    period: 'MXN / mes',
     cta: 'Probar 14 días gratis',
     includesLabel: 'Todo en Xangarro, más:',
     emphasis: false,

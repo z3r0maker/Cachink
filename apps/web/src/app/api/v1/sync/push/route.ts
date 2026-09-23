@@ -1,16 +1,19 @@
 import { ApplyPushUseCase } from '@xangarro/application';
 import { PushRequestSchema, PushResponseSchema } from '@xangarro/contracts';
+import { after } from 'next/server';
 
 import { deviceRoute } from '@/server/api/device-route';
 import { fail, ok } from '@/server/api/respond';
 import { withTenant } from '@/server/db';
 import { reportError } from '@/server/observability/report';
 import { PgPushStore } from '@/server/sync/pg-push-store';
+import { refreshUsageAfterPush } from '@/server/usage/live';
 
 /**
  * `POST /api/v1/sync/push` (B-08; contract §4). HTTP only: parse, run
  * `ApplyPushUseCase` in one tenant transaction, answer per row, and log the
- * batch as one line of counts — never the rows.
+ * batch as one line of counts — never the rows. When rows were accepted, the
+ * business's open-month usage is recounted after the response (N-02).
  */
 const countCodes = (codes: readonly string[]) =>
   codes.reduce<Record<string, number>>((acc, c) => ({ ...acc, [c]: (acc[c] ?? 0) + 1 }), {});
@@ -31,6 +34,7 @@ export const POST = (request: Request): Promise<Response> =>
           reportError(e, scope),
         ).execute(parsed.data),
       );
+      if (result.accepted.length > 0) after(() => refreshUsageAfterPush(businessId));
       return {
         response: ok(PushResponseSchema.parse({ ...result, serverTime: new Date().toISOString() })),
         log: {

@@ -1,6 +1,14 @@
 import 'server-only';
 
-import { activationCodes, businesses, devices, products, sales, users } from '@xangarro/data-pg';
+import {
+  activationCodes,
+  businesses,
+  devices,
+  products,
+  sales,
+  users,
+  openingBalances,
+} from '@xangarro/data-pg';
 import {
   answersToConfiguration,
   parseWizardAnswers,
@@ -68,6 +76,8 @@ export function loadChecklistSignals(businessId: string): Promise<ChecklistSigna
     return {
       operadores: n(await tx.select(c).from(users)),
       productos: n(await tx.select(c).from(products).where(isNull(products.deletedAt))),
+      saldosIniciales:
+        n(await tx.select(c).from(openingBalances).where(isNull(openingBalances.deletedAt))) > 0,
       codigoGenerado: n(await tx.select(c).from(activationCodes)) > 0,
       dispositivosActivos: n(await tx.select(c).from(devices).where(isNull(devices.revokedAt))),
       ventasSincronizadas: n(await tx.select(c).from(sales).where(isNull(sales.deletedAt))),
