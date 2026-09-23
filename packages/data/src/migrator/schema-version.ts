@@ -18,7 +18,7 @@ import type { XangarroDatabase } from '../repositories/drizzle/_db.js';
  * Current schema version. Must match the number of entries in
  * `_journal.json`. After consolidation this starts at 1.
  */
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export async function getSchemaVersion(db: XangarroDatabase): Promise<number> {
   const result = await db.get(sql.raw('PRAGMA user_version'));

@@ -81,18 +81,8 @@ const CLOUD_AHEAD: Readonly<Record<string, readonly string[]>> = {
   // 0029). UP table: the device never sends these; when the app branch
   // mirrors the columns the list empties itself.
   caja_turnos: ['aclarado_at', 'aclarado_por'],
-  // C-15 stores them (0023); the device columns arrive with the app branch.
-  // `businesses` is DOWN-only, so the device never sends; the wire carries
-  // every field, defaulted, so old payloads parse and new ones arrive.
-  businesses: [
-    'brand_color',
-    'receipt_template',
-    'receipt_leyenda',
-    'address_print',
-    'direccion',
-    'whatsapp',
-    'social_links',
-  ],
+  // `businesses` needed no exception after SQLite 0012 mirrored C-15's seven
+  // branding columns (2026-09-22): the device now has every one of them.
 };
 
 /**

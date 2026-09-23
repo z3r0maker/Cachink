@@ -10,6 +10,7 @@ import type {
   DeviceId,
   UserId,
   IsoTimestamp,
+  ReceiptTemplate,
   SaleCategory,
   TipoNegocio,
 } from '@xangarro/domain';
@@ -77,20 +78,9 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
 
   async update(id: BusinessId, patch: BusinessPatch): Promise<Business> {
     const ts = now();
-    // Every patchable column maps 1:1; only the attribute list is stored as
-    // JSON. The C-15 branding columns have no SQLite home yet (the app branch
-    // adds them); they are dropped here, not written as unknown columns.
-    const {
-      atributosProducto,
-      brandColor: _bc,
-      receiptTemplate: _rt,
-      receiptLeyenda: _rl,
-      addressPrint: _ap,
-      whatsapp: _wa,
-      direccion: _di,
-      socialLinks: _sl,
-      ...rest
-    } = patch;
+    // Every patchable column maps 1:1 — the C-15 branding columns included
+    // since migration 0012 — and only the attribute list is stored as JSON.
+    const { atributosProducto, ...rest } = patch;
     const set: Record<string, unknown> = {
       ...rest,
       ...(atributosProducto === undefined
@@ -125,14 +115,7 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       usoCfdi: row.usoCfdi ?? null,
       isrTasa: row.isrTasa,
       logoUrl: row.logoUrl,
-      // C-15 defaults until the device columns land (app branch).
-      brandColor: null,
-      receiptTemplate: 'clasico',
-      receiptLeyenda: null,
-      addressPrint: false,
-      whatsapp: null,
-      direccion: null,
-      socialLinks: '{}',
+      ...this.#branding(row),
       tipoNegocio: (row.tipoNegocio ?? 'mixto') as TipoNegocio,
       categoriaVentaPredeterminada: (row.categoriaVentaPredeterminada ??
         'Producto') as SaleCategory,
@@ -146,6 +129,34 @@ export class DrizzleBusinessesRepository implements BusinessesRepository {
       createdAt: row.createdAt as IsoTimestamp,
       updatedAt: row.updatedAt as IsoTimestamp,
       deletedAt: (row.deletedAt ?? null) as IsoTimestamp | null,
+    };
+  }
+
+  /**
+   * C-15 branding, stored since migration 0012. The fallbacks cover a row
+   * object built before the insert (`create` maps what it wrote) and any row
+   * an older database left null.
+   */
+  #branding(
+    row: BusinessRow,
+  ): Pick<
+    Business,
+    | 'brandColor'
+    | 'receiptTemplate'
+    | 'receiptLeyenda'
+    | 'addressPrint'
+    | 'whatsapp'
+    | 'direccion'
+    | 'socialLinks'
+  > {
+    return {
+      brandColor: row.brandColor ?? null,
+      receiptTemplate: (row.receiptTemplate ?? 'clasico') as ReceiptTemplate,
+      receiptLeyenda: row.receiptLeyenda ?? null,
+      addressPrint: row.addressPrint ?? false,
+      whatsapp: row.whatsapp ?? null,
+      direccion: row.direccion ?? null,
+      socialLinks: row.socialLinks ?? '{}',
     };
   }
 

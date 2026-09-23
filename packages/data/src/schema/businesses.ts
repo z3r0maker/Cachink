@@ -24,6 +24,22 @@ export const businesses = sqliteTable('businesses', {
   usoCfdi: text('uso_cfdi'),
   isrTasa: integer('isr_tasa').notNull(),
   logoUrl: text('logo_url'),
+  /**
+   * Branding and receipts (C-15, migration 0012). Same columns and defaults as
+   * the wire and Postgres, so a pull writes what the portal set. The template
+   * enum is enforced at the schema boundary, not by a SQLite CHECK.
+   */
+  brandColor: text('brand_color'),
+  receiptTemplate: text('receipt_template', {
+    enum: ['clasico', 'moderno', 'ticket', 'minimal'],
+  })
+    .notNull()
+    .default('clasico'),
+  receiptLeyenda: text('receipt_leyenda'),
+  addressPrint: integer('address_print', { mode: 'boolean' }).notNull().default(false),
+  whatsapp: text('whatsapp'),
+  direccion: text('direccion'),
+  socialLinks: text('social_links').notNull().default('{}'),
   tipoNegocio: text('tipo_negocio', {
     enum: ['producto-con-stock', 'producto-sin-stock', 'servicio', 'mixto'],
   })

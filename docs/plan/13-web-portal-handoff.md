@@ -197,13 +197,11 @@ list — see the addendum below.)_
 With the app branch merged, everything below is engineering-workable on
 `main` right now, in dependency order:
 
-1. **The keystone — C-15 branding columns' SQLite half.** Seven `businesses`
-   columns are cloud-ahead in the drift contract (`brand_color`,
-   `receipt_template`, `receipt_leyenda`, `address_print`, `direccion`,
-   `whatsapp`, `social_links`; plus `clients.rfc` and `caja_turnos`'s two).
-   The wire addresses columns by name, so a phone cannot even _receive_ the
-   business's branding until these land (SQLite migration, both schemas,
-   wire). Mechanical; unlocks items 3 and 4.
+1. ~~**The keystone — C-15 branding columns' SQLite half.**~~ **Done 2026-09-22** — SQLite
+   migration 0012 mirrors the seven `businesses` columns, the repository maps them, a pull lands
+   them (`packages/sync/tests/reference-applier.test.ts`) and the drift test's `businesses`
+   exception is gone. Items 3 and 4 are unblocked. Still cloud-ahead: `clients.rfc` and
+   `caja_turnos`'s two `aclarado_*`.
 2. **N-17's half** — `opening_balances` + `opening_balance_clients` in
    SQLite (`packages/data` migration + the device table map; the server wire
    already lists both tables) and the phone's Estados calculators consuming

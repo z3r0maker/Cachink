@@ -332,7 +332,16 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
 
 ### C-15 Business branding and contact columns on the `businesses` DOWN table
 
-- [~] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+- [x] Status · **Surfaced by:** N-11, N-19 · **Blocks:** N-11, N-19
+  - Done: 2026-09-22 · SQLite half — migration **0012** `0012_business_branding` adds the same
+    seven columns with the wire's defaults (`receipt_template` 'clasico', `address_print` 0,
+    `social_links` '{}'), `SCHEMA_VERSION` 13, the columns on `packages/data`'s `businesses`
+    schema, and the repository stops dropping them (`businesses-repository.ts` mapped both ways).
+    Tests: `packages/data/tests/migrations/c15-branding.test.ts` (old → new, 4 cases) and
+    `packages/sync/tests/reference-applier.test.ts` (a pull lands branding; an unbranded pull
+    keeps the defaults). The drift test's `businesses` cloud-ahead exception is **deleted** — it
+    expires by design once the device has the columns, and `packages/data-pg/tests/drift.test.ts`
+    is green without it.
   - Progress: 2026-09-18 · `track-n/c15-n19-branding` · wire + pg halves done: `brandColor`,
     `receiptTemplate (clasico|moderno|ticket|minimal)`, `receiptLeyenda`, `addressPrint`,
     `whatsapp`, `socialLinks` (JSON string, the entity's `featureFlags` precedent) on

@@ -50,6 +50,40 @@ describe('applyReferenceTables', () => {
     assert.equal(p?.precioVentaCentavos, first.precioVentaCentavos);
   });
 
+  it('lands the C-15 branding a pull carries, and defaults it when the cloud sends none', async () => {
+    const db = makeFreshDb();
+    const fx = buildFixtures();
+    const branded = {
+      ...fx.businesses[0]!,
+      brandColor: '#FFD60A',
+      receiptTemplate: 'ticket',
+      receiptLeyenda: '¡Gracias por su compra!',
+      addressPrint: true,
+      whatsapp: '55 1234 5678',
+      direccion: 'Av. Insurgentes 123, CDMX',
+      socialLinks: '{"instagram":"@donpedro"}',
+    };
+    await applyReferenceTables(db, tables({ businesses: [branded] as never }), FIXTURE_BUSINESS_ID);
+    const repo = new DrizzleBusinessesRepository(db, 'DEV' as never);
+    const biz = await repo.findById(FIXTURE_BUSINESS_ID as BusinessId);
+    assert.equal(biz?.brandColor, '#FFD60A');
+    assert.equal(biz?.receiptTemplate, 'ticket');
+    assert.equal(biz?.receiptLeyenda, '¡Gracias por su compra!');
+    assert.equal(biz?.addressPrint, true);
+    assert.equal(biz?.whatsapp, '55 1234 5678');
+    assert.equal(biz?.direccion, 'Av. Insurgentes 123, CDMX');
+    assert.equal(biz?.socialLinks, '{"instagram":"@donpedro"}');
+
+    const plain = makeFreshDb();
+    await applyReferenceTables(plain, tables(), FIXTURE_BUSINESS_ID);
+    const untouched = await new DrizzleBusinessesRepository(plain, 'DEV' as never).findById(
+      FIXTURE_BUSINESS_ID as BusinessId,
+    );
+    assert.equal(untouched?.receiptTemplate, 'clasico');
+    assert.equal(untouched?.addressPrint, false);
+    assert.equal(untouched?.socialLinks, '{}');
+  });
+
   it('is an upsert: re-applying an edited row updates it instead of duplicating', async () => {
     const db = makeFreshDb();
     await applyReferenceTables(db, tables(), FIXTURE_BUSINESS_ID);
