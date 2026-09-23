@@ -63,6 +63,8 @@
 ### N-01 Stripe: annual prices + trial on both paid tiers `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-10, C-12 · **Blocks:** N-13, N-31
+  **Remaining (2026-09-23, verified against the code):** the Suscripción screen hard-codes `iniciarPrueba(planId, 'month')` — no annual option, no «Cambiar a anual», nothing calls `pagarAnualPorSpei`, cards show «MXN / mes» without «+ IVA» (`planes.ts`). Gateway, catalog, card-less trial and SPEI `send_invoice` code are done. The four-price Checkout run needs O-12.
+
 - **What:** second Stripe Price per paid plan. Lookup keys `plan_xangarro_monthly`,
   `plan_xangarro_annual`, `plan_xangarrote_monthly`, `plan_xangarrote_annual`. `trial_period_days: 14`
   on both tiers (B-10 had it on the top tier only), **no payment method collected at trial start**
@@ -102,6 +104,8 @@
 ### N-02 Server usage metering `[LAUNCH]`
 
 - [~] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
+  **Remaining (2026-09-23, verified against the code):** nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. **Bug:** `xangarro.usage_counts()` (0029) counts every `sales` row, but ADR-073 counts one per ticket (`counts-toward-usage.ts`) — multi-line tickets are over-counted and the integration test (one sale per ticket) never catches it. Built: `usage_counters`, nightly cron, `usage` in pull/entitlement, `origen` column.
+
 - **What:** a portal-only `usage_counters (business_id, period 'YYYY-MM', transactions, products,
 computed_at)` table (ADR-060 portal-only entity checklist).
 - **How:** `/sync/push` increments `transactions` by accepted UP rows in the counted tables; a nightly
@@ -134,6 +138,8 @@ computed_at)` table (ADR-060 portal-only entity checklist).
 ### N-03 Overage warnings and provider alerts `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-02, N-08, B-14 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** no portal usage banner; no app banner driven by the pulled `usage` (`usageMessageCode` is never called; `PlanLimitSheet` counts locally); no contract test that a paid tenant at 150 % still syncs every row (the mock's `over-limit` scenario is unused).
+
 - **What:** thresholds 80 % / 100 % per metric → owner email (once per threshold per month), portal
   banner, app banner (from the pulled `usage`). **App copy is neutral** (ADR-069): "Este negocio está
   cerca de su límite mensual. Avisamos al dueño." — no plan names, prices or upgrade prompts on the
@@ -180,7 +186,9 @@ metric, threshold)`. Copy: never punitive ("Tu negocio está creciendo 🎉").
 
 ### N-05 `apps/backoffice` scaffold + staff auth `[LAUNCH]`
 
-- [~] Status · **Blocked by:** B-01, P-22 · **Blocks:** N-06 … N-10, N-46 … N-48
+- [x] Status · **Blocked by:** B-01, P-22 · **Blocks:** N-06 … N-10, N-46 … N-48
+      Done: 2026-09-20 · 0c20104b · staff allowlist + mandatory TOTP/AAL2 gate (in-house auth, 4d524f4), audited mutations, nonce CSP + noindex, service-role CI guard, real-DB Playwright suite + `backoffice-e2e` CI job. Follow-ups outside the acceptance: staff SQL still under `src/server/db/migrations/`; add `backoffice-e2e` to branch protection.
+
 - **What:** Next.js App Router app at `admin.xangarro.mx`, its own Vercel project, reusing
   `@xangarro/tokens`, `data-pg`, `contracts`, `application`.
 - **How:** Supabase Auth with a `staff_members` allowlist; **TOTP 2FA mandatory** (AAL2 required by
@@ -209,6 +217,8 @@ test:e2e:db` (db reset + both migration sets + suite).
 ### N-06 Tenants, licences and Stripe `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, B-10, B-06 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** overrides never reach the entitlement — `tenantEntitlement` (`billing/plan.ts`) reads subscriptions only and nothing outside the backoffice reads `plan_overrides`; billing columns still come from `unknownBillingSource` (`tenants/wiring.ts`) although B-10's table exists.
+
 - **What:** tenant list (plan, Stripe status active/trialing/past_due/lapsed, next charge, interval,
   devices, last sync, last login) and detail with a link to the Stripe customer.
 - **How:** Stripe stays the source of truth (webhooks). Overrides, each audited and each with an
@@ -237,6 +247,8 @@ test:e2e:db` (db reset + both migration sets + suite).
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
+  **Remaining (2026-09-23, verified against the code):** acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B) and the card shares N-02's ticket over-count.
+
 - **What:** per-tenant usage vs limits with an "over limit" filter; a **capacity card** — DB size,
   largest tables by rows, sync p95 (B-18) — each against its N-51 / N-52 trigger, reviewed monthly.
 - **Acceptance:** the capacity card goes amber at 80 % of a trigger and red at the trigger.
@@ -257,7 +269,9 @@ test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
+- [x] Status · **Blocked by:** N-05 · **Blocks:** N-03, N-10, N-18, N-49
+      Done: 2026-09-20 · 0c20104b · `support_items` with audited assign/status; sources wired: bug-report function, portal Ayuda («Es urgente»), P-10 factura, Stripe webhook, CFDI monthly close, N-03 límite, N-18 Hazlo por mí (cf3feaaa). The N-49 source arrives with N-49.
+
 - **What:** portal-only `support_items (kind ∈ bug | factura | migracion | escalacion | limite |
 explorador | sistema, status ∈ nuevo | en_curso | resuelto, urgent, owner_staff_id, business_id,
 body, attachments)`.
@@ -278,6 +292,8 @@ body, attachments)`.
 ### N-09 Platform flags and kill switches `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, A-14 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** `platform_flags_for_entitlement` is never read (entitlement `features` come from plan limits only); the app still uses the compiled `PLATFORM_AVAILABLE` (`use-feature-flags.ts`); no C- task for `comprobanteShare` / `cobrosIntegrados`; the portal Asesor never reads the `asesorLlm` kill switch.
+
 - **What:** UI over the **platform-availability** level of the three-level flags (ADR-053): global
   on/off per feature, plus a beta allowlist of tenants. Kill switches for the Asesor LLM, receipts
   share, card collection (once built).
@@ -299,6 +315,8 @@ body, attachments)`.
 ### N-10 Staff alerts `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-08, B-14, B-18
+  **Remaining (2026-09-23, verified against the code):** digest has no over-limit section; the dormancy section belongs to N-48 (post-launch) — amend to defer it rather than build it now; urgent delivery within a minute needs `ALERT_WEBHOOK_URL` set.
+
 - **What:** daily 08:00 (America/Mexico_City) digest to `soporte@xangarro.mx` — new inbox items, over
   limit tenants, dormancy candidates, B-18 rejection summary. Urgent items also POST to a Slack/Discord
   incoming webhook (URL in env).
@@ -323,7 +341,9 @@ body, attachments)`.
 
 ### N-11 Portal settings parity `[LAUNCH]`
 
-- [ ] Status · **Blocked by:** P-08, P-15, C-15 · **Blocks:** A-01, N-12
+- [~] Status · **Blocked by:** P-08, P-15, C-15 · **Blocks:** A-01, N-12
+  **Remaining (2026-09-23, verified against the code):** every setting is built (`negocio.sync.spec.ts`, `comprobantes.sync.spec.ts`, `sync.spec.ts` Funciones, `avisos-configurar.spec.ts`; the ISR confirm became a switch per ADR-082); only the mapping checklist (portal / device A-12 / dropped-why) is missing. A-01 finished 2026-09-16, so «blocks A-01» is moot.
+
 - **What:** every business setting editable in the portal before the app loses it:
   régimen + **ISR rates with the confirm dialog**; **tipos de pago** switches; atributos de producto;
   **contacto y comprobantes** (new `businesses` columns, C-15); preferencias; **Funciones switches
@@ -336,6 +356,8 @@ body, attachments)`.
 ### N-12 "Platícanos de ti" wizard `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-11, N-19 · **Blocks:** N-13, N-15
+  **Remaining (2026-09-23, verified against the code):** acceptance met (`suggested-plan-table.test.ts`, 535ceaa1). Business type and WhatsApp answers are never saved although `businesses.tipo_negocio` / `whatsapp` exist (`AplicarConfiguracionUseCase` writes only name + payment methods); step 6 records `hasLogo` with no upload (N-19); answers live in `business_onboarding`, not `businesses.onboarding` — documented, not ratified by an ADR.
+
 - **What:** replaces P-04's steps. "Paso N de 8", one question per step, icon + description cards
   (CLAUDE.md §6), every step skippable:
   1. nombre + tipo de negocio · 2. ¿cómo cobras? (Efectivo / Tarjeta / Transferencia / QR / Crédito)
@@ -358,7 +380,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-13 Plan recommendation + signup reorder `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-12, N-01 · **Blocks:** N-30, L-03
+- [x] Status · **Blocked by:** N-12, N-01 · **Blocks:** N-30, L-03
+      Done: 2026-09-18 · 302c95df · `/signup?plan=` → wizard → «Tu plan ideal»; «Probar 14 días» through B-10 Checkout; pending paid answers applied exactly once by the webhook's `EntitlementListener` (`aplicar-respuestas-pendientes-use-case.test.ts`). A live Checkout run is O-12.
+
 - **What:** signup (`?plan=` preselects) → wizard → **"Tu plan ideal: Xangarro — porque manejas
   inventario y vendes a crédito"** → [Probar 14 días] (Checkout) or [Seguir gratis].
 - **How:** paid-only answers show an "Incluido en Xangarro" badge; if the tenant stays free they are
@@ -371,7 +395,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-14 "¿Cómo empiezo?" checklist update `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-12
+- [x] Status · **Blocked by:** N-12
+      Done: 2026-09-18 · b063d4b1 · `/como-empiezo` checklist detected from data, incl. «Sube tu logo» (reads `businesses.logo_url`); the Mercado Pago/Clip item arrives with N-44.
+
 - **What:** P-04's checklist keeps its items (operator, products/import, code, device activated,
   first sale synced) and adds "Sube tu logo". "Conecta Mercado Pago / Clip" appears only when
   `cobrosIntegrados` is platform-available (N-44).
@@ -379,7 +405,9 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-15 Re-run the wizard `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-12
+- [x] Status · **Blocked by:** N-12
+      Done: 2026-09-18 · f29f8fb0 · `/bienvenida/revisar` «esto cambiará» summary, no write when nothing changes, link on Negocio (`configuration.test.ts`, `aplicar-configuracion-use-case.test.ts`).
+
 - **What:** Configuración → "Volver a configurar mi negocio": pre-filled with current values; before
   applying, a summary "esto cambiará" (e.g. "Se desactivará Inventario — tus productos no se
   borran").
@@ -422,6 +450,8 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-16, C-20
+  **Remaining (2026-09-23, verified against the code):** the «¿Cómo empiezo?» checklist has no saldos iniciales row (`onboarding/checklist.ts`); no end-to-end test shows the portal Balance matching the captured figures (only the domain and data-pg unit/integration tests). The SQLite half listed as «still to do» landed in 23c7fd43.
+
 - Progress: 2026-09-19 · `track-n/c20-n17-apertura` · **pg/web halves done.** **Saldos
   iniciales** — `/saldos-iniciales`: fecha de apertura, caja, bancos, and the per-cliente CxC
   lines (hand-edited or prefilled from a .csv of the Clientes-import shape + saldo column; a
@@ -488,6 +518,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-19 Logo + brand colour `[LAUNCH]`
 
 - [~] Status · **Blocked by:** C-15 · **Blocks:** N-12, N-20
+  **Remaining (2026-09-23, verified against the code):** the phone does not download or cache the logo (nothing fetches `/api/logos`; 73324085 only added the branding columns), so «renders offline» is unmet. The monthly-PDF logo (02b207da) is done — drop it from «still to do».
+
 - Progress: 2026-09-18 · `track-n/c15-n19-branding` · **pg/web halves done.** Logos live in a
   portal-only `business_logos` table (0023) — **deviation from the interview's bucket, ratified
   by the owner 2026-09-18**: Supabase Storage's REST upload needs a Supabase JWT the in-house
@@ -546,6 +578,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-21 WhatsApp share `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-20 (done) · web half landed 2026-09-20
+  **Remaining (2026-09-23, verified against the code):** phone half only: no Android send to a preset number (`share-image.ts` opens the generic sheet), no «Enviar como texto», no Maestro flow to the hand-off, no Android-fallback unit test. Blocked on N-24.
+
 - Progress: 2026-09-20 · `track-n/n21-informe-logo` · **the web half lives.** The
   register's share dialog (Track O's) now saves the **branded** comprobante: a
   device-token route `GET /api/v1/comprobante?ticketId=` renders the N-20
@@ -592,7 +626,9 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 > **Note (ADR-071):** the offline page applies to the Director surface only; the operator register
 > (Track O) has its own offline outbox and must never be replaced by this page.
 
-- [~] Status · **Blocked by:** P-24 (shell landed; nothing in its remainder blocks this)
+- [x] Status · **Blocked by:** P-24 (shell landed; nothing in its remainder blocks this)
+      Done: 2026-09-21 · ac61007b · module service worker (`public/sw.js`) precaches `/sin-conexion.html` and replaces failed Director navigations only (never `/operador` or `/api/*`); sw-rule unit tests 3/3; `offline-page.spec.ts` green on the seeded suite (ad774cbc).
+
 - **What:** a minimal service worker that serves a branded "Sin conexión — tus ventas siguen
   guardándose en tus dispositivos" page when navigation fails. No data caching, no writes.
 - Progress: 2026-09-21 · `public/sw.js` (a **module** worker so its one rule,
@@ -647,6 +683,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-26 Security audit `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-05, B-17 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** 3 of 6 highs fixed (SEC-AUTH-01/02, SEC-SEC-01); SEC-DEV-01 half (the `EMAIL_MISMATCH` oracle, C-14); SEC-DATA-01 is the owner switch O-2; SEC-PRIV-01 is N-34. Mediums in scope still open: SEC-SUP-01 (no dependency/secret scanning in `ci.yml`), SEC-WEB-01 (no security headers/CSP in `apps/web/next.config.mjs`). The hosted re-run needs X-01.
+
 - **Scope:** OWASP ASVS L1 on portal, API and admin; RLS test for **every** table; device, portal and
   staff token handling; Stripe webhook signature; secrets and service-role isolation (N-05 guard);
   B-17 rate limits; dependency and secret scanning in CI; LFPDPPP aviso de privacidad and ARCO flow.
@@ -663,6 +701,8 @@ esperando_aprobacion → aplicada/rechazada/expirada`. Staff only _send_
 ### N-27 Database audit `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-03, B-08, B-09 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** fixed: DB-SYNC-01, DB-IDX-01 (8666e6ce), DB-QRY-01, DB-MIG-01. Open: DB-RLS-01 (app-role DELETE revoked only on newer tables, not the ledger), DB-MIG-02 (`supabase/migrations/0001_schema.sql` still in the tree), DB-OPS-01 (PITR + drill = O-3), DB-SYNC-02 (unverified). `pg_stat_statements` re-run needs the hosted project.
+
 - **Scope:** Postgres (the 2026-05 reports cover the archived SQLite desktop DB): `pg_stat_statements`
   top queries and plans, `business_id`-leading indexes, RLS predicate cost, enum CHECK constraints
   (ADR-062 follow-up), migration safety, **a PITR restore drill** with a timed runbook.
@@ -732,6 +772,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 ### N-32 Store-compliance sweep `[LAUNCH]`
 
 - [~] Status · **Blocked by:** N-24, A-15 · **Blocks:** X-05
+  **Remaining (2026-09-23, verified against the code):** **`pnpm lint:store` fails on `main` with 20 violations** since the `rename/xangarro-stored-ids` merge (`planLimit.*`, `planBanner.fellBack`, `settings.plans.*`, `activate.*`, `productos.editInPortal` in `es-mx.ts`) — the «main: 0 violations» note is stale; `lint:store` is not in `ci.yml`; no reviewer checklist for X-05 in `docs/store/`.
+
 - **What:** make the app reviewable as a business-employee tool (ADR-069).
 - **How:** grep the app bundle's strings (i18n `es-mx.ts`, hard-coded text) for plan names
   (`xangarrito|xangarro plan|xangarrote`), prices, `mejora|upgrade|suscr|plan|precio|pagar` and any
@@ -754,6 +796,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 
 - [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** the aviso integral is reachable from no surface (no route, footer or landing link); no ARCO form or `kind=arco` inbox item or due-date clock; consent captured only at signup (48bca19c, `privacy_consents`, migration 0034 — hosted apply pending), not for device linking or operator NIP; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01 open; self-service deletion and consent withdrawal not built. Counsel review is O-17.
+
 - **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
   an aviso de privacidad (integral on the landing and portal footer, simplified at signup and in the
   app's sign-in) covering purposes, transfers (Supabase, Vercel, Stripe, PAC, Sentry), the ADR-064
@@ -801,6 +845,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
 - [~] Status · **Blocked by:** B-10, P-10, N-08 · **Blocks:** N-30
+  **Remaining (2026-09-23, verified against the code):** refund → PAC cancellation not wired (`cancel-cfdi-for-refund.ts` exists, nothing calls it; refunds only file an inbox item); egreso for partial refunds not built. Off-mode, duplicate-webhook and monthly-close criteria have unit tests. Sandbox stamps need Facturapi test keys (O-15); fiscal defaults need O-14.
+
 - **What:** a CFDI 4.0 for every subscription payment (ADR-070). **Launch scope:** the automation is
   wired to the Stripe webhook behind `CFDI_MODE = off | test | live` (production `off`, staging
   `test`), plus an admin **"Pagos sin CFDI"** list (N-08 inbox kind `factura`) so the owner issues
@@ -1046,7 +1092,8 @@ bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
   the lawyer's review. Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
   and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
   engineering one — the cookie-less aggregate case is weak for one, but confirm.
-- [ ] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
+- [x] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
+      Done: 2026-09-22 · 419bd02b · `xangarro.geo_prune` (`0033_geo_prune.sql`, SECURITY DEFINER, 90-day floor, execute only for `xangarro_admin`) called with `GEO_KEEP_DAYS = 400` from the digest cron. No test calls it yet; the `0033` prefix is shared with `0033_tenant_indexes.sql` (harmless, apply order sorts the full name).
 - [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best"
       or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
       fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,

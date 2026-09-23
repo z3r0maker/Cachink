@@ -8,6 +8,7 @@
 ### X-01 Staging environment (Q17 "A later")
 
 - [ ] Status · **Blocked by:** B-01…B-10 · **Blocks:** X-02
+      **Remaining (2026-09-23, verified against the code):** the repo is ready (`eas.json` splits preview/production env and entitlement keys; both `vercel.json` pin `pdx1`) but `docs/ops/provisioning.md` has no staging section and `scripts/hosted/*` targets one database; the `xangarro-staging` Supabase project, the Vercel Preview env, the Stripe test binding and the separate keypair are all outside the repo.
 - **Context:** Must exist **before the first paying customer**. Second Supabase project `xangarro-staging` (same region), Vercel preview env pointing at it, Stripe **test mode** bound to staging and **live mode** bound to prod, EAS `preview` channel → staging, `production` → prod.
 - **Steps:** create project; run migrations; seed (B-04); Vercel env vars per environment; `apps/mobile/eas.json` `preview.env.EXPO_PUBLIC_API_BASE` → staging URL, `production` → prod; rotate the entitlement keypair so staging and prod use **different** keys (prod public key baked only in production builds).
 - **Acceptance:** a preview build activates against staging with a staging-issued code; a production build refuses a staging entitlement (signature mismatch → freelancer limits, banner) — proves keys are separate.
@@ -35,6 +36,7 @@
 > **Amended 2026-09-17 by Track N:** submit under the business-employee framing of ADR-069 (3.1.3(c)); blocked by N-32 (store-compliance sweep); send an external TestFlight build early for a review signal (OQ-6).
 
 - [ ] Status · **Blocked by:** F-01, A-15, X-07, B-04 · **Blocks:** L-05
+      **Remaining (2026-09-23, verified against the code):** `app.json` is renamed (Xangarro!, `mx.xangarro.mobile`) and `store:screenshots` exists, but `docs/store/listing-*.md` still points support/privacy/terms at `cachink.mx`, the copy is pre-pivot (modo local, Director, LAN sync), there are no review notes (demo account, «no purchase flow»), and `eas.json` `submit.production` has no `ascAppId`.
 - **Steps:** App Store Connect + Play Console apps under `mx.xangarro.mobile`, name "Xangarro!"; update `docs/store/listing-*.md`; screenshots via `pnpm store:screenshots` after X-07; **review notes** with the demo account (B-04: email/password + activation code `DEMOK7M3`) and a sentence: "Xangarro is a business tool; subscriptions are purchased by business owners on our website; the app contains no purchase flow." `eas submit` profiles get `ascAppId`. Privacy nutrition labels updated (data now leaves the device). Confirm the current external-purchase/steering rules for the **Mexican** storefront before submission and record the source + date in the Done line (ADR-053 consequence).
 - **Acceptance:** both listings in review with the demo account working from a fresh install.
 
@@ -64,7 +66,7 @@
 ### X-08 Repo + directory rename (optional, coordinate)
 
 - [ ] Status · **Blocked by:** A-15
-- **Steps:** GitHub rename `z3r0maker/Cachink` → `Xangarro` (GitHub redirects the old URL); local `mv ~/Downloads/Cachink ~/Downloads/Cachink` **without `!`**; update `~/.claude/projects/*` memory pointers if any; same for `CachinkLanding` → `XangarroLanding`. Do it when no track branch is mid-flight.
+- **Steps:** GitHub rename `z3r0maker/Cachink` → `Xangarro` (GitHub redirects the old URL); local `mv ~/Downloads/Cachink! ~/Downloads/Cachink` **without `!`** (the directory is already `Cachink`; a stray `~/Downloads/Cachink!` sits beside it); update `~/.claude/projects/*` memory pointers if any; same for `CachinkLanding` → `XangarroLanding`. Do it when no track branch is mid-flight.
 - **Acceptance:** `git remote -v` shows the new name; CI still runs.
 
 ### X-09 ROADMAP.md reset

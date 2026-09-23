@@ -61,6 +61,7 @@
 ### Z-11 Pro extras: audit history + per-operator permissions UI
 
 - [ ] Status · **Trigger:** first Pro customer.
+      **Remaining (2026-09-23, verified against the code):** only the audit-history screen (from `sync_log` / `cancelacion_logs`); the per-operator permissions editor already exists as P-05 (`equipo/operador-actions.tsx`, plan-gated, single key `canCancelSales`).
 - **Scope:** `users.permissions` JSON editor in Operadores (portal), app enforces (already reads permissions); audit history screen from `sync_log` + `cancelacion_logs`.
 
 ### Z-12 Sale-confirm sound: commission new audio (ADR-054 §7)
