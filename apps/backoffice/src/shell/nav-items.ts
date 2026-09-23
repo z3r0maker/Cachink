@@ -4,7 +4,7 @@
  */
 export interface NavItem {
   readonly label: string;
-  readonly href: '/' | '/tenants' | '/uso' | '/inbox' | '/flags';
+  readonly href: '/' | '/tenants' | '/uso' | '/inbox' | '/flags' | '/mapa';
   readonly task: string | null;
   readonly summary: string;
 }
@@ -34,5 +34,11 @@ export const NAV_ITEMS: readonly NavItem[] = [
     href: '/flags',
     task: 'N-09',
     summary: 'Disponibilidad de funciones por plataforma, lista beta y kill switches.',
+  },
+  {
+    label: 'Mapa',
+    href: '/mapa',
+    task: 'N-56',
+    summary: 'Accesos, visitas y conversión por estado, para orientar la inversión en anuncios.',
   },
 ] as const;

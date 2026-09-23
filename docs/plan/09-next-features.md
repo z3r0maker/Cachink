@@ -992,6 +992,58 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
   as unsigned signals → fetch to confirm. Passes the shared adapter contract suite. Production-only
   testing with a real device and a low-amount charge + refund script.
 
+### N-55 Analítica geográfica por estado (ADR-092)
+
+Where users log in, where they are when they buy, and where marketing traffic comes from — one
+console view, by Mexican state. **No raw IP is ever stored:** the state comes from Vercel's derived
+`x-vercel-ip-country-region`, and the table is a daily counter, an aggregate from birth. A spike on
+2026-09-22 confirmed the Hobby plan does receive the geo headers, and that the region arrives as the
+bare ISO 3166-2 code (`CHH`), not `MX-CHH`.
+
+- [x] **N-55 · Phase 1 — the pipe.** `xangarro.geo_counters` + `geo_record` (`0030`, `0031`), the
+      pure `regionFromHeaders`, and the writer hooked into `signInUser` so the password path and both
+      magic-link paths are covered by one call. Proved against real Postgres: the app role counts and
+      cannot read back, an unknown source raises, an unusable region folds into "unknown".
+**The point is to steer marketing spend**, which sets the order below. Raw counts always favour big
+cities — a population artefact, not an insight — so the console is **metric-first**: the user picks
+what to shade by (accesos · visitas · checkouts · **conversión**), and the source is one input to
+that. Two rules the map must not break: a rate below a denominator floor renders as «datos
+insuficientes», never as a bright 100% from one visit; and a rate uses a diverging scale anchored on
+the national average, with that average stated as a number.
+
+- [x] **N-56 · Phase 2 — the console as a sorted table**, plus the metric registry. Ships before the
+      map on purpose: a choropleth over three days of data is an empty country. Build the metric
+      abstraction here even though only `accesos` has data — retrofitting a second axis later is the
+      expensive version.
+- [x] **N-57 · Phase 3 — UTM attribution.** The cheapest item here and the one that makes the rest
+      actionable. `apps/landing/src/App.jsx` already appends `utm_*` to every signup CTA and the
+      portal **reads none of them** — no `utm` reference exists in `apps/web/src` or in any
+      migration, so attribution dies at the door and no campaign can be evaluated, in any city.
+      Store first-touch on the business at signup. Also move the rewrite out of `App.jsx` into the
+      shared client entry: the `/recursos` article pages drop UTMs today, so content marketing is
+      entirely unattributed.
+- [ ] **N-58 · Phase 4 — purchases + landing.** Checkout hook in `probarGratis`; a portal-served 1×1
+      pixel for the landing, so the marketing project needs no database secret. Ahead of the map,
+      because `conversión` cannot exist until landing visits are counted. **Blocked by N-60.**
+- [ ] **N-59 · Phase 5 — the choropleth.** Natural Earth (CC0) geometry, pre-projected offline into
+      SVG path strings so no map library, no tiles and no CSP change are needed. Two scale kinds:
+      sequential for counts, diverging for rates.
+- [ ] **N-60 · Phase 6 — ADR-092 + aviso.** Closes the open TODO at `docs/legal/aviso/aviso-integral.md:255`
+      and publishes an aviso route on the landing. A consent banner is a legal judgement, not an
+      engineering one — the cookie-less aggregate case is weak for one, but confirm.
+- [ ] **N-61 · Phase 7 — retention.** `geo_prune(400)` on the existing backoffice cron.
+- [ ] **N-62 · Cohort metrics from the fiscal address, not from IP.** For "which states retain best"
+      or "where is LTV highest", use `businesses.codigo_postal` — already given by the tenant for
+      fiscal purposes, already exposed through `xangarro.tenant_fiscal`. Self-declared, stable,
+      better than an IP guess, and it adds no new collection.
+
+**Not recommended without evidence:** "we see a trend in Zapopan, so buy ads in Zapopan." That
+measures where we already won, favours big cities by construction, and at current volume cannot
+distinguish signal from noise. The defensible loop is: attribution → conversion rate by state → a
+matched-pair holdout test (advertise in one city, keep a comparable one dark) → then scale. Also
+worth testing before geography: segmenting by **business type**, which likely predicts more for a
+micro-POS than location does.
+
 ---
 
 ## 4. Open questions (not decided in the interview)
