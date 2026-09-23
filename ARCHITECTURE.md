@@ -6151,3 +6151,125 @@ report that something failed but never what.
   plus a case; an unnamed code still degrades to the generic sentence.
 - The boundaries are deliberately thin. The failures worth explaining are
   caught where the real error still exists, not in the boundary.
+
+---
+
+## ADR-092
+
+**Title:** Analítica geográfica por estado, sin IP — un contador diario, no una
+bitácora de eventos; y la atribución de campaña que faltaba
+
+**Date:** 2026-09-22
+
+**Status:** Accepted — N-55 · N-56 · N-57 landed; N-58 · N-59 · N-60 follow
+
+**Context**
+
+Nothing in the product recorded *where* anyone was. The owner wanted one view
+answering three questions — where people log in, where they are when they buy,
+and where marketing traffic comes from — in order to decide where to spend on
+advertising.
+
+Three existing facts constrained every option:
+
+1. **The raw IP was captured on all five auth paths and deliberately thrown
+   away.** `clientIp()` feeds a SHA-256 throttle key and nothing else;
+   `0005_throttle_and_sessions.sql` states the table "holds no personal data"
+   (ADR-079).
+2. **The backoffice CSP names no third-party origin**, and `security.test.ts`
+   asserts it. Map tiles, external fonts and MapLibre's `blob:` worker are all
+   unavailable, and `style-src` has no `'unsafe-inline'`.
+3. **Stripe collects no address, on purpose** — `billing/catalog.ts` uses a
+   flat IVA Tax Rate specifically so checkout needs no address field.
+
+A spike on a Preview deployment answered what no document did: the **Hobby**
+plan *does* receive Vercel's geolocation headers, and
+`x-vercel-ip-country-region` arrives as the **bare** ISO 3166-2 code (`CHH`),
+not `MX-CHH`. So no IP database, no third-party lookup, no new dependency and
+no EULA.
+
+**Decision**
+
+1. **State level only.** Never city, coordinates or postal code, though Vercel
+   sends all of them. Mexico has ~2,500 municipios and most are small: a daily
+   count of one visit from a small municipality is close to naming a person,
+   while a state count is not. City-level geo-IP is also 65–80% accurate and
+   biased by carrier NAT — Mexican mobile traffic resolves to gateway cities —
+   so it would mislead the very decision it was meant to inform.
+2. **A daily counter, not an event log.** `xangarro.geo_counters` is keyed
+   `(day, source, country, region)` and holds an integer. A per-event row
+   carrying no IP still carries a timestamp, and "BCS, 03:14" on a two-visitor
+   day is nearly identifying. The counter is an aggregate *from birth*: there
+   is never a moment at which a per-person row exists to leak, subpoena or
+   mis-join. It is bounded at ~36k rows/year, and a bot increments an integer
+   instead of growing the table. **Forfeited permanently:** hour-of-day, page
+   path, funnel, per-visit dedup. The escape hatch, if ever needed, is an
+   append-only table plus a nightly rollup *behind the same read function*.
+3. **The feature never reads the IP.** `regionFromHeaders` reads exactly two
+   headers and never `x-forwarded-for`. The unit test's fake `Headers` throws
+   on any other name, so a later stray read fails the suite. This is the
+   sentence the *aviso* rests on, which is why it is enforced rather than
+   documented.
+4. **Unknown is recorded honestly** — country `ZZ`, region `''` — and shown as
+   «sin dato», never guessed into a neighbouring state.
+5. **The console reads an aggregate and nothing else.** `admin_geo_rollup` is
+   a STABLE definer function granted to `xangarro_admin`, which holds **no
+   grant on the counter table** (verified against real Postgres: a direct
+   SELECT is "permission denied"). `xangarro_admin` also cannot EXECUTE
+   `geo_record` — the console reads this data, it never writes it.
+6. **Purchase location comes from the checkout request, not from Stripe.**
+   Stripe's only geographic fact would be the card issuer's country — never a
+   Mexican state, often wrong for a Mexican user on a foreign card — and
+   extracting a state would mean switching on required address collection:
+   more friction at the moment of purchase, more personal data, less answer.
+7. **The console is metric-first, and two rules live in code.** Raw counts per
+   state always favour big cities, a population artefact rather than an
+   insight, so the map is shaded by a chosen metric. A rate below a
+   denominator floor (30 visits) renders «datos insuficientes» rather than a
+   bright 100% conjured from one visit; and a rate is shaded **diverging
+   around the national average**, with that average printed, because "above or
+   below average" is the actionable reading. The conversion metric is labelled
+   «visita → checkout iniciado (no pago)», because a metric named "conversión"
+   that quietly means something else is how a dashboard causes a bad decision.
+8. **UTM attribution gets its own table, and first touch wins.** `businesses`
+   is a DOWN table — every column syncs to every phone — and a marketing label
+   has no business travelling to a shopkeeper's device, so
+   `xangarro.signup_attribution` lives in the platform schema instead.
+   `business_id` is the primary key and the writer is `ON CONFLICT DO NOTHING`:
+   last-touch would credit whichever link someone clicked on the way back in,
+   which is how ad spend gets misattributed.
+9. **That row also carries the state at signup**, which is the one place this
+   design keeps a per-entity location rather than an aggregate. It is
+   deliberate: it makes "which campaign, in which state, produced a customer"
+   a single join, which the counter cannot answer; and a business is a
+   commercial entity whose fiscal address (`businesses.codigo_postal`) we
+   already hold at finer granularity. Still no IP, no city, no coordinates.
+10. **Cohort questions use the fiscal address, not geo-IP.** "Which states
+    retain best" is answered from `businesses.codigo_postal` via
+    `xangarro.tenant_fiscal` — self-declared, stable, already covered by the
+    existing basis, and better data than an inference (N-62).
+11. **The map is pre-projected SVG, not a map library** (N-59). Natural Earth
+    ADM1 is CC0 and already carries `iso_3166_2`; the geometry is converted
+    offline with `mapshaper` via `npx` and committed as path strings, so the
+    CSP invariant that `docs/audits/security-2026-09-17.md:229` records as a
+    positive finding is untouched. Colour comes from `styleVariants` classes,
+    never a `style` attribute, which `style-src` would drop.
+12. **The landing beacon is a portal-served pixel** (N-58), not a function in
+    the marketing project: that project's virtue is holding no secrets, and a
+    pixel fires even when the React bundle never hydrates.
+
+**Consequences**
+
+- A misconfigured *state* is impossible to distinguish from an unknown one, by
+  construction — that is the cost of refusing to guess, and it is the right
+  cost.
+- The marketing question the feature exists for is **not** "where are our
+  users, advertise there". That measures where we already won, favours big
+  cities by construction, and at current volume cannot separate signal from
+  noise. The defensible loop is attribution → conversion rate by state → a
+  matched-pair holdout test → then scale. Recorded in
+  `docs/plan/09-next-features.md` so the order is not silently reversed.
+- The legal basis must be published before the landing pixel ships (N-60):
+  the aviso's section 10 TODO is closed by this work, and the marketing site —
+  which today publishes no privacy page at all — needs one, because its
+  visitors are not yet customers and this aviso does not reach them.
