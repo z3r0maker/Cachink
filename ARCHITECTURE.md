@@ -6937,3 +6937,8 @@ portal to be: `domain` 92%, `application` 96.5%, `auth-core` 100%.
   worker targets over CDP is part of P-35.
 - `pnpm test:coverage` in `apps/web` writes raw data only; the report is
   `pnpm coverage:check`, after `pnpm test:e2e:coverage`.
+
+**Update 2026-09-24 (P-35).** Web Workers are measured now: `e2e/worker-coverage.ts`
+opens a second CDP session per page, auto-attaches to its workers paused, and
+starts precise coverage before their first line. `operador/runtime` went from 19%
+to 95%, and the floor rose to lines 77, statements 72, functions 69, branches 56.

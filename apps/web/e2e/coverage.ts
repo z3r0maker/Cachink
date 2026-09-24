@@ -1,4 +1,3 @@
-import type { Page } from '@playwright/test';
 import MCR, { CDPClient, type CoverageReportOptions } from 'monocart-coverage-reports';
 
 import { E2E_DIR, INSPECT_PORT, rawStage } from '../scripts/coverage-gate/options';
@@ -20,7 +19,8 @@ function e2eOptions(): CoverageReportOptions {
   };
 }
 
-type PageCoverage = Awaited<ReturnType<Page['coverage']['stopJSCoverage']>>;
+/** Page coverage as Playwright returns it, or a worker's in the same shape. */
+type PageCoverage = readonly { url: string; source?: string; functions: readonly unknown[] }[];
 
 /** Workers add concurrently; MCR keeps each call in its cache until `generate`. */
 export async function addPageCoverage(coverage: PageCoverage): Promise<void> {

@@ -134,7 +134,7 @@ export default defineConfig({
       dependencies: ['setup'],
       // Every operator screen lives behind the real door in the serial
       // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1440, height: 900 },
@@ -147,7 +147,7 @@ export default defineConfig({
       dependencies: ['setup'],
       // Every operator screen lives behind the real door in the serial
       // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1024, height: 800 },
@@ -159,7 +159,7 @@ export default defineConfig({
       dependencies: ['setup'],
       // Every operator screen lives behind the real door in the serial
       // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts/,
+      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 768, height: 1024 },
@@ -186,9 +186,25 @@ export default defineConfig({
         storageState: OWNER_STORAGE,
       },
     },
+    // Device slots, counted (B-12). After `operador`, never beside it: each
+    // operador file's door revokes a slot and takes it again, and a count taken
+    // in that window saw a free slot the plan did not have (ADR-102's first
+    // run). A project of its own, so a viewport failure does not hold back the
+    // 46 operador specs, as chaining `operador` behind the viewports would.
+    {
+      name: 'devices',
+      dependencies: ['operador'],
+      testMatch: /devices\.spec\.ts/,
+      workers: 1,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1440, height: 900 },
+        storageState: OWNER_STORAGE,
+      },
+    },
     {
       name: 'sync',
-      dependencies: ['operador', 'desktop', 'laptop', 'tablet'],
+      dependencies: ['operador', 'devices', 'desktop', 'laptop', 'tablet'],
       testMatch: /sync\.spec\.ts/,
       // One file at a time: each activates phones on Taquería, which has two
       // device slots, and revokes the previous file's.
