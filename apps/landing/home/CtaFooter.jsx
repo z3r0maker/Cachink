@@ -9,7 +9,7 @@ const COLS = [
 
 function Cta() {
   return (
-    <section className="cta">
+    <section id="contacto" className="cta">
       <div className="xh-wrap cta-row">
         <div className="cta-copy">
           <h2>¿Listo para que suene la caja?</h2>

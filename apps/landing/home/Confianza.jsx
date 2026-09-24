@@ -12,7 +12,7 @@ const CARDS = [
 export function Confianza() {
   const ref = useInView();
   return (
-    <section className="xh-sec" ref={ref} data-motion="">
+    <section id="por-que" className="xh-sec" ref={ref} data-motion="">
       <div className="xh-wrap">
         <div className="conf-top">
           <div className="xhead-text">

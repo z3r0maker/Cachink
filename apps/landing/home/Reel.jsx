@@ -7,7 +7,7 @@ const CHAPTERS = ['01 · La libreta', '02 · La venta', '03 · Don Cuentas', '04
 export function Reel() {
   const ref = useInView();
   return (
-    <section className="xh-sec xh-band reel" ref={ref} data-motion="">
+    <section id="recorrido" className="xh-sec xh-band reel" ref={ref} data-motion="">
       <div className="xh-wrap reel-inner">
         <div className="reel-head">
           <span className="xeyebrow" style={{ color: 'var(--black)' }}>Xangarro en 16 segundos</span>

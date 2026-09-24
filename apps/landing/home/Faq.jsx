@@ -6,7 +6,7 @@ import { FAQ_ITEMS } from '../landing/copy.jsx';
  */
 export default function Faq() {
   return (
-    <section id="preguntas" className="xh-sec xh-band faq">
+    <section id="faq" className="xh-sec xh-band faq">
       <div className="xh-wrap faq-grid">
         <div className="faq-side">
           <span className="xeyebrow">Preguntas</span>
