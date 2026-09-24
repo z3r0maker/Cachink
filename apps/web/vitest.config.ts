@@ -12,6 +12,8 @@ export default mergeConfig(
       alias: {
         // See tests/support/server-only.ts: the guard stays in the source.
         'server-only': fileURLToPath(new URL('./tests/support/server-only.ts', import.meta.url)),
+        // tsconfig's `@/*` path, so a test can import any module the app can.
+        '@/': fileURLToPath(new URL('./src/', import.meta.url)),
       },
     },
     test: {

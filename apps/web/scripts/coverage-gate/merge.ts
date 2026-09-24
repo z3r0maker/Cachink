@@ -11,10 +11,14 @@ import { ALL_FILES, E2E_DIR, MERGED_DIR, UNIT_DIR, WEB_ROOT, sharedOptions } fro
  *
  *   tsx scripts/coverage-gate/merge.ts            # merge, report, hold the floor
  *   tsx scripts/coverage-gate/merge.ts --raise    # …and raise the floor to today
+ *   tsx scripts/coverage-gate/merge.ts --report-only  # report, hold nothing
  *
  * The floor is a ratchet, like `.design-lint-baseline.json` in the other
  * direction: it may rise, never fall. A change that lowers coverage fails
  * here; a change that raises it should carry `--raise` in the same commit.
+ *
+ * `--report-only` is for a run whose E2E step failed: specs that stopped early
+ * covered less than they would have, so the number is shown, not judged.
  */
 
 const METRICS = ['lines', 'statements', 'functions', 'branches'] as const;
@@ -89,7 +93,9 @@ async function main(): Promise<void> {
     await writeFile(FLOOR_FILE, `${JSON.stringify(raised, null, 2)}\n`);
     console.log(`floor raised in ${path.relative(WEB_ROOT, FLOOR_FILE)}`);
   }
-  if (fallen.length > 0) {
+  if (fallen.length > 0 && process.argv.includes('--report-only')) {
+    console.log(`Below the floor on ${fallen.join(', ')} — not enforced: the E2E run failed.`);
+  } else if (fallen.length > 0) {
     console.error(`Coverage fell below the floor on: ${fallen.join(', ')}.`);
     process.exitCode = 1;
   }

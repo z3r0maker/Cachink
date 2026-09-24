@@ -306,6 +306,10 @@ jobs:
     env:
       # The app role, behind the same policies a request hits — never `postgres`.
       DATABASE_URL: postgres://xangarro_app:xangarro_app@localhost:55432/xangarro
+      # The service container's owner, for test-only cleanup (sync-phone's
+      # asOwner). Without it the specs fell back to the app role, which cannot
+      # DELETE from sales since data-pg 0036.
+      DATABASE_SUPER_URL: postgres://postgres:xangarro@localhost:55432/xangarro
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -348,11 +352,15 @@ jobs:
         run: pnpm --filter @xangarro/web run test:coverage
 
       - name: E2E (data, a11y and shell, three viewports)
+        id: e2e
         run: pnpm --filter @xangarro/web run test:e2e:coverage
 
       # Unit + E2E merged; fails if any metric falls below coverage-floor.json.
+      # After a failed E2E step it still reports — the artifact below always
+      # has a number — but judges nothing: specs that stopped early covered less.
       - name: Coverage floor (portal, unit + E2E)
-        run: pnpm --filter @xangarro/web run coverage:check
+        if: ${{ !cancelled() && steps.e2e.outcome != 'skipped' }}
+        run: pnpm --filter @xangarro/web run coverage:check ${{ steps.e2e.outcome == 'success' && ' ' || '--report-only' }}
 
       # The contract's own conformance suite, pointed at this portal instead of
       # the mock. It is the acceptance for `/activate`: identical assertions pass

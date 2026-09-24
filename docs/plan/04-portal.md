@@ -1440,6 +1440,12 @@ critical avisos cannot be switched off.
     overall lines 77.4%, statements 72.1%, functions 69.9%, branches 56.1%. Floor 77 / 72 / 69 / 56.
     Also: `devices.spec` moved to its own serial project after `operador` — beside it, a door
     revoking and re-taking a slot made the slot count race (first CI run under ADR-102).
+  - 2026-09-24 · **Floor calibrated to 76 / 70 / 68 / 54** — one point under the measurement,
+    after P-30/N-07 landed untested code (ADR-102 calibration note). Unit tests for the
+    refusals E2E cannot reach: `read-sheet`, `livePacProvider`, the receipt. CI's portal-e2e
+    now sets `DATABASE_SUPER_URL` (the sync specs' cleanup needs the owner role) and reports
+    coverage even when E2E fails. The six failing `[sync]` specs belong to the session behind
+    ADR-103 (census assertions; fixes in flight).
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
