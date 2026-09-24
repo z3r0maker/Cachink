@@ -142,6 +142,7 @@ Links to discussion, docs, prior art.
 | [100](#adr-100) | 2026-09-23 | The root contract is rewritten against the code it governs, and its table of contents is generated | Accepted |
 | [101](#adr-101) | 2026-09-23 | Activation answers one generic error, and the QR carries a 15-minute token in the fragment | Accepted |
 | [102](#adr-102) | 2026-09-23 | The portal's coverage is unit + E2E merged, and a floor that only rises holds it | Accepted |
+| [103](#adr-103) | 2026-09-23 | The layer boundaries are enforced for real, and the rule table is reconciled with the code | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -6937,3 +6938,82 @@ portal to be: `domain` 92%, `application` 96.5%, `auth-core` 100%.
   worker targets over CDP is part of P-35.
 - `pnpm test:coverage` in `apps/web` writes raw data only; the report is
   `pnpm coverage:check`, after `pnpm test:e2e:coverage`.
+
+## ADR-103
+
+**Title:** The layer boundaries are enforced for real, and the rule table is reconciled with the code
+
+**Date:** 2026-09-23
+
+**Status:** Accepted — follows the 2026-09-23 finding that `boundaries/element-types` never fired
+
+**Context**
+
+CLAUDE.md §2.5 and §4 call the layer boundaries hard, enforced by ESLint. They
+were not. A file in `packages/domain/src` importing `@xangarro/application`
+linted clean from the repo root and from the package. Two independent faults:
+
+1. **Workspace imports never resolved.** eslint-plugin-boundaries resolves
+   imports through `import/resolver`, which defaulted to the node resolver. With
+   `node-linker=hoisted`, pnpm links a workspace package only into the
+   `node_modules` of packages that declare it, and a boundary-crossing import
+   is almost always undeclared, so it was unresolvable exactly when it mattered.
+   The plugin files unresolvable bare imports as external and checks nothing.
+   A TypeScript resolver would not help either: there are no `paths`.
+2. **Globs resolved against the working directory.** Every package lints with
+   `eslint . --config ../../eslint.config.js`. With an explicit `--config`,
+   ESLint resolves `files`/`ignores` against the cwd, and the plugin resolves
+   element patterns against `process.cwd()`. `packages/ui/src/components/**`
+   and `packages/domain/src/**` matched nothing from inside the package.
+
+Also, the `sync` element's pattern `packages/sync-*/src/**` never matched
+`packages/sync`, the package ADR-053 made the phone's sync.
+
+**Decision**
+
+1. `packages/config/eslint-workspace-resolver.cjs` maps `@xangarro/<pkg>[/<sub>]`
+   to the package's source through its `exports`, and relative `./x.js` to
+   `./x.ts`. Everything else stays unresolved, so it stays external.
+2. The shared config anchors itself to the repo root: every config object gets
+   `basePath`, and `boundaries/root-path` is set. The result no longer depends
+   on where ESLint runs.
+3. The rule moves to v6's `boundaries/dependencies` with object selectors.
+4. Switching it on surfaced 46 violations. None was a leak; each was an edge
+   the table never recorded. The table now says:
+   - **application → data, types only.** 33 use cases import repository
+     *interfaces* (`import type { SalesRepository }`), as §3–4 prescribe. A
+     value import of a Drizzle implementation is still rejected.
+   - **testing → ui.** `MockRepositoryProvider` wraps ui's `RepositoryProvider`
+     and lives in testing so it stays off the runtime graph (ADR-033).
+   - **testing → sync, types only.** An in-memory fake implements sync's
+     `ReferenceDataRepository`.
+   - **ui → sync.** 11 imports: the cloud sync bridge, activation, entitlement
+     and the rejected-rows screen take `SyncEngine`, `ApiClient` and
+     `resolveEntitlement` from `@xangarro/sync`, which `@xangarro/ui` declares
+     as a dependency. `packages/ui` is where the phone's providers and screens
+     live, and no rule ever forbade this edge. The sync element simply did not
+     match the package.
+5. `scripts/lint-boundaries.test.ts` lints fixtures that break a boundary and
+   the ui barrel rule, from the root and from the package directories the real
+   `lint` scripts use, and asserts the errors. Against the old config, 4 of its
+   5 tests fail.
+
+**Alternatives considered**
+
+- *Run each package's lint from the repo root* (as `apps/landing` does). It
+  fixes the globs for `pnpm lint`, but not for editors, `lint-staged`, or the
+  next package script written the usual way. Fixing the config fixes all of them.
+- *eslint-import-resolver-typescript.* It resolves through `node_modules` too,
+  so undeclared workspace imports stay unresolvable.
+- *Keep the table and move ui's sync wiring into `apps/mobile`.* That is a
+  refactor of the phone, not a lint fix. If the owner wants `ui` free of sync,
+  deleting `'sync'` from ui's allow list makes the 11 imports the work list.
+
+**Consequences**
+
+- contracts, data-pg, auth-core, tokens, email and observability have no
+  element, so the rule skips them, and so does the portal's §4 chain. Classifying
+  them means deciding each one's allowed imports. That is a separate decision.
+- A new workspace package is invisible to the rule until it gets an element.
+- Adding an edge to the table is now a visible change reviewed in the config,
+  and the test fails if the rule stops firing.

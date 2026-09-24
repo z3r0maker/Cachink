@@ -17,6 +17,7 @@
   },
   "files": [
     "eslint.config.js",
+    "eslint-workspace-resolver.cjs",
     "prettier.config.js",
     "vitest.config.js",
     "tsconfig.base.json",
