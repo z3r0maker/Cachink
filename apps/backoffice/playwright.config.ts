@@ -7,9 +7,10 @@ import { defineConfig, devices } from '@playwright/test';
  * proving nothing.
  *
  * Local: `pnpm test:e2e` (wraps db-local's URLs). The staff fixture is
- * created by `e2e/global-setup.ts` (superuser INSERT, the CLI's own shape),
- * and TOTP enrolment happens through the page — the suite reads the seed
- * the enrolment screen shows for humans without a camera.
+ * created by `e2e/staff-fixture.ts` (superuser INSERT, the CLI's own shape)
+ * in the auth suite's `beforeAll`, and TOTP enrolment happens through the
+ * page — the suite reads the seed the enrolment screen shows for humans
+ * without a camera.
  */
 
 const E2E_PORT = Number(process.env.E2E_PORT ?? 3200);
@@ -37,7 +38,6 @@ export default defineConfig({
   reporter: process.env.CI
     ? [['github'], ['html', { outputFolder: 'playwright-report', open: 'never' }]]
     : 'list',
-  globalSetup: './e2e/global-setup.ts',
   use: { baseURL: BASE_URL, trace: 'retain-on-failure' },
   projects: [{ name: 'desktop', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

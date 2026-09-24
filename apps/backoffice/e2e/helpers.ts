@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test';
 import { totpCode } from '@xangarro/auth-core';
 
+export { ADMIN_COOKIE } from '../src/server/auth/config';
+
 /**
  * Shared e2e helpers (the backoffice's first Playwright suite, N-05's
  * follow-up). The staff account and its password come from the environment
