@@ -1,4 +1,4 @@
-import { expect, test } from './test';
+import { expect, test, type Page } from './test';
 import { randomUUID } from 'node:crypto';
 import { deviceHeaders } from '@xangarro/contracts';
 import postgres from 'postgres';
@@ -16,7 +16,8 @@ import { latestMailTo } from './outbox';
  * activation must be refused, the portal's Revocar must free a slot, and the
  * next activation must fit into exactly that slot.
  *
- * Desktop only: it revokes and activates on the shared demo business.
+ * Its own serial project, after `operador` (see playwright.config.ts): it
+ * revokes and activates on the shared demo business.
  *
  * **Serial.** Everything in this file mutates Taquería's activation codes or
  * device slots, and `generarCodigo` deliberately expires *every* unredeemed
@@ -31,7 +32,7 @@ const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 test('generating a code replaces the old one rather than adding to it', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared rows');
+  test.skip(testInfo.project.name !== 'devices', 'mutates shared rows');
 
   await page.goto('/equipo');
   // SegmentedTabs renders aria-pressed buttons in a labelled group, not a
@@ -67,8 +68,23 @@ test('generating a code replaces the old one rather than adding to it', async ({
   }
 });
 
+/**
+ * Activates phones until the plan refuses one. The seed leaves Taquería full,
+ * but the operador project's door revokes and re-takes slots before this file
+ * runs, so the test establishes "full" instead of assuming it.
+ */
+async function fillThePlan(page: Page): Promise<void> {
+  for (let tries = 0; tries < 3; tries++) {
+    const res = await activate(page, await freshCode(page));
+    if (res.status() === 402) return;
+    expect(res.status(), 'filling the plan').toBe(200);
+  }
+  throw new Error('the plan never filled: is the device limit still 2?');
+}
+
 test('a full plan refuses a new phone until one is revoked', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'revokes and activates on shared rows');
+  test.skip(testInfo.project.name !== 'devices', 'revokes and activates on shared rows');
+  await fillThePlan(page);
 
   // At the limit: refused with the contract's code, and the code is NOT burned
   // — the refusal rolls the claim back, so the same code works once a slot frees.
@@ -107,7 +123,7 @@ test('a full plan refuses a new phone until one is revoked', async ({ page }, te
  * slots and no demo data to disturb.
  */
 test('two phones racing for the last slot: exactly one gets it', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'activates on shared rows');
+  test.skip(testInfo.project.name !== 'devices', 'activates on shared rows');
 
   const CNF = '01HZ8XQN9GZJXV8AKQ5X0CNF01';
   const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
@@ -156,7 +172,7 @@ test('two phones racing for the last slot: exactly one gets it', async ({ page }
 test('the entitlement refresh honours revocation, not just the signature', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'activates on shared rows');
+  test.skip(testInfo.project.name !== 'devices', 'activates on shared rows');
 
   const CNF = '01HZ8XQN9GZJXV8AKQ5X0CNF01';
   const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
@@ -200,7 +216,7 @@ test('the entitlement refresh honours revocation, not just the signature', async
  * Desktop only: the outbox keys a send by the code (idempotency), so a second
  * viewport sending the same live code is — correctly — deduped. */
 test('«Enviar por correo» delivers the live code', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'one outbox per live code');
+  test.skip(testInfo.project.name !== 'devices', 'one outbox per live code');
   const address = `codigo-${randomUUID()}@test.mx`;
   await page.goto('/equipo?tab=dispositivos');
   await page.getByTestId('enviar-codigo-correo').fill(address);
@@ -221,7 +237,7 @@ test('«Enviar por correo» delivers the live code', async ({ page }, testInfo) 
 test('«Mostrar QR» pairs a phone by the scan path, once (C-14, P-06)', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared rows');
+  test.skip(testInfo.project.name !== 'devices', 'mutates shared rows');
   // Last in this serial file: it frees Taquería's slots (seeded at its plan's
   // limit), which every test above relies on being full.
   const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });

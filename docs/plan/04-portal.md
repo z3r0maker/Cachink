@@ -1399,11 +1399,14 @@ critical avisos cannot be switched off.
     job. First full measurement, without the `sync` project (blocked that run): lines
     72.7%, statements 68.0%, functions 67.0%, branches 54.3% — from 20% lines for Vitest
     alone. Floor set at 72 / 68 / 67 / 54.
+  - 2026-09-24 · **Web Worker coverage.** The register's data layer runs in a Worker that
+    page coverage never saw; `e2e/worker-coverage.ts` records it. `operador/runtime` 19% → 95%;
+    overall lines 77.4%, statements 72.1%, functions 69.9%, branches 56.1%. Floor 77 / 72 / 69 / 56.
+    Also: `devices.spec` moved to its own serial project after `operador` — beside it, a door
+    revoking and re-taking a slot made the slot count race (first CI run under ADR-102).
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
-  1. `operador/runtime` (19%, 285 lines) — capture Web Worker coverage over CDP so
-     `db.worker.ts` is measured at all, then unit-test the runtime's pure modules
-     (`fechas`, `shapes`, `cierre-resumen`, `protocol`).
+  1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
   2. `server/actions` (44%, 290 lines; 7 files at 0%) — the error branches Playwright
      never reaches: Postgres integration tests per CLAUDE.md §6.
   3. `app/(portal)` (75%, 319 lines; 13 files at 0%) and `app/api` (49%; 9 files at 0%) —
