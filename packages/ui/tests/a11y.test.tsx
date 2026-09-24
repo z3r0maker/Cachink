@@ -7,7 +7,7 @@
 
 import { describe, expect, it, vi } from 'vitest';
 import { Btn } from '../src/components/Btn/btn';
-import { Card } from '../src/components/Card/Card';
+import { Card } from '../src/components/Card/card';
 import { BottomTabBar } from '../src/components/BottomTabBar/bottom-tab-bar';
 import { TopBar } from '../src/components/TopBar/top-bar';
 import { Input } from '../src/components/Input/input';
