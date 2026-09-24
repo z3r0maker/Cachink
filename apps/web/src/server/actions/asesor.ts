@@ -28,7 +28,9 @@ export async function cerrarAvisoAsesor(id: string, accion: AccionAviso): Promis
         .select({ state: notices.state })
         .from(notices)
         .where(and(eq(notices.id, id), eq(notices.source, 'asesor')));
-      if (!row) throw new TypeError('Ese aviso ya no existe.');
+      if (!row) {
+        throw Object.assign(new Error('Ese aviso ya no existe.'), { code: 'AVISO_NO_EXISTE' });
+      }
       const state = transicionAviso(row.state, accion);
       const now = new Date().toISOString();
       const cerrado = state === 'listo' || state === 'descartado';
@@ -41,7 +43,9 @@ export async function cerrarAvisoAsesor(id: string, accion: AccionAviso): Promis
     return { ok: true };
   } catch (error) {
     const code = (error as { code?: string } | null)?.code;
-    if (code === 'AVISO_TRANSICION' || code === 'NOT_PERMITTED' || error instanceof TypeError) {
+    // Coded refusals only. This once passed every TypeError through, which
+    // showed real bugs to the owner in their own words and never reported them.
+    if (code === 'AVISO_TRANSICION' || code === 'AVISO_NO_EXISTE' || code === 'NOT_PERMITTED') {
       return { ok: false, message: (error as Error).message };
     }
     reportError(error, { endpoint: 'cerrarAvisoAsesor' });

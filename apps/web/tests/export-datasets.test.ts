@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { beforeEach, describe, it, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, it, vi } from 'vitest';
 
 import { loadExcelJs } from '../src/server/export/workbook';
 
@@ -36,6 +36,12 @@ async function rowsOf(bytes: ArrayBuffer): Promise<unknown[][]> {
   });
   return out;
 }
+
+// ExcelJS is imported lazily and is large; loading it once here keeps that
+// cost out of the first test's 5-second budget on a busy machine.
+beforeAll(async () => {
+  await loadExcelJs();
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
