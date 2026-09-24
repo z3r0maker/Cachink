@@ -5,6 +5,7 @@ import { usageOverLimitSource } from '@/server/alerts/over-limit-source';
 import { DEFAULT_DIGEST_TO, transactionalMailer } from '@/server/alerts/email';
 import { DEFAULT_CONSOLE_URL } from '@/server/alerts/webhook-notifier';
 import { db } from '@/server/db/client';
+import { pruneApiLatency } from '@/server/db/latency-prune';
 import { pruneGeoCounters } from '@/server/db/geo-prune';
 import { drizzleRejectionSource } from '@/server/db/rejections';
 import { expireStaleAssistedImports, purgeResolvedAssistedImportFiles } from '@xangarro/data-pg';
@@ -24,6 +25,7 @@ export async function GET(request: Request): Promise<Response> {
     overLimit: usageOverLimitSource(usageDeps(db())),
     pruneSessions: () => pruneStaffSessions(db()),
     pruneGeo: () => pruneGeoCounters(db()),
+    pruneLatency: () => pruneApiLatency(db()),
     expireAssisted: () => expireStaleAssistedImports(db()),
     purgeAssistedFiles: () => purgeResolvedAssistedImportFiles(db()),
     // B-14: Resend with RESEND_API_KEY; the dev outbox (.email-outbox/) without it.

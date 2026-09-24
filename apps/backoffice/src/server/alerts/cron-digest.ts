@@ -31,6 +31,7 @@ export interface DigestCronDeps {
   readonly pruneSessions?: () => Promise<number>;
   /** N-61: drop geographic counters past their retention. */
   readonly pruneGeo?: () => Promise<number>;
+  readonly pruneLatency?: () => Promise<number>;
   /** N-18: expire approvals the tenant ignored for 14 days, and purge the
    * files of rows resolved 30+ days ago (LFPDPPP). Same rule as the
    * sessions: housekeeping never costs the digest. */
@@ -128,10 +129,12 @@ export async function handleDigestCron(req: Request, deps: DigestCronDeps): Prom
 async function housekeeping(deps: DigestCronDeps, log: NonNullable<DigestCronDeps['log']>) {
   const prunedSessions = await pruneSessions(deps, log);
   const prunedGeo = await pruneGeo(deps, log);
+  const prunedLatency = await pruneLatency(deps, log);
   const assisted = await assistedSweeps(deps, log);
   return {
     prunedSessions,
     prunedGeo,
+    prunedLatency,
     expiredAssisted: assisted.expired,
     purgedAssistedFiles: assisted.purgedFiles,
   };
@@ -161,6 +164,20 @@ async function pruneGeo(
     return await deps.pruneGeo();
   } catch (error) {
     log('digest: pruning geo counters failed', error);
+    return null;
+  }
+}
+
+/** N-07's retention sweep; same contract as the two above. */
+async function pruneLatency(
+  deps: DigestCronDeps,
+  log: NonNullable<DigestCronDeps['log']>,
+): Promise<number | null> {
+  if (deps.pruneLatency === undefined) return null;
+  try {
+    return await deps.pruneLatency();
+  } catch (error) {
+    log('digest: pruning latency counters failed', error);
     return null;
   }
 }
