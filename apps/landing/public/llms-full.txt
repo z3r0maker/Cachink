@@ -2,7 +2,7 @@
 
 > Plataforma de gestión de caja para pequeños negocios mexicanos.
 > Sitio web: https://xangarro.mx · Crear cuenta: https://app.xangarro.mx/signup
-> Idioma: Español (México) · Portal web hoy; apps iOS y Android próximamente
+> Idioma: Español (México) · Portal web y caja en el navegador hoy; apps iOS y Android próximamente
 
 ---
 
@@ -94,7 +94,7 @@ Cada negocio tiene su propia cuenta, con su caja, su inventario y su equipo sepa
 | Xangarrote  | $399 MXN / mes      | 30,000          | 5,000     | 5          | Reportes avanzados, soporte prioritario          |
 
 - Los precios son más IVA (16 %). Plan anual: 10 meses al precio de 12 (2 meses gratis).
-- 14 días de prueba gratis en los dos planes de pago, sin tarjeta.
+- Empiezas gratis con Xangarrito, sin tarjeta, y cambias de plan cuando quieras.
 - Pago con tarjeta de crédito o débito; transferencia SPEI en plan anual.
 - Ninguna venta se bloquea por límites: avisamos al dueño con tiempo.
 

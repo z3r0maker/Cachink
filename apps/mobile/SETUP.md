@@ -51,13 +51,15 @@ pnpm add @xangarro/domain@workspace:* @xangarro/application@workspace:* @xangarr
 
 ## Brand assets (pre-staged in `apps/mobile/assets/`)
 
-Three PNGs are already staged here before the Expo init runs:
+These PNGs are already staged here before the Expo init runs:
 
-| File                       | Source                                 | Purpose                                |
-| -------------------------- | -------------------------------------- | -------------------------------------- |
-| `assets/icon.png`          | `../../assets/brand/icon.png`          | iOS + Android app icon                 |
-| `assets/adaptive-icon.png` | `../../assets/brand/icon.png`          | Android adaptive-icon foreground layer |
-| `assets/splash.png`        | `../../assets/brand/splash-mobile.png` | Launch splash image                    |
+| File                                  | Source                                                | Purpose                                  |
+| ------------------------------------- | ----------------------------------------------------- | ---------------------------------------- |
+| `assets/icon.png`                     | `../../assets/brand/icons/app-icon-1024.png`          | iOS + Android app icon (1024², no alpha) |
+| `assets/adaptive-icon.png`            | `../../assets/brand/icons/android-foreground-432.png` | Android adaptive-icon foreground layer   |
+| `assets/adaptive-icon-monochrome.png` | `../../assets/brand/icons/android-monochrome-432.png` | Android 13+ themed-icon layer            |
+| `assets/favicon.png`                  | `../../assets/brand/icons/favicon-48.png`             | Expo web favicon                         |
+| `assets/splash.png`                   | `../../assets/brand/splash-mobile.png`                | Launch splash image                      |
 
 Canonical masters live in the repo-root `assets/brand/` directory — see
 ADR-016 in `ARCHITECTURE.md`. These local copies are derivatives. Never
@@ -85,7 +87,8 @@ into `app.json`:
       "package": "mx.xangarro.mobile",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFD60A"
+        "monochromeImage": "./assets/adaptive-icon-monochrome.png",
+        "backgroundColor": "#111111"
       }
     }
   }

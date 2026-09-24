@@ -1,7 +1,7 @@
 /**
  * Generates public/og-image.png (1200×630) — the Open Graph / Twitter Card
- * social preview image — plus the favicon and apple-touch-icon placeholders
- * and site.webmanifest for Xangarro (L-01: text wordmark until X-07 artwork).
+ * social preview image for Xangarro. The favicons, touch icon and
+ * site.webmanifest are copied from `assets/brand/icons/` (X-07), not generated.
  *
  * Design: neobrutalist yellow card — brand yellow background, hard black
  * border, "XANGARRO!" wordmark, hero headline, and a black footer bar.
@@ -12,15 +12,11 @@
 
 import sharp from 'sharp'
 import { resolve, dirname } from 'node:path'
-import { writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT     = resolve(__dirname, '../public/og-image.png')
 const OUT_WEBP = resolve(__dirname, '../public/og-image.webp')
-const OUT_FAV  = resolve(__dirname, '../public/assets/favicon-32.png')
-const OUT_TOUCH = resolve(__dirname, '../public/assets/apple-touch-icon.png')
-const OUT_MANIFEST = resolve(__dirname, '../public/site.webmanifest')
 
 const W = 1200
 const H = 630
@@ -128,47 +124,8 @@ await sharp(svgBuffer)
   .webp({ quality: 82 })
   .toFile(OUT_WEBP)
 
-// ── Favicon + apple-touch-icon placeholders (L-01: yellow tile, black X) ──
-const icon = (size, rx) => `
-<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"
-     xmlns="http://www.w3.org/2000/svg"
-     style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;">
-  <rect x="2" y="2" width="${size - 4}" height="${size - 4}"
-        fill="#FFD60A" stroke="#0D0D0D" stroke-width="4" rx="${rx}" />
-  <text x="50%" y="54%" font-size="${size * 0.62}" font-weight="900" fill="#0D0D0D"
-        text-anchor="middle" dominant-baseline="middle">X</text>
-</svg>`.trim()
-
-await sharp(Buffer.from(icon(32, 7))).png().toFile(OUT_FAV)
-await sharp(Buffer.from(icon(180, 36))).png().toFile(OUT_TOUCH)
-
-// ── Minimal manifest (L-01) ────────────────────────────────────────────────
-writeFileSync(
-  OUT_MANIFEST,
-  JSON.stringify(
-    {
-      name: 'Xangarro!',
-      short_name: 'Xangarro',
-      description: 'Finanzas para emprendedores — la caja de tu negocio, clara.',
-      lang: 'es-MX',
-      start_url: '/',
-      display: 'browser',
-      background_color: '#FFD60A',
-      theme_color: '#FFD60A',
-      icons: [
-        { src: '/assets/favicon-32.png', sizes: '32x32', type: 'image/png' },
-        { src: '/assets/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
-      ],
-    },
-    null,
-    2,
-  ) + '\n',
-)
-
 const fs = await import('node:fs')
 const pngKB  = (fs.statSync(OUT).size     / 1024).toFixed(1)
 const webpKB = (fs.statSync(OUT_WEBP).size / 1024).toFixed(1)
 console.log(`✓  Generated public/og-image.png  — ${pngKB} KB`)
 console.log(`✓  Generated public/og-image.webp — ${webpKB} KB`)
-console.log('✓  Generated public/assets/favicon-32.png + apple-touch-icon.png')
-console.log('✓  Generated public/site.webmanifest')

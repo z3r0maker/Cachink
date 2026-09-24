@@ -1,60 +1,17 @@
 import { Suspense, lazy } from 'react';
-import { MotionProvider } from '../landing/Motion.jsx';
-import { Nav, Hero } from '../landing/Sections.jsx';
-import { structuredData } from './structured-data.js';
+import { HomeShell } from '../home/HomeShell.jsx';
 
-// Below-fold sections: lazy-loaded on the client so the initial JS chunk
-// only includes Nav + Hero + their direct dependencies (AnimatedHero, Motion).
-// On the server (entry-server.jsx) these are imported eagerly so prerender
-// renders full HTML for crawlers — see src/AppSSR.jsx.
-const ParaQuienEs = lazy(() => import('../landing/sections/ParaQuienEs.jsx'));
-const ComoFunciona = lazy(() => import('../landing/sections/ComoFunciona.jsx'));
-const Recorrido = lazy(() => import('../landing/sections/Recorrido.jsx'));
-const Precios = lazy(() => import('../landing/sections/Precios.jsx'));
-const ContactoFooter = lazy(() => import('../landing/sections/ContactoFooter.jsx'));
-
-// Matches the production tweak defaults from the original index.html.
-const T = {
-  tone: 'educational',
-  yellowIntensity: 'medium',
-  darkComoSection: false,
-  darkContactSection: false,
-  showPricing: true,
-  motion: true,
-};
+// Below the fold loads after the hero is interactive; prerender (AppSSR.jsx)
+// imports it eagerly so crawlers get the full page.
+const BelowFold = lazy(() => import('../home/BelowFold.jsx'));
 
 export default function App() {
-  // The utm_* pass-through moved to src/utm.jsx, which main.jsx wraps around
-  // every route — the /recursos articles never reached this effect (N-57).
+  // The utm_* pass-through lives in src/utm.jsx, which main.jsx wraps around every route (N-57).
   return (
-    <MotionProvider enabled={T.motion}>
-      <div>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-        />
-        <Nav />
-        <Hero tone={T.tone} yellowIntensity={T.yellowIntensity} />
-
-        {/* Below-fold sections load after the hero is interactive */}
-        <Suspense fallback={null}>
-          <ParaQuienEs tone={T.tone} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <ComoFunciona tone={T.tone} darkSection={T.darkComoSection} />
-        </Suspense>
-        <Suspense fallback={null}>
-          <Recorrido />
-        </Suspense>
-        {T.showPricing && (
-          <Suspense fallback={null}>
-            <Precios />
-          </Suspense>
-        )}
-        <Suspense fallback={null}>
-          <ContactoFooter darkSection={T.darkContactSection} />
-        </Suspense>
-      </div>
-    </MotionProvider>
+    <HomeShell>
+      <Suspense fallback={null}>
+        <BelowFold />
+      </Suspense>
+    </HomeShell>
   );
 }

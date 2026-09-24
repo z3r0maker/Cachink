@@ -24,11 +24,12 @@ export const PLANES = [
     mensual: 0,
     anual: 0,
     featured: false,
+    tone: 'white',
     tagline: 'Para empezar a llevar tu caja.',
     features: [
       '300 movimientos al mes',
       '50 productos activos',
-      '1 operador',
+      'Dueño + 1 empleado (1 dispositivo vinculado)',
       'Corte de día',
       'Exportación de tus datos (Excel)',
     ],
@@ -40,17 +41,22 @@ export const PLANES = [
     mensual: 199,
     anual: 1990,
     featured: true,
+    tone: 'yellow',
     tagline: 'Para negocios que ya crecen.',
     features: [
       '10,000 movimientos al mes',
       '1,000 productos activos',
-      '2 operadores (dueño + empleado)',
+      'Dueño + 2 empleados (2 dispositivos vinculados)',
       'Estados financieros NIF',
       'Informe mensual en PDF',
       'Exportación de tus datos (Excel)',
       'Soporte por WhatsApp',
     ],
-    cta: 'Probar 14 días gratis',
+    donCuentas: {
+      title: 'Cierre de mes con Don Cuentas',
+      sub: 'Tu revisión mensual con IA: qué funcionó y qué precios ajustar.',
+    },
+    cta: 'Elegir este plan',
   },
   {
     id: 'xangarrote',
@@ -58,17 +64,22 @@ export const PLANES = [
     mensual: 399,
     anual: 3990,
     featured: false,
+    tone: 'black',
     tagline: 'Para negocios con equipo y flujo alto.',
+    incluye: 'Xangarro',
     features: [
       '30,000 movimientos al mes',
       '5,000 productos activos',
-      '5 operadores',
+      'Dueño + 5 empleados (5 dispositivos vinculados)',
       'Reportes avanzados y PDF para tu contador',
       'Soporte prioritario',
       'Multi-sucursal (próximamente)',
-      'Exportación de tus datos (Excel)',
     ],
-    cta: 'Probar 14 días gratis',
+    donCuentas: {
+      title: 'Don Cuentas completo',
+      sub: 'Cierre de mes con IA más estrategia: precios sugeridos y movidas para crecer.',
+    },
+    cta: 'Elegir este plan',
   },
 ];
 
@@ -81,3 +92,22 @@ export const totalConIva = (plan, interval = 'mensual') =>
 export const PAGO_LINEA = 'Tarjeta de crédito o débito · Transferencia SPEI en plan anual';
 
 export const ANUAL_NOTA = 'El plan anual son 10 meses al precio de 12: 2 meses gratis.';
+
+/** What the annual price works out to per month, for the annual view (+ IVA). */
+export const mensualEquivalente = (plan) => Math.round((PLAN_BY_ID[plan].anual / 12) * 100) / 100;
+
+/** es-MX money: $1,990 for whole pesos, $165.83 otherwise. */
+export const pesos = (n) =>
+  '$' +
+  n.toLocaleString('es-MX', {
+    minimumFractionDigits: Number.isInteger(n) ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+
+/** The IVA footnote under the pricing table, for either interval. */
+export const notaIva = (interval) => {
+  const unidad = interval === 'anual' ? 'al año' : 'al mes';
+  const a = totalConIva('xangarro', interval).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+  const b = totalConIva('xangarrote', interval).toLocaleString('es-MX', { minimumFractionDigits: 2 });
+  return `Precios más IVA: $${a} y $${b} ${unidad} con IVA`;
+};

@@ -48,6 +48,7 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 
 export const config = {
   // Prefetches are gated too: a `purpose: prefetch` header is caller-supplied,
-  // so exempting it would be a way around the gate.
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|robots.txt).*)'],
+  // so exempting it would be a way around the gate. The icons are exempt so
+  // the login page — which no session has reached yet — still shows them.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|robots.txt).*)'],
 };

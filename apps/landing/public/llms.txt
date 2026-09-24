@@ -24,14 +24,14 @@ Xangarro es una plataforma de finanzas para pequeños emprendedores mexicanos: p
 - Vista de caja diaria y mensual
 - Captura sin internet — tu negocio sigue aunque se vaya el internet
 - Estados financieros exportables para contadores
-- Portal web hoy; apps para iOS y Android próximamente
+- Portal web y caja en el navegador hoy; apps para iOS y Android próximamente
 
 ## Planes
 
-- **Xangarrito** — Gratis para siempre: 300 movimientos al mes, 50 productos, 1 operador
-- **Xangarro** — $199 MXN/mes + IVA: 10,000 movimientos, 1,000 productos, 2 operadores, estados financieros NIF
-- **Xangarrote** — $399 MXN/mes + IVA: 30,000 movimientos, 5,000 productos, 5 operadores, reportes avanzados
-- Plan anual con 2 meses gratis; 14 días de prueba en los planes de pago, sin tarjeta
+- **Xangarrito** — Gratis para siempre: 300 movimientos al mes, 50 productos, dueño + 1 empleado
+- **Xangarro** — $199 MXN/mes + IVA: 10,000 movimientos, 1,000 productos, dueño + 2 empleados, estados financieros NIF, cierre de mes con Don Cuentas (IA)
+- **Xangarrote** — $399 MXN/mes + IVA: 30,000 movimientos, 5,000 productos, dueño + 5 empleados, reportes avanzados, Don Cuentas completo
+- Plan anual con 2 meses gratis; empiezas gratis con Xangarrito, sin tarjeta
 
 ## Información de contacto
 
