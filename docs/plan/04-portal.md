@@ -1474,6 +1474,10 @@ critical avisos cannot be switched off.
     `aprobarProducto` always writes `categoria = 'Producto Terminado'` — the column is an
     _inventory_ category — so the owner's choice is discarded. Either the menu category needs a
     home, or the form should not ask. `tests/actions/revision.test.ts` pins today's behaviour.
+  - 2026-09-24 · **Lines, statements and functions past 85%** (run 36069556142, after browser
+    coverage stopped being lost at each full navigation): lines 91.4%, statements 89.1%,
+    functions 85.9%, branches 75.8%. Floor 90 / 88 / 84 / 74. Open: branches — mostly per-screen
+    states (empty, error, viewer) no spec renders yet.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
