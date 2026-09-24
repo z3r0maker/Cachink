@@ -1,5 +1,5 @@
 /**
- * SolicitarPruebaUseCase — [Probar 14 días] on "Tu plan ideal" (N-13).
+ * SolicitarPruebaUseCase — [Contratar este plan] on "Tu plan ideal" (N-13; no trial since ADR-105).
  *
  * Records the intent first, so a tap is never lost even while Checkout does
  * not exist, then asks the `TrialCheckout` port. Today the portal's port
@@ -40,7 +40,7 @@ export class SolicitarPruebaUseCase implements UseCase<SolicitarPruebaInput, Tri
   async execute(input: SolicitarPruebaInput): Promise<TrialCheckoutResult> {
     const intervalOk = (BILLING_INTERVALS as readonly string[]).includes(input.interval);
     if (!PAID_PLANS.includes(input.plan) || !intervalOk) {
-      throw new SignupError('NOT_A_PAID_PLAN', 'La prueba de 14 días es para los planes de pago.');
+      throw new SignupError('NOT_A_PAID_PLAN', 'Solo los planes de pago se contratan; Xangarrito es gratis.');
     }
     const { businessId, plan, interval } = input;
     await this.#store.recordTrialIntent({ plan, interval, at: new Date().toISOString() });
