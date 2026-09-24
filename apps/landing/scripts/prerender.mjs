@@ -31,8 +31,8 @@ const ROUTES = [
     outDir: 'dist',
     title: 'Xangarro · Finanzas para emprendedores',
     description:
-      'Xangarro es la plataforma mexicana para llevar la caja de tu negocio. Registra ventas y egresos en segundos, ve cómo va tu negocio en pesos, y comparte estados financieros con tu contador.',
-    smoke: 'Tu caja',
+      'Control de caja, punto de venta y estados financieros NIF para tu negocio, desde el navegador. Tu equipo cobra en la caja; tú ves todo en el portal, con Don Cuentas, tu asesor.',
+    smoke: 'El mostrador cobra',
   },
   {
     path: '/recursos/',

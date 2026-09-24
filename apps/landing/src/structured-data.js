@@ -5,7 +5,7 @@
  *   1. Organization       — the company
  *   2. SoftwareApplication — the product + Offer nodes
  *   3. Service            — cash management service for Mexican SMBs
- *   4. FAQPage            — 14 questions imported from landing/copy.jsx
+ *   4. FAQPage            — 15 questions imported from landing/copy.jsx
  *                           (single source of truth shared with visible accordion)
  *
  * Rendered server-side via dangerouslySetInnerHTML in AppSSR.jsx,

@@ -203,11 +203,11 @@ export const FAQ_ITEMS = [
   },
   {
     q: '¿Cuánto cuesta Xangarro?',
-    a: 'Xangarrito es $0 para siempre: 300 movimientos al mes, 50 productos y 1 operador. Xangarro cuesta $199 MXN al mes (10,000 movimientos, 1,000 productos, 2 operadores y estados financieros NIF). Xangarrote cuesta $399 MXN al mes (30,000 movimientos, 5,000 productos y 5 operadores). Los precios son más IVA y los dos planes de pago incluyen 14 días de prueba gratis, sin tarjeta.',
+    a: 'Xangarrito es $0 para siempre: 300 movimientos al mes, 50 productos y el dueño más 1 empleado. Xangarro cuesta $199 MXN al mes: 10,000 movimientos, 1,000 productos, el dueño más 2 empleados, estados financieros NIF y el cierre de mes con Don Cuentas. Xangarrote cuesta $399 MXN al mes: 30,000 movimientos, 5,000 productos, el dueño más 5 empleados y Don Cuentas completo. Los precios son más IVA y el plan anual trae 2 meses gratis. Empiezas gratis con Xangarrito y cambias de plan cuando quieras.',
   },
   {
     q: '¿En qué dispositivos está disponible?',
-    a: 'El portal web funciona hoy en cualquier navegador: computadora, tableta o teléfono, sin instalar nada. Las apps para iOS y Android, para que tu equipo capture ventas desde el teléfono, llegan próximamente. Puedes crear tu cuenta desde ya en app.xangarro.mx.',
+    a: 'El portal y la caja funcionan hoy en cualquier navegador: la computadora o la tableta de tu negocio, sin instalar nada. Las apps para iOS y Android, para que tu equipo cobre desde el teléfono, llegan muy pronto a App Store y Google Play. Puedes crear tu cuenta desde ya en app.xangarro.mx.',
   },
   {
     q: '¿Es una alternativa a Excel para llevar las cuentas del negocio?',
@@ -216,6 +216,10 @@ export const FAQ_ITEMS = [
   {
     q: '¿Puedo compartir los estados financieros con mi contador?',
     a: 'Sí. Con los planes de pago puedes exportar estados financieros en formato NIF (Normas de Información Financiera), el estándar que usan los contadores en México, y el informe mensual en PDF se genera con un toque. Puedes enviarlo por correo o WhatsApp directamente.',
+  },
+  {
+    q: '¿Quién es Don Cuentas?',
+    a: 'Don Cuentas es el asesor de Xangarro. Todos los días revisa tus ventas, gastos e inventario y te avisa, calculado a partir de tus registros, qué subió, qué no se mueve y qué se ve raro. Cada fin de mes te entrega tu revisión con IA: qué funcionó, qué no y qué precios ajustar. El cierre de mes viene en Xangarro; Xangarrote suma la estrategia de precios y crecimiento.',
   },
   {
     q: '¿Xangarro maneja CFDI o facturación electrónica?',

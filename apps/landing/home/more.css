@@ -1,0 +1,41 @@
+.feat { padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+.feat h3, .conf-card h3 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.02em; color: var(--black); }
+.conf-card { padding: 26px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-card); }
+.conf-card h3 { font-size: 19px; }
+.conf-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: center; margin-bottom: 48px; }
+
+.od { background: var(--yellow-soft); padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.od-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.od-head strong { font-size: 15px; color: var(--black); }
+.od-sw { display: grid; justify-items: end; }
+.od-sw > * { grid-area: 1 / 1; }
+.od-chips { justify-items: start; margin-top: 2px; }
+.od-off { color: #DA0013; }
+.od-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 9px 12px; background: var(--white); border: var(--border-thin); border-radius: var(--r-10); font-size: 14px; font-weight: 700; }
+.od-row.old { background: var(--gray-100); }
+.od-name { color: var(--black); }
+.od-name span { font-weight: 600; color: #6F6F6B; }
+.od-amt { font-weight: 800; color: var(--black); }
+.od-st { display: flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 800; }
+.od-st.ok { color: #007E5E; } .od-st.wait { color: #8E6600; }
+.od-st .ico, .od .xtag .ico { stroke-width: 2.4; }
+
+.quien { background: var(--yellow-soft); padding-block: 72px; }
+.quien-row { display: flex; align-items: center; gap: 40px; }
+.quien h2 { margin: 0; flex: none; width: 300px; font-size: 36px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; color: var(--black); }
+.quien-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 14px; }
+.quien-list .xtag { min-height: 48px; padding: 0 20px; font-size: 16px; box-shadow: var(--shadow-sm); }
+.quien-list .xtag.on { background: var(--yellow); }
+
+@media (max-width: 999px) {
+  .conf-top { grid-template-columns: minmax(0, 1fr); }
+  .quien-row { flex-direction: column; align-items: flex-start; }
+  .quien h2 { width: auto; font-size: 30px; }
+}
+@media (max-width: 699px) {
+  .quien { padding-block: 48px; }
+  .quien-list { gap: 10px; }
+  .quien-list .xtag { min-height: 40px; font-size: 14px; padding: 0 14px; }
+  .od .xtag { white-space: normal; }
+  .od-row { font-size: 13px; }
+}
