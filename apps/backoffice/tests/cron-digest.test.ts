@@ -7,7 +7,10 @@ import type { RejectionCount, RejectionSource } from '@/server/alerts/rejections
 
 import { brokenRepo, item, seeded } from './support/inbox';
 
-const SECRET = 'cron-secret-0123456789abcdef';
+// Named for `.gitleaks.toml`'s allowlist: a random-looking cron secret reads
+// as a live credential to gitleaks' generic-api-key rule. The value is only
+// ever compared with itself, so every assertion is unchanged.
+const SECRET = 'ci-only-not-a-real-secret';
 const RUN = new Date('2026-09-17T14:00:00.000Z');
 const URL_ = 'https://admin.xangarro.mx/api/cron/digest';
 

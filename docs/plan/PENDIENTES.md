@@ -16,7 +16,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:678`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
-- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:320`
+- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:323`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:947`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1160`
 - **X-07** Brand masters + derivatives (ADR-054 §6) (Lanzamiento) — destraba 3: X-05, X-10, L-05 · `07-launch.md:62`
@@ -214,8 +214,8 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `02-contracts.md` · §8 Table scope
 
-- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:320`
-- [ ] **C-21** Kill switches on the wire · `02-contracts.md:489`
+- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:323`
+- [ ] **C-21** Kill switches on the wire · `02-contracts.md:492`
 
 ### `03-backend.md`
 
