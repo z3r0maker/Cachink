@@ -33,12 +33,34 @@ function bearer(req: Request): string | null {
   return header.startsWith('Bearer ') ? header.slice('Bearer '.length) : null;
 }
 
+/**
+ * The guard on its own, for a scheduled route whose success is not always a
+ * bare 200 — P-30's per-business invocation answers 400 when the caller names
+ * no business, which it may only do *after* proving it is the caller.
+ */
+export function cronAuth(
+  req: Request,
+  secret: string | undefined,
+): 'ok' | 'disabled' | 'unauthorized' {
+  if (!secret) return 'disabled';
+  return matches(bearer(req), secret) ? 'ok' : 'unauthorized';
+}
+
+/** The refusal `cronAuth` earned, as the response every cron route shares. */
+export function cronRefusal(estado: 'disabled' | 'unauthorized'): Response {
+  return estado === 'disabled'
+    ? reply(503, { error: 'cron_disabled' })
+    : reply(401, { error: 'unauthorized' });
+}
+
+export const cronReply = reply;
+
 export async function handleCron<T extends object>(
   req: Request,
   deps: CronDeps<T>,
 ): Promise<Response> {
-  if (!deps.secret) return reply(503, { error: 'cron_disabled' });
-  if (!matches(bearer(req), deps.secret)) return reply(401, { error: 'unauthorized' });
+  const estado = cronAuth(req, deps.secret);
+  if (estado !== 'ok') return cronRefusal(estado);
   try {
     return reply(200, { ok: true, ...(await deps.run(deps.now())) });
   } catch (error) {
