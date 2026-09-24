@@ -26,6 +26,15 @@ import { reportError } from '../observability/report';
 
 export type RevisionResult = { ok: true } | { ok: false; message: string };
 
+/** A read-only member hears why; anything else is reported behind the retry line. */
+function fallo(error: unknown, endpoint: string, retry: string): { ok: false; message: string } {
+  if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
+    return { ok: false, message: (error as Error).message };
+  }
+  reportError(error, { endpoint });
+  return { ok: false, message: retry };
+}
+
 export interface ProductoAprobado {
   readonly precioCentavos: bigint;
   readonly costoCentavos: bigint;
@@ -69,8 +78,7 @@ export async function aprobarProducto(id: string, f: ProductoAprobado): Promise<
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'aprobarProducto' });
-    return { ok: false, message: 'No se pudo aprobar el producto. Intenta de nuevo.' };
+    return fallo(error, 'aprobarProducto', 'No se pudo aprobar el producto. Intenta de nuevo.');
   }
 }
 
@@ -95,8 +103,7 @@ export async function aprobarCliente(
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'aprobarCliente' });
-    return { ok: false, message: 'No se pudo aprobar el cliente. Intenta de nuevo.' };
+    return fallo(error, 'aprobarCliente', 'No se pudo aprobar el cliente. Intenta de nuevo.');
   }
 }
 
@@ -113,8 +120,7 @@ export async function rechazar(tipo: 'producto' | 'cliente', id: string): Promis
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'rechazar' });
-    return { ok: false, message: 'No se pudo rechazar. Intenta de nuevo.' };
+    return fallo(error, 'rechazar', 'No se pudo rechazar. Intenta de nuevo.');
   }
 }
 
@@ -149,7 +155,6 @@ export async function fusionar(
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'fusionar' });
-    return { ok: false, message: 'No se pudo fusionar. Intenta de nuevo.' };
+    return fallo(error, 'fusionar', 'No se pudo fusionar. Intenta de nuevo.');
   }
 }
