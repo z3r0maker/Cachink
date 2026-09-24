@@ -1451,6 +1451,10 @@ critical avisos cannot be switched off.
     (N-17) had no spec — `e2e/inventario-inicial.spec.ts` now drives it on a throwaway owner, and
     found its «Capturado: …» banner lost to the capture's own revalidation ~1 run in 10
     (fixed in `parts.tsx`). The primitives galleries under `src/app/inventario/` leave the count.
+  - 2026-09-24 · **Lines past 85%** (run 36030650074): lines 85.4%, statements 78.4%,
+    functions 78.8%, branches 62.4%. Floor 84 / 77 / 77 / 61. Open: statements, functions and
+    branches to the acceptance line — `server/actions` error paths, `server/billing/actions.ts`
+    (Stripe, 0%), the Estados chart components.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
