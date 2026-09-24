@@ -71,8 +71,24 @@ jobs:
           else
             RANGE="$BASE..HEAD"
           fi
-          docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:v8.30.1 \
-            git /repo --log-opts="$RANGE" --config /repo/.gitleaks.toml --redact --no-banner
+          mkdir -p gitleaks-report
+          # `--verbose` is what makes a failure name itself: without it the log
+          # says only `leaks found: N`, with no rule, file or line — `--redact`
+          # was never the reason. `--redact=80` keeps the finding block while
+          # showing only the first fifth of the value, so a public log never
+          # publishes the whole secret, and the JSON report (redacted the same
+          # way) is uploaded so the fingerprints survive the run.
+          docker run --rm -v "$PWD:/repo" -v "$PWD/gitleaks-report:/report" \
+            ghcr.io/gitleaks/gitleaks:v8.30.1 \
+            git /repo --log-opts="$RANGE" --config /repo/.gitleaks.toml \
+            --no-banner --no-color --verbose --redact=80 \
+            --report-format json --report-path /report/leaks.json
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ failure() }}
+        with:
+          name: gitleaks-report
+          path: gitleaks-report/leaks.json
 
   ci:
     name: ci

@@ -11,7 +11,10 @@ import { transactionalMailer } from '@/server/alerts/email';
 import { item, seeded } from './support/inbox';
 
 const RUN = new Date('2026-09-17T14:00:00.000Z');
-const SECRET = 'cron-secret-0123456789abcdef';
+// Named for `.gitleaks.toml`'s allowlist: a random-looking cron secret reads
+// as a live credential to gitleaks' generic-api-key rule. The value is only
+// ever compared with itself, so every assertion is unchanged.
+const SECRET = 'ci-only-not-a-real-secret';
 
 function run(sender: InMemoryEmailSender) {
   return handleDigestCron(

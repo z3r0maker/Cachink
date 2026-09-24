@@ -16,7 +16,7 @@ tareas abiertas destraban (transitivamente). Se recalcula con cada `pnpm plan:bo
 - **N-24** Phone app adopts the Track O operator design `[LAUNCH]` (Lanzamiento) — destraba 13: N-22, N-25, N-32, N-44, N-29, X-05, … · `09-next-features.md:693`
 - **A-16** Maestro suite for the new app (Colas de tracks) — destraba 9: N-29, N-30, X-02, X-03, X-05, X-04, … · `05-app.md:194`
 - **X-01** Staging environment (Q17 "A later") (Lanzamiento) — destraba 9: X-02, X-10, N-28, N-30, X-03, X-05, … · `07-launch.md:10`
-- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:320`
+- **C-13** Payment intents API (Colas de tracks) — destraba 5: N-41, N-42, N-53, N-43, N-44 · `02-contracts.md:323`
 - **N-40** Provider validation + Clip partnership + legal opinion (Post-lanzamiento) — destraba 5: N-41, N-53, N-42, N-43, N-44 · `09-next-features.md:962`
 - **N-64** Activation funnel and weekly cohorts (Post-lanzamiento) — destraba 3: N-70, N-74, N-73 · `09-next-features.md:1175`
 - **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) (Colas de tracks) — destraba 3: P-30, P-28, P-29 · `04-portal.md:1431`
@@ -213,8 +213,8 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `02-contracts.md` · §8 Table scope
 
-- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:320`
-- [ ] **C-21** Kill switches on the wire · `02-contracts.md:489`
+- [ ] **C-13** Payment intents API — Trigger: N-40 go decision · `02-contracts.md:323`
+- [ ] **C-21** Kill switches on the wire · `02-contracts.md:492`
 
 ### `03-backend.md`
 
@@ -241,7 +241,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 ### `06-landing.md`
 
 - [ ] **L-04** Domain + DNS + email domain — Blocked by: — (do early; ADR-054 follow-up) · Falta: owner-side only — registrar, DNS zone and Resend console (O-4 … O-6, O-13 in `11-pre-launch-and-deferred.md`); nothing in the repo can prove it. · `06-landing.md:59`
-- [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:77`
+- [ ] **L-05** Store badges + legal pages — Blocked by: X-05 (real store URLs) · Falta: `/privacidad/` and `/privacidad/arco/` exist on the landing, rendered from `docs/legal/aviso/*.md`, linked from the footer and carrying WebPage schema (N-34, L-07); still missing: a términos route (`docs/legal/terms.md` mentions neither the 7-day grace nor the downgrade), and the store badges wait for X-05's real URLs. · `06-landing.md:88`
 
 ## Por archivo
 

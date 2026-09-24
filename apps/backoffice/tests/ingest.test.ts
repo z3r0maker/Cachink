@@ -9,7 +9,10 @@ import { InMemorySupportItems } from '@/server/inbox/memory';
 
 import { brokenRepo, idSeq, NOW } from './support/inbox';
 
-const SECRET = 's3cr3t-with-enough-entropy-0123456789';
+// Named for `.gitleaks.toml`'s allowlist: a random-looking shared secret reads
+// as a live credential to gitleaks' generic-api-key rule. `secretMatches`
+// hashes both sides and imposes no shape, so every assertion is unchanged.
+const SECRET = 'ci-only-not-a-real-secret';
 const URL_ = 'https://admin.xangarro.mx/api/internal/support-items';
 
 const payload = {
