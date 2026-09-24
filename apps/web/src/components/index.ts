@@ -36,6 +36,7 @@ export { UsageBar, type UsageBarProps } from './usage-bar';
 export { Switch, type SwitchProps } from './switch';
 export { ConfirmDialog, type ConfirmDialogProps } from './dialog';
 export { Seal, type SealLevel, type SealProps } from './seal';
+export { DonCuentasAvatar, DON_CUENTAS, type DonCuentasSize } from './don-cuentas';
 export { sealPath } from './seal-path';
 export { Celebration, type CelebrationProps } from './celebration';
 export { WhatsAppDialog } from './whatsapp-dialog';

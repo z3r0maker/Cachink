@@ -34,7 +34,7 @@ function Controles({ on, setOn }: { readonly on: boolean; readonly setOn: (v: bo
     <div className={row}>
       <Switch checked={on} onCheckedChange={setOn} label="Seguir existencias" />
       <UsageBar label="Operadores" used={2} limit={5} />
-      <Tag tone="brand">Asesor</Tag>
+      <Tag tone="brand">Don Cuentas</Tag>
       <StatusPill tone="success">Sincronizado</StatusPill>
     </div>
   );

@@ -25,9 +25,12 @@ export interface NavItem {
 export const NAV_ITEMS: readonly NavItem[] = [
   { label: 'Inicio', href: '/', icon: 'M3 11.5 12 4l9 7.5M5.5 10v10h13V10' },
   {
-    label: 'Asesor',
+    // Owner decision 2026-09-24: the advisor is presented as «Don Cuentas».
+    // The route stays /asesor; the design files are to follow (like ADR-092).
+    label: 'Don Cuentas',
     href: '/asesor',
-    icon: 'M12 3l1.9 4.6L18.5 9.5 13.9 11.4 12 16l-1.9-4.6L5.5 9.5l4.6-1.9L12 3ZM18.6 15.4l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z',
+    // His glasses and mustache, stroke-only so it sits with the other icons.
+    icon: 'M5.5 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M12.9 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M11.1 10h1.8M6 16.5c2-2 4-2 6-.3 2-1.7 4-1.7 6 .3',
   },
   {
     label: 'Ventas y gastos',

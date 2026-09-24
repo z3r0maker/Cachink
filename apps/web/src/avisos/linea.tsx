@@ -45,7 +45,7 @@ const SEVERITY: Record<
 const FUENTE: Record<string, string> = {
   sistema: 'Xangarro!',
   operacion: 'Operación',
-  asesor: 'Asesor',
+  asesor: 'Don Cuentas',
 };
 
 export type Aviso = NonNullable<AvisosData>[number];

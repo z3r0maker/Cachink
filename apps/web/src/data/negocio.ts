@@ -115,5 +115,5 @@ export const CAPABILITY_ROWS: readonly (readonly [string, string])[] = [
   ['Estados financieros NIF', SESSION.capabilities.estadosFinancieros ? 'Incluido' : 'No incluido'],
   ['Informe mensual PDF', SESSION.capabilities.informeMensual ? 'Incluido' : 'No incluido'],
   ['Permisos por usuario', SESSION.capabilities.permisosPorUsuario ? 'Incluido' : 'No incluido'],
-  ['Nivel de Asesor', SESSION.capabilities.asesor],
+  ['Nivel de Don Cuentas', SESSION.capabilities.asesor],
 ];
