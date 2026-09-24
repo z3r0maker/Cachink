@@ -11,7 +11,7 @@ Marketing only (Q18/ADR-084); its only product contract is the signup URL
 pnpm --filter @xangarro/landing dev      # Vite dev server
 pnpm --filter @xangarro/landing build    # client build + SSR prerender + smoke tests (also the `test` task)
 pnpm --filter @xangarro/landing preview  # serve dist/ on :4173
-node scripts/generate-og.mjs             # regenerate og-image + favicon + apple-touch-icon + site.webmanifest
+node scripts/generate-og.mjs             # regenerate og-image (icons come from assets/brand/icons/)
 ```
 
 ## Structure
@@ -28,7 +28,7 @@ node scripts/generate-og.mjs             # regenerate og-image + favicon + apple
   ContactoFooter).
 - `scripts/` — `build.mjs` (client build), `prerender.mjs` (SSR prerender of the 6 routes,
   per-route title/description/canonical, domain substitution into robots/sitemap, smoke
-  tests), `generate-og.mjs` (social + icon assets, sharp).
+  tests), `generate-og.mjs` (social preview image, sharp).
 - `public/` — static assets copied verbatim; `robots.txt` / `sitemap.xml` are hand-written
   (keep the route list in sync with `ROUTES` in `prerender.mjs`), `llms.txt` / `llms-full.txt`
   are the LLM-facing product summaries.

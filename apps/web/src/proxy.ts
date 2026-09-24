@@ -25,6 +25,6 @@ export function proxy(request: NextRequest): NextResponse {
 export const config = {
   // Pages only: API responses are JSON, and static files carry no scripts.
   matcher: [
-    '/((?!api/|_next/static|_next/image|favicon.ico|sw.js|sql-wasm.wasm|sin-conexion.html).*)',
+    '/((?!api/|_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|sw.js|sql-wasm.wasm|sin-conexion.html).*)',
   ],
 };

@@ -7,13 +7,40 @@ a master, replace the PNG wholesale and bump a version note in
 
 ## Files
 
-| File                 | What it is                                                                                                            | Consumed by                                                                                                                                                                    |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `icon.png`           | Full-bleed app-icon artwork (1254×1254, no alpha)                                                                     | **Copied** into `apps/mobile/assets/icon.png` — the iOS App Store requires a full-bleed, no-alpha 1024×1024 icon; iOS adds the squircle mask at render time.                   |
-| `icon-padded.png`    | Dock/Launchpad-ready icon (1024×1024 RGBA, ~82% artwork + 9% transparent safe-area padding per side — Apple HIG grid) | Fed to `pnpm tauri icon` for `apps/desktop/src-tauri/icons/*`. Matches the neighbouring macOS dock icons (Adobe, Preview, etc.) so Xangarro doesn't render visually oversized. |
-| `logo.png`           | In-app brand logo (~1536×1024)                                                                                        | **Copied once** into `packages/ui/src/assets/logo.png`, then used by `<BrandLogo />` (Phase 1A-M2). Never copied into an app.                                                  |
-| `splash-mobile.png`  | Mobile launch splash (~852×1846, portrait, no alpha)                                                                  | **Copied** into `apps/mobile/assets/splash.png`. Expo renders full-screen on iOS / Android tablets.                                                                            |
-| `splash-desktop.png` | Desktop launch splash (~1568×1003, landscape, no alpha)                                                               | **Copied** into `apps/desktop/src/shell/splash/splash.png`. Shown by the Tauri two-window splash pattern.                                                                      |
+### `icons/` — the Xangarro icon kit (X-07, ADR-054 §6)
+
+The angular-X coin. Three SVG masters; every PNG/ICO beside them is a rendering
+of one of them. Edit a master, re-render, then re-copy the derivatives below.
+
+| Master                   | What it is                                                      |
+| ------------------------ | --------------------------------------------------------------- |
+| `coin-master.svg`        | Detailed coin on a `#111111` square — the app icon.             |
+| `maskable-master.svg`    | The same coin inset to 78 %, safe inside any OS mask.           |
+| `mark-flat.svg`          | Flat yellow disc + X for small sizes (`favicon.svg` is a copy). |
+| `android-foreground.svg` | Maskable coin without the square — adaptive-icon foreground.    |
+| `android-monochrome.svg` | Single-colour silhouette — Android 13+ themed icon.             |
+
+| Derivative                                                                 | Copied to                                                                                     |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `app-icon-1024.png` (RGB, **no alpha**)                                    | `apps/mobile/assets/icon.png` — the App Store rejects an icon with an alpha channel.          |
+| `android-foreground-432.png`                                               | `apps/mobile/assets/adaptive-icon.png` (background is `#111111` in `app.json`).               |
+| `android-monochrome-432.png`                                               | `apps/mobile/assets/adaptive-icon-monochrome.png`                                             |
+| `favicon-48.png`                                                           | `apps/mobile/assets/favicon.png` (Expo web)                                                   |
+| `favicon.ico`, `favicon.svg`, `app-icon-180.png`                           | `apps/{web,backoffice}/src/app/{favicon.ico,icon.svg,apple-icon.png}` (Next file conventions) |
+| `favicon.ico`                                                              | `apps/landing/public/favicon.ico`                                                             |
+| `favicon.svg`, `app-icon-{180,192,512}.png`, `icon-maskable-{192,512}.png` | `apps/landing/public/assets/` (`app-icon-180.png` → `apple-touch-icon.png`)                   |
+
+`favicon-16.png` and `favicon-32.png` are kept as masters for anything that
+needs a PNG favicon; nothing consumes them today.
+
+### Still to land (X-07)
+
+| File                | What it is                                           | Consumed by                                                                               |
+| ------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `logo.png`          | In-app brand logo (~1536×1024)                       | **Copied once** into `packages/ui/src/assets/logo.png`, used by `<BrandLogo />`.          |
+| `splash-mobile.png` | Mobile launch splash (~852×1846, portrait, no alpha) | **Copied** into `apps/mobile/assets/splash.png` — the current one still reads «Cachink!». |
+
+`icon-padded.png` predates the kit and fed the archived Tauri desktop app.
 
 ## Regenerating `icon-padded.png`
 
@@ -35,8 +62,8 @@ is already square-to-the-edge. The script validates the input is square.
    `packages/ui/src/assets/`) is a derivative of what lives here.
 2. **Never edit a derivative directly.** If a derivative drifts from the
    master, replace it from this directory.
-3. **Background colour for splash / adaptive-icon layers is `#FFD60A`**
-   (`colors.yellow` from CLAUDE.md §8.1). Keep it consistent everywhere.
+3. **Background colour for the splash is `#FFD60A`** (`colors.yellow`); the
+   icon kit's square and the Android adaptive-icon background are `#111111`.
 4. **Do not add new brand assets here without an ADR.** The set is
    intentionally small: one icon, one logo, and one splash per platform
    target (mobile + desktop). New shapes belong to their feature's package,
