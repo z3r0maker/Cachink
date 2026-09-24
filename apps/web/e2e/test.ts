@@ -2,6 +2,7 @@ import { test as base, type Page } from '@playwright/test';
 
 import { coverageEnabled } from '../scripts/coverage-gate/options';
 import { addPageCoverage } from './coverage';
+import { recordPageCoverage } from './page-coverage';
 import { recordWorkerCoverage } from './worker-coverage';
 
 /**
@@ -56,30 +57,57 @@ const hydrated = base.extend({
 });
 
 /**
- * V8's coverage lives with the document: a full navigation or reload throws
- * away what ran on the page before it, and most specs navigate after acting —
- * to check the result somewhere else. So coverage is collected just before
- * every `goto` / `reload` / `goBack` / `goForward`, then restarted (ADR-102).
- * Client-side App Router navigations keep the document and need nothing.
+ * V8's coverage lives with the document: a full navigation throws away what
+ * ran on the page before it. Most specs navigate after acting, and the app
+ * itself navigates too — a redirect after signup, a link, a form post. So the
+ * page's coverage (and its workers') is taken before every navigation the test
+ * makes, and as each document the app navigates to is *requested* — the old
+ * document is alive until the response commits, and a take is milliseconds
+ * against a server-rendered page's tens, though it can lose (ADR-102).
+ *
+ * The `request` event, not `page.route`: CDP calls made inside a route handler
+ * wait on the navigation that handler is holding, and never return. Nothing
+ * here pauses anything. Client-side App Router navigations keep the document
+ * and need none of this.
  */
-const NAVIGATIONS = ['goto', 'reload', 'goBack', 'goForward'] as const;
-
 async function recordPage(page: Page): Promise<() => Promise<void>> {
-  let takeWorkers = await recordWorkerCoverage(page);
-  await page.coverage.startJSCoverage({ resetOnNavigation: false });
-  const flush = async () => {
-    await addPageCoverage([...(await takeWorkers()), ...(await page.coverage.stopJSCoverage())]);
+  const pages = await recordPageCoverage(page);
+  const workers = await recordWorkerCoverage(page);
+  const workerTakes: Awaited<ReturnType<typeof workers.take>>[] = [];
+  const pending: Promise<void>[] = [];
+  const take = async () => {
+    workerTakes.push(await workers.take());
+    await pages.take();
   };
-  for (const method of NAVIGATIONS) {
+  // The test's own navigations: taken before they start — exact.
+  let byTest = false;
+  for (const method of ['goto', 'reload', 'goBack', 'goForward'] as const) {
     const navigate = page[method].bind(page) as (...args: unknown[]) => Promise<unknown>;
     (page as unknown as Record<string, unknown>)[method] = async (...args: unknown[]) => {
-      await flush();
-      takeWorkers = await recordWorkerCoverage(page);
-      await page.coverage.startJSCoverage({ resetOnNavigation: false });
-      return navigate(...args);
+      await take();
+      byTest = true;
+      try {
+        return await navigate(...args);
+      } finally {
+        byTest = false;
+      }
     };
   }
-  return flush;
+  // The app's own (a redirect, a link, a form): taken as the document is
+  // requested — best effort, it races the response.
+  page.on('request', (request) => {
+    if (!byTest && request.isNavigationRequest() && request.frame() === page.mainFrame()) {
+      pending.push(take().catch(() => undefined));
+    }
+  });
+  return async () => {
+    await Promise.all(pending);
+    // A test that closed its own page took its last document with it; what was
+    // taken at earlier navigations is still handed over.
+    if (!page.isClosed()) workerTakes.push(await workers.take());
+    await workers.stop();
+    await addPageCoverage([...workerTakes.flat(), ...(await pages.finish())]);
+  };
 }
 
 const withCoverage = hydrated.extend<{ pageCoverage: void }>({
@@ -88,8 +116,7 @@ const withCoverage = hydrated.extend<{ pageCoverage: void }>({
       if (browserName !== 'chromium') return use();
       const flush = await recordPage(page);
       await use();
-      // A test that closed its own page took the coverage with it.
-      if (!page.isClosed()) await flush();
+      await flush();
     },
     { auto: true },
   ],

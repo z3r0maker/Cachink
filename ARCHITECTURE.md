@@ -7100,3 +7100,17 @@ upload handler it had just run. `e2e/test.ts` now collects the page's (and its
 workers') coverage just before every `goto` / `reload` / `goBack` / `goForward`
 and restarts it; `grid.tsx` reads 17 of 32 and every function. Client-side App
 Router navigations keep the document and never lost anything.
+
+**Amendment 2026-09-24 — navigations the app makes.** Wrapping `goto` / `reload`
+/ `goBack` / `goForward` kept the test's own navigations exact, but the app
+navigates too — a redirect after signup, `window.location.assign`, a link —
+and each still discarded the document before it: the onboarding wizard read
+0% after a spec walked it end to end. Page coverage is now taken over CDP
+(`e2e/page-coverage.ts`, `Profiler.takePreciseCoverage`: counters only,
+sources fetched once at the end), and also as each main-frame document is
+*requested* (`page.on('request')`) — the wizard reads 19 of 26 branches.
+That take races the response and can lose on a fast page; it is best effort
+by design. Tried and rejected: `page.route` to hold the navigation while
+taking — any CDP call made inside a route handler waits on the navigation the
+handler holds, and never returns (it also aborted sign-in outright when the
+worker session was recreated there).
