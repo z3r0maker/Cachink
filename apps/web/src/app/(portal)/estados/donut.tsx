@@ -2,7 +2,15 @@ import { formatMoneyEntero } from '@xangarro/domain';
 import { colors } from '@xangarro/tokens';
 
 import type { DonutSlice } from './charts-data';
-import { barrido, donutFila, donutLista, donutMonto, donutSwatch, donutTitulo } from './charts.css';
+import {
+  barrido,
+  donutEtiqueta,
+  donutFila,
+  donutLista,
+  donutMonto,
+  donutSwatch,
+  donutTitulo,
+} from './charts.css';
 
 /**
  * The composition donut — drawn from the design's own `120×120` canvas (C-13).
@@ -116,7 +124,7 @@ function Leyenda({
             style={{ background: color(paleta, i) }}
             aria-hidden="true"
           />
-          {s.label}
+          <span className={donutEtiqueta}>{s.label}</span>
           <span className={donutMonto}>
             {formatMoneyEntero(s.monto)} ·{' '}
             {total === 0 ? 0 : Math.round((Number(s.monto) / total) * 100)}%

@@ -162,6 +162,18 @@ export const donutFila = style({
   fontSize: portalFontSizes.md,
   fontWeight: typography.weights.bold,
   color: colors.black,
+  // Without this the row cannot shrink below its text, and the amount — which
+  // must not wrap — pushed the whole page 22 px wide at 1024 and 768 px
+  // (`a11y.spec.ts`: the page itself never scrolls sideways).
+  minWidth: 0,
+});
+
+/** The slice's name. It yields first, because the money must stay readable. */
+export const donutEtiqueta = style({
+  minWidth: 0,
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
 });
 
 export const donutSwatch = style({
@@ -174,6 +186,7 @@ export const donutSwatch = style({
 
 export const donutMonto = style({
   marginLeft: 'auto',
+  flex: 'none',
   fontVariantNumeric: 'tabular-nums',
   color: colors.gray600,
   whiteSpace: 'nowrap',

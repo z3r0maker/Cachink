@@ -91,7 +91,9 @@ function Heading({
         <h1 className={pageTitle}>Estados financieros</h1>
         <p className={pageSubtitle}>Tus números en el formato que tu contador espera</p>
       </div>
-      <div style={{ marginLeft: 'auto', display: 'flex', gap: 10 }}>
+      {/* Wraps like its parent: four actions are 693 px on one line, which
+          scrolled the page sideways at 768 (`a11y.spec.ts`). */}
+      <div style={{ marginLeft: 'auto', display: 'flex', gap: 10, flexWrap: 'wrap' }}>
         {/* Export is open to every plan and every role, including the contador. */}
         {/* The statements are computed; what is exportable is the ledger
             they are computed from, which is what the contador actually wants. */}
