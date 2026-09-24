@@ -86,7 +86,7 @@ export const PLAN_CARDS: readonly PlanCard[] = [
     id: 'xangarrote',
     name: 'Xangarrote',
     pitch: 'Para cuando el negocio ya te quedó chico.',
-    cta: 'Probar 14 días gratis',
+    cta: 'Empezar ahora',
     includesLabel: 'Todo en Xangarro, más:',
     emphasis: false,
     features: [

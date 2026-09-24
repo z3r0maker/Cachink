@@ -7049,3 +7049,38 @@ was quietly violating it two projects later.
 - The lock lives in a test-only `e2e` schema on the throwaway database. It is
   never a migration, and `pnpm dev` against that database is unencumbered once
   the run ends.
+
+## ADR-105
+
+**Title:** No free trial: a plan is either free (Xangarrito) or paid from day one
+
+**Date:** 2026-09-24
+
+**Status:** Accepted — owner decision of 2026-09-24; supersedes the 14-day trial
+of N-01 / ADR-067 (prices, IVA and intervals of ADR-067 stand)
+
+**Context**
+
+Both paid tiers started with a card-less 14-day Stripe trial: «Probar 14 días» in
+onboarding, «Probar 14 días gratis» on the plan cards, daily trial emails, and a
+staff override to extend a trial. The owner decided the offer is simpler without
+it: Xangarrito is the free way to try Xangarro, and the paid tiers are paid.
+
+**Decision**
+
+- `StartTrialCheckoutUseCase` never sends `trialDays`; Checkout always collects
+  the card (`payment_method_collection: 'always'`). The class keeps its name so
+  the N-13 seam does not move.
+- Every customer-facing «14 días» / «prueba» goes: onboarding's button is
+  «Contratar este plan», the Xangarrote card says «Empezar ahora», and the
+  landing, FAQ, structured data and llms files say «empiezas gratis con
+  Xangarrito».
+
+**Consequences**
+
+- What stays, for subscriptions that began a trial before this ADR: the
+  `trialing` status and its «Prueba gratis hasta el …» line in Suscripción, the
+  daily trial-emails cron (it finds nothing once those trials end), the gateway's
+  `trialDays` mapping, and the backoffice `extend_trial` override. Remove them in
+  a later cleanup once no subscription is `trialing`.
+- Stripe prices need no change; trials were set per Checkout session, not on the price.

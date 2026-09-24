@@ -24,8 +24,6 @@ export const PRICE_SUBTOTAL_CENTAVOS = {
 /** IVA, in basis points (16 %). */
 export const IVA_BASIS_POINTS = 1_600;
 
-/** Both paid tiers start with a 14-day trial and no card (N-01). */
-export const TRIAL_DAYS = 14;
 
 /**
  * Days a SPEI invoice stays payable. This *is* the payment grace for SPEI

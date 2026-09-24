@@ -30,7 +30,7 @@ type Notice = {
 
 const SOON: Notice = {
   tone: 'info',
-  title: 'Pronto podrás activar tu prueba',
+  title: 'Pronto podrás contratar este plan',
   body: 'Guardamos tu elección y te avisaremos. Mientras tanto, sigue gratis: no pierdes nada.',
 };
 
@@ -83,7 +83,7 @@ function Price(props: {
       <span className={price} data-testid="plan-price">
         {priceLabel(props.plan, props.annual ? 'anual' : 'mensual')}
       </span>
-      <p className={note}>14 días gratis. Sin tarjeta para empezar.</p>
+      <p className={note}>Pagas con tarjeta. Cambias o cancelas cuando quieras.</p>
     </>
   );
 }
@@ -103,7 +103,7 @@ export function PlanScreen({ plan, headline, pending }: PlanScreenProps) {
           <div className={actions}>
             {free ? null : (
               <Button onClick={a.probar} disabled={a.pending}>
-                Probar 14 días
+                Contratar este plan
               </Button>
             )}
             <Button

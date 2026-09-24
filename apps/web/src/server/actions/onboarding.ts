@@ -100,7 +100,7 @@ export async function aplicarCambios(): Promise<OkOr<object>> {
   }
 }
 
-/** [Probar 14 días]: record the intent, then B-10's Stripe Checkout (card-less trial). */
+/** [Contratar este plan]: record the intent, then B-10's Stripe Checkout (paid from day one, ADR-105). */
 export async function probarGratis(
   plan: PlanId,
   interval: BillingInterval,

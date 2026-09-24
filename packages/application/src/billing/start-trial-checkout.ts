@@ -1,10 +1,11 @@
 /**
- * `startTrialCheckout` — the "Probar 14 días" button (B-10, N-01, N-13 seam).
+ * `startTrialCheckout` — the paid-plan button of onboarding and Suscripción
+ * (B-10, N-01, N-13 seam). The name predates ADR-105 and is kept so the seam's
+ * wiring does not move.
  *
- * A card-only Stripe Checkout for a paid plan on either interval. The first
- * subscription a business ever takes starts with a 14-day trial and **no card
- * up front** (the gateway sends `payment_method_collection: 'if_required'`);
- * a business that has had one before pays from day one.
+ * A card-only Stripe Checkout for a paid plan on either interval. **There is no
+ * trial** (ADR-105): Xangarro is either free (Xangarrito) or paid, so every
+ * paid subscription starts charging on day one.
  */
 
 import type { UseCase } from '../_use-case.js';
@@ -15,7 +16,7 @@ import {
   ensureCustomer,
   type BillingBusiness,
 } from './customer.js';
-import { lookupKey, TRIAL_DAYS } from './plans.js';
+import { lookupKey } from './plans.js';
 import type { BillingGateway, BillingRepository } from './ports.js';
 import { currentSubscription, isLive } from './status.js';
 
@@ -47,7 +48,7 @@ export class StartTrialCheckoutUseCase implements UseCase<StartTrialCheckoutInpu
       customerId,
       businessId: input.business.id,
       lookupKey: lookupKey(plan, interval),
-      trialDays: history.length === 0 ? TRIAL_DAYS : null,
+      trialDays: null,
       successUrl: input.successUrl,
       cancelUrl: input.cancelUrl,
     });
