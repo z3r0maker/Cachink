@@ -35,6 +35,19 @@ export type CodeResult =
 
 const ATTEMPTS = 3;
 
+/**
+ * A member without the role hears why; anything else is reported and gets the
+ * retry message — never the error's own text, which for a database failure is
+ * the database's words.
+ */
+function fallo(error: unknown, endpoint: string, retry: string): { ok: false; message: string } {
+  if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
+    return { ok: false, message: (error as Error).message };
+  }
+  reportError(error, { endpoint });
+  return { ok: false, message: retry };
+}
+
 export async function generarCodigo(): Promise<CodeResult> {
   try {
     const session = await requireMember('admin');
@@ -65,16 +78,13 @@ export async function generarCodigo(): Promise<CodeResult> {
           .returning({ code: activationCodes.code });
         if (inserted.length > 0) return candidate;
       }
-      throw new Error('No pudimos generar un código. Intenta de nuevo.');
+      throw new Error(`No free activation code after ${ATTEMPTS} attempts`);
     });
 
     revalidatePath('/equipo');
     return { ok: true, code, expiresAt };
   } catch (error) {
-    reportError(error, { endpoint: 'generarCodigo' });
-    const message =
-      error instanceof Error ? error.message : 'No pudimos generar el código. Intenta de nuevo.';
-    return { ok: false, message };
+    return fallo(error, 'generarCodigo', 'No pudimos generar el código. Intenta de nuevo.');
   }
 }
 
@@ -103,7 +113,6 @@ export async function enviarCodigoPorCorreo(address: string): Promise<EnviarCodi
     if (!r.ok) return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
     return { ok: true, sentTo: to };
   } catch (error) {
-    reportError(error, { endpoint: 'enviarCodigoPorCorreo' });
-    return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
+    return fallo(error, 'enviarCodigoPorCorreo', 'No pudimos enviar el correo. Intenta de nuevo.');
   }
 }

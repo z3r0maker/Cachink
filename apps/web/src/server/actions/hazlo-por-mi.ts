@@ -160,7 +160,14 @@ async function aplicarPendiente(
   const planned = await template.plan(tx, file);
   const count = (kind: string) => planned.filter((r) => r.kind === kind).length;
   const utiles = count('nuevo') + count('actualizar');
-  if (utiles === 0) throw new Error('El archivo mapeado no trae filas válidas.');
+  // Coded, so `fallo` gives the owner this reason — they can reject the
+  // mapping — rather than «No pudimos enviar tu solicitud», which named the
+  // wrong action and promised a retry could help.
+  if (utiles === 0) {
+    throw Object.assign(new Error('El archivo mapeado no trae filas válidas.'), {
+      code: 'IMPORTACION_SIN_FILAS',
+    });
+  }
   await template.apply(tx, businessId, planned as readonly unknown[]);
   return { outcome: 'aplicada', plantilla: claim.plantilla };
 }

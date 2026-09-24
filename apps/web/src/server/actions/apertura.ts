@@ -34,19 +34,31 @@ import { reportError } from '../observability/report';
 
 type PortError = { code?: string };
 
+const MONTO_INVALIDO = 'MONTO_INVALIDO';
+
 function fallo(error: unknown, endpoint: string): { ok: false; message: string } {
   const code = (error as PortError | null)?.code;
-  if (code === 'NOT_PERMITTED' || code?.startsWith('SALDOS_') || code?.startsWith('INVENTARIO_')) {
+  if (
+    code === 'NOT_PERMITTED' ||
+    code === MONTO_INVALIDO ||
+    code?.startsWith('SALDOS_') ||
+    code?.startsWith('INVENTARIO_')
+  ) {
     return { ok: false, message: (error as Error).message };
   }
   reportError(error, { endpoint });
   return { ok: false, message: 'No pudimos guardar. Intenta de nuevo.' };
 }
 
-/** Money in, centavos out; a malformed amount is the user's to fix. */
+/**
+ * Money in, centavos out; a malformed amount is the user's to fix. It carries a
+ * code so `fallo` hands its message back — uncoded, it was reported as an
+ * incident and the owner saw «No pudimos guardar» instead of what to correct.
+ */
 function pesos(v: string): bigint {
   const c = pesosToCentavos(v.trim());
-  if (c === null) throw new Error(`«${v}» no es un monto.`);
+  if (c === null)
+    throw Object.assign(new Error(`«${v}» no es un monto.`), { code: MONTO_INVALIDO });
   return c;
 }
 
