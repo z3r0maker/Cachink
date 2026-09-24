@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 /**
  * P-23's visual-regression baselines (ADR-017's harness, on the in-app

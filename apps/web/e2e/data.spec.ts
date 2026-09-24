@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 import { expectSeededData } from './expect-data';
 import { ROUTES } from './routes';

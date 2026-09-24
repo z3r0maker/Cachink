@@ -208,7 +208,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1250`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1260`
 
-## Colas de tracks (10)
+## Colas de tracks (11)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -231,6 +231,10 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» in production — Blocked by: P-07, P-30 · `04-portal.md:1153`
 - [~] **P-30** Asesor generation runtime — Blocked by: P-26, B-02, B-03 · Falta: only `server/asesor/model.ts` exists; no cron entry, no one-business route, no `notices` writes with `source='asesor'`, no Batches API / prompt caching, no fixture tests. 2026-09-22 doc audit: shipped except the cron entry, the per-business route and the batch API. 2026-09-21 · **The model boundary landed** — the single module ADR-056 requires (`server/asesor/model.ts`): env-gated, unset → null → fixtures (CI/fresh clones/ pre-credential production unchanged), set → an Anthropic SDK client pointed at whichever gateway owns the credential. 5 unit tests (null path, half-credential, live construction, model-id default + override). **Verified live** through the owner's local proxy: seeded-figure prose from `claude-opus-4-6` (ADR-056 names opus-5; `ASESOR_LLM_MODEL` bridges until the gateway catches up). Azure AI Foundry credentials for Vercel will land in the same two env vars — the owner is obtaining them. · `04-portal.md:1163`
 
+### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
+
+- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1395`
+
 ### `05-app.md`
 
 - [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
@@ -244,7 +248,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 20 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
-- `04-portal.md` — 4 abiertos (3 en curso, 0 bloqueados, 30 hechos)
+- `04-portal.md` — 5 abiertos (3 en curso, 0 bloqueados, 30 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)

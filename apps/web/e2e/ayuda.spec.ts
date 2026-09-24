@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 /**
  * «Ayuda» (N-08's wiring): the form files a `kind=ayuda` inbox item through

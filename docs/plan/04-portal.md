@@ -1389,3 +1389,26 @@ critical avisos cannot be switched off.
   Estados for every plan and role.
 - **Acceptance:** the PDF has no browser chrome and matches the screen's rhythm; exports open in
   Excel with correct types.
+
+### P-35 Portal coverage to 85% (unit + E2E merged, ADR-102)
+
+- [ ] Status · **Blocked by:** — · **Blocks:** —
+  - 2026-09-23 · **Measurement and gate landed.** `pnpm test:coverage` (Vitest) and
+    `pnpm test:e2e:coverage` (browser + `next start`) write raw V8 data;
+    `pnpm coverage:check` merges them and holds `coverage-floor.json`, in the `portal-e2e`
+    job. First full measurement, without the `sync` project (blocked that run): lines
+    72.7%, statements 68.0%, functions 67.0%, branches 54.3% — from 20% lines for Vitest
+    alone. Floor set at 72 / 68 / 67 / 54.
+- **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
+  in uncovered lines at the first measurement (≈700 lines to 85%):
+  1. `operador/runtime` (19%, 285 lines) — capture Web Worker coverage over CDP so
+     `db.worker.ts` is measured at all, then unit-test the runtime's pure modules
+     (`fechas`, `shapes`, `cierre-resumen`, `protocol`).
+  2. `server/actions` (44%, 290 lines; 7 files at 0%) — the error branches Playwright
+     never reaches: Postgres integration tests per CLAUDE.md §6.
+  3. `app/(portal)` (75%, 319 lines; 13 files at 0%) and `app/api` (49%; 9 files at 0%) —
+     each 0% file is a route or drawer with no spec: a Playwright spec that asserts real
+     data, or delete the dead file.
+  4. `server/import` (5%) and `server/repositories` (53%).
+- **Acceptance:** `coverage-floor.json` at ≥ 85 for lines, statements and functions, and
+  branches ≥ 75, on a `portal-e2e` run where every project ran.

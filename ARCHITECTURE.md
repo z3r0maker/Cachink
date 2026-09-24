@@ -141,6 +141,7 @@ Links to discussion, docs, prior art.
 | [099](#adr-099) | 2026-09-20 | One SVG renderer for the receipt templates; PDF is a page of that raster | Accepted |
 | [100](#adr-100) | 2026-09-23 | The root contract is rewritten against the code it governs, and its table of contents is generated | Accepted |
 | [101](#adr-101) | 2026-09-23 | Activation answers one generic error, and the QR carries a 15-minute token in the fragment | Accepted |
+| [102](#adr-102) | 2026-09-23 | The portal's coverage is unit + E2E merged, and a floor that only rises holds it | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -6871,3 +6872,68 @@ link preview would fetch it.
 - A shopkeeper who leaves the QR open longer than 15 minutes taps «Generar
   otro QR»; the typed code keeps its 48 hours as the fallback.
 
+
+## ADR-102
+
+**Title:** The portal's coverage is unit + E2E merged, and a floor that only rises holds it
+
+**Date:** 2026-09-23
+
+**Status:** Accepted — owner decision of 2026-09-23 ("unit + E2E combined"); task P-35
+
+**Context**
+
+Measured on 2026-09-23, `apps/web` had 20% line coverage — and nobody had
+known, because nothing measured it. The app had no `test:coverage` script, so
+`turbo run test:coverage` skipped it and the base config's 80% threshold never
+applied. That 20% was also the wrong question: Vitest instrumented only `.ts`
+files, while CLAUDE.md §7 sends UI behaviour to Playwright, whose ~480 specs
+exercised the server actions, loaders and screens and counted for nothing. The
+shared code the portal stands on was already where the owner expects the
+portal to be: `domain` 92%, `application` 96.5%, `auth-core` 100%.
+
+**Decision**
+
+1. **Measure what both suites execute.** Vitest writes raw V8 data through
+   `vitest-monocart-coverage`. The E2E run adds the browser's (Playwright page
+   coverage, Chromium) and the server's (`next start` under
+   `NODE_V8_COVERAGE`, flushed over the inspector in the global teardown).
+   `monocart-coverage-reports` merges the three — one tool, so one converter
+   and one idea of what a file is. The build under test changes only by source
+   maps (`XG_COVERAGE=1`).
+2. **What counts.** Every `apps/web/src/**/*.{ts,tsx}` that exists on disk,
+   untested files at 0%. Not `*.css.ts` (compiled to CSS, never executed), not
+   the shared packages (they keep their own gates).
+3. **Istanbul's metrics, not V8's.** V8 "lines" credit every line of a module
+   that merely loaded and read ~35 points above the statements beside them.
+   Istanbul's are what Vitest reports for `domain`, so the numbers compare.
+4. **A floor that only rises.** `apps/web/coverage-floor.json` holds a floor
+   per metric and the target (85). The `portal-e2e` job fails when a metric
+   falls below its floor; a change that raises one commits `--raise`. The
+   first floor is the first full measurement: lines 72, statements 68,
+   functions 67, branches 54.
+5. **Specs take `test` from `e2e/test.ts`,** which records page coverage when
+   `XG_COVERAGE=1` and is Playwright's own `test` otherwise. A unit test
+   guards the import (an ESLint `files` rule cannot: `pnpm lint` runs from
+   `apps/web`, and flat-config globs resolve against the working directory).
+
+**Alternatives considered**
+
+- *Unit and integration tests only, to 85%.* Rejected: roughly 2,500 more
+  lines of tests, much of it re-proving in Vitest what a Playwright spec
+  already drives through the real page.
+- *Gate only the "logic" directories.* Rejected: the exclusion list becomes
+  the place coverage goes to hide.
+- *Instrument the Next build with Istanbul.* Rejected: it needs a Babel pass
+  beside SWC and vanilla-extract's webpack plugin, and changes the artifact
+  under test far more than source maps do.
+
+**Consequences**
+
+- The number moves with the E2E suite: a flaky spec that stops early lowers
+  it. The floor step runs only when the E2E step passed.
+- Web Workers are not measured — page coverage does not reach them — so
+  `operador/runtime/db.worker.ts` reads 0% whatever the specs do. Capturing
+  worker targets over CDP is part of P-35.
+- `pnpm test:coverage` in `apps/web` writes raw data only; the report is
+  `pnpm coverage:check`, after `pnpm test:e2e:coverage`.

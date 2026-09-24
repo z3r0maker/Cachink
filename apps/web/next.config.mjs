@@ -40,6 +40,10 @@ const nextConfig = {
   // so the page never renders and every spec fails. A private dir per port
   // cannot be pulled out from under the server using it.
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // The coverage build (ADR-102): source maps on both sides, so the V8 data the
+  // E2E run collects maps back to `src/`. Nothing else about the build changes.
+  ...(process.env.XG_COVERAGE === '1' ? { productionBrowserSourceMaps: true } : {}),
+  experimental: { serverSourceMaps: process.env.XG_COVERAGE === '1' },
   // `@xangarro/tokens` and `@xangarro/domain` ship TypeScript sources, not a
   // build output, so Next must compile them rather than treat them as external.
   transpilePackages: ['@xangarro/tokens', '@xangarro/domain'],

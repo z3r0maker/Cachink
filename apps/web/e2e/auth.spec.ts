@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import assert from 'node:assert/strict';
 
 import { BASE_URL } from './base-url';

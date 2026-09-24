@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import { newUlid } from '@xangarro/domain';
 
 import { activatePhone, asTenant, BIZ, pull, push, TACO, type Phone } from './sync-phone';

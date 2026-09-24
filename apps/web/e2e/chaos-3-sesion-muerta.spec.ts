@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import postgres from 'postgres';
 
 import { BASE_URL } from './base-url';
