@@ -2,25 +2,42 @@ import tseslint from 'typescript-eslint';
 import sonarjs from 'eslint-plugin-sonarjs';
 import unicorn from 'eslint-plugin-unicorn';
 import boundaries from 'eslint-plugin-boundaries';
+import { resolve } from 'node:path';
+
+/**
+ * Every package lints itself with `eslint . --config ../../eslint.config.js`,
+ * and with an explicit `--config` ESLint resolves `files`/`ignores` globs
+ * against the working directory, not the config file. A glob like
+ * `packages/ui/src/components/**` then matched nothing from `packages/ui`,
+ * and neither did the boundaries element patterns. Anchoring both to the repo
+ * root makes the result independent of where ESLint is run from.
+ */
+const REPO_ROOT = resolve(import.meta.dirname, '..', '..');
+const WORKSPACE_RESOLVER = resolve(import.meta.dirname, 'eslint-workspace-resolver.cjs');
 
 /**
  * Shared ESLint flat config for the Xangarro monorepo.
  *
  * Encodes the layer boundaries from CLAUDE.md §4.2. Each package declares its
  * element type via `settings.boundaries/elements` below, and the
- * `boundaries/element-types` rule enforces which layers may import which.
+ * `boundaries/dependencies` rule enforces which layers may import which.
+ * `scripts/lint-boundaries.test.ts` proves that it fires.
  *
- * Layers (outermost to innermost):
- *   apps         → may import anything
- *   ui           → domain (types), application, data (interfaces only)
- *   application  → domain
- *   sync         → domain, data (interfaces only)
- *   data         → domain (types only)
+ * Layers (outermost to innermost), as enforced:
+ *   app          → domain, application, data, ui, sync, testing
+ *   ui           → domain, application, data, sync
+ *   testing      → domain, application, data, ui; sync (types only)
+ *   sync         → domain, data
+ *   application  → domain; data (types only: repository interfaces)
+ *   data         → domain
  *   domain       → nothing internal
+ *
+ * Packages with no element below (contracts, data-pg, auth-core, tokens,
+ * email, observability) are unclassified, and the rule skips them.
  *
  * Also loads sonarjs (complexity) and unicorn (best practices).
  */
-export default tseslint.config(
+const configs = tseslint.config(
   // Global ignores
   {
     ignores: [
@@ -55,6 +72,10 @@ export default tseslint.config(
       boundaries,
     },
     settings: {
+      // Element patterns below are relative to this, not to the cwd.
+      'boundaries/root-path': REPO_ROOT,
+      // Maps `@xangarro/*` to package source; see the resolver's header.
+      'import/resolver': { [WORKSPACE_RESOLVER]: {} },
       'boundaries/elements': [
         { type: 'domain', pattern: 'packages/domain/src/**' },
         { type: 'application', pattern: 'packages/application/src/**' },
@@ -70,27 +91,51 @@ export default tseslint.config(
             'packages/ui/**/*.stories.{ts,tsx,mdx}',
           ],
         },
-        { type: 'sync', pattern: 'packages/sync-*/src/**' },
+        { type: 'sync', pattern: ['packages/sync/src/**', 'packages/sync-*/src/**'] },
         { type: 'testing', pattern: 'packages/testing/src/**' },
         { type: 'app', pattern: 'apps/**/src/**' },
       ],
     },
     rules: {
       // === Layer boundary rules (CLAUDE.md §4.2) ===
-      'boundaries/element-types': [
+      'boundaries/dependencies': [
         'error',
         {
           default: 'disallow',
           rules: [
-            { from: 'domain', allow: [] },
-            { from: 'application', allow: ['domain'] },
-            { from: 'data', allow: ['domain'] },
-            { from: 'sync', allow: ['domain', 'data'] },
-            { from: 'ui', allow: ['domain', 'application', 'data'] },
-            { from: 'testing', allow: ['domain', 'application', 'data'] },
+            { from: { type: 'domain' }, disallow: { to: { type: '*' } } },
             {
-              from: 'app',
-              allow: ['domain', 'application', 'data', 'ui', 'sync', 'testing'],
+              // Use cases take repository *interfaces* (CLAUDE.md §3–4); the
+              // Drizzle implementations stay out of reach.
+              from: { type: 'application' },
+              allow: [
+                { to: { type: 'domain' } },
+                { to: { type: 'data' }, dependency: { kind: 'type' } },
+              ],
+            },
+            { from: { type: 'data' }, allow: { to: { type: 'domain' } } },
+            { from: { type: 'sync' }, allow: { to: { type: ['domain', 'data'] } } },
+            {
+              // ui is the phone's body: it wires the cloud sync bridge,
+              // activation and entitlement from @xangarro/sync (ADR-104).
+              from: { type: 'ui' },
+              allow: { to: { type: ['domain', 'application', 'data', 'sync'] } },
+            },
+            {
+              // `MockRepositoryProvider` wraps ui's `RepositoryProvider`, and
+              // lives in testing so it stays off the runtime graph (ADR-033).
+              from: { type: 'testing' },
+              allow: [
+                { to: { type: ['domain', 'application', 'data', 'ui'] } },
+                // In-memory fakes implement sync's repository interfaces.
+                { to: { type: 'sync' }, dependency: { kind: 'type' } },
+              ],
+            },
+            {
+              from: { type: 'app' },
+              allow: {
+                to: { type: ['domain', 'application', 'data', 'ui', 'sync', 'testing'] },
+              },
             },
           ],
         },
@@ -187,3 +232,5 @@ export default tseslint.config(
     },
   },
 );
+
+export default configs.map((config) => ({ basePath: REPO_ROOT, ...config }));
