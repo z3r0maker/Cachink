@@ -2,8 +2,8 @@
 
 import { cortesDeDispositivo, turnosDeOperador } from '@xangarro/data-pg';
 
+import { failure } from '../action-errors';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 
 /**
@@ -15,7 +15,7 @@ type Result<T> = { ok: true; rows: T } | { ok: false; message: string };
 
 async function leer<T>(
   endpoint: string,
-  fallo: string,
+  retry: string,
   fn: (tx: Parameters<Parameters<typeof withTenant>[1]>[0]) => Promise<T>,
 ): Promise<Result<T>> {
   try {
@@ -23,8 +23,7 @@ async function leer<T>(
     if (session === null) return { ok: false, message: 'Inicia sesión para continuar.' };
     return { ok: true, rows: await withTenant(session.business_id, fn) };
   } catch (error) {
-    reportError(error, { endpoint });
-    return { ok: false, message: fallo };
+    return failure(error, endpoint, { retry });
   }
 }
 

@@ -4,8 +4,8 @@ import { CambiarCanalAvisoUseCase } from '@xangarro/application';
 import { guardarPreferencias, preferenciasDe } from '@xangarro/data-pg';
 import type { Canal, FilaPreferencia, TipoAviso } from '@xangarro/domain';
 
+import { failure } from '../action-errors';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 
 /**
@@ -32,9 +32,9 @@ export async function cambiarCanalAviso(
     );
     return { ok: true, filas };
   } catch (error) {
-    const code = (error as { code?: string } | null)?.code;
-    if (code === 'AVISO_OBLIGATORIO') return { ok: false, message: (error as Error).message };
-    reportError(error, { endpoint: 'cambiarCanalAviso' });
-    return { ok: false, message: 'No pudimos guardar el cambio. Intenta de nuevo.' };
+    return failure(error, 'cambiarCanalAviso', {
+      shown: ['AVISO_OBLIGATORIO'],
+      retry: 'No pudimos guardar el cambio. Intenta de nuevo.',
+    });
   }
 }

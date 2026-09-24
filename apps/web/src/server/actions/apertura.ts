@@ -23,7 +23,7 @@ import { APERTURA_MOTIVO, PORTAL_DEVICE_ID } from '@xangarro/domain/usage';
 import { pesosToCentavos } from '@/lib/money';
 import { requireMember } from '../auth';
 import { withTenant, type Tx } from '../db';
-import { reportError } from '../observability/report';
+import { failure, refusal, type FailurePolicy } from '../action-errors';
 
 /**
  * N-17's portal side: the saldos iniciales screen and the one-time
@@ -32,33 +32,17 @@ import { reportError } from '../observability/report';
  * day they land.
  */
 
-type PortError = { code?: string };
-
-const MONTO_INVALIDO = 'MONTO_INVALIDO';
-
-function fallo(error: unknown, endpoint: string): { ok: false; message: string } {
-  const code = (error as PortError | null)?.code;
-  if (
-    code === 'NOT_PERMITTED' ||
-    code === MONTO_INVALIDO ||
-    code?.startsWith('SALDOS_') ||
-    code?.startsWith('INVENTARIO_')
-  ) {
-    return { ok: false, message: (error as Error).message };
-  }
-  reportError(error, { endpoint });
-  return { ok: false, message: 'No pudimos guardar. Intenta de nuevo.' };
-}
+/** The use cases' refusals — the owner's to correct, not incidents. */
+const REFUSALS: FailurePolicy = { shown: ['SALDOS_*', 'INVENTARIO_*'] };
 
 /**
- * Money in, centavos out; a malformed amount is the user's to fix. It carries a
- * code so `fallo` hands its message back — uncoded, it was reported as an
+ * Money in, centavos out; a malformed amount is the user's to fix. A refusal,
+ * so `failure` hands its message back — uncoded, it was reported as an
  * incident and the owner saw «No pudimos guardar» instead of what to correct.
  */
 function pesos(v: string): bigint {
   const c = pesosToCentavos(v.trim());
-  if (c === null)
-    throw Object.assign(new Error(`«${v}» no es un monto.`), { code: MONTO_INVALIDO });
+  if (c === null) throw refusal('MONTO_INVALIDO', `«${v}» no es un monto.`);
   return c;
 }
 
@@ -106,7 +90,7 @@ export async function guardarSaldosIniciales(form: SaldosInicialesForm): Promise
     revalidatePath('/estados');
     return { ok: true };
   } catch (error) {
-    return fallo(error, 'guardarSaldosIniciales');
+    return failure(error, 'guardarSaldosIniciales', REFUSALS);
   }
 }
 
@@ -121,7 +105,7 @@ export async function bloquearSaldosIniciales(): Promise<SaldosResult> {
     revalidatePath('/saldos-iniciales');
     return { ok: true };
   } catch (error) {
-    return fallo(error, 'bloquearSaldosIniciales');
+    return failure(error, 'bloquearSaldosIniciales', REFUSALS);
   }
 }
 
@@ -196,7 +180,7 @@ export async function capturarInventarioInicial(
     revalidatePath('/estados');
     return { ok: true, total: centavosAPesos(result.total), movimientos: result.movimientos };
   } catch (error) {
-    return fallo(error, 'capturarInventarioInicial');
+    return failure(error, 'capturarInventarioInicial', REFUSALS);
   }
 }
 

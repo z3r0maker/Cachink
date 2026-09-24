@@ -2,7 +2,13 @@ import 'server-only';
 
 import { and, eq } from 'drizzle-orm';
 import { users } from '@xangarro/data-pg';
-import { newUlid, type BusinessId, type User, type UserId } from '@xangarro/domain';
+import {
+  newUlid,
+  OperatorNotFoundError,
+  type BusinessId,
+  type User,
+  type UserId,
+} from '@xangarro/domain';
 import type { CreateUserInput, UserPatch, UsersRepository } from '@xangarro/data';
 
 import type { Tx } from '../db';
@@ -82,7 +88,8 @@ function writes(tx: Tx, businessId: BusinessId) {
         })
         .where(and(eq(users.id, id)))
         .returning();
-      if (!row) throw new Error('El operador no existe.');
+      // Gone between the use case's read and this write: the owner's sentence, not an incident.
+      if (!row) throw new OperatorNotFoundError();
       await recordChange(tx, businessId, 'users', id, 'update');
       return toDomain(row);
     },

@@ -4,9 +4,9 @@ import { syncRejections } from '@xangarro/data-pg';
 import { and, eq, isNull } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 
 /**
  * «Marcar como resuelto» (P-11): the owner or an admin has dealt with a
@@ -28,10 +28,8 @@ export async function marcarRechazoResuelto(id: string): Promise<ResolverResult>
     revalidatePath('/sincronizacion');
     return { ok: true };
   } catch (error) {
-    if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-      return { ok: false, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'marcarRechazoResuelto' });
-    return { ok: false, message: 'No pudimos marcarlo. Intenta de nuevo.' };
+    return failure(error, 'marcarRechazoResuelto', {
+      retry: 'No pudimos marcarlo. Intenta de nuevo.',
+    });
   }
 }

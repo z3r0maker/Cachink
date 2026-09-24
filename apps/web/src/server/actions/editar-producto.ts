@@ -5,10 +5,10 @@ import { EditarProductoUseCase } from '@xangarro/application';
 import type { ProductPatch } from '@xangarro/data';
 import type { BusinessId, ProductId } from '@xangarro/domain';
 
+import { failure, type FailurePolicy } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { pgProductsRepository } from '../repositories/products';
-import { reportError } from '../observability/report';
 
 /**
  * Edit a product from the portal.
@@ -39,25 +39,16 @@ const CAMPO: Readonly<Record<string, string>> = {
   umbralStockBajo: 'El aviso de existencias bajas no puede ser negativo.',
 };
 
-type Refusal = { code?: string; name?: string; issues?: readonly { path?: readonly unknown[] }[] };
-
 /**
  * A deleted product or a missing role: its own sentence. A patch the schema
  * refuses: the field, in the form's words — never the validator's JSON. Only
  * what is left is an incident, reported behind the retry message.
  */
-function fallo(error: unknown): { ok: false; message: string } {
-  const e = (error ?? {}) as Refusal;
-  if (e.code === 'PRODUCT_NOT_FOUND' || e.code === 'NOT_PERMITTED') {
-    return { ok: false, message: (error as Error).message };
-  }
-  if (e.name === 'ZodError') {
-    const campo = String(e.issues?.[0]?.path?.[0] ?? '');
-    return { ok: false, message: CAMPO[campo] ?? 'Revisa los datos del producto.' };
-  }
-  reportError(error, { endpoint: 'editarProducto' });
-  return { ok: false, message: 'No pudimos guardar el producto. Intenta de nuevo.' };
-}
+const REFUSALS: FailurePolicy = {
+  shown: ['PRODUCT_NOT_FOUND'],
+  invalid: (campo) => CAMPO[campo] ?? 'Revisa los datos del producto.',
+  retry: 'No pudimos guardar el producto. Intenta de nuevo.',
+};
 
 export async function editarProducto(id: string, patch: ProductPatch): Promise<EditResult> {
   try {
@@ -73,7 +64,7 @@ export async function editarProducto(id: string, patch: ProductPatch): Promise<E
       await useCase.execute({ id: id as ProductId, patch });
     });
   } catch (error) {
-    return fallo(error);
+    return failure(error, 'editarProducto', REFUSALS);
   }
 
   revalidatePath('/productos');

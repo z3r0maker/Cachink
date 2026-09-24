@@ -4,9 +4,9 @@ import { GuardarNegocioUseCase, type GuardarNegocioInput } from '@xangarro/appli
 import { NegocioInvalidoError, type BusinessId, type NegocioErrores } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgBusinessesRepository } from '../repositories/businesses';
 
 /**
@@ -36,10 +36,6 @@ export async function guardarNegocio(form: GuardarNegocioForm): Promise<GuardarN
     if (error instanceof NegocioInvalidoError) {
       return { ok: false, errores: error.errores, message: error.message };
     }
-    if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-      return { ok: false, errores: SIN_ERRORES, message: (error as Error).message };
-    }
-    reportError(error, { endpoint: 'guardarNegocio' });
-    return { ok: false, errores: SIN_ERRORES, message: 'No pudimos guardar. Intenta de nuevo.' };
+    return { ...failure(error, 'guardarNegocio'), errores: SIN_ERRORES };
   }
 }

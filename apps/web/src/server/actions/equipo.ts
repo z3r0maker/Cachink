@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { CODE_TTL_MS, mintActivationCode } from '../activation';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
+import { failure } from '../action-errors';
 import { sendActivationCode } from '../email/activation-code';
 
 /**
@@ -34,19 +34,6 @@ export type CodeResult =
   | { ok: false; message: string };
 
 const ATTEMPTS = 3;
-
-/**
- * A member without the role hears why; anything else is reported and gets the
- * retry message — never the error's own text, which for a database failure is
- * the database's words.
- */
-function fallo(error: unknown, endpoint: string, retry: string): { ok: false; message: string } {
-  if ((error as { code?: string } | null)?.code === 'NOT_PERMITTED') {
-    return { ok: false, message: (error as Error).message };
-  }
-  reportError(error, { endpoint });
-  return { ok: false, message: retry };
-}
 
 export async function generarCodigo(): Promise<CodeResult> {
   try {
@@ -84,9 +71,13 @@ export async function generarCodigo(): Promise<CodeResult> {
     revalidatePath('/equipo');
     return { ok: true, code, expiresAt };
   } catch (error) {
-    return fallo(error, 'generarCodigo', 'No pudimos generar el código. Intenta de nuevo.');
+    return failure(error, 'generarCodigo', {
+      retry: 'No pudimos generar el código. Intenta de nuevo.',
+    });
   }
 }
+
+const ENVIO_FALLIDO = 'No pudimos enviar el correo. Intenta de nuevo.';
 
 /**
  * «Enviar por correo» (P-06): the live code to whatever address the owner
@@ -110,9 +101,9 @@ export async function enviarCodigoPorCorreo(address: string): Promise<EnviarCodi
       return { ok: false, message: 'Genera un código primero.' };
     }
     const r = await sendActivationCode(to, { code: live.code, negocio, expiresAt: live.expiresAt });
-    if (!r.ok) return { ok: false, message: 'No pudimos enviar el correo. Intenta de nuevo.' };
+    if (!r.ok) return { ok: false, message: ENVIO_FALLIDO };
     return { ok: true, sentTo: to };
   } catch (error) {
-    return fallo(error, 'enviarCodigoPorCorreo', 'No pudimos enviar el correo. Intenta de nuevo.');
+    return failure(error, 'enviarCodigoPorCorreo', { retry: ENVIO_FALLIDO });
   }
 }
