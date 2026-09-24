@@ -16,6 +16,7 @@ function toItem(row: SupportItemRow): SupportItem {
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     resolvedAt: row.resolvedAt?.toISOString() ?? null,
+    dueAt: row.dueAt?.toISOString() ?? null,
   });
 }
 
@@ -26,6 +27,7 @@ function toRow(item: SupportItem): SupportItemRow {
     createdAt: new Date(item.createdAt),
     updatedAt: new Date(item.updatedAt),
     resolvedAt: item.resolvedAt === null ? null : new Date(item.resolvedAt),
+    dueAt: item.dueAt === null ? null : new Date(item.dueAt),
   };
 }
 
@@ -68,7 +70,7 @@ async function listForDigest(conn: Conn, since: string): Promise<SupportItem[]> 
   const t = supportItems;
   const openAttention = and(
     ne(t.status, 'resuelto'),
-    or(eq(t.urgent, true), eq(t.kind, 'factura')),
+    or(eq(t.urgent, true), inArray(t.kind, ['factura', 'arco'])),
   );
   const rows = await conn
     .select()

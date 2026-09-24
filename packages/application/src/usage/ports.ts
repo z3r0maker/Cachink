@@ -13,7 +13,12 @@ export type { UsageThresholdNotice };
 
 /** `xangarro.usage_counts()`: every live business, `first`..`last`, zeros included. */
 export interface UsageCountSource {
-  count(first: UsagePeriod, last: UsagePeriod): Promise<UsageSnapshot[]>;
+  /** Every live business, or only `businessIds` when given (the push-time refresh). */
+  count(
+    first: UsagePeriod,
+    last: UsagePeriod,
+    businessIds?: readonly string[],
+  ): Promise<UsageSnapshot[]>;
 }
 
 /** `usage_counters`. */

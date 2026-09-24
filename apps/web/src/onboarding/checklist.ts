@@ -10,6 +10,8 @@
 export interface ChecklistSignals {
   readonly operadores: number;
   readonly productos: number;
+  /** Opening caja, bancos or CxC were captured (N-17). */
+  readonly saldosIniciales: boolean;
   /** A live (unredeemed, unexpired) or already-redeemed activation code exists. */
   readonly codigoGenerado: boolean;
   readonly dispositivosActivos: number;
@@ -17,7 +19,14 @@ export interface ChecklistSignals {
   readonly tieneLogo: boolean;
 }
 
-export type ChecklistKey = 'operador' | 'productos' | 'codigo' | 'dispositivo' | 'venta' | 'logo';
+export type ChecklistKey =
+  | 'operador'
+  | 'productos'
+  | 'saldos'
+  | 'codigo'
+  | 'dispositivo'
+  | 'venta'
+  | 'logo';
 
 export interface ChecklistItem {
   readonly key: ChecklistKey;
@@ -50,6 +59,13 @@ const ITEMS: readonly ItemDef[] = [
     hint: 'Uno por uno o importa tu catálogo.',
     href: '/productos',
     isDone: (s) => s.productos > 0,
+  },
+  {
+    key: 'saldos',
+    title: 'Captura tus saldos iniciales',
+    hint: 'Caja, bancos y lo que te deben el día que empiezas.',
+    href: '/saldos-iniciales',
+    isDone: (s) => s.saldosIniciales,
   },
   {
     key: 'codigo',

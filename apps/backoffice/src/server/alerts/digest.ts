@@ -46,10 +46,14 @@ export interface DailyDigest {
   readonly overLimit: OverLimitSummary;
   readonly newByKind: readonly KindGroup[];
   readonly urgentOpen: readonly SupportItem[];
+  /** Open ARCO requests, the nearest legal deadline first (N-34). */
+  readonly arcoOpen: readonly SupportItem[];
   readonly consoleUrl: string;
 }
 
 const open = (i: SupportItem) => i.status !== 'resuelto';
+const soonestDue = (a: SupportItem, b: SupportItem) =>
+  Date.parse(a.dueAt ?? '') - Date.parse(b.dueAt ?? '');
 const newestFirst = (a: SupportItem, b: SupportItem) =>
   Date.parse(b.createdAt) - Date.parse(a.createdAt) || (a.id < b.id ? 1 : -1);
 
@@ -110,6 +114,7 @@ export function buildDailyDigest(
   };
   const fresh = items.filter(inWindow);
   const urgentOpen = items.filter((i) => i.urgent && open(i)).sort(newestFirst);
+  const arcoOpen = items.filter((i) => i.kind === 'arco' && open(i)).sort(soonestDue);
   const rejections = options.rejections ?? REJECTIONS_UNAVAILABLE;
   const overLimit = options.overLimit ?? OVER_LIMIT_UNAVAILABLE;
   const counts = countsOf(items, fresh, urgentOpen, rejections, overLimit);
@@ -123,6 +128,7 @@ export function buildDailyDigest(
     overLimit,
     newByKind: groupByKind(fresh),
     urgentOpen,
+    arcoOpen,
     consoleUrl: options.consoleUrl ?? DEFAULT_CONSOLE_URL,
   };
   return {

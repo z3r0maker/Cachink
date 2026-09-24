@@ -10,6 +10,13 @@ appId: mx.xangarro.mobile
     visible:
       id: 'activation-screen'
     timeout: 60000
+# N-34: the aviso de privacidad at linking is on screen before anything is sent.
+- scrollUntilVisible:
+    element:
+      id: 'activation-aviso'
+    direction: DOWN
+- assertVisible:
+    text: '.*Aviso completo y derechos ARCO.*'
 # Tap the right edge so the cursor sits at the end; eraseText deletes leftwards.
 - tapOn:
     id: 'activation-email'

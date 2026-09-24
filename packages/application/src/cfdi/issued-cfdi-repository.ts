@@ -42,6 +42,14 @@ export interface CfdiCancellationState {
   readonly complement?: CancellationStatus;
 }
 
+/** A CFDI de egreso stamped for a refund of this payment. */
+export interface CreditNoteRef extends CfdiDocumentRef {
+  /** Stripe refund id that triggered it. */
+  readonly refundId: string;
+  /** The amount it credits, IVA included, in centavos. */
+  readonly totalCentavos: Money;
+}
+
 export interface IssuedCfdiRecord {
   readonly externalPaymentId: string;
   readonly tenantId: string;
@@ -63,6 +71,8 @@ export interface IssuedCfdiRecord {
   readonly complement?: CfdiDocumentRef;
   readonly globalId?: string;
   readonly cancellation?: CfdiCancellationState;
+  /** Credit notes for partial refunds (and refunds of a payment in a stamped global). */
+  readonly creditNotes?: readonly CreditNoteRef[];
 }
 
 export interface GlobalCfdiRecord {

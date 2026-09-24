@@ -20,6 +20,8 @@ import SinExcel from './pages/articles/SinExcel.jsx';
 import NIF from './pages/articles/NIF.jsx';
 import ErroresCaja from './pages/articles/ErroresCaja.jsx';
 import VsExcel from './pages/articles/VsExcel.jsx';
+import Privacidad from './pages/legal/Privacidad.jsx';
+import Arco from './pages/legal/Arco.jsx';
 
 const T = {
   tone: 'educational',
@@ -63,6 +65,8 @@ export default function AppSSR({ route = '/' }) {
   if (clean === '/recursos/errores-caja') return <ErroresCaja />;
   if (clean === '/recursos/vs-excel') return <VsExcel />;
   if (clean === '/recursos') return <Recursos />;
+  if (clean === '/privacidad') return <Privacidad />;
+  if (clean === '/privacidad/arco') return <Arco />;
 
   return <HomePage />;
 }

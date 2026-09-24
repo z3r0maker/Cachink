@@ -26,7 +26,9 @@ import {
  */
 
 export function pgUsageCounts(metering: Db): UsageCountSource {
-  return { count: (first, last) => usageCounts(metering, null, first, last) };
+  return {
+    count: (first, last, businessIds) => usageCounts(metering, businessIds ?? null, first, last),
+  };
 }
 
 export function pgUsageCounters(metering: Db): UsageCounterStore {

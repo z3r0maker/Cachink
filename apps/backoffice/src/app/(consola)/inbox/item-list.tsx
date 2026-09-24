@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { Route } from 'next';
 import type { StaffMemberId, SupportItem } from '@xangarro/domain';
 
-import { formatInstant, KIND_LABELS, STATUS_LABELS } from '@/server/inbox/labels';
+import { formatDueDay, formatInstant, KIND_LABELS, STATUS_LABELS } from '@/server/inbox/labels';
 import { muted } from '@/styles/ui.css';
 
 import { list, meta, pill, row, rowTitle, urgentBadge } from './inbox.css';
@@ -25,6 +25,7 @@ function Row({ item, me }: { readonly item: SupportItem; readonly me: StaffMembe
           <span className={pill}>{STATUS_LABELS[item.status]}</span>
           <span>{owner(item, me)}</span>
           {item.paymentRef ? <span>Pago {item.paymentRef}</span> : null}
+          {item.dueAt ? <span>Responder antes del {formatDueDay(item.dueAt)}</span> : null}
         </div>
       </div>
       <time className={muted} dateTime={item.createdAt}>

@@ -2,24 +2,30 @@ import 'server-only';
 
 import {
   assertKeyMatchesMode,
+  CancelCfdiForRefundUseCase,
   CfdiError,
   CloseCfdiPeriodUseCase,
   CloseMonthlyGlobalCfdiUseCase,
   FacturapiPacProvider,
   IssueCfdiForPaymentUseCase,
+  IssueCreditNoteForRefundUseCase,
   readCfdiIssuerConfig,
   readCfdiMode,
   readFacturapiConfig,
   RecordPaymentForCfdiUseCase,
   RecordRefundForCfdiUseCase,
+  SettleRefundForCfdiUseCase,
   type EnvSource,
   type HttpFetch,
   type IssuedCfdiRepository,
   type PacProvider,
+  type RecordRefundForCfdiResult,
+  type SettleRefundOutcome,
 } from '@xangarro/application/cfdi';
 import {
   cfdiInvoicePaidListener,
   type InvoicePaidListener,
+  type RefundCfdiOutcome,
   type RefundListener,
 } from '@xangarro/application/billing';
 
@@ -84,12 +90,23 @@ export function liveCfdiInvoiceListener(): InvoicePaidListener {
   return cfdiInvoicePaidListener(useCase);
 }
 
-/** What `charge.refunded` does for the CFDI: bookkeeping + an inbox item (N-33). */
+/**
+ * What `charge.refunded` does for the CFDI (N-33). `off`: bookkeeping and an
+ * inbox item. `test` / `live`: cancel a full refund at the PAC, stamp a CFDI
+ * de egreso for a partial one, and fall back to the inbox on any failure.
+ */
 export function liveCfdiRefundListener(): RefundListener {
-  const useCase = new RecordRefundForCfdiUseCase({
-    repo: pgIssuedCfdiRepository(billingDb()),
-    inbox: supportInboxFromEnv(),
-  });
+  const { repo, pac, issuer } = parts();
+  const manual = new RecordRefundForCfdiUseCase({ repo, inbox: supportInboxFromEnv() });
+  const useCase =
+    pac && issuer
+      ? new SettleRefundForCfdiUseCase({
+          repo,
+          cancel: new CancelCfdiForRefundUseCase(repo, pac),
+          credit: new IssueCreditNoteForRefundUseCase(repo, pac, issuer),
+          manual,
+        })
+      : manual;
   return {
     onChargeRefunded: async (refund) => {
       const invoiceId = await invoiceOfCharge(refund.chargeId);
@@ -105,10 +122,18 @@ export function liveCfdiRefundListener(): RefundListener {
       return {
         outcome: 'applied',
         businessId: refund.businessId,
-        refund: result.outcome === 'marked' ? 'recorded' : result.outcome,
+        refund: refundOutcome(result.outcome),
       };
     },
   };
+}
+
+/** The webhook's log word for what the CFDI side did with a refund. */
+function refundOutcome(
+  outcome: RecordRefundForCfdiResult['outcome'] | SettleRefundOutcome,
+): RefundCfdiOutcome {
+  if (outcome === 'marked' || outcome === 'manual') return 'recorded';
+  return outcome;
 }
 
 /**

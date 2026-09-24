@@ -55,6 +55,14 @@ describe('RecomputeUsageUseCase (N-02 nightly + N-03 notices)', () => {
     assert.equal(result.notices, 3);
   });
 
+  it('the nightly recount corrects an injected drift in a stored counter (N-02 acceptance)', async () => {
+    const h = harness();
+    await h.store.save([snap('a', '2026-09', 999)], NOW.toISOString());
+    h.counts.rows = [snap('a', '2026-09', 12)];
+    await h.useCase.execute();
+    assert.equal(h.store.rows.get('a:2026-09')?.transactions, 12);
+  });
+
   it('a second run sends nothing already sent', async () => {
     const h = harness();
     h.counts.rows = [snap('a', '2026-09', 80)];

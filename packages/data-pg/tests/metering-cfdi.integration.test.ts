@@ -53,6 +53,7 @@ const payment = (id: string, over: Partial<CfdiPaymentRow> = {}): CfdiPaymentRow
   complementUuid: null,
   globalId: null,
   cancellation: null,
+  creditNotes: null,
   ...over,
 });
 
@@ -84,6 +85,15 @@ describe('metering and CFDI tables: one writer each, nobody deletes', () => {
     const listed = await cfdiPaymentsOfPeriod(billing, row.period, ['pending_global']);
     assert.ok(listed.some((r) => r.externalPaymentId === row.externalPaymentId));
     assert.deepEqual(await cfdiPaymentsOfPeriod(billing, row.period, []), []);
+  });
+
+  it('billing keeps a payment’s credit notes (0040)', async () => {
+    const row = payment(`in_${run}_notes`, { status: 'stamped' });
+    assert.equal(await claimCfdiPayment(billing, row), true);
+    assert.equal((await cfdiPaymentOf(billing, row.externalPaymentId))?.creditNotes, null);
+    const notes = [{ refundId: 're_1', providerId: 'pac_1', uuid: 'U1', totalCentavos: '5000' }];
+    assert.equal(await updateCfdiPayment(billing, { ...row, creditNotes: notes }), true);
+    assert.deepEqual((await cfdiPaymentOf(billing, row.externalPaymentId))?.creditNotes, notes);
   });
 
   it('billing saves and replaces a global CFDI', async () => {

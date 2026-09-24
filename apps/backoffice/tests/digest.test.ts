@@ -48,6 +48,25 @@ describe('buildDailyDigest', () => {
     assert.match(d.text, /límite/i);
   });
 
+  it('lists open ARCO requests by nearest deadline, and drops answered ones (N-34)', () => {
+    const arco = (n: number, dueAt: string, o: Partial<SupportItem> = {}) =>
+      at('2026-09-01T12:00:00.000Z', n, { kind: 'arco', dueAt, title: `ARCO ${n}`, ...o });
+    const d = buildDailyDigest(
+      [
+        arco(1, '2026-10-21T23:59:59-06:00'),
+        arco(2, '2026-09-29T23:59:59-06:00'),
+        arco(3, '2026-09-28T23:59:59-06:00', { status: 'resuelto' }),
+      ],
+      RUN,
+    );
+    assert.deepEqual(
+      d.arcoOpen.map((i) => i.title),
+      ['ARCO 2', 'ARCO 1'],
+    );
+    assert.match(d.text, /Solicitudes ARCO abiertas \(2\)/);
+    assert.doesNotMatch(buildDailyDigest([], RUN).text, /ARCO/);
+  });
+
   it('counts only yesterday’s items as new, by CDMX midnight', () => {
     const items = [
       at('2026-09-16T05:59:59.000Z', 1), // 23:59 of the 15th in CDMX

@@ -102,6 +102,22 @@ export interface StampPaymentComplementRequest {
   };
 }
 
+/**
+ * A CFDI de egreso (nota de crédito, tipo E) for a refund, related to the
+ * income CFDI it reduces with TipoRelacion 01. One concepto, IVA included.
+ */
+export interface StampCreditNoteRequest {
+  readonly idempotencyKey: string;
+  readonly externalId: string;
+  /** The nominative receptor, or «público en general» for a global CFDI. */
+  readonly receptor: CfdiReceptor;
+  /** UUID of the income CFDI the credit note reduces. */
+  readonly relatedUuid: string;
+  /** How the money went back: the payment's own forma de pago. */
+  readonly formaPago: FormaPago;
+  readonly concepto: CfdiConcepto;
+}
+
 export interface CfdiDocumentRef {
   /** PAC's own id (used for cancel / download). */
   readonly providerId: string;

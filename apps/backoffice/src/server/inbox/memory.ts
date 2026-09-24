@@ -42,7 +42,7 @@ export class InMemorySupportItems implements SupportItemRepository {
       .filter(
         (r) =>
           Date.parse(r.createdAt) >= sinceMs ||
-          (r.status !== 'resuelto' && (r.urgent || r.kind === 'factura')),
+          (r.status !== 'resuelto' && (r.urgent || r.kind === 'factura' || r.kind === 'arco')),
       )
       .sort(newestFirst);
   }

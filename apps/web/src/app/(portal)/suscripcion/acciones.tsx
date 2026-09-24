@@ -3,9 +3,12 @@
 import { useState, useTransition } from 'react';
 
 import { Button } from '@/components';
+import type { BillingInterval } from '@xangarro/application/billing';
+
 import {
   administrarSuscripcion,
   iniciarPrueba,
+  pagarAnualPorSpei,
   type BillingActionResult,
 } from '@/server/billing/actions';
 
@@ -50,6 +53,12 @@ export function BotonStripe(props: {
   );
 }
 
-/** A plan card's CTA: a paid plan opens Checkout; Xangarrito is a cancel, in the Portal. */
-export const accionDePlan = (planId: string) =>
-  planId === 'xangarrito' ? () => administrarSuscripcion() : () => iniciarPrueba(planId, 'month');
+/** A plan card's CTA: a paid plan opens Checkout at the chosen interval; Xangarrito is a cancel, in the Portal. */
+export const accionDePlan = (planId: string, interval: BillingInterval = 'month') =>
+  planId === 'xangarrito' ? () => administrarSuscripcion() : () => iniciarPrueba(planId, interval);
+
+/**
+ * The annual plan by bank transfer (N-01, ADR-067): Stripe issues a CLABE on a
+ * hosted invoice. Annual only — SPEI never pays a monthly plan.
+ */
+export const speiDePlan = (planId: string) => () => pagarAnualPorSpei(planId);

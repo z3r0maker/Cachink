@@ -24,6 +24,26 @@ test('the owner sees the real status, the entitlement line and the billing butto
   await expect(main.getByRole('button', { name: 'Cambiar a Xangarrito' })).toBeVisible();
 });
 
+/** N-01: the annual switch shows the two-months-free prices, and SPEI is offered
+ * on annual only, for a paid plan that is not the current one. */
+test('the annual switch shows annual prices and offers SPEI', async ({ page }) => {
+  await page.goto('/suscripcion');
+  const main = page.locator('main');
+  await expect(main.getByTestId('precio-xangarro')).toContainText('199');
+  await expect(main.getByRole('button', { name: /Pagar por transferencia/ })).toHaveCount(0);
+  await expect(main.getByRole('button', { name: /Cambiar a anual/ })).toBeVisible();
+
+  await main
+    .getByRole('group', { name: 'Periodo de pago' })
+    .getByRole('button', { name: /Anual/ })
+    .click();
+  await expect(main.getByTestId('precio-xangarro')).toContainText('1,990');
+  await expect(main.getByTestId('precio-xangarrote')).toContainText('3,990');
+  await expect(main.getByText('MXN / año + IVA').first()).toBeVisible();
+  // Xangarro is Taquería's own plan, so only Xangarrote gets the SPEI button.
+  await expect(main.getByRole('button', { name: /Pagar por transferencia/ })).toHaveCount(1);
+});
+
 test.describe('past due, seen by a viewer', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
   const email = `pago-${randomUUID()}@test.mx`;

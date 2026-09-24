@@ -3,8 +3,10 @@
 import { useState, type ReactNode } from 'react';
 import { colors } from '@xangarro/tokens';
 import { deviceHeaders } from '@xangarro/contracts';
+import { AVISO_VINCULACION_VERSION } from '@xangarro/domain';
 
 import * as a from './acceso.css';
+import { AvisoVinculacion } from './aviso-vinculacion';
 
 /**
  * Paso 1 · Vincula esta caja. The owner's correo accompanies the code — it is
@@ -64,6 +66,7 @@ function peticion(email: string, codigo: string): Request {
         appVersion: '0.1.0',
         osVersion: navigator.platform || 'web',
       },
+      avisoVersion: AVISO_VINCULACION_VERSION,
     }),
   });
 }
@@ -206,6 +209,7 @@ export function Vincular(p: { readonly onVinculado: (r: Vinculo) => void }) {
         ignoran.
       </span>
       <Pie error={error} listo={listo} enviando={enviando} onContinuar={() => void vincular()} />
+      <AvisoVinculacion />
     </>
   );
 }

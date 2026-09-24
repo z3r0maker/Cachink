@@ -28,6 +28,7 @@ import type {
   EntitlementListener,
   InvoicePaidListener,
   PaymentFailedListener,
+  RefundCfdiOutcome,
   RefundListener,
   StripeEventLedger,
 } from './ports.js';
@@ -49,7 +50,7 @@ export type ApplyStripeEventResult =
   | {
       readonly outcome: 'applied';
       readonly businessId: string;
-      readonly refund: 'recorded' | 'unknown_payment' | 'already_refunded' | 'unresolved';
+      readonly refund: RefundCfdiOutcome;
     };
 
 export interface ApplyStripeEventDeps {

@@ -8,7 +8,7 @@
  */
 
 /** The kinds this package files; the console accepts more (`SUPPORT_KINDS`). */
-export type InboxKind = 'ayuda' | 'factura' | 'limite' | 'migracion' | 'sistema';
+export type InboxKind = 'arco' | 'ayuda' | 'factura' | 'limite' | 'migracion' | 'sistema';
 
 export interface InboxItemRequest {
   readonly kind: InboxKind;
@@ -23,6 +23,8 @@ export interface InboxItemRequest {
   readonly sourceRef: string;
   /** `factura` only: the payment the CFDI is owed for. */
   readonly paymentRef: string | null;
+  /** `arco` only: the legal deadline to answer, an ISO instant (N-34). */
+  readonly dueAt?: string | null;
 }
 
 export interface SupportInbox {

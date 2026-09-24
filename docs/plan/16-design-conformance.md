@@ -257,7 +257,7 @@ need columns `notices` does not have. Both are data, so they belong with W-3.
 
 ## W-5 · Comprobante (Ticket)
 
-- [ ] Status
+- [x] Status — **done 2026-09-22** in 03ddc93b: the Ticket gets the `tarjeta()` shadow and the `#d4a017` fallback is gone from `brand-widgets.tsx`.
 
 - The card shadow the other templates carry via `tarjeta()` (`SOMBRA=5`) and
   the ticket does not.

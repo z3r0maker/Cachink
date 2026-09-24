@@ -495,3 +495,12 @@ paymentRef?, provider }`; `GET /api/v1/payments/intents?unclaimed=1`. Idempotent
   ignore it — and have the register and the phone read it.
 - **Acceptance:** conformance: the entitlement carries the switches; a switch turned off in the
   console hides «Compartir comprobante» on the register and the phone after the next pull.
+
+### C-22 The aviso version on `/activate`
+
+- [x] Status · **Surfaced by:** N-34 (2026-09-23)
+      Done: 2026-09-23 · `ActivateRequest` (both the typed and the scan path) takes an optional
+      `avisoVersion` (1–40 characters): the aviso de privacidad version the device showed before
+      linking. Additive at protocol 1: an older app omits it and still links. The portal keeps it on
+      the device row with the SHA-256 of the text it knows for that version (data-pg `0041`). Test:
+      `endpoints.test.ts` «carries the aviso version».

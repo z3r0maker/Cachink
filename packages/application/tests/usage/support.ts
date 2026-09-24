@@ -18,9 +18,23 @@ export class FakeCounts implements UsageCountSource {
   rows: UsageSnapshot[] = [];
   fail: Error | null = null;
 
-  count(first: UsagePeriod, last: UsagePeriod): Promise<UsageSnapshot[]> {
+  readonly asked: (readonly string[] | undefined)[] = [];
+
+  count(
+    first: UsagePeriod,
+    last: UsagePeriod,
+    businessIds?: readonly string[],
+  ): Promise<UsageSnapshot[]> {
+    this.asked.push(businessIds);
     if (this.fail) return Promise.reject(this.fail);
-    return Promise.resolve(this.rows.filter((r) => r.period >= first && r.period <= last));
+    return Promise.resolve(
+      this.rows.filter(
+        (r) =>
+          r.period >= first &&
+          r.period <= last &&
+          (businessIds === undefined || businessIds.includes(r.businessId)),
+      ),
+    );
   }
 }
 

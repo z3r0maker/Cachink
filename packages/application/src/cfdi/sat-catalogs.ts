@@ -38,6 +38,20 @@ export const RFC_EXTRANJERO_GENERICO = RFC_GENERICO_EXTRANJERO;
 /** Concepto keys the SAT prescribes for each operation inside a global CFDI. */
 export const GLOBAL_CONCEPTO = { claveProdServ: '01010101', claveUnidad: 'ACT' } as const;
 
+/**
+ * A refund's CFDI de egreso (Guía de llenado, Anexo 20): ClaveProdServ
+ * 84111506 «Servicios de facturación», ClaveUnidad ACT, UsoCFDI G02
+ * «Devoluciones, descuentos o bonificaciones» for a nominative receptor,
+ * TipoRelacion 01 «Nota de crédito de los documentos relacionados».
+ * Proposed defaults, part of the contador sign-off (O-14).
+ */
+export const EGRESO = {
+  claveProdServ: '84111506',
+  claveUnidad: 'ACT',
+  usoCfdi: 'G02',
+  tipoRelacion: '01',
+} as const;
+
 /** InformacionGlobal Periodicidad 04 = mensual (Meses 01–12). */
 export const PERIODICIDAD_MENSUAL = '04' as const;
 

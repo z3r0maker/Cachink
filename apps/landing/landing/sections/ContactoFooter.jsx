@@ -450,7 +450,10 @@ function Footer() {
           }}
         >
           <div style={{ fontSize: 13, color: 'var(--gray-600)', fontWeight: 500 }}>
-            © 2026 Xangarro · Todos los derechos reservados
+            © 2026 Xangarro · Todos los derechos reservados ·{' '}
+            <a href="/privacidad/" style={{ color: 'inherit' }}>
+              Aviso de privacidad
+            </a>
           </div>
           <div style={{ flex: 1 }} />
           <div

@@ -11,6 +11,10 @@
  * CFDI", ADR-070): it carries the payment reference, and it can only be
  * resolved once staff record the folio fiscal (UUID) of the CFDI they issued.
  *
+ * `kind = 'arco'` is a titular's request under LFPDPPP (N-34). It carries
+ * `dueAt`, the legal deadline to answer (20 días hábiles), and nothing else
+ * does.
+ *
  * The branded id is declared here rather than in `ids/index.ts` because
  * nothing outside the admin console mints or passes it (as with `staff.ts`).
  */
@@ -25,6 +29,7 @@ export type SupportItemId = Ulid & { readonly __entity: 'SupportItem' };
 export const SupportItemIdSchema = ulidField<SupportItemId>();
 
 export const SUPPORT_KINDS = [
+  'arco',
   'ayuda',
   'bug',
   'factura',
@@ -74,6 +79,8 @@ const SupportItemShape = z.object({
   paymentRef: z.string().trim().min(1).max(200).nullable(),
   /** `factura` only: the folio fiscal, set when staff resolve the item. */
   cfdiUuid: CfdiUuidSchema.nullable(),
+  /** `arco` only: the deadline to answer the titular. */
+  dueAt: isoInstant.nullable(),
   createdAt: isoInstant,
   updatedAt: isoInstant,
   resolvedAt: isoInstant.nullable(),
@@ -81,9 +88,12 @@ const SupportItemShape = z.object({
 
 type Shape = z.infer<typeof SupportItemShape>;
 
-function checkFactura(item: Shape, ctx: z.RefinementCtx): void {
+function checkKindFields(item: Shape, ctx: z.RefinementCtx): void {
   const issue = (path: string, message: string) =>
     ctx.addIssue({ code: 'custom', path: [path], message });
+  if (item.kind === 'arco' && item.dueAt === null)
+    issue('dueAt', 'Un item ARCO necesita su plazo.');
+  if (item.kind !== 'arco' && item.dueAt !== null) issue('dueAt', 'Solo un item ARCO lleva plazo.');
   if (item.kind !== 'factura') {
     if (item.paymentRef !== null) issue('paymentRef', 'Solo un item de factura lleva pago.');
     if (item.cfdiUuid !== null) issue('cfdiUuid', 'Solo un item de factura lleva CFDI.');
@@ -95,5 +105,5 @@ function checkFactura(item: Shape, ctx: z.RefinementCtx): void {
   }
 }
 
-export const SupportItemSchema = SupportItemShape.superRefine(checkFactura);
+export const SupportItemSchema = SupportItemShape.superRefine(checkKindFields);
 export type SupportItem = z.infer<typeof SupportItemSchema>;

@@ -3,7 +3,7 @@
 import { formatFechaHora, PLAN_LIMITS, PLAN_NOMBRE } from '@xangarro/domain';
 
 import { Banner, Card, ScreenBody, UsageBar } from '@/components';
-import { ASESOR_TIERS, PLAN_CARDS } from '@/data/planes';
+import { ASESOR_TIERS, PLAN_CARDS, precioDePlan } from '@/data/planes';
 import type { ListarFacturasResult } from '@/server/billing/facturas-core';
 import { administrarSuscripcion } from '@/server/billing/actions';
 import type { SuscripcionData } from '@/server/suscripcion';
@@ -11,17 +11,24 @@ import { canWrite, isOwner, resolveScreenState } from '@/session/gating';
 import { useSession } from '@/session/provider';
 import { eyebrow, eyebrowOnYellow } from '@/styles/text.css';
 
-import { accionDePlan, BotonStripe } from './acciones';
+import { BotonStripe } from './acciones';
 import { estadoCopy } from './estado';
 import { Facturas } from './facturas';
 import { AsesorBlock, PauseRow } from './parts';
-import { PlanCard } from './plan-card';
-import { pageSubtitle, pageTitle, planGrid, planName, usageLabel } from './suscripcion.css';
+import { Planes } from './planes';
+import { pageSubtitle, pageTitle, planName, usageLabel } from './suscripcion.css';
 
 function CurrentPlan({ owner, data }: { readonly owner: boolean; readonly data: SuscripcionData }) {
   const session = useSession();
   const plan = PLAN_CARDS.find((p) => p.id === session.planId);
   const copy = estadoCopy(data.estado);
+  const precio = precioDePlan(session.planId, data.estado?.interval ?? 'month');
+  // A monthly subscriber can move to annual in the Customer Portal (N-01);
+  // proration is Stripe's.
+  const puedeAnual =
+    data.estado !== null &&
+    data.estado.interval === 'month' &&
+    (data.estado.status === 'active' || data.estado.status === 'trialing');
   return (
     <Card tone="hero" emphasis="hero">
       <div className={eyebrowOnYellow}>Tu plan</div>
@@ -29,7 +36,7 @@ function CurrentPlan({ owner, data }: { readonly owner: boolean; readonly data: 
         {plan?.name}
       </div>
       <div style={{ fontWeight: 800 }}>
-        ${plan?.price}.00 <span style={{ fontWeight: 700 }}>{plan?.period}</span>
+        ${precio.price}.00 <span style={{ fontWeight: 700 }}>{precio.period}</span>
       </div>
       <div style={{ marginTop: 14, fontWeight: 700 }} data-testid="suscripcion-estado">
         {copy.linea}
@@ -40,6 +47,12 @@ function CurrentPlan({ owner, data }: { readonly owner: boolean; readonly data: 
           {data.estado === null ? null : (
             <BotonStripe label="Administrar pago" accion={() => administrarSuscripcion()} />
           )}
+          {puedeAnual ? (
+            <BotonStripe
+              label="Cambiar a anual — 2 meses gratis"
+              accion={() => administrarSuscripcion()}
+            />
+          ) : null}
         </div>
       ) : null}
     </Card>
@@ -116,22 +129,6 @@ function Metrica({
       </div>
       <UsageBar used={usados} limit={limite} label={label} />
     </>
-  );
-}
-
-function Planes({ owner }: { readonly owner: boolean }) {
-  const session = useSession();
-  return (
-    <div className={planGrid} id="planes">
-      {PLAN_CARDS.map((p) => (
-        <PlanCard
-          key={p.id}
-          plan={p}
-          current={p.id === session.planId}
-          accion={owner && p.id !== session.planId ? accionDePlan(p.id) : null}
-        />
-      ))}
-    </div>
   );
 }
 

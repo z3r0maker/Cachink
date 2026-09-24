@@ -62,8 +62,8 @@
 
 ### N-01 Stripe: annual prices + trial on both paid tiers `[LAUNCH]`
 
-- [~] Status · **Blocked by:** B-10, C-12 · **Blocks:** N-13, N-31
-  **Remaining (2026-09-23, verified against the code):** the Suscripción screen hard-codes `iniciarPrueba(planId, 'month')` — no annual option, no «Cambiar a anual», nothing calls `pagarAnualPorSpei`, cards show «MXN / mes» without «+ IVA» (`planes.ts`). Gateway, catalog, card-less trial and SPEI `send_invoice` code are done. The four-price Checkout run needs O-12.
+- [x] Status · **Blocked by:** B-10, C-12 · **Blocks:** N-13, N-31
+      Done: 2026-09-23 · code side complete; the live test-mode run of the Acceptance is the owner's O-12. The Suscripción screen has a Mensual / «Anual — 2 meses gratis» switch; the cards read their price from the catalogue's subtotal with «+ IVA» (`precioDePlan`, `planes-precio.test.ts`); Checkout takes the chosen interval; «Pagar por transferencia (SPEI)» calls `pagarAnualPorSpei` on annual, paid, non-current plans only; a monthly active or trialing owner gets «Cambiar a anual — 2 meses gratis», which opens the Customer Portal (proration is Stripe's). `suscripcion.spec.ts` covers the switch, the prices and the SPEI button. O-12 must save a Customer Portal configuration that allows switching between the monthly and annual prices.
 
 - **What:** second Stripe Price per paid plan. Lookup keys `plan_xangarro_monthly`,
   `plan_xangarro_annual`, `plan_xangarrote_monthly`, `plan_xangarrote_annual`. `trial_period_days: 14`
@@ -103,9 +103,10 @@
 
 ### N-02 Server usage metering `[LAUNCH]`
 
-- [~] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
-  **Remaining (2026-09-23, verified against the code):** nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. **Bug:** `xangarro.usage_counts()` (0029) counts every `sales` row, but ADR-073 counts one per ticket (`counts-toward-usage.ts`) — multi-line tickets are over-counted and the integration test (one sale per ticket) never catches it. Built: `usage_counters`, nightly cron, `usage` in pull/entitlement, `origen` column.
-  **Fixed 2026-09-23:** the ticket over-count — `0035_usage_counts_tickets.sql` replaces the body to count one transaction per ticket (distinct `sales.ticket_id`) plus ticketless lines, the rule in `counts-toward-usage.ts`; the integration test now seeds a three-line ticket beside a ticketless line and asserts 2. The nightly recompute corrects stored counters on its next run.
+- [x] Status · **Blocked by:** C-12, B-08 · **Blocks:** N-03, N-04, N-07
+      Done: 2026-09-23 · push-time counting is a **recount, not an increment** (deviation from How): after a push with accepted rows, `/sync/push` schedules `RefreshUsageUseCase` with `after()`, which recounts only that business's open month through the same `xangarro.usage_counts()` and saves it. An increment would be a second counting rule beside the SQL one; the recount cannot drift. It is skipped when `METERING_DATABASE_URL` is unset, and a failure is reported, never returned to the phone. `refresh-usage.test.ts` (1 happy + 3 unhappy) and the drift test in `recompute-usage.test.ts` (an injected wrong counter is corrected by the nightly run) close the Acceptance; the `sync` e2e project was checked to write `usage_counters` for Taquería.
+      **Remaining (2026-09-23, verified against the code):** nothing counts at push time (push route and `pg-push-store.ts` never touch usage — build it or amend How to «nightly recount is enough»); no drift-injection test. **Bug:** `xangarro.usage_counts()` (0029) counts every `sales` row, but ADR-073 counts one per ticket (`counts-toward-usage.ts`) — multi-line tickets are over-counted and the integration test (one sale per ticket) never catches it. Built: `usage_counters`, nightly cron, `usage` in pull/entitlement, `origen` column.
+      **Fixed 2026-09-23:** the ticket over-count — `0035_usage_counts_tickets.sql` replaces the body to count one transaction per ticket (distinct `sales.ticket_id`) plus ticketless lines, the rule in `counts-toward-usage.ts`; the integration test now seeds a three-line ticket beside a ticketless line and asserts 2. The nightly recompute corrects stored counters on its next run.
 
 - **What:** a portal-only `usage_counters (business_id, period 'YYYY-MM', transactions, products,
 computed_at)` table (ADR-060 portal-only entity checklist).
@@ -342,8 +343,32 @@ body, attachments)`.
 
 ### N-11 Portal settings parity `[LAUNCH]`
 
-- [~] Status · **Blocked by:** P-08, P-15, C-15 · **Blocks:** A-01, N-12
-  **Remaining (2026-09-23, verified against the code):** every setting is built (`negocio.sync.spec.ts`, `comprobantes.sync.spec.ts`, `sync.spec.ts` Funciones, `avisos-configurar.spec.ts`; the ISR confirm became a switch per ADR-082); only the mapping checklist (portal / device A-12 / dropped-why) is missing. A-01 finished 2026-09-16, so «blocks A-01» is moot.
+- [x] Status · **Blocked by:** P-08, P-15, C-15 · **Blocks:** A-01, N-12
+      **Done 2026-09-23.** Every setting was already built; the mapping below closes the acceptance. A-01 finished 2026-09-16, so «blocks A-01» is moot.
+
+  **Mapping of the old phone Settings (`packages/ui/src/screens/Settings/*` before A-01):**
+
+  | Old entry (file)                                                                                      | Now                                                                                                            | Spec                                                        |
+  | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+  | Negocio: nombre, régimen, RFC (`settings-negocio`, `edit-business-modal`)                             | portal `/negocio`                                                                                              | `negocio.sync.spec.ts` (RFC, régimen)                       |
+  | Tasas ISR + confirm (`settings-tasas-isr`, `isr-defaults-card`)                                       | portal `/negocio`; the confirm became a switch (ADR-082)                                                       | `negocio.sync.spec.ts` (régimen → ISR)                      |
+  | Tipos de pago (`tipos-de-pago-screen`)                                                                | portal `/negocio`                                                                                              | `negocio.sync.spec.ts` (payment methods, last one stays on) |
+  | Atributos de producto (Negocio section)                                                               | portal `/negocio` (AtributosCard)                                                                              | `negocio.sync.spec.ts` (saved with payment methods)         |
+  | Contacto y comprobantes (C-15)                                                                        | portal `/negocio/comprobantes`                                                                                 | `comprobantes.sync.spec.ts`                                 |
+  | Funciones switches (P-15)                                                                             | portal `/negocio`, writes                                                                                      | `sync.spec.ts` (switch off reaches the phone)               |
+  | Preferencias / avisos                                                                                 | portal avisos                                                                                                  | `avisos-configurar.spec.ts`                                 |
+  | Empleados (`settings-empleados`, `edit-empleado-modal`, `empleado-*`)                                 | portal `/equipo`                                                                                               | `equipo-drawers.spec.ts`                                    |
+  | Sonido de venta (`cachink-sound-toggle`)                                                              | device (A-12)                                                                                                  | Maestro                                                     |
+  | Notificaciones (`notifications-toggle`)                                                               | device (A-12)                                                                                                  | Maestro                                                     |
+  | Reportes de fallos (`crash-reporting-toggle`)                                                         | device (A-12)                                                                                                  | Maestro                                                     |
+  | Buscar actualizaciones, Reportar un problema (`settings-tail`, `bug-report-sheet`, `feedback-action`) | device (A-12)                                                                                                  | Maestro                                                     |
+  | Estado de sincronización, Actualizar, No enviados                                                     | device (A-12)                                                                                                  | `settings-desvincular.yaml` and sync flows                  |
+  | Exportar datos (`exportar-datos-action`)                                                              | device (A-12)                                                                                                  | Maestro                                                     |
+  | Nombre del negocio + aviso del portal, Desvincular                                                    | device (A-12), read-only name                                                                                  | `settings-desvincular.yaml`                                 |
+  | Idioma (`settings-sistema`)                                                                           | dropped: es-MX is the only locale                                                                              | —                                                           |
+  | LAN (`lan-details-card`, «Modo» in Negocio)                                                           | dropped: A-18 removed LAN sync                                                                                 | —                                                           |
+  | Umbrales de Indicadores (`settings-indicadores`)                                                      | dropped: the portal's Indicadores use fixed health bands (`estados/indicadores.tsx`), no per-business override | —                                                           |
+  | Volver a correr el asistente (`settings-tail`)                                                        | dropped from the device: onboarding is the portal's «¿Cómo empiezo?» and N-12                                  | —                                                           |
 
 - **What:** every business setting editable in the portal before the app loses it:
   régimen + **ISR rates with the confirm dialog**; **tipos de pago** switches; atributos de producto;
@@ -450,8 +475,8 @@ suggestedPlan, reasons[] }` (TDD) — the wizard UI only renders and submits. An
 
 ### N-17 Saldos iniciales template `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-16, C-20
-  **Remaining (2026-09-23, verified against the code):** the «¿Cómo empiezo?» checklist has no saldos iniciales row (`onboarding/checklist.ts`); no end-to-end test shows the portal Balance matching the captured figures (only the domain and data-pg unit/integration tests). The SQLite half listed as «still to do» landed in 23c7fd43.
+- [x] Status · **Blocked by:** N-16, C-20
+      Done: 2026-09-23 · «¿Cómo empiezo?» has a «Captura tus saldos iniciales» row, done once a live opening balance exists (`onboarding.test.ts`). `saldos-iniciales.spec.ts` captures caja 5 000 and bancos 12 000 on a new owner and sees $17,000.00 as the Balance's Efectivo, then the row ticks itself. The SQLite half landed in 23c7fd43.
 
 - Progress: 2026-09-19 · `track-n/c20-n17-apertura` · **pg/web halves done.** **Saldos
   iniciales** — `/saldos-iniciales`: fecha de apertura, caja, bancos, and the per-cliente CxC
@@ -801,7 +826,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 ### N-34 Aviso de privacidad + ARCO requests `[LAUNCH]`
 
 - [~] Status · **Surfaced by:** N-26 (SEC-PRIV-01) · **Blocked by:** N-08 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** the aviso integral is reachable from no surface (no route, footer or landing link); no ARCO form or `kind=arco` inbox item or due-date clock; consent captured only at signup (48bca19c, `privacy_consents`, migration 0034 — hosted apply pending), not for device linking or operator NIP; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01 open; self-service deletion and consent withdrawal not built. Counsel review is O-17.
+  **Remaining (2026-09-23, after the work below):** the operator-NIP notice (variante C); Configuración → Privacidad to withdraw consent; self-service deletion; routing requests from a merchant's customers to the merchant; PRIV-GEO-01, PRIV-IA-01/02, PRIV-OPS-01; hosted apply of data-pg `0034`, `0040`, `0041` and console `0019`. The texts are drafts with `[BRACKET]` gaps until counsel signs off (O-17).
+  Progress: 2026-09-23 · **The aviso is reachable from every surface.** xangarro.mx gets `/privacidad` (the aviso integral) and `/privacidad/arco` (section A of the procedure; the internal annex B is not published), rendered at build time from `docs/legal/aviso/*.md` with every `>` note dropped, as the drafts say; the prerender refuses to publish «BORRADOR», «Nota:» or «Anexo interno». Links: the landing footer, the portal sidebar (beside Ayuda), the login screen, the signup consent (already), and the device-linking notice. **ARCO requests:** the public form `app.xangarro.mx/privacidad/solicitud` (xangarro.mx/privacidad/solicitud redirects there; Ayuda links to it), throttled per IP, files `kind = 'arco'` through `SolicitarArcoUseCase` with a folio and `dueAt`, the end of the 20th día hábil in CDMX (`plazosArco`, LFT art. 74 calendar); the titular sees the folio and the date. The console shows «Responder antes del …» in the list and the detail, and lists open ARCO requests by nearest deadline in every daily digest (console `0019_support_arco.sql`: the kind, `due_at`, a CHECK tying them). **Device linking:** the phone's activation screen and the browser register's «Vincula esta caja» show variante B (no checkbox, per the draft) and send its version; `/activate` stores it with the text's SHA-256 on the device row (C-22, data-pg `0041_device_aviso.sql`). Tests: `arco.test.ts`, `support-item.test.ts`, `solicitar-arco.test.ts`, console `inbox-create`, `digest`, `support-items-sql`, `legal-aviso.test.ts`, `privacidad-arco.spec.ts`, `acceso.sync.spec.ts` (the notice and the stored hash), Maestro `activation.yaml`.
 
 - **What:** LFPDPPP (DOF 2025-03-20; authority: Secretaría Anticorrupción y Buen Gobierno) compliance:
   an aviso de privacidad (integral on the landing and portal footer, simplified at signup and in the
@@ -849,8 +875,8 @@ docs/landing` → 0, prerender smoke tests green (titles updated in lockstep), s
 
 ### N-33 CFDI automation for Xangarro's own subscriptions `[LAUNCH]`
 
-- [~] Status · **Blocked by:** B-10, P-10, N-08 · **Blocks:** N-30
-  **Remaining (2026-09-23, verified against the code):** refund → PAC cancellation not wired (`cancel-cfdi-for-refund.ts` exists, nothing calls it; refunds only file an inbox item); egreso for partial refunds not built. Off-mode, duplicate-webhook and monthly-close criteria have unit tests. Sandbox stamps need Facturapi test keys (O-15); fiscal defaults need O-14.
+- [x] Status · **Blocked by:** B-10, P-10, N-08 · **Blocks:** N-30
+      Done: 2026-09-23 · code side complete; the sandbox stamps of the Acceptance need Facturapi test keys (O-15), and the fiscal defaults below are the contador's to confirm (O-14) before `CFDI_MODE=live`. **Refunds with `test`/`live`** go through `SettleRefundForCfdiUseCase`: a full refund cancels the payment's own CFDI at the PAC (motivo 03, REP first) or drops a payment awaiting the global; a partial refund, or any refund once a note exists, stamps a **CFDI de egreso** (`IssueCreditNoteForRefundUseCase`, `stampCreditNote` on the port and on Facturapi: tipo E, PUE, TipoRelacion 01, `84111506` / `ACT`, uso `G02`) related to the payment's CFDI, or to the stamped global for «público en general». Stripe's cumulative `amount_refunded` minus what earlier notes credited is the note's amount, so a duplicate webhook credits nothing; notes are kept on the payment (data-pg `0040_cfdi_credit_notes.sql`). A SAT rejection, a PAC failure, a hand-stamped global that is not in `cfdi_globals`, and a partial refund of a payment still awaiting its global go to the manual path with the error on the item. `off` is unchanged except that a partial refund no longer drops a payment from the monthly global (that left income without a CFDI). Tests: `settle-refund-for-cfdi.test.ts`, `issue-credit-note-for-refund.test.ts`, `facturapi-credit-note.test.ts`, the mapping and the data-pg integration round trip.
 
 - **What:** a CFDI 4.0 for every subscription payment (ADR-070). **Launch scope:** the automation is
   wired to the Stripe webhook behind `CFDI_MODE = off | test | live` (production `off`, staging

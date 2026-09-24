@@ -71,6 +71,14 @@ describe('RecordRefundForCfdiUseCase', () => {
     assert.equal((await repo.findByPaymentId('in_refund_1'))?.status, 'excluded_from_global');
   });
 
+  it('a partial refund keeps a pending_global payment in the global', async () => {
+    await repo.claim(record('pending_global'));
+    const result = await useCase.execute({ ...refund, amountRefundedCentavos: 5_000 });
+    assert.equal(result.outcome, 'marked');
+    assert.equal((await repo.findByPaymentId('in_refund_1'))?.status, 'pending_global');
+    assert.match(inbox.items[0]?.body ?? '', /al timbrarlo, emitir un CFDI de egreso/);
+  });
+
   it('a manual payment (nothing issued) is cancelled outright', async () => {
     await repo.claim(record('manual'));
     await useCase.execute(refund);
