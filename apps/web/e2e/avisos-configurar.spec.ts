@@ -3,6 +3,7 @@ import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 
+import { clickUntil } from './interact';
 import { asTenant } from './sync-phone';
 
 /**
@@ -42,15 +43,15 @@ test('a channel switch persists; critical avisos cannot be switched off', async 
   await page.getByRole('button', { name: 'Entrar' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
 
+  const correo = page.getByRole('switch', { name: 'Stock bajo por correo' });
   const open = async () => {
     await page.goto('/avisos');
-    await page
-      .getByRole('group', { name: 'Avisos' })
-      .getByRole('button', { name: /Configurar/ })
-      .click();
+    await clickUntil(
+      page.getByRole('group', { name: 'Avisos' }).getByRole('button', { name: /Configurar/ }),
+      correo,
+    );
   };
   await open();
-  const correo = page.getByRole('switch', { name: 'Stock bajo por correo' });
   await expect(correo).not.toBeChecked();
   await correo.click();
   await expect(correo).toBeChecked();

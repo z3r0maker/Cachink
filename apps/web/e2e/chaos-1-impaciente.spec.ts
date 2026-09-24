@@ -1,6 +1,8 @@
 import { expect, test, type Locator } from './test';
 import postgres from 'postgres';
 
+import { SERIAL_TAG } from './shared-tenant';
+
 /**
  * Chaos category 1 — the impatient, chaotic user.
  *
@@ -38,54 +40,55 @@ async function smash(button: Locator): Promise<void> {
   );
 }
 
-test('smashing "Registrar" on a movimiento must not double-write inventory', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates a shared row');
+test(
+  'smashing "Registrar" on a movimiento must not double-write inventory',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    let actionPosts = 0;
+    // Server actions POST to the page URL. Only delay POSTs (never the page GET)
+    // so the pending window outlives the smash.
+    await page.route('**/productos', async (route) => {
+      if (route.request().method() === 'POST') {
+        actionPosts += 1;
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+      await route.continue();
+    });
 
-  let actionPosts = 0;
-  // Server actions POST to the page URL. Only delay POSTs (never the page GET)
-  // so the pending window outlives the smash.
-  await page.route('**/productos', async (route) => {
-    if (route.request().method() === 'POST') {
-      actionPosts += 1;
-      await new Promise((resolve) => setTimeout(resolve, 400));
-    }
-    await route.continue();
-  });
+    await page.goto('/productos');
+    await page
+      .locator('main')
+      .locator('tr', { hasText: 'TAC-001' })
+      .getByRole('button', { name: 'Movimiento' })
+      .click();
 
-  await page.goto('/productos');
-  await page
-    .locator('main')
-    .locator('tr', { hasText: 'TAC-001' })
-    .getByRole('button', { name: 'Movimiento' })
-    .click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByTestId('movimiento-cantidad').fill('2');
+    await dialog.getByTestId('movimiento-costo').fill('7.77');
 
-  const dialog = page.getByRole('dialog');
-  await dialog.getByTestId('movimiento-cantidad').fill('2');
-  await dialog.getByTestId('movimiento-costo').fill('7.77');
+    await smash(dialog.getByRole('button', { name: /^Registrar$|^Guardando…$/ }));
 
-  await smash(dialog.getByRole('button', { name: /^Registrar$|^Guardando…$/ }));
+    // Recovery state 1: the dialog closes and the table re-renders from the DB.
+    await expect(dialog).not.toBeVisible();
+    // Every escaped POST is staggered ~400 ms; settle so all writes land before counting.
+    await new Promise((resolve) => setTimeout(resolve, 2_500));
 
-  // Recovery state 1: the dialog closes and the table re-renders from the DB.
-  await expect(dialog).not.toBeVisible();
-  // Every escaped POST is staggered ~400 ms; settle so all writes land before counting.
-  await new Promise((resolve) => setTimeout(resolve, 2_500));
-
-  // Recovery state 2: EXACTLY one movement row with the marker cost (777
-  // centavos). More than one row means the double-write reached every phone.
-  const rows = await query(async (sql) => {
-    const [row] = await sql<{ n: string }[]>`
+    // Recovery state 2: EXACTLY one movement row with the marker cost (777
+    // centavos). More than one row means the double-write reached every phone.
+    const rows = await query(async (sql) => {
+      const [row] = await sql<{ n: string }[]>`
       SELECT count(*)::text AS n
       FROM inventory_movements im
       JOIN products p ON p.id = im.producto_id
       WHERE p.sku = 'TAC-001' AND im.costo_unit_centavos = 777`;
-    return Number(row?.n ?? 0);
-  });
-  expect(rows, `5 rapid clicks must yield 1 movement (observed ${actionPosts} action POSTs)`).toBe(
-    1,
-  );
-});
+      return Number(row?.n ?? 0);
+    });
+    expect(
+      rows,
+      `5 rapid clicks must yield 1 movement (observed ${actionPosts} action POSTs)`,
+    ).toBe(1);
+  },
+);
 
 test.describe('login gate (signed out)', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
@@ -125,47 +128,47 @@ test.describe('login gate (signed out)', () => {
   });
 });
 
-test('reloading mid-save leaves DB and UI reconciled, no phantom state', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates a shared row');
-
-  await page.route('**/productos', async (route) => {
-    if (route.request().method() === 'POST')
-      await new Promise((resolve) => setTimeout(resolve, 800));
-    await route.continue();
-  });
-
-  const readName = () =>
-    query(async (sql) => {
-      const [row] = await sql<
-        { nombre: string }[]
-      >`SELECT nombre FROM products WHERE sku = 'BEB-002'`;
-      return row?.nombre ?? '';
+test(
+  'reloading mid-save leaves DB and UI reconciled, no phantom state',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    await page.route('**/productos', async (route) => {
+      if (route.request().method() === 'POST')
+        await new Promise((resolve) => setTimeout(resolve, 800));
+      await route.continue();
     });
-  const oldName = await readName();
-  const newName = `Taco al pastor ${Date.now()}`;
 
-  await page.goto('/productos');
-  await page
-    .locator('main')
-    .locator('tr', { hasText: 'BEB-002' })
-    .getByRole('button', { name: 'Editar' })
-    .click();
-  await page.getByTestId('producto-nombre').fill(newName);
-  await page.getByRole('button', { name: 'Guardar' }).click();
-  // Kill the tab while the action POST is still in flight.
-  await page.reload();
+    const readName = () =>
+      query(async (sql) => {
+        const [row] = await sql<
+          { nombre: string }[]
+        >`SELECT nombre FROM products WHERE sku = 'BEB-002'`;
+        return row?.nombre ?? '';
+      });
+    const oldName = await readName();
+    const newName = `Taco al pastor ${Date.now()}`;
 
-  // Recovery state: the row is old OR new — never half-written — and the
-  // re-rendered table agrees with Postgres.
-  await page.goto('/productos');
-  const dbName = await readName();
-  expect([oldName, newName], 'a killed in-flight write must land atomically').toContain(dbName);
-  // Scoped to this product's row. Searching the whole table for the name was
-  // a strict-mode violation the day the seed grew a second «Refresco» (the
-  // finanzas ledger creates products without SKUs), and the claim was never
-  // about the name being *somewhere* — it is that BEB-002's row agrees with
-  // Postgres.
-  await expect(page.locator('main').locator('tr', { hasText: 'BEB-002' })).toContainText(dbName);
-});
+    await page.goto('/productos');
+    await page
+      .locator('main')
+      .locator('tr', { hasText: 'BEB-002' })
+      .getByRole('button', { name: 'Editar' })
+      .click();
+    await page.getByTestId('producto-nombre').fill(newName);
+    await page.getByRole('button', { name: 'Guardar' }).click();
+    // Kill the tab while the action POST is still in flight.
+    await page.reload();
+
+    // Recovery state: the row is old OR new — never half-written — and the
+    // re-rendered table agrees with Postgres.
+    await page.goto('/productos');
+    const dbName = await readName();
+    expect([oldName, newName], 'a killed in-flight write must land atomically').toContain(dbName);
+    // Scoped to this product's row. Searching the whole table for the name was
+    // a strict-mode violation the day the seed grew a second «Refresco» (the
+    // finanzas ledger creates products without SKUs), and the claim was never
+    // about the name being *somewhere* — it is that BEB-002's row agrees with
+    // Postgres.
+    await expect(page.locator('main').locator('tr', { hasText: 'BEB-002' })).toContainText(dbName);
+  },
+);

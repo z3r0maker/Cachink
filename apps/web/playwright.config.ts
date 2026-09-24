@@ -1,6 +1,4 @@
-import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import path from 'node:path';
 
 import { defineConfig, devices } from '@playwright/test';
 
@@ -8,28 +6,12 @@ import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { typ
 
 import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
+import { billingDatabaseUrl, superDatabaseUrl } from './e2e/db-url';
+import { SERIAL_TAG } from './e2e/shared-tenant';
 import { INSPECT_PORT, SERVER_V8_DIR, coverageEnabled } from './scripts/coverage-gate/options';
 
 /** The contract's published test key — never a production fallback. */
 const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
-
-/**
- * The billing DB, where `seed-billing.ts` put the subscriptions the
- * Suscripción/Facturas/data specs assert. The server has no default for it —
- * without this, those pages render their error state and half the suite
- * sweeps error cards (the exact rot the seeded-DB check exists to prevent).
- * CI provides its own; locally it is the same docker Postgres, other role.
- */
-function billingDatabaseUrl(): string {
-  return (
-    process.env.BILLING_DATABASE_URL ??
-    execSync('./db-local.sh billing-url', {
-      cwd: path.resolve(import.meta.dirname, '../../packages/data-pg/scripts'),
-    })
-      .toString()
-      .trim()
-  );
-}
 
 /**
  * Portal accessibility and state/role sweep (P-16).
@@ -63,6 +45,30 @@ function databaseUrl(): string {
   }
   return url;
 }
+
+/** Files that belong to a project of their own, never to a viewport. */
+const OTHER_PROJECTS = /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/;
+
+/** The viewport projects: the whole parallel phase. */
+const VIEWPORTS = ['desktop', 'laptop', 'tablet'] as const;
+
+/** The desktop browser the non-viewport projects use. */
+const DESKTOP = {
+  ...devices['Desktop Chrome'],
+  viewport: { width: 1440, height: 900 },
+  storageState: OWNER_STORAGE,
+} as const;
+
+/**
+ * What `unlock` waits for: the whole parallel phase, so the seeded tenant's
+ * write lock comes off only once those projects have finished reading it.
+ *
+ * `XG_E2E_NO_VIEWPORTS=1` drops the dependency, for a focused run of one serial
+ * project while working on it (`--project=operador`). Opt-in on purpose: several
+ * `sync` specs read state the viewport phase leaves behind, so the honest
+ * default is to run it, exactly as `sync` always did.
+ */
+const AFTER_VIEWPORTS = process.env.XG_E2E_NO_VIEWPORTS === '1' ? [] : [...VIEWPORTS];
 
 /**
  * The server command. Under coverage (ADR-102) it is `next start` run by
@@ -102,11 +108,7 @@ export default defineConfig({
       // in its own step and is alone on the runner.
       ...(process.env.CI ? {} : { NEXT_DIST_DIR: `.next-e2e/${E2E_PORT}` }),
       DATABASE_URL: databaseUrl(),
-      // The throwaway database's owner, for test-only resets (the throttle
-      // table's grants are function-only by design; the backoffice suite
-      // uses the same pattern).
-      DATABASE_SUPER_URL:
-        process.env.DATABASE_SUPER_URL ?? 'postgres://postgres:xangarro@localhost:55432/xangarro',
+      DATABASE_SUPER_URL: superDatabaseUrl(),
       // The seed's day (seed-data.ts `TODAY`): its May rows are "this month".
       PORTAL_TODAY: process.env.PORTAL_TODAY ?? '2026-05-12',
       // /activate signs a device token and an entitlement. The entitlement key
@@ -129,82 +131,88 @@ export default defineConfig({
     // exercises the form and the gate, so the suite is not also testing login
     // a hundred times.
     { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    // The parallel phase: the three viewports, reading the seeded tenant.
+    // `grepInvert` is the half that makes that true — every test that writes
+    // Taquería Don Pedro's rows carries `@serial` and runs in the serial
+    // project below instead. A Postgres trigger enforces it while these run
+    // (e2e/shared-tenant.ts), so an untagged write fails here rather than
+    // corrupting a sibling four files away.
     {
       name: 'desktop',
       dependencies: ['setup'],
       // Every operator screen lives behind the real door in the serial
       // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1440, height: 900 },
-        storageState: OWNER_STORAGE,
-      },
+      testIgnore: OTHER_PROJECTS,
+      grepInvert: new RegExp(SERIAL_TAG),
+      use: { ...DESKTOP },
     },
     // The design's two responsive breakpoints: laptop and the tablet rail.
     {
       name: 'laptop',
       dependencies: ['setup'],
-      // Every operator screen lives behind the real door in the serial
-      // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1024, height: 800 },
-        storageState: OWNER_STORAGE,
-      },
+      testIgnore: OTHER_PROJECTS,
+      grepInvert: new RegExp(SERIAL_TAG),
+      use: { ...DESKTOP, viewport: { width: 1024, height: 800 } },
     },
     {
       name: 'tablet',
       dependencies: ['setup'],
-      // Every operator screen lives behind the real door in the serial
-      // `operador` project (O-38); the viewport projects never run them.
-      testIgnore: /sync\.spec\.ts|operador-.*\.spec\.ts|devices\.spec\.ts/,
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 768, height: 1024 },
-        storageState: OWNER_STORAGE,
-      },
+      testIgnore: OTHER_PROJECTS,
+      grepInvert: new RegExp(SERIAL_TAG),
+      use: { ...DESKTOP, viewport: { width: 768, height: 1024 } },
     },
-    // Phones pushing and pulling against the demo business. Last, after every
-    // viewport, so activating phones and rewriting Taquería's rows cannot race
-    // the specs that read them — devices.spec above all, which counts slots.
+    // One step, between the two phases: it takes the write lock off the seeded
+    // tenant for everything that follows.
+    {
+      name: 'unlock',
+      testMatch: /shared-tenant\.unlock\.ts/,
+      dependencies: AFTER_VIEWPORTS,
+    },
+    // The mutators. `workers: 1` and after the viewports, because they rewrite
+    // rows the parallel phase reads: renaming the business, marking every aviso
+    // read, revoking devices, clearing a corte. Four consecutive full runs used
+    // to fail in four different files for exactly this, each of them passing
+    // alone (ADR-103).
+    {
+      name: 'serial',
+      dependencies: ['setup', 'unlock'],
+      testIgnore: OTHER_PROJECTS,
+      grep: new RegExp(SERIAL_TAG),
+      workers: 1,
+      use: { ...DESKTOP },
+    },
     // O-38: the operator screens behind the real door. Serial like `sync`
-    // because each file's activation takes one of the two device slots; the
-    // fixture-era branch specs still run in the viewport projects behind the
-    // demo flag until each is converted here, and the flag dies with the
+    // because each file's activation takes one of the two device slots, and
+    // after `serial` for the same reason `serial` is after the viewports —
+    // these specs seed and spend the seeded tenant's stock, turnos and caja.
+    // The fixture-era branch specs still run in the viewport projects behind
+    // the demo flag until each is converted here, and the flag dies with the
     // last of them.
     {
       name: 'operador',
-      dependencies: ['setup'],
+      dependencies: ['serial'],
       testMatch:
         /operador-(shell|inicio|turno|avisos|inventario|pendientes|gastos|caja|ventas|cobranza|cliente|cierre|detalle-venta|chaos)\.spec\.ts/,
       workers: 1,
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1440, height: 900 },
-        storageState: OWNER_STORAGE,
-      },
+      use: { ...DESKTOP },
     },
     // Device slots, counted (B-12). After `operador`, never beside it: each
     // operador file's door revokes a slot and takes it again, and a count taken
     // in that window saw a free slot the plan did not have (ADR-102's first
-    // run). A project of its own, so a viewport failure does not hold back the
-    // 46 operador specs, as chaining `operador` behind the viewports would.
+    // run).
     {
       name: 'devices',
       dependencies: ['operador'],
       testMatch: /devices\.spec\.ts/,
       workers: 1,
-      use: {
-        ...devices['Desktop Chrome'],
-        viewport: { width: 1440, height: 900 },
-        storageState: OWNER_STORAGE,
-      },
+      use: { ...DESKTOP },
     },
+    // Phones pushing and pulling against the demo business. Last of all, so
+    // activating phones and rewriting Taquería's rows cannot race the specs
+    // that read them — devices.spec above all, which counts slots.
     {
       name: 'sync',
-      dependencies: ['operador', 'devices', 'desktop', 'laptop', 'tablet'],
+      dependencies: ['devices'],
       testMatch: /sync\.spec\.ts/,
       // One file at a time: each activates phones on Taquería, which has two
       // device slots, and revokes the previous file's.

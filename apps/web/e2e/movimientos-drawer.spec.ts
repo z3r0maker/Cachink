@@ -1,5 +1,7 @@
 import { expect, test } from './test';
 
+import { clickUntil } from './interact';
+
 /**
  * The movement drawer (B-2).
  *
@@ -18,10 +20,9 @@ test.beforeEach(async ({ page }) => {
 test('a venta row opens its detail, and closes again', async ({ page }) => {
   const fila = page.locator('main tbody tr').first();
   const concepto = ((await fila.textContent()) ?? '').trim();
-  await fila.click();
 
   const cajon = page.getByRole('dialog');
-  await expect(cajon).toBeVisible();
+  await clickUntil(fila, cajon);
   // The field list the design specifies, and the amount as its own block.
   await expect(cajon.getByText('Método de pago')).toBeVisible();
   await expect(cajon.getByText('Operador')).toBeVisible();
@@ -33,9 +34,8 @@ test('a venta row opens its detail, and closes again', async ({ page }) => {
 });
 
 test('the drawer offers the comprobante, and the link really renders one', async ({ page }) => {
-  await page.locator('main tbody tr').first().click();
   const enlace = page.getByTestId('compartir-comprobante');
-  await expect(enlace).toBeVisible();
+  await clickUntil(page.locator('main tbody tr').first(), enlace);
 
   // Not just an href: follow it. A receipt route that 404s or answers JSON
   // is the failure this test exists for — the button looks identical either
@@ -51,8 +51,7 @@ test('a gasto has no comprobante to share', async ({ page }) => {
   // Only a venta receipts. The action is absent rather than disabled, which
   // is the portal's rule for an affordance that does not apply.
   await page.goto('/movimientos?tab=gastos');
-  await page.locator('main tbody tr').first().click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await clickUntil(page.locator('main tbody tr').first(), page.getByRole('dialog'));
   await expect(page.getByTestId('compartir-comprobante')).toHaveCount(0);
   // And the field list names the gasto's own classification.
   await expect(page.getByRole('dialog').getByText('Categoría')).toBeVisible();

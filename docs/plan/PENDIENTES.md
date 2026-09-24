@@ -232,7 +232,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 ### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
 
-- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1399`
+- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1431`
 
 ### `05-app.md`
 

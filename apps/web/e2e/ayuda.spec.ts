@@ -1,5 +1,7 @@
 import { expect, test } from './test';
 
+import { filled, filledAll } from './interact';
+
 /**
  * «Ayuda» (N-08's wiring): the form files a `kind=ayuda` inbox item through
  * the console's ingest endpoint, tagged with the member's business. The
@@ -11,10 +13,13 @@ test('any member can send a help request and see the confirmation', async ({ pag
   await page.goto('/ayuda');
   await expect(page.getByRole('heading', { name: 'Ayuda', level: 1 })).toBeVisible();
 
-  await page.getByPlaceholder('No entiendo el corte del día').fill('No veo el corte de ayer');
-  await page
-    .getByPlaceholder('Paso a paso, qué esperabas y qué pasó…')
-    .fill('Ayer cerré el corte pero hoy no aparece en el historial.');
+  await filledAll([
+    [page.getByPlaceholder('No entiendo el corte del día'), 'No veo el corte de ayer'],
+    [
+      page.getByPlaceholder('Paso a paso, qué esperabas y qué pasó…'),
+      'Ayer cerré el corte pero hoy no aparece en el historial.',
+    ],
+  ]);
   await page.getByLabel('Es urgente').check();
   await page.getByRole('button', { name: 'Enviar' }).click();
   await expect(page.getByText('Listo. El equipo de Xangarro recibió tu mensaje.')).toBeVisible();
@@ -25,7 +30,10 @@ test('any member can send a help request and see the confirmation', async ({ pag
 
 test('an empty message is refused with the reason, nothing sent', async ({ page }) => {
   await page.goto('/ayuda');
-  await page.getByPlaceholder('No entiendo el corte del día').fill('Solo asunto');
+  // Filled the same careful way: a fill lost to hydration would make the screen
+  // complain about the asunto instead, and the test would read as a pass on the
+  // wrong claim.
+  await filled(page.getByPlaceholder('No entiendo el corte del día'), 'Solo asunto');
   await page.getByRole('button', { name: 'Enviar' }).click();
   await expect(page.getByText('Escribe tu mensaje (hasta 4000 caracteres).')).toBeVisible();
 });

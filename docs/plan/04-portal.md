@@ -1370,6 +1370,38 @@ critical avisos cannot be switched off.
     evaluation, so each got its own 5-connection pool. The handle now lives on
     `globalThis.__xangarroDb` outside production (module cache kept in production, pool size
     unchanged); `tests/db-singleton.test.ts` proves a fresh module evaluation reuses it.
+  - 2026-09-23 · **Hardening — the seeded tenant stops being a free-for-all** (ADR-103). Four
+    consecutive full runs on a fresh database failed in four different files, each of which passed
+    alone: the specs that rewrite Taquería Don Pedro were racing the specs that read it, and
+    `test.skip(project !== 'desktop')` had never addressed that. A test that writes the seeded
+    tenant now carries `@serial` and runs in the `serial` project (`workers: 1`) after the three
+    viewports, with `operador` and `sync` behind it; a Postgres trigger refuses every write to that
+    tenant while the viewports run, so an untagged write fails naming the table instead of
+    poisoning a sibling. `chaos-3` puts the business name back, and `write.spec.ts` un-reads the
+    avisos it marks, so a second run against the same database asserts what the first did.
+  - 2026-09-23 · **Hardening — the other half of the flakiness was hydration.** With the data races
+    gone, unrelated specs still failed a run at a time for one reason: `goto` resolves on `load`, and
+    React attaches after it. A click in that gap is dropped (the control is visible, enabled, even
+    focused, and nothing is listening) and a `fill` is worse — it writes the DOM, the state behind it
+    stays empty, and the re-render puts the empty value back, so the save stored nothing and the
+    screen asked for a field the test had typed. Every navigation now waits for
+    `next-route-announcer`, the App Router's own client-side element (P-35's `e2e/test.ts`, which
+    every spec already imports); `e2e/interact.ts` retries the interaction itself for what the gate
+    cannot cover — a page Suspense resolving later, a spec's own `context.newPage()` — as
+    `clickUntil` and `filled`. Two long tests also say what they are: the four-scene login animation
+    is `test.slow()` (it watches 20 s inside a 30 s budget), and Equipo's cortes list waits for its
+    server action rather than the default five seconds.
+  - 2026-09-23 · **The `sync` project had been dark.** It only runs after the viewport projects, and
+    a failure there skips it — so six of its specs had drifted from the app unnoticed, and the same
+    six fail on the previous commit: `smoke` never accepted the privacy consent the signup now
+    requires; `estados` counted `.recharts-bar-rectangle` in charts C-13 redrew as SVG, and named
+    donuts that were retitled; `captura` and `ventas` read «the newest ticket» and «folio 2» out of a
+    seed that grew a 212-ticket ledger (a pushed row carries the device's pinned clock, so it is
+    never the newest); `asesor` wrote down $645.00 of May ventas; `comprobantes` typed into a
+    controlled form that a revalidation could reset before the save. All six now assert the same
+    claims against what the app actually does — which also unblocks P-35's first full measurement,
+    taken without the `sync` project because that run could not reach it. **Full suite, three
+    consecutive runs on a fresh database: 482 passed, 0 failed.**
 - **Steps:** One flow — free signup → onboarding → create operator → import 3 products → issue a
   device code → call `/activate` via the C-10 conformance helper → device appears → push one sale
   via the helper → it appears in Movimientos. Runs against local Supabase and the dev server in CI

@@ -36,6 +36,17 @@ async function totalDelContador(page: Page): Promise<number> {
 }
 
 async function enRango(page: Page, desde: string, hasta: string): Promise<number> {
+  // A chip re-renders the table from the server, so for a moment after the
+  // click the rows on screen are still the previous range's. Reading them the
+  // instant after it was this test's own flake — «2026-05-11 is outside
+  // 2026-05-12…2026-05-12» on a screen that was about to be right. Poll until
+  // the table is this range's, then assert about it.
+  await expect
+    .poll(async () =>
+      (await fechasMostradas(page)).filter((f) => f < desde || f > hasta).join(', '),
+    )
+    .toBe('');
+
   const fechas = await fechasMostradas(page);
   // An empty table would satisfy "every row is in range" vacuously.
   expect(fechas.length, 'the range shows no rows at all').toBeGreaterThan(0);

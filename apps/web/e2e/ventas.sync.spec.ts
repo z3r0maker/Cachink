@@ -76,10 +76,15 @@ test("the turno's real tickets, and a cancellation that asks for the NIP", async
     .poll(
       async () =>
         asTenant(BIZ, async (sql) => {
+          // The register numbers its own tickets from 1, and the seeded ledger
+          // has folios of its own — including a 2, cancelled elsewhere in the
+          // run («Cobro duplicado»). So: the newest cancellation of a folio 2,
+          // which is the one this test just made.
           const [row] = await sql<{ motivo: string; cancelado: string }[]>`
             SELECT cl.motivo, t.cancelled_at::text AS cancelado
             FROM cancelacion_logs cl JOIN tickets t ON t.id = cl.ticket_id
-            WHERE t.business_id = ${BIZ} AND t.folio = 2`;
+            WHERE t.business_id = ${BIZ} AND t.folio = 2
+            ORDER BY cl.created_at DESC LIMIT 1`;
           return row?.motivo ?? '';
         }),
       { timeout: 15_000 },

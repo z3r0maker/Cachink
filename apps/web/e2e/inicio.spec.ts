@@ -1,5 +1,6 @@
 import { expect, test } from './test';
 
+import { SERIAL_TAG } from './shared-tenant';
 import { asTenant, BIZ } from './sync-phone';
 
 /**
@@ -19,36 +20,41 @@ test('Inicio dates itself from the business clock and draws the last 30 days', a
 });
 
 /** O-24/ADR-087: the greeting names the account from `auth.users` (seeded: Pedro). */
-test('the greeting names the account and the checklist card reads real data', async ({ page }) => {
-  // Order-independent: the branding e2e (C-15) may have left a logo on the
-  // seeded business, and this test asserts the logo-pending count.
-  await asTenant(BIZ, (sql) => sql`UPDATE businesses SET logo_url = NULL WHERE id = ${BIZ}`);
-  await page.goto('/');
-  const main = page.locator('main');
-  await expect(main.getByRole('heading', { name: 'Hola, Pedro' })).toBeVisible();
-  const card = main.getByTestId('inicio-checklist');
-  await expect(card).toBeVisible();
+test(
+  'the greeting names the account and the checklist card reads real data',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    // Order-independent: the branding e2e (C-15) may have left a logo on the
+    // seeded business, and this test asserts the logo-pending count. Clearing it
+    // is a write to the shared tenant, which is what `@serial` is for.
+    await asTenant(BIZ, (sql) => sql`UPDATE businesses SET logo_url = NULL WHERE id = ${BIZ}`);
+    await page.goto('/');
+    const main = page.locator('main');
+    await expect(main.getByRole('heading', { name: 'Hola, Pedro' })).toBeVisible();
+    const card = main.getByTestId('inicio-checklist');
+    await expect(card).toBeVisible();
 
-  // The summary counts the items the card renders. It used to say «5 de 6»,
-  // which broke twice over: N-17 added the saldos item (six became seven), and
-  // whether saldos are ticked depends on whether `saldos-iniciales.spec.ts`
-  // ran first — a census here makes this test depend on suite order.
-  const items = card.locator('li[data-done]');
-  const total = await items.count();
-  const listos = await card.locator('li[data-done="true"]').count();
-  await expect(main.getByText(`${listos} de ${total} listos.`)).toBeVisible();
+    // The summary counts the items the card renders. It used to say «5 de 6»,
+    // which broke twice over: N-17 added the saldos item (six became seven), and
+    // whether saldos are ticked depends on whether `saldos-iniciales.spec.ts`
+    // ran first — a census here makes this test depend on suite order.
+    const items = card.locator('li[data-done]');
+    const total = await items.count();
+    const listos = await card.locator('li[data-done="true"]').count();
+    await expect(main.getByText(`${listos} de ${total} listos.`)).toBeVisible();
 
-  // And it is really reading data, not rendering a constant: the seed ticks
-  // operador, productos, código, dispositivo and venta, and the logo was just
-  // cleared above, so it cannot be complete.
-  expect(listos).toBeGreaterThanOrEqual(5);
-  expect(listos).toBeLessThan(total);
-  await expect(card.locator('li[data-done="false"]').getByText('Sube tu logo')).toBeVisible();
-  await expect(main.getByRole('link', { name: 'Ver todo' })).toHaveAttribute(
-    'href',
-    '/como-empiezo',
-  );
-});
+    // And it is really reading data, not rendering a constant: the seed ticks
+    // operador, productos, código, dispositivo and venta, and the logo was just
+    // cleared above, so it cannot be complete.
+    expect(listos).toBeGreaterThanOrEqual(5);
+    expect(listos).toBeLessThan(total);
+    await expect(card.locator('li[data-done="false"]').getByText('Sube tu logo')).toBeVisible();
+    await expect(main.getByRole('link', { name: 'Ver todo' })).toHaveAttribute(
+      'href',
+      '/como-empiezo',
+    );
+  },
+);
 
 test('the low-stock banner links into the filtered catalogue', async ({ page }) => {
   await page.goto('/');

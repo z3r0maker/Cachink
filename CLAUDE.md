@@ -147,6 +147,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - **Domain + application:** every entity and use case, minimum 1 happy path + 3 unhappy paths (§2.4).
 - **Anything reading Postgres:** an integration test that builds the rows the seed does not. A broken join is invisible when no seeded row exercises it.
 - **New portal screen, route or drawer:** a Playwright spec that asserts **real data reached the page**, not just that a heading rendered.
+- **A portal spec that writes the seeded tenant** carries the `@serial` tag (ADR-103), which runs it once in the serial project after the parallel phase; whoever wrecks a seeded row restores it in a hook that runs on failure too, and a fixture a test consumes it re-makes. While the viewport projects run, Postgres refuses every write to that tenant — the rule is enforced, not documented.
 - **Phone screens, tabs, modals and auth gates:** a Maestro flow in `apps/mobile/maestro/flows/`, using the shared subflows in `flows/shared/` — never inlined auth steps. Changing a testID or a nav path means updating every affected flow in the same change.
 
 ---
@@ -161,6 +162,7 @@ The phone's E2E is Maestro — `apps/mobile/maestro/`.
 - Do not commit a schema change without a migration test.
 - Do not silently merge sync conflicts. Surface them inline.
 - Do not read a tenant's rows outside `withTenant`.
+- Do not write the seeded portal tenant from an untagged Playwright test (ADR-103).
 - Do not re-baseline `.design-lint-baseline.json` upward to make a change pass.
 
 ---

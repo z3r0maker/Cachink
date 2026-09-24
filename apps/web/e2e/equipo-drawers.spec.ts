@@ -3,6 +3,7 @@ import { hashPassword } from '@xangarro/auth-core';
 import { newUlid } from '@xangarro/domain';
 import { randomUUID } from 'node:crypto';
 
+import { clickUntil } from './interact';
 import { asTenant } from './sync-phone';
 
 /**
@@ -71,11 +72,14 @@ async function signIn(page: Page) {
 test('the operator drawer lists their shifts, the open one first', async ({ page }) => {
   await signIn(page);
   await page.goto('/equipo');
-  await page.locator('main').getByRole('button', { name: 'Ver detalle de Rosa Turnos' }).click();
   const turnos = page
     .getByRole('dialog', { name: 'Rosa Turnos' })
     .getByRole('list', { name: 'Turnos recientes' })
     .getByRole('listitem');
+  await clickUntil(
+    page.locator('main').getByRole('button', { name: 'Ver detalle de Rosa Turnos' }),
+    page.getByRole('dialog', { name: 'Rosa Turnos' }),
+  );
   await expect(turnos).toHaveCount(2);
   await expect(turnos.first()).toContainText('12 may 2026, 09:00 · Turno abierto');
   await expect(turnos.last()).toContainText('cerró 11 may 2026, 21:00, faltó $20.00');
@@ -94,9 +98,14 @@ test('a full plan says so, the drawer shows cortes, and Desvincular frees the sl
     main.getByText(/todos están vinculados\. Un código nuevo solo funcionará/),
   ).toBeVisible();
 
-  await main.getByRole('button', { name: 'Ver detalle de Caja única' }).click();
   const drawer = page.getByRole('dialog', { name: 'Caja única' });
+  await clickUntil(main.getByRole('button', { name: 'Ver detalle de Caja única' }), drawer);
   const cortes = drawer.getByRole('list', { name: 'Cortes recientes' });
+  // The cortes arrive from a server action after the drawer opens
+  // (`dispositivo-drawer.tsx`), and a cold action route under a full parallel
+  // run took longer than the default 5 s — the list was still «Cargando
+  // cortes…» when the count ran out. Wait for the load, then assert the rows.
+  await expect(drawer.getByText('Cargando cortes…')).toHaveCount(0, { timeout: 20_000 });
   await expect(cortes.getByRole('listitem')).toHaveCount(2);
   await expect(cortes.getByRole('listitem').first()).toContainText('2026-05-12');
   await expect(cortes.getByRole('listitem').first()).toContainText('−$20.00');

@@ -2,6 +2,7 @@ import postgres from 'postgres';
 
 import { clearLocalThrottles } from '../scripts/local-throttles';
 import { BASE_URL } from './base-url';
+import { installSharedTenantGuard, lockSharedTenant, SHARED_BIZ } from './shared-tenant';
 
 /**
  * Pre-flight. Fails the whole run in one sentence rather than in N red specs.
@@ -17,14 +18,13 @@ import { BASE_URL } from './base-url';
  *      without the variable gets adopted and `webServer.env` never applies.
  */
 
-const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
 const SEEDED_PRODUCTS = 8;
 const RESET = 'pnpm --filter @xangarro/web test:e2e:db';
 
 async function assertSeeded(url: string): Promise<void> {
   const sql = postgres(url, { max: 1, onnotice: () => undefined });
   try {
-    await sql`SELECT set_config('xangarro.business_id', ${BIZ}, false)`;
+    await sql`SELECT set_config('xangarro.business_id', ${SHARED_BIZ}, false)`;
     const [row] = await sql<{ count: string }[]>`SELECT count(*)::text FROM products`;
     const found = Number(row?.count ?? 0);
     if (found !== SEEDED_PRODUCTS) {
@@ -78,4 +78,8 @@ export default async function globalSetup(): Promise<void> {
     await sql.end({ timeout: 5 });
   }
   await assertServerIsServingTheGate(BASE_URL);
+  // The seeded tenant is read-only for the whole parallel phase; the `unlock`
+  // project opens it for the serial ones (see `shared-tenant.ts`).
+  await installSharedTenantGuard();
+  await lockSharedTenant();
 }

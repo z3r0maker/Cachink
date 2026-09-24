@@ -2,6 +2,8 @@ import { compare } from 'bcryptjs';
 import { expect, test, type Page } from './test';
 import postgres from 'postgres';
 
+import { SERIAL_TAG, SHARED_BIZ } from './shared-tenant';
+
 /**
  * Operator management (B-13 / P-05), end to end.
  *
@@ -10,11 +12,13 @@ import postgres from 'postgres';
  * disabled, and the only way to add someone is to deactivate someone first.
  * That is the rule, exercised through the portal rather than asserted about it.
  *
- * Serial and desktop-only: every test mutates the demo business's operators.
+ * Every test mutates the demo business's operators, so every test is `@serial`:
+ * the `serial` project runs the file once, after the viewport projects have
+ * finished reading those rows (e2e/shared-tenant.ts).
  */
 test.describe.configure({ mode: 'serial' });
 
-const BIZ = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
+const BIZ = SHARED_BIZ;
 
 async function db<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
   const sql = postgres(process.env.DATABASE_URL as string, { max: 1, onnotice: () => undefined });
@@ -41,52 +45,50 @@ const card = (page: Page, nombre: string) =>
     .filter({ has: page.getByRole('button', { name: 'Desactivar' }) })
     .last();
 
-test('a full allowance is freed by deactivating, and a new operator takes the slot', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared operators');
+test(
+  'a full allowance is freed by deactivating, and a new operator takes the slot',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    await page.goto('/equipo');
+    await expect(page.getByText('2 de 2 operadores')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Nuevo operador' })).toBeDisabled();
 
-  await page.goto('/equipo');
-  await expect(page.getByText('2 de 2 operadores')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Nuevo operador' })).toBeDisabled();
+    const before = await usersLogged();
 
-  const before = await usersLogged();
+    // Free a slot.
+    await card(page, 'Luis Ortega').getByRole('button', { name: 'Desactivar' }).click();
+    await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
+    await expect(page.getByText('1 de 2 operadores')).toBeVisible();
 
-  // Free a slot.
-  await card(page, 'Luis Ortega').getByRole('button', { name: 'Desactivar' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
-  await expect(page.getByText('1 de 2 operadores')).toBeVisible();
+    // Take it.
+    await page.getByRole('button', { name: 'Nuevo operador' }).click();
+    await page.getByTestId('operador-nombre').fill('Rosa Medina');
+    await page.getByTestId('operador-pin').fill('4321');
+    await expect(page.getByTestId('operador-pin')).toHaveAttribute('type', 'password');
+    await page.getByTestId('operador-pin-confirmar').fill('4312');
+    await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
+    await expect(page.getByText('Los dos NIP no coinciden.')).toBeVisible();
+    await page.getByTestId('operador-pin-confirmar').fill('4321');
+    await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
+    await expect(page.getByText('2 de 2 operadores')).toBeVisible();
+    await expect(page.locator('main').getByText('Rosa Medina', { exact: true })).toBeVisible();
 
-  // Take it.
-  await page.getByRole('button', { name: 'Nuevo operador' }).click();
-  await page.getByTestId('operador-nombre').fill('Rosa Medina');
-  await page.getByTestId('operador-pin').fill('4321');
-  await expect(page.getByTestId('operador-pin')).toHaveAttribute('type', 'password');
-  await page.getByTestId('operador-pin-confirmar').fill('4312');
-  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
-  await expect(page.getByText('Los dos NIP no coinciden.')).toBeVisible();
-  await page.getByTestId('operador-pin-confirmar').fill('4321');
-  await page.getByRole('dialog').getByRole('button', { name: 'Guardar' }).click();
-  await expect(page.getByText('2 de 2 operadores')).toBeVisible();
-  await expect(page.locator('main').getByText('Rosa Medina', { exact: true })).toBeVisible();
+    // The PIN is stored hashed and verifies; and both writes reached sync_log,
+    // because every phone pulls `users` — a deactivation that never left the
+    // cloud would keep Luis signing in on the counter phone.
+    const hashValue = await db(async (sql) => {
+      const [r] = await sql<
+        { pin_hash: string }[]
+      >`SELECT pin_hash FROM users WHERE nombre = 'Rosa Medina'`;
+      return r?.pin_hash ?? '';
+    });
+    expect(hashValue).not.toBe('4321');
+    expect(await compare('4321', hashValue)).toBe(true);
+    expect(await usersLogged()).toBe(before + 2);
+  },
+);
 
-  // The PIN is stored hashed and verifies; and both writes reached sync_log,
-  // because every phone pulls `users` — a deactivation that never left the
-  // cloud would keep Luis signing in on the counter phone.
-  const hashValue = await db(async (sql) => {
-    const [r] = await sql<
-      { pin_hash: string }[]
-    >`SELECT pin_hash FROM users WHERE nombre = 'Rosa Medina'`;
-    return r?.pin_hash ?? '';
-  });
-  expect(hashValue).not.toBe('4321');
-  expect(await compare('4321', hashValue)).toBe(true);
-  expect(await usersLogged()).toBe(before + 2);
-});
-
-test('a NIP reset replaces the old one', async ({ page }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared operators');
-
+test('a NIP reset replaces the old one', { tag: SERIAL_TAG }, async ({ page }) => {
   await page.goto('/equipo');
   // The seeded tenant is on Xangarro: an active card, and no permissions editor.
   await expect(
@@ -113,20 +115,20 @@ test('a NIP reset replaces the old one', async ({ page }, testInfo) => {
   expect(await compare('4321', hashValue)).toBe(false);
 });
 
-test('deactivating the last active operator is allowed, and warned about', async ({
-  page,
-}, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'mutates shared operators');
-
-  await page.goto('/equipo');
-  for (const nombre of ['Ana Robledo', 'Rosa Medina']) {
-    await card(page, nombre).getByRole('button', { name: 'Desactivar' }).click();
-    await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
-  }
-  await expect(page.getByTestId('operador-warning')).toContainText(
-    'Ya no queda ningún operador activo',
-  );
-});
+test(
+  'deactivating the last active operator is allowed, and warned about',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    await page.goto('/equipo');
+    for (const nombre of ['Ana Robledo', 'Rosa Medina']) {
+      await card(page, nombre).getByRole('button', { name: 'Desactivar' }).click();
+      await page.getByRole('dialog').getByRole('button', { name: 'Desactivar' }).click();
+    }
+    await expect(page.getByTestId('operador-warning')).toContainText(
+      'Ya no queda ningún operador activo',
+    );
+  },
+);
 
 test.afterAll(async () => {
   // The last test deactivates every operator to see the warning; later files

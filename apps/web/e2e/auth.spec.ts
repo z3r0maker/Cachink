@@ -181,6 +181,10 @@ test('the login panel carries the hero illustration at its own ratio', async ({
  * Desktop-only: below 1024 px the yellow panel folds away by design. */
 test('the login panel carries the four-scene animation', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'the panel exists at ≥1024 px');
+  // It watches a 20-second animation and then waits again to prove focus pauses
+  // it: ~24 s of deliberate waiting inside the 30 s default, which on a loaded
+  // machine ran out in teardown. The test is slow by nature, so it says so.
+  test.slow();
   await page.goto('/login');
   const stage = page.getByTestId('animacion-acceso');
   await expect(stage).toBeVisible();

@@ -72,14 +72,26 @@ test('an expandable line lists what it is made of, largest first', async ({ page
 test('the Resultados waterfall and donuts render from the same numbers', async ({ page }) => {
   await page.goto('/estados');
   const main = (p: Page) => p.locator('main');
-  await expect(
-    main(page).getByRole('img', { name: /Cascada del Estado de Resultados/ }),
-  ).toBeVisible();
+  const cascada = main(page).getByRole('img', { name: /Cascada del Estado de Resultados/ });
+  await expect(cascada).toBeVisible();
   // May's seed draws at least the three anchored levels (ingresos, bruta, neta);
   // an exact count would be brittle to the rows other specs legitimately add.
-  const bars = await page.locator('.recharts-bar-rectangle').count();
-  expect(bars).toBeGreaterThanOrEqual(6);
-  await expect(main(page).getByRole('img', { name: /Ingresos por método/ })).toBeVisible();
-  await expect(main(page).getByRole('img', { name: /Egresos por categoría/ })).toBeVisible();
-  await expect(main(page).getByText('Total: $885.00.')).toBeVisible();
+  // The bars are the cascada's own `rect`s: C-13 transcribed the chart from the
+  // design and dropped Recharts, so the `.recharts-bar-rectangle` this counted
+  // has not existed for a while — and counted zero, happily, in a project that
+  // a viewport failure kept skipping. They also grow on mount, hence the poll.
+  await expect
+    .poll(() => cascada.locator('rect').count(), { timeout: 10_000 })
+    .toBeGreaterThanOrEqual(6);
+  // The donuts were drawn to the design in the same change, and with them went
+  // the names this asserted («Ingresos por método») and the «Total: $885.00.»
+  // line — the total now lives inside the ring. Each donut speaks its own
+  // slices, so that is what is read here: May's ventas by método, of which the
+  // seed's largest is $555 in efectivo and its smallest $60 — and they sum to
+  // the $885.00 the statement above states.
+  const ingresos = main(page).getByRole('img', { name: /¿De dónde vienen tus ingresos\?/ });
+  await expect(ingresos).toBeVisible();
+  await expect(ingresos).toHaveAttribute('aria-label', /Efectivo \$555/);
+  await expect(ingresos).toHaveAttribute('aria-label', /Crédito \$90/);
+  await expect(main(page).getByRole('img', { name: /¿En qué se gasta\?/ })).toBeVisible();
 });

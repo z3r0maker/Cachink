@@ -34,15 +34,23 @@ test('the owner brands the business: logo, colour, fields, sidebar', async ({ pa
   await page.getByPlaceholder('¡Gracias por tu compra!').fill('¡Gracias por tu compra!');
 
   // The address that prints (0028): written, saved, and back after a reload.
-  await page
-    .getByPlaceholder('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.')
-    .fill('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.');
-  await page.getByRole('button', { name: 'Guardar comprobantes' }).click();
-  await expect(page.getByText('Guardado.')).toBeVisible();
-  await page.reload();
-  await expect(
-    page.getByPlaceholder('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.'),
-  ).toHaveValue('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.');
+  //
+  // Retried as a whole, because the form is controlled React state and two
+  // things can swallow what was typed before «Guardar» posts it: the logo save
+  // above revalidates this page, and a refresh landing mid-edit resets the form
+  // to the server's values; and a fill that beats hydration sets the input but
+  // not the state behind it. Either way the save stored an empty address and
+  // only the reload showed it. A save that is genuinely broken still fails —
+  // every attempt reloads and reads the row back.
+  const direccion = page.getByPlaceholder('Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.');
+  const escrita = 'Av. Hidalgo 214, Col. Centro · Guadalajara, Jal.';
+  await expect(async () => {
+    await direccion.fill(escrita);
+    await page.getByRole('button', { name: 'Guardar comprobantes' }).click();
+    await expect(page.getByText('Guardado.')).toBeVisible({ timeout: 5_000 });
+    await page.reload();
+    await expect(direccion).toHaveValue(escrita, { timeout: 5_000 });
+  }).toPass({ timeout: 45_000, intervals: [500, 1_000, 2_000] });
 
   // The sidebar brand block now renders the logo, not the wordmark.
   await page.goto('/');

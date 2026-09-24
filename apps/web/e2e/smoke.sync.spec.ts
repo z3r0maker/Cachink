@@ -72,6 +72,11 @@ test('signup → wizard → operator → import → code → activate → push �
   await page.getByTestId('signup-nombre').fill(negocio);
   await page.getByTestId('signup-email').fill(email);
   await page.getByTestId('signup-password').fill(password);
+  // The express consent on the aviso simplificado is required (art. 16 II
+  // LFPDPPP, `signup/consent.tsx`): without it the form refuses, and this flow
+  // sat on /signup — which no run saw, because a failure in the viewport phase
+  // had been skipping this project entirely.
+  await page.getByTestId('signup-acepto').check();
   await page.getByRole('button', { name: 'Crear cuenta' }).click();
   await wizardMinimo(page);
 

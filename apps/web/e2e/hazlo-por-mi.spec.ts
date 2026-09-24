@@ -1,11 +1,17 @@
 import { expect, test, type Page } from './test';
 
+import { SERIAL_TAG } from './shared-tenant';
+
 /**
  * «Hazlo por mí» (N-18's tenant side): the paid business submits the request
  * with a file and sees the waiting state; an empty sistema is refused; a
  * viewer sees the card but never the form. The approval decision path is
  * covered by the data-pg integration suite (staff must send a mapped file
  * first — the claim refuses everything else, which is the acceptance).
+ *
+ * The two tests that submit carry `@serial`: there is one solicitud per
+ * business, so three viewport projects filing it at once was three tests
+ * cancelling each other's request mid-assertion.
  */
 test.describe.configure({ mode: 'serial' });
 
@@ -32,24 +38,28 @@ async function limpiaSolicitud(page: Page): Promise<void> {
   await expect(page.getByLabel('Sistema actual')).toBeVisible();
 }
 
-test('a paid business sends a request and lands in revision', async ({ page }) => {
-  await limpiaSolicitud(page);
+test(
+  'a paid business sends a request and lands in revision',
+  { tag: SERIAL_TAG },
+  async ({ page }) => {
+    await limpiaSolicitud(page);
 
-  await page.getByLabel('Sistema actual').fill('Excel de la tiendita');
-  await page.getByLabel('Qué datos migrar').fill('Productos y clientes');
-  await page.getByTestId('hazlo-por-mi-archivo').setInputFiles({
-    name: 'respaldo.csv',
-    mimeType: 'text/csv',
-    buffer: Buffer.from('nombre,telefono\nDoña Mary,5512345678\n'),
-  });
-  await expect(
-    page.getByText('Solicitud enviada. Te avisamos por correo.', { exact: true }),
-  ).toBeVisible();
-  await expect(page.getByTestId('hazlo-por-mi-estado')).toContainText('En revisión');
-  await expect(page.getByTestId('hazlo-por-mi')).toContainText('1 archivo');
-});
+    await page.getByLabel('Sistema actual').fill('Excel de la tiendita');
+    await page.getByLabel('Qué datos migrar').fill('Productos y clientes');
+    await page.getByTestId('hazlo-por-mi-archivo').setInputFiles({
+      name: 'respaldo.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('nombre,telefono\nDoña Mary,5512345678\n'),
+    });
+    await expect(
+      page.getByText('Solicitud enviada. Te avisamos por correo.', { exact: true }),
+    ).toBeVisible();
+    await expect(page.getByTestId('hazlo-por-mi-estado')).toContainText('En revisión');
+    await expect(page.getByTestId('hazlo-por-mi')).toContainText('1 archivo');
+  },
+);
 
-test('an empty sistema is refused with the reason', async ({ page }) => {
+test('an empty sistema is refused with the reason', { tag: SERIAL_TAG }, async ({ page }) => {
   await limpiaSolicitud(page);
   await page.getByLabel('Qué datos migrar').fill('Lo que sea');
   // The submit button stays disabled without a sistema (client guard), but

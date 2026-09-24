@@ -24,7 +24,8 @@ test('an offline sale lands exactly once when the wire comes back', async ({ pag
 
   // The linked register sells its own catalogue: the seeded Taco al pastor.
   await expect(page.getByRole('button', { name: /Taco al pastor/ })).toBeVisible();
-  const antes = await cuentaTickets();
+  const idsAntes = await idsDeTickets();
+  const antes = idsAntes.length;
 
   // Cut the wire, then capture: the sale must still complete.
   await context.setOffline(true);
@@ -47,8 +48,13 @@ test('an offline sale lands exactly once when the wire comes back', async ({ pag
   await expect.poll(async () => cuentaTickets(), { timeout: 15_000 }).toBe(antes + 1);
 
   const fila = await asTenant(BIZ, async (sql) => {
+    // The pushed row by *identity*, not by «newest». The register stamps it with
+    // the device's clock, which this suite pins to the seed's day, so the
+    // seeded ledger — written at the real now() — is newer by `created_at` and
+    // this used to read a seeded ticket and report its folio (2086).
     const [ticket] = await sql<{ id: string; folio: number }[]>`
-      SELECT id, folio FROM tickets WHERE business_id = ${BIZ} ORDER BY created_at DESC LIMIT 1`;
+      SELECT id, folio FROM tickets
+      WHERE business_id = ${BIZ} AND id <> ALL(${idsAntes})`;
     const [linea] = await sql<{ monto_centavos: string; concepto: string }[]>`
       SELECT monto_centavos::text AS monto_centavos, concepto FROM sales
       WHERE ticket_id = ${ticket?.id ?? ''}`;
@@ -59,10 +65,12 @@ test('an offline sale lands exactly once when the wire comes back', async ({ pag
   expect(fila.linea?.concepto).toContain('Taco al pastor');
 });
 
-/** The business's tickets (the seed ships six; the count watches for new ones). */
-function cuentaTickets(): Promise<number> {
+/** Every ticket the business has: the count watches for new ones, the ids name them. */
+function idsDeTickets(): Promise<string[]> {
   return asTenant(BIZ, async (sql) => {
-    const [row] = await sql<{ n: string }[]>`SELECT count(*)::text AS n FROM tickets`;
-    return Number(row?.n ?? 0);
+    const rows = await sql<{ id: string }[]>`SELECT id FROM tickets`;
+    return rows.map((r) => r.id);
   });
 }
+
+const cuentaTickets = async (): Promise<number> => (await idsDeTickets()).length;

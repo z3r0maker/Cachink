@@ -3,6 +3,8 @@ import { API_PATHS, deviceHeaders, encodeJson } from '@xangarro/contracts';
 import { newUlid } from '@xangarro/domain';
 import postgres from 'postgres';
 
+import { superDatabaseUrl } from './db-url';
+
 /**
  * A phone, for the sync spec: activated through the real `/activate`, then
  * pushing and pulling over HTTP exactly as the app will.
@@ -28,8 +30,11 @@ export async function asTenant<T>(biz: string, fn: (sql: postgres.Sql) => Promis
  * that one statement here, never through `asTenant`.
  */
 export async function asOwner<T>(fn: (sql: postgres.Sql) => Promise<T>): Promise<T> {
-  const url = process.env.DATABASE_SUPER_URL ?? (process.env.DATABASE_URL as string);
-  const sql = postgres(url, { max: 1, onnotice: () => undefined });
+  // `superDatabaseUrl` rather than a fallback to `DATABASE_URL`: falling back
+  // to the app role turned a fixture cleanup into «permission denied for table
+  // sales» on a machine without the variable set, which is a confusing way to
+  // learn the role cannot DELETE.
+  const sql = postgres(superDatabaseUrl(), { max: 1, onnotice: () => undefined });
   try {
     return await fn(sql);
   } finally {

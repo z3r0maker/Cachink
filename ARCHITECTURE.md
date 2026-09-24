@@ -142,6 +142,7 @@ Links to discussion, docs, prior art.
 | [100](#adr-100) | 2026-09-23 | The root contract is rewritten against the code it governs, and its table of contents is generated | Accepted |
 | [101](#adr-101) | 2026-09-23 | Activation answers one generic error, and the QR carries a 15-minute token in the fragment | Accepted |
 | [102](#adr-102) | 2026-09-23 | The portal's coverage is unit + E2E merged, and a floor that only rises holds it | Accepted |
+| [103](#adr-103) | 2026-09-24 | The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial` | Accepted |
 
 <!-- END ADR-INDEX -->
 
@@ -6942,3 +6943,100 @@ portal to be: `domain` 92%, `application` 96.5%, `auth-core` 100%.
 opens a second CDP session per page, auto-attaches to its workers paused, and
 starts precise coverage before their first line. `operador/runtime` went from 19%
 to 95%, and the floor rose to lines 77, statements 72, functions 69, branches 56.
+
+## ADR-103
+
+**Title:** The seeded portal tenant is read-only while the viewport projects run; a spec that writes it carries `@serial`
+
+**Date:** 2026-09-24
+
+**Status:** Accepted — follows the `portal-e2e` triage of 2026-09-23 (commit 16367e0f)
+
+**Context**
+
+`apps/web/playwright.config.ts` runs `fullyParallel` across three viewport
+projects against one Postgres, and almost every interesting portal spec reads
+Taquería Don Pedro's seeded rows. Four consecutive full runs on a freshly
+reset database failed in four *different* files, and every one of those tests
+passed when run alone:
+
+- `write.spec.ts` found no unread aviso, because something else had marked them
+  read;
+- the same file's `/negocio` editor never opened, because the session was on
+  «Negocio B 1764…» — a rename `chaos-3-sesion-muerta.spec.ts` performed and
+  never undid;
+- `hazlo-por-mi.spec.ts`, `saldos-iniciales.spec.ts`, `dueno-cortes.spec.ts`
+  each lost a row to a sibling mid-assertion.
+
+The convention in place was `test.skip(testInfo.project.name !== 'desktop')`.
+It prevents the three *viewports* of one file from colliding and does nothing
+about two files racing inside the same project — nor about the `operador`
+project, which was running alongside all three. `chaos-2`'s docblock claimed
+"each mutating test owns a distinct seeded product" and `operador-caja.spec.ts`
+was quietly violating it two projects later.
+
+**Decision**
+
+1. **A test that writes the seeded tenant carries the `@serial` tag.** Project
+   `grep`/`grepInvert` route it: the viewport projects exclude the tag, and a
+   `serial` project (`workers: 1`) runs exactly those tests, once, at the
+   desktop viewport. Read-only tests in the same file keep their three
+   viewports — the unit is the test, not the file.
+2. **The phases are ordered.** `setup` → the three viewports → `unlock` →
+   `serial` → `operador` → `sync`. `operador` used to run beside the viewports
+   while seeding and spending the same tenant's stock, turnos and caja; it is
+   now behind them for the reason `sync` already was.
+3. **Postgres enforces it, not a docblock.** The global setup installs an
+   `AFTER INSERT OR UPDATE OR DELETE` trigger on every table carrying a
+   `business_id` and locks the seeded tenant; any write to it raises, naming
+   the table and the tag. The `unlock` project releases the lock between the
+   phases, and the global teardown drops the triggers even after a failed run.
+   Tables that move under a plain read — sessions, metering counters, the sync
+   plumbing — are excluded by name in `e2e/shared-tenant.ts`. Other tenants are
+   untouched, so the throwaway-tenant specs keep writing in parallel.
+4. **Whoever wrecks a seeded row restores it**, in a hook that also runs on
+   failure, and the restore is scoped to the `serial` project so the same hook
+   cannot fire from a viewport run. Fixtures a test consumes are re-made by that
+   test (`write.spec.ts` un-reads the avisos it marks), so a second run against
+   the same database asserts the same thing as the first.
+
+**Alternatives considered**
+
+- *A throwaway tenant per mutating spec*, as `saldos-iniciales.spec.ts` and
+  `informe-mensual.spec.ts` do. Kept for new specs where it fits, rejected as
+  the general answer: the seeded figures **are** the assertion in specs like
+  `dueno-cortes` (−$60.00, Ana's corte, Luis's), and seeding a full tenant per
+  file costs more than it saves.
+- *Renaming the files* (`*.serial.spec.ts`), the way `*.sync.spec.ts` selects
+  the `sync` project. Rejected: several files are half read-only, and the
+  filename would either split them or cost those tests their viewport coverage.
+- *A lint rule instead of the trigger.* Rejected as the enforcement: a spec
+  writes through the UI as often as through SQL, and no static rule sees a
+  «Guardar» click. The trigger does.
+
+**Consequences**
+
+- The suite is strictly slower: ~29 tests that used to run inside the parallel
+  phase now run one at a time behind it.
+- `--project=serial` (or `operador`, or `sync`) alone does not drag the viewport
+  phase in as a dependency: `unlock` waits for the viewports only when the run
+  actually selects one. Selecting a viewport keeps the wait.
+- A new spec that writes the seeded tenant without the tag fails immediately
+  with the guard's message instead of poisoning a sibling four files away.
+  `shared-tenant.spec.ts` is the guard's own canary: it runs in each viewport
+  project and requires a write to the seeded tenant to be refused, so a run
+  whose lock never armed fails rather than passing quietly.
+- Playwright skips a project whose dependency failed, so a failing viewport test
+  now also holds back `serial`, `operador` and `sync` — the price of ordering
+  them. That was already true of `sync`, and it is how the `sync` project came
+  to spend weeks dark with six broken specs nobody saw.
+- Serialising the writes exposed the suite's other source of non-determinism,
+  which is not about data at all: `goto` resolves on `load` and React attaches
+  after it, so a click in that gap is dropped and a `fill` is undone by the
+  re-render. Every navigation now waits for `next-route-announcer` — the App
+  Router's own client-side element, absent from the server's HTML — inside the
+  shared `e2e/test.ts` of ADR-102, and `e2e/interact.ts` retries the interaction
+  where the gate cannot reach (a later Suspense, a spec's own page).
+- The lock lives in a test-only `e2e` schema on the throwaway database. It is
+  never a migration, and `pnpm dev` against that database is unencumbered once
+  the run ends.

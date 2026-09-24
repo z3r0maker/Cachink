@@ -85,15 +85,27 @@ test.afterAll(async () => {
 
 /** P-32: the diagnóstico share carries the month's real figures. */
 test('«Compartir diagnóstico» opens with the real month figures', async ({ page }) => {
+  // What the message quotes is `resultados.ingresos` (`resumenParaCompartir`) —
+  // the same total Estados prints for the month. So read it there instead of
+  // writing it down: this test said $645.00, the seed grew a real ledger
+  // anchored to the run date, and the number moved for a change that broke
+  // nothing. The claim is that the share never invents a figure.
+  await page.goto('/estados');
+  const frase = await page
+    .locator('main')
+    .getByText(/^Vendiste \$[\d,]+\.\d\d,/)
+    .first()
+    .innerText();
+  const vendido = /^Vendiste (\$[\d,]+\.\d\d),/.exec(frase)?.[1];
+  expect(vendido, `unreadable Estados summary: ${frase}`).toBeDefined();
+
   await page.goto('/asesor');
   await page.getByRole('button', { name: 'Diagnóstico' }).click();
   await page.getByRole('button', { name: 'Compartir diagnóstico' }).click();
   const compartir = page.getByRole('dialog', { name: 'Compartir por WhatsApp' });
   await expect(compartir).toBeVisible();
-  // The seed's May (clock-pinned): $645.00 vendido — readable in the box and
-  // carried by the deep link.
   const caja = compartir.getByRole('textbox', { name: 'Mensaje' });
-  await expect(caja).toHaveText(/vendimos \$645\.00/);
+  await expect(caja).toContainText(`vendimos ${vendido as string}`);
   await expect(compartir.getByText('Diagnóstico-2026-05.pdf')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(compartir).toBeHidden();
