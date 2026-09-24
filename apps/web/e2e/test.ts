@@ -55,16 +55,41 @@ const hydrated = base.extend({
   },
 });
 
+/**
+ * V8's coverage lives with the document: a full navigation or reload throws
+ * away what ran on the page before it, and most specs navigate after acting —
+ * to check the result somewhere else. So coverage is collected just before
+ * every `goto` / `reload` / `goBack` / `goForward`, then restarted (ADR-102).
+ * Client-side App Router navigations keep the document and need nothing.
+ */
+const NAVIGATIONS = ['goto', 'reload', 'goBack', 'goForward'] as const;
+
+async function recordPage(page: Page): Promise<() => Promise<void>> {
+  let takeWorkers = await recordWorkerCoverage(page);
+  await page.coverage.startJSCoverage({ resetOnNavigation: false });
+  const flush = async () => {
+    await addPageCoverage([...(await takeWorkers()), ...(await page.coverage.stopJSCoverage())]);
+  };
+  for (const method of NAVIGATIONS) {
+    const navigate = page[method].bind(page) as (...args: unknown[]) => Promise<unknown>;
+    (page as unknown as Record<string, unknown>)[method] = async (...args: unknown[]) => {
+      await flush();
+      takeWorkers = await recordWorkerCoverage(page);
+      await page.coverage.startJSCoverage({ resetOnNavigation: false });
+      return navigate(...args);
+    };
+  }
+  return flush;
+}
+
 const withCoverage = hydrated.extend<{ pageCoverage: void }>({
   pageCoverage: [
     async ({ page, browserName }, use) => {
       if (browserName !== 'chromium') return use();
-      const takeWorkers = await recordWorkerCoverage(page);
-      await page.coverage.startJSCoverage({ resetOnNavigation: false });
+      const flush = await recordPage(page);
       await use();
       // A test that closed its own page took the coverage with it.
-      if (page.isClosed()) return;
-      await addPageCoverage([...(await takeWorkers()), ...(await page.coverage.stopJSCoverage())]);
+      if (!page.isClosed()) await flush();
     },
     { auto: true },
   ],

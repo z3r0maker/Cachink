@@ -7091,3 +7091,12 @@ Replaying a full run's server data: `templates.ts` from 0 functions to
 `templateOf` ×10 and its `apply` loop covered. `tests/coverage-duplicate-copies.test.ts`
 runs the case through MCR itself, so an upgrade that loses the patch fails
 there first.
+
+**Amendment 2026-09-24 — browser coverage survives navigation.** V8's page
+coverage lives with the document: a `goto` or `reload` discarded what ran
+before it, and most specs navigate after acting. `inventario-inicial.spec.ts`
+uploads a CSV and then reloads — `grid.tsx` read 1 of 32 branches and 0 for the
+upload handler it had just run. `e2e/test.ts` now collects the page's (and its
+workers') coverage just before every `goto` / `reload` / `goBack` / `goForward`
+and restarts it; `grid.tsx` reads 17 of 32 and every function. Client-side App
+Router navigations keep the document and never lost anything.
