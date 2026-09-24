@@ -69,21 +69,34 @@ function offender(file: string, specifier: string): string | undefined {
   return undefined;
 }
 
+/**
+ * Budget for the sweep. It stats every candidate path of every relative import
+ * in ~3,500 tracked files: about 1.5 s idle, measured at 8 s beside a build or
+ * another agent's test run — past vitest's 5 s default, which is how this
+ * failed once for being slow rather than for finding anything.
+ * `lint-coverage.test.ts` carries the same budget for the same reason.
+ */
+const SWEEP_TIMEOUT_MS = 180_000;
+
 describe('import case', () => {
-  it('every relative import matches the file name exactly', () => {
-    const wrong: string[] = [];
-    for (const file of sources()) {
-      const text = readFileSync(join(REPO, file), 'utf8');
-      for (const [, specifier] of text.matchAll(IMPORT)) {
-        if (specifier === undefined) continue;
-        const real = offender(file, specifier);
-        if (real !== undefined) wrong.push(`${file}: '${specifier}' → ${real}`);
+  it(
+    'every relative import matches the file name exactly',
+    () => {
+      const wrong: string[] = [];
+      for (const file of sources()) {
+        const text = readFileSync(join(REPO, file), 'utf8');
+        for (const [, specifier] of text.matchAll(IMPORT)) {
+          if (specifier === undefined) continue;
+          const real = offender(file, specifier);
+          if (real !== undefined) wrong.push(`${file}: '${specifier}' → ${real}`);
+        }
       }
-    }
-    assert.deepEqual(
-      wrong,
-      [],
-      `These imports resolve on macOS and fail on Linux CI. Match the file's real spelling:\n  ${wrong.join('\n  ')}`,
-    );
-  });
+      assert.deepEqual(
+        wrong,
+        [],
+        `These imports resolve on macOS and fail on Linux CI. Match the file's real spelling:\n  ${wrong.join('\n  ')}`,
+      );
+    },
+    SWEEP_TIMEOUT_MS,
+  );
 });

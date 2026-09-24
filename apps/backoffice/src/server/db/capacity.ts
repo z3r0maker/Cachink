@@ -47,23 +47,40 @@ async function activeTenants(conn: Conn): Promise<number> {
   return Number(rows[0]?.n ?? 0);
 }
 
+/**
+ * p95 of `sync/push` + `sync/pull` over the last day, from the bounded
+ * histogram data-pg 0042 keeps (`xangarro.admin_sync_p95`, console 0020).
+ *
+ * `null` when nothing was recorded — a fresh database, or a day no phone
+ * synced — which is what the card already renders as «sin datos». It is not
+ * null because the number is unavailable in principle any more, which is what
+ * it meant until now.
+ *
+ * Rounded **up** to its bucket's bound: the card may cry wolf against the
+ * 800 ms trigger, never fall silent. The migration says why.
+ */
+async function syncP95(conn: Conn): Promise<number | null> {
+  const rows = await conn.execute<{ ms: number | null }>(
+    sql`SELECT xangarro.admin_sync_p95(1) AS ms`,
+  );
+  const ms = rows[0]?.ms;
+  return ms === null || ms === undefined ? null : Number(ms);
+}
+
 export function drizzleCapacityProbe(conn: Conn): CapacityProbe {
   return {
     async read(): Promise<CapacityReading> {
-      const [bytes, tables, tenants] = await Promise.all([
+      const [bytes, tables, tenants, p95] = await Promise.all([
         dbBytes(conn),
         topTables(conn),
         activeTenants(conn),
+        syncP95(conn),
       ]);
       return {
         dbBytes: bytes,
         topTables: tables,
         activeTenants: tenants,
-        // Not measurable yet. B-18 times every phone call (`deviceRoute`), but
-        // the `ms` only reaches a stdout JSON line (`logApi`) and Sentry runs
-        // with tracesSampleRate 0 — nothing Postgres can query. It needs
-        // `(endpoint, ms, at)` persisted somewhere readable; see N-07 notes.
-        syncP95Ms: null,
+        syncP95Ms: p95,
         measuredAt: new Date().toISOString(),
       };
     },

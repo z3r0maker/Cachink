@@ -248,8 +248,8 @@ test:e2e:db` (db reset + both migration sets + suite).
 
 ### N-07 Usage, limits and capacity `[LAUNCH]`
 
-- [~] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
-  **Remaining (2026-09-23, verified against the code):** acceptance met; sync p95 shows «sin datos» (no per-call timing table in Track B). The ticket over-count is fixed (data-pg 0035). **Fixed 2026-09-23:** `/uso` failed with «permission denied for table inventory_movements» on any database past data-pg 0029, because `usage_counts` reads `origen` and the admin role had no grant on it (console migration 0018); and a lapsed tenant is now judged by the free plan it is entitled to, not the paid plan Stripe last billed (`plan-view.ts`).
+- [x] Status · **Blocked by:** N-05, N-02 · **Blocks:** N-51
+      **Closed 2026-09-24.** The last gap — sync p95 «sin datos» — is measured. The card's acceptance («amber at 80 % of a trigger, red at the trigger») was already met; every metric on it now has a source. The ticket over-count is fixed (data-pg 0035). **Fixed 2026-09-23:** `/uso` failed with «permission denied for table inventory_movements» on any database past data-pg 0029, because `usage_counts` reads `origen` and the admin role had no grant on it (console migration 0018); and a lapsed tenant is now judged by the free plan it is entitled to, not the paid plan Stripe last billed (`plan-view.ts`).
 
 - **What:** per-tenant usage vs limits with an "over limit" filter; a **capacity card** — DB size,
   largest tables by rows, sync p95 (B-18) — each against its N-51 / N-52 trigger, reviewed monthly.
@@ -266,7 +266,22 @@ test:e2e:db` (db reset + both migration sets + suite).
   also counts portal-written movements.
 - 2026-09-18 · sync p95 stays "sin datos": B-18 logs per-call timing to stdout only. Needs a queryable
   per-call timing table (endpoint, duration, at) from Track B — see
-  `apps/backoffice/docs/b18-b16-integration.md`. Noted overlap: the "last seen" rule exists in three
+  `apps/backoffice/docs/b18-b16-integration.md`.
+- 2026-09-24 · **sync p95 is measured.** Not the per-call table that note proposed: a row per call is
+  an unbounded append on the hottest path the product has, kept honest only by a retention job, in a
+  database whose own audit sets N-51's partitioning trigger at 50 M rows.
+  `xangarro.api_latency_counters` (data-pg `0042`) is a **bounded histogram** of
+  `(day, endpoint, bucket_ms) → hits` — `geo_counters`' shape and its reasons (ADR-092) — about 22k
+  rows a year, written from `deviceRoute` beside `logApi` with one `ON CONFLICT DO UPDATE`, not
+  awaited and never able to fail a phone's sync. `xangarro.admin_sync_p95()` reads it and lives in
+  the same migration as the writer, because both halves of one contract (`bucket_ms` is an _upper_
+  bound, 0 is overflow) have to agree. The p95 rounds **up** to its bucket's bound, so against the
+  800 ms trigger the card can cry wolf, never fall silent; it stays null — «sin datos» — when
+  nothing synced. Pruned at 400 days on the console's daily cron, beside the geo counters.
+  What this forfeits permanently: the exact percentile, per-call outliers, and any correlation to a
+  business or device. 10 integration tests against real Postgres, including the bucket bound, the
+  overflow bucket, the two role grants, and the empty database — which caught a real bug on the way
+  in (`least(min(...), 5000)` ignores NULL, so an unsynced database reported a red five-second p95). Noted overlap: the "last seen" rule exists in three
   places (B-16 Studio query, two N-06 files) — consolidate when data-pg gains a shared query.
 
 ### N-08 Inbox (support and escalations) `[LAUNCH]`

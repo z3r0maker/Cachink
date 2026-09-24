@@ -19,7 +19,11 @@ export interface CapacityReading {
   /** Largest first by estimated rows; at most ten. */
   readonly topTables: readonly TableSize[];
   readonly activeTenants: number;
-  /** Null: B-18 logs each call's ms to stdout only, not somewhere queryable. */
+  /**
+   * p95 of the sync endpoints over the last day, rounded up to its bucket's
+   * bound (data-pg 0042). Null when no call was recorded — a fresh database,
+   * or a day no phone synced.
+   */
   readonly syncP95Ms: number | null;
   /** When it was measured, ISO-8601. */
   readonly measuredAt: string;

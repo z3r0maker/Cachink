@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { authenticateDevice, type DeviceCaller } from '../device/authenticate';
+import { countApiLatency } from '../observability/latency';
 import { logApi, reportError, type ApiLine } from '../observability/report';
 import { deviceFailure } from './device-failure';
 import { fail, protocolRefusal } from './respond';
@@ -41,13 +42,17 @@ export async function deviceRoute(
     }
     handled = { response: refused ?? fail('INTERNAL', internalMessage) };
   }
+  const ms = Math.round(performance.now() - started);
   logApi({
     endpoint,
     status: handled.response.status,
-    ms: Math.round(performance.now() - started),
+    ms,
     businessId: caller?.businessId,
     deviceId: caller?.deviceId,
     ...handled.log,
   });
+  // The same number, into the bounded histogram the console's capacity card
+  // reads (N-07). Not awaited and never able to throw: see `latency.ts`.
+  countApiLatency(endpoint, ms);
   return handled.response;
 }

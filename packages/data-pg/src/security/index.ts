@@ -6,3 +6,4 @@ export * from './accounts.js';
 export * from './geo.js';
 export * from './attribution.js';
 export * from './consents.js';
+export * from './api-latency.js';

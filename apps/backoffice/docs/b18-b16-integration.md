@@ -15,22 +15,32 @@ rows counted together; resolved and >24 h rows left out; `payload` and `UPDATE` 
 
 A failed read does not stop the email: the section says «No disponible» and the cron logs it.
 
-## Not measurable: sync p95 (N-07 capacity card)
+## Measured since 2026-09-24: sync p95 (N-07 capacity card)
 
-The card stays «sin datos». B-18 times every phone call in `deviceRoute`, but the `ms` only goes
-to a stdout JSON line (`logApi`, `{evt:'api', endpoint, status, ms, …}`), and Sentry runs with
-`tracesSampleRate: 0`. Nothing Postgres or the console can query holds it.
+The card read «sin datos» because B-18's `ms` only reached a stdout JSON line (`logApi`) and
+Sentry runs with `tracesSampleRate: 0`. It now reads a number.
 
-To feed `capacityStatus(p95, 800)` B-18 would need to expose, per call to `sync/push` and
-`sync/pull`: `endpoint`, `ms`, and a timestamp, somewhere readable. Either:
+This note proposed two options: an `api_call_timings (endpoint, ms, at)` table with one row per
+call, or Sentry performance tracing. **Neither was taken.** A row per call is an unbounded append
+on the hottest path the product has — every push and pull from every device — kept honest only by
+a retention job that has to keep running, in a database whose own audit sets N-51's partitioning
+trigger at 50 M rows. Sentry adds a vendor dependency to a card that should be one SQL read.
 
-- a Postgres table (`api_call_timings (endpoint, ms, at)`, append-only, pruned after 30 days,
-  written by `deviceRoute` beside `logApi`), which the console reads with
-  `percentile_cont(0.95) WITHIN GROUP (ORDER BY ms)` over the last 24 h; or
-- Sentry performance tracing (`tracesSampleRate > 0`) plus a Sentry API read from the console,
-  which adds a vendor dependency to the card.
+What shipped is `xangarro.api_latency_counters` (data-pg `0042_api_latency.sql`), shaped like
+`geo_counters` and for its reasons: a **bounded histogram** of `(day, endpoint, bucket_ms) → hits`,
+about 22k rows a year, written with one `ON CONFLICT DO UPDATE` per call from `deviceRoute` beside
+`logApi` — not awaited, never able to fail a phone's sync. `xangarro.admin_sync_p95(p_days)` reads
+it, and lives in the same migration as the writer because both halves of one contract — `bucket_ms`
+is an _upper_ bound, 0 is overflow — have to agree.
 
-The first keeps the card a single SQL read. Only `drizzleCapacityProbe` changes either way.
+What that forfeits, permanently: the exact percentile, per-call outliers, and any correlation to a
+business or a device. The p95 is the smallest bucket whose cumulative share reaches 95 %, reported
+as that bucket's bound, so it rounds **up**: against the 800 ms trigger the card can cry wolf,
+never fall silent. It is «sin datos» — null, not a number — when no sync was recorded.
+
+The counters are pruned at 400 days on the same daily cron as the geo counters
+(`pruneApiLatency`). Only `drizzleCapacityProbe` changed on the console side, as this note
+predicted.
 
 ## Overlap with B-16's Studio queries (noted, not changed)
 
