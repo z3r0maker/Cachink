@@ -7055,3 +7055,16 @@ reaching the end, CI measured lines 84.1%, statements 77.5%, functions 76.8%,
 branches 62.5% — the earlier local figures never got past the viewport phase.
 Floor 83 / 76 / 75 / 61. `src/app/inventario/` (the primitives galleries) is
 left out by name, the one exclusion besides style modules; another needs an ADR.
+
+**Amendment 2026-09-24 — the coverage build is not minified.** Decision 1 said
+the build under test changes only by source maps; it now also skips the
+minifier (`optimization.minimize`, `serverMinification`). Coverage derives
+statements and branches from the executed code's syntax tree and maps them back
+to `src/`; minified code has a different structure (`if/else` becomes a
+ternary, statements become sequences), so those mapped back as phantom branches
+spanning real ones and could never merge with the unit suite's. `csv.ts` read
+52 statements and 46 branches against its 38 and 25 — every file both suites
+touch was under-reported. Lines were unaffected (merged by byte range), which is
+why lines read 85% while statements and branches lagged. Behaviour is the same
+unminified; bundle size is the only difference, and nothing in the suite
+measures it.

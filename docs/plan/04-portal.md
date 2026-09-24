@@ -1455,6 +1455,10 @@ critical avisos cannot be switched off.
     functions 78.8%, branches 62.4%. Floor 84 / 77 / 77 / 61. Open: statements, functions and
     branches to the acceptance line — `server/actions` error paths, `server/billing/actions.ts`
     (Stripe, 0%), the Estados chart components.
+  - 2026-09-24 · **Statements and branches were under-reported**: the minified coverage build
+    mapped phantom branches onto `src/` that never merged with the unit suite's (`csv.ts`: 52
+    statements / 46 branches counted, 38 / 25 real). The coverage build is no longer minified
+    (ADR-102 amendment); `csv.ts` now reads 38/39 and 25/25 merged.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
