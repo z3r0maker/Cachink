@@ -1459,6 +1459,8 @@ critical avisos cannot be switched off.
     mapped phantom branches onto `src/` that never merged with the unit suite's (`csv.ts`: 52
     statements / 46 branches counted, 38 / 25 real). The coverage build is no longer minified
     (ADR-102 amendment); `csv.ts` now reads 38/39 and 25/25 merged.
+  - 2026-09-24 · **Re-measured unminified** (run 36038951217): lines 85.6%, statements 83.2%,
+    functions 79.8%, branches 69.5%. Floor 84 / 82 / 78 / 68.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
