@@ -1467,6 +1467,8 @@ critical avisos cannot be switched off.
     `server/import/templates.ts`). Fixed in `options.ts` and — after a splitter that did not
     work — a one-rule patch to MCR (`patches/`, ADR-102 correction). Also:
     `server/billing/actions.ts` unit-tested (was 0%).
+  - 2026-09-24 · **Measurement settled** (run 36047293665): lines 87.1%, statements 84.7%,
+    functions 81.2%, branches 71.1%. Floor 86 / 83 / 80 / 70. The gap left is real.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
