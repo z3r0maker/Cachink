@@ -47,6 +47,15 @@ export function toSourcePath(filePath: string): string {
 const onDisk = new Map<string, boolean>();
 
 /**
+ * The one directory left out by name: `/inventario` and `/inventario/operador`
+ * are development galleries of the UI primitives (Fase 1 compuerta, Track O),
+ * reviewed against the design by eye, never shown to a user — `e2e/routes.ts`
+ * leaves them out for the same reason. Anything else that wants out needs an
+ * ADR, not a line here (ADR-102).
+ */
+const DEV_SCAFFOLDING = 'src/app/inventario/';
+
+/**
  * What counts: files under `src/` that exist — a library's source map can
  * name its own `src/…`, and only the disk tells the two apart. The shared
  * packages keep their own gates. Style modules (`*.css.ts`) compile to CSS at
@@ -54,6 +63,7 @@ const onDisk = new Map<string, boolean>();
  */
 export function isPortalSource(sourcePath: string): boolean {
   if (!/^src\/.*\.tsx?$/.test(sourcePath) || /\.(css|d)\.ts$/.test(sourcePath)) return false;
+  if (sourcePath.startsWith(DEV_SCAFFOLDING)) return false;
   let exists = onDisk.get(sourcePath);
   if (exists === undefined) {
     exists = existsSync(path.join(WEB_ROOT, sourcePath));
@@ -86,6 +96,7 @@ export const ALL_FILES: NonNullable<CoverageReportOptions['all']> = {
   dir: [path.join(WEB_ROOT, 'src')],
   filter: {
     '**/*.css.ts': false,
+    '**/src/app/inventario/**': false,
     '**/*.d.ts': false,
     '**/*.{ts,tsx}': true,
     '**/*': false,

@@ -1446,6 +1446,11 @@ critical avisos cannot be switched off.
     now sets `DATABASE_SUPER_URL` (the sync specs' cleanup needs the owner role) and reports
     coverage even when E2E fails. The six failing `[sync]` specs belong to the session behind
     ADR-103 (census assertions; fixes in flight).
+  - 2026-09-24 · **First green `portal-e2e` under the gate** (run 36026962224): lines 84.1%,
+    statements 77.5%, functions 76.8%, branches 62.5%. Floor 83 / 76 / 75 / 61. `/inventario-inicial`
+    (N-17) had no spec — `e2e/inventario-inicial.spec.ts` now drives it on a throwaway owner, and
+    found its «Capturado: …» banner lost to the capture's own revalidation ~1 run in 10
+    (fixed in `parts.tsx`). The primitives galleries under `src/app/inventario/` leave the count.
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.

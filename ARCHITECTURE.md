@@ -7049,3 +7049,9 @@ was quietly violating it two projects later.
 - The lock lives in a test-only `e2e` schema on the throwaway database. It is
   never a migration, and `pnpm dev` against that database is unencumbered once
   the run ends.
+
+**Update 2026-09-24, first green CI (run 36026962224).** With every project
+reaching the end, CI measured lines 84.1%, statements 77.5%, functions 76.8%,
+branches 62.5% — the earlier local figures never got past the viewport phase.
+Floor 83 / 76 / 75 / 61. `src/app/inventario/` (the primitives galleries) is
+left out by name, the one exclusion besides style modules; another needs an ADR.
