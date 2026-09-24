@@ -1464,8 +1464,9 @@ critical avisos cannot be switched off.
   - 2026-09-24 · **Two more measurement bugs, both under-counting the server**: the unminified
     build renamed server sources (`xangarro/src/…`) and the path rule dropped ~500 of them; and a
     module compiled into both webpack layers of one chunk kept its dead copy's 0 (29 files, e.g.
-    `server/import/templates.ts`). Fixed in `options.ts` and `e2e/coverage-split.ts` (ADR-102
-    amendment). Also: `server/billing/actions.ts` unit-tested (was 0%).
+    `server/import/templates.ts`). Fixed in `options.ts` and — after a splitter that did not
+    work — a one-rule patch to MCR (`patches/`, ADR-102 correction). Also:
+    `server/billing/actions.ts` unit-tested (was 0%).
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.

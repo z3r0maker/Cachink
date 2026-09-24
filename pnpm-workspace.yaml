@@ -6,3 +6,6 @@ packages:
 patchedDependencies:
   # Xcode 27 SDK: guard iOS 16-only UIMenuElement.subtitle (app supports 15.1). Drop once expo-router ships the guard.
   expo-router@55.0.14: patches/expo-router@55.0.14.patch
+  # ADR-102: a module Next compiles into two webpack layers of one chunk kept its dead copy's
+  # count — sum repeated original ranges instead. Drop once monocart-coverage-reports merges them.
+  monocart-coverage-reports@2.13.0: patches/monocart-coverage-reports@2.13.0.patch

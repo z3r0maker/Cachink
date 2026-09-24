@@ -7080,3 +7080,14 @@ copy ran) applies. 29 portal files were duplicated this way. Also: the
 source-path rule is now structural (strip wrapper segments, expect `src/`) —
 the unminified build renamed the server's sources and the old list of
 spellings silently dropped ~500 of them.
+
+**Correction 2026-09-24 — a patch, not a splitter.** The per-copy split above
+did not work: every entry still carried the whole chunk's source, so MCR
+parsed both copies again and again kept the first. The fault is one rule in
+MCR — a repeated original range is dropped, first copy wins — and
+`patches/monocart-coverage-reports@2.13.0.patch` changes it to add the
+repeat's counts. `e2e/coverage-split.ts` is gone; `addFromDir` is back.
+Replaying a full run's server data: `templates.ts` from 0 functions to
+`templateOf` ×10 and its `apply` loop covered. `tests/coverage-duplicate-copies.test.ts`
+runs the case through MCR itself, so an upgrade that loses the patch fails
+there first.
