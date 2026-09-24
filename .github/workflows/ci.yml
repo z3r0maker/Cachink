@@ -288,7 +288,8 @@ jobs:
   portal-e2e:
     name: portal-e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    # 25 before ADR-102; the coverage steps add unit coverage and the merge.
+    timeout-minutes: 30
     services:
       postgres:
         image: postgres:17-alpine
@@ -335,11 +336,23 @@ jobs:
       # would restore nothing and `next start` would serve a build that is not
       # there. Building here also makes a build failure read as a build
       # failure rather than as "webServer timed out".
+      # The coverage build (ADR-102): the same production build plus source
+      # maps, so the E2E run's V8 data maps back to apps/web/src.
       - name: Build the portal (production, webpack — P-20)
         run: pnpm --filter @xangarro/web run build
+        env:
+          XG_COVERAGE: '1'
+
+      # Unit half of the portal's coverage: raw data only, merged below.
+      - name: Unit coverage (portal)
+        run: pnpm --filter @xangarro/web run test:coverage
 
       - name: E2E (data, a11y and shell, three viewports)
-        run: pnpm --filter @xangarro/web run test:e2e
+        run: pnpm --filter @xangarro/web run test:e2e:coverage
+
+      # Unit + E2E merged; fails if any metric falls below coverage-floor.json.
+      - name: Coverage floor (portal, unit + E2E)
+        run: pnpm --filter @xangarro/web run coverage:check
 
       # The contract's own conformance suite, pointed at this portal instead of
       # the mock. It is the acceptance for `/activate`: identical assertions pass
@@ -357,3 +370,10 @@ jobs:
             apps/web/playwright-report/
             apps/web/test-results/
           retention-days: 7
+
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: ${{ !cancelled() }}
+        with:
+          name: portal-coverage
+          path: apps/web/coverage/merged/
+          retention-days: 14

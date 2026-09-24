@@ -208,7 +208,7 @@ Cada tarea tiene un disparador; no se empieza antes de que sea cierto.
 - [ ] **N-73** Account health and NPS micro-survey — Blocked by: N-64, N-47 · Trigger: 50 active tenants. · `09-next-features.md:1250`
 - [ ] **N-74** Promo and referral codes with attribution — Blocked by: N-64, N-01 · Trigger: X-10 launch. · `09-next-features.md:1260`
 
-## Colas de tracks (10)
+## Colas de tracks (11)
 
 Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o se archivan.
 
@@ -231,6 +231,10 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 - [ ] **P-29** Catálogo desde una foto — «Próximamente» in production — Blocked by: P-07, P-30 · `04-portal.md:1153`
 - [~] **P-30** Asesor generation runtime — Blocked by: P-26, B-02, B-03 · Falta: the **fan-out** and the **model call**. Everything else landed — see below. The `notices` line in the previous Remaining was already stale when it was written: ADR-088's materialise-on-read has written `source='asesor'` rows since `loadAsesorPage`. **Fan-out.** ADR-056's «a daily job selects the businesses that are due» needs a cross-tenant read of which businesses are live. No portal role has one: RLS scopes the app role to a single tenant, and the only privileged cross-tenant path today is `xangarro.usage_counts` on the metering role. Choosing between a new privileged function, reusing the metering role, or the console's service role is a **Track B decision with a migration behind it**. Until it is taken there is no `vercel.json` entry — and could not be, since the unit of work is a POST with a body and Vercel Cron sends neither. **Model call.** ADR-056 makes it the last step, prompted from the deterministic figures. Held until **P-28**: the Diagnóstico is `<p>Reporte completo del mes.</p>` behind two gates, so generated prose would land in a table no screen reads. The boundary stays the single module ADR-056 requires (`server/asesor/model.ts`) and `runtime.ts` names the seam. The Batches API and prompt caching ride with it — batching needs a ledger to collect results, which is its own table. 2026-09-24 · **One business, on demand** (`ab519eb7`). `server/asesor/runtime.ts` composes the deterministic half in ADR-056's order — entitlement → cadencia → `calcularInsights` → `filtrarPorCadencia` → `materializarInsights` — and is idempotent by construction. `server/asesor/invocacion.ts` is the HTTP contract, split from the route so it tests without Next and without a database; `cron.ts` gained `cronAuth`/`cronRefusal` so it shares the guard with the three `handleCron` routes while answering 400 for a nameless request. `POST /api/cron/asesor`. · `04-portal.md:1163`
 
+### `04-portal.md` · Fase 9 — Impresión, exportes y cierre
+
+- [ ] **P-35** Portal coverage to 85% (unit + E2E merged, ADR-102) — Blocked by: — · `04-portal.md:1395`
+
 ### `05-app.md`
 
 - [ ] **A-16** Maestro suite for the new app — Blocked by: A-04…A-10, A-15 · Falta: 133 flows exist (plan says 142). `login-operator-pin.yaml` not created; the eight pre-activation flows to delete are still present; `full-regression.sh` still buckets demo/wizard/fresh and calls `wizard-local-standalone`; the A-01/A-09 rework list is unaddressed; no green iPhone + iPad run recorded. Also owns A-15's «regression green» clause. · `05-app.md:194`
@@ -244,7 +248,7 @@ Sobrantes de tracks casi cerrados. Se verifican contra el código y se cierran o
 
 - `02-contracts.md` — 2 abiertos (0 en curso, 0 bloqueados, 20 hechos)
 - `03-backend.md` — 1 abiertos (1 en curso, 0 bloqueados, 17 hechos)
-- `04-portal.md` — 4 abiertos (3 en curso, 0 bloqueados, 30 hechos)
+- `04-portal.md` — 5 abiertos (3 en curso, 0 bloqueados, 30 hechos)
 - `05-app.md` — 1 abiertos (0 en curso, 0 bloqueados, 17 hechos)
 - `06-landing.md` — 2 abiertos (0 en curso, 0 bloqueados, 3 hechos)
 - `07-launch.md` — 10 abiertos (0 en curso, 0 bloqueados, 0 hechos)

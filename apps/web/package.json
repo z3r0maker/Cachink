@@ -11,6 +11,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p e2e",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint . --config ../../eslint.config.js",
     "lint:fix": "eslint . --config ../../eslint.config.js --fix",
     "clean": "rm -rf .next dist .turbo",
@@ -18,6 +19,8 @@
     "test:e2e": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test",
     "test:e2e:ui": "DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test --ui",
     "test:e2e:db": "pnpm --filter @xangarro/data-pg db:reset && pnpm test:e2e",
+    "test:e2e:coverage": "rm -rf coverage/e2e && XG_COVERAGE=1 DATABASE_URL=$(../../packages/data-pg/scripts/db-local.sh url) playwright test",
+    "coverage:check": "tsx scripts/coverage-gate/merge.ts",
     "test:conformance": "./scripts/conformance.sh",
     "stripe:seed": "tsx scripts/stripe-seed.ts",
     "entitlement:keygen": "tsx scripts/entitlement-keygen.ts"
@@ -70,8 +73,10 @@
     "@types/sql.js": "1.4.11",
     "@vanilla-extract/next-plugin": "^2.5.2",
     "@xangarro/config": "workspace:*",
+    "monocart-coverage-reports": "^2.13.0",
     "sql.js": "^1.14.2",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "vitest-monocart-coverage": "^4.0.2"
   }
 }

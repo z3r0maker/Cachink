@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import { newUlid } from '@xangarro/domain';
 
 import { asTenant, BIZ, TACO } from './sync-phone';

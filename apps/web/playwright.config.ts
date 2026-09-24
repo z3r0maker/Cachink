@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import { defineConfig, devices } from '@playwright/test';
@@ -7,6 +8,7 @@ import devKeys from '../../packages/contracts/src/mock/dev-keys.json' with { typ
 
 import { OWNER_STORAGE } from './e2e/auth-state';
 import { BASE_URL, E2E_PORT } from './e2e/base-url';
+import { INSPECT_PORT, SERVER_V8_DIR, coverageEnabled } from './scripts/coverage-gate/options';
 
 /** The contract's published test key — never a production fallback. */
 const TEST_ENTITLEMENT_KEY = devKeys.privateHex;
@@ -62,6 +64,22 @@ function databaseUrl(): string {
   return url;
 }
 
+/**
+ * The server command. Under coverage (ADR-102) it is `next start` run by
+ * `node` directly — through `pnpm exec`, the inspector would open on pnpm's
+ * process rather than Next's — with NODE_V8_COVERAGE on the server alone, so
+ * the build's own processes never write into it.
+ */
+function serverCommand(): string {
+  const nextBin = createRequire(import.meta.url).resolve('next/dist/bin/next');
+  const start = coverageEnabled
+    ? `NODE_V8_COVERAGE=${SERVER_V8_DIR} node --inspect=127.0.0.1:${INSPECT_PORT} ${nextBin} start -p ${E2E_PORT}`
+    : `pnpm exec next start -p ${E2E_PORT}`;
+  // CI builds in its own step, so a build failure reads as a build failure
+  // rather than as "webServer timed out".
+  return process.env.CI ? start : `pnpm build && ${start}`;
+}
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -70,12 +88,9 @@ export default defineConfig({
     : 'list',
   retries: process.env.CI ? 1 : 0,
   globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   webServer: {
-    // CI builds in its own step, so a build failure reads as a build failure
-    // rather than as "webServer timed out".
-    command: process.env.CI
-      ? `pnpm exec next start -p ${E2E_PORT}`
-      : `pnpm build && pnpm exec next start -p ${E2E_PORT}`,
+    command: serverCommand(),
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: process.env.CI ? 60_000 : 240_000,

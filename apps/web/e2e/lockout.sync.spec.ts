@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import { deviceHeaders } from '@xangarro/contracts';
 
 import { asTenant, BIZ } from './sync-phone';

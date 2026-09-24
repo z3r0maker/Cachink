@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './test';
 
 import { activatePhone, asTenant, BIZ, pull, type Phone } from './sync-phone';
 

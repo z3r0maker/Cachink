@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 /**
  * P-34's print stylesheet: a statement prints as the document — the sidebar,

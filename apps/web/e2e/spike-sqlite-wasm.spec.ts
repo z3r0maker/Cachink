@@ -10,7 +10,7 @@
  * owner before any fallback.
  */
 
-import { expect, test, webkit, type BrowserContext, type Page } from '@playwright/test';
+import { expect, test, webkit, type BrowserContext, type Page } from './test';
 import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { readFileSync, statSync } from 'node:fs';

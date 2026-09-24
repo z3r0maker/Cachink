@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 /**
  * P-24: the owner can fold the sidebar to its 84 px icon rail at any width,

@@ -1,4 +1,4 @@
-import { expect, test as setup } from '@playwright/test';
+import { expect, test as setup } from './test';
 
 import { OWNER_STORAGE } from './auth-state';
 

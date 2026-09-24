@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page } from './test';
 
 /**
  * Signup → "Platícanos de ti" → "Tu plan ideal" → "¿Cómo empiezo?" → re-run

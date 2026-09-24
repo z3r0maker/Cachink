@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 import { randomUUID } from 'node:crypto';
 import { deviceHeaders } from '@xangarro/contracts';
 import postgres from 'postgres';
