@@ -16,6 +16,11 @@ export function AyudaScreen() {
       <h1 className={pageTitle}>Ayuda</h1>
       <p className={pageSubtitle}>Cuéntanos qué pasa — el equipo lo ve con tu negocio adjunto</p>
       <FormularioAyuda />
+      <p style={{ marginTop: 24 }}>
+        <strong>Privacidad y mis datos.</strong> Para ver, corregir o borrar tus datos personales,
+        haz una <a href="/privacidad/solicitud">solicitud ARCO</a>. Te respondemos en un máximo de
+        20 días hábiles.
+      </p>
     </>
   );
 }

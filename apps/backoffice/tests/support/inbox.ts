@@ -35,6 +35,7 @@ export function item(overrides: Partial<SupportItem> = {}): SupportItem {
     sourceRef: 'ref-1',
     paymentRef: null,
     cfdiUuid: null,
+    dueAt: null,
     createdAt: '2026-09-17T12:00:00.000Z',
     updatedAt: '2026-09-17T12:00:00.000Z',
     resolvedAt: null,

@@ -3,5 +3,12 @@
   "framework": "vite",
   "buildCommand": "pnpm run build",
   "outputDirectory": "dist",
-  "trailingSlash": true
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/privacidad/solicitud",
+      "destination": "https://app.xangarro.mx/privacidad/solicitud",
+      "permanent": false
+    }
+  ]
 }

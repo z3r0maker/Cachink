@@ -29,6 +29,8 @@ export const supportItems = pgTable(
     sourceRef: text('source_ref').notNull(),
     paymentRef: text('payment_ref'),
     cfdiUuid: text('cfdi_uuid'),
+    /** `arco` only: the deadline to answer (0019). */
+    dueAt: instant('due_at'),
     createdAt: instant('created_at').notNull(),
     updatedAt: instant('updated_at').notNull(),
     resolvedAt: instant('resolved_at'),

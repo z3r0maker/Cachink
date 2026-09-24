@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
+
 import { Coin, Icon } from './icon';
 import { NAV_ITEMS, type NavItem } from './nav-items';
 import {
@@ -135,15 +137,20 @@ export function Sidebar({
   );
 }
 
-/** The footer's «Ayuda» link (N-08): help is never more than one tap away. */
+/**
+ * The footer's «Ayuda» link (N-08): help is never more than one tap away.
+ * Beside it, the aviso de privacidad (N-34): reachable from every screen.
+ */
 function AyudaFooter() {
+  const link = { display: 'block', padding: '0 16px 8px', color: 'var(--gray-600)' } as const;
   return (
-    <a
-      href="/ayuda"
-      className={navLabel}
-      style={{ display: 'block', padding: '0 16px 8px', color: 'var(--gray-600)' }}
-    >
-      Ayuda
-    </a>
+    <>
+      <a href="/ayuda" className={navLabel} style={link}>
+        Ayuda
+      </a>
+      <a href={AVISO_INTEGRAL_URL} className={navLabel} style={link}>
+        Aviso de privacidad
+      </a>
+    </>
   );
 }

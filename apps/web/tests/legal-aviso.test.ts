@@ -1,10 +1,14 @@
 import { describe, it } from 'vitest';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { AvisoVigenteSchema } from '@xangarro/domain';
+import {
+  AVISO_VINCULACION_VERSION,
+  AvisoVigenteSchema,
+  avisoVinculacionTexto,
+} from '@xangarro/domain';
 
 import { AVISO_PARRAFOS, AVISO_VERSION, avisoTextoCanonico } from '../src/legal/aviso-simplificado';
-import { avisoVigente, ipHash } from '../src/server/legal/aviso';
+import { avisoDeVinculacion, avisoVigente, ipHash } from '../src/server/legal/aviso';
 
 describe('aviso simplificado at signup (N-34, PRIV-REG-01)', () => {
   it('the recorded hash is the SHA-256 of the canonical text, and validates as an AvisoVigente', () => {
@@ -37,5 +41,25 @@ describe('aviso simplificado at signup (N-34, PRIV-REG-01)', () => {
     assert.equal(ipHash(''), '');
     assert.match(ipHash('203.0.113.9'), /^[0-9a-f]{64}$/);
     assert.notEqual(ipHash('203.0.113.9'), ipHash('203.0.113.10'));
+  });
+});
+
+describe('aviso shown at device linking (N-34, variante B)', () => {
+  it('keeps the version and the hash of the text this server knows for it', () => {
+    const expected = createHash('sha256').update(avisoVinculacionTexto(), 'utf8').digest('hex');
+    assert.deepEqual(avisoDeVinculacion(AVISO_VINCULACION_VERSION), {
+      avisoVersion: AVISO_VINCULACION_VERSION,
+      avisoSha256: expected,
+    });
+  });
+
+  it('keeps an unknown version without inventing a hash, and nothing for an older app', () => {
+    assert.deepEqual(avisoDeVinculacion('9.9'), { avisoVersion: '9.9', avisoSha256: null });
+    assert.deepEqual(avisoDeVinculacion(undefined), { avisoVersion: null, avisoSha256: null });
+  });
+
+  it('names the public aviso, never the portal (ADR-069)', () => {
+    assert.match(avisoVinculacionTexto(), /xangarro\.mx\/privacidad/);
+    assert.doesNotMatch(avisoVinculacionTexto(), /app\.xangarro/);
   });
 });

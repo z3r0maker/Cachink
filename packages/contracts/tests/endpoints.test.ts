@@ -60,6 +60,19 @@ describe('activate', () => {
     assert.throws(() => ActivateRequestSchema.parse({ qrToken: 'short', device }));
     assert.throws(() => ActivateRequestSchema.parse({ device }), 'neither path');
   });
+  it('carries the aviso version the device showed, optionally, on both paths (N-34)', () => {
+    const device = { name: 'iPhone', platform: 'ios', appVersion: '1.0.0', osVersion: '18.1' };
+    const typed = { email: 'a@b.mx', code: 'K7M3P9RW', device };
+    assert.equal(ActivateRequestSchema.parse(typed).avisoVersion, undefined);
+    assert.equal(
+      ActivateRequestSchema.parse({ ...typed, avisoVersion: '0.1-borrador' }).avisoVersion,
+      '0.1-borrador',
+    );
+    const scan = { qrToken: 'q8Zb3n0pXg2KlV7wR4tY1A', device, avisoVersion: '0.1-borrador' };
+    assert.equal(ActivateRequestSchema.parse(scan).avisoVersion, '0.1-borrador');
+    assert.throws(() => ActivateRequestSchema.parse({ ...typed, avisoVersion: '' }));
+    assert.throws(() => ActivateRequestSchema.parse({ ...typed, avisoVersion: 'x'.repeat(41) }));
+  });
   it('rejects ambiguous glyphs, wrong length and unknown platforms', () => {
     assert.throws(() => ActivationCodeSchema.parse('K7M3P9R0'));
     assert.throws(() => ActivationCodeSchema.parse('K7M3P9R'));

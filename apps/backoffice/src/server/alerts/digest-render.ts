@@ -46,8 +46,22 @@ function sections(d: DigestData): Section[] {
       items: [],
       note: `Emítelos en el portal del SAT y registra el UUID: ${d.consoleUrl}/inbox?filtro=pagos_sin_cfdi`,
     },
+    ...arcoSection(d),
     { ...rejectionSection(d.rejections), items: [] },
     { ...overLimitSection(d.overLimit, d.consoleUrl), items: [] },
+  ];
+}
+
+/** Open ARCO requests carry a legal clock, so they are listed until answered. */
+function arcoSection(d: DigestData): Section[] {
+  if (d.arcoOpen.length === 0) return [];
+  return [
+    {
+      title: `Solicitudes ARCO abiertas (${d.arcoOpen.length})`,
+      empty: '',
+      items: d.arcoOpen,
+      note: 'Plazo legal: 20 días hábiles para responder (el título dice la fecha).',
+    },
   ];
 }
 

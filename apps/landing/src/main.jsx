@@ -23,6 +23,10 @@ async function mountApp() {
     Component = (await import('./pages/articles/ErroresCaja.jsx')).default;
   } else if (path === '/recursos/vs-excel') {
     Component = (await import('./pages/articles/VsExcel.jsx')).default;
+  } else if (path === '/privacidad') {
+    Component = (await import('./pages/legal/Privacidad.jsx')).default;
+  } else if (path === '/privacidad/arco') {
+    Component = (await import('./pages/legal/Arco.jsx')).default;
   } else if (path === '/recursos') {
     Component = (await import('./pages/Recursos.jsx')).default;
   } else {

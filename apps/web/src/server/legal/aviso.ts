@@ -1,6 +1,10 @@
 import 'server-only';
 
-import type { AvisoVigente } from '@xangarro/domain';
+import {
+  AVISO_VINCULACION_VERSION,
+  avisoVinculacionTexto,
+  type AvisoVigente,
+} from '@xangarro/domain';
 import { createHash } from 'node:crypto';
 
 import { AVISO_VERSION, avisoTextoCanonico } from '../../legal/aviso-simplificado';
@@ -22,4 +26,19 @@ export function avisoVigente(): AvisoVigente {
 /** The IP as the ledger stores it (ADR-079): a hash, never the address. */
 export function ipHash(ip: string): string {
   return ip === '' ? '' : createHash('sha256').update(ip, 'utf8').digest('hex');
+}
+
+/**
+ * What a device row keeps about the aviso shown at linking (N-34): the version
+ * the device sent, and the hash of the text the server knows for it. A version
+ * this server does not know keeps no hash; an app that sent none keeps nulls.
+ */
+export function avisoDeVinculacion(version: string | undefined): {
+  avisoVersion: string | null;
+  avisoSha256: string | null;
+} {
+  if (version === undefined) return { avisoVersion: null, avisoSha256: null };
+  if (version !== AVISO_VINCULACION_VERSION) return { avisoVersion: version, avisoSha256: null };
+  const sha = createHash('sha256').update(avisoVinculacionTexto(), 'utf8').digest('hex');
+  return { avisoVersion: version, avisoSha256: sha };
 }

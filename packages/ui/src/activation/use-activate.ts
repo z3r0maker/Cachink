@@ -7,7 +7,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { ActivateResponse } from '@xangarro/contracts';
 import type { AppConfigRepository } from '@xangarro/data';
-import type { BusinessId } from '@xangarro/domain';
+import { AVISO_VINCULACION_VERSION, type BusinessId } from '@xangarro/domain';
 import type { ReferenceDataRepository } from '@xangarro/sync';
 import { APP_CONFIG_KEYS, useSetCurrentBusinessId, useSetMode } from '../app-config/index';
 import { useAppConfigRepository, useReferenceDataRepository } from '../app/repository-provider';
@@ -67,7 +67,12 @@ export function useActivate() {
   const setMode = useSetMode();
   return useMutation<ActivationRecord, ActivationError, ActivateInput>({
     async mutationFn(input) {
-      const res = await client.activate({ ...input, device: config.deviceInfo });
+      // N-34: the aviso this screen showed goes with the request.
+      const res = await client.activate({
+        ...input,
+        device: config.deviceInfo,
+        avisoVersion: AVISO_VINCULACION_VERSION,
+      });
       if (!res.ok) throw new ActivationError(activationErrorKey(res.code), res.message);
       return persistActivation(
         { referenceData, appConfig, tokenStore: config.tokenStore },

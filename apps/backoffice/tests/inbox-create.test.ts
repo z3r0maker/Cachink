@@ -33,6 +33,29 @@ function deps(notified: SupportItem[] = [], fail = false) {
 }
 
 describe('createSupportItem', () => {
+  it('files an ARCO request with its deadline, and refuses one without (N-34)', async () => {
+    const repo = new InMemorySupportItems();
+    const arco = {
+      ...input,
+      kind: 'arco',
+      businessId: null,
+      attachments: [],
+      source: 'portal-arco',
+      dueAt: '2026-10-21T23:59:59-06:00',
+    };
+    const { item } = await createSupportItem(repo, arco, deps());
+    assert.equal(item.kind, 'arco');
+    assert.equal(item.dueAt, '2026-10-21T23:59:59-06:00');
+    await rejectsWith(
+      createSupportItem(repo, { ...arco, sourceRef: 'evt_2', dueAt: null }, deps()),
+      'VALIDATION',
+    );
+    await rejectsWith(
+      createSupportItem(repo, { ...input, sourceRef: 'evt_3', dueAt: arco.dueAt }, deps()),
+      'VALIDATION',
+    );
+  });
+
   it('files a new, unassigned item stamped with the clock', async () => {
     const repo = new InMemorySupportItems();
     const { item, created, notified } = await createSupportItem(repo, input, deps());

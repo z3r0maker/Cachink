@@ -9,6 +9,7 @@
 import { useState, type ReactElement } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Text, View } from '@tamagui/core';
+import { AVISO_VINCULACION } from '@xangarro/domain';
 import { Btn, FloatingCoinsBackground, SafeAreaSpacer } from '../../components/index';
 import { Input } from '../../components/Input/input';
 import { useTranslation } from '../../i18n/index';
@@ -73,7 +74,23 @@ function Footnote({ t, errorKey }: { t: T; errorKey?: string | null }): ReactEle
       >
         {t('activate.noCode')}
       </Text>
+      <AvisoVinculacion />
     </>
+  );
+}
+
+/** N-34, variante B: the aviso at linking, no checkbox; its version goes with the request. */
+function AvisoVinculacion(): ReactElement {
+  return (
+    <Text
+      testID="activation-aviso"
+      fontFamily={typography.fontFamily}
+      fontSize={fontSizes.xs}
+      color={colors.gray600}
+      textAlign="center"
+    >
+      {AVISO_VINCULACION.join(' ')}
+    </Text>
   );
 }
 

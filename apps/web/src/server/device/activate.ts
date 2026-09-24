@@ -12,6 +12,7 @@ import { newUlid } from '@xangarro/domain';
 import { sql } from 'drizzle-orm';
 
 import { hashPairingToken } from '../../lib/pairing-token';
+import { avisoDeVinculacion } from '../legal/aviso';
 import { db, type Tx } from '../db';
 import { entitlementFor, referenceTables } from './bootstrap';
 import { mintDeviceToken, signEntitlement } from './credentials';
@@ -79,12 +80,14 @@ async function registerDevice(
   businessId: string,
   device: ActivateRequest['device'],
   now: string,
+  avisoVersion: string | undefined,
 ): Promise<void> {
   await tx.insert(devices).values({
     id: deviceId,
     nombre: device.name,
     plataforma: device.platform,
     modelo: device.osVersion,
+    ...avisoDeVinculacion(avisoVersion),
     businessId,
     createdAt: now,
     updatedAt: now,
@@ -101,7 +104,8 @@ export async function activate(input: ActivateRequest): Promise<ActivateResponse
     await tx.execute(sql`SELECT set_config('xangarro.business_id', ${businessId}, true)`);
     const entitlement = await entitlementFor(tx as Tx, businessId, now);
     await assertSlotFree(tx, businessId, entitlement.limits.devices);
-    await registerDevice(tx, deviceId, businessId, input.device, now.toISOString());
+    const at = now.toISOString();
+    await registerDevice(tx, deviceId, businessId, input.device, at, input.avisoVersion);
     // The committed counter, read BEFORE the tables: a write landing between
     // the two is then sent twice (harmless) rather than never (DB-SYNC-01).
     // `max(seq)` was the bug — it could sit above a row still in flight.

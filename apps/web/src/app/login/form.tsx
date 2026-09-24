@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+
+import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
 
@@ -100,6 +102,7 @@ export function LoginForm({
       <p style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
         <Link href="/login/recuperar">¿Olvidaste tu contraseña?</Link>
         <Link href="/login/enlace">Entrar con un enlace por correo</Link>
+        <a href={AVISO_INTEGRAL_URL}>Aviso de privacidad</a>
       </p>
     </AuthCard>
   );

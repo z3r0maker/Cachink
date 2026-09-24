@@ -40,7 +40,7 @@ export interface SupportItemRepository {
   list(query: SupportItemQuery): Promise<SupportItem[]>;
   /**
    * What the daily digest reads: items created at or after `since`, plus every
-   * open item that is urgent or a factura, whenever it was created.
+   * open item that is urgent, a factura or an ARCO request, whenever it was created.
    */
   listForDigest(since: string): Promise<SupportItem[]>;
 }

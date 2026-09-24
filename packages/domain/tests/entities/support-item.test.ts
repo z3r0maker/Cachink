@@ -25,6 +25,7 @@ const bug = {
   sourceRef: 'evt_123',
   paymentRef: null,
   cfdiUuid: null,
+  dueAt: null,
   createdAt: AT,
   updatedAt: AT,
   resolvedAt: null,
@@ -32,7 +33,25 @@ const bug = {
 
 const factura = { ...bug, kind: 'factura', paymentRef: 'in_1Q2w3E', attachments: [] };
 
+const arco = {
+  ...bug,
+  kind: 'arco',
+  attachments: [],
+  businessId: null,
+  dueAt: '2026-10-21T23:59:59-06:00',
+};
+
 describe('SupportItemSchema', () => {
+  it('accepts an ARCO item with its deadline (N-34)', () => {
+    assert.equal(SupportItemSchema.safeParse(arco).success, true);
+  });
+
+  it('refuses an ARCO item without a deadline, and a deadline on any other kind', () => {
+    assert.equal(SupportItemSchema.safeParse({ ...arco, dueAt: null }).success, false);
+    assert.equal(SupportItemSchema.safeParse({ ...bug, dueAt: arco.dueAt }).success, false);
+    assert.equal(SupportItemSchema.safeParse({ ...arco, dueAt: '21/10/2026' }).success, false);
+  });
+
   it('accepts a new bug item', () => {
     assert.equal(SupportItemSchema.safeParse(bug).success, true);
   });

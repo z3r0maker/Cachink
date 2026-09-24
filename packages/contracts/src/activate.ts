@@ -45,6 +45,13 @@ export const PAIRING_TOKEN_REGEX = /^[A-Za-z0-9_-]{22,64}$/;
 export const PairingTokenSchema = z.string().regex(PAIRING_TOKEN_REGEX, 'pairing token');
 
 /** Typed path: the owner's email and the 8-character code (§3, unchanged). */
+/**
+ * The aviso de privacidad version the device showed before linking (N-34).
+ * Optional and additive: an older app omits it and still links; the server
+ * keeps the version it knows, with its hash, on the device row.
+ */
+export const AvisoVersionSchema = z.string().trim().min(1).max(40);
+
 export const TypedActivateRequestSchema = z.object({
   email: z
     .string()
@@ -52,12 +59,14 @@ export const TypedActivateRequestSchema = z.object({
     .pipe(z.email()),
   code: ActivationCodeSchema,
   device: DeviceInfoSchema,
+  avisoVersion: AvisoVersionSchema.optional(),
 });
 
 /** Scan path (C-14): the token alone — the 128 bits are the credential, no email. */
 export const ScanActivateRequestSchema = z.object({
   qrToken: PairingTokenSchema,
   device: DeviceInfoSchema,
+  avisoVersion: AvisoVersionSchema.optional(),
 });
 
 /** Either path; additive at protocol version 1 (C-16 precedent). */

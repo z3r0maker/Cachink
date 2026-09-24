@@ -6,7 +6,7 @@ import type { StaffMemberId, SupportItem } from '@xangarro/domain';
 import { db } from '@/server/db/client';
 import { drizzleSupportItems } from '@/server/db/support-items';
 import { SupportItemError } from '@/server/inbox/errors';
-import { formatInstant, KIND_LABELS, STATUS_LABELS } from '@/server/inbox/labels';
+import { formatDueDay, formatInstant, KIND_LABELS, STATUS_LABELS } from '@/server/inbox/labels';
 import { loadItem } from '@/server/inbox/load';
 import { requireStaffPage } from '@/server/staff';
 import { heading, label, muted } from '@/styles/ui.css';
@@ -50,21 +50,32 @@ function Facts({ item, me }: { readonly item: SupportItem; readonly me: StaffMem
       <dd>
         {item.source} · {item.sourceRef}
       </dd>
-      {item.paymentRef ? (
-        <>
-          <dt className={label}>Pago</dt>
-          <dd>{item.paymentRef}</dd>
-        </>
-      ) : null}
-      {item.cfdiUuid ? (
-        <>
-          <dt className={label}>CFDI</dt>
-          <dd>{item.cfdiUuid}</dd>
-        </>
-      ) : null}
+      <KindFacts item={item} />
       <dt className={label}>Recibido</dt>
       <dd>{formatInstant(item.createdAt)}</dd>
     </dl>
+  );
+}
+
+/** The rows only some kinds carry: a factura's payment and CFDI, an ARCO deadline. */
+function KindFacts({ item }: { readonly item: SupportItem }) {
+  const row = (term: string, value: string) => (
+    <>
+      <dt className={label}>{term}</dt>
+      <dd>{value}</dd>
+    </>
+  );
+  return (
+    <>
+      {item.paymentRef ? row('Pago', item.paymentRef) : null}
+      {item.dueAt
+        ? row(
+            'Responder antes del',
+            `${formatDueDay(item.dueAt)} · 20 días hábiles; ejecutar en 15 más`,
+          )
+        : null}
+      {item.cfdiUuid ? row('CFDI', item.cfdiUuid) : null}
+    </>
   );
 }
 

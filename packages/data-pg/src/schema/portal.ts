@@ -128,6 +128,9 @@ export const devices = pgTable(
     revokedAt: timestamp('revoked_at', { withTimezone: true, mode: 'string' }),
     /** Highest serverSeq this device's pushes were accepted at — its purge bound (A-11). */
     acknowledgedThrough: bigint('acknowledged_through', { mode: 'number' }).notNull().default(0),
+    /** The aviso de privacidad version shown at linking, and its text's SHA-256 (0041, N-34). */
+    avisoVersion: text('aviso_version'),
+    avisoSha256: text('aviso_sha256'),
     ...tenantStamps,
   },
   (t) => [index('devices_business_idx').on(t.businessId)],
