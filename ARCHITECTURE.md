@@ -7068,3 +7068,15 @@ touch was under-reported. Lines were unaffected (merged by byte range), which is
 why lines read 85% while statements and branches lagged. Behaviour is the same
 unminified; bundle size is the only difference, and nothing in the suite
 measures it.
+
+**Amendment 2026-09-24 — one copy per entry.** Next compiles a module once per
+webpack layer, so a page's server chunk can hold two copies of one file — the
+render layer's and the server action's — and only one runs. MCR folds copies
+inside one script into one state and keeps the first it meets, which was often
+the dead one: `server/import/templates.ts` read 0% while the import specs drove
+it. `e2e/coverage-split.ts` hands such a script to MCR as one entry per copy,
+the other copies marked unexecuted, so MCR's cross-script merge (covered if any
+copy ran) applies. 29 portal files were duplicated this way. Also: the
+source-path rule is now structural (strip wrapper segments, expect `src/`) —
+the unminified build renamed the server's sources and the old list of
+spellings silently dropped ~500 of them.

@@ -448,6 +448,12 @@ importers:
       '@axe-core/playwright':
         specifier: ^4.13.0
         version: 4.13.0(playwright-core@1.63.0)
+      '@jridgewell/gen-mapping':
+        specifier: ^0.3.13
+        version: 0.3.13
+      '@jridgewell/trace-mapping':
+        specifier: ^0.3.31
+        version: 0.3.31
       '@playwright/test':
         specifier: ^1.63.0
         version: 1.63.0
@@ -468,7 +474,7 @@ importers:
         version: 1.4.11
       '@vanilla-extract/next-plugin':
         specifier: ^2.5.2
-        version: 2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))(yaml@2.9.1)
+        version: 2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))(yaml@2.9.1)
       '@xangarro/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -15989,10 +15995,10 @@ snapshots:
       - babel-plugin-macros
       - supports-color
 
-  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0))(yaml@2.9.1)':
+  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))(yaml@2.9.1)':
     dependencies:
-      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
-      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0))
+      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
+      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))
       next: 16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       semver: 7.8.5
     transitivePeerDependencies:
@@ -16013,10 +16019,10 @@ snapshots:
       - webpack
       - yaml
 
-  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))(yaml@2.9.1)':
+  '@vanilla-extract/next-plugin@2.5.2(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(webpack@5.111.0(esbuild@0.28.0))(yaml@2.9.1)':
     dependencies:
-      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
-      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0)(sharp@0.35.4(@types/node@22.19.17)))
+      '@vanilla-extract/turbopack-plugin': 0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)
+      '@vanilla-extract/webpack-plugin': 2.3.27(webpack@5.111.0(esbuild@0.28.0))
       next: 16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       semver: 7.8.5
     transitivePeerDependencies:
@@ -16043,7 +16049,7 @@ snapshots:
     dependencies:
       '@vanilla-extract/css': 1.21.2
 
-  '@vanilla-extract/turbopack-plugin@0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)':
+  '@vanilla-extract/turbopack-plugin@0.1.4(@swc/helpers@0.5.23)(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(next@16.3.5(@babel/core@7.29.0)(@opentelemetry/api@1.9.1)(@playwright/test@1.63.0)(@types/node@22.19.17)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)':
     dependencies:
       '@swc/core': 1.16.2(@swc/helpers@0.5.23)
       '@vanilla-extract/compiler': 0.7.2(@types/node@22.19.17)(esbuild@0.28.0)(jiti@2.7.0)(terser@5.51.2)(tsx@4.23.13)(yaml@2.9.1)

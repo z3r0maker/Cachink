@@ -30,18 +30,26 @@ export const coverageEnabled = process.env.XG_COVERAGE === '1';
 export const INSPECT_PORT = Number(process.env.XG_INSPECT_PORT ?? 9331);
 
 /**
- * Every spelling a portal file arrives in, reduced to `src/…`. MCR has already
- * dropped the `webpack://` scheme, so the client bundle gives `_N_E/src/…` and
- * the server bundle `xangarro/web/src/…`; untested files come as absolute
- * paths and Vitest's as `src/…`. Anything else — a shared package's
- * `packages/domain/src/…`, Next's own `src/client/…` — keeps its spelling and
- * fails `isPortalSource`.
+ * Every spelling a portal file arrives in, reduced to `src/…`. The bundles name
+ * the app's files after webpack's context and layer, and the spelling moves
+ * with the build: `_N_E/src/…` (client), `xangarro/web/src/…` (minified server),
+ * `xangarro/src/…` and `xangarro/web/_N_E/src/…` (unminified server, after MCR
+ * drops `webpack://@` and `./`). So the rule is structural — strip leading
+ * wrapper segments, then expect `src/` — not a list of spellings: a list went
+ * stale the day the build changed and silently dropped ~500 server files.
+ * Untested files arrive absolute and Vitest's as `src/…`. A shared package's
+ * `…/packages/domain/src/…` keeps its spelling and fails `isPortalSource`.
  */
-const PORTAL_FILE = /^(?:.*\/apps\/web\/|_N_E\/|xangarro\/(?:apps\/)?web\/)?(src\/.*)$/;
+const WRAPPER = new Set(['@xangarro', 'xangarro', 'web', '_N_E', '.']);
 
 export function toSourcePath(filePath: string): string {
   const bare = filePath.replace(/\\/g, '/').split('?')[0] ?? '';
-  return PORTAL_FILE.exec(bare)?.[1] ?? bare;
+  const inApp = /(?:^|\/)apps\/web\/(src\/.*)$/.exec(bare);
+  if (inApp?.[1] !== undefined) return inApp[1];
+  const parts = bare.replace(/^webpack:\/\//, '').split('/');
+  let i = 0;
+  while (i < parts.length - 1 && WRAPPER.has(parts[i] ?? '')) i++;
+  return parts[i] === 'src' ? parts.slice(i).join('/') : bare;
 }
 
 const onDisk = new Map<string, boolean>();

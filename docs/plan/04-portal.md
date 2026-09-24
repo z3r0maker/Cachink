@@ -1461,6 +1461,11 @@ critical avisos cannot be switched off.
     (ADR-102 amendment); `csv.ts` now reads 38/39 and 25/25 merged.
   - 2026-09-24 · **Re-measured unminified** (run 36038951217): lines 85.6%, statements 83.2%,
     functions 79.8%, branches 69.5%. Floor 84 / 82 / 78 / 68.
+  - 2026-09-24 · **Two more measurement bugs, both under-counting the server**: the unminified
+    build renamed server sources (`xangarro/src/…`) and the path rule dropped ~500 of them; and a
+    module compiled into both webpack layers of one chunk kept its dead copy's 0 (29 files, e.g.
+    `server/import/templates.ts`). Fixed in `options.ts` and `e2e/coverage-split.ts` (ADR-102
+    amendment). Also: `server/billing/actions.ts` unit-tested (was 0%).
 - **Steps:** raise the floor with `--raise` in the commit that earns it. The largest gaps,
   in uncovered lines at the first measurement (≈700 lines to 85%):
   1. ~~`operador/runtime` (19%, 285 lines)~~ — done 2026-09-24: Worker coverage, 95%.
