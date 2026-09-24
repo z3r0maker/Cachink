@@ -51,7 +51,11 @@ export function requirementsFor(answers: WizardAnswers): AnswerRequirement[] {
   return out;
 }
 
-/** Each person who cobra needs an operator and a device slot. */
+/**
+ * Each person who cobra needs an operator and a device slot. Devices are the
+ * tighter of the two since ADR-104 (operators = devices + 1), so the
+ * suggestion is the same as before the owner got a seat of his own.
+ */
 export function planSatisfies(plan: PlanId, requirement: PlanRequirement): boolean {
   const limits = PLAN_LIMITS[plan];
   if (requirement.kind === 'feature') return limits.features.includes(requirement.key);

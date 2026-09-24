@@ -7049,3 +7049,46 @@ was quietly violating it two projects later.
 - The lock lives in a test-only `e2e` schema on the throwaway database. It is
   never a migration, and `pnpm dev` against that database is unencumbered once
   the run ends.
+
+## ADR-104
+
+**Title:** Each plan is «dueño + N empleados»: N linked devices and N + 1 operators
+
+**Date:** 2026-09-24
+
+**Status:** Accepted — owner decision of 2026-09-24 (landing redesign); amends the
+«devices equal operators» rule of `PLAN_LIMITS`
+
+**Context**
+
+The plans were sold as 1 / 2 / 5 operators, and `PLAN_LIMITS` kept devices equal
+to operators. «2 operadores (dueño + empleado)» meant an owner who works the
+counter spends one of the two seats. The redesigned landing and the portal's plan
+cards now say «Dueño + 1 empleado», «Dueño + 2 empleados», «Dueño + 5 empleados»,
+each with that many linked devices, and the owner decided that the owner is not
+counted against the employees.
+
+**Decision**
+
+- `devices` stays 1 / 2 / 5: one linked device per employee.
+- `operators` becomes 2 / 3 / 6: the employees plus one NIP for the owner, so an
+  owner who cobra never takes an employee's seat. The invariant is now
+  `operators = devices + 1`, pinned by `plan.test.ts`.
+- The onboarding suggestion (`planSatisfies`) keeps requiring both an operator and
+  a device per person who cobra; devices are now the tighter limit, so the plan it
+  suggests does not change.
+
+**Alternatives considered**
+
+- *Employees only (1 / 2 / 5 operators, owner portal-only).* Rejected: owners of
+  small businesses cobran themselves, and a NIP is how the caja knows who sold.
+- *Copy only.* Rejected: the page would promise a seat the entitlement refuses.
+
+**Consequences**
+
+- Every surface reads `PLAN_LIMITS`, so the portal (Equipo, Suscripción), the
+  backoffice tenant view, the signed entitlement and the phones pick the new
+  numbers up without further change.
+- `e2e/operators.spec.ts` changes shape: the seeded tenant (Xangarro, Ana and Luis)
+  starts at «2 de 3 operadores»; adding a third fills it.
+- The design files still say «operadores»; they follow this ADR.

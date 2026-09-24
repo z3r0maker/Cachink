@@ -44,9 +44,12 @@ export interface PlanCapabilities {
 }
 
 export interface PlanLimits {
-  /** Max active Operators (PIN users). */
+  /**
+   * Max active Operators (PIN users): the plan's employees plus one NIP for
+   * the owner, so an owner who cobra never takes an employee's seat (ADR-104).
+   */
   readonly operators: number;
-  /** Max active devices — equals `operators` by decision. */
+  /** Max linked devices — one per employee, i.e. `operators - 1` (ADR-104). */
   readonly devices: number;
   /** Transactions (tickets + gastos + manual/portal movements) per month (C-12, ADR-065). */
   readonly transactionsPerMonth: number;
@@ -60,7 +63,7 @@ export interface PlanLimits {
 
 export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
   xangarrito: {
-    operators: 1,
+    operators: 2,
     devices: 1,
     transactionsPerMonth: 300,
     activeProducts: 50,
@@ -74,7 +77,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     },
   },
   xangarro: {
-    operators: 2,
+    operators: 3,
     devices: 2,
     transactionsPerMonth: 10_000,
     activeProducts: 1_000,
@@ -88,7 +91,7 @@ export const PLAN_LIMITS: Record<PlanId, PlanLimits> = {
     },
   },
   xangarrote: {
-    operators: 5,
+    operators: 6,
     devices: 5,
     transactionsPerMonth: 30_000,
     activeProducts: 5_000,
