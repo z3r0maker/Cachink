@@ -30,9 +30,13 @@ describe('pairing token (C-14)', () => {
     assert.equal(hashPairingToken(t).includes(t), false);
   });
 
+  // The literal is named for `.gitleaks.toml`'s allowlist: a 22-char random
+  // base64url fixture reads as a live credential to the generic-api-key rule,
+  // and failed the secret scan once already. It still satisfies
+  // PAIRING_TOKEN_REGEX, so the assertion is unchanged.
   it('puts the token in the fragment, so no server or Referer ever sees it', () => {
-    const link = pairingLink('https://app.xangarro.mx/', 'q8Zb3n0pXg2KlV7wR4tY1A');
-    assert.equal(link, 'https://app.xangarro.mx/activar#c=q8Zb3n0pXg2KlV7wR4tY1A');
+    const link = pairingLink('https://app.xangarro.mx/', 'dev-only-not-a-real-secret');
+    assert.equal(link, 'https://app.xangarro.mx/activar#c=dev-only-not-a-real-secret');
     const url = new URL(link);
     assert.equal(url.search, '');
     assert.equal(url.pathname, '/activar');

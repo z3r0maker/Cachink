@@ -53,10 +53,11 @@ describe('activate', () => {
     });
     assert.equal(r.device.platform, 'web');
   });
+  // Named for `.gitleaks.toml`'s allowlist — see pairing-token.test.ts.
   it('accepts the scan path with the token alone, and refuses a short token (C-14)', () => {
     const device = { name: 'iPhone', platform: 'ios', appVersion: '1.0.0', osVersion: '18.1' };
-    const r = ActivateRequestSchema.parse({ qrToken: 'q8Zb3n0pXg2KlV7wR4tY1A', device });
-    assert.equal('qrToken' in r && r.qrToken, 'q8Zb3n0pXg2KlV7wR4tY1A');
+    const r = ActivateRequestSchema.parse({ qrToken: 'dev-only-not-a-real-secret', device });
+    assert.equal('qrToken' in r && r.qrToken, 'dev-only-not-a-real-secret');
     assert.throws(() => ActivateRequestSchema.parse({ qrToken: 'short', device }));
     assert.throws(() => ActivateRequestSchema.parse({ device }), 'neither path');
   });
@@ -68,7 +69,7 @@ describe('activate', () => {
       ActivateRequestSchema.parse({ ...typed, avisoVersion: '0.1-borrador' }).avisoVersion,
       '0.1-borrador',
     );
-    const scan = { qrToken: 'q8Zb3n0pXg2KlV7wR4tY1A', device, avisoVersion: '0.1-borrador' };
+    const scan = { qrToken: 'dev-only-not-a-real-secret', device, avisoVersion: '0.1-borrador' };
     assert.equal(ActivateRequestSchema.parse(scan).avisoVersion, '0.1-borrador');
     assert.throws(() => ActivateRequestSchema.parse({ ...typed, avisoVersion: '' }));
     assert.throws(() => ActivateRequestSchema.parse({ ...typed, avisoVersion: 'x'.repeat(41) }));
