@@ -6,26 +6,78 @@ import { randomUUID } from 'node:crypto';
 import { asTenant } from './sync-phone';
 
 /**
- * P-09's range chips and pagination. The chips are relative to the business's
- * today, which the suite pins to the seed's day (2026-05-12, a Tuesday):
- * Hoy has 3 of the seeded ventas, the week (11–17) 5, «Mayo 2026» all 6.
+ * P-09's range chips and pagination. The suite pins the business's today to
+ * 2026-05-12, a Tuesday, so «Semana» is 11–17 May and «Mayo 2026» is the month.
+ *
+ * This used to assert a census — Hoy 3, Semana 5, the month 6 — read off the
+ * seed of the day. The seed then grew a real ledger anchored to the run date,
+ * the counts became 6 and 8, and the test failed for a change that broke
+ * nothing. A census is a fact about the fixture, not about the feature.
+ *
+ * What the chip promises is in `periodo.ts`: each chip **is** a range, and
+ * «a chip that only highlights is a bug». So that is what this asserts — every
+ * row shown falls inside the chosen range, and the counter agrees with the
+ * rows. No number here has to move when the seed does.
  */
 const counter = (page: Page) => page.locator('main').getByRole('status');
 
+/** The first cell of each row is the ISO date (`COLUMNS[0]`, `FechaCell`). */
+async function fechasMostradas(page: Page): Promise<readonly string[]> {
+  const celdas = await page.locator('main tbody tr td:first-child').allInnerTexts();
+  // The cell stacks date over time; the date is its first line.
+  return celdas.map((t) => (t.split('\n')[0] ?? '').trim());
+}
+
+async function totalDelContador(page: Page): Promise<number> {
+  const texto = (await counter(page).innerText()).trim();
+  const hit = /^Mostrando 1–(\d+) de (\d+) movimientos$/.exec(texto);
+  expect(hit, `unreadable counter: ${texto}`).not.toBeNull();
+  return Number(hit?.[2]);
+}
+
+async function enRango(page: Page, desde: string, hasta: string): Promise<number> {
+  const fechas = await fechasMostradas(page);
+  // An empty table would satisfy "every row is in range" vacuously.
+  expect(fechas.length, 'the range shows no rows at all').toBeGreaterThan(0);
+  for (const fecha of fechas) {
+    expect(fecha >= desde && fecha <= hasta, `${fecha} is outside ${desde}…${hasta}`).toBe(true);
+  }
+  const total = await totalDelContador(page);
+  // One page holds this seed; if that stops being true the counter still has
+  // to be at least what is on screen.
+  expect(total).toBeGreaterThanOrEqual(fechas.length);
+  return total;
+}
+
 test('each range chip filters the rows and the counter follows', async ({ page }) => {
   await page.goto('/movimientos');
-  // Parallel projects add rows; the invariant is the counter matches the
-  // rows shown, not a fixed census.
   await expect(counter(page)).toHaveText(/^Mostrando 1–\d+ de \d+ movimientos$/);
+  // The screen opens on the month chip (`use-movimientos.ts`), so the first
+  // view is already filtered — which is why the strict narrowing below is
+  // measured against the month, not against this.
+  const alAbrir = await enRango(page, '2026-05-01', '2026-05-31');
+
   await page.getByRole('button', { name: 'Hoy', exact: true }).click();
-  await expect(counter(page)).toHaveText('Mostrando 1–3 de 3 movimientos');
+  const hoy = await enRango(page, '2026-05-12', '2026-05-12');
+
   await page.getByRole('button', { name: 'Semana', exact: true }).click();
-  await expect(counter(page)).toHaveText('Mostrando 1–5 de 5 movimientos');
+  const semana = await enRango(page, '2026-05-11', '2026-05-17');
+
+  await page.getByRole('button', { name: 'Mayo 2026', exact: true }).click();
+  const mes = await enRango(page, '2026-05-01', '2026-05-31');
+
+  // Nested ranges. The month holds days other than the 12th, so Hoy must be a
+  // *strict* subset of it — that is what catches a chip which highlights
+  // without filtering, the bug `periodo.ts` names.
+  expect(hoy).toBeLessThanOrEqual(semana);
+  expect(semana).toBeLessThanOrEqual(mes);
+  expect(hoy).toBeLessThan(mes);
+  expect(mes).toBe(alAbrir);
+
   await page.getByRole('button', { name: 'Personalizado', exact: true }).click();
   await page.getByTestId('rango-desde').fill('2026-05-11');
   await page.getByTestId('rango-hasta').fill('2026-05-11');
-  await expect(counter(page)).toHaveText('Mostrando 1–2 de 2 movimientos');
-  await expect(page.locator('main').getByText('Quesadilla ×2')).toBeVisible();
+  await enRango(page, '2026-05-11', '2026-05-11');
 });
 
 test.describe('pagination', () => {

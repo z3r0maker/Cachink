@@ -14,7 +14,13 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const email = `saldos-${Date.now()}@test.mx`;
+// A fresh address per *process*, not per millisecond: this file's `beforeAll`
+// runs once in every viewport project, and three of them starting inside the
+// same millisecond gave `Date.now()` the same value and the second insert a
+// duplicate `users_email_key`. `onboarding.spec.ts` already carries a patch
+// for the same collision.
+const sello = randomUUID();
+const email = `saldos-${sello}@test.mx`;
 const biz = newUlid();
 
 test.beforeAll(async () => {
@@ -24,7 +30,7 @@ test.beforeAll(async () => {
     await sql`INSERT INTO auth.users (id, email, encrypted_password) VALUES (${userId}::uuid, ${email}, ${hash})`;
     await sql`
       INSERT INTO businesses (id, nombre, regimen_fiscal, isr_tasa, business_id, device_id, created_at, updated_at)
-      VALUES (${biz}, ${`Saldos ${Date.now()}`}, 'RESICO', 125, ${biz}, ${newUlid()}, now(), now())`;
+      VALUES (${biz}, ${`Saldos ${sello}`}, 'RESICO', 125, ${biz}, ${newUlid()}, now(), now())`;
     await sql`
       INSERT INTO business_members (id, user_id, role, business_id, created_at, updated_at)
       VALUES (${newUlid()}, ${userId}, 'owner', ${biz}, now(), now())`;
@@ -38,7 +44,7 @@ test.beforeAll(async () => {
     await billing`
       INSERT INTO subscriptions (stripe_subscription_id, business_id, stripe_customer_id, plan_id, interval,
         status, stripe_status, current_period_start, current_period_end, collection_method)
-      VALUES (${`sub_saldos_${Date.now()}`}, ${biz}, ${`cus_saldos_${Date.now()}`}, 'xangarro', 'month',
+      VALUES (${`sub_saldos_${sello}`}, ${biz}, ${`cus_saldos_${sello}`}, 'xangarro', 'month',
         'active', 'active', now() - interval '1 day', now() + interval '1 month', 'charge_automatically')`;
   } finally {
     await billing.end({ timeout: 5 });

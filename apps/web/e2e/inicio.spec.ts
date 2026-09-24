@@ -28,9 +28,22 @@ test('the greeting names the account and the checklist card reads real data', as
   await expect(main.getByRole('heading', { name: 'Hola, Pedro' })).toBeVisible();
   const card = main.getByTestId('inicio-checklist');
   await expect(card).toBeVisible();
-  // The seed has operators, products, devices and sales; only the logo is missing.
-  await expect(main.getByText('5 de 6 listos.')).toBeVisible();
-  await expect(card.getByText('Sube tu logo')).toBeVisible();
+
+  // The summary counts the items the card renders. It used to say «5 de 6»,
+  // which broke twice over: N-17 added the saldos item (six became seven), and
+  // whether saldos are ticked depends on whether `saldos-iniciales.spec.ts`
+  // ran first — a census here makes this test depend on suite order.
+  const items = card.locator('li[data-done]');
+  const total = await items.count();
+  const listos = await card.locator('li[data-done="true"]').count();
+  await expect(main.getByText(`${listos} de ${total} listos.`)).toBeVisible();
+
+  // And it is really reading data, not rendering a constant: the seed ticks
+  // operador, productos, código, dispositivo and venta, and the logo was just
+  // cleared above, so it cannot be complete.
+  expect(listos).toBeGreaterThanOrEqual(5);
+  expect(listos).toBeLessThan(total);
+  await expect(card.locator('li[data-done="false"]').getByText('Sube tu logo')).toBeVisible();
   await expect(main.getByRole('link', { name: 'Ver todo' })).toHaveAttribute(
     'href',
     '/como-empiezo',

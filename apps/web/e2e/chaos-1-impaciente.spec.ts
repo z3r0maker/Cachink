@@ -162,5 +162,10 @@ test('reloading mid-save leaves DB and UI reconciled, no phantom state', async (
   await page.goto('/productos');
   const dbName = await readName();
   expect([oldName, newName], 'a killed in-flight write must land atomically').toContain(dbName);
-  await expect(page.locator('main').getByText(dbName)).toBeVisible();
+  // Scoped to this product's row. Searching the whole table for the name was
+  // a strict-mode violation the day the seed grew a second «Refresco» (the
+  // finanzas ledger creates products without SKUs), and the claim was never
+  // about the name being *somewhere* — it is that BEB-002's row agrees with
+  // Postgres.
+  await expect(page.locator('main').locator('tr', { hasText: 'BEB-002' })).toContainText(dbName);
 });

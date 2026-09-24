@@ -70,12 +70,24 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await expect(page.getByTestId('plan-price')).toHaveText('$1,990 al año + IVA');
   await expect(page.getByText('Incluido en Xangarro').first()).toBeVisible();
 
-  await page.getByRole('button', { name: 'Probar 14 días' }).click();
-  await expect(page.getByText('Pronto podrás activar tu prueba')).toBeVisible();
+  // «Probar 14 días» is deliberately not clicked here. What it does depends on
+  // whether Stripe is configured: with keys it navigates to Checkout
+  // (`window.location.assign`), and this test — whose subject is the *free*
+  // path — cannot come back from that. Without keys it showed «Pronto podrás
+  // activar tu prueba», which is the branch this test used to assert, so the
+  // test only passed on a machine with billing half-configured. The button's
+  // presence is the claim that belongs here; where it leads is B-10's.
+  await expect(page.getByRole('button', { name: 'Probar 14 días' })).toBeEnabled();
 
   await page.getByRole('button', { name: 'Seguir gratis' }).click();
   await expect(page.getByRole('heading', { name: '¿Cómo empiezo?' })).toBeVisible();
-  await expect(page.getByText('0 de 6 listos')).toBeVisible();
+  // A brand-new business has ticked nothing; the total is however many items
+  // the checklist has (N-17 made it seven, and this said six).
+  const checklist = page.getByTestId('checklist');
+  await expect(
+    page.getByText(`0 de ${await checklist.locator('li[data-done]').count()} listos`),
+  ).toBeVisible();
+  await expect(checklist.locator('li[data-done="true"]')).toHaveCount(0);
 
   // N-15: re-running with the same answers changes nothing.
   await page.getByRole('link', { name: 'Volver a configurar mi negocio' }).click();

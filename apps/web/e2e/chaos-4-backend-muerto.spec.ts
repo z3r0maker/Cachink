@@ -126,9 +126,15 @@ test('device API answers its exact error contract (real, unmocked)', async ({ pa
   });
   expect([400, 401]).toContain(push.status());
 
-  // 500 — unsigned Stripe webhook (billing unconfigured in the e2e env).
+  // 400/500 — an unsigned Stripe webhook is refused, never applied. Which of
+  // the two you get is an environment fact, not a contract: with billing
+  // configured `webhook.ts` answers 400 («a bad or missing signature is a
+  // 400»), and without it the route answers 500 before reaching that check.
+  // CI has no Stripe keys and saw 500; a developer with `.env.local` sees 400,
+  // and asserting either one alone makes the suite depend on whose machine it
+  // runs on. What must never happen is a 2xx.
   const webhook = await page.request.post('/api/stripe/webhook', { data: '{}' });
-  expect(webhook.status()).toBe(500);
+  expect([400, 500]).toContain(webhook.status());
 });
 
 test.describe('cookie-gated surface (signed out)', () => {

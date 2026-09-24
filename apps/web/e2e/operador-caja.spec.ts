@@ -57,8 +57,11 @@ test('short cash keeps «Registrar venta» disabled and says what is missing', a
 test('a credit sale needs a client, then adds to their balance', async ({ page }) => {
   await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 6000, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
+  // Its own seeded line, like every other test here. Tapping the shared
+  // «Gringa» broke the moment `chaos-2` renamed GRI-001 to its SQL payload —
+  // and the file's own rule is that every line was tapped by this test.
   await page
-    .getByRole('button', { name: /Gringa/ })
+    .getByRole('button', { name: /Suadero del día/ })
     .first()
     .click();
   await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
@@ -89,11 +92,13 @@ test('«Deshacer» brings the sold lines back', async ({ page }) => {
   await puertaOperador(page, [{ nombre: 'Suadero del día', precioCentavos: 6000, sku: 'OPCAJA1' }]);
   await page.goto('/operador/caja');
   await page
-    .getByRole('button', { name: /Gringa/ })
+    .getByRole('button', { name: /Suadero del día/ })
     .first()
     .click();
   await (await ticket(page)).getByRole('button', { name: 'Cobrar', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Tarjeta' }).click();
   await page.getByRole('status').getByRole('button', { name: 'Deshacer' }).click();
-  await expect(page.locator('aside[aria-label=Ticket]').getByText('Gringa')).toBeAttached();
+  await expect(
+    page.locator('aside[aria-label=Ticket]').getByText('Suadero del día'),
+  ).toBeAttached();
 });

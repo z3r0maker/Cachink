@@ -95,12 +95,40 @@ test('a 10,000-character name is refused by the server, row untouched', async ({
   expect(await readName()).toBe(before);
 });
 
+/** Seeded SKUs this test never touches: if the payload had run, they would be gone. */
+const SEMBRADOS = ['BEB-001', 'BEB-002', 'MP-001', 'QUE-001'] as const;
+
+/** The seeded Gringa, by id — the one row this test is allowed to wreck. */
+const GRINGA = '01HZ8XQN9GZJXV8AKQ5X0PGRN1';
+
+const restaurarGringa = () =>
+  query((sql) => sql`UPDATE products SET nombre = 'Gringa', sku = 'GRI-001' WHERE id = ${GRINGA}`);
+
+// Put it back even when the test fails. The payload replaces both the name and
+// the SKU, and a row left mangled follows the suite around: it is what took
+// `operador-caja.spec.ts` down two projects later.
+//
+// Desktop only, and that qualifier is load-bearing: the tests below skip inside
+// their bodies, so laptop and tablet still reach this hook — and an unguarded
+// restore there wiped the payload from under the desktop run mid-assertion.
+test.afterAll(async ({}, testInfo) => {
+  if (testInfo.project.name === 'desktop') await restaurarGringa();
+});
+
 test('SQL fragments in name and SKU are inert end to end', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'mutates a shared row');
   const dialogs = failOnJsDialog(page);
 
   const nombre = `🌮 peor caso'); DROP TABLE products; --`;
   const sku = `x'; DELETE FROM products WHERE '1'='1`;
+
+  // This test's payload *is* the SKU it looks the row up by, so one run leaves
+  // no GRI-001 for the next: it passed on a fresh seed and timed out on every
+  // re-run, looking for a row it had renamed itself. Put the fixture back
+  // first, by id, so the test is honest about owning this row and can run
+  // twice.
+  await restaurarGringa();
+
   await openEditor(page, 'GRI-001');
   await page.getByTestId('producto-nombre').fill(nombre);
   await page.getByTestId('producto-sku').fill(sku);
@@ -111,13 +139,20 @@ test('SQL fragments in name and SKU are inert end to end', async ({ page }, test
   expect(dialogs.fired()).toBe(false);
 
   const state = await query(async (sql) => {
-    const [count] = await sql<{ n: string }[]>`SELECT count(*)::text AS n FROM products`;
     const [row] = await sql<
       { nombre: string; sku: string | null }[]
     >`SELECT nombre, sku FROM products WHERE sku = ${sku}`;
-    return { count: Number(count?.n ?? 0), row };
+    const vivos = await sql<
+      { sku: string }[]
+    >`SELECT sku FROM products WHERE sku IN ${sql(SEMBRADOS)} AND deleted_at IS NULL`;
+    return { row, vivos: vivos.map((r) => r.sku).sort() };
   });
-  expect(state.count, 'products table must survive the injection attempt').toBe(6);
+  // Not `count(*)`: the operador project seeds its own products in parallel, so
+  // the total moves under this test for reasons that have nothing to do with
+  // the payload — a census here failed for someone else's fixture. `DROP TABLE`
+  // and `DELETE FROM products WHERE '1'='1'` would both take the seeded rows
+  // with them, so naming them is the sharper claim.
+  expect(state.vivos, 'products table must survive the injection attempt').toEqual([...SEMBRADOS]);
   expect(state.row?.nombre).toBe(nombre);
 });
 

@@ -12,7 +12,12 @@ import { asTenant } from './sync-phone';
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const email = `avisos-${Date.now()}@test.mx`;
+// A fresh address per *process*, not per millisecond: this file's `beforeAll`
+// runs once in every viewport project, and three of them starting inside the
+// same millisecond gave `Date.now()` the same value and the second insert a
+// duplicate `users_email_key`. `onboarding.spec.ts` already carries a patch
+// for the same collision.
+const email = `avisos-${randomUUID()}@test.mx`;
 const biz = newUlid();
 
 test.beforeAll(async () => {
