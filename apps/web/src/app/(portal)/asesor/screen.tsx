@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { ScreenBody, SegmentedTabs, Tag } from '@/components';
+import { DON_CUENTAS, DonCuentasAvatar, ScreenBody, SegmentedTabs } from '@/components';
 import { useSession } from '@/session/provider';
 import { asesorShowsDiagnostico, resolveScreenState } from '@/session/gating';
 
@@ -23,14 +23,12 @@ const TABS = [
 
 function Heading() {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+      <DonCuentasAvatar size="lg" />
       <div>
-        <h1 className={pageTitle}>Asesor</h1>
-        <p className={pageSubtitle}>Lo que tus números te están diciendo</p>
+        <h1 className={pageTitle}>{DON_CUENTAS}</h1>
+        <p className={pageSubtitle}>Tu asesor: lo que tus números te están diciendo</p>
       </div>
-      <span style={{ marginLeft: 'auto' }}>
-        <Tag tone="soft">Asesor</Tag>
-      </span>
     </div>
   );
 }
@@ -58,7 +56,7 @@ function Diagnostico() {
         }}
         proximamente={{
           title: 'El Diagnóstico llega pronto',
-          body: 'Estamos afinando la lectura mensual de tu negocio. Mientras tanto, tu Asesor sigue avisándote cada día en «Para ti».',
+          body: 'Estamos afinando la lectura mensual de tu negocio. Mientras tanto, Don Cuentas sigue avisándote cada día en «Para ti».',
         }}
       >
         <p>Reporte completo del mes.</p>
@@ -84,7 +82,7 @@ export function AsesorScreen({
   return (
     <>
       <Heading />
-      <SegmentedTabs ariaLabel="Asesor" value={tab} onValueChange={setTab} tabs={TABS} />
+      <SegmentedTabs ariaLabel={DON_CUENTAS} value={tab} onValueChange={setTab} tabs={TABS} />
       {tab === 'parati' ? (
         <>
           <ParaTi insights={data?.feed ?? null} />

@@ -3,7 +3,7 @@
 import { colors } from '@xangarro/tokens';
 import type { Capacidad } from '@xangarro/domain';
 
-import { Button, Card, StatusPill, Tag } from '@/components';
+import { Button, Card, DON_CUENTAS, DonCuentasAvatar, StatusPill, Tag } from '@/components';
 import { cerrarAvisoAsesor } from '@/server/actions/asesor';
 import type { AvisosData } from '@/server/screens';
 import { useSession } from '@/session/provider';
@@ -80,7 +80,7 @@ export function ParaTi({ insights }: { readonly insights: AvisosData | null }) {
         rows.map((n) => <FeedRow key={n.id} n={n} mayAct={canWrite(session.role)} />)
       )}
       <p className={provenance}>
-        <Tag tone="soft">Asesor</Tag> Calculado a partir de tus registros.
+        <DonCuentasAvatar size="sm" /> {DON_CUENTAS} · Calculado a partir de tus registros.
       </p>
     </Card>
   );
@@ -94,7 +94,7 @@ export function ParaTi({ insights }: { readonly insights: AvisosData | null }) {
 export function Capacidades({ capacidades }: { readonly capacidades: readonly Capacidad[] }) {
   return (
     <Card>
-      <div className={eyebrow}>Lo que tu Asesor ya puede ver</div>
+      <div className={eyebrow}>Lo que Don Cuentas ya puede ver</div>
       {capacidades.map((c) => (
         <div key={c.name} className={capRow}>
           <span style={{ minWidth: 0 }}>
