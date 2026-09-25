@@ -14,7 +14,7 @@ setup('authenticate as the owner', async ({ page }) => {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('pedro@taqueria.mx');
   await page.getByTestId('login-password').fill('donpedro123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
 
   await expect(page.getByRole('heading', { name: 'Hola, Pedro', level: 1 })).toBeVisible();
   await page.context().storageState({ path: OWNER_STORAGE });

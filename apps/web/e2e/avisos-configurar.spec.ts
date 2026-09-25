@@ -40,7 +40,7 @@ test('a channel switch persists; critical avisos cannot be switched off', async 
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('avisos-123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
 
   const correo = page.getByRole('switch', { name: 'Stock bajo por correo' });

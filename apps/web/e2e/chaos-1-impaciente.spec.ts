@@ -122,7 +122,7 @@ test.describe('login gate (signed out)', () => {
     // The member form, not the chooser: the door was already taken, and the
     // card behind it is what has to survive six clicks. This asserted the
     // chooser's heading until the doors replaced it.
-    await expect(page.getByRole('heading', { name: 'Entra a tu portal' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Sube la cortina.' })).toBeVisible();
     expect(page.url()).toContain('/login');
     expect(actionPosts).toBeGreaterThanOrEqual(1);
   });

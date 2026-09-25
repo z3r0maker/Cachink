@@ -4,12 +4,13 @@ import Link from 'next/link';
 
 import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import { Button, Input } from '@/components';
 import { login } from '@/server/actions/auth';
 
 import { AuthCard } from './auth-card';
+import { useCortina, type Etapa } from './cortina';
 
 interface FieldsProps {
   readonly email: string;
@@ -42,6 +43,14 @@ function Fields({ email, password, error, onEmail, onPassword }: FieldsProps) {
       />
     </>
   );
+}
+
+/** How far the panel's shutter is up for what the form holds right now. */
+function etapaDe(email: string, password: string, pending: boolean, error: string | null): Etapa {
+  if (pending) return 'abriendo';
+  if (error !== null) return 'error';
+  if (!/.+@.+\..+/.test(email.trim())) return 'dueno';
+  return password === '' ? 'correo' : 'lista';
 }
 
 function useLogin() {
@@ -77,9 +86,13 @@ export function LoginForm({
   readonly backTo?: { readonly href: string; readonly label: string };
 }) {
   const { email, setEmail, password, setPassword, error, setError, pending, submit } = useLogin();
+  const { set } = useCortina();
+  useEffect(() => {
+    set(etapaDe(email, password, pending, error));
+  }, [email, password, pending, error, set]);
 
   return (
-    <AuthCard title="Entra a tu portal" back={backTo}>
+    <AuthCard title="Sube la cortina." back={backTo}>
       <form onSubmit={submit} noValidate>
         <Fields
           email={email}
@@ -94,8 +107,8 @@ export function LoginForm({
             setError(null);
           }}
         />
-        <Button type="submit" disabled={pending}>
-          {pending ? 'Entrando…' : 'Entrar'}
+        <Button type="submit" full disabled={pending}>
+          {pending ? 'Subiendo la cortina…' : 'Abrir mi changarro'}
         </Button>
       </form>
       {/* ADR-080: our own emailed links, no auth vendor. */}
