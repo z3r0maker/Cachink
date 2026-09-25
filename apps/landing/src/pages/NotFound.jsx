@@ -1,8 +1,99 @@
 /**
- * The 404 page. Vercel serves dist/404.html for any path the site does not
- * have; the prerender writes it with a noindex and no canonical.
+ * The 404: a corte de caja that came out one page short, reviewed by Don
+ * Cuentas. Vercel serves dist/404.html for any path the site does not have;
+ * the prerender writes it with a noindex and no canonical. The receipt is
+ * real HTML so the joke reaches crawlers and screen readers, not just eyes.
+ *
+ * Illustration slot: when `public/assets/404-don-cuentas.webp` exists, add a
+ * <picture> above the receipt (see the Recursos cards for the img styling).
  */
 import { ARTICLES } from '../articles.js';
+import { DonCuentas } from '../../home/icons.jsx';
+
+const CORTE = [
+  ['Página esperada', '1'],
+  ['Página encontrada', '0'],
+  ['Diferencia', '−1 página'],
+  ['Estado', 'Faltante'],
+];
+
+const link = { color: 'var(--black)', fontWeight: 700 };
+const btn = {
+  display: 'inline-block',
+  fontWeight: 800,
+  fontSize: 14,
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+  padding: '14px 24px',
+  borderRadius: 12,
+  border: '2px solid var(--black)',
+  boxShadow: '4px 4px 0 var(--black)',
+  textDecoration: 'none',
+};
+
+function Corte() {
+  return (
+    <table
+      aria-label="Corte de caja de esta página"
+      style={{
+        width: '100%',
+        maxWidth: 420,
+        borderCollapse: 'collapse',
+        background: 'var(--white)',
+        border: '2.5px solid var(--black)',
+        boxShadow: '5px 5px 0 var(--black)',
+        fontVariantNumeric: 'tabular-nums',
+        margin: '0 0 28px',
+      }}
+    >
+      <caption
+        style={{
+          captionSide: 'top',
+          textAlign: 'left',
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '0.12em',
+          textTransform: 'uppercase',
+          color: 'var(--gray-600)',
+          padding: '0 0 8px',
+        }}
+      >
+        Corte de caja · error 404
+      </caption>
+      <tbody>
+        {CORTE.map(([k, v], i) => (
+          <tr
+            key={k}
+            style={{ background: i === CORTE.length - 1 ? 'var(--yellow)' : 'var(--white)' }}
+          >
+            <th
+              scope="row"
+              style={{
+                textAlign: 'left',
+                fontWeight: i === CORTE.length - 1 ? 800 : 600,
+                padding: '10px 14px',
+                borderBottom: i < CORTE.length - 1 ? '1.5px dashed var(--gray-200)' : 'none',
+              }}
+            >
+              {k}
+            </th>
+            <td
+              style={{
+                textAlign: 'right',
+                fontWeight: 800,
+                padding: '10px 14px',
+                borderBottom: i < CORTE.length - 1 ? '1.5px dashed var(--gray-200)' : 'none',
+                color: k === 'Diferencia' ? 'var(--red)' : 'var(--black)',
+              }}
+            >
+              {v}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
 
 export default function NotFound() {
   return (
@@ -15,90 +106,61 @@ export default function NotFound() {
         color: 'var(--black)',
       }}
     >
-      <div
-        style={{
-          display: 'inline-block',
-          background: 'var(--yellow)',
-          border: '2px solid var(--black)',
-          borderRadius: 8,
-          padding: '4px 10px',
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          marginBottom: 16,
-        }}
-      >
-        Error 404
-      </div>
       <h1
         style={{
-          fontSize: 'clamp(32px, 6vw, 52px)',
+          fontSize: 'clamp(36px, 7vw, 60px)',
           fontWeight: 900,
           letterSpacing: '-0.04em',
-          lineHeight: 1.05,
-          margin: '0 0 16px',
+          lineHeight: 1.02,
+          margin: '0 0 24px',
         }}
       >
-        Esa página no existe.
+        Esta página no cuadra.
       </h1>
-      <p
-        style={{
-          fontSize: 18,
-          fontWeight: 500,
-          color: 'var(--ink)',
-          lineHeight: 1.6,
-          margin: '0 0 28px',
-        }}
-      >
-        Puede que el enlace esté mal escrito o que la página se haya movido. Lo que sí existe:
-      </p>
+
+      <Corte />
+
+      <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', margin: '0 0 32px' }}>
+        <DonCuentas size={44} />
+        <div className="dc-bubble hi">
+          Revisé todos los registros. Esta página no está en ventas, no está en gastos y nadie la
+          anotó como fiada. Lo que sí cuadra está aquí abajo.
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, margin: '0 0 36px' }}>
+        <a href="/" style={{ ...btn, background: 'var(--black)', color: 'var(--yellow)' }}>
+          Volver al inicio
+        </a>
+        <a href="/recursos/" style={{ ...btn, background: 'var(--yellow)', color: 'var(--black)' }}>
+          Ver las guías
+        </a>
+      </div>
+
+      <h2 style={{ fontSize: 18, fontWeight: 900, letterSpacing: '-0.02em', margin: '0 0 10px' }}>
+        Registrado y en existencia
+      </h2>
       <ul
         style={{
           paddingLeft: 20,
-          margin: '0 0 32px',
+          margin: '0 0 40px',
           display: 'flex',
           flexDirection: 'column',
           gap: 8,
         }}
       >
-        <li style={{ fontSize: 16 }}>
-          <a href="/" style={{ color: 'var(--black)', fontWeight: 700 }}>
-            El inicio de Xangarro
-          </a>
-        </li>
-        <li style={{ fontSize: 16 }}>
-          <a href="/recursos/" style={{ color: 'var(--black)', fontWeight: 700 }}>
-            Guías para pequeños negocios
-          </a>
-        </li>
         {ARTICLES.map((a) => (
-          <li key={a.slug} style={{ fontSize: 16 }}>
-            <a href={`/recursos/${a.slug}/`} style={{ color: 'var(--black)', fontWeight: 700 }}>
+          <li key={a.slug} style={{ fontSize: 16, lineHeight: 1.5 }}>
+            <a href={`/recursos/${a.slug}/`} style={link}>
               {a.title}
             </a>
           </li>
         ))}
       </ul>
-      <a
-        href="https://app.xangarro.mx/signup?plan=xangarrito"
-        style={{
-          display: 'inline-block',
-          background: 'var(--black)',
-          color: 'var(--yellow)',
-          fontWeight: 800,
-          fontSize: 14,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-          padding: '14px 24px',
-          borderRadius: 12,
-          border: '2px solid var(--black)',
-          boxShadow: '4px 4px 0 rgba(0,0,0,0.25)',
-          textDecoration: 'none',
-        }}
-      >
-        Crear cuenta gratis →
-      </a>
+
+      <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-600)', margin: 0 }}>
+        Error 404 · La caja sigue cobrando.
+      </p>
     </main>
   );
 }

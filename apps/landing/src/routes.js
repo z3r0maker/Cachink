@@ -113,9 +113,10 @@ export const ROUTES = [
     path: '/404',
     outDir: 'dist',
     outFile: '404.html',
-    title: 'Página no encontrada · Xangarro',
-    description: 'Esa página no existe. Vuelve al inicio o a las guías para pequeños negocios.',
-    smoke: 'Esa página no existe',
+    title: 'Esta página no cuadra · Xangarro',
+    description:
+      'Corte de caja: página esperada 1, encontrada 0. Don Cuentas ya lo revisó. Vuelve al inicio o a las guías.',
+    smoke: 'Esta página no cuadra',
     type: 'website',
     index: false,
     sources: ['src/pages/NotFound.jsx'],
