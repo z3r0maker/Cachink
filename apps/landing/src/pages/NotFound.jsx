@@ -4,8 +4,8 @@
  * the prerender writes it with a noindex and no canonical. The receipt is
  * real HTML so the joke reaches crawlers and screen readers, not just eyes.
  *
- * Illustration slot: when `public/assets/404-don-cuentas.webp` exists, add a
- * <picture> above the receipt (see the Recursos cards for the img styling).
+ * The illustration (public/assets/404-don-cuentas.*) is Don Cuentas reading
+ * the 404 ticket; WebP first, PNG for whoever cannot read it.
  */
 import { ARTICLES } from '../articles.js';
 import { DonCuentas } from '../../home/icons.jsx';
@@ -106,6 +106,23 @@ export default function NotFound() {
         color: 'var(--black)',
       }}
     >
+      <picture>
+        <source srcSet="/assets/404-don-cuentas.webp" type="image/webp" />
+        <img
+          src="/assets/404-don-cuentas.png"
+          alt="Don Cuentas, la moneda con lentes y bigote, revisa un ticket sellado 404"
+          width={665}
+          height={850}
+          loading="eager"
+          decoding="async"
+          style={{
+            display: 'block',
+            width: 'min(240px, 55vw)',
+            height: 'auto',
+            margin: '0 0 8px -8px',
+          }}
+        />
+      </picture>
       <h1
         style={{
           fontSize: 'clamp(36px, 7vw, 60px)',
