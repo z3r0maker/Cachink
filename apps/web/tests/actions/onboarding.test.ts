@@ -142,12 +142,20 @@ describe('seguirGratis and aplicarCambios', () => {
 });
 
 describe('probarGratis', () => {
+  // P-36.3: the paid tap applies the free-plan configuration first; an earlier
+  // group may have left the mock rejecting, so it answers here.
+  beforeEach(() => aplicar.mockResolvedValue(undefined));
+
   it('records the intent, sends the owner to Checkout, and counts the purchase region', async () => {
     getBusiness.mockResolvedValue({ nombre: 'Taquería Don Pedro' });
     trialCheckoutFor.mockReturnValue('checkout-port');
     solicitar.mockResolvedValue({ status: 'redirect', url: 'https://checkout.stripe.com/c/1' });
     const r = await actions.probarGratis('xangarro' as never, 'month');
-    assert.deepEqual(r, { ok: true, redirect: 'https://checkout.stripe.com/c/1' });
+    assert.deepEqual(r, { ok: true, redirect: 'https://checkout.stripe.com/c/1', beta: false });
+    // P-36.3: the free-plan configuration is applied before Checkout, on this path too.
+    assert.equal(aplicar.mock.calls.length, 1);
+    assert.equal((aplicar.mock.calls[0]?.[0] as { plan: string }).plan, PLAN_IDS[0]);
+    assert.deepEqual(revalidatePath.mock.calls, [['/negocio']]);
     assert.deepEqual(trialCheckoutFor.mock.calls[0], [
       { id: 'biz-1', name: 'Taquería Don Pedro', email: 'pedro@taqueria.mx' },
       'https://app.xangarro.mx',
@@ -166,9 +174,29 @@ describe('probarGratis', () => {
     assert.deepEqual(await actions.probarGratis('xangarro' as never, 'year'), {
       ok: true,
       redirect: null,
+      beta: false,
     });
     assert.equal((trialCheckoutFor.mock.calls[0]?.[0] as { name: string }).name, 'Mi negocio');
     assert.equal(recordGeo.mock.calls.length, 0);
+  });
+
+  it('during the beta (D-1) nothing is charged: configured, intent kept, Checkout never built', async () => {
+    vi.stubEnv('BILLING_BETA_NO_CHARGE', '1');
+    try {
+      getBusiness.mockResolvedValue({ nombre: 'Taquería Don Pedro' });
+      solicitar.mockResolvedValue({ status: 'unavailable' });
+      assert.deepEqual(await actions.probarGratis('xangarro' as never, 'month'), {
+        ok: true,
+        redirect: null,
+        beta: true,
+      });
+      assert.equal(aplicar.mock.calls.length, 1);
+      assert.equal(trialCheckoutFor.mock.calls.length, 0);
+      assert.equal(solicitar.mock.calls.length, 1, 'the choice is still recorded');
+      assert.equal(recordGeo.mock.calls.length, 0);
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it('the free plan cannot be tried, and says so', async () => {

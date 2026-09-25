@@ -5,6 +5,7 @@ import {
   GuardarRespuestasUseCase,
   SolicitarPruebaUseCase,
   type BillingInterval,
+  type TrialCheckout,
 } from '@xangarro/application';
 import {
   PLAN_IDS,
@@ -21,6 +22,7 @@ import { reconcile, skipKeys } from '@/onboarding/wizard-steps';
 
 import { failure, type Failure, type FailurePolicy } from '../action-errors';
 import { requireMember } from '../auth';
+import { betaNoCharge } from '../billing/beta';
 import { portalOrigin } from '../billing/origin';
 import { tenantEntitlement } from '../billing/plan';
 import { withTenant, type Tx } from '../db';
@@ -116,25 +118,42 @@ export async function aplicarCambios(): Promise<OkOr<object>> {
   }
 }
 
-/** [Probar 14 días]: record the intent, then B-10's Stripe Checkout (card-less trial). */
+/** During the beta (D-1) nothing is charged: the intent is kept, Checkout never opens. */
+const noCheckout: TrialCheckout = {
+  startTrialCheckout: () => Promise.resolve({ status: 'unavailable' as const }),
+};
+
+/**
+ * The paid CTA: first apply what the wizard answered and the current (free)
+ * plan allows — payment types, inventory, cash — so the business is configured
+ * whichever way the tap ends (P-36.3: before this, only [Seguir gratis]
+ * applied anything and a paid tap left Negocio at its defaults); the plan-gated
+ * answers stay pending for the entitlement webhook. Then record the intent and
+ * open B-10's Stripe Checkout, unless the beta keeps it closed.
+ */
 export async function probarGratis(
   plan: PlanId,
   interval: BillingInterval,
-): Promise<OkOr<{ redirect: string | null }>> {
+): Promise<OkOr<{ redirect: string | null; beta: boolean }>> {
   let businessId: BusinessId | undefined;
   try {
     const session = await requireMember('owner');
     const id = (businessId = session.business_id as BusinessId);
     const origin = await portalOrigin();
+    const beta = betaNoCharge();
     const result = await withTenant(id, async (tx) => {
+      await aplicar(tx, id, FREE_PLAN, false);
       const name = (await getBusiness(tx))?.nombre ?? 'Mi negocio';
-      const checkout = trialCheckoutFor({ id, name, email: session.email }, origin);
+      const checkout = beta
+        ? noCheckout
+        : trialCheckoutFor({ id, name, email: session.email }, origin);
       return new SolicitarPruebaUseCase(pgOnboardingStore(tx, id), checkout).execute({
         businessId: id,
         plan,
         interval,
       });
     });
+    revalidatePath('/negocio');
     const redirect = result.status === 'redirect' ? result.url : null;
     // N-58: the buyer's region exists only here. The Stripe webhook is a
     // server-to-server call, so its IP is Stripe's, and Stripe's only
@@ -142,7 +161,7 @@ export async function probarGratis(
     // state. Counted at the redirect, so the metric means "checkout started",
     // which is what the console's label says.
     if (redirect !== null) await recordGeo('compra');
-    return { ok: true, redirect };
+    return { ok: true, redirect, beta };
   } catch (error) {
     return failure(error, 'probarGratis', { ...REFUSALS, businessId });
   }
