@@ -24,7 +24,6 @@ export const PRICE_SUBTOTAL_CENTAVOS = {
 /** IVA, in basis points (16 %). */
 export const IVA_BASIS_POINTS = 1_600;
 
-
 /**
  * Days a SPEI invoice stays payable. This *is* the payment grace for SPEI
  * (ADR-053 §5): a send_invoice subscription is active until its invoice is

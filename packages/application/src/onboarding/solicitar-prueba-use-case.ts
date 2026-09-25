@@ -40,7 +40,10 @@ export class SolicitarPruebaUseCase implements UseCase<SolicitarPruebaInput, Tri
   async execute(input: SolicitarPruebaInput): Promise<TrialCheckoutResult> {
     const intervalOk = (BILLING_INTERVALS as readonly string[]).includes(input.interval);
     if (!PAID_PLANS.includes(input.plan) || !intervalOk) {
-      throw new SignupError('NOT_A_PAID_PLAN', 'Solo los planes de pago se contratan; Xangarrito es gratis.');
+      throw new SignupError(
+        'NOT_A_PAID_PLAN',
+        'Solo los planes de pago se contratan; Xangarrito es gratis.',
+      );
     }
     const { businessId, plan, interval } = input;
     await this.#store.recordTrialIntent({ plan, interval, at: new Date().toISOString() });
