@@ -1,8 +1,16 @@
 import { colors } from '@xangarro/tokens';
 
-import type { RevisionData } from './types';
+import type { RevisionData } from '../../src/app/(portal)/revision-caja/types';
 
-/** `Revision de caja.dc.html`: four products and two credit clients waiting. */
+/**
+ * `Revision de caja.dc.html`: four products and two credit clients waiting.
+ *
+ * **Test data only**, which is why it lives under `tests/`. It sat in `src/`
+ * once, and `pendientes.ts` used its length as the sidebar's badge — so
+ * production showed «Revisión de caja 6» above a page that read Postgres and
+ * found nothing to review. The rows here exercise the pure `derive` helpers;
+ * nothing the app ships may import them.
+ */
 export const REVISION_FIXTURE: RevisionData = {
   vendidoSinCosto: 2_840_00n,
   productos: [

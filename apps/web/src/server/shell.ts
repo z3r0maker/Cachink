@@ -18,18 +18,20 @@ import { reportError } from './observability/report';
  * component and wraps every route; an uncaught throw there hands the whole
  * portal to `global-error`, including `/suscripcion`, which reads no database
  * and works today without one. Degrading to zero keeps a database blip local to
- * two badges instead of taking down the app.
+ * three badges instead of taking down the app.
  */
 export interface ShellCounts {
   readonly pendingRows: number;
   readonly unreadNotices: number;
+  /** Products and clients an operator created at the counter, awaiting review. */
+  readonly revisionPendiente: number;
 }
 
-const NONE: ShellCounts = { pendingRows: 0, unreadNotices: 0 };
+const NONE: ShellCounts = { pendingRows: 0, unreadNotices: 0, revisionPendiente: 0 };
 
 export async function loadShellCounts(businessId: string): Promise<ShellCounts> {
   try {
-    return await withTenant(businessId, (tx) => shellCounts(tx));
+    return await withTenant(businessId, (tx) => shellCounts(tx, businessId));
   } catch (error) {
     // Never silent: the screens surface their own error state, but the shell
     // has nowhere to put one, so the log is the only trace.
