@@ -4,7 +4,8 @@
  * site.webmanifest are copied from `assets/brand/icons/` (X-07), not generated.
  *
  * Design: neobrutalist yellow card — brand yellow background, hard black
- * border, "XANGARRO!" wordmark, hero headline, and a black footer bar.
+ * border, "XANGARRO!" wordmark, hero headline, and a black footer bar. The
+ * coin (small mark + large watermark) is `assets/brand/icons/mark-flat.svg`.
  * Matches the landing page's visual language exactly.
  *
  * Run:  node scripts/generate-og.mjs
@@ -12,16 +13,36 @@
 
 import sharp from 'sharp'
 import { resolve, dirname } from 'node:path'
+import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const OUT     = resolve(__dirname, '../public/og-image.png')
 const OUT_WEBP = resolve(__dirname, '../public/og-image.webp')
+// The flat coin mark (X-07) — read from the brand master, never redrawn here.
+const MARK = resolve(__dirname, '../../../assets/brand/icons/mark-flat.svg')
 
 const W = 1200
 const H = 630
 const BORDER = 12        // outer border width
 const SHADOW = 16        // hard offset shadow
+
+// mark-flat.svg is a 1024 viewBox whose disc has r=395 around (512, 512).
+const MARK_VIEWBOX = 1024
+const MARK_DISC_R = 395
+const markSvg = readFileSync(MARK, 'utf8').trim()
+if (!markSvg.includes(`r="${MARK_DISC_R}"`)) {
+  throw new Error(`mark-flat.svg changed shape — update MARK_DISC_R in ${fileURLToPath(import.meta.url)}`)
+}
+
+/** The brand mark as a nested <svg>, its disc of radius `r` centred on (cx, cy). */
+const mark = (cx, cy, r) => {
+  const size = (MARK_VIEWBOX * r) / MARK_DISC_R
+  return markSvg.replace(
+    /^<svg[^>]*>/,
+    `<svg x="${cx - size / 2}" y="${cy - size / 2}" width="${size}" height="${size}" viewBox="0 0 ${MARK_VIEWBOX} ${MARK_VIEWBOX}">`,
+  )
+}
 
 // ── SVG template ──────────────────────────────────────────────────────────
 // Encoded as a string so sharp can rasterise it via libvips.
@@ -76,11 +97,9 @@ const svg = `
     style="text-transform:uppercase; letter-spacing: 0.2em;"
   >¡XANGARRO! · FINANZAS CLARAS</text>
 
-  <!-- Coin logo mark -->
+  <!-- Coin logo mark: the brand mark inside the card's black ring -->
   <circle cx="68" cy="155" r="42" fill="#0D0D0D" />
-  <circle cx="68" cy="155" r="34" fill="#FFD60A" />
-  <text x="68" y="165" font-size="28" font-weight="900" fill="#0D0D0D"
-        text-anchor="middle" dominant-baseline="middle">$</text>
+  ${mark(68, 155, 34)}
 
   <!-- Hero headline -->
   <text x="68" y="270"
@@ -102,12 +121,10 @@ const svg = `
     letter-spacing="1"
   >xangarro.mx · Tu negocio sigue aunque se vaya el internet</text>
 
-  <!-- Right-side accent: large $ coin -->
+  <!-- Right-side accent: large faded coin — the mark as a watermark -->
   <circle cx="980" cy="290" r="180" fill="#0D0D0D" opacity="0.08" />
   <circle cx="980" cy="290" r="155" fill="#0D0D0D" opacity="0.06" />
-  <text x="980" y="340"
-        font-size="160" font-weight="900" fill="#0D0D0D" opacity="0.18"
-        text-anchor="middle" dominant-baseline="middle">$</text>
+  <g opacity="0.18">${mark(980, 290, 155)}</g>
 
 </svg>
 `.trim()
