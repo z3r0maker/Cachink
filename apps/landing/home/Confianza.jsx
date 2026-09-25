@@ -1,12 +1,28 @@
 import { Icon } from './icons.jsx';
 import { OfflineDemo } from './OfflineDemo.jsx';
-import { useInView } from './useInView.js';
+import { useInView } from './use-in-view.js';
 
 const CARDS = [
-  { icon: 'wifiOff', t: 'Cobras sin conexión', d: 'La caja guarda cada venta y la sube sola al volver la señal. Ninguna se pierde en el camino.' },
-  { icon: 'cuadra', t: 'Cortes que cuadran', d: 'Fondo + efectivo − caja chica = lo esperado. Si no cuadra, hay motivo y nota. Sin misterios.' },
-  { icon: 'shield', t: 'Nada se borra', d: 'Una venta cancelada queda a la vista, con su motivo. Tú ves todo lo que pasó en la caja.' },
-  { icon: 'download', t: 'Tus datos son tuyos', d: 'Exporta a Excel en todos los planes, incluido el gratis. Nunca los vendemos ni los compartimos.' },
+  {
+    icon: 'wifiOff',
+    t: 'Cobras sin conexión',
+    d: 'La caja guarda cada venta y la sube sola al volver la señal. Ninguna se pierde en el camino.',
+  },
+  {
+    icon: 'cuadra',
+    t: 'Cortes que cuadran',
+    d: 'Fondo + efectivo − caja chica = lo esperado. Si no cuadra, hay motivo y nota. Sin misterios.',
+  },
+  {
+    icon: 'shield',
+    t: 'Nada se borra',
+    d: 'Una venta cancelada queda a la vista, con su motivo. Tú ves todo lo que pasó en la caja.',
+  },
+  {
+    icon: 'download',
+    t: 'Tus datos son tuyos',
+    d: 'Exporta a Excel en todos los planes, incluido el gratis. Nunca los vendemos ni los compartimos.',
+  },
 ];
 
 export function Confianza() {
@@ -19,7 +35,8 @@ export function Confianza() {
             <span className="xeyebrow">Hecho para el México real</span>
             <h2 className="xh2">Se va el internet, no la venta.</h2>
             <p className="xlead" style={{ color: 'var(--gray-600)' }}>
-              Aunque se caiga la señal, la caja sigue cobrando. Todo se sube solito en cuanto vuelve.
+              Aunque se caiga la señal, la caja sigue cobrando. Todo se sube solito en cuanto
+              vuelve.
             </p>
           </div>
           <OfflineDemo />

@@ -1,5 +1,5 @@
 import { SceneDonCuentas, SceneLibreta, SceneMeta, SceneVenta } from './ReelScenes.jsx';
-import { useInView } from './useInView.js';
+import { useInView } from './use-in-view.js';
 
 const CHAPTERS = ['01 · La libreta', '02 · La venta', '03 · Don Cuentas', '04 · La meta'];
 
@@ -10,7 +10,9 @@ export function Reel() {
     <section id="recorrido" className="xh-sec xh-band reel" ref={ref} data-motion="">
       <div className="xh-wrap reel-inner">
         <div className="reel-head">
-          <span className="xeyebrow" style={{ color: 'var(--black)' }}>Xangarro en 16 segundos</span>
+          <span className="xeyebrow" style={{ color: 'var(--black)' }}>
+            Xangarro en 16 segundos
+          </span>
           <h2 className="xh2">De la libreta al «¡Xangarro!»</h2>
         </div>
         <div
@@ -22,11 +24,15 @@ export function Reel() {
           <SceneVenta />
           <SceneDonCuentas />
           <SceneMeta />
-          <div className="reel-bar"><div className="a-reelbar" /></div>
+          <div className="reel-bar">
+            <div className="a-reelbar" />
+          </div>
         </div>
         <div className="reel-chips" aria-hidden="true">
           {CHAPTERS.map((c, i) => (
-            <span key={c} className={`xtag chip chip${i + 1}`}>{c}</span>
+            <span key={c} className={`xtag chip chip${i + 1}`}>
+              {c}
+            </span>
           ))}
         </div>
       </div>
