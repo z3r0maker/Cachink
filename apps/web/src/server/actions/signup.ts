@@ -1,18 +1,18 @@
 'use server';
 
 import { clientIp, LOGIN_PER_EMAIL, LOGIN_PER_IP, minutes } from '@xangarro/auth-core';
-import { RegistrarCuentaUseCase, SignupError } from '@xangarro/application';
+import { RegistrarCuentaUseCase, SIGNUP_ERROR_CODES } from '@xangarro/application';
 import { recordSignupAttribution, throttleKey, throttleTake } from '@xangarro/data-pg';
 import { randomUUID } from 'node:crypto';
 import { headers } from 'next/headers';
 
+import { failure } from '../action-errors';
 import { EMPTY_UTM, type Utm } from '../attribution/utm';
 import { db } from '../db';
 import { regionFromHeaders } from '../geo/headers';
 import { avisoVigente, ipHash } from '../legal/aviso';
 import { reportError } from '../observability/report';
 import { sendWelcome } from '../email/welcome';
-import { failure } from '../onboarding/errors';
 import { pgSignupStore } from '../onboarding/signup-store';
 import { startSession } from '../session';
 
@@ -102,9 +102,9 @@ export async function registrarse(fields: SignupFields): Promise<SignupResult> {
     });
     return { ok: true };
   } catch (error) {
-    if (error instanceof SignupError) {
-      return { ok: false, message: error.code === 'EMAIL_TAKEN' ? TAKEN : error.message };
-    }
-    return failure(error, 'registrarse');
+    return failure(error, 'registrarse', {
+      shown: SIGNUP_ERROR_CODES,
+      copy: { EMAIL_TAKEN: TAKEN },
+    });
   }
 }

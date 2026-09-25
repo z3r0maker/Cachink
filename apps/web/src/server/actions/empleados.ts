@@ -5,18 +5,13 @@ import {
   GuardarEmpleadoUseCase,
   type EmpleadoForm,
 } from '@xangarro/application';
-import {
-  EmpleadoInvalidoError,
-  EmpleadoNoEncontradoError,
-  type BusinessId,
-  type EmployeeId,
-} from '@xangarro/domain';
+import { EmpleadoInvalidoError, type BusinessId, type EmployeeId } from '@xangarro/domain';
 import { pagosDeEmpleado } from '@xangarro/data-pg';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { readSession } from '../session';
 import { pgEmployeesRepository } from '../repositories/employees';
 
@@ -29,18 +24,12 @@ export type EmpleadoResult =
   | { ok: true }
   | { ok: false; message: string; campos: Readonly<Record<string, string>> };
 
-function failure(error: unknown, endpoint: string): EmpleadoResult {
+/** An invalid form names its fields; the rest is the shared mapping, with no fields. */
+function fallo(error: unknown, endpoint: string): EmpleadoResult {
   if (error instanceof EmpleadoInvalidoError) {
     return { ok: false, message: error.message, campos: error.campos };
   }
-  if (
-    error instanceof EmpleadoNoEncontradoError ||
-    (error as { code?: string } | null)?.code === 'NOT_PERMITTED'
-  ) {
-    return { ok: false, message: (error as Error).message, campos: {} };
-  }
-  reportError(error, { endpoint });
-  return { ok: false, message: 'No pudimos guardar. Intenta de nuevo.', campos: {} };
+  return { ...failure(error, endpoint, { shown: ['EMPLEADO_NO_ENCONTRADO'] }), campos: {} };
 }
 
 export async function guardarEmpleado(
@@ -60,7 +49,7 @@ export async function guardarEmpleado(
     revalidatePath('/empleados');
     return { ok: true };
   } catch (error) {
-    return failure(error, 'guardarEmpleado');
+    return fallo(error, 'guardarEmpleado');
   }
 }
 
@@ -74,7 +63,7 @@ export async function darDeBajaEmpleado(id: string): Promise<EmpleadoResult> {
     revalidatePath('/empleados');
     return { ok: true };
   } catch (error) {
-    return failure(error, 'darDeBajaEmpleado');
+    return fallo(error, 'darDeBajaEmpleado');
   }
 }
 
@@ -96,7 +85,8 @@ export async function pagosDelEmpleado(empleadoId: string): Promise<PagosEmplead
     const pagos = await withTenant(session.business_id, (tx) => pagosDeEmpleado(tx, empleadoId));
     return { ok: true, pagos };
   } catch (error) {
-    reportError(error, { endpoint: 'pagosDelEmpleado' });
-    return { ok: false, message: 'No pudimos leer los pagos. Intenta de nuevo.' };
+    return failure(error, 'pagosDelEmpleado', {
+      retry: 'No pudimos leer los pagos. Intenta de nuevo.',
+    });
   }
 }

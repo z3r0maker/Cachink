@@ -25,7 +25,12 @@ function Sidebar() {
         </div>
       ))}
       <div className="bw-nav">
-        <svg className="ico" style={{ width: 15, height: 15 }} viewBox="0 0 24 24" aria-hidden="true">
+        <svg
+          className="ico"
+          style={{ width: 15, height: 15 }}
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
           <path d="M5.5 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M12.9 10a2.8 2.8 0 1 0 5.6 0 2.8 2.8 0 1 0-5.6 0M11.1 10h1.8M6 16.5c2-2 4-2 6-.3 2-1.7 4-1.7 6 .3" />
         </svg>
         Don Cuentas
@@ -57,7 +62,9 @@ function Kpis({ compact }) {
         <div className="bw-label">Ventas hoy</div>
         <div className="bw-kval num bw-swap">
           <span className="a-valA">$6,480.00</span>
-          <span className="a-valB t-ok" style={{ opacity: 0 }}>$6,565.00</span>
+          <span className="a-valB t-ok" style={{ opacity: 0 }}>
+            $6,565.00
+          </span>
         </div>
         {compact ? null : <div className="bw-ksub">58 ventas</div>}
       </div>
@@ -86,7 +93,12 @@ export function BrowserMock({ compact = false }) {
         <span className="bw-dot" style={{ background: 'var(--yellow)' }} />
         <span className="bw-dot" style={{ background: 'var(--green)' }} />
         <span className="bw-url">
-          <svg className="ico" style={{ width: 12, height: 12 }} viewBox="0 0 24 24" aria-hidden="true">
+          <svg
+            className="ico"
+            style={{ width: 12, height: 12 }}
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
             <path d={PATHS.lock} />
           </svg>
           app.xangarro.mx
@@ -98,7 +110,9 @@ export function BrowserMock({ compact = false }) {
           <div className="bw-greet">
             <div>
               <div className="bw-hi">Buenas tardes, Pedro</div>
-              {compact ? null : <div className="bw-date">jueves, 24 de septiembre de 2026 · Tacos El Güero</div>}
+              {compact ? null : (
+                <div className="bw-date">jueves, 24 de septiembre de 2026 · Tacos El Güero</div>
+              )}
             </div>
             {compact ? null : (
               <span className="xtag bw-live">

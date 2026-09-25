@@ -4,10 +4,10 @@ import { clientIp, hashPassword, MAX_PASSWORD_BYTES, throttleKey } from '@xangar
 import { consumeMagicLink, issueLink, resetPassword, throttleTake } from '@xangarro/data-pg';
 import { headers } from 'next/headers';
 
+import { failure } from '../action-errors';
 import { db } from '../db';
 import { sendMagicLink, sendPasswordReset } from '../email/auth-links';
 import { portalUrl } from '../email/sender';
-import { reportError } from '../observability/report';
 import { NO_BUSINESS, signInUser } from '../sign-in';
 
 /**
@@ -57,8 +57,9 @@ export async function pedirEnlace(email: string, kind: LinkKind): Promise<LinkRe
     }
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'pedirEnlace' });
-    return { ok: false, message: 'No pudimos mandar el enlace. Intenta de nuevo.' };
+    return failure(error, 'pedirEnlace', {
+      retry: 'No pudimos mandar el enlace. Intenta de nuevo.',
+    });
   }
 }
 
@@ -77,8 +78,9 @@ export async function restablecerContrasena(token: string, password: string): Pr
     if (userId === null) return { ok: false, message: EXPIRED };
     return (await signInUser(userId)) ? { ok: true } : { ok: false, message: NO_BUSINESS };
   } catch (error) {
-    reportError(error, { endpoint: 'restablecerContrasena' });
-    return { ok: false, message: 'No pudimos cambiar tu contraseña. Intenta de nuevo.' };
+    return failure(error, 'restablecerContrasena', {
+      retry: 'No pudimos cambiar tu contraseña. Intenta de nuevo.',
+    });
   }
 }
 
@@ -88,7 +90,8 @@ export async function entrarConEnlace(token: string): Promise<LinkResult> {
     if (userId === null) return { ok: false, message: EXPIRED };
     return (await signInUser(userId)) ? { ok: true } : { ok: false, message: NO_BUSINESS };
   } catch (error) {
-    reportError(error, { endpoint: 'entrarConEnlace' });
-    return { ok: false, message: 'No pudimos abrir tu sesión. Intenta de nuevo.' };
+    return failure(error, 'entrarConEnlace', {
+      retry: 'No pudimos abrir tu sesión. Intenta de nuevo.',
+    });
   }
 }

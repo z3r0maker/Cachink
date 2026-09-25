@@ -19,10 +19,10 @@ import {
 } from '@xangarro/data-pg';
 import { newEntityId } from '@xangarro/domain';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { PORTAL_DEVICE_ID } from '../repositories/portal-device';
-import { reportError } from '../observability/report';
 
 export type RevisionResult = { ok: true } | { ok: false; message: string };
 
@@ -69,8 +69,9 @@ export async function aprobarProducto(id: string, f: ProductoAprobado): Promise<
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'aprobarProducto' });
-    return { ok: false, message: 'No se pudo aprobar el producto. Intenta de nuevo.' };
+    return failure(error, 'aprobarProducto', {
+      retry: 'No se pudo aprobar el producto. Intenta de nuevo.',
+    });
   }
 }
 
@@ -95,8 +96,9 @@ export async function aprobarCliente(
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'aprobarCliente' });
-    return { ok: false, message: 'No se pudo aprobar el cliente. Intenta de nuevo.' };
+    return failure(error, 'aprobarCliente', {
+      retry: 'No se pudo aprobar el cliente. Intenta de nuevo.',
+    });
   }
 }
 
@@ -113,8 +115,7 @@ export async function rechazar(tipo: 'producto' | 'cliente', id: string): Promis
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'rechazar' });
-    return { ok: false, message: 'No se pudo rechazar. Intenta de nuevo.' };
+    return failure(error, 'rechazar', { retry: 'No se pudo rechazar. Intenta de nuevo.' });
   }
 }
 
@@ -149,7 +150,6 @@ export async function fusionar(
     revalidatePath('/revision-caja');
     return { ok: true };
   } catch (error) {
-    reportError(error, { endpoint: 'fusionar' });
-    return { ok: false, message: 'No se pudo fusionar. Intenta de nuevo.' };
+    return failure(error, 'fusionar', { retry: 'No se pudo fusionar. Intenta de nuevo.' });
   }
 }

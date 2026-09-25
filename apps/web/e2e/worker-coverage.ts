@@ -64,8 +64,19 @@ class WorkerLink {
   }
 }
 
-/** Starts recording; the returned function collects whatever workers are still alive. */
-export async function recordWorkerCoverage(page: Page): Promise<() => Promise<Entry[]>> {
+export interface WorkerRecorder {
+  /** The coverage of the workers alive now; recording goes on (V8 resets their counters). */
+  readonly take: () => Promise<Entry[]>;
+  readonly stop: () => Promise<void>;
+}
+
+/**
+ * One session for the page's whole life. Recreating it mid-navigation — at
+ * the moment the page's other half collects its coverage — aborted the
+ * navigation: a target auto-attached while paused was never resumed.
+ * Anything attached that is not a worker is let go at once, for the same reason.
+ */
+export async function recordWorkerCoverage(page: Page): Promise<WorkerRecorder> {
   const cdp = await page.context().newCDPSession(page);
   const links = new Map<string, WorkerLink>();
   cdp.on('Target.receivedMessageFromTarget', ({ sessionId, message }) => {
@@ -73,8 +84,11 @@ export async function recordWorkerCoverage(page: Page): Promise<() => Promise<En
   });
   cdp.on('Target.detachedFromTarget', ({ sessionId }) => links.delete(sessionId));
   cdp.on('Target.attachedToTarget', ({ sessionId, targetInfo }) => {
-    if (targetInfo.type !== 'worker') return;
     const link = new WorkerLink(cdp, sessionId);
+    if (targetInfo.type !== 'worker') {
+      void link.send('Runtime.runIfWaitingForDebugger');
+      return;
+    }
     links.set(sessionId, link);
     void link.start();
   });
@@ -83,16 +97,18 @@ export async function recordWorkerCoverage(page: Page): Promise<() => Promise<En
     waitForDebuggerOnStart: true,
     flatten: false,
   });
-  return async () => {
-    const taken = await Promise.all(
-      [...links.values()].map((l) => within(TAKE_TIMEOUT_MS, l.take(), [])),
-    );
-    await cdp.detach();
-    // V8 reports offsets into the script as served, so the source is the chunk itself.
-    return Promise.all(
-      taken
-        .flat()
-        .map(async (t) => ({ ...t, source: await (await page.request.get(t.url)).text() })),
-    );
+  return {
+    take: async () => {
+      const taken = await Promise.all(
+        [...links.values()].map((l) => within(TAKE_TIMEOUT_MS, l.take(), [])),
+      );
+      // V8 reports offsets into the script as served, so the source is the chunk itself.
+      return Promise.all(
+        taken
+          .flat()
+          .map(async (t) => ({ ...t, source: await (await page.request.get(t.url)).text() })),
+      );
+    },
+    stop: () => cdp.detach().catch(() => undefined),
   };
 }

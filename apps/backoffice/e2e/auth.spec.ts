@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 import {
+  ADMIN_COOKIE,
   STAFF_EMAIL,
   STAFF_PASSWORD,
   freshCodeFor,
@@ -9,6 +10,7 @@ import {
   seedFromPageText,
   signInAsStaff,
 } from './helpers';
+import { resetStaffFixture } from './staff-fixture';
 
 /**
  * N-05's original acceptance, as a browser suite: non-allowlisted → 403;
@@ -16,6 +18,12 @@ import {
  * wrong passwords lock the account out; every mutation writes an audit row.
  */
 test.describe.configure({ mode: 'serial' });
+
+// Per attempt, not per run: a serial retry re-runs the file from its first
+// test in a fresh worker. A run-once global setup would hand that retry the
+// member the failed attempt already enrolled — the enrolment test then meets
+// /mfa/verify and the report blames it instead of the test that failed.
+test.beforeAll(resetStaffFixture);
 
 test('a visitor without a session lands on /login', async ({ page }) => {
   await page.goto('/');
@@ -46,15 +54,30 @@ test('the enrolled staff member reaches the console', async ({ page }) => {
   );
 });
 
-test('signing out ends the session for the next navigation too', async ({ page }) => {
+test('signing out ends the session for the next navigation too', async ({ page, request }) => {
   await signInAsStaff(page);
   const salir = page.getByRole('button', { name: 'Cerrar sesión' });
   if ((await salir.count()) === 0) {
     throw new Error('no sign-out control found — the suite cannot assert session end');
   }
+  const token = (await page.context().cookies()).find((c) => c.name === ADMIN_COOKIE)?.value;
+  if (token === undefined) throw new Error('signed in without a session cookie');
+  // The token replayed outside the browser (whose cookie jar sign-out clears):
+  // before sign-out it opens the console, so a refusal afterwards is the
+  // server ending the session — not the browser forgetting it.
+  const replay = () =>
+    request.get('/', { headers: { cookie: `${ADMIN_COOKIE}=${token}` }, maxRedirects: 0 });
+  expect((await replay()).status()).toBe(200);
+
   await salir.click();
+  // Sign-out is a server action; its redirect to /login lands once the
+  // session is gone. Navigating before that races the POST (and can abort it).
+  await page.waitForURL(/\/login/);
   await page.goto('/');
   await expect(page).toHaveURL(/\/login/);
+  const after = await replay();
+  expect(after.status()).toBe(307);
+  expect(after.headers()['location']).toMatch(/\/login/);
 });
 
 test('a staff member revoked mid-session loses the console at once', async ({ page }) => {

@@ -28,9 +28,15 @@ const CARD_CSS = readFileSync(resolve(here, 'og-card.css'), 'utf8');
 
 const CHECK = '<svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>';
 
+// The coin is the brand mark (X-07), read from the master, never redrawn here.
+const MARK = readFileSync(
+  resolve(here, '../../../assets/brand/icons/mark-flat.svg'),
+  'utf8',
+).trim();
+
 const brand = () => `
   <div class="brand">
-    <span class="coin"><svg viewBox="0 0 24 24"><path d="M5 5L19 19M19 5L5 19" stroke="#0d0d0d" stroke-width="4.6"/></svg></span>
+    <span class="coin">${MARK}</span>
     <span class="wm">Xangarro!</span>
   </div>`;
 

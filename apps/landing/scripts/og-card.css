@@ -62,10 +62,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
+/* mark-flat.svg's disc is 790/1024 of its box: scale so the disc fills the coin */
 .coin svg {
-  width: 26px;
-  height: 26px;
+  flex: none;
+  width: 57px;
+  height: 57px;
 }
 .wm {
   font-family: Anton, Impact, sans-serif;

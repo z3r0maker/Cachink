@@ -5,15 +5,16 @@ import postgres from 'postgres';
 import { STAFF_EMAIL, STAFF_PASSWORD } from './helpers';
 
 /**
- * The staff fixture, once per run: an allowlisted member with a known
- * password (the same columns the CLI writes; it is not reused because its
- * password comes from stdin and it prints nothing a script can consume).
+ * The staff fixture, once per attempt of the auth suite: an allowlisted
+ * member with a known password (the same columns the CLI writes; it is not
+ * reused because its password comes from stdin and it prints nothing a
+ * script can consume).
  * TOTP is deliberately NOT seeded — the suite enrolls through the page, the
  * way a real first sign-in goes. Any row from an earlier run is removed
  * first: the unique key is partial (`lower(email) WHERE revoked_at IS NULL`),
  * so reviving duplicates would collide there.
  */
-export default async function globalSetup(): Promise<void> {
+export async function resetStaffFixture(): Promise<void> {
   const url = process.env.DATABASE_SUPER_URL ?? process.env.DATABASE_URL ?? '';
   if (url === '') throw new Error('DATABASE_SUPER_URL (or DATABASE_URL) is not set.');
   const sql = postgres(url, { max: 1, onnotice: () => undefined });

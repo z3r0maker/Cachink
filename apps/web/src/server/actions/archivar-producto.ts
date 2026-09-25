@@ -4,9 +4,9 @@ import { ArchivarProductoUseCase } from '@xangarro/application';
 import type { BusinessId, ProductId } from '@xangarro/domain';
 import { revalidatePath } from 'next/cache';
 
+import { failure } from '../action-errors';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
-import { reportError } from '../observability/report';
 import { pgMovementsCreator } from '../repositories/ledger';
 import { pgProductsRepository } from '../repositories/products';
 
@@ -33,16 +33,12 @@ export async function archivarProducto(id: string, force: boolean): Promise<Arch
     revalidatePath('/productos');
     return { ok: true };
   } catch (error) {
-    const e = error as { code?: string; stock?: number; message?: string } | null;
+    const e = error as { code?: string; stock?: number } | null;
     if (e?.code === 'STOCK_NOT_EMPTY') return { ok: false, kind: 'stock', stock: e.stock ?? 0 };
-    if (e?.code === 'PRODUCT_NOT_FOUND' || e?.code === 'NOT_PERMITTED') {
-      return { ok: false, kind: 'error', message: e.message ?? '' };
-    }
-    reportError(error, { endpoint: 'archivarProducto' });
-    return {
-      ok: false,
-      kind: 'error',
-      message: 'No pudimos archivar el producto. Intenta de nuevo.',
-    };
+    const { message } = failure(error, 'archivarProducto', {
+      shown: ['PRODUCT_NOT_FOUND'],
+      retry: 'No pudimos archivar el producto. Intenta de nuevo.',
+    });
+    return { ok: false, kind: 'error', message };
   }
 }
