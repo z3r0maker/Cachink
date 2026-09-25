@@ -7,6 +7,7 @@ import { syncIsStale, tenantHealth, type Health } from '@/server/torre/briefing'
 import { led } from '@/shell/shell.css';
 import { muted } from '@/styles/ui.css';
 
+import { tenantsHref, type TenantView } from './params';
 import { healthCell, name, stale, sub, table, tableWrap, tag, td, th } from './tenants.css';
 
 const HEALTH_LABEL: Readonly<Record<Health, string>> = {
@@ -40,7 +41,15 @@ function PlanCell({ row }: { readonly row: TenantRow }) {
   );
 }
 
-function Row({ row, now }: { readonly row: TenantRow; readonly now: Date }) {
+function Row({
+  row,
+  now,
+  view,
+}: {
+  readonly row: TenantRow;
+  readonly now: Date;
+  readonly view: TenantView;
+}) {
   const s = row.summary;
   const health = tenantHealth(row, now);
   return (
@@ -49,7 +58,12 @@ function Row({ row, now }: { readonly row: TenantRow; readonly now: Date }) {
         <span className={led[health]} role="img" aria-label={HEALTH_LABEL[health]} />
       </td>
       <td className={td}>
-        <Link href={`/tenants/${s.id}` as Route} className={name}>
+        <Link
+          href={tenantsHref(view, { ficha: s.id }) as Route}
+          className={name}
+          scroll={false}
+          aria-current={view.ficha === s.id ? 'true' : undefined}
+        >
           {s.nombre}
         </Link>
         <span className={sub}>{s.ownerEmail ?? 'Sin dueño en el portal'}</span>
@@ -67,7 +81,13 @@ function Row({ row, now }: { readonly row: TenantRow; readonly now: Date }) {
   );
 }
 
-export function TenantTable({ rows }: { readonly rows: readonly TenantRow[] }) {
+export function TenantTable({
+  rows,
+  view,
+}: {
+  readonly rows: readonly TenantRow[];
+  readonly view: TenantView;
+}) {
   if (rows.length === 0) {
     return (
       <p className={muted}>
@@ -90,7 +110,7 @@ export function TenantTable({ rows }: { readonly rows: readonly TenantRow[] }) {
         </thead>
         <tbody>
           {rows.map((r) => (
-            <Row key={r.summary.id} row={r} now={now} />
+            <Row key={r.summary.id} row={r} now={now} view={view} />
           ))}
         </tbody>
       </table>

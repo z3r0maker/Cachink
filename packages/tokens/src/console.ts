@@ -36,6 +36,8 @@ export interface ConsoleTheme {
   readonly onAccent: string;
   /** The hard shadow under pressable things. */
   readonly shade: string;
+  /** Behind a drawer or dialog: dims the page enough to read as «not now». */
+  readonly scrim: string;
   readonly ok: string;
   readonly warn: string;
   readonly bad: string;
@@ -65,6 +67,7 @@ export const consoleTheme: { readonly light: ConsoleTheme; readonly dark: Consol
     accent: colors.yellow,
     onAccent: colors.black,
     shade: colors.black,
+    scrim: colors.scrim,
     ok: colors.greenText,
     warn: colors.warningText,
     bad: colors.redText,
@@ -91,6 +94,7 @@ export const consoleTheme: { readonly light: ConsoleTheme; readonly dark: Consol
     accent: colors.yellow,
     onAccent: colors.black,
     shade: colors.white,
+    scrim: 'rgba(0, 0, 0, 0.62)',
     ok: colors.green,
     warn: colors.warning,
     bad: '#FF5B67',

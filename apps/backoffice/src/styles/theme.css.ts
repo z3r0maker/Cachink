@@ -19,6 +19,7 @@ export const t = createThemeContract({
   accent: null,
   onAccent: null,
   shade: null,
+  scrim: null,
   ok: null,
   warn: null,
   bad: null,

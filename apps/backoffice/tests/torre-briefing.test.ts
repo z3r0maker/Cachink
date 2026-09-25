@@ -4,7 +4,7 @@ import type { BusinessId, SupportItem } from '@xangarro/domain';
 import type { CapacityMetric } from '@/server/capacity/status';
 import { UNKNOWN_BILLING, type BillingSnapshot } from '@/server/billing/port';
 import type { TenantRow } from '@/server/tenants/list';
-import { briefing } from '@/server/torre/briefing';
+import { briefing, tenantNote } from '@/server/torre/briefing';
 
 const NOW = new Date('2026-09-25T18:00:00Z');
 
@@ -102,5 +102,18 @@ describe('briefing', () => {
     const b = briefing({ tenants: [], openItems: [], capacity: null, now: NOW });
     expect(b.items[0]?.severity).toBe('sistema');
     expect(b.mood).toBe('tranquilo');
+  });
+});
+
+describe('tenantNote', () => {
+  it('is calm for a healthy business', () => {
+    expect(tenantNote(tenant({}), NOW).mood).toBe('tranquilo');
+  });
+
+  it('names the most urgent problem first and lists the rest', () => {
+    const note = tenantNote(tenant({ ownerEmail: null, lastSyncAt: '2026-05-12T12:00:00Z' }), NOW);
+    expect(note.mood).toBe('guardia');
+    expect(note.text).toMatch(/^Ojo aquí: sin sincronizar 136 días/);
+    expect(note.text).toContain('Además:');
   });
 });

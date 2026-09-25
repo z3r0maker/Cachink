@@ -188,3 +188,24 @@ export function tenantHealth(row: TenantRow, now: Date): Health {
 export function syncIsStale(row: TenantRow, now: Date): boolean {
   return staleSync(row, now) !== null;
 }
+
+/** What Don Cuentas says on a tenant's side panel: its own attention items, in words. */
+export function tenantNote(
+  row: TenantRow,
+  now: Date,
+): { readonly mood: Mood; readonly text: string } {
+  const items = tenantItems(row, now);
+  if (items.length === 0) {
+    return {
+      mood: 'tranquilo',
+      text: 'Todo en orden con este negocio: tiene dueño, sus cajas sincronizan y no debe nada.',
+    };
+  }
+  const [first, ...rest] = items.sort((a, b) => ORDER[a.severity] - ORDER[b.severity]);
+  const more =
+    rest.length > 0 ? ` Además: ${rest.map((i) => i.title.split(' · ')[1]).join('; ')}.` : '';
+  return {
+    mood: 'guardia',
+    text: `Ojo aquí: ${first!.title.split(' · ')[1]}. ${first!.detail}${more}`,
+  };
+}
