@@ -20,6 +20,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { ROUTES } from '../src/routes.js';
 import { PLANES } from '../landing/planes.js';
+import { SOCIAL_PROFILES } from '../landing/social.js';
 import { checkCrawlerFiles, writeCrawlerFiles } from './crawler-files.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -129,6 +130,7 @@ const crawlerFailures = checkCrawlerFiles(files, {
   siteUrl: SITE_URL,
   planes: PLANES,
   faq: FAQ_ITEMS,
+  profiles: SOCIAL_PROFILES,
 });
 if (crawlerFailures.length > 0) {
   console.error('\nGenerated crawler files failed their checks:');

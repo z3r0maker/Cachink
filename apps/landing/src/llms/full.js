@@ -1,5 +1,6 @@
 /** /llms-full.txt — the full product spec; plans and FAQ come from the same data the page renders. */
 import { FAQ_ITEMS } from '../../landing/copy.jsx';
+import { SOCIAL_PROFILES } from '../../landing/social.js';
 import { PLANES_NOTAS, planesDetalle } from './planes-text.js';
 
 const faqText = () => FAQ_ITEMS.map(({ q, a }) => `**${q}**\n${a}`).join('\n\n');
@@ -110,7 +111,7 @@ const contacto = (siteUrl) => `## Información de contacto y presencia digital
 - **Correo**: hola@xangarro.mx
 - **País de operación**: México
 - **Idioma**: Español (México)
-- **Redes sociales**: Instagram, TikTok, X (Twitter), YouTube — @xangarro`;
+- **Redes sociales**: ${SOCIAL_PROFILES.map((p) => `${p.name} ${p.handle} (${p.url})`).join(' · ')}`;
 
 const pie = (siteUrl) =>
   `*Ver también: ${siteUrl}/llms.txt (resumen corto) · ${siteUrl}/recursos/ (artículos y guías para emprendedores)*`;

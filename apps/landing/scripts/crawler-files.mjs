@@ -57,24 +57,38 @@ export function writeCrawlerFiles({ root, siteUrl, routes, buildLlmsTxt, buildLl
   return files;
 }
 
+/** Every string in `needles` that `text` lacks, as one failure line each. */
+const missing = (file, text, needles, label) =>
+  needles.filter((n) => !text.includes(n)).map((n) => `✗  ${file} — missing ${label} ${n}`);
+
 /**
  * The generated files must carry what the page carries: every route in the
- * sitemap, every plan and every FAQ question in the llms files.
+ * sitemap, every plan and every FAQ question in the llms files, every
+ * public profile in the full one.
  */
-export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq }) {
-  const failures = [];
-  for (const r of routes) {
-    if (!files['sitemap.xml'].includes(`<loc>${siteUrl}${r.path}</loc>`)) {
-      failures.push(`✗  sitemap.xml — missing ${r.path}`);
-    }
-  }
-  for (const p of planes) {
-    for (const name of ['llms.txt', 'llms-full.txt']) {
-      if (!files[name].includes(p.nombre)) failures.push(`✗  ${name} — missing plan ${p.nombre}`);
-    }
-  }
-  for (const { q } of faq) {
-    if (!files['llms-full.txt'].includes(q)) failures.push(`✗  llms-full.txt — missing FAQ "${q}"`);
-  }
-  return failures;
+export function checkCrawlerFiles(files, { routes, siteUrl, planes, faq, profiles }) {
+  const full = files['llms-full.txt'];
+  const nombres = planes.map((p) => p.nombre);
+  return [
+    ...missing(
+      'sitemap.xml',
+      files['sitemap.xml'],
+      routes.map((r) => `<loc>${siteUrl}${r.path}</loc>`),
+      'route',
+    ),
+    ...missing('llms.txt', files['llms.txt'], nombres, 'plan'),
+    ...missing('llms-full.txt', full, nombres, 'plan'),
+    ...missing(
+      'llms-full.txt',
+      full,
+      faq.map(({ q }) => q),
+      'FAQ',
+    ),
+    ...missing(
+      'llms-full.txt',
+      full,
+      profiles.map((p) => p.url),
+      'profile',
+    ),
+  ];
 }

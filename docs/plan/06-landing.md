@@ -83,7 +83,9 @@
     the four guides) are substituted like the OG tags; articles carry Article + BreadcrumbList and
     `/recursos/` a CollectionPage + ItemList. The portal gained `app/robots.ts` (allow `/login` and
     `/signup`, disallow the rest; `tests/robots.test.ts`) and `metadataBase` from `PORTAL_URL`.
-- **Not done (needs the owner):** confirm the social handles `llms-full.txt` claims (Instagram,
-  TikTok, X, YouTube — @xangarro) and add them as `sameAs` on the Organization schema, or drop the
-  line; trim the home description (~200 chars) and the NIF article title (~80 chars) for SERP
-  truncation.
+- Done: 2026-09-24 · the public profiles (Instagram @xangarro.mx, Facebook /xangarro) live once in
+  `landing/social.js`: the Organization schema lists them as `sameAs` (plus `email`), `llms-full.txt`
+  names them with their URLs, and the build fails when one is missing from it. The old line that
+  claimed TikTok, X and YouTube is gone.
+- **Not done:** trim the home description (~200 chars) and the NIF article title (~80 chars) for
+  SERP truncation.

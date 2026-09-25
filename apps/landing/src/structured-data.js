@@ -16,6 +16,8 @@
 import { FAQ_ITEMS } from '../landing/copy.jsx';
 // Plan prices/limits — same source as the visible pricing table (L-02)
 import { PLANES } from '../landing/planes.js';
+// Public profiles — the Organization's sameAs, the same list llms-full.txt names
+import { SOCIAL_PROFILES } from '../landing/social.js';
 
 const SITE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_SITE_URL) || 'https://xangarro.mx';
@@ -40,6 +42,8 @@ const organization = {
   },
   areaServed: { '@type': 'Country', name: 'México' },
   inLanguage: 'es-MX',
+  email: 'hola@xangarro.mx',
+  sameAs: SOCIAL_PROFILES.map((p) => p.url),
 };
 
 const softwareApplication = {
