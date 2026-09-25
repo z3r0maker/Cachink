@@ -38,10 +38,11 @@ async function rowsOf(bytes: ArrayBuffer): Promise<unknown[][]> {
 }
 
 // ExcelJS is imported lazily and is large; loading it once here keeps that
-// cost out of the first test's 5-second budget on a busy machine.
+// cost out of the first test's 5-second budget on a busy machine. The hook's
+// own budget is generous: on a machine at load 30 the cold import alone took 10s.
 beforeAll(async () => {
   await loadExcelJs();
-});
+}, 30_000);
 
 beforeEach(() => {
   vi.clearAllMocks();
