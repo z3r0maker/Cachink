@@ -80,12 +80,29 @@ describe('AplicarConfiguracionUseCase (N-13, N-15)', () => {
     assert.deepEqual(result.changes, [{ kind: 'feature', key: 'stock', enabled: false }]);
   });
 
-  it('on a paid plan enables credit and adds Crédito as a payment method', async () => {
-    await answer({ vendeACredito: true });
-    await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
+  it('on a paid plan enables credit; Crédito is the Función, never a stored method (P-36)', async () => {
+    await answer({ vendeACredito: true, metodosCobro: ['Efectivo', 'Tarjeta'] });
+    const result = await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
     const after = await read();
     assert.equal(after.flags.ventasCredito, true);
-    assert.ok(after.payments.includes('Crédito'));
+    assert.deepEqual(
+      after.payments,
+      ['Efectivo', 'Tarjeta'],
+      'the list phones read stays configurable',
+    );
+    assert.ok(
+      result.changes.some((c) => c.kind === 'paymentType' && c.method === 'Crédito' && c.enabled),
+      'the "esto cambiará" list still names Crédito',
+    );
+  });
+
+  it('with credit on, applying again is a no-op: Crédito is read back from the Función', async () => {
+    await answer({ vendeACredito: true, metodosCobro: ['Efectivo'] });
+    await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
+    updates = 0;
+    const again = await useCase.execute({ businessId, plan: 'xangarro', allowed: EVERYTHING });
+    assert.deepEqual(again.changes, []);
+    assert.equal(updates, 0);
   });
 
   it('never enables a feature the platform has not released, even on a paid plan', async () => {

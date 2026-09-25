@@ -4,6 +4,7 @@ import { REASON_CODES } from '@xangarro/domain';
 
 import { changeLine } from '../src/onboarding/change-copy';
 import { buildChecklist, type ChecklistSignals } from '../src/onboarding/checklist';
+import { debeIrALaGuia } from '../src/onboarding/guia';
 import {
   REASON_COPY,
   allowedFor,
@@ -105,11 +106,13 @@ describe('"¿Cómo empiezo?" (N-14)', () => {
     dispositivosActivos: 0,
     ventasSincronizadas: 0,
     tieneLogo: false,
+    tieneRfc: false,
+    pagosRevisados: false,
   };
 
-  it('starts at zero of seven and ends complete', () => {
+  it('starts at zero of six required and ends complete', () => {
     assert.equal(buildChecklist(NOTHING).done, 0);
-    assert.equal(buildChecklist(NOTHING).total, 7);
+    assert.equal(buildChecklist(NOTHING).total, 6);
     const all = buildChecklist({
       operadores: 1,
       productos: 3,
@@ -134,5 +137,52 @@ describe('"¿Cómo empiezo?" (N-14)', () => {
     const c = buildChecklist({ ...NOTHING, dispositivosActivos: 1 });
     const done = c.items.filter((i) => i.done).map((i) => i.key);
     assert.deepEqual(done, ['codigo', 'dispositivo']);
+  });
+});
+
+describe('the checklist has a required list and an optional one (P-36 D-2)', () => {
+  const NADA: ChecklistSignals = {
+    operadores: 0,
+    productos: 0,
+    saldosIniciales: false,
+    codigoGenerado: false,
+    dispositivosActivos: 0,
+    ventasSincronizadas: 0,
+    tieneLogo: false,
+    tieneRfc: false,
+    pagosRevisados: false,
+  };
+
+  it('completes on the required items alone; the optional ones never gate', () => {
+    const c = buildChecklist({
+      ...NADA,
+      operadores: 1,
+      productos: 3,
+      saldosIniciales: true,
+      dispositivosActivos: 1,
+      ventasSincronizadas: 1,
+    });
+    assert.equal(c.complete, true);
+    assert.equal(c.optional.filter((i) => i.done).length, 0);
+    assert.deepEqual(
+      c.optional.map((i) => i.key),
+      ['pagos', 'fiscales', 'logo'],
+    );
+  });
+
+  it('marks the optional items from the RFC, the payment list and the logo', () => {
+    const c = buildChecklist({ ...NADA, tieneRfc: true, pagosRevisados: true, tieneLogo: true });
+    assert.deepEqual(
+      c.optional.map((i) => i.done),
+      [true, true, true],
+    );
+    assert.equal(c.complete, false);
+  });
+
+  it('sends only an owner with an unfinished required list to the guide, unless opted out', () => {
+    assert.equal(debeIrALaGuia({ role: 'owner', complete: false, omitida: false }), true);
+    assert.equal(debeIrALaGuia({ role: 'owner', complete: true, omitida: false }), false);
+    assert.equal(debeIrALaGuia({ role: 'owner', complete: false, omitida: true }), false);
+    assert.equal(debeIrALaGuia({ role: 'operador', complete: false, omitida: false }), false);
   });
 });

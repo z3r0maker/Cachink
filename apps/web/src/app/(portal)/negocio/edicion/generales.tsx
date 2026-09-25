@@ -5,6 +5,7 @@ import { REGIMEN_NOMBRE } from '@xangarro/domain';
 import { Input, OptionCards, Switch } from '@/components';
 
 import { SectionShell } from '../parts';
+import { hint } from '../negocio.css';
 import { sugerida, type Business } from './draft';
 import type { Edicion } from './use-edicion';
 
@@ -15,39 +16,41 @@ import type { Edicion } from './use-edicion';
  */
 const COMUNES = ['626', '612', '601', '606', '605'];
 
-const cards = (current: string | null) =>
-  [...COMUNES, ...(current !== null && !COMUNES.includes(current) ? [current] : [])].map((c) => ({
-    value: c,
-    title: `${c} · ${REGIMEN_NOMBRE[c] ?? c}`,
-    description: c === '626' ? 'RESICO: el más común para emprendedores.' : '',
-  }));
+/** «Ninguno por ahora» is a real choice (P-36.4): no régimen, the general ISR rate applies. */
+const NINGUNO = 'ninguno';
+
+const cards = (current: string | null) => [
+  ...[...COMUNES, ...(current !== null && !COMUNES.includes(current) ? [current] : [])].map(
+    (c) => ({
+      value: c,
+      title: `${c} · ${REGIMEN_NOMBRE[c] ?? c}`,
+      description: c === '626' ? 'RESICO: el más común para emprendedores.' : '',
+    }),
+  ),
+  {
+    value: NINGUNO,
+    title: 'Ninguno por ahora',
+    description: 'Estimamos el ISR con tu tasa general; lo cambias cuando quieras.',
+  },
+];
 
 const pct = (bp: number) => `${bp / 100}%`;
 
-export function GeneralesEdit({
-  e,
-  business,
-}: {
-  readonly e: Edicion;
-  readonly business: Business;
-}) {
+function Regimen({ e, business }: { readonly e: Edicion; readonly business: Business }) {
   if (e.draft === null) return null;
   const d = e.draft;
   const s = sugerida(business, d);
   return (
-    <SectionShell title="Datos generales" tone="hero">
-      <Input
-        labelText="Nombre del negocio"
-        value={d.nombre}
-        onChange={(ev) => e.set({ nombre: ev.target.value })}
-        error={e.errores.campos.nombre}
-        data-testid="negocio-nombre"
-      />
+    <>
+      <p className={hint}>
+        Régimen fiscal. Solo sirve para estimar el ISR en tu estado de resultados; no afecta nada
+        más.
+      </p>
       <OptionCards
         ariaLabel="Régimen fiscal"
         options={cards(business.regimenSat)}
-        value={d.regimenSat}
-        onValueChange={(v) => e.set({ regimenSat: v })}
+        value={d.regimenSat ?? NINGUNO}
+        onValueChange={(v) => e.set({ regimenSat: v === NINGUNO ? null : v })}
       />
       {e.errores.campos.regimen ? <p role="alert">{e.errores.campos.regimen}</p> : null}
       {s === null ? null : (
@@ -61,6 +64,29 @@ export function GeneralesEdit({
           régimen
         </label>
       )}
+    </>
+  );
+}
+
+export function GeneralesEdit({
+  e,
+  business,
+}: {
+  readonly e: Edicion;
+  readonly business: Business;
+}) {
+  if (e.draft === null) return null;
+  const d = e.draft;
+  return (
+    <SectionShell title="Datos generales" tone="hero">
+      <Input
+        labelText="Nombre del negocio"
+        value={d.nombre}
+        onChange={(ev) => e.set({ nombre: ev.target.value })}
+        error={e.errores.campos.nombre}
+        data-testid="negocio-nombre"
+      />
+      <Regimen e={e} business={business} />
     </SectionShell>
   );
 }

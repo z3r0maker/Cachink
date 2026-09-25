@@ -24,12 +24,24 @@ function parsePaymentTypes(raw: string): PaymentMethod[] {
   }
 }
 
+/**
+ * Crédito is not stored in `enabledPaymentMethods` (that list is what phones
+ * offer at the mostrador; Crédito is the `ventasCredito` Función). The wizard
+ * still reasons about it as a payment type, so it is read back from the flag:
+ * that keeps a re-run a no-op (N-15) without ever writing it to the list.
+ */
 export function currentConfiguration(business: Business): TenantConfiguration {
+  const toggles = parseFeatureFlags(business.featureFlags);
+  const stored = parsePaymentTypes(business.enabledPaymentMethods).filter((m) => m !== 'Crédito');
   return {
-    toggles: parseFeatureFlags(business.featureFlags),
-    paymentTypes: parsePaymentTypes(business.enabledPaymentMethods),
+    toggles,
+    paymentTypes: toggles.ventasCredito ? canonicalPaymentTypes([...stored, 'Crédito']) : stored,
   };
 }
+
+/** What may be written to `enabledPaymentMethods`: everything but Crédito (see above). */
+export const storablePaymentTypes = (methods: readonly PaymentMethod[]): PaymentMethod[] =>
+  methods.filter((m) => m !== 'Crédito');
 
 /**
  * `answersToConfiguration` knows the plan; it does not know the platform.

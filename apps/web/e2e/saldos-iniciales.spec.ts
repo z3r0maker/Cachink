@@ -65,7 +65,7 @@ test('captured opening cash is the Balance’s Efectivo, and the checklist ticks
 
   await page.goto('/como-empiezo');
   const row = page
-    .getByTestId('checklist')
+    .getByTestId('checklist-requerido')
     .locator('li', { hasText: 'Captura tus saldos iniciales' });
   await expect(row).toHaveAttribute('data-done', 'false');
 

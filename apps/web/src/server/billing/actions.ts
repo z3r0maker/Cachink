@@ -7,6 +7,7 @@ import {
 } from '@xangarro/application/billing';
 import { getBusiness, subscriptionsOfBusiness } from '@xangarro/data-pg';
 
+import { BETA_NO_CHARGE_MESSAGE, betaNoCharge } from './beta';
 import { requireMember } from '../auth';
 import { withTenant } from '../db';
 import { reportError } from '../observability/report';
@@ -49,6 +50,7 @@ function fail(error: unknown, where: string): BillingActionResult {
 
 /** [Contratar este plan]: Stripe Checkout, card only, either interval, no trial (ADR-105). */
 export async function iniciarPrueba(plan: string, interval: string): Promise<BillingActionResult> {
+  if (betaNoCharge()) return { ok: false, message: BETA_NO_CHARGE_MESSAGE };
   try {
     const base = await origin();
     const url = await liveBillingUseCases().trial.execute({
@@ -67,6 +69,7 @@ export async function iniciarPrueba(plan: string, interval: string): Promise<Bil
 
 /** [Pagar por transferencia]: the annual plan by SPEI; returns the hosted invoice with the CLABE. */
 export async function pagarAnualPorSpei(plan: string): Promise<BillingActionResult> {
+  if (betaNoCharge()) return { ok: false, message: BETA_NO_CHARGE_MESSAGE };
   try {
     const url = await liveBillingUseCases().spei.execute({ business: await owner(), plan });
     await recordGeo('compra');
