@@ -43,12 +43,14 @@ export const optionDot = style({
 });
 
 export const optionTitle = style({
+  display: 'block',
   fontSize: fontSizes.lg,
   fontWeight: typography.weights.extraBold,
   color: colors.black,
 });
 
 export const optionBody = style({
+  display: 'block',
   marginTop: 4,
   fontSize: fontSizes.md,
   fontWeight: typography.weights.semibold,

@@ -1,6 +1,12 @@
 import { PLAN_NOMBRE } from '@xangarro/domain';
 
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
+
+import { buildChecklist } from '@/onboarding/checklist';
+import { GUIA_OMITIDA_COOKIE, debeIrALaGuia } from '@/onboarding/guia';
 import { currentSession } from '@/server/current-session';
+import { loadChecklistSignals, wizardCompleted } from '@/server/onboarding/load';
 import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
@@ -26,10 +32,26 @@ import { column, content, frame, main } from '@/shell/shell.css';
  * comes from the session; the switcher lists every business the account
  * belongs to (P-02).
  */
+/**
+ * P-36 D-2: a new business is walked through «¿Cómo empiezo?» before the
+ * portal. A failing read never gates — the shell degrades, it does not lock.
+ */
+async function guiaPrimero(role: string, businessId: string): Promise<void> {
+  const omitida = (await cookies()).get(GUIA_OMITIDA_COOKIE) !== undefined;
+  if (!debeIrALaGuia({ role, complete: false, omitida })) return;
+  // Only a business that finished the wizard is walked; a seeded or older one is not.
+  const complete = await wizardCompleted(businessId)
+    .then((wizard) => (wizard ? loadChecklistSignals(businessId) : null))
+    .then((signals) => signals === null || buildChecklist(signals).complete)
+    .catch(() => true);
+  if (debeIrALaGuia({ role, complete, omitida })) redirect('/como-empiezo');
+}
+
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   // `currentSession` redirects to /login when the cookie is missing or forged,
   // so nothing below this line renders for a signed-out visitor.
   const session = await currentSession();
+  await guiaPrimero(session.role, session.businessId);
   const counts = await loadShellCounts(session.businessId);
   const logoUrl = await loadShellLogo(session.businessId);
   const claims = await readSession();

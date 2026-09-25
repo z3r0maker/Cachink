@@ -57,7 +57,7 @@ test('each payment shows the state of its factura', async ({ page }) => {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('facturas-1');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/suscripcion');
 

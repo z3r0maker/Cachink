@@ -1,11 +1,12 @@
-import { borders, colors, radii, shadows } from '@xangarro/tokens';
+import { borders, colors } from '@xangarro/tokens';
 import { style } from '@vanilla-extract/css';
 
 /**
  * The login page's two-column layout (P-02): a flat-yellow sticky panel on
- * the left — wordmark row, the animation, the headline pinned to the bottom —
- * and the auth card on the right. Below 1024 px the panel folds away and the
- * card stands alone, exactly as the portal's shell rule demands.
+ * the left — wordmark row, the storefront with its shutter, the headline
+ * pinned to the bottom — and the auth card on the right. Below 1024 px the
+ * panel becomes a short band above the card: the wordmark and the storefront,
+ * no headline and no Don Cuentas.
  */
 
 export const rejilla = style({
@@ -34,40 +35,14 @@ export const panel = style({
   boxSizing: 'border-box',
   '@media': {
     '(max-width: 1023px)': {
-      display: 'none',
+      height: 'auto',
+      position: 'static',
+      padding: '18px 16px 26px',
+      gap: 16,
+      borderRight: 0,
+      borderBottom: `2.5px solid ${colors.black}`,
     },
   },
-});
-
-/**
- * The hero illustration's frame (A-12, ADR-093). The box keeps the asset's
- * own 2.5:1 ratio — any other ratio crops the vendor or leaves the artwork
- * floating in dead yellow (design handoff, "Acceso y onboarding" block 2).
- *
- * It yields before the headline does: on a short viewport the panel has to
- * fit a wordmark, this, the animation and the pinned headline inside 100vh,
- * and the headline is the one that carries the product's promise.
- */
-export const heroMarco = style({
-  flex: '0 1 auto',
-  minHeight: 0,
-  width: '100%',
-  aspectRatio: '1983 / 793',
-  border: `2.5px solid ${colors.black}`,
-  borderRadius: radii[5],
-  boxShadow: shadows.hero,
-  boxSizing: 'border-box',
-  overflow: 'hidden',
-  '@media': {
-    '(max-height: 719px)': { display: 'none' },
-  },
-});
-
-export const heroImagen = style({
-  width: '100%',
-  height: '100%',
-  objectFit: 'cover',
-  display: 'block',
 });
 
 export const marca = style({
@@ -93,6 +68,7 @@ export const monedaMarca = style({
 
 export const titular = style({
   margin: 0,
+  '@media': { '(max-width: 1023px)': { display: 'none' } },
   marginTop: 'auto',
   fontSize: 'clamp(30px, 4.2vw, 48px)',
   lineHeight: 1.04,
@@ -103,6 +79,7 @@ export const titular = style({
 });
 
 export const subtitulo = style({
+  '@media': { '(max-width: 1023px)': { display: 'none' } },
   margin: 'clamp(10px, 1.8vh, 18px) 0 0',
   maxWidth: '38ch',
   fontSize: 'clamp(15px, 1.6vw, 17px)',
@@ -121,7 +98,7 @@ export const columna = style({
   '@media': {
     '(max-width: 1023px)': {
       minHeight: 'auto',
-      padding: '10vh 16px 6vh',
+      padding: '28px 16px 6vh',
     },
   },
 });

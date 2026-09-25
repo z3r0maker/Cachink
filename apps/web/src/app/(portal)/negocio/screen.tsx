@@ -47,8 +47,9 @@ function Heading({ owner, e }: { readonly owner: boolean; readonly e: Edicion | 
   );
 }
 
-const regimenLabel = (code: string | null): string | null =>
-  code === null ? null : `${code} · ${REGIMEN_NOMBRE[code] ?? code}`;
+/** P-36.4: no régimen is a choice («Ninguno por ahora»), not something missing. */
+const regimenLabel = (code: string | null): string =>
+  code === null ? 'Ninguno por ahora' : `${code} · ${REGIMEN_NOMBRE[code] ?? code}`;
 
 /**
  * The read-mode rows. A `null` value renders «Falta por completar» in amber —
@@ -64,7 +65,7 @@ function buildSections(business: Business) {
         // «Falta» when the old «Otro» could not be mapped to a code (ADR-082).
         { label: 'Régimen fiscal', value: regimenLabel(business.regimenSat) },
         { label: 'Tasa de ISR', value: `${(business.isrTasa ?? 0) / 100}%` },
-        { label: 'Tipo de negocio', value: business.tipoNegocio },
+        { label: 'Tipo de negocio', value: business.tipoNegocio ?? 'Sin especificar' },
       ],
     },
     {
@@ -104,20 +105,23 @@ function Cards({ business, e }: { readonly business: Business; readonly e: Edici
 
 function Loaded({ business, owner }: { readonly business: Business; readonly owner: boolean }) {
   const e = useEdicion(business);
-  const incomplete = buildSections(business).some((s) => s.fields.some((f) => f.value === null));
+  const incomplete = buildSections(business)
+    .filter((s) => s.title === 'Datos fiscales')
+    .some((s) => s.fields.some((f) => f.value === null));
   return (
     <>
       <Heading owner={owner} e={e} />
       {incomplete && e.draft === null ? (
         <Banner
-          tone="warning"
-          title="Faltan tus datos fiscales."
-          body="Con tu RFC, razón social y código postal podemos facturar a tu nombre."
+          tone="info"
+          title="Sin datos fiscales."
+          body="Solo los necesitas si quieres factura de tu suscripción a Xangarro."
         />
       ) : null}
       {e.draft === null && e.note !== null ? <p role="status">{e.note}</p> : null}
-      <Cards business={business} e={e} />
+      {/* P-36.5: the bar leads the edit, under the header, not after the cards. */}
       <SaveBar e={e} />
+      <Cards business={business} e={e} />
       <FuncionesCard flags={parseFeatureFlags(business.featureFlags ?? '{}')} />
       <CapabilitiesCard />
       {owner && e.draft === null ? <ArchivarNegocio nombre={business.nombre} /> : null}

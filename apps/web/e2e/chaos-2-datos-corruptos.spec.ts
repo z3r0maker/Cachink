@@ -220,7 +220,7 @@ test.describe('login gate (signed out)', () => {
     await page.getByTestId('login-door-owner').click();
     await page.getByTestId('login-email').fill(`<script>alert(1)</script>@x.com`);
     await page.getByTestId('login-password').fill('loquesea123');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
 
     // Recovery state: noValidate let the raw string reach the server; the answer
     // is the anti-enumeration copy, rendered once and unexecuted.

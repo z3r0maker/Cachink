@@ -2,8 +2,9 @@
 
 import { colors } from '@xangarro/tokens';
 
+import { useSession } from '@/session/provider';
 import { Card } from '@/components';
-import { CAPABILITY_ROWS, type Section } from '@/data/negocio';
+import { capabilityRows, type Section } from '@/data/negocio';
 import { Icon } from '@/shell/icon';
 
 import {
@@ -85,6 +86,7 @@ export function SectionCard({ section }: { readonly section: Section }) {
 
 /** Plan capabilities have no tenant switch, so they render without one. */
 export function CapabilitiesCard() {
+  const rows = capabilityRows(useSession().planId);
   return (
     <Card>
       <div className={sectionTitle} style={{ marginBottom: 6 }}>
@@ -93,7 +95,7 @@ export function CapabilitiesCard() {
       <p className={fieldLabel} style={{ marginBottom: 14 }}>
         Esto viene con tu plan. No se activa ni se apaga desde aquí.
       </p>
-      {CAPABILITY_ROWS.map(([label, value]) => (
+      {rows.map(([label, value]) => (
         <div key={label} className={fieldRow}>
           <span className={fieldLabel}>{label}</span>
           <span className={fieldValue}>{value}</span>

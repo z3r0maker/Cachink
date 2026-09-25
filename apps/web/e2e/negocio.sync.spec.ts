@@ -71,7 +71,7 @@ test('the contador (viewer) cannot edit the business', async ({ browser }) => {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('contador@taqueria.mx');
   await page.getByTestId('login-password').fill('contador123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/negocio');
   await expect(page.locator('main').getByText('XOJI740919U48')).toBeVisible();

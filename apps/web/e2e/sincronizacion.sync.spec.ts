@@ -46,7 +46,7 @@ test('a refused row reads as a sentence, is in the history, and stays resolved',
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill('sync-1234');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/sincronizacion');
 

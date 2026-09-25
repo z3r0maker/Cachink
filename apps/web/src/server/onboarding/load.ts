@@ -10,7 +10,9 @@ import {
   openingBalances,
 } from '@xangarro/data-pg';
 import {
+  METODOS_CONFIGURABLES,
   answersToConfiguration,
+  parseMetodosPago,
   parseWizardAnswers,
   type PlanId,
   type WizardAnswers,
@@ -69,10 +71,30 @@ export async function loadRecommendation(
 
 const n = (rows: { n: number }[]) => rows[0]?.n ?? 0;
 
+/** The stored list differs from the default four, in any order: someone chose. */
+function pagosRevisados(json: string | null | undefined): boolean {
+  const chosen = parseMetodosPago(json);
+  return chosen.length !== METODOS_CONFIGURABLES.length;
+}
+
+/** Whether the business went through «Platícanos de ti» (the gate of P-36 D-2 applies only then). */
+export function wizardCompleted(businessId: string): Promise<boolean> {
+  return withTenant(businessId, async (tx) => {
+    const record = await pgOnboardingStore(tx, businessId).find();
+    return record?.completedAt != null;
+  });
+}
+
 export function loadChecklistSignals(businessId: string): Promise<ChecklistSignals> {
   return withTenant(businessId, async (tx) => {
     const c = { n: count() };
-    const [biz] = await tx.select({ logo: businesses.logoUrl }).from(businesses);
+    const [biz] = await tx
+      .select({
+        logo: businesses.logoUrl,
+        rfc: businesses.rfc,
+        pagos: businesses.enabledPaymentMethods,
+      })
+      .from(businesses);
     return {
       operadores: n(await tx.select(c).from(users)),
       productos: n(await tx.select(c).from(products).where(isNull(products.deletedAt))),
@@ -82,6 +104,8 @@ export function loadChecklistSignals(businessId: string): Promise<ChecklistSigna
       dispositivosActivos: n(await tx.select(c).from(devices).where(isNull(devices.revokedAt))),
       ventasSincronizadas: n(await tx.select(c).from(sales).where(isNull(sales.deletedAt))),
       tieneLogo: biz?.logo != null && biz.logo !== '',
+      tieneRfc: biz?.rfc != null && biz.rfc !== '',
+      pagosRevisados: pagosRevisados(biz?.pagos),
     };
   });
 }

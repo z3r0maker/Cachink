@@ -70,24 +70,37 @@ test('a new owner signs up, answers the wizard, stays free and lands on the chec
   await expect(page.getByTestId('plan-price')).toHaveText('$1,990 al año + IVA');
   await expect(page.getByText('Incluido en Xangarro').first()).toBeVisible();
 
-  // «Probar 14 días» is deliberately not clicked here. What it does depends on
+  // «Contratar este plan» is deliberately not clicked here. What it does depends on
   // whether Stripe is configured: with keys it navigates to Checkout
   // (`window.location.assign`), and this test — whose subject is the *free*
   // path — cannot come back from that. Without keys it showed «Pronto podrás
-  // activar tu prueba», which is the branch this test used to assert, so the
+  // contratar este plan», which is the branch this test used to assert, so the
   // test only passed on a machine with billing half-configured. The button's
   // presence is the claim that belongs here; where it leads is B-10's.
-  await expect(page.getByRole('button', { name: 'Probar 14 días' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Contratar este plan' })).toBeEnabled();
+  await expect(page.getByText(/14 días/)).toHaveCount(0);
 
   await page.getByRole('button', { name: 'Seguir gratis' }).click();
   await expect(page.getByRole('heading', { name: '¿Cómo empiezo?' })).toBeVisible();
-  // A brand-new business has ticked nothing; the total is however many items
-  // the checklist has (N-17 made it seven, and this said six).
-  const checklist = page.getByTestId('checklist');
+  // A brand-new business has ticked nothing. «Para vender» is what gates the
+  // portal (P-36 D-2); «Cuando quieras» is listed but never counts.
+  const requerido = page.getByTestId('checklist-requerido');
+  const opcional = page.getByTestId('checklist-opcional');
   await expect(
-    page.getByText(`0 de ${await checklist.locator('li[data-done]').count()} listos`),
+    page.getByText(`0 de ${await requerido.locator('li[data-done]').count()} listos`),
   ).toBeVisible();
-  await expect(checklist.locator('li[data-done="true"]')).toHaveCount(0);
+  await expect(requerido.locator('li[data-done="true"]')).toHaveCount(0);
+  await expect(opcional.locator('li[data-done]')).toHaveCount(3);
+
+  // P-36 D-2: the portal sends the owner back here until «Para vender» is done…
+  await page.goto('/');
+  await expect(page).toHaveURL(/\/como-empiezo$/);
+  // …unless the owner asks for the portal, which this browser then remembers.
+  await page.getByRole('link', { name: 'Ir a mi portal' }).click();
+  await expect(page.getByRole('heading', { name: /^Hola/ })).toBeVisible();
+  await page.goto('/');
+  await expect(page).not.toHaveURL(/\/como-empiezo$/);
+  await page.goto('/como-empiezo');
 
   // N-15: re-running with the same answers changes nothing.
   await page.getByRole('link', { name: 'Volver a configurar mi negocio' }).click();

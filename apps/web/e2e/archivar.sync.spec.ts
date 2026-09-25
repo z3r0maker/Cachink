@@ -40,7 +40,7 @@ async function signIn(page: Page) {
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill(email);
   await page.getByTestId('login-password').fill(password);
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
 }
 
 test('archiving takes the typed name, unlinks the phones and closes the door', async ({ page }) => {

@@ -184,7 +184,14 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
 
 ### P-21 `pnpm design:compare` capture harness
 
-- [x] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
+- [ ] Status · **Blocked by:** P-18 · **Blocks:** every screen task's check 1
+  - **Remaining (2026-09-23, verified against the code):** the whole harness. The one verified in
+    `83ec5840` (2026-09-21) was never committed: the unanchored `.gitignore` pattern
+    `design-compare/` also matched `scripts/design-compare/`, so the commit carried only the
+    `package.json` script and the ignore line. The sources are on no disk (worktree and main
+    checkout checked) and in no commit. Same day: the pattern is now `/design-compare/` and the
+    dangling `design:compare` script is removed, so the Steps below are a rewrite, not a recovery.
+    Restore the script entry when the harness lands.
 - **Context:** ADR-058. Check 1 is a review, not an assertion — the design plan itself lists browser
   width, text reflow and real-vs-sample data as acceptable differences, and the `.dc.html` files
   render through a vendored runtime that fetches fonts over the network. This never runs in CI.
@@ -193,7 +200,8 @@ pages/_document` on `/404` (Next 15). A pristine `create-next-app@16` failed the
   screenshots a named screen from both at the same width, and writes a stacked side-by-side PNG to
   `design-compare/`. Support `--width` (default 1440, plus 768) and `--state`.
 - **Acceptance:** `pnpm design:compare inicio` produces a PNG in which bar heights, card paddings,
-  title sizes and button positions are directly comparable. `design-compare/` is gitignored.
+  title sizes and button positions are directly comparable. `/design-compare/` (repo root) is
+  gitignored with that anchored pattern, and `git check-ignore -v scripts/design-compare/*` matches nothing.
 
 ---
 
@@ -243,7 +251,7 @@ including the press stamp.
 ### P-23 Primitives + Storybook inventory + visual-regression baselines
 
 - [~] Status · **Blocked by:** P-22 · **Blocks:** P-24 and every screen task
-  - **Remaining (2026-09-23, verified against the code):** `pnpm design:compare` cannot run — `package.json` points at `scripts/design-compare/compare.ts`, which is not in the repo because the unanchored `.gitignore` pattern `design-compare/` hides it (this also undercuts P-21's tick). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
+  - **Remaining (2026-09-23, verified against the code):** the `design:compare` acceptance clause waits on P-21, reopened the same day (the harness was never committed and exists on no disk; see P-21). No Storybook page in `apps/web`; Toast, gauge, nav item, switcher and user menu are unharnessed.
   - 2026-09-22 doc audit: shipped except the `design:compare` gate in its Acceptance.
   - In progress: 2026-09-17 · **core vocabulary built and rendering**, gate not yet closed.
   - **Done:** the press stamp and card lift (`styles/press.css.ts`, every value read from
@@ -1489,3 +1497,82 @@ critical avisos cannot be switched off.
   4. `server/import` (5%) and `server/repositories` (53%).
 - **Acceptance:** `coverage-floor.json` at ≥ 85 for lines, statements and functions, and
   branches ≥ 75, on a `portal-e2e` run where every project ran.
+
+### P-36 First production walkthrough: the owner's findings (2026-09-25)
+
+- [~] Status · **Blocked by:** ADR-105 landing (`feat/no-trial`, the billing session) for P-36.1;
+  `feat/don-cuentas-portal` landing for P-36.7
+  - Done: 2026-09-25 · items 2–6 on `main` (`feat/p36-walkthrough`): the guide with its required
+    and optional lists, the D-2 gate (owner, wizard completed, required list open, no opt-out cookie)
+    with «Ir a mi portal» as the escape, both onboarding paths ending on `/como-empiezo`; the wizard's
+    answers applied before any Checkout and Crédito never stored as a method (parser tolerant of old
+    rows); D-1's `BILLING_BETA_NO_CHARGE=1` (to set on `xangarro-web` in Vercel) keeps Checkout
+    closed with the «Durante la beta no cobramos» notice; régimen «Ninguno por ahora» and the two
+    one-line explanations; the edit bar on top; «Tu plan incluye» from the session's plan. Tests:
+    domain 881, application 513, portal unit 522, portal E2E 489 passed (full local run).
+    **Remaining:** P-36.1 and P-36.7 wait on their branches; the Inicio card's line reads «Listo para
+    vender. N opcionales por hacer» once the required list is done.
+- **Context:** the owner walked signup → wizard → «Tu plan ideal» → Stripe → portal on production
+  the night the domains went live and wrote down what was off. Verified against the code
+  (`origin/main` @ `d9e0c4a8`); each item names its cause.
+- **Decisions (owner, 2026-09-25):** D-1 → **no charge during the beta**: paid CTAs show the «pronto»
+  notice behind `BILLING_BETA_NO_CHARGE`, Checkout never opens; D-2 → **yes, gate**: redirect to
+  `/como-empiezo` until the required steps pass, with an escape.
+- **Decisions as they were put:**
+  - **D-1 · Charge during the beta?** ADR-105 removes the trial: a paid plan is paid from day one
+    through Stripe Checkout, Xangarrito is the free way in. Stripe is the billing backbone (B-10),
+    not a placeholder — but if the beta should not charge anyone yet, the paid CTAs must say so
+    («Pronto podrás contratar este plan», the notice `plan/screen.tsx` already has) instead of
+    opening Checkout, behind one flag, until launch. Either way, no card is collected for the free
+    plan.
+  - **D-2 · Gate the portal on the checklist?** Until every required step is done, should
+    `/como-empiezo` be the page every portal entry lands on (a redirect, escapable), or only the
+    first landing after the wizard plus the Inicio card? Recommended: redirect until the required
+    steps pass, with a «Ver el portal» escape; hide the page from the sidebar once complete.
+- **Items:**
+  1. **Trial copy everywhere (wizard, plan page, Suscripción cards, Checkout).** Cause: ADR-105 is
+     on `feat/no-trial` (8 commits ahead of main), not merged; production runs main. Fix: land that
+     branch, then re-read every string of the wizard and the plan pages in one pass for one voice
+     («Contratar este plan» / «Seguir gratis», the Stripe product name, the Suscripción CTA
+     `PLAN_CARDS[xangarrote].cta` = «Probar 14 días gratis»). Depends on D-1.
+  2. **After the wizard the owner lands on Suscripción with no guidance.** Cause: the paid path's
+     Checkout `successUrl` is `/suscripcion?pago=listo` (`server/onboarding/checkout.ts:29`,
+     `server/billing/actions.ts:58`); only the free path goes to `/como-empiezo`. The checklist
+     page exists (P-04/N-14: `/como-empiezo`, 7 detected steps, the Inicio card). Fix: both paths
+     end on `/como-empiezo` (the `pago=listo` toast moves there); the page grows a **required**
+     list (operador, productos, saldos, código, dispositivo, primera venta, tipos de pago revisados,
+     datos del negocio) and an **optional** list (logo, WhatsApp, datos fiscales «solo si quieres
+     factura», meta del mes con Don Cuentas, importar catálogo); it is hidden from nav and Inicio once
+     the required list passes; the subtitle stops saying «Seis pasos» for seven. Depends on D-2.
+  3. **Wizard payment answer not reflected in Negocio → Tipos de pago.** Two causes: (a) the paid
+     path never runs `AplicarConfiguracionUseCase` — answers wait in `pending_paid_answers` for the
+     entitlement listener (`server/onboarding/paid-answers.ts`), which needs the Stripe webhook to
+     fire on production (`STRIPE_WEBHOOK_SECRET` set on `xangarro-web`; verify with `stripe
+listen`/dashboard events); (b) even when applied, the wizard can write «Crédito» into
+     `enabled_payment_methods` (`answers-to-configuration.ts:90,95`) and `parseMetodosPago`
+     (`metodos-pago.ts:33-39`) then falls back to all four. Fix: apply the non-plan-dependent answers
+     (payment types, inventory, cash) at «Seguir gratis» **and** before redirecting to Checkout;
+     keep only the plan-gated ones pending; never write Crédito into the list (it is the
+     `ventasCredito` Función). Test: old → new data (§2.9).
+  4. **Datos generales / Datos fiscales.** Régimen (626/612/601/606/605) **is used**: it picks the
+     ISR estimate in the estado de resultados (`financials/isr-regimen.ts`) and the monthly report.
+     Keep it in Datos generales, add the option **«Ninguno por ahora»** (no ISR line, a note in the
+     estado) and a one-line label: «Solo sirve para estimar tu ISR en el estado de resultados. No
+     afecta nada más.» Uso de CFDI (G03/G01/S01) is **only** the receptor of Xangarro's own invoice
+     to the business (N-33): keep it in Datos fiscales, default G03, collapse the choice behind
+     «Quiero factura de mi suscripción», label «Solo para tu factura de Xangarro».
+  5. **«Estás editando tu negocio» bar** (`negocio/edicion/save-bar.tsx`, rendered at the bottom of
+     `screen.tsx`): move it to the top of the page under the header, sticky, Cancelar/Guardar with it.
+  6. **«Tu plan incluye» card wrong.** Cause: `CapabilitiesCard` rows come from the deprecated
+     fixture `fixtures/business.ts` (plan `xangarro`, asesor `diario`), not the subscription. Fix:
+     build the rows from the live entitlement (`computeEntitlement`) and the plan's Don Cuentas tier;
+     delete the fixture.
+  7. **Sidebar says «Asesor»; no Don Cuentas icon.** `feat/don-cuentas-portal` (f227e0ab, unmerged)
+     renames the entry and adds `DonCuentasAvatar`. Fix: land it; the nav icon becomes a 24-px
+     Lucide-idiom stroke of the brand coin with glasses and moustache (`shell/icon.tsx` path
+     string, matching `apps/landing/home/icons.jsx` `DonCuentasFace`), reused by the avatar.
+- **Acceptance:** a fresh signup on production ends on `/como-empiezo` on both paths; Negocio shows
+  the payment types the wizard chose; no «14 días» string anywhere (`git grep`); «Tu plan incluye»
+  matches the Suscripción card; régimen «Ninguno por ahora» yields an estado without ISR; Playwright
+  specs for the checklist landing and the Negocio edit bar; unit tests for the answer application
+  and the régimen option.

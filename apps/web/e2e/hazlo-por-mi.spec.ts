@@ -79,7 +79,7 @@ test('a viewer sees the card but not the form or decision buttons', async ({ bro
   await page.getByTestId('login-door-owner').click();
   await page.getByTestId('login-email').fill('contador@taqueria.mx');
   await page.getByTestId('login-password').fill('contador123');
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Abrir mi changarro' }).click();
   await page.waitForURL((u) => !u.pathname.startsWith('/login'));
   await page.goto('/importar');
   await expect(page.getByTestId('hazlo-por-mi')).toBeVisible();

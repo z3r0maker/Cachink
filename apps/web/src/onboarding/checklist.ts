@@ -17,6 +17,10 @@ export interface ChecklistSignals {
   readonly dispositivosActivos: number;
   readonly ventasSincronizadas: number;
   readonly tieneLogo: boolean;
+  /** An RFC is on file — the owner wants Xangarro's invoice for the subscription. */
+  readonly tieneRfc: boolean;
+  /** The payment types differ from the default four: someone looked at them. */
+  readonly pagosRevisados: boolean;
 }
 
 export type ChecklistKey =
@@ -26,10 +30,16 @@ export type ChecklistKey =
   | 'codigo'
   | 'dispositivo'
   | 'venta'
+  | 'pagos'
+  | 'fiscales'
   | 'logo';
+
+/** «Para vender» gates the portal until done (P-36 D-2); «Cuando quieras» never does. */
+export type ChecklistGroup = 'requerido' | 'opcional';
 
 export interface ChecklistItem {
   readonly key: ChecklistKey;
+  readonly group: ChecklistGroup;
   readonly title: string;
   readonly hint: string;
   readonly href: string | null;
@@ -37,7 +47,11 @@ export interface ChecklistItem {
 }
 
 export interface Checklist {
+  /** Every item, required first. */
   readonly items: readonly ChecklistItem[];
+  readonly required: readonly ChecklistItem[];
+  readonly optional: readonly ChecklistItem[];
+  /** Progress and completion count the required items only. */
   readonly done: number;
   readonly total: number;
   readonly complete: boolean;
@@ -48,6 +62,7 @@ type ItemDef = Omit<ChecklistItem, 'done'> & { readonly isDone: (s: ChecklistSig
 const ITEMS: readonly ItemDef[] = [
   {
     key: 'operador',
+    group: 'requerido',
     title: 'Crea tu primer operador',
     hint: 'La persona que cobra, con su PIN.',
     href: '/equipo?tab=operadores',
@@ -55,6 +70,7 @@ const ITEMS: readonly ItemDef[] = [
   },
   {
     key: 'productos',
+    group: 'requerido',
     title: 'Agrega tus productos',
     hint: 'Uno por uno o importa tu catálogo.',
     href: '/productos',
@@ -62,6 +78,7 @@ const ITEMS: readonly ItemDef[] = [
   },
   {
     key: 'saldos',
+    group: 'requerido',
     title: 'Captura tus saldos iniciales',
     hint: 'Caja, bancos y lo que te deben el día que empiezas.',
     href: '/saldos-iniciales',
@@ -69,6 +86,7 @@ const ITEMS: readonly ItemDef[] = [
   },
   {
     key: 'codigo',
+    group: 'requerido',
     title: 'Genera el código de tu teléfono',
     hint: 'Ocho letras para vincular el teléfono a tu negocio.',
     href: '/equipo?tab=dispositivos',
@@ -76,6 +94,7 @@ const ITEMS: readonly ItemDef[] = [
   },
   {
     key: 'dispositivo',
+    group: 'requerido',
     title: 'Vincula tu teléfono',
     hint: 'Se marca solo cuando el teléfono usa el código.',
     href: null,
@@ -83,13 +102,31 @@ const ITEMS: readonly ItemDef[] = [
   },
   {
     key: 'venta',
+    group: 'requerido',
     title: 'Tu primera venta sincronizada',
     hint: 'Se marca sola cuando llega la primera venta.',
     href: null,
     isDone: (s) => s.ventasSincronizadas > 0,
   },
   {
+    key: 'pagos',
+    group: 'opcional',
+    title: 'Revisa tus tipos de pago',
+    hint: 'Efectivo, transferencia, tarjeta, QR. Si los cuatro te sirven, déjalo así.',
+    href: '/negocio',
+    isDone: (s) => s.pagosRevisados,
+  },
+  {
+    key: 'fiscales',
+    group: 'opcional',
+    title: 'Captura tus datos fiscales',
+    hint: 'Solo si quieres factura de tu suscripción a Xangarro.',
+    href: '/negocio',
+    isDone: (s) => s.tieneRfc,
+  },
+  {
     key: 'logo',
+    group: 'opcional',
     title: 'Sube tu logo',
     hint: 'Aparece en tus comprobantes.',
     href: '/negocio',
@@ -99,6 +136,15 @@ const ITEMS: readonly ItemDef[] = [
 
 export function buildChecklist(signals: ChecklistSignals): Checklist {
   const items = ITEMS.map(({ isDone, ...item }) => ({ ...item, done: isDone(signals) }));
-  const done = items.filter((i) => i.done).length;
-  return { items, done, total: items.length, complete: done === items.length };
+  const required = items.filter((i) => i.group === 'requerido');
+  const optional = items.filter((i) => i.group === 'opcional');
+  const done = required.filter((i) => i.done).length;
+  return {
+    items,
+    required,
+    optional,
+    done,
+    total: required.length,
+    complete: done === required.length,
+  };
 }

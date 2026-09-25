@@ -8,7 +8,11 @@ import {
 } from '../../src/entities/staff.js';
 
 const ULID = '01HZ8XQN9GZJXV8AKQ5X0C7BJZ';
-const AUTH_UID = '4f1c2b9e-8a57-4c1e-9d0b-6c2f1e3a7b55';
+// A random uuid next to a name containing `auth` is read as a live credential
+// by gitleaks' generic-api-key rule, so this one is spelled to be obviously a
+// fixture. It is still a valid v4 uuid, so `z.uuid()` accepts it exactly as
+// before and every assertion is unchanged.
+const AUTH_UID = '00000000-0000-4000-8000-000000000001';
 const AT = '2026-09-17T12:00:00.000Z';
 
 const member = {

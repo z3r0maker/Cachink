@@ -43,7 +43,7 @@ export const ROUTES: readonly Route[] = [
   // tab click and is not what loads here.
   {
     path: '/asesor',
-    heading: 'Asesor',
+    heading: 'Don Cuentas',
     data: { kind: 'db', sentinel: 'El queso te cuesta 18% más que en junio' },
   },
   // Default tab is `ventas`. A signed amount for the same reason as `/`:

@@ -20,6 +20,8 @@ export interface PlanScreenProps {
   readonly plan: PlanId;
   readonly headline: string;
   readonly pending: readonly PendingPaidAnswer[];
+  /** P-36 D-1: the beta charges nobody, so the card note would promise the wrong thing. */
+  readonly beta: boolean;
 }
 
 type Notice = {
@@ -30,8 +32,15 @@ type Notice = {
 
 const SOON: Notice = {
   tone: 'info',
-  title: 'Pronto podrás activar tu prueba',
+  title: 'Pronto podrás contratar este plan',
   body: 'Guardamos tu elección y te avisaremos. Mientras tanto, sigue gratis: no pierdes nada.',
+};
+
+/** P-36 D-1: the beta charges nobody; the choice is kept and the business is configured. */
+const BETA: Notice = {
+  tone: 'info',
+  title: 'Durante la beta no cobramos',
+  body: 'Guardamos tu elección y ya configuramos tu negocio. Sigue gratis; te avisamos cuando abramos los planes de pago.',
 };
 
 function usePlanActions(plan: PlanId, interval: Interval) {
@@ -43,7 +52,7 @@ function usePlanActions(plan: PlanId, interval: Interval) {
       const r = await probarGratis(plan, interval);
       if (!r.ok) return setNotice({ tone: 'critical', title: r.message });
       if (r.redirect !== null) return window.location.assign(r.redirect);
-      setNotice(SOON);
+      setNotice(r.beta ? BETA : SOON);
     });
   const gratis = () =>
     startTransition(async () => {
@@ -73,6 +82,7 @@ function Price(props: {
   readonly plan: PlanId;
   readonly annual: boolean;
   readonly onAnnual: (on: boolean) => void;
+  readonly beta: boolean;
 }) {
   return (
     <>
@@ -83,12 +93,16 @@ function Price(props: {
       <span className={price} data-testid="plan-price">
         {priceLabel(props.plan, props.annual ? 'anual' : 'mensual')}
       </span>
-      <p className={note}>14 días gratis. Sin tarjeta para empezar.</p>
+      <p className={note}>
+        {props.beta
+          ? 'Durante la beta no cobramos.'
+          : 'Pagas con tarjeta. Cambias o cancelas cuando quieras.'}
+      </p>
     </>
   );
 }
 
-export function PlanScreen({ plan, headline, pending }: PlanScreenProps) {
+export function PlanScreen({ plan, headline, pending, beta }: PlanScreenProps) {
   const [annual, setAnnual] = useState(false);
   const interval: Interval = annual ? 'anual' : 'mensual';
   const a = usePlanActions(plan, interval);
@@ -97,13 +111,13 @@ export function PlanScreen({ plan, headline, pending }: PlanScreenProps) {
     <OnboardingFrame title={headline} subtitle={planPitch(plan)}>
       <Card>
         <div className={stack}>
-          {free ? null : <Price plan={plan} annual={annual} onAnnual={setAnnual} />}
+          {free ? null : <Price plan={plan} annual={annual} onAnnual={setAnnual} beta={beta} />}
           <Pending items={pending} />
           {a.notice ? <Banner {...a.notice} /> : null}
           <div className={actions}>
             {free ? null : (
               <Button onClick={a.probar} disabled={a.pending}>
-                Probar 14 días
+                Contratar este plan
               </Button>
             )}
             <Button
