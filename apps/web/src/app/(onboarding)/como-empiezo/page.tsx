@@ -1,3 +1,5 @@
+import { portalFontSizes } from '@xangarro/tokens';
+
 import { buildChecklist, type Checklist, type ChecklistItem } from '@/onboarding/checklist';
 import { ICON } from '@/onboarding/ui/icons';
 import { LoadFailed, OnboardingFrame, Progress } from '@/onboarding/ui/frame';
@@ -49,7 +51,7 @@ function Lista({
 }) {
   return (
     <Card>
-      <h2 style={{ margin: '0 0 2px', fontSize: 18 }}>{titulo}</h2>
+      <h2 style={{ margin: '0 0 2px', fontSize: portalFontSizes.sectionTitle }}>{titulo}</h2>
       <p className={note} style={{ marginBottom: 12 }}>
         {nota}
       </p>

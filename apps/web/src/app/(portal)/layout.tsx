@@ -11,10 +11,12 @@ import { negociosOf } from '@/server/memberships';
 import { readSession } from '@/server/session';
 import { loadShellCounts, loadShellLogo } from '@/server/shell';
 import { SessionProvider } from '@/session/provider';
+import { ROLE_LABEL, type Session } from '@/session/types';
 import { initials } from '@/shell/initials';
 import { Header } from '@/shell/header';
+import type { UserMenuProps } from '@/shell/user-menu';
 import { OfflineRegister } from '@/shell/offline-register';
-import { Sidebar } from '@/shell/sidebar';
+import { Sidebar, type Pasos } from '@/shell/sidebar';
 
 import { column, content, frame, main } from '@/shell/shell.css';
 
@@ -35,23 +37,42 @@ import { column, content, frame, main } from '@/shell/shell.css';
 /**
  * P-36 D-2: a new business is walked through «¿Cómo empiezo?» before the
  * portal. A failing read never gates — the shell degrades, it does not lock.
+ *
+ * The same checklist feeds the sidebar's «Primeros pasos» card (ADR-107):
+ * every step, optional ones included, until all are done; never for a
+ * read-only role.
  */
-async function guiaPrimero(role: string, businessId: string): Promise<void> {
+async function guiaPrimero(role: string, businessId: string): Promise<Pasos | null> {
   const omitida = (await cookies()).get(GUIA_OMITIDA_COOKIE) !== undefined;
-  if (!debeIrALaGuia({ role, complete: false, omitida })) return;
-  // Only a business that finished the wizard is walked; a seeded or older one is not.
-  const complete = await wizardCompleted(businessId)
+  const checklist = await wizardCompleted(businessId)
     .then((wizard) => (wizard ? loadChecklistSignals(businessId) : null))
-    .then((signals) => signals === null || buildChecklist(signals).complete)
-    .catch(() => true);
+    .then((signals) => (signals === null ? null : buildChecklist(signals)))
+    .catch(() => null);
+  const complete = checklist === null || checklist.complete;
   if (debeIrALaGuia({ role, complete, omitida })) redirect('/como-empiezo');
+  if (checklist === null || role === 'viewer') return null;
+  // The card counts optional steps too: it is the owner's to-do list, not a gate.
+  const done = checklist.items.filter((i) => i.done).length;
+  return done === checklist.items.length ? null : { done, total: checklist.items.length };
+}
+
+/** What the account menu shows: the business, the role, the plan and pending rows. */
+function accountOf(session: Session, pendingRows: number): UserMenuProps {
+  return {
+    initials: initials(session.businessName),
+    businessName: session.businessName,
+    roleLabel: ROLE_LABEL[session.role],
+    // The plan from the business's entitlement (B-10), as people name it.
+    planLabel: PLAN_NOMBRE[session.planId],
+    pendingRows,
+  };
 }
 
 export default async function PortalLayout({ children }: { children: React.ReactNode }) {
   // `currentSession` redirects to /login when the cookie is missing or forged,
   // so nothing below this line renders for a signed-out visitor.
   const session = await currentSession();
-  await guiaPrimero(session.role, session.businessId);
+  const pasos = await guiaPrimero(session.role, session.businessId);
   const counts = await loadShellCounts(session.businessId);
   const logoUrl = await loadShellLogo(session.businessId);
   const claims = await readSession();
@@ -67,16 +88,18 @@ export default async function PortalLayout({ children }: { children: React.React
       {/* N-23: the offline page's service worker, on the Director surface only. */}
       <OfflineRegister />
       <div className={frame}>
-        <Sidebar logoUrl={logoUrl} badges={{ '/revision-caja': counts.revisionPendiente }} />
+        <Sidebar
+          logoUrl={logoUrl}
+          badges={{ '/revision-caja': counts.revisionPendiente }}
+          current={current}
+          negocios={negocios}
+          pasos={pasos}
+        />
         <div className={column}>
-          {/* The plan from the business's entitlement (B-10), as people name it. */}
           <Header
-            current={current}
-            negocios={negocios}
-            planLabel={PLAN_NOMBRE[session.planId]}
+            account={accountOf(session, counts.pendingRows)}
             pendingRows={counts.pendingRows}
             unreadNotices={counts.unreadNotices}
-            userInitials={initials(session.businessName)}
           />
           <main className={main}>
             <div className={content}>{children}</div>

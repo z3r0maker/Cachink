@@ -50,12 +50,15 @@ export const shapeRadii = {
 } as const;
 
 /**
- * Borders are always 2 or 2.5 px solid black per CLAUDE.md §8.3. No other
- * widths. No dashed. No other colors.
+ * Borders are always 2 or 2.5 px solid. Black by default; the one quiet
+ * exception is ADR-107's: a 2 px gray200 edge for surfaces you read but do not
+ * press (El Mostrador), so black stays the sign of "you can act on this".
+ * No other widths. No dashed.
  */
 export const borders = {
   thin: `2px solid ${colors.black}`,
   thick: `2.5px solid ${colors.black}`,
+  quiet: `2px solid ${colors.gray200}`,
 } as const;
 
 /**

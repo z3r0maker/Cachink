@@ -6,7 +6,7 @@ import { AVISO_INTEGRAL_URL } from '@/legal/aviso-simplificado';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useTransition } from 'react';
 
-import { Button, Input } from '@/components';
+import { Button, Input, MonedaGirando } from '@/components';
 import { login } from '@/server/actions/auth';
 
 import { AuthCard } from './auth-card';
@@ -79,6 +79,16 @@ function useLogin() {
   return { email, setEmail, password, setPassword, error, setError, pending, submit };
 }
 
+/** While the form posts, a coin spins beside the words (ADR-107). */
+function SubmitLabel({ pending }: { readonly pending: boolean }) {
+  if (!pending) return <>Abrir mi changarro</>;
+  return (
+    <>
+      <MonedaGirando /> Subiendo la cortina…
+    </>
+  );
+}
+
 export function LoginForm({
   backTo,
 }: {
@@ -108,7 +118,7 @@ export function LoginForm({
           }}
         />
         <Button type="submit" full disabled={pending}>
-          {pending ? 'Subiendo la cortina…' : 'Abrir mi changarro'}
+          <SubmitLabel pending={pending} />
         </Button>
       </form>
       {/* ADR-080: our own emailed links, no auth vendor. */}

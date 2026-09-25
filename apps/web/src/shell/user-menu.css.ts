@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { colors, fontSizes, radii, shadows } from '@xangarro/tokens';
+import { colors, fontSizes, radii, shadows, shapeRadii } from '@xangarro/tokens';
 
 import { pressable } from '../styles/press.css';
 
@@ -33,3 +33,50 @@ export const item = style([
     selectors: { '&[data-highlighted]': { background: colors.yellowSoft, outline: 'none' } },
   },
 ]);
+
+export const menuHead = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 12,
+  padding: '10px 12px 12px',
+  marginBottom: 4,
+  borderBottom: `2px solid ${colors.gray200}`,
+});
+
+export const menuName = style({
+  display: 'block',
+  fontSize: fontSizes.md,
+  fontWeight: 800,
+  color: colors.black,
+});
+
+export const menuRole = style({
+  display: 'block',
+  fontSize: fontSizes.xs,
+  fontWeight: 600,
+  color: colors.gray600,
+});
+
+export const itemLink = style([item, { gap: 12, color: colors.black, textDecoration: 'none' }]);
+
+export const pill = style({
+  marginLeft: 'auto',
+  padding: '2px 8px',
+  borderRadius: shapeRadii.pill,
+  border: `2px solid ${colors.black}`,
+  fontSize: fontSizes.xs,
+  fontWeight: 800,
+});
+
+export const pillTone = {
+  plan: style({ background: colors.yellow, color: colors.black }),
+  warn: style({
+    background: colors.warningSoft,
+    color: colors.warningText,
+    borderColor: colors.warningText,
+  }),
+};
+
+export const separator = style({ height: 2, margin: '4px 0', background: colors.gray200 });
+
+export const logoutItem = style([item, { gap: 12, color: colors.redText }]);

@@ -64,13 +64,14 @@ describe('the four data states (S-1, S-2)', () => {
   }
 
   it('the portal has a loading boundary', () => {
-    // Without it a navigation freezes on the outgoing screen: no gray blocks,
-    // no «Cargando…», nothing to say the click registered.
+    // Without it a navigation freezes on the outgoing screen: nothing to say
+    // the click registered. ADR-107 replaced the static gray blocks with Don
+    // Cuentas counting; the boundary must use that one component, not its own.
     const file = join(PORTAL, 'loading.tsx');
     assert.ok(existsSync(file), 'expected (portal)/loading.tsx');
     assert.ok(
-      readFileSync(file, 'utf8').includes('LoadingState'),
-      "the boundary must render the design's static gray blocks, not its own spinner",
+      readFileSync(file, 'utf8').includes('DonCargando'),
+      'the boundary must render the shared DonCargando loader',
     );
   });
 });

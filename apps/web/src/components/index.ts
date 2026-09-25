@@ -37,6 +37,15 @@ export { Switch, type SwitchProps } from './switch';
 export { ConfirmDialog, type ConfirmDialogProps } from './dialog';
 export { Seal, type SealLevel, type SealProps } from './seal';
 export { DonCuentasAvatar, DON_CUENTAS, type DonCuentasSize } from './don-cuentas';
+export {
+  Don,
+  DonDice,
+  type DonPose,
+  type DonMotion,
+  type DonProps,
+  type DonDiceProps,
+} from './don/don';
+export { DonCargando, MonedaGirando } from './don/cargando';
 export { sealPath } from './seal-path';
 export { Celebration, type CelebrationProps } from './celebration';
 export { WhatsAppDialog } from './whatsapp-dialog';

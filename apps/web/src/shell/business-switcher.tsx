@@ -26,7 +26,7 @@ function Chip({ nombre, role }: { readonly nombre: string; readonly role: Role }
   return (
     <>
       <span className={initialsTile}>{initials(nombre)}</span>
-      <span style={{ minWidth: 0 }}>
+      <span style={{ minWidth: 0, display: 'grid' }}>
         <span className={bizName}>{nombre}</span>
         <span className={roleLabel}>{ROLE_LABEL[role]}</span>
       </span>

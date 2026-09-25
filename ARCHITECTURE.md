@@ -7274,3 +7274,52 @@ counted against the employees.
 - `e2e/operators.spec.ts` changes shape: the seeded tenant (Xangarro, Ana and Luis)
   starts at «2 de 3 operadores»; adding a third fills it.
 - The design files still say «operadores»; they follow this ADR.
+
+---
+
+## ADR-107
+
+**Title:** El Mostrador — the portal's calmer surface, and Don Cuentas in motion
+
+**Date:** 2026-09-25
+
+**Status:** Accepted — owner approval of the El Mostrador design (2026-09-25);
+amends the «black borders only» and «press-only motion» rules of the portal
+
+**Context**
+
+The portal gave every card the same black 2.5 px border and hard shadow, and
+opened most screens with a row of boxed KPIs, so nothing on a page led. The owner
+asked for an app that is easy, friendly and funny, with Don Cuentas as its heart.
+The approved redesign («El Mostrador», design canvas
+https://claude.ai/artifact/DxbWpgBQRbix3mpXnnysyt) rests on two rules the old
+contract did not allow: a quiet edge for read-only surfaces, and motion beyond
+the press stamp.
+
+**Decision**
+
+- **Black means "you can act on this".** Buttons, inputs, selected options,
+  dialogs, drawers and the one hero card per screen keep the black border and
+  hard shadow. Read-only cards (figures, lists, charts) take `borders.quiet`,
+  2 px gray200, and no shadow. Widths stay 2 / 2.5 px; nothing dashed.
+- **Don Cuentas moves.** His poses (`components/don/poses`) may breathe, wave,
+  blink, nod and jump, and the loader tosses a coin. Every one of these stops
+  under `prefers-reduced-motion`. Motion elsewhere stays press-only.
+- **Navigation groups by the owner's questions**: Hoy, Don Cuentas, Dinero,
+  Mi tiendita, Mi gente. Sincronización, Negocio and Suscripción move to the
+  account menu; «Primeros pasos» shows in the sidebar until setup is complete.
+- **Operators and employees are one person** in the owner's eyes (owner decision
+  2026-09-25): Equipo y nómina will show one list; until it lands, both pages sit
+  under Mi gente.
+
+**Alternatives considered**
+
+- *Soft borders as a literal per screen.* Rejected: design-lint exists so that a
+  colour or width is decided once, in tokens.
+- *A rigged (Rive) character.* Deferred: poses plus CSS ship now with no new
+  tooling; a rigged Don can replace them later behind the same component.
+
+**Consequences**
+
+- `borders.quiet` joins the token set; the theme test pins its value.
+- The design files follow the canvas above, not the other way round.
