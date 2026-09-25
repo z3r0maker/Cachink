@@ -7,6 +7,8 @@ import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { INDEXNOW_KEY } from '../landing/indexnow.js';
+
 /** Last commit date (YYYY-MM-DD) touching any of `sources`, or null when git cannot say. */
 export function lastmodFor(root, sources) {
   try {
@@ -74,6 +76,8 @@ export function writeCrawlerFiles({
     'sitemap.xml': buildSitemap(routes, siteUrl, lastmod),
     'llms.txt': buildLlmsTxt(siteUrl),
     'llms-full.txt': buildLlmsFullTxt(siteUrl),
+    // IndexNow's ownership proof: the key, in a file named after it
+    [`${INDEXNOW_KEY}.txt`]: INDEXNOW_KEY,
   };
   for (const [name, content] of Object.entries(files)) {
     writeFileSync(resolve(dist, name), content);

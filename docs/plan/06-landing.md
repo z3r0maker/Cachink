@@ -70,7 +70,9 @@
   `apps/landing/.lastmod.json` to `<dir>/apps/landing/` and `apps/landing/.vercel/project.json` to
   `<dir>/.vercel/`),
   `npx vercel deploy --yes --archive=tgz` from `<dir>`, check the preview with `npx vercel curl <url>`
-  (previews sit behind Vercel Authentication), then `npx vercel promote <preview-url> --yes`. Or add
+  (previews sit behind Vercel Authentication), then `npx vercel promote <preview-url> --yes`, then
+  `node apps/landing/scripts/indexnow.mjs` so Bing fetches the changed pages at once (IndexNow;
+  Google needs Search Console's «Request indexing» instead). Or add
   the commit author's email to the Vercel account.
   **Missing:** `app.xangarro.mx` and `admin.xangarro.mx` are NXDOMAIN, so every signup CTA is a
   dead link until the portal and console projects get their domains (Add domain in Vercel, then a
@@ -157,6 +159,12 @@
   and `vite`; `@font-face` with `font-display: swap` in `colors_and_type.css`; the Google Fonts
   stylesheet, its `@import`, the preconnects and the `gstatic` preload that 404'd on every visit are
   gone; one preload for the sans. Every page has `<main id="main-content">`, the skip link's target.
+- Done (round 5, from the SEO advisor's notes): 2026-09-25 · the home targets the queries it should
+  win — title «Xangarro · Control de caja para negocios pequeños en México», description with
+  «sistema de caja», «control financiero», «México», the hero lead and a line under «Si tienes caja»
+  carrying the same words; the H1 stays the slogan. IndexNow: `landing/indexnow.js` holds the key,
+  the prerender writes `<key>.txt`, `scripts/indexnow.mjs` pings after a deploy. Bing's "description
+  too long" flags were the pre-deploy build; live descriptions are 98–144 characters.
 - **Round 2 (needs the owner):** customer quotes once the beta yields them (Review
   schema only with real reviews); DNS for both domains (L-04). **Content, not code:** growing the
   NIF guide into a 1,200-word pillar with an example estado de resultados.

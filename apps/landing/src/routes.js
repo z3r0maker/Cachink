@@ -12,9 +12,9 @@ export const ROUTES = [
   {
     path: '/',
     outDir: 'dist',
-    title: 'Xangarro · Finanzas para emprendedores',
+    title: 'Xangarro · Control de caja para negocios pequeños en México',
     description:
-      'Caja, punto de venta y estados financieros NIF desde el navegador. Tu equipo cobra; tú ves todo en el portal, con Don Cuentas, tu asesor con IA.',
+      'Sistema de caja y control financiero para negocios pequeños en México: punto de venta, estados financieros NIF y Don Cuentas, tu asesor con IA.',
     smoke: 'El mostrador cobra',
     type: 'website',
     changefreq: 'weekly',
